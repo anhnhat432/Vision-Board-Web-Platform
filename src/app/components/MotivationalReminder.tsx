@@ -19,7 +19,11 @@ export function MotivationalReminder() {
       localStorage.setItem('last_reminder_date', today);
       
       // Auto-hide after 10 seconds
-      setTimeout(() => setShowReminder(false), 10000);
+      const timeoutId = window.setTimeout(() => setShowReminder(false), 10000);
+
+      return () => {
+        window.clearTimeout(timeoutId);
+      };
     }
   }, []);
   

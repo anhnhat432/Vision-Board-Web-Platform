@@ -1,8 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type React from "react";
 import { useNavigate, useParams } from "react-router";
-import { DndProvider, useDrag } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 import {
   Heart,
   Image,
@@ -50,6 +48,12 @@ interface DraggableItemProps {
   onDelete: (id: string) => void;
 }
 
+interface DragState {
+  offsetX: number;
+  offsetY: number;
+  pointerId: number;
+}
+
 const ICON_COMPONENTS = {
   Star,
   Heart,
@@ -72,32 +76,70 @@ const QUOTE_SUGGESTIONS = [
 ];
 
 function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
-  const [{ isDragging }, drag] = useDrag(() => ({
-    type: "board-item",
-    item: { id: item.id },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  }));
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStateRef = useRef<DragState | null>(null);
 
-  const handleDragEnd = (event: React.DragEvent) => {
-    const rect = event.currentTarget.parentElement?.getBoundingClientRect();
-    if (!rect) return;
+  const updatePosition = (clientX: number, clientY: number, container: HTMLElement) => {
+    const dragState = dragStateRef.current;
+    if (!dragState) return;
 
-    const x = ((event.clientX - rect.left) / rect.width) * 100;
-    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    const rect = container.getBoundingClientRect();
+    const x = ((clientX - rect.left - dragState.offsetX) / rect.width) * 100;
+    const y = ((clientY - rect.top - dragState.offsetY) / rect.height) * 100;
 
     onUpdate(item.id, Math.max(0, Math.min(95, x)), Math.max(0, Math.min(95, y)));
+  };
+
+  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest("button")) return;
+
+    const container = event.currentTarget.parentElement;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    const offsetX = event.clientX - rect.left - (rect.width * item.x) / 100;
+    const offsetY = event.clientY - rect.top - (rect.height * item.y) / 100;
+
+    dragStateRef.current = {
+      offsetX,
+      offsetY,
+      pointerId: event.pointerId,
+    };
+
+    setIsDragging(true);
+    event.currentTarget.setPointerCapture(event.pointerId);
+    updatePosition(event.clientX, event.clientY, container);
+  };
+
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragStateRef.current || dragStateRef.current.pointerId !== event.pointerId) return;
+
+    const container = event.currentTarget.parentElement;
+    if (!container) return;
+
+    updatePosition(event.clientX, event.clientY, container);
+  };
+
+  const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragStateRef.current || dragStateRef.current.pointerId !== event.pointerId) return;
+
+    dragStateRef.current = null;
+    setIsDragging(false);
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
   };
 
   const Icon = ICON_COMPONENTS[item.content as IconName] ?? Sparkles;
 
   return (
     <div
-      ref={drag as unknown as React.Ref<HTMLDivElement>}
-      draggable
-      onDragEnd={handleDragEnd}
-      className="absolute cursor-move transition-transform duration-300 hover:scale-[1.015]"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerEnd}
+      onPointerCancel={handlePointerEnd}
+      className="absolute cursor-move touch-none select-none transition-transform duration-300 hover:scale-[1.015]"
       style={{
         left: `${item.x}%`,
         top: `${item.y}%`,
@@ -155,6 +197,7 @@ export function VisionBoardEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [board, setBoard] = useState<VisionBoard | null>(null);
+  const [isResolvingBoard, setIsResolvingBoard] = useState(Boolean(id));
   const [boardName, setBoardName] = useState("");
   const [boardYear, setBoardYear] = useState(new Date().getFullYear().toString());
   const [isAddingItem, setIsAddingItem] = useState(false);
@@ -171,7 +214,12 @@ export function VisionBoardEditor() {
         setBoard(existingBoard);
         setBoardName(existingBoard.name);
         setBoardYear(existingBoard.year);
+        setIsResolvingBoard(false);
+        return;
       }
+
+      toast.info("Bảng tầm nhìn này không còn tồn tại. Đang đưa bạn về thư viện.");
+      navigate("/gallery", { replace: true });
       return;
     }
 
@@ -182,6 +230,7 @@ export function VisionBoardEditor() {
       items: [],
       createdAt: new Date().toISOString(),
     });
+    setIsResolvingBoard(false);
   }, [id]);
 
   const boardStats = useMemo(() => {
@@ -317,10 +366,11 @@ export function VisionBoardEditor() {
     setBoard({ ...board, items: board.items.filter((item) => item.id !== itemId) });
   };
 
+  if (isResolvingBoard) return null;
+
   if (!board) return null;
 
   return (
-    <DndProvider backend={HTML5Backend}>
       <div className="space-y-8 pb-12">
         <Dialog open={isAddingItem} onOpenChange={setIsAddingItem}>
           <Card className="hero-surface overflow-hidden border-0 text-white">
@@ -379,6 +429,10 @@ export function VisionBoardEditor() {
                       Lưu board
                     </Button>
                   </div>
+
+                  <p className="text-sm text-white/70">
+                    Trên điện thoại, bạn có thể chạm giữ rồi rê để di chuyển các phần tử trên canvas.
+                  </p>
                 </div>
 
                 <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
@@ -653,6 +707,5 @@ export function VisionBoardEditor() {
           </div>
         </div>
       </div>
-    </DndProvider>
   );
 }

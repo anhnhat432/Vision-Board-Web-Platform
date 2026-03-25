@@ -61,16 +61,6 @@ function formatDeadline(deadline: string) {
   return date.toLocaleDateString("vi-VN");
 }
 
-function formatDeadlineSafe(deadline: string) {
-  const formattedDeadline = formatCalendarDate(deadline);
-  return formattedDeadline === "--" ? "ChÆ°a cÃ³ háº¡n" : formattedDeadline;
-}
-
-function formatDeadlineLabel(deadline: string) {
-  const formattedDeadline = formatCalendarDate(deadline);
-  return formattedDeadline === "--" ? "Chua co han" : formattedDeadline;
-}
-
 export function GoalTracker() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isAddingGoal, setIsAddingGoal] = useState(false);
@@ -82,8 +72,6 @@ export function GoalTracker() {
   });
   const [newTask, setNewTask] = useState("");
   const [addingTaskToGoalId, setAddingTaskToGoalId] = useState<string | null>(null);
-  void formatDeadlineSafe;
-  void formatDeadlineLabel;
 
   useEffect(() => {
     loadData();

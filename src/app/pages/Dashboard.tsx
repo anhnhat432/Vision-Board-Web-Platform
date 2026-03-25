@@ -52,7 +52,7 @@ export function Dashboard() {
   const recentReflections = sortReflectionsByDateDesc(userData.reflections).slice(0, 2);
   const latestVisionBoard = userData.visionBoards[userData.visionBoards.length - 1];
   const completedGoalsCount = userData.goals.filter(
-    (goal) => goal.tasks.length > 0 && goal.tasks.every((task) => task.completed),
+    (goal) => calculateGoalProgress(goal) === 100,
   ).length;
   const totalTasks = userData.goals.reduce((sum, goal) => sum + goal.tasks.length, 0);
   const completedTasks = userData.goals.reduce(

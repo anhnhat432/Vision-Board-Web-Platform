@@ -232,8 +232,19 @@ export function TwelveWeekSystem() {
 
   const averageWeeklyScore = useMemo(() => {
     if (!system || system.scoreboard.length === 0) return 0;
-    const total = system.scoreboard.reduce((sum, week) => sum + week.weeklyScore, 0);
-    return Math.round(total / system.scoreboard.length);
+    const reviewedWeeks = system.scoreboard.filter(
+      (week) =>
+        week.reviewDone ||
+        week.weeklyScore > 0 ||
+        week.leadCompletionPercent > 0 ||
+        Boolean(week.mainMetricProgress) ||
+        Boolean(week.outputDone),
+    );
+
+    if (reviewedWeeks.length === 0) return 0;
+
+    const total = reviewedWeeks.reduce((sum, week) => sum + week.weeklyScore, 0);
+    return Math.round(total / reviewedWeeks.length);
   }, [system]);
 
   const groupedPlans = useMemo(() => {
@@ -471,21 +482,21 @@ export function TwelveWeekSystem() {
               <Sparkles className="h-10 w-10" />
             </div>
             <h2 className="mt-6 text-3xl font-bold text-slate-900">
-              {legacyPlanGoal ? "Báº¡n Ä‘ang cÃ³ má»™t káº¿ hoáº¡ch 12 tuáº§n theo flow cÅ©" : TEXT.emptyTitle}
+              {legacyPlanGoal ? "Bạn đang có một kế hoạch 12 tuần theo flow cũ" : TEXT.emptyTitle}
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-base text-slate-500">
               {legacyPlanGoal
-                ? "Trang command center hiá»‡n chá»‰ hiá»ƒn thá»‹ system 12 tuáº§n Ä‘áº§y Ä‘á»§. Káº¿ hoáº¡ch cÅ© cá»§a báº¡n váº«n cÃ²n nguyÃªn vÃ  cÃ³ thá»ƒ má»Ÿ tá»« overview legacy."
+                ? "Trang command center hiện chỉ hiển thị system 12 tuần đầy đủ. Kế hoạch cũ của bạn vẫn còn nguyên và có thể mở từ overview legacy."
                 : TEXT.emptyMessage}
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               {legacyPlanGoal && (
                 <Button variant="outline" onClick={() => navigate("/12-week-plan-overview")}>
-                  Má»Ÿ káº¿ hoáº¡ch legacy
+                  Mở kế hoạch legacy
                 </Button>
               )}
               <Button onClick={() => navigate("/life-insight")}>
-                {legacyPlanGoal ? "Táº¡o system 12 tuáº§n má»›i" : TEXT.emptyButton}
+                {legacyPlanGoal ? "Tạo system 12 tuần mới" : TEXT.emptyButton}
               </Button>
             </div>
           </CardContent>
