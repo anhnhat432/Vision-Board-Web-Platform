@@ -696,7 +696,7 @@ export function TwelveWeekSystem() {
             </div>
           </Reveal>
 
-          <Reveal delay={0.04} className="space-y-6">
+          <div className="space-y-6">
           <Card className="bg-white/80 backdrop-blur-md border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="text-xl">{TEXT.sectionVision}</CardTitle>
@@ -972,7 +972,7 @@ export function TwelveWeekSystem() {
               })}
             </CardContent>
           </Card>
-          </Reveal>
+          </div>
         </>
       )}
 
