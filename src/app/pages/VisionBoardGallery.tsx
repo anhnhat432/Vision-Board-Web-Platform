@@ -21,6 +21,16 @@ import {
 } from "lucide-react";
 
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -54,6 +64,7 @@ export function VisionBoardGallery() {
   const navigate = useNavigate();
   const location = useLocation();
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [boardToDelete, setBoardToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -65,10 +76,14 @@ export function VisionBoardGallery() {
   };
 
   const handleDeleteBoard = (boardId: string) => {
-    if (confirm("Bạn có chắc chắn muốn xóa bảng tầm nhìn này không?")) {
-      deleteVisionBoard(boardId);
-      loadData();
-    }
+    setBoardToDelete(boardId);
+  };
+
+  const confirmDeleteBoard = () => {
+    if (!boardToDelete) return;
+    deleteVisionBoard(boardToDelete);
+    setBoardToDelete(null);
+    loadData();
   };
 
   const boardsByYear = useMemo(() => {
@@ -98,6 +113,23 @@ export function VisionBoardGallery() {
 
   return (
     <div className="space-y-8 pb-12">
+      <AlertDialog open={Boolean(boardToDelete)} onOpenChange={(open) => { if (!open) setBoardToDelete(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xóa bảng tầm nhìn này?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Hành động này không thể hoàn tác. Toàn bộ hình ảnh, quote và biểu tượng trong board sẽ bị xóa vĩnh viễn.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteBoard} className="bg-red-600 hover:bg-red-700">
+              Xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <InteractiveSurface className="rounded-[28px]" intensity={9} translate={22}>
         <Card interactive={false} className="hero-surface overflow-hidden border-0 text-white">
         <CardContent className="interactive-layer interactive-layer--medium relative p-8 lg:p-10">

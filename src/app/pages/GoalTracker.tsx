@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import {
+  AlertTriangle,
   CalendarDays,
   CheckCircle2,
   Circle,
@@ -13,6 +14,16 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -72,6 +83,7 @@ export function GoalTracker() {
   });
   const [newTask, setNewTask] = useState("");
   const [addingTaskToGoalId, setAddingTaskToGoalId] = useState<string | null>(null);
+  const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -201,10 +213,14 @@ export function GoalTracker() {
   };
 
   const handleDeleteGoal = (goalId: string) => {
-    if (confirm("Bạn có chắc chắn muốn xóa mục tiêu này không?")) {
-      deleteGoal(goalId);
-      loadData();
-    }
+    setGoalToDelete(goalId);
+  };
+
+  const confirmDeleteGoal = () => {
+    if (!goalToDelete) return;
+    deleteGoal(goalToDelete);
+    setGoalToDelete(null);
+    loadData();
   };
 
   const getDaysUntilDeadline = (deadline: string) => getCalendarDayDifference(deadline);
@@ -243,6 +259,23 @@ export function GoalTracker() {
 
   return (
     <div className="space-y-8 pb-12">
+      <AlertDialog open={Boolean(goalToDelete)} onOpenChange={(open) => { if (!open) setGoalToDelete(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xóa mục tiêu này?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Hành động này không thể hoàn tác. Mục tiêu và toàn bộ nhiệm vụ liên quan sẽ bị xóa vĩnh viễn.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteGoal} className="bg-red-600 hover:bg-red-700">
+              Xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <Card className="hero-surface overflow-hidden border-0 text-white">
         <CardContent className="relative p-8 lg:p-10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
@@ -343,14 +376,6 @@ export function GoalTracker() {
                     </div>
                   </DialogContent>
                 </Dialog>
-
-                <Button
-                  variant="outline"
-                  className="border-white/18 bg-white/12 text-white hover:bg-white/18 hover:text-white"
-                  onClick={() => setIsAddingGoal(true)}
-                >
-                  Mở form nhanh
-                </Button>
               </div>
             </div>
 
@@ -612,8 +637,12 @@ export function GoalTracker() {
                                 </div>
 
                                 <div className="mt-5 space-y-3 text-sm text-slate-600">
-                                  <div className="flex items-center gap-2">
-                                    <CalendarDays className="h-4 w-4 text-slate-400" />
+                                  <div className={`flex items-center gap-2 ${isOverdue && !isCompleted ? "text-red-600 font-semibold" : ""}`}>
+                                    {isOverdue && !isCompleted ? (
+                                      <AlertTriangle className="h-4 w-4 text-red-500" />
+                                    ) : (
+                                      <CalendarDays className="h-4 w-4 text-slate-400" />
+                                    )}
                                     <span>
                                       {isOverdue && !isCompleted
                                         ? `Quá hạn ${Math.abs(daysLeft)} ngày`

@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type React from "react";
-import { useNavigate, useParams } from "react-router";
+import { useBeforeUnload, useBlocker, useNavigate, useParams } from "react-router";
 import {
   Heart,
   Image,
@@ -22,6 +22,16 @@ import {
 import { toast } from "sonner";
 
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
@@ -205,6 +215,20 @@ export function VisionBoardEditor() {
   const [quoteText, setQuoteText] = useState("");
   const [iconName, setIconName] = useState<IconName>("Sparkles");
   const [isSearching, setIsSearching] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const blocker = useBlocker(hasUnsavedChanges);
+
+  const handleBeforeUnload = useCallback(
+    (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    },
+    [hasUnsavedChanges],
+  );
+
+  useBeforeUnload(handleBeforeUnload);
 
   useEffect(() => {
     if (id) {
@@ -291,6 +315,7 @@ export function VisionBoardEditor() {
             : "Board mới của bạn đã được lưu và sẽ được spotlight ngay trong thư viện.",
     });
 
+    setHasUnsavedChanges(false);
     navigate("/gallery", { state: { spotlightBoardId: savedBoardId } });
   };
 
@@ -315,6 +340,7 @@ export function VisionBoardEditor() {
     setSearchQuery("");
     setIsSearching(false);
     setIsAddingItem(false);
+    setHasUnsavedChanges(true);
   };
 
   const handleAddQuote = () => {
@@ -333,6 +359,7 @@ export function VisionBoardEditor() {
     setBoard({ ...board, items: [...board.items, newItem] });
     setQuoteText("");
     setIsAddingItem(false);
+    setHasUnsavedChanges(true);
   };
 
   const handleAddIcon = () => {
@@ -350,6 +377,7 @@ export function VisionBoardEditor() {
 
     setBoard({ ...board, items: [...board.items, newItem] });
     setIsAddingItem(false);
+    setHasUnsavedChanges(true);
   };
 
   const handleUpdateItemPosition = (itemId: string, x: number, y: number) => {
@@ -359,11 +387,13 @@ export function VisionBoardEditor() {
       ...board,
       items: board.items.map((item) => (item.id === itemId ? { ...item, x, y } : item)),
     });
+    setHasUnsavedChanges(true);
   };
 
   const handleDeleteItem = (itemId: string) => {
     if (!board) return;
     setBoard({ ...board, items: board.items.filter((item) => item.id !== itemId) });
+    setHasUnsavedChanges(true);
   };
 
   if (isResolvingBoard) return null;
@@ -372,6 +402,41 @@ export function VisionBoardEditor() {
 
   return (
       <div className="space-y-8 pb-12">
+        <AlertDialog
+          open={blocker.state === "blocked"}
+          onOpenChange={(open) => {
+            if (!open && blocker.state === "blocked") {
+              blocker.reset();
+            }
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Rời khỏi board khi chưa lưu?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Bạn đang có thay đổi chưa được lưu. Nếu rời trang bây giờ, các thay đổi trên canvas sẽ bị mất.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                onClick={() => {
+                  if (blocker.state === "blocked") blocker.reset();
+                }}
+              >
+                Ở lại
+              </AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 hover:bg-red-700"
+                onClick={() => {
+                  if (blocker.state === "blocked") blocker.proceed();
+                }}
+              >
+                Rời khỏi trang
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
         <Dialog open={isAddingItem} onOpenChange={setIsAddingItem}>
           <Card className="hero-surface overflow-hidden border-0 text-white">
             <CardContent className="relative p-8 lg:p-10">
@@ -398,14 +463,14 @@ export function VisionBoardEditor() {
                     <Input
                       placeholder="Tên bảng tầm nhìn của bạn"
                       value={boardName}
-                      onChange={(event) => setBoardName(event.target.value)}
+                      onChange={(event) => { setBoardName(event.target.value); setHasUnsavedChanges(true); }}
                       className="border-white/20 bg-white/14 text-lg font-semibold text-white placeholder:text-white/52"
                     />
                     <Input
                       type="number"
                       placeholder="Năm"
                       value={boardYear}
-                      onChange={(event) => setBoardYear(event.target.value)}
+                      onChange={(event) => { setBoardYear(event.target.value); setHasUnsavedChanges(true); }}
                       className="border-white/20 bg-white/14 text-white placeholder:text-white/52"
                     />
                   </div>

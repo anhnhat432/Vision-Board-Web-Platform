@@ -3,7 +3,7 @@ import { useReducedMotion } from "motion/react";
 
 import { cn } from "./utils";
 
-type InteractiveSurfaceProps = React.ComponentProps<"div"> & {
+type InteractiveSurfaceProps = Omit<React.ComponentProps<"div">, "translate"> & {
   intensity?: number;
   translate?: number;
   shine?: boolean;

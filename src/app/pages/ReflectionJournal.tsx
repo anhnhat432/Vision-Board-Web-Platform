@@ -7,12 +7,23 @@ import {
   Meh,
   NotebookPen,
   Plus,
+  Search,
   Smile,
   Sparkles,
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -91,6 +102,9 @@ export function ReflectionJournal() {
     mood: "" as MoodValue,
     date: formatDateInputValue(new Date()),
   });
+  const [reflectionToDelete, setReflectionToDelete] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterMood, setFilterMood] = useState<MoodValue | "">("");
 
   useEffect(() => {
     loadData();
@@ -145,10 +159,14 @@ export function ReflectionJournal() {
   };
 
   const handleDeleteReflection = (id: string) => {
-    if (confirm("Bạn có chắc chắn muốn xóa nhật ký này không?")) {
-      deleteReflection(id);
-      loadData();
-    }
+    setReflectionToDelete(id);
+  };
+
+  const confirmDeleteReflection = () => {
+    if (!reflectionToDelete) return;
+    deleteReflection(reflectionToDelete);
+    setReflectionToDelete(null);
+    loadData();
   };
 
   const sortedReflections = useMemo(
@@ -183,10 +201,67 @@ export function ReflectionJournal() {
 
   const recentMood = getMoodConfig(sortedReflections[0]?.mood);
 
+  const currentStreak = useMemo(() => {
+    if (sortedReflections.length === 0) return 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const writtenDays = new Set(
+      sortedReflections.map((r) => {
+        const d = parseCalendarDate(r.date);
+        if (!d) return "";
+        d.setHours(0, 0, 0, 0);
+        return d.getTime().toString();
+      }).filter(Boolean),
+    );
+
+    let streak = 0;
+    const cursor = new Date(today);
+    // allow today or yesterday as streak start
+    if (!writtenDays.has(cursor.getTime().toString())) {
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    while (writtenDays.has(cursor.getTime().toString())) {
+      streak += 1;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+    return streak;
+  }, [sortedReflections]);
+
+  const filteredReflections = useMemo(() => {
+    let result = sortedReflections;
+    if (filterMood) result = result.filter((r) => r.mood === filterMood);
+    if (searchQuery.trim()) {
+      const lower = searchQuery.toLowerCase();
+      result = result.filter(
+        (r) =>
+          r.title.toLowerCase().includes(lower) ||
+          r.content.toLowerCase().includes(lower),
+      );
+    }
+    return result;
+  }, [sortedReflections, filterMood, searchQuery]);
+
   if (!userData) return null;
 
   return (
     <div className="space-y-8 pb-12">
+      <AlertDialog open={Boolean(reflectionToDelete)} onOpenChange={(open) => { if (!open) setReflectionToDelete(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xóa nhật ký này?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Hành động này không thể hoàn tác. Bài viết sẽ bị xóa vĩnh viễn khỏi hành trình của bạn.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteReflection} className="bg-red-600 hover:bg-red-700">
+              Xóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <Dialog open={isAddingReflection} onOpenChange={setIsAddingReflection}>
         <Card className="hero-surface overflow-hidden border-0 text-white">
           <CardContent className="relative p-8 lg:p-10">
@@ -460,7 +535,40 @@ export function ReflectionJournal() {
       ) : (
         <Reveal delay={0.04} className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-4">
-            {sortedReflections.map((reflection, index) => {
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative min-w-[200px] flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Input
+                  placeholder="Tìm kiếm nhật ký..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <div className="flex gap-2">
+                {(["", "happy", "neutral", "sad"] as const).map((mood) => {
+                  const labels: Record<string, string> = { "": "Tất cả", happy: "Vui vẻ", neutral: "Bình thường", sad: "Suy tư" };
+                  return (
+                    <Button
+                      key={mood}
+                      size="sm"
+                      variant={filterMood === mood ? "default" : "outline"}
+                      onClick={() => setFilterMood(mood)}
+                    >
+                      {labels[mood]}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {filteredReflections.length === 0 && (sortedReflections.length > 0) && (
+              <div className="rounded-[24px] border border-dashed border-slate-200 bg-slate-50/80 px-5 py-8 text-center text-sm text-slate-500">
+                Không tìm thấy nhật ký nào phù hợp với bộ lọc hiện tại.
+              </div>
+            )}
+
+            {filteredReflections.map((reflection, index) => {
               const mood = getMoodConfig(reflection.mood);
 
               return (
@@ -516,6 +624,27 @@ export function ReflectionJournal() {
           </div>
 
           <div className="space-y-6 xl:sticky xl:top-28">
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  Streak hiện tại
+                </p>
+                <div className="mt-4 flex items-center gap-3 rounded-[20px] border border-violet-200 bg-violet-50 px-4 py-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-violet-100 text-violet-700">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-violet-700">
+                      <CountUp value={currentStreak} /> ngày
+                    </p>
+                    <p className="text-xs text-violet-500">
+                      {currentStreak >= 3 ? "Nhịp viết đang rất tốt!" : currentStreak > 0 ? "Hãy duy trì đều hơn nhé." : "Bắt đầu streak hôm nay!"}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardContent className="p-6">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">

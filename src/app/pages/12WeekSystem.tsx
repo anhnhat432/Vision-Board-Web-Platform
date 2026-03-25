@@ -15,6 +15,7 @@ import {
 } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { Progress } from "../components/ui/progress";
 import { Reveal } from "../components/ui/reveal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Textarea } from "../components/ui/textarea";
@@ -63,6 +64,11 @@ interface WeeklyFormState {
   nextWeekPriority: string;
   workloadDecision: UniversalWeeklyReview["workloadDecision"];
   reviewCompleted: boolean;
+  progressScore: number;
+  disciplineScore: number;
+  focusScore: number;
+  improvementScore: number;
+  outputQualityScore: number;
 }
 
 const TEXT = {
@@ -146,11 +152,35 @@ function formatDate(dateString: string): string {
   return formatCalendarDate(dateString);
 }
 
+function parseLagMetricPercent(current: string, target: string): number | null {
+  // Try "N/M" pattern
+  const fractionMatch = current.match(/(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/);
+  if (fractionMatch) {
+    const num = parseFloat(fractionMatch[1]);
+    const den = parseFloat(fractionMatch[2]);
+    if (den > 0) return Math.min(100, Math.round((num / den) * 100));
+  }
+
+  // Try "N%" pattern
+  const percentMatch = current.match(/(\d+(?:\.\d+)?)\s*%/);
+  if (percentMatch) return Math.min(100, Math.round(parseFloat(percentMatch[1])));
+
+  // Try plain number against target
+  const numVal = parseFloat(current);
+  const tgtVal = parseFloat(target);
+  if (!isNaN(numVal) && !isNaN(tgtVal) && tgtVal > 0) {
+    return Math.min(100, Math.round((numVal / tgtVal) * 100));
+  }
+
+  return null;
+}
+
 export function TwelveWeekSystem() {
   const navigate = useNavigate();
   const [guideOpen, setGuideOpen] = useState(false);
   const [activeGoal, setActiveGoal] = useState<Goal | null>(null);
   const [legacyPlanGoal, setLegacyPlanGoal] = useState<Goal | null>(null);
+  const [allGoalsWithSystem, setAllGoalsWithSystem] = useState<Goal[]>([]);
 
   const [dailyForm, setDailyForm] = useState<DailyFormState>({
     didWorkToday: false,
@@ -170,11 +200,20 @@ export function TwelveWeekSystem() {
     nextWeekPriority: "",
     workloadDecision: "",
     reviewCompleted: true,
+    progressScore: 5,
+    disciplineScore: 5,
+    focusScore: 5,
+    improvementScore: 5,
+    outputQualityScore: 5,
   });
 
-  const loadGoalData = () => {
+  const loadGoalData = (preferredId?: string) => {
     const data = getUserData();
+    const goalsWithSystem = data.goals.filter((g) => Boolean(g.twelveWeekSystem));
+    setAllGoalsWithSystem(goalsWithSystem);
+
     const preferredSystemGoalId =
+      preferredId ??
       localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId) ??
       localStorage.getItem(APP_STORAGE_KEYS.latest12WeekGoalId);
     const goal = getActiveGoalWithSystem(data.goals, preferredSystemGoalId);
@@ -269,6 +308,11 @@ export function TwelveWeekSystem() {
         nextWeekPriority: currentWeekReview.nextWeekPriority,
         workloadDecision: currentWeekReview.workloadDecision,
         reviewCompleted: currentWeekReview.reviewCompleted,
+        progressScore: currentWeekReview.progressScore ?? 5,
+        disciplineScore: currentWeekReview.disciplineScore ?? 5,
+        focusScore: currentWeekReview.focusScore ?? 5,
+        improvementScore: currentWeekReview.improvementScore ?? 5,
+        outputQualityScore: currentWeekReview.outputQualityScore ?? 5,
       });
       return;
     }
@@ -281,6 +325,11 @@ export function TwelveWeekSystem() {
       nextWeekPriority: "",
       workloadDecision: "",
       reviewCompleted: true,
+      progressScore: 5,
+      disciplineScore: 5,
+      focusScore: 5,
+      improvementScore: 5,
+      outputQualityScore: 5,
     });
   }, [system, currentWeek, currentWeekReview]);
 
@@ -334,6 +383,17 @@ export function TwelveWeekSystem() {
     loadGoalData();
   };
 
+  const handleTogglePlanCompleted = (weekNumber: number) => {
+    if (!activeGoal || !system) return;
+    const updatedPlans = system.weeklyPlans.map((plan) =>
+      plan.weekNumber === weekNumber ? { ...plan, completed: !plan.completed } : plan,
+    );
+    updateGoal(activeGoal.id, {
+      twelveWeekSystem: { ...system, weeklyPlans: updatedPlans },
+    });
+    loadGoalData();
+  };
+
   const handleWeeklySubmit = () => {
     if (!activeGoal || !system) return;
 
@@ -363,11 +423,11 @@ export function TwelveWeekSystem() {
       nextWeekPriority: weeklyForm.nextWeekPriority.trim(),
       workloadDecision: weeklyForm.workloadDecision,
       reviewCompleted: weeklyForm.reviewCompleted,
-      progressScore: existingReview?.progressScore ?? 0,
-      disciplineScore: existingReview?.disciplineScore ?? 0,
-      focusScore: existingReview?.focusScore ?? 0,
-      improvementScore: existingReview?.improvementScore ?? 0,
-      outputQualityScore: existingReview?.outputQualityScore ?? 0,
+      progressScore: weeklyForm.progressScore,
+      disciplineScore: weeklyForm.disciplineScore,
+      focusScore: weeklyForm.focusScore,
+      improvementScore: weeklyForm.improvementScore,
+      outputQualityScore: weeklyForm.outputQualityScore,
     };
 
     const updatedReviews = [
@@ -463,6 +523,27 @@ export function TwelveWeekSystem() {
                   Xem tất cả goal
                 </Button>
               </div>
+
+              {allGoalsWithSystem.length > 1 && (
+                <div className="mt-4">
+                  <Label className="text-xs text-white/60">Chuyển mục tiêu 12 tuần</Label>
+                  <Select
+                    value={activeGoal?.id ?? ""}
+                    onValueChange={(value) => loadGoalData(value)}
+                  >
+                    <SelectTrigger className="mt-1 border-white/18 bg-white/10 text-white">
+                      <SelectValue placeholder="Chọn mục tiêu" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {allGoalsWithSystem.map((g) => (
+                        <SelectItem key={g.id} value={g.id}>
+                          {g.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
 
             <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
@@ -623,6 +704,18 @@ export function TwelveWeekSystem() {
               <div className="rounded-xl border bg-white p-4 md:col-span-2">
                 <p className="text-xs uppercase tracking-wide text-gray-500">Tiến độ hiện tại</p>
                 <p className="mt-1 font-semibold text-gray-800">{system.lagMetric.currentValue || "Chưa cập nhật"}</p>
+                {(() => {
+                  const pct = parseLagMetricPercent(system.lagMetric.currentValue ?? "", system.lagMetric.target ?? "");
+                  return pct !== null ? (
+                    <div className="mt-3 space-y-1">
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>Tiến độ</span>
+                        <span className="font-semibold text-gray-700">{pct}%</span>
+                      </div>
+                      <Progress value={pct} className="h-2.5" />
+                    </div>
+                  ) : null;
+                })()}
               </div>
             </CardContent>
           </Card>
@@ -759,6 +852,36 @@ export function TwelveWeekSystem() {
                 </div>
               </div>
 
+              <div className="rounded-xl border border-violet-200 bg-violet-50/60 p-4">
+                <p className="mb-3 text-sm font-semibold text-violet-700">Chấm điểm 5 chiều (1–10)</p>
+                <div className="grid gap-3 md:grid-cols-5">
+                  {[
+                    { key: "progressScore" as const, label: "Tiến độ" },
+                    { key: "disciplineScore" as const, label: "Kỷ luật" },
+                    { key: "focusScore" as const, label: "Tập trung" },
+                    { key: "improvementScore" as const, label: "Cải thiện" },
+                    { key: "outputQualityScore" as const, label: "Chất lượng" },
+                  ].map((dim) => (
+                    <div key={dim.key} className="space-y-1">
+                      <Label className="text-xs">{dim.label}</Label>
+                      <Select
+                        value={String(weeklyForm[dim.key])}
+                        onValueChange={(v) => setWeeklyForm((prev) => ({ ...prev, [dim.key]: Number(v) }))}
+                      >
+                        <SelectTrigger className="h-9">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                            <SelectItem key={n} value={String(n)}>{n}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3 text-sm text-emerald-800">
                 Điểm tuần: <span className="font-semibold">{currentWeekScore?.weeklyScore ?? 0}</span> / 100
               </div>
@@ -796,10 +919,19 @@ export function TwelveWeekSystem() {
                     <h3 className="text-base font-semibold text-gray-800">{PHASE_LABELS[phase] || phase}</h3>
                     <div className="space-y-2">
                       {plans.map((plan) => (
-                        <div key={plan.weekNumber} className="rounded-xl border bg-white p-4">
-                          <p className="text-sm font-medium text-gray-800">Tuần {plan.weekNumber}</p>
-                          <p className="mt-1 text-sm text-gray-600">{plan.focus}</p>
-                          {plan.milestone && <p className="mt-2 text-xs text-purple-700">Cột mốc: <span className="font-medium">{plan.milestone}</span></p>}
+                        <div key={plan.weekNumber} className={`rounded-xl border bg-white p-4 ${plan.completed ? "border-emerald-200 bg-emerald-50/50" : ""}`}>
+                          <div className="flex items-start gap-3">
+                            <Checkbox
+                              checked={Boolean(plan.completed)}
+                              onCheckedChange={() => handleTogglePlanCompleted(plan.weekNumber)}
+                              className="mt-0.5"
+                            />
+                            <div className="min-w-0 flex-1">
+                              <p className={`text-sm font-medium ${plan.completed ? "text-emerald-700 line-through" : "text-gray-800"}`}>Tuần {plan.weekNumber}</p>
+                              <p className={`mt-1 text-sm ${plan.completed ? "text-emerald-600/70 line-through" : "text-gray-600"}`}>{plan.focus}</p>
+                              {plan.milestone && <p className="mt-2 text-xs text-purple-700">Cột mốc: <span className="font-medium">{plan.milestone}</span></p>}
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
