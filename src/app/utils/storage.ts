@@ -287,6 +287,86 @@ function normalizeUserData(data: UserData): UserData {
   };
 }
 
+function getLegacyPhaseName(weekNumber: number): string {
+  if (weekNumber <= 4) return 'Foundation';
+  if (weekNumber <= 8) return 'Build / Acceleration';
+  return 'Finish / Execution';
+}
+
+function migrateLegacyPlanToSystem(goal: Goal): Goal {
+  if (!goal.twelveWeekPlan || goal.twelveWeekSystem) return goal;
+
+  const legacyPlan = goal.twelveWeekPlan;
+  const leadIndicators = legacyPlan.weeklyActions.map((action) => ({
+    name: action,
+    target: '',
+    unit: '',
+  }));
+
+  const weeklyPlans: WeeklyPlanEntry[] = Array.from(
+    { length: Math.max(legacyPlan.totalWeeks || 12, 1) },
+    (_, index) => ({
+      weekNumber: index + 1,
+      phaseName: getLegacyPhaseName(index + 1),
+      focus: legacyPlan.weeklyActions[index] ?? legacyPlan.weeklyActions[0] ?? 'Duy trì nhịp hành động tuần này',
+      milestone: index === 3 || index === 7 || index === 11 ? legacyPlan.week12Outcome : '',
+      completed: false,
+    }),
+  );
+
+  const scoreboard: UniversalScoreboardWeek[] = Array.from({ length: 12 }, (_, index) => ({
+    weekNumber: index + 1,
+    leadCompletionPercent: 0,
+    mainMetricProgress: '',
+    outputDone: '',
+    reviewDone: false,
+    weeklyScore: 0,
+  }));
+
+  return {
+    ...goal,
+    twelveWeekSystem: {
+      goalType: 'legacy-plan',
+      vision12Week: goal.description || goal.title,
+      lagMetric: {
+        name: legacyPlan.successMetric || 'Chỉ số kết quả chính',
+        unit: '',
+        target: '',
+        currentValue: '',
+      },
+      leadIndicators,
+      milestones: {
+        week4: '',
+        week8: '',
+        week12: legacyPlan.week12Outcome || '',
+      },
+      successEvidence: legacyPlan.week12Outcome || '',
+      reviewDay: legacyPlan.reviewDay,
+      week12Outcome: legacyPlan.week12Outcome,
+      weeklyActions: legacyPlan.weeklyActions,
+      successMetric: legacyPlan.successMetric,
+      currentWeek: legacyPlan.currentWeek,
+      totalWeeks: legacyPlan.totalWeeks,
+      weeklyPlans,
+      dailyCheckIns: [],
+      weeklyReviews: [],
+      scoreboard,
+    },
+  };
+}
+
+function migrateLegacyUserData(data: UserData): UserData {
+  const migratedGoals = data.goals.map(migrateLegacyPlanToSystem);
+  const hasChanges = migratedGoals.some((goal, index) => goal !== data.goals[index]);
+
+  if (!hasChanges) return data;
+
+  return {
+    ...data,
+    goals: migratedGoals,
+  };
+}
+
 function shouldHydrateDemoData(data: UserData): boolean {
   return (
     data.goals.length === 0 &&
@@ -726,7 +806,14 @@ export function getUserData(): UserData {
   if (!data) return initializeUserData();
 
   const parsedData = parseStoredUserData(data);
-  return parsedData ?? initializeUserData();
+  if (!parsedData) return initializeUserData();
+
+  const migratedData = migrateLegacyUserData(parsedData);
+  if (migratedData !== parsedData) {
+    saveUserData(migratedData);
+  }
+
+  return migratedData;
 }
 
 export function saveUserData(data: UserData): void {
