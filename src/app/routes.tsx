@@ -1,37 +1,88 @@
+import type { ComponentType } from "react";
 import { createBrowserRouter } from "react-router";
 import { RootLayout } from "./components/RootLayout";
-import { Onboarding } from "./pages/Onboarding";
-import { Dashboard } from "./pages/Dashboard";
-import { VisionBoardEditor } from "./pages/VisionBoardEditor";
-import { GoalTracker } from "./pages/GoalTracker";
-import { LifeBalance } from "./pages/LifeBalance";
-import { Achievements } from "./pages/Achievements";
-import { ReflectionJournal } from "./pages/ReflectionJournal";
-import { VisionBoardGallery } from "./pages/VisionBoardGallery";
-import { LifeInsight } from "./pages/LifeInsight";
-import { FeasibilityCheck } from "./pages/FeasibilityCheck";
-import { SMARTGoalSetup } from "./pages/SMARTGoalSetup";
-import { TwelveWeekPlanSetup } from "./pages/12WeekPlanSetup";
-import { TwelveWeekPlanOverview } from "./pages/12WeekPlanOverview";
+
+function lazyComponent<TModule extends Record<string, unknown>>(
+  loader: () => Promise<TModule>,
+  exportName: keyof TModule,
+) {
+  return async () => {
+    const module = await loader();
+    return {
+      Component: module[exportName] as ComponentType,
+    };
+  };
+}
 
 export const router = createBrowserRouter([
   {
     path: "/",
     Component: RootLayout,
     children: [
-      { index: true, Component: Onboarding },
-      { path: "onboarding", Component: Onboarding },
-      { path: "life-insight", Component: LifeInsight },
-      { path: "feasibility", Component: FeasibilityCheck },
-      { path: "smart-goal-setup", Component: SMARTGoalSetup },
-      { path: "12-week-plan-setup", Component: TwelveWeekPlanSetup },
-      { path: "12-week-plan-overview", Component: TwelveWeekPlanOverview },
-      { path: "vision-board/:id?", Component: VisionBoardEditor },
-      { path: "goals", Component: GoalTracker },
-      { path: "life-balance", Component: LifeBalance },
-      { path: "achievements", Component: Achievements },
-      { path: "journal", Component: ReflectionJournal },
-      { path: "gallery", Component: VisionBoardGallery },
+      {
+        index: true,
+        lazy: lazyComponent(() => import("./pages/Dashboard"), "Dashboard"),
+      },
+      {
+        path: "onboarding",
+        lazy: lazyComponent(() => import("./pages/Onboarding"), "Onboarding"),
+      },
+      {
+        path: "life-insight",
+        lazy: lazyComponent(() => import("./pages/LifeInsight"), "LifeInsight"),
+      },
+      {
+        path: "feasibility",
+        lazy: lazyComponent(() => import("./pages/FeasibilityCheck"), "FeasibilityCheck"),
+      },
+      {
+        path: "smart-goal-setup",
+        lazy: lazyComponent(() => import("./pages/SMARTGoalSetup"), "SMARTGoalSetup"),
+      },
+      {
+        path: "12-week-setup",
+        lazy: lazyComponent(() => import("./pages/12WeekSetup"), "TwelveWeekSetup"),
+      },
+      {
+        path: "12-week-dashboard",
+        lazy: lazyComponent(() => import("./pages/12WeekDashboard"), "TwelveWeekDashboard"),
+      },
+      {
+        path: "12-week-plan-setup",
+        lazy: lazyComponent(() => import("./pages/12WeekPlanSetup"), "TwelveWeekPlanSetup"),
+      },
+      {
+        path: "12-week-plan-overview",
+        lazy: lazyComponent(() => import("./pages/12WeekPlanOverview"), "TwelveWeekPlanOverview"),
+      },
+      {
+        path: "12-week-system",
+        lazy: lazyComponent(() => import("./pages/12WeekSystem"), "TwelveWeekSystem"),
+      },
+      {
+        path: "vision-board/:id?",
+        lazy: lazyComponent(() => import("./pages/VisionBoardEditor"), "VisionBoardEditor"),
+      },
+      {
+        path: "goals",
+        lazy: lazyComponent(() => import("./pages/GoalTracker"), "GoalTracker"),
+      },
+      {
+        path: "life-balance",
+        lazy: lazyComponent(() => import("./pages/LifeBalance"), "LifeBalance"),
+      },
+      {
+        path: "achievements",
+        lazy: lazyComponent(() => import("./pages/Achievements"), "Achievements"),
+      },
+      {
+        path: "journal",
+        lazy: lazyComponent(() => import("./pages/ReflectionJournal"), "ReflectionJournal"),
+      },
+      {
+        path: "gallery",
+        lazy: lazyComponent(() => import("./pages/VisionBoardGallery"), "VisionBoardGallery"),
+      },
     ],
   },
 ]);

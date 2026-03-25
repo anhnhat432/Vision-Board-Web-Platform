@@ -37,7 +37,7 @@ export function MotivationalReminder() {
           <div className="flex items-start gap-3">
             <Sparkles className="w-6 h-6 flex-shrink-0 mt-1" />
             <div>
-              <p className="font-semibold mb-1">Daily Motivation</p>
+              <p className="font-semibold mb-1">Cảm hứng hôm nay</p>
               <p className="text-sm italic opacity-90">"{quote}"</p>
             </div>
             <button

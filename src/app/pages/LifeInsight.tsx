@@ -1,140 +1,274 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { getUserData, LifeArea } from "../utils/storage";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { ArrowRight, TrendingDown } from "lucide-react";
 import { motion } from "motion/react";
-import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } from "recharts";
+import {
+  ArrowRight,
+  Compass,
+  Sparkles,
+  Target,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
+import {
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
+  ResponsiveContainer,
+} from "recharts";
+
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  APP_STORAGE_KEYS,
+  LifeArea,
+  clearGoalPlanningDrafts,
+  getLifeAreaLabel,
+  getUserData,
+} from "../utils/storage";
 
 export function LifeInsight() {
   const navigate = useNavigate();
-  const [lowestArea, setLowestArea] = useState<LifeArea | null>(null);
-  const [radarData, setRadarData] = useState<any[]>([]);
+  const [lifeAreas, setLifeAreas] = useState<LifeArea[]>([]);
 
   useEffect(() => {
     const data = getUserData();
-
-    // Find the lowest scoring life area
-    const lowest = data.currentWheelOfLife.reduce((min, area) =>
-      area.score < min.score ? area : min
-    );
-
-    setLowestArea(lowest);
-
-    // Prepare radar chart data
-    const chartData = data.currentWheelOfLife.map(area => ({
-      subject: area.name,
-      value: area.score,
-      fullMark: 10,
-    }));
-
-    setRadarData(chartData);
+    setLifeAreas(data.currentWheelOfLife);
   }, []);
 
-  if (!lowestArea) return null;
+  const lowestArea = useMemo(() => {
+    if (lifeAreas.length === 0) return null;
+    return [...lifeAreas].sort((a, b) => a.score - b.score)[0];
+  }, [lifeAreas]);
+
+  const strongestArea = useMemo(() => {
+    if (lifeAreas.length === 0) return null;
+    return [...lifeAreas].sort((a, b) => b.score - a.score)[0];
+  }, [lifeAreas]);
+
+  const averageScore = useMemo(() => {
+    if (lifeAreas.length === 0) return 0;
+    return lifeAreas.reduce((sum, area) => sum + area.score, 0) / lifeAreas.length;
+  }, [lifeAreas]);
+
+  const radarData = useMemo(
+    () =>
+      lifeAreas.map((area) => ({
+        subject: getLifeAreaLabel(area.name),
+        value: area.score,
+        fullMark: 10,
+      })),
+    [lifeAreas],
+  );
+
+  if (!lowestArea || !strongestArea) return null;
 
   const handleStartGoalSetup = () => {
-    // Store the selected area for the next screens
-    localStorage.setItem('selected_focus_area', lowestArea.name);
-    navigate('/smart-goal-setup');
+    clearGoalPlanningDrafts();
+    localStorage.setItem(APP_STORAGE_KEYS.selectedFocusArea, lowestArea.name);
+    navigate("/smart-goal-setup");
   };
 
   return (
-    <div className="min-h-screen bg-[#FDF2F8] flex items-center justify-center p-4">
+    <div className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-3xl"
+        className="mx-auto w-full max-w-6xl space-y-6"
       >
-        <Card className="bg-white rounded-3xl shadow-2xl border-0">
-          <CardHeader className="text-center space-y-4 pb-6">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
-              <TrendingDown className="w-8 h-8 text-white" />
-            </div>
-            <CardTitle className="text-4xl">Your Life Insight</CardTitle>
-          </CardHeader>
+        <Card className="hero-surface overflow-hidden border-0 text-white">
+          <CardContent className="relative p-8 lg:p-10">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.1),_transparent_24%)] opacity-90" />
 
-          <CardContent className="space-y-8 p-8">
-            {/* Radar Chart Summary */}
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6">
-              <div className="h-[300px]">
+            <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.12fr)_360px]">
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+                  <Compass className="h-4 w-4" />
+                  Life Insight
+                </div>
+
+                <div className="space-y-4">
+                  <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
+                    Bạn đã có một tín hiệu rất rõ về nơi mình nên ưu tiên tiếp theo.
+                  </h1>
+                  <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
+                    Dựa trên bánh xe cuộc sống hiện tại, hệ thống đang chỉ ra một khu vực cần được
+                    chăm sóc nhiều hơn để kéo toàn bộ hành trình của bạn cân bằng và mạnh hơn.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                    <Target className="mr-1 h-3.5 w-3.5" />
+                    Ưu tiên: {getLifeAreaLabel(lowestArea.name)}
+                  </Badge>
+                  <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                    <TrendingUp className="mr-1 h-3.5 w-3.5" />
+                    Điểm trung bình: {averageScore.toFixed(1)}/10
+                  </Badge>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    variant="outline"
+                    className="border-white/18 bg-white text-slate-900 hover:bg-white/92"
+                    onClick={handleStartGoalSetup}
+                  >
+                    Tạo mục tiêu SMART
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-white/18 bg-white/12 text-white hover:bg-white/18 hover:text-white"
+                    onClick={() => navigate("/")}
+                  >
+                    Về bảng điều khiển
+                  </Button>
+                </div>
+              </div>
+
+              <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">
+                  Snapshot hiện tại
+                </p>
+
+                <div className="mt-6 space-y-4">
+                  <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Cần ưu tiên</p>
+                    <p className="mt-2 text-2xl font-bold text-white">
+                      {getLifeAreaLabel(lowestArea.name)}
+                    </p>
+                    <p className="mt-1 text-sm text-white/68">{lowestArea.score}/10</p>
+                  </div>
+                  <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Điểm mạnh hiện tại</p>
+                    <p className="mt-2 text-2xl font-bold text-white">
+                      {getLifeAreaLabel(strongestArea.name)}
+                    </p>
+                    <p className="mt-1 text-sm text-white/68">{strongestArea.score}/10</p>
+                  </div>
+                  <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Thông điệp</p>
+                    <p className="mt-2 text-sm leading-7 text-white/74">
+                      Đừng cố sửa mọi thứ cùng lúc. Chỉ cần chọn một điểm yếu nhất, rồi biến nó thành
+                      một hướng đi đủ rõ để hành động.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <Card className="overflow-hidden">
+            <CardHeader>
+              <CardTitle>Bức tranh tổng thể của bạn</CardTitle>
+              <CardDescription>
+                Biểu đồ này cho thấy toàn bộ bánh xe cuộc sống hiện tại để bạn không nhìn một chiều.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[340px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={radarData}>
-                    <PolarGrid stroke="#d1d5db" />
-                    <PolarAngleAxis
-                      dataKey="subject"
-                      tick={{ fill: '#6b7280', fontSize: 12 }}
-                    />
-                    <PolarRadiusAxis angle={90} domain={[0, 10]} tick={{ fill: '#9ca3af' }} />
+                    <PolarGrid stroke="#dbe3f1" />
+                    <PolarAngleAxis dataKey="subject" tick={{ fill: "#5b6473", fontSize: 12 }} />
+                    <PolarRadiusAxis angle={90} domain={[0, 10]} tick={{ fill: "#94a3b8" }} />
                     <Radar
-                      name="Score"
+                      name="Điểm"
                       dataKey="value"
-                      stroke="#8b5cf6"
-                      fill="#8b5cf6"
-                      fillOpacity={0.3}
+                      stroke="#7c3aed"
+                      fill="#7c3aed"
+                      fillOpacity={0.42}
                     />
                   </RadarChart>
                 </ResponsiveContainer>
               </div>
-            </div>
 
-            {/* Insight Message */}
-            <div className="text-center space-y-4">
-              <div className="space-y-3">
-                <p className="text-xl text-gray-700">
-                  Based on your Wheel of Life, your{" "}
-                  <span
-                    className="font-bold text-2xl px-3 py-1 rounded-lg inline-block"
-                    style={{
-                      backgroundColor: `${lowestArea.color}20`,
-                      color: lowestArea.color
-                    }}
-                  >
-                    {lowestArea.name}
-                  </span>
-                  {" "}needs the most attention right now.
-                </p>
-
-                <p className="text-lg text-gray-600 italic">
-                  "Let's turn this into a clear and achievable goal."
-                </p>
-              </div>
-
-              {/* Score Display */}
-              <div className="inline-flex items-center gap-3 bg-gray-50 px-6 py-4 rounded-2xl">
-                <span className="text-sm text-gray-600">Current Score:</span>
-                <span
-                  className="text-4xl font-bold"
-                  style={{ color: lowestArea.color }}
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                <div
+                  className="rounded-[24px] border p-4"
+                  style={{
+                    borderColor: `${lowestArea.color}33`,
+                    background: `${lowestArea.color}12`,
+                  }}
                 >
-                  {lowestArea.score}
-                </span>
-                <span className="text-sm text-gray-400">/ 10</span>
+                  <div className="flex items-center gap-2" style={{ color: lowestArea.color }}>
+                    <TrendingDown className="h-4 w-4" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em]">Nút thắt hiện tại</p>
+                  </div>
+                  <p className="mt-3 text-lg font-semibold text-slate-900">
+                    {getLifeAreaLabel(lowestArea.name)}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Đây là khu vực nên trở thành trọng tâm tiếp theo của bạn.
+                  </p>
+                </div>
+
+                <div
+                  className="rounded-[24px] border p-4"
+                  style={{
+                    borderColor: `${strongestArea.color}33`,
+                    background: `${strongestArea.color}12`,
+                  }}
+                >
+                  <div className="flex items-center gap-2" style={{ color: strongestArea.color }}>
+                    <Sparkles className="h-4 w-4" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em]">Lực đỡ hiện có</p>
+                  </div>
+                  <p className="mt-3 text-lg font-semibold text-slate-900">
+                    {getLifeAreaLabel(strongestArea.name)}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Bạn có thể tận dụng sự tự tin ở đây để kéo khu vực đang yếu lên cùng.
+                  </p>
+                </div>
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-6">
-              <Button
-                className="flex-1 h-14 text-lg bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl shadow-lg"
-                onClick={handleStartGoalSetup}
-              >
-                Create SMART Goal
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
+          <div className="space-y-6 xl:sticky xl:top-28">
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[20px] bg-violet-50 text-violet-700">
+                    <Target className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-slate-900">Bước tiếp theo</h3>
+                    <p className="text-sm text-slate-500">
+                      Chúng ta sẽ biến insight này thành một mục tiêu SMART đủ rõ để hành động.
+                    </p>
+                  </div>
+                </div>
 
-              <Button
-                variant="outline"
-                className="flex-1 h-14 text-lg border-2 border-gray-300 hover:bg-gray-50 rounded-2xl"
-                onClick={() => navigate('/')}
-              >
-                Go to Dashboard
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+                <div className="mt-5 space-y-3">
+                  {[
+                    "Chọn đúng một lĩnh vực để tập trung.",
+                    "Biến nó thành mục tiêu cụ thể, đo được và có thời hạn.",
+                    "Tiếp tục sang feasibility rồi hệ 12 tuần.",
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      className="rounded-[20px] border border-white/70 bg-white/72 px-4 py-3 text-sm leading-7 text-slate-600"
+                    >
+                      {item}
+                    </div>
+                  ))}
+                </div>
+
+                <Button className="mt-6 w-full" onClick={handleStartGoalSetup}>
+                  Đi tới mục tiêu SMART
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </motion.div>
     </div>
   );

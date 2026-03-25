@@ -7,9 +7,26 @@ import { Textarea } from "../components/ui/textarea";
 import { Input } from "../components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Badge } from "../components/ui/badge";
-import { ArrowLeft, ArrowRight, CalendarDays, Target } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarDays,
+  CheckCircle2,
+  Compass,
+  Sparkles,
+  Target,
+} from "lucide-react";
 import { motion } from "motion/react";
-import { addGoal } from "../utils/storage";
+import {
+  APP_STORAGE_KEYS,
+  addGoal,
+  clearGoalPlanningDrafts,
+  formatDateInputValue,
+  getFeasibilityResultLabel,
+  getLifeAreaLabel,
+  getReviewDayLabel,
+  parseCalendarDate,
+} from "../utils/storage";
 import { toast } from "sonner";
 
 interface PendingSMARTGoal {
@@ -87,10 +104,8 @@ function extractDeadline(_timeBound: string): string {
 
   const isoDateMatch = timeBound.match(/\b(\d{4})-(\d{2})-(\d{2})\b/);
   if (isoDateMatch) {
-    const parsed = new Date(`${isoDateMatch[1]}-${isoDateMatch[2]}-${isoDateMatch[3]}T00:00:00`);
-    if (!Number.isNaN(parsed.getTime())) {
-      return parsed.toISOString().split("T")[0];
-    }
+    const parsed = parseCalendarDate(`${isoDateMatch[1]}-${isoDateMatch[2]}-${isoDateMatch[3]}`);
+    if (parsed) return formatDateInputValue(parsed);
   }
 
   const monthYearMatch = timeBound.match(
@@ -114,8 +129,7 @@ function extractDeadline(_timeBound: string): string {
     const monthIndex = monthNames.indexOf(monthYearMatch[1].toLowerCase());
     const year = Number(monthYearMatch[2]);
     if (monthIndex >= 0 && year > 1900) {
-      const parsed = new Date(Date.UTC(year, monthIndex, 1));
-      return parsed.toISOString().split("T")[0];
+      return formatDateInputValue(new Date(year, monthIndex, 1));
     }
   }
 
@@ -125,7 +139,7 @@ function extractDeadline(_timeBound: string): string {
     if (!Number.isNaN(months) && months > 0) {
       const parsed = new Date(now);
       parsed.setMonth(parsed.getMonth() + months);
-      return parsed.toISOString().split("T")[0];
+      return formatDateInputValue(parsed);
     }
   }
 
@@ -135,7 +149,7 @@ function extractDeadline(_timeBound: string): string {
     if (!Number.isNaN(weeks) && weeks > 0) {
       const parsed = new Date(now);
       parsed.setDate(parsed.getDate() + weeks * 7);
-      return parsed.toISOString().split("T")[0];
+      return formatDateInputValue(parsed);
     }
   }
 
@@ -145,20 +159,20 @@ function extractDeadline(_timeBound: string): string {
     if (!Number.isNaN(days) && days > 0) {
       const parsed = new Date(now);
       parsed.setDate(parsed.getDate() + days);
-      return parsed.toISOString().split("T")[0];
+      return formatDateInputValue(parsed);
     }
   }
 
   const fallback = new Date(now);
   fallback.setMonth(fallback.getMonth() + 6);
-  return fallback.toISOString().split("T")[0];
+  return formatDateInputValue(fallback);
 }
 
 function generateInitialTasks() {
   return [
-    { id: `task_${Date.now()}_1`, title: "Break down main goal into smaller milestones", completed: false },
-    { id: `task_${Date.now()}_2`, title: "Identify and gather necessary resources", completed: false },
-    { id: `task_${Date.now()}_3`, title: "Set up progress tracking system", completed: false },
+    { id: `task_${Date.now()}_1`, title: "Chia mục tiêu chính thành các cột mốc nhỏ hơn", completed: false },
+    { id: `task_${Date.now()}_2`, title: "Xác định và chuẩn bị các nguồn lực cần thiết", completed: false },
+    { id: `task_${Date.now()}_3`, title: "Thiết lập cách theo dõi tiến độ", completed: false },
   ];
 }
 
@@ -184,18 +198,18 @@ export function TwelveWeekPlanSetup() {
     if (hasInitializedRef.current) return;
     hasInitializedRef.current = true;
 
-    const selectedFocusArea = localStorage.getItem("selected_focus_area");
-    const pendingSmartGoal = localStorage.getItem("pending_smart_goal");
-    const pendingFeasibilityResult = localStorage.getItem("pending_feasibility_result");
+    const selectedFocusArea = localStorage.getItem(APP_STORAGE_KEYS.selectedFocusArea);
+    const pendingSmartGoal = localStorage.getItem(APP_STORAGE_KEYS.pendingSmartGoal);
+    const pendingFeasibilityResult = localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
 
     if (!selectedFocusArea || !pendingSmartGoal) {
-      toast.info("Please complete SMART goal setup first.");
+      toast.info("Vui lòng hoàn thành phần thiết lập mục tiêu SMART trước.");
       navigate("/smart-goal-setup");
       return;
     }
 
     if (!pendingFeasibilityResult) {
-      toast.info("Please complete feasibility check first.");
+      toast.info("Vui lòng hoàn thành phần kiểm tra tính khả thi trước.");
       navigate("/feasibility");
       return;
     }
@@ -207,18 +221,18 @@ export function TwelveWeekPlanSetup() {
       parsedSmart = JSON.parse(pendingSmartGoal);
       parsedFeasibility = JSON.parse(pendingFeasibilityResult);
     } catch {
-      toast.info("We could not load your draft. Please try again.");
+      toast.info("Không thể tải bản nháp hiện tại. Vui lòng thử lại.");
       navigate("/smart-goal-setup");
       return;
     }
 
     if (!isPendingSMARTGoal(parsedSmart) || !isPendingFeasibilityResult(parsedFeasibility)) {
-      toast.info("Your planning data is incomplete. Please retry from SMART goal setup.");
+      toast.info("Dữ liệu lập kế hoạch của bạn chưa đầy đủ. Vui lòng thiết lập lại từ phần SMART.");
       navigate("/smart-goal-setup");
       return;
     }
 
-    const pendingDraftRaw = localStorage.getItem("pending_12_week_plan_draft");
+    const pendingDraftRaw = localStorage.getItem(APP_STORAGE_KEYS.pending12WeekPlanDraft);
     if (pendingDraftRaw) {
       try {
         const pendingDraft = JSON.parse(pendingDraftRaw) as Partial<TwelveWeekPlanDraft>;
@@ -244,7 +258,7 @@ export function TwelveWeekPlanSetup() {
 
   useEffect(() => {
     if (isLoading) return;
-    localStorage.setItem("pending_12_week_plan_draft", JSON.stringify(planDraft));
+    localStorage.setItem(APP_STORAGE_KEYS.pending12WeekPlanDraft, JSON.stringify(planDraft));
   }, [isLoading, planDraft]);
 
   const handleChange = (key: keyof TwelveWeekPlanDraft, value: string) => {
@@ -260,26 +274,26 @@ export function TwelveWeekPlanSetup() {
       .slice(0, 3);
 
     if (!planDraft.week12Outcome.trim()) {
-      toast.error("Week 12 outcome is required.");
+      toast.error("Vui lòng nhập kết quả bạn muốn đạt vào tuần 12.");
       return;
     }
 
     if (weeklyActions.length === 0) {
-      toast.error("Add at least one weekly action.");
+      toast.error("Vui lòng nhập ít nhất một hành động hằng tuần.");
       return;
     }
 
     if (!planDraft.successMetric.trim()) {
-      toast.error("Success metric is required.");
+      toast.error("Vui lòng nhập chỉ số thành công.");
       return;
     }
 
     if (!planDraft.reviewDay.trim()) {
-      toast.error("Please choose a weekly review day.");
+      toast.error("Vui lòng chọn ngày đánh giá hằng tuần.");
       return;
     }
 
-    const description = `This goal focuses on ${smartGoal.specific}. Progress will be measured by ${smartGoal.measurable}, using resources and capabilities such as ${smartGoal.achievable}. It matters because ${smartGoal.relevant}, with a target timeline of ${smartGoal.timeBound}. The feasibility result is: ${feasibility.resultTitle} (readiness score: ${feasibility.readinessScore}/20).`;
+    const description = `Mục tiêu này tập trung vào ${smartGoal.specific}. Tiến độ sẽ được đo bằng ${smartGoal.measurable}, với các nguồn lực hoặc điều kiện cần thiết như ${smartGoal.achievable}. Mục tiêu này quan trọng vì ${smartGoal.relevant}. Kết quả đánh giá tính khả thi: ${feasibility.resultTitle} với điểm sẵn sàng ${feasibility.readinessScore}/20.`;
 
     const goalId = addGoal({
       category: smartGoal.focusArea || focusArea,
@@ -287,7 +301,7 @@ export function TwelveWeekPlanSetup() {
       description,
       deadline: extractDeadline(smartGoal.timeBound),
       tasks: generateInitialTasks(),
-      feasibilityResult: feasibility.resultTitle,
+      feasibilityResult: feasibility.resultType,
       readinessScore: feasibility.readinessScore,
       focusArea: smartGoal.focusArea || focusArea,
       twelveWeekPlan: {
@@ -301,17 +315,12 @@ export function TwelveWeekPlanSetup() {
       },
     });
 
-    localStorage.setItem("latest_12_week_goal_id", goalId);
+    localStorage.setItem(APP_STORAGE_KEYS.latest12WeekGoalId, goalId);
+    localStorage.setItem(APP_STORAGE_KEYS.latest12WeekPlanGoalId, goalId);
+    clearGoalPlanningDrafts();
 
-    localStorage.removeItem("pending_smart_goal");
-    localStorage.removeItem("pending_feasibility_result");
-    localStorage.removeItem("readiness_level");
-    localStorage.removeItem("readiness_score");
-    localStorage.removeItem("pending_feasibility_answers");
-    localStorage.removeItem("pending_12_week_plan_draft");
-
-    toast.success("12-week plan created", {
-      description: "Your goal and execution plan are now in Goal Tracker.",
+    toast.success("Đã tạo kế hoạch 12 tuần", {
+      description: "Mục tiêu và kế hoạch thực thi của bạn đã có trong phần Theo dõi mục tiêu.",
     });
 
     navigate("/12-week-plan-overview");
@@ -324,115 +333,196 @@ export function TwelveWeekPlanSetup() {
   if (isLoading || !smartGoal || !feasibility) return null;
 
   return (
-    <div className="min-h-screen bg-[#FDF2F8] flex items-center justify-center p-4 py-12">
+    <div className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-3xl"
+        className="mx-auto w-full max-w-7xl space-y-6"
       >
-        <Card className="bg-white rounded-3xl shadow-2xl border-0">
-          <CardHeader className="space-y-4 pb-6">
-            <CardTitle className="text-3xl text-center">Build Your 12-Week Plan</CardTitle>
-            <p className="text-center text-gray-600">
-              Turn your SMART goal into a focused 12-week execution plan.
-            </p>
-          </CardHeader>
+        <Card className="hero-surface overflow-hidden border-0 text-white">
+          <CardContent className="relative p-8 lg:p-10">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
 
-          <CardContent className="space-y-6 p-8">
-            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-5 space-y-3">
-              <h3 className="text-lg font-semibold text-gray-800">Goal Summary</h3>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="outline" className="border-2">
-                  <Target className="w-3 h-3 mr-1" />
-                  Focus: {focusArea}
-                </Badge>
-                <Badge variant="outline" className="border-2">
-                  <CalendarDays className="w-3 h-3 mr-1" />
-                  Feasibility: {feasibility.resultType}
-                </Badge>
+            <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+                  <Compass className="h-4 w-4" />
+                  Legacy 12-Week Plan Builder
+                </div>
+
+                <div className="space-y-4">
+                  <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
+                    Biến mục tiêu SMART thành một kế hoạch 12 tuần gọn, rõ và đủ dễ để duy trì đều.
+                  </h1>
+                  <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
+                    Flow này giữ tinh thần đơn giản hơn system đầy đủ, nhưng vẫn đủ các yếu tố quan trọng:
+                    kết quả tuần 12, các hành động lặp lại và nhịp review cố định.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                    <Target className="mr-1 h-3.5 w-3.5" />
+                    Trọng tâm: {getLifeAreaLabel(focusArea)}
+                  </Badge>
+                  <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                    <CalendarDays className="mr-1 h-3.5 w-3.5" />
+                    Khả thi: {getFeasibilityResultLabel(feasibility.resultType)}
+                  </Badge>
+                </div>
               </div>
-              <p className="text-sm text-gray-700 font-medium">{smartGoal.specific}</p>
-              <p className="text-sm text-gray-600">{feasibility.resultTitle}</p>
-            </div>
 
-            <div className="space-y-2">
-              <Label>By the end of 12 weeks, what result do you want to achieve?</Label>
-              <Textarea
-                value={planDraft.week12Outcome}
-                onChange={(e) => handleChange("week12Outcome", e.target.value)}
-                placeholder="Example: Complete my portfolio and submit 20 quality applications"
-                className="min-h-[90px] rounded-2xl border-2"
-              />
-            </div>
-
-            <div className="space-y-3">
-              <Label>What 1-3 actions will you repeat each week to move toward this goal?</Label>
-              <Input
-                value={planDraft.weeklyAction1}
-                onChange={(e) => handleChange("weeklyAction1", e.target.value)}
-                placeholder="Weekly action 1 (required)"
-                className="rounded-xl"
-              />
-              <Input
-                value={planDraft.weeklyAction2}
-                onChange={(e) => handleChange("weeklyAction2", e.target.value)}
-                placeholder="Weekly action 2 (optional)"
-                className="rounded-xl"
-              />
-              <Input
-                value={planDraft.weeklyAction3}
-                onChange={(e) => handleChange("weeklyAction3", e.target.value)}
-                placeholder="Weekly action 3 (optional)"
-                className="rounded-xl"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>How will you measure your progress each week?</Label>
-              <Input
-                value={planDraft.successMetric}
-                onChange={(e) => handleChange("successMetric", e.target.value)}
-                placeholder="Example: Study sessions completed, workouts completed, hours practiced"
-                className="rounded-xl"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Which day will you review your progress each week?</Label>
-              <Select value={planDraft.reviewDay} onValueChange={(value) => handleChange("reviewDay", value)}>
-                <SelectTrigger className="rounded-xl">
-                  <SelectValue placeholder="Choose a review day" />
-                </SelectTrigger>
-                <SelectContent>
-                  {REVIEW_DAYS.map((day) => (
-                    <SelectItem key={day} value={day}>
-                      {day}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex gap-4 pt-4">
-              <Button
-                variant="outline"
-                className="flex-1 h-12 border-2 border-gray-300 hover:bg-gray-50 rounded-2xl"
-                onClick={handleBack}
-              >
-                <ArrowLeft className="mr-2 w-4 h-4" />
-                Back
-              </Button>
-              <Button
-                className="flex-1 h-12 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl shadow-lg"
-                onClick={handleSubmit}
-              >
-                Create My 12-Week Plan
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
+              <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">
+                  Mục tiêu đầu vào
+                </p>
+                <div className="mt-6 space-y-4">
+                  <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">SMART goal</p>
+                    <p className="mt-2 text-lg font-semibold text-white">{smartGoal.specific}</p>
+                  </div>
+                  <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Độ khả thi</p>
+                    <p className="mt-2 text-lg font-semibold text-white">{feasibility.resultTitle}</p>
+                    <p className="mt-1 text-sm text-white/68">{feasibility.resultSummary}</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
+
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+          <div className="space-y-6">
+            <Card>
+              <CardContent className="p-6 lg:p-7">
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[20px] bg-violet-50 text-violet-700">
+                    <Sparkles className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-slate-900">Kết quả tuần 12</h3>
+                    <p className="text-sm text-slate-500">Mô tả thật cụ thể thứ bạn muốn có trong tay khi chu kỳ kết thúc.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Vào cuối 12 tuần, bạn muốn đạt được kết quả gì?</Label>
+                  <Textarea
+                    value={planDraft.week12Outcome}
+                    onChange={(event) => handleChange("week12Outcome", event.target.value)}
+                    placeholder="Ví dụ: Hoàn thiện hồ sơ năng lực và nộp 20 đơn ứng tuyển chất lượng."
+                    className="min-h-[120px]"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6 lg:p-7">
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[20px] bg-emerald-50 text-emerald-700">
+                    <CheckCircle2 className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-slate-900">1-3 hành động lặp lại</h3>
+                    <p className="text-sm text-slate-500">Giữ kế hoạch thật gọn để bạn có thể lặp lại đều mỗi tuần.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <Input
+                    value={planDraft.weeklyAction1}
+                    onChange={(event) => handleChange("weeklyAction1", event.target.value)}
+                    placeholder="Hành động tuần 1"
+                  />
+                  <Input
+                    value={planDraft.weeklyAction2}
+                    onChange={(event) => handleChange("weeklyAction2", event.target.value)}
+                    placeholder="Hành động tuần 2"
+                  />
+                  <Input
+                    value={planDraft.weeklyAction3}
+                    onChange={(event) => handleChange("weeklyAction3", event.target.value)}
+                    placeholder="Hành động tuần 3"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6 lg:p-7">
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[20px] bg-sky-50 text-sky-700">
+                    <CalendarDays className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-slate-900">Đo lường và review</h3>
+                    <p className="text-sm text-slate-500">Xác định một chỉ số rõ ràng và một ngày review cố định để duy trì nhịp.</p>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Bạn sẽ đo lường tiến độ mỗi tuần như thế nào?</Label>
+                    <Input
+                      value={planDraft.successMetric}
+                      onChange={(event) => handleChange("successMetric", event.target.value)}
+                      placeholder="Ví dụ: số buổi học đã hoàn thành, số giờ luyện tập, số đơn đã gửi"
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Bạn sẽ xem xét tiến độ vào ngày nào mỗi tuần?</Label>
+                    <Select value={planDraft.reviewDay} onValueChange={(value) => handleChange("reviewDay", value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn một ngày đánh giá" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {REVIEW_DAYS.map((day) => (
+                          <SelectItem key={day} value={day}>
+                            {getReviewDayLabel(day)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  <Button variant="outline" className="flex-1" onClick={handleBack}>
+                    <ArrowLeft className="h-4 w-4" />
+                    Quay lại
+                  </Button>
+                  <Button className="flex-1" onClick={handleSubmit}>
+                    Tạo kế hoạch 12 tuần
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="space-y-6 xl:sticky xl:top-28">
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  Checklist nhanh
+                </p>
+                <div className="mt-5 space-y-3">
+                  <div className="rounded-[22px] border border-white/70 bg-white/72 p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Bạn nên có</p>
+                    <div className="mt-3 space-y-2 text-sm text-slate-600">
+                      <p>1. Một kết quả tuần 12 đủ cụ thể để nhận ra ngay.</p>
+                      <p>2. Tối đa 3 hành động hằng tuần, không ôm quá nhiều.</p>
+                      <p>3. Một chỉ số đo tiến độ và một ngày review cố định.</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </motion.div>
     </div>
   );

@@ -1,131 +1,400 @@
-import { Outlet, useNavigate, useLocation } from "react-router";
+import { useLocation, useNavigate, useOutlet } from "react-router";
 import { useEffect, useState } from "react";
-import { getUserData, initializeUserData } from "../utils/storage";
-import { Menu, X, LayoutDashboard, Target, TrendingUp, Award, BookOpen, Images, Sparkles } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import {
+  Award,
+  BookOpen,
+  CalendarDays,
+  Images,
+  LayoutDashboard,
+  Menu,
+  Sparkles,
+  Target,
+  TrendingUp,
+  X,
+} from "lucide-react";
+import { initializeUserData } from "../utils/storage";
 import { Button } from "./ui/button";
 import { MotivationalReminder } from "./MotivationalReminder";
 import { Toaster } from "./ui/sonner";
 
+const GUIDED_PATHS = new Set([
+  "/onboarding",
+  "/life-insight",
+  "/feasibility",
+  "/smart-goal-setup",
+  "/12-week-setup",
+  "/12-week-plan-setup",
+  "/12-week-plan-overview",
+]);
+
+const ROUTE_META = [
+  {
+    match: (pathname: string) => pathname === "/",
+    label: "Bảng điều khiển",
+    tagline: "Thấy rõ quỹ đạo phát triển của mình, không chỉ những việc cần làm hôm nay.",
+  },
+  {
+    match: (pathname: string) => pathname.startsWith("/goals"),
+    label: "Mục tiêu",
+    tagline: "Biến ý định thành nhịp thực thi đều, rõ và đo được.",
+  },
+  {
+    match: (pathname: string) => pathname.startsWith("/12-week"),
+    label: "Hệ 12 tuần",
+    tagline: "Giữ đà 12 tuần như đang điều hành một chiến dịch thật sự.",
+  },
+  {
+    match: (pathname: string) => pathname.startsWith("/vision-board"),
+    label: "Vision board",
+    tagline: "Dựng tương lai theo cách đủ đẹp để bạn muốn quay lại mỗi ngày.",
+  },
+  {
+    match: (pathname: string) => pathname.startsWith("/gallery"),
+    label: "Thư viện",
+    tagline: "Những phiên bản tương lai của bạn đang được lưu lại theo từng mùa phát triển.",
+  },
+  {
+    match: (pathname: string) => pathname.startsWith("/life-balance"),
+    label: "Cân bằng cuộc sống",
+    tagline: "Nhìn toàn cảnh để biết nơi nào nên được chăm lại trước tiên.",
+  },
+  {
+    match: (pathname: string) => pathname.startsWith("/achievements"),
+    label: "Thành tựu",
+    tagline: "Mọi cột mốc nhỏ đều xứng đáng được nhìn thấy và ăn mừng.",
+  },
+  {
+    match: (pathname: string) => pathname.startsWith("/journal"),
+    label: "Nhật ký",
+    tagline: "Giữ lại cảm xúc, bài học và những chuyển động tinh tế của hành trình.",
+  },
+];
+
+const NAV_ITEMS = [
+  { path: "/", label: "Bảng điều khiển", icon: LayoutDashboard },
+  { path: "/goals", label: "Mục tiêu", icon: Target },
+  { path: "/12-week-system", label: "Hệ thống 12 tuần", icon: CalendarDays },
+  { path: "/vision-board", label: "Bảng Tầm Nhìn", icon: Sparkles },
+  { path: "/gallery", label: "Thư viện", icon: Images },
+  { path: "/life-balance", label: "Cân bằng cuộc sống", icon: TrendingUp },
+  { path: "/achievements", label: "Thành tựu", icon: Award },
+  { path: "/journal", label: "Nhật ký", icon: BookOpen },
+];
+
+function getRouteTone(pathname: string) {
+  if (pathname.startsWith("/journal")) return "journal";
+  if (pathname.startsWith("/achievements")) return "achievements";
+  if (pathname.startsWith("/life-balance")) return "balance";
+  if (pathname.startsWith("/12-week")) return "system";
+  if (pathname.startsWith("/vision-board") || pathname.startsWith("/gallery")) return "vision";
+  return "default";
+}
+
 export function RootLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const outlet = useOutlet();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
+
   useEffect(() => {
     const userData = initializeUserData();
-    
-    // Redirect to onboarding if not completed and not already there
-    if (!userData.onboardingCompleted && location.pathname !== '/onboarding') {
-      navigate('/onboarding');
+
+    if (!userData.onboardingCompleted && location.pathname !== "/onboarding") {
+      navigate("/onboarding");
     }
-  }, [navigate, location.pathname]);
-  
-  const navItems = [
-    { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/goals', label: 'Goals', icon: Target },
-    { path: '/vision-board', label: 'Vision Board', icon: Sparkles },
-    { path: '/gallery', label: 'Gallery', icon: Images },
-    { path: '/life-balance', label: 'Life Balance', icon: TrendingUp },
-    { path: '/achievements', label: 'Achievements', icon: Award },
-    { path: '/journal', label: 'Journal', icon: BookOpen },
-  ];
-  
+  }, [location.pathname, navigate]);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+
+    const heroCards = Array.from(
+      document.querySelectorAll<HTMLElement>(".hero-surface"),
+    ).filter((card) => !card.closest(".interactive-surface"));
+
+    const resetCard = (card: HTMLElement) => {
+      card.style.setProperty("--hero-pointer-x", "0.5");
+      card.style.setProperty("--hero-pointer-y", "0.5");
+      card.style.setProperty("--hero-rotate-x", "0deg");
+      card.style.setProperty("--hero-rotate-y", "0deg");
+      card.style.setProperty("--hero-shift-x", "0px");
+      card.style.setProperty("--hero-shift-y", "0px");
+      card.dataset.heroHovering = "false";
+    };
+
+    const cleanups = heroCards.map((card) => {
+      resetCard(card);
+
+      const handleMove = (event: PointerEvent) => {
+        if (event.pointerType === "touch") return;
+
+        const bounds = card.getBoundingClientRect();
+        if (bounds.width === 0 || bounds.height === 0) return;
+
+        const pointerX = Math.min(Math.max((event.clientX - bounds.left) / bounds.width, 0), 1);
+        const pointerY = Math.min(Math.max((event.clientY - bounds.top) / bounds.height, 0), 1);
+        const rotateX = ((0.5 - pointerY) * 7).toFixed(3);
+        const rotateY = ((pointerX - 0.5) * 7).toFixed(3);
+        const shiftX = ((pointerX - 0.5) * 14).toFixed(2);
+        const shiftY = ((pointerY - 0.5) * 14).toFixed(2);
+
+        card.style.setProperty("--hero-pointer-x", pointerX.toFixed(4));
+        card.style.setProperty("--hero-pointer-y", pointerY.toFixed(4));
+        card.style.setProperty("--hero-rotate-x", `${rotateX}deg`);
+        card.style.setProperty("--hero-rotate-y", `${rotateY}deg`);
+        card.style.setProperty("--hero-shift-x", `${shiftX}px`);
+        card.style.setProperty("--hero-shift-y", `${shiftY}px`);
+        card.dataset.heroHovering = "true";
+      };
+
+      const handleLeave = () => {
+        resetCard(card);
+      };
+
+      card.addEventListener("pointermove", handleMove);
+      card.addEventListener("pointerenter", handleMove);
+      card.addEventListener("pointerleave", handleLeave);
+
+      return () => {
+        card.removeEventListener("pointermove", handleMove);
+        card.removeEventListener("pointerenter", handleMove);
+        card.removeEventListener("pointerleave", handleLeave);
+        resetCard(card);
+      };
+    });
+
+    return () => {
+      cleanups.forEach((cleanup) => cleanup());
+    };
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const root = document.documentElement;
+    root.style.setProperty("--cursor-x", "50vw");
+    root.style.setProperty("--cursor-y", "30vh");
+    root.style.setProperty("--cursor-glow-opacity", "0");
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (event.pointerType === "touch") {
+        root.style.setProperty("--cursor-glow-opacity", "0");
+        return;
+      }
+
+      root.style.setProperty("--cursor-x", `${event.clientX}px`);
+      root.style.setProperty("--cursor-y", `${event.clientY}px`);
+      root.style.setProperty("--cursor-glow-opacity", "1");
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      root.style.setProperty(
+        "--cursor-glow-opacity",
+        event.pointerType === "touch" ? "0" : "1",
+      );
+    };
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerdown", handlePointerDown);
+      root.style.setProperty("--cursor-glow-opacity", "0");
+    };
+  }, []);
+
   const isActive = (path: string) => {
-    if (path === '/') return location.pathname === '/';
+    if (path === "/") return location.pathname === "/";
     return location.pathname.startsWith(path);
   };
-  
-  // Don't show navigation on onboarding
-  if (location.pathname === '/onboarding' || 
-      location.pathname === '/life-insight' || 
-      location.pathname === '/feasibility' || 
-      location.pathname === '/smart-goal-setup') {
+
+  const pageMeta =
+    ROUTE_META.find((item) => item.match(location.pathname)) ?? ROUTE_META[0];
+  const routeTone = getRouteTone(location.pathname);
+  const shellGradientStyle = {
+    backgroundImage:
+      "linear-gradient(135deg, var(--tone-shell-primary) 0%, var(--tone-shell-secondary) 58%, var(--tone-shell-tertiary) 100%)",
+  };
+  const shellBadgeStyle = {
+    ...shellGradientStyle,
+    boxShadow: "0 20px 45px -20px var(--tone-shell-shadow-strong)",
+  };
+  const shellIndicatorStyle = {
+    ...shellGradientStyle,
+    boxShadow: "0 0 0 6px var(--tone-shell-ring)",
+  };
+  const activeNavStyle = {
+    ...shellGradientStyle,
+    boxShadow: "0 18px 45px -20px var(--tone-shell-shadow)",
+  };
+
+  const pageTransition = {
+    initial: { opacity: 0, y: 18, filter: "blur(10px)" },
+    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+    exit: { opacity: 0, y: -10, filter: "blur(8px)" },
+    transition: { duration: 0.38, ease: [0.22, 1, 0.36, 1] },
+  } as const;
+
+  if (GUIDED_PATHS.has(location.pathname)) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
-        <Outlet />
-        <Toaster />
+      <div className="app-shell min-h-screen" data-route-tone={routeTone}>
+        <div className="cursor-glow" />
+        <div className="ambient-orb ambient-orb--violet" />
+        <div className="ambient-orb ambient-orb--cyan" />
+        <div className="ambient-orb ambient-orb--rose" />
+        <div className="pointer-events-none fixed inset-x-0 top-[-10rem] z-0 mx-auto h-[28rem] max-w-5xl rounded-full bg-[radial-gradient(circle,_rgba(255,255,255,0.92)_0%,_rgba(255,255,255,0)_70%)] blur-3xl" />
+        <div className="relative z-10">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div key={location.pathname} className="page-transition-shell" {...pageTransition}>
+              {outlet}
+            </motion.div>
+          </AnimatePresence>
+          <Toaster />
+        </div>
       </div>
     );
   }
-  
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Vision Board
-              </h1>
-            </div>
-            
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex gap-1">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Button
-                    key={item.path}
-                    variant={isActive(item.path) ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => navigate(item.path)}
-                    className={isActive(item.path) ? "bg-gradient-to-r from-purple-500 to-pink-500" : ""}
-                  >
-                    <Icon className="w-4 h-4 mr-2" />
-                    {item.label}
-                  </Button>
-                );
-              })}
-            </nav>
-            
-            {/* Mobile Menu Button */}
+    <div className="app-shell min-h-screen" data-route-tone={routeTone}>
+      <div className="cursor-glow" />
+      <div className="ambient-orb ambient-orb--violet" />
+      <div className="ambient-orb ambient-orb--cyan" />
+      <div className="ambient-orb ambient-orb--rose" />
+      <div className="pointer-events-none fixed inset-x-0 top-[-9rem] z-0 mx-auto h-[26rem] max-w-6xl rounded-full bg-[radial-gradient(circle,_rgba(255,255,255,0.96)_0%,_rgba(255,255,255,0)_70%)] blur-3xl" />
+
+      <header className="sticky top-4 z-40 px-4 sm:px-6 lg:px-8">
+        <div className="glass-surface mx-auto max-w-7xl rounded-[32px] px-4 py-3 sm:px-5">
+          <div className="flex items-center justify-between gap-4">
             <button
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              type="button"
+              onClick={() => navigate("/")}
+              className="flex items-center gap-4 rounded-[24px] text-left transition-all hover:-translate-y-0.5 hover:opacity-100"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              <div
+                className="flex size-12 items-center justify-center rounded-[18px]"
+                style={shellBadgeStyle}
+              >
+                <Sparkles className="h-6 w-6 text-white" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.32em] text-slate-400">
+                  Vision Board OS
+                </p>
+                <h1 className="truncate text-lg font-bold text-slate-900 lg:text-xl">
+                  Vision Board
+                </h1>
+                <p className="hidden text-sm text-slate-500 lg:block">
+                  {pageMeta.tagline}
+                </p>
+              </div>
+            </button>
+
+            <div className="hidden xl:flex items-center gap-3 rounded-full border border-white/70 bg-white/68 px-4 py-2.5 text-left shadow-[0_18px_36px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
+              <div className="h-2.5 w-2.5 rounded-full" style={shellIndicatorStyle} />
+              <div>
+                <p className="text-[0.62rem] font-semibold uppercase tracking-[0.26em] text-slate-400">
+                  Nhịp hiện tại
+                </p>
+                <p className="text-sm font-semibold text-slate-700">{pageMeta.label}</p>
+              </div>
+            </div>
+
+            <nav className="hidden md:flex md:flex-1 md:justify-end">
+              <div className="flex flex-wrap items-center gap-1 rounded-full border border-white/60 bg-white/58 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+                {NAV_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.path);
+
+                  return (
+                    <Button
+                      key={item.path}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(item.path)}
+                      className={
+                        active
+                          ? "text-white hover:text-white"
+                          : "bg-transparent text-slate-600 shadow-none hover:bg-white/78 hover:text-slate-900"
+                      }
+                      style={active ? activeNavStyle : undefined}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {item.label}
+                    </Button>
+                  );
+                })}
+              </div>
+            </nav>
+
+            <button
+              type="button"
+              className="md:hidden flex size-11 items-center justify-center rounded-2xl border border-white/70 bg-white/72 text-slate-700 shadow-[0_16px_35px_-28px_rgba(15,23,42,0.45)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:bg-white"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
-        
-        {/* Mobile Navigation */}
+
         {mobileMenuOpen && (
-          <div className="md:hidden border-t bg-white">
-            <nav className="px-4 py-2 space-y-1">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.path}
-                    onClick={() => {
-                      navigate(item.path);
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                      isActive(item.path)
-                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                        : 'hover:bg-gray-100'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
+          <div className="mx-auto mt-3 max-w-7xl md:hidden">
+            <div className="glass-surface rounded-[28px] p-3">
+              <nav className="space-y-1">
+                {NAV_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.path);
+
+                  return (
+                    <button
+                      key={item.path}
+                      type="button"
+                      onClick={() => {
+                        navigate(item.path);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold transition-all ${
+                        active
+                          ? "text-white"
+                          : "text-slate-600 hover:bg-white/80 hover:text-slate-900"
+                      }`}
+                      style={active ? activeNavStyle : undefined}
+                    >
+                      <Icon className="h-5 w-5" />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
           </div>
         )}
       </header>
-      
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Outlet />
+
+      <main className="relative z-10 mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div key={location.pathname} className="page-transition-shell" {...pageTransition}>
+            {outlet}
+          </motion.div>
+        </AnimatePresence>
       </main>
-      
+
       <MotivationalReminder />
       <Toaster />
     </div>

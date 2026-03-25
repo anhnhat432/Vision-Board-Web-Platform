@@ -1,14 +1,27 @@
-import { useState, useEffect, useRef } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { motion } from "motion/react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle2,
+  Compass,
+  Gauge,
+  ShieldCheck,
+  Sparkles,
+  Target,
+  TrendingUp,
+} from "lucide-react";
+import { toast } from "sonner";
+
+import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
+import { Card, CardContent } from "../components/ui/card";
+import { Label } from "../components/ui/label";
 import { Progress } from "../components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
-import { Label } from "../components/ui/label";
-import { ArrowLeft, ArrowRight, CheckCircle2, Target, TrendingUp, AlertTriangle } from "lucide-react";
-import { motion } from "motion/react";
-import { getUserData } from "../utils/storage";
-import { toast } from "sonner";
+import { APP_STORAGE_KEYS, getLifeAreaLabel, getUserData } from "../utils/storage";
 
 interface Question {
   id: number;
@@ -28,52 +41,52 @@ interface PendingSMARTGoal {
 const QUESTIONS: Question[] = [
   {
     id: 1,
-    question: "How much time can you realistically commit to this goal each week?",
+    question: "Mỗi tuần bạn có thể dành chính xác bao nhiêu thời gian cho mục tiêu này?",
     options: [
-      { value: "lt1", label: "Less than 1 hour per week", score: 1 },
-      { value: "1to3", label: "1-3 hours per week", score: 2 },
-      { value: "3to5", label: "3-5 hours per week", score: 3 },
-      { value: "gt5", label: "More than 5 hours per week", score: 4 },
+      { value: "lt1", label: "Dưới 1 giờ mỗi tuần", score: 1 },
+      { value: "1to3", label: "1-3 giờ mỗi tuần", score: 2 },
+      { value: "3to5", label: "3-5 giờ mỗi tuần", score: 3 },
+      { value: "gt5", label: "Hơn 5 giờ mỗi tuần", score: 4 },
     ],
   },
   {
     id: 2,
-    question: "How realistic does this goal feel for you right now?",
+    question: "Mục tiêu này cảm thấy thực tế đến mức nào với bạn hiện tại?",
     options: [
-      { value: "overwhelming", label: "It feels too big and overwhelming", score: 1 },
-      { value: "challenging", label: "It feels challenging and hard to sustain", score: 2 },
-      { value: "realistic", label: "It feels realistic with effort", score: 3 },
-      { value: "very_realistic", label: "It feels very realistic and actionable", score: 4 },
+      { value: "overwhelming", label: "Cảm giác quá lớn và quá sức", score: 1 },
+      { value: "challenging", label: "Khó nhưng vẫn có thể chạm tới", score: 2 },
+      { value: "realistic", label: "Thực tế nếu tôi giữ kỷ luật", score: 3 },
+      { value: "very_realistic", label: "Rất thực tế và hoàn toàn có thể làm", score: 4 },
     ],
   },
   {
     id: 3,
-    question: "What is the biggest obstacle that may stop you from completing this goal?",
+    question: "Trở ngại lớn nhất có thể ngăn bạn hoàn thành mục tiêu này là gì?",
     options: [
-      { value: "motivation", label: "Lack of motivation", score: 1 },
-      { value: "time", label: "Time management", score: 2 },
-      { value: "resources", label: "Limited resources or knowledge", score: 2 },
-      { value: "none", label: "No major obstacles", score: 4 },
+      { value: "motivation", label: "Thiếu động lực hoặc dễ mất đà", score: 1 },
+      { value: "time", label: "Khó quản lý thời gian", score: 2 },
+      { value: "resources", label: "Thiếu nguồn lực hoặc kiến thức", score: 2 },
+      { value: "none", label: "Hiện chưa thấy trở ngại lớn nào", score: 4 },
     ],
   },
   {
     id: 4,
-    question: "How consistent are you currently with similar habits or self-improvement efforts?",
+    question: "Bạn thường duy trì những thói quen phát triển bản thân ổn định đến mức nào?",
     options: [
-      { value: "rarely", label: "Rarely follow through", score: 1 },
-      { value: "sometimes", label: "Sometimes, but often lose momentum", score: 2 },
-      { value: "mostly", label: "Mostly consistent with some setbacks", score: 3 },
-      { value: "always", label: "Very consistent and disciplined", score: 4 },
+      { value: "rarely", label: "Hiếm khi theo đến cùng", score: 1 },
+      { value: "sometimes", label: "Có cố gắng nhưng hay mất nhịp", score: 2 },
+      { value: "mostly", label: "Khá kiên trì, đôi lúc chệch nhịp", score: 3 },
+      { value: "always", label: "Rất kỷ luật và duy trì tốt", score: 4 },
     ],
   },
   {
     id: 5,
-    question: "How committed are you to making this specific goal happen?",
+    question: "Bạn cam kết biến mục tiêu này thành hiện thực đến mức nào?",
     options: [
-      { value: "exploring", label: "Just exploring, not serious yet", score: 1 },
-      { value: "interested", label: "Interested, but not urgent", score: 2 },
-      { value: "ready", label: "Ready to start soon", score: 3 },
-      { value: "committed", label: "Fully committed, starting now", score: 4 },
+      { value: "exploring", label: "Mới chỉ đang cân nhắc", score: 1 },
+      { value: "interested", label: "Quan tâm nhưng chưa cấp bách", score: 2 },
+      { value: "ready", label: "Sẵn sàng bắt đầu sớm", score: 3 },
+      { value: "committed", label: "Cam kết hoàn toàn và bắt đầu ngay", score: 4 },
     ],
   },
 ];
@@ -114,9 +127,11 @@ function buildResult(readinessScore: number, wheelScore: number): ResultData {
   if (adjustedScore >= 15) {
     return {
       type: "realistic",
-      title: "This goal looks realistic for you right now.",
-      summary: "Your current readiness and life context suggest that this goal is well matched to your situation.",
-      recommendation: "You can move forward with this goal as planned.",
+      title: "Mục tiêu này khá phù hợp với bạn ở thời điểm hiện tại.",
+      summary:
+        "Độ sẵn sàng của bạn và bối cảnh cuộc sống hiện tại đang cho thấy đây là một mục tiêu đủ thực tế để bắt đầu.",
+      recommendation:
+        "Bạn có thể tiến tới bước thiết kế hệ 12 tuần và giữ nhịp đều ngay từ đầu.",
       readinessScore,
       adjustedScore,
       wheelScore,
@@ -126,9 +141,11 @@ function buildResult(readinessScore: number, wheelScore: number): ResultData {
   if (adjustedScore >= 10) {
     return {
       type: "challenging",
-      title: "This goal is challenging but possible.",
-      summary: "You can likely achieve this goal, but it may require structure, consistency, and small milestones.",
-      recommendation: "Consider breaking this goal into smaller milestones and tracking progress weekly.",
+      title: "Mục tiêu này có tính thách thức cao nhưng vẫn khả thi.",
+      summary:
+        "Bạn có thể đạt được mục tiêu này nếu chia nhỏ đủ tốt và giữ được sự nhất quán trong 12 tuần tới.",
+      recommendation:
+        "Nên tập trung vào một số hành động dẫn dắt cốt lõi và review hằng tuần thật nghiêm túc.",
       readinessScore,
       adjustedScore,
       wheelScore,
@@ -137,9 +154,11 @@ function buildResult(readinessScore: number, wheelScore: number): ResultData {
 
   return {
     type: "too_ambitious",
-    title: "This goal may be too ambitious right now.",
-    summary: "Based on your current readiness and life balance, this goal may be too demanding at the moment.",
-    recommendation: "Consider reducing the scope, extending the timeline, or starting with a smaller first step.",
+    title: "Mục tiêu này có thể đang hơi quá sức vào thời điểm hiện tại.",
+    summary:
+      "Dựa trên độ sẵn sàng và điểm bánh xe cuộc sống của bạn, mục tiêu này có rủi ro cao nếu bắt đầu với quy mô như hiện tại.",
+    recommendation:
+      "Hãy thu nhỏ phạm vi, kéo dài thời hạn hoặc chọn một bước đệm gần hơn trước khi tăng tốc.",
     readinessScore,
     adjustedScore,
     wheelScore,
@@ -175,11 +194,11 @@ export function FeasibilityCheck() {
     if (hasGuardedRef.current) return;
     hasGuardedRef.current = true;
 
-    const storedFocusArea = localStorage.getItem("selected_focus_area");
-    const draft = localStorage.getItem("pending_smart_goal");
+    const storedFocusArea = localStorage.getItem(APP_STORAGE_KEYS.selectedFocusArea);
+    const draft = localStorage.getItem(APP_STORAGE_KEYS.pendingSmartGoal);
 
     if (!storedFocusArea || !draft) {
-      toast.info("Please complete your SMART goal first.");
+      toast.info("Vui lòng hoàn thành mục tiêu SMART của bạn trước.");
       navigate("/smart-goal-setup");
       return;
     }
@@ -188,13 +207,13 @@ export function FeasibilityCheck() {
     try {
       parsedDraft = JSON.parse(draft);
     } catch {
-      toast.info("Your SMART goal draft was invalid. Please review it.");
+      toast.info("Bản nháp mục tiêu SMART của bạn không hợp lệ. Vui lòng kiểm tra lại.");
       navigate("/smart-goal-setup");
       return;
     }
 
     if (!isPendingSMARTGoal(parsedDraft)) {
-      toast.info("Your SMART goal draft is incomplete. Please complete it.");
+      toast.info("Bản nháp mục tiêu SMART của bạn chưa hoàn chỉnh. Vui lòng hoàn thành nó.");
       navigate("/smart-goal-setup");
       return;
     }
@@ -203,7 +222,7 @@ export function FeasibilityCheck() {
     const areaData = data.currentWheelOfLife.find((area) => area.name === storedFocusArea);
 
     if (!areaData) {
-      toast.info("Please complete your life insight first.");
+      toast.info("Vui lòng hoàn thành phần góc nhìn cuộc sống trước.");
       navigate("/life-insight");
       return;
     }
@@ -224,6 +243,7 @@ export function FeasibilityCheck() {
   const currentQuestion = QUESTIONS[currentStep];
   const totalSteps = QUESTIONS.length;
   const progressPercentage = ((currentStep + 1) / totalSteps) * 100;
+  const selectedAnswer = answers[currentQuestion.id];
 
   const handleAnswerChange = (value: string) => {
     setAnswers({ ...answers, [currentQuestion.id]: value });
@@ -266,208 +286,330 @@ export function FeasibilityCheck() {
       wheelScore: result.wheelScore,
     };
 
-    localStorage.setItem("pending_feasibility_result", JSON.stringify(pendingFeasibilityResult));
-    localStorage.setItem("pending_feasibility_answers", JSON.stringify(answers));
+    localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityResult, JSON.stringify(pendingFeasibilityResult));
+    localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers, JSON.stringify(answers));
 
-    toast.success("Feasibility checked", {
-      description: "Continue to build your 12-week execution plan.",
+    toast.success("Đã kiểm tra tính khả thi", {
+      description: "Tiếp tục thiết kế hệ 12 tuần cho mục tiêu của bạn.",
     });
 
-    navigate("/12-week-plan-setup");
+    navigate("/12-week-setup");
   };
 
   const handleAdjustGoal = () => {
     navigate("/smart-goal-setup");
   };
 
-  const isAnswered = answers[currentQuestion.id] !== undefined;
-
   if (result) {
-    const iconMap: Record<ResultType, JSX.Element> = {
-      realistic: <CheckCircle2 className="w-10 h-10 text-white" />,
-      challenging: <TrendingUp className="w-10 h-10 text-white" />,
-      too_ambitious: <AlertTriangle className="w-10 h-10 text-white" />,
+    const iconMap: Record<ResultType, ReactNode> = {
+      realistic: <CheckCircle2 className="h-10 w-10 text-white" />,
+      challenging: <TrendingUp className="h-10 w-10 text-white" />,
+      too_ambitious: <AlertTriangle className="h-10 w-10 text-white" />,
     };
 
-    const colorMap: Record<ResultType, { bg: string; badge: string; border: string }> = {
+    const styleMap: Record<ResultType, { glow: string; badge: string; title: string }> = {
       realistic: {
-        bg: "from-green-500 to-emerald-500",
-        badge: "bg-green-50 border-green-200 text-green-800",
-        border: "border-green-400",
+        glow: "from-emerald-500/18 to-teal-500/10 text-emerald-700",
+        badge: "border-emerald-200 bg-emerald-50 text-emerald-800",
+        title: "border-emerald-200/70 bg-[linear-gradient(135deg,_rgba(236,253,245,0.9)_0%,_rgba(240,253,250,0.85)_100%)]",
       },
       challenging: {
-        bg: "from-yellow-500 to-orange-400",
-        badge: "bg-yellow-50 border-yellow-200 text-yellow-800",
-        border: "border-yellow-400",
+        glow: "from-amber-500/18 to-orange-500/10 text-amber-700",
+        badge: "border-amber-200 bg-amber-50 text-amber-800",
+        title: "border-amber-200/70 bg-[linear-gradient(135deg,_rgba(255,251,235,0.92)_0%,_rgba(255,247,237,0.88)_100%)]",
       },
       too_ambitious: {
-        bg: "from-orange-500 to-red-500",
-        badge: "bg-orange-50 border-orange-200 text-orange-800",
-        border: "border-orange-400",
+        glow: "from-rose-500/18 to-orange-500/10 text-rose-700",
+        badge: "border-rose-200 bg-rose-50 text-rose-800",
+        title: "border-rose-200/70 bg-[linear-gradient(135deg,_rgba(255,241,242,0.92)_0%,_rgba(255,247,237,0.88)_100%)]",
       },
     };
 
-    const colors = colorMap[result.type];
+    const styles = styleMap[result.type];
 
     return (
-      <div className="min-h-screen bg-[#FDF2F8] flex items-center justify-center p-4 py-12">
+      <div className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-2xl"
+          className="mx-auto w-full max-w-6xl space-y-6"
         >
-          <Card className={`bg-white rounded-3xl shadow-2xl border-2 ${colors.border}`}>
-            <CardHeader className="text-center space-y-4 pb-6">
-              <div className={`mx-auto w-20 h-20 bg-gradient-to-br ${colors.bg} rounded-2xl flex items-center justify-center`}>
-                {iconMap[result.type]}
-              </div>
-              <CardTitle className="text-3xl">{result.title}</CardTitle>
-              <p className="text-gray-600 text-base">{result.summary}</p>
-            </CardHeader>
+          <Card className="hero-surface overflow-hidden border-0 text-white">
+            <CardContent className="relative p-8 lg:p-10">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.1),_transparent_22%)] opacity-90" />
 
-            <CardContent className="space-y-6 p-8">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-gray-50 rounded-2xl p-4 text-center">
-                  <Target className="w-5 h-5 mx-auto mb-1 text-purple-500" />
-                  <p className="text-xs text-gray-500 mb-1">Focus Area</p>
-                  <p className="font-semibold text-sm text-gray-800">{focusArea}</p>
+              <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_340px]">
+                <div className="space-y-5">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+                    <ShieldCheck className="h-4 w-4" />
+                    Feasibility Result
+                  </div>
+                  <div className="space-y-4">
+                    <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
+                      {result.title}
+                    </h1>
+                    <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
+                      {result.summary}
+                    </p>
+                  </div>
                 </div>
-                <div className="bg-gray-50 rounded-2xl p-4 text-center">
-                  <TrendingUp className="w-5 h-5 mx-auto mb-1 text-blue-500" />
-                  <p className="text-xs text-gray-500 mb-1">Wheel Score</p>
-                  <p className="font-semibold text-2xl text-gray-800">
-                    {result.wheelScore}
-                    <span className="text-xs text-gray-400">/10</span>
-                  </p>
-                </div>
-                <div className="bg-gray-50 rounded-2xl p-4 text-center">
-                  <CheckCircle2 className="w-5 h-5 mx-auto mb-1 text-green-500" />
-                  <p className="text-xs text-gray-500 mb-1">Readiness</p>
-                  <p className="font-semibold text-2xl text-gray-800">
-                    {result.readinessScore}
-                    <span className="text-xs text-gray-400">/20</span>
-                  </p>
-                </div>
-              </div>
 
-              <div className={`rounded-2xl p-5 border-2 ${colors.badge}`}>
-                <p className="font-semibold mb-1">Recommendation</p>
-                <p className="text-sm">{result.recommendation}</p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 pt-2">
-                <Button
-                  className="flex-1 h-12 text-base bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl shadow-lg"
-                  onClick={handleContinueToPlan}
-                >
-                  <ArrowRight className="mr-2 w-4 h-4" />
-                  {result.type === "too_ambitious" ? "Build a Smaller 12-Week Plan" : "Continue to 12-Week Plan"}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="flex-1 h-12 text-base border-2 border-gray-300 hover:bg-gray-50 rounded-2xl"
-                  onClick={handleAdjustGoal}
-                >
-                  <ArrowLeft className="mr-2 w-4 h-4" />
-                  Adjust Goal
-                </Button>
+                <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-[24px] bg-white/12">
+                    {iconMap[result.type]}
+                  </div>
+                  <div className={`mt-5 inline-flex rounded-full border px-4 py-2 text-sm font-semibold ${styles.badge}`}>
+                    {result.type === "realistic"
+                      ? "Đủ thực tế để bắt đầu"
+                      : result.type === "challenging"
+                        ? "Khó nhưng làm được"
+                        : "Cần thu nhỏ hoặc điều chỉnh"}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            <Card className={`overflow-hidden ${styles.title}`}>
+              <CardContent className="p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Lĩnh vực trọng tâm
+                </p>
+                <p className="mt-3 text-2xl font-bold text-slate-900">
+                  {getLifeAreaLabel(focusArea)}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="overflow-hidden">
+              <CardContent className="p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Điểm bánh xe cuộc sống
+                </p>
+                <p className="mt-3 text-2xl font-bold text-slate-900">{result.wheelScore}/10</p>
+              </CardContent>
+            </Card>
+
+            <Card className="overflow-hidden">
+              <CardContent className="p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Độ sẵn sàng
+                </p>
+                <p className="mt-3 text-2xl font-bold text-slate-900">{result.readinessScore}/20</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <Card>
+              <CardContent className="p-6 lg:p-7">
+                <div className="rounded-[26px] border border-white/70 bg-white/72 p-5">
+                  <div className="flex items-center gap-2 text-violet-700">
+                    <Gauge className="h-4 w-4" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em]">Khuyến nghị</p>
+                  </div>
+                  <p className="mt-4 text-base leading-8 text-slate-700">{result.recommendation}</p>
+                </div>
+
+                <div className="mt-5 rounded-[26px] border border-white/70 bg-white/72 p-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                    Mục tiêu bạn đang đánh giá
+                  </p>
+                  <p className="mt-3 text-lg font-semibold text-slate-900">{pendingGoal.specific}</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">
+                    Thời hạn: {pendingGoal.timeBound}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  Hướng đi tiếp theo
+                </p>
+
+                <div className="mt-5 space-y-3">
+                  {[
+                    "Nếu tiếp tục, bạn sẽ sang bước dựng hệ 12 tuần.",
+                    "Nếu thấy mục tiêu quá nặng, hãy quay lại SMART và chỉnh phạm vi.",
+                    "Kế hoạch tốt là kế hoạch bạn có thể giữ nhịp, không phải kế hoạch nghe thật lớn.",
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      className="rounded-[20px] border border-white/70 bg-white/72 px-4 py-3 text-sm leading-7 text-slate-600"
+                    >
+                      {item}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 flex flex-col gap-3">
+                  <Button onClick={handleContinueToPlan}>
+                    {result.type === "too_ambitious"
+                      ? "Dựng hệ 12 tuần nhỏ hơn"
+                      : "Dựng hệ 12 tuần"}
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" onClick={handleAdjustGoal}>
+                    <ArrowLeft className="h-4 w-4" />
+                    Điều chỉnh mục tiêu SMART
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FDF2F8] flex items-center justify-center p-4 py-12">
+    <div className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-2xl"
+        className="mx-auto w-full max-w-7xl space-y-6"
       >
-        <Card className="bg-white rounded-3xl shadow-2xl border-0">
-          <CardHeader className="space-y-4 pb-6">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Question {currentStep + 1} of {totalSteps}</span>
-                <span>{Math.round(progressPercentage)}%</span>
+        <Card className="hero-surface overflow-hidden border-0 text-white">
+          <CardContent className="relative p-8 lg:p-10">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
+
+            <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+                  <Compass className="h-4 w-4" />
+                  Feasibility Assessment
+                </div>
+
+                <div className="space-y-4">
+                  <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
+                    Kiểm tra xem mục tiêu này có thực tế với bạn ở thời điểm hiện tại hay không.
+                  </h1>
+                  <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
+                    Đây không phải là bài kiểm tra để ngăn bạn lại. Nó giúp bạn biết nên giữ nguyên,
+                    chia nhỏ hay điều chỉnh mục tiêu để hành trình phía sau bền vững hơn.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                    <Target className="mr-1 h-3.5 w-3.5" />
+                    {getLifeAreaLabel(focusArea)}
+                  </Badge>
+                  <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                    <Sparkles className="mr-1 h-3.5 w-3.5" />
+                    Điểm hiện tại: {wheelScore}/10
+                  </Badge>
+                </div>
               </div>
-              <Progress value={progressPercentage} className="h-2" />
-            </div>
 
-            <CardTitle className="text-3xl text-center">Is this goal realistic for you right now?</CardTitle>
+              <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+                <div className="flex items-center justify-between text-sm text-white/72">
+                  <span>Câu hỏi {currentStep + 1} / {totalSteps}</span>
+                  <span>{Math.round(progressPercentage)}%</span>
+                </div>
+                <Progress value={progressPercentage} className="mt-3 h-2.5 bg-white/20" />
 
-            <p className="text-center text-base text-gray-600">
-              For your <span className="font-semibold text-purple-600">{focusArea}</span> goal, answer a few quick
-              questions so we can check whether this goal is realistic, challenging, or too ambitious right now.
-            </p>
-          </CardHeader>
-
-          <CardContent className="space-y-8 p-8">
-            <motion.div
-              key={currentQuestion.id}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-6"
-            >
-              <h3 className="text-xl font-semibold text-gray-800">{currentQuestion.question}</h3>
-
-              <RadioGroup
-                value={answers[currentQuestion.id]}
-                onValueChange={handleAnswerChange}
-                className="space-y-3"
-              >
-                {currentQuestion.options.map((option, index) => (
-                  <motion.div
-                    key={option.value}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Label
-                      htmlFor={option.value}
-                      className={`flex items-center space-x-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${
-                        answers[currentQuestion.id] === option.value
-                          ? "border-purple-500 bg-purple-50"
-                          : "border-gray-200 hover:border-purple-300 hover:bg-gray-50"
-                      }`}
-                    >
-                      <RadioGroupItem value={option.value} id={option.value} />
-                      <span className="flex-1 text-base">{option.label}</span>
-                      {answers[currentQuestion.id] === option.value && (
-                        <CheckCircle2 className="w-5 h-5 text-purple-500" />
-                      )}
-                    </Label>
-                  </motion.div>
-                ))}
-              </RadioGroup>
-            </motion.div>
-
-            <div className="flex gap-4 pt-6">
-              <Button
-                variant="outline"
-                className="flex-1 h-12 text-base border-2 border-gray-300 hover:bg-gray-50 rounded-2xl"
-                onClick={handleBack}
-              >
-                <ArrowLeft className="mr-2 w-4 h-4" />
-                Back
-              </Button>
-
-              <Button
-                className="flex-1 h-12 text-base bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-2xl shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={handleNext}
-                disabled={!isAnswered}
-              >
-                {currentStep < totalSteps - 1 ? "Next" : "Complete Assessment"}
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
+                <div className="mt-6 rounded-[24px] border border-white/10 bg-black/12 p-4">
+                  <p className="text-xs uppercase tracking-[0.16em] text-white/55">Mục tiêu SMART</p>
+                  <p className="mt-2 text-lg font-semibold text-white">{pendingGoal.specific}</p>
+                </div>
+                <div className="mt-4 rounded-[24px] border border-white/10 bg-black/12 p-4">
+                  <p className="text-xs uppercase tracking-[0.16em] text-white/55">Khung thời gian</p>
+                  <p className="mt-2 text-sm font-semibold text-white">{pendingGoal.timeBound}</p>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
+
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <Card className="overflow-hidden">
+            <CardContent className="p-6 lg:p-7">
+              <motion.div
+                key={currentQuestion.id}
+                initial={{ opacity: 0, x: 18 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <div className="rounded-[28px] bg-[linear-gradient(135deg,_rgba(245,243,255,0.95)_0%,_rgba(252,231,243,0.78)_100%)] p-6">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">
+                    Câu hỏi {currentStep + 1}
+                  </p>
+                  <h2 className="mt-3 text-3xl font-bold text-slate-900">{currentQuestion.question}</h2>
+                </div>
+
+                <RadioGroup value={selectedAnswer} onValueChange={handleAnswerChange} className="space-y-3">
+                  {currentQuestion.options.map((option, index) => (
+                    <motion.div
+                      key={option.value}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <Label
+                        htmlFor={option.value}
+                        className={`flex cursor-pointer items-center gap-4 rounded-[24px] border px-5 py-4 transition-all ${
+                          selectedAnswer === option.value
+                            ? "border-violet-300 bg-violet-50/90 shadow-[0_18px_36px_-28px_rgba(109,40,217,0.35)]"
+                            : "border-white/70 bg-white/72 hover:border-violet-200"
+                        }`}
+                      >
+                        <RadioGroupItem value={option.value} id={option.value} />
+                        <div className="flex-1">
+                          <p className="text-base font-medium text-slate-800">{option.label}</p>
+                        </div>
+                        {selectedAnswer === option.value && (
+                          <CheckCircle2 className="h-5 w-5 text-violet-600" />
+                        )}
+                      </Label>
+                    </motion.div>
+                  ))}
+                </RadioGroup>
+
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <Button variant="outline" className="flex-1" onClick={handleBack}>
+                    <ArrowLeft className="h-4 w-4" />
+                    Quay lại
+                  </Button>
+                  <Button className="flex-1" onClick={handleNext} disabled={!selectedAnswer}>
+                    {currentStep < totalSteps - 1 ? "Tiếp theo" : "Hoàn thành đánh giá"}
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </motion.div>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-6 xl:sticky xl:top-28">
+            <Card>
+              <CardContent className="p-6">
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  Mục đích của bài này
+                </p>
+                <div className="mt-5 space-y-3">
+                  {[
+                    "Biết mục tiêu hiện tại đang vừa sức hay quá tải.",
+                    "Nhìn rõ độ sẵn sàng trước khi bước vào system 12 tuần.",
+                    "Giảm rủi ro đặt mục tiêu nghe hay nhưng khó duy trì.",
+                  ].map((item) => (
+                    <div
+                      key={item}
+                      className="rounded-[20px] border border-white/70 bg-white/72 px-4 py-3 text-sm leading-7 text-slate-600"
+                    >
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </motion.div>
     </div>
   );
