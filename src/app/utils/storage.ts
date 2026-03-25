@@ -820,6 +820,19 @@ export function saveUserData(data: UserData): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeUserData(data)));
 }
 
+export function upgradeLegacyGoalToSystem(goalId: string): boolean {
+  const data = getUserData();
+  const goalIndex = data.goals.findIndex((goal) => goal.id === goalId);
+  if (goalIndex === -1) return false;
+
+  const goal = data.goals[goalIndex];
+  if (!goal.twelveWeekPlan || goal.twelveWeekSystem) return false;
+
+  data.goals[goalIndex] = migrateLegacyPlanToSystem(goal);
+  saveUserData(data);
+  return true;
+}
+
 export function updateWheelOfLife(areas: LifeArea[]): void {
   const data = getUserData();
   data.currentWheelOfLife = areas;

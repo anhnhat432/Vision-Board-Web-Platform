@@ -32,6 +32,7 @@ import {
   getLifeAreaLabel,
   getReviewDayLabel,
   getUserData,
+  upgradeLegacyGoalToSystem,
   updateGoal,
 } from "../utils/storage";
 import { celebrateSpark, celebrateSpotlight } from "../utils/experience";
@@ -236,11 +237,37 @@ export function TwelveWeekSystem() {
       localStorage.getItem(APP_STORAGE_KEYS.latest12WeekPlanGoalId) ??
       localStorage.getItem(APP_STORAGE_KEYS.latest12WeekGoalId);
     const legacyGoal = getActiveGoalWithPlan(data.goals, preferredPlanGoalId);
+
+    if (legacyGoal && upgradeLegacyGoalToSystem(legacyGoal.id)) {
+      const refreshedData = getUserData();
+      const upgradedGoal = getActiveGoalWithSystem(refreshedData.goals, legacyGoal.id);
+      if (upgradedGoal) {
+        setActiveGoal(upgradedGoal);
+        setLegacyPlanGoal(null);
+        setAllGoalsWithSystem(refreshedData.goals.filter((g) => Boolean(g.twelveWeekSystem)));
+        localStorage.setItem(APP_STORAGE_KEYS.latest12WeekGoalId, upgradedGoal.id);
+        localStorage.setItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId, upgradedGoal.id);
+        toast.success("Đã khôi phục kế hoạch 12 tuần cũ sang command center mới.");
+        return;
+      }
+    }
+
     setLegacyPlanGoal(legacyGoal);
     if (legacyGoal) {
       localStorage.setItem(APP_STORAGE_KEYS.latest12WeekPlanGoalId, legacyGoal.id);
     }
     setActiveGoal(null);
+  };
+
+  const handleUpgradeLegacyPlan = () => {
+    if (!legacyPlanGoal) return;
+    if (!upgradeLegacyGoalToSystem(legacyPlanGoal.id)) {
+      toast.error("Không thể nâng cấp kế hoạch cũ này.");
+      return;
+    }
+
+    toast.success("Đã nâng cấp kế hoạch cũ sang hệ thống 12 tuần mới.");
+    loadGoalData(legacyPlanGoal.id);
   };
 
   useEffect(() => {
@@ -585,6 +612,11 @@ export function TwelveWeekSystem() {
               {legacyPlanGoal && (
                 <Button variant="outline" onClick={() => navigate("/12-week-plan-overview")}>
                   Mở kế hoạch legacy
+                </Button>
+              )}
+              {legacyPlanGoal && (
+                <Button variant="outline" onClick={handleUpgradeLegacyPlan}>
+                  Khôi phục vào command center mới
                 </Button>
               )}
               <Button onClick={() => navigate("/life-insight")}>
