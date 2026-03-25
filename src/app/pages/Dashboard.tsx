@@ -298,6 +298,28 @@ export function Dashboard() {
         </div>
       </Reveal>
 
+      {userData.isHydratedFromDemo && (
+        <Reveal delay={0.02}>
+          <div className="flex flex-wrap items-center gap-4 rounded-[22px] border border-amber-200 bg-amber-50/90 px-5 py-4 shadow-[0_8px_24px_-16px_rgba(245,158,11,0.28)]">
+            <Sparkles className="h-5 w-5 shrink-0 text-amber-600" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-amber-900">Dữ liệu đang hiển thị là ví dụ demo</p>
+              <p className="mt-0.5 text-sm text-amber-700">
+                Cập nhật bánh xe cuộc sống của bạn để thay dữ liệu mẫu bằng thông tin thật của bạn.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0 border-amber-300 bg-white text-amber-800 hover:bg-amber-100"
+              onClick={() => navigate("/life-balance")}
+            >
+              Cập nhật ngay
+            </Button>
+          </div>
+        </Reveal>
+      )}
+
       <Reveal delay={0.04}>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <motion.div

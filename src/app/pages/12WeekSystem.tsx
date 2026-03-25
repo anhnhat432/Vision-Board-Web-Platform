@@ -25,6 +25,8 @@ import {
   UniversalScoreboardWeek,
   UniversalWeeklyReview,
   formatCalendarDate,
+  formatDateInputValue,
+  getCalendarDateKey,
   getFeasibilityResultLabel,
   getLifeAreaLabel,
   getReviewDayLabel,
@@ -285,6 +287,7 @@ export function TwelveWeekSystem() {
   const handleDailySubmit = () => {
     if (!activeGoal || !system) return;
 
+    const todayKey = formatDateInputValue(new Date());
     const dailyCheckIn: UniversalDailyCheckIn = {
       date: new Date().toISOString(),
       didWorkToday: dailyForm.didWorkToday,
@@ -296,10 +299,18 @@ export function TwelveWeekSystem() {
       optionalNote: dailyForm.optionalNote.trim(),
     };
 
+    const existingTodayIndex = system.dailyCheckIns.findIndex(
+      (c) => getCalendarDateKey(c.date) === todayKey,
+    );
+    const updatedCheckIns =
+      existingTodayIndex >= 0
+        ? system.dailyCheckIns.map((c, i) => (i === existingTodayIndex ? dailyCheckIn : c))
+        : [dailyCheckIn, ...system.dailyCheckIns].slice(0, 120);
+
     updateGoal(activeGoal.id, {
       twelveWeekSystem: {
         ...system,
-        dailyCheckIns: [dailyCheckIn, ...system.dailyCheckIns].slice(0, 120),
+        dailyCheckIns: updatedCheckIns,
       },
     });
 
@@ -521,8 +532,10 @@ export function TwelveWeekSystem() {
               },
               {
                 title: "Điểm tuần này",
-                value: <CountUp value={currentWeekScore?.weeklyScore ?? 0} />,
-                note: "trên thang 100",
+                value: currentWeekScore?.reviewDone
+                  ? <CountUp value={currentWeekScore.weeklyScore} />
+                  : <span className="text-slate-400">--</span>,
+                note: currentWeekScore?.reviewDone ? "trên thang 100" : "Chưa có review tuần này",
                 icon: TrendingUp,
                 color: "from-emerald-500/18 to-teal-500/10 text-emerald-700",
               },

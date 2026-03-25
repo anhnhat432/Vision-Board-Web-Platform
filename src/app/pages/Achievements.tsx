@@ -20,7 +20,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { CountUp } from "../components/ui/count-up";
 import { InteractiveSurface } from "../components/ui/interactive-surface";
 import { Reveal } from "../components/ui/reveal";
-import { getUserData, UserData } from "../utils/storage";
+import { calculateGoalProgress, getUserData, UserData } from "../utils/storage";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Target,
@@ -100,7 +100,7 @@ export function Achievements() {
   if (!userData) return null;
 
   const completedGoals = userData.goals.filter(
-    (goal) => goal.tasks.length > 0 && goal.tasks.every((task) => task.completed),
+    (goal) => calculateGoalProgress(goal) === 100,
   ).length;
   const completionRate = Math.round(
     (userData.achievements.length / ACHIEVEMENT_ORDER.length) * 100,

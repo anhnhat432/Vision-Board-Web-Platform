@@ -195,6 +195,7 @@ export interface UserData {
   reflections: Reflection[];
   lastMotivationalQuote?: string;
   onboardingCompleted: boolean;
+  isHydratedFromDemo?: boolean;
 }
 
 const STORAGE_KEY = 'visionboard_user_data';
@@ -694,6 +695,7 @@ function createDemoUserData(): UserData {
     reflections,
     lastMotivationalQuote: MOTIVATIONAL_QUOTES[0],
     onboardingCompleted: true,
+    isHydratedFromDemo: true,
   });
 }
 
@@ -739,6 +741,7 @@ export function updateWheelOfLife(areas: LifeArea[]): void {
     areas: [...areas],
   });
   data.onboardingCompleted = true;
+  data.isHydratedFromDemo = false;
   saveUserData(data);
 }
 

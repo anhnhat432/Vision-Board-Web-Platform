@@ -136,6 +136,46 @@ function extractDeadline(_timeBound: string): string {
     if (parsed) return formatDateInputValue(parsed);
   }
 
+  // Vietnamese: "tháng N năm YYYY" or "tháng N/YYYY"
+  const viMonthYear = timeBound.match(/tháng\s+(\d{1,2})(?:\s+năm\s+|\/)(\d{4})/);
+  if (viMonthYear) {
+    const month = Number(viMonthYear[1]);
+    const year = Number(viMonthYear[2]);
+    if (month >= 1 && month <= 12 && year > 1900) {
+      return formatDateInputValue(new Date(year, month - 1, 1));
+    }
+  }
+
+  // Vietnamese: "cuối năm YYYY"
+  const viEndYear = timeBound.match(/cuối\s+năm\s+(\d{4})/);
+  if (viEndYear) {
+    const year = Number(viEndYear[1]);
+    if (year > 1900) return formatDateInputValue(new Date(year, 11, 31));
+  }
+
+  // Vietnamese: "đầu năm YYYY"
+  const viStartYear = timeBound.match(/đầu\s+năm\s+(\d{4})/);
+  if (viStartYear) {
+    const year = Number(viStartYear[1]);
+    if (year > 1900) return formatDateInputValue(new Date(year, 0, 1));
+  }
+
+  // Vietnamese: "N tháng nữa" or "trong N tháng" or "trong vòng N tháng"
+  const viMonths = timeBound.match(/(?:trong(?:\s+vòng)?\s+)?(\d+)\s+tháng/);
+  if (viMonths) {
+    const parsed = new Date(now);
+    parsed.setMonth(parsed.getMonth() + Number(viMonths[1]));
+    return formatDateInputValue(parsed);
+  }
+
+  // Vietnamese: "N tuần nữa" or "trong N tuần"
+  const viWeeks = timeBound.match(/(?:trong\s+)?(\d+)\s+tuần/);
+  if (viWeeks) {
+    const parsed = new Date(now);
+    parsed.setDate(parsed.getDate() + Number(viWeeks[1]) * 7);
+    return formatDateInputValue(parsed);
+  }
+
   const monthYearMatch = timeBound.match(
     /\b(?:by\s+)?(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{4})\b/i
   );
