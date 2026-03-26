@@ -97,14 +97,31 @@ function getTaskOffsetsForFrequency(frequency: number): number[] {
   }
 }
 
-function normalizeScheduleOffsets(schedule: number[] | undefined, target: string): number[] {
+function normalizeScheduleOffsets(
+  schedule: number[] | undefined,
+  target: string,
+  preferredDays?: number[],
+): number[] {
   if (Array.isArray(schedule) && schedule.length > 0) {
     return Array.from(new Set(schedule.map((offset) => clampNumber(offset, 0, 6)))).sort(
       (left, right) => left - right,
     );
   }
 
-  return getTaskOffsetsForFrequency(getLeadTargetCount(target));
+  const frequency = getLeadTargetCount(target);
+
+  if (Array.isArray(preferredDays) && preferredDays.length > 0) {
+    const sorted = Array.from(new Set(preferredDays.map((d) => clampNumber(d, 0, 6)))).sort(
+      (a, b) => a - b,
+    );
+    if (frequency <= sorted.length) {
+      return sorted.slice(0, frequency);
+    }
+    const remaining = [0, 1, 2, 3, 4, 5, 6].filter((d) => !sorted.includes(d));
+    return [...sorted, ...remaining].slice(0, frequency).sort((a, b) => a - b);
+  }
+
+  return getTaskOffsetsForFrequency(frequency);
 }
 
 function normalizeLeadIndicator(indicator: LeadIndicator, index: number): LeadIndicator {
@@ -381,7 +398,11 @@ function buildTaskInstances(system: TwelveWeekSystem): TwelveWeekTaskInstance[] 
 
     leadIndicators.forEach((indicator, indicatorIndex) => {
       const frequency = getLeadTargetCount(indicator.target);
-      const offsets = normalizeScheduleOffsets(indicator.schedule, indicator.target);
+      const offsets = normalizeScheduleOffsets(
+        indicator.schedule,
+        indicator.target,
+        system.preferredDays,
+      );
 
       offsets.forEach((offset, slotIndex) => {
         const tacticId = indicator.id || buildLeadIndicatorId(indicator.name, indicatorIndex);

@@ -145,6 +145,8 @@ export interface TwelveWeekSystem {
   status: "active" | "paused" | "completed";
   dailyReminderTime?: string;
   tacticLoadPreference?: "balanced" | "lighter" | "push";
+  preferredDays?: number[];
+  personalConstraint?: "time" | "motivation" | "consistency" | "complexity";
   reentryCount?: number;
   currentWeek: number;
   totalWeeks: number;

@@ -94,6 +94,7 @@ interface TwelveWeekSetupDraft {
   successEvidence: string;
   dailyTimeBudget: string;
   preferredDays: number[];
+  personalConstraint: "time" | "motivation" | "consistency" | "complexity" | "";
 }
 
 const STEPS = [
@@ -305,6 +306,7 @@ export function TwelveWeekSetup() {
     successEvidence: "",
     dailyTimeBudget: "",
     preferredDays: [],
+    personalConstraint: "",
   });
 
   useEffect(() => {
@@ -357,6 +359,13 @@ export function TwelveWeekSetup() {
                 : "balanced",
             dailyTimeBudget: parsedDraft.dailyTimeBudget ?? "",
             preferredDays: Array.isArray(parsedDraft.preferredDays) ? parsedDraft.preferredDays : [],
+            personalConstraint:
+              parsedDraft.personalConstraint === "time" ||
+              parsedDraft.personalConstraint === "motivation" ||
+              parsedDraft.personalConstraint === "consistency" ||
+              parsedDraft.personalConstraint === "complexity"
+                ? parsedDraft.personalConstraint
+                : "",
             leadIndicators:
               Array.isArray(parsedDraft.leadIndicators) && parsedDraft.leadIndicators.length > 0
                 ? parsedDraft.leadIndicators.map((indicator) => ({
@@ -482,6 +491,13 @@ export function TwelveWeekSetup() {
         return original;
       };
 
+      const constraintLoadOverride =
+        previousDraft.personalConstraint === "time" || previousDraft.personalConstraint === "consistency"
+          ? "lighter" as const
+          : previousDraft.personalConstraint === "motivation"
+            ? "balanced" as const
+            : undefined;
+
       return {
         ...previousDraft,
         templateId: template.id,
@@ -493,6 +509,7 @@ export function TwelveWeekSetup() {
         lagMetricUnit: template.lagMetricUnit,
         reviewDay: adaptiveTemplateSupport?.recommendedReviewDay ?? template.reviewDay,
         tacticLoadPreference:
+          constraintLoadOverride ??
           adaptiveTemplateSupport?.recommendedLoadPreference ?? previousDraft.tacticLoadPreference,
         week4Milestone:
           adaptiveTemplateSupport?.week4MilestoneSuggestion ?? template.week4Milestone,
@@ -647,11 +664,12 @@ export function TwelveWeekSetup() {
   const handleNext = () => {
     if (!validateCurrentStep()) return;
 
-    if (currentStep === 0 && draft.templateId && (draft.dailyTimeBudget || draft.preferredDays.length > 0)) {
+    if (currentStep === 0 && draft.templateId && (draft.dailyTimeBudget || draft.preferredDays.length > 0 || draft.personalConstraint)) {
       trackAppEvent("12_week_template_personalized", undefined, {
         templateId: draft.templateId,
         dailyTimeBudget: draft.dailyTimeBudget || "none",
         preferredDaysCount: String(draft.preferredDays.length),
+        personalConstraint: draft.personalConstraint || "none",
       });
     }
 
@@ -721,6 +739,8 @@ export function TwelveWeekSetup() {
         status: "active",
         dailyReminderTime: "19:00",
         tacticLoadPreference: draft.tacticLoadPreference,
+        preferredDays: draft.preferredDays.length > 0 ? draft.preferredDays : undefined,
+        personalConstraint: draft.personalConstraint || undefined,
         reentryCount: 0,
         currentWeek: 1,
         totalWeeks: 12,
@@ -747,6 +767,7 @@ export function TwelveWeekSetup() {
       plan: currentPlan,
       dailyTimeBudget: draft.dailyTimeBudget || "none",
       preferredDaysCount: String(draft.preferredDays.length),
+      personalConstraint: draft.personalConstraint || "none",
     });
     clearGoalPlanningDrafts();
 
@@ -1058,14 +1079,19 @@ export function TwelveWeekSetup() {
                           Cá nhân hóa khung
                         </p>
                         <p className="mt-1 text-sm text-slate-600">
-                          Trả lời nhanh 2 câu để khung tự điều chỉnh lượng tactic phù hợp với bạn.
+                          Trả lời nhanh 3 câu để khung tự điều chỉnh lượng tactic và nhịp phù hợp.
                         </p>
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="daily-time-budget">Mỗi ngày bạn có thể dành bao lâu?</Label>
                         <Select
                           value={draft.dailyTimeBudget}
-                          onValueChange={(value) => handleChange("dailyTimeBudget", value)}
+                          onValueChange={(value) => {
+                            handleChange("dailyTimeBudget", value);
+                            if (selectedTemplate) {
+                              setTimeout(() => applyTemplate(selectedTemplate, false), 0);
+                            }
+                          }}
                         >
                           <SelectTrigger id="daily-time-budget" aria-label="Chọn ngân sách thời gian mỗi ngày">
                             <SelectValue placeholder="Chọn thời lượng" />
@@ -1111,6 +1137,35 @@ export function TwelveWeekSetup() {
                           {draft.preferredDays.length === 0
                             ? "Chưa chọn — mặc định dàn đều cả tuần."
                             : `Đã chọn ${draft.preferredDays.length} ngày.`}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="personal-constraint">Trở ngại lớn nhất hiện tại?</Label>
+                        <Select
+                          value={draft.personalConstraint}
+                          onValueChange={(value) => {
+                            handleChange("personalConstraint", value as TwelveWeekSetupDraft["personalConstraint"]);
+                            if (selectedTemplate) {
+                              setTimeout(() => applyTemplate(selectedTemplate, false), 0);
+                            }
+                          }}
+                        >
+                          <SelectTrigger id="personal-constraint" aria-label="Chọn trở ngại lớn nhất">
+                            <SelectValue placeholder="Chọn trở ngại" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="time">Thiếu thời gian</SelectItem>
+                            <SelectItem value="motivation">Khó giữ động lực</SelectItem>
+                            <SelectItem value="consistency">Hay bị đứt nhịp</SelectItem>
+                            <SelectItem value="complexity">Mục tiêu phức tạp, chưa biết bắt đầu</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-slate-500">
+                          {draft.personalConstraint === "time" && "Hệ thống sẽ ưu tiên giữ nhẹ và tập trung."}
+                          {draft.personalConstraint === "motivation" && "Hệ thống sẽ ưu tiên thắng nhỏ sớm và giảm ma sát."}
+                          {draft.personalConstraint === "consistency" && "Hệ thống sẽ ưu tiên nhịp đều thay vì tải cao."}
+                          {draft.personalConstraint === "complexity" && "Hệ thống sẽ giúp tách lớp rõ hơn."}
+                          {!draft.personalConstraint && "Chọn trở ngại để hệ thống điều chỉnh phù hợp hơn."}
                         </p>
                       </div>
                     </div>
