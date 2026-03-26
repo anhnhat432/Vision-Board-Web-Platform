@@ -117,7 +117,7 @@ export function LifeInsight() {
                     className="border-white/18 bg-white text-slate-900 hover:bg-white/92"
                     onClick={handleStartGoalSetup}
                   >
-                    Tạo mục tiêu SMART
+                    Tạo mục tiêu
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                   <Button
@@ -153,8 +153,8 @@ export function LifeInsight() {
                   <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-white/55">Thông điệp</p>
                     <p className="mt-2 text-sm leading-7 text-white/74">
-                      Đừng cố sửa mọi thứ cùng lúc. Chỉ cần chọn một điểm yếu nhất, rồi biến nó thành
-                      một hướng đi đủ rõ để hành động.
+                      Đừng cố sửa mọi thứ cùng lúc. Chỉ cần chọn một điểm yếu nhất, rồi biến nó
+                      thành một hướng đi đủ rõ để hành động.
                     </p>
                   </div>
                 </div>
@@ -262,7 +262,7 @@ export function LifeInsight() {
                 </div>
 
                 <Button className="mt-6 w-full" onClick={handleStartGoalSetup}>
-                  Đi tới mục tiêu SMART
+                  Tạo mục tiêu
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </CardContent>

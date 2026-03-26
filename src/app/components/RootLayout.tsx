@@ -1,4 +1,3 @@
-import { useLocation, useNavigate, useOutlet } from "react-router";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -13,9 +12,11 @@ import {
   TrendingUp,
   X,
 } from "lucide-react";
+import { useLocation, useNavigate, useOutlet } from "react-router";
+import { maybeShowBrowserReminderNotification, syncPendingOutbox } from "../utils/production";
 import { initializeUserData } from "../utils/storage";
-import { Button } from "./ui/button";
 import { MotivationalReminder } from "./MotivationalReminder";
+import { Button } from "./ui/button";
 import { Toaster } from "./ui/sonner";
 
 const GUIDED_PATHS = new Set([
@@ -46,7 +47,7 @@ const ROUTE_META = [
   },
   {
     match: (pathname: string) => pathname.startsWith("/vision-board"),
-    label: "Vision board",
+    label: "Bảng tầm nhìn",
     tagline: "Dựng tương lai theo cách đủ đẹp để bạn muốn quay lại mỗi ngày.",
   },
   {
@@ -75,7 +76,7 @@ const NAV_ITEMS = [
   { path: "/", label: "Bảng điều khiển", icon: LayoutDashboard },
   { path: "/goals", label: "Mục tiêu", icon: Target },
   { path: "/12-week-system", label: "Hệ thống 12 tuần", icon: CalendarDays },
-  { path: "/vision-board", label: "Bảng Tầm Nhìn", icon: Sparkles },
+  { path: "/vision-board", label: "Bảng tầm nhìn", icon: Sparkles },
   { path: "/gallery", label: "Thư viện", icon: Images },
   { path: "/life-balance", label: "Cân bằng cuộc sống", icon: TrendingUp },
   { path: "/achievements", label: "Thành tựu", icon: Award },
@@ -106,11 +107,15 @@ export function RootLayout() {
   }, [location.pathname, navigate]);
 
   useEffect(() => {
-    setMobileMenuOpen(false);
+    if (location.pathname) {
+      setMobileMenuOpen(false);
+    }
   }, [location.pathname]);
 
   useEffect(() => {
+    const currentPath = location.pathname;
     if (
+      !currentPath ||
       typeof window === "undefined" ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) {
@@ -173,7 +178,9 @@ export function RootLayout() {
     });
 
     return () => {
-      cleanups.forEach((cleanup) => cleanup());
+      cleanups.forEach((cleanup) => {
+        cleanup();
+      });
     };
   }, [location.pathname]);
 
@@ -216,6 +223,40 @@ export function RootLayout() {
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerdown", handlePointerDown);
       root.style.setProperty("--cursor-glow-opacity", "0");
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const runBackgroundSync = () => {
+      void syncPendingOutbox();
+      maybeShowBrowserReminderNotification();
+    };
+
+    runBackgroundSync();
+
+    const handleFocus = () => {
+      maybeShowBrowserReminderNotification();
+    };
+
+    const handleOnline = () => {
+      runBackgroundSync();
+    };
+
+    const intervalId = window.setInterval(() => {
+      maybeShowBrowserReminderNotification();
+    }, 60_000);
+
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("online", handleOnline);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("online", handleOnline);
     };
   }, []);
 

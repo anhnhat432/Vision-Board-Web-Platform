@@ -1,10 +1,11 @@
-import type { ComponentPropsWithoutRef, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
+import type { HTMLMotionProps } from "motion/react";
 
 import { cn } from "./utils";
 import { useInView } from "./use-in-view";
 
-interface RevealProps extends Omit<ComponentPropsWithoutRef<"div">, "children"> {
+interface RevealProps extends Omit<HTMLMotionProps<"div">, "children"> {
   amount?: number;
   children: ReactNode;
   delay?: number;

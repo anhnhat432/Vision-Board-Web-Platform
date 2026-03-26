@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import { createBrowserRouter } from "react-router";
+import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { RootLayout } from "./components/RootLayout";
 
 function lazyComponent<TModule extends Record<string, unknown>>(
@@ -18,6 +19,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     Component: RootLayout,
+    errorElement: <AppErrorBoundary />,
     children: [
       {
         index: true,
@@ -58,6 +60,10 @@ export const router = createBrowserRouter([
       {
         path: "12-week-system",
         lazy: lazyComponent(() => import("./pages/12WeekSystem"), "TwelveWeekSystem"),
+      },
+      {
+        path: "billing/mock-checkout",
+        lazy: lazyComponent(() => import("./pages/MockBillingCheckout"), "MockBillingCheckout"),
       },
       {
         path: "vision-board/:id?",

@@ -1,262 +1,247 @@
 // Local Storage Management Utility
 
-export interface LifeArea {
-  name: string;
-  score: number;
-  color: string;
-}
+import type {
+  Achievement,
+  AppPreferences,
+  EntitlementKey,
+  FunnelStepSummary,
+  Goal,
+  InAppReminder,
+  LifeArea,
+  PricingPlanCode,
+  Reflection,
+  TwelveWeekSystem,
+  TwelveWeekTaskInstance,
+  UserData,
+  VisionBoard,
+} from "./storage-types";
+import {
+  formatCalendarDate as formatCalendarDateFromModule,
+  formatDateInputValue as formatDateInputValueFromModule,
+  getCalendarDateKey as getCalendarDateKeyFromModule,
+  getCalendarDayDifference as getCalendarDayDifferenceFromModule,
+  parseCalendarDate as parseCalendarDateFromModule,
+  sortReflectionsByDateDesc as sortReflectionsByDateDescFromModule,
+} from "./storage-date-utils";
+import {
+  getActiveTwelveWeekGoal as getActiveTwelveWeekGoalFromModule,
+  getGoalExecutionStats as getGoalExecutionStatsFromModule,
+  getTwelveWeekCurrentWeek as getTwelveWeekCurrentWeekFromModule,
+  getTwelveWeekMissedTasks as getTwelveWeekMissedTasksFromModule,
+  getTwelveWeekTacticCount as getTwelveWeekTacticCountFromModule,
+  getTwelveWeekTasksForWeek as getTwelveWeekTasksForWeekFromModule,
+  getTwelveWeekTodayTasks as getTwelveWeekTodayTasksFromModule,
+  getTwelveWeekWeekCompletion as getTwelveWeekWeekCompletionFromModule,
+  getTwelveWeekWeekRange as getTwelveWeekWeekRangeFromModule,
+  isTwelveWeekReviewDueToday as isTwelveWeekReviewDueTodayFromModule,
+  migrateLegacyUserData as migrateLegacyUserDataFromModule,
+  normalizeGoal as normalizeGoalFromModule,
+} from "./storage-twelve-week";
+import {
+  addGoalToData,
+  deleteGoalFromData,
+  resetTwelveWeekGoalCycleInData,
+  updateGoalInData,
+  updateWheelOfLifeInData,
+  upgradeLegacyGoalToSystemInData,
+} from "./storage-goal-ops";
+import {
+  addReflectionToData,
+  deleteReflectionFromData,
+  upsertReflectionInData,
+} from "./storage-reflection-ops";
+import {
+  archiveOutboxItemInData,
+  clearArchivedOutboxInData,
+  clearEventLogInData,
+  clearLocalDeviceSignalsInData,
+  getInAppRemindersFromData,
+  getTwelveWeekFunnelSummaryFromData,
+  restoreArchivedOutboxInData,
+  restoreOutboxItemInData,
+  trackAppEventInData,
+  updateAppPreferencesInData,
+} from "./storage-local-ops";
+import {
+  addVisionBoardToData,
+  deleteVisionBoardFromData,
+  updateVisionBoardInData,
+} from "./storage-vision-board-ops";
+import {
+  addAchievementToData,
+  checkAchievementsInData,
+} from "./storage-achievement-ops";
+import {
+  createDemoUserData as createDemoUserDataFromModule,
+  shouldHydrateDemoData as shouldHydrateDemoDataFromModule,
+} from "./storage-demo-data";
+import { getEntitlementsForPlan, normalizePlanCode } from "./twelve-week-premium";
 
-export interface WheelOfLifeRecord {
-  date: string;
-  areas: LifeArea[];
-}
+export type {
+  Achievement,
+  AppPreferences,
+  DailyUpdate,
+  FunnelStepSummary,
+  Goal,
+  InAppReminder,
+  LagMetric,
+  LeadIndicator,
+  LifeArea,
+  Milestones,
+  PricingPlanCode,
+  Entitlement,
+  EntitlementKey,
+  Subscription,
+  SubscriptionStatus,
+  BillingCycle,
+  Reflection,
+  ScoreboardWeek,
+  SyncOutboxItem,
+  TacticType,
+  Task,
+  TrackingEvent,
+  TwelveWeekPlan,
+  TwelveWeekSystem,
+  TwelveWeekTaskInstance,
+  UniversalDailyCheckIn,
+  UniversalScoreboardWeek,
+  UniversalWeeklyReview,
+  UserData,
+  VisionBoard,
+  VisionBoardItem,
+  WeeklyPlanEntry,
+  WeeklyReview,
+  WheelOfLifeRecord,
+} from "./storage-types";
 
-export interface Task {
-  id: string;
-  title: string;
-  completed: boolean;
-}
+const STORAGE_KEY = "visionboard_user_data";
+const CURRENT_STORAGE_VERSION = 5;
 
-export interface DailyUpdate {
-  date: string;
-  workedToday: boolean;
-  note: string;
-}
+const DEFAULT_APP_PREFERENCES: AppPreferences = {
+  allowLocalAnalytics: true,
+  enableInAppReminders: true,
+  enableBrowserNotifications: false,
+  keepLocalOutbox: true,
+  preferredReminderHour: 19,
+};
 
-export interface WeeklyReview {
-  week: number;
-  wentWell: string;
-  gotInTheWay: string;
-  improveNextWeek: string;
-  score: number;
-  completed: boolean;
-  completedWeeklyActions?: number;
-}
+const TWELVE_WEEK_FUNNEL_STEPS = [
+  {
+    id: "12_week_setup_started",
+    label: "Bắt đầu setup",
+    description: "Người dùng vào flow thiết lập 12 tuần.",
+  },
+  {
+    id: "12_week_plan_created",
+    label: "Tạo chu kỳ",
+    description: "Người dùng hoàn tất setup và tạo chu kỳ.",
+  },
+  {
+    id: "12_week_task_completed",
+    label: "Hoàn thành việc",
+    description: "Một việc trong today queue được đánh dấu xong.",
+  },
+  {
+    id: "12_week_daily_checkin_submitted",
+    label: "Gửi check-in",
+    description: "Người dùng đóng check-in trong ngày.",
+  },
+  {
+    id: "12_week_weekly_review_submitted",
+    label: "Gửi review tuần",
+    description: "Người dùng chốt review tuần và quyết định nhịp tuần sau.",
+  },
+] as const;
 
-export interface ScoreboardWeek {
-  week: number;
-  score: number;
-  reviewed: boolean;
-}
-
-export interface LagMetric {
-  name: string;
-  unit: string;
-  target: string;
-  currentValue: string;
-}
-
-export interface LeadIndicator {
-  name: string;
-  target: string;
-  unit: string;
-}
-
-export interface Milestones {
-  week4: string;
-  week8: string;
-  week12: string;
-}
-
-export interface WeeklyPlanEntry {
-  weekNumber: number;
-  phaseName: string;
-  focus: string;
-  milestone: string;
-  completed: boolean;
-}
-
-export interface UniversalDailyCheckIn {
-  date: string;
-  didWorkToday: boolean;
-  whichLeadIndicatorWorkedOn: string;
-  amountDone: string;
-  outputCreated: string;
-  obstacleOrIssue: string;
-  dailySelfRating: number;
-  optionalNote: string;
-}
-
-export interface UniversalWeeklyReview {
-  weekNumber: number;
-  leadCompletionPercent: number;
-  lagProgressValue: string;
-  biggestOutputThisWeek: string;
-  mainObstacle: string;
-  nextWeekPriority: string;
-  workloadDecision: "keep same" | "reduce slightly" | "increase slightly" | "";
-  reviewCompleted: boolean;
-  progressScore: number;
-  disciplineScore: number;
-  focusScore: number;
-  improvementScore: number;
-  outputQualityScore: number;
-  completedLeadIndicators?: number;
-}
-
-export interface UniversalScoreboardWeek {
-  weekNumber: number;
-  leadCompletionPercent: number;
-  mainMetricProgress: string;
-  outputDone: string;
-  reviewDone: boolean;
-  weeklyScore: number;
-}
-
-export interface TwelveWeekSystem {
-  goalType: string;
-  vision12Week: string;
-  lagMetric: LagMetric;
-  leadIndicators: LeadIndicator[];
-  milestones: Milestones;
-  successEvidence: string;
-  reviewDay: string;
-  week12Outcome: string;
-  weeklyActions: string[];
-  successMetric: string;
-  currentWeek: number;
-  totalWeeks: number;
-  weeklyPlans: WeeklyPlanEntry[];
-  dailyCheckIns: UniversalDailyCheckIn[];
-  weeklyReviews: UniversalWeeklyReview[];
-  scoreboard: UniversalScoreboardWeek[];
-  // Legacy compatibility fields
-  dailyUpdates?: DailyUpdate[];
-  legacyWeeklyReviews?: WeeklyReview[];
-  legacyScoreboard?: ScoreboardWeek[];
-}
-
-export interface TwelveWeekPlan {
-  week12Outcome: string;
-  weeklyActions: string[];
-  successMetric: string;
-  reviewDay: string;
-  currentWeek: number;
-  totalWeeks: number;
-  weeklyCheckIns: string[];
-}
-
-export interface Goal {
-  id: string;
-  category: string;
-  title: string;
-  description: string;
-  deadline: string;
-  tasks: Task[];
-  feasibilityResult?: string;
-  readinessScore?: number;
-  focusArea?: string;
-  twelveWeekSystem?: TwelveWeekSystem;
-  twelveWeekPlan?: TwelveWeekPlan;
-  createdAt: string;
-}
-
-export interface VisionBoardItem {
-  id: string;
-  type: 'image' | 'quote' | 'icon';
-  content: string; // URL for image, text for quote, icon name for icon
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-export interface VisionBoard {
-  id: string;
-  name: string;
-  year: string;
-  items: VisionBoardItem[];
-  createdAt: string;
-}
-
-export interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  earnedAt: string;
-}
-
-export interface Reflection {
-  id: string;
-  date: string;
-  title: string;
-  content: string;
-  mood?: string;
-}
-
-export interface UserData {
-  userId: string;
-  wheelOfLifeHistory: WheelOfLifeRecord[];
-  currentWheelOfLife: LifeArea[];
-  goals: Goal[];
-  visionBoards: VisionBoard[];
-  achievements: Achievement[];
-  reflections: Reflection[];
-  lastMotivationalQuote?: string;
-  onboardingCompleted: boolean;
-  isHydratedFromDemo?: boolean;
-}
-
-const STORAGE_KEY = 'visionboard_user_data';
-const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
+const TWELVE_WEEK_MONETIZATION_STEPS = [
+  {
+    id: "paywall_viewed",
+    label: "Mở paywall",
+    description: "Người dùng đã nhìn thấy paywall nâng cấp trong một ngữ cảnh cụ thể.",
+  },
+  {
+    id: "paywall_cta_clicked",
+    label: "Bấm CTA nâng cấp",
+    description: "Người dùng bấm một CTA dẫn tới paywall hoặc bước nâng cấp tiếp theo.",
+  },
+  {
+    id: "paywall_checkout_started",
+    label: "Bắt đầu checkout",
+    description: "Người dùng bắt đầu bước mở gói trên thiết bị hiện tại.",
+  },
+  {
+    id: "paywall_checkout_completed",
+    label: "Hoàn tất checkout",
+    description: "Thiết bị đã mở gói thành công trong flow local-first hiện tại.",
+  },
+  {
+    id: "premium_template_applied",
+    label: "Áp dụng template",
+    description: "Một template premium hoặc free đã được áp dụng vào setup.",
+  },
+  {
+    id: "premium_insight_opened",
+    label: "Mở insight premium",
+    description: "Người dùng đã mở phần insight review premium trong tab tuần.",
+  },
+] as const;
 
 export const APP_STORAGE_KEYS = {
-  selectedFocusArea: 'selected_focus_area',
-  pendingSmartGoal: 'pending_smart_goal',
-  pendingFeasibilityResult: 'pending_feasibility_result',
-  pendingFeasibilityAnswers: 'pending_feasibility_answers',
-  pending12WeekSetupDraft: 'pending_12_week_setup_draft',
-  pending12WeekPlanDraft: 'pending_12_week_plan_draft',
-  latest12WeekGoalId: 'latest_12_week_goal_id',
-  latest12WeekSystemGoalId: 'latest_12_week_system_goal_id',
-  latest12WeekPlanGoalId: 'latest_12_week_plan_goal_id',
-  readinessLevel: 'readiness_level',
-  readinessScore: 'readiness_score',
+  selectedFocusArea: "selected_focus_area",
+  pendingSmartGoal: "pending_smart_goal",
+  pendingFeasibilityResult: "pending_feasibility_result",
+  pendingFeasibilityAnswers: "pending_feasibility_answers",
+  pending12WeekSetupDraft: "pending_12_week_setup_draft",
+  pending12WeekPlanDraft: "pending_12_week_plan_draft",
+  latest12WeekGoalId: "latest_12_week_goal_id",
+  latest12WeekSystemGoalId: "latest_12_week_system_goal_id",
+  latest12WeekPlanGoalId: "latest_12_week_plan_goal_id",
+  readinessLevel: "readiness_level",
+  readinessScore: "readiness_score",
 } as const;
 
 export const LIFE_AREAS = [
-  { name: 'Career', color: '#8b5cf6' },
-  { name: 'Finance', color: '#10b981' },
-  { name: 'Health', color: '#ef4444' },
-  { name: 'Education', color: '#f59e0b' },
-  { name: 'Relationships', color: '#ec4899' },
-  { name: 'Family', color: '#3b82f6' },
-  { name: 'Personal Growth', color: '#14b8a6' },
-  { name: 'Leisure', color: '#a855f7' },
+  { name: "Career", color: "#8b5cf6" },
+  { name: "Finance", color: "#10b981" },
+  { name: "Health", color: "#ef4444" },
+  { name: "Education", color: "#f59e0b" },
+  { name: "Relationships", color: "#ec4899" },
+  { name: "Family", color: "#3b82f6" },
+  { name: "Personal Growth", color: "#14b8a6" },
+  { name: "Leisure", color: "#a855f7" },
 ];
 
 export const LIFE_AREA_LABELS: Record<string, string> = {
-  Career: 'Sự nghiệp',
-  Finance: 'Tài chính',
-  Health: 'Sức khỏe',
-  Education: 'Học tập',
-  Relationships: 'Mối quan hệ',
-  Family: 'Gia đình',
-  'Personal Growth': 'Phát triển bản thân',
-  Leisure: 'Giải trí',
+  Career: "Sự nghiệp",
+  Finance: "Tài chính",
+  Health: "Sức khỏe",
+  Education: "Học tập",
+  Relationships: "Mối quan hệ",
+  Family: "Gia đình",
+  "Personal Growth": "Phát triển bản thân",
+  Leisure: "Giải trí",
 };
 
 export const REVIEW_DAY_LABELS: Record<string, string> = {
-  Monday: 'Thứ Hai',
-  Tuesday: 'Thứ Ba',
-  Wednesday: 'Thứ Tư',
-  Thursday: 'Thứ Năm',
-  Friday: 'Thứ Sáu',
-  Saturday: 'Thứ Bảy',
-  Sunday: 'Chủ Nhật',
+  Monday: "Thứ Hai",
+  Tuesday: "Thứ Ba",
+  Wednesday: "Thứ Tư",
+  Thursday: "Thứ Năm",
+  Friday: "Thứ Sáu",
+  Saturday: "Thứ Bảy",
+  Sunday: "Chủ Nhật",
 };
 
 export const FEASIBILITY_RESULT_LABELS: Record<string, string> = {
-  realistic: 'Khả thi',
-  challenging: 'Thách thức nhưng làm được',
-  too_ambitious: 'Hơi quá sức lúc này',
-  'This goal looks realistic for you right now.': 'Mục tiêu này có vẻ khả thi với bạn lúc này.',
-  'This goal is challenging but possible.': 'Mục tiêu này đầy thách thức nhưng có thể thực hiện được.',
-  'This goal may be too ambitious right now.': 'Mục tiêu này có thể quá tham vọng lúc này.',
-  'Mục tiêu này có vẻ khả thi với bạn lúc này.': 'Khả thi',
-  'Mục tiêu này đầy thách thức nhưng có thể thực hiện được.': 'Thách thức nhưng làm được',
-  'Mục tiêu này có thể quá tham vọng lúc này.': 'Hơi quá sức lúc này',
+  realistic: "Khả thi",
+  challenging: "Thách thức nhưng làm được",
+  too_ambitious: "Hơi quá sức lúc này",
+  "This goal looks realistic for you right now.": "Mục tiêu này có vẻ khả thi với bạn lúc này.",
+  "This goal is challenging but possible.": "Mục tiêu này đầy thách thức nhưng có thể thực hiện được.",
+  "This goal may be too ambitious right now.": "Mục tiêu này có thể quá tham vọng lúc này.",
+  "Mục tiêu này có vẻ khả thi với bạn lúc này.": "Khả thi",
+  "Mục tiêu này đầy thách thức nhưng có thể thực hiện được.": "Thách thức nhưng làm được",
+  "Mục tiêu này có thể quá tham vọng lúc này.": "Hơi quá sức lúc này",
 };
 
 export const MOTIVATIONAL_QUOTES = [
@@ -272,110 +257,39 @@ export const MOTIVATIONAL_QUOTES = [
   "Bạn càng nỗ lực cho điều gì đó, cảm giác khi đạt được nó sẽ càng ý nghĩa.",
 ];
 
-function padDatePart(value: number): string {
-  return String(value).padStart(2, '0');
-}
-
-function getCalendarDayIndex(date: Date): number {
-  return Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / MILLISECONDS_PER_DAY);
+function normalizeReflection(reflection: Reflection): Reflection {
+  return {
+    ...reflection,
+    entryType: reflection.entryType === "weekly-review" ? "weekly-review" : "freeform",
+    linkedGoalId: reflection.linkedGoalId,
+    linkedWeekNumber: reflection.linkedWeekNumber,
+  };
 }
 
 function normalizeUserData(data: UserData): UserData {
+  const subscription = data.subscription ?? null;
+  const entitlements = Array.isArray(data.entitlements) ? data.entitlements : [];
+  const normalizedEntitlements =
+    subscription?.status === "active" && entitlements.length === 0
+      ? getEntitlementsForPlan(subscription.planCode, subscription.startedAt)
+      : entitlements;
+
   return {
     ...data,
-    reflections: sortReflectionsByDateDesc(Array.isArray(data.reflections) ? data.reflections : []),
-  };
-}
-
-function getLegacyPhaseName(weekNumber: number): string {
-  if (weekNumber <= 4) return 'Foundation';
-  if (weekNumber <= 8) return 'Build / Acceleration';
-  return 'Finish / Execution';
-}
-
-function migrateLegacyPlanToSystem(goal: Goal): Goal {
-  if (!goal.twelveWeekPlan || goal.twelveWeekSystem) return goal;
-
-  const legacyPlan = goal.twelveWeekPlan;
-  const leadIndicators = legacyPlan.weeklyActions.map((action) => ({
-    name: action,
-    target: '',
-    unit: '',
-  }));
-
-  const weeklyPlans: WeeklyPlanEntry[] = Array.from(
-    { length: Math.max(legacyPlan.totalWeeks || 12, 1) },
-    (_, index) => ({
-      weekNumber: index + 1,
-      phaseName: getLegacyPhaseName(index + 1),
-      focus: legacyPlan.weeklyActions[index] ?? legacyPlan.weeklyActions[0] ?? 'Duy trì nhịp hành động tuần này',
-      milestone: index === 3 || index === 7 || index === 11 ? legacyPlan.week12Outcome : '',
-      completed: false,
-    }),
-  );
-
-  const scoreboard: UniversalScoreboardWeek[] = Array.from({ length: 12 }, (_, index) => ({
-    weekNumber: index + 1,
-    leadCompletionPercent: 0,
-    mainMetricProgress: '',
-    outputDone: '',
-    reviewDone: false,
-    weeklyScore: 0,
-  }));
-
-  return {
-    ...goal,
-    twelveWeekSystem: {
-      goalType: 'legacy-plan',
-      vision12Week: goal.description || goal.title,
-      lagMetric: {
-        name: legacyPlan.successMetric || 'Chỉ số kết quả chính',
-        unit: '',
-        target: '',
-        currentValue: '',
-      },
-      leadIndicators,
-      milestones: {
-        week4: '',
-        week8: '',
-        week12: legacyPlan.week12Outcome || '',
-      },
-      successEvidence: legacyPlan.week12Outcome || '',
-      reviewDay: legacyPlan.reviewDay,
-      week12Outcome: legacyPlan.week12Outcome,
-      weeklyActions: legacyPlan.weeklyActions,
-      successMetric: legacyPlan.successMetric,
-      currentWeek: legacyPlan.currentWeek,
-      totalWeeks: legacyPlan.totalWeeks,
-      weeklyPlans,
-      dailyCheckIns: [],
-      weeklyReviews: [],
-      scoreboard,
+    storageVersion: data.storageVersion || CURRENT_STORAGE_VERSION,
+    goals: Array.isArray(data.goals) ? data.goals.map((goal) => normalizeGoalFromModule(goal)) : [],
+    reflections: sortReflectionsByDateDesc(
+      Array.isArray(data.reflections) ? data.reflections.map((reflection) => normalizeReflection(reflection)) : [],
+    ),
+    eventLog: Array.isArray(data.eventLog) ? data.eventLog : [],
+    syncOutbox: Array.isArray(data.syncOutbox) ? data.syncOutbox : [],
+    appPreferences: {
+      ...DEFAULT_APP_PREFERENCES,
+      ...(data.appPreferences ?? {}),
     },
+    subscription,
+    entitlements: normalizedEntitlements,
   };
-}
-
-function migrateLegacyUserData(data: UserData): UserData {
-  const migratedGoals = data.goals.map(migrateLegacyPlanToSystem);
-  const hasChanges = migratedGoals.some((goal, index) => goal !== data.goals[index]);
-
-  if (!hasChanges) return data;
-
-  return {
-    ...data,
-    goals: migratedGoals,
-  };
-}
-
-function shouldHydrateDemoData(data: UserData): boolean {
-  return (
-    data.goals.length === 0 &&
-    data.visionBoards.length === 0 &&
-    data.reflections.length === 0 &&
-    data.achievements.length === 0 &&
-    data.wheelOfLifeHistory.length === 0 &&
-    data.onboardingCompleted === false
-  );
 }
 
 function parseStoredUserData(raw: string): UserData | null {
@@ -387,70 +301,86 @@ function parseStoredUserData(raw: string): UserData | null {
 }
 
 export function formatDateInputValue(date: Date): string {
-  return `${date.getFullYear()}-${padDatePart(date.getMonth() + 1)}-${padDatePart(date.getDate())}`;
+  return formatDateInputValueFromModule(date);
 }
 
 export function parseCalendarDate(value: string): Date | null {
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-
-  const dateOnlyMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (dateOnlyMatch) {
-    const year = Number(dateOnlyMatch[1]);
-    const month = Number(dateOnlyMatch[2]);
-    const day = Number(dateOnlyMatch[3]);
-    const parsed = new Date(year, month - 1, day);
-
-    if (
-      parsed.getFullYear() === year &&
-      parsed.getMonth() === month - 1 &&
-      parsed.getDate() === day
-    ) {
-      return parsed;
-    }
-
-    return null;
-  }
-
-  const parsed = new Date(trimmed);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
+  return parseCalendarDateFromModule(value);
 }
 
 export function getCalendarDateKey(value: string): string | null {
-  const date = parseCalendarDate(value);
-  return date ? formatDateInputValue(date) : null;
+  return getCalendarDateKeyFromModule(value);
 }
 
 export function formatCalendarDate(
   value: string,
-  locale = 'vi-VN',
+  locale = "vi-VN",
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const date = parseCalendarDate(value);
-  if (!date) return '--';
-  return date.toLocaleDateString(locale, options);
+  return formatCalendarDateFromModule(value, locale, options);
 }
 
 export function getCalendarDayDifference(targetDate: string, referenceDate = new Date()): number | null {
-  const target = parseCalendarDate(targetDate);
-  if (!target) return null;
-  return getCalendarDayIndex(target) - getCalendarDayIndex(referenceDate);
+  return getCalendarDayDifferenceFromModule(targetDate, referenceDate);
+}
+
+export function isTwelveWeekReviewDueToday(
+  system: TwelveWeekSystem,
+  referenceDate = new Date(),
+): boolean {
+  return isTwelveWeekReviewDueTodayFromModule(system, referenceDate);
+}
+
+export function getTwelveWeekCurrentWeek(system: TwelveWeekSystem, referenceDate = new Date()): number {
+  return getTwelveWeekCurrentWeekFromModule(system, referenceDate);
+}
+
+export function getTwelveWeekWeekRange(
+  system: TwelveWeekSystem,
+  weekNumber: number,
+): { start: string; end: string } {
+  return getTwelveWeekWeekRangeFromModule(system, weekNumber);
+}
+
+export function getTwelveWeekTasksForWeek(system: TwelveWeekSystem, weekNumber: number): TwelveWeekTaskInstance[] {
+  return getTwelveWeekTasksForWeekFromModule(system, weekNumber);
+}
+
+export function getTwelveWeekTodayTasks(
+  system: TwelveWeekSystem,
+  referenceDate = new Date(),
+): TwelveWeekTaskInstance[] {
+  return getTwelveWeekTodayTasksFromModule(system, referenceDate);
+}
+
+export function getTwelveWeekMissedTasks(
+  system: TwelveWeekSystem,
+  referenceDate = new Date(),
+): TwelveWeekTaskInstance[] {
+  return getTwelveWeekMissedTasksFromModule(system, referenceDate);
+}
+
+export function getTwelveWeekWeekCompletion(
+  system: TwelveWeekSystem,
+  weekNumber: number,
+): { completed: number; total: number; percent: number } {
+  return getTwelveWeekWeekCompletionFromModule(system, weekNumber);
+}
+
+export function getTwelveWeekTacticCount(system: TwelveWeekSystem): number {
+  return getTwelveWeekTacticCountFromModule(system);
+}
+
+export function getGoalExecutionStats(goal: Goal, referenceDate = new Date()) {
+  return getGoalExecutionStatsFromModule(goal, referenceDate);
+}
+
+export function getActiveTwelveWeekGoal(goals: Goal[], preferredGoalId?: string | null): Goal | null {
+  return getActiveTwelveWeekGoalFromModule(goals, preferredGoalId);
 }
 
 export function sortReflectionsByDateDesc(reflections: Reflection[]): Reflection[] {
-  return [...reflections].sort((left, right) => {
-    const leftKey = getCalendarDateKey(left.date);
-    const rightKey = getCalendarDateKey(right.date);
-
-    if (leftKey && rightKey && leftKey !== rightKey) {
-      return rightKey.localeCompare(leftKey);
-    }
-
-    if (leftKey && !rightKey) return -1;
-    if (!leftKey && rightKey) return 1;
-
-    return right.id.localeCompare(left.id);
-  });
+  return sortReflectionsByDateDescFromModule(reflections);
 }
 
 export function clearGoalPlanningDrafts(): void {
@@ -462,7 +392,18 @@ export function clearGoalPlanningDrafts(): void {
     APP_STORAGE_KEYS.pending12WeekPlanDraft,
     APP_STORAGE_KEYS.readinessLevel,
     APP_STORAGE_KEYS.readinessScore,
-  ].forEach((key) => localStorage.removeItem(key));
+  ].forEach((key) => {
+    localStorage.removeItem(key);
+  });
+}
+
+function getPlanRank(planCode: PricingPlanCode): number {
+  switch (normalizePlanCode(planCode)) {
+    case "PLUS":
+      return 1;
+    default:
+      return 0;
+  }
 }
 
 export function getLifeAreaLabel(name: string): string {
@@ -477,328 +418,34 @@ export function getFeasibilityResultLabel(result: string): string {
   return FEASIBILITY_RESULT_LABELS[result] ?? result;
 }
 
-function generateUserId(): string {
-  return `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
-
-function getRelativeISOString(daysOffset: number): string {
-  const date = new Date();
-  date.setDate(date.getDate() + daysOffset);
-  return date.toISOString();
-}
-
-function getRelativeDateValue(daysOffset: number): string {
-  const date = new Date();
-  date.setDate(date.getDate() + daysOffset);
-  return formatDateInputValue(date);
-}
-
-function createDemoUserData(): UserData {
-  const userId = generateUserId();
-
-  const currentWheelOfLife: LifeArea[] = [
-    { name: 'Career', score: 7, color: '#8b5cf6' },
-    { name: 'Finance', score: 6, color: '#10b981' },
-    { name: 'Health', score: 5, color: '#ef4444' },
-    { name: 'Education', score: 8, color: '#f59e0b' },
-    { name: 'Relationships', score: 7, color: '#ec4899' },
-    { name: 'Family', score: 8, color: '#3b82f6' },
-    { name: 'Personal Growth', score: 6, color: '#14b8a6' },
-    { name: 'Leisure', score: 5, color: '#a855f7' },
-  ];
-
-  const wheelOfLifeHistory: WheelOfLifeRecord[] = [
-    {
-      date: getRelativeISOString(-42),
-      areas: currentWheelOfLife.map((area) => ({ ...area, score: Math.max(3, area.score - 1) })),
-    },
-    {
-      date: getRelativeISOString(-21),
-      areas: currentWheelOfLife.map((area) => ({
-        ...area,
-        score: area.name === 'Health' || area.name === 'Leisure' ? area.score - 1 : area.score,
-      })),
-    },
-    {
-      date: getRelativeISOString(-3),
-      areas: currentWheelOfLife,
-    },
-  ];
-
-  const systemGoalId = 'goal_demo_12_week';
-  const careerGoalId = 'goal_demo_portfolio';
-  const healthGoalId = 'goal_demo_health';
-  const boardId = 'board_demo_2026';
-
-  const goals: Goal[] = [
-    {
-      id: systemGoalId,
-      category: 'Career',
-      title: 'Ra mắt portfolio mới và nộp 20 đơn ứng tuyển chất lượng',
-      description:
-        'Một mục tiêu 12 tuần tập trung vào việc hoàn thiện hồ sơ nghề nghiệp, tăng chất lượng portfolio và tạo đầu ra thật để chuẩn bị cho bước chuyển nghề nghiệp rõ ràng hơn.',
-      deadline: getRelativeDateValue(70),
-      feasibilityResult: 'Khả thi',
-      readinessScore: 16,
-      focusArea: 'Career',
-      createdAt: getRelativeISOString(-16),
-      tasks: [
-        { id: 'task_demo_portfolio_1', title: 'Chốt bố cục portfolio và case study chính', completed: true },
-        { id: 'task_demo_portfolio_2', title: 'Viết lại phần giới thiệu bản thân và CV', completed: true },
-        { id: 'task_demo_portfolio_3', title: 'Hoàn thiện trang dự án số 1', completed: true },
-        { id: 'task_demo_portfolio_4', title: 'Chuẩn bị danh sách công ty mục tiêu', completed: false },
-      ],
-      twelveWeekSystem: {
-        goalType: 'career-transition',
-        vision12Week:
-          'Trong 12 tuần tới, tôi muốn có một portfolio đủ mạnh, quy trình nộp đơn đủ rõ và sự tự tin đủ lớn để bước vào một giai đoạn nghề nghiệp tốt hơn.',
-        lagMetric: {
-          name: 'Đơn ứng tuyển chất lượng đã gửi',
-          unit: 'đơn',
-          target: '20',
-          currentValue: '7/20 đơn',
-        },
-        leadIndicators: [
-          { name: 'Hoàn thiện case study portfolio', target: '2', unit: 'buổi/tuần' },
-          { name: 'Networking hoặc outreach', target: '3', unit: 'lần/tuần' },
-          { name: 'Nộp đơn mục tiêu', target: '2', unit: 'đơn/tuần' },
-        ],
-        milestones: {
-          week4: 'Hoàn thành 1 case study và CV phiên bản mới',
-          week8: 'Có ít nhất 10 đơn chất lượng và 3 cuộc trao đổi tuyển dụng',
-          week12: 'Portfolio hoàn chỉnh và đủ dữ liệu để tiếp tục tăng tốc nộp đơn',
-        },
-        successEvidence:
-          'Portfolio đã public, CV hoàn chỉnh, có phản hồi từ nhà tuyển dụng và thói quen review hàng tuần được giữ đều.',
-        reviewDay: 'Sunday',
-        week12Outcome: 'Portfolio hoàn chỉnh, 20 đơn chất lượng và ít nhất 3 cuộc trao đổi tuyển dụng.',
-        weeklyActions: [
-          '2 buổi tối để viết hoặc chỉnh case study',
-          '3 outreach chất lượng tới người trong ngành hoặc recruiter',
-          '2 đơn ứng tuyển đã cá nhân hóa',
-        ],
-        successMetric: 'Số đơn chất lượng và số phản hồi nhận được mỗi tuần',
-        currentWeek: 4,
-        totalWeeks: 12,
-        weeklyPlans: [
-          { weekNumber: 1, phaseName: 'Foundation', focus: 'Làm rõ câu chuyện nghề nghiệp và xác định danh sách công ty mục tiêu', milestone: 'Khung portfolio hoàn chỉnh', completed: true },
-          { weekNumber: 2, phaseName: 'Foundation', focus: 'Xây CV mới và outline case study số 1', milestone: 'CV bản nháp đầu tiên', completed: true },
-          { weekNumber: 3, phaseName: 'Foundation', focus: 'Hoàn thiện case study số 1 và chuẩn hóa visual', milestone: 'Case study số 1 online', completed: true },
-          { weekNumber: 4, phaseName: 'Build / Acceleration', focus: 'Tăng outreach và mở case study số 2', milestone: 'Bắt đầu có phản hồi đầu tiên', completed: false },
-          { weekNumber: 5, phaseName: 'Build / Acceleration', focus: 'Nộp đơn có chọn lọc và lặp lại review hồ sơ', milestone: '', completed: false },
-          { weekNumber: 6, phaseName: 'Build / Acceleration', focus: 'Tinh chỉnh portfolio dựa trên feedback', milestone: '', completed: false },
-          { weekNumber: 7, phaseName: 'Build / Acceleration', focus: 'Tăng tốc số lượng đơn chất lượng', milestone: '', completed: false },
-          { weekNumber: 8, phaseName: 'Build / Acceleration', focus: 'Kiểm tra chất lượng pipeline ứng tuyển', milestone: '10 đơn chất lượng', completed: false },
-          { weekNumber: 9, phaseName: 'Finish / Execution', focus: 'Dồn lực cho các cơ hội phản hồi tốt', milestone: '', completed: false },
-          { weekNumber: 10, phaseName: 'Finish / Execution', focus: 'Chuẩn bị các buổi phỏng vấn hoặc bài test', milestone: '', completed: false },
-          { weekNumber: 11, phaseName: 'Finish / Execution', focus: 'Chốt các cơ hội ưu tiên', milestone: '', completed: false },
-          { weekNumber: 12, phaseName: 'Finish / Execution', focus: 'Review toàn bộ chu kỳ và quyết định bước tiếp theo', milestone: 'Đóng chu kỳ 12 tuần', completed: false },
-        ],
-        dailyCheckIns: [
-          {
-            date: getRelativeISOString(-1),
-            didWorkToday: true,
-            whichLeadIndicatorWorkedOn: 'Hoàn thiện case study portfolio',
-            amountDone: '90 phút',
-            outputCreated: 'Hoàn thiện phần challenge và solution của case study số 2',
-            obstacleOrIssue: 'Mất khá nhiều thời gian chọn ảnh minh họa',
-            dailySelfRating: 4,
-            optionalNote: 'Ngày mai nên khóa layout trước rồi mới polish.',
-          },
-          {
-            date: getRelativeISOString(-2),
-            didWorkToday: true,
-            whichLeadIndicatorWorkedOn: 'Networking hoặc outreach',
-            amountDone: '3 tin nhắn',
-            outputCreated: 'Gửi outreach tới 2 recruiter và 1 designer lead',
-            obstacleOrIssue: '',
-            dailySelfRating: 4,
-            optionalNote: '',
-          },
-        ],
-        weeklyReviews: [
-          {
-            weekNumber: 1,
-            leadCompletionPercent: 75,
-            lagProgressValue: '2/20 đơn',
-            biggestOutputThisWeek: 'Hoàn thành outline portfolio và CV mới',
-            mainObstacle: 'Khó gom ý tưởng thành một câu chuyện rõ',
-            nextWeekPriority: 'Chốt case study số 1',
-            workloadDecision: 'keep same',
-            reviewCompleted: true,
-            progressScore: 7,
-            disciplineScore: 8,
-            focusScore: 7,
-            improvementScore: 7,
-            outputQualityScore: 8,
-          },
-          {
-            weekNumber: 2,
-            leadCompletionPercent: 80,
-            lagProgressValue: '4/20 đơn',
-            biggestOutputThisWeek: 'CV và portfolio có hình hài rõ ràng hơn',
-            mainObstacle: 'Dễ sa vào chỉnh giao diện quá sớm',
-            nextWeekPriority: 'Đưa case study số 1 lên online',
-            workloadDecision: 'keep same',
-            reviewCompleted: true,
-            progressScore: 8,
-            disciplineScore: 8,
-            focusScore: 7,
-            improvementScore: 8,
-            outputQualityScore: 8,
-          },
-          {
-            weekNumber: 3,
-            leadCompletionPercent: 85,
-            lagProgressValue: '7/20 đơn',
-            biggestOutputThisWeek: 'Case study số 1 đã public và có phản hồi tốt',
-            mainObstacle: 'Chưa duy trì outreach đều như dự kiến',
-            nextWeekPriority: 'Giữ nhịp outreach 3 lần và mở case study số 2',
-            workloadDecision: 'increase slightly',
-            reviewCompleted: true,
-            progressScore: 8,
-            disciplineScore: 8,
-            focusScore: 8,
-            improvementScore: 8,
-            outputQualityScore: 9,
-          },
-        ],
-        scoreboard: [
-          { weekNumber: 1, leadCompletionPercent: 75, mainMetricProgress: '2/20 đơn', outputDone: 'Outline portfolio + CV', reviewDone: true, weeklyScore: 78 },
-          { weekNumber: 2, leadCompletionPercent: 80, mainMetricProgress: '4/20 đơn', outputDone: 'CV + cấu trúc portfolio', reviewDone: true, weeklyScore: 80 },
-          { weekNumber: 3, leadCompletionPercent: 85, mainMetricProgress: '7/20 đơn', outputDone: 'Case study số 1', reviewDone: true, weeklyScore: 86 },
-          { weekNumber: 4, leadCompletionPercent: 0, mainMetricProgress: '', outputDone: '', reviewDone: false, weeklyScore: 0 },
-          { weekNumber: 5, leadCompletionPercent: 0, mainMetricProgress: '', outputDone: '', reviewDone: false, weeklyScore: 0 },
-          { weekNumber: 6, leadCompletionPercent: 0, mainMetricProgress: '', outputDone: '', reviewDone: false, weeklyScore: 0 },
-          { weekNumber: 7, leadCompletionPercent: 0, mainMetricProgress: '', outputDone: '', reviewDone: false, weeklyScore: 0 },
-          { weekNumber: 8, leadCompletionPercent: 0, mainMetricProgress: '', outputDone: '', reviewDone: false, weeklyScore: 0 },
-          { weekNumber: 9, leadCompletionPercent: 0, mainMetricProgress: '', outputDone: '', reviewDone: false, weeklyScore: 0 },
-          { weekNumber: 10, leadCompletionPercent: 0, mainMetricProgress: '', outputDone: '', reviewDone: false, weeklyScore: 0 },
-          { weekNumber: 11, leadCompletionPercent: 0, mainMetricProgress: '', outputDone: '', reviewDone: false, weeklyScore: 0 },
-          { weekNumber: 12, leadCompletionPercent: 0, mainMetricProgress: '', outputDone: '', reviewDone: false, weeklyScore: 0 },
-        ],
-      },
-    },
-    {
-      id: careerGoalId,
-      category: 'Personal Growth',
-      title: 'Duy trì thói quen đọc và ghi chú 20 phút mỗi ngày',
-      description: 'Một mục tiêu nền để tăng chất lượng đầu vào tri thức và giữ nhịp học đều.',
-      deadline: getRelativeDateValue(45),
-      createdAt: getRelativeISOString(-12),
-      tasks: [
-        { id: 'task_demo_reading_1', title: 'Chọn 2 cuốn sách ưu tiên trong tháng này', completed: true },
-        { id: 'task_demo_reading_2', title: 'Tạo template ghi chú ngắn sau mỗi buổi đọc', completed: true },
-        { id: 'task_demo_reading_3', title: 'Giữ streak đọc ít nhất 10 ngày', completed: false },
-      ],
-    },
-    {
-      id: healthGoalId,
-      category: 'Health',
-      title: 'Đi bộ 8.000 bước mỗi ngày trong 30 ngày',
-      description: 'Một mục tiêu sức khỏe đơn giản để kéo lại năng lượng nền mỗi ngày.',
-      deadline: getRelativeDateValue(18),
-      createdAt: getRelativeISOString(-30),
-      tasks: [
-        { id: 'task_demo_health_1', title: 'Chuẩn bị khung giờ đi bộ cố định', completed: true },
-        { id: 'task_demo_health_2', title: 'Đi bộ đủ bước trong tuần đầu tiên', completed: true },
-        { id: 'task_demo_health_3', title: 'Giữ nhịp 2 tuần liên tiếp', completed: true },
-      ],
-    },
-  ];
-
-  const visionBoards: VisionBoard[] = [
-    {
-      id: boardId,
-      name: 'Vision 2026',
-      year: '2026',
-      createdAt: getRelativeISOString(-10),
-      items: [
-        { id: 'board_item_1', type: 'image', content: 'https://picsum.photos/seed/demo-office/480/360', x: 10, y: 12, width: 220, height: 180 },
-        { id: 'board_item_2', type: 'image', content: 'https://picsum.photos/seed/demo-travel/480/360', x: 58, y: 14, width: 210, height: 170 },
-        { id: 'board_item_3', type: 'quote', content: 'Kỷ luật là cây cầu nối tầm nhìn với kết quả.', x: 14, y: 58, width: 280, height: 120 },
-        { id: 'board_item_4', type: 'icon', content: 'Sparkles', x: 74, y: 62, width: 96, height: 96 },
-      ],
-    },
-  ];
-
-  const reflections: Reflection[] = [
-    {
-      id: 'reflection_demo_1',
-      date: getRelativeDateValue(-1),
-      title: 'Một ngày giữ được nhịp rất rõ',
-      content:
-        'Hôm nay mình làm ít hơn dự kiến nhưng rất đúng trọng tâm. Điều đáng giá nhất là không bị trôi vào những việc nhìn bận rộn nhưng không tạo ra đầu ra thật.',
-      mood: 'happy',
-    },
-    {
-      id: 'reflection_demo_2',
-      date: getRelativeDateValue(-4),
-      title: 'Nhìn lại sự thiếu nhất quán',
-      content:
-        'Mình nhận ra cứ khi lịch bị xáo trộn thì các thói quen tốt rơi trước. Tuần tới cần khóa trước 2 khung giờ quan trọng nhất thay vì cố nhồi quá nhiều việc.',
-      mood: 'neutral',
-    },
-  ];
-
-  const achievements: Achievement[] = [
-    {
-      id: 'achievement_demo_1',
-      title: 'First Step',
-      description: 'Tạo mục tiêu đầu tiên của bạn',
-      icon: 'Target',
-      earnedAt: getRelativeISOString(-30),
-    },
-    {
-      id: 'achievement_demo_2',
-      title: 'Visionary',
-      description: 'Tạo bảng tầm nhìn đầu tiên của bạn',
-      icon: 'Sparkles',
-      earnedAt: getRelativeISOString(-10),
-    },
-    {
-      id: 'achievement_demo_3',
-      title: 'Reflective Mind',
-      description: 'Viết nhật ký phản tư đầu tiên của bạn',
-      icon: 'BookOpen',
-      earnedAt: getRelativeISOString(-5),
-    },
-  ];
-
-  return normalizeUserData({
-    userId,
-    wheelOfLifeHistory,
-    currentWheelOfLife,
-    goals,
-    visionBoards,
-    achievements,
-    reflections,
-    lastMotivationalQuote: MOTIVATIONAL_QUOTES[0],
-    onboardingCompleted: true,
-    isHydratedFromDemo: true,
-  });
-}
-
 export function initializeUserData(): UserData {
   const existingData = localStorage.getItem(STORAGE_KEY);
-  
+
   if (existingData) {
     const parsedData = parseStoredUserData(existingData);
     if (parsedData) {
-      if (shouldHydrateDemoData(parsedData)) {
-        const demoData = createDemoUserData();
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(demoData));
+      if (shouldHydrateDemoDataFromModule(parsedData)) {
+        const demoData = createDemoUserDataFromModule({
+          currentStorageVersion: CURRENT_STORAGE_VERSION,
+          defaultAppPreferences: DEFAULT_APP_PREFERENCES,
+          motivationalQuotes: MOTIVATIONAL_QUOTES,
+        });
+        saveUserData(demoData);
         return demoData;
       }
 
       return parsedData;
     }
   }
-  
-  const newUserData = createDemoUserData();
-  
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(newUserData));
-  return normalizeUserData(newUserData);
+
+  const newUserData = createDemoUserDataFromModule({
+    currentStorageVersion: CURRENT_STORAGE_VERSION,
+    defaultAppPreferences: DEFAULT_APP_PREFERENCES,
+    motivationalQuotes: MOTIVATIONAL_QUOTES,
+  });
+
+  saveUserData(newUserData);
+  return newUserData;
 }
 
 export function getUserData(): UserData {
@@ -808,7 +455,7 @@ export function getUserData(): UserData {
   const parsedData = parseStoredUserData(data);
   if (!parsedData) return initializeUserData();
 
-  const migratedData = migrateLegacyUserData(parsedData);
+  const migratedData = migrateLegacyUserDataFromModule(parsedData, CURRENT_STORAGE_VERSION);
   if (migratedData !== parsedData) {
     saveUserData(migratedData);
   }
@@ -822,208 +469,251 @@ export function saveUserData(data: UserData): void {
 
 export function upgradeLegacyGoalToSystem(goalId: string): boolean {
   const data = getUserData();
-  const goalIndex = data.goals.findIndex((goal) => goal.id === goalId);
-  if (goalIndex === -1) return false;
-
-  const goal = data.goals[goalIndex];
-  if (!goal.twelveWeekPlan || goal.twelveWeekSystem) return false;
-
-  data.goals[goalIndex] = migrateLegacyPlanToSystem(goal);
+  const didUpgrade = upgradeLegacyGoalToSystemInData(data, goalId);
+  if (!didUpgrade) return false;
   saveUserData(data);
   return true;
 }
 
 export function updateWheelOfLife(areas: LifeArea[]): void {
   const data = getUserData();
-  data.currentWheelOfLife = areas;
-  data.wheelOfLifeHistory.push({
-    date: new Date().toISOString(),
-    areas: [...areas],
-  });
-  data.onboardingCompleted = true;
-  data.isHydratedFromDemo = false;
+  updateWheelOfLifeInData(data, areas);
   saveUserData(data);
 }
 
-export function addGoal(goal: Omit<Goal, 'id' | 'createdAt'>): string {
+export function addGoal(goal: Omit<Goal, "id" | "createdAt">): string {
   const data = getUserData();
-  const newGoal: Goal = {
-    ...goal,
-    id: `goal_${Date.now()}`,
-    createdAt: new Date().toISOString(),
-  };
-  data.goals.push(newGoal);
+  const goalId = addGoalToData(data, goal);
+  checkAchievementsInData(data);
   saveUserData(data);
-  checkAchievements(data);
-  return newGoal.id;
+  return goalId;
 }
 
 export function updateGoal(goalId: string, updates: Partial<Goal>): void {
   const data = getUserData();
-  const goalIndex = data.goals.findIndex(g => g.id === goalId);
-  if (goalIndex !== -1) {
-    data.goals[goalIndex] = { ...data.goals[goalIndex], ...updates };
-    saveUserData(data);
-    checkAchievements(data);
-  }
+  if (!updateGoalInData(data, goalId, updates)) return;
+  checkAchievementsInData(data);
+  saveUserData(data);
+}
+
+export function resetTwelveWeekGoalCycle(goalId: string, referenceDate = new Date()): boolean {
+  const data = getUserData();
+  const didReset = resetTwelveWeekGoalCycleInData(data, goalId, referenceDate);
+  if (!didReset) return false;
+  saveUserData(data);
+  return true;
 }
 
 export function deleteGoal(goalId: string): void {
   const data = getUserData();
-  data.goals = data.goals.filter(g => g.id !== goalId);
+  deleteGoalFromData(data, goalId);
   saveUserData(data);
 }
 
-export function addVisionBoard(board: Omit<VisionBoard, 'id' | 'createdAt'>): string {
+export function addVisionBoard(board: Omit<VisionBoard, "id" | "createdAt">): string {
   const data = getUserData();
-  const newBoard: VisionBoard = {
-    ...board,
-    id: `board_${Date.now()}`,
-    createdAt: new Date().toISOString(),
-  };
-  data.visionBoards.push(newBoard);
+  const newBoardId = addVisionBoardToData(data, board);
+  checkAchievementsInData(data);
   saveUserData(data);
-  checkAchievements(data);
-  return newBoard.id;
+  return newBoardId;
 }
 
 export function updateVisionBoard(boardId: string, updates: Partial<VisionBoard>): void {
   const data = getUserData();
-  const boardIndex = data.visionBoards.findIndex(b => b.id === boardId);
-  if (boardIndex !== -1) {
-    data.visionBoards[boardIndex] = { ...data.visionBoards[boardIndex], ...updates };
-    saveUserData(data);
-  }
+  if (!updateVisionBoardInData(data, boardId, updates)) return;
+  saveUserData(data);
 }
 
 export function deleteVisionBoard(boardId: string): void {
   const data = getUserData();
-  data.visionBoards = data.visionBoards.filter(b => b.id !== boardId);
+  deleteVisionBoardFromData(data, boardId);
   saveUserData(data);
 }
 
-export function addReflection(reflection: Omit<Reflection, 'id'>): void {
+export function addReflection(reflection: Omit<Reflection, "id">): void {
   const data = getUserData();
-  const newReflection: Reflection = {
-    ...reflection,
-    id: `reflection_${Date.now()}`,
-  };
-  data.reflections.unshift(newReflection);
+  addReflectionToData(data, reflection);
+  checkAchievementsInData(data);
   saveUserData(data);
-  checkAchievements(data);
+}
+
+export function upsertReflection(reflection: Omit<Reflection, "id">): void {
+  const data = getUserData();
+  upsertReflectionInData(data, reflection);
+  checkAchievementsInData(data);
+  saveUserData(data);
 }
 
 export function deleteReflection(reflectionId: string): void {
   const data = getUserData();
-  data.reflections = data.reflections.filter(r => r.id !== reflectionId);
+  deleteReflectionFromData(data, reflectionId);
   saveUserData(data);
 }
 
-export function addAchievement(achievement: Omit<Achievement, 'id' | 'earnedAt'>): void {
+export function trackAppEvent(type: string, goalId?: string, metadata?: Record<string, string>): void {
   const data = getUserData();
-  // Check if achievement already exists
-  if (data.achievements.some(a => a.title === achievement.title)) {
-    return;
-  }
-  const newAchievement: Achievement = {
-    ...achievement,
-    id: `achievement_${Date.now()}`,
-    earnedAt: new Date().toISOString(),
-  };
-  data.achievements.push(newAchievement);
+  trackAppEventInData(data, type, goalId, metadata);
+  saveUserData(data);
+}
+
+export function updateAppPreferences(updates: Partial<AppPreferences>): void {
+  const data = getUserData();
+  updateAppPreferencesInData(data, DEFAULT_APP_PREFERENCES, updates);
+  saveUserData(data);
+}
+
+export function archiveOutboxItem(outboxId: string): void {
+  const data = getUserData();
+  archiveOutboxItemInData(data, outboxId);
+  saveUserData(data);
+}
+
+export function restoreOutboxItem(outboxId: string): void {
+  const data = getUserData();
+  restoreOutboxItemInData(data, outboxId);
+  saveUserData(data);
+}
+
+export function restoreArchivedOutbox(): void {
+  const data = getUserData();
+  restoreArchivedOutboxInData(data);
+  saveUserData(data);
+}
+
+export function clearArchivedOutbox(): void {
+  const data = getUserData();
+  clearArchivedOutboxInData(data);
+  saveUserData(data);
+}
+
+export function clearEventLog(): void {
+  const data = getUserData();
+  clearEventLogInData(data);
+  saveUserData(data);
+}
+
+export function clearLocalDeviceSignals(): void {
+  const data = getUserData();
+  clearLocalDeviceSignalsInData(data);
+  saveUserData(data);
+  localStorage.removeItem("last_reminder_date");
+  localStorage.removeItem("visionboard_last_browser_notification");
+  localStorage.removeItem("visionboard_last_outbox_sync");
+}
+
+export function exportUserDataSnapshot(): string {
+  return JSON.stringify(getUserData(), null, 2);
+}
+
+export function getTwelveWeekFunnelSummary(goalId?: string): FunnelStepSummary[] {
+  const data = getUserData();
+  return getTwelveWeekFunnelSummaryFromData(data, TWELVE_WEEK_FUNNEL_STEPS, goalId);
+}
+
+export function getTwelveWeekMonetizationSummary(goalId?: string): FunnelStepSummary[] {
+  const data = getUserData();
+  return getTwelveWeekFunnelSummaryFromData(data, TWELVE_WEEK_MONETIZATION_STEPS, goalId);
+}
+
+export function addAchievement(achievement: Omit<Achievement, "id" | "earnedAt">): void {
+  const data = getUserData();
+  if (!addAchievementToData(data, achievement)) return;
   saveUserData(data);
 }
 
 export function checkAchievements(data: UserData): void {
-  // First Goal Achievement
-  if (data.goals.length === 1) {
-    addAchievement({
-      title: 'First Step',
-      description: 'Tạo mục tiêu đầu tiên của bạn',
-      icon: 'Target',
-    });
-  }
-  
-  // Five Goals Achievement
-  if (data.goals.length === 5) {
-    addAchievement({
-      title: 'Goal Setter',
-      description: 'Tạo 5 mục tiêu',
-      icon: 'Trophy',
-    });
-  }
-  
-  // First Completed Goal
-  const completedGoals = data.goals.filter((goal) => calculateGoalProgress(goal) === 100);
-  if (completedGoals.length === 1) {
-    addAchievement({
-      title: 'Achiever',
-      description: 'Hoàn thành mục tiêu đầu tiên của bạn',
-      icon: 'Award',
-    });
-  }
-  
-  // Five Completed Goals
-  if (completedGoals.length === 5) {
-    addAchievement({
-      title: 'Master Achiever',
-      description: 'Hoàn thành 5 mục tiêu',
-      icon: 'Crown',
-    });
-  }
-  
-  // First Vision Board
-  if (data.visionBoards.length === 1) {
-    addAchievement({
-      title: 'Visionary',
-      description: 'Tạo bảng tầm nhìn đầu tiên của bạn',
-      icon: 'Sparkles',
-    });
-  }
-  
-  // First Reflection
-  if (data.reflections.length === 1) {
-    addAchievement({
-      title: 'Reflective Mind',
-      description: 'Viết nhật ký phản tư đầu tiên của bạn',
-      icon: 'BookOpen',
-    });
-  }
-  
-  // 30 Day Streak (check reflections)
-  const todayKey = formatDateInputValue(new Date());
-  const distinctReflectionDates = Array.from(
-    new Set(
-      data.reflections
-        .map((reflection) => getCalendarDateKey(reflection.date))
-        .filter((dateKey): dateKey is string => Boolean(dateKey) && dateKey <= todayKey)
-    )
-  ).sort();
+  checkAchievementsInData(data);
+}
 
-  let longestStreak = 0;
-  let currentStreak = 0;
-  let previousDayIndex: number | null = null;
+export function getInAppReminders(referenceDate = new Date()): InAppReminder[] {
+  const data = getUserData();
+  return getInAppRemindersFromData(data, referenceDate);
+}
 
-  distinctReflectionDates.forEach((dateKey) => {
-    const currentDate = parseCalendarDate(dateKey);
-    if (!currentDate) return;
+export function getCurrentPlan(userData?: UserData): PricingPlanCode {
+  const data = userData ?? getUserData();
 
-    const currentDayIndex = getCalendarDayIndex(currentDate);
-    currentStreak =
-      previousDayIndex !== null && currentDayIndex === previousDayIndex + 1
-        ? currentStreak + 1
-        : 1;
-    previousDayIndex = currentDayIndex;
-    longestStreak = Math.max(longestStreak, currentStreak);
-  });
-
-  if (longestStreak >= 30) {
-    addAchievement({
-      title: 'Dedicated',
-      description: '30 ngày duy trì viết nhật ký phản tư',
-      icon: 'Flame',
-    });
+  if (data.subscription?.status === "active") {
+    return normalizePlanCode(data.subscription.planCode);
   }
+
+  const highestEntitledPlan = (data.entitlements ?? []).reduce<PricingPlanCode>(
+    (currentHighest, entitlement) =>
+      getPlanRank(entitlement.sourcePlan) > getPlanRank(currentHighest)
+        ? entitlement.sourcePlan
+        : currentHighest,
+    "FREE",
+  );
+
+  return normalizePlanCode(highestEntitledPlan);
+}
+
+export function hasEntitlement(key: EntitlementKey, userData?: UserData): boolean {
+  const data = userData ?? getUserData();
+  return (data.entitlements ?? []).some((entitlement) => entitlement.key === key);
+}
+
+export function getCurrentEntitlementKeys(userData?: UserData): EntitlementKey[] {
+  const data = userData ?? getUserData();
+  return Array.from(new Set((data.entitlements ?? []).map((entitlement) => entitlement.key)));
+}
+
+export function upgradePlanLocally(
+  planCode: Exclude<PricingPlanCode, "FREE">,
+  options?: {
+    startedAt?: string;
+    billingCycle?: "monthly" | "quarterly" | "season-pass";
+  },
+): PricingPlanCode {
+  const data = getUserData();
+  const startedAt = options?.startedAt ?? new Date().toISOString();
+  const currentPlan = getCurrentPlan(data);
+  const normalizedPlanCode = normalizePlanCode(planCode) as Exclude<PricingPlanCode, "FREE">;
+
+  if (getPlanRank(currentPlan) >= getPlanRank(normalizedPlanCode)) {
+    return currentPlan;
+  }
+
+  data.subscription = {
+    planCode: normalizedPlanCode,
+    status: "active",
+    billingCycle: options?.billingCycle ?? "season-pass",
+    startedAt,
+    renewsAt: null,
+    canceledAt: null,
+    isLocalTestMode: true,
+  };
+  data.entitlements = getEntitlementsForPlan(normalizedPlanCode, startedAt);
+
+  saveUserData(data);
+  return normalizedPlanCode;
+}
+
+export function restorePlanAccessLocally(): PricingPlanCode {
+  const data = getUserData();
+  const currentPlan = getCurrentPlan(data);
+
+  if (currentPlan === "FREE") {
+    data.subscription = null;
+    data.entitlements = [];
+    saveUserData(data);
+    return currentPlan;
+  }
+
+  const startedAt = data.subscription?.startedAt ?? new Date().toISOString();
+  data.subscription = {
+    planCode: currentPlan,
+    status: "active",
+    billingCycle: data.subscription?.billingCycle ?? "season-pass",
+    startedAt,
+    renewsAt: data.subscription?.renewsAt ?? null,
+    canceledAt: null,
+    isLocalTestMode: data.subscription?.isLocalTestMode ?? true,
+  };
+  data.entitlements = getEntitlementsForPlan(currentPlan, startedAt);
+
+  saveUserData(data);
+  return currentPlan;
 }
 
 export function getRandomMotivationalQuote(): string {
@@ -1031,7 +721,7 @@ export function getRandomMotivationalQuote(): string {
 }
 
 export function calculateGoalProgress(goal: Goal): number {
-  if (goal.tasks.length === 0) return 0;
-  const completed = goal.tasks.filter(t => t.completed).length;
-  return Math.round((completed / goal.tasks.length) * 100);
+  const execution = getGoalExecutionStatsFromModule(goal);
+  if (execution.total === 0) return 0;
+  return Math.round((execution.completed / execution.total) * 100);
 }

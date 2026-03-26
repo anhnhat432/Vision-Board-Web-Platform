@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import {
+  ArrowRight,
   BookOpen,
   Calendar,
   Frown,
+  Flag,
   Meh,
   NotebookPen,
   Plus,
@@ -46,11 +49,13 @@ import {
   getUnlockedAchievements,
 } from "../utils/experience";
 import {
+  APP_STORAGE_KEYS,
   UserData,
   addReflection,
   deleteReflection,
   formatCalendarDate,
   formatDateInputValue,
+  getReviewDayLabel,
   getUserData,
   parseCalendarDate,
   sortReflectionsByDateDesc,
@@ -94,6 +99,7 @@ function getMoodConfig(mood?: string) {
 }
 
 export function ReflectionJournal() {
+  const navigate = useNavigate();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isAddingReflection, setIsAddingReflection] = useState(false);
   const [newReflection, setNewReflection] = useState({
@@ -105,6 +111,7 @@ export function ReflectionJournal() {
   const [reflectionToDelete, setReflectionToDelete] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterMood, setFilterMood] = useState<MoodValue | "">("");
+  const [filterType, setFilterType] = useState<"all" | "weekly-review" | "freeform">("all");
 
   useEffect(() => {
     loadData();
@@ -173,6 +180,10 @@ export function ReflectionJournal() {
     () => (userData ? sortReflectionsByDateDesc(userData.reflections) : []),
     [userData],
   );
+  const goalsById = useMemo(
+    () => new Map((userData?.goals ?? []).map((goal) => [goal.id, goal])),
+    [userData],
+  );
 
   const monthlyCount = useMemo(() => {
     if (!userData) return 0;
@@ -198,6 +209,16 @@ export function ReflectionJournal() {
       { happy: 0, neutral: 0, sad: 0 },
     );
   }, [sortedReflections, userData]);
+
+  const weeklyReviewCount = useMemo(
+    () => sortedReflections.filter((reflection) => reflection.entryType === "weekly-review").length,
+    [sortedReflections],
+  );
+  const weeklyReviewReflections = useMemo(
+    () => sortedReflections.filter((reflection) => reflection.entryType === "weekly-review"),
+    [sortedReflections],
+  );
+  const latestWeeklyReview = weeklyReviewReflections[0] ?? null;
 
   const recentMood = getMoodConfig(sortedReflections[0]?.mood);
 
@@ -229,6 +250,7 @@ export function ReflectionJournal() {
 
   const filteredReflections = useMemo(() => {
     let result = sortedReflections;
+    if (filterType !== "all") result = result.filter((r) => r.entryType === filterType);
     if (filterMood) result = result.filter((r) => r.mood === filterMood);
     if (searchQuery.trim()) {
       const lower = searchQuery.toLowerCase();
@@ -239,7 +261,14 @@ export function ReflectionJournal() {
       );
     }
     return result;
-  }, [sortedReflections, filterMood, searchQuery]);
+  }, [sortedReflections, filterMood, filterType, searchQuery]);
+
+  const openLinkedCycle = (goalId?: string) => {
+    if (!goalId) return;
+    localStorage.setItem(APP_STORAGE_KEYS.latest12WeekGoalId, goalId);
+    localStorage.setItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId, goalId);
+    navigate("/12-week-system");
+  };
 
   if (!userData) return null;
 
@@ -271,7 +300,7 @@ export function ReflectionJournal() {
               <div className="space-y-6">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <NotebookPen className="h-4 w-4" />
-                  Reflection Journal
+                  Nhật ký phản tư
                 </div>
 
                 <div className="space-y-4">
@@ -471,9 +500,9 @@ export function ReflectionJournal() {
             color: "from-emerald-500/18 to-teal-500/10 text-emerald-700",
           },
           {
-            title: "Bài viết suy tư",
-            value: moodCounts.sad,
-            note: "góc nhìn cần chăm sóc",
+            title: "Review tuần",
+            value: weeklyReviewCount,
+            note: "đã được nối vào chu kỳ 12 tuần",
             icon: Sparkles,
             color: "from-amber-500/18 to-orange-500/10 text-amber-700",
           },
@@ -523,7 +552,7 @@ export function ReflectionJournal() {
             </div>
             <h2 className="mt-6 text-3xl font-bold text-slate-900">Chưa có trang nhật ký nào được mở ra</h2>
             <p className="mx-auto mt-3 max-w-2xl text-base text-slate-500">
-              Hãy bắt đầu bằng một bài viết đầu tiên để lưu lại cảm xúc, bài học và những chuyển động nhỏ trên hành trình của bạn.
+              Hãy bắt đầu bằng một bài viết đầu tiên để lưu lại cảm xúc, bài học và những chuyển động nhỏ trên hành trình của bạn. Review tuần từ chu kỳ 12 tuần cũng sẽ tự động xuất hiện tại đây.
             </p>
             <Button className="mt-8" onClick={() => setIsAddingReflection(true)}>
               <Plus className="h-4 w-4" />
@@ -535,6 +564,35 @@ export function ReflectionJournal() {
       ) : (
         <Reveal delay={0.04} className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-4">
+            {latestWeeklyReview && (
+              <Card className="overflow-hidden border-sky-200 bg-[linear-gradient(135deg,_rgba(239,246,255,0.96)_0%,_rgba(248,250,252,0.92)_100%)]">
+                <CardContent className="p-6">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                      <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white/90 px-3 py-1.5 text-sm font-medium text-sky-700">
+                        <Flag className="h-4 w-4" />
+                        Review tuần mới nhất
+                      </div>
+                      <h3 className="mt-4 text-2xl font-bold text-slate-950">{latestWeeklyReview.title}</h3>
+                      <p className="mt-2 text-sm leading-7 text-slate-600">
+                        {latestWeeklyReview.linkedGoalId ? goalsById.get(latestWeeklyReview.linkedGoalId)?.title : "Chu kỳ 12 tuần"}
+                        {latestWeeklyReview.linkedWeekNumber ? ` • tuần ${latestWeeklyReview.linkedWeekNumber}` : ""}
+                        {latestWeeklyReview.linkedGoalId && goalsById.get(latestWeeklyReview.linkedGoalId)?.twelveWeekSystem?.reviewDay
+                          ? ` • review vào ${getReviewDayLabel(goalsById.get(latestWeeklyReview.linkedGoalId)?.twelveWeekSystem?.reviewDay || "Sunday")}`
+                          : ""}
+                      </p>
+                    </div>
+                    {latestWeeklyReview.linkedGoalId && (
+                      <Button onClick={() => openLinkedCycle(latestWeeklyReview.linkedGoalId)}>
+                        Mở chu kỳ 12 tuần
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <div className="flex flex-wrap items-center gap-3">
               <div className="relative min-w-[200px] flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -544,6 +602,22 @@ export function ReflectionJournal() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9"
                 />
+              </div>
+              <div className="flex gap-2">
+                {([
+                  { value: "all", label: "Tất cả" },
+                  { value: "weekly-review", label: "Review tuần" },
+                  { value: "freeform", label: "Nhật ký tự do" },
+                ] as const).map((item) => (
+                  <Button
+                    key={item.value}
+                    size="sm"
+                    variant={filterType === item.value ? "default" : "outline"}
+                    onClick={() => setFilterType(item.value)}
+                  >
+                    {item.label}
+                  </Button>
+                ))}
               </div>
               <div className="flex gap-2">
                 {(["", "happy", "neutral", "sad"] as const).map((mood) => {
@@ -570,6 +644,7 @@ export function ReflectionJournal() {
 
             {filteredReflections.map((reflection, index) => {
               const mood = getMoodConfig(reflection.mood);
+              const linkedGoal = reflection.linkedGoalId ? goalsById.get(reflection.linkedGoalId) : null;
 
               return (
                 <motion.div
@@ -588,6 +663,21 @@ export function ReflectionJournal() {
                               <span className="mr-1.5">{mood.icon}</span>
                               {mood.label}
                             </Badge>
+                            {reflection.entryType === "weekly-review" && (
+                              <Badge variant="outline" className="rounded-full border-sky-200 bg-sky-50 px-3 py-1.5 text-sky-700">
+                                Review tuần
+                              </Badge>
+                            )}
+                            {reflection.linkedWeekNumber && (
+                              <Badge variant="outline" className="rounded-full border-white/80 bg-white px-3 py-1.5 text-slate-600">
+                                Tuần {reflection.linkedWeekNumber}
+                              </Badge>
+                            )}
+                            {linkedGoal && (
+                              <Badge variant="outline" className="rounded-full border-violet-200 bg-violet-50 px-3 py-1.5 text-violet-700">
+                                {linkedGoal.title}
+                              </Badge>
+                            )}
                           </div>
 
                           <div className="mt-3 flex items-center gap-2 text-sm text-slate-500">
@@ -605,6 +695,7 @@ export function ReflectionJournal() {
                           variant="ghost"
                           size="icon"
                           className="h-10 w-10 rounded-2xl text-slate-500 hover:text-red-600"
+                          aria-label={`Xóa nhật ký ${reflection.title}`}
                           onClick={() => handleDeleteReflection(reflection.id)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -616,6 +707,14 @@ export function ReflectionJournal() {
                           {reflection.content}
                         </p>
                       </div>
+                      {reflection.entryType === "weekly-review" && reflection.linkedGoalId && (
+                        <div className="mt-4 flex justify-end">
+                          <Button variant="outline" onClick={() => openLinkedCycle(reflection.linkedGoalId)}>
+                            Mở chu kỳ 12 tuần
+                            <ArrowRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </motion.div>

@@ -1,0 +1,57 @@
+{
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "src/app/routes.tsx",
+      "src/app/components/AppErrorBoundary.tsx",
+      "src/app/components/RootLayout.tsx",
+      "src/app/components/TwelveWeekSystemSections.tsx",
+      "src/app/components/TwelveWeekSystemSections.test.tsx",
+      "src/app/pages/12WeekSystem.tsx",
+      "src/app/utils/production.ts",
+      "src/app/utils/storage-achievement-ops.test.ts",
+      "src/app/utils/storage-achievement-ops.ts",
+      "src/app/utils/storage-date-utils.ts",
+      "src/app/utils/storage-demo-data.test.ts",
+      "src/app/utils/storage-demo-data.ts",
+      "src/app/utils/storage-goal-ops.ts",
+      "src/app/utils/storage-local-ops.ts",
+      "src/app/utils/storage-reflection-ops.ts",
+      "src/app/utils/storage-twelve-week.ts",
+      "src/app/utils/storage.ts",
+      "src/app/utils/storage-types.ts",
+      "src/app/utils/storage-vision-board-ops.ts",
+      "src/app/utils/twelve-week-system-ui.ts",
+      "src/app/utils/twelve-week-system-ui.test.ts",
+      "package.json",
+      "src/vite-env.d.ts",
+      "tsconfig.json",
+      "vitest.config.ts",
+      "biome.json"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 120
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "jsxQuoteStyle": "double",
+      "semicolons": "always"
+    }
+  }
+}

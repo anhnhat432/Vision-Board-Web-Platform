@@ -192,7 +192,7 @@ export function SMARTGoalSetup() {
               <div className="space-y-6">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Compass className="h-4 w-4" />
-                  SMART Goal Builder
+                  Mục tiêu SMART
                 </div>
 
                 <div className="space-y-4">
@@ -296,7 +296,7 @@ export function SMARTGoalSetup() {
                     placeholder={currentStepData.placeholder}
                     value={smartData[currentStepData.key]}
                     onChange={(event) => handleInputChange(event.target.value)}
-                    className="min-h-[180px] text-base leading-7 resize-none"
+                    className="min-h-[180px] resize-none text-base leading-7"
                   />
                 </div>
 
@@ -308,7 +308,7 @@ export function SMARTGoalSetup() {
                   <Button className="flex-1" onClick={handleNext} disabled={!isCurrentStepValid}>
                     {currentStep < totalSteps - 1
                       ? "Tiếp theo"
-                      : "Tiếp theo: Kiểm tra tính khả thi"}
+                      : "Tiếp theo: kiểm tra tính khả thi"}
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>
