@@ -4,3 +4,6 @@ dist/
 *.log
 codex-backups/
 .codex-test.txt
+.env
+.env.local
+.env.*.local
