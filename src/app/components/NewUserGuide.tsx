@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { ArrowRight, CheckCircle2, Compass, Sparkles } from "lucide-react";
 
@@ -32,8 +32,6 @@ interface NewUserGuideDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userData: UserData;
-  currentPageTourLabel?: string | null;
-  onStartPageTour?: () => void;
 }
 
 function emitOpenGuide() {
@@ -213,8 +211,6 @@ export function NewUserGuideDialog({
   open,
   onOpenChange,
   userData,
-  currentPageTourLabel,
-  onStartPageTour,
 }: NewUserGuideDialogProps) {
   const navigate = useNavigate();
   const { dismissed, dismiss, restore } = useGuideVisibility();
@@ -223,13 +219,13 @@ export function NewUserGuideDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[88vh] max-w-[calc(100%-1.5rem)] overflow-y-auto sm:max-w-3xl">
+      <DialogContent className="max-h-[88vh] max-w-[calc(100%-1rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <div className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
             <Sparkles className="h-3.5 w-3.5" />
             Hướng dẫn sử dụng
           </div>
-          <DialogTitle className="text-2xl tracking-[-0.03em] text-slate-950">
+          <DialogTitle className="text-xl tracking-[-0.03em] text-slate-950 sm:text-2xl">
             {userData.isHydratedFromDemo ? "Khám phá bản demo theo 4 bước." : "Đi web này theo 4 bước là dễ nhất."}
           </DialogTitle>
           <DialogDescription className="text-sm leading-7 text-slate-600">
@@ -275,13 +271,7 @@ export function NewUserGuideDialog({
               {dismissed ? "Hiện lại checklist" : "Ẩn checklist"}
             </Button>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {currentPageTourLabel && onStartPageTour && (
-              <Button variant="outline" onClick={onStartPageTour}>
-                {currentPageTourLabel}
-              </Button>
-            )}
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <div className="flex flex-wrap gap-2">            <Button variant="outline" onClick={() => onOpenChange(false)}>
               Để sau
             </Button>
             {nextStep && (
@@ -301,3 +291,4 @@ export function NewUserGuideDialog({
     </Dialog>
   );
 }
+

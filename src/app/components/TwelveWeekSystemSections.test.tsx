@@ -80,6 +80,10 @@ describe("TwelveWeekSystemSections", () => {
           { label: "Tuần 4", value: "Chốt layout mới" },
           { label: "Tuần 8", value: "Ship flow lõi" },
         ]}
+        hasAdvancedAnalytics={false}
+        executionHeatmap={[]}
+        weeklyTrend={[]}
+        tacticBreakdown={[]}
       />,
     );
 
@@ -149,6 +153,7 @@ describe("TwelveWeekSystemSections", () => {
         onClearEventLog={vi.fn()}
         onClearArchivedOutbox={vi.fn()}
         onOpenClearLocalDialog={vi.fn()}
+        onDeleteAllData={vi.fn()}
         onOpenResetDialog={vi.fn()}
         onOpenUpgradePlan={vi.fn()}
         onSyncEntitlements={vi.fn()}

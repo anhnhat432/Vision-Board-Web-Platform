@@ -92,6 +92,8 @@ interface TwelveWeekSetupDraft {
   week4Milestone: string;
   week8Milestone: string;
   successEvidence: string;
+  dailyTimeBudget: string;
+  preferredDays: number[];
 }
 
 const STEPS = [
@@ -301,6 +303,8 @@ export function TwelveWeekSetup() {
     week4Milestone: "",
     week8Milestone: "",
     successEvidence: "",
+    dailyTimeBudget: "",
+    preferredDays: [],
   });
 
   useEffect(() => {
@@ -351,6 +355,8 @@ export function TwelveWeekSetup() {
               parsedDraft.tacticLoadPreference === "push"
                 ? parsedDraft.tacticLoadPreference
                 : "balanced",
+            dailyTimeBudget: parsedDraft.dailyTimeBudget ?? "",
+            preferredDays: Array.isArray(parsedDraft.preferredDays) ? parsedDraft.preferredDays : [],
             leadIndicators:
               Array.isArray(parsedDraft.leadIndicators) && parsedDraft.leadIndicators.length > 0
                 ? parsedDraft.leadIndicators.map((indicator) => ({
@@ -466,31 +472,42 @@ export function TwelveWeekSetup() {
         : null;
     const nextTactics = adaptiveTemplateSupport?.personalizedTactics ?? template.tactics;
 
-    setDraft((previousDraft) => ({
-      ...previousDraft,
-      templateId: template.id,
-      goalType: template.goalType,
-      vision12Week: template.vision12Week,
-      week12Outcome: template.week12Outcome,
-      lagMetricName: template.lagMetricName,
-      lagMetricTarget: template.lagMetricTarget,
-      lagMetricUnit: template.lagMetricUnit,
-      reviewDay: adaptiveTemplateSupport?.recommendedReviewDay ?? template.reviewDay,
-      tacticLoadPreference:
-        adaptiveTemplateSupport?.recommendedLoadPreference ?? previousDraft.tacticLoadPreference,
-      week4Milestone:
-        adaptiveTemplateSupport?.week4MilestoneSuggestion ?? template.week4Milestone,
-      week8Milestone:
-        adaptiveTemplateSupport?.week8MilestoneSuggestion ?? template.week8Milestone,
-      successEvidence: template.successEvidence,
-      leadIndicators: nextTactics.map((tactic) => ({
-        name: tactic.name,
-        target: tactic.target,
-        unit: tactic.unit,
-        type: tactic.type,
-        cadence: tactic.cadence,
-      })),
-    }));
+    setDraft((previousDraft) => {
+      const timeBudget = previousDraft.dailyTimeBudget;
+      const adjustTarget = (original: string): string => {
+        const parsed = Number.parseInt(original, 10);
+        if (Number.isNaN(parsed) || parsed <= 0) return original;
+        if (timeBudget === "30min") return String(Math.max(1, parsed - 1));
+        if (timeBudget === "2h+") return String(parsed + 1);
+        return original;
+      };
+
+      return {
+        ...previousDraft,
+        templateId: template.id,
+        goalType: template.goalType,
+        vision12Week: template.vision12Week,
+        week12Outcome: template.week12Outcome,
+        lagMetricName: template.lagMetricName,
+        lagMetricTarget: template.lagMetricTarget,
+        lagMetricUnit: template.lagMetricUnit,
+        reviewDay: adaptiveTemplateSupport?.recommendedReviewDay ?? template.reviewDay,
+        tacticLoadPreference:
+          adaptiveTemplateSupport?.recommendedLoadPreference ?? previousDraft.tacticLoadPreference,
+        week4Milestone:
+          adaptiveTemplateSupport?.week4MilestoneSuggestion ?? template.week4Milestone,
+        week8Milestone:
+          adaptiveTemplateSupport?.week8MilestoneSuggestion ?? template.week8Milestone,
+        successEvidence: template.successEvidence,
+        leadIndicators: nextTactics.map((tactic) => ({
+          name: tactic.name,
+          target: adjustTarget(tactic.target),
+          unit: tactic.unit,
+          type: tactic.type,
+          cadence: tactic.cadence,
+        })),
+      };
+    });
 
     trackAppEvent("12_week_template_selected", undefined, {
       templateId: template.id,
@@ -629,6 +646,15 @@ export function TwelveWeekSetup() {
 
   const handleNext = () => {
     if (!validateCurrentStep()) return;
+
+    if (currentStep === 0 && draft.templateId && (draft.dailyTimeBudget || draft.preferredDays.length > 0)) {
+      trackAppEvent("12_week_template_personalized", undefined, {
+        templateId: draft.templateId,
+        dailyTimeBudget: draft.dailyTimeBudget || "none",
+        preferredDaysCount: String(draft.preferredDays.length),
+      });
+    }
+
     setCurrentStep((step) => Math.min(step + 1, STEPS.length - 1));
   };
 
@@ -719,6 +745,8 @@ export function TwelveWeekSetup() {
       optionalTactics: String(optionalCount),
       templateId: selectedTemplate?.id ?? "custom",
       plan: currentPlan,
+      dailyTimeBudget: draft.dailyTimeBudget || "none",
+      preferredDaysCount: String(draft.preferredDays.length),
     });
     clearGoalPlanningDrafts();
 
@@ -1008,11 +1036,82 @@ export function TwelveWeekSetup() {
                                 </Badge>
                               ))}
                             </div>
+                            {isLocked && (
+                              <div className="mt-4 flex items-center justify-between border-t border-violet-200/60 pt-3">
+                                <span className="text-xs font-semibold text-violet-700">Cần gói Plus để dùng khung này</span>
+                                <span className="text-xs font-semibold text-violet-600">Mở khóa →</span>
+                              </div>
+                            )}
                           </button>
                         );
                       })}
                     </div>
                   </div>
+
+                  {selectedTemplate && (
+                    <div className="space-y-4 rounded-[28px] border border-emerald-200 bg-[linear-gradient(180deg,_rgba(236,253,245,0.94)_0%,_rgba(209,250,229,0.82)_100%)] p-5">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
+                          Cá nhân hóa khung
+                        </p>
+                        <p className="mt-1 text-sm text-slate-600">
+                          Trả lời nhanh 2 câu để khung tự điều chỉnh lượng tactic phù hợp với bạn.
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="daily-time-budget">Mỗi ngày bạn có thể dành bao lâu?</Label>
+                        <Select
+                          value={draft.dailyTimeBudget}
+                          onValueChange={(value) => handleChange("dailyTimeBudget", value)}
+                        >
+                          <SelectTrigger id="daily-time-budget" aria-label="Chọn ngân sách thời gian mỗi ngày">
+                            <SelectValue placeholder="Chọn thời lượng" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="30min">30 phút</SelectItem>
+                            <SelectItem value="1h">1 giờ</SelectItem>
+                            <SelectItem value="1.5h">1.5 giờ</SelectItem>
+                            <SelectItem value="2h+">2+ giờ</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Những ngày nào bạn muốn tập trung?</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {(["T2", "T3", "T4", "T5", "T6", "T7", "CN"] as const).map((dayLabel, dayIndex) => {
+                            const isActive = draft.preferredDays.includes(dayIndex);
+                            return (
+                              <button
+                                key={dayLabel}
+                                type="button"
+                                aria-pressed={isActive}
+                                onClick={() => {
+                                  setDraft((previousDraft) => ({
+                                    ...previousDraft,
+                                    preferredDays: isActive
+                                      ? previousDraft.preferredDays.filter((d) => d !== dayIndex)
+                                      : [...previousDraft.preferredDays, dayIndex],
+                                  }));
+                                }}
+                                className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all ${
+                                  isActive
+                                    ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
+                                    : "border-slate-300 bg-white text-slate-700 hover:border-emerald-400"
+                                }`}
+                              >
+                                {dayLabel}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <p className="text-xs text-slate-500">
+                          {draft.preferredDays.length === 0
+                            ? "Chưa chọn — mặc định dàn đều cả tuần."
+                            : `Đã chọn ${draft.preferredDays.length} ngày.`}
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="space-y-2">
                     <Label htmlFor="goal-type">Loại mục tiêu</Label>

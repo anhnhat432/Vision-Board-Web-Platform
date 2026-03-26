@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import * as ProgressPrimitive from "@radix-ui/react-progress";
-import { useReducedMotion } from "motion/react";
+import { useReducedMotion } from "./use-reduced-motion";
 
 import { cn } from "./utils";
 

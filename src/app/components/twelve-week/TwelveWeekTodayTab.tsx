@@ -178,7 +178,9 @@ export function TwelveWeekTodayTab({
                         currentWeekOpenCount: currentWeekTasksCount,
                       })}
                     </p>
-                    <Button variant="outline" className="mt-3 w-full bg-white" onClick={() => onReentry(mode)}>
+                    <Button variant="outline" className="mt-3 w-full bg-white" onClick={() => onReentry(mode)}
+                      aria-label={`Áp dụng ${getReentryModeLabel(mode)}`}
+                    >
                       Áp dụng cách này
                     </Button>
                   </div>
@@ -452,7 +454,6 @@ export function TwelveWeekTodayTab({
                       type="button"
                       role="radio"
                       aria-checked={dailyMood === option.value}
-                      aria-pressed={dailyMood === option.value}
                       variant="outline"
                       className={
                         dailyMood === option.value

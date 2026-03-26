@@ -7,6 +7,7 @@ import {
   syncWeeklyPlans,
 } from "./storage-twelve-week";
 import type { Goal, LifeArea, UserData } from "./storage-types";
+import { generateId } from "./storage-types";
 
 export function upgradeLegacyGoalToSystemInData(data: UserData, goalId: string): boolean {
   const goalIndex = data.goals.findIndex((goal) => goal.id === goalId);
@@ -40,7 +41,7 @@ export function addGoalToData(
 ): string {
   const newGoal: Goal = {
     ...goal,
-    id: `goal_${Date.now()}`,
+    id: generateId("goal"),
     createdAt,
   };
   data.goals.push(newGoal);

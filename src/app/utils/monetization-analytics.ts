@@ -1,5 +1,5 @@
 import { trackAppEvent } from "./storage";
-import type { PricingPlanCode } from "./storage-types";
+import type { PricingPlanCode, RescueTriggerKind, RescueTriggerSeverity } from "./storage-types";
 import type { PremiumFeatureContext } from "./twelve-week-premium";
 
 declare global {
@@ -185,6 +185,76 @@ export function trackPremiumInsightOpened(input: {
       source: input.source,
       currentPlan: input.currentPlan,
       weekNumber: String(input.weekNumber),
+    },
+  });
+}
+
+// ─── D4: Rescue trigger events ────────────────────────────────────────────────
+
+export function trackRescueTriggerFired(input: {
+  goalId?: string;
+  kind: RescueTriggerKind;
+  severity: RescueTriggerSeverity;
+  currentPlan: PricingPlanCode;
+}): void {
+  emitAnalyticsEvent({
+    name: "rescue_trigger_fired",
+    goalId: input.goalId,
+    metadata: {
+      kind: input.kind,
+      severity: input.severity,
+      currentPlan: input.currentPlan,
+    },
+  });
+}
+
+export function trackRescueTriggerDismissed(input: {
+  goalId?: string;
+  kind: RescueTriggerKind;
+  currentPlan: PricingPlanCode;
+}): void {
+  emitAnalyticsEvent({
+    name: "rescue_trigger_dismissed",
+    goalId: input.goalId,
+    metadata: {
+      kind: input.kind,
+      currentPlan: input.currentPlan,
+    },
+  });
+}
+
+export function trackRescueActionTaken(input: {
+  goalId?: string;
+  kind: RescueTriggerKind;
+  action: "navigate_system" | "apply_reentry" | "upgrade";
+  currentPlan: PricingPlanCode;
+}): void {
+  emitAnalyticsEvent({
+    name: "rescue_action_taken",
+    goalId: input.goalId,
+    metadata: {
+      kind: input.kind,
+      action: input.action,
+      currentPlan: input.currentPlan,
+    },
+  });
+}
+
+// ─── C3: Experiment exposure events ──────────────────────────────────────────
+
+export function trackExperimentExposure(input: {
+  experimentId: string;
+  variantId: string;
+  goalId?: string;
+  context?: string;
+}): void {
+  emitAnalyticsEvent({
+    name: "experiment_exposure",
+    goalId: input.goalId,
+    metadata: {
+      experimentId: input.experimentId,
+      variantId: input.variantId,
+      context: input.context ?? "",
     },
   });
 }

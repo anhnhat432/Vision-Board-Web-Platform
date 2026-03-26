@@ -1,4 +1,5 @@
 import type { Reflection, UserData } from "./storage-types";
+import { generateId } from "./storage-types";
 
 export function addReflectionToData(
   data: UserData,
@@ -6,7 +7,7 @@ export function addReflectionToData(
 ): void {
   data.reflections.unshift({
     ...reflection,
-    id: `reflection_${Date.now()}`,
+    id: generateId("reflection"),
   });
 }
 
@@ -32,7 +33,7 @@ export function upsertReflectionInData(
 
   data.reflections.unshift({
     ...reflection,
-    id: `reflection_${Date.now()}`,
+    id: generateId("reflection"),
   });
 }
 

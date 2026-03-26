@@ -1,10 +1,9 @@
 ﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { AlertTriangle, CalendarDays, CheckCircle2, Clock3, Crown, Plus, Target, Trash2, Zap } from "lucide-react";
+import { AlertTriangle, CalendarDays, CheckCircle2, ChevronDown, ChevronUp, Clock3, Crown, Plus, Target, Trash2, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 import { NewUserGuideBanner } from "../components/NewUserGuide";
-import { SpotlightTour, type SpotlightTourStep } from "../components/SpotlightTour";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import {
   AlertDialog,
@@ -24,6 +23,8 @@ import { CountUp } from "../components/ui/count-up";
 import { Input } from "../components/ui/input";
 import { Progress } from "../components/ui/progress";
 import { Reveal } from "../components/ui/reveal";
+import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
+import { useUpgradeDialog } from "../hooks/useUpgradeDialog";
 import {
   celebrateSpark,
   celebrateSpotlight,
@@ -31,15 +32,12 @@ import {
 import {
   APP_STORAGE_KEYS,
   LIFE_AREAS,
-  type PricingPlanCode,
-  UserData,
+  type UserData,
   calculateGoalProgress,
   clearGoalPlanningDrafts,
   deleteGoal,
   formatCalendarDate,
   getCalendarDayDifference,
-  getCurrentEntitlementKeys,
-  getCurrentPlan,
   getGoalExecutionStats,
   getLifeAreaLabel,
   getReviewDayLabel,
@@ -52,13 +50,10 @@ import {
   isTwelveWeekReviewDueToday,
   updateGoal,
 } from "../utils/storage";
-import { trackPaywallCtaClicked } from "../utils/monetization-analytics";
-import { PAGE_TOUR_EVENT } from "../utils/page-tour";
+import { generateId } from "../utils/storage-types";
 import {
   getEntitlementLabel,
-  getPlanDefinition,
   getPlanLabel,
-  type PremiumFeatureContext,
 } from "../utils/twelve-week-premium";
 
 const formatDeadline = (deadline: string) => {
@@ -75,37 +70,9 @@ const getSystemStatusLabel = (status?: string) => {
   return "Đang chạy";
 };
 
-const GOAL_TRACKER_TOUR_STEPS: SpotlightTourStep[] = [
-  {
-    id: "create",
-    targetId: "goaltracker-create-goal",
-    title: "Tạo mục tiêu từ đây",
-    description:
-      "Mọi mục tiêu mới đều nên đi qua insight, SMART và feasibility trước khi bạn bắt đầu thực thi.",
-  },
-  {
-    id: "summary",
-    targetId: "goaltracker-summary",
-    title: "Đọc các tín hiệu nhanh ở hàng này",
-    description:
-      "Hàng summary cho bạn biết nhanh có review đến hạn, mục tiêu quá hạn hay việc nào cần nhìn trước.",
-  },
-  {
-    id: "goals",
-    targetId: "goaltracker-goals",
-    title: "Đọc mục tiêu theo thứ tự này",
-    description:
-      "Chu kỳ 12 tuần được đặt lên trước để việc hằng ngày và review không bị chìm giữa các mục tiêu khác.",
-  },
-];
-
 export function GoalTracker() {
   const navigate = useNavigate();
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
-  const [isTourOpen, setIsTourOpen] = useState(false);
-  const [upgradeContext, setUpgradeContext] = useState<PremiumFeatureContext>("plan");
-  const [recommendedPlan, setRecommendedPlan] = useState<Exclude<PricingPlanCode, "FREE">>("PLUS");
   const [newTask, setNewTask] = useState("");
   const [addingTaskToGoalId, setAddingTaskToGoalId] = useState<string | null>(null);
   const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
@@ -114,53 +81,75 @@ export function GoalTracker() {
     setUserData(getUserData());
   }, []);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  if (!userData) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <p className="text-sm text-slate-400">Đang tải dữ liệu...</p>
+      </div>
+    );
+  }
 
-    const handleTourStart = (event: Event) => {
-      const detail = (event as CustomEvent<{ tour?: string }>).detail;
-      if (detail?.tour === "goal_tracker") {
-        setIsTourOpen(true);
-      }
-    };
+  return (
+    <GoalTrackerContent
+      userData={userData}
+      newTask={newTask}
+      setNewTask={setNewTask}
+      addingTaskToGoalId={addingTaskToGoalId}
+      setAddingTaskToGoalId={setAddingTaskToGoalId}
+      goalToDelete={goalToDelete}
+      setGoalToDelete={setGoalToDelete}
+      onReload={() => setUserData(getUserData())}
+    />
+  );
+}
 
-    window.addEventListener(PAGE_TOUR_EVENT, handleTourStart);
+function GoalTrackerContent({
+  userData,
+  newTask,
+  setNewTask,
+  addingTaskToGoalId,
+  setAddingTaskToGoalId,
+  goalToDelete,
+  setGoalToDelete,
+  onReload,
+}: {
+  userData: UserData;
+  newTask: string;
+  setNewTask: (value: string) => void;
+  addingTaskToGoalId: string | null;
+  setAddingTaskToGoalId: (value: string | null) => void;
+  goalToDelete: string | null;
+  setGoalToDelete: (value: string | null) => void;
+  onReload: () => void;
+}) {
+  const navigate = useNavigate();
+  const [expandedGoals, setExpandedGoals] = useState<Set<string>>(new Set());
+  const { currentPlanCode, currentPlanDefinition, entitlementKeys, hasPremiumReviewInsights, premiumStatusItems } = usePlanEntitlements(userData);
 
-    return () => {
-      window.removeEventListener(PAGE_TOUR_EVENT, handleTourStart);
-    };
-  }, []);
+  // Compute twelveWeekGoals early so we can pass goalId to the upgrade dialog
+  const goals = [...userData.goals].sort((left, right) => {
+    const leftProgress = calculateGoalProgress(left);
+    const rightProgress = calculateGoalProgress(right);
+    if ((leftProgress === 100) !== (rightProgress === 100)) {
+      return leftProgress === 100 ? 1 : -1;
+    }
+    const leftDays = getCalendarDayDifference(left.deadline) ?? Number.MAX_SAFE_INTEGER;
+    const rightDays = getCalendarDayDifference(right.deadline) ?? Number.MAX_SAFE_INTEGER;
+    if (leftDays !== rightDays) return leftDays - rightDays;
+    return left.title.localeCompare(right.title, "vi");
+  });
+  const twelveWeekGoals = goals.filter((goal) => Boolean(goal.twelveWeekSystem));
+  const standardGoals = goals.filter((goal) => !goal.twelveWeekSystem);
 
-  if (!userData) return null;
-
-  const reload = () => setUserData(getUserData());
-  const openUpgradeDialog = (
-    context: PremiumFeatureContext,
-    planCode: Exclude<PricingPlanCode, "FREE"> = "PLUS",
-  ) => {
-    trackPaywallCtaClicked({
-      goalId: twelveWeekGoals[0]?.id,
-      context,
+  const { isUpgradeDialogOpen, setIsUpgradeDialogOpen, upgradeContext, recommendedPlan, openUpgradeDialog } =
+    useUpgradeDialog({
       source: "goal_tracker",
-      currentPlan: currentPlanCode,
-      recommendedPlan: planCode,
-      targetPlan: planCode,
       placement: "goal_tracker_plan_card",
+      currentPlanCode,
+      goalId: twelveWeekGoals[0]?.id,
     });
-    setUpgradeContext(context);
-    setRecommendedPlan(planCode);
-    setIsUpgradeDialogOpen(true);
-  };
-  const currentPlanCode = getCurrentPlan(userData);
-  const currentPlanDefinition = getPlanDefinition(currentPlanCode);
-  const entitlementKeys = getCurrentEntitlementKeys(userData);
-  const hasPremiumReviewInsights = entitlementKeys.includes("premium_review_insights");
-  const premiumStatusItems = [
-    "premium_templates",
-    "premium_review_insights",
-    "priority_reminders",
-    "advanced_analytics",
-  ] as const;
+
+  const reload = onReload;
 
   const openTwelveWeekCenter = (goalId: string) => {
     localStorage.setItem(APP_STORAGE_KEYS.latest12WeekGoalId, goalId);
@@ -188,7 +177,7 @@ export function GoalTracker() {
     }
 
     updateGoal(goalId, {
-      tasks: [...goal.tasks, { id: `task_${Date.now()}`, title: newTask.trim(), completed: false }],
+      tasks: [...goal.tasks, { id: generateId("task"), title: newTask.trim(), completed: false }],
     });
 
     setNewTask("");
@@ -229,7 +218,7 @@ export function GoalTracker() {
       toast.success(justCompletedGoal ? "Mục tiêu vừa chạm mốc 100%." : "Đã chốt thêm một bước nhỏ.");
     }
 
-    setUserData(afterData);
+    reload();
   };
 
   const handleDeleteTask = (goalId: string, taskId: string) => {
@@ -271,24 +260,6 @@ export function GoalTracker() {
     }).length,
     reviewDue: userData.goals.filter((goal) => getGoalExecutionStats(goal).reviewDueToday).length,
   };
-
-  const goals = [...userData.goals].sort((left, right) => {
-    const leftProgress = calculateGoalProgress(left);
-    const rightProgress = calculateGoalProgress(right);
-
-    if ((leftProgress === 100) !== (rightProgress === 100)) {
-      return leftProgress === 100 ? 1 : -1;
-    }
-
-    const leftDays = getCalendarDayDifference(left.deadline) ?? Number.MAX_SAFE_INTEGER;
-    const rightDays = getCalendarDayDifference(right.deadline) ?? Number.MAX_SAFE_INTEGER;
-    if (leftDays !== rightDays) return leftDays - rightDays;
-
-    return left.title.localeCompare(right.title, "vi");
-  });
-
-  const twelveWeekGoals = goals.filter((goal) => Boolean(goal.twelveWeekSystem));
-  const standardGoals = goals.filter((goal) => !goal.twelveWeekSystem);
 
   const summaryCards = [
     {
@@ -358,7 +329,7 @@ export function GoalTracker() {
         key={goal.id}
         className={`overflow-hidden border-0 shadow-[0_28px_70px_-38px_rgba(15,23,42,0.22)] ${system ? "bg-[linear-gradient(180deg,_rgba(238,242,255,0.95)_0%,_rgba(224,231,255,0.84)_100%)]" : "bg-[linear-gradient(180deg,_rgba(226,232,240,0.94)_0%,_rgba(203,213,225,0.82)_100%)]"}`}
       >
-        <CardContent className="grid gap-5 p-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <CardContent className="grid gap-5 p-6 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)]">
           <div className="rounded-[26px] bg-[linear-gradient(135deg,_rgba(15,23,42,0.98)_0%,_rgba(30,41,59,0.94)_100%)] p-5 text-white">
             <div className="flex items-start justify-between gap-3">
               <Badge className="text-white" style={{ backgroundColor: areaMeta?.color ?? "#7c3aed" }}>{progress}%</Badge>
@@ -372,11 +343,11 @@ export function GoalTracker() {
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
-            <h3 className="mt-4 text-2xl font-bold">{goal.title}</h3>
-            <p className="mt-2 text-sm leading-7 text-white/68">{goal.description || "Chưa có mô tả ngắn cho mục tiêu này."}</p>
+            <h3 className="mt-4 line-clamp-2 break-words text-2xl font-bold">{goal.title}</h3>
+            <p className="mt-2 line-clamp-3 text-sm leading-7 text-white/68">{goal.description || "Chưa có mô tả ngắn cho mục tiêu này."}</p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Badge variant="outline" className="border-white/12 bg-white/10 text-white">{getLifeAreaLabel(goal.category)}</Badge>
-              {system && <Badge variant="outline" className="border-white/12 bg-white/10 text-white">Chu kỳ 12 tuần</Badge>}
+              {system && <Badge variant="outline" className="border-white/12 bg-white/10 text-white">12 tuần</Badge>}
               {system && <Badge variant="outline" className="border-white/12 bg-white/10 text-white">Gói {getPlanLabel(currentPlanCode)}</Badge>}
             </div>
             <div className="mt-5">
@@ -394,7 +365,35 @@ export function GoalTracker() {
               <div className="flex items-center gap-2"><Clock3 className="h-4 w-4 text-white/45" /><span>Ngày đích: {formatDeadline(goal.deadline)}</span></div>
               <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-white/45" /><span>{execution.completed}/{execution.total} việc đã chốt</span></div>
             </div>
+            <div className="flex items-center gap-2 lg:hidden mt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full border-white/12 bg-white/10 text-white hover:bg-white/18"
+                aria-expanded={expandedGoals.has(goal.id)}
+                onClick={() => setExpandedGoals((prev) => {
+                  const next = new Set(prev);
+                  if (next.has(goal.id)) next.delete(goal.id);
+                  else next.add(goal.id);
+                  return next;
+                })}
+              >
+                {expandedGoals.has(goal.id) ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                {expandedGoals.has(goal.id) ? "Ẩn chi tiết" : "Xem chi tiết"}
+              </Button>
+              {system && (
+                <Button
+                  size="sm"
+                  className="w-full bg-white text-slate-900 hover:bg-white/92"
+                  onClick={() => openTwelveWeekCenter(goal.id)}
+                >
+                  <Zap className="h-4 w-4" />
+                  Mở 12 tuần
+                </Button>
+              )}
+            </div>
           </div>
+          <div className={`${expandedGoals.has(goal.id) ? "block" : "hidden"} lg:block`}>
           {system ? (
             <div className="space-y-4">
               <div
@@ -545,7 +544,9 @@ export function GoalTracker() {
                 {addingTaskToGoalId === goal.id ? (
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
                     <Input
+                      id={`new-task-${goal.id}`}
                       placeholder="Nhập việc tiếp theo..."
+                      aria-label={`Việc mới cho mục tiêu ${goal.title}`}
                       value={newTask}
                       onChange={(event) => setNewTask(event.target.value)}
                       onKeyDown={(event) => {
@@ -573,6 +574,7 @@ export function GoalTracker() {
               </div>
             </div>
           )}
+          </div>
         </CardContent>
       </Card>
     );
@@ -592,13 +594,6 @@ export function GoalTracker() {
       />
 
       <NewUserGuideBanner userData={userData} variant="compact" />
-      <SpotlightTour
-        open={isTourOpen}
-        onOpenChange={setIsTourOpen}
-        title="Tour mục tiêu"
-        description="Ba điểm chính để người mới hiểu màn này mà không bị quá tải."
-        steps={GOAL_TRACKER_TOUR_STEPS}
-      />
 
       <AlertDialog
         open={Boolean(goalToDelete)}
@@ -622,17 +617,16 @@ export function GoalTracker() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Card className="hero-surface overflow-hidden border-0 text-white">
-        <CardContent className="relative p-8 lg:p-10">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
-          <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.2fr)_360px]">
-            <div className="space-y-6">
+      <Card data-tour-id="goaltracker-hero" className="hero-surface overflow-hidden border-0 text-white">
+        <CardContent className="relative p-5 sm:p-6 lg:p-8">
+          <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(280px,360px)]">
+            <div data-tour-id="goaltracker-start-card" className="space-y-6">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                 <Target className="h-4 w-4" />
                 Không gian mục tiêu
               </div>
               <div className="space-y-4">
-                <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
+                <h1 className="max-w-3xl break-words text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
                   Giữ mục tiêu ở mức dễ nhìn, còn nhịp thực thi thì đi vào đúng flow của từng ngày.
                 </h1>
                 <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
@@ -662,8 +656,7 @@ export function GoalTracker() {
                 rồi mới tới feasibility và hệ 12 tuần.
               </p>
             </div>
-            <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Nhìn nhanh</p>
+            <div className="hidden xl:block rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
               <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                 <div className="rounded-[24px] border border-white/10 bg-black/12 px-4 py-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-white/55">Mục tiêu đang theo</p>
@@ -828,7 +821,7 @@ export function GoalTracker() {
       <div data-tour-id="goaltracker-goals">
         {userData.goals.length === 0 ? (
           <Reveal delay={0.04}>
-          <Card className="overflow-hidden border-0 bg-[linear-gradient(180deg,_rgba(238,242,255,0.95)_0%,_rgba(224,231,255,0.84)_100%)] shadow-[0_28px_70px_-38px_rgba(99,102,241,0.18)]">
+          <Card data-tour-id="goaltracker-empty-state" className="overflow-hidden border-0 bg-[linear-gradient(180deg,_rgba(238,242,255,0.95)_0%,_rgba(224,231,255,0.84)_100%)] shadow-[0_28px_70px_-38px_rgba(99,102,241,0.18)]">
             <CardContent className="p-10 text-center lg:p-14">
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] bg-violet-50 text-violet-700">
                 <Target className="h-10 w-10" />
@@ -847,7 +840,7 @@ export function GoalTracker() {
         ) : (
           <Reveal delay={0.04} className="space-y-8">
           {twelveWeekGoals.length > 0 && (
-            <section className="space-y-4">
+            <section data-tour-id="goaltracker-priority-section" className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h2 className="text-2xl font-bold text-slate-900">Chu kỳ 12 tuần đang chạy</h2>
@@ -862,7 +855,7 @@ export function GoalTracker() {
           )}
 
           {standardGoals.length > 0 && (
-            <section className="space-y-4">
+            <section data-tour-id="goaltracker-standard-section" className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h2 className="text-2xl font-bold text-slate-900">Mục tiêu thường</h2>

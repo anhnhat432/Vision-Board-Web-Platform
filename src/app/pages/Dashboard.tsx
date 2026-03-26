@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { Suspense, lazy } from "react";
@@ -25,14 +25,14 @@ import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { CountUp } from "../components/ui/count-up";
 import { Progress } from "../components/ui/progress";
 import { Reveal } from "../components/ui/reveal";
+import { usePageTour } from "../hooks/usePageTour";
+import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
+import { useUpgradeDialog } from "../hooks/useUpgradeDialog";
 import {
-  type PricingPlanCode,
-  UserData,
+  type UserData,
   calculateGoalProgress,
   formatCalendarDate,
   getActiveTwelveWeekGoal,
-  getCurrentEntitlementKeys,
-  getCurrentPlan,
   getGoalExecutionStats,
   getLifeAreaLabel,
   getRandomMotivationalQuote,
@@ -46,14 +46,19 @@ import {
   isTwelveWeekReviewDueToday,
   sortReflectionsByDateDesc,
 } from "../utils/storage";
-import { trackPaywallCtaClicked } from "../utils/monetization-analytics";
-import { PAGE_TOUR_EVENT } from "../utils/page-tour";
 import {
   getEntitlementLabel,
-  getPlanDefinition,
   getPlanLabel,
-  type PremiumFeatureContext,
 } from "../utils/twelve-week-premium";
+import {
+  dismissRescueTrigger,
+  evaluateRescueTriggers,
+} from "../utils/twelve-week-system-ui";
+import {
+  trackRescueActionTaken,
+  trackRescueTriggerDismissed,
+  trackRescueTriggerFired,
+} from "../utils/monetization-analytics";
 
 const DashboardLifeAreaRadar = lazy(async () => {
   const module = await import("../components/DashboardLifeAreaRadar");
@@ -88,10 +93,7 @@ export function Dashboard() {
   const navigate = useNavigate();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [quote, setQuote] = useState("");
-  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
-  const [isTourOpen, setIsTourOpen] = useState(false);
-  const [upgradeContext, setUpgradeContext] = useState<PremiumFeatureContext>("plan");
-  const [recommendedPlan, setRecommendedPlan] = useState<Exclude<PricingPlanCode, "FREE">>("PLUS");
+  const { isTourOpen, setIsTourOpen } = usePageTour("dashboard");
 
   useEffect(() => {
     const data = getUserData();
@@ -99,43 +101,44 @@ export function Dashboard() {
     setQuote(getRandomMotivationalQuote());
   }, []);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  if (!userData) {
+    return (
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <p className="text-sm text-slate-400">Đang tải dữ liệu...</p>
+      </div>
+    );
+  }
 
-    const handleTourStart = (event: Event) => {
-      const detail = (event as CustomEvent<{ tour?: string }>).detail;
-      if (detail?.tour === "dashboard") {
-        setIsTourOpen(true);
-      }
-    };
+  const activeTwelveWeekGoal = getActiveTwelveWeekGoal(userData.goals);
 
-    window.addEventListener(PAGE_TOUR_EVENT, handleTourStart);
+  return <DashboardContent userData={userData} quote={quote} activeTwelveWeekGoal={activeTwelveWeekGoal} isTourOpen={isTourOpen} setIsTourOpen={setIsTourOpen} onReload={() => setUserData(getUserData())} />;
+}
 
-    return () => {
-      window.removeEventListener(PAGE_TOUR_EVENT, handleTourStart);
-    };
-  }, []);
-
-  if (!userData) return null;
-
-  const reloadDashboard = () => setUserData(getUserData());
-  const openUpgradeDialog = (
-    context: PremiumFeatureContext,
-    planCode: Exclude<PricingPlanCode, "FREE"> = "PLUS",
-  ) => {
-    trackPaywallCtaClicked({
-      goalId: activeTwelveWeekGoal?.id,
-      context,
+function DashboardContent({
+  userData,
+  quote,
+  activeTwelveWeekGoal,
+  isTourOpen,
+  setIsTourOpen,
+  onReload,
+}: {
+  userData: UserData;
+  quote: string;
+  activeTwelveWeekGoal: ReturnType<typeof getActiveTwelveWeekGoal>;
+  isTourOpen: boolean;
+  setIsTourOpen: (open: boolean) => void;
+  onReload: () => void;
+}) {
+  const navigate = useNavigate();
+  const [dismissedTrigger, setDismissedTrigger] = useState<string | null>(null);
+  const { currentPlanCode, currentPlanDefinition, entitlementKeys, premiumStatusItems } = usePlanEntitlements(userData);
+  const { isUpgradeDialogOpen, setIsUpgradeDialogOpen, upgradeContext, recommendedPlan, openUpgradeDialog } =
+    useUpgradeDialog({
       source: "dashboard",
-      currentPlan: currentPlanCode,
-      recommendedPlan: planCode,
-      targetPlan: planCode,
       placement: "dashboard_plan_card",
+      currentPlanCode,
+      goalId: activeTwelveWeekGoal?.id,
     });
-    setUpgradeContext(context);
-    setRecommendedPlan(planCode);
-    setIsUpgradeDialogOpen(true);
-  };
 
   const recentGoals = userData.goals.slice(0, 3);
   const recentReflections = sortReflectionsByDateDesc(userData.reflections).slice(0, 2);
@@ -154,9 +157,12 @@ export function Dashboard() {
   const totalTasks = executionTotals.total;
   const completedTasks = executionTotals.completed;
   const averageLifeScore =
-    userData.currentWheelOfLife.reduce((sum, area) => sum + area.score, 0) / userData.currentWheelOfLife.length;
-  const weakestArea = [...userData.currentWheelOfLife].sort((a, b) => a.score - b.score)[0];
-  const activeTwelveWeekGoal = getActiveTwelveWeekGoal(userData.goals);
+    userData.currentWheelOfLife.length > 0
+      ? userData.currentWheelOfLife.reduce((sum, area) => sum + area.score, 0) / userData.currentWheelOfLife.length
+      : 0;
+  const weakestArea = userData.currentWheelOfLife.length > 0
+    ? [...userData.currentWheelOfLife].sort((a, b) => a.score - b.score)[0]
+    : null;
   const activeSystem = activeTwelveWeekGoal?.twelveWeekSystem ?? null;
   const activeSystemWeek = activeSystem ? getTwelveWeekCurrentWeek(activeSystem) : null;
   const activeSystemTodayTasks = activeSystem ? getTwelveWeekTodayTasks(activeSystem) : [];
@@ -174,15 +180,6 @@ export function Dashboard() {
           : getTwelveWeekTasksForWeek(activeSystem, activeSystemWeek).filter((task) => !task.completed)
         ).slice(0, 3)
       : [];
-  const currentPlanCode = getCurrentPlan(userData);
-  const currentPlanDefinition = getPlanDefinition(currentPlanCode);
-  const entitlementKeys = getCurrentEntitlementKeys(userData);
-  const premiumStatusItems = [
-    "premium_templates",
-    "premium_review_insights",
-    "priority_reminders",
-    "advanced_analytics",
-  ] as const;
 
   const radarData = userData.currentWheelOfLife.map((area) => ({
     subject: getLifeAreaLabel(area.name),
@@ -298,7 +295,7 @@ export function Dashboard() {
           icon: AlertTriangle,
           onClick: () => navigate("/12-week-system"),
         },
-        {
+        ...(weakestArea ? [{
           eyebrow: "Lĩnh vực nên chăm lại",
           title: getLifeAreaLabel(weakestArea.name),
           description: `Điểm hiện tại ${weakestArea.score}/10. Nếu hôm nay còn thời gian, đây là nơi đáng quay lại trước.`,
@@ -309,10 +306,10 @@ export function Dashboard() {
           descriptionClass: "text-slate-600",
           buttonClass: "mt-4 border-white/70 bg-white/82 text-slate-900 hover:bg-white",
           buttonVariant: "outline" as const,
-          buttonLabel: "Xem bánh xe cuộc sống",
+          buttonLabel: "Mở cân bằng cuộc sống",
           icon: TrendingUp,
           onClick: () => navigate("/life-balance"),
-        },
+        }] : []),
       ]
     : [
         {
@@ -330,7 +327,7 @@ export function Dashboard() {
           icon: CalendarDays,
           onClick: () => navigate("/life-insight"),
         },
-        {
+        ...(weakestArea ? [{
           eyebrow: "Lĩnh vực nên chăm lại",
           title: getLifeAreaLabel(weakestArea.name),
           description: `Điểm hiện tại ${weakestArea.score}/10. Nếu muốn bắt đầu nhẹ hơn, hãy cải thiện một góc nhỏ ở đây trước.`,
@@ -341,10 +338,10 @@ export function Dashboard() {
           descriptionClass: "text-slate-600",
           buttonClass: "mt-4 border-white/70 bg-white/82 text-slate-900 hover:bg-white",
           buttonVariant: "outline" as const,
-          buttonLabel: "Xem bánh xe cuộc sống",
+          buttonLabel: "Mở cân bằng cuộc sống",
           icon: TrendingUp,
           onClick: () => navigate("/life-balance"),
-        },
+        }] : []),
         {
           eyebrow: "Bảng tầm nhìn",
           title: latestVisionBoard ? latestVisionBoard.name : "Chưa có bảng tầm nhìn",
@@ -365,6 +362,17 @@ export function Dashboard() {
       ];
   const dashboardAttentionPanels = attentionPanels.slice(0, 2);
 
+  const overdueCount = activeSystem
+    ? activeSystemTodayTasks.filter((t) => !t.completed).length
+    : 0;
+  const activeTriggers = evaluateRescueTriggers({
+    system: activeSystem,
+    subscription: userData.subscription ?? null,
+    missedTasksCount: overdueCount,
+    weekCompletionPercent: activeSystemWeekCompletion?.percent ?? 0,
+  }).filter((t) => t.kind !== dismissedTrigger);
+  const topTrigger = activeTriggers[0] ?? null;
+
   return (
     <div className="space-y-8 pb-12">
       <UpgradePaywallDialog
@@ -375,9 +383,104 @@ export function Dashboard() {
         goalId={activeTwelveWeekGoal?.id}
         recommendedPlan={recommendedPlan}
         source="dashboard"
-        onCheckoutComplete={reloadDashboard}
+        onCheckoutComplete={onReload}
       />
       <NewUserGuideBanner userData={userData} variant="compact" />
+
+      {/* Rescue trigger nudge banner */}
+      {topTrigger && (() => {
+        const severityStyles = {
+          urgent: {
+            wrapper: "border-rose-200 bg-rose-50",
+            icon: "bg-rose-100 text-rose-600",
+            headline: "text-rose-800",
+            detail: "text-rose-700",
+          },
+          caution: {
+            wrapper: "border-amber-200 bg-amber-50",
+            icon: "bg-amber-100 text-amber-600",
+            headline: "text-amber-800",
+            detail: "text-amber-700",
+          },
+          watch: {
+            wrapper: "border-slate-200 bg-slate-50",
+            icon: "bg-slate-100 text-slate-500",
+            headline: "text-slate-800",
+            detail: "text-slate-600",
+          },
+        } as const;
+        const s = severityStyles[topTrigger.severity];
+        const ctaHref = topTrigger.kind === "trial_ending" ? "/billing/plan" : "/12-week-system";
+        const ctaLabel = topTrigger.kind === "trial_ending" ? "Nâng cấp ngay" : "Xem ngay";
+        // Fire analytics once when first rendered (effect not available here; use key trick)
+        return (
+          <Reveal key={topTrigger.kind}>
+            <div
+              className={`rounded-xl border px-4 py-3 text-sm flex flex-wrap items-start gap-3 ${s.wrapper}`}
+              onAnimationStart={() => {
+                trackRescueTriggerFired({ kind: topTrigger.kind, severity: topTrigger.severity, currentPlan: currentPlanCode });
+              }}
+            >
+              <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${s.icon}`}>
+                <AlertTriangle className="h-3.5 w-3.5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className={`font-semibold ${s.headline}`}>{topTrigger.headline}</p>
+                <p className={`mt-0.5 text-xs ${s.detail}`}>{topTrigger.detail}</p>
+              </div>
+              <div className="flex shrink-0 items-center gap-2 ml-auto">
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    trackRescueActionTaken({ kind: topTrigger.kind, action: topTrigger.kind === "trial_ending" ? "upgrade" : "navigate_system", currentPlan: currentPlanCode });
+                    navigate(ctaHref);
+                  }}
+                >
+                  {ctaLabel}
+                </Button>
+                <button
+                  type="button"
+                  className="text-xs opacity-60 hover:opacity-100 transition-opacity px-1"
+                  aria-label="Đóng thông báo"
+                  onClick={() => {
+                    dismissRescueTrigger(topTrigger.kind);
+                    trackRescueTriggerDismissed({ kind: topTrigger.kind, currentPlan: currentPlanCode });
+                    setDismissedTrigger(topTrigger.kind);
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </Reveal>
+        );
+      })()}
+
+      {/* Trial countdown banner */}
+      {userData.subscription?.status === "trialing" &&
+        userData.subscription.renewsAt &&
+        new Date(userData.subscription.renewsAt) >= new Date() && (() => {
+          const daysLeft = Math.max(
+            0,
+            Math.ceil((new Date(userData.subscription.renewsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
+          );
+          return (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 flex flex-wrap items-center gap-3">
+              <Crown className="h-4 w-4 shrink-0 text-amber-600" />
+              <span>
+                <span className="font-semibold">Dùng thử Plus miễn phí:</span>{" "}
+                còn {daysLeft} ngày — nâng cấp để giữ toàn bộ tính năng Plus.
+              </span>
+              <Button
+                size="sm"
+                className="ml-auto shrink-0"
+                onClick={() => navigate("/billing/plan")}
+              >
+                Nâng cấp ngay
+              </Button>
+            </div>
+          );
+        })()}
       <SpotlightTour
         open={isTourOpen}
         onOpenChange={setIsTourOpen}
@@ -413,11 +516,11 @@ export function Dashboard() {
         </Reveal>
       )}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_400px]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,400px)]">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="space-y-4">
             <Card className="hero-surface overflow-hidden border-0 text-white">
-              <CardContent className="relative p-8 lg:p-10">
+              <CardContent className="relative p-5 sm:p-8 lg:p-10">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.18),_transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-80" />
                 <div className="relative space-y-6">
                 <div className="flex flex-wrap items-center gap-3">
@@ -435,7 +538,7 @@ export function Dashboard() {
                 </div>
 
                 <div className="space-y-3">
-                  <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
+                  <h1 className="max-w-3xl break-words text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
                     {activeSystem
                       ? `Hôm nay bạn chỉ cần quay lại đúng nhịp của "${activeTwelveWeekGoal?.title}".`
                       : "Bắt đầu từ một bước rất rõ, thay vì mở app rồi lại phân vân nên làm gì."}
@@ -445,7 +548,7 @@ export function Dashboard() {
 
                   {activeSystem && activeSystemWeekCompletion && activeSystemWeekRange ? (
                     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-                    <div data-tour-id="dashboard-start-card" className="rounded-[28px] border border-white/12 bg-white/10 p-5">
+                    <div data-tour-id="dashboard-start-card" className="rounded-2xl border border-white/12 bg-white/10 p-4 sm:p-5">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
                           <p className="text-xs uppercase tracking-[0.18em] text-white/55">Làm tiếp ngay</p>
@@ -499,7 +602,7 @@ export function Dashboard() {
                       )}
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="hidden lg:block space-y-3">
                       <div className="rounded-[24px] border border-white/12 bg-white/10 p-4">
                         <p className="text-xs uppercase tracking-[0.18em] text-white/55">Việc hôm nay</p>
                         <p className="mt-2 text-3xl font-bold text-white">{activeSystemTodayOpenTasks.length}</p>
@@ -560,22 +663,22 @@ export function Dashboard() {
                   <Button
                     key={action.title}
                     variant="outline"
-                    className="h-auto items-start justify-start whitespace-normal rounded-[22px] border-white/65 bg-white/78 px-4 py-4 text-left shadow-[0_18px_34px_-30px_rgba(15,23,42,0.2)] hover:bg-white"
+                    className="h-auto justify-start whitespace-normal rounded-[22px] border-white/65 bg-white/78 px-4 py-4 text-left shadow-[0_18px_34px_-30px_rgba(15,23,42,0.2)] hover:bg-white"
                     onClick={action.onClick}
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-white">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white">
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="ml-3 min-w-0 flex-1">
-                      <div className="font-semibold text-slate-900">{action.title}</div>
-                      <div className="mt-1 text-sm text-slate-500">{action.description}</div>
+                      <div className="truncate font-semibold text-slate-900">{action.title}</div>
+                      <div className="mt-1 line-clamp-2 text-sm text-slate-500">{action.description}</div>
                     </div>
                   </Button>
                 );
               })}
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
               {overviewCards.map((item, index) => {
                 const Icon = item.icon;
 
@@ -610,7 +713,7 @@ export function Dashboard() {
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
-          <div className="space-y-6">
+          <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
             <Card
               data-tour-id="dashboard-plan-card"
               className="border-0 bg-[linear-gradient(135deg,_rgba(49,46,129,0.96)_0%,_rgba(76,29,149,0.92)_100%)] text-white shadow-[0_28px_70px_-38px_rgba(76,29,149,0.42)]"
@@ -756,7 +859,7 @@ export function Dashboard() {
                 </div>
               ) : (
                 <div className="overflow-hidden rounded-[24px] border border-white/65 bg-white/76 shadow-[0_24px_48px_-36px_rgba(15,23,42,0.2)]">
-                  <div className="hidden grid-cols-[minmax(340px,2.15fr)_minmax(150px,0.9fr)_minmax(200px,1fr)_150px] gap-5 border-b border-slate-200/80 bg-slate-50/90 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 lg:grid">
+                  <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)_minmax(100px,0.5fr)] gap-4 border-b border-slate-200/80 bg-slate-50/90 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 lg:grid">
                     <span>Mục tiêu</span>
                     <span>Loại</span>
                     <span>Tiến độ</span>
@@ -775,67 +878,54 @@ export function Dashboard() {
                             goal.twelveWeekSystem ? "bg-violet-50/55" : "bg-white/40"
                           }`}
                         >
-                          <div className="grid gap-5 lg:grid-cols-[minmax(340px,2.15fr)_minmax(150px,0.9fr)_minmax(200px,1fr)_150px] lg:items-center">
+                          <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)_minmax(100px,0.5fr)] lg:items-center">
                             <div className="min-w-0">
                               <div className="flex items-start gap-3">
-                                <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-[0_12px_24px_-18px_rgba(15,23,42,0.5)]">
+                                <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white">
                                   <Target className="h-4 w-4" />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <div className="flex flex-wrap items-start gap-2">
-                                    <h4 className="text-base font-semibold leading-6 text-slate-900">{goal.title}</h4>
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <h4 className="truncate font-semibold text-slate-900">{goal.title}</h4>
                                     {goal.twelveWeekSystem && (
-                                      <span className="whitespace-nowrap rounded-full bg-violet-100 px-3 py-1 text-[11px] font-semibold text-violet-700">
+                                      <span className="rounded-full bg-violet-100 px-3 py-1 text-[11px] font-semibold text-violet-700">
                                         12 tuần
                                       </span>
                                     )}
                                     {progress === 100 && (
-                                      <span className="whitespace-nowrap rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-semibold text-emerald-700">
+                                      <span className="rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-semibold text-emerald-700">
                                         Hoàn thành
                                       </span>
                                     )}
                                   </div>
-                                  <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
-                                    <span className="font-medium text-slate-600">{getLifeAreaLabel(goal.category)}</span>
-                                    {goal.deadline && <span>Đích {formatCalendarDate(goal.deadline)}</span>}
-                                    {goal.twelveWeekSystem && (
-                                      <span className="whitespace-nowrap text-violet-700/90">Nhịp {getPlanLabel(currentPlanCode)}</span>
-                                    )}
+                                  <div className="mt-1 flex flex-wrap gap-2 text-sm text-slate-500">
+                                    <span>{getLifeAreaLabel(goal.category)}</span>
+                                    {goal.deadline && <span>• Đích {formatCalendarDate(goal.deadline)}</span>}
                                   </div>
                                   <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500 lg:hidden">
-                                    <span className="whitespace-nowrap rounded-full bg-slate-100 px-3 py-1">
+                                    <span className="rounded-full bg-slate-100 px-3 py-1">
                                       {goal.twelveWeekSystem ? "Chu kỳ 12 tuần" : "Mục tiêu thường"}
                                     </span>
-                                    <span className="whitespace-nowrap rounded-full bg-slate-100 px-3 py-1">
+                                    <span className="rounded-full bg-slate-100 px-3 py-1">
                                       {execution.completed}/{execution.total} việc đã chốt
                                     </span>
-                                    <span className="whitespace-nowrap rounded-full bg-slate-100 px-3 py-1">{progress}% tiến độ</span>
+                                    <span className="rounded-full bg-slate-100 px-3 py-1">{progress}% tiến độ</span>
                                   </div>
                                 </div>
-                                <CheckCircle2
-                                  className={`mt-1 h-5 w-5 shrink-0 ${
-                                    progress === 100 ? "text-emerald-600" : "text-slate-300"
-                                  }`}
-                                />
+                                <CheckCircle2 aria-hidden="true" className={`h-5 w-5 shrink-0 ${progress === 100 ? "text-emerald-600" : "text-slate-300"}`} />
                               </div>
                             </div>
 
-                            <div className="hidden lg:block">
-                              <span
-                                className={`inline-flex whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${
-                                  goal.twelveWeekSystem
-                                    ? "bg-violet-100 text-violet-700"
-                                    : "bg-slate-100 text-slate-700"
-                                }`}
-                              >
+                            <div className="hidden min-w-0 lg:block">
+                              <p className="truncate text-sm font-semibold text-slate-900">
                                 {goal.twelveWeekSystem ? "Chu kỳ 12 tuần" : "Mục tiêu thường"}
-                              </span>
-                              <p className="mt-3 text-sm text-slate-500">
+                              </p>
+                              <p className="mt-1 truncate text-sm text-slate-500">
                                 {goal.twelveWeekSystem ? `Gói ${getPlanLabel(currentPlanCode)}` : "Theo dõi tổng quan"}
                               </p>
                             </div>
 
-                            <div className="min-w-0 space-y-2">
+                            <div className="space-y-2">
                               <div className="flex items-center justify-between text-sm">
                                 <span className="font-semibold text-slate-900">{progress}%</span>
                                 <span className="text-slate-500">
@@ -852,12 +942,9 @@ export function Dashboard() {
                               <Button
                                 size="sm"
                                 variant={goal.twelveWeekSystem ? "default" : "outline"}
-                                className={
-                                  goal.twelveWeekSystem
-                                    ? "w-full whitespace-nowrap lg:w-auto"
-                                    : "w-full whitespace-nowrap border-white/70 bg-white hover:bg-slate-50 lg:w-auto"
-                                }
+                                className={goal.twelveWeekSystem ? "" : "border-white/70 bg-white hover:bg-slate-50"}
                                 onClick={() => navigate(goal.twelveWeekSystem ? "/12-week-system" : "/goals")}
+                                aria-label={goal.twelveWeekSystem ? `Mở 12 tuần: ${goal.title}` : `Mở mục tiêu: ${goal.title}`}
                               >
                                 {goal.twelveWeekSystem ? "Mở 12 tuần" : "Mở mục tiêu"}
                               </Button>
@@ -890,10 +977,10 @@ export function Dashboard() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="overflow-hidden rounded-[24px] border border-white/55 bg-white/76 px-5 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.42)]">
+              <div className="rounded-[24px] border border-white/55 bg-white/76 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.42)]">
                 <Suspense
                   fallback={
-                    <div className="flex h-[280px] items-center justify-center rounded-[20px] bg-slate-100/88 text-sm text-slate-500">
+                    <div className="flex h-[300px] items-center justify-center rounded-[20px] bg-slate-100/88 text-sm text-slate-500">
                       Đang tải biểu đồ cân bằng cuộc sống...
                     </div>
                   }
@@ -904,20 +991,20 @@ export function Dashboard() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-[20px] border border-white/65 bg-white/76 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.42)]">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Cần ưu tiên tiếp</p>
-                  <p className="mt-2 text-lg font-semibold text-slate-900">{getLifeAreaLabel(weakestArea.name)}</p>
-                  <p className="mt-1 text-sm text-slate-500">{weakestArea.score}/10</p>
+                  <p className="mt-2 text-lg font-semibold text-slate-900">{weakestArea ? getLifeAreaLabel(weakestArea.name) : "Chưa có dữ liệu"}</p>
+                  <p className="mt-1 text-sm text-slate-500">{weakestArea ? `${weakestArea.score}/10` : "--"}</p>
                 </div>
                 <Button
                   variant="outline"
-                  className="h-auto items-start justify-start whitespace-normal rounded-[20px] border-white/65 bg-white/76 px-4 py-4 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.42)] hover:bg-white"
+                  className="h-auto justify-start whitespace-normal rounded-[20px] border-white/65 bg-white/76 px-4 py-4 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.42)] hover:bg-white"
                   onClick={() => navigate("/life-balance")}
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-white">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white">
                     <TrendingUp className="h-4 w-4" />
                   </div>
                   <div className="ml-3 min-w-0 flex-1">
-                    <div className="font-semibold leading-snug text-slate-900">Xem bánh xe cuộc sống</div>
-                    <div className="mt-1 text-sm leading-6 text-slate-500">Xem chi tiết và cập nhật lại điểm số hiện tại.</div>
+                    <div className="truncate font-semibold text-slate-900">Mở cân bằng cuộc sống</div>
+                    <div className="mt-1 line-clamp-2 text-sm text-slate-500">Xem chi tiết và cập nhật lại bánh xe cuộc đời.</div>
                   </div>
                 </Button>
               </div>
@@ -952,7 +1039,7 @@ export function Dashboard() {
                   }`}
                 >
                   <div className="mb-3 flex items-start justify-between gap-4">
-                    <h4 className={`font-semibold ${index === 0 ? "text-white" : "text-slate-900"}`}>{reflection.title}</h4>
+                    <h4 className={`min-w-0 truncate font-semibold ${index === 0 ? "text-white" : "text-slate-900"}`}>{reflection.title}</h4>
                     <span className={`text-xs font-medium ${index === 0 ? "text-white/56" : "text-slate-400"}`}>
                       {formatCalendarDate(reflection.date)}
                     </span>

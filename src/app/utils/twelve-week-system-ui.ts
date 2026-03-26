@@ -3,7 +3,12 @@ import { formatDateInputValue, getCalendarDateKey, getReviewDayLabel, parseCalen
 import type {
   Goal,
   InAppReminder,
+  RescueTrigger,
+  RescueTriggerKind,
+  RescueTriggerSeverity,
+  Subscription,
   SyncOutboxItem,
+  TwelveWeekSystem,
   TwelveWeekTaskInstance,
   UniversalDailyCheckIn,
   UniversalWeeklyReview,
@@ -318,4 +323,287 @@ export function getSyncStatusLabel(status: OutboxSyncSnapshot["status"] | null):
     default:
       return "Chưa chạy";
   }
+}
+
+// ─── D4: Rescue trigger rule engine ──────────────────────────────────────────
+
+const RESCUE_TRIGGER_DISMISS_KEY = "visionboard_rescue_dismissed";
+
+/** Persist a dismissal for `kind` until end of today. */
+export function dismissRescueTrigger(kind: RescueTriggerKind): void {
+  if (typeof window === "undefined") return;
+  try {
+    const stored = JSON.parse(localStorage.getItem(RESCUE_TRIGGER_DISMISS_KEY) ?? "{}") as Record<string, string>;
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    stored[kind] = tomorrow.toISOString();
+    localStorage.setItem(RESCUE_TRIGGER_DISMISS_KEY, JSON.stringify(stored));
+  } catch {
+    // ignore storage errors
+  }
+}
+
+/** Returns true if this kind was dismissed and the dismissal is still valid. */
+export function isRescueTriggerDismissed(kind: RescueTriggerKind): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const stored = JSON.parse(localStorage.getItem(RESCUE_TRIGGER_DISMISS_KEY) ?? "{}") as Record<string, string>;
+    const until = stored[kind];
+    if (!until) return false;
+    return new Date(until) > new Date();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Evaluates all rescue trigger rules against the current system + subscription
+ * state and returns the list of active, non-dismissed triggers sorted by
+ * severity (urgent → caution → watch).
+ */
+export function evaluateRescueTriggers(input: {
+  system: TwelveWeekSystem | null;
+  subscription?: Subscription | null;
+  missedTasksCount?: number;
+  weekCompletionPercent?: number;
+  referenceDate?: Date;
+}): RescueTrigger[] {
+  const now = input.referenceDate ?? new Date();
+  const triggers: RescueTrigger[] = [];
+
+  // ── trial_ending: trial expires within ≤2 days ───────────────────────────
+  const sub = input.subscription;
+  if (sub?.status === "trialing" && sub.renewsAt) {
+    const msLeft = new Date(sub.renewsAt).getTime() - now.getTime();
+    const daysLeft = msLeft / (1000 * 60 * 60 * 24);
+
+    if (daysLeft >= 0 && daysLeft <= 2) {
+      const hoursLeft = Math.ceil(msLeft / (1000 * 60 * 60));
+      const timeLabel = hoursLeft <= 24 ? `${hoursLeft} giờ` : `${Math.ceil(daysLeft)} ngày`;
+      triggers.push({
+        kind: "trial_ending",
+        severity: daysLeft <= 1 ? "urgent" : "caution",
+        headline: `Còn ${timeLabel} để nâng cấp và giữ Plus.`,
+        detail: "Sau khi hết thử, toàn bộ tính năng Plus sẽ về mức Free. Nâng cấp ngay để không mất nhịp.",
+        surfacedAt: now.toISOString(),
+      });
+    }
+  }
+
+  const system = input.system;
+  if (!system) return filterAndSortTriggers(triggers);
+
+  const todayKey = formatDateInputValue(now);
+
+  // ── missed_checkin: no check-in in the last 2+ days ──────────────────────
+  const lastCheckIn = [...(system.dailyCheckIns ?? [])].sort((a, b) =>
+    (getCalendarDateKey(b.date) ?? b.date).localeCompare(getCalendarDateKey(a.date) ?? a.date),
+  )[0];
+  if (lastCheckIn) {
+    const lastKey = getCalendarDateKey(lastCheckIn.date) ?? lastCheckIn.date;
+    const daysSinceLast = Math.floor(
+      (now.getTime() - (parseCalendarDate(lastKey)?.getTime() ?? now.getTime())) / (1000 * 60 * 60 * 24),
+    );
+    if (daysSinceLast >= 2) {
+      const severity: RescueTriggerSeverity = daysSinceLast >= 4 ? "urgent" : "caution";
+      triggers.push({
+        kind: "missed_checkin",
+        severity,
+        headline: `Bạn chưa check-in ${daysSinceLast} ngày liên tiếp.`,
+        detail: "Mỗi ngày bỏ qua làm khó hơn để quay lại nhịp. Chỉ cần 1 check-in ngắn hôm nay là đủ để giữ đà.",
+        surfacedAt: now.toISOString(),
+      });
+    }
+  }
+
+  // ── low_execution_score: <30% completion with ≥3 days elapsed in the week ─
+  const weekPercent = input.weekCompletionPercent ?? 0;
+  const startDate = system.startDate ? new Date(system.startDate) : null;
+  if (startDate) {
+    const daysSinceStart = Math.floor((now.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    const dayInWeek = daysSinceStart % 7;
+
+    if (dayInWeek >= 3 && weekPercent < 30) {
+      // Only trigger if there are tasks to complete
+      const hasTasks = (input.missedTasksCount ?? 0) > 0 || weekPercent > 0;
+      if (hasTasks) {
+        triggers.push({
+          kind: "low_execution_score",
+          severity: "caution",
+          headline: `Tuần này mới hoàn thành ${weekPercent}% — nhịp đang chậm lại.`,
+          detail: "Còn thời gian cứu tuần này. Chọn 1 việc cốt lõi và khóa nó trước cuối ngày hôm nay.",
+          surfacedAt: now.toISOString(),
+        });
+      }
+    }
+  }
+
+  // ── overdue_pile: ≥3 missed (overdue) tasks ──────────────────────────────
+  const missedCount = input.missedTasksCount ?? 0;
+  if (missedCount >= 3) {
+    triggers.push({
+      kind: "overdue_pile",
+      severity: missedCount >= 5 ? "urgent" : "caution",
+      headline: `${missedCount} việc đang trễ — cần sắp xếp lại ngay.`,
+      detail: "Khi việc trễ chồng chất, cố gồng hết thường phản tác dụng. Hãy chọn cách cứu nhịp đúng nhất.",
+      surfacedAt: now.toISOString(),
+    });
+  }
+
+  return filterAndSortTriggers(triggers);
+}
+
+function filterAndSortTriggers(triggers: RescueTrigger[]): RescueTrigger[] {
+  const severityScore: Record<RescueTriggerSeverity, number> = {
+    urgent: 3,
+    caution: 2,
+    watch: 1,
+  };
+
+  return triggers
+    .filter((trigger) => !isRescueTriggerDismissed(trigger.kind))
+    .sort((a, b) => severityScore[b.severity] - severityScore[a.severity]);
+}
+
+// ─── B4: Premium progress analytics helpers ──────────────────────────────────
+
+/** One cell in the execution heatmap: week × day-of-week. */
+export interface HeatmapCell {
+  weekNumber: number;
+  dayOfWeek: number; // 0 = Mon, 6 = Sun
+  dateKey: string;
+  total: number;
+  completed: number;
+  percent: number;
+}
+
+/** Weekly execution trend data point. */
+export interface WeekTrendPoint {
+  weekNumber: number;
+  executionPercent: number;
+  corePercent: number;
+  optionalPercent: number;
+  score: number;
+}
+
+/** Per-tactic breakdown for a given week range. */
+export interface TacticBreakdownItem {
+  tacticId: string;
+  tacticName: string;
+  type: "core" | "optional";
+  totalTasks: number;
+  completedTasks: number;
+  percent: number;
+  trend: "up" | "down" | "flat";
+}
+
+/**
+ * Build a 7×N heatmap grid of task completion by day×week.
+ * Each cell has total / completed / percent for that day.
+ */
+export function buildExecutionHeatmap(system: TwelveWeekSystem): HeatmapCell[] {
+  const tasks = system.taskInstances ?? [];
+  const cells: HeatmapCell[] = [];
+  const startDate = system.startDate ? new Date(system.startDate) : null;
+  if (!startDate) return cells;
+
+  for (let week = 1; week <= system.totalWeeks; week++) {
+    for (let day = 0; day < 7; day++) {
+      const d = new Date(startDate);
+      d.setDate(d.getDate() + (week - 1) * 7 + day);
+      const dateKey = formatDateInputValue(d);
+      const dayTasks = tasks.filter(
+        (t) => (getCalendarDateKey(t.scheduledDate) ?? t.scheduledDate) === dateKey,
+      );
+      const total = dayTasks.length;
+      const completed = dayTasks.filter((t) => t.completed).length;
+      cells.push({
+        weekNumber: week,
+        dayOfWeek: day,
+        dateKey,
+        total,
+        completed,
+        percent: total > 0 ? Math.round((completed / total) * 100) : -1,
+      });
+    }
+  }
+  return cells;
+}
+
+/**
+ * Build a weekly execution trend: overall %, core %, optional %, score.
+ */
+export function buildWeeklyTrend(system: TwelveWeekSystem): WeekTrendPoint[] {
+  const tasks = system.taskInstances ?? [];
+  const points: WeekTrendPoint[] = [];
+
+  for (let week = 1; week <= system.totalWeeks; week++) {
+    const weekTasks = tasks.filter((t) => t.weekNumber === week);
+    const coreTasks = weekTasks.filter((t) => t.isCore);
+    const optionalTasks = weekTasks.filter((t) => !t.isCore);
+    const scoreEntry = system.scoreboard.find((s) => s.weekNumber === week);
+
+    const pct = (arr: TwelveWeekTaskInstance[]) =>
+      arr.length > 0
+        ? Math.round((arr.filter((t) => t.completed).length / arr.length) * 100)
+        : 0;
+
+    points.push({
+      weekNumber: week,
+      executionPercent: pct(weekTasks),
+      corePercent: pct(coreTasks),
+      optionalPercent: pct(optionalTasks),
+      score: scoreEntry?.weeklyScore ?? 0,
+    });
+  }
+  return points;
+}
+
+/**
+ * Build a per-tactic breakdown comparing the latest N weeks.
+ * `trend` compares the last 2 completed weeks.
+ */
+export function buildTacticBreakdown(
+  system: TwelveWeekSystem,
+  upToWeek?: number,
+): TacticBreakdownItem[] {
+  const tasks = system.taskInstances ?? [];
+  const maxWeek = upToWeek ?? system.totalWeeks;
+  const indicators = system.leadIndicators ?? [];
+
+  return indicators.map((indicator) => {
+    const tacticId = indicator.id ?? indicator.name;
+    const relevantTasks = tasks.filter(
+      (t) =>
+        t.weekNumber <= maxWeek &&
+        (t.tacticId === indicator.id || t.leadIndicatorName === indicator.name),
+    );
+    const total = relevantTasks.length;
+    const completed = relevantTasks.filter((t) => t.completed).length;
+
+    // trend: compare last 2 weeks
+    const lastWeekTasks = relevantTasks.filter((t) => t.weekNumber === maxWeek);
+    const prevWeekTasks = relevantTasks.filter((t) => t.weekNumber === maxWeek - 1);
+    const lastPct =
+      lastWeekTasks.length > 0
+        ? lastWeekTasks.filter((t) => t.completed).length / lastWeekTasks.length
+        : 0;
+    const prevPct =
+      prevWeekTasks.length > 0
+        ? prevWeekTasks.filter((t) => t.completed).length / prevWeekTasks.length
+        : 0;
+    const trend: "up" | "down" | "flat" =
+      lastPct > prevPct + 0.05 ? "up" : lastPct < prevPct - 0.05 ? "down" : "flat";
+
+    return {
+      tacticId,
+      tacticName: indicator.name,
+      type: (indicator.type ?? "core") as "core" | "optional",
+      totalTasks: total,
+      completedTasks: completed,
+      percent: total > 0 ? Math.round((completed / total) * 100) : 0,
+      trend,
+    };
+  });
 }

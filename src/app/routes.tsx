@@ -74,6 +74,10 @@ export const router = createBrowserRouter([
         lazy: lazyComponent(() => import("./pages/MockBillingCheckout"), "MockBillingCheckout"),
       },
       {
+        path: "billing/plan",
+        lazy: lazyComponent(() => import("./pages/BillingPlan"), "BillingPlan"),
+      },
+      {
         path: "vision-board/:id?",
         lazy: lazyComponent(() => import("./pages/VisionBoardEditor"), "VisionBoardEditor"),
       },

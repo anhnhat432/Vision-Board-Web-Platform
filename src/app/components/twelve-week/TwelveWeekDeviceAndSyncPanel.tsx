@@ -69,6 +69,7 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
           onClearEventLog={props.onClearEventLog}
           onClearArchivedOutbox={props.onClearArchivedOutbox}
           onOpenClearLocalDialog={props.onOpenClearLocalDialog}
+          onDeleteAllData={props.onDeleteAllData}
           onOpenResetDialog={props.onOpenResetDialog}
           onNavigateGoals={props.onNavigateGoals}
           onNavigateJournal={props.onNavigateJournal}

@@ -4,11 +4,13 @@ import type {
   Achievement,
   AppPreferences,
   EntitlementKey,
+  ExperimentVariantId,
   FunnelStepSummary,
   Goal,
   InAppReminder,
   LifeArea,
   PricingPlanCode,
+  PrivacyConsentCategory,
   Reflection,
   TwelveWeekSystem,
   TwelveWeekTaskInstance,
@@ -52,13 +54,22 @@ import {
 } from "./storage-reflection-ops";
 import {
   archiveOutboxItemInData,
+  autoScheduleEmailRemindersInData,
+  cancelEmailReminderInData,
   clearArchivedOutboxInData,
   clearEventLogInData,
   clearLocalDeviceSignalsInData,
+  clearPushSubscriptionInData,
+  getDueEmailRemindersInData,
   getInAppRemindersFromData,
+  getOrAssignExperimentVariantInData,
   getTwelveWeekFunnelSummaryFromData,
+  markEmailReminderSentInData,
+  markExperimentExposedInData,
   restoreArchivedOutboxInData,
   restoreOutboxItemInData,
+  savePushSubscriptionInData,
+  scheduleEmailReminderInData,
   trackAppEventInData,
   updateAppPreferencesInData,
 } from "./storage-local-ops";
@@ -118,6 +129,9 @@ export type {
 
 const STORAGE_KEY = "visionboard_user_data";
 const CURRENT_STORAGE_VERSION = 5;
+
+let _cachedUserData: UserData | null = null;
+let _cachedRawHash: string | null = null;
 
 const DEFAULT_APP_PREFERENCES: AppPreferences = {
   allowLocalAnalytics: true,
@@ -294,9 +308,27 @@ function normalizeUserData(data: UserData): UserData {
   };
 }
 
+function isValidUserDataShape(data: unknown): data is UserData {
+  if (typeof data !== "object" || data === null) return false;
+  const obj = data as Record<string, unknown>;
+  return (
+    typeof obj.storageVersion === "number" &&
+    typeof obj.userId === "string" &&
+    Array.isArray(obj.goals) &&
+    Array.isArray(obj.currentWheelOfLife) &&
+    Array.isArray(obj.wheelOfLifeHistory) &&
+    Array.isArray(obj.visionBoards) &&
+    Array.isArray(obj.achievements) &&
+    Array.isArray(obj.reflections) &&
+    typeof obj.onboardingCompleted === "boolean"
+  );
+}
+
 function parseStoredUserData(raw: string): UserData | null {
   try {
-    return normalizeUserData(JSON.parse(raw) as UserData);
+    const parsed: unknown = JSON.parse(raw);
+    if (!isValidUserDataShape(parsed)) return null;
+    return normalizeUserData(parsed);
   } catch {
     return null;
   }
@@ -458,10 +490,14 @@ export function initializeUserData(): UserData {
 }
 
 export function getUserData(): UserData {
-  const data = localStorage.getItem(STORAGE_KEY);
-  if (!data) return initializeUserData();
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return initializeUserData();
 
-  const parsedData = parseStoredUserData(data);
+  if (_cachedUserData && _cachedRawHash === raw) {
+    return _cachedUserData;
+  }
+
+  const parsedData = parseStoredUserData(raw);
   if (!parsedData) return initializeUserData();
 
   const migratedData = migrateLegacyUserDataFromModule(parsedData, CURRENT_STORAGE_VERSION);
@@ -469,11 +505,17 @@ export function getUserData(): UserData {
     saveUserData(migratedData);
   }
 
+  _cachedUserData = migratedData;
+  _cachedRawHash = raw;
   return migratedData;
 }
 
 export function saveUserData(data: UserData): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeUserData(data)));
+  const normalized = normalizeUserData(data);
+  const serialized = JSON.stringify(normalized);
+  localStorage.setItem(STORAGE_KEY, serialized);
+  _cachedUserData = normalized;
+  _cachedRawHash = serialized;
 }
 
 export function upgradeLegacyGoalToSystem(goalId: string): boolean {
@@ -614,6 +656,43 @@ export function exportUserDataSnapshot(): string {
   return JSON.stringify(getUserData(), null, 2);
 }
 
+export function updatePrivacyConsent(category: PrivacyConsentCategory, granted: boolean): void {
+  const data = getUserData();
+  const consents = data.privacyConsents ?? [];
+  const existing = consents.find((c) => c.category === category);
+  if (existing) {
+    existing.granted = granted;
+    existing.updatedAt = new Date().toISOString();
+  } else {
+    consents.push({ category, granted, updatedAt: new Date().toISOString() });
+  }
+  data.privacyConsents = consents;
+  saveUserData(data);
+}
+
+export function getPrivacyConsents(): Record<PrivacyConsentCategory, boolean> {
+  const data = getUserData();
+  const defaults: Record<PrivacyConsentCategory, boolean> = {
+    local_analytics: data.appPreferences.allowLocalAnalytics,
+    push_notifications: data.appPreferences.enableBrowserNotifications,
+    experiment_tracking: true,
+  };
+  for (const record of data.privacyConsents ?? []) {
+    defaults[record.category] = record.granted;
+  }
+  return defaults;
+}
+
+export function deleteAllUserData(): void {
+  const keys = Object.values(APP_STORAGE_KEYS);
+  for (const key of keys) {
+    localStorage.removeItem(key);
+  }
+  localStorage.removeItem("last_reminder_date");
+  localStorage.removeItem("visionboard_last_browser_notification");
+  localStorage.removeItem("visionboard_last_outbox_sync");
+}
+
 export function getTwelveWeekFunnelSummary(goalId?: string): FunnelStepSummary[] {
   const data = getUserData();
   return getTwelveWeekFunnelSummaryFromData(data, TWELVE_WEEK_FUNNEL_STEPS, goalId);
@@ -642,8 +721,16 @@ export function getInAppReminders(referenceDate = new Date()): InAppReminder[] {
 export function getCurrentPlan(userData?: UserData): PricingPlanCode {
   const data = userData ?? getUserData();
 
-  if (data.subscription?.status === "active") {
-    return normalizePlanCode(data.subscription.planCode);
+  const sub = data.subscription;
+  if (sub?.status === "active" || sub?.status === "trialing") {
+    // Enforce expiry: if renewsAt is set and has passed, the plan has expired
+    if (sub.renewsAt && new Date(sub.renewsAt) < new Date()) {
+      // Mark as canceled in-place so subsequent calls are consistent
+      sub.status = "canceled";
+      saveUserData(data);
+      return "FREE";
+    }
+    return normalizePlanCode(sub.planCode);
   }
 
   const highestEntitledPlan = (data.entitlements ?? []).reduce<PricingPlanCode>(
@@ -698,6 +785,37 @@ export function upgradePlanLocally(
   return normalizedPlanCode;
 }
 
+/** Start a local free trial for the given plan (default: PLUS, 7 days). */
+export function startTrialLocally(
+  planCode: Exclude<PricingPlanCode, "FREE"> = "PLUS",
+  trialDays = 7,
+): PricingPlanCode {
+  const data = getUserData();
+  const currentPlan = getCurrentPlan(data);
+
+  // Do not start a trial if the user already has an equal or higher plan
+  if (getPlanRank(currentPlan) >= getPlanRank(planCode)) {
+    return currentPlan;
+  }
+
+  const startedAt = new Date().toISOString();
+  const renewsAt = new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000).toISOString();
+
+  data.subscription = {
+    planCode,
+    status: "trialing",
+    billingCycle: "season-pass",
+    startedAt,
+    renewsAt,
+    canceledAt: null,
+    isLocalTestMode: true,
+  };
+  data.entitlements = getEntitlementsForPlan(planCode, startedAt);
+
+  saveUserData(data);
+  return planCode;
+}
+
 export function restorePlanAccessLocally(): PricingPlanCode {
   const data = getUserData();
   const currentPlan = getCurrentPlan(data);
@@ -727,6 +845,87 @@ export function restorePlanAccessLocally(): PricingPlanCode {
 
 export function getRandomMotivationalQuote(): string {
   return MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
+}
+
+// ─── C3: Experiment framework ─────────────────────────────────────────────────
+
+export function getOrAssignExperimentVariant(
+  experimentId: string,
+  variants: ExperimentVariantId[],
+  weights?: number[],
+): ExperimentVariantId {
+  const data = getUserData();
+  const variantId = getOrAssignExperimentVariantInData(data, experimentId, variants, weights);
+  saveUserData(data);
+  return variantId;
+}
+
+export function markExperimentExposed(experimentId: string): void {
+  const data = getUserData();
+  markExperimentExposedInData(data, experimentId);
+  saveUserData(data);
+}
+
+// ─── D3: Email reminder schedule ─────────────────────────────────────────────
+
+export function scheduleEmailReminder(
+  item: Omit<import("./storage-types").EmailReminderScheduleItem, "id" | "status">,
+): void {
+  const data = getUserData();
+  scheduleEmailReminderInData(data, item);
+  saveUserData(data);
+}
+
+export function cancelEmailReminder(id: string): void {
+  const data = getUserData();
+  cancelEmailReminderInData(data, id);
+  saveUserData(data);
+}
+
+export function markEmailReminderSent(id: string): void {
+  const data = getUserData();
+  markEmailReminderSentInData(data, id);
+  saveUserData(data);
+}
+
+export function getDueEmailReminders(
+  referenceDate = new Date(),
+): import("./storage-types").EmailReminderScheduleItem[] {
+  return getDueEmailRemindersInData(getUserData(), referenceDate);
+}
+
+export function autoScheduleEmailReminders(
+  event: {
+    kind: import("./storage-types").EmailReminderKind;
+    goalId?: string;
+    weekNumber?: number;
+    metadata?: Record<string, string>;
+  },
+  referenceDate = new Date(),
+): void {
+  const data = getUserData();
+  autoScheduleEmailRemindersInData(data, event, referenceDate);
+  saveUserData(data);
+}
+
+// ─── D2: Push subscription ────────────────────────────────────────────────────
+
+export function savePushSubscription(
+  record: import("./storage-types").PushSubscriptionRecord,
+): void {
+  const data = getUserData();
+  savePushSubscriptionInData(data, record);
+  saveUserData(data);
+}
+
+export function clearPushSubscription(): void {
+  const data = getUserData();
+  clearPushSubscriptionInData(data);
+  saveUserData(data);
+}
+
+export function getPushSubscription(): import("./storage-types").PushSubscriptionRecord | null {
+  return getUserData().pushSubscription ?? null;
 }
 
 export function calculateGoalProgress(goal: Goal): number {

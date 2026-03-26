@@ -44,6 +44,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           onClearEventLog={props.onClearEventLog}
           onClearArchivedOutbox={props.onClearArchivedOutbox}
           onOpenClearLocalDialog={props.onOpenClearLocalDialog}
+          onDeleteAllData={props.onDeleteAllData}
           onOpenResetDialog={props.onOpenResetDialog}
           onOpenUpgradePlan={props.onOpenUpgradePlan}
           onSyncEntitlements={props.onSyncEntitlements}

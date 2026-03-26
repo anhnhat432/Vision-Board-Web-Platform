@@ -439,7 +439,7 @@ export function VisionBoardEditor() {
 
         <Dialog open={isAddingItem} onOpenChange={setIsAddingItem}>
           <Card className="hero-surface overflow-hidden border-0 text-white">
-            <CardContent className="relative p-8 lg:p-10">
+            <CardContent className="relative p-5 sm:p-6 lg:p-8">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_22%)] opacity-90" />
 
               <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
@@ -450,7 +450,7 @@ export function VisionBoardEditor() {
                   </div>
 
                   <div className="space-y-4">
-                    <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
+                    <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
                       Dựng một không gian hình ảnh khiến mục tiêu của bạn trở nên chạm được mỗi ngày.
                     </h1>
                     <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
@@ -500,7 +500,7 @@ export function VisionBoardEditor() {
                   </p>
                 </div>
 
-                <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+                <div className="hidden xl:block rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
                   <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">
                     Snapshot canvas
                   </p>

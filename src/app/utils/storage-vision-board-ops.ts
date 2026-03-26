@@ -1,4 +1,5 @@
 import type { UserData, VisionBoard } from "./storage-types";
+import { generateId } from "./storage-types";
 
 export function addVisionBoardToData(
   data: UserData,
@@ -7,7 +8,7 @@ export function addVisionBoardToData(
 ): string {
   const newBoard: VisionBoard = {
     ...board,
-    id: `board_${Date.now()}`,
+    id: generateId("board"),
     createdAt,
   };
 

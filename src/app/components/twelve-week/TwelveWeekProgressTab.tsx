@@ -1,10 +1,15 @@
-import { BarChart3, CalendarDays, Flag } from "lucide-react";
+import { ArrowDown, ArrowUp, BarChart3, CalendarDays, Flag, Lock, Minus, TrendingUp } from "lucide-react";
 
 import { Badge } from "../ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Progress } from "../ui/progress";
 import { formatCalendarDate, getReviewDayLabel } from "../../utils/storage";
 import type { TwelveWeekSystem } from "../../utils/storage-types";
+import type {
+  HeatmapCell,
+  TacticBreakdownItem,
+  WeekTrendPoint,
+} from "../../utils/twelve-week-system-ui";
 
 interface WeekRange {
   start: string;
@@ -31,6 +36,10 @@ interface TwelveWeekProgressTabProps {
   reviewDoneCount: number;
   weekCompletion: WeekCompletionSummary;
   milestoneItems: MilestoneItem[];
+  hasAdvancedAnalytics: boolean;
+  executionHeatmap: HeatmapCell[];
+  weeklyTrend: WeekTrendPoint[];
+  tacticBreakdown: TacticBreakdownItem[];
 }
 
 export function TwelveWeekProgressTab({
@@ -42,6 +51,10 @@ export function TwelveWeekProgressTab({
   reviewDoneCount,
   weekCompletion,
   milestoneItems,
+  hasAdvancedAnalytics,
+  executionHeatmap,
+  weeklyTrend,
+  tacticBreakdown,
 }: TwelveWeekProgressTabProps) {
   return (
     <div className="space-y-6 pt-4">
@@ -262,6 +275,217 @@ export function TwelveWeekProgressTab({
           </CardContent>
         </Card>
       </div>
+
+      {/* ── B4: Premium Analytics Section ── */}
+      {hasAdvancedAnalytics ? (
+        <div className="space-y-6">
+          {/* Execution Heatmap */}
+          {executionHeatmap.length > 0 && (
+            <Card
+              interactive={false}
+              className="border-0 bg-[linear-gradient(180deg,_rgba(15,23,42,0.98)_0%,_rgba(30,41,59,0.95)_100%)] text-white shadow-[0_34px_80px_-42px_rgba(15,23,42,0.72)]"
+            >
+              <CardHeader>
+                <CardTitle className="text-white">Bản đồ thực thi</CardTitle>
+                <CardDescription className="text-white/68">
+                  Mỗi ô là một ngày. Xanh đậm = hoàn thành tốt, nhạt = chưa xong hết, trống = không có việc.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex gap-1 pl-10">
+                    {["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map((d) => (
+                      <div key={d} className="w-9 text-center text-[10px] font-medium text-white/45">
+                        {d}
+                      </div>
+                    ))}
+                  </div>
+                  {Array.from({ length: system.totalWeeks }, (_, w) => {
+                    const week = w + 1;
+                    const cells = executionHeatmap.filter((c) => c.weekNumber === week);
+                    return (
+                      <div key={week} className="flex items-center gap-1">
+                        <span className="w-8 text-right text-[10px] font-medium text-white/45">T{week}</span>
+                        {cells.map((cell) => {
+                          const bg =
+                            cell.total === 0
+                              ? "bg-white/6"
+                              : cell.percent >= 80
+                                ? "bg-emerald-500"
+                                : cell.percent >= 50
+                                  ? "bg-emerald-500/50"
+                                  : cell.percent > 0
+                                    ? "bg-amber-500/50"
+                                    : "bg-rose-500/40";
+                          return (
+                            <div
+                              key={cell.dateKey}
+                              className={`h-9 w-9 rounded-lg ${bg} ${week === currentWeek ? "ring-1 ring-sky-400/40" : ""}`}
+                              title={`${cell.dateKey}: ${cell.completed}/${cell.total} xong`}
+                            />
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                  <div className="mt-3 flex items-center gap-3 text-[10px] text-white/55">
+                    <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded bg-emerald-500" /> ≥80%</span>
+                    <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded bg-emerald-500/50" /> 50–79%</span>
+                    <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded bg-amber-500/50" /> 1–49%</span>
+                    <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded bg-rose-500/40" /> 0%</span>
+                    <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded bg-white/6 ring-1 ring-white/15" /> Trống</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Weekly Execution Trend */}
+          {weeklyTrend.length > 0 && (
+            <Card
+              interactive={false}
+              className="border-0 bg-[linear-gradient(180deg,_rgba(219,234,254,0.94)_0%,_rgba(191,219,254,0.78)_100%)] shadow-[0_24px_60px_-36px_rgba(37,99,235,0.26)]"
+            >
+              <CardHeader>
+                <CardTitle className="text-slate-950">Xu hướng thực thi theo tuần</CardTitle>
+                <CardDescription className="text-slate-600">
+                  So sánh mức hoàn thành cốt lõi, tùy chọn và điểm qua các tuần.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {weeklyTrend.map((point) => {
+                    const isCurrent = point.weekNumber === currentWeek;
+                    return (
+                      <div
+                        key={point.weekNumber}
+                        className={`rounded-2xl border p-4 ${
+                          isCurrent
+                            ? "border-sky-300 bg-white/90 shadow-[0_8px_25px_-12px_rgba(37,99,235,0.25)]"
+                            : "border-slate-200/70 bg-white/60"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <span className={`text-sm font-semibold ${isCurrent ? "text-sky-700" : "text-slate-700"}`}>
+                              Tuần {point.weekNumber}
+                            </span>
+                            {isCurrent && (
+                              <Badge className="border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-50">Đang chạy</Badge>
+                            )}
+                          </div>
+                          <span className="text-sm font-semibold text-slate-900">{point.score} điểm</span>
+                        </div>
+                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                          <div>
+                            <div className="flex items-center justify-between text-xs text-slate-600">
+                              <span>Cốt lõi</span>
+                              <span className="font-semibold text-slate-900">{point.corePercent}%</span>
+                            </div>
+                            <Progress value={point.corePercent} className="mt-1 h-2" />
+                          </div>
+                          <div>
+                            <div className="flex items-center justify-between text-xs text-slate-600">
+                              <span>Tùy chọn</span>
+                              <span className="font-semibold text-slate-900">{point.optionalPercent}%</span>
+                            </div>
+                            <Progress value={point.optionalPercent} className="mt-1 h-2" />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Tactic Breakdown */}
+          {tacticBreakdown.length > 0 && (
+            <Card
+              interactive={false}
+              className="border-0 bg-[linear-gradient(180deg,_rgba(236,253,245,0.95)_0%,_rgba(209,250,229,0.82)_100%)] shadow-[0_24px_60px_-36px_rgba(5,150,105,0.22)]"
+            >
+              <CardHeader>
+                <CardTitle className="text-slate-950">Phân tích theo tactic</CardTitle>
+                <CardDescription className="text-slate-600">
+                  Chi tiết hoàn thành và xu hướng từng tactic đến tuần {currentWeek}.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {tacticBreakdown.map((item) => (
+                  <div
+                    key={item.tacticId}
+                    className="flex items-center gap-4 rounded-2xl border border-white/65 bg-white/76 px-4 py-4"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="truncate text-sm font-semibold text-slate-950">{item.tacticName}</p>
+                        <Badge
+                          variant="outline"
+                          className={
+                            item.type === "core"
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                              : "border-slate-200 bg-slate-50 text-slate-600"
+                          }
+                        >
+                          {item.type === "core" ? "Cốt lõi" : "Tùy chọn"}
+                        </Badge>
+                      </div>
+                      <div className="mt-2 flex items-center gap-3">
+                        <Progress value={item.percent} className="h-2 flex-1" />
+                        <span className="text-sm font-semibold text-slate-800">{item.percent}%</span>
+                      </div>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {item.completedTasks}/{item.totalTasks} lần hoàn thành
+                      </p>
+                    </div>
+                    <div
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
+                        item.trend === "up"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : item.trend === "down"
+                            ? "bg-rose-100 text-rose-700"
+                            : "bg-slate-100 text-slate-500"
+                      }`}
+                    >
+                      {item.trend === "up" ? (
+                        <ArrowUp className="h-4 w-4" />
+                      ) : item.trend === "down" ? (
+                        <ArrowDown className="h-4 w-4" />
+                      ) : (
+                        <Minus className="h-4 w-4" />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      ) : (
+        /* Locked teaser for Free users */
+        <Card
+          interactive={false}
+          className="border border-violet-200/60 bg-[linear-gradient(180deg,_rgba(245,243,255,0.95)_0%,_rgba(237,233,254,0.85)_100%)] shadow-[0_24px_55px_-34px_rgba(124,58,237,0.18)]"
+        >
+          <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100 text-violet-600">
+              <Lock className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-lg font-bold text-slate-950">Phân tích thực thi nâng cao</p>
+              <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-slate-600">
+                Bản đồ nhiệt hoàn thành, xu hướng thực thi theo tuần và breakdown từng tactic — giúp bạn biết chỗ nào đang mạnh, chỗ nào cần cứu trước.
+              </p>
+            </div>
+            <Badge className="border-violet-200 bg-violet-50 text-violet-700 hover:bg-violet-50">
+              <TrendingUp className="mr-1.5 h-3.5 w-3.5" />
+              Tính năng Plus
+            </Badge>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

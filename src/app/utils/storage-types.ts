@@ -1,3 +1,7 @@
+export function generateId(prefix: string): string {
+  return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
 export interface LifeArea {
   name: string;
   score: number;
@@ -230,7 +234,12 @@ export interface SyncOutboxItem {
   createdAt: string;
   goalId?: string;
   payloadSummary: string;
-  status: "pending" | "archived";
+  /** pending → ready to sync · sent → confirmed by server · failed → max retries reached · archived → manually dismissed */
+  status: "pending" | "sent" | "failed" | "archived";
+  retryCount?: number;
+  /** ISO datetime — sync should not be attempted before this */
+  retryAt?: string;
+  failedAt?: string;
 }
 
 export type PricingPlanCode = "FREE" | "PLUS" | "PRO";
@@ -275,6 +284,73 @@ export interface AppPreferences {
   preferredReminderHour: number;
 }
 
+// ─── E2: Privacy consent record ──────────────────────────────────────────────
+
+export type PrivacyConsentCategory = "local_analytics" | "push_notifications" | "experiment_tracking";
+
+export interface PrivacyConsentRecord {
+  category: PrivacyConsentCategory;
+  granted: boolean;
+  updatedAt: string;
+}
+
+// ─── D4: Rescue trigger rule engine ──────────────────────────────────────────
+
+export type RescueTriggerKind =
+  | "missed_checkin"
+  | "low_execution_score"
+  | "overdue_pile"
+  | "trial_ending";
+
+export type RescueTriggerSeverity = "watch" | "caution" | "urgent";
+
+export interface RescueTrigger {
+  kind: RescueTriggerKind;
+  severity: RescueTriggerSeverity;
+  headline: string;
+  detail: string;
+  surfacedAt: string;
+}
+
+// ─── C3: Paywall experiment framework ────────────────────────────────────────
+
+export type ExperimentVariantId = "control" | "variant_a" | "variant_b";
+
+export interface ExperimentAssignment {
+  experimentId: string;
+  variantId: ExperimentVariantId;
+  assignedAt: string;
+  /** ISO datetime when the experiment was first exposed (impression logged) */
+  exposedAt?: string;
+}
+
+// ─── D3: Email reminder cadence contract ─────────────────────────────────────
+
+export type EmailReminderKind =
+  | "review_day_reminder"
+  | "missed_task_rescue"
+  | "trial_ending_reminder"
+  | "cycle_start_nudge";
+
+export interface EmailReminderScheduleItem {
+  id: string;
+  kind: EmailReminderKind;
+  scheduledFor: string;
+  goalId?: string;
+  weekNumber?: number;
+  metadata?: Record<string, string>;
+  status: "scheduled" | "sent" | "canceled";
+}
+
+// ─── D2: Push notification subscription record ───────────────────────────────
+
+export interface PushSubscriptionRecord {
+  endpoint: string;
+  keys: { p256dh: string; auth: string };
+  registeredAt: string;
+  goalId?: string;
+}
+
 export interface InAppReminder {
   id: string;
   title: string;
@@ -309,4 +385,12 @@ export interface UserData {
   lastMotivationalQuote?: string;
   onboardingCompleted: boolean;
   isHydratedFromDemo?: boolean;
+  /** C3: stable A/B experiment assignments for this user */
+  experimentAssignments?: ExperimentAssignment[];
+  /** D3: email reminder schedule items queued for delivery */
+  emailReminderSchedule?: EmailReminderScheduleItem[];
+  /** D2: active web push subscription for this device */
+  pushSubscription?: PushSubscriptionRecord | null;
+  /** E2: privacy consent records with timestamps */
+  privacyConsents?: PrivacyConsentRecord[];
 }

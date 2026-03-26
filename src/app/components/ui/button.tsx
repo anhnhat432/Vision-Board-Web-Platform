@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { useReducedMotion } from "motion/react";
+import { useReducedMotion } from "./use-reduced-motion";
 
 import { cn } from "./utils";
 

@@ -262,6 +262,60 @@ export const TWELVE_WEEK_TEMPLATE_CATALOG: TwelveWeekTemplateDefinition[] = [
       { name: "Lớp mở rộng khi còn sức", target: "2", unit: "lần/tuần", type: "optional", cadence: "backload" },
     ],
   },
+  {
+    id: "exam-deep-study",
+    name: "Học sâu không dàn trải",
+    subtitle: "Khung gợi ý Plus",
+    description: "Khung Plus cho kỳ thi hoặc mục tiêu học có deadline rõ. Giữ tiến độ đều, kiểm tra mức nắm và về đích trước ngày thi.",
+    bestFor: "Khi bạn có một kỳ thi, kỳ sát hạch hoặc deadline học rõ ràng và cần một nhịp học không bị gián đoạn trong 12 tuần.",
+    whyItWorks: "Khung này tách riêng slot học chủ động, slot ôn và slot kiểm tra hiểu, nên bạn không chỉ đọc mà còn biết mình nắm đến đâu.",
+    firstWeekWin: "Tuần đầu đã có nhịp học chủ động, ôn lại và một vòng kiểm tra mức hiểu để biết điểm hổng sớm.",
+    idealFor: ["Thi cử", "Học có deadline", "Cần tiến đều từng tuần"],
+    goalType: "Exam / Study",
+    reviewDay: "Sunday",
+    requiredPlan: "PLUS",
+    accent: "sky",
+    vision12Week: "Trong 12 tuần tới, tôi muốn học sâu, ôn đúng chỗ và vào ngày thi không còn cảm giác phải nhồi nhét.",
+    week12Outcome: "Hoàn thành toàn bộ nội dung cần học, có ít nhất 2 lần ôn tổng hợp và cảm giác vào thi đã đủ chắc.",
+    lagMetricName: "Số buổi học chủ động mỗi tuần",
+    lagMetricTarget: "4",
+    lagMetricUnit: "buổi/tuần",
+    week4Milestone: "Xong phần nền và biết rõ chỗ nào cần ôn thêm.",
+    week8Milestone: "Đã học qua toàn bộ nội dung, bắt đầu chu kỳ ôn chủ động.",
+    successEvidence: "Bạn ngồi vào buổi học là biết ngay hôm nay sẽ nắm thêm phần nào và kiểm tra bằng cách nào.",
+    tactics: [
+      { name: "Buổi học chủ động mới", target: "3", unit: "buổi/tuần", type: "core", cadence: "spread" },
+      { name: "Ôn và consolidate", target: "2", unit: "lần/tuần", type: "core", cadence: "backload" },
+      { name: "Kiểm tra mức hiểu (quiz/flashcard)", target: "1", unit: "lần/tuần", type: "optional", cadence: "spread" },
+    ],
+  },
+  {
+    id: "fitness-consistency-engine",
+    name: "Vào guồng sức khỏe bền",
+    subtitle: "Khung gợi ý Plus",
+    description: "Khung Plus cho mục tiêu sức khỏe cần nhịp đều hơn là nước rút. Giữ tập, theo dõi phục hồi và ghi lại tiến triển thật.",
+    bestFor: "Khi bạn muốn tập luyện thành thói quen bền, không chỉ bứt phá được vài tuần rồi đứt quãng.",
+    whyItWorks: "Nhịp tập cốt lõi được bảo vệ, phần phục hồi được đo và chỉ số chính là tiến bộ thật, không phải cảm giác.",
+    firstWeekWin: "Tuần đầu đã có 3 buổi tập chất lượng, 1 ngày chủ động phục hồi và biết rõ chỉ số chính đang ở đâu.",
+    idealFor: ["Tập luyện đều", "Sức khỏe thể chất", "Tránh chấn thương và đứt quãng"],
+    goalType: "Fitness / Health",
+    reviewDay: "Sunday",
+    requiredPlan: "PLUS",
+    accent: "emerald",
+    vision12Week: "Trong 12 tuần tới, tôi muốn xây một nhịp tập đều, đo được tiến bộ thật và không bị đứt quãng vì kiệt sức.",
+    week12Outcome: "Giữ nhịp tập ít nhất 3 buổi mỗi tuần liên tục và có một chỉ số sức khỏe cốt lõi được cải thiện rõ rệt.",
+    lagMetricName: "Số buổi tập đã hoàn thành mỗi tuần",
+    lagMetricTarget: "3",
+    lagMetricUnit: "buổi/tuần",
+    week4Milestone: "Nhịp 3 buổi/tuần đã thành thói quen, không còn phải cưỡng ép bản thân.",
+    week8Milestone: "Chỉ số chính đã có tiến triển rõ và nhịp phục hồi đang hoạt động tốt.",
+    successEvidence: "Bạn nhìn vào lịch là biết ngay tuần này tập ngày nào, nghỉ ngày nào và không còn tự hỏi 'hôm nay có cần tập không'.",
+    tactics: [
+      { name: "Buổi tập chính", target: "3", unit: "buổi/tuần", type: "core", cadence: "spread" },
+      { name: "Phục hồi chủ động (giãn / đi bộ)", target: "2", unit: "lần/tuần", type: "core", cadence: "spread" },
+      { name: "Ghi chỉ số và tiến triển", target: "1", unit: "lần/tuần", type: "optional", cadence: "backload" },
+    ],
+  },
 ];
 
 const PLAN_RANK: Record<PricingPlanCode, number> = {
@@ -530,6 +584,74 @@ export function buildAdaptiveTemplateSupport(input: {
         week4MilestoneSuggestion: `Tăng được nhịp thực thi cho ${goalLabel} mà tuần vẫn còn chỗ để review và chỉnh tải.`,
         week8MilestoneSuggestion: "Giữ được tốc độ cao hơn nhưng không còn cảm giác bị loãng hoặc hụt hơi giữa tuần.",
       };
+    case "exam-deep-study":
+      return {
+        personalizedTactics: [
+          {
+            ...input.template.tactics[0],
+            name: `Buổi học chủ động cho ${goalLabel}`,
+            target: adaptTargetCount(input.template.tactics[0].target, input.readinessScore, "core"),
+          },
+          {
+            ...input.template.tactics[1],
+            name: "Ôn và consolidate nội dung đã học",
+            target: adaptTargetCount(input.template.tactics[1].target, input.readinessScore, "core"),
+          },
+          {
+            ...input.template.tactics[2],
+            name: `Kiểm tra mức nắm ${goalLabel}`,
+            target: adaptTargetCount(input.template.tactics[2].target, input.readinessScore, "optional"),
+          },
+        ],
+        weekPlanFocuses: buildFocusPhases({
+          early: "Nắm chắc nền kiến thức và xác định điểm hổng sớm.",
+          middle: "Tăng vòng ôn, đẩy phần chưa chắc lên trước, bắt đầu luyện dạng đề.",
+          final: "Ôn tổng hợp, điền điểm hổng còn lại và giữ nhịp ổn định đến ngày thi.",
+        }),
+        week1Headline: "Tuần 1 chỉ cần vào nhịp học và biết điểm hổng ở đâu.",
+        week1Support: `Đừng cố học hết mọi thứ ngay. Tuần đầu của ${goalLabel} nên thắng bằng việc vào được nhịp đều và nhận ra sớm mình cần chú ý phần nào.`,
+        week1CadenceHint: "Rải đều buổi học trong tuần, xen kẽ ôn và kiểm tra mức hiểu, đừng dồn tất cả vào 2-3 ngày.",
+        recommendedReviewDay: "Sunday",
+        recommendedReviewReason: "Review cuối tuần giúp bạn nhìn rõ tuần học được bao nhiêu, còn cách deadline bao xa và cần điều chỉnh tốc độ không.",
+        recommendedLoadPreference: "balanced",
+        recommendedLoadReason: "Học cho thi cần đều và ổn định, không nên ép quá mạnh ở đầu rồi mất sức trước ngày thi.",
+        week4MilestoneSuggestion: `Đã học xong phần nền của ${goalLabel} và biết rõ vùng nào cần ôn thêm.`,
+        week8MilestoneSuggestion: "Đã đi qua toàn bộ nội dung và bắt đầu chu kỳ ôn có định hướng.",
+      };
+    case "fitness-consistency-engine":
+      return {
+        personalizedTactics: [
+          {
+            ...input.template.tactics[0],
+            name: `Buổi tập chính cho ${goalLabel}`,
+            target: adaptTargetCount(input.template.tactics[0].target, input.readinessScore, "core"),
+          },
+          {
+            ...input.template.tactics[1],
+            name: "Ngày phục hồi chủ động",
+            target: adaptTargetCount(input.template.tactics[1].target, input.readinessScore, "core"),
+          },
+          {
+            ...input.template.tactics[2],
+            name: `Ghi lại chỉ số và tiến triển ${goalLabel}`,
+            target: adaptTargetCount(input.template.tactics[2].target, input.readinessScore, "optional"),
+          },
+        ],
+        weekPlanFocuses: buildFocusPhases({
+          early: "Vào guồng đều, không cố sức. Ưu tiên giữ nhịp trước tiến bộ.",
+          middle: "Nhịp đã ổn, bắt đầu chú ý tới chỉ số cốt lõi và tiến bộ thực sự.",
+          final: "Giữ nhịp vững cho đến hết, tránh chấn thương và ghi lại tiến triển cả chu kỳ.",
+        }),
+        week1Headline: "Tuần 1 chỉ cần vào guồng, không cần ép mạnh.",
+        week1Support: `Mục tiêu ${goalLabel} bắt đầu bằng việc giữ nhịp đủ nhẹ để tuần nào cũng hoàn thành được mà không cần ý chí quá cao.`,
+        week1CadenceHint: "Chọn 3 ngày tập cách đều nhau trong tuần, tránh 2 ngày tập liên tiếp khi mới bắt đầu guồng.",
+        recommendedReviewDay: "Sunday",
+        recommendedReviewReason: "Review cuối tuần hợp nhất khi mục tiêu sức khỏe cần đủ cả tuần để thấy rõ nhịp phục hồi và chất lượng tập.",
+        recommendedLoadPreference: "lighter",
+        recommendedLoadReason: "Bắt đầu nhẹ để vào guồng trước. Tuần sau mới tăng tải khi nhịp đã ổn định.",
+        week4MilestoneSuggestion: `Nhịp ${goalLabel} đã thành thói quen và bạn không còn phải nhắc nhở bản thân phải tập.`,
+        week8MilestoneSuggestion: "Chỉ số chính đã cải thiện rõ và bạn biết mình phục hồi ở tốc độ nào.",
+      };
     default:
       return {
         personalizedTactics: [
@@ -576,14 +698,14 @@ export function getPaywallCopy(context: PremiumFeatureContext): {
   switch (context) {
     case "template":
       return {
-        title: "Mở Plus để bắt đầu nhanh hơn",
+        title: "Mở khóa 5 khung Plus thích nghi",
         description:
-          "Thay vì đi tìm một template đúng chủ đề, Plus cho bạn nhiều khung thích nghi để dựng plan nhanh theo đúng kiểu mục tiêu và nhịp của bạn.",
+          "Thay vì mò template từ đầu, chọn ngay khung đã thiết kế sẵn theo đúng kiểu mục tiêu — tìm việc, thi cử, sáng tạo, sức khỏe hay chạy dự án — rồi vào tuần đầu luôn.",
         recommendedPlan: "PLUS",
         bullets: [
-          "Chọn khung theo kiểu vận hành như giữ đều, ra đầu ra, tăng tốc hay cứu nhịp",
-          "Có sẵn tactic mẫu đủ generic để chỉnh nhanh cho bất kỳ mục tiêu nào",
-          "Giữ setup gọn nhưng vẫn đủ sâu để vào tuần đầu ngay",
+          "5 khung chuyên biệt: tìm việc, học sâu, content, fitness, và tăng tốc tổng thể",
+          "Tactic mẫu đủ linh hoạt để chỉnh cho bất kỳ mục tiêu cụ thể nào",
+          "Gợi ý tải và nhịp tuần đầu tự động theo đặc trưng từng khung",
         ],
       };
     case "review":

@@ -1,10 +1,15 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { ChevronDown, Flag, RotateCcw, Settings2, Target } from "lucide-react";
+import { toast } from "sonner";
 
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Switch } from "../ui/switch";
-import { formatCalendarDate } from "../../utils/storage";
+import { formatCalendarDate, getPushSubscription, getUserData } from "../../utils/storage";
+import {
+  requestPushPermissionAndSubscribe,
+  unregisterPushSubscription,
+} from "../../utils/production";
 import {
   formatDateTimeLabel,
   getBrowserNotificationStatusLabel,
@@ -42,7 +47,9 @@ type TwelveWeekDeviceDetailsSectionProps = Pick<
   | "onNavigateGoals"
   | "onNavigateJournal"
   | "onNavigateSetup"
->;
+> & {
+  onDeleteAllData: () => void;
+};
 
 interface ExpandableSectionProps {
   title: string;
@@ -92,10 +99,48 @@ export function TwelveWeekDeviceDetailsSection({
   onClearArchivedOutbox,
   onOpenClearLocalDialog,
   onOpenResetDialog,
+  onDeleteAllData,
   onNavigateGoals,
   onNavigateJournal,
   onNavigateSetup,
 }: TwelveWeekDeviceDetailsSectionProps) {
+  const [isPushSubscribed, setIsPushSubscribed] = useState(false);
+  const [isPushLoading, setIsPushLoading] = useState(false);
+  const hasPushEntitlement = (() => {
+    const sub = getUserData().subscription;
+    if (!sub) return false;
+    if (sub.status === "inactive" || sub.status === "canceled") return false;
+    if (sub.renewsAt && new Date(sub.renewsAt) < new Date() && sub.status !== "active") return false;
+    return true;
+  })();
+
+  useEffect(() => {
+    setIsPushSubscribed(getPushSubscription() !== null);
+  }, []);
+
+  const handlePushToggle = async (enabled: boolean) => {
+    setIsPushLoading(true);
+    try {
+      if (enabled) {
+        const record = await requestPushPermissionAndSubscribe();
+        if (record) {
+          setIsPushSubscribed(true);
+          toast.success("Đã bật push notification.");
+        } else {
+          toast.error("Không thể đăng ký push. Hãy kiểm tra quyền trình duyệt.");
+        }
+      } else {
+        await unregisterPushSubscription();
+        setIsPushSubscribed(false);
+        toast.success("Đã tắt push notification.");
+      }
+    } catch {
+      toast.error("Đã có lỗi khi thay đổi cài đặt push.");
+    } finally {
+      setIsPushLoading(false);
+    }
+  };
+
   return (
     <>
       <ExpandableSection
@@ -152,6 +197,48 @@ export function TwelveWeekDeviceDetailsSection({
               onCheckedChange={onBrowserNotificationToggle}
               aria-label="Bật tắt thông báo trình duyệt"
             />
+          </div>
+
+          {/* Push notification toggle (D2) */}
+          <div className="flex items-center justify-between gap-4 rounded-[22px] border border-white/65 bg-white/76 px-4 py-4">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-semibold text-slate-950">Push notification</p>
+                {hasPushEntitlement ? (
+                  <Badge
+                    variant="outline"
+                    className={
+                      isPushSubscribed
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                        : "border-slate-300 bg-white text-slate-600"
+                    }
+                  >
+                    {isPushSubscribed ? "Đang bật" : "Đang tắt"}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="border-violet-200 bg-violet-50 text-violet-700">
+                    Plus
+                  </Badge>
+                )}
+              </div>
+              <p className="mt-1 text-sm text-slate-600">
+                {hasPushEntitlement
+                  ? "Nhận thông báo đẩy ngay cả khi trình duyệt đang đóng."
+                  : "Nâng cấp lên Plus để bật push notification trên thiết bị này."}
+              </p>
+            </div>
+            {hasPushEntitlement ? (
+              <Switch
+                checked={isPushSubscribed}
+                onCheckedChange={handlePushToggle}
+                disabled={isPushLoading}
+                aria-label="Bật tắt push notification"
+              />
+            ) : (
+              <Badge variant="outline" className="shrink-0 border-slate-200 text-slate-500">
+                Khoá
+              </Badge>
+            )}
           </div>
 
           <div className="flex items-center justify-between gap-4 rounded-[22px] border border-white/65 bg-white/76 px-4 py-4">
@@ -283,6 +370,48 @@ export function TwelveWeekDeviceDetailsSection({
           Sẽ xóa nhật ký sự kiện, outbox và trạng thái nhắc việc local. Dữ liệu chu kỳ 12 tuần và nhật ký vẫn được giữ
           nguyên.
         </p>
+      </ExpandableSection>
+
+      <ExpandableSection
+        title="Quyền riêng tư và dữ liệu"
+        description="Hiểu dữ liệu nào đang lưu trên thiết bị, dữ liệu nào có thể được gửi đi, và xóa toàn bộ nếu cần."
+        badge={
+          <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+            Minh bạch
+          </Badge>
+        }
+      >
+        <div className="space-y-4">
+          <div className="rounded-[22px] border border-emerald-200 bg-emerald-50/86 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Dữ liệu lưu trên thiết bị</p>
+            <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
+              <li>• Mục tiêu, tactic, check-in, review hàng tuần</li>
+              <li>• Nhật ký phản tư và vision board</li>
+              <li>• Nhật ký sự kiện local (nếu bật)</li>
+              <li>• Cài đặt ưu tiên và trạng thái gói</li>
+            </ul>
+          </div>
+          <div className="rounded-[22px] border border-amber-200 bg-amber-50/86 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">Dữ liệu có thể được gửi đi</p>
+            <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
+              <li>• Outbox đồng bộ (nếu bật keepLocalOutbox)</li>
+              <li>• Push subscription endpoint (nếu bật push)</li>
+              <li>• Sự kiện analytics (nếu bật cho phép)</li>
+            </ul>
+            <p className="mt-2 text-xs text-amber-600">
+              Bạn có thể tắt từng kênh ở phần &quot;Nhắc việc và quyền trên thiết bị&quot; bên trên.
+            </p>
+          </div>
+          <div className="rounded-[22px] border border-red-200 bg-red-50/86 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-red-700">Xóa toàn bộ dữ liệu</p>
+            <p className="mt-2 text-sm text-red-800">
+              Hành động này sẽ xóa vĩnh viễn tất cả dữ liệu trên thiết bị này: mục tiêu, nhật ký, check-in, cài đặt, gói đăng ký. Không thể hoàn tác.
+            </p>
+            <Button variant="destructive" className="mt-3 w-full" onClick={onDeleteAllData}>
+              Xóa toàn bộ dữ liệu trên thiết bị
+            </Button>
+          </div>
+        </div>
       </ExpandableSection>
 
       <ExpandableSection

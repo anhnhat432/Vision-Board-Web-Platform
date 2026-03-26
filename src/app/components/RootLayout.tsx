@@ -5,6 +5,7 @@ import {
   BookOpen,
   CalendarDays,
   Compass,
+  CreditCard,
   Images,
   LayoutDashboard,
   Menu,
@@ -15,7 +16,6 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate, useOutlet } from "react-router";
 import { maybeShowBrowserReminderNotification, syncPendingOutbox } from "../utils/production";
-import { getPageTourMeta, startPageTour } from "../utils/page-tour";
 import { getUserData, initializeUserData } from "../utils/storage";
 import { getNewUserGuideProgress, hasSeenNewUserGuide, isNewUserGuideDismissed, markNewUserGuideSeen } from "../utils/new-user-guide";
 import { isDemoMode } from "../utils/app-mode";
@@ -75,18 +75,26 @@ const ROUTE_META = [
     label: "Nhật ký",
     tagline: "Giữ lại cảm xúc, bài học và những chuyển động tinh tế của hành trình.",
   },
+  {
+    match: (pathname: string) => pathname.startsWith("/billing/plan"),
+    label: "Gói & thanh toán",
+    tagline: "Xem gói hiện tại, quyền truy cập và thao tác thanh toán.",
+  },
 ];
 
 const NAV_ITEMS = [
-  { path: "/", label: "Bảng điều khiển", icon: LayoutDashboard },
-  { path: "/goals", label: "Mục tiêu", icon: Target },
-  { path: "/12-week-system", label: "Hệ thống 12 tuần", icon: CalendarDays },
-  { path: "/vision-board", label: "Bảng tầm nhìn", icon: Sparkles },
-  { path: "/gallery", label: "Thư viện", icon: Images },
-  { path: "/life-balance", label: "Cân bằng cuộc sống", icon: TrendingUp },
-  { path: "/achievements", label: "Thành tựu", icon: Award },
-  { path: "/journal", label: "Nhật ký", icon: BookOpen },
+  { path: "/", label: "Bảng điều khiển", compactLabel: "Điều khiển", icon: LayoutDashboard },
+  { path: "/goals", label: "Mục tiêu", compactLabel: "Mục tiêu", icon: Target },
+  { path: "/12-week-system", label: "Hệ thống 12 tuần", compactLabel: "12 tuần", icon: CalendarDays },
+  { path: "/vision-board", label: "Bảng tầm nhìn", compactLabel: "Tầm nhìn", icon: Sparkles },
+  { path: "/gallery", label: "Thư viện", compactLabel: "Thư viện", icon: Images },
+  { path: "/life-balance", label: "Cân bằng cuộc sống", compactLabel: "Cân bằng", icon: TrendingUp },
+  { path: "/achievements", label: "Thành tựu", compactLabel: "Thành tựu", icon: Award },
+  { path: "/journal", label: "Nhật ký", compactLabel: "Nhật ký", icon: BookOpen },
+  { path: "/billing/plan", label: "Gói & thanh toán", compactLabel: "Gói", icon: CreditCard },
 ];
+
+const PRIMARY_NAV_PATHS = new Set(["/", "/goals", "/12-week-system", "/vision-board"]);
 
 function getRouteTone(pathname: string) {
   if (pathname.startsWith("/journal")) return "journal";
@@ -126,6 +134,11 @@ export function RootLayout() {
       setGuideUserData(getUserData());
     }
   }, [location.pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -309,7 +322,8 @@ export function RootLayout() {
 
   const pageMeta =
     ROUTE_META.find((item) => item.match(location.pathname)) ?? ROUTE_META[0];
-  const currentPageTour = getPageTourMeta(location.pathname);
+  const primaryNavItems = NAV_ITEMS.filter((item) => PRIMARY_NAV_PATHS.has(item.path));
+  const secondaryNavItems = NAV_ITEMS.filter((item) => !PRIMARY_NAV_PATHS.has(item.path));
   const routeTone = getRouteTone(location.pathname);
   const shellGradientStyle = {
     backgroundImage:
@@ -328,12 +342,21 @@ export function RootLayout() {
     boxShadow: "0 18px 45px -20px var(--tone-shell-shadow)",
   };
 
-  const pageTransition = {
-    initial: { opacity: 0, y: 18, filter: "blur(10px)" },
-    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-    exit: { opacity: 0, y: -10, filter: "blur(8px)" },
-    transition: { duration: 0.38, ease: [0.22, 1, 0.36, 1] },
-  } as const;
+  const prefersReducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const pageTransition = prefersReducedMotion
+    ? {
+        initial: { opacity: 1 },
+        animate: { opacity: 1 },
+        exit: { opacity: 1 },
+        transition: { duration: 0 },
+      } as const
+    : {
+        initial: { opacity: 0, y: 18, filter: "blur(10px)" },
+        animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+        exit: { opacity: 0, y: -10, filter: "blur(8px)" },
+        transition: { duration: 0.38, ease: [0.22, 1, 0.36, 1] },
+      } as const;
 
   if (GUIDED_PATHS.has(location.pathname)) {
     return (
@@ -363,13 +386,14 @@ export function RootLayout() {
       <div className="ambient-orb ambient-orb--rose" />
       <div className="pointer-events-none fixed inset-x-0 top-[-9rem] z-0 mx-auto h-[26rem] max-w-6xl rounded-full bg-[radial-gradient(circle,_rgba(255,255,255,0.96)_0%,_rgba(255,255,255,0)_70%)] blur-3xl" />
 
-      <header className="sticky top-4 z-40 px-4 sm:px-6 lg:px-8">
-        <div className="glass-surface mx-auto max-w-7xl rounded-[32px] px-4 py-3 sm:px-5">
+      <header className="sticky top-0 z-40 px-4 pt-2 sm:top-4 sm:px-6 sm:pt-0 lg:px-8">
+        <div className="glass-surface mx-auto max-w-7xl rounded-2xl sm:rounded-3xl px-3 py-2.5 sm:px-5 sm:py-3">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <button
               type="button"
               onClick={() => navigate("/")}
               className="flex items-start gap-4 rounded-[24px] text-left transition-all hover:-translate-y-0.5 hover:opacity-100"
+              aria-label="Về trang chủ Vision Board"
             >
               <div
                 className="flex size-12 items-center justify-center rounded-[18px]"
@@ -384,21 +408,11 @@ export function RootLayout() {
                 <h1 className="truncate text-lg font-bold text-slate-900 lg:text-xl">
                   Vision Board
                 </h1>
-                <p className="hidden text-sm text-slate-500 lg:block">
+                <p className="hidden max-w-xs truncate text-sm text-slate-500 lg:block">
                   {pageMeta.tagline}
                 </p>
               </div>
             </button>
-
-            <div className="hidden items-center gap-3 rounded-full border border-white/70 bg-white/68 px-4 py-2.5 text-left shadow-[0_18px_36px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl xl:hidden">
-              <div className="h-2.5 w-2.5 rounded-full" style={shellIndicatorStyle} />
-              <div>
-                <p className="text-[0.62rem] font-semibold uppercase tracking-[0.26em] text-slate-400">
-                  Nhịp hiện tại
-                </p>
-                <p className="text-sm font-semibold text-slate-700">{pageMeta.label}</p>
-              </div>
-            </div>
 
             <Button
               variant="outline"
@@ -407,13 +421,15 @@ export function RootLayout() {
                 setGuideUserData(getUserData());
                 setIsGuideOpen(true);
               }}
-              className="hidden md:inline-flex rounded-full border-white/70 bg-white/72 text-slate-700 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.24)] hover:bg-white"
+              className="hidden rounded-full border-white/70 bg-white/72 text-slate-700 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.24)] hover:bg-white md:inline-flex xl:hidden"
             >
               <Compass className="h-4 w-4" />
               Hướng dẫn
             </Button>
 
-            <nav className="hidden basis-full items-center gap-4 border-t border-white/55 pt-4 md:flex">
+
+
+            <nav className="hidden basis-full items-start gap-3 border-t border-white/55 pt-4 md:flex md:flex-wrap xl:grid xl:grid-cols-[auto_minmax(0,1fr)_auto] xl:flex-nowrap xl:items-center">
               <div className="flex shrink-0 items-center gap-3 rounded-full border border-white/70 bg-white/68 px-4 py-2.5 text-left shadow-[0_18px_36px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
                 <div className="h-2.5 w-2.5 rounded-full" style={shellIndicatorStyle} />
                 <div>
@@ -424,51 +440,94 @@ export function RootLayout() {
                 </div>
               </div>
 
-              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 rounded-[24px] border border-white/60 bg-white/58 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
-                {NAV_ITEMS.map((item) => {
-                  const Icon = item.icon;
-                  const active = isActive(item.path);
+              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 rounded-[1.75rem] border border-white/60 bg-white/58 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+                <div className="flex flex-wrap items-center gap-2">
+                  {primaryNavItems.map((item) => {
+                    const Icon = item.icon;
+                    const active = isActive(item.path);
 
-                  return (
-                    <Button
-                      key={item.path}
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigate(item.path)}
-                      className={
-                        active
+                    return (
+                      <Button
+                        key={item.path}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(item.path)}
+                        aria-current={active ? "page" : undefined}
+                        className={`h-10 shrink-0 rounded-full px-3.5 text-[0.92rem] ${active
                           ? "text-white hover:text-white"
-                          : "bg-transparent text-slate-600 shadow-none hover:bg-white/78 hover:text-slate-900"
-                      }
-                      style={active ? activeNavStyle : undefined}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {item.label}
-                    </Button>
-                  );
-                })}
+                          : "bg-transparent text-slate-700 shadow-none hover:bg-white/78 hover:text-slate-900"}`}
+                        style={active ? activeNavStyle : undefined}
+                      >
+                        <Icon className="h-4 w-4" />
+                        <span className="xl:hidden">{item.compactLabel ?? item.label}</span>
+                        <span className="hidden xl:inline">{item.label}</span>
+                      </Button>
+                    );
+                  })}
+                </div>
+
+                <div className="hidden h-8 w-px shrink-0 bg-white/70 lg:block" />
+
+                <div className="flex flex-wrap items-center gap-2">
+                  {secondaryNavItems.map((item) => {
+                    const Icon = item.icon;
+                    const active = isActive(item.path);
+
+                    return (
+                      <Button
+                        key={item.path}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(item.path)}
+                        aria-current={active ? "page" : undefined}
+                        className={`h-10 shrink-0 rounded-full px-3 text-[0.88rem] ${active
+                          ? "text-white hover:text-white"
+                          : "bg-transparent text-slate-500 shadow-none hover:bg-white/78 hover:text-slate-900"}`}
+                        style={active ? activeNavStyle : undefined}
+                      >
+                        <Icon className="h-4 w-4" />
+                        <span>{item.compactLabel ?? item.label}</span>
+                      </Button>
+                    );
+                  })}
+                </div>
               </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setGuideUserData(getUserData());
+                  setIsGuideOpen(true);
+                }}
+                className="hidden shrink-0 rounded-full border-white/70 bg-white/72 text-slate-700 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.24)] hover:bg-white xl:inline-flex"
+              >
+                <Compass className="h-4 w-4" />
+                Hướng dẫn
+              </Button>
             </nav>
 
             <div className="md:hidden flex items-center gap-2">
+              <span className="text-sm font-semibold text-slate-700 truncate max-w-[120px]">{pageMeta.label}</span>
               <button
                 type="button"
-                className="flex size-11 items-center justify-center rounded-2xl border border-white/70 bg-white/72 text-slate-700 shadow-[0_16px_35px_-28px_rgba(15,23,42,0.45)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:bg-white"
+                className="flex size-10 items-center justify-center rounded-xl border border-white/70 bg-white/72 text-slate-700 backdrop-blur-xl transition-all hover:bg-white"
                 onClick={() => {
                   setGuideUserData(getUserData());
                   setIsGuideOpen(true);
                 }}
                 aria-label="Mở hướng dẫn sử dụng"
               >
-                <Compass className="h-5 w-5" />
+                <Compass className="h-4 w-4" />
               </button>
               <button
                 type="button"
-                className="flex size-11 items-center justify-center rounded-2xl border border-white/70 bg-white/72 text-slate-700 shadow-[0_16px_35px_-28px_rgba(15,23,42,0.45)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:bg-white"
+                className="flex size-10 items-center justify-center rounded-xl border border-white/70 bg-white/72 text-slate-700 backdrop-blur-xl transition-all hover:bg-white"
                 onClick={() => setMobileMenuOpen((open) => !open)}
                 aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
+                aria-expanded={mobileMenuOpen}
               >
-                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
               </button>
             </div>
           </div>
@@ -508,6 +567,7 @@ export function RootLayout() {
                           : "text-slate-600 hover:bg-white/80 hover:text-slate-900"
                       }`}
                       style={active ? activeNavStyle : undefined}
+                      aria-current={active ? "page" : undefined}
                     >
                       <Icon className="h-5 w-5" />
                       <span>{item.label}</span>
@@ -533,16 +593,6 @@ export function RootLayout() {
         open={isGuideOpen}
         onOpenChange={setIsGuideOpen}
         userData={guideUserData}
-        currentPageTourLabel={currentPageTour?.label ?? null}
-        onStartPageTour={
-          currentPageTour
-            ? () => {
-                setGuideUserData(getUserData());
-                setIsGuideOpen(false);
-                startPageTour(currentPageTour.id);
-              }
-            : undefined
-        }
       />
       <Toaster />
     </div>

@@ -37,8 +37,12 @@ import {
   isTwelveWeekReviewDueToday,
 } from "../utils/storage";
 import {
+  buildExecutionHeatmap,
   buildRescuePlanSummary,
+  buildTacticBreakdown,
+  buildWeeklyTrend,
   dedupeTasks,
+  evaluateRescueTriggers,
   getLatestDailyCheckIn,
 } from "../utils/twelve-week-system-ui";
 import {
@@ -72,6 +76,7 @@ export function useTwelveWeekSystemSnapshot() {
   const [pendingOutboxCount, setPendingOutboxCount] = useState(0);
   const [archivedOutboxCount, setArchivedOutboxCount] = useState(0);
   const [eventCount, setEventCount] = useState(0);
+  const [activeSubscription, setActiveSubscription] = useState<import("../utils/storage-types").Subscription | null | undefined>(null);
 
   const loadGoalData = useCallback((preferredGoalId?: string) => {
     const data = getUserData();
@@ -90,7 +95,7 @@ export function useTwelveWeekSystemSnapshot() {
     setActiveReminders(getInAppReminders());
     setEventCount(data.eventLog.length);
     setPendingOutboxCount(data.syncOutbox.filter((item) => item.status === "pending").length);
-    setArchivedOutboxCount(data.syncOutbox.filter((item) => item.status === "archived").length);
+    setArchivedOutboxCount(data.syncOutbox.filter((item) => item.status === "archived" || item.status === "sent" || item.status === "failed").length);
     setRecentOutboxItems(data.syncOutbox.slice(0, 3));
     setFunnelSteps(getTwelveWeekFunnelSummary(selectedGoal?.id));
     setMonetizationSteps(getTwelveWeekMonetizationSummary(selectedGoal?.id));
@@ -101,6 +106,7 @@ export function useTwelveWeekSystemSnapshot() {
     setLastRestoreAccessSnapshot(getLastRestoreAccessSnapshot());
     setActivePlanCode(getCurrentPlan(data));
     setActiveEntitlementKeys(getCurrentEntitlementKeys(data));
+    setActiveSubscription(data.subscription);
 
     if (selectedGoal) {
       localStorage.setItem(APP_STORAGE_KEYS.latest12WeekGoalId, selectedGoal.id);
@@ -164,6 +170,12 @@ export function useTwelveWeekSystemSnapshot() {
   const optionalIndicators = system?.leadIndicators.filter((indicator) => indicator.type === "optional") ?? [];
   const hasSmartRescue = hasEntitlement("priority_reminders");
   const rescuePlanSummary = buildRescuePlanSummary({ missedTasks, currentWeekTasks });
+  const activeTriggers = evaluateRescueTriggers({
+    system,
+    subscription: activeSubscription,
+    missedTasksCount: overdueOpenCount,
+    weekCompletionPercent: weekCompletion.percent,
+  });
   const hasPremiumReviewInsights = hasEntitlement("premium_review_insights");
   const premiumReviewInsight = buildWeeklyReviewPremiumInsight({
     weekCompletionPercent: weekCompletion.percent,
@@ -184,6 +196,19 @@ export function useTwelveWeekSystemSnapshot() {
     coreIndicators,
     optionalIndicators,
   });
+  const hasAdvancedAnalytics = hasEntitlement("advanced_analytics");
+  const executionHeatmap = useMemo(
+    () => (system && hasAdvancedAnalytics ? buildExecutionHeatmap(system) : []),
+    [system, hasAdvancedAnalytics],
+  );
+  const weeklyTrend = useMemo(
+    () => (system && hasAdvancedAnalytics ? buildWeeklyTrend(system) : []),
+    [system, hasAdvancedAnalytics],
+  );
+  const tacticBreakdown = useMemo(
+    () => (system && hasAdvancedAnalytics ? buildTacticBreakdown(system, currentWeek) : []),
+    [system, hasAdvancedAnalytics, currentWeek],
+  );
   const milestoneItems = useMemo(
     () => [
       { label: "Tuần 4", value: system?.milestones.week4 || "Chưa đặt cột mốc cho tuần 4." },
@@ -248,9 +273,14 @@ export function useTwelveWeekSystemSnapshot() {
     optionalIndicators,
     hasSmartRescue,
     rescuePlanSummary,
+    activeTriggers,
     hasPremiumReviewInsights,
     premiumReviewInsight,
     suggestedNextWeekPlan,
+    hasAdvancedAnalytics,
+    executionHeatmap,
+    weeklyTrend,
+    tacticBreakdown,
     milestoneItems,
     loadGoalData,
   };

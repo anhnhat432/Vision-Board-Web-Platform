@@ -315,24 +315,59 @@ export function TwelveWeekWeekTab({
                   </div>
                 </div>
               ) : (
-                <div className="mt-4 rounded-[20px] border border-violet-200/70 bg-white/82 p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-950">
-                        Mở Plus để review sâu hơn và ra luôn một plan tuần sau đủ gọn để làm.
-                      </p>
-                      <p className="mt-1 text-sm text-slate-600">
-                        Plus không chỉ cho bạn insight để đọc. Nó chốt luôn ưu tiên tuần sau, mức tải nên giữ và phần nào nên buông bớt.
-                      </p>
+                <div className="mt-4 space-y-3">
+                  {/* Status indicator — always computed, shown as teaser */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-violet-100 bg-white/80 px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`h-2 w-2 rounded-full ${
+                          premiumInsight.status === "strong"
+                            ? "bg-emerald-500"
+                            : premiumInsight.status === "at_risk"
+                              ? "bg-red-400"
+                              : "bg-amber-400"
+                        }`}
+                      />
+                      <span className="text-sm font-semibold text-slate-800">
+                        Hệ thống đọc được nhịp tuần này
+                      </span>
                     </div>
-                    <Badge className="bg-violet-600 text-white hover:bg-violet-600">
-                      <Crown className="mr-1 h-3.5 w-3.5" />
-                      Premium
+                    <Badge
+                      variant="outline"
+                      className={
+                        premiumInsight.status === "strong"
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                          : premiumInsight.status === "at_risk"
+                            ? "border-red-200 bg-red-50 text-red-800"
+                            : "border-amber-200 bg-amber-50 text-amber-800"
+                      }
+                    >
+                      {premiumInsight.badgeLabel}
                     </Badge>
                   </div>
-                  <Button className="mt-4" onClick={onOpenPremiumInsights}>
-                    Mở review premium của Plus
-                  </Button>
+                  {/* Blurred content preview */}
+                  <div className="relative overflow-hidden rounded-[18px] border border-violet-200 bg-white/80 p-4">
+                    <div className="pointer-events-none select-none blur-[3px] opacity-60">
+                      <p className="text-sm font-semibold text-slate-900">{premiumInsight.headline}</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-600 line-clamp-2">{premiumInsight.summary}</p>
+                      <p className="mt-2 text-xs text-slate-500">Gợi ý chỉnh tải: {premiumInsight.recommendedAdjustment}</p>
+                    </div>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[18px] bg-white/50 backdrop-blur-[2px]">
+                      <Crown className="h-5 w-5 text-violet-500" />
+                      <p className="mt-1 text-xs font-semibold text-violet-700">Chỉ dành cho Plus</p>
+                    </div>
+                  </div>
+                  <div className="rounded-[18px] border border-violet-200/70 bg-white/82 p-4">
+                    <p className="text-sm font-semibold text-slate-950">
+                      Mở Plus để đọc phân tích đầy đủ và ra ngay kế hoạch tuần sau đủ gọn để làm.
+                    </p>
+                    <p className="mt-1 text-sm text-slate-600">
+                      Plus chốt luôn ưu tiên tuần sau, mức tải nên giữ và phần nào nên buông bớt — không chỉ là insight để đọc.
+                    </p>
+                    <Button className="mt-4" onClick={onOpenPremiumInsights}>
+                      Mở review Plus ngay
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>

@@ -132,7 +132,7 @@ export function VisionBoardGallery() {
 
       <InteractiveSurface className="rounded-[28px]" intensity={9} translate={22}>
         <Card interactive={false} className="hero-surface overflow-hidden border-0 text-white">
-        <CardContent className="interactive-layer interactive-layer--medium relative p-8 lg:p-10">
+        <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
 
           <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
@@ -143,7 +143,7 @@ export function VisionBoardGallery() {
               </div>
 
               <div className="space-y-4">
-                <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
+                <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
                   Một thư viện nơi mọi bảng tầm nhìn của bạn được lưu lại như những phiên bản của tương lai.
                 </h1>
                 <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
@@ -171,7 +171,7 @@ export function VisionBoardGallery() {
               </div>
             </div>
 
-            <div className="interactive-layer interactive-layer--strong rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+            <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">
                 Snapshot thư viện
               </p>

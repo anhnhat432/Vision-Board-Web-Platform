@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useReducedMotion } from "motion/react";
+import { useReducedMotion } from "./use-reduced-motion";
 
 import { cn } from "./utils";
 import { useInView } from "./use-in-view";

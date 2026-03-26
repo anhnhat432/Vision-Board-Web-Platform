@@ -1,17 +1,16 @@
-﻿import { Suspense, lazy, useEffect, useState } from "react";
+﻿import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { BarChart3, CalendarDays, Compass, ListTodo, Settings2, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
 import { useTwelveWeekSystemSnapshot } from "../hooks/useTwelveWeekSystemSnapshot";
 import { NewUserGuideBanner } from "../components/NewUserGuide";
-import { SpotlightTour, type SpotlightTourStep } from "../components/SpotlightTour";
+import { TabErrorBoundary } from "../components/TabErrorBoundary";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import {
   trackPaywallCtaClicked,
   trackPremiumInsightOpened,
 } from "../utils/monetization-analytics";
-import { PAGE_TOUR_EVENT } from "../utils/page-tour";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,6 +48,7 @@ import {
   clearLocalDeviceSignals,
   clearArchivedOutbox,
   clearEventLog,
+  deleteAllUserData,
   exportUserDataSnapshot,
   formatCalendarDate,
   formatDateInputValue,
@@ -84,36 +84,6 @@ interface WeeklyReviewForm {
   nextWeekPriority: string;
   workloadDecision: UniversalWeeklyReview["workloadDecision"];
 }
-
-const TWELVE_WEEK_TOUR_STEPS_CLEAN: SpotlightTourStep[] = [
-  {
-    id: "tabs",
-    targetId: "system-tabs",
-    title: "Đổi góc nhìn bằng dải tab này",
-    description:
-      "Bạn không cần đọc cả màn. Chỉ cần nhớ: Hôm nay để làm việc, Tuần để review, Tiến độ để nhìn score, Cài đặt để chỉnh nhịp.",
-  },
-  {
-    id: "today",
-    targetId: "system-today-queue",
-    title: "Bắt đầu từ hàng việc hôm nay",
-    description: "Nếu đang phân vân, hãy chỉ nhìn đúng khối này và bắt đầu từ việc ưu tiên số 1 trước.",
-  },
-  {
-    id: "week",
-    targetId: "system-week-review",
-    title: "Review tuần nằm ở đây",
-    description:
-      "Khi tới cuối tuần, bạn chỉ cần mở tab Tuần để chốt 3 câu reflection và quyết định tuần sau.",
-  },
-  {
-    id: "settings",
-    targetId: "system-settings-panel",
-    title: "Cài đặt để chỉnh nhịp cho hợp bạn",
-    description:
-      "Tab Cài đặt là nơi đổi ngày review, mức tải, thứ tự tactic và xử lý các phần local như nhắc việc hay khôi phục quyền.",
-  },
-];
 
 const TwelveWeekWeekTab = lazy(async () => ({
   default: (await import("../components/twelve-week/TwelveWeekWeekTab")).TwelveWeekWeekTab,
@@ -203,13 +173,16 @@ export function TwelveWeekSystem() {
     hasPremiumReviewInsights,
     premiumReviewInsight,
     suggestedNextWeekPlan,
+    hasAdvancedAnalytics,
+    executionHeatmap,
+    weeklyTrend,
+    tacticBreakdown,
     milestoneItems,
     loadGoalData,
   } = useTwelveWeekSystemSnapshot();
   const [dailyMood, setDailyMood] = useState<DailyMood>("steady");
   const [dailyNote, setDailyNote] = useState("");
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
-  const [isTourOpen, setIsTourOpen] = useState(false);
   const [upgradeContext, setUpgradeContext] = useState<PremiumFeatureContext>("review");
   const [upgradeRecommendedPlan, setUpgradeRecommendedPlan] = useState<Exclude<PricingPlanCode, "FREE">>("PLUS");
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
@@ -226,8 +199,14 @@ export function TwelveWeekSystem() {
 
   const todayDateKey = formatDateInputValue(new Date());
 
+  const formInitRef = useRef<string | null>(null);
+
   useEffect(() => {
-    if (!system) return;
+    if (!system || !activeGoal) return;
+
+    const initKey = `${activeGoal.id}::${currentReview?.weekNumber ?? ""}`;
+    if (formInitRef.current === initKey) return;
+    formInitRef.current = initKey;
 
     setWeeklyForm({
       lagProgressValue: currentReview?.lagProgressValue ?? currentLagMetricValue ?? "",
@@ -238,24 +217,7 @@ export function TwelveWeekSystem() {
     });
     setDailyMood((latestCheckIn?.mood as DailyMood | undefined) ?? "steady");
     setDailyNote(latestCheckIn?.optionalNote ?? "");
-  }, [system, currentReview, currentLagMetricValue, latestCheckIn]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const handleTourStart = (event: Event) => {
-      const detail = (event as CustomEvent<{ tour?: string }>).detail;
-      if (detail?.tour === "twelve_week_system") {
-        setIsTourOpen(true);
-      }
-    };
-
-    window.addEventListener(PAGE_TOUR_EVENT, handleTourStart);
-
-    return () => {
-      window.removeEventListener(PAGE_TOUR_EVENT, handleTourStart);
-    };
-  }, []);
+  }, [system, currentReview, currentLagMetricValue, latestCheckIn, activeGoal?.id]);
 
   if (!activeGoal || !system) {
     return (
@@ -386,22 +348,6 @@ export function TwelveWeekSystem() {
     }
   };
 
-  const handleTourStepChange = (step: SpotlightTourStep) => {
-    if (step.id === "week" && activeTab !== "week") {
-      handleTabChange("week");
-      return;
-    }
-
-    if (step.id === "settings" && activeTab !== "settings") {
-      handleTabChange("settings");
-      return;
-    }
-
-    if ((step.id === "tabs" || step.id === "today") && activeTab !== "today") {
-      handleTabChange("today");
-    }
-  };
-
   const handleToggleTask = (taskId: string, completed: boolean) => {
     const nextTaskInstances = system.taskInstances.map((task) =>
       task.id === taskId ? { ...task, completed, completedAt: completed ? new Date().toISOString() : undefined } : task,
@@ -455,6 +401,15 @@ export function TwelveWeekSystem() {
   };
 
   const handleSaveWeeklyReview = () => {
+    const hasAnyContent =
+      weeklyForm.biggestOutputThisWeek.trim() ||
+      weeklyForm.mainObstacle.trim() ||
+      weeklyForm.nextWeekPriority.trim() ||
+      weeklyForm.lagProgressValue.trim();
+    if (!hasAnyContent) {
+      toast.error("Cần điền ít nhất một mục trước khi chốt review.");
+      return;
+    }
     const nextWeekPriorityValue =
       weeklyForm.nextWeekPriority.trim() ||
       (hasPremiumReviewInsights ? suggestedNextWeekPlan.focus : "");
@@ -505,7 +460,7 @@ export function TwelveWeekSystem() {
         hasPremiumReviewInsights ? `Gợi ý hệ thống: ${suggestedNextWeekPlan.firstMove}` : "",
       ]
         .filter(Boolean)
-        .join("\\n\\n"),
+        .join("\n\n"),
       mood: weekCompletion.percent >= 70 ? "happy" : weekCompletion.percent >= 40 ? "neutral" : "sad",
       entryType: "weekly-review",
       linkedGoalId: activeGoal.id,
@@ -541,6 +496,7 @@ export function TwelveWeekSystem() {
   };
 
   const handleReminderTimeChange = (value: string) => {
+    if (!/^\d{2}:\d{2}$/.test(value)) return;
     updateGoal(activeGoal.id, {
       twelveWeekSystem: {
         ...system,
@@ -665,6 +621,12 @@ export function TwelveWeekSystem() {
     setIsClearLocalDialogOpen(false);
     toast.success("Đã xóa log, outbox và trạng thái nhắc việc trên thiết bị này.");
     refreshAfterGoalUpdate();
+  };
+
+  const handleDeleteAllData = () => {
+    deleteAllUserData();
+    toast.success("Đã xóa toàn bộ dữ liệu trên thiết bị.");
+    navigate("/");
   };
 
   const handleBrowserNotificationToggle = async (value: boolean) => {
@@ -820,14 +782,6 @@ export function TwelveWeekSystem() {
       />
 
       <NewUserGuideBanner userData={getUserData()} variant="compact" />
-      <SpotlightTour
-        open={isTourOpen}
-        onOpenChange={setIsTourOpen}
-        title="Tour trung tâm 12 tuần"
-        description="Bốn điểm chính để người mới biết nên làm gì trong chu kỳ đang chạy."
-        steps={TWELVE_WEEK_TOUR_STEPS_CLEAN}
-        onStepChange={handleTourStepChange}
-      />
 
       <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
         <AlertDialogContent>
@@ -862,16 +816,16 @@ export function TwelveWeekSystem() {
       </AlertDialog>
 
       <Card className="hero-surface overflow-hidden border-0 text-white">
-        <CardContent className="relative p-8 lg:p-10">
+        <CardContent className="relative p-5 sm:p-6 lg:p-8">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_22%)] opacity-90" />
-          <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.12fr)_360px]">
+          <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.12fr)_minmax(280px,360px)]">
             <div className="space-y-6">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                 <Compass className="h-4 w-4" />
                 Nhịp 12 tuần
               </div>
               <div className="space-y-4">
-                <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
+                <h1 className="max-w-3xl text-2xl font-bold tracking-[-0.05em] sm:text-3xl lg:text-4xl">
                   Đây là nơi giữ nhịp thực thi mỗi ngày của chu kỳ 12 tuần.
                 </h1>
                 <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
@@ -910,7 +864,7 @@ export function TwelveWeekSystem() {
                 </Button>
               </div>
             </div>
-            <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+            <div className="hidden rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl xl:block">
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Việc kế tiếp</p>
               <div className="mt-5 rounded-[24px] border border-white/12 bg-black/14 p-5">
                 <p className="text-xs uppercase tracking-[0.16em] text-white/55">
@@ -996,27 +950,28 @@ export function TwelveWeekSystem() {
         <TabsList
           data-tour-id="system-tabs"
           aria-label="Điều hướng trung tâm 12 tuần"
-          className="sticky top-3 z-20 flex h-auto w-full flex-nowrap justify-start gap-1 overflow-x-auto rounded-[22px] border border-white/80 bg-white/86 p-1.5 shadow-[0_22px_48px_-30px_rgba(15,23,42,0.34)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="sticky top-14 z-20 flex h-auto w-full flex-nowrap justify-start gap-1 overflow-x-auto rounded-3xl border border-white/80 bg-white/86 p-1.5 shadow-[0_22px_48px_-30px_rgba(15,23,42,0.34)] sm:top-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          <TabsTrigger value="today" className="min-w-[120px] shrink-0 justify-center gap-2 rounded-2xl px-4 py-2.5 sm:min-w-0 sm:flex-1 md:flex-none md:justify-start">
+          <TabsTrigger value="today" className="min-w-[100px] shrink-0 justify-center gap-2 rounded-2xl px-4 py-2.5">
             <ListTodo className="h-4 w-4" />
             Hôm nay
           </TabsTrigger>
-          <TabsTrigger value="week" className="min-w-[120px] shrink-0 justify-center gap-2 rounded-2xl px-4 py-2.5 sm:min-w-0 sm:flex-1 md:flex-none md:justify-start">
+          <TabsTrigger value="week" className="min-w-[100px] shrink-0 justify-center gap-2 rounded-2xl px-4 py-2.5">
             <CalendarDays className="h-4 w-4" />
             Tuần
           </TabsTrigger>
-          <TabsTrigger value="progress" className="min-w-[120px] shrink-0 justify-center gap-2 rounded-2xl px-4 py-2.5 sm:min-w-0 sm:flex-1 md:flex-none md:justify-start">
+          <TabsTrigger value="progress" className="min-w-[100px] shrink-0 justify-center gap-2 rounded-2xl px-4 py-2.5">
             <BarChart3 className="h-4 w-4" />
             Tiến độ
           </TabsTrigger>
-          <TabsTrigger value="settings" className="min-w-[120px] shrink-0 justify-center gap-2 rounded-2xl px-4 py-2.5 sm:min-w-0 sm:flex-1 md:flex-none md:justify-start">
+          <TabsTrigger value="settings" className="min-w-[100px] shrink-0 justify-center gap-2 rounded-2xl px-4 py-2.5">
             <Settings2 className="h-4 w-4" />
             Cài đặt
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="today" className="space-y-6 pt-4">
+          <TabErrorBoundary fallbackTitle="Tab Hôm nay gặp lỗi">
           <TwelveWeekTodayTab
             system={system}
             currentWeek={currentWeek}
@@ -1051,9 +1006,11 @@ export function TwelveWeekSystem() {
             onDailyNoteChange={setDailyNote}
             onSaveCheckIn={handleSaveCheckIn}
           />
+          </TabErrorBoundary>
         </TabsContent>
 
         <TabsContent value="week" className="space-y-6 pt-4">
+          <TabErrorBoundary fallbackTitle="Tab Tuần gặp lỗi">
           <Suspense
             fallback={
               <TwelveWeekTabFallback
@@ -1090,9 +1047,11 @@ export function TwelveWeekSystem() {
               onSaveWeeklyReview={handleSaveWeeklyReview}
             />
           </Suspense>
+          </TabErrorBoundary>
         </TabsContent>
 
         <TabsContent value="progress">
+          <TabErrorBoundary fallbackTitle="Tab Tiến độ gặp lỗi">
           <Suspense
             fallback={
               <TwelveWeekTabFallback
@@ -1110,11 +1069,17 @@ export function TwelveWeekSystem() {
               reviewDoneCount={reviewDoneCount}
               weekCompletion={weekCompletion}
               milestoneItems={milestoneItems}
+              hasAdvancedAnalytics={hasAdvancedAnalytics}
+              executionHeatmap={executionHeatmap}
+              weeklyTrend={weeklyTrend}
+              tacticBreakdown={tacticBreakdown}
             />
           </Suspense>
+          </TabErrorBoundary>
         </TabsContent>
 
         <TabsContent value="settings">
+          <TabErrorBoundary fallbackTitle="Tab Cài đặt gặp lỗi">
           <Suspense
             fallback={
               <TwelveWeekTabFallback
@@ -1165,6 +1130,7 @@ export function TwelveWeekSystem() {
                 refreshAfterGoalUpdate();
               }}
               onOpenClearLocalDialog={() => setIsClearLocalDialogOpen(true)}
+              onDeleteAllData={handleDeleteAllData}
               onOpenResetDialog={() => setIsResetDialogOpen(true)}
               onOpenUpgradePlan={(planCode) => handleOpenUpgradeDialog("plan", planCode)}
               onSyncEntitlements={handleSyncEntitlements}
@@ -1175,6 +1141,7 @@ export function TwelveWeekSystem() {
               onNavigateSetup={() => navigate("/life-insight")}
             />
           </Suspense>
+          </TabErrorBoundary>
         </TabsContent>
       </Tabs>
     </div>

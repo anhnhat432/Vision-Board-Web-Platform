@@ -293,7 +293,7 @@ export function ReflectionJournal() {
 
       <Dialog open={isAddingReflection} onOpenChange={setIsAddingReflection}>
         <Card className="hero-surface overflow-hidden border-0 text-white">
-          <CardContent className="relative p-8 lg:p-10">
+          <CardContent className="relative p-5 sm:p-6 lg:p-8">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
 
             <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
@@ -304,7 +304,7 @@ export function ReflectionJournal() {
                 </div>
 
                 <div className="space-y-4">
-                  <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
+                  <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
                     Một nơi đủ đẹp và đủ yên để bạn nhìn lại, gọi tên cảm xúc và giữ lại những điều đáng nhớ.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
@@ -325,7 +325,7 @@ export function ReflectionJournal() {
                 </div>
               </div>
 
-              <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+              <div className="hidden xl:block rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">
                   Nhịp viết hiện tại
                 </p>
@@ -593,7 +593,7 @@ export function ReflectionJournal() {
               </Card>
             )}
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
               <div className="relative min-w-[200px] flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
@@ -603,11 +603,11 @@ export function ReflectionJournal() {
                   className="pl-9"
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {([
                   { value: "all", label: "Tất cả" },
-                  { value: "weekly-review", label: "Review tuần" },
-                  { value: "freeform", label: "Nhật ký tự do" },
+                  { value: "weekly-review", label: "Review" },
+                  { value: "freeform", label: "Tự do" },
                 ] as const).map((item) => (
                   <Button
                     key={item.value}
@@ -618,18 +618,20 @@ export function ReflectionJournal() {
                     {item.label}
                   </Button>
                 ))}
-              </div>
-              <div className="flex gap-2">
+                <span className="hidden sm:inline w-px h-6 bg-slate-200" />
                 {(["", "happy", "neutral", "sad"] as const).map((mood) => {
-                  const labels: Record<string, string> = { "": "Tất cả", happy: "Vui vẻ", neutral: "Bình thường", sad: "Suy tư" };
+                  const labels: Record<string, string> = { "": "Tất cả", happy: "😊", neutral: "😐", sad: "😢" };
+                  const fullLabels: Record<string, string> = { "": "Tất cả", happy: "Vui vẻ", neutral: "Bình thường", sad: "Suy tư" };
                   return (
                     <Button
                       key={mood}
                       size="sm"
                       variant={filterMood === mood ? "default" : "outline"}
                       onClick={() => setFilterMood(mood)}
+                      title={fullLabels[mood]}
                     >
-                      {labels[mood]}
+                      <span className="sm:hidden">{labels[mood]}</span>
+                      <span className="hidden sm:inline">{fullLabels[mood]}</span>
                     </Button>
                   );
                 })}

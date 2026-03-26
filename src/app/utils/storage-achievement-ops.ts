@@ -6,6 +6,7 @@ import {
 } from "./storage-date-utils";
 import { getGoalExecutionStats } from "./storage-twelve-week";
 import type { Achievement, Goal, UserData } from "./storage-types";
+import { generateId } from "./storage-types";
 
 function calculateGoalProgress(goal: Goal): number {
   const execution = getGoalExecutionStats(goal);
@@ -24,7 +25,7 @@ export function addAchievementToData(
 
   data.achievements.push({
     ...achievement,
-    id: `achievement_${Date.now()}`,
+    id: generateId("achievement"),
     earnedAt,
   });
 

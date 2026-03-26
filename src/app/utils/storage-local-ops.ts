@@ -7,8 +7,13 @@ import {
 } from "./storage-twelve-week";
 import type {
   AppPreferences,
+  EmailReminderKind,
+  EmailReminderScheduleItem,
+  ExperimentAssignment,
+  ExperimentVariantId,
   FunnelStepSummary,
   InAppReminder,
+  PushSubscriptionRecord,
   SyncOutboxItem,
   TrackingEvent,
   UserData,
@@ -108,6 +113,7 @@ export function trackAppEventInData(
       goalId,
       payloadSummary: buildReadableOutboxSummary(type, metadata),
       status: "pending",
+      retryCount: 0,
     };
 
     data.syncOutbox = [outboxItem, ...data.syncOutbox].slice(0, 200);
@@ -134,18 +140,18 @@ export function archiveOutboxItemInData(data: UserData, outboxId: string): void 
 
 export function restoreOutboxItemInData(data: UserData, outboxId: string): void {
   data.syncOutbox = data.syncOutbox.map((item) =>
-    item.id === outboxId ? { ...item, status: "pending" } : item,
+    item.id === outboxId ? { ...item, status: "pending", retryCount: 0, retryAt: undefined, failedAt: undefined } : item,
   );
 }
 
 export function restoreArchivedOutboxInData(data: UserData): void {
   data.syncOutbox = data.syncOutbox.map((item) =>
-    item.status === "archived" ? { ...item, status: "pending" } : item,
+    item.status === "archived" ? { ...item, status: "pending", retryCount: 0, retryAt: undefined, failedAt: undefined } : item,
   );
 }
 
 export function clearArchivedOutboxInData(data: UserData): void {
-  data.syncOutbox = data.syncOutbox.filter((item) => item.status !== "archived");
+  data.syncOutbox = data.syncOutbox.filter((item) => item.status !== "archived" && item.status !== "failed");
 }
 
 export function clearEventLogInData(data: UserData): void {
@@ -249,4 +255,174 @@ export function getInAppRemindersFromData(
       };
     })
     .slice(0, 3);
+}
+
+// ─── C3: Experiment assignment helpers ───────────────────────────────────────
+
+/**
+ * Returns the stable variant assignment for `experimentId`, assigning one
+ * deterministically from `variants` if not yet assigned.  Assignment is
+ * hash-seeded by userId + experimentId so the same user always gets the same
+ * variant across sessions.
+ */
+export function getOrAssignExperimentVariantInData(
+  data: UserData,
+  experimentId: string,
+  variants: ExperimentVariantId[],
+  weights?: number[],
+): ExperimentVariantId {
+  const assignments = data.experimentAssignments ?? [];
+  const existing = assignments.find((a) => a.experimentId === experimentId);
+  if (existing) return existing.variantId;
+
+  // Deterministic seeded selection: hash userId + experimentId
+  const seed = [...`${data.userId}:${experimentId}`].reduce((acc, ch) => ((acc << 5) - acc + ch.charCodeAt(0)) | 0, 0);
+  const norm = Math.abs(seed) / 2147483647;
+
+  let variantId: ExperimentVariantId;
+  if (weights && weights.length === variants.length) {
+    const total = weights.reduce((acc, w) => acc + w, 0);
+    let cumulative = 0;
+    variantId = variants[0];
+    for (let i = 0; i < variants.length; i++) {
+      cumulative += weights[i] / total;
+      if (norm < cumulative) {
+        variantId = variants[i];
+        break;
+      }
+    }
+  } else {
+    variantId = variants[Math.floor(norm * variants.length)] ?? variants[0];
+  }
+
+  const assignment: ExperimentAssignment = {
+    experimentId,
+    variantId,
+    assignedAt: new Date().toISOString(),
+  };
+
+  data.experimentAssignments = [...assignments, assignment];
+  return variantId;
+}
+
+/** Record that the experiment was exposed (first impression) for this session. */
+export function markExperimentExposedInData(data: UserData, experimentId: string): void {
+  const assignments = data.experimentAssignments ?? [];
+  const index = assignments.findIndex((a) => a.experimentId === experimentId);
+  if (index === -1 || assignments[index].exposedAt) return;
+  assignments[index] = { ...assignments[index], exposedAt: new Date().toISOString() };
+  data.experimentAssignments = assignments;
+}
+
+// ─── D3: Email reminder schedule helpers ─────────────────────────────────────
+
+export function scheduleEmailReminderInData(
+  data: UserData,
+  item: Omit<EmailReminderScheduleItem, "id" | "status">,
+): void {
+  const schedule = data.emailReminderSchedule ?? [];
+  // Avoid duplicate same-kind scheduled entries for the same goal+week
+  const duplicate = schedule.find(
+    (s) =>
+      s.kind === item.kind &&
+      s.goalId === item.goalId &&
+      s.weekNumber === item.weekNumber &&
+      s.status === "scheduled",
+  );
+  if (duplicate) return;
+
+  const newItem: EmailReminderScheduleItem = {
+    ...item,
+    id: `email_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    status: "scheduled",
+  };
+  data.emailReminderSchedule = [newItem, ...schedule].slice(0, 100);
+}
+
+export function cancelEmailReminderInData(data: UserData, id: string): void {
+  data.emailReminderSchedule = (data.emailReminderSchedule ?? []).map((item) =>
+    item.id === id ? { ...item, status: "canceled" } : item,
+  );
+}
+
+export function markEmailReminderSentInData(data: UserData, id: string): void {
+  data.emailReminderSchedule = (data.emailReminderSchedule ?? []).map((item) =>
+    item.id === id ? { ...item, status: "sent" } : item,
+  );
+}
+
+export function getDueEmailRemindersInData(
+  data: UserData,
+  referenceDate = new Date(),
+): EmailReminderScheduleItem[] {
+  return (data.emailReminderSchedule ?? []).filter(
+    (item) => item.status === "scheduled" && new Date(item.scheduledFor) <= referenceDate,
+  );
+}
+
+/**
+ * Auto-schedule email reminders based on system events.
+ *
+ * Intended to be called after key events (review submitted, trial started, etc.)
+ * to proactively queue the right email at the right time.
+ */
+export function autoScheduleEmailRemindersInData(
+  data: UserData,
+  event: { kind: EmailReminderKind; goalId?: string; weekNumber?: number; metadata?: Record<string, string> },
+  referenceDate = new Date(),
+): void {
+  let scheduledFor: Date;
+
+  switch (event.kind) {
+    case "review_day_reminder": {
+      // Schedule next review reminder 6 days from now (day before next review)
+      scheduledFor = new Date(referenceDate);
+      scheduledFor.setDate(scheduledFor.getDate() + 6);
+      scheduledFor.setHours(8, 0, 0, 0);
+      break;
+    }
+    case "missed_task_rescue": {
+      // Schedule rescue email 18 hours from now
+      scheduledFor = new Date(referenceDate.getTime() + 18 * 60 * 60 * 1000);
+      break;
+    }
+    case "trial_ending_reminder": {
+      // Schedule 48 hours before trial end (stored in metadata.renewsAt)
+      const renewsAt = event.metadata?.renewsAt;
+      if (!renewsAt) return;
+      scheduledFor = new Date(new Date(renewsAt).getTime() - 48 * 60 * 60 * 1000);
+      if (scheduledFor <= referenceDate) {
+        // Already past — schedule immediately
+        scheduledFor = new Date(referenceDate.getTime() + 60 * 1000);
+      }
+      break;
+    }
+    case "cycle_start_nudge": {
+      // Send 1 day after cycle creation
+      scheduledFor = new Date(referenceDate);
+      scheduledFor.setDate(scheduledFor.getDate() + 1);
+      scheduledFor.setHours(8, 0, 0, 0);
+      break;
+    }
+    default:
+      return;
+  }
+
+  scheduleEmailReminderInData(data, {
+    kind: event.kind,
+    scheduledFor: scheduledFor.toISOString(),
+    goalId: event.goalId,
+    weekNumber: event.weekNumber,
+    metadata: event.metadata,
+  });
+}
+
+// ─── D2: Push subscription helpers ───────────────────────────────────────────
+
+export function savePushSubscriptionInData(data: UserData, record: PushSubscriptionRecord): void {
+  data.pushSubscription = record;
+}
+
+export function clearPushSubscriptionInData(data: UserData): void {
+  data.pushSubscription = null;
 }

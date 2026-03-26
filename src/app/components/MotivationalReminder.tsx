@@ -27,11 +27,6 @@ export function MotivationalReminder() {
       setQuote(getRandomMotivationalQuote());
       setShowReminder(true);
       localStorage.setItem("last_reminder_date", today);
-
-      const timeoutId = window.setTimeout(() => setShowReminder(false), 12000);
-      return () => {
-        window.clearTimeout(timeoutId);
-      };
     }
   }, []);
 
@@ -42,7 +37,7 @@ export function MotivationalReminder() {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 50 }}
-      className="fixed bottom-6 right-6 z-50 max-w-md"
+      className="fixed bottom-4 left-4 right-4 z-50 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-md"
       role="status"
       aria-live="polite"
     >
