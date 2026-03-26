@@ -8,6 +8,7 @@ import {
   saveUserData,
   savePushSubscription,
   clearPushSubscription,
+  trackAppEvent,
   upgradePlanLocally,
 } from "./storage";
 import {
@@ -1205,13 +1206,10 @@ export async function requestPushPermissionAndSubscribe(
 
     // Queue subscription sync to outbox
     if (PUSH_SUBSCRIBE_ENDPOINT) {
-      const data = getUserData();
-      const { trackAppEventInData: track } = await import("./storage-local-ops");
-      track(data, "push_subscription_registered", goalId, {
+      trackAppEvent("push_subscription_registered", goalId, {
         endpoint: record.endpoint.slice(0, 40),
         registeredAt: record.registeredAt,
       });
-      saveUserData(data);
     }
 
     return "granted";
