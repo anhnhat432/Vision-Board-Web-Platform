@@ -3,6 +3,7 @@ import {
   buildAdaptiveTemplateSupport,
   buildSuggestedNextWeekPlan,
   buildWeeklyReviewPremiumInsight,
+  getPaywallCopy,
   TWELVE_WEEK_TEMPLATE_CATALOG,
   planSatisfiesRequirement,
 } from "./twelve-week-premium";
@@ -127,5 +128,54 @@ describe("twelve-week-premium helpers", () => {
     expect(suggestedPlan.workloadDecision).toBe("reduce slightly");
     expect(suggestedPlan.focus).toContain("Gửi hồ sơ");
     expect(suggestedPlan.secondaryTrackLabel).toBe("Tạm buông");
+  });
+
+  describe("template catalog gating", () => {
+    it("has at least 2 free templates and multiple premium templates", () => {
+      const free = TWELVE_WEEK_TEMPLATE_CATALOG.filter((t) => t.requiredPlan === null);
+      const premium = TWELVE_WEEK_TEMPLATE_CATALOG.filter((t) => t.requiredPlan !== null);
+      expect(free.length).toBeGreaterThanOrEqual(2);
+      expect(premium.length).toBeGreaterThanOrEqual(4);
+    });
+
+    it("free user can access free templates but not premium ones", () => {
+      const free = TWELVE_WEEK_TEMPLATE_CATALOG.filter((t) => t.requiredPlan === null);
+      const premium = TWELVE_WEEK_TEMPLATE_CATALOG.filter((t) => t.requiredPlan !== null);
+
+      for (const t of free) {
+        expect(planSatisfiesRequirement("FREE", t.requiredPlan)).toBe(true);
+      }
+      for (const t of premium) {
+        expect(planSatisfiesRequirement("FREE", t.requiredPlan)).toBe(false);
+      }
+    });
+
+    it("Plus user can access all templates", () => {
+      for (const t of TWELVE_WEEK_TEMPLATE_CATALOG) {
+        expect(planSatisfiesRequirement("PLUS", t.requiredPlan)).toBe(true);
+      }
+    });
+
+    it("each template has non-empty tactics and milestones", () => {
+      for (const t of TWELVE_WEEK_TEMPLATE_CATALOG) {
+        expect(t.name.length).toBeGreaterThan(0);
+        expect(t.tactics.length).toBeGreaterThanOrEqual(2);
+        expect(t.week4Milestone.length).toBeGreaterThan(0);
+        expect(t.week12Outcome.length).toBeGreaterThan(0);
+      }
+    });
+  });
+
+  describe("paywall copy", () => {
+    it("returns context-specific copy for each premium feature context", () => {
+      const contexts = ["template", "review", "reminder", "plan"] as const;
+      for (const ctx of contexts) {
+        const copy = getPaywallCopy(ctx);
+        expect(copy.title.length).toBeGreaterThan(0);
+        expect(copy.description.length).toBeGreaterThan(0);
+        expect(copy.bullets.length).toBeGreaterThanOrEqual(2);
+        expect(copy.recommendedPlan).toBe("PLUS");
+      }
+    });
   });
 });

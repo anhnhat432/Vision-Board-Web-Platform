@@ -8,7 +8,14 @@ vi.mock("./storage", () => ({
   trackAppEvent,
 }));
 
-import { trackCheckoutCompleted, trackPaywallViewed } from "./monetization-analytics";
+import {
+  trackCheckoutCompleted,
+  trackExperimentExposure,
+  trackPaywallViewed,
+  trackRescueActionTaken,
+  trackRescueTriggerDismissed,
+  trackRescueTriggerFired,
+} from "./monetization-analytics";
 
 describe("monetization-analytics", () => {
   beforeEach(() => {
@@ -80,6 +87,65 @@ describe("monetization-analytics", () => {
       planCode: "PLUS",
       resultPlan: "PLUS",
       mode: "api_contract",
+    });
+  });
+
+  it("emits rescue trigger lifecycle events with normalized payloads", () => {
+    trackRescueTriggerFired({
+      kind: "missed_checkin",
+      severity: "urgent",
+      currentPlan: "FREE",
+    });
+
+    expect(trackAppEvent).toHaveBeenCalledWith("rescue_trigger_fired", undefined, {
+      kind: "missed_checkin",
+      severity: "urgent",
+      currentPlan: "FREE",
+    });
+
+    trackRescueActionTaken({
+      kind: "missed_checkin",
+      action: "navigate_system",
+      currentPlan: "FREE",
+    });
+
+    expect(trackAppEvent).toHaveBeenCalledWith("rescue_action_taken", undefined, {
+      kind: "missed_checkin",
+      action: "navigate_system",
+      currentPlan: "FREE",
+    });
+
+    trackRescueTriggerDismissed({
+      kind: "missed_checkin",
+      currentPlan: "FREE",
+    });
+
+    expect(trackAppEvent).toHaveBeenCalledWith("rescue_trigger_dismissed", undefined, {
+      kind: "missed_checkin",
+      currentPlan: "FREE",
+    });
+  });
+
+  it("emits experiment exposure to local log and dataLayer", () => {
+    trackExperimentExposure({
+      experimentId: "paywall_trial_cta",
+      variantId: "trial_first",
+      context: "billing_plan",
+    });
+
+    expect(trackAppEvent).toHaveBeenCalledWith("experiment_exposure", undefined, {
+      experimentId: "paywall_trial_cta",
+      variantId: "trial_first",
+      context: "billing_plan",
+    });
+
+    expect(window.dataLayer).toContainEqual({
+      event: "experiment_exposure",
+      app: "vision_board_web",
+      area: "monetization",
+      experimentId: "paywall_trial_cta",
+      variantId: "trial_first",
+      context: "billing_plan",
     });
   });
 });

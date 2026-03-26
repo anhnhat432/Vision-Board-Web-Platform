@@ -1,6 +1,6 @@
 ﻿import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { BarChart3, CalendarDays, Compass, ListTodo, Settings2, Sparkles, Target } from "lucide-react";
+import { AlertTriangle, BarChart3, CalendarDays, Compass, ListTodo, Settings2, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
 import { useTwelveWeekSystemSnapshot } from "../hooks/useTwelveWeekSystemSnapshot";
@@ -10,6 +10,9 @@ import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import {
   trackPaywallCtaClicked,
   trackPremiumInsightOpened,
+  trackRescueActionTaken,
+  trackRescueTriggerDismissed,
+  trackRescueTriggerFired,
 } from "../utils/monetization-analytics";
 import {
   AlertDialog,
@@ -68,6 +71,7 @@ import {
 import {
   type DailyMood,
   addDaysToDateKey,
+  dismissRescueTrigger,
   getCurrentWeekStartDate,
   getMoodScore,
   getWorkloadDecisionLabel,
@@ -170,6 +174,7 @@ export function TwelveWeekSystem() {
     optionalIndicators,
     hasSmartRescue,
     rescuePlanSummary,
+    activeTriggers,
     hasPremiumReviewInsights,
     premiumReviewInsight,
     suggestedNextWeekPlan,
@@ -187,6 +192,7 @@ export function TwelveWeekSystem() {
   const [upgradeRecommendedPlan, setUpgradeRecommendedPlan] = useState<Exclude<PricingPlanCode, "FREE">>("PLUS");
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [isClearLocalDialogOpen, setIsClearLocalDialogOpen] = useState(false);
+  const [dismissedTriggerKind, setDismissedTriggerKind] = useState<string | null>(null);
   const [isSyncingEntitlements, setIsSyncingEntitlements] = useState(false);
   const [isRestoringPlanAccess, setIsRestoringPlanAccess] = useState(false);
   const [weeklyForm, setWeeklyForm] = useState<WeeklyReviewForm>({
@@ -227,7 +233,7 @@ export function TwelveWeekSystem() {
             <Sparkles className="h-10 w-10" />
           </div>
           <h2 className="mt-6 text-3xl font-bold text-slate-900">Bạn chưa có hệ thống 12 tuần</h2>
-          <p className="mx-auto mt-3 max-w-2xl text-base text-slate-500">
+          <p className="mx-auto mt-3 max-w-2xl text-base text-slate-500" role="status">
             Tạo một chu kỳ 12 tuần để gom nhịp thực thi mỗi ngày, review tuần và điểm vào cùng một nơi.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -945,6 +951,64 @@ export function TwelveWeekSystem() {
           </CardContent>
         </Card>
       )}
+
+      {/* Rescue trigger banner */}
+      {(() => {
+        const visibleTriggers = activeTriggers.filter((t) => t.kind !== dismissedTriggerKind);
+        const topTrigger = visibleTriggers[0] ?? null;
+        if (!topTrigger) return null;
+
+        const severityStyles = {
+          urgent: { wrapper: "border-rose-200 bg-rose-50", icon: "bg-rose-100 text-rose-600", headline: "text-rose-800", detail: "text-rose-700" },
+          caution: { wrapper: "border-amber-200 bg-amber-50", icon: "bg-amber-100 text-amber-600", headline: "text-amber-800", detail: "text-amber-700" },
+          watch: { wrapper: "border-slate-200 bg-slate-50", icon: "bg-slate-100 text-slate-500", headline: "text-slate-800", detail: "text-slate-600" },
+        } as const;
+        const s = severityStyles[topTrigger.severity];
+        const ctaHref = topTrigger.kind === "trial_ending" ? "/billing/plan" : undefined;
+        const ctaLabel = topTrigger.kind === "trial_ending" ? "Nâng cấp ngay" : "Xem lại hàng việc";
+
+        return (
+          <div
+            role="alert"
+            className={`rounded-xl border px-4 py-3 text-sm flex flex-wrap items-start gap-3 ${s.wrapper}`}
+            onAnimationStart={() => {
+              trackRescueTriggerFired({ kind: topTrigger.kind, severity: topTrigger.severity, currentPlan: activePlanCode });
+            }}
+          >
+            <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${s.icon}`}>
+              <AlertTriangle className="h-3.5 w-3.5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className={`font-semibold ${s.headline}`}>{topTrigger.headline}</p>
+              <p className={`mt-0.5 text-xs ${s.detail}`}>{topTrigger.detail}</p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2 ml-auto">
+              <Button
+                size="sm"
+                onClick={() => {
+                  trackRescueActionTaken({ kind: topTrigger.kind, action: ctaHref ? "upgrade" : "navigate_system", currentPlan: activePlanCode });
+                  if (ctaHref) navigate(ctaHref);
+                  else setActiveTab("today");
+                }}
+              >
+                {ctaLabel}
+              </Button>
+              <button
+                type="button"
+                className="text-xs opacity-60 hover:opacity-100 transition-opacity px-1"
+                aria-label="Đóng thông báo"
+                onClick={() => {
+                  dismissRescueTrigger(topTrigger.kind);
+                  trackRescueTriggerDismissed({ kind: topTrigger.kind, currentPlan: activePlanCode });
+                  setDismissedTriggerKind(topTrigger.kind);
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        );
+      })()}
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList

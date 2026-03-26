@@ -202,7 +202,7 @@ export function UpgradePaywallDialog({
               )}
             </div>
 
-            <div className="min-w-0 space-y-4">
+            <div className="min-w-0 space-y-4" role="group" aria-label="Chọn gói nâng cấp">
               {PLAN_DEFINITIONS.filter((plan) => plan.code !== "FREE").map((plan) => {
                 const isRecommended = plan.code === (recommendedPlan ?? paywallCopy.recommendedPlan);
                 const isCurrent = plan.code === currentPlan;
@@ -210,6 +210,7 @@ export function UpgradePaywallDialog({
                 return (
                   <div
                     key={plan.code}
+                    aria-label={`Gói ${plan.name}${isCurrent ? " — đang dùng" : ""}${isRecommended ? " — khuyên dùng" : ""}`}
                     className={`rounded-[28px] border p-5 shadow-[0_24px_60px_-38px_rgba(15,23,42,0.18)] ${
                       isRecommended
                         ? "border-violet-300 bg-[linear-gradient(180deg,_rgba(245,243,255,0.95)_0%,_rgba(237,233,254,0.88)_100%)]"

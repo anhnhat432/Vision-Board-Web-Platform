@@ -73,15 +73,13 @@ export function SpotlightTour({ open, onOpenChange, title, description, steps }:
         )}
 
         <DialogFooter className="flex-row justify-between sm:justify-between">
-          <div className="text-muted-foreground text-xs">
+          <div className="text-muted-foreground text-xs" aria-label={`Bước ${currentStep + 1} trên ${steps.length}`}>
             {currentStep + 1} / {steps.length}
           </div>
           <div className="flex gap-2">
-            {currentStep > 0 && (
-              <Button variant="ghost" size="sm" onClick={handlePrev}>
-                Quay lại
-              </Button>
-            )}
+            <Button variant="ghost" size="sm" onClick={handlePrev} disabled={currentStep === 0}>
+              Quay lại
+            </Button>
             <Button size="sm" onClick={handleNext}>
               {currentStep < steps.length - 1 ? "Tiếp" : "Xong"}
             </Button>

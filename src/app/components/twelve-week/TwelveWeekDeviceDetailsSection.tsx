@@ -61,7 +61,7 @@ interface ExpandableSectionProps {
 function ExpandableSection({ title, description, badge, children }: ExpandableSectionProps) {
   return (
     <details className="group rounded-[24px] border border-white/55 bg-white/72 px-5 py-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)]">
-      <summary className="flex cursor-pointer list-none items-start justify-between gap-4">
+      <summary className="flex cursor-pointer list-none items-start justify-between gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 rounded-[20px]">
         <div>
           <p className="text-sm font-semibold text-slate-950">{title}</p>
           <p className="mt-1 pr-6 text-sm text-slate-600">{description}</p>

@@ -807,15 +807,16 @@ export function TwelveWeekSetup() {
                 <span>Bước {currentStep + 1} / {STEPS.length}</span>
                 <span>{Math.round(progressValue)}%</span>
               </div>
-              <Progress value={progressValue} className="mt-3 h-2.5 bg-white/20" />
-              <div className="mt-6 space-y-3">
+              <Progress value={progressValue} className="mt-3 h-2.5 bg-white/20" aria-label={`Tiến độ thiết lập: ${Math.round(progressValue)}%`} />
+              <ol className="mt-6 space-y-3" aria-label="Các bước thiết lập">
                 {STEPS.map((step, index) => {
                   const active = index === currentStep;
                   const done = index < currentStep;
 
                   return (
-                    <div
+                    <li
                       key={step.id}
+                      aria-current={active ? "step" : undefined}
                       className={`rounded-[22px] border px-4 py-3 transition-all ${
                         active
                           ? "border-white/22 bg-white/14"
@@ -826,6 +827,7 @@ export function TwelveWeekSetup() {
                     >
                       <div className="flex items-center gap-3">
                         <div
+                          aria-hidden="true"
                           className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
                             active
                               ? "bg-white text-slate-900"
@@ -839,12 +841,13 @@ export function TwelveWeekSetup() {
                         <div>
                           <p className="text-sm font-semibold text-white">{step.label}</p>
                           <p className="text-xs text-white/62">{step.title}</p>
+                          <span className="sr-only">{done ? "— đã hoàn thành" : active ? "— đang thực hiện" : "— chưa bắt đầu"}</span>
                         </div>
                       </div>
-                    </div>
+                    </li>
                   );
                 })}
-              </div>
+              </ol>
             </div>
           </div>
         </CardContent>
