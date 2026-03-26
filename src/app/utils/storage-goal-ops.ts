@@ -44,6 +44,7 @@ export function addGoalToData(
     createdAt,
   };
   data.goals.push(newGoal);
+  data.isHydratedFromDemo = false;
   return newGoal.id;
 }
 

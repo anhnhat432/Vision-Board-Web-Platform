@@ -1,6 +1,8 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
+  readonly VITE_APP_MODE?: string;
+  readonly VITE_SHOW_BILLING_DEBUG?: string;
   readonly VITE_ANALYTICS_MODE?: string;
   readonly VITE_GA_MEASUREMENT_ID?: string;
   readonly VITE_OUTBOX_SYNC_ENDPOINT?: string;

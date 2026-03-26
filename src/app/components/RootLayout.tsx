@@ -4,6 +4,7 @@ import {
   Award,
   BookOpen,
   CalendarDays,
+  Compass,
   Images,
   LayoutDashboard,
   Menu,
@@ -14,8 +15,12 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate, useOutlet } from "react-router";
 import { maybeShowBrowserReminderNotification, syncPendingOutbox } from "../utils/production";
-import { initializeUserData } from "../utils/storage";
+import { getPageTourMeta, startPageTour } from "../utils/page-tour";
+import { getUserData, initializeUserData } from "../utils/storage";
+import { getNewUserGuideProgress, hasSeenNewUserGuide, isNewUserGuideDismissed, markNewUserGuideSeen } from "../utils/new-user-guide";
+import { isDemoMode } from "../utils/app-mode";
 import { MotivationalReminder } from "./MotivationalReminder";
+import { NewUserGuideDialog } from "./NewUserGuide";
 import { Button } from "./ui/button";
 import { Toaster } from "./ui/sonner";
 
@@ -96,21 +101,58 @@ export function RootLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const outlet = useOutlet();
+  const demoMode = isDemoMode();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [guideUserData, setGuideUserData] = useState(() => getUserData());
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
 
   useEffect(() => {
     const userData = initializeUserData();
+    setGuideUserData(userData);
+  }, []);
 
-    if (!userData.onboardingCompleted && location.pathname !== "/onboarding") {
+  useEffect(() => {
+    const userData = getUserData();
+    setGuideUserData(userData);
+
+    if (!demoMode && !userData.onboardingCompleted && location.pathname !== "/onboarding") {
       navigate("/onboarding");
     }
-  }, [location.pathname, navigate]);
+  }, [demoMode, location.pathname, navigate]);
 
   useEffect(() => {
     if (location.pathname) {
       setMobileMenuOpen(false);
+      setGuideUserData(getUserData());
     }
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleOpenGuide = () => {
+      setGuideUserData(getUserData());
+      setIsGuideOpen(true);
+    };
+    window.addEventListener("visionboard:open-guide", handleOpenGuide);
+
+    return () => {
+      window.removeEventListener("visionboard:open-guide", handleOpenGuide);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (demoMode) return;
+    if (location.pathname !== "/") return;
+
+    const progress = getNewUserGuideProgress(guideUserData);
+    if (progress.isComplete || isNewUserGuideDismissed() || hasSeenNewUserGuide()) {
+      return;
+    }
+
+    setIsGuideOpen(true);
+    markNewUserGuideSeen();
+  }, [demoMode, guideUserData, location.pathname]);
 
   useEffect(() => {
     const currentPath = location.pathname;
@@ -267,6 +309,7 @@ export function RootLayout() {
 
   const pageMeta =
     ROUTE_META.find((item) => item.match(location.pathname)) ?? ROUTE_META[0];
+  const currentPageTour = getPageTourMeta(location.pathname);
   const routeTone = getRouteTone(location.pathname);
   const shellGradientStyle = {
     backgroundImage:
@@ -322,11 +365,11 @@ export function RootLayout() {
 
       <header className="sticky top-4 z-40 px-4 sm:px-6 lg:px-8">
         <div className="glass-surface mx-auto max-w-7xl rounded-[32px] px-4 py-3 sm:px-5">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-wrap items-start justify-between gap-4">
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="flex items-center gap-4 rounded-[24px] text-left transition-all hover:-translate-y-0.5 hover:opacity-100"
+              className="flex items-start gap-4 rounded-[24px] text-left transition-all hover:-translate-y-0.5 hover:opacity-100"
             >
               <div
                 className="flex size-12 items-center justify-center rounded-[18px]"
@@ -347,7 +390,7 @@ export function RootLayout() {
               </div>
             </button>
 
-            <div className="hidden xl:flex items-center gap-3 rounded-full border border-white/70 bg-white/68 px-4 py-2.5 text-left shadow-[0_18px_36px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
+            <div className="hidden items-center gap-3 rounded-full border border-white/70 bg-white/68 px-4 py-2.5 text-left shadow-[0_18px_36px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl xl:hidden">
               <div className="h-2.5 w-2.5 rounded-full" style={shellIndicatorStyle} />
               <div>
                 <p className="text-[0.62rem] font-semibold uppercase tracking-[0.26em] text-slate-400">
@@ -357,8 +400,31 @@ export function RootLayout() {
               </div>
             </div>
 
-            <nav className="hidden md:flex md:flex-1 md:justify-end">
-              <div className="flex flex-wrap items-center gap-1 rounded-full border border-white/60 bg-white/58 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setGuideUserData(getUserData());
+                setIsGuideOpen(true);
+              }}
+              className="hidden md:inline-flex rounded-full border-white/70 bg-white/72 text-slate-700 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.24)] hover:bg-white"
+            >
+              <Compass className="h-4 w-4" />
+              Hướng dẫn
+            </Button>
+
+            <nav className="hidden basis-full items-center gap-4 border-t border-white/55 pt-4 md:flex">
+              <div className="flex shrink-0 items-center gap-3 rounded-full border border-white/70 bg-white/68 px-4 py-2.5 text-left shadow-[0_18px_36px_-30px_rgba(15,23,42,0.24)] backdrop-blur-xl">
+                <div className="h-2.5 w-2.5 rounded-full" style={shellIndicatorStyle} />
+                <div>
+                  <p className="text-[0.62rem] font-semibold uppercase tracking-[0.26em] text-slate-400">
+                    Nhịp hiện tại
+                  </p>
+                  <p className="text-sm font-semibold text-slate-700">{pageMeta.label}</p>
+                </div>
+              </div>
+
+              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 rounded-[24px] border border-white/60 bg-white/58 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
                 {NAV_ITEMS.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.path);
@@ -384,13 +450,27 @@ export function RootLayout() {
               </div>
             </nav>
 
-            <button
-              type="button"
-              className="md:hidden flex size-11 items-center justify-center rounded-2xl border border-white/70 bg-white/72 text-slate-700 shadow-[0_16px_35px_-28px_rgba(15,23,42,0.45)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:bg-white"
-              onClick={() => setMobileMenuOpen((open) => !open)}
-            >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
+            <div className="md:hidden flex items-center gap-2">
+              <button
+                type="button"
+                className="flex size-11 items-center justify-center rounded-2xl border border-white/70 bg-white/72 text-slate-700 shadow-[0_16px_35px_-28px_rgba(15,23,42,0.45)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:bg-white"
+                onClick={() => {
+                  setGuideUserData(getUserData());
+                  setIsGuideOpen(true);
+                }}
+                aria-label="Mở hướng dẫn sử dụng"
+              >
+                <Compass className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                className="flex size-11 items-center justify-center rounded-2xl border border-white/70 bg-white/72 text-slate-700 shadow-[0_16px_35px_-28px_rgba(15,23,42,0.45)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:bg-white"
+                onClick={() => setMobileMenuOpen((open) => !open)}
+                aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
+              >
+                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -398,6 +478,18 @@ export function RootLayout() {
           <div className="mx-auto mt-3 max-w-7xl md:hidden">
             <div className="glass-surface rounded-[28px] p-3">
               <nav className="space-y-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGuideUserData(getUserData());
+                    setIsGuideOpen(true);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="mb-2 flex w-full items-center gap-3 rounded-2xl border border-white/70 bg-white/78 px-4 py-3 text-left text-sm font-semibold text-slate-700"
+                >
+                  <Compass className="h-5 w-5" />
+                  <span>Hướng dẫn sử dụng</span>
+                </button>
                 {NAV_ITEMS.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.path);
@@ -437,6 +529,21 @@ export function RootLayout() {
       </main>
 
       <MotivationalReminder />
+      <NewUserGuideDialog
+        open={isGuideOpen}
+        onOpenChange={setIsGuideOpen}
+        userData={guideUserData}
+        currentPageTourLabel={currentPageTour?.label ?? null}
+        onStartPageTour={
+          currentPageTour
+            ? () => {
+                setGuideUserData(getUserData());
+                setIsGuideOpen(false);
+                startPageTour(currentPageTour.id);
+              }
+            : undefined
+        }
+      />
       <Toaster />
     </div>
   );

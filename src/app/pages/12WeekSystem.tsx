@@ -1,15 +1,17 @@
-﻿import { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
-import { useCallback } from "react";
+﻿import { Suspense, lazy, useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { BarChart3, CalendarDays, Compass, ListTodo, Settings2, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
+import { useTwelveWeekSystemSnapshot } from "../hooks/useTwelveWeekSystemSnapshot";
+import { NewUserGuideBanner } from "../components/NewUserGuide";
+import { SpotlightTour, type SpotlightTourStep } from "../components/SpotlightTour";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
-import type { BillingActionSnapshot, BillingProviderStatus } from "../utils/billing-contract";
 import {
   trackPaywallCtaClicked,
   trackPremiumInsightOpened,
 } from "../utils/monetization-analytics";
+import { PAGE_TOUR_EVENT } from "../utils/page-tour";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,23 +25,12 @@ import {
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import {
-  TwelveWeekProgressTab,
-  TwelveWeekSettingsTab,
-  TwelveWeekTodayTab,
-  TwelveWeekWeekTab,
-} from "../components/TwelveWeekSystemSections";
+import { TwelveWeekTodayTab } from "../components/twelve-week/TwelveWeekTodayTab";
 import { CountUp } from "../components/ui/count-up";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
-  type BrowserNotificationStatus,
-  type OutboxSyncSnapshot,
-  getBillingProviderStatus,
   getBrowserNotificationStatus,
-  getLastEntitlementSyncSnapshot,
-  getLastOutboxSyncSnapshot,
-  getLastRestoreAccessSnapshot,
   openBillingCustomerPortal,
   requestBrowserNotificationPermission,
   restorePlanAccess,
@@ -48,11 +39,7 @@ import {
   syncPendingOutbox,
 } from "../utils/production";
 import {
-  APP_STORAGE_KEYS,
   type AppPreferences,
-  type EntitlementKey,
-  type FunnelStepSummary,
-  type Goal,
   type InAppReminder,
   type PricingPlanCode,
   type SyncOutboxItem,
@@ -65,25 +52,11 @@ import {
   exportUserDataSnapshot,
   formatCalendarDate,
   formatDateInputValue,
-  getActiveTwelveWeekGoal,
   getCalendarDateKey,
-  getCurrentPlan,
-  getCurrentEntitlementKeys,
   getFeasibilityResultLabel,
-  getInAppReminders,
   getLifeAreaLabel,
   getReviewDayLabel,
-  getTwelveWeekFunnelSummary,
-  getTwelveWeekMonetizationSummary,
-  getTwelveWeekCurrentWeek,
-  getTwelveWeekMissedTasks,
-  getTwelveWeekTasksForWeek,
-  getTwelveWeekTodayTasks,
-  getTwelveWeekWeekCompletion,
-  getTwelveWeekWeekRange,
   getUserData,
-  hasEntitlement,
-  isTwelveWeekReviewDueToday,
   resetTwelveWeekGoalCycle,
   restoreArchivedOutbox,
   restoreOutboxItem,
@@ -95,16 +68,11 @@ import {
 import {
   type DailyMood,
   addDaysToDateKey,
-  buildRescuePlanSummary,
-  dedupeTasks,
   getCurrentWeekStartDate,
-  getLatestDailyCheckIn,
   getMoodScore,
   getWorkloadDecisionLabel,
 } from "../utils/twelve-week-system-ui";
 import {
-  buildSuggestedNextWeekPlan,
-  buildWeeklyReviewPremiumInsight,
   getPlanLabel,
   type PremiumFeatureContext,
 } from "../utils/twelve-week-premium";
@@ -117,34 +85,131 @@ interface WeeklyReviewForm {
   workloadDecision: UniversalWeeklyReview["workloadDecision"];
 }
 
+const TWELVE_WEEK_TOUR_STEPS_CLEAN: SpotlightTourStep[] = [
+  {
+    id: "tabs",
+    targetId: "system-tabs",
+    title: "Đổi góc nhìn bằng dải tab này",
+    description:
+      "Bạn không cần đọc cả màn. Chỉ cần nhớ: Hôm nay để làm việc, Tuần để review, Tiến độ để nhìn score, Cài đặt để chỉnh nhịp.",
+  },
+  {
+    id: "today",
+    targetId: "system-today-queue",
+    title: "Bắt đầu từ hàng việc hôm nay",
+    description: "Nếu đang phân vân, hãy chỉ nhìn đúng khối này và bắt đầu từ việc ưu tiên số 1 trước.",
+  },
+  {
+    id: "week",
+    targetId: "system-week-review",
+    title: "Review tuần nằm ở đây",
+    description:
+      "Khi tới cuối tuần, bạn chỉ cần mở tab Tuần để chốt 3 câu reflection và quyết định tuần sau.",
+  },
+  {
+    id: "settings",
+    targetId: "system-settings-panel",
+    title: "Cài đặt để chỉnh nhịp cho hợp bạn",
+    description:
+      "Tab Cài đặt là nơi đổi ngày review, mức tải, thứ tự tactic và xử lý các phần local như nhắc việc hay khôi phục quyền.",
+  },
+];
+
+const TwelveWeekWeekTab = lazy(async () => ({
+  default: (await import("../components/twelve-week/TwelveWeekWeekTab")).TwelveWeekWeekTab,
+}));
+
+const TwelveWeekProgressTab = lazy(async () => ({
+  default: (await import("../components/twelve-week/TwelveWeekProgressTab")).TwelveWeekProgressTab,
+}));
+
+const TwelveWeekSettingsTab = lazy(async () => ({
+  default: (await import("../components/twelve-week/TwelveWeekSettingsTab")).TwelveWeekSettingsTab,
+}));
+
+function TwelveWeekTabFallback({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <Card className="border border-white/70 bg-white/80 shadow-[0_22px_60px_-36px_rgba(15,23,42,0.32)]">
+      <CardContent className="flex min-h-[220px] flex-col justify-center gap-3 p-6 text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{title}</p>
+        <p className="text-base font-semibold text-slate-900">Đang mở phần này...</p>
+        <p className="mx-auto max-w-xl text-sm leading-7 text-slate-500">{description}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function TwelveWeekSystem() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [activeGoal, setActiveGoal] = useState<Goal | null>(null);
-  const [allGoals, setAllGoals] = useState<Goal[]>([]);
-  const [activeTab, setActiveTab] = useState("today");
-  const [activePlanCode, setActivePlanCode] = useState<PricingPlanCode>(getCurrentPlan());
-  const [activeEntitlementKeys, setActiveEntitlementKeys] = useState<EntitlementKey[]>(getCurrentEntitlementKeys());
+  const {
+    activeGoal,
+    allGoals,
+    activeTab,
+    setActiveTab,
+    activePlanCode,
+    activeEntitlementKeys,
+    appPreferences,
+    activeReminders,
+    recentOutboxItems,
+    funnelSteps,
+    monetizationSteps,
+    billingProviderStatus,
+    browserNotificationStatus,
+    setBrowserNotificationStatus,
+    lastSyncSnapshot,
+    setLastSyncSnapshot,
+    lastEntitlementSyncSnapshot,
+    lastRestoreAccessSnapshot,
+    pendingOutboxCount,
+    archivedOutboxCount,
+    eventCount,
+    system,
+    currentWeek,
+    currentWeekRange,
+    currentWeekTasks,
+    todayQueue,
+    missedTasks,
+    weekCompletion,
+    currentReview,
+    currentScore,
+    currentPlanFocus,
+    currentPlanMilestone,
+    currentLagMetricValue,
+    latestCheckIn,
+    reviewDoneCount,
+    coreTacticCount,
+    optionalTacticCount,
+    todayCompletedCount,
+    todayRemainingCount,
+    overdueOpenCount,
+    currentWeekOpenTasks,
+    optionalOpenThisWeekCount,
+    firstPriorityTask,
+    secondaryTodayTasks,
+    averageScore,
+    reviewDueToday,
+    currentWeekScoreValue,
+    reviewStatusLabel,
+    coreIndicators,
+    optionalIndicators,
+    hasSmartRescue,
+    rescuePlanSummary,
+    hasPremiumReviewInsights,
+    premiumReviewInsight,
+    suggestedNextWeekPlan,
+    milestoneItems,
+    loadGoalData,
+  } = useTwelveWeekSystemSnapshot();
   const [dailyMood, setDailyMood] = useState<DailyMood>("steady");
   const [dailyNote, setDailyNote] = useState("");
-  const [appPreferences, setAppPreferences] = useState<AppPreferences>(getUserData().appPreferences);
-  const [activeReminders, setActiveReminders] = useState<InAppReminder[]>([]);
-  const [recentOutboxItems, setRecentOutboxItems] = useState<SyncOutboxItem[]>([]);
-  const [funnelSteps, setFunnelSteps] = useState<FunnelStepSummary[]>([]);
-  const [monetizationSteps, setMonetizationSteps] = useState<FunnelStepSummary[]>([]);
-  const [billingProviderStatus, setBillingProviderStatus] =
-    useState<BillingProviderStatus>(getBillingProviderStatus());
-  const [browserNotificationStatus, setBrowserNotificationStatus] =
-    useState<BrowserNotificationStatus>(getBrowserNotificationStatus());
-  const [lastSyncSnapshot, setLastSyncSnapshot] = useState<OutboxSyncSnapshot | null>(getLastOutboxSyncSnapshot());
-  const [lastEntitlementSyncSnapshot, setLastEntitlementSyncSnapshot] =
-    useState<BillingActionSnapshot | null>(getLastEntitlementSyncSnapshot());
-  const [lastRestoreAccessSnapshot, setLastRestoreAccessSnapshot] =
-    useState<BillingActionSnapshot | null>(getLastRestoreAccessSnapshot());
-  const [pendingOutboxCount, setPendingOutboxCount] = useState(0);
-  const [archivedOutboxCount, setArchivedOutboxCount] = useState(0);
-  const [eventCount, setEventCount] = useState(0);
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
+  const [isTourOpen, setIsTourOpen] = useState(false);
   const [upgradeContext, setUpgradeContext] = useState<PremiumFeatureContext>("review");
   const [upgradeRecommendedPlan, setUpgradeRecommendedPlan] = useState<Exclude<PricingPlanCode, "FREE">>("PLUS");
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
@@ -159,131 +224,13 @@ export function TwelveWeekSystem() {
     workloadDecision: "keep same",
   });
 
-  const loadGoalData = useCallback((preferredGoalId?: string) => {
-    const data = getUserData();
-    const goalsWithSystem = data.goals.filter((goal) => Boolean(goal.twelveWeekSystem));
-    const selectedGoal =
-      getActiveTwelveWeekGoal(
-        data.goals,
-        preferredGoalId ??
-          localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId) ??
-          localStorage.getItem(APP_STORAGE_KEYS.latest12WeekGoalId),
-      ) ?? null;
-
-    setAllGoals(goalsWithSystem);
-    setActiveGoal(selectedGoal);
-    setAppPreferences(data.appPreferences);
-    setActiveReminders(getInAppReminders());
-    setEventCount(data.eventLog.length);
-    setPendingOutboxCount(data.syncOutbox.filter((item) => item.status === "pending").length);
-    setArchivedOutboxCount(data.syncOutbox.filter((item) => item.status === "archived").length);
-    setRecentOutboxItems(data.syncOutbox.slice(0, 3));
-    setFunnelSteps(getTwelveWeekFunnelSummary(selectedGoal?.id));
-    setMonetizationSteps(getTwelveWeekMonetizationSummary(selectedGoal?.id));
-    setBillingProviderStatus(getBillingProviderStatus());
-    setBrowserNotificationStatus(getBrowserNotificationStatus());
-    setLastSyncSnapshot(getLastOutboxSyncSnapshot());
-    setLastEntitlementSyncSnapshot(getLastEntitlementSyncSnapshot());
-    setLastRestoreAccessSnapshot(getLastRestoreAccessSnapshot());
-    setActivePlanCode(getCurrentPlan(data));
-    setActiveEntitlementKeys(getCurrentEntitlementKeys(data));
-
-    if (selectedGoal) {
-      localStorage.setItem(APP_STORAGE_KEYS.latest12WeekGoalId, selectedGoal.id);
-      localStorage.setItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId, selectedGoal.id);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadGoalData();
-  }, [loadGoalData]);
-
-  useEffect(() => {
-    const nextTab = new URLSearchParams(location.search).get("tab");
-    if (nextTab === "today" || nextTab === "week" || nextTab === "progress" || nextTab === "settings") {
-      setActiveTab(nextTab);
-    }
-  }, [location.search]);
-
-  const system = activeGoal?.twelveWeekSystem ?? null;
-  const currentWeek = system ? getTwelveWeekCurrentWeek(system) : 1;
-  const currentWeekRange = system ? getTwelveWeekWeekRange(system, currentWeek) : null;
-  const currentWeekTasks = system ? getTwelveWeekTasksForWeek(system, currentWeek) : [];
-  const scheduledTodayTasks = system ? getTwelveWeekTodayTasks(system) : [];
-  const missedTasks = system ? getTwelveWeekMissedTasks(system) : [];
-  const fallbackTasks = currentWeekTasks.filter((task) => !task.completed).slice(0, 3);
-  const todayQueue = dedupeTasks([
-    ...missedTasks.slice(0, 2),
-    ...(scheduledTodayTasks.length > 0 ? scheduledTodayTasks : fallbackTasks),
-  ]);
-  const weekCompletion = system ? getTwelveWeekWeekCompletion(system, currentWeek) : { completed: 0, total: 0, percent: 0 };
-  const currentReview = system?.weeklyReviews.find((review) => review.weekNumber === currentWeek) ?? null;
-  const currentScore = system?.scoreboard.find((week) => week.weekNumber === currentWeek) ?? null;
-  const currentPlan = system?.weeklyPlans.find((plan) => plan.weekNumber === currentWeek) ?? null;
-  const latestCheckIn = getLatestDailyCheckIn(activeGoal);
-  const reviewDoneCount = system?.scoreboard.filter((week) => week.reviewDone).length ?? 0;
-  const coreTacticCount = system ? system.leadIndicators.filter((indicator) => indicator.type !== "optional").length : 0;
-  const optionalTacticCount = system ? system.leadIndicators.filter((indicator) => indicator.type === "optional").length : 0;
   const todayDateKey = formatDateInputValue(new Date());
-  const todayCompletedCount = todayQueue.filter((task) => task.completed).length;
-  const todayRemainingCount = todayQueue.filter((task) => !task.completed).length;
-  const overdueOpenCount = missedTasks.filter((task) => !task.completed).length;
-  const currentWeekOpenTasks = currentWeekTasks.filter((task) => !task.completed);
-  const optionalOpenThisWeekCount = currentWeekOpenTasks.filter((task) => !task.isCore).length;
-  const openTodayTasks = todayQueue.filter((task) => !task.completed);
-  const firstPriorityTask = openTodayTasks[0] ?? null;
-  const secondaryTodayTasks = openTodayTasks.slice(1);
-  const averageScore =
-    system && system.scoreboard.length > 0
-      ? Math.round(system.scoreboard.reduce((sum, week) => sum + week.weeklyScore, 0) / system.scoreboard.length)
-      : 0;
-  const reviewDueToday = Boolean(system && isTwelveWeekReviewDueToday(system));
-  const currentWeekScoreValue = currentScore?.weeklyScore ?? weekCompletion.percent;
-  const reviewStatusLabel = reviewDueToday
-    ? "Đến hạn hôm nay"
-    : `Review vào ${getReviewDayLabel(system?.reviewDay ?? "Sunday")}`;
-  const coreIndicators = system?.leadIndicators.filter((indicator) => indicator.type !== "optional") ?? [];
-  const optionalIndicators = system?.leadIndicators.filter((indicator) => indicator.type === "optional") ?? [];
-  const hasSmartRescue = hasEntitlement("priority_reminders");
-  const rescuePlanSummary = buildRescuePlanSummary({
-    missedTasks,
-    currentWeekTasks,
-  });
-  const hasPremiumReviewInsights = hasEntitlement("premium_review_insights");
-  const premiumReviewInsight = buildWeeklyReviewPremiumInsight({
-    weekCompletionPercent: weekCompletion.percent,
-    currentScore: currentWeekScoreValue,
-    currentLagMetricValue: currentReview?.lagProgressValue ?? system?.lagMetric.currentValue ?? "",
-    missedTasksCount: missedTasks.filter((task) => !task.completed).length,
-    coreTacticCount,
-    optionalTacticCount,
-    reviewDueToday,
-  });
-  const suggestedNextWeekPlan = buildSuggestedNextWeekPlan({
-    insight: premiumReviewInsight,
-    currentPlanFocus: currentPlan?.focus ?? "Giữ nhịp tactic cốt lõi và tạo ra một đầu ra thật rõ ràng.",
-    currentPlanMilestone: currentPlan?.milestone ?? "",
-    weekCompletionPercent: weekCompletion.percent,
-    currentScore: currentWeekScoreValue,
-    missedTasksCount: overdueOpenCount,
-    coreIndicators,
-    optionalIndicators,
-  });
-  const milestoneItems = useMemo(
-    () => [
-      { label: "Tuần 4", value: system?.milestones.week4 || "Chưa đặt cột mốc cho tuần 4." },
-      { label: "Tuần 8", value: system?.milestones.week8 || "Chưa đặt cột mốc cho tuần 8." },
-      { label: "Tuần 12", value: system?.milestones.week12 || system?.week12Outcome || "Chưa có outcome cuối chu kỳ." },
-      { label: "Dấu hiệu thành công", value: system?.successEvidence || "Chưa thêm bằng chứng thành công." },
-    ],
-    [system],
-  );
 
   useEffect(() => {
     if (!system) return;
 
     setWeeklyForm({
-      lagProgressValue: currentReview?.lagProgressValue ?? system.lagMetric.currentValue ?? "",
+      lagProgressValue: currentReview?.lagProgressValue ?? currentLagMetricValue ?? "",
       biggestOutputThisWeek: currentReview?.biggestOutputThisWeek ?? "",
       mainObstacle: currentReview?.mainObstacle ?? "",
       nextWeekPriority: currentReview?.nextWeekPriority ?? "",
@@ -291,7 +238,24 @@ export function TwelveWeekSystem() {
     });
     setDailyMood((latestCheckIn?.mood as DailyMood | undefined) ?? "steady");
     setDailyNote(latestCheckIn?.optionalNote ?? "");
-  }, [system, currentReview, latestCheckIn]);
+  }, [system, currentReview, currentLagMetricValue, latestCheckIn]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleTourStart = (event: Event) => {
+      const detail = (event as CustomEvent<{ tour?: string }>).detail;
+      if (detail?.tour === "twelve_week_system") {
+        setIsTourOpen(true);
+      }
+    };
+
+    window.addEventListener(PAGE_TOUR_EVENT, handleTourStart);
+
+    return () => {
+      window.removeEventListener(PAGE_TOUR_EVENT, handleTourStart);
+    };
+  }, []);
 
   if (!activeGoal || !system) {
     return (
@@ -334,8 +298,6 @@ export function TwelveWeekSystem() {
   };
 
   const handleCheckoutComplete = () => {
-    setActivePlanCode(getCurrentPlan());
-    setBillingProviderStatus(getBillingProviderStatus());
     loadGoalData(activeGoal.id);
   };
 
@@ -421,6 +383,22 @@ export function TwelveWeekSystem() {
         currentPlan: activePlanCode,
         weekNumber: currentWeek,
       });
+    }
+  };
+
+  const handleTourStepChange = (step: SpotlightTourStep) => {
+    if (step.id === "week" && activeTab !== "week") {
+      handleTabChange("week");
+      return;
+    }
+
+    if (step.id === "settings" && activeTab !== "settings") {
+      handleTabChange("settings");
+      return;
+    }
+
+    if ((step.id === "tabs" || step.id === "today") && activeTab !== "today") {
+      handleTabChange("today");
     }
   };
 
@@ -527,7 +505,7 @@ export function TwelveWeekSystem() {
         hasPremiumReviewInsights ? `Gợi ý hệ thống: ${suggestedNextWeekPlan.firstMove}` : "",
       ]
         .filter(Boolean)
-        .join("\n\n"),
+        .join("\\n\\n"),
       mood: weekCompletion.percent >= 70 ? "happy" : weekCompletion.percent >= 40 ? "neutral" : "sad",
       entryType: "weekly-review",
       linkedGoalId: activeGoal.id,
@@ -665,7 +643,7 @@ export function TwelveWeekSystem() {
   };
 
   const handleOpenReminder = (reminder: InAppReminder) => {
-    if (reminder.goalId && reminder.goalId !== activeGoal?.id) {
+    if (reminder.goalId && reminder.goalId !== activeGoal.id) {
       loadGoalData(reminder.goalId);
     }
     handleTabChange(reminder.kind === "review" ? "week" : "today");
@@ -772,7 +750,13 @@ export function TwelveWeekSystem() {
     });
 
     trackAppEvent("12_week_reentry_used", activeGoal.id, { mode, weekNumber: String(currentWeek) });
-    toast.success(mode === "restart" ? "Đã sắp lại để bắt đầu lại tuần này." : mode === "lighten" ? "Đã giảm tải cho phần còn lại của tuần." : "Đã đẩy việc trễ sang tuần sau.");
+    toast.success(
+      mode === "restart"
+        ? "Đã sắp lại để bắt đầu lại tuần này."
+        : mode === "lighten"
+          ? "Đã giảm tải cho phần còn lại của tuần."
+          : "Đã đẩy việc trễ sang tuần sau.",
+    );
     refreshAfterGoalUpdate();
   };
 
@@ -833,6 +817,16 @@ export function TwelveWeekSystem() {
         recommendedPlan={upgradeRecommendedPlan}
         source={activeTab === "settings" ? "settings" : upgradeContext === "review" ? "review_teaser" : "12_week_system"}
         onCheckoutComplete={handleCheckoutComplete}
+      />
+
+      <NewUserGuideBanner userData={getUserData()} variant="compact" />
+      <SpotlightTour
+        open={isTourOpen}
+        onOpenChange={setIsTourOpen}
+        title="Tour trung tâm 12 tuần"
+        description="Bốn điểm chính để người mới biết nên làm gì trong chu kỳ đang chạy."
+        steps={TWELVE_WEEK_TOUR_STEPS_CLEAN}
+        onStepChange={handleTourStepChange}
       />
 
       <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
@@ -1000,6 +994,7 @@ export function TwelveWeekSystem() {
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList
+          data-tour-id="system-tabs"
           aria-label="Điều hướng trung tâm 12 tuần"
           className="sticky top-3 z-20 flex h-auto w-full flex-nowrap justify-start gap-1 overflow-x-auto rounded-[22px] border border-white/80 bg-white/86 p-1.5 shadow-[0_22px_48px_-30px_rgba(15,23,42,0.34)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
@@ -1026,7 +1021,7 @@ export function TwelveWeekSystem() {
             system={system}
             currentWeek={currentWeek}
             currentWeekRange={currentWeekRange}
-            currentPlanFocus={currentPlan?.focus || "Giữ nhịp tactic cốt lõi và tạo ra một đầu ra thật rõ ràng."}
+            currentPlanFocus={currentPlanFocus}
             reviewDueToday={reviewDueToday}
             reviewStatusLabel={reviewStatusLabel}
             currentWeekScoreValue={currentWeekScoreValue}
@@ -1059,102 +1054,130 @@ export function TwelveWeekSystem() {
         </TabsContent>
 
         <TabsContent value="week" className="space-y-6 pt-4">
-          <TwelveWeekWeekTab
-            system={system}
-            currentWeekRange={currentWeekRange}
-            currentPlanFocus={currentPlan?.focus || "Giữ nhịp tactic cốt lõi và tạo ra một đầu ra thật rõ ràng."}
-            currentPlanMilestone={currentPlan?.milestone || ""}
-            reviewDueToday={reviewDueToday}
-            reviewStatusLabel={reviewStatusLabel}
-            currentScoreValue={currentScore?.weeklyScore ?? weekCompletion.percent}
-            weekCompletion={weekCompletion}
-            currentLagMetricValue={currentReview?.lagProgressValue || system.lagMetric.currentValue || ""}
-            coreIndicators={coreIndicators}
-            optionalIndicators={optionalIndicators}
-            currentPlanCode={activePlanCode}
-            hasPremiumInsights={hasPremiumReviewInsights}
-            premiumInsight={premiumReviewInsight}
-            suggestedNextWeekPlan={suggestedNextWeekPlan}
-            weeklyForm={weeklyForm}
-            onWeeklyFormChange={(field, value) =>
-              setWeeklyForm((previousForm) => ({
-                ...previousForm,
-                [field]: value,
-              }))
+          <Suspense
+            fallback={
+              <TwelveWeekTabFallback
+                title="Đang mở tab Tuần"
+                description="Phần review tuần và gợi ý cho tuần sau sẽ hiện ra ngay sau khi tải xong."
+              />
             }
-            onApplySuggestedPlan={handleApplySuggestedPlan}
-            onOpenPremiumInsights={() => handleOpenUpgradeDialog("review", "PLUS")}
-            onSaveWeeklyReview={handleSaveWeeklyReview}
-          />
+          >
+            <TwelveWeekWeekTab
+              system={system}
+              currentWeekRange={currentWeekRange}
+              currentPlanFocus={currentPlanFocus}
+              currentPlanMilestone={currentPlanMilestone}
+              reviewDueToday={reviewDueToday}
+              reviewStatusLabel={reviewStatusLabel}
+              currentScoreValue={currentWeekScoreValue}
+              weekCompletion={weekCompletion}
+              currentLagMetricValue={currentLagMetricValue}
+              coreIndicators={coreIndicators}
+              optionalIndicators={optionalIndicators}
+              currentPlanCode={activePlanCode}
+              hasPremiumInsights={hasPremiumReviewInsights}
+              premiumInsight={premiumReviewInsight}
+              suggestedNextWeekPlan={suggestedNextWeekPlan}
+              weeklyForm={weeklyForm}
+              onWeeklyFormChange={(field, value) =>
+                setWeeklyForm((previousForm) => ({
+                  ...previousForm,
+                  [field]: value,
+                }))
+              }
+              onApplySuggestedPlan={handleApplySuggestedPlan}
+              onOpenPremiumInsights={() => handleOpenUpgradeDialog("review", "PLUS")}
+              onSaveWeeklyReview={handleSaveWeeklyReview}
+            />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="progress">
-          <TwelveWeekProgressTab
-            system={system}
-            currentWeek={currentWeek}
-            currentWeekRange={currentWeekRange}
-            currentWeekScoreValue={currentWeekScoreValue}
-            averageScore={averageScore}
-            reviewDoneCount={reviewDoneCount}
-            weekCompletion={weekCompletion}
-            milestoneItems={milestoneItems}
-          />
+          <Suspense
+            fallback={
+              <TwelveWeekTabFallback
+                title="Đang mở tab Tiến độ"
+                description="Bảng điểm và cột mốc của chu kỳ đang được chuẩn bị cho bạn."
+              />
+            }
+          >
+            <TwelveWeekProgressTab
+              system={system}
+              currentWeek={currentWeek}
+              currentWeekRange={currentWeekRange}
+              currentWeekScoreValue={currentWeekScoreValue}
+              averageScore={averageScore}
+              reviewDoneCount={reviewDoneCount}
+              weekCompletion={weekCompletion}
+              milestoneItems={milestoneItems}
+            />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="settings">
-          <TwelveWeekSettingsTab
-            system={system}
-            currentPlanCode={activePlanCode}
-            entitlementKeys={activeEntitlementKeys}
-            billingProviderStatus={billingProviderStatus}
-            lastEntitlementSyncSnapshot={lastEntitlementSyncSnapshot}
-            lastRestoreAccessSnapshot={lastRestoreAccessSnapshot}
-            appPreferences={appPreferences}
-            funnelSteps={funnelSteps}
-            monetizationSteps={monetizationSteps}
-            browserNotificationStatus={browserNotificationStatus}
-            lastSyncSnapshot={lastSyncSnapshot}
-            pendingOutboxCount={pendingOutboxCount}
-            archivedOutboxCount={archivedOutboxCount}
-            eventCount={eventCount}
-            activeReminders={activeReminders}
-            recentOutboxItems={recentOutboxItems}
-            isSyncingEntitlements={isSyncingEntitlements}
-            isRestoringPlanAccess={isRestoringPlanAccess}
-            onReviewDayChange={handleReviewDayChange}
-            onReminderTimeChange={handleReminderTimeChange}
-            onLoadPreferenceChange={handleLoadPreferenceChange}
-            onStatusChange={handleStatusChange}
-            onTacticPriorityChange={handleTacticPriorityChange}
-            onTacticTypeChange={handleTacticTypeChange}
-            onPreferenceToggle={handlePreferenceToggle}
-            onArchivePendingOutbox={handleArchivePendingOutbox}
-            onRestoreArchivedOutbox={handleRestoreArchivedOutbox}
-            onOpenReminder={handleOpenReminder}
-            onExportLocalData={handleExportLocalData}
-            onBrowserNotificationToggle={handleBrowserNotificationToggle}
-            onRunOutboxSync={handleRunOutboxSync}
-            onOutboxItemToggle={handleOutboxItemToggle}
-            onClearEventLog={() => {
-              clearEventLog();
-              refreshAfterGoalUpdate();
-            }}
-            onClearArchivedOutbox={() => {
-              clearArchivedOutbox();
-              refreshAfterGoalUpdate();
-            }}
-            onOpenClearLocalDialog={() => setIsClearLocalDialogOpen(true)}
-            onOpenResetDialog={() => setIsResetDialogOpen(true)}
-            onOpenUpgradePlan={(planCode) => handleOpenUpgradeDialog("plan", planCode)}
-            onSyncEntitlements={handleSyncEntitlements}
-            onRestorePlanAccess={handleRestorePlanAccess}
-            onOpenBillingPortal={handleOpenBillingPortal}
-            onNavigateGoals={() => navigate("/goals")}
-            onNavigateJournal={() => navigate("/journal")}
-            onNavigateSetup={() => navigate("/life-insight")}
-          />
+          <Suspense
+            fallback={
+              <TwelveWeekTabFallback
+                title="Đang mở tab Cài đặt"
+                description="Phần chỉnh nhịp chu kỳ, dữ liệu local và quyền gói đang được tải."
+              />
+            }
+          >
+            <TwelveWeekSettingsTab
+              system={system}
+              currentPlanCode={activePlanCode}
+              entitlementKeys={activeEntitlementKeys}
+              billingProviderStatus={billingProviderStatus}
+              lastEntitlementSyncSnapshot={lastEntitlementSyncSnapshot}
+              lastRestoreAccessSnapshot={lastRestoreAccessSnapshot}
+              appPreferences={appPreferences}
+              funnelSteps={funnelSteps}
+              monetizationSteps={monetizationSteps}
+              browserNotificationStatus={browserNotificationStatus}
+              lastSyncSnapshot={lastSyncSnapshot}
+              pendingOutboxCount={pendingOutboxCount}
+              archivedOutboxCount={archivedOutboxCount}
+              eventCount={eventCount}
+              activeReminders={activeReminders}
+              recentOutboxItems={recentOutboxItems}
+              isSyncingEntitlements={isSyncingEntitlements}
+              isRestoringPlanAccess={isRestoringPlanAccess}
+              onReviewDayChange={handleReviewDayChange}
+              onReminderTimeChange={handleReminderTimeChange}
+              onLoadPreferenceChange={handleLoadPreferenceChange}
+              onStatusChange={handleStatusChange}
+              onTacticPriorityChange={handleTacticPriorityChange}
+              onTacticTypeChange={handleTacticTypeChange}
+              onPreferenceToggle={handlePreferenceToggle}
+              onArchivePendingOutbox={handleArchivePendingOutbox}
+              onRestoreArchivedOutbox={handleRestoreArchivedOutbox}
+              onOpenReminder={handleOpenReminder}
+              onExportLocalData={handleExportLocalData}
+              onBrowserNotificationToggle={handleBrowserNotificationToggle}
+              onRunOutboxSync={handleRunOutboxSync}
+              onOutboxItemToggle={handleOutboxItemToggle}
+              onClearEventLog={() => {
+                clearEventLog();
+                refreshAfterGoalUpdate();
+              }}
+              onClearArchivedOutbox={() => {
+                clearArchivedOutbox();
+                refreshAfterGoalUpdate();
+              }}
+              onOpenClearLocalDialog={() => setIsClearLocalDialogOpen(true)}
+              onOpenResetDialog={() => setIsResetDialogOpen(true)}
+              onOpenUpgradePlan={(planCode) => handleOpenUpgradeDialog("plan", planCode)}
+              onSyncEntitlements={handleSyncEntitlements}
+              onRestorePlanAccess={handleRestorePlanAccess}
+              onOpenBillingPortal={handleOpenBillingPortal}
+              onNavigateGoals={() => navigate("/goals")}
+              onNavigateJournal={() => navigate("/journal")}
+              onNavigateSetup={() => navigate("/life-insight")}
+            />
+          </Suspense>
         </TabsContent>
       </Tabs>
     </div>
   );
 }
+

@@ -72,10 +72,12 @@ import {
   checkAchievementsInData,
 } from "./storage-achievement-ops";
 import {
+  createEmptyUserData as createEmptyUserDataFromModule,
   createDemoUserData as createDemoUserDataFromModule,
   shouldHydrateDemoData as shouldHydrateDemoDataFromModule,
 } from "./storage-demo-data";
 import { getEntitlementsForPlan, normalizePlanCode } from "./twelve-week-premium";
+import { shouldSeedDemoData } from "./app-mode";
 
 export type {
   Achievement,
@@ -419,12 +421,13 @@ export function getFeasibilityResultLabel(result: string): string {
 }
 
 export function initializeUserData(): UserData {
+  const demoMode = shouldSeedDemoData();
   const existingData = localStorage.getItem(STORAGE_KEY);
 
   if (existingData) {
     const parsedData = parseStoredUserData(existingData);
     if (parsedData) {
-      if (shouldHydrateDemoDataFromModule(parsedData)) {
+      if (demoMode && shouldHydrateDemoDataFromModule(parsedData)) {
         const demoData = createDemoUserDataFromModule({
           currentStorageVersion: CURRENT_STORAGE_VERSION,
           defaultAppPreferences: DEFAULT_APP_PREFERENCES,
@@ -438,11 +441,17 @@ export function initializeUserData(): UserData {
     }
   }
 
-  const newUserData = createDemoUserDataFromModule({
-    currentStorageVersion: CURRENT_STORAGE_VERSION,
-    defaultAppPreferences: DEFAULT_APP_PREFERENCES,
-    motivationalQuotes: MOTIVATIONAL_QUOTES,
-  });
+  const newUserData = demoMode
+    ? createDemoUserDataFromModule({
+        currentStorageVersion: CURRENT_STORAGE_VERSION,
+        defaultAppPreferences: DEFAULT_APP_PREFERENCES,
+        motivationalQuotes: MOTIVATIONAL_QUOTES,
+      })
+    : createEmptyUserDataFromModule({
+        currentStorageVersion: CURRENT_STORAGE_VERSION,
+        defaultAppPreferences: DEFAULT_APP_PREFERENCES,
+        motivationalQuotes: MOTIVATIONAL_QUOTES,
+      });
 
   saveUserData(newUserData);
   return newUserData;

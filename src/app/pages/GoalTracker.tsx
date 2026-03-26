@@ -3,6 +3,8 @@ import { useNavigate } from "react-router";
 import { AlertTriangle, CalendarDays, CheckCircle2, Clock3, Crown, Plus, Target, Trash2, Zap } from "lucide-react";
 import { toast } from "sonner";
 
+import { NewUserGuideBanner } from "../components/NewUserGuide";
+import { SpotlightTour, type SpotlightTourStep } from "../components/SpotlightTour";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import {
   AlertDialog,
@@ -51,6 +53,7 @@ import {
   updateGoal,
 } from "../utils/storage";
 import { trackPaywallCtaClicked } from "../utils/monetization-analytics";
+import { PAGE_TOUR_EVENT } from "../utils/page-tour";
 import {
   getEntitlementLabel,
   getPlanDefinition,
@@ -72,10 +75,35 @@ const getSystemStatusLabel = (status?: string) => {
   return "Đang chạy";
 };
 
+const GOAL_TRACKER_TOUR_STEPS: SpotlightTourStep[] = [
+  {
+    id: "create",
+    targetId: "goaltracker-create-goal",
+    title: "Tạo mục tiêu từ đây",
+    description:
+      "Mọi mục tiêu mới đều nên đi qua insight, SMART và feasibility trước khi bạn bắt đầu thực thi.",
+  },
+  {
+    id: "summary",
+    targetId: "goaltracker-summary",
+    title: "Đọc các tín hiệu nhanh ở hàng này",
+    description:
+      "Hàng summary cho bạn biết nhanh có review đến hạn, mục tiêu quá hạn hay việc nào cần nhìn trước.",
+  },
+  {
+    id: "goals",
+    targetId: "goaltracker-goals",
+    title: "Đọc mục tiêu theo thứ tự này",
+    description:
+      "Chu kỳ 12 tuần được đặt lên trước để việc hằng ngày và review không bị chìm giữa các mục tiêu khác.",
+  },
+];
+
 export function GoalTracker() {
   const navigate = useNavigate();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
+  const [isTourOpen, setIsTourOpen] = useState(false);
   const [upgradeContext, setUpgradeContext] = useState<PremiumFeatureContext>("plan");
   const [recommendedPlan, setRecommendedPlan] = useState<Exclude<PricingPlanCode, "FREE">>("PLUS");
   const [newTask, setNewTask] = useState("");
@@ -84,6 +112,23 @@ export function GoalTracker() {
 
   useEffect(() => {
     setUserData(getUserData());
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleTourStart = (event: Event) => {
+      const detail = (event as CustomEvent<{ tour?: string }>).detail;
+      if (detail?.tour === "goal_tracker") {
+        setIsTourOpen(true);
+      }
+    };
+
+    window.addEventListener(PAGE_TOUR_EVENT, handleTourStart);
+
+    return () => {
+      window.removeEventListener(PAGE_TOUR_EVENT, handleTourStart);
+    };
   }, []);
 
   if (!userData) return null;
@@ -546,6 +591,15 @@ export function GoalTracker() {
         onCheckoutComplete={reload}
       />
 
+      <NewUserGuideBanner userData={userData} variant="compact" />
+      <SpotlightTour
+        open={isTourOpen}
+        onOpenChange={setIsTourOpen}
+        title="Tour mục tiêu"
+        description="Ba điểm chính để người mới hiểu màn này mà không bị quá tải."
+        steps={GOAL_TRACKER_TOUR_STEPS}
+      />
+
       <AlertDialog
         open={Boolean(goalToDelete)}
         onOpenChange={(open) => {
@@ -594,7 +648,11 @@ export function GoalTracker() {
                 </Badge>
               </div>
               <div className="flex flex-wrap gap-3">
-                <Button className="w-full bg-white text-slate-900 hover:bg-white/92 sm:w-auto" onClick={handleStartGuidedGoalFlow}>
+                <Button
+                  data-tour-id="goaltracker-create-goal"
+                  className="w-full bg-white text-slate-900 hover:bg-white/92 sm:w-auto"
+                  onClick={handleStartGuidedGoalFlow}
+                >
                   <Target className="h-4 w-4" />
                   Tạo mục tiêu
                 </Button>
@@ -655,7 +713,7 @@ export function GoalTracker() {
       </Reveal>
 
       <Reveal>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div data-tour-id="goaltracker-summary" className="grid gap-4 md:grid-cols-3">
           <Card
             className={
               summary.reviewDue > 0
@@ -767,8 +825,9 @@ export function GoalTracker() {
         </Card>
       </Reveal>
 
-      {userData.goals.length === 0 ? (
-        <Reveal delay={0.04}>
+      <div data-tour-id="goaltracker-goals">
+        {userData.goals.length === 0 ? (
+          <Reveal delay={0.04}>
           <Card className="overflow-hidden border-0 bg-[linear-gradient(180deg,_rgba(238,242,255,0.95)_0%,_rgba(224,231,255,0.84)_100%)] shadow-[0_28px_70px_-38px_rgba(99,102,241,0.18)]">
             <CardContent className="p-10 text-center lg:p-14">
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] bg-violet-50 text-violet-700">
@@ -784,9 +843,9 @@ export function GoalTracker() {
               </Button>
             </CardContent>
           </Card>
-        </Reveal>
-      ) : (
-        <Reveal delay={0.04} className="space-y-8">
+          </Reveal>
+        ) : (
+          <Reveal delay={0.04} className="space-y-8">
           {twelveWeekGoals.length > 0 && (
             <section className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -816,8 +875,9 @@ export function GoalTracker() {
               <div className="space-y-5">{standardGoals.map((goal) => renderGoalCard(goal))}</div>
             </section>
           )}
-        </Reveal>
-      )}
+          </Reveal>
+        )}
+      </div>
     </div>
   );
 }

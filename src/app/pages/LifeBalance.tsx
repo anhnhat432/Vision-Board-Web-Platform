@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import {
   Calendar,
@@ -7,28 +7,15 @@ import {
   Sparkles,
   TrendingUp,
 } from "lucide-react";
-import {
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  PolarAngleAxis,
-  PolarGrid,
-  PolarRadiusAxis,
-  Radar,
-  RadarChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { toast } from "sonner";
 
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
+import type { LifeBalanceHistoryChartPoint } from "../components/LifeBalanceHistoryChart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { CountUp } from "../components/ui/count-up";
 import { Reveal } from "../components/ui/reveal";
+import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { Slider } from "../components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
@@ -39,6 +26,10 @@ import {
   getUserData,
   updateWheelOfLife,
 } from "../utils/storage";
+
+const LifeBalanceHistoryChart = lazy(async () => ({
+  default: (await import("../components/LifeBalanceHistoryChart")).LifeBalanceHistoryChart,
+}));
 
 export function LifeBalance() {
   const [userData, setUserData] = useState<UserData | null>(null);
@@ -96,10 +87,10 @@ export function LifeBalance() {
     return [...lifeAreas].sort((a, b) => a.score - b.score)[0];
   }, [lifeAreas]);
 
-  const historicalData = useMemo(() => {
+  const historicalData = useMemo<LifeBalanceHistoryChartPoint[]>(() => {
     if (!userData) return [];
     return userData.wheelOfLifeHistory.slice(-6).map((record) => {
-      const dataPoint: Record<string, string | number> = {
+      const dataPoint: LifeBalanceHistoryChartPoint = {
         date: new Date(record.date).toLocaleDateString("vi-VN", {
           month: "short",
           day: "numeric",
@@ -291,20 +282,7 @@ export function LifeBalance() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={420}>
-                  <RadarChart data={radarData}>
-                    <PolarGrid stroke="#dbe3f1" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: "#5b6473", fontSize: 12 }} />
-                    <PolarRadiusAxis angle={90} domain={[0, 10]} tick={{ fill: "#94a3b8" }} />
-                    <Radar
-                      name="Điểm"
-                      dataKey="value"
-                      stroke="#7c3aed"
-                      fill="#7c3aed"
-                      fillOpacity={0.55}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
+                <SimpleRadarChart className="mx-auto max-w-[540px]" data={radarData} height={420} />
 
                 <div className="mt-4 grid gap-3 md:grid-cols-2">
                   <div
@@ -431,25 +409,17 @@ export function LifeBalance() {
             </CardHeader>
             <CardContent>
               {historicalData.length > 0 ? (
-                <ResponsiveContainer width="100%" height={420}>
-                  <LineChart data={historicalData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                    <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                    <YAxis domain={[0, 10]} tick={{ fontSize: 12 }} />
-                    <Tooltip />
-                    <Legend />
-                    {LIFE_AREAS.map((area) => (
-                      <Line
-                        key={area.name}
-                        type="monotone"
-                        dataKey={getLifeAreaLabel(area.name)}
-                        stroke={area.color}
-                        strokeWidth={2.5}
-                        dot={{ r: 4 }}
-                      />
-                    ))}
-                  </LineChart>
-                </ResponsiveContainer>
+                <Suspense
+                  fallback={
+                    <div className="rounded-[24px] border border-white/70 bg-white/72 py-12 text-center text-slate-500">
+                      <Calendar className="mx-auto mb-3 h-12 w-12 opacity-50" />
+                      <p>Đang mở biểu đồ lịch sử...</p>
+                      <p className="mt-1 text-sm">Dữ liệu xu hướng sẽ hiện ra ngay sau khi tải xong.</p>
+                    </div>
+                  }
+                >
+                  <LifeBalanceHistoryChart data={historicalData} />
+                </Suspense>
               ) : (
                 <div className="rounded-[24px] border border-white/70 bg-white/72 py-12 text-center text-slate-500">
                   <Calendar className="mx-auto mb-3 h-12 w-12 opacity-50" />

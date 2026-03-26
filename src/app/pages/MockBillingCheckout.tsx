@@ -56,16 +56,23 @@ export function MockBillingCheckout() {
       <div className="space-y-6 pb-12">
         <Card className="overflow-hidden border-0 bg-[linear-gradient(135deg,_rgba(15,23,42,0.98)_0%,_rgba(49,46,129,0.92)_100%)] text-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.52)]">
           <CardContent className="p-8 lg:p-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Mock provider</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Bản demo thanh toán</p>
             <h1 className="mt-3 text-4xl font-bold tracking-[-0.05em]">Phiên checkout này không còn hợp lệ.</h1>
             <p className="mt-3 max-w-2xl text-base leading-8 text-white/74">
-              Có thể bạn đã hoàn tất, hủy phiên này trước đó, hoặc tab checkout được mở quá lâu.
+              Có thể bạn đã hoàn tất, hủy phiên này trước đó, hoặc tab checkout đã mở quá lâu.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Button className="bg-white text-slate-900 hover:bg-white/92" onClick={() => navigate("/12-week-system?tab=settings")}>
+              <Button
+                className="bg-white text-slate-900 hover:bg-white/92"
+                onClick={() => navigate("/12-week-system?tab=settings")}
+              >
                 Quay về cài đặt gói
               </Button>
-              <Button variant="outline" className="border-white/18 bg-white/10 text-white hover:bg-white/18" onClick={() => navigate("/")}>
+              <Button
+                variant="outline"
+                className="border-white/18 bg-white/10 text-white hover:bg-white/18"
+                onClick={() => navigate("/")}
+              >
                 Về bảng điều khiển
               </Button>
             </div>
@@ -85,20 +92,21 @@ export function MockBillingCheckout() {
           <div className="space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/78">
               <CreditCard className="h-3.5 w-3.5" />
-              Mock provider checkout
+              Checkout mô phỏng
             </div>
             <div>
-              <h1 className="text-4xl font-bold tracking-[-0.05em]">Xác nhận gói {plan.name}</h1>
+              <h1 className="text-4xl font-bold tracking-[-0.05em]">Xác nhận mở gói {plan.name}</h1>
               <p className="mt-3 max-w-2xl text-base leading-8 text-white/74">
-                Đây là cổng thanh toán giả lập để bạn test end-to-end flow checkout, restore access và entitlement sync trước khi nối backend thật.
+                Đây là bước mô phỏng checkout để bạn test trọn flow nâng cấp, khôi phục quyền và quay lại app
+                mà chưa cần nối backend thanh toán thật.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <Badge variant="outline" className="border-white/15 bg-white/10 px-4 py-2 text-white">
-                Context: {paywallCopy.title}
+                Ngữ cảnh: {paywallCopy.title}
               </Badge>
               <Badge variant="outline" className="border-white/15 bg-white/10 px-4 py-2 text-white">
-                Return: {returnPath}
+                Quay lại: {returnPath}
               </Badge>
             </div>
           </div>
@@ -107,17 +115,19 @@ export function MockBillingCheckout() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/56">Tóm tắt giao dịch</p>
             <div className="mt-4 space-y-4">
               <div className="rounded-[22px] border border-white/12 bg-black/12 p-4">
-                <p className="text-xs uppercase tracking-[0.16em] text-white/56">Gói đang mở</p>
+                <p className="text-xs uppercase tracking-[0.16em] text-white/56">Gói sẽ mở</p>
                 <p className="mt-2 text-3xl font-bold text-white">{plan.name}</p>
                 <p className="mt-1 text-sm text-white/72">{plan.priceLabel}</p>
               </div>
               <div className="rounded-[22px] border border-white/12 bg-white/8 p-4 text-sm text-white/72">
                 {existingAccount ? (
                   <>
-                    Tài khoản mock hiện có gói <strong className="text-white">{getPlanLabel(existingAccount.planCode)}</strong>. Xác nhận tiếp sẽ nâng hoặc ghi đè trạng thái này.
+                    Thiết bị này đang có gói{" "}
+                    <strong className="text-white">{getPlanLabel(existingAccount.planCode)}</strong>. Xác nhận tiếp sẽ
+                    cập nhật lại trạng thái gói hiện tại.
                   </>
                 ) : (
-                  "Chưa có giao dịch mock nào trước đó cho thiết bị này."
+                  "Thiết bị này chưa có giao dịch mô phỏng nào trước đó."
                 )}
               </div>
             </div>
@@ -130,7 +140,7 @@ export function MockBillingCheckout() {
           <CardHeader>
             <CardTitle className="text-slate-950">Bạn sẽ mở được gì ngay sau khi xác nhận</CardTitle>
             <CardDescription className="text-slate-700">
-              Mock provider sẽ tạo subscription giả lập, cấp entitlement tương ứng và đồng bộ về app.
+              Bản demo sẽ tạo subscription mô phỏng, cấp quyền tương ứng và đồng bộ ngay về app.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -145,9 +155,9 @@ export function MockBillingCheckout() {
 
         <Card className="border-0 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98)_0%,_rgba(241,245,249,0.94)_100%)] shadow-[0_28px_70px_-40px_rgba(15,23,42,0.14)]">
           <CardHeader>
-            <CardTitle className="text-slate-950">Xác nhận mock checkout</CardTitle>
+            <CardTitle className="text-slate-950">Xác nhận bước mô phỏng</CardTitle>
             <CardDescription className="text-slate-600">
-              Sau khi xác nhận, app sẽ quay lại đường dẫn trước đó và trạng thái gói sẽ được cập nhật ngay.
+              Sau khi xác nhận, app sẽ quay lại màn trước đó và cập nhật trạng thái gói ngay trên thiết bị này.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

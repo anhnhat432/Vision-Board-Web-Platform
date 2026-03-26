@@ -244,28 +244,28 @@ export function getOutboxSummaryText(item: SyncOutboxItem): string {
       return `${tacticLabel}: đã cập nhật thông tin tactic.`;
     }
     case "12_week_task_completed":
-      return `Tuần ${metadata.weekNumber || "-"} • đã đánh dấu xong việc ${metadata.taskId || "--"}.`;
+      return `Tuần ${metadata.weekNumber || "-"} · đã đánh dấu xong việc ${metadata.taskId || "--"}.`;
     case "12_week_daily_checkin_submitted": {
       const moodValue =
         metadata.mood === "low" || metadata.mood === "high" || metadata.mood === "steady"
           ? metadata.mood
           : "steady";
-      return `Năng lượng ${getMoodLabel(moodValue)} • hoàn thành ${metadata.completedTasks || "0"} việc.`;
+      return `Năng lượng ${getMoodLabel(moodValue)} · hoàn thành ${metadata.completedTasks || "0"} việc.`;
     }
     case "12_week_weekly_review_submitted":
-      return `Tuần ${metadata.weekNumber || "-"} • điểm ${metadata.score || "-"} • quyết định: ${
+      return `Tuần ${metadata.weekNumber || "-"} · điểm ${metadata.score || "-"} · quyết định: ${
         metadata.decision || "giữ nguyên"
       }.`;
     case "12_week_plan_created":
-      return `${metadata.coreTactics || "0"} tactic cốt lõi • ${metadata.optionalTactics || "0"} tactic tùy chọn • review vào ${getReviewDayLabel(metadata.reviewDay || "Sunday")}.`;
+      return `${metadata.coreTactics || "0"} tactic cốt lõi · ${metadata.optionalTactics || "0"} tactic tùy chọn · review vào ${getReviewDayLabel(metadata.reviewDay || "Sunday")}.`;
     case "12_week_setup_started":
-      return `Vùng trọng tâm: ${metadata.focusArea || "--"} • độ sẵn sàng ${metadata.readinessScore || "--"}.`;
+      return `Vùng trọng tâm: ${metadata.focusArea || "--"} · độ sẵn sàng ${metadata.readinessScore || "--"}.`;
     case "12_week_reentry_used":
-      return `Tuần ${metadata.weekNumber || "-"} • chế độ ${metadata.mode || "--"}.`;
+      return `Tuần ${metadata.weekNumber || "-"} · chế độ ${metadata.mode || "--"}.`;
     case "12_week_cycle_reset":
-      return `Làm mới từ ${metadata.resetFrom || "--"} • tổng ${metadata.totalWeeks || "12"} tuần.`;
+      return `Làm mới từ ${metadata.resetFrom || "--"} · tổng ${metadata.totalWeeks || "12"} tuần.`;
     default:
-      return item.payloadSummary.split("(").join(" • ").split(")").join("");
+      return item.payloadSummary.split("(").join(" · ").split(")").join("");
   }
 }
 

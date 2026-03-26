@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import { createBrowserRouter } from "react-router";
+import { Navigate, createBrowserRouter } from "react-router";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { RootLayout } from "./components/RootLayout";
 
@@ -13,6 +13,14 @@ function lazyComponent<TModule extends Record<string, unknown>>(
       Component: module[exportName] as ComponentType,
     };
   };
+}
+
+function RedirectToTwelveWeekSetup() {
+  return <Navigate to="/12-week-setup" replace />;
+}
+
+function RedirectToTwelveWeekSystem() {
+  return <Navigate to="/12-week-system" replace />;
 }
 
 export const router = createBrowserRouter([
@@ -47,15 +55,15 @@ export const router = createBrowserRouter([
       },
       {
         path: "12-week-dashboard",
-        lazy: lazyComponent(() => import("./pages/12WeekDashboard"), "TwelveWeekDashboard"),
+        Component: RedirectToTwelveWeekSystem,
       },
       {
         path: "12-week-plan-setup",
-        lazy: lazyComponent(() => import("./pages/12WeekPlanSetup"), "TwelveWeekPlanSetup"),
+        Component: RedirectToTwelveWeekSetup,
       },
       {
         path: "12-week-plan-overview",
-        lazy: lazyComponent(() => import("./pages/12WeekPlanOverview"), "TwelveWeekPlanOverview"),
+        Component: RedirectToTwelveWeekSystem,
       },
       {
         path: "12-week-system",

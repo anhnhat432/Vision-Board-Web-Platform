@@ -97,7 +97,7 @@ describe("12-week core flows", () => {
     const user = userEvent.setup();
 
     await user.click(screen.getByRole("tab", { name: "Tuần" }));
-    await user.type(screen.getByLabelText("1. Điều gì chạy tốt nhất trong tuần này?"), "Giữ được nhịp ship mỗi ngày.");
+    await user.type(await screen.findByLabelText("1. Điều gì chạy tốt nhất trong tuần này?"), "Giữ được nhịp ship mỗi ngày.");
     await user.type(screen.getByLabelText("2. Điều gì cản trở nhịp của bạn?"), "Bị phân tán vì đổi context.");
     await user.type(screen.getByLabelText("3. Một ưu tiên duy nhất cho tuần sau là gì?"), "Chốt xong command center trước.");
     await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
@@ -133,8 +133,8 @@ describe("12-week core flows", () => {
     const checkoutRender = renderAppRoute(`${checkoutUrl.pathname}${checkoutUrl.search}`);
     const user = userEvent.setup();
 
-    await screen.findByText("Mock provider checkout");
-    await user.click(screen.getByRole("button", { name: /Plus/ }));
+    await screen.findByText("Checkout mô phỏng");
+    await user.click(screen.getByRole("button", { name: /Xác nhận mở Plus/i }));
 
     await waitFor(() => {
       expect(getCurrentPlan()).toBe("PLUS");

@@ -17,6 +17,17 @@ export interface DemoDataOptions {
   motivationalQuotes: readonly string[];
 }
 
+const EMPTY_WHEEL_AREAS: WheelOfLifeRecord["areas"] = [
+  { name: "Career", score: 0, color: "#8b5cf6" },
+  { name: "Finance", score: 0, color: "#10b981" },
+  { name: "Health", score: 0, color: "#ef4444" },
+  { name: "Education", score: 0, color: "#f59e0b" },
+  { name: "Relationships", score: 0, color: "#ec4899" },
+  { name: "Family", score: 0, color: "#3b82f6" },
+  { name: "Personal Growth", score: 0, color: "#14b8a6" },
+  { name: "Leisure", score: 0, color: "#a855f7" },
+];
+
 function generateUserId(): string {
   return `user_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 }
@@ -447,5 +458,28 @@ export function createDemoUserData({
     lastMotivationalQuote: motivationalQuotes[0] ?? "",
     onboardingCompleted: true,
     isHydratedFromDemo: true,
+  };
+}
+
+export function createEmptyUserData({
+  currentStorageVersion,
+  defaultAppPreferences,
+  motivationalQuotes,
+}: DemoDataOptions): UserData {
+  return {
+    storageVersion: currentStorageVersion,
+    userId: generateUserId(),
+    wheelOfLifeHistory: [],
+    currentWheelOfLife: [...EMPTY_WHEEL_AREAS],
+    goals: [],
+    visionBoards: [],
+    achievements: [],
+    reflections: [],
+    eventLog: [],
+    syncOutbox: [],
+    appPreferences: { ...defaultAppPreferences },
+    lastMotivationalQuote: motivationalQuotes[0] ?? "",
+    onboardingCompleted: false,
+    isHydratedFromDemo: false,
   };
 }

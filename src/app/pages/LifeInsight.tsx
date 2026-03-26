@@ -9,18 +9,11 @@ import {
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
-import {
-  PolarAngleAxis,
-  PolarGrid,
-  PolarRadiusAxis,
-  Radar,
-  RadarChart,
-  ResponsiveContainer,
-} from "recharts";
 
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import {
   APP_STORAGE_KEYS,
   LifeArea,
@@ -172,22 +165,7 @@ export function LifeInsight() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[340px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={radarData}>
-                    <PolarGrid stroke="#dbe3f1" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: "#5b6473", fontSize: 12 }} />
-                    <PolarRadiusAxis angle={90} domain={[0, 10]} tick={{ fill: "#94a3b8" }} />
-                    <Radar
-                      name="Điểm"
-                      dataKey="value"
-                      stroke="#7c3aed"
-                      fill="#7c3aed"
-                      fillOpacity={0.42}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
+              <SimpleRadarChart className="mx-auto max-w-[460px]" data={radarData} height={340} fillOpacity={0.2} />
 
               <div className="mt-4 grid gap-3 md:grid-cols-2">
                 <div

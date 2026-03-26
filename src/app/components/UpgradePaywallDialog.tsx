@@ -21,6 +21,7 @@ import {
   type PremiumFeatureContext,
 } from "../utils/twelve-week-premium";
 import type { PricingPlanCode } from "../utils/storage-types";
+import { isDemoMode, shouldShowBillingDebugUi } from "../utils/app-mode";
 
 interface UpgradePaywallDialogProps {
   open: boolean;
@@ -50,6 +51,8 @@ export function UpgradePaywallDialog({
   const [isUpgrading, setIsUpgrading] = useState(false);
   const paywallCopy = useMemo(() => getPaywallCopy(context), [context]);
   const billingProviderStatus = useMemo(() => getBillingProviderStatus(), []);
+  const billingDebugUi = shouldShowBillingDebugUi();
+  const demoMode = isDemoMode();
 
   useEffect(() => {
     if (!open) return;
@@ -166,35 +169,37 @@ export function UpgradePaywallDialog({
                 </div>
               </div>
 
-              <div className="rounded-[26px] border border-slate-200 bg-slate-50/88 p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Trạng thái thanh toán
-                </p>
-                <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                  <div className="rounded-[18px] border border-white/80 bg-white px-4 py-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Mode</p>
-                    <p className="mt-2 text-sm font-semibold text-slate-900">
-                      {billingProviderStatus.mode === "api_contract"
-                        ? "API contract"
-                        : billingProviderStatus.mode === "mock_provider"
-                          ? "Mock provider"
-                          : "Local test"}
-                    </p>
-                  </div>
-                  <div className="rounded-[18px] border border-white/80 bg-white px-4 py-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Checkout</p>
-                    <p className="mt-2 text-sm font-semibold text-slate-900">
-                      {billingProviderStatus.checkoutReady ? "Sẵn sàng" : "Local fallback"}
-                    </p>
-                  </div>
-                  <div className="rounded-[18px] border border-white/80 bg-white px-4 py-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Restore</p>
-                    <p className="mt-2 text-sm font-semibold text-slate-900">
-                      {billingProviderStatus.restoreReady ? "Sẵn sàng" : "Local fallback"}
-                    </p>
+              {billingDebugUi && (
+                <div className="rounded-[26px] border border-slate-200 bg-slate-50/88 p-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Trạng thái thanh toán
+                  </p>
+                  <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                    <div className="rounded-[18px] border border-white/80 bg-white px-4 py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Mode</p>
+                      <p className="mt-2 text-sm font-semibold text-slate-900">
+                        {billingProviderStatus.mode === "api_contract"
+                          ? "API contract"
+                          : billingProviderStatus.mode === "mock_provider"
+                            ? "Mock provider"
+                            : "Local test"}
+                      </p>
+                    </div>
+                    <div className="rounded-[18px] border border-white/80 bg-white px-4 py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Checkout</p>
+                      <p className="mt-2 text-sm font-semibold text-slate-900">
+                        {billingProviderStatus.checkoutReady ? "Sẵn sàng" : "Local fallback"}
+                      </p>
+                    </div>
+                    <div className="rounded-[18px] border border-white/80 bg-white px-4 py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Restore</p>
+                      <p className="mt-2 text-sm font-semibold text-slate-900">
+                        {billingProviderStatus.restoreReady ? "Sẵn sàng" : "Local fallback"}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <div className="min-w-0 space-y-4">
@@ -261,10 +266,10 @@ export function UpgradePaywallDialog({
 
           <DialogFooter className="flex flex-col gap-3 border-t border-white/70 bg-white/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5">
             <p className="text-sm leading-7 text-slate-500">
-              {billingProviderStatus.mode === "api_contract"
-                ? "Billing contract đã được cấu hình. Nếu provider trả checkout URL, app sẽ mở sang flow thanh toán tương ứng."
-                : billingProviderStatus.mode === "mock_provider"
-                  ? "Mock provider đang bật, nên bạn có thể test checkout, restore và sync end-to-end ngay trong app."
+              {demoMode
+                ? "Đây là bản demo nên bước nâng cấp hiện đang mô phỏng trên thiết bị này để bạn xem toàn bộ trải nghiệm."
+                : billingProviderStatus.mode === "api_contract"
+                  ? "Nếu host đã cấu hình billing thật, app sẽ chuyển bạn sang cổng thanh toán tương ứng ở bước tiếp theo."
                   : "Bạn vẫn có thể tiếp tục với bản Free nếu chưa cần mở thêm lớp hỗ trợ lúc này."}
             </p>
             <Button className="w-full sm:w-auto" variant="outline" onClick={() => onOpenChange(false)}>

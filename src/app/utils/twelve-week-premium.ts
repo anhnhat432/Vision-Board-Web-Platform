@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   Entitlement,
   EntitlementKey,
   LeadIndicator,
@@ -104,7 +104,7 @@ export const PLAN_DEFINITIONS: PricingPlanDefinition[] = [
     priceLabel: "149.000đ / chu kỳ",
     description: "Dành cho người muốn bắt đầu nhanh hơn, giữ nhịp đều hơn và biết tuần sau nên chỉnh gì.",
     highlights: [
-      "Template theo từng mục tiêu thật",
+      "Khung gợi ý thích nghi theo kiểu mục tiêu",
       "Review premium với gợi ý tuần sau",
       "Nhắc việc ưu tiên + analytics nâng cao",
     ],
@@ -617,7 +617,7 @@ export function getPaywallCopy(context: PremiumFeatureContext): {
           "Free đủ để chạy một chu kỳ. Plus dành cho lúc bạn muốn bớt loay hoay, giữ nhịp đều hơn và review tốt hơn mỗi tuần.",
         recommendedPlan: "PLUS",
         bullets: [
-          "Bắt đầu nhanh hơn với template đã dựng sẵn",
+          "Bắt đầu nhanh hơn với khung gợi ý thích nghi",
           "Giữ nhịp tốt hơn với reminder và analytics premium",
           "Review thông minh hơn với gợi ý tuần sau rõ ràng",
         ],
