@@ -394,8 +394,6 @@ export function evaluateRescueTriggers(input: {
   const system = input.system;
   if (!system) return filterAndSortTriggers(triggers);
 
-  const todayKey = formatDateInputValue(now);
-
   // ── missed_checkin: no check-in in the last 2+ days ──────────────────────
   const lastCheckIn = [...(system.dailyCheckIns ?? [])].sort((a, b) =>
     (getCalendarDateKey(b.date) ?? b.date).localeCompare(getCalendarDateKey(a.date) ?? a.date),

@@ -41,7 +41,7 @@ export function MotivationalReminder() {
       role="status"
       aria-live="polite"
     >
-      <Card className="border-0 bg-[linear-gradient(135deg,_rgba(15,23,42,0.98)_0%,_rgba(14,116,144,0.92)_100%)] text-white shadow-2xl">
+      <Card className="border-0 gradient-dark-teal text-white shadow-2xl">
         <CardContent className="space-y-4 p-4">
           {reminder ? (
             <div className="flex items-start gap-3">
@@ -52,7 +52,7 @@ export function MotivationalReminder() {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="mt-3 border-white/18 bg-white text-slate-900 hover:bg-white/92"
+                  className="hero-cta mt-3 border-white/18 bg-white text-slate-900 hover:bg-white/92"
                   onClick={() => {
                     setShowReminder(false);
                     if (reminder.goalId) {

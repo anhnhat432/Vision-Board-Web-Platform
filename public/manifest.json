@@ -1,0 +1,21 @@
+{
+  "name": "Dear Our Future",
+  "short_name": "Dear Our Future",
+  "description": "Lập kế hoạch mục tiêu 12 tuần, theo dõi tiến độ và sống có chủ đích hơn mỗi ngày.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0f0ff",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

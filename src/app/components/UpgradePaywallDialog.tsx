@@ -128,9 +128,9 @@ export function UpgradePaywallDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[calc(100vh-1rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] overflow-hidden border-0 bg-[linear-gradient(180deg,_rgba(248,250,252,0.98)_0%,_rgba(241,245,249,0.96)_100%)] p-0 shadow-[0_40px_90px_-40px_rgba(15,23,42,0.38)] sm:!max-w-4xl">
+      <DialogContent className="max-h-[calc(100vh-1rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] overflow-hidden border-0 gradient-shell p-0 shadow-[0_40px_90px_-40px_rgba(15,23,42,0.38)] sm:!max-w-4xl">
         <div className="max-h-[calc(100vh-1rem)] overflow-hidden rounded-[28px] sm:rounded-[30px]">
-          <div className="border-b border-white/70 bg-[linear-gradient(135deg,_rgba(15,23,42,0.98)_0%,_rgba(49,46,129,0.92)_100%)] px-5 py-6 text-white sm:px-7 sm:py-7">
+          <div className="border-b border-white/70 gradient-dark-indigo px-5 py-6 text-white sm:px-7 sm:py-7">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="max-w-2xl">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/78">
@@ -202,7 +202,8 @@ export function UpgradePaywallDialog({
               )}
             </div>
 
-            <div className="min-w-0 space-y-4" role="group" aria-label="Chọn gói nâng cấp">
+            <fieldset className="min-w-0 space-y-4">
+              <legend className="sr-only">Chọn gói nâng cấp</legend>
               {PLAN_DEFINITIONS.filter((plan) => plan.code !== "FREE").map((plan) => {
                 const isRecommended = plan.code === (recommendedPlan ?? paywallCopy.recommendedPlan);
                 const isCurrent = plan.code === currentPlan;
@@ -210,10 +211,9 @@ export function UpgradePaywallDialog({
                 return (
                   <div
                     key={plan.code}
-                    aria-label={`Gói ${plan.name}${isCurrent ? " — đang dùng" : ""}${isRecommended ? " — khuyên dùng" : ""}`}
                     className={`rounded-[28px] border p-5 shadow-[0_24px_60px_-38px_rgba(15,23,42,0.18)] ${
                       isRecommended
-                        ? "border-violet-300 bg-[linear-gradient(180deg,_rgba(245,243,255,0.95)_0%,_rgba(237,233,254,0.88)_100%)]"
+                        ? "border-violet-300 gradient-violet"
                         : "border-white/70 bg-white/88"
                     }`}
                   >
@@ -262,7 +262,7 @@ export function UpgradePaywallDialog({
                   </div>
                 );
               })}
-            </div>
+            </fieldset>
           </div>
 
           <DialogFooter className="flex flex-col gap-3 border-t border-white/70 bg-white/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5">

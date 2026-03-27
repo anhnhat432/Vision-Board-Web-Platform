@@ -17,7 +17,7 @@ interface CountUpProps extends React.ComponentPropsWithoutRef<"span"> {
 }
 
 function easeOutCubic(progress: number) {
-  return 1 - Math.pow(1 - progress, 3);
+  return 1 - (1 - progress) ** 3;
 }
 
 export function CountUp({

@@ -71,7 +71,7 @@ export function TwelveWeekPlanAccessSection({
   const unlockedEntitlementCount = ENTITLEMENT_ORDER.filter((key) => entitlementKeys.includes(key)).length;
 
   return (
-    <div className="rounded-[26px] border border-violet-200/70 bg-[linear-gradient(135deg,_rgba(49,46,129,0.96)_0%,_rgba(76,29,149,0.92)_100%)] p-5 text-white shadow-[0_28px_60px_-38px_rgba(76,29,149,0.55)]">
+    <div className="rounded-[26px] border border-violet-200/70 gradient-indigo-purple p-5 text-white shadow-[0_28px_60px_-38px_rgba(76,29,149,0.55)]">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Gói và quyền 12 tuần</p>

@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { render } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
@@ -16,7 +16,6 @@ import {
   renderAppRoute,
 } from "../../test/app-flow-helpers";
 import { BillingPlan } from "./BillingPlan";
-import { MockBillingCheckout } from "./MockBillingCheckout";
 
 describe("monetization flows", () => {
   beforeEach(() => {

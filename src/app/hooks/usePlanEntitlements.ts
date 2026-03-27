@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { PricingPlanCode, EntitlementKey, UserData } from "../utils/storage";
+import type { UserData } from "../utils/storage";
 import { getCurrentPlan, getCurrentEntitlementKeys } from "../utils/storage";
 import { getPlanDefinition } from "../utils/twelve-week-premium";
 

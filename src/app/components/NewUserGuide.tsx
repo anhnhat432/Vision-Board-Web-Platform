@@ -73,7 +73,7 @@ function StepList({ userData }: { userData: UserData }) {
                 step.completed
                   ? "bg-emerald-600 text-white"
                   : step.id === progress.nextStep?.id
-                    ? "bg-white text-slate-950"
+                    ? "hero-cta bg-white text-slate-950"
                     : "bg-slate-100 text-slate-700"
               }`}
             >
@@ -135,7 +135,7 @@ export function NewUserGuideBanner({
     : "Website này dễ dùng hơn nhiều nếu bạn đi đúng flow: mục tiêu rõ, chu kỳ rõ, rồi mới nhìn hôm nay và review tuần.";
 
   return (
-    <Card className="overflow-hidden border-0 bg-[linear-gradient(135deg,_rgba(15,23,42,0.98)_0%,_rgba(30,41,59,0.94)_100%)] text-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.58)]">
+    <Card className="overflow-hidden border-0 gradient-dark text-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.58)]">
       <CardContent className={compact ? "p-5" : "p-6 lg:p-7"}>
         <div className={compact ? "space-y-4" : "grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]"}>
           <div className="space-y-4">
@@ -161,7 +161,7 @@ export function NewUserGuideBanner({
               {nextStep && (
                 <Button
                   onClick={() => navigate(nextStep.href)}
-                  className="border-white/12 bg-white text-slate-950 hover:bg-white/92"
+                  className="hero-cta border-white/12 bg-white text-slate-950 hover:bg-white/92"
                 >
                   {nextStep.ctaLabel}
                   <ArrowRight className="h-4 w-4" />

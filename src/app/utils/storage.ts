@@ -133,6 +133,16 @@ const CURRENT_STORAGE_VERSION = 5;
 let _cachedUserData: UserData | null = null;
 let _cachedRawHash: string | null = null;
 
+// Invalidate in-memory cache when another browser tab saves user data
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => {
+    if (e.key === STORAGE_KEY) {
+      _cachedUserData = null;
+      _cachedRawHash = null;
+    }
+  });
+}
+
 const DEFAULT_APP_PREFERENCES: AppPreferences = {
   allowLocalAnalytics: true,
   enableInAppReminders: true,
@@ -324,7 +334,7 @@ function isValidUserDataShape(data: unknown): data is UserData {
   );
 }
 
-function parseStoredUserData(raw: string): UserData | null {
+export function parseStoredUserData(raw: string): UserData | null {
   try {
     const parsed: unknown = JSON.parse(raw);
     if (!isValidUserDataShape(parsed)) return null;
@@ -684,6 +694,11 @@ export function getPrivacyConsents(): Record<PrivacyConsentCategory, boolean> {
 }
 
 export function deleteAllUserData(): void {
+  // Remove main data key first
+  localStorage.removeItem(STORAGE_KEY);
+  _cachedUserData = null;
+  _cachedRawHash = null;
+
   const keys = Object.values(APP_STORAGE_KEYS);
   for (const key of keys) {
     localStorage.removeItem(key);

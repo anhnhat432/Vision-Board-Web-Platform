@@ -65,9 +65,12 @@ describe("twelve-week-premium helpers", () => {
     );
 
     expect(template).toBeDefined();
+    if (!template) {
+      throw new Error("Expected creator-publishing-engine template to exist.");
+    }
 
     const support = buildAdaptiveTemplateSupport({
-      template: template!,
+      template,
       goalStatement: "Ra mắt khóa học đầu tiên",
       measurableText: "Chốt 12 bài và mở bán thử",
       readinessScore: 17,

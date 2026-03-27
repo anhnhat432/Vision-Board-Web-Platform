@@ -86,13 +86,13 @@ export function TwelveWeekWeekTab({
   return (
     <div className="space-y-6 pt-4">
       <div className="grid gap-4 md:grid-cols-3">
-        <Card interactive={false} className="border-0 bg-[linear-gradient(135deg,_rgba(15,23,42,0.98)_0%,_rgba(30,41,59,0.94)_100%)] text-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.7)]">
+        <Card interactive={false} className="border-0 gradient-dark text-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.7)]">
           <CardContent className="p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/56">Một câu để nhớ</p>
             <p className="mt-3 text-lg font-semibold leading-8 text-white">{currentPlanFocus}</p>
           </CardContent>
         </Card>
-        <Card interactive={false} className="border-0 bg-[linear-gradient(180deg,_rgba(219,234,254,0.92)_0%,_rgba(191,219,254,0.76)_100%)] shadow-[0_24px_60px_-36px_rgba(37,99,235,0.24)]">
+        <Card interactive={false} className="border-0 gradient-blue shadow-[0_24px_60px_-36px_rgba(37,99,235,0.24)]">
           <CardContent className="p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Tiến độ tuần</p>
             <p className="mt-3 text-3xl font-bold text-slate-950">{weekCompletion.percent}%</p>
@@ -103,8 +103,8 @@ export function TwelveWeekWeekTab({
           interactive={false}
           className={
             reviewDueToday
-              ? "border-0 bg-[linear-gradient(180deg,_rgba(254,243,199,0.96)_0%,_rgba(253,230,138,0.82)_100%)] shadow-[0_24px_60px_-36px_rgba(217,119,6,0.24)]"
-              : "border-0 bg-[linear-gradient(180deg,_rgba(240,253,244,0.94)_0%,_rgba(209,250,229,0.8)_100%)] shadow-[0_24px_60px_-36px_rgba(5,150,105,0.2)]"
+              ? "border-0 gradient-amber shadow-[0_24px_60px_-36px_rgba(217,119,6,0.24)]"
+              : "border-0 gradient-emerald shadow-[0_24px_60px_-36px_rgba(5,150,105,0.2)]"
           }
         >
           <CardContent className="p-5">
@@ -116,7 +116,7 @@ export function TwelveWeekWeekTab({
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
-        <Card className="h-full border-0 bg-[linear-gradient(180deg,_rgba(238,242,255,0.94)_0%,_rgba(224,231,255,0.82)_100%)] shadow-[0_30px_70px_-40px_rgba(99,102,241,0.22)]">
+        <Card className="h-full border-0 gradient-indigo shadow-[0_30px_70px_-40px_rgba(99,102,241,0.22)]">
           <CardHeader>
             <CardTitle className="text-slate-950">Tuần này chỉ cần giữ 2 lớp việc</CardTitle>
             <CardDescription className="text-slate-700">
@@ -187,7 +187,7 @@ export function TwelveWeekWeekTab({
 
         <Card
           data-tour-id="system-week-review"
-          className="h-full border-0 bg-[linear-gradient(180deg,_rgba(250,245,255,0.94)_0%,_rgba(243,232,255,0.84)_100%)] shadow-[0_30px_70px_-40px_rgba(168,85,247,0.2)]"
+          className="h-full border-0 gradient-purple shadow-[0_30px_70px_-40px_rgba(168,85,247,0.2)]"
         >
           <CardHeader>
             <CardTitle className="text-slate-950">Review tuần</CardTitle>
@@ -225,8 +225,8 @@ export function TwelveWeekWeekTab({
             <div
               className={`rounded-[24px] border p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] ${
                 hasPremiumInsights
-                  ? "border-sky-200 bg-[linear-gradient(180deg,_rgba(239,246,255,0.96)_0%,_rgba(219,234,254,0.9)_100%)]"
-                  : "border-violet-200 bg-[linear-gradient(180deg,_rgba(245,243,255,0.96)_0%,_rgba(237,233,254,0.88)_100%)]"
+                  ? "border-sky-200 gradient-sky"
+                  : "border-violet-200 gradient-violet"
               }`}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">

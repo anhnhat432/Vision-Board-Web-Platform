@@ -1,8 +1,11 @@
-import { Suspense, lazy, useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
+import { useBlocker, useNavigate } from "react-router";
 import { motion } from "motion/react";
 import {
+  AlertTriangle,
   Calendar,
   Compass,
+  Compass as CompassIcon,
   Save,
   Sparkles,
   TrendingUp,
@@ -19,9 +22,8 @@ import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { Slider } from "../components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
-  LIFE_AREAS,
-  LifeArea,
-  UserData,
+  type LifeArea,
+  type UserData,
   getLifeAreaLabel,
   getUserData,
   updateWheelOfLife,
@@ -32,20 +34,27 @@ const LifeBalanceHistoryChart = lazy(async () => ({
 }));
 
 export function LifeBalance() {
+  const navigate = useNavigate();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [lifeAreas, setLifeAreas] = useState<LifeArea[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  // Warn user before navigating away with unsaved changes
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      hasChanges && currentLocation.pathname !== nextLocation.pathname,
+  );
 
-  const loadData = () => {
+  const loadData = useCallback(() => {
     const data = getUserData();
     setUserData(data);
     setLifeAreas([...data.currentWheelOfLife]);
     setHasChanges(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleScoreChange = (index: number, value: number[]) => {
     const updated = [...lifeAreas];
@@ -105,10 +114,66 @@ export function LifeBalance() {
     });
   }, [userData]);
 
-  if (!userData || !strongestArea || !weakestArea) return null;
+  // Empty state: onboarding not yet completed or wheel not set
+  if (!userData || userData.currentWheelOfLife.length === 0) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
+        <div className="relative">
+          <div className="absolute -inset-4 animate-pulse rounded-full border-2 border-dashed border-violet-200" />
+          <div className="flex h-20 w-20 items-center justify-center rounded-[28px] bg-violet-50 text-violet-600">
+            <CompassIcon className="h-9 w-9" />
+          </div>
+        </div>
+        <div className="space-y-3">
+          <h2 className="text-2xl font-bold text-slate-900">Chưa có dữ liệu bánh xe cuộc sống</h2>
+          <p className="max-w-sm text-sm leading-7 text-slate-500">
+            Bạn cần hoàn thành đánh giá ban đầu trước. Chỉ mất khoảng 3 phút để tạo bức tranh nền cho hành trình phát triển.
+          </p>
+        </div>
+        <Button onClick={() => navigate("/onboarding")}>
+          Bắt đầu đánh giá
+          <TrendingUp className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  }
+
+  if (!strongestArea || !weakestArea) return null;
 
   return (
     <div className="space-y-8 pb-12">
+      {/* Unsaved changes navigation blocker dialog */}
+      {blocker.state === "blocked" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-sm rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_32px_80px_-24px_rgba(15,23,42,0.35)]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-[20px] bg-amber-50 text-amber-600">
+              <AlertTriangle className="h-6 w-6" />
+            </div>
+            <h3 className="mt-4 text-lg font-bold text-slate-900">Bạn có thay đổi chưa lưu</h3>
+            <p className="mt-2 text-sm leading-7 text-slate-500">
+              Nếu rời khỏi trang này ngay bây giờ, điểm số vừa điều chỉnh sẽ không được lưu lại.
+            </p>
+            <div className="mt-6 flex flex-col gap-3">
+              <Button
+                onClick={() => {
+                  updateWheelOfLife(lifeAreas);
+                  toast.success("Đã lưu trước khi rời trang.");
+                  blocker.proceed();
+                }}
+              >
+                <Save className="h-4 w-4" />
+                Lưu rồi rời trang
+              </Button>
+              <Button variant="outline" onClick={() => blocker.proceed()}>
+                Rời trang không lưu
+              </Button>
+              <Button variant="ghost" onClick={() => blocker.reset()}>
+                Ở lại trang này
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       <Card className="hero-surface overflow-hidden border-0 text-white">
         <CardContent className="relative p-5 sm:p-6 lg:p-8">
 
@@ -133,7 +198,7 @@ export function LifeBalance() {
                 {hasChanges ? (
                   <Button
                     variant="outline"
-                    className="border-white/18 bg-white text-slate-900 hover:bg-white/92"
+                    className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92"
                     onClick={handleSave}
                   >
                     <Save className="h-4 w-4" />
@@ -194,28 +259,28 @@ export function LifeBalance() {
             value: averageScore.toFixed(1),
             note: "mặt bằng hiện tại",
             icon: TrendingUp,
-            color: "from-violet-500/18 to-fuchsia-500/10 text-violet-700",
+            color: "from-violet-500/18 to-fuchsia-500/10 text-violet-700 dark:text-violet-400",
           },
           {
             title: "Điểm cao nhất",
             value: strongestArea.score,
             note: getLifeAreaLabel(strongestArea.name),
             icon: Sparkles,
-            color: "from-emerald-500/18 to-teal-500/10 text-emerald-700",
+            color: "from-emerald-500/18 to-teal-500/10 text-emerald-700 dark:text-emerald-400",
           },
           {
             title: "Điểm thấp nhất",
             value: weakestArea.score,
             note: getLifeAreaLabel(weakestArea.name),
             icon: Compass,
-            color: "from-amber-500/18 to-orange-500/10 text-amber-700",
+            color: "from-amber-500/18 to-orange-500/10 text-amber-700 dark:text-amber-400",
           },
           {
             title: "Lần đo đã lưu",
             value: userData.wheelOfLifeHistory.length,
             note: "mốc lịch sử hiện có",
             icon: Calendar,
-            color: "from-sky-500/18 to-cyan-500/10 text-sky-700",
+            color: "from-sky-500/18 to-cyan-500/10 text-sky-700 dark:text-sky-400",
           },
         ].map((item, index) => {
           const Icon = item.icon;
@@ -338,7 +403,7 @@ export function LifeBalance() {
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                           <div
-                            className="h-4 w-4 rounded-full shadow-[0_0_0_6px_rgba(255,255,255,0.85)]"
+                            className="h-4 w-4 rounded-full shadow-[0_0_0_6px_rgba(255,255,255,0.85)] dark:shadow-[0_0_0_6px_rgba(0,0,0,0.35)]"
                             style={{ backgroundColor: area.color }}
                           />
                           <div>
@@ -365,6 +430,8 @@ export function LifeBalance() {
                           max={10}
                           step={1}
                           className="w-full"
+                          trackColor={area.color}
+                          aria-label={`Điểm ${getLifeAreaLabel(area.name)}`}
                         />
                         <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.14em] text-slate-400">
                           <span>Cần chú ý</span>

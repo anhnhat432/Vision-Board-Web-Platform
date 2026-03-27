@@ -9,7 +9,7 @@ import {
   Sparkles,
   Target,
   Trophy,
-  LucideIcon,
+  type LucideIcon,
   LockKeyhole,
   ArrowRight,
 } from "lucide-react";
@@ -20,7 +20,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { CountUp } from "../components/ui/count-up";
 import { InteractiveSurface } from "../components/ui/interactive-surface";
 import { Reveal } from "../components/ui/reveal";
-import { calculateGoalProgress, getUserData, UserData } from "../utils/storage";
+import { calculateGoalProgress, getUserData, type UserData } from "../utils/storage";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Target,
@@ -134,7 +134,7 @@ export function Achievements() {
               <div className="flex flex-wrap gap-3">
                 <Button
                   variant="outline"
-                  className="border-white/18 bg-white text-slate-900 hover:bg-white/92"
+                  className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92"
                   onClick={() => navigate("/goals")}
                 >
                   Tiếp tục mục tiêu
@@ -270,6 +270,16 @@ export function Achievements() {
             <p className="mx-auto mt-3 max-w-2xl text-base text-slate-500">
               Cột mốc đầu tiên thường đến rất nhanh. Hãy bắt đầu bằng một mục tiêu, một board tầm nhìn hoặc một bài viết phản tư.
             </p>
+            <div className="mx-auto mt-6 flex flex-wrap justify-center gap-3">
+              <Button variant="outline" onClick={() => navigate("/goals")}>
+                <Target className="h-4 w-4" />
+                Tạo mục tiêu
+              </Button>
+              <Button variant="outline" onClick={() => navigate("/journal")}>
+                <BookOpen className="h-4 w-4" />
+                Viết nhật ký
+              </Button>
+            </div>
           </CardContent>
           </Card>
         </Reveal>
@@ -299,7 +309,7 @@ export function Achievements() {
                   <Card className="overflow-hidden">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-[24px] bg-[linear-gradient(135deg,_rgba(245,158,11,0.14)_0%,_rgba(249,115,22,0.12)_100%)] text-amber-700 shadow-[0_18px_36px_-28px_rgba(245,158,11,0.42)]">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-[24px] gradient-amber-icon text-amber-700 shadow-[0_18px_36px_-28px_rgba(245,158,11,0.42)]">
                           <Icon className="h-8 w-8" />
                         </div>
                         <div className="min-w-0 flex-1">

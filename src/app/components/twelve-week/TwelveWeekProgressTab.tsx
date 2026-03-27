@@ -61,7 +61,7 @@ export function TwelveWeekProgressTab({
       <div className="grid gap-4 md:grid-cols-3">
         <Card
           interactive={false}
-          className="border-0 bg-[linear-gradient(135deg,_rgba(15,23,42,0.98)_0%,_rgba(30,41,59,0.94)_100%)] text-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.7)]"
+          className="border-0 gradient-dark text-white shadow-[0_30px_70px_-40px_rgba(15,23,42,0.7)]"
         >
           <CardContent className="p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/56">Tuần đang chạy</p>
@@ -83,7 +83,7 @@ export function TwelveWeekProgressTab({
 
         <Card
           interactive={false}
-          className="border-0 bg-[linear-gradient(180deg,_rgba(219,234,254,0.94)_0%,_rgba(191,219,254,0.78)_100%)] shadow-[0_24px_60px_-36px_rgba(37,99,235,0.26)]"
+          className="border-0 gradient-blue shadow-[0_24px_60px_-36px_rgba(37,99,235,0.26)]"
         >
           <CardContent className="p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Điểm hiện tại</p>
@@ -101,7 +101,7 @@ export function TwelveWeekProgressTab({
 
         <Card
           interactive={false}
-          className="border-0 bg-[linear-gradient(180deg,_rgba(236,253,245,0.95)_0%,_rgba(209,250,229,0.82)_100%)] shadow-[0_24px_60px_-36px_rgba(5,150,105,0.22)]"
+          className="border-0 gradient-emerald shadow-[0_24px_60px_-36px_rgba(5,150,105,0.22)]"
         >
           <CardContent className="p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Review đã khóa</p>
@@ -125,7 +125,7 @@ export function TwelveWeekProgressTab({
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <Card
           interactive={false}
-          className="border-0 bg-[linear-gradient(180deg,_rgba(15,23,42,0.98)_0%,_rgba(30,41,59,0.95)_100%)] text-white shadow-[0_34px_80px_-42px_rgba(15,23,42,0.72)]"
+          className="border-0 gradient-dark text-white shadow-[0_34px_80px_-42px_rgba(15,23,42,0.72)]"
         >
           <CardHeader>
             <CardTitle className="text-white">Bảng điểm 12 tuần</CardTitle>
@@ -135,7 +135,7 @@ export function TwelveWeekProgressTab({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
-            <div className="rounded-[24px] border border-sky-300/22 bg-[linear-gradient(135deg,_rgba(14,116,144,0.28)_0%,_rgba(30,41,59,0.14)_100%)] p-5">
+            <div className="rounded-[24px] border border-sky-300/22 gradient-teal-dark-subtle p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold text-white">Tuần {currentWeek} đang là trọng tâm</p>
@@ -155,9 +155,9 @@ export function TwelveWeekProgressTab({
                   key={week.weekNumber}
                   className={`rounded-[24px] border p-5 shadow-[0_20px_45px_-34px_rgba(15,23,42,0.35)] ${
                     week.weekNumber === currentWeek
-                      ? "border-sky-300/22 bg-[linear-gradient(135deg,_rgba(8,47,73,0.95)_0%,_rgba(3,105,161,0.88)_100%)]"
+                      ? "border-sky-300/22 gradient-dark-sky"
                       : week.reviewDone
-                        ? "border-emerald-300/20 bg-[linear-gradient(180deg,_rgba(6,78,59,0.3)_0%,_rgba(255,255,255,0.05)_100%)]"
+                        ? "border-emerald-300/20 gradient-emerald-on-dark"
                         : "border-white/10 bg-white/6"
                   }`}
                 >
@@ -243,7 +243,7 @@ export function TwelveWeekProgressTab({
 
         <Card
           interactive={false}
-          className="border-0 bg-[linear-gradient(180deg,_rgba(226,232,240,0.94)_0%,_rgba(203,213,225,0.84)_100%)] shadow-[0_28px_70px_-38px_rgba(15,23,42,0.28)]"
+          className="border-0 gradient-slate shadow-[0_28px_70px_-38px_rgba(15,23,42,0.28)]"
         >
           <CardHeader>
             <CardTitle className="text-slate-950">Cột mốc và đích đến</CardTitle>
@@ -283,7 +283,7 @@ export function TwelveWeekProgressTab({
           {executionHeatmap.length > 0 && (
             <Card
               interactive={false}
-              className="border-0 bg-[linear-gradient(180deg,_rgba(15,23,42,0.98)_0%,_rgba(30,41,59,0.95)_100%)] text-white shadow-[0_34px_80px_-42px_rgba(15,23,42,0.72)]"
+              className="border-0 gradient-dark text-white shadow-[0_34px_80px_-42px_rgba(15,23,42,0.72)]"
             >
               <CardHeader>
                 <CardTitle className="text-white">Bản đồ thực thi</CardTitle>
@@ -344,7 +344,7 @@ export function TwelveWeekProgressTab({
           {weeklyTrend.length > 0 && (
             <Card
               interactive={false}
-              className="border-0 bg-[linear-gradient(180deg,_rgba(219,234,254,0.94)_0%,_rgba(191,219,254,0.78)_100%)] shadow-[0_24px_60px_-36px_rgba(37,99,235,0.26)]"
+              className="border-0 gradient-blue shadow-[0_24px_60px_-36px_rgba(37,99,235,0.26)]"
             >
               <CardHeader>
                 <CardTitle className="text-slate-950">Xu hướng thực thi theo tuần</CardTitle>
@@ -404,7 +404,7 @@ export function TwelveWeekProgressTab({
           {tacticBreakdown.length > 0 && (
             <Card
               interactive={false}
-              className="border-0 bg-[linear-gradient(180deg,_rgba(236,253,245,0.95)_0%,_rgba(209,250,229,0.82)_100%)] shadow-[0_24px_60px_-36px_rgba(5,150,105,0.22)]"
+              className="border-0 gradient-emerald shadow-[0_24px_60px_-36px_rgba(5,150,105,0.22)]"
             >
               <CardHeader>
                 <CardTitle className="text-slate-950">Phân tích theo tactic</CardTitle>
@@ -467,7 +467,7 @@ export function TwelveWeekProgressTab({
         /* Locked teaser for Free users */
         <Card
           interactive={false}
-          className="border border-violet-200/60 bg-[linear-gradient(180deg,_rgba(245,243,255,0.95)_0%,_rgba(237,233,254,0.85)_100%)] shadow-[0_24px_55px_-34px_rgba(124,58,237,0.18)]"
+          className="border border-violet-200/60 gradient-violet shadow-[0_24px_55px_-34px_rgba(124,58,237,0.18)]"
         >
           <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100 text-violet-600">

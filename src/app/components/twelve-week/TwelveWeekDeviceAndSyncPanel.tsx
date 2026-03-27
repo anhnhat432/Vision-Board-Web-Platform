@@ -19,7 +19,7 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
   return (
     <Card
       interactive={false}
-      className="border-0 bg-[linear-gradient(180deg,_rgba(248,250,252,0.98)_0%,_rgba(241,245,249,0.92)_100%)] shadow-[0_30px_70px_-40px_rgba(15,23,42,0.16)] lg:sticky lg:top-6"
+      className="border-0 gradient-shell shadow-[0_30px_70px_-40px_rgba(15,23,42,0.16)] lg:sticky lg:top-6"
     >
       <CardHeader>
         <CardTitle className="text-slate-950">Thiết bị, dữ liệu và đồng bộ</CardTitle>

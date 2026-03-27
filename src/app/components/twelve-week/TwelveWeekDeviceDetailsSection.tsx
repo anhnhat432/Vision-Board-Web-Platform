@@ -537,7 +537,7 @@ export function TwelveWeekDeviceDetailsSection({
         </div>
       </ExpandableSection>
 
-      <div className="rounded-[24px] border border-red-300/70 bg-[linear-gradient(180deg,_rgba(254,226,226,0.96)_0%,_rgba(254,242,242,0.92)_100%)] p-5 shadow-[0_20px_45px_-34px_rgba(220,38,38,0.18)]">
+      <div className="rounded-[24px] border border-red-300/70 gradient-red p-5 shadow-[0_20px_45px_-34px_rgba(220,38,38,0.18)]">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-red-600">Làm mới chu kỳ</p>
         <p className="mt-2 text-sm text-red-900">
           Bắt đầu lại tuần 1 từ tuần hiện tại, giữ nguyên outcome và tactic, nhưng làm mới việc, check-in và review của

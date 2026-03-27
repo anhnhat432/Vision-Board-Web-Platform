@@ -31,7 +31,7 @@ export function TwelveWeekCycleSettingsPanel({
     <Card
       data-tour-id="system-settings-panel"
       interactive={false}
-      className="border-0 bg-[linear-gradient(180deg,_rgba(238,242,255,0.95)_0%,_rgba(224,231,255,0.84)_100%)] shadow-[0_30px_70px_-40px_rgba(99,102,241,0.22)]"
+      className="border-0 gradient-indigo shadow-[0_30px_70px_-40px_rgba(99,102,241,0.22)]"
     >
       <CardHeader>
         <CardTitle className="text-slate-950">Cài đặt chu kỳ</CardTitle>
@@ -40,7 +40,7 @@ export function TwelveWeekCycleSettingsPanel({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="rounded-[26px] border border-slate-900/10 bg-[linear-gradient(135deg,_rgba(15,23,42,0.96)_0%,_rgba(49,46,129,0.9)_100%)] p-5 text-white shadow-[0_28px_60px_-38px_rgba(15,23,42,0.55)]">
+        <div className="rounded-[26px] border border-slate-900/10 gradient-dark-indigo p-5 text-white shadow-[0_28px_60px_-38px_rgba(15,23,42,0.55)]">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/56">
@@ -222,7 +222,7 @@ export function TwelveWeekCycleSettingsPanel({
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">
-          <div className="rounded-[24px] border border-slate-900/10 bg-[linear-gradient(135deg,_rgba(15,23,42,0.96)_0%,_rgba(30,41,59,0.92)_100%)] p-5 text-white shadow-[0_22px_45px_-32px_rgba(15,23,42,0.5)]">
+          <div className="rounded-[24px] border border-slate-900/10 gradient-dark p-5 text-white shadow-[0_22px_45px_-32px_rgba(15,23,42,0.5)]">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/56">Bắt đầu</p>
             <p className="mt-2 text-xl font-bold text-white">{formatCalendarDate(system.startDate)}</p>
           </div>

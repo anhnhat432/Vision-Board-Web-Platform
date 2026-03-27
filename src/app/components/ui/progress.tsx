@@ -38,7 +38,7 @@ function Progress({
 
     const tick = (timestamp: number) => {
       const progress = Math.min((timestamp - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
+      const eased = 1 - (1 - progress) ** 3;
       const nextValue = from + (to - from) * eased;
 
       setDisplayValue(nextValue);
@@ -70,7 +70,7 @@ function Progress({
     >
       <ProgressPrimitive.Indicator
         data-slot="progress-indicator"
-        className="progress-indicator relative h-full w-full flex-1 rounded-full bg-[linear-gradient(135deg,_rgba(109,40,217,0.98)_0%,_rgba(192,38,211,0.92)_46%,_rgba(59,130,246,0.96)_100%)] shadow-[0_10px_28px_-18px_rgba(109,40,217,0.62)]"
+        className="progress-indicator relative h-full w-full flex-1 rounded-full gradient-brand shadow-[0_10px_28px_-18px_rgba(109,40,217,0.62)]"
         style={{ transform: `translateX(-${100 - displayValue}%)` }}
       />
     </ProgressPrimitive.Root>

@@ -56,8 +56,7 @@ export function BillingPlan() {
   useEffect(() => {
     markExperimentExposed("paywall_trial_cta");
     trackExperimentExposure({ experimentId: "paywall_trial_cta", variantId: trialCtaExperiment, context: "billing_plan" });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [trialCtaExperiment]);
 
   const demoMode = isDemoMode();
   const billingStatus = useMemo(() => getBillingProviderStatus(), []);

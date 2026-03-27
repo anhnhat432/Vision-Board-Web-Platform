@@ -1,4 +1,4 @@
-﻿import { ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import {
@@ -207,22 +207,22 @@ function FeasibilityResultView({
     realistic: {
       glow: "bg-gradient-to-br from-emerald-400/24 via-cyan-300/14 to-transparent",
       badge: "border-emerald-200 bg-emerald-50 text-emerald-800",
-      title: "border-emerald-200/70 bg-[linear-gradient(135deg,_rgba(236,253,245,0.92)_0%,_rgba(240,253,250,0.88)_100%)]",
-      panel: "border-emerald-100/80 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98)_0%,_rgba(236,253,245,0.88)_100%)]",
+      title: "border-emerald-200/70 gradient-emerald-title",
+      panel: "border-emerald-100/80 gradient-white-emerald",
       meter: "from-emerald-400 via-teal-400 to-cyan-400",
     },
     challenging: {
       glow: "bg-gradient-to-br from-amber-400/24 via-orange-300/14 to-transparent",
       badge: "border-amber-200 bg-amber-50 text-amber-800",
-      title: "border-amber-200/70 bg-[linear-gradient(135deg,_rgba(255,251,235,0.94)_0%,_rgba(255,247,237,0.9)_100%)]",
-      panel: "border-amber-100/80 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98)_0%,_rgba(255,251,235,0.88)_100%)]",
+      title: "border-amber-200/70 gradient-amber-title",
+      panel: "border-amber-100/80 gradient-white-amber",
       meter: "from-amber-400 via-orange-400 to-rose-400",
     },
     too_ambitious: {
       glow: "bg-gradient-to-br from-rose-400/24 via-orange-300/14 to-transparent",
       badge: "border-rose-200 bg-rose-50 text-rose-800",
-      title: "border-rose-200/70 bg-[linear-gradient(135deg,_rgba(255,241,242,0.94)_0%,_rgba(255,247,237,0.9)_100%)]",
-      panel: "border-rose-100/80 bg-[linear-gradient(180deg,_rgba(255,255,255,0.98)_0%,_rgba(255,241,242,0.88)_100%)]",
+      title: "border-rose-200/70 gradient-rose-title",
+      panel: "border-rose-100/80 gradient-white-rose",
       meter: "from-rose-400 via-fuchsia-400 to-orange-400",
     },
   };
@@ -525,7 +525,7 @@ function FeasibilityResultView({
                           key={highlight.title}
                           className="rounded-[24px] border border-white/80 bg-white/82 p-4 shadow-[0_20px_50px_-34px_rgba(15,23,42,0.22)]"
                         >
-                          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,_rgba(109,40,217,0.12)_0%,_rgba(59,130,246,0.14)_100%)] text-violet-700">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-2xl gradient-violet-blue-icon text-violet-700">
                             {highlight.icon}
                           </div>
                           <p className="mt-4 text-base font-semibold text-slate-900">{highlight.title}</p>
@@ -622,7 +622,7 @@ function FeasibilityResultView({
                       key={item}
                       className="flex gap-3 rounded-[24px] border border-white/80 bg-white/84 p-4 shadow-[0_18px_44px_-34px_rgba(15,23,42,0.22)]"
                     >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,_rgba(109,40,217,0.14)_0%,_rgba(59,130,246,0.16)_100%)] text-sm font-semibold text-violet-700">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl gradient-violet-blue-icon text-sm font-semibold text-violet-700">
                         {index + 1}
                       </div>
                       <p className="text-sm leading-7 text-slate-600">{item}</p>
@@ -884,7 +884,7 @@ export function FeasibilityCheck() {
                 transition={{ duration: 0.3 }}
                 className="space-y-6"
               >
-                <div className="rounded-[28px] bg-[linear-gradient(135deg,_rgba(245,243,255,0.95)_0%,_rgba(252,231,243,0.78)_100%)] p-6">
+                <div className="rounded-[28px] gradient-violet-pink p-6">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">
                     Câu hỏi {currentStep + 1}
                   </p>

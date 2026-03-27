@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { motion } from "motion/react";
 import {
@@ -7,7 +7,6 @@ import {
   Eye,
   Image as ImageIcon,
   Images,
-  MessageSquareQuote,
   Plus,
   Sparkles,
   Trash2,
@@ -35,7 +34,7 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { InteractiveSurface } from "../components/ui/interactive-surface";
-import { UserData, deleteVisionBoard, getUserData } from "../utils/storage";
+import { deleteVisionBoard, getUserData, type UserData } from "../utils/storage";
 
 const ICON_COMPONENTS = {
   Sparkles,
@@ -54,7 +53,7 @@ function BoardPreviewIcon({ content }: { content: string }) {
   const Icon = ICON_COMPONENTS[content as IconName] ?? Sparkles;
 
   return (
-    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[linear-gradient(135deg,_rgba(109,40,217,0.96)_0%,_rgba(236,72,153,0.88)_100%)] text-white shadow-[0_14px_28px_-20px_rgba(109,40,217,0.62)]">
+    <div className="flex h-9 w-9 items-center justify-center rounded-full gradient-violet-pink text-white shadow-[0_14px_28px_-20px_rgba(109,40,217,0.62)]">
       <Icon className="h-4 w-4" />
     </div>
   );
@@ -66,14 +65,14 @@ export function VisionBoardGallery() {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [boardToDelete, setBoardToDelete] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = () => {
+  const loadData = useCallback(() => {
     const data = getUserData();
     setUserData(data);
-  };
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleDeleteBoard = (boardId: string) => {
     setBoardToDelete(boardId);
@@ -96,7 +95,7 @@ export function VisionBoardGallery() {
   }, [userData]);
 
   const years = useMemo(
-    () => Object.keys(boardsByYear).sort((a, b) => parseInt(b) - parseInt(a)),
+    () => Object.keys(boardsByYear).sort((a, b) => parseInt(b, 10) - parseInt(a, 10)),
     [boardsByYear],
   );
 
@@ -139,7 +138,7 @@ export function VisionBoardGallery() {
             <div className="space-y-6">
               <div className="interactive-layer interactive-layer--soft inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                 <Images className="h-4 w-4" />
-                Vision Board Library
+                Dear Our Future Library
               </div>
 
               <div className="space-y-4">
@@ -155,7 +154,7 @@ export function VisionBoardGallery() {
               <div className="flex flex-wrap gap-3">
                 <Button
                   variant="outline"
-                  className="border-white/18 bg-white text-slate-900 hover:bg-white/92"
+                  className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92"
                   onClick={() => navigate("/vision-board")}
                 >
                   <Plus className="h-4 w-4" />
@@ -353,7 +352,7 @@ export function VisionBoardGallery() {
                             className="relative overflow-hidden rounded-[24px] border border-white/80 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.84),_transparent_24%),linear-gradient(135deg,_rgba(244,244,255,0.96)_0%,_rgba(251,244,255,0.94)_48%,_rgba(239,246,255,0.96)_100%)]"
                             style={{ aspectRatio: "16/10" }}
                           >
-                            <div className="absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.12)_1px,transparent_1px)] bg-[size:30px_30px] opacity-60" />
+                            <div className="absolute inset-0 gradient-grid bg-[size:30px_30px] opacity-60" />
                             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,_rgba(15,23,42,0)_20%,_rgba(15,23,42,0.08)_100%)]" />
 
                             {board.items.length === 0 ? (

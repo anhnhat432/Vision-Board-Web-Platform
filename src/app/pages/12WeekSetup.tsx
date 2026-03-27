@@ -25,7 +25,7 @@ import { Textarea } from "../components/ui/textarea";
 import {
   APP_STORAGE_KEYS,
   type PricingPlanCode,
-  TacticType,
+  type TacticType,
   addGoal,
   clearGoalPlanningDrafts,
   formatDateInputValue,
@@ -70,6 +70,7 @@ interface PendingFeasibilityResult {
 }
 
 interface LeadIndicatorDraft {
+  id: string;
   name: string;
   target: string;
   unit: string;
@@ -173,8 +174,13 @@ function addDays(date: Date, amount: number): Date {
   return next;
 }
 
+function createIndicatorId(): string {
+  return `indicator_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
 function createIndicatorDraft(type: TacticType = "core"): LeadIndicatorDraft {
   return {
+    id: createIndicatorId(),
     name: "",
     target: type === "core" ? "2" : "1",
     unit: "lần/tuần",
@@ -369,6 +375,7 @@ export function TwelveWeekSetup() {
             leadIndicators:
               Array.isArray(parsedDraft.leadIndicators) && parsedDraft.leadIndicators.length > 0
                 ? parsedDraft.leadIndicators.map((indicator) => ({
+                    id: typeof indicator?.id === "string" && indicator.id ? indicator.id : createIndicatorId(),
                     name: indicator?.name ?? "",
                     target: indicator?.target ?? "1",
                     unit: indicator?.unit ?? "lần/tuần",
@@ -517,6 +524,7 @@ export function TwelveWeekSetup() {
           adaptiveTemplateSupport?.week8MilestoneSuggestion ?? template.week8Milestone,
         successEvidence: template.successEvidence,
         leadIndicators: nextTactics.map((tactic) => ({
+          id: createIndicatorId(),
           name: tactic.name,
           target: adjustTarget(tactic.target),
           unit: tactic.unit,
@@ -718,6 +726,7 @@ export function TwelveWeekSetup() {
           currentValue: "",
         },
         leadIndicators: validIndicators.map((indicator) => ({
+          id: indicator.id,
           name: indicator.name.trim(),
           target: indicator.target.trim() || "1",
           unit: indicator.unit.trim() || "lần/tuần",
@@ -851,7 +860,7 @@ export function TwelveWeekSetup() {
                           aria-hidden="true"
                           className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
                             active
-                              ? "bg-white text-slate-900"
+                              ? "hero-cta bg-white text-slate-900"
                               : done
                                 ? "bg-white/18 text-white"
                                 : "bg-white/8 text-white/60"
@@ -902,7 +911,7 @@ export function TwelveWeekSetup() {
                       </Badge>
                     </div>
                     {recommendedTemplate && adaptiveTemplateRecommendation && (
-                      <div className="rounded-[24px] border border-sky-200 bg-[linear-gradient(180deg,_rgba(239,246,255,0.94)_0%,_rgba(219,234,254,0.82)_100%)] p-4 shadow-[0_18px_40px_-34px_rgba(37,99,235,0.18)]">
+                      <div className="rounded-[24px] border border-sky-200 gradient-sky p-4 shadow-[0_18px_40px_-34px_rgba(37,99,235,0.18)]">
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
                             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
@@ -1073,7 +1082,7 @@ export function TwelveWeekSetup() {
                   </div>
 
                   {selectedTemplate && (
-                    <div className="space-y-4 rounded-[28px] border border-emerald-200 bg-[linear-gradient(180deg,_rgba(236,253,245,0.94)_0%,_rgba(209,250,229,0.82)_100%)] p-5">
+                    <div className="space-y-4 rounded-[28px] border border-emerald-200 gradient-emerald p-5">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
                           Cá nhân hóa khung
@@ -1280,7 +1289,7 @@ export function TwelveWeekSetup() {
                   </div>
 
                   {draft.leadIndicators.map((indicator, index) => (
-                    <div key={`indicator_${index}`} className="rounded-[24px] border border-white/70 bg-white/72 p-5">
+                    <div key={indicator.id} className="rounded-[24px] border border-white/70 bg-white/72 p-5">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <p className="text-sm font-semibold text-slate-900">Tactic {index + 1}</p>
                         <div className="flex items-center gap-2">

@@ -73,9 +73,9 @@ export function SimpleRadarChart({
   fillOpacity = 0.24,
   className,
 }: SimpleRadarChartProps) {
+  const gradientId = useId();
   if (data.length === 0) return null;
 
-  const gradientId = useId();
   const levels = Array.from({ length: GRID_LEVELS }, (_, index) => index + 1);
   const total = data.length;
   const fullMark = Math.max(...data.map((item) => item.fullMark ?? 10), 1);
@@ -119,8 +119,8 @@ export function SimpleRadarChart({
             <path
               key={`grid-${level}`}
               d={buildPolygonPath(points)}
-              fill={level === GRID_LEVELS ? "#f8fafc" : "none"}
-              stroke="#dbe3f1"
+              fill={level === GRID_LEVELS ? "var(--color-surface-muted, #f8fafc)" : "none"}
+              stroke="var(--color-border-muted, #dbe3f1)"
               strokeWidth={1}
             />
           );
@@ -129,7 +129,7 @@ export function SimpleRadarChart({
         {axisPoints.map(({ inner, outer }, index) => (
           <line
             key={`axis-${data[index]?.subject ?? index}`}
-            stroke="#e2e8f0"
+            stroke="var(--color-border-muted, #e2e8f0)"
             strokeWidth={1}
             x1={inner.x}
             x2={outer.x}
@@ -145,7 +145,7 @@ export function SimpleRadarChart({
             key={`point-${data[index]?.subject ?? index}`}
             cx={point.x}
             cy={point.y}
-            fill="#ffffff"
+            fill="var(--color-background, #ffffff)"
             r={5}
             stroke={stroke}
             strokeWidth={3}
@@ -166,7 +166,7 @@ export function SimpleRadarChart({
           return (
             <g key={`label-${item.subject}`}>
               <text
-                fill="#475569"
+                fill="var(--color-foreground, #475569)"
                 fontSize="12"
                 fontWeight="600"
                 textAnchor={anchor}
@@ -184,7 +184,7 @@ export function SimpleRadarChart({
                 ))}
               </text>
               <text
-                fill="#94a3b8"
+                fill="var(--color-muted-foreground, #94a3b8)"
                 fontSize="11"
                 fontWeight="500"
                 textAnchor={anchor}

@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowRight,
   BookOpen,
@@ -50,7 +50,7 @@ import {
 } from "../utils/experience";
 import {
   APP_STORAGE_KEYS,
-  UserData,
+  type UserData,
   addReflection,
   deleteReflection,
   formatCalendarDate,
@@ -58,6 +58,7 @@ import {
   getReviewDayLabel,
   getUserData,
   parseCalendarDate,
+  saveUserData,
   sortReflectionsByDateDesc,
 } from "../utils/storage";
 
@@ -113,14 +114,14 @@ export function ReflectionJournal() {
   const [filterMood, setFilterMood] = useState<MoodValue | "">("");
   const [filterType, setFilterType] = useState<"all" | "weekly-review" | "freeform">("all");
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = () => {
+  const loadData = useCallback(() => {
     const data = getUserData();
     setUserData(data);
-  };
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleAddReflection = () => {
     if (!newReflection.title || !newReflection.content) return;
@@ -171,9 +172,20 @@ export function ReflectionJournal() {
 
   const confirmDeleteReflection = () => {
     if (!reflectionToDelete) return;
+    const snapshot = getUserData();
     deleteReflection(reflectionToDelete);
     setReflectionToDelete(null);
     loadData();
+    toast.success("Trang nhật ký đã được xóa.", {
+      action: {
+        label: "Hoàn tác",
+        onClick: () => {
+          saveUserData(snapshot);
+          loadData();
+          toast.info("Đã khôi phục trang nhật ký.");
+        },
+      },
+    });
   };
 
   const sortedReflections = useMemo(
@@ -316,7 +328,7 @@ export function ReflectionJournal() {
                 <div className="flex flex-wrap gap-3">
                   <Button
                     variant="outline"
-                    className="border-white/18 bg-white text-slate-900 hover:bg-white/92"
+                    className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92"
                     onClick={() => setIsAddingReflection(true)}
                   >
                     <Plus className="h-4 w-4" />
@@ -433,16 +445,28 @@ export function ReflectionJournal() {
             </div>
 
             <div className="space-y-2">
-              <Label>Nội dung</Label>
+              <div className="flex items-center justify-between">
+                <Label>Nội dung</Label>
+                <span className={`text-xs font-medium transition-colors ${newReflection.content.length > 1800 ? "text-rose-500" : "text-slate-400"}`}>
+                  {newReflection.content.length} ký tự
+                </span>
+              </div>
               <Textarea
                 placeholder="Viết về trải nghiệm, điều bạn học được, khoảnh khắc đáng nhớ hoặc điều bạn muốn nhắc mình sau này..."
                 value={newReflection.content}
                 onChange={(event) =>
                   setNewReflection({ ...newReflection, content: event.target.value })
                 }
+                onKeyDown={(event) => {
+                  if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+                    event.preventDefault();
+                    handleAddReflection();
+                  }
+                }}
                 rows={8}
                 className="min-h-[220px]"
               />
+              <p className="text-xs text-slate-400">Nhấn <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[0.7rem] text-slate-600">Ctrl+Enter</kbd> để lưu nhanh</p>
             </div>
 
             <div className="rounded-[24px] border border-white/70 bg-white/72 p-4">
@@ -468,8 +492,13 @@ export function ReflectionJournal() {
               </div>
             </div>
 
-            <Button className="w-full" onClick={handleAddReflection}>
-              Lưu nhật ký
+            <Button
+              className="w-full"
+              onClick={handleAddReflection}
+              disabled={!newReflection.title || !newReflection.content}
+            >
+              <span>Lưu nhật ký</span>
+              <kbd className="ml-auto rounded border border-white/30 bg-white/10 px-1.5 py-0.5 font-mono text-[0.68rem] opacity-70">Ctrl+↵</kbd>
             </Button>
           </div>
         </DialogContent>
@@ -565,7 +594,7 @@ export function ReflectionJournal() {
         <Reveal delay={0.04} className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-4">
             {latestWeeklyReview && (
-              <Card className="overflow-hidden border-sky-200 bg-[linear-gradient(135deg,_rgba(239,246,255,0.96)_0%,_rgba(248,250,252,0.92)_100%)]">
+              <Card className="overflow-hidden border-sky-200 gradient-sky-slate">
                 <CardContent className="p-6">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
@@ -644,6 +673,7 @@ export function ReflectionJournal() {
               </div>
             )}
 
+            <AnimatePresence>
             {filteredReflections.map((reflection, index) => {
               const mood = getMoodConfig(reflection.mood);
               const linkedGoal = reflection.linkedGoalId ? goalsById.get(reflection.linkedGoalId) : null;
@@ -651,9 +681,11 @@ export function ReflectionJournal() {
               return (
                 <motion.div
                   key={reflection.id}
+                  layout
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ delay: index * 0.05, duration: 0.25 }}
                 >
                   <Card className="overflow-hidden">
                     <CardContent className="p-6 lg:p-7">
@@ -722,6 +754,7 @@ export function ReflectionJournal() {
                 </motion.div>
               );
             })}
+            </AnimatePresence>
           </div>
 
           <div className="space-y-6 xl:sticky xl:top-28">

@@ -73,7 +73,7 @@ export function SpotlightTour({ open, onOpenChange, title, description, steps }:
         )}
 
         <DialogFooter className="flex-row justify-between sm:justify-between">
-          <div className="text-muted-foreground text-xs" aria-label={`Bước ${currentStep + 1} trên ${steps.length}`}>
+          <div className="text-muted-foreground text-xs">
             {currentStep + 1} / {steps.length}
           </div>
           <div className="flex gap-2">

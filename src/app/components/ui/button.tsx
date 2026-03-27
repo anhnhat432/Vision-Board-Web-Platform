@@ -1,4 +1,4 @@
-import * as React from "react";
+import type * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { useReducedMotion } from "./use-reduced-motion";
@@ -18,7 +18,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent bg-[linear-gradient(135deg,_rgba(109,40,217,0.98)_0%,_rgba(192,38,211,0.94)_48%,_rgba(59,130,246,0.96)_100%)] text-primary-foreground shadow-[0_24px_50px_-24px_rgba(109,40,217,0.7)] hover:shadow-[0_30px_64px_-24px_rgba(109,40,217,0.8)]",
+          "border-transparent gradient-brand text-primary-foreground shadow-[0_24px_50px_-24px_rgba(109,40,217,0.7)] hover:shadow-[0_30px_64px_-24px_rgba(109,40,217,0.8)]",
         destructive:
           "border-transparent bg-destructive text-white shadow-[0_20px_40px_-24px_rgba(212,24,61,0.65)] hover:bg-destructive/90 hover:shadow-[0_28px_54px_-28px_rgba(212,24,61,0.72)] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:

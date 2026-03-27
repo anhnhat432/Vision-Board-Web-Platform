@@ -223,7 +223,7 @@ export function TwelveWeekSystem() {
     });
     setDailyMood((latestCheckIn?.mood as DailyMood | undefined) ?? "steady");
     setDailyNote(latestCheckIn?.optionalNote ?? "");
-  }, [system, currentReview, currentLagMetricValue, latestCheckIn, activeGoal?.id]);
+  }, [system, currentReview, currentLagMetricValue, latestCheckIn, activeGoal]);
 
   if (!activeGoal || !system) {
     return (
@@ -862,7 +862,7 @@ export function TwelveWeekSystem() {
                 )}
               </div>
               <div className="flex flex-wrap gap-3">
-                <Button variant="outline" className="border-white/18 bg-white text-slate-900 hover:bg-white/92" onClick={() => handleTabChange("today")}>
+                <Button variant="outline" className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92" onClick={() => handleTabChange("today")}>
                   Mở Hôm nay
                 </Button>
                 <Button variant="outline" className="border-white/18 bg-white/12 text-white hover:bg-white/18 hover:text-white" onClick={() => navigate("/goals")}>
@@ -894,7 +894,7 @@ export function TwelveWeekSystem() {
                 </p>
                 <Button
                   variant="outline"
-                  className="mt-4 border-white/15 bg-white text-slate-900 hover:bg-white/92"
+                  className="hero-cta mt-4 border-white/15 bg-white text-slate-900 hover:bg-white/92"
                   onClick={() => handleTabChange(reviewDueToday ? "week" : "today")}
                 >
                   {reviewDueToday ? "Mở tab Tuần" : "Mở tab Hôm nay"}
@@ -1211,4 +1211,3 @@ export function TwelveWeekSystem() {
     </div>
   );
 }
-

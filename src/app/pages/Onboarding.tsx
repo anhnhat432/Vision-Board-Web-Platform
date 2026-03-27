@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -14,7 +14,7 @@ import {
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Slider } from "../components/ui/slider";
-import { LIFE_AREAS, LifeArea, getLifeAreaLabel, updateWheelOfLife } from "../utils/storage";
+import { LIFE_AREAS, type LifeArea, getLifeAreaLabel, getUserData, updateWheelOfLife } from "../utils/storage";
 
 type OnboardingStep = "welcome" | "assessment";
 
@@ -37,15 +37,28 @@ const FEATURE_PILLS = [
   "Bánh xe cuộc sống trực quan",
   "Insight ưu tiên hành động",
   "Goal tracking rõ tiến độ",
-  "Vision board truyền cảm hứng",
+  "Bảng tầm nhìn truyền cảm hứng",
 ];
 
 export function Onboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState<OnboardingStep>("welcome");
+  const [isReturning, setIsReturning] = useState(false);
   const [lifeAreas, setLifeAreas] = useState<LifeArea[]>(
     LIFE_AREAS.map((area) => ({ ...area, score: 5 })),
   );
+
+  // Guard: detect returning users and preload their existing wheel scores
+  const guardedRef = useRef(false);
+  useEffect(() => {
+    if (guardedRef.current) return;
+    guardedRef.current = true;
+    const data = getUserData();
+    if (data.onboardingCompleted && data.currentWheelOfLife.length > 0) {
+      setIsReturning(true);
+      setLifeAreas(data.currentWheelOfLife);
+    }
+  }, []);
 
   const averageScore =
     lifeAreas.reduce((sum, area) => sum + area.score, 0) / lifeAreas.length;
@@ -58,8 +71,26 @@ export function Onboarding() {
     setLifeAreas(updated);
   };
 
+  const [isDirty, setIsDirty] = useState(false);
+
+  const handleScoreChangeWrapped = useCallback((index: number, value: number[]) => {
+    handleScoreChange(index, value);
+    setIsDirty(true);
+  }, []);
+
+  // Warn before leaving with unsaved changes
+  useEffect(() => {
+    if (!isDirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
+
   const handleComplete = () => {
     updateWheelOfLife(lifeAreas);
+    setIsDirty(false);
     navigate("/life-insight");
   };
 
@@ -78,20 +109,28 @@ export function Onboarding() {
 
               <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.12fr)_360px]">
                 <div className="space-y-8">
+                  {isReturning && (
+                    <div className="rounded-[20px] border border-white/20 bg-white/12 px-4 py-3 text-sm text-white/84 backdrop-blur-xl">
+                      <span className="font-semibold text-white">Bạn đã hoàn thành onboarding rồi.</span>{" "}
+                      Điểm số hiện tại của bạn đã được tải sẵn — thay đổi ở bước đánh giá sẽ cập nhật bánh xe hiện tại, không tạo lại từ đầu.
+                    </div>
+                  )}
                   <div className="space-y-5">
                     <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82 backdrop-blur-xl">
                       <Sparkles className="h-4 w-4" />
-                      Khởi động hành trình định hướng cuộc sống
+                      {isReturning ? "Cập nhật bánh xe cuộc sống" : "Khởi động hành trình định hướng cuộc sống"}
                     </div>
 
                     <div className="space-y-4">
                       <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
-                        Tạo một điểm bắt đầu đủ rõ để phần còn lại của hành trình trở nên nhẹ hơn.
+                        {isReturning
+                          ? "Điểm số thay đổi? Hãy cập nhật lại để insight bám sát thực tế hơn."
+                          : "Tạo một điểm bắt đầu đủ rõ để phần còn lại của hành trình trở nên nhẹ hơn."}
                       </h1>
                       <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
-                        Chỉ trong vài phút, bạn sẽ nhìn thấy bức tranh hiện tại của mình,
-                        chọn ra nơi cần ưu tiên nhất và mở ra một hệ thống phát triển cá nhân
-                        có định hướng rõ ràng.
+                        {isReturning
+                          ? "Điểm số hiện tại của bạn đã được tải sẵn. Chỉ cần điều chỉnh lĩnh vực nào thay đổi rồi lưu lại là xong."
+                          : "Chỉ trong vài phút, bạn sẽ nhìn thấy bức tranh hiện tại của mình, chọn ra nơi cần ưu tiên nhất và mở ra một hệ thống phát triển cá nhân có định hướng rõ ràng."}
                       </p>
                     </div>
                   </div>
@@ -125,7 +164,7 @@ export function Onboarding() {
                   <div className="flex flex-wrap gap-3">
                     <Button
                       variant="outline"
-                      className="border-white/18 bg-white text-slate-900 hover:bg-white/92"
+                      className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92"
                       onClick={() => setStep("assessment")}
                     >
                       Bắt đầu đánh giá
@@ -205,6 +244,15 @@ export function Onboarding() {
                   <Compass className="h-4 w-4" />
                   Bước 1/1: Đánh giá bánh xe cuộc sống
                 </div>
+                {/* Mini progress bar */}
+                <div className="mt-3 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-white/20">
+                  <motion.div
+                    className="h-full rounded-full bg-white/80"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(lifeAreas.filter((a) => a.score !== 5).length / lifeAreas.length) * 100}%` }}
+                    transition={{ type: "spring", stiffness: 200, damping: 30 }}
+                  />
+                </div>
                 <div className="space-y-3">
                   <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
                     Chấm điểm hiện tại để biết chính xác nơi bạn nên bắt đầu.
@@ -283,18 +331,30 @@ export function Onboarding() {
                       className="rounded-full px-4 py-2 text-sm font-semibold text-white shadow-[0_18px_35px_-24px_rgba(15,23,42,0.45)]"
                       style={{ backgroundColor: area.color }}
                     >
-                      {area.score}/10
+                      <AnimatePresence mode="popLayout">
+                        <motion.span
+                          key={area.score}
+                          initial={{ y: -8, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ y: 8, opacity: 0 }}
+                          transition={{ duration: 0.15 }}
+                        >
+                          {area.score}/10
+                        </motion.span>
+                      </AnimatePresence>
                     </div>
                   </div>
 
                   <div className="mt-5 space-y-3">
                     <Slider
                       value={[area.score]}
-                      onValueChange={(value) => handleScoreChange(index, value)}
+                      onValueChange={(value) => handleScoreChangeWrapped(index, value)}
                       min={1}
                       max={10}
                       step={1}
                       className="w-full"
+                      trackColor={area.color}
+                      aria-label={`Điểm ${getLifeAreaLabel(area.name)}`}
                     />
                     <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.14em] text-slate-400">
                       <span>Cần chú ý</span>

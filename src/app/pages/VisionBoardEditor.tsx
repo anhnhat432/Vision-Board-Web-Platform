@@ -45,8 +45,8 @@ import {
   getUnlockedAchievements,
 } from "../utils/experience";
 import {
-  VisionBoard,
-  VisionBoardItem,
+  type VisionBoard,
+  type VisionBoardItem,
   addVisionBoard,
   getUserData,
   updateVisionBoard,
@@ -171,7 +171,7 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
 
         {item.type === "quote" && (
           <div
-            className="rounded-[26px] border border-white/80 bg-[linear-gradient(180deg,_rgba(255,255,255,0.96)_0%,_rgba(248,250,252,0.92)_100%)] p-5 shadow-[0_28px_50px_-34px_rgba(15,23,42,0.45)] backdrop-blur-2xl"
+            className="rounded-[26px] border border-white/80 gradient-white-panel p-5 shadow-[0_28px_50px_-34px_rgba(15,23,42,0.45)] backdrop-blur-2xl"
             style={{ width: `${item.width}px` }}
           >
             <div className="flex items-center gap-2 text-violet-600">
@@ -185,7 +185,7 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
         )}
 
         {item.type === "icon" && (
-          <div className="flex h-24 w-24 items-center justify-center rounded-[28px] bg-[linear-gradient(135deg,_rgba(109,40,217,0.96)_0%,_rgba(236,72,153,0.88)_100%)] text-white shadow-[0_28px_50px_-32px_rgba(109,40,217,0.62)]">
+          <div className="flex h-24 w-24 items-center justify-center rounded-[28px] gradient-violet-pink text-white shadow-[0_28px_50px_-32px_rgba(109,40,217,0.62)]">
             <Icon className="h-10 w-10" />
           </div>
         )}
@@ -255,7 +255,7 @@ export function VisionBoardEditor() {
       createdAt: new Date().toISOString(),
     });
     setIsResolvingBoard(false);
-  }, [id]);
+  }, [id, navigate]);
 
   const boardStats = useMemo(() => {
     if (!board) return { images: 0, quotes: 0, icons: 0 };
@@ -446,7 +446,7 @@ export function VisionBoardEditor() {
                 <div className="space-y-6">
                   <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                     <Wand2 className="h-4 w-4" />
-                    Vision Board Studio
+                    Dear Our Future Studio
                   </div>
 
                   <div className="space-y-4">
@@ -478,7 +478,7 @@ export function VisionBoardEditor() {
                   <div className="flex flex-wrap gap-3">
                     <Button
                       variant="outline"
-                      className="border-white/18 bg-white text-slate-900 hover:bg-white/92"
+                      className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92"
                       onClick={() => setIsAddingItem(true)}
                     >
                       <Plus className="h-4 w-4" />
@@ -618,7 +618,7 @@ export function VisionBoardEditor() {
                             : "border-white/80 bg-white/72 text-slate-500 hover:border-violet-200 hover:text-violet-700"
                         }`}
                       >
-                        <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-[linear-gradient(135deg,_rgba(109,40,217,0.16)_0%,_rgba(236,72,153,0.12)_100%)]">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-[18px] gradient-brand-subtle">
                           <Icon className="h-6 w-6" />
                         </div>
                         <div className="mt-3 text-sm font-semibold">{item}</div>
@@ -641,7 +641,7 @@ export function VisionBoardEditor() {
                 className="relative min-h-[620px] overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.82),_transparent_24%),linear-gradient(135deg,_rgba(244,244,255,0.96)_0%,_rgba(251,244,255,0.94)_48%,_rgba(239,246,255,0.96)_100%)]"
                 style={{ aspectRatio: "16/9" }}
               >
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.12)_1px,transparent_1px)] bg-[size:36px_36px] opacity-70" />
+                <div className="absolute inset-0 gradient-grid bg-[size:36px_36px] opacity-70" />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(168,85,247,0.14),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(56,189,248,0.14),_transparent_22%)]" />
 
                 {board.items.length === 0 ? (

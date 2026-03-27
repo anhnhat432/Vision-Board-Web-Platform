@@ -1,6 +1,7 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { AlertTriangle, CalendarDays, CheckCircle2, ChevronDown, ChevronUp, Clock3, Crown, Plus, Target, Trash2, Zap } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { AlertTriangle, CalendarDays, CheckCircle2, ChevronDown, ChevronUp, Clock3, Crown, Plus, Search, Target, Trash2, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 import { NewUserGuideBanner } from "../components/NewUserGuide";
@@ -21,6 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { Checkbox } from "../components/ui/checkbox";
 import { CountUp } from "../components/ui/count-up";
 import { Input } from "../components/ui/input";
+import { LoadingSpinner } from "../components/ui/loading-spinner";
 import { Progress } from "../components/ui/progress";
 import { Reveal } from "../components/ui/reveal";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
@@ -48,6 +50,7 @@ import {
   getTwelveWeekWeekRange,
   getUserData,
   isTwelveWeekReviewDueToday,
+  saveUserData,
   updateGoal,
 } from "../utils/storage";
 import { generateId } from "../utils/storage-types";
@@ -71,7 +74,6 @@ const getSystemStatusLabel = (status?: string) => {
 };
 
 export function GoalTracker() {
-  const navigate = useNavigate();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [newTask, setNewTask] = useState("");
   const [addingTaskToGoalId, setAddingTaskToGoalId] = useState<string | null>(null);
@@ -84,7 +86,7 @@ export function GoalTracker() {
   if (!userData) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
-        <p className="text-sm text-slate-400">Đang tải dữ liệu...</p>
+        <LoadingSpinner />
       </div>
     );
   }
@@ -124,6 +126,7 @@ function GoalTrackerContent({
 }) {
   const navigate = useNavigate();
   const [expandedGoals, setExpandedGoals] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
   const { currentPlanCode, currentPlanDefinition, entitlementKeys, hasPremiumReviewInsights, premiumStatusItems } = usePlanEntitlements(userData);
 
   // Compute twelveWeekGoals early so we can pass goalId to the upgrade dialog
@@ -140,6 +143,18 @@ function GoalTrackerContent({
   });
   const twelveWeekGoals = goals.filter((goal) => Boolean(goal.twelveWeekSystem));
   const standardGoals = goals.filter((goal) => !goal.twelveWeekSystem);
+
+  const filteredTwelveWeekGoals = useMemo(() => {
+    if (!searchQuery.trim()) return twelveWeekGoals;
+    const q = searchQuery.toLowerCase();
+    return twelveWeekGoals.filter((g) => g.title.toLowerCase().includes(q) || g.description?.toLowerCase().includes(q));
+  }, [twelveWeekGoals, searchQuery]);
+
+  const filteredStandardGoals = useMemo(() => {
+    if (!searchQuery.trim()) return standardGoals;
+    const q = searchQuery.toLowerCase();
+    return standardGoals.filter((g) => g.title.toLowerCase().includes(q) || g.description?.toLowerCase().includes(q));
+  }, [standardGoals, searchQuery]);
 
   const { isUpgradeDialogOpen, setIsUpgradeDialogOpen, upgradeContext, recommendedPlan, openUpgradeDialog } =
     useUpgradeDialog({
@@ -239,9 +254,20 @@ function GoalTrackerContent({
 
   const handleConfirmDeleteGoal = () => {
     if (!goalToDelete) return;
+    const snapshot = getUserData();
     deleteGoal(goalToDelete);
     setGoalToDelete(null);
     reload();
+    toast.success("Mục tiêu đã được xóa.", {
+      action: {
+        label: "Hoàn tác",
+        onClick: () => {
+          saveUserData(snapshot);
+          reload();
+          toast.info("Đã khôi phục mục tiêu.");
+        },
+      },
+    });
   };
 
   const summary = {
@@ -268,7 +294,7 @@ function GoalTrackerContent({
       note: "đang cần được giữ nhịp",
       icon: Target,
       cardClass:
-        "border-0 bg-[linear-gradient(135deg,_rgba(15,23,42,0.98)_0%,_rgba(30,41,59,0.94)_100%)] text-white shadow-[0_28px_65px_-38px_rgba(15,23,42,0.62)]",
+        "border-0 gradient-dark text-white shadow-[0_28px_65px_-38px_rgba(15,23,42,0.62)]",
       iconClass: "bg-white/10 text-white",
       titleClass: "text-white/56",
       noteClass: "text-white/68",
@@ -279,7 +305,7 @@ function GoalTrackerContent({
       note: `trên tổng số ${summary.totalTasks}`,
       icon: CheckCircle2,
       cardClass:
-        "border-0 bg-[linear-gradient(180deg,_rgba(236,253,245,0.95)_0%,_rgba(209,250,229,0.82)_100%)] shadow-[0_24px_55px_-34px_rgba(5,150,105,0.18)]",
+        "border-0 gradient-emerald shadow-[0_24px_55px_-34px_rgba(5,150,105,0.18)]",
       iconClass: "bg-white/80 text-emerald-700",
       titleClass: "text-slate-500",
       noteClass: "text-slate-600",
@@ -290,7 +316,7 @@ function GoalTrackerContent({
       note: "mục tiêu trong 7 ngày tới",
       icon: Clock3,
       cardClass:
-        "border-0 bg-[linear-gradient(180deg,_rgba(254,243,199,0.95)_0%,_rgba(253,230,138,0.82)_100%)] shadow-[0_24px_55px_-34px_rgba(217,119,6,0.18)]",
+        "border-0 gradient-amber shadow-[0_24px_55px_-34px_rgba(217,119,6,0.18)]",
       iconClass: "bg-white/80 text-amber-700",
       titleClass: "text-slate-500",
       noteClass: "text-slate-600",
@@ -301,7 +327,7 @@ function GoalTrackerContent({
       note: "đang chạy theo hệ thống",
       icon: Zap,
       cardClass:
-        "border-0 bg-[linear-gradient(180deg,_rgba(219,234,254,0.95)_0%,_rgba(191,219,254,0.82)_100%)] shadow-[0_24px_55px_-34px_rgba(37,99,235,0.2)]",
+        "border-0 gradient-blue shadow-[0_24px_55px_-34px_rgba(37,99,235,0.2)]",
       iconClass: "bg-white/80 text-sky-700",
       titleClass: "text-slate-500",
       noteClass: "text-slate-600",
@@ -327,10 +353,10 @@ function GoalTrackerContent({
     return (
       <Card
         key={goal.id}
-        className={`overflow-hidden border-0 shadow-[0_28px_70px_-38px_rgba(15,23,42,0.22)] ${system ? "bg-[linear-gradient(180deg,_rgba(238,242,255,0.95)_0%,_rgba(224,231,255,0.84)_100%)]" : "bg-[linear-gradient(180deg,_rgba(226,232,240,0.94)_0%,_rgba(203,213,225,0.82)_100%)]"}`}
+        className={`overflow-hidden border-0 shadow-[0_28px_70px_-38px_rgba(15,23,42,0.22)] ${system ? "gradient-indigo" : "gradient-slate"}`}
       >
         <CardContent className="grid gap-5 p-6 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)]">
-          <div className="rounded-[26px] bg-[linear-gradient(135deg,_rgba(15,23,42,0.98)_0%,_rgba(30,41,59,0.94)_100%)] p-5 text-white">
+          <div className="rounded-[26px] gradient-dark p-5 text-white">
             <div className="flex items-start justify-between gap-3">
               <Badge className="text-white" style={{ backgroundColor: areaMeta?.color ?? "#7c3aed" }}>{progress}%</Badge>
               <Button
@@ -384,7 +410,7 @@ function GoalTrackerContent({
               {system && (
                 <Button
                   size="sm"
-                  className="w-full bg-white text-slate-900 hover:bg-white/92"
+                  className="hero-cta w-full bg-white text-slate-900 hover:bg-white/92"
                   onClick={() => openTwelveWeekCenter(goal.id)}
                 >
                   <Zap className="h-4 w-4" />
@@ -400,7 +426,7 @@ function GoalTrackerContent({
                 className={`rounded-[26px] border p-5 ${
                   systemReviewDueToday
                     ? "border-amber-200 bg-amber-50/92"
-                    : "border-slate-900/10 bg-[linear-gradient(135deg,_rgba(15,23,42,0.96)_0%,_rgba(49,46,129,0.9)_100%)] text-white"
+                    : "border-slate-900/10 gradient-dark-indigo text-white"
                 }`}
               >
                 <p className={`text-xs font-semibold uppercase tracking-[0.18em] ${systemReviewDueToday ? "text-amber-700" : "text-white/60"}`}>
@@ -430,7 +456,7 @@ function GoalTrackerContent({
                     className={`w-full sm:w-auto ${
                       systemReviewDueToday
                         ? "border-amber-200 bg-white text-amber-800 hover:bg-amber-100"
-                        : "border-white/12 bg-white text-slate-900 hover:bg-white/92"
+                        : "hero-cta border-white/12 bg-white text-slate-900 hover:bg-white/92"
                     }`}
                     onClick={() => navigate("/journal")}
                   >
@@ -644,7 +670,7 @@ function GoalTrackerContent({
               <div className="flex flex-wrap gap-3">
                 <Button
                   data-tour-id="goaltracker-create-goal"
-                  className="w-full bg-white text-slate-900 hover:bg-white/92 sm:w-auto"
+                  className="hero-cta w-full bg-white text-slate-900 hover:bg-white/92 sm:w-auto"
                   onClick={handleStartGuidedGoalFlow}
                 >
                   <Target className="h-4 w-4" />
@@ -710,8 +736,8 @@ function GoalTrackerContent({
           <Card
             className={
               summary.reviewDue > 0
-                ? "border-0 bg-[linear-gradient(180deg,_rgba(254,243,199,0.96)_0%,_rgba(253,230,138,0.84)_100%)] shadow-[0_24px_55px_-34px_rgba(217,119,6,0.2)]"
-                : "border-0 bg-[linear-gradient(180deg,_rgba(226,232,240,0.92)_0%,_rgba(203,213,225,0.8)_100%)] shadow-[0_24px_55px_-34px_rgba(15,23,42,0.18)]"
+                ? "border-0 gradient-amber shadow-[0_24px_55px_-34px_rgba(217,119,6,0.2)]"
+                : "border-0 gradient-slate shadow-[0_24px_55px_-34px_rgba(15,23,42,0.18)]"
             }
           >
             <CardHeader className="pb-2">
@@ -728,8 +754,8 @@ function GoalTrackerContent({
           <Card
             className={
               summary.overdue > 0
-                ? "border-0 bg-[linear-gradient(180deg,_rgba(254,226,226,0.96)_0%,_rgba(254,242,242,0.88)_100%)] shadow-[0_24px_55px_-34px_rgba(220,38,38,0.18)]"
-                : "border-0 bg-[linear-gradient(180deg,_rgba(226,232,240,0.92)_0%,_rgba(203,213,225,0.8)_100%)] shadow-[0_24px_55px_-34px_rgba(15,23,42,0.18)]"
+                ? "border-0 gradient-red shadow-[0_24px_55px_-34px_rgba(220,38,38,0.18)]"
+                : "border-0 gradient-slate shadow-[0_24px_55px_-34px_rgba(15,23,42,0.18)]"
             }
           >
             <CardHeader className="pb-2">
@@ -743,7 +769,7 @@ function GoalTrackerContent({
             </CardContent>
           </Card>
 
-          <Card className="border-0 bg-[linear-gradient(180deg,_rgba(219,234,254,0.94)_0%,_rgba(191,219,254,0.82)_100%)] shadow-[0_24px_55px_-34px_rgba(37,99,235,0.18)]">
+          <Card className="border-0 gradient-blue shadow-[0_24px_55px_-34px_rgba(37,99,235,0.18)]">
             <CardHeader className="pb-2">
               <CardDescription>Sắp đến hạn</CardDescription>
               <CardTitle className="text-3xl"><CountUp value={summary.dueSoon} /></CardTitle>
@@ -756,7 +782,7 @@ function GoalTrackerContent({
       </Reveal>
 
       <Reveal>
-        <Card className="overflow-hidden border-0 bg-[linear-gradient(135deg,_rgba(49,46,129,0.96)_0%,_rgba(76,29,149,0.92)_100%)] text-white shadow-[0_28px_70px_-38px_rgba(76,29,149,0.42)]">
+        <Card className="overflow-hidden border-0 gradient-indigo-purple text-white shadow-[0_28px_70px_-38px_rgba(76,29,149,0.42)]">
           <CardContent className="grid gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div>
               <div className="flex flex-wrap items-center gap-3">
@@ -800,7 +826,7 @@ function GoalTrackerContent({
               <div className="grid gap-2">
                 {currentPlanCode === "FREE" ? (
                   <>
-                    <Button className="bg-white text-slate-900 hover:bg-white/92" onClick={() => openUpgradeDialog("plan", "PLUS")}>
+                    <Button className="hero-cta bg-white text-slate-900 hover:bg-white/92" onClick={() => openUpgradeDialog("plan", "PLUS")}>
                       Mở Plus để đỡ loay hoay hơn
                     </Button>
                     <Button variant="outline" className="border-white/15 bg-white/10 text-white hover:bg-white/16" onClick={() => navigate(twelveWeekGoals.length > 0 ? "/12-week-system?tab=settings" : "/life-insight")}>
@@ -819,9 +845,23 @@ function GoalTrackerContent({
       </Reveal>
 
       <div data-tour-id="goaltracker-goals">
+        {userData.goals.length > 0 && (
+          <div className="mb-6">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                type="search"
+                placeholder="Tìm mục tiêu..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-2xl border border-white/70 bg-white/72 py-3 pl-11 pr-4 text-sm font-medium text-slate-900 placeholder:text-slate-400 backdrop-blur-xl outline-none transition-all focus:border-violet-300 focus:ring-2 focus:ring-violet-200"
+              />
+            </div>
+          </div>
+        )}
         {userData.goals.length === 0 ? (
           <Reveal delay={0.04}>
-          <Card data-tour-id="goaltracker-empty-state" className="overflow-hidden border-0 bg-[linear-gradient(180deg,_rgba(238,242,255,0.95)_0%,_rgba(224,231,255,0.84)_100%)] shadow-[0_28px_70px_-38px_rgba(99,102,241,0.18)]">
+          <Card data-tour-id="goaltracker-empty-state" className="overflow-hidden border-0 gradient-indigo shadow-[0_28px_70px_-38px_rgba(99,102,241,0.18)]">
             <CardContent className="p-10 text-center lg:p-14">
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] bg-violet-50 text-violet-700">
                 <Target className="h-10 w-10" />
@@ -834,12 +874,27 @@ function GoalTrackerContent({
                 <Target className="h-4 w-4" />
                 Tạo mục tiêu
               </Button>
+              <div className="mx-auto mt-8 grid max-w-lg gap-3 text-left sm:grid-cols-3">
+                {[
+                  { icon: Target, label: "Tạo mục tiêu SMART" },
+                  { icon: CheckCircle2, label: "Thêm bước hành động" },
+                  { icon: Zap, label: "Theo dõi tiến độ" },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center gap-2 rounded-2xl border border-indigo-100 bg-white/80 px-4 py-3 text-sm text-slate-600"
+                  >
+                    <item.icon className="h-4 w-4 text-indigo-500" />
+                    {item.label}
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
           </Reveal>
         ) : (
           <Reveal delay={0.04} className="space-y-8">
-          {twelveWeekGoals.length > 0 && (
+          {filteredTwelveWeekGoals.length > 0 && (
             <section data-tour-id="goaltracker-priority-section" className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -847,14 +902,14 @@ function GoalTrackerContent({
                   <p className="text-sm text-slate-500">Nhóm này nên được nhìn trước vì việc hằng ngày và review đều nằm ở đây.</p>
                 </div>
                 <Badge variant="outline" className="rounded-full border-violet-200 bg-violet-50 px-4 py-2 text-violet-700">
-                  {twelveWeekGoals.length} chu kỳ
+                  {filteredTwelveWeekGoals.length} chu kỳ
                 </Badge>
               </div>
-              <div className="space-y-5">{twelveWeekGoals.map((goal) => renderGoalCard(goal))}</div>
+              <div className="space-y-5"><AnimatePresence>{filteredTwelveWeekGoals.map((goal) => <motion.div key={goal.id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.25 }}>{renderGoalCard(goal)}</motion.div>)}</AnimatePresence></div>
             </section>
           )}
 
-          {standardGoals.length > 0 && (
+          {filteredStandardGoals.length > 0 && (
             <section data-tour-id="goaltracker-standard-section" className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -862,11 +917,15 @@ function GoalTrackerContent({
                   <p className="text-sm text-slate-500">Những mục tiêu chưa vào chu kỳ 12 tuần, phù hợp để theo dõi theo dạng danh sách việc.</p>
                 </div>
                 <Badge variant="outline" className="rounded-full border-white/70 bg-white/72 px-4 py-2 text-slate-600">
-                  {standardGoals.length} mục tiêu
+                  {filteredStandardGoals.length} mục tiêu
                 </Badge>
               </div>
-              <div className="space-y-5">{standardGoals.map((goal) => renderGoalCard(goal))}</div>
+              <div className="space-y-5"><AnimatePresence>{filteredStandardGoals.map((goal) => <motion.div key={goal.id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.25 }}>{renderGoalCard(goal)}</motion.div>)}</AnimatePresence></div>
             </section>
+          )}
+
+          {searchQuery.trim() && filteredTwelveWeekGoals.length === 0 && filteredStandardGoals.length === 0 && (
+            <p className="py-12 text-center text-sm text-slate-500">Không tìm thấy mục tiêu nào khớp với "{searchQuery}"</p>
           )}
           </Reveal>
         )}
@@ -874,4 +933,3 @@ function GoalTrackerContent({
     </div>
   );
 }
-

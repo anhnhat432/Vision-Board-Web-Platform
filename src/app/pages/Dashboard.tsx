@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { Suspense, lazy } from "react";
@@ -10,12 +10,16 @@ import {
   CalendarDays,
   CheckCircle2,
   Crown,
+  Download,
   Images,
   Plus,
   Sparkles,
   Target,
   TrendingUp,
+  Upload,
 } from "lucide-react";
+
+import { toast } from "sonner";
 
 import { SpotlightTour, type SpotlightTourStep } from "../components/SpotlightTour";
 import { Button } from "../components/ui/button";
@@ -25,12 +29,14 @@ import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { CountUp } from "../components/ui/count-up";
 import { Progress } from "../components/ui/progress";
 import { Reveal } from "../components/ui/reveal";
+import { Skeleton } from "../components/ui/skeleton";
 import { usePageTour } from "../hooks/usePageTour";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useUpgradeDialog } from "../hooks/useUpgradeDialog";
 import {
   type UserData,
   calculateGoalProgress,
+  exportUserDataSnapshot,
   formatCalendarDate,
   getActiveTwelveWeekGoal,
   getGoalExecutionStats,
@@ -44,6 +50,8 @@ import {
   getTwelveWeekWeekRange,
   getUserData,
   isTwelveWeekReviewDueToday,
+  parseStoredUserData,
+  saveUserData,
   sortReflectionsByDateDesc,
 } from "../utils/storage";
 import {
@@ -90,7 +98,6 @@ const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
 ];
 
 export function Dashboard() {
-  const navigate = useNavigate();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [quote, setQuote] = useState("");
   const { isTourOpen, setIsTourOpen } = usePageTour("dashboard");
@@ -99,15 +106,45 @@ export function Dashboard() {
     const data = getUserData();
     setUserData(data);
     setQuote(getRandomMotivationalQuote());
+
+    // Reload user data when the user navigates back to this tab
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        setUserData(getUserData());
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, []);
 
   if (!userData) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <p className="text-sm text-slate-400">Đang tải dữ liệu...</p>
+      <div className="space-y-8 pb-12">
+        {/* Hero card skeleton */}
+        <Skeleton className="h-56 rounded-[28px]" />
+        {/* Quick action tiles skeleton */}
+        <div className="grid gap-3 md:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-20 rounded-[22px]" />
+          ))}
+        </div>
+        {/* Stat cards skeleton */}
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-28 rounded-[22px]" />
+          ))}
+        </div>
+        {/* Content cards skeleton */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Skeleton className="h-48 rounded-[28px]" />
+          <Skeleton className="h-48 rounded-[28px]" />
+        </div>
       </div>
     );
   }
+
 
   const activeTwelveWeekGoal = getActiveTwelveWeekGoal(userData.goals);
 
@@ -131,6 +168,7 @@ function DashboardContent({
 }) {
   const navigate = useNavigate();
   const [dismissedTrigger, setDismissedTrigger] = useState<string | null>(null);
+  const importFileRef = useRef<HTMLInputElement>(null);
   const { currentPlanCode, currentPlanDefinition, entitlementKeys, premiumStatusItems } = usePlanEntitlements(userData);
   const { isUpgradeDialogOpen, setIsUpgradeDialogOpen, upgradeContext, recommendedPlan, openUpgradeDialog } =
     useUpgradeDialog({
@@ -142,6 +180,36 @@ function DashboardContent({
 
   const recentGoals = userData.goals.slice(0, 3);
   const recentReflections = sortReflectionsByDateDesc(userData.reflections).slice(0, 2);
+
+  const handleExport = () => {
+    const snapshot = exportUserDataSnapshot();
+    const blob = new Blob([snapshot], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `dear-our-future-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Đã tải bản sao lưu dữ liệu.");
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = reader.result;
+      if (typeof text !== "string") { toast.error("Không đọc được file."); return; }
+      const parsed = parseStoredUserData(text);
+      if (!parsed) { toast.error("File không hợp lệ hoặc bị hỏng."); return; }
+      saveUserData(parsed);
+      onReload();
+      toast.success("Đã khôi phục dữ liệu thành công!");
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
   const latestVisionBoard = userData.visionBoards[userData.visionBoards.length - 1];
   const completedGoalsCount = userData.goals.filter((goal) => calculateGoalProgress(goal) === 100).length;
   const executionTotals = userData.goals.reduce(
@@ -160,6 +228,29 @@ function DashboardContent({
     userData.currentWheelOfLife.length > 0
       ? userData.currentWheelOfLife.reduce((sum, area) => sum + area.score, 0) / userData.currentWheelOfLife.length
       : 0;
+
+  // Compute journal writing streak
+  const journalStreak = (() => {
+    const sorted = [...userData.reflections].sort((a, b) => b.date.localeCompare(a.date));
+    if (sorted.length === 0) return 0;
+    const dates = [...new Set(sorted.map((r) => r.date.slice(0, 10)))];
+    const today = new Date();
+    const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+    if (dates[0] !== todayKey && dates[0] !== yesterdayKey) return 0;
+    let streak = 0;
+    let check = new Date(dates[0]);
+    for (const d of dates) {
+      const expected = `${check.getFullYear()}-${String(check.getMonth() + 1).padStart(2, "0")}-${String(check.getDate()).padStart(2, "0")}`;
+      if (d !== expected) break;
+      streak++;
+      check.setDate(check.getDate() - 1);
+    }
+    return streak;
+  })();
+
   const weakestArea = userData.currentWheelOfLife.length > 0
     ? [...userData.currentWheelOfLife].sort((a, b) => a.score - b.score)[0]
     : null;
@@ -194,7 +285,7 @@ function DashboardContent({
       note: `${completedGoalsCount} đã hoàn thành`,
       icon: Target,
       cardClass:
-        "border-0 bg-[linear-gradient(135deg,_rgba(15,23,42,0.98)_0%,_rgba(30,41,59,0.94)_100%)] text-white shadow-[0_28px_65px_-38px_rgba(15,23,42,0.65)]",
+        "border-0 gradient-dark text-white shadow-[0_28px_65px_-38px_rgba(15,23,42,0.65)]",
       iconClass: "bg-white/10 text-white",
       titleClass: "text-white/56",
       noteClass: "text-white/68",
@@ -205,7 +296,7 @@ function DashboardContent({
       note: `trên tổng số ${totalTasks}`,
       icon: TrendingUp,
       cardClass:
-        "border-0 bg-[linear-gradient(180deg,_rgba(219,234,254,0.95)_0%,_rgba(191,219,254,0.82)_100%)] shadow-[0_24px_55px_-34px_rgba(37,99,235,0.22)]",
+        "border-0 gradient-blue shadow-[0_24px_55px_-34px_rgba(37,99,235,0.22)]",
       iconClass: "bg-white/80 text-sky-700",
       titleClass: "text-slate-500",
       noteClass: "text-slate-600",
@@ -216,7 +307,7 @@ function DashboardContent({
       note: "huy hiệu đã mở khóa",
       icon: Award,
       cardClass:
-        "border-0 bg-[linear-gradient(180deg,_rgba(236,253,245,0.95)_0%,_rgba(209,250,229,0.82)_100%)] shadow-[0_24px_55px_-34px_rgba(5,150,105,0.18)]",
+        "border-0 gradient-emerald shadow-[0_24px_55px_-34px_rgba(5,150,105,0.18)]",
       iconClass: "bg-white/80 text-emerald-700",
       titleClass: "text-slate-500",
       noteClass: "text-slate-600",
@@ -224,10 +315,10 @@ function DashboardContent({
     {
       title: "Nhật ký",
       value: userData.reflections.length,
-      note: "bài viết đã lưu",
+      note: journalStreak > 0 ? `streak ${journalStreak} ngày` : "bài viết đã lưu",
       icon: BookOpen,
       cardClass:
-        "border-0 bg-[linear-gradient(180deg,_rgba(245,243,255,0.96)_0%,_rgba(233,213,255,0.82)_100%)] shadow-[0_24px_55px_-34px_rgba(124,58,237,0.18)]",
+        "border-0 gradient-violet shadow-[0_24px_55px_-34px_rgba(124,58,237,0.18)]",
       iconClass: "bg-white/80 text-violet-700",
       titleClass: "text-slate-500",
       noteClass: "text-slate-600",
@@ -265,11 +356,11 @@ function DashboardContent({
               ? `${activeSystemTodayOpenTasks.length} việc đang mở hôm nay. Đi thẳng vào trung tâm để chạm tiếp đúng việc cần làm.`
               : `Tuần ${activeSystemWeek}/${activeSystem.totalWeeks} đang khá gọn. Đây là lúc đẹp để nhìn lại tuần hoặc chuẩn bị review.`,
           cardClass:
-            "rounded-[22px] bg-[linear-gradient(135deg,_rgba(15,23,42,0.98)_0%,_rgba(30,41,59,0.94)_100%)] p-4 text-white shadow-[0_24px_48px_-34px_rgba(15,23,42,0.58)]",
+            "rounded-[22px] gradient-dark p-4 text-white shadow-[0_24px_48px_-34px_rgba(15,23,42,0.58)]",
           eyebrowClass: "text-white/60",
           titleClass: "text-white",
           descriptionClass: "text-white/72",
-          buttonClass: "mt-4 border-white/12 bg-white text-slate-900 hover:bg-white/92",
+          buttonClass: "hero-cta mt-4 border-white/12 bg-white text-slate-900 hover:bg-white/92",
           buttonVariant: "outline" as const,
           buttonLabel: "Mở trung tâm 12 tuần",
           icon: CalendarDays,
@@ -317,11 +408,11 @@ function DashboardContent({
           title: "Chưa có chu kỳ đang chạy",
           description: "Tạo một chu kỳ để web luôn trả lời rõ hôm nay nên làm gì, tuần này đang ở đâu và review khi nào đến hạn.",
           cardClass:
-            "rounded-[22px] bg-[linear-gradient(135deg,_rgba(15,23,42,0.98)_0%,_rgba(30,41,59,0.94)_100%)] p-4 text-white shadow-[0_24px_48px_-34px_rgba(15,23,42,0.58)]",
+            "rounded-[22px] gradient-dark p-4 text-white shadow-[0_24px_48px_-34px_rgba(15,23,42,0.58)]",
           eyebrowClass: "text-white/60",
           titleClass: "text-white",
           descriptionClass: "text-white/72",
-          buttonClass: "mt-4 border-white/12 bg-white text-slate-900 hover:bg-white/92",
+          buttonClass: "hero-cta mt-4 border-white/12 bg-white text-slate-900 hover:bg-white/92",
           buttonVariant: "outline" as const,
           buttonLabel: "Tạo mục tiêu",
           icon: CalendarDays,
@@ -561,7 +652,7 @@ function DashboardContent({
                         <Button
                           data-tour-id="dashboard-primary-action"
                           variant="outline"
-                          className="w-full border-white/15 bg-white text-slate-900 hover:bg-white/92 sm:w-auto"
+                          className="hero-cta w-full border-white/15 bg-white text-slate-900 hover:bg-white/92 sm:w-auto"
                           onClick={() => navigate("/12-week-system")}
                         >
                           Mở trung tâm 12 tuần
@@ -576,7 +667,7 @@ function DashboardContent({
                               key={task.id}
                               className={`flex items-center gap-4 rounded-[22px] border px-4 py-4 ${
                                 index === 0
-                                  ? "border-white/12 bg-[linear-gradient(135deg,_rgba(8,47,73,0.95)_0%,_rgba(3,105,161,0.88)_100%)]"
+                                  ? "border-white/12 gradient-dark-sky"
                                   : "border-white/10 bg-slate-950/18"
                               }`}
                             >
@@ -645,7 +736,7 @@ function DashboardContent({
                       </p>
                       <Button
                         data-tour-id="dashboard-primary-action"
-                        className="mt-4 w-full bg-white text-slate-900 hover:bg-white/92 sm:w-auto"
+                        className="hero-cta mt-4 w-full bg-white text-slate-900 hover:bg-white/92 sm:w-auto"
                         onClick={() => navigate("/life-insight")}
                       >
                         Tạo mục tiêu
@@ -716,7 +807,7 @@ function DashboardContent({
           <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
             <Card
               data-tour-id="dashboard-plan-card"
-              className="border-0 bg-[linear-gradient(135deg,_rgba(49,46,129,0.96)_0%,_rgba(76,29,149,0.92)_100%)] text-white shadow-[0_28px_70px_-38px_rgba(76,29,149,0.42)]"
+              className="border-0 gradient-indigo-purple text-white shadow-[0_28px_70px_-38px_rgba(76,29,149,0.42)]"
             >
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
@@ -756,7 +847,7 @@ function DashboardContent({
                 <div className="grid gap-2 sm:grid-cols-2">
                   {currentPlanCode === "FREE" ? (
                     <>
-                      <Button className="bg-white text-slate-900 hover:bg-white/92" onClick={() => openUpgradeDialog("plan", "PLUS")}>
+                      <Button className="hero-cta bg-white text-slate-900 hover:bg-white/92" onClick={() => openUpgradeDialog("plan", "PLUS")}>
                         Mở Plus để đi nhanh hơn
                       </Button>
                       <Button variant="outline" className="border-white/15 bg-white/10 text-white hover:bg-white/16" onClick={() => navigate(activeSystem ? "/12-week-system?tab=settings" : "/life-insight")}>
@@ -778,7 +869,7 @@ function DashboardContent({
 
             <Card
               data-tour-id="dashboard-next-card"
-              className="border-0 bg-[linear-gradient(180deg,_rgba(226,232,240,0.94)_0%,_rgba(203,213,225,0.82)_100%)] shadow-[0_28px_70px_-38px_rgba(15,23,42,0.26)]"
+              className="border-0 gradient-slate shadow-[0_28px_70px_-38px_rgba(15,23,42,0.26)]"
             >
               <CardHeader>
                 <CardTitle className="text-slate-950">Đi tiếp ngay</CardTitle>
@@ -835,7 +926,7 @@ function DashboardContent({
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
         <Reveal>
-          <Card className="h-full border-0 bg-[linear-gradient(180deg,_rgba(238,242,255,0.95)_0%,_rgba(224,231,255,0.84)_100%)] shadow-[0_28px_70px_-38px_rgba(99,102,241,0.22)]">
+          <Card className="h-full border-0 gradient-indigo shadow-[0_28px_70px_-38px_rgba(99,102,241,0.22)]">
             <CardHeader>
               <div className="flex items-center justify-between gap-4">
                 <div>
@@ -961,7 +1052,7 @@ function DashboardContent({
         </Reveal>
 
         <Reveal>
-          <Card className="h-full border-0 bg-[linear-gradient(180deg,_rgba(226,232,240,0.94)_0%,_rgba(203,213,225,0.82)_100%)] shadow-[0_28px_70px_-38px_rgba(15,23,42,0.24)]">
+          <Card className="h-full border-0 gradient-slate shadow-[0_28px_70px_-38px_rgba(15,23,42,0.24)]">
             <CardHeader>
               <div className="flex items-center justify-between gap-4">
                 <div>
@@ -1015,7 +1106,7 @@ function DashboardContent({
 
       {recentReflections.length > 0 && (
         <Reveal>
-          <Card className="border-0 bg-[linear-gradient(180deg,_rgba(250,245,255,0.94)_0%,_rgba(243,232,255,0.84)_100%)] shadow-[0_28px_70px_-38px_rgba(168,85,247,0.18)]">
+          <Card className="border-0 gradient-purple shadow-[0_28px_70px_-38px_rgba(168,85,247,0.18)]">
             <CardHeader>
               <div className="flex items-center justify-between gap-4">
                 <div>
@@ -1034,7 +1125,7 @@ function DashboardContent({
                   key={reflection.id}
                   className={`rounded-[24px] border p-5 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.18)] ${
                     index === 0
-                      ? "border-slate-900/10 bg-[linear-gradient(135deg,_rgba(15,23,42,0.96)_0%,_rgba(51,65,85,0.92)_100%)] text-white"
+                      ? "border-slate-900/10 gradient-dark text-white"
                       : "border-white/65 bg-white/76"
                   }`}
                 >
@@ -1053,7 +1144,27 @@ function DashboardContent({
           </Card>
         </Reveal>
       )}
+
+      {/* Data backup section */}
+      <Reveal>
+        <Card className="glass-surface-sm mt-8 rounded-[28px] border shadow-none">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Sao lưu & khôi phục dữ liệu</CardTitle>
+            <CardDescription>Tải bản sao lưu hoặc khôi phục từ file JSON.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-3">
+            <Button variant="outline" className="gap-2 rounded-full" onClick={handleExport}>
+              <Download className="h-4 w-4" />
+              Xuất bản sao lưu
+            </Button>
+            <Button variant="outline" className="gap-2 rounded-full" onClick={() => importFileRef.current?.click()}>
+              <Upload className="h-4 w-4" />
+              Nhập dữ liệu
+            </Button>
+            <input ref={importFileRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
+          </CardContent>
+        </Card>
+      </Reveal>
     </div>
   );
 }
-

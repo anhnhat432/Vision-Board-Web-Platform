@@ -18,7 +18,7 @@ export function TwelveWeekLocalStatusSection({
           Thiết bị này
         </Badge>
       </div>
-      <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-4">
+      <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
         <div className="rounded-2xl border border-white/10 bg-white/8 px-3 py-3">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">Nhắc việc</p>
           <p className="mt-2 text-sm font-semibold text-white">{appPreferences.enableInAppReminders ? "Bật" : "Tắt"}</p>

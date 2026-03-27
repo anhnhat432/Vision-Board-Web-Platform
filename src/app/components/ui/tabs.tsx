@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import type * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 
 import { cn } from "./utils";
@@ -42,7 +42,11 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "data-[state=active]:bg-card dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-full flex-1 items-center justify-center gap-1.5 rounded-full border border-transparent px-4 py-2 text-sm font-medium whitespace-nowrap transition-[color,box-shadow,background,transform] duration-300 focus-visible:ring-[3px] focus-visible:outline-1 data-[state=active]:shadow-[0_16px_35px_-24px_rgba(15,23,42,0.3)] hover:bg-white/72 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring inline-flex h-full flex-1 items-center justify-center gap-1.5 rounded-full border border-transparent px-4 py-2 text-sm font-medium whitespace-nowrap transition-all duration-300 focus-visible:ring-[3px] focus-visible:outline-1 hover:bg-white/72 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "text-slate-600 dark:text-muted-foreground",
+        "data-[state=active]:text-white data-[state=active]:font-semibold data-[state=active]:border-transparent data-[state=active]:scale-[1.02]",
+        "data-[state=active]:bg-[linear-gradient(135deg,var(--tone-shell-primary)_0%,var(--tone-shell-secondary)_55%,var(--tone-shell-tertiary)_100%)]",
+        "data-[state=active]:shadow-[0_16px_40px_-20px_var(--tone-shell-shadow)]",
         className,
       )}
       {...props}

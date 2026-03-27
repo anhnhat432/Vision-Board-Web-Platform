@@ -129,7 +129,7 @@ export function TwelveWeekTodayTab({
                     {overdueOpenCount} việc đang trễ, {optionalOpenThisWeekCount} việc tùy chọn còn mở, và {currentWeekTasksCount} việc còn mở trong tuần này.
                   </p>
                 </div>
-                <div className="rounded-[22px] border border-violet-200 bg-[linear-gradient(180deg,_rgba(245,243,255,0.96)_0%,_rgba(237,233,254,0.88)_100%)] p-4 shadow-[0_18px_40px_-34px_rgba(109,40,217,0.18)]">
+                <div className="rounded-[22px] border border-violet-200 gradient-violet p-4 shadow-[0_18px_40px_-34px_rgba(109,40,217,0.18)]">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
@@ -196,8 +196,8 @@ export function TwelveWeekTodayTab({
           interactive={false}
           className={
             firstPriorityTask
-              ? "border-0 bg-[linear-gradient(135deg,_rgba(15,23,42,0.98)_0%,_rgba(30,41,59,0.96)_45%,_rgba(37,99,235,0.84)_100%)] text-white shadow-[0_34px_80px_-36px_rgba(15,23,42,0.78)]"
-              : "border-0 bg-[linear-gradient(135deg,_rgba(15,23,42,0.98)_0%,_rgba(30,41,59,0.95)_58%,_rgba(71,85,105,0.88)_100%)] text-white shadow-[0_34px_80px_-36px_rgba(15,23,42,0.72)]"
+              ? "border-0 gradient-dark-blue-accent text-white shadow-[0_34px_80px_-36px_rgba(15,23,42,0.78)]"
+              : "border-0 gradient-dark text-white shadow-[0_34px_80px_-36px_rgba(15,23,42,0.72)]"
           }
         >
           <CardContent className="p-6">
@@ -260,7 +260,7 @@ export function TwelveWeekTodayTab({
 
         <Card
           interactive={false}
-          className="border-0 bg-[linear-gradient(180deg,_rgba(226,232,240,0.86)_0%,_rgba(203,213,225,0.7)_100%)] shadow-[0_30px_70px_-38px_rgba(15,23,42,0.3)]"
+          className="border-0 gradient-slate shadow-[0_30px_70px_-38px_rgba(15,23,42,0.3)]"
         >
           <CardHeader>
             <CardTitle className="text-slate-950">Tuần này đang ở đâu</CardTitle>
@@ -293,7 +293,7 @@ export function TwelveWeekTodayTab({
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <Card
             data-tour-id="system-today-queue"
-            className="h-full border-0 bg-[linear-gradient(180deg,_rgba(237,246,255,0.9)_0%,_rgba(224,236,250,0.84)_100%)] shadow-[0_30px_70px_-40px_rgba(37,99,235,0.24)]"
+            className="h-full border-0 gradient-sky shadow-[0_30px_70px_-40px_rgba(37,99,235,0.24)]"
           >
             <CardHeader>
               <CardTitle className="text-slate-950">Hàng việc hôm nay</CardTitle>
@@ -323,7 +323,7 @@ export function TwelveWeekTodayTab({
                       key={task.id}
                       className={`flex items-start gap-3 rounded-[24px] border p-4 shadow-[0_18px_38px_-34px_rgba(15,23,42,0.28)] ${
                         isPrimaryTask
-                          ? "border-sky-300 bg-[linear-gradient(135deg,_rgba(8,47,73,0.95)_0%,_rgba(3,105,161,0.9)_100%)]"
+                          ? "border-sky-300 gradient-dark-sky"
                           : "border-white/70 bg-white/86"
                       }`}
                     >
@@ -415,7 +415,7 @@ export function TwelveWeekTodayTab({
           </Card>
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}>
-          <Card className="h-full border-0 bg-[linear-gradient(180deg,_rgba(245,239,255,0.92)_0%,_rgba(233,226,255,0.82)_100%)] shadow-[0_30px_70px_-40px_rgba(124,58,237,0.24)]">
+          <Card className="h-full border-0 gradient-violet-warm shadow-[0_30px_70px_-40px_rgba(124,58,237,0.24)]">
             <CardHeader>
               <CardTitle className="text-slate-950">Check-in 30 giây</CardTitle>
               <CardDescription className="text-slate-700">Tick việc trước, rồi chỉ ghi phần thật sự cần nhớ cho ngày mai.</CardDescription>
@@ -457,7 +457,7 @@ export function TwelveWeekTodayTab({
                       variant="outline"
                       className={
                         dailyMood === option.value
-                          ? "h-auto min-h-16 justify-start border-violet-300 bg-[linear-gradient(135deg,_rgba(76,29,149,0.95)_0%,_rgba(109,40,217,0.88)_100%)] px-4 py-3 text-white"
+                          ? "h-auto min-h-16 justify-start border-violet-300 gradient-purple-vivid px-4 py-3 text-white"
                           : "h-auto min-h-16 justify-start border-white/70 bg-white/78 px-4 py-3 text-slate-700"
                       }
                       onClick={() => onDailyMoodChange(option.value)}

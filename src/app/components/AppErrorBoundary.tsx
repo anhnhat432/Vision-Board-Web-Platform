@@ -43,7 +43,7 @@ export function AppErrorBoundary() {
               <div className="space-y-6">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Sparkles className="h-4 w-4" />
-                  Vision Board
+                  Dear Our Future
                 </div>
 
                 <div className="space-y-4">
@@ -59,7 +59,7 @@ export function AppErrorBoundary() {
                 <div className="flex flex-wrap gap-3">
                   <Button
                     variant="outline"
-                    className="border-white/18 bg-white text-slate-900 hover:bg-white/92"
+                    className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92"
                     onClick={() => navigate("/")}
                   >
                     <Home className="h-4 w-4" />

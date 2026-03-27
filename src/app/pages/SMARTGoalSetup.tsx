@@ -244,7 +244,7 @@ export function SMARTGoalSetup() {
                           <div
                             className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
                               active
-                                ? "bg-white text-slate-900"
+                                ? "hero-cta bg-white text-slate-900"
                                 : done
                                   ? "bg-white/18 text-white"
                                   : "bg-white/8 text-white/60"
@@ -276,7 +276,7 @@ export function SMARTGoalSetup() {
                 transition={{ duration: 0.3 }}
                 className="space-y-6"
               >
-                <div className="rounded-[28px] bg-[linear-gradient(135deg,_rgba(245,243,255,0.95)_0%,_rgba(252,231,243,0.78)_100%)] p-6">
+                <div className="rounded-[28px] gradient-violet-pink p-6">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">
                     {currentStepData.label}
                   </p>

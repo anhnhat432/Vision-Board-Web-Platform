@@ -810,7 +810,7 @@ export function sendTestBrowserNotification(): boolean {
   if (typeof window === "undefined" || !("Notification" in window)) return false;
   if (window.Notification.permission !== "granted") return false;
 
-  new window.Notification("Nhắc việc từ Vision Board", {
+  new window.Notification("Nhắc việc từ Dear Our Future", {
     body: "Browser notification đã sẵn sàng. Từ giờ app có thể nhắc việc ngay cả khi bạn không mở đúng tab 12 tuần.",
     tag: "vision-board-test-notification",
   });
@@ -1045,6 +1045,8 @@ export async function syncEmailReminderSchedule(): Promise<EmailSyncResult> {
 
   let sentCount = 0;
   let failedCount = 0;
+  const schedule = data.emailReminderSchedule ?? [];
+  data.emailReminderSchedule = schedule;
 
   for (const item of dueItems) {
     const payload: EmailDeliveryPayload = {
@@ -1063,10 +1065,10 @@ export async function syncEmailReminderSchedule(): Promise<EmailSyncResult> {
         body: JSON.stringify(payload),
       });
 
-      const idx = data.emailReminderSchedule!.findIndex((s) => s.id === item.id);
+      const idx = schedule.findIndex((s) => s.id === item.id);
       if (idx !== -1) {
-        data.emailReminderSchedule![idx] = {
-          ...data.emailReminderSchedule![idx],
+        schedule[idx] = {
+          ...schedule[idx],
           status: response.ok ? "sent" : "canceled",
         };
       }
