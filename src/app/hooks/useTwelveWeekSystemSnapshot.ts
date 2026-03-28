@@ -19,6 +19,7 @@ import {
   type InAppReminder,
   type PricingPlanCode,
   type SyncOutboxItem,
+  type TwelveWeekSystem,
   getActiveTwelveWeekGoal,
   getCurrentEntitlementKeys,
   getCurrentPlan,
@@ -113,6 +114,52 @@ export function useTwelveWeekSystemSnapshot() {
       localStorage.setItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId, selectedGoal.id);
     }
   }, []);
+
+  const updateActiveGoalState = useCallback((updater: (goal: Goal) => Goal) => {
+    setActiveGoal((previousGoal) => {
+      if (!previousGoal) return previousGoal;
+      const nextGoal = updater(previousGoal);
+      setAllGoals((previousGoals) =>
+        previousGoals.map((goal) => (goal.id === nextGoal.id ? nextGoal : goal)),
+      );
+      return nextGoal;
+    });
+  }, []);
+
+  const updateActiveSystemState = useCallback((updater: (system: TwelveWeekSystem) => TwelveWeekSystem) => {
+    updateActiveGoalState((goal) => {
+      if (!goal.twelveWeekSystem) return goal;
+      return {
+        ...goal,
+        twelveWeekSystem: updater(goal.twelveWeekSystem),
+      };
+    });
+  }, [updateActiveGoalState]);
+
+  const refreshSnapshotMeta = useCallback(() => {
+    const data = getUserData();
+    const selectedGoalId = activeGoal?.id;
+
+    setAppPreferences(data.appPreferences);
+    setActiveReminders(getInAppReminders());
+    setEventCount(data.eventLog.length);
+    setPendingOutboxCount(data.syncOutbox.filter((item) => item.status === "pending").length);
+    setArchivedOutboxCount(
+      data.syncOutbox.filter((item) => item.status === "archived" || item.status === "sent" || item.status === "failed")
+        .length,
+    );
+    setRecentOutboxItems(data.syncOutbox.slice(0, 3));
+    setFunnelSteps(getTwelveWeekFunnelSummary(selectedGoalId));
+    setMonetizationSteps(getTwelveWeekMonetizationSummary(selectedGoalId));
+    setBillingProviderStatus(getBillingProviderStatus());
+    setBrowserNotificationStatus(getBrowserNotificationStatus());
+    setLastSyncSnapshot(getLastOutboxSyncSnapshot());
+    setLastEntitlementSyncSnapshot(getLastEntitlementSyncSnapshot());
+    setLastRestoreAccessSnapshot(getLastRestoreAccessSnapshot());
+    setActivePlanCode(getCurrentPlan(data));
+    setActiveEntitlementKeys(getCurrentEntitlementKeys(data));
+    setActiveSubscription(data.subscription);
+  }, [activeGoal?.id]);
 
   useEffect(() => {
     loadGoalData();
@@ -282,6 +329,9 @@ export function useTwelveWeekSystemSnapshot() {
     weeklyTrend,
     tacticBreakdown,
     milestoneItems,
+    updateActiveGoalState,
+    updateActiveSystemState,
+    refreshSnapshotMeta,
     loadGoalData,
   };
 }

@@ -22,20 +22,16 @@ import { Label } from "../components/ui/label";
 import { Progress } from "../components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import { APP_STORAGE_KEYS, getLifeAreaLabel, getUserData } from "../utils/storage";
+import {
+  parsePendingSMARTGoal,
+  parseSmartGoal,
+  type PendingSMARTGoal,
+} from "@/lib/smart-goal";
 
 interface Question {
   id: number;
   question: string;
   options: { value: string; label: string; score: number }[];
-}
-
-interface PendingSMARTGoal {
-  focusArea: string;
-  specific: string;
-  measurable: string;
-  achievable: string;
-  relevant: string;
-  timeBound: string;
 }
 
 const QUESTIONS: Question[] = [
@@ -163,20 +159,6 @@ function buildResult(readinessScore: number, wheelScore: number): ResultData {
     adjustedScore,
     wheelScore,
   };
-}
-
-function isPendingSMARTGoal(value: unknown): value is PendingSMARTGoal {
-  if (!value || typeof value !== "object") return false;
-  const draft = value as Record<string, unknown>;
-
-  return (
-    typeof draft.focusArea === "string" &&
-    typeof draft.specific === "string" &&
-    typeof draft.measurable === "string" &&
-    typeof draft.achievable === "string" &&
-    typeof draft.relevant === "string" &&
-    typeof draft.timeBound === "string"
-  );
 }
 
 interface FeasibilityResultViewProps {
@@ -713,7 +695,17 @@ export function FeasibilityCheck() {
       return;
     }
 
-    if (!isPendingSMARTGoal(parsedDraft)) {
+    const normalizedSmartGoal = parseSmartGoal(parsedDraft, storedFocusArea);
+    if (normalizedSmartGoal) {
+      localStorage.setItem(APP_STORAGE_KEYS.pendingSmartGoal, JSON.stringify(normalizedSmartGoal));
+    }
+
+    const normalizedPendingGoal = parsePendingSMARTGoal(
+      normalizedSmartGoal ?? parsedDraft,
+      storedFocusArea,
+    );
+
+    if (!normalizedPendingGoal) {
       toast.info("Bản nháp mục tiêu SMART của bạn chưa hoàn chỉnh. Vui lòng hoàn thành nó.");
       navigate("/smart-goal-setup");
       return;
@@ -730,10 +722,7 @@ export function FeasibilityCheck() {
 
     setFocusArea(storedFocusArea);
     setWheelScore(areaData.score);
-    setPendingGoal({
-      ...parsedDraft,
-      focusArea: parsedDraft.focusArea || storedFocusArea,
-    });
+    setPendingGoal(normalizedPendingGoal);
     setIsInitializing(false);
   }, [navigate]);
 

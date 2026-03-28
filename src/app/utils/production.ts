@@ -11,6 +11,7 @@ import {
   trackAppEvent,
   upgradePlanLocally,
 } from "./storage";
+import { apiClient } from "@/lib/api/apiClient";
 import {
   trackCheckoutCompleted,
   trackCheckoutStarted,
@@ -256,29 +257,12 @@ function applyBillingAccessPayload(
   };
 }
 
-async function parseContractResponse(response: Response): Promise<BillingAccessContractPayload> {
-  const text = await response.text();
-  if (!text) return {};
-  return JSON.parse(text) as BillingAccessContractPayload;
-}
-
 async function postBillingContract(
   endpoint: string,
   body: Record<string, unknown>,
 ): Promise<BillingAccessContractPayload> {
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
-  }
-
-  return parseContractResponse(response);
+  const payload = await apiClient.post<unknown, Record<string, unknown>>(endpoint, body);
+  return payload && typeof payload === "object" ? (payload as BillingAccessContractPayload) : {};
 }
 
 function buildReturnUrl(): string {
@@ -896,18 +880,9 @@ export async function syncPendingOutbox(): Promise<OutboxSyncSnapshot> {
 
   for (const item of pendingItems) {
     try {
-      const response = await fetch(OUTBOX_SYNC_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(item),
+      await apiClient.post<unknown, typeof item>(OUTBOX_SYNC_ENDPOINT, item, {
         keepalive: true,
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
 
       const itemIndex = data.syncOutbox.findIndex((entry) => entry.id === item.id);
       if (itemIndex !== -1) {
@@ -1059,26 +1034,26 @@ export async function syncEmailReminderSchedule(): Promise<EmailSyncResult> {
     };
 
     try {
-      const response = await fetch(EMAIL_REMINDER_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const idx = schedule.findIndex((s) => s.id === item.id);
 
+      await apiClient.post<unknown, EmailDeliveryPayload>(EMAIL_REMINDER_ENDPOINT, payload);
+
+      if (idx !== -1) {
+        schedule[idx] = {
+          ...schedule[idx],
+          status: "sent",
+        };
+      }
+
+      sentCount++;
+    } catch {
       const idx = schedule.findIndex((s) => s.id === item.id);
       if (idx !== -1) {
         schedule[idx] = {
           ...schedule[idx],
-          status: response.ok ? "sent" : "canceled",
+          status: "canceled",
         };
       }
-
-      if (response.ok) {
-        sentCount++;
-      } else {
-        failedCount++;
-      }
-    } catch {
       failedCount++;
     }
   }

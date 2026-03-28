@@ -27,7 +27,6 @@ import {
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { TwelveWeekTodayTab } from "../components/twelve-week/TwelveWeekTodayTab";
 import { CountUp } from "../components/ui/count-up";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
@@ -80,6 +79,8 @@ import {
   getPlanLabel,
   type PremiumFeatureContext,
 } from "../utils/twelve-week-premium";
+import { TaskBoard } from "@/features/plan12week/components/TaskBoard";
+import { usePlanExecutionSync } from "@/features/plan12week/hooks";
 
 interface WeeklyReviewForm {
   lagProgressValue: string;
@@ -89,16 +90,16 @@ interface WeeklyReviewForm {
   workloadDecision: UniversalWeeklyReview["workloadDecision"];
 }
 
-const TwelveWeekWeekTab = lazy(async () => ({
-  default: (await import("../components/twelve-week/TwelveWeekWeekTab")).TwelveWeekWeekTab,
+const WeeklyReview = lazy(async () => ({
+  default: (await import("@/features/plan12week/components/WeeklyReview")).WeeklyReview,
 }));
 
-const TwelveWeekProgressTab = lazy(async () => ({
-  default: (await import("../components/twelve-week/TwelveWeekProgressTab")).TwelveWeekProgressTab,
+const PlanOverview = lazy(async () => ({
+  default: (await import("@/features/plan12week/components/PlanOverview")).PlanOverview,
 }));
 
-const TwelveWeekSettingsTab = lazy(async () => ({
-  default: (await import("../components/twelve-week/TwelveWeekSettingsTab")).TwelveWeekSettingsTab,
+const WeekEditor = lazy(async () => ({
+  default: (await import("@/features/plan12week/components/WeekEditor")).WeekEditor,
 }));
 
 function TwelveWeekTabFallback({
@@ -118,7 +119,6 @@ function TwelveWeekTabFallback({
     </Card>
   );
 }
-
 export function TwelveWeekSystem() {
   const navigate = useNavigate();
   const {
@@ -183,6 +183,8 @@ export function TwelveWeekSystem() {
     weeklyTrend,
     tacticBreakdown,
     milestoneItems,
+    updateActiveSystemState,
+    refreshSnapshotMeta,
     loadGoalData,
   } = useTwelveWeekSystemSnapshot();
   const [dailyMood, setDailyMood] = useState<DailyMood>("steady");
@@ -225,6 +227,13 @@ export function TwelveWeekSystem() {
     setDailyNote(latestCheckIn?.optionalNote ?? "");
   }, [system, currentReview, currentLagMetricValue, latestCheckIn, activeGoal]);
 
+  const {
+    actions: executionSyncActions,
+  } = usePlanExecutionSync({
+    goalId: activeGoal?.id ?? null,
+    system,
+  });
+
   if (!activeGoal || !system) {
     return (
       <Card className="overflow-hidden">
@@ -245,7 +254,19 @@ export function TwelveWeekSystem() {
     );
   }
 
-  const refreshAfterGoalUpdate = () => loadGoalData(activeGoal.id);
+  const commitSystemUpdate = (nextSystem: typeof system) => {
+    updateGoal(activeGoal.id, {
+      twelveWeekSystem: nextSystem,
+    });
+    updateActiveSystemState(() => nextSystem);
+  };
+
+  const rollbackSystemUpdate = (previousSystem: typeof system) => {
+    updateGoal(activeGoal.id, {
+      twelveWeekSystem: previousSystem,
+    });
+    updateActiveSystemState(() => previousSystem);
+  };
 
   const handleOpenUpgradeDialog = (
     context: PremiumFeatureContext,
@@ -266,7 +287,7 @@ export function TwelveWeekSystem() {
   };
 
   const handleCheckoutComplete = () => {
-    loadGoalData(activeGoal.id);
+    refreshSnapshotMeta();
   };
 
   const handleRestorePlanAccess = async () => {
@@ -287,7 +308,7 @@ export function TwelveWeekSystem() {
         toast.error(result.message);
       }
 
-      loadGoalData(activeGoal.id);
+      refreshSnapshotMeta();
     } finally {
       setIsRestoringPlanAccess(false);
     }
@@ -310,7 +331,7 @@ export function TwelveWeekSystem() {
         toast.error(result.message);
       }
 
-      loadGoalData(activeGoal.id);
+      refreshSnapshotMeta();
     } finally {
       setIsSyncingEntitlements(false);
     }
@@ -354,24 +375,30 @@ export function TwelveWeekSystem() {
     }
   };
 
-  const handleToggleTask = (taskId: string, completed: boolean) => {
+  const handleToggleTask = async (taskId: string, completed: boolean) => {
+    const previousSystem = system;
     const nextTaskInstances = system.taskInstances.map((task) =>
       task.id === taskId ? { ...task, completed, completedAt: completed ? new Date().toISOString() : undefined } : task,
     );
 
-    updateGoal(activeGoal.id, {
-      twelveWeekSystem: {
-        ...system,
-        taskInstances: nextTaskInstances,
-      },
+    commitSystemUpdate({
+      ...system,
+      taskInstances: nextTaskInstances,
     });
 
     if (completed) {
       trackAppEvent("12_week_task_completed", activeGoal.id, { weekNumber: String(currentWeek), taskId });
     }
 
+    const synced = await executionSyncActions.syncTaskToggle(taskId, completed);
+    if (!synced) {
+      rollbackSystemUpdate(previousSystem);
+      toast.error("Không thể đồng bộ trạng thái việc. Mình đã hoàn tác thay đổi.");
+      return;
+    }
+
     toast.success(completed ? "Việc đã được chốt." : "Việc đã được mở lại.");
-    refreshAfterGoalUpdate();
+    refreshSnapshotMeta();
   };
 
   const handleSaveCheckIn = () => {
@@ -391,11 +418,9 @@ export function TwelveWeekSystem() {
     };
 
     const filteredCheckIns = system.dailyCheckIns.filter((item) => getCalendarDateKey(item.date) !== todayKey);
-    updateGoal(activeGoal.id, {
-      twelveWeekSystem: {
-        ...system,
-        dailyCheckIns: [dailyCheckIn, ...filteredCheckIns].slice(0, 120),
-      },
+    commitSystemUpdate({
+      ...system,
+      dailyCheckIns: [dailyCheckIn, ...filteredCheckIns].slice(0, 120),
     });
 
     trackAppEvent("12_week_daily_checkin_submitted", activeGoal.id, {
@@ -403,10 +428,10 @@ export function TwelveWeekSystem() {
       completedTasks: String(completedTodayCount),
     });
     toast.success("Check-in hôm nay đã được lưu.");
-    refreshAfterGoalUpdate();
+    refreshSnapshotMeta();
   };
 
-  const handleSaveWeeklyReview = () => {
+  const handleSaveWeeklyReview = async () => {
     const hasAnyContent =
       weeklyForm.biggestOutputThisWeek.trim() ||
       weeklyForm.mainObstacle.trim() ||
@@ -444,16 +469,28 @@ export function TwelveWeekSystem() {
       nextReview,
     ].sort((left, right) => left.weekNumber - right.weekNumber);
 
-    updateGoal(activeGoal.id, {
-      twelveWeekSystem: {
-        ...system,
-        lagMetric: {
-          ...system.lagMetric,
-          currentValue: weeklyForm.lagProgressValue.trim(),
-        },
-        weeklyReviews: updatedReviews,
+    const previousSystem = system;
+    commitSystemUpdate({
+      ...system,
+      lagMetric: {
+        ...system.lagMetric,
+        currentValue: weeklyForm.lagProgressValue.trim(),
       },
+      weeklyReviews: updatedReviews,
     });
+
+    const synced = await executionSyncActions.syncWeeklyReview({
+      weekNumber: currentWeek,
+      executionScore: currentScore?.weeklyScore ?? weekCompletion.percent,
+      reflection: weeklyForm.biggestOutputThisWeek.trim() || undefined,
+      adjustments: nextWeekPriorityValue || undefined,
+    });
+
+    if (!synced) {
+      rollbackSystemUpdate(previousSystem);
+      toast.error("Không thể đồng bộ weekly review. Mình đã hoàn tác thay đổi.");
+      return;
+    }
 
     upsertReflection({
       date: formatDateInputValue(new Date()),
@@ -481,92 +518,76 @@ export function TwelveWeekSystem() {
         hasPremiumReviewInsights && weeklyForm.nextWeekPriority.trim().length === 0,
       ),
     });
+
     toast.success("Review tuần đã được chốt.", {
       description:
         hasPremiumReviewInsights && weeklyForm.nextWeekPriority.trim().length === 0
           ? "Mình đã dùng luôn gợi ý Plus để khóa ưu tiên tuần sau cho bạn."
           : "Tuần sau giờ đã có ưu tiên đủ rõ để bắt đầu gọn hơn.",
     });
-    refreshAfterGoalUpdate();
+    refreshSnapshotMeta();
   };
 
   const handleReviewDayChange = (value: string) => {
-    updateGoal(activeGoal.id, {
-      twelveWeekSystem: {
-        ...system,
-        reviewDay: value,
-      },
+    commitSystemUpdate({
+      ...system,
+      reviewDay: value,
     });
     toast.success("Ngày review đã được cập nhật.");
-    refreshAfterGoalUpdate();
   };
 
   const handleReminderTimeChange = (value: string) => {
     if (!/^\d{2}:\d{2}$/.test(value)) return;
-    updateGoal(activeGoal.id, {
-      twelveWeekSystem: {
-        ...system,
-        dailyReminderTime: value,
-      },
+    commitSystemUpdate({
+      ...system,
+      dailyReminderTime: value,
     });
     updateAppPreferences({ preferredReminderHour: Number.parseInt(value.split(":")[0] ?? "19", 10) || 19 });
-    refreshAfterGoalUpdate();
+    refreshSnapshotMeta();
   };
 
   const handleLoadPreferenceChange = (value: string) => {
-    updateGoal(activeGoal.id, {
-      twelveWeekSystem: {
-        ...system,
-        tacticLoadPreference: value as typeof system.tacticLoadPreference,
-      },
+    commitSystemUpdate({
+      ...system,
+      tacticLoadPreference: value as typeof system.tacticLoadPreference,
     });
-    refreshAfterGoalUpdate();
   };
 
   const handleStatusChange = (value: string) => {
-    updateGoal(activeGoal.id, {
-      twelveWeekSystem: {
-        ...system,
-        status: value as typeof system.status,
-      },
+    commitSystemUpdate({
+      ...system,
+      status: value as typeof system.status,
     });
-    refreshAfterGoalUpdate();
   };
 
   const handleTacticPriorityChange = (tacticId: string | undefined, value: string) => {
     if (!tacticId) return;
 
-    updateGoal(activeGoal.id, {
-      twelveWeekSystem: {
-        ...system,
-        leadIndicators: system.leadIndicators.map((indicator, index) => {
-          const indicatorId = indicator.id ?? `tactic_${index}`;
-          return indicatorId === tacticId
-            ? { ...indicator, priority: Number.parseInt(value, 10) || index + 1 }
-            : indicator;
-        }),
-      },
+    commitSystemUpdate({
+      ...system,
+      leadIndicators: system.leadIndicators.map((indicator, index) => {
+        const indicatorId = indicator.id ?? `tactic_${index}`;
+        return indicatorId === tacticId
+          ? { ...indicator, priority: Number.parseInt(value, 10) || index + 1 }
+          : indicator;
+      }),
     });
     trackAppEvent("12_week_tactic_updated", activeGoal.id, { tacticId, field: "priority", value });
-    refreshAfterGoalUpdate();
   };
 
   const handleTacticTypeChange = (tacticId: string | undefined, value: string) => {
     if (!tacticId) return;
 
-    updateGoal(activeGoal.id, {
-      twelveWeekSystem: {
-        ...system,
-        leadIndicators: system.leadIndicators.map((indicator, index) => {
-          const indicatorId = indicator.id ?? `tactic_${index}`;
-          return indicatorId === tacticId
-            ? { ...indicator, type: value === "optional" ? "optional" : "core" }
-            : indicator;
-        }),
-      },
+    commitSystemUpdate({
+      ...system,
+      leadIndicators: system.leadIndicators.map((indicator, index) => {
+        const indicatorId = indicator.id ?? `tactic_${index}`;
+        return indicatorId === tacticId
+          ? { ...indicator, type: value === "optional" ? "optional" : "core" }
+          : indicator;
+      }),
     });
     trackAppEvent("12_week_tactic_updated", activeGoal.id, { tacticId, field: "type", value });
-    refreshAfterGoalUpdate();
   };
 
   const handlePreferenceToggle = <K extends keyof AppPreferences>(
@@ -574,7 +595,7 @@ export function TwelveWeekSystem() {
     value: AppPreferences[K],
   ) => {
     updateAppPreferences({ [key]: value } as Pick<AppPreferences, K>);
-    refreshAfterGoalUpdate();
+    refreshSnapshotMeta();
   };
 
   const handleArchivePendingOutbox = () => {
@@ -584,7 +605,7 @@ export function TwelveWeekSystem() {
       .forEach((item) => {
         archiveOutboxItem(item.id);
       });
-    refreshAfterGoalUpdate();
+    refreshSnapshotMeta();
   };
 
   const handleOutboxItemToggle = (item: SyncOutboxItem) => {
@@ -595,13 +616,13 @@ export function TwelveWeekSystem() {
       restoreOutboxItem(item.id);
       toast.success("Mục outbox đã được khôi phục về hàng chờ.");
     }
-    refreshAfterGoalUpdate();
+    refreshSnapshotMeta();
   };
 
   const handleRestoreArchivedOutbox = () => {
     restoreArchivedOutbox();
     toast.success("Các mục outbox đã lưu đã được đưa lại về hàng chờ.");
-    refreshAfterGoalUpdate();
+    refreshSnapshotMeta();
   };
 
   const handleOpenReminder = (reminder: InAppReminder) => {
@@ -626,7 +647,7 @@ export function TwelveWeekSystem() {
     clearLocalDeviceSignals();
     setIsClearLocalDialogOpen(false);
     toast.success("Đã xóa log, outbox và trạng thái nhắc việc trên thiết bị này.");
-    refreshAfterGoalUpdate();
+    refreshSnapshotMeta();
   };
 
   const handleDeleteAllData = () => {
@@ -655,13 +676,13 @@ export function TwelveWeekSystem() {
       setBrowserNotificationStatus(getBrowserNotificationStatus());
     }
 
-    refreshAfterGoalUpdate();
+    refreshSnapshotMeta();
   };
 
   const handleRunOutboxSync = async () => {
     const snapshot = await syncPendingOutbox();
     setLastSyncSnapshot(snapshot);
-    refreshAfterGoalUpdate();
+    refreshSnapshotMeta();
 
     if (snapshot.status === "success") {
       toast.success(snapshot.message);
@@ -708,13 +729,11 @@ export function TwelveWeekSystem() {
       };
     });
 
-    updateGoal(activeGoal.id, {
-      twelveWeekSystem: {
-        ...system,
-        tacticLoadPreference: mode === "lighten" ? "lighter" : system.tacticLoadPreference,
-        reentryCount: (system.reentryCount ?? 0) + 1,
-        taskInstances: nextTaskInstances,
-      },
+    commitSystemUpdate({
+      ...system,
+      tacticLoadPreference: mode === "lighten" ? "lighter" : system.tacticLoadPreference,
+      reentryCount: (system.reentryCount ?? 0) + 1,
+      taskInstances: nextTaskInstances,
     });
 
     trackAppEvent("12_week_reentry_used", activeGoal.id, { mode, weekNumber: String(currentWeek) });
@@ -725,7 +744,7 @@ export function TwelveWeekSystem() {
           ? "Đã giảm tải cho phần còn lại của tuần."
           : "Đã đẩy việc trễ sang tuần sau.",
     );
-    refreshAfterGoalUpdate();
+    refreshSnapshotMeta();
   };
 
   const handleApplyRecommendedReentry = () => {
@@ -771,7 +790,7 @@ export function TwelveWeekSystem() {
     toast.success("Chu kỳ đã được reset từ tuần này.", {
       description: "Việc, check-in và review tuần của chu kỳ hiện tại đã được làm mới để bạn bắt đầu lại gọn hơn.",
     });
-    refreshAfterGoalUpdate();
+    loadGoalData(activeGoal.id);
   };
 
   return (
@@ -1036,7 +1055,7 @@ export function TwelveWeekSystem() {
 
         <TabsContent value="today" className="space-y-6 pt-4">
           <TabErrorBoundary fallbackTitle="Tab Hôm nay gặp lỗi">
-          <TwelveWeekTodayTab
+          <TaskBoard
             system={system}
             currentWeek={currentWeek}
             currentWeekRange={currentWeekRange}
@@ -1083,8 +1102,9 @@ export function TwelveWeekSystem() {
               />
             }
           >
-            <TwelveWeekWeekTab
+            <WeeklyReview
               system={system}
+              currentWeekNumber={currentWeek}
               currentWeekRange={currentWeekRange}
               currentPlanFocus={currentPlanFocus}
               currentPlanMilestone={currentPlanMilestone}
@@ -1124,7 +1144,7 @@ export function TwelveWeekSystem() {
               />
             }
           >
-            <TwelveWeekProgressTab
+            <PlanOverview
               system={system}
               currentWeek={currentWeek}
               currentWeekRange={currentWeekRange}
@@ -1152,7 +1172,7 @@ export function TwelveWeekSystem() {
               />
             }
           >
-            <TwelveWeekSettingsTab
+            <WeekEditor
               system={system}
               currentPlanCode={activePlanCode}
               entitlementKeys={activeEntitlementKeys}
@@ -1187,11 +1207,11 @@ export function TwelveWeekSystem() {
               onOutboxItemToggle={handleOutboxItemToggle}
               onClearEventLog={() => {
                 clearEventLog();
-                refreshAfterGoalUpdate();
+                refreshSnapshotMeta();
               }}
               onClearArchivedOutbox={() => {
                 clearArchivedOutbox();
-                refreshAfterGoalUpdate();
+                refreshSnapshotMeta();
               }}
               onOpenClearLocalDialog={() => setIsClearLocalDialogOpen(true)}
               onDeleteAllData={handleDeleteAllData}
@@ -1211,3 +1231,6 @@ export function TwelveWeekSystem() {
     </div>
   );
 }
+
+
+

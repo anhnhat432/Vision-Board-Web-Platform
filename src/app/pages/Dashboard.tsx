@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { Suspense, lazy } from "react";
@@ -54,6 +54,20 @@ import {
   saveUserData,
   sortReflectionsByDateDesc,
 } from "../utils/storage";
+import { usePlan12Week } from "@/features/plan12week/hooks";
+import { useDashboardPlanLink } from "@/features/dashboard/hooks/useDashboardPlanLink";
+import {
+  buildCurrentWeekExecutionSnapshot,
+  buildGoalProgressSnapshot,
+  buildLeadMetricsSummary,
+  buildWeeklyProgressPoints,
+  calculateWeeklyStreak,
+} from "@/features/dashboard/helpers/dashboardInsights";
+import { GoalProgressCard } from "@/features/dashboard/components/GoalProgressCard";
+import { ExecutionScoreCard } from "@/features/dashboard/components/ExecutionScoreCard";
+import { WeeklyProgressChart } from "@/features/dashboard/components/WeeklyProgressChart";
+import { StreakCard } from "@/features/dashboard/components/StreakCard";
+import { MetricsSummary } from "@/features/dashboard/components/MetricsSummary";
 import {
   getEntitlementLabel,
   getPlanLabel,
@@ -177,9 +191,32 @@ function DashboardContent({
       currentPlanCode,
       goalId: activeTwelveWeekGoal?.id,
     });
+  const {
+    plan,
+    loading: planLoading,
+    error: planError,
+    actions: planActions,
+  } = usePlan12Week();
+  const dashboardPlanId = useDashboardPlanLink(activeTwelveWeekGoal?.id ?? null);
+  const loadPlan = planActions.loadPlan;
+
+  useEffect(() => {
+    if (!dashboardPlanId) return;
+    if (plan?.id === dashboardPlanId) return;
+    void loadPlan(dashboardPlanId);
+  }, [dashboardPlanId, loadPlan, plan?.id]);
 
   const recentGoals = userData.goals.slice(0, 3);
   const recentReflections = sortReflectionsByDateDesc(userData.reflections).slice(0, 2);
+  const dashboardGoalTitle = activeTwelveWeekGoal?.title ?? plan?.vision ?? "Current Goal";
+  const goalProgressSnapshot = useMemo(() => buildGoalProgressSnapshot(plan), [plan]);
+  const currentWeekExecutionSnapshot = useMemo(() => buildCurrentWeekExecutionSnapshot(plan), [plan]);
+  const weeklyProgressPoints = useMemo(() => buildWeeklyProgressPoints(plan), [plan]);
+  const weeklyStreak = useMemo(
+    () => calculateWeeklyStreak(weeklyProgressPoints),
+    [weeklyProgressPoints],
+  );
+  const leadMetricsSummary = useMemo(() => buildLeadMetricsSummary(plan), [plan]);
 
   const handleExport = () => {
     const snapshot = exportUserDataSnapshot();
@@ -800,6 +837,58 @@ function DashboardContent({
                 );
               })}
             </div>
+
+            <section className="space-y-4 rounded-[26px] border border-white/70 bg-gradient-to-br from-white/88 via-white/80 to-slate-50/85 p-4 shadow-[0_28px_60px_-42px_rgba(15,23,42,0.35)] sm:p-5 lg:p-6">
+              <div className="flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Execution Dashboard</p>
+                  <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">12-Week Performance Overview</h2>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Quick insight into progress, consistency, and lead metrics for your active goal.
+                  </p>
+                </div>
+                <span className="rounded-full border border-slate-200 bg-white/90 px-3 py-1 text-xs font-medium text-slate-600">
+                  Live cycle snapshot
+                </span>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+                <GoalProgressCard
+                  goalTitle={dashboardGoalTitle}
+                  percent={goalProgressSnapshot.percent}
+                  completedTasks={goalProgressSnapshot.completedTasks}
+                  totalTasks={goalProgressSnapshot.totalTasks}
+                />
+                <ExecutionScoreCard
+                  weekNumber={currentWeekExecutionSnapshot.weekNumber}
+                  executionScore={currentWeekExecutionSnapshot.executionScore}
+                  completedTasks={currentWeekExecutionSnapshot.completedTasks}
+                  totalTasks={currentWeekExecutionSnapshot.totalTasks}
+                />
+                <StreakCard streak={weeklyStreak} />
+              </div>
+
+              <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
+                <WeeklyProgressChart points={weeklyProgressPoints} />
+                <MetricsSummary items={leadMetricsSummary} />
+              </div>
+
+              {planLoading && !plan && (
+                <Card className="border border-slate-200 bg-white/80 shadow-sm">
+                  <CardContent className="p-4 text-sm text-slate-500">
+                    Loading 12-week dashboard data...
+                  </CardContent>
+                </Card>
+              )}
+
+              {planError && (
+                <Card className="border border-rose-200 bg-rose-50 shadow-sm">
+                  <CardContent className="p-4 text-sm text-rose-700">
+                    {planError.message}
+                  </CardContent>
+                </Card>
+              )}
+            </section>
           </div>
         </motion.div>
 
