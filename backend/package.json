@@ -8,8 +8,10 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
-    "@figma/my-make-file": "file:..",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
