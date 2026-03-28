@@ -101,7 +101,7 @@ You can deploy using the provided Blueprint file at the repo root: `render.yaml`
 3. Select this repository.
 4. Render will detect `render.yaml` and create the backend web service with:
    - root directory: `backend`
-   - build command: `npm ci && npm run build`
+   - build command: `npm ci --include=dev && npm run build`
    - start command: `npm run start`
    - health check: `/api/health`
 5. In Render dashboard, set required env vars:
@@ -118,7 +118,7 @@ You can deploy using the provided Blueprint file at the repo root: `render.yaml`
 1. Create **New Web Service** on Render.
 2. Set:
    - **Root Directory**: `backend`
-   - **Build Command**: `npm ci && npm run build`
+   - **Build Command**: `npm ci --include=dev && npm run build`
    - **Start Command**: `npm run start`
 3. Add the same environment variables listed above.
 4. Deploy and verify health endpoint:
