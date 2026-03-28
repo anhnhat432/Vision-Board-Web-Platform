@@ -13,17 +13,264 @@ import {
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
+import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Progress } from "../components/ui/progress";
 import { Textarea } from "../components/ui/textarea";
 import { APP_STORAGE_KEYS, getLifeAreaLabel } from "../utils/storage";
+import {
+  buildSmartGoal,
+  hasOutcomeIndicator,
+  isPendingSMARTGoal,
+  normalizeListInput,
+  parseNumberInput,
+  parseSmartGoal,
+  stringifyListInput,
+  type SmartGoal,
+} from "@/lib/smart-goal";
 
 interface SMARTData {
-  specific: string;
-  measurable: string;
-  achievable: string;
-  relevant: string;
-  timeBound: string;
+  specific: {
+    goal_statement: string;
+  };
+  measurable: {
+    metric_name: string;
+    baseline_value: string;
+    target_value: string;
+  };
+  achievable: {
+    weekly_time_commitment_hours: string;
+    required_skills: string;
+    support_resources: string;
+  };
+  relevant: {
+    motivation_reason: string;
+    life_dimension_alignment: string;
+  };
+  timeBound: {
+    mode: "date" | "weeks";
+    target_date: string;
+    target_weeks: string;
+  };
+}
+
+type SmartStepKey = keyof SMARTData;
+
+const DEFAULT_TARGET_WEEKS = "12";
+
+function createInitialSMARTData(): SMARTData {
+  return {
+    specific: {
+      goal_statement: "",
+    },
+    measurable: {
+      metric_name: "",
+      baseline_value: "",
+      target_value: "",
+    },
+    achievable: {
+      weekly_time_commitment_hours: "",
+      required_skills: "",
+      support_resources: "",
+    },
+    relevant: {
+      motivation_reason: "",
+      life_dimension_alignment: "",
+    },
+    timeBound: {
+      mode: "weeks",
+      target_date: "",
+      target_weeks: DEFAULT_TARGET_WEEKS,
+    },
+  };
+}
+
+function extractNumberFromText(value: string): number | undefined {
+  const match = value.match(/-?\d+(\.\d+)?/);
+  if (!match) return undefined;
+  return parseNumberInput(match[0]);
+}
+
+function extractDateFromText(value: string): string {
+  const match = value.match(/\b\d{4}-\d{2}-\d{2}\b/);
+  return match?.[0] ?? "";
+}
+
+function buildSMARTDataFromDraft(parsed: unknown): SMARTData {
+  const parsedSmartGoal = parseSmartGoal(parsed, "");
+  if (parsedSmartGoal) {
+    return {
+      specific: {
+        goal_statement: parsedSmartGoal.specific.goal_statement,
+      },
+      measurable: {
+        metric_name: parsedSmartGoal.measurable.metric_name,
+        baseline_value:
+          parsedSmartGoal.measurable.baseline_value !== undefined
+            ? String(parsedSmartGoal.measurable.baseline_value)
+            : "",
+        target_value: String(parsedSmartGoal.measurable.target_value),
+      },
+      achievable: {
+        weekly_time_commitment_hours: String(parsedSmartGoal.achievable.weekly_time_commitment_hours),
+        required_skills: stringifyListInput(parsedSmartGoal.achievable.required_skills),
+        support_resources: stringifyListInput(parsedSmartGoal.achievable.support_resources),
+      },
+      relevant: {
+        motivation_reason: parsedSmartGoal.relevant.motivation_reason,
+        life_dimension_alignment: parsedSmartGoal.relevant.life_dimension_alignment ?? "",
+      },
+      timeBound: {
+        mode: parsedSmartGoal.time_bound.target_date ? "date" : "weeks",
+        target_date: parsedSmartGoal.time_bound.target_date ?? "",
+        target_weeks:
+          parsedSmartGoal.time_bound.target_weeks !== undefined
+            ? String(parsedSmartGoal.time_bound.target_weeks)
+            : DEFAULT_TARGET_WEEKS,
+      },
+    };
+  }
+
+  if (isPendingSMARTGoal(parsed)) {
+    const legacyHours = extractNumberFromText(parsed.achievable);
+    const legacyDate = extractDateFromText(parsed.timeBound);
+    const legacyWeeks = extractNumberFromText(parsed.timeBound);
+
+    return {
+      specific: {
+        goal_statement: parsed.specific,
+      },
+      measurable: {
+        metric_name: parsed.measurable,
+        baseline_value: "",
+        target_value: "",
+      },
+      achievable: {
+        weekly_time_commitment_hours: legacyHours !== undefined ? String(legacyHours) : "",
+        required_skills: "",
+        support_resources: parsed.achievable,
+      },
+      relevant: {
+        motivation_reason: parsed.relevant,
+        life_dimension_alignment: "",
+      },
+      timeBound: {
+        mode: legacyDate ? "date" : "weeks",
+        target_date: legacyDate,
+        target_weeks: legacyWeeks !== undefined ? String(legacyWeeks) : DEFAULT_TARGET_WEEKS,
+      },
+    };
+  }
+
+  return createInitialSMARTData();
+}
+
+function formatStepDraft(stepKey: SmartStepKey, smartData: SMARTData): string {
+  switch (stepKey) {
+    case "specific":
+      return smartData.specific.goal_statement.trim();
+    case "measurable": {
+      const metricName = smartData.measurable.metric_name.trim();
+      const baseline = smartData.measurable.baseline_value.trim();
+      const target = smartData.measurable.target_value.trim();
+
+      if (!metricName && !target) return "";
+      if (baseline) return `${metricName}: ${baseline} -> ${target}`;
+      return metricName ? `${metricName}: ${target}` : target;
+    }
+    case "achievable": {
+      const parts: string[] = [];
+      const weeklyHours = smartData.achievable.weekly_time_commitment_hours.trim();
+      const skills = normalizeListInput(smartData.achievable.required_skills);
+      const support = normalizeListInput(smartData.achievable.support_resources);
+
+      if (weeklyHours) parts.push(`${weeklyHours} gio/tuan`);
+      if (skills.length > 0) parts.push(`Ky nang: ${skills.join(", ")}`);
+      if (support.length > 0) parts.push(`Ho tro: ${support.join(", ")}`);
+
+      return parts.join(". ");
+    }
+    case "relevant": {
+      const motivation = smartData.relevant.motivation_reason.trim();
+      const alignment = smartData.relevant.life_dimension_alignment.trim();
+
+      if (!motivation) return "";
+      return alignment ? `${motivation} (${alignment})` : motivation;
+    }
+    case "timeBound":
+      if (smartData.timeBound.mode === "date") {
+        return smartData.timeBound.target_date.trim()
+          ? `Moc den ${smartData.timeBound.target_date.trim()}`
+          : "";
+      }
+      return smartData.timeBound.target_weeks.trim()
+        ? `Trong ${smartData.timeBound.target_weeks.trim()} tuan`
+        : "";
+    default:
+      return "";
+  }
+}
+
+function getStepValidationError(stepKey: SmartStepKey, smartData: SMARTData): string | null {
+  if (stepKey === "specific") {
+    const value = smartData.specific.goal_statement.trim();
+    if (value.length < 20) {
+      return "Muc tieu can dai toi thieu 20 ky tu.";
+    }
+    return null;
+  }
+
+  if (stepKey === "measurable") {
+    if (smartData.measurable.metric_name.trim().length === 0) {
+      return "Can nhap ten chi so do luong.";
+    }
+
+    const targetValue = parseNumberInput(smartData.measurable.target_value);
+    if (targetValue === undefined) {
+      return "Can nhap target value hop le.";
+    }
+
+    const baselineInput = smartData.measurable.baseline_value.trim();
+    if (baselineInput && parseNumberInput(baselineInput) === undefined) {
+      return "Baseline value can la mot so hop le.";
+    }
+    if (baselineInput) {
+      const baselineValue = parseNumberInput(baselineInput);
+      if (baselineValue !== undefined && targetValue <= baselineValue) {
+        return "Target value phai lon hon baseline value.";
+      }
+    }
+
+    return null;
+  }
+
+  if (stepKey === "achievable") {
+    const weeklyHours = parseNumberInput(smartData.achievable.weekly_time_commitment_hours);
+    if (weeklyHours === undefined || weeklyHours <= 0) {
+      return "Weekly time commitment can lon hon 0.";
+    }
+    return null;
+  }
+
+  if (stepKey === "relevant") {
+    if (smartData.relevant.motivation_reason.trim().length < 15) {
+      return "Ly do dong luc can toi thieu 15 ky tu.";
+    }
+    return null;
+  }
+
+  if (smartData.timeBound.mode === "date") {
+    return smartData.timeBound.target_date.trim().length > 0
+      ? null
+      : "Hay chon target date cho muc tieu.";
+  }
+
+  const targetWeeks = parseNumberInput(smartData.timeBound.target_weeks);
+  if (targetWeeks === undefined || targetWeeks <= 0) {
+    return "Target weeks can la so duong hop le.";
+  }
+
+  return null;
 }
 
 const SMART_STEPS = [
@@ -82,13 +329,7 @@ export function SMARTGoalSetup() {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [focusArea, setFocusArea] = useState<string>("");
-  const [smartData, setSmartData] = useState<SMARTData>({
-    specific: "",
-    measurable: "",
-    achievable: "",
-    relevant: "",
-    timeBound: "",
-  });
+  const [smartData, setSmartData] = useState<SMARTData>(createInitialSMARTData());
 
   useEffect(() => {
     const area = localStorage.getItem(APP_STORAGE_KEYS.selectedFocusArea);
@@ -101,7 +342,7 @@ export function SMARTGoalSetup() {
     try {
       const parsed = JSON.parse(draft);
       const parsedFocusArea =
-        typeof parsed.focusArea === "string" && parsed.focusArea.trim().length > 0
+        isPendingSMARTGoal(parsed) && parsed.focusArea.trim().length > 0
           ? parsed.focusArea
           : "";
 
@@ -113,13 +354,7 @@ export function SMARTGoalSetup() {
         setFocusArea(parsedFocusArea);
       }
 
-      setSmartData({
-        specific: typeof parsed.specific === "string" ? parsed.specific : "",
-        measurable: typeof parsed.measurable === "string" ? parsed.measurable : "",
-        achievable: typeof parsed.achievable === "string" ? parsed.achievable : "",
-        relevant: typeof parsed.relevant === "string" ? parsed.relevant : "",
-        timeBound: typeof parsed.timeBound === "string" ? parsed.timeBound : "",
-      });
+      setSmartData(buildSMARTDataFromDraft(parsed));
     } catch {
       // Ignore malformed drafts.
     }
@@ -129,28 +364,46 @@ export function SMARTGoalSetup() {
   const totalSteps = SMART_STEPS.length;
   const progressPercentage = ((currentStep + 1) / totalSteps) * 100;
   const completedCount = useMemo(
-    () => SMART_STEPS.filter((step) => smartData[step.key].trim().length > 0).length,
+    () =>
+      SMART_STEPS.filter((step) => getStepValidationError(step.key as SmartStepKey, smartData) === null)
+        .length,
     [smartData],
   );
-
-  const handleInputChange = (value: string) => {
-    setSmartData({
-      ...smartData,
-      [currentStepData.key]: value,
-    });
-  };
+  const currentStepError = getStepValidationError(currentStepData.key as SmartStepKey, smartData);
 
   const handleGoToFeasibility = () => {
+    const measurableTarget = parseNumberInput(smartData.measurable.target_value);
+    const weeklyHours = parseNumberInput(smartData.achievable.weekly_time_commitment_hours);
+    const measurableBaseline = parseNumberInput(smartData.measurable.baseline_value);
+    const targetWeeks = parseNumberInput(smartData.timeBound.target_weeks);
+
+    if (measurableTarget === undefined || weeklyHours === undefined) {
+      return;
+    }
+    if (measurableBaseline !== undefined && measurableTarget <= measurableBaseline) {
+      return;
+    }
+
+    const smartGoal: SmartGoal = buildSmartGoal({
+      focusArea,
+      specificGoalStatement: smartData.specific.goal_statement,
+      measurableMetricName: smartData.measurable.metric_name,
+      measurableBaselineValue: measurableBaseline,
+      measurableTargetValue: measurableTarget,
+      achievableWeeklyTimeCommitmentHours: weeklyHours,
+      achievableRequiredSkills: normalizeListInput(smartData.achievable.required_skills),
+      achievableSupportResources: normalizeListInput(smartData.achievable.support_resources),
+      relevantMotivationReason: smartData.relevant.motivation_reason,
+      relevantLifeDimensionAlignment: smartData.relevant.life_dimension_alignment,
+      timeBoundTargetDate:
+        smartData.timeBound.mode === "date" ? smartData.timeBound.target_date : undefined,
+      timeBoundTargetWeeks:
+        smartData.timeBound.mode === "weeks" ? targetWeeks : undefined,
+    });
+
     localStorage.setItem(
       APP_STORAGE_KEYS.pendingSmartGoal,
-      JSON.stringify({
-        focusArea,
-        specific: smartData.specific,
-        measurable: smartData.measurable,
-        achievable: smartData.achievable,
-        relevant: smartData.relevant,
-        timeBound: smartData.timeBound,
-      }),
+      JSON.stringify(smartGoal),
     );
 
     navigate("/feasibility");
@@ -174,7 +427,302 @@ export function SMARTGoalSetup() {
     navigate("/life-insight");
   };
 
-  const isCurrentStepValid = smartData[currentStepData.key].trim().length > 0;
+  const currentStepKey = currentStepData.key as SmartStepKey;
+  const isCurrentStepValid = currentStepError === null;
+  const currentStepSoftWarning =
+    currentStepKey === "specific" &&
+    currentStepError === null &&
+    !hasOutcomeIndicator(smartData.specific.goal_statement)
+      ? "Goi y: Nen dung dong tu ket qua ro rang nhu become, reach, complete, build, launch, achieve."
+      : null;
+
+  const renderCurrentStepFields = () => {
+    if (currentStepKey === "specific") {
+      return (
+        <div className="space-y-2">
+          <Label htmlFor="smart-specific" className="text-base">
+            Cau tra loi cua ban
+          </Label>
+          <Textarea
+            id="smart-specific"
+            placeholder={currentStepData.placeholder}
+            value={smartData.specific.goal_statement}
+            onChange={(event) =>
+              setSmartData((previous) => ({
+                ...previous,
+                specific: {
+                  goal_statement: event.target.value,
+                },
+              }))
+            }
+            className="min-h-[180px] resize-none text-base leading-7"
+          />
+        </div>
+      );
+    }
+
+    if (currentStepKey === "measurable") {
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="smart-metric-name" className="text-base">
+              Metric Name
+            </Label>
+            <Input
+              id="smart-metric-name"
+              placeholder="VD: IELTS Score"
+              value={smartData.measurable.metric_name}
+              onChange={(event) =>
+                setSmartData((previous) => ({
+                  ...previous,
+                  measurable: {
+                    ...previous.measurable,
+                    metric_name: event.target.value,
+                  },
+                }))
+              }
+            />
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="smart-baseline">Baseline (optional)</Label>
+              <Input
+                id="smart-baseline"
+                type="number"
+                inputMode="decimal"
+                step="any"
+                placeholder="VD: 5.5"
+                value={smartData.measurable.baseline_value}
+                onChange={(event) =>
+                  setSmartData((previous) => ({
+                    ...previous,
+                    measurable: {
+                      ...previous.measurable,
+                      baseline_value: event.target.value,
+                    },
+                  }))
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="smart-target">Target Value</Label>
+              <Input
+                id="smart-target"
+                type="number"
+                inputMode="decimal"
+                step="any"
+                placeholder="VD: 7.0"
+                value={smartData.measurable.target_value}
+                onChange={(event) =>
+                  setSmartData((previous) => ({
+                    ...previous,
+                    measurable: {
+                      ...previous.measurable,
+                      target_value: event.target.value,
+                    },
+                  }))
+                }
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (currentStepKey === "achievable") {
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="smart-weekly-hours" className="text-base">
+              Weekly Time Commitment (hours)
+            </Label>
+            <Input
+              id="smart-weekly-hours"
+              type="number"
+              inputMode="decimal"
+              step="any"
+              placeholder="VD: 6"
+              value={smartData.achievable.weekly_time_commitment_hours}
+              onChange={(event) =>
+                setSmartData((previous) => ({
+                  ...previous,
+                  achievable: {
+                    ...previous.achievable,
+                    weekly_time_commitment_hours: event.target.value,
+                  },
+                }))
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="smart-required-skills">Required Skills</Label>
+            <Textarea
+              id="smart-required-skills"
+              placeholder="Moi dong mot ky nang, hoac tach boi dau phay."
+              value={smartData.achievable.required_skills}
+              onChange={(event) =>
+                setSmartData((previous) => ({
+                  ...previous,
+                  achievable: {
+                    ...previous.achievable,
+                    required_skills: event.target.value,
+                  },
+                }))
+              }
+              className="min-h-[120px] resize-none text-base leading-7"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="smart-support-resources">Support Resources</Label>
+            <Textarea
+              id="smart-support-resources"
+              placeholder="VD: Mentor, online course, accountability partner"
+              value={smartData.achievable.support_resources}
+              onChange={(event) =>
+                setSmartData((previous) => ({
+                  ...previous,
+                  achievable: {
+                    ...previous.achievable,
+                    support_resources: event.target.value,
+                  },
+                }))
+              }
+              className="min-h-[120px] resize-none text-base leading-7"
+            />
+          </div>
+        </div>
+      );
+    }
+
+    if (currentStepKey === "relevant") {
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="smart-relevant-reason" className="text-base">
+              Cau tra loi cua ban
+            </Label>
+            <Textarea
+              id="smart-relevant-reason"
+              placeholder={currentStepData.placeholder}
+              value={smartData.relevant.motivation_reason}
+              onChange={(event) =>
+                setSmartData((previous) => ({
+                  ...previous,
+                  relevant: {
+                    ...previous.relevant,
+                    motivation_reason: event.target.value,
+                  },
+                }))
+              }
+              className="min-h-[160px] resize-none text-base leading-7"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="smart-life-alignment">Life Dimension Alignment (optional)</Label>
+            <Input
+              id="smart-life-alignment"
+              placeholder="VD: Career growth, tai chinh, suc khoe..."
+              value={smartData.relevant.life_dimension_alignment}
+              onChange={(event) =>
+                setSmartData((previous) => ({
+                  ...previous,
+                  relevant: {
+                    ...previous.relevant,
+                    life_dimension_alignment: event.target.value,
+                  },
+                }))
+              }
+            />
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Button
+            variant={smartData.timeBound.mode === "weeks" ? "default" : "outline"}
+            onClick={() =>
+              setSmartData((previous) => ({
+                ...previous,
+                timeBound: {
+                  ...previous.timeBound,
+                  mode: "weeks",
+                  target_date: "",
+                  target_weeks: previous.timeBound.target_weeks || DEFAULT_TARGET_WEEKS,
+                },
+              }))
+            }
+          >
+            Target Weeks
+          </Button>
+          <Button
+            variant={smartData.timeBound.mode === "date" ? "default" : "outline"}
+            onClick={() =>
+              setSmartData((previous) => ({
+                ...previous,
+                timeBound: {
+                  ...previous.timeBound,
+                  mode: "date",
+                },
+              }))
+            }
+          >
+            Target Date
+          </Button>
+        </div>
+
+        {smartData.timeBound.mode === "weeks" ? (
+          <div className="space-y-2">
+            <Label htmlFor="smart-target-weeks" className="text-base">
+              So tuan muc tieu
+            </Label>
+            <Input
+              id="smart-target-weeks"
+              type="number"
+              inputMode="numeric"
+              min={1}
+              value={smartData.timeBound.target_weeks}
+              onChange={(event) =>
+                setSmartData((previous) => ({
+                  ...previous,
+                  timeBound: {
+                    ...previous.timeBound,
+                    target_weeks: event.target.value,
+                  },
+                }))
+              }
+            />
+            <p className="text-xs text-slate-500">Goi y: 12 tuan de vao chu ky planning tiep theo.</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <Label htmlFor="smart-target-date" className="text-base">
+              Target Date
+            </Label>
+            <Input
+              id="smart-target-date"
+              type="date"
+              value={smartData.timeBound.target_date}
+              onChange={(event) =>
+                setSmartData((previous) => ({
+                  ...previous,
+                  timeBound: {
+                    ...previous.timeBound,
+                    target_date: event.target.value,
+                  },
+                }))
+              }
+            />
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
@@ -226,7 +774,7 @@ export function SMARTGoalSetup() {
 
                 <div className="mt-6 space-y-3">
                   {SMART_STEPS.map((step, index) => {
-                    const done = smartData[step.key].trim().length > 0;
+                    const done = getStepValidationError(step.key as SmartStepKey, smartData) === null;
                     const active = index === currentStep;
 
                     return (
@@ -286,19 +834,11 @@ export function SMARTGoalSetup() {
                     {currentStepData.coaching}
                   </div>
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="smart-step-input" className="text-base">
-                    Câu trả lời của bạn
-                  </Label>
-                  <Textarea
-                    id="smart-step-input"
-                    placeholder={currentStepData.placeholder}
-                    value={smartData[currentStepData.key]}
-                    onChange={(event) => handleInputChange(event.target.value)}
-                    className="min-h-[180px] resize-none text-base leading-7"
-                  />
-                </div>
+                {renderCurrentStepFields()}
+                {currentStepError ? <p className="text-sm text-rose-600">{currentStepError}</p> : null}
+                {currentStepSoftWarning ? (
+                  <p className="text-sm text-amber-600">{currentStepSoftWarning}</p>
+                ) : null}
 
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <Button variant="outline" className="flex-1" onClick={handleBack}>
@@ -333,7 +873,8 @@ export function SMARTGoalSetup() {
                         {step.label}
                       </p>
                       <p className="mt-2 text-sm leading-7 text-slate-600">
-                        {smartData[step.key].trim() || "Chưa có nội dung cho phần này."}
+                        {formatStepDraft(step.key as SmartStepKey, smartData) ||
+                          "Chưa có nội dung cho phần này."}
                       </p>
                     </div>
                   ))}

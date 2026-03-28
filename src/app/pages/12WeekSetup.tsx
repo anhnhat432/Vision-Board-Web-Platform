@@ -47,15 +47,13 @@ import {
   planSatisfiesRequirement,
   type TwelveWeekTemplateDefinition,
 } from "../utils/twelve-week-premium";
-
-interface PendingSMARTGoal {
-  focusArea: string;
-  specific: string;
-  measurable: string;
-  achievable: string;
-  relevant: string;
-  timeBound: string;
-}
+import {
+  parsePendingSMARTGoal,
+  parseSmartGoal,
+  type PendingSMARTGoal,
+} from "@/lib/smart-goal";
+import { getWeeklyTaskWarning } from "@/features/plan12week/logic";
+import { usePlanSetupSync } from "@/features/plan12week/hooks";
 
 type ResultType = "realistic" | "challenging" | "too_ambitious";
 
@@ -135,20 +133,6 @@ const LOAD_PREFERENCE_OPTIONS = [
 
 function getLoadPreferenceLabel(value: TwelveWeekSetupDraft["tacticLoadPreference"]): string {
   return LOAD_PREFERENCE_OPTIONS.find((option) => option.value === value)?.label ?? "Cân bằng";
-}
-
-function isPendingSMARTGoal(value: unknown): value is PendingSMARTGoal {
-  if (!value || typeof value !== "object") return false;
-  const draft = value as Record<string, unknown>;
-
-  return (
-    typeof draft.focusArea === "string" &&
-    typeof draft.specific === "string" &&
-    typeof draft.measurable === "string" &&
-    typeof draft.achievable === "string" &&
-    typeof draft.relevant === "string" &&
-    typeof draft.timeBound === "string"
-  );
 }
 
 function isPendingFeasibilityResult(value: unknown): value is PendingFeasibilityResult {
@@ -287,6 +271,7 @@ function getPreviewTasks(indicators: LeadIndicatorDraft[]): string[] {
 
 export function TwelveWeekSetup() {
   const navigate = useNavigate();
+  const { actions: planSetupActions } = usePlanSetupSync();
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPlan, setCurrentPlan] = useState<PricingPlanCode>(getCurrentPlan());
@@ -327,11 +312,20 @@ export function TwelveWeekSetup() {
     }
 
     try {
-      const parsedSmartGoal = JSON.parse(pendingSmartGoal);
+      const parsedSmartGoalValue = JSON.parse(pendingSmartGoal);
+      const normalizedSmartGoal = parseSmartGoal(parsedSmartGoalValue, selectedFocusArea);
+      if (normalizedSmartGoal) {
+        localStorage.setItem(APP_STORAGE_KEYS.pendingSmartGoal, JSON.stringify(normalizedSmartGoal));
+      }
+
+      const parsedSmartGoal = parsePendingSMARTGoal(
+        normalizedSmartGoal ?? parsedSmartGoalValue,
+        selectedFocusArea,
+      );
       const parsedFeasibility = JSON.parse(pendingFeasibilityResult);
       const savedDraft = localStorage.getItem(APP_STORAGE_KEYS.pending12WeekSetupDraft);
 
-      if (!isPendingSMARTGoal(parsedSmartGoal) || !isPendingFeasibilityResult(parsedFeasibility)) {
+      if (!parsedSmartGoal || !isPendingFeasibilityResult(parsedFeasibility)) {
         throw new Error("invalid-draft");
       }
 
@@ -474,6 +468,7 @@ export function TwelveWeekSetup() {
     previewTasks.length > 0
       ? previewTasks
       : setupGuideSupport?.personalizedTactics.map((tactic) => tactic.name).slice(0, 4) ?? [];
+  const weekOneTaskWarning = getWeeklyTaskWarning(weekOneTaskPreview.length);
 
   const applyTemplate = (template: TwelveWeekTemplateDefinition, announce = true) => {
     const nextPlan = getCurrentPlan();
@@ -693,7 +688,7 @@ export function TwelveWeekSetup() {
     setCurrentStep((step) => Math.max(step - 1, 0));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validateCurrentStep() || validIndicators.length < 2 || validIndicators.length > 4) {
       return;
     }
@@ -779,6 +774,13 @@ export function TwelveWeekSetup() {
       personalConstraint: draft.personalConstraint || "none",
     });
     clearGoalPlanningDrafts();
+
+    await planSetupActions.syncPlanForGoal({
+      goalId,
+      vision: draft.vision12Week.trim(),
+      startDate: new Date(cycleStartDate).toISOString(),
+      totalWeeks: 12,
+    });
 
     toast.success("Hệ 12 tuần đã sẵn sàng.", {
       description: "Bạn có thể vào ngay màn Hôm nay để bắt đầu tuần đầu tiên.",
@@ -1400,6 +1402,9 @@ export function TwelveWeekSetup() {
                       ))
                     )}
                   </div>
+                  {weekOneTaskWarning ? (
+                    <p className="text-xs text-amber-600">{weekOneTaskWarning}</p>
+                  ) : null}
                 </div>
               </div>
             )}
@@ -1570,6 +1575,9 @@ export function TwelveWeekSetup() {
                         ))
                       )}
                     </div>
+                    {weekOneTaskWarning ? (
+                      <p className="mt-3 text-xs text-amber-600">{weekOneTaskWarning}</p>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -1645,6 +1653,9 @@ export function TwelveWeekSetup() {
                         ))
                       )}
                     </div>
+                    {weekOneTaskWarning ? (
+                      <p className="mt-3 text-xs text-amber-600">{weekOneTaskWarning}</p>
+                    ) : null}
                   </div>
                   {(draft.week4Milestone || draft.week8Milestone) && (
                     <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
