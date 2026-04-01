@@ -78,6 +78,7 @@ import {
   deleteVisionBoardFromData,
   updateVisionBoardInData,
 } from "./storage-vision-board-ops";
+import { toast } from "sonner";
 import {
   addAchievementToData,
   checkAchievementsInData,
@@ -520,12 +521,36 @@ export function getUserData(): UserData {
   return migratedData;
 }
 
-export function saveUserData(data: UserData): void {
+export function saveUserData(data: UserData): boolean {
   const normalized = normalizeUserData(data);
   const serialized = JSON.stringify(normalized);
-  localStorage.setItem(STORAGE_KEY, serialized);
-  _cachedUserData = normalized;
-  _cachedRawHash = serialized;
+
+  // Keep previous cache for rollback in case of quota failure
+  const prevCachedData = _cachedUserData;
+  const prevCachedHash = _cachedRawHash;
+
+  try {
+    localStorage.setItem(STORAGE_KEY, serialized);
+    _cachedUserData = normalized;
+    _cachedRawHash = serialized;
+    return true;
+  } catch (err: unknown) {
+    // Restore in-memory cache so subsequent getUserData() reads stay consistent
+    _cachedUserData = prevCachedData;
+    _cachedRawHash = prevCachedHash;
+
+    if (err instanceof DOMException && err.name === "QuotaExceededError") {
+      toast.error("Bộ nhớ trình duyệt đã đầy. Dữ liệu chưa được lưu.", {
+        description:
+          "Hãy xóa bớt board hoặc ảnh đã tải lên để giải phóng dung lượng, sau đó thử lại.",
+        duration: 8000,
+      });
+      return false;
+    }
+
+    // Re-throw non-quota errors so they surface normally
+    throw err;
+  }
 }
 
 export function upgradeLegacyGoalToSystem(goalId: string): boolean {
@@ -571,18 +596,18 @@ export function deleteGoal(goalId: string): void {
   saveUserData(data);
 }
 
-export function addVisionBoard(board: Omit<VisionBoard, "id" | "createdAt">): string {
+export function addVisionBoard(board: Omit<VisionBoard, "id" | "createdAt">): string | null {
   const data = getUserData();
   const newBoardId = addVisionBoardToData(data, board);
   checkAchievementsInData(data);
-  saveUserData(data);
+  if (!saveUserData(data)) return null;
   return newBoardId;
 }
 
-export function updateVisionBoard(boardId: string, updates: Partial<VisionBoard>): void {
+export function updateVisionBoard(boardId: string, updates: Partial<VisionBoard>): boolean {
   const data = getUserData();
-  if (!updateVisionBoardInData(data, boardId, updates)) return;
-  saveUserData(data);
+  if (!updateVisionBoardInData(data, boardId, updates)) return false;
+  return saveUserData(data);
 }
 
 export function deleteVisionBoard(boardId: string): void {

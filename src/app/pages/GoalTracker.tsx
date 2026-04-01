@@ -1,7 +1,7 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { AlertTriangle, CalendarDays, CheckCircle2, ChevronDown, ChevronUp, Clock3, Crown, Plus, Search, Target, Trash2, Zap } from "lucide-react";
+import { AlertTriangle, CalendarDays, CheckCircle2, ChevronDown, ChevronUp, Clock3, Crown, Package, Plus, Search, Target, Trash2, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 import { NewUserGuideBanner } from "../components/NewUserGuide";
@@ -170,6 +170,15 @@ function GoalTrackerContent({
     localStorage.setItem(APP_STORAGE_KEYS.latest12WeekGoalId, goalId);
     localStorage.setItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId, goalId);
     navigate("/12-week-system");
+  };
+
+  const openOrderFlow = (goalId?: string) => {
+    if (goalId) {
+      navigate("/order", { state: { goalId } });
+      return;
+    }
+
+    navigate("/order");
   };
 
   const handleStartGuidedGoalFlow = () => {
@@ -456,11 +465,23 @@ function GoalTrackerContent({
                     className={`w-full sm:w-auto ${
                       systemReviewDueToday
                         ? "border-amber-200 bg-white text-amber-800 hover:bg-amber-100"
-                        : "hero-cta border-white/12 bg-white text-slate-900 hover:bg-white/92"
+                        : "border-white/12 bg-white/10 text-white hover:bg-white/16"
                     }`}
                     onClick={() => navigate("/journal")}
                   >
                     Mở nhật ký tuần
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className={`w-full sm:w-auto ${
+                      systemReviewDueToday
+                        ? "border-amber-200 bg-white text-amber-800 hover:bg-amber-100"
+                        : "border-white/12 bg-white/10 text-white hover:bg-white/16"
+                    }`}
+                    onClick={() => openOrderFlow(goal.id)}
+                  >
+                    <Package className="h-4 w-4" />
+                    Tạo kit từ mục tiêu này
                   </Button>
                 </div>
               </div>
@@ -566,7 +587,7 @@ function GoalTrackerContent({
                       : "Nếu muốn đi tiếp, hãy thêm việc mới cho chặng kế tiếp."}
                 </p>
               </div>
-              <div className="mt-4">
+              <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
                 {addingTaskToGoalId === goal.id ? (
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
                     <Input
@@ -597,6 +618,10 @@ function GoalTrackerContent({
                     Thêm việc
                   </Button>
                 )}
+                <Button variant="outline" className="w-full" onClick={() => openOrderFlow(goal.id)}>
+                  <Package className="h-4 w-4" />
+                  Tạo kit từ mục tiêu này
+                </Button>
               </div>
             </div>
           )}
@@ -676,10 +701,18 @@ function GoalTrackerContent({
                   <Target className="h-4 w-4" />
                   Tạo mục tiêu
                 </Button>
+                <Button
+                  variant="outline"
+                  className="w-full border-white/18 bg-white/10 text-white hover:bg-white/16 sm:w-auto"
+                  onClick={() => openOrderFlow(goals[0]?.id)}
+                >
+                  <Package className="h-4 w-4" />
+                  {goals.length > 0 ? "Tạo kit từ mục tiêu đang theo" : "Tạo đơn kit"}
+                </Button>
               </div>
               <p className="max-w-2xl text-sm leading-7 text-white/70">
                 Từ bây giờ, mọi mục tiêu mới đều đi qua cùng một flow: insight trước, SMART sau,
-                rồi mới tới feasibility và hệ 12 tuần.
+                rồi mới tới feasibility và hệ 12 tuần. Khi đã rõ mục tiêu, bạn có thể chuyển thẳng sang tạo kit mà không cần chọn lại từ đầu.
               </p>
             </div>
             <div className="hidden xl:block rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">

@@ -4,7 +4,7 @@ import type { ApiErrorEnvelope, ApiSuccessEnvelope, AppError } from "@/types/api
 const DEFAULT_API_BASE_URL = "http://localhost:4000/api";
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL?.trim() || DEFAULT_API_BASE_URL).replace(/\/$/, "");
 
-type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE";
+type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
 export interface ApiRequestOptions extends Omit<RequestInit, "method" | "body" | "headers"> {
   headers?: HeadersInit;
@@ -199,6 +199,14 @@ export function patch<TResponse, TBody = unknown>(
   return request<TResponse, TBody>("PATCH", path, body, options);
 }
 
+export function put<TResponse, TBody = unknown>(
+  path: string,
+  body?: TBody,
+  options?: ApiRequestOptions,
+): Promise<TResponse> {
+  return request<TResponse, TBody>("PUT", path, body, options);
+}
+
 async function deleteRequest<TResponse>(
   path: string,
   options?: ApiRequestOptions,
@@ -216,5 +224,6 @@ export const apiClient = {
   get,
   post,
   patch,
+  put,
   delete: deleteRequest,
 };
