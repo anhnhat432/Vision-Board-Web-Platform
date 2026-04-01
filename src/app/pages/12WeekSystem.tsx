@@ -393,6 +393,7 @@ export function TwelveWeekSystem() {
   };
 
   const handleToggleTask = async (taskId: string, completed: boolean) => {
+    const actionGoalId = activeGoal.id;
     const toggledTask = system.taskInstances.find((task) => task.id === taskId);
     const nextTaskInstances = system.taskInstances.map((task) =>
       task.id === taskId ? { ...task, completed, completedAt: completed ? new Date().toISOString() : undefined } : task,
@@ -404,7 +405,7 @@ export function TwelveWeekSystem() {
     });
 
     if (completed) {
-      trackAppEvent("12_week_task_completed", activeGoal.id, {
+      trackAppEvent("12_week_task_completed", actionGoalId, {
         weekNumber: String(toggledTask?.weekNumber ?? getTwelveWeekCurrentWeek(system)),
         taskId,
       });
@@ -412,7 +413,7 @@ export function TwelveWeekSystem() {
 
     const synced = await executionSyncActions.syncTaskToggle(taskId, completed);
     if (!synced) {
-      const latestGoal = getUserData().goals.find((goal) => goal.id === activeGoal.id);
+      const latestGoal = getUserData().goals.find((goal) => goal.id === actionGoalId);
       const latestSystem = latestGoal?.twelveWeekSystem;
       const latestTask = latestSystem?.taskInstances.find((task) => task.id === taskId);
       const shouldRollbackTask = Boolean(latestSystem && latestTask && latestTask.completed === completed);
@@ -434,10 +435,10 @@ export function TwelveWeekSystem() {
           scoreboard: buildDerivedScoreboard(rollbackSystem, getDefaultScoreboard(rollbackSystem.totalWeeks)),
         };
 
-        updateGoal(activeGoal.id, {
+        updateGoal(actionGoalId, {
           twelveWeekSystem: normalizedRollbackSystem,
         });
-        if (activeGoalIdRef.current === activeGoal.id) {
+        if (activeGoalIdRef.current === actionGoalId) {
           updateActiveSystemState(() => normalizedRollbackSystem);
         }
       }
@@ -451,11 +452,14 @@ export function TwelveWeekSystem() {
     }
 
     toast.success(completed ? "Việc đã được chốt." : "Việc đã được mở lại.");
-    refreshBackendProgressOverlay();
-    refreshSnapshotMeta();
+    if (activeGoalIdRef.current === actionGoalId) {
+      refreshBackendProgressOverlay();
+      refreshSnapshotMeta();
+    }
   };
 
   const handleSaveCheckIn = async () => {
+    const actionGoalId = activeGoal.id;
     const actionDate = new Date();
     const todayKey = formatDateInputValue(actionDate);
     const syncWeekNumber = getTwelveWeekCurrentWeek(system, actionDate);
@@ -487,7 +491,7 @@ export function TwelveWeekSystem() {
       dailyCheckIns: [dailyCheckIn, ...filteredCheckIns].slice(0, 120),
     });
 
-    trackAppEvent("12_week_daily_checkin_submitted", activeGoal.id, {
+    trackAppEvent("12_week_daily_checkin_submitted", actionGoalId, {
       mood: dailyMood,
       completedTasks: String(completedTodayCount),
     });
@@ -500,14 +504,20 @@ export function TwelveWeekSystem() {
 
     if (synced) {
       toast.success("Check-in hôm nay đã được lưu.");
-      refreshBackendProgressOverlay();
+      if (activeGoalIdRef.current === actionGoalId) {
+        refreshBackendProgressOverlay();
+      }
     } else {
       toast.info("Check-in đã lưu local. Sẽ tiếp tục đồng bộ khi backend sẵn sàng.");
     }
-    refreshSnapshotMeta();
+    if (activeGoalIdRef.current === actionGoalId) {
+      refreshSnapshotMeta();
+    }
   };
 
   const handleSaveWeeklyReview = async () => {
+    const actionGoalId = activeGoal.id;
+    const actionGoalTitle = activeGoal.title;
     const hasAnyContent =
       weeklyForm.biggestOutputThisWeek.trim() ||
       weeklyForm.mainObstacle.trim() ||
@@ -569,13 +579,15 @@ export function TwelveWeekSystem() {
 
     if (!synced) {
       toast.info("Review tuần đã lưu local. Sẽ tiếp tục đồng bộ khi backend sẵn sàng.");
-      refreshSnapshotMeta();
+      if (activeGoalIdRef.current === actionGoalId) {
+        refreshSnapshotMeta();
+      }
       return;
     }
 
     upsertReflection({
       date: formatDateInputValue(new Date()),
-      title: `Review tuần - ${activeGoal.title} - tuần ${reviewWeekNumber}`,
+      title: `Review tuần - ${actionGoalTitle} - tuần ${reviewWeekNumber}`,
       content: [
         `Điều hiệu quả: ${weeklyForm.biggestOutputThisWeek.trim() || "--"}`,
         `Điều cản trở: ${weeklyForm.mainObstacle.trim() || "--"}`,
@@ -592,11 +604,11 @@ export function TwelveWeekSystem() {
             ? "neutral"
             : "sad",
       entryType: "weekly-review",
-      linkedGoalId: activeGoal.id,
+      linkedGoalId: actionGoalId,
       linkedWeekNumber: reviewWeekNumber,
     });
 
-    trackAppEvent("12_week_weekly_review_submitted", activeGoal.id, {
+    trackAppEvent("12_week_weekly_review_submitted", actionGoalId, {
       weekNumber: String(reviewWeekNumber),
       score: String(committedWeekScore),
       decision: workloadDecisionValue || "keep same",
@@ -611,8 +623,10 @@ export function TwelveWeekSystem() {
           ? "Mình đã dùng luôn gợi ý Plus để khóa ưu tiên tuần sau cho bạn."
           : "Tuần sau giờ đã có ưu tiên đủ rõ để bắt đầu gọn hơn.",
     });
-    refreshBackendProgressOverlay();
-    refreshSnapshotMeta();
+    if (activeGoalIdRef.current === actionGoalId) {
+      refreshBackendProgressOverlay();
+      refreshSnapshotMeta();
+    }
   };
 
   const handleReviewDayChange = (value: string) => {
