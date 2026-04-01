@@ -220,6 +220,7 @@ export function TwelveWeekSystem() {
   const todayDateKey = formatDateInputValue(new Date());
 
   const formInitRef = useRef<string | null>(null);
+  const activeGoalIdRef = useRef<string | null>(activeGoal?.id ?? null);
 
   useEffect(() => {
     if (!system || !activeGoal) return;
@@ -238,6 +239,10 @@ export function TwelveWeekSystem() {
     setDailyMood((latestCheckIn?.mood as DailyMood | undefined) ?? "steady");
     setDailyNote(latestCheckIn?.optionalNote ?? "");
   }, [system, currentReview, currentLagMetricValue, latestCheckIn, activeGoal]);
+
+  useEffect(() => {
+    activeGoalIdRef.current = activeGoal?.id ?? null;
+  }, [activeGoal?.id]);
 
   const {
     actions: executionSyncActions,
@@ -277,13 +282,6 @@ export function TwelveWeekSystem() {
     });
     updateActiveSystemState(() => normalizedNextSystem);
     return normalizedNextSystem;
-  };
-
-  const rollbackSystemUpdate = (previousSystem: typeof system) => {
-    updateGoal(activeGoal.id, {
-      twelveWeekSystem: previousSystem,
-    });
-    updateActiveSystemState(() => previousSystem);
   };
 
   const handleOpenUpgradeDialog = (
@@ -384,17 +382,17 @@ export function TwelveWeekSystem() {
     setActiveTab(value);
 
     if (value === "week" && hasPremiumReviewInsights) {
+      const insightWeekNumber = getTwelveWeekCurrentWeek(system);
       trackPremiumInsightOpened({
         goalId: activeGoal.id,
         source: "12_week_system",
         currentPlan: activePlanCode,
-        weekNumber: currentWeek,
+        weekNumber: insightWeekNumber,
       });
     }
   };
 
   const handleToggleTask = async (taskId: string, completed: boolean) => {
-    const previousSystem = system;
     const toggledTask = system.taskInstances.find((task) => task.id === taskId);
     const nextTaskInstances = system.taskInstances.map((task) =>
       task.id === taskId ? { ...task, completed, completedAt: completed ? new Date().toISOString() : undefined } : task,
@@ -414,8 +412,41 @@ export function TwelveWeekSystem() {
 
     const synced = await executionSyncActions.syncTaskToggle(taskId, completed);
     if (!synced) {
-      rollbackSystemUpdate(previousSystem);
-      toast.error("Không thể đồng bộ trạng thái việc. Mình đã hoàn tác thay đổi.");
+      const latestGoal = getUserData().goals.find((goal) => goal.id === activeGoal.id);
+      const latestSystem = latestGoal?.twelveWeekSystem;
+      const latestTask = latestSystem?.taskInstances.find((task) => task.id === taskId);
+      const shouldRollbackTask = Boolean(latestSystem && latestTask && latestTask.completed === completed);
+      if (latestSystem && shouldRollbackTask) {
+        const rollbackSystem = {
+          ...latestSystem,
+          taskInstances: latestSystem.taskInstances.map((task) =>
+            task.id === taskId
+              ? {
+                  ...task,
+                  completed: toggledTask?.completed ?? false,
+                  completedAt: toggledTask?.completedAt,
+                }
+              : task,
+          ),
+        };
+        const normalizedRollbackSystem = {
+          ...rollbackSystem,
+          scoreboard: buildDerivedScoreboard(rollbackSystem, getDefaultScoreboard(rollbackSystem.totalWeeks)),
+        };
+
+        updateGoal(activeGoal.id, {
+          twelveWeekSystem: normalizedRollbackSystem,
+        });
+        if (activeGoalIdRef.current === activeGoal.id) {
+          updateActiveSystemState(() => normalizedRollbackSystem);
+        }
+      }
+
+      toast.error(
+        shouldRollbackTask
+          ? "Không thể đồng bộ trạng thái việc. Mình đã hoàn tác thay đổi."
+          : "Không thể đồng bộ trạng thái việc. Mình giữ trạng thái local hiện tại.",
+      );
       return;
     }
 
@@ -812,22 +843,24 @@ export function TwelveWeekSystem() {
 
   const handleApplyRecommendedReentry = () => {
     if (!rescuePlanSummary) return;
+    const reentryWeekNumber = getTwelveWeekCurrentWeek(system);
 
     trackAppEvent("12_week_reentry_recommended_applied", activeGoal.id, {
       mode: rescuePlanSummary.recommendedMode,
-      weekNumber: String(currentWeek),
+      weekNumber: String(reentryWeekNumber),
     });
     handleReentry(rescuePlanSummary.recommendedMode);
   };
 
   const handleApplySuggestedPlan = () => {
+    const suggestedWeekNumber = getTwelveWeekCurrentWeek(system);
     setWeeklyForm((previousForm) => ({
       ...previousForm,
       nextWeekPriority: suggestedNextWeekPlan.focus,
       workloadDecision: suggestedNextWeekPlan.workloadDecision,
     }));
     trackAppEvent("12_week_review_suggestion_applied", activeGoal.id, {
-      weekNumber: String(currentWeek),
+      weekNumber: String(suggestedWeekNumber),
       decision: suggestedNextWeekPlan.workloadDecision,
     });
     toast.success("Đã áp dụng gợi ý cho tuần sau.", {
