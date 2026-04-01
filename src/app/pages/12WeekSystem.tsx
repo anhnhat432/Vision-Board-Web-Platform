@@ -79,6 +79,13 @@ import {
   getPlanLabel,
   type PremiumFeatureContext,
 } from "../utils/twelve-week-premium";
+import {
+  buildDerivedScoreboard,
+  getDefaultScoreboard,
+  getTwelveWeekCurrentWeek,
+  getTwelveWeekWeekCompletion,
+  getTwelveWeekWeekRange,
+} from "../utils/storage-twelve-week";
 import { TaskBoard } from "@/features/plan12week/components/TaskBoard";
 import { usePlanExecutionSync } from "@/features/plan12week/hooks";
 
@@ -185,6 +192,7 @@ export function TwelveWeekSystem() {
     milestoneItems,
     updateActiveSystemState,
     refreshSnapshotMeta,
+    refreshBackendProgressOverlay,
     loadGoalData,
   } = useTwelveWeekSystemSnapshot();
   const [dailyMood, setDailyMood] = useState<DailyMood>("steady");
@@ -255,10 +263,16 @@ export function TwelveWeekSystem() {
   }
 
   const commitSystemUpdate = (nextSystem: typeof system) => {
+    const normalizedNextSystem = {
+      ...nextSystem,
+      scoreboard: buildDerivedScoreboard(nextSystem, getDefaultScoreboard(nextSystem.totalWeeks)),
+    };
+
     updateGoal(activeGoal.id, {
-      twelveWeekSystem: nextSystem,
+      twelveWeekSystem: normalizedNextSystem,
     });
-    updateActiveSystemState(() => nextSystem);
+    updateActiveSystemState(() => normalizedNextSystem);
+    return normalizedNextSystem;
   };
 
   const rollbackSystemUpdate = (previousSystem: typeof system) => {
@@ -398,18 +412,21 @@ export function TwelveWeekSystem() {
     }
 
     toast.success(completed ? "Việc đã được chốt." : "Việc đã được mở lại.");
+    refreshBackendProgressOverlay();
     refreshSnapshotMeta();
   };
 
-  const handleSaveCheckIn = () => {
+  const handleSaveCheckIn = async () => {
     const todayKey = formatDateInputValue(new Date());
+    const syncWeekNumber = getTwelveWeekCurrentWeek(system);
+    const syncWeekTaskCount = system.taskInstances.filter((task) => task.weekNumber === syncWeekNumber).length;
     const completedTodayCount = todayQueue.filter((task) => task.completed).length;
     const completedTitles = todayQueue.filter((task) => task.completed).map((task) => task.title).join(", ");
     const dailyCheckIn: UniversalDailyCheckIn = {
       date: todayKey,
       didWorkToday: completedTodayCount > 0 || dailyNote.trim().length > 0,
       whichLeadIndicatorWorkedOn: completedTitles || todayQueue[0]?.leadIndicatorName || "",
-      amountDone: `${completedTodayCount}/${todayQueue.length || currentWeekTasks.length || 1} việc`,
+      amountDone: `${completedTodayCount}/${todayQueue.length || syncWeekTaskCount || 1} việc`,
       outputCreated: completedTitles,
       obstacleOrIssue: "",
       dailySelfRating: getMoodScore(dailyMood),
@@ -427,7 +444,19 @@ export function TwelveWeekSystem() {
       mood: dailyMood,
       completedTasks: String(completedTodayCount),
     });
-    toast.success("Check-in hôm nay đã được lưu.");
+
+    const synced = await executionSyncActions.syncDailyCheckIn({
+      weekNumber: syncWeekNumber,
+      date: todayKey,
+      didWorkToday: dailyCheckIn.didWorkToday,
+    });
+
+    if (synced) {
+      toast.success("Check-in hôm nay đã được lưu.");
+      refreshBackendProgressOverlay();
+    } else {
+      toast.info("Check-in đã lưu local. Sẽ tiếp tục đồng bộ khi backend sẵn sàng.");
+    }
     refreshSnapshotMeta();
   };
 
@@ -441,6 +470,8 @@ export function TwelveWeekSystem() {
       toast.error("Cần điền ít nhất một mục trước khi chốt review.");
       return;
     }
+    const reviewWeekNumber = getTwelveWeekCurrentWeek(system);
+    const reviewWeekCompletion = getTwelveWeekWeekCompletion(system, reviewWeekNumber);
     const nextWeekPriorityValue =
       weeklyForm.nextWeekPriority.trim() ||
       (hasPremiumReviewInsights ? suggestedNextWeekPlan.focus : "");
@@ -448,29 +479,28 @@ export function TwelveWeekSystem() {
       weeklyForm.workloadDecision ||
       (hasPremiumReviewInsights ? suggestedNextWeekPlan.workloadDecision : "keep same");
     const nextReview: UniversalWeeklyReview = {
-      weekNumber: currentWeek,
-      leadCompletionPercent: weekCompletion.percent,
+      weekNumber: reviewWeekNumber,
+      leadCompletionPercent: reviewWeekCompletion.percent,
       lagProgressValue: weeklyForm.lagProgressValue.trim(),
       biggestOutputThisWeek: weeklyForm.biggestOutputThisWeek.trim(),
       mainObstacle: weeklyForm.mainObstacle.trim(),
       nextWeekPriority: nextWeekPriorityValue,
       workloadDecision: workloadDecisionValue,
       reviewCompleted: true,
-      progressScore: Math.max(5, Math.round(weekCompletion.percent / 20)),
-      disciplineScore: Math.max(5, Math.round(weekCompletion.percent / 20)),
-      focusScore: weekCompletion.percent >= 70 ? 8 : 6,
+      progressScore: Math.max(5, Math.round(reviewWeekCompletion.percent / 20)),
+      disciplineScore: Math.max(5, Math.round(reviewWeekCompletion.percent / 20)),
+      focusScore: reviewWeekCompletion.percent >= 70 ? 8 : 6,
       improvementScore: weeklyForm.mainObstacle.trim() ? 8 : 6,
       outputQualityScore: weeklyForm.biggestOutputThisWeek.trim() ? 8 : 6,
-      completedLeadIndicators: weekCompletion.completed,
+      completedLeadIndicators: reviewWeekCompletion.completed,
     };
 
     const updatedReviews = [
-      ...system.weeklyReviews.filter((review) => review.weekNumber !== currentWeek),
+      ...system.weeklyReviews.filter((review) => review.weekNumber !== reviewWeekNumber),
       nextReview,
     ].sort((left, right) => left.weekNumber - right.weekNumber);
 
-    const previousSystem = system;
-    commitSystemUpdate({
+    const committedSystem = commitSystemUpdate({
       ...system,
       lagMetric: {
         ...system.lagMetric,
@@ -478,23 +508,27 @@ export function TwelveWeekSystem() {
       },
       weeklyReviews: updatedReviews,
     });
+    const committedWeekScore =
+      committedSystem.scoreboard.find((week) => week.weekNumber === reviewWeekNumber)?.weeklyScore ??
+      currentScore?.weeklyScore ??
+      reviewWeekCompletion.percent;
 
     const synced = await executionSyncActions.syncWeeklyReview({
-      weekNumber: currentWeek,
-      executionScore: currentScore?.weeklyScore ?? weekCompletion.percent,
+      weekNumber: reviewWeekNumber,
+      executionScore: committedWeekScore,
       reflection: weeklyForm.biggestOutputThisWeek.trim() || undefined,
       adjustments: nextWeekPriorityValue || undefined,
     });
 
     if (!synced) {
-      rollbackSystemUpdate(previousSystem);
-      toast.error("Không thể đồng bộ weekly review. Mình đã hoàn tác thay đổi.");
+      toast.info("Review tuần đã lưu local. Sẽ tiếp tục đồng bộ khi backend sẵn sàng.");
+      refreshSnapshotMeta();
       return;
     }
 
     upsertReflection({
       date: formatDateInputValue(new Date()),
-      title: `Review tuần - ${activeGoal.title} - tuần ${currentWeek}`,
+      title: `Review tuần - ${activeGoal.title} - tuần ${reviewWeekNumber}`,
       content: [
         `Điều hiệu quả: ${weeklyForm.biggestOutputThisWeek.trim() || "--"}`,
         `Điều cản trở: ${weeklyForm.mainObstacle.trim() || "--"}`,
@@ -504,15 +538,20 @@ export function TwelveWeekSystem() {
       ]
         .filter(Boolean)
         .join("\n\n"),
-      mood: weekCompletion.percent >= 70 ? "happy" : weekCompletion.percent >= 40 ? "neutral" : "sad",
+      mood:
+        reviewWeekCompletion.percent >= 70
+          ? "happy"
+          : reviewWeekCompletion.percent >= 40
+            ? "neutral"
+            : "sad",
       entryType: "weekly-review",
       linkedGoalId: activeGoal.id,
-      linkedWeekNumber: currentWeek,
+      linkedWeekNumber: reviewWeekNumber,
     });
 
     trackAppEvent("12_week_weekly_review_submitted", activeGoal.id, {
-      weekNumber: String(currentWeek),
-      score: String(currentScore?.weeklyScore ?? weekCompletion.percent),
+      weekNumber: String(reviewWeekNumber),
+      score: String(committedWeekScore),
       decision: workloadDecisionValue || "keep same",
       usedSuggestedPlan: String(
         hasPremiumReviewInsights && weeklyForm.nextWeekPriority.trim().length === 0,
@@ -525,6 +564,7 @@ export function TwelveWeekSystem() {
           ? "Mình đã dùng luôn gợi ý Plus để khóa ưu tiên tuần sau cho bạn."
           : "Tuần sau giờ đã có ưu tiên đủ rõ để bắt đầu gọn hơn.",
     });
+    refreshBackendProgressOverlay();
     refreshSnapshotMeta();
   };
 
@@ -703,9 +743,10 @@ export function TwelveWeekSystem() {
   };
 
   const handleReentry = (mode: "restart" | "lighten" | "push") => {
-    if (!currentWeekRange) return;
+    const reentryWeekNumber = getTwelveWeekCurrentWeek(system);
+    const reentryWeekRange = getTwelveWeekWeekRange(system, reentryWeekNumber);
     const todayKey = formatDateInputValue(new Date());
-    const weekEnd = currentWeekRange.end;
+    const weekEnd = reentryWeekRange.end;
     const nextWeekStart = addDaysToDateKey(weekEnd, 1);
     const targets =
       mode === "restart"
@@ -717,7 +758,12 @@ export function TwelveWeekSystem() {
     let moved = 0;
     const nextTaskInstances = system.taskInstances.map((task) => {
       const isMissed = missedTasks.some((item) => item.id === task.id);
-      const isOptionalThisWeek = mode === "lighten" && task.weekNumber === currentWeek && !task.isCore && !task.completed && task.scheduledDate <= weekEnd;
+      const isOptionalThisWeek =
+        mode === "lighten" &&
+        task.weekNumber === reentryWeekNumber &&
+        !task.isCore &&
+        !task.completed &&
+        task.scheduledDate <= weekEnd;
       if (!isMissed && !isOptionalThisWeek) return task;
 
       const date = targets[Math.min(moved, Math.max(targets.length - 1, 0))] ?? todayKey;
@@ -736,7 +782,7 @@ export function TwelveWeekSystem() {
       taskInstances: nextTaskInstances,
     });
 
-    trackAppEvent("12_week_reentry_used", activeGoal.id, { mode, weekNumber: String(currentWeek) });
+    trackAppEvent("12_week_reentry_used", activeGoal.id, { mode, weekNumber: String(reentryWeekNumber) });
     toast.success(
       mode === "restart"
         ? "Đã sắp lại để bắt đầu lại tuần này."
