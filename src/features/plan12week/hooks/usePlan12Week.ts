@@ -20,6 +20,7 @@ import {
   generateExecutionSuggestion,
   interpretExecutionScore,
 } from "../logic/executionFeedback";
+import { savePlanDetailsLink } from "../persistence/planLinkStore";
 import { calculateExecutionScore } from "../logic/executionScore";
 import { calculateGoalProgress } from "../logic/goalProgress";
 import { logLeadMetric as appendLeadMetricLog } from "../logic/leadMetrics";
@@ -255,6 +256,10 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
 
   const applyPlanDetails = useCallback((details: ApiPlanDetails) => {
     const nextPlan = mapApiPlan(details);
+    const linkedGoalId = details.plan.smartGoalId?.trim();
+    if (linkedGoalId) {
+      savePlanDetailsLink(linkedGoalId, details);
+    }
     setApiPlanId(details.plan.id);
     setPlan(nextPlan);
     setWeekIdByNumber(
