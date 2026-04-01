@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import { Navigate, createBrowserRouter } from "react-router";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RootLayout } from "./components/RootLayout";
 
 function lazyComponent<TModule extends Record<string, unknown>>(
@@ -24,6 +25,10 @@ function RedirectToTwelveWeekSystem() {
 }
 
 export const router = createBrowserRouter([
+  {
+    path: "/login",
+    lazy: lazyComponent(() => import("./pages/LoginPage"), "LoginPage"),
+  },
   {
     path: "/",
     Component: RootLayout,
@@ -78,8 +83,26 @@ export const router = createBrowserRouter([
         lazy: lazyComponent(() => import("./pages/BillingPlan"), "BillingPlan"),
       },
       {
+        // Protected routes — require authentication
+        Component: ProtectedRoute,
+        children: [
+          {
+            path: "order",
+            lazy: lazyComponent(() => import("./pages/OrderPage"), "OrderPage"),
+          },
+          {
+            path: "order-status/:orderId?",
+            lazy: lazyComponent(() => import("./pages/OrderStatusPage"), "OrderStatusPage"),
+          },
+        ],
+      },
+      {
         path: "vision-board/:id?",
         lazy: lazyComponent(() => import("./pages/VisionBoardEditor"), "VisionBoardEditor"),
+      },
+      {
+        path: "admin/orders",
+        lazy: lazyComponent(() => import("./pages/AdminOrdersPage"), "AdminOrdersPage"),
       },
       {
         path: "goals",

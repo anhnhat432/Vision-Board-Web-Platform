@@ -4,12 +4,14 @@ import { motion } from "motion/react";
 import {
   ArrowLeft,
   ArrowRight,
+  CircleAlert,
   CheckCircle2,
   Compass,
   Sparkles,
   Target,
 } from "lucide-react";
 
+import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
@@ -184,9 +186,9 @@ function formatStepDraft(stepKey: SmartStepKey, smartData: SMARTData): string {
       const skills = normalizeListInput(smartData.achievable.required_skills);
       const support = normalizeListInput(smartData.achievable.support_resources);
 
-      if (weeklyHours) parts.push(`${weeklyHours} gio/tuan`);
-      if (skills.length > 0) parts.push(`Ky nang: ${skills.join(", ")}`);
-      if (support.length > 0) parts.push(`Ho tro: ${support.join(", ")}`);
+      if (weeklyHours) parts.push(`${weeklyHours} giờ/tuần`);
+      if (skills.length > 0) parts.push(`Kỹ năng: ${skills.join(", ")}`);
+      if (support.length > 0) parts.push(`Hỗ trợ: ${support.join(", ")}`);
 
       return parts.join(". ");
     }
@@ -200,11 +202,11 @@ function formatStepDraft(stepKey: SmartStepKey, smartData: SMARTData): string {
     case "timeBound":
       if (smartData.timeBound.mode === "date") {
         return smartData.timeBound.target_date.trim()
-          ? `Moc den ${smartData.timeBound.target_date.trim()}`
+          ? `Mốc đến ${smartData.timeBound.target_date.trim()}`
           : "";
       }
       return smartData.timeBound.target_weeks.trim()
-        ? `Trong ${smartData.timeBound.target_weeks.trim()} tuan`
+        ? `Trong ${smartData.timeBound.target_weeks.trim()} tuần`
         : "";
     default:
       return "";
@@ -215,29 +217,29 @@ function getStepValidationError(stepKey: SmartStepKey, smartData: SMARTData): st
   if (stepKey === "specific") {
     const value = smartData.specific.goal_statement.trim();
     if (value.length < 20) {
-      return "Muc tieu can dai toi thieu 20 ky tu.";
+      return "Mục tiêu cần dài tối thiểu 20 ký tự.";
     }
     return null;
   }
 
   if (stepKey === "measurable") {
     if (smartData.measurable.metric_name.trim().length === 0) {
-      return "Can nhap ten chi so do luong.";
+      return "Cần nhập tên chỉ số đo lường.";
     }
 
     const targetValue = parseNumberInput(smartData.measurable.target_value);
     if (targetValue === undefined) {
-      return "Can nhap target value hop le.";
+      return "Cần nhập mốc mục tiêu hợp lệ.";
     }
 
     const baselineInput = smartData.measurable.baseline_value.trim();
     if (baselineInput && parseNumberInput(baselineInput) === undefined) {
-      return "Baseline value can la mot so hop le.";
+      return "Mốc hiện tại phải là một con số hợp lệ.";
     }
     if (baselineInput) {
       const baselineValue = parseNumberInput(baselineInput);
       if (baselineValue !== undefined && targetValue <= baselineValue) {
-        return "Target value phai lon hon baseline value.";
+        return "Mốc mục tiêu phải lớn hơn mốc hiện tại.";
       }
     }
 
@@ -247,14 +249,14 @@ function getStepValidationError(stepKey: SmartStepKey, smartData: SMARTData): st
   if (stepKey === "achievable") {
     const weeklyHours = parseNumberInput(smartData.achievable.weekly_time_commitment_hours);
     if (weeklyHours === undefined || weeklyHours <= 0) {
-      return "Weekly time commitment can lon hon 0.";
+      return "Thời gian mỗi tuần phải lớn hơn 0.";
     }
     return null;
   }
 
   if (stepKey === "relevant") {
     if (smartData.relevant.motivation_reason.trim().length < 15) {
-      return "Ly do dong luc can toi thieu 15 ky tu.";
+      return "Lý do theo đuổi cần tối thiểu 15 ký tự.";
     }
     return null;
   }
@@ -262,12 +264,12 @@ function getStepValidationError(stepKey: SmartStepKey, smartData: SMARTData): st
   if (smartData.timeBound.mode === "date") {
     return smartData.timeBound.target_date.trim().length > 0
       ? null
-      : "Hay chon target date cho muc tieu.";
+      : "Hãy chọn ngày mục tiêu cho kế hoạch này.";
   }
 
   const targetWeeks = parseNumberInput(smartData.timeBound.target_weeks);
   if (targetWeeks === undefined || targetWeeks <= 0) {
-    return "Target weeks can la so duong hop le.";
+    return "Số tuần mục tiêu phải là số dương hợp lệ.";
   }
 
   return null;
@@ -370,6 +372,22 @@ export function SMARTGoalSetup() {
     [smartData],
   );
   const currentStepError = getStepValidationError(currentStepData.key as SmartStepKey, smartData);
+  const specificLength = smartData.specific.goal_statement.trim().length;
+  const parsedBaselineValue = parseNumberInput(smartData.measurable.baseline_value);
+  const parsedTargetValue = parseNumberInput(smartData.measurable.target_value);
+  const metricNameMissing = smartData.measurable.metric_name.trim().length === 0;
+  const baselineInvalid =
+    smartData.measurable.baseline_value.trim().length > 0 && parsedBaselineValue === undefined;
+  const targetInvalid =
+    parsedTargetValue === undefined ||
+    (parsedBaselineValue !== undefined && parsedTargetValue !== undefined && parsedTargetValue <= parsedBaselineValue);
+  const parsedWeeklyHours = parseNumberInput(smartData.achievable.weekly_time_commitment_hours);
+  const weeklyHoursInvalid = parsedWeeklyHours === undefined || parsedWeeklyHours <= 0;
+  const motivationInvalid = smartData.relevant.motivation_reason.trim().length < 15;
+  const parsedTargetWeeks = parseNumberInput(smartData.timeBound.target_weeks);
+  const targetWeeksInvalid =
+    smartData.timeBound.mode === "weeks" && (parsedTargetWeeks === undefined || parsedTargetWeeks <= 0);
+  const targetDateInvalid = smartData.timeBound.mode === "date" && smartData.timeBound.target_date.trim().length === 0;
 
   const handleGoToFeasibility = () => {
     const measurableTarget = parseNumberInput(smartData.measurable.target_value);
@@ -433,15 +451,19 @@ export function SMARTGoalSetup() {
     currentStepKey === "specific" &&
     currentStepError === null &&
     !hasOutcomeIndicator(smartData.specific.goal_statement)
-      ? "Goi y: Nen dung dong tu ket qua ro rang nhu become, reach, complete, build, launch, achieve."
+      ? "Gợi ý: nên dùng động từ kết quả rõ ràng như đạt, hoàn thành, xây dựng, ra mắt hoặc chạm mốc."
       : null;
+  const currentStepActionHint =
+    currentStep < totalSteps - 1
+      ? "Hoàn tất bước này để mở bước tiếp theo trong flow SMART."
+      : "Hoàn tất bước này để chuyển sang bước kiểm tra tính khả thi.";
 
   const renderCurrentStepFields = () => {
     if (currentStepKey === "specific") {
       return (
-        <div className="space-y-2">
+        <div className="space-y-3">
           <Label htmlFor="smart-specific" className="text-base">
-            Cau tra loi cua ban
+            Câu trả lời của bạn
           </Label>
           <Textarea
             id="smart-specific"
@@ -456,21 +478,26 @@ export function SMARTGoalSetup() {
               }))
             }
             className="min-h-[180px] resize-none text-base leading-7"
+            aria-invalid={currentStepKey === "specific" && currentStepError !== null}
           />
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500">
+            <p>Viết như một kết quả cụ thể mà bạn có thể nhìn thấy hoặc kiểm chứng.</p>
+            <p>{specificLength}/20 ký tự tối thiểu</p>
+          </div>
         </div>
       );
     }
 
     if (currentStepKey === "measurable") {
       return (
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="smart-metric-name" className="text-base">
-              Metric Name
+              Chỉ số đo lường
             </Label>
             <Input
               id="smart-metric-name"
-              placeholder="VD: IELTS Score"
+              placeholder="Ví dụ: điểm IELTS, số dự án hoàn thành, doanh thu..."
               value={smartData.measurable.metric_name}
               onChange={(event) =>
                 setSmartData((previous) => ({
@@ -481,12 +508,14 @@ export function SMARTGoalSetup() {
                   },
                 }))
               }
+              aria-invalid={currentStepKey === "measurable" && metricNameMissing}
             />
+            <p className="text-sm text-slate-500">Chọn một chỉ số đủ rõ để bạn biết mình đang tiến lên hay đứng yên.</p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="smart-baseline">Baseline (optional)</Label>
+              <Label htmlFor="smart-baseline">Mốc hiện tại (tuỳ chọn)</Label>
               <Input
                 id="smart-baseline"
                 type="number"
@@ -499,14 +528,15 @@ export function SMARTGoalSetup() {
                     ...previous,
                     measurable: {
                       ...previous.measurable,
-                      baseline_value: event.target.value,
-                    },
-                  }))
-                }
+                    baseline_value: event.target.value,
+                  },
+                }))
+              }
+              aria-invalid={currentStepKey === "measurable" && baselineInvalid}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="smart-target">Target Value</Label>
+              <Label htmlFor="smart-target">Mốc mục tiêu</Label>
               <Input
                 id="smart-target"
                 type="number"
@@ -519,23 +549,25 @@ export function SMARTGoalSetup() {
                     ...previous,
                     measurable: {
                       ...previous.measurable,
-                      target_value: event.target.value,
-                    },
-                  }))
-                }
+                    target_value: event.target.value,
+                  },
+                }))
+              }
+              aria-invalid={currentStepKey === "measurable" && targetInvalid}
               />
             </div>
           </div>
+          <p className="text-sm text-slate-500">Nếu bạn nhập cả hai mốc, hệ thống sẽ kiểm tra để mốc mục tiêu lớn hơn mốc hiện tại.</p>
         </div>
       );
     }
 
     if (currentStepKey === "achievable") {
       return (
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="smart-weekly-hours" className="text-base">
-              Weekly Time Commitment (hours)
+              Thời gian mỗi tuần
             </Label>
             <Input
               id="smart-weekly-hours"
@@ -553,14 +585,16 @@ export function SMARTGoalSetup() {
                   },
                 }))
               }
+              aria-invalid={currentStepKey === "achievable" && weeklyHoursInvalid}
             />
+            <p className="text-sm text-slate-500">Chỉ tính khung thời gian bạn thực sự có thể giữ đều mỗi tuần.</p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="smart-required-skills">Required Skills</Label>
+            <Label htmlFor="smart-required-skills">Kỹ năng cần có</Label>
             <Textarea
               id="smart-required-skills"
-              placeholder="Moi dong mot ky nang, hoac tach boi dau phay."
+              placeholder="Mỗi dòng một kỹ năng, hoặc ngăn cách bằng dấu phẩy."
               value={smartData.achievable.required_skills}
               onChange={(event) =>
                 setSmartData((previous) => ({
@@ -573,13 +607,14 @@ export function SMARTGoalSetup() {
               }
               className="min-h-[120px] resize-none text-base leading-7"
             />
+            <p className="text-sm text-slate-500">Chỉ cần liệt kê những kỹ năng thật sự ảnh hưởng tới kết quả của giai đoạn này.</p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="smart-support-resources">Support Resources</Label>
+            <Label htmlFor="smart-support-resources">Nguồn lực hỗ trợ</Label>
             <Textarea
               id="smart-support-resources"
-              placeholder="VD: Mentor, online course, accountability partner"
+              placeholder="Ví dụ: mentor, khóa học, tài liệu, người đồng hành..."
               value={smartData.achievable.support_resources}
               onChange={(event) =>
                 setSmartData((previous) => ({
@@ -592,6 +627,7 @@ export function SMARTGoalSetup() {
               }
               className="min-h-[120px] resize-none text-base leading-7"
             />
+            <p className="text-sm text-slate-500">Hãy ghi cả người hỗ trợ lẫn tài nguyên bạn có thể dùng ngay.</p>
           </div>
         </div>
       );
@@ -599,10 +635,10 @@ export function SMARTGoalSetup() {
 
     if (currentStepKey === "relevant") {
       return (
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="smart-relevant-reason" className="text-base">
-              Cau tra loi cua ban
+              Lý do bạn thật sự muốn theo đuổi
             </Label>
             <Textarea
               id="smart-relevant-reason"
@@ -618,13 +654,15 @@ export function SMARTGoalSetup() {
                 }))
               }
               className="min-h-[160px] resize-none text-base leading-7"
+              aria-invalid={currentStepKey === "relevant" && motivationInvalid}
             />
+            <p className="text-sm text-slate-500">Hãy viết đủ cụ thể để khi mệt bạn vẫn nhớ vì sao mục tiêu này đáng giữ.</p>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="smart-life-alignment">Life Dimension Alignment (optional)</Label>
+            <Label htmlFor="smart-life-alignment">Lĩnh vực cuộc sống liên quan (tuỳ chọn)</Label>
             <Input
               id="smart-life-alignment"
-              placeholder="VD: Career growth, tai chinh, suc khoe..."
+              placeholder="Ví dụ: sự nghiệp, tài chính, sức khỏe..."
               value={smartData.relevant.life_dimension_alignment}
               onChange={(event) =>
                 setSmartData((previous) => ({
@@ -636,13 +674,18 @@ export function SMARTGoalSetup() {
                 }))
               }
             />
+            <p className="text-sm text-slate-500">Bạn có thể bỏ qua nếu lý do ở trên đã đủ rõ.</p>
           </div>
         </div>
       );
     }
 
     return (
-      <div className="space-y-4">
+      <div className="space-y-5">
+        <div className="space-y-1">
+          <p className="text-sm text-slate-600">Chọn cách chốt thời hạn phù hợp nhất với cách bạn muốn theo dõi kế hoạch này.</p>
+        </div>
+
         <div className="grid gap-3 sm:grid-cols-2">
           <Button
             variant={smartData.timeBound.mode === "weeks" ? "default" : "outline"}
@@ -658,7 +701,7 @@ export function SMARTGoalSetup() {
               }))
             }
           >
-            Target Weeks
+            Theo số tuần
           </Button>
           <Button
             variant={smartData.timeBound.mode === "date" ? "default" : "outline"}
@@ -672,14 +715,14 @@ export function SMARTGoalSetup() {
               }))
             }
           >
-            Target Date
+            Theo ngày cụ thể
           </Button>
         </div>
 
         {smartData.timeBound.mode === "weeks" ? (
           <div className="space-y-2">
             <Label htmlFor="smart-target-weeks" className="text-base">
-              So tuan muc tieu
+              Số tuần mục tiêu
             </Label>
             <Input
               id="smart-target-weeks"
@@ -696,13 +739,14 @@ export function SMARTGoalSetup() {
                   },
                 }))
               }
+              aria-invalid={targetWeeksInvalid}
             />
-            <p className="text-xs text-slate-500">Goi y: 12 tuan de vao chu ky planning tiep theo.</p>
+            <p className="text-sm text-slate-500">Gợi ý: 12 tuần là chu kỳ hợp lý để nối sang phần planning tiếp theo.</p>
           </div>
         ) : (
           <div className="space-y-2">
             <Label htmlFor="smart-target-date" className="text-base">
-              Target Date
+              Ngày mục tiêu
             </Label>
             <Input
               id="smart-target-date"
@@ -717,7 +761,9 @@ export function SMARTGoalSetup() {
                   },
                 }))
               }
+              aria-invalid={targetDateInvalid}
             />
+            <p className="text-sm text-slate-500">Chọn mốc ngày đủ rõ để bạn có thể review tiến độ ngược trở lại.</p>
           </div>
         )}
       </div>
@@ -835,22 +881,39 @@ export function SMARTGoalSetup() {
                   </div>
                 </div>
                 {renderCurrentStepFields()}
-                {currentStepError ? <p className="text-sm text-rose-600">{currentStepError}</p> : null}
+                {currentStepError ? (
+                  <Alert className="border-rose-200 bg-rose-50/85 text-rose-700">
+                    <CircleAlert className="h-4 w-4" />
+                    <AlertTitle>Cần hoàn tất bước này</AlertTitle>
+                    <AlertDescription className="text-rose-700/90">{currentStepError}</AlertDescription>
+                  </Alert>
+                ) : null}
                 {currentStepSoftWarning ? (
-                  <p className="text-sm text-amber-600">{currentStepSoftWarning}</p>
+                  <Alert className="border-amber-200 bg-amber-50/85 text-amber-700">
+                    <Sparkles className="h-4 w-4" />
+                    <AlertTitle>Gợi ý để mục tiêu rõ hơn</AlertTitle>
+                    <AlertDescription className="text-amber-700/90">{currentStepSoftWarning}</AlertDescription>
+                  </Alert>
                 ) : null}
 
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <Button variant="outline" className="flex-1" onClick={handleBack}>
-                    <ArrowLeft className="h-4 w-4" />
-                    Quay lại
-                  </Button>
-                  <Button className="flex-1" onClick={handleNext} disabled={!isCurrentStepValid}>
-                    {currentStep < totalSteps - 1
-                      ? "Tiếp theo"
-                      : "Tiếp theo: kiểm tra tính khả thi"}
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
+                <div className="rounded-[22px] border border-slate-200 bg-slate-50/70 p-4">
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Tiếp tục flow SMART</p>
+                    <p className="text-sm text-slate-600">{currentStepActionHint}</p>
+                  </div>
+
+                  <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                    <Button variant="outline" className="flex-1" onClick={handleBack}>
+                      <ArrowLeft className="h-4 w-4" />
+                      Quay lại
+                    </Button>
+                    <Button className="flex-1" onClick={handleNext} disabled={!isCurrentStepValid}>
+                      {currentStep < totalSteps - 1
+                        ? "Tiếp theo"
+                        : "Tiếp theo: kiểm tra tính khả thi"}
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             </CardContent>

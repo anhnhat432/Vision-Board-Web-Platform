@@ -4,7 +4,9 @@ import { useBeforeUnload, useBlocker, useNavigate, useParams } from "react-route
 import {
   Heart,
   Image,
+  Globe,
   LayoutGrid,
+  Link2,
   MessageSquareQuote,
   Moon,
   Palette,
@@ -16,6 +18,7 @@ import {
   Target,
   Trash2,
   Trophy,
+  Upload,
   Wand2,
   Zap,
 } from "lucide-react";
@@ -51,6 +54,15 @@ import {
   getUserData,
   updateVisionBoard,
 } from "../utils/storage";
+import { useAuthContext } from "@/lib/auth/AuthContext";
+import {
+  createVisionBoard as backendCreateVisionBoard,
+  updateVisionBoard as backendUpdateVisionBoard,
+} from "@/services/visionBoardService";
+import {
+  getBackendVisionBoardId,
+  saveVisionBoardLink,
+} from "@/lib/api/visionBoardLinkStore";
 
 interface DraggableItemProps {
   item: VisionBoardItem;
@@ -84,6 +96,72 @@ const QUOTE_SUGGESTIONS = [
   "Kỷ luật là cây cầu nối tầm nhìn với kết quả.",
   "Tôi đang xây một cuộc sống mình thật sự muốn thức dậy mỗi sáng.",
 ];
+
+const CURATED_IMAGES: Array<{ label: string; url: string }> = [
+  { label: "Workspace", url: "https://picsum.photos/seed/vision-workspace/480/360" },
+  { label: "Sunrise", url: "https://picsum.photos/seed/vision-sunrise/480/360" },
+  { label: "Travel", url: "https://picsum.photos/seed/vision-freedom-travel/480/360" },
+  { label: "Home", url: "https://picsum.photos/seed/vision-dream-home/480/360" },
+  { label: "Fitness", url: "https://picsum.photos/seed/vision-fitness-run/480/360" },
+  { label: "Nature", url: "https://picsum.photos/seed/vision-nature-forest/480/360" },
+  { label: "City", url: "https://picsum.photos/seed/vision-city-skyline/480/360" },
+  { label: "Beach", url: "https://picsum.photos/seed/vision-ocean-beach/480/360" },
+  { label: "Books", url: "https://picsum.photos/seed/vision-books-study/480/360" },
+  { label: "Food", url: "https://picsum.photos/seed/vision-healthy-food/480/360" },
+  { label: "Art", url: "https://picsum.photos/seed/vision-creative-art/480/360" },
+  { label: "Garden", url: "https://picsum.photos/seed/vision-garden-bloom/480/360" },
+];
+
+// Upload hardening constants — module scope so they are not recreated on each render
+const MAX_SOURCE_BYTES = 5 * 1024 * 1024; // 5 MB source file limit (compression handles reduction)
+const MAX_COMPRESSED_CHARS = 600_000;     // ~450 KB actual image data after base64 overhead
+const CANVAS_MAX_WIDTH = 1200;
+const CANVAS_MAX_HEIGHT = 900;
+
+/**
+ * Compress an image File to a JPEG data URL via an offscreen canvas.
+ * Rejects with a typed error string if the file cannot be decoded or if
+ * the result is still too large after compression.
+ */
+function compressImageFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("read_failed"));
+    reader.onload = (evt) => {
+      const raw = evt.target?.result;
+      if (typeof raw !== "string") {
+        reject(new Error("invalid_result"));
+        return;
+      }
+      const img = new window.Image();
+      img.onerror = () => reject(new Error("decode_failed"));
+      img.onload = () => {
+        const scale = Math.min(1, CANVAS_MAX_WIDTH / img.width, CANVAS_MAX_HEIGHT / img.height);
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("canvas_unavailable"));
+          return;
+        }
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        const compressed = canvas.toDataURL("image/jpeg", 0.82);
+        if (compressed.length > MAX_COMPRESSED_CHARS) {
+          reject(new Error("too_large_after_compress"));
+          return;
+        }
+        resolve(compressed);
+      };
+      img.src = raw;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
   const [isDragging, setIsDragging] = useState(false);
@@ -206,6 +284,7 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
 export function VisionBoardEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuthContext();
   const [board, setBoard] = useState<VisionBoard | null>(null);
   const [isResolvingBoard, setIsResolvingBoard] = useState(Boolean(id));
   const [boardName, setBoardName] = useState("");
@@ -216,6 +295,8 @@ export function VisionBoardEditor() {
   const [iconName, setIconName] = useState<IconName>("Sparkles");
   const [isSearching, setIsSearching] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+  const uploadInputRef = useRef<HTMLInputElement>(null);
   const blocker = useBlocker(hasUnsavedChanges);
 
   const handleBeforeUnload = useCallback(
@@ -278,18 +359,56 @@ export function VisionBoardEditor() {
     let savedBoardId = id ?? "";
 
     if (id) {
-      updateVisionBoard(id, {
+      const updated = updateVisionBoard(id, {
         name: boardName.trim(),
         year: boardYear.trim(),
         items: board.items,
       });
+      if (!updated) return;
       savedBoardId = id;
     } else {
-      savedBoardId = addVisionBoard({
+      const newId = addVisionBoard({
         name: boardName.trim(),
         year: boardYear.trim(),
         items: board.items,
       });
+      if (!newId) return;
+      savedBoardId = newId;
+    }
+
+    // Fire-and-forget backend sync
+    if (user) {
+      const itemsPayload = board.items.map(({ type, content, x, y, width, height }) => ({
+        type,
+        content,
+        x,
+        y,
+        width,
+        height,
+      }));
+
+      const backendId = getBackendVisionBoardId(savedBoardId);
+      if (backendId) {
+        void backendUpdateVisionBoard(backendId, {
+          name: boardName.trim(),
+          year: boardYear.trim(),
+          items: itemsPayload,
+        }).catch((err: unknown) => {
+          console.warn("Backend vision board update failed silently.", err);
+        });
+      } else {
+        void backendCreateVisionBoard({
+          name: boardName.trim(),
+          year: boardYear.trim(),
+          items: itemsPayload,
+        })
+          .then((created) => {
+            saveVisionBoardLink(savedBoardId, created.id);
+          })
+          .catch((err: unknown) => {
+            console.warn("Backend vision board creation failed silently.", err);
+          });
+      }
     }
 
     const afterData = getUserData();
@@ -341,6 +460,94 @@ export function VisionBoardEditor() {
     setIsSearching(false);
     setIsAddingItem(false);
     setHasUnsavedChanges(true);
+  };
+
+  const handleAddImageFromUrl = () => {
+    if (!board) return;
+    const trimmed = imageUrl.trim();
+    if (!trimmed) return;
+
+    if (!/^https?:\/\/.+\..+/i.test(trimmed)) {
+      toast.error("URL không hợp lệ. Vui lòng nhập link bắt đầu bằng https://");
+      return;
+    }
+
+    const newItem: VisionBoardItem = {
+      id: `item_${Date.now()}`,
+      type: "image",
+      content: trimmed,
+      x: 10 + (board.items.length * 6) % 48,
+      y: 12 + (board.items.length * 5) % 42,
+      width: 220,
+      height: 220,
+    };
+
+    setBoard({ ...board, items: [...board.items, newItem] });
+    setImageUrl("");
+    setIsAddingItem(false);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleAddCuratedImage = (url: string) => {
+    if (!board) return;
+
+    const newItem: VisionBoardItem = {
+      id: `item_${Date.now()}`,
+      type: "image",
+      content: url,
+      x: 10 + (board.items.length * 6) % 48,
+      y: 12 + (board.items.length * 5) % 42,
+      width: 220,
+      height: 220,
+    };
+
+    setBoard({ ...board, items: [...board.items, newItem] });
+    setIsAddingItem(false);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    // Reset input so the same file can be re-selected later
+    event.target.value = "";
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("File không hợp lệ. Vui lòng chọn file ảnh (JPG, PNG, WEBP...).");
+      return;
+    }
+
+    if (file.size > MAX_SOURCE_BYTES) {
+      toast.error("Ảnh quá lớn. Vui lòng chọn ảnh nhỏ hơn 5 MB.");
+      return;
+    }
+
+    void compressImageFile(file)
+      .then((dataUrl) => {
+        setBoard((prev) => {
+          if (!prev) return prev;
+          const newItem: VisionBoardItem = {
+            id: `item_${Date.now()}`,
+            type: "image",
+            content: dataUrl,
+            x: 10 + (prev.items.length * 6) % 48,
+            y: 12 + (prev.items.length * 5) % 42,
+            width: 220,
+            height: 220,
+          };
+          return { ...prev, items: [...prev.items, newItem] };
+        });
+        setIsAddingItem(false);
+        setHasUnsavedChanges(true);
+      })
+      .catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : "";
+        if (msg === "too_large_after_compress") {
+          toast.error("Ảnh vẫn còn quá lớn sau khi nén. Vui lòng thử ảnh nhỏ hơn hoặc ảnh có độ nét thấp hơn.");
+        } else {
+          toast.error("Không thể xử lý ảnh. Vui lòng thử lại với ảnh khác.");
+        }
+      });
   };
 
   const handleAddQuote = () => {
@@ -526,7 +733,7 @@ export function VisionBoardEditor() {
             </CardContent>
           </Card>
 
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-3xl overflow-y-auto max-h-[85vh]">
             <DialogHeader>
               <DialogTitle>Thêm vào bảng tầm nhìn</DialogTitle>
               <DialogDescription>
@@ -552,6 +759,75 @@ export function VisionBoardEditor() {
 
               <TabsContent value="image" className="space-y-5 pt-4">
                 <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <Upload className="h-4 w-4" />
+                    Tải ảnh từ thiết bị
+                  </div>
+                  <input
+                    ref={uploadInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => uploadInputRef.current?.click()}
+                  >
+                    <Upload className="h-4 w-4" />
+                    Chọn ảnh từ máy / điện thoại
+                  </Button>
+                  <p className="text-xs text-slate-400">Hỗ trợ JPG, PNG, WEBP, GIF — tối đa 5 MB (ảnh sẽ được nén tự động)</p>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <Link2 className="h-4 w-4" />
+                    Dán URL hình ảnh
+                  </div>
+                  <Input
+                    placeholder="https://example.com/my-image.jpg"
+                    value={imageUrl}
+                    onChange={(event) => setImageUrl(event.target.value)}
+                    onKeyDown={(event) => event.key === "Enter" && handleAddImageFromUrl()}
+                  />
+                  <Button className="w-full" onClick={handleAddImageFromUrl} disabled={!imageUrl.trim()}>
+                    Thêm ảnh từ URL
+                  </Button>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <Image className="h-4 w-4" />
+                    Chọn từ thư viện gợi ý
+                  </div>
+                  <div className="grid max-h-52 grid-cols-3 gap-2 overflow-y-auto rounded-xl sm:grid-cols-4">
+                    {CURATED_IMAGES.map((img) => (
+                      <button
+                        key={img.label}
+                        type="button"
+                        className="group relative overflow-hidden rounded-xl border border-white/70 transition-all hover:border-violet-300 hover:shadow-[0_8px_20px_-12px_rgba(109,40,217,0.3)]"
+                        onClick={() => handleAddCuratedImage(img.url)}
+                      >
+                        <ImageWithFallback
+                          src={img.url}
+                          alt={img.label}
+                          className="aspect-[4/3] w-full object-cover"
+                        />
+                        <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2 py-1.5 text-[11px] font-medium text-white">
+                          {img.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <Globe className="h-4 w-4" />
+                    Tìm theo vibe
+                  </div>
                   <Input
                     placeholder="Tìm một vibe hình ảnh, ví dụ: dream office, healthy life..."
                     value={searchQuery}
@@ -570,11 +846,10 @@ export function VisionBoardEditor() {
                       </Button>
                     ))}
                   </div>
+                  <Button variant="outline" className="w-full" onClick={handleAddImage} disabled={isSearching || !searchQuery.trim()}>
+                    {isSearching ? "Đang thêm hình..." : "Thêm hình theo vibe"}
+                  </Button>
                 </div>
-
-                <Button className="w-full" onClick={handleAddImage} disabled={isSearching || !searchQuery.trim()}>
-                  {isSearching ? "Đang thêm hình..." : "Thêm hình ảnh vào canvas"}
-                </Button>
               </TabsContent>
 
               <TabsContent value="quote" className="space-y-5 pt-4">

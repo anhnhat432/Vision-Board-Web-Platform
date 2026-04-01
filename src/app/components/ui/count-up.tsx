@@ -99,7 +99,7 @@ export function CountUp({
     : `${prefix}${defaultFormatter.format(displayValue)}${suffix}`;
 
   return (
-    <span ref={ref} className={cn("count-up", className)} {...props}>
+    <span ref={ref} className={cn("count-up stat-value", className)} {...props}>
       {content}
     </span>
   );

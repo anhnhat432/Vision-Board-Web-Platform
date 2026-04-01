@@ -7,6 +7,7 @@ import {
   Eye,
   Image as ImageIcon,
   Images,
+  Package,
   Plus,
   Sparkles,
   Trash2,
@@ -34,7 +35,11 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { InteractiveSurface } from "../components/ui/interactive-surface";
-import { deleteVisionBoard, getUserData, type UserData } from "../utils/storage";
+import { deleteVisionBoard, getUserData, saveUserData, type UserData, type VisionBoard } from "../utils/storage";
+import { useAuthContext } from "@/lib/auth/AuthContext";
+import { deleteVisionBoard as backendDeleteVisionBoard, getVisionBoards as backendGetVisionBoards } from "@/services/visionBoardService";
+import { getBackendVisionBoardId, getLocalVisionBoardId, saveVisionBoardLink } from "@/lib/api/visionBoardLinkStore";
+import { generateId } from "../utils/storage-types";
 
 const ICON_COMPONENTS = {
   Sparkles,
@@ -62,6 +67,7 @@ function BoardPreviewIcon({ content }: { content: string }) {
 export function VisionBoardGallery() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuthContext();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [boardToDelete, setBoardToDelete] = useState<string | null>(null);
 
@@ -74,6 +80,55 @@ export function VisionBoardGallery() {
     loadData();
   }, [loadData]);
 
+  // Hydrate from backend: import any backend boards that have no local counterpart.
+  // Runs once per mount for authenticated users. Backend failures are silent.
+  useEffect(() => {
+    if (!user) return;
+
+    void backendGetVisionBoards()
+      .then((backendBoards) => {
+        if (backendBoards.length === 0) return;
+
+        const localData = getUserData();
+        let didHydrate = false;
+
+        for (const backendBoard of backendBoards) {
+          // If a link already exists, this board was previously known locally.
+          // Skip it — even if the local copy was deleted (intentional deletion).
+          const existingLocalId = getLocalVisionBoardId(backendBoard.id);
+          if (existingLocalId) continue;
+
+          const localBoard: VisionBoard = {
+            id: generateId("board"),
+            name: backendBoard.name,
+            year: backendBoard.year,
+            items: backendBoard.items.map((item) => ({
+              id: generateId("item"),
+              type: item.type,
+              content: item.content,
+              x: item.x,
+              y: item.y,
+              width: item.width,
+              height: item.height,
+            })),
+            createdAt: backendBoard.createdAt,
+          };
+
+          localData.visionBoards.push(localBoard);
+          saveVisionBoardLink(localBoard.id, backendBoard.id);
+          didHydrate = true;
+        }
+
+        if (didHydrate) {
+          saveUserData(localData);
+          loadData();
+        }
+      })
+      .catch((err: unknown) => {
+        console.warn("Backend vision board hydration failed silently.", err);
+      });
+  }, [user, loadData]);
+
   const handleDeleteBoard = (boardId: string) => {
     setBoardToDelete(boardId);
   };
@@ -81,6 +136,15 @@ export function VisionBoardGallery() {
   const confirmDeleteBoard = () => {
     if (!boardToDelete) return;
     deleteVisionBoard(boardToDelete);
+
+    // Fire-and-forget backend delete
+    if (user) {
+      const backendId = getBackendVisionBoardId(boardToDelete);
+      if (backendId) {
+        void backendDeleteVisionBoard(backendId).catch(() => {});
+      }
+    }
+
     setBoardToDelete(null);
     loadData();
   };
@@ -109,6 +173,9 @@ export function VisionBoardGallery() {
     "spotlightBoardId" in location.state
       ? (location.state as { spotlightBoardId?: string }).spotlightBoardId
       : undefined;
+  const orderSourceBoard =
+    (spotlightBoardId ? userData.visionBoards.find((board) => board.id === spotlightBoardId) : undefined) ??
+    latestBoard;
 
   return (
     <div className="space-y-8 pb-12">
@@ -129,10 +196,10 @@ export function VisionBoardGallery() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <InteractiveSurface className="rounded-[28px]" intensity={9} translate={22}>
+      <InteractiveSurface className="rounded-[28px]" intensity={4} translate={10} shine={false}>
         <Card interactive={false} className="hero-surface overflow-hidden border-0 text-white">
         <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.12),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.08),_transparent_22%)] opacity-55" />
 
           <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
             <div className="space-y-6">
@@ -160,9 +227,19 @@ export function VisionBoardGallery() {
                   <Plus className="h-4 w-4" />
                   Tạo bảng mới
                 </Button>
+                {orderSourceBoard ? (
+                  <Button
+                    variant="outline"
+                    className="border-white/18 bg-white/10 text-white hover:bg-white/16 hover:text-white"
+                    onClick={() => navigate("/order", { state: { visionBoardId: orderSourceBoard.id } })}
+                  >
+                    <Package className="h-4 w-4" />
+                    {spotlightBoardId ? "Tạo kit từ board vừa lưu" : "Tạo kit từ board gần nhất"}
+                  </Button>
+                ) : null}
                 <Button
                   variant="outline"
-                  className="border-white/18 bg-white/12 text-white hover:bg-white/18 hover:text-white"
+                  className="border-white/18 bg-white/10 text-white hover:bg-white/16 hover:text-white"
                   onClick={() => navigate("/")}
                 >
                   Về bảng điều khiển
@@ -170,12 +247,12 @@ export function VisionBoardGallery() {
               </div>
             </div>
 
-            <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">
+            <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-[32px] border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-lg">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">
                 Snapshot thư viện
               </p>
 
-              <div className="mt-6 space-y-4">
+              <div className="mt-4 space-y-3">
                 <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-white/55">Tổng số bảng</p>
                   <p className="mt-2 text-3xl font-bold text-white">{userData.visionBoards.length}</p>
@@ -200,7 +277,7 @@ export function VisionBoardGallery() {
       </Card>
       </InteractiveSurface>
 
-      <div className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <div className="stagger-hover-grid grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
         {[
           {
             title: "Tổng số bảng",
@@ -236,26 +313,26 @@ export function VisionBoardGallery() {
           return (
             <motion.div
               key={item.title}
-              initial={{ opacity: 0, y: 18 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.08 * index }}
+              transition={{ delay: 0.04 * index, duration: 0.22 }}
             >
-              <Card className="relative overflow-hidden">
+              <Card className="relative gap-4 overflow-hidden">
                 <div
-                  className={`absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
+                  className={`absolute inset-x-6 top-0 h-14 rounded-b-[24px] bg-gradient-to-br ${item.color} opacity-65 blur-xl`}
                 />
-                <CardHeader className="relative flex flex-row items-start justify-between pb-3">
+                <CardHeader className="relative flex flex-row items-start justify-between pb-0">
                   <div>
                     <CardDescription>{item.title}</CardDescription>
                     <CardTitle className="mt-2 text-4xl">{item.value}</CardTitle>
                   </div>
                   <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${item.color}`}
+                      className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${item.color} opacity-90`}
                   >
                     <Icon className="h-5 w-5" />
                   </div>
                 </CardHeader>
-                <CardContent className="relative">
+                <CardContent className="relative pt-0">
                   <p className="text-sm text-slate-500">{item.note}</p>
                 </CardContent>
               </Card>
@@ -281,14 +358,14 @@ export function VisionBoardGallery() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-10">
           {years.map((year) => (
-            <section key={year} className="space-y-4">
+            <section key={year} className="space-y-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-[20px] bg-violet-50 text-violet-700">
                   <Calendar className="h-6 w-6" />
                 </div>
-                <div>
+                <div className="space-y-1">
                   <h2 className="text-2xl font-bold text-slate-900">{year}</h2>
                   <p className="text-sm text-slate-500">
                     {boardsByYear[year].length} bảng được lưu trong năm này.
@@ -306,24 +383,25 @@ export function VisionBoardGallery() {
                   return (
                     <motion.div
                       key={board.id}
-                      initial={{ opacity: 0, scale: 0.97 }}
+                      initial={{ opacity: 0, y: 8 }}
                       animate={
                         isSpotlight
-                          ? { opacity: 1, scale: [0.97, 1.02, 1], y: [12, -4, 0] }
-                          : { opacity: 1, scale: 1, y: 0 }
+                          ? { opacity: 1, y: 0 }
+                          : { opacity: 1, y: 0 }
                       }
-                      transition={{ delay: index * 0.05, duration: isSpotlight ? 0.55 : 0.32 }}
+                      transition={{ delay: index * 0.03, duration: 0.24 }}
                     >
                       <InteractiveSurface
                         className="preview-hover-card group rounded-[28px]"
-                        intensity={7}
-                        translate={16}
+                        intensity={4}
+                        translate={8}
+                        shine={false}
                       >
                       <Card
                         interactive={false}
-                        className={isSpotlight ? "spotlight-card overflow-hidden" : "overflow-hidden"}
+                        className={isSpotlight ? "spotlight-card gap-5 overflow-hidden" : "gap-5 overflow-hidden"}
                       >
-                        <CardHeader>
+                        <CardHeader className="pb-0">
                           <div className="flex items-start justify-between gap-3">
                             <div>
                               <div className="flex flex-wrap items-center gap-2">
@@ -347,13 +425,13 @@ export function VisionBoardGallery() {
                           </div>
                         </CardHeader>
 
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-5 pt-0">
                           <div
-                            className="relative overflow-hidden rounded-[24px] border border-white/80 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.84),_transparent_24%),linear-gradient(135deg,_rgba(244,244,255,0.96)_0%,_rgba(251,244,255,0.94)_48%,_rgba(239,246,255,0.96)_100%)]"
+                            className="relative overflow-hidden rounded-[24px] border border-white/80 bg-[linear-gradient(180deg,_rgba(248,250,252,0.98)_0%,_rgba(241,245,249,0.96)_100%)]"
                             style={{ aspectRatio: "16/10" }}
                           >
-                            <div className="absolute inset-0 gradient-grid bg-[size:30px_30px] opacity-60" />
-                            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,_rgba(15,23,42,0)_20%,_rgba(15,23,42,0.08)_100%)]" />
+                            <div className="absolute inset-0 gradient-grid bg-[size:30px_30px] opacity-28" />
+                            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,_rgba(15,23,42,0)_24%,_rgba(15,23,42,0.05)_100%)]" />
 
                             {board.items.length === 0 ? (
                               <div className="absolute inset-0 flex items-center justify-center">
@@ -372,7 +450,7 @@ export function VisionBoardGallery() {
                                     }}
                                   >
                                     {item.type === "image" && (
-                                      <div className="rounded-[16px] border border-white/80 bg-white/86 p-1.5 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.38)] backdrop-blur-xl">
+                                      <div className="rounded-[16px] border border-white/80 bg-white/88 p-1.5 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.18)] backdrop-blur-sm">
                                         <ImageWithFallback
                                           src={item.content}
                                           alt="Phần tử bảng"
@@ -381,7 +459,7 @@ export function VisionBoardGallery() {
                                       </div>
                                     )}
                                     {item.type === "quote" && (
-                                      <div className="rounded-[14px] border border-white/80 bg-white/88 px-3 py-2 text-[10px] italic leading-4 text-slate-700 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.38)]">
+                                      <div className="rounded-[14px] border border-white/80 bg-white/90 px-3 py-2 text-[10px] italic leading-4 text-slate-700 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.18)]">
                                         {item.content}
                                       </div>
                                     )}
@@ -391,7 +469,7 @@ export function VisionBoardGallery() {
                               </div>
                             )}
 
-                            <div className="preview-hover-overlay absolute inset-x-4 bottom-4 rounded-[20px] border border-white/22 bg-slate-950/52 px-4 py-3 text-white shadow-[0_20px_40px_-28px_rgba(15,23,42,0.72)] backdrop-blur-xl">
+                            <div className="preview-hover-overlay absolute inset-x-4 bottom-4 rounded-[20px] border border-white/18 bg-slate-900/38 px-4 py-3 text-white shadow-[0_14px_28px_-24px_rgba(15,23,42,0.34)] backdrop-blur-md">
                               <div className="flex items-center justify-between gap-4">
                                 <div>
                                   <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-white/58">
@@ -423,7 +501,7 @@ export function VisionBoardGallery() {
                             </div>
                           </div>
 
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 border-t border-slate-100 pt-4">
                             <Button
                               variant="outline"
                               className="flex-1"

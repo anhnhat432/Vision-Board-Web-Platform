@@ -27,6 +27,7 @@ export async function authMiddleware(
     req.user = {
       uid: decodedToken.uid,
       email: decodedToken.email,
+      name: decodedToken.name,
     };
 
     next();

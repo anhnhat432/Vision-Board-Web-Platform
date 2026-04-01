@@ -41,10 +41,10 @@ function Card({
   const setCardPointer = React.useCallback((x: number, y: number, hovering: boolean) => {
     if (!cardRef.current) return;
 
-    const rotateX = ((0.5 - y) * 4.5).toFixed(3);
-    const rotateY = ((x - 0.5) * 4.5).toFixed(3);
-    const shiftX = ((x - 0.5) * 10).toFixed(2);
-    const shiftY = ((y - 0.5) * 10).toFixed(2);
+    const rotateX = ((0.5 - y) * 2.75).toFixed(3);
+    const rotateY = ((x - 0.5) * 2.75).toFixed(3);
+    const shiftX = ((x - 0.5) * 6).toFixed(2);
+    const shiftY = ((y - 0.5) * 6).toFixed(2);
 
     cardRef.current.style.setProperty("--card-pointer-x", x.toFixed(4));
     cardRef.current.style.setProperty("--card-pointer-y", y.toFixed(4));

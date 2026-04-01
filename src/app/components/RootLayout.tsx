@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   Menu,
   Moon,
+  Package,
   Sparkles,
   Sun,
   Target,
@@ -92,6 +93,24 @@ const ROUTE_META = [
     title: "Gói & thanh toán – Dear Our Future",
     tagline: "Xem gói hiện tại, quyền truy cập và thao tác thanh toán.",
   },
+  {
+    match: (pathname: string) => pathname.startsWith("/admin/orders"),
+    label: "Quản trị đơn hàng",
+    title: "Quản trị đơn hàng – Dear Our Future",
+    tagline: "Xem và chuyển trạng thái đơn hàng từ người dùng.",
+  },
+  {
+    match: (pathname: string) => pathname.startsWith("/order-status"),
+    label: "Trạng thái đơn",
+    title: "Trạng thái đơn – Dear Our Future",
+    tagline: "Theo dõi tiến trình đơn kit trong workspace local hiện tại.",
+  },
+  {
+    match: (pathname: string) => pathname.startsWith("/order"),
+    label: "Tạo đơn",
+    title: "Tạo đơn – Dear Our Future",
+    tagline: "Chốt thông tin kit cá nhân hóa trước khi nối backend và fulfillment thật.",
+  },
 ];
 
 const NAV_ITEMS = [
@@ -104,6 +123,7 @@ const NAV_ITEMS = [
   { path: "/achievements", label: "Thành tựu", compactLabel: "Thành tựu", icon: Award },
   { path: "/journal", label: "Nhật ký", compactLabel: "Nhật ký", icon: BookOpen },
   { path: "/billing/plan", label: "Gói & thanh toán", compactLabel: "Gói", icon: CreditCard },
+  { path: "/order-status", label: "My Orders", compactLabel: "My Orders", icon: Package },
 ];
 
 const PRIMARY_NAV_PATHS = new Set(["/", "/goals", "/12-week-system", "/vision-board"]);
@@ -119,6 +139,7 @@ const ROUTE_IMPORTS: Record<string, () => Promise<unknown>> = {
   "/achievements": () => import("../pages/Achievements"),
   "/journal": () => import("../pages/ReflectionJournal"),
   "/billing/plan": () => import("../pages/BillingPlan"),
+  "/order-status": () => import("../pages/OrderStatusPage"),
 };
 const prefetchedRoutes = new Set<string>();
 function prefetchRoute(path: string) {
@@ -248,10 +269,10 @@ export function RootLayout() {
 
         const pointerX = Math.min(Math.max((event.clientX - bounds.left) / bounds.width, 0), 1);
         const pointerY = Math.min(Math.max((event.clientY - bounds.top) / bounds.height, 0), 1);
-        const rotateX = ((0.5 - pointerY) * 7).toFixed(3);
-        const rotateY = ((pointerX - 0.5) * 7).toFixed(3);
-        const shiftX = ((pointerX - 0.5) * 14).toFixed(2);
-        const shiftY = ((pointerY - 0.5) * 14).toFixed(2);
+        const rotateX = ((0.5 - pointerY) * 3.5).toFixed(3);
+        const rotateY = ((pointerX - 0.5) * 3.5).toFixed(3);
+        const shiftX = ((pointerX - 0.5) * 6).toFixed(2);
+        const shiftY = ((pointerY - 0.5) * 6).toFixed(2);
 
         card.style.setProperty("--hero-pointer-x", pointerX.toFixed(4));
         card.style.setProperty("--hero-pointer-y", pointerY.toFixed(4));
@@ -307,13 +328,13 @@ export function RootLayout() {
 
       root.style.setProperty("--cursor-x", `${event.clientX}px`);
       root.style.setProperty("--cursor-y", `${event.clientY}px`);
-      root.style.setProperty("--cursor-glow-opacity", "1");
+      root.style.setProperty("--cursor-glow-opacity", "0.55");
     };
 
     const handlePointerDown = (event: PointerEvent) => {
       root.style.setProperty(
         "--cursor-glow-opacity",
-        event.pointerType === "touch" ? "0" : "1",
+        event.pointerType === "touch" ? "0" : "0.55",
       );
     };
 
@@ -379,15 +400,15 @@ export function RootLayout() {
   };
   const shellBadgeStyle = {
     ...shellGradientStyle,
-    boxShadow: "0 20px 45px -20px var(--tone-shell-shadow-strong)",
+    boxShadow: "0 14px 28px -20px var(--tone-shell-shadow-strong)",
   };
   const shellIndicatorStyle = {
     ...shellGradientStyle,
-    boxShadow: "0 0 0 6px var(--tone-shell-ring)",
+    boxShadow: "0 0 0 4px var(--tone-shell-ring)",
   };
   const activeNavStyle = {
     ...shellGradientStyle,
-    boxShadow: "0 18px 45px -20px var(--tone-shell-shadow)",
+    boxShadow: "0 14px 30px -18px var(--tone-shell-shadow)",
   };
 
   const prefersReducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -400,10 +421,10 @@ export function RootLayout() {
         transition: { duration: 0 },
       } as const
     : {
-        initial: { opacity: 0, y: 18, filter: "blur(10px)" },
-        animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-        exit: { opacity: 0, y: -10, filter: "blur(8px)" },
-        transition: { duration: 0.38, ease: [0.22, 1, 0.36, 1] },
+        initial: { opacity: 0, y: 8 },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: -4 },
+        transition: { duration: 0.24, ease: [0.22, 1, 0.36, 1] },
       } as const;
 
   if (GUIDED_PATHS.has(location.pathname)) {
@@ -413,7 +434,7 @@ export function RootLayout() {
         <div className="ambient-orb ambient-orb--violet" />
         <div className="ambient-orb ambient-orb--cyan" />
         <div className="ambient-orb ambient-orb--rose" />
-        <div className="pointer-events-none fixed inset-x-0 top-[-10rem] z-0 mx-auto h-[28rem] max-w-5xl rounded-full bg-[radial-gradient(circle,_rgba(255,255,255,0.92)_0%,_rgba(255,255,255,0)_70%)] blur-3xl" />
+        <div className="pointer-events-none fixed inset-x-0 top-[-8rem] z-0 mx-auto h-[20rem] max-w-4xl rounded-full bg-[radial-gradient(circle,_rgba(255,255,255,0.72)_0%,_rgba(255,255,255,0)_70%)] blur-2xl" />
         <div className="relative z-10">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={location.pathname} className="page-transition-shell" {...pageTransition}>
@@ -435,10 +456,10 @@ export function RootLayout() {
       <div className="ambient-orb ambient-orb--violet" />
       <div className="ambient-orb ambient-orb--cyan" />
       <div className="ambient-orb ambient-orb--rose" />
-      <div className="pointer-events-none fixed inset-x-0 top-[-9rem] z-0 mx-auto h-[28rem] max-w-6xl rounded-full bg-[radial-gradient(circle,_rgba(255,255,255,0.98)_0%,_rgba(255,255,255,0)_72%)] blur-3xl" />
+      <div className="pointer-events-none fixed inset-x-0 top-[-8rem] z-0 mx-auto h-[20rem] max-w-5xl rounded-full bg-[radial-gradient(circle,_rgba(255,255,255,0.78)_0%,_rgba(255,255,255,0)_70%)] blur-2xl" />
 
       <header className="sticky top-0 z-40 px-4 pt-2 sm:top-4 sm:px-6 sm:pt-0 lg:px-8">
-        <div className="glass-surface mx-auto max-w-7xl rounded-2xl sm:rounded-3xl px-3 py-2 sm:px-4 sm:py-2 shadow-[0_24px_56px_-30px_rgba(15,23,42,0.24)]">
+        <div className="glass-surface mx-auto max-w-7xl rounded-2xl px-3 py-2 sm:rounded-3xl sm:px-4 sm:py-2 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.14)]">
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"
@@ -453,14 +474,14 @@ export function RootLayout() {
                 <Sparkles className="h-4.5 w-4.5 text-white" />
               </div>
               <div className="min-w-0">
-                <h1 className="truncate text-sm font-bold text-slate-900">
+                <h1 className="truncate text-sm font-semibold tracking-[-0.01em] text-slate-900">
                   Dear Our Future
                 </h1>
               </div>
             </button>
 
             <nav className="hidden flex-1 items-center justify-center md:flex">
-              <div className="flex flex-wrap items-center gap-1 rounded-full border border-white/70 bg-white/65 px-1.5 py-1 shadow-[0_8px_20px_-16px_rgba(15,23,42,0.16),inset_0_1px_0_rgba(255,255,255,0.9)]">
+              <div className="flex flex-wrap items-center gap-1 rounded-full border border-white/75 bg-white/72 px-1.5 py-1 shadow-[0_6px_14px_-14px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.9)]">
                 {primaryNavItems.map((item) => {
                     const Icon = item.icon;
                     const active = isActive(item.path);
@@ -517,7 +538,7 @@ export function RootLayout() {
               <button
                 type="button"
                 onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/75 bg-white/80 text-slate-600 shadow-sm transition-all hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300 dark:hover:bg-white/12"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/75 bg-white/82 text-slate-600 shadow-sm transition-colors hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300 dark:hover:bg-white/12"
                 aria-label={resolvedTheme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
               >
                 {resolvedTheme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
@@ -529,7 +550,7 @@ export function RootLayout() {
                   setGuideUserData(getUserData());
                   setIsGuideOpen(true);
                 }}
-                className="h-8 rounded-full border-white/75 bg-white/80 px-3 text-xs text-slate-600 shadow-sm hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300 dark:hover:bg-white/12"
+                className="h-8 rounded-full border-white/75 bg-white/82 px-3 text-xs text-slate-600 shadow-sm hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300 dark:hover:bg-white/12"
               >
                 <Compass className="h-3.5 w-3.5" />
                 Hướng dẫn
@@ -537,10 +558,10 @@ export function RootLayout() {
             </div>
 
             <div className="md:hidden flex items-center gap-2">
-              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate max-w-[130px]">{pageMeta.label}</span>
+              <span className="text-sm font-medium tracking-[-0.008em] text-slate-700 dark:text-slate-200 truncate max-w-[130px]">{pageMeta.label}</span>
               <button
                 type="button"
-                className="flex size-11 items-center justify-center rounded-xl border border-white/70 bg-white/72 text-slate-700 backdrop-blur-xl transition-all active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300"
+                className="flex size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 backdrop-blur-sm transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300"
                 onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
                 aria-label={resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
               >
@@ -548,7 +569,7 @@ export function RootLayout() {
               </button>
               <button
                 type="button"
-                className="flex size-11 items-center justify-center rounded-xl border border-white/70 bg-white/72 text-slate-700 backdrop-blur-xl transition-all active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300"
+                className="flex size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 backdrop-blur-sm transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300"
                 onClick={() => {
                   setGuideUserData(getUserData());
                   setIsGuideOpen(true);
@@ -559,7 +580,7 @@ export function RootLayout() {
               </button>
               <button
                 type="button"
-                className="flex size-11 items-center justify-center rounded-xl border border-white/70 bg-white/72 text-slate-700 backdrop-blur-xl transition-all active:scale-95 hover:bg-white"
+                className="flex size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 backdrop-blur-sm transition-colors active:scale-95 hover:bg-white"
                 onClick={() => setMobileMenuOpen((open) => !open)}
                 aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
                 aria-expanded={mobileMenuOpen}
@@ -582,7 +603,7 @@ export function RootLayout() {
                     setIsGuideOpen(true);
                     setMobileMenuOpen(false);
                   }}
-                  className="mb-2 flex w-full items-center gap-3 rounded-2xl border border-white/70 bg-white/78 px-4 py-3 text-left text-sm font-semibold text-slate-700"
+                  className="mb-2 flex w-full items-center gap-3 rounded-2xl border border-white/72 bg-white/82 px-4 py-3 text-left text-sm font-medium tracking-[-0.008em] text-slate-700"
                 >
                   <Compass className="h-5 w-5" />
                   <span>Hướng dẫn sử dụng</span>
@@ -600,7 +621,7 @@ export function RootLayout() {
                         setMobileMenuOpen(false);
                       }}
                       onFocus={() => handlePrefetch(item.path)}
-                      className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-sm font-semibold transition-all active:scale-[0.98] ${
+                      className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-sm font-medium tracking-[-0.008em] transition-all active:scale-[0.98] ${
                         active
                           ? "text-white"
                           : "text-slate-600 hover:bg-white/80 hover:text-slate-900"

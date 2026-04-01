@@ -54,6 +54,9 @@ import {
 } from "@/lib/smart-goal";
 import { getWeeklyTaskWarning } from "@/features/plan12week/logic";
 import { usePlanSetupSync } from "@/features/plan12week/hooks";
+import { createGoal, updateGoal } from "@/services/goalService";
+import { saveGoalLink, getBackendGoalId } from "@/lib/api/goalLinkStore";
+import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
 
 type ResultType = "realistic" | "challenging" | "too_ambitious";
 
@@ -775,12 +778,51 @@ export function TwelveWeekSetup() {
     });
     clearGoalPlanningDrafts();
 
+    // Fire-and-forget: persist goal to backend if authenticated.
+    // Fails silently — the local goal is already saved and the app continues.
+    // Not awaited so the success toast and navigation are not blocked by backend latency.
+    void createGoal({
+      title: smartGoal.specific.trim(),
+      category: focusArea,
+      description: [smartGoal.measurable, smartGoal.achievable, smartGoal.relevant]
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .join("\n\n"),
+      deadline: cycleEndDate,
+      status: "active",
+      focusArea,
+      feasibilityResult: {
+        resultType: feasibility.resultType,
+        adjustedScore: feasibility.adjustedScore,
+        readinessScore: feasibility.readinessScore,
+        wheelScore: feasibility.wheelScore,
+      },
+      readinessScore: feasibility.adjustedScore,
+      tasks: previewTasks.slice(0, 4).map((taskTitle) => ({ title: taskTitle, completed: false })),
+    })
+      .then((backendGoal) => {
+        saveGoalLink(goalId, backendGoal.id);
+      })
+      .catch((goalSyncError: unknown) => {
+        console.warn("Backend goal creation failed silently.", goalSyncError);
+      });
+
     await planSetupActions.syncPlanForGoal({
       goalId,
       vision: draft.vision12Week.trim(),
       startDate: new Date(cycleStartDate).toISOString(),
       totalWeeks: 12,
     });
+
+    // Link backend Goal → Plan if both backend IDs are available.
+    // Fire-and-forget — the local flow is already complete.
+    const backendGoalId = getBackendGoalId(goalId);
+    const planLink = getPlanLink(goalId);
+    if (backendGoalId && planLink?.planId) {
+      void updateGoal(backendGoalId, { planId: planLink.planId }).catch((linkError: unknown) => {
+        console.warn("Failed to link backend goal to plan.", linkError);
+      });
+    }
 
     toast.success("Hệ 12 tuần đã sẵn sàng.", {
       description: "Bạn có thể vào ngay màn Hôm nay để bắt đầu tuần đầu tiên.",

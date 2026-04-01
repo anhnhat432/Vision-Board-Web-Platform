@@ -13,20 +13,20 @@ const DEFAULT_BUTTON_STYLE = {
 } as React.CSSProperties;
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-all duration-300 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[4px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive active:translate-y-0 active:scale-[0.985] hover:-translate-y-0.5",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium tracking-[-0.01em] transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[4px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive active:translate-y-0 active:scale-[0.985]",
   {
     variants: {
       variant: {
         default:
-          "border-transparent gradient-brand text-primary-foreground shadow-[0_24px_50px_-24px_rgba(109,40,217,0.7)] hover:shadow-[0_30px_64px_-24px_rgba(109,40,217,0.8)]",
+          "border-transparent gradient-brand text-primary-foreground shadow-[0_18px_38px_-24px_rgba(109,40,217,0.52)] hover:shadow-[0_22px_44px_-24px_rgba(109,40,217,0.58)]",
         destructive:
-          "border-transparent bg-destructive text-white shadow-[0_20px_40px_-24px_rgba(212,24,61,0.65)] hover:bg-destructive/90 hover:shadow-[0_28px_54px_-28px_rgba(212,24,61,0.72)] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "border-transparent bg-destructive text-white shadow-[0_16px_34px_-24px_rgba(212,24,61,0.48)] hover:bg-destructive/90 hover:shadow-[0_20px_40px_-26px_rgba(212,24,61,0.54)] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
-          "border-white/70 bg-white/72 text-foreground shadow-[0_18px_40px_-28px_rgba(15,23,42,0.36)] backdrop-blur-xl hover:border-white hover:bg-white hover:text-accent-foreground hover:shadow-[0_24px_48px_-28px_rgba(15,23,42,0.42)] dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "border-white/70 bg-white/78 text-foreground shadow-[0_12px_28px_-24px_rgba(15,23,42,0.2)] backdrop-blur-sm hover:border-white hover:bg-white hover:text-accent-foreground hover:shadow-[0_16px_32px_-24px_rgba(15,23,42,0.24)] dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         secondary:
-          "border border-white/60 bg-secondary text-secondary-foreground shadow-[0_18px_36px_-28px_rgba(124,58,237,0.4)] hover:bg-secondary/95 hover:shadow-[0_24px_46px_-28px_rgba(124,58,237,0.46)]",
+          "border border-white/60 bg-secondary text-secondary-foreground shadow-[0_14px_28px_-24px_rgba(124,58,237,0.26)] hover:bg-secondary/95 hover:shadow-[0_18px_34px_-24px_rgba(124,58,237,0.3)]",
         ghost:
-          "text-slate-600 hover:bg-white/82 hover:text-slate-900 hover:shadow-[0_18px_36px_-30px_rgba(15,23,42,0.24)] dark:hover:bg-accent/50",
+          "text-slate-600 hover:bg-white/82 hover:text-slate-900 hover:shadow-[0_10px_22px_-24px_rgba(15,23,42,0.16)] dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
@@ -61,8 +61,8 @@ function Button({
   const magnetic = !prefersReducedMotion && variant !== "link";
 
   const setPointer = (element: HTMLElement, x: number, y: number, hovering: boolean) => {
-    const shiftX = ((x - 0.5) * 12).toFixed(2);
-    const shiftY = ((y - 0.5) * 10).toFixed(2);
+    const shiftX = ((x - 0.5) * 5).toFixed(2);
+    const shiftY = ((y - 0.5) * 4).toFixed(2);
 
     element.style.setProperty("--button-shift-x", `${shiftX}px`);
     element.style.setProperty("--button-shift-y", `${shiftY}px`);
