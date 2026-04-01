@@ -70,6 +70,7 @@ import {
 import {
   type DailyMood,
   addDaysToDateKey,
+  dedupeTasks,
   dismissRescueTrigger,
   getCurrentWeekStartDate,
   getMoodScore,
@@ -83,6 +84,9 @@ import {
   buildDerivedScoreboard,
   getDefaultScoreboard,
   getTwelveWeekCurrentWeek,
+  getTwelveWeekMissedTasks,
+  getTwelveWeekTasksForWeek,
+  getTwelveWeekTodayTasks,
   getTwelveWeekWeekCompletion,
   getTwelveWeekWeekRange,
 } from "../utils/storage-twelve-week";
@@ -391,6 +395,7 @@ export function TwelveWeekSystem() {
 
   const handleToggleTask = async (taskId: string, completed: boolean) => {
     const previousSystem = system;
+    const toggledTask = system.taskInstances.find((task) => task.id === taskId);
     const nextTaskInstances = system.taskInstances.map((task) =>
       task.id === taskId ? { ...task, completed, completedAt: completed ? new Date().toISOString() : undefined } : task,
     );
@@ -401,7 +406,10 @@ export function TwelveWeekSystem() {
     });
 
     if (completed) {
-      trackAppEvent("12_week_task_completed", activeGoal.id, { weekNumber: String(currentWeek), taskId });
+      trackAppEvent("12_week_task_completed", activeGoal.id, {
+        weekNumber: String(toggledTask?.weekNumber ?? getTwelveWeekCurrentWeek(system)),
+        taskId,
+      });
     }
 
     const synced = await executionSyncActions.syncTaskToggle(taskId, completed);
@@ -417,16 +425,24 @@ export function TwelveWeekSystem() {
   };
 
   const handleSaveCheckIn = async () => {
-    const todayKey = formatDateInputValue(new Date());
-    const syncWeekNumber = getTwelveWeekCurrentWeek(system);
-    const syncWeekTaskCount = system.taskInstances.filter((task) => task.weekNumber === syncWeekNumber).length;
-    const completedTodayCount = todayQueue.filter((task) => task.completed).length;
-    const completedTitles = todayQueue.filter((task) => task.completed).map((task) => task.title).join(", ");
+    const actionDate = new Date();
+    const todayKey = formatDateInputValue(actionDate);
+    const syncWeekNumber = getTwelveWeekCurrentWeek(system, actionDate);
+    const syncWeekTasks = getTwelveWeekTasksForWeek(system, syncWeekNumber);
+    const actionScheduledTodayTasks = getTwelveWeekTodayTasks(system, actionDate);
+    const actionTodayQueue = dedupeTasks([
+      ...getTwelveWeekMissedTasks(system, actionDate).slice(0, 2),
+      ...(actionScheduledTodayTasks.length > 0
+        ? actionScheduledTodayTasks
+        : syncWeekTasks.filter((task) => !task.completed).slice(0, 3)),
+    ]);
+    const completedTodayCount = actionTodayQueue.filter((task) => task.completed).length;
+    const completedTitles = actionTodayQueue.filter((task) => task.completed).map((task) => task.title).join(", ");
     const dailyCheckIn: UniversalDailyCheckIn = {
       date: todayKey,
       didWorkToday: completedTodayCount > 0 || dailyNote.trim().length > 0,
-      whichLeadIndicatorWorkedOn: completedTitles || todayQueue[0]?.leadIndicatorName || "",
-      amountDone: `${completedTodayCount}/${todayQueue.length || syncWeekTaskCount || 1} việc`,
+      whichLeadIndicatorWorkedOn: completedTitles || actionTodayQueue[0]?.leadIndicatorName || "",
+      amountDone: `${completedTodayCount}/${actionTodayQueue.length || syncWeekTasks.length || 1} việc`,
       outputCreated: completedTitles,
       obstacleOrIssue: "",
       dailySelfRating: getMoodScore(dailyMood),
@@ -745,6 +761,7 @@ export function TwelveWeekSystem() {
   const handleReentry = (mode: "restart" | "lighten" | "push") => {
     const reentryWeekNumber = getTwelveWeekCurrentWeek(system);
     const reentryWeekRange = getTwelveWeekWeekRange(system, reentryWeekNumber);
+    const reentryMissedTasks = getTwelveWeekMissedTasks(system);
     const todayKey = formatDateInputValue(new Date());
     const weekEnd = reentryWeekRange.end;
     const nextWeekStart = addDaysToDateKey(weekEnd, 1);
@@ -757,7 +774,7 @@ export function TwelveWeekSystem() {
 
     let moved = 0;
     const nextTaskInstances = system.taskInstances.map((task) => {
-      const isMissed = missedTasks.some((item) => item.id === task.id);
+      const isMissed = reentryMissedTasks.some((item) => item.id === task.id);
       const isOptionalThisWeek =
         mode === "lighten" &&
         task.weekNumber === reentryWeekNumber &&
