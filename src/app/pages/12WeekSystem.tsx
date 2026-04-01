@@ -307,13 +307,14 @@ export function TwelveWeekSystem() {
   };
 
   const handleRestorePlanAccess = async () => {
+    const actionGoalId = activeGoal.id;
     setIsRestoringPlanAccess(true);
 
     try {
-      const result = await restorePlanAccess(activeGoal.id);
+      const result = await restorePlanAccess(actionGoalId);
 
       if (result.ok && result.planCode !== "FREE") {
-        trackAppEvent("plan_access_restored", activeGoal.id, {
+        trackAppEvent("plan_access_restored", actionGoalId, {
           plan: result.planCode,
           providerMode: result.providerMode,
         });
@@ -324,20 +325,23 @@ export function TwelveWeekSystem() {
         toast.error(result.message);
       }
 
-      refreshSnapshotMeta();
+      if (activeGoalIdRef.current === actionGoalId) {
+        refreshSnapshotMeta();
+      }
     } finally {
       setIsRestoringPlanAccess(false);
     }
   };
 
   const handleSyncEntitlements = async () => {
+    const actionGoalId = activeGoal.id;
     setIsSyncingEntitlements(true);
 
     try {
-      const result = await syncEntitlementsWithProvider(activeGoal.id);
+      const result = await syncEntitlementsWithProvider(actionGoalId);
 
       if (result.ok) {
-        trackAppEvent("billing_access_synced", activeGoal.id, {
+        trackAppEvent("billing_access_synced", actionGoalId, {
           plan: result.planCode,
           providerMode: result.providerMode,
           entitlementCount: String(result.entitlementKeys.length),
@@ -347,7 +351,9 @@ export function TwelveWeekSystem() {
         toast.error(result.message);
       }
 
-      refreshSnapshotMeta();
+      if (activeGoalIdRef.current === actionGoalId) {
+        refreshSnapshotMeta();
+      }
     } finally {
       setIsSyncingEntitlements(false);
     }
@@ -758,6 +764,7 @@ export function TwelveWeekSystem() {
   };
 
   const handleBrowserNotificationToggle = async (value: boolean) => {
+    const actionGoalId = activeGoal.id;
     updateAppPreferences({ enableBrowserNotifications: value });
 
     if (value) {
@@ -777,13 +784,18 @@ export function TwelveWeekSystem() {
       setBrowserNotificationStatus(getBrowserNotificationStatus());
     }
 
-    refreshSnapshotMeta();
+    if (activeGoalIdRef.current === actionGoalId) {
+      refreshSnapshotMeta();
+    }
   };
 
   const handleRunOutboxSync = async () => {
+    const actionGoalId = activeGoal.id;
     const snapshot = await syncPendingOutbox();
     setLastSyncSnapshot(snapshot);
-    refreshSnapshotMeta();
+    if (activeGoalIdRef.current === actionGoalId) {
+      refreshSnapshotMeta();
+    }
 
     if (snapshot.status === "success") {
       toast.success(snapshot.message);
