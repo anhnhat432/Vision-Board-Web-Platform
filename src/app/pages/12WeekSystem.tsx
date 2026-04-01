@@ -166,7 +166,6 @@ export function TwelveWeekSystem() {
     currentPlanFocus,
     currentPlanMilestone,
     currentLagMetricValue,
-    latestCheckIn,
     reviewDoneCount,
     coreTacticCount,
     optionalTacticCount,
@@ -221,6 +220,16 @@ export function TwelveWeekSystem() {
 
   const formInitRef = useRef<string | null>(null);
   const activeGoalIdRef = useRef<string | null>(activeGoal?.id ?? null);
+  const latestCheckIn = (() => {
+    const checkIns = system?.dailyCheckIns ?? [];
+    if (checkIns.length === 0) return null;
+
+    return [...checkIns].sort((left, right) => {
+      const leftKey = getCalendarDateKey(left.date) ?? left.date;
+      const rightKey = getCalendarDateKey(right.date) ?? right.date;
+      return rightKey.localeCompare(leftKey) || right.date.localeCompare(left.date);
+    })[0];
+  })();
 
   useEffect(() => {
     if (!system || !activeGoal) return;
