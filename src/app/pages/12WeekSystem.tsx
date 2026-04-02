@@ -166,7 +166,6 @@ export function TwelveWeekSystem() {
     currentPlanFocus,
     currentPlanMilestone,
     currentLagMetricValue,
-    latestCheckIn,
     reviewDoneCount,
     coreTacticCount,
     optionalTacticCount,
@@ -221,6 +220,16 @@ export function TwelveWeekSystem() {
 
   const formInitRef = useRef<string | null>(null);
   const activeGoalIdRef = useRef<string | null>(activeGoal?.id ?? null);
+  const latestCheckIn = (() => {
+    const checkIns = system?.dailyCheckIns ?? [];
+    if (checkIns.length === 0) return null;
+
+    return [...checkIns].sort((left, right) => {
+      const leftKey = getCalendarDateKey(left.date) ?? left.date;
+      const rightKey = getCalendarDateKey(right.date) ?? right.date;
+      return rightKey.localeCompare(leftKey) || right.date.localeCompare(left.date);
+    })[0];
+  })();
 
   useEffect(() => {
     if (!system || !activeGoal) return;
@@ -307,13 +316,14 @@ export function TwelveWeekSystem() {
   };
 
   const handleRestorePlanAccess = async () => {
+    const actionGoalId = activeGoal.id;
     setIsRestoringPlanAccess(true);
 
     try {
-      const result = await restorePlanAccess(activeGoal.id);
+      const result = await restorePlanAccess(actionGoalId);
 
       if (result.ok && result.planCode !== "FREE") {
-        trackAppEvent("plan_access_restored", activeGoal.id, {
+        trackAppEvent("plan_access_restored", actionGoalId, {
           plan: result.planCode,
           providerMode: result.providerMode,
         });
@@ -324,20 +334,23 @@ export function TwelveWeekSystem() {
         toast.error(result.message);
       }
 
-      refreshSnapshotMeta();
+      if (activeGoalIdRef.current === actionGoalId) {
+        refreshSnapshotMeta();
+      }
     } finally {
       setIsRestoringPlanAccess(false);
     }
   };
 
   const handleSyncEntitlements = async () => {
+    const actionGoalId = activeGoal.id;
     setIsSyncingEntitlements(true);
 
     try {
-      const result = await syncEntitlementsWithProvider(activeGoal.id);
+      const result = await syncEntitlementsWithProvider(actionGoalId);
 
       if (result.ok) {
-        trackAppEvent("billing_access_synced", activeGoal.id, {
+        trackAppEvent("billing_access_synced", actionGoalId, {
           plan: result.planCode,
           providerMode: result.providerMode,
           entitlementCount: String(result.entitlementKeys.length),
@@ -347,7 +360,9 @@ export function TwelveWeekSystem() {
         toast.error(result.message);
       }
 
-      refreshSnapshotMeta();
+      if (activeGoalIdRef.current === actionGoalId) {
+        refreshSnapshotMeta();
+      }
     } finally {
       setIsSyncingEntitlements(false);
     }
@@ -393,6 +408,7 @@ export function TwelveWeekSystem() {
   };
 
   const handleToggleTask = async (taskId: string, completed: boolean) => {
+    const actionGoalId = activeGoal.id;
     const toggledTask = system.taskInstances.find((task) => task.id === taskId);
     const nextTaskInstances = system.taskInstances.map((task) =>
       task.id === taskId ? { ...task, completed, completedAt: completed ? new Date().toISOString() : undefined } : task,
@@ -404,7 +420,7 @@ export function TwelveWeekSystem() {
     });
 
     if (completed) {
-      trackAppEvent("12_week_task_completed", activeGoal.id, {
+      trackAppEvent("12_week_task_completed", actionGoalId, {
         weekNumber: String(toggledTask?.weekNumber ?? getTwelveWeekCurrentWeek(system)),
         taskId,
       });
@@ -412,7 +428,7 @@ export function TwelveWeekSystem() {
 
     const synced = await executionSyncActions.syncTaskToggle(taskId, completed);
     if (!synced) {
-      const latestGoal = getUserData().goals.find((goal) => goal.id === activeGoal.id);
+      const latestGoal = getUserData().goals.find((goal) => goal.id === actionGoalId);
       const latestSystem = latestGoal?.twelveWeekSystem;
       const latestTask = latestSystem?.taskInstances.find((task) => task.id === taskId);
       const shouldRollbackTask = Boolean(latestSystem && latestTask && latestTask.completed === completed);
@@ -434,10 +450,10 @@ export function TwelveWeekSystem() {
           scoreboard: buildDerivedScoreboard(rollbackSystem, getDefaultScoreboard(rollbackSystem.totalWeeks)),
         };
 
-        updateGoal(activeGoal.id, {
+        updateGoal(actionGoalId, {
           twelveWeekSystem: normalizedRollbackSystem,
         });
-        if (activeGoalIdRef.current === activeGoal.id) {
+        if (activeGoalIdRef.current === actionGoalId) {
           updateActiveSystemState(() => normalizedRollbackSystem);
         }
       }
@@ -451,11 +467,14 @@ export function TwelveWeekSystem() {
     }
 
     toast.success(completed ? "Việc đã được chốt." : "Việc đã được mở lại.");
-    refreshBackendProgressOverlay();
-    refreshSnapshotMeta();
+    if (activeGoalIdRef.current === actionGoalId) {
+      refreshBackendProgressOverlay();
+      refreshSnapshotMeta();
+    }
   };
 
   const handleSaveCheckIn = async () => {
+    const actionGoalId = activeGoal.id;
     const actionDate = new Date();
     const todayKey = formatDateInputValue(actionDate);
     const syncWeekNumber = getTwelveWeekCurrentWeek(system, actionDate);
@@ -487,7 +506,7 @@ export function TwelveWeekSystem() {
       dailyCheckIns: [dailyCheckIn, ...filteredCheckIns].slice(0, 120),
     });
 
-    trackAppEvent("12_week_daily_checkin_submitted", activeGoal.id, {
+    trackAppEvent("12_week_daily_checkin_submitted", actionGoalId, {
       mood: dailyMood,
       completedTasks: String(completedTodayCount),
     });
@@ -500,14 +519,20 @@ export function TwelveWeekSystem() {
 
     if (synced) {
       toast.success("Check-in hôm nay đã được lưu.");
-      refreshBackendProgressOverlay();
+      if (activeGoalIdRef.current === actionGoalId) {
+        refreshBackendProgressOverlay();
+      }
     } else {
       toast.info("Check-in đã lưu local. Sẽ tiếp tục đồng bộ khi backend sẵn sàng.");
     }
-    refreshSnapshotMeta();
+    if (activeGoalIdRef.current === actionGoalId) {
+      refreshSnapshotMeta();
+    }
   };
 
   const handleSaveWeeklyReview = async () => {
+    const actionGoalId = activeGoal.id;
+    const actionGoalTitle = activeGoal.title;
     const hasAnyContent =
       weeklyForm.biggestOutputThisWeek.trim() ||
       weeklyForm.mainObstacle.trim() ||
@@ -569,13 +594,15 @@ export function TwelveWeekSystem() {
 
     if (!synced) {
       toast.info("Review tuần đã lưu local. Sẽ tiếp tục đồng bộ khi backend sẵn sàng.");
-      refreshSnapshotMeta();
+      if (activeGoalIdRef.current === actionGoalId) {
+        refreshSnapshotMeta();
+      }
       return;
     }
 
     upsertReflection({
       date: formatDateInputValue(new Date()),
-      title: `Review tuần - ${activeGoal.title} - tuần ${reviewWeekNumber}`,
+      title: `Review tuần - ${actionGoalTitle} - tuần ${reviewWeekNumber}`,
       content: [
         `Điều hiệu quả: ${weeklyForm.biggestOutputThisWeek.trim() || "--"}`,
         `Điều cản trở: ${weeklyForm.mainObstacle.trim() || "--"}`,
@@ -592,11 +619,11 @@ export function TwelveWeekSystem() {
             ? "neutral"
             : "sad",
       entryType: "weekly-review",
-      linkedGoalId: activeGoal.id,
+      linkedGoalId: actionGoalId,
       linkedWeekNumber: reviewWeekNumber,
     });
 
-    trackAppEvent("12_week_weekly_review_submitted", activeGoal.id, {
+    trackAppEvent("12_week_weekly_review_submitted", actionGoalId, {
       weekNumber: String(reviewWeekNumber),
       score: String(committedWeekScore),
       decision: workloadDecisionValue || "keep same",
@@ -611,8 +638,10 @@ export function TwelveWeekSystem() {
           ? "Mình đã dùng luôn gợi ý Plus để khóa ưu tiên tuần sau cho bạn."
           : "Tuần sau giờ đã có ưu tiên đủ rõ để bắt đầu gọn hơn.",
     });
-    refreshBackendProgressOverlay();
-    refreshSnapshotMeta();
+    if (activeGoalIdRef.current === actionGoalId) {
+      refreshBackendProgressOverlay();
+      refreshSnapshotMeta();
+    }
   };
 
   const handleReviewDayChange = (value: string) => {
@@ -744,6 +773,7 @@ export function TwelveWeekSystem() {
   };
 
   const handleBrowserNotificationToggle = async (value: boolean) => {
+    const actionGoalId = activeGoal.id;
     updateAppPreferences({ enableBrowserNotifications: value });
 
     if (value) {
@@ -763,13 +793,18 @@ export function TwelveWeekSystem() {
       setBrowserNotificationStatus(getBrowserNotificationStatus());
     }
 
-    refreshSnapshotMeta();
+    if (activeGoalIdRef.current === actionGoalId) {
+      refreshSnapshotMeta();
+    }
   };
 
   const handleRunOutboxSync = async () => {
+    const actionGoalId = activeGoal.id;
     const snapshot = await syncPendingOutbox();
     setLastSyncSnapshot(snapshot);
-    refreshSnapshotMeta();
+    if (activeGoalIdRef.current === actionGoalId) {
+      refreshSnapshotMeta();
+    }
 
     if (snapshot.status === "success") {
       toast.success(snapshot.message);

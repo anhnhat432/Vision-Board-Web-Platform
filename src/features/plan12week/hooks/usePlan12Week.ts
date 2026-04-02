@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { toAppError } from "@/lib/api/apiClient";
 import { createPlan as createRemotePlan, getPlanById, type CreatePlanPayload } from "@/services/planService";
@@ -210,6 +210,7 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
   const [goalProgress, setGoalProgress] = useState<GoalProgress>(DEFAULT_GOAL_PROGRESS);
   const [error, setError] = useState<AppError | null>(null);
   const [pendingApiRequests, setPendingApiRequests] = useState(0);
+  const hydrationRequestIdRef = useRef(0);
   const [apiPlanId, setApiPlanId] = useState<string | null>(
     isLikelyMongoId(initialPlan?.id) ? initialPlan.id : null,
   );
@@ -221,6 +222,7 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
   );
 
   useEffect(() => {
+    hydrationRequestIdRef.current += 1;
     if (!initialPlan) return;
 
     setWeekIdByNumber((previousMap) => ({
@@ -279,18 +281,23 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
   }, []);
 
   const loadPlan = useCallback(async (planId: string): Promise<Plan12Week | null> => {
+    const requestId = ++hydrationRequestIdRef.current;
     const details = await runWithApi(() => getPlanById(planId));
     if (!details) return null;
+    if (requestId !== hydrationRequestIdRef.current) return null;
 
     applyPlanDetails(details);
     return mapApiPlan(details);
   }, [applyPlanDetails, runWithApi]);
 
   const createPlan = useCallback(async (payload: CreatePlanPayload): Promise<Plan12Week | null> => {
+    const requestId = ++hydrationRequestIdRef.current;
     const created = await runWithApi(() => createRemotePlan(payload));
     if (!created) return null;
+    if (requestId !== hydrationRequestIdRef.current) return null;
 
     const details = await runWithApi(() => getPlanById(created.id));
+    if (requestId !== hydrationRequestIdRef.current) return null;
     if (!details) {
       const nextPlan: Plan12Week = {
         id: created.id,

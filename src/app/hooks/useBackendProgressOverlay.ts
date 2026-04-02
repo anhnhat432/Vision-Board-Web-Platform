@@ -254,6 +254,7 @@ export function useBackendProgressOverlay(
   const [hasBackendData, setHasBackendData] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const lastFetchedPlanId = useRef<string | null>(null);
+  const fetchDetailsRef = useRef<() => Promise<void>>(async () => {});
 
   const fetchDetails = useCallback(async () => {
     if (!user || !goalId || !system) {
@@ -302,6 +303,10 @@ export function useBackendProgressOverlay(
   }, [goalId, hasBackendData, system, user]);
 
   useEffect(() => {
+    fetchDetailsRef.current = fetchDetails;
+  }, [fetchDetails]);
+
+  useEffect(() => {
     void fetchDetails();
 
     return () => {
@@ -318,8 +323,8 @@ export function useBackendProgressOverlay(
 
   const refresh = useCallback(() => {
     lastFetchedPlanId.current = null;
-    void fetchDetails();
-  }, [fetchDetails]);
+    void fetchDetailsRef.current();
+  }, []);
 
   return {
     effectiveSystem,
