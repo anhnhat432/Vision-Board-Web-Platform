@@ -371,6 +371,13 @@ function syncDerivedScoreboard(
   });
 }
 
+export function buildDerivedScoreboard(
+  system: TwelveWeekSystem,
+  existingScoreboard: UniversalScoreboardWeek[],
+): UniversalScoreboardWeek[] {
+  return syncDerivedScoreboard(system, existingScoreboard);
+}
+
 function buildTaskInstances(system: TwelveWeekSystem): TwelveWeekTaskInstance[] {
   const startDate = inferSystemStartDate(system);
   const leadIndicators =
