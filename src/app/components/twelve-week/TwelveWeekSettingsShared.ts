@@ -1,4 +1,5 @@
 import type { BrowserNotificationStatus, OutboxSyncSnapshot } from "../../utils/production";
+import type { BackendPlanHydrationResult } from "../../hooks/useBackendPlanHydration";
 import type { BillingActionSnapshot, BillingProviderStatus } from "../../utils/billing-contract";
 import type {
   AppPreferences,
@@ -32,6 +33,7 @@ export interface TwelveWeekSettingsTabProps {
   billingProviderStatus: BillingProviderStatus;
   lastEntitlementSyncSnapshot: BillingActionSnapshot | null;
   lastRestoreAccessSnapshot: BillingActionSnapshot | null;
+  lastBackendHydrationResult: BackendPlanHydrationResult | null;
   appPreferences: AppPreferences;
   funnelSteps: FunnelStepSummary[];
   monetizationSteps: FunnelStepSummary[];
@@ -44,6 +46,7 @@ export interface TwelveWeekSettingsTabProps {
   recentOutboxItems: SyncOutboxItem[];
   isSyncingEntitlements: boolean;
   isRestoringPlanAccess: boolean;
+  isHydratingBackendPlans: boolean;
   onReviewDayChange: (value: string) => void;
   onReminderTimeChange: (value: string) => void;
   onLoadPreferenceChange: (value: string) => void;
@@ -66,6 +69,7 @@ export interface TwelveWeekSettingsTabProps {
   onOpenUpgradePlan: (planCode: Exclude<PricingPlanCode, "FREE">) => void;
   onSyncEntitlements: () => void;
   onRestorePlanAccess: () => void;
+  onHydrateBackendPlans: () => void;
   onOpenBillingPortal: () => void;
   onNavigateGoals: () => void;
   onNavigateJournal: () => void;

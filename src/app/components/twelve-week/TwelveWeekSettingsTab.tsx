@@ -22,6 +22,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           billingProviderStatus={props.billingProviderStatus}
           lastEntitlementSyncSnapshot={props.lastEntitlementSyncSnapshot}
           lastRestoreAccessSnapshot={props.lastRestoreAccessSnapshot}
+          lastBackendHydrationResult={props.lastBackendHydrationResult}
           appPreferences={props.appPreferences}
           funnelSteps={props.funnelSteps}
           monetizationSteps={props.monetizationSteps}
@@ -34,6 +35,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           recentOutboxItems={props.recentOutboxItems}
           isSyncingEntitlements={props.isSyncingEntitlements}
           isRestoringPlanAccess={props.isRestoringPlanAccess}
+          isHydratingBackendPlans={props.isHydratingBackendPlans}
           onPreferenceToggle={props.onPreferenceToggle}
           onArchivePendingOutbox={props.onArchivePendingOutbox}
           onRestoreArchivedOutbox={props.onRestoreArchivedOutbox}
@@ -50,6 +52,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           onOpenUpgradePlan={props.onOpenUpgradePlan}
           onSyncEntitlements={props.onSyncEntitlements}
           onRestorePlanAccess={props.onRestorePlanAccess}
+          onHydrateBackendPlans={props.onHydrateBackendPlans}
           onOpenBillingPortal={props.onOpenBillingPortal}
           onNavigateGoals={props.onNavigateGoals}
           onNavigateJournal={props.onNavigateJournal}

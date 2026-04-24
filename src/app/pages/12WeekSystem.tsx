@@ -4,6 +4,10 @@ import { AlertTriangle, BarChart3, CalendarDays, Compass, ListTodo, Settings2, S
 import { toast } from "sonner";
 
 import { useTwelveWeekSystemSnapshot } from "../hooks/useTwelveWeekSystemSnapshot";
+import {
+  hydrateTwelveWeekPlansFromBackend,
+  type BackendPlanHydrationResult,
+} from "../hooks/useBackendPlanHydration";
 import { NewUserGuideBanner } from "../components/NewUserGuide";
 import { TabErrorBoundary } from "../components/TabErrorBoundary";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
@@ -236,6 +240,9 @@ export function TwelveWeekSystem() {
   const [dismissedTriggerKind, setDismissedTriggerKind] = useState<string | null>(null);
   const [isSyncingEntitlements, setIsSyncingEntitlements] = useState(false);
   const [isRestoringPlanAccess, setIsRestoringPlanAccess] = useState(false);
+  const [isHydratingBackendPlans, setIsHydratingBackendPlans] = useState(false);
+  const [lastBackendHydrationResult, setLastBackendHydrationResult] =
+    useState<BackendPlanHydrationResult | null>(null);
   const [weeklyForm, setWeeklyForm] = useState<WeeklyReviewForm>({
     lagProgressValue: "",
     biggestOutputThisWeek: "",
@@ -926,6 +933,42 @@ export function TwelveWeekSystem() {
     toast.error(snapshot.message);
   };
 
+  const handleHydrateBackendPlans = async () => {
+    if (!isBackendProfileReady) {
+      toast.info("Đăng nhập và chờ backend profile sẵn sàng trước khi khôi phục dữ liệu.");
+      return;
+    }
+
+    setIsHydratingBackendPlans(true);
+
+    try {
+      const result = await hydrateTwelveWeekPlansFromBackend();
+      setLastBackendHydrationResult(result);
+      lastBackendSyncKeyRef.current = null;
+
+      if (result.status === "error") {
+        toast.error(result.message);
+      } else if (result.status === "partial") {
+        toast.info(result.message);
+      } else if (result.hydratedCount + result.updatedCount > 0) {
+        toast.success(
+          `Đã khôi phục ${result.hydratedCount} chu kỳ mới và cập nhật ${result.updatedCount} chu kỳ từ backend.`,
+        );
+      } else {
+        toast.info("Đã kiểm tra backend. Chưa có chu kỳ 12-week mới cần khôi phục.");
+      }
+
+      loadGoalData(result.latestGoalId ?? activeGoal?.id);
+      refreshBackendProgressOverlay();
+      refreshSnapshotMeta();
+    } catch (error) {
+      console.error("Failed to hydrate backend 12-week plans.", error);
+      toast.error("Không thể khôi phục dữ liệu 12-week từ backend lúc này.");
+    } finally {
+      setIsHydratingBackendPlans(false);
+    }
+  };
+
   const handleReentry = (mode: "restart" | "lighten" | "push") => {
     const reentryWeekNumber = getTwelveWeekCurrentWeek(system);
     const reentryWeekRange = getTwelveWeekWeekRange(system, reentryWeekNumber);
@@ -1413,6 +1456,7 @@ export function TwelveWeekSystem() {
               billingProviderStatus={billingProviderStatus}
               lastEntitlementSyncSnapshot={lastEntitlementSyncSnapshot}
               lastRestoreAccessSnapshot={lastRestoreAccessSnapshot}
+              lastBackendHydrationResult={lastBackendHydrationResult}
               appPreferences={appPreferences}
               funnelSteps={funnelSteps}
               monetizationSteps={monetizationSteps}
@@ -1425,6 +1469,7 @@ export function TwelveWeekSystem() {
               recentOutboxItems={recentOutboxItems}
               isSyncingEntitlements={isSyncingEntitlements}
               isRestoringPlanAccess={isRestoringPlanAccess}
+              isHydratingBackendPlans={isHydratingBackendPlans}
               onReviewDayChange={handleReviewDayChange}
               onReminderTimeChange={handleReminderTimeChange}
               onLoadPreferenceChange={handleLoadPreferenceChange}
@@ -1453,6 +1498,7 @@ export function TwelveWeekSystem() {
               onOpenUpgradePlan={(planCode) => handleOpenUpgradeDialog("plan", planCode)}
               onSyncEntitlements={handleSyncEntitlements}
               onRestorePlanAccess={handleRestorePlanAccess}
+              onHydrateBackendPlans={handleHydrateBackendPlans}
               onOpenBillingPortal={handleOpenBillingPortal}
               onNavigateGoals={() => navigate("/goals")}
               onNavigateJournal={() => navigate("/journal")}

@@ -1,9 +1,16 @@
+import { CloudDownload } from "lucide-react";
 import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
 
 type TwelveWeekLocalStatusSectionProps = Pick<
   TwelveWeekSettingsTabProps,
-  "appPreferences" | "backendConnectionStatus" | "pendingOutboxCount"
+  | "appPreferences"
+  | "backendConnectionStatus"
+  | "isHydratingBackendPlans"
+  | "lastBackendHydrationResult"
+  | "onHydrateBackendPlans"
+  | "pendingOutboxCount"
 >;
 
 function getBackendBadgeClass(status: TwelveWeekSettingsTabProps["backendConnectionStatus"]): string {
@@ -41,11 +48,36 @@ function getBackendStatusDescription(status: TwelveWeekSettingsTabProps["backend
     : "Backend profile đã sẵn sàng cho các thao tác đồng bộ.";
 }
 
+function getBackendHydrationDescription(
+  result: TwelveWeekSettingsTabProps["lastBackendHydrationResult"],
+): string {
+  if (!result) return "Kéo các chu kỳ 12-week đã có trên backend về thiết bị này nếu local còn thiếu.";
+
+  if (result.status === "error") return result.message;
+  if (result.status === "partial") return result.message;
+  if (result.hydratedCount + result.updatedCount > 0) {
+    return `Đã khôi phục ${result.hydratedCount} chu kỳ mới và cập nhật ${result.updatedCount} chu kỳ.`;
+  }
+
+  return "Backend đã được kiểm tra, chưa có chu kỳ mới cần khôi phục.";
+}
+
 export function TwelveWeekLocalStatusSection({
   appPreferences,
   backendConnectionStatus,
+  isHydratingBackendPlans,
+  lastBackendHydrationResult,
+  onHydrateBackendPlans,
   pendingOutboxCount,
 }: TwelveWeekLocalStatusSectionProps) {
+  const canHydrateBackendPlans =
+    backendConnectionStatus.authConfigured &&
+    !backendConnectionStatus.authLoading &&
+    backendConnectionStatus.signedIn &&
+    backendConnectionStatus.profileReady &&
+    !backendConnectionStatus.syncing &&
+    !isHydratingBackendPlans;
+
   return (
     <div className="rounded-[26px] border border-slate-900/10 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-5 text-white shadow-[0_28px_60px_-38px_rgba(15,23,42,0.7)]">
       <div className="flex items-center justify-between gap-3">
@@ -68,6 +100,25 @@ export function TwelveWeekLocalStatusSection({
           <Badge variant="outline" className={getBackendBadgeClass(backendConnectionStatus)}>
             {getBackendStatusLabel(backendConnectionStatus)}
           </Badge>
+        </div>
+        <div className="mt-4 rounded-2xl border border-white/10 bg-white/8 p-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm leading-6 text-white/72">
+              {isHydratingBackendPlans
+                ? "Đang kiểm tra backend và khôi phục các chu kỳ còn thiếu."
+                : getBackendHydrationDescription(lastBackendHydrationResult)}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              className="shrink-0 border-white/20 bg-white/12 text-white hover:bg-white/20 hover:text-white"
+              disabled={!canHydrateBackendPlans}
+              onClick={onHydrateBackendPlans}
+            >
+              <CloudDownload className="mr-2 h-4 w-4" />
+              {isHydratingBackendPlans ? "Đang khôi phục..." : "Khôi phục từ backend"}
+            </Button>
+          </div>
         </div>
       </div>
       <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">

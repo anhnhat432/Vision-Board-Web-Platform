@@ -45,6 +45,9 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
         <TwelveWeekLocalStatusSection
           appPreferences={props.appPreferences}
           backendConnectionStatus={props.backendConnectionStatus}
+          isHydratingBackendPlans={props.isHydratingBackendPlans}
+          lastBackendHydrationResult={props.lastBackendHydrationResult}
+          onHydrateBackendPlans={props.onHydrateBackendPlans}
           pendingOutboxCount={props.pendingOutboxCount}
         />
 

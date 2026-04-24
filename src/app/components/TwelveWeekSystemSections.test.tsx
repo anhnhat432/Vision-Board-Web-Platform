@@ -108,6 +108,7 @@ describe("TwelveWeekSystemSections", () => {
         }}
         lastEntitlementSyncSnapshot={null}
         lastRestoreAccessSnapshot={null}
+        lastBackendHydrationResult={null}
         backendConnectionStatus={{
           authConfigured: true,
           authLoading: false,
@@ -149,6 +150,7 @@ describe("TwelveWeekSystemSections", () => {
         recentOutboxItems={[]}
         isSyncingEntitlements={false}
         isRestoringPlanAccess={false}
+        isHydratingBackendPlans={false}
         onReviewDayChange={vi.fn()}
         onReminderTimeChange={vi.fn()}
         onLoadPreferenceChange={vi.fn()}
@@ -171,6 +173,7 @@ describe("TwelveWeekSystemSections", () => {
         onOpenUpgradePlan={vi.fn()}
         onSyncEntitlements={vi.fn()}
         onRestorePlanAccess={vi.fn()}
+        onHydrateBackendPlans={vi.fn()}
         onOpenBillingPortal={vi.fn()}
         onNavigateGoals={vi.fn()}
         onNavigateJournal={vi.fn()}
@@ -183,5 +186,6 @@ describe("TwelveWeekSystemSections", () => {
     expect(screen.getByText("Đã đồng bộ")).toBeInTheDocument();
     expect(screen.getByText("Bảng điều khiển local")).toBeInTheDocument();
     expect(screen.getByLabelText("Chọn ngày review")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Khôi phục từ backend" })).toBeInTheDocument();
   });
 });
