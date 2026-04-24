@@ -30,6 +30,7 @@ import { CountUp } from "../components/ui/count-up";
 import { Progress } from "../components/ui/progress";
 import { Reveal } from "../components/ui/reveal";
 import { Skeleton } from "../components/ui/skeleton";
+import { useBackendProgressOverlay } from "../hooks/useBackendProgressOverlay";
 import { usePageTour } from "../hooks/usePageTour";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useUpgradeDialog } from "../hooks/useUpgradeDialog";
@@ -135,7 +136,7 @@ export function Dashboard() {
 
   if (!userData) {
     return (
-      <div className="space-y-8 pb-12">
+      <div className="ops-shell ops-dashboard">
         {/* Hero card skeleton */}
         <Skeleton className="h-56 rounded-[28px]" />
         {/* Quick action tiles skeleton */}
@@ -278,7 +279,7 @@ function DashboardContent({
     const yesterdayKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
     if (dates[0] !== todayKey && dates[0] !== yesterdayKey) return 0;
     let streak = 0;
-    let check = new Date(dates[0]);
+    const check = new Date(dates[0]);
     for (const d of dates) {
       const expected = `${check.getFullYear()}-${String(check.getMonth() + 1).padStart(2, "0")}-${String(check.getDate()).padStart(2, "0")}`;
       if (d !== expected) break;
@@ -291,21 +292,27 @@ function DashboardContent({
   const weakestArea = userData.currentWheelOfLife.length > 0
     ? [...userData.currentWheelOfLife].sort((a, b) => a.score - b.score)[0]
     : null;
-  const activeSystem = activeTwelveWeekGoal?.twelveWeekSystem ?? null;
-  const activeSystemWeek = activeSystem ? getTwelveWeekCurrentWeek(activeSystem) : null;
-  const activeSystemTodayTasks = activeSystem ? getTwelveWeekTodayTasks(activeSystem) : [];
+  const localActiveSystem = activeTwelveWeekGoal?.twelveWeekSystem ?? null;
+  const { effectiveSystem: activeSystem } = useBackendProgressOverlay(
+    activeTwelveWeekGoal?.id ?? null,
+    localActiveSystem,
+  );
+  const effectiveSystem = activeSystem;
+
+  const activeSystemWeek = effectiveSystem ? getTwelveWeekCurrentWeek(effectiveSystem) : null;
+  const activeSystemTodayTasks = effectiveSystem ? getTwelveWeekTodayTasks(effectiveSystem) : [];
   const activeSystemTodayOpenTasks = activeSystemTodayTasks.filter((task) => !task.completed);
   const activeSystemTodayCompletedCount = activeSystemTodayTasks.length - activeSystemTodayOpenTasks.length;
   const activeSystemWeekCompletion =
-    activeSystem && activeSystemWeek ? getTwelveWeekWeekCompletion(activeSystem, activeSystemWeek) : null;
+    effectiveSystem && activeSystemWeek ? getTwelveWeekWeekCompletion(effectiveSystem, activeSystemWeek) : null;
   const activeSystemWeekRange =
-    activeSystem && activeSystemWeek ? getTwelveWeekWeekRange(activeSystem, activeSystemWeek) : null;
-  const reviewDueToday = Boolean(activeSystem && isTwelveWeekReviewDueToday(activeSystem));
+    effectiveSystem && activeSystemWeek ? getTwelveWeekWeekRange(effectiveSystem, activeSystemWeek) : null;
+  const reviewDueToday = Boolean(effectiveSystem && isTwelveWeekReviewDueToday(effectiveSystem));
   const activeSystemTaskPreview =
-    activeSystem && activeSystemWeek
+    effectiveSystem && activeSystemWeek
       ? (activeSystemTodayOpenTasks.length > 0
           ? activeSystemTodayOpenTasks
-          : getTwelveWeekTasksForWeek(activeSystem, activeSystemWeek).filter((task) => !task.completed)
+          : getTwelveWeekTasksForWeek(effectiveSystem, activeSystemWeek).filter((task) => !task.completed)
         ).slice(0, 3)
       : [];
 
@@ -502,7 +509,7 @@ function DashboardContent({
   const topTrigger = activeTriggers[0] ?? null;
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="ops-shell ops-dashboard">
       <UpgradePaywallDialog
         open={isUpgradeDialogOpen}
         onOpenChange={setIsUpgradeDialogOpen}

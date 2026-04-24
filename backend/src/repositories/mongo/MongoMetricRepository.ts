@@ -36,6 +36,12 @@ export interface LogMetricData {
   completed: boolean;
 }
 
+export interface UpdateMetricLogData {
+  date?: Date;
+  value: number;
+  completed: boolean;
+}
+
 type RawMetricDoc = {
   _id: Types.ObjectId;
   weekId: Types.ObjectId;
@@ -102,6 +108,29 @@ export class MongoMetricRepository {
           },
         },
       },
+      { new: true, runValidators: true },
+    ).lean();
+
+    return doc ? mapMetric(doc) : null;
+  }
+
+  async updateMetricLog(
+    metricId: string,
+    logId: string,
+    updates: UpdateMetricLogData,
+  ): Promise<MetricEntity | null> {
+    const setPayload: Record<string, unknown> = {
+      "logs.$.value": updates.value,
+      "logs.$.completed": updates.completed,
+    };
+
+    if (updates.date) {
+      setPayload["logs.$.date"] = updates.date;
+    }
+
+    const doc = await LeadMetricModel.findOneAndUpdate(
+      { _id: metricId, "logs._id": logId },
+      { $set: setPayload },
       { new: true, runValidators: true },
     ).lean();
 

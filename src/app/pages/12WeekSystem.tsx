@@ -925,7 +925,7 @@ export function TwelveWeekSystem() {
   };
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="ops-shell ops-system">
       <UpgradePaywallDialog
         open={isUpgradeDialogOpen}
         onOpenChange={setIsUpgradeDialogOpen}
@@ -981,7 +981,7 @@ export function TwelveWeekSystem() {
                 Nhịp 12 tuần
               </div>
               <div className="space-y-4">
-                <h1 className="max-w-3xl text-2xl font-bold tracking-[-0.05em] sm:text-3xl lg:text-4xl">
+                <h1 className="max-w-3xl text-2xl font-bold tracking-normal sm:text-3xl lg:text-4xl">
                   Đây là nơi giữ nhịp thực thi mỗi ngày của chu kỳ 12 tuần.
                 </h1>
                 <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
@@ -1164,21 +1164,21 @@ export function TwelveWeekSystem() {
         <TabsList
           data-tour-id="system-tabs"
           aria-label="Điều hướng trung tâm 12 tuần"
-          className="sticky top-14 z-20 flex h-auto w-full flex-nowrap justify-start gap-1 overflow-x-auto rounded-3xl border border-white/80 bg-white/86 p-1.5 shadow-[0_22px_48px_-30px_rgba(15,23,42,0.34)] sm:top-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="sticky top-14 z-20 flex h-auto w-full flex-nowrap justify-start gap-1 overflow-x-auto rounded-lg border border-slate-200 bg-white/95 p-1 shadow-sm sm:top-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          <TabsTrigger value="today" className="min-w-[100px] shrink-0 justify-center gap-2 rounded-2xl px-4 py-2.5">
+          <TabsTrigger value="today" className="min-w-[100px] shrink-0 justify-center gap-2 rounded-md px-4 py-2.5">
             <ListTodo className="h-4 w-4" />
             Hôm nay
           </TabsTrigger>
-          <TabsTrigger value="week" className="min-w-[100px] shrink-0 justify-center gap-2 rounded-2xl px-4 py-2.5">
+          <TabsTrigger value="week" className="min-w-[100px] shrink-0 justify-center gap-2 rounded-md px-4 py-2.5">
             <CalendarDays className="h-4 w-4" />
             Tuần
           </TabsTrigger>
-          <TabsTrigger value="progress" className="min-w-[100px] shrink-0 justify-center gap-2 rounded-2xl px-4 py-2.5">
+          <TabsTrigger value="progress" className="min-w-[100px] shrink-0 justify-center gap-2 rounded-md px-4 py-2.5">
             <BarChart3 className="h-4 w-4" />
             Tiến độ
           </TabsTrigger>
-          <TabsTrigger value="settings" className="min-w-[100px] shrink-0 justify-center gap-2 rounded-2xl px-4 py-2.5">
+          <TabsTrigger value="settings" className="min-w-[100px] shrink-0 justify-center gap-2 rounded-md px-4 py-2.5">
             <Settings2 className="h-4 w-4" />
             Cài đặt
           </TabsTrigger>

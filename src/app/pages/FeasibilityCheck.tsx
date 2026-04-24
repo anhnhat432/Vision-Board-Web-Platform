@@ -410,7 +410,7 @@ function FeasibilityResultView({
                   <div className={`inline-flex rounded-full border px-4 py-2 text-sm font-semibold ${styles.badge}`}>
                     {copy.statusLabel}
                   </div>
-                  <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
+                  <h1 className="max-w-3xl text-4xl font-bold tracking-normal lg:text-5xl">
                     {result.title}
                   </h1>
                   <p className="max-w-3xl text-base leading-8 text-white/84 lg:text-lg">{result.summary}</p>
@@ -495,7 +495,7 @@ function FeasibilityResultView({
                       Điều kết quả này đang nói với bạn
                     </div>
                     <div className="space-y-3">
-                      <h2 className="text-2xl font-bold tracking-[-0.04em] text-slate-900 lg:text-[2rem]">
+                      <h2 className="text-2xl font-bold tracking-normal text-slate-900 lg:text-[2rem]">
                         {copy.guideTitle}
                       </h2>
                       <p className="text-base leading-8 text-slate-600">{copy.guideBody}</p>
@@ -593,7 +593,7 @@ function FeasibilityResultView({
                   Hướng đi tiếp theo
                 </div>
 
-                <h2 className="mt-4 text-2xl font-bold tracking-[-0.04em] text-slate-900">
+                <h2 className="mt-4 text-2xl font-bold tracking-normal text-slate-900">
                   {result.type === "too_ambitious" ? "Thu nhỏ rồi đi tiếp." : "Đây là hướng nên đi tiếp."}
                 </h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">{copy.statusHint}</p>
@@ -822,7 +822,7 @@ export function FeasibilityCheck() {
                 </div>
 
                 <div className="space-y-4">
-                  <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
+                  <h1 className="max-w-3xl text-4xl font-bold tracking-normal lg:text-5xl">
                     Kiểm tra xem mục tiêu này có thực tế với bạn ở thời điểm hiện tại hay không.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">

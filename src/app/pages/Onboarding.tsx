@@ -65,16 +65,14 @@ export function Onboarding() {
   const strongestArea = [...lifeAreas].sort((a, b) => b.score - a.score)[0];
   const growthArea = [...lifeAreas].sort((a, b) => a.score - b.score)[0];
 
-  const handleScoreChange = (index: number, value: number[]) => {
-    const updated = [...lifeAreas];
-    updated[index] = { ...updated[index], score: value[0] };
-    setLifeAreas(updated);
-  };
-
   const [isDirty, setIsDirty] = useState(false);
 
   const handleScoreChangeWrapped = useCallback((index: number, value: number[]) => {
-    handleScoreChange(index, value);
+    setLifeAreas((currentAreas) =>
+      currentAreas.map((area, areaIndex) =>
+        areaIndex === index ? { ...area, score: value[0] ?? 1 } : area,
+      ),
+    );
     setIsDirty(true);
   }, []);
 
@@ -122,7 +120,7 @@ export function Onboarding() {
                     </div>
 
                     <div className="space-y-4">
-                      <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
+                      <h1 className="max-w-3xl text-4xl font-bold tracking-normal lg:text-5xl">
                         {isReturning
                           ? "Điểm số thay đổi? Hãy cập nhật lại để insight bám sát thực tế hơn."
                           : "Tạo một điểm bắt đầu đủ rõ để phần còn lại của hành trình trở nên nhẹ hơn."}
@@ -254,7 +252,7 @@ export function Onboarding() {
                   />
                 </div>
                 <div className="space-y-3">
-                  <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
+                  <h1 className="max-w-3xl text-4xl font-bold tracking-normal lg:text-5xl">
                     Chấm điểm hiện tại để biết chính xác nơi bạn nên bắt đầu.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">

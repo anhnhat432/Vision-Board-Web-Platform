@@ -855,7 +855,7 @@ export function TwelveWeekSetup() {
                 Thiết lập 12 tuần
               </div>
               <div className="space-y-4">
-                <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
+                <h1 className="max-w-3xl text-4xl font-bold tracking-normal lg:text-5xl">
                   Chốt một chu kỳ 12 tuần gọn, rõ và vào việc ngay.
                 </h1>
                 <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">

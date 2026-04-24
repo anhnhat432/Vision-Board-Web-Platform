@@ -108,7 +108,7 @@ export function TwelveWeekTodayTab({
   const rescueModes: ReentryMode[] = ["restart", "lighten", "push"];
 
   return (
-    <div className="space-y-6 pt-4">
+    <div className="ops-system-panel space-y-5 pt-4">
       {missedTasks.length > 0 && (
         <Card className="border-amber-200 bg-amber-50/70">
           <CardHeader>

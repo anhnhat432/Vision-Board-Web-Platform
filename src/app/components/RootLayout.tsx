@@ -165,7 +165,7 @@ export function RootLayout() {
   const location = useLocation();
   const outlet = useOutlet();
   const demoMode = isDemoMode();
-  const { theme, resolvedTheme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [guideUserData, setGuideUserData] = useState(() => getUserData());
   const [isGuideOpen, setIsGuideOpen] = useState(false);
@@ -311,48 +311,6 @@ export function RootLayout() {
       return;
     }
 
-    const root = document.documentElement;
-    root.style.setProperty("--cursor-x", "50vw");
-    root.style.setProperty("--cursor-y", "30vh");
-    root.style.setProperty("--cursor-glow-opacity", "0");
-
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      return;
-    }
-
-    const handlePointerMove = (event: PointerEvent) => {
-      if (event.pointerType === "touch") {
-        root.style.setProperty("--cursor-glow-opacity", "0");
-        return;
-      }
-
-      root.style.setProperty("--cursor-x", `${event.clientX}px`);
-      root.style.setProperty("--cursor-y", `${event.clientY}px`);
-      root.style.setProperty("--cursor-glow-opacity", "0.55");
-    };
-
-    const handlePointerDown = (event: PointerEvent) => {
-      root.style.setProperty(
-        "--cursor-glow-opacity",
-        event.pointerType === "touch" ? "0" : "0.55",
-      );
-    };
-
-    window.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("pointerdown", handlePointerDown);
-
-    return () => {
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("pointerdown", handlePointerDown);
-      root.style.setProperty("--cursor-glow-opacity", "0");
-    };
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
     const runBackgroundSync = () => {
       void syncPendingOutbox();
       maybeShowBrowserReminderNotification();
@@ -402,10 +360,6 @@ export function RootLayout() {
     ...shellGradientStyle,
     boxShadow: "0 14px 28px -20px var(--tone-shell-shadow-strong)",
   };
-  const shellIndicatorStyle = {
-    ...shellGradientStyle,
-    boxShadow: "0 0 0 4px var(--tone-shell-ring)",
-  };
   const activeNavStyle = {
     ...shellGradientStyle,
     boxShadow: "0 14px 30px -18px var(--tone-shell-shadow)",
@@ -430,11 +384,6 @@ export function RootLayout() {
   if (GUIDED_PATHS.has(location.pathname)) {
     return (
       <div className="app-shell min-h-screen" data-route-tone={routeTone}>
-        <div className="cursor-glow" />
-        <div className="ambient-orb ambient-orb--violet" />
-        <div className="ambient-orb ambient-orb--cyan" />
-        <div className="ambient-orb ambient-orb--rose" />
-        <div className="pointer-events-none fixed inset-x-0 top-[-8rem] z-0 mx-auto h-[20rem] max-w-4xl rounded-full bg-[radial-gradient(circle,_rgba(255,255,255,0.72)_0%,_rgba(255,255,255,0)_70%)] blur-2xl" />
         <div className="relative z-10">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={location.pathname} className="page-transition-shell" {...pageTransition}>
@@ -449,22 +398,17 @@ export function RootLayout() {
 
   return (
     <div className="app-shell min-h-screen" data-route-tone={routeTone}>
-      <div className="cursor-glow" />
       <a href="#main-content" className="skip-to-content">
         Bỏ qua điều hướng
       </a>
-      <div className="ambient-orb ambient-orb--violet" />
-      <div className="ambient-orb ambient-orb--cyan" />
-      <div className="ambient-orb ambient-orb--rose" />
-      <div className="pointer-events-none fixed inset-x-0 top-[-8rem] z-0 mx-auto h-[20rem] max-w-5xl rounded-full bg-[radial-gradient(circle,_rgba(255,255,255,0.78)_0%,_rgba(255,255,255,0)_70%)] blur-2xl" />
 
       <header className="sticky top-0 z-40 px-4 pt-2 sm:top-4 sm:px-6 sm:pt-0 lg:px-8">
-        <div className="glass-surface mx-auto max-w-7xl rounded-2xl px-3 py-2 sm:rounded-3xl sm:px-4 sm:py-2 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.14)]">
+        <div className="glass-surface mx-auto max-w-7xl rounded-lg px-3 py-2 sm:px-4 sm:py-2 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.16)]">
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"
               onClick={() => navigate("/")}
-              className="flex shrink-0 items-center gap-2.5 rounded-2xl text-left transition-all duration-200 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
+              className="flex shrink-0 items-center gap-2.5 rounded-lg text-left transition-all duration-200 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
               aria-label="Về trang chủ Dear Our Future"
             >
               <div
@@ -474,7 +418,7 @@ export function RootLayout() {
                 <Sparkles className="h-4.5 w-4.5 text-white" />
               </div>
               <div className="min-w-0">
-                <h1 className="truncate text-sm font-semibold tracking-[-0.01em] text-slate-900">
+                <h1 className="truncate text-sm font-semibold tracking-normal text-slate-900">
                   Dear Our Future
                 </h1>
               </div>
@@ -557,11 +501,11 @@ export function RootLayout() {
               </Button>
             </div>
 
-            <div className="md:hidden flex items-center gap-2">
-              <span className="text-sm font-medium tracking-[-0.008em] text-slate-700 dark:text-slate-200 truncate max-w-[130px]">{pageMeta.label}</span>
+            <div className="md:hidden flex min-w-0 items-center gap-2">
+              <span className="hidden max-w-[120px] truncate text-sm font-medium tracking-normal text-slate-700 dark:text-slate-200 sm:inline">{pageMeta.label}</span>
               <button
                 type="button"
-                className="flex size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 backdrop-blur-sm transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300"
+                className="hidden size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 backdrop-blur-sm transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300 sm:flex"
                 onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
                 aria-label={resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
               >
@@ -603,7 +547,7 @@ export function RootLayout() {
                     setIsGuideOpen(true);
                     setMobileMenuOpen(false);
                   }}
-                  className="mb-2 flex w-full items-center gap-3 rounded-2xl border border-white/72 bg-white/82 px-4 py-3 text-left text-sm font-medium tracking-[-0.008em] text-slate-700"
+                  className="mb-2 flex w-full items-center gap-3 rounded-2xl border border-white/72 bg-white/82 px-4 py-3 text-left text-sm font-medium tracking-normal text-slate-700"
                 >
                   <Compass className="h-5 w-5" />
                   <span>Hướng dẫn sử dụng</span>
@@ -621,7 +565,7 @@ export function RootLayout() {
                         setMobileMenuOpen(false);
                       }}
                       onFocus={() => handlePrefetch(item.path)}
-                      className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-sm font-medium tracking-[-0.008em] transition-all active:scale-[0.98] ${
+                      className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-sm font-medium tracking-normal transition-all active:scale-[0.98] ${
                         active
                           ? "text-white"
                           : "text-slate-600 hover:bg-white/80 hover:text-slate-900"

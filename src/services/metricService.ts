@@ -1,4 +1,4 @@
-import { get, post } from "@/lib/api/apiClient";
+import { get, patch, post } from "@/lib/api/apiClient";
 import type { Metric } from "@/types/plan";
 
 export interface CreateMetricPayload {
@@ -7,6 +7,12 @@ export interface CreateMetricPayload {
 }
 
 export interface LogMetricPayload {
+  date?: string;
+  value: number;
+  completed?: boolean;
+}
+
+export interface UpdateMetricLogPayload {
   date?: string;
   value: number;
   completed?: boolean;
@@ -28,4 +34,12 @@ export function logMetric(
   payload: LogMetricPayload,
 ): Promise<Metric> {
   return post<Metric, LogMetricPayload>(`/metrics/${metricId}/logs`, payload);
+}
+
+export function updateMetricLog(
+  metricId: string,
+  logId: string,
+  payload: UpdateMetricLogPayload,
+): Promise<Metric> {
+  return patch<Metric, UpdateMetricLogPayload>(`/metrics/${metricId}/logs/${logId}`, payload);
 }

@@ -47,7 +47,7 @@ export function AppErrorBoundary() {
                 </div>
 
                 <div className="space-y-4">
-                  <h1 className="max-w-3xl text-4xl font-bold tracking-[-0.05em] lg:text-5xl">
+                  <h1 className="max-w-3xl text-4xl font-bold tracking-normal lg:text-5xl">
                     Trang này vừa gặp lỗi, nhưng mình vẫn có thể quay lại flow chính ngay.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">

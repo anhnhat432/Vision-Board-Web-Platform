@@ -1,5 +1,6 @@
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
@@ -13,6 +14,7 @@ const {
 }));
 
 vi.mock("@/lib/auth/AuthContext", () => ({
+  AuthProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
   useAuthContext: () => ({
     user: null,
   }),
@@ -157,7 +159,11 @@ describe("12-week write-path safety", () => {
     const system = readGoal(goalId).twelveWeekSystem;
     expect(system).toBeDefined();
 
-    const currentWeek = getTwelveWeekCurrentWeek(system!);
+    if (!system) {
+      throw new Error("Expected seeded 12-week system to exist.");
+    }
+
+    const currentWeek = getTwelveWeekCurrentWeek(system);
     const review = system?.weeklyReviews.find((item) => item.weekNumber === currentWeek);
     const scoreWeek = system?.scoreboard.find((item) => item.weekNumber === currentWeek);
     const lastSyncCall = syncWeeklyReviewMock.mock.calls[syncWeeklyReviewMock.mock.calls.length - 1];

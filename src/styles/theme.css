@@ -2,7 +2,7 @@
 
 :root {
   --font-size: 16px;
-  --font-family-sans: "Inter", "Be Vietnam Pro", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-family-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --text-xs: 0.75rem;
   --text-xs--line-height: 1.4;
   --text-sm: 0.875rem;
@@ -229,13 +229,8 @@
     font-family: var(--font-family-sans);
     font-size: var(--text-base);
     line-height: var(--text-base--line-height);
-    letter-spacing: -0.011em;
-    background-image:
-      radial-gradient(ellipse at 8% 14%, var(--tone-bg-left), transparent 24%),
-      radial-gradient(ellipse at 92% 10%, var(--tone-bg-right), transparent 28%),
-      radial-gradient(ellipse at 72% 92%, var(--tone-bg-bottom), transparent 24%),
-      radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.16), transparent 68%),
-      linear-gradient(160deg, #fafcff 0%, #f4f6fb 42%, #f6f9fe 80%, #fafcff 100%);
+    letter-spacing: 0;
+    background-image: linear-gradient(180deg, #f8fafc 0%, #f4f7fb 48%, #f8fafc 100%);
     background-attachment: fixed;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -244,19 +239,14 @@
   }
 
   .dark body {
-    background-image:
-      radial-gradient(ellipse at 8% 14%, var(--tone-bg-left), transparent 24%),
-      radial-gradient(ellipse at 92% 10%, var(--tone-bg-right), transparent 28%),
-      radial-gradient(ellipse at 72% 92%, var(--tone-bg-bottom), transparent 24%),
-      radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0.12), transparent 68%),
-      linear-gradient(160deg, #0a0a12 0%, #0f0f1a 42%, #0a0e18 80%, #0a0a12 100%);
+    background-image: linear-gradient(180deg, #0b1020 0%, #101827 52%, #0b1020 100%);
   }
 
   h1 {
     font-size: var(--text-3xl);
     font-weight: 700;
     line-height: 1.08;
-    letter-spacing: -0.036em;
+    letter-spacing: 0;
     text-wrap: balance;
   }
 
@@ -264,7 +254,7 @@
     font-size: var(--text-2xl);
     font-weight: 700;
     line-height: 1.14;
-    letter-spacing: -0.03em;
+    letter-spacing: 0;
     text-wrap: balance;
   }
 
@@ -272,7 +262,7 @@
     font-size: var(--text-xl);
     font-weight: 600;
     line-height: 1.22;
-    letter-spacing: -0.022em;
+    letter-spacing: 0;
     text-wrap: balance;
   }
 
@@ -280,13 +270,13 @@
     font-size: var(--text-lg);
     font-weight: 600;
     line-height: 1.28;
-    letter-spacing: -0.016em;
+    letter-spacing: 0;
   }
 
   h5, h6 {
     font-weight: 600;
     line-height: 1.35;
-    letter-spacing: -0.012em;
+    letter-spacing: 0;
   }
 
   @media (min-width: 1024px) {
@@ -297,7 +287,7 @@
 
   p {
     line-height: 1.68;
-    letter-spacing: -0.005em;
+    letter-spacing: 0;
     text-wrap: pretty;
   }
 
@@ -305,21 +295,21 @@
     font-size: var(--text-sm);
     font-weight: 500;
     line-height: 1.45;
-    letter-spacing: -0.005em;
+    letter-spacing: 0;
   }
 
   button {
     font-size: var(--text-sm);
     font-weight: var(--font-weight-medium);
     line-height: 1.4;
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
   }
 
   input {
     font-size: var(--text-sm);
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
-    letter-spacing: -0.006em;
+    letter-spacing: 0;
   }
 
   input,
@@ -393,7 +383,7 @@
     font-size: var(--text-sm);
     font-weight: 400;
     line-height: 1.55;
-    letter-spacing: -0.004em;
+    letter-spacing: 0;
   }
 
   ::selection {
@@ -1202,7 +1192,7 @@
     font-variant-numeric: tabular-nums lining-nums;
     font-feature-settings: "tnum", "lnum";
     font-weight: 700;
-    letter-spacing: -0.032em;
+    letter-spacing: 0;
     line-height: 1;
   }
 
@@ -1714,6 +1704,90 @@
   .dark ::-webkit-scrollbar-track { background: rgba(15, 15, 25, 0.5); }
   .dark ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); }
   .dark ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+}
+
+@layer components {
+  .ops-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding-bottom: 3rem;
+  }
+
+  .ops-shell [data-slot="card"],
+  .ops-shell .rounded-\[32px\],
+  .ops-shell .rounded-\[28px\],
+  .ops-shell .rounded-\[26px\],
+  .ops-shell .rounded-\[24px\],
+  .ops-shell .rounded-\[22px\],
+  .ops-shell .rounded-\[20px\],
+  .ops-shell .rounded-3xl,
+  .ops-shell .rounded-2xl {
+    border-radius: 0.5rem !important;
+  }
+
+  .ops-shell .glass-surface {
+    box-shadow: 0 16px 42px -34px rgba(15, 23, 42, 0.34);
+  }
+
+  .ops-shell .hero-surface {
+    color: #0f172a !important;
+    border: 1px solid rgba(148, 163, 184, 0.28) !important;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.9)),
+      linear-gradient(90deg, rgba(15, 23, 42, 0.06), rgba(14, 165, 233, 0.05)) !important;
+    box-shadow: 0 18px 44px -36px rgba(15, 23, 42, 0.38) !important;
+  }
+
+  .ops-shell .hero-surface > [data-slot="card-content"] > .absolute {
+    display: none;
+  }
+
+  .ops-shell .hero-surface .text-white {
+    color: #0f172a !important;
+  }
+
+  .ops-shell .hero-surface [class*="text-white/"] {
+    color: rgba(51, 65, 85, 0.78) !important;
+  }
+
+  .ops-shell .hero-surface [class*="border-white/"] {
+    border-color: rgba(203, 213, 225, 0.8) !important;
+  }
+
+  .ops-shell .hero-surface [class*="bg-white/"],
+  .ops-shell .hero-surface [class*="bg-black/"] {
+    background-color: rgba(248, 250, 252, 0.86) !important;
+  }
+
+  .ops-shell .hero-surface .shadow-\[0_26px_70px_-34px_rgba\(0\,0\,0\,0\.38\)\],
+  .ops-shell .hero-surface .shadow-\[0_20px_48px_-30px_rgba\(0\,0\,0\,0\.32\)\] {
+    box-shadow: 0 12px 30px -28px rgba(15, 23, 42, 0.3) !important;
+  }
+
+  .ops-dashboard .gradient-dark,
+  .ops-system .gradient-dark,
+  .ops-system .gradient-dark-blue-accent,
+  .ops-system .gradient-dark-sky {
+    background: #172033 !important;
+  }
+
+  .ops-shell .gradient-slate,
+  .ops-shell .gradient-sky,
+  .ops-shell .gradient-violet,
+  .ops-shell .gradient-violet-warm {
+    border: 1px solid rgba(203, 213, 225, 0.78) !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    box-shadow: 0 14px 34px -30px rgba(15, 23, 42, 0.28) !important;
+  }
+
+  .ops-system .gradient-purple-vivid {
+    background: #6d28d9 !important;
+  }
+
+  .ops-system-panel [data-slot="card"] {
+    border-color: rgba(203, 213, 225, 0.78);
+  }
 }
 
 @keyframes hero-sheen {

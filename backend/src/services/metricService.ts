@@ -1,9 +1,16 @@
 import { MongoMetricRepository } from "../repositories/mongo/MongoMetricRepository";
 import { MongoPlanRepository } from "../repositories/mongo/MongoPlanRepository";
 import { MongoWeekRepository } from "../repositories/mongo/MongoWeekRepository";
+import { ApiError } from "../utils/apiError";
 import { requireMetricOwnership, requireWeekOwnership } from "./serviceGuards";
 
 export interface LogLeadMetricPayload {
+  date?: string;
+  value: number;
+  completed?: boolean;
+}
+
+export interface UpdateLeadMetricLogPayload {
   date?: string;
   value: number;
   completed?: boolean;
@@ -49,6 +56,37 @@ class MetricService {
       value: payload.value,
       completed: payload.completed ?? payload.value > 0,
     });
+
+    return metric;
+  }
+
+  async updateLeadMetricLog(
+    userId: string,
+    metricId: string,
+    logId: string,
+    payload: UpdateLeadMetricLogPayload,
+  ) {
+    await requireMetricOwnership(
+      this.planRepository,
+      this.weekRepository,
+      this.metricRepository,
+      userId,
+      metricId,
+    );
+
+    if (!Number.isFinite(payload.value)) {
+      throw new ApiError(400, "Invalid metric log value.");
+    }
+
+    const metric = await this.metricRepository.updateMetricLog(metricId, logId, {
+      date: payload.date ? new Date(payload.date) : undefined,
+      value: payload.value,
+      completed: payload.completed ?? payload.value > 0,
+    });
+
+    if (!metric) {
+      throw new ApiError(404, "Metric log not found.");
+    }
 
     return metric;
   }
