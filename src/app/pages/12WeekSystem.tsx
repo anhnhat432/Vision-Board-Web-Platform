@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { useTwelveWeekSystemSnapshot } from "../hooks/useTwelveWeekSystemSnapshot";
 import {
+  applyBackendPlanSnapshotToLocal,
   hydrateTwelveWeekPlansFromBackend,
   type BackendPlanHydrationResult,
 } from "../hooks/useBackendPlanHydration";
@@ -97,6 +98,7 @@ import {
 } from "../utils/storage-twelve-week";
 import { TaskBoard } from "@/features/plan12week/components/TaskBoard";
 import { usePlanExecutionSync } from "@/features/plan12week/hooks";
+import { getUniversalWeeklyReviewExecutionScore } from "@/features/plan12week/persistence/reviewExecutionScore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 
 interface WeeklyReviewForm {
@@ -194,7 +196,6 @@ export function TwelveWeekSystem() {
     missedTasks,
     weekCompletion,
     currentReview,
-    currentScore,
     currentPlanFocus,
     currentPlanMilestone,
     currentLagMetricValue,
@@ -241,6 +242,7 @@ export function TwelveWeekSystem() {
   const [isSyncingEntitlements, setIsSyncingEntitlements] = useState(false);
   const [isRestoringPlanAccess, setIsRestoringPlanAccess] = useState(false);
   const [isHydratingBackendPlans, setIsHydratingBackendPlans] = useState(false);
+  const [isResolvingBackendPlanConflicts, setIsResolvingBackendPlanConflicts] = useState(false);
   const [lastBackendHydrationResult, setLastBackendHydrationResult] =
     useState<BackendPlanHydrationResult | null>(null);
   const [weeklyForm, setWeeklyForm] = useState<WeeklyReviewForm>({
@@ -322,6 +324,10 @@ export function TwelveWeekSystem() {
   useEffect(() => {
     const localSystem = activeGoal?.twelveWeekSystem ?? null;
     if (!isBackendProfileReady || !activeGoal || !localSystem) return;
+    const hasPendingBackendConflict = lastBackendHydrationResult?.conflicts.some(
+      (conflict) => conflict.goalId === activeGoal.id,
+    );
+    if (hasPendingBackendConflict) return;
 
     const syncKey = buildBackendSyncKey(activeGoal.id, localSystem);
     if (lastBackendSyncKeyRef.current === syncKey) return;
@@ -344,6 +350,7 @@ export function TwelveWeekSystem() {
     activeGoal,
     executionSyncActions,
     isBackendProfileReady,
+    lastBackendHydrationResult,
     refreshBackendProgressOverlay,
     refreshSnapshotMeta,
   ]);
@@ -660,7 +667,7 @@ export function TwelveWeekSystem() {
       nextReview,
     ].sort((left, right) => left.weekNumber - right.weekNumber);
 
-    const committedSystem = commitSystemUpdate({
+    commitSystemUpdate({
       ...system,
       lagMetric: {
         ...system.lagMetric,
@@ -668,14 +675,11 @@ export function TwelveWeekSystem() {
       },
       weeklyReviews: updatedReviews,
     });
-    const committedWeekScore =
-      committedSystem.scoreboard.find((week) => week.weekNumber === reviewWeekNumber)?.weeklyScore ??
-      currentScore?.weeklyScore ??
-      reviewWeekCompletion.percent;
+    const reviewExecutionScore = getUniversalWeeklyReviewExecutionScore(nextReview, reviewWeekCompletion.percent);
 
     const synced = await executionSyncActions.syncWeeklyReview({
       weekNumber: reviewWeekNumber,
-      executionScore: committedWeekScore,
+      executionScore: reviewExecutionScore,
       reflection: weeklyForm.biggestOutputThisWeek.trim() || undefined,
       adjustments: nextWeekPriorityValue || undefined,
     });
@@ -713,7 +717,7 @@ export function TwelveWeekSystem() {
 
     trackAppEvent("12_week_weekly_review_submitted", actionGoalId, {
       weekNumber: String(reviewWeekNumber),
-      score: String(committedWeekScore),
+      score: String(reviewExecutionScore),
       decision: workloadDecisionValue || "keep same",
       usedSuggestedPlan: String(
         hasPremiumReviewInsights && weeklyForm.nextWeekPriority.trim().length === 0,
@@ -968,6 +972,80 @@ export function TwelveWeekSystem() {
       toast.error("Không thể khôi phục dữ liệu 12-week từ backend lúc này.");
     } finally {
       setIsHydratingBackendPlans(false);
+    }
+  };
+
+  const refreshBackendConflictReview = async (preferredGoalId: string, options?: { preserveSyncKey?: boolean }) => {
+    const result = await hydrateTwelveWeekPlansFromBackend();
+    setLastBackendHydrationResult(result);
+    if (!options?.preserveSyncKey) {
+      lastBackendSyncKeyRef.current = null;
+    }
+    loadGoalData(result.latestGoalId ?? preferredGoalId);
+    refreshBackendProgressOverlay();
+    refreshSnapshotMeta();
+    return result;
+  };
+
+  const handleUseBackendPlanForConflicts = async (goalId: string) => {
+    if (isResolvingBackendPlanConflicts) return;
+    setIsResolvingBackendPlanConflicts(true);
+
+    try {
+      const result = await applyBackendPlanSnapshotToLocal(goalId);
+      if (result.status === "error") {
+        toast.error("Không thể áp dụng bản backend cho chu kỳ này lúc này.");
+        return;
+      }
+
+      toast.success("Đã dùng bản backend cho chu kỳ này.");
+      const reviewResult = await refreshBackendConflictReview(goalId);
+      if (reviewResult.conflictCount > 0) {
+        toast.info(reviewResult.message);
+      }
+    } catch (error) {
+      console.error("Failed to apply backend plan snapshot.", error);
+      toast.error("Không thể áp dụng bản backend cho chu kỳ này lúc này.");
+    } finally {
+      setIsResolvingBackendPlanConflicts(false);
+    }
+  };
+
+  const handleKeepLocalPlanForConflicts = async (goalId: string) => {
+    if (isResolvingBackendPlanConflicts) return;
+
+    if (goalId !== activeGoal.id) {
+      loadGoalData(goalId);
+      toast.info("Đã mở chu kỳ này. Bấm Giữ local lần nữa để đẩy bản local lên backend.");
+      return;
+    }
+
+    setIsResolvingBackendPlanConflicts(true);
+
+    try {
+      const localSystem = activeGoal.twelveWeekSystem ?? system;
+      const snapshot = await executionSyncActions.syncLocalSnapshot({ system: localSystem });
+      if (snapshot.status === "error") {
+        toast.error(snapshot.message);
+        return;
+      }
+
+      if (snapshot.status === "partial") {
+        toast.info(snapshot.message);
+      } else {
+        toast.success("Đã giữ bản local và đồng bộ lại lên backend.");
+      }
+
+      lastBackendSyncKeyRef.current = buildBackendSyncKey(goalId, localSystem);
+      const reviewResult = await refreshBackendConflictReview(goalId, { preserveSyncKey: true });
+      if (reviewResult.conflictCount > 0) {
+        toast.info(reviewResult.message);
+      }
+    } catch (error) {
+      console.error("Failed to keep local plan snapshot.", error);
+      toast.error("Không thể đồng bộ bản local lên backend lúc này.");
+    } finally {
+      setIsResolvingBackendPlanConflicts(false);
     }
   };
 
@@ -1452,6 +1530,7 @@ export function TwelveWeekSystem() {
           >
             <WeekEditor
               system={system}
+              activeGoalId={activeGoal.id}
               backendConnectionStatus={backendConnectionStatus}
               currentPlanCode={activePlanCode}
               entitlementKeys={activeEntitlementKeys}
@@ -1472,6 +1551,7 @@ export function TwelveWeekSystem() {
               isSyncingEntitlements={isSyncingEntitlements}
               isRestoringPlanAccess={isRestoringPlanAccess}
               isHydratingBackendPlans={isHydratingBackendPlans}
+              isResolvingBackendPlanConflicts={isResolvingBackendPlanConflicts}
               onReviewDayChange={handleReviewDayChange}
               onReminderTimeChange={handleReminderTimeChange}
               onLoadPreferenceChange={handleLoadPreferenceChange}
@@ -1501,6 +1581,8 @@ export function TwelveWeekSystem() {
               onSyncEntitlements={handleSyncEntitlements}
               onRestorePlanAccess={handleRestorePlanAccess}
               onHydrateBackendPlans={handleHydrateBackendPlans}
+              onKeepLocalPlanForConflicts={handleKeepLocalPlanForConflicts}
+              onUseBackendPlanForConflicts={handleUseBackendPlanForConflicts}
               onOpenBillingPortal={handleOpenBillingPortal}
               onNavigateGoals={() => navigate("/goals")}
               onNavigateJournal={() => navigate("/journal")}

@@ -5,7 +5,7 @@ import { getGoals, type ApiGoal } from "@/services/goalService";
 import { getPlan, getPlans } from "@/services/planService";
 import type { Metric, PlanDetails } from "@/types/plan";
 import { APP_STORAGE_KEYS, getUserData, saveUserData } from "../utils/storage";
-import { hydrateTwelveWeekPlansFromBackend } from "./useBackendPlanHydration";
+import { applyBackendPlanSnapshotToLocal, hydrateTwelveWeekPlansFromBackend } from "./useBackendPlanHydration";
 
 vi.mock("@/services/goalService", () => ({
   getGoals: vi.fn(),
@@ -144,6 +144,7 @@ describe("hydrateTwelveWeekPlansFromBackend", () => {
     expect(goal?.twelveWeekSystem?.weeklyPlans[0]?.focus).toBe("Write the first proposal");
     expect(goal?.twelveWeekSystem?.dailyCheckIns[0]?.didWorkToday).toBe(true);
     expect(goal?.twelveWeekSystem?.weeklyReviews[0]?.reviewCompleted).toBe(true);
+    expect(goal?.twelveWeekSystem?.weeklyReviews[0]?.progressScore).toBe(8);
 
     const completedTask = goal?.twelveWeekSystem?.taskInstances.find((task) => task.completed);
     expect(completedTask?.title).toBe("Write proposal");
@@ -187,8 +188,43 @@ describe("hydrateTwelveWeekPlansFromBackend", () => {
     expect(result.status).toBe("idle");
     expect(result.skippedCount).toBe(1);
     expect(result.conflictCount).toBe(1);
+    expect(result.conflicts).toHaveLength(1);
+    expect(result.conflicts[0]).toEqual(
+      expect.objectContaining({
+        goalId: "local_goal_1",
+        goalTitle: apiGoal.title,
+        kind: "task_completion",
+        planId: "plan_1",
+      }),
+    );
     expect(result.message).toBe("1 local/backend differences need review.");
     expect(getUserData().goals).toHaveLength(1);
+  });
+
+  it("applies the backend snapshot over a linked local plan", async () => {
+    const apiGoal = createApiGoal();
+    const details = createPlanDetails();
+    vi.mocked(getGoals).mockResolvedValue([apiGoal]);
+    vi.mocked(getPlans).mockResolvedValue([details.plan]);
+    vi.mocked(getPlan).mockResolvedValue(details);
+
+    await hydrateTwelveWeekPlansFromBackend();
+
+    const divergentDetails = createPlanDetails();
+    divergentDetails.weeks[0].tasks[0].status = "todo";
+    vi.mocked(getPlan).mockResolvedValue(divergentDetails);
+
+    const result = await applyBackendPlanSnapshotToLocal("local_goal_1");
+
+    expect(result.status).toBe("success");
+    expect(result.updatedCount).toBe(1);
+    expect(result.conflictCount).toBe(0);
+    expect(result.conflicts).toHaveLength(0);
+
+    const task = getUserData().goals[0]?.twelveWeekSystem?.taskInstances.find(
+      (item) => item.title === "Write proposal",
+    );
+    expect(task?.completed).toBe(false);
   });
 
   it("leaves onboarding untouched when there are no backend plans", async () => {

@@ -34,6 +34,7 @@ export interface TwelveWeekSettingsTabProps {
   lastEntitlementSyncSnapshot: BillingActionSnapshot | null;
   lastRestoreAccessSnapshot: BillingActionSnapshot | null;
   lastBackendHydrationResult: BackendPlanHydrationResult | null;
+  activeGoalId: string;
   appPreferences: AppPreferences;
   funnelSteps: FunnelStepSummary[];
   monetizationSteps: FunnelStepSummary[];
@@ -47,6 +48,7 @@ export interface TwelveWeekSettingsTabProps {
   isSyncingEntitlements: boolean;
   isRestoringPlanAccess: boolean;
   isHydratingBackendPlans: boolean;
+  isResolvingBackendPlanConflicts: boolean;
   onReviewDayChange: (value: string) => void;
   onReminderTimeChange: (value: string) => void;
   onLoadPreferenceChange: (value: string) => void;
@@ -70,6 +72,8 @@ export interface TwelveWeekSettingsTabProps {
   onSyncEntitlements: () => void;
   onRestorePlanAccess: () => void;
   onHydrateBackendPlans: () => void;
+  onUseBackendPlanForConflicts: (goalId: string) => void;
+  onKeepLocalPlanForConflicts: (goalId: string) => void;
   onOpenBillingPortal: () => void;
   onNavigateGoals: () => void;
   onNavigateJournal: () => void;

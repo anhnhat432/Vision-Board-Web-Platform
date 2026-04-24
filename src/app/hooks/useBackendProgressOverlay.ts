@@ -83,6 +83,9 @@ function mergeWeeklyReviews(
       const backendWeek = backendWeekByNumber.get(weekNumber);
       const backendReview = backendWeek?.review;
       const metricSummary = getMetricProgressSummary(backendWeek);
+      const backendReviewScore = backendReview
+        ? Math.max(0, Math.min(10, Math.round(backendReview.executionScore / 10)))
+        : 0;
 
       if (!existingReview && !backendReview && !metricSummary) {
         return null;
@@ -101,11 +104,11 @@ function mergeWeeklyReviews(
           backendReview?.adjustments?.trim() || existingReview?.nextWeekPriority || "",
         workloadDecision: (existingReview?.workloadDecision || "") as UniversalWeeklyReview["workloadDecision"],
         reviewCompleted: backendReview ? true : existingReview?.reviewCompleted ?? false,
-        progressScore: existingReview?.progressScore ?? 0,
-        disciplineScore: existingReview?.disciplineScore ?? 0,
-        focusScore: existingReview?.focusScore ?? 0,
-        improvementScore: existingReview?.improvementScore ?? 0,
-        outputQualityScore: existingReview?.outputQualityScore ?? 0,
+        progressScore: existingReview?.progressScore || backendReviewScore,
+        disciplineScore: existingReview?.disciplineScore || backendReviewScore,
+        focusScore: existingReview?.focusScore || backendReviewScore,
+        improvementScore: existingReview?.improvementScore || backendReviewScore,
+        outputQualityScore: existingReview?.outputQualityScore || backendReviewScore,
         completedLeadIndicators: completion.completed,
       };
     });

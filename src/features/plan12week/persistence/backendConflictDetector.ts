@@ -1,6 +1,7 @@
-import type { TwelveWeekSystem, TwelveWeekTaskInstance, UniversalWeeklyReview } from "@/app/utils/storage-types";
+import type { TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
 import { getCalendarDateKey } from "@/app/utils/storage-date-utils";
 import { isDailyCheckInMetric } from "../constants/progressMetrics";
+import { getUniversalWeeklyReviewExecutionScore } from "./reviewExecutionScore";
 import type { PlanDetails, Task as BackendTask, WeekDetails } from "@/types/plan";
 
 export type BackendPlanConflictKind =
@@ -62,22 +63,6 @@ function getBackendTaskDone(task: BackendTask): boolean {
 
 function formatCompletion(value: boolean): string {
   return value ? "done" : "not done";
-}
-
-function getLocalReviewExecutionScore(review: UniversalWeeklyReview): number {
-  const scores = [
-    review.progressScore,
-    review.disciplineScore,
-    review.focusScore,
-    review.improvementScore,
-    review.outputQualityScore,
-  ].filter((score) => Number.isFinite(score) && score > 0);
-
-  if (scores.length === 0) return 0;
-
-  const average = scores.reduce((sum, score) => sum + score, 0) / scores.length;
-  const scale = average <= 5 ? 20 : 10;
-  return Math.round(average * scale);
 }
 
 function addConflict(conflicts: BackendPlanConflict[], conflict: BackendPlanConflict): void {
@@ -300,7 +285,7 @@ function detectWeeklyReviewConflicts(
       });
     }
 
-    const localScore = getLocalReviewExecutionScore(localReview);
+    const localScore = getUniversalWeeklyReviewExecutionScore(localReview);
     const backendScore = backendReview.executionScore;
     if (localScore > 0 && backendScore > 0 && localScore !== backendScore) {
       addConflict(conflicts, {

@@ -16,6 +16,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           onTacticTypeChange={props.onTacticTypeChange}
         />
         <TwelveWeekDeviceAndSyncPanel
+          activeGoalId={props.activeGoalId}
           backendConnectionStatus={props.backendConnectionStatus}
           currentPlanCode={props.currentPlanCode}
           entitlementKeys={props.entitlementKeys}
@@ -36,6 +37,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           isSyncingEntitlements={props.isSyncingEntitlements}
           isRestoringPlanAccess={props.isRestoringPlanAccess}
           isHydratingBackendPlans={props.isHydratingBackendPlans}
+          isResolvingBackendPlanConflicts={props.isResolvingBackendPlanConflicts}
           onPreferenceToggle={props.onPreferenceToggle}
           onArchivePendingOutbox={props.onArchivePendingOutbox}
           onRestoreArchivedOutbox={props.onRestoreArchivedOutbox}
@@ -53,6 +55,8 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           onSyncEntitlements={props.onSyncEntitlements}
           onRestorePlanAccess={props.onRestorePlanAccess}
           onHydrateBackendPlans={props.onHydrateBackendPlans}
+          onKeepLocalPlanForConflicts={props.onKeepLocalPlanForConflicts}
+          onUseBackendPlanForConflicts={props.onUseBackendPlanForConflicts}
           onOpenBillingPortal={props.onOpenBillingPortal}
           onNavigateGoals={props.onNavigateGoals}
           onNavigateJournal={props.onNavigateJournal}

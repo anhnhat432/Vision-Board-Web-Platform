@@ -96,6 +96,7 @@ describe("TwelveWeekSystemSections", () => {
     render(
       <TwelveWeekSettingsTab
         system={baseSystem}
+        activeGoalId="goal_1"
         currentPlanCode="FREE"
         entitlementKeys={[]}
         billingProviderStatus={{
@@ -151,6 +152,7 @@ describe("TwelveWeekSystemSections", () => {
         isSyncingEntitlements={false}
         isRestoringPlanAccess={false}
         isHydratingBackendPlans={false}
+        isResolvingBackendPlanConflicts={false}
         onReviewDayChange={vi.fn()}
         onReminderTimeChange={vi.fn()}
         onLoadPreferenceChange={vi.fn()}
@@ -174,6 +176,8 @@ describe("TwelveWeekSystemSections", () => {
         onSyncEntitlements={vi.fn()}
         onRestorePlanAccess={vi.fn()}
         onHydrateBackendPlans={vi.fn()}
+        onKeepLocalPlanForConflicts={vi.fn()}
+        onUseBackendPlanForConflicts={vi.fn()}
         onOpenBillingPortal={vi.fn()}
         onNavigateGoals={vi.fn()}
         onNavigateJournal={vi.fn()}

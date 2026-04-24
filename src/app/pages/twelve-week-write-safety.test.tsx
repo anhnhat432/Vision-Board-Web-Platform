@@ -42,6 +42,7 @@ vi.mock("@/features/plan12week/hooks", async () => {
 });
 
 import { getTwelveWeekCurrentWeek } from "../utils/storage-twelve-week";
+import { getUniversalWeeklyReviewExecutionScore } from "@/features/plan12week/persistence/reviewExecutionScore";
 import {
   readGoal,
   renderAppRoute,
@@ -177,7 +178,7 @@ describe("12-week write-path safety", () => {
     expect(syncPayload).toEqual(
       expect.objectContaining({
         weekNumber: currentWeek,
-        executionScore: scoreWeek?.weeklyScore,
+        executionScore: review ? getUniversalWeeklyReviewExecutionScore(review) : undefined,
       }),
     );
   });

@@ -1,17 +1,30 @@
-import { CloudDownload } from "lucide-react";
+import { AlertTriangle, CloudDownload, CloudUpload } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
 
 type TwelveWeekLocalStatusSectionProps = Pick<
   TwelveWeekSettingsTabProps,
+  | "activeGoalId"
   | "appPreferences"
   | "backendConnectionStatus"
   | "isHydratingBackendPlans"
+  | "isResolvingBackendPlanConflicts"
   | "lastBackendHydrationResult"
   | "onHydrateBackendPlans"
+  | "onKeepLocalPlanForConflicts"
+  | "onUseBackendPlanForConflicts"
   | "pendingOutboxCount"
 >;
+
+type BackendConflict = NonNullable<TwelveWeekSettingsTabProps["lastBackendHydrationResult"]>["conflicts"][number];
+
+interface BackendConflictGroup {
+  goalId: string;
+  goalTitle: string;
+  planVision: string;
+  conflicts: BackendConflict[];
+}
 
 function getBackendBadgeClass(status: TwelveWeekSettingsTabProps["backendConnectionStatus"]): string {
   if (!status.authConfigured) return "border-amber-200 bg-amber-50 text-amber-800";
@@ -63,12 +76,78 @@ function getBackendHydrationDescription(
   return "Backend đã được kiểm tra, chưa có chu kỳ mới cần khôi phục.";
 }
 
+function getConflictKindLabel(kind: BackendConflict["kind"]): string {
+  switch (kind) {
+    case "weekly_focus":
+      return "Trọng tâm tuần";
+    case "weekly_milestone":
+      return "Mốc tuần";
+    case "task_completion":
+      return "Trạng thái việc";
+    case "task_title":
+      return "Tên việc";
+    case "task_schedule":
+      return "Lịch việc";
+    case "linked_task_missing_backend":
+      return "Việc đã link";
+    case "daily_checkin":
+      return "Check-in ngày";
+    case "weekly_review_output":
+      return "Kết quả review";
+    case "weekly_review_priority":
+      return "Ưu tiên tuần tới";
+    case "weekly_review_score":
+      return "Điểm review";
+    default:
+      return "Khác biệt";
+  }
+}
+
+function getConflictScopeLabel(conflict: BackendConflict): string {
+  const parts = [];
+  if (conflict.weekNumber) parts.push(`Tuần ${conflict.weekNumber}`);
+  if (conflict.localId && conflict.kind === "daily_checkin") parts.push(conflict.localId);
+  return parts.join(" · ") || "Chu kỳ";
+}
+
+function getConflictValueLabel(value: string): string {
+  return value.trim() || "Trống";
+}
+
+function getBackendConflictGroups(
+  result: TwelveWeekSettingsTabProps["lastBackendHydrationResult"],
+): BackendConflictGroup[] {
+  if (!result?.conflicts.length) return [];
+
+  const groupByGoalId = new Map<string, BackendConflictGroup>();
+  result.conflicts.forEach((conflict) => {
+    const existingGroup = groupByGoalId.get(conflict.goalId);
+    if (existingGroup) {
+      existingGroup.conflicts.push(conflict);
+      return;
+    }
+
+    groupByGoalId.set(conflict.goalId, {
+      goalId: conflict.goalId,
+      goalTitle: conflict.goalTitle,
+      planVision: conflict.planVision,
+      conflicts: [conflict],
+    });
+  });
+
+  return Array.from(groupByGoalId.values());
+}
+
 export function TwelveWeekLocalStatusSection({
+  activeGoalId,
   appPreferences,
   backendConnectionStatus,
   isHydratingBackendPlans,
+  isResolvingBackendPlanConflicts,
   lastBackendHydrationResult,
   onHydrateBackendPlans,
+  onKeepLocalPlanForConflicts,
+  onUseBackendPlanForConflicts,
   pendingOutboxCount,
 }: TwelveWeekLocalStatusSectionProps) {
   const canHydrateBackendPlans =
@@ -78,6 +157,7 @@ export function TwelveWeekLocalStatusSection({
     backendConnectionStatus.profileReady &&
     !backendConnectionStatus.syncing &&
     !isHydratingBackendPlans;
+  const conflictGroups = getBackendConflictGroups(lastBackendHydrationResult);
 
   return (
     <div className="rounded-[26px] border border-slate-900/10 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-5 text-white shadow-[0_28px_60px_-38px_rgba(15,23,42,0.7)]">
@@ -121,6 +201,88 @@ export function TwelveWeekLocalStatusSection({
             </Button>
           </div>
         </div>
+        {conflictGroups.length > 0 ? (
+          <div className="mt-4 space-y-3 rounded-2xl border border-amber-300/25 bg-amber-300/10 p-3">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-200" />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-white">Cần chọn nguồn dữ liệu</p>
+                <p className="mt-1 text-xs leading-5 text-white/65">
+                  Local và backend đang khác nhau. Chọn bản muốn giữ cho từng chu kỳ trước khi app tự đồng bộ tiếp.
+                </p>
+              </div>
+            </div>
+            {conflictGroups.map((group) => {
+              const isActiveGoalConflict = group.goalId === activeGoalId;
+              const visibleConflicts = group.conflicts.slice(0, 4);
+              const hiddenCount = group.conflicts.length - visibleConflicts.length;
+
+              return (
+                <div key={group.goalId} className="rounded-xl border border-white/10 bg-slate-950/35 p-3">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="break-words text-sm font-semibold text-white">{group.goalTitle}</p>
+                      {group.planVision ? (
+                        <p className="mt-1 break-words text-xs leading-5 text-white/55">{group.planVision}</p>
+                      ) : null}
+                    </div>
+                    <Badge variant="outline" className="w-fit border-amber-200/40 bg-amber-200/10 text-amber-100">
+                      {group.conflicts.length} khác biệt
+                    </Badge>
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    {visibleConflicts.map((conflict, index) => (
+                      <div
+                        key={`${conflict.kind}-${conflict.localId ?? conflict.backendId ?? index}`}
+                        className="grid gap-2 rounded-lg border border-white/10 bg-white/8 p-2 text-xs sm:grid-cols-[150px_minmax(0,1fr)_minmax(0,1fr)]"
+                      >
+                        <div className="min-w-0">
+                          <p className="font-semibold text-white/85">{getConflictKindLabel(conflict.kind)}</p>
+                          <p className="mt-1 text-white/45">{getConflictScopeLabel(conflict)}</p>
+                        </div>
+                        <div className="min-w-0 rounded-md bg-slate-950/35 p-2">
+                          <p className="font-semibold uppercase tracking-[0.12em] text-white/35">Local</p>
+                          <p className="mt-1 break-words text-white/80">{getConflictValueLabel(conflict.localValue)}</p>
+                        </div>
+                        <div className="min-w-0 rounded-md bg-slate-950/35 p-2">
+                          <p className="font-semibold uppercase tracking-[0.12em] text-white/35">Backend</p>
+                          <p className="mt-1 break-words text-white/80">
+                            {getConflictValueLabel(conflict.backendValue)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    {hiddenCount > 0 ? (
+                      <p className="text-xs text-white/55">Còn {hiddenCount} khác biệt khác trong chu kỳ này.</p>
+                    ) : null}
+                  </div>
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                      disabled={isResolvingBackendPlanConflicts}
+                      onClick={() => onUseBackendPlanForConflicts(group.goalId)}
+                    >
+                      <CloudDownload className="mr-2 h-4 w-4" />
+                      Dùng backend
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                      disabled={isResolvingBackendPlanConflicts}
+                      onClick={() => onKeepLocalPlanForConflicts(group.goalId)}
+                    >
+                      <CloudUpload className="mr-2 h-4 w-4" />
+                      {isActiveGoalConflict ? "Giữ local" : "Mở chu kỳ"}
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : null}
       </div>
       <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
         <div className="rounded-2xl border border-white/10 bg-white/8 px-3 py-3">

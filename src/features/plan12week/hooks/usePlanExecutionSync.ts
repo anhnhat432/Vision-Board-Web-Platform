@@ -11,6 +11,7 @@ import type { TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/stora
 import { getCalendarDateKey } from "@/app/utils/storage-date-utils";
 import { getTwelveWeekCurrentWeek } from "@/app/utils/storage-twelve-week";
 import { DAILY_CHECKIN_METRIC_NAME } from "../constants/progressMetrics";
+import { getUniversalWeeklyReviewExecutionScore } from "../persistence/reviewExecutionScore";
 import {
   getMetricIdForGoal,
   getPlanLink,
@@ -119,7 +120,9 @@ function shouldUpdateRemoteTask(remoteTask: Task, localTask: TwelveWeekTaskInsta
 }
 
 function getReviewExecutionScore(system: TwelveWeekSystem, weekNumber: number, fallback: number): number {
-  return system.scoreboard.find((week) => week.weekNumber === weekNumber)?.weeklyScore ?? fallback;
+  const review = system.weeklyReviews.find((item) => item.weekNumber === weekNumber);
+  if (!review) return fallback;
+  return getUniversalWeeklyReviewExecutionScore(review, fallback);
 }
 
 function hasReviewContent(review: TwelveWeekSystem["weeklyReviews"][number]): boolean {

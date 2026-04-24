@@ -486,7 +486,7 @@ describe("12-week backend sync round trip", () => {
     expect(backendWeek?.metrics.some((metric) => metric.name === DAILY_CHECKIN_METRIC_NAME)).toBe(true);
     expect(backendWeek?.review).toEqual(
       expect.objectContaining({
-        executionScore: 92,
+        executionScore: 78,
         reflection: "Brief shipped",
         adjustments: "Publish",
       }),

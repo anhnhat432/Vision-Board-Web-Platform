@@ -396,7 +396,7 @@ describe("usePlanExecutionSync.syncDailyCheckIn", () => {
     expect(updateWeekReview).toHaveBeenCalledWith(
       "week_1",
       expect.objectContaining({
-        executionScore: 92,
+        executionScore: 78,
         reflection: "Brief shipped",
         adjustments: "Publish",
       }),

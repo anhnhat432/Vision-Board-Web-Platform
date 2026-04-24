@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { isDailyCheckInMetric } from "@/features/plan12week/constants/progressMetrics";
-import { detectBackendPlanConflicts } from "@/features/plan12week/persistence/backendConflictDetector";
+import {
+  detectBackendPlanConflicts,
+  type BackendPlanConflict,
+} from "@/features/plan12week/persistence/backendConflictDetector";
 import {
   getPlanLink,
   savePlanDetailsLink,
@@ -56,8 +59,16 @@ export interface BackendPlanHydrationResult {
   skippedCount: number;
   failedCount: number;
   conflictCount: number;
+  conflicts: BackendPlanHydrationConflict[];
   latestGoalId: string | null;
   message: string;
+}
+
+export interface BackendPlanHydrationConflict extends BackendPlanConflict {
+  goalId: string;
+  goalTitle: string;
+  planId: string;
+  planVision: string;
 }
 
 interface UseBackendPlanHydrationOptions {
@@ -480,7 +491,10 @@ export function buildHydratedGoalFromPlanDetails(
   const hydratedSystem: TwelveWeekSystem = {
     ...systemWithReviews,
     currentWeek,
-    scoreboard: buildDerivedScoreboard(systemWithReviews, getDefaultScoreboard(systemWithReviews.totalWeeks)),
+    scoreboard: preserveBackendReviewScores(
+      buildDerivedScoreboard(systemWithReviews, getDefaultScoreboard(systemWithReviews.totalWeeks)),
+      details,
+    ),
   };
 
   return {
@@ -533,6 +547,39 @@ function persistHydratedGoalLinks(
   }
 }
 
+function buildHydrationConflicts(
+  goal: Goal,
+  plan: Plan,
+  conflicts: BackendPlanConflict[],
+): BackendPlanHydrationConflict[] {
+  return conflicts.map((conflict) => ({
+    ...conflict,
+    goalId: goal.id,
+    goalTitle: goal.title,
+    planId: plan.id,
+    planVision: plan.vision?.trim() ?? "",
+  }));
+}
+
+function preserveBackendReviewScores(
+  scoreboard: TwelveWeekSystem["scoreboard"],
+  details: PlanDetails,
+): TwelveWeekSystem["scoreboard"] {
+  const backendWeekByNumber = getWeekByNumber(details);
+
+  return scoreboard.map((week) => {
+    const backendReview = backendWeekByNumber.get(week.weekNumber)?.review;
+    if (!backendReview) return week;
+
+    return {
+      ...week,
+      outputDone: backendReview.reflection?.trim() || week.outputDone,
+      reviewDone: true,
+      weeklyScore: backendReview.executionScore,
+    };
+  });
+}
+
 function createHydrationResult(
   result: Omit<BackendPlanHydrationResult, "status" | "message">,
 ): BackendPlanHydrationResult {
@@ -571,6 +618,7 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
       skippedCount: 0,
       failedCount: 0,
       conflictCount: 0,
+      conflicts: [],
       latestGoalId: null,
     });
   }
@@ -587,6 +635,7 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
       skippedCount: 0,
       failedCount: 0,
       conflictCount: 0,
+      conflicts: [],
       latestGoalId: null,
     });
   }
@@ -599,6 +648,7 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
   let skippedCount = 0;
   let failedCount = 0;
   let conflictCount = 0;
+  const conflicts: BackendPlanHydrationConflict[] = [];
   let latestGoalId: string | null = null;
 
   detailsResults.forEach((detailsResult, index) => {
@@ -625,6 +675,7 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
         existingPlanLink.taskIdByLocalTaskId,
       );
       conflictCount += conflictReport.conflicts.length;
+      conflicts.push(...buildHydrationConflicts(existingGoal, plan, conflictReport.conflicts));
       skippedCount += 1;
       latestGoalId ??= existingGoal.id;
       return;
@@ -676,8 +727,75 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
     skippedCount,
     failedCount,
     conflictCount,
+    conflicts,
     latestGoalId,
   });
+}
+
+export async function applyBackendPlanSnapshotToLocal(goalId: string): Promise<BackendPlanHydrationResult> {
+  const failedResult = () =>
+    createHydrationResult({
+      hydratedCount: 0,
+      updatedCount: 0,
+      skippedCount: 0,
+      failedCount: 1,
+      conflictCount: 0,
+      conflicts: [],
+      latestGoalId: goalId,
+    });
+
+  if (typeof window === "undefined") return failedResult();
+
+  const data = getUserData();
+  const existingGoalIndex = data.goals.findIndex((goal) => goal.id === goalId);
+  const existingGoal = existingGoalIndex >= 0 ? data.goals[existingGoalIndex] : null;
+  const existingPlanLink = getPlanLink(goalId);
+  if (!existingGoal?.twelveWeekSystem || !existingPlanLink?.planId) return failedResult();
+
+  try {
+    const [apiGoals, details] = await Promise.all([
+      getGoals().catch(() => [] as ApiGoal[]),
+      getPlan(existingPlanLink.planId),
+    ]);
+    const apiGoal = findRelatedApiGoal(apiGoals, details.plan);
+    const buildResult = buildHydratedGoalFromPlanDetails(apiGoal, details, {
+      goalId: existingGoal.id,
+    });
+    const backendSystem = buildResult.goal.twelveWeekSystem;
+    if (!backendSystem) return failedResult();
+
+    const nextGoal: Goal = {
+      ...existingGoal,
+      twelveWeekSystem: backendSystem,
+    };
+
+    data.goals[existingGoalIndex] = nextGoal;
+    if (!saveUserData(data)) return failedResult();
+
+    persistHydratedGoalLinks(existingGoal.id, details, buildResult.taskIdByRemoteTaskId, apiGoal);
+    localStorage.setItem(APP_STORAGE_KEYS.latest12WeekGoalId, existingGoal.id);
+    localStorage.setItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId, existingGoal.id);
+    window.dispatchEvent(new CustomEvent(HYDRATION_EVENT_NAME));
+
+    const latestPlanLink = getPlanLink(existingGoal.id);
+    const conflictReport = detectBackendPlanConflicts(
+      backendSystem,
+      details,
+      latestPlanLink?.taskIdByLocalTaskId ?? {},
+    );
+
+    return createHydrationResult({
+      hydratedCount: 0,
+      updatedCount: 1,
+      skippedCount: 0,
+      failedCount: 0,
+      conflictCount: conflictReport.conflicts.length,
+      conflicts: buildHydrationConflicts(nextGoal, details.plan, conflictReport.conflicts),
+      latestGoalId: existingGoal.id,
+    });
+  } catch {
+    return failedResult();
+  }
 }
 
 export function useBackendPlanHydration(
