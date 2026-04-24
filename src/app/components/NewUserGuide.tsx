@@ -13,14 +13,7 @@ import {
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "./ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 
 interface NewUserGuideBannerProps {
   userData: UserData;
@@ -110,11 +103,7 @@ function StepList({ userData }: { userData: UserData }) {
   );
 }
 
-export function NewUserGuideBanner({
-  userData,
-  variant = "full",
-  onOpenGuide,
-}: NewUserGuideBannerProps) {
+export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: NewUserGuideBannerProps) {
   const navigate = useNavigate();
   const { dismissed, dismiss } = useGuideVisibility();
   const progress = useMemo(() => getNewUserGuideProgress(userData), [userData]);
@@ -133,36 +122,58 @@ export function NewUserGuideBanner({
   const description = userData.isHydratedFromDemo
     ? "Bản hiện tại đã có dữ liệu mẫu sẵn. Hãy dùng checklist này như đường đi ngắn nhất để nhìn rõ flow thật của sản phẩm."
     : "Website này dễ dùng hơn nhiều nếu bạn đi đúng flow: mục tiêu rõ, chu kỳ rõ, rồi mới nhìn hôm nay và review tuần.";
+  const surfaceClass = compact
+    ? "max-w-full overflow-hidden border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]"
+    : "max-w-full overflow-hidden border-0 gradient-dark text-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.58)]";
+  const contentClass = compact ? "p-4" : "p-5 sm:p-6 lg:p-7";
+  const layoutClass = compact
+    ? "grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] lg:items-center"
+    : "grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]";
+  const badgeClass = compact ? "border-slate-200 bg-slate-50 text-slate-600" : "border-white/14 bg-white/10 text-white";
+  const demoBadgeClass = compact
+    ? "border-amber-200 bg-amber-50 text-amber-800"
+    : "border-amber-300/30 bg-amber-200/12 text-amber-100";
+  const descriptionClass = compact ? "text-slate-600" : "text-white/74";
+  const primaryButtonClass = compact
+    ? "w-full justify-center bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
+    : "hero-cta w-full justify-center border-white/12 bg-white text-slate-950 hover:bg-white/92 sm:w-auto";
+  const secondaryButtonClass = compact
+    ? "w-full justify-center border-slate-200 bg-white text-slate-900 hover:bg-slate-50 sm:w-auto"
+    : "w-full justify-center border-white/12 bg-white/10 text-white hover:bg-white/16 hover:text-white sm:w-auto";
+  const ghostButtonClass = compact
+    ? "w-full justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 sm:w-auto"
+    : "w-full justify-center text-white/72 hover:bg-white/10 hover:text-white sm:w-auto";
 
   return (
-    <Card className="max-w-full overflow-hidden border-0 gradient-dark text-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.58)]">
-      <CardContent className={compact ? "p-4 sm:p-5" : "p-5 sm:p-6 lg:p-7"}>
-        <div className={compact ? "space-y-4" : "grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]"}>
-          <div className="space-y-4">
-            <Badge variant="outline" className="border-white/14 bg-white/10 text-white">
+    <Card className={surfaceClass}>
+      <CardContent className={contentClass}>
+        <div className={layoutClass}>
+          <div className={compact ? "space-y-3" : "space-y-4"}>
+            <Badge variant="outline" className={badgeClass}>
               <Compass className="mr-2 h-3.5 w-3.5" />
               Hướng dẫn cho người mới
             </Badge>
             <div>
-              <h2 className={`${compact ? "text-xl" : "text-2xl"} font-bold tracking-normal`}>{title}</h2>
-              <p className="mt-2 max-w-2xl text-sm leading-7 text-white/74">{description}</p>
+              <h2 className={`${compact ? "text-lg text-slate-950" : "text-2xl"} font-bold tracking-normal`}>
+                {title}
+              </h2>
+              <p className={`mt-2 max-w-2xl text-sm leading-7 ${compact ? "line-clamp-2" : ""} ${descriptionClass}`}>
+                {description}
+              </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <Badge variant="outline" className="border-white/14 bg-white/10 text-white">
+              <Badge variant="outline" className={badgeClass}>
                 {progress.completedCount}/{progress.totalSteps} bước đã xong
               </Badge>
               {userData.isHydratedFromDemo && (
-                <Badge variant="outline" className="border-amber-300/30 bg-amber-200/12 text-amber-100">
+                <Badge variant="outline" className={demoBadgeClass}>
                   Bạn đang ở bản demo
                 </Badge>
               )}
             </div>
             <div className="flex flex-wrap gap-3">
               {nextStep && (
-                <Button
-                  onClick={() => navigate(nextStep.href)}
-                  className="hero-cta w-full justify-center border-white/12 bg-white text-slate-950 hover:bg-white/92 sm:w-auto"
-                >
+                <Button onClick={() => navigate(nextStep.href)} className={primaryButtonClass}>
                   {nextStep.ctaLabel}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -177,11 +188,11 @@ export function NewUserGuideBanner({
 
                   emitOpenGuide();
                 }}
-                className="w-full justify-center border-white/12 bg-white/10 text-white hover:bg-white/16 hover:text-white sm:w-auto"
+                className={secondaryButtonClass}
               >
                 Mở hướng dẫn đầy đủ
               </Button>
-              <Button variant="ghost" onClick={dismiss} className="w-full justify-center text-white/72 hover:bg-white/10 hover:text-white sm:w-auto">
+              <Button variant="ghost" onClick={dismiss} className={ghostButtonClass}>
                 Ẩn checklist này
               </Button>
             </div>
@@ -195,10 +206,10 @@ export function NewUserGuideBanner({
           )}
 
           {compact && nextStep && (
-            <div className="rounded-[24px] border border-white/12 bg-white/8 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/52">Bước nên làm tiếp</p>
-              <p className="mt-2 text-base font-semibold">{nextStep.title}</p>
-              <p className="mt-2 text-sm leading-7 text-white/74">{nextStep.description}</p>
+            <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Bước nên làm tiếp</p>
+              <p className="mt-2 text-base font-semibold text-slate-950">{nextStep.title}</p>
+              <p className="mt-2 line-clamp-2 text-sm leading-7 text-slate-600">{nextStep.description}</p>
             </div>
           )}
         </div>
@@ -207,11 +218,7 @@ export function NewUserGuideBanner({
   );
 }
 
-export function NewUserGuideDialog({
-  open,
-  onOpenChange,
-  userData,
-}: NewUserGuideDialogProps) {
+export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuideDialogProps) {
   const navigate = useNavigate();
   const { dismissed, dismiss, restore } = useGuideVisibility();
   const progress = useMemo(() => getNewUserGuideProgress(userData), [userData]);
@@ -237,8 +244,8 @@ export function NewUserGuideDialog({
 
         {userData.isHydratedFromDemo && (
           <div className="rounded-[24px] border border-amber-200 bg-amber-50/90 p-4 text-sm leading-7 text-amber-900">
-            Dữ liệu hiện tại là dữ liệu mẫu để bạn xem nhanh sản phẩm. Khi chuyển sang bản thật, flow chuẩn vẫn là:
-            đo bánh xe cuộc đời, chốt insight, viết SMART goal, kiểm tra feasibility rồi mới vào chu kỳ 12 tuần.
+            Dữ liệu hiện tại là dữ liệu mẫu để bạn xem nhanh sản phẩm. Khi chuyển sang bản thật, flow chuẩn vẫn là: đo
+            bánh xe cuộc đời, chốt insight, viết SMART goal, kiểm tra feasibility rồi mới vào chu kỳ 12 tuần.
           </div>
         )}
 
@@ -271,7 +278,9 @@ export function NewUserGuideDialog({
               {dismissed ? "Hiện lại checklist" : "Ẩn checklist"}
             </Button>
           </div>
-          <div className="flex flex-wrap gap-2">            <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <div className="flex flex-wrap gap-2">
+            {" "}
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
               Để sau
             </Button>
             {nextStep && (
