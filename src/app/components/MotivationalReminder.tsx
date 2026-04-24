@@ -37,18 +37,18 @@ export function MotivationalReminder() {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 50 }}
-      className="fixed bottom-4 left-4 right-4 z-50 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-md"
+      className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-3 right-3 z-50 sm:bottom-6 sm:left-auto sm:right-6 sm:w-full sm:max-w-md"
       role="status"
       aria-live="polite"
     >
-      <Card className="border-0 gradient-dark-teal text-white shadow-2xl">
+      <Card className="max-w-full overflow-hidden border-0 gradient-dark-teal text-white shadow-2xl">
         <CardContent className="space-y-4 p-4">
           {reminder ? (
             <div className="flex items-start gap-3">
               <BellRing className="mt-1 h-6 w-6 flex-shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="font-semibold">{reminder.title}</p>
-                <p className="mt-1 text-sm text-white/82">{reminder.description}</p>
+                <p className="break-words font-semibold">{reminder.title}</p>
+                <p className="mt-1 break-words text-sm text-white/82">{reminder.description}</p>
                 <Button
                   size="sm"
                   variant="outline"

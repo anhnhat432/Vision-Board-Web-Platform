@@ -57,7 +57,7 @@ export function MockBillingCheckout() {
         <Card className="overflow-hidden border-0 gradient-dark-indigo text-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.52)]">
           <CardContent className="p-8 lg:p-10">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Bản demo thanh toán</p>
-            <h1 className="mt-3 text-4xl font-bold tracking-[-0.05em]">Phiên checkout này không còn hợp lệ.</h1>
+            <h1 className="mt-3 text-4xl font-bold tracking-normal">Phiên checkout này không còn hợp lệ.</h1>
             <p className="mt-3 max-w-2xl text-base leading-8 text-white/74">
               Có thể bạn đã hoàn tất, hủy phiên này trước đó, hoặc tab checkout đã mở quá lâu.
             </p>
@@ -95,7 +95,7 @@ export function MockBillingCheckout() {
               Checkout mô phỏng
             </div>
             <div>
-              <h1 className="text-4xl font-bold tracking-[-0.05em]">Xác nhận mở gói {plan.name}</h1>
+              <h1 className="text-4xl font-bold tracking-normal">Xác nhận mở gói {plan.name}</h1>
               <p className="mt-3 max-w-2xl text-base leading-8 text-white/74">
                 Đây là bước mô phỏng checkout để bạn test trọn flow nâng cấp, khôi phục quyền và quay lại app
                 mà chưa cần nối backend thanh toán thật.

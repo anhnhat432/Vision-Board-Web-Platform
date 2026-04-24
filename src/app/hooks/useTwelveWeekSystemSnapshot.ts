@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router";
 
+import { useBackendProgressOverlay } from "./useBackendProgressOverlay";
 import type { BillingActionSnapshot, BillingProviderStatus } from "../utils/billing-contract";
 import type { BrowserNotificationStatus, OutboxSyncSnapshot } from "../utils/production";
 import {
@@ -173,29 +174,34 @@ export function useTwelveWeekSystemSnapshot() {
   }, [location.search]);
 
   const system = activeGoal?.twelveWeekSystem ?? null;
-  const currentWeek = system ? getTwelveWeekCurrentWeek(system) : 1;
-  const currentWeekRange = system ? getTwelveWeekWeekRange(system, currentWeek) : null;
-  const currentWeekTasks = system ? getTwelveWeekTasksForWeek(system, currentWeek) : [];
-  const scheduledTodayTasks = system ? getTwelveWeekTodayTasks(system) : [];
-  const missedTasks = system ? getTwelveWeekMissedTasks(system) : [];
+  const {
+    effectiveSystem,
+    refresh: refreshBackendProgressOverlay,
+  } = useBackendProgressOverlay(activeGoal?.id ?? null, system);
+
+  const currentWeek = effectiveSystem ? getTwelveWeekCurrentWeek(effectiveSystem) : 1;
+  const currentWeekRange = effectiveSystem ? getTwelveWeekWeekRange(effectiveSystem, currentWeek) : null;
+  const currentWeekTasks = effectiveSystem ? getTwelveWeekTasksForWeek(effectiveSystem, currentWeek) : [];
+  const scheduledTodayTasks = effectiveSystem ? getTwelveWeekTodayTasks(effectiveSystem) : [];
+  const missedTasks = effectiveSystem ? getTwelveWeekMissedTasks(effectiveSystem) : [];
   const fallbackTasks = currentWeekTasks.filter((task) => !task.completed).slice(0, 3);
   const todayQueue = dedupeTasks([
     ...missedTasks.slice(0, 2),
     ...(scheduledTodayTasks.length > 0 ? scheduledTodayTasks : fallbackTasks),
   ]);
-  const weekCompletion = system
-    ? getTwelveWeekWeekCompletion(system, currentWeek)
+  const weekCompletion = effectiveSystem
+    ? getTwelveWeekWeekCompletion(effectiveSystem, currentWeek)
     : { completed: 0, total: 0, percent: 0 };
-  const currentReview = system?.weeklyReviews.find((review) => review.weekNumber === currentWeek) ?? null;
-  const currentScore = system?.scoreboard.find((week) => week.weekNumber === currentWeek) ?? null;
-  const currentPlan = system?.weeklyPlans.find((plan) => plan.weekNumber === currentWeek) ?? null;
+  const currentReview = effectiveSystem?.weeklyReviews.find((review) => review.weekNumber === currentWeek) ?? null;
+  const currentScore = effectiveSystem?.scoreboard.find((week) => week.weekNumber === currentWeek) ?? null;
+  const currentPlan = effectiveSystem?.weeklyPlans.find((plan) => plan.weekNumber === currentWeek) ?? null;
   const currentPlanFocus = currentPlan?.focus ?? DEFAULT_WEEK_FOCUS;
   const currentPlanMilestone = currentPlan?.milestone ?? "";
-  const currentLagMetricValue = currentReview?.lagProgressValue || system?.lagMetric.currentValue || "";
+  const currentLagMetricValue = currentReview?.lagProgressValue || effectiveSystem?.lagMetric.currentValue || "";
   const latestCheckIn = getLatestDailyCheckIn(activeGoal);
-  const reviewDoneCount = system?.scoreboard.filter((week) => week.reviewDone).length ?? 0;
-  const coreTacticCount = system ? system.leadIndicators.filter((indicator) => indicator.type !== "optional").length : 0;
-  const optionalTacticCount = system ? system.leadIndicators.filter((indicator) => indicator.type === "optional").length : 0;
+  const reviewDoneCount = effectiveSystem?.scoreboard.filter((week) => week.reviewDone).length ?? 0;
+  const coreTacticCount = effectiveSystem ? effectiveSystem.leadIndicators.filter((indicator) => indicator.type !== "optional").length : 0;
+  const optionalTacticCount = effectiveSystem ? effectiveSystem.leadIndicators.filter((indicator) => indicator.type === "optional").length : 0;
   const todayCompletedCount = todayQueue.filter((task) => task.completed).length;
   const todayRemainingCount = todayQueue.filter((task) => !task.completed).length;
   const overdueOpenCount = missedTasks.filter((task) => !task.completed).length;
@@ -205,20 +211,23 @@ export function useTwelveWeekSystemSnapshot() {
   const firstPriorityTask = openTodayTasks[0] ?? null;
   const secondaryTodayTasks = openTodayTasks.slice(1);
   const averageScore =
-    system && system.scoreboard.length > 0
-      ? Math.round(system.scoreboard.reduce((sum, week) => sum + week.weeklyScore, 0) / system.scoreboard.length)
+    effectiveSystem && effectiveSystem.scoreboard.length > 0
+      ? Math.round(
+          effectiveSystem.scoreboard.reduce((sum, week) => sum + week.weeklyScore, 0) /
+            effectiveSystem.scoreboard.length,
+        )
       : 0;
-  const reviewDueToday = Boolean(system && isTwelveWeekReviewDueToday(system));
+  const reviewDueToday = Boolean(effectiveSystem && isTwelveWeekReviewDueToday(effectiveSystem));
   const currentWeekScoreValue = currentScore?.weeklyScore ?? weekCompletion.percent;
   const reviewStatusLabel = reviewDueToday
     ? "Đến hạn hôm nay"
-    : `Review vào ${getReviewDayLabel(system?.reviewDay ?? "Sunday")}`;
-  const coreIndicators = system?.leadIndicators.filter((indicator) => indicator.type !== "optional") ?? [];
-  const optionalIndicators = system?.leadIndicators.filter((indicator) => indicator.type === "optional") ?? [];
+    : `Review vào ${getReviewDayLabel(effectiveSystem?.reviewDay ?? "Sunday")}`;
+  const coreIndicators = effectiveSystem?.leadIndicators.filter((indicator) => indicator.type !== "optional") ?? [];
+  const optionalIndicators = effectiveSystem?.leadIndicators.filter((indicator) => indicator.type === "optional") ?? [];
   const hasSmartRescue = hasEntitlement("priority_reminders");
   const rescuePlanSummary = buildRescuePlanSummary({ missedTasks, currentWeekTasks });
   const activeTriggers = evaluateRescueTriggers({
-    system,
+    system: effectiveSystem,
     subscription: activeSubscription,
     missedTasksCount: overdueOpenCount,
     weekCompletionPercent: weekCompletion.percent,
@@ -245,25 +254,28 @@ export function useTwelveWeekSystemSnapshot() {
   });
   const hasAdvancedAnalytics = hasEntitlement("advanced_analytics");
   const executionHeatmap = useMemo(
-    () => (system && hasAdvancedAnalytics ? buildExecutionHeatmap(system) : []),
-    [system, hasAdvancedAnalytics],
+    () => (effectiveSystem && hasAdvancedAnalytics ? buildExecutionHeatmap(effectiveSystem) : []),
+    [effectiveSystem, hasAdvancedAnalytics],
   );
   const weeklyTrend = useMemo(
-    () => (system && hasAdvancedAnalytics ? buildWeeklyTrend(system) : []),
-    [system, hasAdvancedAnalytics],
+    () => (effectiveSystem && hasAdvancedAnalytics ? buildWeeklyTrend(effectiveSystem) : []),
+    [effectiveSystem, hasAdvancedAnalytics],
   );
   const tacticBreakdown = useMemo(
-    () => (system && hasAdvancedAnalytics ? buildTacticBreakdown(system, currentWeek) : []),
-    [system, hasAdvancedAnalytics, currentWeek],
+    () => (effectiveSystem && hasAdvancedAnalytics ? buildTacticBreakdown(effectiveSystem, currentWeek) : []),
+    [effectiveSystem, hasAdvancedAnalytics, currentWeek],
   );
   const milestoneItems = useMemo(
     () => [
-      { label: "Tuần 4", value: system?.milestones.week4 || "Chưa đặt cột mốc cho tuần 4." },
-      { label: "Tuần 8", value: system?.milestones.week8 || "Chưa đặt cột mốc cho tuần 8." },
-      { label: "Tuần 12", value: system?.milestones.week12 || system?.week12Outcome || "Chưa có outcome cuối chu kỳ." },
-      { label: "Dấu hiệu thành công", value: system?.successEvidence || "Chưa thêm bằng chứng thành công." },
+      { label: "Tuần 4", value: effectiveSystem?.milestones.week4 || "Chưa đặt cột mốc cho tuần 4." },
+      { label: "Tuần 8", value: effectiveSystem?.milestones.week8 || "Chưa đặt cột mốc cho tuần 8." },
+      {
+        label: "Tuần 12",
+        value: effectiveSystem?.milestones.week12 || effectiveSystem?.week12Outcome || "Chưa có outcome cuối chu kỳ.",
+      },
+      { label: "Dấu hiệu thành công", value: effectiveSystem?.successEvidence || "Chưa thêm bằng chứng thành công." },
     ],
-    [system],
+    [effectiveSystem],
   );
 
   return {
@@ -288,7 +300,7 @@ export function useTwelveWeekSystemSnapshot() {
     pendingOutboxCount,
     archivedOutboxCount,
     eventCount,
-    system,
+    system: effectiveSystem,
     currentWeek,
     currentWeekRange,
     currentWeekTasks,
@@ -332,6 +344,7 @@ export function useTwelveWeekSystemSnapshot() {
     updateActiveGoalState,
     updateActiveSystemState,
     refreshSnapshotMeta,
+    refreshBackendProgressOverlay,
     loadGoalData,
   };
 }

@@ -135,8 +135,8 @@ export function NewUserGuideBanner({
     : "Website này dễ dùng hơn nhiều nếu bạn đi đúng flow: mục tiêu rõ, chu kỳ rõ, rồi mới nhìn hôm nay và review tuần.";
 
   return (
-    <Card className="overflow-hidden border-0 gradient-dark text-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.58)]">
-      <CardContent className={compact ? "p-5" : "p-6 lg:p-7"}>
+    <Card className="max-w-full overflow-hidden border-0 gradient-dark text-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.58)]">
+      <CardContent className={compact ? "p-4 sm:p-5" : "p-5 sm:p-6 lg:p-7"}>
         <div className={compact ? "space-y-4" : "grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]"}>
           <div className="space-y-4">
             <Badge variant="outline" className="border-white/14 bg-white/10 text-white">
@@ -144,7 +144,7 @@ export function NewUserGuideBanner({
               Hướng dẫn cho người mới
             </Badge>
             <div>
-              <h2 className={`${compact ? "text-xl" : "text-2xl"} font-bold tracking-[-0.03em]`}>{title}</h2>
+              <h2 className={`${compact ? "text-xl" : "text-2xl"} font-bold tracking-normal`}>{title}</h2>
               <p className="mt-2 max-w-2xl text-sm leading-7 text-white/74">{description}</p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
@@ -161,7 +161,7 @@ export function NewUserGuideBanner({
               {nextStep && (
                 <Button
                   onClick={() => navigate(nextStep.href)}
-                  className="hero-cta border-white/12 bg-white text-slate-950 hover:bg-white/92"
+                  className="hero-cta w-full justify-center border-white/12 bg-white text-slate-950 hover:bg-white/92 sm:w-auto"
                 >
                   {nextStep.ctaLabel}
                   <ArrowRight className="h-4 w-4" />
@@ -177,11 +177,11 @@ export function NewUserGuideBanner({
 
                   emitOpenGuide();
                 }}
-                className="border-white/12 bg-white/10 text-white hover:bg-white/16 hover:text-white"
+                className="w-full justify-center border-white/12 bg-white/10 text-white hover:bg-white/16 hover:text-white sm:w-auto"
               >
                 Mở hướng dẫn đầy đủ
               </Button>
-              <Button variant="ghost" onClick={dismiss} className="text-white/72 hover:bg-white/10 hover:text-white">
+              <Button variant="ghost" onClick={dismiss} className="w-full justify-center text-white/72 hover:bg-white/10 hover:text-white sm:w-auto">
                 Ẩn checklist này
               </Button>
             </div>
@@ -225,7 +225,7 @@ export function NewUserGuideDialog({
             <Sparkles className="h-3.5 w-3.5" />
             Hướng dẫn sử dụng
           </div>
-          <DialogTitle className="text-xl tracking-[-0.03em] text-slate-950 sm:text-2xl">
+          <DialogTitle className="text-xl tracking-normal text-slate-950 sm:text-2xl">
             {userData.isHydratedFromDemo ? "Khám phá bản demo theo 4 bước." : "Đi web này theo 4 bước là dễ nhất."}
           </DialogTitle>
           <DialogDescription className="text-sm leading-7 text-slate-600">
@@ -291,4 +291,3 @@ export function NewUserGuideDialog({
     </Dialog>
   );
 }
-

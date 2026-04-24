@@ -350,15 +350,6 @@ export function useBackendProgressOverlayMap(
     [entries],
   );
 
-  const fetchKey = useMemo(
-    () =>
-      normalizedEntries
-        .map((entry) => `${entry.goalId}:${getPlanLink(entry.goalId)?.planId ?? ""}`)
-        .sort()
-        .join("|"),
-    [normalizedEntries],
-  );
-
   useEffect(() => {
     if (!user || normalizedEntries.length === 0) {
       setDetailsByGoalId({});
@@ -403,7 +394,7 @@ export function useBackendProgressOverlayMap(
     return () => {
       cancelled = true;
     };
-  }, [fetchKey, user]);
+  }, [normalizedEntries, user]);
 
   return useMemo(() => {
     if (normalizedEntries.length === 0) return EMPTY_OVERLAY_MAP;

@@ -199,7 +199,7 @@ export function BillingPlan() {
               <CreditCard className="h-4 w-4" />
               Gói & thanh toán
             </div>
-            <h1 className="mt-4 max-w-3xl text-2xl font-bold tracking-[-0.05em] sm:text-3xl lg:text-4xl">
+            <h1 className="mt-4 max-w-3xl text-2xl font-bold tracking-normal sm:text-3xl lg:text-4xl">
               Quản lý gói của bạn
             </h1>
             <p className="mt-2 max-w-2xl text-base leading-8 text-white/82">

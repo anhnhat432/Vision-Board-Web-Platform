@@ -1,6 +1,7 @@
 import { render } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 
+import { AuthProvider } from "../lib/auth/AuthContext";
 import { TwelveWeekSetup } from "../app/pages/12WeekSetup";
 import { TwelveWeekSystem } from "../app/pages/12WeekSystem";
 import { MockBillingCheckout } from "../app/pages/MockBillingCheckout";
@@ -284,7 +285,11 @@ export function renderAppRoute(initialEntry: string): {
     },
   );
 
-  const ui = render(<RouterProvider router={router} />);
+  const ui = render(
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>,
+  );
   return { router, ui };
 }
 

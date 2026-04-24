@@ -21,3 +21,14 @@ export async function createMetricLog(req: Request, res: Response): Promise<void
   const metric = await metricService.logLeadMetric(user.uid, req.params.metricId, req.body ?? {});
   res.status(200).json(successResponse(metric));
 }
+
+export async function updateMetricLog(req: Request, res: Response): Promise<void> {
+  const user = requireAuthUser(req);
+  const metric = await metricService.updateLeadMetricLog(
+    user.uid,
+    req.params.metricId,
+    req.params.logId,
+    req.body ?? {},
+  );
+  res.status(200).json(successResponse(metric));
+}

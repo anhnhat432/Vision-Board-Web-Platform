@@ -25,6 +25,7 @@ import { Input } from "../components/ui/input";
 import { LoadingSpinner } from "../components/ui/loading-spinner";
 import { Progress } from "../components/ui/progress";
 import { Reveal } from "../components/ui/reveal";
+import { useBackendProgressOverlayMap } from "../hooks/useBackendProgressOverlay";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useUpgradeDialog } from "../hooks/useUpgradeDialog";
 import {
@@ -141,8 +142,35 @@ function GoalTrackerContent({
     if (leftDays !== rightDays) return leftDays - rightDays;
     return left.title.localeCompare(right.title, "vi");
   });
-  const twelveWeekGoals = goals.filter((goal) => Boolean(goal.twelveWeekSystem));
-  const standardGoals = goals.filter((goal) => !goal.twelveWeekSystem);
+  const backendSystemsByGoalId = useBackendProgressOverlayMap(
+    useMemo(
+      () =>
+        goals
+          .filter((goal) => Boolean(goal.twelveWeekSystem))
+          .map((goal) => ({
+            goalId: goal.id,
+            system: goal.twelveWeekSystem,
+          })),
+      [goals],
+    ),
+  );
+  const effectiveGoals = useMemo(
+    () =>
+      goals.map((goal) => {
+        if (!goal.twelveWeekSystem) return goal;
+
+        const effectiveSystem = backendSystemsByGoalId.get(goal.id);
+        if (!effectiveSystem) return goal;
+
+        return {
+          ...goal,
+          twelveWeekSystem: effectiveSystem,
+        };
+      }),
+    [backendSystemsByGoalId, goals],
+  );
+  const twelveWeekGoals = effectiveGoals.filter((goal) => Boolean(goal.twelveWeekSystem));
+  const standardGoals = effectiveGoals.filter((goal) => !goal.twelveWeekSystem);
 
   const filteredTwelveWeekGoals = useMemo(() => {
     if (!searchQuery.trim()) return twelveWeekGoals;
@@ -280,20 +308,20 @@ function GoalTrackerContent({
   };
 
   const summary = {
-    totalGoals: userData.goals.length,
-    completedGoals: userData.goals.filter((goal) => calculateGoalProgress(goal) === 100).length,
-    completedTasks: userData.goals.reduce((sum, goal) => sum + getGoalExecutionStats(goal).completed, 0),
-    totalTasks: userData.goals.reduce((sum, goal) => sum + getGoalExecutionStats(goal).total, 0),
-    activeSystems: userData.goals.filter((goal) => Boolean(goal.twelveWeekSystem)).length,
-    dueSoon: userData.goals.filter((goal) => {
+    totalGoals: effectiveGoals.length,
+    completedGoals: effectiveGoals.filter((goal) => calculateGoalProgress(goal) === 100).length,
+    completedTasks: effectiveGoals.reduce((sum, goal) => sum + getGoalExecutionStats(goal).completed, 0),
+    totalTasks: effectiveGoals.reduce((sum, goal) => sum + getGoalExecutionStats(goal).total, 0),
+    activeSystems: effectiveGoals.filter((goal) => Boolean(goal.twelveWeekSystem)).length,
+    dueSoon: effectiveGoals.filter((goal) => {
       const daysLeft = getCalendarDayDifference(goal.deadline);
       return calculateGoalProgress(goal) < 100 && daysLeft !== null && daysLeft >= 0 && daysLeft <= 7;
     }).length,
-    overdue: userData.goals.filter((goal) => {
+    overdue: effectiveGoals.filter((goal) => {
       const daysLeft = getCalendarDayDifference(goal.deadline);
       return calculateGoalProgress(goal) < 100 && daysLeft !== null && daysLeft < 0;
     }).length,
-    reviewDue: userData.goals.filter((goal) => getGoalExecutionStats(goal).reviewDueToday).length,
+    reviewDue: effectiveGoals.filter((goal) => getGoalExecutionStats(goal).reviewDueToday).length,
   };
 
   const summaryCards = [

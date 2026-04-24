@@ -21,7 +21,6 @@ export function generateExecutionSuggestion(score: number): string {
       return "Execution is stable. Keep the current weekly plan.";
     case "at_risk":
       return "Execution is slipping. Reduce weekly tasks to regain consistency.";
-    case "critical":
     default:
       return "Execution is critical. Simplify the plan and focus on one key task.";
   }

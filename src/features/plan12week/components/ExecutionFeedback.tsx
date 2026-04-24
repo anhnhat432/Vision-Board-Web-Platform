@@ -17,7 +17,6 @@ function getStatusLabel(status: ReturnType<typeof interpretExecutionScore>): str
       return "On Track";
     case "at_risk":
       return "At Risk";
-    case "critical":
     default:
       return "Critical";
   }
