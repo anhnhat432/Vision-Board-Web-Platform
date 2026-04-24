@@ -94,19 +94,19 @@ export function Onboarding() {
 
   if (step === "welcome") {
     return (
-      <div className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
+      <div className="flow-shell min-h-screen px-4 py-6 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55 }}
-          className="mx-auto max-w-6xl"
+          className="mx-auto w-full max-w-6xl"
         >
-          <Card className="hero-surface overflow-hidden border-0 text-white">
-            <CardContent className="relative p-8 lg:p-10 xl:p-12">
+          <Card className="hero-surface flow-surface overflow-hidden">
+            <CardContent className="relative p-5 sm:p-6 lg:p-7 xl:p-8">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_24%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.1),_transparent_24%)] opacity-90" />
 
-              <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.12fr)_360px]">
-                <div className="space-y-8">
+              <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.12fr)_360px]">
+                <div className="space-y-6">
                   {isReturning && (
                     <div className="rounded-[20px] border border-white/20 bg-white/12 px-4 py-3 text-sm text-white/84 backdrop-blur-xl">
                       <span className="font-semibold text-white">Bạn đã hoàn thành onboarding rồi.</span>{" "}
@@ -120,7 +120,7 @@ export function Onboarding() {
                     </div>
 
                     <div className="space-y-4">
-                      <h1 className="max-w-3xl text-4xl font-bold tracking-normal lg:text-5xl">
+                      <h1 className="max-w-3xl text-3xl font-bold tracking-normal lg:text-4xl">
                         {isReturning
                           ? "Điểm số thay đổi? Hãy cập nhật lại để insight bám sát thực tế hơn."
                           : "Tạo một điểm bắt đầu đủ rõ để phần còn lại của hành trình trở nên nhẹ hơn."}
@@ -148,7 +148,7 @@ export function Onboarding() {
                     {JOURNEY_STEPS.map((item, index) => (
                       <div
                         key={item.title}
-                        className="rounded-[26px] border border-white/14 bg-black/10 p-5 backdrop-blur-2xl"
+                        className="flow-panel p-4"
                       >
                         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/12 text-sm font-semibold">
                           0{index + 1}
@@ -162,7 +162,7 @@ export function Onboarding() {
                   <div className="flex flex-wrap gap-3">
                     <Button
                       variant="outline"
-                      className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92"
+                      className="hero-cta w-full border-white/18 bg-white text-slate-900 hover:bg-white/92 sm:w-auto"
                       onClick={() => setStep("assessment")}
                     >
                       Bắt đầu đánh giá
@@ -170,7 +170,7 @@ export function Onboarding() {
                     </Button>
                     <Button
                       variant="outline"
-                      className="border-white/18 bg-white/12 text-white hover:bg-white/18 hover:text-white"
+                      className="w-full border-white/18 bg-white/12 text-white hover:bg-white/18 hover:text-white sm:w-auto"
                       onClick={() => navigate("/")}
                     >
                       Xem bảng điều khiển
@@ -178,7 +178,7 @@ export function Onboarding() {
                   </div>
                 </div>
 
-                <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+                <div className="flow-panel p-5 sm:p-6">
                   <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white/62">
                     Bạn sẽ nhận được gì
                   </p>
@@ -192,7 +192,7 @@ export function Onboarding() {
                     ].map((item) => (
                       <div
                         key={item}
-                        className="flex items-start gap-3 rounded-[22px] border border-white/10 bg-black/10 p-4"
+                        className="flow-muted flex items-start gap-3 p-4"
                       >
                         <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/14">
                           <Check className="h-4 w-4" />
@@ -202,7 +202,7 @@ export function Onboarding() {
                     ))}
                   </div>
 
-                  <div className="mt-6 rounded-[24px] border border-white/10 bg-black/12 p-5">
+                  <div className="flow-muted mt-6 p-5">
                     <p className="text-xs uppercase tracking-[0.18em] text-white/55">
                       Thời lượng ước tính
                     </p>
@@ -225,34 +225,34 @@ export function Onboarding() {
   }
 
   return (
-    <div className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
+    <div className="flow-shell min-h-screen px-4 py-6 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.55 }}
-        className="mx-auto max-w-6xl space-y-6"
+        className="mx-auto w-full max-w-6xl space-y-5"
       >
-        <Card className="hero-surface overflow-hidden border-0 text-white">
-          <CardContent className="relative p-8 lg:p-10">
+        <Card className="hero-surface flow-surface overflow-hidden">
+          <CardContent className="relative p-5 sm:p-6 lg:p-7">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.1),_transparent_26%)] opacity-90" />
 
-            <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
+            <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
               <div className="space-y-5">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Compass className="h-4 w-4" />
                   Bước 1/1: Đánh giá bánh xe cuộc sống
                 </div>
                 {/* Mini progress bar */}
-                <div className="mt-3 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-white/20">
+                <div className="mt-3 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-slate-200">
                   <motion.div
-                    className="h-full rounded-full bg-white/80"
+                    className="h-full rounded-full bg-slate-900"
                     initial={{ width: 0 }}
                     animate={{ width: `${(lifeAreas.filter((a) => a.score !== 5).length / lifeAreas.length) * 100}%` }}
                     transition={{ type: "spring", stiffness: 200, damping: 30 }}
                   />
                 </div>
                 <div className="space-y-3">
-                  <h1 className="max-w-3xl text-4xl font-bold tracking-normal lg:text-5xl">
+                  <h1 className="max-w-3xl text-3xl font-bold tracking-normal lg:text-4xl">
                     Chấm điểm hiện tại để biết chính xác nơi bạn nên bắt đầu.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
@@ -282,7 +282,7 @@ export function Onboarding() {
                 ].map((item) => (
                   <div
                     key={item.label}
-                    className="rounded-[24px] border border-white/14 bg-black/12 p-4 backdrop-blur-2xl"
+                    className="flow-panel p-4"
                   >
                     <p className="text-xs uppercase tracking-[0.18em] text-white/56">{item.label}</p>
                     <p className="mt-2 text-2xl font-bold text-white">{item.value}</p>
@@ -294,16 +294,16 @@ export function Onboarding() {
           </CardContent>
         </Card>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <Card className="overflow-hidden">
-            <CardContent className="space-y-4 p-6 lg:p-7">
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <Card className="flow-panel overflow-hidden">
+            <CardContent className="space-y-4 p-5 sm:p-6 lg:p-7">
               {lifeAreas.map((area, index) => (
                 <motion.div
                   key={area.name}
                   initial={{ opacity: 0, x: -18 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="rounded-[26px] border border-white/70 bg-white/66 p-5 shadow-[0_18px_42px_-30px_rgba(15,23,42,0.3)]"
+                  className="flow-panel p-4 sm:p-5"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
@@ -364,8 +364,8 @@ export function Onboarding() {
             </CardContent>
           </Card>
 
-          <div className="space-y-6 xl:sticky xl:top-28">
-            <Card>
+          <div className="space-y-5 xl:sticky xl:top-28">
+            <Card className="flow-panel">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -379,13 +379,13 @@ export function Onboarding() {
                       Điểm trung bình cho bức tranh cuộc sống hiện tại của bạn.
                     </p>
                   </div>
-                  <div className="flex h-14 w-14 items-center justify-center rounded-[22px] bg-violet-50 text-violet-700">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-violet-50 text-violet-700">
                     <BarChart3 className="h-6 w-6" />
                   </div>
                 </div>
 
                 <div className="mt-6 space-y-3">
-                  <div className="rounded-[22px] border border-emerald-100 bg-emerald-50/80 p-4">
+                  <div className="rounded-lg border border-emerald-100 bg-emerald-50/80 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700/70">
                       Điểm mạnh nhất
                     </p>
@@ -395,7 +395,7 @@ export function Onboarding() {
                     <p className="mt-1 text-sm text-emerald-800/80">{strongestArea.score}/10</p>
                   </div>
 
-                  <div className="rounded-[22px] border border-amber-100 bg-amber-50/85 p-4">
+                  <div className="rounded-lg border border-amber-100 bg-amber-50/85 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700/70">
                       Nên ưu tiên tiếp theo
                     </p>
@@ -408,10 +408,10 @@ export function Onboarding() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="flow-panel">
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-[20px] bg-violet-50 text-violet-700">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-violet-50 text-violet-700">
                     <Target className="h-5 w-5" />
                   </div>
                   <div>
@@ -430,7 +430,7 @@ export function Onboarding() {
                   ].map((item) => (
                     <div
                       key={item}
-                      className="flex items-start gap-3 rounded-[20px] border border-white/70 bg-white/70 p-4"
+                      className="flow-muted flex items-start gap-3 p-4"
                     >
                       <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-violet-100 text-violet-700">
                         <Check className="h-3.5 w-3.5" />
