@@ -22,6 +22,11 @@ import { maybeShowBrowserReminderNotification, syncPendingOutbox } from "../util
 import { getUserData, initializeUserData } from "../utils/storage";
 import { getNewUserGuideProgress, hasSeenNewUserGuide, isNewUserGuideDismissed, markNewUserGuideSeen } from "../utils/new-user-guide";
 import { isDemoMode } from "../utils/app-mode";
+import { useAuthContext } from "@/lib/auth/AuthContext";
+import {
+  BACKEND_PLAN_HYDRATION_EVENT_NAME,
+  useBackendPlanHydration,
+} from "../hooks/useBackendPlanHydration";
 import { useTheme } from "../hooks/useTheme";
 import { MotivationalReminder } from "./MotivationalReminder";
 import { NewUserGuideDialog } from "./NewUserGuide";
@@ -165,6 +170,11 @@ export function RootLayout() {
   const location = useLocation();
   const outlet = useOutlet();
   const demoMode = isDemoMode();
+  const { authLoading, isConfigured, userProfile } = useAuthContext();
+  const backendPlanHydration = useBackendPlanHydration({
+    enabled: !demoMode && isConfigured && Boolean(userProfile),
+    scopeKey: userProfile?.id ?? null,
+  });
   const { resolvedTheme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [guideUserData, setGuideUserData] = useState(() => getUserData());
@@ -179,10 +189,12 @@ export function RootLayout() {
     const userData = getUserData();
     setGuideUserData(userData);
 
+    if (!demoMode && isConfigured && (authLoading || backendPlanHydration.loading)) return;
+
     if (!demoMode && !userData.onboardingCompleted && location.pathname !== "/onboarding") {
       navigate("/onboarding");
     }
-  }, [demoMode, location.pathname, navigate]);
+  }, [authLoading, backendPlanHydration.loading, demoMode, isConfigured, location.pathname, navigate]);
 
   useEffect(() => {
     if (location.pathname) {
@@ -214,10 +226,15 @@ export function RootLayout() {
       setGuideUserData(getUserData());
       setIsGuideOpen(true);
     };
+    const handleBackendHydrated = () => {
+      setGuideUserData(getUserData());
+    };
     window.addEventListener("visionboard:open-guide", handleOpenGuide);
+    window.addEventListener(BACKEND_PLAN_HYDRATION_EVENT_NAME, handleBackendHydrated);
 
     return () => {
       window.removeEventListener("visionboard:open-guide", handleOpenGuide);
+      window.removeEventListener(BACKEND_PLAN_HYDRATION_EVENT_NAME, handleBackendHydrated);
     };
   }, []);
 
