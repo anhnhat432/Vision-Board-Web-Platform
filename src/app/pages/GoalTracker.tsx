@@ -330,19 +330,17 @@ function GoalTrackerContent({
       value: summary.totalGoals,
       note: "đang cần được giữ nhịp",
       icon: Target,
-      cardClass:
-        "border-0 gradient-dark text-white shadow-[0_28px_65px_-38px_rgba(15,23,42,0.62)]",
-      iconClass: "bg-white/10 text-white",
-      titleClass: "text-white/56",
-      noteClass: "text-white/68",
+      cardClass: "flow-panel",
+      iconClass: "bg-slate-100 text-slate-900",
+      titleClass: "text-slate-500",
+      noteClass: "text-slate-600",
     },
     {
       title: "Việc đã chốt",
       value: summary.completedTasks,
       note: `trên tổng số ${summary.totalTasks}`,
       icon: CheckCircle2,
-      cardClass:
-        "border-0 gradient-emerald shadow-[0_24px_55px_-34px_rgba(5,150,105,0.18)]",
+      cardClass: "flow-panel",
       iconClass: "bg-white/80 text-emerald-700",
       titleClass: "text-slate-500",
       noteClass: "text-slate-600",
@@ -352,8 +350,7 @@ function GoalTrackerContent({
       value: summary.dueSoon,
       note: "mục tiêu trong 7 ngày tới",
       icon: Clock3,
-      cardClass:
-        "border-0 gradient-amber shadow-[0_24px_55px_-34px_rgba(217,119,6,0.18)]",
+      cardClass: "flow-panel",
       iconClass: "bg-white/80 text-amber-700",
       titleClass: "text-slate-500",
       noteClass: "text-slate-600",
@@ -363,8 +360,7 @@ function GoalTrackerContent({
       value: summary.activeSystems,
       note: "đang chạy theo hệ thống",
       icon: Zap,
-      cardClass:
-        "border-0 gradient-blue shadow-[0_24px_55px_-34px_rgba(37,99,235,0.2)]",
+      cardClass: "flow-panel",
       iconClass: "bg-white/80 text-sky-700",
       titleClass: "text-slate-500",
       noteClass: "text-slate-600",
@@ -390,9 +386,9 @@ function GoalTrackerContent({
     return (
       <Card
         key={goal.id}
-        className={`overflow-hidden border-0 shadow-[0_28px_70px_-38px_rgba(15,23,42,0.22)] ${system ? "gradient-indigo" : "gradient-slate"}`}
+        className="flow-panel overflow-hidden"
       >
-        <CardContent className="grid gap-5 p-6 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)]">
+        <CardContent className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)]">
           <div className="rounded-[26px] gradient-dark p-5 text-white">
             <div className="flex items-start justify-between gap-3">
               <Badge className="text-white" style={{ backgroundColor: areaMeta?.color ?? "#7c3aed" }}>{progress}%</Badge>
@@ -428,7 +424,7 @@ function GoalTrackerContent({
               <div className="flex items-center gap-2"><Clock3 className="h-4 w-4 text-white/45" /><span>Ngày đích: {formatDeadline(goal.deadline)}</span></div>
               <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-white/45" /><span>{execution.completed}/{execution.total} việc đã chốt</span></div>
             </div>
-            <div className="flex items-center gap-2 lg:hidden mt-2">
+            <div className="mt-2 grid gap-2 lg:hidden">
               <Button
                 variant="outline"
                 size="sm"
@@ -660,7 +656,7 @@ function GoalTrackerContent({
   };
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="flow-shell space-y-6 pb-12">
       <UpgradePaywallDialog
         open={isUpgradeDialogOpen}
         onOpenChange={setIsUpgradeDialogOpen}
@@ -696,16 +692,16 @@ function GoalTrackerContent({
         </AlertDialogContent>
       </AlertDialog>
 
-      <Card data-tour-id="goaltracker-hero" className="hero-surface overflow-hidden border-0 text-white">
+      <Card data-tour-id="goaltracker-hero" className="hero-surface flow-surface overflow-hidden">
         <CardContent className="relative p-5 sm:p-6 lg:p-8">
-          <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(280px,360px)]">
-            <div data-tour-id="goaltracker-start-card" className="space-y-6">
+          <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(280px,360px)]">
+            <div data-tour-id="goaltracker-start-card" className="space-y-5">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                 <Target className="h-4 w-4" />
                 Không gian mục tiêu
               </div>
               <div className="space-y-4">
-                <h1 className="max-w-3xl break-words text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+                <h1 className="max-w-3xl break-words text-2xl font-bold tracking-normal sm:text-3xl lg:text-4xl">
                   Giữ mục tiêu ở mức dễ nhìn, còn nhịp thực thi thì đi vào đúng flow của từng ngày.
                 </h1>
                 <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
@@ -743,14 +739,14 @@ function GoalTrackerContent({
                 rồi mới tới feasibility và hệ 12 tuần. Khi đã rõ mục tiêu, bạn có thể chuyển thẳng sang tạo kit mà không cần chọn lại từ đầu.
               </p>
             </div>
-            <div className="hidden xl:block rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+            <div className="flow-panel hidden p-5 xl:block">
               <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                <div className="rounded-[24px] border border-white/10 bg-black/12 px-4 py-4">
+                <div className="flow-muted px-4 py-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-white/55">Mục tiêu đang theo</p>
                   <p className="mt-2 text-3xl font-bold text-white"><CountUp value={summary.totalGoals} /></p>
                   <p className="mt-1 text-sm text-white/68">{summary.completedGoals} đã hoàn thành</p>
                 </div>
-                <div className="rounded-[24px] border border-white/10 bg-black/12 px-4 py-4">
+                <div className="flow-muted px-4 py-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-white/55">Việc đã chốt</p>
                   <p className="mt-2 text-3xl font-bold text-white">
                     <CountUp value={summary.completedTasks} />
@@ -758,7 +754,7 @@ function GoalTrackerContent({
                   </p>
                   <p className="mt-1 text-sm text-white/68">trên toàn bộ mục tiêu</p>
                 </div>
-                <div className="rounded-[24px] border border-white/10 bg-black/12 px-4 py-4">
+                <div className="flow-muted px-4 py-4">
                   <p className="text-xs uppercase tracking-[0.18em] text-white/55">Chu kỳ 12 tuần</p>
                   <p className="mt-2 text-3xl font-bold text-white"><CountUp value={summary.activeSystems} /></p>
                   <p className="mt-1 text-sm text-white/68">đang chạy lúc này</p>
@@ -777,9 +773,9 @@ function GoalTrackerContent({
                 <CardHeader className="flex flex-row items-start justify-between pb-3">
                   <div>
                     <CardDescription className={item.titleClass}>{item.title}</CardDescription>
-                    <CardTitle className="mt-2 text-4xl"><CountUp value={item.value} /></CardTitle>
+                    <CardTitle className="mt-2 text-3xl"><CountUp value={item.value} /></CardTitle>
                   </div>
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${item.iconClass}`}>
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${item.iconClass}`}>
                     <Icon className="h-5 w-5" />
                   </div>
                 </CardHeader>
@@ -797,8 +793,8 @@ function GoalTrackerContent({
           <Card
             className={
               summary.reviewDue > 0
-                ? "border-0 gradient-amber shadow-[0_24px_55px_-34px_rgba(217,119,6,0.2)]"
-                : "border-0 gradient-slate shadow-[0_24px_55px_-34px_rgba(15,23,42,0.18)]"
+                ? "flow-panel border-amber-200 bg-amber-50/85"
+                : "flow-panel"
             }
           >
             <CardHeader className="pb-2">
@@ -815,8 +811,8 @@ function GoalTrackerContent({
           <Card
             className={
               summary.overdue > 0
-                ? "border-0 gradient-red shadow-[0_24px_55px_-34px_rgba(220,38,38,0.18)]"
-                : "border-0 gradient-slate shadow-[0_24px_55px_-34px_rgba(15,23,42,0.18)]"
+                ? "flow-panel border-red-200 bg-red-50/85"
+                : "flow-panel"
             }
           >
             <CardHeader className="pb-2">
@@ -830,7 +826,7 @@ function GoalTrackerContent({
             </CardContent>
           </Card>
 
-          <Card className="border-0 gradient-blue shadow-[0_24px_55px_-34px_rgba(37,99,235,0.18)]">
+          <Card className="flow-panel">
             <CardHeader className="pb-2">
               <CardDescription>Sắp đến hạn</CardDescription>
               <CardTitle className="text-3xl"><CountUp value={summary.dueSoon} /></CardTitle>
@@ -843,19 +839,19 @@ function GoalTrackerContent({
       </Reveal>
 
       <Reveal>
-        <Card className="overflow-hidden border-0 gradient-indigo-purple text-white shadow-[0_28px_70px_-38px_rgba(76,29,149,0.42)]">
+        <Card className="flow-panel overflow-hidden">
           <CardContent className="grid gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div>
               <div className="flex flex-wrap items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-white/10">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-violet-200 bg-violet-50 text-violet-700">
                   <Crown className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Gói và quyền 12 tuần</p>
-                  <p className="mt-2 text-2xl font-bold text-white">Bạn đang ở gói {getPlanLabel(currentPlanCode)}</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Gói và quyền 12 tuần</p>
+                  <p className="mt-2 text-2xl font-bold text-slate-900">Bạn đang ở gói {getPlanLabel(currentPlanCode)}</p>
                 </div>
               </div>
-              <p className="mt-4 max-w-3xl text-sm leading-7 text-white/74">{currentPlanDefinition.description}</p>
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">{currentPlanDefinition.description}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {premiumStatusItems.map((key) => {
                   const isUnlocked = entitlementKeys.includes(key);
@@ -867,7 +863,7 @@ function GoalTrackerContent({
                       className={
                         isUnlocked
                           ? "border-emerald-200/70 bg-emerald-50 text-emerald-900"
-                          : "border-white/15 bg-white/8 text-white/72"
+                          : "border-slate-200 bg-slate-50 text-slate-600"
                       }
                     >
                       {isUnlocked ? "Đang mở" : "Đang khóa"} · {getEntitlementLabel(key)}
@@ -877,9 +873,9 @@ function GoalTrackerContent({
               </div>
             </div>
 
-            <div className="space-y-3 rounded-[26px] border border-white/12 bg-white/8 p-5">
-              <p className="text-xs uppercase tracking-[0.18em] text-white/56">Đi tiếp với gói hiện tại</p>
-              <p className="text-lg font-semibold text-white">
+            <div className="flow-muted space-y-3 p-5">
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Đi tiếp với gói hiện tại</p>
+              <p className="text-lg font-semibold text-slate-900">
                 {currentPlanCode === "FREE"
                   ? "Free đủ để bạn chạy một chu kỳ. Mở Plus khi bạn muốn bớt loay hoay lúc setup và review tốt hơn mỗi tuần."
                   : "Plus đang giúp bạn bắt đầu nhanh hơn, giữ nhịp đều hơn và biết tuần sau nên chỉnh gì."}
@@ -887,15 +883,15 @@ function GoalTrackerContent({
               <div className="grid gap-2">
                 {currentPlanCode === "FREE" ? (
                   <>
-                    <Button className="hero-cta bg-white text-slate-900 hover:bg-white/92" onClick={() => openUpgradeDialog("plan", "PLUS")}>
+                    <Button onClick={() => openUpgradeDialog("plan", "PLUS")}>
                       Mở Plus để đỡ loay hoay hơn
                     </Button>
-                    <Button variant="outline" className="border-white/15 bg-white/10 text-white hover:bg-white/16" onClick={() => navigate(twelveWeekGoals.length > 0 ? "/12-week-system?tab=settings" : "/life-insight")}>
+                    <Button variant="outline" onClick={() => navigate(twelveWeekGoals.length > 0 ? "/12-week-system?tab=settings" : "/life-insight")}>
                       Xem Free đang có gì
                     </Button>
                   </>
                 ) : (
-                  <Button variant="outline" className="border-white/15 bg-white/10 text-white hover:bg-white/16" onClick={() => navigate(twelveWeekGoals.length > 0 ? "/12-week-system?tab=settings" : "/life-insight")}>
+                  <Button variant="outline" onClick={() => navigate(twelveWeekGoals.length > 0 ? "/12-week-system?tab=settings" : "/life-insight")}>
                     Quản lý gói và quyền
                   </Button>
                 )}
@@ -915,16 +911,16 @@ function GoalTrackerContent({
                 placeholder="Tìm mục tiêu..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-2xl border border-white/70 bg-white/72 py-3 pl-11 pr-4 text-sm font-medium text-slate-900 placeholder:text-slate-400 backdrop-blur-xl outline-none transition-all focus:border-violet-300 focus:ring-2 focus:ring-violet-200"
+                className="w-full rounded-lg border border-slate-200 bg-white/90 py-3 pl-11 pr-4 text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-violet-300 focus:ring-2 focus:ring-violet-200"
               />
             </div>
           </div>
         )}
         {userData.goals.length === 0 ? (
           <Reveal delay={0.04}>
-          <Card data-tour-id="goaltracker-empty-state" className="overflow-hidden border-0 gradient-indigo shadow-[0_28px_70px_-38px_rgba(99,102,241,0.18)]">
+          <Card data-tour-id="goaltracker-empty-state" className="flow-panel overflow-hidden">
             <CardContent className="p-10 text-center lg:p-14">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] bg-violet-50 text-violet-700">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-lg bg-violet-50 text-violet-700">
                 <Target className="h-10 w-10" />
               </div>
               <h2 className="mt-6 text-3xl font-bold text-slate-900">Chưa có mục tiêu nào trong workspace của bạn</h2>
@@ -943,7 +939,7 @@ function GoalTrackerContent({
                 ].map((item) => (
                   <div
                     key={item.label}
-                    className="flex items-center gap-2 rounded-2xl border border-indigo-100 bg-white/80 px-4 py-3 text-sm text-slate-600"
+                    className="flex items-center gap-2 rounded-lg border border-indigo-100 bg-white/80 px-4 py-3 text-sm text-slate-600"
                   >
                     <item.icon className="h-4 w-4 text-indigo-500" />
                     {item.label}

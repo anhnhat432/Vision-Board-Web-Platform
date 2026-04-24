@@ -180,7 +180,7 @@ export function BillingPlan() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flow-shell space-y-5 pb-12">
       <UpgradePaywallDialog
         open={isUpgradeDialogOpen}
         onOpenChange={setIsUpgradeDialogOpen}
@@ -191,7 +191,7 @@ export function BillingPlan() {
       />
 
       {/* Hero */}
-      <Card className="hero-surface overflow-hidden border-0 text-white">
+      <Card className="hero-surface flow-surface overflow-hidden">
         <CardContent className="relative p-5 sm:p-6 lg:p-8">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_22%)] opacity-90" />
           <div className="relative">
@@ -210,7 +210,7 @@ export function BillingPlan() {
       </Card>
 
       {/* Current plan */}
-      <Card>
+      <Card className="flow-panel">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Crown className="h-5 w-5 text-violet-600" />
@@ -248,7 +248,7 @@ export function BillingPlan() {
 
           {subscription && (
             <div className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
-              <div>
+              <div className="flow-muted p-4">
                 <p className="text-slate-500">Trạng thái</p>
                 <p className="font-medium text-slate-900">
                   {subscription.status === "active"
@@ -260,19 +260,19 @@ export function BillingPlan() {
                         : "Không hoạt động"}
                 </p>
               </div>
-              <div>
+              <div className="flow-muted p-4">
                 <p className="text-slate-500">Bắt đầu</p>
                 <p className="font-medium text-slate-900">
                   {formatDate(subscription.startedAt)}
                 </p>
               </div>
-              <div>
+              <div className="flow-muted p-4">
                 <p className="text-slate-500">Gia hạn</p>
                 <p className="font-medium text-slate-900">
                   {formatDate(subscription.renewsAt)}
                 </p>
               </div>
-              <div>
+              <div className="flow-muted p-4">
                 <p className="text-slate-500">Chu kỳ</p>
                 <p className="font-medium text-slate-900">
                   {subscription.billingCycle === "monthly"
@@ -285,17 +285,18 @@ export function BillingPlan() {
             </div>
           )}
 
-          <div className="flex flex-wrap gap-3 pt-2">
+          <div className="grid gap-3 pt-2 sm:flex sm:flex-wrap">
             {currentPlanCode === "FREE" ? (
               <>
-                <Button onClick={() => handleOpenUpgrade("plan")}>
+                <Button className="w-full sm:w-auto" onClick={() => handleOpenUpgrade("plan")}>
                   <Sparkles className="mr-2 h-4 w-4" />
                   Nâng cấp lên Plus
                 </Button>
                 {!isTrialing && (
-                  <div className="flex flex-col items-start gap-1">
+                  <div className="flex w-full flex-col items-start gap-1 sm:w-auto">
                     <Button
                       variant="outline"
+                      className="w-full sm:w-auto"
                       onClick={handleStartTrial}
                       disabled={isStartingTrial}
                     >
@@ -312,12 +313,12 @@ export function BillingPlan() {
             ) : (
               <>
                 {isTrialing && trialDaysLeft !== null && (
-                  <div className="w-full rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  <div className="w-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
                     <span className="font-semibold">Đang dùng thử:</span>{" "}
                     còn {trialDaysLeft} ngày — nâng cấp để giữ quyền truy cập sau khi hết thử.
                     <Button
                       size="sm"
-                      className="ml-3"
+                      className="mt-3 w-full sm:ml-3 sm:mt-0 sm:w-auto"
                       onClick={() => handleOpenUpgrade("plan")}
                     >
                       Nâng cấp ngay
@@ -340,7 +341,7 @@ export function BillingPlan() {
       </Card>
 
       {/* Entitlements */}
-      <Card>
+      <Card className="flow-panel">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-emerald-600" />
@@ -355,7 +356,7 @@ export function BillingPlan() {
               return (
                 <div
                   key={key}
-                  className={`flex items-center gap-3 rounded-2xl border p-4 ${
+                  className={`flex items-center gap-3 rounded-lg border p-4 ${
                     isActive
                       ? "border-emerald-200 bg-emerald-50/60"
                       : "border-slate-100 bg-slate-50/50"
@@ -386,7 +387,7 @@ export function BillingPlan() {
       </Card>
 
       {/* Actions */}
-      <Card>
+      <Card className="flow-panel">
         <CardHeader>
           <CardTitle>Thao tác</CardTitle>
           <CardDescription>Đồng bộ quyền, khôi phục giao dịch hoặc quay lại trang chính.</CardDescription>
@@ -434,7 +435,7 @@ export function BillingPlan() {
 
       {/* Billing provider info (debug/demo) */}
       {demoMode && (
-        <Card>
+        <Card className="flow-panel">
           <CardHeader>
             <CardTitle className="text-sm">Thông tin billing provider</CardTitle>
           </CardHeader>
@@ -463,7 +464,7 @@ export function BillingPlan() {
       )}
 
       {/* Compare plans */}
-      <Card>
+      <Card className="flow-panel">
         <CardHeader>
           <CardTitle>So sánh các gói</CardTitle>
           <CardDescription>Xem sự khác biệt giữa Free và Plus.</CardDescription>
@@ -473,7 +474,7 @@ export function BillingPlan() {
             {PLAN_DEFINITIONS.map((plan) => (
               <div
                 key={plan.code}
-                className={`rounded-2xl border p-5 ${
+                className={`rounded-lg border p-5 ${
                   plan.code === currentPlanCode
                     ? "border-violet-300 bg-violet-50/50"
                     : "border-slate-100 bg-slate-50/30"
