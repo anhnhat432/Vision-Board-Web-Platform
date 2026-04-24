@@ -36,12 +36,46 @@ const DEFAULT_LOGIN_OPTIONS: Required<Pick<LoginOptions, "provider" | "mode">> =
   mode: "signin",
 };
 
-function resolveErrorMessage(error: unknown): string {
+function getFirebaseErrorCode(error: unknown): string | null {
+  if (!error || typeof error !== "object" || !("code" in error)) return null;
+
+  const code = (error as { code?: unknown }).code;
+  return typeof code === "string" ? code : null;
+}
+
+export function resolveAuthErrorMessage(error: unknown): string {
+  const code = getFirebaseErrorCode(error);
+
+  switch (code) {
+    case "auth/configuration-not-found":
+      return "Firebase Authentication chưa được bật cho project này. Vào Firebase Console > Authentication > Get started, rồi bật Google hoặc Email/Password.";
+    case "auth/operation-not-allowed":
+      return "Phương thức đăng nhập này chưa được bật trong Firebase Authentication. Hãy bật Google hoặc Email/Password trong tab Sign-in method.";
+    case "auth/unauthorized-domain":
+      return "Domain hiện tại chưa nằm trong Authorized domains của Firebase Authentication. Hãy thêm domain production hoặc localhost trong Firebase Console > Authentication > Settings.";
+    case "auth/popup-blocked":
+      return "Trình duyệt đã chặn popup đăng nhập. Hãy cho phép popup rồi thử lại.";
+    case "auth/popup-closed-by-user":
+      return "Bạn đã đóng popup đăng nhập trước khi hoàn tất.";
+    case "auth/email-already-in-use":
+      return "Email này đã có tài khoản. Hãy chuyển sang đăng nhập.";
+    case "auth/invalid-email":
+      return "Email không hợp lệ.";
+    case "auth/invalid-credential":
+    case "auth/user-not-found":
+    case "auth/wrong-password":
+      return "Email hoặc mật khẩu không đúng.";
+    case "auth/weak-password":
+      return "Mật khẩu quá yếu. Hãy dùng ít nhất 6 ký tự.";
+    default:
+      break;
+  }
+
   if (error instanceof Error && error.message.trim().length > 0) {
     return error.message;
   }
 
-  return "Authentication failed.";
+  return "Đăng nhập thất bại.";
 }
 
 export function useAuth(): UseAuthResult {
@@ -89,7 +123,7 @@ export function useAuth(): UseAuthResult {
 
       return await loginWithEmail(email, password);
     } catch (nextError) {
-      const message = resolveErrorMessage(nextError);
+      const message = resolveAuthErrorMessage(nextError);
       setError(message);
       console.error("Login failed.", nextError);
       return null;
@@ -105,7 +139,7 @@ export function useAuth(): UseAuthResult {
     try {
       await logoutFirebase();
     } catch (nextError) {
-      const message = resolveErrorMessage(nextError);
+      const message = resolveAuthErrorMessage(nextError);
       setError(message);
       console.error("Logout failed.", nextError);
     } finally {
@@ -119,7 +153,7 @@ export function useAuth(): UseAuthResult {
     try {
       return await getFirebaseToken(forceRefresh);
     } catch (nextError) {
-      const message = resolveErrorMessage(nextError);
+      const message = resolveAuthErrorMessage(nextError);
       setError(message);
       console.error("Get token failed.", nextError);
       return null;
