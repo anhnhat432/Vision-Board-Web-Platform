@@ -771,26 +771,26 @@ export function SMARTGoalSetup() {
   };
 
   return (
-    <div className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
+    <div className="flow-shell min-h-screen px-4 py-6 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mx-auto w-full max-w-7xl space-y-6"
+        className="mx-auto w-full max-w-7xl space-y-5"
       >
-        <Card className="hero-surface overflow-hidden border-0 text-white">
-          <CardContent className="relative p-8 lg:p-10">
+        <Card className="hero-surface flow-surface overflow-hidden">
+          <CardContent className="relative p-5 sm:p-6 lg:p-7">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
 
-            <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
-              <div className="space-y-6">
+            <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_360px]">
+              <div className="space-y-5">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Compass className="h-4 w-4" />
                   Mục tiêu SMART
                 </div>
 
                 <div className="space-y-4">
-                  <h1 className="max-w-3xl text-4xl font-bold tracking-normal lg:text-5xl">
+                  <h1 className="max-w-3xl text-3xl font-bold tracking-normal lg:text-4xl">
                     Chúng ta sẽ biến insight vừa có thành một mục tiêu đủ rõ để bắt đầu hành động.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
@@ -811,7 +811,7 @@ export function SMARTGoalSetup() {
                 </div>
               </div>
 
-              <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+              <div className="flow-panel p-5 sm:p-6">
                 <div className="flex items-center justify-between text-sm text-white/72">
                   <span>Bước {currentStep + 1} / {totalSteps}</span>
                   <span>{Math.round(progressPercentage)}%</span>
@@ -828,10 +828,10 @@ export function SMARTGoalSetup() {
                         key={step.key}
                         className={`rounded-[22px] border px-4 py-3 transition-all ${
                           active
-                            ? "border-white/22 bg-white/14"
+                            ? "border-slate-300 bg-slate-100"
                             : done
-                              ? "border-white/10 bg-black/10"
-                              : "border-white/8 bg-black/6"
+                              ? "border-slate-200 bg-white"
+                              : "border-slate-200 bg-slate-50"
                         }`}
                       >
                         <div className="flex items-center gap-3">
@@ -861,8 +861,8 @@ export function SMARTGoalSetup() {
         </Card>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-          <Card className="overflow-hidden">
-            <CardContent className="p-6 lg:p-7">
+          <Card className="flow-panel overflow-hidden">
+            <CardContent className="p-5 sm:p-6 lg:p-7">
               <motion.div
                 key={currentStep}
                 initial={{ opacity: 0, x: 18 }}
@@ -870,13 +870,13 @@ export function SMARTGoalSetup() {
                 transition={{ duration: 0.3 }}
                 className="space-y-6"
               >
-                <div className="rounded-[28px] gradient-violet-pink p-6">
+                <div className="flow-muted p-5 sm:p-6">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">
                     {currentStepData.label}
                   </p>
                   <h2 className="mt-3 text-3xl font-bold text-slate-900">{currentStepData.title}</h2>
                   <p className="mt-3 text-base leading-7 text-slate-600">{currentStepData.description}</p>
-                  <div className="mt-4 rounded-[22px] border border-white/70 bg-white/72 px-4 py-3 text-sm text-slate-600">
+                  <div className="flow-panel mt-4 px-4 py-3 text-sm text-slate-600">
                     {currentStepData.coaching}
                   </div>
                 </div>
@@ -896,7 +896,7 @@ export function SMARTGoalSetup() {
                   </Alert>
                 ) : null}
 
-                <div className="rounded-[22px] border border-slate-200 bg-slate-50/70 p-4">
+                <div className="flow-muted p-4">
                   <div className="space-y-1">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Tiếp tục flow SMART</p>
                     <p className="text-sm text-slate-600">{currentStepActionHint}</p>
@@ -919,8 +919,8 @@ export function SMARTGoalSetup() {
             </CardContent>
           </Card>
 
-          <div className="space-y-6 xl:sticky xl:top-28">
-            <Card>
+          <div className="space-y-5 xl:sticky xl:top-28">
+            <Card className="flow-panel">
               <CardContent className="p-6">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
                   Bản nháp hiện tại
@@ -930,7 +930,7 @@ export function SMARTGoalSetup() {
                   {SMART_STEPS.map((step) => (
                     <div
                       key={step.key}
-                      className="rounded-[22px] border border-white/70 bg-white/72 p-4"
+                      className="flow-muted p-4"
                     >
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                         {step.label}
