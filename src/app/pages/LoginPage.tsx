@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router";
-import { Loader2, Sparkles } from "lucide-react";
+import { AlertCircle, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "../components/ui/button";
@@ -193,6 +193,16 @@ export function LoginPage() {
                   )}
                 </Button>
               </form>
+
+              {error ? (
+                <div
+                  role="alert"
+                  className="flex gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm leading-5 text-red-700"
+                >
+                  <AlertCircle className="mt-0.5 h-4 w-4 flex-none" aria-hidden="true" />
+                  <p className="min-w-0 break-words">{error}</p>
+                </div>
+              ) : null}
             </div>
           </CardContent>
         </Card>
