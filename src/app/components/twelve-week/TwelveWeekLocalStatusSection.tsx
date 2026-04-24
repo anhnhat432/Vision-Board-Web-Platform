@@ -50,27 +50,31 @@ function getBackendStatusLabel(status: TwelveWeekSettingsTabProps["backendConnec
 }
 
 function getBackendStatusDescription(status: TwelveWeekSettingsTabProps["backendConnectionStatus"]): string {
-  if (!status.authConfigured) return "Firebase chưa được cấu hình, dữ liệu vẫn chạy ở chế độ local-first.";
+  if (!status.authConfigured) return "Backend chưa được cấu hình. Dữ liệu vẫn được giữ local trên thiết bị này.";
   if (status.authLoading) return "Đang kiểm tra phiên đăng nhập trước khi nối backend.";
-  if (!status.signedIn) return "Đăng nhập để bật profile backend và đồng bộ tiến độ qua thiết bị khác.";
-  if (!status.profileReady) return "Đã có phiên đăng nhập, đang chờ backend profile hoàn tất bootstrap.";
-  if (status.syncing) return "Đang đẩy plan, task, check-in và review 12-week lên backend.";
+  if (!status.signedIn) return "Đăng nhập để đồng bộ tiến độ qua thiết bị khác.";
+  if (!status.profileReady) return "Đã có phiên đăng nhập, đang chờ backend profile sẵn sàng.";
+  if (status.syncing) return "Đang đồng bộ plan, task, check-in và review 12-week lên backend.";
   if (status.syncMessage) return status.syncMessage;
   return status.displayName || status.email
-    ? `Đang đồng bộ dưới tài khoản ${status.displayName || status.email}.`
-    : "Backend profile đã sẵn sàng cho các thao tác đồng bộ.";
+    ? `Đang đồng bộ dưới tài khoản ${status.displayName || status.email}. Nếu local và backend khác nhau, app sẽ hỏi bạn trước khi ghi đè.`
+    : "Backend đã sẵn sàng. Nếu local và backend khác nhau, app sẽ hỏi bạn trước khi ghi đè.";
 }
 
 function getBackendHydrationDescription(
   result: TwelveWeekSettingsTabProps["lastBackendHydrationResult"],
 ): string {
-  if (!result) return "Kéo các chu kỳ 12-week đã có trên backend về thiết bị này nếu local còn thiếu.";
+  if (!result) {
+    return "Kiểm tra backend và chỉ kéo về những chu kỳ 12-week đang thiếu ở local. Nếu hai bên khác nhau, app sẽ yêu cầu bạn chọn nguồn dữ liệu trước.";
+  }
 
   if (result.status === "error") return result.message;
   if (result.status === "partial") return result.message;
-  if (result.conflictCount > 0) return result.message;
+  if (result.conflictCount > 0) {
+    return `${result.message} App đã tạm dừng tự đồng bộ cho các chu kỳ này.`;
+  }
   if (result.hydratedCount + result.updatedCount > 0) {
-    return `Đã khôi phục ${result.hydratedCount} chu kỳ mới và cập nhật ${result.updatedCount} chu kỳ.`;
+    return `Đã khôi phục ${result.hydratedCount} chu kỳ mới và cập nhật ${result.updatedCount} chu kỳ từ backend.`;
   }
 
   return "Backend đã được kiểm tra, chưa có chu kỳ mới cần khôi phục.";
@@ -184,20 +188,25 @@ export function TwelveWeekLocalStatusSection({
         </div>
         <div className="mt-4 rounded-2xl border border-white/10 bg-white/8 p-3">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm leading-6 text-white/72">
-              {isHydratingBackendPlans
-                ? "Đang kiểm tra backend và khôi phục các chu kỳ còn thiếu."
-                : getBackendHydrationDescription(lastBackendHydrationResult)}
-            </p>
+            <div className="min-w-0 space-y-1">
+              <p className="text-sm leading-6 text-white/72">
+                {isHydratingBackendPlans
+                  ? "Đang kiểm tra backend và khôi phục các chu kỳ còn thiếu."
+                  : getBackendHydrationDescription(lastBackendHydrationResult)}
+              </p>
+              <p className="text-xs leading-5 text-white/45">
+                Hành động này không tự xóa dữ liệu local khi phát hiện khác biệt.
+              </p>
+            </div>
             <Button
               type="button"
               variant="outline"
-              className="shrink-0 border-white/20 bg-white/12 text-white hover:bg-white/20 hover:text-white"
+              className="shrink-0 whitespace-normal border-white/20 bg-white/12 text-center text-white hover:bg-white/20 hover:text-white sm:whitespace-nowrap"
               disabled={!canHydrateBackendPlans}
               onClick={onHydrateBackendPlans}
             >
               <CloudDownload className="mr-2 h-4 w-4" />
-              {isHydratingBackendPlans ? "Đang khôi phục..." : "Khôi phục từ backend"}
+              {isHydratingBackendPlans ? "Đang kiểm tra..." : "Kiểm tra backend"}
             </Button>
           </div>
         </div>
@@ -208,7 +217,7 @@ export function TwelveWeekLocalStatusSection({
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-white">Cần chọn nguồn dữ liệu</p>
                 <p className="mt-1 text-xs leading-5 text-white/65">
-                  Local và backend đang khác nhau. Chọn bản muốn giữ cho từng chu kỳ trước khi app tự đồng bộ tiếp.
+                  Local và backend đang khác nhau. Chưa có dữ liệu nào bị ghi đè; chọn bản muốn giữ cho từng chu kỳ trước khi app tự đồng bộ tiếp.
                 </p>
               </div>
             </div>
@@ -256,26 +265,34 @@ export function TwelveWeekLocalStatusSection({
                       <p className="text-xs text-white/55">Còn {hiddenCount} khác biệt khác trong chu kỳ này.</p>
                     ) : null}
                   </div>
+                  <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
+                    <div className="rounded-lg border border-white/10 bg-white/8 p-2 leading-5 text-white/62">
+                      <span className="font-semibold text-white/85">Dùng bản backend:</span> thay dữ liệu local của chu kỳ này bằng bản đang lưu trên backend.
+                    </div>
+                    <div className="rounded-lg border border-white/10 bg-white/8 p-2 leading-5 text-white/62">
+                      <span className="font-semibold text-white/85">Giữ bản local:</span> đẩy dữ liệu trên thiết bị này lên backend để dùng làm bản chính.
+                    </div>
+                  </div>
                   <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end">
                     <Button
                       type="button"
                       variant="outline"
-                      className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                      className="whitespace-normal border-white/20 bg-white/10 text-center text-white hover:bg-white/20 hover:text-white sm:whitespace-nowrap"
                       disabled={isResolvingBackendPlanConflicts}
                       onClick={() => onUseBackendPlanForConflicts(group.goalId)}
                     >
                       <CloudDownload className="mr-2 h-4 w-4" />
-                      Dùng backend
+                      Dùng bản backend
                     </Button>
                     <Button
                       type="button"
                       variant="outline"
-                      className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                      className="whitespace-normal border-white/20 bg-white/10 text-center text-white hover:bg-white/20 hover:text-white sm:whitespace-nowrap"
                       disabled={isResolvingBackendPlanConflicts}
                       onClick={() => onKeepLocalPlanForConflicts(group.goalId)}
                     >
                       <CloudUpload className="mr-2 h-4 w-4" />
-                      {isActiveGoalConflict ? "Giữ local" : "Mở chu kỳ"}
+                      {isActiveGoalConflict ? "Giữ bản local" : "Mở chu kỳ để giữ local"}
                     </Button>
                   </div>
                 </div>

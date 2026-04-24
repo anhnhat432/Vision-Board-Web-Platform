@@ -71,13 +71,16 @@ describe("TwelveWeekLocalStatusSection", () => {
     );
 
     expect(screen.getByText("Cần chọn nguồn dữ liệu")).toBeInTheDocument();
+    expect(screen.getByText(/Chưa có dữ liệu nào bị ghi đè/i)).toBeInTheDocument();
     expect(screen.getByText("Launch cycle")).toBeInTheDocument();
     expect(screen.getByText("Trạng thái việc")).toBeInTheDocument();
+    expect(screen.getByText("Dùng bản backend:")).toBeInTheDocument();
+    expect(screen.getByText("Giữ bản local:")).toBeInTheDocument();
     expect(screen.getByText("done")).toBeInTheDocument();
     expect(screen.getByText("not done")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Dùng backend/i }));
-    fireEvent.click(screen.getByRole("button", { name: /Giữ local/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Dùng bản backend/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Giữ bản local/i }));
 
     expect(onUseBackendPlanForConflicts).toHaveBeenCalledWith("goal_1");
     expect(onKeepLocalPlanForConflicts).toHaveBeenCalledWith("goal_1");
