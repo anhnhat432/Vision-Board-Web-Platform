@@ -55,6 +55,7 @@ function getBackendHydrationDescription(
 
   if (result.status === "error") return result.message;
   if (result.status === "partial") return result.message;
+  if (result.conflictCount > 0) return result.message;
   if (result.hydratedCount + result.updatedCount > 0) {
     return `Đã khôi phục ${result.hydratedCount} chu kỳ mới và cập nhật ${result.updatedCount} chu kỳ.`;
   }

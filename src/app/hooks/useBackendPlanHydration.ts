@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { isDailyCheckInMetric } from "@/features/plan12week/constants/progressMetrics";
+import { detectBackendPlanConflicts } from "@/features/plan12week/persistence/backendConflictDetector";
 import {
   getPlanLink,
   savePlanDetailsLink,
@@ -54,6 +55,7 @@ export interface BackendPlanHydrationResult {
   updatedCount: number;
   skippedCount: number;
   failedCount: number;
+  conflictCount: number;
   latestGoalId: string | null;
   message: string;
 }
@@ -550,6 +552,8 @@ function createHydrationResult(
         ? "Some backend plans were restored, but a few could not be loaded."
         : status === "error"
           ? "Backend plans could not be restored to this device."
+          : result.conflictCount > 0
+            ? `${result.conflictCount} local/backend differences need review.`
           : "No backend plans needed local hydration.";
 
   return {
@@ -566,6 +570,7 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
       updatedCount: 0,
       skippedCount: 0,
       failedCount: 0,
+      conflictCount: 0,
       latestGoalId: null,
     });
   }
@@ -581,6 +586,7 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
       updatedCount: 0,
       skippedCount: 0,
       failedCount: 0,
+      conflictCount: 0,
       latestGoalId: null,
     });
   }
@@ -592,6 +598,7 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
   let updatedCount = 0;
   let skippedCount = 0;
   let failedCount = 0;
+  let conflictCount = 0;
   let latestGoalId: string | null = null;
 
   detailsResults.forEach((detailsResult, index) => {
@@ -612,6 +619,12 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
     const existingPlanLink = existingGoal ? getPlanLink(existingGoal.id) : null;
 
     if (existingGoal?.twelveWeekSystem && existingPlanLink?.planId === plan.id) {
+      const conflictReport = detectBackendPlanConflicts(
+        existingGoal.twelveWeekSystem,
+        details,
+        existingPlanLink.taskIdByLocalTaskId,
+      );
+      conflictCount += conflictReport.conflicts.length;
       skippedCount += 1;
       latestGoalId ??= existingGoal.id;
       return;
@@ -662,6 +675,7 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
     updatedCount,
     skippedCount,
     failedCount,
+    conflictCount,
     latestGoalId,
   });
 }

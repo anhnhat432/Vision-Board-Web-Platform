@@ -169,6 +169,28 @@ describe("hydrateTwelveWeekPlansFromBackend", () => {
     expect(getUserData().goals).toHaveLength(1);
   });
 
+  it("reports local/backend differences for an already linked plan", async () => {
+    const apiGoal = createApiGoal();
+    const details = createPlanDetails();
+    vi.mocked(getGoals).mockResolvedValue([apiGoal]);
+    vi.mocked(getPlans).mockResolvedValue([details.plan]);
+    vi.mocked(getPlan).mockResolvedValue(details);
+
+    await hydrateTwelveWeekPlansFromBackend();
+
+    const divergentDetails = createPlanDetails();
+    divergentDetails.weeks[0].tasks[0].status = "todo";
+    vi.mocked(getPlan).mockResolvedValue(divergentDetails);
+
+    const result = await hydrateTwelveWeekPlansFromBackend();
+
+    expect(result.status).toBe("idle");
+    expect(result.skippedCount).toBe(1);
+    expect(result.conflictCount).toBe(1);
+    expect(result.message).toBe("1 local/backend differences need review.");
+    expect(getUserData().goals).toHaveLength(1);
+  });
+
   it("leaves onboarding untouched when there are no backend plans", async () => {
     vi.mocked(getGoals).mockResolvedValue([]);
     vi.mocked(getPlans).mockResolvedValue([]);

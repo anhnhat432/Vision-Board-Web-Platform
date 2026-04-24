@@ -950,6 +950,8 @@ export function TwelveWeekSystem() {
         toast.error(result.message);
       } else if (result.status === "partial") {
         toast.info(result.message);
+      } else if (result.conflictCount > 0) {
+        toast.info(result.message);
       } else if (result.hydratedCount + result.updatedCount > 0) {
         toast.success(
           `Đã khôi phục ${result.hydratedCount} chu kỳ mới và cập nhật ${result.updatedCount} chu kỳ từ backend.`,
