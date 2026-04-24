@@ -92,6 +92,7 @@ import {
 } from "../utils/storage-twelve-week";
 import { TaskBoard } from "@/features/plan12week/components/TaskBoard";
 import { usePlanExecutionSync } from "@/features/plan12week/hooks";
+import { useAuthContext } from "@/lib/auth/AuthContext";
 
 interface WeeklyReviewForm {
   lagProgressValue: string;
@@ -132,6 +133,7 @@ function TwelveWeekTabFallback({
 }
 export function TwelveWeekSystem() {
   const navigate = useNavigate();
+  const { authLoading, isConfigured: isAuthConfigured, user, userProfile } = useAuthContext();
   const {
     activeGoal,
     allGoals,
@@ -217,6 +219,14 @@ export function TwelveWeekSystem() {
   });
 
   const todayDateKey = formatDateInputValue(new Date());
+  const backendConnectionStatus = {
+    authConfigured: isAuthConfigured,
+    authLoading,
+    signedIn: Boolean(user),
+    profileReady: Boolean(userProfile),
+    displayName: userProfile?.displayName || user?.displayName || null,
+    email: userProfile?.email || user?.email || null,
+  };
 
   const formInitRef = useRef<string | null>(null);
   const activeGoalIdRef = useRef<string | null>(activeGoal?.id ?? null);
@@ -1305,6 +1315,7 @@ export function TwelveWeekSystem() {
           >
             <WeekEditor
               system={system}
+              backendConnectionStatus={backendConnectionStatus}
               currentPlanCode={activePlanCode}
               entitlementKeys={activeEntitlementKeys}
               billingProviderStatus={billingProviderStatus}

@@ -108,6 +108,14 @@ describe("TwelveWeekSystemSections", () => {
         }}
         lastEntitlementSyncSnapshot={null}
         lastRestoreAccessSnapshot={null}
+        backendConnectionStatus={{
+          authConfigured: true,
+          authLoading: false,
+          signedIn: true,
+          profileReady: true,
+          displayName: "Test User",
+          email: "test@example.com",
+        }}
         appPreferences={appPreferences}
         funnelSteps={[
           {
@@ -166,6 +174,8 @@ describe("TwelveWeekSystemSections", () => {
     );
 
     expect(screen.getByText("Cài đặt chu kỳ")).toBeInTheDocument();
+    expect(screen.getByText("Đồng bộ backend")).toBeInTheDocument();
+    expect(screen.getByText("Đã sẵn sàng")).toBeInTheDocument();
     expect(screen.getByText("Bảng điều khiển local")).toBeInTheDocument();
     expect(screen.getByLabelText("Chọn ngày review")).toBeInTheDocument();
   });

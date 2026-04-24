@@ -1,10 +1,40 @@
 import { Badge } from "../ui/badge";
 import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
 
-type TwelveWeekLocalStatusSectionProps = Pick<TwelveWeekSettingsTabProps, "appPreferences" | "pendingOutboxCount">;
+type TwelveWeekLocalStatusSectionProps = Pick<
+  TwelveWeekSettingsTabProps,
+  "appPreferences" | "backendConnectionStatus" | "pendingOutboxCount"
+>;
+
+function getBackendBadgeClass(status: TwelveWeekSettingsTabProps["backendConnectionStatus"]): string {
+  if (!status.authConfigured) return "border-amber-200 bg-amber-50 text-amber-800";
+  if (status.authLoading) return "border-sky-200 bg-sky-50 text-sky-800";
+  if (!status.signedIn) return "border-slate-300 bg-white text-slate-700";
+  if (!status.profileReady) return "border-violet-200 bg-violet-50 text-violet-800";
+  return "border-emerald-200 bg-emerald-50 text-emerald-800";
+}
+
+function getBackendStatusLabel(status: TwelveWeekSettingsTabProps["backendConnectionStatus"]): string {
+  if (!status.authConfigured) return "Chưa cấu hình";
+  if (status.authLoading) return "Đang kiểm tra";
+  if (!status.signedIn) return "Chưa đăng nhập";
+  if (!status.profileReady) return "Đang nối profile";
+  return "Đã sẵn sàng";
+}
+
+function getBackendStatusDescription(status: TwelveWeekSettingsTabProps["backendConnectionStatus"]): string {
+  if (!status.authConfigured) return "Firebase chưa được cấu hình, dữ liệu vẫn chạy ở chế độ local-first.";
+  if (status.authLoading) return "Đang kiểm tra phiên đăng nhập trước khi nối backend.";
+  if (!status.signedIn) return "Đăng nhập để bật profile backend và đồng bộ tiến độ qua thiết bị khác.";
+  if (!status.profileReady) return "Đã có phiên đăng nhập, đang chờ backend profile hoàn tất bootstrap.";
+  return status.displayName || status.email
+    ? `Đang đồng bộ dưới tài khoản ${status.displayName || status.email}.`
+    : "Backend profile đã sẵn sàng cho các thao tác đồng bộ.";
+}
 
 export function TwelveWeekLocalStatusSection({
   appPreferences,
+  backendConnectionStatus,
   pendingOutboxCount,
 }: TwelveWeekLocalStatusSectionProps) {
   return (
@@ -17,6 +47,19 @@ export function TwelveWeekLocalStatusSection({
         <Badge variant="outline" className="border-white/15 bg-white/10 text-white">
           Thiết bị này
         </Badge>
+      </div>
+      <div className="mt-4 rounded-2xl border border-white/10 bg-white/8 px-4 py-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">Đồng bộ backend</p>
+            <p className="mt-2 text-sm leading-6 text-white/72">
+              {getBackendStatusDescription(backendConnectionStatus)}
+            </p>
+          </div>
+          <Badge variant="outline" className={getBackendBadgeClass(backendConnectionStatus)}>
+            {getBackendStatusLabel(backendConnectionStatus)}
+          </Badge>
+        </div>
       </div>
       <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
         <div className="rounded-2xl border border-white/10 bg-white/8 px-3 py-3">

@@ -16,6 +16,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           onTacticTypeChange={props.onTacticTypeChange}
         />
         <TwelveWeekDeviceAndSyncPanel
+          backendConnectionStatus={props.backendConnectionStatus}
           currentPlanCode={props.currentPlanCode}
           entitlementKeys={props.entitlementKeys}
           billingProviderStatus={props.billingProviderStatus}

@@ -44,6 +44,7 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
 
         <TwelveWeekLocalStatusSection
           appPreferences={props.appPreferences}
+          backendConnectionStatus={props.backendConnectionStatus}
           pendingOutboxCount={props.pendingOutboxCount}
         />
 

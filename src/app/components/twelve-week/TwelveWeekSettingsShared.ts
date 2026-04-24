@@ -10,8 +10,18 @@ import type {
   TwelveWeekSystem,
 } from "../../utils/storage-types";
 
+export interface BackendConnectionStatus {
+  authConfigured: boolean;
+  authLoading: boolean;
+  signedIn: boolean;
+  profileReady: boolean;
+  displayName: string | null;
+  email: string | null;
+}
+
 export interface TwelveWeekSettingsTabProps {
   system: TwelveWeekSystem;
+  backendConnectionStatus: BackendConnectionStatus;
   currentPlanCode: PricingPlanCode;
   entitlementKeys: EntitlementKey[];
   billingProviderStatus: BillingProviderStatus;
