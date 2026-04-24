@@ -78,6 +78,7 @@ vi.mock("../persistence/planLinkStore", () => ({
 }));
 
 import { DAILY_CHECKIN_METRIC_NAME } from "../constants/progressMetrics";
+import { detectBackendPlanConflicts } from "../persistence/backendConflictDetector";
 import type { TwelveWeekSystem } from "@/app/utils/storage-types";
 import { usePlanExecutionSync } from "./usePlanExecutionSync";
 
@@ -401,5 +402,178 @@ describe("usePlanExecutionSync.syncDailyCheckIn", () => {
         adjustments: "Publish",
       }),
     );
+  });
+
+  it("pushes the local snapshot over a divergent backend plan so conflicts clear", async () => {
+    const backendDetails = {
+      ...buildPlanDetails(),
+      weeks: [
+        {
+          ...buildPlanDetails().weeks[0],
+          focus: "Backend focus",
+          expectedOutput: "Backend milestone",
+          tasks: [
+            {
+              ...buildTask({ status: "done" }),
+              title: "Backend brief",
+              scheduledDate: "2026-04-02T00:00:00.000Z",
+            },
+          ],
+          metrics: [
+            buildMetric([
+              {
+                id: "daily_log_1",
+                date: "2026-04-01T00:00:00.000Z",
+                value: 1,
+                completed: true,
+              },
+            ]),
+          ],
+          review: {
+            weekNumber: 1,
+            executionScore: 20,
+            reflection: "Backend review",
+            adjustments: "Backend priority",
+          },
+        },
+      ],
+    };
+    const localSystem = {
+      ...buildSystem(),
+      weeklyPlans: [
+        {
+          weekNumber: 1,
+          phaseName: "Launch",
+          focus: "Local focus",
+          milestone: "Local milestone",
+          completed: false,
+        },
+      ],
+      taskInstances: [
+        {
+          id: "local_task_1",
+          weekNumber: 1,
+          scheduledDate: "2026-04-01",
+          title: "Write launch brief",
+          leadIndicatorName: "Deep work",
+          isCore: true,
+          completed: false,
+        },
+      ],
+      dailyCheckIns: [
+        {
+          date: "2026-04-01",
+          didWorkToday: false,
+          whichLeadIndicatorWorkedOn: "Deep work",
+          amountDone: "0",
+          outputCreated: "",
+          obstacleOrIssue: "Blocked",
+          dailySelfRating: 2,
+          optionalNote: "",
+          mood: "low",
+        },
+      ],
+      weeklyReviews: [
+        {
+          weekNumber: 1,
+          leadCompletionPercent: 0,
+          lagProgressValue: "0/1",
+          biggestOutputThisWeek: "Local review",
+          mainObstacle: "",
+          nextWeekPriority: "Local priority",
+          workloadDecision: "reduce slightly",
+          reviewCompleted: true,
+          progressScore: 4,
+          disciplineScore: 4,
+          focusScore: 4,
+          improvementScore: 4,
+          outputQualityScore: 4,
+          completedLeadIndicators: 0,
+        },
+      ],
+      scoreboard: [],
+    } satisfies TwelveWeekSystem;
+    const taskLinkMap = { local_task_1: "remote_task_1" };
+
+    getPlan.mockImplementation(async () => backendDetails);
+    getMetrics.mockImplementation(async () => backendDetails.weeks[0].metrics);
+    getRemoteTaskIdForGoal.mockReturnValue("remote_task_1");
+    getPlanLink.mockReturnValue({
+      planId: "plan_1",
+      weekIdByNumber: { 1: "week_1" },
+      metricIdByKey: {},
+      taskIdByLocalTaskId: taskLinkMap,
+    });
+    updateWeek.mockImplementation(async (_weekId, input) => {
+      backendDetails.weeks[0].focus = input.focus ?? "";
+      backendDetails.weeks[0].expectedOutput = input.expectedOutput ?? "";
+      return backendDetails.weeks[0];
+    });
+    updateTask.mockImplementation(async (_taskId, input) => {
+      const task = backendDetails.weeks[0].tasks[0];
+      task.title = input.title ?? task.title;
+      task.status = input.status ?? task.status;
+      task.scheduledDate = input.scheduledDate ?? task.scheduledDate;
+      return task;
+    });
+    updateMetricLog.mockImplementation(async (_metricId, logId, input) => {
+      const log = backendDetails.weeks[0].metrics[0].logs.find((item) => item.id === logId);
+      if (log) {
+        log.date = input.date ?? log.date;
+        log.value = input.value ?? log.value;
+        log.completed = input.completed ?? log.completed;
+      }
+      return backendDetails.weeks[0].metrics[0];
+    });
+    updateWeekReview.mockImplementation(async (_weekId, input) => {
+      backendDetails.weeks[0].review = input;
+      return backendDetails.weeks[0];
+    });
+
+    const beforeSync = detectBackendPlanConflicts(localSystem, backendDetails, taskLinkMap);
+    expect(beforeSync.hasConflicts).toBe(true);
+
+    const { result } = renderHook(() => usePlanExecutionSync({ goalId: "goal_1", system: localSystem }));
+
+    let status: string | undefined;
+    await act(async () => {
+      const snapshot = await result.current.actions.syncLocalSnapshot({ system: localSystem });
+      status = snapshot.status;
+    });
+
+    expect(status).toBe("success");
+    expect(updateWeek).toHaveBeenCalledWith(
+      "week_1",
+      expect.objectContaining({
+        focus: "Local focus",
+        expectedOutput: "Local milestone",
+      }),
+    );
+    expect(updateTask).toHaveBeenCalledWith(
+      "remote_task_1",
+      expect.objectContaining({
+        title: "Write launch brief",
+        status: "todo",
+        scheduledDate: "2026-04-01T00:00:00.000Z",
+      }),
+    );
+    expect(updateMetricLog).toHaveBeenCalledWith(
+      "metric_1",
+      "daily_log_1",
+      expect.objectContaining({
+        value: 0,
+        completed: false,
+      }),
+    );
+    expect(updateWeekReview).toHaveBeenCalledWith(
+      "week_1",
+      expect.objectContaining({
+        reflection: "Local review",
+        adjustments: "Local priority",
+      }),
+    );
+
+    const afterSync = detectBackendPlanConflicts(localSystem, backendDetails, taskLinkMap);
+    expect(afterSync.conflicts).toHaveLength(0);
   });
 });

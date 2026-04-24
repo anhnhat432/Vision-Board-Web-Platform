@@ -1389,21 +1389,21 @@ export function TwelveWeekSystem() {
         <TabsList
           data-tour-id="system-tabs"
           aria-label="Điều hướng trung tâm 12 tuần"
-          className="sticky top-14 z-20 flex h-auto w-full flex-nowrap justify-start gap-1 overflow-x-auto rounded-lg border border-slate-200 bg-white/95 p-1 shadow-sm sm:top-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="sticky top-14 z-20 grid h-auto w-full grid-cols-4 gap-1 rounded-lg border border-slate-200 bg-white/95 p-1 shadow-sm sm:top-3"
         >
-          <TabsTrigger value="today" className="min-w-[100px] shrink-0 justify-center gap-2 rounded-md px-4 py-2.5">
+          <TabsTrigger value="today" className="min-w-0 shrink-0 flex-col justify-center gap-1 rounded-md px-2 py-2 text-xs leading-tight sm:flex-row sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm">
             <ListTodo className="h-4 w-4" />
             Hôm nay
           </TabsTrigger>
-          <TabsTrigger value="week" className="min-w-[100px] shrink-0 justify-center gap-2 rounded-md px-4 py-2.5">
+          <TabsTrigger value="week" className="min-w-0 shrink-0 flex-col justify-center gap-1 rounded-md px-2 py-2 text-xs leading-tight sm:flex-row sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm">
             <CalendarDays className="h-4 w-4" />
             Tuần
           </TabsTrigger>
-          <TabsTrigger value="progress" className="min-w-[100px] shrink-0 justify-center gap-2 rounded-md px-4 py-2.5">
+          <TabsTrigger value="progress" className="min-w-0 shrink-0 flex-col justify-center gap-1 rounded-md px-2 py-2 text-xs leading-tight sm:flex-row sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm">
             <BarChart3 className="h-4 w-4" />
             Tiến độ
           </TabsTrigger>
-          <TabsTrigger value="settings" className="min-w-[100px] shrink-0 justify-center gap-2 rounded-md px-4 py-2.5">
+          <TabsTrigger value="settings" className="min-w-0 shrink-0 flex-col justify-center gap-1 rounded-md px-2 py-2 text-xs leading-tight sm:flex-row sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm">
             <Settings2 className="h-4 w-4" />
             Cài đặt
           </TabsTrigger>

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
+import { Card, CardContent } from "@/app/components/ui/card";
 
 import {
   generateExecutionSuggestion,
@@ -12,13 +12,13 @@ interface ExecutionFeedbackProps {
 function getStatusLabel(status: ReturnType<typeof interpretExecutionScore>): string {
   switch (status) {
     case "excellent_execution":
-      return "Excellent Execution";
+      return "Thực thi rất tốt";
     case "on_track":
-      return "On Track";
+      return "Đang đúng nhịp";
     case "at_risk":
-      return "At Risk";
+      return "Cần chú ý";
     default:
-      return "Critical";
+      return "Cần cứu nhịp";
   }
 }
 
@@ -27,17 +27,13 @@ export function ExecutionFeedback({ score }: ExecutionFeedbackProps) {
   const suggestion = generateExecutionSuggestion(score);
 
   return (
-    <Card className="border-0 bg-white/85 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.32)]">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base text-slate-900">Execution Feedback</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        <p className="text-sm text-slate-700">
-          <span className="font-semibold">Status:</span> {getStatusLabel(status)}
-        </p>
-        <p className="text-sm text-slate-600">
-          <span className="font-semibold text-slate-700">Suggestion:</span> {suggestion}
-        </p>
+    <Card className="border border-slate-200 bg-white/88 shadow-[0_22px_48px_-36px_rgba(15,23,42,0.3)]">
+      <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Phản hồi thực thi</p>
+          <p className="mt-1 text-lg font-semibold text-slate-950">{getStatusLabel(status)}</p>
+        </div>
+        <p className="max-w-3xl text-sm leading-6 text-slate-600">{suggestion}</p>
       </CardContent>
     </Card>
   );
