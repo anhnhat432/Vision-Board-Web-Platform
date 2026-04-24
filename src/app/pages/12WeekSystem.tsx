@@ -1383,7 +1383,7 @@ export function TwelveWeekSystem() {
         return (
           <div
             role="alert"
-            className={`rounded-xl border px-4 py-3 text-sm flex flex-wrap items-start gap-3 ${s.wrapper}`}
+            className={`rounded-xl border px-4 py-3 text-sm ${s.wrapper}`}
             onAnimationStart={() => {
               trackRescueTriggerFired({
                 kind: topTrigger.kind,
@@ -1392,40 +1392,45 @@ export function TwelveWeekSystem() {
               });
             }}
           >
-            <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${s.icon}`}>
-              <AlertTriangle className="h-3.5 w-3.5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className={`font-semibold ${s.headline}`}>{topTrigger.headline}</p>
-              <p className={`mt-0.5 text-xs ${s.detail}`}>{topTrigger.detail}</p>
-            </div>
-            <div className="flex shrink-0 items-center gap-2 ml-auto">
-              <Button
-                size="sm"
-                onClick={() => {
-                  trackRescueActionTaken({
-                    kind: topTrigger.kind,
-                    action: ctaHref ? "upgrade" : "navigate_system",
-                    currentPlan: activePlanCode,
-                  });
-                  if (ctaHref) navigate(ctaHref);
-                  else setActiveTab("today");
-                }}
-              >
-                {ctaLabel}
-              </Button>
-              <button
-                type="button"
-                className="text-xs opacity-60 hover:opacity-100 transition-opacity px-1"
-                aria-label="Đóng thông báo"
-                onClick={() => {
-                  dismissRescueTrigger(topTrigger.kind);
-                  trackRescueTriggerDismissed({ kind: topTrigger.kind, currentPlan: activePlanCode });
-                  setDismissedTriggerKind(topTrigger.kind);
-                }}
-              >
-                ✕
-              </button>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+              <div className="flex min-w-0 flex-1 items-start gap-3">
+                <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${s.icon}`}>
+                  <AlertTriangle className="h-3.5 w-3.5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className={`font-semibold ${s.headline}`}>{topTrigger.headline}</p>
+                  <p className={`mt-0.5 text-xs leading-5 ${s.detail}`}>{topTrigger.detail}</p>
+                </div>
+              </div>
+              <div className="flex w-full shrink-0 items-center gap-2 sm:ml-auto sm:w-auto">
+                <Button
+                  size="sm"
+                  className="flex-1 sm:flex-none"
+                  onClick={() => {
+                    trackRescueActionTaken({
+                      kind: topTrigger.kind,
+                      action: ctaHref ? "upgrade" : "navigate_system",
+                      currentPlan: activePlanCode,
+                    });
+                    if (ctaHref) navigate(ctaHref);
+                    else setActiveTab("today");
+                  }}
+                >
+                  {ctaLabel}
+                </Button>
+                <button
+                  type="button"
+                  className="px-1 text-xs opacity-60 transition-opacity hover:opacity-100"
+                  aria-label="Đóng thông báo"
+                  onClick={() => {
+                    dismissRescueTrigger(topTrigger.kind);
+                    trackRescueTriggerDismissed({ kind: topTrigger.kind, currentPlan: activePlanCode });
+                    setDismissedTriggerKind(topTrigger.kind);
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
             </div>
           </div>
         );
