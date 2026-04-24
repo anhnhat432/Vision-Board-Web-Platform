@@ -12,7 +12,9 @@
     "format": "biome format --write .",
     "test": "vitest",
     "test:run": "vitest run",
-    "check": "npm run typecheck && npm run lint && npm run test:run && npm run build"
+    "check": "npm run typecheck && npm run lint && npm run test:run && npm run build",
+    "env:check": "node scripts/check-runtime-env.mjs",
+    "env:check:full": "node scripts/check-runtime-env.mjs --full-stack"
   },
   "dependencies": {
     "@fontsource/be-vietnam-pro": "^5.2.8",
