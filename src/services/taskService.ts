@@ -8,7 +8,9 @@ export interface AddTaskPayload {
 }
 
 export interface UpdateTaskPayload {
-  status: TaskStatus;
+  title?: string;
+  status?: TaskStatus;
+  scheduledDate?: string;
 }
 
 export function addTask(weekId: string, payload: AddTaskPayload): Promise<Task> {

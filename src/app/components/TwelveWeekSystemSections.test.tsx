@@ -115,6 +115,11 @@ describe("TwelveWeekSystemSections", () => {
           profileReady: true,
           displayName: "Test User",
           email: "test@example.com",
+          syncing: false,
+          syncStatus: "success",
+          lastSyncedAt: "2026-03-26T10:10:00.000Z",
+          syncMessage: "Đã đồng bộ 3 mục 12-week lên backend.",
+          failedSyncCount: 0,
         }}
         appPreferences={appPreferences}
         funnelSteps={[
@@ -175,7 +180,7 @@ describe("TwelveWeekSystemSections", () => {
 
     expect(screen.getByText("Cài đặt chu kỳ")).toBeInTheDocument();
     expect(screen.getByText("Đồng bộ backend")).toBeInTheDocument();
-    expect(screen.getByText("Đã sẵn sàng")).toBeInTheDocument();
+    expect(screen.getByText("Đã đồng bộ")).toBeInTheDocument();
     expect(screen.getByText("Bảng điều khiển local")).toBeInTheDocument();
     expect(screen.getByLabelText("Chọn ngày review")).toBeInTheDocument();
   });

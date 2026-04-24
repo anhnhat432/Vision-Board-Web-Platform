@@ -12,6 +12,12 @@ export interface AddTaskPayload {
   scheduledDate?: string;
 }
 
+export interface UpdateTaskPayload {
+  title?: string;
+  status?: TaskStatus;
+  scheduledDate?: string;
+}
+
 class TaskService {
   constructor(
     private readonly planRepository: MongoPlanRepository,
@@ -30,7 +36,7 @@ class TaskService {
     });
   }
 
-  async updateTaskStatus(userId: string, taskId: string, status: TaskStatus) {
+  async updateTask(userId: string, taskId: string, payload: UpdateTaskPayload) {
     await requireTaskOwnership(
       this.planRepository,
       this.weekRepository,
@@ -39,7 +45,15 @@ class TaskService {
       taskId,
     );
 
-    return this.taskRepository.updateTask(taskId, { status });
+    return this.taskRepository.updateTask(taskId, {
+      title: payload.title,
+      status: payload.status,
+      scheduledDate: payload.scheduledDate ? new Date(payload.scheduledDate) : undefined,
+    });
+  }
+
+  async updateTaskStatus(userId: string, taskId: string, status: TaskStatus) {
+    return this.updateTask(userId, taskId, { status });
   }
 
   async deleteTask(userId: string, taskId: string) {

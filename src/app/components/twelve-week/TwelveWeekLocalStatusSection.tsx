@@ -11,6 +11,9 @@ function getBackendBadgeClass(status: TwelveWeekSettingsTabProps["backendConnect
   if (status.authLoading) return "border-sky-200 bg-sky-50 text-sky-800";
   if (!status.signedIn) return "border-slate-300 bg-white text-slate-700";
   if (!status.profileReady) return "border-violet-200 bg-violet-50 text-violet-800";
+  if (status.syncing) return "border-sky-200 bg-sky-50 text-sky-800";
+  if (status.syncStatus === "partial") return "border-amber-200 bg-amber-50 text-amber-800";
+  if (status.syncStatus === "error") return "border-red-200 bg-red-50 text-red-800";
   return "border-emerald-200 bg-emerald-50 text-emerald-800";
 }
 
@@ -19,6 +22,10 @@ function getBackendStatusLabel(status: TwelveWeekSettingsTabProps["backendConnec
   if (status.authLoading) return "Đang kiểm tra";
   if (!status.signedIn) return "Chưa đăng nhập";
   if (!status.profileReady) return "Đang nối profile";
+  if (status.syncing) return "Đang đồng bộ";
+  if (status.syncStatus === "success") return "Đã đồng bộ";
+  if (status.syncStatus === "partial") return "Đồng bộ một phần";
+  if (status.syncStatus === "error") return "Có lỗi sync";
   return "Đã sẵn sàng";
 }
 
@@ -27,6 +34,8 @@ function getBackendStatusDescription(status: TwelveWeekSettingsTabProps["backend
   if (status.authLoading) return "Đang kiểm tra phiên đăng nhập trước khi nối backend.";
   if (!status.signedIn) return "Đăng nhập để bật profile backend và đồng bộ tiến độ qua thiết bị khác.";
   if (!status.profileReady) return "Đã có phiên đăng nhập, đang chờ backend profile hoàn tất bootstrap.";
+  if (status.syncing) return "Đang đẩy plan, task, check-in và review 12-week lên backend.";
+  if (status.syncMessage) return status.syncMessage;
   return status.displayName || status.email
     ? `Đang đồng bộ dưới tài khoản ${status.displayName || status.email}.`
     : "Backend profile đã sẵn sàng cho các thao tác đồng bộ.";

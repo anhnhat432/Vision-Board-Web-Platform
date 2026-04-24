@@ -17,6 +17,11 @@ export interface BackendConnectionStatus {
   profileReady: boolean;
   displayName: string | null;
   email: string | null;
+  syncing: boolean;
+  syncStatus: "idle" | "syncing" | "success" | "partial" | "error";
+  lastSyncedAt: string | null;
+  syncMessage: string | null;
+  failedSyncCount: number;
 }
 
 export interface TwelveWeekSettingsTabProps {

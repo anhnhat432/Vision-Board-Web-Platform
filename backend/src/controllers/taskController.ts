@@ -13,17 +13,32 @@ export async function addTask(req: Request, res: Response): Promise<void> {
 
 export async function updateTask(req: Request, res: Response): Promise<void> {
   const user = requireAuthUser(req);
-  const status = req.body?.status as "todo" | "doing" | "done" | undefined;
+  const body = req.body ?? {};
+  const status = body.status as "todo" | "doing" | "done" | undefined;
+  const title = typeof body.title === "string" ? body.title.trim() : undefined;
+  const scheduledDate = typeof body.scheduledDate === "string" ? body.scheduledDate : undefined;
 
-  if (!status || !["todo", "doing", "done"].includes(status)) {
+  if (status && !["todo", "doing", "done"].includes(status)) {
     throw new ApiError(400, "Invalid task status. Use todo, doing, or done.");
   }
 
-  const task = await taskService.updateTaskStatus(
-    user.uid,
-    req.params.taskId,
+  if (body.title !== undefined && !title) {
+    throw new ApiError(400, "Task title cannot be empty.");
+  }
+
+  if (scheduledDate !== undefined && !Number.isFinite(new Date(scheduledDate).valueOf())) {
+    throw new ApiError(400, "Invalid scheduledDate.");
+  }
+
+  if (!status && title === undefined && scheduledDate === undefined) {
+    throw new ApiError(400, "Provide at least one task field to update.");
+  }
+
+  const task = await taskService.updateTask(user.uid, req.params.taskId, {
     status,
-  );
+    title,
+    scheduledDate,
+  });
   res.status(200).json(successResponse(task));
 }
 

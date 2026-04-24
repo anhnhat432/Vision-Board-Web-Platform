@@ -44,6 +44,7 @@ import {
   type InAppReminder,
   type PricingPlanCode,
   type SyncOutboxItem,
+  type TwelveWeekSystem as TwelveWeekSystemData,
   type UniversalDailyCheckIn,
   type UniversalWeeklyReview,
   archiveOutboxItem,
@@ -113,6 +114,31 @@ const PlanOverview = lazy(async () => ({
 const WeekEditor = lazy(async () => ({
   default: (await import("@/features/plan12week/components/WeekEditor")).WeekEditor,
 }));
+
+function buildBackendSyncKey(goalId: string, system: TwelveWeekSystemData): string {
+  return JSON.stringify({
+    goalId,
+    startDate: system.startDate,
+    totalWeeks: system.totalWeeks,
+    weeklyPlans: system.weeklyPlans.map((week) => [week.weekNumber, week.focus, week.milestone]),
+    tasks: system.taskInstances.map((task) => [
+      task.id,
+      task.weekNumber,
+      task.scheduledDate,
+      task.title,
+      task.completed,
+      task.completedAt,
+    ]),
+    checkIns: system.dailyCheckIns.map((checkIn) => [checkIn.date, checkIn.didWorkToday]),
+    reviews: system.weeklyReviews.map((review) => [
+      review.weekNumber,
+      review.reviewCompleted,
+      review.lagProgressValue,
+      review.biggestOutputThisWeek,
+      review.nextWeekPriority,
+    ]),
+  });
+}
 
 function TwelveWeekTabFallback({
   title,
@@ -219,17 +245,11 @@ export function TwelveWeekSystem() {
   });
 
   const todayDateKey = formatDateInputValue(new Date());
-  const backendConnectionStatus = {
-    authConfigured: isAuthConfigured,
-    authLoading,
-    signedIn: Boolean(user),
-    profileReady: Boolean(userProfile),
-    displayName: userProfile?.displayName || user?.displayName || null,
-    email: userProfile?.email || user?.email || null,
-  };
+  const isBackendProfileReady = Boolean(userProfile);
 
   const formInitRef = useRef<string | null>(null);
   const activeGoalIdRef = useRef<string | null>(activeGoal?.id ?? null);
+  const lastBackendSyncKeyRef = useRef<string | null>(null);
   const latestCheckIn = (() => {
     const checkIns = system?.dailyCheckIns ?? [];
     if (checkIns.length === 0) return null;
@@ -264,11 +284,62 @@ export function TwelveWeekSystem() {
   }, [activeGoal?.id]);
 
   const {
+    loading: isBackendSyncing,
+    error: backendSyncError,
+    data: backendSyncData,
     actions: executionSyncActions,
   } = usePlanExecutionSync({
     goalId: activeGoal?.id ?? null,
     system,
+    enabled: isBackendProfileReady,
   });
+
+  const backendConnectionStatus = {
+    authConfigured: isAuthConfigured,
+    authLoading,
+    signedIn: Boolean(user),
+    profileReady: isBackendProfileReady,
+    displayName: userProfile?.displayName || user?.displayName || null,
+    email: userProfile?.email || user?.email || null,
+    syncing: isBackendSyncing,
+    syncStatus: backendSyncError
+      ? "error"
+      : isBackendSyncing
+        ? "syncing"
+        : backendSyncData.lastSnapshot?.status ?? "idle",
+    lastSyncedAt: backendSyncData.lastSnapshot?.at ?? null,
+    syncMessage: backendSyncError?.message ?? backendSyncData.lastSnapshot?.message ?? null,
+    failedSyncCount: backendSyncData.lastSnapshot?.failedCount ?? 0,
+  } as const;
+
+  useEffect(() => {
+    const localSystem = activeGoal?.twelveWeekSystem ?? null;
+    if (!isBackendProfileReady || !activeGoal || !localSystem) return;
+
+    const syncKey = buildBackendSyncKey(activeGoal.id, localSystem);
+    if (lastBackendSyncKeyRef.current === syncKey) return;
+    lastBackendSyncKeyRef.current = syncKey;
+
+    let cancelled = false;
+    void executionSyncActions.syncLocalSnapshot({ system: localSystem }).then((snapshot) => {
+      if (cancelled || activeGoalIdRef.current !== activeGoal.id) return;
+
+      if (snapshot.status === "success" || snapshot.status === "partial") {
+        refreshBackendProgressOverlay();
+      }
+      refreshSnapshotMeta();
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    activeGoal,
+    executionSyncActions,
+    isBackendProfileReady,
+    refreshBackendProgressOverlay,
+    refreshSnapshotMeta,
+  ]);
 
   if (!activeGoal || !system) {
     return (
@@ -810,6 +881,27 @@ export function TwelveWeekSystem() {
 
   const handleRunOutboxSync = async () => {
     const actionGoalId = activeGoal.id;
+    if (isBackendProfileReady) {
+      const backendSnapshot = await executionSyncActions.syncLocalSnapshot({
+        system: activeGoal.twelveWeekSystem ?? system,
+      });
+
+      if (backendSnapshot.status === "success" && backendSnapshot.syncedCount > 0) {
+        toast.success(backendSnapshot.message);
+      } else if (backendSnapshot.status === "partial") {
+        toast.info(backendSnapshot.message);
+      } else if (backendSnapshot.status === "error") {
+        toast.error(backendSnapshot.message);
+      }
+
+      if (
+        activeGoalIdRef.current === actionGoalId &&
+        (backendSnapshot.status === "success" || backendSnapshot.status === "partial")
+      ) {
+        refreshBackendProgressOverlay();
+      }
+    }
+
     const snapshot = await syncPendingOutbox();
     setLastSyncSnapshot(snapshot);
     if (activeGoalIdRef.current === actionGoalId) {
