@@ -4,10 +4,12 @@ import {
   Award,
   BookOpen,
   CalendarDays,
+  CheckCircle2,
   Compass,
   CreditCard,
   Images,
   LayoutDashboard,
+  LogOut,
   Menu,
   Moon,
   Package,
@@ -15,6 +17,7 @@ import {
   Sun,
   Target,
   TrendingUp,
+  User2,
   X,
 } from "lucide-react";
 import { useLocation, useNavigate, useOutlet } from "react-router";
@@ -170,7 +173,15 @@ export function RootLayout() {
   const location = useLocation();
   const outlet = useOutlet();
   const demoMode = isDemoMode();
-  const { authLoading, isConfigured, userProfile } = useAuthContext();
+  const {
+    authLoading,
+    isConfigured,
+    logout,
+    user,
+    userProfile,
+    userProfileError,
+    userProfileLoading,
+  } = useAuthContext();
   const backendPlanHydration = useBackendPlanHydration({
     enabled: !demoMode && isConfigured && Boolean(userProfile),
     scopeKey: userProfile?.id ?? null,
@@ -179,6 +190,7 @@ export function RootLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [guideUserData, setGuideUserData] = useState(() => getUserData());
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
     const userData = initializeUserData();
@@ -381,6 +393,35 @@ export function RootLayout() {
     ...shellGradientStyle,
     boxShadow: "0 14px 30px -18px var(--tone-shell-shadow)",
   };
+  const accountLabel = userProfile?.displayName || user?.displayName || user?.email || "Khách";
+  const accountStatus = !isConfigured
+    ? "Demo local"
+    : authLoading
+      ? "Đang kiểm tra"
+      : !user
+        ? "Chưa đăng nhập"
+        : userProfileLoading
+          ? "Đang nối backend"
+          : userProfileError
+            ? "Lỗi profile"
+            : userProfile
+              ? "Đã nối backend"
+              : "Chờ profile";
+  const accountStatusClass = userProfileError
+    ? "bg-red-50 text-red-700 ring-red-200"
+    : userProfile
+      ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+      : "bg-slate-50 text-slate-600 ring-slate-200";
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await logout();
+      navigate("/login", { replace: true });
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
 
   const prefersReducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -496,6 +537,37 @@ export function RootLayout() {
             </nav>
 
             <div className="hidden shrink-0 items-center gap-1.5 md:flex">
+              {user ? (
+                <div
+                  className="flex max-w-[210px] items-center gap-2 rounded-full border border-white/75 bg-white/82 px-2.5 py-1.5 text-left text-slate-700 shadow-sm"
+                  title={userProfileError ?? accountLabel}
+                >
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+                    <User2 className="h-3.5 w-3.5" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-xs font-semibold leading-4">{accountLabel}</span>
+                    <span
+                      className={`mt-0.5 inline-flex max-w-full items-center gap-1 rounded-full px-1.5 py-0.5 text-[0.65rem] font-semibold leading-none ring-1 ${accountStatusClass}`}
+                    >
+                      <CheckCircle2 className="h-2.5 w-2.5 shrink-0" />
+                      <span className="truncate">{accountStatus}</span>
+                    </span>
+                  </span>
+                </div>
+              ) : null}
+              {user ? (
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  disabled={isSigningOut}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-white/75 bg-white/82 text-slate-600 shadow-sm transition-colors hover:bg-white disabled:opacity-50 dark:border-white/10 dark:bg-white/6 dark:text-slate-300 dark:hover:bg-white/12"
+                  aria-label="Đăng xuất"
+                  title="Đăng xuất"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                </button>
+              ) : null}
               <button
                 type="button"
                 onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
@@ -557,6 +629,34 @@ export function RootLayout() {
           <div id="mobile-nav-menu" className="mx-auto mt-2 max-w-7xl md:hidden">
             <div className="glass-surface rounded-[28px] p-3">
               <nav className="space-y-1" aria-label="Menu điều hướng">
+                {user ? (
+                  <div className="mb-2 rounded-2xl border border-white/72 bg-white/82 px-4 py-3 text-left">
+                    <div className="flex items-center gap-3">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+                        <User2 className="h-5 w-5" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-slate-800">{accountLabel}</p>
+                        <p className="mt-1 text-xs font-medium text-slate-500">{accountStatus}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          void handleSignOut();
+                        }}
+                        disabled={isSigningOut}
+                        className="flex size-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 disabled:opacity-50"
+                        aria-label="Đăng xuất"
+                      >
+                        <LogOut className="h-4 w-4" />
+                      </button>
+                    </div>
+                    {userProfileError ? (
+                      <p className="mt-2 text-xs leading-5 text-red-600">{userProfileError}</p>
+                    ) : null}
+                  </div>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => {
