@@ -13,6 +13,7 @@ import {
   Menu,
   Moon,
   Package,
+  RefreshCw,
   Sparkles,
   Sun,
   Target,
@@ -177,6 +178,7 @@ export function RootLayout() {
     authLoading,
     isConfigured,
     logout,
+    refreshUserProfile,
     user,
     userProfile,
     userProfileError,
@@ -412,6 +414,7 @@ export function RootLayout() {
     : userProfile
       ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
       : "bg-slate-50 text-slate-600 ring-slate-200";
+  const canRetryUserProfile = Boolean(user) && !userProfileLoading && (!userProfile || Boolean(userProfileError));
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -559,6 +562,18 @@ export function RootLayout() {
               {user ? (
                 <button
                   type="button"
+                  onClick={refreshUserProfile}
+                  disabled={!canRetryUserProfile}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-white/75 bg-white/82 text-slate-600 shadow-sm transition-colors hover:bg-white disabled:opacity-50 dark:border-white/10 dark:bg-white/6 dark:text-slate-300 dark:hover:bg-white/12"
+                  aria-label="Kiểm tra lại backend profile"
+                  title="Kiểm tra lại backend profile"
+                >
+                  <RefreshCw className={`h-3.5 w-3.5 ${userProfileLoading ? "animate-spin" : ""}`} />
+                </button>
+              ) : null}
+              {user ? (
+                <button
+                  type="button"
                   onClick={handleSignOut}
                   disabled={isSigningOut}
                   className="flex h-8 w-8 items-center justify-center rounded-full border border-white/75 bg-white/82 text-slate-600 shadow-sm transition-colors hover:bg-white disabled:opacity-50 dark:border-white/10 dark:bg-white/6 dark:text-slate-300 dark:hover:bg-white/12"
@@ -639,6 +654,15 @@ export function RootLayout() {
                         <p className="truncate text-sm font-semibold text-slate-800">{accountLabel}</p>
                         <p className="mt-1 text-xs font-medium text-slate-500">{accountStatus}</p>
                       </div>
+                      <button
+                        type="button"
+                        onClick={refreshUserProfile}
+                        disabled={!canRetryUserProfile}
+                        className="flex size-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 disabled:opacity-50"
+                        aria-label="Kiểm tra lại backend profile"
+                      >
+                        <RefreshCw className={`h-4 w-4 ${userProfileLoading ? "animate-spin" : ""}`} />
+                      </button>
                       <button
                         type="button"
                         onClick={() => {

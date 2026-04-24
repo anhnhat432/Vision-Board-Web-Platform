@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { User, UserCredential } from "firebase/auth";
 
@@ -15,6 +15,7 @@ interface AuthContextValue {
   error: string | null;
   login: (options?: LoginOptions) => Promise<UserCredential | null>;
   logout: () => Promise<void>;
+  refreshUserProfile: () => void;
   isConfigured: boolean;
 }
 
@@ -25,7 +26,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userProfileLoading, setUserProfileLoading] = useState(false);
   const [userProfileError, setUserProfileError] = useState<string | null>(null);
+  const [profileRefreshIndex, setProfileRefreshIndex] = useState(0);
   const bootstrappedUid = useRef<string | null>(null);
+
+  const refreshUserProfile = useCallback(() => {
+    bootstrappedUid.current = null;
+    setProfileRefreshIndex((index) => index + 1);
+  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -36,9 +43,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Avoid re-bootstrapping the same user on every render
-    if (bootstrappedUid.current === user.uid) return;
-    bootstrappedUid.current = user.uid;
+    // Avoid re-bootstrapping the same user on every render unless the user retries.
+    const bootstrapKey = `${user.uid}:${profileRefreshIndex}`;
+    if (bootstrappedUid.current === bootstrapKey) return;
+    bootstrappedUid.current = bootstrapKey;
     setUserProfileLoading(true);
     setUserProfileError(null);
 
@@ -70,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [user]);
+  }, [user, profileRefreshIndex]);
 
   const value: AuthContextValue = {
     user,
@@ -81,6 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     error,
     login,
     logout,
+    refreshUserProfile,
     isConfigured,
   };
 
