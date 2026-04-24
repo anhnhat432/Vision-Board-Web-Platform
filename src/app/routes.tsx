@@ -16,6 +16,27 @@ function lazyComponent<TModule extends Record<string, unknown>>(
   };
 }
 
+function RouteHydrateFallback() {
+  return (
+    <div className="flex min-h-[360px] items-center justify-center px-6 py-12" role="status" aria-live="polite">
+      <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white/90 p-6 text-center shadow-[0_18px_44px_-34px_rgba(15,23,42,0.35)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Dear Our Future</p>
+        <p className="mt-3 text-base font-semibold text-slate-900">Đang mở trang...</p>
+      </div>
+    </div>
+  );
+}
+
+function lazyRoute<TModule extends Record<string, unknown>>(
+  loader: () => Promise<TModule>,
+  exportName: keyof TModule,
+) {
+  return {
+    lazy: lazyComponent(loader, exportName),
+    HydrateFallback: RouteHydrateFallback,
+  };
+}
+
 function RedirectToTwelveWeekSetup() {
   return <Navigate to="/12-week-setup" replace />;
 }
@@ -27,7 +48,7 @@ function RedirectToTwelveWeekSystem() {
 export const router = createBrowserRouter([
   {
     path: "/login",
-    lazy: lazyComponent(() => import("./pages/LoginPage"), "LoginPage"),
+    ...lazyRoute(() => import("./pages/LoginPage"), "LoginPage"),
   },
   {
     path: "/",
@@ -36,27 +57,27 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        lazy: lazyComponent(() => import("./pages/Dashboard"), "Dashboard"),
+        ...lazyRoute(() => import("./pages/Dashboard"), "Dashboard"),
       },
       {
         path: "onboarding",
-        lazy: lazyComponent(() => import("./pages/Onboarding"), "Onboarding"),
+        ...lazyRoute(() => import("./pages/Onboarding"), "Onboarding"),
       },
       {
         path: "life-insight",
-        lazy: lazyComponent(() => import("./pages/LifeInsight"), "LifeInsight"),
+        ...lazyRoute(() => import("./pages/LifeInsight"), "LifeInsight"),
       },
       {
         path: "feasibility",
-        lazy: lazyComponent(() => import("./pages/FeasibilityCheck"), "FeasibilityCheck"),
+        ...lazyRoute(() => import("./pages/FeasibilityCheck"), "FeasibilityCheck"),
       },
       {
         path: "smart-goal-setup",
-        lazy: lazyComponent(() => import("./pages/SMARTGoalSetup"), "SMARTGoalSetup"),
+        ...lazyRoute(() => import("./pages/SMARTGoalSetup"), "SMARTGoalSetup"),
       },
       {
         path: "12-week-setup",
-        lazy: lazyComponent(() => import("./pages/12WeekSetup"), "TwelveWeekSetup"),
+        ...lazyRoute(() => import("./pages/12WeekSetup"), "TwelveWeekSetup"),
       },
       {
         path: "12-week-dashboard",
@@ -72,15 +93,15 @@ export const router = createBrowserRouter([
       },
       {
         path: "12-week-system",
-        lazy: lazyComponent(() => import("./pages/12WeekSystem"), "TwelveWeekSystem"),
+        ...lazyRoute(() => import("./pages/12WeekSystem"), "TwelveWeekSystem"),
       },
       {
         path: "billing/mock-checkout",
-        lazy: lazyComponent(() => import("./pages/MockBillingCheckout"), "MockBillingCheckout"),
+        ...lazyRoute(() => import("./pages/MockBillingCheckout"), "MockBillingCheckout"),
       },
       {
         path: "billing/plan",
-        lazy: lazyComponent(() => import("./pages/BillingPlan"), "BillingPlan"),
+        ...lazyRoute(() => import("./pages/BillingPlan"), "BillingPlan"),
       },
       {
         // Protected routes — require authentication
@@ -88,41 +109,41 @@ export const router = createBrowserRouter([
         children: [
           {
             path: "order",
-            lazy: lazyComponent(() => import("./pages/OrderPage"), "OrderPage"),
+            ...lazyRoute(() => import("./pages/OrderPage"), "OrderPage"),
           },
           {
             path: "order-status/:orderId?",
-            lazy: lazyComponent(() => import("./pages/OrderStatusPage"), "OrderStatusPage"),
+            ...lazyRoute(() => import("./pages/OrderStatusPage"), "OrderStatusPage"),
           },
         ],
       },
       {
         path: "vision-board/:id?",
-        lazy: lazyComponent(() => import("./pages/VisionBoardEditor"), "VisionBoardEditor"),
+        ...lazyRoute(() => import("./pages/VisionBoardEditor"), "VisionBoardEditor"),
       },
       {
         path: "admin/orders",
-        lazy: lazyComponent(() => import("./pages/AdminOrdersPage"), "AdminOrdersPage"),
+        ...lazyRoute(() => import("./pages/AdminOrdersPage"), "AdminOrdersPage"),
       },
       {
         path: "goals",
-        lazy: lazyComponent(() => import("./pages/GoalTracker"), "GoalTracker"),
+        ...lazyRoute(() => import("./pages/GoalTracker"), "GoalTracker"),
       },
       {
         path: "life-balance",
-        lazy: lazyComponent(() => import("./pages/LifeBalance"), "LifeBalance"),
+        ...lazyRoute(() => import("./pages/LifeBalance"), "LifeBalance"),
       },
       {
         path: "achievements",
-        lazy: lazyComponent(() => import("./pages/Achievements"), "Achievements"),
+        ...lazyRoute(() => import("./pages/Achievements"), "Achievements"),
       },
       {
         path: "journal",
-        lazy: lazyComponent(() => import("./pages/ReflectionJournal"), "ReflectionJournal"),
+        ...lazyRoute(() => import("./pages/ReflectionJournal"), "ReflectionJournal"),
       },
       {
         path: "gallery",
-        lazy: lazyComponent(() => import("./pages/VisionBoardGallery"), "VisionBoardGallery"),
+        ...lazyRoute(() => import("./pages/VisionBoardGallery"), "VisionBoardGallery"),
       },
     ],
   },
