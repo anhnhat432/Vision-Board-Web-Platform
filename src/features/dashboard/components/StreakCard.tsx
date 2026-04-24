@@ -17,8 +17,8 @@ function StreakCardComponent({ streak, threshold = 70 }: StreakCardProps) {
             <Flame className="h-5 w-5" />
           </div>
           <div>
-            <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Weekly Streak</CardDescription>
-            <CardTitle className="mt-1 text-base font-semibold text-slate-900">Consistency Streak</CardTitle>
+            <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Chuỗi tuần đều</CardDescription>
+            <CardTitle className="mt-1 text-base font-semibold text-slate-900">Nhịp nhất quán</CardTitle>
           </div>
         </div>
       </CardHeader>
@@ -26,11 +26,11 @@ function StreakCardComponent({ streak, threshold = 70 }: StreakCardProps) {
         <div className="flex items-end justify-between">
           <p className="text-3xl font-bold tracking-tight text-slate-900">{streak}</p>
           <span className="rounded-full border border-amber-200 bg-white/90 px-2.5 py-1 text-xs font-medium text-amber-700">
-            Threshold {threshold}%
+            Ngưỡng {threshold}%
           </span>
         </div>
         <p className="text-sm text-slate-600">
-          Longest run of weeks with healthy execution.
+          Chuỗi tuần dài nhất giữ được mức thực thi khỏe.
         </p>
       </CardContent>
     </Card>

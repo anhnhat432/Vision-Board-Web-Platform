@@ -25,8 +25,8 @@ function GoalProgressCardComponent({
             <Target className="h-5 w-5" />
           </div>
           <div>
-            <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Goal Progress</CardDescription>
-            <CardTitle className="mt-1 line-clamp-1 text-base font-semibold text-slate-900">
+            <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Tiến độ mục tiêu</CardDescription>
+            <CardTitle className="mt-1 line-clamp-2 text-base font-semibold leading-6 text-slate-900">
               {goalTitle}
             </CardTitle>
           </div>
@@ -36,17 +36,17 @@ function GoalProgressCardComponent({
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="text-3xl font-bold tracking-tight text-slate-900">{percent}%</p>
-            <p className="text-xs text-slate-500">Overall completion</p>
+            <p className="text-xs text-slate-500">Tiến độ tổng thể</p>
           </div>
           <div className="rounded-xl border border-violet-200 bg-white/90 px-3 py-1.5 text-right">
             <p className="text-sm font-semibold text-slate-900">{completedTasks}/{totalTasks || 0}</p>
-            <p className="text-[11px] text-slate-500">tasks</p>
+            <p className="text-[11px] text-slate-500">việc</p>
           </div>
         </div>
         <div className="space-y-1.5">
           <Progress value={percent} className="h-2.5 bg-violet-100/70" />
           <p className="text-xs text-slate-500">
-            Focus on completing high-impact tasks first.
+            Ưu tiên hoàn thành các việc có tác động cao trước.
           </p>
         </div>
       </CardContent>

@@ -24,9 +24,9 @@ function WeeklyProgressChartComponent({ points }: WeeklyProgressChartProps) {
             <BarChart3 className="h-5 w-5" />
           </div>
           <div>
-            <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Weekly Progress</CardDescription>
+            <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Tiến độ theo tuần</CardDescription>
             <CardTitle className="mt-1 text-base font-semibold text-slate-900">
-              Execution By Week
+              Thực thi từng tuần
             </CardTitle>
           </div>
         </div>
@@ -34,7 +34,7 @@ function WeeklyProgressChartComponent({ points }: WeeklyProgressChartProps) {
       <CardContent className="space-y-3 pt-1">
         {points.length === 0 ? (
           <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4">
-            <p className="text-sm text-slate-500">No weekly execution data yet.</p>
+            <p className="text-sm text-slate-500">Chưa có dữ liệu thực thi theo tuần.</p>
           </div>
         ) : (
           <div className="space-y-2.5">
@@ -44,7 +44,7 @@ function WeeklyProgressChartComponent({ points }: WeeklyProgressChartProps) {
                 className="rounded-xl border border-slate-200/80 bg-white/85 px-3 py-2.5"
               >
                 <div className="mb-2 flex items-center justify-between gap-2">
-                  <span className="text-sm font-semibold text-slate-800">Week {point.weekNumber}</span>
+                  <span className="text-sm font-semibold text-slate-800">Tuần {point.weekNumber}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-slate-500">
                       {point.completedTasks}/{point.totalTasks || 0}

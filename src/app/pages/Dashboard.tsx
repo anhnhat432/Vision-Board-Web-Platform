@@ -209,7 +209,7 @@ function DashboardContent({
 
   const recentGoals = userData.goals.slice(0, 3);
   const recentReflections = sortReflectionsByDateDesc(userData.reflections).slice(0, 2);
-  const dashboardGoalTitle = activeTwelveWeekGoal?.title ?? plan?.vision ?? "Current Goal";
+  const dashboardGoalTitle = activeTwelveWeekGoal?.title ?? plan?.vision ?? "Mục tiêu hiện tại";
   const goalProgressSnapshot = useMemo(() => buildGoalProgressSnapshot(plan), [plan]);
   const currentWeekExecutionSnapshot = useMemo(() => buildCurrentWeekExecutionSnapshot(plan), [plan]);
   const weeklyProgressPoints = useMemo(() => buildWeeklyProgressPoints(plan), [plan]);
@@ -798,14 +798,16 @@ function DashboardContent({
                   <Button
                     key={action.title}
                     variant="outline"
-                    className="h-auto justify-start whitespace-normal rounded-[22px] border-white/65 bg-white/78 px-4 py-4 text-left shadow-[0_18px_34px_-30px_rgba(15,23,42,0.2)] hover:bg-white"
+                    className="h-auto min-w-0 justify-start whitespace-normal rounded-[22px] border-white/65 bg-white/78 px-4 py-4 text-left shadow-[0_18px_34px_-30px_rgba(15,23,42,0.2)] hover:bg-white"
                     onClick={action.onClick}
                   >
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white">
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="ml-3 min-w-0 flex-1">
-                      <div className="truncate font-semibold text-slate-900">{action.title}</div>
+                      <div className="line-clamp-2 break-words text-sm font-semibold leading-5 text-slate-900 sm:text-base">
+                        {action.title}
+                      </div>
                       <div className="mt-1 line-clamp-2 text-sm text-slate-500">{action.description}</div>
                     </div>
                   </Button>
@@ -1024,8 +1026,8 @@ function DashboardContent({
         <Reveal>
           <Card className="h-full border-0 gradient-indigo shadow-[0_28px_70px_-38px_rgba(99,102,241,0.22)]">
             <CardHeader>
-              <div className="flex items-center justify-between gap-4">
-                <div>
+              <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                <div className="min-w-0">
                   <CardTitle className="text-slate-950">Mục tiêu gần đây</CardTitle>
                   <CardDescription className="text-slate-700">Đủ ít để bạn nhìn một lượt là hiểu.</CardDescription>
                 </div>

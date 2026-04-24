@@ -18,9 +18,9 @@ function getScoreTone(score: number): string {
 }
 
 function getScoreLabel(score: number): string {
-  if (score >= 80) return "Strong execution";
-  if (score >= 50) return "On track";
-  return "Needs recovery";
+  if (score >= 80) return "Thực thi tốt";
+  if (score >= 50) return "Đúng nhịp";
+  return "Cần phục hồi nhịp";
 }
 
 function ExecutionScoreCardComponent({
@@ -37,9 +37,9 @@ function ExecutionScoreCardComponent({
             <Gauge className="h-5 w-5" />
           </div>
           <div>
-            <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Execution Score</CardDescription>
+            <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Điểm thực thi</CardDescription>
             <CardTitle className="mt-1 text-base font-semibold text-slate-900">
-              {weekNumber ? `Week ${weekNumber}` : "Current Week"}
+              {weekNumber ? `Tuần ${weekNumber}` : "Tuần hiện tại"}
             </CardTitle>
           </div>
         </div>
@@ -52,13 +52,13 @@ function ExecutionScoreCardComponent({
           </div>
           <div className="rounded-xl border border-sky-200 bg-white/90 px-3 py-1.5 text-right">
             <p className="text-sm font-semibold text-slate-900">{completedTasks}/{totalTasks || 0}</p>
-            <p className="text-[11px] text-slate-500">planned tasks</p>
+            <p className="text-[11px] text-slate-500">việc đã lên kế hoạch</p>
           </div>
         </div>
         <div className="space-y-1.5">
           <Progress value={executionScore} className="h-2.5 bg-sky-100/70" />
           <p className="text-xs text-slate-500">
-            Maintain consistency to stabilize weekly results.
+            Giữ nhịp đều để kết quả tuần ổn định hơn.
           </p>
         </div>
       </CardContent>
