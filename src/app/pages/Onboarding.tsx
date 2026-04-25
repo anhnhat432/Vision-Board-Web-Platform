@@ -1,15 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  BarChart3,
-  Check,
-  Compass,
-  Sparkles,
-  Target,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, BarChart3, Check, Compass, Sparkles, Target } from "lucide-react";
 
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
@@ -44,9 +36,7 @@ export function Onboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState<OnboardingStep>("welcome");
   const [isReturning, setIsReturning] = useState(false);
-  const [lifeAreas, setLifeAreas] = useState<LifeArea[]>(
-    LIFE_AREAS.map((area) => ({ ...area, score: 5 })),
-  );
+  const [lifeAreas, setLifeAreas] = useState<LifeArea[]>(LIFE_AREAS.map((area) => ({ ...area, score: 5 })));
 
   // Guard: detect returning users and preload their existing wheel scores
   const guardedRef = useRef(false);
@@ -60,8 +50,7 @@ export function Onboarding() {
     }
   }, []);
 
-  const averageScore =
-    lifeAreas.reduce((sum, area) => sum + area.score, 0) / lifeAreas.length;
+  const averageScore = lifeAreas.reduce((sum, area) => sum + area.score, 0) / lifeAreas.length;
   const strongestArea = [...lifeAreas].sort((a, b) => b.score - a.score)[0];
   const growthArea = [...lifeAreas].sort((a, b) => a.score - b.score)[0];
 
@@ -69,9 +58,7 @@ export function Onboarding() {
 
   const handleScoreChangeWrapped = useCallback((index: number, value: number[]) => {
     setLifeAreas((currentAreas) =>
-      currentAreas.map((area, areaIndex) =>
-        areaIndex === index ? { ...area, score: value[0] ?? 1 } : area,
-      ),
+      currentAreas.map((area, areaIndex) => (areaIndex === index ? { ...area, score: value[0] ?? 1 } : area)),
     );
     setIsDirty(true);
   }, []);
@@ -108,24 +95,25 @@ export function Onboarding() {
               <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.12fr)_360px]">
                 <div className="space-y-6">
                   {isReturning && (
-                    <div className="rounded-[20px] border border-white/20 bg-white/12 px-4 py-3 text-sm text-white/84 backdrop-blur-xl">
-                      <span className="font-semibold text-white">Bạn đã hoàn thành onboarding rồi.</span>{" "}
-                      Điểm số hiện tại của bạn đã được tải sẵn — thay đổi ở bước đánh giá sẽ cập nhật bánh xe hiện tại, không tạo lại từ đầu.
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                      <span className="font-semibold text-slate-950">Bạn đã hoàn thành onboarding rồi.</span> Điểm số
+                      hiện tại của bạn đã được tải sẵn — thay đổi ở bước đánh giá sẽ cập nhật bánh xe hiện tại, không
+                      tạo lại từ đầu.
                     </div>
                   )}
                   <div className="space-y-5">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82 backdrop-blur-xl">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-sm text-slate-600">
                       <Sparkles className="h-4 w-4" />
                       {isReturning ? "Cập nhật bánh xe cuộc sống" : "Khởi động hành trình định hướng cuộc sống"}
                     </div>
 
                     <div className="space-y-4">
-                      <h1 className="max-w-3xl text-3xl font-bold tracking-normal lg:text-4xl">
+                      <h1 className="max-w-3xl text-3xl font-bold tracking-normal text-slate-950 lg:text-4xl">
                         {isReturning
                           ? "Điểm số thay đổi? Hãy cập nhật lại để insight bám sát thực tế hơn."
                           : "Tạo một điểm bắt đầu đủ rõ để phần còn lại của hành trình trở nên nhẹ hơn."}
                       </h1>
-                      <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
+                      <p className="max-w-2xl text-base leading-8 text-slate-600 lg:text-lg">
                         {isReturning
                           ? "Điểm số hiện tại của bạn đã được tải sẵn. Chỉ cần điều chỉnh lĩnh vực nào thay đổi rồi lưu lại là xong."
                           : "Chỉ trong vài phút, bạn sẽ nhìn thấy bức tranh hiện tại của mình, chọn ra nơi cần ưu tiên nhất và mở ra một hệ thống phát triển cá nhân có định hướng rõ ràng."}
@@ -137,7 +125,7 @@ export function Onboarding() {
                     {FEATURE_PILLS.map((item) => (
                       <div
                         key={item}
-                        className="rounded-full border border-white/18 bg-white/12 px-4 py-2 text-sm text-white/82 backdrop-blur-xl"
+                        className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600"
                       >
                         {item}
                       </div>
@@ -146,15 +134,12 @@ export function Onboarding() {
 
                   <div className="grid gap-4 md:grid-cols-3">
                     {JOURNEY_STEPS.map((item, index) => (
-                      <div
-                        key={item.title}
-                        className="flow-panel p-4"
-                      >
-                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/12 text-sm font-semibold">
+                      <div key={item.title} className="flow-muted p-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-sm font-semibold text-slate-700">
                           0{index + 1}
                         </div>
-                        <h3 className="mt-4 text-lg font-semibold text-white">{item.title}</h3>
-                        <p className="mt-2 text-sm leading-7 text-white/72">{item.description}</p>
+                        <h3 className="mt-4 text-lg font-semibold text-slate-950">{item.title}</h3>
+                        <p className="mt-2 text-sm leading-7 text-slate-600">{item.description}</p>
                       </div>
                     ))}
                   </div>
@@ -162,7 +147,7 @@ export function Onboarding() {
                   <div className="flex flex-wrap gap-3">
                     <Button
                       variant="outline"
-                      className="hero-cta w-full border-white/18 bg-white text-slate-900 hover:bg-white/92 sm:w-auto"
+                      className="w-full border-slate-950 bg-slate-950 text-white hover:bg-slate-800 hover:text-white sm:w-auto"
                       onClick={() => setStep("assessment")}
                     >
                       Bắt đầu đánh giá
@@ -170,7 +155,7 @@ export function Onboarding() {
                     </Button>
                     <Button
                       variant="outline"
-                      className="w-full border-white/18 bg-white/12 text-white hover:bg-white/18 hover:text-white sm:w-auto"
+                      className="w-full border-slate-200 bg-white text-slate-900 hover:bg-slate-50 sm:w-auto"
                       onClick={() => navigate("/")}
                     >
                       Xem bảng điều khiển
@@ -179,7 +164,7 @@ export function Onboarding() {
                 </div>
 
                 <div className="flow-panel p-5 sm:p-6">
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white/62">
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">
                     Bạn sẽ nhận được gì
                   </p>
 
@@ -190,29 +175,23 @@ export function Onboarding() {
                       "Tiếp tục sang flow SMART, feasibility và 12-week mà không bị đứt mạch.",
                       "Lưu lại trạng thái khởi đầu để theo dõi tiến bộ thật sự về sau.",
                     ].map((item) => (
-                      <div
-                        key={item}
-                        className="flow-muted flex items-start gap-3 p-4"
-                      >
-                        <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/14">
+                      <div key={item} className="flow-muted flex items-start gap-3 p-4">
+                        <div className="mt-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 text-slate-700">
                           <Check className="h-4 w-4" />
                         </div>
-                        <p className="text-sm leading-7 text-white/78">{item}</p>
+                        <p className="text-sm leading-7 text-slate-600">{item}</p>
                       </div>
                     ))}
                   </div>
 
                   <div className="flow-muted mt-6 p-5">
-                    <p className="text-xs uppercase tracking-[0.18em] text-white/55">
-                      Thời lượng ước tính
-                    </p>
+                    <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Thời lượng ước tính</p>
                     <div className="mt-3 flex items-end gap-2">
-                      <span className="text-4xl font-bold">3</span>
-                      <span className="pb-1 text-sm text-white/62">phút để hoàn thành</span>
+                      <span className="text-4xl font-bold text-slate-950">3</span>
+                      <span className="pb-1 text-sm text-slate-500">phút để hoàn thành</span>
                     </div>
-                    <p className="mt-3 text-sm leading-7 text-white/72">
-                      Một bước khởi động ngắn, nhưng đủ để tạo ra bức tranh rõ ràng cho cả
-                      trải nghiệm phía sau.
+                    <p className="mt-3 text-sm leading-7 text-slate-600">
+                      Một bước khởi động ngắn, nhưng đủ để tạo ra bức tranh rõ ràng cho cả trải nghiệm phía sau.
                     </p>
                   </div>
                 </div>
@@ -238,7 +217,7 @@ export function Onboarding() {
 
             <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
               <div className="space-y-5">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-sm text-slate-600">
                   <Compass className="h-4 w-4" />
                   Bước 1/1: Đánh giá bánh xe cuộc sống
                 </div>
@@ -252,12 +231,12 @@ export function Onboarding() {
                   />
                 </div>
                 <div className="space-y-3">
-                  <h1 className="max-w-3xl text-3xl font-bold tracking-normal lg:text-4xl">
+                  <h1 className="max-w-3xl text-3xl font-bold tracking-normal text-slate-950 lg:text-4xl">
                     Chấm điểm hiện tại để biết chính xác nơi bạn nên bắt đầu.
                   </h1>
-                  <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
-                    Mỗi thanh kéo là một góc nhìn về cuộc sống của bạn. Đánh giá từ 1 đến 10,
-                    sau đó hệ thống sẽ dùng bức tranh này để mở ra insight cá nhân hóa ở bước tiếp theo.
+                  <p className="max-w-2xl text-base leading-8 text-slate-600 lg:text-lg">
+                    Mỗi thanh kéo là một góc nhìn về cuộc sống của bạn. Đánh giá từ 1 đến 10, sau đó hệ thống sẽ dùng
+                    bức tranh này để mở ra insight cá nhân hóa ở bước tiếp theo.
                   </p>
                 </div>
               </div>
@@ -280,13 +259,10 @@ export function Onboarding() {
                     note: `${growthArea.score}/10`,
                   },
                 ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="flow-panel p-4"
-                  >
-                    <p className="text-xs uppercase tracking-[0.18em] text-white/56">{item.label}</p>
-                    <p className="mt-2 text-2xl font-bold text-white">{item.value}</p>
-                    <p className="mt-1 text-sm text-white/68">{item.note}</p>
+                  <div key={item.label} className="flow-muted p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
+                    <p className="mt-2 text-2xl font-bold text-slate-950">{item.value}</p>
+                    <p className="mt-1 text-sm text-slate-500">{item.note}</p>
                   </div>
                 ))}
               </div>
@@ -303,7 +279,7 @@ export function Onboarding() {
                   initial={{ opacity: 0, x: -18 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="flow-panel p-4 sm:p-5"
+                  className="flow-muted p-4 sm:p-5"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
@@ -312,9 +288,7 @@ export function Onboarding() {
                         style={{ backgroundColor: area.color }}
                       />
                       <div>
-                        <h3 className="text-lg font-semibold text-slate-900">
-                          {getLifeAreaLabel(area.name)}
-                        </h3>
+                        <h3 className="text-lg font-semibold text-slate-900">{getLifeAreaLabel(area.name)}</h3>
                         <p className="text-sm text-slate-500">
                           {area.score <= 4
                             ? "Đang cần thêm sự chăm sóc và ưu tiên."
@@ -369,12 +343,8 @@ export function Onboarding() {
               <CardContent className="p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
-                      Snapshot hiện tại
-                    </p>
-                    <h3 className="mt-3 text-3xl font-bold text-slate-900">
-                      {averageScore.toFixed(1)}
-                    </h3>
+                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Snapshot hiện tại</p>
+                    <h3 className="mt-3 text-3xl font-bold text-slate-900">{averageScore.toFixed(1)}</h3>
                     <p className="mt-2 text-sm text-slate-500">
                       Điểm trung bình cho bức tranh cuộc sống hiện tại của bạn.
                     </p>
@@ -399,9 +369,7 @@ export function Onboarding() {
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700/70">
                       Nên ưu tiên tiếp theo
                     </p>
-                    <p className="mt-2 text-lg font-semibold text-amber-950">
-                      {getLifeAreaLabel(growthArea.name)}
-                    </p>
+                    <p className="mt-2 text-lg font-semibold text-amber-950">{getLifeAreaLabel(growthArea.name)}</p>
                     <p className="mt-1 text-sm text-amber-900/78">{growthArea.score}/10</p>
                   </div>
                 </div>
@@ -428,10 +396,7 @@ export function Onboarding() {
                     "Nhận cầu nối sang mục tiêu SMART và hệ 12 tuần.",
                     "Lưu lại mốc khởi đầu để so sánh tiến bộ về sau.",
                   ].map((item) => (
-                    <div
-                      key={item}
-                      className="flow-muted flex items-start gap-3 p-4"
-                    >
+                    <div key={item} className="flow-muted flex items-start gap-3 p-4">
                       <div className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-violet-100 text-violet-700">
                         <Check className="h-3.5 w-3.5" />
                       </div>

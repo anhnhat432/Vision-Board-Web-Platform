@@ -52,12 +52,12 @@ function StepList({ userData }: { userData: UserData }) {
       {progress.steps.map((step, index) => (
         <div
           key={step.id}
-          className={`rounded-[22px] border px-4 py-4 ${
+          className={`rounded-lg border px-4 py-4 ${
             step.completed
               ? "border-emerald-200 bg-emerald-50/90"
               : step.id === progress.nextStep?.id
-                ? "border-slate-900 bg-slate-950 text-white"
-                : "border-white/70 bg-white/82"
+                ? "border-sky-200 bg-sky-50/90 shadow-[0_14px_32px_-28px_rgba(14,165,233,0.55)]"
+                : "border-slate-200 bg-white"
           }`}
         >
           <div className="flex items-start gap-3">
@@ -66,7 +66,7 @@ function StepList({ userData }: { userData: UserData }) {
                 step.completed
                   ? "bg-emerald-600 text-white"
                   : step.id === progress.nextStep?.id
-                    ? "hero-cta bg-white text-slate-950"
+                    ? "bg-slate-950 text-white"
                     : "bg-slate-100 text-slate-700"
               }`}
             >
@@ -78,7 +78,7 @@ function StepList({ userData }: { userData: UserData }) {
                   step.completed
                     ? "text-emerald-900"
                     : step.id === progress.nextStep?.id
-                      ? "text-white"
+                      ? "text-slate-950"
                       : "text-slate-900"
                 }`}
               >
@@ -89,7 +89,7 @@ function StepList({ userData }: { userData: UserData }) {
                   step.completed
                     ? "text-emerald-800/80"
                     : step.id === progress.nextStep?.id
-                      ? "text-white/74"
+                      ? "text-slate-600"
                       : "text-slate-600"
                 }`}
               >
@@ -124,25 +124,18 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
     : "Website này dễ dùng hơn nhiều nếu bạn đi đúng flow: mục tiêu rõ, chu kỳ rõ, rồi mới nhìn hôm nay và review tuần.";
   const surfaceClass = compact
     ? "max-w-full overflow-hidden border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]"
-    : "max-w-full overflow-hidden border-0 gradient-dark text-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.58)]";
+    : "max-w-full overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.34)]";
   const contentClass = compact ? "p-4" : "p-5 sm:p-6 lg:p-7";
   const layoutClass = compact
     ? "grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] lg:items-center"
     : "grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]";
-  const badgeClass = compact ? "border-slate-200 bg-slate-50 text-slate-600" : "border-white/14 bg-white/10 text-white";
-  const demoBadgeClass = compact
-    ? "border-amber-200 bg-amber-50 text-amber-800"
-    : "border-amber-300/30 bg-amber-200/12 text-amber-100";
-  const descriptionClass = compact ? "text-slate-600" : "text-white/74";
-  const primaryButtonClass = compact
-    ? "w-full justify-center bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
-    : "hero-cta w-full justify-center border-white/12 bg-white text-slate-950 hover:bg-white/92 sm:w-auto";
-  const secondaryButtonClass = compact
-    ? "w-full justify-center border-slate-200 bg-white text-slate-900 hover:bg-slate-50 sm:w-auto"
-    : "w-full justify-center border-white/12 bg-white/10 text-white hover:bg-white/16 hover:text-white sm:w-auto";
-  const ghostButtonClass = compact
-    ? "w-full justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 sm:w-auto"
-    : "w-full justify-center text-white/72 hover:bg-white/10 hover:text-white sm:w-auto";
+  const badgeClass = "border-slate-200 bg-slate-50 text-slate-600";
+  const demoBadgeClass = "border-amber-200 bg-amber-50 text-amber-800";
+  const descriptionClass = "text-slate-600";
+  const primaryButtonClass = "w-full justify-center bg-slate-950 text-white hover:bg-slate-800 sm:w-auto";
+  const secondaryButtonClass =
+    "w-full justify-center border-slate-200 bg-white text-slate-900 hover:bg-slate-50 sm:w-auto";
+  const ghostButtonClass = "w-full justify-center text-slate-500 hover:bg-slate-100 hover:text-slate-900 sm:w-auto";
 
   return (
     <Card className={surfaceClass}>
@@ -154,7 +147,7 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
               Hướng dẫn cho người mới
             </Badge>
             <div>
-              <h2 className={`${compact ? "text-lg text-slate-950" : "text-2xl"} font-bold tracking-normal`}>
+              <h2 className={`${compact ? "text-lg" : "text-2xl"} font-bold tracking-normal text-slate-950`}>
                 {title}
               </h2>
               <p className={`mt-2 max-w-2xl text-sm leading-7 ${compact ? "line-clamp-2" : ""} ${descriptionClass}`}>
@@ -199,14 +192,14 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
           </div>
 
           {!compact && (
-            <div className="space-y-3 rounded-[28px] border border-white/12 bg-white/8 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/52">Trạng thái hiện tại</p>
+            <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50/80 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Trạng thái hiện tại</p>
               <StepList userData={userData} />
             </div>
           )}
 
           {compact && nextStep && (
-            <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
+            <div className="rounded-lg border border-slate-200 bg-slate-50/80 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Bước nên làm tiếp</p>
               <p className="mt-2 text-base font-semibold text-slate-950">{nextStep.title}</p>
               <p className="mt-2 line-clamp-2 text-sm leading-7 text-slate-600">{nextStep.description}</p>
@@ -243,7 +236,7 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
         </DialogHeader>
 
         {userData.isHydratedFromDemo && (
-          <div className="rounded-[24px] border border-amber-200 bg-amber-50/90 p-4 text-sm leading-7 text-amber-900">
+          <div className="rounded-lg border border-amber-200 bg-amber-50/90 p-4 text-sm leading-7 text-amber-900">
             Dữ liệu hiện tại là dữ liệu mẫu để bạn xem nhanh sản phẩm. Khi chuyển sang bản thật, flow chuẩn vẫn là: đo
             bánh xe cuộc đời, chốt insight, viết SMART goal, kiểm tra feasibility rồi mới vào chu kỳ 12 tuần.
           </div>
@@ -279,7 +272,6 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
             </Button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {" "}
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Để sau
             </Button>
