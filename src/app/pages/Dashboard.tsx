@@ -33,6 +33,7 @@ import { Skeleton } from "../components/ui/skeleton";
 import { useBackendProgressOverlay } from "../hooks/useBackendProgressOverlay";
 import { usePageTour } from "../hooks/usePageTour";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
+import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useUpgradeDialog } from "../hooks/useUpgradeDialog";
 import {
   type UserData,
@@ -49,7 +50,6 @@ import {
   getTwelveWeekTodayTasks,
   getTwelveWeekWeekCompletion,
   getTwelveWeekWeekRange,
-  getUserData,
   isTwelveWeekReviewDueToday,
   parseStoredUserData,
   saveUserData,
@@ -105,25 +105,12 @@ const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
 ];
 
 export function Dashboard() {
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const { userData, reloadUserData } = useSyncedUserData();
   const [quote, setQuote] = useState("");
   const { isTourOpen, setIsTourOpen } = usePageTour("dashboard");
 
   useEffect(() => {
-    const data = getUserData();
-    setUserData(data);
     setQuote(getRandomMotivationalQuote());
-
-    // Reload user data when the user navigates back to this tab
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        setUserData(getUserData());
-      }
-    };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
   }, []);
 
   if (!userData) {
@@ -161,7 +148,7 @@ export function Dashboard() {
       activeTwelveWeekGoal={activeTwelveWeekGoal}
       isTourOpen={isTourOpen}
       setIsTourOpen={setIsTourOpen}
-      onReload={() => setUserData(getUserData())}
+      onReload={reloadUserData}
     />
   );
 }

@@ -47,11 +47,7 @@ import {
   updateWheelOfLifeInData,
   upgradeLegacyGoalToSystemInData,
 } from "./storage-goal-ops";
-import {
-  addReflectionToData,
-  deleteReflectionFromData,
-  upsertReflectionInData,
-} from "./storage-reflection-ops";
+import { addReflectionToData, deleteReflectionFromData, upsertReflectionInData } from "./storage-reflection-ops";
 import {
   archiveOutboxItemInData,
   autoScheduleEmailRemindersInData,
@@ -73,16 +69,9 @@ import {
   trackAppEventInData,
   updateAppPreferencesInData,
 } from "./storage-local-ops";
-import {
-  addVisionBoardToData,
-  deleteVisionBoardFromData,
-  updateVisionBoardInData,
-} from "./storage-vision-board-ops";
+import { addVisionBoardToData, deleteVisionBoardFromData, updateVisionBoardInData } from "./storage-vision-board-ops";
 import { toast } from "sonner";
-import {
-  addAchievementToData,
-  checkAchievementsInData,
-} from "./storage-achievement-ops";
+import { addAchievementToData, checkAchievementsInData } from "./storage-achievement-ops";
 import {
   createEmptyUserData as createEmptyUserDataFromModule,
   createDemoUserData as createDemoUserDataFromModule,
@@ -128,7 +117,10 @@ export type {
   WheelOfLifeRecord,
 } from "./storage-types";
 
-const STORAGE_KEY = "visionboard_user_data";
+export const USER_DATA_STORAGE_KEY = "visionboard_user_data";
+export const USER_DATA_UPDATED_EVENT_NAME = "visionboard:user-data-updated";
+
+const STORAGE_KEY = USER_DATA_STORAGE_KEY;
 const CURRENT_STORAGE_VERSION = 5;
 
 let _cachedUserData: UserData | null = null;
@@ -142,6 +134,21 @@ if (typeof window !== "undefined") {
       _cachedRawHash = null;
     }
   });
+}
+
+function notifyUserDataUpdated(): void {
+  if (typeof window === "undefined") return;
+
+  const emit = () => {
+    window.dispatchEvent(new CustomEvent(USER_DATA_UPDATED_EVENT_NAME));
+  };
+
+  if (typeof queueMicrotask === "function") {
+    queueMicrotask(emit);
+    return;
+  }
+
+  window.setTimeout(emit, 0);
 }
 
 const DEFAULT_APP_PREFERENCES: AppPreferences = {
@@ -357,11 +364,7 @@ export function getCalendarDateKey(value: string): string | null {
   return getCalendarDateKeyFromModule(value);
 }
 
-export function formatCalendarDate(
-  value: string,
-  locale = "vi-VN",
-  options?: Intl.DateTimeFormatOptions,
-): string {
+export function formatCalendarDate(value: string, locale = "vi-VN", options?: Intl.DateTimeFormatOptions): string {
   return formatCalendarDateFromModule(value, locale, options);
 }
 
@@ -369,10 +372,7 @@ export function getCalendarDayDifference(targetDate: string, referenceDate = new
   return getCalendarDayDifferenceFromModule(targetDate, referenceDate);
 }
 
-export function isTwelveWeekReviewDueToday(
-  system: TwelveWeekSystem,
-  referenceDate = new Date(),
-): boolean {
+export function isTwelveWeekReviewDueToday(system: TwelveWeekSystem, referenceDate = new Date()): boolean {
   return isTwelveWeekReviewDueTodayFromModule(system, referenceDate);
 }
 
@@ -380,10 +380,7 @@ export function getTwelveWeekCurrentWeek(system: TwelveWeekSystem, referenceDate
   return getTwelveWeekCurrentWeekFromModule(system, referenceDate);
 }
 
-export function getTwelveWeekWeekRange(
-  system: TwelveWeekSystem,
-  weekNumber: number,
-): { start: string; end: string } {
+export function getTwelveWeekWeekRange(system: TwelveWeekSystem, weekNumber: number): { start: string; end: string } {
   return getTwelveWeekWeekRangeFromModule(system, weekNumber);
 }
 
@@ -533,6 +530,7 @@ export function saveUserData(data: UserData): boolean {
     localStorage.setItem(STORAGE_KEY, serialized);
     _cachedUserData = normalized;
     _cachedRawHash = serialized;
+    notifyUserDataUpdated();
     return true;
   } catch (err: unknown) {
     // Restore in-memory cache so subsequent getUserData() reads stay consistent
@@ -541,8 +539,7 @@ export function saveUserData(data: UserData): boolean {
 
     if (err instanceof DOMException && err.name === "QuotaExceededError") {
       toast.error("Bộ nhớ trình duyệt đã đầy. Dữ liệu chưa được lưu.", {
-        description:
-          "Hãy xóa bớt board hoặc ảnh đã tải lên để giải phóng dung lượng, sau đó thử lại.",
+        description: "Hãy xóa bớt board hoặc ảnh đã tải lên để giải phóng dung lượng, sau đó thử lại.",
         duration: 8000,
       });
       return false;
@@ -731,6 +728,7 @@ export function deleteAllUserData(): void {
   localStorage.removeItem("last_reminder_date");
   localStorage.removeItem("visionboard_last_browser_notification");
   localStorage.removeItem("visionboard_last_outbox_sync");
+  notifyUserDataUpdated();
 }
 
 export function getTwelveWeekFunnelSummary(goalId?: string): FunnelStepSummary[] {
@@ -775,9 +773,7 @@ export function getCurrentPlan(userData?: UserData): PricingPlanCode {
 
   const highestEntitledPlan = (data.entitlements ?? []).reduce<PricingPlanCode>(
     (currentHighest, entitlement) =>
-      getPlanRank(entitlement.sourcePlan) > getPlanRank(currentHighest)
-        ? entitlement.sourcePlan
-        : currentHighest,
+      getPlanRank(entitlement.sourcePlan) > getPlanRank(currentHighest) ? entitlement.sourcePlan : currentHighest,
     "FREE",
   );
 
@@ -826,10 +822,7 @@ export function upgradePlanLocally(
 }
 
 /** Start a local free trial for the given plan (default: PLUS, 7 days). */
-export function startTrialLocally(
-  planCode: Exclude<PricingPlanCode, "FREE"> = "PLUS",
-  trialDays = 7,
-): PricingPlanCode {
+export function startTrialLocally(planCode: Exclude<PricingPlanCode, "FREE"> = "PLUS", trialDays = 7): PricingPlanCode {
   const data = getUserData();
   const currentPlan = getCurrentPlan(data);
 
@@ -950,9 +943,7 @@ export function autoScheduleEmailReminders(
 
 // ─── D2: Push subscription ────────────────────────────────────────────────────
 
-export function savePushSubscription(
-  record: import("./storage-types").PushSubscriptionRecord,
-): void {
+export function savePushSubscription(record: import("./storage-types").PushSubscriptionRecord): void {
   const data = getUserData();
   savePushSubscriptionInData(data, record);
   saveUserData(data);

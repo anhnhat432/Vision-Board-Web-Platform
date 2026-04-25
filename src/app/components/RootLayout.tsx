@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate, useOutlet } from "react-router";
 import { maybeShowBrowserReminderNotification, syncPendingOutbox } from "../utils/production";
-import { getUserData, initializeUserData } from "../utils/storage";
+import { getUserData, initializeUserData, USER_DATA_UPDATED_EVENT_NAME } from "../utils/storage";
 import {
   getNewUserGuideProgress,
   hasSeenNewUserGuide,
@@ -284,10 +284,12 @@ export function RootLayout() {
       setGuideUserData(getUserData());
     };
     window.addEventListener("visionboard:open-guide", handleOpenGuide);
+    window.addEventListener(USER_DATA_UPDATED_EVENT_NAME, handleBackendHydrated);
     window.addEventListener(BACKEND_PLAN_HYDRATION_EVENT_NAME, handleBackendHydrated);
 
     return () => {
       window.removeEventListener("visionboard:open-guide", handleOpenGuide);
+      window.removeEventListener(USER_DATA_UPDATED_EVENT_NAME, handleBackendHydrated);
       window.removeEventListener(BACKEND_PLAN_HYDRATION_EVENT_NAME, handleBackendHydrated);
     };
   }, []);
@@ -451,6 +453,7 @@ export function RootLayout() {
     boxShadow: "0 14px 30px -18px var(--tone-shell-shadow)",
   };
   const accountLabel = userProfile?.displayName || user?.displayName || user?.email || "Khách";
+  const backendHydrationStatus = backendPlanHydration.result?.status;
   const accountStatus = !isConfigured
     ? "Demo local"
     : authLoading
@@ -462,13 +465,26 @@ export function RootLayout() {
           : userProfileError
             ? "Lỗi profile"
             : userProfile
-              ? "Đã nối backend"
+              ? backendPlanHydration.loading
+                ? "Đang đồng bộ"
+                : backendPlanHydration.error
+                  ? "Lỗi đồng bộ"
+                  : backendHydrationStatus === "partial"
+                    ? "Đồng bộ một phần"
+                    : backendHydrationStatus === "success"
+                      ? "Đã đồng bộ"
+                      : "Đã nối backend"
               : "Chờ profile";
-  const accountStatusClass = userProfileError
-    ? "bg-red-50 text-red-700 ring-red-200"
-    : userProfile
-      ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
-      : "bg-slate-50 text-slate-600 ring-slate-200";
+  const accountStatusClass =
+    userProfileError || backendPlanHydration.error
+      ? "bg-red-50 text-red-700 ring-red-200"
+      : backendHydrationStatus === "partial"
+        ? "bg-amber-50 text-amber-700 ring-amber-200"
+        : backendPlanHydration.loading
+          ? "bg-sky-50 text-sky-700 ring-sky-200"
+          : userProfile
+            ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+            : "bg-slate-50 text-slate-600 ring-slate-200";
   const canRetryUserProfile = Boolean(user) && !userProfileLoading && (!userProfile || Boolean(userProfileError));
 
   const handleSignOut = async () => {
