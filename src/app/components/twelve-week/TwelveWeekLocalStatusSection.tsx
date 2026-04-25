@@ -61,9 +61,7 @@ function getBackendStatusDescription(status: TwelveWeekSettingsTabProps["backend
     : "Backend đã sẵn sàng. Nếu local và backend khác nhau, app sẽ hỏi bạn trước khi ghi đè.";
 }
 
-function getBackendHydrationDescription(
-  result: TwelveWeekSettingsTabProps["lastBackendHydrationResult"],
-): string {
+function getBackendHydrationDescription(result: TwelveWeekSettingsTabProps["lastBackendHydrationResult"]): string {
   if (!result) {
     return "Kiểm tra backend và chỉ kéo về những chu kỳ 12-week đang thiếu ở local. Nếu hai bên khác nhau, app sẽ yêu cầu bạn chọn nguồn dữ liệu trước.";
   }
@@ -164,21 +162,23 @@ export function TwelveWeekLocalStatusSection({
   const conflictGroups = getBackendConflictGroups(lastBackendHydrationResult);
 
   return (
-    <div className="rounded-[26px] border border-slate-900/10 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-5 text-white shadow-[0_28px_60px_-38px_rgba(15,23,42,0.7)]">
+    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.22)]">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Bảng điều khiển local</p>
-          <p className="mt-2 text-lg font-semibold">Các tiện ích dưới đây chỉ tác động trên thiết bị hiện tại.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Bảng điều khiển local</p>
+          <p className="mt-2 text-lg font-semibold text-slate-950">
+            Các tiện ích dưới đây chỉ tác động trên thiết bị hiện tại.
+          </p>
         </div>
-        <Badge variant="outline" className="border-white/15 bg-white/10 text-white">
+        <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">
           Thiết bị này
         </Badge>
       </div>
-      <div className="mt-4 rounded-2xl border border-white/10 bg-white/8 px-4 py-4">
+      <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">Đồng bộ backend</p>
-            <p className="mt-2 text-sm leading-6 text-white/72">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Đồng bộ backend</p>
+            <p className="mt-2 text-sm leading-6 text-slate-700">
               {getBackendStatusDescription(backendConnectionStatus)}
             </p>
           </div>
@@ -186,22 +186,22 @@ export function TwelveWeekLocalStatusSection({
             {getBackendStatusLabel(backendConnectionStatus)}
           </Badge>
         </div>
-        <div className="mt-4 rounded-2xl border border-white/10 bg-white/8 p-3">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-4 rounded-lg border border-slate-200 bg-white p-3">
+          <div className="flex flex-col gap-3">
             <div className="min-w-0 space-y-1">
-              <p className="text-sm leading-6 text-white/72">
+              <p className="text-sm leading-6 text-slate-700">
                 {isHydratingBackendPlans
                   ? "Đang kiểm tra backend và khôi phục các chu kỳ còn thiếu."
                   : getBackendHydrationDescription(lastBackendHydrationResult)}
               </p>
-              <p className="text-xs leading-5 text-white/45">
+              <p className="text-xs leading-5 text-slate-500">
                 Hành động này không tự xóa dữ liệu local khi phát hiện khác biệt.
               </p>
             </div>
             <Button
               type="button"
               variant="outline"
-              className="shrink-0 whitespace-normal border-white/20 bg-white/12 text-center text-white hover:bg-white/20 hover:text-white sm:whitespace-nowrap"
+              className="w-full whitespace-normal border-slate-200 bg-white text-center text-slate-800 hover:bg-slate-50"
               disabled={!canHydrateBackendPlans}
               onClick={onHydrateBackendPlans}
             >
@@ -211,13 +211,14 @@ export function TwelveWeekLocalStatusSection({
           </div>
         </div>
         {conflictGroups.length > 0 ? (
-          <div className="mt-4 space-y-3 rounded-2xl border border-amber-300/25 bg-amber-300/10 p-3">
+          <div className="mt-4 space-y-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-200" />
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-white">Cần chọn nguồn dữ liệu</p>
-                <p className="mt-1 text-xs leading-5 text-white/65">
-                  Local và backend đang khác nhau. Chưa có dữ liệu nào bị ghi đè; chọn bản muốn giữ cho từng chu kỳ trước khi app tự đồng bộ tiếp.
+                <p className="text-sm font-semibold text-amber-950">Cần chọn nguồn dữ liệu</p>
+                <p className="mt-1 text-xs leading-5 text-amber-800">
+                  Local và backend đang khác nhau. Chưa có dữ liệu nào bị ghi đè; chọn bản muốn giữ cho từng chu kỳ
+                  trước khi app tự đồng bộ tiếp.
                 </p>
               </div>
             </div>
@@ -227,15 +228,15 @@ export function TwelveWeekLocalStatusSection({
               const hiddenCount = group.conflicts.length - visibleConflicts.length;
 
               return (
-                <div key={group.goalId} className="rounded-xl border border-white/10 bg-slate-950/35 p-3">
+                <div key={group.goalId} className="rounded-lg border border-amber-200 bg-white p-3">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
-                      <p className="break-words text-sm font-semibold text-white">{group.goalTitle}</p>
+                      <p className="break-words text-sm font-semibold text-slate-950">{group.goalTitle}</p>
                       {group.planVision ? (
-                        <p className="mt-1 break-words text-xs leading-5 text-white/55">{group.planVision}</p>
+                        <p className="mt-1 break-words text-xs leading-5 text-slate-600">{group.planVision}</p>
                       ) : null}
                     </div>
-                    <Badge variant="outline" className="w-fit border-amber-200/40 bg-amber-200/10 text-amber-100">
+                    <Badge variant="outline" className="w-fit border-amber-200 bg-amber-50 text-amber-800">
                       {group.conflicts.length} khác biệt
                     </Badge>
                   </div>
@@ -243,41 +244,45 @@ export function TwelveWeekLocalStatusSection({
                     {visibleConflicts.map((conflict, index) => (
                       <div
                         key={`${conflict.kind}-${conflict.localId ?? conflict.backendId ?? index}`}
-                        className="grid gap-2 rounded-lg border border-white/10 bg-white/8 p-2 text-xs sm:grid-cols-[150px_minmax(0,1fr)_minmax(0,1fr)]"
+                        className="grid gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs sm:grid-cols-[150px_minmax(0,1fr)_minmax(0,1fr)]"
                       >
                         <div className="min-w-0">
-                          <p className="font-semibold text-white/85">{getConflictKindLabel(conflict.kind)}</p>
-                          <p className="mt-1 text-white/45">{getConflictScopeLabel(conflict)}</p>
+                          <p className="font-semibold text-slate-800">{getConflictKindLabel(conflict.kind)}</p>
+                          <p className="mt-1 text-slate-500">{getConflictScopeLabel(conflict)}</p>
                         </div>
-                        <div className="min-w-0 rounded-md bg-slate-950/35 p-2">
-                          <p className="font-semibold uppercase tracking-[0.12em] text-white/35">Local</p>
-                          <p className="mt-1 break-words text-white/80">{getConflictValueLabel(conflict.localValue)}</p>
+                        <div className="min-w-0 rounded-md bg-white p-2">
+                          <p className="font-semibold uppercase tracking-[0.12em] text-slate-400">Local</p>
+                          <p className="mt-1 break-words text-slate-800">
+                            {getConflictValueLabel(conflict.localValue)}
+                          </p>
                         </div>
-                        <div className="min-w-0 rounded-md bg-slate-950/35 p-2">
-                          <p className="font-semibold uppercase tracking-[0.12em] text-white/35">Backend</p>
-                          <p className="mt-1 break-words text-white/80">
+                        <div className="min-w-0 rounded-md bg-white p-2">
+                          <p className="font-semibold uppercase tracking-[0.12em] text-slate-400">Backend</p>
+                          <p className="mt-1 break-words text-slate-800">
                             {getConflictValueLabel(conflict.backendValue)}
                           </p>
                         </div>
                       </div>
                     ))}
                     {hiddenCount > 0 ? (
-                      <p className="text-xs text-white/55">Còn {hiddenCount} khác biệt khác trong chu kỳ này.</p>
+                      <p className="text-xs text-slate-600">Còn {hiddenCount} khác biệt khác trong chu kỳ này.</p>
                     ) : null}
                   </div>
                   <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
-                    <div className="rounded-lg border border-white/10 bg-white/8 p-2 leading-5 text-white/62">
-                      <span className="font-semibold text-white/85">Dùng bản backend:</span> thay dữ liệu local của chu kỳ này bằng bản đang lưu trên backend.
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-2 leading-5 text-slate-600">
+                      <span className="font-semibold text-slate-900">Dùng bản backend:</span> thay dữ liệu local của chu
+                      kỳ này bằng bản đang lưu trên backend.
                     </div>
-                    <div className="rounded-lg border border-white/10 bg-white/8 p-2 leading-5 text-white/62">
-                      <span className="font-semibold text-white/85">Giữ bản local:</span> đẩy dữ liệu trên thiết bị này lên backend để dùng làm bản chính.
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-2 leading-5 text-slate-600">
+                      <span className="font-semibold text-slate-900">Giữ bản local:</span> đẩy dữ liệu trên thiết bị này
+                      lên backend để dùng làm bản chính.
                     </div>
                   </div>
                   <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end">
                     <Button
                       type="button"
                       variant="outline"
-                      className="whitespace-normal border-white/20 bg-white/10 text-center text-white hover:bg-white/20 hover:text-white sm:whitespace-nowrap"
+                      className="whitespace-normal border-slate-200 bg-white text-center text-slate-800 hover:bg-slate-50 sm:whitespace-nowrap"
                       disabled={isResolvingBackendPlanConflicts}
                       onClick={() => onUseBackendPlanForConflicts(group.goalId)}
                     >
@@ -287,7 +292,7 @@ export function TwelveWeekLocalStatusSection({
                     <Button
                       type="button"
                       variant="outline"
-                      className="whitespace-normal border-white/20 bg-white/10 text-center text-white hover:bg-white/20 hover:text-white sm:whitespace-nowrap"
+                      className="whitespace-normal border-slate-200 bg-white text-center text-slate-800 hover:bg-slate-50 sm:whitespace-nowrap"
                       disabled={isResolvingBackendPlanConflicts}
                       onClick={() => onKeepLocalPlanForConflicts(group.goalId)}
                     >
@@ -301,24 +306,28 @@ export function TwelveWeekLocalStatusSection({
           </div>
         ) : null}
       </div>
-      <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-4">
-        <div className="rounded-2xl border border-white/10 bg-white/8 px-3 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">Nhắc việc</p>
-          <p className="mt-2 text-sm font-semibold text-white">{appPreferences.enableInAppReminders ? "Bật" : "Tắt"}</p>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Nhắc việc</p>
+          <p className="mt-2 text-sm font-semibold text-slate-950">
+            {appPreferences.enableInAppReminders ? "Bật" : "Tắt"}
+          </p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-white/8 px-3 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">Trình duyệt</p>
-          <p className="mt-2 text-sm font-semibold text-white">
+        <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Trình duyệt</p>
+          <p className="mt-2 text-sm font-semibold text-slate-950">
             {appPreferences.enableBrowserNotifications ? "Bật" : "Tắt"}
           </p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-white/8 px-3 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">Phân tích</p>
-          <p className="mt-2 text-sm font-semibold text-white">{appPreferences.allowLocalAnalytics ? "Bật" : "Tắt"}</p>
+        <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Phân tích</p>
+          <p className="mt-2 text-sm font-semibold text-slate-950">
+            {appPreferences.allowLocalAnalytics ? "Bật" : "Tắt"}
+          </p>
         </div>
-        <div className="rounded-2xl border border-white/10 bg-white/8 px-3 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">Outbox</p>
-          <p className="mt-2 text-sm font-semibold text-white">{pendingOutboxCount} chờ</p>
+        <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Outbox</p>
+          <p className="mt-2 text-sm font-semibold text-slate-950">{pendingOutboxCount} chờ</p>
         </div>
       </div>
     </div>

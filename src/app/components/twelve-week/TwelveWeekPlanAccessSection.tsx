@@ -71,14 +71,14 @@ export function TwelveWeekPlanAccessSection({
   const unlockedEntitlementCount = ENTITLEMENT_ORDER.filter((key) => entitlementKeys.includes(key)).length;
 
   return (
-    <div className="rounded-[26px] border border-violet-200/70 gradient-indigo-purple p-5 text-white shadow-[0_28px_60px_-38px_rgba(76,29,149,0.55)]">
+    <div className="rounded-lg border border-violet-200/70 bg-violet-50/75 p-5 shadow-[0_18px_44px_-36px_rgba(124,58,237,0.24)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Gói và quyền 12 tuần</p>
-          <p className="mt-2 text-2xl font-bold">{getPlanLabel(currentPlanCode)}</p>
-          <p className="mt-2 text-sm leading-7 text-white/74">{currentPlanDefinition.description}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">Gói và quyền 12 tuần</p>
+          <p className="mt-2 text-2xl font-bold text-slate-950">{getPlanLabel(currentPlanCode)}</p>
+          <p className="mt-2 text-sm leading-7 text-slate-700">{currentPlanDefinition.description}</p>
         </div>
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-white">
+        <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-violet-200 bg-white text-violet-700">
           <Crown className="h-5 w-5" />
         </div>
       </div>
@@ -94,7 +94,7 @@ export function TwelveWeekPlanAccessSection({
               className={
                 isUnlocked
                   ? "border-emerald-200/70 bg-emerald-50 text-emerald-900"
-                  : "border-white/15 bg-white/8 text-white/70"
+                  : "border-slate-200 bg-white text-slate-600"
               }
             >
               {isUnlocked ? "Đang mở" : "Đang khóa"} · {getEntitlementLabel(key)}
@@ -104,42 +104,40 @@ export function TwelveWeekPlanAccessSection({
       </div>
 
       <div className="mt-4 grid gap-3">
-        <div className="rounded-[22px] border border-white/12 bg-white/8 p-4">
-          <p className="text-xs uppercase tracking-[0.16em] text-white/56">Trạng thái nhanh</p>
-          <p className="mt-2 text-lg font-semibold text-white">
+        <div className="rounded-lg border border-violet-100 bg-white p-4">
+          <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Trạng thái nhanh</p>
+          <p className="mt-2 text-lg font-semibold text-slate-950">
             {unlockedEntitlementCount}/{ENTITLEMENT_ORDER.length} quyền premium đang mở trên thiết bị này
           </p>
-          <p className="mt-1 text-sm text-white/70">
+          <p className="mt-1 text-sm text-slate-600">
             Nhìn nhanh xem bạn đã có đủ lớp hỗ trợ để bắt đầu nhanh, giữ nhịp đều và review rõ hơn hay chưa.
           </p>
         </div>
 
         {billingDebugUi ? (
           <>
-            <div className="rounded-[22px] border border-white/12 bg-white/8 p-4">
+            <div className="rounded-lg border border-violet-100 bg-white p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-xs uppercase tracking-[0.16em] text-white/56">Billing contract</p>
-                <Badge variant="outline" className="border-white/15 bg-white/10 text-white">
+                <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Billing contract</p>
+                <Badge variant="outline" className="border-violet-200 bg-violet-50 text-violet-800">
                   {getBillingProviderModeLabel(billingProviderStatus.mode)}
                 </Badge>
               </div>
-              <div className="mt-3 space-y-1 text-sm text-white/72">
+              <div className="mt-3 space-y-1 text-sm text-slate-700">
                 <p>Provider: {billingProviderStatus.providerLabel}</p>
                 <p>Checkout: {getBillingReadinessLabel(billingProviderStatus.checkoutReady, "Local fallback")}</p>
                 <p>Restore: {getBillingReadinessLabel(billingProviderStatus.restoreReady, "Local fallback")}</p>
                 <p>
-                  Sync quyền:{" "}
-                  {getBillingReadinessLabel(billingProviderStatus.entitlementSyncReady, "Local fallback")}
+                  Sync quyền: {getBillingReadinessLabel(billingProviderStatus.entitlementSyncReady, "Local fallback")}
                 </p>
                 <p>
-                  Cổng quản lý:{" "}
-                  {getBillingReadinessLabel(billingProviderStatus.manageBillingReady, "Chưa cấu hình")}
+                  Cổng quản lý: {getBillingReadinessLabel(billingProviderStatus.manageBillingReady, "Chưa cấu hình")}
                 </p>
               </div>
             </div>
 
             <div
-              className={`rounded-[22px] border px-4 py-4 ${getBillingSnapshotTone(
+              className={`rounded-lg border px-4 py-4 ${getBillingSnapshotTone(
                 lastEntitlementSyncSnapshot?.providerMode ?? "local_test",
                 lastEntitlementSyncSnapshot?.status ?? "local_only",
               )}`}
@@ -165,7 +163,7 @@ export function TwelveWeekPlanAccessSection({
             </div>
 
             <div
-              className={`rounded-[22px] border px-4 py-4 ${getBillingSnapshotTone(
+              className={`rounded-lg border px-4 py-4 ${getBillingSnapshotTone(
                 lastRestoreAccessSnapshot?.providerMode ?? "local_test",
                 lastRestoreAccessSnapshot?.status ?? "local_only",
               )}`}
@@ -191,14 +189,12 @@ export function TwelveWeekPlanAccessSection({
             </div>
           </>
         ) : (
-          <div className="rounded-[22px] border border-white/12 bg-white/8 p-4">
-            <p className="text-xs uppercase tracking-[0.16em] text-white/56">Thanh toán và quyền</p>
-            <p className="mt-2 text-lg font-semibold text-white">
-              {demoMode
-                ? "Bản demo đang mô phỏng bước nâng cấp."
-                : "Quyền nâng cấp sẽ đồng bộ theo cấu hình của host."}
+          <div className="rounded-lg border border-violet-100 bg-white p-4">
+            <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Thanh toán và quyền</p>
+            <p className="mt-2 text-lg font-semibold text-slate-950">
+              {demoMode ? "Bản demo đang mô phỏng bước nâng cấp." : "Quyền nâng cấp sẽ đồng bộ theo cấu hình của host."}
             </p>
-            <p className="mt-1 text-sm text-white/70">
+            <p className="mt-1 text-sm text-slate-600">
               {currentPlanCode === "FREE"
                 ? "Bạn vẫn có thể dùng Free để chạy một chu kỳ. Khi cần bắt đầu nhanh hơn và review rõ hơn, hãy mở Plus."
                 : "Plus đang mở toàn bộ lớp giúp bạn bắt đầu nhanh hơn, giữ nhịp đều hơn và review rõ hơn."}
@@ -210,19 +206,19 @@ export function TwelveWeekPlanAccessSection({
       <div className="mt-4 grid gap-2">
         {currentPlanCode === "FREE" ? (
           <>
-            <Button className="bg-white text-slate-900 hover:bg-white/92" onClick={() => onOpenUpgradePlan("PLUS")}>
+            <Button className="bg-slate-950 text-white hover:bg-slate-800" onClick={() => onOpenUpgradePlan("PLUS")}>
               Mở Plus để giữ nhịp tốt hơn
             </Button>
             <Button
               variant="outline"
-              className="border-white/15 bg-white/10 text-white hover:bg-white/16"
+              className="border-violet-200 bg-white text-violet-800 hover:bg-violet-50"
               onClick={onRestorePlanAccess}
             >
               Khôi phục quyền
             </Button>
           </>
         ) : (
-          <div className="rounded-[18px] border border-white/12 bg-white/8 px-4 py-3 text-sm text-white/72">
+          <div className="rounded-lg border border-violet-100 bg-white px-4 py-3 text-sm text-slate-700">
             Plus đang mở toàn bộ lớp giúp bạn bắt đầu nhanh hơn, giữ nhịp đều hơn và review rõ hơn.
           </div>
         )}
@@ -232,7 +228,7 @@ export function TwelveWeekPlanAccessSection({
         {billingProviderStatus.manageBillingReady && (
           <Button
             variant="outline"
-            className="border-white/15 bg-white/10 text-white hover:bg-white/16"
+            className="border-violet-200 bg-white text-violet-800 hover:bg-violet-50"
             onClick={onOpenBillingPortal}
           >
             Quản lý thanh toán
@@ -241,7 +237,7 @@ export function TwelveWeekPlanAccessSection({
         {billingDebugUi && (
           <Button
             variant="outline"
-            className="border-white/15 bg-white/10 text-white hover:bg-white/16"
+            className="border-violet-200 bg-white text-violet-800 hover:bg-violet-50"
             onClick={onSyncEntitlements}
             disabled={isSyncingEntitlements}
           >
@@ -250,7 +246,7 @@ export function TwelveWeekPlanAccessSection({
         )}
         <Button
           variant="outline"
-          className="border-white/15 bg-white/10 text-white hover:bg-white/16"
+          className="border-violet-200 bg-white text-violet-800 hover:bg-violet-50"
           onClick={onRestorePlanAccess}
           disabled={isRestoringPlanAccess}
         >

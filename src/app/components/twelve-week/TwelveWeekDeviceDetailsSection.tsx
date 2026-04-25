@@ -6,10 +6,7 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Switch } from "../ui/switch";
 import { formatCalendarDate, getPushSubscription, getUserData } from "../../utils/storage";
-import {
-  requestPushPermissionAndSubscribe,
-  unregisterPushSubscription,
-} from "../../utils/production";
+import { requestPushPermissionAndSubscribe, unregisterPushSubscription } from "../../utils/production";
 import {
   formatDateTimeLabel,
   getBrowserNotificationStatusLabel,
@@ -60,8 +57,8 @@ interface ExpandableSectionProps {
 
 function ExpandableSection({ title, description, badge, children }: ExpandableSectionProps) {
   return (
-    <details className="group rounded-[24px] border border-white/55 bg-white/72 px-5 py-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)]">
-      <summary className="flex cursor-pointer list-none items-start justify-between gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 rounded-[20px]">
+    <details className="group rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-[0_16px_36px_-32px_rgba(15,23,42,0.18)]">
+      <summary className="flex cursor-pointer list-none items-start justify-between gap-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2">
         <div>
           <p className="text-sm font-semibold text-slate-950">{title}</p>
           <p className="mt-1 pr-6 text-sm text-slate-600">{description}</p>
@@ -148,7 +145,7 @@ export function TwelveWeekDeviceDetailsSection({
         description="Bật tắt nhắc việc, thông báo và dữ liệu chỉ lưu trên thiết bị này."
       >
         <div className="space-y-3">
-          <div className="flex items-center justify-between gap-4 rounded-[22px] border border-white/65 bg-white/76 px-4 py-4">
+          <div className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-semibold text-slate-950">Nhắc việc trong app</p>
@@ -172,7 +169,7 @@ export function TwelveWeekDeviceDetailsSection({
             />
           </div>
 
-          <div className="flex items-center justify-between gap-4 rounded-[22px] border border-white/65 bg-white/76 px-4 py-4">
+          <div className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-semibold text-slate-950">Nhắc ngoài trình duyệt</p>
@@ -200,7 +197,7 @@ export function TwelveWeekDeviceDetailsSection({
           </div>
 
           {/* Push notification toggle (D2) */}
-          <div className="flex items-center justify-between gap-4 rounded-[22px] border border-white/65 bg-white/76 px-4 py-4">
+          <div className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-semibold text-slate-950">Push notification</p>
@@ -241,7 +238,7 @@ export function TwelveWeekDeviceDetailsSection({
             )}
           </div>
 
-          <div className="flex items-center justify-between gap-4 rounded-[22px] border border-white/65 bg-white/76 px-4 py-4">
+          <div className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-semibold text-slate-950">Phân tích trên thiết bị</p>
@@ -267,7 +264,7 @@ export function TwelveWeekDeviceDetailsSection({
             />
           </div>
 
-          <div className="flex items-center justify-between gap-4 rounded-[22px] border border-white/65 bg-white/76 px-4 py-4">
+          <div className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-semibold text-slate-950">Hàng chờ trên thiết bị</p>
@@ -306,7 +303,7 @@ export function TwelveWeekDeviceDetailsSection({
       >
         <ul className="space-y-3" aria-label="Hành trình 12 tuần">
           {funnelSteps.map((step) => (
-            <li key={step.id} className="rounded-[18px] border border-white/70 bg-white/82 px-4 py-4">
+            <li key={step.id} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-slate-950">{step.label}</p>
@@ -333,7 +330,7 @@ export function TwelveWeekDeviceDetailsSection({
       >
         <ul className="space-y-3" aria-label="Funnel nâng cấp">
           {monetizationSteps.map((step) => (
-            <li key={step.id} className="rounded-[18px] border border-white/70 bg-white/82 px-4 py-4">
+            <li key={step.id} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-slate-950">{step.label}</p>
@@ -382,8 +379,10 @@ export function TwelveWeekDeviceDetailsSection({
         }
       >
         <div className="space-y-4">
-          <div className="rounded-[22px] border border-emerald-200 bg-emerald-50/86 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Dữ liệu lưu trên thiết bị</p>
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
+              Dữ liệu lưu trên thiết bị
+            </p>
             <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
               <li>• Mục tiêu, tactic, check-in, review hàng tuần</li>
               <li>• Nhật ký phản tư và vision board</li>
@@ -391,8 +390,10 @@ export function TwelveWeekDeviceDetailsSection({
               <li>• Cài đặt ưu tiên và trạng thái gói</li>
             </ul>
           </div>
-          <div className="rounded-[22px] border border-amber-200 bg-amber-50/86 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">Dữ liệu có thể được gửi đi</p>
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">
+              Dữ liệu có thể được gửi đi
+            </p>
             <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
               <li>• Outbox đồng bộ (nếu bật keepLocalOutbox)</li>
               <li>• Push subscription endpoint (nếu bật push)</li>
@@ -402,10 +403,11 @@ export function TwelveWeekDeviceDetailsSection({
               Bạn có thể tắt từng kênh ở phần &quot;Nhắc việc và quyền trên thiết bị&quot; bên trên.
             </p>
           </div>
-          <div className="rounded-[22px] border border-red-200 bg-red-50/86 p-4">
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-red-700">Xóa toàn bộ dữ liệu</p>
             <p className="mt-2 text-sm text-red-800">
-              Hành động này sẽ xóa vĩnh viễn tất cả dữ liệu trên thiết bị này: mục tiêu, nhật ký, check-in, cài đặt, gói đăng ký. Không thể hoàn tác.
+              Hành động này sẽ xóa vĩnh viễn tất cả dữ liệu trên thiết bị này: mục tiêu, nhật ký, check-in, cài đặt, gói
+              đăng ký. Không thể hoàn tác.
             </p>
             <Button variant="destructive" className="mt-3 w-full" onClick={onDeleteAllData}>
               Xóa toàn bộ dữ liệu trên thiết bị
@@ -419,7 +421,7 @@ export function TwelveWeekDeviceDetailsSection({
         description="Xem trạng thái đồng bộ, outbox gần đây và những nhắc việc đang chờ mà không phải kéo qua nhiều card rời."
       >
         <div className="grid gap-3">
-          <div className="rounded-[24px] border border-sky-200 bg-sky-50/92 p-5">
+          <div className="rounded-lg border border-sky-200 bg-sky-50 p-5">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700">Nhật ký sự kiện</p>
@@ -435,10 +437,12 @@ export function TwelveWeekDeviceDetailsSection({
             </Button>
           </div>
 
-          <div className="rounded-[24px] border border-violet-200 bg-violet-50/92 p-5">
+          <div className="rounded-lg border border-violet-200 bg-violet-50 p-5">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">Outbox trên thiết bị</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">
+                  Outbox trên thiết bị
+                </p>
                 <p className="mt-2 text-3xl font-bold text-slate-950">{pendingOutboxCount} đang chờ</p>
                 <p className="text-sm text-slate-600">{archivedOutboxCount} mục đã lưu</p>
                 <p className="mt-2 text-sm text-slate-600">
@@ -468,10 +472,12 @@ export function TwelveWeekDeviceDetailsSection({
           </div>
         </div>
 
-        <div className="mt-3 rounded-[24px] border border-white/65 bg-white/76 p-5">
+        <div className="mt-3 rounded-lg border border-slate-200 bg-white p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Nhắc việc đang hoạt động</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Nhắc việc đang hoạt động
+              </p>
               <p className="mt-1 text-sm text-slate-600">Danh sách nhắc việc local đang chờ được hiện.</p>
             </div>
             <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
@@ -480,15 +486,20 @@ export function TwelveWeekDeviceDetailsSection({
           </div>
           <div className="mt-3 space-y-2" aria-live="polite">
             {activeReminders.length === 0 ? (
-              <div className="rounded-[18px] border border-dashed border-slate-300 bg-white/86 px-4 py-4 text-sm text-slate-600">
+              <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-4 text-sm text-slate-600">
                 Không có nhắc việc nào đang chờ lúc này.
               </div>
             ) : (
               activeReminders.map((reminder) => (
-                <div key={reminder.id} className="rounded-[18px] border border-white/70 bg-white/84 p-4">
+                <div key={reminder.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                   <p className="text-sm font-semibold text-slate-950">{reminder.title}</p>
                   <p className="mt-1 text-sm text-slate-600">{reminder.description}</p>
-                  <Button variant="outline" size="sm" className="mt-3 bg-white" onClick={() => onOpenReminder(reminder)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-3 bg-white"
+                    onClick={() => onOpenReminder(reminder)}
+                  >
                     {getReminderActionLabel(reminder.kind)}
                   </Button>
                 </div>
@@ -497,7 +508,7 @@ export function TwelveWeekDeviceDetailsSection({
           </div>
         </div>
 
-        <div className="mt-3 rounded-[24px] border border-white/65 bg-white/76 p-5">
+        <div className="mt-3 rounded-lg border border-slate-200 bg-white p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Outbox gần đây</p>
@@ -509,12 +520,12 @@ export function TwelveWeekDeviceDetailsSection({
           </div>
           <div className="mt-3 max-h-[360px] space-y-2 overflow-y-auto pr-1">
             {recentOutboxItems.length === 0 ? (
-              <div className="rounded-[18px] border border-dashed border-slate-300 bg-white/86 px-4 py-4 text-sm text-slate-600">
+              <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-4 text-sm text-slate-600">
                 Chưa có mục nào trong outbox trên thiết bị.
               </div>
             ) : (
               recentOutboxItems.map((item) => (
-                <div key={item.id} className="rounded-[18px] border border-white/70 bg-white/84 p-4">
+                <div key={item.id} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-slate-950">{getOutboxTypeLabel(item.type)}</p>
@@ -527,7 +538,12 @@ export function TwelveWeekDeviceDetailsSection({
                     </Badge>
                   </div>
                   <p className="mt-3 break-words text-sm leading-6 text-slate-600">{getOutboxSummaryText(item)}</p>
-                  <Button variant="outline" size="sm" className="mt-3 bg-white" onClick={() => onOutboxItemToggle(item)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-3 bg-white"
+                    onClick={() => onOutboxItemToggle(item)}
+                  >
                     {item.status === "pending" ? "Lưu mục này" : "Khôi phục về hàng chờ"}
                   </Button>
                 </div>
@@ -537,7 +553,7 @@ export function TwelveWeekDeviceDetailsSection({
         </div>
       </ExpandableSection>
 
-      <div className="rounded-[24px] border border-red-300/70 gradient-red p-5 shadow-[0_20px_45px_-34px_rgba(220,38,38,0.18)]">
+      <div className="rounded-lg border border-red-300/70 bg-red-50 p-5 shadow-[0_18px_38px_-34px_rgba(220,38,38,0.18)]">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-red-600">Làm mới chu kỳ</p>
         <p className="mt-2 text-sm text-red-900">
           Bắt đầu lại tuần 1 từ tuần hiện tại, giữ nguyên outcome và tactic, nhưng làm mới việc, check-in và review của

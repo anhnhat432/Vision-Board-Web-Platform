@@ -5,7 +5,7 @@ import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
 export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
   return (
     <div className="space-y-6 pt-4">
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         <TwelveWeekCycleSettingsPanel
           system={props.system}
           onReviewDayChange={props.onReviewDayChange}
