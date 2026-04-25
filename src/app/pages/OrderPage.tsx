@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CircleAlert, ClipboardList, Package, Sparkles, Truck } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -11,7 +11,8 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Textarea } from "../components/ui/textarea";
-import { APP_STORAGE_KEYS, getLifeAreaLabel, getUserData, type Goal, type VisionBoard } from "../utils/storage";
+import { useSyncedUserData } from "../hooks/useSyncedUserData";
+import { APP_STORAGE_KEYS, getLifeAreaLabel, type Goal, type VisionBoard } from "../utils/storage";
 import { createLocalOrder, getKitTypeLabel, type OrderKitType } from "../utils/order-storage";
 import { parsePendingSMARTGoal, type PendingSMARTGoal } from "@/lib/smart-goal";
 import { useAuthContext } from "@/lib/auth/AuthContext";
@@ -137,7 +138,9 @@ export function OrderPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuthContext();
+  const { userData } = useSyncedUserData();
   const routeState = useMemo(() => getOrderPageRouteState(location.state), [location.state]);
+  const didApplyInitialContextRef = useRef(false);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [referenceBoard, setReferenceBoard] = useState<VisionBoard | null>(null);
@@ -155,26 +158,42 @@ export function OrderPage() {
   });
 
   useEffect(() => {
-    const userData = getUserData();
+    if (!userData) return;
+
     const nextGoals = userData.goals;
     const preferredGoal = getPreferredGoal(nextGoals, routeState.goalId);
     const routeBoard = getPreferredVisionBoard(userData.visionBoards, routeState.visionBoardId);
     const preferredBoard = routeState.visionBoardId || !preferredGoal ? routeBoard : null;
     const storedFocusArea = localStorage.getItem(APP_STORAGE_KEYS.selectedFocusArea)?.trim() ?? "";
     const pendingGoal = parsePendingSMARTGoal(readStoredJson(APP_STORAGE_KEYS.pendingSmartGoal), storedFocusArea);
+    const routeHasExplicitContext = Boolean(routeState.goalId || routeState.visionBoardId);
+    const shouldApplyPreferredContext = !didApplyInitialContextRef.current || routeHasExplicitContext;
+    didApplyInitialContextRef.current = true;
 
     setGoals(nextGoals);
-    setSelectedGoal(preferredGoal);
-    setReferenceBoard(preferredBoard);
+    setSelectedGoal((currentGoal) => {
+      if (shouldApplyPreferredContext) return preferredGoal;
+      if (!currentGoal) return null;
+      return nextGoals.find((goal) => goal.id === currentGoal.id) ?? preferredGoal;
+    });
+    setReferenceBoard((currentBoard) => {
+      if (shouldApplyPreferredContext) return preferredBoard;
+      if (!currentBoard) return null;
+      return userData.visionBoards.find((board) => board.id === currentBoard.id) ?? null;
+    });
     setPendingGoalDraft(pendingGoal);
     setForm((current) => ({
       ...current,
-      selectedGoalId: preferredGoal?.id ?? "none",
+      selectedGoalId: shouldApplyPreferredContext
+        ? (preferredGoal?.id ?? "none")
+        : current.selectedGoalId !== "none" && !nextGoals.some((goal) => goal.id === current.selectedGoalId)
+          ? (preferredGoal?.id ?? "none")
+          : current.selectedGoalId,
       keywords: current.keywords || buildSuggestedKeywords(preferredGoal, preferredBoard, pendingGoal),
       note: current.note || buildSuggestedNote(preferredGoal, preferredBoard, pendingGoal),
     }));
     document.title = "Tạo đơn kit - Dear Our Future";
-  }, [routeState.goalId, routeState.visionBoardId]);
+  }, [routeState.goalId, routeState.visionBoardId, userData]);
 
   const suggestedKitSummary = useMemo(() => {
     if (selectedGoal && referenceBoard) {

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { AlertTriangle, BarChart3, CalendarDays, Compass, ListTodo, Settings2, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
+import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useTwelveWeekSystemSnapshot } from "../hooks/useTwelveWeekSystemSnapshot";
 import {
   applyBackendPlanSnapshotToLocal,
@@ -156,6 +157,7 @@ function TwelveWeekTabFallback({ title, description }: { title: string; descript
 export function TwelveWeekSystem() {
   const navigate = useNavigate();
   const { authLoading, isConfigured: isAuthConfigured, user, userProfile } = useAuthContext();
+  const { userData: guideUserData } = useSyncedUserData();
   const {
     activeGoal,
     allGoals,
@@ -1151,7 +1153,7 @@ export function TwelveWeekSystem() {
         onCheckoutComplete={handleCheckoutComplete}
       />
 
-      <NewUserGuideBanner userData={getUserData()} variant="compact" />
+      <NewUserGuideBanner userData={guideUserData ?? getUserData()} variant="compact" />
 
       <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
         <AlertDialogContent>
