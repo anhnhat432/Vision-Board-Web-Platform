@@ -2,14 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Crown, LockKeyhole, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "./ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { trackPaywallCtaClicked, trackPaywallViewed, type MonetizationSource } from "../utils/monetization-analytics";
@@ -111,7 +104,7 @@ export function UpgradePaywallDialog({
             result.providerMode === "api_contract"
               ? "Quyền đã được đồng bộ qua billing contract."
               : result.providerMode === "mock_provider"
-                ? "Đã hoàn tất qua mock provider để bạn test end-to-end ngay trong app."
+                ? "Đã hoàn tất qua mock provider để bạn test end-to-end ngay trên web."
                 : "Đây là lớp local checkout để nối billing thật ở bước sau.",
         });
       }
@@ -212,9 +205,7 @@ export function UpgradePaywallDialog({
                   <div
                     key={plan.code}
                     className={`rounded-[28px] border p-5 shadow-[0_24px_60px_-38px_rgba(15,23,42,0.18)] ${
-                      isRecommended
-                        ? "border-violet-300 gradient-violet"
-                        : "border-white/70 bg-white/88"
+                      isRecommended ? "border-violet-300 gradient-violet" : "border-white/70 bg-white/88"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -244,7 +235,10 @@ export function UpgradePaywallDialog({
 
                     <div className="mt-4 space-y-2">
                       {plan.highlights.map((feature) => (
-                        <div key={feature} className="flex gap-3 rounded-[18px] border border-slate-100 bg-white/92 px-4 py-3">
+                        <div
+                          key={feature}
+                          className="flex gap-3 rounded-[18px] border border-slate-100 bg-white/92 px-4 py-3"
+                        >
                           <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-violet-500" />
                           <p className="text-sm leading-7 text-slate-700">{feature}</p>
                         </div>
@@ -270,7 +264,7 @@ export function UpgradePaywallDialog({
               {demoMode
                 ? "Đây là bản demo nên bước nâng cấp hiện đang mô phỏng trên thiết bị này để bạn xem toàn bộ trải nghiệm."
                 : billingProviderStatus.mode === "api_contract"
-                  ? "Nếu host đã cấu hình billing thật, app sẽ chuyển bạn sang cổng thanh toán tương ứng ở bước tiếp theo."
+                  ? "Nếu host đã cấu hình billing thật, web sẽ chuyển bạn sang cổng thanh toán tương ứng ở bước tiếp theo."
                   : "Bạn vẫn có thể tiếp tục với bản Free nếu chưa cần mở thêm lớp hỗ trợ lúc này."}
             </p>
             <Button className="w-full sm:w-auto" variant="outline" onClick={() => onOpenChange(false)}>

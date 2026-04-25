@@ -11,10 +11,10 @@ function getErrorMessage(error: unknown): string {
   }
 
   if (error instanceof Error) {
-    return error.message || "Ứng dụng vừa gặp lỗi ngoài dự kiến.";
+    return error.message || "Trang web vừa gặp lỗi ngoài dự kiến.";
   }
 
-  return "Ứng dụng vừa gặp lỗi ngoài dự kiến.";
+  return "Trang web vừa gặp lỗi ngoài dự kiến.";
 }
 
 function getErrorCode(error: unknown): string | null {
@@ -51,8 +51,8 @@ export function AppErrorBoundary() {
                     Trang này vừa gặp lỗi, nhưng mình vẫn có thể quay lại flow chính ngay.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
-                    Mình đã chặn màn lỗi mặc định để trải nghiệm đỡ gắt hơn. Bạn có thể tải lại trang
-                    hoặc quay về bảng điều khiển rồi tiếp tục từ đó.
+                    Mình đã chặn màn lỗi mặc định để trải nghiệm đỡ gắt hơn. Bạn có thể tải lại trang hoặc quay về bảng
+                    điều khiển rồi tiếp tục từ đó.
                   </p>
                 </div>
 
@@ -82,27 +82,19 @@ export function AppErrorBoundary() {
                     <AlertTriangle className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
-                      Trạng thái
-                    </p>
-                    <p className="text-lg font-semibold text-white">
-                      {errorCode ? `Lỗi ${errorCode}` : "Lỗi runtime"}
-                    </p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">Trạng thái</p>
+                    <p className="text-lg font-semibold text-white">{errorCode ? `Lỗi ${errorCode}` : "Lỗi runtime"}</p>
                   </div>
                 </div>
 
                 <div className="mt-6 rounded-[24px] border border-white/12 bg-black/12 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/55">
-                    Mô tả
-                  </p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/55">Mô tả</p>
                   <p className="mt-2 text-sm leading-7 text-white/82">{errorMessage}</p>
                 </div>
 
                 {import.meta.env.DEV && error instanceof Error ? (
                   <div className="mt-4 rounded-[24px] border border-white/12 bg-black/18 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/55">
-                      Chi tiết dev
-                    </p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/55">Chi tiết dev</p>
                     <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs leading-6 text-white/72">
                       {error.stack || error.message}
                     </pre>

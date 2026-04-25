@@ -155,7 +155,7 @@ export function TwelveWeekPlanAccessSection({
               </p>
               <p className="mt-1 text-sm opacity-80">
                 {lastEntitlementSyncSnapshot?.message ??
-                  "Khi chạy sync, app sẽ lấy lại trạng thái quyền mới nhất từ provider hoặc local fallback."}
+                  "Khi chạy sync, web sẽ lấy lại trạng thái quyền mới nhất từ provider hoặc local fallback."}
               </p>
               <p className="mt-3 text-xs uppercase tracking-[0.16em] opacity-60">
                 {lastEntitlementSyncSnapshot ? formatDateTimeLabel(lastEntitlementSyncSnapshot.at) : "Chưa chạy"}

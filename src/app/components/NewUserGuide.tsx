@@ -114,8 +114,8 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
   const compact = variant === "compact";
   const title = userData.isHydratedFromDemo
     ? compact
-      ? "Khám phá app demo theo thứ tự này"
-      : "Nếu đang xem bản demo, cứ đi theo 4 bước này là hiểu app nhanh nhất."
+      ? "Khám phá web demo theo thứ tự này"
+      : "Nếu đang xem bản demo, cứ đi theo 4 bước này là hiểu web nhanh nhất."
     : compact
       ? "Đi tiếp theo đúng thứ tự này"
       : "Nếu mới vào web, cứ đi theo 4 bước này là đủ gọn.";

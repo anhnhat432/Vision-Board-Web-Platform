@@ -12,11 +12,7 @@ import {
   upgradePlanLocally,
 } from "./storage";
 import { apiClient } from "@/lib/api/apiClient";
-import {
-  trackCheckoutCompleted,
-  trackCheckoutStarted,
-  type MonetizationSource,
-} from "./monetization-analytics";
+import { trackCheckoutCompleted, trackCheckoutStarted, type MonetizationSource } from "./monetization-analytics";
 import type {
   BillingActionSnapshot,
   BillingAccessContractPayload,
@@ -56,7 +52,8 @@ const BILLING_PORTAL_ENDPOINT =
 const BILLING_RESTORE_ENDPOINT =
   import.meta.env.VITE_BILLING_RESTORE_ENDPOINT?.trim() || (BILLING_API_BASE ? `${BILLING_API_BASE}/restore` : "");
 const BILLING_ENTITLEMENT_SYNC_ENDPOINT =
-  import.meta.env.VITE_BILLING_ENTITLEMENT_SYNC_ENDPOINT?.trim() || (BILLING_API_BASE ? `${BILLING_API_BASE}/entitlements` : "");
+  import.meta.env.VITE_BILLING_ENTITLEMENT_SYNC_ENDPOINT?.trim() ||
+  (BILLING_API_BASE ? `${BILLING_API_BASE}/entitlements` : "");
 
 const ENTITLEMENT_KEYS: EntitlementKey[] = [
   "premium_templates",
@@ -196,7 +193,9 @@ function normalizeRemoteEntitlements(
 
   if (Array.isArray(entitlements)) {
     const normalized = entitlements.filter((item): item is Entitlement => {
-      return Boolean(item) && typeof item === "object" && isEntitlementKey(item.key) && typeof item.grantedAt === "string";
+      return (
+        Boolean(item) && typeof item === "object" && isEntitlementKey(item.key) && typeof item.grantedAt === "string"
+      );
     });
 
     if (normalized.length > 0) {
@@ -515,7 +514,7 @@ const mockBillingProvider: BillingProvider = {
       providerMode: "mock_provider",
       planCode: currentPlan,
       checkoutUrl: createMockCheckoutUrl(sessionId),
-      message: "Đã tạo mock checkout session. Bạn có thể hoàn tất flow thanh toán giả lập ngay trong app.",
+      message: "Đã tạo mock checkout session. Bạn có thể hoàn tất flow thanh toán giả lập ngay trên web.",
     };
   },
   syncEntitlements: async (_goalId?: string) => {
@@ -530,8 +529,8 @@ const mockBillingProvider: BillingProvider = {
         entitlementKeys: getCurrentEntitlementKeys(),
         message:
           getCurrentPlan() === "FREE"
-            ? "Mock provider hiện chưa có giao dịch nào và app đang khớp ở gói Free."
-            : "Mock provider chưa có giao dịch nào để đồng bộ. App giữ nguyên trạng thái hiện tại.",
+            ? "Mock provider hiện chưa có giao dịch nào và web đang khớp ở gói Free."
+            : "Mock provider chưa có giao dịch nào để đồng bộ. Web giữ nguyên trạng thái hiện tại.",
       };
     }
 
@@ -600,7 +599,7 @@ const apiContractBillingProvider: BillingProvider = {
       const fallbackResult = await localBillingProvider.startCheckout(input);
       return {
         ...fallbackResult,
-        message: `${fallbackResult.message} Checkout provider chưa sẵn sàng nên app dùng local checkout fallback.`,
+        message: `${fallbackResult.message} Checkout provider chưa sẵn sàng nên web dùng local checkout fallback.`,
       };
     }
 
@@ -795,7 +794,7 @@ export function sendTestBrowserNotification(): boolean {
   if (window.Notification.permission !== "granted") return false;
 
   new window.Notification("Nhắc việc từ Dear Our Future", {
-    body: "Browser notification đã sẵn sàng. Từ giờ app có thể nhắc việc ngay cả khi bạn không mở đúng tab 12 tuần.",
+    body: "Browser notification đã sẵn sàng. Từ giờ web có thể nhắc việc ngay cả khi bạn không mở đúng tab 12 tuần.",
     tag: "vision-board-test-notification",
   });
 
@@ -835,9 +834,7 @@ export async function syncPendingOutbox(): Promise<OutboxSyncSnapshot> {
 
   // Only process items that are pending and whose retryAt has passed (or not set)
   const pendingItems = data.syncOutbox.filter(
-    (item) =>
-      item.status === "pending" &&
-      (!item.retryAt || new Date(item.retryAt) <= now),
+    (item) => item.status === "pending" && (!item.retryAt || new Date(item.retryAt) <= now),
   );
 
   const baseSnapshot = {
@@ -870,7 +867,7 @@ export async function syncPendingOutbox(): Promise<OutboxSyncSnapshot> {
     const snapshot: OutboxSyncSnapshot = {
       ...baseSnapshot,
       status: "not_configured",
-      message: "Chưa cấu hình VITE_OUTBOX_SYNC_ENDPOINT nên app giữ outbox ở local.",
+      message: "Chưa cấu hình VITE_OUTBOX_SYNC_ENDPOINT nên web giữ outbox ở local.",
     };
     persistSyncSnapshot(snapshot);
     return snapshot;
@@ -930,12 +927,7 @@ export async function syncPendingOutbox(): Promise<OutboxSyncSnapshot> {
     at: now.toISOString(),
     syncedCount,
     pendingCount: remainingPendingCount,
-    status:
-      syncedCount === 0
-        ? "error"
-        : remainingPendingCount === 0
-          ? "success"
-          : "partial",
+    status: syncedCount === 0 ? "error" : remainingPendingCount === 0 ? "success" : "partial",
     message:
       syncedCount === 0
         ? "Không thể gửi outbox tới endpoint đã cấu hình."
@@ -950,7 +942,8 @@ export async function syncPendingOutbox(): Promise<OutboxSyncSnapshot> {
 // ─── D3: Email reminder cadence ──────────────────────────────────────────────
 
 const EMAIL_REMINDER_ENDPOINT =
-  import.meta.env.VITE_EMAIL_REMINDER_ENDPOINT?.trim() || (BILLING_API_BASE ? `${BILLING_API_BASE}/email-reminders` : "");
+  import.meta.env.VITE_EMAIL_REMINDER_ENDPOINT?.trim() ||
+  (BILLING_API_BASE ? `${BILLING_API_BASE}/email-reminders` : "");
 
 export interface EmailDeliveryPayload {
   userId: string;
@@ -1076,7 +1069,8 @@ export async function syncEmailReminderSchedule(): Promise<EmailSyncResult> {
 
 const PUSH_VAPID_PUBLIC_KEY = import.meta.env.VITE_PUSH_VAPID_PUBLIC_KEY?.trim() || "";
 const PUSH_SUBSCRIBE_ENDPOINT =
-  import.meta.env.VITE_PUSH_SUBSCRIBE_ENDPOINT?.trim() || (BILLING_API_BASE ? `${BILLING_API_BASE}/push-subscribe` : "");
+  import.meta.env.VITE_PUSH_SUBSCRIBE_ENDPOINT?.trim() ||
+  (BILLING_API_BASE ? `${BILLING_API_BASE}/push-subscribe` : "");
 
 /** Deep-link payload shapes for push notifications */
 export interface PushDeepLinkPayload {

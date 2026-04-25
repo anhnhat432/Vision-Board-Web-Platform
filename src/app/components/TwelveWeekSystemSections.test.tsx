@@ -5,7 +5,7 @@ import type { AppPreferences, TwelveWeekSystem } from "../utils/storage-types";
 
 const baseSystem: TwelveWeekSystem = {
   goalType: "Project Completion",
-  vision12Week: "Ra mắt phiên bản tốt hơn của ứng dụng.",
+  vision12Week: "Ra mắt phiên bản tốt hơn của web.",
   lagMetric: {
     name: "Người dùng hoạt động",
     unit: "người",

@@ -107,7 +107,7 @@ export function seedPendingSetupContext(): void {
       specific: "Ra mắt flow 12 tuần dễ dùng hơn",
       measurable: "Người dùng có thể hoàn thành flow setup và dùng Today mỗi ngày",
       achievable: "Ship theo từng màn, test từng nhịp",
-      relevant: "Đây là luồng chính của app",
+      relevant: "Đây là luồng chính của web",
       timeBound: "Trong 12 tuần tới",
     }),
   );
@@ -166,26 +166,24 @@ export function seedTwelveWeekGoal(options?: {
     },
   ];
 
-  const taskSeeds =
-    options?.todayTasks ??
-    [
-      {
-        id: "task_focus_today",
-        title: "Chốt layout hero",
-        leadIndicatorName: tactics[0].name,
-        isCore: true,
-        completed: false,
-        scheduledOffsetDays: 0,
-      },
-      {
-        id: "task_followup_today",
-        title: "Viết note cho review",
-        leadIndicatorName: tactics[1].name,
-        isCore: tactics[1].type !== "optional",
-        completed: false,
-        scheduledOffsetDays: 0,
-      },
-    ];
+  const taskSeeds = options?.todayTasks ?? [
+    {
+      id: "task_focus_today",
+      title: "Chốt layout hero",
+      leadIndicatorName: tactics[0].name,
+      isCore: true,
+      completed: false,
+      scheduledOffsetDays: 0,
+    },
+    {
+      id: "task_followup_today",
+      title: "Viết note cho review",
+      leadIndicatorName: tactics[1].name,
+      isCore: tactics[1].type !== "optional",
+      completed: false,
+      scheduledOffsetDays: 0,
+    },
+  ];
 
   const system: TwelveWeekSystemModel = {
     goalType: "Project Completion",
@@ -202,7 +200,7 @@ export function seedTwelveWeekGoal(options?: {
       week8: "Xong trung tâm 12 tuần",
       week12: "Flow đủ ổn để dùng hằng ngày",
     },
-    successEvidence: "Mở app ra là biết việc tiếp theo.",
+    successEvidence: "Mở web ra là biết việc tiếp theo.",
     reviewDay: options?.reviewDay ?? "Sunday",
     week12Outcome: "Người dùng có thể setup, làm việc hôm nay và review tuần rất nhanh.",
     startDate: weekStartKey,

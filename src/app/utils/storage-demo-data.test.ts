@@ -27,7 +27,7 @@ function createEmptyUserData(): UserData {
 }
 
 describe("storage-demo-data", () => {
-  it("detects when the app should hydrate demo data", () => {
+  it("detects when the web should hydrate demo data", () => {
     expect(shouldHydrateDemoData(createEmptyUserData())).toBe(true);
 
     const seeded = createEmptyUserData();
@@ -35,7 +35,7 @@ describe("storage-demo-data", () => {
     expect(shouldHydrateDemoData(seeded)).toBe(false);
   });
 
-  it("creates a normalized demo dataset for the app shell", () => {
+  it("creates a normalized demo dataset for the web shell", () => {
     const demoData = createDemoUserData({
       currentStorageVersion: 4,
       defaultAppPreferences,

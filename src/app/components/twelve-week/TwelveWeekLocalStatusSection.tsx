@@ -57,19 +57,19 @@ function getBackendStatusDescription(status: TwelveWeekSettingsTabProps["backend
   if (status.syncing) return "Đang đồng bộ plan, task, check-in và review 12-week lên backend.";
   if (status.syncMessage) return status.syncMessage;
   return status.displayName || status.email
-    ? `Đang đồng bộ dưới tài khoản ${status.displayName || status.email}. Nếu local và backend khác nhau, app sẽ hỏi bạn trước khi ghi đè.`
-    : "Backend đã sẵn sàng. Nếu local và backend khác nhau, app sẽ hỏi bạn trước khi ghi đè.";
+    ? `Đang đồng bộ dưới tài khoản ${status.displayName || status.email}. Nếu local và backend khác nhau, web sẽ hỏi bạn trước khi ghi đè.`
+    : "Backend đã sẵn sàng. Nếu local và backend khác nhau, web sẽ hỏi bạn trước khi ghi đè.";
 }
 
 function getBackendHydrationDescription(result: TwelveWeekSettingsTabProps["lastBackendHydrationResult"]): string {
   if (!result) {
-    return "Kiểm tra backend và chỉ kéo về những chu kỳ 12-week đang thiếu ở local. Nếu hai bên khác nhau, app sẽ yêu cầu bạn chọn nguồn dữ liệu trước.";
+    return "Kiểm tra backend và chỉ kéo về những chu kỳ 12-week đang thiếu ở local. Nếu hai bên khác nhau, web sẽ yêu cầu bạn chọn nguồn dữ liệu trước.";
   }
 
   if (result.status === "error") return result.message;
   if (result.status === "partial") return result.message;
   if (result.conflictCount > 0) {
-    return `${result.message} App đã tạm dừng tự đồng bộ cho các chu kỳ này.`;
+    return `${result.message} Web đã tạm dừng tự đồng bộ cho các chu kỳ này.`;
   }
   if (result.hydratedCount + result.updatedCount > 0) {
     return `Đã khôi phục ${result.hydratedCount} chu kỳ mới và cập nhật ${result.updatedCount} chu kỳ từ backend.`;
@@ -218,7 +218,7 @@ export function TwelveWeekLocalStatusSection({
                 <p className="text-sm font-semibold text-amber-950">Cần chọn nguồn dữ liệu</p>
                 <p className="mt-1 text-xs leading-5 text-amber-800">
                   Local và backend đang khác nhau. Chưa có dữ liệu nào bị ghi đè; chọn bản muốn giữ cho từng chu kỳ
-                  trước khi app tự đồng bộ tiếp.
+                  trước khi web tự đồng bộ tiếp.
                 </p>
               </div>
             </div>

@@ -1,16 +1,7 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  CalendarDays,
-  CheckCircle2,
-  Compass,
-  Flag,
-  Sparkles,
-  Target,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, CheckCircle2, Compass, Flag, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
@@ -47,11 +38,7 @@ import {
   planSatisfiesRequirement,
   type TwelveWeekTemplateDefinition,
 } from "../utils/twelve-week-premium";
-import {
-  parsePendingSMARTGoal,
-  parseSmartGoal,
-  type PendingSMARTGoal,
-} from "@/lib/smart-goal";
+import { parsePendingSMARTGoal, parseSmartGoal, type PendingSMARTGoal } from "@/lib/smart-goal";
 import { getWeeklyTaskWarning } from "@/features/plan12week/logic";
 import { usePlanSetupSync } from "@/features/plan12week/hooks";
 import { createGoal, updateGoal } from "@/services/goalService";
@@ -235,13 +222,7 @@ function buildWeeklyPlans(
             ? "Tăng tốc điều đang hiệu quả và tạo đầu ra thật."
             : "Về đích gọn, ưu tiên ít nhưng rõ."),
       milestone:
-        weekNumber === 4
-          ? week4Milestone
-          : weekNumber === 8
-            ? week8Milestone
-            : weekNumber === 12
-              ? week12Outcome
-              : "",
+        weekNumber === 4 ? week4Milestone : weekNumber === 8 ? week8Milestone : weekNumber === 12 ? week12Outcome : "",
       completed: false,
     };
   });
@@ -321,10 +302,7 @@ export function TwelveWeekSetup() {
         localStorage.setItem(APP_STORAGE_KEYS.pendingSmartGoal, JSON.stringify(normalizedSmartGoal));
       }
 
-      const parsedSmartGoal = parsePendingSMARTGoal(
-        normalizedSmartGoal ?? parsedSmartGoalValue,
-        selectedFocusArea,
-      );
+      const parsedSmartGoal = parsePendingSMARTGoal(normalizedSmartGoal ?? parsedSmartGoalValue, selectedFocusArea);
       const parsedFeasibility = JSON.parse(pendingFeasibilityResult);
       const savedDraft = localStorage.getItem(APP_STORAGE_KEYS.pending12WeekSetupDraft);
 
@@ -356,8 +334,7 @@ export function TwelveWeekSetup() {
             ...parsedDraft,
             templateId: parsedDraft.templateId ?? "",
             tacticLoadPreference:
-              parsedDraft.tacticLoadPreference === "lighter" ||
-              parsedDraft.tacticLoadPreference === "push"
+              parsedDraft.tacticLoadPreference === "lighter" || parsedDraft.tacticLoadPreference === "push"
                 ? parsedDraft.tacticLoadPreference
                 : "balanced",
             dailyTimeBudget: parsedDraft.dailyTimeBudget ?? "",
@@ -413,10 +390,8 @@ export function TwelveWeekSetup() {
     () => draft.leadIndicators.filter((indicator) => indicator.name.trim().length > 0),
     [draft.leadIndicators],
   );
-  const selectedTemplate =
-    TWELVE_WEEK_TEMPLATE_CATALOG.find((template) => template.id === draft.templateId) ?? null;
-  const pendingTemplate =
-    TWELVE_WEEK_TEMPLATE_CATALOG.find((template) => template.id === pendingTemplateId) ?? null;
+  const selectedTemplate = TWELVE_WEEK_TEMPLATE_CATALOG.find((template) => template.id === draft.templateId) ?? null;
+  const pendingTemplate = TWELVE_WEEK_TEMPLATE_CATALOG.find((template) => template.id === pendingTemplateId) ?? null;
   const adaptiveTemplateRecommendation = useMemo(() => {
     if (!smartGoal || !feasibility) return null;
 
@@ -427,9 +402,7 @@ export function TwelveWeekSetup() {
     });
   }, [smartGoal, feasibility]);
   const recommendedTemplate =
-    TWELVE_WEEK_TEMPLATE_CATALOG.find(
-      (template) => template.id === adaptiveTemplateRecommendation?.templateId,
-    ) ?? null;
+    TWELVE_WEEK_TEMPLATE_CATALOG.find((template) => template.id === adaptiveTemplateRecommendation?.templateId) ?? null;
   const selectedTemplateSupport = useMemo(() => {
     if (!selectedTemplate || !smartGoal || !feasibility) return null;
 
@@ -470,7 +443,7 @@ export function TwelveWeekSetup() {
   const weekOneTaskPreview =
     previewTasks.length > 0
       ? previewTasks
-      : setupGuideSupport?.personalizedTactics.map((tactic) => tactic.name).slice(0, 4) ?? [];
+      : (setupGuideSupport?.personalizedTactics.map((tactic) => tactic.name).slice(0, 4) ?? []);
   const weekOneTaskWarning = getWeeklyTaskWarning(weekOneTaskPreview.length);
 
   const applyTemplate = (template: TwelveWeekTemplateDefinition, announce = true) => {
@@ -498,9 +471,9 @@ export function TwelveWeekSetup() {
 
       const constraintLoadOverride =
         previousDraft.personalConstraint === "time" || previousDraft.personalConstraint === "consistency"
-          ? "lighter" as const
+          ? ("lighter" as const)
           : previousDraft.personalConstraint === "motivation"
-            ? "balanced" as const
+            ? ("balanced" as const)
             : undefined;
 
       return {
@@ -515,11 +488,10 @@ export function TwelveWeekSetup() {
         reviewDay: adaptiveTemplateSupport?.recommendedReviewDay ?? template.reviewDay,
         tacticLoadPreference:
           constraintLoadOverride ??
-          adaptiveTemplateSupport?.recommendedLoadPreference ?? previousDraft.tacticLoadPreference,
-        week4Milestone:
-          adaptiveTemplateSupport?.week4MilestoneSuggestion ?? template.week4Milestone,
-        week8Milestone:
-          adaptiveTemplateSupport?.week8MilestoneSuggestion ?? template.week8Milestone,
+          adaptiveTemplateSupport?.recommendedLoadPreference ??
+          previousDraft.tacticLoadPreference,
+        week4Milestone: adaptiveTemplateSupport?.week4MilestoneSuggestion ?? template.week4Milestone,
+        week8Milestone: adaptiveTemplateSupport?.week8MilestoneSuggestion ?? template.week8Milestone,
         successEvidence: template.successEvidence,
         leadIndicators: nextTactics.map((tactic) => ({
           id: createIndicatorId(),
@@ -598,14 +570,14 @@ export function TwelveWeekSetup() {
     }
   };
 
-  const handleChange = <K extends keyof TwelveWeekSetupDraft>(
-    key: K,
-    value: TwelveWeekSetupDraft[K],
-  ) => {
-    setDraft((previousDraft) => ({
-      ...previousDraft,
-      [key]: value,
-    }) as TwelveWeekSetupDraft);
+  const handleChange = <K extends keyof TwelveWeekSetupDraft>(key: K, value: TwelveWeekSetupDraft[K]) => {
+    setDraft(
+      (previousDraft) =>
+        ({
+          ...previousDraft,
+          [key]: value,
+        }) as TwelveWeekSetupDraft,
+    );
   };
 
   const handleIndicatorChange = <K extends keyof LeadIndicatorDraft>(
@@ -670,7 +642,11 @@ export function TwelveWeekSetup() {
   const handleNext = () => {
     if (!validateCurrentStep()) return;
 
-    if (currentStep === 0 && draft.templateId && (draft.dailyTimeBudget || draft.preferredDays.length > 0 || draft.personalConstraint)) {
+    if (
+      currentStep === 0 &&
+      draft.templateId &&
+      (draft.dailyTimeBudget || draft.preferredDays.length > 0 || draft.personalConstraint)
+    ) {
       trackAppEvent("12_week_template_personalized", undefined, {
         templateId: draft.templateId,
         dailyTimeBudget: draft.dailyTimeBudget || "none",
@@ -779,7 +755,7 @@ export function TwelveWeekSetup() {
     clearGoalPlanningDrafts();
 
     // Fire-and-forget: persist goal to backend if authenticated.
-    // Fails silently — the local goal is already saved and the app continues.
+    // Fails silently — the local goal is already saved and the web continues.
     // Not awaited so the success toast and navigation are not blocked by backend latency.
     void createGoal({
       title: smartGoal.specific.trim(),
@@ -859,7 +835,8 @@ export function TwelveWeekSetup() {
                   Chốt một chu kỳ 12 tuần gọn, rõ và vào việc ngay.
                 </h1>
                 <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
-                  Bạn sẽ rời khỏi màn này với một outcome rõ, 2-4 tactic có lịch thực thi, và một tuần đầu tiên đủ nhẹ để bắt đầu ngay.
+                  Bạn sẽ rời khỏi màn này với một outcome rõ, 2-4 tactic có lịch thực thi, và một tuần đầu tiên đủ nhẹ
+                  để bắt đầu ngay.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -878,10 +855,16 @@ export function TwelveWeekSetup() {
             </div>
             <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
               <div className="flex items-center justify-between text-sm text-white/72">
-                <span>Bước {currentStep + 1} / {STEPS.length}</span>
+                <span>
+                  Bước {currentStep + 1} / {STEPS.length}
+                </span>
                 <span>{Math.round(progressValue)}%</span>
               </div>
-              <Progress value={progressValue} className="mt-3 h-2.5 bg-white/20" aria-label={`Tiến độ thiết lập: ${Math.round(progressValue)}%`} />
+              <Progress
+                value={progressValue}
+                className="mt-3 h-2.5 bg-white/20"
+                aria-label={`Tiến độ thiết lập: ${Math.round(progressValue)}%`}
+              />
               <ol className="mt-6 space-y-3" aria-label="Các bước thiết lập">
                 {STEPS.map((step, index) => {
                   const active = index === currentStep;
@@ -915,7 +898,9 @@ export function TwelveWeekSetup() {
                         <div>
                           <p className="text-sm font-semibold text-white">{step.label}</p>
                           <p className="text-xs text-white/62">{step.title}</p>
-                          <span className="sr-only">{done ? "— đã hoàn thành" : active ? "— đang thực hiện" : "— chưa bắt đầu"}</span>
+                          <span className="sr-only">
+                            {done ? "— đã hoàn thành" : active ? "— đang thực hiện" : "— chưa bắt đầu"}
+                          </span>
                         </div>
                       </div>
                     </li>
@@ -947,7 +932,8 @@ export function TwelveWeekSetup() {
                       <div>
                         <p className="text-sm font-semibold text-slate-900">Bắt đầu nhanh bằng khung gợi ý</p>
                         <p className="mt-1 text-sm text-slate-500">
-                          Thay vì tìm một template đúng chủ đề, bạn chỉ cần chọn kiểu vận hành phù hợp. Sau đó vẫn sửa lại toàn bộ cho sát mục tiêu của mình.
+                          Thay vì tìm một template đúng chủ đề, bạn chỉ cần chọn kiểu vận hành phù hợp. Sau đó vẫn sửa
+                          lại toàn bộ cho sát mục tiêu của mình.
                         </p>
                       </div>
                       <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
@@ -961,9 +947,7 @@ export function TwelveWeekSetup() {
                             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
                               Gợi ý cho mục tiêu này
                             </p>
-                            <p className="mt-2 text-lg font-semibold text-slate-950">
-                              {recommendedTemplate.name}
-                            </p>
+                            <p className="mt-2 text-lg font-semibold text-slate-950">{recommendedTemplate.name}</p>
                             <p className="mt-2 text-sm leading-7 text-slate-600">
                               {adaptiveTemplateRecommendation.reason}
                             </p>
@@ -1040,7 +1024,9 @@ export function TwelveWeekSetup() {
                                           : "border-slate-300 bg-white text-slate-700"
                                     }
                                   >
-                                    {template.requiredPlan ? `Khung ${getPlanLabel(template.requiredPlan)}` : "Khung Free"}
+                                    {template.requiredPlan
+                                      ? `Khung ${getPlanLabel(template.requiredPlan)}`
+                                      : "Khung Free"}
                                   </Badge>
                                 </div>
                                 <p className={`mt-1 text-sm ${isSelected ? "text-white/74" : "text-slate-600"}`}>
@@ -1068,7 +1054,9 @@ export function TwelveWeekSetup() {
                                   : "border-white/70 bg-white/72 text-slate-600"
                               }`}
                             >
-                              <p className={`text-xs font-semibold uppercase tracking-[0.16em] ${isSelected ? "text-white/54" : "text-slate-400"}`}>
+                              <p
+                                className={`text-xs font-semibold uppercase tracking-[0.16em] ${isSelected ? "text-white/54" : "text-slate-400"}`}
+                              >
                                 Hợp khi
                               </p>
                               <p className="mt-2">{template.bestFor}</p>
@@ -1080,7 +1068,9 @@ export function TwelveWeekSetup() {
                                   : "border-white/70 bg-white/72 text-slate-600"
                               }`}
                             >
-                              <p className={`text-xs font-semibold uppercase tracking-[0.16em] ${isSelected ? "text-white/54" : "text-slate-400"}`}>
+                              <p
+                                className={`text-xs font-semibold uppercase tracking-[0.16em] ${isSelected ? "text-white/54" : "text-slate-400"}`}
+                              >
                                 Tuần 1 sẽ có gì
                               </p>
                               <p className="mt-2">{template.firstWeekWin}</p>
@@ -1115,7 +1105,9 @@ export function TwelveWeekSetup() {
                             </div>
                             {isLocked && (
                               <div className="mt-4 flex items-center justify-between border-t border-violet-200/60 pt-3">
-                                <span className="text-xs font-semibold text-violet-700">Cần gói Plus để dùng khung này</span>
+                                <span className="text-xs font-semibold text-violet-700">
+                                  Cần gói Plus để dùng khung này
+                                </span>
                                 <span className="text-xs font-semibold text-violet-600">Mở khóa →</span>
                               </div>
                             )}
@@ -1215,8 +1207,10 @@ export function TwelveWeekSetup() {
                         </Select>
                         <p className="text-xs text-slate-500">
                           {draft.personalConstraint === "time" && "Hệ thống sẽ ưu tiên giữ nhẹ và tập trung."}
-                          {draft.personalConstraint === "motivation" && "Hệ thống sẽ ưu tiên thắng nhỏ sớm và giảm ma sát."}
-                          {draft.personalConstraint === "consistency" && "Hệ thống sẽ ưu tiên nhịp đều thay vì tải cao."}
+                          {draft.personalConstraint === "motivation" &&
+                            "Hệ thống sẽ ưu tiên thắng nhỏ sớm và giảm ma sát."}
+                          {draft.personalConstraint === "consistency" &&
+                            "Hệ thống sẽ ưu tiên nhịp đều thay vì tải cao."}
                           {draft.personalConstraint === "complexity" && "Hệ thống sẽ giúp tách lớp rõ hơn."}
                           {!draft.personalConstraint && "Chọn trở ngại để hệ thống điều chỉnh phù hợp hơn."}
                         </p>
@@ -1241,17 +1235,31 @@ export function TwelveWeekSetup() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="vision-12-week">Tầm nhìn 12 tuần</Label>
-                    <Textarea id="vision-12-week" rows={4} value={draft.vision12Week} onChange={(event) => handleChange("vision12Week", event.target.value)} />
+                    <Textarea
+                      id="vision-12-week"
+                      rows={4}
+                      value={draft.vision12Week}
+                      onChange={(event) => handleChange("vision12Week", event.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="week-12-outcome">Outcome muốn chạm tới ở tuần 12</Label>
-                    <Textarea id="week-12-outcome" rows={3} value={draft.week12Outcome} onChange={(event) => handleChange("week12Outcome", event.target.value)} />
+                    <Textarea
+                      id="week-12-outcome"
+                      rows={3}
+                      value={draft.week12Outcome}
+                      onChange={(event) => handleChange("week12Outcome", event.target.value)}
+                    />
                   </div>
                 </div>
                 <div className="space-y-4 rounded-[28px] border border-white/70 bg-white/72 p-5">
                   <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                      {selectedTemplate ? "Khung đang dùng" : setupGuideTemplate ? "Khung nên bắt đầu" : "Khung đang dùng"}
+                      {selectedTemplate
+                        ? "Khung đang dùng"
+                        : setupGuideTemplate
+                          ? "Khung nên bắt đầu"
+                          : "Khung đang dùng"}
                     </p>
                     {setupGuideTemplate ? (
                       <div className="mt-3 space-y-3">
@@ -1272,7 +1280,9 @@ export function TwelveWeekSetup() {
                           </Badge>
                         </div>
                         <div className="rounded-[18px] border border-white/70 bg-white/86 p-4">
-                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Vì sao khung này chạy được</p>
+                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
+                            Vì sao khung này chạy được
+                          </p>
                           <p className="mt-2 text-sm leading-7 text-slate-700">{setupGuideTemplate.whyItWorks}</p>
                         </div>
                         <div className="rounded-[18px] border border-white/70 bg-white/86 p-4">
@@ -1283,26 +1293,22 @@ export function TwelveWeekSetup() {
                         </div>
                         {setupGuideSupport && (
                           <div className="rounded-[18px] border border-white/70 bg-slate-950 p-4 text-white">
-                            <p className="text-xs uppercase tracking-[0.16em] text-white/54">
-                              Nhịp nên giữ ở tuần 1
-                            </p>
-                            <p className="mt-2 text-sm font-semibold">
-                              {setupGuideSupport.week1Headline}
-                            </p>
-                            <p className="mt-2 text-sm leading-7 text-white/78">
-                              {setupGuideSupport.week1CadenceHint}
-                            </p>
+                            <p className="text-xs uppercase tracking-[0.16em] text-white/54">Nhịp nên giữ ở tuần 1</p>
+                            <p className="mt-2 text-sm font-semibold">{setupGuideSupport.week1Headline}</p>
+                            <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1CadenceHint}</p>
                           </div>
                         )}
                         {!selectedTemplate && (
                           <p className="text-xs leading-6 text-slate-500">
-                            Đây là khung gợi ý nổi bật cho mục tiêu này. Bạn có thể áp dụng, rồi sửa tactic theo đúng hoàn cảnh của mình.
+                            Đây là khung gợi ý nổi bật cho mục tiêu này. Bạn có thể áp dụng, rồi sửa tactic theo đúng
+                            hoàn cảnh của mình.
                           </p>
                         )}
                       </div>
                     ) : (
                       <p className="mt-3 text-sm leading-7 text-slate-600">
-                        Chưa chọn khung nào. Bạn vẫn có thể đi theo flow custom, nhưng khung gợi ý sẽ giúp tuần đầu bớt phải nghĩ từ trang trắng.
+                        Chưa chọn khung nào. Bạn vẫn có thể đi theo flow custom, nhưng khung gợi ý sẽ giúp tuần đầu bớt
+                        phải nghĩ từ trang trắng.
                       </p>
                     )}
                   </div>
@@ -1325,9 +1331,16 @@ export function TwelveWeekSetup() {
                   <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-dashed border-slate-200 bg-slate-50/80 p-4">
                     <div>
                       <p className="text-sm font-semibold text-slate-900">Giữ 2-4 tactic cho cả chu kỳ</p>
-                      <p className="mt-1 text-sm text-slate-500">Tactic cốt lõi được ưu tiên trong điểm tuần. Tactic tùy chọn là phần thêm khi bạn còn sức.</p>
+                      <p className="mt-1 text-sm text-slate-500">
+                        Tactic cốt lõi được ưu tiên trong điểm tuần. Tactic tùy chọn là phần thêm khi bạn còn sức.
+                      </p>
                     </div>
-                    <Button type="button" variant="outline" onClick={handleAddIndicator} disabled={draft.leadIndicators.length >= 4}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleAddIndicator}
+                      disabled={draft.leadIndicators.length >= 4}
+                    >
                       Thêm tactic
                     </Button>
                   </div>
@@ -1341,7 +1354,12 @@ export function TwelveWeekSetup() {
                             {indicator.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
                           </Badge>
                           {draft.leadIndicators.length > 2 && (
-                            <Button type="button" variant="ghost" size="sm" onClick={() => handleRemoveIndicator(index)}>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveIndicator(index)}
+                            >
                               Xóa
                             </Button>
                           )}
@@ -1362,11 +1380,12 @@ export function TwelveWeekSetup() {
                             <Label htmlFor={`tactic-type-${index}`}>Loại</Label>
                             <Select
                               value={indicator.type}
-                              onValueChange={(value) =>
-                                handleIndicatorChange(index, "type", value as TacticType)
-                              }
+                              onValueChange={(value) => handleIndicatorChange(index, "type", value as TacticType)}
                             >
-                              <SelectTrigger id={`tactic-type-${index}`} aria-label={`Chọn loại cho tactic ${index + 1}`}>
+                              <SelectTrigger
+                                id={`tactic-type-${index}`}
+                                aria-label={`Chọn loại cho tactic ${index + 1}`}
+                              >
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -1377,25 +1396,32 @@ export function TwelveWeekSetup() {
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor={`tactic-target-${index}`}>Tần suất / tuần</Label>
-                            <Input id={`tactic-target-${index}`} value={indicator.target} onChange={(event) => handleIndicatorChange(index, "target", event.target.value)} />
+                            <Input
+                              id={`tactic-target-${index}`}
+                              value={indicator.target}
+                              onChange={(event) => handleIndicatorChange(index, "target", event.target.value)}
+                            />
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor={`tactic-unit-${index}`}>Đơn vị</Label>
-                            <Input id={`tactic-unit-${index}`} value={indicator.unit} onChange={(event) => handleIndicatorChange(index, "unit", event.target.value)} />
+                            <Input
+                              id={`tactic-unit-${index}`}
+                              value={indicator.unit}
+                              onChange={(event) => handleIndicatorChange(index, "unit", event.target.value)}
+                            />
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor={`tactic-cadence-${index}`}>Nhịp</Label>
                             <Select
                               value={indicator.cadence}
                               onValueChange={(value) =>
-                                handleIndicatorChange(
-                                  index,
-                                  "cadence",
-                                  value as LeadIndicatorDraft["cadence"],
-                                )
+                                handleIndicatorChange(index, "cadence", value as LeadIndicatorDraft["cadence"])
                               }
                             >
-                              <SelectTrigger id={`tactic-cadence-${index}`} aria-label={`Chọn nhịp cho tactic ${index + 1}`}>
+                              <SelectTrigger
+                                id={`tactic-cadence-${index}`}
+                                aria-label={`Chọn nhịp cho tactic ${index + 1}`}
+                              >
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -1425,9 +1451,7 @@ export function TwelveWeekSetup() {
                         {selectedTemplate ? "Tuần 1 theo khung đang dùng" : "Nếu đi theo khung gợi ý này"}
                       </p>
                       <p className="mt-2 text-base font-semibold">{setupGuideSupport.week1Headline}</p>
-                      <p className="mt-2 text-sm leading-7 text-white/78">
-                        {setupGuideSupport.week1Support}
-                      </p>
+                      <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1Support}</p>
                       <p className="mt-3 rounded-2xl border border-white/12 bg-white/8 px-3 py-3 text-sm text-white/74">
                         {setupGuideSupport.week1CadenceHint}
                       </p>
@@ -1438,15 +1462,16 @@ export function TwelveWeekSetup() {
                       <p className="text-sm text-slate-500">Thêm tactic để thấy tuần đầu tiên sẽ trông như thế nào.</p>
                     ) : (
                       weekOneTaskPreview.map((task) => (
-                        <div key={task} className="rounded-2xl border border-white/70 bg-slate-50/80 px-4 py-3 text-sm text-slate-700">
+                        <div
+                          key={task}
+                          className="rounded-2xl border border-white/70 bg-slate-50/80 px-4 py-3 text-sm text-slate-700"
+                        >
                           {task}
                         </div>
                       ))
                     )}
                   </div>
-                  {weekOneTaskWarning ? (
-                    <p className="text-xs text-amber-600">{weekOneTaskWarning}</p>
-                  ) : null}
+                  {weekOneTaskWarning ? <p className="text-xs text-amber-600">{weekOneTaskWarning}</p> : null}
                 </div>
               </div>
             )}
@@ -1457,8 +1482,15 @@ export function TwelveWeekSetup() {
                   <div className="grid gap-3 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="cycle-start-date">Ngày bắt đầu chu kỳ</Label>
-                      <Input id="cycle-start-date" type="date" value={draft.startDate} onChange={(event) => handleChange("startDate", event.target.value)} />
-                      <p className="text-xs text-slate-500">Hệ thống sẽ canh chu kỳ về Thứ Hai để việc và điểm tuần khớp nhau.</p>
+                      <Input
+                        id="cycle-start-date"
+                        type="date"
+                        value={draft.startDate}
+                        onChange={(event) => handleChange("startDate", event.target.value)}
+                      />
+                      <p className="text-xs text-slate-500">
+                        Hệ thống sẽ canh chu kỳ về Thứ Hai để việc và điểm tuần khớp nhau.
+                      </p>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="review-day">Ngày review hằng tuần</Label>
@@ -1481,10 +1513,7 @@ export function TwelveWeekSetup() {
                     <Select
                       value={draft.tacticLoadPreference}
                       onValueChange={(value) =>
-                        handleChange(
-                          "tacticLoadPreference",
-                          value as TwelveWeekSetupDraft["tacticLoadPreference"],
-                        )
+                        handleChange("tacticLoadPreference", value as TwelveWeekSetupDraft["tacticLoadPreference"])
                       }
                     >
                       <SelectTrigger id="week-load-preference" aria-label="Chọn nhịp tuần mặc định">
@@ -1502,19 +1531,31 @@ export function TwelveWeekSetup() {
                       Đây là nhịp khởi đầu của chu kỳ. Bạn vẫn có thể chỉnh lại sau trong phần Cài đặt.
                     </p>
                   </div>
-                <div className="grid gap-3 md:grid-cols-3">
+                  <div className="grid gap-3 md:grid-cols-3">
                     <div className="space-y-2 md:col-span-2">
                       <Label htmlFor="lag-metric-name">Chỉ số kết quả chính</Label>
-                      <Input id="lag-metric-name" value={draft.lagMetricName} onChange={(event) => handleChange("lagMetricName", event.target.value)} />
+                      <Input
+                        id="lag-metric-name"
+                        value={draft.lagMetricName}
+                        onChange={(event) => handleChange("lagMetricName", event.target.value)}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="lag-metric-target">Mục tiêu</Label>
-                      <Input id="lag-metric-target" value={draft.lagMetricTarget} onChange={(event) => handleChange("lagMetricTarget", event.target.value)} />
+                      <Input
+                        id="lag-metric-target"
+                        value={draft.lagMetricTarget}
+                        onChange={(event) => handleChange("lagMetricTarget", event.target.value)}
+                      />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lag-metric-unit">Đơn vị của chỉ số</Label>
-                    <Input id="lag-metric-unit" value={draft.lagMetricUnit} onChange={(event) => handleChange("lagMetricUnit", event.target.value)} />
+                    <Input
+                      id="lag-metric-unit"
+                      value={draft.lagMetricUnit}
+                      onChange={(event) => handleChange("lagMetricUnit", event.target.value)}
+                    />
                   </div>
                 </div>
                 <div className="space-y-4 rounded-[28px] border border-white/70 bg-white/72 p-5">
@@ -1523,48 +1564,34 @@ export function TwelveWeekSetup() {
                       <CalendarDays className="h-4 w-4" />
                       <p className="text-sm font-semibold">Chu kỳ 12 tuần</p>
                     </div>
-                    <p className="mt-3 text-sm text-slate-600">{cycleStartDate} đến {cycleEndDate}</p>
+                    <p className="mt-3 text-sm text-slate-600">
+                      {cycleStartDate} đến {cycleEndDate}
+                    </p>
                   </div>
                   {setupGuideSupport && setupGuideTemplate && (
                     <div className="rounded-[22px] border border-slate-900 bg-slate-950 p-4 text-white">
-                      <p className="text-xs uppercase tracking-[0.16em] text-white/54">
-                        Nhịp nên giữ ở tuần 1
-                      </p>
+                      <p className="text-xs uppercase tracking-[0.16em] text-white/54">Nhịp nên giữ ở tuần 1</p>
                       <p className="mt-2 text-base font-semibold">{setupGuideSupport.week1Headline}</p>
-                      <p className="mt-2 text-sm leading-7 text-white/78">
-                        {setupGuideSupport.week1Support}
-                      </p>
+                      <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1Support}</p>
                       <div className="mt-3 rounded-2xl border border-white/12 bg-white/8 p-3">
-                        <p className="text-xs uppercase tracking-[0.16em] text-white/54">
-                          Gợi ý giữ nhịp
-                        </p>
-                        <p className="mt-2 text-sm leading-7 text-white/78">
-                          {setupGuideSupport.week1CadenceHint}
-                        </p>
+                        <p className="text-xs uppercase tracking-[0.16em] text-white/54">Gợi ý giữ nhịp</p>
+                        <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1CadenceHint}</p>
                       </div>
                     </div>
                   )}
                   {setupGuideSupport && (
                     <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-                      <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
-                        Review và tải tuần gợi ý
-                      </p>
+                      <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Review và tải tuần gợi ý</p>
                       <div className="mt-3 grid gap-3 sm:grid-cols-2">
                         <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
-                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
-                            Review
-                          </p>
-                          <p className="mt-2 text-sm font-semibold text-slate-900">
-                            {draft.reviewDay}
-                          </p>
+                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Review</p>
+                          <p className="mt-2 text-sm font-semibold text-slate-900">{draft.reviewDay}</p>
                           <p className="mt-2 text-sm leading-6 text-slate-600">
                             {setupGuideSupport.recommendedReviewReason}
                           </p>
                         </div>
                         <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
-                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
-                            Nhịp tuần
-                          </p>
+                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Nhịp tuần</p>
                           <p className="mt-2 text-sm font-semibold text-slate-900">
                             {getLoadPreferenceLabel(draft.tacticLoadPreference)}
                           </p>
@@ -1577,25 +1604,15 @@ export function TwelveWeekSetup() {
                   )}
                   {(draft.week4Milestone || draft.week8Milestone) && (
                     <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-                      <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
-                        Mốc gợi ý theo khung
-                      </p>
+                      <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Mốc gợi ý theo khung</p>
                       <div className="mt-3 space-y-3">
                         <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
-                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
-                            Tuần 4
-                          </p>
-                          <p className="mt-2 text-sm leading-7 text-slate-700">
-                            {draft.week4Milestone}
-                          </p>
+                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tuần 4</p>
+                          <p className="mt-2 text-sm leading-7 text-slate-700">{draft.week4Milestone}</p>
                         </div>
                         <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
-                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
-                            Tuần 8
-                          </p>
-                          <p className="mt-2 text-sm leading-7 text-slate-700">
-                            {draft.week8Milestone}
-                          </p>
+                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tuần 8</p>
+                          <p className="mt-2 text-sm leading-7 text-slate-700">{draft.week8Milestone}</p>
                         </div>
                       </div>
                     </div>
@@ -1611,15 +1628,16 @@ export function TwelveWeekSetup() {
                         </p>
                       ) : (
                         weekOneTaskPreview.map((task) => (
-                          <div key={task} className="rounded-2xl border border-white/70 bg-slate-50/80 px-4 py-3 text-sm text-slate-700">
+                          <div
+                            key={task}
+                            className="rounded-2xl border border-white/70 bg-slate-50/80 px-4 py-3 text-sm text-slate-700"
+                          >
                             {task}
                           </div>
                         ))
                       )}
                     </div>
-                    {weekOneTaskWarning ? (
-                      <p className="mt-3 text-xs text-amber-600">{weekOneTaskWarning}</p>
-                    ) : null}
+                    {weekOneTaskWarning ? <p className="mt-3 text-xs text-amber-600">{weekOneTaskWarning}</p> : null}
                   </div>
                 </div>
               </div>
@@ -1649,16 +1667,29 @@ export function TwelveWeekSetup() {
                       <div className="grid gap-3 md:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="milestone-week-4">Milestone tuần 4</Label>
-                          <Input id="milestone-week-4" value={draft.week4Milestone} onChange={(event) => handleChange("week4Milestone", event.target.value)} />
+                          <Input
+                            id="milestone-week-4"
+                            value={draft.week4Milestone}
+                            onChange={(event) => handleChange("week4Milestone", event.target.value)}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="milestone-week-8">Milestone tuần 8</Label>
-                          <Input id="milestone-week-8" value={draft.week8Milestone} onChange={(event) => handleChange("week8Milestone", event.target.value)} />
+                          <Input
+                            id="milestone-week-8"
+                            value={draft.week8Milestone}
+                            onChange={(event) => handleChange("week8Milestone", event.target.value)}
+                          />
                         </div>
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="success-evidence">Bằng chứng thành công muốn thấy</Label>
-                        <Textarea id="success-evidence" rows={3} value={draft.successEvidence} onChange={(event) => handleChange("successEvidence", event.target.value)} />
+                        <Textarea
+                          id="success-evidence"
+                          rows={3}
+                          value={draft.successEvidence}
+                          onChange={(event) => handleChange("successEvidence", event.target.value)}
+                        />
                       </div>
                     </div>
                   </details>
@@ -1667,7 +1698,8 @@ export function TwelveWeekSetup() {
                 <div className="space-y-4 rounded-[28px] border border-white/70 bg-white/72 p-5">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Sau khi tạo xong</p>
                   <div className="rounded-[22px] border border-white/70 bg-white/78 p-4 text-sm leading-7 text-slate-700">
-                    Bạn sẽ đi thẳng vào trung tâm 12 tuần, nơi có màn Hôm nay, Tuần, Tiến độ và Cài đặt trong cùng một nhịp.
+                    Bạn sẽ đi thẳng vào trung tâm 12 tuần, nơi có màn Hôm nay, Tuần, Tiến độ và Cài đặt trong cùng một
+                    nhịp.
                   </div>
                   {setupGuideSupport && setupGuideTemplate && (
                     <div className="rounded-[22px] border border-slate-900 bg-slate-950 p-4 text-white">
@@ -1675,9 +1707,7 @@ export function TwelveWeekSetup() {
                         Tuần đầu sẽ khởi động như thế nào
                       </p>
                       <p className="mt-2 text-base font-semibold">{setupGuideSupport.week1Headline}</p>
-                      <p className="mt-2 text-sm leading-7 text-white/78">
-                        {setupGuideSupport.week1Support}
-                      </p>
+                      <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1Support}</p>
                     </div>
                   )}
                   <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
@@ -1689,15 +1719,16 @@ export function TwelveWeekSetup() {
                         </p>
                       ) : (
                         weekOneTaskPreview.map((task) => (
-                          <div key={task} className="rounded-2xl border border-white/70 bg-slate-50/80 px-4 py-3 text-sm text-slate-700">
+                          <div
+                            key={task}
+                            className="rounded-2xl border border-white/70 bg-slate-50/80 px-4 py-3 text-sm text-slate-700"
+                          >
                             {task}
                           </div>
                         ))
                       )}
                     </div>
-                    {weekOneTaskWarning ? (
-                      <p className="mt-3 text-xs text-amber-600">{weekOneTaskWarning}</p>
-                    ) : null}
+                    {weekOneTaskWarning ? <p className="mt-3 text-xs text-amber-600">{weekOneTaskWarning}</p> : null}
                   </div>
                   {(draft.week4Milestone || draft.week8Milestone) && (
                     <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">

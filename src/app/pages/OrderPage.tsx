@@ -242,10 +242,7 @@ export function OrderPage() {
     }),
     [form.email, form.fullName, form.shippingAddress],
   );
-  const missingRequiredCount = useMemo(
-    () => Object.values(fieldErrors).filter(Boolean).length,
-    [fieldErrors],
-  );
+  const missingRequiredCount = useMemo(() => Object.values(fieldErrors).filter(Boolean).length, [fieldErrors]);
   const showInlineErrors = hasTriedSubmit && missingRequiredCount > 0;
 
   const handleFieldChange = <TKey extends keyof FormState>(field: TKey, value: FormState[TKey]) => {
@@ -289,7 +286,7 @@ export function OrderPage() {
     });
 
     // Fire-and-forget: persist order to backend if authenticated.
-    // Fails silently — the local order is already saved and the app continues.
+    // Fails silently — the local order is already saved and the web continues.
     if (user) {
       const backendGoalId = selectedGoal?.id ? getBackendGoalId(selectedGoal.id) : null;
 
@@ -355,7 +352,8 @@ export function OrderPage() {
                   Tạo đơn kit cá nhân hóa từ mục tiêu hiện tại.
                 </h1>
                 <p className="max-w-3xl text-base leading-8 text-white/82 lg:text-lg">
-                  Đây là bước local-first tối thiểu để chốt nhu cầu, người nhận và định hướng kit. Chưa kết nối backend hay fulfillment thật, nhưng đủ để nhóm kiểm tra flow đặt đơn sớm.
+                  Đây là bước local-first tối thiểu để chốt nhu cầu, người nhận và định hướng kit. Chưa kết nối backend
+                  hay fulfillment thật, nhưng đủ để nhóm kiểm tra flow đặt đơn sớm.
                 </p>
               </div>
 
@@ -406,7 +404,9 @@ export function OrderPage() {
           <CardContent className="space-y-6">
             <div className="space-y-4">
               <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Mục tiêu & cấu hình kit</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  Mục tiêu & cấu hình kit
+                </p>
                 <p className="text-sm text-slate-600">
                   Chọn mục tiêu nếu bạn muốn kit bám theo một hành trình cụ thể, hoặc giữ đơn ở dạng độc lập.
                 </p>
@@ -432,7 +432,10 @@ export function OrderPage() {
 
                 <div className="grid gap-2">
                   <Label htmlFor="order-kit-type">Loại kit</Label>
-                  <Select value={form.kitType} onValueChange={(value: OrderKitType) => handleFieldChange("kitType", value)}>
+                  <Select
+                    value={form.kitType}
+                    onValueChange={(value: OrderKitType) => handleFieldChange("kitType", value)}
+                  >
                     <SelectTrigger id="order-kit-type" aria-label="Chọn loại kit">
                       <SelectValue placeholder="Chọn loại kit" />
                     </SelectTrigger>
@@ -446,7 +449,9 @@ export function OrderPage() {
               </div>
 
               <div className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Tóm tắt cấu hình hiện tại</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Tóm tắt cấu hình hiện tại
+                </p>
                 <p className="mt-2 text-base font-semibold text-slate-900">
                   {selectedGoal ? selectedGoal.title : "Đơn này chưa gắn mục tiêu cụ thể"}
                 </p>
@@ -463,7 +468,9 @@ export function OrderPage() {
             <div className="space-y-4 border-t border-slate-100 pt-6">
               <div className="space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Người nhận</p>
-                <p className="text-sm text-slate-600">Thông tin tối thiểu để tạo đơn và theo dõi lại trong local order flow.</p>
+                <p className="text-sm text-slate-600">
+                  Thông tin tối thiểu để tạo đơn và theo dõi lại trong local order flow.
+                </p>
                 <p className="text-sm text-slate-500">Các trường có ghi “Bắt buộc” cần hoàn tất trước khi tạo đơn.</p>
               </div>
 
@@ -519,7 +526,9 @@ export function OrderPage() {
                   onChange={(event) => handleFieldChange("phone", event.target.value)}
                   placeholder="090..."
                 />
-                <p className="text-sm text-slate-500">Thêm số điện thoại nếu bạn muốn trang trạng thái đủ thông tin hơn cho demo.</p>
+                <p className="text-sm text-slate-500">
+                  Thêm số điện thoại nếu bạn muốn trang trạng thái đủ thông tin hơn cho demo.
+                </p>
               </div>
             </div>
 
@@ -584,15 +593,17 @@ export function OrderPage() {
                 <CircleAlert className="h-4 w-4" />
                 <AlertTitle>Cần hoàn tất thông tin bắt buộc</AlertTitle>
                 <AlertDescription className="text-rose-700/90">
-                  Còn {missingRequiredCount} trường bắt buộc chưa điền. Hãy kiểm tra lại họ tên, email và địa chỉ
-                  nhận hàng trước khi tạo đơn.
+                  Còn {missingRequiredCount} trường bắt buộc chưa điền. Hãy kiểm tra lại họ tên, email và địa chỉ nhận
+                  hàng trước khi tạo đơn.
                 </AlertDescription>
               </Alert>
             ) : null}
 
             <div className="rounded-[22px] border border-slate-200 bg-slate-50/70 p-4">
               <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Hoàn tất bước tạo đơn</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Hoàn tất bước tạo đơn
+                </p>
                 <p className={`text-sm ${showInlineErrors ? "text-rose-600" : "text-slate-600"}`}>
                   {showInlineErrors
                     ? "Điền xong các trường bắt buộc để chuyển sang trang trạng thái đơn."
@@ -622,7 +633,9 @@ export function OrderPage() {
           <CardContent className="space-y-2.5">
             <div className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Lưu dữ liệu</p>
-              <p className="mt-2 text-sm leading-7 text-slate-600">Đơn được lưu cục bộ bằng localStorage trong bước triển khai đầu tiên.</p>
+              <p className="mt-2 text-sm leading-7 text-slate-600">
+                Đơn được lưu cục bộ bằng localStorage trong bước triển khai đầu tiên.
+              </p>
             </div>
 
             <div className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-4">

@@ -97,8 +97,8 @@ export function MockBillingCheckout() {
             <div>
               <h1 className="text-4xl font-bold tracking-normal">Xác nhận mở gói {plan.name}</h1>
               <p className="mt-3 max-w-2xl text-base leading-8 text-white/74">
-                Đây là bước mô phỏng checkout để bạn test trọn flow nâng cấp, khôi phục quyền và quay lại app
-                mà chưa cần nối backend thanh toán thật.
+                Đây là bước mô phỏng checkout để bạn test trọn flow nâng cấp, khôi phục quyền và quay lại web mà chưa
+                cần nối backend thanh toán thật.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -140,7 +140,7 @@ export function MockBillingCheckout() {
           <CardHeader>
             <CardTitle className="text-slate-950">Bạn sẽ mở được gì ngay sau khi xác nhận</CardTitle>
             <CardDescription className="text-slate-700">
-              Bản demo sẽ tạo subscription mô phỏng, cấp quyền tương ứng và đồng bộ ngay về app.
+              Bản demo sẽ tạo subscription mô phỏng, cấp quyền tương ứng và đồng bộ ngay về web.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -157,7 +157,7 @@ export function MockBillingCheckout() {
           <CardHeader>
             <CardTitle className="text-slate-950">Xác nhận bước mô phỏng</CardTitle>
             <CardDescription className="text-slate-600">
-              Sau khi xác nhận, app sẽ quay lại màn trước đó và cập nhật trạng thái gói ngay trên thiết bị này.
+              Sau khi xác nhận, web sẽ quay lại màn trước đó và cập nhật trạng thái gói ngay trên thiết bị này.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

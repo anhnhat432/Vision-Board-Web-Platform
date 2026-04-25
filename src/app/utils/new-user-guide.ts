@@ -34,7 +34,7 @@ function getDemoGuideSteps(): NewUserGuideStep[] {
     {
       id: "create_goal",
       title: "Xem bảng điều khiển trước",
-      description: "Mở bảng điều khiển để nhìn nhanh cấu trúc app và hiểu một chu kỳ 12 tuần trông như thế nào.",
+      description: "Mở bảng điều khiển để nhìn nhanh cấu trúc web và hiểu một chu kỳ 12 tuần trông như thế nào.",
       completed: false,
       href: "/",
       ctaLabel: "Mở bảng điều khiển",
@@ -51,7 +51,7 @@ function getDemoGuideSteps(): NewUserGuideStep[] {
     {
       id: "complete_today",
       title: "Thử hàng việc hôm nay",
-      description: "Mở trung tâm 12 tuần và xem cách app trả lời câu hỏi: hôm nay tôi nên làm gì trước.",
+      description: "Mở trung tâm 12 tuần và xem cách web trả lời câu hỏi: hôm nay tôi nên làm gì trước.",
       completed: false,
       href: "/12-week-system",
       ctaLabel: "Mở hôm nay",
@@ -85,8 +85,7 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
   const hasAnyGoal = userData.goals.length > 0;
   const hasCycle = Boolean(activeSystem);
   const hasTouchedToday =
-    Boolean(activeSystem?.dailyCheckIns.length) ||
-    Boolean(activeSystem?.taskInstances.some((task) => task.completed));
+    Boolean(activeSystem?.dailyCheckIns.length) || Boolean(activeSystem?.taskInstances.some((task) => task.completed));
   const hasWeeklyReview = Boolean(activeSystem?.weeklyReviews.length);
 
   const steps: NewUserGuideStep[] = [
