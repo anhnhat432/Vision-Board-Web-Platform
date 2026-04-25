@@ -374,6 +374,9 @@ function DashboardContent({
       onClick: () => navigate("/journal"),
     },
   ];
+  const quickActionIntro = activeSystem
+    ? "Đi theo thứ tự: xử lý việc hôm nay, kiểm tra mục tiêu, rồi ghi lại điều học được."
+    : "Đi theo thứ tự: tạo mục tiêu, kiểm tra hướng đi, rồi ghi lại suy nghĩ đầu tiên.";
 
   const attentionPanels = activeSystem
     ? [
@@ -804,29 +807,47 @@ function DashboardContent({
               </CardContent>
             </Card>
 
-            <div className="grid gap-3 md:grid-cols-3">
-              {quickActions.map((action) => {
-                const Icon = action.icon;
-                return (
-                  <Button
-                    key={action.title}
-                    variant="outline"
-                    className="h-auto min-w-0 justify-start whitespace-normal rounded-[22px] border-slate-200 bg-white px-4 py-4 text-left shadow-sm hover:bg-slate-50"
-                    onClick={action.onClick}
-                  >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white">
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="ml-3 min-w-0 flex-1">
-                      <div className="line-clamp-2 break-words text-sm font-semibold leading-5 text-slate-900 sm:text-base">
-                        {action.title}
+            <section className="rounded-[24px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.28)] sm:p-5">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Thứ tự nên đi</p>
+                  <h2 className="mt-1 text-base font-semibold text-slate-950 sm:text-lg">
+                    Một luồng chính, không phải ba lựa chọn ngang nhau.
+                  </h2>
+                </div>
+                <p className="max-w-xl text-sm leading-6 text-slate-600">{quickActionIntro}</p>
+              </div>
+
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                {quickActions.map((action, actionIndex) => {
+                  const Icon = action.icon;
+                  const stepIndex = actionIndex + 1;
+
+                  return (
+                    <Button
+                      key={action.title}
+                      variant="outline"
+                      className="group h-auto min-w-0 justify-start whitespace-normal rounded-[18px] border-slate-200 bg-slate-50/70 px-3.5 py-3.5 text-left shadow-none transition-all hover:border-slate-300 hover:bg-white"
+                      onClick={action.onClick}
+                    >
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-sm font-semibold text-white">
+                        {stepIndex}
                       </div>
-                      <div className="mt-1 line-clamp-2 text-sm text-slate-500">{action.description}</div>
-                    </div>
-                  </Button>
-                );
-              })}
-            </div>
+                      <div className="ml-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white text-slate-700 ring-1 ring-slate-200 transition-colors group-hover:text-slate-950">
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <div className="ml-3 min-w-0 flex-1">
+                        <div className="line-clamp-2 break-words text-sm font-semibold leading-5 text-slate-900 sm:text-base">
+                          {action.title}
+                        </div>
+                        <div className="mt-1 line-clamp-2 text-sm text-slate-500">{action.description}</div>
+                      </div>
+                      <ArrowRight className="ml-2 h-4 w-4 shrink-0 text-slate-300 transition-colors group-hover:text-slate-700" />
+                    </Button>
+                  );
+                })}
+              </div>
+            </section>
 
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
               {overviewCards.map((item, index) => {
