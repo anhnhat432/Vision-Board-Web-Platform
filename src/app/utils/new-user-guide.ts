@@ -1,11 +1,20 @@
-import { getActiveTwelveWeekGoal } from "./storage";
+import { APP_STORAGE_KEYS, getActiveTwelveWeekGoal } from "./storage";
 import type { UserData } from "./storage-types";
 
 const GUIDE_DISMISSED_KEY = "visionboard_new_user_guide_dismissed";
 const GUIDE_SEEN_KEY = "visionboard_new_user_guide_seen_at";
 const GUIDE_UPDATED_EVENT = "visionboard:new-user-guide-updated";
 
-export type NewUserGuideStepId = "create_goal" | "setup_cycle" | "complete_today" | "complete_review";
+export type NewUserGuideStepId =
+  | "dashboard_preview"
+  | "goal_preview"
+  | "life_balance"
+  | "life_insight"
+  | "smart_goal"
+  | "feasibility"
+  | "setup_cycle"
+  | "complete_today"
+  | "complete_review";
 
 export interface NewUserGuideStep {
   id: NewUserGuideStepId;
@@ -29,10 +38,16 @@ function emitGuideUpdate() {
   window.dispatchEvent(new Event(GUIDE_UPDATED_EVENT));
 }
 
+function hasLocalDraft(key: string): boolean {
+  if (typeof window === "undefined") return false;
+  const value = window.localStorage.getItem(key);
+  return value !== null && value.trim().length > 0;
+}
+
 function getDemoGuideSteps(): NewUserGuideStep[] {
   return [
     {
-      id: "create_goal",
+      id: "dashboard_preview",
       title: "Xem bảng điều khiển trước",
       description: "Mở bảng điều khiển để nhìn nhanh cấu trúc web và hiểu một chu kỳ 12 tuần trông như thế nào.",
       completed: false,
@@ -40,7 +55,7 @@ function getDemoGuideSteps(): NewUserGuideStep[] {
       ctaLabel: "Mở bảng điều khiển",
     },
     {
-      id: "setup_cycle",
+      id: "goal_preview",
       title: "Mở một mục tiêu mẫu",
       description:
         "Vào màn Mục tiêu để xem cách một mục tiêu đã đi qua insight, SMART và 12 tuần được biểu diễn ra sao.",
@@ -82,28 +97,55 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
 
   const activeGoal = getActiveTwelveWeekGoal(userData.goals);
   const activeSystem = activeGoal?.twelveWeekSystem ?? null;
+  const hasLifeBalance = userData.onboardingCompleted && userData.currentWheelOfLife.length > 0;
   const hasAnyGoal = userData.goals.length > 0;
+  const hasInsight = hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.selectedFocusArea);
+  const hasSmartGoal = hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.pendingSmartGoal);
+  const hasFeasibility = hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.pendingFeasibilityResult);
   const hasCycle = Boolean(activeSystem);
   const hasTouchedToday =
     Boolean(activeSystem?.dailyCheckIns.length) || Boolean(activeSystem?.taskInstances.some((task) => task.completed));
-  const hasWeeklyReview = Boolean(activeSystem?.weeklyReviews.length);
 
   const steps: NewUserGuideStep[] = [
     {
-      id: "create_goal",
-      title: "Tạo mục tiêu đầu tiên",
-      description: "Bắt đầu từ insight, rồi qua SMART và feasibility để mục tiêu rõ và đủ khả thi.",
-      completed: hasAnyGoal,
+      id: "life_balance",
+      title: "Đánh giá Life Balance",
+      description: "Chấm điểm 8 lĩnh vực để biết hiện tại mình đang lệch ở đâu và nên ưu tiên nơi nào.",
+      completed: hasLifeBalance,
+      href: "/onboarding",
+      ctaLabel: "Đánh giá cân bằng",
+    },
+    {
+      id: "life_insight",
+      title: "Chọn Life Insight",
+      description: "Dùng dữ liệu Life Balance để chọn một lĩnh vực trọng tâm, thay vì bắt đầu từ cảm hứng mơ hồ.",
+      completed: hasInsight,
       href: "/life-insight",
-      ctaLabel: "Tạo mục tiêu",
+      ctaLabel: "Chọn trọng tâm",
+    },
+    {
+      id: "smart_goal",
+      title: "Viết SMART Goal",
+      description: "Biến trọng tâm đó thành mục tiêu có kết quả, chỉ số đo, thời gian và lý do rõ ràng.",
+      completed: hasSmartGoal,
+      href: hasInsight ? "/smart-goal-setup" : "/life-insight",
+      ctaLabel: hasInsight ? "Viết SMART Goal" : "Chọn trọng tâm trước",
+    },
+    {
+      id: "feasibility",
+      title: "Kiểm tra tính khả thi",
+      description: "Đo mức sẵn sàng trước khi dựng kế hoạch, để mục tiêu không quá nặng so với lịch sống hiện tại.",
+      completed: hasFeasibility,
+      href: hasSmartGoal ? "/feasibility" : "/smart-goal-setup",
+      ctaLabel: hasSmartGoal ? "Kiểm tra khả thi" : "Viết SMART Goal trước",
     },
     {
       id: "setup_cycle",
       title: "Chốt chu kỳ 12 tuần",
-      description: "Biến mục tiêu đó thành một chu kỳ có tactic, tuần đầu và ngày review rõ ràng.",
+      description: "Biến mục tiêu đó thành một chu kỳ có outcome, tactic, metric, tuần đầu và ngày review rõ ràng.",
       completed: hasCycle,
-      href: hasAnyGoal ? "/goals" : "/life-insight",
-      ctaLabel: hasAnyGoal ? "Mở mục tiêu" : "Đi vào flow",
+      href: hasFeasibility ? "/12-week-setup" : "/feasibility",
+      ctaLabel: hasFeasibility ? "Dựng hệ 12 tuần" : "Kiểm tra khả thi trước",
     },
     {
       id: "complete_today",
@@ -112,14 +154,6 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
       completed: hasTouchedToday,
       href: "/12-week-system",
       ctaLabel: "Mở hôm nay",
-    },
-    {
-      id: "complete_review",
-      title: "Chốt một review tuần",
-      description: "Cuối tuần review lại score, điều gì bị lệch và tuần sau nên giữ, giảm hay tăng tải.",
-      completed: hasWeeklyReview,
-      href: "/12-week-system?tab=week",
-      ctaLabel: "Mở review tuần",
     },
   ];
 

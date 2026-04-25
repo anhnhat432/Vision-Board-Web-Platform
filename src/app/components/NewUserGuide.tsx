@@ -115,10 +115,10 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
   const title = userData.isHydratedFromDemo
     ? compact
       ? "Khám phá web demo theo thứ tự này"
-      : "Nếu đang xem bản demo, cứ đi theo 4 bước này là hiểu web nhanh nhất."
+      : "Nếu đang xem bản demo, cứ đi theo checklist này là hiểu web nhanh nhất."
     : compact
       ? "Đi tiếp theo đúng thứ tự này"
-      : "Nếu mới vào web, cứ đi theo 4 bước này là đủ gọn.";
+      : `Nếu mới vào web, cứ đi theo ${progress.totalSteps} bước này là đủ gọn.`;
   const description = userData.isHydratedFromDemo
     ? "Bản hiện tại đã có dữ liệu mẫu sẵn. Hãy dùng checklist này như đường đi ngắn nhất để nhìn rõ flow thật của sản phẩm."
     : "Website này dễ dùng hơn nhiều nếu bạn đi đúng flow: mục tiêu rõ, chu kỳ rõ, rồi mới nhìn hôm nay và review tuần.";
@@ -226,7 +226,9 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
             Hướng dẫn sử dụng
           </div>
           <DialogTitle className="text-xl tracking-normal text-slate-950 sm:text-2xl">
-            {userData.isHydratedFromDemo ? "Khám phá bản demo theo 4 bước." : "Đi web này theo 4 bước là dễ nhất."}
+            {userData.isHydratedFromDemo
+              ? "Khám phá bản demo theo checklist."
+              : `Đi web này theo ${progress.totalSteps} bước là dễ nhất.`}
           </DialogTitle>
           <DialogDescription className="text-sm leading-7 text-slate-600">
             {userData.isHydratedFromDemo

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowLeft, ArrowRight, BarChart3, Check, Compass, Sparkles, Target } from "lucide-react";
 
+import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Slider } from "../components/ui/slider";
@@ -86,8 +87,10 @@ export function Onboarding() {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55 }}
-          className="mx-auto w-full max-w-6xl"
+          className="mx-auto w-full max-w-6xl space-y-5"
         >
+          <CoreFlowProgress currentStepId="life_balance" />
+
           <Card className="hero-surface flow-surface overflow-hidden">
             <CardContent className="relative p-5 sm:p-6 lg:p-7 xl:p-8">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_24%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.1),_transparent_24%)] opacity-90" />
@@ -211,6 +214,8 @@ export function Onboarding() {
         transition={{ duration: 0.55 }}
         className="mx-auto w-full max-w-6xl space-y-5"
       >
+        <CoreFlowProgress currentStepId="life_balance" />
+
         <Card className="hero-surface flow-surface overflow-hidden">
           <CardContent className="relative p-5 sm:p-6 lg:p-7">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.1),_transparent_26%)] opacity-90" />

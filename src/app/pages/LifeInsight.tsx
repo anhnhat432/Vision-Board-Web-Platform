@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { ArrowRight, Check, Compass, Loader2, Sparkles, Target, TrendingDown, TrendingUp } from "lucide-react";
 
+import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -110,6 +111,8 @@ export function LifeInsight() {
         transition={{ duration: 0.5 }}
         className="mx-auto w-full max-w-6xl space-y-6"
       >
+        <CoreFlowProgress currentStepId="life_insight" />
+
         <Card className="hero-surface overflow-hidden border-0 text-white">
           <CardContent className="relative p-8 lg:p-10">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.1),_transparent_24%)] opacity-90" />

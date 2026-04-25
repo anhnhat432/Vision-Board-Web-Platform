@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
@@ -427,6 +428,8 @@ function FeasibilityResultView({
         transition={{ duration: 0.5 }}
         className="mx-auto w-full max-w-6xl space-y-6"
       >
+        <CoreFlowProgress currentStepId="feasibility" />
+
         <Card className="hero-surface overflow-hidden border-0 text-white">
           <CardContent className="relative p-8 lg:p-10">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.12),_transparent_24%),linear-gradient(135deg,_rgba(255,255,255,0.08)_0%,_rgba(255,255,255,0)_58%)] opacity-95" />
@@ -871,6 +874,8 @@ export function FeasibilityCheck() {
         transition={{ duration: 0.5 }}
         className="mx-auto w-full max-w-7xl space-y-6"
       >
+        <CoreFlowProgress currentStepId="feasibility" />
+
         <Card className="hero-surface overflow-hidden border-0 text-white">
           <CardContent className="relative p-8 lg:p-10">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />

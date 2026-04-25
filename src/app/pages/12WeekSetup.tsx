@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { ArrowLeft, ArrowRight, CalendarDays, CheckCircle2, Compass, Flag, Loader2, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
+import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -878,6 +879,8 @@ export function TwelveWeekSetup() {
         description="Bạn đang chọn một khung Plus. Mở Plus để đi vào ngay một cách vận hành phù hợp hơn với kiểu mục tiêu và mức sẵn sàng của bạn."
         onCheckoutComplete={handleCheckoutComplete}
       />
+
+      <CoreFlowProgress currentStepId="twelve_week_setup" />
 
       <Card className="hero-surface overflow-hidden border-0 text-white">
         <CardContent className="relative p-8 lg:p-10">
