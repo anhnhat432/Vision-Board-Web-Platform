@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { LoginPage } from "./LoginPage";
@@ -25,6 +25,12 @@ function setAuthContext(overrides: Record<string, unknown> = {}) {
   });
 }
 
+function DestinationProbe() {
+  const location = useLocation();
+
+  return <div data-testid="destination">{`${location.pathname}${location.search}${location.hash}`}</div>;
+}
+
 describe("LoginPage", () => {
   beforeEach(() => {
     setAuthContext();
@@ -42,5 +48,20 @@ describe("LoginPage", () => {
     );
 
     expect(screen.getByRole("alert")).toHaveTextContent(message);
+  });
+
+  it("redirects an authenticated user back to the requested route", async () => {
+    setAuthContext({ user: { uid: "user_test" } });
+
+    render(
+      <MemoryRouter initialEntries={[{ pathname: "/login", state: { from: "/order?kit=vision#recipient" } }]}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/order" element={<DestinationProbe />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByTestId("destination")).toHaveTextContent("/order?kit=vision#recipient");
   });
 });
