@@ -202,9 +202,35 @@ export function RootLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMoreOpen, setDesktopMoreOpen] = useState(false);
   const desktopMoreRef = useRef<HTMLDivElement | null>(null);
+  const routerLocationRef = useRef(`${location.pathname}${location.search}${location.hash}`);
   const [guideUserData, setGuideUserData] = useState(() => getUserData());
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const currentRouteKey = `${location.pathname}${location.search}${location.hash}`;
+
+  useEffect(() => {
+    routerLocationRef.current = currentRouteKey;
+  }, [currentRouteKey]);
+
+  const navigateAppRoute = useCallback(
+    (path: string) => {
+      const targetUrl = new URL(path, window.location.origin);
+      const targetRouteKey = `${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`;
+
+      if (currentRouteKey === targetRouteKey) return;
+
+      navigate(path);
+
+      window.setTimeout(() => {
+        const browserRouteKey = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+        if (browserRouteKey === targetRouteKey && routerLocationRef.current !== targetRouteKey) {
+          window.location.assign(targetRouteKey);
+        }
+      }, 700);
+    },
+    [currentRouteKey, navigate],
+  );
 
   useEffect(() => {
     const userData = initializeUserData();
@@ -504,7 +530,7 @@ export function RootLayout() {
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"
-              onClick={() => navigate("/")}
+              onClick={() => navigateAppRoute("/")}
               className="flex shrink-0 items-center gap-2.5 rounded-lg text-left transition-all duration-200 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
               aria-label="Về trang chủ Dear Our Future"
             >
@@ -527,7 +553,7 @@ export function RootLayout() {
                       key={item.path}
                       variant="ghost"
                       size="sm"
-                      onClick={() => navigate(item.path)}
+                      onClick={() => navigateAppRoute(item.path)}
                       onPointerEnter={() => handlePrefetch(item.path)}
                       aria-current={active ? "page" : undefined}
                       title={item.label}
@@ -591,7 +617,7 @@ export function RootLayout() {
                             onPointerEnter={() => handlePrefetch(item.path)}
                             onClick={() => {
                               setDesktopMoreOpen(false);
-                              navigate(item.path);
+                              navigateAppRoute(item.path);
                             }}
                             className={`my-1 flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium tracking-normal outline-none transition-colors ${
                               active
@@ -780,7 +806,7 @@ export function RootLayout() {
                       key={item.path}
                       type="button"
                       onClick={() => {
-                        navigate(item.path);
+                        navigateAppRoute(item.path);
                         setMobileMenuOpen(false);
                       }}
                       onFocus={() => handlePrefetch(item.path)}
@@ -835,7 +861,7 @@ export function RootLayout() {
                 aria-current={active ? "page" : undefined}
                 onClick={() => {
                   setMobileMenuOpen(false);
-                  navigate(item.path);
+                  navigateAppRoute(item.path);
                 }}
                 onPointerEnter={() => handlePrefetch(item.path)}
                 title={item.label}
