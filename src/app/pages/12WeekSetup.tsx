@@ -1,7 +1,7 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
-import { ArrowLeft, ArrowRight, CalendarDays, CheckCircle2, Compass, Flag, Sparkles, Target } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, CheckCircle2, Compass, Flag, Loader2, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
@@ -253,6 +253,43 @@ function getPreviewTasks(indicators: LeadIndicatorDraft[]): string[] {
     .slice(0, 6);
 }
 
+function TwelveWeekSetupState({
+  title,
+  description,
+  actionLabel,
+  onAction,
+  loading = false,
+}: {
+  title: string;
+  description: string;
+  actionLabel?: string;
+  onAction?: () => void;
+  loading?: boolean;
+}) {
+  return (
+    <div className="space-y-8 pb-12">
+      <Card className="overflow-hidden border border-white/70 bg-white/82 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.38)]">
+        <CardContent className="p-8 text-center sm:p-10 lg:p-12">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-violet-50 text-violet-700">
+            {loading ? <Loader2 className="h-8 w-8 animate-spin" /> : <Compass className="h-8 w-8" />}
+          </div>
+          <h1 className="mt-6 text-2xl font-bold text-slate-900 sm:text-3xl">{title}</h1>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-500 sm:text-base" role="status">
+            {description}
+          </p>
+          {actionLabel && onAction ? (
+            <div className="mt-6 flex justify-center">
+              <Button type="button" onClick={onAction}>
+                {actionLabel}
+              </Button>
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export function TwelveWeekSetup() {
   const navigate = useNavigate();
   const { actions: planSetupActions } = usePlanSetupSync();
@@ -291,6 +328,7 @@ export function TwelveWeekSetup() {
 
     if (!selectedFocusArea || !pendingSmartGoal || !pendingFeasibilityResult) {
       toast.info("Bạn cần hoàn thành SMART goal và feasibility trước khi vào hệ 12 tuần.");
+      setIsLoading(false);
       navigate("/smart-goal-setup");
       return;
     }
@@ -374,6 +412,7 @@ export function TwelveWeekSetup() {
       }
     } catch {
       toast.info("Dữ liệu tạm thời chưa hợp lệ. Mình sẽ đưa bạn quay lại bước trước.");
+      setIsLoading(false);
       navigate("/smart-goal-setup");
       return;
     }
@@ -382,9 +421,9 @@ export function TwelveWeekSetup() {
   }, [navigate]);
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || !smartGoal || !feasibility) return;
     localStorage.setItem(APP_STORAGE_KEYS.pending12WeekSetupDraft, JSON.stringify(draft));
-  }, [draft, isLoading]);
+  }, [draft, feasibility, isLoading, smartGoal]);
 
   const validIndicators = useMemo(
     () => draft.leadIndicators.filter((indicator) => indicator.name.trim().length > 0),
@@ -436,7 +475,26 @@ export function TwelveWeekSetup() {
     return formatDateInputValue(addDays(parsedStartDate, 83));
   }, [cycleStartDate]);
 
-  if (isLoading || !smartGoal || !feasibility) return null;
+  if (isLoading) {
+    return (
+      <TwelveWeekSetupState
+        title="Đang chuẩn bị dữ liệu setup 12 tuần"
+        description="Mình đang lấy lại SMART Goal, kết quả feasibility và bản nháp gần nhất để mở đúng flow."
+        loading
+      />
+    );
+  }
+
+  if (!smartGoal || !feasibility) {
+    return (
+      <TwelveWeekSetupState
+        title="Không thấy dữ liệu để tiếp tục setup 12 tuần"
+        description="Bạn cần hoàn thành SMART Goal và bước kiểm tra tính khả thi trước khi tạo hệ 12 tuần."
+        actionLabel="Quay lại SMART Goal"
+        onAction={() => navigate("/smart-goal-setup")}
+      />
+    );
+  }
 
   const coreCount = validIndicators.filter((indicator) => indicator.type !== "optional").length;
   const optionalCount = validIndicators.filter((indicator) => indicator.type === "optional").length;
