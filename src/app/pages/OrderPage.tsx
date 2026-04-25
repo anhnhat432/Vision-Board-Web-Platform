@@ -141,6 +141,8 @@ export function OrderPage() {
   const { userData } = useSyncedUserData();
   const routeState = useMemo(() => getOrderPageRouteState(location.state), [location.state]);
   const didApplyInitialContextRef = useRef(false);
+  const lastSuggestedKeywordsRef = useRef("");
+  const lastSuggestedNoteRef = useRef("");
   const [goals, setGoals] = useState<Goal[]>([]);
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
   const [referenceBoard, setReferenceBoard] = useState<VisionBoard | null>(null);
@@ -182,16 +184,29 @@ export function OrderPage() {
       return userData.visionBoards.find((board) => board.id === currentBoard.id) ?? null;
     });
     setPendingGoalDraft(pendingGoal);
-    setForm((current) => ({
-      ...current,
-      selectedGoalId: shouldApplyPreferredContext
+    setForm((current) => {
+      const selectedGoalId = shouldApplyPreferredContext
         ? (preferredGoal?.id ?? "none")
         : current.selectedGoalId !== "none" && !nextGoals.some((goal) => goal.id === current.selectedGoalId)
           ? (preferredGoal?.id ?? "none")
-          : current.selectedGoalId,
-      keywords: current.keywords || buildSuggestedKeywords(preferredGoal, preferredBoard, pendingGoal),
-      note: current.note || buildSuggestedNote(preferredGoal, preferredBoard, pendingGoal),
-    }));
+          : current.selectedGoalId;
+      const selectedGoalForSuggestions = nextGoals.find((goal) => goal.id === selectedGoalId) ?? null;
+      const suggestedKeywords = buildSuggestedKeywords(selectedGoalForSuggestions, preferredBoard, pendingGoal);
+      const suggestedNote = buildSuggestedNote(selectedGoalForSuggestions, preferredBoard, pendingGoal);
+      const shouldRefreshKeywords =
+        current.keywords.trim().length === 0 || current.keywords === lastSuggestedKeywordsRef.current;
+      const shouldRefreshNote = current.note.trim().length === 0 || current.note === lastSuggestedNoteRef.current;
+
+      lastSuggestedKeywordsRef.current = suggestedKeywords;
+      lastSuggestedNoteRef.current = suggestedNote;
+
+      return {
+        ...current,
+        selectedGoalId,
+        keywords: shouldRefreshKeywords ? suggestedKeywords : current.keywords,
+        note: shouldRefreshNote ? suggestedNote : current.note,
+      };
+    });
     document.title = "Tạo đơn kit - Dear Our Future";
   }, [routeState.goalId, routeState.visionBoardId, userData]);
 
@@ -270,15 +285,25 @@ export function OrderPage() {
 
   const handleGoalChange = (goalId: string) => {
     const nextGoal = goals.find((goal) => goal.id === goalId) ?? null;
+    const suggestedKeywords = buildSuggestedKeywords(nextGoal, referenceBoard, pendingGoalDraft);
+    const suggestedNote = buildSuggestedNote(nextGoal, referenceBoard, pendingGoalDraft);
+
     setSelectedGoal(nextGoal);
-    setForm((current) => ({
-      ...current,
-      selectedGoalId: goalId,
-      keywords: current.keywords.trim()
-        ? current.keywords
-        : buildSuggestedKeywords(nextGoal, referenceBoard, pendingGoalDraft),
-      note: current.note.trim() ? current.note : buildSuggestedNote(nextGoal, referenceBoard, pendingGoalDraft),
-    }));
+    setForm((current) => {
+      const shouldRefreshKeywords =
+        current.keywords.trim().length === 0 || current.keywords === lastSuggestedKeywordsRef.current;
+      const shouldRefreshNote = current.note.trim().length === 0 || current.note === lastSuggestedNoteRef.current;
+
+      lastSuggestedKeywordsRef.current = suggestedKeywords;
+      lastSuggestedNoteRef.current = suggestedNote;
+
+      return {
+        ...current,
+        selectedGoalId: goalId,
+        keywords: shouldRefreshKeywords ? suggestedKeywords : current.keywords,
+        note: shouldRefreshNote ? suggestedNote : current.note,
+      };
+    });
   };
 
   const handleSubmit = () => {
