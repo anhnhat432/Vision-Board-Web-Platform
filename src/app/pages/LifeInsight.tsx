@@ -1,37 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
-import {
-  ArrowRight,
-  Check,
-  Compass,
-  Sparkles,
-  Target,
-  TrendingDown,
-  TrendingUp,
-} from "lucide-react";
+import { ArrowRight, Check, Compass, Sparkles, Target, TrendingDown, TrendingUp } from "lucide-react";
 
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { SimpleRadarChart } from "../components/SimpleRadarChart";
-import {
-  APP_STORAGE_KEYS,
-  type LifeArea,
-  clearGoalPlanningDrafts,
-  getLifeAreaLabel,
-  getUserData,
-} from "../utils/storage";
+import { useSyncedUserData } from "../hooks/useSyncedUserData";
+import { APP_STORAGE_KEYS, clearGoalPlanningDrafts, getLifeAreaLabel } from "../utils/storage";
 
 export function LifeInsight() {
   const navigate = useNavigate();
-  const [lifeAreas, setLifeAreas] = useState<LifeArea[]>([]);
+  const { userData } = useSyncedUserData();
+  const lifeAreas = userData?.currentWheelOfLife ?? [];
   const [selectedAreaName, setSelectedAreaName] = useState<string | null>(null);
-
-  useEffect(() => {
-    const data = getUserData();
-    setLifeAreas(data.currentWheelOfLife);
-  }, []);
 
   const lowestArea = useMemo(() => {
     if (lifeAreas.length === 0) return null;
@@ -98,7 +81,8 @@ export function LifeInsight() {
                     Bạn đã có một tín hiệu rất rõ về nơi mình nên ưu tiên tiếp theo.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
-                    Hệ thống gợi ý lĩnh vực có điểm thấp nhất. Bạn cũng có thể chọn lại bên dưới nếu muốn tập trung vào một khu vực khác phù hợp hơn với lúc này.
+                    Hệ thống gợi ý lĩnh vực có điểm thấp nhất. Bạn cũng có thể chọn lại bên dưới nếu muốn tập trung vào
+                    một khu vực khác phù hợp hơn với lúc này.
                   </p>
                 </div>
 
@@ -112,7 +96,10 @@ export function LifeInsight() {
                     Điểm trung bình: {averageScore.toFixed(1)}/10
                   </Badge>
                   {isCustomSelection && (
-                    <Badge variant="outline" className="rounded-full border-amber-300/50 bg-amber-400/20 px-4 py-2 text-white">
+                    <Badge
+                      variant="outline"
+                      className="rounded-full border-amber-300/50 bg-amber-400/20 px-4 py-2 text-white"
+                    >
                       Bạn đã chọn thủ công
                     </Badge>
                   )}
@@ -138,30 +125,24 @@ export function LifeInsight() {
               </div>
 
               <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">
-                  Snapshot hiện tại
-                </p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Snapshot hiện tại</p>
 
                 <div className="mt-6 space-y-4">
                   <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-white/55">Đang tập trung vào</p>
-                    <p className="mt-2 text-2xl font-bold text-white">
-                      {getLifeAreaLabel(focusArea.name)}
-                    </p>
+                    <p className="mt-2 text-2xl font-bold text-white">{getLifeAreaLabel(focusArea.name)}</p>
                     <p className="mt-1 text-sm text-white/68">{focusArea.score}/10</p>
                   </div>
                   <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-white/55">Điểm mạnh hiện tại</p>
-                    <p className="mt-2 text-2xl font-bold text-white">
-                      {getLifeAreaLabel(strongestArea.name)}
-                    </p>
+                    <p className="mt-2 text-2xl font-bold text-white">{getLifeAreaLabel(strongestArea.name)}</p>
                     <p className="mt-1 text-sm text-white/68">{strongestArea.score}/10</p>
                   </div>
                   <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-white/55">Thông điệp</p>
                     <p className="mt-2 text-sm leading-7 text-white/74">
-                      Đừng cố sửa mọi thứ cùng lúc. Chỉ cần chọn một điểm yếu nhất, rồi biến nó
-                      thành một hướng đi đủ rõ để hành động.
+                      Đừng cố sửa mọi thứ cùng lúc. Chỉ cần chọn một điểm yếu nhất, rồi biến nó thành một hướng đi đủ rõ
+                      để hành động.
                     </p>
                   </div>
                 </div>
@@ -194,9 +175,7 @@ export function LifeInsight() {
                       <TrendingDown className="h-4 w-4" />
                       <p className="text-xs font-semibold uppercase tracking-[0.16em]">Nút thắt hiện tại</p>
                     </div>
-                    <p className="mt-3 text-lg font-semibold text-slate-900">
-                      {getLifeAreaLabel(lowestArea.name)}
-                    </p>
+                    <p className="mt-3 text-lg font-semibold text-slate-900">{getLifeAreaLabel(lowestArea.name)}</p>
                     <p className="mt-1 text-sm text-slate-600">
                       Đây là khu vực nên trở thành trọng tâm tiếp theo của bạn.
                     </p>
@@ -213,9 +192,7 @@ export function LifeInsight() {
                       <Sparkles className="h-4 w-4" />
                       <p className="text-xs font-semibold uppercase tracking-[0.16em]">Lực đỡ hiện có</p>
                     </div>
-                    <p className="mt-3 text-lg font-semibold text-slate-900">
-                      {getLifeAreaLabel(strongestArea.name)}
-                    </p>
+                    <p className="mt-3 text-lg font-semibold text-slate-900">{getLifeAreaLabel(strongestArea.name)}</p>
                     <p className="mt-1 text-sm text-slate-600">
                       Bạn có thể tận dụng sự tự tin ở đây để kéo khu vực đang yếu lên cùng.
                     </p>
@@ -229,7 +206,8 @@ export function LifeInsight() {
               <CardHeader>
                 <CardTitle>Chọn lĩnh vực trọng tâm</CardTitle>
                 <CardDescription>
-                  Hệ thống gợi ý <strong>{getLifeAreaLabel(lowestArea.name)}</strong> vì đây là điểm thấp nhất. Nếu bạn muốn tập trung vào khu vực khác, hãy chọn bên dưới.
+                  Hệ thống gợi ý <strong>{getLifeAreaLabel(lowestArea.name)}</strong> vì đây là điểm thấp nhất. Nếu bạn
+                  muốn tập trung vào khu vực khác, hãy chọn bên dưới.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -254,15 +232,10 @@ export function LifeInsight() {
                           </span>
                         )}
                         <div className="flex items-center justify-between gap-2">
-                          <div
-                            className="h-3 w-3 rounded-full"
-                            style={{ backgroundColor: area.color }}
-                          />
+                          <div className="h-3 w-3 rounded-full" style={{ backgroundColor: area.color }} />
                           {isSelected && <Check className="h-4 w-4 text-violet-600" />}
                         </div>
-                        <p className="mt-3 text-sm font-semibold text-slate-900">
-                          {getLifeAreaLabel(area.name)}
-                        </p>
+                        <p className="mt-3 text-sm font-semibold text-slate-900">{getLifeAreaLabel(area.name)}</p>
                         <p className="mt-1 text-xs font-medium" style={{ color: area.color }}>
                           {area.score}/10
                         </p>

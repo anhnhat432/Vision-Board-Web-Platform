@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { motion } from "motion/react";
 import {
@@ -35,9 +35,13 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { InteractiveSurface } from "../components/ui/interactive-surface";
-import { deleteVisionBoard, getUserData, saveUserData, type UserData, type VisionBoard } from "../utils/storage";
+import { useSyncedUserData } from "../hooks/useSyncedUserData";
+import { deleteVisionBoard, getUserData, saveUserData, type VisionBoard } from "../utils/storage";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { deleteVisionBoard as backendDeleteVisionBoard, getVisionBoards as backendGetVisionBoards } from "@/services/visionBoardService";
+import {
+  deleteVisionBoard as backendDeleteVisionBoard,
+  getVisionBoards as backendGetVisionBoards,
+} from "@/services/visionBoardService";
 import { getBackendVisionBoardId, getLocalVisionBoardId, saveVisionBoardLink } from "@/lib/api/visionBoardLinkStore";
 import { generateId } from "../utils/storage-types";
 
@@ -68,17 +72,8 @@ export function VisionBoardGallery() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuthContext();
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const { userData, reloadUserData } = useSyncedUserData();
   const [boardToDelete, setBoardToDelete] = useState<string | null>(null);
-
-  const loadData = useCallback(() => {
-    const data = getUserData();
-    setUserData(data);
-  }, []);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
 
   // Hydrate from backend: import any backend boards that have no local counterpart.
   // Runs once per mount for authenticated users. Backend failures are silent.
@@ -121,13 +116,13 @@ export function VisionBoardGallery() {
 
         if (didHydrate) {
           saveUserData(localData);
-          loadData();
+          reloadUserData();
         }
       })
       .catch((err: unknown) => {
         console.warn("Backend vision board hydration failed silently.", err);
       });
-  }, [user, loadData]);
+  }, [user, reloadUserData]);
 
   const handleDeleteBoard = (boardId: string) => {
     setBoardToDelete(boardId);
@@ -146,16 +141,19 @@ export function VisionBoardGallery() {
     }
 
     setBoardToDelete(null);
-    loadData();
+    reloadUserData();
   };
 
   const boardsByYear = useMemo(() => {
     if (!userData) return {};
-    return userData.visionBoards.reduce((acc, board) => {
-      if (!acc[board.year]) acc[board.year] = [];
-      acc[board.year].push(board);
-      return acc;
-    }, {} as Record<string, typeof userData.visionBoards>);
+    return userData.visionBoards.reduce(
+      (acc, board) => {
+        if (!acc[board.year]) acc[board.year] = [];
+        acc[board.year].push(board);
+        return acc;
+      },
+      {} as Record<string, typeof userData.visionBoards>,
+    );
   }, [userData]);
 
   const years = useMemo(
@@ -168,9 +166,7 @@ export function VisionBoardGallery() {
   const totalItems = userData.visionBoards.reduce((sum, board) => sum + board.items.length, 0);
   const latestBoard = userData.visionBoards[userData.visionBoards.length - 1];
   const spotlightBoardId =
-    typeof location.state === "object" &&
-    location.state &&
-    "spotlightBoardId" in location.state
+    typeof location.state === "object" && location.state && "spotlightBoardId" in location.state
       ? (location.state as { spotlightBoardId?: string }).spotlightBoardId
       : undefined;
   const orderSourceBoard =
@@ -179,7 +175,12 @@ export function VisionBoardGallery() {
 
   return (
     <div className="space-y-8 pb-12">
-      <AlertDialog open={Boolean(boardToDelete)} onOpenChange={(open) => { if (!open) setBoardToDelete(null); }}>
+      <AlertDialog
+        open={Boolean(boardToDelete)}
+        onOpenChange={(open) => {
+          if (!open) setBoardToDelete(null);
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Xóa bảng tầm nhìn này?</AlertDialogTitle>
@@ -198,83 +199,81 @@ export function VisionBoardGallery() {
 
       <InteractiveSurface className="rounded-[28px]" intensity={4} translate={10} shine={false}>
         <Card interactive={false} className="hero-surface overflow-hidden border-0 text-white">
-        <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.12),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.08),_transparent_22%)] opacity-55" />
+          <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.12),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.08),_transparent_22%)] opacity-55" />
 
-          <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
-            <div className="space-y-6">
-              <div className="interactive-layer interactive-layer--soft inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
-                <Images className="h-4 w-4" />
-                Dear Our Future Library
-              </div>
+            <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
+              <div className="space-y-6">
+                <div className="interactive-layer interactive-layer--soft inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+                  <Images className="h-4 w-4" />
+                  Dear Our Future Library
+                </div>
 
-              <div className="space-y-4">
-                <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-                  Một thư viện nơi mọi bảng tầm nhìn của bạn được lưu lại như những phiên bản của tương lai.
-                </h1>
-                <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
-                  Tại đây bạn có thể xem lại các board theo từng năm, tiếp tục chỉnh sửa, so sánh độ phong phú
-                  của từng canvas và giữ cảm hứng luôn ở gần mình.
-                </p>
-              </div>
+                <div className="space-y-4">
+                  <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+                    Một thư viện nơi mọi bảng tầm nhìn của bạn được lưu lại như những phiên bản của tương lai.
+                  </h1>
+                  <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
+                    Tại đây bạn có thể xem lại các board theo từng năm, tiếp tục chỉnh sửa, so sánh độ phong phú của
+                    từng canvas và giữ cảm hứng luôn ở gần mình.
+                  </p>
+                </div>
 
-              <div className="flex flex-wrap gap-3">
-                <Button
-                  variant="outline"
-                  className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92"
-                  onClick={() => navigate("/vision-board")}
-                >
-                  <Plus className="h-4 w-4" />
-                  Tạo bảng mới
-                </Button>
-                {orderSourceBoard ? (
+                <div className="flex flex-wrap gap-3">
+                  <Button
+                    variant="outline"
+                    className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92"
+                    onClick={() => navigate("/vision-board")}
+                  >
+                    <Plus className="h-4 w-4" />
+                    Tạo bảng mới
+                  </Button>
+                  {orderSourceBoard ? (
+                    <Button
+                      variant="outline"
+                      className="border-white/18 bg-white/10 text-white hover:bg-white/16 hover:text-white"
+                      onClick={() => navigate("/order", { state: { visionBoardId: orderSourceBoard.id } })}
+                    >
+                      <Package className="h-4 w-4" />
+                      {spotlightBoardId ? "Tạo kit từ board vừa lưu" : "Tạo kit từ board gần nhất"}
+                    </Button>
+                  ) : null}
                   <Button
                     variant="outline"
                     className="border-white/18 bg-white/10 text-white hover:bg-white/16 hover:text-white"
-                    onClick={() => navigate("/order", { state: { visionBoardId: orderSourceBoard.id } })}
+                    onClick={() => navigate("/")}
                   >
-                    <Package className="h-4 w-4" />
-                    {spotlightBoardId ? "Tạo kit từ board vừa lưu" : "Tạo kit từ board gần nhất"}
+                    Về bảng điều khiển
                   </Button>
-                ) : null}
-                <Button
-                  variant="outline"
-                  className="border-white/18 bg-white/10 text-white hover:bg-white/16 hover:text-white"
-                  onClick={() => navigate("/")}
-                >
-                  Về bảng điều khiển
-                </Button>
+                </div>
               </div>
-            </div>
 
-            <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-[32px] border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-lg">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">
-                Snapshot thư viện
-              </p>
+              <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-[32px] border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-lg">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Snapshot thư viện</p>
 
-              <div className="mt-4 space-y-3">
-                <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-white/55">Tổng số bảng</p>
-                  <p className="mt-2 text-3xl font-bold text-white">{userData.visionBoards.length}</p>
-                </div>
-                <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-white/55">Tổng số phần tử</p>
-                  <p className="mt-2 text-3xl font-bold text-white">{totalItems}</p>
-                </div>
-                <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-white/55">Board gần nhất</p>
-                  <p className="mt-2 text-lg font-semibold text-white">
-                    {latestBoard ? latestBoard.name : "Chưa có board nào"}
-                  </p>
-                  <p className="mt-1 text-sm text-white/68">
-                    {latestBoard ? `Năm ${latestBoard.year}` : "Bắt đầu với board đầu tiên của bạn."}
-                  </p>
+                <div className="mt-4 space-y-3">
+                  <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Tổng số bảng</p>
+                    <p className="mt-2 text-3xl font-bold text-white">{userData.visionBoards.length}</p>
+                  </div>
+                  <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Tổng số phần tử</p>
+                    <p className="mt-2 text-3xl font-bold text-white">{totalItems}</p>
+                  </div>
+                  <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Board gần nhất</p>
+                    <p className="mt-2 text-lg font-semibold text-white">
+                      {latestBoard ? latestBoard.name : "Chưa có board nào"}
+                    </p>
+                    <p className="mt-1 text-sm text-white/68">
+                      {latestBoard ? `Năm ${latestBoard.year}` : "Bắt đầu với board đầu tiên của bạn."}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
       </InteractiveSurface>
 
       <div className="stagger-hover-grid grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -327,7 +326,7 @@ export function VisionBoardGallery() {
                     <CardTitle className="mt-2 text-4xl">{item.value}</CardTitle>
                   </div>
                   <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${item.color} opacity-90`}
+                    className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${item.color} opacity-90`}
                   >
                     <Icon className="h-5 w-5" />
                   </div>
@@ -367,9 +366,7 @@ export function VisionBoardGallery() {
                 </div>
                 <div className="space-y-1">
                   <h2 className="text-2xl font-bold text-slate-900">{year}</h2>
-                  <p className="text-sm text-slate-500">
-                    {boardsByYear[year].length} bảng được lưu trong năm này.
-                  </p>
+                  <p className="text-sm text-slate-500">{boardsByYear[year].length} bảng được lưu trong năm này.</p>
                 </div>
               </div>
 
@@ -384,11 +381,7 @@ export function VisionBoardGallery() {
                     <motion.div
                       key={board.id}
                       initial={{ opacity: 0, y: 8 }}
-                      animate={
-                        isSpotlight
-                          ? { opacity: 1, y: 0 }
-                          : { opacity: 1, y: 0 }
-                      }
+                      animate={isSpotlight ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.03, duration: 0.24 }}
                     >
                       <InteractiveSurface
@@ -397,137 +390,140 @@ export function VisionBoardGallery() {
                         translate={8}
                         shine={false}
                       >
-                      <Card
-                        interactive={false}
-                        className={isSpotlight ? "spotlight-card gap-5 overflow-hidden" : "gap-5 overflow-hidden"}
-                      >
-                        <CardHeader className="pb-0">
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <div className="flex flex-wrap items-center gap-2">
-                                <CardTitle>{board.name}</CardTitle>
-                                {isSpotlight && (
-                                  <Badge
-                                    variant="outline"
-                                    className="spotlight-badge rounded-full border-0 px-3 py-1.5"
-                                  >
-                                    Vừa lưu
-                                  </Badge>
-                                )}
+                        <Card
+                          interactive={false}
+                          className={isSpotlight ? "spotlight-card gap-5 overflow-hidden" : "gap-5 overflow-hidden"}
+                        >
+                          <CardHeader className="pb-0">
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <CardTitle>{board.name}</CardTitle>
+                                  {isSpotlight && (
+                                    <Badge
+                                      variant="outline"
+                                      className="spotlight-badge rounded-full border-0 px-3 py-1.5"
+                                    >
+                                      Vừa lưu
+                                    </Badge>
+                                  )}
+                                </div>
+                                <CardDescription>
+                                  {new Date(board.createdAt).toLocaleDateString("vi-VN")} • {board.items.length} phần tử
+                                </CardDescription>
                               </div>
-                              <CardDescription>
-                                {new Date(board.createdAt).toLocaleDateString("vi-VN")} • {board.items.length} phần tử
-                              </CardDescription>
+                              <Badge
+                                variant="outline"
+                                className="rounded-full border-white/70 bg-white/72 px-3 py-1.5 text-slate-600"
+                              >
+                                {board.year}
+                              </Badge>
                             </div>
-                            <Badge variant="outline" className="rounded-full border-white/70 bg-white/72 px-3 py-1.5 text-slate-600">
-                              {board.year}
-                            </Badge>
-                          </div>
-                        </CardHeader>
+                          </CardHeader>
 
-                        <CardContent className="space-y-5 pt-0">
-                          <div
-                            className="relative overflow-hidden rounded-[24px] border border-white/80 bg-[linear-gradient(180deg,_rgba(248,250,252,0.98)_0%,_rgba(241,245,249,0.96)_100%)]"
-                            style={{ aspectRatio: "16/10" }}
-                          >
-                            <div className="absolute inset-0 gradient-grid bg-[size:30px_30px] opacity-28" />
-                            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,_rgba(15,23,42,0)_24%,_rgba(15,23,42,0.05)_100%)]" />
+                          <CardContent className="space-y-5 pt-0">
+                            <div
+                              className="relative overflow-hidden rounded-[24px] border border-white/80 bg-[linear-gradient(180deg,_rgba(248,250,252,0.98)_0%,_rgba(241,245,249,0.96)_100%)]"
+                              style={{ aspectRatio: "16/10" }}
+                            >
+                              <div className="absolute inset-0 gradient-grid bg-[size:30px_30px] opacity-28" />
+                              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,_rgba(15,23,42,0)_24%,_rgba(15,23,42,0.05)_100%)]" />
 
-                            {board.items.length === 0 ? (
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <Sparkles className="h-12 w-12 text-slate-300" />
-                              </div>
-                            ) : (
-                              <div className="preview-hover-media relative h-full w-full interactive-layer interactive-layer--strong">
-                                {board.items.slice(0, 6).map((item) => (
-                                  <div
-                                    key={item.id}
-                                    className="absolute"
-                                    style={{
-                                      left: `${item.x}%`,
-                                      top: `${item.y}%`,
-                                      width: `${item.width * 0.44}px`,
-                                    }}
-                                  >
-                                    {item.type === "image" && (
-                                      <div className="rounded-[16px] border border-white/80 bg-white/88 p-1.5 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.18)] backdrop-blur-sm">
-                                        <ImageWithFallback
-                                          src={item.content}
-                                          alt="Phần tử bảng"
-                                          className="rounded-[12px] shadow-sm w-full h-auto"
-                                        />
-                                      </div>
-                                    )}
-                                    {item.type === "quote" && (
-                                      <div className="rounded-[14px] border border-white/80 bg-white/90 px-3 py-2 text-[10px] italic leading-4 text-slate-700 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.18)]">
-                                        {item.content}
-                                      </div>
-                                    )}
-                                    {item.type === "icon" && <BoardPreviewIcon content={item.content} />}
+                              {board.items.length === 0 ? (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <Sparkles className="h-12 w-12 text-slate-300" />
+                                </div>
+                              ) : (
+                                <div className="preview-hover-media relative h-full w-full interactive-layer interactive-layer--strong">
+                                  {board.items.slice(0, 6).map((item) => (
+                                    <div
+                                      key={item.id}
+                                      className="absolute"
+                                      style={{
+                                        left: `${item.x}%`,
+                                        top: `${item.y}%`,
+                                        width: `${item.width * 0.44}px`,
+                                      }}
+                                    >
+                                      {item.type === "image" && (
+                                        <div className="rounded-[16px] border border-white/80 bg-white/88 p-1.5 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.18)] backdrop-blur-sm">
+                                          <ImageWithFallback
+                                            src={item.content}
+                                            alt="Phần tử bảng"
+                                            className="rounded-[12px] shadow-sm w-full h-auto"
+                                          />
+                                        </div>
+                                      )}
+                                      {item.type === "quote" && (
+                                        <div className="rounded-[14px] border border-white/80 bg-white/90 px-3 py-2 text-[10px] italic leading-4 text-slate-700 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.18)]">
+                                          {item.content}
+                                        </div>
+                                      )}
+                                      {item.type === "icon" && <BoardPreviewIcon content={item.content} />}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+
+                              <div className="preview-hover-overlay absolute inset-x-4 bottom-4 rounded-[20px] border border-white/18 bg-slate-900/38 px-4 py-3 text-white shadow-[0_14px_28px_-24px_rgba(15,23,42,0.34)] backdrop-blur-md">
+                                <div className="flex items-center justify-between gap-4">
+                                  <div>
+                                    <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-white/58">
+                                      Preview sống
+                                    </p>
+                                    <p className="mt-1 text-sm font-semibold">
+                                      {imageCount} ảnh • {quoteCount} quote • {iconCount} biểu tượng
+                                    </p>
                                   </div>
-                                ))}
-                              </div>
-                            )}
-
-                            <div className="preview-hover-overlay absolute inset-x-4 bottom-4 rounded-[20px] border border-white/18 bg-slate-900/38 px-4 py-3 text-white shadow-[0_14px_28px_-24px_rgba(15,23,42,0.34)] backdrop-blur-md">
-                              <div className="flex items-center justify-between gap-4">
-                                <div>
-                                  <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-white/58">
-                                    Preview sống
-                                  </p>
-                                  <p className="mt-1 text-sm font-semibold">
-                                    {imageCount} ảnh • {quoteCount} quote • {iconCount} biểu tượng
-                                  </p>
-                                </div>
-                                <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/16 bg-white/10">
-                                  <Eye className="h-4 w-4" />
+                                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/16 bg-white/10">
+                                    <Eye className="h-4 w-4" />
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </div>
 
-                          <div className="grid grid-cols-3 gap-3">
-                            <div className="rounded-[20px] border border-white/70 bg-white/72 p-3 text-center">
-                              <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Ảnh</p>
-                              <p className="mt-2 text-xl font-bold text-slate-900">{imageCount}</p>
+                            <div className="grid grid-cols-3 gap-3">
+                              <div className="rounded-[20px] border border-white/70 bg-white/72 p-3 text-center">
+                                <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Ảnh</p>
+                                <p className="mt-2 text-xl font-bold text-slate-900">{imageCount}</p>
+                              </div>
+                              <div className="rounded-[20px] border border-white/70 bg-white/72 p-3 text-center">
+                                <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Quote</p>
+                                <p className="mt-2 text-xl font-bold text-slate-900">{quoteCount}</p>
+                              </div>
+                              <div className="rounded-[20px] border border-white/70 bg-white/72 p-3 text-center">
+                                <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Icon</p>
+                                <p className="mt-2 text-xl font-bold text-slate-900">{iconCount}</p>
+                              </div>
                             </div>
-                            <div className="rounded-[20px] border border-white/70 bg-white/72 p-3 text-center">
-                              <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Quote</p>
-                              <p className="mt-2 text-xl font-bold text-slate-900">{quoteCount}</p>
-                            </div>
-                            <div className="rounded-[20px] border border-white/70 bg-white/72 p-3 text-center">
-                              <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Icon</p>
-                              <p className="mt-2 text-xl font-bold text-slate-900">{iconCount}</p>
-                            </div>
-                          </div>
 
-                          <div className="flex gap-2 border-t border-slate-100 pt-4">
-                            <Button
-                              variant="outline"
-                              className="flex-1"
-                              onClick={() => navigate(`/vision-board/${board.id}`)}
-                            >
-                              <Edit className="h-4 w-4" />
-                              Chỉnh sửa
-                            </Button>
-                            <Button
-                              variant="outline"
-                              className="flex-1"
-                              onClick={() => navigate(`/vision-board/${board.id}`)}
-                            >
-                              <Eye className="h-4 w-4" />
-                              Mở
-                            </Button>
-                            <Button
-                              variant="outline"
-                              className="border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100"
-                              onClick={() => handleDeleteBoard(board.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
+                            <div className="flex gap-2 border-t border-slate-100 pt-4">
+                              <Button
+                                variant="outline"
+                                className="flex-1"
+                                onClick={() => navigate(`/vision-board/${board.id}`)}
+                              >
+                                <Edit className="h-4 w-4" />
+                                Chỉnh sửa
+                              </Button>
+                              <Button
+                                variant="outline"
+                                className="flex-1"
+                                onClick={() => navigate(`/vision-board/${board.id}`)}
+                              >
+                                <Eye className="h-4 w-4" />
+                                Mở
+                              </Button>
+                              <Button
+                                variant="outline"
+                                className="border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100"
+                                onClick={() => handleDeleteBoard(board.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
                       </InteractiveSurface>
                     </motion.div>
                   );

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -31,17 +31,12 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { CountUp } from "../components/ui/count-up";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "../components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Reveal } from "../components/ui/reveal";
 import { Textarea } from "../components/ui/textarea";
+import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import {
   celebrateAchievementUnlock,
   celebrateSpotlight,
@@ -50,7 +45,6 @@ import {
 } from "../utils/experience";
 import {
   APP_STORAGE_KEYS,
-  type UserData,
   addReflection,
   deleteReflection,
   formatCalendarDate,
@@ -101,7 +95,7 @@ function getMoodConfig(mood?: string) {
 
 export function ReflectionJournal() {
   const navigate = useNavigate();
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const { userData, reloadUserData } = useSyncedUserData();
   const [isAddingReflection, setIsAddingReflection] = useState(false);
   const [newReflection, setNewReflection] = useState({
     title: "",
@@ -113,15 +107,6 @@ export function ReflectionJournal() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterMood, setFilterMood] = useState<MoodValue | "">("");
   const [filterType, setFilterType] = useState<"all" | "weekly-review" | "freeform">("all");
-
-  const loadData = useCallback(() => {
-    const data = getUserData();
-    setUserData(data);
-  }, []);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
 
   const handleAddReflection = () => {
     if (!newReflection.title || !newReflection.content) return;
@@ -136,10 +121,7 @@ export function ReflectionJournal() {
     });
 
     const afterData = getUserData();
-    const unlockedAchievements = getUnlockedAchievements(
-      beforeData.achievements,
-      afterData.achievements,
-    );
+    const unlockedAchievements = getUnlockedAchievements(beforeData.achievements, afterData.achievements);
     const achievementCopy = getAchievementCelebrationCopy(unlockedAchievements);
 
     celebrateSpotlight({ x: 0.8, y: 0.16 });
@@ -150,10 +132,9 @@ export function ReflectionJournal() {
     }
 
     toast.success("Một trang mới đã được giữ lại.", {
-      description:
-        achievementCopy?.title
-          ? `${achievementCopy.title}. ${achievementCopy.description}`
-          : "Suy nghĩ, cảm xúc và bài học hôm nay đã có chỗ đứng trong hành trình của bạn.",
+      description: achievementCopy?.title
+        ? `${achievementCopy.title}. ${achievementCopy.description}`
+        : "Suy nghĩ, cảm xúc và bài học hôm nay đã có chỗ đứng trong hành trình của bạn.",
     });
 
     setNewReflection({
@@ -163,7 +144,7 @@ export function ReflectionJournal() {
       date: formatDateInputValue(new Date()),
     });
     setIsAddingReflection(false);
-    setUserData(afterData);
+    reloadUserData();
   };
 
   const handleDeleteReflection = (id: string) => {
@@ -175,13 +156,13 @@ export function ReflectionJournal() {
     const snapshot = getUserData();
     deleteReflection(reflectionToDelete);
     setReflectionToDelete(null);
-    loadData();
+    reloadUserData();
     toast.success("Trang nhật ký đã được xóa.", {
       action: {
         label: "Hoàn tác",
         onClick: () => {
           saveUserData(snapshot);
-          loadData();
+          reloadUserData();
           toast.info("Đã khôi phục trang nhật ký.");
         },
       },
@@ -192,19 +173,14 @@ export function ReflectionJournal() {
     () => (userData ? sortReflectionsByDateDesc(userData.reflections) : []),
     [userData],
   );
-  const goalsById = useMemo(
-    () => new Map((userData?.goals ?? []).map((goal) => [goal.id, goal])),
-    [userData],
-  );
+  const goalsById = useMemo(() => new Map((userData?.goals ?? []).map((goal) => [goal.id, goal])), [userData]);
 
   const monthlyCount = useMemo(() => {
     if (!userData) return 0;
     const now = new Date();
     return sortedReflections.filter((reflection) => {
       const date = parseCalendarDate(reflection.date);
-      return Boolean(
-        date && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear(),
-      );
+      return Boolean(date && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear());
     }).length;
   }, [sortedReflections, userData]);
 
@@ -239,12 +215,14 @@ export function ReflectionJournal() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const writtenDays = new Set(
-      sortedReflections.map((r) => {
-        const d = parseCalendarDate(r.date);
-        if (!d) return "";
-        d.setHours(0, 0, 0, 0);
-        return d.getTime().toString();
-      }).filter(Boolean),
+      sortedReflections
+        .map((r) => {
+          const d = parseCalendarDate(r.date);
+          if (!d) return "";
+          d.setHours(0, 0, 0, 0);
+          return d.getTime().toString();
+        })
+        .filter(Boolean),
     );
 
     let streak = 0;
@@ -266,11 +244,7 @@ export function ReflectionJournal() {
     if (filterMood) result = result.filter((r) => r.mood === filterMood);
     if (searchQuery.trim()) {
       const lower = searchQuery.toLowerCase();
-      result = result.filter(
-        (r) =>
-          r.title.toLowerCase().includes(lower) ||
-          r.content.toLowerCase().includes(lower),
-      );
+      result = result.filter((r) => r.title.toLowerCase().includes(lower) || r.content.toLowerCase().includes(lower));
     }
     return result;
   }, [sortedReflections, filterMood, filterType, searchQuery]);
@@ -286,7 +260,12 @@ export function ReflectionJournal() {
 
   return (
     <div className="space-y-8 pb-12">
-      <AlertDialog open={Boolean(reflectionToDelete)} onOpenChange={(open) => { if (!open) setReflectionToDelete(null); }}>
+      <AlertDialog
+        open={Boolean(reflectionToDelete)}
+        onOpenChange={(open) => {
+          if (!open) setReflectionToDelete(null);
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Xóa nhật ký này?</AlertDialogTitle>
@@ -320,8 +299,8 @@ export function ReflectionJournal() {
                     Một nơi đủ đẹp và đủ yên để bạn nhìn lại, gọi tên cảm xúc và giữ lại những điều đáng nhớ.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
-                    Nhật ký ở đây không chỉ để lưu chữ. Nó là nơi gom lại bài học, cảm xúc, những chuyển động nhỏ
-                    và cả cách bạn đang lớn lên qua từng ngày.
+                    Nhật ký ở đây không chỉ để lưu chữ. Nó là nơi gom lại bài học, cảm xúc, những chuyển động nhỏ và cả
+                    cách bạn đang lớn lên qua từng ngày.
                   </p>
                 </div>
 
@@ -338,19 +317,14 @@ export function ReflectionJournal() {
               </div>
 
               <div className="hidden xl:block rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">
-                  Nhịp viết hiện tại
-                </p>
+                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Nhịp viết hiện tại</p>
                 <div className="mt-6 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
                   {[
                     { label: "Tổng số bài", value: userData.reflections.length, note: "đã lưu trong hành trình" },
                     { label: "Tháng này", value: monthlyCount, note: "bài viết trong tháng hiện tại" },
                     { label: "Tâm trạng gần nhất", value: recentMood.label, note: "tín hiệu cảm xúc mới nhất" },
                   ].map((item) => (
-                    <div
-                      key={item.label}
-                      className="rounded-[24px] border border-white/10 bg-black/12 px-4 py-4"
-                    >
+                    <div key={item.label} className="rounded-[24px] border border-white/10 bg-black/12 px-4 py-4">
                       <p className="text-xs uppercase tracking-[0.18em] text-white/55">{item.label}</p>
                       <p className="mt-2 text-2xl font-bold text-white">
                         {typeof item.value === "number" ? <CountUp value={item.value} /> : item.value}
@@ -379,9 +353,7 @@ export function ReflectionJournal() {
                 <Input
                   type="date"
                   value={newReflection.date}
-                  onChange={(event) =>
-                    setNewReflection({ ...newReflection, date: event.target.value })
-                  }
+                  onChange={(event) => setNewReflection({ ...newReflection, date: event.target.value })}
                 />
               </div>
 
@@ -390,9 +362,7 @@ export function ReflectionJournal() {
                 <Input
                   placeholder="Ví dụ: Một ngày tôi lấy lại được nhịp"
                   value={newReflection.title}
-                  onChange={(event) =>
-                    setNewReflection({ ...newReflection, title: event.target.value })
-                  }
+                  onChange={(event) => setNewReflection({ ...newReflection, title: event.target.value })}
                 />
               </div>
             </div>
@@ -429,9 +399,7 @@ export function ReflectionJournal() {
                       type="button"
                       onClick={() => setNewReflection({ ...newReflection, mood: item.value })}
                       className={`rounded-[24px] border px-4 py-4 text-left transition-all ${
-                        active
-                          ? item.activeClass
-                          : "border-white/70 bg-white/72 text-slate-500 hover:border-slate-200"
+                        active ? item.activeClass : "border-white/70 bg-white/72 text-slate-500 hover:border-slate-200"
                       }`}
                     >
                       <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-white/70">
@@ -447,16 +415,16 @@ export function ReflectionJournal() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label>Nội dung</Label>
-                <span className={`text-xs font-medium transition-colors ${newReflection.content.length > 1800 ? "text-rose-500" : "text-slate-400"}`}>
+                <span
+                  className={`text-xs font-medium transition-colors ${newReflection.content.length > 1800 ? "text-rose-500" : "text-slate-400"}`}
+                >
                   {newReflection.content.length} ký tự
                 </span>
               </div>
               <Textarea
                 placeholder="Viết về trải nghiệm, điều bạn học được, khoảnh khắc đáng nhớ hoặc điều bạn muốn nhắc mình sau này..."
                 value={newReflection.content}
-                onChange={(event) =>
-                  setNewReflection({ ...newReflection, content: event.target.value })
-                }
+                onChange={(event) => setNewReflection({ ...newReflection, content: event.target.value })}
                 onKeyDown={(event) => {
                   if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
                     event.preventDefault();
@@ -466,13 +434,17 @@ export function ReflectionJournal() {
                 rows={8}
                 className="min-h-[220px]"
               />
-              <p className="text-xs text-slate-400">Nhấn <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[0.7rem] text-slate-600">Ctrl+Enter</kbd> để lưu nhanh</p>
+              <p className="text-xs text-slate-400">
+                Nhấn{" "}
+                <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[0.7rem] text-slate-600">
+                  Ctrl+Enter
+                </kbd>{" "}
+                để lưu nhanh
+              </p>
             </div>
 
             <div className="rounded-[24px] border border-white/70 bg-white/72 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                Gợi ý bắt đầu
-              </p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Gợi ý bắt đầu</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {JOURNAL_PROMPTS.map((prompt) => (
                   <Button
@@ -498,7 +470,9 @@ export function ReflectionJournal() {
               disabled={!newReflection.title || !newReflection.content}
             >
               <span>Lưu nhật ký</span>
-              <kbd className="ml-auto rounded border border-white/30 bg-white/10 px-1.5 py-0.5 font-mono text-[0.68rem] opacity-70">Ctrl+↵</kbd>
+              <kbd className="ml-auto rounded border border-white/30 bg-white/10 px-1.5 py-0.5 font-mono text-[0.68rem] opacity-70">
+                Ctrl+↵
+              </kbd>
             </Button>
           </div>
         </DialogContent>
@@ -506,88 +480,89 @@ export function ReflectionJournal() {
 
       <Reveal>
         <div className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-        {[
-          {
-            title: "Tổng số nhật ký",
-            value: userData.reflections.length,
-            note: "đã lưu lại",
-            icon: BookOpen,
-            color: "from-violet-500/18 to-fuchsia-500/10 text-violet-700",
-          },
-          {
-            title: "Tháng này",
-            value: monthlyCount,
-            note: "bài viết mới",
-            icon: Calendar,
-            color: "from-sky-500/18 to-cyan-500/10 text-sky-700",
-          },
-          {
-            title: "Bài viết vui vẻ",
-            value: moodCounts.happy,
-            note: "ghi nhận tích cực",
-            icon: Smile,
-            color: "from-emerald-500/18 to-teal-500/10 text-emerald-700",
-          },
-          {
-            title: "Review tuần",
-            value: weeklyReviewCount,
-            note: "đã được nối vào chu kỳ 12 tuần",
-            icon: Sparkles,
-            color: "from-amber-500/18 to-orange-500/10 text-amber-700",
-          },
-        ].map((item, index) => {
-          const Icon = item.icon;
+          {[
+            {
+              title: "Tổng số nhật ký",
+              value: userData.reflections.length,
+              note: "đã lưu lại",
+              icon: BookOpen,
+              color: "from-violet-500/18 to-fuchsia-500/10 text-violet-700",
+            },
+            {
+              title: "Tháng này",
+              value: monthlyCount,
+              note: "bài viết mới",
+              icon: Calendar,
+              color: "from-sky-500/18 to-cyan-500/10 text-sky-700",
+            },
+            {
+              title: "Bài viết vui vẻ",
+              value: moodCounts.happy,
+              note: "ghi nhận tích cực",
+              icon: Smile,
+              color: "from-emerald-500/18 to-teal-500/10 text-emerald-700",
+            },
+            {
+              title: "Review tuần",
+              value: weeklyReviewCount,
+              note: "đã được nối vào chu kỳ 12 tuần",
+              icon: Sparkles,
+              color: "from-amber-500/18 to-orange-500/10 text-amber-700",
+            },
+          ].map((item, index) => {
+            const Icon = item.icon;
 
-          return (
-            <motion.div
-              key={item.title}
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.08 * index }}
-            >
-              <Card className="relative overflow-hidden">
-                <div
-                  className={`absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
-                />
-                <CardHeader className="relative flex flex-row items-start justify-between pb-3">
-                  <div>
-                    <CardDescription>{item.title}</CardDescription>
-                    <CardTitle className="mt-2 text-4xl">
-                      <CountUp value={item.value} />
-                    </CardTitle>
-                  </div>
+            return (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.08 * index }}
+              >
+                <Card className="relative overflow-hidden">
                   <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${item.color}`}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </div>
-                </CardHeader>
-                <CardContent className="relative">
-                  <p className="text-sm text-slate-500">{item.note}</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          );
-        })}
+                    className={`absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
+                  />
+                  <CardHeader className="relative flex flex-row items-start justify-between pb-3">
+                    <div>
+                      <CardDescription>{item.title}</CardDescription>
+                      <CardTitle className="mt-2 text-4xl">
+                        <CountUp value={item.value} />
+                      </CardTitle>
+                    </div>
+                    <div
+                      className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${item.color}`}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="relative">
+                    <p className="text-sm text-slate-500">{item.note}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
         </div>
       </Reveal>
 
       {sortedReflections.length === 0 ? (
         <Reveal delay={0.04}>
           <Card className="overflow-hidden">
-          <CardContent className="p-10 text-center lg:p-14">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] bg-violet-50 text-violet-700">
-              <BookOpen className="h-10 w-10" />
-            </div>
-            <h2 className="mt-6 text-3xl font-bold text-slate-900">Chưa có trang nhật ký nào được mở ra</h2>
-            <p className="mx-auto mt-3 max-w-2xl text-base text-slate-500">
-              Hãy bắt đầu bằng một bài viết đầu tiên để lưu lại cảm xúc, bài học và những chuyển động nhỏ trên hành trình của bạn. Review tuần từ chu kỳ 12 tuần cũng sẽ tự động xuất hiện tại đây.
-            </p>
-            <Button className="mt-8" onClick={() => setIsAddingReflection(true)}>
-              <Plus className="h-4 w-4" />
-              Viết bài đầu tiên
-            </Button>
-          </CardContent>
+            <CardContent className="p-10 text-center lg:p-14">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] bg-violet-50 text-violet-700">
+                <BookOpen className="h-10 w-10" />
+              </div>
+              <h2 className="mt-6 text-3xl font-bold text-slate-900">Chưa có trang nhật ký nào được mở ra</h2>
+              <p className="mx-auto mt-3 max-w-2xl text-base text-slate-500">
+                Hãy bắt đầu bằng một bài viết đầu tiên để lưu lại cảm xúc, bài học và những chuyển động nhỏ trên hành
+                trình của bạn. Review tuần từ chu kỳ 12 tuần cũng sẽ tự động xuất hiện tại đây.
+              </p>
+              <Button className="mt-8" onClick={() => setIsAddingReflection(true)}>
+                <Plus className="h-4 w-4" />
+                Viết bài đầu tiên
+              </Button>
+            </CardContent>
           </Card>
         </Reveal>
       ) : (
@@ -604,9 +579,12 @@ export function ReflectionJournal() {
                       </div>
                       <h3 className="mt-4 text-2xl font-bold text-slate-950">{latestWeeklyReview.title}</h3>
                       <p className="mt-2 text-sm leading-7 text-slate-600">
-                        {latestWeeklyReview.linkedGoalId ? goalsById.get(latestWeeklyReview.linkedGoalId)?.title : "Chu kỳ 12 tuần"}
+                        {latestWeeklyReview.linkedGoalId
+                          ? goalsById.get(latestWeeklyReview.linkedGoalId)?.title
+                          : "Chu kỳ 12 tuần"}
                         {latestWeeklyReview.linkedWeekNumber ? ` • tuần ${latestWeeklyReview.linkedWeekNumber}` : ""}
-                        {latestWeeklyReview.linkedGoalId && goalsById.get(latestWeeklyReview.linkedGoalId)?.twelveWeekSystem?.reviewDay
+                        {latestWeeklyReview.linkedGoalId &&
+                        goalsById.get(latestWeeklyReview.linkedGoalId)?.twelveWeekSystem?.reviewDay
                           ? ` • review vào ${getReviewDayLabel(goalsById.get(latestWeeklyReview.linkedGoalId)?.twelveWeekSystem?.reviewDay || "Sunday")}`
                           : ""}
                       </p>
@@ -633,11 +611,13 @@ export function ReflectionJournal() {
                 />
               </div>
               <div className="flex flex-wrap gap-2">
-                {([
-                  { value: "all", label: "Tất cả" },
-                  { value: "weekly-review", label: "Review" },
-                  { value: "freeform", label: "Tự do" },
-                ] as const).map((item) => (
+                {(
+                  [
+                    { value: "all", label: "Tất cả" },
+                    { value: "weekly-review", label: "Review" },
+                    { value: "freeform", label: "Tự do" },
+                  ] as const
+                ).map((item) => (
                   <Button
                     key={item.value}
                     size="sm"
@@ -650,7 +630,12 @@ export function ReflectionJournal() {
                 <span className="hidden sm:inline w-px h-6 bg-slate-200" />
                 {(["", "happy", "neutral", "sad"] as const).map((mood) => {
                   const labels: Record<string, string> = { "": "Tất cả", happy: "😊", neutral: "😐", sad: "😢" };
-                  const fullLabels: Record<string, string> = { "": "Tất cả", happy: "Vui vẻ", neutral: "Bình thường", sad: "Suy tư" };
+                  const fullLabels: Record<string, string> = {
+                    "": "Tất cả",
+                    happy: "Vui vẻ",
+                    neutral: "Bình thường",
+                    sad: "Suy tư",
+                  };
                   return (
                     <Button
                       key={mood}
@@ -667,102 +652,107 @@ export function ReflectionJournal() {
               </div>
             </div>
 
-            {filteredReflections.length === 0 && (sortedReflections.length > 0) && (
+            {filteredReflections.length === 0 && sortedReflections.length > 0 && (
               <div className="rounded-[24px] border border-dashed border-slate-200 bg-slate-50/80 px-5 py-8 text-center text-sm text-slate-500">
                 Không tìm thấy nhật ký nào phù hợp với bộ lọc hiện tại.
               </div>
             )}
 
             <AnimatePresence>
-            {filteredReflections.map((reflection, index) => {
-              const mood = getMoodConfig(reflection.mood);
-              const linkedGoal = reflection.linkedGoalId ? goalsById.get(reflection.linkedGoalId) : null;
+              {filteredReflections.map((reflection, index) => {
+                const mood = getMoodConfig(reflection.mood);
+                const linkedGoal = reflection.linkedGoalId ? goalsById.get(reflection.linkedGoalId) : null;
 
-              return (
-                <motion.div
-                  key={reflection.id}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ delay: index * 0.05, duration: 0.25 }}
-                >
-                  <Card className="overflow-hidden">
-                    <CardContent className="p-6 lg:p-7">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-2xl font-bold text-slate-900">{reflection.title}</h3>
-                            <Badge variant="outline" className={`rounded-full px-3 py-1.5 ${mood.badge}`}>
-                              <span className="mr-1.5">{mood.icon}</span>
-                              {mood.label}
-                            </Badge>
-                            {reflection.entryType === "weekly-review" && (
-                              <Badge variant="outline" className="rounded-full border-sky-200 bg-sky-50 px-3 py-1.5 text-sky-700">
-                                Review tuần
+                return (
+                  <motion.div
+                    key={reflection.id}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ delay: index * 0.05, duration: 0.25 }}
+                  >
+                    <Card className="overflow-hidden">
+                      <CardContent className="p-6 lg:p-7">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h3 className="text-2xl font-bold text-slate-900">{reflection.title}</h3>
+                              <Badge variant="outline" className={`rounded-full px-3 py-1.5 ${mood.badge}`}>
+                                <span className="mr-1.5">{mood.icon}</span>
+                                {mood.label}
                               </Badge>
-                            )}
-                            {reflection.linkedWeekNumber && (
-                              <Badge variant="outline" className="rounded-full border-white/80 bg-white px-3 py-1.5 text-slate-600">
-                                Tuần {reflection.linkedWeekNumber}
-                              </Badge>
-                            )}
-                            {linkedGoal && (
-                              <Badge variant="outline" className="rounded-full border-violet-200 bg-violet-50 px-3 py-1.5 text-violet-700">
-                                {linkedGoal.title}
-                              </Badge>
-                            )}
+                              {reflection.entryType === "weekly-review" && (
+                                <Badge
+                                  variant="outline"
+                                  className="rounded-full border-sky-200 bg-sky-50 px-3 py-1.5 text-sky-700"
+                                >
+                                  Review tuần
+                                </Badge>
+                              )}
+                              {reflection.linkedWeekNumber && (
+                                <Badge
+                                  variant="outline"
+                                  className="rounded-full border-white/80 bg-white px-3 py-1.5 text-slate-600"
+                                >
+                                  Tuần {reflection.linkedWeekNumber}
+                                </Badge>
+                              )}
+                              {linkedGoal && (
+                                <Badge
+                                  variant="outline"
+                                  className="rounded-full border-violet-200 bg-violet-50 px-3 py-1.5 text-violet-700"
+                                >
+                                  {linkedGoal.title}
+                                </Badge>
+                              )}
+                            </div>
+
+                            <div className="mt-3 flex items-center gap-2 text-sm text-slate-500">
+                              <Calendar className="h-4 w-4" />
+                              {formatCalendarDate(reflection.date, "vi-VN", {
+                                weekday: "long",
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })}
+                            </div>
                           </div>
 
-                          <div className="mt-3 flex items-center gap-2 text-sm text-slate-500">
-                            <Calendar className="h-4 w-4" />
-                            {formatCalendarDate(reflection.date, "vi-VN", {
-                              weekday: "long",
-                              year: "numeric",
-                              month: "long",
-                              day: "numeric",
-                            })}
-                          </div>
-                        </div>
-
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-10 w-10 rounded-2xl text-slate-500 hover:text-red-600"
-                          aria-label={`Xóa nhật ký ${reflection.title}`}
-                          onClick={() => handleDeleteReflection(reflection.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-
-                      <div className="mt-5 rounded-[24px] border border-white/70 bg-white/72 p-5">
-                        <p className="whitespace-pre-wrap text-sm leading-8 text-slate-600">
-                          {reflection.content}
-                        </p>
-                      </div>
-                      {reflection.entryType === "weekly-review" && reflection.linkedGoalId && (
-                        <div className="mt-4 flex justify-end">
-                          <Button variant="outline" onClick={() => openLinkedCycle(reflection.linkedGoalId)}>
-                            Mở chu kỳ 12 tuần
-                            <ArrowRight className="h-4 w-4" />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-10 w-10 rounded-2xl text-slate-500 hover:text-red-600"
+                            aria-label={`Xóa nhật ký ${reflection.title}`}
+                            onClick={() => handleDeleteReflection(reflection.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
+
+                        <div className="mt-5 rounded-[24px] border border-white/70 bg-white/72 p-5">
+                          <p className="whitespace-pre-wrap text-sm leading-8 text-slate-600">{reflection.content}</p>
+                        </div>
+                        {reflection.entryType === "weekly-review" && reflection.linkedGoalId && (
+                          <div className="mt-4 flex justify-end">
+                            <Button variant="outline" onClick={() => openLinkedCycle(reflection.linkedGoalId)}>
+                              Mở chu kỳ 12 tuần
+                              <ArrowRight className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </div>
 
           <div className="space-y-6 xl:sticky xl:top-28">
             <Card>
               <CardContent className="p-6">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
-                  Streak hiện tại
-                </p>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Streak hiện tại</p>
                 <div className="mt-4 flex items-center gap-3 rounded-[20px] border border-violet-200 bg-violet-50 px-4 py-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-violet-100 text-violet-700">
                     <Sparkles className="h-5 w-5" />
@@ -772,7 +762,11 @@ export function ReflectionJournal() {
                       <CountUp value={currentStreak} /> ngày
                     </p>
                     <p className="text-xs text-violet-500">
-                      {currentStreak >= 3 ? "Nhịp viết đang rất tốt!" : currentStreak > 0 ? "Hãy duy trì đều hơn nhé." : "Bắt đầu streak hôm nay!"}
+                      {currentStreak >= 3
+                        ? "Nhịp viết đang rất tốt!"
+                        : currentStreak > 0
+                          ? "Hãy duy trì đều hơn nhé."
+                          : "Bắt đầu streak hôm nay!"}
                     </p>
                   </div>
                 </div>
@@ -781,9 +775,7 @@ export function ReflectionJournal() {
 
             <Card>
               <CardContent className="p-6">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
-                  Nhịp cảm xúc
-                </p>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Nhịp cảm xúc</p>
                 <div className="mt-5 space-y-3">
                   {[
                     {
@@ -818,9 +810,7 @@ export function ReflectionJournal() {
 
             <Card>
               <CardContent className="p-6">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
-                  Viết tiếp khi bí ý
-                </p>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Viết tiếp khi bí ý</p>
                 <div className="mt-5 space-y-3">
                   {JOURNAL_PROMPTS.map((prompt) => (
                     <div

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { CreditCard, Crown, RefreshCw, Shield, Sparkles } from "lucide-react";
 import { toast } from "sonner";
@@ -8,16 +8,11 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
+import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { isDemoMode } from "../utils/app-mode";
-import {
-  getBillingProviderModeLabel,
-  getBillingReadinessLabel,
-} from "../utils/billing-contract";
+import { getBillingProviderModeLabel, getBillingReadinessLabel } from "../utils/billing-contract";
 import { trackExperimentExposure, trackPaywallCtaClicked } from "../utils/monetization-analytics";
-import {
-  getOrAssignExperimentVariant,
-  markExperimentExposed,
-} from "../utils/storage";
+import { getOrAssignExperimentVariant, markExperimentExposed } from "../utils/storage";
 import {
   getBillingProviderStatus,
   getLastEntitlementSyncSnapshot,
@@ -37,9 +32,9 @@ import {
 
 export function BillingPlan() {
   const navigate = useNavigate();
-  const [userData, setUserData] = useState(getUserData);
-  const { currentPlanCode, currentPlanDefinition, entitlementKeys, premiumStatusItems } =
-    usePlanEntitlements(userData);
+  const { userData: syncedUserData, reloadUserData } = useSyncedUserData();
+  const userData = syncedUserData ?? getUserData();
+  const { currentPlanCode, currentPlanDefinition, entitlementKeys, premiumStatusItems } = usePlanEntitlements(userData);
 
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
   const [upgradeContext, setUpgradeContext] = useState<PremiumFeatureContext>("plan");
@@ -55,7 +50,11 @@ export function BillingPlan() {
 
   useEffect(() => {
     markExperimentExposed("paywall_trial_cta");
-    trackExperimentExposure({ experimentId: "paywall_trial_cta", variantId: trialCtaExperiment, context: "billing_plan" });
+    trackExperimentExposure({
+      experimentId: "paywall_trial_cta",
+      variantId: trialCtaExperiment,
+      context: "billing_plan",
+    });
   }, [trialCtaExperiment]);
 
   const demoMode = isDemoMode();
@@ -64,14 +63,6 @@ export function BillingPlan() {
 
   const lastEntitlementSync = useMemo(() => getLastEntitlementSyncSnapshot(), []);
   const lastRestoreAccess = useMemo(() => getLastRestoreAccessSnapshot(), []);
-
-  const refreshData = useCallback(() => setUserData(getUserData()), []);
-
-  useEffect(() => {
-    const handleStorage = () => refreshData();
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
-  }, [refreshData]);
 
   const handleOpenUpgrade = (context: PremiumFeatureContext = "plan") => {
     trackPaywallCtaClicked({
@@ -96,7 +87,7 @@ export function BillingPlan() {
       } else {
         toast.error(result.message);
       }
-      refreshData();
+      reloadUserData();
     } finally {
       setIsSyncing(false);
     }
@@ -111,7 +102,7 @@ export function BillingPlan() {
       } else {
         toast.error(result.message);
       }
-      refreshData();
+      reloadUserData();
     } finally {
       setIsRestoring(false);
     }
@@ -134,7 +125,7 @@ export function BillingPlan() {
   };
 
   const handleCheckoutComplete = (planCode: PricingPlanCode) => {
-    refreshData();
+    reloadUserData();
     if (planCode !== "FREE") {
       toast.success(`Đã nâng cấp lên ${getPlanLabel(planCode)}.`);
     }
@@ -153,8 +144,7 @@ export function BillingPlan() {
     }
   };
 
-  const isExpired =
-    subscription?.renewsAt && new Date(subscription.renewsAt) < new Date();
+  const isExpired = subscription?.renewsAt && new Date(subscription.renewsAt) < new Date();
 
   const isTrialing = subscription?.status === "trialing" && !isExpired;
 
@@ -170,7 +160,7 @@ export function BillingPlan() {
       const granted = startTrialLocally("PLUS", 7);
       if (granted !== "FREE") {
         toast.success("Đã kích hoạt dùng thử 7 ngày miễn phí!");
-        refreshData();
+        reloadUserData();
       } else {
         toast.info("Bạn đã có gói này rồi.");
       }
@@ -235,9 +225,7 @@ export function BillingPlan() {
               {currentPlanDefinition?.name ?? currentPlanCode}
             </Badge>
             {currentPlanDefinition && (
-              <span className="text-sm text-slate-500">
-                {currentPlanDefinition.priceLabel}
-              </span>
+              <span className="text-sm text-slate-500">{currentPlanDefinition.priceLabel}</span>
             )}
             {isExpired && (
               <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700">
@@ -262,15 +250,11 @@ export function BillingPlan() {
               </div>
               <div className="flow-muted p-4">
                 <p className="text-slate-500">Bắt đầu</p>
-                <p className="font-medium text-slate-900">
-                  {formatDate(subscription.startedAt)}
-                </p>
+                <p className="font-medium text-slate-900">{formatDate(subscription.startedAt)}</p>
               </div>
               <div className="flow-muted p-4">
                 <p className="text-slate-500">Gia hạn</p>
-                <p className="font-medium text-slate-900">
-                  {formatDate(subscription.renewsAt)}
-                </p>
+                <p className="font-medium text-slate-900">{formatDate(subscription.renewsAt)}</p>
               </div>
               <div className="flow-muted p-4">
                 <p className="text-slate-500">Chu kỳ</p>
@@ -314,8 +298,8 @@ export function BillingPlan() {
               <>
                 {isTrialing && trialDaysLeft !== null && (
                   <div className="w-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                    <span className="font-semibold">Đang dùng thử:</span>{" "}
-                    còn {trialDaysLeft} ngày — nâng cấp để giữ quyền truy cập sau khi hết thử.
+                    <span className="font-semibold">Đang dùng thử:</span> còn {trialDaysLeft} ngày — nâng cấp để giữ
+                    quyền truy cập sau khi hết thử.
                     <Button
                       size="sm"
                       className="mt-3 w-full sm:ml-3 sm:mt-0 sm:w-auto"
@@ -326,11 +310,7 @@ export function BillingPlan() {
                   </div>
                 )}
                 {billingStatus.manageBillingReady && (
-                  <Button
-                    variant="outline"
-                    onClick={handleOpenPortal}
-                    disabled={isOpeningPortal}
-                  >
+                  <Button variant="outline" onClick={handleOpenPortal} disabled={isOpeningPortal}>
                     {isOpeningPortal ? "Đang mở…" : "Quản lý thanh toán"}
                   </Button>
                 )}
@@ -357,16 +337,12 @@ export function BillingPlan() {
                 <div
                   key={key}
                   className={`flex items-center gap-3 rounded-lg border p-4 ${
-                    isActive
-                      ? "border-emerald-200 bg-emerald-50/60"
-                      : "border-slate-100 bg-slate-50/50"
+                    isActive ? "border-emerald-200 bg-emerald-50/60" : "border-slate-100 bg-slate-50/50"
                   }`}
                 >
                   <div
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
-                      isActive
-                        ? "bg-emerald-600 text-white"
-                        : "bg-slate-200 text-slate-500"
+                      isActive ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-500"
                     }`}
                   >
                     {isActive ? "✓" : "—"}
@@ -375,9 +351,7 @@ export function BillingPlan() {
                     <p className={`text-sm font-medium ${isActive ? "text-emerald-900" : "text-slate-600"}`}>
                       {getEntitlementLabel(key)}
                     </p>
-                    <p className="text-xs text-slate-500">
-                      {isActive ? "Đang hoạt động" : "Cần nâng cấp"}
-                    </p>
+                    <p className="text-xs text-slate-500">{isActive ? "Đang hoạt động" : "Cần nâng cấp"}</p>
                   </div>
                 </div>
               );
@@ -394,19 +368,11 @@ export function BillingPlan() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-3">
-            <Button
-              variant="outline"
-              onClick={handleSyncEntitlements}
-              disabled={isSyncing}
-            >
+            <Button variant="outline" onClick={handleSyncEntitlements} disabled={isSyncing}>
               <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
               {isSyncing ? "Đang đồng bộ…" : "Đồng bộ quyền"}
             </Button>
-            <Button
-              variant="outline"
-              onClick={handleRestoreAccess}
-              disabled={isRestoring}
-            >
+            <Button variant="outline" onClick={handleRestoreAccess} disabled={isRestoring}>
               {isRestoring ? "Đang khôi phục…" : "Khôi phục giao dịch"}
             </Button>
             <Button variant="outline" onClick={() => navigate("/")}>
@@ -418,14 +384,12 @@ export function BillingPlan() {
             <div className="space-y-2 text-xs text-slate-500">
               {lastEntitlementSync && (
                 <p>
-                  Đồng bộ gần nhất: {formatDate(lastEntitlementSync.at)} —{" "}
-                  {lastEntitlementSync.message}
+                  Đồng bộ gần nhất: {formatDate(lastEntitlementSync.at)} — {lastEntitlementSync.message}
                 </p>
               )}
               {lastRestoreAccess && (
                 <p>
-                  Khôi phục gần nhất: {formatDate(lastRestoreAccess.at)} —{" "}
-                  {lastRestoreAccess.message}
+                  Khôi phục gần nhất: {formatDate(lastRestoreAccess.at)} — {lastRestoreAccess.message}
                 </p>
               )}
             </div>
@@ -499,12 +463,7 @@ export function BillingPlan() {
                   ))}
                 </ul>
                 {plan.code !== "FREE" && currentPlanCode === "FREE" && (
-                  <Button
-                    className="mt-4 w-full"
-                    onClick={() =>
-                      handleOpenUpgrade("plan")
-                    }
-                  >
+                  <Button className="mt-4 w-full" onClick={() => handleOpenUpgrade("plan")}>
                     Nâng cấp
                   </Button>
                 )}
