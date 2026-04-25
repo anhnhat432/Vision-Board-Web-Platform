@@ -5,6 +5,7 @@ import { AuthProvider } from "../lib/auth/AuthContext";
 import { TwelveWeekSetup } from "../app/pages/12WeekSetup";
 import { TwelveWeekSystem } from "../app/pages/12WeekSystem";
 import { MockBillingCheckout } from "../app/pages/MockBillingCheckout";
+import { LifeInsight } from "../app/pages/LifeInsight";
 import {
   APP_STORAGE_KEYS,
   addGoal,
@@ -271,6 +272,9 @@ export function renderAppRoute(initialEntry: string): {
   const router = createMemoryRouter(
     [
       { path: "/", element: <Placeholder title="Trang chủ" /> },
+      { path: "/onboarding", element: <Placeholder title="Onboarding" /> },
+      { path: "/life-balance", element: <Placeholder title="Life Balance" /> },
+      { path: "/life-insight", element: <LifeInsight /> },
       { path: "/smart-goal-setup", element: <Placeholder title="SMART Goal" /> },
       { path: "/goals", element: <Placeholder title="Goals" /> },
       { path: "/journal", element: <Placeholder title="Journal" /> },
