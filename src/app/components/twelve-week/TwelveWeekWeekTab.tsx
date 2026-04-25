@@ -169,17 +169,23 @@ export function TwelveWeekWeekTab({
                   <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">{coreIndicators.length}</Badge>
                 </div>
                 <div className="mt-4 space-y-3">
-                  {coreIndicators.map((indicator) => (
-                    <div
-                      key={indicator.id || indicator.name}
-                      className="rounded-lg border border-emerald-100 bg-white px-4 py-3"
-                    >
-                      <p className="font-medium text-slate-900">{indicator.name}</p>
-                      <p className="mt-1 text-sm text-slate-500">
-                        {indicator.target || "1"} {indicator.unit || "lần/tuần"}
-                      </p>
+                  {coreIndicators.length === 0 ? (
+                    <div className="rounded-lg border border-emerald-100 bg-white px-4 py-4 text-sm leading-6 text-slate-500">
+                      Chưa có tactic cốt lõi. Khi tactic được thêm, phần này sẽ cho bạn biết nhịp nào cần giữ trước.
                     </div>
-                  ))}
+                  ) : (
+                    coreIndicators.map((indicator) => (
+                      <div
+                        key={indicator.id || indicator.name}
+                        className="rounded-lg border border-emerald-100 bg-white px-4 py-3"
+                      >
+                        <p className="font-medium text-slate-900">{indicator.name}</p>
+                        <p className="mt-1 text-sm text-slate-500">
+                          {indicator.target || "1"} {indicator.unit || "lần/tuần"}
+                        </p>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 

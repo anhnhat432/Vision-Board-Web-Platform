@@ -52,6 +52,33 @@ describe("12-week core flows", () => {
     expect(localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId)).toBe(data.goals[0]?.id);
   });
 
+  it("shows a clear next action when no 12-week plan exists", async () => {
+    renderAppRoute("/12-week-system");
+
+    await screen.findByRole("heading", { name: "Bạn chưa có hệ thống 12 tuần" });
+    expect(screen.getByText("Chưa có chu kỳ đang chạy")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Tạo mục tiêu 12 tuần" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Mở mục tiêu đã có" })).toBeInTheDocument();
+  });
+
+  it("explains what is missing when a 12-week plan has no tasks or metrics", async () => {
+    const { goalId } = seedTwelveWeekGoal();
+    updateUserData((data) => {
+      const goal = data.goals.find((item) => item.id === goalId);
+      if (!goal?.twelveWeekSystem) return;
+
+      goal.twelveWeekSystem.leadIndicators = [];
+      goal.twelveWeekSystem.taskInstances = [];
+      goal.twelveWeekSystem.lagMetric.name = "";
+    });
+
+    renderAppRoute("/12-week-system");
+
+    await screen.findByText("Chu kỳ này chưa có việc hoặc metric đủ rõ");
+    expect(screen.getByText("Chưa có việc nào trong chu kỳ này")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Tạo lại chu kỳ" })).toBeInTheDocument();
+  });
+
   it("persists task completion from the today queue", async () => {
     const { goalId } = seedTwelveWeekGoal();
     renderAppRoute("/12-week-system");

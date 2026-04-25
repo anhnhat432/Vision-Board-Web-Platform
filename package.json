@@ -13,6 +13,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "check": "npm run typecheck && npm run lint && npm run test:run && npm run build",
+    "check:backend": "npm --prefix backend run check",
+    "check:all": "npm run check && npm run check:backend",
     "env:check": "node scripts/check-runtime-env.mjs",
     "env:check:full": "node scripts/check-runtime-env.mjs --full-stack"
   },

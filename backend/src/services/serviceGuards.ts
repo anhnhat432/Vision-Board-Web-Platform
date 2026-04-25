@@ -1,3 +1,5 @@
+import { isValidObjectId } from "mongoose";
+
 import type { PlanEntity } from "../repositories/mongo/MongoPlanRepository";
 import type { MetricEntity } from "../repositories/mongo/MongoMetricRepository";
 import type { TaskEntity } from "../repositories/mongo/MongoTaskRepository";
@@ -8,11 +10,19 @@ import type { MongoTaskRepository } from "../repositories/mongo/MongoTaskReposit
 import type { MongoWeekRepository } from "../repositories/mongo/MongoWeekRepository";
 import { ApiError } from "../utils/apiError";
 
+export function assertValidObjectId(value: string, label: string): void {
+  if (!isValidObjectId(value)) {
+    throw new ApiError(400, `${label} must be a valid ObjectId.`);
+  }
+}
+
 export async function requirePlanOwnership(
   planRepository: MongoPlanRepository,
   userId: string,
   planId: string,
 ): Promise<PlanEntity> {
+  assertValidObjectId(planId, "planId");
+
   const plan = await planRepository.getPlanById(planId);
   if (!plan) {
     throw new ApiError(404, "Plan not found.");
@@ -31,6 +41,8 @@ export async function requireWeekOwnership(
   userId: string,
   weekId: string,
 ): Promise<WeekEntity> {
+  assertValidObjectId(weekId, "weekId");
+
   const week = await weekRepository.getWeekById(weekId);
   if (!week) {
     throw new ApiError(404, "Week not found.");
@@ -47,6 +59,8 @@ export async function requireTaskOwnership(
   userId: string,
   taskId: string,
 ): Promise<TaskEntity> {
+  assertValidObjectId(taskId, "taskId");
+
   const task = await taskRepository.getTaskById(taskId);
   if (!task) {
     throw new ApiError(404, "Task not found.");
@@ -63,6 +77,8 @@ export async function requireMetricOwnership(
   userId: string,
   metricId: string,
 ): Promise<MetricEntity> {
+  assertValidObjectId(metricId, "metricId");
+
   const metric = await metricRepository.getMetricById(metricId);
   if (!metric) {
     throw new ApiError(404, "Metric not found.");

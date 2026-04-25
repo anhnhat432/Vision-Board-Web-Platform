@@ -50,6 +50,8 @@ interface TwelveWeekTodayTabProps {
   todayRemainingCount: number;
   overdueOpenCount: number;
   optionalOpenThisWeekCount: number;
+  hasPlanTasks?: boolean;
+  hasLeadMetrics?: boolean;
   firstPriorityTask: TwelveWeekTaskInstance | null;
   secondaryTodayTasks: TwelveWeekTaskInstance[];
   hasSmartRescue: boolean;
@@ -84,6 +86,8 @@ export function TwelveWeekTodayTab({
   todayRemainingCount,
   overdueOpenCount,
   optionalOpenThisWeekCount,
+  hasPlanTasks = currentWeekTasksCount > 0 || todayQueue.length > 0,
+  hasLeadMetrics = coreTacticCount + optionalTacticCount > 0,
   firstPriorityTask,
   secondaryTodayTasks,
   hasSmartRescue,
@@ -333,7 +337,18 @@ export function TwelveWeekTodayTab({
             <CardContent className="space-y-3">
               {todayQueue.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600">
-                  Không có việc nào đang chờ lúc này. Đây là lúc đẹp để chốt review hoặc làm mới nhịp cho gọn.
+                  {hasPlanTasks ? (
+                    "Không có việc nào đang chờ lúc này. Đây là lúc đẹp để chốt review hoặc làm mới nhịp cho gọn."
+                  ) : (
+                    <div className="mx-auto max-w-lg space-y-2">
+                      <p className="font-semibold text-slate-900">Chưa có việc nào trong chu kỳ này</p>
+                      <p className="text-sm leading-6 text-slate-600">
+                        {hasLeadMetrics
+                          ? "Chu kỳ đã có tactic, nhưng chưa có task nào được tạo cho tuần hiện tại. Hãy kiểm tra lại setup hoặc tạo lại chu kỳ."
+                          : "Chu kỳ chưa có tactic/lead metric, nên dashboard chưa thể tạo hàng việc hôm nay."}
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 todayQueue.map((task) => {

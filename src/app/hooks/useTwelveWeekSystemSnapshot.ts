@@ -58,6 +58,7 @@ export function useTwelveWeekSystemSnapshot() {
   const location = useLocation();
   const [activeGoal, setActiveGoal] = useState<Goal | null>(null);
   const [allGoals, setAllGoals] = useState<Goal[]>([]);
+  const [isReady, setIsReady] = useState(false);
   const [activeTab, setActiveTab] = useState("today");
   const [activePlanCode, setActivePlanCode] = useState<PricingPlanCode>(getCurrentPlan());
   const [activeEntitlementKeys, setActiveEntitlementKeys] = useState<EntitlementKey[]>(getCurrentEntitlementKeys());
@@ -114,6 +115,8 @@ export function useTwelveWeekSystemSnapshot() {
       localStorage.setItem(APP_STORAGE_KEYS.latest12WeekGoalId, selectedGoal.id);
       localStorage.setItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId, selectedGoal.id);
     }
+
+    setIsReady(true);
   }, []);
 
   const updateActiveGoalState = useCallback((updater: (goal: Goal) => Goal) => {
@@ -279,6 +282,7 @@ export function useTwelveWeekSystemSnapshot() {
   );
 
   return {
+    isReady,
     activeGoal,
     allGoals,
     activeTab,

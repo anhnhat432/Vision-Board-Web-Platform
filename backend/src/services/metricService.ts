@@ -2,7 +2,7 @@ import { MongoMetricRepository } from "../repositories/mongo/MongoMetricReposito
 import { MongoPlanRepository } from "../repositories/mongo/MongoPlanRepository";
 import { MongoWeekRepository } from "../repositories/mongo/MongoWeekRepository";
 import { ApiError } from "../utils/apiError";
-import { requireMetricOwnership, requireWeekOwnership } from "./serviceGuards";
+import { assertValidObjectId, requireMetricOwnership, requireWeekOwnership } from "./serviceGuards";
 
 export interface LogLeadMetricPayload {
   date?: string;
@@ -21,6 +21,86 @@ export interface CreateWeekMetricPayload {
   weeklyTarget?: number;
 }
 
+function isPayloadRecord(payload: unknown): payload is Record<string, unknown> {
+  return Boolean(payload) && typeof payload === "object" && !Array.isArray(payload);
+}
+
+function validateMetricName(value: unknown): string {
+  if (typeof value !== "string") {
+    throw new ApiError(400, "Metric name is required.");
+  }
+
+  const name = value.trim();
+  if (!name) {
+    throw new ApiError(400, "Metric name cannot be empty.");
+  }
+
+  return name;
+}
+
+function validateOptionalNonNegativeNumber(value: unknown, fieldName: string): number | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    throw new ApiError(400, `${fieldName} must be a non-negative number.`);
+  }
+
+  return value;
+}
+
+function validateMetricValue(value: unknown): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new ApiError(400, "Metric value must be a valid number.");
+  }
+
+  return value;
+}
+
+function validateOptionalDate(value: unknown, fieldName: string): Date | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new ApiError(400, `${fieldName} must be a valid ISO date string.`);
+  }
+
+  const parsed = new Date(value);
+  if (!Number.isFinite(parsed.valueOf())) {
+    throw new ApiError(400, `${fieldName} must be a valid ISO date string.`);
+  }
+
+  return parsed;
+}
+
+function validateOptionalBoolean(value: unknown, fieldName: string): boolean | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== "boolean") {
+    throw new ApiError(400, `${fieldName} must be a boolean.`);
+  }
+
+  return value;
+}
+
+function validateCreateMetricPayload(payload: unknown): { name: string; weeklyTarget?: number } {
+  if (!isPayloadRecord(payload)) {
+    throw new ApiError(400, "Request body must be an object.");
+  }
+
+  return {
+    name: validateMetricName(payload.name),
+    weeklyTarget: validateOptionalNonNegativeNumber(payload.weeklyTarget, "weeklyTarget"),
+  };
+}
+
+function validateMetricLogPayload(payload: unknown): { date?: Date; value: number; completed?: boolean } {
+  if (!isPayloadRecord(payload)) {
+    throw new ApiError(400, "Request body must be an object.");
+  }
+
+  return {
+    date: validateOptionalDate(payload.date, "date"),
+    value: validateMetricValue(payload.value),
+    completed: validateOptionalBoolean(payload.completed, "completed"),
+  };
+}
+
 class MetricService {
   constructor(
     private readonly planRepository: MongoPlanRepository,
@@ -34,11 +114,12 @@ class MetricService {
     payload: CreateWeekMetricPayload,
   ) {
     await requireWeekOwnership(this.planRepository, this.weekRepository, userId, weekId);
+    const metric = validateCreateMetricPayload(payload);
 
     return this.metricRepository.createMetric({
       weekId,
-      name: payload.name?.trim() || "Lead Metric",
-      weeklyTarget: payload.weeklyTarget ?? 0,
+      name: metric.name,
+      weeklyTarget: metric.weeklyTarget ?? 0,
     });
   }
 
@@ -50,12 +131,16 @@ class MetricService {
       userId,
       metricId,
     );
+    const log = validateMetricLogPayload(payload);
 
     const metric = await this.metricRepository.logMetric(metricId, {
-      date: payload.date ? new Date(payload.date) : new Date(),
-      value: payload.value,
-      completed: payload.completed ?? payload.value > 0,
+      date: log.date ?? new Date(),
+      value: log.value,
+      completed: log.completed ?? log.value > 0,
     });
+    if (!metric) {
+      throw new ApiError(404, "Metric not found.");
+    }
 
     return metric;
   }
@@ -73,15 +158,13 @@ class MetricService {
       userId,
       metricId,
     );
-
-    if (!Number.isFinite(payload.value)) {
-      throw new ApiError(400, "Invalid metric log value.");
-    }
+    assertValidObjectId(logId, "logId");
+    const log = validateMetricLogPayload(payload);
 
     const metric = await this.metricRepository.updateMetricLog(metricId, logId, {
-      date: payload.date ? new Date(payload.date) : undefined,
-      value: payload.value,
-      completed: payload.completed ?? payload.value > 0,
+      date: log.date,
+      value: log.value,
+      completed: log.completed ?? log.value > 0,
     });
 
     if (!metric) {

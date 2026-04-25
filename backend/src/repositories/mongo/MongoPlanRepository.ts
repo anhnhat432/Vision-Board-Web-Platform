@@ -1,4 +1,4 @@
-import type { Types } from "mongoose";
+import { isValidObjectId, type Types } from "mongoose";
 
 import { PlanModel } from "../../models/PlanModel";
 
@@ -58,6 +58,8 @@ export class MongoPlanRepository {
   }
 
   async getPlanById(id: string): Promise<PlanEntity | null> {
+    if (!isValidObjectId(id)) return null;
+
     const doc = await PlanModel.findById(id).lean();
     return doc ? mapPlan(doc) : null;
   }

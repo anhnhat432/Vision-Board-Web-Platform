@@ -1,6 +1,17 @@
-﻿import { Suspense, lazy, useEffect, useRef, useState } from "react";
+﻿import { Suspense, lazy, useEffect, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
-import { AlertTriangle, BarChart3, CalendarDays, Compass, ListTodo, Settings2, Sparkles, Target } from "lucide-react";
+import {
+  AlertTriangle,
+  BarChart3,
+  CalendarDays,
+  CheckCircle2,
+  Compass,
+  ListTodo,
+  Loader2,
+  Settings2,
+  Sparkles,
+  Target,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
@@ -154,11 +165,85 @@ function TwelveWeekTabFallback({ title, description }: { title: string; descript
     </Card>
   );
 }
+
+function TwelveWeekDashboardState({
+  kind,
+  eyebrow,
+  title,
+  description,
+  children,
+}: {
+  kind: "loading" | "empty";
+  eyebrow: string;
+  title: string;
+  description: string;
+  children?: ReactNode;
+}) {
+  const Icon = kind === "loading" ? Loader2 : Sparkles;
+
+  return (
+    <Card className="overflow-hidden border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.34)]">
+      <CardContent className="p-8 text-center sm:p-10 lg:p-14">
+        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] bg-violet-50 text-violet-700">
+          <Icon className={`h-10 w-10 ${kind === "loading" ? "animate-spin" : ""}`} />
+        </div>
+        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{eyebrow}</p>
+        <h2 className="mt-3 text-2xl font-bold tracking-normal text-slate-900 sm:text-3xl">{title}</h2>
+        <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-500 sm:text-base" role="status">
+          {description}
+        </p>
+        {children}
+      </CardContent>
+    </Card>
+  );
+}
+
+function TwelveWeekDashboardNotice({
+  tone,
+  title,
+  description,
+  children,
+}: {
+  tone: "warning" | "error" | "success";
+  title: string;
+  description: string;
+  children?: ReactNode;
+}) {
+  const Icon = tone === "success" ? CheckCircle2 : AlertTriangle;
+  const toneClass =
+    tone === "success"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+      : tone === "error"
+        ? "border-rose-200 bg-rose-50 text-rose-900"
+        : "border-amber-200 bg-amber-50 text-amber-900";
+  const iconClass =
+    tone === "success"
+      ? "bg-emerald-100 text-emerald-700"
+      : tone === "error"
+        ? "bg-rose-100 text-rose-700"
+        : "bg-amber-100 text-amber-700";
+
+  return (
+    <div role={tone === "success" ? "status" : "alert"} className={`rounded-xl border px-4 py-4 ${toneClass}`}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconClass}`}>
+          <Icon className="h-4 w-4" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold">{title}</p>
+          <p className="mt-1 text-sm leading-6 opacity-80">{description}</p>
+        </div>
+        {children ? <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">{children}</div> : null}
+      </div>
+    </div>
+  );
+}
 export function TwelveWeekSystem() {
   const navigate = useNavigate();
   const { authLoading, isConfigured: isAuthConfigured, user, userProfile } = useAuthContext();
   const { userData: guideUserData } = useSyncedUserData();
   const {
+    isReady,
     activeGoal,
     allGoals,
     activeTab,
@@ -311,6 +396,39 @@ export function TwelveWeekSystem() {
     syncMessage: backendSyncError?.message ?? backendSyncData.lastSnapshot?.message ?? null,
     failedSyncCount: backendSyncData.lastSnapshot?.failedCount ?? 0,
   } as const;
+  const planHasNoTasks = Boolean(system && system.taskInstances.length === 0);
+  const planHasNoLeadMetrics = Boolean(system && system.leadIndicators.length === 0);
+  const planHasNoLagMetric = Boolean(system && system.lagMetric.name.trim().length === 0);
+  const hasIncompletePlanStructure = Boolean(
+    system && (planHasNoTasks || planHasNoLeadMetrics || planHasNoLagMetric),
+  );
+  const hasBackendSyncIssue = Boolean(
+    backendConnectionStatus.syncStatus === "error" ||
+      backendConnectionStatus.syncStatus === "partial" ||
+      lastBackendHydrationResult?.status === "error" ||
+      lastBackendHydrationResult?.status === "partial",
+  );
+  const backendSyncIssueMessage =
+    backendConnectionStatus.syncMessage ||
+    lastBackendHydrationResult?.message ||
+    "Dữ liệu trên thiết bị vẫn được giữ lại. Bạn có thể thử đồng bộ lại khi backend hoặc mạng ổn định hơn.";
+  const syncBadgeClass =
+    backendConnectionStatus.syncStatus === "success"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+      : backendConnectionStatus.syncStatus === "error" || backendConnectionStatus.syncStatus === "partial"
+        ? "border-amber-200 bg-amber-50 text-amber-800"
+        : backendConnectionStatus.syncing
+          ? "border-sky-200 bg-sky-50 text-sky-800"
+          : "border-slate-200 bg-slate-50 text-slate-600";
+  const syncBadgeLabel = backendConnectionStatus.syncing
+    ? "Đang đồng bộ"
+    : backendConnectionStatus.syncStatus === "success"
+      ? "Đã lưu & đồng bộ"
+      : backendConnectionStatus.syncStatus === "error" || backendConnectionStatus.syncStatus === "partial"
+        ? "Đã lưu local"
+        : backendConnectionStatus.signedIn
+          ? "Backend sẵn sàng"
+          : "Lưu trên thiết bị";
 
   useEffect(() => {
     const localSystem = activeGoal?.twelveWeekSystem ?? null;
@@ -346,25 +464,46 @@ export function TwelveWeekSystem() {
     refreshSnapshotMeta,
   ]);
 
+  if (!isReady) {
+    return (
+      <TwelveWeekDashboardState
+        kind="loading"
+        eyebrow="Đang chuẩn bị dashboard"
+        title="Đang tải hệ thống 12 tuần"
+        description="Mình đang đọc dữ liệu local và kiểm tra trạng thái chu kỳ hiện tại trước khi mở hàng việc hôm nay."
+      />
+    );
+  }
+
   if (!activeGoal || !system) {
     return (
-      <Card className="overflow-hidden">
-        <CardContent className="p-10 text-center lg:p-14">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] bg-violet-50 text-violet-700">
-            <Sparkles className="h-10 w-10" />
-          </div>
-          <h2 className="mt-6 text-3xl font-bold text-slate-900">Bạn chưa có hệ thống 12 tuần</h2>
-          <p className="mx-auto mt-3 max-w-2xl text-base text-slate-500" role="status">
-            Tạo một chu kỳ 12 tuần để gom nhịp thực thi mỗi ngày, review tuần và điểm vào cùng một nơi.
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Button onClick={() => navigate("/life-insight")}>Tạo mục tiêu</Button>
-            <Button variant="outline" onClick={() => navigate("/goals")}>
-              Mở mục tiêu
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <TwelveWeekDashboardState
+        kind="empty"
+        eyebrow="Chưa có chu kỳ đang chạy"
+        title="Bạn chưa có hệ thống 12 tuần"
+        description="Tạo một chu kỳ 12 tuần để web trả lời rõ hôm nay nên làm gì, tuần này đang ở đâu và khi nào cần review."
+      >
+        <div className="mx-auto mt-8 grid max-w-3xl gap-3 text-left sm:grid-cols-3">
+          {[
+            "Chọn lĩnh vực ưu tiên từ Life Insight.",
+            "Viết SMART goal và kiểm tra feasibility.",
+            "Chốt tactic, metric và ngày review tuần.",
+          ].map((item, index) => (
+            <div key={item} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+              <span className="mr-2 font-semibold text-slate-950">0{index + 1}</span>
+              {item}
+            </div>
+          ))}
+        </div>
+        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+          <Button className="w-full sm:w-auto" onClick={() => navigate("/life-insight")}>
+            Tạo mục tiêu 12 tuần
+          </Button>
+          <Button className="w-full sm:w-auto" variant="outline" onClick={() => navigate("/goals")}>
+            Mở mục tiêu đã có
+          </Button>
+        </div>
+      </TwelveWeekDashboardState>
     );
   }
 
@@ -1224,6 +1363,9 @@ export function TwelveWeekSystem() {
                 >
                   Gói: {getPlanLabel(activePlanCode)}
                 </Badge>
+                <Badge variant="outline" className={`rounded-full px-3 py-1.5 ${syncBadgeClass}`}>
+                  {syncBadgeLabel}
+                </Badge>
                 {activeGoal.feasibilityResult && (
                   <Badge
                     variant="outline"
@@ -1350,6 +1492,49 @@ export function TwelveWeekSystem() {
             </Select>
           </CardContent>
         </Card>
+      )}
+
+      {hasIncompletePlanStructure && (
+        <TwelveWeekDashboardNotice
+          tone="warning"
+          title="Chu kỳ này chưa có việc hoặc metric đủ rõ"
+          description={
+            planHasNoLeadMetrics
+              ? "Dashboard đã thấy plan, nhưng chưa có tactic/lead metric để tạo hàng việc mỗi tuần. Hãy tạo lại chu kỳ từ flow mục tiêu để có task và review rõ ràng."
+              : planHasNoTasks
+                ? "Plan đã có tactic nhưng chưa có task nào trong chu kỳ. Hãy kiểm tra lại setup hoặc tạo lại chu kỳ để dashboard có hàng việc hôm nay."
+                : "Metric kết quả chính đang trống, nên phần tiến độ và review sẽ khó hiểu hơn. Hãy bổ sung metric khi chỉnh lại chu kỳ."
+          }
+        >
+          <Button
+            className="w-full border-slate-950 bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
+            onClick={() => navigate("/life-insight")}
+          >
+            Tạo lại chu kỳ
+          </Button>
+          <Button className="w-full bg-white sm:w-auto" variant="outline" onClick={() => handleTabChange("settings")}>
+            Mở cài đặt
+          </Button>
+        </TwelveWeekDashboardNotice>
+      )}
+
+      {hasBackendSyncIssue && (
+        <TwelveWeekDashboardNotice
+          tone="error"
+          title="Chưa thể đồng bộ backend"
+          description={`${backendSyncIssueMessage} Các thay đổi hiện tại vẫn được giữ trên thiết bị này.`}
+        >
+          <Button
+            className="w-full border-rose-900 bg-rose-900 text-white hover:bg-rose-800 sm:w-auto"
+            disabled={isBackendSyncing}
+            onClick={handleRunOutboxSync}
+          >
+            {isBackendSyncing ? "Đang thử lại..." : "Thử đồng bộ lại"}
+          </Button>
+          <Button className="w-full bg-white sm:w-auto" variant="outline" onClick={() => handleTabChange("settings")}>
+            Xem trạng thái
+          </Button>
+        </TwelveWeekDashboardNotice>
       )}
 
       {/* Rescue trigger banner */}
@@ -1495,6 +1680,8 @@ export function TwelveWeekSystem() {
               todayRemainingCount={todayRemainingCount}
               overdueOpenCount={overdueOpenCount}
               optionalOpenThisWeekCount={optionalOpenThisWeekCount}
+              hasPlanTasks={!planHasNoTasks}
+              hasLeadMetrics={!planHasNoLeadMetrics}
               firstPriorityTask={firstPriorityTask}
               secondaryTodayTasks={secondaryTodayTasks}
               hasSmartRescue={hasSmartRescue}

@@ -21,3 +21,9 @@ export async function getPlanById(req: Request, res: Response): Promise<void> {
   const details = await planService.getPlanDetails(user.uid, req.params.id);
   res.status(200).json(successResponse(details));
 }
+
+export async function updatePlan(req: Request, res: Response): Promise<void> {
+  const user = requireAuthUser(req);
+  const plan = await planService.updatePlan(user.uid, req.params.id, req.body ?? {});
+  res.status(200).json(successResponse(plan));
+}
