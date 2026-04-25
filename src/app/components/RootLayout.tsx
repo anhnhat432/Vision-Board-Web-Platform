@@ -50,6 +50,10 @@ const GUIDED_PATHS = new Set([
   "/12-week-plan-overview",
 ]);
 
+function isAuthProtectedPath(pathname: string) {
+  return pathname === "/order" || pathname.startsWith("/order-status");
+}
+
 const ROUTE_META = [
   {
     match: (pathname: string) => pathname === "/",
@@ -223,11 +227,12 @@ export function RootLayout() {
     setGuideUserData(userData);
 
     if (!demoMode && isConfigured && (authLoading || backendPlanHydration.loading)) return;
+    if (!demoMode && isConfigured && !user && isAuthProtectedPath(location.pathname)) return;
 
     if (!demoMode && !userData.onboardingCompleted && location.pathname !== "/onboarding") {
       navigate("/onboarding");
     }
-  }, [authLoading, backendPlanHydration.loading, demoMode, isConfigured, location.pathname, navigate]);
+  }, [authLoading, backendPlanHydration.loading, demoMode, isConfigured, location.pathname, navigate, user]);
 
   useEffect(() => {
     if (location.pathname) {
