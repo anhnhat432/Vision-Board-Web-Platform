@@ -149,8 +149,10 @@ const MOBILE_NAV_LABELS: Record<string, string> = {
 
 // Prefetch the remaining lazy route modules on hover so navigation feels instant.
 const ROUTE_IMPORTS: Record<string, () => Promise<unknown>> = {
+  "/12-week-system": () => import("../pages/12WeekSystem"),
   "/order-status": () => import("../pages/OrderStatusPage"),
 };
+const WARM_PREFETCH_ROUTE_PATHS = ["/12-week-system"] as const;
 const prefetchedRoutes = new Set<string>();
 function prefetchRoute(path: string) {
   if (prefetchedRoutes.has(path)) return;
@@ -409,6 +411,19 @@ export function RootLayout() {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const warmPrimaryHeavyRoutes = () => {
+      for (const path of WARM_PREFETCH_ROUTE_PATHS) {
+        prefetchRoute(path);
+      }
+    };
+
+    const timeoutId = globalThis.setTimeout(warmPrimaryHeavyRoutes, 300);
+    return () => globalThis.clearTimeout(timeoutId);
+  }, []);
+
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
     return location.pathname.startsWith(path);
@@ -487,7 +502,7 @@ export function RootLayout() {
     return (
       <div className="app-shell min-h-screen" data-route-tone={routeTone}>
         <div className="relative z-10">
-          <AnimatePresence mode="wait" initial={false}>
+          <AnimatePresence initial={false}>
             <motion.div key={location.pathname} className="page-transition-shell" {...pageTransition}>
               {outlet}
             </motion.div>
@@ -815,7 +830,7 @@ export function RootLayout() {
         <div className="sr-only" aria-live="polite" aria-atomic="true" role="status">
           {pageMeta.label}
         </div>
-        <AnimatePresence mode="wait" initial={false}>
+        <AnimatePresence initial={false}>
           <motion.div key={location.pathname} className="page-transition-shell" {...pageTransition}>
             {outlet}
           </motion.div>

@@ -1,9 +1,8 @@
-import type { ComponentType } from "react";
+import { Suspense, lazy, type ComponentType } from "react";
 import { Navigate, createBrowserRouter } from "react-router";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RootLayout } from "./components/RootLayout";
-import { TwelveWeekSystem } from "./pages/12WeekSystem";
 import { Achievements } from "./pages/Achievements";
 import { BillingPlan } from "./pages/BillingPlan";
 import { Dashboard } from "./pages/Dashboard";
@@ -33,6 +32,18 @@ function RouteHydrateFallback() {
         <p className="mt-3 text-base font-semibold text-slate-900">Đang mở trang...</p>
       </div>
     </div>
+  );
+}
+
+const TwelveWeekSystemPage = lazy(async () => ({
+  default: (await import("./pages/12WeekSystem")).TwelveWeekSystem,
+}));
+
+function TwelveWeekSystemRoute() {
+  return (
+    <Suspense fallback={<RouteHydrateFallback />}>
+      <TwelveWeekSystemPage />
+    </Suspense>
   );
 }
 
@@ -99,7 +110,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "12-week-system",
-        Component: TwelveWeekSystem,
+        Component: TwelveWeekSystemRoute,
       },
       {
         path: "billing/mock-checkout",
