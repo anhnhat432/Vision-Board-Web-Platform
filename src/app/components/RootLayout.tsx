@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Award,
   BookOpen,
   CalendarDays,
   CheckCircle2,
+  ChevronDown,
   Compass,
   CreditCard,
   Images,
@@ -199,6 +200,8 @@ export function RootLayout() {
   });
   const { resolvedTheme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [desktopMoreOpen, setDesktopMoreOpen] = useState(false);
+  const desktopMoreRef = useRef<HTMLDivElement | null>(null);
   const [guideUserData, setGuideUserData] = useState(() => getUserData());
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -222,11 +225,32 @@ export function RootLayout() {
   useEffect(() => {
     if (location.pathname) {
       setMobileMenuOpen(false);
+      setDesktopMoreOpen(false);
       setGuideUserData(getUserData());
       const meta = ROUTE_META.find((item) => item.match(location.pathname)) ?? ROUTE_META[0];
       document.title = meta.title ?? "Dear Our Future";
     }
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!desktopMoreOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!desktopMoreRef.current?.contains(event.target as Node)) {
+        setDesktopMoreOpen(false);
+      }
+    };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setDesktopMoreOpen(false);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [desktopMoreOpen]);
 
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
@@ -391,6 +415,7 @@ export function RootLayout() {
   const primaryNavItems = NAV_ITEMS.filter((item) => PRIMARY_NAV_PATHS.has(item.path));
   const secondaryNavItems = NAV_ITEMS.filter((item) => !PRIMARY_NAV_PATHS.has(item.path));
   const bottomNavItems = NAV_ITEMS.filter((item) => MOBILE_BOTTOM_NAV_PATHS.has(item.path));
+  const isDesktopMoreNavActive = desktopMoreOpen || secondaryNavItems.some((item) => isActive(item.path));
   const isMoreNavActive = mobileMenuOpen || secondaryNavItems.some((item) => isActive(item.path));
   const routeTone = getRouteTone(location.pathname);
   const shellGradientStyle = {
@@ -521,31 +546,68 @@ export function RootLayout() {
 
                 <div className="mx-0.5 h-5 w-px shrink-0 bg-slate-200/60" />
 
-                {secondaryNavItems.map((item) => {
-                  const Icon = item.icon;
-                  const active = isActive(item.path);
+                <div ref={desktopMoreRef} className="relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-current={secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined}
+                    aria-expanded={desktopMoreOpen}
+                    aria-haspopup="menu"
+                    className={`h-8 shrink-0 rounded-full px-3 text-[0.82rem] transition-all duration-200 active:scale-95 ${
+                      isDesktopMoreNavActive
+                        ? "text-white hover:text-white"
+                        : "bg-transparent text-slate-500 shadow-none hover:bg-white/90 hover:text-slate-700"
+                    }`}
+                    style={isDesktopMoreNavActive ? activeNavStyle : undefined}
+                    onClick={() => setDesktopMoreOpen((open) => !open)}
+                  >
+                    <Menu className="h-3.5 w-3.5" />
+                    <span>Thêm</span>
+                    <ChevronDown
+                      className={`h-3.5 w-3.5 transition-transform ${desktopMoreOpen ? "rotate-180" : ""}`}
+                    />
+                  </Button>
 
-                  return (
-                    <Button
-                      key={item.path}
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigate(item.path)}
-                      onPointerEnter={() => handlePrefetch(item.path)}
-                      aria-current={active ? "page" : undefined}
-                      title={item.label}
-                      className={`h-8 shrink-0 rounded-full px-2.5 text-[0.78rem] transition-all duration-200 active:scale-95 ${
-                        active
-                          ? "text-white hover:text-white"
-                          : "bg-transparent text-slate-500 shadow-none hover:bg-white/90 hover:text-slate-700"
-                      }`}
-                      style={active ? activeNavStyle : undefined}
+                  {desktopMoreOpen ? (
+                    <div
+                      role="menu"
+                      aria-label="Mục khác"
+                      className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-lg border border-slate-200 bg-white/96 p-2 shadow-[0_24px_60px_-34px_rgba(15,23,42,0.32)] backdrop-blur-xl"
                     >
-                      <Icon className="h-3.5 w-3.5" />
-                      <span>{item.compactLabel ?? item.label}</span>
-                    </Button>
-                  );
-                })}
+                      <div className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                        Mục khác
+                      </div>
+                      <div className="mx-1 mb-1 h-px bg-slate-200/80" />
+                      {secondaryNavItems.map((item) => {
+                        const Icon = item.icon;
+                        const active = isActive(item.path);
+
+                        return (
+                          <button
+                            key={item.path}
+                            type="button"
+                            role="menuitem"
+                            aria-current={active ? "page" : undefined}
+                            onPointerEnter={() => handlePrefetch(item.path)}
+                            onClick={() => {
+                              setDesktopMoreOpen(false);
+                              navigate(item.path);
+                            }}
+                            className={`my-1 flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium tracking-normal outline-none transition-colors ${
+                              active
+                                ? "text-white focus:text-white"
+                                : "text-slate-600 hover:bg-slate-50 hover:text-slate-950 focus:bg-slate-50 focus:text-slate-950"
+                            }`}
+                            style={active ? activeNavStyle : undefined}
+                          >
+                            <Icon className={`h-4 w-4 shrink-0 ${active ? "text-white" : "text-slate-500"}`} />
+                            <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+                </div>
               </div>
             </nav>
 
