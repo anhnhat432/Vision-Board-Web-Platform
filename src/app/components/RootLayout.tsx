@@ -24,13 +24,15 @@ import {
 import { useLocation, useNavigate, useOutlet } from "react-router";
 import { maybeShowBrowserReminderNotification, syncPendingOutbox } from "../utils/production";
 import { getUserData, initializeUserData } from "../utils/storage";
-import { getNewUserGuideProgress, hasSeenNewUserGuide, isNewUserGuideDismissed, markNewUserGuideSeen } from "../utils/new-user-guide";
+import {
+  getNewUserGuideProgress,
+  hasSeenNewUserGuide,
+  isNewUserGuideDismissed,
+  markNewUserGuideSeen,
+} from "../utils/new-user-guide";
 import { isDemoMode } from "../utils/app-mode";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import {
-  BACKEND_PLAN_HYDRATION_EVENT_NAME,
-  useBackendPlanHydration,
-} from "../hooks/useBackendPlanHydration";
+import { BACKEND_PLAN_HYDRATION_EVENT_NAME, useBackendPlanHydration } from "../hooks/useBackendPlanHydration";
 import { useTheme } from "../hooks/useTheme";
 import { MotivationalReminder } from "./MotivationalReminder";
 import { NewUserGuideDialog } from "./NewUserGuide";
@@ -136,6 +138,13 @@ const NAV_ITEMS = [
 ];
 
 const PRIMARY_NAV_PATHS = new Set(["/", "/goals", "/12-week-system", "/vision-board"]);
+const MOBILE_BOTTOM_NAV_PATHS = new Set(["/", "/goals", "/12-week-system", "/vision-board"]);
+const MOBILE_NAV_LABELS: Record<string, string> = {
+  "/": "Tổng quan",
+  "/goals": "Mục tiêu",
+  "/12-week-system": "12 tuần",
+  "/vision-board": "Tầm nhìn",
+};
 
 // Prefetch route module on hover so navigation feels instant
 const ROUTE_IMPORTS: Record<string, () => Promise<unknown>> = {
@@ -275,9 +284,9 @@ export function RootLayout() {
       return;
     }
 
-    const heroCards = Array.from(
-      document.querySelectorAll<HTMLElement>(".hero-surface"),
-    ).filter((card) => !card.closest(".interactive-surface"));
+    const heroCards = Array.from(document.querySelectorAll<HTMLElement>(".hero-surface")).filter(
+      (card) => !card.closest(".interactive-surface"),
+    );
 
     const resetCard = (card: HTMLElement) => {
       card.style.setProperty("--hero-pointer-x", "0.5");
@@ -378,10 +387,11 @@ export function RootLayout() {
 
   const handlePrefetch = useCallback((path: string) => prefetchRoute(path), []);
 
-  const pageMeta =
-    ROUTE_META.find((item) => item.match(location.pathname)) ?? ROUTE_META[0];
+  const pageMeta = ROUTE_META.find((item) => item.match(location.pathname)) ?? ROUTE_META[0];
   const primaryNavItems = NAV_ITEMS.filter((item) => PRIMARY_NAV_PATHS.has(item.path));
   const secondaryNavItems = NAV_ITEMS.filter((item) => !PRIMARY_NAV_PATHS.has(item.path));
+  const bottomNavItems = NAV_ITEMS.filter((item) => MOBILE_BOTTOM_NAV_PATHS.has(item.path));
+  const isMoreNavActive = mobileMenuOpen || secondaryNavItems.some((item) => isActive(item.path));
   const routeTone = getRouteTone(location.pathname);
   const shellGradientStyle = {
     backgroundImage:
@@ -426,21 +436,22 @@ export function RootLayout() {
     }
   };
 
-  const prefersReducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const prefersReducedMotion =
+    typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const pageTransition = prefersReducedMotion
-    ? {
+    ? ({
         initial: { opacity: 1 },
         animate: { opacity: 1 },
         exit: { opacity: 1 },
         transition: { duration: 0 },
-      } as const
-    : {
+      } as const)
+    : ({
         initial: { opacity: 0, y: 8 },
         animate: { opacity: 1, y: 0 },
         exit: { opacity: 0, y: -4 },
         transition: { duration: 0.24, ease: [0.22, 1, 0.36, 1] },
-      } as const;
+      } as const);
 
   if (GUIDED_PATHS.has(location.pathname)) {
     return (
@@ -472,70 +483,69 @@ export function RootLayout() {
               className="flex shrink-0 items-center gap-2.5 rounded-lg text-left transition-all duration-200 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
               aria-label="Về trang chủ Dear Our Future"
             >
-              <div
-                className="flex size-9 items-center justify-center rounded-xl"
-                style={shellBadgeStyle}
-              >
+              <div className="flex size-9 items-center justify-center rounded-xl" style={shellBadgeStyle}>
                 <Sparkles className="h-4.5 w-4.5 text-white" />
               </div>
               <div className="min-w-0">
-                <h1 className="truncate text-sm font-semibold tracking-normal text-slate-900">
-                  Dear Our Future
-                </h1>
+                <h1 className="truncate text-sm font-semibold tracking-normal text-slate-900">Dear Our Future</h1>
               </div>
             </button>
 
             <nav className="hidden flex-1 items-center justify-center md:flex">
               <div className="flex flex-wrap items-center gap-1 rounded-full border border-white/75 bg-white/72 px-1.5 py-1 shadow-[0_6px_14px_-14px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.9)]">
                 {primaryNavItems.map((item) => {
-                    const Icon = item.icon;
-                    const active = isActive(item.path);
+                  const Icon = item.icon;
+                  const active = isActive(item.path);
 
-                    return (
-                      <Button
-                        key={item.path}
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(item.path)}
-                        onPointerEnter={() => handlePrefetch(item.path)}
-                        aria-current={active ? "page" : undefined}
-                        title={item.label}
-                        className={`h-8 shrink-0 rounded-full px-3 text-[0.82rem] transition-all duration-200 active:scale-95 ${active
+                  return (
+                    <Button
+                      key={item.path}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(item.path)}
+                      onPointerEnter={() => handlePrefetch(item.path)}
+                      aria-current={active ? "page" : undefined}
+                      title={item.label}
+                      className={`h-8 shrink-0 rounded-full px-3 text-[0.82rem] transition-all duration-200 active:scale-95 ${
+                        active
                           ? "text-white hover:text-white"
-                          : "bg-transparent text-slate-600 shadow-none hover:bg-white/90 hover:text-slate-900"}`}
-                        style={active ? activeNavStyle : undefined}
-                      >
-                        <Icon className="h-3.5 w-3.5" />
-                        <span>{item.compactLabel ?? item.label}</span>
-                      </Button>
-                    );
-                  })}
+                          : "bg-transparent text-slate-600 shadow-none hover:bg-white/90 hover:text-slate-900"
+                      }`}
+                      style={active ? activeNavStyle : undefined}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      <span>{item.compactLabel ?? item.label}</span>
+                    </Button>
+                  );
+                })}
 
                 <div className="mx-0.5 h-5 w-px shrink-0 bg-slate-200/60" />
 
                 {secondaryNavItems.map((item) => {
-                    const Icon = item.icon;
-                    const active = isActive(item.path);
+                  const Icon = item.icon;
+                  const active = isActive(item.path);
 
-                    return (
-                      <Button
-                        key={item.path}
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(item.path)}
-                        onPointerEnter={() => handlePrefetch(item.path)}
-                        aria-current={active ? "page" : undefined}
-                        title={item.label}
-                        className={`h-8 shrink-0 rounded-full px-2.5 text-[0.78rem] transition-all duration-200 active:scale-95 ${active
+                  return (
+                    <Button
+                      key={item.path}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(item.path)}
+                      onPointerEnter={() => handlePrefetch(item.path)}
+                      aria-current={active ? "page" : undefined}
+                      title={item.label}
+                      className={`h-8 shrink-0 rounded-full px-2.5 text-[0.78rem] transition-all duration-200 active:scale-95 ${
+                        active
                           ? "text-white hover:text-white"
-                          : "bg-transparent text-slate-500 shadow-none hover:bg-white/90 hover:text-slate-700"}`}
-                        style={active ? activeNavStyle : undefined}
-                      >
-                        <Icon className="h-3.5 w-3.5" />
-                        <span>{item.compactLabel ?? item.label}</span>
-                      </Button>
-                    );
-                  })}
+                          : "bg-transparent text-slate-500 shadow-none hover:bg-white/90 hover:text-slate-700"
+                      }`}
+                      style={active ? activeNavStyle : undefined}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      <span>{item.compactLabel ?? item.label}</span>
+                    </Button>
+                  );
+                })}
               </div>
             </nav>
 
@@ -606,14 +616,20 @@ export function RootLayout() {
             </div>
 
             <div className="md:hidden flex min-w-0 items-center gap-2">
-              <span className="hidden max-w-[120px] truncate text-sm font-medium tracking-normal text-slate-700 dark:text-slate-200 sm:inline">{pageMeta.label}</span>
+              <span className="hidden max-w-[120px] truncate text-sm font-medium tracking-normal text-slate-700 dark:text-slate-200 sm:inline">
+                {pageMeta.label}
+              </span>
               <button
                 type="button"
                 className="hidden size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 backdrop-blur-sm transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300 sm:flex"
                 onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
                 aria-label={resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
               >
-                {resolvedTheme === "dark" ? <Sun className="h-[1.1rem] w-[1.1rem]" /> : <Moon className="h-[1.1rem] w-[1.1rem]" />}
+                {resolvedTheme === "dark" ? (
+                  <Sun className="h-[1.1rem] w-[1.1rem]" />
+                ) : (
+                  <Moon className="h-[1.1rem] w-[1.1rem]" />
+                )}
               </button>
               <button
                 type="button"
@@ -707,9 +723,7 @@ export function RootLayout() {
                       }}
                       onFocus={() => handlePrefetch(item.path)}
                       className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-sm font-medium tracking-normal transition-all active:scale-[0.98] ${
-                        active
-                          ? "text-white"
-                          : "text-slate-600 hover:bg-white/80 hover:text-slate-900"
+                        active ? "text-white" : "text-slate-600 hover:bg-white/80 hover:text-slate-900"
                       }`}
                       style={active ? activeNavStyle : undefined}
                       aria-current={active ? "page" : undefined}
@@ -725,7 +739,11 @@ export function RootLayout() {
         )}
       </header>
 
-      <main className="relative z-10 mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 lg:px-8 main-content-mobile-pad" id="main-content" aria-label="Nội dung trang">
+      <main
+        className="relative z-10 mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 lg:px-8 main-content-mobile-pad"
+        id="main-content"
+        aria-label="Nội dung trang"
+      >
         {/* Screen-reader route announcer */}
         <div className="sr-only" aria-live="polite" aria-atomic="true" role="status">
           {pageMeta.label}
@@ -738,9 +756,13 @@ export function RootLayout() {
       </main>
 
       {/* Mobile bottom navigation bar */}
-      <nav className="bottom-nav md:hidden" aria-label="Điều hướng chính" style={{ animation: "bottom-nav-rise 0.38s cubic-bezier(0.22,1,0.36,1) both" }}>
+      <nav
+        className="bottom-nav md:hidden"
+        aria-label="Điều hướng chính"
+        style={{ animation: "bottom-nav-rise 0.38s cubic-bezier(0.22,1,0.36,1) both" }}
+      >
         <div className="bottom-nav-inner">
-          {primaryNavItems.concat(secondaryNavItems.filter(item => item.path === "/life-balance" || item.path === "/journal")).map((item) => {
+          {bottomNavItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
             return (
@@ -749,8 +771,12 @@ export function RootLayout() {
                 type="button"
                 className="bottom-nav-item"
                 aria-current={active ? "page" : undefined}
-                onClick={() => navigate(item.path)}
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigate(item.path);
+                }}
                 onPointerEnter={() => handlePrefetch(item.path)}
+                title={item.label}
               >
                 <div className="bottom-nav-icon">
                   <Icon
@@ -758,10 +784,8 @@ export function RootLayout() {
                     strokeWidth={active ? 2.25 : 1.8}
                   />
                 </div>
-                <span
-                  className={`bottom-nav-label ${active ? "nav-label-active" : "text-slate-400"}`}
-                >
-                  {item.compactLabel ?? item.label}
+                <span className={`bottom-nav-label ${active ? "nav-label-active" : "text-slate-400"}`}>
+                  {MOBILE_NAV_LABELS[item.path] ?? item.compactLabel ?? item.label}
                 </span>
               </button>
             );
@@ -772,21 +796,23 @@ export function RootLayout() {
             className="bottom-nav-item"
             onClick={() => setMobileMenuOpen((open) => !open)}
             aria-label="Thêm"
+            aria-current={isMoreNavActive ? "page" : undefined}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-nav-menu"
           >
             <div className="bottom-nav-icon">
-              <Menu className="h-4 w-4 text-slate-500" strokeWidth={1.8} />
+              <Menu
+                className={`h-4 w-4 ${isMoreNavActive ? "text-white" : "text-slate-500"}`}
+                strokeWidth={isMoreNavActive ? 2.25 : 1.8}
+              />
             </div>
-            <span className="bottom-nav-label text-slate-400">Thêm</span>
+            <span className={`bottom-nav-label ${isMoreNavActive ? "nav-label-active" : "text-slate-400"}`}>Thêm</span>
           </button>
         </div>
       </nav>
 
       <MotivationalReminder />
-      <NewUserGuideDialog
-        open={isGuideOpen}
-        onOpenChange={setIsGuideOpen}
-        userData={guideUserData}
-      />
+      <NewUserGuideDialog open={isGuideOpen} onOpenChange={setIsGuideOpen} userData={guideUserData} />
       <Toaster />
     </div>
   );
