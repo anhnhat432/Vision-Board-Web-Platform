@@ -3,6 +3,15 @@ import { Navigate, createBrowserRouter } from "react-router";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RootLayout } from "./components/RootLayout";
+import { TwelveWeekSystem } from "./pages/12WeekSystem";
+import { Achievements } from "./pages/Achievements";
+import { BillingPlan } from "./pages/BillingPlan";
+import { Dashboard } from "./pages/Dashboard";
+import { GoalTracker } from "./pages/GoalTracker";
+import { LifeBalance } from "./pages/LifeBalance";
+import { ReflectionJournal } from "./pages/ReflectionJournal";
+import { VisionBoardEditor } from "./pages/VisionBoardEditor";
+import { VisionBoardGallery } from "./pages/VisionBoardGallery";
 
 function lazyComponent<TModule extends Record<string, unknown>>(
   loader: () => Promise<TModule>,
@@ -27,10 +36,7 @@ function RouteHydrateFallback() {
   );
 }
 
-function lazyRoute<TModule extends Record<string, unknown>>(
-  loader: () => Promise<TModule>,
-  exportName: keyof TModule,
-) {
+function lazyRoute<TModule extends Record<string, unknown>>(loader: () => Promise<TModule>, exportName: keyof TModule) {
   return {
     lazy: lazyComponent(loader, exportName),
     HydrateFallback: RouteHydrateFallback,
@@ -57,7 +63,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        ...lazyRoute(() => import("./pages/Dashboard"), "Dashboard"),
+        Component: Dashboard,
       },
       {
         path: "onboarding",
@@ -93,7 +99,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "12-week-system",
-        ...lazyRoute(() => import("./pages/12WeekSystem"), "TwelveWeekSystem"),
+        Component: TwelveWeekSystem,
       },
       {
         path: "billing/mock-checkout",
@@ -101,7 +107,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "billing/plan",
-        ...lazyRoute(() => import("./pages/BillingPlan"), "BillingPlan"),
+        Component: BillingPlan,
       },
       {
         // Protected routes — require authentication
@@ -119,7 +125,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "vision-board/:id?",
-        ...lazyRoute(() => import("./pages/VisionBoardEditor"), "VisionBoardEditor"),
+        Component: VisionBoardEditor,
       },
       {
         path: "admin/orders",
@@ -127,23 +133,23 @@ export const router = createBrowserRouter([
       },
       {
         path: "goals",
-        ...lazyRoute(() => import("./pages/GoalTracker"), "GoalTracker"),
+        Component: GoalTracker,
       },
       {
         path: "life-balance",
-        ...lazyRoute(() => import("./pages/LifeBalance"), "LifeBalance"),
+        Component: LifeBalance,
       },
       {
         path: "achievements",
-        ...lazyRoute(() => import("./pages/Achievements"), "Achievements"),
+        Component: Achievements,
       },
       {
         path: "journal",
-        ...lazyRoute(() => import("./pages/ReflectionJournal"), "ReflectionJournal"),
+        Component: ReflectionJournal,
       },
       {
         path: "gallery",
-        ...lazyRoute(() => import("./pages/VisionBoardGallery"), "VisionBoardGallery"),
+        Component: VisionBoardGallery,
       },
     ],
   },

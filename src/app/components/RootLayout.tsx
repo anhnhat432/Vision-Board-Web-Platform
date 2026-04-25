@@ -147,17 +147,8 @@ const MOBILE_NAV_LABELS: Record<string, string> = {
   "/vision-board": "Tầm nhìn",
 };
 
-// Prefetch route module on hover so navigation feels instant
+// Prefetch the remaining lazy route modules on hover so navigation feels instant.
 const ROUTE_IMPORTS: Record<string, () => Promise<unknown>> = {
-  "/": () => import("../pages/Dashboard"),
-  "/goals": () => import("../pages/GoalTracker"),
-  "/12-week-system": () => import("../pages/12WeekSystem"),
-  "/vision-board": () => import("../pages/VisionBoardEditor"),
-  "/gallery": () => import("../pages/VisionBoardGallery"),
-  "/life-balance": () => import("../pages/LifeBalance"),
-  "/achievements": () => import("../pages/Achievements"),
-  "/journal": () => import("../pages/ReflectionJournal"),
-  "/billing/plan": () => import("../pages/BillingPlan"),
   "/order-status": () => import("../pages/OrderStatusPage"),
 };
 const prefetchedRoutes = new Set<string>();
@@ -202,16 +193,11 @@ export function RootLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMoreOpen, setDesktopMoreOpen] = useState(false);
   const desktopMoreRef = useRef<HTMLDivElement | null>(null);
-  const routerLocationRef = useRef(`${location.pathname}${location.search}${location.hash}`);
   const [guideUserData, setGuideUserData] = useState(() => getUserData());
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const currentRouteKey = `${location.pathname}${location.search}${location.hash}`;
-
-  useEffect(() => {
-    routerLocationRef.current = currentRouteKey;
-  }, [currentRouteKey]);
 
   const navigateAppRoute = useCallback(
     (path: string) => {
@@ -220,14 +206,7 @@ export function RootLayout() {
 
       if (currentRouteKey === targetRouteKey) return;
 
-      navigate(path);
-
-      window.setTimeout(() => {
-        const browserRouteKey = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-        if (browserRouteKey === targetRouteKey && routerLocationRef.current !== targetRouteKey) {
-          window.location.assign(targetRouteKey);
-        }
-      }, 700);
+      navigate(path, { flushSync: true });
     },
     [currentRouteKey, navigate],
   );
