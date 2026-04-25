@@ -227,12 +227,12 @@ export function RootLayout() {
     setGuideUserData(userData);
 
     if (!demoMode && isConfigured && (authLoading || backendPlanHydration.loading)) return;
-    if (!demoMode && isConfigured && !user && isAuthProtectedPath(location.pathname)) return;
+    if (!demoMode && isAuthProtectedPath(location.pathname)) return;
 
     if (!demoMode && !userData.onboardingCompleted && location.pathname !== "/onboarding") {
       navigate("/onboarding");
     }
-  }, [authLoading, backendPlanHydration.loading, demoMode, isConfigured, location.pathname, navigate, user]);
+  }, [authLoading, backendPlanHydration.loading, demoMode, isConfigured, location.pathname, navigate]);
 
   useEffect(() => {
     if (location.pathname) {

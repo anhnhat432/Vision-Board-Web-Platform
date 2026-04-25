@@ -91,6 +91,14 @@ describe("RootLayout onboarding redirect", () => {
     expect(router.state.location.state).toMatchObject({ from: "/order?kit=vision#recipient" });
   });
 
+  it("does not force onboarding after login returns to a protected route", async () => {
+    setAuthContext({ user: { uid: "user_test" } });
+    const { router } = renderAppShell("/order?kit=vision#recipient");
+
+    expect(await screen.findByTestId("order-page")).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/order");
+  });
+
   it("still sends public app routes to onboarding when setup is incomplete", async () => {
     const { router } = renderAppShell("/goals");
 
