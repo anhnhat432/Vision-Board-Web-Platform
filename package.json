@@ -1,5 +1,6 @@
 {
-  "name": "@figma/my-make-file",
+  "name": "vision-board-web-platform",
+  "description": "A full-stack web app for turning life vision into SMART goals and 12-week execution plans.",
   "private": true,
   "version": "0.0.1",
   "type": "module",

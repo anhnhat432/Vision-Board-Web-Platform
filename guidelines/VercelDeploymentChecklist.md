@@ -16,7 +16,7 @@ Vercel có thể tự nhận diện Vite, nhưng nếu muốn điền tay thì d
 
 Lưu ý:
 
-- App này là SPA và đã có rewrite trong [vercel.json](c:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/vercel.json), nên route như `/dashboard` hay `/12-week-system` sẽ không bị 404 khi refresh.
+- App này là SPA và đã có rewrite trong [`vercel.json`](../vercel.json), nên route như `/dashboard` hay `/12-week-system` sẽ không bị 404 khi refresh.
 
 ## 3. Chọn mode deploy
 
@@ -89,7 +89,7 @@ Nếu có outbox sync thật, thêm:
 
 ## 4. Env variables nên tạo trên Vercel
 
-Tham chiếu nhanh từ [.env.example](c:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/.env.example):
+Tham chiếu nhanh từ [`.env.example`](../.env.example):
 
 - `VITE_ANALYTICS_MODE`
 - `VITE_GA_MEASUREMENT_ID`
@@ -109,10 +109,10 @@ Sau khi Vercel build xong, kiểm tra nhanh:
 1. Mở `/`
 2. Refresh ở `/dashboard` để chắc rewrite SPA hoạt động
 3. Mở flow `Tạo mục tiêu -> SMART -> Feasibility -> 12-week`
-4. Kiểm tra [12WeekSetup.tsx](c:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/pages/12WeekSetup.tsx) có hiện `khung gợi ý`
-5. Kiểm tra [12WeekSystem.tsx](c:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/pages/12WeekSystem.tsx) mở được tab `Hôm nay / Tuần / Tiến độ / Cài đặt`
-6. Mở paywall để chắc [UpgradePaywallDialog.tsx](c:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/components/UpgradePaywallDialog.tsx) không vỡ layout
-7. Nếu đang để `mock_provider`, thử flow mock checkout ở [MockBillingCheckout.tsx](c:/Users/admin/Downloads/Vision%20Board%20Web%20Platform/src/app/pages/MockBillingCheckout.tsx)
+4. Kiểm tra [`12WeekSetup.tsx`](../src/app/pages/12WeekSetup.tsx) có hiện `khung gợi ý`
+5. Kiểm tra [`12WeekSystem.tsx`](../src/app/pages/12WeekSystem.tsx) mở được tab `Hôm nay / Tuần / Tiến độ / Cài đặt`
+6. Mở paywall để chắc [`UpgradePaywallDialog.tsx`](../src/app/components/UpgradePaywallDialog.tsx) không vỡ layout
+7. Nếu đang để `mock_provider`, thử flow mock checkout ở [`MockBillingCheckout.tsx`](../src/app/pages/MockBillingCheckout.tsx)
 
 ## 6. Khuyến nghị cho bản hiện tại
 

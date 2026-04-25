@@ -1,106 +1,107 @@
 # Vision Board Web Platform
 
-Vision Board Web Platform là một web app local-first cho flow:
+Full-stack web app for turning a life vision into SMART goals, feasibility checks, 12-week execution plans, weekly action, and reflection.
 
-- đánh giá "wheel of life"
-- rút ra life insight
-- tạo SMART goal
-- kiểm tra feasibility
-- vận hành chu kỳ 12 tuần
-- lưu vision board, journal, achievements và billing state
+Live production demo: https://vision-board-web-platform.vercel.app
 
-Frontend chạy bằng React + Vite + TypeScript. Backend là Express + MongoDB + Firebase Auth, hiện được dùng chủ yếu để đồng bộ plan/task/week/metric cho flow 12 tuần.
+## Product Flow
 
-## Kiến trúc nhanh
+The app is intentionally focused on one core journey:
 
-- `./`: frontend React/Vite
-- `./backend`: API Express/Mongo/Firebase
-- `localStorage`: source of truth chính cho dữ liệu local-first
-- `guidelines/`: ghi chú deploy và vận hành
+```text
+Onboarding
+-> Life Balance
+-> Life Insight
+-> SMART Goal
+-> Feasibility Check
+-> 12-Week Plan
+-> Weekly Execution
+-> Reflection / Review
+```
 
-Nếu bạn chỉ muốn xem UI và nghiệp vụ, có thể chạy frontend ở `demo mode` mà không cần backend.
+The frontend is local-first so the main product flow can be tested quickly without a backend. The backend adds authenticated sync for the 12-week planning domain.
 
-## Yêu cầu môi trường
+## Tech Stack
 
-- Node.js `20.x`
-- npm
-- MongoDB Atlas chỉ cần khi muốn chạy backend thật
-- Firebase client + Firebase service account chỉ cần khi muốn auth và sync API thật
+- Frontend: React, Vite, TypeScript
+- UI: existing project components, Radix primitives, Lucide icons, Tailwind CSS
+- Auth: Firebase Auth
+- Backend: Express, TypeScript, MongoDB/Mongoose
+- Deployment: Vercel for frontend, Render-ready backend blueprint
+- Testing: Vitest, Testing Library, Biome, TypeScript
 
-## Cách 1: Chạy nhanh frontend demo
+## Repository Structure
 
-Đây là cách để xem app nhanh nhất.
+```text
+.
++-- src/                         Frontend app source
+|   +-- app/pages/                Route-level product screens
+|   +-- app/components/           Shared UI and app components
+|   +-- features/plan12week/      12-week planning logic and persistence
+|   +-- lib/api/                  Frontend API clients and link stores
+|   +-- test/                     Frontend test helpers
++-- backend/                     Express + MongoDB API
+|   +-- src/
+|       +-- routes/               API route definitions
+|       +-- controllers/          Request handlers
+|       +-- services/             Domain rules and validation
+|       +-- repositories/         Mongo-backed persistence
+|       +-- models/               Mongoose models
++-- scripts/check-runtime-env.mjs Runtime env report for local/full-stack setup
++-- guidelines/                  Deployment and operating notes
++-- render.yaml                  Render backend blueprint
++-- vercel.json                  SPA rewrite for Vercel
+```
 
-### 1. Cài dependencies frontend
+## Quick Start: Frontend Demo
+
+Use this path when you want to inspect the product, UI, and local-first flow quickly.
 
 ```powershell
 npm install
-```
-
-### 2. Tạo file env frontend
-
-```powershell
 Copy-Item .env.example .env
-```
-
-Mặc định file `.env.example` đã phù hợp để chạy demo:
-
-- `VITE_APP_MODE=demo`
-- `VITE_BILLING_PROVIDER_MODE=mock_provider`
-- `VITE_API_BASE_URL=http://localhost:4000/api`
-
-Trong demo mode:
-
-- app vẫn chạy được dù không bật backend
-- dữ liệu được lưu local trong trình duyệt
-- billing flow dùng mock checkout
-- Firebase có thể để trống
-
-### 3. Chạy frontend
-
-```powershell
 npm run dev
 ```
 
-Mở:
+Open:
 
 ```text
 http://localhost:5173
 ```
 
-## Cách 2: Chạy full stack local
+Default demo settings from `.env.example`:
 
-Sử dụng cách này nếu bạn muốn:
+```env
+VITE_APP_MODE=demo
+VITE_API_BASE_URL=http://localhost:4000/api
+VITE_BILLING_PROVIDER_MODE=mock_provider
+```
 
-- test sync 12-week plan với backend
-- dùng Firebase Auth thật
-- dùng MongoDB thật
+In demo mode:
 
-### Bước 1. Cài dependencies cho cả 2 phần
+- the main product flow works without a running backend
+- data is stored in browser `localStorage`
+- billing/paywall flows use mock checkout
+- Firebase values may be left empty unless you want real login/sync
 
-Frontend:
+## Full-Stack Local Setup
+
+Use this path when you want real Firebase Auth, MongoDB persistence, and backend sync for plans/weeks/tasks/metrics.
+
+### 1. Install dependencies
 
 ```powershell
 npm install
+npm --prefix backend install
 ```
 
-Backend:
-
-```powershell
-cd backend
-npm install
-cd ..
-```
-
-### Bước 2. Cấu hình env frontend
-
-Tạo file `.env` từ mẫu:
+### 2. Configure frontend env
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Khi muốn chạy full stack, nên sửa ít nhất:
+Minimum full-stack values:
 
 ```env
 VITE_API_BASE_URL=http://localhost:4000/api
@@ -108,7 +109,7 @@ VITE_APP_MODE=real
 VITE_BILLING_PROVIDER_MODE=mock_provider
 ```
 
-Nếu muốn login và gọi API có token Firebase, điền thêm đầy đủ:
+Firebase client values are required for real login and authenticated API calls:
 
 ```env
 VITE_FIREBASE_API_KEY=
@@ -120,20 +121,13 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_MEASUREMENT_ID=
 ```
 
-Lưu ý:
-
-- Nếu không điền `VITE_FIREBASE_*`, UI vẫn mở được, nhưng các API cần auth sẽ không có token hợp lệ.
-- Backend gần như tất cả route đều yêu cầu Firebase ID token, trừ `GET /api/health`.
-
-### Bước 3. Cấu hình env backend
-
-Tạo file `backend/.env`:
+### 3. Configure backend env
 
 ```powershell
 Copy-Item backend/.env.example backend/.env
 ```
 
-Giá trị bắt buộc trong `backend/.env`:
+Required backend values:
 
 ```env
 PORT=4000
@@ -144,150 +138,148 @@ FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY\n-----END PR
 FRONTEND_ORIGIN=http://localhost:5173
 ```
 
-Lưu ý cho `FIREBASE_PRIVATE_KEY`:
+Keep `FIREBASE_PRIVATE_KEY` quoted and keep `\n` escaped. The backend converts it to real line breaks at runtime.
 
-- giữ nguyên dấu ngoặc kép
-- giữ `\n` trong file env, backend sẽ tự convert thành xuống dòng thật
-
-### Bước 4. Chạy backend
-
-Mở terminal 1:
+### 4. Run the backend
 
 ```powershell
-cd backend
-npm run dev
+npm --prefix backend run dev
 ```
 
-Kiểm tra health:
+Health check:
 
 ```text
 http://localhost:4000/api/health
 ```
 
-### Bước 5. Chạy frontend
-
-Mở terminal 2:
+### 5. Run the frontend
 
 ```powershell
 npm run dev
 ```
+
+## Verification Commands
 
 Frontend:
 
-```text
-http://localhost:5173
-```
-
-## Scripts hay dùng
-
-### Frontend
-
 ```powershell
-npm run dev
-npm run build
 npm run typecheck
 npm run lint
 npm run test:run
+npm run build
 npm run check
 ```
 
-Ý nghĩa:
-
-- `dev`: chạy Vite dev server
-- `build`: build frontend production
-- `typecheck`: chạy TypeScript check
-- `lint`: chạy Biome lint
-- `test:run`: chạy Vitest 1 lần
-- `check`: typecheck + lint + test + build
-
-### Backend
+Backend:
 
 ```powershell
-cd backend
-npm run dev
-npm run build
-npm run start
+npm --prefix backend run typecheck
+npm --prefix backend run build
+npm --prefix backend run check
 ```
 
-Ý nghĩa:
-
-- `dev`: chạy backend bằng `ts-node-dev`
-- `build`: compile TypeScript vào `backend/dist`
-- `start`: chạy bản build production
-
-## Dữ liệu trong dự án đang hoạt động thế nào
-
-Đây là điểm quan trọng nếu bạn debug:
-
-- app hiện tại là `local-first`
-- goals, vision boards, reflections, achievements, subscription state và nhiều dữ liệu UI được lưu trong `localStorage`
-- backend hiện được nối chủ yếu cho domain `plan / week / task / metric`
-- nếu backend lỗi, frontend vẫn có thể tiếp tục chạy được phần lớn nghiệp vụ local
-
-Vì vậy:
-
-- debug giao diện và nghiệp vụ có thể bắt đầu từ frontend
-- debug sync thì cần xem cả `.env`, Firebase token và backend logs
-
-## Billing và thanh toán
-
-App hiện có 3 chế độ billing:
-
-- `local_test`
-- `mock_provider`
-- `api_contract`
-
-Trong local dev, khuyến nghị:
-
-- dùng `mock_provider` để test flow paywall và checkout mà không cần provider thật
-
-Biến liên quan nằm trong `.env.example`:
-
-- `VITE_BILLING_PROVIDER_MODE`
-- `VITE_BILLING_PROVIDER_LABEL`
-- `VITE_BILLING_API_BASE`
-- `VITE_BILLING_CHECKOUT_ENDPOINT`
-- `VITE_BILLING_PORTAL_ENDPOINT`
-- `VITE_BILLING_RESTORE_ENDPOINT`
-- `VITE_BILLING_ENTITLEMENT_SYNC_ENDPOINT`
-
-## Deploy
-
-- Frontend env template: `./.env.example`
-- Backend env template: `./backend/.env.example`
-- Frontend deploy notes: `./guidelines/VercelDeploymentChecklist.md`
-- Backend deploy notes: `./backend/README.md`
-- Backend Render blueprint: `./render.yaml`
-
-## Nếu chạy lỗi, xem nhanh các điểm này
-
-### Frontend mở được nhưng sync lỗi
-
-Kiểm tra:
-
-- backend đã chạy chưa
-- `VITE_API_BASE_URL` có đúng `http://localhost:4000/api` không
-- frontend đã đăng nhập Firebase chưa
-- backend có đủ `FIREBASE_*` và `MONGODB_URI` chưa
-
-### API bị 401
-
-Thường là:
-
-- frontend chưa có Firebase token
-- `VITE_FIREBASE_*` chưa khai báo
-- backend đang dùng Firebase project khác với frontend
-
-### Chỉ muốn xem app cho nhanh
-
-Dùng:
-
-- `VITE_APP_MODE=demo`
-- `VITE_BILLING_PROVIDER_MODE=mock_provider`
-
-và chỉ cần:
+Full project:
 
 ```powershell
-npm install
-npm run dev
+npm run check:all
 ```
+
+Environment report:
+
+```powershell
+npm run env:check
+npm run env:check:full
+```
+
+`env:check` reports missing env values without failing the local demo path. `env:check:full` is stricter and should pass before testing authenticated backend sync.
+
+## API Surface
+
+All backend routes except `GET /api/health` require:
+
+```http
+Authorization: Bearer <firebase-id-token>
+```
+
+Main backend domains:
+
+- Auth/user bootstrap
+- Goals
+- Plans
+- Weeks
+- Tasks
+- Lead metrics
+- Vision boards
+- Orders
+
+The 12-week planning domain is the most production-relevant backend contract today. The frontend stores local progress first, then syncs plan/week/task/metric data when auth and backend configuration are available.
+
+## Deployment
+
+Frontend production is configured for Vercel:
+
+- build command: `npm run build`
+- output directory: `dist`
+- SPA rewrites: `vercel.json`
+- live alias: https://vision-board-web-platform.vercel.app
+
+Backend deployment is Render-ready:
+
+- blueprint: `render.yaml`
+- backend guide: `backend/README.md`
+- health path: `/api/health`
+
+Detailed frontend deployment checklist:
+
+- `guidelines/VercelDeploymentChecklist.md`
+
+## Portfolio Review Notes
+
+What this project demonstrates:
+
+- end-to-end product flow from self-assessment to execution
+- local-first UX with graceful backend sync
+- authenticated Express/Mongo API boundaries
+- 12-week planning domain with plans, weeks, tasks, and metrics
+- route-level loading, empty, error, and fallback states
+- production deployment and smoke-tested Vercel build
+
+Current intentional limitations:
+
+- billing is mock/provider-contract focused, not a real payment integration
+- the product is web-only; there is no mobile app target
+- localStorage remains the primary UX source of truth for most non-plan data
+- full backend sync requires Firebase and MongoDB env configuration
+
+## Troubleshooting
+
+Frontend opens but backend sync fails:
+
+- confirm backend is running
+- confirm `VITE_API_BASE_URL=http://localhost:4000/api`
+- confirm the user is logged in with Firebase
+- confirm backend Firebase service account matches the frontend Firebase project
+
+API returns `401`:
+
+- frontend is missing a valid Firebase ID token
+- Firebase client env is incomplete
+- backend Firebase project does not match the frontend project
+
+`env:check` reports missing backend env:
+
+- this is expected for frontend-only demo mode
+- use `env:check:full` only when running authenticated backend sync
+
+Vercel refresh gives 404:
+
+- confirm `vercel.json` is present and rewrites all routes to `/index.html`
+
+## Definition of Done for Future Changes
+
+For every meaningful change:
+
+- keep scope small and aligned with the core flow
+- run the most relevant frontend/backend checks
+- verify loading, empty, error, and success states when touching user flows
+- report commands run and any remaining failure clearly
