@@ -99,7 +99,20 @@ describe("RootLayout onboarding redirect", () => {
     expect(router.state.location.pathname).toBe("/order");
   });
 
-  it("still sends public app routes to onboarding when setup is incomplete", async () => {
+  it("sends public app routes to login before onboarding when signed out", async () => {
+    const { router } = renderAppShell("/goals");
+
+    expect(await screen.findByTestId("login-page")).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/login");
+    expect(router.state.location.search).toBe("?next=%2Fgoals");
+    expect(router.state.location.state).toMatchObject({ from: "/goals" });
+  });
+
+  it("sends signed-in users to onboarding when setup is incomplete", async () => {
+    setAuthContext({
+      user: { uid: "user_test", email: "test@example.com" },
+      userProfile: { id: "profile_test", email: "test@example.com" },
+    });
     const { router } = renderAppShell("/goals");
 
     expect(await screen.findByTestId("onboarding-page")).toBeInTheDocument();

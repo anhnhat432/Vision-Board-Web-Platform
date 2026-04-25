@@ -54,6 +54,14 @@ function isAuthProtectedPath(pathname: string) {
   return pathname === "/order" || pathname.startsWith("/order-status");
 }
 
+function buildLoginRedirect(pathname: string, search: string, hash: string) {
+  const destination = `${pathname}${search}${hash}`;
+  return {
+    destination,
+    loginPath: `/login?next=${encodeURIComponent(destination)}`,
+  };
+}
+
 const ROUTE_META = [
   {
     match: (pathname: string) => pathname === "/",
@@ -223,16 +231,45 @@ export function RootLayout() {
   }, []);
 
   useEffect(() => {
+    if (!demoMode && isConfigured && !authLoading && !user && !isAuthProtectedPath(location.pathname)) {
+      const { destination, loginPath } = buildLoginRedirect(location.pathname, location.search, location.hash);
+      navigate(loginPath, { replace: true, state: { from: destination } });
+      return;
+    }
+
+    if (
+      !demoMode &&
+      isConfigured &&
+      (authLoading ||
+        userProfileLoading ||
+        backendPlanHydration.loading ||
+        (Boolean(user) && !userProfile && !userProfileError))
+    ) {
+      return;
+    }
+
     const userData = getUserData();
     setGuideUserData(userData);
 
-    if (!demoMode && isConfigured && (authLoading || backendPlanHydration.loading)) return;
     if (!demoMode && isAuthProtectedPath(location.pathname)) return;
 
     if (!demoMode && !userData.onboardingCompleted && location.pathname !== "/onboarding") {
       navigate("/onboarding");
     }
-  }, [authLoading, backendPlanHydration.loading, demoMode, isConfigured, location.pathname, navigate]);
+  }, [
+    authLoading,
+    backendPlanHydration.loading,
+    demoMode,
+    isConfigured,
+    location.hash,
+    location.pathname,
+    location.search,
+    navigate,
+    user,
+    userProfile,
+    userProfileError,
+    userProfileLoading,
+  ]);
 
   useEffect(() => {
     if (location.pathname) {
