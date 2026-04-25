@@ -64,4 +64,34 @@ describe("LoginPage", () => {
 
     expect(await screen.findByTestId("destination")).toHaveTextContent("/order?kit=vision#recipient");
   });
+
+  it("uses the login next query when navigation state is unavailable", async () => {
+    setAuthContext({ user: { uid: "user_test" } });
+
+    render(
+      <MemoryRouter initialEntries={["/login?next=%2Forder%3Fkit%3Dvision%23recipient"]}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/order" element={<DestinationProbe />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByTestId("destination")).toHaveTextContent("/order?kit=vision#recipient");
+  });
+
+  it("ignores unsafe login next redirects", async () => {
+    setAuthContext({ user: { uid: "user_test" } });
+
+    render(
+      <MemoryRouter initialEntries={["/login?next=%2F%2Fevil.example"]}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<DestinationProbe />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByTestId("destination")).toHaveTextContent("/");
+  });
 });

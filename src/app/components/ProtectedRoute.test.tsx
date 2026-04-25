@@ -24,8 +24,14 @@ function setAuthContext(overrides: Record<string, unknown> = {}) {
 function LoginProbe() {
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from ?? "";
+  const next = new URLSearchParams(location.search).get("next") ?? "";
 
-  return <div data-testid="login-from">{from}</div>;
+  return (
+    <div>
+      <div data-testid="login-from">{from}</div>
+      <div data-testid="login-next">{next}</div>
+    </div>
+  );
 }
 
 function renderProtectedRoute(initialEntry = "/order?kit=vision#recipient") {
@@ -50,6 +56,7 @@ describe("ProtectedRoute", () => {
     renderProtectedRoute();
 
     expect(await screen.findByTestId("login-from")).toHaveTextContent("/order?kit=vision#recipient");
+    expect(screen.getByTestId("login-next")).toHaveTextContent("/order?kit=vision#recipient");
   });
 
   it("renders protected content when auth is unavailable for local demo mode", () => {

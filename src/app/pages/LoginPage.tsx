@@ -12,18 +12,24 @@ import { useAuthContext } from "@/lib/auth/AuthContext";
 
 type LoginMode = "signin" | "signup";
 
-function getRedirectPath(from: unknown): string {
-  if (typeof from === "string" && from.startsWith("/") && !from.startsWith("/login")) {
-    return from;
+function normalizeRedirectPath(from: unknown): string | null {
+  if (typeof from !== "string") return null;
+
+  const value = from.trim();
+  if (value.startsWith("/") && !value.startsWith("//") && !value.startsWith("/\\") && !value.startsWith("/login")) {
+    return value;
   }
-  return "/";
+
+  return null;
 }
 
 export function LoginPage() {
   const { user, authLoading, error, login, isConfigured } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectTo = getRedirectPath((location.state as Record<string, unknown> | null)?.from);
+  const stateRedirect = normalizeRedirectPath((location.state as Record<string, unknown> | null)?.from);
+  const queryRedirect = normalizeRedirectPath(new URLSearchParams(location.search).get("next"));
+  const redirectTo = stateRedirect ?? queryRedirect ?? "/";
 
   useEffect(() => {
     if (error) toast.error(error);

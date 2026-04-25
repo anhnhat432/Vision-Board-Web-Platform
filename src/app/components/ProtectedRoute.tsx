@@ -6,6 +6,7 @@ export function ProtectedRoute() {
   const { user, authLoading, isConfigured } = useAuthContext();
   const location = useLocation();
   const destination = `${location.pathname}${location.search}${location.hash}`;
+  const loginPath = `/login?next=${encodeURIComponent(destination)}`;
 
   // Firebase not configured (demo mode or missing env vars) — skip auth gate entirely
   if (!isConfigured) {
@@ -22,7 +23,7 @@ export function ProtectedRoute() {
   }
 
   if (!user) {
-    return <Navigate to="/login" state={{ from: destination }} replace />;
+    return <Navigate to={loginPath} state={{ from: destination }} replace />;
   }
 
   return <Outlet />;

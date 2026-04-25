@@ -87,6 +87,7 @@ describe("RootLayout onboarding redirect", () => {
 
     expect(await screen.findByTestId("login-page")).toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/login");
+    expect(router.state.location.search).toBe("?next=%2Forder%3Fkit%3Dvision%23recipient");
     expect(router.state.location.state).toMatchObject({ from: "/order?kit=vision#recipient" });
   });
 
