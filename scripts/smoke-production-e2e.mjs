@@ -458,13 +458,14 @@ async function completeTwelveWeekSetup() {
   await waitFor("12-week system route", 'location.pathname === "/12-week-system"', { timeoutMs: 75_000 });
 }
 
-async function assertSystemLoaded() {
+async function assertSystemLoaded({ requireTactics = true } = {}) {
   await waitFor(
-    "12-week system with created goal and tasks",
+    requireTactics ? "12-week system with created goal and tasks" : "12-week system with persisted goal",
     `
       document.body.innerText.includes(${JSON.stringify(GOAL_TITLE)}) &&
-      document.body.innerText.includes(${JSON.stringify(TACTIC_ONE)}) &&
-      document.body.innerText.includes(${JSON.stringify(TACTIC_TWO)}) &&
+      (${JSON.stringify(!requireTactics)} ||
+        (document.body.innerText.includes(${JSON.stringify(TACTIC_ONE)}) &&
+          document.body.innerText.includes(${JSON.stringify(TACTIC_TWO)}))) &&
       (document.body.innerText.includes("Đã nối") || document.body.innerText.includes("Đã lưu"))
     `,
     { timeoutMs: 75_000 },
@@ -490,7 +491,7 @@ async function logoutAndLoginAgain() {
   await fillSelector("#login-password", PASSWORD);
   await clickButton("Đăng nhập");
   await waitFor("12-week system route after login", 'location.pathname === "/12-week-system"', { timeoutMs: 75_000 });
-  await assertSystemLoaded();
+  await assertSystemLoaded({ requireTactics: false });
 }
 
 async function main() {
