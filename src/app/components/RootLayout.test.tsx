@@ -8,6 +8,13 @@ import { RootLayout } from "./RootLayout";
 const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
 }));
+const backendHydrationMock = vi.hoisted(() => ({
+  value: {
+    loading: false,
+    result: null,
+    error: null,
+  },
+}));
 
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
@@ -15,11 +22,7 @@ vi.mock("@/lib/auth/AuthContext", () => ({
 
 vi.mock("../hooks/useBackendPlanHydration", () => ({
   BACKEND_PLAN_HYDRATION_EVENT_NAME: "visionboard:backend-hydrated",
-  useBackendPlanHydration: () => ({
-    loading: false,
-    result: null,
-    error: null,
-  }),
+  useBackendPlanHydration: () => backendHydrationMock.value,
 }));
 
 vi.mock("../utils/app-mode", () => ({
@@ -79,6 +82,11 @@ function renderAppShell(initialEntry: string) {
 describe("RootLayout onboarding redirect", () => {
   beforeEach(() => {
     localStorage.clear();
+    backendHydrationMock.value = {
+      loading: false,
+      result: null,
+      error: null,
+    };
     setAuthContext();
   });
 
@@ -92,11 +100,46 @@ describe("RootLayout onboarding redirect", () => {
   });
 
   it("does not force onboarding after login returns to a protected route", async () => {
-    setAuthContext({ user: { uid: "user_test" } });
+    setAuthContext({
+      user: { uid: "user_test", email: "test@example.com" },
+      userProfile: { id: "profile_test", email: "test@example.com" },
+    });
     const { router } = renderAppShell("/order?kit=vision#recipient");
 
     expect(await screen.findByTestId("order-page")).toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/order");
+  });
+
+  it("shows a workspace gate while an authenticated profile is loading", async () => {
+    setAuthContext({
+      user: { uid: "user_test", email: "test@example.com" },
+      userProfile: null,
+      userProfileLoading: true,
+    });
+    const { router } = renderAppShell("/goals");
+
+    expect(await screen.findByText("Đang mở workspace của bạn")).toBeInTheDocument();
+    expect(screen.queryByTestId("goals-page")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("onboarding-page")).not.toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/goals");
+  });
+
+  it("shows a workspace gate while backend data is hydrating", async () => {
+    backendHydrationMock.value = {
+      loading: true,
+      result: null,
+      error: null,
+    };
+    setAuthContext({
+      user: { uid: "user_test", email: "test@example.com" },
+      userProfile: { id: "profile_test", email: "test@example.com" },
+    });
+    const { router } = renderAppShell("/goals");
+
+    expect(await screen.findByText("Đang đồng bộ dữ liệu")).toBeInTheDocument();
+    expect(screen.queryByTestId("goals-page")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("onboarding-page")).not.toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/goals");
   });
 
   it("sends public app routes to login before onboarding when signed out", async () => {
