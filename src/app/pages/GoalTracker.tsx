@@ -175,6 +175,11 @@ function GoalTrackerContent({
       }),
     [backendSystemsByGoalId, goals],
   );
+  const hasGoals = effectiveGoals.length > 0;
+  const isFreshGoalWorkspace = !hasGoals;
+  const hasRealLifeBalance = userData.onboardingCompleted && userData.currentWheelOfLife.some((area) => area.score > 0);
+  const goalFlowStartHref = hasRealLifeBalance ? "/life-insight" : "/onboarding";
+  const goalFlowStartLabel = hasRealLifeBalance ? "Tạo mục tiêu từ insight" : "Bắt đầu Life Balance";
   const twelveWeekGoals = effectiveGoals.filter((goal) => Boolean(goal.twelveWeekSystem));
   const standardGoals = effectiveGoals.filter((goal) => !goal.twelveWeekSystem);
 
@@ -217,7 +222,7 @@ function GoalTrackerContent({
 
   const handleStartGuidedGoalFlow = () => {
     clearGoalPlanningDrafts();
-    navigate("/life-insight");
+    navigate(goalFlowStartHref);
   };
 
   const handleAddTask = (goalId: string) => {
@@ -797,16 +802,18 @@ function GoalTrackerContent({
                   onClick={handleStartGuidedGoalFlow}
                 >
                   <Target className="h-4 w-4" />
-                  Tạo mục tiêu
+                  {goalFlowStartLabel}
                 </Button>
-                <Button
-                  variant="outline"
-                  className="w-full border-white/18 bg-white/10 text-white hover:bg-white/16 sm:w-auto"
-                  onClick={() => openOrderFlow(goals[0]?.id)}
-                >
-                  <Package className="h-4 w-4" />
-                  {goals.length > 0 ? "Tạo kit từ mục tiêu đang theo" : "Tạo đơn kit"}
-                </Button>
+                {hasGoals && (
+                  <Button
+                    variant="outline"
+                    className="w-full border-white/18 bg-white/10 text-white hover:bg-white/16 sm:w-auto"
+                    onClick={() => openOrderFlow(goals[0]?.id)}
+                  >
+                    <Package className="h-4 w-4" />
+                    Tạo kit từ mục tiêu đang theo
+                  </Button>
+                )}
               </div>
               <p className="max-w-2xl text-sm leading-7 text-white/70">
                 Từ bây giờ, mọi mục tiêu mới đều đi qua cùng một flow: insight trước, SMART sau, rồi mới tới feasibility
@@ -814,183 +821,214 @@ function GoalTrackerContent({
               </p>
             </div>
             <div className="flow-panel hidden p-5 xl:block">
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                <div className="flow-muted px-4 py-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-white/55">Mục tiêu đang theo</p>
-                  <p className="mt-2 text-3xl font-bold text-white">
-                    <CountUp value={summary.totalGoals} />
-                  </p>
-                  <p className="mt-1 text-sm text-white/68">{summary.completedGoals} đã hoàn thành</p>
+              {isFreshGoalWorkspace ? (
+                <div className="space-y-3">
+                  <p className="text-xs uppercase tracking-[0.18em] text-white/55">Flow đúng cho user mới</p>
+                  {[
+                    { icon: Target, label: "Chấm Life Balance", note: "Lấy dữ liệu thật trước khi viết mục tiêu." },
+                    { icon: CheckCircle2, label: "Chọn Life Insight", note: "Ưu tiên đúng lĩnh vực đang lệch nhất." },
+                    { icon: Zap, label: "SMART + 12 tuần", note: "Chỉ tạo kế hoạch khi mục tiêu đủ rõ và khả thi." },
+                  ].map((item) => (
+                    <div key={item.label} className="flow-muted px-4 py-4">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/12 text-white">
+                          <item.icon className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-white">{item.label}</p>
+                          <p className="mt-1 text-sm leading-6 text-white/68">{item.note}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flow-muted px-4 py-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-white/55">Việc đã chốt</p>
-                  <p className="mt-2 text-3xl font-bold text-white">
-                    <CountUp value={summary.completedTasks} />
-                    <span className="text-white/68">/{summary.totalTasks}</span>
-                  </p>
-                  <p className="mt-1 text-sm text-white/68">trên toàn bộ mục tiêu</p>
+              ) : (
+                <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                  <div className="flow-muted px-4 py-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-white/55">Mục tiêu đang theo</p>
+                    <p className="mt-2 text-3xl font-bold text-white">
+                      <CountUp value={summary.totalGoals} />
+                    </p>
+                    <p className="mt-1 text-sm text-white/68">{summary.completedGoals} đã hoàn thành</p>
+                  </div>
+                  <div className="flow-muted px-4 py-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-white/55">Việc đã chốt</p>
+                    <p className="mt-2 text-3xl font-bold text-white">
+                      <CountUp value={summary.completedTasks} />
+                      <span className="text-white/68">/{summary.totalTasks}</span>
+                    </p>
+                    <p className="mt-1 text-sm text-white/68">trên toàn bộ mục tiêu</p>
+                  </div>
+                  <div className="flow-muted px-4 py-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-white/55">Chu kỳ 12 tuần</p>
+                    <p className="mt-2 text-3xl font-bold text-white">
+                      <CountUp value={summary.activeSystems} />
+                    </p>
+                    <p className="mt-1 text-sm text-white/68">đang chạy lúc này</p>
+                  </div>
                 </div>
-                <div className="flow-muted px-4 py-4">
-                  <p className="text-xs uppercase tracking-[0.18em] text-white/55">Chu kỳ 12 tuần</p>
-                  <p className="mt-2 text-3xl font-bold text-white">
-                    <CountUp value={summary.activeSystems} />
-                  </p>
-                  <p className="mt-1 text-sm text-white/68">đang chạy lúc này</p>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </CardContent>
       </Card>
-      <Reveal>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-          {summaryCards.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Card key={item.title} className={item.cardClass}>
-                <CardHeader className="flex flex-row items-start justify-between pb-3">
+      {!isFreshGoalWorkspace && (
+        <Reveal>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {summaryCards.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Card key={item.title} className={item.cardClass}>
+                  <CardHeader className="flex flex-row items-start justify-between pb-3">
+                    <div>
+                      <CardDescription className={item.titleClass}>{item.title}</CardDescription>
+                      <CardTitle className="mt-2 text-3xl">
+                        <CountUp value={item.value} />
+                      </CardTitle>
+                    </div>
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${item.iconClass}`}>
+                      <Icon className="h-5 w-5" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className={`text-sm ${item.noteClass}`}>{item.note}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </Reveal>
+      )}
+
+      {!isFreshGoalWorkspace && (
+        <Reveal>
+          <div data-tour-id="goaltracker-summary" className="grid gap-4 md:grid-cols-3">
+            <Card className={summary.reviewDue > 0 ? "flow-panel border-amber-200 bg-amber-50/85" : "flow-panel"}>
+              <CardHeader className="pb-2">
+                <CardDescription>Review tuần</CardDescription>
+                <CardTitle className="text-3xl">
+                  <CountUp value={summary.reviewDue} />
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-slate-600">
+                  {summary.reviewDue > 0
+                    ? "Có chu kỳ đến hạn chốt review hôm nay."
+                    : "Hiện chưa có review nào đến hạn."}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className={summary.overdue > 0 ? "flow-panel border-red-200 bg-red-50/85" : "flow-panel"}>
+              <CardHeader className="pb-2">
+                <CardDescription>Mục tiêu quá hạn</CardDescription>
+                <CardTitle className="text-3xl">
+                  <CountUp value={summary.overdue} />
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-slate-600">
+                  {summary.overdue > 0
+                    ? "Đây là nhóm nên nhìn trước để tránh trễ kéo dài."
+                    : "Hiện chưa có mục tiêu nào quá hạn."}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="flow-panel">
+              <CardHeader className="pb-2">
+                <CardDescription>Sắp đến hạn</CardDescription>
+                <CardTitle className="text-3xl">
+                  <CountUp value={summary.dueSoon} />
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-slate-600">Mục tiêu sẽ đến ngày đích trong 7 ngày tới.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </Reveal>
+      )}
+
+      {!isFreshGoalWorkspace && (
+        <Reveal>
+          <Card className="flow-panel overflow-hidden">
+            <CardContent className="grid gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+              <div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-violet-200 bg-violet-50 text-violet-700">
+                    <Crown className="h-5 w-5" />
+                  </div>
                   <div>
-                    <CardDescription className={item.titleClass}>{item.title}</CardDescription>
-                    <CardTitle className="mt-2 text-3xl">
-                      <CountUp value={item.value} />
-                    </CardTitle>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                      Gói và quyền 12 tuần
+                    </p>
+                    <p className="mt-2 text-2xl font-bold text-slate-900">
+                      Bạn đang ở gói {getPlanLabel(currentPlanCode)}
+                    </p>
                   </div>
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${item.iconClass}`}>
-                    <Icon className="h-5 w-5" />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className={`text-sm ${item.noteClass}`}>{item.note}</p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </Reveal>
-
-      <Reveal>
-        <div data-tour-id="goaltracker-summary" className="grid gap-4 md:grid-cols-3">
-          <Card className={summary.reviewDue > 0 ? "flow-panel border-amber-200 bg-amber-50/85" : "flow-panel"}>
-            <CardHeader className="pb-2">
-              <CardDescription>Review tuần</CardDescription>
-              <CardTitle className="text-3xl">
-                <CountUp value={summary.reviewDue} />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-slate-600">
-                {summary.reviewDue > 0 ? "Có chu kỳ đến hạn chốt review hôm nay." : "Hiện chưa có review nào đến hạn."}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className={summary.overdue > 0 ? "flow-panel border-red-200 bg-red-50/85" : "flow-panel"}>
-            <CardHeader className="pb-2">
-              <CardDescription>Mục tiêu quá hạn</CardDescription>
-              <CardTitle className="text-3xl">
-                <CountUp value={summary.overdue} />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-slate-600">
-                {summary.overdue > 0
-                  ? "Đây là nhóm nên nhìn trước để tránh trễ kéo dài."
-                  : "Hiện chưa có mục tiêu nào quá hạn."}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="flow-panel">
-            <CardHeader className="pb-2">
-              <CardDescription>Sắp đến hạn</CardDescription>
-              <CardTitle className="text-3xl">
-                <CountUp value={summary.dueSoon} />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-slate-600">Mục tiêu sẽ đến ngày đích trong 7 ngày tới.</p>
-            </CardContent>
-          </Card>
-        </div>
-      </Reveal>
-
-      <Reveal>
-        <Card className="flow-panel overflow-hidden">
-          <CardContent className="grid gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-            <div>
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-violet-200 bg-violet-50 text-violet-700">
-                  <Crown className="h-5 w-5" />
                 </div>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Gói và quyền 12 tuần
-                  </p>
-                  <p className="mt-2 text-2xl font-bold text-slate-900">
-                    Bạn đang ở gói {getPlanLabel(currentPlanCode)}
-                  </p>
+                <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">{currentPlanDefinition.description}</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {premiumStatusItems.map((key) => {
+                    const isUnlocked = entitlementKeys.includes(key);
+
+                    return (
+                      <Badge
+                        key={key}
+                        variant="outline"
+                        className={
+                          isUnlocked
+                            ? "border-emerald-200/70 bg-emerald-50 text-emerald-900"
+                            : "border-slate-200 bg-slate-50 text-slate-600"
+                        }
+                      >
+                        {isUnlocked ? "Đang mở" : "Đang khóa"} · {getEntitlementLabel(key)}
+                      </Badge>
+                    );
+                  })}
                 </div>
               </div>
-              <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-600">{currentPlanDefinition.description}</p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {premiumStatusItems.map((key) => {
-                  const isUnlocked = entitlementKeys.includes(key);
 
-                  return (
-                    <Badge
-                      key={key}
-                      variant="outline"
-                      className={
-                        isUnlocked
-                          ? "border-emerald-200/70 bg-emerald-50 text-emerald-900"
-                          : "border-slate-200 bg-slate-50 text-slate-600"
-                      }
-                    >
-                      {isUnlocked ? "Đang mở" : "Đang khóa"} · {getEntitlementLabel(key)}
-                    </Badge>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="flow-muted space-y-3 p-5">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Đi tiếp với gói hiện tại</p>
-              <p className="text-lg font-semibold text-slate-900">
-                {currentPlanCode === "FREE"
-                  ? "Free đủ để bạn chạy một chu kỳ. Mở Plus khi bạn muốn bớt loay hoay lúc setup và review tốt hơn mỗi tuần."
-                  : "Plus đang giúp bạn bắt đầu nhanh hơn, giữ nhịp đều hơn và biết tuần sau nên chỉnh gì."}
-              </p>
-              <div className="grid gap-2">
-                {currentPlanCode === "FREE" ? (
-                  <>
-                    <Button onClick={() => openUpgradeDialog("plan", "PLUS")}>Mở Plus để đỡ loay hoay hơn</Button>
+              <div className="flow-muted space-y-3 p-5">
+                <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Đi tiếp với gói hiện tại</p>
+                <p className="text-lg font-semibold text-slate-900">
+                  {currentPlanCode === "FREE"
+                    ? "Free đủ để bạn chạy một chu kỳ. Mở Plus khi bạn muốn bớt loay hoay lúc setup và review tốt hơn mỗi tuần."
+                    : "Plus đang giúp bạn bắt đầu nhanh hơn, giữ nhịp đều hơn và biết tuần sau nên chỉnh gì."}
+                </p>
+                <div className="grid gap-2">
+                  {currentPlanCode === "FREE" ? (
+                    <>
+                      <Button onClick={() => openUpgradeDialog("plan", "PLUS")}>Mở Plus để đỡ loay hoay hơn</Button>
+                      <Button
+                        variant="outline"
+                        onClick={() =>
+                          navigate(twelveWeekGoals.length > 0 ? "/12-week-system?tab=settings" : "/life-insight")
+                        }
+                      >
+                        Xem Free đang có gì
+                      </Button>
+                    </>
+                  ) : (
                     <Button
                       variant="outline"
                       onClick={() =>
                         navigate(twelveWeekGoals.length > 0 ? "/12-week-system?tab=settings" : "/life-insight")
                       }
                     >
-                      Xem Free đang có gì
+                      Quản lý gói và quyền
                     </Button>
-                  </>
-                ) : (
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      navigate(twelveWeekGoals.length > 0 ? "/12-week-system?tab=settings" : "/life-insight")
-                    }
-                  >
-                    Quản lý gói và quyền
-                  </Button>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </Reveal>
+            </CardContent>
+          </Card>
+        </Reveal>
+      )}
 
       <div data-tour-id="goaltracker-goals">
-        {userData.goals.length > 0 && (
+        {hasGoals && (
           <div className="mb-6">
             <div className="relative">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -1004,27 +1042,31 @@ function GoalTrackerContent({
             </div>
           </div>
         )}
-        {userData.goals.length === 0 ? (
+        {!hasGoals ? (
           <Reveal delay={0.04}>
-            <Card data-tour-id="goaltracker-empty-state" className="flow-panel overflow-hidden">
+            <Card
+              data-testid="goaltracker-fresh-empty-state"
+              data-tour-id="goaltracker-empty-state"
+              className="flow-panel overflow-hidden"
+            >
               <CardContent className="p-10 text-center lg:p-14">
                 <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-lg bg-violet-50 text-violet-700">
                   <Target className="h-10 w-10" />
                 </div>
                 <h2 className="mt-6 text-3xl font-bold text-slate-900">Chưa có mục tiêu nào trong workspace của bạn</h2>
                 <p className="mx-auto mt-3 max-w-2xl text-base text-slate-500">
-                  Hãy tạo mục tiêu đầu tiên để bắt đầu một hệ thống theo dõi rõ ràng hơn: có hạn chót, có việc cụ thể,
-                  có nhịp tiến độ và có chỗ để thấy mình đang đi tới đâu.
+                  Bắt đầu bằng Life Balance để có dữ liệu thật, sau đó chọn Life Insight, viết SMART goal, kiểm tra
+                  feasibility rồi mới tạo chu kỳ 12 tuần.
                 </p>
                 <Button className="mt-8 w-full sm:w-auto" onClick={handleStartGuidedGoalFlow}>
                   <Target className="h-4 w-4" />
-                  Tạo mục tiêu
+                  {goalFlowStartLabel}
                 </Button>
                 <div className="mx-auto mt-8 grid max-w-lg gap-3 text-left sm:grid-cols-3">
                   {[
-                    { icon: Target, label: "Tạo mục tiêu SMART" },
-                    { icon: CheckCircle2, label: "Thêm bước hành động" },
-                    { icon: Zap, label: "Theo dõi tiến độ" },
+                    { icon: Target, label: "Chấm Life Balance" },
+                    { icon: CheckCircle2, label: "Chọn Life Insight" },
+                    { icon: Zap, label: "SMART + 12 tuần" },
                   ].map((item) => (
                     <div
                       key={item.label}

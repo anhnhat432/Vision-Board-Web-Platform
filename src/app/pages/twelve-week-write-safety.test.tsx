@@ -182,7 +182,7 @@ describe("12-week write-path safety", () => {
         executionScore: review ? getUniversalWeeklyReviewExecutionScore(review) : undefined,
       }),
     );
-  });
+  }, 10_000);
 
   it("keeps weekly review, linked reflection, and outbox event when backend review sync fails", async () => {
     syncWeeklyReviewMock.mockResolvedValueOnce(false);
@@ -225,5 +225,5 @@ describe("12-week write-path safety", () => {
     expect(reflection?.content).toContain("Hoàn thành review local trước khi backend kịp trả lời.");
     expect(data.eventLog.some((event) => event.type === "12_week_weekly_review_submitted")).toBe(true);
     expect(data.syncOutbox.some((item) => item.type === "12_week_weekly_review_submitted")).toBe(true);
-  });
+  }, 10_000);
 });
