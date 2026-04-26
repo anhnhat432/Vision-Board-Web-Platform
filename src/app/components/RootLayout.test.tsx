@@ -61,6 +61,7 @@ function renderAppShell(initialEntry: string) {
         path: "/",
         element: <RootLayout />,
         children: [
+          { index: true, element: <div data-testid="home-page">Home page</div> },
           { path: "onboarding", element: <div data-testid="onboarding-page">Onboarding page</div> },
           { path: "goals", element: <div data-testid="goals-page">Goals page</div> },
           {
@@ -140,6 +141,15 @@ describe("RootLayout onboarding redirect", () => {
     expect(screen.queryByTestId("goals-page")).not.toBeInTheDocument();
     expect(screen.queryByTestId("onboarding-page")).not.toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/goals");
+  });
+
+  it("keeps signed-out visitors on the public home page with auth actions", async () => {
+    const { router } = renderAppShell("/");
+
+    expect(await screen.findByTestId("home-page")).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/");
+    expect(screen.getByRole("button", { name: "Đăng nhập" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Đăng ký" })).toBeInTheDocument();
   });
 
   it("sends public app routes to login before onboarding when signed out", async () => {

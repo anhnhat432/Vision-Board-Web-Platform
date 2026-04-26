@@ -54,12 +54,23 @@ function isAuthProtectedPath(pathname: string) {
   return pathname === "/order" || pathname.startsWith("/order-status");
 }
 
+function isPublicHomePath(pathname: string) {
+  return pathname === "/";
+}
+
 function buildLoginRedirect(pathname: string, search: string, hash: string) {
   const destination = `${pathname}${search}${hash}`;
   return {
     destination,
     loginPath: `/login?next=${encodeURIComponent(destination)}`,
   };
+}
+
+function buildAuthPath(mode: "signin" | "signup", pathname: string, search: string, hash: string) {
+  const destination = `${pathname}${search}${hash}`;
+  const params = new URLSearchParams({ next: destination });
+  if (mode === "signup") params.set("mode", "signup");
+  return `/login?${params.toString()}`;
 }
 
 const ROUTE_META = [
@@ -302,7 +313,12 @@ export function RootLayout() {
 
   const currentRouteKey = `${location.pathname}${location.search}${location.hash}`;
   const shouldRedirectToLogin =
-    !demoMode && isConfigured && !authLoading && !user && !isAuthProtectedPath(location.pathname);
+    !demoMode &&
+    isConfigured &&
+    !authLoading &&
+    !user &&
+    !isPublicHomePath(location.pathname) &&
+    !isAuthProtectedPath(location.pathname);
   const shouldWaitForWorkspace =
     !demoMode &&
     isConfigured &&
@@ -352,7 +368,7 @@ export function RootLayout() {
 
     if (!demoMode && isAuthProtectedPath(location.pathname)) return;
 
-    if (!demoMode && !userData.onboardingCompleted && location.pathname !== "/onboarding") {
+    if (!demoMode && user && !userData.onboardingCompleted && location.pathname !== "/onboarding") {
       navigate("/onboarding");
     }
   }, [
@@ -363,6 +379,7 @@ export function RootLayout() {
     navigate,
     shouldRedirectToLogin,
     shouldWaitForWorkspace,
+    user,
   ]);
 
   useEffect(() => {
@@ -433,6 +450,7 @@ export function RootLayout() {
   useEffect(() => {
     if (demoMode) return;
     if (shouldShowWorkspaceGate) return;
+    if (!user) return;
     if (location.pathname !== "/") return;
 
     const progress = getNewUserGuideProgress(guideUserData);
@@ -442,7 +460,7 @@ export function RootLayout() {
 
     setIsGuideOpen(true);
     markNewUserGuideSeen();
-  }, [demoMode, guideUserData, location.pathname, shouldShowWorkspaceGate]);
+  }, [demoMode, guideUserData, location.pathname, shouldShowWorkspaceGate, user]);
 
   useEffect(() => {
     const currentPath = location.pathname;
@@ -569,6 +587,12 @@ export function RootLayout() {
   };
 
   const handlePrefetch = useCallback((path: string) => prefetchRoute(path), []);
+  const handleAuthNavigate = useCallback(
+    (mode: "signin" | "signup") => {
+      navigate(buildAuthPath(mode, location.pathname, location.search, location.hash));
+    },
+    [location.hash, location.pathname, location.search, navigate],
+  );
 
   const pageMeta = ROUTE_META.find((item) => item.match(location.pathname)) ?? ROUTE_META[0];
   const primaryNavItems = NAV_ITEMS.filter((item) => PRIMARY_NAV_PATHS.has(item.path));
@@ -808,6 +832,25 @@ export function RootLayout() {
                   </span>
                 </div>
               ) : null}
+              {!user ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAuthNavigate("signin")}
+                    className="h-8 rounded-full border-white/75 bg-white/82 px-3 text-xs text-slate-700 shadow-sm hover:bg-white"
+                  >
+                    Đăng nhập
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => handleAuthNavigate("signup")}
+                    className="h-8 rounded-full bg-slate-950 px-3 text-xs text-white shadow-sm hover:bg-slate-800"
+                  >
+                    Đăng ký
+                  </Button>
+                </>
+              ) : null}
               {user ? (
                 <button
                   type="button"
@@ -934,6 +977,29 @@ export function RootLayout() {
                     {userProfileError ? (
                       <p className="mt-2 text-xs leading-5 text-red-600">{userProfileError}</p>
                     ) : null}
+                  </div>
+                ) : null}
+                {!user ? (
+                  <div className="mb-2 grid grid-cols-2 gap-2 rounded-2xl border border-white/72 bg-white/82 p-2">
+                    <Button
+                      variant="outline"
+                      className="w-full border-slate-200 bg-white text-slate-900"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        handleAuthNavigate("signin");
+                      }}
+                    >
+                      Đăng nhập
+                    </Button>
+                    <Button
+                      className="w-full bg-slate-950 text-white hover:bg-slate-800"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        handleAuthNavigate("signup");
+                      }}
+                    >
+                      Đăng ký
+                    </Button>
                   </div>
                 ) : null}
                 <button

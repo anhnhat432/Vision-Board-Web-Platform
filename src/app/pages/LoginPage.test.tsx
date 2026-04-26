@@ -80,6 +80,17 @@ describe("LoginPage", () => {
     expect(await screen.findByTestId("destination")).toHaveTextContent("/order?kit=vision#recipient");
   });
 
+  it("opens in sign-up mode from the mode query", () => {
+    render(
+      <MemoryRouter initialEntries={["/login?mode=signup&next=%2F"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText("Tạo tài khoản để bắt đầu.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Tạo tài khoản" })).toBeInTheDocument();
+  });
+
   it("ignores unsafe login next redirects", async () => {
     setAuthContext({ user: { uid: "user_test" } });
 

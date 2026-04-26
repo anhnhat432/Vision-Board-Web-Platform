@@ -12,6 +12,10 @@ import { useAuthContext } from "@/lib/auth/AuthContext";
 
 type LoginMode = "signin" | "signup";
 
+function getInitialLoginMode(search: string): LoginMode {
+  return new URLSearchParams(search).get("mode") === "signup" ? "signup" : "signin";
+}
+
 function normalizeRedirectPath(from: unknown): string | null {
   if (typeof from !== "string") return null;
 
@@ -35,10 +39,14 @@ export function LoginPage() {
     if (error) toast.error(error);
   }, [error]);
 
-  const [mode, setMode] = useState<LoginMode>("signin");
+  const [mode, setMode] = useState<LoginMode>(() => getInitialLoginMode(location.search));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    setMode(getInitialLoginMode(location.search));
+  }, [location.search]);
 
   // If already authenticated, send to destination immediately
   if (!authLoading && user) {
