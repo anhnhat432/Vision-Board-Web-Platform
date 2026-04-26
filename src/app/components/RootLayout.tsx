@@ -169,6 +169,11 @@ const MOBILE_NAV_LABELS: Record<string, string> = {
   "/12-week-system": "12 tuần",
   "/vision-board": "Tầm nhìn",
 };
+const SIGNED_OUT_HOME_NAV_ITEM = {
+  ...NAV_ITEMS[0],
+  label: "Trang chính",
+  compactLabel: "Trang chính",
+};
 
 // Prefetch the remaining lazy route modules on hover so navigation feels instant.
 const ROUTE_IMPORTS: Record<string, () => Promise<unknown>> = {
@@ -597,9 +602,13 @@ export function RootLayout() {
   );
 
   const pageMeta = ROUTE_META.find((item) => item.match(location.pathname)) ?? ROUTE_META[0];
-  const primaryNavItems = NAV_ITEMS.filter((item) => PRIMARY_NAV_PATHS.has(item.path));
-  const secondaryNavItems = NAV_ITEMS.filter((item) => !PRIMARY_NAV_PATHS.has(item.path));
-  const bottomNavItems = NAV_ITEMS.filter((item) => MOBILE_BOTTOM_NAV_PATHS.has(item.path));
+  const isSignedOutVisitor = isConfigured && !user;
+  const primaryNavItems = isSignedOutVisitor
+    ? [SIGNED_OUT_HOME_NAV_ITEM]
+    : NAV_ITEMS.filter((item) => PRIMARY_NAV_PATHS.has(item.path));
+  const secondaryNavItems = isSignedOutVisitor ? [] : NAV_ITEMS.filter((item) => !PRIMARY_NAV_PATHS.has(item.path));
+  const bottomNavItems = isSignedOutVisitor ? [] : NAV_ITEMS.filter((item) => MOBILE_BOTTOM_NAV_PATHS.has(item.path));
+  const mobileMenuNavItems = isSignedOutVisitor ? primaryNavItems : NAV_ITEMS;
   const isDesktopMoreNavActive = desktopMoreOpen || secondaryNavItems.some((item) => isActive(item.path));
   const isMoreNavActive = mobileMenuOpen || secondaryNavItems.some((item) => isActive(item.path));
   const routeTone = getRouteTone(location.pathname);
@@ -747,70 +756,74 @@ export function RootLayout() {
                   );
                 })}
 
-                <div className="mx-0.5 h-5 w-px shrink-0 bg-slate-200/60" />
+                {secondaryNavItems.length > 0 ? (
+                  <>
+                    <div className="mx-0.5 h-5 w-px shrink-0 bg-slate-200/60" />
 
-                <div ref={desktopMoreRef} className="relative">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    aria-current={secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined}
-                    aria-expanded={desktopMoreOpen}
-                    aria-haspopup="menu"
-                    className={`h-8 shrink-0 rounded-full px-3 text-[0.82rem] transition-all duration-200 active:scale-95 ${
-                      isDesktopMoreNavActive
-                        ? "text-white hover:text-white"
-                        : "bg-transparent text-slate-500 shadow-none hover:bg-white/90 hover:text-slate-700"
-                    }`}
-                    style={isDesktopMoreNavActive ? activeNavStyle : undefined}
-                    onClick={() => setDesktopMoreOpen((open) => !open)}
-                  >
-                    <Menu className="h-3.5 w-3.5" />
-                    <span>Thêm</span>
-                    <ChevronDown
-                      className={`h-3.5 w-3.5 transition-transform ${desktopMoreOpen ? "rotate-180" : ""}`}
-                    />
-                  </Button>
+                    <div ref={desktopMoreRef} className="relative">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        aria-current={secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined}
+                        aria-expanded={desktopMoreOpen}
+                        aria-haspopup="menu"
+                        className={`h-8 shrink-0 rounded-full px-3 text-[0.82rem] transition-all duration-200 active:scale-95 ${
+                          isDesktopMoreNavActive
+                            ? "text-white hover:text-white"
+                            : "bg-transparent text-slate-500 shadow-none hover:bg-white/90 hover:text-slate-700"
+                        }`}
+                        style={isDesktopMoreNavActive ? activeNavStyle : undefined}
+                        onClick={() => setDesktopMoreOpen((open) => !open)}
+                      >
+                        <Menu className="h-3.5 w-3.5" />
+                        <span>Thêm</span>
+                        <ChevronDown
+                          className={`h-3.5 w-3.5 transition-transform ${desktopMoreOpen ? "rotate-180" : ""}`}
+                        />
+                      </Button>
 
-                  {desktopMoreOpen ? (
-                    <div
-                      role="menu"
-                      aria-label="Mục khác"
-                      className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-lg border border-slate-200 bg-white/96 p-2 shadow-[0_24px_60px_-34px_rgba(15,23,42,0.32)] backdrop-blur-xl"
-                    >
-                      <div className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                        Mục khác
-                      </div>
-                      <div className="mx-1 mb-1 h-px bg-slate-200/80" />
-                      {secondaryNavItems.map((item) => {
-                        const Icon = item.icon;
-                        const active = isActive(item.path);
+                      {desktopMoreOpen ? (
+                        <div
+                          role="menu"
+                          aria-label="Mục khác"
+                          className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-lg border border-slate-200 bg-white/96 p-2 shadow-[0_24px_60px_-34px_rgba(15,23,42,0.32)] backdrop-blur-xl"
+                        >
+                          <div className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                            Mục khác
+                          </div>
+                          <div className="mx-1 mb-1 h-px bg-slate-200/80" />
+                          {secondaryNavItems.map((item) => {
+                            const Icon = item.icon;
+                            const active = isActive(item.path);
 
-                        return (
-                          <button
-                            key={item.path}
-                            type="button"
-                            role="menuitem"
-                            aria-current={active ? "page" : undefined}
-                            onPointerEnter={() => handlePrefetch(item.path)}
-                            onClick={() => {
-                              setDesktopMoreOpen(false);
-                              navigateAppRoute(item.path);
-                            }}
-                            className={`my-1 flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium tracking-normal outline-none transition-colors ${
-                              active
-                                ? "text-white focus:text-white"
-                                : "text-slate-600 hover:bg-slate-50 hover:text-slate-950 focus:bg-slate-50 focus:text-slate-950"
-                            }`}
-                            style={active ? activeNavStyle : undefined}
-                          >
-                            <Icon className={`h-4 w-4 shrink-0 ${active ? "text-white" : "text-slate-500"}`} />
-                            <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                          </button>
-                        );
-                      })}
+                            return (
+                              <button
+                                key={item.path}
+                                type="button"
+                                role="menuitem"
+                                aria-current={active ? "page" : undefined}
+                                onPointerEnter={() => handlePrefetch(item.path)}
+                                onClick={() => {
+                                  setDesktopMoreOpen(false);
+                                  navigateAppRoute(item.path);
+                                }}
+                                className={`my-1 flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium tracking-normal outline-none transition-colors ${
+                                  active
+                                    ? "text-white focus:text-white"
+                                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-950 focus:bg-slate-50 focus:text-slate-950"
+                                }`}
+                                style={active ? activeNavStyle : undefined}
+                              >
+                                <Icon className={`h-4 w-4 shrink-0 ${active ? "text-white" : "text-slate-500"}`} />
+                                <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : null}
                     </div>
-                  ) : null}
-                </div>
+                  </>
+                ) : null}
               </div>
             </nav>
 
@@ -915,17 +928,27 @@ export function RootLayout() {
                   <Moon className="h-[1.1rem] w-[1.1rem]" />
                 )}
               </button>
-              <button
-                type="button"
-                className="flex size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 backdrop-blur-sm transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300"
-                onClick={() => {
-                  setGuideUserData(getUserData());
-                  setIsGuideOpen(true);
-                }}
-                aria-label="Mở hướng dẫn sử dụng"
-              >
-                <Compass className="h-[1.1rem] w-[1.1rem]" />
-              </button>
+              {isSignedOutVisitor ? (
+                <Button
+                  size="sm"
+                  className="h-11 rounded-xl bg-slate-950 px-3 text-xs text-white shadow-sm hover:bg-slate-800"
+                  onClick={() => handleAuthNavigate("signup")}
+                >
+                  Đăng ký
+                </Button>
+              ) : (
+                <button
+                  type="button"
+                  className="flex size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 backdrop-blur-sm transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300"
+                  onClick={() => {
+                    setGuideUserData(getUserData());
+                    setIsGuideOpen(true);
+                  }}
+                  aria-label="Mở hướng dẫn sử dụng"
+                >
+                  <Compass className="h-[1.1rem] w-[1.1rem]" />
+                </button>
+              )}
               <button
                 type="button"
                 className="flex size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 backdrop-blur-sm transition-colors active:scale-95 hover:bg-white"
@@ -1016,7 +1039,7 @@ export function RootLayout() {
                   <Compass className="h-5 w-5" />
                   <span>Hướng dẫn sử dụng</span>
                 </button>
-                {NAV_ITEMS.map((item) => {
+                {mobileMenuNavItems.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.path);
 
@@ -1047,7 +1070,9 @@ export function RootLayout() {
       </header>
 
       <main
-        className="relative z-10 mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 lg:px-8 main-content-mobile-pad"
+        className={`relative z-10 mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 lg:px-8 ${
+          isSignedOutVisitor ? "" : "main-content-mobile-pad"
+        }`}
         id="main-content"
         aria-label="Nội dung trang"
       >
@@ -1062,61 +1087,63 @@ export function RootLayout() {
         </AnimatePresence>
       </main>
 
-      {/* Mobile bottom navigation bar */}
-      <nav
-        className="bottom-nav md:hidden"
-        aria-label="Điều hướng chính"
-        style={{ animation: "bottom-nav-rise 0.38s cubic-bezier(0.22,1,0.36,1) both" }}
-      >
-        <div className="bottom-nav-inner">
-          {bottomNavItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.path);
-            return (
-              <button
-                key={item.path}
-                type="button"
-                className="bottom-nav-item"
-                aria-current={active ? "page" : undefined}
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  navigateAppRoute(item.path);
-                }}
-                onPointerEnter={() => handlePrefetch(item.path)}
-                title={item.label}
-              >
-                <div className="bottom-nav-icon">
-                  <Icon
-                    className={`h-4 w-4 ${active ? "text-white" : "text-slate-500"}`}
-                    strokeWidth={active ? 2.25 : 1.8}
-                  />
-                </div>
-                <span className={`bottom-nav-label ${active ? "nav-label-active" : "text-slate-400"}`}>
-                  {MOBILE_NAV_LABELS[item.path] ?? item.compactLabel ?? item.label}
-                </span>
-              </button>
-            );
-          })}
-          {/* More button on mobile to open full menu */}
-          <button
-            type="button"
-            className="bottom-nav-item"
-            onClick={() => setMobileMenuOpen((open) => !open)}
-            aria-label="Thêm"
-            aria-current={isMoreNavActive ? "page" : undefined}
-            aria-expanded={mobileMenuOpen}
-            aria-controls="mobile-nav-menu"
-          >
-            <div className="bottom-nav-icon">
-              <Menu
-                className={`h-4 w-4 ${isMoreNavActive ? "text-white" : "text-slate-500"}`}
-                strokeWidth={isMoreNavActive ? 2.25 : 1.8}
-              />
-            </div>
-            <span className={`bottom-nav-label ${isMoreNavActive ? "nav-label-active" : "text-slate-400"}`}>Thêm</span>
-          </button>
-        </div>
-      </nav>
+      {!isSignedOutVisitor ? (
+        <nav
+          className="bottom-nav md:hidden"
+          aria-label="Điều hướng chính"
+          style={{ animation: "bottom-nav-rise 0.38s cubic-bezier(0.22,1,0.36,1) both" }}
+        >
+          <div className="bottom-nav-inner">
+            {bottomNavItems.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.path);
+              return (
+                <button
+                  key={item.path}
+                  type="button"
+                  className="bottom-nav-item"
+                  aria-current={active ? "page" : undefined}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    navigateAppRoute(item.path);
+                  }}
+                  onPointerEnter={() => handlePrefetch(item.path)}
+                  title={item.label}
+                >
+                  <div className="bottom-nav-icon">
+                    <Icon
+                      className={`h-4 w-4 ${active ? "text-white" : "text-slate-500"}`}
+                      strokeWidth={active ? 2.25 : 1.8}
+                    />
+                  </div>
+                  <span className={`bottom-nav-label ${active ? "nav-label-active" : "text-slate-400"}`}>
+                    {MOBILE_NAV_LABELS[item.path] ?? item.compactLabel ?? item.label}
+                  </span>
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              className="bottom-nav-item"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              aria-label="Thêm"
+              aria-current={isMoreNavActive ? "page" : undefined}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-nav-menu"
+            >
+              <div className="bottom-nav-icon">
+                <Menu
+                  className={`h-4 w-4 ${isMoreNavActive ? "text-white" : "text-slate-500"}`}
+                  strokeWidth={isMoreNavActive ? 2.25 : 1.8}
+                />
+              </div>
+              <span className={`bottom-nav-label ${isMoreNavActive ? "nav-label-active" : "text-slate-400"}`}>
+                Thêm
+              </span>
+            </button>
+          </div>
+        </nav>
+      ) : null}
 
       <MotivationalReminder />
       <NewUserGuideDialog open={isGuideOpen} onOpenChange={setIsGuideOpen} userData={guideUserData} />

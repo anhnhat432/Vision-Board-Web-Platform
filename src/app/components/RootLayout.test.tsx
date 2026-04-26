@@ -149,7 +149,10 @@ describe("RootLayout onboarding redirect", () => {
     expect(await screen.findByTestId("home-page")).toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/");
     expect(screen.getByRole("button", { name: "Đăng nhập" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Đăng ký" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Đăng ký" }).length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "Trang chính" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Mục tiêu" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "12 tuần" })).not.toBeInTheDocument();
   });
 
   it("does not block the public home page while auth is loading", async () => {

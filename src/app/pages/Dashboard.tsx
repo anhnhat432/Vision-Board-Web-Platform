@@ -1548,14 +1548,14 @@ function DashboardContent({
                 </div>
                 <Button
                   variant="outline"
-                  className="h-auto justify-start whitespace-normal rounded-[20px] border-slate-200 bg-white px-4 py-4 text-left shadow-sm hover:bg-slate-50"
+                  className="h-auto w-full min-w-0 justify-start whitespace-normal rounded-[20px] border-slate-200 bg-white px-4 py-4 text-left shadow-sm hover:bg-slate-50"
                   onClick={() => (isPublicVisitor ? handleAuthNavigate("signup") : navigate("/life-balance"))}
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white">
                     <TrendingUp className="h-4 w-4" />
                   </div>
                   <div className="ml-3 min-w-0 flex-1">
-                    <div className="truncate font-semibold text-slate-900">
+                    <div className="line-clamp-2 break-words font-semibold text-slate-900">
                       {isPublicVisitor ? "Bắt đầu bằng cân bằng cuộc sống" : "Mở cân bằng cuộc sống"}
                     </div>
                     <div className="mt-1 line-clamp-2 text-sm text-slate-500">
