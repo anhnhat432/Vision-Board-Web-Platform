@@ -545,6 +545,9 @@ export function RootLayout() {
     if (typeof window === "undefined") {
       return;
     }
+    if (!demoMode && !user) {
+      return;
+    }
 
     const runBackgroundSync = () => {
       void syncPendingOutbox();
@@ -573,7 +576,7 @@ export function RootLayout() {
       window.removeEventListener("focus", handleFocus);
       window.removeEventListener("online", handleOnline);
     };
-  }, []);
+  }, [demoMode, user]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -1145,7 +1148,7 @@ export function RootLayout() {
         </nav>
       ) : null}
 
-      <MotivationalReminder />
+      {demoMode || user ? <MotivationalReminder /> : null}
       <NewUserGuideDialog open={isGuideOpen} onOpenChange={setIsGuideOpen} userData={guideUserData} />
       <Toaster />
     </div>

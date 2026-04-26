@@ -301,17 +301,22 @@ function DashboardContent({
   const [dismissedTrigger, setDismissedTrigger] = useState<string | null>(null);
   const importFileRef = useRef<HTMLInputElement>(null);
   const { currentPlanCode, currentPlanDefinition, entitlementKeys, premiumStatusItems } = usePlanEntitlements(userData);
+  const isPublicVisitor = isConfigured && !authLoading && !user;
+  const visibleGoals = isPublicVisitor ? [] : userData.goals;
+  const visibleWheelOfLife = isPublicVisitor ? [] : userData.currentWheelOfLife;
+  const visibleReflections = isPublicVisitor ? [] : userData.reflections;
+  const visibleVisionBoards = isPublicVisitor ? [] : userData.visionBoards;
+  const visibleActiveTwelveWeekGoal = isPublicVisitor ? null : activeTwelveWeekGoal;
   const { isUpgradeDialogOpen, setIsUpgradeDialogOpen, upgradeContext, recommendedPlan, openUpgradeDialog } =
     useUpgradeDialog({
       source: "dashboard",
       placement: "dashboard_plan_card",
       currentPlanCode,
-      goalId: activeTwelveWeekGoal?.id,
+      goalId: visibleActiveTwelveWeekGoal?.id,
     });
   const { plan, loading: planLoading, error: planError, actions: planActions } = usePlan12Week();
-  const dashboardPlanId = useDashboardPlanLink(activeTwelveWeekGoal?.id ?? null);
+  const dashboardPlanId = useDashboardPlanLink(visibleActiveTwelveWeekGoal?.id ?? null);
   const loadPlan = planActions.loadPlan;
-  const isPublicVisitor = isConfigured && !authLoading && !user;
   const authDestination = `${location.pathname}${location.search}${location.hash}`;
   const handleAuthNavigate = (mode: "signin" | "signup") => {
     navigate(buildLoginPath(mode, authDestination));
@@ -323,9 +328,9 @@ function DashboardContent({
     void loadPlan(dashboardPlanId);
   }, [dashboardPlanId, loadPlan, plan?.id]);
 
-  const recentGoals = userData.goals.slice(0, 3);
-  const recentReflections = sortReflectionsByDateDesc(userData.reflections).slice(0, 2);
-  const dashboardGoalTitle = activeTwelveWeekGoal?.title ?? plan?.vision ?? "Mục tiêu hiện tại";
+  const recentGoals = visibleGoals.slice(0, 3);
+  const recentReflections = sortReflectionsByDateDesc(visibleReflections).slice(0, 2);
+  const dashboardGoalTitle = visibleActiveTwelveWeekGoal?.title ?? plan?.vision ?? "Mục tiêu hiện tại";
   const goalProgressSnapshot = useMemo(() => buildGoalProgressSnapshot(plan), [plan]);
   const currentWeekExecutionSnapshot = useMemo(() => buildCurrentWeekExecutionSnapshot(plan), [plan]);
   const weeklyProgressPoints = useMemo(() => buildWeeklyProgressPoints(plan), [plan]);
@@ -367,9 +372,9 @@ function DashboardContent({
     e.target.value = "";
   };
 
-  const latestVisionBoard = userData.visionBoards[userData.visionBoards.length - 1];
-  const completedGoalsCount = userData.goals.filter((goal) => calculateGoalProgress(goal) === 100).length;
-  const executionTotals = userData.goals.reduce(
+  const latestVisionBoard = visibleVisionBoards[visibleVisionBoards.length - 1];
+  const completedGoalsCount = visibleGoals.filter((goal) => calculateGoalProgress(goal) === 100).length;
+  const executionTotals = visibleGoals.reduce(
     (sum, goal) => {
       const execution = getGoalExecutionStats(goal);
       return {
@@ -382,13 +387,13 @@ function DashboardContent({
   const totalTasks = executionTotals.total;
   const completedTasks = executionTotals.completed;
   const averageLifeScore =
-    userData.currentWheelOfLife.length > 0
-      ? userData.currentWheelOfLife.reduce((sum, area) => sum + area.score, 0) / userData.currentWheelOfLife.length
+    visibleWheelOfLife.length > 0
+      ? visibleWheelOfLife.reduce((sum, area) => sum + area.score, 0) / visibleWheelOfLife.length
       : 0;
 
   // Compute journal writing streak
   const journalStreak = (() => {
-    const sorted = [...userData.reflections].sort((a, b) => b.date.localeCompare(a.date));
+    const sorted = [...visibleReflections].sort((a, b) => b.date.localeCompare(a.date));
     if (sorted.length === 0) return 0;
     const dates = [...new Set(sorted.map((r) => r.date.slice(0, 10)))];
     const today = new Date();
@@ -409,12 +414,12 @@ function DashboardContent({
   })();
 
   const weakestArea =
-    userData.currentWheelOfLife.length > 0
-      ? [...userData.currentWheelOfLife].sort((a, b) => a.score - b.score)[0]
+    visibleWheelOfLife.length > 0
+      ? [...visibleWheelOfLife].sort((a, b) => a.score - b.score)[0]
       : null;
-  const localActiveSystem = activeTwelveWeekGoal?.twelveWeekSystem ?? null;
+  const localActiveSystem = visibleActiveTwelveWeekGoal?.twelveWeekSystem ?? null;
   const { effectiveSystem: activeSystem } = useBackendProgressOverlay(
-    activeTwelveWeekGoal?.id ?? null,
+    visibleActiveTwelveWeekGoal?.id ?? null,
     localActiveSystem,
   );
   const effectiveSystem = activeSystem;
@@ -436,7 +441,7 @@ function DashboardContent({
         ).slice(0, 3)
       : [];
 
-  const radarData = userData.currentWheelOfLife.map((area) => ({
+  const radarData = visibleWheelOfLife.map((area) => ({
     subject: getLifeAreaLabel(area.name),
     value: area.score,
     fullMark: 10,
@@ -590,7 +595,7 @@ function DashboardContent({
       ? [
         {
           eyebrow: "Chu kỳ đang chạy",
-          title: activeTwelveWeekGoal?.title ?? "Chu kỳ 12 tuần hiện tại",
+          title: visibleActiveTwelveWeekGoal?.title ?? "Chu kỳ 12 tuần hiện tại",
           description:
             activeSystemTodayOpenTasks.length > 0
               ? `${activeSystemTodayOpenTasks.length} việc đang mở hôm nay. Đi thẳng vào trung tâm để chạm tiếp đúng việc cần làm.`
@@ -700,7 +705,7 @@ function DashboardContent({
   const overdueCount = activeSystem ? activeSystemTodayTasks.filter((t) => !t.completed).length : 0;
   const activeTriggers = evaluateRescueTriggers({
     system: activeSystem,
-    subscription: userData.subscription ?? null,
+    subscription: isPublicVisitor ? null : userData.subscription ?? null,
     missedTasksCount: overdueCount,
     weekCompletionPercent: activeSystemWeekCompletion?.percent ?? 0,
   }).filter((t) => t.kind !== dismissedTrigger);
@@ -713,7 +718,7 @@ function DashboardContent({
         onOpenChange={setIsUpgradeDialogOpen}
         context={upgradeContext}
         currentPlan={currentPlanCode}
-        goalId={activeTwelveWeekGoal?.id}
+        goalId={visibleActiveTwelveWeekGoal?.id}
         recommendedPlan={recommendedPlan}
         source="dashboard"
         onCheckoutComplete={onReload}
@@ -806,7 +811,8 @@ function DashboardContent({
         })()}
 
       {/* Trial countdown banner */}
-      {userData.subscription?.status === "trialing" &&
+      {!isPublicVisitor &&
+        userData.subscription?.status === "trialing" &&
         userData.subscription.renewsAt &&
         new Date(userData.subscription.renewsAt) >= new Date() &&
         (() => {
@@ -849,7 +855,7 @@ function DashboardContent({
                   </p>
                   <h3 className="mt-1 text-2xl font-bold text-slate-950">Hôm nay là lúc chốt review tuần.</h3>
                   <p className="mt-2 text-sm text-slate-600">
-                    {activeTwelveWeekGoal?.title}. Khóa tuần {activeSystemWeek} và quyết định nhịp cho tuần tiếp theo.
+                    {visibleActiveTwelveWeekGoal?.title}. Khóa tuần {activeSystemWeek} và quyết định nhịp cho tuần tiếp theo.
                   </p>
                 </div>
               </div>
@@ -893,7 +899,7 @@ function DashboardContent({
                       {isPublicVisitor
                         ? "Trang chính giúp bạn nhìn rõ luồng sản phẩm trước khi tạo tài khoản."
                         : activeSystem
-                        ? `Quay lại đúng nhịp của "${activeTwelveWeekGoal?.title}".`
+                        ? `Quay lại đúng nhịp của "${visibleActiveTwelveWeekGoal?.title}".`
                         : "Bắt đầu từ một bước rõ ràng, rồi nối tiếp sang hệ 12 tuần."}
                     </h1>
                     <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
@@ -1328,7 +1334,7 @@ function DashboardContent({
         </motion.div>
       </div>
 
-      {userData.isHydratedFromDemo && (
+      {!isPublicVisitor && userData.isHydratedFromDemo && (
         <Reveal>
           <div className="flex flex-wrap items-center gap-4 rounded-[22px] border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-[0_20px_45px_-34px_rgba(217,119,6,0.25)]">
             <Sparkles className="h-5 w-5 shrink-0 text-amber-600" />
@@ -1522,15 +1528,25 @@ function DashboardContent({
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
-                <Suspense
-                  fallback={
-                    <div className="flex h-[300px] items-center justify-center rounded-[20px] bg-slate-100/88 text-sm text-slate-500">
-                      Đang tải biểu đồ cân bằng cuộc sống...
-                    </div>
-                  }
-                >
-                  <DashboardLifeAreaRadar data={radarData} />
-                </Suspense>
+                {radarData.length > 0 ? (
+                  <Suspense
+                    fallback={
+                      <div className="flex h-[300px] items-center justify-center rounded-[20px] bg-slate-100/88 text-sm text-slate-500">
+                        Đang tải biểu đồ cân bằng cuộc sống...
+                      </div>
+                    }
+                  >
+                    <DashboardLifeAreaRadar data={radarData} />
+                  </Suspense>
+                ) : (
+                  <div className="flex h-[300px] flex-col items-center justify-center rounded-[20px] bg-slate-50 px-5 text-center">
+                    <TrendingUp className="h-10 w-10 text-slate-300" />
+                    <p className="mt-3 font-semibold text-slate-900">Chưa có dữ liệu bánh xe cuộc sống</p>
+                    <p className="mt-1 max-w-sm text-sm leading-6 text-slate-500">
+                      Đăng ký hoặc đăng nhập để chấm điểm 8 lĩnh vực và lưu dữ liệu thật theo tài khoản.
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm">

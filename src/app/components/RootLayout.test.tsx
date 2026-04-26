@@ -15,6 +15,10 @@ const backendHydrationMock = vi.hoisted(() => ({
     error: null,
   },
 }));
+const productionMock = vi.hoisted(() => ({
+  maybeShowBrowserReminderNotification: vi.fn(),
+  syncPendingOutbox: vi.fn(),
+}));
 
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
@@ -34,8 +38,8 @@ vi.mock("../utils/app-mode", () => ({
 }));
 
 vi.mock("../utils/production", () => ({
-  maybeShowBrowserReminderNotification: vi.fn(),
-  syncPendingOutbox: vi.fn(),
+  maybeShowBrowserReminderNotification: productionMock.maybeShowBrowserReminderNotification,
+  syncPendingOutbox: productionMock.syncPendingOutbox,
 }));
 
 function setAuthContext(overrides: Record<string, unknown> = {}) {
@@ -88,6 +92,8 @@ describe("RootLayout onboarding redirect", () => {
       result: null,
       error: null,
     };
+    productionMock.maybeShowBrowserReminderNotification.mockClear();
+    productionMock.syncPendingOutbox.mockClear();
     setAuthContext();
   });
 
@@ -153,6 +159,8 @@ describe("RootLayout onboarding redirect", () => {
     expect(screen.getByRole("button", { name: "Trang chính" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Mục tiêu" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "12 tuần" })).not.toBeInTheDocument();
+    expect(productionMock.maybeShowBrowserReminderNotification).not.toHaveBeenCalled();
+    expect(productionMock.syncPendingOutbox).not.toHaveBeenCalled();
   });
 
   it("does not block the public home page while auth is loading", async () => {
