@@ -5,7 +5,9 @@ import { spawn } from "node:child_process";
 const BASE_URL = (process.env.PROD_SMOKE_URL ?? "https://vision-board-web-platform.vercel.app").replace(/\/$/, "");
 const TIMESTAMP = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
 const GENERATED_EMAIL = `codex.qa+smoke-${TIMESTAMP}@example.com`;
+const FRESH_EMAIL = `codex.qa+fresh-${TIMESTAMP}@example.com`;
 const GENERATED_PASSWORD = `CodexSmoke${TIMESTAMP}!`;
+const FRESH_PASSWORD = GENERATED_PASSWORD;
 const EMAIL = process.env.PROD_SMOKE_EMAIL?.trim() || GENERATED_EMAIL;
 const PASSWORD = process.env.PROD_SMOKE_PASSWORD || GENERATED_PASSWORD;
 const HAS_PROVIDED_CREDENTIALS = Boolean(process.env.PROD_SMOKE_EMAIL && process.env.PROD_SMOKE_PASSWORD);
@@ -206,6 +208,24 @@ async function getPageState() {
   `);
 }
 
+function assertTextIncludes(state, expected, context) {
+  if (state.text.includes(expected)) return;
+  throw new Error(`${context} is missing expected text: ${expected}\nURL: ${state.url}\nText: ${state.text.slice(0, 900)}`);
+}
+
+function assertTextExcludes(state, forbidden, context) {
+  if (!state.text.includes(forbidden)) return;
+  throw new Error(`${context} includes forbidden text: ${forbidden}\nURL: ${state.url}\nText: ${state.text.slice(0, 900)}`);
+}
+
+function assertNoFreshWorkspaceLeaks(state, context) {
+  const forbiddenTexts = ["Ra mắt", "Duy trì", "Đi bộ 8", "Bánh xe cuộc sống là bước mở đầu"];
+  const leakedText = forbiddenTexts.find((text) => state.text.includes(text));
+  if (leakedText) {
+    throw new Error(`${context} leaks stale/demo workspace text: ${leakedText}\nURL: ${state.url}\nText: ${state.text.slice(0, 900)}`);
+  }
+}
+
 async function assertNoBrowserErrors() {
   const { stdout } = await runAgentBrowser(["errors"], { timeoutMs: 30_000 });
   const errors = stdout.trim();
@@ -309,16 +329,30 @@ async function runStep(label, task) {
   await task();
 }
 
-async function signInOrSignUp() {
-  const modeQuery = AUTH_MODE === "signup" ? "mode=signup&" : "";
-  await openPage(`/login?${modeQuery}next=%2Fonboarding`);
+async function authenticate({ mode, email, password, nextPath = "/onboarding", accountLabel = "QA account" }) {
+  const modeQuery = mode === "signup" ? "mode=signup&" : "";
+  await openPage(`/login?${modeQuery}next=${encodeURIComponent(nextPath)}`);
   await waitFor("login form", 'document.querySelector("#login-email") && document.querySelector("#login-password")');
 
-  log(`${AUTH_MODE === "signup" ? "Creating" : "Signing in with"} QA account ${EMAIL}`);
-  await fillSelector("#login-email", EMAIL);
-  await fillSelector("#login-password", PASSWORD);
-  await clickButton(AUTH_MODE === "signup" ? "Tạo tài khoản" : "Đăng nhập");
-  await waitFor("authenticated onboarding route", 'location.pathname === "/onboarding"', { timeoutMs: 70_000 });
+  log(`${mode === "signup" ? "Creating" : "Signing in with"} ${accountLabel} ${email}`);
+  await fillSelector("#login-email", email);
+  await fillSelector("#login-password", password);
+  await clickButton(mode === "signup" ? "Tạo tài khoản" : "Đăng nhập");
+  await waitFor(
+    `authenticated ${nextPath} route`,
+    `location.pathname === ${JSON.stringify(nextPath)}`,
+    { timeoutMs: 70_000 },
+  );
+}
+
+async function signInOrSignUp() {
+  await authenticate({
+    mode: AUTH_MODE,
+    email: EMAIL,
+    password: PASSWORD,
+    nextPath: "/onboarding",
+    accountLabel: "QA account",
+  });
 }
 
 async function runSignedOutSmoke() {
@@ -337,6 +371,115 @@ async function runSignedOutSmoke() {
   }
   if (state.apiResources.length > 0) {
     throw new Error(`Signed-out public home called API resources: ${state.apiResources.join(", ")}`);
+  }
+}
+
+async function seedFreshLocalWorkspace() {
+  log("Seeding zero-score fresh workspace state");
+  const result = await browserEval(`
+    (() => {
+      const mainKey = "visionboard_user_data";
+      const raw = localStorage.getItem(mainKey);
+      if (!raw) return { ok: false, reason: "Missing user data snapshot" };
+
+      let data;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        return { ok: false, reason: "User data snapshot is not valid JSON" };
+      }
+
+      data.isHydratedFromDemo = false;
+      data.onboardingCompleted = true;
+      data.goals = [];
+      data.reflections = [];
+      data.visionBoards = [];
+      data.wheelOfLifeHistory = [];
+      data.eventLog = [];
+      data.syncOutbox = [];
+      data.inAppReminders = [];
+      data.currentWheelOfLife = Array.isArray(data.currentWheelOfLife)
+        ? data.currentWheelOfLife.map((area) => ({ ...area, score: 0 }))
+        : [];
+
+      const serialized = JSON.stringify(data);
+      localStorage.setItem(mainKey, serialized);
+
+      const scopedKeys = [];
+      for (let index = 0; index < localStorage.length; index += 1) {
+        const key = localStorage.key(index);
+        if (key?.startsWith(mainKey + ":auth:")) scopedKeys.push(key);
+      }
+      scopedKeys.forEach((key) => localStorage.setItem(key, serialized));
+
+      [
+        "selected_focus_area",
+        "pending_smart_goal",
+        "pending_feasibility_result",
+        "pending_feasibility_answers",
+        "pending_12_week_setup_draft",
+        "pending_12_week_plan_draft",
+        "latest_12_week_goal_id",
+        "latest_12_week_system_goal_id",
+        "latest_12_week_plan_goal_id",
+        "readiness_level",
+        "readiness_score",
+        "visionboard_new_user_guide_dismissed",
+        "visionboard_new_user_guide_seen_at",
+      ].forEach((key) => localStorage.removeItem(key));
+
+      window.dispatchEvent(new CustomEvent("visionboard:user-data-updated"));
+
+      return {
+        ok: true,
+        goals: data.goals.length,
+        reflections: data.reflections.length,
+        scoredAreas: data.currentWheelOfLife.filter((area) => area.score > 0).length,
+      };
+    })()
+  `);
+
+  if (!result?.ok) {
+    throw new Error(`Could not seed fresh local workspace: ${result?.reason ?? "unknown error"}`);
+  }
+}
+
+async function runFreshAuthenticatedWorkspaceSmoke() {
+  try {
+    await authenticate({
+      mode: "signup",
+      email: FRESH_EMAIL,
+      password: FRESH_PASSWORD,
+      nextPath: "/onboarding",
+      accountLabel: "fresh QA account",
+    });
+    await seedFreshLocalWorkspace();
+
+    await openPage("/");
+    await waitFor("fresh dashboard empty state", 'document.querySelector("[data-testid=\\"fresh-workspace-empty-state\\"]")');
+    let state = await getPageState();
+    assertTextIncludes(state, "Chưa có dữ liệu thực thi để hiển thị.", "fresh dashboard");
+    assertTextIncludes(state, "0/6 bước đã xong", "fresh dashboard guide");
+    assertTextIncludes(state, "Đánh giá cân bằng", "fresh dashboard guide");
+    assertNoFreshWorkspaceLeaks(state, "fresh dashboard");
+
+    await openPage("/goals");
+    await waitFor("fresh goals empty state", 'document.querySelector("[data-testid=\\"goaltracker-fresh-empty-state\\"]")');
+    state = await getPageState();
+    assertTextIncludes(state, "Chưa có mục tiêu nào trong workspace của bạn", "fresh goals");
+    assertTextIncludes(state, "Bắt đầu Life Balance", "fresh goals");
+    assertNoFreshWorkspaceLeaks(state, "fresh goals");
+
+    await openPage("/journal");
+    await waitFor("fresh journal empty state", 'document.querySelector("[data-testid=\\"journal-fresh-empty-state\\"]")');
+    state = await getPageState();
+    assertTextIncludes(state, "Chưa có trang nhật ký nào được mở ra", "fresh journal");
+    assertTextIncludes(state, "Bắt đầu Life Balance", "fresh journal");
+    assertTextExcludes(state, "Tổng số nhật ký", "fresh journal");
+    assertTextExcludes(state, "Tổng số bài", "fresh journal");
+    assertNoFreshWorkspaceLeaks(state, "fresh journal");
+  } finally {
+    await clearBrowserStorage().catch(() => undefined);
   }
 }
 
@@ -524,6 +667,7 @@ async function main() {
       await runAgentBrowser(["close"], { timeoutMs: 30_000 }).catch(() => undefined);
     });
     await runStep("Signed-out home", runSignedOutSmoke);
+    await runStep("Fresh authenticated workspace", runFreshAuthenticatedWorkspaceSmoke);
     await runStep("Authentication", signInOrSignUp);
     await runStep("Onboarding mobile polish", runOnboardingSmoke);
     await runStep("Life balance assessment", completeOnboarding);
