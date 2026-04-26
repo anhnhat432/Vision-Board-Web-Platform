@@ -1,6 +1,8 @@
 name: Production smoke e2e
 
 on:
+  schedule:
+    - cron: "0 1 * * *"
   workflow_dispatch:
     inputs:
       target_url:
@@ -17,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      PROD_SMOKE_URL: ${{ inputs.target_url }}
+      PROD_SMOKE_URL: ${{ github.event.inputs.target_url || 'https://vision-board-web-platform.vercel.app' }}
       PROD_SMOKE_EMAIL: ${{ secrets.PROD_SMOKE_EMAIL }}
       PROD_SMOKE_PASSWORD: ${{ secrets.PROD_SMOKE_PASSWORD }}
     steps:
