@@ -1,7 +1,17 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
-import { ArrowLeft, ArrowRight, CalendarDays, CheckCircle2, Compass, Flag, Loader2, Sparkles, Target } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarDays,
+  CheckCircle2,
+  Compass,
+  Flag,
+  Loader2,
+  Sparkles,
+  Target,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
@@ -23,9 +33,11 @@ import {
   formatDateInputValue,
   getCurrentPlan,
   getLifeAreaLabel,
+  getUserData,
   parseCalendarDate,
   trackAppEvent,
 } from "../utils/storage";
+import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
 import {
   trackPaywallCtaClicked,
   trackPremiumTemplateUnlockPrompted,
@@ -323,6 +335,14 @@ export function TwelveWeekSetup() {
   });
 
   useEffect(() => {
+    const data = getUserData();
+    if (!hasRealLifeBalance(data)) {
+      toast.info("Bạn cần hoàn thành Life Balance trước khi vào hệ 12 tuần.");
+      setIsLoading(false);
+      navigate("/onboarding");
+      return;
+    }
+
     const selectedFocusArea = localStorage.getItem(APP_STORAGE_KEYS.selectedFocusArea);
     const pendingSmartGoal = localStorage.getItem(APP_STORAGE_KEYS.pendingSmartGoal);
     const pendingFeasibilityResult = localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
@@ -347,6 +367,13 @@ export function TwelveWeekSetup() {
 
       if (!parsedSmartGoal || !isPendingFeasibilityResult(parsedFeasibility)) {
         throw new Error("invalid-draft");
+      }
+
+      if (!getScoredLifeArea(data, selectedFocusArea)) {
+        toast.info("Bạn cần chọn lại Life Insight từ dữ liệu Life Balance thật.");
+        setIsLoading(false);
+        navigate("/life-insight");
+        return;
       }
 
       setFocusArea(selectedFocusArea);

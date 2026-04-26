@@ -9,12 +9,14 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
+import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { APP_STORAGE_KEYS, clearGoalPlanningDrafts, getLifeAreaLabel } from "../utils/storage";
 
 export function LifeInsight() {
   const navigate = useNavigate();
   const { userData } = useSyncedUserData();
   const lifeAreas = userData?.currentWheelOfLife ?? [];
+  const hasLifeBalance = hasRealLifeBalance(userData);
   const [selectedAreaName, setSelectedAreaName] = useState<string | null>(null);
 
   const lowestArea = useMemo(() => {
@@ -67,7 +69,7 @@ export function LifeInsight() {
     );
   }
 
-  if (!lowestArea || !strongestArea || !focusArea) {
+  if (!hasLifeBalance || !lowestArea || !strongestArea || !focusArea) {
     return (
       <div className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
         <Card className="mx-auto max-w-3xl border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.34)]">

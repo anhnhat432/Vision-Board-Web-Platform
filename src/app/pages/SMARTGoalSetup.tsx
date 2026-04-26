@@ -1,15 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  CircleAlert,
-  CheckCircle2,
-  Compass,
-  Sparkles,
-  Target,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, CircleAlert, CheckCircle2, Compass, Loader2, Sparkles, Target } from "lucide-react";
 
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
@@ -20,7 +12,8 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Progress } from "../components/ui/progress";
 import { Textarea } from "../components/ui/textarea";
-import { APP_STORAGE_KEYS, getLifeAreaLabel } from "../utils/storage";
+import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
+import { APP_STORAGE_KEYS, getLifeAreaLabel, getUserData } from "../utils/storage";
 import {
   buildSmartGoal,
   hasOutcomeIndicator,
@@ -202,13 +195,9 @@ function formatStepDraft(stepKey: SmartStepKey, smartData: SMARTData): string {
     }
     case "timeBound":
       if (smartData.timeBound.mode === "date") {
-        return smartData.timeBound.target_date.trim()
-          ? `Mốc đến ${smartData.timeBound.target_date.trim()}`
-          : "";
+        return smartData.timeBound.target_date.trim() ? `Mốc đến ${smartData.timeBound.target_date.trim()}` : "";
       }
-      return smartData.timeBound.target_weeks.trim()
-        ? `Trong ${smartData.timeBound.target_weeks.trim()} tuần`
-        : "";
+      return smartData.timeBound.target_weeks.trim() ? `Trong ${smartData.timeBound.target_weeks.trim()} tuần` : "";
     default:
       return "";
   }
@@ -263,9 +252,7 @@ function getStepValidationError(stepKey: SmartStepKey, smartData: SMARTData): st
   }
 
   if (smartData.timeBound.mode === "date") {
-    return smartData.timeBound.target_date.trim().length > 0
-      ? null
-      : "Hãy chọn ngày mục tiêu cho kế hoạch này.";
+    return smartData.timeBound.target_date.trim().length > 0 ? null : "Hãy chọn ngày mục tiêu cho kế hoạch này.";
   }
 
   const targetWeeks = parseNumberInput(smartData.timeBound.target_weeks);
@@ -281,40 +268,32 @@ const SMART_STEPS = [
     key: "specific" as keyof SMARTData,
     label: "Cụ thể",
     title: "Bạn muốn đạt được chính xác điều gì?",
-    placeholder:
-      "Ví dụ: Tôi muốn được thăng chức lên vị trí Lập trình viên cao cấp và dẫn dắt một dự án quan trọng.",
-    description:
-      "Mục tiêu càng rõ thì năng lượng hành động càng dễ tập trung. Tránh những câu quá rộng hoặc mơ hồ.",
+    placeholder: "Ví dụ: Tôi muốn được thăng chức lên vị trí Lập trình viên cao cấp và dẫn dắt một dự án quan trọng.",
+    description: "Mục tiêu càng rõ thì năng lượng hành động càng dễ tập trung. Tránh những câu quá rộng hoặc mơ hồ.",
     coaching: "Hãy mô tả kết quả cuối cùng, không chỉ nói về mong muốn chung chung.",
   },
   {
     key: "measurable" as keyof SMARTData,
     label: "Đo được",
     title: "Bạn sẽ biết mình đang tiến bộ bằng cách nào?",
-    placeholder:
-      "Ví dụ: Hoàn thành 3 khóa học nâng cao, dẫn dắt 2 tính năng lớn và nhận đánh giá tốt từ quản lý.",
-    description:
-      "Đặt ra dấu hiệu cụ thể để bạn không phải đoán cảm tính rằng mình có đang đi đúng hướng hay không.",
+    placeholder: "Ví dụ: Hoàn thành 3 khóa học nâng cao, dẫn dắt 2 tính năng lớn và nhận đánh giá tốt từ quản lý.",
+    description: "Đặt ra dấu hiệu cụ thể để bạn không phải đoán cảm tính rằng mình có đang đi đúng hướng hay không.",
     coaching: "Hãy nghĩ bằng số lượng, cột mốc, đầu ra hoặc tiêu chí dễ quan sát.",
   },
   {
     key: "achievable" as keyof SMARTData,
     label: "Khả thi",
     title: "Bạn cần những nguồn lực, kỹ năng hay điều kiện nào?",
-    placeholder:
-      "Ví dụ: cần 5 giờ học mỗi tuần, mentor góp ý định kỳ và thời gian thực hành có lịch cố định.",
-    description:
-      "Phần này giúp mục tiêu bớt mơ hồ và kéo nó gần hơn với đời sống thật của bạn.",
+    placeholder: "Ví dụ: cần 5 giờ học mỗi tuần, mentor góp ý định kỳ và thời gian thực hành có lịch cố định.",
+    description: "Phần này giúp mục tiêu bớt mơ hồ và kéo nó gần hơn với đời sống thật của bạn.",
     coaching: "Nghĩ đến thời gian, kỹ năng, người hỗ trợ và môi trường bạn cần.",
   },
   {
     key: "relevant" as keyof SMARTData,
     label: "Liên quan",
     title: "Tại sao mục tiêu này thực sự quan trọng với bạn?",
-    placeholder:
-      "Ví dụ: Vì nó gắn trực tiếp với tầm nhìn nghề nghiệp 3 năm tới và mức thu nhập tôi đang hướng đến.",
-    description:
-      "Khi mục tiêu gắn với một lý do đủ mạnh, bạn sẽ dễ giữ được kỷ luật hơn trong giai đoạn khó.",
+    placeholder: "Ví dụ: Vì nó gắn trực tiếp với tầm nhìn nghề nghiệp 3 năm tới và mức thu nhập tôi đang hướng đến.",
+    description: "Khi mục tiêu gắn với một lý do đủ mạnh, bạn sẽ dễ giữ được kỷ luật hơn trong giai đoạn khó.",
     coaching: "Viết theo kiểu: mục tiêu này quan trọng vì...",
   },
   {
@@ -322,34 +301,85 @@ const SMART_STEPS = [
     label: "Thời hạn",
     title: "Bạn muốn đạt được điều này vào khi nào?",
     placeholder: "Ví dụ: Trong vòng 12 tháng, trước tháng 3 năm 2027.",
-    description:
-      "Thời hạn tạo ra nhịp. Không cần quá gấp, nhưng cần đủ rõ để buộc bạn ra quyết định.",
+    description: "Thời hạn tạo ra nhịp. Không cần quá gấp, nhưng cần đủ rõ để buộc bạn ra quyết định.",
     coaching: "Nếu chưa chắc ngày cụ thể, ít nhất hãy đưa ra khung tuần hoặc tháng.",
   },
 ];
 
+function SMARTGoalSetupState({
+  title,
+  description,
+  actionLabel,
+  onAction,
+  loading = false,
+}: {
+  title: string;
+  description: string;
+  actionLabel?: string;
+  onAction?: () => void;
+  loading?: boolean;
+}) {
+  return (
+    <div className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
+      <Card className="mx-auto max-w-3xl overflow-hidden border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.34)]">
+        <CardContent className="p-8 text-center sm:p-12">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-violet-50 text-violet-700">
+            {loading ? <Loader2 className="h-8 w-8 animate-spin" /> : <Compass className="h-8 w-8" />}
+          </div>
+          <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">SMART Goal</p>
+          <h1 className="mt-2 text-2xl font-bold text-slate-900">{title}</h1>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-500" role="status">
+            {description}
+          </p>
+          {actionLabel && onAction ? (
+            <div className="mt-7 flex justify-center">
+              <Button type="button" onClick={onAction}>
+                {actionLabel}
+              </Button>
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export function SMARTGoalSetup() {
   const navigate = useNavigate();
+  const [setupState, setSetupState] = useState<"checking" | "needs_life_balance" | "needs_life_insight" | "ready">(
+    "checking",
+  );
   const [currentStep, setCurrentStep] = useState(0);
   const [focusArea, setFocusArea] = useState<string>("");
   const [smartData, setSmartData] = useState<SMARTData>(createInitialSMARTData());
 
   useEffect(() => {
+    const data = getUserData();
+    if (!hasRealLifeBalance(data)) {
+      setSetupState("needs_life_balance");
+      return;
+    }
+
     const area = localStorage.getItem(APP_STORAGE_KEYS.selectedFocusArea);
-    const fallbackArea = area || "Personal Growth";
-    setFocusArea(fallbackArea);
+    if (!area || !getScoredLifeArea(data, area)) {
+      setSetupState("needs_life_insight");
+      return;
+    }
+
+    setFocusArea(area);
 
     const draft = localStorage.getItem(APP_STORAGE_KEYS.pendingSmartGoal);
-    if (!draft) return;
+    if (!draft) {
+      setSetupState("ready");
+      return;
+    }
 
     try {
       const parsed = JSON.parse(draft);
-      const parsedFocusArea =
-        isPendingSMARTGoal(parsed) && parsed.focusArea.trim().length > 0
-          ? parsed.focusArea
-          : "";
+      const parsedFocusArea = isPendingSMARTGoal(parsed) && parsed.focusArea.trim().length > 0 ? parsed.focusArea : "";
 
       if (area && parsedFocusArea && parsedFocusArea !== area) {
+        setSetupState("ready");
         return;
       }
 
@@ -361,15 +391,15 @@ export function SMARTGoalSetup() {
     } catch {
       // Ignore malformed drafts.
     }
+
+    setSetupState("ready");
   }, []);
 
   const currentStepData = SMART_STEPS[currentStep];
   const totalSteps = SMART_STEPS.length;
   const progressPercentage = ((currentStep + 1) / totalSteps) * 100;
   const completedCount = useMemo(
-    () =>
-      SMART_STEPS.filter((step) => getStepValidationError(step.key as SmartStepKey, smartData) === null)
-        .length,
+    () => SMART_STEPS.filter((step) => getStepValidationError(step.key as SmartStepKey, smartData) === null).length,
     [smartData],
   );
   const currentStepError = getStepValidationError(currentStepData.key as SmartStepKey, smartData);
@@ -377,8 +407,7 @@ export function SMARTGoalSetup() {
   const parsedBaselineValue = parseNumberInput(smartData.measurable.baseline_value);
   const parsedTargetValue = parseNumberInput(smartData.measurable.target_value);
   const metricNameMissing = smartData.measurable.metric_name.trim().length === 0;
-  const baselineInvalid =
-    smartData.measurable.baseline_value.trim().length > 0 && parsedBaselineValue === undefined;
+  const baselineInvalid = smartData.measurable.baseline_value.trim().length > 0 && parsedBaselineValue === undefined;
   const targetInvalid =
     parsedTargetValue === undefined ||
     (parsedBaselineValue !== undefined && parsedTargetValue !== undefined && parsedTargetValue <= parsedBaselineValue);
@@ -414,16 +443,11 @@ export function SMARTGoalSetup() {
       achievableSupportResources: normalizeListInput(smartData.achievable.support_resources),
       relevantMotivationReason: smartData.relevant.motivation_reason,
       relevantLifeDimensionAlignment: smartData.relevant.life_dimension_alignment,
-      timeBoundTargetDate:
-        smartData.timeBound.mode === "date" ? smartData.timeBound.target_date : undefined,
-      timeBoundTargetWeeks:
-        smartData.timeBound.mode === "weeks" ? targetWeeks : undefined,
+      timeBoundTargetDate: smartData.timeBound.mode === "date" ? smartData.timeBound.target_date : undefined,
+      timeBoundTargetWeeks: smartData.timeBound.mode === "weeks" ? targetWeeks : undefined,
     });
 
-    localStorage.setItem(
-      APP_STORAGE_KEYS.pendingSmartGoal,
-      JSON.stringify(smartGoal),
-    );
+    localStorage.setItem(APP_STORAGE_KEYS.pendingSmartGoal, JSON.stringify(smartGoal));
 
     navigate("/feasibility");
   };
@@ -458,6 +482,38 @@ export function SMARTGoalSetup() {
     currentStep < totalSteps - 1
       ? "Hoàn tất bước này để mở bước tiếp theo trong flow SMART."
       : "Hoàn tất bước này để chuyển sang bước kiểm tra tính khả thi.";
+
+  if (setupState === "checking") {
+    return (
+      <SMARTGoalSetupState
+        loading
+        title="Đang kiểm tra dữ liệu SMART Goal"
+        description="Mình đang kiểm tra Life Balance và Life Insight trước khi mở phần viết mục tiêu."
+      />
+    );
+  }
+
+  if (setupState === "needs_life_balance") {
+    return (
+      <SMARTGoalSetupState
+        title="Hoàn thành Life Balance trước"
+        description="SMART Goal cần đi sau dữ liệu Life Balance thật. Hãy chấm điểm các lĩnh vực trước để mục tiêu không bắt đầu từ số mặc định."
+        actionLabel="Bắt đầu Life Balance"
+        onAction={() => navigate("/onboarding")}
+      />
+    );
+  }
+
+  if (setupState === "needs_life_insight") {
+    return (
+      <SMARTGoalSetupState
+        title="Chọn Life Insight trước"
+        description="Bạn đã có dữ liệu Life Balance, nhưng chưa chọn lĩnh vực trọng tâm. Hãy chọn một insight rồi quay lại viết SMART Goal."
+        actionLabel="Mở Life Insight"
+        onAction={() => navigate("/life-insight")}
+      />
+    );
+  }
 
   const renderCurrentStepFields = () => {
     if (currentStepKey === "specific") {
@@ -529,11 +585,11 @@ export function SMARTGoalSetup() {
                     ...previous,
                     measurable: {
                       ...previous.measurable,
-                    baseline_value: event.target.value,
-                  },
-                }))
-              }
-              aria-invalid={currentStepKey === "measurable" && baselineInvalid}
+                      baseline_value: event.target.value,
+                    },
+                  }))
+                }
+                aria-invalid={currentStepKey === "measurable" && baselineInvalid}
               />
             </div>
             <div className="space-y-2">
@@ -550,15 +606,17 @@ export function SMARTGoalSetup() {
                     ...previous,
                     measurable: {
                       ...previous.measurable,
-                    target_value: event.target.value,
-                  },
-                }))
-              }
-              aria-invalid={currentStepKey === "measurable" && targetInvalid}
+                      target_value: event.target.value,
+                    },
+                  }))
+                }
+                aria-invalid={currentStepKey === "measurable" && targetInvalid}
               />
             </div>
           </div>
-          <p className="text-sm text-slate-500">Nếu bạn nhập cả hai mốc, hệ thống sẽ kiểm tra để mốc mục tiêu lớn hơn mốc hiện tại.</p>
+          <p className="text-sm text-slate-500">
+            Nếu bạn nhập cả hai mốc, hệ thống sẽ kiểm tra để mốc mục tiêu lớn hơn mốc hiện tại.
+          </p>
         </div>
       );
     }
@@ -608,7 +666,9 @@ export function SMARTGoalSetup() {
               }
               className="min-h-[120px] resize-none text-base leading-7"
             />
-            <p className="text-sm text-slate-500">Chỉ cần liệt kê những kỹ năng thật sự ảnh hưởng tới kết quả của giai đoạn này.</p>
+            <p className="text-sm text-slate-500">
+              Chỉ cần liệt kê những kỹ năng thật sự ảnh hưởng tới kết quả của giai đoạn này.
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -657,7 +717,9 @@ export function SMARTGoalSetup() {
               className="min-h-[160px] resize-none text-base leading-7"
               aria-invalid={currentStepKey === "relevant" && motivationInvalid}
             />
-            <p className="text-sm text-slate-500">Hãy viết đủ cụ thể để khi mệt bạn vẫn nhớ vì sao mục tiêu này đáng giữ.</p>
+            <p className="text-sm text-slate-500">
+              Hãy viết đủ cụ thể để khi mệt bạn vẫn nhớ vì sao mục tiêu này đáng giữ.
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="smart-life-alignment">Lĩnh vực cuộc sống liên quan (tuỳ chọn)</Label>
@@ -684,7 +746,9 @@ export function SMARTGoalSetup() {
     return (
       <div className="space-y-5">
         <div className="space-y-1">
-          <p className="text-sm text-slate-600">Chọn cách chốt thời hạn phù hợp nhất với cách bạn muốn theo dõi kế hoạch này.</p>
+          <p className="text-sm text-slate-600">
+            Chọn cách chốt thời hạn phù hợp nhất với cách bạn muốn theo dõi kế hoạch này.
+          </p>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -742,7 +806,9 @@ export function SMARTGoalSetup() {
               }
               aria-invalid={targetWeeksInvalid}
             />
-            <p className="text-sm text-slate-500">Gợi ý: 12 tuần là chu kỳ hợp lý để nối sang phần planning tiếp theo.</p>
+            <p className="text-sm text-slate-500">
+              Gợi ý: 12 tuần là chu kỳ hợp lý để nối sang phần planning tiếp theo.
+            </p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -797,8 +863,8 @@ export function SMARTGoalSetup() {
                     Chúng ta sẽ biến insight vừa có thành một mục tiêu đủ rõ để bắt đầu hành động.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
-                    SMART không phải chỉ để viết cho đẹp. Nó giúp mục tiêu của bạn trở nên rõ hơn,
-                    thực tế hơn và dễ mang sang bước đánh giá khả thi cũng như hệ 12 tuần phía sau.
+                    SMART không phải chỉ để viết cho đẹp. Nó giúp mục tiêu của bạn trở nên rõ hơn, thực tế hơn và dễ
+                    mang sang bước đánh giá khả thi cũng như hệ 12 tuần phía sau.
                   </p>
                 </div>
 
@@ -816,7 +882,9 @@ export function SMARTGoalSetup() {
 
               <div className="flow-panel p-5 sm:p-6">
                 <div className="flex items-center justify-between text-sm text-white/72">
-                  <span>Bước {currentStep + 1} / {totalSteps}</span>
+                  <span>
+                    Bước {currentStep + 1} / {totalSteps}
+                  </span>
                   <span>{Math.round(progressPercentage)}%</span>
                 </div>
                 <Progress value={progressPercentage} className="mt-3 h-2.5 bg-white/20" />
@@ -879,9 +947,7 @@ export function SMARTGoalSetup() {
                   </p>
                   <h2 className="mt-3 text-3xl font-bold text-slate-900">{currentStepData.title}</h2>
                   <p className="mt-3 text-base leading-7 text-slate-600">{currentStepData.description}</p>
-                  <div className="flow-panel mt-4 px-4 py-3 text-sm text-slate-600">
-                    {currentStepData.coaching}
-                  </div>
+                  <div className="flow-panel mt-4 px-4 py-3 text-sm text-slate-600">{currentStepData.coaching}</div>
                 </div>
                 {renderCurrentStepFields()}
                 {currentStepError ? (
@@ -901,7 +967,9 @@ export function SMARTGoalSetup() {
 
                 <div className="flow-muted p-4">
                   <div className="space-y-1">
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Tiếp tục flow SMART</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      Tiếp tục flow SMART
+                    </p>
                     <p className="text-sm text-slate-600">{currentStepActionHint}</p>
                   </div>
 
@@ -911,9 +979,7 @@ export function SMARTGoalSetup() {
                       Quay lại
                     </Button>
                     <Button className="flex-1" onClick={handleNext} disabled={!isCurrentStepValid}>
-                      {currentStep < totalSteps - 1
-                        ? "Tiếp theo"
-                        : "Tiếp theo: kiểm tra tính khả thi"}
+                      {currentStep < totalSteps - 1 ? "Tiếp theo" : "Tiếp theo: kiểm tra tính khả thi"}
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </div>
@@ -925,22 +991,14 @@ export function SMARTGoalSetup() {
           <div className="space-y-5 xl:sticky xl:top-28">
             <Card className="flow-panel">
               <CardContent className="p-6">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
-                  Bản nháp hiện tại
-                </p>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Bản nháp hiện tại</p>
 
                 <div className="mt-5 space-y-3">
                   {SMART_STEPS.map((step) => (
-                    <div
-                      key={step.key}
-                      className="flow-muted p-4"
-                    >
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                        {step.label}
-                      </p>
+                    <div key={step.key} className="flow-muted p-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{step.label}</p>
                       <p className="mt-2 text-sm leading-7 text-slate-600">
-                        {formatStepDraft(step.key as SmartStepKey, smartData) ||
-                          "Chưa có nội dung cho phần này."}
+                        {formatStepDraft(step.key as SmartStepKey, smartData) || "Chưa có nội dung cho phần này."}
                       </p>
                     </div>
                   ))}

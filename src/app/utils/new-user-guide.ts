@@ -1,4 +1,5 @@
 import { APP_STORAGE_KEYS, getActiveTwelveWeekGoal } from "./storage";
+import { hasRealLifeBalance } from "./core-flow-guard";
 import type { UserData } from "./storage-types";
 
 const GUIDE_DISMISSED_KEY = "visionboard_new_user_guide_dismissed";
@@ -97,7 +98,7 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
 
   const activeGoal = getActiveTwelveWeekGoal(userData.goals);
   const activeSystem = activeGoal?.twelveWeekSystem ?? null;
-  const hasLifeBalance = userData.onboardingCompleted && userData.currentWheelOfLife.length > 0;
+  const hasLifeBalance = hasRealLifeBalance(userData);
   const hasAnyGoal = userData.goals.length > 0;
   const hasInsight = hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.selectedFocusArea);
   const hasSmartGoal = hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.pendingSmartGoal);

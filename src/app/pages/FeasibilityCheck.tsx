@@ -23,12 +23,9 @@ import { Card, CardContent } from "../components/ui/card";
 import { Label } from "../components/ui/label";
 import { Progress } from "../components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
+import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
 import { APP_STORAGE_KEYS, getLifeAreaLabel, getUserData } from "../utils/storage";
-import {
-  parsePendingSMARTGoal,
-  parseSmartGoal,
-  type PendingSMARTGoal,
-} from "@/lib/smart-goal";
+import { parsePendingSMARTGoal, parseSmartGoal, type PendingSMARTGoal } from "@/lib/smart-goal";
 
 interface Question {
   id: number;
@@ -167,8 +164,7 @@ function buildResult(readinessScore: number, wheelScore: number): ResultData {
       title: "Mục tiêu này khá phù hợp với bạn ở thời điểm hiện tại.",
       summary:
         "Độ sẵn sàng của bạn và bối cảnh cuộc sống hiện tại đang cho thấy đây là một mục tiêu đủ thực tế để bắt đầu.",
-      recommendation:
-        "Bạn có thể tiến tới bước thiết kế hệ 12 tuần và giữ nhịp đều ngay từ đầu.",
+      recommendation: "Bạn có thể tiến tới bước thiết kế hệ 12 tuần và giữ nhịp đều ngay từ đầu.",
       readinessScore,
       adjustedScore,
       wheelScore,
@@ -179,10 +175,8 @@ function buildResult(readinessScore: number, wheelScore: number): ResultData {
     return {
       type: "challenging",
       title: "Mục tiêu này có tính thách thức cao nhưng vẫn khả thi.",
-      summary:
-        "Bạn có thể đạt được mục tiêu này nếu chia nhỏ đủ tốt và giữ được sự nhất quán trong 12 tuần tới.",
-      recommendation:
-        "Nên tập trung vào một số hành động dẫn dắt cốt lõi và review hằng tuần thật nghiêm túc.",
+      summary: "Bạn có thể đạt được mục tiêu này nếu chia nhỏ đủ tốt và giữ được sự nhất quán trong 12 tuần tới.",
+      recommendation: "Nên tập trung vào một số hành động dẫn dắt cốt lõi và review hằng tuần thật nghiêm túc.",
       readinessScore,
       adjustedScore,
       wheelScore,
@@ -194,8 +188,7 @@ function buildResult(readinessScore: number, wheelScore: number): ResultData {
     title: "Mục tiêu này có thể đang hơi quá sức vào thời điểm hiện tại.",
     summary:
       "Dựa trên độ sẵn sàng và điểm bánh xe cuộc sống của bạn, mục tiêu này có rủi ro cao nếu bắt đầu với quy mô như hiện tại.",
-    recommendation:
-      "Hãy thu nhỏ phạm vi, kéo dài thời hạn hoặc chọn một bước đệm gần hơn trước khi tăng tốc.",
+    recommendation: "Hãy thu nhỏ phạm vi, kéo dài thời hạn hoặc chọn một bước đệm gần hơn trước khi tăng tốc.",
     readinessScore,
     adjustedScore,
     wheelScore,
@@ -223,10 +216,7 @@ function FeasibilityResultView({
     too_ambitious: <AlertTriangle className="h-10 w-10 text-white" />,
   };
 
-  const styleMap: Record<
-    ResultType,
-    { glow: string; badge: string; title: string; panel: string; meter: string }
-  > = {
+  const styleMap: Record<ResultType, { glow: string; badge: string; title: string; panel: string; meter: string }> = {
     realistic: {
       glow: "bg-gradient-to-br from-emerald-400/24 via-cyan-300/14 to-transparent",
       badge: "border-emerald-200 bg-emerald-50 text-emerald-800",
@@ -350,7 +340,8 @@ function FeasibilityResultView({
     },
     too_ambitious: {
       statusLabel: "Cần thu nhỏ trước khi tăng tốc",
-      statusHint: "Mục tiêu này đang hơi nặng so với nền hiện tại. Thu nhỏ đúng cách sẽ giúp bạn giữ được động lực và xác suất hoàn thành cao hơn.",
+      statusHint:
+        "Mục tiêu này đang hơi nặng so với nền hiện tại. Thu nhỏ đúng cách sẽ giúp bạn giữ được động lực và xác suất hoàn thành cao hơn.",
       guideTitle: "Đừng hạ tham vọng, hãy hạ độ nặng của bước đầu.",
       guideBody:
         "Bạn chưa cần từ bỏ mục tiêu lớn. Điều nên làm là biến nó thành một bước đệm vừa tầm hơn, để 12 tuần tới là một chu kỳ thắng được chứ không phải một lời hứa áp lực.",
@@ -453,9 +444,7 @@ function FeasibilityResultView({
                   <div className={`inline-flex rounded-full border px-4 py-2 text-sm font-semibold ${styles.badge}`}>
                     {copy.statusLabel}
                   </div>
-                  <h1 className="max-w-3xl text-4xl font-bold tracking-normal lg:text-5xl">
-                    {result.title}
-                  </h1>
+                  <h1 className="max-w-3xl text-4xl font-bold tracking-normal lg:text-5xl">{result.title}</h1>
                   <p className="max-w-3xl text-base leading-8 text-white/84 lg:text-lg">{result.summary}</p>
                 </div>
 
@@ -465,9 +454,7 @@ function FeasibilityResultView({
                       key={card.label}
                       className="rounded-[28px] border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl"
                     >
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/58">
-                        {card.label}
-                      </p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/58">{card.label}</p>
                       <p className="mt-3 text-3xl font-bold text-white">{card.value}</p>
                       <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/12">
                         <div
@@ -484,9 +471,7 @@ function FeasibilityResultView({
               <div className="rounded-[34px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/58">
-                      Mức độ phù hợp
-                    </p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/58">Mức độ phù hợp</p>
                     <p className="mt-2 text-4xl font-bold text-white">{fitScore}%</p>
                     <p className="mt-2 text-sm leading-7 text-white/72">{copy.statusHint}</p>
                   </div>
@@ -560,7 +545,9 @@ function FeasibilityResultView({
                     </div>
                   </div>
 
-                  <div className={`rounded-[30px] border p-5 shadow-[0_26px_70px_-42px_rgba(15,23,42,0.28)] ${styles.title}`}>
+                  <div
+                    className={`rounded-[30px] border p-5 shadow-[0_26px_70px_-42px_rgba(15,23,42,0.28)] ${styles.title}`}
+                  >
                     <div className="flex items-center gap-2 text-slate-700">
                       <Target className="h-4 w-4" />
                       <p className="text-xs font-semibold uppercase tracking-[0.18em]">Bản chụp mục tiêu hiện tại</p>
@@ -574,11 +561,15 @@ function FeasibilityResultView({
                         <p className="mt-2 text-sm font-medium leading-6 text-slate-700">{pendingGoal.timeBound}</p>
                       </div>
                       <div className="rounded-[22px] border border-white/80 bg-white/76 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Dấu hiệu hoàn thành</p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                          Dấu hiệu hoàn thành
+                        </p>
                         <p className="mt-2 text-sm leading-6 text-slate-700">{pendingGoal.measurable}</p>
                       </div>
                       <div className="rounded-[22px] border border-white/80 bg-white/76 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Lý do mục tiêu này đáng theo đuổi</p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                          Lý do mục tiêu này đáng theo đuổi
+                        </p>
                         <p className="mt-2 text-sm leading-6 text-slate-700">{pendingGoal.relevant}</p>
                       </div>
                     </div>
@@ -590,9 +581,7 @@ function FeasibilityResultView({
             <div className="grid gap-6 lg:grid-cols-3">
               <Card className={`overflow-hidden ${styles.title}`}>
                 <CardContent className="p-6">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                    Lĩnh vực trọng tâm
-                  </p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Lĩnh vực trọng tâm</p>
                   <p className="mt-3 text-2xl font-bold text-slate-900">{getLifeAreaLabel(focusArea)}</p>
                   <p className="mt-3 text-sm leading-6 text-slate-600">
                     Đây là phần đời sống đang tác động trực tiếp tới độ khả thi của mục tiêu này.
@@ -616,12 +605,11 @@ function FeasibilityResultView({
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 text-slate-700">
                     <TrendingUp className="h-4 w-4 text-violet-600" />
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                      Tâm thế nên giữ
-                    </p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Tâm thế nên giữ</p>
                   </div>
                   <p className="mt-3 text-sm leading-7 text-slate-600">
-                    Kế hoạch tốt là kế hoạch bạn có thể giữ nhịp. Mục tiêu lớn vẫn có thể đạt được, miễn là bước đầu được thiết kế đúng tải.
+                    Kế hoạch tốt là kế hoạch bạn có thể giữ nhịp. Mục tiêu lớn vẫn có thể đạt được, miễn là bước đầu
+                    được thiết kế đúng tải.
                   </p>
                 </CardContent>
               </Card>
@@ -722,6 +710,14 @@ export function FeasibilityCheck() {
 
     const storedFocusArea = localStorage.getItem(APP_STORAGE_KEYS.selectedFocusArea);
     const draft = localStorage.getItem(APP_STORAGE_KEYS.pendingSmartGoal);
+    const data = getUserData();
+
+    if (!hasRealLifeBalance(data)) {
+      toast.info("Vui lòng hoàn thành Life Balance trước khi kiểm tra tính khả thi.");
+      setIsInitializing(false);
+      navigate("/onboarding");
+      return;
+    }
 
     if (!storedFocusArea || !draft) {
       toast.info("Vui lòng hoàn thành mục tiêu SMART của bạn trước.");
@@ -745,10 +741,7 @@ export function FeasibilityCheck() {
       localStorage.setItem(APP_STORAGE_KEYS.pendingSmartGoal, JSON.stringify(normalizedSmartGoal));
     }
 
-    const normalizedPendingGoal = parsePendingSMARTGoal(
-      normalizedSmartGoal ?? parsedDraft,
-      storedFocusArea,
-    );
+    const normalizedPendingGoal = parsePendingSMARTGoal(normalizedSmartGoal ?? parsedDraft, storedFocusArea);
 
     if (!normalizedPendingGoal) {
       toast.info("Bản nháp mục tiêu SMART của bạn chưa hoàn chỉnh. Vui lòng hoàn thành nó.");
@@ -757,8 +750,7 @@ export function FeasibilityCheck() {
       return;
     }
 
-    const data = getUserData();
-    const areaData = data.currentWheelOfLife.find((area) => area.name === storedFocusArea);
+    const areaData = getScoredLifeArea(data, storedFocusArea);
 
     if (!areaData) {
       toast.info("Vui lòng hoàn thành phần góc nhìn cuộc sống trước.");
@@ -892,8 +884,8 @@ export function FeasibilityCheck() {
                     Kiểm tra xem mục tiêu này có thực tế với bạn ở thời điểm hiện tại hay không.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
-                    Đây không phải là bài kiểm tra để ngăn bạn lại. Nó giúp bạn biết nên giữ nguyên,
-                    chia nhỏ hay điều chỉnh mục tiêu để hành trình phía sau bền vững hơn.
+                    Đây không phải là bài kiểm tra để ngăn bạn lại. Nó giúp bạn biết nên giữ nguyên, chia nhỏ hay điều
+                    chỉnh mục tiêu để hành trình phía sau bền vững hơn.
                   </p>
                 </div>
 
@@ -911,7 +903,9 @@ export function FeasibilityCheck() {
 
               <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
                 <div className="flex items-center justify-between text-sm text-white/72">
-                  <span>Câu hỏi {currentStep + 1} / {totalSteps}</span>
+                  <span>
+                    Câu hỏi {currentStep + 1} / {totalSteps}
+                  </span>
                   <span>{Math.round(progressPercentage)}%</span>
                 </div>
                 <Progress value={progressPercentage} className="mt-3 h-2.5 bg-white/20" />
@@ -966,9 +960,7 @@ export function FeasibilityCheck() {
                         <div className="flex-1">
                           <p className="text-base font-medium text-slate-800">{option.label}</p>
                         </div>
-                        {selectedAnswer === option.value && (
-                          <CheckCircle2 className="h-5 w-5 text-violet-600" />
-                        )}
+                        {selectedAnswer === option.value && <CheckCircle2 className="h-5 w-5 text-violet-600" />}
                       </Label>
                     </motion.div>
                   ))}
@@ -991,9 +983,7 @@ export function FeasibilityCheck() {
           <div className="space-y-6 xl:sticky xl:top-28">
             <Card>
               <CardContent className="p-6">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
-                  Mục đích của bài này
-                </p>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Mục đích của bài này</p>
                 <div className="mt-5 space-y-3">
                   {[
                     "Biết mục tiêu hiện tại đang vừa sức hay quá tải.",

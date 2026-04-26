@@ -100,6 +100,14 @@ export interface SeededGoalResult {
 }
 
 export function seedPendingSetupContext(): void {
+  const data = getUserData();
+  data.onboardingCompleted = true;
+  data.currentWheelOfLife = data.currentWheelOfLife.map((area) => ({
+    ...area,
+    score: area.name === "Career" ? 7 : Math.max(area.score, 5),
+  }));
+  saveUserData(data);
+
   localStorage.setItem(APP_STORAGE_KEYS.selectedFocusArea, "Career");
   localStorage.setItem(
     APP_STORAGE_KEYS.pendingSmartGoal,
