@@ -17,7 +17,8 @@
     "check:backend": "npm --prefix backend run check",
     "check:all": "npm run check && npm run check:backend",
     "env:check": "node scripts/check-runtime-env.mjs",
-    "env:check:full": "node scripts/check-runtime-env.mjs --full-stack"
+    "env:check:full": "node scripts/check-runtime-env.mjs --full-stack",
+    "smoke:prod": "node scripts/smoke-production-e2e.mjs"
   },
   "dependencies": {
     "@fontsource/be-vietnam-pro": "^5.2.8",

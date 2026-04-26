@@ -184,6 +184,26 @@ Full project:
 npm run check:all
 ```
 
+Production smoke e2e:
+
+```powershell
+npm run smoke:prod
+```
+
+By default this opens the live Vercel site, creates a generated QA email account, and runs the signed-out home check plus the authenticated onboarding -> 12-week system flow. To reuse a fixed QA account instead of creating a new one each run:
+
+```powershell
+$env:PROD_SMOKE_EMAIL="codex.qa@example.com"
+$env:PROD_SMOKE_PASSWORD="replace-with-qa-password"
+npm run smoke:prod
+```
+
+Optional target override:
+
+```powershell
+$env:PROD_SMOKE_URL="https://vision-board-web-platform.vercel.app"
+```
+
 Environment report:
 
 ```powershell
