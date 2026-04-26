@@ -207,6 +207,7 @@ export function ReflectionJournal() {
     [sortedReflections],
   );
   const latestWeeklyReview = weeklyReviewReflections[0] ?? null;
+  const hasReflections = sortedReflections.length > 0;
 
   const recentMood = getMoodConfig(sortedReflections[0]?.mood);
 
@@ -316,23 +317,35 @@ export function ReflectionJournal() {
                 </div>
               </div>
 
-              <div className="hidden xl:block rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+              <div className="hidden rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl xl:block">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Nhịp viết hiện tại</p>
-                <div className="mt-6 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-                  {[
-                    { label: "Tổng số bài", value: userData.reflections.length, note: "đã lưu trong hành trình" },
-                    { label: "Tháng này", value: monthlyCount, note: "bài viết trong tháng hiện tại" },
-                    { label: "Tâm trạng gần nhất", value: recentMood.label, note: "tín hiệu cảm xúc mới nhất" },
-                  ].map((item) => (
-                    <div key={item.label} className="rounded-[24px] border border-white/10 bg-black/12 px-4 py-4">
-                      <p className="text-xs uppercase tracking-[0.18em] text-white/55">{item.label}</p>
-                      <p className="mt-2 text-2xl font-bold text-white">
-                        {typeof item.value === "number" ? <CountUp value={item.value} /> : item.value}
-                      </p>
-                      <p className="mt-1 text-sm text-white/68">{item.note}</p>
+                {hasReflections ? (
+                  <div className="mt-6 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+                    {[
+                      { label: "Tổng số bài", value: userData.reflections.length, note: "đã lưu trong hành trình" },
+                      { label: "Tháng này", value: monthlyCount, note: "bài viết trong tháng hiện tại" },
+                      { label: "Tâm trạng gần nhất", value: recentMood.label, note: "tín hiệu cảm xúc mới nhất" },
+                    ].map((item) => (
+                      <div key={item.label} className="rounded-[24px] border border-white/10 bg-black/12 px-4 py-4">
+                        <p className="text-xs uppercase tracking-[0.18em] text-white/55">{item.label}</p>
+                        <p className="mt-2 text-2xl font-bold text-white">
+                          {typeof item.value === "number" ? <CountUp value={item.value} /> : item.value}
+                        </p>
+                        <p className="mt-1 text-sm text-white/68">{item.note}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-6 rounded-[24px] border border-white/12 bg-black/12 px-5 py-6">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-white/14 text-white">
+                      <BookOpen className="h-6 w-6" />
                     </div>
-                  ))}
-                </div>
+                    <p className="mt-4 text-xl font-bold text-white">Chưa có nhật ký nào</p>
+                    <p className="mt-2 text-sm leading-7 text-white/72">
+                      Dữ liệu thật sẽ xuất hiện sau bài viết đầu tiên hoặc sau review tuần trong chu kỳ 12 tuần.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
@@ -478,90 +491,98 @@ export function ReflectionJournal() {
         </DialogContent>
       </Dialog>
 
-      <Reveal>
-        <div className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-          {[
-            {
-              title: "Tổng số nhật ký",
-              value: userData.reflections.length,
-              note: "đã lưu lại",
-              icon: BookOpen,
-              color: "from-violet-500/18 to-fuchsia-500/10 text-violet-700",
-            },
-            {
-              title: "Tháng này",
-              value: monthlyCount,
-              note: "bài viết mới",
-              icon: Calendar,
-              color: "from-sky-500/18 to-cyan-500/10 text-sky-700",
-            },
-            {
-              title: "Bài viết vui vẻ",
-              value: moodCounts.happy,
-              note: "ghi nhận tích cực",
-              icon: Smile,
-              color: "from-emerald-500/18 to-teal-500/10 text-emerald-700",
-            },
-            {
-              title: "Review tuần",
-              value: weeklyReviewCount,
-              note: "đã được nối vào chu kỳ 12 tuần",
-              icon: Sparkles,
-              color: "from-amber-500/18 to-orange-500/10 text-amber-700",
-            },
-          ].map((item, index) => {
-            const Icon = item.icon;
+      {hasReflections && (
+        <Reveal>
+          <div className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {[
+              {
+                title: "Tổng số nhật ký",
+                value: userData.reflections.length,
+                note: "đã lưu lại",
+                icon: BookOpen,
+                color: "from-violet-500/18 to-fuchsia-500/10 text-violet-700",
+              },
+              {
+                title: "Tháng này",
+                value: monthlyCount,
+                note: "bài viết mới",
+                icon: Calendar,
+                color: "from-sky-500/18 to-cyan-500/10 text-sky-700",
+              },
+              {
+                title: "Bài viết vui vẻ",
+                value: moodCounts.happy,
+                note: "ghi nhận tích cực",
+                icon: Smile,
+                color: "from-emerald-500/18 to-teal-500/10 text-emerald-700",
+              },
+              {
+                title: "Review tuần",
+                value: weeklyReviewCount,
+                note: "đã được nối vào chu kỳ 12 tuần",
+                icon: Sparkles,
+                color: "from-amber-500/18 to-orange-500/10 text-amber-700",
+              },
+            ].map((item, index) => {
+              const Icon = item.icon;
 
-            return (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.08 * index }}
-              >
-                <Card className="relative overflow-hidden">
-                  <div
-                    className={`absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
-                  />
-                  <CardHeader className="relative flex flex-row items-start justify-between pb-3">
-                    <div>
-                      <CardDescription>{item.title}</CardDescription>
-                      <CardTitle className="mt-2 text-4xl">
-                        <CountUp value={item.value} />
-                      </CardTitle>
-                    </div>
+              return (
+                <motion.div
+                  key={item.title}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.08 * index }}
+                >
+                  <Card className="relative overflow-hidden">
                     <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${item.color}`}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </div>
-                  </CardHeader>
-                  <CardContent className="relative">
-                    <p className="text-sm text-slate-500">{item.note}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </div>
-      </Reveal>
+                      className={`absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
+                    />
+                    <CardHeader className="relative flex flex-row items-start justify-between pb-3">
+                      <div>
+                        <CardDescription>{item.title}</CardDescription>
+                        <CardTitle className="mt-2 text-4xl">
+                          <CountUp value={item.value} />
+                        </CardTitle>
+                      </div>
+                      <div
+                        className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${item.color}`}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </div>
+                    </CardHeader>
+                    <CardContent className="relative">
+                      <p className="text-sm text-slate-500">{item.note}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </div>
+        </Reveal>
+      )}
 
       {sortedReflections.length === 0 ? (
         <Reveal delay={0.04}>
-          <Card className="overflow-hidden">
+          <Card className="overflow-hidden" data-testid="journal-fresh-empty-state">
             <CardContent className="p-10 text-center lg:p-14">
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] bg-violet-50 text-violet-700">
                 <BookOpen className="h-10 w-10" />
               </div>
               <h2 className="mt-6 text-3xl font-bold text-slate-900">Chưa có trang nhật ký nào được mở ra</h2>
               <p className="mx-auto mt-3 max-w-2xl text-base text-slate-500">
-                Hãy bắt đầu bằng một bài viết đầu tiên để lưu lại cảm xúc, bài học và những chuyển động nhỏ trên hành
-                trình của bạn. Review tuần từ chu kỳ 12 tuần cũng sẽ tự động xuất hiện tại đây.
+                Nhật ký phản tư là phần về sau của flow. Bạn có thể đi từ Life Balance trước, hoặc viết một trang tự do
+                nếu hôm nay đã có điều cần ghi lại.
               </p>
-              <Button className="mt-8" onClick={() => setIsAddingReflection(true)}>
-                <Plus className="h-4 w-4" />
-                Viết bài đầu tiên
-              </Button>
+              <div className="mt-8 flex flex-wrap justify-center gap-3">
+                <Button onClick={() => navigate("/onboarding")}>
+                  Bắt đầu Life Balance
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" onClick={() => setIsAddingReflection(true)}>
+                  <Plus className="h-4 w-4" />
+                  Viết nhật ký tự do
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </Reveal>

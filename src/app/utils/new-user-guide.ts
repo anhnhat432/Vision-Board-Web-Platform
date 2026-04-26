@@ -100,12 +100,13 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
   const activeSystem = activeGoal?.twelveWeekSystem ?? null;
   const hasLifeBalance = hasRealLifeBalance(userData);
   const hasAnyGoal = userData.goals.length > 0;
-  const hasInsight = hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.selectedFocusArea);
-  const hasSmartGoal = hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.pendingSmartGoal);
-  const hasFeasibility = hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.pendingFeasibilityResult);
-  const hasCycle = Boolean(activeSystem);
+  const hasInsight = hasLifeBalance && (hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.selectedFocusArea));
+  const hasSmartGoal = hasInsight && (hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.pendingSmartGoal));
+  const hasFeasibility = hasSmartGoal && (hasAnyGoal || hasLocalDraft(APP_STORAGE_KEYS.pendingFeasibilityResult));
+  const hasCycle = hasFeasibility && Boolean(activeSystem);
   const hasTouchedToday =
-    Boolean(activeSystem?.dailyCheckIns.length) || Boolean(activeSystem?.taskInstances.some((task) => task.completed));
+    hasCycle &&
+    (Boolean(activeSystem?.dailyCheckIns.length) || Boolean(activeSystem?.taskInstances.some((task) => task.completed)));
 
   const steps: NewUserGuideStep[] = [
     {
