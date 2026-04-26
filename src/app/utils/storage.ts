@@ -121,6 +121,8 @@ export const USER_DATA_STORAGE_KEY = "visionboard_user_data";
 export const USER_DATA_UPDATED_EVENT_NAME = "visionboard:user-data-updated";
 
 const STORAGE_KEY = USER_DATA_STORAGE_KEY;
+const AUTH_OWNER_STORAGE_KEY = `${USER_DATA_STORAGE_KEY}:auth_owner_uid`;
+const ANONYMOUS_USER_DATA_STORAGE_KEY = `${USER_DATA_STORAGE_KEY}:anonymous`;
 const CURRENT_STORAGE_VERSION = 5;
 
 let _cachedUserData: UserData | null = null;
@@ -149,6 +151,45 @@ function notifyUserDataUpdated(): void {
   }
 
   window.setTimeout(emit, 0);
+}
+
+function resetUserDataCache(): void {
+  _cachedUserData = null;
+  _cachedRawHash = null;
+}
+
+function getScopedUserDataStorageKey(authUid: string): string {
+  return `${USER_DATA_STORAGE_KEY}:auth:${encodeURIComponent(authUid)}`;
+}
+
+function createFreshUserData(): UserData {
+  return createEmptyUserDataFromModule({
+    currentStorageVersion: CURRENT_STORAGE_VERSION,
+    defaultAppPreferences: DEFAULT_APP_PREFERENCES,
+    motivationalQuotes: MOTIVATIONAL_QUOTES,
+  });
+}
+
+function readActiveAuthOwnerUid(): string | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const value = localStorage.getItem(AUTH_OWNER_STORAGE_KEY)?.trim() ?? "";
+    return value.length > 0 ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function mirrorUserDataToActiveAuthScope(serialized: string): void {
+  const authUid = readActiveAuthOwnerUid();
+  if (!authUid) return;
+
+  try {
+    localStorage.setItem(getScopedUserDataStorageKey(authUid), serialized);
+  } catch {
+    // The main local snapshot has already been saved. Scoped mirroring is best-effort.
+  }
 }
 
 const DEFAULT_APP_PREFERENCES: AppPreferences = {
@@ -497,6 +538,62 @@ export function initializeUserData(): UserData {
   return newUserData;
 }
 
+export function activateAuthenticatedUserData(authUid: string): void {
+  if (typeof window === "undefined") return;
+
+  const nextAuthUid = authUid.trim();
+  if (!nextAuthUid) return;
+
+  try {
+    const currentOwnerUid = readActiveAuthOwnerUid();
+    const currentRaw = localStorage.getItem(STORAGE_KEY);
+    const nextScopedKey = getScopedUserDataStorageKey(nextAuthUid);
+
+    if (currentOwnerUid === nextAuthUid) {
+      if (currentRaw) mirrorUserDataToActiveAuthScope(currentRaw);
+      return;
+    }
+
+    if (currentRaw) {
+      const archiveKey = currentOwnerUid
+        ? getScopedUserDataStorageKey(currentOwnerUid)
+        : ANONYMOUS_USER_DATA_STORAGE_KEY;
+      localStorage.setItem(archiveKey, currentRaw);
+    }
+
+    const scopedRaw = localStorage.getItem(nextScopedKey);
+    localStorage.setItem(AUTH_OWNER_STORAGE_KEY, nextAuthUid);
+
+    if (scopedRaw && parseStoredUserData(scopedRaw)) {
+      localStorage.setItem(STORAGE_KEY, scopedRaw);
+      resetUserDataCache();
+      notifyUserDataUpdated();
+      return;
+    }
+
+    const freshUserData = normalizeUserData(createFreshUserData());
+    const serialized = JSON.stringify(freshUserData);
+    localStorage.setItem(STORAGE_KEY, serialized);
+    localStorage.setItem(nextScopedKey, serialized);
+    _cachedUserData = freshUserData;
+    _cachedRawHash = serialized;
+    notifyUserDataUpdated();
+  } catch {
+    resetUserDataCache();
+  }
+}
+
+export function persistActiveAuthenticatedUserData(): void {
+  if (typeof window === "undefined") return;
+
+  try {
+    const currentRaw = localStorage.getItem(STORAGE_KEY);
+    if (currentRaw) mirrorUserDataToActiveAuthScope(currentRaw);
+  } catch {
+    // ignore storage errors during auth teardown
+  }
+}
+
 export function getUserData(): UserData {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return initializeUserData();
@@ -528,6 +625,7 @@ export function saveUserData(data: UserData): boolean {
 
   try {
     localStorage.setItem(STORAGE_KEY, serialized);
+    mirrorUserDataToActiveAuthScope(serialized);
     _cachedUserData = normalized;
     _cachedRawHash = serialized;
     notifyUserDataUpdated();
@@ -716,10 +814,15 @@ export function getPrivacyConsents(): Record<PrivacyConsentCategory, boolean> {
 }
 
 export function deleteAllUserData(): void {
+  const activeAuthUid = readActiveAuthOwnerUid();
+
   // Remove main data key first
   localStorage.removeItem(STORAGE_KEY);
-  _cachedUserData = null;
-  _cachedRawHash = null;
+  resetUserDataCache();
+  if (activeAuthUid) {
+    localStorage.removeItem(getScopedUserDataStorageKey(activeAuthUid));
+  }
+  localStorage.removeItem(AUTH_OWNER_STORAGE_KEY);
 
   const keys = Object.values(APP_STORAGE_KEYS);
   for (const key of keys) {

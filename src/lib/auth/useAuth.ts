@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { User, UserCredential } from "firebase/auth";
 
+import { activateAuthenticatedUserData, persistActiveAuthenticatedUserData } from "@/app/utils/storage";
 import {
   getFirebaseToken,
   isFirebaseAuthEnabled,
@@ -87,6 +88,11 @@ export function useAuth(): UseAuthResult {
 
   useEffect(() => {
     const unsubscribe = subscribeAuthState((nextUser) => {
+      if (nextUser) {
+        activateAuthenticatedUserData(nextUser.uid);
+      } else {
+        persistActiveAuthenticatedUserData();
+      }
       setUser(nextUser);
       setLoading(false);
     });
@@ -107,7 +113,9 @@ export function useAuth(): UseAuthResult {
       }
 
       if (resolvedProvider === "google") {
-        return await loginWithGoogle();
+        const credential = await loginWithGoogle();
+        if (credential) activateAuthenticatedUserData(credential.user.uid);
+        return credential;
       }
 
       const email = options?.email?.trim() ?? "";
@@ -118,10 +126,14 @@ export function useAuth(): UseAuthResult {
       }
 
       if (resolvedMode === "signup") {
-        return await registerWithEmail(email, password);
+        const credential = await registerWithEmail(email, password);
+        if (credential) activateAuthenticatedUserData(credential.user.uid);
+        return credential;
       }
 
-      return await loginWithEmail(email, password);
+      const credential = await loginWithEmail(email, password);
+      if (credential) activateAuthenticatedUserData(credential.user.uid);
+      return credential;
     } catch (nextError) {
       const message = resolveAuthErrorMessage(nextError);
       setError(message);
@@ -137,6 +149,7 @@ export function useAuth(): UseAuthResult {
     setLoading(true);
 
     try {
+      persistActiveAuthenticatedUserData();
       await logoutFirebase();
     } catch (nextError) {
       const message = resolveAuthErrorMessage(nextError);
