@@ -172,6 +172,23 @@ describe("RootLayout onboarding redirect", () => {
     expect(router.state.location.pathname).toBe("/");
   });
 
+  it("waits for backend hydration on the public home page once a user is signed in", async () => {
+    backendHydrationMock.value = {
+      loading: true,
+      result: null,
+      error: null,
+    };
+    setAuthContext({
+      user: { uid: "user_test", email: "test@example.com" },
+      userProfile: { id: "profile_test", email: "test@example.com" },
+    });
+    const { router } = renderAppShell("/");
+
+    expect(await screen.findByText(/workspace/i)).toBeInTheDocument();
+    expect(screen.queryByTestId("home-page")).not.toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/");
+  });
+
   it("sends public app routes to login before onboarding when signed out", async () => {
     const { router } = renderAppShell("/goals");
 

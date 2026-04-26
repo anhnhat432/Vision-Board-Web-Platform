@@ -328,7 +328,7 @@ export function RootLayout() {
   const shouldWaitForWorkspace =
     !demoMode &&
     isConfigured &&
-    !isPublicHome &&
+    (!isPublicHome || Boolean(user)) &&
     (authLoading ||
       userProfileLoading ||
       backendPlanHydration.loading ||
