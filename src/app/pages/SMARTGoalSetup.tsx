@@ -271,6 +271,7 @@ const SMART_STEPS = [
     placeholder: "Ví dụ: Tôi muốn được thăng chức lên vị trí Lập trình viên cao cấp và dẫn dắt một dự án quan trọng.",
     description: "Mục tiêu càng rõ thì năng lượng hành động càng dễ tập trung. Tránh những câu quá rộng hoặc mơ hồ.",
     coaching: "Hãy mô tả kết quả cuối cùng, không chỉ nói về mong muốn chung chung.",
+    completionHint: "Viết một kết quả cụ thể đủ rõ để người khác hiểu bạn muốn đạt điều gì.",
   },
   {
     key: "measurable" as keyof SMARTData,
@@ -279,6 +280,7 @@ const SMART_STEPS = [
     placeholder: "Ví dụ: Hoàn thành 3 khóa học nâng cao, dẫn dắt 2 tính năng lớn và nhận đánh giá tốt từ quản lý.",
     description: "Đặt ra dấu hiệu cụ thể để bạn không phải đoán cảm tính rằng mình có đang đi đúng hướng hay không.",
     coaching: "Hãy nghĩ bằng số lượng, cột mốc, đầu ra hoặc tiêu chí dễ quan sát.",
+    completionHint: "Chốt một chỉ số, mốc hiện tại và mốc mục tiêu để tiến độ không còn cảm tính.",
   },
   {
     key: "achievable" as keyof SMARTData,
@@ -287,6 +289,7 @@ const SMART_STEPS = [
     placeholder: "Ví dụ: cần 5 giờ học mỗi tuần, mentor góp ý định kỳ và thời gian thực hành có lịch cố định.",
     description: "Phần này giúp mục tiêu bớt mơ hồ và kéo nó gần hơn với đời sống thật của bạn.",
     coaching: "Nghĩ đến thời gian, kỹ năng, người hỗ trợ và môi trường bạn cần.",
+    completionHint: "Điền thời gian mỗi tuần, kỹ năng và nguồn lực thực tế bạn có thể dựa vào.",
   },
   {
     key: "relevant" as keyof SMARTData,
@@ -295,6 +298,7 @@ const SMART_STEPS = [
     placeholder: "Ví dụ: Vì nó gắn trực tiếp với tầm nhìn nghề nghiệp 3 năm tới và mức thu nhập tôi đang hướng đến.",
     description: "Khi mục tiêu gắn với một lý do đủ mạnh, bạn sẽ dễ giữ được kỷ luật hơn trong giai đoạn khó.",
     coaching: "Viết theo kiểu: mục tiêu này quan trọng vì...",
+    completionHint: "Nêu lý do đủ thật để mục tiêu này đáng theo đuổi trong vài tuần tới.",
   },
   {
     key: "timeBound" as keyof SMARTData,
@@ -303,6 +307,7 @@ const SMART_STEPS = [
     placeholder: "Ví dụ: Trong vòng 12 tháng, trước tháng 3 năm 2027.",
     description: "Thời hạn tạo ra nhịp. Không cần quá gấp, nhưng cần đủ rõ để buộc bạn ra quyết định.",
     coaching: "Nếu chưa chắc ngày cụ thể, ít nhất hãy đưa ra khung tuần hoặc tháng.",
+    completionHint: "Chốt số tuần hoặc ngày đích trước khi chuyển sang kiểm tra tính khả thi.",
   },
 ];
 
@@ -478,10 +483,7 @@ export function SMARTGoalSetup() {
     !hasOutcomeIndicator(smartData.specific.goal_statement)
       ? "Gợi ý: nên dùng động từ kết quả rõ ràng như đạt, hoàn thành, xây dựng, ra mắt hoặc chạm mốc."
       : null;
-  const currentStepActionHint =
-    currentStep < totalSteps - 1
-      ? "Hoàn tất bước này để mở bước tiếp theo trong flow SMART."
-      : "Hoàn tất bước này để chuyển sang bước kiểm tra tính khả thi.";
+  const currentStepActionHint = currentStepData.completionHint;
 
   if (setupState === "checking") {
     return (

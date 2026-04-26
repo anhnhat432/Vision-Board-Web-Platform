@@ -1006,7 +1006,7 @@ export function TwelveWeekSetup() {
             <CardTitle>{STEPS[currentStep].title}</CardTitle>
             <CardDescription>
               {currentStep === 0 && "Làm rõ điều bạn muốn chạm tới sau 12 tuần."}
-              {currentStep === 1 && "Chỉ giữ vài tactic có thể lặp lại gần như mỗi tuần."}
+              {currentStep === 1 && "Tactic là hành động bạn kiểm soát mỗi tuần; chỉ giữ vài việc có thể lặp lại."}
               {currentStep === 2 && "Chốt ngày bắt đầu, ngày review và hình dung tuần đầu."}
               {currentStep === 3 && "Kiểm tra lần cuối, còn phần nâng cao thì để tùy chọn."}
             </CardDescription>
@@ -1422,6 +1422,10 @@ export function TwelveWeekSetup() {
                       <p className="mt-1 text-sm text-slate-500">
                         Tactic cốt lõi được ưu tiên trong điểm tuần. Tactic tùy chọn là phần thêm khi bạn còn sức.
                       </p>
+                      <p className="mt-2 text-xs leading-6 text-slate-500">
+                        Tactic không phải kết quả cuối cùng. Hãy viết hành động bạn có thể làm tuần này, ví dụ: tập 2
+                        buổi, viết 3 trang hoặc gửi 5 email.
+                      </p>
                     </div>
                     <Button
                       type="button"
@@ -1488,6 +1492,7 @@ export function TwelveWeekSetup() {
                               id={`tactic-target-${index}`}
                               value={indicator.target}
                               onChange={(event) => handleIndicatorChange(index, "target", event.target.value)}
+                              placeholder="Ví dụ: 2"
                             />
                           </div>
                           <div className="space-y-2">
@@ -1496,6 +1501,7 @@ export function TwelveWeekSetup() {
                               id={`tactic-unit-${index}`}
                               value={indicator.unit}
                               onChange={(event) => handleIndicatorChange(index, "unit", event.target.value)}
+                              placeholder="buổi, bài, lần..."
                             />
                           </div>
                           <div className="space-y-2">
@@ -1626,7 +1632,11 @@ export function TwelveWeekSetup() {
                         id="lag-metric-name"
                         value={draft.lagMetricName}
                         onChange={(event) => handleChange("lagMetricName", event.target.value)}
+                        placeholder="Ví dụ: số kg giảm, số bài xuất bản, doanh thu mới..."
                       />
+                      <p className="text-xs text-slate-500">
+                        Đây là chỉ số đầu ra cuối chu kỳ, khác với tactic hằng tuần.
+                      </p>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="lag-metric-target">Mục tiêu</Label>
@@ -1634,6 +1644,7 @@ export function TwelveWeekSetup() {
                         id="lag-metric-target"
                         value={draft.lagMetricTarget}
                         onChange={(event) => handleChange("lagMetricTarget", event.target.value)}
+                        placeholder="Ví dụ: 12"
                       />
                     </div>
                   </div>
@@ -1643,10 +1654,20 @@ export function TwelveWeekSetup() {
                       id="lag-metric-unit"
                       value={draft.lagMetricUnit}
                       onChange={(event) => handleChange("lagMetricUnit", event.target.value)}
+                      placeholder="kg, bài, triệu đồng..."
                     />
                   </div>
                 </div>
                 <div className="space-y-4 rounded-[28px] border border-white/70 bg-white/72 p-5">
+                  <div className="rounded-[22px] border border-violet-100 bg-violet-50/80 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
+                      Tactic và metric
+                    </p>
+                    <p className="mt-2 text-sm leading-7 text-slate-700">
+                      Tactic là việc bạn làm mỗi tuần. Chỉ số kết quả chính là con số dùng để review xem chu kỳ có đi
+                      đúng hướng không.
+                    </p>
+                  </div>
                   <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
                     <div className="flex items-center gap-2 text-slate-700">
                       <CalendarDays className="h-4 w-4" />

@@ -938,6 +938,10 @@ export function FeasibilityCheck() {
                     Câu hỏi {currentStep + 1}
                   </p>
                   <h2 className="mt-3 text-3xl font-bold text-slate-900">{currentQuestion.question}</h2>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">
+                    Trả lời theo lịch sống thật hiện tại, không theo phiên bản lý tưởng. Kết quả chỉ dùng để chỉnh độ
+                    nặng của kế hoạch 12 tuần phía sau.
+                  </p>
                 </div>
 
                 <RadioGroup value={selectedAnswer} onValueChange={handleAnswerChange} className="space-y-3">
@@ -986,6 +990,7 @@ export function FeasibilityCheck() {
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Mục đích của bài này</p>
                 <div className="mt-5 space-y-3">
                   {[
+                    "Trả lời theo lịch sống thật, không theo phiên bản lý tưởng.",
                     "Biết mục tiêu hiện tại đang vừa sức hay quá tải.",
                     "Nhìn rõ độ sẵn sàng trước khi bước vào system 12 tuần.",
                     "Giảm rủi ro đặt mục tiêu nghe hay nhưng khó duy trì.",

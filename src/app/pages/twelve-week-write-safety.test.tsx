@@ -191,11 +191,7 @@ describe("12-week write-path safety", () => {
     renderAppRoute("/12-week-system");
     const user = userEvent.setup();
 
-    const openReviewButton = screen
-      .getAllByRole("button")
-      .find((button) => button.textContent?.includes("Chốt review tuần"));
-    expect(openReviewButton).toBeDefined();
-    await user.click(openReviewButton as HTMLElement);
+    await user.click(screen.getByRole("tab", { name: "Tuần" }));
     await user.type(
       await screen.findByLabelText(/chạy tốt nhất/i),
       "Hoàn thành review local trước khi backend kịp trả lời.",

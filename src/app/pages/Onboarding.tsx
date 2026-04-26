@@ -28,10 +28,10 @@ const JOURNEY_STEPS = [
 ];
 
 const FEATURE_PILLS = [
-  "Bánh xe cuộc sống trực quan",
-  "Insight ưu tiên hành động",
-  "Goal tracking rõ tiến độ",
-  "Bảng tầm nhìn truyền cảm hứng",
+  "Chấm 8 lĩnh vực",
+  "Chọn một trọng tâm",
+  "Viết SMART Goal",
+  "Dựng chu kỳ 12 tuần",
 ];
 
 export function Onboarding() {
