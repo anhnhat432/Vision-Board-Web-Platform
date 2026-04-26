@@ -5,12 +5,14 @@ import { spawn } from "node:child_process";
 const BASE_URL = (process.env.PROD_SMOKE_URL ?? "https://vision-board-web-platform.vercel.app").replace(/\/$/, "");
 const TIMESTAMP = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
 const GENERATED_EMAIL = `codex.qa+smoke-${TIMESTAMP}@example.com`;
-const FRESH_EMAIL = `codex.qa+fresh-${TIMESTAMP}@example.com`;
 const GENERATED_PASSWORD = `CodexSmoke${TIMESTAMP}!`;
-const FRESH_PASSWORD = GENERATED_PASSWORD;
 const EMAIL = process.env.PROD_SMOKE_EMAIL?.trim() || GENERATED_EMAIL;
 const PASSWORD = process.env.PROD_SMOKE_PASSWORD || GENERATED_PASSWORD;
 const HAS_PROVIDED_CREDENTIALS = Boolean(process.env.PROD_SMOKE_EMAIL && process.env.PROD_SMOKE_PASSWORD);
+const FRESH_EMAIL =
+  process.env.PROD_SMOKE_FRESH_EMAIL?.trim() ||
+  (HAS_PROVIDED_CREDENTIALS ? deriveTaggedEmail(EMAIL, "fresh") : `codex.qa+fresh-${TIMESTAMP}@example.com`);
+const FRESH_PASSWORD = process.env.PROD_SMOKE_FRESH_PASSWORD || PASSWORD;
 const AUTH_MODE_OVERRIDE = process.env.PROD_SMOKE_AUTH_MODE?.trim().toLowerCase();
 const AUTH_MODE = AUTH_MODE_OVERRIDE || (HAS_PROVIDED_CREDENTIALS ? "signin" : "signup");
 const GOAL_TITLE = `QA smoke production ${TIMESTAMP}`;
@@ -19,6 +21,18 @@ const TACTIC_TWO = `Hoan thanh viec QA ${TIMESTAMP}`;
 
 function log(message) {
   console.log(`[prod-smoke] ${message}`);
+}
+
+function deriveTaggedEmail(email, tag) {
+  const value = email.trim();
+  const atIndex = value.lastIndexOf("@");
+  if (atIndex <= 0 || atIndex === value.length - 1) {
+    return `codex.qa+${tag}@example.com`;
+  }
+
+  const local = value.slice(0, atIndex).replace(/\+.*$/, "");
+  const domain = value.slice(atIndex + 1);
+  return `${local}+${tag}@${domain}`;
 }
 
 function sleep(ms) {
@@ -329,7 +343,44 @@ async function runStep(label, task) {
   await task();
 }
 
-async function authenticate({ mode, email, password, nextPath = "/onboarding", accountLabel = "QA account" }) {
+async function waitForAuthOutcome(description, nextPath, { timeoutMs = 70_000, intervalMs = 700 } = {}) {
+  log(`Waiting for ${description}`);
+  const startedAt = Date.now();
+  let lastValue;
+
+  while (Date.now() - startedAt < timeoutMs) {
+    lastValue = await browserEval(`
+      (() => {
+        const alert = document.querySelector('[role="alert"]');
+        return {
+          path: location.pathname,
+          ok: location.pathname === ${JSON.stringify(nextPath)},
+          errorText: alert?.textContent?.replace(/\\s+/g, " ").trim() || "",
+        };
+      })()
+    `);
+
+    if (lastValue?.ok) return { ok: true, path: lastValue.path, errorText: "" };
+    if (lastValue?.errorText) return { ok: false, path: lastValue.path, errorText: lastValue.errorText };
+    await sleep(intervalMs);
+  }
+
+  const diagnostics = await getPageState();
+  throw new Error(
+    `Timed out waiting for ${description}. Last value: ${JSON.stringify(lastValue)}\n` +
+      `URL: ${diagnostics.url}\nText: ${diagnostics.text.slice(0, 900)}`,
+  );
+}
+
+async function submitEmailAuth({
+  mode,
+  email,
+  password,
+  nextPath = "/onboarding",
+  accountLabel = "QA account",
+  allowAuthError = false,
+  timeoutMs = 70_000,
+}) {
   const modeQuery = mode === "signup" ? "mode=signup&" : "";
   await openPage(`/login?${modeQuery}next=${encodeURIComponent(nextPath)}`);
   await waitFor("login form", 'document.querySelector("#login-email") && document.querySelector("#login-password")');
@@ -338,11 +389,58 @@ async function authenticate({ mode, email, password, nextPath = "/onboarding", a
   await fillSelector("#login-email", email);
   await fillSelector("#login-password", password);
   await clickButton(mode === "signup" ? "Tạo tài khoản" : "Đăng nhập");
-  await waitFor(
-    `authenticated ${nextPath} route`,
-    `location.pathname === ${JSON.stringify(nextPath)}`,
-    { timeoutMs: 70_000 },
+  await sleep(300);
+  const outcome = await waitForAuthOutcome(`authenticated ${nextPath} route`, nextPath, { timeoutMs });
+
+  if (!outcome.ok && !allowAuthError) {
+    throw new Error(`Email auth failed for ${accountLabel}: ${outcome.errorText || "unknown auth error"}`);
+  }
+
+  return outcome;
+}
+
+async function authenticate({ mode, email, password, nextPath = "/onboarding", accountLabel = "QA account" }) {
+  const outcome = await submitEmailAuth({ mode, email, password, nextPath, accountLabel });
+  if (!outcome.ok) {
+    throw new Error(`Email auth failed for ${accountLabel}: ${outcome.errorText || "unknown auth error"}`);
+  }
+}
+
+function isExistingAccountAuthError(message) {
+  const normalized = String(message ?? "").toLowerCase();
+  return (
+    normalized.includes("đã có tài khoản") ||
+    normalized.includes("da co tai khoan") ||
+    normalized.includes("already") ||
+    normalized.includes("email-already")
   );
+}
+
+async function authenticateReusableEmailAccount({ email, password, nextPath = "/onboarding", accountLabel }) {
+  const signupOutcome = await submitEmailAuth({
+    mode: "signup",
+    email,
+    password,
+    nextPath,
+    accountLabel,
+    allowAuthError: true,
+    timeoutMs: 30_000,
+  });
+
+  if (signupOutcome.ok) return;
+
+  if (!isExistingAccountAuthError(signupOutcome.errorText)) {
+    throw new Error(`Could not create reusable ${accountLabel}: ${signupOutcome.errorText || "unknown auth error"}`);
+  }
+
+  log(`${accountLabel} already exists; signing in instead`);
+  await authenticate({
+    mode: "signin",
+    email,
+    password,
+    nextPath,
+    accountLabel,
+  });
 }
 
 async function signInOrSignUp() {
@@ -446,12 +544,12 @@ async function seedFreshLocalWorkspace() {
 
 async function runFreshAuthenticatedWorkspaceSmoke() {
   try {
-    await authenticate({
-      mode: "signup",
+    await clearBrowserStorage();
+    await authenticateReusableEmailAccount({
       email: FRESH_EMAIL,
       password: FRESH_PASSWORD,
       nextPath: "/onboarding",
-      accountLabel: "fresh QA account",
+      accountLabel: "fresh reusable QA account",
     });
     await seedFreshLocalWorkspace();
 

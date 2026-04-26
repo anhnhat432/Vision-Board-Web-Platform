@@ -26,6 +26,8 @@ jobs:
       PROD_SMOKE_URL: ${{ github.event.inputs.target_url || 'https://vision-board-web-platform.vercel.app' }}
       PROD_SMOKE_EMAIL: ${{ secrets.PROD_SMOKE_EMAIL }}
       PROD_SMOKE_PASSWORD: ${{ secrets.PROD_SMOKE_PASSWORD }}
+      PROD_SMOKE_FRESH_EMAIL: ${{ secrets.PROD_SMOKE_FRESH_EMAIL }}
+      PROD_SMOKE_FRESH_PASSWORD: ${{ secrets.PROD_SMOKE_FRESH_PASSWORD }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
