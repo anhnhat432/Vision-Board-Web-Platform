@@ -198,6 +198,14 @@ $env:PROD_SMOKE_PASSWORD="replace-with-qa-password"
 npm run smoke:prod
 ```
 
+To create that fixed QA account once:
+
+```powershell
+$env:PROD_SMOKE_AUTH_MODE="signup"
+npm run smoke:prod
+Remove-Item Env:\PROD_SMOKE_AUTH_MODE
+```
+
 Optional target override:
 
 ```powershell

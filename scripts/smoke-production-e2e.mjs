@@ -8,7 +8,9 @@ const GENERATED_EMAIL = `codex.qa+smoke-${TIMESTAMP}@example.com`;
 const GENERATED_PASSWORD = `CodexSmoke${TIMESTAMP}!`;
 const EMAIL = process.env.PROD_SMOKE_EMAIL?.trim() || GENERATED_EMAIL;
 const PASSWORD = process.env.PROD_SMOKE_PASSWORD || GENERATED_PASSWORD;
-const AUTH_MODE = process.env.PROD_SMOKE_EMAIL && process.env.PROD_SMOKE_PASSWORD ? "signin" : "signup";
+const HAS_PROVIDED_CREDENTIALS = Boolean(process.env.PROD_SMOKE_EMAIL && process.env.PROD_SMOKE_PASSWORD);
+const AUTH_MODE_OVERRIDE = process.env.PROD_SMOKE_AUTH_MODE?.trim().toLowerCase();
+const AUTH_MODE = AUTH_MODE_OVERRIDE || (HAS_PROVIDED_CREDENTIALS ? "signin" : "signup");
 const GOAL_TITLE = `QA smoke production ${TIMESTAMP}`;
 const TACTIC_ONE = `Review tuan QA ${TIMESTAMP}`;
 const TACTIC_TWO = `Hoan thanh viec QA ${TIMESTAMP}`;
@@ -492,8 +494,15 @@ async function logoutAndLoginAgain() {
 }
 
 async function main() {
+  if (!["signin", "signup"].includes(AUTH_MODE)) {
+    throw new Error('PROD_SMOKE_AUTH_MODE must be either "signin" or "signup" when provided');
+  }
+  if (AUTH_MODE === "signin" && !HAS_PROVIDED_CREDENTIALS) {
+    throw new Error("PROD_SMOKE_EMAIL and PROD_SMOKE_PASSWORD are required when PROD_SMOKE_AUTH_MODE=signin");
+  }
+
   log(`Target: ${BASE_URL}`);
-  if (AUTH_MODE === "signup") {
+  if (!HAS_PROVIDED_CREDENTIALS) {
     log(`No PROD_SMOKE_EMAIL/PROD_SMOKE_PASSWORD provided; using generated QA account ${EMAIL}`);
   }
 
