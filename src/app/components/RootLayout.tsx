@@ -312,16 +312,18 @@ export function RootLayout() {
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const currentRouteKey = `${location.pathname}${location.search}${location.hash}`;
+  const isPublicHome = isPublicHomePath(location.pathname);
   const shouldRedirectToLogin =
     !demoMode &&
     isConfigured &&
     !authLoading &&
     !user &&
-    !isPublicHomePath(location.pathname) &&
+    !isPublicHome &&
     !isAuthProtectedPath(location.pathname);
   const shouldWaitForWorkspace =
     !demoMode &&
     isConfigured &&
+    !isPublicHome &&
     (authLoading ||
       userProfileLoading ||
       backendPlanHydration.loading ||

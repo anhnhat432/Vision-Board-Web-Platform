@@ -152,6 +152,15 @@ describe("RootLayout onboarding redirect", () => {
     expect(screen.getByRole("button", { name: "Đăng ký" })).toBeInTheDocument();
   });
 
+  it("does not block the public home page while auth is loading", async () => {
+    setAuthContext({ authLoading: true });
+    const { router } = renderAppShell("/");
+
+    expect(await screen.findByTestId("home-page")).toBeInTheDocument();
+    expect(screen.queryByText("Đang kiểm tra tài khoản")).not.toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/");
+  });
+
   it("sends public app routes to login before onboarding when signed out", async () => {
     const { router } = renderAppShell("/goals");
 
