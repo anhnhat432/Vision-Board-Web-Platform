@@ -1,6 +1,9 @@
 name: Production smoke e2e
 
 on:
+  push:
+    branches:
+      - main
   schedule:
     - cron: "0 1 * * *"
   workflow_dispatch:
@@ -12,6 +15,7 @@ on:
 
 permissions:
   contents: read
+  deployments: read
 
 jobs:
   smoke:
@@ -24,10 +28,10 @@ jobs:
       PROD_SMOKE_PASSWORD: ${{ secrets.PROD_SMOKE_PASSWORD }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -42,6 +46,61 @@ jobs:
             echo "::error::Set repository secrets PROD_SMOKE_EMAIL and PROD_SMOKE_PASSWORD before running production smoke e2e."
             exit 1
           fi
+
+      - name: Wait for Vercel production deployment
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Waiting for Vercel production deployment for commit ${GITHUB_SHA}."
+
+          for attempt in {1..72}; do
+            deployment_id="$(
+              gh api \
+                --method GET \
+                "repos/${GITHUB_REPOSITORY}/deployments" \
+                -f ref="${GITHUB_SHA}" \
+                -f environment="Production" \
+                --jq '.[] | select(.creator.login == "vercel[bot]") | .id' \
+                | head -n 1
+            )"
+
+            if [ -n "${deployment_id}" ]; then
+              deployment_status="$(
+                gh api \
+                  "repos/${GITHUB_REPOSITORY}/deployments/${deployment_id}/statuses" \
+                  --jq '.[0].state // ""'
+              )"
+              deployment_url="$(
+                gh api \
+                  "repos/${GITHUB_REPOSITORY}/deployments/${deployment_id}/statuses" \
+                  --jq '.[0].environment_url // .[0].target_url // ""'
+              )"
+
+              echo "Attempt ${attempt}: deployment ${deployment_id} status=${deployment_status:-unknown} url=${deployment_url:-n/a}"
+
+              case "${deployment_status}" in
+                success)
+                  echo "Vercel production deployment is ready."
+                  exit 0
+                  ;;
+                failure|error|inactive)
+                  echo "::error::Vercel production deployment ended with status ${deployment_status}."
+                  exit 1
+                  ;;
+              esac
+            else
+              echo "Attempt ${attempt}: no Vercel production deployment found yet."
+            fi
+
+            sleep 10
+          done
+
+          echo "::error::Timed out waiting for Vercel production deployment for ${GITHUB_SHA}."
+          exit 1
 
       - name: Run production smoke e2e
         run: npm run smoke:prod
