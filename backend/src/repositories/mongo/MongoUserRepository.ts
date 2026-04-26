@@ -23,6 +23,14 @@ export interface UpdateUserData {
   onboardingCompletedAt?: Date | null;
 }
 
+function getDisplayName(displayName: string, email: string): string {
+  const trimmedDisplayName = displayName.trim();
+  if (trimmedDisplayName) return trimmedDisplayName;
+
+  const emailName = email.split("@")[0]?.replace(/[._-]+/g, " ").trim();
+  return emailName || "User";
+}
+
 function mapUser(doc: {
   _id: Types.ObjectId;
   firebaseUid: string;
@@ -51,6 +59,7 @@ function mapUser(doc: {
 
 export class MongoUserRepository {
   async findOrCreate(uid: string, email: string, displayName: string): Promise<UserEntity> {
+    const normalizedEmail = email.toLowerCase().trim();
     const doc = await UserModel.findOneAndUpdate(
       { firebaseUid: uid },
       {
@@ -61,8 +70,8 @@ export class MongoUserRepository {
           locale: "vi",
         },
         $set: {
-          email: email.toLowerCase().trim(),
-          displayName: displayName.trim(),
+          email: normalizedEmail,
+          displayName: getDisplayName(displayName, normalizedEmail),
         },
       },
       { upsert: true, new: true, runValidators: true },

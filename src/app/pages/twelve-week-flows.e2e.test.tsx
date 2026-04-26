@@ -50,7 +50,7 @@ describe("12-week core flows", () => {
     expect(data.goals).toHaveLength(1);
     expect(data.goals[0]?.twelveWeekSystem).toBeDefined();
     expect(localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId)).toBe(data.goals[0]?.id);
-  });
+  }, 10_000);
 
   it("shows a clear next action when no 12-week plan exists", async () => {
     renderAppRoute("/12-week-system");

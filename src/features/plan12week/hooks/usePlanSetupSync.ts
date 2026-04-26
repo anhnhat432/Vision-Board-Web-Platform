@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 import { toAppError } from "@/lib/api/apiClient";
 import { createPlan, getPlan } from "@/services/planService";
 import type { AppError } from "@/types/api";
+import { isDemoMode } from "@/app/utils/app-mode";
 import { savePlanDetailsLink } from "../persistence/planLinkStore";
 
 interface SyncPlanPayload {
@@ -18,6 +19,10 @@ export function usePlanSetupSync() {
   const [lastSyncedPlanId, setLastSyncedPlanId] = useState<string | null>(null);
 
   const syncPlanForGoal = useCallback(async (payload: SyncPlanPayload): Promise<string | null> => {
+    if (isDemoMode()) {
+      return null;
+    }
+
     setLoading(true);
     setError(null);
 

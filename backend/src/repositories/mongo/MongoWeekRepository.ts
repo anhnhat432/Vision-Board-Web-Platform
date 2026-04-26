@@ -32,6 +32,11 @@ export interface UpdateWeekData {
   expectedOutput?: string;
 }
 
+function getRequiredText(value: string | undefined, fallback: string): string {
+  const trimmed = value?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : fallback;
+}
+
 function mapWeek(doc: {
   _id: Types.ObjectId;
   planId: Types.ObjectId;
@@ -73,8 +78,8 @@ export class MongoWeekRepository {
     const doc = await WeekModel.create({
       planId: data.planId,
       weekNumber: data.weekNumber,
-      focus: data.focus ?? "",
-      expectedOutput: data.expectedOutput ?? "",
+      focus: getRequiredText(data.focus, `Week ${data.weekNumber} focus`),
+      expectedOutput: getRequiredText(data.expectedOutput, `Week ${data.weekNumber} expected output`),
     });
 
     return mapWeek(doc.toObject());
@@ -91,9 +96,23 @@ export class MongoWeekRepository {
   }
 
   async updateWeek(id: string, updates: UpdateWeekData): Promise<WeekEntity | null> {
+    const existing = await WeekModel.findById(id).lean();
+    if (!existing) return null;
+
+    const normalizedUpdates: UpdateWeekData = {};
+    if (updates.focus !== undefined) {
+      normalizedUpdates.focus = getRequiredText(updates.focus, existing.focus || `Week ${existing.weekNumber} focus`);
+    }
+    if (updates.expectedOutput !== undefined) {
+      normalizedUpdates.expectedOutput = getRequiredText(
+        updates.expectedOutput,
+        existing.expectedOutput || `Week ${existing.weekNumber} expected output`,
+      );
+    }
+
     const doc = await WeekModel.findByIdAndUpdate(
       id,
-      { $set: updates },
+      { $set: normalizedUpdates },
       { new: true, runValidators: true },
     ).lean();
 
