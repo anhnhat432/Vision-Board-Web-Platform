@@ -43,7 +43,7 @@ import {
 } from "../components/ui/alert-dialog";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
@@ -1475,7 +1475,10 @@ export function TwelveWeekSystem() {
       {allGoals.length > 1 && (
         <Card>
           <CardHeader>
-            <CardTitle>Đổi mục tiêu 12 tuần</CardTitle>
+            <CardTitle>Đổi chu kỳ 12 tuần</CardTitle>
+            <CardDescription>
+              App đang ưu tiên chu kỳ active mới nhất; bạn vẫn có thể mở lại chu kỳ cũ khi cần đối chiếu.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Select value={activeGoal.id} onValueChange={(value) => loadGoalData(value)}>

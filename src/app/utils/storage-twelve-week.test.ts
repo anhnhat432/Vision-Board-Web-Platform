@@ -1,5 +1,10 @@
-import { getDefaultScoreboard, getTwelveWeekCurrentWeek } from "./storage-twelve-week";
-import type { TwelveWeekSystem } from "./storage-types";
+import {
+  getActiveTwelveWeekGoal,
+  getDefaultScoreboard,
+  getTwelveWeekCurrentWeek,
+  sortTwelveWeekGoalsForSelection,
+} from "./storage-twelve-week";
+import type { Goal, TwelveWeekSystem } from "./storage-types";
 
 function createSystem(overrides: Partial<TwelveWeekSystem> = {}): TwelveWeekSystem {
   return {
@@ -46,6 +51,23 @@ function createSystem(overrides: Partial<TwelveWeekSystem> = {}): TwelveWeekSyst
   };
 }
 
+function createGoal(
+  id: string,
+  createdAt: string,
+  systemOverrides: Partial<TwelveWeekSystem> = {},
+): Goal {
+  return {
+    id,
+    category: "Career",
+    title: id,
+    description: "",
+    deadline: "2026-06-30",
+    tasks: [],
+    createdAt,
+    twelveWeekSystem: createSystem(systemOverrides),
+  };
+}
+
 describe("getTwelveWeekCurrentWeek boundary derivation", () => {
   it("switches weeks at Monday boundary for Monday-start systems", () => {
     const system = createSystem({
@@ -65,5 +87,35 @@ describe("getTwelveWeekCurrentWeek boundary derivation", () => {
 
     expect(getTwelveWeekCurrentWeek(system, new Date(2026, 2, 7))).toBe(1);
     expect(getTwelveWeekCurrentWeek(system, new Date(2026, 2, 8))).toBe(2);
+  });
+});
+
+describe("getActiveTwelveWeekGoal", () => {
+  it("prefers the newest active cycle over a newer completed cycle", () => {
+    const olderActive = createGoal("older-active", "2026-04-01T00:00:00.000Z", { status: "active" });
+    const newerCompleted = createGoal("newer-completed", "2026-04-20T00:00:00.000Z", { status: "completed" });
+
+    expect(getActiveTwelveWeekGoal([newerCompleted, olderActive])?.id).toBe("older-active");
+  });
+
+  it("keeps an explicit preferred cycle when it exists", () => {
+    const olderActive = createGoal("older-active", "2026-04-01T00:00:00.000Z", { status: "active" });
+    const newerCompleted = createGoal("newer-completed", "2026-04-20T00:00:00.000Z", { status: "completed" });
+
+    expect(getActiveTwelveWeekGoal([olderActive, newerCompleted], "newer-completed")?.id).toBe("newer-completed");
+  });
+});
+
+describe("sortTwelveWeekGoalsForSelection", () => {
+  it("orders selectable cycles by status before recency", () => {
+    const newerCompleted = createGoal("newer-completed", "2026-04-20T00:00:00.000Z", { status: "completed" });
+    const newestPaused = createGoal("newest-paused", "2026-04-25T00:00:00.000Z", { status: "paused" });
+    const olderActive = createGoal("older-active", "2026-04-01T00:00:00.000Z", { status: "active" });
+
+    expect(sortTwelveWeekGoalsForSelection([newerCompleted, newestPaused, olderActive]).map((goal) => goal.id)).toEqual([
+      "older-active",
+      "newest-paused",
+      "newer-completed",
+    ]);
   });
 });

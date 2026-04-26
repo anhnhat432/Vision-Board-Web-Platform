@@ -38,6 +38,7 @@ import {
   isTwelveWeekReviewDueToday as isTwelveWeekReviewDueTodayFromModule,
   migrateLegacyUserData as migrateLegacyUserDataFromModule,
   normalizeGoal as normalizeGoalFromModule,
+  sortTwelveWeekGoalsForSelection as sortTwelveWeekGoalsForSelectionFromModule,
 } from "./storage-twelve-week";
 import {
   addGoalToData,
@@ -460,6 +461,10 @@ export function getGoalExecutionStats(goal: Goal, referenceDate = new Date()) {
 
 export function getActiveTwelveWeekGoal(goals: Goal[], preferredGoalId?: string | null): Goal | null {
   return getActiveTwelveWeekGoalFromModule(goals, preferredGoalId);
+}
+
+export function sortTwelveWeekGoalsForSelection(goals: Goal[]): Goal[] {
+  return sortTwelveWeekGoalsForSelectionFromModule(goals);
 }
 
 export function sortReflectionsByDateDesc(reflections: Reflection[]): Reflection[] {

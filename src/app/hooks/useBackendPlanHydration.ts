@@ -610,6 +610,18 @@ function createHydrationResult(
   };
 }
 
+function getPlanRecencyKey(plan: Plan): string {
+  return plan.updatedAt?.trim() || plan.createdAt?.trim() || plan.startDate?.trim() || "";
+}
+
+function sortPlansByRecency(plans: Plan[]): Plan[] {
+  return [...plans].sort((left, right) => {
+    const recencySort = getPlanRecencyKey(right).localeCompare(getPlanRecencyKey(left));
+    if (recencySort !== 0) return recencySort;
+    return right.id.localeCompare(left.id);
+  });
+}
+
 export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHydrationResult> {
   if (typeof window === "undefined") {
     return createHydrationResult({
@@ -640,7 +652,8 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
     });
   }
 
-  const detailsResults = await Promise.allSettled(plans.map((plan) => getPlan(plan.id)));
+  const plansByRecency = sortPlansByRecency(plans);
+  const detailsResults = await Promise.allSettled(plansByRecency.map((plan) => getPlan(plan.id)));
   const data = getUserData();
   const knownGoalIds = new Set(data.goals.map((goal) => goal.id));
   let hydratedCount = 0;
@@ -658,7 +671,7 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
     }
 
     const details = detailsResult.value;
-    const plan = plans[index];
+    const plan = plansByRecency[index];
     if (!plan) {
       failedCount += 1;
       return;
@@ -689,6 +702,7 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
       goalId: preferredGoalId,
     });
     const hydratedGoal = buildResult.goal;
+    let hydratedGoalId = hydratedGoal.id;
 
     if (existingGoalIndex >= 0) {
       data.goals[existingGoalIndex] = {
@@ -697,16 +711,17 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
         createdAt: existingGoal?.createdAt ?? hydratedGoal.createdAt,
         tasks: existingGoal?.tasks.length ? existingGoal.tasks : hydratedGoal.tasks,
       };
+      hydratedGoalId = data.goals[existingGoalIndex]?.id ?? hydratedGoal.id;
       updatedCount += 1;
-      latestGoalId = data.goals[existingGoalIndex]?.id ?? hydratedGoal.id;
+      latestGoalId ??= hydratedGoalId;
     } else {
       data.goals.push(hydratedGoal);
       knownGoalIds.add(hydratedGoal.id);
       hydratedCount += 1;
-      latestGoalId = hydratedGoal.id;
+      latestGoalId ??= hydratedGoalId;
     }
 
-    persistHydratedGoalLinks(latestGoalId ?? hydratedGoal.id, details, buildResult.taskIdByRemoteTaskId, apiGoal);
+    persistHydratedGoalLinks(hydratedGoalId, details, buildResult.taskIdByRemoteTaskId, apiGoal);
   });
 
   if (hydratedCount + updatedCount > 0) {

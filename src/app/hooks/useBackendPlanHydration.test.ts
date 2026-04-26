@@ -116,6 +116,25 @@ function createPlanDetails(): PlanDetails {
   };
 }
 
+function clonePlanDetails(details: PlanDetails, overrides: Partial<PlanDetails["plan"]>): PlanDetails {
+  return {
+    ...details,
+    plan: {
+      ...details.plan,
+      ...overrides,
+    },
+    weeks: details.weeks.map((week) => ({
+      ...week,
+      planId: overrides.id ?? week.planId,
+      tasks: week.tasks.map((task) => ({ ...task })),
+      metrics: week.metrics.map((metric) => ({
+        ...metric,
+        logs: metric.logs.map((log) => ({ ...log })),
+      })),
+    })),
+  };
+}
+
 describe("hydrateTwelveWeekPlansFromBackend", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -153,6 +172,42 @@ describe("hydrateTwelveWeekPlansFromBackend", () => {
     expect(link?.planId).toBe("plan_1");
     expect(completedTask ? link?.taskIdByLocalTaskId[completedTask.id] : null).toBe("remote_task_1");
     expect(localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId)).toBe("local_goal_1");
+  });
+
+  it("uses the newest backend plan as the latest 12-week system even when the API returns older plans first", async () => {
+    const olderDetails = createPlanDetails();
+    const newerDetails = clonePlanDetails(olderDetails, {
+      id: "plan_2",
+      smartGoalId: "local_goal_2",
+      vision: "Newest backend cycle",
+      createdAt: "2026-04-20T00:00:00.000Z",
+      updatedAt: "2026-04-20T00:00:00.000Z",
+    });
+    const olderApiGoal = createApiGoal();
+    const newerApiGoal: ApiGoal = {
+      ...olderApiGoal,
+      id: "remote_goal_2",
+      title: "Newest backend cycle",
+      planId: "plan_2",
+      createdAt: "2026-04-20T00:00:00.000Z",
+      updatedAt: "2026-04-20T00:00:00.000Z",
+    };
+
+    vi.mocked(getGoals).mockResolvedValue([olderApiGoal, newerApiGoal]);
+    vi.mocked(getPlans).mockResolvedValue([olderDetails.plan, newerDetails.plan]);
+    vi.mocked(getPlan).mockImplementation(async (planId) => {
+      if (planId === "plan_2") return newerDetails;
+      return olderDetails;
+    });
+
+    const result = await hydrateTwelveWeekPlansFromBackend();
+
+    expect(result.status).toBe("success");
+    expect(result.latestGoalId).toBe("local_goal_2");
+    expect(localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId)).toBe("local_goal_2");
+    expect(getPlanLink("local_goal_2")?.planId).toBe("plan_2");
+    expect(getPlanLink("local_goal_1")?.planId).toBe("plan_1");
+    expect(getUserData().goals.map((goal) => goal.title)).toContain("Newest backend cycle");
   });
 
   it("does not duplicate an already hydrated backend plan", async () => {

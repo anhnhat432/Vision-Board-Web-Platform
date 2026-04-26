@@ -37,6 +37,7 @@ import {
   getUserData,
   hasEntitlement,
   isTwelveWeekReviewDueToday,
+  sortTwelveWeekGoalsForSelection,
 } from "../utils/storage";
 import {
   buildExecutionHeatmap,
@@ -83,7 +84,7 @@ export function useTwelveWeekSystemSnapshot() {
 
   const loadGoalData = useCallback((preferredGoalId?: string) => {
     const data = getUserData();
-    const goalsWithSystem = data.goals.filter((goal) => Boolean(goal.twelveWeekSystem));
+    const goalsWithSystem = sortTwelveWeekGoalsForSelection(data.goals);
     const selectedGoal =
       getActiveTwelveWeekGoal(
         data.goals,

@@ -589,7 +589,7 @@ export function getActiveTwelveWeekGoal(
   goals: Goal[],
   preferredGoalId?: string | null,
 ): Goal | null {
-  const goalsWithSystem = goals.filter((goal) => Boolean(goal.twelveWeekSystem));
+  const goalsWithSystem = sortTwelveWeekGoalsForSelection(goals);
   if (goalsWithSystem.length === 0) return null;
 
   if (preferredGoalId) {
@@ -597,7 +597,32 @@ export function getActiveTwelveWeekGoal(
     if (preferredGoal) return preferredGoal;
   }
 
-  return [...goalsWithSystem].sort((left, right) => right.createdAt.localeCompare(left.createdAt))[0];
+  return goalsWithSystem[0];
+}
+
+export function sortTwelveWeekGoalsForSelection(goals: Goal[]): Goal[] {
+  const goalsWithSystem = goals.filter((goal) => Boolean(goal.twelveWeekSystem));
+
+  const statusRank = (goal: Goal) => {
+    switch (goal.twelveWeekSystem?.status) {
+      case "active":
+        return 0;
+      case "paused":
+        return 1;
+      case "completed":
+        return 2;
+      default:
+        return 3;
+    }
+  };
+
+  return [...goalsWithSystem].sort((left, right) => {
+    const statusSort = statusRank(left) - statusRank(right);
+    if (statusSort !== 0) return statusSort;
+    const createdSort = right.createdAt.localeCompare(left.createdAt);
+    if (createdSort !== 0) return createdSort;
+    return right.id.localeCompare(left.id);
+  });
 }
 
 export function migrateLegacyPlanToSystem(goal: Goal): Goal {
