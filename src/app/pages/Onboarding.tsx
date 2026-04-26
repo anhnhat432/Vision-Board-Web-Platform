@@ -7,6 +7,7 @@ import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Slider } from "../components/ui/slider";
+import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { LIFE_AREAS, type LifeArea, getLifeAreaLabel, getUserData, updateWheelOfLife } from "../utils/storage";
 
 type OnboardingStep = "welcome" | "assessment";
@@ -45,7 +46,7 @@ export function Onboarding() {
     if (guardedRef.current) return;
     guardedRef.current = true;
     const data = getUserData();
-    if (data.onboardingCompleted && data.currentWheelOfLife.length > 0) {
+    if (hasRealLifeBalance(data)) {
       setIsReturning(true);
       setLifeAreas(data.currentWheelOfLife);
     }

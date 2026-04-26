@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { getUserData, saveUserData } from "../utils/storage";
 import { Onboarding } from "./Onboarding";
 
 describe("Onboarding", () => {
@@ -33,5 +34,26 @@ describe("Onboarding", () => {
     });
 
     scrollToMock.mockRestore();
+  });
+
+  it("does not reuse a completed zero-score wheel as real onboarding data", async () => {
+    const data = getUserData();
+    data.onboardingCompleted = true;
+    data.currentWheelOfLife = data.currentWheelOfLife.map((area) => ({ ...area, score: 0 }));
+    saveUserData(data);
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter>
+        <Onboarding />
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu đánh giá/i }));
+    await user.click(await screen.findByRole("button", { name: /Hoàn thành đánh giá/i }));
+
+    await waitFor(() => {
+      expect(getUserData().currentWheelOfLife.some((area) => area.score > 0)).toBe(true);
+    });
   });
 });
