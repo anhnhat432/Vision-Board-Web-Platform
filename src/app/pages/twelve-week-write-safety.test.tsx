@@ -42,6 +42,7 @@ vi.mock("@/features/plan12week/hooks", async () => {
 });
 
 import { getTwelveWeekCurrentWeek } from "../utils/storage-twelve-week";
+import { getUserData } from "../utils/storage";
 import { getUniversalWeeklyReviewExecutionScore } from "@/features/plan12week/persistence/reviewExecutionScore";
 import {
   readGoal,
@@ -181,5 +182,48 @@ describe("12-week write-path safety", () => {
         executionScore: review ? getUniversalWeeklyReviewExecutionScore(review) : undefined,
       }),
     );
+  });
+
+  it("keeps weekly review, linked reflection, and outbox event when backend review sync fails", async () => {
+    syncWeeklyReviewMock.mockResolvedValueOnce(false);
+    const { goalId } = seedTwelveWeekGoal();
+
+    renderAppRoute("/12-week-system");
+    const user = userEvent.setup();
+
+    const openReviewButton = screen
+      .getAllByRole("button")
+      .find((button) => button.textContent?.includes("Chốt review tuần"));
+    expect(openReviewButton).toBeDefined();
+    await user.click(openReviewButton as HTMLElement);
+    await user.type(
+      await screen.findByLabelText(/chạy tốt nhất/i),
+      "Hoàn thành review local trước khi backend kịp trả lời.",
+    );
+    await user.type(
+      screen.getByLabelText(/cản trở/i),
+      "Backend đang chậm.",
+    );
+    await user.type(
+      screen.getByLabelText(/ưu tiên duy nhất/i),
+      "Giữ review hiển thị trong journal.",
+    );
+    await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
+
+    await waitFor(() => {
+      expect(syncWeeklyReviewMock).toHaveBeenCalledTimes(1);
+    });
+
+    const system = readGoal(goalId).twelveWeekSystem;
+    const currentWeek = system ? getTwelveWeekCurrentWeek(system) : 1;
+    const data = getUserData();
+    const reflection = data.reflections.find(
+      (item) => item.entryType === "weekly-review" && item.linkedGoalId === goalId,
+    );
+
+    expect(system?.weeklyReviews.find((review) => review.weekNumber === currentWeek)?.reviewCompleted).toBe(true);
+    expect(reflection?.content).toContain("Hoàn thành review local trước khi backend kịp trả lời.");
+    expect(data.eventLog.some((event) => event.type === "12_week_weekly_review_submitted")).toBe(true);
+    expect(data.syncOutbox.some((item) => item.type === "12_week_weekly_review_submitted")).toBe(true);
   });
 });

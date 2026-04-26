@@ -815,21 +815,6 @@ export function TwelveWeekSystem() {
     });
     const reviewExecutionScore = getUniversalWeeklyReviewExecutionScore(nextReview, reviewWeekCompletion.percent);
 
-    const synced = await executionSyncActions.syncWeeklyReview({
-      weekNumber: reviewWeekNumber,
-      executionScore: reviewExecutionScore,
-      reflection: weeklyForm.biggestOutputThisWeek.trim() || undefined,
-      adjustments: nextWeekPriorityValue || undefined,
-    });
-
-    if (!synced) {
-      toast.info("Review tuần đã lưu local. Sẽ tiếp tục đồng bộ khi backend sẵn sàng.");
-      if (activeGoalIdRef.current === actionGoalId) {
-        refreshSnapshotMeta();
-      }
-      return;
-    }
-
     upsertReflection({
       date: formatDateInputValue(new Date()),
       title: `Review tuần - ${actionGoalTitle} - tuần ${reviewWeekNumber}`,
@@ -854,6 +839,21 @@ export function TwelveWeekSystem() {
       decision: workloadDecisionValue || "keep same",
       usedSuggestedPlan: String(hasPremiumReviewInsights && weeklyForm.nextWeekPriority.trim().length === 0),
     });
+
+    const synced = await executionSyncActions.syncWeeklyReview({
+      weekNumber: reviewWeekNumber,
+      executionScore: reviewExecutionScore,
+      reflection: weeklyForm.biggestOutputThisWeek.trim() || undefined,
+      adjustments: nextWeekPriorityValue || undefined,
+    });
+
+    if (!synced) {
+      toast.info("Review tuần đã lưu local. Sẽ tiếp tục đồng bộ khi backend sẵn sàng.");
+      if (activeGoalIdRef.current === actionGoalId) {
+        refreshSnapshotMeta();
+      }
+      return;
+    }
 
     toast.success("Review tuần đã được chốt.", {
       description:
