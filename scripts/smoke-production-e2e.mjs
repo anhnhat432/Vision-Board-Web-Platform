@@ -472,6 +472,18 @@ async function assertSystemLoaded({ requireTactics = true } = {}) {
   );
 }
 
+async function assertPersistedSystemLoaded() {
+  await waitFor(
+    "persisted 12-week system after login",
+    `
+      document.body.innerText.includes("Hệ 12 tuần") &&
+      document.body.innerText.includes("Chu kỳ đang chạy") &&
+      (document.body.innerText.includes("Đã nối") || document.body.innerText.includes("Đã lưu"))
+    `,
+    { timeoutMs: 75_000 },
+  );
+}
+
 async function reloadAndAssert() {
   log("Reloading 12-week system and checking persisted data");
   await browserEval("location.reload()");
@@ -491,7 +503,7 @@ async function logoutAndLoginAgain() {
   await fillSelector("#login-password", PASSWORD);
   await clickButton("Đăng nhập");
   await waitFor("12-week system route after login", 'location.pathname === "/12-week-system"', { timeoutMs: 75_000 });
-  await assertSystemLoaded({ requireTactics: false });
+  await assertPersistedSystemLoaded();
 }
 
 async function main() {
