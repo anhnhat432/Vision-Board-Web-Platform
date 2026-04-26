@@ -204,6 +204,15 @@ Optional target override:
 $env:PROD_SMOKE_URL="https://vision-board-web-platform.vercel.app"
 ```
 
+GitHub Actions:
+
+The manual workflow `.github/workflows/production-smoke-e2e.yml` runs the same production smoke test from GitHub. Configure repository secrets first:
+
+- `PROD_SMOKE_EMAIL`
+- `PROD_SMOKE_PASSWORD`
+
+Then open GitHub Actions -> Production smoke e2e -> Run workflow. The workflow intentionally fails if those secrets are missing so CI does not create a new QA user every run.
+
 Environment report:
 
 ```powershell
