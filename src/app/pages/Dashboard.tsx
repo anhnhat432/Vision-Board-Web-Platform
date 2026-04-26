@@ -295,6 +295,8 @@ function DashboardContent({
   const visibleReflections = isPublicVisitor ? [] : userData.reflections;
   const visibleVisionBoards = isPublicVisitor ? [] : userData.visionBoards;
   const visibleActiveTwelveWeekGoal = isPublicVisitor ? null : activeTwelveWeekGoal;
+  const hasRealLifeBalance =
+    !isPublicVisitor && userData.onboardingCompleted && visibleWheelOfLife.some((area) => area.score > 0);
   const { isUpgradeDialogOpen, setIsUpgradeDialogOpen, upgradeContext, recommendedPlan, openUpgradeDialog } =
     useUpgradeDialog({
       source: "dashboard",
@@ -375,7 +377,7 @@ function DashboardContent({
   const totalTasks = executionTotals.total;
   const completedTasks = executionTotals.completed;
   const averageLifeScore =
-    visibleWheelOfLife.length > 0
+    hasRealLifeBalance && visibleWheelOfLife.length > 0
       ? visibleWheelOfLife.reduce((sum, area) => sum + area.score, 0) / visibleWheelOfLife.length
       : 0;
 
@@ -402,7 +404,9 @@ function DashboardContent({
   })();
 
   const weakestArea =
-    visibleWheelOfLife.length > 0 ? [...visibleWheelOfLife].sort((a, b) => a.score - b.score)[0] : null;
+    hasRealLifeBalance && visibleWheelOfLife.length > 0
+      ? [...visibleWheelOfLife].sort((a, b) => a.score - b.score)[0]
+      : null;
   const localActiveSystem = visibleActiveTwelveWeekGoal?.twelveWeekSystem ?? null;
   const { effectiveSystem: activeSystem } = useBackendProgressOverlay(
     visibleActiveTwelveWeekGoal?.id ?? null,
@@ -427,11 +431,13 @@ function DashboardContent({
         ).slice(0, 3)
       : [];
 
-  const radarData = visibleWheelOfLife.map((area) => ({
-    subject: getLifeAreaLabel(area.name),
-    value: area.score,
-    fullMark: 10,
-  }));
+  const radarData = hasRealLifeBalance
+    ? visibleWheelOfLife.map((area) => ({
+        subject: getLifeAreaLabel(area.name),
+        value: area.score,
+        fullMark: 10,
+      }))
+    : [];
 
   const overviewCards = isPublicVisitor
     ? [
@@ -1145,6 +1151,50 @@ function DashboardContent({
                   ))}
                 </div>
               </section>
+            ) : !activeSystem ? (
+              <section
+                data-testid="fresh-workspace-empty-state"
+                className="space-y-4 rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)] sm:p-5 lg:p-6"
+              >
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Workspace mới</p>
+                    <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-950">
+                      Chưa có dữ liệu thực thi để hiển thị.
+                    </h2>
+                    <p className="mt-1 max-w-2xl text-sm leading-7 text-slate-600">
+                      Dashboard sẽ chỉ hiện điểm, streak và metric sau khi bạn tạo chu kỳ 12 tuần đầu tiên. Bây giờ nên
+                      đi từ Life Balance để có dữ liệu thật, rồi mới chốt mục tiêu SMART.
+                    </p>
+                  </div>
+                </div>
+                <div className="grid gap-3 md:grid-cols-3">
+                  {[
+                    "Chấm 8 lĩnh vực cuộc sống",
+                    "Chọn một insight ưu tiên",
+                    "Tạo SMART goal và chu kỳ 12 tuần",
+                  ].map((item, index) => (
+                    <div key={item} className="rounded-[20px] border border-slate-200 bg-slate-50/80 p-4">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white">
+                        {index + 1}
+                      </div>
+                      <p className="mt-3 text-sm font-semibold leading-6 text-slate-900">{item}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Button className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto" onClick={() => navigate("/onboarding")}>
+                    Bắt đầu Life Balance
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full border-slate-200 bg-white text-slate-900 hover:bg-slate-50 sm:w-auto"
+                    onClick={() => navigate("/life-insight")}
+                  >
+                    Tôi đã có insight
+                  </Button>
+                </div>
+              </section>
             ) : (
               <section className="space-y-4 rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)] sm:p-5 lg:p-6">
                 <div className="flex flex-wrap items-end justify-between gap-3">
@@ -1533,7 +1583,9 @@ function DashboardContent({
                       <TrendingUp className="h-10 w-10 text-slate-300" />
                       <p className="mt-3 font-semibold text-slate-900">Chưa có dữ liệu bánh xe cuộc sống</p>
                       <p className="mt-1 max-w-sm text-sm leading-6 text-slate-500">
-                        Đăng ký hoặc đăng nhập để chấm điểm 8 lĩnh vực và lưu dữ liệu thật theo tài khoản.
+                        {isPublicVisitor
+                          ? "Đăng ký hoặc đăng nhập để chấm điểm 8 lĩnh vực và lưu dữ liệu thật theo tài khoản."
+                          : "Bắt đầu bằng bài đánh giá Life Balance để dashboard có dữ liệu thật thay vì số mặc định."}
                       </p>
                     </div>
                   )}
@@ -1566,12 +1618,18 @@ function DashboardContent({
                     </div>
                     <div className="ml-3 min-w-0 flex-1">
                       <div className="line-clamp-2 break-words font-semibold text-slate-900">
-                        {isPublicVisitor ? "Bắt đầu bằng cân bằng cuộc sống" : "Mở cân bằng cuộc sống"}
+                        {isPublicVisitor
+                          ? "Bắt đầu bằng cân bằng cuộc sống"
+                          : hasRealLifeBalance
+                            ? "Mở cân bằng cuộc sống"
+                            : "Bắt đầu đánh giá cuộc sống"}
                       </div>
                       <div className="mt-1 line-clamp-2 text-sm text-slate-500">
                         {isPublicVisitor
                           ? "Đăng ký để chấm điểm và lưu bức tranh hiện tại."
-                          : "Xem chi tiết và cập nhật lại bánh xe cuộc đời."}
+                          : hasRealLifeBalance
+                            ? "Xem chi tiết và cập nhật lại bánh xe cuộc đời."
+                            : "Chấm điểm 8 lĩnh vực để mở đúng luồng mục tiêu."}
                       </div>
                     </div>
                   </Button>
