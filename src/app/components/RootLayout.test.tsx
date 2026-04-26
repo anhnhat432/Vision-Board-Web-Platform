@@ -163,6 +163,24 @@ describe("RootLayout onboarding redirect", () => {
     expect(productionMock.syncPendingOutbox).not.toHaveBeenCalled();
   });
 
+  it("resets the viewport to the top when the app route changes", async () => {
+    const scrollToMock = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
+    setAuthContext({ isConfigured: false });
+    const { router } = renderAppShell("/goals");
+
+    expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
+    scrollToMock.mockClear();
+
+    await router.navigate("/onboarding");
+
+    expect(await screen.findByTestId("onboarding-page")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(scrollToMock).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "auto" });
+    });
+
+    scrollToMock.mockRestore();
+  });
+
   it("does not block the public home page while auth is loading", async () => {
     setAuthContext({ authLoading: true });
     const { router } = renderAppShell("/");

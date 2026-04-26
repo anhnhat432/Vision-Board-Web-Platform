@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   Award,
@@ -316,7 +316,8 @@ export function RootLayout() {
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
-  const currentRouteKey = `${location.pathname}${location.search}${location.hash}`;
+  const routeScrollKey = `${location.pathname}${location.search}`;
+  const currentRouteKey = `${routeScrollKey}${location.hash}`;
   const isPublicHome = isPublicHomePath(location.pathname);
   const shouldRedirectToLogin =
     !demoMode &&
@@ -353,6 +354,12 @@ export function RootLayout() {
     },
     [currentRouteKey, navigate],
   );
+
+  useLayoutEffect(() => {
+    if (!routeScrollKey || typeof window === "undefined" || location.hash) return;
+
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [location.hash, routeScrollKey]);
 
   useEffect(() => {
     const userData = initializeUserData();

@@ -57,6 +57,17 @@ export function Onboarding() {
 
   const [isDirty, setIsDirty] = useState(false);
 
+  const scrollToFlowTop = useCallback(() => {
+    if (typeof window === "undefined") return;
+
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
+  useEffect(() => {
+    if (!step) return;
+    scrollToFlowTop();
+  }, [scrollToFlowTop, step]);
+
   const handleScoreChangeWrapped = useCallback((index: number, value: number[]) => {
     setLifeAreas((currentAreas) =>
       currentAreas.map((area, areaIndex) => (areaIndex === index ? { ...area, score: value[0] ?? 1 } : area)),
@@ -78,6 +89,10 @@ export function Onboarding() {
     updateWheelOfLife(lifeAreas);
     setIsDirty(false);
     navigate("/life-insight");
+  };
+
+  const handleStartAssessment = () => {
+    setStep("assessment");
   };
 
   if (step === "welcome") {
@@ -150,8 +165,8 @@ export function Onboarding() {
                   <div className="flex flex-wrap gap-3">
                     <Button
                       variant="outline"
-                      className="w-full border-slate-950 bg-slate-950 text-white hover:bg-slate-800 hover:text-white sm:w-auto"
-                      onClick={() => setStep("assessment")}
+                      className="w-full border-violet-200 bg-violet-50 text-violet-700 shadow-[0_18px_38px_-28px_rgba(124,58,237,0.55)] hover:border-violet-300 hover:bg-white hover:text-violet-800 sm:w-auto"
+                      onClick={handleStartAssessment}
                     >
                       Bắt đầu đánh giá
                       <ArrowRight className="h-4 w-4" />

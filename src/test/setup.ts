@@ -17,6 +17,12 @@ if (!window.matchMedia) {
   });
 }
 
+Object.defineProperty(window, "scrollTo", {
+  writable: true,
+  configurable: true,
+  value: () => {},
+});
+
 class MockIntersectionObserver implements IntersectionObserver {
   readonly root = null;
   readonly rootMargin = "0px";
