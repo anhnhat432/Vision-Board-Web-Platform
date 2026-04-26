@@ -589,6 +589,7 @@ export function persistActiveAuthenticatedUserData(): void {
   try {
     const currentRaw = localStorage.getItem(STORAGE_KEY);
     if (currentRaw) mirrorUserDataToActiveAuthScope(currentRaw);
+    localStorage.removeItem(AUTH_OWNER_STORAGE_KEY);
   } catch {
     // ignore storage errors during auth teardown
   }

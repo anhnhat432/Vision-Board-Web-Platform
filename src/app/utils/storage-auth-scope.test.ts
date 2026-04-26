@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { activateAuthenticatedUserData, getUserData, saveUserData } from "./storage";
+import {
+  activateAuthenticatedUserData,
+  getUserData,
+  persistActiveAuthenticatedUserData,
+  saveUserData,
+} from "./storage";
 import type { AppPreferences, Goal, UserData } from "./storage-types";
 
 const defaultAppPreferences: AppPreferences = {
@@ -68,5 +73,19 @@ describe("authenticated user data scoping", () => {
 
     activateAuthenticatedUserData("firebase_uid_two");
     expect(getUserData().goals.map((goal) => goal.title)).toEqual(["Account Two Goal"]);
+  });
+
+  it("stores signed-out writes as anonymous after the active account is persisted", () => {
+    activateAuthenticatedUserData("firebase_uid_one");
+    saveUserData(createUserData("local_one", ["Account One Goal"]));
+
+    persistActiveAuthenticatedUserData();
+    saveUserData(createUserData("signed_out_browser", ["Signed Out Stale Goal"]));
+
+    activateAuthenticatedUserData("firebase_uid_two");
+    expect(getUserData().goals.map((goal) => goal.title)).toEqual([]);
+
+    activateAuthenticatedUserData("firebase_uid_one");
+    expect(getUserData().goals.map((goal) => goal.title)).toEqual(["Account One Goal"]);
   });
 });
