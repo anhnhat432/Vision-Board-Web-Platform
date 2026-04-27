@@ -338,7 +338,11 @@ export function TwelveWeekTodayTab({
               {todayQueue.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600">
                   {hasPlanTasks ? (
-                    "Không có việc nào đang chờ lúc này. Đây là lúc đẹp để chốt review hoặc làm mới nhịp cho gọn."
+                    reviewDueToday ? (
+                      "Không còn việc nào đang chờ lúc này. Đây là lúc đẹp để chốt review tuần và khóa ưu tiên cho tuần sau."
+                    ) : (
+                      "Không còn việc nào đang chờ hôm nay. Bạn có thể lưu check-in ngắn hoặc xem tab Tuần để chuẩn bị review."
+                    )
                   ) : (
                     <div className="mx-auto max-w-lg space-y-2">
                       <p className="font-semibold text-slate-900">Chưa có việc nào trong chu kỳ này</p>

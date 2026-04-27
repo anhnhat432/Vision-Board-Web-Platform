@@ -192,6 +192,8 @@ describe("12-week write-path safety", () => {
     const user = userEvent.setup();
 
     await user.click(screen.getByRole("tab", { name: "Tuần" }));
+    expect(screen.queryByLabelText("Reflection")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Adjustments")).not.toBeInTheDocument();
     await user.type(
       await screen.findByLabelText(/chạy tốt nhất/i),
       "Hoàn thành review local trước khi backend kịp trả lời.",
