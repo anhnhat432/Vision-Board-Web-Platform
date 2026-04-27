@@ -1129,131 +1129,138 @@ export function TwelveWeekSetup() {
                         )}
                       </div>
                     )}
-                    <div className="grid gap-3 md:grid-cols-2">
-                      {TWELVE_WEEK_TEMPLATE_CATALOG.map((template) => {
-                        const isLocked = !planSatisfiesRequirement(currentPlan, template.requiredPlan);
-                        const isSelected = selectedTemplate?.id === template.id;
+                    <details className="rounded-[24px] border border-dashed border-slate-200 bg-white/66 p-4">
+                      <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
+                        Xem tất cả khung mẫu
+                      </summary>
+                      <div className="mt-4 grid gap-3 md:grid-cols-2">
+                        {TWELVE_WEEK_TEMPLATE_CATALOG.map((template) => {
+                          const isLocked = !planSatisfiesRequirement(currentPlan, template.requiredPlan);
+                          const isSelected = selectedTemplate?.id === template.id;
 
-                        return (
-                          <button
-                            key={template.id}
-                            type="button"
-                            onClick={() => handleTemplateSelect(template)}
-                            className={`rounded-[24px] border p-4 text-left transition-all ${
-                              isSelected
-                                ? "border-slate-900 bg-slate-900 text-white shadow-[0_22px_50px_-32px_rgba(15,23,42,0.48)]"
-                                : isLocked
-                                  ? "border-violet-200 bg-violet-50/86 hover:border-violet-300"
-                                  : "border-white/70 bg-white/84 hover:border-slate-300"
-                            }`}
-                          >
-                            <div className="flex flex-wrap items-start justify-between gap-3">
-                              <div className="min-w-0">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <p className={`font-semibold ${isSelected ? "text-white" : "text-slate-950"}`}>
-                                    {template.name}
+                          return (
+                            <button
+                              key={template.id}
+                              type="button"
+                              onClick={() => handleTemplateSelect(template)}
+                              className={`rounded-[24px] border p-4 text-left transition-all ${
+                                isSelected
+                                  ? "border-slate-900 bg-slate-900 text-white shadow-[0_22px_50px_-32px_rgba(15,23,42,0.48)]"
+                                  : isLocked
+                                    ? "border-violet-200 bg-violet-50/86 hover:border-violet-300"
+                                    : "border-white/70 bg-white/84 hover:border-slate-300"
+                              }`}
+                            >
+                              <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <p className={`font-semibold ${isSelected ? "text-white" : "text-slate-950"}`}>
+                                      {template.name}
+                                    </p>
+                                    <Badge
+                                      variant={template.requiredPlan ? "default" : "outline"}
+                                      className={
+                                        isSelected
+                                          ? "border-white/15 bg-white/10 text-white hover:bg-white/10"
+                                          : template.requiredPlan
+                                            ? "bg-violet-600 text-white hover:bg-violet-600"
+                                            : "border-slate-300 bg-white text-slate-700"
+                                      }
+                                    >
+                                      {template.requiredPlan
+                                        ? `Khung ${getPlanLabel(template.requiredPlan)}`
+                                        : "Khung Free"}
+                                    </Badge>
+                                  </div>
+                                  <p className={`mt-1 text-sm ${isSelected ? "text-white/74" : "text-slate-600"}`}>
+                                    {template.subtitle}
                                   </p>
+                                </div>
+                                <Badge
+                                  variant="outline"
+                                  className={
+                                    isSelected
+                                      ? "border-white/15 bg-white/10 text-white"
+                                      : "border-slate-300 bg-white text-slate-700"
+                                  }
+                                >
+                                  {isSelected ? "Đang dùng" : isLocked ? "Đang khóa" : "Sẵn sàng"}
+                                </Badge>
+                              </div>
+                              <p
+                                className={`mt-3 text-sm leading-7 ${isSelected ? "text-white/84" : "text-slate-600"}`}
+                              >
+                                {template.description}
+                              </p>
+                              <div
+                                className={`mt-3 rounded-[20px] border px-3 py-3 text-sm leading-6 ${
+                                  isSelected
+                                    ? "border-white/12 bg-white/8 text-white/82"
+                                    : "border-white/70 bg-white/72 text-slate-600"
+                                }`}
+                              >
+                                <p
+                                  className={`text-xs font-semibold uppercase tracking-[0.16em] ${isSelected ? "text-white/54" : "text-slate-400"}`}
+                                >
+                                  Hợp khi
+                                </p>
+                                <p className="mt-2">{template.bestFor}</p>
+                              </div>
+                              <div
+                                className={`mt-3 rounded-[20px] border px-3 py-3 text-sm leading-6 ${
+                                  isSelected
+                                    ? "border-white/12 bg-white/8 text-white/82"
+                                    : "border-white/70 bg-white/72 text-slate-600"
+                                }`}
+                              >
+                                <p
+                                  className={`text-xs font-semibold uppercase tracking-[0.16em] ${isSelected ? "text-white/54" : "text-slate-400"}`}
+                                >
+                                  Tuần 1 sẽ có gì
+                                </p>
+                                <p className="mt-2">{template.firstWeekWin}</p>
+                              </div>
+                              <div className="mt-4 flex flex-wrap gap-2">
+                                {template.idealFor.map((item) => (
                                   <Badge
-                                    variant={template.requiredPlan ? "default" : "outline"}
+                                    key={`${template.id}_${item}`}
+                                    variant="outline"
                                     className={
                                       isSelected
-                                        ? "border-white/15 bg-white/10 text-white hover:bg-white/10"
-                                        : template.requiredPlan
-                                          ? "bg-violet-600 text-white hover:bg-violet-600"
-                                          : "border-slate-300 bg-white text-slate-700"
+                                        ? "border-white/15 bg-white/10 text-white"
+                                        : "border-slate-200 bg-slate-50 text-slate-700"
                                     }
                                   >
-                                    {template.requiredPlan
-                                      ? `Khung ${getPlanLabel(template.requiredPlan)}`
-                                      : "Khung Free"}
+                                    {item}
                                   </Badge>
+                                ))}
+                                {template.tactics.slice(0, 2).map((tactic) => (
+                                  <Badge
+                                    key={`${template.id}_${tactic.name}`}
+                                    variant="outline"
+                                    className={
+                                      isSelected
+                                        ? "border-white/15 bg-white/10 text-white"
+                                        : "border-slate-200 bg-slate-50 text-slate-700"
+                                    }
+                                  >
+                                    {tactic.name}
+                                  </Badge>
+                                ))}
+                              </div>
+                              {isLocked && (
+                                <div className="mt-4 flex items-center justify-between border-t border-violet-200/60 pt-3">
+                                  <span className="text-xs font-semibold text-violet-700">
+                                    Cần gói Plus để dùng khung này
+                                  </span>
+                                  <span className="text-xs font-semibold text-violet-600">Mở khóa →</span>
                                 </div>
-                                <p className={`mt-1 text-sm ${isSelected ? "text-white/74" : "text-slate-600"}`}>
-                                  {template.subtitle}
-                                </p>
-                              </div>
-                              <Badge
-                                variant="outline"
-                                className={
-                                  isSelected
-                                    ? "border-white/15 bg-white/10 text-white"
-                                    : "border-slate-300 bg-white text-slate-700"
-                                }
-                              >
-                                {isSelected ? "Đang dùng" : isLocked ? "Đang khóa" : "Sẵn sàng"}
-                              </Badge>
-                            </div>
-                            <p className={`mt-3 text-sm leading-7 ${isSelected ? "text-white/84" : "text-slate-600"}`}>
-                              {template.description}
-                            </p>
-                            <div
-                              className={`mt-3 rounded-[20px] border px-3 py-3 text-sm leading-6 ${
-                                isSelected
-                                  ? "border-white/12 bg-white/8 text-white/82"
-                                  : "border-white/70 bg-white/72 text-slate-600"
-                              }`}
-                            >
-                              <p
-                                className={`text-xs font-semibold uppercase tracking-[0.16em] ${isSelected ? "text-white/54" : "text-slate-400"}`}
-                              >
-                                Hợp khi
-                              </p>
-                              <p className="mt-2">{template.bestFor}</p>
-                            </div>
-                            <div
-                              className={`mt-3 rounded-[20px] border px-3 py-3 text-sm leading-6 ${
-                                isSelected
-                                  ? "border-white/12 bg-white/8 text-white/82"
-                                  : "border-white/70 bg-white/72 text-slate-600"
-                              }`}
-                            >
-                              <p
-                                className={`text-xs font-semibold uppercase tracking-[0.16em] ${isSelected ? "text-white/54" : "text-slate-400"}`}
-                              >
-                                Tuần 1 sẽ có gì
-                              </p>
-                              <p className="mt-2">{template.firstWeekWin}</p>
-                            </div>
-                            <div className="mt-4 flex flex-wrap gap-2">
-                              {template.idealFor.map((item) => (
-                                <Badge
-                                  key={`${template.id}_${item}`}
-                                  variant="outline"
-                                  className={
-                                    isSelected
-                                      ? "border-white/15 bg-white/10 text-white"
-                                      : "border-slate-200 bg-slate-50 text-slate-700"
-                                  }
-                                >
-                                  {item}
-                                </Badge>
-                              ))}
-                              {template.tactics.slice(0, 2).map((tactic) => (
-                                <Badge
-                                  key={`${template.id}_${tactic.name}`}
-                                  variant="outline"
-                                  className={
-                                    isSelected
-                                      ? "border-white/15 bg-white/10 text-white"
-                                      : "border-slate-200 bg-slate-50 text-slate-700"
-                                  }
-                                >
-                                  {tactic.name}
-                                </Badge>
-                              ))}
-                            </div>
-                            {isLocked && (
-                              <div className="mt-4 flex items-center justify-between border-t border-violet-200/60 pt-3">
-                                <span className="text-xs font-semibold text-violet-700">
-                                  Cần gói Plus để dùng khung này
-                                </span>
-                                <span className="text-xs font-semibold text-violet-600">Mở khóa →</span>
-                              </div>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </details>
                   </div>
 
                   {selectedTemplate && (
