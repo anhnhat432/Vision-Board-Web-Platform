@@ -1,7 +1,16 @@
 import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { useBlocker, useNavigate } from "react-router";
 import { motion } from "motion/react";
-import { AlertTriangle, Calendar, Compass, Compass as CompassIcon, Save, Sparkles, TrendingUp } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  Calendar,
+  Compass,
+  Compass as CompassIcon,
+  Save,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "../components/ui/badge";
@@ -14,6 +23,7 @@ import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { Slider } from "../components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
+import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { type LifeArea, getLifeAreaLabel, updateWheelOfLife } from "../utils/storage";
 
 const LifeBalanceHistoryChart = lazy(async () => ({
@@ -50,6 +60,19 @@ export function LifeBalance() {
     });
     setHasChanges(false);
     reloadUserData();
+  };
+
+  const handleContinueToInsight = () => {
+    if (hasChanges) {
+      updateWheelOfLife(lifeAreas);
+      toast.success("Đã lưu Life Balance trước khi mở Life Insight.");
+      setHasChanges(false);
+      reloadUserData();
+      window.setTimeout(() => navigate("/life-insight"), 0);
+      return;
+    }
+
+    navigate("/life-insight");
   };
 
   const radarData = useMemo(
@@ -95,8 +118,10 @@ export function LifeBalance() {
     });
   }, [userData]);
 
-  // Empty state: onboarding not yet completed or wheel not set
-  if (!userData || userData.currentWheelOfLife.length === 0) {
+  const hasLifeBalanceData = hasRealLifeBalance(userData);
+
+  // Empty state: onboarding not yet completed or wheel not set with real scores.
+  if (!userData || !hasLifeBalanceData) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
         <div className="relative">
@@ -225,6 +250,38 @@ export function LifeBalance() {
           </div>
         </CardContent>
       </Card>
+
+      <Reveal delay={0.02}>
+        <Card
+          data-testid="life-balance-next-step-card"
+          className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]"
+        >
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                  Tiếp theo trong luồng chính
+                </p>
+                <h2 className="mt-1 text-xl font-bold text-slate-950">
+                  Chọn một Life Insight trước khi viết mục tiêu.
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
+                  Dùng điểm đang lệch nhất để chọn đúng trọng tâm, rồi mới chuyển sang SMART Goal và kế hoạch 12 tuần.
+                </p>
+                {hasChanges && (
+                  <p className="mt-2 text-sm font-medium text-amber-700">
+                    Bạn có thay đổi chưa lưu. Khi đi tiếp, hệ thống sẽ lưu điểm mới trước.
+                  </p>
+                )}
+              </div>
+              <Button className="w-full sm:w-auto" onClick={handleContinueToInsight}>
+                Mở Life Insight
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </Reveal>
 
       <Reveal>
         <div className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
