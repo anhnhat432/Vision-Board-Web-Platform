@@ -109,7 +109,7 @@ export function TwelveWeekTodayTab({
   const checkInTotal = todayQueue.length || currentWeekTasksCount || 1;
 
   return (
-    <div className="ops-system-panel space-y-5 pt-4">
+    <div className="ops-system-panel min-w-0 space-y-5 pt-4">
       {missedTasks.length > 0 && (
         <Card className="border border-amber-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(146,64,14,0.32)]">
           <CardHeader>
@@ -210,7 +210,7 @@ export function TwelveWeekTodayTab({
         </Card>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_360px]">
+      <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.1fr)_360px]">
         <Card
           interactive={false}
           className="border border-slate-200/80 bg-white/92 shadow-[0_22px_54px_-38px_rgba(15,23,42,0.34)]"
@@ -322,19 +322,19 @@ export function TwelveWeekTodayTab({
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.12fr)_380px]">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.12fr)_380px]">
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="min-w-0">
           <Card
             data-tour-id="system-today-queue"
-            className="h-full border border-slate-200/80 bg-white/92 shadow-[0_22px_54px_-40px_rgba(37,99,235,0.22)]"
+            className="h-full min-w-0 overflow-hidden border border-slate-200/80 bg-white/92 shadow-[0_22px_54px_-40px_rgba(37,99,235,0.22)]"
           >
-            <CardHeader>
-              <CardTitle className="text-slate-950">Hàng việc hôm nay</CardTitle>
-              <CardDescription className="text-slate-700">
+            <CardHeader className="min-w-0">
+              <CardTitle className="break-words text-slate-950">Hàng việc hôm nay</CardTitle>
+              <CardDescription className="break-words text-slate-700">
                 Bắt đầu từ việc đầu tiên. Nếu xong rồi mới nhìn sang việc tiếp theo.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="min-w-0 space-y-3">
               {todayQueue.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600">
                   {hasPlanTasks ? (
@@ -369,7 +369,7 @@ export function TwelveWeekTodayTab({
                   return (
                     <div
                       key={task.id}
-                      className={`flex items-start gap-3 rounded-lg border p-4 shadow-[0_18px_38px_-34px_rgba(15,23,42,0.28)] ${
+                      className={`flex min-w-0 items-start gap-3 rounded-lg border p-4 shadow-[0_18px_38px_-34px_rgba(15,23,42,0.28)] ${
                         isPrimaryTask ? "border-slate-950 bg-slate-950" : "border-slate-200 bg-white"
                       }`}
                     >
@@ -384,11 +384,11 @@ export function TwelveWeekTodayTab({
                             Việc ưu tiên số 1
                           </p>
                         )}
-                        <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                           <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
                               <p
-                                className={`break-words font-medium ${
+                                className={`min-w-0 max-w-full break-words font-medium ${
                                   task.completed
                                     ? "text-slate-400 line-through"
                                     : isPrimaryTask
@@ -436,14 +436,14 @@ export function TwelveWeekTodayTab({
                 })
               )}
               {secondaryTodayTasks.length > 0 && (
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Sau việc đầu tiên</p>
                   <p className="mt-2 text-sm text-slate-600">Xong việc số 1 rồi mới nhìn sang các bước này.</p>
                   <div className="mt-3 space-y-2">
                     {secondaryPreviewTasks.map((task, index) => (
                       <div
                         key={task.id}
-                        className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-3"
+                        className="flex min-w-0 items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-3"
                       >
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-xs font-semibold text-white">
                           {index + 2}
@@ -472,18 +472,23 @@ export function TwelveWeekTodayTab({
             </CardContent>
           </Card>
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }}>
-          <Card className="h-full border border-slate-200/80 bg-white/92 shadow-[0_22px_54px_-40px_rgba(124,58,237,0.18)]">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-slate-950">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.06 }}
+          className="min-w-0"
+        >
+          <Card className="h-full min-w-0 overflow-hidden border border-slate-200/80 bg-white/92 shadow-[0_22px_54px_-40px_rgba(124,58,237,0.18)]">
+            <CardHeader className="min-w-0">
+              <CardTitle className="flex items-center gap-2 break-words text-slate-950">
                 <Gauge className="h-5 w-5 text-violet-600" />
                 Check-in 30 giây
               </CardTitle>
-              <CardDescription className="text-slate-700">
+              <CardDescription className="break-words text-slate-700">
                 Tick việc trước, rồi chỉ ghi phần thật sự cần nhớ cho ngày mai.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="min-w-0 space-y-4">
               <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Bước 1</p>
@@ -516,8 +521,8 @@ export function TwelveWeekTodayTab({
                       variant="outline"
                       className={
                         dailyMood === option.value
-                          ? "h-auto min-h-16 justify-start whitespace-normal border-violet-300 bg-violet-600 px-4 py-3 text-left text-white hover:bg-violet-600"
-                          : "h-auto min-h-16 justify-start whitespace-normal border-slate-200 bg-white px-4 py-3 text-left text-slate-700 hover:bg-slate-50"
+                          ? "h-auto min-h-16 min-w-0 justify-start whitespace-normal border-violet-300 bg-violet-600 px-4 py-3 text-left text-white hover:bg-violet-600"
+                          : "h-auto min-h-16 min-w-0 justify-start whitespace-normal border-slate-200 bg-white px-4 py-3 text-left text-slate-700 hover:bg-slate-50"
                       }
                       onClick={() => onDailyMoodChange(option.value)}
                     >

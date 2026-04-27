@@ -18,6 +18,7 @@
     "check:all": "npm run check && npm run check:backend",
     "env:check": "node scripts/check-runtime-env.mjs",
     "env:check:full": "node scripts/check-runtime-env.mjs --full-stack",
+    "visual:prod": "node scripts/visual-core-flow-qa.mjs",
     "smoke:prod": "node scripts/smoke-production-e2e.mjs"
   },
   "dependencies": {
