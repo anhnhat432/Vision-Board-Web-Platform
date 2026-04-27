@@ -104,6 +104,10 @@ export function LifeInsight() {
   };
 
   const isCustomSelection = selectedAreaName !== null && selectedAreaName !== lowestArea.name;
+  const focusAreaLabel = getLifeAreaLabel(focusArea.name);
+  const lowestAreaLabel = getLifeAreaLabel(lowestArea.name);
+  const strongestAreaLabel = getLifeAreaLabel(strongestArea.name);
+  const scoreGapFromAverage = Math.max(0, averageScore - focusArea.score);
 
   return (
     <div className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
@@ -155,10 +159,48 @@ export function LifeInsight() {
                   )}
                 </div>
 
+                <div
+                  data-testid="life-insight-recommendation-card"
+                  className="grid gap-3 rounded-[24px] border border-white/14 bg-white/12 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] sm:grid-cols-[minmax(0,1.35fr)_minmax(220px,0.65fr)]"
+                >
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/58">
+                      Vì sao chọn trọng tâm này?
+                    </p>
+                    <h2 className="mt-2 text-xl font-bold text-white">
+                      {isCustomSelection
+                        ? `Bạn đang chọn ${focusAreaLabel} thay cho gợi ý ${lowestAreaLabel}.`
+                        : `${focusAreaLabel} là điểm thấp nhất trong bánh xe hiện tại.`}
+                    </h2>
+                    <p className="mt-2 text-sm leading-7 text-white/74">
+                      Dùng một lĩnh vực đủ cụ thể giúp bước SMART Goal không bị rộng. Sau khi chọn xong, phần tiếp theo
+                      sẽ ép trọng tâm này thành mục tiêu đo được và có thời hạn.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-2 text-sm">
+                    <div className="rounded-[18px] border border-white/10 bg-black/12 px-4 py-3">
+                      <p className="text-white/56">Điểm hiện tại</p>
+                      <p className="mt-1 text-lg font-bold text-white">{focusArea.score}/10</p>
+                    </div>
+                    <div className="rounded-[18px] border border-white/10 bg-black/12 px-4 py-3">
+                      <p className="text-white/56">Lệch so với trung bình</p>
+                      <p className="mt-1 text-lg font-bold text-white">
+                        {scoreGapFromAverage > 0 ? `-${scoreGapFromAverage.toFixed(1)}` : "0.0"}
+                      </p>
+                    </div>
+                    <div className="rounded-[18px] border border-white/10 bg-black/12 px-4 py-3">
+                      <p className="text-white/56">Lực đỡ hiện có</p>
+                      <p className="mt-1 font-semibold text-white">{strongestAreaLabel}</p>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex flex-wrap gap-3">
                   <Button
+                    data-testid="life-insight-primary-cta"
                     variant="outline"
-                    className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92"
+                    className="hero-cta w-full justify-center border-white/18 bg-white text-slate-900 hover:bg-white/92 sm:w-auto"
                     onClick={handleStartGoalSetup}
                   >
                     Tạo mục tiêu với {getLifeAreaLabel(focusArea.name)}
