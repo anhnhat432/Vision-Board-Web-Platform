@@ -45,7 +45,6 @@ import {
   getActiveTwelveWeekGoal,
   getGoalExecutionStats,
   getLifeAreaLabel,
-  getRandomMotivationalQuote,
   getReviewDayLabel,
   getTwelveWeekCurrentWeek,
   getTwelveWeekTasksForWeek,
@@ -221,12 +220,7 @@ const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
 
 export function Dashboard() {
   const { userData, reloadUserData } = useSyncedUserData();
-  const [quote, setQuote] = useState("");
   const { isTourOpen, setIsTourOpen } = usePageTour("dashboard");
-
-  useEffect(() => {
-    setQuote(getRandomMotivationalQuote());
-  }, []);
 
   if (!userData) {
     return (
@@ -259,7 +253,6 @@ export function Dashboard() {
   return (
     <DashboardContent
       userData={userData}
-      quote={quote}
       activeTwelveWeekGoal={activeTwelveWeekGoal}
       isTourOpen={isTourOpen}
       setIsTourOpen={setIsTourOpen}
@@ -270,14 +263,12 @@ export function Dashboard() {
 
 function DashboardContent({
   userData,
-  quote,
   activeTwelveWeekGoal,
   isTourOpen,
   setIsTourOpen,
   onReload,
 }: {
   userData: UserData;
-  quote: string;
   activeTwelveWeekGoal: ReturnType<typeof getActiveTwelveWeekGoal>;
   isTourOpen: boolean;
   setIsTourOpen: (open: boolean) => void;
@@ -702,6 +693,13 @@ function DashboardContent({
     weekCompletionPercent: activeSystemWeekCompletion?.percent ?? 0,
   }).filter((t) => t.kind !== dismissedTrigger);
   const topTrigger = activeTriggers[0] ?? null;
+  const shouldShowSetupGuide = !isPublicVisitor && !activeSystem;
+  const shouldShowTopSidebar = isPublicVisitor || !activeSystem;
+  const dashboardTourSteps = shouldShowTopSidebar
+    ? DASHBOARD_TOUR_STEPS
+    : DASHBOARD_TOUR_STEPS.filter(
+        (step) => step.targetId !== "dashboard-next-card" && step.targetId !== "dashboard-plan-card",
+      );
 
   return (
     <div className="ops-shell ops-dashboard">
@@ -720,9 +718,9 @@ function DashboardContent({
           onSignIn={() => handleAuthNavigate("signin")}
           onSignUp={() => handleAuthNavigate("signup")}
         />
-      ) : (
+      ) : shouldShowSetupGuide ? (
         <NewUserGuideBanner userData={userData} variant="compact" />
-      )}
+      ) : null}
 
       {/* Rescue trigger nudge banner */}
       {topTrigger &&
@@ -830,7 +828,7 @@ function DashboardContent({
         onOpenChange={setIsTourOpen}
         title="Tour bảng điều khiển"
         description="Ba điểm chính để người mới mở vào là biết nên bắt đầu từ đâu."
-        steps={DASHBOARD_TOUR_STEPS}
+        steps={dashboardTourSteps}
       />
 
       {activeSystem && reviewDueToday && (
@@ -861,7 +859,11 @@ function DashboardContent({
         </Reveal>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,400px)]">
+      <div
+        className={
+          shouldShowTopSidebar ? "grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,400px)]" : "grid gap-6"
+        }
+      >
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="space-y-4">
             <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.38)]">
@@ -892,18 +894,22 @@ function DashboardContent({
                       {isPublicVisitor
                         ? "Trang chính giúp bạn nhìn rõ luồng sản phẩm trước khi tạo tài khoản."
                         : activeSystem
-                          ? `Quay lại đúng nhịp của "${visibleActiveTwelveWeekGoal?.title}".`
+                          ? `Quay lại đúng nhịp của "${visibleActiveTwelveWeekGoal?.title ?? "chu kỳ 12 tuần hiện tại"}".`
                           : "Bắt đầu từ một bước rõ ràng, rồi nối tiếp sang hệ 12 tuần."}
                     </h1>
                     <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                       {isPublicVisitor
                         ? "Bạn có thể xem tổng quan ngay tại đây. Khi bắt đầu thật, hãy đăng ký để dữ liệu mục tiêu và kế hoạch không bị mất theo trình duyệt."
-                        : `"${quote}"`}
+                        : activeSystem
+                          ? activeSystemTodayOpenTasks.length > 0
+                            ? `Tập trung vào ${activeSystemTodayOpenTasks.length} việc đang mở hôm nay trước khi xem tiến độ tuần.`
+                            : "Hôm nay không còn việc mở. Nếu còn thời gian, hãy xem lại tuần hoặc chuẩn bị review khi đến hạn."
+                          : "Đi tiếp theo đúng thứ tự: Life Balance, Life Insight, SMART Goal, rồi mới sang chu kỳ 12 tuần."}
                     </p>
                   </div>
 
                   {activeSystem && activeSystemWeekCompletion && activeSystemWeekRange ? (
-                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+                    <div className="grid gap-4">
                       <div
                         data-tour-id="dashboard-start-card"
                         className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 sm:p-5"
@@ -960,49 +966,46 @@ function DashboardContent({
                             </p>
                           </div>
                         )}
-                      </div>
 
-                      <div className="hidden lg:block space-y-3">
-                        <div className="rounded-[24px] border border-slate-200 bg-white p-4">
-                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                            Việc hôm nay
-                          </p>
-                          <p className="mt-2 text-3xl font-bold text-slate-950">{activeSystemTodayOpenTasks.length}</p>
-                          <p className="mt-1 text-sm text-slate-500">{activeSystemTodayCompletedCount} việc đã chốt</p>
-                        </div>
-                        <div className="rounded-[24px] border border-slate-200 bg-white p-4">
-                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                            Tiến độ tuần này
-                          </p>
-                          <p className="mt-2 text-3xl font-bold text-slate-950">
-                            {activeSystemWeekCompletion.percent}%
-                          </p>
-                          <Progress value={activeSystemWeekCompletion.percent} className="mt-3 h-2.5 bg-slate-100" />
-                          <p className="mt-2 text-sm text-slate-500">
-                            {formatCalendarDate(activeSystemWeekRange.start)} -{" "}
-                            {formatCalendarDate(activeSystemWeekRange.end)}
-                          </p>
-                        </div>
-                        <div
-                          className={`rounded-[24px] border p-4 ${
-                            reviewDueToday
-                              ? "border-amber-200 bg-amber-50 text-slate-950"
-                              : "border-slate-200 bg-white text-slate-950"
-                          }`}
-                        >
-                          <p
-                            className={`text-xs font-semibold uppercase tracking-[0.16em] ${reviewDueToday ? "text-amber-700" : "text-slate-500"}`}
+                        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                          <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-3">
+                            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Hôm nay</p>
+                            <p className="mt-1 text-xl font-bold text-slate-950">{activeSystemTodayOpenTasks.length}</p>
+                            <p className="text-xs text-slate-500">{activeSystemTodayCompletedCount} việc đã chốt</p>
+                          </div>
+                          <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-3">
+                            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tuần này</p>
+                            <div className="mt-1 flex items-center gap-3">
+                              <p className="text-xl font-bold text-slate-950">{activeSystemWeekCompletion.percent}%</p>
+                              <Progress
+                                value={activeSystemWeekCompletion.percent}
+                                className="h-2 flex-1 bg-slate-100"
+                              />
+                            </div>
+                            <p className="mt-1 text-xs text-slate-500">
+                              {formatCalendarDate(activeSystemWeekRange.start)} -{" "}
+                              {formatCalendarDate(activeSystemWeekRange.end)}
+                            </p>
+                          </div>
+                          <div
+                            className={`rounded-[18px] border px-4 py-3 ${
+                              reviewDueToday ? "border-amber-200 bg-amber-50" : "border-slate-200 bg-white"
+                            }`}
                           >
-                            Review tuần
-                          </p>
-                          <p className="mt-2 text-2xl font-bold">
-                            {reviewDueToday ? "Đến hạn hôm nay" : getReviewDayLabel(activeSystem.reviewDay)}
-                          </p>
-                          <p className={`mt-1 text-sm ${reviewDueToday ? "text-slate-600" : "text-slate-500"}`}>
-                            {reviewDueToday
-                              ? "Nên chốt trước khi sang nhịp tuần mới."
-                              : "Ngày review cố định của chu kỳ."}
-                          </p>
+                            <p
+                              className={`text-xs font-semibold uppercase tracking-[0.14em] ${
+                                reviewDueToday ? "text-amber-700" : "text-slate-500"
+                              }`}
+                            >
+                              Review
+                            </p>
+                            <p className="mt-1 text-base font-bold text-slate-950">
+                              {reviewDueToday ? "Đến hạn hôm nay" : getReviewDayLabel(activeSystem.reviewDay)}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              {reviewDueToday ? "Nên chốt trước tuần mới." : "Ngày cố định của chu kỳ."}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1048,79 +1051,85 @@ function DashboardContent({
               </CardContent>
             </Card>
 
-            <section className="rounded-[24px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.28)] sm:p-5">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Thứ tự nên đi</p>
-                  <h2 className="mt-1 text-base font-semibold text-slate-950 sm:text-lg">
-                    Một luồng chính, không phải ba lựa chọn ngang nhau.
-                  </h2>
+            {shouldShowTopSidebar && (
+              <>
+                <section className="rounded-[24px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.28)] sm:p-5">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Thứ tự nên đi</p>
+                      <h2 className="mt-1 text-base font-semibold text-slate-950 sm:text-lg">
+                        Một luồng chính, không phải ba lựa chọn ngang nhau.
+                      </h2>
+                    </div>
+                    <p className="max-w-xl text-sm leading-6 text-slate-600">{quickActionIntro}</p>
+                  </div>
+
+                  <div className="mt-4 grid gap-3 md:grid-cols-3">
+                    {quickActions.map((action, actionIndex) => {
+                      const Icon = action.icon;
+                      const stepIndex = actionIndex + 1;
+
+                      return (
+                        <Button
+                          key={action.title}
+                          variant="outline"
+                          className="group h-auto min-w-0 justify-start whitespace-normal rounded-[18px] border-slate-200 bg-slate-50/70 px-3.5 py-3.5 text-left shadow-none transition-all hover:border-slate-300 hover:bg-white"
+                          onClick={action.onClick}
+                        >
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-sm font-semibold text-white">
+                            {stepIndex}
+                          </div>
+                          <div className="ml-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white text-slate-700 ring-1 ring-slate-200 transition-colors group-hover:text-slate-950">
+                            <Icon className="h-4 w-4" />
+                          </div>
+                          <div className="ml-3 min-w-0 flex-1">
+                            <div className="line-clamp-2 break-words text-sm font-semibold leading-5 text-slate-900 sm:text-base">
+                              {action.title}
+                            </div>
+                            <div className="mt-1 line-clamp-2 text-sm text-slate-500">{action.description}</div>
+                          </div>
+                          <ArrowRight className="ml-2 h-4 w-4 shrink-0 text-slate-300 transition-colors group-hover:text-slate-700" />
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </section>
+
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                  {overviewCards.map((item, index) => {
+                    const Icon = item.icon;
+
+                    return (
+                      <motion.div
+                        key={`top-${item.title}`}
+                        initial={{ opacity: 0, y: 18 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.04 * index }}
+                      >
+                        <Card className="h-full border border-slate-200/80 bg-white/92 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.28)]">
+                          <CardHeader className="flex flex-row items-start justify-between pb-3">
+                            <div>
+                              <CardDescription className="text-xs font-medium text-slate-500">
+                                {item.title}
+                              </CardDescription>
+                              <CardTitle className="mt-2 text-3xl font-bold text-slate-950">
+                                {isPublicVisitor ? item.value : <CountUp value={item.value} />}
+                              </CardTitle>
+                            </div>
+                            <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${item.iconClass}`}>
+                              <Icon className="h-5 w-5" />
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-sm text-slate-500">{item.note}</p>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    );
+                  })}
                 </div>
-                <p className="max-w-xl text-sm leading-6 text-slate-600">{quickActionIntro}</p>
-              </div>
-
-              <div className="mt-4 grid gap-3 md:grid-cols-3">
-                {quickActions.map((action, actionIndex) => {
-                  const Icon = action.icon;
-                  const stepIndex = actionIndex + 1;
-
-                  return (
-                    <Button
-                      key={action.title}
-                      variant="outline"
-                      className="group h-auto min-w-0 justify-start whitespace-normal rounded-[18px] border-slate-200 bg-slate-50/70 px-3.5 py-3.5 text-left shadow-none transition-all hover:border-slate-300 hover:bg-white"
-                      onClick={action.onClick}
-                    >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-sm font-semibold text-white">
-                        {stepIndex}
-                      </div>
-                      <div className="ml-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white text-slate-700 ring-1 ring-slate-200 transition-colors group-hover:text-slate-950">
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <div className="ml-3 min-w-0 flex-1">
-                        <div className="line-clamp-2 break-words text-sm font-semibold leading-5 text-slate-900 sm:text-base">
-                          {action.title}
-                        </div>
-                        <div className="mt-1 line-clamp-2 text-sm text-slate-500">{action.description}</div>
-                      </div>
-                      <ArrowRight className="ml-2 h-4 w-4 shrink-0 text-slate-300 transition-colors group-hover:text-slate-700" />
-                    </Button>
-                  );
-                })}
-              </div>
-            </section>
-
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-              {overviewCards.map((item, index) => {
-                const Icon = item.icon;
-
-                return (
-                  <motion.div
-                    key={`top-${item.title}`}
-                    initial={{ opacity: 0, y: 18 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.04 * index }}
-                  >
-                    <Card className="h-full border border-slate-200/80 bg-white/92 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.28)]">
-                      <CardHeader className="flex flex-row items-start justify-between pb-3">
-                        <div>
-                          <CardDescription className="text-xs font-medium text-slate-500">{item.title}</CardDescription>
-                          <CardTitle className="mt-2 text-3xl font-bold text-slate-950">
-                            {isPublicVisitor ? item.value : <CountUp value={item.value} />}
-                          </CardTitle>
-                        </div>
-                        <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${item.iconClass}`}>
-                          <Icon className="h-5 w-5" />
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-slate-500">{item.note}</p>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                );
-              })}
-            </div>
+              </>
+            )}
 
             {isPublicVisitor ? (
               <section className="space-y-4 rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)] sm:p-5 lg:p-6">
@@ -1169,21 +1178,22 @@ function DashboardContent({
                   </div>
                 </div>
                 <div className="grid gap-3 md:grid-cols-3">
-                  {[
-                    "Chấm 8 lĩnh vực cuộc sống",
-                    "Chọn một insight ưu tiên",
-                    "Tạo SMART goal và chu kỳ 12 tuần",
-                  ].map((item, index) => (
-                    <div key={item} className="rounded-[20px] border border-slate-200 bg-slate-50/80 p-4">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white">
-                        {index + 1}
+                  {["Chấm 8 lĩnh vực cuộc sống", "Chọn một insight ưu tiên", "Tạo SMART goal và chu kỳ 12 tuần"].map(
+                    (item, index) => (
+                      <div key={item} className="rounded-[20px] border border-slate-200 bg-slate-50/80 p-4">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white">
+                          {index + 1}
+                        </div>
+                        <p className="mt-3 text-sm font-semibold leading-6 text-slate-900">{item}</p>
                       </div>
-                      <p className="mt-3 text-sm font-semibold leading-6 text-slate-900">{item}</p>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
                 <div className="flex flex-col gap-2 sm:flex-row">
-                  <Button className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto" onClick={() => navigate("/onboarding")}>
+                  <Button
+                    className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
+                    onClick={() => navigate("/onboarding")}
+                  >
                     Bắt đầu Life Balance
                   </Button>
                   <Button
@@ -1228,10 +1238,18 @@ function DashboardContent({
                   <StreakCard streak={weeklyStreak} />
                 </div>
 
-                <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
-                  <WeeklyProgressChart points={weeklyProgressPoints} />
-                  <MetricsSummary items={leadMetricsSummary} />
-                </div>
+                <details className="group rounded-[22px] border border-slate-200 bg-slate-50/70 p-4">
+                  <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 text-sm font-semibold text-slate-950">
+                    <span>Phân tích mở rộng</span>
+                    <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-500">
+                      Tiến độ theo tuần + metric dẫn
+                    </span>
+                  </summary>
+                  <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
+                    <WeeklyProgressChart points={weeklyProgressPoints} />
+                    <MetricsSummary items={leadMetricsSummary} />
+                  </div>
+                </details>
 
                 {planLoading && !plan && (
                   <Card className="border border-slate-200 bg-white/80 shadow-sm">
@@ -1251,124 +1269,128 @@ function DashboardContent({
           </div>
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
-          <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-            {isPublicVisitor ? (
-              <PublicVisitorAccountCard
-                onSignIn={() => handleAuthNavigate("signin")}
-                onSignUp={() => handleAuthNavigate("signup")}
-              />
-            ) : (
-              <Card
-                data-tour-id="dashboard-plan-card"
-                className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)]"
-              >
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-slate-950">
-                    <Crown className="h-5 w-5" />
-                    Gói 12 tuần hiện tại
-                  </CardTitle>
-                  <CardDescription className="text-slate-600">
-                    Free đủ để chạy một chu kỳ. Plus dành cho lúc bạn muốn bắt đầu nhanh hơn và giữ nhịp chắc hơn.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Đang dùng</p>
-                    <p className="mt-2 text-3xl font-bold text-slate-950">{getPlanLabel(currentPlanCode)}</p>
-                    <p className="mt-2 text-sm leading-7 text-slate-600">{currentPlanDefinition.description}</p>
-                  </div>
+        {shouldShowTopSidebar && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
+            <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+              {isPublicVisitor ? (
+                <PublicVisitorAccountCard
+                  onSignIn={() => handleAuthNavigate("signin")}
+                  onSignUp={() => handleAuthNavigate("signup")}
+                />
+              ) : (
+                <Card
+                  data-tour-id="dashboard-plan-card"
+                  className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)]"
+                >
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-slate-950">
+                      <Crown className="h-5 w-5" />
+                      Gói 12 tuần hiện tại
+                    </CardTitle>
+                    <CardDescription className="text-slate-600">
+                      Free đủ để chạy một chu kỳ. Plus dành cho lúc bạn muốn bắt đầu nhanh hơn và giữ nhịp chắc hơn.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Đang dùng</p>
+                      <p className="mt-2 text-3xl font-bold text-slate-950">{getPlanLabel(currentPlanCode)}</p>
+                      <p className="mt-2 text-sm leading-7 text-slate-600">{currentPlanDefinition.description}</p>
+                    </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    {premiumStatusItems.map((key) => {
-                      const isUnlocked = entitlementKeys.includes(key);
+                    <div className="flex flex-wrap gap-2">
+                      {premiumStatusItems.map((key) => {
+                        const isUnlocked = entitlementKeys.includes(key);
 
-                      return (
-                        <span
-                          key={key}
-                          className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
-                            isUnlocked
-                              ? "border-emerald-200/70 bg-emerald-50 text-emerald-900"
-                              : "border-slate-200 bg-slate-50 text-slate-500"
-                          }`}
-                        >
-                          {isUnlocked ? "Đang mở" : "Đang khóa"} · {getEntitlementLabel(key)}
-                        </span>
-                      );
-                    })}
-                  </div>
+                        return (
+                          <span
+                            key={key}
+                            className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
+                              isUnlocked
+                                ? "border-emerald-200/70 bg-emerald-50 text-emerald-900"
+                                : "border-slate-200 bg-slate-50 text-slate-500"
+                            }`}
+                          >
+                            {isUnlocked ? "Đang mở" : "Đang khóa"} · {getEntitlementLabel(key)}
+                          </span>
+                        );
+                      })}
+                    </div>
 
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {currentPlanCode === "FREE" ? (
-                      <>
-                        <Button
-                          className="bg-slate-950 text-white hover:bg-slate-800"
-                          onClick={() => openUpgradeDialog("plan", "PLUS")}
-                        >
-                          Mở Plus để đi nhanh hơn
-                        </Button>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {currentPlanCode === "FREE" ? (
+                        <>
+                          <Button
+                            className="bg-slate-950 text-white hover:bg-slate-800"
+                            onClick={() => openUpgradeDialog("plan", "PLUS")}
+                          >
+                            Mở Plus để đi nhanh hơn
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                            onClick={() => navigate(activeSystem ? "/12-week-system?tab=settings" : "/life-insight")}
+                          >
+                            Xem Free đang có gì
+                          </Button>
+                        </>
+                      ) : (
                         <Button
                           variant="outline"
-                          className="border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                          className="border-slate-200 bg-white text-slate-900 hover:bg-slate-50 sm:col-span-2"
                           onClick={() => navigate(activeSystem ? "/12-week-system?tab=settings" : "/life-insight")}
                         >
-                          Xem Free đang có gì
+                          Quản lý gói và quyền
                         </Button>
-                      </>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        className="border-slate-200 bg-white text-slate-900 hover:bg-slate-50 sm:col-span-2"
-                        onClick={() => navigate(activeSystem ? "/12-week-system?tab=settings" : "/life-insight")}
-                      >
-                        Quản lý gói và quyền
-                      </Button>
-                    )}
-                  </div>
+                      )}
+                    </div>
 
-                  <p className="text-sm text-slate-500">
-                    Nếu bạn đã từng mở quyền trên thiết bị này, có thể vào tab Cài đặt của trung tâm 12 tuần để khôi
-                    phục lại ngay.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
+                    <p className="text-sm text-slate-500">
+                      Nếu bạn đã từng mở quyền trên thiết bị này, có thể vào tab Cài đặt của trung tâm 12 tuần để khôi
+                      phục lại ngay.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
 
-            <Card
-              data-tour-id="dashboard-next-card"
-              className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]"
-            >
-              <CardHeader>
-                <CardTitle className="text-slate-950">Đi tiếp ngay</CardTitle>
-                <CardDescription className="text-slate-700">
-                  Chỉ giữ hai tín hiệu quan trọng nhất để bạn quyết định nhanh.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {dashboardAttentionPanels.map((panel) => {
-                  const Icon = panel.icon;
-                  return (
-                    <div key={panel.eyebrow} className={panel.cardClass}>
-                      <div className="flex items-start gap-3">
-                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
-                          <Icon className="h-5 w-5" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className={`text-xs uppercase tracking-[0.16em] ${panel.eyebrowClass}`}>{panel.eyebrow}</p>
-                          <p className={`mt-2 text-lg font-semibold ${panel.titleClass}`}>{panel.title}</p>
-                          <p className={`mt-1 text-sm leading-7 ${panel.descriptionClass}`}>{panel.description}</p>
-                          <Button variant={panel.buttonVariant} className={panel.buttonClass} onClick={panel.onClick}>
-                            {panel.buttonLabel}
-                          </Button>
+              <Card
+                data-tour-id="dashboard-next-card"
+                className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]"
+              >
+                <CardHeader>
+                  <CardTitle className="text-slate-950">Đi tiếp ngay</CardTitle>
+                  <CardDescription className="text-slate-700">
+                    Chỉ giữ hai tín hiệu quan trọng nhất để bạn quyết định nhanh.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {dashboardAttentionPanels.map((panel) => {
+                    const Icon = panel.icon;
+                    return (
+                      <div key={panel.eyebrow} className={panel.cardClass}>
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className={`text-xs uppercase tracking-[0.16em] ${panel.eyebrowClass}`}>
+                              {panel.eyebrow}
+                            </p>
+                            <p className={`mt-2 text-lg font-semibold ${panel.titleClass}`}>{panel.title}</p>
+                            <p className={`mt-1 text-sm leading-7 ${panel.descriptionClass}`}>{panel.description}</p>
+                            <Button variant={panel.buttonVariant} className={panel.buttonClass} onClick={panel.onClick}>
+                              {panel.buttonLabel}
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          </div>
-        </motion.div>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            </div>
+          </motion.div>
+        )}
       </div>
 
       {!isPublicVisitor && userData.isHydratedFromDemo && (
