@@ -694,7 +694,7 @@ function DashboardContent({
   }).filter((t) => t.kind !== dismissedTrigger);
   const topTrigger = activeTriggers[0] ?? null;
   const shouldShowSetupGuide = !isPublicVisitor && !activeSystem;
-  const shouldShowTopSidebar = isPublicVisitor || !activeSystem;
+  const shouldShowTopSidebar = !isPublicVisitor && !activeSystem;
   const dashboardTourSteps = shouldShowTopSidebar
     ? DASHBOARD_TOUR_STEPS
     : DASHBOARD_TOUR_STEPS.filter(
@@ -1131,36 +1131,7 @@ function DashboardContent({
               </>
             )}
 
-            {isPublicVisitor ? (
-              <section className="space-y-4 rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)] sm:p-5 lg:p-6">
-                <div className="flex flex-wrap items-end justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Sau khi bắt đầu</p>
-                    <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-950">
-                      Dashboard sẽ đổi từ trang giới thiệu thành trung tâm thực thi của riêng bạn.
-                    </h2>
-                    <p className="mt-1 max-w-2xl text-sm leading-7 text-slate-600">
-                      Khi đã có mục tiêu và kế hoạch, khu vực này sẽ hiện tiến độ mục tiêu, điểm thực thi tuần, streak
-                      và chỉ số dẫn thay vì các con số xem trước.
-                    </p>
-                  </div>
-                </div>
-                <div className="grid gap-3 md:grid-cols-3">
-                  {[
-                    "Mỗi ngày biết việc cần làm",
-                    "Mỗi tuần có điểm thực thi",
-                    "Mỗi chu kỳ có review để điều chỉnh",
-                  ].map((item, index) => (
-                    <div key={item} className="rounded-[20px] border border-slate-200 bg-slate-50/80 p-4">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white">
-                        {index + 1}
-                      </div>
-                      <p className="mt-3 text-sm font-semibold leading-6 text-slate-900">{item}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            ) : !activeSystem ? (
+            {isPublicVisitor ? null : !activeSystem ? (
               <section
                 data-testid="fresh-workspace-empty-state"
                 className="space-y-4 rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)] sm:p-5 lg:p-6"
