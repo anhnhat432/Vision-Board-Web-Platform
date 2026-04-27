@@ -1021,7 +1021,7 @@ export function TwelveWeekSetup() {
           </CardHeader>
           <CardContent className="space-y-6">
             {currentStep === 0 && (
-              <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+              <div className="mx-auto max-w-4xl space-y-6">
                 <div className="space-y-5">
                   <div className="space-y-4 rounded-[28px] border border-white/70 bg-white/72 p-5">
                     <div>
@@ -1431,7 +1431,7 @@ export function TwelveWeekSetup() {
             )}
 
             {currentStep === 1 && (
-              <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+              <div className="mx-auto max-w-4xl space-y-6">
                 <div className="space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-dashed border-slate-200 bg-slate-50/80 p-4">
                     <div>
@@ -1484,7 +1484,7 @@ export function TwelveWeekSetup() {
                             placeholder="Ví dụ: viết 3 bài, tập 2 buổi, gửi 5 outreach..."
                           />
                         </div>
-                        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                        <div className="grid gap-3 md:grid-cols-2">
                           <div className="space-y-2">
                             <Label htmlFor={`tactic-type-${index}`}>Loại</Label>
                             <Select
@@ -1588,7 +1588,7 @@ export function TwelveWeekSetup() {
             )}
 
             {currentStep === 2 && (
-              <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+              <div className="mx-auto max-w-4xl space-y-6">
                 <div className="space-y-5">
                   <div className="grid gap-3 md:grid-cols-2">
                     <div className="space-y-2">
@@ -1770,7 +1770,7 @@ export function TwelveWeekSetup() {
             )}
 
             {currentStep === 3 && (
-              <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+              <div className="mx-auto max-w-4xl space-y-6">
                 <div className="space-y-5">
                   <div className="rounded-[24px] border border-white/70 bg-white/72 p-5">
                     <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tóm tắt hệ thống</p>
