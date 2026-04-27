@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
@@ -158,6 +158,24 @@ function buildTask(overrides: Partial<{ id: string; status: "todo" | "doing" | "
   };
 }
 
+function buildTaskSystem(completed = false): TwelveWeekSystem {
+  return {
+    ...buildSystem(),
+    taskInstances: [
+      {
+        id: "local_task_1",
+        weekNumber: 1,
+        scheduledDate: "2026-04-01",
+        title: "Write launch brief",
+        leadIndicatorName: "",
+        isCore: true,
+        completed,
+        completedAt: completed ? "2026-04-01T10:00:00.000Z" : undefined,
+      },
+    ],
+  };
+}
+
 describe("usePlanExecutionSync.syncDailyCheckIn", () => {
   beforeEach(() => {
     createMetric.mockReset();
@@ -288,6 +306,53 @@ describe("usePlanExecutionSync.syncDailyCheckIn", () => {
     expect(synced).toBe(true);
     expect(updateMetricLog).not.toHaveBeenCalled();
     expect(logMetric).not.toHaveBeenCalled();
+  });
+
+  it("queues snapshot sync before a newer task toggle so stale snapshots cannot win", async () => {
+    const backendTask = buildTask({ status: "done" });
+    const backendDetails = {
+      ...buildPlanDetails(),
+      weeks: [
+        {
+          ...buildPlanDetails().weeks[0],
+          tasks: [backendTask],
+        },
+      ],
+    };
+    const staleSystem = buildTaskSystem(false);
+    let releaseStaleUpdate: (() => void) | null = null;
+
+    getPlan.mockImplementation(async () => backendDetails);
+    getRemoteTaskIdForGoal.mockReturnValue("remote_task_1");
+    updateTask.mockImplementation((_taskId, input) => {
+      if (updateTask.mock.calls.length === 1) {
+        return new Promise((resolve) => {
+          releaseStaleUpdate = () => {
+            backendTask.status = input.status ?? backendTask.status;
+            resolve({ ...backendTask });
+          };
+        });
+      }
+
+      backendTask.status = input.status ?? backendTask.status;
+      return Promise.resolve({ ...backendTask });
+    });
+
+    const { result } = renderHook(() => usePlanExecutionSync({ goalId: "goal_1", system: staleSystem }));
+
+    let staleSync: Promise<unknown>;
+    let toggleSync: Promise<unknown>;
+    await act(async () => {
+      staleSync = result.current.actions.syncLocalSnapshot({ system: staleSystem });
+      await waitFor(() => expect(updateTask).toHaveBeenCalledTimes(1));
+      toggleSync = result.current.actions.syncTaskToggle("local_task_1", true);
+      expect(updateTask).toHaveBeenCalledTimes(1);
+      releaseStaleUpdate?.();
+      await Promise.all([staleSync, toggleSync]);
+    });
+
+    expect(updateTask).toHaveBeenCalledTimes(2);
+    expect(backendTask.status).toBe("done");
   });
 
   it("bootstraps a backend plan and backfills local 12-week state", async () => {

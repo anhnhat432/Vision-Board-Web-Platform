@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import { toAppError } from "@/lib/api/apiClient";
 import { createMetric, getMetrics, logMetric, updateMetricLog } from "@/services/metricService";
@@ -171,6 +171,7 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
   const [pendingRequests, setPendingRequests] = useState(0);
   const [error, setError] = useState<AppError | null>(null);
   const [lastSnapshot, setLastSnapshot] = useState<PlanExecutionSyncSnapshot | null>(null);
+  const syncQueueRef = useRef<Promise<void>>(Promise.resolve());
 
   const loading = pendingRequests > 0;
   const enabled = options.enabled ?? true;
@@ -189,6 +190,15 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     } finally {
       setPendingRequests((count) => Math.max(0, count - 1));
     }
+  }, []);
+
+  const enqueueSync = useCallback(<T,>(action: () => Promise<T>): Promise<T> => {
+    const queuedAction = syncQueueRef.current.catch(() => undefined).then(action);
+    syncQueueRef.current = queuedAction.then(
+      () => undefined,
+      () => undefined,
+    );
+    return queuedAction;
   }, []);
 
   const ensurePlanDetails = useCallback(async (
@@ -401,7 +411,7 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     return Boolean(updatedWeek);
   }, [runAction]);
 
-  const syncTaskToggle = useCallback(async (taskId: string, completed: boolean): Promise<boolean> => {
+  const syncTaskToggle = useCallback((taskId: string, completed: boolean): Promise<boolean> => enqueueSync(async () => {
     const goalId = options.goalId;
     const system = options.system;
     if (!goalId || !system || !enabled) return true;
@@ -421,9 +431,17 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     if (!week) return true;
 
     return syncCompletedTaskMetricForWeek(goalId, week.id, { ...task, completed });
-  }, [enabled, ensurePlanDetails, options.goalId, options.system, syncCompletedTaskMetricForWeek, syncTaskSnapshot]);
+  }), [
+    enabled,
+    enqueueSync,
+    ensurePlanDetails,
+    options.goalId,
+    options.system,
+    syncCompletedTaskMetricForWeek,
+    syncTaskSnapshot,
+  ]);
 
-  const syncWeeklyReview = useCallback(async (input: SyncWeeklyReviewInput): Promise<boolean> => {
+  const syncWeeklyReview = useCallback((input: SyncWeeklyReviewInput): Promise<boolean> => enqueueSync(async () => {
     const goalId = options.goalId;
     const system = options.system;
     if (!goalId || !system || !enabled) return true;
@@ -435,9 +453,9 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     if (!weekId) return true;
 
     return syncWeeklyReviewForWeek(weekId, input);
-  }, [enabled, ensurePlanDetails, options.goalId, options.system, syncWeeklyReviewForWeek]);
+  }), [enabled, enqueueSync, ensurePlanDetails, options.goalId, options.system, syncWeeklyReviewForWeek]);
 
-  const syncDailyCheckIn = useCallback(async (input: SyncDailyCheckInInput): Promise<boolean> => {
+  const syncDailyCheckIn = useCallback((input: SyncDailyCheckInInput): Promise<boolean> => enqueueSync(async () => {
     const goalId = options.goalId;
     const system = options.system;
     if (!goalId || !system || !enabled) return true;
@@ -449,9 +467,10 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     if (!weekId) return true;
 
     return syncDailyCheckInForWeek(goalId, weekId, input);
-  }, [enabled, ensurePlanDetails, options.goalId, options.system, syncDailyCheckInForWeek]);
+  }), [enabled, enqueueSync, ensurePlanDetails, options.goalId, options.system, syncDailyCheckInForWeek]);
 
-  const syncLocalSnapshot = useCallback(async (input: SyncLocalSnapshotInput = {}): Promise<PlanExecutionSyncSnapshot> => {
+  const syncLocalSnapshot = useCallback((input: SyncLocalSnapshotInput = {}): Promise<PlanExecutionSyncSnapshot> =>
+    enqueueSync(async () => {
     const goalId = options.goalId;
     const system = input.system ?? options.system;
     const counter: SyncCounter = {
@@ -546,8 +565,10 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     const snapshot = createSnapshot(counter, latestLink?.planId ?? details.plan.id);
     setLastSnapshot(snapshot);
     return snapshot;
-  }, [
+    }),
+  [
     enabled,
+    enqueueSync,
     ensurePlanDetails,
     options.goalId,
     options.system,
