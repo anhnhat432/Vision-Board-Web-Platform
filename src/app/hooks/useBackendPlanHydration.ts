@@ -177,11 +177,20 @@ function getMatchingTasksByWeek(details: PlanDetails, indicatorName: string): Ma
 function getIndicatorTargetCount(details: PlanDetails, indicatorName: string, weeklyTarget = 0): number {
   const matchingTasksByWeek = getMatchingTasksByWeek(details, indicatorName);
   const maxTaskCount = Array.from(matchingTasksByWeek.values()).reduce(
-    (max, tasks) => Math.max(max, tasks.length),
+    (max, tasks) => Math.max(max, getUniqueTaskSlotCount(tasks)),
     0,
   );
 
   return clampNumber(maxTaskCount || Math.round(weeklyTarget) || 1, 1, 7);
+}
+
+function getUniqueTaskSlotCount(tasks: ApiTask[]): number {
+  return new Set(
+    tasks.map((task) => {
+      const dateKey = getTaskDateKey(task);
+      return `${normalizeComparableText(task.title)}::${dateKey || task.id}`;
+    }),
+  ).size;
 }
 
 function getIndicatorSchedule(details: PlanDetails, indicatorName: string): number[] | undefined {
@@ -374,9 +383,19 @@ function findRemoteTaskForLocalTask(
   const sameTitleTasks = week.tasks.filter(
     (task) => normalizeComparableText(task.title) === localTitle && !usedRemoteTaskIds.has(task.id),
   );
-  const sameTitleAndDateTask = sameTitleTasks.find((task) => getTaskDateKey(task) === localDateKey);
+  const sameTitleAndDateTask = pickBestRemoteTask(
+    sameTitleTasks.filter((task) => getTaskDateKey(task) === localDateKey),
+  );
 
   return sameTitleAndDateTask ?? (sameTitleTasks.length === 1 ? sameTitleTasks[0] : null);
+}
+
+function pickBestRemoteTask(tasks: ApiTask[]): ApiTask | null {
+  return [...tasks].sort((left, right) => {
+    const completionPriority = Number(right.status === "done") - Number(left.status === "done");
+    if (completionPriority !== 0) return completionPriority;
+    return left.createdAt.localeCompare(right.createdAt);
+  })[0] ?? null;
 }
 
 function buildTaskLinkMap(

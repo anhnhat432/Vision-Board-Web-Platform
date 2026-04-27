@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
@@ -308,7 +308,7 @@ describe("usePlanExecutionSync.syncDailyCheckIn", () => {
     expect(logMetric).not.toHaveBeenCalled();
   });
 
-  it("queues snapshot sync before a newer task toggle so stale snapshots cannot win", async () => {
+  it("does not downgrade a completed backend task during broad snapshot sync", async () => {
     const backendTask = buildTask({ status: "done" });
     const backendDetails = {
       ...buildPlanDetails(),
@@ -320,38 +320,21 @@ describe("usePlanExecutionSync.syncDailyCheckIn", () => {
       ],
     };
     const staleSystem = buildTaskSystem(false);
-    let releaseStaleUpdate: (() => void) | null = null;
 
     getPlan.mockImplementation(async () => backendDetails);
     getRemoteTaskIdForGoal.mockReturnValue("remote_task_1");
     updateTask.mockImplementation((_taskId, input) => {
-      if (updateTask.mock.calls.length === 1) {
-        return new Promise((resolve) => {
-          releaseStaleUpdate = () => {
-            backendTask.status = input.status ?? backendTask.status;
-            resolve({ ...backendTask });
-          };
-        });
-      }
-
       backendTask.status = input.status ?? backendTask.status;
       return Promise.resolve({ ...backendTask });
     });
 
     const { result } = renderHook(() => usePlanExecutionSync({ goalId: "goal_1", system: staleSystem }));
 
-    let staleSync: Promise<unknown>;
-    let toggleSync: Promise<unknown>;
     await act(async () => {
-      staleSync = result.current.actions.syncLocalSnapshot({ system: staleSystem });
-      await waitFor(() => expect(updateTask).toHaveBeenCalledTimes(1));
-      toggleSync = result.current.actions.syncTaskToggle("local_task_1", true);
-      expect(updateTask).toHaveBeenCalledTimes(1);
-      releaseStaleUpdate?.();
-      await Promise.all([staleSync, toggleSync]);
+      await result.current.actions.syncLocalSnapshot({ system: staleSystem });
     });
 
-    expect(updateTask).toHaveBeenCalledTimes(2);
+    expect(updateTask).not.toHaveBeenCalled();
     expect(backendTask.status).toBe("done");
   });
 
@@ -522,7 +505,8 @@ describe("usePlanExecutionSync.syncDailyCheckIn", () => {
           title: "Write launch brief",
           leadIndicatorName: "Deep work",
           isCore: true,
-          completed: false,
+          completed: true,
+          completedAt: "2026-04-01T10:00:00.000Z",
         },
       ],
       dailyCheckIns: [
@@ -618,7 +602,7 @@ describe("usePlanExecutionSync.syncDailyCheckIn", () => {
       "remote_task_1",
       expect.objectContaining({
         title: "Write launch brief",
-        status: "todo",
+        status: "done",
         scheduledDate: "2026-04-01T00:00:00.000Z",
       }),
     );

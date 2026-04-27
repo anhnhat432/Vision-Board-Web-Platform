@@ -63,6 +63,10 @@ interface SyncCounter {
   failedCount: number;
 }
 
+interface SyncTaskSnapshotOptions {
+  allowStatusDowngrade?: boolean;
+}
+
 function toIsoDate(value: string | undefined): string | undefined {
   if (!value) return undefined;
   const parsed = new Date(value);
@@ -108,13 +112,38 @@ function findRemoteTaskForLocalTask(
   const localTitle = localTask.title.trim().toLowerCase();
   const localDateKey = getTaskDateKey(localTask.scheduledDate);
   const sameTitleTasks = week.tasks.filter((task) => task.title.trim().toLowerCase() === localTitle);
-  const sameTitleAndDateTask = sameTitleTasks.find((task) => getTaskDateKey(task.scheduledDate) === localDateKey);
+  const sameTitleAndDateTasks = sameTitleTasks.filter((task) => getTaskDateKey(task.scheduledDate) === localDateKey);
+  const bestSameDateTask = pickBestRemoteTask(sameTitleAndDateTasks);
 
-  return sameTitleAndDateTask ?? (sameTitleTasks.length === 1 ? sameTitleTasks[0] : null);
+  return bestSameDateTask ?? (sameTitleTasks.length === 1 ? sameTitleTasks[0] : null);
 }
 
-function shouldUpdateRemoteTask(remoteTask: Task, localTask: TwelveWeekTaskInstance): boolean {
-  if (remoteTask.status !== getTaskStatus(localTask.completed)) return true;
+function pickBestRemoteTask(tasks: Task[]): Task | null {
+  return [...tasks].sort((left, right) => {
+    const completionPriority = Number(right.status === "done") - Number(left.status === "done");
+    if (completionPriority !== 0) return completionPriority;
+    return left.createdAt.localeCompare(right.createdAt);
+  })[0] ?? null;
+}
+
+function getTargetRemoteTaskStatus(
+  remoteTask: Task,
+  localTask: TwelveWeekTaskInstance,
+  options: SyncTaskSnapshotOptions,
+): Task["status"] {
+  const localStatus = getTaskStatus(localTask.completed);
+  if (!options.allowStatusDowngrade && remoteTask.status === "done" && localStatus !== "done") {
+    return remoteTask.status;
+  }
+  return localStatus;
+}
+
+function shouldUpdateRemoteTask(
+  remoteTask: Task,
+  localTask: TwelveWeekTaskInstance,
+  options: SyncTaskSnapshotOptions,
+): boolean {
+  if (remoteTask.status !== getTargetRemoteTaskStatus(remoteTask, localTask, options)) return true;
   if (remoteTask.title.trim() !== localTask.title.trim()) return true;
   return getTaskDateKey(remoteTask.scheduledDate) !== getTaskDateKey(localTask.scheduledDate);
 }
@@ -279,6 +308,7 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     goalId: string,
     details: PlanDetails,
     task: TwelveWeekTaskInstance,
+    options: SyncTaskSnapshotOptions = {},
   ): Promise<"synced" | "skipped" | "failed"> => {
     const week = findWeekDetails(details, task.weekNumber);
     if (!week) return "skipped";
@@ -302,14 +332,14 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
 
     setRemoteTaskIdForGoal(goalId, task.id, remoteTask.id);
 
-    if (!shouldUpdateRemoteTask(remoteTask, task)) {
+    if (!shouldUpdateRemoteTask(remoteTask, task, options)) {
       return "skipped";
     }
 
     const updatedTask = await runAction(() =>
       updateTask(remoteTask.id, {
         title: task.title,
-        status: getTaskStatus(task.completed),
+        status: getTargetRemoteTaskStatus(remoteTask, task, options),
         scheduledDate: toIsoDate(task.scheduledDate),
       }),
     );
@@ -422,7 +452,12 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     const details = await ensurePlanDetails(goalId, system);
     if (!details) return true;
 
-    const taskSyncResult = await syncTaskSnapshot(goalId, details, { ...task, completed });
+    const taskSyncResult = await syncTaskSnapshot(
+      goalId,
+      details,
+      { ...task, completed },
+      { allowStatusDowngrade: true },
+    );
     if (taskSyncResult === "failed") return false;
 
     if (!completed) return true;

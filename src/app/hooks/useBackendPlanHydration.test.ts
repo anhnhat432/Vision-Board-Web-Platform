@@ -174,6 +174,43 @@ describe("hydrateTwelveWeekPlansFromBackend", () => {
     expect(localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId)).toBe("local_goal_1");
   });
 
+  it("prefers the completed backend task when duplicate remote tasks share the same title and date", async () => {
+    const apiGoal = createApiGoal();
+    const details = createPlanDetails();
+    const week = details.weeks[0];
+    if (!week) throw new Error("Expected fixture week");
+    const baseTask = week.tasks[0];
+    if (!baseTask) throw new Error("Expected fixture task");
+    week.tasks = [
+      {
+        ...baseTask,
+        id: "remote_task_todo",
+        status: "todo",
+        createdAt: "2026-04-01T00:00:00.000Z",
+      },
+      {
+        ...baseTask,
+        id: "remote_task_done",
+        status: "done",
+        createdAt: "2026-04-01T00:01:00.000Z",
+      },
+    ];
+    vi.mocked(getGoals).mockResolvedValue([apiGoal]);
+    vi.mocked(getPlans).mockResolvedValue([details.plan]);
+    vi.mocked(getPlan).mockResolvedValue(details);
+
+    await hydrateTwelveWeekPlansFromBackend();
+
+    const goal = getUserData().goals[0];
+    const completedTask = goal?.twelveWeekSystem?.taskInstances.find(
+      (task) => task.leadIndicatorName === "Write proposal" && task.completed,
+    );
+    expect(completedTask?.completed).toBe(true);
+
+    const link = getPlanLink("local_goal_1");
+    expect(completedTask ? link?.taskIdByLocalTaskId[completedTask.id] : null).toBe("remote_task_done");
+  });
+
   it("uses the newest backend plan as the latest 12-week system even when the API returns older plans first", async () => {
     const olderDetails = createPlanDetails();
     const newerDetails = clonePlanDetails(olderDetails, {
