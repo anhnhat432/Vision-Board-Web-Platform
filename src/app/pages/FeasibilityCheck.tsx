@@ -925,7 +925,7 @@ export function FeasibilityCheck() {
           </CardContent>
         </Card>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="mx-auto max-w-4xl">
           <Card className="overflow-hidden">
             <CardContent className="p-5 sm:p-6 lg:p-7">
               <motion.div
@@ -986,7 +986,7 @@ export function FeasibilityCheck() {
             </CardContent>
           </Card>
 
-          <div className="space-y-6 xl:sticky xl:top-28">
+          <div className="hidden">
             <Card>
               <CardContent className="p-6">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Mục đích của bài này</p>

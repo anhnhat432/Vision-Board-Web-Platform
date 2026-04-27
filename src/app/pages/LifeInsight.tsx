@@ -201,7 +201,7 @@ export function LifeInsight() {
           </CardContent>
         </Card>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="mx-auto max-w-5xl space-y-6">
           <div className="space-y-6">
             <Card className="overflow-hidden">
               <CardHeader>
@@ -297,7 +297,7 @@ export function LifeInsight() {
             </Card>
           </div>
 
-          <div className="space-y-6 xl:sticky xl:top-28">
+          <div className="mx-auto max-w-3xl">
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
