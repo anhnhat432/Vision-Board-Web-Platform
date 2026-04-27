@@ -116,18 +116,18 @@ export function LifeInsight() {
         <CoreFlowProgress currentStepId="life_insight" />
 
         <Card className="hero-surface overflow-hidden border-0 text-white">
-          <CardContent className="relative p-8 lg:p-10">
+          <CardContent className="relative p-5 sm:p-6 lg:p-10">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.1),_transparent_24%)] opacity-90" />
 
-            <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.12fr)_360px]">
-              <div className="space-y-6">
+            <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.12fr)_360px] xl:gap-8">
+              <div className="space-y-5 sm:space-y-6">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Compass className="h-4 w-4" />
                   Life Insight
                 </div>
 
                 <div className="space-y-4">
-                  <h1 className="max-w-3xl text-4xl font-bold tracking-normal lg:text-5xl">
+                  <h1 className="max-w-3xl text-3xl font-bold tracking-normal sm:text-4xl lg:text-5xl">
                     Bạn đã có một tín hiệu rất rõ về nơi mình nên ưu tiên tiếp theo.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
@@ -174,7 +174,7 @@ export function LifeInsight() {
                 </div>
               </div>
 
-              <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+              <div className="hidden rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl xl:block">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Snapshot hiện tại</p>
 
                 <div className="mt-6 space-y-4">

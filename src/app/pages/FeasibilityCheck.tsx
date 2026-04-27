@@ -422,7 +422,7 @@ function FeasibilityResultView({
         <CoreFlowProgress currentStepId="feasibility" />
 
         <Card className="hero-surface overflow-hidden border-0 text-white">
-          <CardContent className="relative p-8 lg:p-10">
+          <CardContent className="relative p-5 sm:p-6 lg:p-10">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.12),_transparent_24%),linear-gradient(135deg,_rgba(255,255,255,0.08)_0%,_rgba(255,255,255,0)_58%)] opacity-95" />
             <div className={`absolute -right-12 top-10 h-72 w-72 rounded-full blur-3xl ${styles.glow}`} />
             <div className="absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-white/8 blur-3xl" />
@@ -444,7 +444,9 @@ function FeasibilityResultView({
                   <div className={`inline-flex rounded-full border px-4 py-2 text-sm font-semibold ${styles.badge}`}>
                     {copy.statusLabel}
                   </div>
-                  <h1 className="max-w-3xl text-4xl font-bold tracking-normal lg:text-5xl">{result.title}</h1>
+                  <h1 className="max-w-3xl text-3xl font-bold tracking-normal sm:text-4xl lg:text-5xl">
+                    {result.title}
+                  </h1>
                   <p className="max-w-3xl text-base leading-8 text-white/84 lg:text-lg">{result.summary}</p>
                 </div>
 
@@ -869,18 +871,18 @@ export function FeasibilityCheck() {
         <CoreFlowProgress currentStepId="feasibility" />
 
         <Card className="hero-surface overflow-hidden border-0 text-white">
-          <CardContent className="relative p-8 lg:p-10">
+          <CardContent className="relative p-5 sm:p-6 lg:p-10">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
 
-            <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
-              <div className="space-y-6">
+            <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_360px] xl:gap-8">
+              <div className="space-y-5 sm:space-y-6">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Compass className="h-4 w-4" />
                   Feasibility Assessment
                 </div>
 
                 <div className="space-y-4">
-                  <h1 className="max-w-3xl text-4xl font-bold tracking-normal lg:text-5xl">
+                  <h1 className="max-w-3xl text-3xl font-bold tracking-normal sm:text-4xl lg:text-5xl">
                     Kiểm tra xem mục tiêu này có thực tế với bạn ở thời điểm hiện tại hay không.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
@@ -901,7 +903,7 @@ export function FeasibilityCheck() {
                 </div>
               </div>
 
-              <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+              <div className="hidden rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl xl:block">
                 <div className="flex items-center justify-between text-sm text-white/72">
                   <span>
                     Câu hỏi {currentStep + 1} / {totalSteps}
@@ -925,7 +927,7 @@ export function FeasibilityCheck() {
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <Card className="overflow-hidden">
-            <CardContent className="p-6 lg:p-7">
+            <CardContent className="p-5 sm:p-6 lg:p-7">
               <motion.div
                 key={currentQuestion.id}
                 initial={{ opacity: 0, x: 18 }}
@@ -937,7 +939,7 @@ export function FeasibilityCheck() {
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">
                     Câu hỏi {currentStep + 1}
                   </p>
-                  <h2 className="mt-3 text-3xl font-bold text-slate-900">{currentQuestion.question}</h2>
+                  <h2 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">{currentQuestion.question}</h2>
                   <p className="mt-3 text-sm leading-7 text-slate-600">
                     Trả lời theo lịch sống thật hiện tại, không theo phiên bản lý tưởng. Kết quả chỉ dùng để chỉnh độ
                     nặng của kế hoạch 12 tuần phía sau.

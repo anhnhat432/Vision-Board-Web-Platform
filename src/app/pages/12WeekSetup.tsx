@@ -918,16 +918,16 @@ export function TwelveWeekSetup() {
       <CoreFlowProgress currentStepId="twelve_week_setup" />
 
       <Card className="hero-surface overflow-hidden border-0 text-white">
-        <CardContent className="relative p-8 lg:p-10">
+        <CardContent className="relative p-5 sm:p-6 lg:p-10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_22%)] opacity-90" />
-          <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.12fr)_360px]">
-            <div className="space-y-6">
+          <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.12fr)_360px] xl:gap-8">
+            <div className="space-y-5 sm:space-y-6">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                 <Compass className="h-4 w-4" />
                 Thiết lập 12 tuần
               </div>
               <div className="space-y-4">
-                <h1 className="max-w-3xl text-4xl font-bold tracking-normal lg:text-5xl">
+                <h1 className="max-w-3xl text-3xl font-bold tracking-normal sm:text-4xl lg:text-5xl">
                   Chốt một chu kỳ 12 tuần gọn, rõ và vào việc ngay.
                 </h1>
                 <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
@@ -949,7 +949,7 @@ export function TwelveWeekSetup() {
                 </Badge>
               </div>
             </div>
-            <div className="rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+            <div className="hidden rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl xl:block">
               <div className="flex items-center justify-between text-sm text-white/72">
                 <span>
                   Bước {currentStep + 1} / {STEPS.length}
@@ -1356,7 +1356,6 @@ export function TwelveWeekSetup() {
                       </div>
                     </div>
                   )}
-
                 </div>
                 <div className="space-y-4 rounded-[28px] border border-white/70 bg-white/72 p-5">
                   <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
@@ -1876,18 +1875,18 @@ export function TwelveWeekSetup() {
               </div>
             )}
 
-            <div className="flex flex-wrap justify-between gap-3 border-t border-white/70 pt-2">
-              <Button variant="outline" onClick={handleBack}>
+            <div className="flex flex-col justify-between gap-3 border-t border-white/70 pt-2 sm:flex-row">
+              <Button className="w-full sm:w-auto" variant="outline" onClick={handleBack}>
                 <ArrowLeft className="h-4 w-4" />
                 Quay lại
               </Button>
               {currentStep < STEPS.length - 1 ? (
-                <Button onClick={handleNext}>
+                <Button className="w-full sm:w-auto" onClick={handleNext}>
                   Tiếp tục
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               ) : (
-                <Button onClick={handleSubmit}>
+                <Button className="w-full sm:w-auto" onClick={handleSubmit}>
                   <Flag className="h-4 w-4" />
                   Tạo hệ thống 12 tuần
                 </Button>

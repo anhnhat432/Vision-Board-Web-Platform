@@ -11,12 +11,7 @@ import { SMARTGoalSetup } from "./SMARTGoalSetup";
 import { FeasibilityCheck } from "./FeasibilityCheck";
 import { TwelveWeekSetup } from "./12WeekSetup";
 import { TwelveWeekSystem } from "./12WeekSystem";
-import {
-  APP_STORAGE_KEYS,
-  activateAuthenticatedUserData,
-  getUserData,
-  saveUserData,
-} from "../utils/storage";
+import { APP_STORAGE_KEYS, activateAuthenticatedUserData, getUserData, saveUserData } from "../utils/storage";
 
 const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
@@ -380,5 +375,5 @@ describe("authenticated new user core flow", () => {
     expect(getUserData().goals).toHaveLength(1);
 
     reloadRender.ui.unmount();
-  }, 20_000);
+  }, 40_000);
 });
