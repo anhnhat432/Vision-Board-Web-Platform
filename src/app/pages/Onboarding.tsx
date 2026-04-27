@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowLeft, ArrowRight, BarChart3, Check, Compass, Sparkles, Target } from "lucide-react";
@@ -39,6 +39,7 @@ export function Onboarding() {
   const [step, setStep] = useState<OnboardingStep>("welcome");
   const [isReturning, setIsReturning] = useState(false);
   const [lifeAreas, setLifeAreas] = useState<LifeArea[]>(LIFE_AREAS.map((area) => ({ ...area, score: 5 })));
+  const flowTopRef = useRef<HTMLDivElement | null>(null);
 
   // Guard: detect returning users and preload their existing wheel scores
   const guardedRef = useRef(false);
@@ -61,10 +62,13 @@ export function Onboarding() {
   const scrollToFlowTop = useCallback(() => {
     if (typeof window === "undefined") return;
 
+    flowTopRef.current?.focus({ preventScroll: true });
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!step) return;
     scrollToFlowTop();
   }, [scrollToFlowTop, step]);
@@ -98,7 +102,11 @@ export function Onboarding() {
 
   if (step === "welcome") {
     return (
-      <div className="flow-shell min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+      <div
+        ref={flowTopRef}
+        tabIndex={-1}
+        className="flow-shell min-h-screen px-4 py-6 focus:outline-none sm:px-6 lg:px-8"
+      >
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -223,7 +231,11 @@ export function Onboarding() {
   }
 
   return (
-    <div className="flow-shell min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+    <div
+      ref={flowTopRef}
+      tabIndex={-1}
+      className="flow-shell min-h-screen px-4 py-6 focus:outline-none sm:px-6 lg:px-8"
+    >
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
