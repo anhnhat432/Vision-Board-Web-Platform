@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, Circle, Compass } from "lucide-react";
+import { ArrowRight, Compass } from "lucide-react";
 
 import { Badge } from "./ui/badge";
 import { Card, CardContent } from "./ui/card";
@@ -82,68 +82,34 @@ export function CoreFlowProgress({ currentStepId, className = "" }: CoreFlowProg
     <Card
       className={`border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.3)] ${className}`}
     >
-      <CardContent className="p-3.5 sm:p-5">
-        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,340px)] lg:items-center">
-          <div className="min-w-0 space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-600">
-                <Compass className="mr-2 h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Đường chính cho người mới</span>
-                <span className="sm:hidden">Đường chính</span>
-              </Badge>
-              <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
-                Bước {currentIndex + 1}/{CORE_FLOW_STEPS.length}
-              </Badge>
-            </div>
-
-            <div>
-              <h2 className="text-lg font-bold tracking-normal text-slate-950 sm:text-xl">{currentStep.title}</h2>
-              <p className="mt-1 max-w-3xl text-sm leading-7 text-slate-600">{currentStep.description}</p>
-            </div>
-
-            <div className="space-y-2">
-              <Progress value={progressValue} aria-label={`Tiến độ đường chính: ${Math.round(progressValue)}%`} />
-              <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/85 px-3 py-2 text-sm text-slate-600 sm:hidden">
-                <ArrowRight className="h-4 w-4 shrink-0 text-slate-500" />
-                <span className="min-w-0 truncate font-medium text-slate-800">{nextActionLabel}</span>
-              </div>
-              <div className="hidden flex-wrap gap-2 sm:flex">
-                {CORE_FLOW_STEPS.map((step, index) => {
-                  const isDone = index < currentIndex;
-                  const isCurrent = index === currentIndex;
-
-                  return (
-                    <div
-                      key={step.id}
-                      className={`inline-flex max-w-full items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium ${
-                        isCurrent
-                          ? "border-slate-300 bg-slate-950 text-white"
-                          : isDone
-                            ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                            : "border-slate-200 bg-slate-50 text-slate-500"
-                      }`}
-                      aria-current={isCurrent ? "step" : undefined}
-                    >
-                      {isDone ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Circle className="h-3 w-3" />}
-                      <span className="truncate">{step.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+      <CardContent className="p-3.5 sm:p-4">
+        <div className="grid gap-3 lg:grid-cols-[auto_minmax(0,1fr)_minmax(220px,300px)] lg:items-center">
+          <div className="flex flex-wrap items-center gap-2 lg:flex-col lg:items-start">
+            <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-600">
+              <Compass className="mr-2 h-3.5 w-3.5" />
+              Đường chính
+            </Badge>
+            <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+              Bước {currentIndex + 1}/{CORE_FLOW_STEPS.length}
+            </Badge>
           </div>
 
-          <div className="hidden rounded-lg border border-slate-200 bg-slate-50/85 p-4 sm:block">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Nên làm gì tiếp?</p>
-            <div className="mt-3 flex items-start gap-3">
-              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm">
+          <div className="min-w-0 space-y-2">
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h2 className="text-base font-bold tracking-normal text-slate-950 sm:text-lg">{currentStep.title}</h2>
+              <p className="text-sm leading-6 text-slate-600">{currentStep.description}</p>
+            </div>
+            <Progress value={progressValue} aria-label={`Tiến độ đường chính: ${Math.round(progressValue)}%`} />
+          </div>
+
+          <div className="rounded-lg border border-slate-200 bg-slate-50/85 px-3 py-2">
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm">
                 <ArrowRight className="h-4 w-4" />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-slate-950">
-                  {nextStep ? `Tiếp theo: ${nextStep.title}` : "Tiếp tục giữ nhịp"}
-                </p>
-                <p className="mt-1 text-sm leading-6 text-slate-600">{currentStep.nextAction}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Tiếp theo</p>
+                <p className="truncate text-sm font-semibold text-slate-950">{nextActionLabel}</p>
               </div>
             </div>
           </div>

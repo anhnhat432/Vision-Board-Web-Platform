@@ -883,7 +883,7 @@ export function SMARTGoalSetup() {
           <CardContent className="relative p-5 sm:p-6 lg:p-7">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
 
-            <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_360px]">
+            <div className="relative max-w-4xl">
               <div className="space-y-5">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Compass className="h-4 w-4" />
@@ -912,7 +912,7 @@ export function SMARTGoalSetup() {
                 </div>
               </div>
 
-              <div className="flow-panel p-5 sm:p-6">
+              <div className="hidden flow-panel p-5 sm:p-6">
                 <div className="flex items-center justify-between text-sm text-white/72">
                   <span>
                     Bước {currentStep + 1} / {totalSteps}

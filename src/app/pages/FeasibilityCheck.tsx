@@ -427,7 +427,7 @@ function FeasibilityResultView({
             <div className={`absolute -right-12 top-10 h-72 w-72 rounded-full blur-3xl ${styles.glow}`} />
             <div className="absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-white/8 blur-3xl" />
 
-            <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.1fr)_360px]">
+            <div className="relative max-w-4xl">
               <div className="space-y-6">
                 <div className="flex flex-wrap gap-3">
                   <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
@@ -470,7 +470,7 @@ function FeasibilityResultView({
                 </div>
               </div>
 
-              <div className="rounded-[34px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+              <div className="hidden rounded-[34px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/58">Mức độ phù hợp</p>
@@ -874,7 +874,7 @@ export function FeasibilityCheck() {
           <CardContent className="relative p-5 sm:p-6 lg:p-10">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
 
-            <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_360px] xl:gap-8">
+            <div className="relative max-w-4xl">
               <div className="space-y-5 sm:space-y-6">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Compass className="h-4 w-4" />
@@ -903,7 +903,7 @@ export function FeasibilityCheck() {
                 </div>
               </div>
 
-              <div className="hidden rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl xl:block">
+              <div className="hidden rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
                 <div className="flex items-center justify-between text-sm text-white/72">
                   <span>
                     Câu hỏi {currentStep + 1} / {totalSteps}
