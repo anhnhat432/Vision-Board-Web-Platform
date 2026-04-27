@@ -879,6 +879,11 @@ async function exerciseTwelveWeekDailyExecution() {
   await fillLabel("Điều gì cản trở", WEEKLY_REVIEW_OBSTACLE);
   await fillLabel("Một ưu tiên duy nhất", WEEKLY_REVIEW_PRIORITY);
   await clickButton("Chốt review tuần này");
+  await waitFor(
+    "weekly review backend sync confirmation",
+    'document.body.innerText.includes("Review tuần đã được chốt")',
+    { timeoutMs: 90_000 },
+  );
   await waitForGoalSnapshot(
     "weekly review and linked journal persisted",
     (snapshot) =>
