@@ -1,11 +1,21 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { BellRing, Sparkles, X } from "lucide-react";
 import { motion } from "motion/react";
 
 import { getInAppReminders, getRandomMotivationalQuote } from "../utils/storage";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
+
+const QUOTE_SUPPRESSED_ROUTES = [
+  "/onboarding",
+  "/life-balance",
+  "/life-insight",
+  "/smart-goal-setup",
+  "/feasibility",
+  "/12-week-setup",
+  "/12-week-system",
+];
 
 function getReminderActionLabel(kind: "tasks" | "review" | "check-in"): string {
   if (kind === "review") return "Mở review tuần";
@@ -15,11 +25,20 @@ function getReminderActionLabel(kind: "tasks" | "review" | "check-in"): string {
 
 export function MotivationalReminder() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [quote, setQuote] = useState("");
   const [showReminder, setShowReminder] = useState(false);
   const [reminder] = useState(() => getInAppReminders()[0] ?? null);
 
   useEffect(() => {
+    const suppressQuoteOnlyReminder =
+      !reminder && QUOTE_SUPPRESSED_ROUTES.some((route) => location.pathname.startsWith(route));
+
+    if (suppressQuoteOnlyReminder) {
+      setShowReminder(false);
+      return;
+    }
+
     const lastReminderDate = localStorage.getItem("last_reminder_date");
     const today = new Date().toDateString();
 
@@ -28,7 +47,7 @@ export function MotivationalReminder() {
       setShowReminder(true);
       localStorage.setItem("last_reminder_date", today);
     }
-  }, []);
+  }, [location.pathname, reminder]);
 
   if (!showReminder) return null;
 

@@ -203,6 +203,34 @@ function formatStepDraft(stepKey: SmartStepKey, smartData: SMARTData): string {
   }
 }
 
+function hasStepDraftContent(stepKey: SmartStepKey, smartData: SMARTData): boolean {
+  switch (stepKey) {
+    case "specific":
+      return smartData.specific.goal_statement.trim().length > 0;
+    case "measurable":
+      return (
+        smartData.measurable.metric_name.trim().length > 0 ||
+        smartData.measurable.baseline_value.trim().length > 0 ||
+        smartData.measurable.target_value.trim().length > 0
+      );
+    case "achievable":
+      return (
+        smartData.achievable.weekly_time_commitment_hours.trim().length > 0 ||
+        smartData.achievable.required_skills.trim().length > 0 ||
+        smartData.achievable.support_resources.trim().length > 0
+      );
+    case "relevant":
+      return (
+        smartData.relevant.motivation_reason.trim().length > 0 ||
+        smartData.relevant.life_dimension_alignment.trim().length > 0
+      );
+    case "timeBound":
+      return smartData.timeBound.mode === "date" || smartData.timeBound.target_weeks.trim() !== DEFAULT_TARGET_WEEKS;
+    default:
+      return false;
+  }
+}
+
 function getStepValidationError(stepKey: SmartStepKey, smartData: SMARTData): string | null {
   if (stepKey === "specific") {
     const value = smartData.specific.goal_statement.trim();
@@ -477,6 +505,8 @@ export function SMARTGoalSetup() {
 
   const currentStepKey = currentStepData.key as SmartStepKey;
   const isCurrentStepValid = currentStepError === null;
+  const currentStepHasDraftContent = hasStepDraftContent(currentStepKey, smartData);
+  const shouldShowCurrentStepError = currentStepError !== null && currentStepHasDraftContent;
   const currentStepSoftWarning =
     currentStepKey === "specific" &&
     currentStepError === null &&
@@ -537,7 +567,7 @@ export function SMARTGoalSetup() {
               }))
             }
             className="min-h-[180px] resize-none text-base leading-7"
-            aria-invalid={currentStepKey === "specific" && currentStepError !== null}
+            aria-invalid={currentStepKey === "specific" && shouldShowCurrentStepError}
           />
           <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500">
             <p>Viết như một kết quả cụ thể mà bạn có thể nhìn thấy hoặc kiểm chứng.</p>
@@ -567,7 +597,7 @@ export function SMARTGoalSetup() {
                   },
                 }))
               }
-              aria-invalid={currentStepKey === "measurable" && metricNameMissing}
+              aria-invalid={currentStepKey === "measurable" && metricNameMissing && currentStepHasDraftContent}
             />
             <p className="text-sm text-slate-500">Chọn một chỉ số đủ rõ để bạn biết mình đang tiến lên hay đứng yên.</p>
           </div>
@@ -612,7 +642,7 @@ export function SMARTGoalSetup() {
                     },
                   }))
                 }
-                aria-invalid={currentStepKey === "measurable" && targetInvalid}
+                aria-invalid={currentStepKey === "measurable" && targetInvalid && currentStepHasDraftContent}
               />
             </div>
           </div>
@@ -646,7 +676,7 @@ export function SMARTGoalSetup() {
                   },
                 }))
               }
-              aria-invalid={currentStepKey === "achievable" && weeklyHoursInvalid}
+              aria-invalid={currentStepKey === "achievable" && weeklyHoursInvalid && currentStepHasDraftContent}
             />
             <p className="text-sm text-slate-500">Chỉ tính khung thời gian bạn thực sự có thể giữ đều mỗi tuần.</p>
           </div>
@@ -717,7 +747,7 @@ export function SMARTGoalSetup() {
                 }))
               }
               className="min-h-[160px] resize-none text-base leading-7"
-              aria-invalid={currentStepKey === "relevant" && motivationInvalid}
+              aria-invalid={currentStepKey === "relevant" && motivationInvalid && currentStepHasDraftContent}
             />
             <p className="text-sm text-slate-500">
               Hãy viết đủ cụ thể để khi mệt bạn vẫn nhớ vì sao mục tiêu này đáng giữ.
@@ -952,7 +982,7 @@ export function SMARTGoalSetup() {
                   <div className="flow-panel mt-4 px-4 py-3 text-sm text-slate-600">{currentStepData.coaching}</div>
                 </div>
                 {renderCurrentStepFields()}
-                {currentStepError ? (
+                {shouldShowCurrentStepError ? (
                   <Alert className="border-rose-200 bg-rose-50/85 text-rose-700">
                     <CircleAlert className="h-4 w-4" />
                     <AlertTitle>Cần hoàn tất bước này</AlertTitle>

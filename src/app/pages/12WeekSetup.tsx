@@ -138,6 +138,14 @@ function getLoadPreferenceLabel(value: TwelveWeekSetupDraft["tacticLoadPreferenc
   return LOAD_PREFERENCE_OPTIONS.find((option) => option.value === value)?.label ?? "Cân bằng";
 }
 
+function getGoalTypeLabel(value: string): string {
+  return GOAL_TYPES.find((option) => option.value === value)?.label ?? value;
+}
+
+function getReviewDayLabel(value: string): string {
+  return REVIEW_DAYS.find((option) => option.value === value)?.label ?? value;
+}
+
 function isPendingFeasibilityResult(value: unknown): value is PendingFeasibilityResult {
   if (!value || typeof value !== "object") return false;
   const result = value as Record<string, unknown>;
@@ -1015,6 +1023,49 @@ export function TwelveWeekSetup() {
             {currentStep === 0 && (
               <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
                 <div className="space-y-5">
+                  <div className="space-y-4 rounded-[28px] border border-white/70 bg-white/72 p-5">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">Chốt phần bắt buộc trước</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-500">
+                        Ba mục này là đủ để đi tiếp. Khung gợi ý phía dưới chỉ dùng để setup nhanh hơn, không phải việc
+                        bắt buộc phải chọn.
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="goal-type">Loại mục tiêu</Label>
+                      <Select value={draft.goalType} onValueChange={(value) => handleChange("goalType", value)}>
+                        <SelectTrigger id="goal-type" aria-label="Chọn loại mục tiêu">
+                          <SelectValue placeholder="Chọn loại mục tiêu" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {GOAL_TYPES.map((item) => (
+                            <SelectItem key={item.value} value={item.value}>
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="vision-12-week">Tầm nhìn 12 tuần</Label>
+                      <Textarea
+                        id="vision-12-week"
+                        rows={4}
+                        value={draft.vision12Week}
+                        onChange={(event) => handleChange("vision12Week", event.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="week-12-outcome">Outcome muốn chạm tới ở tuần 12</Label>
+                      <Textarea
+                        id="week-12-outcome"
+                        rows={3}
+                        value={draft.week12Outcome}
+                        onChange={(event) => handleChange("week12Outcome", event.target.value)}
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-3 rounded-[28px] border border-white/70 bg-white/72 p-5">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
@@ -1306,39 +1357,6 @@ export function TwelveWeekSetup() {
                     </div>
                   )}
 
-                  <div className="space-y-2">
-                    <Label htmlFor="goal-type">Loại mục tiêu</Label>
-                    <Select value={draft.goalType} onValueChange={(value) => handleChange("goalType", value)}>
-                      <SelectTrigger id="goal-type" aria-label="Chọn loại mục tiêu">
-                        <SelectValue placeholder="Chọn loại mục tiêu" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {GOAL_TYPES.map((item) => (
-                          <SelectItem key={item.value} value={item.value}>
-                            {item.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="vision-12-week">Tầm nhìn 12 tuần</Label>
-                    <Textarea
-                      id="vision-12-week"
-                      rows={4}
-                      value={draft.vision12Week}
-                      onChange={(event) => handleChange("vision12Week", event.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="week-12-outcome">Outcome muốn chạm tới ở tuần 12</Label>
-                    <Textarea
-                      id="week-12-outcome"
-                      rows={3}
-                      value={draft.week12Outcome}
-                      onChange={(event) => handleChange("week12Outcome", event.target.value)}
-                    />
-                  </div>
                 </div>
                 <div className="space-y-4 rounded-[28px] border border-white/70 bg-white/72 p-5">
                   <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
@@ -1760,9 +1778,9 @@ export function TwelveWeekSetup() {
                     <h3 className="mt-3 text-xl font-semibold text-slate-900">{smartGoal.specific}</h3>
                     <p className="mt-3 text-sm leading-7 text-slate-600">{draft.vision12Week}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
-                      <Badge variant="outline">{draft.goalType}</Badge>
+                      <Badge variant="outline">{getGoalTypeLabel(draft.goalType)}</Badge>
                       <Badge variant="outline">{getLifeAreaLabel(focusArea)}</Badge>
-                      <Badge variant="outline">Review {draft.reviewDay}</Badge>
+                      <Badge variant="outline">Review {getReviewDayLabel(draft.reviewDay)}</Badge>
                       <Badge variant="outline">Nhịp {getLoadPreferenceLabel(draft.tacticLoadPreference)}</Badge>
                       {selectedTemplate && <Badge variant="outline">Khung {selectedTemplate.name}</Badge>}
                     </div>

@@ -151,18 +151,6 @@ export function Onboarding() {
                     ))}
                   </div>
 
-                  <div className="grid gap-4 md:grid-cols-3">
-                    {JOURNEY_STEPS.map((item, index) => (
-                      <div key={item.title} className="flow-muted p-4">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-sm font-semibold text-slate-700">
-                          0{index + 1}
-                        </div>
-                        <h3 className="mt-4 text-lg font-semibold text-slate-950">{item.title}</h3>
-                        <p className="mt-2 text-sm leading-7 text-slate-600">{item.description}</p>
-                      </div>
-                    ))}
-                  </div>
-
                   <div className="flex flex-wrap gap-3">
                     <Button
                       variant="outline"
@@ -179,6 +167,18 @@ export function Onboarding() {
                     >
                       Xem bảng điều khiển
                     </Button>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-3">
+                    {JOURNEY_STEPS.map((item, index) => (
+                      <div key={item.title} className="flow-muted p-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-sm font-semibold text-slate-700">
+                          0{index + 1}
+                        </div>
+                        <h3 className="mt-4 text-lg font-semibold text-slate-950">{item.title}</h3>
+                        <p className="mt-2 text-sm leading-7 text-slate-600">{item.description}</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
