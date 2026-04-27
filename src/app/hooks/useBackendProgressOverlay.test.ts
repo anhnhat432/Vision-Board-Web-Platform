@@ -190,4 +190,42 @@ describe("applyBackendProgressOverlay", () => {
     expect(overlaid.lagMetric.currentValue).toBe("Review-owned lag");
     expect(overlaid.scoreboard[0]?.mainMetricProgress).toBe("Review-owned lag");
   });
+
+  it("restores task completion from matching backend metric logs when remote task status is stale", () => {
+    const system = createSystem({
+      taskInstances: [
+        {
+          id: "local_task_1",
+          weekNumber: 1,
+          scheduledDate: "2026-04-01",
+          title: "Ship",
+          leadIndicatorName: "Ship",
+          isCore: true,
+          completed: false,
+          tacticId: "tactic_1",
+        },
+      ],
+    });
+    const details = createPlanDetails({
+      metrics: [createMetric("Ship", [{ id: "ship_1", date: "2026-04-01", value: 1, completed: true }])],
+    });
+    const week = details.weeks[0];
+    if (!week) throw new Error("Expected fixture week");
+    week.tasks = [
+      {
+        id: "remote_task_1",
+        weekId: "week_1",
+        title: "Ship",
+        status: "todo",
+        scheduledDate: "2026-04-01",
+        createdAt: "2026-04-01T00:00:00.000Z",
+        updatedAt: "2026-04-01T00:00:00.000Z",
+      },
+    ];
+
+    const overlaid = applyBackendProgressOverlay(system, details, { local_task_1: "remote_task_1" });
+
+    expect(overlaid.taskInstances[0]?.completed).toBe(true);
+    expect(overlaid.weeklyReviews[0]?.completedLeadIndicators).toBe(1);
+  });
 });

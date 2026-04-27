@@ -273,6 +273,9 @@ describe("hydrateTwelveWeekPlansFromBackend", () => {
 
     const divergentDetails = createPlanDetails();
     divergentDetails.weeks[0].tasks[0].status = "todo";
+    divergentDetails.weeks[0].metrics = divergentDetails.weeks[0].metrics.map((metric) =>
+      metric.name === "Write proposal" ? { ...metric, logs: [] } : metric,
+    );
     vi.mocked(getPlan).mockResolvedValue(divergentDetails);
 
     const result = await hydrateTwelveWeekPlansFromBackend();
@@ -304,6 +307,9 @@ describe("hydrateTwelveWeekPlansFromBackend", () => {
 
     const divergentDetails = createPlanDetails();
     divergentDetails.weeks[0].tasks[0].status = "todo";
+    divergentDetails.weeks[0].metrics = divergentDetails.weeks[0].metrics.map((metric) =>
+      metric.name === "Write proposal" ? { ...metric, logs: [] } : metric,
+    );
     vi.mocked(getPlan).mockResolvedValue(divergentDetails);
 
     const result = await applyBackendPlanSnapshotToLocal("local_goal_1");

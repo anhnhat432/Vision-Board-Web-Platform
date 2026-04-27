@@ -19,6 +19,7 @@ const EMPTY_OVERLAY_MAP = new Map<string, TwelveWeekSystem>();
 
 function buildTaskOverlayFromPlanDetails(
   details: PlanDetails,
+  localTasks: TwelveWeekSystem["taskInstances"],
   taskIdByLocalTaskId: Record<string, string>,
 ): TaskOverlayMap {
   const remoteTaskMap = new Map<string, boolean>();
@@ -29,6 +30,7 @@ function buildTaskOverlayFromPlanDetails(
     });
   });
 
+  const completedMetricDatesByName = buildCompletedMetricDatesByName(details);
   const overlay = new Map<string, boolean>();
 
   Object.entries(taskIdByLocalTaskId).forEach(([localTaskId, remoteTaskId]) => {
@@ -37,7 +39,45 @@ function buildTaskOverlayFromPlanDetails(
     overlay.set(localTaskId, completed);
   });
 
+  localTasks.forEach((task) => {
+    const metricName = normalizeComparableText(task.leadIndicatorName || task.title);
+    const taskDateKey = getCalendarDateKey(task.scheduledDate);
+    if (!metricName || !taskDateKey) return;
+    if (completedMetricDatesByName.get(metricName)?.has(taskDateKey)) {
+      overlay.set(task.id, true);
+    }
+  });
+
   return overlay;
+}
+
+function normalizeComparableText(value: string): string {
+  return value.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+function buildCompletedMetricDatesByName(details: PlanDetails): Map<string, Set<string>> {
+  const completedMetricDatesByName = new Map<string, Set<string>>();
+
+  details.weeks.forEach((week) => {
+    week.metrics
+      .filter((metric) => !isDailyCheckInMetric(metric.name))
+      .forEach((metric) => {
+        const metricName = normalizeComparableText(metric.name);
+        if (!metricName) return;
+
+        metric.logs.forEach((log) => {
+          if (!log.completed && log.value <= 0) return;
+          const dateKey = getCalendarDateKey(log.date);
+          if (!dateKey) return;
+
+          const completedDates = completedMetricDatesByName.get(metricName) ?? new Set<string>();
+          completedDates.add(dateKey);
+          completedMetricDatesByName.set(metricName, completedDates);
+        });
+      });
+  });
+
+  return completedMetricDatesByName;
 }
 
 function getMetricProgressSummary(week: ApiWeekDetails | undefined): string {
@@ -179,7 +219,7 @@ export function applyBackendProgressOverlay(
   details: PlanDetails,
   taskIdByLocalTaskId: Record<string, string>,
 ): TwelveWeekSystem {
-  const taskOverlay = buildTaskOverlayFromPlanDetails(details, taskIdByLocalTaskId);
+  const taskOverlay = buildTaskOverlayFromPlanDetails(details, system.taskInstances, taskIdByLocalTaskId);
   const overlaidTaskInstances = applyTaskOverlay(system.taskInstances, taskOverlay);
   const taskOverlaidSystem =
     overlaidTaskInstances === system.taskInstances
