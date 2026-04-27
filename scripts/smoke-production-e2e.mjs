@@ -723,8 +723,7 @@ async function assertSystemLoaded({ requireTactics = true } = {}) {
       document.body.innerText.includes(${JSON.stringify(GOAL_TITLE)}) &&
       (${JSON.stringify(!requireTactics)} ||
         (document.body.innerText.includes(${JSON.stringify(TACTIC_ONE)}) &&
-          document.body.innerText.includes(${JSON.stringify(TACTIC_TWO)}))) &&
-      (document.body.innerText.includes("Đã nối") || document.body.innerText.includes("Đã lưu"))
+          document.body.innerText.includes(${JSON.stringify(TACTIC_TWO)})))
     `,
     { timeoutMs: 75_000 },
   );
@@ -905,12 +904,28 @@ async function assertDailyExecutionPersisted() {
   );
 }
 
+async function assertDailyExecutionRestoredAfterLogin() {
+  await waitForGoalSnapshot(
+    "same daily execution state after fresh login",
+    (snapshot) =>
+      snapshot.title?.includes(GOAL_TITLE) &&
+      snapshot.completedTaskCount >= 1 &&
+      snapshot.dailyCheckInCount >= 1 &&
+      snapshot.latestDailyCheckIn?.didWorkToday === true &&
+      snapshot.weeklyReviewCount >= 1 &&
+      snapshot.latestWeeklyReview?.biggestOutputThisWeek === WEEKLY_REVIEW_OUTPUT &&
+      snapshot.latestWeeklyReview?.nextWeekPriority === WEEKLY_REVIEW_PRIORITY,
+    { timeoutMs: 90_000 },
+  );
+}
+
 async function assertPersistedSystemLoaded() {
   await waitFor(
     "persisted 12-week system after login",
     `
       document.body.innerText.includes("Hệ 12 tuần") &&
       document.body.innerText.includes("Chu kỳ đang chạy") &&
+      document.body.innerText.includes(${JSON.stringify(GOAL_TITLE)}) &&
       (document.body.innerText.includes("Đã nối") || document.body.innerText.includes("Đã lưu"))
     `,
     { timeoutMs: 75_000 },
@@ -938,6 +953,7 @@ async function logoutAndLoginAgain() {
   await clickButton("Đăng nhập");
   await waitFor("12-week system route after login", 'location.pathname === "/12-week-system"', { timeoutMs: 75_000 });
   await assertPersistedSystemLoaded();
+  await assertDailyExecutionRestoredAfterLogin();
 }
 
 async function main() {

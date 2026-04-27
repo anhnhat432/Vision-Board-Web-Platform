@@ -112,9 +112,37 @@ describe("12-week core flows", () => {
     await user.click(screen.getByRole("button", { name: "Lưu check-in hôm nay" }));
 
     await waitFor(() => {
-      const checkIn = readGoal(goalId).twelveWeekSystem?.dailyCheckIns[0];
+      const system = readGoal(goalId).twelveWeekSystem;
+      const checkIn = system?.dailyCheckIns[0];
+      const completedCount = system?.taskInstances.filter((item) => item.completed).length ?? 0;
       expect(checkIn?.optionalNote).toBe("Mai bắt đầu từ việc này trước.");
       expect(checkIn?.didWorkToday).toBe(true);
+      expect(completedCount).toBeGreaterThan(0);
+    });
+  });
+
+  it("keeps daily execution state when a weekly review is submitted after check-in", async () => {
+    const { goalId } = seedTwelveWeekGoal();
+    renderAppRoute("/12-week-system");
+    const user = userEvent.setup();
+
+    const taskListCard = (await screen.findByText("Hàng việc hôm nay")).closest("[data-slot='card']");
+    expect(taskListCard).not.toBeNull();
+
+    await user.click(within(taskListCard as HTMLElement).getAllByRole("checkbox")[0]);
+    await user.type(screen.getByLabelText("Note tùy chọn"), "Giữ task đã tick khi review tuần.");
+    await user.click(screen.getByRole("button", { name: "Lưu check-in hôm nay" }));
+    await user.click(screen.getByRole("tab", { name: "Tuần" }));
+    await user.type(await screen.findByLabelText("1. Điều gì chạy tốt nhất trong tuần này?"), "Chốt được một việc thật.");
+    await user.type(screen.getByLabelText("3. Một ưu tiên duy nhất cho tuần sau là gì?"), "Giữ nhịp execution.");
+    await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
+
+    await waitFor(() => {
+      const system = readGoal(goalId).twelveWeekSystem;
+      const completedCount = system?.taskInstances.filter((item) => item.completed).length ?? 0;
+      expect(completedCount).toBeGreaterThan(0);
+      expect(system?.dailyCheckIns[0]?.optionalNote).toBe("Giữ task đã tick khi review tuần.");
+      expect(system?.weeklyReviews).toHaveLength(1);
     });
   });
 

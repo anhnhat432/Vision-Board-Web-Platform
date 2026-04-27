@@ -520,6 +520,22 @@ export function TwelveWeekSystem() {
     return normalizedNextSystem;
   };
 
+  const getLatestActiveSystem = () =>
+    getUserData().goals.find((goal) => goal.id === activeGoal.id)?.twelveWeekSystem ?? system;
+
+  const getTodayQueueForSystem = (nextSystem: TwelveWeekSystemData) => {
+    const nextCurrentWeek = getTwelveWeekCurrentWeek(nextSystem);
+    const nextCurrentWeekTasks = getTwelveWeekTasksForWeek(nextSystem, nextCurrentWeek);
+    const nextScheduledTodayTasks = getTwelveWeekTodayTasks(nextSystem);
+    const nextMissedTasks = getTwelveWeekMissedTasks(nextSystem);
+    const nextFallbackTasks = nextCurrentWeekTasks.filter((task) => !task.completed).slice(0, 3);
+
+    return dedupeTasks([
+      ...nextMissedTasks.slice(0, 2),
+      ...(nextScheduledTodayTasks.length > 0 ? nextScheduledTodayTasks : nextFallbackTasks),
+    ]);
+  };
+
   const handleOpenUpgradeDialog = (
     context: PremiumFeatureContext,
     recommendedPlan: Exclude<PricingPlanCode, "FREE"> = "PLUS",
@@ -709,15 +725,10 @@ export function TwelveWeekSystem() {
     const actionGoalId = activeGoal.id;
     const actionDate = new Date();
     const todayKey = formatDateInputValue(actionDate);
-    const syncWeekNumber = getTwelveWeekCurrentWeek(system, actionDate);
-    const syncWeekTasks = getTwelveWeekTasksForWeek(system, syncWeekNumber);
-    const actionScheduledTodayTasks = getTwelveWeekTodayTasks(system, actionDate);
-    const actionTodayQueue = dedupeTasks([
-      ...getTwelveWeekMissedTasks(system, actionDate).slice(0, 2),
-      ...(actionScheduledTodayTasks.length > 0
-        ? actionScheduledTodayTasks
-        : syncWeekTasks.filter((task) => !task.completed).slice(0, 3)),
-    ]);
+    const latestSystem = getLatestActiveSystem();
+    const syncWeekNumber = getTwelveWeekCurrentWeek(latestSystem, actionDate);
+    const syncWeekTasks = getTwelveWeekTasksForWeek(latestSystem, syncWeekNumber);
+    const actionTodayQueue = getTodayQueueForSystem(latestSystem);
     const completedTodayCount = actionTodayQueue.filter((task) => task.completed).length;
     const completedTitles = actionTodayQueue
       .filter((task) => task.completed)
@@ -735,9 +746,9 @@ export function TwelveWeekSystem() {
       mood: dailyMood,
     };
 
-    const filteredCheckIns = system.dailyCheckIns.filter((item) => getCalendarDateKey(item.date) !== todayKey);
+    const filteredCheckIns = latestSystem.dailyCheckIns.filter((item) => getCalendarDateKey(item.date) !== todayKey);
     commitSystemUpdate({
-      ...system,
+      ...latestSystem,
       dailyCheckIns: [dailyCheckIn, ...filteredCheckIns].slice(0, 120),
     });
 
@@ -777,8 +788,9 @@ export function TwelveWeekSystem() {
       toast.error("Cần điền ít nhất một mục trước khi chốt review.");
       return;
     }
-    const reviewWeekNumber = getTwelveWeekCurrentWeek(system);
-    const reviewWeekCompletion = getTwelveWeekWeekCompletion(system, reviewWeekNumber);
+    const latestSystem = getLatestActiveSystem();
+    const reviewWeekNumber = getTwelveWeekCurrentWeek(latestSystem);
+    const reviewWeekCompletion = getTwelveWeekWeekCompletion(latestSystem, reviewWeekNumber);
     const nextWeekPriorityValue =
       weeklyForm.nextWeekPriority.trim() || (hasPremiumReviewInsights ? suggestedNextWeekPlan.focus : "");
     const workloadDecisionValue =
@@ -801,14 +813,14 @@ export function TwelveWeekSystem() {
     };
 
     const updatedReviews = [
-      ...system.weeklyReviews.filter((review) => review.weekNumber !== reviewWeekNumber),
+      ...latestSystem.weeklyReviews.filter((review) => review.weekNumber !== reviewWeekNumber),
       nextReview,
     ].sort((left, right) => left.weekNumber - right.weekNumber);
 
     commitSystemUpdate({
-      ...system,
+      ...latestSystem,
       lagMetric: {
-        ...system.lagMetric,
+        ...latestSystem.lagMetric,
         currentValue: weeklyForm.lagProgressValue.trim(),
       },
       weeklyReviews: updatedReviews,
