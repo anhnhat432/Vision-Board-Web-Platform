@@ -18,6 +18,10 @@ const AUTH_MODE = AUTH_MODE_OVERRIDE || (HAS_PROVIDED_CREDENTIALS ? "signin" : "
 const GOAL_TITLE = `QA smoke production ${TIMESTAMP}`;
 const TACTIC_ONE = `Review tuan QA ${TIMESTAMP}`;
 const TACTIC_TWO = `Hoan thanh viec QA ${TIMESTAMP}`;
+const DAILY_CHECKIN_NOTE = `Daily check-in QA ${TIMESTAMP}`;
+const WEEKLY_REVIEW_OUTPUT = `Da tick task va luu check-in QA ${TIMESTAMP}`;
+const WEEKLY_REVIEW_OBSTACLE = `Can giu smoke ngan gon QA ${TIMESTAMP}`;
+const WEEKLY_REVIEW_PRIORITY = `Mo daily execution truoc QA ${TIMESTAMP}`;
 
 function log(message) {
   console.log(`[prod-smoke] ${message}`);
@@ -336,6 +340,19 @@ async function fillSelector(selector, value) {
 async function clickLabel(text) {
   log(`Clicking label: ${text}`);
   await pageAction(`clickLabel(${JSON.stringify(text)});`);
+}
+
+async function clickTab(text) {
+  log(`Clicking tab: ${text}`);
+  await pageAction(`
+    const target = normalize(${JSON.stringify(text)});
+    const tab = Array.from(document.querySelectorAll('[role="tab"]')).find((item) =>
+      normalize(item.innerText || item.textContent).includes(target),
+    );
+    if (!tab) throw new Error("Could not find tab: " + ${JSON.stringify(text)});
+    tab.scrollIntoView({ block: "center" });
+    tab.click();
+  `);
 }
 
 async function runStep(label, task) {
@@ -713,6 +730,181 @@ async function assertSystemLoaded({ requireTactics = true } = {}) {
   );
 }
 
+async function getCreatedGoalSnapshot() {
+  return browserEval(`
+    (() => {
+      const mainKey = "visionboard_user_data";
+      const keys = [mainKey];
+      for (let index = 0; index < localStorage.length; index += 1) {
+        const key = localStorage.key(index);
+        if (key?.startsWith(mainKey + ":auth:")) keys.push(key);
+      }
+
+      const seenKeys = Array.from(new Set(keys));
+      const snapshots = seenKeys
+        .map((key) => {
+          const raw = localStorage.getItem(key);
+          if (!raw) return null;
+          try {
+            return { key, data: JSON.parse(raw) };
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean);
+
+      const matching = snapshots
+        .map((snapshot) => {
+          const goal = Array.isArray(snapshot.data.goals)
+            ? snapshot.data.goals.find((item) => item?.title?.includes(${JSON.stringify(GOAL_TITLE)}))
+            : null;
+          if (!goal?.twelveWeekSystem) return null;
+
+          const system = goal.twelveWeekSystem;
+          const completedTasks = Array.isArray(system.taskInstances)
+            ? system.taskInstances.filter((task) => task.completed)
+            : [];
+          const dailyCheckIns = Array.isArray(system.dailyCheckIns) ? system.dailyCheckIns : [];
+          const weeklyReviews = Array.isArray(system.weeklyReviews) ? system.weeklyReviews : [];
+          const linkedReflections = Array.isArray(snapshot.data.reflections)
+            ? snapshot.data.reflections.filter(
+                (item) => item.entryType === "weekly-review" && item.linkedGoalId === goal.id,
+              )
+            : [];
+
+          return {
+            key: snapshot.key,
+            goalId: goal.id,
+            title: goal.title,
+            taskCount: Array.isArray(system.taskInstances) ? system.taskInstances.length : 0,
+            completedTaskCount: completedTasks.length,
+            completedTaskTitles: completedTasks.map((task) => task.title),
+            dailyCheckInCount: dailyCheckIns.length,
+            latestDailyCheckIn: dailyCheckIns[0] ?? null,
+            weeklyReviewCount: weeklyReviews.length,
+            latestWeeklyReview: weeklyReviews[weeklyReviews.length - 1] ?? null,
+            linkedWeeklyReviewReflectionCount: linkedReflections.length,
+            linkedWeeklyReviewReflectionTitles: linkedReflections.map((item) => item.title),
+          };
+        })
+        .filter(Boolean);
+
+      return matching[0] ?? {
+        key: null,
+        goalId: null,
+        title: null,
+        taskCount: 0,
+        completedTaskCount: 0,
+        completedTaskTitles: [],
+        dailyCheckInCount: 0,
+        latestDailyCheckIn: null,
+        weeklyReviewCount: 0,
+        latestWeeklyReview: null,
+        linkedWeeklyReviewReflectionCount: 0,
+        linkedWeeklyReviewReflectionTitles: [],
+      };
+    })()
+  `);
+}
+
+async function waitForGoalSnapshot(description, predicate, { timeoutMs = 45_000, intervalMs = 700 } = {}) {
+  log(`Waiting for ${description}`);
+  const startedAt = Date.now();
+  let lastSnapshot = null;
+
+  while (Date.now() - startedAt < timeoutMs) {
+    lastSnapshot = await getCreatedGoalSnapshot();
+    if (predicate(lastSnapshot)) return lastSnapshot;
+    await sleep(intervalMs);
+  }
+
+  const state = await getPageState();
+  throw new Error(
+    `Timed out waiting for ${description}.\n` +
+      `Last snapshot: ${JSON.stringify(lastSnapshot, null, 2)}\n` +
+      `URL: ${state.url}\nText: ${state.text.slice(0, 900)}`,
+  );
+}
+
+async function clickFirstTodayTaskCheckbox() {
+  log("Clicking first open task in Today queue");
+  await pageAction(`
+    const queue =
+      document.querySelector('[data-tour-id="system-today-queue"]') ||
+      Array.from(document.querySelectorAll('[data-slot="card"], section, div')).find((item) =>
+        normalize(item.textContent).includes("hàng việc hôm nay"),
+      );
+    if (!queue) throw new Error("Could not find Today task queue");
+
+    const checkbox = Array.from(queue.querySelectorAll('[role="checkbox"], input[type="checkbox"]')).find((item) => {
+      if (item.disabled) return false;
+      if (item.matches?.('input[type="checkbox"]')) return !item.checked;
+      return item.getAttribute("aria-checked") !== "true";
+    });
+    if (!checkbox) throw new Error("Could not find an open Today task checkbox");
+    checkbox.scrollIntoView({ block: "center" });
+    checkbox.click();
+  `);
+}
+
+async function exerciseTwelveWeekDailyExecution() {
+  await assertSystemLoaded();
+
+  const initialSnapshot = await waitForGoalSnapshot(
+    "created 12-week system storage snapshot",
+    (snapshot) => snapshot.goalId && snapshot.taskCount > 0,
+  );
+  if (initialSnapshot.completedTaskCount > 0) {
+    throw new Error(`Expected fresh daily execution state, got completed tasks: ${initialSnapshot.completedTaskCount}`);
+  }
+
+  await clickTab("Hôm nay");
+  await waitFor("Today queue ready", 'document.body.innerText.includes("Hàng việc hôm nay")');
+  await clickFirstTodayTaskCheckbox();
+  await waitForGoalSnapshot("completed Today task persisted", (snapshot) => snapshot.completedTaskCount >= 1);
+
+  await fillLabel("Note tùy chọn", DAILY_CHECKIN_NOTE);
+  await clickButton("Lưu check-in hôm nay");
+  await waitForGoalSnapshot(
+    "daily check-in persisted",
+    (snapshot) =>
+      snapshot.dailyCheckInCount >= 1 && snapshot.latestDailyCheckIn?.optionalNote === DAILY_CHECKIN_NOTE,
+  );
+
+  await openPage("/12-week-system?tab=week");
+  await waitFor(
+    "weekly review form ready",
+    'document.querySelector("#weekly-best") && document.querySelector("#weekly-obstacle") && document.querySelector("#weekly-priority")',
+  );
+  await fillLabel("Điều gì chạy tốt nhất", WEEKLY_REVIEW_OUTPUT);
+  await fillLabel("Điều gì cản trở", WEEKLY_REVIEW_OBSTACLE);
+  await fillLabel("Một ưu tiên duy nhất", WEEKLY_REVIEW_PRIORITY);
+  await clickButton("Chốt review tuần này");
+  await waitForGoalSnapshot(
+    "weekly review and linked journal persisted",
+    (snapshot) =>
+      snapshot.weeklyReviewCount >= 1 &&
+      snapshot.latestWeeklyReview?.biggestOutputThisWeek === WEEKLY_REVIEW_OUTPUT &&
+      snapshot.latestWeeklyReview?.mainObstacle === WEEKLY_REVIEW_OBSTACLE &&
+      snapshot.latestWeeklyReview?.nextWeekPriority === WEEKLY_REVIEW_PRIORITY &&
+      snapshot.linkedWeeklyReviewReflectionCount >= 1,
+  );
+}
+
+async function assertDailyExecutionPersisted() {
+  await waitForGoalSnapshot(
+    "daily execution state after reload",
+    (snapshot) =>
+      snapshot.completedTaskCount >= 1 &&
+      snapshot.dailyCheckInCount >= 1 &&
+      snapshot.latestDailyCheckIn?.optionalNote === DAILY_CHECKIN_NOTE &&
+      snapshot.weeklyReviewCount >= 1 &&
+      snapshot.latestWeeklyReview?.biggestOutputThisWeek === WEEKLY_REVIEW_OUTPUT &&
+      snapshot.linkedWeeklyReviewReflectionCount >= 1,
+    { timeoutMs: 75_000 },
+  );
+}
+
 async function assertPersistedSystemLoaded() {
   await waitFor(
     "persisted 12-week system after login",
@@ -731,6 +923,7 @@ async function reloadAndAssert() {
   await runAgentBrowser(["wait", "--load", "networkidle"], { timeoutMs: 90_000 });
   await waitFor("reloaded 12-week system route", 'location.pathname === "/12-week-system"', { timeoutMs: 75_000 });
   await assertSystemLoaded();
+  await assertDailyExecutionPersisted();
 }
 
 async function logoutAndLoginAgain() {
@@ -774,6 +967,7 @@ async function main() {
     await runStep("Feasibility check", completeFeasibility);
     await runStep("12-week setup", completeTwelveWeekSetup);
     await runStep("12-week system", assertSystemLoaded);
+    await runStep("Daily execution and weekly review", exerciseTwelveWeekDailyExecution);
     await runStep("Persistence after reload", reloadAndAssert);
     await runStep("Logout/login persistence", logoutAndLoginAgain);
     await runStep("Browser error scan", assertNoBrowserErrors);
