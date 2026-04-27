@@ -124,7 +124,7 @@ describe("Dashboard fresh workspace states", () => {
   it("keeps signed-out visitors from seeing stale local goals", async () => {
     seedStaleLocalGoal();
 
-    renderDashboard();
+    const { container } = renderDashboard();
 
     expect(
       await screen.findByRole("heading", {
@@ -133,6 +133,9 @@ describe("Dashboard fresh workspace states", () => {
     ).toBeInTheDocument();
     expect(screen.queryByText("Private stale goal must stay hidden")).not.toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: /Bắt đầu miễn phí/i }).length).toBeGreaterThan(0);
+    expect(screen.queryByText("Một luồng chính, không phải ba lựa chọn ngang nhau.")).not.toBeInTheDocument();
+    expect(container.querySelector('[data-tour-id="dashboard-plan-card"]')).not.toBeInTheDocument();
+    expect(container.querySelector('[data-tour-id="dashboard-next-card"]')).not.toBeInTheDocument();
   });
 
   it("shows a true empty execution state for a newly signed-in user", async () => {
