@@ -31,6 +31,16 @@ export function MotivationalReminder() {
   const [reminder] = useState(() => getInAppReminders()[0] ?? null);
 
   useEffect(() => {
+    const isOnReminderTarget =
+      reminder &&
+      (location.pathname === reminder.href || (reminder.href !== "/" && location.pathname.startsWith(`${reminder.href}/`)));
+
+    if (isOnReminderTarget) {
+      // The destination page already shows the same task/review prompt; a fixed card blocks the first mobile viewport.
+      setShowReminder(false);
+      return;
+    }
+
     const suppressQuoteOnlyReminder =
       !reminder && QUOTE_SUPPRESSED_ROUTES.some((route) => location.pathname.startsWith(route));
 
