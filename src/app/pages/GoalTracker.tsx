@@ -182,6 +182,7 @@ function GoalTrackerContent({
   const goalFlowStartLabel = hasRealLifeBalance ? "Tạo mục tiêu từ insight" : "Bắt đầu Life Balance";
   const twelveWeekGoals = effectiveGoals.filter((goal) => Boolean(goal.twelveWeekSystem));
   const standardGoals = effectiveGoals.filter((goal) => !goal.twelveWeekSystem);
+  const shouldShowGoalGuide = twelveWeekGoals.length === 0;
 
   const filteredTwelveWeekGoals = useMemo(() => {
     if (!searchQuery.trim()) return twelveWeekGoals;
@@ -746,7 +747,7 @@ function GoalTrackerContent({
         onCheckoutComplete={reload}
       />
 
-      <NewUserGuideBanner userData={userData} variant="compact" />
+      {shouldShowGoalGuide && <NewUserGuideBanner userData={userData} variant="compact" />}
 
       <AlertDialog
         open={Boolean(goalToDelete)}

@@ -65,6 +65,70 @@ function seedAnonymousStaleGoal() {
   saveUserData(data);
 }
 
+function seedActiveTwelveWeekGoal() {
+  const data = getUserData();
+  data.isHydratedFromDemo = false;
+  data.onboardingCompleted = true;
+  data.currentWheelOfLife = data.currentWheelOfLife.map((area) => ({
+    ...area,
+    score: area.name === "Career" ? 7 : 5,
+  }));
+  data.goals = [
+    {
+      id: "goal_active_system",
+      category: "Career",
+      title: "Active 12-week goal",
+      description: "A real active cycle should keep the goals page focused on goals.",
+      deadline: "2026-07-19",
+      tasks: [],
+      focusArea: "Career",
+      feasibilityResult: "realistic",
+      readinessScore: 16,
+      createdAt: "2026-04-28T00:00:00.000Z",
+      twelveWeekSystem: {
+        goalType: "Personal Growth",
+        vision12Week: "Run a clean 12-week execution cycle.",
+        lagMetric: {
+          name: "Reviews",
+          unit: "reviews",
+          target: "12",
+          currentValue: "0",
+        },
+        leadIndicators: [
+          {
+            id: "lead_1",
+            name: "Weekly review",
+            target: "1",
+            unit: "time/week",
+            type: "core",
+          },
+        ],
+        milestones: {
+          week4: "Week 4",
+          week8: "Week 8",
+          week12: "Week 12",
+        },
+        successEvidence: "The cycle is visible in the goals list.",
+        reviewDay: "Sunday",
+        week12Outcome: "Complete the cycle",
+        startDate: "2026-04-27",
+        endDate: "2026-07-19",
+        timezone: "Asia/Saigon",
+        weekStartsOn: "Monday",
+        status: "active",
+        currentWeek: 1,
+        totalWeeks: 12,
+        weeklyPlans: [],
+        taskInstances: [],
+        dailyCheckIns: [],
+        weeklyReviews: [],
+        scoreboard: [],
+      },
+    },
+  ] as typeof data.goals;
+  saveUserData(data);
+}
+
 function renderGoalTracker() {
   const router = createMemoryRouter(
     [
@@ -122,5 +186,15 @@ describe("GoalTracker fresh workspace state", () => {
     await user.click(within(emptyState).getByRole("button", { name: "Bắt đầu Life Balance" }));
 
     expect(router.state.location.pathname).toBe("/onboarding");
+  });
+
+  it("hides the new user checklist once a real 12-week goal exists", async () => {
+    activateAuthenticatedUserData("firebase_uid_fresh_goals");
+    seedActiveTwelveWeekGoal();
+
+    renderGoalTracker();
+
+    expect(await screen.findByText("Active 12-week goal")).toBeInTheDocument();
+    expect(screen.queryByText("Hướng dẫn cho người mới")).not.toBeInTheDocument();
   });
 });
