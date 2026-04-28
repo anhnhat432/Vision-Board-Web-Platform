@@ -475,138 +475,23 @@ function FeasibilityResultView({
           </CardContent>
         </Card>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-          <div className="space-y-6">
-            <Card className="overflow-hidden border-white/70 bg-white/82">
-              <CardContent className="p-6 lg:p-7">
-                <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(280px,0.95fr)]">
-                  <div className="space-y-5">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">
-                      <Sparkles className="h-3.5 w-3.5" />
-                      Điều kết quả này đang nói với bạn
-                    </div>
-                    <div className="space-y-3">
-                      <h2 className="text-2xl font-bold tracking-normal text-slate-900 lg:text-[2rem]">
-                        {copy.guideTitle}
-                      </h2>
-                      <p className="text-base leading-8 text-slate-600">{copy.guideBody}</p>
-                    </div>
-
-                    <div className="grid gap-3 sm:grid-cols-3">
-                      {copy.highlights.map((highlight) => (
-                        <div
-                          key={highlight.title}
-                          className="rounded-[24px] border border-white/80 bg-white/82 p-4 shadow-[0_20px_50px_-34px_rgba(15,23,42,0.22)]"
-                        >
-                          <div className="flex h-10 w-10 items-center justify-center rounded-2xl gradient-violet-blue-icon text-violet-700">
-                            {highlight.icon}
-                          </div>
-                          <p className="mt-4 text-base font-semibold text-slate-900">{highlight.title}</p>
-                          <p className="mt-2 text-sm leading-6 text-slate-600">{highlight.description}</p>
-                        </div>
-                      ))}
-                    </div>
+        <div className="space-y-5">
+          <Card className={`overflow-hidden ${styles.panel}`}>
+            <CardContent className="p-5 lg:p-6">
+              <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] lg:items-center">
+                <div>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/82 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                    <Compass className="h-3.5 w-3.5" />
+                    Hướng đi tiếp theo
                   </div>
-
-                  <div
-                    className={`rounded-[30px] border p-5 shadow-[0_26px_70px_-42px_rgba(15,23,42,0.28)] ${styles.title}`}
-                  >
-                    <div className="flex items-center gap-2 text-slate-700">
-                      <Target className="h-4 w-4" />
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em]">Bản chụp mục tiêu hiện tại</p>
-                    </div>
-
-                    <p className="mt-4 text-xl font-semibold leading-9 text-slate-900">{pendingGoal.specific}</p>
-
-                    <div className="mt-5 space-y-3">
-                      <div className="rounded-[22px] border border-white/80 bg-white/76 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Thời hạn</p>
-                        <p className="mt-2 text-sm font-medium leading-6 text-slate-700">{pendingGoal.timeBound}</p>
-                      </div>
-                      <div className="rounded-[22px] border border-white/80 bg-white/76 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                          Dấu hiệu hoàn thành
-                        </p>
-                        <p className="mt-2 text-sm leading-6 text-slate-700">{pendingGoal.measurable}</p>
-                      </div>
-                      <div className="rounded-[22px] border border-white/80 bg-white/76 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                          Lý do mục tiêu này đáng theo đuổi
-                        </p>
-                        <p className="mt-2 text-sm leading-6 text-slate-700">{pendingGoal.relevant}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="grid gap-6 lg:grid-cols-3">
-              <Card className={`overflow-hidden ${styles.title}`}>
-                <CardContent className="p-6">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Lĩnh vực trọng tâm</p>
-                  <p className="mt-3 text-2xl font-bold text-slate-900">{getLifeAreaLabel(focusArea)}</p>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">
-                    Đây là phần đời sống đang tác động trực tiếp tới độ khả thi của mục tiêu này.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="overflow-hidden border-white/70 bg-white/82">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2 text-slate-700">
-                    <Gauge className="h-4 w-4 text-violet-600" />
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                      Khuyến nghị chính
-                    </p>
-                  </div>
-                  <p className="mt-3 text-lg font-semibold leading-8 text-slate-900">{result.recommendation}</p>
-                </CardContent>
-              </Card>
-
-              <Card className="overflow-hidden border-white/70 bg-white/82">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2 text-slate-700">
-                    <TrendingUp className="h-4 w-4 text-violet-600" />
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Tâm thế nên giữ</p>
-                  </div>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">
-                    Kế hoạch tốt là kế hoạch bạn có thể giữ nhịp. Mục tiêu lớn vẫn có thể đạt được, miễn là bước đầu
-                    được thiết kế đúng tải.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <Card className={`overflow-hidden ${styles.panel}`}>
-              <CardContent className="p-6">
-                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/82 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">
-                  <Compass className="h-3.5 w-3.5" />
-                  Hướng đi tiếp theo
+                  <h2 className="mt-4 text-2xl font-bold tracking-normal text-slate-900">
+                    {result.type === "too_ambitious" ? "Thu nhỏ rồi đi tiếp." : "Đây là hướng nên đi tiếp."}
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">{copy.statusHint}</p>
+                  <p className="mt-3 text-base font-semibold leading-7 text-slate-900">{result.recommendation}</p>
                 </div>
 
-                <h2 className="mt-4 text-2xl font-bold tracking-normal text-slate-900">
-                  {result.type === "too_ambitious" ? "Thu nhỏ rồi đi tiếp." : "Đây là hướng nên đi tiếp."}
-                </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{copy.statusHint}</p>
-
-                <div className="mt-6 space-y-3">
-                  {copy.nextMoves.map((item, index) => (
-                    <div
-                      key={item}
-                      className="flex gap-3 rounded-[24px] border border-white/80 bg-white/84 p-4 shadow-[0_18px_44px_-34px_rgba(15,23,42,0.22)]"
-                    >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl gradient-violet-blue-icon text-sm font-semibold text-violet-700">
-                        {index + 1}
-                      </div>
-                      <p className="text-sm leading-7 text-slate-600">{item}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-6 flex flex-col gap-3">
+                <div className="flex flex-col gap-3">
                   <Button onClick={onContinue}>
                     {result.type === "too_ambitious" ? "Dựng hệ 12 tuần nhỏ hơn" : "Dựng hệ 12 tuần"}
                     <ArrowRight className="h-4 w-4" />
@@ -616,40 +501,87 @@ function FeasibilityResultView({
                     Điều chỉnh mục tiêu SMART
                   </Button>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid gap-5 lg:grid-cols-3">
+            <Card className={`overflow-hidden ${styles.title}`}>
+              <CardContent className="p-5 lg:p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Lĩnh vực trọng tâm</p>
+                <p className="mt-3 text-2xl font-bold text-slate-900">{getLifeAreaLabel(focusArea)}</p>
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  Đây là phần đời sống đang tác động trực tiếp tới độ khả thi của mục tiêu này.
+                </p>
               </CardContent>
             </Card>
 
-            <Card className="overflow-hidden border-white/70 bg-white/82">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 text-slate-700">
-                  <ShieldCheck className="h-4 w-4 text-violet-600" />
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Nhịp triển khai gợi ý
-                  </p>
+            <details className="rounded-[28px] border border-white/70 bg-white/82 p-5 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.2)] lg:p-6">
+              <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
+                Xem bản chụp mục tiêu SMART
+              </summary>
+              <div className="mt-4 space-y-4">
+                <p className="text-base font-semibold leading-7 text-slate-900">{pendingGoal.specific}</p>
+                <div className="space-y-3 text-sm leading-6 text-slate-600">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Thời hạn</p>
+                    <p className="mt-1">{pendingGoal.timeBound}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                      Dấu hiệu hoàn thành
+                    </p>
+                    <p className="mt-1">{pendingGoal.measurable}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Lý do theo đuổi</p>
+                    <p className="mt-1">{pendingGoal.relevant}</p>
+                  </div>
                 </div>
+              </div>
+            </details>
 
-                <div className="mt-5 space-y-4">
-                  {copy.weeklyRhythm.map((item, index) => (
-                    <div key={item.label} className="flex gap-3">
-                      <div className="flex flex-col items-center">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-violet-200 bg-violet-50 text-sm font-semibold text-violet-700">
-                          0{index + 1}
-                        </div>
-                        {index < copy.weeklyRhythm.length - 1 ? (
-                          <div className="mt-2 h-full w-px bg-[linear-gradient(180deg,_rgba(109,40,217,0.35)_0%,_rgba(109,40,217,0)_100%)]" />
-                        ) : null}
-                      </div>
-
-                      <div className="rounded-[24px] border border-white/70 bg-white/78 p-4">
-                        <p className="text-sm font-semibold text-slate-900">{item.label}</p>
-                        <p className="mt-2 text-sm leading-7 text-slate-600">{item.detail}</p>
-                      </div>
+            <details className="rounded-[28px] border border-white/70 bg-white/82 p-5 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.2)] lg:p-6">
+              <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
+                Xem nhịp triển khai gợi ý
+              </summary>
+              <div className="mt-4 space-y-4">
+                {copy.weeklyRhythm.map((item, index) => (
+                  <div key={item.label} className="flex gap-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl border border-violet-200 bg-violet-50 text-xs font-semibold text-violet-700">
+                      {index + 1}
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">{item.label}</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">{item.detail}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </details>
           </div>
+
+          <details className="rounded-[28px] border border-white/70 bg-white/82 p-5 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.2)] lg:p-6">
+            <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
+              Xem lý do đằng sau kết quả
+            </summary>
+            <div className="mt-4 grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+              <div>
+                <h2 className="text-xl font-bold tracking-normal text-slate-900">{copy.guideTitle}</h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">{copy.guideBody}</p>
+              </div>
+              <div className="space-y-3">
+                {copy.nextMoves.map((item, index) => (
+                  <div key={item} className="flex gap-3 rounded-[20px] border border-slate-200 bg-slate-50/80 p-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl gradient-violet-blue-icon text-xs font-semibold text-violet-700">
+                      {index + 1}
+                    </div>
+                    <p className="text-sm leading-6 text-slate-600">{item}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </details>
         </div>
       </motion.div>
     </div>
