@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 
 import {
   APP_STORAGE_KEYS,
+  formatDateInputValue,
   getCurrentEntitlementKeys,
   getCurrentPlan,
   getUserData,
@@ -47,8 +48,14 @@ describe("12-week core flows", () => {
     await screen.findByText("Nhịp 12 tuần");
 
     const data = getUserData();
+    const createdSystem = data.goals[0]?.twelveWeekSystem;
+    const weekOneTasks = createdSystem?.taskInstances.filter((task) => task.weekNumber === 1) ?? [];
+    const todayKey = formatDateInputValue(new Date());
+
     expect(data.goals).toHaveLength(1);
-    expect(data.goals[0]?.twelveWeekSystem).toBeDefined();
+    expect(createdSystem).toBeDefined();
+    expect(weekOneTasks.length).toBeGreaterThan(0);
+    expect(weekOneTasks.every((task) => task.scheduledDate >= todayKey)).toBe(true);
     expect(localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId)).toBe(data.goals[0]?.id);
   }, 10_000);
 

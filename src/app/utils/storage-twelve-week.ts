@@ -124,6 +124,25 @@ function normalizeScheduleOffsets(
   return getTaskOffsetsForFrequency(frequency);
 }
 
+function keepGeneratedTaskOutOfPast(startDate: Date, totalWeeks: number, weekNumber: number, generatedDate: string) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const weekStart = addCalendarDays(startDate, (weekNumber - 1) * 7);
+  const weekEnd = addCalendarDays(weekStart, 6);
+  const todayIndex = getCalendarDayIndex(today);
+
+  if (todayIndex < getCalendarDayIndex(weekStart) || todayIndex > getCalendarDayIndex(weekEnd)) {
+    return generatedDate;
+  }
+
+  const todayKey = formatDateInputValue(today);
+  if (generatedDate >= todayKey) return generatedDate;
+
+  const cycleEnd = getCycleEndDate(startDate, totalWeeks);
+  return todayIndex <= getCalendarDayIndex(cycleEnd) ? todayKey : generatedDate;
+}
+
 function normalizeLeadIndicator(indicator: LeadIndicator, index: number): LeadIndicator {
   return {
     ...indicator,
@@ -417,11 +436,17 @@ function buildTaskInstances(system: TwelveWeekSystem): TwelveWeekTaskInstance[] 
         const existing = previousInstances.get(id);
         const title = frequency === 1 ? indicator.name : `${indicator.name} ${slotIndex + 1}`;
         const generatedDate = formatDateInputValue(addCalendarDays(weekStart, offset));
+        const scheduledDate = existing?.scheduledDate || keepGeneratedTaskOutOfPast(
+          startDate,
+          system.totalWeeks,
+          weekNumber,
+          generatedDate,
+        );
 
         nextInstances.push({
           id,
           weekNumber,
-          scheduledDate: existing?.scheduledDate || generatedDate,
+          scheduledDate,
           title,
           leadIndicatorName: indicator.name,
           isCore: indicator.type !== "optional",

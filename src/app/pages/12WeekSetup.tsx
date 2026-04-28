@@ -888,21 +888,21 @@ export function TwelveWeekSetup() {
         <CardContent className="relative p-5 sm:p-6 lg:p-10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_22%)] opacity-90" />
           <div className="relative max-w-4xl">
-            <div className="space-y-5 sm:space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                 <Compass className="h-4 w-4" />
                 Thiết lập 12 tuần
               </div>
               <div className="space-y-4">
-                <h1 className="max-w-3xl text-3xl font-bold tracking-normal sm:text-4xl lg:text-5xl">
+                <h1 className="max-w-3xl text-2xl font-bold tracking-normal sm:text-4xl lg:text-5xl">
                   Chốt một chu kỳ 12 tuần gọn, rõ và vào việc ngay.
                 </h1>
-                <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
+                <p className="max-w-2xl text-sm leading-7 text-white/82 sm:text-base lg:text-lg">
                   Bạn sẽ rời khỏi màn này với một outcome rõ, 2-4 tactic có lịch thực thi, và một tuần đầu tiên đủ nhẹ
                   để bắt đầu ngay.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2 sm:gap-3">
                 <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
                   <Target className="mr-1 h-3.5 w-3.5" />
                   Ưu tiên: {getLifeAreaLabel(focusArea)}
@@ -988,12 +988,12 @@ export function TwelveWeekSetup() {
           </CardHeader>
           <CardContent className="space-y-6">
             {currentStep === 0 && (
-              <div className="mx-auto max-w-4xl space-y-6">
-                <div className="space-y-5">
-                  <div className="space-y-4 rounded-[28px] border border-white/70 bg-white/72 p-5">
+              <div className="mx-auto max-w-4xl space-y-4">
+                <div className="space-y-4">
+                  <div className="space-y-4 rounded-[24px] border border-white/70 bg-white/72 p-4 sm:p-5">
                     <div>
                       <p className="text-sm font-semibold text-slate-900">Chốt phần bắt buộc trước</p>
-                      <p className="mt-1 text-sm leading-6 text-slate-500">
+                      <p className="mt-1 hidden text-sm leading-6 text-slate-500 sm:block">
                         Ba mục này là đủ để đi tiếp. Khung gợi ý phía dưới chỉ dùng để setup nhanh hơn, không phải việc
                         bắt buộc phải chọn.
                       </p>
@@ -1017,7 +1017,7 @@ export function TwelveWeekSetup() {
                       <Label htmlFor="vision-12-week">Tầm nhìn 12 tuần</Label>
                       <Textarea
                         id="vision-12-week"
-                        rows={4}
+                        rows={3}
                         value={draft.vision12Week}
                         onChange={(event) => handleChange("vision12Week", event.target.value)}
                       />
@@ -1026,18 +1026,18 @@ export function TwelveWeekSetup() {
                       <Label htmlFor="week-12-outcome">Outcome muốn chạm tới ở tuần 12</Label>
                       <Textarea
                         id="week-12-outcome"
-                        rows={3}
+                        rows={2}
                         value={draft.week12Outcome}
                         onChange={(event) => handleChange("week12Outcome", event.target.value)}
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-3 rounded-[28px] border border-white/70 bg-white/72 p-5">
+                  <div className="space-y-3 rounded-[24px] border border-white/70 bg-white/72 p-4 sm:p-5">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <p className="text-sm font-semibold text-slate-900">Bắt đầu nhanh bằng khung gợi ý</p>
-                        <p className="mt-1 text-sm text-slate-500">
+                        <p className="mt-1 text-sm leading-6 text-slate-500">
                           Thay vì tìm một template đúng chủ đề, bạn chỉ cần chọn kiểu vận hành phù hợp. Sau đó vẫn sửa
                           lại toàn bộ cho sát mục tiêu của mình.
                         </p>
@@ -1072,27 +1072,32 @@ export function TwelveWeekSetup() {
                             : "Dùng khung gợi ý này"}
                         </Button>
                         {recommendedTemplateSupport && (
-                          <div className="mt-4 grid gap-3">
-                            <div className="rounded-[20px] border border-sky-200 bg-white/86 p-4">
-                              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
-                                Tuần 1 nên thắng ở đâu
-                              </p>
-                              <p className="mt-2 text-sm font-semibold text-slate-950">
-                                {recommendedTemplateSupport.week1Headline}
-                              </p>
-                              <p className="mt-2 text-sm leading-7 text-slate-600">
-                                {recommendedTemplateSupport.week1Support}
-                              </p>
+                          <details className="mt-4 rounded-[20px] border border-sky-200 bg-white/72 px-4 py-3">
+                            <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
+                              Xem gợi ý tuần 1 và nhịp giữ
+                            </summary>
+                            <div className="mt-3 grid gap-3">
+                              <div className="rounded-[20px] border border-sky-200 bg-white/86 p-4">
+                                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
+                                  Tuần 1 nên thắng ở đâu
+                                </p>
+                                <p className="mt-2 text-sm font-semibold text-slate-950">
+                                  {recommendedTemplateSupport.week1Headline}
+                                </p>
+                                <p className="mt-2 text-sm leading-7 text-slate-600">
+                                  {recommendedTemplateSupport.week1Support}
+                                </p>
+                              </div>
+                              <div className="rounded-[20px] border border-sky-200 bg-white/86 p-4">
+                                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
+                                  Nhịp nên giữ
+                                </p>
+                                <p className="mt-2 text-sm leading-7 text-slate-600">
+                                  {recommendedTemplateSupport.week1CadenceHint}
+                                </p>
+                              </div>
                             </div>
-                            <div className="rounded-[20px] border border-sky-200 bg-white/86 p-4">
-                              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
-                                Nhịp nên giữ
-                              </p>
-                              <p className="mt-2 text-sm leading-7 text-slate-600">
-                                {recommendedTemplateSupport.week1CadenceHint}
-                              </p>
-                            </div>
-                          </div>
+                          </details>
                         )}
                       </div>
                     )}
@@ -1331,9 +1336,9 @@ export function TwelveWeekSetup() {
                     </div>
                   )}
                 </div>
-                <div className="space-y-3 rounded-[28px] border border-white/70 bg-white/72 p-5">
-                  <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-                    {selectedTemplate ? (
+                <div className="space-y-3">
+                  {selectedTemplate && (
+                    <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <div>
                           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
@@ -1353,18 +1358,8 @@ export function TwelveWeekSetup() {
                           {selectedTemplate.requiredPlan ? getPlanLabel(selectedTemplate.requiredPlan) : "Free"}
                         </Badge>
                       </div>
-                    ) : (
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                          Có thể đi custom
-                        </p>
-                        <p className="mt-2 text-base font-semibold text-slate-950">Ba mục bắt buộc ở trên là đủ.</p>
-                        <p className="mt-1 text-sm leading-6 text-slate-600">
-                          Khung gợi ý chỉ là đường tắt. Nếu chưa chắc, cứ bấm Tiếp tục rồi chốt tactic ở bước sau.
-                        </p>
-                      </div>
+                    </div>
                     )}
-                  </div>
                   <details className="rounded-[22px] border border-dashed border-slate-200 bg-white/72 p-4">
                     <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                       Xem nguồn vào từ SMART
