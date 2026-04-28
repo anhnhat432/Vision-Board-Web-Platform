@@ -14,14 +14,12 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useTwelveWeekSystemSnapshot } from "../hooks/useTwelveWeekSystemSnapshot";
 import {
   applyBackendPlanSnapshotToLocal,
   hydrateTwelveWeekPlansFromBackend,
   type BackendPlanHydrationResult,
 } from "../hooks/useBackendPlanHydration";
-import { NewUserGuideBanner } from "../components/NewUserGuide";
 import { TabErrorBoundary } from "../components/TabErrorBoundary";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import {
@@ -241,7 +239,6 @@ function TwelveWeekDashboardNotice({
 export function TwelveWeekSystem() {
   const navigate = useNavigate();
   const { authLoading, isConfigured: isAuthConfigured, user, userProfile } = useAuthContext();
-  const { userData: guideUserData } = useSyncedUserData();
   const {
     isReady,
     activeGoal,
@@ -1303,8 +1300,6 @@ export function TwelveWeekSystem() {
         onCheckoutComplete={handleCheckoutComplete}
       />
 
-      <NewUserGuideBanner userData={guideUserData ?? getUserData()} variant="compact" />
-
       <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -1424,7 +1419,7 @@ export function TwelveWeekSystem() {
             </div>
           </div>
 
-          <div className="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="mt-4 hidden flex-col gap-3 border-t border-slate-200 pt-4 sm:flex lg:flex-row lg:items-center lg:justify-between">
             <p className="min-w-0 text-sm leading-6 text-slate-600">
               {reviewDueToday
                 ? "Ưu tiên: chốt review tuần trước khi mở việc mới."
@@ -1432,7 +1427,7 @@ export function TwelveWeekSystem() {
                   ? `Ưu tiên: ${firstPriorityTask.title}`
                   : "Hôm nay đang gọn. Có thể check-in hoặc xem lại tuần."}
             </p>
-            <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+            <div className="hidden shrink-0 flex-col gap-2 sm:flex sm:flex-row">
               <Button
                 className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
                 onClick={() => handleTabChange(reviewDueToday ? "week" : "today")}

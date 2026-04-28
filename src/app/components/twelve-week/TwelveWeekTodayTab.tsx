@@ -210,13 +210,20 @@ export function TwelveWeekTodayTab({
             data-tour-id="system-today-queue"
             className="h-full min-w-0 overflow-hidden border border-slate-200/80 bg-white/92 shadow-[0_22px_54px_-40px_rgba(37,99,235,0.22)]"
           >
-            <CardHeader className="min-w-0">
-              <CardTitle className="break-words text-slate-950">Hàng việc hôm nay</CardTitle>
-              <CardDescription className="break-words text-slate-700">
-                Bắt đầu từ việc đầu tiên. Nếu xong rồi mới nhìn sang việc tiếp theo.
-              </CardDescription>
+            <CardHeader className="min-w-0 space-y-0 pb-3">
+              <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <CardTitle className="break-words text-slate-950">Hàng việc hôm nay</CardTitle>
+                  <CardDescription className="mt-1 break-words text-slate-700">
+                    Làm việc đầu tiên trước, phần còn lại để sau.
+                  </CardDescription>
+                </div>
+                <Badge variant="outline" className="shrink-0 border-slate-200 bg-slate-50 text-slate-700">
+                  {todayCompletedCount}/{checkInTotal} xong
+                </Badge>
+              </div>
             </CardHeader>
-            <CardContent className="min-w-0 space-y-3">
+            <CardContent className="min-w-0 space-y-3 pt-0">
               {todayQueue.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600">
                   {hasPlanTasks ? (
@@ -251,7 +258,7 @@ export function TwelveWeekTodayTab({
                   return (
                     <div
                       key={task.id}
-                      className={`flex min-w-0 items-start gap-3 rounded-lg border p-4 shadow-[0_18px_38px_-34px_rgba(15,23,42,0.28)] ${
+                      className={`flex min-w-0 items-start gap-3 rounded-lg border p-3 shadow-[0_18px_38px_-34px_rgba(15,23,42,0.28)] sm:p-4 ${
                         isPrimaryTask ? "border-slate-950 bg-slate-950" : "border-slate-200 bg-white"
                       }`}
                     >
@@ -318,9 +325,14 @@ export function TwelveWeekTodayTab({
                 })
               )}
               {secondaryTodayTasks.length > 0 && (
-                <div className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Sau việc đầu tiên</p>
-                  <p className="mt-2 text-sm text-slate-600">Xong việc số 1 rồi mới nhìn sang các bước này.</p>
+                <details className="group min-w-0 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-slate-900">
+                    <span>Sau việc đầu tiên</span>
+                    <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-500">
+                      {secondaryTodayTasks.length} việc
+                    </span>
+                  </summary>
+                  <p className="mt-2 text-sm text-slate-600">Xong việc số 1 rồi mới mở danh sách này.</p>
                   <div className="mt-3 space-y-2">
                     {secondaryPreviewTasks.map((task, index) => (
                       <div
@@ -342,7 +354,7 @@ export function TwelveWeekTodayTab({
                       Còn {remainingSecondaryTasks} việc mở phía sau, chưa cần nghĩ tới ngay.
                     </p>
                   )}
-                </div>
+                </details>
               )}
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
                 <div className="flex items-center justify-between text-sm text-slate-500">
@@ -361,57 +373,49 @@ export function TwelveWeekTodayTab({
           className="min-w-0"
         >
           <Card className="h-full min-w-0 overflow-hidden border border-slate-200/80 bg-white/92 shadow-[0_22px_54px_-40px_rgba(124,58,237,0.18)]">
-            <CardHeader className="min-w-0">
-              <CardTitle className="flex items-center gap-2 break-words text-slate-950">
-                <Gauge className="h-5 w-5 text-violet-600" />
-                Check-in 30 giây
-              </CardTitle>
-              <CardDescription className="break-words text-slate-700">
-                Tick việc trước, rồi chỉ ghi phần thật sự cần nhớ cho ngày mai.
-              </CardDescription>
+            <CardHeader className="min-w-0 space-y-0 pb-3">
+              <div className="flex min-w-0 items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <CardTitle className="flex items-center gap-2 break-words text-slate-950">
+                    <Gauge className="h-5 w-5 text-violet-600" />
+                    Check-in 30 giây
+                  </CardTitle>
+                  <CardDescription className="mt-1 break-words text-slate-700">
+                    Tick việc, chọn năng lượng, lưu lại.
+                  </CardDescription>
+                </div>
+                <Badge variant="outline" className="shrink-0 border-violet-200 bg-violet-50 text-violet-700">
+                  {todayCompletedCount}/{checkInTotal}
+                </Badge>
+              </div>
             </CardHeader>
-            <CardContent className="min-w-0 space-y-4">
-              <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Bước 1</p>
-                  <p className="mt-2 text-sm font-semibold text-slate-900">Tick việc đã xong</p>
-                </div>
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Bước 2</p>
-                  <p className="mt-2 text-sm font-semibold text-slate-900">Chọn mức năng lượng</p>
-                </div>
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Bước 3</p>
-                  <p className="mt-2 text-sm font-semibold text-slate-900">Lưu lại trong 1 chạm</p>
-                </div>
-              </div>
-              <div className="rounded-lg border border-violet-200 bg-violet-50 p-4">
-                <p className="text-sm font-semibold text-slate-950">
-                  Hôm nay bạn đã chốt {todayCompletedCount}/{checkInTotal} việc
-                </p>
-                <p className="mt-1 text-sm text-slate-600">Check-in càng ngắn thì càng dễ giữ đều mỗi ngày.</p>
-              </div>
+            <CardContent className="min-w-0 space-y-4 pt-0">
               <div className="space-y-3">
                 <Label id="daily-mood-label">Năng lượng hôm nay</Label>
-                <div role="radiogroup" aria-labelledby="daily-mood-label" className="grid gap-2">
+                <div
+                  role="radiogroup"
+                  aria-labelledby="daily-mood-label"
+                  className="grid grid-cols-3 gap-2 lg:grid-cols-1 2xl:grid-cols-3"
+                >
                   {MOOD_OPTIONS.map((option) => (
                     <Button
                       key={option.value}
                       type="button"
                       role="radio"
                       aria-checked={dailyMood === option.value}
+                      aria-label={`${option.label}: ${option.hint}`}
                       variant="outline"
                       className={
                         dailyMood === option.value
-                          ? "h-auto min-h-16 min-w-0 justify-start whitespace-normal border-violet-300 bg-violet-600 px-4 py-3 text-left text-white hover:bg-violet-600"
-                          : "h-auto min-h-16 min-w-0 justify-start whitespace-normal border-slate-200 bg-white px-4 py-3 text-left text-slate-700 hover:bg-slate-50"
+                          ? "h-auto min-h-11 min-w-0 justify-center whitespace-normal border-violet-300 bg-violet-600 px-2 py-2 text-center text-white hover:bg-violet-600 sm:min-h-14 sm:justify-start sm:px-4 sm:py-3 sm:text-left"
+                          : "h-auto min-h-11 min-w-0 justify-center whitespace-normal border-slate-200 bg-white px-2 py-2 text-center text-slate-700 hover:bg-slate-50 sm:min-h-14 sm:justify-start sm:px-4 sm:py-3 sm:text-left"
                       }
                       onClick={() => onDailyMoodChange(option.value)}
                     >
                       <span className="min-w-0 text-left">
-                        <span className="block text-sm font-semibold">{option.label}</span>
+                        <span className="block text-center text-sm font-semibold sm:text-left">{option.label}</span>
                         <span
-                          className={`block break-words text-xs leading-5 ${dailyMood === option.value ? "text-white/72" : "text-slate-500"}`}
+                          className={`hidden break-words text-xs leading-5 sm:block ${dailyMood === option.value ? "text-white/72" : "text-slate-500"}`}
                         >
                           {option.hint}
                         </span>
@@ -424,7 +428,7 @@ export function TwelveWeekTodayTab({
                 <Label htmlFor="daily-note">Note tùy chọn</Label>
                 <Textarea
                   id="daily-note"
-                  rows={3}
+                  rows={2}
                   value={dailyNote}
                   onChange={(event) => onDailyNoteChange(event.target.value)}
                   placeholder="Nếu cần, chỉ ghi đúng một ý để ngày mai đỡ quên."
