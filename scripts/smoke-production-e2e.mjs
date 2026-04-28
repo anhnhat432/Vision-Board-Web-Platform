@@ -929,7 +929,7 @@ async function assertPersistedSystemLoaded() {
     "persisted 12-week system after login",
     `
       document.body.innerText.includes("Hệ 12 tuần") &&
-      document.body.innerText.includes("Chu kỳ đang chạy") &&
+      (document.body.innerText.includes("Chu kỳ đang chạy") || document.body.innerText.includes("Nhịp 12 tuần")) &&
       document.body.innerText.includes(${JSON.stringify(GOAL_TITLE)}) &&
       (document.body.innerText.includes("Đã nối") || document.body.innerText.includes("Đã lưu"))
     `,
