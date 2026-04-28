@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   Compass,
   Gauge,
-  Loader2,
   ShieldCheck,
   Sparkles,
   Target,
@@ -16,6 +15,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -106,45 +106,6 @@ interface PendingFeasibilityResult {
   readinessScore: number;
   adjustedScore: number;
   wheelScore: number;
-}
-
-function FeasibilitySetupState({
-  title,
-  description,
-  actionLabel,
-  onAction,
-  loading = false,
-}: {
-  title: string;
-  description: string;
-  actionLabel?: string;
-  onAction?: () => void;
-  loading?: boolean;
-}) {
-  return (
-    <div className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-3xl justify-center">
-        <Card className="w-full overflow-hidden border border-white/70 bg-white/82 shadow-[0_22px_60px_-40px_rgba(15,23,42,0.38)]">
-          <CardContent className="p-8 text-center sm:p-10">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-violet-50 text-violet-700">
-              {loading ? <Loader2 className="h-8 w-8 animate-spin" /> : <Compass className="h-8 w-8" />}
-            </div>
-            <h1 className="mt-6 text-2xl font-bold text-slate-900 sm:text-3xl">{title}</h1>
-            <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-500 sm:text-base" role="status">
-              {description}
-            </p>
-            {actionLabel && onAction ? (
-              <div className="mt-6 flex justify-center">
-                <Button type="button" onClick={onAction}>
-                  {actionLabel}
-                </Button>
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
 }
 
 function getWheelPenalty(score: number): number {
@@ -769,7 +730,9 @@ export function FeasibilityCheck() {
 
   if (isInitializing) {
     return (
-      <FeasibilitySetupState
+      <CoreFlowGateState
+        currentStepId="feasibility"
+        eyebrow="Feasibility"
         title="Đang chuẩn bị phần kiểm tra tính khả thi"
         description="Mình đang đọc lại SMART Goal và dữ liệu Life Insight trước khi bắt đầu đánh giá."
         loading
@@ -779,7 +742,9 @@ export function FeasibilityCheck() {
 
   if (!pendingGoal || wheelScore === null) {
     return (
-      <FeasibilitySetupState
+      <CoreFlowGateState
+        currentStepId="smart_goal"
+        eyebrow="Feasibility"
         title="Thiếu dữ liệu để mở bài đánh giá"
         description="Không tìm thấy đủ thông tin SMART Goal hoặc điểm Life Insight. Mở lại bước SMART Goal để tiếp tục."
         actionLabel="Quay lại SMART Goal"

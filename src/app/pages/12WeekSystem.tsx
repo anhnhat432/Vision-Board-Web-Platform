@@ -43,7 +43,7 @@ import {
 } from "../components/ui/alert-dialog";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Card, CardContent } from "../components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
@@ -268,7 +268,6 @@ export function TwelveWeekSystem() {
     system,
     currentWeek,
     currentWeekRange,
-    currentWeekTasks,
     todayQueue,
     missedTasks,
     weekCompletion,
@@ -1338,54 +1337,28 @@ export function TwelveWeekSystem() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.34)]">
-        <CardContent className="p-5 sm:p-6 lg:p-7">
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(300px,380px)] lg:items-start">
-            <div className="min-w-0 space-y-5">
-              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-600">
-                <Compass className="h-4 w-4" />
-                Nhịp 12 tuần
-              </div>
-              <div className="space-y-3">
-                <h1 className="max-w-3xl break-words text-2xl font-bold tracking-normal text-slate-950 sm:text-3xl">
-                  Chu kỳ đang chạy: {activeGoal.title}
-                </h1>
-                <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                  Tập trung vào hàng việc hôm nay, trạng thái tuần này và điểm review tiếp theo trong cùng một màn.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-3">
+      <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.3)]">
+        <CardContent className="p-4 sm:p-5 lg:p-6">
+          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+            <div className="min-w-0 flex-1 space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className="rounded-full border-slate-200 bg-slate-50 px-3 py-1.5 text-slate-600"
+                >
+                  <Compass className="mr-1 h-3.5 w-3.5" />
+                  Nhịp 12 tuần
+                </Badge>
                 <Badge
                   variant="outline"
                   className="rounded-full border-slate-200 bg-slate-50 px-3 py-1.5 text-slate-600"
                 >
                   <Target className="mr-1 h-3.5 w-3.5" />
-                  {currentWeek}/{system.totalWeeks} tuần
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className="rounded-full border-slate-200 bg-slate-50 px-3 py-1.5 text-slate-600"
-                >
-                  <Sparkles className="mr-1 h-3.5 w-3.5" />
-                  {getLifeAreaLabel(activeGoal.focusArea || activeGoal.category)}
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className="rounded-full border-slate-200 bg-slate-50 px-3 py-1.5 text-slate-600"
-                >
-                  Gói: {getPlanLabel(activePlanCode)}
+                  Tuần {currentWeek}/{system.totalWeeks}
                 </Badge>
                 <Badge variant="outline" className={`rounded-full px-3 py-1.5 ${syncBadgeClass}`}>
                   {syncBadgeLabel}
                 </Badge>
-                {activeGoal.feasibilityResult && (
-                  <Badge
-                    variant="outline"
-                    className="rounded-full border-slate-200 bg-slate-50 px-3 py-1.5 text-slate-600"
-                  >
-                    {getFeasibilityResultLabel(activeGoal.feasibilityResult)}
-                  </Badge>
-                )}
                 {reviewDueToday && (
                   <Badge
                     variant="outline"
@@ -1395,104 +1368,101 @@ export function TwelveWeekSystem() {
                   </Badge>
                 )}
               </div>
-              <div className="flex flex-wrap gap-3">
-                <Button
-                  className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
-                  onClick={() => handleTabChange("today")}
-                >
-                  Mở Hôm nay
-                </Button>
-                {reviewDueToday && (
-                  <Button
-                    variant="outline"
-                    className="w-full border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100 sm:w-auto"
-                    onClick={() => handleTabChange("week")}
-                  >
-                    Chốt review tuần
-                  </Button>
+              <div className="space-y-2">
+                <h1 className="max-w-4xl break-words text-xl font-bold tracking-normal text-slate-950 sm:text-2xl">
+                  {activeGoal.title}
+                </h1>
+                <p className="max-w-3xl text-sm leading-7 text-slate-600">
+                  Mở vào là thấy việc hôm nay trước. Tiến độ, review và cài đặt nằm ở các tab phía dưới.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs text-slate-500">
+                <span className="rounded-full bg-slate-100 px-3 py-1">
+                  {getLifeAreaLabel(activeGoal.focusArea || activeGoal.category)}
+                </span>
+                <span className="rounded-full bg-slate-100 px-3 py-1">Gói {getPlanLabel(activePlanCode)}</span>
+                {activeGoal.feasibilityResult && (
+                  <span className="rounded-full bg-slate-100 px-3 py-1">
+                    {getFeasibilityResultLabel(activeGoal.feasibilityResult)}
+                  </span>
                 )}
-                <Button
-                  variant="outline"
-                  className="w-full border-slate-200 bg-white text-slate-900 hover:bg-slate-50 sm:w-auto"
-                  onClick={() => navigate("/goals")}
-                >
-                  Mở Mục tiêu
-                </Button>
               </div>
             </div>
-            <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4 shadow-sm sm:p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Việc kế tiếp</p>
-              <div className="mt-4 rounded-[20px] border border-slate-200 bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                  {reviewDueToday ? "Ưu tiên ngay" : firstPriorityTask ? "Ưu tiên số 1" : "Trạng thái hôm nay"}
+
+            <div className="grid min-w-0 gap-2 sm:grid-cols-3 xl:w-[520px]">
+              <div className="rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Hôm nay</p>
+                <p className="mt-1 text-2xl font-bold text-slate-950">{todayRemainingCount}</p>
+                <p className="text-xs text-slate-500">{todayCompletedCount} việc đã chốt</p>
+              </div>
+              <div className="rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tuần này</p>
+                <p className="mt-1 text-2xl font-bold text-slate-950">{weekCompletion.percent}%</p>
+                <p className="text-xs text-slate-500">
+                  {currentWeekRange
+                    ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
+                    : "Đang chạy"}
                 </p>
-                <p className="mt-2 line-clamp-3 break-words text-xl font-bold text-slate-950">
-                  {reviewDueToday
-                    ? "Chốt review tuần"
-                    : firstPriorityTask
-                      ? firstPriorityTask.title
-                      : "Hôm nay đang khá gọn"}
-                </p>
-                <p className="mt-2 text-sm leading-7 text-slate-600">
-                  {reviewDueToday
-                    ? "Nếu chốt review ngay hôm nay, tuần sau sẽ bắt đầu nhẹ đầu hơn nhiều."
-                    : firstPriorityTask
-                      ? `${firstPriorityTask.leadIndicatorName} • ${
-                          firstPriorityTask.isCore ? "Việc cốt lõi nên làm trước." : "Việc tùy chọn nếu bạn còn sức."
-                        }`
-                      : "Bạn đã đi qua phần việc mở của hôm nay. Có thể tranh thủ xem lại tuần hoặc chuẩn bị review."}
-                </p>
-                <Button
-                  variant="outline"
-                  className="mt-4 border-slate-950 bg-slate-950 text-white hover:bg-slate-800"
-                  onClick={() => handleTabChange(reviewDueToday ? "week" : "today")}
+              </div>
+              <div
+                className={`rounded-lg border px-4 py-3 ${
+                  reviewDueToday ? "border-amber-200 bg-amber-50/90" : "border-slate-200 bg-slate-50/80"
+                }`}
+              >
+                <p
+                  className={`text-xs font-semibold uppercase tracking-[0.14em] ${
+                    reviewDueToday ? "text-amber-700" : "text-slate-500"
+                  }`}
                 >
-                  {reviewDueToday ? "Mở tab Tuần" : "Mở tab Hôm nay"}
-                </Button>
+                  Review
+                </p>
+                <p className="mt-1 truncate text-base font-bold text-slate-950">
+                  {reviewDueToday ? "Hôm nay" : getReviewDayLabel(system.reviewDay)}
+                </p>
+                <p className="text-xs text-slate-500">{reviewStatusLabel}</p>
               </div>
-              <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                <div className="rounded-[20px] border border-slate-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Tuần hiện tại</p>
-                  <p className="mt-2 text-3xl font-bold text-slate-950">
-                    {currentWeek}/{system.totalWeeks}
-                  </p>
-                  {currentWeekRange && (
-                    <p className="mt-1 text-sm text-slate-500">
-                      {formatCalendarDate(currentWeekRange.start)} - {formatCalendarDate(currentWeekRange.end)}
-                    </p>
-                  )}
-                </div>
-                <div className="rounded-[20px] border border-slate-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Việc mở hôm nay</p>
-                  <p className="mt-2 text-3xl font-bold text-slate-950">{todayRemainingCount}</p>
-                  <p className="mt-1 text-sm text-slate-500">
-                    {overdueOpenCount > 0
-                      ? `${overdueOpenCount} việc đang bị trễ`
-                      : `${todayCompletedCount}/${todayQueue.length || currentWeekTasks.length || 1} việc đã chốt`}
-                  </p>
-                </div>
-                <div className="rounded-[20px] border border-slate-200 bg-white p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Review tuần</p>
-                  <p className="mt-2 text-xl font-bold text-slate-950">
-                    {reviewDueToday ? "Hôm nay" : getReviewDayLabel(system.reviewDay)}
-                  </p>
-                  <p className="mt-1 text-sm text-slate-500">{reviewStatusLabel}</p>
-                </div>
-              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4 lg:flex-row lg:items-center lg:justify-between">
+            <p className="min-w-0 text-sm leading-6 text-slate-600">
+              {reviewDueToday
+                ? "Ưu tiên: chốt review tuần trước khi mở việc mới."
+                : firstPriorityTask
+                  ? `Ưu tiên: ${firstPriorityTask.title}`
+                  : "Hôm nay đang gọn. Có thể check-in hoặc xem lại tuần."}
+            </p>
+            <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+              <Button
+                className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
+                onClick={() => handleTabChange(reviewDueToday ? "week" : "today")}
+              >
+                {reviewDueToday ? "Mở review" : "Mở Hôm nay"}
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full border-slate-200 bg-white text-slate-900 hover:bg-slate-50 sm:w-auto"
+                onClick={() => navigate("/goals")}
+              >
+                Mở mục tiêu
+              </Button>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {allGoals.length > 1 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Đổi chu kỳ 12 tuần</CardTitle>
-            <CardDescription>
-              App đang ưu tiên chu kỳ active mới nhất; bạn vẫn có thể mở lại chu kỳ cũ khi cần đối chiếu.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <details className="group rounded-xl border border-slate-200 bg-white/88 px-4 py-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.2)]">
+          <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 text-sm font-semibold text-slate-900">
+            <span>Đổi chu kỳ 12 tuần khác</span>
+            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
+              {allGoals.length} chu kỳ
+            </span>
+          </summary>
+          <div className="mt-3 space-y-3 border-t border-slate-200 pt-3">
+            <p className="text-sm leading-6 text-slate-600">
+              App đang ưu tiên chu kỳ active mới nhất; chỉ mở lại chu kỳ cũ khi cần đối chiếu.
+            </p>
             <Select value={activeGoal.id} onValueChange={(value) => loadGoalData(value)}>
               <SelectTrigger className="max-w-xl" aria-label="Chọn mục tiêu 12 tuần">
                 <SelectValue placeholder="Chọn mục tiêu" />
@@ -1505,8 +1475,8 @@ export function TwelveWeekSystem() {
                 ))}
               </SelectContent>
             </Select>
-          </CardContent>
-        </Card>
+          </div>
+        </details>
       )}
 
       {hasIncompletePlanStructure && (

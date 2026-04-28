@@ -1,5 +1,5 @@
 ﻿import { motion } from "motion/react";
-import { AlertTriangle, ArrowRight, CheckCircle2, Clock3, Crown, Gauge, ListChecks } from "lucide-react";
+import { AlertTriangle, ArrowRight, Crown, Gauge } from "lucide-react";
 
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -8,7 +8,7 @@ import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
 import { Progress } from "../ui/progress";
 import { Textarea } from "../ui/textarea";
-import { formatCalendarDate, getReviewDayLabel } from "../../utils/storage";
+import { formatCalendarDate } from "../../utils/storage";
 import type { TwelveWeekTaskInstance, TwelveWeekSystem, UniversalDailyCheckIn } from "../../utils/storage-types";
 import {
   MOOD_OPTIONS,
@@ -68,13 +68,8 @@ interface TwelveWeekTodayTabProps {
   onSaveCheckIn: () => void;
 }
 export function TwelveWeekTodayTab({
-  system,
   currentWeek,
-  currentWeekRange,
-  currentPlanFocus,
   reviewDueToday,
-  reviewStatusLabel,
-  currentWeekScoreValue,
   weekCompletion,
   coreTacticCount,
   optionalTacticCount,
@@ -83,7 +78,6 @@ export function TwelveWeekTodayTab({
   currentWeekTasksCount,
   todayDateKey,
   todayCompletedCount,
-  todayRemainingCount,
   overdueOpenCount,
   optionalOpenThisWeekCount,
   hasPlanTasks = currentWeekTasksCount > 0 || todayQueue.length > 0,
@@ -109,7 +103,7 @@ export function TwelveWeekTodayTab({
   const checkInTotal = todayQueue.length || currentWeekTasksCount || 1;
 
   return (
-    <div className="ops-system-panel min-w-0 space-y-5 pt-4">
+    <div className="ops-system-panel min-w-0 space-y-5">
       {missedTasks.length > 0 && (
         <Card className="border border-amber-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(146,64,14,0.32)]">
           <CardHeader>
@@ -209,118 +203,6 @@ export function TwelveWeekTodayTab({
           </CardContent>
         </Card>
       )}
-
-      <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.1fr)_360px]">
-        <Card
-          interactive={false}
-          className="border border-slate-200/80 bg-white/92 shadow-[0_22px_54px_-38px_rgba(15,23,42,0.34)]"
-        >
-          <CardContent className="p-6">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="min-w-0 flex-1">
-                <p className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                  <Clock3 className="h-3.5 w-3.5" />
-                  Làm ngay bây giờ
-                </p>
-                <h2 className="mt-3 max-w-3xl break-words text-2xl font-bold text-slate-950 sm:text-3xl">
-                  {reviewDueToday
-                    ? "Chốt review tuần"
-                    : firstPriorityTask
-                      ? firstPriorityTask.title
-                      : "Hôm nay đang khá gọn"}
-                </h2>
-                <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
-                  {reviewDueToday
-                    ? "Tuần này đã đi đến lúc khóa lại. Chốt review trước sẽ giúp bạn bước sang tuần mới gọn đầu hơn."
-                    : firstPriorityTask
-                      ? `${firstPriorityTask.leadIndicatorName} • ${
-                          firstPriorityTask.isCore
-                            ? "Đây là việc cốt lõi nên làm trước."
-                            : "Đây là việc tùy chọn nếu bạn còn sức."
-                        }`
-                      : "Bạn đã đi qua phần việc mở của hôm nay. Có thể tranh thủ nhìn lại tuần hoặc chuẩn bị review."}
-                </p>
-              </div>
-              <div className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-4 text-left sm:w-auto sm:min-w-40 sm:text-right">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Điểm tuần</p>
-                <p className="mt-2 text-3xl font-bold text-slate-950">{currentWeekScoreValue}</p>
-                <p className="mt-1 text-sm text-slate-500">
-                  {weekCompletion.completed}/{weekCompletion.total} việc đã chốt
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
-              <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
-                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                  <ListChecks className="h-3.5 w-3.5" />
-                  Việc mở hôm nay
-                </p>
-                <p className="mt-2 text-2xl font-bold text-slate-950">{todayRemainingCount}</p>
-                <p className="mt-1 text-sm text-slate-500">{todayCompletedCount} việc đã chốt</p>
-              </div>
-              <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
-                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                  Việc bị trễ
-                </p>
-                <p className="mt-2 text-2xl font-bold text-slate-950">{overdueOpenCount}</p>
-                <p className="mt-1 text-sm text-slate-500">
-                  {overdueOpenCount > 0 ? "Có thể giảm tải bằng re-entry." : "Nhịp tuần đang khá gọn."}
-                </p>
-              </div>
-              <div
-                className={`rounded-lg border px-4 py-4 ${reviewDueToday ? "border-amber-200 bg-amber-50" : "border-slate-200 bg-slate-50"}`}
-              >
-                <p
-                  className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] ${reviewDueToday ? "text-amber-700" : "text-slate-500"}`}
-                >
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  Review tuần
-                </p>
-                <p className="mt-2 text-2xl font-bold text-slate-950">
-                  {reviewDueToday ? "Hôm nay" : getReviewDayLabel(system.reviewDay)}
-                </p>
-                <p className="mt-1 text-sm text-slate-500">{reviewStatusLabel}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card
-          interactive={false}
-          className="border border-slate-200/80 bg-slate-50/80 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.26)]"
-        >
-          <CardHeader>
-            <CardTitle className="text-slate-950">Tuần này đang ở đâu</CardTitle>
-            <CardDescription className="text-slate-700">
-              Ba tín hiệu để bạn định hướng nhanh mà không phải đọc cả màn.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="rounded-lg border border-slate-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Tuần hiện tại</p>
-              <p className="mt-2 text-2xl font-bold text-slate-950">
-                Tuần {currentWeek}/{system.totalWeeks}
-              </p>
-              {currentWeekRange && (
-                <p className="mt-1 text-sm text-slate-500">
-                  {formatCalendarDate(currentWeekRange.start)} - {formatCalendarDate(currentWeekRange.end)}
-                </p>
-              )}
-            </div>
-            <div className="rounded-lg border border-slate-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Tactic đang giữ nhịp</p>
-              <p className="mt-2 text-2xl font-bold text-slate-950">{coreTacticCount}</p>
-              <p className="mt-1 text-sm text-slate-500">{optionalTacticCount} tactic tùy chọn nếu còn sức</p>
-            </div>
-            <div className="rounded-lg border border-slate-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Ưu tiên tuần</p>
-              <p className="mt-2 text-sm font-semibold leading-7 text-slate-900">{currentPlanFocus}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.12fr)_380px]">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="min-w-0">

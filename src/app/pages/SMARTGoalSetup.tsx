@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
-import { ArrowLeft, ArrowRight, CircleAlert, CheckCircle2, Compass, Loader2, Sparkles, Target } from "lucide-react";
+import { ArrowLeft, ArrowRight, CircleAlert, CheckCircle2, Compass, Sparkles, Target } from "lucide-react";
 
+import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import { Badge } from "../components/ui/badge";
@@ -339,44 +340,6 @@ const SMART_STEPS = [
   },
 ];
 
-function SMARTGoalSetupState({
-  title,
-  description,
-  actionLabel,
-  onAction,
-  loading = false,
-}: {
-  title: string;
-  description: string;
-  actionLabel?: string;
-  onAction?: () => void;
-  loading?: boolean;
-}) {
-  return (
-    <div className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
-      <Card className="mx-auto max-w-3xl overflow-hidden border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.34)]">
-        <CardContent className="p-8 text-center sm:p-12">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-violet-50 text-violet-700">
-            {loading ? <Loader2 className="h-8 w-8 animate-spin" /> : <Compass className="h-8 w-8" />}
-          </div>
-          <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">SMART Goal</p>
-          <h1 className="mt-2 text-2xl font-bold text-slate-900">{title}</h1>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-500" role="status">
-            {description}
-          </p>
-          {actionLabel && onAction ? (
-            <div className="mt-7 flex justify-center">
-              <Button type="button" onClick={onAction}>
-                {actionLabel}
-              </Button>
-            </div>
-          ) : null}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
 export function SMARTGoalSetup() {
   const navigate = useNavigate();
   const [setupState, setSetupState] = useState<"checking" | "needs_life_balance" | "needs_life_insight" | "ready">(
@@ -517,7 +480,9 @@ export function SMARTGoalSetup() {
 
   if (setupState === "checking") {
     return (
-      <SMARTGoalSetupState
+      <CoreFlowGateState
+        currentStepId="smart_goal"
+        eyebrow="SMART Goal"
         loading
         title="Đang kiểm tra dữ liệu SMART Goal"
         description="Mình đang kiểm tra Life Balance và Life Insight trước khi mở phần viết mục tiêu."
@@ -527,7 +492,9 @@ export function SMARTGoalSetup() {
 
   if (setupState === "needs_life_balance") {
     return (
-      <SMARTGoalSetupState
+      <CoreFlowGateState
+        currentStepId="life_balance"
+        eyebrow="SMART Goal"
         title="Hoàn thành Life Balance trước"
         description="SMART Goal cần đi sau dữ liệu Life Balance thật. Hãy chấm điểm các lĩnh vực trước để mục tiêu không bắt đầu từ số mặc định."
         actionLabel="Bắt đầu Life Balance"
@@ -538,7 +505,9 @@ export function SMARTGoalSetup() {
 
   if (setupState === "needs_life_insight") {
     return (
-      <SMARTGoalSetupState
+      <CoreFlowGateState
+        currentStepId="life_insight"
+        eyebrow="SMART Goal"
         title="Chọn Life Insight trước"
         description="Bạn đã có dữ liệu Life Balance, nhưng chưa chọn lĩnh vực trọng tâm. Hãy chọn một insight rồi quay lại viết SMART Goal."
         actionLabel="Mở Life Insight"

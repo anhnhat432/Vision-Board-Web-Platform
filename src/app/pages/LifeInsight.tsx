@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
-import { ArrowRight, Check, Compass, Loader2, Sparkles, Target, TrendingDown, TrendingUp } from "lucide-react";
+import { ArrowRight, Check, Compass, Sparkles, Target, TrendingDown, TrendingUp } from "lucide-react";
 
+import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -52,48 +53,28 @@ export function LifeInsight() {
 
   if (!userData) {
     return (
-      <div className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
-        <Card className="mx-auto max-w-3xl border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.34)]">
-          <CardContent className="p-10 text-center sm:p-12">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-violet-50 text-violet-700">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Life Insight</p>
-            <h1 className="mt-2 text-2xl font-bold text-slate-900">Đang tải dữ liệu insight</h1>
-            <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-500" role="status">
-              Mình đang đọc dữ liệu bánh xe cuộc sống để gợi ý lĩnh vực bạn nên ưu tiên tiếp theo.
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <CoreFlowGateState
+        currentStepId="life_insight"
+        eyebrow="Life Insight"
+        title="Đang tải dữ liệu insight"
+        description="Mình đang đọc dữ liệu bánh xe cuộc sống để gợi ý lĩnh vực bạn nên ưu tiên tiếp theo."
+        loading
+      />
     );
   }
 
   if (!hasLifeBalance || !lowestArea || !strongestArea || !focusArea) {
     return (
-      <div className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
-        <Card className="mx-auto max-w-3xl border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.34)]">
-          <CardContent className="p-8 text-center sm:p-12">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[22px] bg-amber-50 text-amber-700">
-              <Compass className="h-8 w-8" />
-            </div>
-            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Life Insight</p>
-            <h1 className="mt-2 text-2xl font-bold text-slate-900">Chưa có dữ liệu cân bằng cuộc sống</h1>
-            <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-500">
-              Trước khi tạo SMART goal, bạn cần hoàn thành bước đánh giá bánh xe cuộc sống để hệ thống biết nên ưu tiên
-              khu vực nào.
-            </p>
-            <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-              <Button className="w-full sm:w-auto" onClick={() => navigate("/onboarding")}>
-                Đi tới Onboarding
-              </Button>
-              <Button className="w-full sm:w-auto" variant="outline" onClick={() => navigate("/life-balance")}>
-                Mở Life Balance
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <CoreFlowGateState
+        currentStepId="life_balance"
+        eyebrow="Life Insight"
+        title="Chưa có dữ liệu cân bằng cuộc sống"
+        description="Trước khi tạo SMART Goal, bạn cần hoàn thành Life Balance để hệ thống biết nên ưu tiên khu vực nào."
+        actionLabel="Đi tới Onboarding"
+        onAction={() => navigate("/onboarding")}
+        secondaryActionLabel="Mở Life Balance"
+        onSecondaryAction={() => navigate("/life-balance")}
+      />
     );
   }
 
