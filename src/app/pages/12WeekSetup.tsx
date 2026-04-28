@@ -1331,75 +1331,55 @@ export function TwelveWeekSetup() {
                     </div>
                   )}
                 </div>
-                <div className="space-y-4 rounded-[28px] border border-white/70 bg-white/72 p-5">
+                <div className="space-y-3 rounded-[28px] border border-white/70 bg-white/72 p-5">
                   <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                      {selectedTemplate
-                        ? "Khung đang dùng"
-                        : setupGuideTemplate
-                          ? "Khung nên bắt đầu"
-                          : "Khung đang dùng"}
-                    </p>
-                    {setupGuideTemplate ? (
-                      <div className="mt-3 space-y-3">
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div>
-                            <p className="text-lg font-semibold text-slate-950">{setupGuideTemplate.name}</p>
-                            <p className="mt-1 text-sm text-slate-500">{setupGuideTemplate.subtitle}</p>
-                          </div>
-                          <Badge
-                            variant={setupGuideTemplate.requiredPlan ? "default" : "outline"}
-                            className={
-                              setupGuideTemplate.requiredPlan
-                                ? "bg-violet-600 text-white hover:bg-violet-600"
-                                : "border-slate-300 bg-white text-slate-700"
-                            }
-                          >
-                            {setupGuideTemplate.requiredPlan ? getPlanLabel(setupGuideTemplate.requiredPlan) : "Free"}
-                          </Badge>
-                        </div>
-                        <div className="rounded-[18px] border border-white/70 bg-white/86 p-4">
-                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
-                            Vì sao khung này chạy được
+                    {selectedTemplate ? (
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                            Khung đang dùng
                           </p>
-                          <p className="mt-2 text-sm leading-7 text-slate-700">{setupGuideTemplate.whyItWorks}</p>
+                          <p className="mt-2 text-base font-semibold text-slate-950">{selectedTemplate.name}</p>
+                          <p className="mt-1 text-sm text-slate-500">{selectedTemplate.subtitle}</p>
                         </div>
-                        <div className="rounded-[18px] border border-white/70 bg-white/86 p-4">
-                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tuần đầu sẽ thắng ở đâu</p>
-                          <p className="mt-2 text-sm leading-7 text-slate-700">
-                            {setupGuideSupport?.week1Support ?? setupGuideTemplate.firstWeekWin}
-                          </p>
-                        </div>
-                        {setupGuideSupport && (
-                          <div className="rounded-[18px] border border-white/70 bg-slate-950 p-4 text-white">
-                            <p className="text-xs uppercase tracking-[0.16em] text-white/54">Nhịp nên giữ ở tuần 1</p>
-                            <p className="mt-2 text-sm font-semibold">{setupGuideSupport.week1Headline}</p>
-                            <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1CadenceHint}</p>
-                          </div>
-                        )}
-                        {!selectedTemplate && (
-                          <p className="text-xs leading-6 text-slate-500">
-                            Đây là khung gợi ý nổi bật cho mục tiêu này. Bạn có thể áp dụng, rồi sửa tactic theo đúng
-                            hoàn cảnh của mình.
-                          </p>
-                        )}
+                        <Badge
+                          variant={selectedTemplate.requiredPlan ? "default" : "outline"}
+                          className={
+                            selectedTemplate.requiredPlan
+                              ? "bg-violet-600 text-white hover:bg-violet-600"
+                              : "border-slate-300 bg-white text-slate-700"
+                          }
+                        >
+                          {selectedTemplate.requiredPlan ? getPlanLabel(selectedTemplate.requiredPlan) : "Free"}
+                        </Badge>
                       </div>
                     ) : (
-                      <p className="mt-3 text-sm leading-7 text-slate-600">
-                        Chưa chọn khung nào. Bạn vẫn có thể đi theo flow custom, nhưng khung gợi ý sẽ giúp tuần đầu bớt
-                        phải nghĩ từ trang trắng.
-                      </p>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                          Có thể đi custom
+                        </p>
+                        <p className="mt-2 text-base font-semibold text-slate-950">Ba mục bắt buộc ở trên là đủ.</p>
+                        <p className="mt-1 text-sm leading-6 text-slate-600">
+                          Khung gợi ý chỉ là đường tắt. Nếu chưa chắc, cứ bấm Tiếp tục rồi chốt tactic ở bước sau.
+                        </p>
+                      </div>
                     )}
                   </div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Nguồn vào từ SMART</p>
-                  <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Specific</p>
-                    <p className="mt-2 text-sm leading-7 text-slate-700">{smartGoal.specific}</p>
-                  </div>
-                  <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Measurable</p>
-                    <p className="mt-2 text-sm leading-7 text-slate-700">{smartGoal.measurable}</p>
-                  </div>
+                  <details className="rounded-[22px] border border-dashed border-slate-200 bg-white/72 p-4">
+                    <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
+                      Xem nguồn vào từ SMART
+                    </summary>
+                    <div className="mt-4 space-y-3">
+                      <div className="rounded-[18px] border border-white/70 bg-white/86 p-4">
+                        <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Specific</p>
+                        <p className="mt-2 text-sm leading-7 text-slate-700">{smartGoal.specific}</p>
+                      </div>
+                      <div className="rounded-[18px] border border-white/70 bg-white/86 p-4">
+                        <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Measurable</p>
+                        <p className="mt-2 text-sm leading-7 text-slate-700">{smartGoal.measurable}</p>
+                      </div>
+                    </div>
+                  </details>
                 </div>
               </div>
             )}
