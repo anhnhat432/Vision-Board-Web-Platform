@@ -149,8 +149,10 @@ describe("Dashboard fresh workspace states", () => {
 
     expect(await screen.findByTestId("fresh-workspace-empty-state")).toBeInTheDocument();
     expect(screen.getByText("Chưa có dữ liệu thực thi để hiển thị.")).toBeInTheDocument();
-    expect(screen.getByText("Chưa có dữ liệu bánh xe cuộc sống")).toBeInTheDocument();
+    expect(screen.queryByText("Chưa có dữ liệu bánh xe cuộc sống")).not.toBeInTheDocument();
     expect(screen.queryByText("Tổng quan hiệu suất 12 tuần")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Bắt đầu Life Balance" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Tôi đã có insight" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Mục tiêu gần đây")).not.toBeInTheDocument();
   });
 });

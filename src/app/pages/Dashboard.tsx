@@ -430,6 +430,17 @@ function DashboardContent({
       }))
     : [];
 
+  const hasWorkspaceSignals =
+    hasRealLifeBalance || visibleGoals.length > 0 || visibleVisionBoards.length > 0 || visibleReflections.length > 0;
+  const setupPrimaryPath = hasRealLifeBalance ? "/life-insight" : "/onboarding";
+  const setupPrimaryLabel = hasRealLifeBalance ? "Tạo mục tiêu" : "Bắt đầu Life Balance";
+  const setupStartTitle = hasRealLifeBalance
+    ? "Đi qua insight rồi chốt mục tiêu SMART."
+    : "Chấm Life Balance trước để dashboard không bị rỗng.";
+  const setupStartDescription = hasRealLifeBalance
+    ? "Đây là funnel gốc của web: insight trước, SMART sau, rồi mới sang feasibility và hệ 12 tuần."
+    : "Bước này tạo dữ liệu thật cho các màn sau: Life Insight, SMART Goal, feasibility và kế hoạch 12 tuần.";
+
   const overviewCards = isPublicVisitor
     ? [
         {
@@ -515,12 +526,14 @@ function DashboardContent({
       ]
     : [
         {
-          title: activeSystem ? "Mở trung tâm 12 tuần" : "Tạo mục tiêu",
+          title: activeSystem ? "Mở trung tâm 12 tuần" : setupPrimaryLabel,
           description: activeSystem
             ? "Vào thẳng hàng việc hôm nay."
-            : "Đi lại đúng funnel: insight, SMART, feasibility rồi mới vào 12 tuần.",
+            : hasRealLifeBalance
+              ? "Đi tiếp đúng funnel: insight, SMART, feasibility rồi mới vào 12 tuần."
+              : "Chấm Life Balance trước để có dữ liệu thật cho mục tiêu.",
           icon: CalendarDays,
-          onClick: () => navigate(activeSystem ? "/12-week-system" : "/life-insight"),
+          onClick: () => navigate(activeSystem ? "/12-week-system" : setupPrimaryPath),
         },
         {
           title: "Mở mục tiêu",
@@ -694,7 +707,9 @@ function DashboardContent({
   }).filter((t) => t.kind !== dismissedTrigger);
   const topTrigger = activeTriggers[0] ?? null;
   const shouldShowSetupGuide = !isPublicVisitor && !activeSystem;
-  const shouldShowTopSidebar = !isPublicVisitor && !activeSystem;
+  const shouldShowTopSidebar = !isPublicVisitor && !activeSystem && hasWorkspaceSignals;
+  const shouldShowWorkspaceDetailGrid = !isPublicVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
+  const shouldShowMainDashboardCard = isPublicVisitor || Boolean(activeSystem) || hasWorkspaceSignals;
   const dashboardTourSteps = shouldShowTopSidebar
     ? DASHBOARD_TOUR_STEPS
     : DASHBOARD_TOUR_STEPS.filter(
@@ -866,9 +881,10 @@ function DashboardContent({
       >
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="space-y-4">
-            <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.38)]">
-              <CardContent className="p-5 sm:p-6 lg:p-7">
-                <div className="space-y-5">
+            {shouldShowMainDashboardCard && (
+              <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.38)]">
+                <CardContent className="p-5 sm:p-6 lg:p-7">
+                  <div className="space-y-5">
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-slate-500">
                       {isPublicVisitor ? "Trang chính" : "Hôm nay"}
@@ -895,7 +911,7 @@ function DashboardContent({
                         ? "Trang chính giúp bạn nhìn rõ luồng sản phẩm trước khi tạo tài khoản."
                         : activeSystem
                           ? `Quay lại đúng nhịp của "${visibleActiveTwelveWeekGoal?.title ?? "chu kỳ 12 tuần hiện tại"}".`
-                          : "Bắt đầu từ một bước rõ ràng, rồi nối tiếp sang hệ 12 tuần."}
+                          : setupStartTitle}
                     </h1>
                     <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                       {isPublicVisitor
@@ -904,7 +920,7 @@ function DashboardContent({
                           ? activeSystemTodayOpenTasks.length > 0
                             ? `Tập trung vào ${activeSystemTodayOpenTasks.length} việc đang mở hôm nay trước khi xem tiến độ tuần.`
                             : "Hôm nay không còn việc mở. Nếu còn thời gian, hãy xem lại tuần hoặc chuẩn bị review khi đến hạn."
-                          : "Đi tiếp theo đúng thứ tự: Life Balance, Life Insight, SMART Goal, rồi mới sang chu kỳ 12 tuần."}
+                          : setupStartDescription}
                     </p>
                   </div>
 
@@ -1018,22 +1034,20 @@ function DashboardContent({
                         {isPublicVisitor ? "Bắt đầu đúng cách" : "Bắt đầu nhanh nhất"}
                       </p>
                       <h2 className="mt-2 text-2xl font-bold text-slate-950">
-                        {isPublicVisitor
-                          ? "Tạo tài khoản trước khi nhập dữ liệu thật."
-                          : "Đi qua insight rồi chốt mục tiêu SMART."}
+                        {isPublicVisitor ? "Tạo tài khoản trước khi nhập dữ liệu thật." : setupStartTitle}
                       </h2>
                       <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
                         {isPublicVisitor
                           ? "Phần onboarding, mục tiêu và kế hoạch đều là dữ liệu cá nhân. Đăng ký trước sẽ giúp bạn lưu lại tiến trình và quay lại đúng workspace sau này."
-                          : "Đây là funnel gốc của web: insight trước, SMART sau, rồi mới sang feasibility và hệ 12 tuần."}
+                          : setupStartDescription}
                       </p>
                       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                         <Button
                           data-tour-id="dashboard-primary-action"
                           className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
-                          onClick={() => (isPublicVisitor ? handleAuthNavigate("signup") : navigate("/life-insight"))}
+                          onClick={() => (isPublicVisitor ? handleAuthNavigate("signup") : navigate(setupPrimaryPath))}
                         >
-                          {isPublicVisitor ? "Đăng ký miễn phí" : "Tạo mục tiêu"}
+                          {isPublicVisitor ? "Đăng ký miễn phí" : setupPrimaryLabel}
                         </Button>
                         {isPublicVisitor ? (
                           <Button
@@ -1047,9 +1061,10 @@ function DashboardContent({
                       </div>
                     </div>
                   )}
-                </div>
-              </CardContent>
-            </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {shouldShowTopSidebar && (
               <>
@@ -1166,13 +1181,6 @@ function DashboardContent({
                     onClick={() => navigate("/onboarding")}
                   >
                     Bắt đầu Life Balance
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full border-slate-200 bg-white text-slate-900 hover:bg-slate-50 sm:w-auto"
-                    onClick={() => navigate("/life-insight")}
-                  >
-                    Tôi đã có insight
                   </Button>
                 </div>
               </section>
@@ -1386,7 +1394,7 @@ function DashboardContent({
         </Reveal>
       )}
 
-      {!isPublicVisitor && (
+      {shouldShowWorkspaceDetailGrid && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
           <Reveal>
             <Card className="h-full border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]">
@@ -1670,7 +1678,7 @@ function DashboardContent({
         </Reveal>
       )}
 
-      {!isPublicVisitor && (
+      {shouldShowWorkspaceDetailGrid && (
         <Reveal>
           <Card className="glass-surface-sm mt-8 rounded-[28px] border shadow-none">
             <CardHeader className="pb-3">
