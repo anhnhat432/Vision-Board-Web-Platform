@@ -1,16 +1,7 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  CalendarDays,
-  CheckCircle2,
-  Compass,
-  Flag,
-  Sparkles,
-  Target,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, CheckCircle2, Compass, Flag, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
@@ -24,6 +15,7 @@ import { Label } from "../components/ui/label";
 import { Progress } from "../components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Textarea } from "../components/ui/textarea";
+import { trackAnalyticsEvent } from "../utils/analytics";
 import {
   APP_STORAGE_KEYS,
   type PricingPlanCode,
@@ -58,276 +50,24 @@ import { createGoal, updateGoal } from "@/services/goalService";
 import { saveGoalLink } from "@/lib/api/goalLinkStore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { isDemoMode } from "../utils/app-mode";
-
-type ResultType = "realistic" | "challenging" | "too_ambitious";
-type PlanLoadRecommendation = "lighter" | "balanced" | "push";
-type WeeklyCapacity = "low" | "medium" | "high";
-
-interface PendingFeasibilityResult {
-  resultType: ResultType;
-  resultTitle: string;
-  resultSummary: string;
-  recommendation: string;
-  readinessScore: number;
-  adjustedScore: number;
-  wheelScore: number;
-  diagnosticScore?: number;
-  maxDiagnosticScore?: number;
-  axisScores?: Array<{
-    axis: string;
-    label: string;
-    score: number;
-    maxScore: number;
-    percent: number;
-    diagnostic: string;
-  }>;
-  bottleneck?: {
-    axis: string;
-    label: string;
-    score: number;
-    action: string;
-  };
-  planLoad?: PlanLoadRecommendation;
-  weeklyCapacity?: WeeklyCapacity;
-  firstWeekGuidance?: string;
-  scopeRecommendation?: string;
-}
-
-interface LeadIndicatorDraft {
-  id: string;
-  name: string;
-  target: string;
-  unit: string;
-  type: TacticType;
-  cadence: "spread" | "frontload" | "backload";
-}
-
-interface TwelveWeekSetupDraft {
-  templateId: string;
-  goalType: string;
-  vision12Week: string;
-  week12Outcome: string;
-  lagMetricName: string;
-  lagMetricTarget: string;
-  lagMetricUnit: string;
-  leadIndicators: LeadIndicatorDraft[];
-  startDate: string;
-  reviewDay: string;
-  tacticLoadPreference: "balanced" | "lighter" | "push";
-  week4Milestone: string;
-  week8Milestone: string;
-  successEvidence: string;
-  dailyTimeBudget: string;
-  preferredDays: number[];
-  personalConstraint: "time" | "motivation" | "consistency" | "complexity" | "";
-}
-
-const STEPS = [
-  { id: "outcome", label: "Mục tiêu", title: "Mục tiêu 12 tuần" },
-  { id: "tactics", label: "Việc lặp lại", title: "2-4 việc giữ nhịp" },
-  { id: "week1", label: "Tuần 1", title: "Tuần đầu tiên và lịch nhìn lại" },
-  { id: "finish", label: "Chốt", title: "Chốt kế hoạch" },
-] as const;
-
-const GOAL_TYPES = [
-  { value: "Skill Learning", label: "Học kỹ năng" },
-  { value: "Habit Building", label: "Xây thói quen" },
-  { value: "Fitness / Health", label: "Sức khỏe" },
-  { value: "Exam / Study", label: "Thi cử / học tập" },
-  { value: "Career / Job Search", label: "Sự nghiệp / tìm việc" },
-  { value: "Finance / Saving", label: "Tài chính / tiết kiệm" },
-  { value: "Project Completion", label: "Hoàn thành dự án" },
-  { value: "Personal Growth", label: "Phát triển bản thân" },
-  { value: "Other", label: "Khác" },
-] as const;
-
-const REVIEW_DAYS = [
-  { value: "Monday", label: "Thứ Hai" },
-  { value: "Tuesday", label: "Thứ Ba" },
-  { value: "Wednesday", label: "Thứ Tư" },
-  { value: "Thursday", label: "Thứ Năm" },
-  { value: "Friday", label: "Thứ Sáu" },
-  { value: "Saturday", label: "Thứ Bảy" },
-  { value: "Sunday", label: "Chủ Nhật" },
-] as const;
-
-const LOAD_PREFERENCE_OPTIONS = [
-  { value: "balanced", label: "Cân bằng" },
-  { value: "lighter", label: "Nhẹ hơn" },
-  { value: "push", label: "Đẩy mạnh" },
-] as const;
-
-function getLoadPreferenceLabel(value: TwelveWeekSetupDraft["tacticLoadPreference"]): string {
-  return LOAD_PREFERENCE_OPTIONS.find((option) => option.value === value)?.label ?? "Cân bằng";
-}
-
-function getGoalTypeLabel(value: string): string {
-  return GOAL_TYPES.find((option) => option.value === value)?.label ?? value;
-}
-
-function getReviewDayLabel(value: string): string {
-  return REVIEW_DAYS.find((option) => option.value === value)?.label ?? value;
-}
-
-function getPlanLoadLabel(value: PlanLoadRecommendation | undefined): string {
-  if (value === "lighter") return "Nhẹ hơn";
-  if (value === "push") return "Đẩy nhẹ";
-  return "Cân bằng";
-}
-
-function getFeasibilityDraftDefaults(feasibility: PendingFeasibilityResult): Pick<
-  TwelveWeekSetupDraft,
-  "dailyTimeBudget" | "personalConstraint" | "tacticLoadPreference"
-> {
-  const dailyTimeBudget =
-    feasibility.weeklyCapacity === "low" ? "30min" : feasibility.weeklyCapacity === "high" ? "1.5h" : "1h";
-
-  const bottleneckAxis = feasibility.bottleneck?.axis;
-  const personalConstraint: TwelveWeekSetupDraft["personalConstraint"] =
-    bottleneckAxis === "time"
-      ? "time"
-      : bottleneckAxis === "energy" || bottleneckAxis === "routine"
-        ? "consistency"
-        : bottleneckAxis === "resources" || bottleneckAxis === "clarity" || bottleneckAxis === "wheel"
-          ? "complexity"
-          : bottleneckAxis === "obstacle"
-            ? "motivation"
-            : "";
-
-  return {
-    dailyTimeBudget,
-    personalConstraint,
-    tacticLoadPreference: feasibility.planLoad ?? "balanced",
-  };
-}
-
-function isPendingFeasibilityResult(value: unknown): value is PendingFeasibilityResult {
-  if (!value || typeof value !== "object") return false;
-  const result = value as Record<string, unknown>;
-
-  return (
-    (result.resultType === "realistic" ||
-      result.resultType === "challenging" ||
-      result.resultType === "too_ambitious") &&
-    typeof result.resultTitle === "string" &&
-    typeof result.resultSummary === "string" &&
-    typeof result.recommendation === "string" &&
-    typeof result.readinessScore === "number" &&
-    typeof result.adjustedScore === "number" &&
-    typeof result.wheelScore === "number"
-  );
-}
-
-function addDays(date: Date, amount: number): Date {
-  const next = new Date(date);
-  next.setDate(next.getDate() + amount);
-  return next;
-}
-
-function createIndicatorId(): string {
-  return `indicator_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-}
-
-function createIndicatorDraft(type: TacticType = "core"): LeadIndicatorDraft {
-  return {
-    id: createIndicatorId(),
-    name: "",
-    target: type === "core" ? "2" : "1",
-    unit: "lần/tuần",
-    type,
-    cadence: "spread",
-  };
-}
-
-function buildScheduleOffsets(target: string, cadence: LeadIndicatorDraft["cadence"]): number[] {
-  const parsedTarget = Number.parseInt(target, 10);
-  const frequency = Number.isFinite(parsedTarget) && parsedTarget > 0 ? Math.min(parsedTarget, 7) : 1;
-
-  if (cadence === "frontload") {
-    return Array.from({ length: frequency }, (_, index) => Math.min(index, 6));
-  }
-
-  if (cadence === "backload") {
-    return Array.from({ length: frequency }, (_, index) => Math.max(0, 7 - frequency + index));
-  }
-
-  switch (frequency) {
-    case 1:
-      return [1];
-    case 2:
-      return [1, 4];
-    case 3:
-      return [1, 3, 5];
-    case 4:
-      return [0, 2, 4, 6];
-    case 5:
-      return [0, 1, 2, 4, 6];
-    case 6:
-      return [0, 1, 2, 3, 4, 6];
-    default:
-      return [0, 1, 2, 3, 4, 5, 6];
-  }
-}
-
-function getCycleWeekStart(date: Date): Date {
-  const start = new Date(date);
-  start.setHours(0, 0, 0, 0);
-  const delta = (start.getDay() + 6) % 7;
-  start.setDate(start.getDate() - delta);
-  return start;
-}
-
-function buildWeeklyPlans(
-  week12Outcome: string,
-  week4Milestone: string,
-  week8Milestone: string,
-  focusOverrides?: string[],
-) {
-  return Array.from({ length: 12 }, (_, index) => {
-    const weekNumber = index + 1;
-    const phaseName = weekNumber <= 4 ? "Foundation" : weekNumber <= 8 ? "Build / Acceleration" : "Finish / Execution";
-
-    return {
-      weekNumber,
-      phaseName,
-      focus:
-        focusOverrides?.[index] ??
-        (weekNumber <= 4
-          ? "Giữ nhịp việc chính thật đều."
-          : weekNumber <= 8
-            ? "Tăng tốc điều đang hiệu quả và tạo đầu ra thật."
-            : "Về đích gọn, ưu tiên ít nhưng rõ."),
-      milestone:
-        weekNumber === 4 ? week4Milestone : weekNumber === 8 ? week8Milestone : weekNumber === 12 ? week12Outcome : "",
-      completed: false,
-    };
-  });
-}
-
-function buildScoreboard() {
-  return Array.from({ length: 12 }, (_, index) => ({
-    weekNumber: index + 1,
-    leadCompletionPercent: 0,
-    mainMetricProgress: "",
-    outputDone: "",
-    reviewDone: false,
-    weeklyScore: 0,
-  }));
-}
-
-function getPreviewTasks(indicators: LeadIndicatorDraft[]): string[] {
-  return indicators
-    .filter((indicator) => indicator.name.trim())
-    .flatMap((indicator) => {
-      const parsedTarget = Number.parseInt(indicator.target, 10);
-      const count = Number.isFinite(parsedTarget) && parsedTarget > 0 ? Math.min(parsedTarget, 3) : 1;
-
-      return Array.from({ length: count }, (_, index) =>
-        count === 1 ? indicator.name.trim() : `${indicator.name.trim()} ${index + 1}`,
-      );
-    })
-    .slice(0, 6);
-}
+import { GOAL_TYPES, LOAD_PREFERENCE_OPTIONS, REVIEW_DAYS, STEPS } from "./12WeekSetup/constants";
+import {
+  addDays,
+  buildScoreboard,
+  buildScheduleOffsets,
+  buildWeeklyPlans,
+  createIndicatorDraft,
+  createIndicatorId,
+  getCycleWeekStart,
+  getFeasibilityDraftDefaults,
+  getGoalTypeLabel,
+  getLoadPreferenceLabel,
+  getPlanLoadLabel,
+  getPreviewTasks,
+  getReviewDayLabel,
+  isPendingFeasibilityResult,
+} from "./12WeekSetup/helpers";
+import type { LeadIndicatorDraft, PendingFeasibilityResult, TwelveWeekSetupDraft } from "./12WeekSetup/types";
 
 export function TwelveWeekSetup() {
   const navigate = useNavigate();
@@ -874,16 +614,32 @@ export function TwelveWeekSetup() {
 
     localStorage.setItem(APP_STORAGE_KEYS.latest12WeekGoalId, goalId);
     localStorage.setItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId, goalId);
-    trackAppEvent("12_week_plan_created", goalId, {
-      reviewDay: draft.reviewDay,
-      coreTactics: String(coreCount),
-      optionalTactics: String(optionalCount),
-      templateId: selectedTemplate?.id ?? "custom",
-      plan: currentPlan,
-      dailyTimeBudget: draft.dailyTimeBudget || "none",
-      preferredDaysCount: String(draft.preferredDays.length),
-      personalConstraint: draft.personalConstraint || "none",
-    });
+    trackAnalyticsEvent(
+      "twelve_week_plan_created",
+      {
+        goal_type: draft.goalType,
+        focus_area: focusArea,
+        total_weeks: 12,
+        lead_indicator_count: validIndicators.length,
+        core_indicator_count: coreCount,
+        task_count: previewTasks.length,
+        template_tier: selectedTemplate ? (selectedTemplate.requiredPlan ? "premium" : "free") : "none",
+      },
+      {
+        goalId,
+        legacyEventName: "12_week_plan_created",
+        legacyPayload: {
+          reviewDay: draft.reviewDay,
+          coreTactics: String(coreCount),
+          optionalTactics: String(optionalCount),
+          templateId: selectedTemplate?.id ?? "custom",
+          plan: currentPlan,
+          dailyTimeBudget: draft.dailyTimeBudget || "none",
+          preferredDaysCount: String(draft.preferredDays.length),
+          personalConstraint: draft.personalConstraint || "none",
+        },
+      },
+    );
     clearGoalPlanningDrafts();
 
     const backendGoalPayload = {
@@ -984,8 +740,8 @@ export function TwelveWeekSetup() {
                   Chốt một chu kỳ 12 tuần gọn, rõ và vào việc ngay.
                 </h1>
                 <p className="max-w-2xl text-sm leading-7 text-white/82 sm:text-base lg:text-lg">
-                  Bạn sẽ rời khỏi màn này với một kết quả rõ, 2-4 việc lặp lại có lịch làm, và một tuần đầu tiên đủ
-                  nhẹ để bắt đầu ngay.
+                  Bạn sẽ rời khỏi màn này với một kết quả rõ, 2-4 việc lặp lại có lịch làm, và một tuần đầu tiên đủ nhẹ
+                  để bắt đầu ngay.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 sm:gap-3">
@@ -1091,9 +847,7 @@ export function TwelveWeekSetup() {
                       </p>
                       <div className="mt-3 grid gap-3 md:grid-cols-3">
                         <div className="rounded-[18px] border border-amber-200 bg-white/76 p-3">
-                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-                            Cần chú ý
-                          </p>
+                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Cần chú ý</p>
                           <p className="mt-1 text-sm font-semibold text-slate-950">
                             {feasibility.bottleneck?.label ?? "Chưa có"}
                           </p>
@@ -1108,9 +862,7 @@ export function TwelveWeekSetup() {
                           </p>
                         </div>
                         <div className="rounded-[18px] border border-amber-200 bg-white/76 p-3">
-                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-                            Độ nặng
-                          </p>
+                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Độ nặng</p>
                           <p className="mt-1 text-sm font-semibold text-slate-950">
                             {getPlanLoadLabel(feasibility.planLoad)}
                           </p>
@@ -1190,7 +942,9 @@ export function TwelveWeekSetup() {
                             </p>
                           </div>
                           <Badge variant="outline" className="border-sky-200 bg-white text-sky-800">
-                            {recommendedTemplate.requiredPlan ? getPlanLabel(recommendedTemplate.requiredPlan) : "Miễn phí"}
+                            {recommendedTemplate.requiredPlan
+                              ? getPlanLabel(recommendedTemplate.requiredPlan)
+                              : "Miễn phí"}
                           </Badge>
                         </div>
                         <Button
@@ -1490,7 +1244,7 @@ export function TwelveWeekSetup() {
                         </Badge>
                       </div>
                     </div>
-                    )}
+                  )}
                   <details className="rounded-[22px] border border-dashed border-slate-200 bg-white/72 p-4">
                     <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                       Xem mục tiêu đã viết
@@ -1571,10 +1325,7 @@ export function TwelveWeekSetup() {
                               value={indicator.type}
                               onValueChange={(value) => handleIndicatorChange(index, "type", value as TacticType)}
                             >
-                              <SelectTrigger
-                                id={`tactic-type-${index}`}
-                                aria-label={`Chọn loại cho việc ${index + 1}`}
-                              >
+                              <SelectTrigger id={`tactic-type-${index}`} aria-label={`Chọn loại cho việc ${index + 1}`}>
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>

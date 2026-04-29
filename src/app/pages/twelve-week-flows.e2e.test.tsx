@@ -81,7 +81,7 @@ describe("12-week core flows", () => {
 
     renderAppRoute("/12-week-system");
 
-    await screen.findByText("Chu kỳ này chưa có việc hoặc metric đủ rõ");
+    await screen.findByText("Chu kỳ này chưa có việc hoặc chỉ số đủ rõ");
     expect(screen.getByText("Chưa có việc nào trong chu kỳ này")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Tạo lại chu kỳ" })).toBeInTheDocument();
   });

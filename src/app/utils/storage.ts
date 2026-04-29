@@ -126,6 +126,29 @@ const AUTH_OWNER_STORAGE_KEY = `${USER_DATA_STORAGE_KEY}:auth_owner_uid`;
 const ANONYMOUS_USER_DATA_STORAGE_KEY = `${USER_DATA_STORAGE_KEY}:anonymous`;
 const CURRENT_STORAGE_VERSION = 5;
 
+const AUXILIARY_USER_DATA_STORAGE_KEYS = [
+  ANONYMOUS_USER_DATA_STORAGE_KEY,
+  "backend_goal_links",
+  "backend_plan_links",
+  "backend_order_links",
+  "backend_vision_board_links",
+  "visionboard_orders_v1",
+  "last_reminder_date",
+  "visionboard_last_browser_notification",
+  "visionboard_last_outbox_sync",
+  "visionboard_last_entitlement_sync",
+  "visionboard_last_restore_access",
+  "visionboard_mock_billing_account",
+  "visionboard_new_user_guide_dismissed",
+  "visionboard_new_user_guide_seen_at",
+  "visionboard_rescue_dismissed",
+] as const;
+
+const AUXILIARY_USER_DATA_STORAGE_PREFIXES = [
+  `${USER_DATA_STORAGE_KEY}:auth:`,
+  "visionboard_mock_billing_session_",
+] as const;
+
 let _cachedUserData: UserData | null = null;
 let _cachedRawHash: string | null = null;
 
@@ -161,6 +184,21 @@ function resetUserDataCache(): void {
 
 function getScopedUserDataStorageKey(authUid: string): string {
   return `${USER_DATA_STORAGE_KEY}:auth:${encodeURIComponent(authUid)}`;
+}
+
+function removeKnownAuxiliaryUserData(): void {
+  AUXILIARY_USER_DATA_STORAGE_KEYS.forEach((key) => {
+    localStorage.removeItem(key);
+  });
+
+  for (let index = localStorage.length - 1; index >= 0; index -= 1) {
+    const key = localStorage.key(index);
+    if (!key) continue;
+
+    if (AUXILIARY_USER_DATA_STORAGE_PREFIXES.some((prefix) => key.startsWith(prefix))) {
+      localStorage.removeItem(key);
+    }
+  }
 }
 
 function createFreshUserData(): UserData {
@@ -783,9 +821,13 @@ export function clearLocalDeviceSignals(): void {
   const data = getUserData();
   clearLocalDeviceSignalsInData(data);
   saveUserData(data);
-  localStorage.removeItem("last_reminder_date");
-  localStorage.removeItem("visionboard_last_browser_notification");
-  localStorage.removeItem("visionboard_last_outbox_sync");
+  [
+    "last_reminder_date",
+    "visionboard_last_browser_notification",
+    "visionboard_last_outbox_sync",
+  ].forEach((key) => {
+    localStorage.removeItem(key);
+  });
 }
 
 export function exportUserDataSnapshot(): string {
@@ -820,23 +862,16 @@ export function getPrivacyConsents(): Record<PrivacyConsentCategory, boolean> {
 }
 
 export function deleteAllUserData(): void {
-  const activeAuthUid = readActiveAuthOwnerUid();
-
   // Remove main data key first
   localStorage.removeItem(STORAGE_KEY);
   resetUserDataCache();
-  if (activeAuthUid) {
-    localStorage.removeItem(getScopedUserDataStorageKey(activeAuthUid));
-  }
   localStorage.removeItem(AUTH_OWNER_STORAGE_KEY);
 
   const keys = Object.values(APP_STORAGE_KEYS);
   for (const key of keys) {
     localStorage.removeItem(key);
   }
-  localStorage.removeItem("last_reminder_date");
-  localStorage.removeItem("visionboard_last_browser_notification");
-  localStorage.removeItem("visionboard_last_outbox_sync");
+  removeKnownAuxiliaryUserData();
   notifyUserDataUpdated();
 }
 

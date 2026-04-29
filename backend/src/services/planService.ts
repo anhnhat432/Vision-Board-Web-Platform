@@ -146,7 +146,7 @@ function validateUpdatePlanPayload(payload: unknown): UpdatePlanPayload {
   return updates;
 }
 
-class PlanService {
+export class PlanService {
   constructor(
     private readonly planRepository: MongoPlanRepository,
     private readonly weekRepository: MongoWeekRepository,

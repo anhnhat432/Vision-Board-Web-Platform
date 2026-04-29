@@ -13,6 +13,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Progress } from "../components/ui/progress";
 import { Textarea } from "../components/ui/textarea";
+import { trackAnalyticsEvent } from "../utils/analytics";
 import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
 import { getSmartGoalStarter, getSmartGoalStarterPreview } from "../utils/smart-goal-starters";
 import { APP_STORAGE_KEYS, getLifeAreaLabel, getUserData } from "../utils/storage";
@@ -335,7 +336,9 @@ function buildGoalClarityItems(smartData: SMARTData): GoalClarityItem[] {
     {
       id: "measurable",
       label: "Có dấu hiệu theo dõi",
-      detail: metricReady ? "Đã có chỉ số và mốc muốn chạm tới." : "Cần một chỉ số và mốc muốn chạm tới để tránh đoán cảm tính.",
+      detail: metricReady
+        ? "Đã có chỉ số và mốc muốn chạm tới."
+        : "Cần một chỉ số và mốc muốn chạm tới để tránh đoán cảm tính.",
       done: metricReady,
       stepKey: "measurable",
     },
@@ -352,7 +355,10 @@ function buildGoalClarityItems(smartData: SMARTData): GoalClarityItem[] {
     {
       id: "relevant",
       label: "Có lý do đủ mạnh",
-      detail: motivation.length >= 15 ? "Lý do đã đủ rõ để nhắc bạn khi khó giữ nhịp." : "Viết lý do đủ thật để mục tiêu này đáng theo đuổi.",
+      detail:
+        motivation.length >= 15
+          ? "Lý do đã đủ rõ để nhắc bạn khi khó giữ nhịp."
+          : "Viết lý do đủ thật để mục tiêu này đáng theo đuổi.",
       done: motivation.length >= 15,
       stepKey: "relevant",
     },
@@ -531,6 +537,13 @@ export function SMARTGoalSetup() {
     });
 
     localStorage.setItem(APP_STORAGE_KEYS.pendingSmartGoal, JSON.stringify(smartGoal));
+    trackAnalyticsEvent("smart_goal_created", {
+      focus_area: focusArea,
+      target_mode: smartData.timeBound.mode,
+      target_weeks: smartData.timeBound.mode === "weeks" ? targetWeeks : undefined,
+      has_baseline: measurableBaseline !== undefined,
+      weekly_hours: weeklyHours,
+    });
 
     navigate("/feasibility");
   };
@@ -1129,7 +1142,11 @@ export function SMARTGoalSetup() {
                       {clarityDoneCount}/{clarityItems.length}
                     </Badge>
                   </div>
-                  <Progress value={clarityProgress} className="mt-4 h-2" aria-label={`Độ rõ của mục tiêu: ${clarityDoneCount}/${clarityItems.length}`} />
+                  <Progress
+                    value={clarityProgress}
+                    className="mt-4 h-2"
+                    aria-label={`Độ rõ của mục tiêu: ${clarityDoneCount}/${clarityItems.length}`}
+                  />
                   <div className="mt-4 grid gap-2 sm:grid-cols-2">
                     {clarityItems.map((item) => (
                       <button
@@ -1148,7 +1165,11 @@ export function SMARTGoalSetup() {
                               item.done ? "bg-emerald-600 text-white" : "bg-white text-slate-400"
                             }`}
                           >
-                            {item.done ? <CheckCircle2 className="h-3.5 w-3.5" /> : <CircleAlert className="h-3.5 w-3.5" />}
+                            {item.done ? (
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                            ) : (
+                              <CircleAlert className="h-3.5 w-3.5" />
+                            )}
                           </span>
                           <span>
                             <span className="block text-sm font-semibold text-slate-900">{item.label}</span>

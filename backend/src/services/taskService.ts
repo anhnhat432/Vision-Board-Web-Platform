@@ -92,7 +92,7 @@ function validateUpdateTaskPayload(payload: unknown): { title?: string; status?:
   return updates;
 }
 
-class TaskService {
+export class TaskService {
   constructor(
     private readonly planRepository: MongoPlanRepository,
     private readonly weekRepository: MongoWeekRepository,

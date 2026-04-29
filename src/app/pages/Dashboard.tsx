@@ -37,6 +37,7 @@ import { usePageTour } from "../hooks/usePageTour";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useUpgradeDialog } from "../hooks/useUpgradeDialog";
+import { trackAnalyticsEvent } from "../utils/analytics";
 import {
   type UserData,
   calculateGoalProgress,
@@ -113,7 +114,7 @@ function PublicVisitorHero({ onSignIn, onSignUp }: { onSignIn: () => void; onSig
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button className="bg-slate-950 text-white hover:bg-slate-800" onClick={onSignUp}>
                 <UserPlus className="h-4 w-4" />
-                Bắt đầu miễn phí
+                Đăng ký miễn phí để lưu
               </Button>
               <Button variant="outline" className="border-slate-200 bg-white text-slate-900" onClick={onSignIn}>
                 <LogIn className="h-4 w-4" />
@@ -202,7 +203,7 @@ const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
     targetId: "dashboard-start-card",
     title: "Bắt đầu từ khối này",
     description:
-      "Nếu chưa có chu kỳ, hãy nhìn khối này trước. Đây là nơi dẫn bạn qua đúng flow: insight, SMART, feasibility rồi mới vào 12 tuần.",
+      "Nếu chưa có chu kỳ, hãy nhìn khối này trước. Đây là nơi dẫn bạn qua đúng flow: insight, SMART, kiểm tra tính thực tế rồi mới vào 12 tuần.",
   },
   {
     id: "attention",
@@ -279,6 +280,7 @@ function DashboardContent({
   const { isConfigured, user } = useAuthContext();
   const [dismissedTrigger, setDismissedTrigger] = useState<string | null>(null);
   const importFileRef = useRef<HTMLInputElement>(null);
+  const progressViewedGoalIdRef = useRef<string | null>(null);
   const { currentPlanCode, currentPlanDefinition, entitlementKeys, premiumStatusItems } = usePlanEntitlements(userData);
   const isPublicVisitor = isConfigured && !user;
   const visibleGoals = isPublicVisitor ? [] : userData.goals;
@@ -422,6 +424,23 @@ function DashboardContent({
         ).slice(0, 3)
       : [];
 
+  useEffect(() => {
+    if (!visibleActiveTwelveWeekGoal || !effectiveSystem || !activeSystemWeek) return;
+    if (progressViewedGoalIdRef.current === visibleActiveTwelveWeekGoal.id) return;
+
+    progressViewedGoalIdRef.current = visibleActiveTwelveWeekGoal.id;
+    trackAnalyticsEvent(
+      "progress_viewed",
+      {
+        source: "dashboard",
+        week_number: activeSystemWeek,
+        total_weeks: effectiveSystem.totalWeeks,
+        current_plan: currentPlanCode,
+      },
+      { goalId: visibleActiveTwelveWeekGoal.id },
+    );
+  }, [activeSystemWeek, currentPlanCode, effectiveSystem, visibleActiveTwelveWeekGoal]);
+
   const radarData = hasRealLifeBalance
     ? visibleWheelOfLife.map((area) => ({
         subject: getLifeAreaLabel(area.name),
@@ -438,8 +457,8 @@ function DashboardContent({
     ? "Đi qua insight rồi chốt mục tiêu SMART."
     : "Chấm Life Balance trước để dashboard không bị rỗng.";
   const setupStartDescription = hasRealLifeBalance
-    ? "Đây là funnel gốc của web: insight trước, SMART sau, rồi mới sang feasibility và hệ 12 tuần."
-    : "Bước này tạo dữ liệu thật cho các màn sau: Life Insight, SMART Goal, feasibility và kế hoạch 12 tuần.";
+    ? "Đây là funnel gốc của web: insight trước, SMART sau, rồi mới kiểm tra tính thực tế và vào hệ 12 tuần."
+    : "Bước này tạo dữ liệu thật cho các màn sau: Life Insight, SMART Goal, kiểm tra tính thực tế và kế hoạch 12 tuần.";
 
   const overviewCards = isPublicVisitor
     ? [
@@ -506,7 +525,7 @@ function DashboardContent({
   const quickActions = isPublicVisitor
     ? [
         {
-          title: "Đăng ký để bắt đầu",
+          title: "Đăng ký để lưu workspace",
           description: "Tạo workspace riêng để lưu bánh xe cuộc sống, mục tiêu SMART và kế hoạch 12 tuần.",
           icon: UserPlus,
           onClick: () => handleAuthNavigate("signup"),
@@ -518,8 +537,8 @@ function DashboardContent({
           onClick: () => handleAuthNavigate("signin"),
         },
         {
-          title: "Hiểu luồng chính",
-          description: "Bắt đầu từ Life Balance, chọn insight, chốt mục tiêu SMART rồi mới vào 12 tuần.",
+          title: "Đăng ký rồi đi theo luồng chính",
+          description: "Sau khi có workspace, bạn đi từ Life Balance, chọn insight, chốt mục tiêu SMART rồi mới vào 12 tuần.",
           icon: CalendarDays,
           onClick: () => handleAuthNavigate("signup"),
         },
@@ -530,7 +549,7 @@ function DashboardContent({
           description: activeSystem
             ? "Vào thẳng hàng việc hôm nay."
             : hasRealLifeBalance
-              ? "Đi tiếp đúng funnel: insight, SMART, feasibility rồi mới vào 12 tuần."
+              ? "Đi tiếp đúng thứ tự: insight, SMART, kiểm tra tính thực tế rồi mới vào 12 tuần."
               : "Chấm Life Balance trước để có dữ liệu thật cho mục tiêu.",
           icon: CalendarDays,
           onClick: () => navigate(activeSystem ? "/12-week-system" : setupPrimaryPath),
@@ -885,182 +904,192 @@ function DashboardContent({
               <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.38)]">
                 <CardContent className="p-5 sm:p-6 lg:p-7">
                   <div className="space-y-5">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                      {isPublicVisitor ? "Trang chính" : "Hôm nay"}
-                    </span>
-                    {isPublicVisitor ? (
-                      <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
-                        Đăng ký để lưu và đồng bộ dữ liệu
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        {isPublicVisitor ? "Trang chính" : "Hôm nay"}
                       </span>
-                    ) : (
-                      <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
-                        Gói {getPlanLabel(currentPlanCode)}
-                      </span>
-                    )}
-                    {activeSystem && activeSystemWeek && (
-                      <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
-                        Tuần {activeSystemWeek} của chu kỳ hiện tại
-                      </span>
-                    )}
-                  </div>
+                      {isPublicVisitor ? (
+                        <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
+                          Đăng ký để lưu và đồng bộ dữ liệu
+                        </span>
+                      ) : (
+                        <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
+                          Gói {getPlanLabel(currentPlanCode)}
+                        </span>
+                      )}
+                      {activeSystem && activeSystemWeek && (
+                        <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
+                          Tuần {activeSystemWeek} của chu kỳ hiện tại
+                        </span>
+                      )}
+                    </div>
 
-                  <div className="space-y-3">
-                    <h1 className="max-w-3xl break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-                      {isPublicVisitor
-                        ? "Trang chính giúp bạn nhìn rõ luồng sản phẩm trước khi tạo tài khoản."
-                        : activeSystem
-                          ? `Quay lại đúng nhịp của "${visibleActiveTwelveWeekGoal?.title ?? "chu kỳ 12 tuần hiện tại"}".`
-                          : setupStartTitle}
-                    </h1>
-                    <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                      {isPublicVisitor
-                        ? "Bạn có thể xem tổng quan ngay tại đây. Khi bắt đầu thật, hãy đăng ký để dữ liệu mục tiêu và kế hoạch không bị mất theo trình duyệt."
-                        : activeSystem
-                          ? activeSystemTodayOpenTasks.length > 0
-                            ? `Tập trung vào ${activeSystemTodayOpenTasks.length} việc đang mở hôm nay trước khi xem tiến độ tuần.`
-                            : "Hôm nay không còn việc mở. Nếu còn thời gian, hãy xem lại tuần hoặc chuẩn bị review khi đến hạn."
-                          : setupStartDescription}
-                    </p>
-                  </div>
+                    <div className="space-y-3">
+                      <h1 className="max-w-3xl break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+                        {isPublicVisitor
+                          ? "Trang chính giúp bạn nhìn rõ luồng sản phẩm trước khi tạo tài khoản."
+                          : activeSystem
+                            ? `Quay lại đúng nhịp của "${visibleActiveTwelveWeekGoal?.title ?? "chu kỳ 12 tuần hiện tại"}".`
+                            : setupStartTitle}
+                      </h1>
+                      <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
+                        {isPublicVisitor
+                          ? "Bạn có thể xem tổng quan ngay tại đây. Khi bắt đầu thật, hãy đăng ký để dữ liệu mục tiêu và kế hoạch không bị mất theo trình duyệt."
+                          : activeSystem
+                            ? activeSystemTodayOpenTasks.length > 0
+                              ? `Tập trung vào ${activeSystemTodayOpenTasks.length} việc đang mở hôm nay trước khi xem tiến độ tuần.`
+                              : "Hôm nay không còn việc mở. Nếu còn thời gian, hãy xem lại tuần hoặc chuẩn bị review khi đến hạn."
+                            : setupStartDescription}
+                      </p>
+                    </div>
 
-                  {activeSystem && activeSystemWeekCompletion && activeSystemWeekRange ? (
-                    <div className="grid gap-4">
-                      <div
-                        data-tour-id="dashboard-start-card"
-                        className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 sm:p-5"
-                      >
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                              Làm tiếp ngay
-                            </p>
-                            <h2 className="mt-2 text-2xl font-bold text-slate-950">
-                              {activeSystemTodayOpenTasks.length > 0
-                                ? `${activeSystemTodayOpenTasks.length} việc đang mở hôm nay`
-                                : "Hôm nay đang khá gọn"}
-                            </h2>
-                          </div>
-                          <Button
-                            data-tour-id="dashboard-primary-action"
-                            variant="outline"
-                            className="w-full border-slate-950 bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
-                            onClick={() => navigate("/12-week-system")}
-                          >
-                            Mở trung tâm 12 tuần
-                            <ArrowRight className="h-4 w-4" />
-                          </Button>
-                        </div>
-
-                        {activeSystemTaskPreview.length > 0 ? (
-                          <div className="mt-4 space-y-3">
-                            {activeSystemTaskPreview.map((task, index) => (
-                              <div
-                                key={task.id}
-                                className={`flex items-center gap-4 rounded-[22px] border px-4 py-4 ${
-                                  index === 0 ? "border-slate-300 bg-white" : "border-slate-200 bg-white/80"
-                                }`}
-                              >
-                                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-sm font-semibold text-white">
-                                  {index + 1}
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <p className="truncate text-sm font-semibold text-slate-950">{task.title}</p>
-                                  <p className="mt-1 text-xs text-slate-500">
-                                    {index === 0 ? "Việc nên chạm vào đầu tiên" : "Việc đang chờ phía sau"}
-                                  </p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="mt-4 rounded-[22px] border border-slate-200 bg-white p-4">
-                            <p className="font-semibold text-slate-950">Bạn đã chốt xong phần mở của hôm nay.</p>
-                            <p className="mt-1 text-sm leading-7 text-slate-600">
-                              Nếu còn sức, hãy mở trung tâm 12 tuần để xem phần còn lại của tuần hoặc chốt review khi
-                              đến hạn.
-                            </p>
-                          </div>
-                        )}
-
-                        <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                          <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-3">
-                            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Hôm nay</p>
-                            <p className="mt-1 text-xl font-bold text-slate-950">{activeSystemTodayOpenTasks.length}</p>
-                            <p className="text-xs text-slate-500">{activeSystemTodayCompletedCount} việc đã chốt</p>
-                          </div>
-                          <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-3">
-                            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tuần này</p>
-                            <div className="mt-1 flex items-center gap-3">
-                              <p className="text-xl font-bold text-slate-950">{activeSystemWeekCompletion.percent}%</p>
-                              <Progress
-                                value={activeSystemWeekCompletion.percent}
-                                className="h-2 flex-1 bg-slate-100"
-                              />
+                    {activeSystem && activeSystemWeekCompletion && activeSystemWeekRange ? (
+                      <div className="grid gap-4">
+                        <div
+                          data-tour-id="dashboard-start-card"
+                          className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 sm:p-5"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                                Làm tiếp ngay
+                              </p>
+                              <h2 className="mt-2 text-2xl font-bold text-slate-950">
+                                {activeSystemTodayOpenTasks.length > 0
+                                  ? `${activeSystemTodayOpenTasks.length} việc đang mở hôm nay`
+                                  : "Hôm nay đang khá gọn"}
+                              </h2>
                             </div>
-                            <p className="mt-1 text-xs text-slate-500">
-                              {formatCalendarDate(activeSystemWeekRange.start)} -{" "}
-                              {formatCalendarDate(activeSystemWeekRange.end)}
-                            </p>
+                            <Button
+                              data-tour-id="dashboard-primary-action"
+                              variant="outline"
+                              className="w-full border-slate-950 bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
+                              onClick={() => navigate("/12-week-system")}
+                            >
+                              Mở trung tâm 12 tuần
+                              <ArrowRight className="h-4 w-4" />
+                            </Button>
                           </div>
-                          <div
-                            className={`rounded-[18px] border px-4 py-3 ${
-                              reviewDueToday ? "border-amber-200 bg-amber-50" : "border-slate-200 bg-white"
-                            }`}
-                          >
-                            <p
-                              className={`text-xs font-semibold uppercase tracking-[0.14em] ${
-                                reviewDueToday ? "text-amber-700" : "text-slate-500"
+
+                          {activeSystemTaskPreview.length > 0 ? (
+                            <div className="mt-4 space-y-3">
+                              {activeSystemTaskPreview.map((task, index) => (
+                                <div
+                                  key={task.id}
+                                  className={`flex items-center gap-4 rounded-[22px] border px-4 py-4 ${
+                                    index === 0 ? "border-slate-300 bg-white" : "border-slate-200 bg-white/80"
+                                  }`}
+                                >
+                                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-sm font-semibold text-white">
+                                    {index + 1}
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="truncate text-sm font-semibold text-slate-950">{task.title}</p>
+                                    <p className="mt-1 text-xs text-slate-500">
+                                      {index === 0 ? "Việc nên chạm vào đầu tiên" : "Việc đang chờ phía sau"}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="mt-4 rounded-[22px] border border-slate-200 bg-white p-4">
+                              <p className="font-semibold text-slate-950">Bạn đã chốt xong phần mở của hôm nay.</p>
+                              <p className="mt-1 text-sm leading-7 text-slate-600">
+                                Nếu còn sức, hãy mở trung tâm 12 tuần để xem phần còn lại của tuần hoặc chốt review khi
+                                đến hạn.
+                              </p>
+                            </div>
+                          )}
+
+                          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                            <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-3">
+                              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                Hôm nay
+                              </p>
+                              <p className="mt-1 text-xl font-bold text-slate-950">
+                                {activeSystemTodayOpenTasks.length}
+                              </p>
+                              <p className="text-xs text-slate-500">{activeSystemTodayCompletedCount} việc đã chốt</p>
+                            </div>
+                            <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-3">
+                              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                Tuần này
+                              </p>
+                              <div className="mt-1 flex items-center gap-3">
+                                <p className="text-xl font-bold text-slate-950">
+                                  {activeSystemWeekCompletion.percent}%
+                                </p>
+                                <Progress
+                                  value={activeSystemWeekCompletion.percent}
+                                  className="h-2 flex-1 bg-slate-100"
+                                />
+                              </div>
+                              <p className="mt-1 text-xs text-slate-500">
+                                {formatCalendarDate(activeSystemWeekRange.start)} -{" "}
+                                {formatCalendarDate(activeSystemWeekRange.end)}
+                              </p>
+                            </div>
+                            <div
+                              className={`rounded-[18px] border px-4 py-3 ${
+                                reviewDueToday ? "border-amber-200 bg-amber-50" : "border-slate-200 bg-white"
                               }`}
                             >
-                              Review
-                            </p>
-                            <p className="mt-1 text-base font-bold text-slate-950">
-                              {reviewDueToday ? "Đến hạn hôm nay" : getReviewDayLabel(activeSystem.reviewDay)}
-                            </p>
-                            <p className="text-xs text-slate-500">
-                              {reviewDueToday ? "Nên chốt trước tuần mới." : "Ngày cố định của chu kỳ."}
-                            </p>
+                              <p
+                                className={`text-xs font-semibold uppercase tracking-[0.14em] ${
+                                  reviewDueToday ? "text-amber-700" : "text-slate-500"
+                                }`}
+                              >
+                                Review
+                              </p>
+                              <p className="mt-1 text-base font-bold text-slate-950">
+                                {reviewDueToday ? "Đến hạn hôm nay" : getReviewDayLabel(activeSystem.reviewDay)}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                {reviewDueToday ? "Nên chốt trước tuần mới." : "Ngày cố định của chu kỳ."}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ) : (
-                    <div
-                      data-tour-id="dashboard-start-card"
-                      className="rounded-[26px] border border-slate-200 bg-slate-50/80 p-5"
-                    >
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                        {isPublicVisitor ? "Bắt đầu đúng cách" : "Bắt đầu nhanh nhất"}
-                      </p>
-                      <h2 className="mt-2 text-2xl font-bold text-slate-950">
-                        {isPublicVisitor ? "Tạo tài khoản trước khi nhập dữ liệu thật." : setupStartTitle}
-                      </h2>
-                      <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
-                        {isPublicVisitor
-                          ? "Phần onboarding, mục tiêu và kế hoạch đều là dữ liệu cá nhân. Đăng ký trước sẽ giúp bạn lưu lại tiến trình và quay lại đúng workspace sau này."
-                          : setupStartDescription}
-                      </p>
-                      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                        <Button
-                          data-tour-id="dashboard-primary-action"
-                          className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
-                          onClick={() => (isPublicVisitor ? handleAuthNavigate("signup") : navigate(setupPrimaryPath))}
-                        >
-                          {isPublicVisitor ? "Đăng ký miễn phí" : setupPrimaryLabel}
-                        </Button>
-                        {isPublicVisitor ? (
+                    ) : (
+                      <div
+                        data-tour-id="dashboard-start-card"
+                        className="rounded-[26px] border border-slate-200 bg-slate-50/80 p-5"
+                      >
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                          {isPublicVisitor ? "Bắt đầu đúng cách" : "Bắt đầu nhanh nhất"}
+                        </p>
+                        <h2 className="mt-2 text-2xl font-bold text-slate-950">
+                          {isPublicVisitor ? "Tạo tài khoản trước khi nhập dữ liệu thật." : setupStartTitle}
+                        </h2>
+                        <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
+                          {isPublicVisitor
+                            ? "Phần onboarding, mục tiêu và kế hoạch đều là dữ liệu cá nhân. Đăng ký trước sẽ giúp bạn lưu lại tiến trình và quay lại đúng workspace sau này."
+                            : setupStartDescription}
+                        </p>
+                        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                           <Button
-                            variant="outline"
-                            className="w-full border-slate-200 bg-white text-slate-900 sm:w-auto"
-                            onClick={() => handleAuthNavigate("signin")}
+                            data-tour-id="dashboard-primary-action"
+                            className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
+                            onClick={() =>
+                              isPublicVisitor ? handleAuthNavigate("signup") : navigate(setupPrimaryPath)
+                            }
                           >
-                            Đăng nhập
+                            {isPublicVisitor ? "Đăng ký miễn phí" : setupPrimaryLabel}
                           </Button>
-                        ) : null}
+                          {isPublicVisitor ? (
+                            <Button
+                              variant="outline"
+                              className="w-full border-slate-200 bg-white text-slate-900 sm:w-auto"
+                              onClick={() => handleAuthNavigate("signin")}
+                            >
+                              Đăng nhập
+                            </Button>
+                          ) : null}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -1158,8 +1187,8 @@ function DashboardContent({
                       Chưa có dữ liệu thực thi để hiển thị.
                     </h2>
                     <p className="mt-1 max-w-2xl text-sm leading-7 text-slate-600">
-                      Dashboard sẽ chỉ hiện điểm, streak và metric sau khi bạn tạo chu kỳ 12 tuần đầu tiên. Bây giờ nên
-                      đi từ Life Balance để có dữ liệu thật, rồi mới chốt mục tiêu SMART.
+                      Dashboard sẽ chỉ hiện điểm, chuỗi ngày và chỉ số sau khi bạn tạo chu kỳ 12 tuần đầu tiên. Bây giờ
+                      nên đi từ Life Balance để có dữ liệu thật, rồi mới chốt mục tiêu SMART.
                     </p>
                   </div>
                 </div>
@@ -1221,7 +1250,7 @@ function DashboardContent({
                   <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 text-sm font-semibold text-slate-950">
                     <span>Phân tích mở rộng</span>
                     <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-500">
-                      Tiến độ theo tuần + metric dẫn
+                      Tiến độ theo tuần + chỉ số dẫn
                     </span>
                   </summary>
                   <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
@@ -1417,7 +1446,7 @@ function DashboardContent({
                     onClick={() => (isPublicVisitor ? handleAuthNavigate("signup") : navigate("/life-insight"))}
                   >
                     <Plus className="h-4 w-4" />
-                    {isPublicVisitor ? "Bắt đầu" : "Tạo mục tiêu"}
+                    {isPublicVisitor ? "Đăng ký" : "Tạo mục tiêu"}
                   </Button>
                 </div>
               </CardHeader>
@@ -1427,7 +1456,7 @@ function DashboardContent({
                     <Target className="mx-auto mb-4 h-12 w-12 text-slate-300" />
                     <p>
                       {isPublicVisitor
-                        ? "Sau khi đăng ký, bạn sẽ đi qua Life Insight, SMART Goal và Feasibility Check trước khi tạo kế hoạch 12 tuần."
+                        ? "Sau khi đăng ký, bạn sẽ đi qua Life Insight, SMART Goal và kiểm tra tính thực tế trước khi tạo kế hoạch 12 tuần."
                         : "Chưa có mục tiêu nào. Hãy bắt đầu bằng mục tiêu đầu tiên của bạn."}
                     </p>
                     <Button
@@ -1517,7 +1546,7 @@ function DashboardContent({
                                 </div>
                                 <Progress value={progress} className="h-2.5" />
                                 {goal.twelveWeekSystem && !entitlementKeys.includes("premium_review_insights") && (
-                                  <p className="text-xs font-medium text-violet-700">Insight review đang khóa</p>
+                                  <p className="text-xs font-medium text-violet-700">Phân tích review đang khóa</p>
                                 )}
                               </div>
 

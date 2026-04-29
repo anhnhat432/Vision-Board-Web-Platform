@@ -237,8 +237,8 @@ export function TwelveWeekTodayTab({
                       <p className="font-semibold text-slate-900">Chưa có việc nào trong chu kỳ này</p>
                       <p className="text-sm leading-6 text-slate-600">
                         {hasLeadMetrics
-                          ? "Chu kỳ đã có tactic, nhưng chưa có task nào được tạo cho tuần hiện tại. Hãy kiểm tra lại setup hoặc tạo lại chu kỳ."
-                          : "Chu kỳ chưa có tactic/lead metric, nên dashboard chưa thể tạo hàng việc hôm nay."}
+                          ? "Chu kỳ đã có việc giữ nhịp, nhưng chưa có việc nào được tạo cho tuần hiện tại. Hãy kiểm tra lại setup hoặc tạo lại chu kỳ."
+                          : "Chu kỳ chưa có việc giữ nhịp, nên dashboard chưa thể tạo hàng việc hôm nay."}
                       </p>
                     </div>
                   )}

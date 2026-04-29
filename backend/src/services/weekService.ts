@@ -89,7 +89,7 @@ function validateWeeklyReviewPayload(payload: unknown, fallbackWeekNumber: numbe
   };
 }
 
-class WeekService {
+export class WeekService {
   constructor(
     private readonly planRepository: MongoPlanRepository,
     private readonly weekRepository: MongoWeekRepository,

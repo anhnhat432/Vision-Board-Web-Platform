@@ -344,7 +344,7 @@ export function TwelveWeekProgressTab({
               <CardHeader>
                 <CardTitle className="text-slate-950">Xu hướng thực thi theo tuần</CardTitle>
                 <CardDescription className="text-slate-600">
-                  So sánh mức hoàn thành cốt lõi, tùy chọn và điểm qua các tuần.
+                  So sánh mức hoàn thành việc cốt lõi, việc tùy chọn và điểm qua các tuần.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -402,9 +402,9 @@ export function TwelveWeekProgressTab({
               className="border border-emerald-200/80 bg-emerald-50/70 shadow-[0_18px_44px_-36px_rgba(5,150,105,0.24)]"
             >
               <CardHeader>
-                <CardTitle className="text-slate-950">Phân tích theo tactic</CardTitle>
+                <CardTitle className="text-slate-950">Phân tích theo việc giữ nhịp</CardTitle>
                 <CardDescription className="text-slate-600">
-                  Chi tiết hoàn thành và xu hướng từng tactic đến tuần {currentWeek}.
+                  Chi tiết hoàn thành và xu hướng từng việc giữ nhịp đến tuần {currentWeek}.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -470,8 +470,8 @@ export function TwelveWeekProgressTab({
             <div>
               <p className="text-lg font-bold text-slate-950">Phân tích thực thi nâng cao</p>
               <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-slate-600">
-                Bản đồ nhiệt hoàn thành, xu hướng theo tuần và breakdown từng tactic giúp bạn biết chỗ nào đang mạnh,
-                chỗ nào cần cứu trước.
+                Bản đồ nhiệt hoàn thành, xu hướng theo tuần và phân tích từng việc giữ nhịp giúp bạn biết chỗ nào đang
+                mạnh, chỗ nào cần cứu trước.
               </p>
             </div>
             <Badge className="border-violet-200 bg-white text-violet-700 hover:bg-white">

@@ -251,7 +251,11 @@ export function UpgradePaywallDialog({
                       variant={isCurrent ? "outline" : isRecommended ? "default" : "outline"}
                       onClick={() => handleUpgrade(plan.code as Exclude<PricingPlanCode, "FREE">)}
                     >
-                      {isCurrent ? "Đang dùng trên thiết bị này" : `Mở ${plan.name} để đi nhanh hơn`}
+                      {isCurrent
+                        ? "Đang dùng trên thiết bị này"
+                        : demoMode
+                          ? `Mở ${plan.name} demo`
+                          : `Mở ${plan.name} để đi nhanh hơn`}
                     </Button>
                   </div>
                 );

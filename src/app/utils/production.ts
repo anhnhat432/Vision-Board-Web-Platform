@@ -12,7 +12,12 @@ import {
   upgradePlanLocally,
 } from "./storage";
 import { apiClient } from "@/lib/api/apiClient";
-import { trackCheckoutCompleted, trackCheckoutStarted, type MonetizationSource } from "./monetization-analytics";
+import {
+  trackCheckoutCompleted,
+  trackCheckoutStarted,
+  trackUpgradeRestored,
+  type MonetizationSource,
+} from "./monetization-analytics";
 import type {
   BillingActionSnapshot,
   BillingAccessContractPayload,
@@ -1300,6 +1305,14 @@ export async function restorePlanAccess(goalId?: string): Promise<RestoreAccessR
 
   try {
     const result = await provider.restoreAccess(goalId);
+    trackUpgradeRestored({
+      goalId,
+      source: goalId ? "12_week_system" : "billing_plan",
+      status: result.status,
+      providerMode: result.providerMode,
+      planCode: result.planCode,
+      entitlementCount: result.entitlementKeys.length,
+    });
     const snapshot = buildBillingActionSnapshot(
       result.providerMode,
       result.status === "offline"
@@ -1437,6 +1450,7 @@ export function completeMockCheckoutSession(sessionId: string): MockCheckoutComp
   }
 
   const now = new Date().toISOString();
+  const currentPlan = getCurrentPlan();
   const normalizedPlanCode = normalizePlanCode(session.planCode) as Exclude<PricingPlanCode, "FREE">;
   const account: MockBillingProviderAccount = {
     customerId: "mock_customer_01",
@@ -1453,6 +1467,16 @@ export function completeMockCheckoutSession(sessionId: string): MockCheckoutComp
   writeMockBillingAccount(account);
   cancelMockCheckoutSession(sessionId);
   applyBillingAccessPayload(buildMockBillingPayload(account), "mock_provider");
+  trackCheckoutCompleted({
+    goalId: session.goalId,
+    context: session.context,
+    source: session.source ?? "paywall_dialog",
+    currentPlan,
+    recommendedPlan: session.recommendedPlan ?? normalizedPlanCode,
+    planCode: normalizedPlanCode,
+    resultPlan: account.planCode,
+    mode: "mock_provider",
+  });
 
   return {
     ok: true,

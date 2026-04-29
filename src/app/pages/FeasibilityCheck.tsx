@@ -23,6 +23,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { Label } from "../components/ui/label";
 import { Progress } from "../components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
+import { trackAnalyticsEvent } from "../utils/analytics";
 import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
 import { APP_STORAGE_KEYS, getLifeAreaLabel, getUserData } from "../utils/storage";
 import { parsePendingSMARTGoal, parseSmartGoal, type PendingSMARTGoal } from "@/lib/smart-goal";
@@ -48,10 +49,20 @@ const QUESTIONS: Question[] = [
     question: "Mỗi tuần bạn có thể dành chính xác bao nhiêu thời gian cho mục tiêu này?",
     helper: "Trả lời theo lịch sống thật. Câu này giúp hệ thống biết tuần đầu nên ít việc hay nhiều việc.",
     options: [
-      { value: "lt1", label: "Dưới 1 giờ mỗi tuần", score: 1, diagnostic: "Kế hoạch phải rất nhẹ, chỉ nên giữ 1-2 việc chính." },
+      {
+        value: "lt1",
+        label: "Dưới 1 giờ mỗi tuần",
+        score: 1,
+        diagnostic: "Kế hoạch phải rất nhẹ, chỉ nên giữ 1-2 việc chính.",
+      },
       { value: "1to3", label: "1-3 giờ mỗi tuần", score: 2, diagnostic: "Kế hoạch nên gọn, ít việc nhưng lặp đều." },
       { value: "3to5", label: "3-5 giờ mỗi tuần", score: 3, diagnostic: "Có đủ chỗ cho một nhịp cân bằng." },
-      { value: "gt5", label: "Hơn 5 giờ mỗi tuần", score: 4, diagnostic: "Có thể làm nhiều hơn một chút nếu các phần khác cũng ổn." },
+      {
+        value: "gt5",
+        label: "Hơn 5 giờ mỗi tuần",
+        score: 4,
+        diagnostic: "Có thể làm nhiều hơn một chút nếu các phần khác cũng ổn.",
+      },
     ],
   },
   {
@@ -61,10 +72,30 @@ const QUESTIONS: Question[] = [
     question: "Sau một ngày bình thường, bạn còn bao nhiêu năng lượng cho mục tiêu này?",
     helper: "Năng lượng thấp không có nghĩa là mục tiêu sai; nó chỉ nói rằng tuần đầu cần nhẹ và ít ma sát hơn.",
     options: [
-      { value: "energy_drained", label: "Thường đã cạn sức", score: 1, diagnostic: "Cần giảm việc và chọn khoảng thời gian rất nhỏ." },
-      { value: "energy_low", label: "Còn ít, dễ bỏ nếu ngày bận", score: 2, diagnostic: "Cần thắng nhỏ sớm để giữ nhịp." },
-      { value: "energy_stable", label: "Còn đủ nếu đã đặt lịch trước", score: 3, diagnostic: "Có thể đi cân bằng nếu lịch được khóa rõ." },
-      { value: "energy_high", label: "Còn khá tốt và chủ động được", score: 4, diagnostic: "Có thể giữ nhịp đều và tăng lượng việc từ từ." },
+      {
+        value: "energy_drained",
+        label: "Thường đã cạn sức",
+        score: 1,
+        diagnostic: "Cần giảm việc và chọn khoảng thời gian rất nhỏ.",
+      },
+      {
+        value: "energy_low",
+        label: "Còn ít, dễ bỏ nếu ngày bận",
+        score: 2,
+        diagnostic: "Cần thắng nhỏ sớm để giữ nhịp.",
+      },
+      {
+        value: "energy_stable",
+        label: "Còn đủ nếu đã đặt lịch trước",
+        score: 3,
+        diagnostic: "Có thể đi cân bằng nếu lịch được khóa rõ.",
+      },
+      {
+        value: "energy_high",
+        label: "Còn khá tốt và chủ động được",
+        score: 4,
+        diagnostic: "Có thể giữ nhịp đều và tăng lượng việc từ từ.",
+      },
     ],
   },
   {
@@ -74,10 +105,30 @@ const QUESTIONS: Question[] = [
     question: "Bạn đã có đủ kỹ năng, công cụ hoặc nguồn lực để bắt đầu chưa?",
     helper: "Nếu chưa đủ nguồn lực, kế hoạch 12 tuần nên có bước chuẩn bị nhỏ trước khi làm việc lớn.",
     options: [
-      { value: "resources_missing", label: "Thiếu khá nhiều, chưa biết bắt đầu từ đâu", score: 1, diagnostic: "Cần bước đệm học/chuẩn bị trước khi tăng tốc." },
-      { value: "resources_basic", label: "Có nền cơ bản nhưng còn nhiều lỗ hổng", score: 2, diagnostic: "Kế hoạch nên chừa chỗ cho học và thử nghiệm." },
-      { value: "resources_mostly_ready", label: "Phần lớn đã có, chỉ cần bổ sung dần", score: 3, diagnostic: "Có thể bắt đầu hành động chính song song với bổ sung." },
-      { value: "resources_ready", label: "Đủ để bắt đầu ngay", score: 4, diagnostic: "Kế hoạch có thể tập trung nhiều hơn vào làm thật." },
+      {
+        value: "resources_missing",
+        label: "Thiếu khá nhiều, chưa biết bắt đầu từ đâu",
+        score: 1,
+        diagnostic: "Cần bước đệm học/chuẩn bị trước khi tăng tốc.",
+      },
+      {
+        value: "resources_basic",
+        label: "Có nền cơ bản nhưng còn nhiều lỗ hổng",
+        score: 2,
+        diagnostic: "Kế hoạch nên chừa chỗ cho học và thử nghiệm.",
+      },
+      {
+        value: "resources_mostly_ready",
+        label: "Phần lớn đã có, chỉ cần bổ sung dần",
+        score: 3,
+        diagnostic: "Có thể bắt đầu hành động chính song song với bổ sung.",
+      },
+      {
+        value: "resources_ready",
+        label: "Đủ để bắt đầu ngay",
+        score: 4,
+        diagnostic: "Kế hoạch có thể tập trung nhiều hơn vào làm thật.",
+      },
     ],
   },
   {
@@ -87,10 +138,30 @@ const QUESTIONS: Question[] = [
     question: "Mục tiêu này cảm thấy thực tế và rõ đến mức nào với bạn hiện tại?",
     helper: "Mục tiêu càng rõ về kết quả, con số cần đạt và thời hạn thì càng dễ chia thành việc hằng tuần.",
     options: [
-      { value: "overwhelming", label: "Cảm giác quá lớn và quá sức", score: 1, diagnostic: "Nên thu nhỏ mục tiêu trước khi tạo kế hoạch." },
-      { value: "challenging", label: "Khó nhưng vẫn có thể chạm tới", score: 2, diagnostic: "Cần chọn một kết quả 12 tuần hẹp hơn." },
-      { value: "realistic", label: "Thực tế nếu tôi giữ kỷ luật", score: 3, diagnostic: "Có thể đi tiếp với nhịp cân bằng." },
-      { value: "very_realistic", label: "Rất thực tế và hoàn toàn có thể làm", score: 4, diagnostic: "Đủ rõ để chuyển sang kế hoạch 12 tuần." },
+      {
+        value: "overwhelming",
+        label: "Cảm giác quá lớn và quá sức",
+        score: 1,
+        diagnostic: "Nên thu nhỏ mục tiêu trước khi tạo kế hoạch.",
+      },
+      {
+        value: "challenging",
+        label: "Khó nhưng vẫn có thể chạm tới",
+        score: 2,
+        diagnostic: "Cần chọn một kết quả 12 tuần hẹp hơn.",
+      },
+      {
+        value: "realistic",
+        label: "Thực tế nếu tôi giữ kỷ luật",
+        score: 3,
+        diagnostic: "Có thể đi tiếp với nhịp cân bằng.",
+      },
+      {
+        value: "very_realistic",
+        label: "Rất thực tế và hoàn toàn có thể làm",
+        score: 4,
+        diagnostic: "Đủ rõ để chuyển sang kế hoạch 12 tuần.",
+      },
     ],
   },
   {
@@ -100,11 +171,31 @@ const QUESTIONS: Question[] = [
     question: "Trở ngại lớn nhất có thể ngăn bạn hoàn thành mục tiêu này là gì?",
     helper: "Câu này giúp hệ thống biết nên giảm việc, chia nhỏ hay thêm bước chuẩn bị.",
     options: [
-      { value: "motivation", label: "Thiếu động lực hoặc dễ mất đà", score: 2, diagnostic: "Cần thắng nhỏ sớm và một lần nhìn lại ngắn mỗi tuần." },
+      {
+        value: "motivation",
+        label: "Thiếu động lực hoặc dễ mất đà",
+        score: 2,
+        diagnostic: "Cần thắng nhỏ sớm và một lần nhìn lại ngắn mỗi tuần.",
+      },
       { value: "time", label: "Khó quản lý thời gian", score: 2, diagnostic: "Cần giảm số việc và khóa lịch cố định." },
-      { value: "resources", label: "Thiếu nguồn lực hoặc kiến thức", score: 2, diagnostic: "Cần thêm bước học/chuẩn bị vào tuần đầu." },
-      { value: "complexity", label: "Mục tiêu phức tạp, dễ bị loãng", score: 2, diagnostic: "Cần tách rõ phần bắt buộc và phần mở rộng." },
-      { value: "none", label: "Hiện chưa thấy trở ngại lớn nào", score: 4, diagnostic: "Có thể tập trung vào nhịp làm đều." },
+      {
+        value: "resources",
+        label: "Thiếu nguồn lực hoặc kiến thức",
+        score: 2,
+        diagnostic: "Cần thêm bước học/chuẩn bị vào tuần đầu.",
+      },
+      {
+        value: "complexity",
+        label: "Mục tiêu phức tạp, dễ bị loãng",
+        score: 2,
+        diagnostic: "Cần tách rõ phần bắt buộc và phần mở rộng.",
+      },
+      {
+        value: "none",
+        label: "Hiện chưa thấy trở ngại lớn nào",
+        score: 4,
+        diagnostic: "Có thể tập trung vào nhịp làm đều.",
+      },
     ],
   },
   {
@@ -114,10 +205,30 @@ const QUESTIONS: Question[] = [
     question: "Bạn đã có chỗ cố định trong lịch để làm mục tiêu này chưa?",
     helper: "Không có lịch cố định thì kế hoạch đẹp vẫn dễ trôi. Câu này giúp hệ thống biết cần giữ nhịp chặt đến đâu.",
     options: [
-      { value: "rarely", label: "Chưa có, thường làm khi nhớ ra", score: 1, diagnostic: "Kế hoạch phải bắt đầu bằng việc khóa lịch." },
-      { value: "sometimes", label: "Có dự định nhưng hay bị chen ngang", score: 2, diagnostic: "Cần lịch nhẹ và một lần nhìn lại để kéo lại nhịp." },
-      { value: "mostly", label: "Có vài khung giờ khá ổn trong tuần", score: 3, diagnostic: "Có thể giữ nhịp cân bằng nếu không thêm quá nhiều việc." },
-      { value: "always", label: "Đã có khung giờ khá cố định", score: 4, diagnostic: "Nền lịch đủ tốt để triển khai đều hơn." },
+      {
+        value: "rarely",
+        label: "Chưa có, thường làm khi nhớ ra",
+        score: 1,
+        diagnostic: "Kế hoạch phải bắt đầu bằng việc khóa lịch.",
+      },
+      {
+        value: "sometimes",
+        label: "Có dự định nhưng hay bị chen ngang",
+        score: 2,
+        diagnostic: "Cần lịch nhẹ và một lần nhìn lại để kéo lại nhịp.",
+      },
+      {
+        value: "mostly",
+        label: "Có vài khung giờ khá ổn trong tuần",
+        score: 3,
+        diagnostic: "Có thể giữ nhịp cân bằng nếu không thêm quá nhiều việc.",
+      },
+      {
+        value: "always",
+        label: "Đã có khung giờ khá cố định",
+        score: 4,
+        diagnostic: "Nền lịch đủ tốt để triển khai đều hơn.",
+      },
     ],
   },
   {
@@ -127,10 +238,30 @@ const QUESTIONS: Question[] = [
     question: "Nếu phải bắt đầu trong tuần này, bạn tự tin hoàn thành tuần đầu ở mức nào?",
     helper: "Câu này giúp chọn tuần đầu nên nhẹ, vừa phải hay hơi thử thách.",
     options: [
-      { value: "exploring", label: "Thấp, tôi còn khá do dự", score: 1, diagnostic: "Cần thu nhỏ để tạo niềm tin ban đầu." },
-      { value: "interested", label: "Vừa phải, tôi cần kế hoạch thật rõ", score: 2, diagnostic: "Cần ít việc lặp lại và chỉ số đo đơn giản." },
-      { value: "ready", label: "Khá tự tin nếu tuần đầu vừa sức", score: 3, diagnostic: "Có thể đi cân bằng với tuần đầu nhẹ." },
-      { value: "committed", label: "Cam kết hoàn toàn và bắt đầu ngay", score: 4, diagnostic: "Có thể bắt đầu ngay, miễn là không làm kế hoạch phình quá rộng." },
+      {
+        value: "exploring",
+        label: "Thấp, tôi còn khá do dự",
+        score: 1,
+        diagnostic: "Cần thu nhỏ để tạo niềm tin ban đầu.",
+      },
+      {
+        value: "interested",
+        label: "Vừa phải, tôi cần kế hoạch thật rõ",
+        score: 2,
+        diagnostic: "Cần ít việc lặp lại và chỉ số đo đơn giản.",
+      },
+      {
+        value: "ready",
+        label: "Khá tự tin nếu tuần đầu vừa sức",
+        score: 3,
+        diagnostic: "Có thể đi cân bằng với tuần đầu nhẹ.",
+      },
+      {
+        value: "committed",
+        label: "Cam kết hoàn toàn và bắt đầu ngay",
+        score: 4,
+        diagnostic: "Có thể bắt đầu ngay, miễn là không làm kế hoạch phình quá rộng.",
+      },
     ],
   },
 ];
@@ -248,7 +379,8 @@ function buildPlanGuidance(input: {
 }) {
   if (input.resultType === "too_ambitious") {
     return {
-      firstWeekGuidance: "Tuần 1 chỉ nên có 1-2 hành động bắt buộc, ưu tiên tạo nhịp thắng nhỏ thay vì chứng minh năng lực.",
+      firstWeekGuidance:
+        "Tuần 1 chỉ nên có 1-2 hành động bắt buộc, ưu tiên tạo nhịp thắng nhỏ thay vì chứng minh năng lực.",
       scopeRecommendation: "Thu nhỏ mục tiêu 12 tuần hoặc kéo dài thời hạn trước khi tăng độ khó.",
     };
   }
@@ -308,7 +440,8 @@ function buildResult(answers: Record<number, string>, wheelScore: number): Resul
         };
   const weeklyCapacity = getWeeklyCapacity(answers);
 
-  const resultType: ResultType = adjustedScore >= 15 ? "realistic" : adjustedScore >= 10 ? "challenging" : "too_ambitious";
+  const resultType: ResultType =
+    adjustedScore >= 15 ? "realistic" : adjustedScore >= 10 ? "challenging" : "too_ambitious";
   const planLoad = getPlanLoadRecommendation({ adjustedScore, bottleneck, weeklyCapacity });
   const guidance = buildPlanGuidance({ resultType, bottleneck, planLoad, weeklyCapacity });
 
@@ -324,12 +457,14 @@ function buildResult(answers: Record<number, string>, wheelScore: number): Resul
     challenging: {
       title: "Mục tiêu này làm được, nhưng phải xử lý đúng phần yếu nhất.",
       summary: `Kết quả không chỉ dựa vào cảm giác chung. Phần yếu nhất hiện tại là ${bottleneck.label.toLowerCase()}, nên nếu bỏ qua nó thì kế hoạch 12 tuần rất dễ dày lên nhưng khó giữ.`,
-      recommendation: "Nên thu hẹp mục tiêu, chọn ít việc chính hơn và biến phần cần chú ý nhất thành nguyên tắc cho tuần đầu.",
+      recommendation:
+        "Nên thu hẹp mục tiêu, chọn ít việc chính hơn và biến phần cần chú ý nhất thành nguyên tắc cho tuần đầu.",
     },
     too_ambitious: {
       title: "Mục tiêu này cần thu nhỏ trước khi tạo kế hoạch 12 tuần.",
       summary: `Một vài nền tảng hiện tại chưa đủ chắc, đặc biệt là ${bottleneck.label.toLowerCase()}. Nếu giữ nguyên độ rộng, rủi ro lớn nhất là bắt đầu hăng nhưng mất nhịp sớm.`,
-      recommendation: "Hãy chọn phiên bản nhỏ hơn của mục tiêu, giữ tuần đầu rất nhẹ và chỉ tăng độ khó khi phần nhìn lại hằng tuần cho thấy bạn giữ được nhịp.",
+      recommendation:
+        "Hãy chọn phiên bản nhỏ hơn của mục tiêu, giữ tuần đầu rất nhẹ và chỉ tăng độ khó khi phần nhìn lại hằng tuần cho thấy bạn giữ được nhịp.",
     },
   };
 
@@ -452,7 +587,8 @@ function FeasibilityResultView({
     },
     challenging: {
       statusLabel: "Khó nhưng vẫn làm được",
-      statusHint: "Bạn có thể đạt mục tiêu này nếu thu gọn mục tiêu, làm rõ việc cần làm và nhìn lại mỗi tuần thật nghiêm túc.",
+      statusHint:
+        "Bạn có thể đạt mục tiêu này nếu thu gọn mục tiêu, làm rõ việc cần làm và nhìn lại mỗi tuần thật nghiêm túc.",
       guideTitle: "Tập trung hơn một chút, bạn sẽ đi được xa hơn.",
       guideBody:
         "Đây là kiểu mục tiêu có sức bật, nhưng không phù hợp nếu triển khai quá rộng. Hãy giữ một hướng chính rõ và bỏ bớt các phần gây nhiễu.",
@@ -592,7 +728,9 @@ function FeasibilityResultView({
         <Card className="hero-surface overflow-hidden border-0 text-white">
           <CardContent className="relative p-4 sm:p-6 lg:p-9">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.12),_transparent_24%),linear-gradient(135deg,_rgba(255,255,255,0.08)_0%,_rgba(255,255,255,0)_58%)] opacity-95" />
-            <div className={`absolute -right-12 top-10 hidden h-72 w-72 rounded-full blur-3xl sm:block ${styles.glow}`} />
+            <div
+              className={`absolute -right-12 top-10 hidden h-72 w-72 rounded-full blur-3xl sm:block ${styles.glow}`}
+            />
             <div className="absolute -left-16 bottom-0 hidden h-56 w-56 rounded-full bg-white/8 blur-3xl sm:block" />
 
             <div className="relative max-w-4xl">
@@ -631,15 +769,18 @@ function FeasibilityResultView({
                     </div>
                   </div>
                   <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/12">
-                    <div className={`h-full rounded-full bg-gradient-to-r ${styles.meter}`} style={{ width: `${fitScore}%` }} />
+                    <div
+                      className={`h-full rounded-full bg-gradient-to-r ${styles.meter}`}
+                      style={{ width: `${fitScore}%` }}
+                    />
                   </div>
                   <div className="mt-3 grid gap-2 text-sm leading-6 text-white/74">
                     <p>
                       <span className="font-semibold text-white">Cần chú ý:</span> {result.bottleneck.label}
                     </p>
                     <p>
-                      <span className="font-semibold text-white">Độ nặng gợi ý:</span>{" "}
-                      {planLoadLabel[result.planLoad]} · {capacityLabel[result.weeklyCapacity]}
+                      <span className="font-semibold text-white">Độ nặng gợi ý:</span> {planLoadLabel[result.planLoad]}{" "}
+                      · {capacityLabel[result.weeklyCapacity]}
                     </p>
                     <p>{result.firstWeekGuidance}</p>
                   </div>
@@ -774,7 +915,10 @@ function FeasibilityResultView({
                       </span>
                     </div>
                     <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
-                      <div className={`h-full rounded-full bg-gradient-to-r ${styles.meter}`} style={{ width: `${axis.percent}%` }} />
+                      <div
+                        className={`h-full rounded-full bg-gradient-to-r ${styles.meter}`}
+                        style={{ width: `${axis.percent}%` }}
+                      />
                     </div>
                     <p className="mt-2 text-sm leading-6 text-slate-600">{axis.diagnostic}</p>
                   </div>
@@ -1008,6 +1152,16 @@ export function FeasibilityCheck() {
 
     localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityResult, JSON.stringify(pendingFeasibilityResult));
     localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers, JSON.stringify(answers));
+    trackAnalyticsEvent("feasibility_completed", {
+      focus_area: focusArea,
+      result_type: result.type,
+      readiness_score: result.readinessScore,
+      adjusted_score: result.adjustedScore,
+      bottleneck_axis: result.bottleneck.axis,
+      plan_load: result.planLoad,
+      weekly_capacity: result.weeklyCapacity,
+      answer_count: Object.keys(answers).length,
+    });
 
     toast.success("Đã kiểm tra tính thực tế", {
       description: "Tiếp tục thiết kế kế hoạch 12 tuần cho mục tiêu của bạn.",

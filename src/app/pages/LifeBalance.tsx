@@ -23,6 +23,7 @@ import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { Slider } from "../components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
+import { trackAnalyticsEvent } from "../utils/analytics";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { type LifeArea, getLifeAreaLabel, updateWheelOfLife } from "../utils/storage";
 
@@ -55,6 +56,15 @@ export function LifeBalance() {
 
   const handleSave = () => {
     updateWheelOfLife(lifeAreas);
+    if (strongestArea && weakestArea) {
+      trackAnalyticsEvent("life_balance_completed", {
+        source: "life_balance",
+        area_count: lifeAreas.length,
+        average_score: Number(averageScore.toFixed(1)),
+        weakest_area: getLifeAreaLabel(weakestArea.name),
+        strongest_area: getLifeAreaLabel(strongestArea.name),
+      });
+    }
     toast.success("Đã cập nhật cân bằng cuộc sống!", {
       description: "Điểm số bánh xe cuộc sống của bạn đã được lưu.",
     });
@@ -65,6 +75,15 @@ export function LifeBalance() {
   const handleContinueToInsight = () => {
     if (hasChanges) {
       updateWheelOfLife(lifeAreas);
+      if (strongestArea && weakestArea) {
+        trackAnalyticsEvent("life_balance_completed", {
+          source: "life_balance",
+          area_count: lifeAreas.length,
+          average_score: Number(averageScore.toFixed(1)),
+          weakest_area: getLifeAreaLabel(weakestArea.name),
+          strongest_area: getLifeAreaLabel(strongestArea.name),
+        });
+      }
       toast.success("Đã lưu Life Balance trước khi mở Life Insight.");
       setHasChanges(false);
       reloadUserData();

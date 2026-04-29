@@ -163,7 +163,7 @@ export function TwelveWeekWeekTab({
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Cốt lõi trước</p>
                     <p className="mt-2 text-lg font-semibold text-slate-900">
-                      {coreIndicators.length} tactic giữ nhịp chính
+                      {coreIndicators.length} việc giữ nhịp chính
                     </p>
                   </div>
                   <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">{coreIndicators.length}</Badge>
@@ -171,7 +171,7 @@ export function TwelveWeekWeekTab({
                 <div className="mt-4 space-y-3">
                   {coreIndicators.length === 0 ? (
                     <div className="rounded-lg border border-emerald-100 bg-white px-4 py-4 text-sm leading-6 text-slate-500">
-                      Chưa có tactic cốt lõi. Khi tactic được thêm, phần này sẽ cho bạn biết nhịp nào cần giữ trước.
+                      Chưa có việc cốt lõi. Khi việc giữ nhịp được thêm, phần này sẽ cho bạn biết nhịp nào cần giữ trước.
                     </div>
                   ) : (
                     coreIndicators.map((indicator) => (
@@ -197,8 +197,8 @@ export function TwelveWeekWeekTab({
                     </p>
                     <p className="mt-2 text-lg font-semibold text-slate-900">
                       {optionalIndicators.length > 0
-                        ? `${optionalIndicators.length} tactic bổ sung`
-                        : "Không có tactic tùy chọn"}
+                        ? `${optionalIndicators.length} việc bổ sung`
+                        : "Không có việc tùy chọn"}
                     </p>
                   </div>
                   <Badge variant="outline" className="border-amber-200 bg-white text-amber-800">
@@ -208,7 +208,7 @@ export function TwelveWeekWeekTab({
                 <div className="mt-4 space-y-3">
                   {optionalIndicators.length === 0 ? (
                     <div className="rounded-lg border border-amber-100 bg-white px-4 py-4 text-sm text-slate-500">
-                      Tuần này bạn chỉ cần giữ các tactic cốt lõi là đủ.
+                      Tuần này bạn chỉ cần giữ các việc cốt lõi là đủ.
                     </div>
                   ) : (
                     optionalIndicators.map((indicator) => (
@@ -287,7 +287,7 @@ export function TwelveWeekWeekTab({
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Insight review premium
+                    Phân tích review Plus
                   </p>
                   <p className="mt-2 text-lg font-semibold text-slate-950">{premiumInsight.headline}</p>
                   <p className="mt-2 text-sm leading-7 text-slate-600">{premiumInsight.summary}</p>
@@ -319,7 +319,7 @@ export function TwelveWeekWeekTab({
                       <p className="mt-2 text-sm leading-7 text-slate-800">{premiumInsight.recommendedAdjustment}</p>
                     </div>
                     <div className="rounded-lg border border-sky-100 bg-white p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Coach note</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Gợi ý ngắn</p>
                       <p className="mt-2 text-sm leading-7 text-slate-800">{premiumInsight.coachNote}</p>
                     </div>
                   </div>
@@ -421,8 +421,8 @@ export function TwelveWeekWeekTab({
                       Mở Plus để đọc phân tích đầy đủ và ra ngay kế hoạch tuần sau đủ gọn để làm.
                     </p>
                     <p className="mt-1 text-sm text-slate-600">
-                      Plus chốt luôn ưu tiên tuần sau, mức tải nên giữ và phần nào nên buông bớt — không chỉ là insight
-                      để đọc.
+                      Plus chốt luôn ưu tiên tuần sau, mức tải nên giữ và phần nào nên buông bớt — không chỉ là phân
+                      tích để đọc.
                     </p>
                     <Button className="mt-4 w-full sm:w-auto" onClick={onOpenPremiumInsights}>
                       Mở review Plus ngay

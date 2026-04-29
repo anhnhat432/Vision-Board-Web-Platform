@@ -7,6 +7,7 @@ import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Slider } from "../components/ui/slider";
+import { trackAnalyticsEvent } from "../utils/analytics";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { LIFE_AREAS, type LifeArea, getLifeAreaLabel, getUserData, updateWheelOfLife } from "../utils/storage";
 
@@ -27,12 +28,7 @@ const JOURNEY_STEPS = [
   },
 ];
 
-const FEATURE_PILLS = [
-  "Chấm 8 lĩnh vực",
-  "Chọn một trọng tâm",
-  "Viết SMART Goal",
-  "Dựng chu kỳ 12 tuần",
-];
+const FEATURE_PILLS = ["Chấm 8 lĩnh vực", "Chọn một trọng tâm", "Viết SMART Goal", "Dựng chu kỳ 12 tuần"];
 
 export function Onboarding() {
   const navigate = useNavigate();
@@ -92,11 +88,22 @@ export function Onboarding() {
 
   const handleComplete = () => {
     updateWheelOfLife(lifeAreas);
+    trackAnalyticsEvent("life_balance_completed", {
+      source: "onboarding",
+      area_count: lifeAreas.length,
+      average_score: Number(averageScore.toFixed(1)),
+      weakest_area: getLifeAreaLabel(growthArea.name),
+      strongest_area: getLifeAreaLabel(strongestArea.name),
+    });
     setIsDirty(false);
     navigate("/life-insight");
   };
 
   const handleStartAssessment = () => {
+    trackAnalyticsEvent("onboarding_started", {
+      source: "onboarding",
+      returning_user: isReturning,
+    });
     setStep("assessment");
   };
 
@@ -161,11 +168,10 @@ export function Onboarding() {
 
                   <div className="flex flex-wrap gap-3">
                     <Button
-                      variant="outline"
-                      className="w-full border-violet-200 bg-violet-50 text-violet-700 shadow-[0_18px_38px_-28px_rgba(124,58,237,0.55)] hover:border-violet-300 hover:bg-white hover:text-violet-800 sm:w-auto"
+                      className="w-full bg-violet-600 text-white shadow-[0_18px_38px_-28px_rgba(124,58,237,0.55)] hover:bg-violet-700 sm:w-auto"
                       onClick={handleStartAssessment}
                     >
-                      Bắt đầu đánh giá
+                      Chấm Life Balance
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                     <Button
@@ -308,8 +314,8 @@ export function Onboarding() {
             <CardContent className="space-y-3 p-4 sm:p-5 lg:p-6">
               <div className="hidden rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600 sm:block">
                 Kéo từng lĩnh vực từ <span className="font-semibold text-slate-950">1</span> đến{" "}
-                <span className="font-semibold text-slate-950">10</span>. Điểm thấp là nơi cần chú ý, điểm cao là
-                nơi đang tạo lực đẩy tốt.
+                <span className="font-semibold text-slate-950">10</span>. Điểm thấp là nơi cần chú ý, điểm cao là nơi
+                đang tạo lực đẩy tốt.
               </div>
 
               {lifeAreas.map((area, index) => (
@@ -388,7 +394,9 @@ export function Onboarding() {
                   </div>
                   <div className="rounded-lg border border-emerald-100 bg-emerald-50/80 p-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700/70">Mạnh nhất</p>
-                    <p className="mt-1 text-sm font-semibold text-emerald-950">{getLifeAreaLabel(strongestArea.name)}</p>
+                    <p className="mt-1 text-sm font-semibold text-emerald-950">
+                      {getLifeAreaLabel(strongestArea.name)}
+                    </p>
                     <p className="mt-0.5 text-sm text-emerald-800/80">{strongestArea.score}/10</p>
                   </div>
                   <div className="rounded-lg border border-amber-100 bg-amber-50/85 p-3">

@@ -240,7 +240,7 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
         {userData.isHydratedFromDemo && (
           <div className="rounded-lg border border-amber-200 bg-amber-50/90 p-4 text-sm leading-7 text-amber-900">
             Dữ liệu hiện tại là dữ liệu mẫu để bạn xem nhanh sản phẩm. Khi chuyển sang bản thật, flow chuẩn vẫn là: đo
-            bánh xe cuộc đời, chốt insight, viết SMART goal, kiểm tra feasibility rồi mới vào chu kỳ 12 tuần.
+            bánh xe cuộc đời, chốt insight, viết SMART goal, kiểm tra tính thực tế rồi mới vào chu kỳ 12 tuần.
           </div>
         )}
 

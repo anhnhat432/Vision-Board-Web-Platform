@@ -11,7 +11,7 @@ describe("Onboarding", () => {
     localStorage.clear();
   });
 
-  it("uses a lighter primary CTA and starts the assessment at the top of the page", async () => {
+  it("uses a clear primary CTA and starts the assessment at the top of the page", async () => {
     const scrollToMock = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
     const user = userEvent.setup();
 
@@ -21,8 +21,8 @@ describe("Onboarding", () => {
       </MemoryRouter>,
     );
 
-    const startButton = await screen.findByRole("button", { name: /Bắt đầu đánh giá/i });
-    expect(startButton).toHaveClass("bg-violet-50");
+    const startButton = await screen.findByRole("button", { name: /Chấm Life Balance/i });
+    expect(startButton).toHaveClass("bg-violet-600");
     expect(startButton).not.toHaveClass("bg-slate-950");
 
     scrollToMock.mockClear();
@@ -49,7 +49,7 @@ describe("Onboarding", () => {
       </MemoryRouter>,
     );
 
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu đánh giá/i }));
+    await user.click(await screen.findByRole("button", { name: /Chấm Life Balance/i }));
     await user.click(await screen.findByRole("button", { name: /Hoàn thành đánh giá/i }));
 
     await waitFor(() => {

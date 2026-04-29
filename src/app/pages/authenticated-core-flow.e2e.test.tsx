@@ -342,7 +342,7 @@ describe("authenticated new user core flow", () => {
     });
     expect(screen.queryByText("Anonymous stale goal must stay hidden")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Bắt đầu đánh giá" }));
+    await user.click(screen.getByRole("button", { name: "Chấm Life Balance" }));
     await user.click(await screen.findByRole("button", { name: "Hoàn thành đánh giá" }));
 
     expect(await screen.findByText(/Bạn đã có một tín hiệu rất rõ/i)).toBeInTheDocument();

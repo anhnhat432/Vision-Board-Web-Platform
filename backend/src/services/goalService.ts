@@ -33,7 +33,7 @@ export interface UpdateGoalPayload {
 
 const VALID_STATUSES: GoalStatus[] = ["active", "completed", "archived"];
 
-class GoalService {
+export class GoalService {
   constructor(private readonly goalRepository: MongoGoalRepository) {}
 
   async createGoal(userId: string, payload: CreateGoalPayload) {

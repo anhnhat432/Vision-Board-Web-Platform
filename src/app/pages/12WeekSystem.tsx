@@ -1,17 +1,6 @@
-﻿import { Suspense, lazy, useEffect, useRef, useState, type ReactNode } from "react";
+﻿import { Suspense, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import {
-  AlertTriangle,
-  BarChart3,
-  CalendarDays,
-  CheckCircle2,
-  Compass,
-  ListTodo,
-  Loader2,
-  Settings2,
-  Sparkles,
-  Target,
-} from "lucide-react";
+import { BarChart3, CalendarDays, ListTodo, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { useTwelveWeekSystemSnapshot } from "../hooks/useTwelveWeekSystemSnapshot";
@@ -22,6 +11,7 @@ import {
 } from "../hooks/useBackendPlanHydration";
 import { TabErrorBoundary } from "../components/TabErrorBoundary";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
+import { trackAnalyticsEvent } from "../utils/analytics";
 import {
   trackPaywallCtaClicked,
   trackPremiumInsightOpened,
@@ -39,10 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
-import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import { Card, CardContent } from "../components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
   getBrowserNotificationStatus,
@@ -58,7 +45,6 @@ import {
   type InAppReminder,
   type PricingPlanCode,
   type SyncOutboxItem,
-  type TwelveWeekSystem as TwelveWeekSystemData,
   type UniversalDailyCheckIn,
   type UniversalWeeklyReview,
   archiveOutboxItem,
@@ -67,12 +53,8 @@ import {
   clearEventLog,
   deleteAllUserData,
   exportUserDataSnapshot,
-  formatCalendarDate,
   formatDateInputValue,
   getCalendarDateKey,
-  getFeasibilityResultLabel,
-  getLifeAreaLabel,
-  getReviewDayLabel,
   getUserData,
   resetTwelveWeekGoalCycle,
   restoreArchivedOutbox,
@@ -83,22 +65,19 @@ import {
   upsertReflection,
 } from "../utils/storage";
 import {
-  type DailyMood,
   addDaysToDateKey,
-  dedupeTasks,
   dismissRescueTrigger,
   getCurrentWeekStartDate,
   getMoodScore,
   getWorkloadDecisionLabel,
 } from "../utils/twelve-week-system-ui";
-import { getPlanLabel, type PremiumFeatureContext } from "../utils/twelve-week-premium";
+import type { PremiumFeatureContext } from "../utils/twelve-week-premium";
 import {
   buildDerivedScoreboard,
   getDefaultScoreboard,
   getTwelveWeekCurrentWeek,
   getTwelveWeekMissedTasks,
   getTwelveWeekTasksForWeek,
-  getTwelveWeekTodayTasks,
   getTwelveWeekWeekCompletion,
   getTwelveWeekWeekRange,
 } from "../utils/storage-twelve-week";
@@ -106,136 +85,26 @@ import { TaskBoard } from "@/features/plan12week/components/TaskBoard";
 import { usePlanExecutionSync } from "@/features/plan12week/hooks";
 import { getUniversalWeeklyReviewExecutionScore } from "@/features/plan12week/persistence/reviewExecutionScore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
+import {
+  TwelveWeekDashboardHeader,
+  TwelveWeekDashboardNotice,
+  TwelveWeekDashboardState,
+  TwelveWeekGoalSwitcher,
+  TwelveWeekRescueTriggerBanner,
+  TwelveWeekTabFallback,
+} from "./12WeekSystem/components";
+import {
+  buildBackendSyncKey,
+  getBackendSyncIssueMessage,
+  getLatestCheckIn,
+  getSyncBadgeClass,
+  getSyncBadgeLabel,
+  getTodayQueueForSystem,
+  hasBackendSyncIssue as getHasBackendSyncIssue,
+} from "./12WeekSystem/helpers";
+import { PlanOverview, WeekEditor, WeeklyReview } from "./12WeekSystem/lazyTabs";
+import { useWeeklyReviewFormState } from "./12WeekSystem/useWeeklyReviewFormState";
 
-interface WeeklyReviewForm {
-  lagProgressValue: string;
-  biggestOutputThisWeek: string;
-  mainObstacle: string;
-  nextWeekPriority: string;
-  workloadDecision: UniversalWeeklyReview["workloadDecision"];
-}
-
-const WeeklyReview = lazy(async () => ({
-  default: (await import("@/features/plan12week/components/WeeklyReview")).WeeklyReview,
-}));
-
-const PlanOverview = lazy(async () => ({
-  default: (await import("@/features/plan12week/components/PlanOverview")).PlanOverview,
-}));
-
-const WeekEditor = lazy(async () => ({
-  default: (await import("@/features/plan12week/components/WeekEditor")).WeekEditor,
-}));
-
-function buildBackendSyncKey(goalId: string, system: TwelveWeekSystemData): string {
-  return JSON.stringify({
-    goalId,
-    startDate: system.startDate,
-    totalWeeks: system.totalWeeks,
-    weeklyPlans: system.weeklyPlans.map((week) => [week.weekNumber, week.focus, week.milestone]),
-    tasks: system.taskInstances.map((task) => [
-      task.id,
-      task.weekNumber,
-      task.scheduledDate,
-      task.title,
-      task.completed,
-      task.completedAt,
-    ]),
-    checkIns: system.dailyCheckIns.map((checkIn) => [checkIn.date, checkIn.didWorkToday]),
-    reviews: system.weeklyReviews.map((review) => [
-      review.weekNumber,
-      review.reviewCompleted,
-      review.lagProgressValue,
-      review.biggestOutputThisWeek,
-      review.nextWeekPriority,
-    ]),
-  });
-}
-
-function TwelveWeekTabFallback({ title, description }: { title: string; description: string }) {
-  return (
-    <Card className="border border-white/70 bg-white/80 shadow-[0_22px_60px_-36px_rgba(15,23,42,0.32)]">
-      <CardContent className="flex min-h-[220px] flex-col justify-center gap-3 p-6 text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{title}</p>
-        <p className="text-base font-semibold text-slate-900">Đang mở phần này...</p>
-        <p className="mx-auto max-w-xl text-sm leading-7 text-slate-500">{description}</p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function TwelveWeekDashboardState({
-  kind,
-  eyebrow,
-  title,
-  description,
-  children,
-}: {
-  kind: "loading" | "empty";
-  eyebrow: string;
-  title: string;
-  description: string;
-  children?: ReactNode;
-}) {
-  const Icon = kind === "loading" ? Loader2 : Sparkles;
-
-  return (
-    <Card className="overflow-hidden border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.34)]">
-      <CardContent className="p-8 text-center sm:p-10 lg:p-14">
-        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] bg-violet-50 text-violet-700">
-          <Icon className={`h-10 w-10 ${kind === "loading" ? "animate-spin" : ""}`} />
-        </div>
-        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{eyebrow}</p>
-        <h2 className="mt-3 text-2xl font-bold tracking-normal text-slate-900 sm:text-3xl">{title}</h2>
-        <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-500 sm:text-base" role="status">
-          {description}
-        </p>
-        {children}
-      </CardContent>
-    </Card>
-  );
-}
-
-function TwelveWeekDashboardNotice({
-  tone,
-  title,
-  description,
-  children,
-}: {
-  tone: "warning" | "error" | "success";
-  title: string;
-  description: string;
-  children?: ReactNode;
-}) {
-  const Icon = tone === "success" ? CheckCircle2 : AlertTriangle;
-  const toneClass =
-    tone === "success"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-      : tone === "error"
-        ? "border-rose-200 bg-rose-50 text-rose-900"
-        : "border-amber-200 bg-amber-50 text-amber-900";
-  const iconClass =
-    tone === "success"
-      ? "bg-emerald-100 text-emerald-700"
-      : tone === "error"
-        ? "bg-rose-100 text-rose-700"
-        : "bg-amber-100 text-amber-700";
-
-  return (
-    <div role={tone === "success" ? "status" : "alert"} className={`rounded-xl border px-4 py-4 ${toneClass}`}>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconClass}`}>
-          <Icon className="h-4 w-4" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="font-semibold">{title}</p>
-          <p className="mt-1 text-sm leading-6 opacity-80">{description}</p>
-        </div>
-        {children ? <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">{children}</div> : null}
-      </div>
-    </div>
-  );
-}
 export function TwelveWeekSystem() {
   const navigate = useNavigate();
   const { authLoading, isConfigured: isAuthConfigured, user, userProfile } = useAuthContext();
@@ -304,8 +173,6 @@ export function TwelveWeekSystem() {
     refreshBackendProgressOverlay,
     loadGoalData,
   } = useTwelveWeekSystemSnapshot();
-  const [dailyMood, setDailyMood] = useState<DailyMood>("steady");
-  const [dailyNote, setDailyNote] = useState("");
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
   const [upgradeContext, setUpgradeContext] = useState<PremiumFeatureContext>("review");
   const [upgradeRecommendedPlan, setUpgradeRecommendedPlan] = useState<Exclude<PricingPlanCode, "FREE">>("PLUS");
@@ -317,48 +184,20 @@ export function TwelveWeekSystem() {
   const [isHydratingBackendPlans, setIsHydratingBackendPlans] = useState(false);
   const [isResolvingBackendPlanConflicts, setIsResolvingBackendPlanConflicts] = useState(false);
   const [lastBackendHydrationResult, setLastBackendHydrationResult] = useState<BackendPlanHydrationResult | null>(null);
-  const [weeklyForm, setWeeklyForm] = useState<WeeklyReviewForm>({
-    lagProgressValue: "",
-    biggestOutputThisWeek: "",
-    mainObstacle: "",
-    nextWeekPriority: "",
-    workloadDecision: "keep same",
-  });
 
   const todayDateKey = formatDateInputValue(new Date());
   const isBackendProfileReady = Boolean(userProfile);
+  const latestCheckIn = getLatestCheckIn(system);
+  const { dailyMood, dailyNote, weeklyForm, setDailyMood, setDailyNote, setWeeklyForm } = useWeeklyReviewFormState({
+    activeGoalId: activeGoal?.id ?? null,
+    system,
+    currentReview,
+    currentLagMetricValue,
+    latestCheckIn,
+  });
 
-  const formInitRef = useRef<string | null>(null);
   const activeGoalIdRef = useRef<string | null>(activeGoal?.id ?? null);
   const lastBackendSyncKeyRef = useRef<string | null>(null);
-  const latestCheckIn = (() => {
-    const checkIns = system?.dailyCheckIns ?? [];
-    if (checkIns.length === 0) return null;
-
-    return [...checkIns].sort((left, right) => {
-      const leftKey = getCalendarDateKey(left.date) ?? left.date;
-      const rightKey = getCalendarDateKey(right.date) ?? right.date;
-      return rightKey.localeCompare(leftKey) || right.date.localeCompare(left.date);
-    })[0];
-  })();
-
-  useEffect(() => {
-    if (!system || !activeGoal) return;
-
-    const initKey = `${activeGoal.id}::${currentReview?.weekNumber ?? ""}`;
-    if (formInitRef.current === initKey) return;
-    formInitRef.current = initKey;
-
-    setWeeklyForm({
-      lagProgressValue: currentReview?.lagProgressValue ?? currentLagMetricValue ?? "",
-      biggestOutputThisWeek: currentReview?.biggestOutputThisWeek ?? "",
-      mainObstacle: currentReview?.mainObstacle ?? "",
-      nextWeekPriority: currentReview?.nextWeekPriority ?? "",
-      workloadDecision: currentReview?.workloadDecision ?? "keep same",
-    });
-    setDailyMood((latestCheckIn?.mood as DailyMood | undefined) ?? "steady");
-    setDailyNote(latestCheckIn?.optionalNote ?? "");
-  }, [system, currentReview, currentLagMetricValue, latestCheckIn, activeGoal]);
 
   useEffect(() => {
     activeGoalIdRef.current = activeGoal?.id ?? null;
@@ -395,36 +234,11 @@ export function TwelveWeekSystem() {
   const planHasNoTasks = Boolean(system && system.taskInstances.length === 0);
   const planHasNoLeadMetrics = Boolean(system && system.leadIndicators.length === 0);
   const planHasNoLagMetric = Boolean(system && system.lagMetric.name.trim().length === 0);
-  const hasIncompletePlanStructure = Boolean(
-    system && (planHasNoTasks || planHasNoLeadMetrics || planHasNoLagMetric),
-  );
-  const hasBackendSyncIssue = Boolean(
-    backendConnectionStatus.syncStatus === "error" ||
-      backendConnectionStatus.syncStatus === "partial" ||
-      lastBackendHydrationResult?.status === "error" ||
-      lastBackendHydrationResult?.status === "partial",
-  );
-  const backendSyncIssueMessage =
-    backendConnectionStatus.syncMessage ||
-    lastBackendHydrationResult?.message ||
-    "Dữ liệu trên thiết bị vẫn được giữ lại. Bạn có thể thử đồng bộ lại khi backend hoặc mạng ổn định hơn.";
-  const syncBadgeClass =
-    backendConnectionStatus.syncStatus === "success"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-      : backendConnectionStatus.syncStatus === "error" || backendConnectionStatus.syncStatus === "partial"
-        ? "border-amber-200 bg-amber-50 text-amber-800"
-        : backendConnectionStatus.syncing
-          ? "border-sky-200 bg-sky-50 text-sky-800"
-          : "border-slate-200 bg-slate-50 text-slate-600";
-  const syncBadgeLabel = backendConnectionStatus.syncing
-    ? "Đang đồng bộ"
-    : backendConnectionStatus.syncStatus === "success"
-      ? "Đã lưu & đồng bộ"
-      : backendConnectionStatus.syncStatus === "error" || backendConnectionStatus.syncStatus === "partial"
-        ? "Đã lưu local"
-        : backendConnectionStatus.signedIn
-          ? "Backend sẵn sàng"
-          : "Lưu trên thiết bị";
+  const hasIncompletePlanStructure = Boolean(system && (planHasNoTasks || planHasNoLeadMetrics || planHasNoLagMetric));
+  const hasBackendSyncIssue = getHasBackendSyncIssue(backendConnectionStatus, lastBackendHydrationResult);
+  const backendSyncIssueMessage = getBackendSyncIssueMessage(backendConnectionStatus, lastBackendHydrationResult);
+  const syncBadgeClass = getSyncBadgeClass(backendConnectionStatus);
+  const syncBadgeLabel = getSyncBadgeLabel(backendConnectionStatus);
 
   useEffect(() => {
     const localSystem = activeGoal?.twelveWeekSystem ?? null;
@@ -482,8 +296,8 @@ export function TwelveWeekSystem() {
         <div className="mx-auto mt-8 grid max-w-3xl gap-3 text-left sm:grid-cols-3">
           {[
             "Chọn lĩnh vực ưu tiên từ Life Insight.",
-            "Viết SMART goal và kiểm tra feasibility.",
-            "Chốt tactic, metric và ngày review tuần.",
+            "Viết SMART goal và kiểm tra tính thực tế.",
+            "Chốt việc giữ nhịp, chỉ số và ngày review tuần.",
           ].map((item, index) => (
             <div key={item} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
               <span className="mr-2 font-semibold text-slate-950">0{index + 1}</span>
@@ -518,19 +332,6 @@ export function TwelveWeekSystem() {
 
   const getLatestActiveSystem = () =>
     getUserData().goals.find((goal) => goal.id === activeGoal.id)?.twelveWeekSystem ?? system;
-
-  const getTodayQueueForSystem = (nextSystem: TwelveWeekSystemData) => {
-    const nextCurrentWeek = getTwelveWeekCurrentWeek(nextSystem);
-    const nextCurrentWeekTasks = getTwelveWeekTasksForWeek(nextSystem, nextCurrentWeek);
-    const nextScheduledTodayTasks = getTwelveWeekTodayTasks(nextSystem);
-    const nextMissedTasks = getTwelveWeekMissedTasks(nextSystem);
-    const nextFallbackTasks = nextCurrentWeekTasks.filter((task) => !task.completed).slice(0, 3);
-
-    return dedupeTasks([
-      ...nextMissedTasks.slice(0, 2),
-      ...(nextScheduledTodayTasks.length > 0 ? nextScheduledTodayTasks : nextFallbackTasks),
-    ]);
-  };
 
   const handleOpenUpgradeDialog = (
     context: PremiumFeatureContext,
@@ -567,10 +368,6 @@ export function TwelveWeekSystem() {
       const result = await restorePlanAccess(actionGoalId);
 
       if (result.ok && result.planCode !== "FREE") {
-        trackAppEvent("plan_access_restored", actionGoalId, {
-          plan: result.planCode,
-          providerMode: result.providerMode,
-        });
         toast.success(result.message);
       } else if (result.ok) {
         toast.info(result.message);
@@ -640,6 +437,19 @@ export function TwelveWeekSystem() {
   const handleTabChange = (value: string) => {
     setActiveTab(value);
 
+    if (value === "progress") {
+      trackAnalyticsEvent(
+        "progress_viewed",
+        {
+          source: "12_week_system",
+          week_number: getTwelveWeekCurrentWeek(system),
+          total_weeks: system.totalWeeks,
+          current_plan: activePlanCode,
+        },
+        { goalId: activeGoal.id },
+      );
+    }
+
     if (value === "week" && hasPremiumReviewInsights) {
       const insightWeekNumber = getTwelveWeekCurrentWeek(system);
       trackPremiumInsightOpened({
@@ -664,10 +474,22 @@ export function TwelveWeekSystem() {
     });
 
     if (completed) {
-      trackAppEvent("12_week_task_completed", actionGoalId, {
-        weekNumber: String(toggledTask?.weekNumber ?? getTwelveWeekCurrentWeek(system)),
-        taskId,
-      });
+      trackAnalyticsEvent(
+        "today_task_completed",
+        {
+          source: "12_week_system",
+          week_number: toggledTask?.weekNumber ?? getTwelveWeekCurrentWeek(system),
+          is_core: Boolean(toggledTask?.isCore),
+        },
+        {
+          goalId: actionGoalId,
+          legacyEventName: "12_week_task_completed",
+          legacyPayload: {
+            weekNumber: String(toggledTask?.weekNumber ?? getTwelveWeekCurrentWeek(system)),
+            taskId,
+          },
+        },
+      );
     }
 
     const synced = await executionSyncActions.syncTaskToggle(taskId, completed);
@@ -841,12 +663,26 @@ export function TwelveWeekSystem() {
       linkedWeekNumber: reviewWeekNumber,
     });
 
-    trackAppEvent("12_week_weekly_review_submitted", actionGoalId, {
-      weekNumber: String(reviewWeekNumber),
-      score: String(reviewExecutionScore),
-      decision: workloadDecisionValue || "keep same",
-      usedSuggestedPlan: String(hasPremiumReviewInsights && weeklyForm.nextWeekPriority.trim().length === 0),
-    });
+    trackAnalyticsEvent(
+      "weekly_review_submitted",
+      {
+        source: "12_week_system",
+        week_number: reviewWeekNumber,
+        lead_completion_percent: reviewWeekCompletion.percent,
+        execution_score: reviewExecutionScore,
+        workload_decision: workloadDecisionValue || "keep same",
+      },
+      {
+        goalId: actionGoalId,
+        legacyEventName: "12_week_weekly_review_submitted",
+        legacyPayload: {
+          weekNumber: String(reviewWeekNumber),
+          score: String(reviewExecutionScore),
+          decision: workloadDecisionValue || "keep same",
+          usedSuggestedPlan: String(hasPremiumReviewInsights && weeklyForm.nextWeekPriority.trim().length === 0),
+        },
+      },
+    );
 
     const synced = await executionSyncActions.syncWeeklyReview({
       weekNumber: reviewWeekNumber,
@@ -1332,158 +1168,36 @@ export function TwelveWeekSystem() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.3)]">
-        <CardContent className="p-4 sm:p-5 lg:p-6">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-            <div className="min-w-0 flex-1 space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge
-                  variant="outline"
-                  className="rounded-full border-slate-200 bg-slate-50 px-3 py-1.5 text-slate-600"
-                >
-                  <Compass className="mr-1 h-3.5 w-3.5" />
-                  Nhịp 12 tuần
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className="rounded-full border-slate-200 bg-slate-50 px-3 py-1.5 text-slate-600"
-                >
-                  <Target className="mr-1 h-3.5 w-3.5" />
-                  Tuần {currentWeek}/{system.totalWeeks}
-                </Badge>
-                <Badge variant="outline" className={`rounded-full px-3 py-1.5 ${syncBadgeClass}`}>
-                  {syncBadgeLabel}
-                </Badge>
-                {reviewDueToday && (
-                  <Badge
-                    variant="outline"
-                    className="rounded-full border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-800"
-                  >
-                    Review hôm nay
-                  </Badge>
-                )}
-              </div>
-              <div className="space-y-2">
-                <h1 className="max-w-4xl break-words text-xl font-bold tracking-normal text-slate-950 sm:text-2xl">
-                  {activeGoal.title}
-                </h1>
-                <p className="max-w-3xl text-sm leading-7 text-slate-600">
-                  Mở vào là thấy việc hôm nay trước. Tiến độ, review và cài đặt nằm ở các tab phía dưới.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-                <span className="rounded-full bg-slate-100 px-3 py-1">
-                  {getLifeAreaLabel(activeGoal.focusArea || activeGoal.category)}
-                </span>
-                <span className="rounded-full bg-slate-100 px-3 py-1">Gói {getPlanLabel(activePlanCode)}</span>
-                {activeGoal.feasibilityResult && (
-                  <span className="rounded-full bg-slate-100 px-3 py-1">
-                    {getFeasibilityResultLabel(activeGoal.feasibilityResult)}
-                  </span>
-                )}
-              </div>
-            </div>
+      <TwelveWeekDashboardHeader
+        activeGoal={activeGoal}
+        system={system}
+        activePlanCode={activePlanCode}
+        currentWeek={currentWeek}
+        syncBadgeClass={syncBadgeClass}
+        syncBadgeLabel={syncBadgeLabel}
+        reviewDueToday={reviewDueToday}
+        todayRemainingCount={todayRemainingCount}
+        todayCompletedCount={todayCompletedCount}
+        weekCompletion={weekCompletion}
+        currentWeekRange={currentWeekRange}
+        reviewStatusLabel={reviewStatusLabel}
+        firstPriorityTask={firstPriorityTask}
+        onOpenFocusTab={() => handleTabChange(reviewDueToday ? "week" : "today")}
+        onOpenGoals={() => navigate("/goals")}
+      />
 
-            <div className="grid min-w-0 gap-2 sm:grid-cols-3 xl:w-[520px]">
-              <div className="rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Hôm nay</p>
-                <p className="mt-1 text-2xl font-bold text-slate-950">{todayRemainingCount}</p>
-                <p className="text-xs text-slate-500">{todayCompletedCount} việc đã chốt</p>
-              </div>
-              <div className="rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tuần này</p>
-                <p className="mt-1 text-2xl font-bold text-slate-950">{weekCompletion.percent}%</p>
-                <p className="text-xs text-slate-500">
-                  {currentWeekRange
-                    ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
-                    : "Đang chạy"}
-                </p>
-              </div>
-              <div
-                className={`rounded-lg border px-4 py-3 ${
-                  reviewDueToday ? "border-amber-200 bg-amber-50/90" : "border-slate-200 bg-slate-50/80"
-                }`}
-              >
-                <p
-                  className={`text-xs font-semibold uppercase tracking-[0.14em] ${
-                    reviewDueToday ? "text-amber-700" : "text-slate-500"
-                  }`}
-                >
-                  Review
-                </p>
-                <p className="mt-1 truncate text-base font-bold text-slate-950">
-                  {reviewDueToday ? "Hôm nay" : getReviewDayLabel(system.reviewDay)}
-                </p>
-                <p className="text-xs text-slate-500">{reviewStatusLabel}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 hidden flex-col gap-3 border-t border-slate-200 pt-4 sm:flex lg:flex-row lg:items-center lg:justify-between">
-            <p className="min-w-0 text-sm leading-6 text-slate-600">
-              {reviewDueToday
-                ? "Ưu tiên: chốt review tuần trước khi mở việc mới."
-                : firstPriorityTask
-                  ? `Ưu tiên: ${firstPriorityTask.title}`
-                  : "Hôm nay đang gọn. Có thể check-in hoặc xem lại tuần."}
-            </p>
-            <div className="hidden shrink-0 flex-col gap-2 sm:flex sm:flex-row">
-              <Button
-                className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
-                onClick={() => handleTabChange(reviewDueToday ? "week" : "today")}
-              >
-                {reviewDueToday ? "Mở review" : "Mở Hôm nay"}
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full border-slate-200 bg-white text-slate-900 hover:bg-slate-50 sm:w-auto"
-                onClick={() => navigate("/goals")}
-              >
-                Mở mục tiêu
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {allGoals.length > 1 && (
-        <details className="group rounded-xl border border-slate-200 bg-white/88 px-4 py-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.2)]">
-          <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 text-sm font-semibold text-slate-900">
-            <span>Đổi chu kỳ 12 tuần khác</span>
-            <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
-              {allGoals.length} chu kỳ
-            </span>
-          </summary>
-          <div className="mt-3 space-y-3 border-t border-slate-200 pt-3">
-            <p className="text-sm leading-6 text-slate-600">
-              App đang ưu tiên chu kỳ active mới nhất; chỉ mở lại chu kỳ cũ khi cần đối chiếu.
-            </p>
-            <Select value={activeGoal.id} onValueChange={(value) => loadGoalData(value)}>
-              <SelectTrigger className="max-w-xl" aria-label="Chọn mục tiêu 12 tuần">
-                <SelectValue placeholder="Chọn mục tiêu" />
-              </SelectTrigger>
-              <SelectContent>
-                {allGoals.map((goal) => (
-                  <SelectItem key={goal.id} value={goal.id}>
-                    {goal.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </details>
-      )}
+      <TwelveWeekGoalSwitcher allGoals={allGoals} activeGoalId={activeGoal.id} onLoadGoal={loadGoalData} />
 
       {hasIncompletePlanStructure && (
         <TwelveWeekDashboardNotice
           tone="warning"
-          title="Chu kỳ này chưa có việc hoặc metric đủ rõ"
+          title="Chu kỳ này chưa có việc hoặc chỉ số đủ rõ"
           description={
             planHasNoLeadMetrics
-              ? "Dashboard đã thấy plan, nhưng chưa có tactic/lead metric để tạo hàng việc mỗi tuần. Hãy tạo lại chu kỳ từ flow mục tiêu để có task và review rõ ràng."
+              ? "Dashboard đã thấy kế hoạch, nhưng chưa có việc giữ nhịp để tạo hàng việc mỗi tuần. Hãy tạo lại chu kỳ từ flow mục tiêu để có việc và review rõ ràng."
               : planHasNoTasks
-                ? "Plan đã có tactic nhưng chưa có task nào trong chu kỳ. Hãy kiểm tra lại setup hoặc tạo lại chu kỳ để dashboard có hàng việc hôm nay."
-                : "Metric kết quả chính đang trống, nên phần tiến độ và review sẽ khó hiểu hơn. Hãy bổ sung metric khi chỉnh lại chu kỳ."
+                ? "Kế hoạch đã có việc giữ nhịp nhưng chưa có việc nào trong chu kỳ. Hãy kiểm tra lại setup hoặc tạo lại chu kỳ để dashboard có hàng việc hôm nay."
+                : "Chỉ số kết quả chính đang trống, nên phần tiến độ và review sẽ khó hiểu hơn. Hãy bổ sung chỉ số khi chỉnh lại chu kỳ."
           }
         >
           <Button
@@ -1517,91 +1231,30 @@ export function TwelveWeekSystem() {
         </TwelveWeekDashboardNotice>
       )}
 
-      {/* Rescue trigger banner */}
-      {(() => {
-        const visibleTriggers = activeTriggers.filter((t) => t.kind !== dismissedTriggerKind);
-        const topTrigger = visibleTriggers[0] ?? null;
-        if (!topTrigger) return null;
-
-        const severityStyles = {
-          urgent: {
-            wrapper: "border-rose-200 bg-rose-50",
-            icon: "bg-rose-100 text-rose-600",
-            headline: "text-rose-800",
-            detail: "text-rose-700",
-          },
-          caution: {
-            wrapper: "border-amber-200 bg-amber-50",
-            icon: "bg-amber-100 text-amber-600",
-            headline: "text-amber-800",
-            detail: "text-amber-700",
-          },
-          watch: {
-            wrapper: "border-slate-200 bg-slate-50",
-            icon: "bg-slate-100 text-slate-500",
-            headline: "text-slate-800",
-            detail: "text-slate-600",
-          },
-        } as const;
-        const s = severityStyles[topTrigger.severity];
-        const ctaHref = topTrigger.kind === "trial_ending" ? "/billing/plan" : undefined;
-        const ctaLabel = topTrigger.kind === "trial_ending" ? "Nâng cấp ngay" : "Xem lại hàng việc";
-
-        return (
-          <div
-            role="alert"
-            className={`rounded-xl border px-4 py-3 text-sm ${s.wrapper}`}
-            onAnimationStart={() => {
-              trackRescueTriggerFired({
-                kind: topTrigger.kind,
-                severity: topTrigger.severity,
-                currentPlan: activePlanCode,
-              });
-            }}
-          >
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-              <div className="flex min-w-0 flex-1 items-start gap-3">
-                <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${s.icon}`}>
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className={`font-semibold ${s.headline}`}>{topTrigger.headline}</p>
-                  <p className={`mt-0.5 text-xs leading-5 ${s.detail}`}>{topTrigger.detail}</p>
-                </div>
-              </div>
-              <div className="flex w-full shrink-0 items-center gap-2 sm:ml-auto sm:w-auto">
-                <Button
-                  size="sm"
-                  className="flex-1 sm:flex-none"
-                  onClick={() => {
-                    trackRescueActionTaken({
-                      kind: topTrigger.kind,
-                      action: ctaHref ? "upgrade" : "navigate_system",
-                      currentPlan: activePlanCode,
-                    });
-                    if (ctaHref) navigate(ctaHref);
-                    else setActiveTab("today");
-                  }}
-                >
-                  {ctaLabel}
-                </Button>
-                <button
-                  type="button"
-                  className="px-1 text-xs opacity-60 transition-opacity hover:opacity-100"
-                  aria-label="Đóng thông báo"
-                  onClick={() => {
-                    dismissRescueTrigger(topTrigger.kind);
-                    trackRescueTriggerDismissed({ kind: topTrigger.kind, currentPlan: activePlanCode });
-                    setDismissedTriggerKind(topTrigger.kind);
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+      <TwelveWeekRescueTriggerBanner
+        trigger={activeTriggers.filter((trigger) => trigger.kind !== dismissedTriggerKind)[0] ?? null}
+        onTriggerFired={(trigger) => {
+          trackRescueTriggerFired({
+            kind: trigger.kind,
+            severity: trigger.severity,
+            currentPlan: activePlanCode,
+          });
+        }}
+        onActionTaken={(trigger, action) => {
+          trackRescueActionTaken({
+            kind: trigger.kind,
+            action,
+            currentPlan: activePlanCode,
+          });
+        }}
+        onOpenUpgrade={() => navigate("/billing/plan")}
+        onOpenToday={() => setActiveTab("today")}
+        onDismiss={(kind) => {
+          dismissRescueTrigger(kind);
+          trackRescueTriggerDismissed({ kind, currentPlan: activePlanCode });
+          setDismissedTriggerKind(kind);
+        }}
+      />
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList
