@@ -31,7 +31,7 @@ describe("12-week core flows", () => {
     await screen.findByRole("heading", { name: "Mục tiêu 12 tuần" });
     await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
 
-    const tacticInputs = await screen.findAllByLabelText("Tên tactic");
+    const tacticInputs = await screen.findAllByLabelText("Tên việc");
     await user.clear(tacticInputs[0]);
     await user.type(tacticInputs[0], "Ship phần việc cốt lõi");
     await user.clear(tacticInputs[1]);
@@ -39,7 +39,7 @@ describe("12-week core flows", () => {
 
     await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
     await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
-    await user.click(screen.getByRole("button", { name: "Tạo hệ thống 12 tuần" }));
+    await user.click(screen.getByRole("button", { name: "Tạo kế hoạch 12 tuần" }));
 
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/12-week-system");

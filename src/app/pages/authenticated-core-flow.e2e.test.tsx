@@ -218,15 +218,17 @@ async function fillSmartGoal(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole("button", { name: "Tiếp theo" }));
 
   await screen.findByLabelText("Số tuần mục tiêu");
-  await user.click(screen.getByRole("button", { name: "Tiếp theo: kiểm tra tính khả thi" }));
+  await user.click(screen.getByRole("button", { name: "Tiếp theo: kiểm tra tính thực tế" }));
 }
 
 async function completeFeasibility(user: ReturnType<typeof userEvent.setup>) {
   const answers = [
     /Hơn 5 giờ mỗi tuần/i,
+    /Còn khá tốt và chủ động được/i,
+    /Đủ để bắt đầu ngay/i,
     /Rất thực tế/i,
     /Hiện chưa thấy trở ngại lớn/i,
-    /Rất kỷ luật/i,
+    /Đã có khung giờ khá cố định/i,
     /Cam kết hoàn toàn/i,
   ];
 
@@ -239,14 +241,14 @@ async function completeFeasibility(user: ReturnType<typeof userEvent.setup>) {
     );
   }
 
-  await user.click(await screen.findByRole("button", { name: "Dựng hệ 12 tuần" }));
+  await user.click(await screen.findByRole("button", { name: "Tạo kế hoạch 12 tuần" }));
 }
 
 async function completeTwelveWeekSetup(user: ReturnType<typeof userEvent.setup>) {
   await screen.findByRole("heading", { name: "Mục tiêu 12 tuần" });
   await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
 
-  const tacticInputs = await screen.findAllByLabelText("Tên tactic");
+  const tacticInputs = await screen.findAllByLabelText("Tên việc");
   await user.clear(tacticInputs[0]);
   await user.type(tacticInputs[0], "Chốt review tuần");
   await user.clear(tacticInputs[1]);
@@ -254,7 +256,7 @@ async function completeTwelveWeekSetup(user: ReturnType<typeof userEvent.setup>)
 
   await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
   await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
-  await user.click(screen.getByRole("button", { name: "Tạo hệ thống 12 tuần" }));
+  await user.click(screen.getByRole("button", { name: "Tạo kế hoạch 12 tuần" }));
 }
 
 describe("authenticated new user core flow", () => {

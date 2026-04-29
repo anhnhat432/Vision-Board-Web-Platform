@@ -485,7 +485,7 @@ async function completeLifeInsight() {
 
 async function completeSmartGoal() {
   await captureCheckpoint("smart goal setup", {
-    expectedTexts: ["SMART"],
+    expectedTexts: ["Viết mục tiêu rõ"],
     forbiddenTexts: ["Nên làm gì tiếp?"],
   });
 
@@ -507,28 +507,28 @@ async function completeSmartGoal() {
   await clickButton("Tiếp theo");
 
   await waitFor("smart deadline step", 'document.querySelector("#smart-target-weeks")');
-  await clickButton("kiểm tra tính khả thi");
+  await clickButton("kiểm tra tính thực tế");
   await waitFor("feasibility route", 'location.pathname === "/feasibility"', { timeoutMs: 45_000 });
 }
 
 async function completeFeasibility() {
   await captureCheckpoint("feasibility check", {
-    expectedTexts: ["Feasibility Assessment"],
+    expectedTexts: ["Kiểm tra tính thực tế"],
     forbiddenTexts: ["Nên làm gì tiếp?"],
   });
 
-  const answers = ["gt5", "very_realistic", "none", "always", "committed"];
+  const answers = ["gt5", "energy_high", "resources_ready", "very_realistic", "none", "always", "committed"];
   for (const [index, answer] of answers.entries()) {
     await clickRadio(answer);
     await clickButton(index === answers.length - 1 ? "Hoàn thành đánh giá" : "Tiếp theo");
   }
 
   await captureCheckpoint("feasibility result", {
-    expectedTexts: ["Dựng hệ 12 tuần"],
+    expectedTexts: ["Tạo kế hoạch 12 tuần"],
     forbiddenTexts: ["Nên làm gì tiếp?"],
   });
 
-  await clickButton("Dựng hệ 12 tuần");
+  await clickButton("Tạo kế hoạch 12 tuần");
   await waitFor("12-week setup route", 'location.pathname === "/12-week-setup"', { timeoutMs: 45_000 });
 }
 
@@ -550,8 +550,8 @@ async function completeTwelveWeekSetup() {
   await fill("#lag-metric-unit", "tuần");
   await clickButton("Tiếp tục");
 
-  await waitFor("finish step", 'document.body.innerText.includes("Chốt hệ thống")');
-  await clickButton("Tạo hệ thống 12 tuần");
+  await waitFor("finish step", 'document.body.innerText.includes("Chốt kế hoạch")');
+  await clickButton("Tạo kế hoạch 12 tuần");
   await waitFor("12-week system route", 'location.pathname === "/12-week-system"', { timeoutMs: 75_000 });
 }
 

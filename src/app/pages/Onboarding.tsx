@@ -105,22 +105,22 @@ export function Onboarding() {
       <div
         ref={flowTopRef}
         tabIndex={-1}
-        className="flow-shell min-h-screen px-4 py-6 focus:outline-none sm:px-6 lg:px-8"
+        className="flow-shell min-h-screen px-4 py-4 focus:outline-none sm:px-6 sm:py-6 lg:px-8"
       >
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55 }}
-          className="mx-auto w-full max-w-6xl space-y-5"
+          className="mx-auto w-full max-w-6xl space-y-4 sm:space-y-5"
         >
           <CoreFlowProgress currentStepId="life_balance" />
 
           <Card className="hero-surface flow-surface overflow-hidden">
-            <CardContent className="relative p-5 sm:p-6 lg:p-7 xl:p-8">
+            <CardContent className="relative p-4 sm:p-6 lg:p-7 xl:p-8">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_24%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.1),_transparent_24%)] opacity-90" />
 
               <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.12fr)_360px]">
-                <div className="space-y-6">
+                <div className="space-y-5 sm:space-y-6">
                   {isReturning && (
                     <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
                       <span className="font-semibold text-slate-950">Bạn đã hoàn thành onboarding rồi.</span> Điểm số
@@ -128,19 +128,19 @@ export function Onboarding() {
                       tạo lại từ đầu.
                     </div>
                   )}
-                  <div className="space-y-5">
+                  <div className="space-y-4 sm:space-y-5">
                     <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-sm text-slate-600">
                       <Sparkles className="h-4 w-4" />
                       {isReturning ? "Cập nhật bánh xe cuộc sống" : "Khởi động hành trình định hướng cuộc sống"}
                     </div>
 
                     <div className="space-y-4">
-                      <h1 className="max-w-3xl text-3xl font-bold tracking-normal text-slate-950 lg:text-4xl">
+                      <h1 className="max-w-3xl text-2xl font-bold tracking-normal text-slate-950 sm:text-3xl lg:text-4xl">
                         {isReturning
                           ? "Điểm số thay đổi? Hãy cập nhật lại để insight bám sát thực tế hơn."
                           : "Tạo một điểm bắt đầu đủ rõ để phần còn lại của hành trình trở nên nhẹ hơn."}
                       </h1>
-                      <p className="max-w-2xl text-base leading-8 text-slate-600 lg:text-lg">
+                      <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base lg:text-lg">
                         {isReturning
                           ? "Điểm số hiện tại của bạn đã được tải sẵn. Chỉ cần điều chỉnh lĩnh vực nào thay đổi rồi lưu lại là xong."
                           : "Chỉ trong vài phút, bạn sẽ nhìn thấy bức tranh hiện tại của mình, chọn ra nơi cần ưu tiên nhất và mở ra một hệ thống phát triển cá nhân có định hướng rõ ràng."}
@@ -148,7 +148,7 @@ export function Onboarding() {
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-3">
+                  <div className="hidden flex-wrap gap-3 sm:flex">
                     {FEATURE_PILLS.map((item) => (
                       <div
                         key={item}
@@ -177,7 +177,7 @@ export function Onboarding() {
                     </Button>
                   </div>
 
-                  <div className="grid gap-4 md:grid-cols-3">
+                  <div className="hidden gap-4 md:grid md:grid-cols-3">
                     {JOURNEY_STEPS.map((item, index) => (
                       <div key={item.title} className="flow-muted p-4">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-sm font-semibold text-slate-700">
@@ -190,7 +190,7 @@ export function Onboarding() {
                   </div>
                 </div>
 
-                <div className="flow-panel p-5 sm:p-6">
+                <div className="hidden flow-panel p-5 sm:p-6 xl:block">
                   <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">
                     Bạn sẽ nhận được gì
                   </p>
@@ -234,22 +234,22 @@ export function Onboarding() {
     <div
       ref={flowTopRef}
       tabIndex={-1}
-      className="flow-shell min-h-screen px-4 py-6 focus:outline-none sm:px-6 lg:px-8"
+      className="flow-shell min-h-screen px-4 py-4 focus:outline-none sm:px-6 sm:py-6 lg:px-8"
     >
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.55 }}
-        className="mx-auto w-full max-w-6xl space-y-5"
+        className="mx-auto w-full max-w-6xl space-y-4 sm:space-y-5"
       >
         <CoreFlowProgress currentStepId="life_balance" />
 
         <Card className="hero-surface flow-surface overflow-hidden">
-          <CardContent className="relative p-5 sm:p-6 lg:p-7">
+          <CardContent className="relative p-4 sm:p-6 lg:p-7">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.1),_transparent_26%)] opacity-90" />
 
-            <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
-              <div className="space-y-5">
+            <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-6">
+              <div className="space-y-4 sm:space-y-5">
                 <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-sm text-slate-600">
                   <Compass className="h-4 w-4" />
                   Bước 1/1: Đánh giá bánh xe cuộc sống
@@ -264,17 +264,17 @@ export function Onboarding() {
                   />
                 </div>
                 <div className="space-y-3">
-                  <h1 className="max-w-3xl text-3xl font-bold tracking-normal text-slate-950 lg:text-4xl">
+                  <h1 className="max-w-3xl text-2xl font-bold tracking-normal text-slate-950 sm:text-3xl lg:text-4xl">
                     Chấm điểm hiện tại để biết chính xác nơi bạn nên bắt đầu.
                   </h1>
-                  <p className="max-w-2xl text-base leading-8 text-slate-600 lg:text-lg">
+                  <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base lg:text-lg">
                     Mỗi thanh kéo là một góc nhìn về cuộc sống của bạn. Đánh giá từ 1 đến 10, sau đó hệ thống sẽ dùng
                     bức tranh này để mở ra insight cá nhân hóa ở bước tiếp theo.
                   </p>
                 </div>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+              <div className="hidden gap-3 sm:grid sm:grid-cols-3 lg:grid-cols-1">
                 {[
                   {
                     label: "Điểm trung bình",
@@ -306,7 +306,7 @@ export function Onboarding() {
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <Card className="flow-panel overflow-hidden">
             <CardContent className="space-y-3 p-4 sm:p-5 lg:p-6">
-              <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
+              <div className="hidden rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600 sm:block">
                 Kéo từng lĩnh vực từ <span className="font-semibold text-slate-950">1</span> đến{" "}
                 <span className="font-semibold text-slate-950">10</span>. Điểm thấp là nơi cần chú ý, điểm cao là
                 nơi đang tạo lực đẩy tốt.
@@ -381,7 +381,7 @@ export function Onboarding() {
                   </div>
                 </div>
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+                <div className="mt-5 hidden gap-3 sm:grid sm:grid-cols-3 xl:grid-cols-1">
                   <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Trung bình</p>
                     <p className="mt-1 text-xl font-bold text-slate-950">{averageScore.toFixed(1)}</p>

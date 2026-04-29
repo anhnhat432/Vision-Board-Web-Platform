@@ -117,7 +117,7 @@ describe("core funnel guards", () => {
   it("blocks direct SMART Goal access when Life Balance has not been completed", async () => {
     renderCoreFunnel("/smart-goal-setup");
 
-    expect(await screen.findByRole("heading", { name: "Hoàn thành Life Balance trước" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Hoàn thành bước cân bằng trước" })).toBeInTheDocument();
     expect(screen.queryByLabelText("Câu trả lời của bạn")).not.toBeInTheDocument();
   });
 
@@ -126,8 +126,8 @@ describe("core funnel guards", () => {
     const user = userEvent.setup();
     const { router } = renderCoreFunnel("/smart-goal-setup");
 
-    expect(await screen.findByRole("heading", { name: "Chọn Life Insight trước" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Mở Life Insight" }));
+    expect(await screen.findByRole("heading", { name: "Chọn trọng tâm trước" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Mở bước chọn trọng tâm" }));
 
     expect(router.state.location.pathname).toBe("/life-insight");
   });

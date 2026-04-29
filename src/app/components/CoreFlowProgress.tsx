@@ -19,39 +19,39 @@ const CORE_FLOW_STEPS: Array<{
 }> = [
   {
     id: "life_balance",
-    label: "Life Balance",
+    label: "Cân bằng",
     title: "Đánh giá cân bằng",
     description: "Chấm điểm các lĩnh vực quan trọng để biết nên ưu tiên nơi nào trước.",
   },
   {
     id: "life_insight",
-    label: "Life Insight",
+    label: "Trọng tâm",
     title: "Chọn trọng tâm",
     description: "Chọn một lĩnh vực đủ quan trọng để hành động.",
   },
   {
     id: "smart_goal",
-    label: "SMART Goal",
+    label: "Viết mục tiêu",
     title: "Viết mục tiêu rõ",
     description: "Làm rõ kết quả, chỉ số đo, thời gian và lý do.",
   },
   {
     id: "feasibility",
-    label: "Feasibility",
-    title: "Kiểm tra khả thi",
+    label: "Kiểm tra",
+    title: "Kiểm tra tính thực tế",
     description: "Đo mức sẵn sàng trước khi biến mục tiêu thành kế hoạch 12 tuần.",
   },
   {
     id: "twelve_week_setup",
-    label: "12-Week Setup",
-    title: "Dựng hệ 12 tuần",
-    description: "Chốt outcome, tactic, metric và lịch review.",
+    label: "Kế hoạch 12 tuần",
+    title: "Tạo kế hoạch 12 tuần",
+    description: "Chốt kết quả, việc lặp lại, chỉ số và lịch nhìn lại.",
   },
   {
     id: "today",
-    label: "Today",
+    label: "Hôm nay",
     title: "Làm việc hôm nay",
-    description: "Theo dõi việc cần làm, check-in hằng ngày và review tuần.",
+    description: "Theo dõi việc cần làm, đánh dấu việc hằng ngày và nhìn lại tuần.",
   },
 ];
 

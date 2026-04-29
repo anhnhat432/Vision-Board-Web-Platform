@@ -243,7 +243,7 @@ function getStepValidationError(stepKey: SmartStepKey, smartData: SMARTData): st
 
   if (stepKey === "measurable") {
     if (smartData.measurable.metric_name.trim().length === 0) {
-      return "Cần nhập tên chỉ số đo lường.";
+      return "Hãy chọn một con số hoặc dấu hiệu rõ để theo dõi.";
     }
 
     const targetValue = parseNumberInput(smartData.measurable.target_value);
@@ -295,48 +295,48 @@ function getStepValidationError(stepKey: SmartStepKey, smartData: SMARTData): st
 const SMART_STEPS = [
   {
     key: "specific" as keyof SMARTData,
-    label: "Cụ thể",
-    title: "Bạn muốn đạt được chính xác điều gì?",
+    label: "Điều muốn đạt",
+    title: "Bạn muốn có kết quả gì?",
     placeholder: "Ví dụ: Tôi muốn được thăng chức lên vị trí Lập trình viên cao cấp và dẫn dắt một dự án quan trọng.",
-    description: "Mục tiêu càng rõ thì năng lượng hành động càng dễ tập trung. Tránh những câu quá rộng hoặc mơ hồ.",
-    coaching: "Hãy mô tả kết quả cuối cùng, không chỉ nói về mong muốn chung chung.",
-    completionHint: "Viết một kết quả cụ thể đủ rõ để người khác hiểu bạn muốn đạt điều gì.",
+    description: "Viết bằng một câu rõ ràng để chính bạn nhìn vào là biết mình đang hướng tới điều gì.",
+    coaching: "Nói về kết quả cuối cùng, không chỉ viết mong muốn chung chung.",
+    completionHint: "Viết một kết quả đủ rõ để người khác đọc cũng hiểu bạn muốn đạt điều gì.",
   },
   {
     key: "measurable" as keyof SMARTData,
-    label: "Đo được",
-    title: "Bạn sẽ biết mình đang tiến bộ bằng cách nào?",
+    label: "Con số theo dõi",
+    title: "Bạn sẽ biết mình đang tiến bộ bằng dấu hiệu nào?",
     placeholder: "Ví dụ: Hoàn thành 3 khóa học nâng cao, dẫn dắt 2 tính năng lớn và nhận đánh giá tốt từ quản lý.",
-    description: "Đặt ra dấu hiệu cụ thể để bạn không phải đoán cảm tính rằng mình có đang đi đúng hướng hay không.",
-    coaching: "Hãy nghĩ bằng số lượng, cột mốc, đầu ra hoặc tiêu chí dễ quan sát.",
-    completionHint: "Chốt một chỉ số, mốc hiện tại và mốc mục tiêu để tiến độ không còn cảm tính.",
+    description: "Chọn một dấu hiệu cụ thể để bạn không phải đoán mò mình có đang đi đúng hướng hay không.",
+    coaching: "Có thể là số lượng, cột mốc, đầu ra hoặc một tiêu chí dễ quan sát.",
+    completionHint: "Chốt một chỉ số, mốc hiện tại và mốc muốn chạm tới.",
   },
   {
     key: "achievable" as keyof SMARTData,
-    label: "Khả thi",
-    title: "Bạn cần những nguồn lực, kỹ năng hay điều kiện nào?",
+    label: "Điều kiện thật",
+    title: "Bạn thật sự có gì để làm mục tiêu này?",
     placeholder: "Ví dụ: cần 5 giờ học mỗi tuần, mentor góp ý định kỳ và thời gian thực hành có lịch cố định.",
-    description: "Phần này giúp mục tiêu bớt mơ hồ và kéo nó gần hơn với đời sống thật của bạn.",
-    coaching: "Nghĩ đến thời gian, kỹ năng, người hỗ trợ và môi trường bạn cần.",
+    description: "Phần này kéo mục tiêu về đời sống thật: thời gian, kỹ năng, người hỗ trợ và nguồn lực bạn có.",
+    coaching: "Đừng viết phiên bản lý tưởng. Hãy viết phần bạn thật sự có thể giữ đều.",
     completionHint: "Điền thời gian mỗi tuần, kỹ năng và nguồn lực thực tế bạn có thể dựa vào.",
   },
   {
     key: "relevant" as keyof SMARTData,
-    label: "Liên quan",
-    title: "Tại sao mục tiêu này thực sự quan trọng với bạn?",
+    label: "Lý do",
+    title: "Vì sao mục tiêu này đáng theo đuổi?",
     placeholder: "Ví dụ: Vì nó gắn trực tiếp với tầm nhìn nghề nghiệp 3 năm tới và mức thu nhập tôi đang hướng đến.",
     description: "Khi mục tiêu gắn với một lý do đủ mạnh, bạn sẽ dễ giữ được kỷ luật hơn trong giai đoạn khó.",
-    coaching: "Viết theo kiểu: mục tiêu này quan trọng vì...",
+    coaching: "Viết như đang tự nhắc mình: mục tiêu này quan trọng vì...",
     completionHint: "Nêu lý do đủ thật để mục tiêu này đáng theo đuổi trong vài tuần tới.",
   },
   {
     key: "timeBound" as keyof SMARTData,
-    label: "Thời hạn",
-    title: "Bạn muốn đạt được điều này vào khi nào?",
+    label: "Mốc thời gian",
+    title: "Bạn muốn chạm tới kết quả này vào khi nào?",
     placeholder: "Ví dụ: Trong vòng 12 tháng, trước tháng 3 năm 2027.",
-    description: "Thời hạn tạo ra nhịp. Không cần quá gấp, nhưng cần đủ rõ để buộc bạn ra quyết định.",
+    description: "Mốc thời gian tạo ra nhịp. Không cần quá gấp, nhưng cần đủ rõ để bạn biết khi nào phải nhìn lại.",
     coaching: "Nếu chưa chắc ngày cụ thể, ít nhất hãy đưa ra khung tuần hoặc tháng.",
-    completionHint: "Chốt số tuần hoặc ngày đích trước khi chuyển sang kiểm tra tính khả thi.",
+    completionHint: "Chốt số tuần hoặc ngày đích trước khi chuyển sang kiểm tra tính thực tế.",
   },
 ];
 
@@ -482,10 +482,10 @@ export function SMARTGoalSetup() {
     return (
       <CoreFlowGateState
         currentStepId="smart_goal"
-        eyebrow="SMART Goal"
+        eyebrow="Viết mục tiêu"
         loading
-        title="Đang kiểm tra dữ liệu SMART Goal"
-        description="Mình đang kiểm tra Life Balance và Life Insight trước khi mở phần viết mục tiêu."
+        title="Đang chuẩn bị bước viết mục tiêu"
+        description="Mình đang kiểm tra dữ liệu cân bằng cuộc sống và trọng tâm đã chọn trước khi mở phần viết mục tiêu."
       />
     );
   }
@@ -494,10 +494,10 @@ export function SMARTGoalSetup() {
     return (
       <CoreFlowGateState
         currentStepId="life_balance"
-        eyebrow="SMART Goal"
-        title="Hoàn thành Life Balance trước"
-        description="SMART Goal cần đi sau dữ liệu Life Balance thật. Hãy chấm điểm các lĩnh vực trước để mục tiêu không bắt đầu từ số mặc định."
-        actionLabel="Bắt đầu Life Balance"
+        eyebrow="Viết mục tiêu"
+        title="Hoàn thành bước cân bằng trước"
+        description="Bước viết mục tiêu cần đi sau dữ liệu cân bằng cuộc sống thật. Hãy chấm điểm các lĩnh vực trước để mục tiêu không bắt đầu từ số mặc định."
+        actionLabel="Bắt đầu cân bằng"
         onAction={() => navigate("/onboarding")}
       />
     );
@@ -507,10 +507,10 @@ export function SMARTGoalSetup() {
     return (
       <CoreFlowGateState
         currentStepId="life_insight"
-        eyebrow="SMART Goal"
-        title="Chọn Life Insight trước"
-        description="Bạn đã có dữ liệu Life Balance, nhưng chưa chọn lĩnh vực trọng tâm. Hãy chọn một insight rồi quay lại viết SMART Goal."
-        actionLabel="Mở Life Insight"
+        eyebrow="Viết mục tiêu"
+        title="Chọn trọng tâm trước"
+        description="Bạn đã có dữ liệu cân bằng cuộc sống, nhưng chưa chọn lĩnh vực trọng tâm. Hãy chọn một trọng tâm rồi quay lại viết mục tiêu."
+        actionLabel="Mở bước chọn trọng tâm"
         onAction={() => navigate("/life-insight")}
       />
     );
@@ -808,7 +808,7 @@ export function SMARTGoalSetup() {
               aria-invalid={targetWeeksInvalid}
             />
             <p className="text-sm text-slate-500">
-              Gợi ý: 12 tuần là chu kỳ hợp lý để nối sang phần planning tiếp theo.
+              Gợi ý: 12 tuần là chu kỳ hợp lý để nối sang bước lập kế hoạch tiếp theo.
             </p>
           </div>
         ) : (
@@ -831,7 +831,7 @@ export function SMARTGoalSetup() {
               }
               aria-invalid={targetDateInvalid}
             />
-            <p className="text-sm text-slate-500">Chọn mốc ngày đủ rõ để bạn có thể review tiến độ ngược trở lại.</p>
+            <p className="text-sm text-slate-500">Chọn mốc ngày đủ rõ để bạn có thể nhìn lại tiến độ.</p>
           </div>
         )}
       </div>
@@ -856,16 +856,16 @@ export function SMARTGoalSetup() {
               <div className="space-y-5">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Compass className="h-4 w-4" />
-                  Mục tiêu SMART
+                  Viết mục tiêu rõ
                 </div>
 
                 <div className="space-y-4">
                   <h1 className="max-w-3xl text-3xl font-bold tracking-normal lg:text-4xl">
-                    Chúng ta sẽ biến insight vừa có thành một mục tiêu đủ rõ để bắt đầu hành động.
+                    Biến trọng tâm vừa chọn thành một mục tiêu rõ, đo được và đủ thực tế để bắt đầu.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
-                    SMART không phải chỉ để viết cho đẹp. Nó giúp mục tiêu của bạn trở nên rõ hơn, thực tế hơn và dễ
-                    mang sang bước đánh giá khả thi cũng như hệ 12 tuần phía sau.
+                    Màn này chỉ giữ 5 câu hỏi quan trọng: muốn đạt gì, đo bằng gì, có đủ điều kiện không, vì sao đáng
+                    làm, và khi nào cần nhìn lại. Sau đó mục tiêu sẽ đi sang bước kiểm tra tính thực tế.
                   </p>
                 </div>
 
@@ -969,7 +969,7 @@ export function SMARTGoalSetup() {
                 <div className="flow-muted p-4">
                   <div className="space-y-1">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                      Tiếp tục flow SMART
+                      Tiếp tục viết mục tiêu
                     </p>
                     <p className="text-sm text-slate-600">{currentStepActionHint}</p>
                   </div>
@@ -980,7 +980,7 @@ export function SMARTGoalSetup() {
                       Quay lại
                     </Button>
                     <Button className="flex-1" onClick={handleNext} disabled={!isCurrentStepValid}>
-                      {currentStep < totalSteps - 1 ? "Tiếp theo" : "Tiếp theo: kiểm tra tính khả thi"}
+                      {currentStep < totalSteps - 1 ? "Tiếp theo" : "Tiếp theo: kiểm tra tính thực tế"}
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </div>
@@ -989,24 +989,22 @@ export function SMARTGoalSetup() {
             </CardContent>
           </Card>
 
-          <div className="hidden">
-            <Card className="flow-panel">
-              <CardContent className="p-6">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Bản nháp hiện tại</p>
+          <details className="mt-5 rounded-[24px] border border-dashed border-slate-200 bg-white/78 p-4 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.24)]">
+            <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
+              Xem lại mục tiêu đang viết
+            </summary>
 
-                <div className="mt-5 space-y-3">
-                  {SMART_STEPS.map((step) => (
-                    <div key={step.key} className="flow-muted p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{step.label}</p>
-                      <p className="mt-2 text-sm leading-7 text-slate-600">
-                        {formatStepDraft(step.key as SmartStepKey, smartData) || "Chưa có nội dung cho phần này."}
-                      </p>
-                    </div>
-                  ))}
+            <div className="mt-4 space-y-3">
+              {SMART_STEPS.map((step) => (
+                <div key={step.key} className="flow-muted p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{step.label}</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">
+                    {formatStepDraft(step.key as SmartStepKey, smartData) || "Chưa có nội dung cho phần này."}
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              ))}
+            </div>
+          </details>
         </div>
       </motion.div>
     </div>

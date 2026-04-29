@@ -59,6 +59,8 @@ import { saveGoalLink, getBackendGoalId } from "@/lib/api/goalLinkStore";
 import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
 
 type ResultType = "realistic" | "challenging" | "too_ambitious";
+type PlanLoadRecommendation = "lighter" | "balanced" | "push";
+type WeeklyCapacity = "low" | "medium" | "high";
 
 interface PendingFeasibilityResult {
   resultType: ResultType;
@@ -68,6 +70,26 @@ interface PendingFeasibilityResult {
   readinessScore: number;
   adjustedScore: number;
   wheelScore: number;
+  diagnosticScore?: number;
+  maxDiagnosticScore?: number;
+  axisScores?: Array<{
+    axis: string;
+    label: string;
+    score: number;
+    maxScore: number;
+    percent: number;
+    diagnostic: string;
+  }>;
+  bottleneck?: {
+    axis: string;
+    label: string;
+    score: number;
+    action: string;
+  };
+  planLoad?: PlanLoadRecommendation;
+  weeklyCapacity?: WeeklyCapacity;
+  firstWeekGuidance?: string;
+  scopeRecommendation?: string;
 }
 
 interface LeadIndicatorDraft {
@@ -101,9 +123,9 @@ interface TwelveWeekSetupDraft {
 
 const STEPS = [
   { id: "outcome", label: "Mục tiêu", title: "Mục tiêu 12 tuần" },
-  { id: "tactics", label: "Tactic", title: "2-4 tactic giữ nhịp" },
-  { id: "week1", label: "Tuần 1", title: "Tuần đầu tiên và lịch review" },
-  { id: "finish", label: "Chốt", title: "Chốt hệ thống" },
+  { id: "tactics", label: "Việc lặp lại", title: "2-4 việc giữ nhịp" },
+  { id: "week1", label: "Tuần 1", title: "Tuần đầu tiên và lịch nhìn lại" },
+  { id: "finish", label: "Chốt", title: "Chốt kế hoạch" },
 ] as const;
 
 const GOAL_TYPES = [
@@ -144,6 +166,38 @@ function getGoalTypeLabel(value: string): string {
 
 function getReviewDayLabel(value: string): string {
   return REVIEW_DAYS.find((option) => option.value === value)?.label ?? value;
+}
+
+function getPlanLoadLabel(value: PlanLoadRecommendation | undefined): string {
+  if (value === "lighter") return "Nhẹ hơn";
+  if (value === "push") return "Đẩy nhẹ";
+  return "Cân bằng";
+}
+
+function getFeasibilityDraftDefaults(feasibility: PendingFeasibilityResult): Pick<
+  TwelveWeekSetupDraft,
+  "dailyTimeBudget" | "personalConstraint" | "tacticLoadPreference"
+> {
+  const dailyTimeBudget =
+    feasibility.weeklyCapacity === "low" ? "30min" : feasibility.weeklyCapacity === "high" ? "1.5h" : "1h";
+
+  const bottleneckAxis = feasibility.bottleneck?.axis;
+  const personalConstraint: TwelveWeekSetupDraft["personalConstraint"] =
+    bottleneckAxis === "time"
+      ? "time"
+      : bottleneckAxis === "energy" || bottleneckAxis === "routine"
+        ? "consistency"
+        : bottleneckAxis === "resources" || bottleneckAxis === "clarity" || bottleneckAxis === "wheel"
+          ? "complexity"
+          : bottleneckAxis === "obstacle"
+            ? "motivation"
+            : "";
+
+  return {
+    dailyTimeBudget,
+    personalConstraint,
+    tacticLoadPreference: feasibility.planLoad ?? "balanced",
+  };
 }
 
 function isPendingFeasibilityResult(value: unknown): value is PendingFeasibilityResult {
@@ -238,7 +292,7 @@ function buildWeeklyPlans(
       focus:
         focusOverrides?.[index] ??
         (weekNumber <= 4
-          ? "Giữ nhịp tactic cốt lõi thật đều."
+          ? "Giữ nhịp việc chính thật đều."
           : weekNumber <= 8
             ? "Tăng tốc điều đang hiệu quả và tạo đầu ra thật."
             : "Về đích gọn, ưu tiên ít nhưng rõ."),
@@ -308,7 +362,7 @@ export function TwelveWeekSetup() {
   useEffect(() => {
     const data = getUserData();
     if (!hasRealLifeBalance(data)) {
-      toast.info("Bạn cần hoàn thành Life Balance trước khi vào hệ 12 tuần.");
+      toast.info("Bạn cần hoàn thành bước cân bằng cuộc sống trước khi vào kế hoạch 12 tuần.");
       setIsLoading(false);
       navigate("/onboarding");
       return;
@@ -319,7 +373,7 @@ export function TwelveWeekSetup() {
     const pendingFeasibilityResult = localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
 
     if (!selectedFocusArea || !pendingSmartGoal || !pendingFeasibilityResult) {
-      toast.info("Bạn cần hoàn thành SMART goal và feasibility trước khi vào hệ 12 tuần.");
+      toast.info("Bạn cần hoàn thành bước viết mục tiêu và kiểm tra tính thực tế trước khi vào kế hoạch 12 tuần.");
       setIsLoading(false);
       navigate("/smart-goal-setup");
       return;
@@ -347,6 +401,7 @@ export function TwelveWeekSetup() {
         return;
       }
 
+      const feasibilityDefaults = getFeasibilityDraftDefaults(parsedFeasibility);
       setFocusArea(selectedFocusArea);
       setSmartGoal(parsedSmartGoal);
       setFeasibility(parsedFeasibility);
@@ -360,6 +415,12 @@ export function TwelveWeekSetup() {
             `Trong 12 tuần tới, tôi muốn biến mục tiêu "${parsedSmartGoal.specific}" thành một nhịp thực thi rõ ràng.`,
           week12Outcome: previousDraft.week12Outcome || parsedSmartGoal.measurable || parsedSmartGoal.specific,
           lagMetricName: previousDraft.lagMetricName || parsedSmartGoal.measurable || "Chỉ số kết quả chính",
+          tacticLoadPreference:
+            previousDraft.tacticLoadPreference === "balanced"
+              ? feasibilityDefaults.tacticLoadPreference
+              : previousDraft.tacticLoadPreference,
+          dailyTimeBudget: previousDraft.dailyTimeBudget || feasibilityDefaults.dailyTimeBudget,
+          personalConstraint: previousDraft.personalConstraint || feasibilityDefaults.personalConstraint,
         };
 
         if (!savedDraft) return baseDraft;
@@ -478,9 +539,9 @@ export function TwelveWeekSetup() {
     return (
       <CoreFlowGateState
         currentStepId="twelve_week_setup"
-        eyebrow="12-Week Setup"
-        title="Đang chuẩn bị dữ liệu setup 12 tuần"
-        description="Mình đang lấy lại SMART Goal, kết quả feasibility và bản nháp gần nhất để mở đúng flow."
+        eyebrow="Thiết lập 12 tuần"
+        title="Đang chuẩn bị dữ liệu thiết lập 12 tuần"
+        description="Mình đang lấy lại mục tiêu, kết quả kiểm tra và bản nháp gần nhất để mở đúng bước."
         loading
       />
     );
@@ -490,10 +551,10 @@ export function TwelveWeekSetup() {
     return (
       <CoreFlowGateState
         currentStepId="feasibility"
-        eyebrow="12-Week Setup"
-        title="Không thấy dữ liệu để tiếp tục setup 12 tuần"
-        description="Bạn cần hoàn thành SMART Goal và bước kiểm tra tính khả thi trước khi tạo hệ 12 tuần."
-        actionLabel="Quay lại SMART Goal"
+        eyebrow="Thiết lập 12 tuần"
+        title="Không thấy dữ liệu để tiếp tục thiết lập 12 tuần"
+        description="Bạn cần hoàn thành bước viết mục tiêu và kiểm tra tính thực tế trước khi tạo kế hoạch 12 tuần."
+        actionLabel="Quay lại viết mục tiêu"
         onAction={() => navigate("/smart-goal-setup")}
       />
     );
@@ -549,6 +610,7 @@ export function TwelveWeekSetup() {
         reviewDay: adaptiveTemplateSupport?.recommendedReviewDay ?? template.reviewDay,
         tacticLoadPreference:
           constraintLoadOverride ??
+          feasibility?.planLoad ??
           adaptiveTemplateSupport?.recommendedLoadPreference ??
           previousDraft.tacticLoadPreference,
         week4Milestone: adaptiveTemplateSupport?.week4MilestoneSuggestion ?? template.week4Milestone,
@@ -581,7 +643,7 @@ export function TwelveWeekSetup() {
 
     if (announce) {
       toast.success(`Đã áp dụng khung "${template.name}".`, {
-        description: "Bạn vẫn có thể sửa mọi tactic và cột mốc ngay trong flow này.",
+        description: "Bạn vẫn có thể sửa mọi việc lặp lại và cột mốc ngay trong bước này.",
       });
     }
   };
@@ -683,17 +745,17 @@ export function TwelveWeekSetup() {
 
   const validateCurrentStep = () => {
     if (currentStep === 0 && (!draft.goalType || !draft.vision12Week.trim() || !draft.week12Outcome.trim())) {
-      toast.error("Hãy làm rõ outcome 12 tuần trước.");
+      toast.error("Hãy làm rõ kết quả 12 tuần trước.");
       return false;
     }
 
     if (currentStep === 1 && (validIndicators.length < 2 || validIndicators.length > 4)) {
-      toast.error("Giữ từ 2 đến 4 tactic để flow gọn và dễ giữ nhịp.");
+      toast.error("Giữ từ 2 đến 4 việc lặp lại để bước này gọn và dễ giữ nhịp.");
       return false;
     }
 
     if (currentStep === 2 && (!draft.lagMetricName.trim() || !draft.startDate || !draft.reviewDay)) {
-      toast.error("Hãy chốt chỉ số chính, ngày bắt đầu và ngày review.");
+      toast.error("Hãy chốt chỉ số chính, ngày bắt đầu và ngày nhìn lại.");
       return false;
     }
 
@@ -833,6 +895,10 @@ export function TwelveWeekSetup() {
         adjustedScore: feasibility.adjustedScore,
         readinessScore: feasibility.readinessScore,
         wheelScore: feasibility.wheelScore,
+        planLoad: feasibility.planLoad,
+        bottleneck: feasibility.bottleneck,
+        diagnosticScore: feasibility.diagnosticScore,
+        maxDiagnosticScore: feasibility.maxDiagnosticScore,
       },
       readinessScore: feasibility.adjustedScore,
       tasks: previewTasks.slice(0, 4).map((taskTitle) => ({ title: taskTitle, completed: false })),
@@ -861,7 +927,7 @@ export function TwelveWeekSetup() {
       });
     }
 
-    toast.success("Hệ 12 tuần đã sẵn sàng.", {
+    toast.success("Kế hoạch 12 tuần đã sẵn sàng.", {
       description: "Bạn có thể vào ngay màn Hôm nay để bắt đầu tuần đầu tiên.",
     });
 
@@ -877,7 +943,7 @@ export function TwelveWeekSetup() {
         currentPlan={currentPlan}
         recommendedPlan={pendingTemplate?.requiredPlan ?? "PLUS"}
         source="12_week_setup"
-        title="Mở Plus để setup nhanh hơn"
+        title="Mở Plus để thiết lập nhanh hơn"
         description="Bạn đang chọn một khung Plus. Mở Plus để đi vào ngay một cách vận hành phù hợp hơn với kiểu mục tiêu và mức sẵn sàng của bạn."
         onCheckoutComplete={handleCheckoutComplete}
       />
@@ -898,8 +964,8 @@ export function TwelveWeekSetup() {
                   Chốt một chu kỳ 12 tuần gọn, rõ và vào việc ngay.
                 </h1>
                 <p className="max-w-2xl text-sm leading-7 text-white/82 sm:text-base lg:text-lg">
-                  Bạn sẽ rời khỏi màn này với một outcome rõ, 2-4 tactic có lịch thực thi, và một tuần đầu tiên đủ nhẹ
-                  để bắt đầu ngay.
+                  Bạn sẽ rời khỏi màn này với một kết quả rõ, 2-4 việc lặp lại có lịch làm, và một tuần đầu tiên đủ
+                  nhẹ để bắt đầu ngay.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 sm:gap-3">
@@ -911,6 +977,14 @@ export function TwelveWeekSetup() {
                   <Sparkles className="mr-1 h-3.5 w-3.5" />
                   Độ sẵn sàng: {feasibility.adjustedScore}/20
                 </Badge>
+                <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                  Nhịp gợi ý: {getPlanLoadLabel(feasibility.planLoad)}
+                </Badge>
+                {feasibility.bottleneck && (
+                  <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                    Cần chú ý: {feasibility.bottleneck.label}
+                  </Badge>
+                )}
                 <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
                   Gói: {getPlanLabel(currentPlan)}
                 </Badge>
@@ -981,8 +1055,8 @@ export function TwelveWeekSetup() {
             <CardTitle>{STEPS[currentStep].title}</CardTitle>
             <CardDescription>
               {currentStep === 0 && "Làm rõ điều bạn muốn chạm tới sau 12 tuần."}
-              {currentStep === 1 && "Tactic là hành động bạn kiểm soát mỗi tuần; chỉ giữ vài việc có thể lặp lại."}
-              {currentStep === 2 && "Chốt ngày bắt đầu, ngày review và hình dung tuần đầu."}
+              {currentStep === 1 && "Chọn vài việc bạn tự kiểm soát được mỗi tuần; chỉ giữ phần có thể lặp lại."}
+              {currentStep === 2 && "Chốt ngày bắt đầu, ngày nhìn lại và hình dung tuần đầu."}
               {currentStep === 3 && "Kiểm tra lần cuối, còn phần nâng cao thì để tùy chọn."}
             </CardDescription>
           </CardHeader>
@@ -990,12 +1064,49 @@ export function TwelveWeekSetup() {
             {currentStep === 0 && (
               <div className="mx-auto max-w-4xl space-y-4">
                 <div className="space-y-4">
+                  {(feasibility.bottleneck || feasibility.firstWeekGuidance || feasibility.scopeRecommendation) && (
+                    <div className="rounded-[24px] border border-amber-200 bg-amber-50/86 p-4 sm:p-5">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">
+                        Gợi ý từ bước kiểm tra
+                      </p>
+                      <div className="mt-3 grid gap-3 md:grid-cols-3">
+                        <div className="rounded-[18px] border border-amber-200 bg-white/76 p-3">
+                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                            Cần chú ý
+                          </p>
+                          <p className="mt-1 text-sm font-semibold text-slate-950">
+                            {feasibility.bottleneck?.label ?? "Chưa có"}
+                          </p>
+                          {feasibility.bottleneck?.action && (
+                            <p className="mt-2 text-xs leading-5 text-slate-600">{feasibility.bottleneck.action}</p>
+                          )}
+                        </div>
+                        <div className="rounded-[18px] border border-amber-200 bg-white/76 p-3">
+                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Tuần 1</p>
+                          <p className="mt-1 text-sm leading-6 text-slate-700">
+                            {feasibility.firstWeekGuidance ?? "Giữ tuần đầu vừa sức để tạo nhịp."}
+                          </p>
+                        </div>
+                        <div className="rounded-[18px] border border-amber-200 bg-white/76 p-3">
+                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                            Độ nặng
+                          </p>
+                          <p className="mt-1 text-sm font-semibold text-slate-950">
+                            {getPlanLoadLabel(feasibility.planLoad)}
+                          </p>
+                          <p className="mt-2 text-xs leading-5 text-slate-600">
+                            {feasibility.scopeRecommendation ?? "Giữ 2-3 việc lặp lại và một buổi nhìn lại cố định."}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   <div className="space-y-4 rounded-[24px] border border-white/70 bg-white/72 p-4 sm:p-5">
                     <div>
                       <p className="text-sm font-semibold text-slate-900">Chốt phần bắt buộc trước</p>
                       <p className="mt-1 hidden text-sm leading-6 text-slate-500 sm:block">
-                        Ba mục này là đủ để đi tiếp. Khung gợi ý phía dưới chỉ dùng để setup nhanh hơn, không phải việc
-                        bắt buộc phải chọn.
+                        Ba mục này là đủ để đi tiếp. Khung gợi ý phía dưới chỉ dùng để thiết lập nhanh hơn, không phải
+                        việc bắt buộc phải chọn.
                       </p>
                     </div>
                     <div className="space-y-2">
@@ -1023,7 +1134,7 @@ export function TwelveWeekSetup() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="week-12-outcome">Outcome muốn chạm tới ở tuần 12</Label>
+                      <Label htmlFor="week-12-outcome">Kết quả muốn chạm tới ở tuần 12</Label>
                       <Textarea
                         id="week-12-outcome"
                         rows={2}
@@ -1038,7 +1149,7 @@ export function TwelveWeekSetup() {
                       <div>
                         <p className="text-sm font-semibold text-slate-900">Bắt đầu nhanh bằng khung gợi ý</p>
                         <p className="mt-1 text-sm leading-6 text-slate-500">
-                          Thay vì tìm một template đúng chủ đề, bạn chỉ cần chọn kiểu vận hành phù hợp. Sau đó vẫn sửa
+                          Thay vì tìm một khung mẫu đúng chủ đề, bạn chỉ cần chọn kiểu vận hành phù hợp. Sau đó vẫn sửa
                           lại toàn bộ cho sát mục tiêu của mình.
                         </p>
                       </div>
@@ -1059,7 +1170,7 @@ export function TwelveWeekSetup() {
                             </p>
                           </div>
                           <Badge variant="outline" className="border-sky-200 bg-white text-sky-800">
-                            {recommendedTemplate.requiredPlan ? getPlanLabel(recommendedTemplate.requiredPlan) : "Free"}
+                            {recommendedTemplate.requiredPlan ? getPlanLabel(recommendedTemplate.requiredPlan) : "Miễn phí"}
                           </Badge>
                         </div>
                         <Button
@@ -1141,7 +1252,7 @@ export function TwelveWeekSetup() {
                                     >
                                       {template.requiredPlan
                                         ? `Khung ${getPlanLabel(template.requiredPlan)}`
-                                        : "Khung Free"}
+                                        : "Khung miễn phí"}
                                     </Badge>
                                   </div>
                                   <p className={`mt-1 text-sm ${isSelected ? "text-white/74" : "text-slate-600"}`}>
@@ -1242,7 +1353,7 @@ export function TwelveWeekSetup() {
                           Cá nhân hóa khung
                         </p>
                         <p className="mt-1 text-sm text-slate-600">
-                          Trả lời nhanh 3 câu để khung tự điều chỉnh lượng tactic và nhịp phù hợp.
+                          Trả lời nhanh 3 câu để khung tự điều chỉnh số việc và nhịp phù hợp.
                         </p>
                       </div>
                       <div className="space-y-2">
@@ -1324,13 +1435,13 @@ export function TwelveWeekSetup() {
                           </SelectContent>
                         </Select>
                         <p className="text-xs text-slate-500">
-                          {draft.personalConstraint === "time" && "Hệ thống sẽ ưu tiên giữ nhẹ và tập trung."}
+                          {draft.personalConstraint === "time" && "Kế hoạch sẽ ưu tiên giữ nhẹ và tập trung."}
                           {draft.personalConstraint === "motivation" &&
-                            "Hệ thống sẽ ưu tiên thắng nhỏ sớm và giảm ma sát."}
+                            "Kế hoạch sẽ ưu tiên thắng nhỏ sớm và giảm ma sát."}
                           {draft.personalConstraint === "consistency" &&
-                            "Hệ thống sẽ ưu tiên nhịp đều thay vì tải cao."}
-                          {draft.personalConstraint === "complexity" && "Hệ thống sẽ giúp tách lớp rõ hơn."}
-                          {!draft.personalConstraint && "Chọn trở ngại để hệ thống điều chỉnh phù hợp hơn."}
+                            "Kế hoạch sẽ ưu tiên nhịp đều thay vì tải cao."}
+                          {draft.personalConstraint === "complexity" && "Kế hoạch sẽ giúp tách lớp rõ hơn."}
+                          {!draft.personalConstraint && "Chọn trở ngại để kế hoạch điều chỉnh phù hợp hơn."}
                         </p>
                       </div>
                     </div>
@@ -1355,22 +1466,22 @@ export function TwelveWeekSetup() {
                               : "border-slate-300 bg-white text-slate-700"
                           }
                         >
-                          {selectedTemplate.requiredPlan ? getPlanLabel(selectedTemplate.requiredPlan) : "Free"}
+                          {selectedTemplate.requiredPlan ? getPlanLabel(selectedTemplate.requiredPlan) : "Miễn phí"}
                         </Badge>
                       </div>
                     </div>
                     )}
                   <details className="rounded-[22px] border border-dashed border-slate-200 bg-white/72 p-4">
                     <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
-                      Xem nguồn vào từ SMART
+                      Xem mục tiêu đã viết
                     </summary>
                     <div className="mt-4 space-y-3">
                       <div className="rounded-[18px] border border-white/70 bg-white/86 p-4">
-                        <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Specific</p>
+                        <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Mục tiêu cụ thể</p>
                         <p className="mt-2 text-sm leading-7 text-slate-700">{smartGoal.specific}</p>
                       </div>
                       <div className="rounded-[18px] border border-white/70 bg-white/86 p-4">
-                        <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Measurable</p>
+                        <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Cách đo kết quả</p>
                         <p className="mt-2 text-sm leading-7 text-slate-700">{smartGoal.measurable}</p>
                       </div>
                     </div>
@@ -1384,13 +1495,13 @@ export function TwelveWeekSetup() {
                 <div className="space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-dashed border-slate-200 bg-slate-50/80 p-4">
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">Giữ 2-4 tactic cho cả chu kỳ</p>
+                      <p className="text-sm font-semibold text-slate-900">Giữ 2-4 việc lặp lại cho cả chu kỳ</p>
                       <p className="mt-1 text-sm text-slate-500">
-                        Tactic cốt lõi được ưu tiên trong điểm tuần. Tactic tùy chọn là phần thêm khi bạn còn sức.
+                        Việc chính được ưu tiên trong điểm tuần. Việc tùy chọn là phần thêm khi bạn còn sức.
                       </p>
                       <p className="mt-2 text-xs leading-6 text-slate-500">
-                        Tactic không phải kết quả cuối cùng. Hãy viết hành động bạn có thể làm tuần này, ví dụ: tập 2
-                        buổi, viết 3 trang hoặc gửi 5 email.
+                        Việc lặp lại không phải kết quả cuối cùng. Hãy viết hành động bạn có thể làm tuần này, ví dụ:
+                        tập 2 buổi, viết 3 trang hoặc gửi 5 email.
                       </p>
                     </div>
                     <Button
@@ -1399,14 +1510,14 @@ export function TwelveWeekSetup() {
                       onClick={handleAddIndicator}
                       disabled={draft.leadIndicators.length >= 4}
                     >
-                      Thêm tactic
+                      Thêm việc
                     </Button>
                   </div>
 
                   {draft.leadIndicators.map((indicator, index) => (
                     <div key={indicator.id} className="rounded-[24px] border border-white/70 bg-white/72 p-5">
                       <div className="flex flex-wrap items-center justify-between gap-3">
-                        <p className="text-sm font-semibold text-slate-900">Tactic {index + 1}</p>
+                        <p className="text-sm font-semibold text-slate-900">Việc {index + 1}</p>
                         <div className="flex items-center gap-2">
                           <Badge variant={indicator.type === "optional" ? "outline" : "default"}>
                             {indicator.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
@@ -1425,7 +1536,7 @@ export function TwelveWeekSetup() {
                       </div>
                       <div className="mt-4 grid gap-3">
                         <div className="space-y-2">
-                          <Label htmlFor={`tactic-name-${index}`}>Tên tactic</Label>
+                          <Label htmlFor={`tactic-name-${index}`}>Tên việc</Label>
                           <Input
                             id={`tactic-name-${index}`}
                             value={indicator.name}
@@ -1442,7 +1553,7 @@ export function TwelveWeekSetup() {
                             >
                               <SelectTrigger
                                 id={`tactic-type-${index}`}
-                                aria-label={`Chọn loại cho tactic ${index + 1}`}
+                                aria-label={`Chọn loại cho việc ${index + 1}`}
                               >
                                 <SelectValue />
                               </SelectTrigger>
@@ -1480,7 +1591,7 @@ export function TwelveWeekSetup() {
                             >
                               <SelectTrigger
                                 id={`tactic-cadence-${index}`}
-                                aria-label={`Chọn nhịp cho tactic ${index + 1}`}
+                                aria-label={`Chọn nhịp cho việc ${index + 1}`}
                               >
                                 <SelectValue />
                               </SelectTrigger>
@@ -1519,7 +1630,7 @@ export function TwelveWeekSetup() {
                   )}
                   <div className="space-y-2">
                     {weekOneTaskPreview.length === 0 ? (
-                      <p className="text-sm text-slate-500">Thêm tactic để thấy tuần đầu tiên sẽ trông như thế nào.</p>
+                      <p className="text-sm text-slate-500">Thêm việc để thấy tuần đầu tiên sẽ trông như thế nào.</p>
                     ) : (
                       weekOneTaskPreview.map((task) => (
                         <div
@@ -1549,14 +1660,14 @@ export function TwelveWeekSetup() {
                         onChange={(event) => handleChange("startDate", event.target.value)}
                       />
                       <p className="text-xs text-slate-500">
-                        Hệ thống sẽ canh chu kỳ về Thứ Hai để việc và điểm tuần khớp nhau.
+                        Kế hoạch sẽ canh chu kỳ về Thứ Hai để việc và điểm tuần khớp nhau.
                       </p>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="review-day">Ngày review hằng tuần</Label>
+                      <Label htmlFor="review-day">Ngày nhìn lại hằng tuần</Label>
                       <Select value={draft.reviewDay} onValueChange={(value) => handleChange("reviewDay", value)}>
-                        <SelectTrigger id="review-day" aria-label="Chọn ngày review hằng tuần">
-                          <SelectValue placeholder="Chọn ngày review" />
+                        <SelectTrigger id="review-day" aria-label="Chọn ngày nhìn lại hằng tuần">
+                          <SelectValue placeholder="Chọn ngày nhìn lại" />
                         </SelectTrigger>
                         <SelectContent>
                           {REVIEW_DAYS.map((day) => (
@@ -1601,7 +1712,7 @@ export function TwelveWeekSetup() {
                         placeholder="Ví dụ: số kg giảm, số bài xuất bản, doanh thu mới..."
                       />
                       <p className="text-xs text-slate-500">
-                        Đây là chỉ số đầu ra cuối chu kỳ, khác với tactic hằng tuần.
+                        Đây là chỉ số đầu ra cuối chu kỳ, khác với việc hằng tuần.
                       </p>
                     </div>
                     <div className="space-y-2">
@@ -1627,11 +1738,11 @@ export function TwelveWeekSetup() {
                 <div className="space-y-4 rounded-[28px] border border-white/70 bg-white/72 p-5">
                   <div className="rounded-[22px] border border-violet-100 bg-violet-50/80 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
-                      Tactic và metric
+                      Việc lặp lại và chỉ số
                     </p>
                     <p className="mt-2 text-sm leading-7 text-slate-700">
-                      Tactic là việc bạn làm mỗi tuần. Chỉ số kết quả chính là con số dùng để review xem chu kỳ có đi
-                      đúng hướng không.
+                      Việc lặp lại là việc bạn làm mỗi tuần. Chỉ số kết quả chính là con số dùng để nhìn lại xem chu kỳ
+                      có đi đúng hướng không.
                     </p>
                   </div>
                   <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
@@ -1656,10 +1767,12 @@ export function TwelveWeekSetup() {
                   )}
                   {setupGuideSupport && (
                     <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-                      <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Review và tải tuần gợi ý</p>
+                      <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
+                        Ngày nhìn lại và độ nặng tuần gợi ý
+                      </p>
                       <div className="mt-3 grid gap-3 sm:grid-cols-2">
                         <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
-                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Review</p>
+                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Nhìn lại</p>
                           <p className="mt-2 text-sm font-semibold text-slate-900">{draft.reviewDay}</p>
                           <p className="mt-2 text-sm leading-6 text-slate-600">
                             {setupGuideSupport.recommendedReviewReason}
@@ -1699,7 +1812,7 @@ export function TwelveWeekSetup() {
                     <div className="mt-3 space-y-2">
                       {weekOneTaskPreview.length === 0 ? (
                         <p className="text-sm text-slate-500">
-                          Khi bạn chốt khung hoặc thêm tactic, tuần đầu sẽ hiện rõ các việc cần mở ở màn Hôm nay.
+                          Khi bạn chốt khung hoặc thêm việc, tuần đầu sẽ hiện rõ các việc cần mở ở màn Hôm nay.
                         </p>
                       ) : (
                         weekOneTaskPreview.map((task) => (
@@ -1722,13 +1835,13 @@ export function TwelveWeekSetup() {
               <div className="mx-auto max-w-4xl space-y-6">
                 <div className="space-y-5">
                   <div className="rounded-[24px] border border-white/70 bg-white/72 p-5">
-                    <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tóm tắt hệ thống</p>
+                    <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tóm tắt kế hoạch</p>
                     <h3 className="mt-3 text-xl font-semibold text-slate-900">{smartGoal.specific}</h3>
                     <p className="mt-3 text-sm leading-7 text-slate-600">{draft.vision12Week}</p>
                     <div className="mt-4 flex flex-wrap gap-2">
                       <Badge variant="outline">{getGoalTypeLabel(draft.goalType)}</Badge>
                       <Badge variant="outline">{getLifeAreaLabel(focusArea)}</Badge>
-                      <Badge variant="outline">Review {getReviewDayLabel(draft.reviewDay)}</Badge>
+                      <Badge variant="outline">Nhìn lại {getReviewDayLabel(draft.reviewDay)}</Badge>
                       <Badge variant="outline">Nhịp {getLoadPreferenceLabel(draft.tacticLoadPreference)}</Badge>
                       {selectedTemplate && <Badge variant="outline">Khung {selectedTemplate.name}</Badge>}
                     </div>
@@ -1741,7 +1854,7 @@ export function TwelveWeekSetup() {
                     <div className="mt-4 space-y-4">
                       <div className="grid gap-3 md:grid-cols-2">
                         <div className="space-y-2">
-                          <Label htmlFor="milestone-week-4">Milestone tuần 4</Label>
+                          <Label htmlFor="milestone-week-4">Mốc tuần 4</Label>
                           <Input
                             id="milestone-week-4"
                             value={draft.week4Milestone}
@@ -1749,7 +1862,7 @@ export function TwelveWeekSetup() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="milestone-week-8">Milestone tuần 8</Label>
+                          <Label htmlFor="milestone-week-8">Mốc tuần 8</Label>
                           <Input
                             id="milestone-week-8"
                             value={draft.week8Milestone}
@@ -1790,7 +1903,7 @@ export function TwelveWeekSetup() {
                     <div className="mt-3 space-y-2">
                       {weekOneTaskPreview.length === 0 ? (
                         <p className="text-sm text-slate-500">
-                          Bạn có thể thêm hoặc chỉnh tactic trước khi tạo hệ thống để tuần đầu hiện rõ hơn.
+                          Bạn có thể thêm hoặc chỉnh việc trước khi tạo kế hoạch để tuần đầu hiện rõ hơn.
                         </p>
                       ) : (
                         weekOneTaskPreview.map((task) => (
@@ -1837,7 +1950,7 @@ export function TwelveWeekSetup() {
               ) : (
                 <Button className="w-full sm:w-auto" onClick={handleSubmit}>
                   <Flag className="h-4 w-4" />
-                  Tạo hệ thống 12 tuần
+                  Tạo kế hoạch 12 tuần
                 </Button>
               )}
             </div>

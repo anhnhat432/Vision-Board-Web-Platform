@@ -70,8 +70,8 @@ function Progress({
     >
       <ProgressPrimitive.Indicator
         data-slot="progress-indicator"
-        className="progress-indicator relative h-full w-full flex-1 rounded-full gradient-brand shadow-[0_10px_28px_-18px_rgba(109,40,217,0.62)]"
-        style={{ transform: `translateX(-${100 - displayValue}%)` }}
+        className="progress-indicator h-full rounded-full gradient-brand shadow-[0_10px_28px_-18px_rgba(109,40,217,0.62)]"
+        style={{ width: `${displayValue}%` }}
       />
     </ProgressPrimitive.Root>
   );
