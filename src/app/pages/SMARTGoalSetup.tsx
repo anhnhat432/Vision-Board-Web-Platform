@@ -14,6 +14,7 @@ import { Label } from "../components/ui/label";
 import { Progress } from "../components/ui/progress";
 import { Textarea } from "../components/ui/textarea";
 import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
+import { getSmartGoalStarter, getSmartGoalStarterPreview } from "../utils/smart-goal-starters";
 import { APP_STORAGE_KEYS, getLifeAreaLabel, getUserData } from "../utils/storage";
 import {
   buildSmartGoal,
@@ -471,6 +472,7 @@ export function SMARTGoalSetup() {
     () => SMART_STEPS.filter((step) => getStepValidationError(step.key as SmartStepKey, smartData) === null).length,
     [smartData],
   );
+  const smartGoalStarter = useMemo(() => getSmartGoalStarter(focusArea), [focusArea]);
   const clarityItems = useMemo(() => buildGoalClarityItems(smartData), [smartData]);
   const clarityDoneCount = clarityItems.filter((item) => item.done).length;
   const clarityProgress = (clarityDoneCount / clarityItems.length) * 100;
@@ -556,9 +558,61 @@ export function SMARTGoalSetup() {
     if (nextStep >= 0) setCurrentStep(nextStep);
   };
 
+  const handleApplyStarterForStep = (stepKey: SmartStepKey) => {
+    setSmartData((previous) => {
+      switch (stepKey) {
+        case "specific":
+          return {
+            ...previous,
+            specific: {
+              goal_statement: smartGoalStarter.specificGoalStatement,
+            },
+          };
+        case "measurable":
+          return {
+            ...previous,
+            measurable: {
+              metric_name: smartGoalStarter.metricName,
+              baseline_value: smartGoalStarter.baselineValue,
+              target_value: smartGoalStarter.targetValue,
+            },
+          };
+        case "achievable":
+          return {
+            ...previous,
+            achievable: {
+              weekly_time_commitment_hours: smartGoalStarter.weeklyHours,
+              required_skills: smartGoalStarter.requiredSkills,
+              support_resources: smartGoalStarter.supportResources,
+            },
+          };
+        case "relevant":
+          return {
+            ...previous,
+            relevant: {
+              motivation_reason: smartGoalStarter.motivationReason,
+              life_dimension_alignment: smartGoalStarter.lifeDimensionAlignment,
+            },
+          };
+        case "timeBound":
+          return {
+            ...previous,
+            timeBound: {
+              mode: "weeks",
+              target_date: "",
+              target_weeks: smartGoalStarter.targetWeeks,
+            },
+          };
+        default:
+          return previous;
+      }
+    });
+  };
+
   const currentStepKey = currentStepData.key as SmartStepKey;
   const isCurrentStepValid = currentStepError === null;
   const currentStepHasDraftContent = hasStepDraftContent(currentStepKey, smartData);
+  const currentStarterPreview = getSmartGoalStarterPreview(currentStepKey, smartGoalStarter);
   const shouldShowCurrentStepError = currentStepError !== null && currentStepHasDraftContent;
   const currentStepSoftWarning =
     currentStepKey === "specific" &&
@@ -1041,6 +1095,28 @@ export function SMARTGoalSetup() {
                   <div className="flow-panel mt-4 px-4 py-3 text-sm text-slate-600">{currentStepData.coaching}</div>
                 </div>
                 {renderCurrentStepFields()}
+                <div className="rounded-[24px] border border-violet-100 bg-violet-50/80 p-4 shadow-[0_14px_34px_-32px_rgba(109,40,217,0.35)]">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-violet-700">
+                        <Sparkles className="h-4 w-4" />
+                        Gợi ý điền nhanh
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{currentStarterPreview}</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">
+                        Dùng như bản nháp nếu bạn chưa biết bắt đầu từ đâu, sau đó sửa lại cho đúng đời sống của mình.
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full shrink-0 border-violet-200 bg-white text-violet-700 hover:bg-violet-50 sm:w-auto"
+                      onClick={() => handleApplyStarterForStep(currentStepKey)}
+                    >
+                      Dùng gợi ý
+                    </Button>
+                  </div>
+                </div>
                 <div className="rounded-[24px] border border-slate-200 bg-white/82 p-4 shadow-[0_16px_36px_-34px_rgba(15,23,42,0.22)]">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>

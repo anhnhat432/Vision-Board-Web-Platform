@@ -32,7 +32,8 @@ const SMART_GOAL_DOMAINS: readonly SmartGoalDomain[] = [
   "life",
 ];
 
-const OUTCOME_INDICATOR_PATTERN = /\b(become|reach|complete|build|launch|achieve)\b/i;
+const OUTCOME_INDICATOR_PATTERN =
+  /\b(become|reach|complete|build|launch|achieve)\b|(?:đạt|hoàn thành|xây dựng|ra mắt|chạm mốc|cải thiện|duy trì|tăng|giảm|trở thành|thăng chức)/i;
 const MIN_WEEKLY_TIME_COMMITMENT_HOURS = 1;
 const MAX_WEEKLY_TIME_COMMITMENT_HOURS = 60;
 const DEFAULT_TARGET_VALUE = 1;
