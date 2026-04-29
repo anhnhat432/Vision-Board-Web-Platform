@@ -200,7 +200,7 @@ async function fillSmartGoal(user: ReturnType<typeof userEvent.setup>) {
   );
   await user.click(screen.getByRole("button", { name: "Tiếp theo" }));
 
-  await user.type(await screen.findByLabelText("Chỉ số đo lường"), "Số tuần review hoàn chỉnh");
+  await user.type(await screen.findByLabelText("Con số hoặc dấu hiệu theo dõi"), "Số tuần review hoàn chỉnh");
   await user.type(screen.getByLabelText(/Mốc hiện tại/i), "0");
   await user.type(screen.getByLabelText(/Mốc mục tiêu/i), "12");
   await user.click(screen.getByRole("button", { name: "Tiếp theo" }));

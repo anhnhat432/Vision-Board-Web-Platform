@@ -53,6 +53,14 @@ interface SMARTData {
 
 type SmartStepKey = keyof SMARTData;
 
+interface GoalClarityItem {
+  id: string;
+  label: string;
+  detail: string;
+  done: boolean;
+  stepKey: SmartStepKey;
+}
+
 const DEFAULT_TARGET_WEEKS = "12";
 
 function createInitialSMARTData(): SMARTData {
@@ -292,6 +300,71 @@ function getStepValidationError(stepKey: SmartStepKey, smartData: SMARTData): st
   return null;
 }
 
+function buildGoalClarityItems(smartData: SMARTData): GoalClarityItem[] {
+  const specific = smartData.specific.goal_statement.trim();
+  const metricName = smartData.measurable.metric_name.trim();
+  const baselineInput = smartData.measurable.baseline_value.trim();
+  const baselineValue = parseNumberInput(baselineInput);
+  const targetValue = parseNumberInput(smartData.measurable.target_value);
+  const weeklyHours = parseNumberInput(smartData.achievable.weekly_time_commitment_hours);
+  const motivation = smartData.relevant.motivation_reason.trim();
+  const timeReady =
+    smartData.timeBound.mode === "date"
+      ? smartData.timeBound.target_date.trim().length > 0
+      : (parseNumberInput(smartData.timeBound.target_weeks) ?? 0) > 0;
+  const metricReady =
+    metricName.length > 0 &&
+    targetValue !== undefined &&
+    (baselineInput.length === 0 || baselineValue !== undefined) &&
+    (baselineValue === undefined || targetValue > baselineValue);
+
+  return [
+    {
+      id: "specific",
+      label: "Kết quả cụ thể",
+      detail:
+        specific.length >= 20
+          ? hasOutcomeIndicator(specific)
+            ? "Câu mục tiêu đã có hướng kết quả rõ."
+            : "Nên thêm một động từ kết quả như đạt, hoàn thành, xây dựng, ra mắt."
+          : "Viết rõ điều bạn muốn đạt bằng một câu đủ cụ thể.",
+      done: specific.length >= 20 && hasOutcomeIndicator(specific),
+      stepKey: "specific",
+    },
+    {
+      id: "measurable",
+      label: "Có dấu hiệu theo dõi",
+      detail: metricReady ? "Đã có chỉ số và mốc muốn chạm tới." : "Cần một chỉ số và mốc muốn chạm tới để tránh đoán cảm tính.",
+      done: metricReady,
+      stepKey: "measurable",
+    },
+    {
+      id: "achievable",
+      label: "Có thời gian thật",
+      detail:
+        weeklyHours !== undefined && weeklyHours > 0
+          ? `Bạn đang dành khoảng ${weeklyHours} giờ mỗi tuần.`
+          : "Hãy nhập số giờ mỗi tuần bạn thật sự có thể giữ.",
+      done: weeklyHours !== undefined && weeklyHours > 0,
+      stepKey: "achievable",
+    },
+    {
+      id: "relevant",
+      label: "Có lý do đủ mạnh",
+      detail: motivation.length >= 15 ? "Lý do đã đủ rõ để nhắc bạn khi khó giữ nhịp." : "Viết lý do đủ thật để mục tiêu này đáng theo đuổi.",
+      done: motivation.length >= 15,
+      stepKey: "relevant",
+    },
+    {
+      id: "timeBound",
+      label: "Có mốc nhìn lại",
+      detail: timeReady ? "Đã có mốc thời gian để kiểm tra tiến độ." : "Chọn số tuần hoặc ngày đích cho mục tiêu này.",
+      done: timeReady,
+      stepKey: "timeBound",
+    },
+  ];
+}
+
 const SMART_STEPS = [
   {
     key: "specific" as keyof SMARTData,
@@ -398,6 +471,18 @@ export function SMARTGoalSetup() {
     () => SMART_STEPS.filter((step) => getStepValidationError(step.key as SmartStepKey, smartData) === null).length,
     [smartData],
   );
+  const clarityItems = useMemo(() => buildGoalClarityItems(smartData), [smartData]);
+  const clarityDoneCount = clarityItems.filter((item) => item.done).length;
+  const clarityProgress = (clarityDoneCount / clarityItems.length) * 100;
+  const summaryRows = useMemo(
+    () =>
+      SMART_STEPS.map((step) => ({
+        key: step.key as SmartStepKey,
+        label: step.label,
+        value: formatStepDraft(step.key as SmartStepKey, smartData) || "Chưa có nội dung cho phần này.",
+      })),
+    [smartData],
+  );
   const currentStepError = getStepValidationError(currentStepData.key as SmartStepKey, smartData);
   const specificLength = smartData.specific.goal_statement.trim().length;
   const parsedBaselineValue = parseNumberInput(smartData.measurable.baseline_value);
@@ -464,6 +549,11 @@ export function SMARTGoalSetup() {
     }
 
     navigate("/life-insight");
+  };
+
+  const handleJumpToStep = (stepKey: SmartStepKey) => {
+    const nextStep = SMART_STEPS.findIndex((step) => step.key === stepKey);
+    if (nextStep >= 0) setCurrentStep(nextStep);
   };
 
   const currentStepKey = currentStepData.key as SmartStepKey;
@@ -551,7 +641,7 @@ export function SMARTGoalSetup() {
         <div className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="smart-metric-name" className="text-base">
-              Chỉ số đo lường
+              Con số hoặc dấu hiệu theo dõi
             </Label>
             <Input
               id="smart-metric-name"
@@ -951,6 +1041,80 @@ export function SMARTGoalSetup() {
                   <div className="flow-panel mt-4 px-4 py-3 text-sm text-slate-600">{currentStepData.coaching}</div>
                 </div>
                 {renderCurrentStepFields()}
+                <div className="rounded-[24px] border border-slate-200 bg-white/82 p-4 shadow-[0_16px_36px_-34px_rgba(15,23,42,0.22)]">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-950">Độ rõ của mục tiêu</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-500">
+                        Hoàn thành các điểm này để mục tiêu dễ chuyển sang kế hoạch 12 tuần hơn.
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">
+                      {clarityDoneCount}/{clarityItems.length}
+                    </Badge>
+                  </div>
+                  <Progress value={clarityProgress} className="mt-4 h-2" aria-label={`Độ rõ của mục tiêu: ${clarityDoneCount}/${clarityItems.length}`} />
+                  <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                    {clarityItems.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleJumpToStep(item.stepKey)}
+                        className={`rounded-2xl border px-3 py-3 text-left transition-all ${
+                          item.done
+                            ? "border-emerald-200 bg-emerald-50/80 hover:border-emerald-300"
+                            : "border-slate-200 bg-slate-50/80 hover:border-violet-200"
+                        }`}
+                      >
+                        <div className="flex items-start gap-2">
+                          <span
+                            className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
+                              item.done ? "bg-emerald-600 text-white" : "bg-white text-slate-400"
+                            }`}
+                          >
+                            {item.done ? <CheckCircle2 className="h-3.5 w-3.5" /> : <CircleAlert className="h-3.5 w-3.5" />}
+                          </span>
+                          <span>
+                            <span className="block text-sm font-semibold text-slate-900">{item.label}</span>
+                            <span className="mt-1 block text-xs leading-5 text-slate-500">{item.detail}</span>
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {currentStepKey === "timeBound" ? (
+                  <div className="rounded-[24px] border border-emerald-200 bg-emerald-50/80 p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-950">Tóm tắt trước khi kiểm tra</p>
+                        <p className="mt-1 text-sm leading-6 text-slate-600">
+                          Xem lại nhanh các phần chính trước khi sang bước kiểm tra tính thực tế.
+                        </p>
+                      </div>
+                      <Badge variant="outline" className="border-emerald-200 bg-white text-emerald-700">
+                        Sẵn sàng: {clarityDoneCount}/{clarityItems.length}
+                      </Badge>
+                    </div>
+                    <div className="mt-4 space-y-3">
+                      {summaryRows.map((row) => (
+                        <div key={row.key} className="rounded-2xl border border-white/80 bg-white/82 p-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                                {row.label}
+                              </p>
+                              <p className="mt-2 text-sm leading-6 text-slate-700">{row.value}</p>
+                            </div>
+                            <Button type="button" variant="ghost" size="sm" onClick={() => handleJumpToStep(row.key)}>
+                              Sửa
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
                 {shouldShowCurrentStepError ? (
                   <Alert className="border-rose-200 bg-rose-50/85 text-rose-700">
                     <CircleAlert className="h-4 w-4" />
