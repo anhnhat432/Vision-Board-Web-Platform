@@ -647,8 +647,8 @@ async function completeSmartGoal() {
   await fillLabel("Câu trả lời của bạn", GOAL_TITLE);
   await clickButton("Tiếp theo");
 
-  await waitFor("smart metric step", 'document.body.innerText.includes("Chỉ số đo lường")');
-  await fillLabel("Chỉ số đo lường", "So tuan review hoan thanh");
+  await waitFor("smart metric step", 'document.body.innerText.includes("Con số hoặc dấu hiệu theo dõi")');
+  await fillLabel("Con số hoặc dấu hiệu theo dõi", "So tuan review hoan thanh");
   await fillLabel("Mốc hiện tại", "0");
   await fillLabel("Mốc mục tiêu", "12");
   await clickButton("Tiếp theo");
@@ -665,16 +665,18 @@ async function completeSmartGoal() {
   await clickButton("Tiếp theo");
 
   await waitFor("smart deadline step", 'document.body.innerText.includes("Số tuần mục tiêu")');
-  await clickButton("kiểm tra tính khả thi");
+  await clickButton("kiểm tra tính thực tế");
   await waitFor("feasibility route", 'location.pathname === "/feasibility"', { timeoutMs: 45_000 });
 }
 
 async function completeFeasibility() {
   const answers = [
     "3-5 giờ mỗi tuần",
+    "Còn khá tốt và chủ động được",
+    "Đủ để bắt đầu ngay",
     "Rất thực tế",
     "Hiện chưa thấy trở ngại lớn",
-    "Rất kỷ luật",
+    "Đã có khung giờ khá cố định",
     "Cam kết hoàn toàn",
   ];
 
@@ -684,8 +686,8 @@ async function completeFeasibility() {
     await clickButton(index === answers.length - 1 ? "Hoàn thành đánh giá" : "Tiếp theo");
   }
 
-  await waitFor("feasibility result", 'document.body.innerText.includes("Dựng hệ 12 tuần")');
-  await clickButton("Dựng hệ 12 tuần");
+  await waitFor("feasibility result", 'document.body.innerText.includes("Tạo kế hoạch 12 tuần")');
+  await clickButton("Tạo kế hoạch 12 tuần");
   await waitFor("12-week setup route", 'location.pathname === "/12-week-setup"', { timeoutMs: 45_000 });
 }
 
@@ -693,12 +695,12 @@ async function completeTwelveWeekSetup() {
   await waitFor("12-week goal step", 'document.body.innerText.includes("Mục tiêu 12 tuần")');
   await clickButton("Tiếp tục");
 
-  await waitFor("12-week tactics step", 'document.body.innerText.includes("2-4 tactic")');
+  await waitFor("12-week tactics step", 'document.body.innerText.includes("2-4 việc")');
   await pageAction(`
     const tacticInputs = Array.from(document.querySelectorAll("input")).filter((input) => {
       const id = input.id;
       const label = id ? document.querySelector(\`label[for="\${id}"]\`) : null;
-      return label?.textContent?.includes("Tên tactic");
+      return label?.textContent?.includes("Tên việc");
     });
     if (tacticInputs.length < 2) throw new Error("Expected at least 2 tactic inputs");
     setNativeValue(tacticInputs[0], ${JSON.stringify(TACTIC_ONE)});
@@ -711,8 +713,8 @@ async function completeTwelveWeekSetup() {
   await fillLabel("Đơn vị của chỉ số", "tuan");
   await clickButton("Tiếp tục");
 
-  await waitFor("12-week final step", 'document.body.innerText.includes("Chốt hệ thống")');
-  await clickButton("Tạo hệ thống 12 tuần");
+  await waitFor("12-week final step", 'document.body.innerText.includes("Chốt kế hoạch")');
+  await clickButton("Tạo kế hoạch 12 tuần");
   await waitFor("12-week system route", 'location.pathname === "/12-week-system"', { timeoutMs: 75_000 });
 }
 
