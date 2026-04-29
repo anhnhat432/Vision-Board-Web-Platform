@@ -26,6 +26,7 @@ Phù hợp khi bạn chỉ muốn web chạy ổn trên Vercel trước.
 
 Thiết lập env:
 
+- `VITE_APP_MODE=demo`
 - `VITE_ANALYTICS_MODE=off`
 - `VITE_BILLING_PROVIDER_MODE=mock_provider`
 - `VITE_BILLING_PROVIDER_LABEL=Mock provider`
@@ -33,24 +34,31 @@ Thiết lập env:
 Mode này:
 
 - không cần GA4
+- không cần Firebase
+- không gọi backend sync khi tạo 12-week plan
 - không cần backend billing
 - paywall vẫn hiện được ở dạng mock/demo
 
-### Mode B: Có analytics, billing vẫn mock
+### Mode B: Real login + backend sync
 
-Phù hợp khi bạn muốn đo funnel trước.
+Phù hợp khi bạn muốn dùng Firebase login và sync 12-week plan về backend thật.
 
 Thiết lập env:
 
-- `VITE_ANALYTICS_MODE=ga4`
-- `VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX`
+- `VITE_APP_MODE=real`
+- `VITE_API_BASE_URL=https://your-backend.example.com/api`
+- `VITE_FIREBASE_API_KEY=...`
+- `VITE_FIREBASE_AUTH_DOMAIN=...`
+- `VITE_FIREBASE_PROJECT_ID=...`
+- `VITE_FIREBASE_APP_ID=...`
 - `VITE_BILLING_PROVIDER_MODE=mock_provider`
 - `VITE_BILLING_PROVIDER_LABEL=Mock provider`
 
 Mode này:
 
 - app vẫn dùng mock checkout
-- event premium/paywall có thể đẩy sang `gtag` / `dataLayer`
+- backend sync chỉ chạy sau khi Firebase configured, user đã đăng nhập và backend profile đã sẵn sàng
+- nếu thiếu Firebase env, Login page sẽ hiện notice cấu hình và backend sync sẽ bị bỏ qua
 
 ### Mode C: Billing contract thật
 
@@ -93,6 +101,12 @@ Tham chiếu nhanh từ [`.env.example`](../.env.example):
 
 - `VITE_ANALYTICS_MODE`
 - `VITE_GA_MEASUREMENT_ID`
+- `VITE_APP_MODE`
+- `VITE_API_BASE_URL`
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_APP_ID`
 - `VITE_OUTBOX_SYNC_ENDPOINT`
 - `VITE_BILLING_PROVIDER_MODE`
 - `VITE_BILLING_PROVIDER_LABEL`
@@ -122,5 +136,5 @@ Với tình trạng dự án bây giờ, cách an toàn nhất là deploy theo `
 - không phụ thuộc backend
 - vẫn demo được `Free` và `Plus`
 
-Khi cần đo funnel thật thì chuyển sang `Mode B`.
+Khi cần login và backend sync thật thì chuyển sang `Mode B` sau khi Firebase/Vercel env đã đầy đủ.
 Khi có backend billing thật thì mới chuyển sang `Mode C`.

@@ -133,7 +133,12 @@ async function checkApiHealth(baseUrl) {
 
 const frontendEnv = mergeEnvFiles(frontendEnvFiles);
 const backendEnv = parseEnvFile(backendEnvFile);
-const frontendMissing = collectMissing(requiredFrontendForBackendSync, frontendEnv.values);
+const frontendAppMode =
+  frontendEnv.values.VITE_APP_MODE?.trim().toLowerCase() === "real" ? "real" : "demo";
+const shouldRequireBackendSyncEnv = fullStack || frontendAppMode === "real";
+const frontendMissing = shouldRequireBackendSyncEnv
+  ? collectMissing(requiredFrontendForBackendSync, frontendEnv.values)
+  : [];
 const backendMissing = backendEnv.exists ? collectMissing(requiredBackendKeys, backendEnv.values) : requiredBackendKeys;
 
 console.log("Runtime environment check");
@@ -150,23 +155,33 @@ console.log("");
 printKeyStatus("Backend local API requirements", requiredBackendKeys, backendEnv.values);
 console.log("");
 
-if (frontendEnv.values.VITE_APP_MODE && frontendEnv.values.VITE_APP_MODE !== "real") {
-  console.log(`WARN    VITE_APP_MODE is "${frontendEnv.values.VITE_APP_MODE}". Full backend sync expects "real".`);
+if (frontendAppMode !== "real") {
+  console.log("INFO    VITE_APP_MODE is demo. Firebase/backend sync env is optional and API health is skipped unless --full-stack is used.");
 }
 
-let healthResult = { status: "skipped", message: "Use --skip-health=false by default." };
+if (fullStack && frontendAppMode !== "real") {
+  console.log(`WARN    VITE_APP_MODE is "${frontendEnv.values.VITE_APP_MODE ?? "demo"}". Full backend sync expects "real".`);
+}
+
+let healthResult = { status: "skipped", message: "Demo mode does not require API health." };
 if (skipHealth) {
   healthResult = { status: "skipped", message: "Skipped by --skip-health." };
-} else {
+} else if (fullStack || frontendAppMode === "real") {
   healthResult = await checkApiHealth(frontendEnv.values.VITE_API_BASE_URL);
+} else {
+  healthResult = { status: "skipped", message: "Demo mode does not require API health." };
 }
 
 console.log(`API health: ${healthResult.status.toUpperCase()} ${healthResult.message}`);
 
 const fullStackFailures = [
   ...frontendMissing.map((key) => `frontend:${key}`),
-  ...backendMissing.map((key) => `backend:${key}`),
+  ...(shouldRequireBackendSyncEnv ? backendMissing.map((key) => `backend:${key}`) : []),
 ];
+
+if (fullStack && frontendAppMode !== "real") {
+  fullStackFailures.push("frontend:VITE_APP_MODE(real-required)");
+}
 
 if (!skipHealth && healthResult.status === "failed") {
   fullStackFailures.push("api:health");

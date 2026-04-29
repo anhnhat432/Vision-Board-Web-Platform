@@ -13,6 +13,21 @@ const planSetupSyncMock = vi.hoisted(() => ({
   syncPlanForGoal: vi.fn(),
 }));
 
+vi.mock("@/lib/auth/AuthContext", () => ({
+  useAuthContext: () => ({
+    user: null,
+    userProfile: null,
+    userProfileLoading: false,
+    userProfileError: null,
+    authLoading: false,
+    error: null,
+    login: vi.fn(),
+    logout: vi.fn(),
+    refreshUserProfile: vi.fn(),
+    isConfigured: false,
+  }),
+}));
+
 vi.mock("@/features/plan12week/hooks", () => ({
   usePlanSetupSync: () => ({
     loading: false,

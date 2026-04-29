@@ -7,7 +7,9 @@ import { isDemoMode } from "@/app/utils/app-mode";
 import { savePlanDetailsLink } from "../persistence/planLinkStore";
 
 interface SyncPlanPayload {
-  goalId: string;
+  goalId?: string;
+  localGoalId?: string;
+  backendGoalId?: string;
   vision: string;
   startDate: string;
   totalWeeks?: number;
@@ -23,19 +25,26 @@ export function usePlanSetupSync() {
       return null;
     }
 
+    const localGoalId = payload.localGoalId ?? payload.goalId;
+    const smartGoalId = payload.backendGoalId ?? payload.goalId ?? payload.localGoalId;
+    if (!localGoalId || !smartGoalId) {
+      console.warn("Skipped plan setup sync because goal IDs were missing.", payload);
+      return null;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
       const createdPlan = await createPlan({
         vision: payload.vision,
-        smartGoalId: payload.goalId,
+        smartGoalId,
         startDate: payload.startDate,
         initializeWeeks: true,
         totalWeeks: payload.totalWeeks ?? 12,
       });
       const details = await getPlan(createdPlan.id);
-      savePlanDetailsLink(payload.goalId, details);
+      savePlanDetailsLink(localGoalId, details);
       setLastSyncedPlanId(createdPlan.id);
       return createdPlan.id;
     } catch (nextError) {

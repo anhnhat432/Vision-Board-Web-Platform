@@ -83,6 +83,7 @@ In demo mode:
 - data is stored in browser `localStorage`
 - billing/paywall flows use mock checkout
 - Firebase values may be left empty unless you want real login/sync
+- backend-only sync is skipped unless the app is in `real` mode with Firebase auth ready
 
 ## Full-Stack Local Setup
 
@@ -120,6 +121,9 @@ VITE_FIREBASE_STORAGE_BUCKET=
 VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_MEASUREMENT_ID=
 ```
+
+If `VITE_APP_MODE=real` is set but Firebase client values are missing, the login page shows the existing
+configuration notice and protected/backend sync paths do not call the API until auth is ready.
 
 ### 3. Configure backend env
 
@@ -259,6 +263,16 @@ Frontend production is configured for Vercel:
 - output directory: `dist`
 - SPA rewrites: `vercel.json`
 - live alias: https://vision-board-web-platform.vercel.app
+
+The checked-in `.env.production` is intentionally demo-safe. A production deployment that should use real
+Firebase login and backend sync must set these Vercel env vars explicitly:
+
+- `VITE_APP_MODE=real`
+- `VITE_API_BASE_URL=https://your-backend.example.com/api`
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_APP_ID`
 
 Backend deployment is Render-ready:
 

@@ -55,8 +55,9 @@ import { parsePendingSMARTGoal, parseSmartGoal, type PendingSMARTGoal } from "@/
 import { getWeeklyTaskWarning } from "@/features/plan12week/logic";
 import { usePlanSetupSync } from "@/features/plan12week/hooks";
 import { createGoal, updateGoal } from "@/services/goalService";
-import { saveGoalLink, getBackendGoalId } from "@/lib/api/goalLinkStore";
-import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
+import { saveGoalLink } from "@/lib/api/goalLinkStore";
+import { useAuthContext } from "@/lib/auth/AuthContext";
+import { isDemoMode } from "../utils/app-mode";
 
 type ResultType = "realistic" | "challenging" | "too_ambitious";
 type PlanLoadRecommendation = "lighter" | "balanced" | "push";
@@ -331,6 +332,7 @@ function getPreviewTasks(indicators: LeadIndicatorDraft[]): string[] {
 export function TwelveWeekSetup() {
   const navigate = useNavigate();
   const { actions: planSetupActions } = usePlanSetupSync();
+  const auth = useAuthContext();
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPlan, setCurrentPlan] = useState<PricingPlanCode>(getCurrentPlan());
@@ -534,6 +536,13 @@ export function TwelveWeekSetup() {
     const parsedStartDate = parseCalendarDate(cycleStartDate) ?? new Date();
     return formatDateInputValue(addDays(parsedStartDate, 83));
   }, [cycleStartDate]);
+  const canRunBackendSync =
+    !isDemoMode() &&
+    auth.isConfigured &&
+    !auth.authLoading &&
+    Boolean(auth.user) &&
+    !auth.userProfileLoading &&
+    Boolean(auth.userProfile);
 
   if (isLoading) {
     return (
@@ -877,10 +886,7 @@ export function TwelveWeekSetup() {
     });
     clearGoalPlanningDrafts();
 
-    // Fire-and-forget: persist goal to backend if authenticated.
-    // Fails silently — the local goal is already saved and the web continues.
-    // Not awaited so the success toast and navigation are not blocked by backend latency.
-    void createGoal({
+    const backendGoalPayload = {
       title: smartGoal.specific.trim(),
       category: focusArea,
       description: [smartGoal.measurable, smartGoal.achievable, smartGoal.relevant]
@@ -902,29 +908,43 @@ export function TwelveWeekSetup() {
       },
       readinessScore: feasibility.adjustedScore,
       tasks: previewTasks.slice(0, 4).map((taskTitle) => ({ title: taskTitle, completed: false })),
-    })
-      .then((backendGoal) => {
-        saveGoalLink(goalId, backendGoal.id);
-      })
-      .catch((goalSyncError: unknown) => {
-        console.warn("Backend goal creation failed silently.", goalSyncError);
-      });
+    } satisfies Parameters<typeof createGoal>[0];
 
-    await planSetupActions.syncPlanForGoal({
-      goalId,
-      vision: draft.vision12Week.trim(),
-      startDate: new Date(cycleStartDate).toISOString(),
-      totalWeeks: 12,
-    });
+    if (canRunBackendSync) {
+      void (async () => {
+        let backendGoalId: string | null = null;
 
-    // Link backend Goal → Plan if both backend IDs are available.
-    // Fire-and-forget — the local flow is already complete.
-    const backendGoalId = getBackendGoalId(goalId);
-    const planLink = getPlanLink(goalId);
-    if (backendGoalId && planLink?.planId) {
-      void updateGoal(backendGoalId, { planId: planLink.planId }).catch((linkError: unknown) => {
-        console.warn("Failed to link backend goal to plan.", linkError);
-      });
+        try {
+          const backendGoal = await createGoal(backendGoalPayload);
+          backendGoalId = backendGoal.id;
+          saveGoalLink(goalId, backendGoal.id);
+        } catch (goalSyncError) {
+          console.warn("Backend goal creation failed; keeping local-first 12-week plan.", goalSyncError);
+        }
+
+        const backendPlanId = await planSetupActions.syncPlanForGoal({
+          localGoalId: goalId,
+          backendGoalId: backendGoalId ?? undefined,
+          vision: draft.vision12Week.trim(),
+          startDate: new Date(cycleStartDate).toISOString(),
+          totalWeeks: 12,
+        });
+
+        if (!backendPlanId) {
+          console.warn("Backend plan sync did not return a plan id; skipping backend goal plan link.");
+          return;
+        }
+
+        if (!backendGoalId) {
+          return;
+        }
+
+        try {
+          await updateGoal(backendGoalId, { planId: backendPlanId });
+        } catch (linkError) {
+          console.warn("Failed to link backend goal to plan.", linkError);
+        }
+      })();
     }
 
     toast.success("Kế hoạch 12 tuần đã sẵn sàng.", {

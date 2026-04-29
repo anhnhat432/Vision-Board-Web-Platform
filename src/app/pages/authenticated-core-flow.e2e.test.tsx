@@ -367,7 +367,18 @@ describe("authenticated new user core flow", () => {
     expect(localStorage.getItem(APP_STORAGE_KEYS.pendingSmartGoal)).toBeNull();
     expect(localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult)).toBeNull();
     expect(localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId)).toBe(dataAfterSetup.goals[0]?.id);
-    expect(planHookMock.syncPlanForGoal).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(planHookMock.syncPlanForGoal).toHaveBeenCalledTimes(1);
+    });
+    expect(planHookMock.syncPlanForGoal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        localGoalId: dataAfterSetup.goals[0]?.id,
+        backendGoalId: "backend_goal_1",
+      }),
+    );
+    await waitFor(() => {
+      expect(goalServiceMock.updateGoal).toHaveBeenCalledWith("backend_goal_1", { planId: "backend_plan_1" });
+    });
 
     ui.unmount();
 
