@@ -101,7 +101,7 @@ function validateMetricLogPayload(payload: unknown): { date?: Date; value: numbe
   };
 }
 
-class MetricService {
+export class MetricService {
   constructor(
     private readonly planRepository: MongoPlanRepository,
     private readonly weekRepository: MongoWeekRepository,

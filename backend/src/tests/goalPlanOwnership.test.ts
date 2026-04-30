@@ -188,6 +188,7 @@ describe("goal ownership", () => {
     assert.equal(goal.id, ids.goal);
 
     await assertApiError(service.getGoal(ownerUserId, ids.otherGoal), 403, "access");
+    await assertApiError(service.getGoal(ownerUserId, "not-an-object-id"), 400, "ObjectId");
     await assertApiError(service.getGoal(ownerUserId, "507f1f77bcf86cd799439099"), 404, "not found");
   });
 
@@ -202,6 +203,56 @@ describe("goal ownership", () => {
     assert.equal(updated.title, "Updated title");
     assert.equal(updated.readinessScore, 80);
     await assertApiError(service.updateGoal(ownerUserId, ids.goal, { readinessScore: 101 }), 400, "readinessScore");
+    await assertApiError(service.updateGoal(ownerUserId, ids.goal, { title: 123 } as never), 400, "title");
+    await assertApiError(service.updateGoal(ownerUserId, ids.goal, {}), 400, "at least one");
+    await assertApiError(service.deleteGoal(ownerUserId, ids.otherGoal), 403, "access");
+    await assertApiError(service.deleteGoal(ownerUserId, "not-an-object-id"), 400, "ObjectId");
+  });
+
+  it("validates goal create payloads before repository writes", async () => {
+    const service = new GoalService(createGoalRepository() as never);
+
+    const created = await service.createGoal(ownerUserId, {
+      title: "  New goal  ",
+      category: "Career",
+      description: "Build product",
+      deadline: "2026-02-01T00:00:00.000Z",
+      tasks: [{ title: "  First task  " }],
+    });
+
+    assert.equal(created.title, "New goal");
+    assert.deepEqual(created.tasks, [{ title: "First task", completed: false }]);
+    await assertApiError(
+      service.createGoal(ownerUserId, {
+        title: 123,
+        category: "Career",
+        description: "Build product",
+        deadline: "2026-02-01T00:00:00.000Z",
+      } as never),
+      400,
+      "title",
+    );
+    await assertApiError(
+      service.createGoal(ownerUserId, {
+        title: "New goal",
+        category: "Career",
+        description: "Build product",
+        deadline: "not-a-date",
+      }),
+      400,
+      "deadline",
+    );
+    await assertApiError(
+      service.createGoal(ownerUserId, {
+        title: "New goal",
+        category: "Career",
+        description: "Build product",
+        deadline: "2026-02-01T00:00:00.000Z",
+        tasks: [{ title: "Bad task", completed: "yes" }],
+      } as never),
+      400,
+      "tasks\\[0\\].completed",
+    );
   });
 });
 

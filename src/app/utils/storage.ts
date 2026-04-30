@@ -78,8 +78,36 @@ import {
   createDemoUserData as createDemoUserDataFromModule,
   shouldHydrateDemoData as shouldHydrateDemoDataFromModule,
 } from "./storage-demo-data";
-import { getEntitlementsForPlan, normalizePlanCode } from "./twelve-week-premium";
+import { getEntitlementsForPlan } from "./twelve-week-premium";
 import { shouldSeedDemoData } from "./app-mode";
+import {
+  APP_STORAGE_KEYS,
+  AUTH_OWNER_STORAGE_KEY,
+  CURRENT_STORAGE_VERSION,
+  DEFAULT_APP_PREFERENCES,
+  FEASIBILITY_RESULT_LABELS,
+  LIFE_AREA_LABELS,
+  MOTIVATIONAL_QUOTES,
+  REVIEW_DAY_LABELS,
+  STORAGE_KEY,
+  TWELVE_WEEK_FUNNEL_STEPS,
+  TWELVE_WEEK_MONETIZATION_STEPS,
+  USER_DATA_UPDATED_EVENT_NAME,
+} from "./storage-constants";
+import {
+  activateAuthenticatedUserDataInStorage,
+  mirrorUserDataToActiveAuthScope,
+  persistActiveAuthenticatedUserDataInStorage,
+  removeKnownAuxiliaryUserData,
+} from "./storage-auth-scope";
+import {
+  getCurrentEntitlementKeysFromData,
+  getCurrentPlanFromData,
+  hasEntitlementInData,
+  restorePlanAccessLocallyInData,
+  startTrialLocallyInData,
+  upgradePlanLocallyInData,
+} from "./storage-billing-ops";
 
 export type {
   Achievement,
@@ -118,36 +146,16 @@ export type {
   WheelOfLifeRecord,
 } from "./storage-types";
 
-export const USER_DATA_STORAGE_KEY = "visionboard_user_data";
-export const USER_DATA_UPDATED_EVENT_NAME = "visionboard:user-data-updated";
-
-const STORAGE_KEY = USER_DATA_STORAGE_KEY;
-const AUTH_OWNER_STORAGE_KEY = `${USER_DATA_STORAGE_KEY}:auth_owner_uid`;
-const ANONYMOUS_USER_DATA_STORAGE_KEY = `${USER_DATA_STORAGE_KEY}:anonymous`;
-const CURRENT_STORAGE_VERSION = 5;
-
-const AUXILIARY_USER_DATA_STORAGE_KEYS = [
-  ANONYMOUS_USER_DATA_STORAGE_KEY,
-  "backend_goal_links",
-  "backend_plan_links",
-  "backend_order_links",
-  "backend_vision_board_links",
-  "visionboard_orders_v1",
-  "last_reminder_date",
-  "visionboard_last_browser_notification",
-  "visionboard_last_outbox_sync",
-  "visionboard_last_entitlement_sync",
-  "visionboard_last_restore_access",
-  "visionboard_mock_billing_account",
-  "visionboard_new_user_guide_dismissed",
-  "visionboard_new_user_guide_seen_at",
-  "visionboard_rescue_dismissed",
-] as const;
-
-const AUXILIARY_USER_DATA_STORAGE_PREFIXES = [
-  `${USER_DATA_STORAGE_KEY}:auth:`,
-  "visionboard_mock_billing_session_",
-] as const;
+export {
+  APP_STORAGE_KEYS,
+  FEASIBILITY_RESULT_LABELS,
+  LIFE_AREAS,
+  LIFE_AREA_LABELS,
+  MOTIVATIONAL_QUOTES,
+  REVIEW_DAY_LABELS,
+  USER_DATA_STORAGE_KEY,
+  USER_DATA_UPDATED_EVENT_NAME,
+} from "./storage-constants";
 
 let _cachedUserData: UserData | null = null;
 let _cachedRawHash: string | null = null;
@@ -182,23 +190,9 @@ function resetUserDataCache(): void {
   _cachedRawHash = null;
 }
 
-function getScopedUserDataStorageKey(authUid: string): string {
-  return `${USER_DATA_STORAGE_KEY}:auth:${encodeURIComponent(authUid)}`;
-}
-
-function removeKnownAuxiliaryUserData(): void {
-  AUXILIARY_USER_DATA_STORAGE_KEYS.forEach((key) => {
-    localStorage.removeItem(key);
-  });
-
-  for (let index = localStorage.length - 1; index >= 0; index -= 1) {
-    const key = localStorage.key(index);
-    if (!key) continue;
-
-    if (AUXILIARY_USER_DATA_STORAGE_PREFIXES.some((prefix) => key.startsWith(prefix))) {
-      localStorage.removeItem(key);
-    }
-  }
+function setUserDataCache(data: UserData, rawHash: string): void {
+  _cachedUserData = data;
+  _cachedRawHash = rawHash;
 }
 
 function createFreshUserData(): UserData {
@@ -208,168 +202,6 @@ function createFreshUserData(): UserData {
     motivationalQuotes: MOTIVATIONAL_QUOTES,
   });
 }
-
-function readActiveAuthOwnerUid(): string | null {
-  if (typeof window === "undefined") return null;
-
-  try {
-    const value = localStorage.getItem(AUTH_OWNER_STORAGE_KEY)?.trim() ?? "";
-    return value.length > 0 ? value : null;
-  } catch {
-    return null;
-  }
-}
-
-function mirrorUserDataToActiveAuthScope(serialized: string): void {
-  const authUid = readActiveAuthOwnerUid();
-  if (!authUid) return;
-
-  try {
-    localStorage.setItem(getScopedUserDataStorageKey(authUid), serialized);
-  } catch {
-    // The main local snapshot has already been saved. Scoped mirroring is best-effort.
-  }
-}
-
-const DEFAULT_APP_PREFERENCES: AppPreferences = {
-  allowLocalAnalytics: true,
-  enableInAppReminders: true,
-  enableBrowserNotifications: false,
-  keepLocalOutbox: true,
-  preferredReminderHour: 19,
-};
-
-const TWELVE_WEEK_FUNNEL_STEPS = [
-  {
-    id: "12_week_setup_started",
-    label: "Bắt đầu setup",
-    description: "Người dùng vào flow thiết lập 12 tuần.",
-  },
-  {
-    id: "12_week_plan_created",
-    label: "Tạo chu kỳ",
-    description: "Người dùng hoàn tất setup và tạo chu kỳ.",
-  },
-  {
-    id: "12_week_task_completed",
-    label: "Hoàn thành việc",
-    description: "Một việc trong today queue được đánh dấu xong.",
-  },
-  {
-    id: "12_week_daily_checkin_submitted",
-    label: "Gửi check-in",
-    description: "Người dùng đóng check-in trong ngày.",
-  },
-  {
-    id: "12_week_weekly_review_submitted",
-    label: "Gửi review tuần",
-    description: "Người dùng chốt review tuần và quyết định nhịp tuần sau.",
-  },
-] as const;
-
-const TWELVE_WEEK_MONETIZATION_STEPS = [
-  {
-    id: "paywall_viewed",
-    label: "Mở paywall",
-    description: "Người dùng đã nhìn thấy paywall nâng cấp trong một ngữ cảnh cụ thể.",
-  },
-  {
-    id: "paywall_cta_clicked",
-    label: "Bấm CTA nâng cấp",
-    description: "Người dùng bấm một CTA dẫn tới paywall hoặc bước nâng cấp tiếp theo.",
-  },
-  {
-    id: "paywall_checkout_started",
-    label: "Bắt đầu checkout",
-    description: "Người dùng bắt đầu bước mở gói trên thiết bị hiện tại.",
-  },
-  {
-    id: "paywall_checkout_completed",
-    label: "Hoàn tất checkout",
-    description: "Thiết bị đã mở gói thành công trong flow local-first hiện tại.",
-  },
-  {
-    id: "premium_template_applied",
-    label: "Áp dụng template",
-    description: "Một template premium hoặc free đã được áp dụng vào setup.",
-  },
-  {
-    id: "premium_insight_opened",
-    label: "Mở insight premium",
-    description: "Người dùng đã mở phần insight review premium trong tab tuần.",
-  },
-] as const;
-
-export const APP_STORAGE_KEYS = {
-  selectedFocusArea: "selected_focus_area",
-  pendingSmartGoal: "pending_smart_goal",
-  pendingFeasibilityResult: "pending_feasibility_result",
-  pendingFeasibilityAnswers: "pending_feasibility_answers",
-  pending12WeekSetupDraft: "pending_12_week_setup_draft",
-  pending12WeekPlanDraft: "pending_12_week_plan_draft",
-  latest12WeekGoalId: "latest_12_week_goal_id",
-  latest12WeekSystemGoalId: "latest_12_week_system_goal_id",
-  latest12WeekPlanGoalId: "latest_12_week_plan_goal_id",
-  readinessLevel: "readiness_level",
-  readinessScore: "readiness_score",
-} as const;
-
-export const LIFE_AREAS = [
-  { name: "Career", color: "#8b5cf6" },
-  { name: "Finance", color: "#10b981" },
-  { name: "Health", color: "#ef4444" },
-  { name: "Education", color: "#f59e0b" },
-  { name: "Relationships", color: "#ec4899" },
-  { name: "Family", color: "#3b82f6" },
-  { name: "Personal Growth", color: "#14b8a6" },
-  { name: "Leisure", color: "#a855f7" },
-];
-
-export const LIFE_AREA_LABELS: Record<string, string> = {
-  Career: "Sự nghiệp",
-  Finance: "Tài chính",
-  Health: "Sức khỏe",
-  Education: "Học tập",
-  Relationships: "Mối quan hệ",
-  Family: "Gia đình",
-  "Personal Growth": "Phát triển bản thân",
-  Leisure: "Giải trí",
-};
-
-export const REVIEW_DAY_LABELS: Record<string, string> = {
-  Monday: "Thứ Hai",
-  Tuesday: "Thứ Ba",
-  Wednesday: "Thứ Tư",
-  Thursday: "Thứ Năm",
-  Friday: "Thứ Sáu",
-  Saturday: "Thứ Bảy",
-  Sunday: "Chủ Nhật",
-};
-
-export const FEASIBILITY_RESULT_LABELS: Record<string, string> = {
-  realistic: "Khả thi",
-  challenging: "Thách thức nhưng làm được",
-  too_ambitious: "Hơi quá sức lúc này",
-  "This goal looks realistic for you right now.": "Mục tiêu này có vẻ khả thi với bạn lúc này.",
-  "This goal is challenging but possible.": "Mục tiêu này đầy thách thức nhưng có thể thực hiện được.",
-  "This goal may be too ambitious right now.": "Mục tiêu này có thể quá tham vọng lúc này.",
-  "Mục tiêu này có vẻ khả thi với bạn lúc này.": "Khả thi",
-  "Mục tiêu này đầy thách thức nhưng có thể thực hiện được.": "Thách thức nhưng làm được",
-  "Mục tiêu này có thể quá tham vọng lúc này.": "Hơi quá sức lúc này",
-};
-
-export const MOTIVATIONAL_QUOTES = [
-  "Tương lai thuộc về những người tin vào vẻ đẹp của ước mơ mình.",
-  "Thành công không phải điểm kết, thất bại không phải dấu chấm hết: điều quan trọng là lòng can đảm để tiếp tục.",
-  "Hãy tin rằng bạn có thể, và bạn đã đi được một nửa chặng đường.",
-  "Cách duy nhất để làm nên điều tuyệt vời là yêu điều bạn đang làm.",
-  "Giới hạn của bạn thường chỉ đến từ trí tưởng tượng của chính bạn.",
-  "Hãy thúc đẩy chính mình, vì không ai có thể làm điều đó thay bạn.",
-  "Những điều tuyệt vời không sinh ra từ vùng an toàn.",
-  "Hãy mơ ước, mong cầu và bắt tay vào hành động.",
-  "Thành công không tự tìm đến bạn. Bạn phải đứng dậy và đi tìm nó.",
-  "Bạn càng nỗ lực cho điều gì đó, cảm giác khi đạt được nó sẽ càng ý nghĩa.",
-];
 
 function normalizeReflection(reflection: Reflection): Reflection {
   return {
@@ -523,15 +355,6 @@ export function clearGoalPlanningDrafts(): void {
   });
 }
 
-function getPlanRank(planCode: PricingPlanCode): number {
-  switch (normalizePlanCode(planCode)) {
-    case "PLUS":
-      return 1;
-    default:
-      return 0;
-  }
-}
-
 export function getLifeAreaLabel(name: string): string {
   return LIFE_AREA_LABELS[name] ?? name;
 }
@@ -582,60 +405,18 @@ export function initializeUserData(): UserData {
 }
 
 export function activateAuthenticatedUserData(authUid: string): void {
-  if (typeof window === "undefined") return;
-
-  const nextAuthUid = authUid.trim();
-  if (!nextAuthUid) return;
-
-  try {
-    const currentOwnerUid = readActiveAuthOwnerUid();
-    const currentRaw = localStorage.getItem(STORAGE_KEY);
-    const nextScopedKey = getScopedUserDataStorageKey(nextAuthUid);
-
-    if (currentOwnerUid === nextAuthUid) {
-      if (currentRaw) mirrorUserDataToActiveAuthScope(currentRaw);
-      return;
-    }
-
-    if (currentRaw) {
-      const archiveKey = currentOwnerUid
-        ? getScopedUserDataStorageKey(currentOwnerUid)
-        : ANONYMOUS_USER_DATA_STORAGE_KEY;
-      localStorage.setItem(archiveKey, currentRaw);
-    }
-
-    const scopedRaw = localStorage.getItem(nextScopedKey);
-    localStorage.setItem(AUTH_OWNER_STORAGE_KEY, nextAuthUid);
-
-    if (scopedRaw && parseStoredUserData(scopedRaw)) {
-      localStorage.setItem(STORAGE_KEY, scopedRaw);
-      resetUserDataCache();
-      notifyUserDataUpdated();
-      return;
-    }
-
-    const freshUserData = normalizeUserData(createFreshUserData());
-    const serialized = JSON.stringify(freshUserData);
-    localStorage.setItem(STORAGE_KEY, serialized);
-    localStorage.setItem(nextScopedKey, serialized);
-    _cachedUserData = freshUserData;
-    _cachedRawHash = serialized;
-    notifyUserDataUpdated();
-  } catch {
-    resetUserDataCache();
-  }
+  activateAuthenticatedUserDataInStorage(authUid, {
+    createFreshUserData,
+    normalizeUserData,
+    parseStoredUserData,
+    resetUserDataCache,
+    setUserDataCache,
+    notifyUserDataUpdated,
+  });
 }
 
 export function persistActiveAuthenticatedUserData(): void {
-  if (typeof window === "undefined") return;
-
-  try {
-    const currentRaw = localStorage.getItem(STORAGE_KEY);
-    if (currentRaw) mirrorUserDataToActiveAuthScope(currentRaw);
-    localStorage.removeItem(AUTH_OWNER_STORAGE_KEY);
-  } catch {
-    // ignore storage errors during auth teardown
-  }
+  persistActiveAuthenticatedUserDataInStorage();
 }
 
 export function getUserData(): UserData {
@@ -902,36 +683,19 @@ export function getInAppReminders(referenceDate = new Date()): InAppReminder[] {
 
 export function getCurrentPlan(userData?: UserData): PricingPlanCode {
   const data = userData ?? getUserData();
-
-  const sub = data.subscription;
-  if (sub?.status === "active" || sub?.status === "trialing") {
-    // Enforce expiry: if renewsAt is set and has passed, the plan has expired
-    if (sub.renewsAt && new Date(sub.renewsAt) < new Date()) {
-      // Mark as canceled in-place so subsequent calls are consistent
-      sub.status = "canceled";
-      saveUserData(data);
-      return "FREE";
-    }
-    return normalizePlanCode(sub.planCode);
-  }
-
-  const highestEntitledPlan = (data.entitlements ?? []).reduce<PricingPlanCode>(
-    (currentHighest, entitlement) =>
-      getPlanRank(entitlement.sourcePlan) > getPlanRank(currentHighest) ? entitlement.sourcePlan : currentHighest,
-    "FREE",
-  );
-
-  return normalizePlanCode(highestEntitledPlan);
+  return getCurrentPlanFromData(data, () => {
+    saveUserData(data);
+  });
 }
 
 export function hasEntitlement(key: EntitlementKey, userData?: UserData): boolean {
   const data = userData ?? getUserData();
-  return (data.entitlements ?? []).some((entitlement) => entitlement.key === key);
+  return hasEntitlementInData(key, data);
 }
 
 export function getCurrentEntitlementKeys(userData?: UserData): EntitlementKey[] {
   const data = userData ?? getUserData();
-  return Array.from(new Set((data.entitlements ?? []).map((entitlement) => entitlement.key)));
+  return getCurrentEntitlementKeysFromData(data);
 }
 
 export function upgradePlanLocally(
@@ -942,80 +706,36 @@ export function upgradePlanLocally(
   },
 ): PricingPlanCode {
   const data = getUserData();
-  const startedAt = options?.startedAt ?? new Date().toISOString();
-  const currentPlan = getCurrentPlan(data);
-  const normalizedPlanCode = normalizePlanCode(planCode) as Exclude<PricingPlanCode, "FREE">;
-
-  if (getPlanRank(currentPlan) >= getPlanRank(normalizedPlanCode)) {
-    return currentPlan;
+  const beforePlanState = JSON.stringify({ subscription: data.subscription, entitlements: data.entitlements });
+  const nextPlan = upgradePlanLocallyInData(data, planCode, options, () => {
+    saveUserData(data);
+  });
+  const afterPlanState = JSON.stringify({ subscription: data.subscription, entitlements: data.entitlements });
+  if (afterPlanState !== beforePlanState) {
+    saveUserData(data);
   }
-
-  data.subscription = {
-    planCode: normalizedPlanCode,
-    status: "active",
-    billingCycle: options?.billingCycle ?? "season-pass",
-    startedAt,
-    renewsAt: null,
-    canceledAt: null,
-    isLocalTestMode: true,
-  };
-  data.entitlements = getEntitlementsForPlan(normalizedPlanCode, startedAt);
-
-  saveUserData(data);
-  return normalizedPlanCode;
+  return nextPlan;
 }
 
 /** Start a local free trial for the given plan (default: PLUS, 7 days). */
 export function startTrialLocally(planCode: Exclude<PricingPlanCode, "FREE"> = "PLUS", trialDays = 7): PricingPlanCode {
   const data = getUserData();
-  const currentPlan = getCurrentPlan(data);
-
-  // Do not start a trial if the user already has an equal or higher plan
-  if (getPlanRank(currentPlan) >= getPlanRank(planCode)) {
-    return currentPlan;
+  const beforePlanState = JSON.stringify({ subscription: data.subscription, entitlements: data.entitlements });
+  const nextPlan = startTrialLocallyInData(data, planCode, trialDays, () => {
+    saveUserData(data);
+  });
+  const afterPlanState = JSON.stringify({ subscription: data.subscription, entitlements: data.entitlements });
+  if (afterPlanState !== beforePlanState) {
+    saveUserData(data);
   }
-
-  const startedAt = new Date().toISOString();
-  const renewsAt = new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000).toISOString();
-
-  data.subscription = {
-    planCode,
-    status: "trialing",
-    billingCycle: "season-pass",
-    startedAt,
-    renewsAt,
-    canceledAt: null,
-    isLocalTestMode: true,
-  };
-  data.entitlements = getEntitlementsForPlan(planCode, startedAt);
-
-  saveUserData(data);
-  return planCode;
+  return nextPlan;
 }
 
 export function restorePlanAccessLocally(): PricingPlanCode {
   const data = getUserData();
-  const currentPlan = getCurrentPlan(data);
-
-  if (currentPlan === "FREE") {
-    data.subscription = null;
-    data.entitlements = [];
+  const currentPlan = restorePlanAccessLocallyInData(data, () => {
     saveUserData(data);
-    return currentPlan;
-  }
-
-  const startedAt = data.subscription?.startedAt ?? new Date().toISOString();
-  data.subscription = {
-    planCode: currentPlan,
-    status: "active",
-    billingCycle: data.subscription?.billingCycle ?? "season-pass",
-    startedAt,
-    renewsAt: data.subscription?.renewsAt ?? null,
-    canceledAt: null,
-    isLocalTestMode: data.subscription?.isLocalTestMode ?? true,
-  };
-  data.entitlements = getEntitlementsForPlan(currentPlan, startedAt);
-
+  });
   saveUserData(data);
   return currentPlan;
 }

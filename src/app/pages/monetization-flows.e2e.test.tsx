@@ -29,13 +29,13 @@ describe("monetization flows", () => {
     );
     render(<RouterProvider router={router} />);
 
-    await screen.findByText("Gói & thanh toán");
+    await screen.findByText("Gói demo & mock upgrade");
     expect(screen.getByText("Gói hiện tại")).toBeInTheDocument();
-    expect(screen.getByText("Bạn đang dùng gói miễn phí.")).toBeInTheDocument();
+    expect(screen.getByText("Bạn đang dùng gói miễn phí trên trình duyệt này.")).toBeInTheDocument();
 
     // Should show all 4 entitlement slots, all locked
     expect(screen.getByText("Template premium")).toBeInTheDocument();
-    expect(screen.getByText("Nâng cấp")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Mở Plus demo" }).length).toBeGreaterThan(0);
   });
 
   it("BillingPlan page shows active plan for Plus user", async () => {
@@ -47,8 +47,8 @@ describe("monetization flows", () => {
     );
     render(<RouterProvider router={router} />);
 
-    await screen.findByText("Gói & thanh toán");
-    expect(screen.getByText("Bạn đang dùng Plus.")).toBeInTheDocument();
+    await screen.findByText("Gói demo & mock upgrade");
+    expect(screen.getByText("Bạn đang dùng Plus trên trình duyệt này.")).toBeInTheDocument();
     // Entitlements should show as active
     const activeItems = screen.getAllByText("Đang hoạt động");
     expect(activeItems.length).toBeGreaterThan(0);
@@ -62,8 +62,8 @@ describe("monetization flows", () => {
     render(<RouterProvider router={router} />);
     const user = userEvent.setup();
 
-    await screen.findByRole("button", { name: "Nâng cấp lên Plus" });
-    await user.click(screen.getByRole("button", { name: "Nâng cấp lên Plus" }));
+    const upgradeButtons = await screen.findAllByRole("button", { name: "Mở Plus demo" });
+    await user.click(upgradeButtons[0]);
 
     // Paywall dialog should open
     await screen.findByRole("dialog");
@@ -147,7 +147,7 @@ describe("monetization flows", () => {
 
     await screen.findByText("So sánh các gói");
     // Upgrade button in the plan comparison section
-    const upgradeButtons = screen.getAllByRole("button", { name: "Nâng cấp" });
+    const upgradeButtons = screen.getAllByRole("button", { name: "Mở Plus demo" });
     expect(upgradeButtons.length).toBeGreaterThan(0);
   });
 
@@ -181,7 +181,7 @@ describe("monetization flows", () => {
     // Restore via settings tab in 12WeekSystem
     renderAppRoute("/12-week-system?tab=settings");
     await screen.findByText("Thiết bị, dữ liệu và đồng bộ");
-    await user.click(screen.getByRole("button", { name: "Khôi phục giao dịch" }));
+    await user.click(screen.getByRole("button", { name: "Khôi phục mock upgrade" }));
 
     await waitFor(() => {
       expect(getCurrentPlan()).toBe("PLUS");

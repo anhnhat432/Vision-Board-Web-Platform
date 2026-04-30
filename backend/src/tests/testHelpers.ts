@@ -14,6 +14,9 @@ export const ids = {
   otherWeek: "507f1f77bcf86cd799439032",
   task: "507f1f77bcf86cd799439041",
   otherTask: "507f1f77bcf86cd799439042",
+  metric: "507f1f77bcf86cd799439051",
+  otherMetric: "507f1f77bcf86cd799439052",
+  metricLog: "507f1f77bcf86cd799439053",
 };
 
 export async function assertApiError(

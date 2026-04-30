@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -13,14 +14,18 @@ const planHookMock = vi.hoisted(() => ({
   loadPlan: vi.fn(),
 }));
 
+const appModeMock = vi.hoisted(() => ({
+  mode: "real" as "demo" | "real",
+}));
+
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
 }));
 
 vi.mock("../utils/app-mode", () => ({
-  getAppMode: () => "real",
-  isDemoMode: () => false,
-  isRealMode: () => true,
+  getAppMode: () => appModeMock.mode,
+  isDemoMode: () => appModeMock.mode === "demo",
+  isRealMode: () => appModeMock.mode === "real",
   shouldSeedDemoData: () => false,
   shouldShowBillingDebugUi: () => false,
 }));
@@ -117,6 +122,7 @@ function seedStaleLocalGoal() {
 describe("Dashboard fresh workspace states", () => {
   beforeEach(() => {
     localStorage.clear();
+    appModeMock.mode = "real";
     planHookMock.loadPlan.mockReset();
     setAuthContext();
   });
@@ -136,6 +142,21 @@ describe("Dashboard fresh workspace states", () => {
     expect(screen.queryByText("Một luồng chính, không phải ba lựa chọn ngang nhau.")).not.toBeInTheDocument();
     expect(container.querySelector('[data-tour-id="dashboard-plan-card"]')).not.toBeInTheDocument();
     expect(container.querySelector('[data-tour-id="dashboard-next-card"]')).not.toBeInTheDocument();
+  });
+
+  it("lets demo-mode signed-out visitors start onboarding even when Firebase auth is configured", async () => {
+    appModeMock.mode = "demo";
+    const user = userEvent.setup();
+
+    renderDashboard();
+
+    const startButton = await screen.findByRole("button", { name: /Trải nghiệm demo miễn phí/i });
+    expect(screen.getByText(/Dữ liệu demo\/local được lưu trên trình duyệt hiện tại/i)).toBeInTheDocument();
+
+    await user.click(startButton);
+
+    expect(await screen.findByTestId("onboarding-page")).toBeInTheDocument();
+    expect(screen.queryByTestId("login-page")).not.toBeInTheDocument();
   });
 
   it("shows a true empty execution state for a newly signed-in user", async () => {

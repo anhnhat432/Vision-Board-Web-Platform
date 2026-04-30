@@ -1,19 +1,13 @@
 ﻿import { Suspense, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { BarChart3, CalendarDays, ListTodo, Settings2 } from "lucide-react";
-import { toast } from "sonner";
 
 import { useTwelveWeekSystemSnapshot } from "../hooks/useTwelveWeekSystemSnapshot";
-import {
-  applyBackendPlanSnapshotToLocal,
-  hydrateTwelveWeekPlansFromBackend,
-  type BackendPlanHydrationResult,
-} from "../hooks/useBackendPlanHydration";
+import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { TabErrorBoundary } from "../components/TabErrorBoundary";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import {
-  trackPaywallCtaClicked,
   trackPremiumInsightOpened,
   trackRescueActionTaken,
   trackRescueTriggerDismissed,
@@ -32,58 +26,20 @@ import {
 import { Button } from "../components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
-  getBrowserNotificationStatus,
-  openBillingCustomerPortal,
-  requestBrowserNotificationPermission,
-  restorePlanAccess,
-  sendTestBrowserNotification,
-  syncEntitlementsWithProvider,
-  syncPendingOutbox,
-} from "../utils/production";
-import {
-  type AppPreferences,
-  type InAppReminder,
-  type PricingPlanCode,
-  type SyncOutboxItem,
-  type UniversalDailyCheckIn,
-  type UniversalWeeklyReview,
-  archiveOutboxItem,
-  clearLocalDeviceSignals,
   clearArchivedOutbox,
   clearEventLog,
-  deleteAllUserData,
-  exportUserDataSnapshot,
   formatDateInputValue,
-  getCalendarDateKey,
-  getUserData,
-  resetTwelveWeekGoalCycle,
-  restoreArchivedOutbox,
-  restoreOutboxItem,
-  trackAppEvent,
-  updateAppPreferences,
   updateGoal,
-  upsertReflection,
 } from "../utils/storage";
-import {
-  addDaysToDateKey,
-  dismissRescueTrigger,
-  getCurrentWeekStartDate,
-  getMoodScore,
-  getWorkloadDecisionLabel,
-} from "../utils/twelve-week-system-ui";
-import type { PremiumFeatureContext } from "../utils/twelve-week-premium";
+import { dismissRescueTrigger } from "../utils/twelve-week-system-ui";
+import type { TwelveWeekSystem as TwelveWeekSystemModel } from "../utils/storage-types";
 import {
   buildDerivedScoreboard,
   getDefaultScoreboard,
   getTwelveWeekCurrentWeek,
-  getTwelveWeekMissedTasks,
-  getTwelveWeekTasksForWeek,
-  getTwelveWeekWeekCompletion,
-  getTwelveWeekWeekRange,
 } from "../utils/storage-twelve-week";
 import { TaskBoard } from "@/features/plan12week/components/TaskBoard";
 import { usePlanExecutionSync } from "@/features/plan12week/hooks";
-import { getUniversalWeeklyReviewExecutionScore } from "@/features/plan12week/persistence/reviewExecutionScore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
   TwelveWeekDashboardHeader,
@@ -99,10 +55,13 @@ import {
   getLatestCheckIn,
   getSyncBadgeClass,
   getSyncBadgeLabel,
-  getTodayQueueForSystem,
   hasBackendSyncIssue as getHasBackendSyncIssue,
 } from "./12WeekSystem/helpers";
 import { PlanOverview, WeekEditor, WeeklyReview } from "./12WeekSystem/lazyTabs";
+import { useTwelveWeekBackendActions } from "./12WeekSystem/useTwelveWeekBackendActions";
+import { useTwelveWeekBillingActions } from "./12WeekSystem/useTwelveWeekBillingActions";
+import { useTwelveWeekExecutionActions } from "./12WeekSystem/useTwelveWeekExecutionActions";
+import { useTwelveWeekSettingsActions } from "./12WeekSystem/useTwelveWeekSettingsActions";
 import { useWeeklyReviewFormState } from "./12WeekSystem/useWeeklyReviewFormState";
 
 export function TwelveWeekSystem() {
@@ -173,17 +132,9 @@ export function TwelveWeekSystem() {
     refreshBackendProgressOverlay,
     loadGoalData,
   } = useTwelveWeekSystemSnapshot();
-  const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
-  const [upgradeContext, setUpgradeContext] = useState<PremiumFeatureContext>("review");
-  const [upgradeRecommendedPlan, setUpgradeRecommendedPlan] = useState<Exclude<PricingPlanCode, "FREE">>("PLUS");
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [isClearLocalDialogOpen, setIsClearLocalDialogOpen] = useState(false);
   const [dismissedTriggerKind, setDismissedTriggerKind] = useState<string | null>(null);
-  const [isSyncingEntitlements, setIsSyncingEntitlements] = useState(false);
-  const [isRestoringPlanAccess, setIsRestoringPlanAccess] = useState(false);
-  const [isHydratingBackendPlans, setIsHydratingBackendPlans] = useState(false);
-  const [isResolvingBackendPlanConflicts, setIsResolvingBackendPlanConflicts] = useState(false);
-  const [lastBackendHydrationResult, setLastBackendHydrationResult] = useState<BackendPlanHydrationResult | null>(null);
 
   const todayDateKey = formatDateInputValue(new Date());
   const isBackendProfileReady = Boolean(userProfile);
@@ -198,6 +149,7 @@ export function TwelveWeekSystem() {
 
   const activeGoalIdRef = useRef<string | null>(activeGoal?.id ?? null);
   const lastBackendSyncKeyRef = useRef<string | null>(null);
+  const tabsTopRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     activeGoalIdRef.current = activeGoal?.id ?? null;
@@ -235,6 +187,160 @@ export function TwelveWeekSystem() {
   const planHasNoLeadMetrics = Boolean(system && system.leadIndicators.length === 0);
   const planHasNoLagMetric = Boolean(system && system.lagMetric.name.trim().length === 0);
   const hasIncompletePlanStructure = Boolean(system && (planHasNoTasks || planHasNoLeadMetrics || planHasNoLagMetric));
+
+  const commitSystemUpdate = (nextSystem: TwelveWeekSystemModel) => {
+    const normalizedNextSystem = {
+      ...nextSystem,
+      scoreboard: buildDerivedScoreboard(nextSystem, getDefaultScoreboard(nextSystem.totalWeeks)),
+    };
+
+    if (!activeGoal) return normalizedNextSystem;
+
+    updateGoal(activeGoal.id, {
+      twelveWeekSystem: normalizedNextSystem,
+    });
+    updateActiveSystemState(() => normalizedNextSystem);
+    return normalizedNextSystem;
+  };
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+
+    if (!activeGoal || !system) return;
+
+    if (value === "progress") {
+      trackAnalyticsEvent(
+        "progress_viewed",
+        {
+          source: "12_week_system",
+          week_number: getTwelveWeekCurrentWeek(system),
+          total_weeks: system.totalWeeks,
+          current_plan: activePlanCode,
+        },
+        { goalId: activeGoal.id },
+      );
+    }
+
+    if (value === "week" && hasPremiumReviewInsights) {
+      const insightWeekNumber = getTwelveWeekCurrentWeek(system);
+      trackPremiumInsightOpened({
+        goalId: activeGoal.id,
+        source: "12_week_system",
+        currentPlan: activePlanCode,
+        weekNumber: insightWeekNumber,
+      });
+    }
+  };
+
+  const {
+    isUpgradeDialogOpen,
+    setIsUpgradeDialogOpen,
+    upgradeContext,
+    upgradeRecommendedPlan,
+    isSyncingEntitlements,
+    isRestoringPlanAccess,
+    handleOpenUpgradeDialog,
+    handleCheckoutComplete,
+    handleRestorePlanAccess,
+    handleSyncEntitlements,
+    handleOpenBillingPortal,
+  } = useTwelveWeekBillingActions({
+    activeGoalId: activeGoal?.id ?? null,
+    activeGoalIdRef,
+    activeTab,
+    activePlanCode,
+    refreshSnapshotMeta,
+  });
+
+  const {
+    isHydratingBackendPlans,
+    isResolvingBackendPlanConflicts,
+    lastBackendHydrationResult,
+    handleRunOutboxSync,
+    handleHydrateBackendPlans,
+    handleUseBackendPlanForConflicts,
+    handleKeepLocalPlanForConflicts,
+  } = useTwelveWeekBackendActions({
+    activeGoal,
+    system,
+    isBackendProfileReady,
+    executionSyncActions,
+    activeGoalIdRef,
+    lastBackendSyncKeyRef,
+    setLastSyncSnapshot,
+    loadGoalData,
+    refreshBackendProgressOverlay,
+    refreshSnapshotMeta,
+  });
+
+  const {
+    handleToggleTask,
+    handleSaveCheckIn,
+    handleSaveWeeklyReview,
+    handleReentry,
+    handleApplyRecommendedReentry,
+    handleApplySuggestedPlan,
+  } = useTwelveWeekExecutionActions({
+    activeGoal,
+    system,
+    activeGoalIdRef,
+    dailyMood,
+    dailyNote,
+    weeklyForm,
+    setWeeklyForm,
+    hasPremiumReviewInsights,
+    suggestedNextWeekPlan,
+    rescuePlanSummary,
+    executionSyncActions,
+    commitSystemUpdate,
+    updateActiveSystemState,
+    refreshBackendProgressOverlay,
+    refreshSnapshotMeta,
+  });
+
+  const {
+    handleReviewDayChange,
+    handleReminderTimeChange,
+    handleLoadPreferenceChange,
+    handleStatusChange,
+    handleTacticPriorityChange,
+    handleTacticTypeChange,
+    handlePreferenceToggle,
+    handleArchivePendingOutbox,
+    handleOutboxItemToggle,
+    handleRestoreArchivedOutbox,
+    handleOpenReminder,
+    handleExportLocalData,
+    handleClearLocalSignals,
+    handleDeleteAllData,
+    handleBrowserNotificationToggle,
+    handleResetCycle,
+  } = useTwelveWeekSettingsActions({
+    activeGoal,
+    system,
+    activeGoalIdRef,
+    commitSystemUpdate,
+    refreshSnapshotMeta,
+    loadGoalData,
+    handleTabChange,
+    setActiveTab,
+    setBrowserNotificationStatus,
+    setIsClearLocalDialogOpen,
+    setIsResetDialogOpen,
+    navigate,
+  });
+
+  useScrollToTopOnChange(activeTab, {
+    targetRef: tabsTopRef,
+    focus: false,
+    enabled:
+      isReady &&
+      Boolean(activeGoal && system) &&
+      !isUpgradeDialogOpen &&
+      !isResetDialogOpen &&
+      !isClearLocalDialogOpen,
+  });
+
   const hasBackendSyncIssue = getHasBackendSyncIssue(backendConnectionStatus, lastBackendHydrationResult);
   const backendSyncIssueMessage = getBackendSyncIssueMessage(backendConnectionStatus, lastBackendHydrationResult);
   const syncBadgeClass = getSyncBadgeClass(backendConnectionStatus);
@@ -316,810 +422,6 @@ export function TwelveWeekSystem() {
       </TwelveWeekDashboardState>
     );
   }
-
-  const commitSystemUpdate = (nextSystem: typeof system) => {
-    const normalizedNextSystem = {
-      ...nextSystem,
-      scoreboard: buildDerivedScoreboard(nextSystem, getDefaultScoreboard(nextSystem.totalWeeks)),
-    };
-
-    updateGoal(activeGoal.id, {
-      twelveWeekSystem: normalizedNextSystem,
-    });
-    updateActiveSystemState(() => normalizedNextSystem);
-    return normalizedNextSystem;
-  };
-
-  const getLatestActiveSystem = () =>
-    getUserData().goals.find((goal) => goal.id === activeGoal.id)?.twelveWeekSystem ?? system;
-
-  const handleOpenUpgradeDialog = (
-    context: PremiumFeatureContext,
-    recommendedPlan: Exclude<PricingPlanCode, "FREE"> = "PLUS",
-  ) => {
-    trackPaywallCtaClicked({
-      goalId: activeGoal.id,
-      context,
-      source: activeTab === "settings" ? "settings" : context === "review" ? "review_teaser" : "12_week_system",
-      currentPlan: activePlanCode,
-      recommendedPlan,
-      targetPlan: recommendedPlan,
-      placement:
-        activeTab === "settings"
-          ? "settings_plan_card"
-          : context === "review"
-            ? "weekly_review_teaser"
-            : "inline_upgrade",
-    });
-    setUpgradeContext(context);
-    setUpgradeRecommendedPlan(recommendedPlan);
-    setIsUpgradeDialogOpen(true);
-  };
-
-  const handleCheckoutComplete = () => {
-    refreshSnapshotMeta();
-  };
-
-  const handleRestorePlanAccess = async () => {
-    const actionGoalId = activeGoal.id;
-    setIsRestoringPlanAccess(true);
-
-    try {
-      const result = await restorePlanAccess(actionGoalId);
-
-      if (result.ok && result.planCode !== "FREE") {
-        toast.success(result.message);
-      } else if (result.ok) {
-        toast.info(result.message);
-      } else {
-        toast.error(result.message);
-      }
-
-      if (activeGoalIdRef.current === actionGoalId) {
-        refreshSnapshotMeta();
-      }
-    } finally {
-      setIsRestoringPlanAccess(false);
-    }
-  };
-
-  const handleSyncEntitlements = async () => {
-    const actionGoalId = activeGoal.id;
-    setIsSyncingEntitlements(true);
-
-    try {
-      const result = await syncEntitlementsWithProvider(actionGoalId);
-
-      if (result.ok) {
-        trackAppEvent("billing_access_synced", actionGoalId, {
-          plan: result.planCode,
-          providerMode: result.providerMode,
-          entitlementCount: String(result.entitlementKeys.length),
-        });
-        toast.success(result.message);
-      } else {
-        toast.error(result.message);
-      }
-
-      if (activeGoalIdRef.current === actionGoalId) {
-        refreshSnapshotMeta();
-      }
-    } finally {
-      setIsSyncingEntitlements(false);
-    }
-  };
-
-  const handleOpenBillingPortal = async () => {
-    const result = await openBillingCustomerPortal(activeGoal.id);
-
-    if (result.ok && result.url && typeof window !== "undefined") {
-      const isSameOriginTarget = result.url.startsWith("/") || result.url.startsWith(window.location.origin);
-
-      if (isSameOriginTarget) {
-        window.location.assign(result.url);
-      } else {
-        window.open(result.url, "_blank", "noopener,noreferrer");
-      }
-
-      toast.success(result.message);
-      return;
-    }
-
-    if (result.ok) {
-      toast.success(result.message);
-    } else if (result.status === "local_only" || result.status === "not_configured") {
-      toast.info(result.message);
-    } else {
-      toast.error(result.message);
-    }
-  };
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-
-    if (value === "progress") {
-      trackAnalyticsEvent(
-        "progress_viewed",
-        {
-          source: "12_week_system",
-          week_number: getTwelveWeekCurrentWeek(system),
-          total_weeks: system.totalWeeks,
-          current_plan: activePlanCode,
-        },
-        { goalId: activeGoal.id },
-      );
-    }
-
-    if (value === "week" && hasPremiumReviewInsights) {
-      const insightWeekNumber = getTwelveWeekCurrentWeek(system);
-      trackPremiumInsightOpened({
-        goalId: activeGoal.id,
-        source: "12_week_system",
-        currentPlan: activePlanCode,
-        weekNumber: insightWeekNumber,
-      });
-    }
-  };
-
-  const handleToggleTask = async (taskId: string, completed: boolean) => {
-    const actionGoalId = activeGoal.id;
-    const toggledTask = system.taskInstances.find((task) => task.id === taskId);
-    const nextTaskInstances = system.taskInstances.map((task) =>
-      task.id === taskId ? { ...task, completed, completedAt: completed ? new Date().toISOString() : undefined } : task,
-    );
-
-    commitSystemUpdate({
-      ...system,
-      taskInstances: nextTaskInstances,
-    });
-
-    if (completed) {
-      trackAnalyticsEvent(
-        "today_task_completed",
-        {
-          source: "12_week_system",
-          week_number: toggledTask?.weekNumber ?? getTwelveWeekCurrentWeek(system),
-          is_core: Boolean(toggledTask?.isCore),
-        },
-        {
-          goalId: actionGoalId,
-          legacyEventName: "12_week_task_completed",
-          legacyPayload: {
-            weekNumber: String(toggledTask?.weekNumber ?? getTwelveWeekCurrentWeek(system)),
-            taskId,
-          },
-        },
-      );
-    }
-
-    const synced = await executionSyncActions.syncTaskToggle(taskId, completed);
-    if (!synced) {
-      const latestGoal = getUserData().goals.find((goal) => goal.id === actionGoalId);
-      const latestSystem = latestGoal?.twelveWeekSystem;
-      const latestTask = latestSystem?.taskInstances.find((task) => task.id === taskId);
-      const shouldRollbackTask = Boolean(latestSystem && latestTask && latestTask.completed === completed);
-      if (latestSystem && shouldRollbackTask) {
-        const rollbackSystem = {
-          ...latestSystem,
-          taskInstances: latestSystem.taskInstances.map((task) =>
-            task.id === taskId
-              ? {
-                  ...task,
-                  completed: toggledTask?.completed ?? false,
-                  completedAt: toggledTask?.completedAt,
-                }
-              : task,
-          ),
-        };
-        const normalizedRollbackSystem = {
-          ...rollbackSystem,
-          scoreboard: buildDerivedScoreboard(rollbackSystem, getDefaultScoreboard(rollbackSystem.totalWeeks)),
-        };
-
-        updateGoal(actionGoalId, {
-          twelveWeekSystem: normalizedRollbackSystem,
-        });
-        if (activeGoalIdRef.current === actionGoalId) {
-          updateActiveSystemState(() => normalizedRollbackSystem);
-        }
-      }
-
-      toast.error(
-        shouldRollbackTask
-          ? "Không thể đồng bộ trạng thái việc. Mình đã hoàn tác thay đổi."
-          : "Không thể đồng bộ trạng thái việc. Mình giữ trạng thái local hiện tại.",
-      );
-      return;
-    }
-
-    toast.success(completed ? "Việc đã được chốt." : "Việc đã được mở lại.");
-    if (activeGoalIdRef.current === actionGoalId) {
-      refreshBackendProgressOverlay();
-      refreshSnapshotMeta();
-    }
-  };
-
-  const handleSaveCheckIn = async () => {
-    const actionGoalId = activeGoal.id;
-    const actionDate = new Date();
-    const todayKey = formatDateInputValue(actionDate);
-    const latestSystem = getLatestActiveSystem();
-    const syncWeekNumber = getTwelveWeekCurrentWeek(latestSystem, actionDate);
-    const syncWeekTasks = getTwelveWeekTasksForWeek(latestSystem, syncWeekNumber);
-    const actionTodayQueue = getTodayQueueForSystem(latestSystem);
-    const completedTodayCount = actionTodayQueue.filter((task) => task.completed).length;
-    const completedTitles = actionTodayQueue
-      .filter((task) => task.completed)
-      .map((task) => task.title)
-      .join(", ");
-    const dailyCheckIn: UniversalDailyCheckIn = {
-      date: todayKey,
-      didWorkToday: completedTodayCount > 0 || dailyNote.trim().length > 0,
-      whichLeadIndicatorWorkedOn: completedTitles || actionTodayQueue[0]?.leadIndicatorName || "",
-      amountDone: `${completedTodayCount}/${actionTodayQueue.length || syncWeekTasks.length || 1} việc`,
-      outputCreated: completedTitles,
-      obstacleOrIssue: "",
-      dailySelfRating: getMoodScore(dailyMood),
-      optionalNote: dailyNote.trim(),
-      mood: dailyMood,
-    };
-
-    const filteredCheckIns = latestSystem.dailyCheckIns.filter((item) => getCalendarDateKey(item.date) !== todayKey);
-    commitSystemUpdate({
-      ...latestSystem,
-      dailyCheckIns: [dailyCheckIn, ...filteredCheckIns].slice(0, 120),
-    });
-
-    trackAppEvent("12_week_daily_checkin_submitted", actionGoalId, {
-      mood: dailyMood,
-      completedTasks: String(completedTodayCount),
-    });
-
-    const synced = await executionSyncActions.syncDailyCheckIn({
-      weekNumber: syncWeekNumber,
-      date: todayKey,
-      didWorkToday: dailyCheckIn.didWorkToday,
-    });
-
-    if (synced) {
-      toast.success("Check-in hôm nay đã được lưu.");
-      if (activeGoalIdRef.current === actionGoalId) {
-        refreshBackendProgressOverlay();
-      }
-    } else {
-      toast.info("Check-in đã lưu local. Sẽ tiếp tục đồng bộ khi backend sẵn sàng.");
-    }
-    if (activeGoalIdRef.current === actionGoalId) {
-      refreshSnapshotMeta();
-    }
-  };
-
-  const handleSaveWeeklyReview = async () => {
-    const actionGoalId = activeGoal.id;
-    const actionGoalTitle = activeGoal.title;
-    const hasAnyContent =
-      weeklyForm.biggestOutputThisWeek.trim() ||
-      weeklyForm.mainObstacle.trim() ||
-      weeklyForm.nextWeekPriority.trim() ||
-      weeklyForm.lagProgressValue.trim();
-    if (!hasAnyContent) {
-      toast.error("Cần điền ít nhất một mục trước khi chốt review.");
-      return;
-    }
-    const latestSystem = getLatestActiveSystem();
-    const reviewWeekNumber = getTwelveWeekCurrentWeek(latestSystem);
-    const reviewWeekCompletion = getTwelveWeekWeekCompletion(latestSystem, reviewWeekNumber);
-    const nextWeekPriorityValue =
-      weeklyForm.nextWeekPriority.trim() || (hasPremiumReviewInsights ? suggestedNextWeekPlan.focus : "");
-    const workloadDecisionValue =
-      weeklyForm.workloadDecision || (hasPremiumReviewInsights ? suggestedNextWeekPlan.workloadDecision : "keep same");
-    const nextReview: UniversalWeeklyReview = {
-      weekNumber: reviewWeekNumber,
-      leadCompletionPercent: reviewWeekCompletion.percent,
-      lagProgressValue: weeklyForm.lagProgressValue.trim(),
-      biggestOutputThisWeek: weeklyForm.biggestOutputThisWeek.trim(),
-      mainObstacle: weeklyForm.mainObstacle.trim(),
-      nextWeekPriority: nextWeekPriorityValue,
-      workloadDecision: workloadDecisionValue,
-      reviewCompleted: true,
-      progressScore: Math.max(5, Math.round(reviewWeekCompletion.percent / 20)),
-      disciplineScore: Math.max(5, Math.round(reviewWeekCompletion.percent / 20)),
-      focusScore: reviewWeekCompletion.percent >= 70 ? 8 : 6,
-      improvementScore: weeklyForm.mainObstacle.trim() ? 8 : 6,
-      outputQualityScore: weeklyForm.biggestOutputThisWeek.trim() ? 8 : 6,
-      completedLeadIndicators: reviewWeekCompletion.completed,
-    };
-
-    const updatedReviews = [
-      ...latestSystem.weeklyReviews.filter((review) => review.weekNumber !== reviewWeekNumber),
-      nextReview,
-    ].sort((left, right) => left.weekNumber - right.weekNumber);
-
-    commitSystemUpdate({
-      ...latestSystem,
-      lagMetric: {
-        ...latestSystem.lagMetric,
-        currentValue: weeklyForm.lagProgressValue.trim(),
-      },
-      weeklyReviews: updatedReviews,
-    });
-    const reviewExecutionScore = getUniversalWeeklyReviewExecutionScore(nextReview, reviewWeekCompletion.percent);
-
-    upsertReflection({
-      date: formatDateInputValue(new Date()),
-      title: `Review tuần - ${actionGoalTitle} - tuần ${reviewWeekNumber}`,
-      content: [
-        `Điều hiệu quả: ${weeklyForm.biggestOutputThisWeek.trim() || "--"}`,
-        `Điều cản trở: ${weeklyForm.mainObstacle.trim() || "--"}`,
-        `Ưu tiên tuần sau: ${nextWeekPriorityValue || "--"}`,
-        `Quyết định: ${getWorkloadDecisionLabel(workloadDecisionValue)}`,
-        hasPremiumReviewInsights ? `Gợi ý hệ thống: ${suggestedNextWeekPlan.firstMove}` : "",
-      ]
-        .filter(Boolean)
-        .join("\n\n"),
-      mood: reviewWeekCompletion.percent >= 70 ? "happy" : reviewWeekCompletion.percent >= 40 ? "neutral" : "sad",
-      entryType: "weekly-review",
-      linkedGoalId: actionGoalId,
-      linkedWeekNumber: reviewWeekNumber,
-    });
-
-    trackAnalyticsEvent(
-      "weekly_review_submitted",
-      {
-        source: "12_week_system",
-        week_number: reviewWeekNumber,
-        lead_completion_percent: reviewWeekCompletion.percent,
-        execution_score: reviewExecutionScore,
-        workload_decision: workloadDecisionValue || "keep same",
-      },
-      {
-        goalId: actionGoalId,
-        legacyEventName: "12_week_weekly_review_submitted",
-        legacyPayload: {
-          weekNumber: String(reviewWeekNumber),
-          score: String(reviewExecutionScore),
-          decision: workloadDecisionValue || "keep same",
-          usedSuggestedPlan: String(hasPremiumReviewInsights && weeklyForm.nextWeekPriority.trim().length === 0),
-        },
-      },
-    );
-
-    const synced = await executionSyncActions.syncWeeklyReview({
-      weekNumber: reviewWeekNumber,
-      executionScore: reviewExecutionScore,
-      reflection: weeklyForm.biggestOutputThisWeek.trim() || undefined,
-      adjustments: nextWeekPriorityValue || undefined,
-    });
-
-    if (!synced) {
-      toast.info("Review tuần đã lưu local. Sẽ tiếp tục đồng bộ khi backend sẵn sàng.");
-      if (activeGoalIdRef.current === actionGoalId) {
-        refreshSnapshotMeta();
-      }
-      return;
-    }
-
-    toast.success("Review tuần đã được chốt.", {
-      description:
-        hasPremiumReviewInsights && weeklyForm.nextWeekPriority.trim().length === 0
-          ? "Mình đã dùng luôn gợi ý Plus để khóa ưu tiên tuần sau cho bạn."
-          : "Tuần sau giờ đã có ưu tiên đủ rõ để bắt đầu gọn hơn.",
-    });
-    if (activeGoalIdRef.current === actionGoalId) {
-      refreshBackendProgressOverlay();
-      refreshSnapshotMeta();
-    }
-  };
-
-  const handleReviewDayChange = (value: string) => {
-    commitSystemUpdate({
-      ...system,
-      reviewDay: value,
-    });
-    toast.success("Ngày review đã được cập nhật.");
-  };
-
-  const handleReminderTimeChange = (value: string) => {
-    if (!/^\d{2}:\d{2}$/.test(value)) return;
-    commitSystemUpdate({
-      ...system,
-      dailyReminderTime: value,
-    });
-    updateAppPreferences({ preferredReminderHour: Number.parseInt(value.split(":")[0] ?? "19", 10) || 19 });
-    refreshSnapshotMeta();
-  };
-
-  const handleLoadPreferenceChange = (value: string) => {
-    commitSystemUpdate({
-      ...system,
-      tacticLoadPreference: value as typeof system.tacticLoadPreference,
-    });
-  };
-
-  const handleStatusChange = (value: string) => {
-    commitSystemUpdate({
-      ...system,
-      status: value as typeof system.status,
-    });
-  };
-
-  const handleTacticPriorityChange = (tacticId: string | undefined, value: string) => {
-    if (!tacticId) return;
-
-    commitSystemUpdate({
-      ...system,
-      leadIndicators: system.leadIndicators.map((indicator, index) => {
-        const indicatorId = indicator.id ?? `tactic_${index}`;
-        return indicatorId === tacticId
-          ? { ...indicator, priority: Number.parseInt(value, 10) || index + 1 }
-          : indicator;
-      }),
-    });
-    trackAppEvent("12_week_tactic_updated", activeGoal.id, { tacticId, field: "priority", value });
-  };
-
-  const handleTacticTypeChange = (tacticId: string | undefined, value: string) => {
-    if (!tacticId) return;
-
-    commitSystemUpdate({
-      ...system,
-      leadIndicators: system.leadIndicators.map((indicator, index) => {
-        const indicatorId = indicator.id ?? `tactic_${index}`;
-        return indicatorId === tacticId
-          ? { ...indicator, type: value === "optional" ? "optional" : "core" }
-          : indicator;
-      }),
-    });
-    trackAppEvent("12_week_tactic_updated", activeGoal.id, { tacticId, field: "type", value });
-  };
-
-  const handlePreferenceToggle = <K extends keyof AppPreferences>(key: K, value: AppPreferences[K]) => {
-    updateAppPreferences({ [key]: value } as Pick<AppPreferences, K>);
-    refreshSnapshotMeta();
-  };
-
-  const handleArchivePendingOutbox = () => {
-    const data = getUserData();
-    data.syncOutbox
-      .filter((item) => item.status === "pending")
-      .forEach((item) => {
-        archiveOutboxItem(item.id);
-      });
-    refreshSnapshotMeta();
-  };
-
-  const handleOutboxItemToggle = (item: SyncOutboxItem) => {
-    if (item.status === "pending") {
-      archiveOutboxItem(item.id);
-      toast.success("Mục outbox đã được lưu lại.");
-    } else {
-      restoreOutboxItem(item.id);
-      toast.success("Mục outbox đã được khôi phục về hàng chờ.");
-    }
-    refreshSnapshotMeta();
-  };
-
-  const handleRestoreArchivedOutbox = () => {
-    restoreArchivedOutbox();
-    toast.success("Các mục outbox đã lưu đã được đưa lại về hàng chờ.");
-    refreshSnapshotMeta();
-  };
-
-  const handleOpenReminder = (reminder: InAppReminder) => {
-    if (reminder.goalId && reminder.goalId !== activeGoal.id) {
-      loadGoalData(reminder.goalId);
-    }
-    handleTabChange(reminder.kind === "review" ? "week" : "today");
-  };
-
-  const handleExportLocalData = () => {
-    const blob = new Blob([exportUserDataSnapshot()], { type: "application/json;charset=utf-8" });
-    const url = window.URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `vision-board-local-${formatDateInputValue(new Date())}.json`;
-    anchor.click();
-    window.URL.revokeObjectURL(url);
-    toast.success("Đã tải bản sao dữ liệu local.");
-  };
-
-  const handleClearLocalSignals = () => {
-    clearLocalDeviceSignals();
-    setIsClearLocalDialogOpen(false);
-    toast.success("Đã xóa log, outbox và trạng thái nhắc việc trên thiết bị này.");
-    refreshSnapshotMeta();
-  };
-
-  const handleDeleteAllData = () => {
-    deleteAllUserData();
-    toast.success("Đã xóa toàn bộ dữ liệu trên thiết bị.");
-    navigate("/");
-  };
-
-  const handleBrowserNotificationToggle = async (value: boolean) => {
-    const actionGoalId = activeGoal.id;
-    updateAppPreferences({ enableBrowserNotifications: value });
-
-    if (value) {
-      const permission = await requestBrowserNotificationPermission();
-      setBrowserNotificationStatus(permission);
-
-      if (permission === "granted") {
-        sendTestBrowserNotification();
-        toast.success("Thông báo ngoài trình duyệt đã được bật.");
-      } else if (permission === "denied") {
-        toast.error("Trình duyệt đang chặn thông báo ngoài trình duyệt.");
-      } else if (permission === "unsupported") {
-        toast.info("Trình duyệt hiện tại không hỗ trợ thông báo ngoài trình duyệt.");
-      }
-    } else {
-      toast.success("Đã tắt thông báo ngoài trình duyệt.");
-      setBrowserNotificationStatus(getBrowserNotificationStatus());
-    }
-
-    if (activeGoalIdRef.current === actionGoalId) {
-      refreshSnapshotMeta();
-    }
-  };
-
-  const handleRunOutboxSync = async () => {
-    const actionGoalId = activeGoal.id;
-    if (isBackendProfileReady) {
-      const backendSnapshot = await executionSyncActions.syncLocalSnapshot({
-        system: activeGoal.twelveWeekSystem ?? system,
-      });
-
-      if (backendSnapshot.status === "success" && backendSnapshot.syncedCount > 0) {
-        toast.success(backendSnapshot.message);
-      } else if (backendSnapshot.status === "partial") {
-        toast.info(backendSnapshot.message);
-      } else if (backendSnapshot.status === "error") {
-        toast.error(backendSnapshot.message);
-      }
-
-      if (
-        activeGoalIdRef.current === actionGoalId &&
-        (backendSnapshot.status === "success" || backendSnapshot.status === "partial")
-      ) {
-        refreshBackendProgressOverlay();
-      }
-    }
-
-    const snapshot = await syncPendingOutbox();
-    setLastSyncSnapshot(snapshot);
-    if (activeGoalIdRef.current === actionGoalId) {
-      refreshSnapshotMeta();
-    }
-
-    if (snapshot.status === "success") {
-      toast.success(snapshot.message);
-      return;
-    }
-
-    if (snapshot.status === "partial") {
-      toast.info(snapshot.message);
-      return;
-    }
-
-    if (snapshot.status === "offline" || snapshot.status === "not_configured" || snapshot.status === "idle") {
-      toast.info(snapshot.message);
-      return;
-    }
-
-    toast.error(snapshot.message);
-  };
-
-  const handleHydrateBackendPlans = async () => {
-    if (!isBackendProfileReady) {
-      toast.info("Đăng nhập và chờ backend profile sẵn sàng trước khi khôi phục dữ liệu.");
-      return;
-    }
-
-    setIsHydratingBackendPlans(true);
-
-    try {
-      const result = await hydrateTwelveWeekPlansFromBackend();
-      setLastBackendHydrationResult(result);
-      lastBackendSyncKeyRef.current = null;
-
-      if (result.status === "error") {
-        toast.error(result.message);
-      } else if (result.status === "partial") {
-        toast.info(result.message);
-      } else if (result.conflictCount > 0) {
-        toast.info(result.message);
-      } else if (result.hydratedCount + result.updatedCount > 0) {
-        toast.success(
-          `Đã khôi phục ${result.hydratedCount} chu kỳ mới và cập nhật ${result.updatedCount} chu kỳ từ backend.`,
-        );
-      } else {
-        toast.info("Đã kiểm tra backend. Chưa có chu kỳ 12-week mới cần khôi phục.");
-      }
-
-      loadGoalData(result.latestGoalId ?? activeGoal?.id);
-      refreshBackendProgressOverlay();
-      refreshSnapshotMeta();
-    } catch (error) {
-      console.error("Failed to hydrate backend 12-week plans.", error);
-      toast.error("Không thể khôi phục dữ liệu 12-week từ backend lúc này.");
-    } finally {
-      setIsHydratingBackendPlans(false);
-    }
-  };
-
-  const refreshBackendConflictReview = async (preferredGoalId: string, options?: { preserveSyncKey?: boolean }) => {
-    const result = await hydrateTwelveWeekPlansFromBackend();
-    setLastBackendHydrationResult(result);
-    if (!options?.preserveSyncKey) {
-      lastBackendSyncKeyRef.current = null;
-    }
-    loadGoalData(result.latestGoalId ?? preferredGoalId);
-    refreshBackendProgressOverlay();
-    refreshSnapshotMeta();
-    return result;
-  };
-
-  const handleUseBackendPlanForConflicts = async (goalId: string) => {
-    if (isResolvingBackendPlanConflicts) return;
-    setIsResolvingBackendPlanConflicts(true);
-
-    try {
-      const result = await applyBackendPlanSnapshotToLocal(goalId);
-      if (result.status === "error") {
-        toast.error("Không thể áp dụng bản backend cho chu kỳ này lúc này.");
-        return;
-      }
-
-      toast.success("Đã dùng bản backend cho chu kỳ này.");
-      const reviewResult = await refreshBackendConflictReview(goalId);
-      if (reviewResult.conflictCount > 0) {
-        toast.info(reviewResult.message);
-      }
-    } catch (error) {
-      console.error("Failed to apply backend plan snapshot.", error);
-      toast.error("Không thể áp dụng bản backend cho chu kỳ này lúc này.");
-    } finally {
-      setIsResolvingBackendPlanConflicts(false);
-    }
-  };
-
-  const handleKeepLocalPlanForConflicts = async (goalId: string) => {
-    if (isResolvingBackendPlanConflicts) return;
-
-    if (goalId !== activeGoal.id) {
-      loadGoalData(goalId);
-      toast.info("Đã mở chu kỳ này. Bấm Giữ local lần nữa để đẩy bản local lên backend.");
-      return;
-    }
-
-    setIsResolvingBackendPlanConflicts(true);
-
-    try {
-      const localSystem = activeGoal.twelveWeekSystem ?? system;
-      const snapshot = await executionSyncActions.syncLocalSnapshot({ system: localSystem });
-      if (snapshot.status === "error") {
-        toast.error(snapshot.message);
-        return;
-      }
-
-      if (snapshot.status === "partial") {
-        toast.info(snapshot.message);
-      } else {
-        toast.success("Đã giữ bản local và đồng bộ lại lên backend.");
-      }
-
-      lastBackendSyncKeyRef.current = buildBackendSyncKey(goalId, localSystem);
-      const reviewResult = await refreshBackendConflictReview(goalId, { preserveSyncKey: true });
-      if (reviewResult.conflictCount > 0) {
-        toast.info(reviewResult.message);
-      }
-    } catch (error) {
-      console.error("Failed to keep local plan snapshot.", error);
-      toast.error("Không thể đồng bộ bản local lên backend lúc này.");
-    } finally {
-      setIsResolvingBackendPlanConflicts(false);
-    }
-  };
-
-  const handleReentry = (mode: "restart" | "lighten" | "push") => {
-    const reentryWeekNumber = getTwelveWeekCurrentWeek(system);
-    const reentryWeekRange = getTwelveWeekWeekRange(system, reentryWeekNumber);
-    const reentryMissedTasks = getTwelveWeekMissedTasks(system);
-    const todayKey = formatDateInputValue(new Date());
-    const weekEnd = reentryWeekRange.end;
-    const nextWeekStart = addDaysToDateKey(weekEnd, 1);
-    const targets =
-      mode === "restart"
-        ? Array.from({ length: 4 }, (_, index) => addDaysToDateKey(todayKey, index))
-        : mode === "lighten"
-          ? [weekEnd, addDaysToDateKey(weekEnd, -1), addDaysToDateKey(weekEnd, -2)].filter((value) => value >= todayKey)
-          : Array.from({ length: 4 }, (_, index) => addDaysToDateKey(nextWeekStart, index));
-
-    let moved = 0;
-    const nextTaskInstances = system.taskInstances.map((task) => {
-      const isMissed = reentryMissedTasks.some((item) => item.id === task.id);
-      const isOptionalThisWeek =
-        mode === "lighten" &&
-        task.weekNumber === reentryWeekNumber &&
-        !task.isCore &&
-        !task.completed &&
-        task.scheduledDate <= weekEnd;
-      if (!isMissed && !isOptionalThisWeek) return task;
-
-      const date = targets[Math.min(moved, Math.max(targets.length - 1, 0))] ?? todayKey;
-      moved += 1;
-      return {
-        ...task,
-        scheduledDate: date,
-        rescheduledFrom: task.rescheduledFrom ?? task.scheduledDate,
-      };
-    });
-
-    commitSystemUpdate({
-      ...system,
-      tacticLoadPreference: mode === "lighten" ? "lighter" : system.tacticLoadPreference,
-      reentryCount: (system.reentryCount ?? 0) + 1,
-      taskInstances: nextTaskInstances,
-    });
-
-    trackAppEvent("12_week_reentry_used", activeGoal.id, { mode, weekNumber: String(reentryWeekNumber) });
-    toast.success(
-      mode === "restart"
-        ? "Đã sắp lại để bắt đầu lại tuần này."
-        : mode === "lighten"
-          ? "Đã giảm tải cho phần còn lại của tuần."
-          : "Đã đẩy việc trễ sang tuần sau.",
-    );
-    refreshSnapshotMeta();
-  };
-
-  const handleApplyRecommendedReentry = () => {
-    if (!rescuePlanSummary) return;
-    const reentryWeekNumber = getTwelveWeekCurrentWeek(system);
-
-    trackAppEvent("12_week_reentry_recommended_applied", activeGoal.id, {
-      mode: rescuePlanSummary.recommendedMode,
-      weekNumber: String(reentryWeekNumber),
-    });
-    handleReentry(rescuePlanSummary.recommendedMode);
-  };
-
-  const handleApplySuggestedPlan = () => {
-    const suggestedWeekNumber = getTwelveWeekCurrentWeek(system);
-    setWeeklyForm((previousForm) => ({
-      ...previousForm,
-      nextWeekPriority: suggestedNextWeekPlan.focus,
-      workloadDecision: suggestedNextWeekPlan.workloadDecision,
-    }));
-    trackAppEvent("12_week_review_suggestion_applied", activeGoal.id, {
-      weekNumber: String(suggestedWeekNumber),
-      decision: suggestedNextWeekPlan.workloadDecision,
-    });
-    toast.success("Đã áp dụng gợi ý cho tuần sau.", {
-      description: "Bạn có thể chỉnh lại thêm trước khi chốt review.",
-    });
-  };
-
-  const handleResetCycle = () => {
-    const resetFrom = getCurrentWeekStartDate(system.weekStartsOn ?? "Monday");
-    const didReset = resetTwelveWeekGoalCycle(activeGoal.id, resetFrom);
-
-    if (!didReset) {
-      toast.error("Không thể reset chu kỳ lúc này.");
-      return;
-    }
-
-    trackAppEvent("12_week_cycle_reset", activeGoal.id, {
-      resetFrom: formatDateInputValue(resetFrom),
-      totalWeeks: String(system.totalWeeks),
-    });
-    setIsResetDialogOpen(false);
-    setActiveTab("today");
-    toast.success("Chu kỳ đã được reset từ tuần này.", {
-      description: "Việc, check-in và review tuần của chu kỳ hiện tại đã được làm mới để bạn bắt đầu lại gọn hơn.",
-    });
-    loadGoalData(activeGoal.id);
-  };
 
   return (
     <div className="ops-shell ops-system">
@@ -1256,12 +558,13 @@ export function TwelveWeekSystem() {
         }}
       />
 
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <TabsList
-          data-tour-id="system-tabs"
-          aria-label="Điều hướng trung tâm 12 tuần"
-          className="sticky top-14 z-20 grid h-auto w-full grid-cols-4 gap-1 rounded-lg border border-slate-200 bg-white/95 p-1 shadow-sm sm:top-3"
-        >
+      <div ref={tabsTopRef}>
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <TabsList
+            data-tour-id="system-tabs"
+            aria-label="Điều hướng trung tâm 12 tuần"
+            className="sticky top-14 z-20 grid h-auto w-full grid-cols-4 gap-1 rounded-lg border border-slate-200 bg-white/95 p-1 shadow-sm sm:top-3"
+          >
           <TabsTrigger
             value="today"
             className="min-w-0 shrink-0 flex-col justify-center gap-1 rounded-md px-2 py-2 text-xs leading-tight sm:flex-row sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
@@ -1475,8 +778,9 @@ export function TwelveWeekSystem() {
               />
             </Suspense>
           </TabErrorBoundary>
-        </TabsContent>
-      </Tabs>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

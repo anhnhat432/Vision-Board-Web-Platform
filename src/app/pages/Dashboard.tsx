@@ -10,14 +10,12 @@ import {
   CalendarDays,
   CheckCircle2,
   Crown,
-  Download,
   Images,
   LogIn,
   Plus,
   Sparkles,
   Target,
   TrendingUp,
-  Upload,
   UserPlus,
 } from "lucide-react";
 
@@ -71,6 +69,10 @@ import { ExecutionScoreCard } from "@/features/dashboard/components/ExecutionSco
 import { WeeklyProgressChart } from "@/features/dashboard/components/WeeklyProgressChart";
 import { StreakCard } from "@/features/dashboard/components/StreakCard";
 import { MetricsSummary } from "@/features/dashboard/components/MetricsSummary";
+import { PublicVisitorHero } from "@/features/dashboard/components/PublicVisitorHero";
+import { PublicVisitorAccountCard } from "@/features/dashboard/components/PublicVisitorAccountCard";
+import { DashboardDataBackupCard } from "@/features/dashboard/components/DashboardDataBackupCard";
+import { buildLoginPath } from "@/features/dashboard/helpers/dashboardNavigation";
 import { getEntitlementLabel, getPlanLabel } from "../utils/twelve-week-premium";
 import { dismissRescueTrigger, evaluateRescueTriggers } from "../utils/twelve-week-system-ui";
 import {
@@ -79,118 +81,7 @@ import {
   trackRescueTriggerFired,
 } from "../utils/monetization-analytics";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-
-function buildLoginPath(mode: "signin" | "signup", destination: string) {
-  const params = new URLSearchParams({ next: destination });
-  if (mode === "signup") params.set("mode", "signup");
-  return `/login?${params.toString()}`;
-}
-
-function PublicVisitorHero({ onSignIn, onSignUp }: { onSignIn: () => void; onSignUp: () => void }) {
-  const flowSteps = [
-    "Đánh giá cân bằng cuộc sống",
-    "Chọn insight và mục tiêu SMART",
-    "Chạy kế hoạch 12 tuần rồi review",
-  ];
-
-  return (
-    <Card className="overflow-hidden border border-slate-200/80 bg-white/94 shadow-[0_22px_60px_-42px_rgba(15,23,42,0.32)]">
-      <CardContent className="p-5 sm:p-6 lg:p-7">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)] lg:items-center">
-          <div className="min-w-0 space-y-4">
-            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-              <Sparkles className="h-3.5 w-3.5" />
-              Trang chính
-            </span>
-            <div className="space-y-3">
-              <h1 className="max-w-3xl text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-                Biến tầm nhìn thành mục tiêu rõ ràng và kế hoạch 12 tuần có thể làm mỗi ngày.
-              </h1>
-              <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                Người mới nên bắt đầu bằng bức tranh cuộc sống hiện tại, sau đó chốt một mục tiêu SMART, kiểm tra khả
-                thi và để hệ thống chia nhỏ thành tuần, việc, review.
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <Button className="bg-slate-950 text-white hover:bg-slate-800" onClick={onSignUp}>
-                <UserPlus className="h-4 w-4" />
-                Đăng ký miễn phí để lưu
-              </Button>
-              <Button variant="outline" className="border-slate-200 bg-white text-slate-900" onClick={onSignIn}>
-                <LogIn className="h-4 w-4" />
-                Tôi đã có tài khoản
-              </Button>
-            </div>
-          </div>
-
-          <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Luồng nên đi</p>
-            <div className="mt-4 space-y-3">
-              {flowSteps.map((step, index) => (
-                <div key={step} className="flex items-center gap-3 rounded-[18px] bg-white px-3 py-3 shadow-sm">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white">
-                    {index + 1}
-                  </div>
-                  <span className="min-w-0 text-sm font-medium leading-6 text-slate-800">{step}</span>
-                  {index === flowSteps.length - 1 ? (
-                    <CheckCircle2 className="ml-auto h-4 w-4 shrink-0 text-emerald-600" />
-                  ) : (
-                    <ArrowRight className="ml-auto h-4 w-4 shrink-0 text-slate-300" />
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function PublicVisitorAccountCard({ onSignIn, onSignUp }: { onSignIn: () => void; onSignUp: () => void }) {
-  const accountBenefits = [
-    "Lưu mục tiêu, kế hoạch 12 tuần và tiến độ theo tài khoản.",
-    "Quay lại đúng bước đang làm, kể cả khi đổi thiết bị.",
-    "Dữ liệu cá nhân không bị trộn với bản xem thử trên trình duyệt.",
-  ];
-
-  return (
-    <Card
-      data-tour-id="dashboard-plan-card"
-      className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)]"
-    >
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-slate-950">
-          <UserPlus className="h-5 w-5" />
-          Tài khoản dùng để lưu workspace
-        </CardTitle>
-        <CardDescription className="text-slate-600">
-          Trang chính có thể xem trước. Khi bắt đầu nhập dữ liệu thật, hãy đăng ký hoặc đăng nhập để đồng bộ.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-3 rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
-          {accountBenefits.map((benefit) => (
-            <div key={benefit} className="flex items-start gap-3">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-              <p className="text-sm leading-6 text-slate-700">{benefit}</p>
-            </div>
-          ))}
-        </div>
-        <div className="grid gap-2 sm:grid-cols-2">
-          <Button className="bg-slate-950 text-white hover:bg-slate-800" onClick={onSignUp}>
-            <UserPlus className="h-4 w-4" />
-            Đăng ký
-          </Button>
-          <Button variant="outline" className="border-slate-200 bg-white text-slate-900" onClick={onSignIn}>
-            <LogIn className="h-4 w-4" />
-            Đăng nhập
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+import { isDemoMode } from "../utils/app-mode";
 
 const DashboardLifeAreaRadar = lazy(async () => {
   const module = await import("../components/DashboardLifeAreaRadar");
@@ -282,7 +173,9 @@ function DashboardContent({
   const importFileRef = useRef<HTMLInputElement>(null);
   const progressViewedGoalIdRef = useRef<string | null>(null);
   const { currentPlanCode, currentPlanDefinition, entitlementKeys, premiumStatusItems } = usePlanEntitlements(userData);
+  const demoMode = isDemoMode();
   const isPublicVisitor = isConfigured && !user;
+  const shouldRequireAuthForPublicVisitor = isPublicVisitor && !demoMode;
   const visibleGoals = isPublicVisitor ? [] : userData.goals;
   const visibleWheelOfLife = isPublicVisitor ? [] : userData.currentWheelOfLife;
   const visibleReflections = isPublicVisitor ? [] : userData.reflections;
@@ -303,6 +196,14 @@ function DashboardContent({
   const authDestination = `${location.pathname}${location.search}${location.hash}`;
   const handleAuthNavigate = (mode: "signin" | "signup") => {
     navigate(buildLoginPath(mode, authDestination));
+  };
+  const handlePublicVisitorStart = () => {
+    if (shouldRequireAuthForPublicVisitor) {
+      handleAuthNavigate("signup");
+      return;
+    }
+
+    navigate("/onboarding");
   };
 
   useEffect(() => {
@@ -459,6 +360,20 @@ function DashboardContent({
   const setupStartDescription = hasRealLifeBalance
     ? "Đây là funnel gốc của web: insight trước, SMART sau, rồi mới kiểm tra tính thực tế và vào hệ 12 tuần."
     : "Bước này tạo dữ liệu thật cho các màn sau: Life Insight, SMART Goal, kiểm tra tính thực tế và kế hoạch 12 tuần.";
+  const publicVisitorBadge = demoMode ? "Bản demo lưu trên trình duyệt này" : "Đăng ký để lưu và đồng bộ dữ liệu";
+  const publicVisitorDashboardTitle = demoMode
+    ? "Dùng thử flow MVP 1 ngay trên trình duyệt hiện tại."
+    : "Trang chính giúp bạn nhìn rõ luồng sản phẩm trước khi tạo tài khoản.";
+  const publicVisitorDashboardDescription = demoMode
+    ? "Bạn có thể bắt đầu Onboarding, chấm Life Balance, chọn insight, tạo SMART goal và đi tới 12-week setup mà không cần đăng nhập. Bản demo lưu dữ liệu trên trình duyệt này; hãy export nếu muốn giữ bản sao."
+    : "Bạn có thể xem tổng quan ngay tại đây. Khi bắt đầu thật, hãy đăng ký để dữ liệu mục tiêu và kế hoạch không bị mất theo trình duyệt.";
+  const publicVisitorStartTitle = demoMode
+    ? "Dùng thử không cần đăng nhập."
+    : "Tạo tài khoản trước khi nhập dữ liệu thật.";
+  const publicVisitorStartDescription = demoMode
+    ? "Bắt đầu bằng Onboarding hoặc Life Balance để trải nghiệm core flow MVP 1. Đăng nhập/sync là lớp sau, không bắt buộc cho demo."
+    : "Phần onboarding, mục tiêu và kế hoạch đều là dữ liệu cá nhân. Đăng ký trước sẽ giúp bạn lưu lại tiến trình và quay lại đúng workspace sau này.";
+  const publicVisitorPrimaryLabel = demoMode ? "Dùng thử không cần đăng nhập" : "Đăng ký miễn phí";
 
   const overviewCards = isPublicVisitor
     ? [
@@ -479,7 +394,7 @@ function DashboardContent({
         {
           title: "Tài khoản",
           value: 1,
-          note: "nơi đồng bộ mục tiêu và kế hoạch của bạn",
+          note: demoMode ? "tùy chọn để sync sau, không bắt buộc" : "nơi đồng bộ mục tiêu và kế hoạch của bạn",
           icon: UserPlus,
           iconClass: "bg-emerald-100 text-emerald-700",
         },
@@ -525,20 +440,26 @@ function DashboardContent({
   const quickActions = isPublicVisitor
     ? [
         {
-          title: "Đăng ký để lưu workspace",
-          description: "Tạo workspace riêng để lưu bánh xe cuộc sống, mục tiêu SMART và kế hoạch 12 tuần.",
+          title: demoMode ? "Tùy chọn: đăng ký để sync sau" : "Đăng ký để lưu workspace",
+          description: demoMode
+            ? "Demo vẫn dùng được không cần đăng nhập. Tài khoản chỉ dành cho lớp lưu/sync sau này."
+            : "Tạo workspace riêng để lưu bánh xe cuộc sống, mục tiêu SMART và kế hoạch 12 tuần.",
           icon: UserPlus,
           onClick: () => handleAuthNavigate("signup"),
         },
         {
-          title: "Đăng nhập tài khoản cũ",
-          description: "Quay lại đúng dữ liệu đã đồng bộ: mục tiêu, tuần hiện tại và review gần nhất.",
+          title: "Đăng nhập nếu đã có tài khoản",
+          description: demoMode
+            ? "Không bắt buộc cho demo. Chỉ dùng khi bạn muốn thử lớp tài khoản/sync sau này."
+            : "Quay lại đúng dữ liệu đã đồng bộ: mục tiêu, tuần hiện tại và review gần nhất.",
           icon: LogIn,
           onClick: () => handleAuthNavigate("signin"),
         },
         {
-          title: "Đăng ký rồi đi theo luồng chính",
-          description: "Sau khi có workspace, bạn đi từ Life Balance, chọn insight, chốt mục tiêu SMART rồi mới vào 12 tuần.",
+          title: demoMode ? "Demo có thể đi thẳng vào core flow" : "Đăng ký rồi đi theo luồng chính",
+          description: demoMode
+            ? "CTA demo chính sẽ đưa bạn vào Life Balance mà không cần tài khoản."
+            : "Sau khi có workspace, bạn đi từ Life Balance, chọn insight, chốt mục tiêu SMART rồi mới vào 12 tuần.",
           icon: CalendarDays,
           onClick: () => handleAuthNavigate("signup"),
         },
@@ -577,24 +498,28 @@ function DashboardContent({
     ? [
         {
           eyebrow: "Điểm bắt đầu",
-          title: "Đừng vào thẳng 12 tuần khi mục tiêu còn mơ hồ",
+          title: demoMode ? "Đăng nhập không phải cổng chặn demo" : "Đừng vào thẳng 12 tuần khi mục tiêu còn mơ hồ",
           description:
-            "Web này dẫn bạn từ bức tranh cuộc sống hiện tại tới một mục tiêu SMART đủ rõ, rồi mới chia thành kế hoạch 12 tuần.",
+            demoMode
+              ? "Bạn có thể dùng core flow ngay trên trình duyệt này. Đăng ký chỉ là lựa chọn để chuẩn bị sync sau."
+              : "Web này dẫn bạn từ bức tranh cuộc sống hiện tại tới một mục tiêu SMART đủ rõ, rồi mới chia thành kế hoạch 12 tuần.",
           cardClass: "rounded-[22px] border border-slate-300 bg-slate-50/90 p-4 shadow-sm",
           eyebrowClass: "text-slate-500",
           titleClass: "text-slate-950",
           descriptionClass: "text-slate-600",
           buttonClass: "mt-4 bg-slate-950 text-white hover:bg-slate-800",
           buttonVariant: "outline" as const,
-          buttonLabel: "Bắt đầu miễn phí",
+          buttonLabel: demoMode ? "Đăng ký nếu muốn sync" : "Bắt đầu miễn phí",
           icon: Target,
           onClick: () => handleAuthNavigate("signup"),
         },
         {
           eyebrow: "Dữ liệu cá nhân",
-          title: "Đăng nhập để đồng bộ thay vì chỉ lưu trên máy",
+          title: demoMode ? "Sync là lớp sau của demo local-first" : "Đăng nhập để đồng bộ thay vì chỉ lưu trên máy",
           description:
-            "Khi có tài khoản, mục tiêu, kế hoạch và tiến độ được nối với workspace của bạn thay vì phụ thuộc vào trình duyệt hiện tại.",
+            demoMode
+              ? "Bản demo hiện lưu trên trình duyệt này. Nếu muốn giữ bản sao, hãy export dữ liệu trước khi đổi máy hoặc xóa site data."
+              : "Khi có tài khoản, mục tiêu, kế hoạch và tiến độ được nối với workspace của bạn thay vì phụ thuộc vào trình duyệt hiện tại.",
           cardClass: "rounded-[22px] border border-slate-200 bg-white p-4 shadow-sm",
           eyebrowClass: "text-slate-400",
           titleClass: "text-slate-900",
@@ -749,6 +674,8 @@ function DashboardContent({
       />
       {isPublicVisitor ? (
         <PublicVisitorHero
+          isDemo={demoMode}
+          onStartDemo={handlePublicVisitorStart}
           onSignIn={() => handleAuthNavigate("signin")}
           onSignUp={() => handleAuthNavigate("signup")}
         />
@@ -781,7 +708,7 @@ function DashboardContent({
           } as const;
           const s = severityStyles[topTrigger.severity];
           const ctaHref = topTrigger.kind === "trial_ending" ? "/billing/plan" : "/12-week-system";
-          const ctaLabel = topTrigger.kind === "trial_ending" ? "Nâng cấp ngay" : "Xem ngay";
+          const ctaLabel = topTrigger.kind === "trial_ending" ? "Mở mock upgrade" : "Xem ngay";
           // Fire analytics once when first rendered (effect not available here; use key trick)
           return (
             <Reveal key={topTrigger.kind}>
@@ -848,11 +775,11 @@ function DashboardContent({
             <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 flex flex-wrap items-center gap-3">
               <Crown className="h-4 w-4 shrink-0 text-amber-600" />
               <span>
-                <span className="font-semibold">Dùng thử Plus miễn phí:</span> còn {daysLeft} ngày — nâng cấp để giữ
-                toàn bộ tính năng Plus.
+                <span className="font-semibold">Plus demo local:</span> còn {daysLeft} ngày — mock upgrade không thu
+                tiền thật.
               </span>
               <Button size="sm" className="ml-auto shrink-0" onClick={() => navigate("/billing/plan")}>
-                Nâng cấp ngay
+                Mở mock upgrade
               </Button>
             </div>
           );
@@ -910,7 +837,7 @@ function DashboardContent({
                       </span>
                       {isPublicVisitor ? (
                         <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
-                          Đăng ký để lưu và đồng bộ dữ liệu
+                          {publicVisitorBadge}
                         </span>
                       ) : (
                         <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
@@ -927,14 +854,14 @@ function DashboardContent({
                     <div className="space-y-3">
                       <h1 className="max-w-3xl break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
                         {isPublicVisitor
-                          ? "Trang chính giúp bạn nhìn rõ luồng sản phẩm trước khi tạo tài khoản."
+                          ? publicVisitorDashboardTitle
                           : activeSystem
                             ? `Quay lại đúng nhịp của "${visibleActiveTwelveWeekGoal?.title ?? "chu kỳ 12 tuần hiện tại"}".`
                             : setupStartTitle}
                       </h1>
                       <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                         {isPublicVisitor
-                          ? "Bạn có thể xem tổng quan ngay tại đây. Khi bắt đầu thật, hãy đăng ký để dữ liệu mục tiêu và kế hoạch không bị mất theo trình duyệt."
+                          ? publicVisitorDashboardDescription
                           : activeSystem
                             ? activeSystemTodayOpenTasks.length > 0
                               ? `Tập trung vào ${activeSystemTodayOpenTasks.length} việc đang mở hôm nay trước khi xem tiến độ tuần.`
@@ -1061,22 +988,18 @@ function DashboardContent({
                           {isPublicVisitor ? "Bắt đầu đúng cách" : "Bắt đầu nhanh nhất"}
                         </p>
                         <h2 className="mt-2 text-2xl font-bold text-slate-950">
-                          {isPublicVisitor ? "Tạo tài khoản trước khi nhập dữ liệu thật." : setupStartTitle}
+                          {isPublicVisitor ? publicVisitorStartTitle : setupStartTitle}
                         </h2>
                         <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
-                          {isPublicVisitor
-                            ? "Phần onboarding, mục tiêu và kế hoạch đều là dữ liệu cá nhân. Đăng ký trước sẽ giúp bạn lưu lại tiến trình và quay lại đúng workspace sau này."
-                            : setupStartDescription}
+                          {isPublicVisitor ? publicVisitorStartDescription : setupStartDescription}
                         </p>
                         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                           <Button
                             data-tour-id="dashboard-primary-action"
                             className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
-                            onClick={() =>
-                              isPublicVisitor ? handleAuthNavigate("signup") : navigate(setupPrimaryPath)
-                            }
+                            onClick={() => (isPublicVisitor ? handlePublicVisitorStart() : navigate(setupPrimaryPath))}
                           >
-                            {isPublicVisitor ? "Đăng ký miễn phí" : setupPrimaryLabel}
+                            {isPublicVisitor ? publicVisitorPrimaryLabel : setupPrimaryLabel}
                           </Button>
                           {isPublicVisitor ? (
                             <Button
@@ -1332,7 +1255,7 @@ function DashboardContent({
                             className="bg-slate-950 text-white hover:bg-slate-800"
                             onClick={() => openUpgradeDialog("plan", "PLUS")}
                           >
-                            Mở Plus để đi nhanh hơn
+                            Mở Plus demo
                           </Button>
                           <Button
                             variant="outline"
@@ -1354,8 +1277,7 @@ function DashboardContent({
                     </div>
 
                     <p className="text-sm text-slate-500">
-                      Nếu bạn đã từng mở quyền trên thiết bị này, có thể vào tab Cài đặt của trung tâm 12 tuần để khôi
-                      phục lại ngay.
+                      Quyền Plus trong MVP 1 là mock/local trên trình duyệt này. Mock checkout không thu tiền thật.
                     </p>
                   </CardContent>
                 </Card>
@@ -1431,7 +1353,7 @@ function DashboardContent({
                 <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                   <div className="min-w-0">
                     <CardTitle className="text-slate-950">
-                      {isPublicVisitor ? "Luồng mục tiêu sau khi đăng ký" : "Mục tiêu gần đây"}
+                      {isPublicVisitor ? "Luồng mục tiêu trong demo" : "Mục tiêu gần đây"}
                     </CardTitle>
                     <CardDescription className="text-slate-700">
                       {isPublicVisitor
@@ -1446,7 +1368,7 @@ function DashboardContent({
                     onClick={() => (isPublicVisitor ? handleAuthNavigate("signup") : navigate("/life-insight"))}
                   >
                     <Plus className="h-4 w-4" />
-                    {isPublicVisitor ? "Đăng ký" : "Tạo mục tiêu"}
+                    {isPublicVisitor ? "Đăng ký để sync sau" : "Tạo mục tiêu"}
                   </Button>
                 </div>
               </CardHeader>
@@ -1456,14 +1378,14 @@ function DashboardContent({
                     <Target className="mx-auto mb-4 h-12 w-12 text-slate-300" />
                     <p>
                       {isPublicVisitor
-                        ? "Sau khi đăng ký, bạn sẽ đi qua Life Insight, SMART Goal và kiểm tra tính thực tế trước khi tạo kế hoạch 12 tuần."
+                        ? "Trong demo, bạn có thể đi qua Life Insight, SMART Goal và kiểm tra tính thực tế mà không cần đăng nhập."
                         : "Chưa có mục tiêu nào. Hãy bắt đầu bằng mục tiêu đầu tiên của bạn."}
                     </p>
                     <Button
                       className="mt-5 w-full sm:w-auto"
                       onClick={() => (isPublicVisitor ? handleAuthNavigate("signup") : navigate("/life-insight"))}
                     >
-                      {isPublicVisitor ? "Đăng ký để bắt đầu" : "Tạo mục tiêu"}
+                      {isPublicVisitor ? "Đăng ký để sync sau" : "Tạo mục tiêu"}
                     </Button>
                   </div>
                 ) : (
@@ -1614,7 +1536,7 @@ function DashboardContent({
                       <p className="mt-3 font-semibold text-slate-900">Chưa có dữ liệu bánh xe cuộc sống</p>
                       <p className="mt-1 max-w-sm text-sm leading-6 text-slate-500">
                         {isPublicVisitor
-                          ? "Đăng ký hoặc đăng nhập để chấm điểm 8 lĩnh vực và lưu dữ liệu thật theo tài khoản."
+                          ? "Trong demo, bạn có thể bắt đầu Life Balance không cần đăng nhập. Tài khoản/sync là lớp sau."
                           : "Bắt đầu bằng bài đánh giá Life Balance để dashboard có dữ liệu thật thay vì số mặc định."}
                       </p>
                     </div>
@@ -1625,14 +1547,14 @@ function DashboardContent({
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Cần ưu tiên tiếp</p>
                     <p className="mt-2 text-lg font-semibold text-slate-900">
                       {isPublicVisitor
-                        ? "Chọn sau khi đăng ký"
+                        ? "Chọn sau Life Balance"
                         : weakestArea
                           ? getLifeAreaLabel(weakestArea.name)
                           : "Chưa có dữ liệu"}
                     </p>
                     <p className="mt-1 text-sm text-slate-500">
                       {isPublicVisitor
-                        ? "Dữ liệu thật sẽ được lưu theo tài khoản"
+                        ? "Demo lưu local trên trình duyệt này"
                         : weakestArea
                           ? `${weakestArea.score}/10`
                           : "--"}
@@ -1656,7 +1578,7 @@ function DashboardContent({
                       </div>
                       <div className="mt-1 line-clamp-2 text-sm text-slate-500">
                         {isPublicVisitor
-                          ? "Đăng ký để chấm điểm và lưu bức tranh hiện tại."
+                          ? "Đăng ký chỉ khi muốn thử lớp sync sau."
                           : hasRealLifeBalance
                             ? "Xem chi tiết và cập nhật lại bánh xe cuộc đời."
                             : "Chấm điểm 8 lĩnh vực để mở đúng luồng mục tiêu."}
@@ -1709,23 +1631,12 @@ function DashboardContent({
 
       {shouldShowWorkspaceDetailGrid && (
         <Reveal>
-          <Card className="glass-surface-sm mt-8 rounded-[28px] border shadow-none">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Sao lưu & khôi phục dữ liệu</CardTitle>
-              <CardDescription>Tải bản sao lưu hoặc khôi phục từ file JSON.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-wrap gap-3">
-              <Button variant="outline" className="gap-2 rounded-full" onClick={handleExport}>
-                <Download className="h-4 w-4" />
-                Xuất bản sao lưu
-              </Button>
-              <Button variant="outline" className="gap-2 rounded-full" onClick={() => importFileRef.current?.click()}>
-                <Upload className="h-4 w-4" />
-                Nhập dữ liệu
-              </Button>
-              <input ref={importFileRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
-            </CardContent>
-          </Card>
+          <DashboardDataBackupCard
+            importInputRef={importFileRef}
+            onExport={handleExport}
+            onImport={handleImport}
+            onOpenImportPicker={() => importFileRef.current?.click()}
+          />
         </Reveal>
       )}
     </div>

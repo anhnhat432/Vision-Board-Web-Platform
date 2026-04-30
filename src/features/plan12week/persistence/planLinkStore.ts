@@ -1,3 +1,4 @@
+import { readBackendLinkMap, writeBackendLinkMap } from "@/app/utils/backend-link-storage";
 import type { PlanDetails } from "@/types/plan";
 
 const PLAN_LINK_STORAGE_KEY = "backend_plan_links";
@@ -16,29 +17,11 @@ function createMetricLookupKey(weekNumber: number, metricName: string): string {
 }
 
 function readLinkMap(): PlanLinkMap {
-  if (typeof window === "undefined") return {};
-
-  try {
-    const rawValue = localStorage.getItem(PLAN_LINK_STORAGE_KEY);
-    if (!rawValue) return {};
-
-    const parsedValue = JSON.parse(rawValue) as unknown;
-    if (!parsedValue || typeof parsedValue !== "object") return {};
-
-    return parsedValue as PlanLinkMap;
-  } catch {
-    return {};
-  }
+  return readBackendLinkMap<PlanLinkMap>(PLAN_LINK_STORAGE_KEY);
 }
 
 function writeLinkMap(nextMap: PlanLinkMap): void {
-  if (typeof window === "undefined") return;
-
-  try {
-    localStorage.setItem(PLAN_LINK_STORAGE_KEY, JSON.stringify(nextMap));
-  } catch {
-    // ignore storage errors
-  }
+  writeBackendLinkMap(PLAN_LINK_STORAGE_KEY, nextMap);
 }
 
 function upsertPlanLink(

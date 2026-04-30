@@ -55,6 +55,12 @@ Full repo check, if time permits:
 npm run check:all
 ```
 
+Local-first MVP 1 smoke:
+
+```bash
+npm run smoke:mvp1
+```
+
 Production smoke:
 
 ```bash
@@ -184,6 +190,14 @@ Checklist:
 ## 7. Smoke Test Manual Flow
 
 Run in a fresh browser profile or after resetting local data.
+
+Automated local-first smoke:
+
+- [ ] Start the local frontend with demo-safe env, or set `MVP1_SMOKE_URL` to the candidate demo URL.
+- [ ] Run `npm run smoke:mvp1`.
+- [ ] Confirm the script passes without Firebase/backend/payment credentials.
+- [ ] If the UI wizard path changes and the script uses its controlled localStorage seed fallback, verify the log explains the fallback reason.
+- [ ] Optional deep run: set `MVP1_SMOKE_FULL_UI=true` to exercise the full onboarding -> 12-week setup wizard instead of the fast seed path.
 
 Core journey:
 

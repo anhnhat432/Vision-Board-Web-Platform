@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { ArrowLeft, ArrowRight, CircleAlert, CheckCircle2, Compass, Sparkles, Target } from "lucide-react";
 
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
+import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -428,6 +429,8 @@ export function SMARTGoalSetup() {
   const [currentStep, setCurrentStep] = useState(0);
   const [focusArea, setFocusArea] = useState<string>("");
   const [smartData, setSmartData] = useState<SMARTData>(createInitialSMARTData());
+  const stepTopRef = useRef<HTMLDivElement | null>(null);
+  const stepHeadingRef = useRef<HTMLHeadingElement | null>(null);
 
   useEffect(() => {
     const data = getUserData();
@@ -634,6 +637,12 @@ export function SMARTGoalSetup() {
       ? "Gợi ý: nên dùng động từ kết quả rõ ràng như đạt, hoàn thành, xây dựng, ra mắt hoặc chạm mốc."
       : null;
   const currentStepActionHint = currentStepData.completionHint;
+
+  useScrollToTopOnChange(currentStep, {
+    targetRef: stepTopRef,
+    focusRef: stepHeadingRef,
+    enabled: setupState === "ready",
+  });
 
   if (setupState === "checking") {
     return (
@@ -1089,7 +1098,7 @@ export function SMARTGoalSetup() {
           </CardContent>
         </Card>
 
-        <div className="mx-auto max-w-4xl">
+        <div ref={stepTopRef} className="mx-auto max-w-4xl">
           <Card className="flow-panel overflow-hidden">
             <CardContent className="p-5 sm:p-6 lg:p-7">
               <motion.div
@@ -1103,7 +1112,13 @@ export function SMARTGoalSetup() {
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">
                     {currentStepData.label}
                   </p>
-                  <h2 className="mt-3 text-3xl font-bold text-slate-900">{currentStepData.title}</h2>
+                  <h2
+                    ref={stepHeadingRef}
+                    tabIndex={-1}
+                    className="mt-3 text-3xl font-bold text-slate-900 focus:outline-none"
+                  >
+                    {currentStepData.title}
+                  </h2>
                   <p className="mt-3 text-base leading-7 text-slate-600">{currentStepData.description}</p>
                   <div className="flow-panel mt-4 px-4 py-3 text-sm text-slate-600">{currentStepData.coaching}</div>
                 </div>

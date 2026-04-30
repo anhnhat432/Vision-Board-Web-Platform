@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowLeft, ArrowRight, BarChart3, Check, Compass, Sparkles } from "lucide-react";
@@ -10,6 +10,7 @@ import { Slider } from "../components/ui/slider";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { LIFE_AREAS, type LifeArea, getLifeAreaLabel, getUserData, updateWheelOfLife } from "../utils/storage";
+import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 
 type OnboardingStep = "welcome" | "assessment";
 
@@ -55,19 +56,11 @@ export function Onboarding() {
 
   const [isDirty, setIsDirty] = useState(false);
 
-  const scrollToFlowTop = useCallback(() => {
-    if (typeof window === "undefined") return;
-
-    flowTopRef.current?.focus({ preventScroll: true });
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  }, []);
-
-  useLayoutEffect(() => {
-    if (!step) return;
-    scrollToFlowTop();
-  }, [scrollToFlowTop, step]);
+  useScrollToTopOnChange(step, {
+    targetRef: flowTopRef,
+    focusRef: flowTopRef,
+    topOffset: 0,
+  });
 
   const handleScoreChangeWrapped = useCallback((index: number, value: number[]) => {
     setLifeAreas((currentAreas) =>

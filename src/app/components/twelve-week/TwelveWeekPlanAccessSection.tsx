@@ -74,7 +74,9 @@ export function TwelveWeekPlanAccessSection({
     <div className="rounded-lg border border-violet-200/70 bg-violet-50/75 p-5 shadow-[0_18px_44px_-36px_rgba(124,58,237,0.24)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">Gói và quyền 12 tuần</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
+            Gói demo và quyền local
+          </p>
           <p className="mt-2 text-2xl font-bold text-slate-950">{getPlanLabel(currentPlanCode)}</p>
           <p className="mt-2 text-sm leading-7 text-slate-700">{currentPlanDefinition.description}</p>
         </div>
@@ -110,7 +112,7 @@ export function TwelveWeekPlanAccessSection({
             {unlockedEntitlementCount}/{ENTITLEMENT_ORDER.length} quyền premium đang mở trên thiết bị này
           </p>
           <p className="mt-1 text-sm text-slate-600">
-            Nhìn nhanh xem bạn đã có đủ lớp hỗ trợ để bắt đầu nhanh, giữ nhịp đều và review rõ hơn hay chưa.
+            Quyền Plus trong MVP 1 là mock/local trên trình duyệt này, không phải quyền production thật.
           </p>
         </div>
 
@@ -128,7 +130,8 @@ export function TwelveWeekPlanAccessSection({
                 <p>Checkout: {getBillingReadinessLabel(billingProviderStatus.checkoutReady, "Local fallback")}</p>
                 <p>Restore: {getBillingReadinessLabel(billingProviderStatus.restoreReady, "Local fallback")}</p>
                 <p>
-                  Sync quyền: {getBillingReadinessLabel(billingProviderStatus.entitlementSyncReady, "Local fallback")}
+                  Kiểm tra quyền:{" "}
+                  {getBillingReadinessLabel(billingProviderStatus.entitlementSyncReady, "Local fallback")}
                 </p>
                 <p>
                   Cổng quản lý: {getBillingReadinessLabel(billingProviderStatus.manageBillingReady, "Chưa cấu hình")}
@@ -143,7 +146,7 @@ export function TwelveWeekPlanAccessSection({
               )}`}
             >
               <div className="flex items-center justify-between gap-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em]">Đồng bộ quyền</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em]">Kiểm tra quyền local</p>
                 <Badge variant="outline" className="border-current/20 bg-white/70 text-current">
                   {getBillingActionStatusLabel(lastEntitlementSyncSnapshot?.status ?? "local_only")}
                 </Badge>
@@ -151,11 +154,11 @@ export function TwelveWeekPlanAccessSection({
               <p className="mt-3 text-sm font-semibold">
                 {lastEntitlementSyncSnapshot
                   ? `${lastEntitlementSyncSnapshot.planCode} · ${lastEntitlementSyncSnapshot.entitlementCount} quyền`
-                  : "Chưa có lần đồng bộ nào"}
+                  : "Chưa có lần kiểm tra nào"}
               </p>
               <p className="mt-1 text-sm opacity-80">
                 {lastEntitlementSyncSnapshot?.message ??
-                  "Khi chạy sync, web sẽ lấy lại trạng thái quyền mới nhất từ provider hoặc local fallback."}
+                  "Khi kiểm tra, web sẽ đọc lại trạng thái quyền từ provider hoặc local fallback."}
               </p>
               <p className="mt-3 text-xs uppercase tracking-[0.16em] opacity-60">
                 {lastEntitlementSyncSnapshot ? formatDateTimeLabel(lastEntitlementSyncSnapshot.at) : "Chưa chạy"}
@@ -169,7 +172,7 @@ export function TwelveWeekPlanAccessSection({
               )}`}
             >
               <div className="flex items-center justify-between gap-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em]">Khôi phục giao dịch</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em]">Khôi phục mock upgrade</p>
                 <Badge variant="outline" className="border-current/20 bg-white/70 text-current">
                   {getBillingActionStatusLabel(lastRestoreAccessSnapshot?.status ?? "local_only")}
                 </Badge>
@@ -181,7 +184,7 @@ export function TwelveWeekPlanAccessSection({
               </p>
               <p className="mt-1 text-sm opacity-80">
                 {lastRestoreAccessSnapshot?.message ??
-                  "Dùng khi bạn đã từng mở quyền trước đó và muốn lấy lại trên thiết bị hiện tại."}
+                  "Dùng khi bạn đã từng mở mock upgrade và muốn lấy lại quyền local trên trình duyệt này."}
               </p>
               <p className="mt-3 text-xs uppercase tracking-[0.16em] opacity-60">
                 {lastRestoreAccessSnapshot ? formatDateTimeLabel(lastRestoreAccessSnapshot.at) : "Chưa chạy"}
@@ -192,12 +195,14 @@ export function TwelveWeekPlanAccessSection({
           <div className="rounded-lg border border-violet-100 bg-white p-4">
             <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Thanh toán và quyền</p>
             <p className="mt-2 text-lg font-semibold text-slate-950">
-              {demoMode ? "Bản demo đang mô phỏng bước nâng cấp." : "Quyền nâng cấp sẽ đồng bộ theo cấu hình của host."}
+              {demoMode
+                ? "Bản demo đang mô phỏng bước nâng cấp, không thu tiền thật."
+                : "Quyền nâng cấp sẽ đồng bộ theo cấu hình của host."}
             </p>
             <p className="mt-1 text-sm text-slate-600">
               {currentPlanCode === "FREE"
-                ? "Bạn vẫn có thể dùng Free để chạy một chu kỳ. Khi cần bắt đầu nhanh hơn và review rõ hơn, hãy mở Plus."
-                : "Plus đang mở toàn bộ lớp giúp bạn bắt đầu nhanh hơn, giữ nhịp đều hơn và review rõ hơn."}
+                ? "Bạn vẫn có thể dùng Free để chạy một chu kỳ. Khi cần xem lớp Plus, hãy mở mock upgrade."
+                : "Plus demo đang mở local trên trình duyệt này để bạn xem trải nghiệm đầy đủ."}
             </p>
           </div>
         )}
@@ -207,19 +212,19 @@ export function TwelveWeekPlanAccessSection({
         {currentPlanCode === "FREE" ? (
           <>
             <Button className="bg-slate-950 text-white hover:bg-slate-800" onClick={() => onOpenUpgradePlan("PLUS")}>
-              Mở Plus để giữ nhịp tốt hơn
+              Mở Plus demo
             </Button>
             <Button
               variant="outline"
               className="border-violet-200 bg-white text-violet-800 hover:bg-violet-50"
               onClick={onRestorePlanAccess}
             >
-              Khôi phục quyền
+              Khôi phục quyền local
             </Button>
           </>
         ) : (
           <div className="rounded-lg border border-violet-100 bg-white px-4 py-3 text-sm text-slate-700">
-            Plus đang mở toàn bộ lớp giúp bạn bắt đầu nhanh hơn, giữ nhịp đều hơn và review rõ hơn.
+            Plus demo đang mở local trên trình duyệt này; đây chưa phải quyền production thật.
           </div>
         )}
       </div>
@@ -241,7 +246,7 @@ export function TwelveWeekPlanAccessSection({
             onClick={onSyncEntitlements}
             disabled={isSyncingEntitlements}
           >
-            {isSyncingEntitlements ? "Đang đồng bộ..." : "Đồng bộ quyền"}
+            {isSyncingEntitlements ? "Đang kiểm tra..." : "Kiểm tra quyền local"}
           </Button>
         )}
         <Button
@@ -250,7 +255,7 @@ export function TwelveWeekPlanAccessSection({
           onClick={onRestorePlanAccess}
           disabled={isRestoringPlanAccess}
         >
-          {isRestoringPlanAccess ? "Đang khôi phục..." : "Khôi phục giao dịch"}
+          {isRestoringPlanAccess ? "Đang khôi phục..." : "Khôi phục mock upgrade"}
         </Button>
       </div>
     </div>

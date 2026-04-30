@@ -17,6 +17,7 @@ import { toast } from "sonner";
 
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
+import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
@@ -1015,6 +1016,8 @@ export function FeasibilityCheck() {
   const [pendingGoal, setPendingGoal] = useState<PendingSMARTGoal | null>(null);
   const [result, setResult] = useState<ResultData | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
+  const questionTopRef = useRef<HTMLDivElement | null>(null);
+  const questionHeadingRef = useRef<HTMLHeadingElement | null>(null);
 
   useEffect(() => {
     if (hasGuardedRef.current) return;
@@ -1076,6 +1079,12 @@ export function FeasibilityCheck() {
     setPendingGoal(normalizedPendingGoal);
     setIsInitializing(false);
   }, [navigate]);
+
+  useScrollToTopOnChange(currentStep, {
+    targetRef: questionTopRef,
+    focusRef: questionHeadingRef,
+    enabled: !isInitializing && Boolean(pendingGoal && wheelScore !== null && !result),
+  });
 
   if (isInitializing) {
     return (
@@ -1251,7 +1260,7 @@ export function FeasibilityCheck() {
           </CardContent>
         </Card>
 
-        <div className="mx-auto max-w-4xl">
+        <div ref={questionTopRef} className="mx-auto max-w-4xl">
           <Card className="overflow-hidden">
             <CardContent className="p-5 sm:p-6 lg:p-7">
               <motion.div
@@ -1265,7 +1274,13 @@ export function FeasibilityCheck() {
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">
                     {currentQuestion.axisLabel} · Câu hỏi {currentStep + 1}/{totalSteps}
                   </p>
-                  <h2 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">{currentQuestion.question}</h2>
+                  <h2
+                    ref={questionHeadingRef}
+                    tabIndex={-1}
+                    className="mt-3 text-2xl font-bold text-slate-900 focus:outline-none sm:text-3xl"
+                  >
+                    {currentQuestion.question}
+                  </h2>
                   <p className="mt-3 text-sm leading-7 text-slate-600">{currentQuestion.helper}</p>
                 </div>
 

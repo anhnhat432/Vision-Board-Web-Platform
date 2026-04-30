@@ -127,7 +127,7 @@ export function BillingPlan() {
   const handleCheckoutComplete = (planCode: PricingPlanCode) => {
     reloadUserData();
     if (planCode !== "FREE") {
-      toast.success(`Đã nâng cấp lên ${getPlanLabel(planCode)}.`);
+      toast.success(`Đã mở ${getPlanLabel(planCode)} demo trên trình duyệt này.`);
     }
   };
 
@@ -159,7 +159,7 @@ export function BillingPlan() {
     try {
       const granted = startTrialLocally("PLUS", 7);
       if (granted !== "FREE") {
-        toast.success("Đã kích hoạt dùng thử 7 ngày miễn phí!");
+        toast.success("Đã kích hoạt Plus demo local 7 ngày.");
         reloadUserData();
       } else {
         toast.info("Bạn đã có gói này rồi.");
@@ -187,13 +187,13 @@ export function BillingPlan() {
           <div className="relative">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
               <CreditCard className="h-4 w-4" />
-              Gói & thanh toán
+              Gói demo & mock upgrade
             </div>
             <h1 className="mt-4 max-w-3xl text-2xl font-bold tracking-normal sm:text-3xl lg:text-4xl">
-              Quản lý gói của bạn
+              Quản lý gói demo của bạn
             </h1>
             <p className="mt-2 max-w-2xl text-base leading-8 text-white/82">
-              Xem gói hiện tại, quyền truy cập và thao tác thanh toán.
+              Mock checkout không thu tiền thật. Quyền Plus trong MVP 1 chỉ lưu local trên trình duyệt này.
             </p>
           </div>
         </CardContent>
@@ -208,8 +208,8 @@ export function BillingPlan() {
           </CardTitle>
           <CardDescription>
             {currentPlanCode === "FREE"
-              ? "Bạn đang dùng gói miễn phí."
-              : `Bạn đang dùng ${currentPlanDefinition?.name ?? currentPlanCode}.`}
+              ? "Bạn đang dùng gói miễn phí trên trình duyệt này."
+              : `Bạn đang dùng ${currentPlanDefinition?.name ?? currentPlanCode} trên trình duyệt này.`}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -274,7 +274,7 @@ export function BillingPlan() {
               <>
                 <Button className="w-full sm:w-auto" onClick={() => handleOpenUpgrade("plan")}>
                   <Sparkles className="mr-2 h-4 w-4" />
-                  Nâng cấp lên Plus
+                  Mở Plus demo
                 </Button>
                 {!isTrialing && (
                   <div className="flex w-full flex-col items-start gap-1 sm:w-auto">
@@ -287,10 +287,12 @@ export function BillingPlan() {
                       {isStartingTrial
                         ? "Đang kích hoạt…"
                         : trialCtaExperiment === "variant_a"
-                          ? "Bắt đầu Plus ngay — thử 7 ngày miễn phí"
-                          : "Dùng thử miễn phí 7 ngày"}
+                          ? "Bắt đầu Plus demo — 7 ngày local"
+                          : "Dùng thử Plus local 7 ngày"}
                     </Button>
-                    <p className="text-xs text-slate-500">Không cần thẻ — trải nghiệm đầy đủ tính năng Plus.</p>
+                    <p className="text-xs text-slate-500">
+                      Không cần thẻ. Mock upgrade không thu tiền thật và chỉ mở quyền trên trình duyệt này.
+                    </p>
                   </div>
                 )}
               </>
@@ -298,14 +300,14 @@ export function BillingPlan() {
               <>
                 {isTrialing && trialDaysLeft !== null && (
                   <div className="w-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                    <span className="font-semibold">Đang dùng thử:</span> còn {trialDaysLeft} ngày — nâng cấp để giữ
-                    quyền truy cập sau khi hết thử.
+                    <span className="font-semibold">Plus demo local:</span> còn {trialDaysLeft} ngày — mock upgrade
+                    không thu tiền thật.
                     <Button
                       size="sm"
                       className="mt-3 w-full sm:ml-3 sm:mt-0 sm:w-auto"
                       onClick={() => handleOpenUpgrade("plan")}
                     >
-                      Nâng cấp ngay
+                      Mở mock upgrade
                     </Button>
                   </div>
                 )}
@@ -327,7 +329,7 @@ export function BillingPlan() {
             <Shield className="h-5 w-5 text-emerald-600" />
             Quyền truy cập
           </CardTitle>
-          <CardDescription>Các tính năng premium bạn đang có quyền sử dụng.</CardDescription>
+          <CardDescription>Các quyền premium đang mở local trên trình duyệt này.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -364,16 +366,16 @@ export function BillingPlan() {
       <Card className="flow-panel">
         <CardHeader>
           <CardTitle>Thao tác</CardTitle>
-          <CardDescription>Đồng bộ quyền, khôi phục giao dịch hoặc quay lại trang chính.</CardDescription>
+          <CardDescription>Kiểm tra quyền local/mock, khôi phục mock upgrade hoặc quay lại trang chính.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" onClick={handleSyncEntitlements} disabled={isSyncing}>
               <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
-              {isSyncing ? "Đang đồng bộ…" : "Đồng bộ quyền"}
+              {isSyncing ? "Đang kiểm tra…" : "Kiểm tra quyền local"}
             </Button>
             <Button variant="outline" onClick={handleRestoreAccess} disabled={isRestoring}>
-              {isRestoring ? "Đang khôi phục…" : "Khôi phục giao dịch"}
+              {isRestoring ? "Đang khôi phục…" : "Khôi phục mock upgrade"}
             </Button>
             <Button variant="outline" onClick={() => navigate("/")}>
               Quay lại bảng điều khiển
@@ -431,7 +433,7 @@ export function BillingPlan() {
       <Card className="flow-panel">
         <CardHeader>
           <CardTitle>So sánh các gói</CardTitle>
-          <CardDescription>Xem sự khác biệt giữa Free và Plus.</CardDescription>
+          <CardDescription>So sánh Free với Plus demo. Mock checkout không thu tiền thật.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -464,7 +466,7 @@ export function BillingPlan() {
                 </ul>
                 {plan.code !== "FREE" && currentPlanCode === "FREE" && (
                   <Button className="mt-4 w-full" onClick={() => handleOpenUpgrade("plan")}>
-                    Nâng cấp
+                    Mở Plus demo
                   </Button>
                 )}
               </div>

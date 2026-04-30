@@ -1,4 +1,5 @@
 import type { TacticType } from "../../utils/storage";
+import { getMaxTasksPerTactic, getMaxWeeklyTaskCount } from "@/features/plan12week/logic/taskConstraints";
 import { GOAL_TYPES, LOAD_PREFERENCE_OPTIONS, REVIEW_DAYS } from "./constants";
 import type { LeadIndicatorDraft, PendingFeasibilityResult, PlanLoadRecommendation, TwelveWeekSetupDraft } from "./types";
 
@@ -84,9 +85,79 @@ export function createIndicatorDraft(type: TacticType = "core"): LeadIndicatorDr
   };
 }
 
-export function buildScheduleOffsets(target: string, cadence: LeadIndicatorDraft["cadence"]): number[] {
+interface ScheduleLoadOptions {
+  tacticLoadPreference?: TwelveWeekSetupDraft["tacticLoadPreference"];
+  dailyTimeBudget?: string;
+  preferredDays?: number[];
+}
+
+export interface ScheduledLeadIndicatorDraft extends LeadIndicatorDraft {
+  schedule: number[];
+}
+
+function parseTargetFrequency(target: string): number {
   const parsedTarget = Number.parseInt(target, 10);
-  const frequency = Number.isFinite(parsedTarget) && parsedTarget > 0 ? Math.min(parsedTarget, 7) : 1;
+  return Number.isFinite(parsedTarget) && parsedTarget > 0 ? Math.min(parsedTarget, 7) : 1;
+}
+
+function normalizePreferredDays(preferredDays: number[] | undefined): number[] {
+  if (!Array.isArray(preferredDays) || preferredDays.length === 0) return [];
+
+  return Array.from(
+    new Set(
+      preferredDays
+        .map((day) => Math.trunc(day))
+        .filter((day) => Number.isFinite(day) && day >= 0 && day <= 6),
+    ),
+  ).sort((left, right) => left - right);
+}
+
+function pickCadencedDays(
+  preferredDays: number[],
+  frequency: number,
+  cadence: LeadIndicatorDraft["cadence"],
+): number[] {
+  if (frequency <= 0) return [];
+  if (frequency >= preferredDays.length) return preferredDays;
+
+  if (cadence === "frontload") return preferredDays.slice(0, frequency);
+  if (cadence === "backload") return preferredDays.slice(-frequency);
+
+  if (frequency === 1) {
+    return [preferredDays[Math.floor(preferredDays.length / 2)] ?? preferredDays[0]];
+  }
+
+  const selected = new Set<number>();
+  for (let index = 0; index < frequency; index += 1) {
+    const preferredDayIndex = Math.round((index * (preferredDays.length - 1)) / (frequency - 1));
+    selected.add(preferredDays[preferredDayIndex] ?? preferredDays[0]);
+  }
+
+  for (const day of preferredDays) {
+    if (selected.size >= frequency) break;
+    selected.add(day);
+  }
+
+  return Array.from(selected).sort((left, right) => left - right);
+}
+
+export function buildScheduleOffsets(
+  target: string,
+  cadence: LeadIndicatorDraft["cadence"],
+  options: Pick<ScheduleLoadOptions, "preferredDays"> & { maxFrequency?: number } = {},
+): number[] {
+  const preferredDays = normalizePreferredDays(options.preferredDays);
+  const requestedFrequency = parseTargetFrequency(target);
+  const cappedFrequency = Math.max(
+    1,
+    Math.min(requestedFrequency, options.maxFrequency ?? requestedFrequency, preferredDays.length || 7),
+  );
+
+  if (preferredDays.length > 0) {
+    return pickCadencedDays(preferredDays, cappedFrequency, cadence);
+  }
+
+  const frequency = cappedFrequency;
 
   if (cadence === "frontload") {
     return Array.from({ length: frequency }, (_, index) => Math.min(index, 6));
@@ -160,16 +231,48 @@ export function buildScoreboard() {
   }));
 }
 
-export function getPreviewTasks(indicators: LeadIndicatorDraft[]): string[] {
-  return indicators
+export function buildLeadIndicatorSchedules(
+  indicators: LeadIndicatorDraft[],
+  options: ScheduleLoadOptions = {},
+): ScheduledLeadIndicatorDraft[] {
+  const validIndicators = indicators.filter((indicator) => indicator.name.trim());
+  if (validIndicators.length === 0) return [];
+
+  const maxWeeklyTasks = Math.max(validIndicators.length, getMaxWeeklyTaskCount(options));
+  const maxTasksPerTactic = getMaxTasksPerTactic(options);
+  let remainingWeeklyTasks = maxWeeklyTasks;
+
+  return validIndicators.map((indicator, index) => {
+    const remainingIndicators = validIndicators.length - index - 1;
+    const reservedForRemainingIndicators = Math.max(0, remainingIndicators);
+    const maxForCurrentIndicator = Math.max(1, remainingWeeklyTasks - reservedForRemainingIndicators);
+    const frequency = Math.min(
+      parseTargetFrequency(indicator.target),
+      maxTasksPerTactic,
+      maxForCurrentIndicator,
+    );
+    const schedule = buildScheduleOffsets(indicator.target, indicator.cadence, {
+      maxFrequency: frequency,
+      preferredDays: options.preferredDays,
+    });
+
+    remainingWeeklyTasks = Math.max(0, remainingWeeklyTasks - schedule.length);
+
+    return {
+      ...indicator,
+      schedule,
+    };
+  });
+}
+
+export function getPreviewTasks(indicators: LeadIndicatorDraft[], options: ScheduleLoadOptions = {}): string[] {
+  return buildLeadIndicatorSchedules(indicators, options)
     .filter((indicator) => indicator.name.trim())
     .flatMap((indicator) => {
-      const parsedTarget = Number.parseInt(indicator.target, 10);
-      const count = Number.isFinite(parsedTarget) && parsedTarget > 0 ? Math.min(parsedTarget, 3) : 1;
+      const count = indicator.schedule.length;
 
       return Array.from({ length: count }, (_, index) =>
         count === 1 ? indicator.name.trim() : `${indicator.name.trim()} ${index + 1}`,
       );
-    })
-    .slice(0, 6);
+    });
 }

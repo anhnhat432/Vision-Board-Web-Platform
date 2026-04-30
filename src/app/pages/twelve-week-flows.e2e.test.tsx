@@ -214,7 +214,7 @@ describe("12-week core flows", () => {
 
     renderAppRoute("/12-week-system?tab=settings");
     await screen.findByText("Thiết bị, dữ liệu và đồng bộ");
-    await user.click(screen.getByRole("button", { name: "Khôi phục giao dịch" }));
+    await user.click(screen.getByRole("button", { name: "Khôi phục mock upgrade" }));
 
     await waitFor(() => {
       expect(getCurrentPlan()).toBe("PLUS");

@@ -6,9 +6,27 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getUserData, saveUserData } from "../utils/storage";
 import { Onboarding } from "./Onboarding";
 
+function mockMobileViewport() {
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: vi.fn().mockImplementation((query: string) => ({
+      matches: true,
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+}
+
 describe("Onboarding", () => {
   beforeEach(() => {
     localStorage.clear();
+    mockMobileViewport();
   });
 
   it("uses a clear primary CTA and starts the assessment at the top of the page", async () => {

@@ -142,7 +142,7 @@ export function TwelveWeekDeviceDetailsSection({
     <>
       <ExpandableSection
         title="Nhắc việc và quyền trên thiết bị"
-        description="Bật tắt nhắc việc, thông báo và dữ liệu chỉ lưu trên thiết bị này."
+        description="Bật tắt nhắc việc, thông báo và dữ liệu chỉ lưu trên trình duyệt này."
       >
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
@@ -221,7 +221,7 @@ export function TwelveWeekDeviceDetailsSection({
               <p className="mt-1 text-sm text-slate-600">
                 {hasPushEntitlement
                   ? "Nhận thông báo đẩy ngay cả khi trình duyệt đang đóng."
-                  : "Nâng cấp lên Plus để bật push notification trên thiết bị này."}
+                  : "Mở Plus demo để bật push notification trên thiết bị này. Mock upgrade không thu tiền thật."}
               </p>
             </div>
             {hasPushEntitlement ? (
@@ -348,7 +348,7 @@ export function TwelveWeekDeviceDetailsSection({
 
       <ExpandableSection
         title="Dữ liệu trên thiết bị"
-        description="Xuất dữ liệu hoặc xóa dấu vết local mà không đụng vào chu kỳ và review của bạn."
+        description="Bản demo lưu trên trình duyệt này. Hãy export dữ liệu nếu muốn giữ bản sao."
         badge={
           <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
             Thiết bị này
@@ -365,7 +365,7 @@ export function TwelveWeekDeviceDetailsSection({
         </div>
         <p className="mt-3 text-sm text-slate-500">
           Sẽ xóa nhật ký sự kiện, outbox và trạng thái nhắc việc local. Dữ liệu chu kỳ 12 tuần và nhật ký vẫn được giữ
-          nguyên.
+          nguyên trên trình duyệt này.
         </p>
       </ExpandableSection>
 
@@ -387,7 +387,7 @@ export function TwelveWeekDeviceDetailsSection({
               <li>• Mục tiêu, tactic, check-in, review hàng tuần</li>
               <li>• Nhật ký phản tư và vision board</li>
               <li>• Nhật ký sự kiện local (nếu bật)</li>
-              <li>• Cài đặt ưu tiên và trạng thái gói</li>
+              <li>• Cài đặt ưu tiên và trạng thái gói mock/local</li>
             </ul>
           </div>
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
@@ -406,8 +406,8 @@ export function TwelveWeekDeviceDetailsSection({
           <div className="rounded-lg border border-red-200 bg-red-50 p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-red-700">Xóa toàn bộ dữ liệu</p>
             <p className="mt-2 text-sm text-red-800">
-              Hành động này sẽ xóa vĩnh viễn tất cả dữ liệu trên thiết bị này: mục tiêu, nhật ký, check-in, cài đặt, gói
-              đăng ký. Không thể hoàn tác.
+              Hành động này sẽ xóa vĩnh viễn tất cả dữ liệu local trên trình duyệt này: mục tiêu, nhật ký, check-in,
+              cài đặt và gói mock. Không thể hoàn tác.
             </p>
             <Button variant="destructive" className="mt-3 w-full" onClick={onDeleteAllData}>
               Xóa toàn bộ dữ liệu trên thiết bị
@@ -418,7 +418,7 @@ export function TwelveWeekDeviceDetailsSection({
 
       <ExpandableSection
         title="Outbox, đồng bộ và nhắc việc"
-        description="Xem trạng thái đồng bộ, outbox gần đây và những nhắc việc đang chờ mà không phải kéo qua nhiều card rời."
+        description="Xem outbox local, trạng thái sync thử nghiệm và nhắc việc đang chờ. Demo không hứa cloud sync."
       >
         <div className="grid gap-3">
           <div className="rounded-lg border border-sky-200 bg-sky-50 p-5">

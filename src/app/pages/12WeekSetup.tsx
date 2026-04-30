@@ -1,25 +1,18 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { motion } from "motion/react";
-import { ArrowLeft, ArrowRight, CalendarDays, CheckCircle2, Compass, Flag, Sparkles, Target } from "lucide-react";
+import { CheckCircle2, Compass, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { Badge } from "../components/ui/badge";
-import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
+import { Card, CardContent } from "../components/ui/card";
 import { Progress } from "../components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Textarea } from "../components/ui/textarea";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import {
   APP_STORAGE_KEYS,
   type PricingPlanCode,
-  type TacticType,
   addGoal,
   clearGoalPlanningDrafts,
   formatDateInputValue,
@@ -50,24 +43,26 @@ import { createGoal, updateGoal } from "@/services/goalService";
 import { saveGoalLink } from "@/lib/api/goalLinkStore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { isDemoMode } from "../utils/app-mode";
-import { GOAL_TYPES, LOAD_PREFERENCE_OPTIONS, REVIEW_DAYS, STEPS } from "./12WeekSetup/constants";
+import { STEPS } from "./12WeekSetup/constants";
 import {
   addDays,
+  buildLeadIndicatorSchedules,
   buildScoreboard,
-  buildScheduleOffsets,
   buildWeeklyPlans,
   createIndicatorDraft,
   createIndicatorId,
   getCycleWeekStart,
   getFeasibilityDraftDefaults,
-  getGoalTypeLabel,
-  getLoadPreferenceLabel,
   getPlanLoadLabel,
   getPreviewTasks,
-  getReviewDayLabel,
   isPendingFeasibilityResult,
 } from "./12WeekSetup/helpers";
 import type { LeadIndicatorDraft, PendingFeasibilityResult, TwelveWeekSetupDraft } from "./12WeekSetup/types";
+import { SetupStepShell } from "./12WeekSetup/components/SetupStepShell";
+import { OutcomeStep } from "./12WeekSetup/components/OutcomeStep";
+import { LeadIndicatorsStep } from "./12WeekSetup/components/LeadIndicatorsStep";
+import { ScheduleStep } from "./12WeekSetup/components/ScheduleStep";
+import { ReviewStep } from "./12WeekSetup/components/ReviewStep";
 
 export function TwelveWeekSetup() {
   const navigate = useNavigate();
@@ -266,7 +261,22 @@ export function TwelveWeekSetup() {
   }, [recommendedTemplate, smartGoal, feasibility]);
   const setupGuideTemplate = selectedTemplate ?? recommendedTemplate;
   const setupGuideSupport = selectedTemplateSupport ?? recommendedTemplateSupport;
-  const previewTasks = useMemo(() => getPreviewTasks(validIndicators), [validIndicators]);
+  const planLoadOptions = useMemo(
+    () => ({
+      tacticLoadPreference: draft.tacticLoadPreference,
+      dailyTimeBudget: draft.dailyTimeBudget,
+      preferredDays: draft.preferredDays,
+    }),
+    [draft.dailyTimeBudget, draft.preferredDays, draft.tacticLoadPreference],
+  );
+  const scheduledLeadIndicators = useMemo(
+    () => buildLeadIndicatorSchedules(validIndicators, planLoadOptions),
+    [validIndicators, planLoadOptions],
+  );
+  const previewTasks = useMemo(
+    () => getPreviewTasks(validIndicators, planLoadOptions),
+    [validIndicators, planLoadOptions],
+  );
   const progressValue = ((currentStep + 1) / STEPS.length) * 100;
   const cycleStartDate = useMemo(() => {
     const parsedStartDate = parseCalendarDate(draft.startDate) ?? new Date();
@@ -283,6 +293,14 @@ export function TwelveWeekSetup() {
     Boolean(auth.user) &&
     !auth.userProfileLoading &&
     Boolean(auth.userProfile);
+  const currentStepDescription =
+    currentStep === 0
+      ? "Làm rõ điều bạn muốn chạm tới sau 12 tuần."
+      : currentStep === 1
+        ? "Chọn vài việc bạn tự kiểm soát được mỗi tuần; chỉ giữ phần có thể lặp lại."
+        : currentStep === 2
+          ? "Chốt ngày bắt đầu, ngày nhìn lại và hình dung tuần đầu."
+          : "Kiểm tra lần cuối, còn phần nâng cao thì để tùy chọn.";
 
   if (isLoading) {
     return (
@@ -452,6 +470,28 @@ export function TwelveWeekSetup() {
     );
   };
 
+  const handleTemplatePersonalizationChange = <K extends "dailyTimeBudget" | "personalConstraint">(
+    key: K,
+    value: TwelveWeekSetupDraft[K],
+  ) => {
+    handleChange(key, value);
+    if (selectedTemplate) {
+      setTimeout(() => applyTemplate(selectedTemplate, false), 0);
+    }
+  };
+
+  const handlePreferredDayToggle = (dayIndex: number) => {
+    setDraft((previousDraft) => {
+      const isActive = previousDraft.preferredDays.includes(dayIndex);
+      return {
+        ...previousDraft,
+        preferredDays: isActive
+          ? previousDraft.preferredDays.filter((day) => day !== dayIndex)
+          : [...previousDraft.preferredDays, dayIndex],
+      };
+    });
+  };
+
   const handleIndicatorChange = <K extends keyof LeadIndicatorDraft>(
     index: number,
     key: K,
@@ -571,13 +611,13 @@ export function TwelveWeekSetup() {
           target: draft.lagMetricTarget.trim(),
           currentValue: "",
         },
-        leadIndicators: validIndicators.map((indicator) => ({
+        leadIndicators: scheduledLeadIndicators.map((indicator) => ({
           id: indicator.id,
           name: indicator.name.trim(),
           target: indicator.target.trim() || "1",
           unit: indicator.unit.trim() || "lần/tuần",
           type: indicator.type,
-          schedule: buildScheduleOffsets(indicator.target, indicator.cadence),
+          schedule: indicator.schedule,
         })),
         milestones: {
           week4: draft.week4Milestone.trim(),
@@ -825,909 +865,76 @@ export function TwelveWeekSetup() {
         </CardContent>
       </Card>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
-        <Card>
-          <CardHeader>
-            <CardTitle>{STEPS[currentStep].title}</CardTitle>
-            <CardDescription>
-              {currentStep === 0 && "Làm rõ điều bạn muốn chạm tới sau 12 tuần."}
-              {currentStep === 1 && "Chọn vài việc bạn tự kiểm soát được mỗi tuần; chỉ giữ phần có thể lặp lại."}
-              {currentStep === 2 && "Chốt ngày bắt đầu, ngày nhìn lại và hình dung tuần đầu."}
-              {currentStep === 3 && "Kiểm tra lần cuối, còn phần nâng cao thì để tùy chọn."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {currentStep === 0 && (
-              <div className="mx-auto max-w-4xl space-y-4">
-                <div className="space-y-4">
-                  {(feasibility.bottleneck || feasibility.firstWeekGuidance || feasibility.scopeRecommendation) && (
-                    <div className="rounded-[24px] border border-amber-200 bg-amber-50/86 p-4 sm:p-5">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">
-                        Gợi ý từ bước kiểm tra
-                      </p>
-                      <div className="mt-3 grid gap-3 md:grid-cols-3">
-                        <div className="rounded-[18px] border border-amber-200 bg-white/76 p-3">
-                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Cần chú ý</p>
-                          <p className="mt-1 text-sm font-semibold text-slate-950">
-                            {feasibility.bottleneck?.label ?? "Chưa có"}
-                          </p>
-                          {feasibility.bottleneck?.action && (
-                            <p className="mt-2 text-xs leading-5 text-slate-600">{feasibility.bottleneck.action}</p>
-                          )}
-                        </div>
-                        <div className="rounded-[18px] border border-amber-200 bg-white/76 p-3">
-                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Tuần 1</p>
-                          <p className="mt-1 text-sm leading-6 text-slate-700">
-                            {feasibility.firstWeekGuidance ?? "Giữ tuần đầu vừa sức để tạo nhịp."}
-                          </p>
-                        </div>
-                        <div className="rounded-[18px] border border-amber-200 bg-white/76 p-3">
-                          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Độ nặng</p>
-                          <p className="mt-1 text-sm font-semibold text-slate-950">
-                            {getPlanLoadLabel(feasibility.planLoad)}
-                          </p>
-                          <p className="mt-2 text-xs leading-5 text-slate-600">
-                            {feasibility.scopeRecommendation ?? "Giữ 2-3 việc lặp lại và một buổi nhìn lại cố định."}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <div className="space-y-4 rounded-[24px] border border-white/70 bg-white/72 p-4 sm:p-5">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">Chốt phần bắt buộc trước</p>
-                      <p className="mt-1 hidden text-sm leading-6 text-slate-500 sm:block">
-                        Ba mục này là đủ để đi tiếp. Khung gợi ý phía dưới chỉ dùng để thiết lập nhanh hơn, không phải
-                        việc bắt buộc phải chọn.
-                      </p>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="goal-type">Loại mục tiêu</Label>
-                      <Select value={draft.goalType} onValueChange={(value) => handleChange("goalType", value)}>
-                        <SelectTrigger id="goal-type" aria-label="Chọn loại mục tiêu">
-                          <SelectValue placeholder="Chọn loại mục tiêu" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {GOAL_TYPES.map((item) => (
-                            <SelectItem key={item.value} value={item.value}>
-                              {item.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="vision-12-week">Tầm nhìn 12 tuần</Label>
-                      <Textarea
-                        id="vision-12-week"
-                        rows={3}
-                        value={draft.vision12Week}
-                        onChange={(event) => handleChange("vision12Week", event.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="week-12-outcome">Kết quả muốn chạm tới ở tuần 12</Label>
-                      <Textarea
-                        id="week-12-outcome"
-                        rows={2}
-                        value={draft.week12Outcome}
-                        onChange={(event) => handleChange("week12Outcome", event.target.value)}
-                      />
-                    </div>
-                  </div>
+      <SetupStepShell
+        title={STEPS[currentStep].title}
+        description={currentStepDescription}
+        currentStep={currentStep}
+        stepCount={STEPS.length}
+        onBack={handleBack}
+        onNext={handleNext}
+        onSubmit={handleSubmit}
+      >
+        {currentStep === 0 && (
+          <OutcomeStep
+            feasibility={feasibility}
+            draft={draft}
+            currentPlan={currentPlan}
+            smartGoal={smartGoal}
+            selectedTemplate={selectedTemplate}
+            recommendedTemplate={recommendedTemplate}
+            adaptiveTemplateRecommendation={adaptiveTemplateRecommendation}
+            recommendedTemplateSupport={recommendedTemplateSupport}
+            onChange={handleChange}
+            onTemplateSelect={handleTemplateSelect}
+            onTemplatePersonalizationChange={handleTemplatePersonalizationChange}
+            onPreferredDayToggle={handlePreferredDayToggle}
+          />
+        )}
 
-                  <div className="space-y-3 rounded-[24px] border border-white/70 bg-white/72 p-4 sm:p-5">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-900">Bắt đầu nhanh bằng khung gợi ý</p>
-                        <p className="mt-1 text-sm leading-6 text-slate-500">
-                          Thay vì tìm một khung mẫu đúng chủ đề, bạn chỉ cần chọn kiểu vận hành phù hợp. Sau đó vẫn sửa
-                          lại toàn bộ cho sát mục tiêu của mình.
-                        </p>
-                      </div>
-                      <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
-                        Gói {getPlanLabel(currentPlan)}
-                      </Badge>
-                    </div>
-                    {recommendedTemplate && adaptiveTemplateRecommendation && (
-                      <div className="rounded-[24px] border border-sky-200 gradient-sky p-4 shadow-[0_18px_40px_-34px_rgba(37,99,235,0.18)]">
-                        <div className="flex flex-wrap items-start justify-between gap-3">
-                          <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
-                              Gợi ý cho mục tiêu này
-                            </p>
-                            <p className="mt-2 text-lg font-semibold text-slate-950">{recommendedTemplate.name}</p>
-                            <p className="mt-2 text-sm leading-7 text-slate-600">
-                              {adaptiveTemplateRecommendation.reason}
-                            </p>
-                          </div>
-                          <Badge variant="outline" className="border-sky-200 bg-white text-sky-800">
-                            {recommendedTemplate.requiredPlan
-                              ? getPlanLabel(recommendedTemplate.requiredPlan)
-                              : "Miễn phí"}
-                          </Badge>
-                        </div>
-                        <Button
-                          className="mt-4"
-                          variant={selectedTemplate?.id === recommendedTemplate.id ? "outline" : "default"}
-                          onClick={() => handleTemplateSelect(recommendedTemplate)}
-                        >
-                          {selectedTemplate?.id === recommendedTemplate.id
-                            ? "Đang dùng khung gợi ý"
-                            : "Dùng khung gợi ý này"}
-                        </Button>
-                        {recommendedTemplateSupport && (
-                          <details className="mt-4 rounded-[20px] border border-sky-200 bg-white/72 px-4 py-3">
-                            <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
-                              Xem gợi ý tuần 1 và nhịp giữ
-                            </summary>
-                            <div className="mt-3 grid gap-3">
-                              <div className="rounded-[20px] border border-sky-200 bg-white/86 p-4">
-                                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
-                                  Tuần 1 nên thắng ở đâu
-                                </p>
-                                <p className="mt-2 text-sm font-semibold text-slate-950">
-                                  {recommendedTemplateSupport.week1Headline}
-                                </p>
-                                <p className="mt-2 text-sm leading-7 text-slate-600">
-                                  {recommendedTemplateSupport.week1Support}
-                                </p>
-                              </div>
-                              <div className="rounded-[20px] border border-sky-200 bg-white/86 p-4">
-                                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
-                                  Nhịp nên giữ
-                                </p>
-                                <p className="mt-2 text-sm leading-7 text-slate-600">
-                                  {recommendedTemplateSupport.week1CadenceHint}
-                                </p>
-                              </div>
-                            </div>
-                          </details>
-                        )}
-                      </div>
-                    )}
-                    <details className="rounded-[24px] border border-dashed border-slate-200 bg-white/66 p-4">
-                      <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
-                        Xem tất cả khung mẫu
-                      </summary>
-                      <div className="mt-4 grid gap-3 md:grid-cols-2">
-                        {TWELVE_WEEK_TEMPLATE_CATALOG.map((template) => {
-                          const isLocked = !planSatisfiesRequirement(currentPlan, template.requiredPlan);
-                          const isSelected = selectedTemplate?.id === template.id;
+        {currentStep === 1 && (
+          <LeadIndicatorsStep
+            draft={draft}
+            coreCount={coreCount}
+            optionalCount={optionalCount}
+            setupGuideSupport={setupGuideSupport}
+            setupGuideTemplate={setupGuideTemplate}
+            selectedTemplate={selectedTemplate}
+            weekOneTaskPreview={weekOneTaskPreview}
+            weekOneTaskWarning={weekOneTaskWarning}
+            onAddIndicator={handleAddIndicator}
+            onRemoveIndicator={handleRemoveIndicator}
+            onIndicatorChange={handleIndicatorChange}
+          />
+        )}
 
-                          return (
-                            <button
-                              key={template.id}
-                              type="button"
-                              onClick={() => handleTemplateSelect(template)}
-                              className={`rounded-[24px] border p-4 text-left transition-all ${
-                                isSelected
-                                  ? "border-slate-900 bg-slate-900 text-white shadow-[0_22px_50px_-32px_rgba(15,23,42,0.48)]"
-                                  : isLocked
-                                    ? "border-violet-200 bg-violet-50/86 hover:border-violet-300"
-                                    : "border-white/70 bg-white/84 hover:border-slate-300"
-                              }`}
-                            >
-                              <div className="flex flex-wrap items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <p className={`font-semibold ${isSelected ? "text-white" : "text-slate-950"}`}>
-                                      {template.name}
-                                    </p>
-                                    <Badge
-                                      variant={template.requiredPlan ? "default" : "outline"}
-                                      className={
-                                        isSelected
-                                          ? "border-white/15 bg-white/10 text-white hover:bg-white/10"
-                                          : template.requiredPlan
-                                            ? "bg-violet-600 text-white hover:bg-violet-600"
-                                            : "border-slate-300 bg-white text-slate-700"
-                                      }
-                                    >
-                                      {template.requiredPlan
-                                        ? `Khung ${getPlanLabel(template.requiredPlan)}`
-                                        : "Khung miễn phí"}
-                                    </Badge>
-                                  </div>
-                                  <p className={`mt-1 text-sm ${isSelected ? "text-white/74" : "text-slate-600"}`}>
-                                    {template.subtitle}
-                                  </p>
-                                </div>
-                                <Badge
-                                  variant="outline"
-                                  className={
-                                    isSelected
-                                      ? "border-white/15 bg-white/10 text-white"
-                                      : "border-slate-300 bg-white text-slate-700"
-                                  }
-                                >
-                                  {isSelected ? "Đang dùng" : isLocked ? "Đang khóa" : "Sẵn sàng"}
-                                </Badge>
-                              </div>
-                              <p
-                                className={`mt-3 text-sm leading-7 ${isSelected ? "text-white/84" : "text-slate-600"}`}
-                              >
-                                {template.description}
-                              </p>
-                              <div
-                                className={`mt-3 rounded-[20px] border px-3 py-3 text-sm leading-6 ${
-                                  isSelected
-                                    ? "border-white/12 bg-white/8 text-white/82"
-                                    : "border-white/70 bg-white/72 text-slate-600"
-                                }`}
-                              >
-                                <p
-                                  className={`text-xs font-semibold uppercase tracking-[0.16em] ${isSelected ? "text-white/54" : "text-slate-400"}`}
-                                >
-                                  Hợp khi
-                                </p>
-                                <p className="mt-2">{template.bestFor}</p>
-                              </div>
-                              <div
-                                className={`mt-3 rounded-[20px] border px-3 py-3 text-sm leading-6 ${
-                                  isSelected
-                                    ? "border-white/12 bg-white/8 text-white/82"
-                                    : "border-white/70 bg-white/72 text-slate-600"
-                                }`}
-                              >
-                                <p
-                                  className={`text-xs font-semibold uppercase tracking-[0.16em] ${isSelected ? "text-white/54" : "text-slate-400"}`}
-                                >
-                                  Tuần 1 sẽ có gì
-                                </p>
-                                <p className="mt-2">{template.firstWeekWin}</p>
-                              </div>
-                              <div className="mt-4 flex flex-wrap gap-2">
-                                {template.idealFor.map((item) => (
-                                  <Badge
-                                    key={`${template.id}_${item}`}
-                                    variant="outline"
-                                    className={
-                                      isSelected
-                                        ? "border-white/15 bg-white/10 text-white"
-                                        : "border-slate-200 bg-slate-50 text-slate-700"
-                                    }
-                                  >
-                                    {item}
-                                  </Badge>
-                                ))}
-                                {template.tactics.slice(0, 2).map((tactic) => (
-                                  <Badge
-                                    key={`${template.id}_${tactic.name}`}
-                                    variant="outline"
-                                    className={
-                                      isSelected
-                                        ? "border-white/15 bg-white/10 text-white"
-                                        : "border-slate-200 bg-slate-50 text-slate-700"
-                                    }
-                                  >
-                                    {tactic.name}
-                                  </Badge>
-                                ))}
-                              </div>
-                              {isLocked && (
-                                <div className="mt-4 flex items-center justify-between border-t border-violet-200/60 pt-3">
-                                  <span className="text-xs font-semibold text-violet-700">
-                                    Cần gói Plus để dùng khung này
-                                  </span>
-                                  <span className="text-xs font-semibold text-violet-600">Mở khóa →</span>
-                                </div>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </details>
-                  </div>
+        {currentStep === 2 && (
+          <ScheduleStep
+            draft={draft}
+            cycleStartDate={cycleStartDate}
+            cycleEndDate={cycleEndDate}
+            setupGuideSupport={setupGuideSupport}
+            setupGuideTemplate={setupGuideTemplate}
+            hasPreviewTasks={previewTasks.length > 0}
+            weekOneTaskPreview={weekOneTaskPreview}
+            weekOneTaskWarning={weekOneTaskWarning}
+            onChange={handleChange}
+          />
+        )}
 
-                  {selectedTemplate && (
-                    <div className="space-y-4 rounded-[28px] border border-emerald-200 gradient-emerald p-5">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
-                          Cá nhân hóa khung
-                        </p>
-                        <p className="mt-1 text-sm text-slate-600">
-                          Trả lời nhanh 3 câu để khung tự điều chỉnh số việc và nhịp phù hợp.
-                        </p>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="daily-time-budget">Mỗi ngày bạn có thể dành bao lâu?</Label>
-                        <Select
-                          value={draft.dailyTimeBudget}
-                          onValueChange={(value) => {
-                            handleChange("dailyTimeBudget", value);
-                            if (selectedTemplate) {
-                              setTimeout(() => applyTemplate(selectedTemplate, false), 0);
-                            }
-                          }}
-                        >
-                          <SelectTrigger id="daily-time-budget" aria-label="Chọn ngân sách thời gian mỗi ngày">
-                            <SelectValue placeholder="Chọn thời lượng" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="30min">30 phút</SelectItem>
-                            <SelectItem value="1h">1 giờ</SelectItem>
-                            <SelectItem value="1.5h">1.5 giờ</SelectItem>
-                            <SelectItem value="2h+">2+ giờ</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Những ngày nào bạn muốn tập trung?</Label>
-                        <div className="flex flex-wrap gap-2">
-                          {(["T2", "T3", "T4", "T5", "T6", "T7", "CN"] as const).map((dayLabel, dayIndex) => {
-                            const isActive = draft.preferredDays.includes(dayIndex);
-                            return (
-                              <button
-                                key={dayLabel}
-                                type="button"
-                                aria-pressed={isActive}
-                                onClick={() => {
-                                  setDraft((previousDraft) => ({
-                                    ...previousDraft,
-                                    preferredDays: isActive
-                                      ? previousDraft.preferredDays.filter((d) => d !== dayIndex)
-                                      : [...previousDraft.preferredDays, dayIndex],
-                                  }));
-                                }}
-                                className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all ${
-                                  isActive
-                                    ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
-                                    : "border-slate-300 bg-white text-slate-700 hover:border-emerald-400"
-                                }`}
-                              >
-                                {dayLabel}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        <p className="text-xs text-slate-500">
-                          {draft.preferredDays.length === 0
-                            ? "Chưa chọn — mặc định dàn đều cả tuần."
-                            : `Đã chọn ${draft.preferredDays.length} ngày.`}
-                        </p>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="personal-constraint">Trở ngại lớn nhất hiện tại?</Label>
-                        <Select
-                          value={draft.personalConstraint}
-                          onValueChange={(value) => {
-                            handleChange("personalConstraint", value as TwelveWeekSetupDraft["personalConstraint"]);
-                            if (selectedTemplate) {
-                              setTimeout(() => applyTemplate(selectedTemplate, false), 0);
-                            }
-                          }}
-                        >
-                          <SelectTrigger id="personal-constraint" aria-label="Chọn trở ngại lớn nhất">
-                            <SelectValue placeholder="Chọn trở ngại" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="time">Thiếu thời gian</SelectItem>
-                            <SelectItem value="motivation">Khó giữ động lực</SelectItem>
-                            <SelectItem value="consistency">Hay bị đứt nhịp</SelectItem>
-                            <SelectItem value="complexity">Mục tiêu phức tạp, chưa biết bắt đầu</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <p className="text-xs text-slate-500">
-                          {draft.personalConstraint === "time" && "Kế hoạch sẽ ưu tiên giữ nhẹ và tập trung."}
-                          {draft.personalConstraint === "motivation" &&
-                            "Kế hoạch sẽ ưu tiên thắng nhỏ sớm và giảm ma sát."}
-                          {draft.personalConstraint === "consistency" &&
-                            "Kế hoạch sẽ ưu tiên nhịp đều thay vì tải cao."}
-                          {draft.personalConstraint === "complexity" && "Kế hoạch sẽ giúp tách lớp rõ hơn."}
-                          {!draft.personalConstraint && "Chọn trở ngại để kế hoạch điều chỉnh phù hợp hơn."}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-3">
-                  {selectedTemplate && (
-                    <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                            Khung đang dùng
-                          </p>
-                          <p className="mt-2 text-base font-semibold text-slate-950">{selectedTemplate.name}</p>
-                          <p className="mt-1 text-sm text-slate-500">{selectedTemplate.subtitle}</p>
-                        </div>
-                        <Badge
-                          variant={selectedTemplate.requiredPlan ? "default" : "outline"}
-                          className={
-                            selectedTemplate.requiredPlan
-                              ? "bg-violet-600 text-white hover:bg-violet-600"
-                              : "border-slate-300 bg-white text-slate-700"
-                          }
-                        >
-                          {selectedTemplate.requiredPlan ? getPlanLabel(selectedTemplate.requiredPlan) : "Miễn phí"}
-                        </Badge>
-                      </div>
-                    </div>
-                  )}
-                  <details className="rounded-[22px] border border-dashed border-slate-200 bg-white/72 p-4">
-                    <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
-                      Xem mục tiêu đã viết
-                    </summary>
-                    <div className="mt-4 space-y-3">
-                      <div className="rounded-[18px] border border-white/70 bg-white/86 p-4">
-                        <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Mục tiêu cụ thể</p>
-                        <p className="mt-2 text-sm leading-7 text-slate-700">{smartGoal.specific}</p>
-                      </div>
-                      <div className="rounded-[18px] border border-white/70 bg-white/86 p-4">
-                        <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Cách đo kết quả</p>
-                        <p className="mt-2 text-sm leading-7 text-slate-700">{smartGoal.measurable}</p>
-                      </div>
-                    </div>
-                  </details>
-                </div>
-              </div>
-            )}
-
-            {currentStep === 1 && (
-              <div className="mx-auto max-w-4xl space-y-6">
-                <div className="space-y-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-dashed border-slate-200 bg-slate-50/80 p-4">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">Giữ 2-4 việc lặp lại cho cả chu kỳ</p>
-                      <p className="mt-1 text-sm text-slate-500">
-                        Việc chính được ưu tiên trong điểm tuần. Việc tùy chọn là phần thêm khi bạn còn sức.
-                      </p>
-                      <p className="mt-2 text-xs leading-6 text-slate-500">
-                        Việc lặp lại không phải kết quả cuối cùng. Hãy viết hành động bạn có thể làm tuần này, ví dụ:
-                        tập 2 buổi, viết 3 trang hoặc gửi 5 email.
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleAddIndicator}
-                      disabled={draft.leadIndicators.length >= 4}
-                    >
-                      Thêm việc
-                    </Button>
-                  </div>
-
-                  {draft.leadIndicators.map((indicator, index) => (
-                    <div key={indicator.id} className="rounded-[24px] border border-white/70 bg-white/72 p-5">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <p className="text-sm font-semibold text-slate-900">Việc {index + 1}</p>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={indicator.type === "optional" ? "outline" : "default"}>
-                            {indicator.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
-                          </Badge>
-                          {draft.leadIndicators.length > 2 && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleRemoveIndicator(index)}
-                            >
-                              Xóa
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                      <div className="mt-4 grid gap-3">
-                        <div className="space-y-2">
-                          <Label htmlFor={`tactic-name-${index}`}>Tên việc</Label>
-                          <Input
-                            id={`tactic-name-${index}`}
-                            value={indicator.name}
-                            onChange={(event) => handleIndicatorChange(index, "name", event.target.value)}
-                            placeholder="Ví dụ: viết 3 bài, tập 2 buổi, gửi 5 outreach..."
-                          />
-                        </div>
-                        <div className="grid gap-3 md:grid-cols-2">
-                          <div className="space-y-2">
-                            <Label htmlFor={`tactic-type-${index}`}>Loại</Label>
-                            <Select
-                              value={indicator.type}
-                              onValueChange={(value) => handleIndicatorChange(index, "type", value as TacticType)}
-                            >
-                              <SelectTrigger id={`tactic-type-${index}`} aria-label={`Chọn loại cho việc ${index + 1}`}>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="core">Cốt lõi</SelectItem>
-                                <SelectItem value="optional">Tùy chọn</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor={`tactic-target-${index}`}>Tần suất / tuần</Label>
-                            <Input
-                              id={`tactic-target-${index}`}
-                              value={indicator.target}
-                              onChange={(event) => handleIndicatorChange(index, "target", event.target.value)}
-                              placeholder="Ví dụ: 2"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor={`tactic-unit-${index}`}>Đơn vị</Label>
-                            <Input
-                              id={`tactic-unit-${index}`}
-                              value={indicator.unit}
-                              onChange={(event) => handleIndicatorChange(index, "unit", event.target.value)}
-                              placeholder="buổi, bài, lần..."
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor={`tactic-cadence-${index}`}>Nhịp</Label>
-                            <Select
-                              value={indicator.cadence}
-                              onValueChange={(value) =>
-                                handleIndicatorChange(index, "cadence", value as LeadIndicatorDraft["cadence"])
-                              }
-                            >
-                              <SelectTrigger
-                                id={`tactic-cadence-${index}`}
-                                aria-label={`Chọn nhịp cho việc ${index + 1}`}
-                              >
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="spread">Trải đều</SelectItem>
-                                <SelectItem value="frontload">Đầu tuần</SelectItem>
-                                <SelectItem value="backload">Cuối tuần</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="space-y-4 rounded-[28px] border border-white/70 bg-white/72 p-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Xem trước tuần 1</p>
-                  <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Cốt lõi / Tùy chọn</p>
-                    <p className="mt-2 text-sm text-slate-600">
-                      {coreCount} cốt lõi • {optionalCount} tùy chọn
-                    </p>
-                  </div>
-                  {setupGuideSupport && setupGuideTemplate && (
-                    <div className="rounded-[22px] border border-slate-900 bg-slate-950 p-4 text-white">
-                      <p className="text-xs uppercase tracking-[0.16em] text-white/54">
-                        {selectedTemplate ? "Tuần 1 theo khung đang dùng" : "Nếu đi theo khung gợi ý này"}
-                      </p>
-                      <p className="mt-2 text-base font-semibold">{setupGuideSupport.week1Headline}</p>
-                      <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1Support}</p>
-                      <p className="mt-3 rounded-2xl border border-white/12 bg-white/8 px-3 py-3 text-sm text-white/74">
-                        {setupGuideSupport.week1CadenceHint}
-                      </p>
-                    </div>
-                  )}
-                  <div className="space-y-2">
-                    {weekOneTaskPreview.length === 0 ? (
-                      <p className="text-sm text-slate-500">Thêm việc để thấy tuần đầu tiên sẽ trông như thế nào.</p>
-                    ) : (
-                      weekOneTaskPreview.map((task) => (
-                        <div
-                          key={task}
-                          className="rounded-2xl border border-white/70 bg-slate-50/80 px-4 py-3 text-sm text-slate-700"
-                        >
-                          {task}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                  {weekOneTaskWarning ? <p className="text-xs text-amber-600">{weekOneTaskWarning}</p> : null}
-                </div>
-              </div>
-            )}
-
-            {currentStep === 2 && (
-              <div className="mx-auto max-w-4xl space-y-6">
-                <div className="space-y-5">
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="cycle-start-date">Ngày bắt đầu chu kỳ</Label>
-                      <Input
-                        id="cycle-start-date"
-                        type="date"
-                        value={draft.startDate}
-                        onChange={(event) => handleChange("startDate", event.target.value)}
-                      />
-                      <p className="text-xs text-slate-500">
-                        Kế hoạch sẽ canh chu kỳ về Thứ Hai để việc và điểm tuần khớp nhau.
-                      </p>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="review-day">Ngày nhìn lại hằng tuần</Label>
-                      <Select value={draft.reviewDay} onValueChange={(value) => handleChange("reviewDay", value)}>
-                        <SelectTrigger id="review-day" aria-label="Chọn ngày nhìn lại hằng tuần">
-                          <SelectValue placeholder="Chọn ngày nhìn lại" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {REVIEW_DAYS.map((day) => (
-                            <SelectItem key={day.value} value={day.value}>
-                              {day.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="week-load-preference">Nhịp tuần mặc định</Label>
-                    <Select
-                      value={draft.tacticLoadPreference}
-                      onValueChange={(value) =>
-                        handleChange("tacticLoadPreference", value as TwelveWeekSetupDraft["tacticLoadPreference"])
-                      }
-                    >
-                      <SelectTrigger id="week-load-preference" aria-label="Chọn nhịp tuần mặc định">
-                        <SelectValue placeholder="Chọn nhịp tuần mặc định" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {LOAD_PREFERENCE_OPTIONS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-slate-500">
-                      Đây là nhịp khởi đầu của chu kỳ. Bạn vẫn có thể chỉnh lại sau trong phần Cài đặt.
-                    </p>
-                  </div>
-                  <div className="grid gap-3 md:grid-cols-3">
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="lag-metric-name">Chỉ số kết quả chính</Label>
-                      <Input
-                        id="lag-metric-name"
-                        value={draft.lagMetricName}
-                        onChange={(event) => handleChange("lagMetricName", event.target.value)}
-                        placeholder="Ví dụ: số kg giảm, số bài xuất bản, doanh thu mới..."
-                      />
-                      <p className="text-xs text-slate-500">
-                        Đây là chỉ số đầu ra cuối chu kỳ, khác với việc hằng tuần.
-                      </p>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lag-metric-target">Mục tiêu</Label>
-                      <Input
-                        id="lag-metric-target"
-                        value={draft.lagMetricTarget}
-                        onChange={(event) => handleChange("lagMetricTarget", event.target.value)}
-                        placeholder="Ví dụ: 12"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lag-metric-unit">Đơn vị của chỉ số</Label>
-                    <Input
-                      id="lag-metric-unit"
-                      value={draft.lagMetricUnit}
-                      onChange={(event) => handleChange("lagMetricUnit", event.target.value)}
-                      placeholder="kg, bài, triệu đồng..."
-                    />
-                  </div>
-                </div>
-                <div className="space-y-4 rounded-[28px] border border-white/70 bg-white/72 p-5">
-                  <div className="rounded-[22px] border border-violet-100 bg-violet-50/80 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
-                      Việc lặp lại và chỉ số
-                    </p>
-                    <p className="mt-2 text-sm leading-7 text-slate-700">
-                      Việc lặp lại là việc bạn làm mỗi tuần. Chỉ số kết quả chính là con số dùng để nhìn lại xem chu kỳ
-                      có đi đúng hướng không.
-                    </p>
-                  </div>
-                  <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-                    <div className="flex items-center gap-2 text-slate-700">
-                      <CalendarDays className="h-4 w-4" />
-                      <p className="text-sm font-semibold">Chu kỳ 12 tuần</p>
-                    </div>
-                    <p className="mt-3 text-sm text-slate-600">
-                      {cycleStartDate} đến {cycleEndDate}
-                    </p>
-                  </div>
-                  {setupGuideSupport && setupGuideTemplate && (
-                    <div className="rounded-[22px] border border-slate-900 bg-slate-950 p-4 text-white">
-                      <p className="text-xs uppercase tracking-[0.16em] text-white/54">Nhịp nên giữ ở tuần 1</p>
-                      <p className="mt-2 text-base font-semibold">{setupGuideSupport.week1Headline}</p>
-                      <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1Support}</p>
-                      <div className="mt-3 rounded-2xl border border-white/12 bg-white/8 p-3">
-                        <p className="text-xs uppercase tracking-[0.16em] text-white/54">Gợi ý giữ nhịp</p>
-                        <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1CadenceHint}</p>
-                      </div>
-                    </div>
-                  )}
-                  {setupGuideSupport && (
-                    <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-                      <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
-                        Ngày nhìn lại và độ nặng tuần gợi ý
-                      </p>
-                      <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                        <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
-                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Nhìn lại</p>
-                          <p className="mt-2 text-sm font-semibold text-slate-900">{draft.reviewDay}</p>
-                          <p className="mt-2 text-sm leading-6 text-slate-600">
-                            {setupGuideSupport.recommendedReviewReason}
-                          </p>
-                        </div>
-                        <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
-                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Nhịp tuần</p>
-                          <p className="mt-2 text-sm font-semibold text-slate-900">
-                            {getLoadPreferenceLabel(draft.tacticLoadPreference)}
-                          </p>
-                          <p className="mt-2 text-sm leading-6 text-slate-600">
-                            {setupGuideSupport.recommendedLoadReason}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  {(draft.week4Milestone || draft.week8Milestone) && (
-                    <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-                      <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Mốc gợi ý theo khung</p>
-                      <div className="mt-3 space-y-3">
-                        <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
-                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tuần 4</p>
-                          <p className="mt-2 text-sm leading-7 text-slate-700">{draft.week4Milestone}</p>
-                        </div>
-                        <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
-                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tuần 8</p>
-                          <p className="mt-2 text-sm leading-7 text-slate-700">{draft.week8Milestone}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
-                      {previewTasks.length > 0 ? "Những việc sẽ hiện ở màn Hôm nay" : "Tuần đầu nên mở bằng"}
-                    </p>
-                    <div className="mt-3 space-y-2">
-                      {weekOneTaskPreview.length === 0 ? (
-                        <p className="text-sm text-slate-500">
-                          Khi bạn chốt khung hoặc thêm việc, tuần đầu sẽ hiện rõ các việc cần mở ở màn Hôm nay.
-                        </p>
-                      ) : (
-                        weekOneTaskPreview.map((task) => (
-                          <div
-                            key={task}
-                            className="rounded-2xl border border-white/70 bg-slate-50/80 px-4 py-3 text-sm text-slate-700"
-                          >
-                            {task}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                    {weekOneTaskWarning ? <p className="mt-3 text-xs text-amber-600">{weekOneTaskWarning}</p> : null}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {currentStep === 3 && (
-              <div className="mx-auto max-w-4xl space-y-6">
-                <div className="space-y-5">
-                  <div className="rounded-[24px] border border-white/70 bg-white/72 p-5">
-                    <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tóm tắt kế hoạch</p>
-                    <h3 className="mt-3 text-xl font-semibold text-slate-900">{smartGoal.specific}</h3>
-                    <p className="mt-3 text-sm leading-7 text-slate-600">{draft.vision12Week}</p>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <Badge variant="outline">{getGoalTypeLabel(draft.goalType)}</Badge>
-                      <Badge variant="outline">{getLifeAreaLabel(focusArea)}</Badge>
-                      <Badge variant="outline">Nhìn lại {getReviewDayLabel(draft.reviewDay)}</Badge>
-                      <Badge variant="outline">Nhịp {getLoadPreferenceLabel(draft.tacticLoadPreference)}</Badge>
-                      {selectedTemplate && <Badge variant="outline">Khung {selectedTemplate.name}</Badge>}
-                    </div>
-                  </div>
-
-                  <details className="rounded-[24px] border border-dashed border-slate-200 bg-slate-50/80 p-5">
-                    <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
-                      Mở phần nâng cao (tùy chọn)
-                    </summary>
-                    <div className="mt-4 space-y-4">
-                      <div className="grid gap-3 md:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label htmlFor="milestone-week-4">Mốc tuần 4</Label>
-                          <Input
-                            id="milestone-week-4"
-                            value={draft.week4Milestone}
-                            onChange={(event) => handleChange("week4Milestone", event.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="milestone-week-8">Mốc tuần 8</Label>
-                          <Input
-                            id="milestone-week-8"
-                            value={draft.week8Milestone}
-                            onChange={(event) => handleChange("week8Milestone", event.target.value)}
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="success-evidence">Bằng chứng thành công muốn thấy</Label>
-                        <Textarea
-                          id="success-evidence"
-                          rows={3}
-                          value={draft.successEvidence}
-                          onChange={(event) => handleChange("successEvidence", event.target.value)}
-                        />
-                      </div>
-                    </div>
-                  </details>
-                </div>
-
-                <div className="space-y-4 rounded-[28px] border border-white/70 bg-white/72 p-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Sau khi tạo xong</p>
-                  <div className="rounded-[22px] border border-white/70 bg-white/78 p-4 text-sm leading-7 text-slate-700">
-                    Bạn sẽ đi thẳng vào trung tâm 12 tuần, nơi có màn Hôm nay, Tuần, Tiến độ và Cài đặt trong cùng một
-                    nhịp.
-                  </div>
-                  {setupGuideSupport && setupGuideTemplate && (
-                    <div className="rounded-[22px] border border-slate-900 bg-slate-950 p-4 text-white">
-                      <p className="text-xs uppercase tracking-[0.16em] text-white/54">
-                        Tuần đầu sẽ khởi động như thế nào
-                      </p>
-                      <p className="mt-2 text-base font-semibold">{setupGuideSupport.week1Headline}</p>
-                      <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1Support}</p>
-                    </div>
-                  )}
-                  <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tuần đầu có gì</p>
-                    <div className="mt-3 space-y-2">
-                      {weekOneTaskPreview.length === 0 ? (
-                        <p className="text-sm text-slate-500">
-                          Bạn có thể thêm hoặc chỉnh việc trước khi tạo kế hoạch để tuần đầu hiện rõ hơn.
-                        </p>
-                      ) : (
-                        weekOneTaskPreview.map((task) => (
-                          <div
-                            key={task}
-                            className="rounded-2xl border border-white/70 bg-slate-50/80 px-4 py-3 text-sm text-slate-700"
-                          >
-                            {task}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                    {weekOneTaskWarning ? <p className="mt-3 text-xs text-amber-600">{weekOneTaskWarning}</p> : null}
-                  </div>
-                  {(draft.week4Milestone || draft.week8Milestone) && (
-                    <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-                      <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Mốc giữa chu kỳ</p>
-                      <div className="mt-3 space-y-3">
-                        <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
-                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tuần 4</p>
-                          <p className="mt-2 text-sm leading-7 text-slate-700">{draft.week4Milestone}</p>
-                        </div>
-                        <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
-                          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tuần 8</p>
-                          <p className="mt-2 text-sm leading-7 text-slate-700">{draft.week8Milestone}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <div className="flex flex-col justify-between gap-3 border-t border-white/70 pt-2 sm:flex-row">
-              <Button className="w-full sm:w-auto" variant="outline" onClick={handleBack}>
-                <ArrowLeft className="h-4 w-4" />
-                Quay lại
-              </Button>
-              {currentStep < STEPS.length - 1 ? (
-                <Button className="w-full sm:w-auto" onClick={handleNext}>
-                  Tiếp tục
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              ) : (
-                <Button className="w-full sm:w-auto" onClick={handleSubmit}>
-                  <Flag className="h-4 w-4" />
-                  Tạo kế hoạch 12 tuần
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+        {currentStep === 3 && (
+          <ReviewStep
+            smartGoal={smartGoal}
+            draft={draft}
+            focusArea={focusArea}
+            selectedTemplate={selectedTemplate}
+            setupGuideSupport={setupGuideSupport}
+            setupGuideTemplate={setupGuideTemplate}
+            weekOneTaskPreview={weekOneTaskPreview}
+            weekOneTaskWarning={weekOneTaskWarning}
+            onChange={handleChange}
+          />
+        )}
+      </SetupStepShell>
     </div>
   );
 }

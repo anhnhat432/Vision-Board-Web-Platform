@@ -94,7 +94,10 @@ export function UpgradePaywallDialog({
         }
 
         toast.success(result.message, {
-          description: "Checkout sẽ tiếp tục ở provider đã cấu hình.",
+          description:
+            result.providerMode === "mock_provider"
+              ? "Mock checkout không thu tiền thật; quyền mở local trên trình duyệt này."
+              : "Checkout sẽ tiếp tục ở provider đã cấu hình.",
         });
       } else if (result.status === "already_active") {
         toast.info(result.message);
@@ -104,7 +107,7 @@ export function UpgradePaywallDialog({
             result.providerMode === "api_contract"
               ? "Quyền đã được đồng bộ qua billing contract."
               : result.providerMode === "mock_provider"
-                ? "Đã hoàn tất qua mock provider để bạn test end-to-end ngay trên web."
+                ? "Mock checkout đã mở quyền local trên trình duyệt này, không thu tiền thật."
                 : "Đây là lớp local checkout để nối billing thật ở bước sau.",
         });
       }
@@ -266,7 +269,7 @@ export function UpgradePaywallDialog({
           <DialogFooter className="flex flex-col gap-3 border-t border-white/70 bg-white/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5">
             <p className="text-sm leading-7 text-slate-500">
               {demoMode
-                ? "Đây là bản demo nên bước nâng cấp hiện đang mô phỏng trên thiết bị này để bạn xem toàn bộ trải nghiệm."
+                ? "Đây là bản demo: mock checkout không thu tiền thật và quyền Plus chỉ lưu trên trình duyệt này."
                 : billingProviderStatus.mode === "api_contract"
                   ? "Nếu host đã cấu hình billing thật, web sẽ chuyển bạn sang cổng thanh toán tương ứng ở bước tiếp theo."
                   : "Bạn vẫn có thể tiếp tục với bản Free nếu chưa cần mở thêm lớp hỗ trợ lúc này."}
