@@ -64,6 +64,7 @@ The public demo supports:
 - Reflection entry from weekly review.
 - Progress tab.
 - Settings/local demo controls.
+- Optional no-login feedback dialog with browser-local raw feedback storage.
 - Mock paywall.
 - Mock checkout.
 - Local Plus entitlement unlock.
@@ -80,6 +81,7 @@ Release-candidate status from 2026-04-29:
 Data persistence:
 
 - Demo data is stored in the current browser/device using local storage.
+- Raw feedback submitted from the demo is stored locally on the current browser/device; analytics only receives safe metadata such as rating, category, and text length.
 - Refreshing the page should keep the plan on the same browser/device.
 - Clearing browser/site data can remove demo progress.
 - The demo should not be presented as durable account-level storage.

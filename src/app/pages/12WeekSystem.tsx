@@ -146,9 +146,12 @@ export function TwelveWeekSystem() {
     currentLagMetricValue,
     latestCheckIn,
   });
+  const hasTodayTasks = todayQueue.length > 0;
+  const hasCurrentReview = Boolean(currentReview);
 
   const activeGoalIdRef = useRef<string | null>(activeGoal?.id ?? null);
   const lastBackendSyncKeyRef = useRef<string | null>(null);
+  const systemViewedGoalIdRef = useRef<string | null>(null);
   const tabsTopRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -340,6 +343,35 @@ export function TwelveWeekSystem() {
       !isResetDialogOpen &&
       !isClearLocalDialogOpen,
   });
+
+  useEffect(() => {
+    if (!isReady || !activeGoal || !system) return;
+    if (systemViewedGoalIdRef.current === activeGoal.id) return;
+
+    systemViewedGoalIdRef.current = activeGoal.id;
+    trackAnalyticsEvent(
+      "twelve_week_system_viewed",
+      {
+        source: "12_week_system",
+        week_number: currentWeek,
+        total_weeks: system.totalWeeks,
+        current_plan: activePlanCode,
+        active_tab: activeTab,
+        has_today_tasks: hasTodayTasks,
+        has_weekly_review: hasCurrentReview,
+      },
+      { goalId: activeGoal.id },
+    );
+  }, [
+    activeGoal,
+    activePlanCode,
+    activeTab,
+    currentWeek,
+    hasCurrentReview,
+    hasTodayTasks,
+    isReady,
+    system,
+  ]);
 
   const hasBackendSyncIssue = getHasBackendSyncIssue(backendConnectionStatus, lastBackendHydrationResult);
   const backendSyncIssueMessage = getBackendSyncIssueMessage(backendConnectionStatus, lastBackendHydrationResult);
@@ -594,6 +626,11 @@ export function TwelveWeekSystem() {
             Cài đặt
           </TabsTrigger>
         </TabsList>
+
+        <p className="mt-3 rounded-lg border border-slate-200 bg-white/82 px-4 py-3 text-sm leading-6 text-slate-600 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.16)]">
+          Hôm nay: tick việc và check-in. Tuần: chốt review. Tiến độ: xem điểm và cột mốc. Cài đặt: export hoặc xóa
+          dữ liệu local trên trình duyệt này.
+        </p>
 
         <TabsContent value="today" className="space-y-6 pt-4">
           <TabErrorBoundary fallbackTitle="Tab Hôm nay gặp lỗi">

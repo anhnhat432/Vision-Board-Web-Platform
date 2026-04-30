@@ -69,7 +69,7 @@ function createGoalRepository() {
   };
 }
 
-function createPlanFixture() {
+function createPlanFixture(options: { failWeekNumber?: number } = {}) {
   const plans = new Map([
     [
       ids.plan,
@@ -149,9 +149,16 @@ function createPlanFixture() {
         plans.set(id, updated as never);
         return updated;
       },
+      async deletePlan(id: string) {
+        return plans.delete(id);
+      },
     },
     weekRepository: {
       async createWeek(data: Record<string, unknown>) {
+        if (data.weekNumber === options.failWeekNumber) {
+          throw new Error("Simulated week initialization failure");
+        }
+
         const week = {
           id: `507f1f77bcf86cd7994390${weeks.size + 60}`,
           focus: "",
@@ -165,6 +172,17 @@ function createPlanFixture() {
       },
       async getWeeksByPlanId(planId: string) {
         return [...weeks.values()].filter((week) => week.planId === planId);
+      },
+      async deleteWeeksByPlanId(planId: string) {
+        const matchingWeekIds = [...weeks.entries()]
+          .filter(([, week]) => week.planId === planId)
+          .map(([weekId]) => weekId);
+
+        for (const weekId of matchingWeekIds) {
+          weeks.delete(weekId);
+        }
+
+        return matchingWeekIds.length;
       },
     },
     taskRepository: {
@@ -306,5 +324,31 @@ describe("plan ownership", () => {
 
     assert.equal(plan.vision, "New cycle");
     assert.equal(weeks.length, 3);
+  });
+
+  it("rolls back a newly created plan when week initialization fails", async () => {
+    const fixture = createPlanFixture({ failWeekNumber: 2 });
+    const service = new PlanService(
+      fixture.planRepository as never,
+      fixture.weekRepository as never,
+      fixture.taskRepository as never,
+      fixture.metricRepository as never,
+    );
+
+    await assert.rejects(
+      service.createPlanForUser(ownerUserId, {
+        vision: "  Broken cycle  ",
+        startDate: "2026-02-01T00:00:00.000Z",
+        initializeWeeks: true,
+        totalWeeks: 3,
+      }),
+      /week initialization failure/,
+    );
+
+    const plans = await fixture.planRepository.getPlansByUserId(ownerUserId);
+    const rolledBackPlan = plans.find((plan) => plan.vision === "Broken cycle");
+
+    assert.equal(rolledBackPlan, undefined);
+    assert.equal((await fixture.weekRepository.getWeeksByPlanId("507f1f77bcf86cd799439098")).length, 0);
   });
 });

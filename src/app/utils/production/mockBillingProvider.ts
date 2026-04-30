@@ -1,10 +1,8 @@
-
-import { getCurrentEntitlementKeys, getCurrentPlan } from "../storage";
 import type { BillingAccessContractPayload, BillingProvider, CheckoutFlowInput } from "../billing-contract";
-import { trackCheckoutCompleted, type MonetizationSource } from "../monetization-analytics";
+import { type MonetizationSource, trackCheckoutCompleted } from "../monetization-analytics";
+import { getCurrentEntitlementKeys, getCurrentPlan } from "../storage";
 import type { BillingCycle, Entitlement, PricingPlanCode } from "../storage-types";
 import { getEntitlementsForPlan, normalizePlanCode } from "../twelve-week-premium";
-import { MOCK_BILLING_ACCOUNT_KEY, MOCK_BILLING_SESSION_PREFIX } from "./env";
 import {
   applyBillingAccessPayload,
   buildReturnUrl,
@@ -12,6 +10,7 @@ import {
   getPlanRank,
   getProviderLabel,
 } from "./billingCore";
+import { MOCK_BILLING_ACCOUNT_KEY, MOCK_BILLING_SESSION_PREFIX } from "./env";
 
 export interface MockBillingProviderAccount {
   customerId: string;
@@ -110,7 +109,7 @@ function buildMockBillingPayload(account: MockBillingProviderAccount): BillingAc
       externalSubscriptionId: account.subscriptionId,
     },
     entitlements: account.entitlements,
-    message: `Mock provider xác nhận gói ${account.planCode} đang hoạt động.`,
+    message: `Mock provider xác nhận gói ${account.planCode} đang mở local.`,
   };
 }
 
@@ -138,7 +137,7 @@ export const mockBillingProvider: BillingProvider = {
         status: "already_active",
         providerMode: "mock_provider",
         planCode,
-        message: `Mock provider xác nhận gói ${planCode} đã sẵn sàng cho tài khoản này.`,
+        message: `Mock provider xác nhận gói ${planCode} đã sẵn sàng trên trình duyệt này.`,
       };
     }
 
@@ -148,7 +147,7 @@ export const mockBillingProvider: BillingProvider = {
         status: "already_active",
         providerMode: "mock_provider",
         planCode: currentPlan,
-        message: `Gói ${currentPlan} đã đang hoạt động trên thiết bị này.`,
+        message: `Gói ${currentPlan} đã mở local trên thiết bị này.`,
       };
     }
 
@@ -172,7 +171,7 @@ export const mockBillingProvider: BillingProvider = {
       providerMode: "mock_provider",
       planCode: currentPlan,
       checkoutUrl: createMockCheckoutUrl(sessionId),
-      message: "Đã tạo mock checkout session. Bạn có thể hoàn tất flow thanh toán giả lập ngay trên web.",
+      message: "Đã tạo mock checkout session. Flow này không thu tiền thật và hoàn tất ngay trên web.",
     };
   },
   syncEntitlements: async (_goalId?: string) => {
@@ -187,8 +186,8 @@ export const mockBillingProvider: BillingProvider = {
         entitlementKeys: getCurrentEntitlementKeys(),
         message:
           getCurrentPlan() === "FREE"
-            ? "Mock provider hiện chưa có giao dịch nào và web đang khớp ở gói Free."
-            : "Mock provider chưa có giao dịch nào để đồng bộ. Web giữ nguyên trạng thái hiện tại.",
+            ? "Mock provider hiện chưa có mock upgrade nào và web đang khớp ở gói Free."
+            : "Mock provider chưa có mock upgrade nào để đồng bộ. Web giữ nguyên trạng thái hiện tại.",
       };
     }
 
@@ -209,7 +208,7 @@ export const mockBillingProvider: BillingProvider = {
       message:
         isSamePlan && isSameEntitlements
           ? "Quyền hiện tại đã khớp với mock provider."
-          : `Đã đồng bộ gói ${planCode} và quyền premium từ mock provider.`,
+          : `Đã cập nhật gói ${planCode} và quyền local từ mock provider.`,
     };
   },
   restoreAccess: async (_goalId?: string) => {
@@ -222,7 +221,7 @@ export const mockBillingProvider: BillingProvider = {
         providerMode: "mock_provider",
         planCode: getCurrentPlan(),
         entitlementKeys: getCurrentEntitlementKeys(),
-        message: "Mock provider chưa có giao dịch nào để khôi phục.",
+        message: "Mock provider chưa có mock upgrade nào để khôi phục.",
       };
     }
 
@@ -237,8 +236,8 @@ export const mockBillingProvider: BillingProvider = {
       entitlementKeys,
       message:
         planCode === currentPlan
-          ? `Mock provider xác nhận gói ${planCode} vẫn đang hoạt động.`
-          : `Đã khôi phục quyền ${planCode} từ mock provider.`,
+          ? `Mock provider xác nhận gói ${planCode} vẫn đang mở local.`
+          : `Đã khôi phục quyền local ${planCode} từ mock provider.`,
     };
   },
   openCustomerPortal: async () => ({
@@ -246,10 +245,9 @@ export const mockBillingProvider: BillingProvider = {
     status: "local_only",
     providerMode: "mock_provider",
     providerLabel: getProviderLabel("mock_provider"),
-    message: "Mock provider chưa có cổng quản lý thanh toán riêng.",
+    message: "Mock provider chưa có cổng quản lý billing thật.",
   }),
 };
-
 
 export function resolveAppReturnPath(returnUrl?: string): string {
   if (!returnUrl) return "/12-week-system?tab=settings";
@@ -311,6 +309,6 @@ export function completeMockCheckoutSession(sessionId: string): MockCheckoutComp
     ok: true,
     planCode: account.planCode,
     returnUrl: resolveAppReturnPath(session.returnUrl),
-    message: `Đã xác nhận mock checkout và mở gói ${account.planCode}.`,
+    message: `Đã xác nhận mock checkout và mở gói ${account.planCode} local, không thu tiền thật.`,
   };
 }

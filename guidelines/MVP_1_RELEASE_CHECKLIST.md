@@ -256,9 +256,21 @@ Mobile:
 PWA/service worker:
 
 - [ ] `public/sw.js` does not serve stale broken assets after deploy.
-- [ ] Hard refresh or unregister service worker if production shows stale UI.
-- [ ] Offline navigation fallback is acceptable for cached `/index.html`.
+- [ ] Navigation requests load from network first; cached `/index.html` is only an offline fallback.
+- [ ] Vite hashed JS/CSS assets can use cache-first, but `/sw.js` itself must not be served from runtime cache.
+- [ ] Mock checkout routes such as `/billing/mock-checkout?session=...` load through the SPA rewrite and are not cached as session-specific shell entries.
+- [ ] After deploy, hard refresh the production URL and confirm the visible dashboard matches the new release copy.
+- [ ] If production shows stale UI, unregister the service worker before treating it as a failed deployment.
+- [ ] Clear site data when validating rollback or when a tester reports seeing an old dashboard after rollback.
 - [ ] Service worker cache name changes are considered if shipping asset behavior changes.
+
+If a tester sees an old build:
+
+- [ ] Desktop Chrome/Edge: open DevTools -> Application -> Service Workers -> Unregister, then Application -> Storage -> Clear site data.
+- [ ] Desktop Chrome/Edge quick check: open DevTools, right-click reload, choose Empty Cache and Hard Reload.
+- [ ] Mobile browser: close all tabs for the site, clear site data/history for the domain if available, then reopen the production URL.
+- [ ] Reopen `/`, `/12-week-system`, and `/billing/mock-checkout?session=invalid` to confirm SPA refresh behavior still works after cache reset.
+- [ ] Re-run `MVP1_SMOKE_URL=<candidate-url> npm run smoke:mvp1` after cache reset.
 
 Accessibility/ergonomics:
 
@@ -327,7 +339,11 @@ If production demo breaks:
 - [ ] Set `VITE_APP_MODE=demo`.
 - [ ] Set `VITE_BILLING_PROVIDER_MODE=mock_provider`.
 - [ ] Set `VITE_ANALYTICS_MODE=off` if analytics is suspected.
-- [ ] Ask testers to hard refresh and unregister service worker if stale cache persists.
+- [ ] Ask testers to hard refresh after rollback.
+- [ ] If stale UI persists, unregister the service worker for the domain.
+- [ ] Clear site data when testing rollback so cached `/index.html`, old chunks, mock checkout sessions, and local demo state do not mask the deployed build.
+- [ ] After rollback, open the production URL in a clean browser profile and confirm the dashboard shows the expected rollback build.
+- [ ] After rollback, refresh a deep SPA route such as `/12-week-system` and `/billing/mock-checkout?session=invalid` to verify Vercel rewrite still serves the app shell.
 - [ ] Re-run `npm run smoke:prod` after rollback.
 
 If backend is down:

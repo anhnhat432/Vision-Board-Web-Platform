@@ -1,7 +1,3 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
-import { motion } from "motion/react";
-import { Suspense, lazy } from "react";
 import {
   AlertTriangle,
   ArrowRight,
@@ -18,14 +14,36 @@ import {
   TrendingUp,
   UserPlus,
 } from "lucide-react";
+import { motion } from "motion/react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
 
 import { toast } from "sonner";
-
+import { DashboardDataBackupCard } from "@/features/dashboard/components/DashboardDataBackupCard";
+import { ExecutionScoreCard } from "@/features/dashboard/components/ExecutionScoreCard";
+import { GoalProgressCard } from "@/features/dashboard/components/GoalProgressCard";
+import { MetricsSummary } from "@/features/dashboard/components/MetricsSummary";
+import { PublicVisitorAccountCard } from "@/features/dashboard/components/PublicVisitorAccountCard";
+import { PublicVisitorHero } from "@/features/dashboard/components/PublicVisitorHero";
+import { StreakCard } from "@/features/dashboard/components/StreakCard";
+import { WeeklyProgressChart } from "@/features/dashboard/components/WeeklyProgressChart";
+import {
+  buildCurrentWeekExecutionSnapshot,
+  buildGoalProgressSnapshot,
+  buildLeadMetricsSummary,
+  buildWeeklyProgressPoints,
+  calculateWeeklyStreak,
+} from "@/features/dashboard/helpers/dashboardInsights";
+import { buildLoginPath } from "@/features/dashboard/helpers/dashboardNavigation";
+import { useDashboardPlanLink } from "@/features/dashboard/hooks/useDashboardPlanLink";
+import { usePlan12Week } from "@/features/plan12week/hooks";
+import { useAuthContext } from "@/lib/auth/AuthContext";
+import { FeedbackDialog } from "../components/FeedbackDialog";
+import { NewUserGuideBanner } from "../components/NewUserGuide";
 import { SpotlightTour, type SpotlightTourStep } from "../components/SpotlightTour";
+import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { NewUserGuideBanner } from "../components/NewUserGuide";
-import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { CountUp } from "../components/ui/count-up";
 import { Progress } from "../components/ui/progress";
 import { Reveal } from "../components/ui/reveal";
@@ -36,8 +54,13 @@ import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useUpgradeDialog } from "../hooks/useUpgradeDialog";
 import { trackAnalyticsEvent } from "../utils/analytics";
+import { isDemoMode } from "../utils/app-mode";
 import {
-  type UserData,
+  trackRescueActionTaken,
+  trackRescueTriggerDismissed,
+  trackRescueTriggerFired,
+} from "../utils/monetization-analytics";
+import {
   calculateGoalProgress,
   exportUserDataSnapshot,
   formatCalendarDate,
@@ -54,34 +77,10 @@ import {
   parseStoredUserData,
   saveUserData,
   sortReflectionsByDateDesc,
+  type UserData,
 } from "../utils/storage";
-import { usePlan12Week } from "@/features/plan12week/hooks";
-import { useDashboardPlanLink } from "@/features/dashboard/hooks/useDashboardPlanLink";
-import {
-  buildCurrentWeekExecutionSnapshot,
-  buildGoalProgressSnapshot,
-  buildLeadMetricsSummary,
-  buildWeeklyProgressPoints,
-  calculateWeeklyStreak,
-} from "@/features/dashboard/helpers/dashboardInsights";
-import { GoalProgressCard } from "@/features/dashboard/components/GoalProgressCard";
-import { ExecutionScoreCard } from "@/features/dashboard/components/ExecutionScoreCard";
-import { WeeklyProgressChart } from "@/features/dashboard/components/WeeklyProgressChart";
-import { StreakCard } from "@/features/dashboard/components/StreakCard";
-import { MetricsSummary } from "@/features/dashboard/components/MetricsSummary";
-import { PublicVisitorHero } from "@/features/dashboard/components/PublicVisitorHero";
-import { PublicVisitorAccountCard } from "@/features/dashboard/components/PublicVisitorAccountCard";
-import { DashboardDataBackupCard } from "@/features/dashboard/components/DashboardDataBackupCard";
-import { buildLoginPath } from "@/features/dashboard/helpers/dashboardNavigation";
 import { getEntitlementLabel, getPlanLabel } from "../utils/twelve-week-premium";
 import { dismissRescueTrigger, evaluateRescueTriggers } from "../utils/twelve-week-system-ui";
-import {
-  trackRescueActionTaken,
-  trackRescueTriggerDismissed,
-  trackRescueTriggerFired,
-} from "../utils/monetization-analytics";
-import { useAuthContext } from "@/lib/auth/AuthContext";
-import { isDemoMode } from "../utils/app-mode";
 
 const DashboardLifeAreaRadar = lazy(async () => {
   const module = await import("../components/DashboardLifeAreaRadar");
@@ -171,6 +170,7 @@ function DashboardContent({
   const { isConfigured, user } = useAuthContext();
   const [dismissedTrigger, setDismissedTrigger] = useState<string | null>(null);
   const importFileRef = useRef<HTMLInputElement>(null);
+  const landingViewedRef = useRef(false);
   const progressViewedGoalIdRef = useRef<string | null>(null);
   const { currentPlanCode, currentPlanDefinition, entitlementKeys, premiumStatusItems } = usePlanEntitlements(userData);
   const demoMode = isDemoMode();
@@ -203,6 +203,13 @@ function DashboardContent({
       return;
     }
 
+    trackAnalyticsEvent("demo_started", {
+      source: "dashboard",
+      app_mode: demoMode ? "demo" : "real",
+      signed_in: Boolean(user),
+      auth_configured: isConfigured,
+      start_destination: "onboarding",
+    });
     navigate("/onboarding");
   };
 
@@ -324,6 +331,21 @@ function DashboardContent({
           : getTwelveWeekTasksForWeek(effectiveSystem, activeSystemWeek).filter((task) => !task.completed)
         ).slice(0, 3)
       : [];
+  const signedIn = Boolean(user);
+  const hasLocalTwelveWeekSystem = Boolean(effectiveSystem);
+
+  useEffect(() => {
+    if (landingViewedRef.current) return;
+
+    landingViewedRef.current = true;
+    trackAnalyticsEvent("landing_viewed", {
+      source: "dashboard",
+      app_mode: demoMode ? "demo" : "real",
+      signed_in: signedIn,
+      auth_configured: isConfigured,
+      has_local_12_week_system: hasLocalTwelveWeekSystem,
+    });
+  }, [demoMode, hasLocalTwelveWeekSystem, isConfigured, signedIn]);
 
   useEffect(() => {
     if (!visibleActiveTwelveWeekGoal || !effectiveSystem || !activeSystemWeek) return;
@@ -499,10 +521,9 @@ function DashboardContent({
         {
           eyebrow: "Điểm bắt đầu",
           title: demoMode ? "Đăng nhập không phải cổng chặn demo" : "Đừng vào thẳng 12 tuần khi mục tiêu còn mơ hồ",
-          description:
-            demoMode
-              ? "Bạn có thể dùng core flow ngay trên trình duyệt này. Đăng ký chỉ là lựa chọn để chuẩn bị sync sau."
-              : "Web này dẫn bạn từ bức tranh cuộc sống hiện tại tới một mục tiêu SMART đủ rõ, rồi mới chia thành kế hoạch 12 tuần.",
+          description: demoMode
+            ? "Bạn có thể dùng core flow ngay trên trình duyệt này. Đăng ký chỉ là lựa chọn để chuẩn bị sync sau."
+            : "Web này dẫn bạn từ bức tranh cuộc sống hiện tại tới một mục tiêu SMART đủ rõ, rồi mới chia thành kế hoạch 12 tuần.",
           cardClass: "rounded-[22px] border border-slate-300 bg-slate-50/90 p-4 shadow-sm",
           eyebrowClass: "text-slate-500",
           titleClass: "text-slate-950",
@@ -516,10 +537,9 @@ function DashboardContent({
         {
           eyebrow: "Dữ liệu cá nhân",
           title: demoMode ? "Sync là lớp sau của demo local-first" : "Đăng nhập để đồng bộ thay vì chỉ lưu trên máy",
-          description:
-            demoMode
-              ? "Bản demo hiện lưu trên trình duyệt này. Nếu muốn giữ bản sao, hãy export dữ liệu trước khi đổi máy hoặc xóa site data."
-              : "Khi có tài khoản, mục tiêu, kế hoạch và tiến độ được nối với workspace của bạn thay vì phụ thuộc vào trình duyệt hiện tại.",
+          description: demoMode
+            ? "Bản demo hiện lưu trên trình duyệt này. Nếu muốn giữ bản sao, hãy export dữ liệu trước khi đổi máy hoặc xóa site data."
+            : "Khi có tài khoản, mục tiêu, kế hoạch và tiến độ được nối với workspace của bạn thay vì phụ thuộc vào trình duyệt hiện tại.",
           cardClass: "rounded-[22px] border border-slate-200 bg-white p-4 shadow-sm",
           eyebrowClass: "text-slate-400",
           titleClass: "text-slate-900",
@@ -673,12 +693,21 @@ function DashboardContent({
         onCheckoutComplete={onReload}
       />
       {isPublicVisitor ? (
-        <PublicVisitorHero
-          isDemo={demoMode}
-          onStartDemo={handlePublicVisitorStart}
-          onSignIn={() => handleAuthNavigate("signin")}
-          onSignUp={() => handleAuthNavigate("signup")}
-        />
+        <>
+          <PublicVisitorHero
+            isDemo={demoMode}
+            onStartDemo={handlePublicVisitorStart}
+            onSignIn={() => handleAuthNavigate("signin")}
+            onSignUp={() => handleAuthNavigate("signup")}
+          />
+          <div className="flex justify-end">
+            <FeedbackDialog
+              source="dashboard"
+              context="dashboard"
+              triggerClassName="border-slate-200 bg-white/80 text-slate-700 hover:bg-white"
+            />
+          </div>
+        </>
       ) : shouldShowSetupGuide ? (
         <NewUserGuideBanner userData={userData} variant="compact" />
       ) : null}

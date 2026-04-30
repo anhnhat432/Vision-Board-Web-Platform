@@ -3,10 +3,11 @@
   import App from "./app/App.tsx";
   import "./styles/index.css";
 
-  // Inject GA4 script when analytics mode is ga4 and measurement ID is set
+  // Inject GA4 script only for explicitly configured real-mode analytics.
+  const appMode = import.meta.env.VITE_APP_MODE?.trim().toLowerCase() ?? "demo";
   const analyticsMode = import.meta.env.VITE_ANALYTICS_MODE?.trim().toLowerCase();
   const gaMeasurementId = import.meta.env.VITE_GA_MEASUREMENT_ID?.trim();
-  if (analyticsMode === "ga4" && gaMeasurementId && /^G-[A-Z0-9]+$/.test(gaMeasurementId)) {
+  if (appMode === "real" && analyticsMode === "ga4" && gaMeasurementId && /^G-[A-Z0-9]+$/.test(gaMeasurementId)) {
     const gtagScript = document.createElement("script");
     gtagScript.async = true;
     gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaMeasurementId)}`;
@@ -30,4 +31,3 @@
       navigator.serviceWorker.register("/sw.js").catch(() => {});
     });
   }
-  

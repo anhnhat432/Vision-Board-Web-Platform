@@ -164,16 +164,20 @@ export class PlanService {
     });
 
     if (validatedPayload.initializeWeeks) {
-      await Promise.all(
-        Array.from({ length: validatedPayload.totalWeeks }, (_, index) =>
-          this.weekRepository.createWeek({
+      try {
+        for (let index = 0; index < validatedPayload.totalWeeks; index += 1) {
+          await this.weekRepository.createWeek({
             planId: plan.id,
             weekNumber: index + 1,
             focus: "",
             expectedOutput: "",
-          }),
-        ),
-      );
+          });
+        }
+      } catch (error) {
+        await this.weekRepository.deleteWeeksByPlanId(plan.id);
+        await this.planRepository.deletePlan(plan.id);
+        throw error;
+      }
     }
 
     return plan;

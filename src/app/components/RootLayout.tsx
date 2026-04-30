@@ -1,24 +1,15 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
-  Award,
-  BookOpen,
-  CalendarDays,
   CheckCircle2,
   ChevronDown,
   Compass,
-  CreditCard,
-  Images,
-  LayoutDashboard,
   LogOut,
   Menu,
   Moon,
-  Package,
   RefreshCw,
   Sparkles,
   Sun,
-  Target,
-  TrendingUp,
   User2,
   X,
 } from "lucide-react";
@@ -32,262 +23,32 @@ import {
   markNewUserGuideSeen,
 } from "../utils/new-user-guide";
 import { isDemoMode } from "../utils/app-mode";
+import {
+  getAnonymousLocalDataMigrationCandidate,
+  hasSkippedLocalDataMigrationPrompt,
+  importAnonymousLocalDataToAccountScope,
+  markLocalDataMigrationPromptSkipped,
+  type LocalDataMigrationCandidate,
+} from "../utils/local-data-migration";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { BACKEND_PLAN_HYDRATION_EVENT_NAME, useBackendPlanHydration } from "../hooks/useBackendPlanHydration";
 import { useTheme } from "../hooks/useTheme";
 import { MotivationalReminder } from "./MotivationalReminder";
 import { NewUserGuideDialog } from "./NewUserGuide";
+import { LocalDataMigrationPrompt } from "./root-layout/LocalDataMigrationPrompt";
+import {
+  buildAuthPath,
+  getNavItemsForState,
+  isActiveRoute,
+  MOBILE_NAV_LABELS,
+  prefetchRoute,
+  WARM_PREFETCH_ROUTE_PATHS,
+} from "./root-layout/navConfig";
+import { GUIDED_PATHS, getRouteMeta, getRouteTone } from "./root-layout/routeMeta";
+import { WorkspaceLoadingGate } from "./root-layout/WorkspaceLoadingGate";
+import { buildLoginRedirect, isAuthProtectedPath, useWorkspaceGate } from "./root-layout/useWorkspaceGate";
 import { Button } from "./ui/button";
 import { Toaster } from "./ui/sonner";
-
-const GUIDED_PATHS = new Set([
-  "/onboarding",
-  "/life-insight",
-  "/feasibility",
-  "/smart-goal-setup",
-  "/12-week-setup",
-  "/12-week-plan-setup",
-  "/12-week-plan-overview",
-]);
-
-function isAuthProtectedPath(pathname: string) {
-  return pathname === "/order" || pathname.startsWith("/order-status");
-}
-
-function isPublicHomePath(pathname: string) {
-  return pathname === "/";
-}
-
-function buildLoginRedirect(pathname: string, search: string, hash: string) {
-  const destination = `${pathname}${search}${hash}`;
-  return {
-    destination,
-    loginPath: `/login?next=${encodeURIComponent(destination)}`,
-  };
-}
-
-function buildAuthPath(mode: "signin" | "signup", pathname: string, search: string, hash: string) {
-  const destination = `${pathname}${search}${hash}`;
-  const params = new URLSearchParams({ next: destination });
-  if (mode === "signup") params.set("mode", "signup");
-  return `/login?${params.toString()}`;
-}
-
-const ROUTE_META = [
-  {
-    match: (pathname: string) => pathname === "/",
-    label: "Bảng điều khiển",
-    title: "Bảng điều khiển – Dear Our Future",
-    tagline: "Thấy rõ quỹ đạo phát triển của mình, không chỉ những việc cần làm hôm nay.",
-  },
-  {
-    match: (pathname: string) => pathname.startsWith("/goals"),
-    label: "Mục tiêu",
-    title: "Mục tiêu – Dear Our Future",
-    tagline: "Biến ý định thành nhịp thực thi đều, rõ và đo được.",
-  },
-  {
-    match: (pathname: string) => pathname.startsWith("/12-week"),
-    label: "Hệ 12 tuần",
-    title: "Hệ 12 tuần – Dear Our Future",
-    tagline: "Giữ đà 12 tuần như đang điều hành một chiến dịch thật sự.",
-  },
-  {
-    match: (pathname: string) => pathname.startsWith("/vision-board"),
-    label: "Bảng tầm nhìn",
-    title: "Bảng tầm nhìn – Dear Our Future",
-    tagline: "Dựng tương lai theo cách đủ đẹp để bạn muốn quay lại mỗi ngày.",
-  },
-  {
-    match: (pathname: string) => pathname.startsWith("/gallery"),
-    label: "Thư viện",
-    title: "Thư viện – Dear Our Future",
-    tagline: "Những phiên bản tương lai của bạn đang được lưu lại theo từng mùa phát triển.",
-  },
-  {
-    match: (pathname: string) => pathname.startsWith("/life-balance"),
-    label: "Cân bằng cuộc sống",
-    title: "Cân bằng cuộc sống – Dear Our Future",
-    tagline: "Nhìn toàn cảnh để biết nơi nào nên được chăm lại trước tiên.",
-  },
-  {
-    match: (pathname: string) => pathname.startsWith("/achievements"),
-    label: "Thành tựu",
-    title: "Thành tựu – Dear Our Future",
-    tagline: "Mọi cột mốc nhỏ đều xứng đáng được nhìn thấy và ăn mừng.",
-  },
-  {
-    match: (pathname: string) => pathname.startsWith("/journal"),
-    label: "Nhật ký",
-    title: "Nhật ký – Dear Our Future",
-    tagline: "Giữ lại cảm xúc, bài học và những chuyển động tinh tế của hành trình.",
-  },
-  {
-    match: (pathname: string) => pathname.startsWith("/billing/plan"),
-    label: "Gói & thanh toán",
-    title: "Gói & thanh toán – Dear Our Future",
-    tagline: "Xem gói hiện tại, quyền truy cập và thao tác thanh toán.",
-  },
-  {
-    match: (pathname: string) => pathname.startsWith("/admin/orders"),
-    label: "Quản trị đơn hàng",
-    title: "Quản trị đơn hàng – Dear Our Future",
-    tagline: "Xem và chuyển trạng thái đơn hàng từ người dùng.",
-  },
-  {
-    match: (pathname: string) => pathname.startsWith("/order-status"),
-    label: "Trạng thái đơn",
-    title: "Trạng thái đơn – Dear Our Future",
-    tagline: "Theo dõi tiến trình đơn kit trong workspace local hiện tại.",
-  },
-  {
-    match: (pathname: string) => pathname.startsWith("/order"),
-    label: "Tạo đơn",
-    title: "Tạo đơn – Dear Our Future",
-    tagline: "Chốt thông tin kit cá nhân hóa trước khi nối backend và fulfillment thật.",
-  },
-];
-
-const NAV_ITEMS = [
-  { path: "/", label: "Bảng điều khiển", compactLabel: "Điều khiển", icon: LayoutDashboard },
-  { path: "/goals", label: "Mục tiêu", compactLabel: "Mục tiêu", icon: Target },
-  { path: "/12-week-system", label: "Hệ thống 12 tuần", compactLabel: "12 tuần", icon: CalendarDays },
-  { path: "/vision-board", label: "Bảng tầm nhìn", compactLabel: "Tầm nhìn", icon: Sparkles },
-  { path: "/gallery", label: "Thư viện", compactLabel: "Thư viện", icon: Images },
-  { path: "/life-balance", label: "Cân bằng cuộc sống", compactLabel: "Cân bằng", icon: TrendingUp },
-  { path: "/achievements", label: "Thành tựu", compactLabel: "Thành tựu", icon: Award },
-  { path: "/journal", label: "Nhật ký", compactLabel: "Nhật ký", icon: BookOpen },
-  { path: "/billing/plan", label: "Gói & thanh toán", compactLabel: "Gói", icon: CreditCard },
-  { path: "/order-status", label: "My Orders", compactLabel: "My Orders", icon: Package },
-];
-
-const PRIMARY_NAV_PATHS = new Set(["/", "/goals", "/12-week-system", "/vision-board"]);
-const MOBILE_BOTTOM_NAV_PATHS = new Set(["/", "/goals", "/12-week-system", "/vision-board"]);
-const MOBILE_NAV_LABELS: Record<string, string> = {
-  "/": "Tổng quan",
-  "/goals": "Mục tiêu",
-  "/12-week-system": "12 tuần",
-  "/vision-board": "Tầm nhìn",
-};
-const SIGNED_OUT_HOME_NAV_ITEM = {
-  ...NAV_ITEMS[0],
-  label: "Trang chính",
-  compactLabel: "Trang chính",
-};
-
-// Prefetch the remaining lazy route modules on hover so navigation feels instant.
-const ROUTE_IMPORTS: Record<string, () => Promise<unknown>> = {
-  "/12-week-system": () => import("../pages/12WeekSystem"),
-  "/order-status": () => import("../pages/OrderStatusPage"),
-};
-const WARM_PREFETCH_ROUTE_PATHS = ["/12-week-system"] as const;
-const prefetchedRoutes = new Set<string>();
-function prefetchRoute(path: string) {
-  if (prefetchedRoutes.has(path)) return;
-  const loader = ROUTE_IMPORTS[path];
-  if (loader) {
-    prefetchedRoutes.add(path);
-    loader();
-  }
-}
-
-function getRouteTone(pathname: string) {
-  if (pathname.startsWith("/journal")) return "journal";
-  if (pathname.startsWith("/achievements")) return "achievements";
-  if (pathname.startsWith("/life-balance")) return "balance";
-  if (pathname.startsWith("/12-week")) return "system";
-  if (pathname.startsWith("/vision-board") || pathname.startsWith("/gallery")) return "vision";
-  return "default";
-}
-
-type WorkspaceGateStage = "redirect-login" | "auth" | "profile" | "sync";
-
-function WorkspaceLoadingGate({ stage }: { stage: WorkspaceGateStage }) {
-  const stageCopy: Record<WorkspaceGateStage, { title: string; description: string }> = {
-    "redirect-login": {
-      title: "Đang chuyển tới đăng nhập",
-      description: "Bạn cần đăng nhập trước để dữ liệu mục tiêu và kế hoạch được lưu theo tài khoản.",
-    },
-    auth: {
-      title: "Đang kiểm tra tài khoản",
-      description: "Mình đang xác nhận phiên đăng nhập trước khi mở workspace của bạn.",
-    },
-    profile: {
-      title: "Đang mở workspace của bạn",
-      description: "Mình đang nối profile backend để biết đây là người dùng mới hay người dùng đã có dữ liệu.",
-    },
-    sync: {
-      title: "Đang đồng bộ dữ liệu",
-      description: "Mình đang kiểm tra mục tiêu và kế hoạch 12 tuần đã lưu trên backend trước khi quyết định màn tiếp theo.",
-    },
-  };
-  const copy = stageCopy[stage];
-  const steps = [
-    {
-      label: "Xác thực đăng nhập",
-      done: stage === "profile" || stage === "sync",
-      active: stage === "auth" || stage === "redirect-login",
-    },
-    {
-      label: "Nối backend profile",
-      done: stage === "sync",
-      active: stage === "profile",
-    },
-    {
-      label: "Đồng bộ workspace",
-      done: false,
-      active: stage === "sync",
-    },
-  ];
-
-  return (
-    <div className="app-shell flex min-h-screen items-center justify-center px-4" data-route-tone="default">
-      <div className="relative z-10 w-full max-w-md">
-        <div className="rounded-lg border border-slate-200/80 bg-white/94 p-6 text-center shadow-[0_22px_60px_-40px_rgba(15,23,42,0.38)] sm:p-7">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-50 text-violet-700">
-            <RefreshCw className="h-6 w-6 animate-spin" />
-          </div>
-          <p className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-            Dear Our Future
-          </p>
-          <h1 className="mt-2 text-2xl font-bold tracking-normal text-slate-950">{copy.title}</h1>
-          <p className="mx-auto mt-3 max-w-sm text-sm leading-7 text-slate-600" role="status" aria-live="polite">
-            {copy.description}
-          </p>
-
-          <div className="mt-6 space-y-2 text-left">
-            {steps.map((step) => (
-              <div
-                key={step.label}
-                className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm ${
-                  step.done
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                    : step.active
-                      ? "border-sky-200 bg-sky-50 text-sky-800"
-                      : "border-slate-200 bg-slate-50 text-slate-500"
-                }`}
-              >
-                <div
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
-                    step.done
-                      ? "bg-emerald-600 text-white"
-                      : step.active
-                        ? "bg-sky-600 text-white"
-                        : "bg-white text-slate-400"
-                  }`}
-                >
-                  {step.done ? <CheckCircle2 className="h-4 w-4" /> : <RefreshCw className="h-3.5 w-3.5" />}
-                </div>
-                <span className="font-medium">{step.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      <Toaster />
-    </div>
-  );
-}
 
 export function RootLayout() {
   const navigate = useNavigate();
@@ -315,33 +76,24 @@ export function RootLayout() {
   const [guideUserData, setGuideUserData] = useState(() => getUserData());
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [localDataMigrationCandidate, setLocalDataMigrationCandidate] =
+    useState<LocalDataMigrationCandidate | null>(null);
+  const [isLocalDataMigrationPromptOpen, setIsLocalDataMigrationPromptOpen] = useState(false);
 
   const routeScrollKey = `${location.pathname}${location.search}`;
   const currentRouteKey = `${routeScrollKey}${location.hash}`;
-  const isPublicHome = isPublicHomePath(location.pathname);
-  const shouldRedirectToLogin =
-    !demoMode &&
-    isConfigured &&
-    !authLoading &&
-    !user &&
-    !isPublicHome &&
-    !isAuthProtectedPath(location.pathname);
-  const shouldWaitForWorkspace =
-    !demoMode &&
-    isConfigured &&
-    (!isPublicHome || Boolean(user)) &&
-    (authLoading ||
-      userProfileLoading ||
-      backendPlanHydration.loading ||
-      (Boolean(user) && !userProfile && !userProfileError));
-  const workspaceGateStage: WorkspaceGateStage = shouldRedirectToLogin
-    ? "redirect-login"
-    : authLoading
-      ? "auth"
-      : userProfileLoading || (Boolean(user) && !userProfile && !userProfileError)
-        ? "profile"
-        : "sync";
-  const shouldShowWorkspaceGate = shouldRedirectToLogin || shouldWaitForWorkspace;
+  const { shouldRedirectToLogin, shouldShowWorkspaceGate, shouldWaitForWorkspace, workspaceGateStage } =
+    useWorkspaceGate({
+      authLoading,
+      backendHydrationLoading: backendPlanHydration.loading,
+      demoMode,
+      isConfigured,
+      pathname: location.pathname,
+      user,
+      userProfile,
+      userProfileError,
+      userProfileLoading,
+    });
 
   const navigateAppRoute = useCallback(
     (path: string) => {
@@ -401,8 +153,7 @@ export function RootLayout() {
       setMobileMenuOpen(false);
       setDesktopMoreOpen(false);
       setGuideUserData(getUserData());
-      const meta = ROUTE_META.find((item) => item.match(location.pathname)) ?? ROUTE_META[0];
-      document.title = meta.title ?? "Dear Our Future";
+      document.title = getRouteMeta(location.pathname).title ?? "Dear Our Future";
     }
   }, [location.pathname]);
 
@@ -466,6 +217,7 @@ export function RootLayout() {
     if (shouldShowWorkspaceGate) return;
     if (!user) return;
     if (location.pathname !== "/") return;
+    if (localDataMigrationCandidate && isLocalDataMigrationPromptOpen) return;
 
     const progress = getNewUserGuideProgress(guideUserData);
     if (progress.isComplete || isNewUserGuideDismissed() || hasSeenNewUserGuide()) {
@@ -474,7 +226,33 @@ export function RootLayout() {
 
     setIsGuideOpen(true);
     markNewUserGuideSeen();
-  }, [demoMode, guideUserData, location.pathname, shouldShowWorkspaceGate, user]);
+  }, [
+    demoMode,
+    guideUserData,
+    isLocalDataMigrationPromptOpen,
+    localDataMigrationCandidate,
+    location.pathname,
+    shouldShowWorkspaceGate,
+    user,
+  ]);
+
+  useEffect(() => {
+    if (demoMode || shouldShowWorkspaceGate || !user) {
+      setLocalDataMigrationCandidate(null);
+      setIsLocalDataMigrationPromptOpen(false);
+      return;
+    }
+
+    const candidate = getAnonymousLocalDataMigrationCandidate();
+    if (!candidate || hasSkippedLocalDataMigrationPrompt(user.uid, candidate.fingerprint)) {
+      setLocalDataMigrationCandidate(null);
+      setIsLocalDataMigrationPromptOpen(false);
+      return;
+    }
+
+    setLocalDataMigrationCandidate(candidate);
+    setIsLocalDataMigrationPromptOpen(true);
+  }, [demoMode, shouldShowWorkspaceGate, user]);
 
   useEffect(() => {
     const currentPath = location.pathname;
@@ -598,10 +376,7 @@ export function RootLayout() {
     return () => globalThis.clearTimeout(timeoutId);
   }, []);
 
-  const isActive = (path: string) => {
-    if (path === "/") return location.pathname === "/";
-    return location.pathname.startsWith(path);
-  };
+  const isActive = (path: string) => isActiveRoute(location.pathname, path);
 
   const handlePrefetch = useCallback((path: string) => prefetchRoute(path), []);
   const handleAuthNavigate = useCallback(
@@ -611,14 +386,10 @@ export function RootLayout() {
     [location.hash, location.pathname, location.search, navigate],
   );
 
-  const pageMeta = ROUTE_META.find((item) => item.match(location.pathname)) ?? ROUTE_META[0];
+  const pageMeta = getRouteMeta(location.pathname);
   const isSignedOutVisitor = isConfigured && !user;
-  const primaryNavItems = isSignedOutVisitor
-    ? [SIGNED_OUT_HOME_NAV_ITEM]
-    : NAV_ITEMS.filter((item) => PRIMARY_NAV_PATHS.has(item.path));
-  const secondaryNavItems = isSignedOutVisitor ? [] : NAV_ITEMS.filter((item) => !PRIMARY_NAV_PATHS.has(item.path));
-  const bottomNavItems = isSignedOutVisitor ? [] : NAV_ITEMS.filter((item) => MOBILE_BOTTOM_NAV_PATHS.has(item.path));
-  const mobileMenuNavItems = isSignedOutVisitor ? primaryNavItems : NAV_ITEMS;
+  const { bottomNavItems, mobileMenuNavItems, primaryNavItems, secondaryNavItems } =
+    getNavItemsForState(isSignedOutVisitor);
   const isDesktopMoreNavActive = desktopMoreOpen || secondaryNavItems.some((item) => isActive(item.path));
   const isMoreNavActive = mobileMenuOpen || secondaryNavItems.some((item) => isActive(item.path));
   const routeTone = getRouteTone(location.pathname);
@@ -678,6 +449,37 @@ export function RootLayout() {
       setIsSigningOut(false);
     }
   };
+  const handleSkipLocalDataMigration = useCallback(() => {
+    if (user?.uid && localDataMigrationCandidate) {
+      markLocalDataMigrationPromptSkipped(user.uid, localDataMigrationCandidate.fingerprint);
+    }
+
+    setIsLocalDataMigrationPromptOpen(false);
+    setLocalDataMigrationCandidate(null);
+  }, [localDataMigrationCandidate, user?.uid]);
+
+  const handleImportLocalDataMigration = useCallback(() => {
+    if (!user?.uid || !localDataMigrationCandidate) {
+      return { status: "inactive_auth_scope" as const };
+    }
+
+    const result = importAnonymousLocalDataToAccountScope(user.uid, localDataMigrationCandidate.fingerprint);
+    if (result.status === "imported") {
+      markLocalDataMigrationPromptSkipped(user.uid, localDataMigrationCandidate.fingerprint);
+      setGuideUserData(getUserData());
+    }
+
+    return result;
+  }, [localDataMigrationCandidate, user?.uid]);
+
+  const localDataMigrationPrompt = (
+    <LocalDataMigrationPrompt
+      candidate={localDataMigrationCandidate}
+      open={Boolean(localDataMigrationCandidate && isLocalDataMigrationPromptOpen)}
+      onImport={handleImportLocalDataMigration}
+      onSkip={handleSkipLocalDataMigration}
+    />
+  );
 
   const prefersReducedMotion =
     typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -709,6 +511,7 @@ export function RootLayout() {
               {outlet}
             </motion.div>
           </AnimatePresence>
+          {localDataMigrationPrompt}
           <Toaster />
         </div>
       </div>
@@ -1157,6 +960,7 @@ export function RootLayout() {
 
       {demoMode || user ? <MotivationalReminder /> : null}
       <NewUserGuideDialog open={isGuideOpen} onOpenChange={setIsGuideOpen} userData={guideUserData} />
+      {localDataMigrationPrompt}
       <Toaster />
     </div>
   );

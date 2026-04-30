@@ -1,4 +1,3 @@
-
 import { apiClient } from "@/lib/api/apiClient";
 import {
   clearPushSubscription,
@@ -9,8 +8,8 @@ import {
   trackAppEvent,
 } from "../storage";
 import type { PushSubscriptionRecord } from "../storage-types";
-import { EMAIL_REMINDER_ENDPOINT, PUSH_SUBSCRIBE_ENDPOINT, PUSH_VAPID_PUBLIC_KEY } from "./env";
 import { isOffline } from "./billingCore";
+import { EMAIL_REMINDER_ENDPOINT, PUSH_SUBSCRIBE_ENDPOINT, PUSH_VAPID_PUBLIC_KEY } from "./env";
 
 export interface EmailDeliveryPayload {
   userId: string;
@@ -168,10 +167,10 @@ export function getPushDeepLinkPayload(
     case "trial_ending":
       return {
         url: "/billing/plan",
-        title: "Gói dùng thử sắp hết hạn",
+        title: "Plus demo local sắp hết hạn",
         body: context?.daysLeft
-          ? `Còn ${context.daysLeft} ngày — nâng cấp để giữ toàn bộ Plus.`
-          : "Nâng cấp ngay để không mất quyền truy cập.",
+          ? `Còn ${context.daysLeft} ngày — mock upgrade không thu tiền thật.`
+          : "Mở mock upgrade nếu muốn giữ lớp Plus demo trên trình duyệt này.",
         tag: "trial-ending",
         data: context,
       };

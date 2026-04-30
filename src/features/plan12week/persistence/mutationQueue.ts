@@ -1,0 +1,699 @@
+import type { TwelveWeekSystem, UniversalDailyCheckIn, UniversalWeeklyReview } from "@/app/utils/storage-types";
+import { readActiveAuthOwnerUid } from "@/app/utils/storage-auth-scope";
+
+export const DATA_MUTATION_QUEUE_VERSION = 1;
+export const DATA_MUTATION_QUEUE_LEGACY_STORAGE_KEY = "visionboard_data_mutation_queue";
+export const DATA_MUTATION_QUEUE_ANONYMOUS_STORAGE_KEY = `${DATA_MUTATION_QUEUE_LEGACY_STORAGE_KEY}:anonymous`;
+export const DATA_MUTATION_QUEUE_AUTH_STORAGE_PREFIX = `${DATA_MUTATION_QUEUE_LEGACY_STORAGE_KEY}:auth:`;
+export const DATA_MUTATION_QUEUE_DEVICE_ID_STORAGE_KEY = `${DATA_MUTATION_QUEUE_LEGACY_STORAGE_KEY}:device_id`;
+export const DATA_MUTATION_QUEUE_RECOVERY_STORAGE_PREFIX = `${DATA_MUTATION_QUEUE_LEGACY_STORAGE_KEY}:recovery:`;
+
+export type DataMutationQueueVersion = typeof DATA_MUTATION_QUEUE_VERSION;
+
+export type DataMutationKind =
+  | "task_completed_changed"
+  | "daily_check_in_upserted"
+  | "weekly_review_upserted"
+  | "plan_snapshot_updated";
+
+export type DataMutationStatus =
+  | "pending"
+  | "in_flight"
+  | "retry_scheduled"
+  | "blocked_auth"
+  | "blocked_config"
+  | "blocked_conflict"
+  | "failed_validation"
+  | "failed_terminal"
+  | "applied"
+  | "archived";
+
+export interface DataMutationQueueStore {
+  version: DataMutationQueueVersion;
+  ownerUid: string | null;
+  deviceId: string;
+  updatedAt: string;
+  lastDrainStartedAt?: string;
+  lastDrainFinishedAt?: string;
+  items: DataMutationItem[];
+}
+
+export interface DataMutationError {
+  code: string;
+  message: string;
+  httpStatus?: number;
+  lastSeenAt: string;
+  retryable: boolean;
+}
+
+export interface TaskCompletedChangedMutationPayload {
+  taskId: string;
+  clientTaskId?: string;
+  clientPlanId?: string | null;
+  clientWeekId?: string | null;
+  weekNumber: number;
+  completed: boolean;
+  completedAt?: string;
+  scheduledDate: string;
+  title?: string;
+  leadIndicatorName?: string;
+  isCore?: boolean;
+}
+
+export interface DailyCheckInUpsertedMutationPayload {
+  date: string;
+  weekNumber: number;
+  checkIn: UniversalDailyCheckIn;
+}
+
+export interface WeeklyReviewUpsertedMutationPayload {
+  weekNumber: number;
+  review: UniversalWeeklyReview;
+}
+
+export type PlanSnapshotMutationReason = "setup" | "reentry" | "reset" | "manual_update" | "snapshot_retry";
+
+export type PlanSnapshotSystemPayload = Pick<
+  TwelveWeekSystem,
+  | "vision12Week"
+  | "lagMetric"
+  | "leadIndicators"
+  | "milestones"
+  | "successEvidence"
+  | "reviewDay"
+  | "week12Outcome"
+  | "startDate"
+  | "endDate"
+  | "timezone"
+  | "weekStartsOn"
+  | "status"
+  | "currentWeek"
+  | "totalWeeks"
+  | "weeklyPlans"
+  | "taskInstances"
+  | "dailyCheckIns"
+  | "weeklyReviews"
+>;
+
+export interface PlanSnapshotUpdatedMutationPayload {
+  reason: PlanSnapshotMutationReason;
+  system: PlanSnapshotSystemPayload;
+}
+
+export type DataMutationPayloadByKind = {
+  task_completed_changed: TaskCompletedChangedMutationPayload;
+  daily_check_in_upserted: DailyCheckInUpsertedMutationPayload;
+  weekly_review_upserted: WeeklyReviewUpsertedMutationPayload;
+  plan_snapshot_updated: PlanSnapshotUpdatedMutationPayload;
+};
+
+export type DataMutationPayload = DataMutationPayloadByKind[DataMutationKind];
+
+export type DataMutationItem = {
+  [Kind in DataMutationKind]: {
+    id: string;
+    idempotencyKey: string;
+    collapseKey: string;
+    kind: Kind;
+    status: DataMutationStatus;
+    createdAt: string;
+    updatedAt: string;
+    nextRetryAt?: string;
+    lastAttemptAt?: string;
+    attemptCount: number;
+    maxAttempts: number;
+    ownerUid: string | null;
+    goalId: string;
+    planId?: string | null;
+    localRevision?: number;
+    dependsOn?: string[];
+    supersedes?: string[];
+    error?: DataMutationError;
+    payload: DataMutationPayloadByKind[Kind];
+  };
+}[DataMutationKind];
+
+export type DataMutationEnqueueInput = {
+  [Kind in DataMutationKind]: {
+    kind: Kind;
+    ownerUid?: string | null;
+    goalId: string;
+    planId?: string | null;
+    localRevision?: number;
+    dependsOn?: string[];
+    payload: DataMutationPayloadByKind[Kind];
+  };
+}[DataMutationKind];
+
+export interface MutationQueueOptions {
+  now?: string | Date;
+}
+
+export interface EnqueueMutationOptions extends MutationQueueOptions {
+  deviceId?: string;
+  createId?: () => string;
+  maxAttempts?: number;
+}
+
+export interface ListPendingMutationsOptions extends MutationQueueOptions {
+  ownerUid?: string | null;
+  includeBlockedAuth?: boolean;
+  includeBlockedConfig?: boolean;
+}
+
+export interface MarkMutationFailedOptions extends MutationQueueOptions {
+  nextRetryAt?: string | Date;
+}
+
+export interface ReadStoredMutationQueueOptions extends MutationQueueOptions {
+  storage?: Storage | null;
+  deviceId?: string;
+}
+
+export interface StoredMutationQueueOptions extends EnqueueMutationOptions {
+  ownerUid?: string | null;
+  storage?: Storage | null;
+}
+
+export interface StoredMutationQueueResult {
+  ok: boolean;
+  store: DataMutationQueueStore;
+  item: DataMutationItem | null;
+  error?: unknown;
+}
+
+export interface MutationFailureInput {
+  code: string;
+  message: string;
+  httpStatus?: number;
+  retryable?: boolean;
+}
+
+const COLLAPSIBLE_STATUSES = new Set<DataMutationStatus>([
+  "pending",
+  "retry_scheduled",
+  "blocked_auth",
+  "blocked_config",
+]);
+
+function toIso(value?: string | Date): string {
+  if (value instanceof Date) return value.toISOString();
+  if (value) return new Date(value).toISOString();
+  return new Date().toISOString();
+}
+
+function compareIso(left: string, right: string): number {
+  return new Date(left).getTime() - new Date(right).getTime();
+}
+
+function normalizeOwnerUid(ownerUid: string | null | undefined): string | null {
+  const normalized = ownerUid?.trim() ?? "";
+  return normalized.length > 0 ? normalized : null;
+}
+
+function ownerMatches(itemOwnerUid: string | null, ownerUid: string | null): boolean {
+  return normalizeOwnerUid(itemOwnerUid) === normalizeOwnerUid(ownerUid);
+}
+
+function encodeOwner(ownerUid: string): string {
+  return encodeURIComponent(ownerUid);
+}
+
+function getItemOwner(inputOwnerUid: string | null | undefined, storeOwnerUid: string | null): string | null {
+  return normalizeOwnerUid(inputOwnerUid) ?? normalizeOwnerUid(storeOwnerUid);
+}
+
+function buildIdempotencyKey(ownerUid: string | null, deviceId: string, mutationId: string): string {
+  const ownerPart = ownerUid ? encodeOwner(ownerUid) : "anonymous";
+  return `${ownerPart}:${encodeURIComponent(deviceId)}:${mutationId}`;
+}
+
+function getCollapseKey(input: DataMutationEnqueueInput): string {
+  switch (input.kind) {
+    case "task_completed_changed":
+      return `task:${input.goalId}:${input.payload.clientTaskId ?? input.payload.taskId}`;
+    case "daily_check_in_upserted":
+      return `daily-checkin:${input.goalId}:${input.payload.date}`;
+    case "weekly_review_upserted":
+      return `weekly-review:${input.goalId}:${input.payload.weekNumber}`;
+    case "plan_snapshot_updated":
+      return `plan-snapshot:${input.goalId}`;
+  }
+}
+
+function hasDueRetry(item: DataMutationItem, now: string): boolean {
+  if (item.status !== "retry_scheduled") return false;
+  if (!item.nextRetryAt) return true;
+  return compareIso(item.nextRetryAt, now) <= 0;
+}
+
+function shouldListAsPending(
+  item: DataMutationItem,
+  now: string,
+  options: ListPendingMutationsOptions,
+): boolean {
+  if (item.status === "pending") return true;
+  if (hasDueRetry(item, now)) return true;
+  if (options.includeBlockedAuth && item.status === "blocked_auth") return true;
+  if (options.includeBlockedConfig && item.status === "blocked_config") return true;
+  return false;
+}
+
+function getFailureStatus(input: MutationFailureInput): DataMutationStatus {
+  if (input.httpStatus === 400) return "failed_validation";
+  if (input.httpStatus === 401) return "blocked_auth";
+  if (input.httpStatus === 409) return "blocked_conflict";
+  return input.retryable ? "retry_scheduled" : "failed_terminal";
+}
+
+function getBrowserStorage(storage?: Storage | null): Storage | null {
+  if (storage) return storage;
+
+  try {
+    return (globalThis as typeof globalThis & { localStorage?: Storage }).localStorage ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function safeGetItem(storage: Storage, key: string): string | null {
+  try {
+    return storage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeSetItem(storage: Storage, key: string, value: string): boolean {
+  try {
+    storage.setItem(key, value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function createMutationQueueDeviceId(now: Date = new Date(), random: () => number = Math.random): string {
+  const suffix = Math.floor(random() * 36 ** 8)
+    .toString(36)
+    .padStart(6, "0")
+    .slice(0, 8);
+  return `dmq_device_${now.getTime()}_${suffix}`;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function isStoredMutationItem(value: unknown): value is DataMutationItem {
+  if (!isRecord(value)) return false;
+
+  return (
+    typeof value.id === "string" &&
+    typeof value.idempotencyKey === "string" &&
+    typeof value.collapseKey === "string" &&
+    typeof value.kind === "string" &&
+    typeof value.status === "string" &&
+    typeof value.createdAt === "string" &&
+    typeof value.updatedAt === "string" &&
+    typeof value.attemptCount === "number" &&
+    typeof value.maxAttempts === "number" &&
+    typeof value.goalId === "string" &&
+    isRecord(value.payload)
+  );
+}
+
+function parseStoredQueue(
+  rawValue: string,
+  ownerUid: string | null,
+  deviceId: string,
+  now?: string | Date,
+): DataMutationQueueStore | null {
+  try {
+    const parsedValue = JSON.parse(rawValue) as unknown;
+    if (!isRecord(parsedValue) || !Array.isArray(parsedValue.items)) return null;
+
+    const items = parsedValue.items.filter(isStoredMutationItem).map((item) => ({
+      ...item,
+      ownerUid: normalizeOwnerUid(item.ownerUid) ?? ownerUid,
+    })) as DataMutationItem[];
+
+    return {
+      version: DATA_MUTATION_QUEUE_VERSION,
+      ownerUid,
+      deviceId: typeof parsedValue.deviceId === "string" && parsedValue.deviceId ? parsedValue.deviceId : deviceId,
+      updatedAt: typeof parsedValue.updatedAt === "string" ? parsedValue.updatedAt : toIso(now),
+      lastDrainStartedAt:
+        typeof parsedValue.lastDrainStartedAt === "string" ? parsedValue.lastDrainStartedAt : undefined,
+      lastDrainFinishedAt:
+        typeof parsedValue.lastDrainFinishedAt === "string" ? parsedValue.lastDrainFinishedAt : undefined,
+      items,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function preserveInvalidQueue(storage: Storage, sourceKey: string, rawValue: string, now?: string | Date): void {
+  const recoveryKey = `${DATA_MUTATION_QUEUE_RECOVERY_STORAGE_PREFIX}${encodeURIComponent(sourceKey)}:${Date.parse(toIso(now))}`;
+  safeSetItem(storage, recoveryKey, rawValue);
+}
+
+function getExplicitOwnerUid(input: {
+  inputOwnerUid?: string | null;
+  optionsOwnerUid?: string | null;
+}): string | null {
+  if (input.inputOwnerUid !== undefined) return normalizeOwnerUid(input.inputOwnerUid);
+  if (input.optionsOwnerUid !== undefined) return normalizeOwnerUid(input.optionsOwnerUid);
+  return readActiveAuthOwnerUid();
+}
+
+export function getOrCreateMutationQueueDeviceId(options: ReadStoredMutationQueueOptions = {}): string {
+  if (options.deviceId) return options.deviceId;
+
+  const storage = getBrowserStorage(options.storage);
+  if (!storage) return createMutationQueueDeviceId(options.now ? new Date(toIso(options.now)) : undefined);
+
+  const existingDeviceId = safeGetItem(storage, DATA_MUTATION_QUEUE_DEVICE_ID_STORAGE_KEY)?.trim() ?? "";
+  if (existingDeviceId) return existingDeviceId;
+
+  const nextDeviceId = createMutationQueueDeviceId(options.now ? new Date(toIso(options.now)) : undefined);
+  safeSetItem(storage, DATA_MUTATION_QUEUE_DEVICE_ID_STORAGE_KEY, nextDeviceId);
+  return nextDeviceId;
+}
+
+export function getMutationQueueStorageKey(ownerUid?: string | null): string {
+  const normalizedOwnerUid = normalizeOwnerUid(ownerUid);
+  return normalizedOwnerUid
+    ? `${DATA_MUTATION_QUEUE_AUTH_STORAGE_PREFIX}${encodeOwner(normalizedOwnerUid)}`
+    : DATA_MUTATION_QUEUE_ANONYMOUS_STORAGE_KEY;
+}
+
+export function createEmptyMutationQueueStore(input: {
+  ownerUid?: string | null;
+  deviceId: string;
+  now?: string | Date;
+}): DataMutationQueueStore {
+  return {
+    version: DATA_MUTATION_QUEUE_VERSION,
+    ownerUid: normalizeOwnerUid(input.ownerUid),
+    deviceId: input.deviceId,
+    updatedAt: toIso(input.now),
+    items: [],
+  };
+}
+
+export function readMutationQueueStore(
+  ownerUid?: string | null,
+  options: ReadStoredMutationQueueOptions = {},
+): DataMutationQueueStore {
+  const normalizedOwnerUid = normalizeOwnerUid(ownerUid);
+  const storage = getBrowserStorage(options.storage);
+  const deviceId = getOrCreateMutationQueueDeviceId({ ...options, storage });
+  const emptyStore = createEmptyMutationQueueStore({
+    ownerUid: normalizedOwnerUid,
+    deviceId,
+    now: options.now,
+  });
+
+  if (!storage) return emptyStore;
+
+  const scopedKey = getMutationQueueStorageKey(normalizedOwnerUid);
+  const scopedValue = safeGetItem(storage, scopedKey);
+  if (scopedValue) {
+    const parsedQueue = parseStoredQueue(scopedValue, normalizedOwnerUid, deviceId, options.now);
+    if (parsedQueue) return parsedQueue;
+
+    preserveInvalidQueue(storage, scopedKey, scopedValue, options.now);
+    return emptyStore;
+  }
+
+  if (normalizedOwnerUid) return emptyStore;
+
+  const legacyValue = safeGetItem(storage, DATA_MUTATION_QUEUE_LEGACY_STORAGE_KEY);
+  if (!legacyValue) return emptyStore;
+
+  const parsedLegacyQueue = parseStoredQueue(legacyValue, null, deviceId, options.now);
+  if (parsedLegacyQueue) return parsedLegacyQueue;
+
+  preserveInvalidQueue(storage, DATA_MUTATION_QUEUE_LEGACY_STORAGE_KEY, legacyValue, options.now);
+  return emptyStore;
+}
+
+export function writeMutationQueueStore(
+  store: DataMutationQueueStore,
+  options: Pick<ReadStoredMutationQueueOptions, "storage"> = {},
+): boolean {
+  const storage = getBrowserStorage(options.storage);
+  if (!storage) return false;
+
+  return safeSetItem(storage, getMutationQueueStorageKey(store.ownerUid), JSON.stringify(store));
+}
+
+export function enqueueStoredMutation(
+  input: DataMutationEnqueueInput,
+  options: StoredMutationQueueOptions = {},
+): StoredMutationQueueResult {
+  const ownerUid = getExplicitOwnerUid({
+    inputOwnerUid: input.ownerUid,
+    optionsOwnerUid: options.ownerUid,
+  });
+  const deviceId = getOrCreateMutationQueueDeviceId(options);
+  const store = readMutationQueueStore(ownerUid, { ...options, deviceId });
+  const scopedInput = {
+    ...input,
+    ownerUid,
+  } as DataMutationEnqueueInput;
+
+  try {
+    const nextStore = enqueueMutation(store, scopedInput, {
+      ...options,
+      deviceId,
+    });
+    const collapseKey = getCollapseKey(scopedInput);
+    const item =
+      nextStore.items.find((candidate) => ownerMatches(candidate.ownerUid, ownerUid) && candidate.collapseKey === collapseKey) ??
+      null;
+    const ok = writeMutationQueueStore(nextStore, options);
+
+    return {
+      ok,
+      store: nextStore,
+      item,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      store,
+      item: null,
+      error,
+    };
+  }
+}
+
+export function listStoredPendingMutations(
+  ownerUid?: string | null,
+  options: ReadStoredMutationQueueOptions & ListPendingMutationsOptions = {},
+): DataMutationItem[] {
+  const normalizedOwnerUid =
+    ownerUid !== undefined ? normalizeOwnerUid(ownerUid) : normalizeOwnerUid(options.ownerUid) ?? readActiveAuthOwnerUid();
+  const store = readMutationQueueStore(normalizedOwnerUid, options);
+
+  return listPendingMutations(store, {
+    ...options,
+    ownerUid: normalizedOwnerUid,
+  });
+}
+
+export function createMutationId(now: Date = new Date(), random: () => number = Math.random): string {
+  const suffix = Math.floor(random() * 36 ** 8)
+    .toString(36)
+    .padStart(6, "0")
+    .slice(0, 8);
+  return `dmq_${now.getTime()}_${suffix}`;
+}
+
+export function compactMutations(store: DataMutationQueueStore, options: MutationQueueOptions = {}): DataMutationQueueStore {
+  const updatedAt = toIso(options.now ?? store.updatedAt);
+  const latestByCollapseKey = new Map<string, DataMutationItem>();
+  const compactedItems: DataMutationItem[] = [];
+
+  for (const item of store.items) {
+    if (!COLLAPSIBLE_STATUSES.has(item.status)) {
+      compactedItems.push(item);
+      continue;
+    }
+
+    const groupKey = `${item.ownerUid ?? "anonymous"}:${item.collapseKey}`;
+    const previous = latestByCollapseKey.get(groupKey);
+    if (!previous) {
+      latestByCollapseKey.set(groupKey, item);
+      continue;
+    }
+
+    const previousTime = compareIso(previous.updatedAt, item.updatedAt);
+    const latest = previousTime <= 0 ? item : previous;
+    const superseded = previousTime <= 0 ? previous : item;
+    const mergedSupersedes = [
+      ...(latest.supersedes ?? []),
+      superseded.id,
+      ...(superseded.supersedes ?? []),
+    ];
+
+    latestByCollapseKey.set(groupKey, {
+      ...latest,
+      updatedAt,
+      supersedes: Array.from(new Set(mergedSupersedes)),
+    } as DataMutationItem);
+  }
+
+  return {
+    ...store,
+    updatedAt,
+    items: [...compactedItems, ...latestByCollapseKey.values()].sort((left, right) =>
+      compareIso(left.createdAt, right.createdAt),
+    ),
+  };
+}
+
+export function enqueueMutation(
+  store: DataMutationQueueStore,
+  input: DataMutationEnqueueInput,
+  options: EnqueueMutationOptions = {},
+): DataMutationQueueStore {
+  const now = toIso(options.now);
+  const mutationId = options.createId?.() ?? createMutationId(new Date(now));
+  const ownerUid = getItemOwner(input.ownerUid, store.ownerUid);
+  const deviceId = options.deviceId ?? store.deviceId;
+  const item = {
+    id: mutationId,
+    idempotencyKey: buildIdempotencyKey(ownerUid, deviceId, mutationId),
+    collapseKey: getCollapseKey(input),
+    kind: input.kind,
+    status: "pending",
+    createdAt: now,
+    updatedAt: now,
+    attemptCount: 0,
+    maxAttempts: options.maxAttempts ?? 7,
+    ownerUid,
+    goalId: input.goalId,
+    planId: input.planId,
+    localRevision: input.localRevision,
+    dependsOn: input.dependsOn,
+    payload: input.payload,
+  } as DataMutationItem;
+
+  return compactMutations(
+    {
+      ...store,
+      deviceId,
+      updatedAt: now,
+      items: [...store.items, item],
+    },
+    { now },
+  );
+}
+
+export function listPendingMutations(
+  store: DataMutationQueueStore,
+  options: ListPendingMutationsOptions = {},
+): DataMutationItem[] {
+  const now = toIso(options.now);
+  const ownerUid = normalizeOwnerUid(options.ownerUid) ?? store.ownerUid;
+  return store.items.filter((item) => ownerMatches(item.ownerUid, ownerUid) && shouldListAsPending(item, now, options));
+}
+
+export function markMutationInFlight(
+  store: DataMutationQueueStore,
+  mutationId: string,
+  options: MutationQueueOptions = {},
+): DataMutationQueueStore {
+  const now = toIso(options.now);
+  return {
+    ...store,
+    updatedAt: now,
+    items: store.items.map((item) =>
+      item.id === mutationId
+        ? {
+            ...item,
+            status: "in_flight",
+            lastAttemptAt: now,
+            nextRetryAt: undefined,
+            attemptCount: item.attemptCount + 1,
+            updatedAt: now,
+          }
+        : item,
+    ),
+  };
+}
+
+export function markMutationSucceeded(
+  store: DataMutationQueueStore,
+  mutationId: string,
+  options: MutationQueueOptions = {},
+): DataMutationQueueStore {
+  const now = toIso(options.now);
+  return {
+    ...store,
+    updatedAt: now,
+    items: store.items.map((item) =>
+      item.id === mutationId
+        ? {
+            ...item,
+            status: "applied",
+            error: undefined,
+            nextRetryAt: undefined,
+            updatedAt: now,
+          }
+        : item,
+    ),
+  };
+}
+
+export function markMutationFailed(
+  store: DataMutationQueueStore,
+  mutationId: string,
+  failure: MutationFailureInput,
+  options: MarkMutationFailedOptions = {},
+): DataMutationQueueStore {
+  const now = toIso(options.now);
+  const status = getFailureStatus(failure);
+  const nextRetryAt = status === "retry_scheduled" && options.nextRetryAt ? toIso(options.nextRetryAt) : undefined;
+
+  return {
+    ...store,
+    updatedAt: now,
+    items: store.items.map((item) =>
+      item.id === mutationId
+        ? {
+            ...item,
+            status,
+            error: {
+              code: failure.code,
+              message: failure.message,
+              httpStatus: failure.httpStatus,
+              retryable: status === "retry_scheduled",
+              lastSeenAt: now,
+            },
+            nextRetryAt,
+            updatedAt: now,
+          }
+        : item,
+    ),
+  };
+}
+
+export function clearMutationsForAuthOwner(
+  store: DataMutationQueueStore,
+  ownerUid?: string | null,
+  options: MutationQueueOptions = {},
+): DataMutationQueueStore {
+  const normalizedOwnerUid = normalizeOwnerUid(ownerUid);
+  const now = toIso(options.now);
+
+  return {
+    ...store,
+    updatedAt: now,
+    items: store.items.filter((item) => !ownerMatches(item.ownerUid, normalizedOwnerUid)),
+  };
+}

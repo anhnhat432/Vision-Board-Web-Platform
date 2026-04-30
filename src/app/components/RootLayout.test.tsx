@@ -1,12 +1,25 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ProtectedRoute } from "./ProtectedRoute";
 import { RootLayout } from "./RootLayout";
+import {
+  ANONYMOUS_USER_DATA_STORAGE_KEY,
+  CURRENT_STORAGE_VERSION,
+  DEFAULT_APP_PREFERENCES,
+  MOTIVATIONAL_QUOTES,
+} from "../utils/storage-constants";
+import { createEmptyUserData } from "../utils/storage-demo-data";
+import { activateAuthenticatedUserData, getUserData, saveUserData } from "../utils/storage";
+import { getScopedUserDataStorageKey } from "../utils/storage-auth-scope";
+import type { Goal, UserData } from "../utils/storage-types";
 
 const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
+}));
+const appModeMock = vi.hoisted(() => ({
+  isDemoMode: vi.fn(() => false),
 }));
 const backendHydrationMock = vi.hoisted(() => ({
   value: {
@@ -30,9 +43,9 @@ vi.mock("../hooks/useBackendPlanHydration", () => ({
 }));
 
 vi.mock("../utils/app-mode", () => ({
-  getAppMode: () => "real",
-  isDemoMode: () => false,
-  isRealMode: () => true,
+  getAppMode: () => (appModeMock.isDemoMode() ? "demo" : "real"),
+  isDemoMode: appModeMock.isDemoMode,
+  isRealMode: () => !appModeMock.isDemoMode(),
   shouldSeedDemoData: () => false,
   shouldShowBillingDebugUi: () => false,
 }));
@@ -55,6 +68,38 @@ function setAuthContext(overrides: Record<string, unknown> = {}) {
     isConfigured: true,
     ...overrides,
   });
+}
+
+function createFreshUserData(): UserData {
+  return createEmptyUserData({
+    currentStorageVersion: CURRENT_STORAGE_VERSION,
+    defaultAppPreferences: DEFAULT_APP_PREFERENCES,
+    motivationalQuotes: MOTIVATIONAL_QUOTES,
+  });
+}
+
+function createRealGoal(overrides: Partial<Goal> = {}): Goal {
+  return {
+    id: "goal_real_1",
+    category: "Career",
+    title: "Prepare account migration",
+    description: "",
+    deadline: "2026-12-31",
+    tasks: [],
+    createdAt: "2026-04-30T00:00:00.000Z",
+    ...overrides,
+  };
+}
+
+function seedAnonymousData(data: UserData) {
+  localStorage.setItem(ANONYMOUS_USER_DATA_STORAGE_KEY, JSON.stringify(data));
+}
+
+function seedMeaningfulAnonymousData() {
+  const data = createFreshUserData();
+  data.goals.push(createRealGoal());
+  seedAnonymousData(data);
+  return data;
 }
 
 function renderAppShell(initialEntry: string) {
@@ -92,6 +137,7 @@ describe("RootLayout onboarding redirect", () => {
       result: null,
       error: null,
     };
+    appModeMock.isDemoMode.mockReturnValue(false);
     productionMock.maybeShowBrowserReminderNotification.mockClear();
     productionMock.syncPendingOutbox.mockClear();
     setAuthContext();
@@ -227,5 +273,121 @@ describe("RootLayout onboarding redirect", () => {
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/onboarding");
     });
+  });
+
+  it("does not show the local data migration prompt for fresh anonymous data", async () => {
+    seedAnonymousData(createFreshUserData());
+    setAuthContext({
+      user: { uid: "user_test", email: "test@example.com" },
+      userProfile: { id: "profile_test", email: "test@example.com" },
+    });
+
+    renderAppShell("/");
+
+    expect(await screen.findByTestId("onboarding-page")).toBeInTheDocument();
+    expect(screen.queryByText("Có dữ liệu local trên trình duyệt này")).not.toBeInTheDocument();
+  });
+
+  it("shows the local data migration prompt when signed-in account has meaningful anonymous data", async () => {
+    seedMeaningfulAnonymousData();
+    setAuthContext({
+      user: { uid: "user_test", email: "test@example.com" },
+      userProfile: { id: "profile_test", email: "test@example.com" },
+    });
+
+    renderAppShell("/");
+
+    expect(await screen.findByText("Có dữ liệu local trên trình duyệt này")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Import local data" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Review local data" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Skip for now" })).toBeInTheDocument();
+  });
+
+  it("imports meaningful anonymous data into a fresh signed-in account scope", async () => {
+    const anonymousData = seedMeaningfulAnonymousData();
+    const rawAnonymousData = localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY);
+    activateAuthenticatedUserData("user_test");
+    setAuthContext({
+      user: { uid: "user_test", email: "test@example.com" },
+      userProfile: { id: "profile_test", email: "test@example.com" },
+    });
+
+    renderAppShell("/");
+
+    expect(await screen.findByText("Có dữ liệu local trên trình duyệt này")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Import local data" }));
+
+    expect(await screen.findByText(/Đã copy dữ liệu vào account scope/)).toBeInTheDocument();
+    expect(getUserData().goals.map((goal) => goal.title)).toEqual(anonymousData.goals.map((goal) => goal.title));
+    expect(localStorage.getItem(getScopedUserDataStorageKey("user_test"))).toBe(rawAnonymousData);
+    expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(rawAnonymousData);
+  });
+
+  it("blocks local import when the signed-in account already has meaningful data", async () => {
+    activateAuthenticatedUserData("user_test");
+    saveUserData(createFreshUserData());
+    const accountData = createFreshUserData();
+    accountData.goals.push(createRealGoal({ id: "goal_account_1", title: "Existing account goal" }));
+    saveUserData(accountData);
+    const rawAccountData = localStorage.getItem(getScopedUserDataStorageKey("user_test"));
+    const anonymousData = createFreshUserData();
+    anonymousData.goals.push(createRealGoal({ id: "goal_anonymous_1", title: "Anonymous local goal" }));
+    seedAnonymousData(anonymousData);
+    setAuthContext({
+      user: { uid: "user_test", email: "test@example.com" },
+      userProfile: { id: "profile_test", email: "test@example.com" },
+    });
+
+    renderAppShell("/");
+
+    expect(await screen.findByText("Có dữ liệu local trên trình duyệt này")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Import local data" }));
+
+    expect(await screen.findByText(/sẽ không ghi đè tự động/)).toBeInTheDocument();
+    expect(getUserData().goals.map((goal) => goal.title)).toEqual(["Existing account goal"]);
+    expect(localStorage.getItem(getScopedUserDataStorageKey("user_test"))).toBe(rawAccountData);
+    expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toContain("Anonymous local goal");
+  });
+
+  it("lets the user skip local data migration without deleting anonymous data", async () => {
+    seedMeaningfulAnonymousData();
+    const rawAnonymousData = localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY);
+    setAuthContext({
+      user: { uid: "user_test", email: "test@example.com" },
+      userProfile: { id: "profile_test", email: "test@example.com" },
+    });
+
+    renderAppShell("/");
+
+    expect(await screen.findByText("Có dữ liệu local trên trình duyệt này")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Skip for now" }));
+
+    await waitFor(() => {
+      expect(screen.queryByText("Có dữ liệu local trên trình duyệt này")).not.toBeInTheDocument();
+    });
+    expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(rawAnonymousData);
+  });
+
+  it("does not show the local data migration prompt in demo mode", async () => {
+    appModeMock.isDemoMode.mockReturnValue(true);
+    seedMeaningfulAnonymousData();
+    setAuthContext({
+      user: { uid: "user_test", email: "test@example.com" },
+      userProfile: { id: "profile_test", email: "test@example.com" },
+    });
+
+    renderAppShell("/");
+
+    expect(await screen.findByTestId("home-page")).toBeInTheDocument();
+    expect(screen.queryByText("Có dữ liệu local trên trình duyệt này")).not.toBeInTheDocument();
+  });
+
+  it("does not show the local data migration prompt while signed out", async () => {
+    seedMeaningfulAnonymousData();
+
+    renderAppShell("/");
+
+    expect(await screen.findByTestId("home-page")).toBeInTheDocument();
+    expect(screen.queryByText("Có dữ liệu local trên trình duyệt này")).not.toBeInTheDocument();
   });
 });

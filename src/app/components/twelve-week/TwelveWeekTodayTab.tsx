@@ -103,9 +103,9 @@ export function TwelveWeekTodayTab({
   const checkInTotal = todayQueue.length || currentWeekTasksCount || 1;
 
   return (
-    <div className="ops-system-panel min-w-0 space-y-5">
+    <div className="ops-system-panel flex min-w-0 flex-col gap-5">
       {missedTasks.length > 0 && (
-        <Card className="border border-amber-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(146,64,14,0.32)]">
+        <Card className="order-2 border border-amber-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(146,64,14,0.32)]">
           <CardHeader>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -204,7 +204,7 @@ export function TwelveWeekTodayTab({
         </Card>
       )}
 
-      <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.12fr)_380px]">
+      <div className="order-1 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.12fr)_380px]">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="min-w-0">
           <Card
             data-tour-id="system-today-queue"
@@ -228,9 +228,9 @@ export function TwelveWeekTodayTab({
                 <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600">
                   {hasPlanTasks ? (
                     reviewDueToday ? (
-                      "Không còn việc nào đang chờ lúc này. Đây là lúc đẹp để chốt review tuần và khóa ưu tiên cho tuần sau."
+                      "Không còn việc nào đang chờ lúc này. Mở tab Tuần để chốt review và khóa ưu tiên cho tuần sau."
                     ) : (
-                      "Không còn việc nào đang chờ hôm nay. Bạn có thể lưu check-in ngắn hoặc xem tab Tuần để chuẩn bị review."
+                      "Không còn việc nào đang chờ hôm nay. Lưu check-in ngắn ở bên cạnh hoặc mở tab Tuần để chuẩn bị review."
                     )
                   ) : (
                     <div className="mx-auto max-w-lg space-y-2">

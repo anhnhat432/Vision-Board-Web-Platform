@@ -111,6 +111,44 @@ describe("monetization-analytics", () => {
     });
   });
 
+  it("mirrors checkout completion with only safe monetization fields", () => {
+    trackCheckoutCompleted({
+      goalId: "goal_2",
+      context: "plan",
+      source: "paywall_dialog",
+      currentPlan: "FREE",
+      recommendedPlan: "PLUS",
+      planCode: "PLUS",
+      resultPlan: "PLUS",
+      mode: "api_contract",
+      email: "buyer@example.com",
+      firebaseUid: "firebase_uid_123",
+      backendUserId: "user_456",
+      goalText: "Private launch plan",
+      note: "Private checkout note",
+    } as Parameters<typeof trackCheckoutCompleted>[0]);
+
+    const remotePayload = window.dataLayer?.find((item) => item.event === "checkout_completed");
+
+    expect(remotePayload).toEqual({
+      event: "checkout_completed",
+      app: "vision_board_web",
+      area: "monetization",
+      context: "plan",
+      source: "paywall_dialog",
+      current_plan: "FREE",
+      recommended_plan: "PLUS",
+      plan_code: "PLUS",
+      result_plan: "PLUS",
+      provider_mode: "api_contract",
+    });
+    expect(JSON.stringify(remotePayload)).not.toContain("buyer@example.com");
+    expect(JSON.stringify(remotePayload)).not.toContain("firebase_uid_123");
+    expect(JSON.stringify(remotePayload)).not.toContain("user_456");
+    expect(JSON.stringify(remotePayload)).not.toContain("Private launch plan");
+    expect(JSON.stringify(remotePayload)).not.toContain("Private checkout note");
+  });
+
   it("emits rescue trigger lifecycle events with normalized payloads", () => {
     trackRescueTriggerFired({
       kind: "missed_checkin",

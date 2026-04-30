@@ -1,18 +1,16 @@
+import { CreditCard, Crown, RefreshCw, Shield, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { CreditCard, Crown, RefreshCw, Shield, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-
+import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { isDemoMode } from "../utils/app-mode";
 import { getBillingProviderModeLabel, getBillingReadinessLabel } from "../utils/billing-contract";
 import { trackExperimentExposure, trackPaywallCtaClicked } from "../utils/monetization-analytics";
-import { getOrAssignExperimentVariant, markExperimentExposed } from "../utils/storage";
 import {
   getBillingProviderStatus,
   getLastEntitlementSyncSnapshot,
@@ -21,7 +19,7 @@ import {
   restorePlanAccess,
   syncEntitlementsWithProvider,
 } from "../utils/production";
-import { getUserData, startTrialLocally } from "../utils/storage";
+import { getOrAssignExperimentVariant, getUserData, markExperimentExposed, startTrialLocally } from "../utils/storage";
 import type { PricingPlanCode } from "../utils/storage-types";
 import {
   getEntitlementLabel,
@@ -240,30 +238,30 @@ export function BillingPlan() {
                 <p className="text-slate-500">Trạng thái</p>
                 <p className="font-medium text-slate-900">
                   {subscription.status === "active"
-                    ? "Đang hoạt động"
+                    ? "Đang mở local"
                     : subscription.status === "trialing"
-                      ? "Dùng thử"
+                      ? "Dùng thử local"
                       : subscription.status === "canceled"
                         ? "Đã hủy"
                         : "Không hoạt động"}
                 </p>
               </div>
               <div className="flow-muted p-4">
-                <p className="text-slate-500">Bắt đầu</p>
+                <p className="text-slate-500">Bắt đầu local</p>
                 <p className="font-medium text-slate-900">{formatDate(subscription.startedAt)}</p>
               </div>
               <div className="flow-muted p-4">
-                <p className="text-slate-500">Gia hạn</p>
+                <p className="text-slate-500">Mốc local</p>
                 <p className="font-medium text-slate-900">{formatDate(subscription.renewsAt)}</p>
               </div>
               <div className="flow-muted p-4">
-                <p className="text-slate-500">Chu kỳ</p>
+                <p className="text-slate-500">Chu kỳ demo</p>
                 <p className="font-medium text-slate-900">
                   {subscription.billingCycle === "monthly"
-                    ? "Hàng tháng"
+                    ? "Tháng (mock)"
                     : subscription.billingCycle === "quarterly"
-                      ? "Hàng quý"
-                      : "Trọn chu kỳ"}
+                      ? "Quý (mock)"
+                      : "Trọn chu kỳ demo"}
                 </p>
               </div>
             </div>
@@ -353,7 +351,7 @@ export function BillingPlan() {
                     <p className={`text-sm font-medium ${isActive ? "text-emerald-900" : "text-slate-600"}`}>
                       {getEntitlementLabel(key)}
                     </p>
-                    <p className="text-xs text-slate-500">{isActive ? "Đang hoạt động" : "Cần nâng cấp"}</p>
+                    <p className="text-xs text-slate-500">{isActive ? "Đang mở local" : "Chưa mở local"}</p>
                   </div>
                 </div>
               );
@@ -366,7 +364,9 @@ export function BillingPlan() {
       <Card className="flow-panel">
         <CardHeader>
           <CardTitle>Thao tác</CardTitle>
-          <CardDescription>Kiểm tra quyền local/mock, khôi phục mock upgrade hoặc quay lại trang chính.</CardDescription>
+          <CardDescription>
+            Kiểm tra quyền local/mock, khôi phục mock upgrade hoặc quay lại trang chính.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-3">
@@ -386,7 +386,7 @@ export function BillingPlan() {
             <div className="space-y-2 text-xs text-slate-500">
               {lastEntitlementSync && (
                 <p>
-                  Đồng bộ gần nhất: {formatDate(lastEntitlementSync.at)} — {lastEntitlementSync.message}
+                  Kiểm tra quyền gần nhất: {formatDate(lastEntitlementSync.at)} — {lastEntitlementSync.message}
                 </p>
               )}
               {lastRestoreAccess && (

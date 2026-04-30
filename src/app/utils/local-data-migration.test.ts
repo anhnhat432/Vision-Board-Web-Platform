@@ -1,8 +1,24 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
-import { CURRENT_STORAGE_VERSION, DEFAULT_APP_PREFERENCES, MOTIVATIONAL_QUOTES } from "./storage-constants";
+import {
+  ANONYMOUS_USER_DATA_STORAGE_KEY,
+  AUTH_OWNER_STORAGE_KEY,
+  CURRENT_STORAGE_VERSION,
+  DEFAULT_APP_PREFERENCES,
+  LOCAL_DATA_IMPORT_BACKUP_STORAGE_PREFIX,
+  LOCAL_DATA_MIGRATION_PROMPT_STATE_KEY,
+  MOTIVATIONAL_QUOTES,
+  STORAGE_KEY,
+} from "./storage-constants";
 import { createDemoUserData, createEmptyUserData } from "./storage-demo-data";
-import { hasMeaningfulLocalWork } from "./local-data-migration";
+import { getScopedUserDataStorageKey } from "./storage-auth-scope";
+import {
+  getAnonymousLocalDataMigrationCandidate,
+  hasMeaningfulLocalWork,
+  hasSkippedLocalDataMigrationPrompt,
+  importAnonymousLocalDataToAccountScope,
+  markLocalDataMigrationPromptSkipped,
+} from "./local-data-migration";
 import type { Goal, TrackingEvent, UserData } from "./storage-types";
 
 function createFreshUserData(): UserData {
@@ -25,6 +41,10 @@ function createRealGoal(overrides: Partial<Goal> = {}): Goal {
     ...overrides,
   };
 }
+
+beforeEach(() => {
+  localStorage.clear();
+});
 
 describe("hasMeaningfulLocalWork", () => {
   it("returns false for empty user data", () => {
@@ -144,5 +164,103 @@ describe("hasMeaningfulLocalWork", () => {
     });
 
     expect(hasMeaningfulLocalWork(data)).toBe(false);
+  });
+});
+
+describe("anonymous local data migration candidate", () => {
+  it("returns null when anonymous data is fresh", () => {
+    localStorage.setItem(ANONYMOUS_USER_DATA_STORAGE_KEY, JSON.stringify(createFreshUserData()));
+
+    expect(getAnonymousLocalDataMigrationCandidate()).toBeNull();
+  });
+
+  it("returns a candidate summary when anonymous data has meaningful work", () => {
+    const data = createFreshUserData();
+    data.goals.push(createRealGoal());
+    localStorage.setItem(ANONYMOUS_USER_DATA_STORAGE_KEY, JSON.stringify(data));
+
+    const candidate = getAnonymousLocalDataMigrationCandidate();
+
+    expect(candidate).not.toBeNull();
+    expect(candidate?.summary.goalCount).toBe(1);
+    expect(candidate?.fingerprint).toMatch(/^[a-z0-9]+-[a-z0-9]+$/);
+  });
+
+  it("stores skip state without deleting anonymous data", () => {
+    const data = createFreshUserData();
+    data.goals.push(createRealGoal());
+    const rawData = JSON.stringify(data);
+    localStorage.setItem(ANONYMOUS_USER_DATA_STORAGE_KEY, rawData);
+
+    const candidate = getAnonymousLocalDataMigrationCandidate();
+    if (!candidate) throw new Error("Expected migration candidate");
+
+    markLocalDataMigrationPromptSkipped("auth_user_1", candidate.fingerprint);
+
+    expect(hasSkippedLocalDataMigrationPrompt("auth_user_1", candidate.fingerprint)).toBe(true);
+    expect(hasSkippedLocalDataMigrationPrompt("auth_user_2", candidate.fingerprint)).toBe(false);
+    expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(rawData);
+    expect(localStorage.getItem(LOCAL_DATA_MIGRATION_PROMPT_STATE_KEY)).toContain(candidate.fingerprint);
+  });
+
+  it("imports anonymous work into a fresh active account scope", () => {
+    const anonymousData = createFreshUserData();
+    anonymousData.goals.push(createRealGoal());
+    const anonymousRaw = JSON.stringify(anonymousData);
+    const freshAccountRaw = JSON.stringify(createFreshUserData());
+    localStorage.setItem(ANONYMOUS_USER_DATA_STORAGE_KEY, anonymousRaw);
+    localStorage.setItem(AUTH_OWNER_STORAGE_KEY, "auth_user_1");
+    localStorage.setItem(STORAGE_KEY, freshAccountRaw);
+    localStorage.setItem(getScopedUserDataStorageKey("auth_user_1"), freshAccountRaw);
+
+    const candidate = getAnonymousLocalDataMigrationCandidate();
+    if (!candidate) throw new Error("Expected migration candidate");
+
+    const result = importAnonymousLocalDataToAccountScope("auth_user_1", candidate.fingerprint);
+
+    expect(result.status).toBe("imported");
+    expect(result.backupKey).toContain(LOCAL_DATA_IMPORT_BACKUP_STORAGE_PREFIX);
+    expect(localStorage.getItem(STORAGE_KEY)).toBe(anonymousRaw);
+    expect(localStorage.getItem(getScopedUserDataStorageKey("auth_user_1"))).toBe(anonymousRaw);
+    expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(anonymousRaw);
+  });
+
+  it("does not silently overwrite an account scope with existing meaningful data", () => {
+    const anonymousData = createFreshUserData();
+    anonymousData.goals.push(createRealGoal({ title: "Anonymous goal" }));
+    const anonymousRaw = JSON.stringify(anonymousData);
+    const accountData = createFreshUserData();
+    accountData.goals.push(createRealGoal({ id: "goal_account_1", title: "Existing account goal" }));
+    const accountRaw = JSON.stringify(accountData);
+    localStorage.setItem(ANONYMOUS_USER_DATA_STORAGE_KEY, anonymousRaw);
+    localStorage.setItem(AUTH_OWNER_STORAGE_KEY, "auth_user_1");
+    localStorage.setItem(STORAGE_KEY, accountRaw);
+    localStorage.setItem(getScopedUserDataStorageKey("auth_user_1"), accountRaw);
+
+    const candidate = getAnonymousLocalDataMigrationCandidate();
+    if (!candidate) throw new Error("Expected migration candidate");
+
+    const result = importAnonymousLocalDataToAccountScope("auth_user_1", candidate.fingerprint);
+
+    expect(result.status).toBe("blocked_existing_account_data");
+    expect(result.accountSummary?.goalCount).toBe(1);
+    expect(localStorage.getItem(STORAGE_KEY)).toBe(accountRaw);
+    expect(localStorage.getItem(getScopedUserDataStorageKey("auth_user_1"))).toBe(accountRaw);
+    expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(anonymousRaw);
+  });
+
+  it("does not import when the active auth owner does not match the target account", () => {
+    const anonymousData = createFreshUserData();
+    anonymousData.goals.push(createRealGoal());
+    localStorage.setItem(ANONYMOUS_USER_DATA_STORAGE_KEY, JSON.stringify(anonymousData));
+    localStorage.setItem(AUTH_OWNER_STORAGE_KEY, "auth_user_2");
+
+    const candidate = getAnonymousLocalDataMigrationCandidate();
+    if (!candidate) throw new Error("Expected migration candidate");
+
+    const result = importAnonymousLocalDataToAccountScope("auth_user_1", candidate.fingerprint);
+
+    expect(result.status).toBe("inactive_auth_scope");
+    expect(localStorage.getItem(getScopedUserDataStorageKey("auth_user_1"))).toBeNull();
   });
 });

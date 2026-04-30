@@ -179,7 +179,8 @@ export function TwelveWeekDashboardHeader({
                 {activeGoal.title}
               </h1>
               <p className="max-w-3xl text-sm leading-7 text-slate-600">
-                Mở vào là thấy việc hôm nay trước. Tiến độ, review và cài đặt nằm ở các tab phía dưới.
+                Bắt đầu từ tab Hôm nay: tick việc quan trọng nhất, lưu check-in, rồi mở Tuần để review. Bản demo lưu
+                trên trình duyệt này.
               </p>
             </div>
             <div className="flex flex-wrap gap-2 text-xs text-slate-500">
@@ -197,9 +198,9 @@ export function TwelveWeekDashboardHeader({
 
           <div className="grid min-w-0 gap-2 sm:grid-cols-3 xl:w-[520px]">
             <div className="rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Hôm nay</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Còn cần làm</p>
               <p className="mt-1 text-2xl font-bold text-slate-950">{todayRemainingCount}</p>
-              <p className="text-xs text-slate-500">{todayCompletedCount} việc đã chốt</p>
+              <p className="text-xs text-slate-500">{todayCompletedCount} việc đã chốt hôm nay</p>
             </div>
             <div className="rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tuần này</p>
@@ -230,17 +231,17 @@ export function TwelveWeekDashboardHeader({
           </div>
         </div>
 
-        <div className="mt-4 hidden flex-col gap-3 border-t border-slate-200 pt-4 sm:flex lg:flex-row lg:items-center lg:justify-between">
+        <div className="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4 lg:flex-row lg:items-center lg:justify-between">
           <p className="min-w-0 text-sm leading-6 text-slate-600">
             {reviewDueToday
-              ? "Ưu tiên: chốt review tuần trước khi mở việc mới."
+              ? "Việc tiếp theo: chốt review tuần trước khi mở việc mới."
               : firstPriorityTask
-                ? `Ưu tiên: ${firstPriorityTask.title}`
-                : "Hôm nay đang gọn. Có thể check-in hoặc xem lại tuần."}
+                ? `Việc quan trọng nhất: ${firstPriorityTask.title}`
+                : "Hôm nay đang gọn. Bạn có thể lưu check-in hoặc xem lại tab Tuần."}
           </p>
-          <div className="hidden shrink-0 flex-col gap-2 sm:flex sm:flex-row">
+          <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
             <Button className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto" onClick={onOpenFocusTab}>
-              {reviewDueToday ? "Mở review" : "Mở Hôm nay"}
+              {reviewDueToday ? "Mở review tuần" : "Xem việc hôm nay"}
             </Button>
             <Button
               variant="outline"

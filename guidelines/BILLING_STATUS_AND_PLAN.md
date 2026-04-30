@@ -27,6 +27,13 @@ Current user-facing flow:
 6. If the flow completes locally or through mock provider, the app writes `subscription` and `entitlements` into localStorage.
 7. Billing settings and 12-week settings read those local values and update UI.
 
+Public demo copy convention:
+
+- Public UI should say `Free` and `Plus demo`; do not present `PRO` as a purchasable plan.
+- Mock checkout surfaces must state that no real money is charged.
+- Local entitlement state should be described as `quyền local`, `mock upgrade`, or `mở trên trình duyệt này`, not as a verified paid subscription.
+- Words such as subscription, renewal, transaction, payment, and billing authority are acceptable in technical docs/contracts, but public MVP 1 copy should use them only with a clear mock/demo qualifier.
+
 ## Plans
 
 Current TypeScript plan code type:
@@ -38,7 +45,7 @@ Current TypeScript plan code type:
 Current UI plan catalog in `PLAN_DEFINITIONS`:
 
 - `FREE`: price `0đ`, supports one 12-week cycle, Today queue/check-in, basic weekly review.
-- `PLUS`: price `149.000đ / chu kỳ`, unlocks premium templates, premium review insight, priority reminders, and advanced analytics.
+- `PLUS`: demo price label `Demo 149.000đ / chu kỳ`, unlocks premium templates, premium review insight, priority reminders, and advanced analytics for the local/mock demo flow.
 
 Important compatibility note:
 

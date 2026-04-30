@@ -30,6 +30,8 @@ Important current behavior:
 - On first sign-in for a Firebase UID, the app starts from a fresh account-scoped local snapshot.
 - The previous anonymous snapshot is archived under `visionboard_user_data:anonymous`.
 - Account-specific snapshots are stored under `visionboard_user_data:auth:<firebaseUid>`.
+- `RootLayout` now has a first-step local data migration prompt that detects meaningful archived anonymous work after login, offers review/skip/import choices, and only imports after an explicit user action.
+- Local-to-account import phase 1 is frontend local-scope copy only: it copies `visionboard_user_data:anonymous` into `visionboard_user_data:auth:<firebaseUid>` and the active local workspace on this browser, creates a local backup of the pre-import account scope, keeps the anonymous snapshot, and blocks import if the account scope already has meaningful local work.
 - Backend link maps such as `backend_goal_links` and `backend_plan_links` are currently global localStorage keys, not auth-scoped keys.
 
 MVP 2 implication:
@@ -186,12 +188,14 @@ Recommended migration flow:
    - "Move this device data to this account"
    - "Keep it only on this device"
    - "Review before importing"
+   - Current implementation status: the prompt exists with "Import local data", "Skip for now" persisted per account/snapshot, and "Review local data" showing a local summary.
 5. On import:
-   - copy the anonymous snapshot into the auth-scoped workspace only after user confirmation;
-   - keep a backup under `visionboard_user_data:anonymous` until import completes;
-   - create or upsert backend goals/plans/weeks/tasks/metrics;
-   - save link maps after every successful backend create;
-   - record an import result summary.
+   - phase 1 copies the anonymous snapshot into the auth-scoped local workspace only after user confirmation;
+   - phase 1 keeps `visionboard_user_data:anonymous` unchanged and stores a local pre-import account backup under `visionboard_local_data_import_backup:*`;
+   - phase 1 blocks instead of overwriting when the account scope already contains meaningful local work;
+   - later backend import should create or upsert backend goals/plans/weeks/tasks/metrics;
+   - later backend import should save link maps after every successful backend create;
+   - later backend import should record an import result summary.
 6. If backend is empty, local import can become the account's initial cloud snapshot.
 7. If backend already has data, run conflict detection before pushing local data.
 8. If conflict detection finds differences, pause automatic sync for the affected goal until the user chooses local or backend.
@@ -318,10 +322,11 @@ Nice-to-have after MVP 2:
 
 Account/migration gaps:
 
-- No explicit local-to-account migration UI.
-- Login starts clean for a new auth UID and archives anonymous data, but does not offer import.
-- No summary of what will be moved into the account.
-- No account migration completion marker.
+- Initial local-to-account migration UI exists. Import phase 1 is enabled as a local-only account-scope copy on the current browser; it is not cloud sync and does not call a backend import endpoint.
+- Login starts clean for a new auth UID and archives anonymous data; the prompt can detect meaningful archived work after login.
+- The prompt shows a lightweight summary of local data, but there is no detailed review screen yet.
+- Skip state is local per account/snapshot; there is no backend/account migration completion marker yet.
+- Import is blocked when the account scope already has meaningful local work, so there is no merge UI for account-vs-anonymous conflicts yet.
 
 Sync correctness gaps:
 
@@ -453,10 +458,10 @@ Phase 1: harden current account sync foundation.
 Phase 2: add local-to-account migration UX.
 
 - Detect meaningful anonymous data before login.
-- Show migration prompt after profile bootstrap.
-- Import only after confirmation.
+- Show migration prompt after profile bootstrap. Status: first-step prompt implemented in `RootLayout`.
+- Import only after confirmation. Status: phase 1 local account-scope copy implemented; backend/cloud import is still pending the import endpoint and conflict-safe model contract.
 - Keep anonymous backup until import succeeds.
-- Add migration tests.
+- Add migration tests. Status: utility and RootLayout prompt coverage added.
 
 Phase 3: add backend sync contract.
 

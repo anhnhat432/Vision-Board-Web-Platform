@@ -1,11 +1,15 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = "dof-v1";
-const PRECACHE_URLS = ["/", "/index.html"];
+const CACHE_NAME = "dof-mvp1-shell-v2";
+const PRECACHE_URLS = ["/index.html"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS))
+    caches
+      .open(CACHE_NAME)
+      .then((cache) =>
+        cache.addAll(PRECACHE_URLS.map((url) => new Request(url, { cache: "reload" })))
+      )
   );
   self.skipWaiting();
 });
@@ -28,13 +32,24 @@ self.addEventListener("fetch", (event) => {
   // Skip cross-origin
   if (!request.url.startsWith(self.location.origin)) return;
 
+  const url = new URL(request.url);
+
+  // Never serve the service worker script itself from a runtime cache.
+  if (url.pathname === "/sw.js") return;
+
   // Navigation requests: network-first with cache fallback
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
+      fetch(request.url, {
+        cache: "no-store",
+        credentials: "same-origin",
+        redirect: "follow",
+      })
         .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put("/index.html", clone));
+          }
           return response;
         })
         .catch(() => caches.match("/index.html"))
@@ -44,15 +59,17 @@ self.addEventListener("fetch", (event) => {
 
   // Static assets (JS, CSS, images): cache-first
   if (
-    request.url.match(/\.(js|css|png|jpg|jpeg|svg|woff2?|ico)(\?.*)?$/)
+    url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|woff2?|ico)$/)
   ) {
     event.respondWith(
       caches.match(request).then(
         (cached) =>
           cached ||
           fetch(request).then((response) => {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+            if (response.ok) {
+              const clone = response.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+            }
             return response;
           })
       )

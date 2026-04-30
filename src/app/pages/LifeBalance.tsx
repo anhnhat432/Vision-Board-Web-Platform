@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import { useBlocker, useNavigate } from "react-router";
 import { motion } from "motion/react";
 import {
@@ -36,6 +36,7 @@ export function LifeBalance() {
   const { userData, reloadUserData } = useSyncedUserData();
   const [lifeAreas, setLifeAreas] = useState<LifeArea[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
+  const lifeBalanceStartedRef = useRef(false);
 
   // Warn user before navigating away with unsaved changes
   const blocker = useBlocker(
@@ -46,6 +47,20 @@ export function LifeBalance() {
     if (!userData || hasChanges) return;
     setLifeAreas([...userData.currentWheelOfLife]);
   }, [hasChanges, userData]);
+
+  useEffect(() => {
+    if (!userData || lifeBalanceStartedRef.current) return;
+
+    const hasExistingScores = hasRealLifeBalance(userData);
+    if (!hasExistingScores) return;
+
+    lifeBalanceStartedRef.current = true;
+    trackAnalyticsEvent("life_balance_started", {
+      source: "life_balance",
+      returning_user: hasExistingScores,
+      has_existing_scores: hasExistingScores,
+    });
+  }, [userData]);
 
   const handleScoreChange = (index: number, value: number[]) => {
     const updated = [...lifeAreas];

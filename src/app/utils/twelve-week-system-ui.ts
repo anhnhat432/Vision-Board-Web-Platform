@@ -137,9 +137,7 @@ export function buildRescuePlanSummary(input: {
 
   if (overdueOpenCount === 0) return null;
 
-  const optionalOpenThisWeekCount = input.currentWeekTasks.filter(
-    (task) => !task.completed && !task.isCore,
-  ).length;
+  const optionalOpenThisWeekCount = input.currentWeekTasks.filter((task) => !task.completed && !task.isCore).length;
 
   if (optionalOpenThisWeekCount > 0 && overdueOpenCount >= 2) {
     return {
@@ -147,8 +145,7 @@ export function buildRescuePlanSummary(input: {
       headline: "Tuần này nên nhẹ xuống trước khi nghĩ tới tăng tốc.",
       reason:
         "Bạn đang có cả việc trễ lẫn phần tùy chọn còn mở. Giữ phần cốt lõi trước sẽ giúp tuần sau không bị vỡ nhịp tiếp.",
-      firstMove:
-        "Buông phần tùy chọn trong vài ngày tới, giữ 1-2 việc cốt lõi đẹp nhất rồi mới cân nhắc thêm lại.",
+      firstMove: "Buông phần tùy chọn trong vài ngày tới, giữ 1-2 việc cốt lõi đẹp nhất rồi mới cân nhắc thêm lại.",
     };
   }
 
@@ -156,8 +153,7 @@ export function buildRescuePlanSummary(input: {
     return {
       recommendedMode: "push",
       headline: "Dời phần trễ sang đầu tuần sau sẽ an toàn hơn cố gồng tiếp.",
-      reason:
-        "Khi việc trễ đã chồng lên nhau, ép hoàn thành hết trong tuần này thường chỉ làm review nặng đầu hơn.",
+      reason: "Khi việc trễ đã chồng lên nhau, ép hoàn thành hết trong tuần này thường chỉ làm review nặng đầu hơn.",
       firstMove:
         "Khóa lại vài việc đẹp nhất của tuần này, còn phần trễ thì dời hẳn sang đầu tuần sau để mở lại từ trạng thái gọn.",
     };
@@ -168,8 +164,7 @@ export function buildRescuePlanSummary(input: {
     headline: "Bạn vẫn cứu được tuần này nếu dàn lại ngay từ hôm nay.",
     reason:
       "Số việc trễ chưa quá nhiều. Cách tốt nhất lúc này là đặt lại thứ tự và vào lại nhịp thay vì tiếp tục né phần mở.",
-    firstMove:
-      "Xếp lại các việc trễ vào 3-4 ngày tới và bắt đầu bằng đúng việc quan trọng nhất của hôm nay.",
+    firstMove: "Xếp lại các việc trễ vào 3-4 ngày tới và bắt đầu bằng đúng việc quan trọng nhất của hôm nay.",
   };
 }
 
@@ -239,7 +234,11 @@ export function getOutboxSummaryText(item: SyncOutboxItem): string {
 
   switch (item.type) {
     case "12_week_tactic_updated": {
-      const tacticLabel = metadata.tacticId?.replace(/^tactic_/, "").split("_").join(" ") || "một tactic";
+      const tacticLabel =
+        metadata.tacticId
+          ?.replace(/^tactic_/, "")
+          .split("_")
+          .join(" ") || "một tactic";
       if (metadata.field === "type") {
         return `${tacticLabel}: đổi loại sang ${metadata.value === "optional" ? "Tùy chọn" : "Cốt lõi"}.`;
       }
@@ -252,9 +251,7 @@ export function getOutboxSummaryText(item: SyncOutboxItem): string {
       return `Tuần ${metadata.weekNumber || "-"} · đã đánh dấu xong việc ${metadata.taskId || "--"}.`;
     case "12_week_daily_checkin_submitted": {
       const moodValue =
-        metadata.mood === "low" || metadata.mood === "high" || metadata.mood === "steady"
-          ? metadata.mood
-          : "steady";
+        metadata.mood === "low" || metadata.mood === "high" || metadata.mood === "steady" ? metadata.mood : "steady";
       return `Năng lượng ${getMoodLabel(moodValue)} · hoàn thành ${metadata.completedTasks || "0"} việc.`;
     }
     case "12_week_weekly_review_submitted":
@@ -384,8 +381,9 @@ export function evaluateRescueTriggers(input: {
       triggers.push({
         kind: "trial_ending",
         severity: daysLeft <= 1 ? "urgent" : "caution",
-        headline: `Còn ${timeLabel} để nâng cấp và giữ Plus.`,
-        detail: "Sau khi hết thử, toàn bộ tính năng Plus sẽ về mức Free. Nâng cấp ngay để không mất nhịp.",
+        headline: `Còn ${timeLabel} để giữ lớp Plus demo local.`,
+        detail:
+          "Sau khi hết thử, tính năng Plus demo sẽ về mức Free trên trình duyệt này. Mock upgrade không thu tiền thật.",
         surfacedAt: now.toISOString(),
       });
     }
@@ -511,9 +509,7 @@ export function buildExecutionHeatmap(system: TwelveWeekSystem): HeatmapCell[] {
       const d = new Date(startDate);
       d.setDate(d.getDate() + (week - 1) * 7 + day);
       const dateKey = formatDateInputValue(d);
-      const dayTasks = tasks.filter(
-        (t) => (getCalendarDateKey(t.scheduledDate) ?? t.scheduledDate) === dateKey,
-      );
+      const dayTasks = tasks.filter((t) => (getCalendarDateKey(t.scheduledDate) ?? t.scheduledDate) === dateKey);
       const total = dayTasks.length;
       const completed = dayTasks.filter((t) => t.completed).length;
       cells.push({
@@ -543,9 +539,7 @@ export function buildWeeklyTrend(system: TwelveWeekSystem): WeekTrendPoint[] {
     const scoreEntry = system.scoreboard.find((s) => s.weekNumber === week);
 
     const pct = (arr: TwelveWeekTaskInstance[]) =>
-      arr.length > 0
-        ? Math.round((arr.filter((t) => t.completed).length / arr.length) * 100)
-        : 0;
+      arr.length > 0 ? Math.round((arr.filter((t) => t.completed).length / arr.length) * 100) : 0;
 
     points.push({
       weekNumber: week,
@@ -562,10 +556,7 @@ export function buildWeeklyTrend(system: TwelveWeekSystem): WeekTrendPoint[] {
  * Build a per-tactic breakdown comparing the latest N weeks.
  * `trend` compares the last 2 completed weeks.
  */
-export function buildTacticBreakdown(
-  system: TwelveWeekSystem,
-  upToWeek?: number,
-): TacticBreakdownItem[] {
+export function buildTacticBreakdown(system: TwelveWeekSystem, upToWeek?: number): TacticBreakdownItem[] {
   const tasks = system.taskInstances ?? [];
   const maxWeek = upToWeek ?? system.totalWeeks;
   const indicators = system.leadIndicators ?? [];
@@ -573,9 +564,7 @@ export function buildTacticBreakdown(
   return indicators.map((indicator) => {
     const tacticId = indicator.id ?? indicator.name;
     const relevantTasks = tasks.filter(
-      (t) =>
-        t.weekNumber <= maxWeek &&
-        (t.tacticId === indicator.id || t.leadIndicatorName === indicator.name),
+      (t) => t.weekNumber <= maxWeek && (t.tacticId === indicator.id || t.leadIndicatorName === indicator.name),
     );
     const total = relevantTasks.length;
     const completed = relevantTasks.filter((t) => t.completed).length;
@@ -584,15 +573,10 @@ export function buildTacticBreakdown(
     const lastWeekTasks = relevantTasks.filter((t) => t.weekNumber === maxWeek);
     const prevWeekTasks = relevantTasks.filter((t) => t.weekNumber === maxWeek - 1);
     const lastPct =
-      lastWeekTasks.length > 0
-        ? lastWeekTasks.filter((t) => t.completed).length / lastWeekTasks.length
-        : 0;
+      lastWeekTasks.length > 0 ? lastWeekTasks.filter((t) => t.completed).length / lastWeekTasks.length : 0;
     const prevPct =
-      prevWeekTasks.length > 0
-        ? prevWeekTasks.filter((t) => t.completed).length / prevWeekTasks.length
-        : 0;
-    const trend: "up" | "down" | "flat" =
-      lastPct > prevPct + 0.05 ? "up" : lastPct < prevPct - 0.05 ? "down" : "flat";
+      prevWeekTasks.length > 0 ? prevWeekTasks.filter((t) => t.completed).length / prevWeekTasks.length : 0;
+    const trend: "up" | "down" | "flat" = lastPct > prevPct + 0.05 ? "up" : lastPct < prevPct - 0.05 ? "down" : "flat";
 
     return {
       tacticId,

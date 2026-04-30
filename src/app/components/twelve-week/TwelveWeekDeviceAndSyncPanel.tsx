@@ -24,7 +24,7 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
       <CardHeader>
         <CardTitle className="text-slate-950">Thiết bị, dữ liệu và đồng bộ</CardTitle>
         <CardDescription className="text-slate-600">
-          Gom các phần liên quan đến thiết bị này vào một cột để dễ nhìn hơn khi dùng trên web.
+          Bản demo lưu trên trình duyệt này. Export dữ liệu nếu muốn giữ bản sao; đăng nhập và sync chỉ là lớp sau.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

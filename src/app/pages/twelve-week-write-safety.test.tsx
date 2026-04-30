@@ -43,6 +43,7 @@ vi.mock("@/features/plan12week/hooks", async () => {
 
 import { getTwelveWeekCurrentWeek } from "../utils/storage-twelve-week";
 import { getUserData } from "../utils/storage";
+import { listStoredPendingMutations } from "@/features/plan12week/persistence/mutationQueue";
 import { getUniversalWeeklyReviewExecutionScore } from "@/features/plan12week/persistence/reviewExecutionScore";
 import {
   readGoal,
@@ -125,6 +126,15 @@ describe("12-week write-path safety", () => {
       expect(toggledTask?.completed).toBe(false);
       expect(updatedPeerTask?.completed).toBe(true);
     });
+
+    const pendingMutations = listStoredPendingMutations(null);
+    expect(pendingMutations).toHaveLength(1);
+    expect(pendingMutations[0].supersedes).toHaveLength(1);
+    if (pendingMutations[0].kind === "task_completed_changed") {
+      expect(pendingMutations[0].payload.clientTaskId).toBe(toggledTaskId);
+      expect(pendingMutations[0].payload.completed).toBe(false);
+      expect(pendingMutations[0].payload.completedAt).toBeUndefined();
+    }
   });
 
   it("keeps lag metric, weekly review, and scoreboard metric aligned before weekly-review sync", async () => {

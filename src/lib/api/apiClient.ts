@@ -2,7 +2,8 @@ import { getFirebaseToken, getStoredFirebaseToken, logoutFirebase } from "@/lib/
 import type { ApiErrorEnvelope, ApiSuccessEnvelope, AppError } from "@/types/api";
 
 const DEFAULT_API_BASE_URL = "http://localhost:4000/api";
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL?.trim() || DEFAULT_API_BASE_URL).replace(/\/$/, "");
+const CONFIGURED_API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.trim() ?? "";
+const API_BASE_URL = (CONFIGURED_API_BASE_URL || DEFAULT_API_BASE_URL).replace(/\/$/, "");
 
 type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
@@ -85,6 +86,14 @@ function buildApiUrl(path: string): string {
   if (/^https?:\/\//i.test(path)) return path;
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   return `${API_BASE_URL}${normalizedPath}`;
+}
+
+export function getApiBaseUrl(): string {
+  return API_BASE_URL;
+}
+
+export function isApiBaseUrlConfigured(): boolean {
+  return CONFIGURED_API_BASE_URL.length > 0;
 }
 
 async function parseResponseBody(response: Response): Promise<unknown> {

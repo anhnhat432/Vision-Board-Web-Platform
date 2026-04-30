@@ -12,7 +12,7 @@ import {
   updateGoal,
   upsertReflection,
 } from "@/app/utils/storage";
-import type { Goal, TwelveWeekSystem } from "@/app/utils/storage-types";
+import type { Goal, TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
 import {
   addDaysToDateKey,
   getMoodScore,
@@ -32,6 +32,8 @@ import {
 } from "@/app/utils/storage-twelve-week";
 import type { SuggestedNextWeekPlan } from "@/app/utils/twelve-week-premium";
 import { getUniversalWeeklyReviewExecutionScore } from "@/features/plan12week/persistence/reviewExecutionScore";
+import { enqueueStoredMutation } from "@/features/plan12week/persistence/mutationQueue";
+import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
 import { getTodayQueueForSystem } from "./helpers";
 import type { WeeklyReviewForm } from "./types";
 
@@ -64,6 +66,40 @@ interface UseTwelveWeekExecutionActionsOptions {
   refreshSnapshotMeta: () => void;
 }
 
+function getClientPlanId(goalId: string): string {
+  return `${goalId}:12-week-system`;
+}
+
+function getClientWeekId(goalId: string, weekNumber: number): string {
+  return `${goalId}:week:${weekNumber}`;
+}
+
+function enqueueTaskCompletionChangedMutation(goalId: string, task: TwelveWeekTaskInstance): void {
+  try {
+    const planLink = getPlanLink(goalId);
+    enqueueStoredMutation({
+      kind: "task_completed_changed",
+      goalId,
+      planId: planLink?.planId ?? null,
+      payload: {
+        taskId: task.id,
+        clientTaskId: task.id,
+        clientPlanId: getClientPlanId(goalId),
+        clientWeekId: getClientWeekId(goalId, task.weekNumber),
+        weekNumber: task.weekNumber,
+        completed: task.completed,
+        completedAt: task.completedAt,
+        scheduledDate: task.scheduledDate,
+        title: task.title,
+        leadIndicatorName: task.leadIndicatorName,
+        isCore: task.isCore,
+      },
+    });
+  } catch {
+    // Queueing is a best-effort sidecar. The local-first task save stays authoritative.
+  }
+}
+
 export function useTwelveWeekExecutionActions({
   activeGoal,
   system,
@@ -93,6 +129,7 @@ export function useTwelveWeekExecutionActions({
     const nextTaskInstances = system.taskInstances.map((task) =>
       task.id === taskId ? { ...task, completed, completedAt: completed ? new Date().toISOString() : undefined } : task,
     );
+    const nextToggledTask = nextTaskInstances.find((task) => task.id === taskId);
 
     commitSystemUpdate({
       ...system,
@@ -117,6 +154,8 @@ export function useTwelveWeekExecutionActions({
         },
       );
     }
+
+    if (nextToggledTask) enqueueTaskCompletionChangedMutation(actionGoalId, nextToggledTask);
 
     const synced = await executionSyncActions.syncTaskToggle(taskId, completed);
     if (!synced) {
@@ -148,6 +187,8 @@ export function useTwelveWeekExecutionActions({
         if (activeGoalIdRef.current === actionGoalId) {
           updateActiveSystemState(() => normalizedRollbackSystem);
         }
+        const rollbackTask = normalizedRollbackSystem.taskInstances.find((task) => task.id === taskId);
+        if (rollbackTask) enqueueTaskCompletionChangedMutation(actionGoalId, rollbackTask);
       }
 
       toast.error(

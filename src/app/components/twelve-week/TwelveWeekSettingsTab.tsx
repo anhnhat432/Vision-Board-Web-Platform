@@ -1,3 +1,4 @@
+import { FeedbackDialog } from "../FeedbackDialog";
 import { TwelveWeekCycleSettingsPanel } from "./TwelveWeekCycleSettingsPanel";
 import { TwelveWeekDeviceAndSyncPanel } from "./TwelveWeekDeviceAndSyncPanel";
 import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
@@ -61,6 +62,14 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           onNavigateGoals={props.onNavigateGoals}
           onNavigateJournal={props.onNavigateJournal}
           onNavigateSetup={props.onNavigateSetup}
+        />
+      </div>
+      <div className="flex justify-end">
+        <FeedbackDialog
+          source="settings"
+          context="12_week_settings"
+          triggerLabel="Góp ý về demo"
+          triggerClassName="border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
         />
       </div>
     </div>

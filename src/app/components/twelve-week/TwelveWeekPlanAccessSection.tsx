@@ -1,16 +1,15 @@
 import { Crown } from "lucide-react";
-
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
+import { isDemoMode, shouldShowBillingDebugUi } from "../../utils/app-mode";
 import {
   getBillingActionStatusLabel,
   getBillingProviderModeLabel,
   getBillingReadinessLabel,
 } from "../../utils/billing-contract";
-import { isDemoMode, shouldShowBillingDebugUi } from "../../utils/app-mode";
+import type { BillingProviderMode } from "../../utils/storage-types";
 import { getEntitlementLabel, getPlanDefinition, getPlanLabel } from "../../utils/twelve-week-premium";
 import { formatDateTimeLabel } from "../../utils/twelve-week-system-ui";
-import type { BillingProviderMode } from "../../utils/storage-types";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
 
 type TwelveWeekPlanAccessSectionProps = Pick<
@@ -74,9 +73,7 @@ export function TwelveWeekPlanAccessSection({
     <div className="rounded-lg border border-violet-200/70 bg-violet-50/75 p-5 shadow-[0_18px_44px_-36px_rgba(124,58,237,0.24)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
-            Gói demo và quyền local
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">Gói demo và quyền local</p>
           <p className="mt-2 text-2xl font-bold text-slate-950">{getPlanLabel(currentPlanCode)}</p>
           <p className="mt-2 text-sm leading-7 text-slate-700">{currentPlanDefinition.description}</p>
         </div>
@@ -99,7 +96,7 @@ export function TwelveWeekPlanAccessSection({
                   : "border-slate-200 bg-white text-slate-600"
               }
             >
-              {isUnlocked ? "Đang mở" : "Đang khóa"} · {getEntitlementLabel(key)}
+              {isUnlocked ? "Đang mở local" : "Đang khóa"} · {getEntitlementLabel(key)}
             </Badge>
           );
         })}
@@ -193,7 +190,7 @@ export function TwelveWeekPlanAccessSection({
           </>
         ) : (
           <div className="rounded-lg border border-violet-100 bg-white p-4">
-            <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Thanh toán và quyền</p>
+            <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Mock upgrade và quyền local</p>
             <p className="mt-2 text-lg font-semibold text-slate-950">
               {demoMode
                 ? "Bản demo đang mô phỏng bước nâng cấp, không thu tiền thật."

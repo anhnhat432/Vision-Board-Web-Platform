@@ -56,7 +56,7 @@ export function MockBillingCheckout() {
       <div className="space-y-6 pb-12">
         <Card className="overflow-hidden border-0 gradient-dark-indigo text-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.52)]">
           <CardContent className="p-8 lg:p-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Bản demo thanh toán</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Bản demo mock checkout</p>
             <h1 className="mt-3 text-4xl font-bold tracking-normal">Phiên checkout này không còn hợp lệ.</h1>
             <p className="mt-3 max-w-2xl text-base leading-8 text-white/74">
               Có thể bạn đã hoàn tất, hủy phiên này trước đó, hoặc tab checkout đã mở quá lâu.
@@ -112,7 +112,7 @@ export function MockBillingCheckout() {
           </div>
 
           <div className="rounded-[28px] border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/56">Tóm tắt giao dịch</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/56">Tóm tắt mock upgrade</p>
             <div className="mt-4 space-y-4">
               <div className="rounded-[22px] border border-white/12 bg-black/12 p-4">
                 <p className="text-xs uppercase tracking-[0.16em] text-white/56">Gói sẽ mở</p>
@@ -127,7 +127,7 @@ export function MockBillingCheckout() {
                     cập nhật lại trạng thái gói hiện tại.
                   </>
                 ) : (
-                  "Thiết bị này chưa có giao dịch mô phỏng nào trước đó."
+                  "Thiết bị này chưa có mock upgrade nào trước đó."
                 )}
               </div>
             </div>
@@ -140,7 +140,7 @@ export function MockBillingCheckout() {
           <CardHeader>
             <CardTitle className="text-slate-950">Bạn sẽ mở được gì ngay sau khi xác nhận</CardTitle>
             <CardDescription className="text-slate-700">
-              Bản demo sẽ tạo subscription mô phỏng và cập nhật quyền local ngay trên trình duyệt này.
+              Bản demo chỉ cập nhật trạng thái gói và quyền local trên trình duyệt này.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">

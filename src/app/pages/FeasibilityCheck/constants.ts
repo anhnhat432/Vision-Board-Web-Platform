@@ -1,0 +1,226 @@
+import type { Question } from "./types";
+
+export const QUESTIONS: Question[] = [
+  {
+    id: 1,
+    axis: "time",
+    axisLabel: "Thời gian thật",
+    question: "Mỗi tuần bạn có thể dành chính xác bao nhiêu thời gian cho mục tiêu này?",
+    helper: "Trả lời theo lịch sống thật. Câu này giúp hệ thống biết tuần đầu nên ít việc hay nhiều việc.",
+    options: [
+      {
+        value: "lt1",
+        label: "Dưới 1 giờ mỗi tuần",
+        score: 1,
+        diagnostic: "Kế hoạch phải rất nhẹ, chỉ nên giữ 1-2 việc chính.",
+      },
+      { value: "1to3", label: "1-3 giờ mỗi tuần", score: 2, diagnostic: "Kế hoạch nên gọn, ít việc nhưng lặp đều." },
+      { value: "3to5", label: "3-5 giờ mỗi tuần", score: 3, diagnostic: "Có đủ chỗ cho một nhịp cân bằng." },
+      {
+        value: "gt5",
+        label: "Hơn 5 giờ mỗi tuần",
+        score: 4,
+        diagnostic: "Có thể làm nhiều hơn một chút nếu các phần khác cũng ổn.",
+      },
+    ],
+  },
+  {
+    id: 2,
+    axis: "energy",
+    axisLabel: "Năng lượng hiện tại",
+    question: "Sau một ngày bình thường, bạn còn bao nhiêu năng lượng cho mục tiêu này?",
+    helper: "Năng lượng thấp không có nghĩa là mục tiêu sai; nó chỉ nói rằng tuần đầu cần nhẹ và ít ma sát hơn.",
+    options: [
+      {
+        value: "energy_drained",
+        label: "Thường đã cạn sức",
+        score: 1,
+        diagnostic: "Cần giảm việc và chọn khoảng thời gian rất nhỏ.",
+      },
+      {
+        value: "energy_low",
+        label: "Còn ít, dễ bỏ nếu ngày bận",
+        score: 2,
+        diagnostic: "Cần thắng nhỏ sớm để giữ nhịp.",
+      },
+      {
+        value: "energy_stable",
+        label: "Còn đủ nếu đã đặt lịch trước",
+        score: 3,
+        diagnostic: "Có thể đi cân bằng nếu lịch được khóa rõ.",
+      },
+      {
+        value: "energy_high",
+        label: "Còn khá tốt và chủ động được",
+        score: 4,
+        diagnostic: "Có thể giữ nhịp đều và tăng lượng việc từ từ.",
+      },
+    ],
+  },
+  {
+    id: 3,
+    axis: "resources",
+    axisLabel: "Nguồn lực / kỹ năng",
+    question: "Bạn đã có đủ kỹ năng, công cụ hoặc nguồn lực để bắt đầu chưa?",
+    helper: "Nếu chưa đủ nguồn lực, kế hoạch 12 tuần nên có bước chuẩn bị nhỏ trước khi làm việc lớn.",
+    options: [
+      {
+        value: "resources_missing",
+        label: "Thiếu khá nhiều, chưa biết bắt đầu từ đâu",
+        score: 1,
+        diagnostic: "Cần bước đệm học/chuẩn bị trước khi tăng tốc.",
+      },
+      {
+        value: "resources_basic",
+        label: "Có nền cơ bản nhưng còn nhiều lỗ hổng",
+        score: 2,
+        diagnostic: "Kế hoạch nên chừa chỗ cho học và thử nghiệm.",
+      },
+      {
+        value: "resources_mostly_ready",
+        label: "Phần lớn đã có, chỉ cần bổ sung dần",
+        score: 3,
+        diagnostic: "Có thể bắt đầu hành động chính song song với bổ sung.",
+      },
+      {
+        value: "resources_ready",
+        label: "Đủ để bắt đầu ngay",
+        score: 4,
+        diagnostic: "Kế hoạch có thể tập trung nhiều hơn vào làm thật.",
+      },
+    ],
+  },
+  {
+    id: 4,
+    axis: "clarity",
+    axisLabel: "Độ rõ mục tiêu",
+    question: "Mục tiêu này cảm thấy thực tế và rõ đến mức nào với bạn hiện tại?",
+    helper: "Mục tiêu càng rõ về kết quả, con số cần đạt và thời hạn thì càng dễ chia thành việc hằng tuần.",
+    options: [
+      {
+        value: "overwhelming",
+        label: "Cảm giác quá lớn và quá sức",
+        score: 1,
+        diagnostic: "Nên thu nhỏ mục tiêu trước khi tạo kế hoạch.",
+      },
+      {
+        value: "challenging",
+        label: "Khó nhưng vẫn có thể chạm tới",
+        score: 2,
+        diagnostic: "Cần chọn một kết quả 12 tuần hẹp hơn.",
+      },
+      {
+        value: "realistic",
+        label: "Thực tế nếu tôi giữ kỷ luật",
+        score: 3,
+        diagnostic: "Có thể đi tiếp với nhịp cân bằng.",
+      },
+      {
+        value: "very_realistic",
+        label: "Rất thực tế và hoàn toàn có thể làm",
+        score: 4,
+        diagnostic: "Đủ rõ để chuyển sang kế hoạch 12 tuần.",
+      },
+    ],
+  },
+  {
+    id: 5,
+    axis: "obstacle",
+    axisLabel: "Trở ngại chính",
+    question: "Trở ngại lớn nhất có thể ngăn bạn hoàn thành mục tiêu này là gì?",
+    helper: "Câu này giúp hệ thống biết nên giảm việc, chia nhỏ hay thêm bước chuẩn bị.",
+    options: [
+      {
+        value: "motivation",
+        label: "Thiếu động lực hoặc dễ mất đà",
+        score: 2,
+        diagnostic: "Cần thắng nhỏ sớm và một lần nhìn lại ngắn mỗi tuần.",
+      },
+      { value: "time", label: "Khó quản lý thời gian", score: 2, diagnostic: "Cần giảm số việc và khóa lịch cố định." },
+      {
+        value: "resources",
+        label: "Thiếu nguồn lực hoặc kiến thức",
+        score: 2,
+        diagnostic: "Cần thêm bước học/chuẩn bị vào tuần đầu.",
+      },
+      {
+        value: "complexity",
+        label: "Mục tiêu phức tạp, dễ bị loãng",
+        score: 2,
+        diagnostic: "Cần tách rõ phần bắt buộc và phần mở rộng.",
+      },
+      {
+        value: "none",
+        label: "Hiện chưa thấy trở ngại lớn nào",
+        score: 4,
+        diagnostic: "Có thể tập trung vào nhịp làm đều.",
+      },
+    ],
+  },
+  {
+    id: 6,
+    axis: "routine",
+    axisLabel: "Lịch cố định",
+    question: "Bạn đã có chỗ cố định trong lịch để làm mục tiêu này chưa?",
+    helper: "Không có lịch cố định thì kế hoạch đẹp vẫn dễ trôi. Câu này giúp hệ thống biết cần giữ nhịp chặt đến đâu.",
+    options: [
+      {
+        value: "rarely",
+        label: "Chưa có, thường làm khi nhớ ra",
+        score: 1,
+        diagnostic: "Kế hoạch phải bắt đầu bằng việc khóa lịch.",
+      },
+      {
+        value: "sometimes",
+        label: "Có dự định nhưng hay bị chen ngang",
+        score: 2,
+        diagnostic: "Cần lịch nhẹ và một lần nhìn lại để kéo lại nhịp.",
+      },
+      {
+        value: "mostly",
+        label: "Có vài khung giờ khá ổn trong tuần",
+        score: 3,
+        diagnostic: "Có thể giữ nhịp cân bằng nếu không thêm quá nhiều việc.",
+      },
+      {
+        value: "always",
+        label: "Đã có khung giờ khá cố định",
+        score: 4,
+        diagnostic: "Nền lịch đủ tốt để triển khai đều hơn.",
+      },
+    ],
+  },
+  {
+    id: 7,
+    axis: "confidence",
+    axisLabel: "Tự tin hoàn thành",
+    question: "Nếu phải bắt đầu trong tuần này, bạn tự tin hoàn thành tuần đầu ở mức nào?",
+    helper: "Câu này giúp chọn tuần đầu nên nhẹ, vừa phải hay hơi thử thách.",
+    options: [
+      {
+        value: "exploring",
+        label: "Thấp, tôi còn khá do dự",
+        score: 1,
+        diagnostic: "Cần thu nhỏ để tạo niềm tin ban đầu.",
+      },
+      {
+        value: "interested",
+        label: "Vừa phải, tôi cần kế hoạch thật rõ",
+        score: 2,
+        diagnostic: "Cần ít việc lặp lại và chỉ số đo đơn giản.",
+      },
+      {
+        value: "ready",
+        label: "Khá tự tin nếu tuần đầu vừa sức",
+        score: 3,
+        diagnostic: "Có thể đi cân bằng với tuần đầu nhẹ.",
+      },
+      {
+        value: "committed",
+        label: "Cam kết hoàn toàn và bắt đầu ngay",
+        score: 4,
+        diagnostic: "Có thể bắt đầu ngay, miễn là không làm kế hoạch phình quá rộng.",
+      },
+    ],
+  },
+];

@@ -9,6 +9,7 @@ import {
   getUserData,
 } from "../utils/storage";
 import { startCheckoutFlow } from "../utils/production";
+import { listStoredPendingMutations } from "@/features/plan12week/persistence/mutationQueue";
 import {
   readGoal,
   renderAppRoute,
@@ -97,13 +98,57 @@ describe("12-week core flows", () => {
     const checkbox = within(taskListCard as HTMLElement).getAllByRole("checkbox")[0];
     await user.click(checkbox);
 
+    let completedTaskId: string | null = null;
     await waitFor(() => {
-      const completedCount =
-        readGoal(goalId).twelveWeekSystem?.taskInstances.filter((item) => item.completed).length ?? 0;
-      expect(completedCount).toBeGreaterThan(0);
+      const completedTask = readGoal(goalId).twelveWeekSystem?.taskInstances.find((item) => item.completed);
+      expect(completedTask).toBeDefined();
+      completedTaskId = completedTask?.id ?? null;
     });
 
+    const pendingMutations = listStoredPendingMutations(null);
+    expect(pendingMutations).toHaveLength(1);
+    expect(pendingMutations[0]).toEqual(expect.objectContaining({ kind: "task_completed_changed", goalId }));
+    if (pendingMutations[0].kind === "task_completed_changed") {
+      expect(pendingMutations[0].payload.clientTaskId).toBe(completedTaskId);
+      expect(pendingMutations[0].payload.completed).toBe(true);
+      expect(pendingMutations[0].payload.completedAt).toBeTruthy();
+    }
     expect(getUserData().eventLog.some((event) => event.type === "12_week_task_completed")).toBe(true);
+  });
+
+  it("compacts repeated task toggles to the latest queued state", async () => {
+    const { goalId } = seedTwelveWeekGoal();
+    renderAppRoute("/12-week-system");
+    const user = userEvent.setup();
+
+    await screen.findAllByRole("checkbox");
+    const getFirstCheckbox = () => screen.getAllByRole("checkbox")[0];
+    await user.click(getFirstCheckbox());
+    let toggledTaskId: string | null = null;
+    await waitFor(() => {
+      const completedTask = readGoal(goalId).twelveWeekSystem?.taskInstances.find((item) => item.completed);
+      expect(completedTask).toBeDefined();
+      toggledTaskId = completedTask?.id ?? null;
+    });
+
+    await user.click(getFirstCheckbox());
+
+    let reopenedTaskId: string | null = null;
+    await waitFor(() => {
+      const system = readGoal(goalId).twelveWeekSystem;
+      const reopenedTask = system?.taskInstances.find((item) => item.id === toggledTaskId);
+      expect(reopenedTask?.completed).toBe(false);
+      reopenedTaskId = reopenedTask?.id ?? null;
+    });
+
+    const pendingMutations = listStoredPendingMutations(null);
+    expect(pendingMutations).toHaveLength(1);
+    expect(pendingMutations[0].supersedes).toHaveLength(1);
+    if (pendingMutations[0].kind === "task_completed_changed") {
+      expect(pendingMutations[0].payload.clientTaskId).toBe(reopenedTaskId);
+      expect(pendingMutations[0].payload.completed).toBe(false);
+      expect(pendingMutations[0].payload.completedAt).toBeUndefined();
+    }
   });
 
   it("saves a daily check-in from the Today tab", async () => {

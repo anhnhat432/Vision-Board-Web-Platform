@@ -30,17 +30,17 @@ function buildReadableOutboxSummary(type: string, metadata?: Record<string, stri
 
   switch (type) {
     case "paywall_viewed":
-      return `Mở paywall từ ${metadata.source ?? "--"} â€¢ context ${metadata.context ?? "--"} â€¢ gợi ý ${metadata.recommendedPlan ?? "--"}`;
+      return `Mở paywall từ ${metadata.source ?? "--"} · context ${metadata.context ?? "--"} · gợi ý ${metadata.recommendedPlan ?? "--"}`;
     case "paywall_cta_clicked":
-      return `Bấm CTA ${metadata.placement ?? "--"} từ ${metadata.source ?? "--"} â€¢ target ${metadata.targetPlan ?? "--"}`;
+      return `Bấm CTA ${metadata.placement ?? "--"} từ ${metadata.source ?? "--"} · target ${metadata.targetPlan ?? "--"}`;
     case "paywall_checkout_started":
       return `Bắt đầu mở gói ${metadata.planCode ?? "--"} từ ${metadata.source ?? "--"}`;
     case "paywall_checkout_completed":
-      return `Đã mở gói ${metadata.resultPlan ?? metadata.planCode ?? "--"} â€¢ mode ${metadata.mode ?? "local_test"}`;
+      return `Đã mở gói ${metadata.resultPlan ?? metadata.planCode ?? "--"} · mode ${metadata.mode ?? "local_test"}`;
     case "premium_template_unlock_prompted":
       return `Template ${metadata.templateId ?? "--"} cần gói ${metadata.requiredPlan ?? "--"}`;
     case "premium_template_applied":
-      return `Áp dụng template ${metadata.templateName ?? metadata.templateId ?? "--"} â€¢ ${metadata.tier ?? "free"}`;
+      return `Áp dụng template ${metadata.templateName ?? metadata.templateId ?? "--"} · ${metadata.tier ?? "free"}`;
     case "premium_insight_opened":
       return `Đã mở insight premium ở tuần ${metadata.weekNumber ?? "--"} từ ${metadata.source ?? "--"}`;
     default:

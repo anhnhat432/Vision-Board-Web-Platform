@@ -1,20 +1,9 @@
-import { screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { render } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
-
-import {
-  getCurrentEntitlementKeys,
-  getCurrentPlan,
-  getUserData,
-} from "../utils/storage";
+import { renderAppRoute, resetTestStorage, seedTwelveWeekGoal, updateUserData } from "../../test/app-flow-helpers";
 import { startCheckoutFlow } from "../utils/production";
-import {
-  resetTestStorage,
-  seedTwelveWeekGoal,
-  updateUserData,
-  renderAppRoute,
-} from "../../test/app-flow-helpers";
+import { getCurrentEntitlementKeys, getCurrentPlan, getUserData } from "../utils/storage";
 import { BillingPlan } from "./BillingPlan";
 
 describe("monetization flows", () => {
@@ -23,10 +12,9 @@ describe("monetization flows", () => {
   });
 
   it("BillingPlan page renders current plan and entitlements for free user", async () => {
-    const router = createMemoryRouter(
-      [{ path: "/billing/plan", element: <BillingPlan /> }],
-      { initialEntries: ["/billing/plan"] },
-    );
+    const router = createMemoryRouter([{ path: "/billing/plan", element: <BillingPlan /> }], {
+      initialEntries: ["/billing/plan"],
+    });
     render(<RouterProvider router={router} />);
 
     await screen.findByText("Gói demo & mock upgrade");
@@ -41,24 +29,22 @@ describe("monetization flows", () => {
   it("BillingPlan page shows active plan for Plus user", async () => {
     seedTwelveWeekGoal({ planCode: "PLUS" });
 
-    const router = createMemoryRouter(
-      [{ path: "/billing/plan", element: <BillingPlan /> }],
-      { initialEntries: ["/billing/plan"] },
-    );
+    const router = createMemoryRouter([{ path: "/billing/plan", element: <BillingPlan /> }], {
+      initialEntries: ["/billing/plan"],
+    });
     render(<RouterProvider router={router} />);
 
     await screen.findByText("Gói demo & mock upgrade");
     expect(screen.getByText("Bạn đang dùng Plus trên trình duyệt này.")).toBeInTheDocument();
     // Entitlements should show as active
-    const activeItems = screen.getAllByText("Đang hoạt động");
+    const activeItems = screen.getAllByText("Đang mở local");
     expect(activeItems.length).toBeGreaterThan(0);
   });
 
   it("paywall dialog opens from BillingPlan upgrade button", async () => {
-    const router = createMemoryRouter(
-      [{ path: "/billing/plan", element: <BillingPlan /> }],
-      { initialEntries: ["/billing/plan"] },
-    );
+    const router = createMemoryRouter([{ path: "/billing/plan", element: <BillingPlan /> }], {
+      initialEntries: ["/billing/plan"],
+    });
     render(<RouterProvider router={router} />);
     const user = userEvent.setup();
 
@@ -139,10 +125,9 @@ describe("monetization flows", () => {
 
   it("BillingPlan plan comparison shows upgrade button only for free user", async () => {
     // Free user
-    const router = createMemoryRouter(
-      [{ path: "/billing/plan", element: <BillingPlan /> }],
-      { initialEntries: ["/billing/plan"] },
-    );
+    const router = createMemoryRouter([{ path: "/billing/plan", element: <BillingPlan /> }], {
+      initialEntries: ["/billing/plan"],
+    });
     render(<RouterProvider router={router} />);
 
     await screen.findByText("So sánh các gói");

@@ -128,4 +128,9 @@ export class MongoWeekRepository {
 
     return doc ? mapWeek(doc) : null;
   }
+
+  async deleteWeeksByPlanId(planId: string): Promise<number> {
+    const result = await WeekModel.deleteMany({ planId });
+    return result.deletedCount ?? 0;
+  }
 }

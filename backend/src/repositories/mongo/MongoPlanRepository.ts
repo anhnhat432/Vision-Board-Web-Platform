@@ -78,4 +78,9 @@ export class MongoPlanRepository {
 
     return doc ? mapPlan(doc) : null;
   }
+
+  async deletePlan(id: string): Promise<boolean> {
+    const result = await PlanModel.findByIdAndDelete(id).lean();
+    return Boolean(result);
+  }
 }

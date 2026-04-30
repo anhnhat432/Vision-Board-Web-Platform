@@ -139,10 +139,11 @@ export function TwelveWeekSetup() {
       }
 
       const feasibilityDefaults = getFeasibilityDraftDefaults(parsedFeasibility);
+      const setupPlan = getCurrentPlan();
       setFocusArea(selectedFocusArea);
       setSmartGoal(parsedSmartGoal);
       setFeasibility(parsedFeasibility);
-      setCurrentPlan(getCurrentPlan());
+      setCurrentPlan(setupPlan);
 
       setDraft((previousDraft) => {
         const baseDraft = {
@@ -202,10 +203,23 @@ export function TwelveWeekSetup() {
       });
 
       if (!savedDraft) {
-        trackAppEvent("12_week_setup_started", undefined, {
-          focusArea: selectedFocusArea,
-          readinessScore: String(parsedFeasibility.adjustedScore),
-        });
+        trackAnalyticsEvent(
+          "twelve_week_setup_started",
+          {
+            source: "12_week_setup",
+            current_plan: setupPlan,
+            entry_mode: "smart_goal_handoff",
+            template_tier: "none",
+            has_saved_draft: false,
+          },
+          {
+            legacyEventName: "12_week_setup_started",
+            legacyPayload: {
+              focusArea: selectedFocusArea,
+              readinessScore: String(parsedFeasibility.adjustedScore),
+            },
+          },
+        );
       }
     } catch {
       toast.info("Dữ liệu tạm thời chưa hợp lệ. Mình sẽ đưa bạn quay lại bước trước.");

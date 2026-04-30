@@ -29,9 +29,28 @@ export type AnalyticsSource =
   | "template_catalog";
 
 export interface AnalyticsEventPayloads {
+  landing_viewed: {
+    source: AnalyticsSource;
+    app_mode: "demo" | "real";
+    signed_in: boolean;
+    auth_configured: boolean;
+    has_local_12_week_system: boolean;
+  };
+  demo_started: {
+    source: AnalyticsSource;
+    app_mode: "demo" | "real";
+    signed_in: boolean;
+    auth_configured: boolean;
+    start_destination: string;
+  };
   onboarding_started: {
     source: AnalyticsSource;
     returning_user: boolean;
+  };
+  life_balance_started: {
+    source: AnalyticsSource;
+    returning_user: boolean;
+    has_existing_scores: boolean;
   };
   life_balance_completed: {
     source: AnalyticsSource;
@@ -65,6 +84,22 @@ export interface AnalyticsEventPayloads {
     core_indicator_count: number;
     task_count: number;
     template_tier: "free" | "premium" | "none";
+  };
+  twelve_week_setup_started: {
+    source: AnalyticsSource;
+    current_plan: PricingPlanCode;
+    entry_mode: "smart_goal_handoff" | "draft_resume" | "direct";
+    template_tier: "free" | "premium" | "none";
+    has_saved_draft: boolean;
+  };
+  twelve_week_system_viewed: {
+    source: AnalyticsSource;
+    week_number: number;
+    total_weeks: number;
+    current_plan: PricingPlanCode;
+    active_tab: string;
+    has_today_tasks: boolean;
+    has_weekly_review: boolean;
   };
   today_task_completed: {
     source: AnalyticsSource;
@@ -159,6 +194,15 @@ export interface AnalyticsEventPayloads {
     variant_id: string;
     context: string;
   };
+  feedback_submitted: {
+    source: AnalyticsSource;
+    context: "dashboard" | "12_week_settings";
+    rating: number;
+    feedback_category: string;
+    confusing_text_length: number;
+    next_help_text_length: number;
+    has_next_help_text: boolean;
+  };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventPayloads;
@@ -169,6 +213,103 @@ interface TrackAnalyticsOptions {
   legacyEventName?: string;
   legacyPayload?: AnalyticsPayload;
 }
+
+const REMOTE_ANALYTICS_FIELD_ALLOWLIST: Record<AnalyticsEventName, readonly string[]> = {
+  landing_viewed: ["source", "app_mode", "signed_in", "auth_configured", "has_local_12_week_system"],
+  demo_started: ["source", "app_mode", "signed_in", "auth_configured", "start_destination"],
+  onboarding_started: ["source", "returning_user"],
+  life_balance_started: ["source", "returning_user", "has_existing_scores"],
+  life_balance_completed: ["source", "area_count", "average_score", "weakest_area", "strongest_area"],
+  smart_goal_created: ["focus_area", "target_mode", "target_weeks", "has_baseline", "weekly_hours"],
+  feasibility_completed: [
+    "focus_area",
+    "result_type",
+    "readiness_score",
+    "adjusted_score",
+    "bottleneck_axis",
+    "plan_load",
+    "weekly_capacity",
+    "answer_count",
+  ],
+  twelve_week_plan_created: [
+    "goal_type",
+    "focus_area",
+    "total_weeks",
+    "lead_indicator_count",
+    "core_indicator_count",
+    "task_count",
+    "template_tier",
+  ],
+  twelve_week_setup_started: ["source", "current_plan", "entry_mode", "template_tier", "has_saved_draft"],
+  twelve_week_system_viewed: [
+    "source",
+    "week_number",
+    "total_weeks",
+    "current_plan",
+    "active_tab",
+    "has_today_tasks",
+    "has_weekly_review",
+  ],
+  today_task_completed: ["source", "week_number", "is_core"],
+  weekly_review_submitted: ["source", "week_number", "lead_completion_percent", "execution_score", "workload_decision"],
+  progress_viewed: ["source", "week_number", "total_weeks", "current_plan"],
+  paywall_opened: ["context", "source", "current_plan", "recommended_plan"],
+  checkout_started: ["context", "source", "current_plan", "recommended_plan", "plan_code"],
+  checkout_completed: [
+    "context",
+    "source",
+    "current_plan",
+    "recommended_plan",
+    "plan_code",
+    "result_plan",
+    "provider_mode",
+  ],
+  upgrade_restored: ["source", "status", "provider_mode", "plan_code", "entitlement_count"],
+  paywall_cta_clicked: ["context", "source", "current_plan", "recommended_plan", "target_plan", "placement"],
+  premium_template_unlock_prompted: ["source", "current_plan", "template_id", "required_plan"],
+  premium_template_applied: ["source", "current_plan", "template_id", "template_name", "tier", "required_plan"],
+  premium_insight_opened: ["source", "current_plan", "week_number"],
+  rescue_trigger_fired: ["kind", "severity", "current_plan"],
+  rescue_trigger_dismissed: ["kind", "current_plan"],
+  rescue_action_taken: ["kind", "action", "current_plan"],
+  experiment_exposure: ["experiment_id", "variant_id", "context"],
+  feedback_submitted: [
+    "source",
+    "context",
+    "rating",
+    "feedback_category",
+    "confusing_text_length",
+    "next_help_text_length",
+    "has_next_help_text",
+  ],
+};
+
+const REMOTE_ANALYTICS_AREAS = new Set(["core_funnel", "12_week", "monetization"]);
+const MAX_REMOTE_METADATA_VALUE_LENGTH = 120;
+const EMAIL_VALUE_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ACCOUNT_ID_VALUE_PATTERN = /(?:firebase|backend|user)[_-]?(?:uid|id)[_-]?[a-z0-9]/i;
+const SENSITIVE_REMOTE_METADATA_KEY_TOKENS = [
+  "email",
+  "firebaseuid",
+  "firebaseid",
+  "backenduserid",
+  "backendid",
+  "userid",
+  "uid",
+  "fullname",
+  "phone",
+  "address",
+  "goaltitle",
+  "goaltext",
+  "goalname",
+  "goaldescription",
+  "reflection",
+  "note",
+  "freetext",
+  "usertext",
+  "content",
+  "description",
+];
 
 function getAnalyticsMode(): string {
   return import.meta.env.VITE_ANALYTICS_MODE?.trim().toLowerCase() ?? "off";
@@ -203,6 +344,9 @@ function getDefaultArea(eventName: AnalyticsEventName): string {
   if (eventName.startsWith("checkout") || eventName.startsWith("paywall") || eventName === "upgrade_restored") {
     return "monetization";
   }
+  if (eventName.startsWith("premium_")) {
+    return "monetization";
+  }
   if (
     eventName === "progress_viewed" ||
     eventName.includes("twelve_week") ||
@@ -214,14 +358,49 @@ function getDefaultArea(eventName: AnalyticsEventName): string {
   return "core_funnel";
 }
 
+function isSensitiveRemoteMetadataKey(key: string): boolean {
+  const normalizedKey = key.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+  return SENSITIVE_REMOTE_METADATA_KEY_TOKENS.some((token) => normalizedKey.includes(token));
+}
+
+function isSafeRemoteMetadataValue(value: string): boolean {
+  const trimmedValue = value.trim();
+  if (trimmedValue.length > MAX_REMOTE_METADATA_VALUE_LENGTH) return false;
+  if (/[\r\n]/.test(trimmedValue)) return false;
+  if (EMAIL_VALUE_PATTERN.test(trimmedValue)) return false;
+  if (ACCOUNT_ID_VALUE_PATTERN.test(trimmedValue)) return false;
+  return true;
+}
+
+function sanitizeRemoteMetadata(
+  eventName: AnalyticsEventName,
+  metadata: Record<string, string>,
+): Record<string, string> {
+  const allowedFields = new Set(REMOTE_ANALYTICS_FIELD_ALLOWLIST[eventName]);
+
+  return Object.entries(metadata).reduce<Record<string, string>>((safeMetadata, [key, value]) => {
+    if (!allowedFields.has(key)) return safeMetadata;
+    if (isSensitiveRemoteMetadataKey(key)) return safeMetadata;
+    if (!isSafeRemoteMetadataValue(value)) return safeMetadata;
+    safeMetadata[key] = value;
+    return safeMetadata;
+  }, {});
+}
+
+function sanitizeRemoteArea(eventName: AnalyticsEventName, area: string): string {
+  return REMOTE_ANALYTICS_AREAS.has(area) ? area : getDefaultArea(eventName);
+}
+
 function pushRemoteAnalytics(eventName: AnalyticsEventName, metadata: Record<string, string>, area: string): void {
   if (typeof window === "undefined" || !isRemoteAnalyticsEnabled()) return;
 
+  const safeMetadata = sanitizeRemoteMetadata(eventName, metadata);
+  const safeArea = sanitizeRemoteArea(eventName, area);
   const eventPayload = {
     event: eventName,
     app: "vision_board_web",
-    area,
-    ...metadata,
+    area: safeArea,
+    ...safeMetadata,
   };
 
   window.dataLayer = window.dataLayer ?? [];
@@ -230,8 +409,8 @@ function pushRemoteAnalytics(eventName: AnalyticsEventName, metadata: Record<str
   if (typeof window.gtag === "function") {
     window.gtag("event", eventName, {
       app: "vision_board_web",
-      area,
-      ...metadata,
+      area: safeArea,
+      ...safeMetadata,
     });
   }
 }

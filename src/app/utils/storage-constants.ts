@@ -15,11 +15,19 @@ export const BACKEND_LINK_STORAGE_KEYS = [
   "backend_vision_board_links",
 ] as const;
 export const BACKEND_LINK_LEGACY_OWNER_STORAGE_KEY = "backend_link_store_legacy_owner_uid";
+export const LOCAL_DATA_MIGRATION_PROMPT_STATE_KEY = "visionboard_local_data_migration_prompt_state";
+export const LOCAL_DATA_IMPORT_BACKUP_STORAGE_PREFIX = "visionboard_local_data_import_backup:";
+export const DEMO_FEEDBACK_STORAGE_KEY = "visionboard_demo_feedback";
 
 export const AUXILIARY_USER_DATA_STORAGE_KEYS = [
   ANONYMOUS_USER_DATA_STORAGE_KEY,
   ...BACKEND_LINK_STORAGE_KEYS,
   BACKEND_LINK_LEGACY_OWNER_STORAGE_KEY,
+  LOCAL_DATA_MIGRATION_PROMPT_STATE_KEY,
+  DEMO_FEEDBACK_STORAGE_KEY,
+  "visionboard_data_mutation_queue",
+  "visionboard_data_mutation_queue:anonymous",
+  "visionboard_data_mutation_queue:device_id",
   "visionboard_orders_v1",
   "last_reminder_date",
   "visionboard_last_browser_notification",
@@ -38,6 +46,9 @@ export const AUXILIARY_USER_DATA_STORAGE_PREFIXES = [
   "backend_plan_links:auth:",
   "backend_order_links:auth:",
   "backend_vision_board_links:auth:",
+  "visionboard_data_mutation_queue:auth:",
+  "visionboard_data_mutation_queue:recovery:",
+  LOCAL_DATA_IMPORT_BACKUP_STORAGE_PREFIX,
   "visionboard_mock_billing_session_",
 ] as const;
 

@@ -1,5 +1,16 @@
-import { CURRENT_STORAGE_VERSION, DEFAULT_APP_PREFERENCES, MOTIVATIONAL_QUOTES } from "./storage-constants";
+import {
+  ANONYMOUS_USER_DATA_STORAGE_KEY,
+  AUTH_OWNER_STORAGE_KEY,
+  CURRENT_STORAGE_VERSION,
+  DEFAULT_APP_PREFERENCES,
+  LOCAL_DATA_IMPORT_BACKUP_STORAGE_PREFIX,
+  LOCAL_DATA_MIGRATION_PROMPT_STATE_KEY,
+  MOTIVATIONAL_QUOTES,
+  STORAGE_KEY,
+  USER_DATA_UPDATED_EVENT_NAME,
+} from "./storage-constants";
 import { createDemoUserData } from "./storage-demo-data";
+import { getScopedUserDataStorageKey, readActiveAuthOwnerUid } from "./storage-auth-scope";
 import type {
   Goal,
   Reflection,
@@ -10,6 +21,39 @@ import type {
 } from "./storage-types";
 
 type ComparableValue = Record<string, unknown>;
+type LocalDataMigrationPromptState = Record<string, string[]>;
+
+export interface LocalDataMigrationSummary {
+  goalCount: number;
+  twelveWeekSystemCount: number;
+  taskCount: number;
+  dailyCheckInCount: number;
+  weeklyReviewCount: number;
+  wheelRecordCount: number;
+  reflectionCount: number;
+  visionBoardCount: number;
+}
+
+export interface LocalDataMigrationCandidate {
+  data: UserData;
+  fingerprint: string;
+  summary: LocalDataMigrationSummary;
+}
+
+export type LocalDataAccountImportStatus =
+  | "imported"
+  | "blocked_existing_account_data"
+  | "inactive_auth_scope"
+  | "missing_candidate"
+  | "fingerprint_mismatch"
+  | "write_failed";
+
+export interface LocalDataAccountImportResult {
+  status: LocalDataAccountImportStatus;
+  summary?: LocalDataMigrationSummary;
+  accountSummary?: LocalDataMigrationSummary;
+  backupKey?: string;
+}
 
 let seededDemoComparableSnapshot: string | null = null;
 
@@ -202,4 +246,220 @@ export function hasMeaningfulLocalWork(data: UserData): boolean {
     data.reflections.some(hasMeaningfulReflection) ||
     hasRealWheelScores(data)
   );
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function parseUserDataForMigration(rawData: string | null): UserData | null {
+  if (!rawData) return null;
+
+  try {
+    const parsed = JSON.parse(rawData);
+    if (!isRecord(parsed)) return null;
+
+    if (
+      !Array.isArray(parsed.goals) ||
+      !Array.isArray(parsed.visionBoards) ||
+      !Array.isArray(parsed.reflections) ||
+      !Array.isArray(parsed.wheelOfLifeHistory) ||
+      !Array.isArray(parsed.currentWheelOfLife)
+    ) {
+      return null;
+    }
+
+    return parsed as unknown as UserData;
+  } catch {
+    return null;
+  }
+}
+
+function createSnapshotFingerprint(rawData: string): string {
+  let hash = 2_166_136_261;
+
+  for (let index = 0; index < rawData.length; index += 1) {
+    hash ^= rawData.charCodeAt(index);
+    hash = Math.imul(hash, 16_777_619);
+  }
+
+  return `${rawData.length.toString(36)}-${(hash >>> 0).toString(36)}`;
+}
+
+function createLocalDataMigrationSummary(data: UserData): LocalDataMigrationSummary {
+  const twelveWeekSystems = data.goals
+    .map((goal) => goal.twelveWeekSystem)
+    .filter((system): system is TwelveWeekSystem => Boolean(system));
+
+  return {
+    goalCount: data.goals.length,
+    twelveWeekSystemCount: twelveWeekSystems.length,
+    taskCount:
+      data.goals.reduce((total, goal) => total + goal.tasks.length, 0) +
+      twelveWeekSystems.reduce((total, system) => total + system.taskInstances.length, 0),
+    dailyCheckInCount: twelveWeekSystems.reduce((total, system) => total + system.dailyCheckIns.length, 0),
+    weeklyReviewCount: twelveWeekSystems.reduce((total, system) => total + system.weeklyReviews.length, 0),
+    wheelRecordCount:
+      data.wheelOfLifeHistory.length + (data.currentWheelOfLife.some((area) => area.score > 0) ? 1 : 0),
+    reflectionCount: data.reflections.length,
+    visionBoardCount: data.visionBoards.length,
+  };
+}
+
+function readPromptState(): LocalDataMigrationPromptState {
+  if (typeof window === "undefined") return {};
+
+  try {
+    const rawState = window.localStorage.getItem(LOCAL_DATA_MIGRATION_PROMPT_STATE_KEY);
+    if (!rawState) return {};
+
+    const parsed = JSON.parse(rawState);
+    if (!isRecord(parsed)) return {};
+
+    return Object.fromEntries(
+      Object.entries(parsed).filter((entry): entry is [string, string[]] => {
+        const [, fingerprints] = entry;
+        return Array.isArray(fingerprints) && fingerprints.every((fingerprint) => typeof fingerprint === "string");
+      }),
+    );
+  } catch {
+    return {};
+  }
+}
+
+function writePromptState(state: LocalDataMigrationPromptState): void {
+  if (typeof window === "undefined") return;
+
+  window.localStorage.setItem(LOCAL_DATA_MIGRATION_PROMPT_STATE_KEY, JSON.stringify(state));
+}
+
+function notifyUserDataUpdated(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(USER_DATA_UPDATED_EVENT_NAME));
+}
+
+function restoreStorageItem(key: string, value: string | null): void {
+  if (value === null) {
+    window.localStorage.removeItem(key);
+    return;
+  }
+
+  window.localStorage.setItem(key, value);
+}
+
+function createImportBackupKey(authUid: string, fingerprint: string): string {
+  return `${LOCAL_DATA_IMPORT_BACKUP_STORAGE_PREFIX}auth:${encodeURIComponent(authUid)}:${Date.now().toString(36)}:${fingerprint}`;
+}
+
+function findMeaningfulAccountData(rawSnapshots: Array<string | null>): UserData | null {
+  for (const rawSnapshot of rawSnapshots) {
+    const data = parseUserDataForMigration(rawSnapshot);
+    if (data && hasMeaningfulLocalWork(data)) return data;
+  }
+
+  return null;
+}
+
+export function getAnonymousLocalDataMigrationCandidate(): LocalDataMigrationCandidate | null {
+  if (typeof window === "undefined") return null;
+
+  const rawData = window.localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY);
+  const data = parseUserDataForMigration(rawData);
+  if (!data || !rawData || !hasMeaningfulLocalWork(data)) return null;
+
+  return {
+    data,
+    fingerprint: createSnapshotFingerprint(rawData),
+    summary: createLocalDataMigrationSummary(data),
+  };
+}
+
+export function importAnonymousLocalDataToAccountScope(
+  authUid: string | null | undefined,
+  expectedSnapshotFingerprint: string | null | undefined,
+): LocalDataAccountImportResult {
+  if (typeof window === "undefined") return { status: "missing_candidate" };
+
+  const normalizedAuthUid = authUid?.trim() ?? "";
+  if (!normalizedAuthUid || readActiveAuthOwnerUid() !== normalizedAuthUid) {
+    return { status: "inactive_auth_scope" };
+  }
+
+  const anonymousRaw = window.localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY);
+  const anonymousData = parseUserDataForMigration(anonymousRaw);
+  if (!anonymousRaw || !anonymousData || !hasMeaningfulLocalWork(anonymousData)) {
+    return { status: "missing_candidate" };
+  }
+
+  const actualFingerprint = createSnapshotFingerprint(anonymousRaw);
+  if (expectedSnapshotFingerprint && actualFingerprint !== expectedSnapshotFingerprint) {
+    return { status: "fingerprint_mismatch", summary: createLocalDataMigrationSummary(anonymousData) };
+  }
+
+  const scopedKey = getScopedUserDataStorageKey(normalizedAuthUid);
+  const activeRaw = window.localStorage.getItem(STORAGE_KEY);
+  const scopedRaw = window.localStorage.getItem(scopedKey);
+  const existingAccountData = findMeaningfulAccountData([activeRaw, scopedRaw]);
+  if (existingAccountData) {
+    return {
+      status: "blocked_existing_account_data",
+      summary: createLocalDataMigrationSummary(anonymousData),
+      accountSummary: createLocalDataMigrationSummary(existingAccountData),
+    };
+  }
+
+  const backupKey = createImportBackupKey(normalizedAuthUid, actualFingerprint);
+  const backupPayload = {
+    authUid: normalizedAuthUid,
+    createdAt: new Date().toISOString(),
+    source: "anonymous_local_import_phase_1",
+    snapshotFingerprint: actualFingerprint,
+    activeOwnerUid: window.localStorage.getItem(AUTH_OWNER_STORAGE_KEY),
+    activeBeforeImportRaw: activeRaw,
+    scopedBeforeImportRaw: scopedRaw,
+  };
+
+  try {
+    window.localStorage.setItem(backupKey, JSON.stringify(backupPayload));
+    window.localStorage.setItem(scopedKey, anonymousRaw);
+    window.localStorage.setItem(STORAGE_KEY, anonymousRaw);
+    notifyUserDataUpdated();
+
+    return {
+      status: "imported",
+      summary: createLocalDataMigrationSummary(anonymousData),
+      backupKey,
+    };
+  } catch {
+    try {
+      restoreStorageItem(scopedKey, scopedRaw);
+      restoreStorageItem(STORAGE_KEY, activeRaw);
+    } catch {
+      // Best-effort rollback only. The anonymous source snapshot is never removed.
+    }
+
+    return {
+      status: "write_failed",
+      summary: createLocalDataMigrationSummary(anonymousData),
+      backupKey,
+    };
+  }
+}
+
+export function hasSkippedLocalDataMigrationPrompt(
+  authUid: string | null | undefined,
+  snapshotFingerprint: string | null | undefined,
+): boolean {
+  if (!authUid || !snapshotFingerprint) return false;
+
+  return readPromptState()[authUid]?.includes(snapshotFingerprint) ?? false;
+}
+
+export function markLocalDataMigrationPromptSkipped(authUid: string, snapshotFingerprint: string): void {
+  if (!authUid || !snapshotFingerprint) return;
+
+  const state = readPromptState();
+  const fingerprints = new Set(state[authUid] ?? []);
+  fingerprints.add(snapshotFingerprint);
+  writePromptState({ ...state, [authUid]: [...fingerprints] });
 }

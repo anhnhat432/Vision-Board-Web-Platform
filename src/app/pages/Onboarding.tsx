@@ -97,6 +97,11 @@ export function Onboarding() {
       source: "onboarding",
       returning_user: isReturning,
     });
+    trackAnalyticsEvent("life_balance_started", {
+      source: "onboarding",
+      returning_user: isReturning,
+      has_existing_scores: isReturning,
+    });
     setStep("assessment");
   };
 

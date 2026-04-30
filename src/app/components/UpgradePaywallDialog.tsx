@@ -1,20 +1,19 @@
-import { useEffect, useMemo, useState } from "react";
 import { Crown, LockKeyhole, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
-import { trackPaywallCtaClicked, trackPaywallViewed, type MonetizationSource } from "../utils/monetization-analytics";
+import { isDemoMode, shouldShowBillingDebugUi } from "../utils/app-mode";
+import { type MonetizationSource, trackPaywallCtaClicked, trackPaywallViewed } from "../utils/monetization-analytics";
 import { getBillingProviderStatus, startCheckoutFlow } from "../utils/production";
+import type { PricingPlanCode } from "../utils/storage-types";
 import {
   getPaywallCopy,
   getPlanLabel,
   PLAN_DEFINITIONS,
   type PremiumFeatureContext,
 } from "../utils/twelve-week-premium";
-import type { PricingPlanCode } from "../utils/storage-types";
-import { isDemoMode, shouldShowBillingDebugUi } from "../utils/app-mode";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 
 interface UpgradePaywallDialogProps {
   open: boolean;
@@ -108,7 +107,7 @@ export function UpgradePaywallDialog({
               ? "Quyền đã được đồng bộ qua billing contract."
               : result.providerMode === "mock_provider"
                 ? "Mock checkout đã mở quyền local trên trình duyệt này, không thu tiền thật."
-                : "Đây là lớp local checkout để nối billing thật ở bước sau.",
+                : "Đây là local checkout để thử flow; chưa thu tiền thật.",
         });
       }
 
@@ -168,7 +167,7 @@ export function UpgradePaywallDialog({
               {billingDebugUi && (
                 <div className="rounded-[26px] border border-slate-200 bg-slate-50/88 p-5">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Trạng thái thanh toán
+                    Trạng thái billing demo
                   </p>
                   <div className="mt-4 grid gap-2 sm:grid-cols-3">
                     <div className="rounded-[18px] border border-white/80 bg-white px-4 py-3">
