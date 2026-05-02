@@ -42,18 +42,18 @@ export function FeasibilityStepShell({
             transition={{ duration: 0.3 }}
             className="space-y-6"
           >
-            <div className="rounded-[28px] gradient-violet-pink p-6">
+            <div className="rounded-[28px] gradient-violet-pink p-4 sm:p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">
                 {currentQuestion.axisLabel} · Câu hỏi {currentStep + 1}/{totalSteps}
               </p>
               <h2
                 ref={headingRef}
                 tabIndex={-1}
-                className="mt-3 text-2xl font-bold text-slate-900 focus:outline-none sm:text-3xl"
+                className="mt-2 text-xl font-bold leading-tight text-slate-900 focus:outline-none sm:mt-3 sm:text-3xl"
               >
                 {currentQuestion.question}
               </h2>
-              <p className="mt-3 text-sm leading-7 text-slate-600">{currentQuestion.helper}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600 sm:mt-3 sm:leading-7">{currentQuestion.helper}</p>
             </div>
 
             <RadioGroup value={selectedAnswer} onValueChange={onAnswerChange} className="space-y-3">
@@ -66,7 +66,7 @@ export function FeasibilityStepShell({
                 >
                   <Label
                     htmlFor={option.value}
-                    className={`flex cursor-pointer items-center gap-4 rounded-[24px] border px-5 py-4 transition-all ${
+                    className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-[24px] border px-4 py-3 transition-all sm:gap-4 sm:px-5 sm:py-4 ${
                       selectedAnswer === option.value
                         ? "border-violet-300 bg-violet-50/90 shadow-[0_18px_36px_-28px_rgba(109,40,217,0.35)]"
                         : "border-white/70 bg-white/72 hover:border-violet-200"
@@ -74,9 +74,9 @@ export function FeasibilityStepShell({
                   >
                     <RadioGroupItem value={option.value} id={option.value} />
                     <div className="flex-1">
-                      <p className="text-base font-medium text-slate-800">{option.label}</p>
+                      <p className="text-sm font-medium leading-6 text-slate-800 sm:text-base">{option.label}</p>
                     </div>
-                    {selectedAnswer === option.value && <CheckCircle2 className="h-5 w-5 text-violet-600" />}
+                    {selectedAnswer === option.value && <CheckCircle2 className="h-5 w-5 shrink-0 text-violet-600" />}
                   </Label>
                 </motion.div>
               ))}

@@ -668,35 +668,35 @@ export function TwelveWeekSystem() {
           >
           <TabsTrigger
             value="today"
-            className="min-w-0 shrink-0 flex-col justify-center gap-1 rounded-md px-2 py-2 text-xs leading-tight sm:flex-row sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
+            className="min-h-12 min-w-0 shrink-0 flex-col justify-center gap-1 rounded-md px-2 py-2 text-xs leading-tight sm:min-h-11 sm:flex-row sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
           >
             <ListTodo className="h-4 w-4" />
             Hôm nay
           </TabsTrigger>
           <TabsTrigger
             value="week"
-            className="min-w-0 shrink-0 flex-col justify-center gap-1 rounded-md px-2 py-2 text-xs leading-tight sm:flex-row sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
+            className="min-h-12 min-w-0 shrink-0 flex-col justify-center gap-1 rounded-md px-2 py-2 text-xs leading-tight sm:min-h-11 sm:flex-row sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
           >
             <CalendarDays className="h-4 w-4" />
             Tuần
           </TabsTrigger>
           <TabsTrigger
             value="progress"
-            className="min-w-0 shrink-0 flex-col justify-center gap-1 rounded-md px-2 py-2 text-xs leading-tight sm:flex-row sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
+            className="min-h-12 min-w-0 shrink-0 flex-col justify-center gap-1 rounded-md px-2 py-2 text-xs leading-tight sm:min-h-11 sm:flex-row sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
           >
             <BarChart3 className="h-4 w-4" />
             Tiến độ
           </TabsTrigger>
           <TabsTrigger
             value="settings"
-            className="min-w-0 shrink-0 flex-col justify-center gap-1 rounded-md px-2 py-2 text-xs leading-tight sm:flex-row sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
+            className="min-h-12 min-w-0 shrink-0 flex-col justify-center gap-1 rounded-md px-2 py-2 text-xs leading-tight sm:min-h-11 sm:flex-row sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
           >
             <Settings2 className="h-4 w-4" />
             Cài đặt
           </TabsTrigger>
         </TabsList>
 
-        <p className="mt-3 rounded-lg border border-slate-200 bg-white/82 px-4 py-3 text-sm leading-6 text-slate-600 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.16)]">
+        <p className="mt-3 hidden rounded-lg border border-slate-200 bg-white/82 px-4 py-3 text-sm leading-6 text-slate-600 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.16)] sm:block">
           Hôm nay: tick việc và check-in. Tuần: chốt review. Tiến độ: xem điểm và cột mốc. Cài đặt: export hoặc xóa
           dữ liệu local trên trình duyệt này.
         </p>
