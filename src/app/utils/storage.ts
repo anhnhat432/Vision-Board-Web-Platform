@@ -78,6 +78,7 @@ import {
   createDemoUserData as createDemoUserDataFromModule,
   shouldHydrateDemoData as shouldHydrateDemoDataFromModule,
 } from "./storage-demo-data";
+import { createLocalUserDataBackupJson } from "./local-data-backup";
 import { getEntitlementsForPlan } from "./twelve-week-premium";
 import { shouldSeedDemoData } from "./app-mode";
 import {
@@ -612,7 +613,7 @@ export function clearLocalDeviceSignals(): void {
 }
 
 export function exportUserDataSnapshot(): string {
-  return JSON.stringify(getUserData(), null, 2);
+  return createLocalUserDataBackupJson(getUserData());
 }
 
 export function updatePrivacyConsent(category: PrivacyConsentCategory, granted: boolean): void {

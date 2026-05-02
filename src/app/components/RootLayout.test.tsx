@@ -20,6 +20,15 @@ const authContextMock = vi.hoisted(() => ({
 }));
 const appModeMock = vi.hoisted(() => ({
   isDemoMode: vi.fn(() => false),
+  shouldEnable12WeekImportDryRun: vi.fn(() => true),
+  shouldEnable12WeekCloudImport: vi.fn(() => true),
+}));
+const apiClientMock = vi.hoisted(() => ({
+  isApiBaseUrlConfigured: vi.fn(() => true),
+}));
+const syncServiceMock = vi.hoisted(() => ({
+  post12WeekImportValidation: vi.fn(),
+  post12WeekImport: vi.fn(),
 }));
 const backendHydrationMock = vi.hoisted(() => ({
   value: {
@@ -48,6 +57,17 @@ vi.mock("../utils/app-mode", () => ({
   isRealMode: () => !appModeMock.isDemoMode(),
   shouldSeedDemoData: () => false,
   shouldShowBillingDebugUi: () => false,
+  shouldEnable12WeekImportDryRun: appModeMock.shouldEnable12WeekImportDryRun,
+  shouldEnable12WeekCloudImport: appModeMock.shouldEnable12WeekCloudImport,
+}));
+
+vi.mock("@/lib/api/apiClient", () => ({
+  isApiBaseUrlConfigured: apiClientMock.isApiBaseUrlConfigured,
+}));
+
+vi.mock("@/services/syncService", () => ({
+  post12WeekImportValidation: syncServiceMock.post12WeekImportValidation,
+  post12WeekImport: syncServiceMock.post12WeekImport,
 }));
 
 vi.mock("../utils/production", () => ({
@@ -89,6 +109,89 @@ function createRealGoal(overrides: Partial<Goal> = {}): Goal {
     createdAt: "2026-04-30T00:00:00.000Z",
     ...overrides,
   };
+}
+
+function createTwelveWeekSystem(): NonNullable<Goal["twelveWeekSystem"]> {
+  return {
+    goalType: "Project",
+    vision12Week: "Validate cloud import dry-run without writing cloud data",
+    lagMetric: { name: "Tester feedback", unit: "responses", target: "5", currentValue: "1" },
+    leadIndicators: [{ id: "lead_1", name: "User interview", target: "1", unit: "session/week" }],
+    milestones: { week4: "First signal", week8: "Clear pattern", week12: "Decision ready" },
+    successEvidence: "A safe dry-run report is available.",
+    reviewDay: "Sunday",
+    week12Outcome: "Know whether import payload is cloud-ready",
+    startDate: "2026-04-30",
+    endDate: "2026-07-23",
+    timezone: "Asia/Saigon",
+    weekStartsOn: "Monday",
+    status: "active",
+    currentWeek: 1,
+    totalWeeks: 12,
+    weeklyPlans: [
+      {
+        weekNumber: 1,
+        phaseName: "Start",
+        focus: "Validate the import contract",
+        milestone: "One dry-run result",
+        completed: false,
+      },
+    ],
+    taskInstances: [
+      {
+        id: "task_private_1",
+        weekNumber: 1,
+        scheduledDate: "2026-04-30",
+        title: "Private task title should stay first-party only",
+        leadIndicatorName: "User interview",
+        isCore: true,
+        completed: false,
+      },
+    ],
+    dailyCheckIns: [
+      {
+        date: "2026-04-30",
+        didWorkToday: true,
+        whichLeadIndicatorWorkedOn: "User interview",
+        amountDone: "1 session",
+        outputCreated: "Private check-in output",
+        obstacleOrIssue: "",
+        dailySelfRating: 4,
+        optionalNote: "Private check-in note should not go to external analytics",
+      },
+    ],
+    weeklyReviews: [
+      {
+        weekNumber: 1,
+        leadCompletionPercent: 75,
+        lagProgressValue: "1 response",
+        biggestOutputThisWeek: "Private review output",
+        mainObstacle: "Private review obstacle",
+        nextWeekPriority: "Private review priority",
+        workloadDecision: "keep same",
+        reviewCompleted: true,
+        progressScore: 8,
+        disciplineScore: 7,
+        focusScore: 8,
+        improvementScore: 7,
+        outputQualityScore: 8,
+        completedLeadIndicators: 1,
+      },
+    ],
+    scoreboard: [],
+  };
+}
+
+function seedMeaningfulAnonymousTwelveWeekData() {
+  const data = createFreshUserData();
+  data.goals.push(
+    createRealGoal({
+      description: "Private goal description should stay first-party only",
+      twelveWeekSystem: createTwelveWeekSystem(),
+    }),
+  );
+  seedAnonymousData(data);
+  return data;
 }
 
 function seedAnonymousData(data: UserData) {
@@ -138,6 +241,29 @@ describe("RootLayout onboarding redirect", () => {
       error: null,
     };
     appModeMock.isDemoMode.mockReturnValue(false);
+    appModeMock.shouldEnable12WeekImportDryRun.mockReturnValue(true);
+    appModeMock.shouldEnable12WeekCloudImport.mockReturnValue(true);
+    apiClientMock.isApiBaseUrlConfigured.mockReturnValue(true);
+    syncServiceMock.post12WeekImportValidation.mockReset();
+    syncServiceMock.post12WeekImport.mockReset();
+    syncServiceMock.post12WeekImportValidation.mockResolvedValue({
+      status: "valid",
+      mode: "validate_only",
+      dryRun: true,
+      acceptedEntityCounts: {
+        goals: 1,
+        plans: 1,
+        weeks: 1,
+        tasks: 1,
+        leadIndicators: 1,
+        leadMetrics: 1,
+        dailyCheckIns: 1,
+        weeklyReviews: 1,
+      },
+      warnings: [],
+      errors: [],
+      normalizedClientIdsCount: 8,
+    });
     productionMock.maybeShowBrowserReminderNotification.mockClear();
     productionMock.syncPendingOutbox.mockClear();
     setAuthContext();
@@ -323,6 +449,98 @@ describe("RootLayout onboarding redirect", () => {
     expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(rawAnonymousData);
   });
 
+  it("validates account-scope 12-week data with the cloud import dry-run endpoint after local import", async () => {
+    seedMeaningfulAnonymousTwelveWeekData();
+    activateAuthenticatedUserData("user_test");
+    setAuthContext({
+      user: { uid: "user_test", email: "test@example.com" },
+      userProfile: { id: "profile_test", email: "test@example.com" },
+    });
+    window.dataLayer = [];
+    window.gtag = vi.fn();
+
+    renderAppShell("/");
+
+    expect(await screen.findByText(/Có dữ liệu local trên trình duyệt này/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Kiểm tra payload" })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Import local data" }));
+    fireEvent.click(screen.getByRole("button", { name: "Kiểm tra payload" }));
+
+    await waitFor(() => {
+      expect(syncServiceMock.post12WeekImportValidation).toHaveBeenCalledTimes(1);
+    });
+    expect(syncServiceMock.post12WeekImportValidation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: "account_scope_import_dry_run",
+        mode: "validate_only",
+        workspace: {
+          goals: [
+            expect.objectContaining({
+              clientGoalId: "goal_real_1",
+              plan: expect.objectContaining({
+                clientPlanId: "goal_real_1:12-week-system",
+              }),
+            }),
+          ],
+        },
+      }),
+    );
+    expect(await screen.findByText(/Payload hợp lệ cho cloud import dry-run/i)).toBeInTheDocument();
+    expect(window.dataLayer).toEqual([]);
+    expect(window.gtag).not.toHaveBeenCalled();
+  });
+
+  it("shows backend validation errors without deleting local data", async () => {
+    const anonymousData = seedMeaningfulAnonymousTwelveWeekData();
+    const rawAnonymousData = localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY);
+    activateAuthenticatedUserData("user_test");
+    syncServiceMock.post12WeekImportValidation.mockRejectedValueOnce({
+      message: "12-week import payload validation failed.",
+      details: {
+        details: {
+          status: "invalid",
+          mode: "validate_only",
+          dryRun: true,
+          acceptedEntityCounts: {
+            goals: 1,
+            plans: 1,
+            weeks: 0,
+            tasks: 0,
+            leadIndicators: 0,
+            leadMetrics: 0,
+            dailyCheckIns: 0,
+            weeklyReviews: 0,
+          },
+          warnings: [],
+          errors: [
+            {
+              path: "workspace.goals[0].plan.weeks",
+              code: "required",
+              message: "workspace.goals[0].plan.weeks is required.",
+            },
+          ],
+          normalizedClientIdsCount: 2,
+        },
+      },
+    });
+    setAuthContext({
+      user: { uid: "user_test", email: "test@example.com" },
+      userProfile: { id: "profile_test", email: "test@example.com" },
+    });
+
+    renderAppShell("/");
+
+    expect(await screen.findByText(/Có dữ liệu local trên trình duyệt này/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Import local data" }));
+    fireEvent.click(screen.getByRole("button", { name: "Kiểm tra payload" }));
+
+    expect(await screen.findByText(/Backend báo payload chưa sẵn sàng cho cloud import/i)).toBeInTheDocument();
+    expect(screen.getByText(/workspace.goals\[0\]\.plan\.weeks is required/i)).toBeInTheDocument();
+    expect(getUserData().goals.map((goal) => goal.title)).toEqual(anonymousData.goals.map((goal) => goal.title));
+    expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(rawAnonymousData);
+  });
+
   it("blocks local import when the signed-in account already has meaningful data", async () => {
     activateAuthenticatedUserData("user_test");
     saveUserData(createFreshUserData());
@@ -377,6 +595,7 @@ describe("RootLayout onboarding redirect", () => {
     });
 
     renderAppShell("/");
+    expect(syncServiceMock.post12WeekImportValidation).not.toHaveBeenCalled();
 
     expect(await screen.findByTestId("home-page")).toBeInTheDocument();
     expect(screen.queryByText("Có dữ liệu local trên trình duyệt này")).not.toBeInTheDocument();
@@ -386,6 +605,7 @@ describe("RootLayout onboarding redirect", () => {
     seedMeaningfulAnonymousData();
 
     renderAppShell("/");
+    expect(syncServiceMock.post12WeekImportValidation).not.toHaveBeenCalled();
 
     expect(await screen.findByTestId("home-page")).toBeInTheDocument();
     expect(screen.queryByText("Có dữ liệu local trên trình duyệt này")).not.toBeInTheDocument();

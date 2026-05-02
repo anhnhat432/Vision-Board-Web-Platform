@@ -73,6 +73,10 @@ vi.mock("../utils/app-mode", () => ({
   isRealMode: () => true,
   shouldSeedDemoData: () => false,
   shouldShowBillingDebugUi: () => false,
+  shouldEnable12WeekMutationSync: () => false,
+  shouldEnable12WeekPullSync: () => false,
+  shouldEnable12WeekImportDryRun: () => false,
+  shouldEnable12WeekCloudImport: () => false,
 }));
 
 vi.mock("../utils/production", () => ({

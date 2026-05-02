@@ -203,6 +203,17 @@ export interface AnalyticsEventPayloads {
     next_help_text_length: number;
     has_next_help_text: boolean;
   };
+  sync_conflict_action: {
+    source: AnalyticsSource;
+    action: "review_details" | "export_local_backup" | "keep_local" | "retry_sync" | "use_cloud_version";
+    status: "conflict" | "unsafe";
+    conflict_count: number;
+    local_only_count: number;
+    cloud_only_count: number;
+    missing_client_id_count: number;
+    unsupported_field_count: number;
+    unresolved_local_mutation_count: number;
+  };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventPayloads;
@@ -282,6 +293,17 @@ const REMOTE_ANALYTICS_FIELD_ALLOWLIST: Record<AnalyticsEventName, readonly stri
     "next_help_text_length",
     "has_next_help_text",
   ],
+  sync_conflict_action: [
+    "source",
+    "action",
+    "status",
+    "conflict_count",
+    "local_only_count",
+    "cloud_only_count",
+    "missing_client_id_count",
+    "unsupported_field_count",
+    "unresolved_local_mutation_count",
+  ],
 };
 
 const REMOTE_ANALYTICS_AREAS = new Set(["core_funnel", "12_week", "monetization"]);
@@ -349,6 +371,7 @@ function getDefaultArea(eventName: AnalyticsEventName): string {
   }
   if (
     eventName === "progress_viewed" ||
+    eventName === "sync_conflict_action" ||
     eventName.includes("twelve_week") ||
     eventName.includes("review") ||
     eventName.includes("task")

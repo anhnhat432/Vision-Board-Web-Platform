@@ -24,11 +24,55 @@ const planSchema = new Schema(
       required: true,
       default: Date.now,
     },
+    clientPlanId: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    clientGoalId: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    revision: {
+      type: Number,
+      required: false,
+      default: 1,
+      min: 0,
+    },
+    deletedAt: {
+      type: Date,
+      required: false,
+    },
+    lastMutationId: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    syncUpdatedAt: {
+      type: Date,
+      required: false,
+    },
   },
   {
     timestamps: true,
   },
 );
+
+planSchema.index(
+  { userId: 1, clientPlanId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { clientPlanId: { $type: "string" } },
+  },
+);
+planSchema.index(
+  { userId: 1, clientGoalId: 1 },
+  {
+    partialFilterExpression: { clientGoalId: { $type: "string" } },
+  },
+);
+planSchema.index({ userId: 1, syncUpdatedAt: 1, _id: 1 });
 
 export type PlanDocument = {
   _id: string;
@@ -36,6 +80,12 @@ export type PlanDocument = {
   vision: string;
   smartGoalId?: string;
   startDate: Date;
+  clientPlanId?: string;
+  clientGoalId?: string;
+  revision?: number;
+  deletedAt?: Date;
+  lastMutationId?: string;
+  syncUpdatedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 };

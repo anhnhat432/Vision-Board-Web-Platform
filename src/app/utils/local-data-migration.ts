@@ -463,3 +463,25 @@ export function markLocalDataMigrationPromptSkipped(authUid: string, snapshotFin
   fingerprints.add(snapshotFingerprint);
   writePromptState({ ...state, [authUid]: [...fingerprints] });
 }
+
+const CLOUD_IMPORT_COMPLETED_PREFIX = "cloud_imported:";
+
+export function markCloudImportCompleted(authUid: string, snapshotFingerprint: string): void {
+  if (!authUid || !snapshotFingerprint) return;
+
+  const state = readPromptState();
+  const fingerprints = new Set(state[authUid] ?? []);
+  fingerprints.add(`${CLOUD_IMPORT_COMPLETED_PREFIX}${snapshotFingerprint}`);
+  fingerprints.add(snapshotFingerprint);
+  writePromptState({ ...state, [authUid]: [...fingerprints] });
+}
+
+export function hasCompletedCloudImport(
+  authUid: string | null | undefined,
+  snapshotFingerprint: string | null | undefined,
+): boolean {
+  if (!authUid || !snapshotFingerprint) return false;
+
+  return readPromptState()[authUid]?.includes(`${CLOUD_IMPORT_COMPLETED_PREFIX}${snapshotFingerprint}`) ?? false;
+}
+

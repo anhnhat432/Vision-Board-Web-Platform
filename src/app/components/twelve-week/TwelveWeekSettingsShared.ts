@@ -1,6 +1,8 @@
 import type { BrowserNotificationStatus, OutboxSyncSnapshot } from "../../utils/production";
 import type { BackendPlanHydrationResult } from "../../hooks/useBackendPlanHydration";
 import type { BillingActionSnapshot, BillingProviderStatus } from "../../utils/billing-contract";
+import type { TwelveWeekManualCloudSyncResult } from "@/features/plan12week/hooks/useTwelveWeekManualCloudSync";
+import type { DataMutationQueueStoreSummary } from "@/features/plan12week/persistence/mutationQueue";
 import type {
   AppPreferences,
   EntitlementKey,
@@ -23,6 +25,20 @@ export interface BackendConnectionStatus {
   lastSyncedAt: string | null;
   syncMessage: string | null;
   failedSyncCount: number;
+}
+
+export interface MutationQueueManualSyncStatus {
+  realMode: boolean;
+  featureEnabled: boolean;
+  pullFeatureEnabled: boolean;
+  apiConfigured: boolean;
+  loading: boolean;
+  lastResult: TwelveWeekManualCloudSyncResult | null;
+  queueSummary: DataMutationQueueStoreSummary;
+  /** Browser network status: online, offline, or unknown. */
+  networkStatus: "online" | "offline" | "unknown";
+  /** Whether reconnect-retry is enabled for this session. */
+  retryOnReconnectEnabled: boolean;
 }
 
 export interface TwelveWeekSettingsTabProps {
@@ -49,6 +65,7 @@ export interface TwelveWeekSettingsTabProps {
   isRestoringPlanAccess: boolean;
   isHydratingBackendPlans: boolean;
   isResolvingBackendPlanConflicts: boolean;
+  mutationQueueSyncStatus: MutationQueueManualSyncStatus;
   onReviewDayChange: (value: string) => void;
   onReminderTimeChange: (value: string) => void;
   onLoadPreferenceChange: (value: string) => void;
@@ -72,8 +89,10 @@ export interface TwelveWeekSettingsTabProps {
   onSyncEntitlements: () => void;
   onRestorePlanAccess: () => void;
   onHydrateBackendPlans: () => void;
+  onRunMutationQueueSync: () => void;
   onUseBackendPlanForConflicts: (goalId: string) => void;
   onKeepLocalPlanForConflicts: (goalId: string) => void;
+  onUseCloudVersion: () => void;
   onOpenBillingPortal: () => void;
   onNavigateGoals: () => void;
   onNavigateJournal: () => void;

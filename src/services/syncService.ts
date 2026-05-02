@@ -1,5 +1,6 @@
-import { post } from "@/lib/api/apiClient";
+import { get, post } from "@/lib/api/apiClient";
 import type { DataMutationItem, DataMutationKind, DataMutationPayload } from "@/features/plan12week/persistence/mutationQueue";
+import type { TwelveWeekImportPayload } from "@/features/plan12week/persistence/twelveWeekImportPayload";
 
 export type TwelveWeekMutationResultStatus =
   | "accepted"
@@ -58,13 +59,227 @@ export interface TwelveWeekMutationBatchResponse {
   };
 }
 
+export interface TwelveWeekImportValidationIssue {
+  path: string;
+  code: string;
+  message: string;
+}
+
+export interface TwelveWeekImportValidationEntityCounts {
+  goals: number;
+  plans: number;
+  weeks: number;
+  tasks: number;
+  leadIndicators: number;
+  leadMetrics: number;
+  dailyCheckIns: number;
+  weeklyReviews: number;
+}
+
+export interface TwelveWeekImportValidationReport {
+  status: "valid" | "invalid";
+  mode: "validate_only";
+  dryRun: true;
+  acceptedEntityCounts: TwelveWeekImportValidationEntityCounts;
+  warnings: TwelveWeekImportValidationIssue[];
+  errors: TwelveWeekImportValidationIssue[];
+  normalizedClientIdsCount: number;
+  idempotencyKey?: string;
+  requestId?: string;
+}
+
+export interface TwelveWeekImportValidationRequest {
+  requestId: string;
+  idempotencyKey: string;
+  source: "account_scope_import_dry_run";
+  mode: "validate_only";
+  workspace: {
+    goals: TwelveWeekImportPayload[];
+  };
+}
+
+export interface TwelveWeekPullOptions {
+  cursor?: string | null;
+  clientPlanId?: string | null;
+}
+
+export interface TwelveWeekPullWarning {
+  code: string;
+  message: string;
+}
+
+export interface TwelveWeekPullEntityBase {
+  id: string;
+  revision?: number;
+  deletedAt?: string;
+  lastMutationId?: string;
+  syncUpdatedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface TwelveWeekPulledGoal extends TwelveWeekPullEntityBase {
+  clientGoalId?: string;
+  title?: string;
+  category?: string;
+  description?: string;
+  deadline?: string;
+  status?: string;
+  focusArea?: string;
+  readinessScore?: number;
+  tasks?: Array<{ title: string; completed: boolean }>;
+  planId?: string;
+}
+
+export interface TwelveWeekPulledPlan extends TwelveWeekPullEntityBase {
+  clientPlanId?: string;
+  clientGoalId?: string;
+  vision?: string;
+  smartGoalId?: string;
+  startDate?: string;
+}
+
+export interface TwelveWeekPulledWeek extends TwelveWeekPullEntityBase {
+  planId: string;
+  clientWeekId?: string;
+  clientPlanId?: string;
+  weekNumber?: number;
+  focus?: string;
+  expectedOutput?: string;
+  review?: {
+    weekNumber?: number;
+    executionScore?: number;
+    reflection?: string;
+    adjustments?: string;
+  };
+}
+
+export interface TwelveWeekPulledTask extends TwelveWeekPullEntityBase {
+  weekId: string;
+  clientTaskId?: string;
+  clientWeekId?: string;
+  clientPlanId?: string;
+  weekNumber?: number;
+  title?: string;
+  status?: string;
+  scheduledDate?: string;
+  leadIndicatorName?: string;
+  isCore?: boolean;
+  completedAt?: string;
+  tacticId?: string;
+  rescheduledFrom?: string;
+}
+
+export interface TwelveWeekPulledLeadMetric extends TwelveWeekPullEntityBase {
+  weekId: string;
+  clientMetricId?: string;
+  clientWeekId?: string;
+  clientPlanId?: string;
+  leadIndicatorId?: string;
+  name?: string;
+  weeklyTarget?: number;
+  unit?: string;
+  type?: string;
+  priority?: number;
+  schedule?: number[];
+  logs: Array<{
+    id?: string;
+    date?: string;
+    value?: number;
+    completed?: boolean;
+  }>;
+}
+
+export interface TwelveWeekPulledDailyCheckIn extends TwelveWeekPullEntityBase {
+  planId: string;
+  weekId: string;
+  clientGoalId?: string;
+  clientPlanId?: string;
+  clientWeekId?: string;
+  clientCheckInId?: string;
+  weekNumber?: number;
+  localDate?: string;
+  didWorkToday?: boolean;
+  whichLeadIndicatorWorkedOn?: string;
+  amountDone?: string;
+  outputCreated?: string;
+  obstacleOrIssue?: string;
+  dailySelfRating?: number;
+  optionalNote?: string;
+  mood?: string;
+}
+
+export interface TwelveWeekPulledWeeklyReview extends TwelveWeekPullEntityBase {
+  planId?: string;
+  weekId: string;
+  clientPlanId?: string;
+  clientWeekId?: string;
+  clientReviewId?: string;
+  weekNumber?: number;
+  executionScore?: number;
+  reflection?: string;
+  adjustments?: string;
+  leadCompletionPercent?: number;
+  lagProgressValue?: string;
+  biggestOutputThisWeek?: string;
+  mainObstacle?: string;
+  nextWeekPriority?: string;
+  workloadDecision?: string;
+  reviewCompleted?: boolean;
+  progressScore?: number;
+  disciplineScore?: number;
+  focusScore?: number;
+  improvementScore?: number;
+  outputQualityScore?: number;
+  completedLeadIndicators?: number;
+}
+
+export interface TwelveWeekPulledWorkspace {
+  goals: TwelveWeekPulledGoal[];
+  plans: TwelveWeekPulledPlan[];
+  weeks: TwelveWeekPulledWeek[];
+  tasks: TwelveWeekPulledTask[];
+  leadMetrics: TwelveWeekPulledLeadMetric[];
+  dailyCheckIns: TwelveWeekPulledDailyCheckIn[];
+  weeklyReviews: TwelveWeekPulledWeeklyReview[];
+}
+
+export interface TwelveWeekPullTombstone {
+  id: string;
+  clientId?: string;
+  revision?: number;
+  deletedAt: string;
+  syncUpdatedAt?: string;
+}
+
+export interface TwelveWeekPullResponse {
+  serverTime: string;
+  mode: "full" | "delta";
+  cursor: string | null;
+  nextCursor: string | null;
+  hasMore: boolean;
+  cursorStatus?: "not_provided" | "reserved_ignored" | "applied" | "invalid";
+  filters?: {
+    clientPlanId?: string;
+  };
+  warnings: TwelveWeekPullWarning[];
+  workspace: TwelveWeekPulledWorkspace;
+  changes: TwelveWeekPulledWorkspace;
+  tombstones: Record<keyof TwelveWeekPulledWorkspace, TwelveWeekPullTombstone[]>;
+  counts: Record<keyof TwelveWeekPulledWorkspace, number>;
+}
+
 function getClientPlanId(item: DataMutationItem): string | null | undefined {
   if (item.kind === "task_completed_changed") return item.payload.clientPlanId ?? item.planId;
+  if (item.kind === "daily_check_in_upserted") return item.payload.clientPlanId ?? item.planId;
+  if (item.kind === "weekly_review_upserted") return item.payload.clientPlanId ?? item.planId;
   return item.planId;
 }
 
 function getClientWeekId(item: DataMutationItem): string | null | undefined {
   if (item.kind === "task_completed_changed") return item.payload.clientWeekId;
+  if (item.kind === "daily_check_in_upserted") return item.payload.clientWeekId;
+  if (item.kind === "weekly_review_upserted") return item.payload.clientWeekId;
   return undefined;
 }
 
@@ -95,3 +310,56 @@ export function post12WeekMutations(
 ): Promise<TwelveWeekMutationBatchResponse> {
   return post<TwelveWeekMutationBatchResponse, TwelveWeekMutationBatchRequest>("/sync/12-week/mutations", payload);
 }
+
+export function post12WeekImportValidation(
+  payload: TwelveWeekImportValidationRequest,
+): Promise<TwelveWeekImportValidationReport> {
+  return post<TwelveWeekImportValidationReport, TwelveWeekImportValidationRequest>(
+    "/sync/12-week/import/validate",
+    payload,
+  );
+}
+
+export interface TwelveWeekImportRequest {
+  importId: string;
+  idempotencyKey: string;
+  source: "account_scope_cloud_import";
+  workspace: {
+    goals: TwelveWeekImportPayload[];
+  };
+}
+
+export interface TwelveWeekImportEntityLinks {
+  goalId?: string;
+  planId?: string;
+  weekIds?: string[];
+  taskIds?: string[];
+  metricIds?: string[];
+  checkInIds?: string[];
+  reviewIds?: string[];
+}
+
+export interface TwelveWeekImportResponse {
+  status: "applied" | "duplicate" | "partial" | "failed";
+  importId?: string;
+  message?: string;
+  created?: Record<string, number>;
+  updated?: Record<string, number>;
+  links?: TwelveWeekImportEntityLinks[];
+}
+
+export function post12WeekImport(
+  payload: TwelveWeekImportRequest,
+): Promise<TwelveWeekImportResponse> {
+  return post<TwelveWeekImportResponse, TwelveWeekImportRequest>("/sync/12-week/import", payload);
+}
+
+export function pullTwelveWeekWorkspace(options: TwelveWeekPullOptions = {}): Promise<TwelveWeekPullResponse> {
+  const params = new URLSearchParams();
+  if (options.cursor?.trim()) params.set("cursor", options.cursor.trim());
+  if (options.clientPlanId?.trim()) params.set("clientPlanId", options.clientPlanId.trim());
+
+  const query = params.toString();
+  return get<TwelveWeekPullResponse>(`/sync/12-week/pull${query ? `?${query}` : ""}`);
+}
+

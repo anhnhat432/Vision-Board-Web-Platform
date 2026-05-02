@@ -38,6 +38,16 @@ export interface DataMutationQueueStore {
   items: DataMutationItem[];
 }
 
+export interface DataMutationQueueStoreSummary {
+  totalCount: number;
+  pendingCount: number;
+  inFlightCount: number;
+  failedOrRetryableCount: number;
+  succeededCount: number;
+  lastDrainStartedAt: string | null;
+  lastDrainFinishedAt: string | null;
+}
+
 export interface DataMutationError {
   code: string;
   message: string;
@@ -62,12 +72,17 @@ export interface TaskCompletedChangedMutationPayload {
 
 export interface DailyCheckInUpsertedMutationPayload {
   date: string;
+  clientPlanId?: string | null;
+  clientWeekId?: string | null;
   weekNumber: number;
   checkIn: UniversalDailyCheckIn;
 }
 
 export interface WeeklyReviewUpsertedMutationPayload {
+  clientPlanId?: string | null;
+  clientWeekId?: string | null;
   weekNumber: number;
+  executionScore?: number;
   review: UniversalWeeklyReview;
 }
 
@@ -601,6 +616,27 @@ export function listPendingMutations(
   const now = toIso(options.now);
   const ownerUid = normalizeOwnerUid(options.ownerUid) ?? store.ownerUid;
   return store.items.filter((item) => ownerMatches(item.ownerUid, ownerUid) && shouldListAsPending(item, now, options));
+}
+
+export function summarizeMutationQueueStore(store: DataMutationQueueStore): DataMutationQueueStoreSummary {
+  const failedOrRetryableStatuses = new Set<DataMutationStatus>([
+    "retry_scheduled",
+    "blocked_auth",
+    "blocked_config",
+    "blocked_conflict",
+    "failed_validation",
+    "failed_terminal",
+  ]);
+
+  return {
+    totalCount: store.items.length,
+    pendingCount: store.items.filter((item) => item.status === "pending").length,
+    inFlightCount: store.items.filter((item) => item.status === "in_flight").length,
+    failedOrRetryableCount: store.items.filter((item) => failedOrRetryableStatuses.has(item.status)).length,
+    succeededCount: store.items.filter((item) => item.status === "applied").length,
+    lastDrainStartedAt: store.lastDrainStartedAt ?? null,
+    lastDrainFinishedAt: store.lastDrainFinishedAt ?? null,
+  };
 }
 
 export function markMutationInFlight(

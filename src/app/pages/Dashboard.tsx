@@ -60,9 +60,9 @@ import {
   trackRescueTriggerDismissed,
   trackRescueTriggerFired,
 } from "../utils/monetization-analytics";
+import { downloadLocalUserDataBackup } from "../utils/local-data-backup";
 import {
   calculateGoalProgress,
-  exportUserDataSnapshot,
   formatCalendarDate,
   getActiveTwelveWeekGoal,
   getGoalExecutionStats,
@@ -229,14 +229,7 @@ function DashboardContent({
   const leadMetricsSummary = useMemo(() => buildLeadMetricsSummary(plan), [plan]);
 
   const handleExport = () => {
-    const snapshot = exportUserDataSnapshot();
-    const blob = new Blob([snapshot], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `dear-our-future-backup-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadLocalUserDataBackup({ data: userData, filenamePrefix: "dear-our-future-backup" });
     toast.success("Đã tải bản sao lưu dữ liệu.");
   };
 

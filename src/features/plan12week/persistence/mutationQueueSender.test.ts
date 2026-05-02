@@ -6,6 +6,7 @@ import {
   type DataMutationItem,
 } from "./mutationQueue";
 import { sendPending12WeekMutations } from "./mutationQueueSender";
+import type { UniversalDailyCheckIn, UniversalWeeklyReview } from "@/app/utils/storage-types";
 import type { TwelveWeekMutationBatchRequest, TwelveWeekMutationBatchResponse } from "@/services/syncService";
 
 const baseNow = "2026-04-30T00:00:00.000Z";
@@ -40,6 +41,88 @@ function seedTaskMutation(input: {
       deviceId: "device_1",
       now: at(1),
       createId: () => input.mutationId ?? "mutation_1",
+    },
+  );
+}
+
+function seedDailyCheckInMutation(input: {
+  ownerUid?: string | null;
+  mutationId?: string;
+  note?: string;
+} = {}): void {
+  const checkIn: UniversalDailyCheckIn = {
+    date: "2026-04-30",
+    didWorkToday: true,
+    whichLeadIndicatorWorkedOn: "Write",
+    amountDone: "1/3 tasks",
+    outputCreated: "Draft",
+    obstacleOrIssue: "",
+    dailySelfRating: 4,
+    optionalNote: input.note ?? "Daily check-in note",
+  };
+
+  enqueueStoredMutation(
+    {
+      kind: "daily_check_in_upserted",
+      goalId: "goal_1",
+      payload: {
+        date: checkIn.date,
+        clientPlanId: "goal_1:12-week-system",
+        clientWeekId: "goal_1:week:1",
+        weekNumber: 1,
+        checkIn,
+      },
+    },
+    {
+      ownerUid: input.ownerUid ?? "user_1",
+      storage: localStorage,
+      deviceId: "device_1",
+      now: at(1),
+      createId: () => input.mutationId ?? "daily_mutation_1",
+    },
+  );
+}
+
+function seedWeeklyReviewMutation(input: {
+  ownerUid?: string | null;
+  mutationId?: string;
+  priority?: string;
+} = {}): void {
+  const review: UniversalWeeklyReview = {
+    weekNumber: 1,
+    leadCompletionPercent: 80,
+    lagProgressValue: "13 days",
+    biggestOutputThisWeek: "Published draft",
+    mainObstacle: "Context switching",
+    nextWeekPriority: input.priority ?? "Keep one priority",
+    workloadDecision: "keep same",
+    reviewCompleted: true,
+    progressScore: 8,
+    disciplineScore: 7,
+    focusScore: 8,
+    improvementScore: 7,
+    outputQualityScore: 8,
+    completedLeadIndicators: 4,
+  };
+
+  enqueueStoredMutation(
+    {
+      kind: "weekly_review_upserted",
+      goalId: "goal_1",
+      payload: {
+        clientPlanId: "goal_1:12-week-system",
+        clientWeekId: "goal_1:week:1",
+        weekNumber: review.weekNumber,
+        executionScore: 76,
+        review,
+      },
+    },
+    {
+      ownerUid: input.ownerUid ?? "user_1",
+      storage: localStorage,
+      deviceId: "device_1",
+      now: at(1),
+      createId: () => input.mutationId ?? "weekly_mutation_1",
     },
   );
 }
@@ -97,6 +180,27 @@ describe("mutation queue sender", () => {
     expect(postMutations).not.toHaveBeenCalled();
   });
 
+  it("does not call the backend when the feature flag is disabled", async () => {
+    seedTaskMutation();
+    const postMutations = vi.fn();
+
+    const result = await sendPending12WeekMutations({
+      ownerUid: "user_1",
+      authenticated: true,
+      featureEnabled: false,
+      realMode: true,
+      apiConfigured: true,
+      storage: localStorage,
+      now: at(2),
+      postMutations,
+    });
+
+    expect(result.status).toBe("skipped");
+    expect(result.skipReason).toBe("feature_disabled");
+    expect(postMutations).not.toHaveBeenCalled();
+    expect(readItem().status).toBe("pending");
+  });
+
   it("marks accepted mutations as succeeded", async () => {
     seedTaskMutation({ mutationId: "mutation_success" });
     const postMutations = vi.fn(
@@ -138,8 +242,103 @@ describe("mutation queue sender", () => {
     expect(readItem("user_1", "mutation_success").status).toBe("applied");
   });
 
+  it("sends daily check-in entity client ids with the queued payload", async () => {
+    seedDailyCheckInMutation({ mutationId: "daily_success" });
+    const postMutations = vi.fn(
+      async (request: TwelveWeekMutationBatchRequest): Promise<TwelveWeekMutationBatchResponse> => {
+        expect(request.mutations).toHaveLength(1);
+        expect(request.mutations[0]).toEqual(
+          expect.objectContaining({
+            mutationId: "daily_success",
+            type: "daily_check_in_upserted",
+            entity: expect.objectContaining({
+              clientGoalId: "goal_1",
+              clientPlanId: "goal_1:12-week-system",
+              clientWeekId: "goal_1:week:1",
+              clientTaskId: undefined,
+            }),
+          }),
+        );
+
+        return {
+          accepted: [
+            {
+              mutationId: "daily_success",
+              type: "daily_check_in_upserted",
+              status: "accepted",
+            },
+          ],
+        };
+      },
+    );
+
+    const result = await sendPending12WeekMutations({
+      ownerUid: "user_1",
+      authenticated: true,
+      featureEnabled: true,
+      realMode: true,
+      apiConfigured: true,
+      storage: localStorage,
+      now: at(2),
+      postMutations,
+    });
+
+    expect(result.status).toBe("success");
+    expect(readItem("user_1", "daily_success").status).toBe("applied");
+  });
+
+  it("sends weekly review entity client ids with the queued payload", async () => {
+    seedWeeklyReviewMutation({ mutationId: "weekly_success" });
+    const postMutations = vi.fn(
+      async (request: TwelveWeekMutationBatchRequest): Promise<TwelveWeekMutationBatchResponse> => {
+        expect(request.mutations).toHaveLength(1);
+        expect(request.mutations[0]).toEqual(
+          expect.objectContaining({
+            mutationId: "weekly_success",
+            type: "weekly_review_upserted",
+            entity: expect.objectContaining({
+              clientGoalId: "goal_1",
+              clientPlanId: "goal_1:12-week-system",
+              clientWeekId: "goal_1:week:1",
+              clientTaskId: undefined,
+            }),
+            payload: expect.objectContaining({
+              executionScore: 76,
+            }),
+          }),
+        );
+
+        return {
+          accepted: [
+            {
+              mutationId: "weekly_success",
+              type: "weekly_review_upserted",
+              status: "accepted",
+            },
+          ],
+        };
+      },
+    );
+
+    const result = await sendPending12WeekMutations({
+      ownerUid: "user_1",
+      authenticated: true,
+      featureEnabled: true,
+      realMode: true,
+      apiConfigured: true,
+      storage: localStorage,
+      now: at(2),
+      postMutations,
+    });
+
+    expect(result.status).toBe("success");
+    expect(readItem("user_1", "weekly_success").status).toBe("applied");
+  });
+
   it("keeps failed request mutations in a retryable queue state", async () => {
     seedTaskMutation({ mutationId: "mutation_network" });
+    const userDataSnapshot = JSON.stringify({ sentinel: "local user data remains untouched" });
+    localStorage.setItem("visionboard_user_data", userDataSnapshot);
     const postMutations = vi.fn(async () => {
       throw { message: "Network down", isNetworkError: true };
     });
@@ -161,6 +360,7 @@ describe("mutation queue sender", () => {
     expect(item.status).toBe("retry_scheduled");
     expect(item.error?.retryable).toBe(true);
     expect(item.nextRetryAt).toBeTruthy();
+    expect(localStorage.getItem("visionboard_user_data")).toBe(userDataSnapshot);
   });
 
   it("handles duplicate responses as safely succeeded", async () => {

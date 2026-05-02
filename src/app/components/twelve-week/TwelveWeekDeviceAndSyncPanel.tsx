@@ -49,9 +49,13 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
           isHydratingBackendPlans={props.isHydratingBackendPlans}
           isResolvingBackendPlanConflicts={props.isResolvingBackendPlanConflicts}
           lastBackendHydrationResult={props.lastBackendHydrationResult}
+          mutationQueueSyncStatus={props.mutationQueueSyncStatus}
+          onExportLocalData={props.onExportLocalData}
           onHydrateBackendPlans={props.onHydrateBackendPlans}
+          onRunMutationQueueSync={props.onRunMutationQueueSync}
           onKeepLocalPlanForConflicts={props.onKeepLocalPlanForConflicts}
           onUseBackendPlanForConflicts={props.onUseBackendPlanForConflicts}
+          onUseCloudVersion={props.onUseCloudVersion}
           pendingOutboxCount={props.pendingOutboxCount}
         />
 

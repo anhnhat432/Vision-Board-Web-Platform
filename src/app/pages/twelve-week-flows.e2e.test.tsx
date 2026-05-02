@@ -171,6 +171,46 @@ describe("12-week core flows", () => {
       expect(checkIn?.didWorkToday).toBe(true);
       expect(completedCount).toBeGreaterThan(0);
     });
+
+    const pendingMutations = listStoredPendingMutations(null);
+    const dailyMutation = pendingMutations.find((item) => item.kind === "daily_check_in_upserted");
+    expect(dailyMutation).toEqual(expect.objectContaining({ kind: "daily_check_in_upserted", goalId }));
+    if (dailyMutation?.kind === "daily_check_in_upserted") {
+      expect(dailyMutation.payload.date).toBe(formatDateInputValue(new Date()));
+      expect(dailyMutation.payload.clientPlanId).toBe(`${goalId}:12-week-system`);
+      expect(dailyMutation.payload.clientWeekId).toBe(`${goalId}:week:${dailyMutation.payload.weekNumber}`);
+      expect(dailyMutation.payload.checkIn.didWorkToday).toBe(true);
+    }
+  });
+
+  it("compacts repeated daily check-ins for the same day to the latest queued payload", async () => {
+    const { goalId } = seedTwelveWeekGoal();
+    renderAppRoute("/12-week-system");
+    const user = userEvent.setup();
+
+    const noteInput = await screen.findByRole("textbox", { name: /note/i });
+    await user.type(noteInput, "First local check-in.");
+    await user.click(screen.getByRole("button", { name: /check-in/i }));
+
+    await waitFor(() => {
+      expect(readGoal(goalId).twelveWeekSystem?.dailyCheckIns[0]?.optionalNote).toBe("First local check-in.");
+    });
+
+    await user.clear(noteInput);
+    await user.type(noteInput, "Latest local check-in.");
+    await user.click(screen.getByRole("button", { name: /check-in/i }));
+
+    await waitFor(() => {
+      expect(readGoal(goalId).twelveWeekSystem?.dailyCheckIns[0]?.optionalNote).toBe("Latest local check-in.");
+    });
+
+    const dailyMutations = listStoredPendingMutations(null).filter((item) => item.kind === "daily_check_in_upserted");
+    expect(dailyMutations).toHaveLength(1);
+    expect(dailyMutations[0].supersedes).toHaveLength(1);
+    if (dailyMutations[0].kind === "daily_check_in_upserted") {
+      expect(dailyMutations[0].payload.checkIn.optionalNote).toBe("Latest local check-in.");
+      expect(dailyMutations[0].payload.clientPlanId).toBe(`${goalId}:12-week-system`);
+    }
   });
 
   it("keeps daily execution state when a weekly review is submitted after check-in", async () => {
@@ -221,6 +261,55 @@ describe("12-week core flows", () => {
 
     expect(reflection).toBeDefined();
     expect(reflection?.content).toContain("Giữ được nhịp ship mỗi ngày.");
+
+    const weeklyMutation = listStoredPendingMutations(null).find((item) => item.kind === "weekly_review_upserted");
+    const review = readGoal(goalId).twelveWeekSystem?.weeklyReviews[0];
+    expect(weeklyMutation).toEqual(expect.objectContaining({ kind: "weekly_review_upserted", goalId }));
+    if (weeklyMutation?.kind === "weekly_review_upserted") {
+      expect(weeklyMutation.payload.clientPlanId).toBe(`${goalId}:12-week-system`);
+      expect(weeklyMutation.payload.clientWeekId).toBe(`${goalId}:week:${weeklyMutation.payload.weekNumber}`);
+      expect(weeklyMutation.payload.executionScore).toEqual(expect.any(Number));
+      expect(weeklyMutation.payload.review.reviewCompleted).toBe(true);
+      expect(weeklyMutation.payload.review.biggestOutputThisWeek).toBe(review?.biggestOutputThisWeek);
+      expect(weeklyMutation.payload.review.mainObstacle).toBe(review?.mainObstacle);
+      expect(weeklyMutation.payload.review.nextWeekPriority).toBe(review?.nextWeekPriority);
+    }
+  });
+
+  it("compacts repeated weekly reviews for the same week to the latest queued payload", async () => {
+    const { goalId } = seedTwelveWeekGoal();
+    renderAppRoute("/12-week-system");
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("tab", { name: "Tuần" }));
+    const [bestInput, obstacleInput, priorityInput] = await screen.findAllByRole("textbox");
+    await user.type(bestInput, "First weekly output.");
+    await user.type(obstacleInput, "First obstacle.");
+    await user.type(priorityInput, "First priority.");
+    await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
+
+    await waitFor(() => {
+      expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.biggestOutputThisWeek).toBe("First weekly output.");
+    });
+
+    await user.clear(bestInput);
+    await user.type(bestInput, "Latest weekly output.");
+    await user.clear(priorityInput);
+    await user.type(priorityInput, "Latest priority.");
+    await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
+
+    await waitFor(() => {
+      expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.biggestOutputThisWeek).toBe("Latest weekly output.");
+    });
+
+    const weeklyMutations = listStoredPendingMutations(null).filter((item) => item.kind === "weekly_review_upserted");
+    expect(weeklyMutations).toHaveLength(1);
+    expect(weeklyMutations[0].supersedes).toHaveLength(1);
+    if (weeklyMutations[0].kind === "weekly_review_upserted") {
+      expect(weeklyMutations[0].payload.review.biggestOutputThisWeek).toBe("Latest weekly output.");
+      expect(weeklyMutations[0].payload.review.nextWeekPriority).toBe("Latest priority.");
+      expect(weeklyMutations[0].payload.executionScore).toEqual(expect.any(Number));
+    }
   });
 
   it("completes mock checkout and restores access from settings", async () => {

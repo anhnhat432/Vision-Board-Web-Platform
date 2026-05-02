@@ -74,11 +74,44 @@ const goalSchema = new Schema(
       required: false,
       trim: true,
     },
+    clientGoalId: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    revision: {
+      type: Number,
+      required: false,
+      default: 1,
+      min: 0,
+    },
+    deletedAt: {
+      type: Date,
+      required: false,
+    },
+    lastMutationId: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    syncUpdatedAt: {
+      type: Date,
+      required: false,
+    },
   },
   {
     timestamps: true,
   },
 );
+
+goalSchema.index(
+  { userId: 1, clientGoalId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { clientGoalId: { $type: "string" } },
+  },
+);
+goalSchema.index({ userId: 1, syncUpdatedAt: 1, _id: 1 });
 
 export type GoalStatus = "active" | "completed" | "archived";
 

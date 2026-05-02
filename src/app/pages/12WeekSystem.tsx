@@ -1,12 +1,18 @@
-﻿import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { BarChart3, CalendarDays, ListTodo, Settings2 } from "lucide-react";
 
 import { useTwelveWeekSystemSnapshot } from "../hooks/useTwelveWeekSystemSnapshot";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
+import { useNetworkStatus } from "../hooks/useNetworkStatus";
 import { TabErrorBoundary } from "../components/TabErrorBoundary";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { trackAnalyticsEvent } from "../utils/analytics";
+import {
+  isRealMode,
+  shouldEnable12WeekMutationSync,
+  shouldEnable12WeekPullSync,
+} from "../utils/app-mode";
 import {
   trackPremiumInsightOpened,
   trackRescueActionTaken,
@@ -29,6 +35,8 @@ import {
   clearArchivedOutbox,
   clearEventLog,
   formatDateInputValue,
+  getUserData,
+  saveUserData,
   updateGoal,
 } from "../utils/storage";
 import { dismissRescueTrigger } from "../utils/twelve-week-system-ui";
@@ -40,6 +48,13 @@ import {
 } from "../utils/storage-twelve-week";
 import { TaskBoard } from "@/features/plan12week/components/TaskBoard";
 import { usePlanExecutionSync } from "@/features/plan12week/hooks";
+import { useTwelveWeekManualCloudSync } from "@/features/plan12week/hooks/useTwelveWeekManualCloudSync";
+import {
+  readMutationQueueStore,
+  summarizeMutationQueueStore,
+} from "@/features/plan12week/persistence/mutationQueue";
+import { applyPulledWorkspaceToUserData } from "@/features/plan12week/persistence/pulledWorkspaceApply";
+import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
   TwelveWeekDashboardHeader,
@@ -63,6 +78,16 @@ import { useTwelveWeekBillingActions } from "./12WeekSystem/useTwelveWeekBilling
 import { useTwelveWeekExecutionActions } from "./12WeekSystem/useTwelveWeekExecutionActions";
 import { useTwelveWeekSettingsActions } from "./12WeekSystem/useTwelveWeekSettingsActions";
 import { useWeeklyReviewFormState } from "./12WeekSystem/useWeeklyReviewFormState";
+
+const emptyMutationQueueSummary = {
+  totalCount: 0,
+  pendingCount: 0,
+  inFlightCount: 0,
+  failedOrRetryableCount: 0,
+  succeededCount: 0,
+  lastDrainStartedAt: null,
+  lastDrainFinishedAt: null,
+};
 
 export function TwelveWeekSystem() {
   const navigate = useNavigate();
@@ -135,6 +160,31 @@ export function TwelveWeekSystem() {
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [isClearLocalDialogOpen, setIsClearLocalDialogOpen] = useState(false);
   const [dismissedTriggerKind, setDismissedTriggerKind] = useState<string | null>(null);
+  const {
+    loading: isManualCloudSyncing,
+    lastResult: lastManualCloudSyncResult,
+    syncNow: syncManualCloudNow,
+  } = useTwelveWeekManualCloudSync({
+    onApplied: () => {
+      loadGoalData(activeGoalIdRef.current ?? undefined);
+      refreshBackendProgressOverlay();
+      refreshSnapshotMeta();
+    },
+  });
+  const networkStatusInfo = useNetworkStatus();
+
+  const handleUseCloudVersion = () => {
+    const pullResponse = lastManualCloudSyncResult?.pullResponse;
+    if (!pullResponse?.workspace) return;
+    const localData = getUserData();
+    const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, {});
+    const didWrite = saveUserData(nextData);
+    if (didWrite) {
+      loadGoalData(activeGoalIdRef.current ?? undefined);
+      refreshBackendProgressOverlay();
+      refreshSnapshotMeta();
+    }
+  };
 
   const todayDateKey = formatDateInputValue(new Date());
   const isBackendProfileReady = Boolean(userProfile);
@@ -186,6 +236,21 @@ export function TwelveWeekSystem() {
     syncMessage: backendSyncError?.message ?? backendSyncData.lastSnapshot?.message ?? null,
     failedSyncCount: backendSyncData.lastSnapshot?.failedCount ?? 0,
   } as const;
+  const mutationQueueRealMode = isRealMode();
+  const mutationQueueSummary = mutationQueueRealMode
+    ? summarizeMutationQueueStore(readMutationQueueStore(user?.uid ?? null))
+    : emptyMutationQueueSummary;
+  const mutationQueueSyncStatus = {
+    realMode: mutationQueueRealMode,
+    featureEnabled: shouldEnable12WeekMutationSync(),
+    pullFeatureEnabled: shouldEnable12WeekPullSync(),
+    apiConfigured: isApiBaseUrlConfigured(),
+    loading: isManualCloudSyncing,
+    lastResult: lastManualCloudSyncResult,
+    queueSummary: mutationQueueSummary,
+    networkStatus: networkStatusInfo.status,
+    retryOnReconnectEnabled: false,
+  };
   const planHasNoTasks = Boolean(system && system.taskInstances.length === 0);
   const planHasNoLeadMetrics = Boolean(system && system.leadIndicators.length === 0);
   const planHasNoLagMetric = Boolean(system && system.lagMetric.name.trim().length === 0);
@@ -233,6 +298,10 @@ export function TwelveWeekSystem() {
         weekNumber: insightWeekNumber,
       });
     }
+  };
+
+  const handleRunMutationQueueSync = () => {
+    void syncManualCloudNow();
   };
 
   const {
@@ -777,6 +846,7 @@ export function TwelveWeekSystem() {
                 isRestoringPlanAccess={isRestoringPlanAccess}
                 isHydratingBackendPlans={isHydratingBackendPlans}
                 isResolvingBackendPlanConflicts={isResolvingBackendPlanConflicts}
+                mutationQueueSyncStatus={mutationQueueSyncStatus}
                 onReviewDayChange={handleReviewDayChange}
                 onReminderTimeChange={handleReminderTimeChange}
                 onLoadPreferenceChange={handleLoadPreferenceChange}
@@ -806,8 +876,10 @@ export function TwelveWeekSystem() {
                 onSyncEntitlements={handleSyncEntitlements}
                 onRestorePlanAccess={handleRestorePlanAccess}
                 onHydrateBackendPlans={handleHydrateBackendPlans}
+                onRunMutationQueueSync={handleRunMutationQueueSync}
                 onKeepLocalPlanForConflicts={handleKeepLocalPlanForConflicts}
                 onUseBackendPlanForConflicts={handleUseBackendPlanForConflicts}
+                onUseCloudVersion={handleUseCloudVersion}
                 onOpenBillingPortal={handleOpenBillingPortal}
                 onNavigateGoals={() => navigate("/goals")}
                 onNavigateJournal={() => navigate("/journal")}

@@ -39,6 +39,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           isRestoringPlanAccess={props.isRestoringPlanAccess}
           isHydratingBackendPlans={props.isHydratingBackendPlans}
           isResolvingBackendPlanConflicts={props.isResolvingBackendPlanConflicts}
+          mutationQueueSyncStatus={props.mutationQueueSyncStatus}
           onPreferenceToggle={props.onPreferenceToggle}
           onArchivePendingOutbox={props.onArchivePendingOutbox}
           onRestoreArchivedOutbox={props.onRestoreArchivedOutbox}
@@ -56,8 +57,10 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           onSyncEntitlements={props.onSyncEntitlements}
           onRestorePlanAccess={props.onRestorePlanAccess}
           onHydrateBackendPlans={props.onHydrateBackendPlans}
+          onRunMutationQueueSync={props.onRunMutationQueueSync}
           onKeepLocalPlanForConflicts={props.onKeepLocalPlanForConflicts}
           onUseBackendPlanForConflicts={props.onUseBackendPlanForConflicts}
+          onUseCloudVersion={props.onUseCloudVersion}
           onOpenBillingPortal={props.onOpenBillingPortal}
           onNavigateGoals={props.onNavigateGoals}
           onNavigateJournal={props.onNavigateJournal}

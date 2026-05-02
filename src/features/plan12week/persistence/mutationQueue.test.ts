@@ -15,6 +15,7 @@ import {
   markMutationFailed,
   markMutationInFlight,
   markMutationSucceeded,
+  summarizeMutationQueueStore,
 } from "./mutationQueue";
 
 const baseNow = "2026-04-30T00:00:00.000Z";
@@ -230,6 +231,8 @@ describe("data mutation queue", () => {
         goalId: "goal_1",
         payload: {
           date: "2026-04-30",
+          clientPlanId: "goal_1:12-week-system",
+          clientWeekId: "goal_1:week:1",
           weekNumber: 1,
           checkIn: createCheckIn("2026-04-30", "first"),
         },
@@ -244,6 +247,8 @@ describe("data mutation queue", () => {
         goalId: "goal_1",
         payload: {
           date: "2026-04-30",
+          clientPlanId: "goal_1:12-week-system",
+          clientWeekId: "goal_1:week:1",
           weekNumber: 1,
           checkIn: createCheckIn("2026-04-30", "latest"),
         },
@@ -257,7 +262,10 @@ describe("data mutation queue", () => {
         ownerUid: "user_a",
         goalId: "goal_1",
         payload: {
+          clientPlanId: "goal_1:12-week-system",
+          clientWeekId: "goal_1:week:1",
           weekNumber: 1,
+          executionScore: 72,
           review: createWeeklyReview(1, "first priority"),
         },
       },
@@ -270,7 +278,10 @@ describe("data mutation queue", () => {
         ownerUid: "user_a",
         goalId: "goal_1",
         payload: {
+          clientPlanId: "goal_1:12-week-system",
+          clientWeekId: "goal_1:week:1",
           weekNumber: 1,
+          executionScore: 84,
           review: createWeeklyReview(1, "latest priority"),
         },
       },
@@ -311,8 +322,17 @@ describe("data mutation queue", () => {
     expect(daily?.supersedes).toEqual(["daily_1"]);
     expect(review?.supersedes).toEqual(["review_1"]);
     expect(snapshot?.supersedes).toEqual(["snapshot_1"]);
-    if (daily?.kind === "daily_check_in_upserted") expect(daily.payload.checkIn.optionalNote).toBe("latest");
-    if (review?.kind === "weekly_review_upserted") expect(review.payload.review.nextWeekPriority).toBe("latest priority");
+    if (daily?.kind === "daily_check_in_upserted") {
+      expect(daily.payload.clientPlanId).toBe("goal_1:12-week-system");
+      expect(daily.payload.clientWeekId).toBe("goal_1:week:1");
+      expect(daily.payload.checkIn.optionalNote).toBe("latest");
+    }
+    if (review?.kind === "weekly_review_upserted") {
+      expect(review.payload.clientPlanId).toBe("goal_1:12-week-system");
+      expect(review.payload.clientWeekId).toBe("goal_1:week:1");
+      expect(review.payload.executionScore).toBe(84);
+      expect(review.payload.review.nextWeekPriority).toBe("latest priority");
+    }
     if (snapshot?.kind === "plan_snapshot_updated") expect(snapshot.payload.system.vision12Week).toBe("latest snapshot");
   });
 
@@ -377,6 +397,88 @@ describe("data mutation queue", () => {
     expect(store.items[0].status).toBe("applied");
     expect(store.items[0].error).toBeUndefined();
     expect(store.items).toHaveLength(1);
+  });
+
+  it("summarizes queue counts for settings visibility", () => {
+    let store = createEmptyMutationQueueStore({ ownerUid: "user_a", deviceId: "device_1", now: at(0) });
+
+    store = enqueueMutation(
+      store,
+      {
+        kind: "task_completed_changed",
+        goalId: "goal_1",
+        payload: {
+          taskId: "task_pending",
+          weekNumber: 1,
+          completed: true,
+          scheduledDate: "2026-04-30",
+        },
+      },
+      { now: at(1), createId: () => "pending_1" },
+    );
+    store = enqueueMutation(
+      store,
+      {
+        kind: "task_completed_changed",
+        goalId: "goal_1",
+        payload: {
+          taskId: "task_in_flight",
+          weekNumber: 1,
+          completed: true,
+          scheduledDate: "2026-04-30",
+        },
+      },
+      { now: at(2), createId: () => "in_flight_1" },
+    );
+    store = markMutationInFlight(store, "in_flight_1", { now: at(3) });
+    store = enqueueMutation(
+      store,
+      {
+        kind: "daily_check_in_upserted",
+        goalId: "goal_1",
+        payload: {
+          date: "2026-04-30",
+          weekNumber: 1,
+          checkIn: createCheckIn("2026-04-30"),
+        },
+      },
+      { now: at(4), createId: () => "failed_1" },
+    );
+    store = markMutationFailed(
+      store,
+      "failed_1",
+      { code: "network_error", message: "offline", retryable: true },
+      { now: at(5), nextRetryAt: at(10) },
+    );
+    store = enqueueMutation(
+      store,
+      {
+        kind: "weekly_review_upserted",
+        goalId: "goal_1",
+        payload: {
+          weekNumber: 1,
+          review: createWeeklyReview(),
+        },
+      },
+      { now: at(6), createId: () => "applied_1" },
+    );
+    store = markMutationSucceeded(store, "applied_1", { now: at(7) });
+
+    const summary = summarizeMutationQueueStore({
+      ...store,
+      lastDrainStartedAt: at(8),
+      lastDrainFinishedAt: at(9),
+    });
+
+    expect(summary).toEqual({
+      totalCount: 4,
+      pendingCount: 1,
+      inFlightCount: 1,
+      failedOrRetryableCount: 1,
+      succeededCount: 1,
+      lastDrainStartedAt: at(8),
+      lastDrainFinishedAt: at(9),
+    });
   });
 
   it("maps common HTTP failures to blocked or terminal statuses", () => {

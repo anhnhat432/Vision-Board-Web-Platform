@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-export type SyncMutationLogStatus = "accepted";
+export type SyncMutationLogStatus = "received" | "accepted" | "applied" | "skipped" | "failed";
 
 const syncMutationLogSchema = new Schema(
   {
@@ -32,9 +32,9 @@ const syncMutationLogSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["accepted"],
+      enum: ["received", "accepted", "applied", "skipped", "failed"],
       required: true,
-      default: "accepted",
+      default: "received",
     },
     clientTimestamp: {
       type: Date,

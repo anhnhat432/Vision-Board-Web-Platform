@@ -14,9 +14,11 @@ import { createDemoUserData, createEmptyUserData } from "./storage-demo-data";
 import { getScopedUserDataStorageKey } from "./storage-auth-scope";
 import {
   getAnonymousLocalDataMigrationCandidate,
+  hasCompletedCloudImport,
   hasMeaningfulLocalWork,
   hasSkippedLocalDataMigrationPrompt,
   importAnonymousLocalDataToAccountScope,
+  markCloudImportCompleted,
   markLocalDataMigrationPromptSkipped,
 } from "./local-data-migration";
 import type { Goal, TrackingEvent, UserData } from "./storage-types";
@@ -264,3 +266,91 @@ describe("anonymous local data migration candidate", () => {
     expect(localStorage.getItem(getScopedUserDataStorageKey("auth_user_1"))).toBeNull();
   });
 });
+
+describe("cloud import tracking", () => {
+  it("marks cloud import completed for a user and fingerprint", () => {
+    const data = createFreshUserData();
+    data.goals.push(createRealGoal());
+    localStorage.setItem(ANONYMOUS_USER_DATA_STORAGE_KEY, JSON.stringify(data));
+
+    const candidate = getAnonymousLocalDataMigrationCandidate();
+    if (!candidate) throw new Error("Expected candidate");
+
+    expect(hasCompletedCloudImport("auth_user_1", candidate.fingerprint)).toBe(false);
+
+    markCloudImportCompleted("auth_user_1", candidate.fingerprint);
+
+    expect(hasCompletedCloudImport("auth_user_1", candidate.fingerprint)).toBe(true);
+  });
+
+  it("does not mark cloud import for a different user", () => {
+    const data = createFreshUserData();
+    data.goals.push(createRealGoal());
+    localStorage.setItem(ANONYMOUS_USER_DATA_STORAGE_KEY, JSON.stringify(data));
+
+    const candidate = getAnonymousLocalDataMigrationCandidate();
+    if (!candidate) throw new Error("Expected candidate");
+
+    markCloudImportCompleted("auth_user_1", candidate.fingerprint);
+
+    expect(hasCompletedCloudImport("auth_user_2", candidate.fingerprint)).toBe(false);
+  });
+
+  it("cloud import completed also marks prompt as skipped", () => {
+    const data = createFreshUserData();
+    data.goals.push(createRealGoal());
+    localStorage.setItem(ANONYMOUS_USER_DATA_STORAGE_KEY, JSON.stringify(data));
+
+    const candidate = getAnonymousLocalDataMigrationCandidate();
+    if (!candidate) throw new Error("Expected candidate");
+
+    markCloudImportCompleted("auth_user_1", candidate.fingerprint);
+
+    expect(hasSkippedLocalDataMigrationPrompt("auth_user_1", candidate.fingerprint)).toBe(true);
+  });
+
+  it("does not report completed for a different fingerprint", () => {
+    markCloudImportCompleted("auth_user_1", "fingerprint_a");
+
+    expect(hasCompletedCloudImport("auth_user_1", "fingerprint_b")).toBe(false);
+    expect(hasCompletedCloudImport("auth_user_1", "fingerprint_a")).toBe(true);
+  });
+
+  it("import does not delete anonymous data", () => {
+    const anonymousData = createFreshUserData();
+    anonymousData.goals.push(createRealGoal());
+    const anonymousRaw = JSON.stringify(anonymousData);
+    const freshAccountRaw = JSON.stringify(createFreshUserData());
+    localStorage.setItem(ANONYMOUS_USER_DATA_STORAGE_KEY, anonymousRaw);
+    localStorage.setItem(AUTH_OWNER_STORAGE_KEY, "auth_user_1");
+    localStorage.setItem(STORAGE_KEY, freshAccountRaw);
+    localStorage.setItem(getScopedUserDataStorageKey("auth_user_1"), freshAccountRaw);
+
+    const candidate = getAnonymousLocalDataMigrationCandidate();
+    if (!candidate) throw new Error("Expected candidate");
+
+    const result = importAnonymousLocalDataToAccountScope("auth_user_1", candidate.fingerprint);
+
+    expect(result.status).toBe("imported");
+    // Anonymous data preserved
+    expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(anonymousRaw);
+
+    // Marking cloud import does not touch local/anonymous data
+    markCloudImportCompleted("auth_user_1", candidate.fingerprint);
+
+    expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(anonymousRaw);
+    expect(localStorage.getItem(STORAGE_KEY)).toBe(anonymousRaw);
+    expect(localStorage.getItem(getScopedUserDataStorageKey("auth_user_1"))).toBe(anonymousRaw);
+  });
+
+  it("handles empty/null arguments safely", () => {
+    expect(hasCompletedCloudImport(null, "fp")).toBe(false);
+    expect(hasCompletedCloudImport("uid", null)).toBe(false);
+    expect(hasCompletedCloudImport(null, null)).toBe(false);
+
+    // These should not throw
+    markCloudImportCompleted("", "fp");
+    markCloudImportCompleted("uid", "");
+  });
+});
+

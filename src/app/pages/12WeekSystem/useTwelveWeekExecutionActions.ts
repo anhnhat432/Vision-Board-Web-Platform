@@ -100,6 +100,55 @@ function enqueueTaskCompletionChangedMutation(goalId: string, task: TwelveWeekTa
   }
 }
 
+function enqueueDailyCheckInUpsertedMutation(
+  goalId: string,
+  weekNumber: number,
+  checkIn: UniversalDailyCheckIn,
+): void {
+  try {
+    const planLink = getPlanLink(goalId);
+    enqueueStoredMutation({
+      kind: "daily_check_in_upserted",
+      goalId,
+      planId: planLink?.planId ?? null,
+      payload: {
+        date: checkIn.date,
+        clientPlanId: getClientPlanId(goalId),
+        clientWeekId: getClientWeekId(goalId, weekNumber),
+        weekNumber,
+        checkIn,
+      },
+    });
+  } catch {
+    // Queueing is a best-effort sidecar. The local-first check-in save stays authoritative.
+  }
+}
+
+function enqueueWeeklyReviewUpsertedMutation(
+  goalId: string,
+  weekNumber: number,
+  review: UniversalWeeklyReview,
+  executionScore: number,
+): void {
+  try {
+    const planLink = getPlanLink(goalId);
+    enqueueStoredMutation({
+      kind: "weekly_review_upserted",
+      goalId,
+      planId: planLink?.planId ?? null,
+      payload: {
+        clientPlanId: getClientPlanId(goalId),
+        clientWeekId: getClientWeekId(goalId, weekNumber),
+        weekNumber,
+        executionScore,
+        review,
+      },
+    });
+  } catch {
+    // Queueing is a best-effort sidecar. The local-first weekly review save stays authoritative.
+  }
+}
+
 export function useTwelveWeekExecutionActions({
   activeGoal,
   system,
@@ -238,6 +287,8 @@ export function useTwelveWeekExecutionActions({
       dailyCheckIns: [dailyCheckIn, ...filteredCheckIns].slice(0, 120),
     });
 
+    enqueueDailyCheckInUpsertedMutation(actionGoalId, syncWeekNumber, dailyCheckIn);
+
     trackAppEvent("12_week_daily_checkin_submitted", actionGoalId, {
       mood: dailyMood,
       completedTasks: String(completedTodayCount),
@@ -331,6 +382,8 @@ export function useTwelveWeekExecutionActions({
       linkedGoalId: actionGoalId,
       linkedWeekNumber: reviewWeekNumber,
     });
+
+    enqueueWeeklyReviewUpsertedMutation(actionGoalId, reviewWeekNumber, nextReview, reviewExecutionScore);
 
     trackAnalyticsEvent(
       "weekly_review_submitted",

@@ -41,6 +41,35 @@ const weekSchema = new Schema(
       required: false,
       default: undefined,
     },
+    clientWeekId: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    clientPlanId: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    revision: {
+      type: Number,
+      required: false,
+      default: 1,
+      min: 0,
+    },
+    deletedAt: {
+      type: Date,
+      required: false,
+    },
+    lastMutationId: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    syncUpdatedAt: {
+      type: Date,
+      required: false,
+    },
   },
   {
     timestamps: true,
@@ -48,5 +77,19 @@ const weekSchema = new Schema(
 );
 
 weekSchema.index({ planId: 1, weekNumber: 1 }, { unique: true });
+weekSchema.index(
+  { planId: 1, clientWeekId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { clientWeekId: { $type: "string" } },
+  },
+);
+weekSchema.index(
+  { planId: 1, clientPlanId: 1 },
+  {
+    partialFilterExpression: { clientPlanId: { $type: "string" } },
+  },
+);
+weekSchema.index({ planId: 1, syncUpdatedAt: 1, _id: 1 });
 
 export const WeekModel = model("Week", weekSchema);

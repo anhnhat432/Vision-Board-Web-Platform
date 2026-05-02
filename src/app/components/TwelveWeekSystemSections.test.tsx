@@ -153,6 +153,25 @@ describe("TwelveWeekSystemSections", () => {
         isRestoringPlanAccess={false}
         isHydratingBackendPlans={false}
         isResolvingBackendPlanConflicts={false}
+        mutationQueueSyncStatus={{
+          realMode: false,
+          featureEnabled: false,
+          pullFeatureEnabled: false,
+          apiConfigured: false,
+          loading: false,
+          lastResult: null,
+          queueSummary: {
+            totalCount: 0,
+            pendingCount: 0,
+            inFlightCount: 0,
+            failedOrRetryableCount: 0,
+            succeededCount: 0,
+            lastDrainStartedAt: null,
+            lastDrainFinishedAt: null,
+          },
+          networkStatus: "online" as const,
+          retryOnReconnectEnabled: false,
+        }}
         onReviewDayChange={vi.fn()}
         onReminderTimeChange={vi.fn()}
         onLoadPreferenceChange={vi.fn()}
@@ -176,8 +195,10 @@ describe("TwelveWeekSystemSections", () => {
         onSyncEntitlements={vi.fn()}
         onRestorePlanAccess={vi.fn()}
         onHydrateBackendPlans={vi.fn()}
+        onRunMutationQueueSync={vi.fn()}
         onKeepLocalPlanForConflicts={vi.fn()}
         onUseBackendPlanForConflicts={vi.fn()}
+        onUseCloudVersion={vi.fn()}
         onOpenBillingPortal={vi.fn()}
         onNavigateGoals={vi.fn()}
         onNavigateJournal={vi.fn()}

@@ -20,7 +20,8 @@
     "env:check:full": "node scripts/check-runtime-env.mjs --full-stack",
     "visual:prod": "node scripts/visual-core-flow-qa.mjs",
     "smoke:mvp1": "node scripts/smoke-mvp1-local-demo.mjs",
-    "smoke:prod": "node scripts/smoke-production-e2e.mjs"
+    "smoke:prod": "node scripts/smoke-production-e2e.mjs",
+    "smoke:mvp2-sync": "node scripts/smoke-mvp2-sync-staging.mjs"
   },
   "dependencies": {
     "@fontsource/be-vietnam-pro": "^5.2.8",

@@ -7,6 +7,7 @@ import {
   requestBrowserNotificationPermission,
   sendTestBrowserNotification,
 } from "@/app/utils/production";
+import { downloadLocalUserDataBackup } from "@/app/utils/local-data-backup";
 import {
   type AppPreferences,
   type InAppReminder,
@@ -14,7 +15,6 @@ import {
   archiveOutboxItem,
   clearLocalDeviceSignals,
   deleteAllUserData,
-  exportUserDataSnapshot,
   formatDateInputValue,
   getUserData,
   resetTwelveWeekGoalCycle,
@@ -158,13 +158,7 @@ export function useTwelveWeekSettingsActions({
   };
 
   const handleExportLocalData = () => {
-    const blob = new Blob([exportUserDataSnapshot()], { type: "application/json;charset=utf-8" });
-    const url = window.URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `vision-board-local-${formatDateInputValue(new Date())}.json`;
-    anchor.click();
-    window.URL.revokeObjectURL(url);
+    downloadLocalUserDataBackup({ data: getUserData(), filenamePrefix: "vision-board-local" });
     toast.success("Đã tải bản sao dữ liệu local.");
   };
 

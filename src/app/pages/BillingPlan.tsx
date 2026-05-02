@@ -1,6 +1,6 @@
-import { CreditCard, Crown, RefreshCw, Shield, Sparkles } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { CreditCard, Crown, Loader2, RefreshCw, Shield, Sparkles } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { Badge } from "../components/ui/badge";
@@ -8,10 +8,11 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
-import { isDemoMode } from "../utils/app-mode";
+import { isDemoMode, isRealMode } from "../utils/app-mode";
 import { getBillingProviderModeLabel, getBillingReadinessLabel } from "../utils/billing-contract";
 import { trackExperimentExposure, trackPaywallCtaClicked } from "../utils/monetization-analytics";
 import {
+  cancelSubscriptionOnServer,
   getBillingProviderStatus,
   getLastEntitlementSyncSnapshot,
   getLastRestoreAccessSnapshot,
@@ -28,8 +29,11 @@ import {
   type PremiumFeatureContext,
 } from "../utils/twelve-week-premium";
 
+type CheckoutReturnStatus = "idle" | "pending" | "confirmed" | "failed";
+
 export function BillingPlan() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { userData: syncedUserData, reloadUserData } = useSyncedUserData();
   const userData = syncedUserData ?? getUserData();
   const { currentPlanCode, currentPlanDefinition, entitlementKeys, premiumStatusItems } = usePlanEntitlements(userData);
@@ -40,6 +44,45 @@ export function BillingPlan() {
   const [isRestoring, setIsRestoring] = useState(false);
   const [isOpeningPortal, setIsOpeningPortal] = useState(false);
   const [isStartingTrial, setIsStartingTrial] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [checkoutReturnStatus, setCheckoutReturnStatus] = useState<CheckoutReturnStatus>("idle");
+
+  // Handle checkout return URL
+  const returnStatus = searchParams.get("status");
+  const isCheckoutReturn = returnStatus === "success" && isRealMode();
+
+  const pollServerEntitlement = useCallback(async () => {
+    if (!isCheckoutReturn) return;
+    setCheckoutReturnStatus("pending");
+
+    // Clear the URL params so refreshing doesn't re-trigger
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete("status");
+    newParams.delete("context");
+    setSearchParams(newParams, { replace: true });
+
+    try {
+      const result = await syncEntitlementsWithProvider();
+      reloadUserData();
+      if (result.ok && result.planCode !== "FREE") {
+        setCheckoutReturnStatus("confirmed");
+        toast.success(`Đã xác nhận gói ${result.planCode} từ server.`);
+      } else {
+        setCheckoutReturnStatus("pending");
+        toast.info("Thanh toán đang được xử lý. Quyền sẽ được cập nhật khi server xác nhận.");
+      }
+    } catch {
+      setCheckoutReturnStatus("failed");
+      toast.error("Không thể kiểm tra quyền từ server. Vui lòng thử lại.");
+    }
+  }, [isCheckoutReturn, searchParams, setSearchParams, reloadUserData]);
+
+  useEffect(() => {
+    if (isCheckoutReturn && checkoutReturnStatus === "idle") {
+      pollServerEntitlement();
+    }
+  }, [isCheckoutReturn, checkoutReturnStatus, pollServerEntitlement]);
 
   const trialCtaExperiment = useMemo(
     () => getOrAssignExperimentVariant("paywall_trial_cta", ["control", "variant_a"]),
@@ -167,6 +210,24 @@ export function BillingPlan() {
     }
   };
 
+  const realMode = isRealMode();
+
+  const handleCancelSubscription = async () => {
+    setIsCanceling(true);
+    try {
+      const result = await cancelSubscriptionOnServer();
+      if (result.ok) {
+        toast.success(result.message);
+        reloadUserData();
+      } else {
+        toast.error(result.message);
+      }
+    } finally {
+      setIsCanceling(false);
+      setShowCancelConfirm(false);
+    }
+  };
+
   return (
     <div className="flow-shell space-y-5 pb-12">
       <UpgradePaywallDialog
@@ -196,6 +257,50 @@ export function BillingPlan() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Checkout return status */}
+      {checkoutReturnStatus === "pending" && (
+        <Card className="border-amber-200 bg-amber-50">
+          <CardContent className="flex items-center gap-3 p-4">
+            <Loader2 className="h-5 w-5 animate-spin text-amber-600" />
+            <div>
+              <p className="font-medium text-amber-900">Đang chờ xác nhận thanh toán</p>
+              <p className="text-sm text-amber-700">
+                Thanh toán đang được xử lý. Quyền sẽ được cập nhật khi server xác nhận. Vui lòng đợi hoặc nhấn "Kiểm tra quyền" bên dưới.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      {checkoutReturnStatus === "confirmed" && (
+        <Card className="border-emerald-200 bg-emerald-50">
+          <CardContent className="flex items-center gap-3 p-4">
+            <Shield className="h-5 w-5 text-emerald-600" />
+            <div>
+              <p className="font-medium text-emerald-900">Thanh toán đã xác nhận</p>
+              <p className="text-sm text-emerald-700">
+                Quyền Plus đã được server xác nhận và kích hoạt trên tài khoản của bạn.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      {checkoutReturnStatus === "failed" && (
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="flex items-center gap-3 p-4">
+            <Shield className="h-5 w-5 text-red-600" />
+            <div>
+              <p className="font-medium text-red-900">Không thể kiểm tra thanh toán</p>
+              <p className="text-sm text-red-700">
+                Vui lòng nhấn "Kiểm tra quyền" bên dưới hoặc thử lại sau.
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={pollServerEntitlement}>
+              Thử lại
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Current plan */}
       <Card className="flow-panel">
@@ -309,10 +414,45 @@ export function BillingPlan() {
                     </Button>
                   </div>
                 )}
-                {billingStatus.manageBillingReady && (
+                {(billingStatus.manageBillingReady || realMode) && (
                   <Button variant="outline" onClick={handleOpenPortal} disabled={isOpeningPortal}>
                     {isOpeningPortal ? "Đang mở…" : "Quản lý thanh toán"}
                   </Button>
+                )}
+                {realMode && !showCancelConfirm && (
+                  <Button
+                    variant="outline"
+                    className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                    onClick={() => setShowCancelConfirm(true)}
+                  >
+                    Hủy gói
+                  </Button>
+                )}
+                {showCancelConfirm && (
+                  <div className="w-full rounded-lg border border-red-200 bg-red-50 p-4">
+                    <p className="text-sm font-medium text-red-900">Bạn có chắc muốn hủy gói Plus?</p>
+                    <p className="mt-1 text-xs text-red-700">
+                      Bạn vẫn giữ quyền truy cập cho đến hết chu kỳ hiện tại. Sau đó gói sẽ chuyển về Free.
+                    </p>
+                    <div className="mt-3 flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={handleCancelSubscription}
+                        disabled={isCanceling}
+                      >
+                        {isCanceling ? "Đang hủy…" : "Xác nhận hủy"}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowCancelConfirm(false)}
+                        disabled={isCanceling}
+                      >
+                        Giữ gói
+                      </Button>
+                    </div>
+                  </div>
                 )}
               </>
             )}
@@ -327,7 +467,7 @@ export function BillingPlan() {
             <Shield className="h-5 w-5 text-emerald-600" />
             Quyền truy cập
           </CardTitle>
-          <CardDescription>Các quyền premium đang mở local trên trình duyệt này.</CardDescription>
+          <CardDescription>{realMode ? "Quyền premium được quản lý bởi server." : "Các quyền premium đang mở local trên trình duyệt này."}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -351,7 +491,7 @@ export function BillingPlan() {
                     <p className={`text-sm font-medium ${isActive ? "text-emerald-900" : "text-slate-600"}`}>
                       {getEntitlementLabel(key)}
                     </p>
-                    <p className="text-xs text-slate-500">{isActive ? "Đang mở local" : "Chưa mở local"}</p>
+                    <p className="text-xs text-slate-500">{isActive ? (realMode ? "Đang hoạt động" : "Đang mở local") : (realMode ? "Chưa kích hoạt" : "Chưa mở local")}</p>
                   </div>
                 </div>
               );

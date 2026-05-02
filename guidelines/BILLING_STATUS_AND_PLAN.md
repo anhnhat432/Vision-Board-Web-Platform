@@ -424,3 +424,304 @@ VITE_BILLING_PROVIDER_LABEL=Mock provider
 ```
 
 Do not claim real payment support yet. The current implementation is useful for validating paywall UX, entitlement UX, analytics, and upgrade intent before building the production billing backend.
+
+## Backend Billing Domain (Provider-Agnostic)
+
+Last updated: 2026-05-01
+
+### Status: PREPARE ONLY — No Real Provider Connected
+
+Backend billing domain models and service have been added to prepare for a future paid MVP transition. No real payment provider (Stripe, Paddle, VNPay, MoMo, PayOS) is integrated.
+
+### Files Added
+
+| File | Purpose |
+|---|---|
+| `backend/src/models/BillingSubscriptionModel.ts` | Mongoose model for provider-agnostic subscriptions with embedded entitlement grants |
+| `backend/src/models/BillingEventModel.ts` | Mongoose model for webhook/provider event idempotency log |
+| `backend/src/services/billingService.ts` | Pure service with repository interfaces, entitlement resolution, and provider event processing |
+| `backend/src/tests/billingService.test.ts` | 25 tests covering entitlement resolution, status transitions, idempotency, and user isolation |
+
+### Models
+
+#### BillingSubscription
+
+- `userId` (string, indexed) — Firebase UID
+- `planCode` ("FREE" | "PLUS") — no PRO for paid MVP
+- `status` ("trialing" | "active" | "past_due" | "canceled" | "incomplete" | "unpaid")
+- `provider` (string) — "none", "stripe", "paddle", etc.
+- `source` ("mock" | "manual" | "provider")
+- `providerCustomerId` (optional string)
+- `providerSubscriptionId` (optional string, unique sparse index)
+- `billingCycle` (optional: "monthly" | "quarterly" | "yearly" | "lifetime")
+- `currentPeriodStart` / `currentPeriodEnd` (optional dates)
+- `cancelAtPeriodEnd` (optional boolean)
+- `canceledAt` (optional date)
+- `entitlements` — embedded array of `{ key, grantedAt, expiresAt?, revokedAt? }`
+- `lastSyncedAt` (optional date)
+- `createdAt` / `updatedAt` (Mongoose timestamps)
+
+#### BillingEvent
+
+- `provider` (string)
+- `providerEventId` (string, unique compound index with provider)
+- `eventType` (string)
+- `userId` (optional string, indexed)
+- `status` ("received" | "processed" | "ignored" | "failed")
+- `payloadHash` (string — SHA-256, raw payload never stored)
+- `processedAt` (optional date)
+- `error` (optional string)
+- `createdAt` / `updatedAt` (Mongoose timestamps)
+
+### Service API
+
+```typescript
+class BillingService {
+  getCurrentEntitlementForUser(userId: string): Promise<UserEntitlementSnapshot>;
+  upsertSubscriptionFromProviderEvent(event: ProviderSubscriptionEvent): Promise<{ subscription, eventStatus, eventId }>;
+  createMockOrManualEntitlement(userId: string, planCode: BillingPlanCode, source: "mock" | "manual"): Promise<BillingSubscriptionEntity>;
+}
+```
+
+### Entitlement Resolution Rules
+
+1. No subscription → FREE, no keys.
+2. FREE plan → no keys regardless of status.
+3. PLUS + "active" or "trialing" → all 4 standard entitlement keys.
+4. PLUS + "past_due" / "canceled" / "incomplete" / "unpaid" → no keys.
+5. If explicit entitlement grants exist, filter by revocation and expiry.
+6. Entitlements resolved server-side; frontend localStorage becomes a cache.
+
+### Test Coverage (25 tests)
+
+- `resolveActiveEntitlementKeys` — null, FREE, active PLUS, trialing, canceled, past_due, incomplete, revoked grants, expired grants.
+- `getCurrentEntitlementForUser` — new user defaults FREE, active sub → PLUS keys, canceled → no keys, user isolation.
+- `upsertSubscriptionFromProviderEvent` — first event creates sub, duplicate event idempotent, cancel updates status, user isolation.
+- `createMockOrManualEntitlement` — mock PLUS, manual FREE, cross-user safety.
+- `billing status transitions` — all non-active statuses verified to deny entitlements.
+
+### Remaining Work for Provider Integration
+
+When the owner answers provider constraint questions (see `guidelines/PAID_MVP_PROVIDER_DECISION.md` Section 4):
+
+1. **Mongo repository**: Wire `BillingSubscriptionRepository` and `BillingEventRepository` interfaces to the Mongoose models.
+2. **Routes**: Add `POST /billing/checkout`, `POST /billing/webhook`, `POST /billing/portal`.
+3. **Provider adapter**: Implement provider-specific checkout/portal creation behind the repository interface.
+4. **Webhook handler**: Verify provider signature, parse event, call `upsertSubscriptionFromProviderEvent`.
+5. ~~**Frontend entitlement boot**: On login, fetch entitlements from backend instead of localStorage.~~ → **Done** (see below).
+6. **Disable local fallback**: In real billing mode, `upgradePlanLocally()` and `startTrialLocally()` must not unlock features.
+
+## Server-Authoritative Entitlement API
+
+Last updated: 2026-05-01
+
+### Endpoint
+
+`GET /api/billing/entitlement` — auth required.
+
+Response shape:
+
+```json
+{
+  "success": true,
+  "data": {
+    "planCode": "FREE" | "PLUS",
+    "status": "none" | "trialing" | "active" | "past_due" | "canceled" | "incomplete" | "unpaid",
+    "entitlements": ["premium_templates", ...],
+    "source": "default" | "mock" | "manual" | "provider",
+    "currentPeriodEnd": null,
+    "resolvedAt": "2026-05-01T03:28:00.000Z"
+  }
+}
+```
+
+No provider secrets exposed (no providerCustomerId, providerSubscriptionId, payloadHash).
+
+### Backend Files
+
+| File | Purpose |
+|---|---|
+| `backend/src/controllers/billingController.ts` | Controller for GET /api/billing/entitlement |
+| `backend/src/routes/billingRoutes.ts` | Route registration |
+| `backend/src/services/billingServiceInstance.ts` | Singleton BillingService with in-memory repos |
+| `backend/src/tests/billingRoutes.test.ts` | 6 route-level tests |
+
+### Frontend Client
+
+| File | Purpose |
+|---|---|
+| `src/lib/api/billingApi.ts` | `fetchServerEntitlement()`, `hasServerPremiumAccess()`, `hasServerEntitlement()` |
+
+### Demo vs Real Mode Behavior
+
+| Scenario | Behavior |
+|---|---|
+| **Demo mode** | `fetchServerEntitlement()` returns `null` immediately — no backend call. Local/mock entitlements from `localStorage` are used. |
+| **Real mode + authenticated** | Calls `GET /api/billing/entitlement`. Server response is the entitlement authority. |
+| **Real mode + backend failure** | Returns `null`. Caller must NOT unlock premium. Safe fallback = no premium access. |
+| **Real mode + unauthenticated** | API returns 401. Frontend returns `null`. No premium. |
+| **Mock checkout** | Unchanged. Demo mode still uses `mock_provider` with local upgrade. |
+
+### Test Coverage
+
+Backend (6 new route tests):
+- 401 unauthorized
+- New user → FREE, no entitlements
+- Active Plus user → PLUS, 4 entitlements
+- Canceled subscription → PLUS status but no active entitlements
+- Cross-user isolation
+- No provider secrets in response
+
+### Architecture Notes
+
+- Backend uses in-memory repositories for now. Switch to Mongo when `MongoSubscriptionRepository` is implemented.
+- Frontend `billingApi.ts` is a pure utility module — no React hooks. Consumers (hooks, pages) can call it and merge with local state as needed.
+- The API does not modify local state. It is read-only. State application (writing to localStorage) is left to the existing `applyBillingAccessPayload` flow.
+
+---
+
+## Provider-Agnostic Payment Adapter (Added 2026-05-01)
+
+### What Was Added
+
+1. **`PaymentProviderAdapter` interface** (`backend/src/services/paymentProviderAdapter.ts`)
+   - `createCheckoutSession` � create a checkout URL
+   - `verifyWebhookSignature` � validate webhook authenticity before parsing
+   - `parseWebhookEvent` � transform provider payload into `NormalizedProviderEvent`
+   - `mapSubscriptionStatus` � pure function mapping provider status to domain
+   - `createCustomerPortalSession` � optional self-service portal
+   - Error types: `PaymentProviderNotConfiguredError`, `PaymentProviderError`
+
+2. **Mock adapter** (`backend/src/services/mockPaymentAdapter.ts`)
+   - Implements full adapter interface without external API calls
+   - `createMockWebhookBody()` helper for test webhook simulation
+   - Safe for dev/test/demo
+
+3. **Provider registry** (`backend/src/services/paymentProviderRegistry.ts`)
+   - Resolves adapter from `BILLING_PROVIDER` env var
+   - Supported values: `mock` (default), `stripe`, `payos`, `momo`, `vnpay`
+   - Missing/unknown env falls back to mock (app never crashes)
+   - Placeholder adapter for unconfigured providers (all methods throw safe error)
+   - `isPaymentProviderReady()` � returns false for mock/placeholder
+
+4. **Tests** (`backend/src/tests/paymentProviderAdapter.test.ts`)
+   - 21 tests covering: mock checkout, webhook verify/parse, status mapping,
+     portal, entitlement gating (checkout alone does NOT unlock), registry
+     env resolution, placeholder safe errors, pure status mapping
+
+### Key Safety Rules
+
+- **Entitlement requires webhook**: `createCheckoutSession` alone does NOT grant entitlements. Only `BillingService.upsertSubscriptionFromProviderEvent` (called after webhook verification) unlocks features.
+- **No secrets in code**: All provider credentials from env vars.
+- **No crash on missing config**: Placeholder adapter returns safe errors.
+- **Mock is default**: Demo/local always works without any billing env.
+
+### Next Steps to Add a Real Provider
+
+1. Choose provider and set `BILLING_PROVIDER` env var.
+2. Create `backend/src/services/{provider}PaymentAdapter.ts` implementing `PaymentProviderAdapter`.
+3. Add provider-specific env validation in the adapter constructor.
+4. Add webhook endpoint route (`POST /api/billing/webhook/{provider}`).
+5. Wire adapter into registry switch statement.
+6. Add integration tests with provider test/sandbox keys.
+7. Do NOT remove mock adapter � keep for dev/test.
+
+---
+
+## Real Checkout Flow (Added 2026-05-01)
+
+### What Was Added
+
+1. **Backend endpoint: `POST /api/billing/checkout-session`** (`backend/src/controllers/billingController.ts`)
+   - Auth required (Firebase token)
+   - Validates: `planCode` allowlist (only PLUS), `returnUrl`/`cancelUrl` format and origin
+   - Calls `PaymentProviderAdapter.createCheckoutSession()`
+   - Returns: `{ checkoutSessionId, checkoutUrl, provider, expiresAt, currentEntitlement }`
+   - **Does NOT grant entitlement** � response includes `currentEntitlement` proving plan is still FREE
+   - Unconfigured provider returns 503 with `provider_not_configured` error code
+
+2. **Backend route** (`backend/src/routes/billingRoutes.ts`)
+   - `POST /api/billing/checkout-session` added alongside existing `GET /api/billing/entitlement`
+
+3. **Frontend: real checkout flow** (`src/app/utils/production/billingProvider.ts`)
+   - In `api_contract` mode with `VITE_API_BASE_URL` configured:
+     - Calls `POST /api/billing/checkout-session` via `apiClient`
+     - Returns `redirect_required` with `checkoutUrl` for provider redirect
+     - **Does NOT unlock entitlement from checkout response**
+   - If backend fails, falls back to legacy `BILLING_CHECKOUT_ENDPOINT` flow
+   - If offline, falls back to local checkout
+   - Demo mode: unchanged mock checkout behavior
+
+4. **Frontend: return URL handling** (`src/app/pages/BillingPlan.tsx`)
+   - When returning from checkout (`?status=success`) in real mode:
+     - Shows pending banner with spinner
+     - Polls `GET /api/billing/entitlement` via `syncEntitlementsWithProvider()`
+     - Only updates local state if server confirms PLUS
+     - Shows confirmed/failed banner with retry option
+   - **Return URL alone does NOT unlock premium** � server must confirm
+   - Clears URL params after processing to prevent re-trigger
+
+5. **Tests** (`backend/src/tests/billingRoutes.test.ts`)
+   - 7 new checkout-session tests: 401, invalid plan, FREE plan, missing URLs, session creation, entitlement NOT granted, unconfigured provider 503
+
+### Security Properties
+
+- Checkout session creation ? entitlement grant
+- Return URL ? entitlement grant
+- Only verified webhook event (via `BillingService.upsertSubscriptionFromProviderEvent`) grants entitlement
+- localStorage is never the authority for paid entitlements in real mode
+- Origin validation prevents returnUrl/cancelUrl pointing to external domains
+
+### Demo vs Real Mode Behavior
+
+| Action | Demo mode | Real mode |
+|--------|-----------|-----------|
+| Upgrade CTA | Mock checkout (local) | Backend checkout session ? provider redirect |
+| Entitlement source | localStorage | Server (`GET /api/billing/entitlement`) |
+| Return URL | N/A | Polls server, shows pending banner |
+| Mock checkout | Works normally | Skipped if API configured |
+
+---
+
+## Webhook Billing Endpoint (Added 2026-05-01)
+
+### What Was Added
+
+1. **Webhook controller** (`backend/src/controllers/webhookController.ts`)
+   - `POST /api/billing/webhook/:provider`
+   - Signature verification via `adapter.verifyWebhookSignature()` BEFORE any processing
+   - Event parsing via `adapter.parseWebhookEvent()`
+   - Idempotent processing via `BillingService.upsertSubscriptionFromProviderEvent()`
+   - Handles: checkout_completed, subscription_created, subscription_updated, subscription_canceled, subscription_expired, payment_succeeded, payment_failed
+   - `payment_failed` forces status to `past_due` � never grants entitlements
+   - `subscription_canceled`/`subscription_expired` forces status to `canceled`
+   - Unknown event types acknowledged with 200 (no processing, no retry)
+   - Missing `userId` acknowledged with 200 and ignored
+   - Non-active provider acknowledged with 200
+
+2. **Webhook routes** (`backend/src/routes/webhookRoutes.ts`)
+   - Mounted BEFORE `authMiddleware` in route chain
+   - Providers send webhooks directly � no Firebase auth required
+   - Signature verification is the security gate
+
+3. **Route mounting** (`backend/src/routes/index.ts`)
+   - `webhookRoutes` mounted after `healthRoutes`, before `authMiddleware`
+
+4. **Signature-checking mock adapter** (`backend/src/services/mockPaymentAdapter.ts`)
+   - `createMockPaymentAdapterWithSignature()` requires `X-Mock-Signature` header
+   - Used for testing signature rejection without a real provider
+
+5. **Tests** (`backend/src/tests/webhookRoutes.test.ts`)
+   - 11 tests: valid event, duplicate idempotent, cancel revokes entitlements, payment_failed no entitlements, unknown event acknowledged, no userId ignored, non-active provider, no auth needed, signature reject/accept/missing
+
+### Security Properties
+
+1. **Signature verification first**: `verifyWebhookSignature()` called BEFORE `parseWebhookEvent()`
+2. **No raw body logging**: Only safe metadata logged (provider, eventType, eventId, userId)
+3. **No raw body persistence**: Only SHA-256 `payloadHash` stored in BillingEvent
+4. **No auth bypass**: Webhook routes use signature verification instead of Firebase auth
+5. **No entitlement from checkout/return URL**: Only verified webhook events grant entitlements
+6. **payment_failed safety**: Forced to `past_due` status regardless of event payload
+7. **Idempotent**: Duplicate `providerEventId` returns 200 no-op
+8. **No provider SDK**: Uses adapter interface � provider logic isolated in adapters
+9. **Graceful unknown events**: Returns 200 to prevent provider retries on unhandled types

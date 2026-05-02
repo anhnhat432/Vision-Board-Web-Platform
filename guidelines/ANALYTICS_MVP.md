@@ -45,6 +45,7 @@ Analytics MVP records the public demo funnel and the 12-week execution loop with
 | `rescue_action_taken` | `12_week` | User acts on a rescue suggestion. | `kind`, `action`, `current_plan` |
 | `experiment_exposure` | `core_funnel` | User is assigned or exposed to an experiment variant. | `experiment_id`, `variant_id`, `context` |
 | `feedback_submitted` | `core_funnel` / `12_week` | User submits short public-demo feedback without login. | `source`, `context`, `rating`, `feedback_category`, `confusing_text_length`, `next_help_text_length`, `has_next_help_text` |
+| `sync_conflict_action` | `12_week` | User reviews or chooses a safe action when manual cloud sync detects local/cloud conflict. | `source`, `action`, `status`, `conflict_count`, `local_only_count`, `cloud_only_count`, `missing_client_id_count`, `unsupported_field_count`, `unresolved_local_mutation_count` |
 
 ## External Privacy Contract
 
@@ -53,6 +54,7 @@ Analytics MVP records the public demo funnel and the 12-week execution loop with
 - The wrapper also drops external string values that look like emails/account ids, contain newlines, or are long enough to look like free-form user text.
 - `goalId`, legacy event payloads, and richer debug metadata stay local-only through `trackAppEvent`.
 - `feedback_submitted` must never send raw feedback text externally. Raw public-demo feedback is stored only in the browser-local feedback store; external analytics receives rating/category/source/context and text lengths only.
+- `sync_conflict_action` must never send raw task titles, goal text, check-in notes, review text, client ids, Firebase UID, or backend ids externally. External analytics receives only action/status/count fields.
 
 ## Env
 

@@ -15,27 +15,45 @@ import {
 } from "lucide-react";
 import { useLocation, useNavigate, useOutlet } from "react-router";
 import { maybeShowBrowserReminderNotification, syncPendingOutbox } from "../utils/production";
-import { getUserData, initializeUserData, USER_DATA_UPDATED_EVENT_NAME } from "../utils/storage";
+import { exportUserDataSnapshot, getUserData, initializeUserData, trackAppEvent, USER_DATA_UPDATED_EVENT_NAME } from "../utils/storage";
 import {
   getNewUserGuideProgress,
   hasSeenNewUserGuide,
   isNewUserGuideDismissed,
   markNewUserGuideSeen,
 } from "../utils/new-user-guide";
-import { isDemoMode } from "../utils/app-mode";
+import { isDemoMode, shouldEnable12WeekImportDryRun, shouldEnable12WeekCloudImport } from "../utils/app-mode";
 import {
   getAnonymousLocalDataMigrationCandidate,
+  hasCompletedCloudImport,
   hasSkippedLocalDataMigrationPrompt,
   importAnonymousLocalDataToAccountScope,
+  markCloudImportCompleted,
   markLocalDataMigrationPromptSkipped,
   type LocalDataMigrationCandidate,
 } from "../utils/local-data-migration";
+import {
+  createTwelveWeekImportPayload,
+  type TwelveWeekImportPayload,
+} from "@/features/plan12week/persistence/twelveWeekImportPayload";
+import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
+import {
+  post12WeekImport,
+  post12WeekImportValidation,
+  type TwelveWeekImportRequest,
+  type TwelveWeekImportValidationReport,
+  type TwelveWeekImportValidationRequest,
+} from "@/services/syncService";
 import { BACKEND_PLAN_HYDRATION_EVENT_NAME, useBackendPlanHydration } from "../hooks/useBackendPlanHydration";
 import { useTheme } from "../hooks/useTheme";
 import { MotivationalReminder } from "./MotivationalReminder";
 import { NewUserGuideDialog } from "./NewUserGuide";
-import { LocalDataMigrationPrompt } from "./root-layout/LocalDataMigrationPrompt";
+import {
+  LocalDataMigrationPrompt,
+  type CloudImportDryRunResult,
+  type CloudImportResult,
+} from "./root-layout/LocalDataMigrationPrompt";
 import {
   buildAuthPath,
   getNavItemsForState,
@@ -49,6 +67,49 @@ import { WorkspaceLoadingGate } from "./root-layout/WorkspaceLoadingGate";
 import { buildLoginRedirect, isAuthProtectedPath, useWorkspaceGate } from "./root-layout/useWorkspaceGate";
 import { Button } from "./ui/button";
 import { Toaster } from "./ui/sonner";
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function isImportValidationReport(value: unknown): value is TwelveWeekImportValidationReport {
+  return (
+    isRecord(value) &&
+    (value.status === "valid" || value.status === "invalid") &&
+    value.mode === "validate_only" &&
+    value.dryRun === true &&
+    isRecord(value.acceptedEntityCounts) &&
+    Array.isArray(value.warnings) &&
+    Array.isArray(value.errors)
+  );
+}
+
+function getImportValidationReportFromError(error: unknown): TwelveWeekImportValidationReport | null {
+  if (!isRecord(error)) return null;
+
+  if (isImportValidationReport(error.details)) return error.details;
+  if (isRecord(error.details) && isImportValidationReport(error.details.details)) {
+    return error.details.details;
+  }
+
+  return null;
+}
+
+function getErrorMessage(error: unknown): string {
+  if (isRecord(error) && typeof error.message === "string" && error.message.trim()) {
+    return error.message;
+  }
+
+  return "Không thể kiểm tra cloud import lúc này.";
+}
+
+function createImportValidationRequestId(): string {
+  return `import_validate_${Date.now().toString(36)}`;
+}
+
+function createCloudImportId(): string {
+  return `cloud_import_${Date.now().toString(36)}`;
+}
 
 export function RootLayout() {
   const navigate = useNavigate();
@@ -472,11 +533,239 @@ export function RootLayout() {
     return result;
   }, [localDataMigrationCandidate, user?.uid]);
 
+  const cloudImportDryRunEnabled =
+    !demoMode && Boolean(user) && isApiBaseUrlConfigured() && shouldEnable12WeekImportDryRun();
+  const cloudImportDryRunUnavailableReason = demoMode
+    ? "Demo mode chỉ lưu local trên trình duyệt này, không gọi cloud import."
+    : !user
+      ? "Bạn cần đăng nhập trước khi kiểm tra cloud import."
+      : !isApiBaseUrlConfigured()
+        ? "Backend API chưa được cấu hình cho workspace này."
+        : !shouldEnable12WeekImportDryRun()
+          ? "Cloud import dry-run đang tắt bằng feature flag."
+          : undefined;
+
+  const handleValidateCloudImport = useCallback(async (): Promise<CloudImportDryRunResult> => {
+    if (demoMode) {
+      return {
+        status: "skipped",
+        message: "Demo mode chỉ lưu local trên trình duyệt này, không gọi cloud import.",
+      };
+    }
+
+    if (!user?.uid) {
+      return {
+        status: "skipped",
+        message: "Bạn cần đăng nhập trước khi kiểm tra cloud import.",
+      };
+    }
+
+    if (!isApiBaseUrlConfigured()) {
+      return {
+        status: "skipped",
+        message: "Backend API chưa được cấu hình cho workspace này.",
+      };
+    }
+
+    if (!shouldEnable12WeekImportDryRun()) {
+      return {
+        status: "skipped",
+        message: "Cloud import dry-run đang tắt bằng feature flag.",
+      };
+    }
+
+    const importPayloads = getUserData()
+      .goals.map(createTwelveWeekImportPayload)
+      .filter((payload): payload is TwelveWeekImportPayload => Boolean(payload));
+    if (importPayloads.length === 0) {
+      return {
+        status: "skipped",
+        message: "Account scope trên trình duyệt này chưa có dữ liệu 12 tuần để kiểm tra.",
+      };
+    }
+
+    const requestId = createImportValidationRequestId();
+    const request: TwelveWeekImportValidationRequest = {
+      requestId,
+      idempotencyKey: `account_scope_import_dry_run:${requestId}`,
+      source: "account_scope_import_dry_run",
+      mode: "validate_only",
+      workspace: {
+        goals: importPayloads,
+      },
+    };
+
+    try {
+      const report = await post12WeekImportValidation(request);
+      return {
+        status: report.status === "valid" ? "valid" : "invalid",
+        message:
+          report.status === "valid"
+            ? "Payload hợp lệ cho cloud import dry-run. Backend chưa ghi cloud data."
+            : "Backend báo payload chưa sẵn sàng cho cloud import.",
+        report,
+      };
+    } catch (error) {
+      const report = getImportValidationReportFromError(error);
+      if (report) {
+        return {
+          status: "invalid",
+          message: "Backend báo payload chưa sẵn sàng cho cloud import.",
+          report,
+        };
+      }
+
+      return {
+        status: "error",
+        message: getErrorMessage(error),
+      };
+    }
+  }, [demoMode, user?.uid]);
+
+  const cloudImportEnabled =
+    !demoMode && Boolean(user) && isApiBaseUrlConfigured() && shouldEnable12WeekCloudImport();
+  const cloudImportUnavailableReason = demoMode
+    ? "Demo mode chỉ lưu local trên trình duyệt này, không gọi cloud import."
+    : !user
+      ? "Bạn cần đăng nhập trước khi import cloud."
+      : !isApiBaseUrlConfigured()
+        ? "Backend API chưa được cấu hình cho workspace này."
+        : !shouldEnable12WeekCloudImport()
+          ? "Cloud import chưa được bật bằng feature flag."
+          : undefined;
+  const cloudImportAlreadyCompleted = Boolean(
+    user?.uid && localDataMigrationCandidate && hasCompletedCloudImport(user.uid, localDataMigrationCandidate.fingerprint),
+  );
+
+  const handleCloudImport = useCallback(async (): Promise<CloudImportResult> => {
+    if (demoMode) {
+      return {
+        status: "skipped",
+        message: "Demo mode chỉ lưu local trên trình duyệt này, không gọi cloud import.",
+      };
+    }
+
+    if (!user?.uid) {
+      return {
+        status: "skipped",
+        message: "Bạn cần đăng nhập trước khi import cloud.",
+      };
+    }
+
+    if (!isApiBaseUrlConfigured()) {
+      return {
+        status: "skipped",
+        message: "Backend API chưa được cấu hình cho workspace này.",
+      };
+    }
+
+    if (!shouldEnable12WeekCloudImport()) {
+      return {
+        status: "skipped",
+        message: "Cloud import chưa được bật bằng feature flag.",
+      };
+    }
+
+    const importPayloads = getUserData()
+      .goals.map(createTwelveWeekImportPayload)
+      .filter((payload): payload is TwelveWeekImportPayload => Boolean(payload));
+    if (importPayloads.length === 0) {
+      return {
+        status: "skipped",
+        message: "Account scope trên trình duyệt này chưa có dữ liệu 12 tuần để import.",
+      };
+    }
+
+    // Safe analytics: only counts, no raw text
+    trackAppEvent("cloud_import_started", undefined, {
+      goalCount: String(importPayloads.length),
+      source: "local_data_migration_prompt",
+    });
+
+    const importId = createCloudImportId();
+    const request: TwelveWeekImportRequest = {
+      importId,
+      idempotencyKey: `account_scope_cloud_import:${importId}`,
+      source: "account_scope_cloud_import",
+      workspace: {
+        goals: importPayloads,
+      },
+    };
+
+    try {
+      const response = await post12WeekImport(request);
+      const succeeded = response.status === "applied" || response.status === "duplicate";
+
+      if (succeeded && localDataMigrationCandidate) {
+        markCloudImportCompleted(user.uid, localDataMigrationCandidate.fingerprint);
+      }
+
+      // Safe analytics: only status, no raw text
+      trackAppEvent(
+        succeeded ? "cloud_import_succeeded" : "cloud_import_partial",
+        undefined,
+        {
+          status: response.status,
+          importId,
+        },
+      );
+
+      return {
+        status: response.status,
+        message:
+          response.status === "applied"
+            ? "Dữ liệu đã được import lên cloud thành công."
+            : response.status === "duplicate"
+              ? "Dữ liệu này đã được import lên cloud trước đó."
+              : response.status === "partial"
+                ? "Import thành công một phần. Một số mục có thể chưa được ghi cloud."
+                : response.message || "Import thất bại.",
+        response,
+      };
+    } catch (error) {
+      // Safe analytics: only error code, no raw text
+      trackAppEvent("cloud_import_failed", undefined, {
+        errorCode: isRecord(error) && typeof error.errorCode === "string" ? error.errorCode : "unknown",
+        importId,
+      });
+
+      return {
+        status: "error",
+        message: isRecord(error) && typeof error.message === "string" && error.message.trim()
+          ? error.message
+          : "Không thể import cloud lúc này. Dữ liệu local vẫn an toàn.",
+      };
+    }
+  }, [demoMode, localDataMigrationCandidate, user?.uid]);
+
+  const handleExportBackup = useCallback(() => {
+    try {
+      const backupJson = exportUserDataSnapshot();
+      const blob = new Blob([backupJson], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `visionboard-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // best-effort backup
+    }
+  }, []);
+
   const localDataMigrationPrompt = (
     <LocalDataMigrationPrompt
       candidate={localDataMigrationCandidate}
       open={Boolean(localDataMigrationCandidate && isLocalDataMigrationPromptOpen)}
       onImport={handleImportLocalDataMigration}
+      onValidateCloudImport={handleValidateCloudImport}
+      onCloudImport={handleCloudImport}
+      cloudImportDryRunEnabled={cloudImportDryRunEnabled}
+      cloudImportEnabled={cloudImportEnabled}
+      cloudImportUnavailableReason={cloudImportUnavailableReason}
+      cloudImportDryRunUnavailableReason={cloudImportDryRunUnavailableReason}
+      cloudImportAlreadyCompleted={cloudImportAlreadyCompleted}
+      onExportBackup={handleExportBackup}
       onSkip={handleSkipLocalDataMigration}
     />
   );

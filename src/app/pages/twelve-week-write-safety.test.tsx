@@ -137,6 +137,85 @@ describe("12-week write-path safety", () => {
     }
   });
 
+  it("keeps local daily check-in saved when queue persistence fails", async () => {
+    const { goalId } = seedTwelveWeekGoal();
+
+    renderAppRoute("/12-week-system");
+    const user = userEvent.setup();
+    const noteInput = await screen.findByRole("textbox", { name: /note/i });
+    const originalSetItem = Storage.prototype.setItem;
+    const setItemSpy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(function (
+      this: Storage,
+      key: string,
+      value: string,
+    ) {
+      if (key.startsWith("visionboard_data_mutation_queue")) {
+        throw new Error("queue write failed");
+      }
+      return originalSetItem.call(this, key, value);
+    });
+
+    try {
+      await user.type(noteInput, "Check-in still saves locally.");
+      await user.click(screen.getByRole("button", { name: /check-in/i }));
+
+      await waitFor(() => {
+        expect(readGoal(goalId).twelveWeekSystem?.dailyCheckIns[0]?.optionalNote).toBe(
+          "Check-in still saves locally.",
+        );
+      });
+
+      expect(syncDailyCheckInMock).toHaveBeenCalledTimes(1);
+      expect(listStoredPendingMutations(null)).toEqual([]);
+    } finally {
+      setItemSpy.mockRestore();
+    }
+  });
+
+  it("keeps local weekly review and reflection saved when queue persistence fails", async () => {
+    const { goalId } = seedTwelveWeekGoal();
+
+    renderAppRoute("/12-week-system");
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("tab", { name: "Tuần" }));
+    const [bestInput, obstacleInput, priorityInput] = await screen.findAllByRole("textbox");
+    await user.type(bestInput, "Weekly review still saves locally.");
+    await user.type(obstacleInput, "Queue storage is full.");
+    await user.type(priorityInput, "Keep the local review.");
+
+    const originalSetItem = Storage.prototype.setItem;
+    const setItemSpy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(function (
+      this: Storage,
+      key: string,
+      value: string,
+    ) {
+      if (key.startsWith("visionboard_data_mutation_queue")) {
+        throw new Error("queue write failed");
+      }
+      return originalSetItem.call(this, key, value);
+    });
+
+    try {
+      await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
+
+      await waitFor(() => {
+        expect(syncWeeklyReviewMock).toHaveBeenCalledTimes(1);
+      });
+
+      const system = readGoal(goalId).twelveWeekSystem;
+      const data = getUserData();
+      const reflection = data.reflections.find(
+        (item) => item.entryType === "weekly-review" && item.linkedGoalId === goalId,
+      );
+
+      expect(system?.weeklyReviews[0]?.biggestOutputThisWeek).toBe("Weekly review still saves locally.");
+      expect(reflection?.content).toContain("Weekly review still saves locally.");
+      expect(listStoredPendingMutations(null)).toEqual([]);
+    } finally {
+      setItemSpy.mockRestore();
+    }
+  });
+
   it("keeps lag metric, weekly review, and scoreboard metric aligned before weekly-review sync", async () => {
     const { goalId } = seedTwelveWeekGoal();
 

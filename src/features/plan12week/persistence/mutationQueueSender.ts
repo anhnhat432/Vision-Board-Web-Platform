@@ -7,6 +7,7 @@ import {
   type TwelveWeekMutationResult,
 } from "@/services/syncService";
 import {
+  compactMutations,
   listPendingMutations,
   markMutationFailed,
   markMutationInFlight,
@@ -188,7 +189,11 @@ export async function sendPending12WeekMutations(
   if (!apiConfigured) return createSkippedResult("api_not_configured");
   if (!online) return createSkippedResult("offline");
 
-  const store = readMutationQueueStore(ownerUid, { storage: options.storage, now });
+  const rawStore = readMutationQueueStore(ownerUid, { storage: options.storage, now });
+  const store = compactMutations(rawStore, { now });
+  if (store.items.length !== rawStore.items.length) {
+    writeMutationQueueStore(store, { storage: options.storage });
+  }
   const pendingMutations = listPendingMutations(store, { ownerUid, now }).slice(0, options.batchSize ?? DEFAULT_BATCH_SIZE);
   if (pendingMutations.length === 0) return createSkippedResult("empty");
 
