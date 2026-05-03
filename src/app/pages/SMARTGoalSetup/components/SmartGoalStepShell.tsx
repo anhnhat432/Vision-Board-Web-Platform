@@ -71,13 +71,22 @@ export function SmartGoalStepShell({
       transition={{ duration: 0.3 }}
       className="space-y-6"
     >
-      <div className="flow-muted p-5 sm:p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">{step.label}</p>
-        <h2 ref={headingRef} tabIndex={-1} className="mt-3 text-3xl font-bold text-slate-900 focus:outline-none">
+      <div className="flow-muted p-4 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">{step.label}</p>
+          <span className="text-xs font-medium text-slate-500">
+            Bước {stepIndex + 1}/{totalSteps}
+          </span>
+        </div>
+        <h2
+          ref={headingRef}
+          tabIndex={-1}
+          className="mt-2 text-2xl font-bold leading-tight text-slate-900 focus:outline-none sm:mt-3 sm:text-3xl"
+        >
           {step.title}
         </h2>
-        <p className="mt-3 text-base leading-7 text-slate-600">{step.description}</p>
-        <div className="flow-panel mt-4 px-4 py-3 text-sm text-slate-600">{step.coaching}</div>
+        <p className="mt-2 text-sm leading-6 text-slate-600 sm:mt-3 sm:text-base sm:leading-7">{step.description}</p>
+        <div className="flow-panel mt-3 px-4 py-3 text-sm text-slate-600 sm:mt-4">{step.coaching}</div>
       </div>
 
       {children}
