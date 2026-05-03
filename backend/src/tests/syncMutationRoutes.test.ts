@@ -12,6 +12,8 @@ import {
   type AppliedTaskMutationEntity,
   type AppliedWorkspaceMutationEntity,
   type DailyCheckInUpsertApplyInput,
+  type LeadMetricUpsertApplyInput,
+  type PlanSnapshotUpdatedApplyInput,
   type SyncMutationBatchResult,
   type SyncTaskMutationRepository,
   type SyncWorkspaceMutationRepository,
@@ -196,6 +198,17 @@ interface TestWeekRef {
   clientPlanId: string;
   clientWeekId: string;
   weekNumber: number;
+  focus?: string;
+  expectedOutput?: string;
+  revision?: number;
+}
+
+interface TestPlanSnapshotRecord extends AppliedWorkspaceMutationEntity {
+  userId: string;
+  clientPlanId: string;
+  clientGoalId?: string;
+  vision: string;
+  startDate: string;
 }
 
 interface TestDailyCheckInRecord extends AppliedWorkspaceMutationEntity {
@@ -226,8 +239,28 @@ interface TestWeeklyReviewRecord extends AppliedWorkspaceMutationEntity {
   reviewCompleted?: boolean;
 }
 
+interface TestLeadMetricRecord extends AppliedWorkspaceMutationEntity {
+  userId: string;
+  clientPlanId: string;
+  clientWeekId?: string;
+  clientMetricId: string;
+  leadIndicatorId?: string;
+  weekNumber: number;
+  name: string;
+  weeklyTarget?: number;
+  target?: string;
+  currentValue?: number;
+  unit?: string;
+  type?: string;
+  priority?: number;
+  schedule?: number[];
+  weeklyReviewMarker?: string;
+}
+
 function createSyncWorkspaceMutationRepository() {
+  const plans = new Map<string, TestPlanSnapshotRecord>();
   const weeks = new Map<string, TestWeekRef>();
+  const leadMetrics = new Map<string, TestLeadMetricRecord>();
   const dailyCheckIns = new Map<string, TestDailyCheckInRecord>();
   const weeklyReviews = new Map<string, TestWeeklyReviewRecord>();
   let sequence = 0;
@@ -241,12 +274,24 @@ function createSyncWorkspaceMutationRepository() {
     return `${userId}:${clientPlanId}:week:${weekNumber}`;
   }
 
+  function planKey(userId: string, clientPlanId: string): string {
+    return `${userId}:${clientPlanId}`;
+  }
+
   function dailyKey(userId: string, clientPlanId: string, localDate: string): string {
     return `${userId}:${clientPlanId}:${localDate}`;
   }
 
   function reviewKey(userId: string, clientPlanId: string, weekNumber: number): string {
     return `${userId}:${clientPlanId}:${weekNumber}`;
+  }
+
+  function metricKey(userId: string, clientPlanId: string, clientMetricId: string): string {
+    return `${userId}:${clientPlanId}:${clientMetricId}`;
+  }
+
+  function seedPlan(plan: TestPlanSnapshotRecord): void {
+    plans.set(planKey(plan.userId, plan.clientPlanId), { ...plan });
   }
 
   function seedWeek(week: TestWeekRef): void {
@@ -273,7 +318,98 @@ function createSyncWorkspaceMutationRepository() {
     return review ? { ...review } : undefined;
   }
 
+  function getLeadMetric(userId: string, clientPlanId: string, clientMetricId: string): TestLeadMetricRecord | undefined {
+    const metric = leadMetrics.get(metricKey(userId, clientPlanId, clientMetricId));
+    return metric ? { ...metric, schedule: metric.schedule ? [...metric.schedule] : undefined } : undefined;
+  }
+
+  function getPlan(userId: string, clientPlanId: string): TestPlanSnapshotRecord | undefined {
+    const plan = plans.get(planKey(userId, clientPlanId));
+    return plan ? { ...plan } : undefined;
+  }
+
+  function getWeek(userId: string, clientPlanId: string, weekNumber: number): TestWeekRef | undefined {
+    const week = weeks.get(weekKey(userId, clientPlanId, weekNumber));
+    return week ? { ...week } : undefined;
+  }
+
   const repository: SyncWorkspaceMutationRepository = {
+    async applyPlanSnapshotUpdated(
+      userId: string,
+      input: PlanSnapshotUpdatedApplyInput,
+    ): Promise<AppliedWorkspaceMutationEntity | null> {
+      const key = planKey(userId, input.clientPlanId);
+      const existing = plans.get(key);
+      if (!existing) return null;
+
+      const nextPlan: TestPlanSnapshotRecord = {
+        ...existing,
+        clientGoalId: input.clientGoalId ?? existing.clientGoalId,
+        vision: input.vision ?? existing.vision,
+        startDate: input.startDate?.toISOString().slice(0, 10) ?? existing.startDate,
+        revision: (existing.revision ?? 0) + 1,
+        syncUpdatedAt: input.syncUpdatedAt,
+      };
+      plans.set(key, nextPlan);
+
+      input.weeks.forEach((weekUpdate) => {
+        const week = weeks.get(weekKey(userId, input.clientPlanId, weekUpdate.weekNumber));
+        if (!week) return;
+        if (weekUpdate.clientWeekId && week.clientWeekId !== weekUpdate.clientWeekId) return;
+        weeks.set(weekKey(userId, input.clientPlanId, weekUpdate.weekNumber), {
+          ...week,
+          focus: weekUpdate.focus ?? week.focus,
+          expectedOutput: weekUpdate.expectedOutput ?? week.expectedOutput,
+          revision: (week.revision ?? 0) + 1,
+        });
+      });
+
+      return {
+        id: nextPlan.id,
+        clientId: nextPlan.clientPlanId,
+        revision: nextPlan.revision,
+        syncUpdatedAt: nextPlan.syncUpdatedAt,
+      };
+    },
+    async applyLeadMetricUpserted(
+      userId: string,
+      input: LeadMetricUpsertApplyInput,
+    ): Promise<AppliedWorkspaceMutationEntity | null> {
+      const week = findWeek(userId, input);
+      if (!week) return null;
+
+      const key = metricKey(userId, input.clientPlanId, input.clientMetricId);
+      const existing = leadMetrics.get(key);
+      const nextRecord: TestLeadMetricRecord = {
+        id: existing?.id ?? nextId("leadMetric"),
+        userId,
+        clientId: input.clientMetricId,
+        clientPlanId: input.clientPlanId,
+        clientWeekId: week.clientWeekId,
+        clientMetricId: input.clientMetricId,
+        leadIndicatorId: input.leadIndicatorId,
+        weekNumber: input.weekNumber,
+        name: input.name,
+        weeklyTarget: input.weeklyTarget,
+        target: input.target,
+        currentValue: input.currentValue,
+        unit: input.unit,
+        type: input.type,
+        priority: input.priority,
+        schedule: input.schedule ? [...input.schedule] : undefined,
+        weeklyReviewMarker: existing?.weeklyReviewMarker,
+        revision: (existing?.revision ?? 0) + 1,
+        syncUpdatedAt: input.syncUpdatedAt,
+      };
+      leadMetrics.set(key, nextRecord);
+
+      return {
+        id: nextRecord.id,
+        clientId: nextRecord.clientId,
+        revision: nextRecord.revision,
+        syncUpdatedAt: nextRecord.syncUpdatedAt,
+      };
+    },
     async applyDailyCheckInUpserted(
       userId: string,
       input: DailyCheckInUpsertApplyInput,
@@ -346,6 +482,24 @@ function createSyncWorkspaceMutationRepository() {
     },
   };
 
+  seedPlan({
+    id: "plan_owner_1",
+    userId: ownerUserId,
+    clientPlanId: "goal_local_1:12-week-system",
+    clientGoalId: "goal_local_1",
+    vision: "Original backend vision",
+    startDate: "2026-04-30",
+    revision: 1,
+  });
+  seedPlan({
+    id: "plan_other_1",
+    userId: otherUserId,
+    clientPlanId: "goal_local_1:12-week-system",
+    clientGoalId: "goal_local_1",
+    vision: "Other user's backend vision",
+    startDate: "2026-04-30",
+    revision: 1,
+  });
   seedWeek({
     userId: ownerUserId,
     planId: "plan_owner_1",
@@ -353,6 +507,9 @@ function createSyncWorkspaceMutationRepository() {
     clientPlanId: "goal_local_1:12-week-system",
     clientWeekId: "goal_local_1:week:1",
     weekNumber: 1,
+    focus: "Original week focus",
+    expectedOutput: "Original expected output",
+    revision: 1,
   });
   seedWeek({
     userId: otherUserId,
@@ -361,6 +518,9 @@ function createSyncWorkspaceMutationRepository() {
     clientPlanId: "goal_local_1:12-week-system",
     clientWeekId: "goal_local_1:week:1",
     weekNumber: 1,
+    focus: "Other user focus",
+    expectedOutput: "Other user expected output",
+    revision: 1,
   });
   seedWeek({
     userId: otherUserId,
@@ -371,7 +531,7 @@ function createSyncWorkspaceMutationRepository() {
     weekNumber: 1,
   });
 
-  return { repository, getDailyCheckIn, getWeeklyReview };
+  return { repository, getDailyCheckIn, getWeeklyReview, getLeadMetric, getPlan, getWeek };
 }
 
 function createTwelveWeekImportRepository(): TwelveWeekImportRepository {
@@ -804,6 +964,115 @@ function createWeeklyReviewMutation(
   };
 }
 
+function createLeadMetricMutation(
+  mutationId = "dmq_metric_1",
+  input: {
+    clientPlanId?: string;
+    clientWeekId?: string;
+    clientMetricId?: string;
+    weekNumber?: number;
+    name?: string;
+    weeklyTarget?: number;
+    currentValue?: number;
+    unsupportedWeeklyReviewMarker?: string;
+  } = {},
+): TestMutationRequestBody {
+  const clientPlanId = input.clientPlanId ?? "goal_local_1:12-week-system";
+  const clientWeekId = input.clientWeekId ?? "goal_local_1:week:1";
+  const clientMetricId = input.clientMetricId ?? "goal_local_1:week:1:metric:lead_demo_feedback";
+  const weekNumber = input.weekNumber ?? 1;
+
+  return {
+    batchId: "batch_metric_1",
+    clientGeneratedAt: "2026-04-30T00:00:00.000Z",
+    mutations: [
+      {
+        mutationId,
+        type: "lead_metric_upserted",
+        clientTimestamp: "2026-04-30T00:00:01.000Z",
+        entity: {
+          clientGoalId: "goal_local_1",
+          clientPlanId,
+          clientWeekId,
+          clientMetricId,
+        },
+        payload: {
+          reason: "manual_update",
+          clientPlanId,
+          clientWeekId,
+          clientMetricId,
+          leadIndicatorId: "lead_demo_feedback",
+          weekNumber,
+          name: input.name ?? "Demo feedback",
+          weeklyTarget: input.weeklyTarget ?? 5,
+          target: String(input.weeklyTarget ?? 5),
+          unit: "responses/week",
+          type: "core",
+          priority: 1,
+          schedule: [1, 3, 5],
+          currentValue: input.currentValue ?? 2,
+          weeklyReviewMarker: input.unsupportedWeeklyReviewMarker,
+        },
+      },
+    ],
+  };
+}
+
+function createPlanSnapshotMutation(
+  mutationId = "dmq_plan_snapshot_1",
+  input: {
+    clientPlanId?: string;
+    clientGoalId?: string;
+    vision?: string;
+    startDate?: string;
+    weekFocus?: string;
+    expectedOutput?: string;
+  } = {},
+): TestMutationRequestBody {
+  const clientGoalId = input.clientGoalId ?? "goal_local_1";
+  const clientPlanId = input.clientPlanId ?? "goal_local_1:12-week-system";
+
+  return {
+    batchId: "batch_snapshot_1",
+    clientGeneratedAt: "2026-04-30T00:00:00.000Z",
+    mutations: [
+      {
+        mutationId,
+        type: "plan_snapshot_updated",
+        clientTimestamp: "2026-04-30T00:00:01.000Z",
+        entity: {
+          clientGoalId,
+          clientPlanId,
+        },
+        payload: {
+          reason: "manual_update",
+          clientGoalId,
+          clientPlanId,
+          changedAt: "2026-04-30T00:00:01.000Z",
+          clientUpdatedAt: "2026-04-30T00:00:01.000Z",
+          system: {
+            vision12Week: input.vision ?? "Updated backend vision",
+            startDate: input.startDate ?? "2026-05-04",
+            status: "active",
+            currentWeek: 1,
+            totalWeeks: 12,
+            weeklyPlans: [
+              {
+                clientWeekId: "goal_local_1:week:1",
+                weekNumber: 1,
+                phaseName: "Start",
+                focus: input.weekFocus ?? "Updated focus",
+                milestone: input.expectedOutput ?? "Updated expected output",
+                completed: false,
+              },
+            ],
+          },
+        },
+      },
+    ],
+  };
+}
+
 function createValidImportPayload(idempotencyKey = "import_validate_test_1") {
   return {
     idempotencyKey,
@@ -1150,7 +1419,7 @@ describe("12-week sync mutation route", () => {
         mutations: [
           {
             mutationId: "dmq_unsupported_allowed_1",
-            type: "plan_snapshot_updated",
+            type: "plan_snapshot_upsert",
             clientTimestamp: "2026-04-30T00:00:01.000Z",
             payload: {
               clientPlanId: "goal_local_1:12-week-system",
@@ -1247,6 +1516,219 @@ describe("12-week sync mutation route", () => {
     assert.equal(second.status, 200);
     assert.equal(review?.nextWeekPriority, "Run three tests");
     assert.equal(review?.revision, 2);
+  });
+
+  it("applies and upserts lead_metric_upserted by owned plan, week, and client metric", async () => {
+    const app = createRouteTestApp();
+
+    const first = await requestJson(app, "POST", "/api/sync/12-week/mutations", {
+      body: createLeadMetricMutation("dmq_metric_create_1", { weeklyTarget: 5, currentValue: 2 }),
+    });
+    const second = await requestJson(app, "POST", "/api/sync/12-week/mutations", {
+      body: createLeadMetricMutation("dmq_metric_update_1", { weeklyTarget: 7, currentValue: 4 }),
+    });
+    const data = getBatchResult(second);
+    const metric = syncWorkspaceFixture?.getLeadMetric(
+      ownerUserId,
+      "goal_local_1:12-week-system",
+      "goal_local_1:week:1:metric:lead_demo_feedback",
+    );
+
+    assert.equal(first.status, 200);
+    assert.equal(second.status, 200);
+    assert.equal(data.status, "applied");
+    assert.equal(data.appliedCount, 1);
+    assert.equal(data.accepted[0].entityType, "lead_metric");
+    assert.equal(metric?.name, "Demo feedback");
+    assert.equal(metric?.weeklyTarget, 7);
+    assert.equal(metric?.target, "7");
+    assert.equal(metric?.currentValue, 4);
+    assert.equal(metric?.unit, "responses/week");
+    assert.equal(metric?.type, "core");
+    assert.deepEqual(metric?.schedule, [1, 3, 5]);
+    assert.equal(metric?.revision, 2);
+  });
+
+  it("returns duplicate for repeated lead_metric_upserted without applying twice", async () => {
+    const app = createRouteTestApp();
+    const payload = createLeadMetricMutation("dmq_metric_duplicate_1", { currentValue: 3 });
+
+    const first = await requestJson(app, "POST", "/api/sync/12-week/mutations", { body: payload });
+    const second = await requestJson(app, "POST", "/api/sync/12-week/mutations", { body: payload });
+    const secondData = getBatchResult(second);
+    const metric = syncWorkspaceFixture?.getLeadMetric(
+      ownerUserId,
+      "goal_local_1:12-week-system",
+      "goal_local_1:week:1:metric:lead_demo_feedback",
+    );
+
+    assert.equal(first.status, 200);
+    assert.equal(second.status, 200);
+    assert.equal(secondData.status, "duplicate");
+    assert.equal(secondData.duplicate.length, 1);
+    assert.equal(metric?.revision, 1);
+  });
+
+  it("returns 400 for invalid lead_metric_upserted payloads", async () => {
+    const invalidMissingMetricId = createLeadMetricMutation("dmq_metric_invalid_1");
+    delete invalidMissingMetricId.mutations[0].payload.clientMetricId;
+    if (invalidMissingMetricId.mutations[0].entity) {
+      delete invalidMissingMetricId.mutations[0].entity.clientMetricId;
+    }
+
+    const invalid = await requestJson(createRouteTestApp(), "POST", "/api/sync/12-week/mutations", {
+      body: invalidMissingMetricId,
+    });
+
+    assert.equal(invalid.status, 400);
+    assert.match(invalid.body.message ?? "", /clientMetricId/i);
+  });
+
+  it("blocks cross-user lead_metric_upserted parents", async () => {
+    const response = await requestJson(createRouteTestApp(), "POST", "/api/sync/12-week/mutations", {
+      body: createLeadMetricMutation("dmq_metric_cross_user_1", {
+        clientPlanId: "other_goal:12-week-system",
+        clientWeekId: "other_goal:week:1",
+        clientMetricId: "other_goal:week:1:metric:lead_demo_feedback",
+      }),
+      token: "owner-token",
+    });
+    const data = getBatchResult(response);
+
+    assert.equal(response.status, 200);
+    assert.equal(data.status, "failed");
+    assert.equal(data.failed[0].status, "failed_not_found");
+    assert.equal(data.failed[0].reason, "week_not_found_or_not_owned");
+    assert.equal(data.failed[0].syncErrorCode, "ownership_denied");
+  });
+
+  it("ignores unsupported lead_metric_upserted fields without touching weekly review data", async () => {
+    const app = createRouteTestApp();
+
+    const reviewResponse = await requestJson(app, "POST", "/api/sync/12-week/mutations", {
+      body: createWeeklyReviewMutation("dmq_metric_guard_review_1", { nextWeekPriority: "Keep review data" }),
+    });
+    const metricResponse = await requestJson(app, "POST", "/api/sync/12-week/mutations", {
+      body: createLeadMetricMutation("dmq_metric_unsupported_1", {
+        unsupportedWeeklyReviewMarker: "unsafe review overwrite",
+      }),
+    });
+    const review = syncWorkspaceFixture?.getWeeklyReview(ownerUserId, "goal_local_1:12-week-system", 1);
+    const metric = syncWorkspaceFixture?.getLeadMetric(
+      ownerUserId,
+      "goal_local_1:12-week-system",
+      "goal_local_1:week:1:metric:lead_demo_feedback",
+    );
+
+    assert.equal(reviewResponse.status, 200);
+    assert.equal(metricResponse.status, 200);
+    assert.equal(review?.nextWeekPriority, "Keep review data");
+    assert.equal(metric?.weeklyReviewMarker, undefined);
+  });
+
+  it("applies plan_snapshot_updated allowed plan and week fields", async () => {
+    const response = await requestJson(createRouteTestApp(), "POST", "/api/sync/12-week/mutations", {
+      body: createPlanSnapshotMutation("dmq_snapshot_apply_1", {
+        vision: "A narrower updated 12-week vision",
+        startDate: "2026-05-04",
+        weekFocus: "Validate the updated plan",
+        expectedOutput: "Updated demo notes",
+      }),
+    });
+    const data = getBatchResult(response);
+    const plan = syncWorkspaceFixture?.getPlan(ownerUserId, "goal_local_1:12-week-system");
+    const week = syncWorkspaceFixture?.getWeek(ownerUserId, "goal_local_1:12-week-system", 1);
+
+    assert.equal(response.status, 200);
+    assert.equal(data.status, "applied");
+    assert.equal(data.appliedCount, 1);
+    assert.equal(data.accepted[0].entityType, "plan");
+    assert.equal(data.accepted[0].clientId, "goal_local_1:12-week-system");
+    assert.equal(plan?.vision, "A narrower updated 12-week vision");
+    assert.equal(plan?.startDate, "2026-05-04");
+    assert.equal(plan?.revision, 2);
+    assert.equal(week?.focus, "Validate the updated plan");
+    assert.equal(week?.expectedOutput, "Updated demo notes");
+    assert.equal(week?.revision, 2);
+  });
+
+  it("does not overwrite task completion from plan_snapshot_updated payloads", async () => {
+    const app = createRouteTestApp();
+    const taskMutation = createValidMutation("dmq_snapshot_task_guard_1");
+    const snapshotMutation = createPlanSnapshotMutation("dmq_snapshot_task_guard_2");
+    const snapshotSystem = snapshotMutation.mutations[0].payload.system as Record<string, unknown>;
+    snapshotMutation.mutations[0].payload.system = {
+      ...snapshotSystem,
+      taskInstances: [
+        {
+          id: "task_local_1",
+          completed: false,
+          completedAt: undefined,
+        },
+      ],
+    };
+
+    const completed = await requestJson(app, "POST", "/api/sync/12-week/mutations", {
+      body: taskMutation,
+    });
+    const snapshot = await requestJson(app, "POST", "/api/sync/12-week/mutations", {
+      body: snapshotMutation,
+    });
+    const task = syncTaskFixture?.getTask("64f000000000000000000001");
+
+    assert.equal(completed.status, 200);
+    assert.equal(snapshot.status, 200);
+    assert.equal(task?.status, "done");
+    assert.equal(task?.completedAt?.toISOString(), "2026-04-30T00:00:02.000Z");
+  });
+
+  it("returns duplicate for repeated plan_snapshot_updated without applying twice", async () => {
+    const app = createRouteTestApp();
+    const payload = createPlanSnapshotMutation("dmq_snapshot_duplicate_1", {
+      vision: "One snapshot apply only",
+    });
+
+    const first = await requestJson(app, "POST", "/api/sync/12-week/mutations", { body: payload });
+    const second = await requestJson(app, "POST", "/api/sync/12-week/mutations", { body: payload });
+    const secondData = getBatchResult(second);
+    const plan = syncWorkspaceFixture?.getPlan(ownerUserId, "goal_local_1:12-week-system");
+
+    assert.equal(first.status, 200);
+    assert.equal(second.status, 200);
+    assert.equal(secondData.status, "duplicate");
+    assert.equal(secondData.duplicate.length, 1);
+    assert.equal(plan?.revision, 2);
+  });
+
+  it("returns 409 when a plan_snapshot_updated mutationId is reused with different payload", async () => {
+    const app = createRouteTestApp();
+    const firstPayload = createPlanSnapshotMutation("dmq_snapshot_conflict_1", { vision: "First vision" });
+    const secondPayload = createPlanSnapshotMutation("dmq_snapshot_conflict_1", { vision: "Second vision" });
+
+    const first = await requestJson(app, "POST", "/api/sync/12-week/mutations", { body: firstPayload });
+    const second = await requestJson(app, "POST", "/api/sync/12-week/mutations", { body: secondPayload });
+
+    assert.equal(first.status, 200);
+    assert.equal(second.status, 409);
+    assert.equal(second.body.success, false);
+    assert.match(second.body.message ?? "", /idempotency conflict/i);
+  });
+
+  it("blocks cross-user plan_snapshot_updated parents", async () => {
+    const response = await requestJson(createRouteTestApp(), "POST", "/api/sync/12-week/mutations", {
+      body: createPlanSnapshotMutation("dmq_snapshot_cross_user_1", {
+        clientPlanId: "other_goal:12-week-system",
+        clientGoalId: "other_goal",
+      }),
+      token: "owner-token",
+    });
+    const data = getBatchResult(response);
+
+    assert.equal(response.status, 200);
+    assert.equal(data.status, "failed");
+    assert.equal(data.failed[0].status, "failed_not_found");
+    assert.equal(data.failed[0].reason, "plan_not_found_or_not_owned");
+    assert.equal(data.failed[0].syncErrorCode, "ownership_denied");
   });
 
   it("returns duplicate for repeated daily_check_in_upserted without updating again", async () => {

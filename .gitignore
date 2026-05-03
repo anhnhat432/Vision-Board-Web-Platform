@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .codex-worktrees/
+.claude/
 .DS_Store
 *.log
 codex-backups/

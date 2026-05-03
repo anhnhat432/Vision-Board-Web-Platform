@@ -7,13 +7,16 @@ on:
         description: Staging/preview URL to test
         required: true
       skip_auth:
-        description: Skip authentication (local-only smoke)
+        description: Skip authentication (signed-out guard only)
         required: false
         default: "false"
       cleanup:
         description: Clean up test data after run
         required: false
         default: "true"
+      test_prefix:
+        description: Custom test data prefix (default auto-generated)
+        required: false
 
 permissions:
   contents: read
@@ -29,6 +32,7 @@ jobs:
       MVP2_SMOKE_PASSWORD: ${{ secrets.MVP2_SMOKE_PASSWORD }}
       MVP2_SMOKE_SKIP_AUTH: ${{ github.event.inputs.skip_auth }}
       MVP2_SMOKE_CLEANUP: ${{ github.event.inputs.cleanup }}
+      MVP2_SMOKE_TEST_PREFIX: ${{ github.event.inputs.test_prefix }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
@@ -57,4 +61,4 @@ jobs:
           fi
 
       - name: Run MVP2 sync staging smoke
-        run: npm run smoke:mvp2-sync
+        run: npm run smoke:mvp2-sync:staging

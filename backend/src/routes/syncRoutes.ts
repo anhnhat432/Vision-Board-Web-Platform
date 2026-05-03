@@ -1,6 +1,8 @@
 import express, { Router } from "express";
 
 import {
+  deleteTwelveWeekWorkspace,
+  exportTwelveWeekWorkspace,
   importTwelveWeekWorkspace,
   pullTwelveWeekWorkspace,
   submitTwelveWeekMutations,
@@ -21,6 +23,8 @@ syncRoutes.post("/sync/12-week/import", asyncHandler(importTwelveWeekWorkspace))
 syncRoutes.post("/sync/12-week/import/validate", asyncHandler(validateTwelveWeekImport));
 syncRoutes.post("/sync/12-week/mutations", asyncHandler(submitTwelveWeekMutations));
 syncRoutes.get("/sync/12-week/pull", asyncHandler(pullTwelveWeekWorkspace));
+syncRoutes.get("/sync/12-week/workspace/export", asyncHandler(exportTwelveWeekWorkspace));
+syncRoutes.delete("/sync/12-week/workspace", asyncHandler(deleteTwelveWeekWorkspace));
 
 export { syncRoutes };
 

@@ -77,6 +77,8 @@ export interface TwelveWeekSettingsTabProps {
   onRestoreArchivedOutbox: () => void;
   onOpenReminder: (reminder: InAppReminder) => void;
   onExportLocalData: () => void;
+  onExportCloudWorkspace: () => void;
+  onDeleteCloudWorkspace: () => void;
   onBrowserNotificationToggle: (value: boolean) => void;
   onRunOutboxSync: () => void;
   onOutboxItemToggle: (item: SyncOutboxItem) => void;

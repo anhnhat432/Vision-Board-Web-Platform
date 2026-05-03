@@ -57,6 +57,7 @@ function createWeeklyReview(weekNumber = 1, priority = "Keep going"): UniversalW
 
 function createPlanSnapshotSystem(vision12Week = "Ship version one"): PlanSnapshotSystemPayload {
   return {
+    goalType: "Career",
     vision12Week,
     lagMetric: {
       name: "Published articles",
@@ -99,19 +100,6 @@ function createPlanSnapshotSystem(vision12Week = "Ship version one"): PlanSnapsh
         completed: false,
       },
     ],
-    taskInstances: [
-      {
-        id: "task_1",
-        weekNumber: 1,
-        scheduledDate: "2026-04-30",
-        title: "Write first draft",
-        leadIndicatorName: "Write",
-        isCore: true,
-        completed: false,
-      },
-    ],
-    dailyCheckIns: [],
-    weeklyReviews: [],
   };
 }
 
@@ -295,6 +283,10 @@ describe("data mutation queue", () => {
         goalId: "goal_1",
         payload: {
           reason: "setup",
+          clientPlanId: "goal_1:12-week-system",
+          clientGoalId: "goal_1",
+          changedAt: at(5),
+          clientUpdatedAt: at(5),
           system: createPlanSnapshotSystem("first snapshot"),
         },
       },
@@ -308,20 +300,80 @@ describe("data mutation queue", () => {
         goalId: "goal_1",
         payload: {
           reason: "manual_update",
+          clientPlanId: "goal_1:12-week-system",
+          clientGoalId: "goal_1",
+          changedAt: at(6),
+          clientUpdatedAt: at(6),
           system: createPlanSnapshotSystem("latest snapshot"),
         },
       },
       { now: at(6), createId: () => "snapshot_2" },
     );
+    store = enqueueMutation(
+      store,
+      {
+        kind: "lead_metric_upserted",
+        ownerUid: "user_a",
+        goalId: "goal_1",
+        payload: {
+          reason: "manual_update",
+          clientPlanId: "goal_1:12-week-system",
+          clientWeekId: "goal_1:week:1",
+          clientMetricId: "goal_1:week:1:metric:lead_1",
+          leadIndicatorId: "lead_1",
+          weekNumber: 1,
+          name: "Write",
+          weeklyTarget: 5,
+          target: "5",
+          unit: "hours",
+          type: "core",
+          priority: 1,
+          schedule: [1, 3, 5],
+          currentValue: 1,
+          changedAt: at(7),
+          clientUpdatedAt: at(7),
+        },
+      },
+      { now: at(7), createId: () => "metric_1" },
+    );
+    store = enqueueMutation(
+      store,
+      {
+        kind: "lead_metric_upserted",
+        ownerUid: "user_a",
+        goalId: "goal_1",
+        payload: {
+          reason: "task_progress",
+          clientPlanId: "goal_1:12-week-system",
+          clientWeekId: "goal_1:week:1",
+          clientMetricId: "goal_1:week:1:metric:lead_1",
+          leadIndicatorId: "lead_1",
+          weekNumber: 1,
+          name: "Write",
+          weeklyTarget: 5,
+          target: "5",
+          unit: "hours",
+          type: "core",
+          priority: 1,
+          schedule: [1, 3, 5],
+          currentValue: 2,
+          changedAt: at(8),
+          clientUpdatedAt: at(8),
+        },
+      },
+      { now: at(8), createId: () => "metric_2" },
+    );
 
-    expect(store.items.map((item) => item.id)).toEqual(["daily_2", "review_2", "snapshot_2"]);
+    expect(store.items.map((item) => item.id)).toEqual(["daily_2", "review_2", "snapshot_2", "metric_2"]);
     const daily = store.items.find((item) => item.kind === "daily_check_in_upserted");
     const review = store.items.find((item) => item.kind === "weekly_review_upserted");
     const snapshot = store.items.find((item) => item.kind === "plan_snapshot_updated");
+    const metric = store.items.find((item) => item.kind === "lead_metric_upserted");
 
     expect(daily?.supersedes).toEqual(["daily_1"]);
     expect(review?.supersedes).toEqual(["review_1"]);
     expect(snapshot?.supersedes).toEqual(["snapshot_1"]);
+    expect(metric?.supersedes).toEqual(["metric_1"]);
     if (daily?.kind === "daily_check_in_upserted") {
       expect(daily.payload.clientPlanId).toBe("goal_1:12-week-system");
       expect(daily.payload.clientWeekId).toBe("goal_1:week:1");
@@ -334,6 +386,10 @@ describe("data mutation queue", () => {
       expect(review.payload.review.nextWeekPriority).toBe("latest priority");
     }
     if (snapshot?.kind === "plan_snapshot_updated") expect(snapshot.payload.system.vision12Week).toBe("latest snapshot");
+    if (metric?.kind === "lead_metric_upserted") {
+      expect(metric.payload.currentValue).toBe(2);
+      expect(metric.payload.reason).toBe("task_progress");
+    }
   });
 
   it("lists pending mutations by auth owner and keeps anonymous separate", () => {

@@ -1,5 +1,5 @@
 import { type SyntheticEvent, useCallback, useState } from "react";
-import { AlertTriangle, CloudDownload, CloudUpload, FileDown, RefreshCw, WifiOff } from "lucide-react";
+import { AlertTriangle, CloudDownload, CloudUpload, FileDown, RefreshCw, Trash2, WifiOff } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
@@ -15,6 +15,8 @@ type TwelveWeekLocalStatusSectionProps = Pick<
   | "lastBackendHydrationResult"
   | "mutationQueueSyncStatus"
   | "onExportLocalData"
+  | "onExportCloudWorkspace"
+  | "onDeleteCloudWorkspace"
   | "onHydrateBackendPlans"
   | "onRunMutationQueueSync"
   | "onKeepLocalPlanForConflicts"
@@ -327,6 +329,14 @@ function MutationQueueConflictResolutionPanel({
   const [confirmExported, setConfirmExported] = useState(false);
   const [showCloudConfirm, setShowCloudConfirm] = useState(false);
 
+  const handleConfirmUseCloud = useCallback(() => {
+    if (!confirmExported || !result) return;
+    trackMutationQueueConflictAction("use_cloud_version", result, activeGoalId);
+    onUseCloudVersion();
+    setShowCloudConfirm(false);
+    setConfirmExported(false);
+  }, [confirmExported, result, activeGoalId, onUseCloudVersion]);
+
   if (!isMutationQueueMergeReviewNeeded(result) || !result.mergeReport) return null;
 
   const report = result.mergeReport;
@@ -371,14 +381,6 @@ function MutationQueueConflictResolutionPanel({
     setShowCloudConfirm(true);
     setKeptLocal(false);
   };
-
-  const handleConfirmUseCloud = useCallback(() => {
-    if (!confirmExported) return;
-    trackMutationQueueConflictAction("use_cloud_version", result, activeGoalId);
-    onUseCloudVersion();
-    setShowCloudConfirm(false);
-    setConfirmExported(false);
-  }, [confirmExported, result, activeGoalId, onUseCloudVersion]);
 
   return (
     <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
@@ -426,9 +428,9 @@ function MutationQueueConflictResolutionPanel({
           </p>
           {visibleConflicts.length > 0 ? (
             <div className="space-y-2">
-              {visibleConflicts.map((conflict, index) => (
+              {visibleConflicts.map((conflict) => (
                 <div
-                  key={`${conflict.kind}-${conflict.reason}-${index}`}
+                  key={`${conflict.kind}-${conflict.reason}`}
                   className="rounded-lg border border-slate-200 bg-slate-50 p-2"
                 >
                   <p className="font-semibold text-slate-900">{getPullEntityKindLabel(conflict.kind)}</p>
@@ -446,8 +448,8 @@ function MutationQueueConflictResolutionPanel({
             <div>
               <p className="font-semibold text-slate-900">Field chưa tự merge:</p>
               <ul className="mt-1 list-disc space-y-1 pl-4">
-                {visibleUnsupportedFields.map((field, index) => (
-                  <li key={`${field.field}-${index}`}>{field.field}</li>
+                {visibleUnsupportedFields.map((field) => (
+                  <li key={field.field}>{field.field}</li>
                 ))}
               </ul>
               {hiddenUnsupportedCount > 0 ? <p className="mt-1">Còn {hiddenUnsupportedCount} field khác.</p> : null}
@@ -561,6 +563,8 @@ export function TwelveWeekLocalStatusSection({
   lastBackendHydrationResult,
   mutationQueueSyncStatus,
   onExportLocalData,
+  onExportCloudWorkspace,
+  onDeleteCloudWorkspace,
   onHydrateBackendPlans,
   onRunMutationQueueSync,
   onKeepLocalPlanForConflicts,
@@ -833,6 +837,31 @@ export function TwelveWeekLocalStatusSection({
               <RefreshCw className={`mr-2 h-4 w-4 ${mutationQueueSyncStatus.loading ? "animate-spin" : ""}`} />
               {mutationQueueSyncStatus.loading ? "Đang đồng bộ..." : "Đồng bộ cloud thủ công"}
             </Button>
+            <div className="grid grid-cols-2 gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full whitespace-normal border-slate-200 bg-white text-center text-slate-800 hover:bg-slate-50"
+                disabled={!canRunMutationQueueSync}
+                onClick={onExportCloudWorkspace}
+              >
+                <FileDown className="mr-2 h-4 w-4" />
+                Export cloud
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full whitespace-normal border-red-200 bg-white text-center text-red-700 hover:bg-red-50"
+                disabled={!canRunMutationQueueSync}
+                onClick={onDeleteCloudWorkspace}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Xóa cloud
+              </Button>
+            </div>
+            <p className="text-xs leading-5 text-slate-500">
+              Export cloud tải bản sao JSON workspace trên server. Xóa cloud chỉ xóa dữ liệu 12-week trên server, không xóa local, billing hay tài khoản.
+            </p>
           </div>
         </div>
       </div>

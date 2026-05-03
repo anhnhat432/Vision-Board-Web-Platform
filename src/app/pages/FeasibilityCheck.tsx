@@ -1,9 +1,17 @@
 import { Compass, Sparkles, Target } from "lucide-react";
 import { motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import { type PendingSMARTGoal, parsePendingSMARTGoal, parseSmartGoal } from "@/lib/smart-goal";
+import {
+  type GoalArchetype,
+  type PendingSMARTGoal,
+  evaluateSmartGoalQuality,
+  inferGoalArchetype,
+  parsePendingSMARTGoal,
+  parseSmartGoal,
+} from "@/lib/smart-goal";
+import type { SmartGoalQualityBridge } from "./FeasibilityCheck/types";
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { Badge } from "../components/ui/badge";
@@ -31,6 +39,8 @@ export function FeasibilityCheck() {
   const [isInitializing, setIsInitializing] = useState(true);
   const questionTopRef = useRef<HTMLDivElement | null>(null);
   const questionHeadingRef = useRef<HTMLHeadingElement | null>(null);
+  const smartGoalQualityLevelRef: MutableRefObject<SmartGoalQualityBridge | undefined> = useRef(undefined);
+  const goalArchetypeRef: MutableRefObject<GoalArchetype | undefined> = useRef(undefined);
 
   useEffect(() => {
     if (hasGuardedRef.current) return;
@@ -67,6 +77,15 @@ export function FeasibilityCheck() {
     const normalizedSmartGoal = parseSmartGoal(parsedDraft, storedFocusArea);
     if (normalizedSmartGoal) {
       localStorage.setItem(APP_STORAGE_KEYS.pendingSmartGoal, JSON.stringify(normalizedSmartGoal));
+      const qualityResult = evaluateSmartGoalQuality(normalizedSmartGoal);
+      smartGoalQualityLevelRef.current = qualityResult.level;
+      goalArchetypeRef.current = inferGoalArchetype({
+        domain: normalizedSmartGoal.domain,
+        focusArea: storedFocusArea,
+        goalStatement: normalizedSmartGoal.specific?.goal_statement,
+        metricName: normalizedSmartGoal.measurable?.metric_name,
+        metricUnit: normalizedSmartGoal.measurable?.metric_unit,
+      });
     }
 
     const normalizedPendingGoal = parsePendingSMARTGoal(normalizedSmartGoal ?? parsedDraft, storedFocusArea);
@@ -148,7 +167,10 @@ export function FeasibilityCheck() {
       return;
     }
 
-    setResult(buildResult(answers, wheelScore));
+    setResult(buildResult(answers, wheelScore, {
+      smartGoalQualityLevel: smartGoalQualityLevelRef.current,
+      goalArchetype: goalArchetypeRef.current,
+    }));
   };
 
   const handleContinueToPlan = () => {
@@ -170,6 +192,8 @@ export function FeasibilityCheck() {
       weeklyCapacity: result.weeklyCapacity,
       firstWeekGuidance: result.firstWeekGuidance,
       scopeRecommendation: result.scopeRecommendation,
+      smartGoalQualityLevel: result.smartGoalQualityLevel,
+      smartGoalQualityNote: result.smartGoalQualityNote,
     };
 
     localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityResult, JSON.stringify(pendingFeasibilityResult));

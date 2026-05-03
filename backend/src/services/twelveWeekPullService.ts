@@ -160,6 +160,8 @@ export interface TwelveWeekPullRepository {
   listWorkspace(userId: string, filters: TwelveWeekPullFilters): Promise<TwelveWeekPullRepositoryData>;
 }
 
+type TwelveWeekPullMode = "full" | "delta";
+
 interface PullEntityBase {
   id: string;
   revision?: number;
@@ -311,17 +313,84 @@ export interface TwelveWeekPullTombstone {
 
 export interface TwelveWeekPullResult {
   serverTime: string;
-  mode: "full";
+  mode: TwelveWeekPullMode;
   cursor: string | null;
-  nextCursor: string | null;
+  nextCursor: string;
   hasMore: false;
-  cursorStatus: "not_provided" | "reserved_ignored";
+  cursorStatus: "not_provided" | "applied";
   filters: TwelveWeekPullFilters;
   warnings: TwelveWeekPullWarning[];
   workspace: TwelveWeekPullWorkspace;
   changes: TwelveWeekPullWorkspace;
   tombstones: Record<keyof TwelveWeekPullWorkspace, TwelveWeekPullTombstone[]>;
   counts: Record<keyof TwelveWeekPullWorkspace, number>;
+}
+
+interface DecodedPullCursor {
+  raw: string;
+  since: Date;
+}
+
+const PULL_CURSOR_PREFIX = "twpc_v1_";
+const MAX_PULL_CURSOR_LENGTH = 512;
+
+function createInvalidCursorError(message: string): ApiError {
+  return new ApiError(
+    400,
+    "Invalid 12-week pull cursor. Run a full pull before retrying incremental sync.",
+    { code: "cursor_invalid", message },
+    "invalid_cursor",
+  );
+}
+
+function parseValidDate(value: unknown): Date | null {
+  if (typeof value !== "string" || !value.trim()) return null;
+  const date = new Date(value);
+  return Number.isFinite(date.valueOf()) ? date : null;
+}
+
+export function createTwelveWeekPullCursor(timestamp: Date | string): string {
+  const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+  if (!Number.isFinite(date.valueOf())) {
+    throw new Error("Cannot create 12-week pull cursor from an invalid timestamp.");
+  }
+
+  const payload = Buffer.from(
+    JSON.stringify({
+      v: 1,
+      ts: date.toISOString(),
+    }),
+    "utf8",
+  ).toString("base64url");
+
+  return `${PULL_CURSOR_PREFIX}${payload}`;
+}
+
+function decodePullCursor(cursor: string): DecodedPullCursor {
+  if (cursor.length > MAX_PULL_CURSOR_LENGTH) {
+    throw createInvalidCursorError("Cursor is too long.");
+  }
+  if (!cursor.startsWith(PULL_CURSOR_PREFIX)) {
+    throw createInvalidCursorError("Cursor prefix is not recognized.");
+  }
+
+  try {
+    const rawPayload = cursor.slice(PULL_CURSOR_PREFIX.length);
+    const parsed = JSON.parse(Buffer.from(rawPayload, "base64url").toString("utf8")) as Record<string, unknown>;
+    if (parsed.v !== 1) {
+      throw createInvalidCursorError("Cursor version is not supported.");
+    }
+
+    const since = parseValidDate(parsed.ts);
+    if (!since) {
+      throw createInvalidCursorError("Cursor timestamp is invalid.");
+    }
+
+    return { raw: cursor, since };
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    throw createInvalidCursorError("Cursor payload is malformed.");
+  }
 }
 
 class MongoTwelveWeekPullRepository implements TwelveWeekPullRepository {
@@ -605,13 +674,18 @@ function normalizeOptionalQueryString(value: unknown, fieldPath: string): string
   return trimmed || undefined;
 }
 
-function parsePullQuery(query: unknown): { cursor?: string; filters: TwelveWeekPullFilters } {
+function parsePullQuery(query: unknown): {
+  cursor?: string;
+  decodedCursor?: DecodedPullCursor;
+  filters: TwelveWeekPullFilters;
+} {
   const record = query && typeof query === "object" && !Array.isArray(query) ? (query as Record<string, unknown>) : {};
   const cursor = normalizeOptionalQueryString(record.cursor, "cursor");
   const clientPlanId = normalizeOptionalQueryString(record.clientPlanId, "clientPlanId");
 
   return {
     cursor,
+    decodedCursor: cursor ? decodePullCursor(cursor) : undefined,
     filters: clientPlanId ? { clientPlanId } : {},
   };
 }
@@ -681,18 +755,116 @@ function splitActiveAndTombstones(workspace: TwelveWeekPullWorkspace): {
   };
 }
 
+type TimestampSource = "syncUpdatedAt" | "deletedAt" | "updatedAt" | "createdAt";
+
+function getLatestEntityTimestamp(entity: PullEntityBase): { date: Date; source: TimestampSource } | null {
+  const candidates: Array<{ value?: string; source: TimestampSource }> = [
+    { value: entity.syncUpdatedAt, source: "syncUpdatedAt" },
+    { value: entity.deletedAt, source: "deletedAt" },
+    { value: entity.updatedAt, source: "updatedAt" },
+    { value: entity.createdAt, source: "createdAt" },
+  ];
+
+  return candidates.reduce<{ date: Date; source: TimestampSource } | null>((latest, candidate) => {
+    const date = parseValidDate(candidate.value);
+    if (!date) return latest;
+    if (!latest || date.valueOf() > latest.date.valueOf()) return { date, source: candidate.source };
+    return latest;
+  }, null);
+}
+
+function filterChangedEntities<T extends PullEntityBase>(
+  entities: T[],
+  kind: keyof TwelveWeekPullWorkspace,
+  since: Date,
+  until: Date,
+  fallbackTimestampKinds: Set<keyof TwelveWeekPullWorkspace>,
+  missingTimestampKinds: Set<keyof TwelveWeekPullWorkspace>,
+): T[] {
+  return entities.filter((entity) => {
+    const timestamp = getLatestEntityTimestamp(entity);
+    if (!timestamp) {
+      missingTimestampKinds.add(kind);
+      return false;
+    }
+
+    if (timestamp.source === "updatedAt" || timestamp.source === "createdAt") {
+      fallbackTimestampKinds.add(kind);
+    }
+
+    return timestamp.date.valueOf() > since.valueOf() && timestamp.date.valueOf() <= until.valueOf();
+  });
+}
+
+function filterWorkspaceByCursorWindow(
+  workspace: TwelveWeekPullWorkspace,
+  since: Date,
+  until: Date,
+  warnings: TwelveWeekPullWarning[],
+): TwelveWeekPullWorkspace {
+  const fallbackTimestampKinds = new Set<keyof TwelveWeekPullWorkspace>();
+  const missingTimestampKinds = new Set<keyof TwelveWeekPullWorkspace>();
+  const changedWorkspace: TwelveWeekPullWorkspace = {
+    goals: filterChangedEntities(workspace.goals, "goals", since, until, fallbackTimestampKinds, missingTimestampKinds),
+    plans: filterChangedEntities(workspace.plans, "plans", since, until, fallbackTimestampKinds, missingTimestampKinds),
+    weeks: filterChangedEntities(workspace.weeks, "weeks", since, until, fallbackTimestampKinds, missingTimestampKinds),
+    tasks: filterChangedEntities(workspace.tasks, "tasks", since, until, fallbackTimestampKinds, missingTimestampKinds),
+    leadMetrics: filterChangedEntities(
+      workspace.leadMetrics,
+      "leadMetrics",
+      since,
+      until,
+      fallbackTimestampKinds,
+      missingTimestampKinds,
+    ),
+    dailyCheckIns: filterChangedEntities(
+      workspace.dailyCheckIns,
+      "dailyCheckIns",
+      since,
+      until,
+      fallbackTimestampKinds,
+      missingTimestampKinds,
+    ),
+    weeklyReviews: filterChangedEntities(
+      workspace.weeklyReviews,
+      "weeklyReviews",
+      since,
+      until,
+      fallbackTimestampKinds,
+      missingTimestampKinds,
+    ),
+  };
+
+  if (fallbackTimestampKinds.size > 0) {
+    warnings.push({
+      code: "delta_timestamp_fallback",
+      message: `Delta pull used updatedAt/createdAt fallback for: ${[...fallbackTimestampKinds].join(", ")}.`,
+    });
+  }
+  if (missingTimestampKinds.size > 0) {
+    warnings.push({
+      code: "delta_timestamp_missing",
+      message: `Some entities cannot be evaluated for delta pull because they have no sync timestamp: ${[
+        ...missingTimestampKinds,
+      ].join(", ")}.`,
+    });
+  }
+
+  return changedWorkspace;
+}
+
 export class TwelveWeekPullService {
   constructor(private readonly repository: TwelveWeekPullRepository = new MongoTwelveWeekPullRepository()) {}
 
   async pullWorkspace(userId: string, query: unknown): Promise<TwelveWeekPullResult> {
-    const { cursor, filters } = parsePullQuery(query);
+    const { cursor, decodedCursor, filters } = parsePullQuery(query);
     const warnings: TwelveWeekPullWarning[] = [];
-    if (cursor) {
-      warnings.push({
-        code: "cursor_reserved",
-        message: "Cursor support is reserved in pull v1; returning a full workspace snapshot.",
-      });
+    const highWatermark = new Date();
+    const serverTime = highWatermark.toISOString();
+    if (decodedCursor && decodedCursor.since.valueOf() > highWatermark.valueOf()) {
+      throw createInvalidCursorError("Cursor timestamp is ahead of server time.");
     }
+    const mode: TwelveWeekPullMode = decodedCursor ? "delta" : "full";
 
     const data = await this.repository.listWorkspace(userId, filters);
     const mappedWorkspace: TwelveWeekPullWorkspace = {
@@ -704,28 +876,44 @@ export class TwelveWeekPullService {
       dailyCheckIns: data.dailyCheckIns.map(mapDailyCheckIn),
       weeklyReviews: data.weeklyReviews.map(mapWeeklyReview),
     };
-    const split = splitActiveAndTombstones(mappedWorkspace);
+    const responseWorkspace = decodedCursor
+      ? filterWorkspaceByCursorWindow(mappedWorkspace, decodedCursor.since, highWatermark, warnings)
+      : mappedWorkspace;
+    const split = splitActiveAndTombstones(responseWorkspace);
 
-    if (filters.clientPlanId && split.workspace.plans.length === 0) {
+    if (filters.clientPlanId && data.plans.length === 0) {
       warnings.push({
         code: "plan_not_found",
         message: "No 12-week plan was found for this authenticated user and clientPlanId.",
       });
     }
-    if (split.workspace.plans.length > 0) {
+    if (mode === "full" && split.workspace.plans.length > 0) {
       warnings.push({
         code: "plan_metadata_partial",
         message: "Pull v1 returns current backend fields only; some local setup metadata is not yet persisted.",
       });
     }
+    if (
+      mode === "delta" &&
+      (responseWorkspace.goals.length > 0 ||
+        responseWorkspace.plans.length > 0 ||
+        responseWorkspace.weeks.length > 0 ||
+        responseWorkspace.leadMetrics.length > 0)
+    ) {
+      warnings.push({
+        code: "delta_context_entities_require_full_pull",
+        message:
+          "Delta pull includes goal/plan/week/metric context changes; clients should retry with a full pull before applying.",
+      });
+    }
 
     const result: TwelveWeekPullResult = {
-      serverTime: new Date().toISOString(),
-      mode: "full",
-      cursor: null,
-      nextCursor: null,
+      serverTime,
+      mode,
+      cursor: decodedCursor?.raw ?? null,
+      nextCursor: createTwelveWeekPullCursor(serverTime),
       hasMore: false,
-      cursorStatus: cursor ? "reserved_ignored" : "not_provided",
+      cursorStatus: cursor ? "applied" : "not_provided",
       filters,
       warnings,
       workspace: split.workspace,

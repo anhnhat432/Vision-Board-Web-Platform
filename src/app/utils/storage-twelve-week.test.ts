@@ -1,10 +1,18 @@
+import { describe, expect, it } from "vitest";
+
 import {
   getActiveTwelveWeekGoal,
   getDefaultScoreboard,
   getTwelveWeekCurrentWeek,
+  getTwelveWeekMissedTasks,
+  getTwelveWeekTodayTasks,
+  getTwelveWeekWeekCompletion,
+  rescheduleTwelveWeekTaskToNextWeek,
+  rescheduleTwelveWeekTaskWithinWeek,
+  skipTwelveWeekNonCoreTask,
   sortTwelveWeekGoalsForSelection,
 } from "./storage-twelve-week";
-import type { Goal, TwelveWeekSystem } from "./storage-types";
+import type { Goal, TwelveWeekSystem, TwelveWeekTaskInstance } from "./storage-types";
 
 function createSystem(overrides: Partial<TwelveWeekSystem> = {}): TwelveWeekSystem {
   return {
@@ -117,5 +125,190 @@ describe("sortTwelveWeekGoalsForSelection", () => {
       "newest-paused",
       "newer-completed",
     ]);
+  });
+});
+
+function makeTask(overrides: Partial<TwelveWeekTaskInstance> = {}): TwelveWeekTaskInstance {
+  return {
+    id: overrides.id ?? "task_1",
+    weekNumber: overrides.weekNumber ?? 1,
+    scheduledDate: overrides.scheduledDate ?? "2026-03-03",
+    title: overrides.title ?? "Việc giữ nhịp",
+    leadIndicatorName: overrides.leadIndicatorName ?? "Ship",
+    isCore: overrides.isCore ?? true,
+    completed: overrides.completed ?? false,
+    completedAt: overrides.completedAt,
+    tacticId: overrides.tacticId ?? "tactic_1",
+    rescheduledFrom: overrides.rescheduledFrom,
+    skipped: overrides.skipped,
+  };
+}
+
+function createSystemWithTasks(tasks: TwelveWeekTaskInstance[]): TwelveWeekSystem {
+  return createSystem({ taskInstances: tasks });
+}
+
+describe("rescheduleTwelveWeekTaskWithinWeek", () => {
+  it("moves an overdue task to today (within current week range)", () => {
+    const system = createSystemWithTasks([
+      makeTask({ id: "task_a", weekNumber: 1, scheduledDate: "2026-03-03" }),
+    ]);
+    const today = new Date(2026, 2, 5); // Mar 5, week 1 (Mar 2 - Mar 8)
+    const result = rescheduleTwelveWeekTaskWithinWeek(system, "task_a", today);
+
+    expect(result.applied).toBe(true);
+    expect(result.reason).toBe("ok");
+    expect(result.updatedTask?.scheduledDate).toBe("2026-03-05");
+    expect(result.updatedTask?.weekNumber).toBe(1);
+    expect(result.updatedTask?.rescheduledFrom).toBe("2026-03-03");
+  });
+
+  it("preserves the original rescheduledFrom when re-rescheduled later", () => {
+    const system = createSystemWithTasks([
+      makeTask({ id: "task_a", scheduledDate: "2026-03-04", rescheduledFrom: "2026-03-02" }),
+    ]);
+    const today = new Date(2026, 2, 6);
+    const result = rescheduleTwelveWeekTaskWithinWeek(system, "task_a", today);
+
+    expect(result.applied).toBe(true);
+    expect(result.updatedTask?.rescheduledFrom).toBe("2026-03-02");
+  });
+
+  it("refuses when there is no room left in the current week", () => {
+    const system = createSystemWithTasks([
+      makeTask({ id: "task_a", weekNumber: 1, scheduledDate: "2026-03-08" }),
+    ]);
+    // Today is Sunday, last day of week 1 → no later day available within week
+    const today = new Date(2026, 2, 8);
+    const result = rescheduleTwelveWeekTaskWithinWeek(system, "task_a", today);
+
+    expect(result.applied).toBe(false);
+    expect(result.reason).toBe("no_room_in_current_week");
+    expect(result.system).toBe(system);
+  });
+
+  it("refuses when task does not exist", () => {
+    const system = createSystemWithTasks([makeTask({ id: "task_a" })]);
+    const result = rescheduleTwelveWeekTaskWithinWeek(system, "missing", new Date(2026, 2, 5));
+    expect(result.applied).toBe(false);
+    expect(result.reason).toBe("task_not_found");
+  });
+
+  it("refuses when task is already completed", () => {
+    const system = createSystemWithTasks([makeTask({ id: "task_a", completed: true })]);
+    const result = rescheduleTwelveWeekTaskWithinWeek(system, "task_a", new Date(2026, 2, 5));
+    expect(result.applied).toBe(false);
+    expect(result.reason).toBe("task_already_completed");
+  });
+});
+
+describe("rescheduleTwelveWeekTaskToNextWeek", () => {
+  it("moves a task into the first day of next week and bumps weekNumber", () => {
+    const system = createSystemWithTasks([
+      makeTask({ id: "task_a", weekNumber: 2, scheduledDate: "2026-03-10" }),
+    ]);
+    const result = rescheduleTwelveWeekTaskToNextWeek(system, "task_a");
+
+    expect(result.applied).toBe(true);
+    expect(result.updatedTask?.weekNumber).toBe(3);
+    // Week 3 starts 14 days after start (2026-03-02) = 2026-03-16
+    expect(result.updatedTask?.scheduledDate).toBe("2026-03-16");
+    expect(result.updatedTask?.rescheduledFrom).toBe("2026-03-10");
+  });
+
+  it("refuses when current week is the final week of the cycle", () => {
+    const system = createSystemWithTasks([
+      makeTask({ id: "task_a", weekNumber: 12, scheduledDate: "2026-05-20" }),
+    ]);
+    const result = rescheduleTwelveWeekTaskToNextWeek(system, "task_a");
+
+    expect(result.applied).toBe(false);
+    expect(result.reason).toBe("no_next_week_available");
+  });
+
+  it("refuses when task is already skipped", () => {
+    const system = createSystemWithTasks([
+      makeTask({ id: "task_a", weekNumber: 2, skipped: true, isCore: false }),
+    ]);
+    const result = rescheduleTwelveWeekTaskToNextWeek(system, "task_a");
+
+    expect(result.applied).toBe(false);
+    expect(result.reason).toBe("task_already_skipped");
+  });
+});
+
+describe("skipTwelveWeekNonCoreTask", () => {
+  it("skips a non-core task", () => {
+    const system = createSystemWithTasks([
+      makeTask({ id: "task_opt", isCore: false }),
+    ]);
+    const result = skipTwelveWeekNonCoreTask(system, "task_opt");
+
+    expect(result.applied).toBe(true);
+    expect(result.updatedTask?.skipped).toBe(true);
+    expect(result.system.taskInstances[0]?.skipped).toBe(true);
+  });
+
+  it("refuses to skip a core task", () => {
+    const system = createSystemWithTasks([makeTask({ id: "task_core", isCore: true })]);
+    const result = skipTwelveWeekNonCoreTask(system, "task_core");
+
+    expect(result.applied).toBe(false);
+    expect(result.reason).toBe("core_task_cannot_skip");
+    expect(result.system).toBe(system);
+  });
+
+  it("refuses when task is already skipped", () => {
+    const system = createSystemWithTasks([
+      makeTask({ id: "task_opt", isCore: false, skipped: true }),
+    ]);
+    const result = skipTwelveWeekNonCoreTask(system, "task_opt");
+
+    expect(result.applied).toBe(false);
+    expect(result.reason).toBe("task_already_skipped");
+  });
+
+  it("refuses when task is already completed", () => {
+    const system = createSystemWithTasks([
+      makeTask({ id: "task_opt", isCore: false, completed: true }),
+    ]);
+    const result = skipTwelveWeekNonCoreTask(system, "task_opt");
+
+    expect(result.applied).toBe(false);
+    expect(result.reason).toBe("task_already_completed");
+  });
+});
+
+describe("Skipped tasks excluded from queries", () => {
+  it("excludes skipped tasks from getTwelveWeekMissedTasks", () => {
+    const system = createSystemWithTasks([
+      makeTask({ id: "task_opt", isCore: false, skipped: true, scheduledDate: "2026-03-03" }),
+      makeTask({ id: "task_core", isCore: true, scheduledDate: "2026-03-03" }),
+    ]);
+    const today = new Date(2026, 2, 5);
+    const missed = getTwelveWeekMissedTasks(system, today);
+    expect(missed.map((task) => task.id)).toEqual(["task_core"]);
+  });
+
+  it("excludes skipped tasks from getTwelveWeekTodayTasks", () => {
+    const system = createSystemWithTasks([
+      makeTask({ id: "task_opt", isCore: false, skipped: true, scheduledDate: "2026-03-05" }),
+      makeTask({ id: "task_core", isCore: true, scheduledDate: "2026-03-05" }),
+    ]);
+    const today = new Date(2026, 2, 5);
+    const todayTasks = getTwelveWeekTodayTasks(system, today);
+    expect(todayTasks.map((task) => task.id)).toEqual(["task_core"]);
+  });
+
+  it("excludes skipped tasks from getTwelveWeekWeekCompletion total + percent", () => {
+    const system = createSystemWithTasks([
+      makeTask({ id: "task_opt", isCore: false, skipped: true, weekNumber: 1 }),
+      makeTask({ id: "task_a", weekNumber: 1, completed: true }),
+      makeTask({ id: "task_b", weekNumber: 1, completed: false }),
+    ]);
+    const completion = getTwelveWeekWeekCompletion(system, 1);
+    expect(completion.total).toBe(2);
+    expect(completion.completed).toBe(1);
+    expect(completion.percent).toBe(50);
   });
 });

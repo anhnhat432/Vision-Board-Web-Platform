@@ -1,4 +1,4 @@
-import { get, post } from "@/lib/api/apiClient";
+import { get, post, delete as deleteRequest } from "@/lib/api/apiClient";
 import type { DataMutationItem, DataMutationKind, DataMutationPayload } from "@/features/plan12week/persistence/mutationQueue";
 import type { TwelveWeekImportPayload } from "@/features/plan12week/persistence/twelveWeekImportPayload";
 
@@ -23,6 +23,7 @@ export interface TwelveWeekMutationRequestItem {
     clientPlanId?: string | null;
     clientWeekId?: string | null;
     clientTaskId?: string | null;
+    clientMetricId?: string | null;
   };
   baseRevision?: number;
   payload: DataMutationPayload;
@@ -273,18 +274,26 @@ function getClientPlanId(item: DataMutationItem): string | null | undefined {
   if (item.kind === "task_completed_changed") return item.payload.clientPlanId ?? item.planId;
   if (item.kind === "daily_check_in_upserted") return item.payload.clientPlanId ?? item.planId;
   if (item.kind === "weekly_review_upserted") return item.payload.clientPlanId ?? item.planId;
-  return item.planId;
+  if (item.kind === "plan_snapshot_updated") return item.payload.clientPlanId ?? item.planId;
+  if (item.kind === "lead_metric_upserted") return item.payload.clientPlanId ?? item.planId;
+  return undefined;
 }
 
 function getClientWeekId(item: DataMutationItem): string | null | undefined {
   if (item.kind === "task_completed_changed") return item.payload.clientWeekId;
   if (item.kind === "daily_check_in_upserted") return item.payload.clientWeekId;
   if (item.kind === "weekly_review_upserted") return item.payload.clientWeekId;
+  if (item.kind === "lead_metric_upserted") return item.payload.clientWeekId;
   return undefined;
 }
 
 function getClientTaskId(item: DataMutationItem): string | null | undefined {
   if (item.kind === "task_completed_changed") return item.payload.clientTaskId ?? item.payload.taskId;
+  return undefined;
+}
+
+function getClientMetricId(item: DataMutationItem): string | null | undefined {
+  if (item.kind === "lead_metric_upserted") return item.payload.clientMetricId;
   return undefined;
 }
 
@@ -299,6 +308,7 @@ export function toTwelveWeekMutationRequestItem(item: DataMutationItem): TwelveW
       clientPlanId: getClientPlanId(item),
       clientWeekId: getClientWeekId(item),
       clientTaskId: getClientTaskId(item),
+      clientMetricId: getClientMetricId(item),
     },
     baseRevision: item.localRevision,
     payload: item.payload,
@@ -363,3 +373,52 @@ export function pullTwelveWeekWorkspace(options: TwelveWeekPullOptions = {}): Pr
   return get<TwelveWeekPullResponse>(`/sync/12-week/pull${query ? `?${query}` : ""}`);
 }
 
+// ---------------------------------------------------------------------------
+// Cloud workspace export & delete
+// ---------------------------------------------------------------------------
+
+export interface CloudWorkspaceExportResponse {
+  generatedAt: string;
+  version: number;
+  userId: string;
+  workspace: {
+    goals: unknown[];
+    plans: unknown[];
+    weeks: unknown[];
+    tasks: unknown[];
+    leadMetrics: unknown[];
+    dailyCheckIns: unknown[];
+    weeklyReviews: unknown[];
+  };
+  counts: {
+    goals: number;
+    plans: number;
+    weeks: number;
+    tasks: number;
+    leadMetrics: number;
+    dailyCheckIns: number;
+    weeklyReviews: number;
+  };
+}
+
+export interface CloudWorkspaceDeleteResponse {
+  deletedAt: string;
+  policy: string;
+  counts: {
+    goals: number;
+    plans: number;
+    weeks: number;
+    tasks: number;
+    leadMetrics: number;
+    dailyCheckIns: number;
+    weeklyReviews: number;
+  };
+}
+
+export function exportCloudWorkspace(): Promise<CloudWorkspaceExportResponse> {
+  return get<CloudWorkspaceExportResponse>("/sync/12-week/workspace/export");
+}
+
+export function deleteCloudWorkspace(): Promise<CloudWorkspaceDeleteResponse> {
+  return deleteRequest<CloudWorkspaceDeleteResponse>("/sync/12-week/workspace");
+}

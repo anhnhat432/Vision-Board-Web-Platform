@@ -49,6 +49,8 @@ import { getBackendGoalId } from "@/lib/api/goalLinkStore";
 import { APP_STORAGE_KEYS, getUserData, saveUserData } from "../utils/storage";
 import { TwelveWeekSetup } from "./12WeekSetup";
 
+const INTEGRATION_TEST_TIMEOUT_MS = 10_000;
+
 function setAuthReady() {
   authContext.useAuthContext.mockReturnValue({
     user: { uid: "firebase_uid_1", email: "user@example.com" },
@@ -286,7 +288,7 @@ describe("12-week setup backend sync", () => {
     expect(createGoal).not.toHaveBeenCalled();
     expect(createPlan).not.toHaveBeenCalled();
     expect(updateGoal).not.toHaveBeenCalled();
-  });
+  }, INTEGRATION_TEST_TIMEOUT_MS);
 
   it("creates backend goal, syncs plan with backend goal id, stores links, then updates goal with plan id", async () => {
     seedReadyTwelveWeekSetup();
@@ -307,7 +309,7 @@ describe("12-week setup backend sync", () => {
     );
     expect(getBackendGoalId(localGoal.id)).toBe("backend_goal_1");
     expect(getPlanLink(localGoal.id)?.planId).toBe("backend_plan_1");
-  });
+  }, INTEGRATION_TEST_TIMEOUT_MS);
 
   it("keeps local flow when backend goal creation fails and falls back to local goal id for plan sync", async () => {
     createGoal.mockRejectedValueOnce(new Error("goal sync failed"));
@@ -326,7 +328,7 @@ describe("12-week setup backend sync", () => {
     expect(getBackendGoalId(localGoal.id)).toBeNull();
     expect(getPlanLink(localGoal.id)?.planId).toBe("backend_plan_1");
     expect(updateGoal).not.toHaveBeenCalled();
-  });
+  }, INTEGRATION_TEST_TIMEOUT_MS);
 
   it("keeps local flow when backend plan sync fails and does not link an empty plan id", async () => {
     createPlan.mockRejectedValueOnce(new Error("plan sync failed"));
@@ -346,5 +348,5 @@ describe("12-week setup backend sync", () => {
     expect(getBackendGoalId(localGoal.id)).toBe("backend_goal_1");
     expect(getPlanLink(localGoal.id)).toBeNull();
     expect(updateGoal).not.toHaveBeenCalled();
-  });
+  }, INTEGRATION_TEST_TIMEOUT_MS);
 });

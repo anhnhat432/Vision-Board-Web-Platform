@@ -4,6 +4,7 @@ import { syncMutationService } from "../services/syncMutationService";
 import { twelveWeekPullService } from "../services/twelveWeekPullService";
 import { twelveWeekImportService } from "../services/twelveWeekImportService";
 import { twelveWeekImportValidationService } from "../services/twelveWeekImportValidationService";
+import { twelveWeekWorkspaceService } from "../services/twelveWeekWorkspaceService";
 import { successResponse } from "../utils/apiResponse";
 import { requireAuthUser } from "./controllerHelpers";
 
@@ -28,5 +29,17 @@ export async function importTwelveWeekWorkspace(req: Request, res: Response): Pr
 export async function pullTwelveWeekWorkspace(req: Request, res: Response): Promise<void> {
   const user = requireAuthUser(req);
   const result = await twelveWeekPullService.pullWorkspace(user.uid, req.query ?? {});
+  res.status(200).json(successResponse(result));
+}
+
+export async function exportTwelveWeekWorkspace(req: Request, res: Response): Promise<void> {
+  const user = requireAuthUser(req);
+  const result = await twelveWeekWorkspaceService.exportWorkspace(user.uid);
+  res.status(200).json(successResponse(result));
+}
+
+export async function deleteTwelveWeekWorkspace(req: Request, res: Response): Promise<void> {
+  const user = requireAuthUser(req);
+  const result = await twelveWeekWorkspaceService.deleteWorkspace(user.uid);
   res.status(200).json(successResponse(result));
 }

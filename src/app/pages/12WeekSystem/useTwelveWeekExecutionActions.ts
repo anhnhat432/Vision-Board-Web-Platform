@@ -29,10 +29,16 @@ import {
   getTwelveWeekTasksForWeek,
   getTwelveWeekWeekCompletion,
   getTwelveWeekWeekRange,
+  rescheduleTwelveWeekTaskToNextWeek,
+  rescheduleTwelveWeekTaskWithinWeek,
+  skipTwelveWeekNonCoreTask,
+  type OverdueTaskActionReason,
 } from "@/app/utils/storage-twelve-week";
 import type { SuggestedNextWeekPlan } from "@/app/utils/twelve-week-premium";
+import { enqueueLeadMetricUpsertedMutations } from "@/features/plan12week/persistence/leadMetricMutation";
 import { getUniversalWeeklyReviewExecutionScore } from "@/features/plan12week/persistence/reviewExecutionScore";
 import { enqueueStoredMutation } from "@/features/plan12week/persistence/mutationQueue";
+import { enqueuePlanSnapshotUpdatedMutation } from "@/features/plan12week/persistence/planSnapshotMutation";
 import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
 import { getTodayQueueForSystem } from "./helpers";
 import type { WeeklyReviewForm } from "./types";
@@ -180,10 +186,19 @@ export function useTwelveWeekExecutionActions({
     );
     const nextToggledTask = nextTaskInstances.find((task) => task.id === taskId);
 
-    commitSystemUpdate({
+    const savedSystem = commitSystemUpdate({
       ...system,
       taskInstances: nextTaskInstances,
     });
+
+    if (nextToggledTask) {
+      enqueueTaskCompletionChangedMutation(actionGoalId, nextToggledTask);
+      enqueueLeadMetricUpsertedMutations(actionGoalId, savedSystem, "task_progress", {
+        weekNumbers: [nextToggledTask.weekNumber],
+        indicatorIds: nextToggledTask.tacticId ? [nextToggledTask.tacticId] : undefined,
+        indicatorNames: [nextToggledTask.leadIndicatorName],
+      });
+    }
 
     if (completed) {
       trackAnalyticsEvent(
@@ -203,8 +218,6 @@ export function useTwelveWeekExecutionActions({
         },
       );
     }
-
-    if (nextToggledTask) enqueueTaskCompletionChangedMutation(actionGoalId, nextToggledTask);
 
     const synced = await executionSyncActions.syncTaskToggle(taskId, completed);
     if (!synced) {
@@ -237,7 +250,14 @@ export function useTwelveWeekExecutionActions({
           updateActiveSystemState(() => normalizedRollbackSystem);
         }
         const rollbackTask = normalizedRollbackSystem.taskInstances.find((task) => task.id === taskId);
-        if (rollbackTask) enqueueTaskCompletionChangedMutation(actionGoalId, rollbackTask);
+        if (rollbackTask) {
+          enqueueTaskCompletionChangedMutation(actionGoalId, rollbackTask);
+          enqueueLeadMetricUpsertedMutations(actionGoalId, normalizedRollbackSystem, "task_progress", {
+            weekNumbers: [rollbackTask.weekNumber],
+            indicatorIds: rollbackTask.tacticId ? [rollbackTask.tacticId] : undefined,
+            indicatorNames: [rollbackTask.leadIndicatorName],
+          });
+        }
       }
 
       toast.error(
@@ -320,6 +340,8 @@ export function useTwelveWeekExecutionActions({
     const hasAnyContent =
       weeklyForm.biggestOutputThisWeek.trim() ||
       weeklyForm.mainObstacle.trim() ||
+      weeklyForm.keepTactic.trim() ||
+      weeklyForm.reduceTactic.trim() ||
       weeklyForm.nextWeekPriority.trim() ||
       weeklyForm.lagProgressValue.trim();
     if (!hasAnyContent) {
@@ -333,6 +355,8 @@ export function useTwelveWeekExecutionActions({
       weeklyForm.nextWeekPriority.trim() || (hasPremiumReviewInsights ? suggestedNextWeekPlan.focus : "");
     const workloadDecisionValue =
       weeklyForm.workloadDecision || (hasPremiumReviewInsights ? suggestedNextWeekPlan.workloadDecision : "keep same");
+    const keepTacticTrimmed = weeklyForm.keepTactic.trim();
+    const reduceTacticTrimmed = weeklyForm.reduceTactic.trim();
     const nextReview: UniversalWeeklyReview = {
       weekNumber: reviewWeekNumber,
       leadCompletionPercent: reviewWeekCompletion.percent,
@@ -348,6 +372,8 @@ export function useTwelveWeekExecutionActions({
       improvementScore: weeklyForm.mainObstacle.trim() ? 8 : 6,
       outputQualityScore: weeklyForm.biggestOutputThisWeek.trim() ? 8 : 6,
       completedLeadIndicators: reviewWeekCompletion.completed,
+      ...(keepTacticTrimmed ? { keepTactic: keepTacticTrimmed } : {}),
+      ...(reduceTacticTrimmed ? { reduceTactic: reduceTacticTrimmed } : {}),
     };
 
     const updatedReviews = [
@@ -468,12 +494,13 @@ export function useTwelveWeekExecutionActions({
       };
     });
 
-    commitSystemUpdate({
+    const nextSystem = commitSystemUpdate({
       ...system,
       tacticLoadPreference: mode === "lighten" ? "lighter" : system.tacticLoadPreference,
       reentryCount: (system.reentryCount ?? 0) + 1,
       taskInstances: nextTaskInstances,
     });
+    enqueuePlanSnapshotUpdatedMutation(activeGoal.id, nextSystem, "reentry");
 
     trackAppEvent("12_week_reentry_used", activeGoal.id, { mode, weekNumber: String(reentryWeekNumber) });
     toast.success(
@@ -514,6 +541,69 @@ export function useTwelveWeekExecutionActions({
     });
   };
 
+  const REASON_TOAST_COPY: Record<OverdueTaskActionReason, string> = {
+    ok: "",
+    task_not_found: "Không tìm thấy việc này — có thể đã được cập nhật ở nơi khác.",
+    task_already_completed: "Việc này đã chốt rồi.",
+    task_already_skipped: "Việc này đã bỏ qua trước đó.",
+    no_room_in_current_week: "Tuần này đã hết ngày để dời. Hãy dời sang tuần sau.",
+    no_next_week_available: "Đây là tuần cuối — không còn tuần sau để dời.",
+    core_task_cannot_skip: "Việc cốt lõi không thể bỏ. Hãy dời lịch hoặc làm phiên bản nhỏ hơn.",
+  };
+
+  function applyOverdueTaskActionResult(
+    actionGoalId: string,
+    snapshotResult: { applied: boolean; reason: OverdueTaskActionReason; system: TwelveWeekSystem },
+    successMessage: string,
+    eventName: string,
+  ): boolean {
+    if (!snapshotResult.applied) {
+      const message = REASON_TOAST_COPY[snapshotResult.reason];
+      if (message) toast.error(message);
+      return false;
+    }
+
+    const savedSystem = commitSystemUpdate(snapshotResult.system);
+    trackAppEvent(eventName, actionGoalId, {
+      weekNumber: String(getTwelveWeekCurrentWeek(savedSystem)),
+    });
+    toast.success(successMessage);
+    return true;
+  }
+
+  const handleRescheduleTaskWithinWeek = (taskId: string): boolean => {
+    if (!activeGoal || !system) return false;
+    const result = rescheduleTwelveWeekTaskWithinWeek(system, taskId);
+    return applyOverdueTaskActionResult(
+      activeGoal.id,
+      result,
+      "Đã dời sang ngày khác trong tuần này.",
+      "12_week_task_rescheduled_within_week",
+    );
+  };
+
+  const handleRescheduleTaskToNextWeek = (taskId: string): boolean => {
+    if (!activeGoal || !system) return false;
+    const result = rescheduleTwelveWeekTaskToNextWeek(system, taskId);
+    return applyOverdueTaskActionResult(
+      activeGoal.id,
+      result,
+      "Đã dời sang tuần sau.",
+      "12_week_task_rescheduled_next_week",
+    );
+  };
+
+  const handleSkipNonCoreTask = (taskId: string): boolean => {
+    if (!activeGoal || !system) return false;
+    const result = skipTwelveWeekNonCoreTask(system, taskId);
+    return applyOverdueTaskActionResult(
+      activeGoal.id,
+      result,
+      "Đã bỏ qua việc tùy chọn này.",
+      "12_week_task_skipped_non_core",
+    );
+  };
+
   return {
     handleToggleTask,
     handleSaveCheckIn,
@@ -521,5 +611,8 @@ export function useTwelveWeekExecutionActions({
     handleReentry,
     handleApplyRecommendedReentry,
     handleApplySuggestedPlan,
+    handleRescheduleTaskWithinWeek,
+    handleRescheduleTaskToNextWeek,
+    handleSkipNonCoreTask,
   };
 }

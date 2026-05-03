@@ -53,6 +53,8 @@ import {
   updateUserData,
 } from "../../test/app-flow-helpers";
 
+const INTEGRATION_TEST_TIMEOUT_MS = 10_000;
+
 describe("12-week write-path safety", () => {
   beforeEach(() => {
     resetTestStorage();
@@ -128,13 +130,12 @@ describe("12-week write-path safety", () => {
     });
 
     const pendingMutations = listStoredPendingMutations(null);
-    expect(pendingMutations).toHaveLength(1);
-    expect(pendingMutations[0].supersedes).toHaveLength(1);
-    if (pendingMutations[0].kind === "task_completed_changed") {
-      expect(pendingMutations[0].payload.clientTaskId).toBe(toggledTaskId);
-      expect(pendingMutations[0].payload.completed).toBe(false);
-      expect(pendingMutations[0].payload.completedAt).toBeUndefined();
-    }
+    const taskMutations = pendingMutations.filter((m) => m.kind === "task_completed_changed");
+    expect(taskMutations).toHaveLength(1);
+    expect(taskMutations[0].supersedes).toHaveLength(1);
+    expect(taskMutations[0].payload.clientTaskId).toBe(toggledTaskId);
+    expect(taskMutations[0].payload.completed).toBe(false);
+    expect(taskMutations[0].payload.completedAt).toBeUndefined();
   });
 
   it("keeps local daily check-in saved when queue persistence fails", async () => {
@@ -178,7 +179,9 @@ describe("12-week write-path safety", () => {
     renderAppRoute("/12-week-system");
     const user = userEvent.setup();
     await user.click(screen.getByRole("tab", { name: "Tuần" }));
-    const [bestInput, obstacleInput, priorityInput] = await screen.findAllByRole("textbox");
+    const bestInput = await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?");
+    const obstacleInput = screen.getByLabelText("2. Điều gì cản trở nhiều nhất?");
+    const priorityInput = screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?");
     await user.type(bestInput, "Weekly review still saves locally.");
     await user.type(obstacleInput, "Queue storage is full.");
     await user.type(priorityInput, "Keep the local review.");
@@ -214,7 +217,7 @@ describe("12-week write-path safety", () => {
     } finally {
       setItemSpy.mockRestore();
     }
-  });
+  }, INTEGRATION_TEST_TIMEOUT_MS);
 
   it("keeps lag metric, weekly review, and scoreboard metric aligned before weekly-review sync", async () => {
     const { goalId } = seedTwelveWeekGoal();
@@ -230,15 +233,15 @@ describe("12-week write-path safety", () => {
 
     await user.click(screen.getByRole("tab", { name: "Tuần" }));
     await user.type(
-      await screen.findByLabelText("1. Điều gì chạy tốt nhất trong tuần này?"),
+      await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?"),
       "Giữ được nhịp ship mỗi ngày.",
     );
     await user.type(
-      screen.getByLabelText("2. Điều gì cản trở nhịp của bạn?"),
+      screen.getByLabelText("2. Điều gì cản trở nhiều nhất?"),
       "Bị phân tán vì đổi context.",
     );
     await user.type(
-      screen.getByLabelText("3. Một ưu tiên duy nhất cho tuần sau là gì?"),
+      screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?"),
       "Chốt xong command center trước.",
     );
     await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
@@ -284,15 +287,15 @@ describe("12-week write-path safety", () => {
     expect(screen.queryByLabelText("Reflection")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Adjustments")).not.toBeInTheDocument();
     await user.type(
-      await screen.findByLabelText(/chạy tốt nhất/i),
+      await screen.findByLabelText(/kết quả lớn nhất/i),
       "Hoàn thành review local trước khi backend kịp trả lời.",
     );
     await user.type(
-      screen.getByLabelText(/cản trở/i),
+      screen.getByLabelText(/cản trở nhiều nhất/i),
       "Backend đang chậm.",
     );
     await user.type(
-      screen.getByLabelText(/ưu tiên duy nhất/i),
+      screen.getByLabelText(/ưu tiên số 1/i),
       "Giữ review hiển thị trong journal.",
     );
     await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));

@@ -1,11 +1,16 @@
-import { ArrowDown, ArrowUp, BarChart3, CalendarDays, Flag, Lock, Minus, Target, TrendingUp } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUp, BarChart3, CalendarDays, Flag, Lock, Minus, Sparkles, Target, TrendingUp } from "lucide-react";
 
 import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Progress } from "../ui/progress";
 import { formatCalendarDate, getReviewDayLabel } from "../../utils/storage";
 import type { TwelveWeekSystem } from "../../utils/storage-types";
 import type { HeatmapCell, TacticBreakdownItem, WeekTrendPoint } from "../../utils/twelve-week-system-ui";
+import { interpretProgressTrend, type ProgressTrendInterpretation } from "@/features/plan12week/logic";
+import type { ExecutionInsight } from "@/features/plan12week/logic";
+
+import { TwelveWeekInsightsCard } from "./TwelveWeekInsightsCard";
 
 interface WeekRange {
   start: string;
@@ -36,6 +41,65 @@ interface TwelveWeekProgressTabProps {
   executionHeatmap: HeatmapCell[];
   weeklyTrend: WeekTrendPoint[];
   tacticBreakdown: TacticBreakdownItem[];
+  reviewDueToday?: boolean;
+  onOpenTodayTab?: () => void;
+  onOpenWeekTab?: () => void;
+  onNavigateToSetup?: () => void;
+  /**
+   * Optional execution insights computed by `getExecutionInsights`. When
+   * provided and non-empty, the Progress tab renders an insights card under
+   * the trend hero. When omitted or empty, no card renders (backwards compat).
+   */
+  executionInsights?: ReadonlyArray<ExecutionInsight>;
+}
+
+function getNarrativeStyle(level: ProgressTrendInterpretation["level"]): {
+  container: string;
+  badge: string;
+  badgeLabel: string;
+} {
+  switch (level) {
+    case "on_track":
+      return {
+        container: "border-emerald-200 bg-emerald-50/82",
+        badge: "border-emerald-300 bg-white text-emerald-800",
+        badgeLabel: "Đang giữ nhịp",
+      };
+    case "early":
+      return {
+        container: "border-sky-200 bg-sky-50/82",
+        badge: "border-sky-300 bg-white text-sky-800",
+        badgeLabel: "Mới bắt đầu",
+      };
+    case "slowing":
+      return {
+        container: "border-amber-200 bg-amber-50/82",
+        badge: "border-amber-300 bg-white text-amber-800",
+        badgeLabel: "Cần chú ý",
+      };
+    case "at_risk":
+      return {
+        container: "border-rose-200 bg-rose-50/82",
+        badge: "border-rose-300 bg-white text-rose-800",
+        badgeLabel: "Cần cứu nhịp",
+      };
+    default:
+      return {
+        container: "border-slate-200 bg-slate-50",
+        badge: "border-slate-300 bg-white text-slate-700",
+        badgeLabel: "Chưa có dữ liệu",
+      };
+  }
+}
+
+function pickNextActionHandler(
+  level: ProgressTrendInterpretation["level"],
+  reviewDueToday: boolean,
+  callbacks: { onOpenTodayTab?: () => void; onOpenWeekTab?: () => void; onNavigateToSetup?: () => void },
+): (() => void) | undefined {
+  if (level === "no_data") return callbacks.onNavigateToSetup;
+  if (reviewDueToday) return callbacks.onOpenWeekTab;
+  return callbacks.onOpenTodayTab;
 }
 
 export function TwelveWeekProgressTab({
@@ -51,9 +115,100 @@ export function TwelveWeekProgressTab({
   executionHeatmap,
   weeklyTrend,
   tacticBreakdown,
+  reviewDueToday = false,
+  onOpenTodayTab,
+  onOpenWeekTab,
+  onNavigateToSetup,
+  executionInsights,
 }: TwelveWeekProgressTabProps) {
+  const previousWeekEntry = system.scoreboard.find((entry) => entry.weekNumber === currentWeek - 1);
+  const previousWeekScore =
+    previousWeekEntry && previousWeekEntry.weeklyScore > 0 ? previousWeekEntry.weeklyScore : null;
+  const hasAnyTasks = system.scoreboard.some((entry) => entry.weeklyScore > 0) || system.taskInstances.length > 0;
+
+  const trend = interpretProgressTrend({
+    currentWeek,
+    totalWeeks: system.totalWeeks,
+    currentWeekScore: currentWeekScoreValue,
+    previousWeekScore,
+    averageScore,
+    reviewDoneCount,
+    reviewDueToday,
+    hasAnyTasks,
+  });
+  const narrativeStyle = getNarrativeStyle(trend.level);
+  const nextActionHandler = pickNextActionHandler(trend.level, reviewDueToday, {
+    onOpenTodayTab,
+    onOpenWeekTab,
+    onNavigateToSetup,
+  });
+  const isEarlyState = trend.level === "early" || trend.level === "no_data";
+
   return (
     <div className="space-y-6 pt-4">
+      <Card
+        interactive={false}
+        data-testid="progress-trend-hero"
+        className={`border ${narrativeStyle.container}`}
+      >
+        <CardContent className="p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <Sparkles className="h-3.5 w-3.5" />
+                Trạng thái nhịp tuần này
+              </p>
+              <p className="mt-2 text-base font-semibold text-slate-950 sm:text-lg">{trend.headline}</p>
+              <p className="mt-1 text-sm leading-6 text-slate-700">{trend.advice}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {trend.weekOverWeekDelta !== null && (
+                  <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+                    {trend.trendDirection === "up" ? (
+                      <ArrowUp className="mr-1 h-3 w-3 text-emerald-600" />
+                    ) : trend.trendDirection === "down" ? (
+                      <ArrowDown className="mr-1 h-3 w-3 text-rose-600" />
+                    ) : (
+                      <Minus className="mr-1 h-3 w-3 text-slate-500" />
+                    )}
+                    {trend.weekOverWeekDelta > 0 ? "+" : ""}
+                    {trend.weekOverWeekDelta} so với tuần trước
+                  </Badge>
+                )}
+                <span className="text-xs text-slate-500">→ Tiếp theo: {trend.nextAction}</span>
+              </div>
+              {nextActionHandler && (
+                <Button variant="outline" className="mt-4 bg-white sm:w-auto" onClick={nextActionHandler}>
+                  {trend.level === "no_data"
+                    ? "Mở Setup"
+                    : reviewDueToday
+                      ? "Mở tab Tuần"
+                      : "Mở tab Hôm nay"}
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            <span
+              className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${narrativeStyle.badge}`}
+            >
+              {narrativeStyle.badgeLabel}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {executionInsights && executionInsights.length > 0 && (
+        <TwelveWeekInsightsCard
+          insights={executionInsights}
+          onOpenToday={onOpenTodayTab}
+          onOpenWeekReview={onOpenWeekTab}
+          onReduceLoad={onOpenWeekTab}
+          onTightenScope={onOpenWeekTab}
+          onResetFocus={onOpenTodayTab}
+          onCelebrate={onOpenTodayTab}
+          onOpenSetup={onNavigateToSetup}
+        />
+      )}
+
       <div className="grid gap-4 md:grid-cols-3">
         <Card
           interactive={false}
@@ -99,10 +254,12 @@ export function TwelveWeekProgressTab({
               Review đã khóa
             </p>
             <p className="mt-3 text-3xl font-bold text-slate-950">
-              {reviewDoneCount}/{system.totalWeeks}
+              {isEarlyState ? `Tuần ${currentWeek}/${system.totalWeeks}` : `${reviewDoneCount}/${system.totalWeeks}`}
             </p>
             <p className="mt-1 text-sm text-slate-600">
-              {weekCompletion.completed}/{weekCompletion.total} việc tuần này đã xong
+              {isEarlyState
+                ? "Hết tuần này thì có review đầu tiên — chưa cần gấp."
+                : `${weekCompletion.completed}/${weekCompletion.total} việc tuần này đã xong`}
             </p>
           </CardContent>
         </Card>

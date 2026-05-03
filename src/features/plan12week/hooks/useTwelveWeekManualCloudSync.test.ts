@@ -488,7 +488,7 @@ describe("runTwelveWeekManualCloudSync", () => {
 
   it("saves the nextCursor after a successful pull+apply", async () => {
     let savedCursor: string | null | undefined;
-    const writeCursor = vi.fn((uid: string, cursor: string | null) => {
+    const writeCursor = vi.fn((_uid: string, cursor: string | null) => {
       savedCursor = cursor;
     });
 
@@ -602,6 +602,88 @@ describe("runTwelveWeekManualCloudSync", () => {
     expect(clearCursorFn).toHaveBeenCalledWith("user_1");
     expect(pullWorkspace).toHaveBeenCalledTimes(2);
     expect(pullWorkspace.mock.calls[0]).toEqual([{ cursor: "old_invalid_cursor" }]);
+    expect(pullWorkspace.mock.calls[1]).toEqual([]);
+    expect(result.status).toBe("applied");
+  });
+
+  it("clears cursor and retries full pull when backend rejects the cursor", async () => {
+    const clearCursorFn = vi.fn();
+    const pullWorkspace = vi
+      .fn()
+      .mockRejectedValueOnce({
+        status: 400,
+        details: {
+          errorCode: "invalid_cursor",
+          details: { code: "cursor_invalid" },
+        },
+      })
+      .mockResolvedValueOnce(createPullResponse(createSafeCloudWorkspace()));
+
+    const result = await runTwelveWeekManualCloudSync({
+      ...baseOptions(),
+      drainMutations: vi.fn(async () => ({
+        status: "idle" as const,
+        skipReason: "empty" as const,
+        attemptedCount: 0,
+        succeededCount: 0,
+        duplicateCount: 0,
+        failedCount: 0,
+        pendingCount: 0,
+      })),
+      pullWorkspace,
+      readUserData: () => createUserData(),
+      writeUserData: vi.fn(() => true),
+      readCursor: () => "old_invalid_cursor",
+      writeCursor: vi.fn(),
+      clearCursorFn,
+    });
+
+    expect(clearCursorFn).toHaveBeenCalledWith("user_1");
+    expect(pullWorkspace).toHaveBeenCalledTimes(2);
+    expect(pullWorkspace.mock.calls[0]).toEqual([{ cursor: "old_invalid_cursor" }]);
+    expect(pullWorkspace.mock.calls[1]).toEqual([]);
+    expect(result.status).toBe("applied");
+  });
+
+  it("falls back to a full pull when an incremental pull returns warnings", async () => {
+    const clearCursorFn = vi.fn();
+    let callCount = 0;
+    const pullWorkspace = vi.fn(async () => {
+      callCount += 1;
+      if (callCount === 1) {
+        return {
+          ...createPullResponse(createEmptyWorkspace()),
+          mode: "delta" as const,
+          cursorStatus: "applied" as const,
+          warnings: [{ code: "delta_context_entities_require_full_pull", message: "Full pull required." }],
+        };
+      }
+
+      return createPullResponse(createSafeCloudWorkspace());
+    });
+
+    const result = await runTwelveWeekManualCloudSync({
+      ...baseOptions(),
+      drainMutations: vi.fn(async () => ({
+        status: "idle" as const,
+        skipReason: "empty" as const,
+        attemptedCount: 0,
+        succeededCount: 0,
+        duplicateCount: 0,
+        failedCount: 0,
+        pendingCount: 0,
+      })),
+      pullWorkspace,
+      readUserData: () => createUserData(),
+      writeUserData: vi.fn(() => true),
+      readCursor: () => "stored_cursor",
+      writeCursor: vi.fn(),
+      clearCursorFn,
+    });
+
+    expect(clearCursorFn).toHaveBeenCalledWith("user_1");
+    expect(pullWorkspace).toHaveBeenCalledTimes(2);
+    expect(pullWorkspace.mock.calls[0]).toEqual([{ cursor: "stored_cursor" }]);
     expect(pullWorkspace.mock.calls[1]).toEqual([]);
     expect(result.status).toBe("applied");
   });

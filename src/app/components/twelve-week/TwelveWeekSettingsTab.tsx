@@ -45,6 +45,8 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           onRestoreArchivedOutbox={props.onRestoreArchivedOutbox}
           onOpenReminder={props.onOpenReminder}
           onExportLocalData={props.onExportLocalData}
+          onExportCloudWorkspace={props.onExportCloudWorkspace}
+          onDeleteCloudWorkspace={props.onDeleteCloudWorkspace}
           onBrowserNotificationToggle={props.onBrowserNotificationToggle}
           onRunOutboxSync={props.onRunOutboxSync}
           onOutboxItemToggle={props.onOutboxItemToggle}

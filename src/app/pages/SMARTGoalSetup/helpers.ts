@@ -1,11 +1,14 @@
 ﻿import {
+  buildSmartGoal,
   hasOutcomeIndicator,
   isPendingSMARTGoal,
   normalizeListInput,
   parseNumberInput,
   parseSmartGoal,
   stringifyListInput,
+  type SmartGoal,
 } from "@/lib/smart-goal";
+import type { DimensionScore, QualityDimension, SmartGoalQualityResult } from "@/lib/smart-goal/quality";
 
 import { DEFAULT_TARGET_WEEKS } from "./constants";
 import type { GoalClarityItem, SMARTData, SmartStepKey } from "./types";
@@ -245,6 +248,79 @@ export function getStepValidationError(stepKey: SmartStepKey, smartData: SMARTDa
   }
 
   return null;
+}
+
+export function buildSmartGoalFromFormData(smartData: SMARTData, focusArea: string): SmartGoal {
+  return buildSmartGoal({
+    focusArea,
+    specificGoalStatement: smartData.specific.goal_statement,
+    measurableMetricName: smartData.measurable.metric_name,
+    measurableBaselineValue: parseNumberInput(smartData.measurable.baseline_value),
+    measurableTargetValue: parseNumberInput(smartData.measurable.target_value) ?? 0,
+    achievableWeeklyTimeCommitmentHours:
+      parseNumberInput(smartData.achievable.weekly_time_commitment_hours) ?? 0,
+    achievableRequiredSkills: normalizeListInput(smartData.achievable.required_skills),
+    achievableSupportResources: normalizeListInput(smartData.achievable.support_resources),
+    relevantMotivationReason: smartData.relevant.motivation_reason,
+    relevantLifeDimensionAlignment: smartData.relevant.life_dimension_alignment,
+    timeBoundTargetDate:
+      smartData.timeBound.mode === "date" ? smartData.timeBound.target_date : undefined,
+    timeBoundTargetWeeks:
+      smartData.timeBound.mode === "weeks"
+        ? parseNumberInput(smartData.timeBound.target_weeks)
+        : undefined,
+  });
+}
+
+const STEP_QUALITY_DIMENSIONS: Record<SmartStepKey, QualityDimension[]> = {
+  specific: ["specificity"],
+  measurable: ["measurableClarity", "baselineTargetQuality"],
+  achievable: ["achievableRealism", "resourceSupportClarity"],
+  relevant: ["relevanceMotivation"],
+  timeBound: ["timeBoundClarity", "twelveWeekCompatibility"],
+};
+
+const DIMENSION_HINTS: Partial<Record<QualityDimension, string>> = {
+  specificity:
+    "Gợi ý: dùng động từ kết quả rõ ràng như đạt, hoàn thành, xây dựng để mục tiêu có hướng.",
+  measurableClarity: "Gợi ý: thêm đơn vị đo giúp chỉ số rõ ràng hơn.",
+  baselineTargetQuality:
+    "Gợi ý: thêm mốc hiện tại (baseline) để đánh giá khoảng cách cần vượt qua.",
+  resourceSupportClarity:
+    "Gợi ý: thêm kỹ năng và nguồn hỗ trợ giúp kiểm tra tính khả thi chính xác hơn.",
+  relevanceMotivation:
+    "Gợi ý: gắn với lĩnh vực cuộc sống (sự nghiệp, sức khỏe...) giúp giữ cam kết lâu hơn.",
+  twelveWeekCompatibility:
+    "Gợi ý: chu kỳ 8–16 tuần phù hợp nhất với hệ thống 12 tuần.",
+};
+
+export function getStepQualityHint(
+  stepKey: SmartStepKey,
+  qualityResult: SmartGoalQualityResult,
+  hasContent: boolean,
+): string | null {
+  if (!hasContent) return null;
+
+  const dimensionKeys = STEP_QUALITY_DIMENSIONS[stepKey];
+  if (!dimensionKeys) return null;
+
+  const weakDimensions = dimensionKeys
+    .map((key) => qualityResult.dimensions.find((d: DimensionScore) => d.dimension === key))
+    .filter(
+      (d): d is DimensionScore => d !== undefined && d.score < d.maxScore * 0.5,
+    );
+
+  if (weakDimensions.length === 0) return null;
+
+  return DIMENSION_HINTS[weakDimensions[0].dimension] ?? null;
+}
+
+export function getQualityScoreBucket(score: number): string {
+  if (score < 20) return "0-19";
+  if (score < 40) return "20-39";
+  if (score < 60) return "40-59";
+  if (score < 80) return "60-79";
+  return "80-100";
 }
 
 export function buildGoalClarityItems(smartData: SMARTData): GoalClarityItem[] {

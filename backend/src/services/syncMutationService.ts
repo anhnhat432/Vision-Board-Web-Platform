@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { isValidObjectId } from "mongoose";
 
 import { DailyCheckInModel } from "../models/DailyCheckInModel";
+import { LeadMetricModel } from "../models/LeadMetricModel";
 import { PlanModel } from "../models/PlanModel";
 import { TaskModel } from "../models/TaskModel";
 import { WeekModel } from "../models/WeekModel";
@@ -18,6 +19,7 @@ export const SYNC_MUTATION_TYPES = [
   "daily_check_in_upserted",
   "weekly_review_upserted",
   "plan_snapshot_updated",
+  "lead_metric_upserted",
   "task_upsert",
   "daily_checkin_upsert",
   "weekly_review_upsert",
@@ -39,7 +41,7 @@ export interface SyncMutationResult {
     | "conflict";
   acceptedAt?: string;
   duplicateOf?: string;
-  entityType?: "task" | "daily_check_in" | "weekly_review";
+  entityType?: "task" | "daily_check_in" | "weekly_review" | "plan" | "lead_metric";
   clientId?: string;
   serverId?: string;
   revision?: number;
@@ -161,6 +163,42 @@ export interface WeeklyReviewUpsertApplyInput {
   syncUpdatedAt: Date;
 }
 
+export interface PlanSnapshotWeekUpdateInput {
+  clientWeekId?: string;
+  weekNumber: number;
+  focus?: string;
+  expectedOutput?: string;
+}
+
+export interface PlanSnapshotUpdatedApplyInput {
+  mutationId: string;
+  clientGoalId?: string;
+  clientPlanId: string;
+  vision?: string;
+  startDate?: Date;
+  weeks: PlanSnapshotWeekUpdateInput[];
+  syncUpdatedAt: Date;
+}
+
+export interface LeadMetricUpsertApplyInput {
+  mutationId: string;
+  clientPlanId: string;
+  clientWeekId?: string;
+  clientMetricId: string;
+  leadIndicatorId?: string;
+  weekNumber: number;
+  name: string;
+  weeklyTarget?: number;
+  target?: string;
+  currentValue?: number;
+  unit?: string;
+  frequency?: string;
+  type?: string;
+  priority?: number;
+  schedule?: number[];
+  syncUpdatedAt: Date;
+}
+
 export interface AppliedWorkspaceMutationEntity {
   id: string;
   clientId?: string;
@@ -176,6 +214,14 @@ export interface SyncWorkspaceMutationRepository {
   applyWeeklyReviewUpserted(
     userId: string,
     input: WeeklyReviewUpsertApplyInput,
+  ): Promise<AppliedWorkspaceMutationEntity | null>;
+  applyPlanSnapshotUpdated(
+    userId: string,
+    input: PlanSnapshotUpdatedApplyInput,
+  ): Promise<AppliedWorkspaceMutationEntity | null>;
+  applyLeadMetricUpserted(
+    userId: string,
+    input: LeadMetricUpsertApplyInput,
   ): Promise<AppliedWorkspaceMutationEntity | null>;
 }
 
@@ -199,7 +245,11 @@ interface MongoWeekDoc {
 interface MongoPlanDoc {
   _id: { toString(): string } | string;
   userId: string;
+  vision?: string | null;
+  startDate?: Date | null;
   clientPlanId?: string | null;
+  revision?: number | null;
+  syncUpdatedAt?: Date | null;
 }
 
 interface OwnedWeekRef {
@@ -220,6 +270,13 @@ interface MongoDailyCheckInDoc {
 interface MongoWeekReviewDoc {
   _id: { toString(): string } | string;
   clientReviewId?: string | null;
+  revision?: number | null;
+  syncUpdatedAt?: Date | null;
+}
+
+interface MongoLeadMetricDoc {
+  _id: { toString(): string } | string;
+  clientMetricId?: string | null;
   revision?: number | null;
   syncUpdatedAt?: Date | null;
 }
@@ -648,7 +705,127 @@ function mapWeekReviewDoc(doc: MongoWeekReviewDoc): AppliedWorkspaceMutationEnti
   };
 }
 
+function mapPlanDoc(doc: MongoPlanDoc): AppliedWorkspaceMutationEntity {
+  return {
+    id: getDocId(doc),
+    clientId: doc.clientPlanId ?? undefined,
+    revision: doc.revision ?? undefined,
+    syncUpdatedAt: doc.syncUpdatedAt ?? undefined,
+  };
+}
+
+function mapLeadMetricDoc(doc: MongoLeadMetricDoc): AppliedWorkspaceMutationEntity {
+  return {
+    id: getDocId(doc),
+    clientId: doc.clientMetricId ?? undefined,
+    revision: doc.revision ?? undefined,
+    syncUpdatedAt: doc.syncUpdatedAt ?? undefined,
+  };
+}
+
 export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutationRepository {
+  async applyPlanSnapshotUpdated(
+    userId: string,
+    input: PlanSnapshotUpdatedApplyInput,
+  ): Promise<AppliedWorkspaceMutationEntity | null> {
+    const existingPlan = await PlanModel.findOne({ userId, clientPlanId: input.clientPlanId }).lean();
+    if (!existingPlan) return null;
+
+    const mappedPlan = existingPlan as unknown as MongoPlanDoc;
+    const planId = getDocId(mappedPlan);
+    const planSet: Record<string, unknown> = {
+      lastMutationId: input.mutationId,
+      syncUpdatedAt: input.syncUpdatedAt,
+    };
+    if (input.clientGoalId) planSet.clientGoalId = input.clientGoalId;
+    if (input.vision !== undefined) planSet.vision = input.vision;
+    if (input.startDate !== undefined) planSet.startDate = input.startDate;
+
+    const updatedPlan = await PlanModel.findByIdAndUpdate(
+      planId,
+      { $set: planSet, $inc: { revision: 1 } },
+      { new: true, runValidators: true },
+    ).lean();
+    if (!updatedPlan) return null;
+
+    for (const week of input.weeks) {
+      const weekQuery: Record<string, unknown> = { planId };
+      if (week.clientWeekId) weekQuery.clientWeekId = week.clientWeekId;
+      else weekQuery.weekNumber = week.weekNumber;
+
+      const weekSet: Record<string, unknown> = {
+        clientPlanId: input.clientPlanId,
+        lastMutationId: input.mutationId,
+        syncUpdatedAt: input.syncUpdatedAt,
+      };
+      if (week.focus !== undefined) weekSet.focus = week.focus;
+      if (week.expectedOutput !== undefined) weekSet.expectedOutput = week.expectedOutput;
+
+      await WeekModel.findOneAndUpdate(
+        weekQuery,
+        { $set: weekSet, $inc: { revision: 1 } },
+        { runValidators: true },
+      ).lean();
+    }
+
+    return mapPlanDoc(updatedPlan as unknown as MongoPlanDoc);
+  }
+
+  async applyLeadMetricUpserted(
+    userId: string,
+    input: LeadMetricUpsertApplyInput,
+  ): Promise<AppliedWorkspaceMutationEntity | null> {
+    const ownedWeek = await this.findOwnedWeek(userId, input);
+    if (!ownedWeek) return null;
+
+    const existing = await LeadMetricModel.findOne({
+      $or: [
+        {
+          userId,
+          clientPlanId: ownedWeek.clientPlanId,
+          clientWeekId: ownedWeek.clientWeekId,
+          clientMetricId: input.clientMetricId,
+        },
+        {
+          weekId: ownedWeek.weekId,
+          clientMetricId: input.clientMetricId,
+        },
+      ],
+    }).lean();
+    const update = {
+      userId,
+      weekId: ownedWeek.weekId,
+      clientPlanId: ownedWeek.clientPlanId,
+      clientWeekId: ownedWeek.clientWeekId,
+      clientMetricId: input.clientMetricId,
+      leadIndicatorId: input.leadIndicatorId,
+      name: input.name,
+      weeklyTarget: input.weeklyTarget ?? 0,
+      target: input.target,
+      currentValue: input.currentValue,
+      unit: input.unit,
+      frequency: input.frequency,
+      type: input.type,
+      priority: input.priority,
+      schedule: input.schedule,
+      lastMutationId: input.mutationId,
+      syncUpdatedAt: input.syncUpdatedAt,
+    };
+
+    if (existing) {
+      const doc = await LeadMetricModel.findByIdAndUpdate(
+        getDocId(existing as unknown as MongoLeadMetricDoc),
+        { $set: update, $inc: { revision: 1 } },
+        { new: true, runValidators: true },
+      ).lean();
+
+      return doc ? mapLeadMetricDoc(doc as unknown as MongoLeadMetricDoc) : null;
+    }
+
+    const doc = await LeadMetricModel.create(update);
+    return mapLeadMetricDoc(doc.toObject() as unknown as MongoLeadMetricDoc);
+  }
+
   async applyDailyCheckInUpserted(
     userId: string,
     input: DailyCheckInUpsertApplyInput,
@@ -981,6 +1158,139 @@ function validateWeeklyReviewUpsertedMutation(
   };
 }
 
+function validateOptionalSchedule(value: unknown, fieldPath: string): number[] | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (!Array.isArray(value)) {
+    throw new ApiError(400, `${fieldPath} must be an array.`);
+  }
+
+  return value.map((day, index) => {
+    if (!Number.isInteger(day)) {
+      throw new ApiError(400, `${fieldPath}[${index}] must be an integer.`);
+    }
+    return day;
+  });
+}
+
+function validateLeadMetricUpsertedMutation(
+  mutation: ValidatedMutation,
+): Omit<LeadMetricUpsertApplyInput, "mutationId" | "syncUpdatedAt"> {
+  const metric = getNestedPayloadRecord(mutation.payload, "metric");
+  const clientPlanId = getClientPlanId(mutation, metric);
+  const clientWeekId = getClientWeekId(mutation, metric);
+  const clientMetricId =
+    validateOptionalString(mutation.entity?.clientMetricId, "entity.clientMetricId") ??
+    validateOptionalString(mutation.payload.clientMetricId, "payload.clientMetricId") ??
+    validateOptionalString(metric.clientMetricId, "payload.metric.clientMetricId");
+  if (!clientMetricId) {
+    throw new ApiError(400, "lead_metric_upserted requires clientMetricId.");
+  }
+  validateStringLength(clientMetricId, "payload.clientMetricId", MAX_CLIENT_ID_LENGTH);
+
+  const name = validateRequiredString(metric.name ?? mutation.payload.name, "payload.metric.name");
+  validateStringLength(name, "payload.metric.name", 200);
+
+  return {
+    clientPlanId,
+    clientWeekId,
+    clientMetricId,
+    leadIndicatorId:
+      validateOptionalString(metric.leadIndicatorId, "payload.metric.leadIndicatorId") ??
+      validateOptionalString(mutation.payload.leadIndicatorId, "payload.leadIndicatorId"),
+    weekNumber: validateWeekNumber(mutation.payload.weekNumber ?? metric.weekNumber, "payload.weekNumber"),
+    name,
+    weeklyTarget: validateOptionalNumberRange(
+      metric.weeklyTarget ?? mutation.payload.weeklyTarget,
+      "payload.metric.weeklyTarget",
+      0,
+      10_000,
+    ),
+    target: validateOptionalText(metric.target ?? mutation.payload.target, "payload.metric.target", 200),
+    currentValue: validateOptionalNumberRange(
+      metric.currentValue ?? mutation.payload.currentValue,
+      "payload.metric.currentValue",
+      0,
+      10_000,
+    ),
+    unit: validateOptionalText(metric.unit ?? mutation.payload.unit, "payload.metric.unit", 120),
+    frequency: validateOptionalText(metric.frequency ?? mutation.payload.frequency, "payload.metric.frequency", 120),
+    type: validateOptionalText(metric.type ?? mutation.payload.type, "payload.metric.type", 120),
+    priority: validateOptionalNumberRange(
+      metric.priority ?? mutation.payload.priority,
+      "payload.metric.priority",
+      0,
+      1_000,
+    ),
+    schedule: validateOptionalSchedule(metric.schedule ?? mutation.payload.schedule, "payload.metric.schedule"),
+  };
+}
+
+function validatePlanSnapshotUpdatedMutation(
+  mutation: ValidatedMutation,
+): Omit<PlanSnapshotUpdatedApplyInput, "mutationId" | "syncUpdatedAt"> {
+  const system = getNestedPayloadRecord(mutation.payload, "system");
+  const clientPlanId = getClientPlanId(mutation, system);
+  validateStringLength(clientPlanId, "payload.clientPlanId", MAX_CLIENT_ID_LENGTH);
+  const clientGoalId =
+    validateOptionalString(mutation.entity?.clientGoalId, "entity.clientGoalId") ??
+    validateOptionalString(mutation.payload.clientGoalId, "payload.clientGoalId");
+  if (clientGoalId) validateStringLength(clientGoalId, "payload.clientGoalId", MAX_CLIENT_ID_LENGTH);
+
+  const vision = validateOptionalText(
+    mutation.payload.vision ?? system.vision ?? system.vision12Week,
+    "payload.system.vision12Week",
+  );
+  const startDate = validateOptionalDate(
+    mutation.payload.startDate ?? system.startDate,
+    "payload.system.startDate",
+  );
+  const rawWeeks = Array.isArray(system.weeklyPlans)
+    ? system.weeklyPlans
+    : Array.isArray(mutation.payload.weeks)
+      ? mutation.payload.weeks
+      : [];
+  if (rawWeeks.length > 12) {
+    throw new ApiError(400, "payload.system.weeklyPlans cannot contain more than 12 weeks.");
+  }
+
+  const seenWeekNumbers = new Set<number>();
+  const weeks = rawWeeks.map((rawWeek, index): PlanSnapshotWeekUpdateInput => {
+    if (!isRecord(rawWeek)) {
+      throw new ApiError(400, `payload.system.weeklyPlans[${index}] must be an object.`);
+    }
+
+    const weekNumber = validateWeekNumber(rawWeek.weekNumber, `payload.system.weeklyPlans[${index}].weekNumber`);
+    if (seenWeekNumbers.has(weekNumber)) {
+      throw new ApiError(400, `payload.system.weeklyPlans[${index}].weekNumber must be unique.`);
+    }
+    seenWeekNumbers.add(weekNumber);
+
+    const clientWeekId = validateOptionalString(
+      rawWeek.clientWeekId,
+      `payload.system.weeklyPlans[${index}].clientWeekId`,
+    );
+    if (clientWeekId) validateStringLength(clientWeekId, `payload.system.weeklyPlans[${index}].clientWeekId`, MAX_CLIENT_ID_LENGTH);
+
+    return {
+      clientWeekId,
+      weekNumber,
+      focus: validateOptionalText(rawWeek.focus, `payload.system.weeklyPlans[${index}].focus`),
+      expectedOutput: validateOptionalText(
+        rawWeek.expectedOutput ?? rawWeek.milestone,
+        `payload.system.weeklyPlans[${index}].expectedOutput`,
+      ),
+    };
+  });
+
+  return {
+    clientGoalId,
+    clientPlanId,
+    vision,
+    startDate,
+    weeks,
+  };
+}
+
 function createUnsupportedMutationResult(mutation: ValidatedMutation): SyncMutationResult {
   return {
     mutationId: mutation.mutationId,
@@ -1130,6 +1440,76 @@ export class SyncMutationService {
             clientId: applyInput.clientReviewId,
             reason: "week_not_found_or_not_owned",
             message: "Weekly review parent week was not found for this authenticated user.",
+            syncErrorCode: "ownership_denied",
+          };
+        }
+      } else if (mutation.type === "lead_metric_upserted") {
+        const applyInput = validateLeadMetricUpsertedMutation(mutation);
+        const updatedMetric = await this.workspaceMutationRepository.applyLeadMetricUpserted(userId, {
+          ...applyInput,
+          mutationId: mutation.mutationId,
+          syncUpdatedAt: processedAt,
+        });
+
+        if (updatedMetric) {
+          logStatus = "applied";
+          appliedCount += 1;
+          result = {
+            mutationId: mutation.mutationId,
+            type: mutation.type,
+            status: "applied",
+            entityType: "lead_metric",
+            clientId: updatedMetric.clientId ?? applyInput.clientMetricId,
+            serverId: updatedMetric.id,
+            revision: updatedMetric.revision,
+            syncUpdatedAt: (updatedMetric.syncUpdatedAt ?? processedAt).toISOString(),
+            message: "Lead metric mutation applied.",
+          };
+        } else {
+          logStatus = "failed";
+          result = {
+            mutationId: mutation.mutationId,
+            type: mutation.type,
+            status: "failed_not_found",
+            entityType: "lead_metric",
+            clientId: applyInput.clientMetricId,
+            reason: "week_not_found_or_not_owned",
+            message: "Lead metric parent week was not found for this authenticated user.",
+            syncErrorCode: "ownership_denied",
+          };
+        }
+      } else if (mutation.type === "plan_snapshot_updated") {
+        const applyInput = validatePlanSnapshotUpdatedMutation(mutation);
+        const updatedPlan = await this.workspaceMutationRepository.applyPlanSnapshotUpdated(userId, {
+          ...applyInput,
+          mutationId: mutation.mutationId,
+          syncUpdatedAt: processedAt,
+        });
+
+        if (updatedPlan) {
+          logStatus = "applied";
+          appliedCount += 1;
+          result = {
+            mutationId: mutation.mutationId,
+            type: mutation.type,
+            status: "applied",
+            entityType: "plan",
+            clientId: updatedPlan.clientId ?? applyInput.clientPlanId,
+            serverId: updatedPlan.id,
+            revision: updatedPlan.revision,
+            syncUpdatedAt: (updatedPlan.syncUpdatedAt ?? processedAt).toISOString(),
+            message: "Plan snapshot mutation applied.",
+          };
+        } else {
+          logStatus = "failed";
+          result = {
+            mutationId: mutation.mutationId,
+            type: mutation.type,
+            status: "failed_not_found",
+            entityType: "plan",
+            clientId: applyInput.clientPlanId,
+            reason: "plan_not_found_or_not_owned",
+            message: "Plan was not found for this authenticated user.",
             syncErrorCode: "ownership_denied",
           };
         }

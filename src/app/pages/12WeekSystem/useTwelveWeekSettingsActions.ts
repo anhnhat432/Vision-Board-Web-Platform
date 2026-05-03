@@ -8,6 +8,8 @@ import {
   sendTestBrowserNotification,
 } from "@/app/utils/production";
 import { downloadLocalUserDataBackup } from "@/app/utils/local-data-backup";
+import { isDemoMode } from "@/app/utils/app-mode";
+import { exportCloudWorkspace, deleteCloudWorkspace } from "@/services/syncService";
 import {
   type AppPreferences,
   type InAppReminder,
@@ -25,6 +27,8 @@ import {
 } from "@/app/utils/storage";
 import type { Goal, TwelveWeekSystem } from "@/app/utils/storage-types";
 import { getCurrentWeekStartDate } from "@/app/utils/twelve-week-system-ui";
+import { enqueueLeadMetricUpsertedMutations } from "@/features/plan12week/persistence/leadMetricMutation";
+import { enqueuePlanSnapshotUpdatedMutation } from "@/features/plan12week/persistence/planSnapshotMutation";
 
 interface UseTwelveWeekSettingsActionsOptions {
   activeGoal: Goal | null;
@@ -55,9 +59,15 @@ export function useTwelveWeekSettingsActions({
   setIsResetDialogOpen,
   navigate,
 }: UseTwelveWeekSettingsActionsOptions) {
+  const commitPlanSnapshotUpdate = (nextSystem: TwelveWeekSystem) => {
+    const savedSystem = commitSystemUpdate(nextSystem);
+    if (activeGoal) enqueuePlanSnapshotUpdatedMutation(activeGoal.id, savedSystem, "manual_update");
+    return savedSystem;
+  };
+
   const handleReviewDayChange = (value: string) => {
     if (!system) return;
-    commitSystemUpdate({
+    commitPlanSnapshotUpdate({
       ...system,
       reviewDay: value,
     });
@@ -77,7 +87,7 @@ export function useTwelveWeekSettingsActions({
 
   const handleLoadPreferenceChange = (value: string) => {
     if (!system) return;
-    commitSystemUpdate({
+    commitPlanSnapshotUpdate({
       ...system,
       tacticLoadPreference: value as typeof system.tacticLoadPreference,
     });
@@ -85,7 +95,7 @@ export function useTwelveWeekSettingsActions({
 
   const handleStatusChange = (value: string) => {
     if (!system) return;
-    commitSystemUpdate({
+    commitPlanSnapshotUpdate({
       ...system,
       status: value as typeof system.status,
     });
@@ -94,26 +104,28 @@ export function useTwelveWeekSettingsActions({
   const handleTacticPriorityChange = (tacticId: string | undefined, value: string) => {
     if (!activeGoal || !system || !tacticId) return;
 
-    commitSystemUpdate({
+    const savedSystem = commitPlanSnapshotUpdate({
       ...system,
       leadIndicators: system.leadIndicators.map((indicator, index) => {
         const indicatorId = indicator.id ?? `tactic_${index}`;
         return indicatorId === tacticId ? { ...indicator, priority: Number.parseInt(value, 10) || index + 1 } : indicator;
       }),
     });
+    enqueueLeadMetricUpsertedMutations(activeGoal.id, savedSystem, "manual_update", { indicatorIds: [tacticId] });
     trackAppEvent("12_week_tactic_updated", activeGoal.id, { tacticId, field: "priority", value });
   };
 
   const handleTacticTypeChange = (tacticId: string | undefined, value: string) => {
     if (!activeGoal || !system || !tacticId) return;
 
-    commitSystemUpdate({
+    const savedSystem = commitPlanSnapshotUpdate({
       ...system,
       leadIndicators: system.leadIndicators.map((indicator, index) => {
         const indicatorId = indicator.id ?? `tactic_${index}`;
         return indicatorId === tacticId ? { ...indicator, type: value === "optional" ? "optional" : "core" } : indicator;
       }),
     });
+    enqueueLeadMetricUpsertedMutations(activeGoal.id, savedSystem, "manual_update", { indicatorIds: [tacticId] });
     trackAppEvent("12_week_tactic_updated", activeGoal.id, { tacticId, field: "type", value });
   };
 
@@ -160,6 +172,57 @@ export function useTwelveWeekSettingsActions({
   const handleExportLocalData = () => {
     downloadLocalUserDataBackup({ data: getUserData(), filenamePrefix: "vision-board-local" });
     toast.success("Đã tải bản sao dữ liệu local.");
+  };
+
+  const handleExportCloudWorkspace = async () => {
+    if (isDemoMode()) {
+      toast.info("Bản demo không hỗ trợ export cloud. Dùng export local.");
+      return;
+    }
+    try {
+      const data = await exportCloudWorkspace();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json;charset=utf-8" });
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `vision-board-cloud-${new Date().toISOString().slice(0, 10)}.json`;
+      anchor.style.display = "none";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.URL.revokeObjectURL(url);
+      trackAppEvent("cloud_workspace_exported", activeGoal?.id ?? "", { counts: JSON.stringify(data.counts) });
+      toast.success("Đã tải bản sao cloud workspace.");
+    } catch (error) {
+      toast.error("Không thể export cloud workspace. Kiểm tra kết nối và thử lại.");
+    }
+  };
+
+  const handleDeleteCloudWorkspace = async () => {
+    if (isDemoMode()) {
+      toast.info("Bản demo không hỗ trợ xóa cloud workspace.");
+      return;
+    }
+    const confirmed = window.confirm(
+      "Bạn có chắc muốn xóa toàn bộ dữ liệu 12-week trên cloud?\n\n" +
+        "• Chỉ xóa dữ liệu workspace trên server (goal, plan, week, task, lead metric, check-in, review).\n" +
+        "• KHÔNG xóa dữ liệu local trên trình duyệt này.\n" +
+        "• KHÔNG xóa billing, subscription hay tài khoản.\n\n" +
+        "Hành động này không thể hoàn tác.",
+    );
+    if (!confirmed) return;
+    try {
+      const result = await deleteCloudWorkspace();
+      trackAppEvent("cloud_workspace_deleted", activeGoal?.id ?? "", {
+        policy: result.policy,
+        counts: JSON.stringify(result.counts),
+      });
+      toast.success("Đã xóa dữ liệu 12-week trên cloud.", {
+        description: "Dữ liệu local, billing và tài khoản không bị ảnh hưởng.",
+      });
+    } catch (error) {
+      toast.error("Không thể xóa cloud workspace. Kiểm tra kết nối và thử lại.");
+    }
   };
 
   const handleClearLocalSignals = () => {
@@ -217,6 +280,8 @@ export function useTwelveWeekSettingsActions({
       totalWeeks: String(system.totalWeeks),
     });
     setIsResetDialogOpen(false);
+    const resetSystem = getUserData().goals.find((goal) => goal.id === activeGoal.id)?.twelveWeekSystem;
+    if (resetSystem) enqueuePlanSnapshotUpdatedMutation(activeGoal.id, resetSystem, "reset");
     setActiveTab("today");
     toast.success("Chu kỳ đã được reset từ tuần này.", {
       description: "Việc, check-in và review tuần của chu kỳ hiện tại đã được làm mới để bạn bắt đầu lại gọn hơn.",
@@ -237,6 +302,8 @@ export function useTwelveWeekSettingsActions({
     handleRestoreArchivedOutbox,
     handleOpenReminder,
     handleExportLocalData,
+    handleExportCloudWorkspace,
+    handleDeleteCloudWorkspace,
     handleClearLocalSignals,
     handleDeleteAllData,
     handleBrowserNotificationToggle,

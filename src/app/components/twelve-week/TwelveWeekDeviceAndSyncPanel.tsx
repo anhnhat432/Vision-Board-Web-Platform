@@ -51,6 +51,8 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
           lastBackendHydrationResult={props.lastBackendHydrationResult}
           mutationQueueSyncStatus={props.mutationQueueSyncStatus}
           onExportLocalData={props.onExportLocalData}
+          onExportCloudWorkspace={props.onExportCloudWorkspace}
+          onDeleteCloudWorkspace={props.onDeleteCloudWorkspace}
           onHydrateBackendPlans={props.onHydrateBackendPlans}
           onRunMutationQueueSync={props.onRunMutationQueueSync}
           onKeepLocalPlanForConflicts={props.onKeepLocalPlanForConflicts}

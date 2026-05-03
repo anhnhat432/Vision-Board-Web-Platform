@@ -19,6 +19,8 @@ import {
   updateUserData,
 } from "../../test/app-flow-helpers";
 
+const INTEGRATION_TEST_TIMEOUT_MS = 10_000;
+
 describe("12-week core flows", () => {
   beforeEach(() => {
     resetTestStorage();
@@ -58,6 +60,28 @@ describe("12-week core flows", () => {
     expect(weekOneTasks.length).toBeGreaterThan(0);
     expect(weekOneTasks.every((task) => task.scheduledDate >= todayKey)).toBe(true);
     expect(localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId)).toBe(data.goals[0]?.id);
+
+    const snapshotMutation = listStoredPendingMutations(null).find((item) => item.kind === "plan_snapshot_updated");
+    expect(snapshotMutation).toEqual(expect.objectContaining({ kind: "plan_snapshot_updated", goalId: data.goals[0]?.id }));
+    if (snapshotMutation?.kind === "plan_snapshot_updated") {
+      expect(snapshotMutation.payload.reason).toBe("setup");
+      expect(snapshotMutation.payload.clientPlanId).toBe(`${data.goals[0]?.id}:12-week-system`);
+      expect(snapshotMutation.payload.system.vision12Week).toBe(createdSystem?.vision12Week);
+      expect(snapshotMutation.payload.system.weeklyPlans.length).toBe(createdSystem?.weeklyPlans.length);
+      expect("taskInstances" in snapshotMutation.payload.system).toBe(false);
+      expect("dailyCheckIns" in snapshotMutation.payload.system).toBe(false);
+      expect("weeklyReviews" in snapshotMutation.payload.system).toBe(false);
+      expect("dailyReminderTime" in snapshotMutation.payload.system).toBe(false);
+    }
+
+    const leadMetricMutations = listStoredPendingMutations(null).filter((item) => item.kind === "lead_metric_upserted");
+    expect(leadMetricMutations.length).toBeGreaterThan(0);
+    if (leadMetricMutations[0]?.kind === "lead_metric_upserted") {
+      expect(leadMetricMutations[0].payload.reason).toBe("setup");
+      expect(leadMetricMutations[0].payload.clientPlanId).toBe(`${data.goals[0]?.id}:12-week-system`);
+      expect(leadMetricMutations[0].payload.clientMetricId).toContain(":metric:");
+      expect(leadMetricMutations[0].payload.weeklyTarget).toBeGreaterThanOrEqual(0);
+    }
   }, 10_000);
 
   it("shows a clear next action when no 12-week plan exists", async () => {
@@ -106,12 +130,18 @@ describe("12-week core flows", () => {
     });
 
     const pendingMutations = listStoredPendingMutations(null);
-    expect(pendingMutations).toHaveLength(1);
-    expect(pendingMutations[0]).toEqual(expect.objectContaining({ kind: "task_completed_changed", goalId }));
-    if (pendingMutations[0].kind === "task_completed_changed") {
-      expect(pendingMutations[0].payload.clientTaskId).toBe(completedTaskId);
-      expect(pendingMutations[0].payload.completed).toBe(true);
-      expect(pendingMutations[0].payload.completedAt).toBeTruthy();
+    const taskMutation = pendingMutations.find((item) => item.kind === "task_completed_changed");
+    const leadMetricMutation = pendingMutations.find((item) => item.kind === "lead_metric_upserted");
+    expect(taskMutation).toEqual(expect.objectContaining({ kind: "task_completed_changed", goalId }));
+    expect(leadMetricMutation).toEqual(expect.objectContaining({ kind: "lead_metric_upserted", goalId }));
+    if (taskMutation?.kind === "task_completed_changed") {
+      expect(taskMutation.payload.clientTaskId).toBe(completedTaskId);
+      expect(taskMutation.payload.completed).toBe(true);
+      expect(taskMutation.payload.completedAt).toBeTruthy();
+    }
+    if (leadMetricMutation?.kind === "lead_metric_upserted") {
+      expect(leadMetricMutation.payload.reason).toBe("task_progress");
+      expect(leadMetricMutation.payload.currentValue).toBeGreaterThan(0);
     }
     expect(getUserData().eventLog.some((event) => event.type === "12_week_task_completed")).toBe(true);
   });
@@ -142,12 +172,17 @@ describe("12-week core flows", () => {
     });
 
     const pendingMutations = listStoredPendingMutations(null);
-    expect(pendingMutations).toHaveLength(1);
-    expect(pendingMutations[0].supersedes).toHaveLength(1);
-    if (pendingMutations[0].kind === "task_completed_changed") {
-      expect(pendingMutations[0].payload.clientTaskId).toBe(reopenedTaskId);
-      expect(pendingMutations[0].payload.completed).toBe(false);
-      expect(pendingMutations[0].payload.completedAt).toBeUndefined();
+    const taskMutation = pendingMutations.find((item) => item.kind === "task_completed_changed");
+    const leadMetricMutation = pendingMutations.find((item) => item.kind === "lead_metric_upserted");
+    expect(taskMutation?.supersedes).toHaveLength(1);
+    expect(leadMetricMutation?.supersedes).toHaveLength(1);
+    if (taskMutation?.kind === "task_completed_changed") {
+      expect(taskMutation.payload.clientTaskId).toBe(reopenedTaskId);
+      expect(taskMutation.payload.completed).toBe(false);
+      expect(taskMutation.payload.completedAt).toBeUndefined();
+    }
+    if (leadMetricMutation?.kind === "lead_metric_upserted") {
+      expect(leadMetricMutation.payload.currentValue).toBe(0);
     }
   });
 
@@ -225,8 +260,8 @@ describe("12-week core flows", () => {
     await user.type(screen.getByLabelText("Note tùy chọn"), "Giữ task đã tick khi review tuần.");
     await user.click(screen.getByRole("button", { name: "Lưu check-in hôm nay" }));
     await user.click(screen.getByRole("tab", { name: "Tuần" }));
-    await user.type(await screen.findByLabelText("1. Điều gì chạy tốt nhất trong tuần này?"), "Chốt được một việc thật.");
-    await user.type(screen.getByLabelText("3. Một ưu tiên duy nhất cho tuần sau là gì?"), "Giữ nhịp execution.");
+    await user.type(await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?"), "Chốt được một việc thật.");
+    await user.type(screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?"), "Giữ nhịp execution.");
     await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
 
     await waitFor(() => {
@@ -236,7 +271,7 @@ describe("12-week core flows", () => {
       expect(system?.dailyCheckIns[0]?.optionalNote).toBe("Giữ task đã tick khi review tuần.");
       expect(system?.weeklyReviews).toHaveLength(1);
     });
-  });
+  }, INTEGRATION_TEST_TIMEOUT_MS);
 
   it("submits the weekly review and writes the linked journal entry", async () => {
     const { goalId } = seedTwelveWeekGoal();
@@ -244,9 +279,9 @@ describe("12-week core flows", () => {
     const user = userEvent.setup();
 
     await user.click(screen.getByRole("tab", { name: "Tuần" }));
-    await user.type(await screen.findByLabelText("1. Điều gì chạy tốt nhất trong tuần này?"), "Giữ được nhịp ship mỗi ngày.");
-    await user.type(screen.getByLabelText("2. Điều gì cản trở nhịp của bạn?"), "Bị phân tán vì đổi context.");
-    await user.type(screen.getByLabelText("3. Một ưu tiên duy nhất cho tuần sau là gì?"), "Chốt xong command center trước.");
+    await user.type(await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?"), "Giữ được nhịp ship mỗi ngày.");
+    await user.type(screen.getByLabelText("2. Điều gì cản trở nhiều nhất?"), "Bị phân tán vì đổi context.");
+    await user.type(screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?"), "Chốt xong command center trước.");
     await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
 
     await waitFor(() => {
@@ -276,13 +311,92 @@ describe("12-week core flows", () => {
     }
   });
 
+  it("saves keep/reduce tactic fields and shows the post-save summary card", async () => {
+    const { goalId } = seedTwelveWeekGoal();
+    renderAppRoute("/12-week-system");
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("tab", { name: "Tuần" }));
+    await user.type(
+      await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?"),
+      "Đã ship 1 deliverable nhỏ.",
+    );
+    await user.type(screen.getByLabelText("3. Việc nào tuần sau nên giữ?"), "Giữ buổi review thứ Năm.");
+    await user.type(
+      screen.getByLabelText("4. Việc nào nên giảm hoặc bỏ?"),
+      "Giảm thời gian họp dài cuối tuần.",
+    );
+    await user.type(
+      screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?"),
+      "Hoàn thành module sync trước thứ Tư.",
+    );
+    await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
+
+    await waitFor(() => {
+      const review = readGoal(goalId).twelveWeekSystem?.weeklyReviews[0];
+      expect(review?.keepTactic).toBe("Giữ buổi review thứ Năm.");
+      expect(review?.reduceTactic).toBe("Giảm thời gian họp dài cuối tuần.");
+      expect(review?.reviewCompleted).toBe(true);
+    });
+
+    expect(await screen.findByTestId("weekly-review-summary")).toBeInTheDocument();
+    expect(screen.getByTestId("weekly-score-interpretation")).toBeInTheDocument();
+  }, INTEGRATION_TEST_TIMEOUT_MS);
+
+  it("loads a legacy review without keep/reduce fields without breaking the form", async () => {
+    const { goalId } = seedTwelveWeekGoal();
+    updateUserData((data) => {
+      const goal = data.goals.find((item) => item.id === goalId);
+      if (!goal?.twelveWeekSystem) return;
+      goal.twelveWeekSystem.weeklyReviews = [
+        {
+          weekNumber: 1,
+          leadCompletionPercent: 60,
+          lagProgressValue: "Legacy progress",
+          biggestOutputThisWeek: "Legacy output",
+          mainObstacle: "Legacy obstacle",
+          nextWeekPriority: "Legacy priority",
+          workloadDecision: "keep same",
+          reviewCompleted: true,
+          progressScore: 6,
+          disciplineScore: 6,
+          focusScore: 7,
+          improvementScore: 6,
+          outputQualityScore: 6,
+          completedLeadIndicators: 3,
+        },
+      ];
+    });
+
+    renderAppRoute("/12-week-system");
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole("tab", { name: "Tuần" }));
+
+    // Existing legacy fields should hydrate the form
+    expect(await screen.findByDisplayValue("Legacy output")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Legacy obstacle")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Legacy priority")).toBeInTheDocument();
+
+    // New keep/reduce fields render empty for legacy reviews
+    const keepInput = screen.getByLabelText("3. Việc nào tuần sau nên giữ?") as HTMLTextAreaElement;
+    const reduceInput = screen.getByLabelText("4. Việc nào nên giảm hoặc bỏ?") as HTMLTextAreaElement;
+    expect(keepInput.value).toBe("");
+    expect(reduceInput.value).toBe("");
+
+    // Summary card still renders since reviewCompleted === true
+    expect(screen.getByTestId("weekly-review-summary")).toBeInTheDocument();
+  }, INTEGRATION_TEST_TIMEOUT_MS);
+
   it("compacts repeated weekly reviews for the same week to the latest queued payload", async () => {
     const { goalId } = seedTwelveWeekGoal();
     renderAppRoute("/12-week-system");
     const user = userEvent.setup();
 
     await user.click(screen.getByRole("tab", { name: "Tuần" }));
-    const [bestInput, obstacleInput, priorityInput] = await screen.findAllByRole("textbox");
+    const bestInput = await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?");
+    const obstacleInput = screen.getByLabelText("2. Điều gì cản trở nhiều nhất?");
+    const priorityInput = screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?");
     await user.type(bestInput, "First weekly output.");
     await user.type(obstacleInput, "First obstacle.");
     await user.type(priorityInput, "First priority.");

@@ -27,6 +27,8 @@ export function useWeeklyReviewFormState({
     lagProgressValue: "",
     biggestOutputThisWeek: "",
     mainObstacle: "",
+    keepTactic: "",
+    reduceTactic: "",
     nextWeekPriority: "",
     workloadDecision: "keep same",
   });
@@ -42,6 +44,8 @@ export function useWeeklyReviewFormState({
       lagProgressValue: currentReview?.lagProgressValue ?? currentLagMetricValue ?? "",
       biggestOutputThisWeek: currentReview?.biggestOutputThisWeek ?? "",
       mainObstacle: currentReview?.mainObstacle ?? "",
+      keepTactic: currentReview?.keepTactic ?? "",
+      reduceTactic: currentReview?.reduceTactic ?? "",
       nextWeekPriority: currentReview?.nextWeekPriority ?? "",
       workloadDecision: currentReview?.workloadDecision ?? "keep same",
     });

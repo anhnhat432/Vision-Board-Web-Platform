@@ -1,5 +1,7 @@
 ﻿import { motion } from "motion/react";
-import { AlertTriangle, ArrowRight, Crown, Gauge } from "lucide-react";
+import { AlertTriangle, ArrowRight, CalendarClock, CalendarPlus, Crown, Gauge, Sparkles, X } from "lucide-react";
+
+import type { RescueModeStatus } from "@/features/plan12week/logic";
 
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -8,6 +10,7 @@ import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
 import { Progress } from "../ui/progress";
 import { Textarea } from "../ui/textarea";
+import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 import { formatCalendarDate } from "../../utils/storage";
 import type { TwelveWeekTaskInstance, TwelveWeekSystem, UniversalDailyCheckIn } from "../../utils/storage-types";
 import {
@@ -66,6 +69,25 @@ interface TwelveWeekTodayTabProps {
   onDailyMoodChange: (value: DailyMood) => void;
   onDailyNoteChange: (value: string) => void;
   onSaveCheckIn: () => void;
+  onOpenWeekTab?: () => void;
+  onNavigateToSetup?: () => void;
+  /**
+   * Optional rule-based rescue status. When provided and severity !== 'none',
+   * a gentle rescue nudge is rendered above the primary hero with up to 3
+   * suggestions tailored to the current triggers. Pure presentation — no
+   * automatic side effects.
+   */
+  rescueStatus?: RescueModeStatus | null;
+  onPickTinyTask?: () => void;
+  onReviewPlan?: () => void;
+  /**
+   * Overdue task actions. Each callback is optional; the corresponding button
+   * is only rendered when the callback is provided. Helpers handle their own
+   * validation and toast feedback — the row UI just dispatches.
+   */
+  onRescheduleTaskWithinWeek?: (taskId: string) => void;
+  onRescheduleTaskToNextWeek?: (taskId: string) => void;
+  onSkipNonCoreTask?: (taskId: string) => void;
 }
 export function TwelveWeekTodayTab({
   currentWeek,
@@ -96,14 +118,38 @@ export function TwelveWeekTodayTab({
   onDailyMoodChange,
   onDailyNoteChange,
   onSaveCheckIn,
+  onOpenWeekTab,
+  onNavigateToSetup,
+  rescueStatus,
+  onPickTinyTask,
+  onReviewPlan,
+  onRescheduleTaskWithinWeek,
+  onRescheduleTaskToNextWeek,
+  onSkipNonCoreTask,
 }: TwelveWeekTodayTabProps) {
   const secondaryPreviewTasks = secondaryTodayTasks.slice(0, 2);
   const remainingSecondaryTasks = Math.max(secondaryTodayTasks.length - secondaryPreviewTasks.length, 0);
   const rescueModes: ReentryMode[] = ["restart", "lighten", "push"];
   const checkInTotal = todayQueue.length || currentWeekTasksCount || 1;
+  const primaryTask = firstPriorityTask && !firstPriorityTask.completed ? firstPriorityTask : null;
+  const primaryTaskOverdue = Boolean(primaryTask && primaryTask.scheduledDate < todayDateKey);
+  const primaryTaskCompletedToday = Boolean(
+    firstPriorityTask?.completed && todayQueue.some((task) => task.id === firstPriorityTask.id),
+  );
+  const isFirstWeek = currentWeek === 1;
 
   return (
     <div className="ops-system-panel flex min-w-0 flex-col gap-5">
+      {rescueStatus && rescueStatus.severity !== "none" && (
+        <TwelveWeekRescueNudge
+          status={rescueStatus}
+          variant="today"
+          onPickTinyTask={onPickTinyTask}
+          onQuickCheckIn={onSaveCheckIn}
+          onOpenWeekTab={onOpenWeekTab}
+          onReviewPlan={onReviewPlan ?? onNavigateToSetup}
+        />
+      )}
       {missedTasks.length > 0 && (
         <Card className="order-2 border border-amber-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(146,64,14,0.32)]">
           <CardHeader>
@@ -204,6 +250,48 @@ export function TwelveWeekTodayTab({
         </Card>
       )}
 
+      {primaryTask && (
+        <div
+          data-testid="today-primary-hero"
+          className="order-1 rounded-[24px] border border-slate-200 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.18)] sm:p-5"
+        >
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
+                <Sparkles className="h-3.5 w-3.5" />
+                {isFirstWeek ? "Việc đầu tiên của tuần 1" : "Việc quan trọng nhất hôm nay"}
+              </p>
+              <p className="mt-2 break-words text-base font-semibold text-slate-950 sm:text-lg">
+                {primaryTask.title}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                {primaryTaskOverdue
+                  ? `Việc này đang trễ — hôm nay làm phiên bản gọn nhất, đừng bỏ luôn. Làm đều '${primaryTask.leadIndicatorName}' quan trọng hơn làm hết.`
+                  : isFirstWeek
+                    ? `Thuộc nhóm việc lặp lại '${primaryTask.leadIndicatorName}'. Bắt đầu nhỏ — xong việc này là tuần 1 đã khởi động đúng hướng.`
+                    : `Thuộc nhóm việc lặp lại '${primaryTask.leadIndicatorName}'. Xong việc này là tuần đã đi đúng hướng.`}
+              </p>
+              <p className="mt-2 text-sm font-medium text-emerald-700">
+                Chỉ cần xong việc này là hôm nay đã đủ. Phần còn lại để sau.
+              </p>
+              {isFirstWeek && (
+                <p
+                  data-testid="today-first-week-encouragement"
+                  className="mt-2 text-sm leading-6 text-violet-800"
+                >
+                  Tuần đầu — bắt đầu nhỏ là quan trọng nhất. Đừng cố làm hết hôm nay, hãy giữ nhịp đến hết tuần.
+                </p>
+              )}
+            </div>
+            {primaryTaskOverdue && (
+              <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">
+                Đang trễ
+              </Badge>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="order-1 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.12fr)_380px]">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="min-w-0">
           <Card
@@ -225,21 +313,41 @@ export function TwelveWeekTodayTab({
             </CardHeader>
             <CardContent className="min-w-0 space-y-3 pt-0">
               {todayQueue.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600">
+                <div
+                  data-testid="today-empty-state"
+                  className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center text-slate-600"
+                >
                   {hasPlanTasks ? (
-                    reviewDueToday ? (
-                      "Không còn việc nào đang chờ lúc này. Mở tab Tuần để chốt review và khóa ưu tiên cho tuần sau."
-                    ) : (
-                      "Không còn việc nào đang chờ hôm nay. Lưu check-in ngắn ở bên cạnh hoặc mở tab Tuần để chuẩn bị review."
-                    )
+                    <div className="mx-auto max-w-lg space-y-3">
+                      <p className="font-semibold text-slate-900">
+                        {reviewDueToday ? "Tuần đã sẵn sàng để chốt review" : "Hết việc hôm nay"}
+                      </p>
+                      <p className="text-sm leading-6 text-slate-600">
+                        {reviewDueToday
+                          ? "Mở tab Tuần để chốt review và khóa ưu tiên cho tuần sau."
+                          : "Lưu check-in ngắn ở bên cạnh, hoặc mở tab Tuần để chuẩn bị review."}
+                      </p>
+                      {onOpenWeekTab && (
+                        <Button variant="outline" onClick={onOpenWeekTab} className="bg-white">
+                          Mở tab Tuần
+                          <ArrowRight className="ml-1 h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   ) : (
-                    <div className="mx-auto max-w-lg space-y-2">
+                    <div className="mx-auto max-w-lg space-y-3">
                       <p className="font-semibold text-slate-900">Chưa có việc nào trong chu kỳ này</p>
                       <p className="text-sm leading-6 text-slate-600">
                         {hasLeadMetrics
-                          ? "Chu kỳ đã có việc giữ nhịp, nhưng chưa có việc nào được tạo cho tuần hiện tại. Hãy kiểm tra lại setup hoặc tạo lại chu kỳ."
-                          : "Chu kỳ chưa có việc giữ nhịp, nên dashboard chưa thể tạo hàng việc hôm nay."}
+                          ? "Chu kỳ đã có việc giữ nhịp, nhưng chưa có việc nào được tạo cho tuần hiện tại. Vào lại Setup để tạo lại chu kỳ."
+                          : "Chu kỳ chưa có việc giữ nhịp. Vào Setup để thêm 2-4 việc lặp lại trước."}
                       </p>
+                      {onNavigateToSetup && (
+                        <Button onClick={onNavigateToSetup}>
+                          {hasLeadMetrics ? "Mở Setup để chỉnh" : "Đi tới Setup"}
+                          <ArrowRight className="ml-1 h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -319,6 +427,73 @@ export function TwelveWeekTodayTab({
                             {statusLabel}
                           </Badge>
                         </div>
+                        {isOverdue &&
+                          (onRescheduleTaskWithinWeek ||
+                            onRescheduleTaskToNextWeek ||
+                            (onSkipNonCoreTask && !task.isCore)) && (
+                            <div
+                              data-testid={`overdue-actions-${task.id}`}
+                              className="mt-3 flex flex-wrap items-center gap-2"
+                            >
+                              {onRescheduleTaskWithinWeek && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className={
+                                    isPrimaryTask
+                                      ? "border-white/20 bg-white/10 text-white hover:bg-white/20"
+                                      : "bg-white"
+                                  }
+                                  onClick={() => onRescheduleTaskWithinWeek(task.id)}
+                                  data-action="reschedule-within-week"
+                                  aria-label={`Dời ${task.title} sang ngày khác trong tuần`}
+                                >
+                                  <CalendarClock className="mr-1 h-3.5 w-3.5" />
+                                  Dời trong tuần
+                                </Button>
+                              )}
+                              {onRescheduleTaskToNextWeek && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className={
+                                    isPrimaryTask
+                                      ? "border-white/20 bg-white/10 text-white hover:bg-white/20"
+                                      : "bg-white"
+                                  }
+                                  onClick={() => onRescheduleTaskToNextWeek(task.id)}
+                                  data-action="reschedule-next-week"
+                                  aria-label={`Dời ${task.title} sang tuần sau`}
+                                >
+                                  <CalendarPlus className="mr-1 h-3.5 w-3.5" />
+                                  Sang tuần sau
+                                </Button>
+                              )}
+                              {onSkipNonCoreTask && !task.isCore && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className={
+                                    isPrimaryTask ? "text-slate-200 hover:bg-white/10" : "text-slate-600"
+                                  }
+                                  onClick={() => onSkipNonCoreTask(task.id)}
+                                  data-action="skip-non-core"
+                                  aria-label={`Bỏ qua việc tùy chọn ${task.title}`}
+                                >
+                                  <X className="mr-1 h-3.5 w-3.5" />
+                                  Bỏ qua
+                                </Button>
+                              )}
+                              {task.isCore && (onRescheduleTaskWithinWeek || onRescheduleTaskToNextWeek) && (
+                                <span
+                                  data-testid={`overdue-core-note-${task.id}`}
+                                  className={`text-xs ${isPrimaryTask ? "text-slate-300" : "text-slate-500"}`}
+                                >
+                                  Việc cốt lõi không thể bỏ — chỉ dời lịch.
+                                </span>
+                              )}
+                            </div>
+                          )}
                       </div>
                     </div>
                   );
@@ -363,6 +538,14 @@ export function TwelveWeekTodayTab({
                 </div>
                 <Progress value={weekCompletion.percent} className="mt-3 h-2.5" />
               </div>
+              {primaryTaskCompletedToday && (
+                <p
+                  data-testid="today-primary-done-nudge"
+                  className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-800"
+                >
+                  Việc chính đã xong — lưu check-in để chốt nhịp hôm nay.
+                </p>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -381,7 +564,7 @@ export function TwelveWeekTodayTab({
                     Check-in 30 giây
                   </CardTitle>
                   <CardDescription className="mt-1 break-words text-slate-700">
-                    Tick việc, chọn năng lượng, lưu lại.
+                    Chọn năng lượng và ghi 1 ý ngắn nếu cần.
                   </CardDescription>
                 </div>
                 <Badge variant="outline" className="shrink-0 border-violet-200 bg-violet-50 text-violet-700">

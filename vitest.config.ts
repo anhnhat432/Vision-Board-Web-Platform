@@ -14,6 +14,12 @@ export default defineConfig({
     globals: true,
     setupFiles: "./src/test/setup.ts",
     css: true,
-    exclude: ["**/node_modules/**", "**/dist/**", "**/.codex-worktrees/**", "backend/src/tests/**"],
+    exclude: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/.codex-worktrees/**",
+      "**/.claude/worktrees/**",
+      "backend/src/tests/**",
+    ],
   },
 });

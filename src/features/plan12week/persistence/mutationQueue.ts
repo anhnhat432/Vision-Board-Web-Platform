@@ -14,7 +14,8 @@ export type DataMutationKind =
   | "task_completed_changed"
   | "daily_check_in_upserted"
   | "weekly_review_upserted"
-  | "plan_snapshot_updated";
+  | "plan_snapshot_updated"
+  | "lead_metric_upserted";
 
 export type DataMutationStatus =
   | "pending"
@@ -90,6 +91,7 @@ export type PlanSnapshotMutationReason = "setup" | "reentry" | "reset" | "manual
 
 export type PlanSnapshotSystemPayload = Pick<
   TwelveWeekSystem,
+  | "goalType"
   | "vision12Week"
   | "lagMetric"
   | "leadIndicators"
@@ -102,17 +104,43 @@ export type PlanSnapshotSystemPayload = Pick<
   | "timezone"
   | "weekStartsOn"
   | "status"
+  | "tacticLoadPreference"
+  | "preferredDays"
+  | "personalConstraint"
+  | "reentryCount"
   | "currentWeek"
   | "totalWeeks"
   | "weeklyPlans"
-  | "taskInstances"
-  | "dailyCheckIns"
-  | "weeklyReviews"
 >;
 
 export interface PlanSnapshotUpdatedMutationPayload {
   reason: PlanSnapshotMutationReason;
+  clientPlanId: string;
+  clientGoalId?: string;
+  changedAt: string;
+  clientUpdatedAt: string;
   system: PlanSnapshotSystemPayload;
+}
+
+export type LeadMetricMutationReason = "setup" | "manual_update" | "task_progress" | "snapshot_retry";
+
+export interface LeadMetricUpsertedMutationPayload {
+  reason: LeadMetricMutationReason;
+  clientPlanId: string;
+  clientWeekId: string;
+  clientMetricId: string;
+  leadIndicatorId?: string;
+  weekNumber: number;
+  name: string;
+  weeklyTarget: number;
+  target?: string;
+  unit?: string;
+  type?: TwelveWeekSystem["leadIndicators"][number]["type"];
+  priority?: number;
+  schedule?: number[];
+  currentValue?: number;
+  changedAt: string;
+  clientUpdatedAt: string;
 }
 
 export type DataMutationPayloadByKind = {
@@ -120,6 +148,7 @@ export type DataMutationPayloadByKind = {
   daily_check_in_upserted: DailyCheckInUpsertedMutationPayload;
   weekly_review_upserted: WeeklyReviewUpsertedMutationPayload;
   plan_snapshot_updated: PlanSnapshotUpdatedMutationPayload;
+  lead_metric_upserted: LeadMetricUpsertedMutationPayload;
 };
 
 export type DataMutationPayload = DataMutationPayloadByKind[DataMutationKind];
@@ -253,6 +282,8 @@ function getCollapseKey(input: DataMutationEnqueueInput): string {
       return `weekly-review:${input.goalId}:${input.payload.weekNumber}`;
     case "plan_snapshot_updated":
       return `plan-snapshot:${input.goalId}`;
+    case "lead_metric_upserted":
+      return `lead-metric:${input.goalId}:${input.payload.clientMetricId}`;
   }
 }
 

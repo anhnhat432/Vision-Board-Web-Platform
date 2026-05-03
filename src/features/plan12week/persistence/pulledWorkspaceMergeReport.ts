@@ -112,6 +112,10 @@ function getWorkspace(input: TwelveWeekPulledWorkspace | TwelveWeekPullResponse)
   return isPullResponse(input) ? input.workspace : input;
 }
 
+function isDeltaPull(input: TwelveWeekPulledWorkspace | TwelveWeekPullResponse): boolean {
+  return isPullResponse(input) && input.mode === "delta";
+}
+
 function normalizeDateKey(value: string | undefined): string {
   if (!value) return "";
   const trimmed = value.trim();
@@ -436,7 +440,9 @@ function getPendingMutationClientId(item: DataMutationItem): string | undefined 
     case "weekly_review_upserted":
       return `${item.payload.clientPlanId ?? item.planId ?? getTwelveWeekClientPlanId(item.goalId)}:review:${item.payload.weekNumber}`;
     case "plan_snapshot_updated":
-      return item.planId ?? getTwelveWeekClientPlanId(item.goalId);
+      return item.payload.clientPlanId ?? item.planId ?? getTwelveWeekClientPlanId(item.goalId);
+    case "lead_metric_upserted":
+      return item.payload.clientMetricId;
   }
 }
 
@@ -450,6 +456,8 @@ function getPendingMutationKind(item: DataMutationItem): PulledWorkspaceMergeEnt
       return "weeklyReview";
     case "plan_snapshot_updated":
       return "plan";
+    case "lead_metric_upserted":
+      return "leadMetric";
   }
 }
 
@@ -639,19 +647,20 @@ export function createPulledWorkspaceMergeReport(
 ): PulledWorkspaceMergeReport {
   const localGoals = getLocalGoals(localGoalOrUserData);
   const workspace = getWorkspace(pulledWorkspace);
+  const isDelta = isDeltaPull(pulledWorkspace);
   const missingClientIds: PulledWorkspaceMergeIssue[] = [];
   const localIndex = createLocalIndex(localGoals);
   const cloudIndex = createCloudIndex(workspace, missingClientIds);
   const pendingConflicts = buildPendingMutationConflicts(cloudIndex, options.pendingMutations ?? []);
   const pendingConflictKeys = new Set(pendingConflicts.map((conflict) => `${conflict.kind}:${conflict.clientId}`));
-  const valueConflicts = buildValueDiffConflicts(localIndex, cloudIndex, pendingConflictKeys);
+  const valueConflicts = isDelta ? [] : buildValueDiffConflicts(localIndex, cloudIndex, pendingConflictKeys);
   const conflicts = [...pendingConflicts, ...valueConflicts];
   const cloudOnlyChanges = [
     ...buildCloudOnlyChanges(localIndex, cloudIndex),
     ...buildMatchedCloudChanges(localIndex, cloudIndex),
   ];
-  const localOnlyChanges = buildLocalOnlyChanges(localIndex, cloudIndex);
-  const unsupportedFields = collectUnsupportedFields(localGoals, cloudIndex);
+  const localOnlyChanges = isDelta ? [] : buildLocalOnlyChanges(localIndex, cloudIndex);
+  const unsupportedFields = isDelta ? [] : collectUnsupportedFields(localGoals, cloudIndex);
 
   return {
     safeToApply:

@@ -1,3 +1,6 @@
+import type { GoalArchetype } from "@/lib/smart-goal";
+
+import { getArchetypeFeasibilityOverride } from "./archetypeCopy";
 import { QUESTIONS } from "./constants";
 import type {
   AxisScore,
@@ -7,8 +10,19 @@ import type {
   Question,
   ResultData,
   ResultType,
+  SmartGoalQualityBridge,
   WeeklyCapacity,
 } from "./types";
+
+export interface BuildResultOptions {
+  smartGoalQualityLevel?: SmartGoalQualityBridge;
+  /**
+   * Optional goal archetype used to tune human-readable copy
+   * (firstWeekGuidance, scopeRecommendation, bottleneck overlay note).
+   * Numeric scoring is unaffected by this option.
+   */
+  goalArchetype?: GoalArchetype;
+}
 
 function getWheelPenalty(score: number): number {
   if (score <= 3) return 3;
@@ -61,41 +75,87 @@ function getPlanLoadRecommendation(input: {
   return "balanced";
 }
 
+function getPrePlanAction(bottleneck: FeasibilityBottleneck): string {
+  switch (bottleneck.axis) {
+    case "time":
+      return "khóa ít nhất 2 khung giờ cố định trong tuần cho mục tiêu này";
+    case "energy":
+      return "chọn thời điểm trong ngày bạn còn năng lượng nhất để làm việc chính";
+    case "resources":
+      return "xác định 1-2 nguồn lực hoặc kỹ năng cần bổ sung ngay tuần đầu";
+    case "clarity":
+      return "thu hẹp mục tiêu về một kết quả chính duy nhất có thể đo được trong 12 tuần";
+    case "obstacle":
+      return "viết ra trở ngại chính và quyết định cách xử lý trước khi bắt đầu";
+    case "routine":
+      return "khóa lịch cố định cho mục tiêu trước khi thêm bất kỳ việc mới nào";
+    case "confidence":
+      return "chọn một bước nhỏ nhất bạn chắc chắn hoàn thành được trong tuần đầu";
+    case "wheel":
+      return "cân nhắc củng cố nền tảng lĩnh vực này song song với mục tiêu";
+  }
+}
+
+function getSmartGoalQualityNote(
+  qualityLevel: SmartGoalQualityBridge | undefined,
+): string | undefined {
+  if (qualityLevel === "weak") {
+    return "Mục tiêu viết chưa đủ rõ ràng. Nên quay lại bước viết mục tiêu để làm rõ kết quả cần đạt, con số đo và lý do trước khi tạo kế hoạch 12 tuần.";
+  }
+  return undefined;
+}
+
 function buildPlanGuidance(input: {
   resultType: ResultType;
   bottleneck: FeasibilityBottleneck;
   planLoad: PlanLoadRecommendation;
   weeklyCapacity: WeeklyCapacity;
+  smartGoalQualityLevel?: SmartGoalQualityBridge;
 }) {
+  const qualitySuffix =
+    input.smartGoalQualityLevel === "weak"
+      ? " Ngoài ra, mục tiêu viết chưa rõ — nên làm rõ kết quả và con số trước khi bắt đầu."
+      : "";
+
   if (input.resultType === "too_ambitious") {
     return {
       firstWeekGuidance:
         "Tuần 1 chỉ nên có 1-2 hành động bắt buộc, ưu tiên tạo nhịp thắng nhỏ thay vì chứng minh năng lực.",
-      scopeRecommendation: "Thu nhỏ mục tiêu 12 tuần hoặc kéo dài thời hạn trước khi tăng độ khó.",
+      scopeRecommendation:
+        `Thu nhỏ mục tiêu 12 tuần hoặc kéo dài thời hạn trước khi tăng độ khó.${qualitySuffix}`,
     };
   }
 
   if (input.planLoad === "lighter") {
     return {
       firstWeekGuidance: `Tuần 1 nên nhẹ hơn vì phần cần chú ý nhất là ${input.bottleneck.label.toLowerCase()}.`,
-      scopeRecommendation: "Giữ 2 việc chính, bỏ bớt phần mở rộng cho đến khi nhịp ổn định.",
+      scopeRecommendation:
+        `Giữ 2 việc chính, bỏ bớt phần mở rộng cho đến khi nhịp ổn định.${qualitySuffix}`,
     };
   }
 
   if (input.planLoad === "push") {
     return {
-      firstWeekGuidance: "Tuần 1 có thể thử thách hơn một chút, nhưng vẫn cần nhìn lại sớm để tránh ôm quá nhiều.",
-      scopeRecommendation: "Có thể dùng 3-4 việc lặp lại nếu mỗi việc có lịch rõ và đo được.",
+      firstWeekGuidance:
+        "Tuần 1 có thể thử thách hơn một chút, nhưng vẫn cần nhìn lại sớm để tránh ôm quá nhiều.",
+      scopeRecommendation:
+        `Có thể dùng 3-4 việc lặp lại nếu mỗi việc có lịch rõ và đo được.${qualitySuffix}`,
     };
   }
 
   return {
     firstWeekGuidance: "Tuần 1 nên cân bằng: đủ rõ để tiến lên, đủ nhẹ để không mất nhịp.",
-    scopeRecommendation: "Giữ một kết quả chính, 2-3 việc lặp lại và một buổi nhìn lại cố định.",
+    scopeRecommendation:
+      `Giữ một kết quả chính, 2-3 việc lặp lại và một buổi nhìn lại cố định.${qualitySuffix}`,
   };
 }
 
-export function buildResult(answers: Record<number, string>, wheelScore: number): ResultData {
+export function buildResult(
+  answers: Record<number, string>,
+  wheelScore: number,
+  options?: BuildResultOptions,
+): ResultData {
+  const goalArchetype = options?.goalArchetype;
   const axisScores: AxisScore[] = QUESTIONS.map((question) => {
     const option = getSelectedOption(answers, question);
     return {
@@ -129,11 +189,14 @@ export function buildResult(answers: Record<number, string>, wheelScore: number)
           action: getBottleneckAction(weakestAxis.axis),
         };
   const weeklyCapacity = getWeeklyCapacity(answers);
+  const smartGoalQualityLevel = options?.smartGoalQualityLevel;
 
   const resultType: ResultType =
     adjustedScore >= 15 ? "realistic" : adjustedScore >= 10 ? "challenging" : "too_ambitious";
   const planLoad = getPlanLoadRecommendation({ adjustedScore, bottleneck, weeklyCapacity });
-  const guidance = buildPlanGuidance({ resultType, bottleneck, planLoad, weeklyCapacity });
+  const guidance = buildPlanGuidance({ resultType, bottleneck, planLoad, weeklyCapacity, smartGoalQualityLevel });
+  const prePlanAction = getPrePlanAction(bottleneck);
+  const smartGoalQualityNote = getSmartGoalQualityNote(smartGoalQualityLevel);
 
   const resultCopy: Record<ResultType, Pick<ResultData, "title" | "summary" | "recommendation">> = {
     realistic: {
@@ -141,22 +204,44 @@ export function buildResult(answers: Record<number, string>, wheelScore: number)
       summary: `Đánh giá dựa trên ${QUESTIONS.length} góc nhìn cho thấy bạn có thể bắt đầu. Phần cần chú ý nhất là ${bottleneck.label.toLowerCase()}, nên kế hoạch 12 tuần cần xử lý phần này ngay từ tuần đầu.`,
       recommendation:
         planLoad === "push"
-          ? "Bạn có thể thử thách hơn một chút, nhưng vẫn cần nhìn lại sớm để không mở rộng quá tay."
-          : "Bạn có thể đi tiếp sang kế hoạch 12 tuần với nhịp rõ, ít việc và nhìn lại đều.",
+          ? `Trước khi tạo kế hoạch 12 tuần, hãy ${prePlanAction}. Sau đó có thể thử thách hơn một chút, nhưng vẫn cần nhìn lại sớm.`
+          : `Trước khi tạo kế hoạch 12 tuần, hãy ${prePlanAction}. Sau đó giữ nhịp rõ, ít việc và nhìn lại đều.`,
     },
     challenging: {
       title: "Mục tiêu này làm được, nhưng phải xử lý đúng phần yếu nhất.",
       summary: `Kết quả không chỉ dựa vào cảm giác chung. Phần yếu nhất hiện tại là ${bottleneck.label.toLowerCase()}, nên nếu bỏ qua nó thì kế hoạch 12 tuần rất dễ dày lên nhưng khó giữ.`,
       recommendation:
-        "Nên thu hẹp mục tiêu, chọn ít việc chính hơn và biến phần cần chú ý nhất thành nguyên tắc cho tuần đầu.",
+        `Trước khi tạo kế hoạch 12 tuần: ${prePlanAction}. Thu hẹp mục tiêu, chọn ít việc chính hơn và biến ${bottleneck.label.toLowerCase()} thành nguyên tắc cho tuần đầu.`,
     },
     too_ambitious: {
       title: "Mục tiêu này cần thu nhỏ trước khi tạo kế hoạch 12 tuần.",
       summary: `Một vài nền tảng hiện tại chưa đủ chắc, đặc biệt là ${bottleneck.label.toLowerCase()}. Nếu giữ nguyên độ rộng, rủi ro lớn nhất là bắt đầu hăng nhưng mất nhịp sớm.`,
       recommendation:
-        "Hãy chọn phiên bản nhỏ hơn của mục tiêu, giữ tuần đầu rất nhẹ và chỉ tăng độ khó khi phần nhìn lại hằng tuần cho thấy bạn giữ được nhịp.",
+        `Trước khi tạo kế hoạch 12 tuần: ${prePlanAction}. Chọn phiên bản nhỏ hơn của mục tiêu, giữ tuần đầu rất nhẹ và chỉ tăng độ khó khi nhịp ổn.`,
     },
   };
+
+  const archetypeOverride = getArchetypeFeasibilityOverride(
+    goalArchetype,
+    resultType,
+    bottleneck.axis,
+  );
+
+  const finalBottleneck: FeasibilityBottleneck = archetypeOverride.bottleneckOverlayNote
+    ? { ...bottleneck, action: `${bottleneck.action} ${archetypeOverride.bottleneckOverlayNote}` }
+    : bottleneck;
+
+  // Archetype override replaces generic firstWeek / scope copy when present,
+  // but we preserve the smartGoalQualityLevel suffix so "weak" goals still
+  // get the "mục tiêu viết chưa rõ" nudge appended.
+  const qualitySuffix =
+    smartGoalQualityLevel === "weak"
+      ? " Ngoài ra, mục tiêu viết chưa rõ — nên làm rõ kết quả và con số trước khi bắt đầu."
+      : "";
+  const firstWeekGuidance = archetypeOverride.firstWeekGuidance ?? guidance.firstWeekGuidance;
+  const scopeRecommendation = archetypeOverride.scopeRecommendation
+    ? `${archetypeOverride.scopeRecommendation}${qualitySuffix}`
+    : guidance.scopeRecommendation;
 
   return {
     type: resultType,
@@ -167,10 +252,12 @@ export function buildResult(answers: Record<number, string>, wheelScore: number)
     diagnosticScore,
     maxDiagnosticScore,
     axisScores,
-    bottleneck,
+    bottleneck: finalBottleneck,
     planLoad,
     weeklyCapacity,
-    firstWeekGuidance: guidance.firstWeekGuidance,
-    scopeRecommendation: guidance.scopeRecommendation,
+    firstWeekGuidance,
+    scopeRecommendation,
+    smartGoalQualityLevel,
+    smartGoalQualityNote,
   };
 }

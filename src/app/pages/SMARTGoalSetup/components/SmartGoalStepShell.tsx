@@ -2,12 +2,23 @@
 import { motion } from "motion/react";
 import { ArrowLeft, ArrowRight, CircleAlert, CheckCircle2, Sparkles } from "lucide-react";
 
+import type { QualityLevel } from "@/lib/smart-goal/quality";
+
 import { Alert, AlertDescription, AlertTitle } from "../../../components/ui/alert";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import { Progress } from "../../../components/ui/progress";
+import { QualityFeedbackPanel } from "./QualityFeedbackPanel";
 import { ReviewStep } from "./ReviewStep";
 import type { GoalClarityItem, SmartGoalSummaryRow, SmartStepDefinition, SmartStepKey } from "../types";
+
+interface QualityFeedbackData {
+  level: QualityLevel;
+  overallScore: number;
+  warnings: string[];
+  suggestions: string[];
+  canProceedToFeasibility: boolean;
+}
 
 interface SmartGoalStepShellProps {
   stepIndex: number;
@@ -24,6 +35,7 @@ interface SmartGoalStepShellProps {
   currentStepError: string | null;
   currentStepSoftWarning: string | null;
   isCurrentStepValid: boolean;
+  qualityFeedback: QualityFeedbackData | null;
   onApplyStarter: () => void;
   onJumpToStep: (stepKey: SmartStepKey) => void;
   onBack: () => void;
@@ -45,6 +57,7 @@ export function SmartGoalStepShell({
   currentStepError,
   currentStepSoftWarning,
   isCurrentStepValid,
+  qualityFeedback,
   onApplyStarter,
   onJumpToStep,
   onBack,
@@ -140,12 +153,23 @@ export function SmartGoalStepShell({
       </div>
 
       {showReview ? (
-        <ReviewStep
-          clarityDoneCount={clarityDoneCount}
-          clarityItemCount={clarityItems.length}
-          summaryRows={summaryRows}
-          onJumpToStep={onJumpToStep}
-        />
+        <>
+          <ReviewStep
+            clarityDoneCount={clarityDoneCount}
+            clarityItemCount={clarityItems.length}
+            summaryRows={summaryRows}
+            onJumpToStep={onJumpToStep}
+          />
+          {qualityFeedback ? (
+            <QualityFeedbackPanel
+              level={qualityFeedback.level}
+              overallScore={qualityFeedback.overallScore}
+              warnings={qualityFeedback.warnings}
+              suggestions={qualityFeedback.suggestions}
+              canProceedToFeasibility={qualityFeedback.canProceedToFeasibility}
+            />
+          ) : null}
+        </>
       ) : null}
 
       {currentStepError ? (

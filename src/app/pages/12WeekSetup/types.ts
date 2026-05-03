@@ -32,6 +32,8 @@ export interface PendingFeasibilityResult {
   weeklyCapacity?: WeeklyCapacity;
   firstWeekGuidance?: string;
   scopeRecommendation?: string;
+  smartGoalQualityLevel?: "weak" | "okay" | "strong";
+  smartGoalQualityNote?: string;
 }
 
 export interface LeadIndicatorDraft {

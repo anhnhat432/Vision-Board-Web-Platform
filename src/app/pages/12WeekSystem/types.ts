@@ -4,6 +4,8 @@ export interface WeeklyReviewForm {
   lagProgressValue: string;
   biggestOutputThisWeek: string;
   mainObstacle: string;
+  keepTactic: string;
+  reduceTactic: string;
   nextWeekPriority: string;
   workloadDecision: UniversalWeeklyReview["workloadDecision"];
 }

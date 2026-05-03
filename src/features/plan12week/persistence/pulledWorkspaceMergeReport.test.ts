@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { Goal, TwelveWeekSystem, UserData } from "@/app/utils/storage-types";
 import type { DataMutationItem } from "./mutationQueue";
 import { createPulledWorkspaceMergeReport } from "./pulledWorkspaceMergeReport";
-import type { TwelveWeekPulledWorkspace } from "@/services/syncService";
+import type { TwelveWeekPulledWorkspace, TwelveWeekPullResponse } from "@/services/syncService";
 
 const baseNow = "2026-04-30T00:00:00.000Z";
 
@@ -81,6 +81,40 @@ function createCloudWorkspace(overrides: Partial<TwelveWeekPulledWorkspace> = {}
     weeklyReviews: [],
     ...overrides,
   });
+}
+
+function createDeltaPullResponse(workspace: Partial<TwelveWeekPulledWorkspace>): TwelveWeekPullResponse {
+  const deltaWorkspace = createEmptyWorkspace(workspace);
+
+  return {
+    serverTime: at(20),
+    mode: "delta",
+    cursor: "cursor_before",
+    nextCursor: "cursor_after",
+    hasMore: false,
+    cursorStatus: "applied",
+    warnings: [],
+    workspace: deltaWorkspace,
+    changes: deltaWorkspace,
+    tombstones: {
+      goals: [],
+      plans: [],
+      weeks: [],
+      tasks: [],
+      leadMetrics: [],
+      dailyCheckIns: [],
+      weeklyReviews: [],
+    },
+    counts: {
+      goals: deltaWorkspace.goals.length,
+      plans: deltaWorkspace.plans.length,
+      weeks: deltaWorkspace.weeks.length,
+      tasks: deltaWorkspace.tasks.length,
+      leadMetrics: deltaWorkspace.leadMetrics.length,
+      dailyCheckIns: deltaWorkspace.dailyCheckIns.length,
+      weeklyReviews: deltaWorkspace.weeklyReviews.length,
+    },
+  };
 }
 
 function createTwelveWeekSystem(overrides: Partial<TwelveWeekSystem> = {}): TwelveWeekSystem {
@@ -304,6 +338,48 @@ describe("pulled workspace merge report", () => {
           kind: "task",
           clientId: "task_local_only",
           source: "local",
+        }),
+      ]),
+    );
+  });
+
+  it("does not treat omitted local records as local-only during delta pull", () => {
+    const localGoal = createGoal({}, {
+      taskInstances: [
+        {
+          id: "task_1",
+          weekNumber: 1,
+          scheduledDate: "2026-04-30",
+          title: "Run one test",
+          leadIndicatorName: "",
+          isCore: true,
+          completed: false,
+        },
+        {
+          id: "task_local_unchanged",
+          weekNumber: 1,
+          scheduledDate: "2026-04-30",
+          title: "Unchanged local task",
+          leadIndicatorName: "",
+          isCore: true,
+          completed: false,
+        },
+      ],
+    });
+    const delta = createDeltaPullResponse({
+      tasks: createCloudWorkspace().tasks,
+    });
+
+    const report = createPulledWorkspaceMergeReport(localGoal, delta);
+
+    expect(report.safeToApply).toBe(true);
+    expect(report.localOnlyChanges).toEqual([]);
+    expect(report.conflicts).toEqual([]);
+    expect(report.cloudOnlyChanges).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "task",
+          clientId: "task_1",
         }),
       ]),
     );

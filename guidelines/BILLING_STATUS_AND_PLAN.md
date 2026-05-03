@@ -725,3 +725,117 @@ Backend (6 new route tests):
 7. **Idempotent**: Duplicate `providerEventId` returns 200 no-op
 8. **No provider SDK**: Uses adapter interface — provider logic isolated in adapters
 9. **Graceful unknown events**: Returns 200 to prevent provider retries on unhandled types
+
+---
+
+## Subscription Management — Portal & Cancel (Added 2026-05-02)
+
+### What Was Added
+
+1. **Backend: `POST /api/billing/customer-portal`** (`billingController.ts`)
+   - Auth required
+   - Returns `portalUrl` if provider supports self-service portal
+   - Returns `supported: false` with support email if provider does not support portal
+   - Returns `supported: false` if user has no premium subscription
+   - Does NOT modify entitlements
+
+2. **Backend: `POST /api/billing/subscription/cancel`** (`billingController.ts`)
+   - Auth required
+   - Soft cancel: sets `cancelAtPeriodEnd = true`
+   - Does NOT immediately remove entitlements — user keeps access until period end
+   - Returns `already_canceled` or `already_pending_cancel` for idempotency
+   - Response includes full `currentEntitlement` snapshot
+
+3. **Backend service** (`billingService.ts`)
+   - `getSubscriptionForUser(userId)` — returns raw subscription
+   - `markCancelAtPeriodEnd(userId)` — sets cancel flag without revoking entitlements
+
+4. **Backend routes** (`billingRoutes.ts`)
+   - `POST /api/billing/customer-portal`\n   - `POST /api/billing/subscription/cancel`
+
+5. **Backend entitlement endpoint enhanced** (`GET /api/billing/entitlement`)
+   - Now returns `currentPeriodEnd` and `cancelAtPeriodEnd` from subscription
+
+6. **Frontend: portal via backend** (`billingProvider.ts`)
+   - `openBillingCustomerPortal()` prefers `POST /api/billing/customer-portal` in real mode
+   - Falls back to legacy flow if backend unavailable
+
+7. **Frontend: cancel subscription** (`billingProvider.ts`)
+   - `cancelSubscriptionOnServer()` calls `POST /api/billing/subscription/cancel`
+   - Only works in real mode with backend configured
+   - Handles offline/error gracefully
+
+8. **Frontend UI** (`BillingPlan.tsx`)
+   - Cancel button with confirmation dialog for PLUS users in real mode
+   - Confirmation warns user keeps access until period end
+   - Manage billing button shows in real mode even without legacy endpoint
+   - Entitlement labels distinguish real mode (server) vs demo (local)
+
+9. **Tests** (`billingRoutes.test.ts`)
+   - Portal: 401, unsupported for FREE, portalUrl for PLUS
+   - Cancel: 401, 400 for FREE, marks cancelAtPeriodEnd, keeps entitlements, duplicate idempotent
+
+### Cancel Policy
+
+- Cancel = soft cancel at period end
+- Entitlements remain active until `currentPeriodEnd`
+- Final revocation happens via webhook (`subscription_expired` / `subscription_canceled`)
+- No immediate data deletion
+- No refund logic implemented
+
+---
+
+## Entitlement Reconciliation Tool (Added 2026-05-02)
+
+### Purpose
+
+Detects and fixes mismatches between subscription records and their entitlement grants without manual DB intervention.
+
+### Files
+
+- `backend/src/services/billingReconciliation.ts` — Pure reconciliation service
+- `backend/scripts/reconcile-entitlements.ts` — CLI tool
+- `backend/src/tests/billingReconciliation.test.ts` — 15 tests
+
+### CLI Usage
+
+```bash
+# Dry-run all users (default — no writes)
+npm --prefix backend run reconcile:entitlements
+
+# Fix all mismatches
+npm --prefix backend run reconcile:entitlements -- --write
+
+# Check specific user
+npm --prefix backend run reconcile:entitlements -- --user uid123
+
+# Fix specific user
+npm --prefix backend run reconcile:entitlements -- --user uid123 --write
+```n
+### Reconciliation Rules
+
+| Subscription State | Expected Entitlements |
+|---|---|
+| active/trialing PLUS | Full 4 PLUS keys |
+| canceled/past_due/incomplete/unpaid | None |
+| expired currentPeriodEnd on active | None |
+| FREE plan | None |
+| No subscription | None (FREE) |
+| pending checkout (no webhook) | None |
+| payment_failed | None |
+
+### Dry-Run Policy
+
+- Default is always dry-run (`--write` is opt-in)
+- Dry-run shows mismatches and exits with code 1 if any found
+- Write mode applies fixes and exits with code 0
+- No sensitive data in output (no card numbers, no raw webhooks)
+- No external provider API calls
+- No deletion of billing events
+
+### Constraints
+
+- CLI currently uses in-memory repo (swap to Mongo when Mongo repos are ready)
+- No admin UI for reconciliation
+- No frontend changes
+- Does not call payment provider external APIs

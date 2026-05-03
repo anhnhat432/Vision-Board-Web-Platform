@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { UserData } from "@/app/utils/storage-types";
-import type { TwelveWeekPulledWorkspace } from "@/services/syncService";
+import type { TwelveWeekPulledWorkspace, TwelveWeekPullResponse } from "@/services/syncService";
 import { applyPulledWorkspaceToUserData } from "./pulledWorkspaceApply";
 
 const baseNow = "2026-04-30T00:00:00.000Z";
@@ -167,6 +167,49 @@ function createWorkspace(): TwelveWeekPulledWorkspace {
   };
 }
 
+function createDeltaResponse(workspace: Partial<TwelveWeekPulledWorkspace>): TwelveWeekPullResponse {
+  const deltaWorkspace: TwelveWeekPulledWorkspace = {
+    goals: [],
+    plans: [],
+    weeks: [],
+    tasks: [],
+    leadMetrics: [],
+    dailyCheckIns: [],
+    weeklyReviews: [],
+    ...workspace,
+  };
+
+  return {
+    serverTime: "2026-04-30T02:00:00.000Z",
+    mode: "delta",
+    cursor: "cursor_before",
+    nextCursor: "cursor_after",
+    hasMore: false,
+    cursorStatus: "applied",
+    warnings: [],
+    workspace: deltaWorkspace,
+    changes: deltaWorkspace,
+    tombstones: {
+      goals: [],
+      plans: [],
+      weeks: [],
+      tasks: [],
+      leadMetrics: [],
+      dailyCheckIns: [],
+      weeklyReviews: [],
+    },
+    counts: {
+      goals: deltaWorkspace.goals.length,
+      plans: deltaWorkspace.plans.length,
+      weeks: deltaWorkspace.weeks.length,
+      tasks: deltaWorkspace.tasks.length,
+      leadMetrics: deltaWorkspace.leadMetrics.length,
+      dailyCheckIns: deltaWorkspace.dailyCheckIns.length,
+      weeklyReviews: deltaWorkspace.weeklyReviews.length,
+    },
+  };
+}
+
 describe("applyPulledWorkspaceToUserData", () => {
   it("adds a safe pulled cloud workspace to empty local user data", () => {
     const nextData = applyPulledWorkspaceToUserData(createUserData(), createWorkspace(), { now: baseNow });
@@ -214,5 +257,56 @@ describe("applyPulledWorkspaceToUserData", () => {
     applyPulledWorkspaceToUserData(userData, createWorkspace(), { now: baseNow });
 
     expect(userData).toEqual(before);
+  });
+
+  it("applies an incremental task delta to the existing local 12-week system", () => {
+    const userData = applyPulledWorkspaceToUserData(createUserData(), createWorkspace(), { now: baseNow });
+    const delta = createDeltaResponse({
+      tasks: [
+        {
+          id: "backend_task_1",
+          weekId: "backend_week_1",
+          clientPlanId: "goal_1:12-week-system",
+          clientWeekId: "goal_1:week:1",
+          clientTaskId: "tw_task_1_tactic_write_0",
+          weekNumber: 1,
+          title: "Write",
+          status: "todo",
+          scheduledDate: "2026-04-27",
+          leadIndicatorName: "Write",
+          tacticId: "tactic_write",
+          isCore: true,
+        },
+      ],
+    });
+
+    const nextData = applyPulledWorkspaceToUserData(userData, delta, { now: baseNow });
+    const task = nextData.goals[0].twelveWeekSystem?.taskInstances.find(
+      (item) => item.id === "tw_task_1_tactic_write_0",
+    );
+
+    expect(task?.completed).toBe(false);
+    expect(task?.completedAt).toBeUndefined();
+    expect(nextData.goals[0].twelveWeekSystem?.dailyCheckIns).toHaveLength(1);
+  });
+
+  it("applies supported incremental tombstones without clearing unrelated local data", () => {
+    const userData = applyPulledWorkspaceToUserData(createUserData(), createWorkspace(), { now: baseNow });
+    const delta = createDeltaResponse({});
+    delta.tombstones.tasks = [
+      {
+        id: "backend_task_1",
+        clientId: "tw_task_1_tactic_write_0",
+        deletedAt: "2026-04-30T02:00:00.000Z",
+      },
+    ];
+
+    const nextData = applyPulledWorkspaceToUserData(userData, delta, { now: baseNow });
+
+    expect(
+      nextData.goals[0].twelveWeekSystem?.taskInstances.some((task) => task.id === "tw_task_1_tactic_write_0"),
+    ).toBe(false);
+    expect(nextData.goals[0].twelveWeekSystem?.dailyCheckIns).toHaveLength(1);
+    expect(nextData.eventLog).toBe(userData.eventLog);
   });
 });

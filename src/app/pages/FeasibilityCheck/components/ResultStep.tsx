@@ -414,6 +414,12 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   </h2>
                   <p className="mt-3 text-sm leading-7 text-slate-600">{copy.statusHint}</p>
                   <p className="mt-3 text-base font-semibold leading-7 text-slate-900">{result.recommendation}</p>
+
+                  {result.smartGoalQualityNote ? (
+                    <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3">
+                      <p className="text-sm leading-6 text-amber-800">{result.smartGoalQualityNote}</p>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </CardContent>

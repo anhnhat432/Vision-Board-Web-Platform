@@ -12,7 +12,7 @@ import { getSmartGoalStarter, getSmartGoalStarterPreview } from "../utils/smart-
 import { APP_STORAGE_KEYS, getUserData } from "../utils/storage";
 import {
   buildSmartGoal,
-  hasOutcomeIndicator,
+  evaluateSmartGoalQuality,
   isPendingSMARTGoal,
   normalizeListInput,
   parseNumberInput,
@@ -22,8 +22,11 @@ import { SMART_STEPS } from "./SMARTGoalSetup/constants";
 import {
   buildGoalClarityItems,
   buildSMARTDataFromDraft,
+  buildSmartGoalFromFormData,
   createInitialSMARTData,
   formatStepDraft,
+  getQualityScoreBucket,
+  getStepQualityHint,
   getStepValidationError,
   hasStepDraftContent,
 } from "./SMARTGoalSetup/helpers";
@@ -120,11 +123,21 @@ export function SMARTGoalSetup() {
   const currentStepHasDraftContent = hasStepDraftContent(currentStepKey, smartData);
   const currentStarterPreview = getSmartGoalStarterPreview(currentStepKey, smartGoalStarter);
   const shouldShowCurrentStepError = currentStepError !== null && currentStepHasDraftContent;
+  const liveSmartGoal = useMemo(() => buildSmartGoalFromFormData(smartData, focusArea), [smartData, focusArea]);
+  const qualityResult = useMemo(() => evaluateSmartGoalQuality(liveSmartGoal), [liveSmartGoal]);
   const currentStepSoftWarning =
-    currentStepKey === "specific" &&
-    currentStepError === null &&
-    !hasOutcomeIndicator(smartData.specific.goal_statement)
-      ? "Gợi ý: nên dùng động từ kết quả rõ ràng như đạt, hoàn thành, xây dựng, ra mắt hoặc chạm mốc."
+    currentStepError === null
+      ? getStepQualityHint(currentStepKey, qualityResult, currentStepHasDraftContent)
+      : null;
+  const qualityFeedback =
+    currentStepKey === "timeBound"
+      ? {
+          level: qualityResult.level,
+          overallScore: qualityResult.overallScore,
+          warnings: qualityResult.warnings,
+          suggestions: qualityResult.suggestions,
+          canProceedToFeasibility: qualityResult.canProceedToFeasibility,
+        }
       : null;
 
   useScrollToTopOnChange(currentStep, {
@@ -162,12 +175,15 @@ export function SMARTGoalSetup() {
     });
 
     localStorage.setItem(APP_STORAGE_KEYS.pendingSmartGoal, JSON.stringify(smartGoal));
+    const finalQuality = evaluateSmartGoalQuality(smartGoal);
     trackAnalyticsEvent("smart_goal_created", {
       focus_area: focusArea,
       target_mode: smartData.timeBound.mode,
       target_weeks: smartData.timeBound.mode === "weeks" ? targetWeeks : undefined,
       has_baseline: measurableBaseline !== undefined,
       weekly_hours: weeklyHours,
+      quality_level: finalQuality.level,
+      score_bucket: getQualityScoreBucket(finalQuality.overallScore),
     });
 
     navigate("/feasibility");
@@ -364,6 +380,7 @@ export function SMARTGoalSetup() {
                 currentStepError={shouldShowCurrentStepError ? currentStepError : null}
                 currentStepSoftWarning={currentStepSoftWarning}
                 isCurrentStepValid={isCurrentStepValid}
+                qualityFeedback={qualityFeedback}
                 onApplyStarter={() => handleApplyStarterForStep(currentStepKey)}
                 onJumpToStep={handleJumpToStep}
                 onBack={handleBack}

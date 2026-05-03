@@ -400,7 +400,7 @@ describe("offline/online mutation queue hardening", () => {
     expect(result.failedCount).toBe(1);
 
     // The mutation is still in storage, not deleted
-    const raw = JSON.parse(localStorage.getItem("visionboard_data_mutation_queue:auth:user_a")!);
+    const raw = JSON.parse(localStorage.getItem("visionboard_data_mutation_queue:auth:user_a") ?? "{}");
     expect(raw.items).toHaveLength(1);
     expect(raw.items[0].id).toBe("fail_mutation");
     expect(raw.items[0].status).not.toBe("applied");

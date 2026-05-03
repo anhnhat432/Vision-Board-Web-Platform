@@ -158,11 +158,11 @@ function normalizeClientIdPart(value: string, fallback: string): string {
   return normalized || fallback;
 }
 
-function getLeadIndicatorId(indicator: LeadIndicator, index: number): string {
+export function getTwelveWeekLeadIndicatorId(indicator: LeadIndicator, index: number): string {
   return indicator.id?.trim() || `lead_${index + 1}_${normalizeClientIdPart(indicator.name, "indicator")}`;
 }
 
-function getTwelveWeekClientMetricId(clientWeekId: string, leadIndicatorId: string): string {
+export function getTwelveWeekClientMetricId(clientWeekId: string, leadIndicatorId: string): string {
   return `${clientWeekId}:metric:${leadIndicatorId}`;
 }
 
@@ -210,7 +210,7 @@ function mapGoalTask(task: Task): TwelveWeekImportGoalTaskPayload {
 }
 
 function mapLeadIndicator(indicator: LeadIndicator, index: number): TwelveWeekImportLeadIndicatorPayload {
-  const leadIndicatorId = getLeadIndicatorId(indicator, index);
+  const leadIndicatorId = getTwelveWeekLeadIndicatorId(indicator, index);
   return {
     id: leadIndicatorId,
     leadIndicatorId,

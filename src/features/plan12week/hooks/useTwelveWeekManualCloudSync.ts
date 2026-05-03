@@ -156,6 +156,30 @@ function getDrainFailureMessage(result: MutationQueueSyncResult): string {
   return "Chưa gửi được mutation queue. Đã dừng pull để giữ dữ liệu local an toàn.";
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function isInvalidPullCursorError(error: unknown): boolean {
+  if (!isRecord(error) || error.status !== 400) return false;
+  const details = isRecord(error.details) ? error.details : {};
+  const nestedDetails = isRecord(details.details) ? details.details : {};
+
+  return details.errorCode === "invalid_cursor" || nestedDetails.code === "cursor_invalid";
+}
+
+function shouldFallbackToFullPull(pullResponse: TwelveWeekPullResponse, hadStoredCursor: boolean): boolean {
+  if (!hadStoredCursor) return false;
+  if (
+    pullResponse.cursorStatus === "invalid" ||
+    pullResponse.warnings?.some((warning) => warning.code === "cursor_invalid")
+  ) {
+    return true;
+  }
+
+  return pullResponse.mode === "delta" && pullResponse.warnings.length > 0;
+}
+
 export async function runTwelveWeekManualCloudSync(
   options: RunTwelveWeekManualCloudSyncOptions = {},
 ): Promise<TwelveWeekManualCloudSyncResult> {
@@ -208,17 +232,30 @@ export async function runTwelveWeekManualCloudSync(
     // Read stored cursor for this user
     const readCursorFn = options.readCursor ?? ((uid: string) => readPullCursorState(uid, options.storage).lastSuccessfulPullCursor);
     const storedCursor = readCursorFn(ownerUid);
+    const clearCursorFn = options.clearCursorFn ?? ((uid: string) => clearPullCursor(uid, options.storage));
+    let cursorClearedForFallback = false;
+    const clearCursorForFallback = () => {
+      if (cursorClearedForFallback) return;
+      clearCursorFn(ownerUid);
+      cursorClearedForFallback = true;
+    };
 
     // First pull attempt: use stored cursor if available
-    let pullResponse = await pullWorkspace(storedCursor ? { cursor: storedCursor } : undefined);
+    let pullResponse: TwelveWeekPullResponse;
+    try {
+      pullResponse = await pullWorkspace(storedCursor ? { cursor: storedCursor } : undefined);
+    } catch (pullError) {
+      if (!storedCursor || !isInvalidPullCursorError(pullError)) {
+        throw pullError;
+      }
 
-    // If backend reports invalid cursor, clear it and retry once with full pull
-    const isInvalidCursor =
-      pullResponse.cursorStatus === "invalid" ||
-      pullResponse.warnings?.some((w) => w.code === "cursor_invalid");
-    if (isInvalidCursor && storedCursor) {
-      const clearCursorFn = options.clearCursorFn ?? ((uid: string) => clearPullCursor(uid, options.storage));
-      clearCursorFn(ownerUid);
+      clearCursorForFallback();
+      pullResponse = await pullWorkspace();
+    }
+
+    // If backend reports invalid cursor or a delta warning, clear it and retry once with full pull.
+    if (shouldFallbackToFullPull(pullResponse, Boolean(storedCursor))) {
+      clearCursorForFallback();
       pullResponse = await pullWorkspace();
     }
 
@@ -328,6 +365,7 @@ export function useTwelveWeekManualCloudSync(options: UseTwelveWeekManualCloudSy
       inFlightRef.current = null;
       setLoading(false);
     }
+    // biome-ignore lint/correctness/useExhaustiveDependencies: runOptions is a rest-spread; callers pass stable objects and inFlightRef prevents duplicate calls
   }, [authenticated, onApplied, runOptions, user?.uid]);
 
   return useMemo(

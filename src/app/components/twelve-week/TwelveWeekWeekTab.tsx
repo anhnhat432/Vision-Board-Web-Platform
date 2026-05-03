@@ -1,6 +1,6 @@
 ﻿import { Crown } from "lucide-react";
 
-import { CalendarCheck, ClipboardCheck, Flag, Layers, TrendingUp } from "lucide-react";
+import { CalendarCheck, CheckCircle2, ClipboardCheck, Flag, Layers, TrendingUp } from "lucide-react";
 
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -10,13 +10,28 @@ import { Progress } from "../ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import { formatCalendarDate, getReviewDayLabel } from "../../utils/storage";
-import type { LeadIndicator, PricingPlanCode, TwelveWeekSystem } from "../../utils/storage-types";
+import type {
+  LeadIndicator,
+  PricingPlanCode,
+  TwelveWeekSystem,
+  UniversalWeeklyReview,
+} from "../../utils/storage-types";
 import {
   getPlanLabel,
   type SuggestedNextWeekPlan,
   type WeeklyReviewPremiumInsight,
 } from "../../utils/twelve-week-premium";
 import { WORKLOAD_OPTIONS, getWorkloadDecisionLabel } from "../../utils/twelve-week-system-ui";
+import { interpretWeeklyExecutionScore } from "@/features/plan12week/logic";
+import type {
+  ExecutionInsight,
+  NextWeekRecommendation,
+  RescueModeStatus,
+} from "@/features/plan12week/logic";
+
+import { TwelveWeekInsightsCard } from "./TwelveWeekInsightsCard";
+import { TwelveWeekNextWeekRecommendationCard } from "./TwelveWeekNextWeekRecommendationCard";
+import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 
 interface WeekRange {
   start: string;
@@ -33,6 +48,8 @@ interface TwelveWeekWeeklyReviewForm {
   lagProgressValue: string;
   biggestOutputThisWeek: string;
   mainObstacle: string;
+  keepTactic: string;
+  reduceTactic: string;
   nextWeekPriority: string;
   workloadDecision: "keep same" | "reduce slightly" | "increase slightly" | "";
 }
@@ -54,10 +71,41 @@ interface TwelveWeekWeekTabProps {
   premiumInsight: WeeklyReviewPremiumInsight;
   suggestedNextWeekPlan: SuggestedNextWeekPlan;
   weeklyForm: TwelveWeekWeeklyReviewForm;
+  currentReview?: UniversalWeeklyReview | null;
   onWeeklyFormChange: (field: keyof TwelveWeekWeeklyReviewForm, value: string) => void;
   onApplySuggestedPlan: () => void;
   onOpenPremiumInsights: () => void;
   onSaveWeeklyReview: () => void;
+  onOpenTodayTab?: () => void;
+  /**
+   * Optional rule-based rescue status. When severity !== 'none' a gentle
+   * guidance card is shown above the week summary cards. Read-only — does
+   * not auto-mutate plan or tasks.
+   */
+  rescueStatus?: RescueModeStatus | null;
+  onPickTinyTask?: () => void;
+  onReducePlan?: () => void;
+  /**
+   * Optional rule-based recommendation for next week's posture. When provided
+   * and the current week's review is completed, a recommendation card is
+   * rendered below the summary. Pure presentation — caller decides what
+   * `onAcceptNextWeekRecommendation` does.
+   */
+  nextWeekRecommendation?: NextWeekRecommendation | null;
+  onAcceptNextWeekRecommendation?: () => void;
+  /**
+   * Optional week-scoped insights computed by `getWeeklyReflectionInsights`.
+   * Only rendered when the current week's review has been completed and the
+   * list is non-empty.
+   */
+  weeklyReflectionInsights?: ReadonlyArray<ExecutionInsight>;
+}
+
+function getWorkloadIntensityHint(value: TwelveWeekWeeklyReviewForm["workloadDecision"]): string {
+  if (value === "reduce slightly") return "Nhẹ hơn — giảm tải để khôi phục nhịp.";
+  if (value === "increase slightly") return "Đẩy nhanh — tăng nhẹ một việc quan trọng.";
+  if (value === "keep same") return "Giữ nguyên — chạy như tuần này.";
+  return "";
 }
 export function TwelveWeekWeekTab({
   system,
@@ -76,13 +124,36 @@ export function TwelveWeekWeekTab({
   premiumInsight,
   suggestedNextWeekPlan,
   weeklyForm,
+  currentReview,
   onWeeklyFormChange,
   onApplySuggestedPlan,
   onOpenPremiumInsights,
   onSaveWeeklyReview,
+  onOpenTodayTab,
+  rescueStatus,
+  onPickTinyTask,
+  onReducePlan,
+  nextWeekRecommendation,
+  onAcceptNextWeekRecommendation,
+  weeklyReflectionInsights,
 }: TwelveWeekWeekTabProps) {
+  const scoreInterpretation = interpretWeeklyExecutionScore(currentScoreValue);
+  const reviewIsCompleted = Boolean(currentReview?.reviewCompleted);
+  const summaryReview = reviewIsCompleted ? currentReview ?? null : null;
+  const intensityHint = getWorkloadIntensityHint(weeklyForm.workloadDecision);
+
   return (
     <div className="space-y-6 pt-4">
+      {rescueStatus && rescueStatus.severity !== "none" && (
+        <TwelveWeekRescueNudge
+          status={rescueStatus}
+          variant="week"
+          onPickTinyTask={onPickTinyTask ?? onOpenTodayTab}
+          onOpenWeekTab={onOpenTodayTab}
+          onReducePlan={onReducePlan}
+          onReviewPlan={onApplySuggestedPlan}
+        />
+      )}
       <div className="grid gap-4 md:grid-cols-3">
         <Card
           interactive={false}
@@ -271,12 +342,121 @@ export function TwelveWeekWeekTab({
                 </Badge>
               </div>
             </div>
+            {summaryReview && (
+              <div
+                data-testid="weekly-review-summary"
+                className={`rounded-lg border p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] ${
+                  scoreInterpretation.level === "strong"
+                    ? "border-emerald-200 bg-emerald-50/82"
+                    : scoreInterpretation.level === "okay"
+                      ? "border-sky-200 bg-sky-50/82"
+                      : "border-amber-200 bg-amber-50/82"
+                }`}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      Tuần {summaryReview.weekNumber} đã chốt
+                    </p>
+                    <p className="mt-2 text-base font-semibold text-slate-950">{scoreInterpretation.headline}</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-700">{scoreInterpretation.advice}</p>
+                  </div>
+                  <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+                    {getWorkloadDecisionLabel(summaryReview.workloadDecision)}
+                  </Badge>
+                </div>
+                <div className="mt-3 grid gap-2 md:grid-cols-2">
+                  {summaryReview.biggestOutputThisWeek && (
+                    <div className="rounded-lg border border-white/82 bg-white/82 px-3 py-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Kết quả chính</p>
+                      <p className="mt-1 text-sm leading-5 text-slate-700">{summaryReview.biggestOutputThisWeek}</p>
+                    </div>
+                  )}
+                  {summaryReview.mainObstacle && (
+                    <div className="rounded-lg border border-white/82 bg-white/82 px-3 py-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Cản trở</p>
+                      <p className="mt-1 text-sm leading-5 text-slate-700">{summaryReview.mainObstacle}</p>
+                    </div>
+                  )}
+                  {summaryReview.keepTactic && (
+                    <div className="rounded-lg border border-emerald-200/70 bg-white/82 px-3 py-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Giữ</p>
+                      <p className="mt-1 text-sm leading-5 text-slate-700">{summaryReview.keepTactic}</p>
+                    </div>
+                  )}
+                  {summaryReview.reduceTactic && (
+                    <div className="rounded-lg border border-amber-200/70 bg-white/82 px-3 py-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Giảm / bỏ</p>
+                      <p className="mt-1 text-sm leading-5 text-slate-700">{summaryReview.reduceTactic}</p>
+                    </div>
+                  )}
+                  {summaryReview.nextWeekPriority && (
+                    <div className="rounded-lg border border-violet-200/70 bg-white/82 px-3 py-2 md:col-span-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-violet-700">Ưu tiên tuần sau</p>
+                      <p className="mt-1 text-sm leading-5 text-slate-700">{summaryReview.nextWeekPriority}</p>
+                    </div>
+                  )}
+                </div>
+                {onOpenTodayTab && (
+                  <Button
+                    variant="outline"
+                    className="mt-4 w-full bg-white sm:w-auto"
+                    onClick={onOpenTodayTab}
+                  >
+                    Mở Today để bắt đầu tuần sau
+                  </Button>
+                )}
+              </div>
+            )}
+            {summaryReview && nextWeekRecommendation && (
+              <TwelveWeekNextWeekRecommendationCard
+                recommendation={nextWeekRecommendation}
+                onAcceptRecommendation={onAcceptNextWeekRecommendation}
+                onOpenTodayTab={onOpenTodayTab}
+              />
+            )}
+            {summaryReview && weeklyReflectionInsights && weeklyReflectionInsights.length > 0 && (
+              <TwelveWeekInsightsCard
+                insights={weeklyReflectionInsights}
+                title="Đáng giữ và đáng điều chỉnh tuần sau"
+                onOpenToday={onOpenTodayTab}
+                onOpenWeekReview={undefined}
+                onReduceLoad={onApplySuggestedPlan}
+                onTightenScope={onApplySuggestedPlan}
+                onResetFocus={onOpenTodayTab}
+                onCelebrate={onOpenTodayTab}
+              />
+            )}
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
               <div className="flex items-center justify-between text-sm text-slate-500">
                 <span>Điểm tự động</span>
                 <span className="font-semibold text-slate-700">{currentScoreValue}</span>
               </div>
               <Progress value={currentScoreValue} className="mt-3 h-2.5" />
+              <div
+                data-testid="weekly-score-interpretation"
+                className={`mt-3 rounded-lg border px-3 py-2 ${
+                  scoreInterpretation.level === "strong"
+                    ? "border-emerald-200 bg-emerald-50"
+                    : scoreInterpretation.level === "okay"
+                      ? "border-sky-200 bg-sky-50"
+                      : "border-amber-200 bg-amber-50"
+                }`}
+              >
+                <p
+                  className={`text-sm font-semibold ${
+                    scoreInterpretation.level === "strong"
+                      ? "text-emerald-800"
+                      : scoreInterpretation.level === "okay"
+                        ? "text-sky-800"
+                        : "text-amber-800"
+                  }`}
+                >
+                  {scoreInterpretation.headline}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-slate-600">{scoreInterpretation.advice}</p>
+              </div>
               <p className="mt-3 text-sm text-slate-500">Chỉ số chính: {currentLagMetricValue || "Chưa cập nhật"}</p>
             </div>
             <div
@@ -432,7 +612,7 @@ export function TwelveWeekWeekTab({
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="weekly-best">1. Điều gì chạy tốt nhất trong tuần này?</Label>
+              <Label htmlFor="weekly-best">1. Tuần này kết quả lớn nhất là gì?</Label>
               <Textarea
                 id="weekly-best"
                 rows={3}
@@ -441,7 +621,7 @@ export function TwelveWeekWeekTab({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="weekly-obstacle">2. Điều gì cản trở nhịp của bạn?</Label>
+              <Label htmlFor="weekly-obstacle">2. Điều gì cản trở nhiều nhất?</Label>
               <Textarea
                 id="weekly-obstacle"
                 rows={3}
@@ -450,7 +630,27 @@ export function TwelveWeekWeekTab({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="weekly-priority">3. Một ưu tiên duy nhất cho tuần sau là gì?</Label>
+              <Label htmlFor="weekly-keep">3. Việc nào tuần sau nên giữ?</Label>
+              <Textarea
+                id="weekly-keep"
+                rows={2}
+                value={weeklyForm.keepTactic}
+                placeholder="Việc nào đang chạy tốt — giữ nguyên cách làm."
+                onChange={(event) => onWeeklyFormChange("keepTactic", event.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="weekly-reduce">4. Việc nào nên giảm hoặc bỏ?</Label>
+              <Textarea
+                id="weekly-reduce"
+                rows={2}
+                value={weeklyForm.reduceTactic}
+                placeholder="Việc nào đang ngốn thời gian mà ít hiệu quả — giảm tải hoặc đổi lịch."
+                onChange={(event) => onWeeklyFormChange("reduceTactic", event.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="weekly-priority">5. Ưu tiên số 1 tuần sau là gì?</Label>
               <Textarea
                 id="weekly-priority"
                 rows={3}
@@ -462,7 +662,7 @@ export function TwelveWeekWeekTab({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="weekly-decision">Quyết định cho tuần sau</Label>
+              <Label htmlFor="weekly-decision">Tuần sau muốn nhẹ hơn, giữ nguyên hay đẩy nhanh?</Label>
               <Select
                 value={weeklyForm.workloadDecision}
                 onValueChange={(value) => onWeeklyFormChange("workloadDecision", value)}
@@ -478,6 +678,7 @@ export function TwelveWeekWeekTab({
                   ))}
                 </SelectContent>
               </Select>
+              {intensityHint && <p className="text-xs leading-5 text-slate-500">{intensityHint}</p>}
             </div>
             <Button className="w-full sm:w-auto" onClick={onSaveWeeklyReview}>
               Chốt review tuần này

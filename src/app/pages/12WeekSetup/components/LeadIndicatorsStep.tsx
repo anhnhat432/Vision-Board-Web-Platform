@@ -5,6 +5,8 @@ import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
+import { formatScheduleDayLabels, validateLeadIndicatorDraft } from "../helpers";
+import type { IndicatorPreviewGroup } from "../helpers";
 import type { LeadIndicatorDraft, TwelveWeekSetupDraft } from "../types";
 
 interface LeadIndicatorsStepProps {
@@ -16,6 +18,7 @@ interface LeadIndicatorsStepProps {
   selectedTemplate: TwelveWeekTemplateDefinition | null;
   weekOneTaskPreview: string[];
   weekOneTaskWarning: string | null;
+  weekOneTaskGroups: IndicatorPreviewGroup[];
   onAddIndicator: () => void;
   onRemoveIndicator: (index: number) => void;
   onIndicatorChange: <K extends keyof LeadIndicatorDraft>(
@@ -34,10 +37,19 @@ export function LeadIndicatorsStep({
   selectedTemplate,
   weekOneTaskPreview,
   weekOneTaskWarning,
+  weekOneTaskGroups,
   onAddIndicator,
   onRemoveIndicator,
   onIndicatorChange,
 }: LeadIndicatorsStepProps) {
+  const validationOptions = {
+    tacticLoadPreference: draft.tacticLoadPreference,
+    dailyTimeBudget: draft.dailyTimeBudget,
+  };
+  const indicatorWarnings = draft.leadIndicators.map((indicator) =>
+    validateLeadIndicatorDraft(indicator, validationOptions).warnings,
+  );
+
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="space-y-4">
@@ -48,14 +60,43 @@ export function LeadIndicatorsStep({
               Việc chính được ưu tiên trong điểm tuần. Việc tùy chọn là phần thêm khi bạn còn sức.
             </p>
             <p className="mt-2 text-xs leading-6 text-slate-500">
-              Việc lặp lại không phải kết quả cuối cùng. Hãy viết hành động bạn có thể làm tuần này, ví dụ: tập 2 buổi,
-              viết 3 trang hoặc gửi 5 email.
+              Việc lặp lại là <strong>hành động bạn kiểm soát được</strong> — không phải kết quả cuối. Mỗi tuần hệ thống
+              sẽ tạo việc hôm nay dựa trên các việc này.
             </p>
           </div>
           <Button type="button" variant="outline" onClick={onAddIndicator} disabled={draft.leadIndicators.length >= 4}>
             Thêm việc
           </Button>
         </div>
+
+        <details className="rounded-[24px] border border-sky-200 bg-sky-50/72 p-4">
+          <summary className="cursor-pointer list-none text-sm font-semibold text-sky-900">
+            Việc lặp lại là gì? Khác kết quả cuối thế nào?
+          </summary>
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            <div className="rounded-2xl border border-emerald-200 bg-white/82 p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Ví dụ tốt (kiểm soát được)</p>
+              <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
+                <li>• Viết draft 800 từ</li>
+                <li>• Tập gym 45 phút</li>
+                <li>• Gửi 5 email outreach</li>
+                <li>• Học flashcard tiếng Anh 30 phút</li>
+              </ul>
+            </div>
+            <div className="rounded-2xl border border-amber-200 bg-white/82 p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Ví dụ chưa hợp (kết quả cuối)</p>
+              <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
+                <li>• Tăng 100 followers</li>
+                <li>• Giảm 5kg</li>
+                <li>• Có job mới</li>
+                <li>• Đạt IELTS 7.0</li>
+              </ul>
+              <p className="mt-2 text-xs leading-5 text-slate-500">
+                Đây là kết quả cuối — đo ở chỉ số chính, không phải việc tuần.
+              </p>
+            </div>
+          </div>
+        </details>
 
         {draft.leadIndicators.map((indicator, index) => (
           <div key={indicator.id} className="rounded-[24px] border border-white/70 bg-white/72 p-5">
@@ -136,6 +177,16 @@ export function LeadIndicatorsStep({
                 </div>
               </div>
             </div>
+            {indicatorWarnings[index]?.length > 0 && (
+              <ul
+                className="mt-3 space-y-1 rounded-2xl border border-amber-200 bg-amber-50/82 px-3 py-2 text-xs leading-5 text-amber-800"
+                aria-label={`Cảnh báo cho việc ${index + 1}`}
+              >
+                {indicatorWarnings[index].map((warning) => (
+                  <li key={warning}>• {warning}</li>
+                ))}
+              </ul>
+            )}
           </div>
         ))}
       </div>
@@ -160,13 +211,34 @@ export function LeadIndicatorsStep({
             </p>
           </div>
         )}
-        <div className="space-y-2">
-          {weekOneTaskPreview.length === 0 ? (
+        <p className="text-xs leading-5 text-slate-500">
+          Từ mỗi việc lặp lại bên trên, hệ thống sẽ tạo việc hôm nay vào các ngày sau:
+        </p>
+        <div className="space-y-3">
+          {weekOneTaskGroups.length === 0 ? (
             <p className="text-sm text-slate-500">Thêm việc để thấy tuần đầu tiên sẽ trông như thế nào.</p>
           ) : (
-            weekOneTaskPreview.map((task) => (
-              <div key={task} className="rounded-2xl border border-white/70 bg-slate-50/80 px-4 py-3 text-sm text-slate-700">
-                {task}
+            weekOneTaskGroups.map((group) => (
+              <div
+                key={group.id}
+                className="rounded-2xl border border-white/70 bg-slate-50/80 px-4 py-3"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-slate-900">{group.name}</p>
+                  <Badge variant={group.type === "optional" ? "outline" : "default"} className="text-xs">
+                    {group.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
+                  </Badge>
+                </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  {group.taskTitles.length} task / tuần • Lịch: {formatScheduleDayLabels(group.scheduleDays)}
+                </p>
+                {group.taskTitles.length > 0 && (
+                  <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-600">
+                    {group.taskTitles.map((title) => (
+                      <li key={title}>→ {title}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
             ))
           )}

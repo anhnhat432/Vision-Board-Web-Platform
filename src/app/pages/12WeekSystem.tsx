@@ -143,6 +143,10 @@ export function TwelveWeekSystem() {
     optionalIndicators,
     hasSmartRescue,
     rescuePlanSummary,
+    rescueStatus,
+    nextWeekRecommendation,
+    executionInsights,
+    weeklyReflectionInsights,
     activeTriggers,
     hasPremiumReviewInsights,
     premiumReviewInsight,
@@ -352,6 +356,9 @@ export function TwelveWeekSystem() {
     handleReentry,
     handleApplyRecommendedReentry,
     handleApplySuggestedPlan,
+    handleRescheduleTaskWithinWeek,
+    handleRescheduleTaskToNextWeek,
+    handleSkipNonCoreTask,
   } = useTwelveWeekExecutionActions({
     activeGoal,
     system,
@@ -383,6 +390,8 @@ export function TwelveWeekSystem() {
     handleRestoreArchivedOutbox,
     handleOpenReminder,
     handleExportLocalData,
+    handleExportCloudWorkspace,
+    handleDeleteCloudWorkspace,
     handleClearLocalSignals,
     handleDeleteAllData,
     handleBrowserNotificationToggle,
@@ -738,6 +747,14 @@ export function TwelveWeekSystem() {
               onDailyMoodChange={setDailyMood}
               onDailyNoteChange={setDailyNote}
               onSaveCheckIn={handleSaveCheckIn}
+              onOpenWeekTab={() => handleTabChange("week")}
+              onNavigateToSetup={() => navigate("/life-insight")}
+              rescueStatus={rescueStatus}
+              onPickTinyTask={() => handleTabChange("today")}
+              onReviewPlan={() => navigate("/life-insight")}
+              onRescheduleTaskWithinWeek={handleRescheduleTaskWithinWeek}
+              onRescheduleTaskToNextWeek={handleRescheduleTaskToNextWeek}
+              onSkipNonCoreTask={handleSkipNonCoreTask}
             />
           </TabErrorBoundary>
         </TabsContent>
@@ -770,6 +787,7 @@ export function TwelveWeekSystem() {
                 premiumInsight={premiumReviewInsight}
                 suggestedNextWeekPlan={suggestedNextWeekPlan}
                 weeklyForm={weeklyForm}
+                currentReview={currentReview}
                 onWeeklyFormChange={(field, value) =>
                   setWeeklyForm((previousForm) => ({
                     ...previousForm,
@@ -779,6 +797,13 @@ export function TwelveWeekSystem() {
                 onApplySuggestedPlan={handleApplySuggestedPlan}
                 onOpenPremiumInsights={() => handleOpenUpgradeDialog("review", "PLUS")}
                 onSaveWeeklyReview={handleSaveWeeklyReview}
+                onOpenTodayTab={() => handleTabChange("today")}
+                rescueStatus={rescueStatus}
+                onPickTinyTask={() => handleTabChange("today")}
+                onReducePlan={handleApplySuggestedPlan}
+                nextWeekRecommendation={nextWeekRecommendation}
+                onAcceptNextWeekRecommendation={handleApplySuggestedPlan}
+                weeklyReflectionInsights={weeklyReflectionInsights}
               />
             </Suspense>
           </TabErrorBoundary>
@@ -807,6 +832,11 @@ export function TwelveWeekSystem() {
                 executionHeatmap={executionHeatmap}
                 weeklyTrend={weeklyTrend}
                 tacticBreakdown={tacticBreakdown}
+                reviewDueToday={reviewDueToday}
+                onOpenTodayTab={() => handleTabChange("today")}
+                onOpenWeekTab={() => handleTabChange("week")}
+                onNavigateToSetup={() => navigate("/life-insight")}
+                executionInsights={executionInsights}
               />
             </Suspense>
           </TabErrorBoundary>
@@ -858,6 +888,8 @@ export function TwelveWeekSystem() {
                 onRestoreArchivedOutbox={handleRestoreArchivedOutbox}
                 onOpenReminder={handleOpenReminder}
                 onExportLocalData={handleExportLocalData}
+                onExportCloudWorkspace={handleExportCloudWorkspace}
+                onDeleteCloudWorkspace={handleDeleteCloudWorkspace}
                 onBrowserNotificationToggle={handleBrowserNotificationToggle}
                 onRunOutboxSync={handleRunOutboxSync}
                 onOutboxItemToggle={handleOutboxItemToggle}

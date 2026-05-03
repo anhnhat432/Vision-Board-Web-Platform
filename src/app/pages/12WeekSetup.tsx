@@ -39,6 +39,8 @@ import {
 import { parsePendingSMARTGoal, parseSmartGoal, type PendingSMARTGoal } from "@/lib/smart-goal";
 import { getWeeklyTaskWarning } from "@/features/plan12week/logic";
 import { usePlanSetupSync } from "@/features/plan12week/hooks";
+import { enqueuePlanSnapshotUpdatedMutation } from "@/features/plan12week/persistence/planSnapshotMutation";
+import { enqueueLeadMetricUpsertedMutations } from "@/features/plan12week/persistence/leadMetricMutation";
 import { createGoal, updateGoal } from "@/services/goalService";
 import { saveGoalLink } from "@/lib/api/goalLinkStore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
@@ -55,6 +57,7 @@ import {
   getFeasibilityDraftDefaults,
   getPlanLoadLabel,
   getPreviewTasks,
+  getPreviewTasksByIndicator,
   isPendingFeasibilityResult,
 } from "./12WeekSetup/helpers";
 import type { LeadIndicatorDraft, PendingFeasibilityResult, TwelveWeekSetupDraft } from "./12WeekSetup/types";
@@ -289,6 +292,10 @@ export function TwelveWeekSetup() {
   );
   const previewTasks = useMemo(
     () => getPreviewTasks(validIndicators, planLoadOptions),
+    [validIndicators, planLoadOptions],
+  );
+  const previewTaskGroups = useMemo(
+    () => getPreviewTasksByIndicator(validIndicators, planLoadOptions),
     [validIndicators, planLoadOptions],
   );
   const progressValue = ((currentStep + 1) / STEPS.length) * 100;
@@ -668,6 +675,11 @@ export function TwelveWeekSetup() {
 
     localStorage.setItem(APP_STORAGE_KEYS.latest12WeekGoalId, goalId);
     localStorage.setItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId, goalId);
+    const createdSystem = getUserData().goals.find((goal) => goal.id === goalId)?.twelveWeekSystem;
+    if (createdSystem) {
+      enqueuePlanSnapshotUpdatedMutation(goalId, createdSystem, "setup");
+      enqueueLeadMetricUpsertedMutations(goalId, createdSystem, "setup");
+    }
     trackAnalyticsEvent(
       "twelve_week_plan_created",
       {
@@ -915,6 +927,7 @@ export function TwelveWeekSetup() {
             selectedTemplate={selectedTemplate}
             weekOneTaskPreview={weekOneTaskPreview}
             weekOneTaskWarning={weekOneTaskWarning}
+            weekOneTaskGroups={previewTaskGroups}
             onAddIndicator={handleAddIndicator}
             onRemoveIndicator={handleRemoveIndicator}
             onIndicatorChange={handleIndicatorChange}
@@ -945,6 +958,8 @@ export function TwelveWeekSetup() {
             setupGuideTemplate={setupGuideTemplate}
             weekOneTaskPreview={weekOneTaskPreview}
             weekOneTaskWarning={weekOneTaskWarning}
+            feasibility={feasibility}
+            scheduledLeadIndicators={scheduledLeadIndicators}
             onChange={handleChange}
           />
         )}

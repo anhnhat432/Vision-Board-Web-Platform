@@ -13,7 +13,7 @@ describe("useNetworkStatus", () => {
     listeners.clear();
     vi.spyOn(window, "addEventListener").mockImplementation((type: string, listener: EventListenerOrEventListenerObject) => {
       if (!listeners.has(type)) listeners.set(type, new Set());
-      listeners.get(type)!.add(listener as EventListener);
+      listeners.get(type)?.add(listener as EventListener);
     });
     vi.spyOn(window, "removeEventListener").mockImplementation((type: string, listener: EventListenerOrEventListenerObject) => {
       listeners.get(type)?.delete(listener as EventListener);

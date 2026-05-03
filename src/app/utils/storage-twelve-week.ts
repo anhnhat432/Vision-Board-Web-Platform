@@ -454,6 +454,7 @@ function buildTaskInstances(system: TwelveWeekSystem): TwelveWeekTaskInstance[] 
           completedAt: existing?.completedAt,
           tacticId,
           rescheduledFrom: existing?.rescheduledFrom,
+          skipped: existing?.skipped,
         });
       });
     });
@@ -509,7 +510,7 @@ export function getTwelveWeekTodayTasks(
   );
 
   return system.taskInstances
-    .filter((task) => task.scheduledDate === dateKey)
+    .filter((task) => task.scheduledDate === dateKey && !task.skipped)
     .sort((left, right) => {
       const leftPriority = priorityMap.get(left.tacticId) ?? 99;
       const rightPriority = priorityMap.get(right.tacticId) ?? 99;
@@ -536,7 +537,7 @@ export function getTwelveWeekMissedTasks(
   );
 
   return getTwelveWeekTasksForWeek(system, currentWeek)
-    .filter((task) => !task.completed && task.scheduledDate < todayKey)
+    .filter((task) => !task.completed && !task.skipped && task.scheduledDate < todayKey)
     .sort((left, right) => {
       const leftPriority = priorityMap.get(left.tacticId) ?? 99;
       const rightPriority = priorityMap.get(right.tacticId) ?? 99;
@@ -553,7 +554,7 @@ export function getTwelveWeekWeekCompletion(
   system: TwelveWeekSystem,
   weekNumber: number,
 ): { completed: number; total: number; percent: number } {
-  const tasks = getTwelveWeekTasksForWeek(system, weekNumber);
+  const tasks = getTwelveWeekTasksForWeek(system, weekNumber).filter((task) => !task.skipped);
   const completed = tasks.filter((task) => task.completed).length;
   const total = tasks.length;
 
@@ -561,6 +562,141 @@ export function getTwelveWeekWeekCompletion(
     completed,
     total,
     percent: total === 0 ? 0 : Math.round((completed / total) * 100),
+  };
+}
+
+export type OverdueTaskActionReason =
+  | "task_not_found"
+  | "task_already_completed"
+  | "task_already_skipped"
+  | "no_room_in_current_week"
+  | "no_next_week_available"
+  | "core_task_cannot_skip"
+  | "ok";
+
+export interface OverdueTaskActionResult {
+  /** Resulting system. Equals input when `applied === false`. */
+  system: TwelveWeekSystem;
+  applied: boolean;
+  reason: OverdueTaskActionReason;
+  /** Updated task (when applied), helpful for logging / UI feedback. */
+  updatedTask?: TwelveWeekTaskInstance;
+}
+
+function findTaskInstance(
+  system: TwelveWeekSystem,
+  taskId: string,
+): TwelveWeekTaskInstance | undefined {
+  return system.taskInstances.find((task) => task.id === taskId);
+}
+
+function replaceTaskInstance(
+  system: TwelveWeekSystem,
+  taskId: string,
+  next: TwelveWeekTaskInstance,
+): TwelveWeekSystem {
+  return {
+    ...system,
+    taskInstances: system.taskInstances.map((task) => (task.id === taskId ? next : task)),
+  };
+}
+
+/**
+ * Move an overdue task to a later day **within the same week**. Picks the
+ * smallest valid date strictly greater than the current `scheduledDate` and
+ * `>= todayKey`, capped to `weekEnd`. Sets `rescheduledFrom` to the original
+ * scheduled date. Pure — caller persists.
+ */
+export function rescheduleTwelveWeekTaskWithinWeek(
+  system: TwelveWeekSystem,
+  taskId: string,
+  referenceDate = new Date(),
+): OverdueTaskActionResult {
+  const task = findTaskInstance(system, taskId);
+  if (!task) return { system, applied: false, reason: "task_not_found" };
+  if (task.completed) return { system, applied: false, reason: "task_already_completed" };
+  if (task.skipped) return { system, applied: false, reason: "task_already_skipped" };
+
+  const range = getTwelveWeekWeekRange(system, task.weekNumber);
+  const todayKey = formatDateInputValue(referenceDate);
+  // Earliest valid new date: max(today, scheduledDate+1 day) — avoid picking a
+  // past day, but at least move strictly forward from current schedule.
+  const startDate = parseCalendarDate(task.scheduledDate);
+  const dayAfterScheduled = startDate
+    ? formatDateInputValue(addCalendarDays(startDate, 1))
+    : todayKey;
+  const candidateKey = todayKey > dayAfterScheduled ? todayKey : dayAfterScheduled;
+
+  if (candidateKey > range.end) {
+    return { system, applied: false, reason: "no_room_in_current_week" };
+  }
+
+  const nextTask: TwelveWeekTaskInstance = {
+    ...task,
+    scheduledDate: candidateKey,
+    rescheduledFrom: task.rescheduledFrom ?? task.scheduledDate,
+  };
+  return {
+    system: replaceTaskInstance(system, taskId, nextTask),
+    applied: true,
+    reason: "ok",
+    updatedTask: nextTask,
+  };
+}
+
+/**
+ * Move an overdue task to the **first day of the next week**. Increments
+ * `weekNumber` and resets `scheduledDate` to the next week's start. Refuses
+ * when current week is the final week of the cycle.
+ */
+export function rescheduleTwelveWeekTaskToNextWeek(
+  system: TwelveWeekSystem,
+  taskId: string,
+): OverdueTaskActionResult {
+  const task = findTaskInstance(system, taskId);
+  if (!task) return { system, applied: false, reason: "task_not_found" };
+  if (task.completed) return { system, applied: false, reason: "task_already_completed" };
+  if (task.skipped) return { system, applied: false, reason: "task_already_skipped" };
+  if (task.weekNumber >= system.totalWeeks) {
+    return { system, applied: false, reason: "no_next_week_available" };
+  }
+
+  const nextWeekRange = getTwelveWeekWeekRange(system, task.weekNumber + 1);
+  const nextTask: TwelveWeekTaskInstance = {
+    ...task,
+    weekNumber: task.weekNumber + 1,
+    scheduledDate: nextWeekRange.start,
+    rescheduledFrom: task.rescheduledFrom ?? task.scheduledDate,
+  };
+  return {
+    system: replaceTaskInstance(system, taskId, nextTask),
+    applied: true,
+    reason: "ok",
+    updatedTask: nextTask,
+  };
+}
+
+/**
+ * Skip a **non-core** task. Sets `skipped: true`. Refuses for core tasks —
+ * caller is responsible for surfacing a confirmation flow elsewhere if a core
+ * task should ever be skipped (out of scope for v1).
+ */
+export function skipTwelveWeekNonCoreTask(
+  system: TwelveWeekSystem,
+  taskId: string,
+): OverdueTaskActionResult {
+  const task = findTaskInstance(system, taskId);
+  if (!task) return { system, applied: false, reason: "task_not_found" };
+  if (task.completed) return { system, applied: false, reason: "task_already_completed" };
+  if (task.skipped) return { system, applied: false, reason: "task_already_skipped" };
+  if (task.isCore) return { system, applied: false, reason: "core_task_cannot_skip" };
+
+  const nextTask: TwelveWeekTaskInstance = { ...task, skipped: true };
+  return {
+    system: replaceTaskInstance(system, taskId, nextTask),
+    applied: true,
+    reason: "ok",
+    updatedTask: nextTask,
   };
 }
 

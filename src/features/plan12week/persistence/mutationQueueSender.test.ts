@@ -127,6 +127,106 @@ function seedWeeklyReviewMutation(input: {
   );
 }
 
+function seedPlanSnapshotMutation(input: {
+  ownerUid?: string | null;
+  mutationId?: string;
+  vision?: string;
+} = {}): void {
+  enqueueStoredMutation(
+    {
+      kind: "plan_snapshot_updated",
+      goalId: "goal_1",
+      payload: {
+        reason: "manual_update",
+        clientGoalId: "goal_1",
+        clientPlanId: "goal_1:12-week-system",
+        changedAt: at(1),
+        clientUpdatedAt: at(1),
+        system: {
+          goalType: "Career",
+          vision12Week: input.vision ?? "Ship the plan",
+          lagMetric: {
+            name: "Published drafts",
+            unit: "drafts",
+            target: "3",
+            currentValue: "0",
+          },
+          leadIndicators: [],
+          milestones: {
+            week4: "Outline",
+            week8: "Draft",
+            week12: "Ship",
+          },
+          successEvidence: "Plan is usable",
+          reviewDay: "Sunday",
+          week12Outcome: "Public beta",
+          startDate: "2026-04-30",
+          endDate: "2026-07-23",
+          timezone: "Asia/Saigon",
+          weekStartsOn: "Monday",
+          status: "active",
+          currentWeek: 1,
+          totalWeeks: 12,
+          weeklyPlans: [
+            {
+              weekNumber: 1,
+              phaseName: "Start",
+              focus: "Validate",
+              milestone: "One useful test",
+              completed: false,
+            },
+          ],
+        },
+      },
+    },
+    {
+      ownerUid: input.ownerUid ?? "user_1",
+      storage: localStorage,
+      deviceId: "device_1",
+      now: at(1),
+      createId: () => input.mutationId ?? "snapshot_mutation_1",
+    },
+  );
+}
+
+function seedLeadMetricMutation(input: {
+  ownerUid?: string | null;
+  mutationId?: string;
+  currentValue?: number;
+} = {}): void {
+  enqueueStoredMutation(
+    {
+      kind: "lead_metric_upserted",
+      goalId: "goal_1",
+      payload: {
+        reason: "task_progress",
+        clientPlanId: "goal_1:12-week-system",
+        clientWeekId: "goal_1:week:1",
+        clientMetricId: "goal_1:week:1:metric:lead_write",
+        leadIndicatorId: "lead_write",
+        weekNumber: 1,
+        name: "Write",
+        weeklyTarget: 3,
+        target: "3",
+        unit: "sessions/week",
+        type: "core",
+        priority: 1,
+        schedule: [1, 3, 5],
+        currentValue: input.currentValue ?? 1,
+        changedAt: at(1),
+        clientUpdatedAt: at(1),
+      },
+    },
+    {
+      ownerUid: input.ownerUid ?? "user_1",
+      storage: localStorage,
+      deviceId: "device_1",
+      now: at(1),
+      createId: () => input.mutationId ?? "lead_metric_mutation_1",
+    },
+  );
+}
+
 function readItem(ownerUid = "user_1", mutationId = "mutation_1"): DataMutationItem {
   const item = readMutationQueueStore(ownerUid, { storage: localStorage, now: at(5) }).items.find(
     (candidate) => candidate.id === mutationId,
@@ -141,7 +241,7 @@ describe("mutation queue sender", () => {
   });
 
   it("does not call the backend in demo mode", async () => {
-    seedTaskMutation();
+    seedPlanSnapshotMutation({ mutationId: "snapshot_demo" });
     const postMutations = vi.fn();
 
     const result = await sendPending12WeekMutations({
@@ -158,7 +258,7 @@ describe("mutation queue sender", () => {
     expect(result.status).toBe("skipped");
     expect(result.skipReason).toBe("demo_mode");
     expect(postMutations).not.toHaveBeenCalled();
-    expect(readItem().status).toBe("pending");
+    expect(readItem("user_1", "snapshot_demo").status).toBe("pending");
   });
 
   it("does not call the backend when the user is not authenticated", async () => {
@@ -333,6 +433,128 @@ describe("mutation queue sender", () => {
 
     expect(result.status).toBe("success");
     expect(readItem("user_1", "weekly_success").status).toBe("applied");
+  });
+
+  it("sends plan snapshot entity client ids with the queued payload", async () => {
+    seedPlanSnapshotMutation({ mutationId: "snapshot_success", vision: "Updated plan vision" });
+    const postMutations = vi.fn(
+      async (request: TwelveWeekMutationBatchRequest): Promise<TwelveWeekMutationBatchResponse> => {
+        expect(request.mutations).toHaveLength(1);
+        expect(request.mutations[0]).toEqual(
+          expect.objectContaining({
+            mutationId: "snapshot_success",
+            type: "plan_snapshot_updated",
+            entity: expect.objectContaining({
+              clientGoalId: "goal_1",
+              clientPlanId: "goal_1:12-week-system",
+              clientWeekId: undefined,
+              clientTaskId: undefined,
+            }),
+            payload: expect.objectContaining({
+              clientPlanId: "goal_1:12-week-system",
+              system: expect.objectContaining({
+                vision12Week: "Updated plan vision",
+              }),
+            }),
+          }),
+        );
+
+        return {
+          accepted: [
+            {
+              mutationId: "snapshot_success",
+              type: "plan_snapshot_updated",
+              status: "applied",
+            },
+          ],
+        };
+      },
+    );
+
+    const result = await sendPending12WeekMutations({
+      ownerUid: "user_1",
+      authenticated: true,
+      featureEnabled: true,
+      realMode: true,
+      apiConfigured: true,
+      storage: localStorage,
+      now: at(2),
+      postMutations,
+    });
+
+    expect(result.status).toBe("success");
+    expect(readItem("user_1", "snapshot_success").status).toBe("applied");
+  });
+
+  it("sends lead metric entity client ids with the queued payload", async () => {
+    seedLeadMetricMutation({ mutationId: "metric_success", currentValue: 2 });
+    const postMutations = vi.fn(
+      async (request: TwelveWeekMutationBatchRequest): Promise<TwelveWeekMutationBatchResponse> => {
+        expect(request.mutations).toHaveLength(1);
+        expect(request.mutations[0]).toEqual(
+          expect.objectContaining({
+            mutationId: "metric_success",
+            type: "lead_metric_upserted",
+            entity: expect.objectContaining({
+              clientGoalId: "goal_1",
+              clientPlanId: "goal_1:12-week-system",
+              clientWeekId: "goal_1:week:1",
+              clientMetricId: "goal_1:week:1:metric:lead_write",
+              clientTaskId: undefined,
+            }),
+            payload: expect.objectContaining({
+              clientMetricId: "goal_1:week:1:metric:lead_write",
+              currentValue: 2,
+            }),
+          }),
+        );
+
+        return {
+          accepted: [
+            {
+              mutationId: "metric_success",
+              type: "lead_metric_upserted",
+              status: "applied",
+            },
+          ],
+        };
+      },
+    );
+
+    const result = await sendPending12WeekMutations({
+      ownerUid: "user_1",
+      authenticated: true,
+      featureEnabled: true,
+      realMode: true,
+      apiConfigured: true,
+      storage: localStorage,
+      now: at(2),
+      postMutations,
+    });
+
+    expect(result.status).toBe("success");
+    expect(readItem("user_1", "metric_success").status).toBe("applied");
+  });
+
+  it("does not call the backend for queued lead metrics in demo mode", async () => {
+    seedLeadMetricMutation({ mutationId: "metric_demo" });
+    const postMutations = vi.fn();
+
+    const result = await sendPending12WeekMutations({
+      ownerUid: "user_1",
+      authenticated: true,
+      featureEnabled: true,
+      realMode: false,
+      apiConfigured: true,
+      storage: localStorage,
+      now: at(2),
+      postMutations,
+    });
+
+    expect(result.status).toBe("skipped");
+    expect(result.skipReason).toBe("demo_mode");
+    expect(postMutations).not.toHaveBeenCalled();
+    expect(readItem("user_1", "metric_demo").status).toBe("pending");
   });
 
   it("keeps failed request mutations in a retryable queue state", async () => {

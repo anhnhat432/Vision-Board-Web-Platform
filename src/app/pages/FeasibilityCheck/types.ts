@@ -29,6 +29,8 @@ export interface FeasibilityBottleneck {
   action: string;
 }
 
+export type SmartGoalQualityBridge = "weak" | "okay" | "strong";
+
 export interface ResultData {
   type: ResultType;
   title: string;
@@ -45,6 +47,8 @@ export interface ResultData {
   weeklyCapacity: WeeklyCapacity;
   firstWeekGuidance: string;
   scopeRecommendation: string;
+  smartGoalQualityLevel?: SmartGoalQualityBridge;
+  smartGoalQualityNote?: string;
 }
 
 export interface PendingFeasibilityResult {
@@ -63,4 +67,6 @@ export interface PendingFeasibilityResult {
   weeklyCapacity: WeeklyCapacity;
   firstWeekGuidance: string;
   scopeRecommendation: string;
+  smartGoalQualityLevel?: SmartGoalQualityBridge;
+  smartGoalQualityNote?: string;
 }

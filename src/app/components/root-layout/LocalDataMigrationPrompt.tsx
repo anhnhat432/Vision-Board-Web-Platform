@@ -119,7 +119,7 @@ export function LocalDataMigrationPrompt({
       setShowCloudImportConfirm(false);
     }
   }, [open]);
-
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fingerprint is an intentional change trigger to reset state when a new migration candidate appears
   useEffect(() => {
     setImportResult(null);
     setCloudImportResult(null);

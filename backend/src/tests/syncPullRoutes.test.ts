@@ -7,6 +7,7 @@ import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
 import { syncRoutes } from "../routes/syncRoutes";
 import {
+  createTwelveWeekPullCursor,
   TwelveWeekPullService,
   twelveWeekPullService,
   type PullDailyCheckInSource,
@@ -45,7 +46,9 @@ function replaceMethod<T extends object, K extends keyof T>(target: T, key: K, v
 }
 
 function createPullRepository(): TwelveWeekPullRepository {
-  const now = new Date("2026-04-30T01:00:00.000Z");
+  const baseSyncTime = new Date("2026-04-30T01:00:00.000Z");
+  const deletedTaskSyncTime = new Date("2026-04-30T01:20:00.000Z");
+  const taskSyncTime = new Date("2026-04-30T02:00:00.000Z");
   const goals: PullGoalSource[] = [
     {
       _id: "goal_owner_1",
@@ -60,7 +63,7 @@ function createPullRepository(): TwelveWeekPullRepository {
       readinessScore: 82,
       planId: "plan_owner_1",
       revision: 2,
-      syncUpdatedAt: now,
+      syncUpdatedAt: baseSyncTime,
     },
     {
       _id: "goal_other_1",
@@ -73,7 +76,7 @@ function createPullRepository(): TwelveWeekPullRepository {
       status: "active",
       planId: "plan_other_1",
       revision: 1,
-      syncUpdatedAt: now,
+      syncUpdatedAt: baseSyncTime,
     },
   ];
   const plans: PullPlanSource[] = [
@@ -86,7 +89,7 @@ function createPullRepository(): TwelveWeekPullRepository {
       vision: "A clear public demo loop.",
       startDate: new Date("2026-04-30T00:00:00.000Z"),
       revision: 1,
-      syncUpdatedAt: now,
+      syncUpdatedAt: baseSyncTime,
     },
     {
       _id: "plan_other_1",
@@ -97,7 +100,7 @@ function createPullRepository(): TwelveWeekPullRepository {
       vision: "Other user plan",
       startDate: new Date("2026-04-30T00:00:00.000Z"),
       revision: 1,
-      syncUpdatedAt: now,
+      syncUpdatedAt: baseSyncTime,
     },
   ];
   const weeks: PullWeekSource[] = [
@@ -110,7 +113,7 @@ function createPullRepository(): TwelveWeekPullRepository {
       focus: "Validate demo clarity",
       expectedOutput: "Three tester notes",
       revision: 1,
-      syncUpdatedAt: now,
+      syncUpdatedAt: baseSyncTime,
     },
     {
       _id: "week_other_1",
@@ -121,7 +124,7 @@ function createPullRepository(): TwelveWeekPullRepository {
       focus: "Other user focus",
       expectedOutput: "Other output",
       revision: 1,
-      syncUpdatedAt: now,
+      syncUpdatedAt: baseSyncTime,
     },
   ];
   const tasks: PullTaskSource[] = [
@@ -137,7 +140,20 @@ function createPullRepository(): TwelveWeekPullRepository {
       completedAt: new Date("2026-04-30T02:00:00.000Z"),
       isCore: true,
       revision: 3,
-      syncUpdatedAt: now,
+      syncUpdatedAt: taskSyncTime,
+    },
+    {
+      _id: "task_deleted_1",
+      weekId: "week_owner_1",
+      clientPlanId: ownerPlanClientId,
+      clientWeekId: ownerWeekClientId,
+      clientTaskId: "task_deleted_1",
+      weekNumber: 1,
+      title: "Deleted task",
+      status: "todo",
+      revision: 4,
+      deletedAt: deletedTaskSyncTime,
+      syncUpdatedAt: deletedTaskSyncTime,
     },
     {
       _id: "task_other_1",
@@ -149,7 +165,7 @@ function createPullRepository(): TwelveWeekPullRepository {
       title: "Other private task",
       status: "todo",
       revision: 1,
-      syncUpdatedAt: now,
+      syncUpdatedAt: baseSyncTime,
     },
   ];
   const leadMetrics: PullLeadMetricSource[] = [
@@ -165,7 +181,7 @@ function createPullRepository(): TwelveWeekPullRepository {
       unit: "tests/week",
       logs: [{ _id: "metric_log_1", date: new Date("2026-04-30T00:00:00.000Z"), value: 1, completed: true }],
       revision: 1,
-      syncUpdatedAt: now,
+      syncUpdatedAt: baseSyncTime,
     },
   ];
   const dailyCheckIns: PullDailyCheckInSource[] = [
@@ -185,7 +201,7 @@ function createPullRepository(): TwelveWeekPullRepository {
       outputCreated: "Interview notes",
       mood: "steady",
       revision: 1,
-      syncUpdatedAt: now,
+      syncUpdatedAt: baseSyncTime,
     },
   ];
   const weeklyReviews: PullWeeklyReviewSource[] = [
@@ -204,7 +220,7 @@ function createPullRepository(): TwelveWeekPullRepository {
       nextWeekPriority: "Shorten setup copy",
       reviewCompleted: true,
       revision: 1,
-      syncUpdatedAt: now,
+      syncUpdatedAt: baseSyncTime,
     },
     {
       _id: "review_mismatched_user_1",
@@ -218,7 +234,7 @@ function createPullRepository(): TwelveWeekPullRepository {
       executionScore: 10,
       biggestOutputThisWeek: "Mismatched user review must not leak",
       revision: 1,
-      syncUpdatedAt: now,
+      syncUpdatedAt: baseSyncTime,
     },
   ];
 
@@ -379,7 +395,77 @@ describe("12-week pull route", () => {
     assert.equal(data.workspace.weeklyReviews[0].leadCompletionPercent, 75);
     assert.deepEqual(data.workspace, data.changes);
     assert.equal(data.hasMore, false);
-    assert.equal(data.nextCursor, null);
+    assert.match(data.nextCursor, /^twpc_v1_/);
+    assert.equal(data.cursorStatus, "not_provided");
+  });
+
+  it("returns only changed task records for an incremental pull cursor", async () => {
+    const cursor = createTwelveWeekPullCursor("2026-04-30T01:30:00.000Z");
+    const response = await requestJson(
+      createRouteTestApp(),
+      "GET",
+      `/api/sync/12-week/pull?cursor=${encodeURIComponent(cursor)}`,
+    );
+    const data = getPullResult(response);
+
+    assert.equal(data.mode, "delta");
+    assert.equal(data.cursor, cursor);
+    assert.match(data.nextCursor, /^twpc_v1_/);
+    assert.equal(data.cursorStatus, "applied");
+    assert.deepEqual(data.workspace.goals, []);
+    assert.deepEqual(data.workspace.plans, []);
+    assert.deepEqual(data.workspace.weeks, []);
+    assert.equal(data.workspace.tasks.length, 1);
+    assert.equal(data.workspace.tasks[0].clientTaskId, "task_local_1");
+    assert.deepEqual(data.workspace.dailyCheckIns, []);
+    assert.deepEqual(data.workspace.weeklyReviews, []);
+    assert.deepEqual(data.tombstones.tasks, []);
+  });
+
+  it("includes supported daily check-in and weekly review changes in incremental pulls", async () => {
+    const dailyReviewSyncTime = new Date("2026-04-30T02:05:00.000Z");
+    const repository = createPullRepository();
+    const service = new TwelveWeekPullService({
+      async listWorkspace(userId, filters) {
+        const workspace = await repository.listWorkspace(userId, filters);
+        return {
+          ...workspace,
+          tasks: [],
+          dailyCheckIns: workspace.dailyCheckIns.map((checkIn) => ({
+            ...checkIn,
+            syncUpdatedAt: dailyReviewSyncTime,
+          })),
+          weeklyReviews: workspace.weeklyReviews.map((review) => ({
+            ...review,
+            syncUpdatedAt: dailyReviewSyncTime,
+          })),
+        };
+      },
+    });
+    const cursor = createTwelveWeekPullCursor("2026-04-30T02:00:00.000Z");
+    const data = await service.pullWorkspace(ownerUserId, { cursor });
+
+    assert.equal(data.mode, "delta");
+    assert.equal(data.workspace.dailyCheckIns.length, 1);
+    assert.equal(data.workspace.dailyCheckIns[0].clientCheckInId, `${ownerPlanClientId}:checkin:2026-04-30`);
+    assert.equal(data.workspace.weeklyReviews.length, 1);
+    assert.equal(data.workspace.weeklyReviews[0].clientReviewId, `${ownerPlanClientId}:review:1`);
+  });
+
+  it("includes tombstones for deleted records changed since the cursor", async () => {
+    const cursor = createTwelveWeekPullCursor("2026-04-30T01:10:00.000Z");
+    const response = await requestJson(
+      createRouteTestApp(),
+      "GET",
+      `/api/sync/12-week/pull?cursor=${encodeURIComponent(cursor)}`,
+    );
+    const data = getPullResult(response);
+
+    assert.equal(data.mode, "delta");
+    assert.equal(data.tombstones.tasks.length, 1);
+    assert.equal(data.tombstones.tasks[0].clientId, "task_deleted_1");
+    assert.equal(data.tombstones.tasks[0].deletedAt, "2026-04-30T01:20:00.000Z");
+    assert.equal(JSON.stringify(data.workspace.tasks).includes("task_deleted_1"), false);
   });
 
   it("does not leak another user's workspace, even with the same clientPlanId", async () => {
@@ -420,13 +506,16 @@ describe("12-week pull route", () => {
     assert.equal(serialized.includes("review_mismatched_user_1"), false);
   });
 
-  it("handles unsupported cursors safely with a full pull and warning", async () => {
+  it("reports invalid cursors so clients can retry with a full pull", async () => {
     const response = await requestJson(createRouteTestApp(), "GET", "/api/sync/12-week/pull?cursor=sync_cursor_old");
-    const data = getPullResult(response);
 
-    assert.equal(data.cursorStatus, "reserved_ignored");
-    assert.equal(data.workspace.plans.length, 1);
-    assert.ok(data.warnings.some((warning) => warning.code === "cursor_reserved"));
+    assert.equal(response.status, 400);
+    assert.equal(response.body.success, false);
+    assert.equal((response.body as { errorCode?: string }).errorCode, "invalid_cursor");
+    assert.deepEqual(response.body.details, {
+      code: "cursor_invalid",
+      message: "Cursor prefix is not recognized.",
+    });
   });
 
   it("does not include analytics, billing, entitlement, or mock checkout fields", async () => {

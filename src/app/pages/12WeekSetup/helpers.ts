@@ -25,14 +25,22 @@ export function getFeasibilityDraftDefaults(feasibility: PendingFeasibilityResul
   TwelveWeekSetupDraft,
   "dailyTimeBudget" | "personalConstraint" | "tacticLoadPreference"
 > {
-  const dailyTimeBudget =
-    feasibility.weeklyCapacity === "low" ? "30min" : feasibility.weeklyCapacity === "high" ? "1.5h" : "1h";
-
   const bottleneckAxis = feasibility.bottleneck?.axis;
+
+  // Energy or confidence bottlenecks reduce effective capacity even if time is OK.
+  const isEffectiveLowCapacity =
+    feasibility.weeklyCapacity === "low" || bottleneckAxis === "energy" || bottleneckAxis === "confidence";
+  const isEffectiveHighCapacity =
+    feasibility.weeklyCapacity === "high" &&
+    bottleneckAxis !== "energy" &&
+    bottleneckAxis !== "confidence";
+
+  const dailyTimeBudget = isEffectiveLowCapacity ? "30min" : isEffectiveHighCapacity ? "1.5h" : "1h";
+
   const personalConstraint: TwelveWeekSetupDraft["personalConstraint"] =
     bottleneckAxis === "time"
       ? "time"
-      : bottleneckAxis === "energy" || bottleneckAxis === "routine"
+      : bottleneckAxis === "energy" || bottleneckAxis === "routine" || bottleneckAxis === "confidence"
         ? "consistency"
         : bottleneckAxis === "resources" || bottleneckAxis === "clarity" || bottleneckAxis === "wheel"
           ? "complexity"
@@ -45,6 +53,77 @@ export function getFeasibilityDraftDefaults(feasibility: PendingFeasibilityResul
     personalConstraint,
     tacticLoadPreference: feasibility.planLoad ?? "balanced",
   };
+}
+
+export interface PlanRationaleReason {
+  id: string;
+  title: string;
+  detail: string;
+}
+
+/**
+ * Builds 2-4 explicit reasons explaining why this 12-week plan is being recommended,
+ * derived from feasibility scoring. Used to power the "Vì sao kế hoạch này được đề xuất" panel.
+ */
+export function buildPlanRationaleReasons(feasibility: PendingFeasibilityResult): PlanRationaleReason[] {
+  const reasons: PlanRationaleReason[] = [];
+  const planLoadLabel = getPlanLoadLabel(feasibility.planLoad);
+
+  // Reason 1: Plan load tied to readiness
+  if (feasibility.planLoad === "lighter") {
+    reasons.push({
+      id: "readiness-lighter",
+      title: `Nhịp đề xuất: ${planLoadLabel}`,
+      detail: `Độ sẵn sàng ${feasibility.adjustedScore}/20 cho thấy nên giữ kế hoạch gọn để tránh ôm quá nhiều và mất nhịp sớm.`,
+    });
+  } else if (feasibility.planLoad === "push") {
+    reasons.push({
+      id: "readiness-push",
+      title: `Nhịp đề xuất: ${planLoadLabel}`,
+      detail: `Độ sẵn sàng ${feasibility.adjustedScore}/20 cho phép đẩy nhịp mạnh hơn, nhưng vẫn nên nhìn lại đều mỗi tuần.`,
+    });
+  } else {
+    reasons.push({
+      id: "readiness-balanced",
+      title: `Nhịp đề xuất: ${planLoadLabel}`,
+      detail: `Độ sẵn sàng ${feasibility.adjustedScore}/20 đủ cho khung cân bằng với 2-3 việc lặp lại và một buổi nhìn lại.`,
+    });
+  }
+
+  // Reason 2: bottleneck-specific
+  if (feasibility.bottleneck) {
+    reasons.push({
+      id: "bottleneck",
+      title: `Phần yếu nhất: ${feasibility.bottleneck.label}`,
+      detail: feasibility.bottleneck.action,
+    });
+  }
+
+  // Reason 3: weekly capacity
+  if (feasibility.weeklyCapacity === "low") {
+    reasons.push({
+      id: "capacity-low",
+      title: "Quỹ thời gian hạn chế",
+      detail: "Ngân sách thời gian mỗi ngày để mức nhẹ, giữ ít việc lặp lại để bạn dễ giữ đúng nhịp hằng tuần.",
+    });
+  } else if (feasibility.weeklyCapacity === "high" && feasibility.bottleneck?.axis !== "energy") {
+    reasons.push({
+      id: "capacity-high",
+      title: "Quỹ thời gian khá rộng",
+      detail: "Giữ nhịp đều với 3-4 việc lặp lại, nhưng tránh dồn hết vào tuần đầu.",
+    });
+  }
+
+  // Reason 4: SMART goal quality (if weak)
+  if (feasibility.smartGoalQualityLevel === "weak") {
+    reasons.push({
+      id: "smart-quality-weak",
+      title: "Mục tiêu hiện còn chung chung",
+      detail: "Giữ outcome 12 tuần đơn giản ngay lúc này. Bạn có thể quay lại bước viết mục tiêu để làm rõ hơn nếu cần.",
+    });
+  }
+
+  return reasons.slice(0, 4);
 }
 
 export function isPendingFeasibilityResult(value: unknown): value is PendingFeasibilityResult {
@@ -275,4 +354,123 @@ export function getPreviewTasks(indicators: LeadIndicatorDraft[], options: Sched
         count === 1 ? indicator.name.trim() : `${indicator.name.trim()} ${index + 1}`,
       );
     });
+}
+
+export interface IndicatorPreviewGroup {
+  id: string;
+  name: string;
+  type: TacticType;
+  taskTitles: string[];
+  scheduleDays: number[];
+}
+
+/**
+ * Group week-1 preview tasks by source indicator so the UI can render
+ * "Từ indicator X (Y lần/tuần) → các task vào ngày Z".
+ */
+export function getPreviewTasksByIndicator(
+  indicators: LeadIndicatorDraft[],
+  options: ScheduleLoadOptions = {},
+): IndicatorPreviewGroup[] {
+  return buildLeadIndicatorSchedules(indicators, options)
+    .filter((indicator) => indicator.name.trim().length > 0)
+    .map((indicator) => {
+      const trimmedName = indicator.name.trim();
+      const count = indicator.schedule.length;
+      const taskTitles = Array.from({ length: count }, (_, index) =>
+        count === 1 ? trimmedName : `${trimmedName} ${index + 1}`,
+      );
+
+      return {
+        id: indicator.id,
+        name: trimmedName,
+        type: indicator.type,
+        taskTitles,
+        scheduleDays: indicator.schedule,
+      };
+    });
+}
+
+/**
+ * Vague phrases that often signal a user wrote an outcome (lag metric) instead of a controllable
+ * weekly action. Heuristic only — we still let users save these.
+ */
+const OUTCOME_LIKE_PATTERNS = [
+  /^(tang|tăng)\b/iu,
+  /^(giam|giảm)\b/iu,
+  /^(dat|đạt)\b/iu,
+  /^(co them|có thêm)\b/iu,
+  /^(tro thanh|trở thành)\b/iu,
+  /^(kiem|kiếm) (duoc|được)\b/iu,
+];
+
+const GENERIC_NAME_PATTERNS = [
+  /^(việc|viec)\s*\d*$/iu,
+  /^task\s*\d*$/iu,
+  /^(thành công|thanh cong)$/iu,
+  /^(kết quả|ket qua)$/iu,
+  /^(làm việc|lam viec)$/iu,
+];
+
+export interface ValidateLeadIndicatorResult {
+  warnings: string[];
+}
+
+/**
+ * Light, non-blocking validation for a single lead indicator card.
+ * Returns Vietnamese warning strings to be rendered inline under the inputs.
+ *
+ * Does NOT check uniqueness across indicators — left to the higher-level plan quality module.
+ */
+export function validateLeadIndicatorDraft(
+  indicator: LeadIndicatorDraft,
+  options: ScheduleLoadOptions & { maxTasksPerTactic?: number } = {},
+): ValidateLeadIndicatorResult {
+  const warnings: string[] = [];
+  const trimmedName = indicator.name.trim();
+
+  if (trimmedName.length === 0) {
+    warnings.push("Hãy đặt tên cho việc lặp lại này.");
+  } else {
+    if (trimmedName.length < 6) {
+      warnings.push("Tên hơi ngắn — viết rõ hành động bạn sẽ làm (ví dụ: 'viết draft 800 từ').");
+    }
+    if (GENERIC_NAME_PATTERNS.some((pattern) => pattern.test(trimmedName))) {
+      warnings.push("Tên còn quá chung chung — mô tả cụ thể hành động hằng tuần.");
+    }
+    if (OUTCOME_LIKE_PATTERNS.some((pattern) => pattern.test(trimmedName))) {
+      warnings.push("Tên đang giống một kết quả cuối, không phải hành động kiểm soát được. Đổi sang việc bạn làm hằng tuần.");
+    }
+  }
+
+  const parsedTarget = Number.parseInt(indicator.target, 10);
+  if (!indicator.target || !Number.isFinite(parsedTarget) || parsedTarget <= 0) {
+    warnings.push("Tần suất phải là số dương (ví dụ: 2 hoặc 3).");
+  } else if (parsedTarget > 7) {
+    warnings.push("Tần suất tối đa là 7 lần/tuần (mỗi ngày một lần).");
+  } else {
+    const maxTasksPerTactic =
+      options.maxTasksPerTactic ?? getMaxTasksPerTactic(options);
+    if (parsedTarget > maxTasksPerTactic) {
+      warnings.push(
+        `Vượt giới hạn ${maxTasksPerTactic} lần/tuần cho cấu hình hiện tại. Hệ thống sẽ tự cắt bớt khi tạo task.`,
+      );
+    }
+  }
+
+  if (!indicator.unit.trim()) {
+    warnings.push("Thêm đơn vị (ví dụ: buổi, lần, bài) để task hiển thị rõ.");
+  }
+
+  return { warnings };
+}
+
+const PREVIEW_DAY_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"] as const;
+
+export function formatScheduleDayLabels(scheduleDays: number[]): string {
+  if (scheduleDays.length === 0) return "Chưa có lịch";
+  return scheduleDays
+    .filter((day) => day >= 0 && day <= 6)
+    .map((day) => PREVIEW_DAY_LABELS[day])
+    .join(", ");
 }

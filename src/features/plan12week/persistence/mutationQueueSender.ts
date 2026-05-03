@@ -14,7 +14,6 @@ import {
   markMutationSucceeded,
   readMutationQueueStore,
   writeMutationQueueStore,
-  type DataMutationItem,
   type DataMutationQueueStore,
   type MutationFailureInput,
 } from "./mutationQueue";

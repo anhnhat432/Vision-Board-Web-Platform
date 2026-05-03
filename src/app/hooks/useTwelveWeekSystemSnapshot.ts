@@ -52,6 +52,16 @@ import {
   buildSuggestedNextWeekPlan,
   buildWeeklyReviewPremiumInsight,
 } from "../utils/twelve-week-premium";
+import { formatDateInputValue } from "../utils/storage";
+import {
+  getExecutionInsights,
+  getNextWeekAdjustmentRecommendation,
+  getRescueModeStatus,
+  getWeeklyReflectionInsights,
+  type ExecutionInsight,
+  type NextWeekRecommendation,
+  type RescueModeStatus,
+} from "@/features/plan12week/logic";
 
 const DEFAULT_WEEK_FOCUS = "Giữ nhịp tactic cốt lõi và tạo ra một đầu ra thật rõ ràng.";
 
@@ -269,6 +279,99 @@ export function useTwelveWeekSystemSnapshot() {
     () => (effectiveSystem && hasAdvancedAnalytics ? buildTacticBreakdown(effectiveSystem, currentWeek) : []),
     [effectiveSystem, hasAdvancedAnalytics, currentWeek],
   );
+  const rescueStatus: RescueModeStatus = useMemo(() => {
+    if (!effectiveSystem) {
+      return {
+        severity: "none",
+        triggers: [],
+        daysSinceLastCompletion: null,
+        daysSinceLastCheckIn: null,
+        daysRemainingInWeek: null,
+      };
+    }
+    return getRescueModeStatus({
+      todayDateKey: formatDateInputValue(new Date()),
+      currentWeek,
+      currentWeekRange,
+      weekCompletionPercent: weekCompletion.percent,
+      overdueOpenCount,
+      todayQueueCount: todayQueue.length,
+      reviewDueToday,
+      dailyCheckIns: effectiveSystem.dailyCheckIns ?? [],
+      weeklyReviews: effectiveSystem.weeklyReviews ?? [],
+      taskInstances: effectiveSystem.taskInstances ?? [],
+      startDate: effectiveSystem.startDate,
+    });
+  }, [
+    effectiveSystem,
+    currentWeek,
+    currentWeekRange,
+    weekCompletion.percent,
+    overdueOpenCount,
+    todayQueue.length,
+    reviewDueToday,
+  ]);
+
+  const nextWeekRecommendation: NextWeekRecommendation | null = useMemo(() => {
+    if (!effectiveSystem || !currentReview?.reviewCompleted) return null;
+
+    // Daily check-in consistency this week: # of check-ins logged in current week range
+    // divided by days elapsed (capped at 7).
+    let consistencyPercent: number | null = null;
+    if (currentWeekRange) {
+      const todayKey = formatDateInputValue(new Date());
+      const start = currentWeekRange.start.slice(0, 10);
+      const end = currentWeekRange.end.slice(0, 10);
+      const checkInsThisWeek = (effectiveSystem.dailyCheckIns ?? []).filter((entry) => {
+        const date = entry.date?.slice(0, 10) ?? "";
+        return date >= start && date <= end;
+      }).length;
+      const startMs = Date.parse(`${start}T00:00:00Z`);
+      const todayMs = Date.parse(`${todayKey}T00:00:00Z`);
+      const endMs = Date.parse(`${end}T00:00:00Z`);
+      const cappedTodayMs = Math.min(todayMs, endMs);
+      const daysElapsed = Number.isFinite(startMs) && Number.isFinite(cappedTodayMs)
+        ? Math.max(1, Math.round((cappedTodayMs - startMs) / 86_400_000) + 1)
+        : 7;
+      consistencyPercent = Math.min(
+        100,
+        Math.round((checkInsThisWeek / Math.min(daysElapsed, 7)) * 100),
+      );
+    }
+
+    return getNextWeekAdjustmentRecommendation({
+      weekCompletionPercent: weekCompletion.percent,
+      leadMetricCompletionPercent: null,
+      dailyCheckInConsistencyPercent: consistencyPercent,
+      workloadDecision: currentReview?.workloadDecision,
+      feasibilityPlanLoad: effectiveSystem.tacticLoadPreference ?? null,
+      rescueSeverity: rescueStatus.severity,
+      rescueTriggers: rescueStatus.triggers,
+    });
+  }, [
+    effectiveSystem,
+    currentReview,
+    weekCompletion.percent,
+    currentWeekRange,
+    rescueStatus.severity,
+    rescueStatus.triggers,
+  ]);
+
+  const executionInsights: ExecutionInsight[] = useMemo(() => {
+    if (!effectiveSystem) return [];
+    return getExecutionInsights(effectiveSystem, {
+      todayDateKey: formatDateInputValue(new Date()),
+      weekNumber: currentWeek,
+    });
+  }, [effectiveSystem, currentWeek]);
+
+  const weeklyReflectionInsights: ExecutionInsight[] = useMemo(() => {
+    if (!effectiveSystem) return [];
+    return getWeeklyReflectionInsights(effectiveSystem, currentWeek, {
+      todayDateKey: formatDateInputValue(new Date()),
+    });
+  }, [effectiveSystem, currentWeek]);
+
   const milestoneItems = useMemo(
     () => [
       { label: "Tuần 4", value: effectiveSystem?.milestones.week4 || "Chưa đặt cột mốc cho tuần 4." },
@@ -337,6 +440,10 @@ export function useTwelveWeekSystemSnapshot() {
     optionalIndicators,
     hasSmartRescue,
     rescuePlanSummary,
+    rescueStatus,
+    nextWeekRecommendation,
+    executionInsights,
+    weeklyReflectionInsights,
     activeTriggers,
     hasPremiumReviewInsights,
     premiumReviewInsight,

@@ -101,6 +101,10 @@ export interface UniversalWeeklyReview {
   improvementScore: number;
   outputQualityScore: number;
   completedLeadIndicators?: number;
+  /** Việc nào tuần sau nên giữ — added in Weekly Review v2 (optional, backwards-compat). */
+  keepTactic?: string;
+  /** Việc nào tuần sau nên giảm hoặc bỏ — added in Weekly Review v2 (optional, backwards-compat). */
+  reduceTactic?: string;
 }
 
 export interface UniversalScoreboardWeek {
@@ -123,6 +127,13 @@ export interface TwelveWeekTaskInstance {
   completedAt?: string;
   tacticId?: string;
   rescheduledFrom?: string;
+  /**
+   * Optional. When `true`, the task is excluded from completion stats and from
+   * the missed/today queues. Only allowed for non-core (`isCore === false`)
+   * tasks per overdue handling rules. Backwards compatible — older payloads
+   * never set this field, callers must default to `false` when reading.
+   */
+  skipped?: boolean;
 }
 
 export interface TwelveWeekSystem {

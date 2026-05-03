@@ -24,6 +24,7 @@ import type {
   TwelveWeekPulledWeeklyReview,
   TwelveWeekPulledWorkspace,
   TwelveWeekPullResponse,
+  TwelveWeekPullTombstone,
 } from "@/services/syncService";
 import { getTwelveWeekClientPlanId } from "./twelveWeekImportPayload";
 
@@ -35,6 +36,10 @@ function isPullResponse(value: PulledWorkspaceInput): value is TwelveWeekPullRes
 
 function getWorkspace(input: PulledWorkspaceInput): TwelveWeekPulledWorkspace {
   return isPullResponse(input) ? input.workspace : input;
+}
+
+function isDeltaPullResponse(input: PulledWorkspaceInput): input is TwelveWeekPullResponse {
+  return isPullResponse(input) && input.mode === "delta";
 }
 
 function normalizeDateKey(value: string | undefined): string {
@@ -194,7 +199,151 @@ function mergeTaskInstances(
     const dateSort = left.scheduledDate.localeCompare(right.scheduledDate);
     if (dateSort !== 0) return dateSort;
     return left.title.localeCompare(right.title);
+    });
+}
+
+function withDerivedExecutionState(system: TwelveWeekSystem): TwelveWeekSystem {
+  return {
+    ...system,
+    currentWeek: getTwelveWeekCurrentWeek(system),
+    scoreboard: buildDerivedScoreboard(system, getDefaultScoreboard(system.totalWeeks)),
+  };
+}
+
+function applySystemDelta(
+  goals: Goal[],
+  clientPlanId: string | undefined,
+  updater: (system: TwelveWeekSystem) => TwelveWeekSystem,
+): Goal[] {
+  if (!clientPlanId?.trim()) return goals;
+
+  return goals.map((goal) => {
+    if (!goal.twelveWeekSystem || getTwelveWeekClientPlanId(goal.id) !== clientPlanId) return goal;
+    return {
+      ...goal,
+      twelveWeekSystem: updater(goal.twelveWeekSystem),
+    };
   });
+}
+
+function getTombstoneClientId(tombstone: TwelveWeekPullTombstone): string | undefined {
+  return tombstone.clientId?.trim();
+}
+
+function getDateFromCheckInClientId(clientId: string): string | null {
+  const match = clientId.match(/:checkin:(\d{4}-\d{2}-\d{2})$/);
+  return match?.[1] ?? null;
+}
+
+function getPlanIdFromCheckInClientId(clientId: string): string | null {
+  const markerIndex = clientId.lastIndexOf(":checkin:");
+  return markerIndex > 0 ? clientId.slice(0, markerIndex) : null;
+}
+
+function getWeekNumberFromReviewClientId(clientId: string): number | null {
+  const match = clientId.match(/:review:(\d+)$/);
+  if (!match?.[1]) return null;
+  const value = Number(match[1]);
+  return Number.isInteger(value) ? value : null;
+}
+
+function getPlanIdFromReviewClientId(clientId: string): string | null {
+  const markerIndex = clientId.lastIndexOf(":review:");
+  return markerIndex > 0 ? clientId.slice(0, markerIndex) : null;
+}
+
+function applyPulledDeltaToUserData(userData: UserData, pullResponse: TwelveWeekPullResponse): UserData {
+  let nextGoals = userData.goals;
+
+  pullResponse.workspace.tasks.forEach((task) => {
+    if (!task.clientPlanId || !task.clientTaskId) return;
+    nextGoals = applySystemDelta(nextGoals, task.clientPlanId, (system) => {
+      const pulledTask = buildTaskInstances([task], system.totalWeeks)[0];
+      if (!pulledTask) return system;
+      return withDerivedExecutionState({
+        ...system,
+        taskInstances: mergeTaskInstances(system.taskInstances, [pulledTask]),
+      });
+    });
+  });
+
+  pullResponse.workspace.dailyCheckIns.forEach((checkIn) => {
+    if (!checkIn.clientPlanId) return;
+    nextGoals = applySystemDelta(nextGoals, checkIn.clientPlanId, (system) => {
+      const pulledCheckIn = buildDailyCheckIns([checkIn])[0];
+      if (!pulledCheckIn) return system;
+      return withDerivedExecutionState({
+        ...system,
+        dailyCheckIns: [
+          ...system.dailyCheckIns.filter((item) => normalizeDateKey(item.date) !== pulledCheckIn.date),
+          pulledCheckIn,
+        ].sort((left, right) => left.date.localeCompare(right.date)),
+      });
+    });
+  });
+
+  pullResponse.workspace.weeklyReviews.forEach((review) => {
+    if (!review.clientPlanId) return;
+    nextGoals = applySystemDelta(nextGoals, review.clientPlanId, (system) => {
+      const pulledReview = buildWeeklyReviews([review], system.totalWeeks)[0];
+      if (!pulledReview) return system;
+      return withDerivedExecutionState({
+        ...system,
+        weeklyReviews: [
+          ...system.weeklyReviews.filter((item) => item.weekNumber !== pulledReview.weekNumber),
+          pulledReview,
+        ].sort((left, right) => left.weekNumber - right.weekNumber),
+      });
+    });
+  });
+
+  pullResponse.tombstones.tasks.forEach((tombstone) => {
+    const clientTaskId = getTombstoneClientId(tombstone);
+    if (!clientTaskId) return;
+    nextGoals = nextGoals.map((goal) => {
+      if (!goal.twelveWeekSystem) return goal;
+      return {
+        ...goal,
+        twelveWeekSystem: withDerivedExecutionState({
+          ...goal.twelveWeekSystem,
+          taskInstances: goal.twelveWeekSystem.taskInstances.filter((task) => task.id !== clientTaskId),
+        }),
+      };
+    });
+  });
+
+  pullResponse.tombstones.dailyCheckIns.forEach((tombstone) => {
+    const clientCheckInId = getTombstoneClientId(tombstone);
+    if (!clientCheckInId) return;
+    const date = getDateFromCheckInClientId(clientCheckInId);
+    const clientPlanId = getPlanIdFromCheckInClientId(clientCheckInId);
+    if (!date || !clientPlanId) return;
+    nextGoals = applySystemDelta(nextGoals, clientPlanId, (system) => {
+      return withDerivedExecutionState({
+        ...system,
+        dailyCheckIns: system.dailyCheckIns.filter((checkIn) => normalizeDateKey(checkIn.date) !== date),
+      });
+    });
+  });
+
+  pullResponse.tombstones.weeklyReviews.forEach((tombstone) => {
+    const clientReviewId = getTombstoneClientId(tombstone);
+    if (!clientReviewId) return;
+    const weekNumber = getWeekNumberFromReviewClientId(clientReviewId);
+    const clientPlanId = getPlanIdFromReviewClientId(clientReviewId);
+    if (!weekNumber || !clientPlanId) return;
+    nextGoals = applySystemDelta(nextGoals, clientPlanId, (system) => {
+      return withDerivedExecutionState({
+        ...system,
+        weeklyReviews: system.weeklyReviews.filter((review) => review.weekNumber !== weekNumber),
+      });
+    });
+  });
+
+  return {
+    ...userData,
+    goals: nextGoals,
+  };
 }
 
 function buildDailyCheckIns(checkIns: TwelveWeekPulledDailyCheckIn[]): UniversalDailyCheckIn[] {
@@ -358,6 +507,10 @@ export function applyPulledWorkspaceToUserData(
   pulledWorkspace: PulledWorkspaceInput,
   options: { now?: string | Date } = {},
 ): UserData {
+  if (isDeltaPullResponse(pulledWorkspace)) {
+    return applyPulledDeltaToUserData(userData, pulledWorkspace);
+  }
+
   const workspace = getWorkspace(pulledWorkspace);
   const now =
     options.now instanceof Date

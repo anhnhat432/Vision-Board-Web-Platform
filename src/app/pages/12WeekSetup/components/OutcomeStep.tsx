@@ -16,7 +16,7 @@ import { Label } from "@/app/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import { Textarea } from "@/app/components/ui/textarea";
 import { GOAL_TYPES } from "../constants";
-import { getPlanLoadLabel } from "../helpers";
+import { buildPlanRationaleReasons, getPlanLoadLabel } from "../helpers";
 import type { PendingFeasibilityResult, TwelveWeekSetupDraft } from "../types";
 
 interface OutcomeStepProps {
@@ -51,9 +51,40 @@ export function OutcomeStep({
   onTemplatePersonalizationChange,
   onPreferredDayToggle,
 }: OutcomeStepProps) {
+  const planRationaleReasons = buildPlanRationaleReasons(feasibility);
+
   return (
     <div className="mx-auto max-w-4xl space-y-4">
       <div className="space-y-4">
+        {planRationaleReasons.length > 0 && (
+          <div className="rounded-[24px] border border-violet-200 bg-violet-50/72 p-4 sm:p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
+                Vì sao kế hoạch này được đề xuất
+              </p>
+              <span className="text-xs text-violet-700/82">
+                Dựa trên kết quả kiểm tra tính khả thi
+              </span>
+            </div>
+            <ul className="mt-3 grid gap-2 md:grid-cols-2">
+              {planRationaleReasons.map((reason) => (
+                <li
+                  key={reason.id}
+                  className="rounded-[18px] border border-violet-200 bg-white/82 p-3"
+                >
+                  <p className="text-sm font-semibold text-slate-950">{reason.title}</p>
+                  <p className="mt-1 text-xs leading-5 text-slate-600">{reason.detail}</p>
+                </li>
+              ))}
+            </ul>
+            {feasibility.smartGoalQualityNote && (
+              <div className="mt-3 rounded-[18px] border border-amber-200 bg-amber-50/82 px-4 py-3">
+                <p className="text-sm leading-6 text-amber-800">{feasibility.smartGoalQualityNote}</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {(feasibility.bottleneck || feasibility.firstWeekGuidance || feasibility.scopeRecommendation) && (
           <div className="rounded-[24px] border border-amber-200 bg-amber-50/86 p-4 sm:p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">Gợi ý từ bước kiểm tra</p>
@@ -74,7 +105,7 @@ export function OutcomeStep({
                 </p>
               </div>
               <div className="rounded-[18px] border border-amber-200 bg-white/76 p-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Độ nặng</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Mức tải</p>
                 <p className="mt-1 text-sm font-semibold text-slate-950">{getPlanLoadLabel(feasibility.planLoad)}</p>
                 <p className="mt-2 text-xs leading-5 text-slate-600">
                   {feasibility.scopeRecommendation ?? "Giữ 2-3 việc lặp lại và một buổi nhìn lại cố định."}
