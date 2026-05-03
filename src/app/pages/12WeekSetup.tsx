@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { CheckCircle2, Compass, Sparkles, Target } from "lucide-react";
+import { Compass, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
@@ -8,7 +8,6 @@ import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { Badge } from "../components/ui/badge";
 import { Card, CardContent } from "../components/ui/card";
-import { Progress } from "../components/ui/progress";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import {
   APP_STORAGE_KEYS,
@@ -298,7 +297,6 @@ export function TwelveWeekSetup() {
     () => getPreviewTasksByIndicator(validIndicators, planLoadOptions),
     [validIndicators, planLoadOptions],
   );
-  const progressValue = ((currentStep + 1) / STEPS.length) * 100;
   const cycleStartDate = useMemo(() => {
     const parsedStartDate = parseCalendarDate(draft.startDate) ?? new Date();
     return formatDateInputValue(getCycleWeekStart(parsedStartDate));
@@ -322,6 +320,14 @@ export function TwelveWeekSetup() {
         : currentStep === 2
           ? "Chốt ngày bắt đầu, ngày nhìn lại và hình dung tuần đầu."
           : "Kiểm tra lần cuối, còn phần nâng cao thì để tùy chọn.";
+  const currentStepWhy =
+    currentStep === 0
+      ? "Outcome rõ giúp bạn biết khi nào về đích — và tránh đổi đích giữa chu kỳ vì cảm xúc."
+      : currentStep === 1
+        ? "Việc lặp lại là phần bạn kiểm soát được. Đo việc, không đo kết quả — kết quả tự đến khi việc đều."
+        : currentStep === 2
+          ? "Lịch và buổi nhìn lại cố định giữ nhịp khi động lực giảm — quan trọng hơn nội dung từng tuần."
+          : "Một lần xác nhận cuối để chốt; bạn vẫn sửa được sau khi tạo.";
 
   if (isLoading) {
     return (
@@ -832,61 +838,6 @@ export function TwelveWeekSetup() {
                 </Badge>
               </div>
             </div>
-            <div className="hidden rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
-              <div className="flex items-center justify-between text-sm text-white/72">
-                <span>
-                  Bước {currentStep + 1} / {STEPS.length}
-                </span>
-                <span>{Math.round(progressValue)}%</span>
-              </div>
-              <Progress
-                value={progressValue}
-                className="mt-3 h-2.5 bg-white/20"
-                aria-label={`Tiến độ thiết lập: ${Math.round(progressValue)}%`}
-              />
-              <ol className="mt-6 space-y-3" aria-label="Các bước thiết lập">
-                {STEPS.map((step, index) => {
-                  const active = index === currentStep;
-                  const done = index < currentStep;
-
-                  return (
-                    <li
-                      key={step.id}
-                      aria-current={active ? "step" : undefined}
-                      className={`rounded-[22px] border px-4 py-3 transition-all ${
-                        active
-                          ? "border-white/22 bg-white/14"
-                          : done
-                            ? "border-white/10 bg-black/10"
-                            : "border-white/8 bg-black/6"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          aria-hidden="true"
-                          className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
-                            active
-                              ? "hero-cta bg-white text-slate-900"
-                              : done
-                                ? "bg-white/18 text-white"
-                                : "bg-white/8 text-white/60"
-                          }`}
-                        >
-                          {done ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-white">{step.label}</p>
-                          <p className="text-xs text-white/62">{step.title}</p>
-                          <span className="sr-only">
-                            {done ? "— đã hoàn thành" : active ? "— đang thực hiện" : "— chưa bắt đầu"}
-                          </span>
-                        </div>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ol>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -894,6 +845,7 @@ export function TwelveWeekSetup() {
       <SetupStepShell
         title={STEPS[currentStep].title}
         description={currentStepDescription}
+        whyThisMatters={currentStepWhy}
         currentStep={currentStep}
         stepCount={STEPS.length}
         onBack={handleBack}
