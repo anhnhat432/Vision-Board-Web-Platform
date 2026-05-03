@@ -114,13 +114,18 @@ export function OutcomeStep({
             </div>
           </div>
         )}
-        <div className="space-y-4 rounded-[24px] border border-white/70 bg-white/72 p-4 sm:p-5">
-          <div>
-            <p className="text-sm font-semibold text-slate-900">Chốt phần bắt buộc trước</p>
-            <p className="mt-1 hidden text-sm leading-6 text-slate-500 sm:block">
-              Ba mục này là đủ để đi tiếp. Khung gợi ý phía dưới chỉ dùng để thiết lập nhanh hơn, không phải việc bắt
-              buộc phải chọn.
-            </p>
+        <div className="space-y-4 rounded-[24px] border-2 border-slate-900/12 bg-white/82 p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.18)] sm:p-5">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <p className="text-sm font-semibold text-slate-900">Chốt phần bắt buộc trước</p>
+              <p className="mt-1 hidden text-sm leading-6 text-slate-500 sm:block">
+                Ba mục này là đủ để đi tiếp. Khung gợi ý phía dưới chỉ dùng để thiết lập nhanh hơn, không phải việc bắt
+                buộc phải chọn.
+              </p>
+            </div>
+            <Badge variant="outline" className="border-slate-300 bg-slate-50 text-slate-700">
+              Bắt buộc
+            </Badge>
           </div>
           <div className="space-y-2">
             <Label htmlFor="goal-type">Loại mục tiêu</Label>

@@ -99,7 +99,14 @@ export function LeadIndicatorsStep({
         </details>
 
         {draft.leadIndicators.map((indicator, index) => (
-          <div key={indicator.id} className="rounded-[24px] border border-white/70 bg-white/72 p-5">
+          <div
+            key={indicator.id}
+            className={`rounded-[24px] border p-5 ${
+              indicator.type === "optional"
+                ? "border-slate-200 bg-slate-50/72"
+                : "border-emerald-200 bg-white/72 shadow-[0_14px_30px_-28px_rgba(16,185,129,0.32)]"
+            }`}
+          >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-sm font-semibold text-slate-900">Việc {index + 1}</p>
               <div className="flex items-center gap-2">

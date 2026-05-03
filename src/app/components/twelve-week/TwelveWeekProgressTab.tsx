@@ -174,17 +174,22 @@ export function TwelveWeekProgressTab({
                     {trend.weekOverWeekDelta} so với tuần trước
                   </Badge>
                 )}
-                <span className="text-xs text-slate-500">→ Tiếp theo: {trend.nextAction}</span>
               </div>
               {nextActionHandler && (
-                <Button variant="outline" className="mt-4 bg-white sm:w-auto" onClick={nextActionHandler}>
-                  {trend.level === "no_data"
-                    ? "Mở Setup"
-                    : reviewDueToday
-                      ? "Mở tab Tuần"
-                      : "Mở tab Hôm nay"}
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </Button>
+                <div className="mt-4 rounded-lg border border-slate-900/10 bg-white/86 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    Tiếp theo nên làm
+                  </p>
+                  <p className="mt-1 text-sm leading-6 text-slate-800">{trend.nextAction}</p>
+                  <Button size="lg" className="mt-3 w-full sm:w-auto" onClick={nextActionHandler}>
+                    {trend.level === "no_data"
+                      ? "Mở Setup"
+                      : reviewDueToday
+                        ? "Mở tab Tuần"
+                        : "Mở tab Hôm nay"}
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Button>
+                </div>
               )}
             </div>
             <span
