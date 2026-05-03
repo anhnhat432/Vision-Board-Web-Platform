@@ -253,13 +253,16 @@ export function FeasibilityCheck() {
                   Kiểm tra tính thực tế
                 </div>
 
-                <div className="space-y-4">
-                  <h1 className="max-w-3xl text-3xl font-bold tracking-normal sm:text-4xl lg:text-5xl">
-                    Kiểm tra xem mục tiêu này có thực tế với bạn ở thời điểm hiện tại hay không.
+                <div className="space-y-3 sm:space-y-4">
+                  <h1 className="max-w-3xl text-2xl font-bold leading-tight tracking-normal sm:text-4xl lg:text-5xl">
+                    Kiểm tra xem mục tiêu có thực tế với bạn lúc này không.
                   </h1>
-                  <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
+                  <p className="hidden max-w-2xl text-base leading-8 text-white/82 sm:block lg:text-lg">
                     Đây không phải là bài kiểm tra để ngăn bạn lại. Nó giúp bạn biết nên giữ nguyên, chia nhỏ hay điều
                     chỉnh mục tiêu để hành trình phía sau bền vững hơn.
+                  </p>
+                  <p className="max-w-2xl text-sm leading-6 text-white/82 sm:hidden">
+                    Giúp bạn biết nên giữ nguyên, chia nhỏ hay điều chỉnh mục tiêu trước khi vào kế hoạch 12 tuần.
                   </p>
                 </div>
 

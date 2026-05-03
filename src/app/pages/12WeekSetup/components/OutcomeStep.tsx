@@ -378,7 +378,7 @@ export function OutcomeStep({
                       type="button"
                       aria-pressed={isActive}
                       onClick={() => onPreferredDayToggle(dayIndex)}
-                      className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all ${
+                      className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border px-4 py-2 text-sm font-medium transition-all ${
                         isActive
                           ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
                           : "border-slate-300 bg-white text-slate-700 hover:border-emerald-400"
