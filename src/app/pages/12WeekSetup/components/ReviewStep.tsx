@@ -1,20 +1,24 @@
-import { CheckCircle2, Flag, Sparkles, Target } from "lucide-react";
+import { useMemo } from "react";
+import { CircleAlert, Flag, Lightbulb, Sparkles, Target, Wrench } from "lucide-react";
 
-import type { PendingSMARTGoal } from "@/lib/smart-goal";
-import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
 import { Badge } from "@/app/components/ui/badge";
 import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import { Textarea } from "@/app/components/ui/textarea";
 import { getLifeAreaLabel } from "@/app/utils/storage";
-import { evaluateTwelveWeekPlanQuality, type PlanQualityLevel } from "@/features/plan12week/logic";
+import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
 import {
-  buildPlanRationaleReasons,
-  formatScheduleDayLabels,
-  getGoalTypeLabel,
-  getLoadPreferenceLabel,
-  getReviewDayLabel,
-} from "../helpers";
+  getArchetypeForIntent,
+  getUserIntentId,
+  hasActionableArchetypeHint,
+} from "@/app/utils/user-intent";
+import {
+  evaluateTwelveWeekPlanQuality,
+  getPlanRationale,
+  type PlanQualityLevel,
+} from "@/features/plan12week/logic";
+import type { PendingSMARTGoal } from "@/lib/smart-goal";
+import { formatScheduleDayLabels, getGoalTypeLabel, getLoadPreferenceLabel, getReviewDayLabel } from "../helpers";
 import type { LeadIndicatorDraft, PendingFeasibilityResult, TwelveWeekSetupDraft } from "../types";
 
 interface ReviewStepProps {
@@ -56,6 +60,67 @@ export function ReviewStep({
   scheduledLeadIndicators,
   onChange,
 }: ReviewStepProps) {
+  const intentArchetype = useMemo(() => {
+    const intent = getUserIntentId();
+    if (!intent || !hasActionableArchetypeHint(intent)) return null;
+    return getArchetypeForIntent(intent);
+  }, []);
+
+  const feasibilityContext = feasibility
+    ? {
+        planLoad: feasibility.planLoad,
+        weeklyCapacity: feasibility.weeklyCapacity,
+        bottleneck: feasibility.bottleneck
+          ? { axis: feasibility.bottleneck.axis, label: feasibility.bottleneck.label }
+          : undefined,
+        adjustedScore: feasibility.adjustedScore,
+        smartGoalQualityLevel: feasibility.smartGoalQualityLevel,
+      }
+    : undefined;
+
+  const rationaleInput = useMemo(
+    () => ({
+      vision12Week: draft.vision12Week,
+      week12Outcome: draft.week12Outcome,
+      goalArchetype: intentArchetype,
+      leadIndicators: scheduledLeadIndicators.map((indicator) => ({
+        name: indicator.name,
+        target: indicator.target,
+        schedule: indicator.schedule,
+        type: indicator.type,
+      })),
+      milestones: {
+        week4: draft.week4Milestone,
+        week8: draft.week8Milestone,
+        week12: draft.week12Outcome,
+      },
+      reviewDay: draft.reviewDay,
+      tacticLoadPreference: draft.tacticLoadPreference,
+      weeklyTaskCount: weekOneTaskPreview.length,
+      firstTaskTitle: weekOneTaskPreview[0],
+    }),
+    [
+      draft.vision12Week,
+      draft.week12Outcome,
+      draft.week4Milestone,
+      draft.week8Milestone,
+      draft.reviewDay,
+      draft.tacticLoadPreference,
+      weekOneTaskPreview,
+      scheduledLeadIndicators,
+      intentArchetype,
+    ],
+  );
+
+  const planRationale = useMemo(
+    () =>
+      getPlanRationale(rationaleInput, {
+        feasibility: feasibilityContext ?? null,
+        goalArchetype: intentArchetype,
+      }),
+    [rationaleInput, feasibilityContext, intentArchetype],
+  );
+
   const planQuality = evaluateTwelveWeekPlanQuality(
     {
       vision12Week: draft.vision12Week,
@@ -81,21 +146,10 @@ export function ReviewStep({
     {
       weeklyTaskCount: weekOneTaskPreview.length,
       firstTaskTitle: weekOneTaskPreview[0],
-      feasibility: feasibility
-        ? {
-            planLoad: feasibility.planLoad,
-            weeklyCapacity: feasibility.weeklyCapacity,
-            bottleneck: feasibility.bottleneck
-              ? { axis: feasibility.bottleneck.axis, label: feasibility.bottleneck.label }
-              : undefined,
-            adjustedScore: feasibility.adjustedScore,
-            smartGoalQualityLevel: feasibility.smartGoalQualityLevel,
-          }
-        : undefined,
+      feasibility: feasibilityContext,
     },
   );
 
-  const rationaleReasons = feasibility ? buildPlanRationaleReasons(feasibility) : [];
   const firstAction = weekOneTaskPreview[0] ?? null;
   const coreIndicators = scheduledLeadIndicators.filter((indicator) => indicator.type !== "optional");
   const optionalIndicators = scheduledLeadIndicators.filter((indicator) => indicator.type === "optional");
@@ -118,26 +172,91 @@ export function ReviewStep({
       <section className="rounded-[24px] border-2 border-emerald-200 bg-emerald-50/60 p-5">
         <div className="flex items-center gap-2">
           <Target className="h-4 w-4 text-emerald-700" aria-hidden="true" />
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">
-            Kết quả 12 tuần
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">Kết quả 12 tuần</p>
         </div>
         <p className="mt-3 text-base leading-7 text-slate-900">
           {draft.week12Outcome.trim() || (
-            <span className="italic text-slate-400">Chưa điền — quay lại bước 1 để bổ sung.</span>
+            <span className="italic text-slate-400">Chưa điền - quay lại bước 1 để bổ sung.</span>
           )}
         </p>
         {(draft.lagMetricName.trim() || draft.lagMetricTarget.trim()) && (
           <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/86 px-3 py-1 text-sm text-slate-700">
             <span className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Đo bằng</span>
             <span>
-              {draft.lagMetricName || "—"}
+              {draft.lagMetricName || "-"}
               {draft.lagMetricTarget ? ` · ${draft.lagMetricTarget}` : ""}
               {draft.lagMetricUnit ? ` ${draft.lagMetricUnit}` : ""}
             </span>
           </div>
         )}
       </section>
+
+      <details
+        data-testid="plan-rationale-panel"
+        data-reason-count={planRationale.reasons.length}
+        data-warning-count={planRationale.warnings.length}
+        className="rounded-[24px] border border-violet-200 bg-violet-50/76 p-5"
+      >
+        <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-violet-900">
+          <Lightbulb className="h-4 w-4 shrink-0 text-violet-700" aria-hidden="true" />
+          <span>Vì sao kế hoạch này phù hợp với bạn?</span>
+        </summary>
+        <p className="mt-2 text-xs leading-6 text-violet-900/72">
+          App tổng hợp ngắn gọn từ feasibility, nhịp tuần, việc lặp lại và cột mốc. Đây là gợi ý - kế hoạch không bảo
+          đảm thành công, nhưng giúp bạn biết vì sao nên thử cách này trước.
+        </p>
+
+        <ul data-testid="plan-rationale-reasons" className="mt-4 space-y-2 text-sm leading-6 text-slate-800">
+          {planRationale.reasons.map((reason) => (
+            <li
+              key={reason.id}
+              data-reason-id={reason.id}
+              className="rounded-2xl border border-white/70 bg-white/82 px-3 py-2"
+            >
+              <span aria-hidden="true">• </span>
+              {reason.text}
+            </li>
+          ))}
+        </ul>
+
+        {planRationale.warnings.length > 0 && (
+          <div
+            data-testid="plan-rationale-warnings"
+            className="mt-3 rounded-2xl border border-amber-200 bg-amber-50/82 p-3"
+          >
+            <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-amber-800">
+              <CircleAlert className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Lưu ý cần biết</span>
+            </p>
+            <ul className="mt-2 space-y-1 text-sm leading-6 text-amber-900">
+              {planRationale.warnings.map((warning) => (
+                <li key={warning.id} data-warning-id={warning.id}>
+                  • {warning.text}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {planRationale.adjustments.length > 0 && (
+          <div
+            data-testid="plan-rationale-adjustments"
+            className="mt-3 rounded-2xl border border-sky-200 bg-sky-50/82 p-3"
+          >
+            <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-sky-800">
+              <Wrench className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Nếu bạn thấy chưa khớp, có thể đổi</span>
+            </p>
+            <ul className="mt-2 space-y-1 text-sm leading-6 text-sky-900">
+              {planRationale.adjustments.map((adjustment) => (
+                <li key={adjustment.id} data-adjustment-id={adjustment.id}>
+                  • {adjustment.text}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </details>
 
       <section className="rounded-[24px] border border-white/70 bg-white/72 p-5">
         <div className="flex items-center gap-2">
@@ -150,16 +269,13 @@ export function ReviewStep({
             { label: "Tuần 8", value: draft.week8Milestone },
             { label: "Tuần 12", value: draft.week12Outcome },
           ].map((milestone) => (
-            <div
-              key={milestone.label}
-              className="rounded-[18px] border border-white/70 bg-slate-50/80 p-3"
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-                {milestone.label}
-              </p>
+            <div key={milestone.label} className="rounded-[18px] border border-white/70 bg-slate-50/80 p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{milestone.label}</p>
               <p className="mt-2 text-sm leading-6 text-slate-700">
                 {milestone.value.trim() || (
-                  <span className="italic text-slate-400">Chưa có — bạn có thể thêm trong phần nâng cao bên dưới.</span>
+                  <span className="italic text-slate-400">
+                    Chưa có - bạn có thể thêm trong phần nâng cao bên dưới.
+                  </span>
                 )}
               </p>
             </div>
@@ -169,9 +285,7 @@ export function ReviewStep({
 
       <section className="rounded-[24px] border border-white/70 bg-white/72 p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-            Việc lặp lại mỗi tuần
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Việc lặp lại mỗi tuần</p>
           <span className="text-xs text-slate-500">
             {coreIndicators.length} cốt lõi · {optionalIndicators.length} tùy chọn
           </span>
@@ -184,15 +298,14 @@ export function ReviewStep({
               <li
                 key={indicator.id}
                 className={`flex flex-wrap items-center justify-between gap-2 rounded-2xl border px-3 py-2 ${
-                  indicator.type === "optional"
-                    ? "border-slate-200 bg-slate-50/80"
-                    : "border-emerald-200 bg-white/82"
+                  indicator.type === "optional" ? "border-slate-200 bg-slate-50/80" : "border-emerald-200 bg-white/82"
                 }`}
               >
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900">{indicator.name || "—"}</p>
+                  <p className="text-sm font-semibold text-slate-900">{indicator.name || "-"}</p>
                   <p className="text-xs text-slate-500">
-                    {indicator.target || "1"} {indicator.unit || "lần/tuần"} · {formatScheduleDayLabels(indicator.schedule)}
+                    {indicator.target || "1"} {indicator.unit || "lần/tuần"} ·{" "}
+                    {formatScheduleDayLabels(indicator.schedule)}
                   </p>
                 </div>
                 <Badge variant={indicator.type === "optional" ? "outline" : "default"} className="text-xs">
@@ -236,7 +349,7 @@ export function ReviewStep({
             <p className="mt-2 text-base font-semibold text-slate-950">
               Chất lượng: {getQualityLevelLabel(planQuality.level)} · {planQuality.overallScore}/100
             </p>
-            <p className="mt-1 text-sm text-slate-600">Đây là gợi ý — bạn vẫn có thể tạo kế hoạch.</p>
+            <p className="mt-1 text-sm text-slate-600">Đây là gợi ý - bạn vẫn có thể tạo kế hoạch.</p>
           </div>
           <span
             className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${getQualityBadgeStyle(
@@ -295,25 +408,6 @@ export function ReviewStep({
           </details>
         )}
       </section>
-
-      {rationaleReasons.length > 0 && (
-        <section className="rounded-[24px] border border-violet-200 bg-violet-50/72 p-5">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 text-violet-700" aria-hidden="true" />
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
-              Vì sao kế hoạch này hợp với bạn
-            </p>
-          </div>
-          <ul className="mt-3 grid gap-2 md:grid-cols-2">
-            {rationaleReasons.map((reason) => (
-              <li key={reason.id} className="rounded-[18px] border border-violet-200 bg-white/82 p-3">
-                <p className="text-sm font-semibold text-slate-950">{reason.title}</p>
-                <p className="mt-1 text-xs leading-5 text-slate-600">{reason.detail}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
 
       {weekOneTaskPreview.length > 0 && (
         <section className="rounded-[24px] border border-white/70 bg-white/72 p-5">

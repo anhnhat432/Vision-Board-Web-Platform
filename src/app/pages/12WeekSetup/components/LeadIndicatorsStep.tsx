@@ -1,3 +1,14 @@
+import { useMemo } from "react";
+import { AlertTriangle } from "lucide-react";
+
+import type { GoalArchetype } from "@/lib/smart-goal";
+
+import { GoalArchetypeExamples } from "@/app/components/GoalArchetypeExamples";
+import {
+  getArchetypeForIntent,
+  getUserIntentId,
+  hasActionableArchetypeHint,
+} from "@/app/utils/user-intent";
 import type { TacticType } from "@/app/utils/storage";
 import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
 import { Badge } from "@/app/components/ui/badge";
@@ -49,6 +60,14 @@ export function LeadIndicatorsStep({
   const indicatorWarnings = draft.leadIndicators.map((indicator) =>
     validateLeadIndicatorDraft(indicator, validationOptions).warnings,
   );
+  // Read the stored onboarding intent once on mount. The component does not
+  // mutate intent, only consumes it for the example panel; storage is the
+  // single source of truth.
+  const intentArchetype: GoalArchetype | null = useMemo(() => {
+    const intent = getUserIntentId();
+    if (!intent || !hasActionableArchetypeHint(intent)) return null;
+    return getArchetypeForIntent(intent);
+  }, []);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -98,6 +117,8 @@ export function LeadIndicatorsStep({
           </div>
         </details>
 
+        <GoalArchetypeExamples archetype={intentArchetype} variant="lead_indicator" />
+
         {draft.leadIndicators.map((indicator, index) => (
           <div
             key={indicator.id}
@@ -114,7 +135,13 @@ export function LeadIndicatorsStep({
                   {indicator.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
                 </Badge>
                 {draft.leadIndicators.length > 2 && (
-                  <Button type="button" variant="ghost" size="sm" onClick={() => onRemoveIndicator(index)}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onRemoveIndicator(index)}
+                    aria-label={`Xóa việc ${index + 1}${indicator.name ? `: ${indicator.name}` : ""}`}
+                  >
                     Xóa
                   </Button>
                 )}
@@ -250,7 +277,17 @@ export function LeadIndicatorsStep({
             ))
           )}
         </div>
-        {weekOneTaskWarning ? <p className="text-xs text-amber-600">{weekOneTaskWarning}</p> : null}
+        {weekOneTaskWarning ? (
+          <p
+            role="status"
+            className="mt-2 flex items-start gap-1.5 text-xs leading-5 text-amber-700"
+          >
+            <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <span>
+              <span className="font-semibold">Cảnh báo:</span> {weekOneTaskWarning}
+            </span>
+          </p>
+        ) : null}
       </div>
     </div>
   );

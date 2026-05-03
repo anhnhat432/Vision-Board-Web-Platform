@@ -1,5 +1,8 @@
 ﻿import type { Dispatch, SetStateAction } from "react";
 
+import type { GoalArchetype } from "@/lib/smart-goal";
+
+import { GoalArchetypeExamples } from "../../../components/GoalArchetypeExamples";
 import { Label } from "../../../components/ui/label";
 import { Textarea } from "../../../components/ui/textarea";
 import type { SMARTData } from "../types";
@@ -9,9 +12,22 @@ interface SpecificStepProps {
   setSmartData: Dispatch<SetStateAction<SMARTData>>;
   placeholder: string;
   showError: boolean;
+  /**
+   * Optional archetype derived from the user's onboarding intent. When set
+   * to a concrete archetype, the step renders a small collapsible "weak vs
+   * stronger goal" example panel under the input. Renders nothing for null,
+   * undefined, or `"other"`.
+   */
+  intentArchetype?: GoalArchetype | null;
 }
 
-export function SpecificStep({ smartData, setSmartData, placeholder, showError }: SpecificStepProps) {
+export function SpecificStep({
+  smartData,
+  setSmartData,
+  placeholder,
+  showError,
+  intentArchetype,
+}: SpecificStepProps) {
   const specificLength = smartData.specific.goal_statement.trim().length;
 
   return (
@@ -33,11 +49,13 @@ export function SpecificStep({ smartData, setSmartData, placeholder, showError }
         }
         className="min-h-[180px] resize-none text-base leading-7"
         aria-invalid={showError}
+        aria-describedby="smart-specific-hint smart-specific-counter"
       />
       <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500">
-        <p>Viết như một kết quả cụ thể mà bạn có thể nhìn thấy hoặc kiểm chứng.</p>
-        <p>{specificLength}/20 ký tự tối thiểu</p>
+        <p id="smart-specific-hint">Viết như một kết quả cụ thể mà bạn có thể nhìn thấy hoặc kiểm chứng.</p>
+        <p id="smart-specific-counter">{specificLength}/20 ký tự tối thiểu</p>
       </div>
+      <GoalArchetypeExamples archetype={intentArchetype} variant="goal" />
     </div>
   );
 }

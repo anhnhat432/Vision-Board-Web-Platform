@@ -48,15 +48,27 @@ export function FeasibilityStepShell({
               </p>
               <h2
                 ref={headingRef}
+                id={`feasibility-question-${currentQuestion.id}`}
                 tabIndex={-1}
                 className="mt-2 text-xl font-bold leading-tight text-slate-900 focus:outline-none sm:mt-3 sm:text-3xl"
               >
                 {currentQuestion.question}
               </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600 sm:mt-3 sm:leading-7">{currentQuestion.helper}</p>
+              <p
+                id={`feasibility-question-${currentQuestion.id}-helper`}
+                className="mt-2 text-sm leading-6 text-slate-600 sm:mt-3 sm:leading-7"
+              >
+                {currentQuestion.helper}
+              </p>
             </div>
 
-            <RadioGroup value={selectedAnswer} onValueChange={onAnswerChange} className="space-y-3">
+            <RadioGroup
+              value={selectedAnswer}
+              onValueChange={onAnswerChange}
+              aria-labelledby={`feasibility-question-${currentQuestion.id}`}
+              aria-describedby={`feasibility-question-${currentQuestion.id}-helper`}
+              className="space-y-3"
+            >
               {currentQuestion.options.map((option, index) => (
                 <motion.div
                   key={option.value}

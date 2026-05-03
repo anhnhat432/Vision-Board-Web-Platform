@@ -1,4 +1,6 @@
-﻿import { Badge } from "../../../components/ui/badge";
+﻿import { Pencil } from "lucide-react";
+
+import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import type { SmartGoalSummaryRow, SmartStepKey } from "../types";
 
@@ -27,11 +29,19 @@ export function ReviewStep({ clarityDoneCount, clarityItemCount, summaryRows, on
         {summaryRows.map((row) => (
           <div key={row.key} className="rounded-2xl border border-white/80 bg-white/82 p-3">
             <div className="flex items-start justify-between gap-3">
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{row.label}</p>
                 <p className="mt-2 text-sm leading-6 text-slate-700">{row.value}</p>
               </div>
-              <Button type="button" variant="ghost" size="sm" onClick={() => onJumpToStep(row.key)}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="shrink-0 border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50"
+                onClick={() => onJumpToStep(row.key)}
+                aria-label={`Sửa phần ${row.label}`}
+              >
+                <Pencil className="h-3.5 w-3.5" />
                 Sửa
               </Button>
             </div>

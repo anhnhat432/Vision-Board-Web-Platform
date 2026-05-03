@@ -42,6 +42,20 @@ export type {
   ExecutionInsightSeverity,
   ExecutionInsightsContext,
 } from "./executionInsights";
+export { getPlanRationale } from "./planRationale";
+export type {
+  PlanRationaleAdjustment,
+  PlanRationaleAdjustmentId,
+  PlanRationaleContext,
+  PlanRationaleFeasibilityContext,
+  PlanRationaleInput,
+  PlanRationaleLeadIndicator,
+  PlanRationaleReason,
+  PlanRationaleReasonId,
+  PlanRationaleResult,
+  PlanRationaleWarning,
+  PlanRationaleWarningId,
+} from "./planRationale";
 export { getNextWeekAdjustmentRecommendation } from "./nextWeekRecommendation";
 export type {
   FeasibilityPlanLoadInput,

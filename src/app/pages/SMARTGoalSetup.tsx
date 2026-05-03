@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
+import { PageShell } from "../components/PageShell";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { Card, CardContent } from "../components/ui/card";
 import { trackAnalyticsEvent } from "../utils/analytics";
@@ -18,6 +19,16 @@ import {
   parseNumberInput,
   type SmartGoal,
 } from "@/lib/smart-goal";
+import {
+  getArchetypeQualityHints,
+  type GoalArchetype,
+} from "@/lib/smart-goal/goalArchetypes";
+import {
+  getArchetypeForIntent,
+  getUserIntentId,
+  hasActionableArchetypeHint,
+  type UserIntentId,
+} from "../utils/user-intent";
 import { SMART_STEPS } from "./SMARTGoalSetup/constants";
 import {
   buildGoalClarityItems,
@@ -47,6 +58,7 @@ export function SMARTGoalSetup() {
   const [currentStep, setCurrentStep] = useState(0);
   const [focusArea, setFocusArea] = useState<string>("");
   const [smartData, setSmartData] = useState<SMARTData>(createInitialSMARTData());
+  const [userIntent, setUserIntentState] = useState<UserIntentId | null>(null);
   const stepTopRef = useRef<HTMLDivElement | null>(null);
   const stepHeadingRef = useRef<HTMLHeadingElement | null>(null);
 
@@ -89,8 +101,19 @@ export function SMARTGoalSetup() {
       // Ignore malformed drafts.
     }
 
+    setUserIntentState(getUserIntentId());
     setSetupState("ready");
   }, []);
+
+  const intentArchetype: GoalArchetype | null = useMemo(() => {
+    if (!userIntent || !hasActionableArchetypeHint(userIntent)) return null;
+    return getArchetypeForIntent(userIntent);
+  }, [userIntent]);
+
+  const intentMetricHint = useMemo(() => {
+    if (!intentArchetype) return undefined;
+    return getArchetypeQualityHints(intentArchetype).recommendedMetric;
+  }, [intentArchetype]);
 
   const firstStepData = SMART_STEPS[0];
   if (!firstStepData) {
@@ -272,6 +295,7 @@ export function SMARTGoalSetup() {
             setSmartData={setSmartData}
             placeholder={currentStepData.placeholder}
             showError={shouldShowCurrentStepError}
+            intentArchetype={intentArchetype}
           />
         );
       case "measurable":
@@ -280,6 +304,8 @@ export function SMARTGoalSetup() {
             smartData={smartData}
             setSmartData={setSmartData}
             currentStepHasDraftContent={currentStepHasDraftContent}
+            intentMetricHint={intentMetricHint}
+            intentArchetype={intentArchetype}
           />
         );
       case "achievable":
@@ -345,14 +371,14 @@ export function SMARTGoalSetup() {
   }
 
   return (
-    <div className="flow-shell min-h-screen px-4 py-6 sm:px-6 lg:px-8">
+    <PageShell maxWidth="hero">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mx-auto w-full max-w-7xl space-y-5"
+        className="space-y-5"
       >
-        <CoreFlowProgress currentStepId="smart_goal" />
+        <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} />
 
         <SmartGoalHero
           focusArea={focusArea}
@@ -409,6 +435,6 @@ export function SMARTGoalSetup() {
           </details>
         </div>
       </motion.div>
-    </div>
+    </PageShell>
   );
 }

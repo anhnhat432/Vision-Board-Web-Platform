@@ -1,7 +1,10 @@
 ﻿import type { Dispatch, SetStateAction } from "react";
+import { Lightbulb } from "lucide-react";
 
+import type { GoalArchetype } from "@/lib/smart-goal";
 import { parseNumberInput } from "@/lib/smart-goal";
 
+import { GoalArchetypeExamples } from "../../../components/GoalArchetypeExamples";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import type { SMARTData } from "../types";
@@ -10,9 +13,28 @@ interface MeasurableStepProps {
   smartData: SMARTData;
   setSmartData: Dispatch<SetStateAction<SMARTData>>;
   currentStepHasDraftContent: boolean;
+  /**
+   * Optional archetype-specific metric suggestion derived from the
+   * user's onboarding intent. Rendered as a soft hint below the metric
+   * name helper; does not affect validation or scoring. When absent,
+   * the step renders identically to before.
+   */
+  intentMetricHint?: string;
+  /**
+   * Optional archetype derived from the user's onboarding intent. Drives
+   * the collapsible "good vs bad metric" example panel. Renders nothing
+   * for null, undefined, or `"other"`.
+   */
+  intentArchetype?: GoalArchetype | null;
 }
 
-export function MeasurableStep({ smartData, setSmartData, currentStepHasDraftContent }: MeasurableStepProps) {
+export function MeasurableStep({
+  smartData,
+  setSmartData,
+  currentStepHasDraftContent,
+  intentMetricHint,
+  intentArchetype,
+}: MeasurableStepProps) {
   const parsedBaselineValue = parseNumberInput(smartData.measurable.baseline_value);
   const parsedTargetValue = parseNumberInput(smartData.measurable.target_value);
   const metricNameMissing = smartData.measurable.metric_name.trim().length === 0;
@@ -41,8 +63,28 @@ export function MeasurableStep({ smartData, setSmartData, currentStepHasDraftCon
             }))
           }
           aria-invalid={metricNameMissing && currentStepHasDraftContent}
+          aria-describedby={
+            intentMetricHint
+              ? "smart-metric-name-hint smart-metric-intent-hint"
+              : "smart-metric-name-hint"
+          }
         />
-        <p className="text-sm text-slate-500">Chọn một chỉ số đủ rõ để bạn biết mình đang tiến lên hay đứng yên.</p>
+        <p id="smart-metric-name-hint" className="text-sm text-slate-500">
+          Chọn một chỉ số đủ rõ để bạn biết mình đang tiến lên hay đứng yên.
+        </p>
+        {intentMetricHint && (
+          <div
+            data-testid="smart-intent-metric-hint"
+            id="smart-metric-intent-hint"
+            role="note"
+            className="flex items-start gap-2 rounded-2xl border border-sky-200 bg-sky-50/82 px-3 py-2.5 text-sm leading-6 text-sky-900"
+          >
+            <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" aria-hidden="true" />
+            <span>
+              <span className="font-semibold">Gợi ý theo hướng bạn chọn:</span> {intentMetricHint}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -92,6 +134,7 @@ export function MeasurableStep({ smartData, setSmartData, currentStepHasDraftCon
       <p className="text-sm text-slate-500">
         Nếu bạn nhập cả hai mốc, hệ thống sẽ kiểm tra để mốc mục tiêu lớn hơn mốc hiện tại.
       </p>
+      <GoalArchetypeExamples archetype={intentArchetype} variant="metric" />
     </div>
   );
 }

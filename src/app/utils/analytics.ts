@@ -59,6 +59,13 @@ export interface AnalyticsEventPayloads {
     weakest_area: string;
     strongest_area: string;
   };
+  user_intent_selected: {
+    source: AnalyticsSource;
+    intent_id: string;
+  };
+  user_intent_cleared: {
+    source: AnalyticsSource;
+  };
   smart_goal_created: {
     focus_area: string;
     target_mode: "date" | "weeks";
@@ -233,6 +240,8 @@ const REMOTE_ANALYTICS_FIELD_ALLOWLIST: Record<AnalyticsEventName, readonly stri
   onboarding_started: ["source", "returning_user"],
   life_balance_started: ["source", "returning_user", "has_existing_scores"],
   life_balance_completed: ["source", "area_count", "average_score", "weakest_area", "strongest_area"],
+  user_intent_selected: ["source", "intent_id"],
+  user_intent_cleared: ["source"],
   smart_goal_created: ["focus_area", "target_mode", "target_weeks", "has_baseline", "weekly_hours", "quality_level", "score_bucket"],
   feasibility_completed: [
     "focus_area",

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { ArrowRight, Check, Compass, Sparkles, Target, TrendingDown, TrendingUp } from "lucide-react";
@@ -10,8 +10,16 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
+import { trackAnalyticsEvent } from "../utils/analytics";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { APP_STORAGE_KEYS, clearGoalPlanningDrafts, getLifeAreaLabel } from "../utils/storage";
+import {
+  clearUserIntent,
+  getUserIntentId,
+  getUserIntentOptions,
+  setUserIntent,
+  type UserIntentId,
+} from "../utils/user-intent";
 
 export function LifeInsight() {
   const navigate = useNavigate();
@@ -19,6 +27,28 @@ export function LifeInsight() {
   const lifeAreas = userData?.currentWheelOfLife ?? [];
   const hasLifeBalance = hasRealLifeBalance(userData);
   const [selectedAreaName, setSelectedAreaName] = useState<string | null>(null);
+  const [selectedIntent, setSelectedIntent] = useState<UserIntentId | null>(null);
+
+  useEffect(() => {
+    setSelectedIntent(getUserIntentId());
+  }, []);
+
+  const handleIntentSelect = (intent: UserIntentId) => {
+    setSelectedIntent(intent);
+    setUserIntent(intent);
+    trackAnalyticsEvent("user_intent_selected", {
+      source: "life_balance",
+      intent_id: intent,
+    });
+  };
+
+  const handleIntentClear = () => {
+    setSelectedIntent(null);
+    clearUserIntent();
+    trackAnalyticsEvent("user_intent_cleared", { source: "life_balance" });
+  };
+
+  const intentOptions = getUserIntentOptions();
 
   const lowestArea = useMemo(() => {
     if (lifeAreas.length === 0) return null;
@@ -265,6 +295,68 @@ export function LifeInsight() {
                 );
               })}
             </div>
+          </details>
+
+          <details
+            data-testid="life-insight-intent-picker"
+            className="rounded-[28px] border border-white/70 bg-white/82 p-5 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.2)] lg:p-6"
+            open={selectedIntent !== null}
+          >
+            <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
+              Bạn đang muốn làm điều gì trong 12 tuần tới?
+            </summary>
+            <p className="mt-3 text-sm leading-7 text-slate-600">
+              Chọn một mô tả gần nhất để app gợi ý cho sát hơn. Không bắt buộc — bạn có thể bỏ qua, thay đổi hoặc xoá
+              bất cứ lúc nào.
+            </p>
+            <div
+              role="radiogroup"
+              aria-label="Chọn điều bạn muốn làm trong 12 tuần tới"
+              className="mt-5 grid gap-2 sm:grid-cols-2"
+            >
+              {intentOptions.map((option) => {
+                const isSelected = selectedIntent === option.id;
+                return (
+                  <label
+                    key={option.id}
+                    data-intent-id={option.id}
+                    className={`cursor-pointer rounded-[18px] border p-4 text-left transition-all hover:-translate-y-0.5 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-violet-300 ${
+                      isSelected
+                        ? "border-violet-300 bg-violet-50 shadow-[0_8px_24px_-12px_rgba(109,40,217,0.35)]"
+                        : "border-white/70 bg-white/72 hover:border-white hover:bg-white"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="life-insight-intent"
+                      value={option.id}
+                      checked={isSelected}
+                      onChange={() => handleIntentSelect(option.id)}
+                      className="sr-only"
+                    />
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm font-semibold text-slate-900">{option.label}</p>
+                      {isSelected && <Check className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" aria-hidden="true" />}
+                    </div>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">{option.description}</p>
+                  </label>
+                );
+              })}
+            </div>
+            {selectedIntent !== null && (
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <p className="text-xs text-slate-500">
+                  Lựa chọn này được lưu trên trình duyệt này để gợi ý bước SMART và kế hoạch 12 tuần.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleIntentClear}
+                  className="text-xs font-semibold text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline"
+                >
+                  Bỏ chọn
+                </button>
+              </div>
+            )}
           </details>
 
           <details className="rounded-[28px] border border-white/70 bg-white/82 p-5 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.2)] lg:p-6">

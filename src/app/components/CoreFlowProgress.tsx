@@ -1,6 +1,7 @@
-import { ArrowRight, Compass } from "lucide-react";
+import { ArrowRight, Compass, LogOut } from "lucide-react";
 
 import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 
 export type CoreFlowStepId =
@@ -58,9 +59,26 @@ const CORE_FLOW_STEPS: Array<{
 interface CoreFlowProgressProps {
   currentStepId: CoreFlowStepId;
   className?: string;
+  /**
+   * Optional escape hatch shown next to the step badges. Renders a small
+   * "Tạm thoát" button that calls `onExit` so the user can leave the wizard
+   * mid-flow (their draft auto-saves locally and they can resume by re-opening
+   * the same step from the dashboard). Default `undefined` — no button rendered.
+   */
+  onExit?: () => void;
+  /** Override the exit button label. Default `"Tạm thoát"`. */
+  exitLabel?: string;
+  /** Override the accessible label / tooltip for the exit button. */
+  exitTooltip?: string;
 }
 
-export function CoreFlowProgress({ currentStepId, className = "" }: CoreFlowProgressProps) {
+export function CoreFlowProgress({
+  currentStepId,
+  className = "",
+  onExit,
+  exitLabel = "Tạm thoát",
+  exitTooltip = "Quay lại bảng điều khiển — tiến độ đã nhập tự lưu trên trình duyệt này",
+}: CoreFlowProgressProps) {
   const currentIndex = Math.max(
     0,
     CORE_FLOW_STEPS.findIndex((step) => step.id === currentStepId),
@@ -85,6 +103,20 @@ export function CoreFlowProgress({ currentStepId, className = "" }: CoreFlowProg
           <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
             Bước {currentIndex + 1}/{CORE_FLOW_STEPS.length}
           </Badge>
+          {onExit ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={onExit}
+              title={exitTooltip}
+              aria-label={exitTooltip}
+              className="h-7 rounded-full border border-slate-200 bg-white px-2.5 text-[11px] font-medium text-slate-600 shadow-sm hover:bg-slate-50 hover:text-slate-900"
+            >
+              <LogOut className="mr-1 h-3 w-3" />
+              {exitLabel}
+            </Button>
+          ) : null}
         </div>
 
         <div className="min-w-0 flex-1 space-y-2">

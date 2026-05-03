@@ -666,7 +666,9 @@ function DashboardContent({
   const shouldShowSetupGuide = !isPublicVisitor && !activeSystem;
   const shouldShowTopSidebar = !isPublicVisitor && !activeSystem && hasWorkspaceSignals;
   const shouldShowWorkspaceDetailGrid = !isPublicVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
-  const shouldShowMainDashboardCard = isPublicVisitor || Boolean(activeSystem) || hasWorkspaceSignals;
+  // Signed-out visitors get their hero from `PublicVisitorHero` (rendered above);
+  // skip the secondary dashboard card for them to avoid a double-hero.
+  const shouldShowMainDashboardCard = !isPublicVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
   const dashboardTourSteps = shouldShowTopSidebar
     ? DASHBOARD_TOUR_STEPS
     : DASHBOARD_TOUR_STEPS.filter(
@@ -911,8 +913,7 @@ function DashboardContent({
                             </div>
                             <Button
                               data-tour-id="dashboard-primary-action"
-                              variant="outline"
-                              className="w-full border-slate-950 bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
+                              className="w-full bg-slate-950 text-white shadow-sm hover:bg-slate-800 sm:w-auto"
                               onClick={() => navigate("/12-week-system")}
                             >
                               Mở trung tâm 12 tuần

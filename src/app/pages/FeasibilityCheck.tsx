@@ -14,6 +14,7 @@ import {
 import type { SmartGoalQualityBridge } from "./FeasibilityCheck/types";
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
+import { PageShell } from "../components/PageShell";
 import { Badge } from "../components/ui/badge";
 import { Card, CardContent } from "../components/ui/card";
 import { Progress } from "../components/ui/progress";
@@ -233,14 +234,14 @@ export function FeasibilityCheck() {
   }
 
   return (
-    <div className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
+    <PageShell maxWidth="hero">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mx-auto w-full max-w-7xl space-y-6"
+        className="space-y-6"
       >
-        <CoreFlowProgress currentStepId="feasibility" />
+        <CoreFlowProgress currentStepId="feasibility" onExit={() => navigate("/")} />
 
         <Card className="hero-surface overflow-hidden border-0 text-white">
           <CardContent className="relative p-5 sm:p-6 lg:p-10">
@@ -312,6 +313,6 @@ export function FeasibilityCheck() {
           headingRef={questionHeadingRef}
         />
       </motion.div>
-    </div>
+    </PageShell>
   );
 }

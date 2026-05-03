@@ -1,4 +1,4 @@
-import { CalendarDays } from "lucide-react";
+import { AlertTriangle, CalendarDays } from "lucide-react";
 
 import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
 import { Input } from "@/app/components/ui/input";
@@ -194,7 +194,17 @@ export function ScheduleStep({
               ))
             )}
           </div>
-          {weekOneTaskWarning ? <p className="mt-3 text-xs text-amber-600">{weekOneTaskWarning}</p> : null}
+          {weekOneTaskWarning ? (
+            <p
+              role="status"
+              className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-amber-700"
+            >
+              <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <span>
+                <span className="font-semibold">Cảnh báo:</span> {weekOneTaskWarning}
+              </span>
+            </p>
+          ) : null}
         </div>
       </div>
     </div>

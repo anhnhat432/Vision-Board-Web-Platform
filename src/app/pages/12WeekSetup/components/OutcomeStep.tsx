@@ -231,11 +231,16 @@ export function OutcomeStep({
                 const isLocked = !planSatisfiesRequirement(currentPlan, template.requiredPlan);
                 const isSelected = selectedTemplate?.id === template.id;
 
+                const templateAriaLabel = isLocked
+                  ? `${template.name} — cần gói Plus để dùng khung này`
+                  : `${template.name}${isSelected ? " — đang dùng" : ""}`;
                 return (
                   <button
                     key={template.id}
                     type="button"
                     onClick={() => onTemplateSelect(template)}
+                    aria-pressed={isSelected}
+                    aria-label={templateAriaLabel}
                     className={`rounded-[24px] border p-4 text-left transition-all ${
                       isSelected
                         ? "border-slate-900 bg-slate-900 text-white shadow-[0_22px_50px_-32px_rgba(15,23,42,0.48)]"

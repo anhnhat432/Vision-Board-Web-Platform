@@ -1,6 +1,6 @@
 ﻿import type { ReactNode, RefObject } from "react";
 import { motion } from "motion/react";
-import { ArrowLeft, ArrowRight, CircleAlert, CheckCircle2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, CircleAlert, CheckCircle2, Lightbulb, Sparkles } from "lucide-react";
 
 import type { QualityLevel } from "@/lib/smart-goal/quality";
 
@@ -108,6 +108,7 @@ export function SmartGoalStepShell({
             variant="outline"
             className="w-full shrink-0 border-violet-200 bg-white text-violet-700 hover:bg-violet-50 sm:w-auto"
             onClick={onApplyStarter}
+            aria-label={`Dùng gợi ý cho bước ${step.label}`}
           >
             Dùng gợi ý
           </Button>
@@ -190,7 +191,7 @@ export function SmartGoalStepShell({
       ) : null}
       {currentStepSoftWarning ? (
         <Alert className="border-amber-200 bg-amber-50/85 text-amber-700">
-          <Sparkles className="h-4 w-4" />
+          <Lightbulb className="h-4 w-4" />
           <AlertTitle>Gợi ý để mục tiêu rõ hơn</AlertTitle>
           <AlertDescription className="text-amber-700/90">{currentStepSoftWarning}</AlertDescription>
         </Alert>

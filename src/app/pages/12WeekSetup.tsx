@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
+import { PageShell } from "../components/PageShell";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { Badge } from "../components/ui/badge";
 import { Card, CardContent } from "../components/ui/card";
@@ -783,7 +784,7 @@ export function TwelveWeekSetup() {
   };
 
   return (
-    <div className="space-y-8 pb-12">
+    <PageShell maxWidth="hero" className="space-y-6 sm:space-y-8">
       <UpgradePaywallDialog
         open={isPaywallOpen}
         onOpenChange={setIsPaywallOpen}
@@ -796,7 +797,7 @@ export function TwelveWeekSetup() {
         onCheckoutComplete={handleCheckoutComplete}
       />
 
-      <CoreFlowProgress currentStepId="twelve_week_setup" />
+      <CoreFlowProgress currentStepId="twelve_week_setup" onExit={() => navigate("/")} />
 
       <Card className="hero-surface overflow-hidden border-0 text-white">
         <CardContent className="relative p-5 sm:p-6 lg:p-10">
@@ -916,6 +917,6 @@ export function TwelveWeekSetup() {
           />
         )}
       </SetupStepShell>
-    </div>
+    </PageShell>
   );
 }

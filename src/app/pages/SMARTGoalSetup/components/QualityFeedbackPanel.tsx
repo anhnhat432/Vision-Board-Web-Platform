@@ -63,20 +63,23 @@ export function QualityFeedbackPanel({
   const topWarnings = warnings.slice(0, MAX_DISPLAY_ITEMS);
   const topSuggestions = suggestions.slice(0, MAX_DISPLAY_ITEMS);
 
+  const headerDescription =
+    level === "strong"
+      ? "Mục tiêu đã đủ rõ ràng để chuyển sang kiểm tra tính thực tế."
+      : level === "okay"
+        ? "Mục tiêu đã khá ổn. Vài gợi ý nhỏ bên dưới nếu bạn muốn chỉnh thêm."
+        : canProceedToFeasibility
+          ? "Bạn vẫn có thể tiếp tục. Thêm chi tiết theo gợi ý dưới sẽ giúp kế hoạch 12 tuần chắc hơn."
+          : "Mục tiêu cần bổ sung thêm chi tiết để chuyển sang kế hoạch.";
+
   return (
     <div className={`rounded-[24px] border ${config.border} ${config.bg} p-4`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Icon className={`h-5 w-5 ${config.iconColor}`} />
-          <div>
+        <div className="flex items-start gap-2">
+          <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${config.iconColor}`} />
+          <div className="min-w-0">
             <p className="text-sm font-semibold text-slate-950">Chất lượng mục tiêu</p>
-            <p className="mt-0.5 text-sm text-slate-600">
-              {level === "strong"
-                ? "Mục tiêu đã đủ rõ ràng để chuyển sang kiểm tra tính thực tế."
-                : level === "okay"
-                  ? "Mục tiêu khá ổn. Xem gợi ý bên dưới để cải thiện thêm."
-                  : "Mục tiêu cần bổ sung thêm chi tiết để tăng tính khả thi."}
-            </p>
+            <p className="mt-0.5 text-sm leading-6 text-slate-600">{headerDescription}</p>
           </div>
         </div>
         <Badge variant="outline" className={config.badgeClass}>
@@ -112,12 +115,6 @@ export function QualityFeedbackPanel({
             </div>
           ))}
         </div>
-      )}
-
-      {level === "weak" && canProceedToFeasibility && (
-        <p className="mt-4 text-sm leading-6 text-slate-500">
-          Bạn vẫn có thể tiếp tục, nhưng mục tiêu hiện tại có rủi ro thiếu rõ ràng khi chuyển sang kế hoạch 12 tuần.
-        </p>
       )}
     </div>
   );

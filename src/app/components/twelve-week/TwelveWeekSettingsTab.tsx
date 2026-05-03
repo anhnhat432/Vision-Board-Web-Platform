@@ -1,4 +1,5 @@
 import { FeedbackDialog } from "../FeedbackDialog";
+import { FunnelDiagnosticsPanel } from "./FunnelDiagnosticsPanel";
 import { TwelveWeekCycleSettingsPanel } from "./TwelveWeekCycleSettingsPanel";
 import { TwelveWeekDeviceAndSyncPanel } from "./TwelveWeekDeviceAndSyncPanel";
 import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
@@ -69,6 +70,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           onNavigateSetup={props.onNavigateSetup}
         />
       </div>
+      <FunnelDiagnosticsPanel />
       <div className="flex justify-end">
         <FeedbackDialog
           source="settings"

@@ -4,6 +4,7 @@ import {
   CheckCircle2,
   ChevronDown,
   Compass,
+  HardDrive,
   LogOut,
   Menu,
   Moon,
@@ -794,6 +795,16 @@ export function RootLayout() {
   if (GUIDED_PATHS.has(location.pathname)) {
     return (
       <div className="app-shell min-h-screen" data-route-tone={routeTone}>
+        {demoMode ? (
+          <div
+            role="note"
+            className="border-b border-amber-200 bg-amber-50/85 px-4 py-1.5 text-center text-[11px] font-medium text-amber-800 sm:px-6"
+          >
+            <HardDrive className="mr-1 inline h-3 w-3 align-text-bottom" />
+            Đang ở chế độ <strong>demo</strong> — dữ liệu chỉ lưu trên trình duyệt này. Có thể bấm{" "}
+            <span className="font-semibold">Tạm thoát</span> bất kỳ lúc nào để quay lại bảng điều khiển.
+          </div>
+        ) : null}
         <div className="relative z-10">
           <AnimatePresence initial={false}>
             <motion.div key={location.pathname} className="page-transition-shell" {...pageTransition}>
@@ -816,19 +827,31 @@ export function RootLayout() {
       <header className="sticky top-0 z-40 px-4 pt-2 sm:top-4 sm:px-6 sm:pt-0 lg:px-8">
         <div className="glass-surface mx-auto max-w-7xl rounded-lg px-3 py-2 sm:px-4 sm:py-2 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.16)]">
           <div className="flex items-center justify-between gap-3">
-            <button
-              type="button"
-              onClick={() => navigateAppRoute("/")}
-              className="flex shrink-0 items-center gap-2.5 rounded-lg text-left transition-all duration-200 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
-              aria-label="Về trang chủ Dear Our Future"
-            >
-              <div className="flex size-9 items-center justify-center rounded-xl" style={shellBadgeStyle}>
-                <Sparkles className="h-4.5 w-4.5 text-white" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="truncate text-sm font-semibold tracking-normal text-slate-900">Dear Our Future</h1>
-              </div>
-            </button>
+            <div className="flex min-w-0 shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={() => navigateAppRoute("/")}
+                className="flex shrink-0 items-center gap-2.5 rounded-lg text-left transition-all duration-200 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
+                aria-label="Về trang chủ Dear Our Future"
+              >
+                <div className="flex size-9 items-center justify-center rounded-xl" style={shellBadgeStyle}>
+                  <Sparkles className="h-4.5 w-4.5 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <h1 className="truncate text-sm font-semibold tracking-normal text-slate-900">Dear Our Future</h1>
+                </div>
+              </button>
+
+              {demoMode ? (
+                <span
+                  title="Đang ở chế độ demo — dữ liệu chỉ lưu trên trình duyệt hiện tại, không gửi lên server."
+                  className="hidden shrink-0 items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold leading-none text-amber-800 sm:inline-flex"
+                >
+                  <HardDrive className="h-3 w-3" aria-hidden="true" />
+                  Demo · cục bộ
+                </span>
+              ) : null}
+            </div>
 
             <nav className="hidden flex-1 items-center justify-center md:flex">
               <div className="flex flex-wrap items-center gap-1 rounded-full border border-white/75 bg-white/72 px-1.5 py-1 shadow-[0_6px_14px_-14px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.9)]">

@@ -133,6 +133,7 @@ export const APP_STORAGE_KEYS = {
   latest12WeekPlanGoalId: "latest_12_week_plan_goal_id",
   readinessLevel: "readiness_level",
   readinessScore: "readiness_score",
+  userIntent: "user_intent",
 } as const;
 
 export const LIFE_AREAS = [
