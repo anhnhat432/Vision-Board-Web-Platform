@@ -680,9 +680,27 @@ export function TwelveWeekWeekTab({
               </Select>
               {intensityHint && <p className="text-xs leading-5 text-slate-500">{intensityHint}</p>}
             </div>
-            <Button className="w-full sm:w-auto" onClick={onSaveWeeklyReview}>
-              Chốt review tuần này
-            </Button>
+            <div
+              className={`flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between ${
+                reviewDueToday
+                  ? "border-amber-300 bg-amber-50"
+                  : "border-slate-200 bg-slate-50"
+              }`}
+            >
+              <p className="text-sm leading-6 text-slate-700">
+                {reviewDueToday
+                  ? "Sẵn sàng chốt review tuần này. Hệ thống sẽ khóa tuần và tạo gợi ý cho tuần sau."
+                  : "Có thể chốt sớm — bạn vẫn được phép sửa đến ngày review chính thức."}
+              </p>
+              <Button
+                size="lg"
+                className="w-full shrink-0 sm:w-auto"
+                onClick={onSaveWeeklyReview}
+              >
+                <ClipboardCheck className="h-4 w-4" />
+                Chốt review tuần này
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

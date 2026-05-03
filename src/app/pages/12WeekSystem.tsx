@@ -705,9 +705,14 @@ export function TwelveWeekSystem() {
           </TabsTrigger>
         </TabsList>
 
-        <p className="mt-3 rounded-lg border border-slate-200 bg-white/82 px-4 py-3 text-sm leading-6 text-slate-600 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.16)]">
-          Hôm nay: tick việc và check-in. Tuần: chốt review. Tiến độ: xem điểm và cột mốc. Cài đặt: export hoặc xóa
-          dữ liệu local trên trình duyệt này.
+        <p className="mt-3 px-1 text-xs leading-5 text-slate-500">
+          {activeTab === "today"
+            ? "Hôm nay: tick việc và lưu một check-in ngắn để giữ nhịp."
+            : activeTab === "week"
+              ? "Tuần: chốt review tuần này và quyết định nhịp cho tuần sau."
+              : activeTab === "progress"
+                ? "Tiến độ: xem nhịp tuần này, điểm 12 tuần và bước tiếp theo nên làm."
+                : "Cài đặt: chỉnh nhịp chu kỳ, xuất dữ liệu hoặc xem trạng thái sync."}
         </p>
 
         <TabsContent value="today" className="space-y-6 pt-4">
