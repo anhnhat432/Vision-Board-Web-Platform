@@ -635,6 +635,7 @@
         0 22px 46px -30px rgba(15, 23, 42, 0.18),
         0 8px 16px -10px rgba(15, 23, 42, 0.08);
       border-color: rgba(255, 255, 255, 0.86);
+      transform: translateY(-2px);
     }
   }
 
@@ -701,6 +702,48 @@
     bottom: -8%;
     right: -8%;
     background: radial-gradient(circle, rgba(99,102,241,0.4), transparent 70%);
+  }
+
+  .card-hover-lift {
+    transition: transform 260ms ease, box-shadow 260ms ease;
+  }
+
+  .focus-ring {
+    outline: none;
+  }
+  .focus-ring:focus-visible {
+    outline: 2px solid rgba(124,58,237,0.5);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(124,58,237,0.12);
+  }
+
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255,255,255,0.55) 50%,
+      transparent 60%
+    );
+    background-size: 200% 100%;
+    animation: shimmer-move 1.8s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes shimmer-move {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  @media (hover: hover) {
+    .card-hover-lift:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px -16px rgba(15,23,42,0.18);
+    }
   }
 
   .card-interactive-base {

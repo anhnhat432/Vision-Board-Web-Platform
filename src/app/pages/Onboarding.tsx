@@ -140,7 +140,7 @@ export function Onboarding() {
                     </div>
 
                     <div className="space-y-4">
-                      <h1 className="max-w-3xl text-2xl font-bold tracking-normal text-slate-950 sm:text-3xl lg:text-4xl">
+                      <h1 className="max-w-3xl text-2xl font-bold tracking-normal text-slate-950 sm:text-3xl lg:text-4xl gradient-text">
                         {isReturning
                           ? "Điểm số thay đổi? Hãy cập nhật lại để insight bám sát thực tế hơn."
                           : "Tạo một điểm bắt đầu đủ rõ để phần còn lại của hành trình trở nên nhẹ hơn."}
@@ -281,7 +281,7 @@ export function Onboarding() {
                   />
                 </div>
                 <div className="space-y-3">
-                  <h1 className="max-w-3xl text-2xl font-bold tracking-normal text-slate-950 sm:text-3xl lg:text-4xl">
+                  <h1 className="max-w-3xl text-2xl font-bold tracking-normal text-slate-950 sm:text-3xl lg:text-4xl gradient-text">
                     Chấm điểm hiện tại để biết chính xác nơi bạn nên bắt đầu.
                   </h1>
                   <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base lg:text-lg">

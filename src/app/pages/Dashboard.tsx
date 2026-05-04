@@ -875,7 +875,7 @@ function DashboardContent({
                     </div>
 
                     <div className="space-y-3">
-                      <h1 className="max-w-3xl break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+                      <h1 className="max-w-3xl break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl gradient-text">
                         {isPublicVisitor
                           ? publicVisitorDashboardTitle
                           : activeSystem
