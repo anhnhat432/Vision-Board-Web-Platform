@@ -135,7 +135,7 @@ export function FeasibilityStepShell({
               {[
                 "Trả lời theo lịch sống thật, không theo phiên bản lý tưởng.",
                 "Biết mục tiêu hiện tại đang vừa sức hay quá tải.",
-                "Nhìn rõ độ sẵn sàng trước khi bước vào system 12 tuần.",
+                "Nhìn rõ độ sẵn sàng trước khi bước vào kế hoạch 12 tuần.",
                 "Giảm rủi ro đặt mục tiêu nghe hay nhưng khó duy trì.",
               ].map((item) => (
                 <div

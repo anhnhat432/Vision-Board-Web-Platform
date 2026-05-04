@@ -70,7 +70,7 @@ export function AchievableStep({
           className="min-h-[120px] resize-none text-base leading-7"
         />
         <p className="text-sm text-slate-500">
-          Chỉ cần liệt kê những kỹ năng thật sự ảnh hưởng tới kết quả của giai đoạn này.
+          Liệt kê kỹ năng thật sự ảnh hưởng tới kết quả giai đoạn này.
         </p>
       </div>
 
@@ -91,7 +91,7 @@ export function AchievableStep({
           }
           className="min-h-[120px] resize-none text-base leading-7"
         />
-        <p className="text-sm text-slate-500">Hãy ghi cả người hỗ trợ lẫn tài nguyên bạn có thể dùng ngay.</p>
+        <p className="text-sm text-slate-500">Ghi cả người hỗ trợ lẫn tài liệu, công cụ bạn dùng được ngay.</p>
       </div>
 
       <ArchetypeHint archetype={archetype} variant="leadAction" />

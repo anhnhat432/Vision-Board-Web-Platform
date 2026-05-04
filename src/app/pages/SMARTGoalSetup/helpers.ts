@@ -194,14 +194,14 @@ export function getStepValidationError(stepKey: SmartStepKey, smartData: SMARTDa
   if (stepKey === "specific") {
     const value = smartData.specific.goal_statement.trim();
     if (value.length < 20) {
-      return "Mục tiêu cần dài tối thiểu 20 ký tự.";
+      return "Tối thiểu 20 ký tự để mục tiêu đủ rõ.";
     }
     return null;
   }
 
   if (stepKey === "measurable") {
     if (smartData.measurable.metric_name.trim().length === 0) {
-      return "Hãy chọn một con số hoặc dấu hiệu rõ để theo dõi.";
+      return "Chọn một con số hoặc dấu hiệu rõ để theo dõi.";
     }
 
     const targetValue = parseNumberInput(smartData.measurable.target_value);
@@ -233,13 +233,13 @@ export function getStepValidationError(stepKey: SmartStepKey, smartData: SMARTDa
 
   if (stepKey === "relevant") {
     if (smartData.relevant.motivation_reason.trim().length < 15) {
-      return "Lý do theo đuổi cần tối thiểu 15 ký tự.";
+      return "Tối thiểu 15 ký tự để lý do đủ rõ.";
     }
     return null;
   }
 
   if (smartData.timeBound.mode === "date") {
-    return smartData.timeBound.target_date.trim().length > 0 ? null : "Hãy chọn ngày mục tiêu cho kế hoạch này.";
+    return smartData.timeBound.target_date.trim().length > 0 ? null : "Chọn ngày mục tiêu cho kế hoạch này.";
   }
 
   const targetWeeks = parseNumberInput(smartData.timeBound.target_weeks);
@@ -369,7 +369,7 @@ export function buildGoalClarityItems(smartData: SMARTData): GoalClarityItem[] {
       detail:
         weeklyHours !== undefined && weeklyHours > 0
           ? `Bạn đang dành khoảng ${weeklyHours} giờ mỗi tuần.`
-          : "Hãy nhập số giờ mỗi tuần bạn thật sự có thể giữ.",
+          : "Nhập số giờ mỗi tuần bạn thật sự giữ được.",
       done: weeklyHours !== undefined && weeklyHours > 0,
       stepKey: "achievable",
     },

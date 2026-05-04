@@ -39,11 +39,11 @@ export function SmartGoalHero({
 
             <div className="space-y-4">
               <h1 className="max-w-3xl text-3xl font-bold tracking-normal lg:text-4xl">
-                Biến trọng tâm vừa chọn thành một mục tiêu rõ, đo được và đủ thực tế để bắt đầu.
+                Biến trọng tâm thành mục tiêu rõ, đo được, đủ thực tế.
               </h1>
               <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
-                Màn này chỉ giữ 5 câu hỏi quan trọng: muốn đạt gì, đo bằng gì, có đủ điều kiện không, vì sao đáng
-                làm, và khi nào cần nhìn lại. Sau đó mục tiêu sẽ đi sang bước kiểm tra tính thực tế.
+                5 câu hỏi: kết quả, chỉ số, điều kiện, lý do và mốc thời gian. Sau đó sang kiểm tra tính thực
+                tế.
               </p>
             </div>
 

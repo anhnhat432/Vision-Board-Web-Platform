@@ -365,7 +365,7 @@ export function SMARTGoalSetup() {
         eyebrow="Viết mục tiêu"
         loading
         title="Đang chuẩn bị bước viết mục tiêu"
-        description="Mình đang kiểm tra dữ liệu cân bằng cuộc sống và trọng tâm đã chọn trước khi mở phần viết mục tiêu."
+        description="Đang kiểm tra dữ liệu cân bằng và trọng tâm trước khi mở phần viết mục tiêu."
       />
     );
   }
@@ -376,7 +376,7 @@ export function SMARTGoalSetup() {
         currentStepId="life_balance"
         eyebrow="Viết mục tiêu"
         title="Hoàn thành bước cân bằng trước"
-        description="Bước viết mục tiêu cần đi sau dữ liệu cân bằng cuộc sống thật. Hãy chấm điểm các lĩnh vực trước để mục tiêu không bắt đầu từ số mặc định."
+        description="Chấm điểm các lĩnh vực cuộc sống trước để mục tiêu dựa trên dữ liệu thật, không phải số mặc định."
         actionLabel="Bắt đầu cân bằng"
         onAction={() => navigate("/onboarding")}
       />
@@ -389,7 +389,7 @@ export function SMARTGoalSetup() {
         currentStepId="life_insight"
         eyebrow="Viết mục tiêu"
         title="Chọn trọng tâm trước"
-        description="Bạn đã có dữ liệu cân bằng cuộc sống, nhưng chưa chọn lĩnh vực trọng tâm. Hãy chọn một trọng tâm rồi quay lại viết mục tiêu."
+        description="Đã có dữ liệu cân bằng nhưng chưa chọn trọng tâm. Chọn một lĩnh vực rồi quay lại viết mục tiêu."
         actionLabel="Mở bước chọn trọng tâm"
         onAction={() => navigate("/life-insight")}
       />

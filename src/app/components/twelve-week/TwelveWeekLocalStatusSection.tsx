@@ -391,7 +391,7 @@ function MutationQueueConflictResolutionPanel({
             Có thay đổi trên trình duyệt này và trên cloud.
           </p>
           <p className="mt-1 text-xs leading-5 text-amber-800">
-            Ứng dụng chưa tự ghi đè để tránh mất dữ liệu. Hãy export backup trước khi xử lý conflict.
+            Ứng dụng chưa tự ghi đè để tránh mất dữ liệu. Nên export backup trước khi xử lý conflict.
           </p>
         </div>
       </div>
@@ -420,7 +420,7 @@ function MutationQueueConflictResolutionPanel({
       </div>
 
       <details className="mt-3 rounded-lg border border-amber-200 bg-white p-3" onToggle={handleDetailsToggle}>
-        <summary className="cursor-pointer text-sm font-semibold text-slate-900">Review details</summary>
+        <summary className="cursor-pointer text-sm font-semibold text-slate-900">Xem chi tiết</summary>
         <div className="mt-3 space-y-3 text-xs leading-5 text-slate-600">
           <p>
             Chi tiết bên dưới chỉ hiển thị loại dữ liệu và số lượng. Nội dung note, reflection, check-in hoặc review
@@ -466,7 +466,7 @@ function MutationQueueConflictResolutionPanel({
           onClick={handleExport}
         >
           <FileDown className="mr-2 h-4 w-4" />
-          Export local backup
+          Tải bản sao local
         </Button>
         <Button
           type="button"
@@ -474,7 +474,7 @@ function MutationQueueConflictResolutionPanel({
           className="whitespace-normal border-amber-200 bg-white text-center text-slate-800 hover:bg-amber-50"
           onClick={handleKeepLocal}
         >
-          Keep local for now
+          Giữ bản local
         </Button>
         <Button
           type="button"
@@ -484,7 +484,7 @@ function MutationQueueConflictResolutionPanel({
           onClick={handleRetry}
         >
           <RefreshCw className={`mr-2 h-4 w-4 ${syncLoading ? "animate-spin" : ""}`} />
-          Retry sync
+          Thử lại đồng bộ
         </Button>
         <Button
           type="button"
@@ -494,13 +494,13 @@ function MutationQueueConflictResolutionPanel({
           onClick={handleShowCloudConfirm}
         >
           <CloudDownload className="mr-2 h-4 w-4" />
-          Use cloud version
+          Dùng bản cloud
         </Button>
       </div>
 
       {!canUseCloudVersion && hasPendingLocalMutations ? (
         <p className="mt-2 text-xs leading-5 text-amber-800">
-          Không thể dùng bản cloud khi vẫn còn thay đổi local chưa gửi. Hãy retry sync trước.
+          Không thể dùng bản cloud khi vẫn còn thay đổi local chưa gửi. Thử đồng bộ lại trước.
         </p>
       ) : null}
 

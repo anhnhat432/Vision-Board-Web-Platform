@@ -246,7 +246,7 @@ export function TwelveWeekWeekTab({
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Cốt lõi trước</p>
                     <p className="mt-2 text-lg font-semibold text-slate-900">
-                      {coreIndicators.length} việc giữ nhịp chính
+                      {coreIndicators.length} việc lặp lại chính
                     </p>
                   </div>
                   <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">{coreIndicators.length}</Badge>
@@ -254,7 +254,7 @@ export function TwelveWeekWeekTab({
                 <div className="mt-4 space-y-3">
                   {coreIndicators.length === 0 ? (
                     <div className="rounded-lg border border-emerald-100 bg-white px-4 py-4 text-sm leading-6 text-slate-500">
-                      Chưa có việc cốt lõi. Khi việc giữ nhịp được thêm, phần này sẽ cho bạn biết nhịp nào cần giữ trước.
+                      Chưa có việc cốt lõi. Khi việc lặp lại được thêm, phần này sẽ cho bạn biết việc nào cần làm trước.
                     </div>
                   ) : (
                     coreIndicators.map((indicator) => (
@@ -416,7 +416,7 @@ export function TwelveWeekWeekTab({
                     className="mt-4 w-full bg-white sm:w-auto"
                     onClick={onOpenTodayTab}
                   >
-                    Mở Today để bắt đầu tuần sau
+                    Mở Hôm nay để bắt đầu tuần sau
                   </Button>
                 )}
               </div>
@@ -579,7 +579,7 @@ export function TwelveWeekWeekTab({
                               : "bg-amber-400"
                         }`}
                       />
-                      <span className="text-sm font-semibold text-slate-800">Hệ thống đọc được nhịp tuần này</span>
+                      <span className="text-sm font-semibold text-slate-800">Đã đọc được nhịp tuần này</span>
                     </div>
                     <Badge
                       variant="outline"
@@ -701,7 +701,7 @@ export function TwelveWeekWeekTab({
             >
               <p className="text-sm leading-6 text-slate-700">
                 {reviewDueToday
-                  ? "Sẵn sàng chốt review tuần này. Hệ thống sẽ khóa tuần và tạo gợi ý cho tuần sau."
+                  ? "Sẵn sàng chốt review tuần này. Tuần sẽ được khóa và tạo gợi ý cho tuần sau."
                   : "Có thể chốt sớm — bạn vẫn được phép sửa đến ngày review chính thức."}
               </p>
               <Button
