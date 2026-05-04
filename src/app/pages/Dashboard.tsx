@@ -853,7 +853,7 @@ function DashboardContent({
           <div className="space-y-4">
             {shouldShowMainDashboardCard && (
               <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.38)]">
-                <CardContent className="p-5 sm:p-6 lg:p-7">
+                <CardContent className="p-4 sm:p-6 lg:p-7">
                   <div className="space-y-5">
                     <div className="flex flex-wrap items-center gap-3">
                       <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-slate-500">
