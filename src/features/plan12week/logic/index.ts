@@ -9,4 +9,15 @@ export { calculatePlanInsights } from "./planInsights";
 export { calculatePlanProgress } from "./progress";
 export { calculateMetricStreak } from "./streak";
 export { getWeeklyTaskWarning, isTaskCountInRecommendedRange } from "./taskConstraints";
+export {
+  assessPlanQuality,
+  assessWeekOneLoad,
+  type AssessPlanQualityInput,
+  type AssessWeekOneLoadInput,
+  type PlanQualityAssessment,
+  type PlanQualityLevel,
+  type WeekOneLoadAssessment,
+  type WeekOneLoadLevel,
+  type WeeklyCapacityBand,
+} from "./planQuality";
 export { createWeeklyReview } from "./weeklyReview";

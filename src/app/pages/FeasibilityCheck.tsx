@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { type PendingSMARTGoal, parsePendingSMARTGoal, parseSmartGoal } from "@/lib/smart-goal";
+import { type GoalArchetype, inferGoalArchetype } from "@/lib/smart-goal/goalArchetypes";
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { Badge } from "../components/ui/badge";
@@ -27,6 +28,7 @@ export function FeasibilityCheck() {
   const [focusArea, setFocusArea] = useState<string>("");
   const [wheelScore, setWheelScore] = useState<number | null>(null);
   const [pendingGoal, setPendingGoal] = useState<PendingSMARTGoal | null>(null);
+  const [goalArchetype, setGoalArchetype] = useState<GoalArchetype | undefined>(undefined);
   const [result, setResult] = useState<ResultData | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const questionTopRef = useRef<HTMLDivElement | null>(null);
@@ -90,6 +92,9 @@ export function FeasibilityCheck() {
     setFocusArea(storedFocusArea);
     setWheelScore(areaData.score);
     setPendingGoal(normalizedPendingGoal);
+    if (normalizedSmartGoal) {
+      setGoalArchetype(inferGoalArchetype(normalizedSmartGoal));
+    }
     setIsInitializing(false);
   }, [navigate]);
 
@@ -148,7 +153,7 @@ export function FeasibilityCheck() {
       return;
     }
 
-    setResult(buildResult(answers, wheelScore));
+    setResult(buildResult(answers, wheelScore, goalArchetype));
   };
 
   const handleContinueToPlan = () => {

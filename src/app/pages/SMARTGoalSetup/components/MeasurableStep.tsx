@@ -1,18 +1,26 @@
 ﻿import type { Dispatch, SetStateAction } from "react";
 
 import { parseNumberInput } from "@/lib/smart-goal";
+import type { GoalArchetype } from "@/lib/smart-goal/goalArchetypes";
 
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import type { SMARTData } from "../types";
+import { ArchetypeHint } from "./ArchetypeHint";
 
 interface MeasurableStepProps {
   smartData: SMARTData;
   setSmartData: Dispatch<SetStateAction<SMARTData>>;
   currentStepHasDraftContent: boolean;
+  archetype: GoalArchetype;
 }
 
-export function MeasurableStep({ smartData, setSmartData, currentStepHasDraftContent }: MeasurableStepProps) {
+export function MeasurableStep({
+  smartData,
+  setSmartData,
+  currentStepHasDraftContent,
+  archetype,
+}: MeasurableStepProps) {
   const parsedBaselineValue = parseNumberInput(smartData.measurable.baseline_value);
   const parsedTargetValue = parseNumberInput(smartData.measurable.target_value);
   const metricNameMissing = smartData.measurable.metric_name.trim().length === 0;
@@ -42,7 +50,7 @@ export function MeasurableStep({ smartData, setSmartData, currentStepHasDraftCon
           }
           aria-invalid={metricNameMissing && currentStepHasDraftContent}
         />
-        <p className="text-sm text-slate-500">Chọn một chỉ số đủ rõ để bạn biết mình đang tiến lên hay đứng yên.</p>
+        <p className="text-sm text-slate-500">Chọn chỉ số đo được — tăng hay đứng yên phải nhìn ra ngay.</p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -92,6 +100,8 @@ export function MeasurableStep({ smartData, setSmartData, currentStepHasDraftCon
       <p className="text-sm text-slate-500">
         Nếu bạn nhập cả hai mốc, hệ thống sẽ kiểm tra để mốc mục tiêu lớn hơn mốc hiện tại.
       </p>
+
+      <ArchetypeHint archetype={archetype} variant="metric" />
     </div>
   );
 }

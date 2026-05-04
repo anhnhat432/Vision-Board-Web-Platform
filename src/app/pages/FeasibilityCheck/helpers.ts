@@ -1,4 +1,7 @@
+import type { GoalArchetype } from "@/lib/smart-goal/goalArchetypes";
+
 import { QUESTIONS } from "./constants";
+import { getArchetypeFeasibilityOverride } from "./archetypeCopy";
 import type {
   AxisScore,
   FeasibilityAxis,
@@ -95,7 +98,11 @@ function buildPlanGuidance(input: {
   };
 }
 
-export function buildResult(answers: Record<number, string>, wheelScore: number): ResultData {
+export function buildResult(
+  answers: Record<number, string>,
+  wheelScore: number,
+  goalArchetype?: GoalArchetype,
+): ResultData {
   const axisScores: AxisScore[] = QUESTIONS.map((question) => {
     const option = getSelectedOption(answers, question);
     return {
@@ -158,6 +165,16 @@ export function buildResult(answers: Record<number, string>, wheelScore: number)
     },
   };
 
+  const archetypeOverride = getArchetypeFeasibilityOverride(
+    goalArchetype,
+    resultType,
+    bottleneck.axis,
+  );
+
+  const finalBottleneck: FeasibilityBottleneck = archetypeOverride.bottleneckOverlayNote
+    ? { ...bottleneck, action: `${bottleneck.action} ${archetypeOverride.bottleneckOverlayNote}` }
+    : bottleneck;
+
   return {
     type: resultType,
     ...resultCopy[resultType],
@@ -167,10 +184,11 @@ export function buildResult(answers: Record<number, string>, wheelScore: number)
     diagnosticScore,
     maxDiagnosticScore,
     axisScores,
-    bottleneck,
+    bottleneck: finalBottleneck,
     planLoad,
     weeklyCapacity,
-    firstWeekGuidance: guidance.firstWeekGuidance,
-    scopeRecommendation: guidance.scopeRecommendation,
+    firstWeekGuidance: archetypeOverride.firstWeekGuidance ?? guidance.firstWeekGuidance,
+    scopeRecommendation:
+      archetypeOverride.scopeRecommendation ?? guidance.scopeRecommendation,
   };
 }

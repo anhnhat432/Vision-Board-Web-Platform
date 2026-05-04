@@ -87,7 +87,7 @@ export function SmartGoalStepShell({
             </div>
             <p className="mt-2 text-sm leading-6 text-slate-600">{starterPreview}</p>
             <p className="mt-1 text-xs leading-5 text-slate-500">
-              Dùng như bản nháp nếu bạn chưa biết bắt đầu từ đâu, sau đó sửa lại cho đúng đời sống của mình.
+              Dùng làm bản nháp rồi sửa cho đúng đời sống bạn.
             </p>
           </div>
           <Button

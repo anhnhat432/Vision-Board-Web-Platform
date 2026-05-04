@@ -18,6 +18,11 @@ import {
   parseNumberInput,
   type SmartGoal,
 } from "@/lib/smart-goal";
+import {
+  type GoalArchetype,
+  inferGoalArchetype,
+} from "@/lib/smart-goal/goalArchetypes";
+import { mapFocusAreaToDomain } from "@/lib/smart-goal";
 import { SMART_STEPS } from "./SMARTGoalSetup/constants";
 import {
   buildGoalClarityItems,
@@ -44,6 +49,7 @@ export function SMARTGoalSetup() {
   const [currentStep, setCurrentStep] = useState(0);
   const [focusArea, setFocusArea] = useState<string>("");
   const [smartData, setSmartData] = useState<SMARTData>(createInitialSMARTData());
+  const [archetypeOverride, setArchetypeOverride] = useState<GoalArchetype | null>(null);
   const stepTopRef = useRef<HTMLDivElement | null>(null);
   const stepHeadingRef = useRef<HTMLHeadingElement | null>(null);
 
@@ -102,6 +108,18 @@ export function SMARTGoalSetup() {
     () => SMART_STEPS.filter((step) => getStepValidationError(step.key, smartData) === null).length,
     [smartData],
   );
+  const inferredArchetype = useMemo<GoalArchetype>(
+    () =>
+      inferGoalArchetype({
+        domain: focusArea ? mapFocusAreaToDomain(focusArea) : undefined,
+        focusArea,
+        goalStatement: smartData.specific.goal_statement,
+        metricName: smartData.measurable.metric_name,
+      }),
+    [focusArea, smartData.specific.goal_statement, smartData.measurable.metric_name],
+  );
+  const archetype: GoalArchetype = archetypeOverride ?? inferredArchetype;
+  const isArchetypeOverridden = archetypeOverride !== null;
   const smartGoalStarter = useMemo(() => getSmartGoalStarter(focusArea), [focusArea]);
   const clarityItems = useMemo(() => buildGoalClarityItems(smartData), [smartData]);
   const clarityDoneCount = clarityItems.filter((item) => item.done).length;
@@ -168,6 +186,8 @@ export function SMARTGoalSetup() {
       target_weeks: smartData.timeBound.mode === "weeks" ? targetWeeks : undefined,
       has_baseline: measurableBaseline !== undefined,
       weekly_hours: weeklyHours,
+      goal_archetype: archetype,
+      archetype_overridden: isArchetypeOverridden,
     });
 
     navigate("/feasibility");
@@ -256,6 +276,11 @@ export function SMARTGoalSetup() {
             setSmartData={setSmartData}
             placeholder={currentStepData.placeholder}
             showError={shouldShowCurrentStepError}
+            archetype={archetype}
+            inferredArchetype={inferredArchetype}
+            isArchetypeOverridden={isArchetypeOverridden}
+            onArchetypeChange={(next) => setArchetypeOverride(next)}
+            onArchetypeResetToInferred={() => setArchetypeOverride(null)}
           />
         );
       case "measurable":
@@ -264,6 +289,7 @@ export function SMARTGoalSetup() {
             smartData={smartData}
             setSmartData={setSmartData}
             currentStepHasDraftContent={currentStepHasDraftContent}
+            archetype={archetype}
           />
         );
       case "achievable":
@@ -272,6 +298,7 @@ export function SMARTGoalSetup() {
             smartData={smartData}
             setSmartData={setSmartData}
             currentStepHasDraftContent={currentStepHasDraftContent}
+            archetype={archetype}
           />
         );
       case "relevant":
