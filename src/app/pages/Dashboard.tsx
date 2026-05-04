@@ -42,6 +42,7 @@ import { FeedbackDialog } from "../components/FeedbackDialog";
 import { NewUserGuideBanner } from "../components/NewUserGuide";
 import { SpotlightTour, type SpotlightTourStep } from "../components/SpotlightTour";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
+import { EmptyState } from "../components/states";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { CountUp } from "../components/ui/count-up";
@@ -1122,43 +1123,39 @@ function DashboardContent({
             )}
 
             {isPublicVisitor ? null : !activeSystem ? (
-              <section
-                data-testid="fresh-workspace-empty-state"
-                className="space-y-4 rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)] sm:p-5 lg:p-6"
-              >
-                <div className="flex flex-wrap items-end justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Workspace mới</p>
-                    <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-950">
-                      Chưa có dữ liệu thực thi để hiển thị.
-                    </h2>
-                    <p className="mt-1 max-w-2xl text-sm leading-7 text-slate-600">
-                      Dashboard sẽ chỉ hiện điểm, chuỗi ngày và chỉ số sau khi bạn tạo chu kỳ 12 tuần đầu tiên. Bây giờ
-                      nên đi từ Life Balance để có dữ liệu thật, rồi mới chốt mục tiêu SMART.
-                    </p>
-                  </div>
-                </div>
-                <div className="grid gap-3 md:grid-cols-3">
-                  {["Chấm 8 lĩnh vực cuộc sống", "Chọn một insight ưu tiên", "Tạo SMART goal và chu kỳ 12 tuần"].map(
-                    (item, index) => (
-                      <div key={item} className="rounded-[20px] border border-slate-200 bg-slate-50/80 p-4">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white">
-                          {index + 1}
-                        </div>
-                        <p className="mt-3 text-sm font-semibold leading-6 text-slate-900">{item}</p>
-                      </div>
-                    ),
-                  )}
-                </div>
-                <div className="flex flex-col gap-2 sm:flex-row">
+              <EmptyState
+                as="section"
+                align="left"
+                headingLevel={2}
+                testId="fresh-workspace-empty-state"
+                eyebrow="Workspace mới"
+                title="Chưa có dữ liệu thực thi để hiển thị."
+                description="Dashboard sẽ chỉ hiện điểm, chuỗi ngày và chỉ số sau khi bạn tạo chu kỳ 12 tuần đầu tiên. Bây giờ nên đi từ Life Balance để có dữ liệu thật, rồi mới chốt mục tiêu SMART."
+                actions={
                   <Button
                     className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
                     onClick={() => navigate("/onboarding")}
                   >
                     Bắt đầu Life Balance
                   </Button>
-                </div>
-              </section>
+                }
+              >
+                <ol className="grid gap-3 md:grid-cols-3">
+                  {["Chấm 8 lĩnh vực cuộc sống", "Chọn một insight ưu tiên", "Tạo SMART goal và chu kỳ 12 tuần"].map(
+                    (item, index) => (
+                      <li key={item} className="rounded-[20px] border border-slate-200 bg-slate-50/80 p-4">
+                        <div
+                          aria-hidden="true"
+                          className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white"
+                        >
+                          {index + 1}
+                        </div>
+                        <p className="mt-3 text-sm font-semibold leading-6 text-slate-900">{item}</p>
+                      </li>
+                    ),
+                  )}
+                </ol>
+              </EmptyState>
             ) : (
               <section className="space-y-4 rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)] sm:p-5 lg:p-6">
                 <div className="flex flex-wrap items-end justify-between gap-3">

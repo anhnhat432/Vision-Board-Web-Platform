@@ -1,5 +1,5 @@
 ﻿import { motion } from "motion/react";
-import { AlertTriangle, ArrowRight, CalendarClock, CalendarPlus, Check, Crown, Gauge, Sparkles, X } from "lucide-react";
+import { AlertTriangle, ArrowRight, CalendarClock, CalendarPlus, Check, Crown, Gauge, Inbox, Sparkles, X } from "lucide-react";
 
 import type { RescueModeStatus } from "@/features/plan12week/logic";
 
@@ -10,6 +10,7 @@ import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
 import { Progress } from "../ui/progress";
 import { Textarea } from "../ui/textarea";
+import { EmptyState } from "../states";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 import { formatCalendarDate } from "../../utils/storage";
 import type { TwelveWeekTaskInstance, TwelveWeekSystem, UniversalDailyCheckIn } from "../../utils/storage-types";
@@ -338,44 +339,47 @@ export function TwelveWeekTodayTab({
             </CardHeader>
             <CardContent className="min-w-0 space-y-3 pt-0">
               {todayQueue.length === 0 ? (
-                <div
-                  data-testid="today-empty-state"
-                  className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center text-slate-600"
-                >
-                  {hasPlanTasks ? (
-                    <div className="mx-auto max-w-lg space-y-3">
-                      <p className="font-semibold text-slate-900">
-                        {reviewDueToday ? "Tuần đã sẵn sàng để chốt review" : "Hết việc hôm nay"}
-                      </p>
-                      <p className="text-sm leading-6 text-slate-600">
-                        {reviewDueToday
-                          ? "Mở tab Tuần để chốt review và khóa ưu tiên cho tuần sau."
-                          : "Lưu check-in ngắn ở bên cạnh, hoặc mở tab Tuần để chuẩn bị review."}
-                      </p>
-                      {onOpenWeekTab && (
+                hasPlanTasks ? (
+                  <EmptyState
+                    variant="dashed"
+                    testId="today-empty-state"
+                    icon={<Check className="h-5 w-5" />}
+                    title={reviewDueToday ? "Tuần đã sẵn sàng để chốt review" : "Hết việc hôm nay"}
+                    description={
+                      reviewDueToday
+                        ? "Mở tab Tuần để chốt review và khóa ưu tiên cho tuần sau."
+                        : "Lưu check-in ngắn ở bên cạnh, hoặc mở tab Tuần để chuẩn bị review."
+                    }
+                    actions={
+                      onOpenWeekTab ? (
                         <Button variant="outline" onClick={onOpenWeekTab} className="bg-white">
                           Mở tab Tuần
                           <ArrowRight className="ml-1 h-4 w-4" />
                         </Button>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="mx-auto max-w-lg space-y-3">
-                      <p className="font-semibold text-slate-900">Chưa có việc nào trong chu kỳ này</p>
-                      <p className="text-sm leading-6 text-slate-600">
-                        {hasLeadMetrics
-                          ? "Chu kỳ đã có việc giữ nhịp, nhưng chưa có việc nào được tạo cho tuần hiện tại. Vào lại Setup để tạo lại chu kỳ."
-                          : "Chu kỳ chưa có việc giữ nhịp. Vào Setup để thêm 2-4 việc lặp lại trước."}
-                      </p>
-                      {onNavigateToSetup && (
+                      ) : undefined
+                    }
+                  />
+                ) : (
+                  <EmptyState
+                    variant="dashed"
+                    testId="today-empty-state"
+                    icon={<Inbox className="h-5 w-5" />}
+                    title="Chưa có việc nào trong chu kỳ này"
+                    description={
+                      hasLeadMetrics
+                        ? "Chu kỳ đã có việc giữ nhịp, nhưng chưa có việc nào được tạo cho tuần hiện tại. Vào lại Setup để tạo lại chu kỳ."
+                        : "Chu kỳ chưa có việc giữ nhịp. Vào Setup để thêm 2-4 việc lặp lại trước."
+                    }
+                    actions={
+                      onNavigateToSetup ? (
                         <Button onClick={onNavigateToSetup}>
                           {hasLeadMetrics ? "Mở Setup để chỉnh" : "Đi tới Setup"}
                           <ArrowRight className="ml-1 h-4 w-4" />
                         </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
+                      ) : undefined
+                    }
+                  />
+                )
               ) : (
                 todayQueue.map((task) => {
                   const isOverdue = !task.completed && task.scheduledDate < todayDateKey;
