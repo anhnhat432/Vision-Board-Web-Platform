@@ -97,15 +97,31 @@ export function FeasibilityStepShell({
               ))}
             </RadioGroup>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button variant="outline" className="flex-1" onClick={onBack}>
-                <ArrowLeft className="h-4 w-4" />
-                Quay lại
-              </Button>
-              <Button className="flex-1" onClick={onNext} disabled={!selectedAnswer}>
-                {currentStep < totalSteps - 1 ? "Tiếp theo" : "Hoàn thành đánh giá"}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
+            <div className="space-y-2">
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button variant="outline" className="flex-1" onClick={onBack}>
+                  <ArrowLeft className="h-4 w-4" />
+                  Quay lại
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={onNext}
+                  disabled={!selectedAnswer}
+                  aria-describedby={!selectedAnswer ? `feasibility-question-${currentQuestion.id}-next-hint` : undefined}
+                >
+                  {currentStep < totalSteps - 1 ? "Tiếp theo" : "Hoàn thành đánh giá"}
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+              {!selectedAnswer && (
+                <p
+                  id={`feasibility-question-${currentQuestion.id}-next-hint`}
+                  role="status"
+                  className="text-center text-xs text-slate-500 sm:text-right"
+                >
+                  Chọn một lựa chọn phù hợp để tiếp tục.
+                </p>
+              )}
             </div>
           </motion.div>
         </CardContent>

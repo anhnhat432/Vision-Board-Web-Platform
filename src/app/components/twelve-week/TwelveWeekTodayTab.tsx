@@ -1,5 +1,6 @@
 ﻿import { motion } from "motion/react";
-import { AlertTriangle, ArrowRight, CalendarClock, CalendarPlus, Check, Crown, Gauge, Inbox, Sparkles, X } from "lucide-react";
+import { useState } from "react";
+import { AlertTriangle, ArrowRight, CalendarClock, CalendarPlus, Check, Crown, Gauge, Inbox, Loader2, Sparkles, X } from "lucide-react";
 
 import type { RescueModeStatus } from "@/features/plan12week/logic";
 
@@ -138,6 +139,17 @@ export function TwelveWeekTodayTab({
     firstPriorityTask?.completed && todayQueue.some((task) => task.id === firstPriorityTask.id),
   );
   const isFirstWeek = currentWeek === 1;
+  const [isSavingCheckIn, setIsSavingCheckIn] = useState(false);
+
+  const handleSaveCheckInClick = async () => {
+    if (isSavingCheckIn) return;
+    setIsSavingCheckIn(true);
+    try {
+      await Promise.resolve(onSaveCheckIn());
+    } finally {
+      setIsSavingCheckIn(false);
+    }
+  };
 
   return (
     <div className="ops-system-panel flex min-w-0 flex-col gap-5">
@@ -650,8 +662,21 @@ export function TwelveWeekTodayTab({
                   placeholder="Nếu cần, chỉ ghi đúng một ý để ngày mai đỡ quên."
                 />
               </div>
-              <Button size="lg" className="w-full sm:w-auto" onClick={onSaveCheckIn}>
-                Lưu check-in hôm nay
+              <Button
+                size="lg"
+                className="w-full sm:w-auto"
+                onClick={handleSaveCheckInClick}
+                disabled={isSavingCheckIn}
+                aria-busy={isSavingCheckIn}
+              >
+                {isSavingCheckIn ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    Đang lưu check-in...
+                  </>
+                ) : (
+                  "Lưu check-in hôm nay"
+                )}
               </Button>
               {latestCheckIn && (
                 <div

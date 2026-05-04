@@ -1,6 +1,7 @@
-﻿import { Crown } from "lucide-react";
+﻿import { useState } from "react";
+import { Crown } from "lucide-react";
 
-import { CalendarCheck, CheckCircle2, ClipboardCheck, Flag, Layers, TrendingUp } from "lucide-react";
+import { CalendarCheck, CheckCircle2, ClipboardCheck, Flag, Layers, Loader2, TrendingUp } from "lucide-react";
 
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -141,6 +142,17 @@ export function TwelveWeekWeekTab({
   const reviewIsCompleted = Boolean(currentReview?.reviewCompleted);
   const summaryReview = reviewIsCompleted ? currentReview ?? null : null;
   const intensityHint = getWorkloadIntensityHint(weeklyForm.workloadDecision);
+  const [isSavingReview, setIsSavingReview] = useState(false);
+
+  const handleSaveReviewClick = async () => {
+    if (isSavingReview) return;
+    setIsSavingReview(true);
+    try {
+      await Promise.resolve(onSaveWeeklyReview());
+    } finally {
+      setIsSavingReview(false);
+    }
+  };
 
   return (
     <div className="space-y-6 pt-4">
@@ -695,10 +707,16 @@ export function TwelveWeekWeekTab({
               <Button
                 size="lg"
                 className="w-full shrink-0 sm:w-auto"
-                onClick={onSaveWeeklyReview}
+                onClick={handleSaveReviewClick}
+                disabled={isSavingReview}
+                aria-busy={isSavingReview}
               >
-                <ClipboardCheck className="h-4 w-4" />
-                Chốt review tuần này
+                {isSavingReview ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <ClipboardCheck className="h-4 w-4" />
+                )}
+                {isSavingReview ? "Đang chốt review..." : "Chốt review tuần này"}
               </Button>
             </div>
           </CardContent>
