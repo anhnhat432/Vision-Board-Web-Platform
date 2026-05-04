@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { CheckCircle2, CircleAlert, CircleDot, Flag, Lightbulb, Sparkles, Target, TriangleAlert, Wrench } from "lucide-react";
 
 import { Badge } from "@/app/components/ui/badge";
@@ -74,6 +74,44 @@ export function ReviewStep({
   scheduledLeadIndicators,
   onChange,
 }: ReviewStepProps) {
+  const [qualityOpen, setQualityOpen] = useState(() => {
+    try {
+      return localStorage.getItem("review-step-quality-open") === "true";
+    } catch {
+      return false;
+    }
+  });
+  const [suggestionsOpen, setSuggestionsOpen] = useState(() => {
+    try {
+      return localStorage.getItem("review-step-suggestions-open") === "true";
+    } catch {
+      return false;
+    }
+  });
+  const [advancedOpen, setAdvancedOpen] = useState(() => {
+    try {
+      return localStorage.getItem("review-step-advanced-open") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("review-step-quality-open", String(qualityOpen));
+    } catch { /* ignore */ }
+  }, [qualityOpen]);
+  useEffect(() => {
+    try {
+      localStorage.setItem("review-step-suggestions-open", String(suggestionsOpen));
+    } catch { /* ignore */ }
+  }, [suggestionsOpen]);
+  useEffect(() => {
+    try {
+      localStorage.setItem("review-step-advanced-open", String(advancedOpen));
+    } catch { /* ignore */ }
+  }, [advancedOpen]);
+
   const intentArchetype = useMemo(() => {
     const intent = getUserIntentId();
     if (!intent || !hasActionableArchetypeHint(intent)) return null;
@@ -331,99 +369,92 @@ export function ReviewStep({
         )}
       </section>
 
-      {firstAction && (
-        <section className="rounded-[24px] border border-slate-900 bg-slate-950 p-5 text-white">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-white/70" aria-hidden="true" />
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/60">
-              Việc đầu tiên ở tuần 1
-            </p>
-          </div>
-          <p className="mt-3 text-lg font-semibold">{firstAction}</p>
-          <p className="mt-2 text-sm leading-6 text-white/74">
-            Việc này sẽ xuất hiện ngay khi bạn vào màn Hôm nay. Bắt đầu từ đây để tạo nhịp.
-          </p>
-        </section>
-      )}
-
-      <section
-        className={`rounded-[24px] border p-5 ${
-          planQuality.level === "strong"
-            ? "border-emerald-200 bg-emerald-50/72"
-            : planQuality.level === "okay"
-              ? "border-sky-200 bg-sky-50/72"
-              : "border-amber-200 bg-amber-50/78"
-        }`}
+      <details
+        className="rounded-[24px] border border-white/70 bg-white/72 p-5"
+        open={qualityOpen}
+        onToggle={() => setQualityOpen(!qualityOpen)}
       >
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-              Đánh giá nhanh kế hoạch
-            </p>
-            <p className="mt-2 text-base font-semibold text-slate-950">
-              Chất lượng: {getQualityLevelLabel(planQuality.level)} · {planQuality.overallScore}/100
-            </p>
-            <p className="mt-1 text-sm text-slate-600">Đây là gợi ý - bạn vẫn có thể tạo kế hoạch.</p>
-          </div>
-          <span
-            className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${getQualityBadgeStyle(
-              planQuality.level,
-            )}`}
-          >
-            {getQualityLevelLabel(planQuality.level)}
-          </span>
-        </div>
-
-        <ul className="mt-4 grid gap-2 md:grid-cols-2">
-          {planQuality.dimensions.map((dimension) => {
-            const statusMeta = getDimensionStatusMeta(dimension.status);
-            const StatusIcon = statusMeta.icon;
-            return (
-              <li
-                key={dimension.id}
-                className="flex items-center justify-between rounded-2xl border border-white/70 bg-white/82 px-3 py-2"
+        <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-slate-900">
+          <Lightbulb className="h-4 w-4 shrink-0 text-violet-700" aria-hidden="true" />
+          <span>Xem đánh giá nhanh</span>
+        </summary>
+        <div className="mt-4 space-y-4">
+          <section className="rounded-[24px] border p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Đánh giá nhanh kế hoạch
+                </p>
+                <p className="mt-2 text-base font-semibold text-slate-950">
+                  Chất lượng: {getQualityLevelLabel(planQuality.level)} · {planQuality.overallScore}/100
+                </p>
+                <p className="mt-1 text-sm text-slate-600">Đây là gợi ý - bạn vẫn có thể tạo kế hoạch.</p>
+              </div>
+              <span
+                className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${getQualityBadgeStyle(
+                  planQuality.level,
+                )}`}
               >
-                <span className="text-sm text-slate-700">{dimension.label}</span>
-                <span
-                  className={`flex items-center gap-1.5 text-xs font-semibold ${statusMeta.textClass}`}
-                >
-                  <StatusIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                  <span className="sr-only">{statusMeta.label}: </span>
-                  <span>
-                    {dimension.score}/{dimension.maxScore}
-                  </span>
-                </span>
-              </li>
-            );
-          })}
-        </ul>
+                {getQualityLevelLabel(planQuality.level)}
+              </span>
+            </div>
 
-        {planQuality.warnings.length > 0 && (
-          <div className="mt-4 rounded-2xl border border-amber-300 bg-white/86 p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">
-              Cảnh báo ({planQuality.warnings.length})
-            </p>
-            <ul className="mt-2 space-y-1 text-sm leading-6 text-amber-900">
-              {planQuality.warnings.map((warning) => (
-                <li key={warning}>• {warning}</li>
-              ))}
+            <ul className="mt-4 grid gap-2 md:grid-cols-2">
+              {planQuality.dimensions.map((dimension) => {
+                const statusMeta = getDimensionStatusMeta(dimension.status);
+                const StatusIcon = statusMeta.icon;
+                return (
+                  <li
+                    key={dimension.id}
+                    className="flex items-center justify-between rounded-2xl border border-white/70 bg-white/82 px-3 py-2"
+                  >
+                    <span className="text-sm text-slate-700">{dimension.label}</span>
+                    <span
+                      className={`flex items-center gap-1.5 text-xs font-semibold ${statusMeta.textClass}`}
+                    >
+                      <StatusIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span className="sr-only">{statusMeta.label}: </span>
+                      <span>
+                        {dimension.score}/{dimension.maxScore}
+                      </span>
+                    </span>
+                  </li>
+                );
+              })}
             </ul>
-          </div>
-        )}
 
-        {planQuality.suggestions.length > 0 && (
-          <details className="mt-3 rounded-2xl border border-white/70 bg-white/72 px-3 py-2">
-            <summary className="cursor-pointer list-none text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-              Gợi ý cải thiện ({planQuality.suggestions.length})
-            </summary>
-            <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
-              {planQuality.suggestions.map((suggestion) => (
-                <li key={suggestion}>• {suggestion}</li>
-              ))}
-            </ul>
-          </details>
-        )}
-      </section>
+            {planQuality.warnings.length > 0 && (
+              <div className="mt-4 rounded-2xl border border-amber-300 bg-white/86 p-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">
+                  Cảnh báo ({planQuality.warnings.length})
+                </p>
+                <ul className="mt-2 space-y-1 text-sm leading-6 text-amber-900">
+                  {planQuality.warnings.map((warning) => (
+                    <li key={warning}>• {warning}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {planQuality.suggestions.length > 0 && (
+              <details
+                className="mt-3 rounded-2xl border border-white/70 bg-white/72 px-3 py-2"
+                open={suggestionsOpen}
+                onToggle={() => setSuggestionsOpen(!suggestionsOpen)}
+              >
+                <summary className="cursor-pointer list-none text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  Gợi ý cải thiện ({planQuality.suggestions.length})
+                </summary>
+                <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
+                  {planQuality.suggestions.map((suggestion) => (
+                    <li key={suggestion}>• {suggestion}</li>
+                  ))}
+                </ul>
+              </details>
+            )}
+          </section>
+        </div>
+      </details>
 
       {weekOneTaskPreview.length > 0 && (
         <section className="rounded-[24px] border border-white/70 bg-white/72 p-5">
@@ -452,7 +483,11 @@ export function ReviewStep({
         </section>
       )}
 
-      <details className="rounded-[24px] border border-dashed border-slate-200 bg-slate-50/80 p-5">
+      <details
+        className="rounded-[24px] border border-dashed border-slate-200 bg-slate-50/80 p-5"
+        open={advancedOpen}
+        onToggle={() => setAdvancedOpen(!advancedOpen)}
+      >
         <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
           Mở phần nâng cao (tùy chọn)
         </summary>

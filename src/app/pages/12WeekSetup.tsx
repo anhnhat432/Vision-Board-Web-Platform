@@ -239,6 +239,12 @@ export function TwelveWeekSetup() {
     localStorage.setItem(APP_STORAGE_KEYS.pending12WeekSetupDraft, JSON.stringify(draft));
   }, [draft, feasibility, isLoading, smartGoal]);
 
+  const handleJumpToStep = (stepIndex: number) => {
+    if (stepIndex < currentStep) {
+      setCurrentStep(stepIndex);
+    }
+  };
+
   const validIndicators = useMemo(
     () => draft.leadIndicators.filter((indicator) => indicator.name.trim().length > 0),
     [draft.leadIndicators],
@@ -860,6 +866,7 @@ export function TwelveWeekSetup() {
         onBack={handleBack}
         onNext={handleNext}
         onSubmit={handleSubmit}
+        onJumpToStep={handleJumpToStep}
       >
         {currentStep === 0 && (
           <OutcomeStep

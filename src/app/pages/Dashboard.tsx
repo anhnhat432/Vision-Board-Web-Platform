@@ -797,14 +797,12 @@ function DashboardContent({
             Math.ceil((new Date(userData.subscription.renewsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
           );
           return (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 flex flex-wrap items-center gap-3">
-              <Crown className="h-4 w-4 shrink-0 text-amber-600" />
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 flex flex-wrap items-center gap-3">
               <span>
-                <span className="font-semibold">Plus demo local:</span> còn {daysLeft} ngày — mock upgrade không thu
-                tiền thật.
+                <span className="font-semibold">Plus demo:</span> còn {daysLeft} ngày — dùng thử local, không thu tiền thật.
               </span>
-              <Button size="sm" className="ml-auto shrink-0" onClick={() => navigate("/billing/plan")}>
-                Mở mock upgrade
+              <Button size="sm" variant="ghost" className="ml-auto shrink-0 text-slate-600 hover:bg-slate-100" onClick={() => navigate("/billing/plan")}>
+                Chi tiết
               </Button>
             </div>
           );
@@ -1235,11 +1233,10 @@ function DashboardContent({
                 >
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-slate-950">
-                      <Crown className="h-5 w-5" />
-                      Gói 12 tuần hiện tại
+                      Kế hoạch hiện tại
                     </CardTitle>
                     <CardDescription className="text-slate-600">
-                      Free đủ để chạy một chu kỳ. Plus dành cho lúc bạn muốn bắt đầu nhanh hơn và giữ nhịp chắc hơn.
+                      {getPlanLabel(currentPlanCode)} — {currentPlanDefinition.description}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">

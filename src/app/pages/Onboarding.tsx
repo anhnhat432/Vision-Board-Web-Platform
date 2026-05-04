@@ -150,6 +150,9 @@ export function Onboarding() {
                           ? "Điểm số hiện tại của bạn đã được tải sẵn. Chỉ cần điều chỉnh lĩnh vực nào thay đổi rồi lưu lại là xong."
                           : "Chỉ trong vài phút, bạn sẽ nhìn thấy bức tranh hiện tại của mình, chọn ra nơi cần ưu tiên nhất và mở ra một hệ thống phát triển cá nhân có định hướng rõ ràng."}
                       </p>
+                      <p className="mt-1 text-xs text-slate-400">
+                        ước tính: ~20 phút cho toàn bộ hành trình (SMART → Thực tế → 12 tuần)
+                      </p>
                     </div>
                   </div>
 
@@ -178,6 +181,16 @@ export function Onboarding() {
                       onClick={() => navigate("/")}
                     >
                       Xem bảng điều khiển
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="w-full text-slate-500 hover:bg-slate-50 sm:w-auto"
+                      onClick={() => {
+                        localStorage.setItem("onboarding_draft_saved", "true");
+                        navigate("/");
+                      }}
+                    >
+                      Lưu nháp và đi tiếp lúc khác
                     </Button>
                   </div>
 

@@ -18,6 +18,7 @@ interface SetupStepShellProps {
   onBack: () => void;
   onNext: () => void;
   onSubmit: () => void;
+  onJumpToStep?: (stepIndex: number) => void;
 }
 
 export function SetupStepShell({
@@ -30,6 +31,7 @@ export function SetupStepShell({
   onBack,
   onNext,
   onSubmit,
+  onJumpToStep,
 }: SetupStepShellProps) {
   const isLastStep = currentStep >= stepCount - 1;
   const stepShellRef = useRef<HTMLDivElement | null>(null);
@@ -76,9 +78,10 @@ export function SetupStepShell({
                     active
                       ? "border-slate-900 bg-slate-900 text-white"
                       : done
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-800 cursor-pointer hover:bg-emerald-100"
                         : "border-slate-200 bg-white text-slate-500"
                   }`}
+                  onClick={done && onJumpToStep ? () => onJumpToStep(index) : undefined}
                 >
                   <span
                     aria-hidden="true"
