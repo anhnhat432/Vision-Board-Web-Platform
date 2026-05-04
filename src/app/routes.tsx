@@ -7,7 +7,6 @@ import { Achievements } from "./pages/Achievements";
 import { BillingPlan } from "./pages/BillingPlan";
 import { Dashboard } from "./pages/Dashboard";
 import { GoalTracker } from "./pages/GoalTracker";
-import { LifeBalance } from "./pages/LifeBalance";
 import { ReflectionJournal } from "./pages/ReflectionJournal";
 import { VisionBoardEditor } from "./pages/VisionBoardEditor";
 import { VisionBoardGallery } from "./pages/VisionBoardGallery";
@@ -148,7 +147,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "life-balance",
-        Component: LifeBalance,
+        ...lazyRoute(() => import("./pages/LifeBalance"), "LifeBalance"),
       },
       {
         path: "achievements",

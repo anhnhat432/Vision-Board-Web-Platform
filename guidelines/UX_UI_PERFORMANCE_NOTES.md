@@ -286,9 +286,122 @@ Ràng buộc:
 
 ---
 
+## 7. Change Log
+
+### 2026-05-04 — Lazy-load LifeBalance (P1)
+
+**What changed:** `src/app/routes.tsx` — removed static import of `LifeBalance`, replaced `Component: LifeBalance` with `...lazyRoute(() => import("./pages/LifeBalance"), "LifeBalance")`.
+
+**Build result after change:**
+
+| Chunk              | Before        | After         | Delta          |
+| ------------------ | ------------- | ------------- | -------------- |
+| index (raw)        | 456.80 kB     | 437.36 kB     | **−19.44 kB**  |
+| index (gzip)       | 124.38 kB     | 119.33 kB     | **−5.05 kB**   |
+| LifeBalance (new)  | —             | 15.87 kB      | +15.87 kB lazy |
+| charts             | 312.40 kB     | 312.40 kB     | unchanged      |
+
+Conclusion: LifeBalance itself was ~19 kB raw in the index chunk. The charts chunk did **not** drop — confirming that `DashboardLifeAreaRadar` (eager, inside Dashboard) is the remaining charts consumer, not LifeBalance. Win 2 (lazy-load chart inside Dashboard) is still needed to defer the 80 kB gzip charts chunk.
+
+Verified: `tsc` pass, `vitest run core-funnel-guard.test.tsx authenticated-core-flow.e2e.test.tsx` 6/6 pass, `npm run build` ✓ 8.91s no warnings.
+
+---
+
+## 8. Remaining Optimizations
+
+### Still recommended (in priority order)
+
+| #  | Win  | Description                                    | Est. saving (gzip) | Effort   | Risk   |
+| -- | ---- | ---------------------------------------------- | ------------------- | -------- | ------ |
+| 1  | Win 1 (partial) | Lazy-load remaining 6 eager pages (GoalTracker, Achievements, ReflectionJournal, VisionBoardEditor, VisionBoardGallery, BillingPlan) | ~25-40 kB | 15 min | Low |
+| 2  | Win 2 | Lazy-load `DashboardLifeAreaRadar` inside Dashboard → defer 80 kB charts chunk | ~80 kB | 10 min | Low |
+| 3  | Win 5 | Audit `motion` usage on eager path → defer 42 kB if removable from Dashboard/RootLayout | ~42 kB | 20 min | Medium |
+
+### Not recommended now
+
+| Win   | Description                          | Why skip                                                                                    |
+| ----- | ------------------------------------ | ------------------------------------------------------------------------------------------- |
+| Win 3 | Lazy-initialize Firebase/AuthProvider | Medium risk — auth state needed synchronously for ProtectedRoute. Needs careful refactor.   |
+| Win 4 | Audit unused Radix packages          | Low bundle impact (tree-shaking works). Cleanup value only, not performance-critical.       |
+| Win 5 (CSS) | CSS code-splitting              | Not actionable — Tailwind v4 + Vite don't support it yet.                                   |
+
+---
+
+## 9. Current State Summary
+
+| Metric                    | Value          | Target           |
+| ------------------------- | -------------- | ---------------- |
+| index chunk (raw)         | 437.36 kB      | < 350 kB         |
+| index chunk (gzip)        | 119.33 kB      | < 90 kB          |
+| First-paint total (gzip)  | ~356 kB        | < 300 kB         |
+| Lazy-loaded routes        | 10 / 17        | 16 / 17          |
+| Eager non-Dashboard pages | 6              | 0                |
+
+---
+
+## 10. Next 3 Quota-Safe Prompts
+
+### Prompt 1 — Lazy-load remaining 6 eager pages
+
+```
+QUOTA-SAFE MODE.
+
+Bạn là frontend performance engineer.
+
+Chỉ đọc:
+1. src/app/routes.tsx
+
+Nhiệm vụ:
+Convert 6 eager pages (GoalTracker, Achievements, ReflectionJournal,
+VisionBoardEditor, VisionBoardGallery, BillingPlan) to lazyRoute() in routes.tsx.
+Remove 6 static imports. Verify each has named export matching the string.
+
+Sau khi sửa:
+- Chạy npm run typecheck.
+- Chạy npm run build, chỉ báo cáo index chunk size.
+- Không chạy full test suite.
+```
+
+### Prompt 2 — Lazy-load DashboardLifeAreaRadar (charts defer)
+
+```
+QUOTA-SAFE MODE.
+
+Bạn là frontend performance engineer.
+
+Chỉ đọc:
+1. src/app/pages/Dashboard.tsx — tìm DashboardLifeAreaRadar import/usage
+2. src/app/components/DashboardLifeAreaRadar.tsx — verify export
+
+Nhiệm vụ:
+Wrap DashboardLifeAreaRadar in React.lazy() + <Suspense> inside Dashboard.tsx
+so the 312 kB charts chunk is deferred from first paint.
+
+Sau khi sửa:
+- Chạy npm run typecheck.
+- Chạy npm run build, báo cáo charts chunk còn load eager không.
+```
+
+### Prompt 3 — Update performance notes
+
+```
+QUOTA-SAFE MODE.
+
+Bạn là frontend performance reviewer. Không code.
+
+Chỉ đọc:
+1. guidelines/UX_UI_PERFORMANCE_NOTES.md
+
+Nhiệm vụ:
+Cập nhật notes với build result mới, recalculate first-paint total,
+đánh giá có đạt target < 300 kB gzip chưa, đề xuất next steps.
+```
+
+---
+
 ## Cross-reference
 
 - Build config: `vite.config.ts` — manual chunks already split charts, radix, motion, icons, router, forms, effects, feedback, vendor.
-- Route config: `src/app/routes.tsx` — `lazyRoute()` helper available, used by 9 routes.
+- Route config: `src/app/routes.tsx` — `lazyRoute()` helper available, used by 10 routes (after LifeBalance conversion).
 - Entrypoint: `src/main.tsx` — GA4 conditional, service worker registration.
 - Tab-level audits: ProgressTab and TodayTab audited 2026-05-04 — both already lean, no optimization needed.
