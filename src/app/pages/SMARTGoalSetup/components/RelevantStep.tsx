@@ -43,7 +43,7 @@ export function RelevantStep({
           aria-invalid={motivationInvalid && currentStepHasDraftContent}
         />
         <p className="text-sm text-slate-500">
-          Hãy viết đủ cụ thể để khi mệt bạn vẫn nhớ vì sao mục tiêu này đáng giữ.
+          Viết đủ cụ thể để khi mệt vẫn nhớ vì sao mục tiêu này đáng giữ.
         </p>
       </div>
       <div className="space-y-2">

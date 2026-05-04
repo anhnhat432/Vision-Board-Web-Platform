@@ -79,8 +79,8 @@ export function LeadIndicatorsStep({
               Việc chính được ưu tiên trong điểm tuần. Việc tùy chọn là phần thêm khi bạn còn sức.
             </p>
             <p className="mt-2 text-xs leading-6 text-slate-500">
-              Việc lặp lại là <strong>hành động bạn kiểm soát được</strong> — không phải kết quả cuối. Mỗi tuần hệ thống
-              sẽ tạo việc hôm nay dựa trên các việc này.
+              Việc lặp lại là <strong>hành động bạn kiểm soát được</strong> — không phải kết quả cuối. Mỗi tuần, việc
+              hôm nay sẽ được tạo từ các việc này.
             </p>
           </div>
           <Button type="button" variant="outline" onClick={onAddIndicator} disabled={draft.leadIndicators.length >= 4}>
@@ -246,7 +246,7 @@ export function LeadIndicatorsStep({
           </div>
         )}
         <p className="text-xs leading-5 text-slate-500">
-          Từ mỗi việc lặp lại bên trên, hệ thống sẽ tạo việc hôm nay vào các ngày sau:
+          Từ mỗi việc lặp lại bên trên, việc hôm nay sẽ được tạo vào các ngày sau:
         </p>
         <div className="space-y-3">
           {weekOneTaskGroups.length === 0 ? (
@@ -264,7 +264,7 @@ export function LeadIndicatorsStep({
                   </Badge>
                 </div>
                 <p className="mt-1 text-xs text-slate-500">
-                  {group.taskTitles.length} task / tuần • Lịch: {formatScheduleDayLabels(group.scheduleDays)}
+                  {group.taskTitles.length} việc / tuần • Lịch: {formatScheduleDayLabels(group.scheduleDays)}
                 </p>
                 {group.taskTitles.length > 0 && (
                   <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-600">

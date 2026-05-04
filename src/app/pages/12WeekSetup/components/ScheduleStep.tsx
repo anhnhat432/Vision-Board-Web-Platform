@@ -93,7 +93,7 @@ export function ScheduleStep({
               onChange={(event) => onChange("lagMetricName", event.target.value)}
               placeholder="Ví dụ: số kg giảm, số bài xuất bản, doanh thu mới..."
             />
-            <p className="text-xs text-slate-500">Đây là chỉ số đầu ra cuối chu kỳ, khác với việc hằng tuần.</p>
+            <p className="text-xs text-slate-500">Đây là chỉ số kết quả cuối chu kỳ, khác với việc hằng tuần.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="lag-metric-target">Mục tiêu</Label>
@@ -138,14 +138,14 @@ export function ScheduleStep({
             <p className="mt-2 text-base font-semibold">{setupGuideSupport.week1Headline}</p>
             <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1Support}</p>
             <div className="mt-3 rounded-2xl border border-white/12 bg-white/8 p-3">
-              <p className="text-xs uppercase tracking-[0.16em] text-white/54">Gợi ý giữ nhịp</p>
+              <p className="text-xs uppercase tracking-[0.16em] text-white/54">Gợi ý duy trì</p>
               <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1CadenceHint}</p>
             </div>
           </div>
         )}
         {setupGuideSupport && (
           <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-            <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Ngày nhìn lại và độ nặng tuần gợi ý</p>
+            <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Ngày nhìn lại và mức tải tuần gợi ý</p>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
                 <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Nhìn lại</p>

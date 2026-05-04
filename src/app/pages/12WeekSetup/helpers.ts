@@ -74,19 +74,19 @@ export function buildPlanRationaleReasons(feasibility: PendingFeasibilityResult)
     reasons.push({
       id: "readiness-lighter",
       title: `Nhịp đề xuất: ${planLoadLabel}`,
-      detail: `Độ sẵn sàng ${feasibility.adjustedScore}/20 cho thấy nên giữ kế hoạch gọn để tránh ôm quá nhiều và mất nhịp sớm.`,
+      detail: `Độ sẵn sàng ${feasibility.adjustedScore}/20 — giữ kế hoạch gọn để dễ duy trì từ tuần đầu.`,
     });
   } else if (feasibility.planLoad === "push") {
     reasons.push({
       id: "readiness-push",
       title: `Nhịp đề xuất: ${planLoadLabel}`,
-      detail: `Độ sẵn sàng ${feasibility.adjustedScore}/20 cho phép đẩy nhịp mạnh hơn, nhưng vẫn nên nhìn lại đều mỗi tuần.`,
+      detail: `Độ sẵn sàng ${feasibility.adjustedScore}/20 — có thể đẩy mạnh hơn, nhưng vẫn nhìn lại đều mỗi tuần.`,
     });
   } else {
     reasons.push({
       id: "readiness-balanced",
       title: `Nhịp đề xuất: ${planLoadLabel}`,
-      detail: `Độ sẵn sàng ${feasibility.adjustedScore}/20 đủ cho khung cân bằng với 2-3 việc lặp lại và một buổi nhìn lại.`,
+      detail: `Độ sẵn sàng ${feasibility.adjustedScore}/20 — phù hợp khung cân bằng với 2-3 việc lặp lại và một buổi nhìn lại.`,
     });
   }
 
@@ -103,14 +103,14 @@ export function buildPlanRationaleReasons(feasibility: PendingFeasibilityResult)
   if (feasibility.weeklyCapacity === "low") {
     reasons.push({
       id: "capacity-low",
-      title: "Quỹ thời gian hạn chế",
-      detail: "Ngân sách thời gian mỗi ngày để mức nhẹ, giữ ít việc lặp lại để bạn dễ giữ đúng nhịp hằng tuần.",
+      title: "Thời gian hạn chế",
+      detail: "Thời gian mỗi ngày hạn chế — giữ ít việc lặp lại để dễ duy trì đều hằng tuần.",
     });
   } else if (feasibility.weeklyCapacity === "high" && feasibility.bottleneck?.axis !== "energy") {
     reasons.push({
       id: "capacity-high",
-      title: "Quỹ thời gian khá rộng",
-      detail: "Giữ nhịp đều với 3-4 việc lặp lại, nhưng tránh dồn hết vào tuần đầu.",
+      title: "Thời gian khá rộng",
+      detail: "Có thể giữ 3-4 việc lặp lại, nhưng tránh dồn hết vào tuần đầu.",
     });
   }
 
@@ -119,7 +119,7 @@ export function buildPlanRationaleReasons(feasibility: PendingFeasibilityResult)
     reasons.push({
       id: "smart-quality-weak",
       title: "Mục tiêu hiện còn chung chung",
-      detail: "Giữ outcome 12 tuần đơn giản ngay lúc này. Bạn có thể quay lại bước viết mục tiêu để làm rõ hơn nếu cần.",
+      detail: "Giữ kết quả 12 tuần đơn giản ngay lúc này. Bạn có thể quay lại bước viết mục tiêu để làm rõ hơn nếu cần.",
     });
   }
 
@@ -290,7 +290,7 @@ export function buildWeeklyPlans(
         (weekNumber <= 4
           ? "Giữ nhịp việc chính thật đều."
           : weekNumber <= 8
-            ? "Tăng tốc điều đang hiệu quả và tạo đầu ra thật."
+            ? "Tăng tốc điều đang hiệu quả và tạo kết quả thật."
             : "Về đích gọn, ưu tiên ít nhưng rõ."),
       milestone:
         weekNumber === 4 ? week4Milestone : weekNumber === 8 ? week8Milestone : weekNumber === 12 ? week12Outcome : "",
@@ -430,7 +430,7 @@ export function validateLeadIndicatorDraft(
   const trimmedName = indicator.name.trim();
 
   if (trimmedName.length === 0) {
-    warnings.push("Hãy đặt tên cho việc lặp lại này.");
+    warnings.push("Đặt tên cho việc lặp lại này.");
   } else {
     if (trimmedName.length < 6) {
       warnings.push("Tên hơi ngắn — viết rõ hành động bạn sẽ làm (ví dụ: 'viết draft 800 từ').");
@@ -453,13 +453,13 @@ export function validateLeadIndicatorDraft(
       options.maxTasksPerTactic ?? getMaxTasksPerTactic(options);
     if (parsedTarget > maxTasksPerTactic) {
       warnings.push(
-        `Vượt giới hạn ${maxTasksPerTactic} lần/tuần cho cấu hình hiện tại. Hệ thống sẽ tự cắt bớt khi tạo task.`,
+        `Vượt giới hạn ${maxTasksPerTactic} lần/tuần cho cấu hình hiện tại. Số việc sẽ được cắt bớt khi tạo kế hoạch.`,
       );
     }
   }
 
   if (!indicator.unit.trim()) {
-    warnings.push("Thêm đơn vị (ví dụ: buổi, lần, bài) để task hiển thị rõ.");
+    warnings.push("Thêm đơn vị (ví dụ: buổi, lần, bài) để việc hiển thị rõ.");
   }
 
   return { warnings };

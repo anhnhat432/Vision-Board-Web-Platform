@@ -25,7 +25,7 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
         <CardTitle className="text-slate-950">Thiết bị, dữ liệu và đồng bộ</CardTitle>
         <CardDescription className="text-slate-600">
           Mục tiêu, review và check-in được lưu local trên trình duyệt này — vẫn dùng được khi offline. Đăng nhập và
-          cloud sync là lớp tùy chọn để phòng khi đổi máy. Mọi xóa đều có xác nhận trước.
+          đồng bộ cloud là lớp tùy chọn để phòng khi đổi máy. Mọi xóa đều có xác nhận trước.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

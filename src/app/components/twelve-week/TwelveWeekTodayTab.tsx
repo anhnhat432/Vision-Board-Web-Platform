@@ -170,11 +170,10 @@ export function TwelveWeekTodayTab({
               <div>
                 <CardTitle className="flex items-center gap-2 text-slate-950">
                   <AlertTriangle className="h-5 w-5 text-amber-600" />
-                  Cứu nhịp tuần này
+                  Quay lại nhịp tuần này
                 </CardTitle>
                 <CardDescription className="mt-2 max-w-3xl text-slate-600">
-                  Bạn đang có {missedTasks.length} việc bị trễ. Mục tiêu lúc này không phải làm hết, mà là chọn cách
-                  quay lại nhịp gọn nhất.
+                  Có {missedTasks.length} việc bị trễ. Không cần làm hết — chọn cách quay lại nhịp gọn nhất.
                 </CardDescription>
               </div>
               <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">
@@ -198,17 +197,17 @@ export function TwelveWeekTodayTab({
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
-                        Gợi ý cứu nhịp của Plus
+                        Gợi ý quay lại nhịp từ Plus
                       </p>
                       <p className="mt-2 text-base font-semibold text-slate-950">
                         {hasSmartRescue && rescuePlanSummary
                           ? rescuePlanSummary.headline
-                          : "Plus sẽ gợi ý nên dàn lại tuần, giảm tải hay dời lịch để bạn không phải tự đoán."}
+                          : "Plus gợi ý nên dàn lại tuần, giảm tải hay dời lịch — không cần tự đoán."}
                       </p>
                       <p className="mt-2 text-sm leading-7 text-slate-600">
                         {hasSmartRescue && rescuePlanSummary
                           ? rescuePlanSummary.reason
-                          : "Điểm khác của Plus không phải thêm việc, mà là chỉ rõ cách quay lại nhịp nhẹ đầu nhất ngay lúc bạn bắt đầu trễ."}
+                          : "Plus không thêm việc, mà chỉ rõ cách quay lại nhịp nhẹ nhất ngay khi bạn bắt đầu trễ."}
                       </p>
                       {hasSmartRescue && rescuePlanSummary && (
                         <p className="mt-2 text-sm leading-7 text-slate-600">
@@ -227,7 +226,7 @@ export function TwelveWeekTodayTab({
                     </Button>
                   ) : (
                     <Button className="mt-4 w-full sm:w-auto" onClick={onOpenSmartRescue}>
-                      Mở Plus để có rescue thông minh
+                      Mở Plus để có gợi ý phù hợp
                     </Button>
                   )}
                 </div>
@@ -296,7 +295,7 @@ export function TwelveWeekTodayTab({
                   data-testid="today-first-week-encouragement"
                   className="mt-2 text-sm leading-6 text-violet-800"
                 >
-                  Tuần đầu — bắt đầu nhỏ là quan trọng nhất. Đừng cố làm hết hôm nay, hãy giữ nhịp đến hết tuần.
+                  Tuần đầu — bắt đầu nhỏ là quan trọng nhất. Không cần làm hết hôm nay, duy trì đến hết tuần.
                 </p>
               )}
             </div>
@@ -379,8 +378,8 @@ export function TwelveWeekTodayTab({
                     title="Chưa có việc nào trong chu kỳ này"
                     description={
                       hasLeadMetrics
-                        ? "Chu kỳ đã có việc giữ nhịp, nhưng chưa có việc nào được tạo cho tuần hiện tại. Vào lại Setup để tạo lại chu kỳ."
-                        : "Chu kỳ chưa có việc giữ nhịp. Vào Setup để thêm 2-4 việc lặp lại trước."
+                        ? "Chu kỳ đã có việc lặp lại, nhưng chưa có việc nào cho tuần này. Vào Setup để tạo lại chu kỳ."
+                        : "Chu kỳ chưa có việc lặp lại. Vào Setup để thêm 2-4 việc lặp lại trước."
                     }
                     actions={
                       onNavigateToSetup ? (
@@ -588,7 +587,7 @@ export function TwelveWeekTodayTab({
                   data-testid="today-primary-done-nudge"
                   className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-800"
                 >
-                  Việc chính đã xong — lưu check-in để chốt nhịp hôm nay.
+                  Việc chính đã xong — lưu check-in để chốt hôm nay.
                 </p>
               )}
             </CardContent>

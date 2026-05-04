@@ -74,7 +74,7 @@ export function MeasurableStep({
           }
         />
         <p id="smart-metric-name-hint" className="text-sm text-slate-500">
-          Chọn một chỉ số đủ rõ để bạn biết mình đang tiến lên hay đứng yên.
+          Chọn chỉ số đo được — tăng hay đứng yên phải nhìn ra ngay.
         </p>
         {intentMetricHint && (
           <div
@@ -136,7 +136,7 @@ export function MeasurableStep({
         </div>
       </div>
       <p className="text-sm text-slate-500">
-        Nếu bạn nhập cả hai mốc, hệ thống sẽ kiểm tra để mốc mục tiêu lớn hơn mốc hiện tại.
+        Nhập cả hai mốc thì mốc mục tiêu phải lớn hơn mốc hiện tại.
       </p>
       <ArchetypeHint archetype={activeArchetype} variant="metric" />
       <GoalArchetypeExamples archetype={intentArchetype} variant="metric" />

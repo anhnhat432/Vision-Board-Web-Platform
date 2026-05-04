@@ -634,18 +634,18 @@ describe("TwelveWeekLocalStatusSection", () => {
 
     expect(screen.getByText("Có thay đổi trên trình duyệt này và trên cloud.")).toBeInTheDocument();
     expect(screen.getByText(/Ứng dụng chưa tự ghi đè để tránh mất dữ liệu/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Export local backup/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Keep local for now/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Retry sync/i })).toBeInTheDocument();
-    // Use cloud version button is present but disabled when no pull response available
-    expect(screen.getByRole("button", { name: /Use cloud version/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Tải bản sao local/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Giữ bản local/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Thử lại đồng bộ/i })).toBeInTheDocument();
+    // Dùng bản cloud button is present but disabled when no pull response available
+    expect(screen.getByRole("button", { name: /Dùng bản cloud/i })).toBeInTheDocument();
   });
 
   it("keeps local for now without mutating browser data", () => {
     renderConflictSection();
     window.localStorage.setItem("mvp2-local-sentinel", "keep-me");
 
-    fireEvent.click(screen.getByRole("button", { name: /Keep local for now/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Giữ bản local/i }));
 
     expect(window.localStorage.getItem("mvp2-local-sentinel")).toBe("keep-me");
     expect(screen.getByText(/Không có dữ liệu nào bị xóa hoặc ghi đè/i)).toBeInTheDocument();
@@ -655,7 +655,7 @@ describe("TwelveWeekLocalStatusSection", () => {
     const onExportLocalData = vi.fn();
     renderConflictSection({ onExportLocalData });
 
-    fireEvent.click(screen.getByRole("button", { name: /Export local backup/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Tải bản sao local/i }));
 
     expect(onExportLocalData).toHaveBeenCalledTimes(1);
   });
@@ -664,7 +664,7 @@ describe("TwelveWeekLocalStatusSection", () => {
     const onRunMutationQueueSync = vi.fn();
     renderConflictSection({ onRunMutationQueueSync });
 
-    fireEvent.click(screen.getByRole("button", { name: /Retry sync/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Thử lại đồng bộ/i }));
 
     expect(onRunMutationQueueSync).toHaveBeenCalledTimes(1);
   });
@@ -672,10 +672,10 @@ describe("TwelveWeekLocalStatusSection", () => {
   it("tracks conflict actions with safe counts only", () => {
     renderConflictSection();
 
-    fireEvent.click(screen.getByText("Review details"));
-    fireEvent.click(screen.getByRole("button", { name: /Export local backup/i }));
-    fireEvent.click(screen.getByRole("button", { name: /Keep local for now/i }));
-    fireEvent.click(screen.getByRole("button", { name: /Retry sync/i }));
+    fireEvent.click(screen.getByText("Xem chi tiết"));
+    fireEvent.click(screen.getByRole("button", { name: /Tải bản sao local/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Giữ bản local/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Thử lại đồng bộ/i }));
 
     const serializedCalls = JSON.stringify(trackAnalyticsEvent.mock.calls);
     expect(serializedCalls).toContain("sync_conflict_action");
@@ -725,22 +725,22 @@ describe("TwelveWeekLocalStatusSection", () => {
     expect(screen.getByText(/Dữ liệu local không bị xóa/i)).toBeInTheDocument();
   });
 
-  it("shows 'Use cloud version' disabled when no pull response", () => {
+  it("shows 'Dùng bản cloud' disabled when no pull response", () => {
     renderConflictSection({ pullResponse: undefined });
 
-    const useCloudBtn = screen.getByRole("button", { name: /Use cloud version/i });
+    const useCloudBtn = screen.getByRole("button", { name: /Dùng bản cloud/i });
     expect(useCloudBtn).toBeDisabled();
   });
 
-  it("shows 'Use cloud version' disabled when pending local mutations exist", () => {
+  it("shows 'Dùng bản cloud' disabled when pending local mutations exist", () => {
     renderConflictSection({ unresolvedLocalMutationCount: 3 });
 
-    const useCloudBtn = screen.getByRole("button", { name: /Use cloud version/i });
+    const useCloudBtn = screen.getByRole("button", { name: /Dùng bản cloud/i });
     expect(useCloudBtn).toBeDisabled();
     expect(screen.getByText(/Không thể dùng bản cloud/i)).toBeInTheDocument();
   });
 
-  it("'Use cloud version' button shows confirm dialog — does not apply without checkbox", () => {
+  it("'Dùng bản cloud' button shows confirm dialog — does not apply without checkbox", () => {
     const onUseCloudVersion = vi.fn();
     // Supply a pull response and zero pending mutations so the button is enabled
     renderConflictSection({
@@ -749,7 +749,7 @@ describe("TwelveWeekLocalStatusSection", () => {
       pullResponse: minimalPullResponse,
     });
 
-    fireEvent.click(screen.getByRole("button", { name: /Use cloud version/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Dùng bản cloud/i }));
 
     // Confirm panel appears
     expect(screen.getByText(/Xác nhận ghi đè dữ liệu local/i)).toBeInTheDocument();
@@ -762,7 +762,7 @@ describe("TwelveWeekLocalStatusSection", () => {
     expect(onUseCloudVersion).not.toHaveBeenCalled();
   });
 
-  it("'Use cloud version' calls onUseCloudVersion only after confirm checkbox", () => {
+  it("'Dùng bản cloud' calls onUseCloudVersion only after confirm checkbox", () => {
     const onUseCloudVersion = vi.fn();
     renderConflictSection({
       onUseCloudVersion,
@@ -770,7 +770,7 @@ describe("TwelveWeekLocalStatusSection", () => {
       pullResponse: minimalPullResponse,
     });
 
-    fireEvent.click(screen.getByRole("button", { name: /Use cloud version/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Dùng bản cloud/i }));
     fireEvent.click(screen.getByRole("checkbox"));
     fireEvent.click(screen.getByRole("button", { name: /Xác nhận dùng bản cloud/i }));
 
@@ -780,7 +780,7 @@ describe("TwelveWeekLocalStatusSection", () => {
   it("tracks use_cloud_version action with safe counts only — no raw text", () => {
     renderConflictSection({ unresolvedLocalMutationCount: 0, pullResponse: minimalPullResponse });
 
-    fireEvent.click(screen.getByRole("button", { name: /Use cloud version/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Dùng bản cloud/i }));
     fireEvent.click(screen.getByRole("checkbox"));
     fireEvent.click(screen.getByRole("button", { name: /Xác nhận dùng bản cloud/i }));
 

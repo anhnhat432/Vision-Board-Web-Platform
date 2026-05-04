@@ -123,7 +123,7 @@ export function SmartGoalStepShell({
           <div>
             <p className="text-sm font-semibold text-slate-950">Độ rõ của mục tiêu</p>
             <p className="mt-1 text-sm leading-6 text-slate-500">
-              Hoàn thành các điểm này để mục tiêu dễ chuyển sang kế hoạch 12 tuần hơn.
+              Hoàn thành để mục tiêu sẵn sàng cho kế hoạch 12 tuần.
             </p>
           </div>
           <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">

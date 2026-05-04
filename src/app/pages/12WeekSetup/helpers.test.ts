@@ -352,7 +352,7 @@ describe("buildPlanRationaleReasons", () => {
 describe("validateLeadIndicatorDraft", () => {
   it("warns when name is empty", () => {
     const result = validateLeadIndicatorDraft(makeIndicator("", "2"));
-    expect(result.warnings.find((w) => w.includes("Hãy đặt tên"))).toBeDefined();
+    expect(result.warnings.find((w) => w.includes("Đặt tên"))).toBeDefined();
   });
 
   it("warns when name is too short", () => {

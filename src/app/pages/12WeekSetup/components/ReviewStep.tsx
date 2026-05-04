@@ -216,7 +216,7 @@ export function ReviewStep({
           <span>Vì sao kế hoạch này phù hợp với bạn?</span>
         </summary>
         <p className="mt-2 text-xs leading-6 text-violet-900/72">
-          App tổng hợp ngắn gọn từ feasibility, nhịp tuần, việc lặp lại và cột mốc. Đây là gợi ý - kế hoạch không bảo
+          Tổng hợp từ kết quả kiểm tra, nhịp tuần, việc lặp lại và cột mốc. Đây là gợi ý — kế hoạch không bảo
           đảm thành công, nhưng giúp bạn biết vì sao nên thử cách này trước.
         </p>
 
@@ -341,7 +341,7 @@ export function ReviewStep({
           </div>
           <p className="mt-3 text-lg font-semibold">{firstAction}</p>
           <p className="mt-2 text-sm leading-6 text-white/74">
-            Đây là việc đầu tiên hệ thống tạo ngay khi bạn vào màn Hôm nay. Bắt đầu từ đây để tạo nhịp.
+            Việc này sẽ xuất hiện ngay khi bạn vào màn Hôm nay. Bắt đầu từ đây để tạo nhịp.
           </p>
         </section>
       )}
