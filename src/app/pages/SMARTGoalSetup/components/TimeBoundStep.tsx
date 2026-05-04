@@ -23,7 +23,7 @@ export function TimeBoundStep({ smartData, setSmartData }: TimeBoundStepProps) {
     <div className="space-y-5">
       <div className="space-y-1">
         <p className="text-sm text-slate-600">
-          Chọn cách chốt thời hạn phù hợp nhất với cách bạn muốn theo dõi kế hoạch này.
+          Chọn cách chốt thời hạn phù hợp với bạn.
         </p>
       </div>
 
@@ -83,7 +83,7 @@ export function TimeBoundStep({ smartData, setSmartData }: TimeBoundStepProps) {
             aria-invalid={targetWeeksInvalid}
           />
           <p className="text-sm text-slate-500">
-            Gợi ý: 12 tuần là chu kỳ hợp lý để nối sang bước lập kế hoạch tiếp theo.
+            12 tuần phù hợp nhất với bước lập kế hoạch tiếp theo.
           </p>
         </div>
       ) : (
@@ -106,7 +106,7 @@ export function TimeBoundStep({ smartData, setSmartData }: TimeBoundStepProps) {
             }
             aria-invalid={targetDateInvalid}
           />
-          <p className="text-sm text-slate-500">Chọn mốc ngày đủ rõ để bạn có thể nhìn lại tiến độ.</p>
+          <p className="text-sm text-slate-500">Chọn ngày đủ rõ để nhìn lại tiến độ.</p>
         </div>
       )}
     </div>

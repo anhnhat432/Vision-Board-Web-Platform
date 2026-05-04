@@ -1,9 +1,10 @@
-import { useRef, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { motion } from "motion/react";
-import { ArrowLeft, ArrowRight, CheckCircle2, Flag, Lightbulb } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Flag, Lightbulb, Loader2 } from "lucide-react";
 
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
+import { useReducedMotion } from "@/app/components/ui/use-reduced-motion";
 import { useScrollToTopOnChange } from "@/app/hooks/useScrollToTopOnChange";
 import { STEPS } from "../constants";
 
@@ -33,6 +34,18 @@ export function SetupStepShell({
   const isLastStep = currentStep >= stepCount - 1;
   const stepShellRef = useRef<HTMLDivElement | null>(null);
   const titleFocusRef = useRef<HTMLSpanElement | null>(null);
+  const prefersReducedMotion = useReducedMotion();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmitClick = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await Promise.resolve(onSubmit());
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useScrollToTopOnChange(currentStep, {
     targetRef: stepShellRef,
@@ -42,9 +55,9 @@ export function SetupStepShell({
   return (
     <motion.div
       ref={stepShellRef}
-      initial={{ opacity: 0, y: 20 }}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45 }}
+      transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.45 }}
     >
       <Card>
         <CardHeader className="space-y-4">
@@ -115,14 +128,24 @@ export function SetupStepShell({
                 : ""
             }`}
           >
-            <Button className="w-full sm:w-auto" variant="outline" onClick={onBack}>
+            <Button className="w-full sm:w-auto" variant="outline" onClick={onBack} disabled={isSubmitting}>
               <ArrowLeft className="h-4 w-4" />
               Quay lại
             </Button>
             {isLastStep ? (
-              <Button className="w-full sm:w-auto" onClick={onSubmit} size="lg">
-                <Flag className="h-4 w-4" />
-                Tạo kế hoạch 12 tuần
+              <Button
+                className="w-full sm:w-auto"
+                onClick={handleSubmitClick}
+                size="lg"
+                disabled={isSubmitting}
+                aria-busy={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <Flag className="h-4 w-4" />
+                )}
+                {isSubmitting ? "Đang tạo kế hoạch..." : "Tạo kế hoạch 12 tuần"}
               </Button>
             ) : (
               <Button className="w-full sm:w-auto" onClick={onNext}>

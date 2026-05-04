@@ -1,5 +1,6 @@
 ﻿import type { ReactNode, RefObject } from "react";
 import { motion } from "motion/react";
+import { useReducedMotion } from "../../../components/ui/use-reduced-motion";
 import { ArrowLeft, ArrowRight, CircleAlert, CheckCircle2, Lightbulb, Sparkles } from "lucide-react";
 
 import type { QualityLevel } from "@/lib/smart-goal/quality";
@@ -63,12 +64,14 @@ export function SmartGoalStepShell({
   onBack,
   onNext,
 }: SmartGoalStepShellProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <motion.div
       key={step.key}
-      initial={{ opacity: 0, x: 18 }}
+      initial={prefersReducedMotion ? false : { opacity: 0, x: 18 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
       className="space-y-6"
     >
       <div className="flow-muted p-4 sm:p-6">
@@ -100,7 +103,7 @@ export function SmartGoalStepShell({
             </div>
             <p className="mt-2 text-sm leading-6 text-slate-600">{starterPreview}</p>
             <p className="mt-1 text-xs leading-5 text-slate-500">
-              Dùng như bản nháp nếu bạn chưa biết bắt đầu từ đâu, sau đó sửa lại cho đúng đời sống của mình.
+              Dùng làm bản nháp rồi sửa cho đúng đời sống bạn.
             </p>
           </div>
           <Button
@@ -120,7 +123,7 @@ export function SmartGoalStepShell({
           <div>
             <p className="text-sm font-semibold text-slate-950">Độ rõ của mục tiêu</p>
             <p className="mt-1 text-sm leading-6 text-slate-500">
-              Hoàn thành các điểm này để mục tiêu dễ chuyển sang kế hoạch 12 tuần hơn.
+              Hoàn thành để mục tiêu sẵn sàng cho kế hoạch 12 tuần.
             </p>
           </div>
           <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">

@@ -67,10 +67,10 @@ export function QualityFeedbackPanel({
     level === "strong"
       ? "Mục tiêu đã đủ rõ ràng để chuyển sang kiểm tra tính thực tế."
       : level === "okay"
-        ? "Mục tiêu đã khá ổn. Vài gợi ý nhỏ bên dưới nếu bạn muốn chỉnh thêm."
+        ? "Mục tiêu khá ổn — xem gợi ý bên dưới nếu muốn chỉnh thêm."
         : canProceedToFeasibility
-          ? "Bạn vẫn có thể tiếp tục. Thêm chi tiết theo gợi ý dưới sẽ giúp kế hoạch 12 tuần chắc hơn."
-          : "Mục tiêu cần bổ sung thêm chi tiết để chuyển sang kế hoạch.";
+          ? "Vẫn tiếp tục được. Bổ sung theo gợi ý dưới sẽ giúp kế hoạch 12 tuần chắc hơn."
+          : "Cần bổ sung câu mục tiêu và mốc đích để tiếp tục.";
 
   return (
     <div className={`rounded-[24px] border ${config.border} ${config.bg} p-4`}>

@@ -1,19 +1,27 @@
 ﻿import type { Dispatch, SetStateAction } from "react";
 
 import { parseNumberInput } from "@/lib/smart-goal";
+import type { GoalArchetype } from "@/lib/smart-goal/goalArchetypes";
 
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Textarea } from "../../../components/ui/textarea";
 import type { SMARTData } from "../types";
+import { ArchetypeHint } from "./ArchetypeHint";
 
 interface AchievableStepProps {
   smartData: SMARTData;
   setSmartData: Dispatch<SetStateAction<SMARTData>>;
   currentStepHasDraftContent: boolean;
+  archetype: GoalArchetype;
 }
 
-export function AchievableStep({ smartData, setSmartData, currentStepHasDraftContent }: AchievableStepProps) {
+export function AchievableStep({
+  smartData,
+  setSmartData,
+  currentStepHasDraftContent,
+  archetype,
+}: AchievableStepProps) {
   const parsedWeeklyHours = parseNumberInput(smartData.achievable.weekly_time_commitment_hours);
   const weeklyHoursInvalid = parsedWeeklyHours === undefined || parsedWeeklyHours <= 0;
 
@@ -41,7 +49,7 @@ export function AchievableStep({ smartData, setSmartData, currentStepHasDraftCon
           }
           aria-invalid={weeklyHoursInvalid && currentStepHasDraftContent}
         />
-        <p className="text-sm text-slate-500">Chỉ tính khung thời gian bạn thực sự có thể giữ đều mỗi tuần.</p>
+        <p className="text-sm text-slate-500">Chỉ đếm thời gian bạn giữ được đều — không phải lúc lý tưởng.</p>
       </div>
 
       <div className="space-y-2">
@@ -62,7 +70,7 @@ export function AchievableStep({ smartData, setSmartData, currentStepHasDraftCon
           className="min-h-[120px] resize-none text-base leading-7"
         />
         <p className="text-sm text-slate-500">
-          Chỉ cần liệt kê những kỹ năng thật sự ảnh hưởng tới kết quả của giai đoạn này.
+          Liệt kê kỹ năng thật sự ảnh hưởng tới kết quả giai đoạn này.
         </p>
       </div>
 
@@ -83,8 +91,10 @@ export function AchievableStep({ smartData, setSmartData, currentStepHasDraftCon
           }
           className="min-h-[120px] resize-none text-base leading-7"
         />
-        <p className="text-sm text-slate-500">Hãy ghi cả người hỗ trợ lẫn tài nguyên bạn có thể dùng ngay.</p>
+        <p className="text-sm text-slate-500">Ghi cả người hỗ trợ lẫn tài liệu, công cụ bạn dùng được ngay.</p>
       </div>
+
+      <ArchetypeHint archetype={archetype} variant="leadAction" />
     </div>
   );
 }

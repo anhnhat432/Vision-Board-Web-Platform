@@ -14,6 +14,7 @@ import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import type { PendingSMARTGoal } from "@/lib/smart-goal";
 import { CoreFlowProgress } from "../../../components/CoreFlowProgress";
+import { useReducedMotion } from "../../../components/ui/use-reduced-motion";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import { Card, CardContent } from "../../../components/ui/card";
@@ -29,6 +30,7 @@ interface ResultStepProps {
 }
 
 export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjustGoal }: ResultStepProps) {
+  const prefersReducedMotion = useReducedMotion();
   const iconMap: Record<ResultType, ReactNode> = {
     realistic: <CheckCircle2 className="h-10 w-10 text-white" />,
     challenging: <TrendingUp className="h-10 w-10 text-white" />,
@@ -73,132 +75,132 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
   > = {
     realistic: {
       statusLabel: "Đủ thực tế để bắt đầu",
-      statusHint: "Nền tảng hiện tại đang ủng hộ bạn bước vào một chu kỳ 12 tuần gọn, rõ và giữ được nhịp.",
+      statusHint: "Nền tảng hiện tại đủ để bước vào chu kỳ 12 tuần gọn và rõ.",
       guideTitle: "Đi tiếp, nhưng giữ cho tuần đầu thật vừa tay.",
       guideBody:
-        "Bạn không cần một kế hoạch thật lớn để thắng. Điều bạn cần là một hệ hành động nhỏ, rõ, đo được và đủ nhẹ để giữ đều qua từng tuần.",
+        "Không cần kế hoạch lớn. Chỉ cần vài việc nhỏ, rõ, đo được và đủ nhẹ để duy trì đều mỗi tuần.",
       highlights: [
         {
-          title: "Giữ nhịp nhỏ nhưng đều",
-          description: "Chọn 2-4 việc chính để lặp lại mỗi tuần, thay vì nhồi quá nhiều việc ngay lúc đầu.",
+          title: "Nhịp nhỏ nhưng đều",
+          description: "Chọn 2-4 việc lặp lại mỗi tuần thay vì nhồi quá nhiều ngay đầu.",
           icon: <Sparkles className="h-4 w-4" />,
         },
         {
           title: "Khóa lịch nhìn lại ngay",
-          description: "Một lịch nhìn lại cố định sẽ giúp bạn không lệch nhịp khi tuần bắt đầu bận hơn.",
+          description: "Lịch nhìn lại cố định giúp không lệch khi tuần bận hơn.",
           icon: <ShieldCheck className="h-4 w-4" />,
         },
         {
           title: "Ưu tiên cảm giác thắng sớm",
-          description: "Tuần đầu nên đủ nhẹ để bạn hoàn thành tốt và tạo đà cho cả chu kỳ.",
+          description: "Tuần đầu đủ nhẹ để hoàn thành tốt và tạo đà cho cả chu kỳ.",
           icon: <Target className="h-4 w-4" />,
         },
       ],
       nextMoves: [
-        "Chuyển mục tiêu này thành kế hoạch 12 tuần với 2-4 việc chính thật rõ.",
-        "Thiết kế tuần đầu thiên về nhịp độ, không phải khối lượng quá lớn.",
-        "Giữ một buổi nhìn lại hằng tuần để điều chỉnh trước khi bị trễ nhịp.",
+        "Chuyển mục tiêu thành kế hoạch 12 tuần với 2-4 việc chính thật rõ.",
+        "Thiết kế tuần đầu thiên về duy trì đều, không phải khối lượng lớn.",
+        "Giữ một buổi nhìn lại hằng tuần để điều chỉnh trước khi bị trễ.",
       ],
       weeklyRhythm: [
         {
           label: "Ngay sau kết quả",
-          detail: "Chốt kết quả 12 tuần và các việc chính bạn sẽ lặp lại hằng tuần.",
+          detail: "Chốt kết quả 12 tuần và việc bạn sẽ lặp lại hằng tuần.",
         },
         {
           label: "Tuần 1",
-          detail: "Giữ kế hoạch gọn để tạo cảm giác thắng sớm và củng cố niềm tin hành động.",
+          detail: "Giữ kế hoạch gọn để thắng sớm và tạo đà.",
         },
         {
           label: "Từ tuần 2 trở đi",
-          detail: "Duy trì buổi nhìn lại, chỉ tăng độ khó khi bạn đang giữ nhịp ổn định thật sự.",
+          detail: "Duy trì buổi nhìn lại, chỉ tăng độ khó khi đang duy trì ổn thật sự.",
         },
       ],
     },
     challenging: {
       statusLabel: "Khó nhưng vẫn làm được",
       statusHint:
-        "Bạn có thể đạt mục tiêu này nếu thu gọn mục tiêu, làm rõ việc cần làm và nhìn lại mỗi tuần thật nghiêm túc.",
+        "Có thể đạt nếu thu gọn mục tiêu, làm rõ việc cần làm và nhìn lại mỗi tuần nghiêm túc.",
       guideTitle: "Tập trung hơn một chút, bạn sẽ đi được xa hơn.",
       guideBody:
-        "Đây là kiểu mục tiêu có sức bật, nhưng không phù hợp nếu triển khai quá rộng. Hãy giữ một hướng chính rõ và bỏ bớt các phần gây nhiễu.",
+        "Mục tiêu có sức bật nhưng không phù hợp nếu triển khai quá rộng. Giữ một hướng chính rõ và bỏ bớt phần gây nhiễu.",
       highlights: [
         {
           title: "Thu hẹp mục tiêu 12 tuần đầu",
-          description: "Chỉ giữ kết quả quan trọng nhất thay vì cố ôm toàn bộ bức tranh ngay lúc này.",
+          description: "Chỉ giữ kết quả quan trọng nhất, bỏ phần còn lại cho chu kỳ sau.",
           icon: <Target className="h-4 w-4" />,
         },
         {
-          title: "Ưu tiên hành động dẫn dắt",
-          description: "Tập trung vào vài việc có thể đo được, thay vì một danh sách dài nhưng mờ hiệu quả.",
+          title: "Ưu tiên việc đo được",
+          description: "Tập trung vài việc đo được, thay vì danh sách dài nhưng mờ hiệu quả.",
           icon: <Gauge className="h-4 w-4" />,
         },
         {
           title: "Dùng buổi nhìn lại để cắt nhiễu",
-          description: "Mỗi tuần nên bỏ bớt những việc không còn phục vụ kết quả chính.",
+          description: "Mỗi tuần bỏ bớt việc không phục vụ kết quả chính.",
           icon: <Compass className="h-4 w-4" />,
         },
       ],
       nextMoves: [
-        "Giữ mục tiêu chính nhưng thu gọn nó về một kết quả duy nhất cho 12 tuần đầu.",
-        "Chỉ chọn các việc chính thật sự đo được và có thể lặp lại mỗi tuần.",
-        "Đặt buổi nhìn lại hằng tuần để kiểm soát độ nặng, không để kế hoạch phình dần.",
+        "Thu gọn về một kết quả duy nhất cho 12 tuần đầu.",
+        "Chỉ chọn việc thật sự đo được và lặp lại được mỗi tuần.",
+        "Đặt buổi nhìn lại hằng tuần để kiểm soát mức tải, không để kế hoạch phình dần.",
       ],
       weeklyRhythm: [
         {
           label: "Ngay sau kết quả",
-          detail: "Chốt một kết quả đủ rõ và bỏ bớt các mục tiêu phụ không cần thiết cho chu kỳ này.",
+          detail: "Chốt một kết quả đủ rõ, bỏ bớt mục tiêu phụ không cần cho chu kỳ này.",
         },
         {
           label: "Tuần 1-2",
-          detail: "Kiểm chứng xem nhịp hành động hiện tại có thực sự vừa với lịch sống của bạn hay chưa.",
+          detail: "Kiểm tra xem lịch hành động có thực sự vừa với cuộc sống hằng ngày không.",
         },
         {
           label: "Sau mỗi lần nhìn lại",
-          detail: "Nếu đang đuối, giảm tải trước khi tăng tốc. Tính bền quan trọng hơn cảm giác hưng phấn đầu kỳ.",
+          detail: "Đang đuối thì giảm tải trước khi tăng tốc. Bền quan trọng hơn hưng phấn đầu kỳ.",
         },
       ],
     },
     too_ambitious: {
       statusLabel: "Cần thu nhỏ trước khi tăng tốc",
       statusHint:
-        "Mục tiêu này đang hơi nặng so với nền hiện tại. Thu nhỏ đúng cách sẽ giúp bạn giữ được động lực và xác suất hoàn thành cao hơn.",
-      guideTitle: "Đừng hạ tham vọng, hãy hạ độ nặng của bước đầu.",
+        "Mục tiêu đang hơi nặng so với nền hiện tại. Thu nhỏ đúng cách giúp giữ động lực và xác suất hoàn thành cao hơn.",
+      guideTitle: "Không cần hạ tham vọng — chỉ cần hạ mức tải bước đầu.",
       guideBody:
-        "Bạn chưa cần từ bỏ mục tiêu lớn. Điều nên làm là biến nó thành một bước đệm vừa tầm hơn, để 12 tuần tới là một chu kỳ thắng được chứ không phải một lời hứa áp lực.",
+        "Chưa cần từ bỏ mục tiêu lớn. Biến nó thành bước đệm vừa tầm để 12 tuần tới là chu kỳ thắng được, không phải lời hứa áp lực.",
       highlights: [
         {
           title: "Thu nhỏ kết quả đầu tiên",
-          description: "Chọn một phiên bản gần hơn và dễ thắng hơn để làm cột mốc khởi động.",
+          description: "Chọn phiên bản gần hơn, dễ thắng hơn làm cột mốc khởi động.",
           icon: <AlertTriangle className="h-4 w-4" />,
         },
         {
           title: "Kéo giãn thời hạn nếu cần",
-          description: "Không phải mục tiêu sai, chỉ là thời điểm hoặc tốc độ hiện tại có thể chưa phù hợp.",
+          description: "Không phải mục tiêu sai — chỉ là tốc độ hoặc thời điểm chưa phù hợp.",
           icon: <Gauge className="h-4 w-4" />,
         },
         {
           title: "Dựng mục tiêu bước đệm",
-          description: "Một chu kỳ 12 tuần nhỏ nhưng hoàn thành được sẽ tốt hơn một kế hoạch quá tải rồi bỏ dở.",
+          description: "Chu kỳ 12 tuần nhỏ mà hoàn thành được tốt hơn kế hoạch quá tải rồi bỏ dở.",
           icon: <ShieldCheck className="h-4 w-4" />,
         },
       ],
       nextMoves: [
-        "Quay lại bước viết mục tiêu nếu cần và giảm độ rộng hoặc áp lực thời gian của mục tiêu hiện tại.",
-        "Chọn một bước đệm gần hơn để chu kỳ 12 tuần đầu tiên có khả năng thắng cao hơn.",
-        "Sau khi nhịp hành động ổn định, bạn có thể tăng độ khó ở chu kỳ kế tiếp.",
+        "Quay lại sửa mục tiêu nếu cần — giảm quy mô hoặc kéo dài thời hạn.",
+        "Chọn bước đệm gần hơn để chu kỳ 12 tuần đầu có khả năng thắng.",
+        "Khi đã duy trì ổn, có thể tăng độ khó ở chu kỳ sau.",
       ],
       weeklyRhythm: [
         {
           label: "Ngay sau kết quả",
-          detail: "Xác định phiên bản mục tiêu nhỏ hơn nhưng vẫn đủ ý nghĩa để bạn muốn theo đuổi.",
+          detail: "Xác định phiên bản nhỏ hơn nhưng vẫn đủ ý nghĩa để muốn theo đuổi.",
         },
         {
           label: "Tuần 1",
-          detail: "Thiết kế kế hoạch cực gọn để tạo sự ổn định, không tạo thêm áp lực chứng minh bản thân.",
+          detail: "Thiết kế kế hoạch cực gọn để tạo ổn định, không tạo áp lực chứng minh.",
         },
         {
           label: "Sau chu kỳ đầu",
-          detail: "Khi đã giữ nhịp tốt, dùng dữ liệu thực để quyết định tăng tốc ở vòng tiếp theo.",
+          detail: "Khi đã duy trì tốt, dùng dữ liệu thực để quyết định tăng tốc ở vòng sau.",
         },
       ],
     },
@@ -246,9 +248,9 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
   return (
     <div className="app-shell min-h-screen px-4 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-6 sm:pt-6 lg:px-8">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5 }}
         className="mx-auto w-full max-w-6xl space-y-4 sm:space-y-6"
       >
         <CoreFlowProgress currentStepId="feasibility" />
@@ -307,7 +309,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                       <span className="font-semibold text-white">Cần chú ý:</span> {result.bottleneck.label}
                     </p>
                     <p>
-                      <span className="font-semibold text-white">Độ nặng gợi ý:</span> {planLoadLabel[result.planLoad]}{" "}
+                      <span className="font-semibold text-white">Mức tải gợi ý:</span> {planLoadLabel[result.planLoad]}{" "}
                       · {capacityLabel[result.weeklyCapacity]}
                     </p>
                     <p>{result.firstWeekGuidance}</p>
@@ -391,7 +393,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                         Tuần 1 nên thế nào
                       </p>
                       <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
-                        Độ nặng: {planLoadLabel[result.planLoad]}
+                        Mức tải: {planLoadLabel[result.planLoad]}
                       </span>
                       <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
                         Quỹ thời gian: {capacityLabel[result.weeklyCapacity]}

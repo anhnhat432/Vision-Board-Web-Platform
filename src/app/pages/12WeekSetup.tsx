@@ -102,7 +102,7 @@ export function TwelveWeekSetup() {
   useEffect(() => {
     const data = getUserData();
     if (!hasRealLifeBalance(data)) {
-      toast.info("Bạn cần hoàn thành bước cân bằng cuộc sống trước khi vào kế hoạch 12 tuần.");
+      toast.info("Hoàn thành bước cân bằng cuộc sống trước.");
       setIsLoading(false);
       navigate("/onboarding");
       return;
@@ -113,7 +113,7 @@ export function TwelveWeekSetup() {
     const pendingFeasibilityResult = localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
 
     if (!selectedFocusArea || !pendingSmartGoal || !pendingFeasibilityResult) {
-      toast.info("Bạn cần hoàn thành bước viết mục tiêu và kiểm tra tính thực tế trước khi vào kế hoạch 12 tuần.");
+      toast.info("Hoàn thành bước viết mục tiêu và kiểm tra tính thực tế trước.");
       setIsLoading(false);
       navigate("/smart-goal-setup");
       return;
@@ -135,7 +135,7 @@ export function TwelveWeekSetup() {
       }
 
       if (!getScoredLifeArea(data, selectedFocusArea)) {
-        toast.info("Bạn cần chọn lại Life Insight từ dữ liệu Life Balance thật.");
+        toast.info("Chọn lại trọng tâm từ dữ liệu cân bằng thật.");
         setIsLoading(false);
         navigate("/life-insight");
         return;
@@ -225,7 +225,7 @@ export function TwelveWeekSetup() {
         );
       }
     } catch {
-      toast.info("Dữ liệu tạm thời chưa hợp lệ. Mình sẽ đưa bạn quay lại bước trước.");
+      toast.info("Dữ liệu tạm chưa hợp lệ. Quay lại bước trước.");
       setIsLoading(false);
       navigate("/smart-goal-setup");
       return;
@@ -315,20 +315,20 @@ export function TwelveWeekSetup() {
     Boolean(auth.userProfile);
   const currentStepDescription =
     currentStep === 0
-      ? "Làm rõ điều bạn muốn chạm tới sau 12 tuần."
+      ? "Làm rõ kết quả bạn muốn chạm tới sau 12 tuần."
       : currentStep === 1
-        ? "Chọn vài việc bạn tự kiểm soát được mỗi tuần; chỉ giữ phần có thể lặp lại."
-        : currentStep === 2
-          ? "Chốt ngày bắt đầu, ngày nhìn lại và hình dung tuần đầu."
-          : "Kiểm tra lần cuối, còn phần nâng cao thì để tùy chọn.";
+        ? "Chọn 2-4 việc bạn kiểm soát được và lặp lại được mỗi tuần."
+      : currentStep === 2
+        ? "Chốt ngày bắt đầu, ngày nhìn lại và chỉ số kết quả."
+        : "Kiểm tra lần cuối trước khi tạo kế hoạch.";
   const currentStepWhy =
     currentStep === 0
-      ? "Outcome rõ giúp bạn biết khi nào về đích — và tránh đổi đích giữa chu kỳ vì cảm xúc."
+      ? "Kết quả rõ giúp biết khi nào về đích — và tránh đổi đích giữa chu kỳ vì cảm xúc."
       : currentStep === 1
         ? "Việc lặp lại là phần bạn kiểm soát được. Đo việc, không đo kết quả — kết quả tự đến khi việc đều."
-        : currentStep === 2
-          ? "Lịch và buổi nhìn lại cố định giữ nhịp khi động lực giảm — quan trọng hơn nội dung từng tuần."
-          : "Một lần xác nhận cuối để chốt; bạn vẫn sửa được sau khi tạo.";
+      : currentStep === 2
+        ? "Lịch và buổi nhìn lại cố định giúp duy trì khi động lực giảm — quan trọng hơn nội dung từng tuần."
+        : "Xác nhận lần cuối để chốt; vẫn sửa được sau khi tạo.";
 
   if (isLoading) {
     return (
@@ -336,7 +336,7 @@ export function TwelveWeekSetup() {
         currentStepId="twelve_week_setup"
         eyebrow="Thiết lập 12 tuần"
         title="Đang chuẩn bị dữ liệu thiết lập 12 tuần"
-        description="Mình đang lấy lại mục tiêu, kết quả kiểm tra và bản nháp gần nhất để mở đúng bước."
+        description="Đang lấy lại mục tiêu, kết quả kiểm tra và bản nháp gần nhất."
         loading
       />
     );
@@ -347,8 +347,8 @@ export function TwelveWeekSetup() {
       <CoreFlowGateState
         currentStepId="feasibility"
         eyebrow="Thiết lập 12 tuần"
-        title="Không thấy dữ liệu để tiếp tục thiết lập 12 tuần"
-        description="Bạn cần hoàn thành bước viết mục tiêu và kiểm tra tính thực tế trước khi tạo kế hoạch 12 tuần."
+        title="Thiếu dữ liệu để thiết lập 12 tuần"
+        description="Hoàn thành bước viết mục tiêu và kiểm tra tính thực tế trước khi tạo kế hoạch."
         actionLabel="Quay lại viết mục tiêu"
         onAction={() => navigate("/smart-goal-setup")}
       />
@@ -562,7 +562,7 @@ export function TwelveWeekSetup() {
 
   const validateCurrentStep = () => {
     if (currentStep === 0 && (!draft.goalType || !draft.vision12Week.trim() || !draft.week12Outcome.trim())) {
-      toast.error("Hãy làm rõ kết quả 12 tuần trước.");
+      toast.error("Làm rõ kết quả 12 tuần trước.");
       return false;
     }
 
@@ -572,7 +572,7 @@ export function TwelveWeekSetup() {
     }
 
     if (currentStep === 2 && (!draft.lagMetricName.trim() || !draft.startDate || !draft.reviewDay)) {
-      toast.error("Hãy chốt chỉ số chính, ngày bắt đầu và ngày nhìn lại.");
+      toast.error("Chốt chỉ số chính, ngày bắt đầu và ngày nhìn lại.");
       return false;
     }
 
@@ -777,7 +777,7 @@ export function TwelveWeekSetup() {
     }
 
     toast.success("Kế hoạch 12 tuần đã sẵn sàng.", {
-      description: "Bạn có thể vào ngay màn Hôm nay để bắt đầu tuần đầu tiên.",
+      description: "Vào ngay màn Hôm nay để bắt đầu tuần đầu tiên.",
     });
 
     navigate("/12-week-system");
@@ -793,7 +793,7 @@ export function TwelveWeekSetup() {
         recommendedPlan={pendingTemplate?.requiredPlan ?? "PLUS"}
         source="12_week_setup"
         title="Mở Plus để thiết lập nhanh hơn"
-        description="Bạn đang chọn một khung Plus. Mở Plus để đi vào ngay một cách vận hành phù hợp hơn với kiểu mục tiêu và mức sẵn sàng của bạn."
+        description="Khung này phù hợp với kiểu mục tiêu và mức sẵn sàng của bạn. Mở Plus để dùng ngay."
         onCheckoutComplete={handleCheckoutComplete}
       />
 
@@ -810,11 +810,10 @@ export function TwelveWeekSetup() {
               </div>
               <div className="space-y-4">
                 <h1 className="max-w-3xl text-2xl font-bold tracking-normal sm:text-4xl lg:text-5xl">
-                  Chốt một chu kỳ 12 tuần gọn, rõ và vào việc ngay.
+                  Chốt chu kỳ 12 tuần gọn, rõ và vào việc ngay.
                 </h1>
                 <p className="max-w-2xl text-sm leading-7 text-white/82 sm:text-base lg:text-lg">
-                  Bạn sẽ rời khỏi màn này với một kết quả rõ, 2-4 việc lặp lại có lịch làm, và một tuần đầu tiên đủ nhẹ
-                  để bắt đầu ngay.
+                  Sau bước này bạn có kết quả rõ, 2-4 việc lặp lại có lịch, và tuần 1 đủ nhẹ để bắt đầu.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 sm:gap-3">

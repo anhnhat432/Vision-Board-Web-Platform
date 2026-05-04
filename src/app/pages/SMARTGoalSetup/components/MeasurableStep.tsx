@@ -8,6 +8,7 @@ import { GoalArchetypeExamples } from "../../../components/GoalArchetypeExamples
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import type { SMARTData } from "../types";
+import { ArchetypeHint } from "./ArchetypeHint";
 
 interface MeasurableStepProps {
   smartData: SMARTData;
@@ -26,6 +27,7 @@ interface MeasurableStepProps {
    * for null, undefined, or `"other"`.
    */
   intentArchetype?: GoalArchetype | null;
+  archetype?: GoalArchetype;
 }
 
 export function MeasurableStep({
@@ -34,7 +36,9 @@ export function MeasurableStep({
   currentStepHasDraftContent,
   intentMetricHint,
   intentArchetype,
+  archetype,
 }: MeasurableStepProps) {
+  const activeArchetype = archetype ?? intentArchetype ?? "other";
   const parsedBaselineValue = parseNumberInput(smartData.measurable.baseline_value);
   const parsedTargetValue = parseNumberInput(smartData.measurable.target_value);
   const metricNameMissing = smartData.measurable.metric_name.trim().length === 0;
@@ -70,7 +74,7 @@ export function MeasurableStep({
           }
         />
         <p id="smart-metric-name-hint" className="text-sm text-slate-500">
-          Chọn một chỉ số đủ rõ để bạn biết mình đang tiến lên hay đứng yên.
+          Chọn chỉ số đo được — tăng hay đứng yên phải nhìn ra ngay.
         </p>
         {intentMetricHint && (
           <div
@@ -132,8 +136,9 @@ export function MeasurableStep({
         </div>
       </div>
       <p className="text-sm text-slate-500">
-        Nếu bạn nhập cả hai mốc, hệ thống sẽ kiểm tra để mốc mục tiêu lớn hơn mốc hiện tại.
+        Nhập cả hai mốc thì mốc mục tiêu phải lớn hơn mốc hiện tại.
       </p>
+      <ArchetypeHint archetype={activeArchetype} variant="metric" />
       <GoalArchetypeExamples archetype={intentArchetype} variant="metric" />
     </div>
   );

@@ -52,7 +52,7 @@ import {
   buildSuggestedNextWeekPlan,
   buildWeeklyReviewPremiumInsight,
 } from "../utils/twelve-week-premium";
-import { formatDateInputValue } from "../utils/storage";
+import { formatDateInputValue, getCalendarDateKey } from "../utils/storage";
 import {
   getExecutionInsights,
   getNextWeekAdjustmentRecommendation,
@@ -198,9 +198,14 @@ export function useTwelveWeekSystemSnapshot() {
   const currentWeekTasks = effectiveSystem ? getTwelveWeekTasksForWeek(effectiveSystem, currentWeek) : [];
   const scheduledTodayTasks = effectiveSystem ? getTwelveWeekTodayTasks(effectiveSystem) : [];
   const missedTasks = effectiveSystem ? getTwelveWeekMissedTasks(effectiveSystem) : [];
+  const snapshotTodayDateKey = formatDateInputValue(new Date());
+  const completedTodayTasks = currentWeekTasks
+    .filter((task) => task.completed && !task.skipped && getCalendarDateKey(task.completedAt || "") === snapshotTodayDateKey)
+    .slice(0, 3);
   const fallbackTasks = currentWeekTasks.filter((task) => !task.completed).slice(0, 3);
   const todayQueue = dedupeTasks([
     ...missedTasks.slice(0, 2),
+    ...completedTodayTasks,
     ...(scheduledTodayTasks.length > 0 ? scheduledTodayTasks : fallbackTasks),
   ]);
   const weekCompletion = effectiveSystem

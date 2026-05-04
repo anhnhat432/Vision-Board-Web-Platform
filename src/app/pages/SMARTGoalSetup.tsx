@@ -7,6 +7,7 @@ import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { PageShell } from "../components/PageShell";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { Card, CardContent } from "../components/ui/card";
+import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
 import { getSmartGoalStarter, getSmartGoalStarterPreview } from "../utils/smart-goal-starters";
@@ -14,7 +15,9 @@ import { APP_STORAGE_KEYS, getUserData } from "../utils/storage";
 import {
   buildSmartGoal,
   evaluateSmartGoalQuality,
+  inferGoalArchetype,
   isPendingSMARTGoal,
+  mapFocusAreaToDomain,
   normalizeListInput,
   parseNumberInput,
   type SmartGoal,
@@ -52,6 +55,7 @@ import type { SMARTData, SmartStepKey } from "./SMARTGoalSetup/types";
 
 export function SMARTGoalSetup() {
   const navigate = useNavigate();
+  const prefersReducedMotion = useReducedMotion();
   const [setupState, setSetupState] = useState<"checking" | "needs_life_balance" | "needs_life_insight" | "ready">(
     "checking",
   );
@@ -59,6 +63,7 @@ export function SMARTGoalSetup() {
   const [focusArea, setFocusArea] = useState<string>("");
   const [smartData, setSmartData] = useState<SMARTData>(createInitialSMARTData());
   const [userIntent, setUserIntentState] = useState<UserIntentId | null>(null);
+  const [archetypeOverride, setArchetypeOverride] = useState<GoalArchetype | null>(null);
   const stepTopRef = useRef<HTMLDivElement | null>(null);
   const stepHeadingRef = useRef<HTMLHeadingElement | null>(null);
 
@@ -109,6 +114,18 @@ export function SMARTGoalSetup() {
     if (!userIntent || !hasActionableArchetypeHint(userIntent)) return null;
     return getArchetypeForIntent(userIntent);
   }, [userIntent]);
+
+  const inferredArchetype: GoalArchetype = useMemo(() => {
+    if (intentArchetype) return intentArchetype;
+    return inferGoalArchetype({
+      domain: focusArea ? mapFocusAreaToDomain(focusArea) : undefined,
+      focusArea,
+      goalStatement: smartData.specific.goal_statement,
+      metricName: smartData.measurable.metric_name,
+    });
+  }, [focusArea, intentArchetype, smartData.measurable.metric_name, smartData.specific.goal_statement]);
+  const archetype: GoalArchetype = archetypeOverride ?? inferredArchetype;
+  const isArchetypeOverridden = archetypeOverride !== null;
 
   const intentMetricHint = useMemo(() => {
     if (!intentArchetype) return undefined;
@@ -207,6 +224,8 @@ export function SMARTGoalSetup() {
       weekly_hours: weeklyHours,
       quality_level: finalQuality.level,
       score_bucket: getQualityScoreBucket(finalQuality.overallScore),
+      goal_archetype: archetype,
+      archetype_overridden: isArchetypeOverridden,
     });
 
     navigate("/feasibility");
@@ -295,6 +314,11 @@ export function SMARTGoalSetup() {
             setSmartData={setSmartData}
             placeholder={currentStepData.placeholder}
             showError={shouldShowCurrentStepError}
+            archetype={archetype}
+            inferredArchetype={inferredArchetype}
+            isArchetypeOverridden={isArchetypeOverridden}
+            onArchetypeChange={(next) => setArchetypeOverride(next)}
+            onArchetypeResetToInferred={() => setArchetypeOverride(null)}
             intentArchetype={intentArchetype}
           />
         );
@@ -306,6 +330,7 @@ export function SMARTGoalSetup() {
             currentStepHasDraftContent={currentStepHasDraftContent}
             intentMetricHint={intentMetricHint}
             intentArchetype={intentArchetype}
+            archetype={archetype}
           />
         );
       case "achievable":
@@ -314,6 +339,7 @@ export function SMARTGoalSetup() {
             smartData={smartData}
             setSmartData={setSmartData}
             currentStepHasDraftContent={currentStepHasDraftContent}
+            archetype={archetype}
           />
         );
       case "relevant":
@@ -339,7 +365,7 @@ export function SMARTGoalSetup() {
         eyebrow="Viết mục tiêu"
         loading
         title="Đang chuẩn bị bước viết mục tiêu"
-        description="Mình đang kiểm tra dữ liệu cân bằng cuộc sống và trọng tâm đã chọn trước khi mở phần viết mục tiêu."
+        description="Đang kiểm tra dữ liệu cân bằng và trọng tâm trước khi mở phần viết mục tiêu."
       />
     );
   }
@@ -350,7 +376,7 @@ export function SMARTGoalSetup() {
         currentStepId="life_balance"
         eyebrow="Viết mục tiêu"
         title="Hoàn thành bước cân bằng trước"
-        description="Bước viết mục tiêu cần đi sau dữ liệu cân bằng cuộc sống thật. Hãy chấm điểm các lĩnh vực trước để mục tiêu không bắt đầu từ số mặc định."
+        description="Chấm điểm các lĩnh vực cuộc sống trước để mục tiêu dựa trên dữ liệu thật, không phải số mặc định."
         actionLabel="Bắt đầu cân bằng"
         onAction={() => navigate("/onboarding")}
       />
@@ -363,7 +389,7 @@ export function SMARTGoalSetup() {
         currentStepId="life_insight"
         eyebrow="Viết mục tiêu"
         title="Chọn trọng tâm trước"
-        description="Bạn đã có dữ liệu cân bằng cuộc sống, nhưng chưa chọn lĩnh vực trọng tâm. Hãy chọn một trọng tâm rồi quay lại viết mục tiêu."
+        description="Đã có dữ liệu cân bằng nhưng chưa chọn trọng tâm. Chọn một lĩnh vực rồi quay lại viết mục tiêu."
         actionLabel="Mở bước chọn trọng tâm"
         onAction={() => navigate("/life-insight")}
       />
@@ -373,9 +399,9 @@ export function SMARTGoalSetup() {
   return (
     <PageShell maxWidth="hero">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5 }}
         className="space-y-5"
       >
         <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} />

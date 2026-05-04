@@ -153,6 +153,7 @@ describe("12-week core flows", () => {
 
     await screen.findAllByRole("checkbox");
     const getFirstCheckbox = () => screen.getAllByRole("checkbox")[0];
+    const firstCheckboxLabel = getFirstCheckbox().getAttribute("aria-label") ?? "";
     await user.click(getFirstCheckbox());
     let toggledTaskId: string | null = null;
     await waitFor(() => {
@@ -161,7 +162,7 @@ describe("12-week core flows", () => {
       toggledTaskId = completedTask?.id ?? null;
     });
 
-    await user.click(getFirstCheckbox());
+    await user.click(await screen.findByRole("checkbox", { name: firstCheckboxLabel }));
 
     let reopenedTaskId: string | null = null;
     await waitFor(() => {

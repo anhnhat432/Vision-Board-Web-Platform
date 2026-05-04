@@ -1,5 +1,6 @@
 ﻿import { motion } from "motion/react";
-import { AlertTriangle, ArrowRight, CalendarClock, CalendarPlus, Check, Crown, Gauge, Sparkles, X } from "lucide-react";
+import { useState } from "react";
+import { AlertTriangle, ArrowRight, CalendarClock, CalendarPlus, Check, Crown, Gauge, Inbox, Loader2, Sparkles, X } from "lucide-react";
 
 import type { RescueModeStatus } from "@/features/plan12week/logic";
 
@@ -10,6 +11,7 @@ import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
 import { Progress } from "../ui/progress";
 import { Textarea } from "../ui/textarea";
+import { EmptyState } from "../states";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 import { formatCalendarDate } from "../../utils/storage";
 import type { TwelveWeekTaskInstance, TwelveWeekSystem, UniversalDailyCheckIn } from "../../utils/storage-types";
@@ -137,6 +139,17 @@ export function TwelveWeekTodayTab({
     firstPriorityTask?.completed && todayQueue.some((task) => task.id === firstPriorityTask.id),
   );
   const isFirstWeek = currentWeek === 1;
+  const [isSavingCheckIn, setIsSavingCheckIn] = useState(false);
+
+  const handleSaveCheckInClick = async () => {
+    if (isSavingCheckIn) return;
+    setIsSavingCheckIn(true);
+    try {
+      await Promise.resolve(onSaveCheckIn());
+    } finally {
+      setIsSavingCheckIn(false);
+    }
+  };
 
   return (
     <div className="ops-system-panel flex min-w-0 flex-col gap-5">
@@ -157,11 +170,10 @@ export function TwelveWeekTodayTab({
               <div>
                 <CardTitle className="flex items-center gap-2 text-slate-950">
                   <AlertTriangle className="h-5 w-5 text-amber-600" />
-                  Cứu nhịp tuần này
+                  Quay lại nhịp tuần này
                 </CardTitle>
                 <CardDescription className="mt-2 max-w-3xl text-slate-600">
-                  Bạn đang có {missedTasks.length} việc bị trễ. Mục tiêu lúc này không phải làm hết, mà là chọn cách
-                  quay lại nhịp gọn nhất.
+                  Có {missedTasks.length} việc bị trễ. Không cần làm hết — chọn cách quay lại nhịp gọn nhất.
                 </CardDescription>
               </div>
               <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">
@@ -185,17 +197,17 @@ export function TwelveWeekTodayTab({
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
-                        Gợi ý cứu nhịp của Plus
+                        Gợi ý quay lại nhịp từ Plus
                       </p>
                       <p className="mt-2 text-base font-semibold text-slate-950">
                         {hasSmartRescue && rescuePlanSummary
                           ? rescuePlanSummary.headline
-                          : "Plus sẽ gợi ý nên dàn lại tuần, giảm tải hay dời lịch để bạn không phải tự đoán."}
+                          : "Plus gợi ý nên dàn lại tuần, giảm tải hay dời lịch — không cần tự đoán."}
                       </p>
                       <p className="mt-2 text-sm leading-7 text-slate-600">
                         {hasSmartRescue && rescuePlanSummary
                           ? rescuePlanSummary.reason
-                          : "Điểm khác của Plus không phải thêm việc, mà là chỉ rõ cách quay lại nhịp nhẹ đầu nhất ngay lúc bạn bắt đầu trễ."}
+                          : "Plus không thêm việc, mà chỉ rõ cách quay lại nhịp nhẹ nhất ngay khi bạn bắt đầu trễ."}
                       </p>
                       {hasSmartRescue && rescuePlanSummary && (
                         <p className="mt-2 text-sm leading-7 text-slate-600">
@@ -214,7 +226,7 @@ export function TwelveWeekTodayTab({
                     </Button>
                   ) : (
                     <Button className="mt-4 w-full sm:w-auto" onClick={onOpenSmartRescue}>
-                      Mở Plus để có rescue thông minh
+                      Mở Plus để có gợi ý phù hợp
                     </Button>
                   )}
                 </div>
@@ -283,7 +295,7 @@ export function TwelveWeekTodayTab({
                   data-testid="today-first-week-encouragement"
                   className="mt-2 text-sm leading-6 text-violet-800"
                 >
-                  Tuần đầu — bắt đầu nhỏ là quan trọng nhất. Đừng cố làm hết hôm nay, hãy giữ nhịp đến hết tuần.
+                  Tuần đầu — bắt đầu nhỏ là quan trọng nhất. Không cần làm hết hôm nay, duy trì đến hết tuần.
                 </p>
               )}
             </div>
@@ -338,44 +350,47 @@ export function TwelveWeekTodayTab({
             </CardHeader>
             <CardContent className="min-w-0 space-y-3 pt-0">
               {todayQueue.length === 0 ? (
-                <div
-                  data-testid="today-empty-state"
-                  className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center text-slate-600"
-                >
-                  {hasPlanTasks ? (
-                    <div className="mx-auto max-w-lg space-y-3">
-                      <p className="font-semibold text-slate-900">
-                        {reviewDueToday ? "Tuần đã sẵn sàng để chốt review" : "Hết việc hôm nay"}
-                      </p>
-                      <p className="text-sm leading-6 text-slate-600">
-                        {reviewDueToday
-                          ? "Mở tab Tuần để chốt review và khóa ưu tiên cho tuần sau."
-                          : "Lưu check-in ngắn ở bên cạnh, hoặc mở tab Tuần để chuẩn bị review."}
-                      </p>
-                      {onOpenWeekTab && (
+                hasPlanTasks ? (
+                  <EmptyState
+                    variant="dashed"
+                    testId="today-empty-state"
+                    icon={<Check className="h-5 w-5" />}
+                    title={reviewDueToday ? "Tuần đã sẵn sàng để chốt review" : "Hết việc hôm nay"}
+                    description={
+                      reviewDueToday
+                        ? "Mở tab Tuần để chốt review và khóa ưu tiên cho tuần sau."
+                        : "Lưu check-in ngắn ở bên cạnh, hoặc mở tab Tuần để chuẩn bị review."
+                    }
+                    actions={
+                      onOpenWeekTab ? (
                         <Button variant="outline" onClick={onOpenWeekTab} className="bg-white">
                           Mở tab Tuần
                           <ArrowRight className="ml-1 h-4 w-4" />
                         </Button>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="mx-auto max-w-lg space-y-3">
-                      <p className="font-semibold text-slate-900">Chưa có việc nào trong chu kỳ này</p>
-                      <p className="text-sm leading-6 text-slate-600">
-                        {hasLeadMetrics
-                          ? "Chu kỳ đã có việc giữ nhịp, nhưng chưa có việc nào được tạo cho tuần hiện tại. Vào lại Setup để tạo lại chu kỳ."
-                          : "Chu kỳ chưa có việc giữ nhịp. Vào Setup để thêm 2-4 việc lặp lại trước."}
-                      </p>
-                      {onNavigateToSetup && (
+                      ) : undefined
+                    }
+                  />
+                ) : (
+                  <EmptyState
+                    variant="dashed"
+                    testId="today-empty-state"
+                    icon={<Inbox className="h-5 w-5" />}
+                    title="Chưa có việc nào trong chu kỳ này"
+                    description={
+                      hasLeadMetrics
+                        ? "Chu kỳ đã có việc lặp lại, nhưng chưa có việc nào cho tuần này. Vào Setup để tạo lại chu kỳ."
+                        : "Chu kỳ chưa có việc lặp lại. Vào Setup để thêm 2-4 việc lặp lại trước."
+                    }
+                    actions={
+                      onNavigateToSetup ? (
                         <Button onClick={onNavigateToSetup}>
                           {hasLeadMetrics ? "Mở Setup để chỉnh" : "Đi tới Setup"}
                           <ArrowRight className="ml-1 h-4 w-4" />
                         </Button>
-                      )}
-                    </div>
-                  )}
-                </div>
+                      ) : undefined
+                    }
+                  />
+                )
               ) : (
                 todayQueue.map((task) => {
                   const isOverdue = !task.completed && task.scheduledDate < todayDateKey;
@@ -572,7 +587,7 @@ export function TwelveWeekTodayTab({
                   data-testid="today-primary-done-nudge"
                   className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-800"
                 >
-                  Việc chính đã xong — lưu check-in để chốt nhịp hôm nay.
+                  Việc chính đã xong — lưu check-in để chốt hôm nay.
                 </p>
               )}
             </CardContent>
@@ -646,8 +661,21 @@ export function TwelveWeekTodayTab({
                   placeholder="Nếu cần, chỉ ghi đúng một ý để ngày mai đỡ quên."
                 />
               </div>
-              <Button size="lg" className="w-full sm:w-auto" onClick={onSaveCheckIn}>
-                Lưu check-in hôm nay
+              <Button
+                size="lg"
+                className="w-full sm:w-auto"
+                onClick={handleSaveCheckInClick}
+                disabled={isSavingCheckIn}
+                aria-busy={isSavingCheckIn}
+              >
+                {isSavingCheckIn ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    Đang lưu check-in...
+                  </>
+                ) : (
+                  "Lưu check-in hôm nay"
+                )}
               </Button>
               {latestCheckIn && (
                 <div

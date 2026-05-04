@@ -41,7 +41,7 @@ export function TwelveWeekCycleSettingsPanel({
           Cài đặt chu kỳ
         </CardTitle>
         <CardDescription className="text-slate-700">
-          Chỉnh nhịp review, mức tải và thứ tự tactic để hệ thống này hợp với cách bạn làm thật ngoài đời.
+          Chỉnh nhịp review, mức tải và thứ tự việc lặp lại để hợp với cách bạn làm thật ngoài đời.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -52,7 +52,7 @@ export function TwelveWeekCycleSettingsPanel({
                 Một lần chỉnh cho cả chu kỳ
               </p>
               <p className="mt-2 text-lg font-semibold text-slate-950">
-                Giữ nhịp tuần, thứ tự tactic và trạng thái chu kỳ trong cùng một nơi.
+                Nhịp tuần, thứ tự việc và trạng thái chu kỳ trong cùng một nơi.
               </p>
             </div>
             <Badge variant="outline" className="border-sky-200 bg-white text-sky-800">
@@ -108,7 +108,7 @@ export function TwelveWeekCycleSettingsPanel({
                 Nhịp tuần
               </p>
               <p className="mt-1 text-sm text-slate-600">
-                Cho hệ thống biết tuần này bạn muốn cân bằng, nhẹ hơn hay đẩy mạnh.
+                Cho biết tuần này bạn muốn cân bằng, nhẹ hơn hay đẩy mạnh.
               </p>
             </div>
             <Select value={system.tacticLoadPreference || "balanced"} onValueChange={onLoadPreferenceChange}>
@@ -153,13 +153,13 @@ export function TwelveWeekCycleSettingsPanel({
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Ưu tiên tactic</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Thứ tự việc lặp lại</p>
               <p className="mt-1 text-sm text-slate-600">
-                Tactic cốt lõi được ưu tiên trong điểm tuần. Tactic tùy chọn là phần thêm khi bạn còn sức.
+                Việc cốt lõi được ưu tiên trong điểm tuần. Việc tùy chọn là phần thêm khi bạn còn sức.
               </p>
             </div>
             <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
-              {system.leadIndicators.length} tactic
+              {system.leadIndicators.length} việc
             </Badge>
           </div>
           <div className="mt-4 space-y-4">
@@ -243,7 +243,7 @@ export function TwelveWeekCycleSettingsPanel({
             <p className="mt-2 text-xl font-bold text-slate-950">{formatCalendarDate(system.endDate)}</p>
           </div>
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 shadow-[0_18px_38px_-34px_rgba(217,119,6,0.16)]">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">Re-entry đã dùng</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">Số lần quay lại nhịp</p>
             <p className="mt-2 text-xl font-bold text-slate-950">{system.reentryCount ?? 0} lần</p>
           </div>
         </div>

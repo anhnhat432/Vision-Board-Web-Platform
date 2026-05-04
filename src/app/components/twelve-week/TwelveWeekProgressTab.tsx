@@ -63,7 +63,7 @@ function getNarrativeStyle(level: ProgressTrendInterpretation["level"]): {
       return {
         container: "border-emerald-200 bg-emerald-50/82",
         badge: "border-emerald-300 bg-white text-emerald-800",
-        badgeLabel: "Đang giữ nhịp",
+        badgeLabel: "Đang đúng nhịp",
       };
     case "early":
       return {
@@ -81,7 +81,7 @@ function getNarrativeStyle(level: ProgressTrendInterpretation["level"]): {
       return {
         container: "border-rose-200 bg-rose-50/82",
         badge: "border-rose-300 bg-white text-rose-800",
-        badgeLabel: "Cần cứu nhịp",
+        badgeLabel: "Cần quay lại nhịp",
       };
     default:
       return {
@@ -290,7 +290,7 @@ export function TwelveWeekProgressTab({
                 <div>
                   <p className="text-sm font-semibold text-slate-950">Tuần {currentWeek} đang là trọng tâm</p>
                   <p className="mt-1 text-sm text-slate-600">
-                    Ưu tiên giữ nhịp việc cốt lõi và chốt review vào {getReviewDayLabel(system.reviewDay)}.
+                    Ưu tiên duy trì việc cốt lõi và chốt review vào {getReviewDayLabel(system.reviewDay)}.
                   </p>
                 </div>
                 <Badge className="bg-sky-700 text-white hover:bg-sky-700">{currentWeekScoreValue} điểm</Badge>
@@ -564,9 +564,9 @@ export function TwelveWeekProgressTab({
               className="border border-emerald-200/80 bg-emerald-50/70 shadow-[0_18px_44px_-36px_rgba(5,150,105,0.24)]"
             >
               <CardHeader>
-                <CardTitle className="text-slate-950">Phân tích theo việc giữ nhịp</CardTitle>
+                <CardTitle className="text-slate-950">Phân tích theo việc lặp lại</CardTitle>
                 <CardDescription className="text-slate-600">
-                  Chi tiết hoàn thành và xu hướng từng việc giữ nhịp đến tuần {currentWeek}.
+                  Chi tiết hoàn thành và xu hướng từng việc lặp lại đến tuần {currentWeek}.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -632,8 +632,8 @@ export function TwelveWeekProgressTab({
             <div>
               <p className="text-lg font-bold text-slate-950">Phân tích thực thi nâng cao</p>
               <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-slate-600">
-                Bản đồ nhiệt hoàn thành, xu hướng theo tuần và phân tích từng việc giữ nhịp giúp bạn biết chỗ nào đang
-                mạnh, chỗ nào cần cứu trước.
+                Bản đồ nhiệt hoàn thành, xu hướng theo tuần và phân tích từng việc lặp lại giúp bạn biết chỗ nào đang
+                mạnh, chỗ nào cần chú ý trước.
               </p>
             </div>
             <Badge className="border-violet-200 bg-white text-violet-700 hover:bg-white">

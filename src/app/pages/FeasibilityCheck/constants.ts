@@ -6,7 +6,7 @@ export const QUESTIONS: Question[] = [
     axis: "time",
     axisLabel: "Thời gian thật",
     question: "Mỗi tuần bạn có thể dành chính xác bao nhiêu thời gian cho mục tiêu này?",
-    helper: "Trả lời theo lịch sống thật. Câu này giúp hệ thống biết tuần đầu nên ít việc hay nhiều việc.",
+    helper: "Trả lời theo lịch sống thật — giúp biết tuần đầu nên ít việc hay nhiều việc.",
     options: [
       {
         value: "lt1",
@@ -29,7 +29,7 @@ export const QUESTIONS: Question[] = [
     axis: "energy",
     axisLabel: "Năng lượng hiện tại",
     question: "Sau một ngày bình thường, bạn còn bao nhiêu năng lượng cho mục tiêu này?",
-    helper: "Năng lượng thấp không có nghĩa là mục tiêu sai; nó chỉ nói rằng tuần đầu cần nhẹ và ít ma sát hơn.",
+    helper: "Năng lượng thấp không nghĩa là mục tiêu sai — chỉ nghĩa là tuần đầu cần nhẹ hơn.",
     options: [
       {
         value: "energy_drained",
@@ -62,7 +62,7 @@ export const QUESTIONS: Question[] = [
     axis: "resources",
     axisLabel: "Nguồn lực / kỹ năng",
     question: "Bạn đã có đủ kỹ năng, công cụ hoặc nguồn lực để bắt đầu chưa?",
-    helper: "Nếu chưa đủ nguồn lực, kế hoạch 12 tuần nên có bước chuẩn bị nhỏ trước khi làm việc lớn.",
+    helper: "Chưa đủ nguồn lực thì kế hoạch nên có bước chuẩn bị trước khi làm việc lớn.",
     options: [
       {
         value: "resources_missing",
@@ -95,7 +95,7 @@ export const QUESTIONS: Question[] = [
     axis: "clarity",
     axisLabel: "Độ rõ mục tiêu",
     question: "Mục tiêu này cảm thấy thực tế và rõ đến mức nào với bạn hiện tại?",
-    helper: "Mục tiêu càng rõ về kết quả, con số cần đạt và thời hạn thì càng dễ chia thành việc hằng tuần.",
+    helper: "Mục tiêu rõ về kết quả, con số và thời hạn thì dễ chia thành việc hằng tuần.",
     options: [
       {
         value: "overwhelming",
@@ -128,7 +128,7 @@ export const QUESTIONS: Question[] = [
     axis: "obstacle",
     axisLabel: "Trở ngại chính",
     question: "Trở ngại lớn nhất có thể ngăn bạn hoàn thành mục tiêu này là gì?",
-    helper: "Câu này giúp hệ thống biết nên giảm việc, chia nhỏ hay thêm bước chuẩn bị.",
+    helper: "Giúp biết nên giảm việc, chia nhỏ hay thêm bước chuẩn bị.",
     options: [
       {
         value: "motivation",
@@ -162,7 +162,7 @@ export const QUESTIONS: Question[] = [
     axis: "routine",
     axisLabel: "Lịch cố định",
     question: "Bạn đã có chỗ cố định trong lịch để làm mục tiêu này chưa?",
-    helper: "Không có lịch cố định thì kế hoạch đẹp vẫn dễ trôi. Câu này giúp hệ thống biết cần giữ nhịp chặt đến đâu.",
+    helper: "Không có lịch cố định thì kế hoạch dễ trôi — giúp biết tuần đầu cần chặt đến đâu.",
     options: [
       {
         value: "rarely",
@@ -195,7 +195,7 @@ export const QUESTIONS: Question[] = [
     axis: "confidence",
     axisLabel: "Tự tin hoàn thành",
     question: "Nếu phải bắt đầu trong tuần này, bạn tự tin hoàn thành tuần đầu ở mức nào?",
-    helper: "Câu này giúp chọn tuần đầu nên nhẹ, vừa phải hay hơi thử thách.",
+    helper: "Giúp chọn tuần đầu nên nhẹ, vừa phải hay hơi thử thách.",
     options: [
       {
         value: "exploring",

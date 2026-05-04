@@ -89,6 +89,16 @@ export type {
 } from "./progressNarrative";
 export { calculateMetricStreak } from "./streak";
 export { getWeeklyTaskWarning, isTaskCountInRecommendedRange } from "./taskConstraints";
+export {
+  assessPlanQuality,
+  assessWeekOneLoad,
+  type AssessPlanQualityInput,
+  type AssessWeekOneLoadInput,
+  type PlanQualityAssessment,
+  type WeekOneLoadAssessment,
+  type WeekOneLoadLevel,
+  type WeeklyCapacityBand,
+} from "./planQuality";
 export { createWeeklyReview } from "./weeklyReview";
 export { interpretWeeklyExecutionScore } from "./weeklyExecutionInterpretation";
 export type { WeeklyExecutionInterpretation, WeeklyExecutionLevel } from "./weeklyExecutionInterpretation";

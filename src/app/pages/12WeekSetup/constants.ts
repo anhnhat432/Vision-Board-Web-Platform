@@ -1,6 +1,6 @@
 export const STEPS = [
   { id: "outcome", label: "Mục tiêu", title: "Mục tiêu 12 tuần" },
-  { id: "tactics", label: "Việc lặp lại", title: "2-4 việc giữ nhịp" },
+  { id: "tactics", label: "Việc lặp lại", title: "2-4 việc lặp lại" },
   { id: "week1", label: "Tuần 1", title: "Tuần đầu tiên và lịch nhìn lại" },
   { id: "finish", label: "Chốt", title: "Chốt kế hoạch" },
 ] as const;

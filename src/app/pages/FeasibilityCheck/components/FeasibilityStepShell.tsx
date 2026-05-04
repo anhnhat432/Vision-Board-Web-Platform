@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import type { Ref } from "react";
 
 import { Button } from "../../../components/ui/button";
+import { useReducedMotion } from "../../../components/ui/use-reduced-motion";
 import { Card, CardContent } from "../../../components/ui/card";
 import { Label } from "../../../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
@@ -31,15 +32,17 @@ export function FeasibilityStepShell({
   targetRef,
   headingRef,
 }: FeasibilityStepShellProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <div ref={targetRef} className="mx-auto max-w-4xl">
       <Card className="overflow-hidden">
         <CardContent className="p-5 sm:p-6 lg:p-7">
           <motion.div
             key={currentQuestion.id}
-            initial={{ opacity: 0, x: 18 }}
+            initial={prefersReducedMotion ? false : { opacity: 0, x: 18 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
             className="space-y-6"
           >
             <div className="rounded-[28px] gradient-violet-pink p-4 sm:p-6">
@@ -72,9 +75,9 @@ export function FeasibilityStepShell({
               {currentQuestion.options.map((option, index) => (
                 <motion.div
                   key={option.value}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
+                  transition={prefersReducedMotion ? { duration: 0 } : { delay: index * 0.05 }}
                 >
                   <Label
                     htmlFor={option.value}
@@ -94,15 +97,31 @@ export function FeasibilityStepShell({
               ))}
             </RadioGroup>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <Button variant="outline" className="flex-1" onClick={onBack}>
-                <ArrowLeft className="h-4 w-4" />
-                Quay lại
-              </Button>
-              <Button className="flex-1" onClick={onNext} disabled={!selectedAnswer}>
-                {currentStep < totalSteps - 1 ? "Tiếp theo" : "Hoàn thành đánh giá"}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
+            <div className="space-y-2">
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button variant="outline" className="flex-1" onClick={onBack}>
+                  <ArrowLeft className="h-4 w-4" />
+                  Quay lại
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={onNext}
+                  disabled={!selectedAnswer}
+                  aria-describedby={!selectedAnswer ? `feasibility-question-${currentQuestion.id}-next-hint` : undefined}
+                >
+                  {currentStep < totalSteps - 1 ? "Tiếp theo" : "Hoàn thành đánh giá"}
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </div>
+              {!selectedAnswer && (
+                <p
+                  id={`feasibility-question-${currentQuestion.id}-next-hint`}
+                  role="status"
+                  className="text-center text-xs text-slate-500 sm:text-right"
+                >
+                  Chọn một lựa chọn phù hợp để tiếp tục.
+                </p>
+              )}
             </div>
           </motion.div>
         </CardContent>
@@ -116,7 +135,7 @@ export function FeasibilityStepShell({
               {[
                 "Trả lời theo lịch sống thật, không theo phiên bản lý tưởng.",
                 "Biết mục tiêu hiện tại đang vừa sức hay quá tải.",
-                "Nhìn rõ độ sẵn sàng trước khi bước vào system 12 tuần.",
+                "Nhìn rõ độ sẵn sàng trước khi bước vào kế hoạch 12 tuần.",
                 "Giảm rủi ro đặt mục tiêu nghe hay nhưng khó duy trì.",
               ].map((item) => (
                 <div

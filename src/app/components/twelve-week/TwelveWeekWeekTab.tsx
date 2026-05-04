@@ -1,6 +1,7 @@
-﻿import { Crown } from "lucide-react";
+﻿import { useState } from "react";
+import { Crown } from "lucide-react";
 
-import { CalendarCheck, CheckCircle2, ClipboardCheck, Flag, Layers, TrendingUp } from "lucide-react";
+import { CalendarCheck, CheckCircle2, ClipboardCheck, Flag, Layers, Loader2, TrendingUp } from "lucide-react";
 
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -141,6 +142,17 @@ export function TwelveWeekWeekTab({
   const reviewIsCompleted = Boolean(currentReview?.reviewCompleted);
   const summaryReview = reviewIsCompleted ? currentReview ?? null : null;
   const intensityHint = getWorkloadIntensityHint(weeklyForm.workloadDecision);
+  const [isSavingReview, setIsSavingReview] = useState(false);
+
+  const handleSaveReviewClick = async () => {
+    if (isSavingReview) return;
+    setIsSavingReview(true);
+    try {
+      await Promise.resolve(onSaveWeeklyReview());
+    } finally {
+      setIsSavingReview(false);
+    }
+  };
 
   return (
     <div className="space-y-6 pt-4">
@@ -234,7 +246,7 @@ export function TwelveWeekWeekTab({
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Cốt lõi trước</p>
                     <p className="mt-2 text-lg font-semibold text-slate-900">
-                      {coreIndicators.length} việc giữ nhịp chính
+                      {coreIndicators.length} việc lặp lại chính
                     </p>
                   </div>
                   <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">{coreIndicators.length}</Badge>
@@ -242,7 +254,7 @@ export function TwelveWeekWeekTab({
                 <div className="mt-4 space-y-3">
                   {coreIndicators.length === 0 ? (
                     <div className="rounded-lg border border-emerald-100 bg-white px-4 py-4 text-sm leading-6 text-slate-500">
-                      Chưa có việc cốt lõi. Khi việc giữ nhịp được thêm, phần này sẽ cho bạn biết nhịp nào cần giữ trước.
+                      Chưa có việc cốt lõi. Khi việc lặp lại được thêm, phần này sẽ cho bạn biết việc nào cần làm trước.
                     </div>
                   ) : (
                     coreIndicators.map((indicator) => (
@@ -404,7 +416,7 @@ export function TwelveWeekWeekTab({
                     className="mt-4 w-full bg-white sm:w-auto"
                     onClick={onOpenTodayTab}
                   >
-                    Mở Today để bắt đầu tuần sau
+                    Mở Hôm nay để bắt đầu tuần sau
                   </Button>
                 )}
               </div>
@@ -567,7 +579,7 @@ export function TwelveWeekWeekTab({
                               : "bg-amber-400"
                         }`}
                       />
-                      <span className="text-sm font-semibold text-slate-800">Hệ thống đọc được nhịp tuần này</span>
+                      <span className="text-sm font-semibold text-slate-800">Đã đọc được nhịp tuần này</span>
                     </div>
                     <Badge
                       variant="outline"
@@ -689,16 +701,22 @@ export function TwelveWeekWeekTab({
             >
               <p className="text-sm leading-6 text-slate-700">
                 {reviewDueToday
-                  ? "Sẵn sàng chốt review tuần này. Hệ thống sẽ khóa tuần và tạo gợi ý cho tuần sau."
+                  ? "Sẵn sàng chốt review tuần này. Tuần sẽ được khóa và tạo gợi ý cho tuần sau."
                   : "Có thể chốt sớm — bạn vẫn được phép sửa đến ngày review chính thức."}
               </p>
               <Button
                 size="lg"
                 className="w-full shrink-0 sm:w-auto"
-                onClick={onSaveWeeklyReview}
+                onClick={handleSaveReviewClick}
+                disabled={isSavingReview}
+                aria-busy={isSavingReview}
               >
-                <ClipboardCheck className="h-4 w-4" />
-                Chốt review tuần này
+                {isSavingReview ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <ClipboardCheck className="h-4 w-4" />
+                )}
+                {isSavingReview ? "Đang chốt review..." : "Chốt review tuần này"}
               </Button>
             </div>
           </CardContent>

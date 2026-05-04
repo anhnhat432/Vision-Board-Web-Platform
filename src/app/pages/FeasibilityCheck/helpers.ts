@@ -43,7 +43,7 @@ function getBottleneckAction(axis: FeasibilityAxis | "wheel"): string {
     case "energy":
       return "Thiết kế tuần đầu nhẹ hơn, ưu tiên bước nhỏ dễ hoàn thành sau ngày bận.";
     case "resources":
-      return "Thêm một bước chuẩn bị hoặc học nhanh trước khi yêu cầu đầu ra lớn.";
+      return "Thêm một bước chuẩn bị hoặc học nhanh trước khi yêu cầu kết quả lớn.";
     case "clarity":
       return "Thu hẹp mục tiêu 12 tuần để chỉ còn một kết quả chính có thể đo được.";
     case "obstacle":
@@ -100,7 +100,7 @@ function getSmartGoalQualityNote(
   qualityLevel: SmartGoalQualityBridge | undefined,
 ): string | undefined {
   if (qualityLevel === "weak") {
-    return "Mục tiêu viết chưa đủ rõ ràng. Nên quay lại bước viết mục tiêu để làm rõ kết quả cần đạt, con số đo và lý do trước khi tạo kế hoạch 12 tuần.";
+    return "Mục tiêu viết chưa đủ rõ ràng. Nên quay lại làm rõ kết quả, con số đo và lý do trước khi tạo kế hoạch 12 tuần.";
   }
   return undefined;
 }
@@ -120,7 +120,7 @@ function buildPlanGuidance(input: {
   if (input.resultType === "too_ambitious") {
     return {
       firstWeekGuidance:
-        "Tuần 1 chỉ nên có 1-2 hành động bắt buộc, ưu tiên tạo nhịp thắng nhỏ thay vì chứng minh năng lực.",
+        "Tuần 1 chỉ nên có 1-2 việc bắt buộc, ưu tiên thắng nhỏ thay vì chứng minh năng lực.",
       scopeRecommendation:
         `Thu nhỏ mục tiêu 12 tuần hoặc kéo dài thời hạn trước khi tăng độ khó.${qualitySuffix}`,
     };
@@ -130,7 +130,7 @@ function buildPlanGuidance(input: {
     return {
       firstWeekGuidance: `Tuần 1 nên nhẹ hơn vì phần cần chú ý nhất là ${input.bottleneck.label.toLowerCase()}.`,
       scopeRecommendation:
-        `Giữ 2 việc chính, bỏ bớt phần mở rộng cho đến khi nhịp ổn định.${qualitySuffix}`,
+        `Giữ 2 việc chính, bỏ bớt phần mở rộng cho đến khi duy trì ổn.${qualitySuffix}`,
     };
   }
 
@@ -144,7 +144,7 @@ function buildPlanGuidance(input: {
   }
 
   return {
-    firstWeekGuidance: "Tuần 1 nên cân bằng: đủ rõ để tiến lên, đủ nhẹ để không mất nhịp.",
+    firstWeekGuidance: "Tuần 1 nên cân bằng: đủ rõ để tiến lên, đủ nhẹ để duy trì đều.",
     scopeRecommendation:
       `Giữ một kết quả chính, 2-3 việc lặp lại và một buổi nhìn lại cố định.${qualitySuffix}`,
   };
@@ -200,8 +200,8 @@ export function buildResult(
 
   const resultCopy: Record<ResultType, Pick<ResultData, "title" | "summary" | "recommendation">> = {
     realistic: {
-      title: "Mục tiêu này đủ thực tế nếu giữ đúng độ nặng.",
-      summary: `Đánh giá dựa trên ${QUESTIONS.length} góc nhìn cho thấy bạn có thể bắt đầu. Phần cần chú ý nhất là ${bottleneck.label.toLowerCase()}, nên kế hoạch 12 tuần cần xử lý phần này ngay từ tuần đầu.`,
+      title: "Mục tiêu này đủ thực tế nếu giữ đúng mức tải.",
+      summary: `${QUESTIONS.length} góc nhìn cho thấy bạn có thể bắt đầu. Phần cần chú ý nhất là ${bottleneck.label.toLowerCase()}, nên kế hoạch 12 tuần cần xử lý phần này ngay từ tuần đầu.`,
       recommendation:
         planLoad === "push"
           ? `Trước khi tạo kế hoạch 12 tuần, hãy ${prePlanAction}. Sau đó có thể thử thách hơn một chút, nhưng vẫn cần nhìn lại sớm.`
@@ -209,15 +209,15 @@ export function buildResult(
     },
     challenging: {
       title: "Mục tiêu này làm được, nhưng phải xử lý đúng phần yếu nhất.",
-      summary: `Kết quả không chỉ dựa vào cảm giác chung. Phần yếu nhất hiện tại là ${bottleneck.label.toLowerCase()}, nên nếu bỏ qua nó thì kế hoạch 12 tuần rất dễ dày lên nhưng khó giữ.`,
+      summary: `Kết quả không chỉ dựa vào cảm giác chung. Phần yếu nhất là ${bottleneck.label.toLowerCase()} — bỏ qua phần này thì kế hoạch 12 tuần dễ phình nhưng khó duy trì.`,
       recommendation:
         `Trước khi tạo kế hoạch 12 tuần: ${prePlanAction}. Thu hẹp mục tiêu, chọn ít việc chính hơn và biến ${bottleneck.label.toLowerCase()} thành nguyên tắc cho tuần đầu.`,
     },
     too_ambitious: {
       title: "Mục tiêu này cần thu nhỏ trước khi tạo kế hoạch 12 tuần.",
-      summary: `Một vài nền tảng hiện tại chưa đủ chắc, đặc biệt là ${bottleneck.label.toLowerCase()}. Nếu giữ nguyên độ rộng, rủi ro lớn nhất là bắt đầu hăng nhưng mất nhịp sớm.`,
+      summary: `Một vài nền tảng chưa đủ chắc, đặc biệt là ${bottleneck.label.toLowerCase()}. Giữ nguyên quy mô thì rủi ro lớn nhất là bắt đầu mạnh nhưng sớm đuối.`,
       recommendation:
-        `Trước khi tạo kế hoạch 12 tuần: ${prePlanAction}. Chọn phiên bản nhỏ hơn của mục tiêu, giữ tuần đầu rất nhẹ và chỉ tăng độ khó khi nhịp ổn.`,
+        `Trước khi tạo kế hoạch 12 tuần: ${prePlanAction}. Chọn phiên bản nhỏ hơn, giữ tuần đầu rất nhẹ và chỉ tăng độ khó khi đã duy trì ổn.`,
     },
   };
 

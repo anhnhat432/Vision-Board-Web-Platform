@@ -31,8 +31,8 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
                 Biến tầm nhìn thành mục tiêu rõ ràng và kế hoạch 12 tuần có thể làm mỗi ngày.
               </h1>
               <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                Người mới nên bắt đầu bằng bức tranh cuộc sống hiện tại, sau đó chốt một mục tiêu SMART, kiểm tra khả
-                thi và để hệ thống chia nhỏ thành tuần, việc, review.
+                Dùng được ngay, không cần đăng nhập. Chấm cân bằng cuộc sống, chốt mục tiêu SMART, kiểm tra khả thi rồi
+                vào kế hoạch 12 tuần có việc cho từng ngày.
               </p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
@@ -66,8 +66,8 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
             </div>
             {isDemo ? (
               <p className="max-w-2xl text-xs leading-6 text-slate-500">
-                Dữ liệu demo/local được lưu trên trình duyệt hiện tại. Đăng nhập/sync là lớp sau, không bắt buộc; hãy
-                export nếu muốn giữ bản sao.
+                Dữ liệu demo/local được lưu trên trình duyệt hiện tại. Đăng ký là tuỳ chọn để đồng bộ sau — export nếu
+                muốn giữ bản sao.
               </p>
             ) : null}
           </div>

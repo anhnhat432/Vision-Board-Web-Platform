@@ -1,5 +1,6 @@
 import { Compass, Sparkles, Target } from "lucide-react";
 import { motion } from "motion/react";
+import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -30,6 +31,7 @@ import type { PendingFeasibilityResult, ResultData } from "./FeasibilityCheck/ty
 
 export function FeasibilityCheck() {
   const navigate = useNavigate();
+  const prefersReducedMotion = useReducedMotion();
   const hasGuardedRef = useRef(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -52,14 +54,14 @@ export function FeasibilityCheck() {
     const data = getUserData();
 
     if (!hasRealLifeBalance(data)) {
-      toast.info("Vui lòng hoàn thành Life Balance trước khi kiểm tra tính khả thi.");
+      toast.info("Hoàn thành bước cân bằng cuộc sống trước.");
       setIsInitializing(false);
       navigate("/onboarding");
       return;
     }
 
     if (!storedFocusArea || !draft) {
-      toast.info("Vui lòng hoàn thành bước viết mục tiêu trước.");
+      toast.info("Hoàn thành bước viết mục tiêu trước.");
       setIsInitializing(false);
       navigate("/smart-goal-setup");
       return;
@@ -69,7 +71,7 @@ export function FeasibilityCheck() {
     try {
       parsedDraft = JSON.parse(draft);
     } catch {
-      toast.info("Bản nháp mục tiêu của bạn không hợp lệ. Vui lòng kiểm tra lại.");
+      toast.info("Bản nháp mục tiêu không hợp lệ. Kiểm tra lại.");
       setIsInitializing(false);
       navigate("/smart-goal-setup");
       return;
@@ -92,7 +94,7 @@ export function FeasibilityCheck() {
     const normalizedPendingGoal = parsePendingSMARTGoal(normalizedSmartGoal ?? parsedDraft, storedFocusArea);
 
     if (!normalizedPendingGoal) {
-      toast.info("Bản nháp mục tiêu của bạn chưa hoàn chỉnh. Vui lòng hoàn thành nó.");
+      toast.info("Bản nháp mục tiêu chưa hoàn chỉnh.");
       setIsInitializing(false);
       navigate("/smart-goal-setup");
       return;
@@ -101,7 +103,7 @@ export function FeasibilityCheck() {
     const areaData = getScoredLifeArea(data, storedFocusArea);
 
     if (!areaData) {
-      toast.info("Vui lòng hoàn thành phần góc nhìn cuộc sống trước.");
+      toast.info("Hoàn thành bước chọn trọng tâm trước.");
       setIsInitializing(false);
       navigate("/life-insight");
       return;
@@ -125,7 +127,7 @@ export function FeasibilityCheck() {
         currentStepId="feasibility"
         eyebrow="Kiểm tra"
         title="Đang chuẩn bị phần kiểm tra tính khả thi"
-        description="Mình đang đọc lại mục tiêu và dữ liệu chọn trọng tâm trước khi bắt đầu đánh giá."
+        description="Đang đọc lại mục tiêu và dữ liệu trọng tâm trước khi bắt đầu."
         loading
       />
     );
@@ -136,8 +138,8 @@ export function FeasibilityCheck() {
       <CoreFlowGateState
         currentStepId="smart_goal"
         eyebrow="Kiểm tra"
-        title="Thiếu dữ liệu để mở bài đánh giá"
-        description="Không tìm thấy đủ thông tin mục tiêu hoặc điểm trọng tâm. Mở lại bước viết mục tiêu để tiếp tục."
+        title="Thiếu dữ liệu để kiểm tra"
+        description="Chưa đủ thông tin mục tiêu hoặc điểm trọng tâm. Quay lại bước viết mục tiêu để tiếp tục."
         actionLabel="Quay lại viết mục tiêu"
         onAction={() => navigate("/smart-goal-setup")}
       />
@@ -211,7 +213,7 @@ export function FeasibilityCheck() {
     });
 
     toast.success("Đã kiểm tra tính thực tế", {
-      description: "Tiếp tục thiết kế kế hoạch 12 tuần cho mục tiêu của bạn.",
+      description: "Tiếp tục thiết kế kế hoạch 12 tuần.",
     });
 
     navigate("/12-week-setup");
@@ -236,9 +238,9 @@ export function FeasibilityCheck() {
   return (
     <PageShell maxWidth="hero">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5 }}
         className="space-y-6"
       >
         <CoreFlowProgress currentStepId="feasibility" onExit={() => navigate("/")} />
@@ -256,14 +258,14 @@ export function FeasibilityCheck() {
 
                 <div className="space-y-3 sm:space-y-4">
                   <h1 className="max-w-3xl text-2xl font-bold leading-tight tracking-normal sm:text-4xl lg:text-5xl">
-                    Kiểm tra xem mục tiêu có thực tế với bạn lúc này không.
+                    Mục tiêu này có thực tế với bạn lúc này không?
                   </h1>
                   <p className="hidden max-w-2xl text-base leading-8 text-white/82 sm:block lg:text-lg">
-                    Đây không phải là bài kiểm tra để ngăn bạn lại. Nó giúp bạn biết nên giữ nguyên, chia nhỏ hay điều
-                    chỉnh mục tiêu để hành trình phía sau bền vững hơn.
+                    Không phải bài kiểm tra chặn lại — giúp bạn biết nên giữ nguyên, chia nhỏ hay điều chỉnh mục tiêu
+                    trước khi vào kế hoạch 12 tuần.
                   </p>
                   <p className="max-w-2xl text-sm leading-6 text-white/82 sm:hidden">
-                    Giúp bạn biết nên giữ nguyên, chia nhỏ hay điều chỉnh mục tiêu trước khi vào kế hoạch 12 tuần.
+                    Giúp biết nên giữ nguyên, chia nhỏ hay điều chỉnh mục tiêu trước khi vào kế hoạch 12 tuần.
                   </p>
                 </div>
 
