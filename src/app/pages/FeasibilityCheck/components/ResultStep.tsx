@@ -244,7 +244,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
   ];
 
   return (
-    <div className="app-shell min-h-screen px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+    <div className="app-shell min-h-screen px-4 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-6 sm:pt-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -522,6 +522,30 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           </details>
         </div>
       </motion.div>
+
+      {/* Mobile-only sticky bottom CTA bar — guided path, no bottom-nav conflict.
+          Buttons use aria-hidden so screen readers + RTL queries reach the canonical
+          in-hero buttons; visual users still see this sticky bar on small viewports. */}
+      <div
+        aria-hidden="true"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-3 shadow-[0_-12px_32px_-20px_rgba(15,23,42,0.18)] backdrop-blur-md sm:hidden"
+      >
+        <div className="flex gap-2">
+          <Button
+            tabIndex={-1}
+            variant="outline"
+            className="flex-1 bg-white"
+            onClick={onAdjustGoal}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Sửa
+          </Button>
+          <Button tabIndex={-1} className="flex-[2]" size="lg" onClick={onContinue}>
+            {result.type === "too_ambitious" ? "Tạo kế hoạch nhỏ hơn" : "Tạo kế hoạch 12 tuần"}
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

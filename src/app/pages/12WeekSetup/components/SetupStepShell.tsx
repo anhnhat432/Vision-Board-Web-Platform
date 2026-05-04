@@ -108,7 +108,13 @@ export function SetupStepShell({
         <CardContent className="space-y-6">
           {children}
 
-          <div className="flex flex-col justify-between gap-3 border-t border-white/70 pt-4 sm:flex-row">
+          <div
+            className={`flex flex-col justify-between gap-3 border-t border-white/70 pt-4 sm:flex-row sm:static ${
+              isLastStep
+                ? "sticky bottom-0 -mx-4 -mb-6 bg-white/95 px-4 pb-[max(env(safe-area-inset-bottom),1rem)] pt-3 backdrop-blur-md sm:mx-0 sm:mb-0 sm:bg-transparent sm:px-0 sm:pb-0 sm:pt-4 sm:backdrop-blur-none"
+                : ""
+            }`}
+          >
             <Button className="w-full sm:w-auto" variant="outline" onClick={onBack}>
               <ArrowLeft className="h-4 w-4" />
               Quay lại
