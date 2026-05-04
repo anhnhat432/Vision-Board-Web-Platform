@@ -1,5 +1,6 @@
 import { Compass, Sparkles, Target } from "lucide-react";
 import { motion } from "motion/react";
+import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -30,6 +31,7 @@ import type { PendingFeasibilityResult, ResultData } from "./FeasibilityCheck/ty
 
 export function FeasibilityCheck() {
   const navigate = useNavigate();
+  const prefersReducedMotion = useReducedMotion();
   const hasGuardedRef = useRef(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -236,9 +238,9 @@ export function FeasibilityCheck() {
   return (
     <PageShell maxWidth="hero">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5 }}
         className="space-y-6"
       >
         <CoreFlowProgress currentStepId="feasibility" onExit={() => navigate("/")} />

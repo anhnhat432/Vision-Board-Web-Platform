@@ -14,6 +14,7 @@ import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import type { PendingSMARTGoal } from "@/lib/smart-goal";
 import { CoreFlowProgress } from "../../../components/CoreFlowProgress";
+import { useReducedMotion } from "../../../components/ui/use-reduced-motion";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
 import { Card, CardContent } from "../../../components/ui/card";
@@ -29,6 +30,7 @@ interface ResultStepProps {
 }
 
 export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjustGoal }: ResultStepProps) {
+  const prefersReducedMotion = useReducedMotion();
   const iconMap: Record<ResultType, ReactNode> = {
     realistic: <CheckCircle2 className="h-10 w-10 text-white" />,
     challenging: <TrendingUp className="h-10 w-10 text-white" />,
@@ -246,9 +248,9 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
   return (
     <div className="app-shell min-h-screen px-4 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-6 sm:pt-6 lg:px-8">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5 }}
         className="mx-auto w-full max-w-6xl space-y-4 sm:space-y-6"
       >
         <CoreFlowProgress currentStepId="feasibility" />

@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import type { Ref } from "react";
 
 import { Button } from "../../../components/ui/button";
+import { useReducedMotion } from "../../../components/ui/use-reduced-motion";
 import { Card, CardContent } from "../../../components/ui/card";
 import { Label } from "../../../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
@@ -31,15 +32,17 @@ export function FeasibilityStepShell({
   targetRef,
   headingRef,
 }: FeasibilityStepShellProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <div ref={targetRef} className="mx-auto max-w-4xl">
       <Card className="overflow-hidden">
         <CardContent className="p-5 sm:p-6 lg:p-7">
           <motion.div
             key={currentQuestion.id}
-            initial={{ opacity: 0, x: 18 }}
+            initial={prefersReducedMotion ? false : { opacity: 0, x: 18 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
             className="space-y-6"
           >
             <div className="rounded-[28px] gradient-violet-pink p-4 sm:p-6">
@@ -72,9 +75,9 @@ export function FeasibilityStepShell({
               {currentQuestion.options.map((option, index) => (
                 <motion.div
                   key={option.value}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
+                  transition={prefersReducedMotion ? { duration: 0 } : { delay: index * 0.05 }}
                 >
                   <Label
                     htmlFor={option.value}

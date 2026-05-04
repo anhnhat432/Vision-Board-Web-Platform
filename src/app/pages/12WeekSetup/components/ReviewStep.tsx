@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { CircleAlert, Flag, Lightbulb, Sparkles, Target, Wrench } from "lucide-react";
+import { CheckCircle2, CircleAlert, CircleDot, Flag, Lightbulb, Sparkles, Target, TriangleAlert, Wrench } from "lucide-react";
 
 import { Badge } from "@/app/components/ui/badge";
 import { Input } from "@/app/components/ui/input";
@@ -45,6 +45,20 @@ function getQualityLevelLabel(level: PlanQualityLevel): string {
   if (level === "strong") return "Tốt";
   if (level === "okay") return "Ổn";
   return "Cần xem lại";
+}
+
+function getDimensionStatusMeta(status: PlanQualityLevel): {
+  label: string;
+  icon: typeof CheckCircle2;
+  textClass: string;
+} {
+  if (status === "strong") {
+    return { label: "Tốt", icon: CheckCircle2, textClass: "text-emerald-700" };
+  }
+  if (status === "okay") {
+    return { label: "Ổn", icon: CircleDot, textClass: "text-sky-700" };
+  }
+  return { label: "Cần xem lại", icon: TriangleAlert, textClass: "text-amber-700" };
 }
 
 export function ReviewStep({
@@ -361,25 +375,27 @@ export function ReviewStep({
         </div>
 
         <ul className="mt-4 grid gap-2 md:grid-cols-2">
-          {planQuality.dimensions.map((dimension) => (
-            <li
-              key={dimension.id}
-              className="flex items-center justify-between rounded-2xl border border-white/70 bg-white/82 px-3 py-2"
-            >
-              <span className="text-sm text-slate-700">{dimension.label}</span>
-              <span
-                className={`text-xs font-semibold ${
-                  dimension.status === "strong"
-                    ? "text-emerald-700"
-                    : dimension.status === "okay"
-                      ? "text-sky-700"
-                      : "text-amber-700"
-                }`}
+          {planQuality.dimensions.map((dimension) => {
+            const statusMeta = getDimensionStatusMeta(dimension.status);
+            const StatusIcon = statusMeta.icon;
+            return (
+              <li
+                key={dimension.id}
+                className="flex items-center justify-between rounded-2xl border border-white/70 bg-white/82 px-3 py-2"
               >
-                {dimension.score}/{dimension.maxScore}
-              </span>
-            </li>
-          ))}
+                <span className="text-sm text-slate-700">{dimension.label}</span>
+                <span
+                  className={`flex items-center gap-1.5 text-xs font-semibold ${statusMeta.textClass}`}
+                >
+                  <StatusIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span className="sr-only">{statusMeta.label}: </span>
+                  <span>
+                    {dimension.score}/{dimension.maxScore}
+                  </span>
+                </span>
+              </li>
+            );
+          })}
         </ul>
 
         {planQuality.warnings.length > 0 && (

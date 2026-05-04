@@ -7,6 +7,7 @@ import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { PageShell } from "../components/PageShell";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { Card, CardContent } from "../components/ui/card";
+import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
 import { getSmartGoalStarter, getSmartGoalStarterPreview } from "../utils/smart-goal-starters";
@@ -54,6 +55,7 @@ import type { SMARTData, SmartStepKey } from "./SMARTGoalSetup/types";
 
 export function SMARTGoalSetup() {
   const navigate = useNavigate();
+  const prefersReducedMotion = useReducedMotion();
   const [setupState, setSetupState] = useState<"checking" | "needs_life_balance" | "needs_life_insight" | "ready">(
     "checking",
   );
@@ -397,9 +399,9 @@ export function SMARTGoalSetup() {
   return (
     <PageShell maxWidth="hero">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5 }}
         className="space-y-5"
       >
         <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} />

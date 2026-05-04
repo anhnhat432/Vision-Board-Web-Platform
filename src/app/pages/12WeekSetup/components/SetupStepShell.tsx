@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Flag, Lightbulb } from "lucide-rea
 
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
+import { useReducedMotion } from "@/app/components/ui/use-reduced-motion";
 import { useScrollToTopOnChange } from "@/app/hooks/useScrollToTopOnChange";
 import { STEPS } from "../constants";
 
@@ -33,6 +34,7 @@ export function SetupStepShell({
   const isLastStep = currentStep >= stepCount - 1;
   const stepShellRef = useRef<HTMLDivElement | null>(null);
   const titleFocusRef = useRef<HTMLSpanElement | null>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   useScrollToTopOnChange(currentStep, {
     targetRef: stepShellRef,
@@ -42,9 +44,9 @@ export function SetupStepShell({
   return (
     <motion.div
       ref={stepShellRef}
-      initial={{ opacity: 0, y: 20 }}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45 }}
+      transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.45 }}
     >
       <Card>
         <CardHeader className="space-y-4">

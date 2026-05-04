@@ -1,5 +1,6 @@
 ﻿import type { ReactNode, RefObject } from "react";
 import { motion } from "motion/react";
+import { useReducedMotion } from "../../../components/ui/use-reduced-motion";
 import { ArrowLeft, ArrowRight, CircleAlert, CheckCircle2, Lightbulb, Sparkles } from "lucide-react";
 
 import type { QualityLevel } from "@/lib/smart-goal/quality";
@@ -63,12 +64,14 @@ export function SmartGoalStepShell({
   onBack,
   onNext,
 }: SmartGoalStepShellProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <motion.div
       key={step.key}
-      initial={{ opacity: 0, x: 18 }}
+      initial={prefersReducedMotion ? false : { opacity: 0, x: 18 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
       className="space-y-6"
     >
       <div className="flow-muted p-4 sm:p-6">
