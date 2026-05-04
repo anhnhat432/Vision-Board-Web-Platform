@@ -42,7 +42,7 @@ export function useScrollToTopOnChange(changeKey: unknown, options: UseScrollToT
     mobileOnly = true,
     mediaQuery = DEFAULT_MOBILE_MEDIA_QUERY,
     topOffset = 72,
-    behavior = "auto",
+    behavior = "smooth",
     focus = true,
     skipInitial = true,
   } = options;

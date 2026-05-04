@@ -120,7 +120,7 @@ export function Onboarding() {
         >
           <CoreFlowProgress currentStepId="life_balance" />
 
-          <Card className="hero-surface flow-surface overflow-hidden">
+          <Card className="hero-surface flow-surface overflow-hidden glass-surface-gradient-border ambient-glow">
             <CardContent className="relative p-4 sm:p-6 lg:p-7 xl:p-8">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_24%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.1),_transparent_24%)] opacity-90" />
 

@@ -648,6 +648,61 @@
     -webkit-backdrop-filter: blur(10px) saturate(1.1);
   }
 
+  .glass-surface-gradient-border {
+    position: relative;
+    border: 1px solid transparent;
+    background:
+      linear-gradient(rgba(255,255,255,0.94), rgba(255,255,255,0.86)) padding-box,
+      linear-gradient(160deg, rgba(124,58,237,0.6), rgba(99,102,241,0.4), rgba(168,85,247,0.5)) border-box;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.9) inset,
+      0 0 0 1px rgba(148,163,184,0.06),
+      0 18px 40px -30px rgba(15,23,42,0.16),
+      0 6px 12px -10px rgba(15,23,42,0.06);
+  }
+
+  @media (hover: hover) {
+    .glass-surface-gradient-border:hover {
+      background:
+        linear-gradient(rgba(255,255,255,0.96), rgba(255,255,255,0.88)) padding-box,
+        linear-gradient(160deg, rgba(124,58,237,0.7), rgba(99,102,241,0.5), rgba(168,85,247,0.6)) border-box;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.95) inset,
+        0 0 0 1px rgba(148,163,184,0.08),
+        0 22px 46px -30px rgba(15,23,42,0.18),
+        0 8px 16px -10px rgba(15,23,42,0.08);
+    }
+  }
+
+  .ambient-glow {
+    position: relative;
+    isolation: isolate;
+  }
+  .ambient-glow::before,
+  .ambient-glow::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.18;
+    z-index: -1;
+    pointer-events: none;
+  }
+  .ambient-glow::before {
+    width: 60%;
+    height: 60%;
+    top: -10%;
+    left: -10%;
+    background: radial-gradient(circle, rgba(124,58,237,0.5), transparent 70%);
+  }
+  .ambient-glow::after {
+    width: 50%;
+    height: 50%;
+    bottom: -8%;
+    right: -8%;
+    background: radial-gradient(circle, rgba(99,102,241,0.4), transparent 70%);
+  }
+
   .card-interactive-base {
     position: relative;
     isolation: isolate;
@@ -2039,6 +2094,25 @@
   50% {
     transform: translateY(-0.32rem) scale(1);
     opacity: 1;
+  }
+}
+
+.check-bounce {
+  animation: check-bounce 0.6s ease-in-out;
+}
+
+@keyframes check-bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(0.85);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  75% {
+    transform: scale(0.97);
   }
 }
 

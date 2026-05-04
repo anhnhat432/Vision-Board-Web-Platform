@@ -412,7 +412,7 @@ export function ReviewStep({
                     <span
                       className={`flex items-center gap-1.5 text-xs font-semibold ${statusMeta.textClass}`}
                     >
-                      <StatusIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                      <StatusIcon className={`h-3.5 w-3.5 ${dimension.status === "strong" ? "check-bounce" : ""}`} aria-hidden="true" />
                       <span className="sr-only">{statusMeta.label}: </span>
                       <span>
                         {dimension.score}/{dimension.maxScore}

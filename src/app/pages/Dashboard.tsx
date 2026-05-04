@@ -1229,7 +1229,7 @@ function DashboardContent({
               ) : (
                 <Card
                   data-tour-id="dashboard-plan-card"
-                  className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)]"
+                  className="glass-surface-gradient-border border-0 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)] ambient-glow"
                 >
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-slate-950">

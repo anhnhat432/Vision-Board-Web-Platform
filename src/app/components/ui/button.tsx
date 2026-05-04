@@ -18,15 +18,15 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent gradient-brand text-primary-foreground shadow-[0_18px_38px_-24px_rgba(109,40,217,0.52)] hover:shadow-[0_22px_44px_-24px_rgba(109,40,217,0.58)]",
+          "border-transparent gradient-brand text-primary-foreground shadow-[0_18px_38px_-24px_rgba(109,40,217,0.52)] hover:shadow-[0_22px_44px_-24px_rgba(109,40,217,0.58)] hover:scale-[1.02]",
         destructive:
-          "border-transparent bg-destructive text-white shadow-[0_16px_34px_-24px_rgba(212,24,61,0.48)] hover:bg-destructive/90 hover:shadow-[0_20px_40px_-26px_rgba(212,24,61,0.54)] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "border-transparent bg-destructive text-white shadow-[0_16px_34px_-24px_rgba(212,24,61,0.48)] hover:bg-destructive/90 hover:shadow-[0_20px_40px_-26px_rgba(212,24,61,0.54)] hover:scale-[1.02] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
-          "border-white/70 bg-white/78 text-foreground shadow-[0_12px_28px_-24px_rgba(15,23,42,0.2)] backdrop-blur-sm hover:border-white hover:bg-white hover:text-accent-foreground hover:shadow-[0_16px_32px_-24px_rgba(15,23,42,0.24)] dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "border-white/70 bg-white/78 text-foreground shadow-[0_12px_28px_-24px_rgba(15,23,42,0.2)] backdrop-blur-sm hover:border-white hover:bg-white hover:text-accent-foreground hover:shadow-[0_16px_32px_-24px_rgba(15,23,42,0.24)] hover:scale-[1.02] dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         secondary:
-          "border border-white/60 bg-secondary text-secondary-foreground shadow-[0_14px_28px_-24px_rgba(124,58,237,0.26)] hover:bg-secondary/95 hover:shadow-[0_18px_34px_-24px_rgba(124,58,237,0.3)]",
+          "border border-white/60 bg-secondary text-secondary-foreground shadow-[0_14px_28px_-24px_rgba(124,58,237,0.26)] hover:bg-secondary/95 hover:shadow-[0_18px_34px_-24px_rgba(124,58,237,0.3)] hover:scale-[1.02]",
         ghost:
-          "text-slate-600 hover:bg-white/82 hover:text-slate-900 hover:shadow-[0_10px_22px_-24px_rgba(15,23,42,0.16)] dark:hover:bg-accent/50",
+          "text-slate-600 hover:bg-white/82 hover:text-slate-900 hover:shadow-[0_10px_22px_-24px_rgba(15,23,42,0.16)] hover:scale-[1.02] dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
