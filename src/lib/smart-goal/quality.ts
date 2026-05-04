@@ -1,5 +1,5 @@
 import type { SmartGoal } from "./types";
-import { hasOutcomeIndicator } from "./helpers";
+import { estimateGoalDifficulty, hasOutcomeIndicator } from "./helpers";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -510,4 +510,176 @@ export function getSmartGoalQualityWarnings(goal: SmartGoal): string[] {
 
 export function getSmartGoalImprovementSuggestions(goal: SmartGoal): string[] {
   return evaluateSmartGoalQuality(goal).suggestions;
+}
+
+// ---------------------------------------------------------------------------
+// Calibration helpers
+// ---------------------------------------------------------------------------
+
+export type GoalClarityLevel = "weak" | "moderate" | "strong";
+
+export type GoalClarityDimensionId =
+  | "outcome_verb"
+  | "measurable_target"
+  | "achievable_weekly_hours"
+  | "relevant_motivation"
+  | "time_bound";
+
+export interface GoalClarityCheck {
+  id: GoalClarityDimensionId;
+  label: string;
+  passed: boolean;
+}
+
+export interface GoalClarityAssessment {
+  level: GoalClarityLevel;
+  score: number;
+  passed: GoalClarityDimensionId[];
+  missing: GoalClarityDimensionId[];
+  checks: GoalClarityCheck[];
+}
+
+export type CalibratedDifficulty = "easy" | "medium" | "hard" | "qualitative" | "unknown";
+
+const MIN_CALIBRATED_WEEKLY_HOURS = 1;
+const MAX_CALIBRATED_WEEKLY_HOURS = 60;
+const CLARITY_STRONG_THRESHOLD = 0.8;
+const CLARITY_MODERATE_THRESHOLD = 0.6;
+
+const QUALITATIVE_METRIC_KEYWORDS = [
+  "band",
+  "level",
+  "score",
+  "grade",
+  "rank",
+  "tier",
+  "percentile",
+  "điểm",
+  "diem",
+  "hạng",
+  "hang",
+  "mức",
+  "muc",
+  "cấp",
+  "cap",
+];
+
+function normalizeLower(value: string | undefined): string {
+  return (value ?? "").trim().toLowerCase();
+}
+
+export function isQualitativeMetric(goal: SmartGoal): boolean {
+  const unit = normalizeLower(goal.measurable.metric_unit);
+  const name = normalizeLower(goal.measurable.metric_name);
+
+  if (!unit && !name) return false;
+  return QUALITATIVE_METRIC_KEYWORDS.some((keyword) => unit.includes(keyword) || name.includes(keyword));
+}
+
+export function getCalibratedDifficulty(goal: SmartGoal): CalibratedDifficulty {
+  if (isQualitativeMetric(goal)) return "qualitative";
+
+  const target = goal.measurable.target_value;
+  const baseline = goal.measurable.baseline_value ?? 0;
+  const hours = goal.achievable.weekly_time_commitment_hours;
+  const metricName = goal.measurable.metric_name.trim();
+
+  if (!Number.isFinite(target) || !Number.isFinite(hours) || hours <= 0) return "unknown";
+  if (target <= 0 || target <= baseline) return "unknown";
+  if (metricName.length === 0) return "unknown";
+
+  return estimateGoalDifficulty(goal);
+}
+
+function checkMeasurableTarget(goal: SmartGoal): boolean {
+  const target = goal.measurable.target_value;
+  if (!Number.isFinite(target) || target <= 0) return false;
+
+  const baseline = goal.measurable.baseline_value;
+  if (baseline !== undefined && target <= baseline) return false;
+
+  return goal.measurable.metric_name.trim().length > 0;
+}
+
+function checkAchievableWeeklyHours(goal: SmartGoal): boolean {
+  const hours = goal.achievable.weekly_time_commitment_hours;
+  return Number.isFinite(hours) && hours >= MIN_CALIBRATED_WEEKLY_HOURS && hours <= MAX_CALIBRATED_WEEKLY_HOURS;
+}
+
+function checkRelevantMotivation(goal: SmartGoal): boolean {
+  return goal.relevant.motivation_reason.trim().length >= 10;
+}
+
+function checkTimeBound(goal: SmartGoal): boolean {
+  const weeks = goal.time_bound.target_weeks;
+  if (typeof weeks === "number" && Number.isFinite(weeks) && weeks > 0) return true;
+
+  const date = goal.time_bound.target_date;
+  return typeof date === "string" && date.trim().length > 0;
+}
+
+const CLARITY_CHECK_LABELS: Record<GoalClarityDimensionId, string> = {
+  outcome_verb: "Câu mục tiêu có động từ kết quả rõ (đạt, hoàn thành, ra mắt, duy trì...)",
+  measurable_target: "Có chỉ số đo và con số mục tiêu lớn hơn baseline",
+  achievable_weekly_hours: "Quỹ thời gian mỗi tuần hợp lý (1-60 giờ)",
+  relevant_motivation: "Lý do quan trọng đủ rõ",
+  time_bound: "Có deadline (số tuần hoặc ngày cụ thể)",
+};
+
+export function assessGoalClarity(goal: SmartGoal): GoalClarityAssessment {
+  const checks: GoalClarityCheck[] = [
+    { id: "outcome_verb", label: CLARITY_CHECK_LABELS.outcome_verb, passed: hasOutcomeIndicator(goal.specific.goal_statement) },
+    { id: "measurable_target", label: CLARITY_CHECK_LABELS.measurable_target, passed: checkMeasurableTarget(goal) },
+    {
+      id: "achievable_weekly_hours",
+      label: CLARITY_CHECK_LABELS.achievable_weekly_hours,
+      passed: checkAchievableWeeklyHours(goal),
+    },
+    {
+      id: "relevant_motivation",
+      label: CLARITY_CHECK_LABELS.relevant_motivation,
+      passed: checkRelevantMotivation(goal),
+    },
+    { id: "time_bound", label: CLARITY_CHECK_LABELS.time_bound, passed: checkTimeBound(goal) },
+  ];
+
+  const passed = checks.filter((check) => check.passed).map((check) => check.id);
+  const missing = checks.filter((check) => !check.passed).map((check) => check.id);
+  const score = checks.length === 0 ? 0 : passed.length / checks.length;
+
+  let level: GoalClarityLevel;
+  if (score >= CLARITY_STRONG_THRESHOLD) level = "strong";
+  else if (score >= CLARITY_MODERATE_THRESHOLD) level = "moderate";
+  else level = "weak";
+
+  if (!passed.includes("outcome_verb") && level === "strong") {
+    level = "moderate";
+  }
+
+  return { level, score, passed, missing, checks };
+}
+
+const SUGGESTION_BY_CLARITY_DIMENSION: Record<GoalClarityDimensionId, string> = {
+  outcome_verb:
+    "Thêm động từ kết quả rõ vào câu mục tiêu (ví dụ: đạt, hoàn thành, ra mắt, duy trì, chạm mốc).",
+  measurable_target:
+    "Thêm chỉ số đo và một con số mục tiêu rõ ràng. Nếu có baseline, target phải lớn hơn baseline.",
+  achievable_weekly_hours:
+    "Đặt quỹ thời gian mỗi tuần trong khoảng 1-60 giờ. Quá ít sẽ không tạo nhịp; quá nhiều khó duy trì.",
+  relevant_motivation:
+    "Viết một câu ngắn vì sao mục tiêu này quan trọng với bạn ở thời điểm hiện tại.",
+  time_bound: "Chốt deadline: hoặc số tuần (ví dụ 12) hoặc ngày cụ thể.",
+};
+
+export function generateGoalClaritySuggestions(goal: SmartGoal): string[] {
+  const assessment = assessGoalClarity(goal);
+  const suggestions = assessment.missing.map((id) => SUGGESTION_BY_CLARITY_DIMENSION[id]);
+
+  if (assessment.level === "strong" && isQualitativeMetric(goal)) {
+    suggestions.push(
+      "Chỉ số có vẻ định tính (band, level, hạng...). Đừng tin nhãn easy/medium/hard cho mục tiêu này; hãy dùng Feasibility để đánh giá độ tham vọng.",
+    );
+  }
+
+  return suggestions;
 }

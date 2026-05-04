@@ -813,8 +813,7 @@ export function TwelveWeekSetup() {
                   Chốt một chu kỳ 12 tuần gọn, rõ và vào việc ngay.
                 </h1>
                 <p className="max-w-2xl text-sm leading-7 text-white/82 sm:text-base lg:text-lg">
-                  Bạn sẽ rời khỏi màn này với một kết quả rõ, 2-4 việc lặp lại có lịch làm, và một tuần đầu tiên đủ nhẹ
-                  để bắt đầu ngay.
+                  Bạn rời màn này với một outcome rõ, 2-4 việc giữ nhịp có lịch, và tuần 1 đủ nhẹ để bắt đầu.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 sm:gap-3">

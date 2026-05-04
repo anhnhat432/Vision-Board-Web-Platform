@@ -74,6 +74,8 @@ export interface AnalyticsEventPayloads {
     weekly_hours?: number;
     quality_level?: string;
     score_bucket?: string;
+    goal_archetype?: string;
+    archetype_overridden?: boolean;
   };
   feasibility_completed: {
     focus_area: string;
@@ -242,7 +244,17 @@ const REMOTE_ANALYTICS_FIELD_ALLOWLIST: Record<AnalyticsEventName, readonly stri
   life_balance_completed: ["source", "area_count", "average_score", "weakest_area", "strongest_area"],
   user_intent_selected: ["source", "intent_id"],
   user_intent_cleared: ["source"],
-  smart_goal_created: ["focus_area", "target_mode", "target_weeks", "has_baseline", "weekly_hours", "quality_level", "score_bucket"],
+  smart_goal_created: [
+    "focus_area",
+    "target_mode",
+    "target_weeks",
+    "has_baseline",
+    "weekly_hours",
+    "quality_level",
+    "score_bucket",
+    "goal_archetype",
+    "archetype_overridden",
+  ],
   feasibility_completed: [
     "focus_area",
     "result_type",

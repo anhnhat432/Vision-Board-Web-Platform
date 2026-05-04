@@ -1,6 +1,6 @@
 import type { BackendConnectionStatus } from "@/app/components/twelve-week/TwelveWeekSettingsShared";
 import type { BackendPlanHydrationResult } from "@/app/hooks/useBackendPlanHydration";
-import { getCalendarDateKey } from "@/app/utils/storage";
+import { formatDateInputValue, getCalendarDateKey } from "@/app/utils/storage";
 import type { TwelveWeekSystem, UniversalDailyCheckIn } from "@/app/utils/storage-types";
 import { dedupeTasks } from "@/app/utils/twelve-week-system-ui";
 import {
@@ -53,10 +53,15 @@ export function getTodayQueueForSystem(system: TwelveWeekSystem) {
   const nextCurrentWeekTasks = getTwelveWeekTasksForWeek(system, nextCurrentWeek);
   const nextScheduledTodayTasks = getTwelveWeekTodayTasks(system);
   const nextMissedTasks = getTwelveWeekMissedTasks(system);
+  const todayDateKey = formatDateInputValue(new Date());
+  const nextCompletedTodayTasks = nextCurrentWeekTasks
+    .filter((task) => task.completed && !task.skipped && getCalendarDateKey(task.completedAt || "") === todayDateKey)
+    .slice(0, 3);
   const nextFallbackTasks = nextCurrentWeekTasks.filter((task) => !task.completed).slice(0, 3);
 
   return dedupeTasks([
     ...nextMissedTasks.slice(0, 2),
+    ...nextCompletedTodayTasks,
     ...(nextScheduledTodayTasks.length > 0 ? nextScheduledTodayTasks : nextFallbackTasks),
   ]);
 }
