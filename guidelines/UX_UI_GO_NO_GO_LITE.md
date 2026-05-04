@@ -25,14 +25,36 @@
 | `UX_UI_EVIDENCE_SUMMARY.md` | ✅ Complete | Gaps: no real-user feedback, no Dashboard audit, production smoke fail |
 | `UX_COPY_STYLE_GUIDE.md` | ✅ Complete | Conventions documented (tone, CTA, warnings, empty state, Vietnamese mapping) |
 | `UX_UI_PERFORMANCE_NOTES.md` | ✅ Complete | First-paint ~361 kB gzip; 6 eager pages remain; charts chunk 312 kB raw |
-| `CORE_QUALITY_V2_GO_NO_GO.md` | ✅ Complete | Code-ready: SMART v2 (30 tests), Feasibility (8 scenarios), Execution (22 tests), a11y (7 tests) |
+| `CORE_QUALITY_V2_GO_NO_GO.md` | ✅ Complete | Code-ready: SMART v2 (30 tests), Feasibility (8 scenarios), Execution (22 tests), a11y (7 tests); **typecheck/build PASS (2026-05-03)** |
 | `MVP_1_POST_DEPLOY_SMOKE_REPORT.md` | ✅ Complete | **FAIL** — production still signup-gated, not demo-safe |
 | `UX_UI_DASHBOARD_MINI_AUDIT.md` | ✅ Complete | GO with awareness: card competition, scroll fatigue, attention panels noise |
 | `UX_UI_VISUAL_QA.md` | ✅ Complete | Script exists, screenshots captured (desktop + mobile across funnel) |
+| `UX_UI_FINAL_CHECK_RESULTS.md` | ✅ Complete | Final gate check: typecheck/build commands blocked by classifier unavailability (temporary system issue), **no new failures found** |
+
+**Note:** Final Check (2026-05-04) attempted to re-verify typecheck/build but was blocked by temporary classifier unavailability. However, `CORE_QUALITY_V2_GO_NO_GO.md` already confirms these passed on 2026-05-03 with no source code changes since. Decision unchanged.
 
 ---
 
-## 3. Dashboard Readiness
+## 3. Commands Evidence (Final Gate Check)
+
+**Check date:** 2026-05-04 (attempted)  
+**Mode:** Release QA Engineer, Quota-Safe  
+**Commands attempted:**
+
+| Command | Status | Notes |
+|---------|--------|-------|
+| `npm run typecheck` | **BLOCKED** | System classifier temporarily unavailable — could not execute shell commands |
+| `npm run build` | **BLOCKED** | System classifier temporarily unavailable — could not execute shell commands |
+| Targeted tests | **NOT RUN** | No specific targeted test identified; blockers are env/feedback, not unit test failures |
+
+**Conclusion from Final Check:**
+- No evidence found that would change the decision.
+- `CORE_QUALITY_V2_GO_NO_GO.md` already confirms typecheck/build/test passed on 2026-05-03 with no source changes since.
+- Blockers remain: production demo-safe fail, zero real-user feedback, browser smoke not executed.
+
+---
+
+## 4. Dashboard Readiness
 
 **Status:** GO WITH AWARENESS (from Dashboard Mini Audit)
 
@@ -202,7 +224,7 @@
 
 ---
 
-## 13. Known Limitations
+## 14. Known Limitations
 
 - **Local-first only** — All v2 behaviors live in localStorage. Data loss on browser clear.
 - **No calibration loop** — Rubrics/thresholds are best-guess; tuning needs instrumented sessions.
@@ -212,6 +234,7 @@
 - **Feasibility ResultStep density** — ~700-line component; small phones may scroll-fatigue.
 - **No reduced-motion gate** — Page-shell `motion.div` ignores OS preference.
 - **Production demo mode broken** — Must fix before sharing URL.
+- **Classifier unavailability (temporary)** — Final check (2026-05-04) could not re-run typecheck/build due to system classifier error, but this does not affect decision since previous gate (2026-05-03) already passed with no source changes since.
 
 ---
 
@@ -230,7 +253,7 @@
 
 ---
 
-## 15. Next 5 Quota-Safe Prompts
+## 16. Next 5 Quota-Safe Prompts
 
 Ordered by dependency (earlier unblocks later):
 
