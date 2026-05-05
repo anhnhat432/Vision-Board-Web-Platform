@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { Compass, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
@@ -234,16 +234,34 @@ export function TwelveWeekSetup() {
     setIsLoading(false);
   }, [navigate]);
 
+  const saveTimeoutRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (isLoading || !smartGoal || !feasibility) return;
-    localStorage.setItem(APP_STORAGE_KEYS.pending12WeekSetupDraft, JSON.stringify(draft));
+
+    // Clear any pending save
+    if (saveTimeoutRef.current) {
+      window.clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Debounce: save after 500ms of inactivity
+    saveTimeoutRef.current = window.setTimeout(() => {
+      localStorage.setItem(APP_STORAGE_KEYS.pending12WeekSetupDraft, JSON.stringify(draft));
+      saveTimeoutRef.current = null;
+    }, 500);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        window.clearTimeout(saveTimeoutRef.current);
+      }
+    };
   }, [draft, feasibility, isLoading, smartGoal]);
 
-  const handleJumpToStep = (stepIndex: number) => {
+  const handleJumpToStep = useCallback((stepIndex: number) => {
     if (stepIndex < currentStep) {
       setCurrentStep(stepIndex);
     }
-  };
+  }, [currentStep]);
 
   const validIndicators = useMemo(
     () => draft.leadIndicators.filter((indicator) => indicator.name.trim().length > 0),

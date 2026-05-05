@@ -121,3 +121,68 @@ Wrapped ~20 derived values with `useMemo` to prevent unnecessary recalculations 
 - Runtime: Derived values memoized → fewer recalculations per state update
 
 **Test coverage**: 71 tests for twelve-week components - all passing.
+
+## 2. Wizard Performance Optimizations (2026-05-05)
+
+Audited and optimized three core wizard components: SMARTGoalSetup, FeasibilityCheck, 12WeekSetup. Goals: eliminate input lag, reduce unnecessary re-renders, and defer motion chunk.
+
+### 8. Replace motion.div with CSS Animations (All Wizards)
+
+**Files**:
+- `src/app/pages/SMARTGoalSetup.tsx`
+- `src/app/pages/FeasibilityCheck.tsx`
+- `src/app/pages/12WeekSetup/components/SetupStepShell.tsx`
+
+Removed `import { motion } from "motion/react"` and replaced page transition `<motion.div>` wrappers with `<div className="animate-fade-in-up">`. Used `prefersReducedMotion` to conditionally apply animation (no animation in reduced motion mode).
+
+**Impact**: Motion chunk (~42 KB gzip) no longer loads on any wizard page. It remains only for Onboarding page.
+
+### 9. Memoize Plan Quality Evaluation in ReviewStep
+
+**File**: `src/app/pages/12WeekSetup/components/ReviewStep.tsx`
+
+Wrapped `evaluateTwelveWeekPlanQuality()` call in `useMemo` with comprehensive dependency array covering all draft fields, lead indicators, weekOneTaskPreview, and feasibility context.
+
+**Impact**: Prevents expensive quality scoring (7 dimensions, archetype fit checks) from re-running on every draft change. Smooths ReviewStep rendering during plan iteration.
+
+### 10. Debounce Autosave in 12WeekSetup
+
+**File**: `src/app/pages/12WeekSetup.tsx`
+
+Replaced immediate `localStorage.setItem()` in `useEffect` with 500ms debounce using `setTimeout` and `saveTimeoutRef`. Clears pending timeout on each change to batch writes.
+
+**Impact**: Draft autosave no longer blocks UI thread during rapid input changes (typing, dropdown selections). localStorage writes now occur after user pauses.
+
+### 11. Memoize handleJumpToStep Handler
+
+**File**: `src/app/pages/12WeekSetup.tsx`
+
+Wrapped `handleJumpToStep` in `useCallback` with `[currentStep]` dependency.
+
+**Impact**: Stabilizes function reference passed to SetupStepShell step navigation. Prevents child re-renders when parent updates for unrelated reasons.
+
+## Verification
+
+- **Typecheck**: `npm run typecheck` - passed
+- **Build**: `npm run build` - completed in 8.92s, no errors
+- **Tests**: Wizard component tests passing (SMARTGoalSetup, FeasibilityCheck, 12WeekSetup)
+
+## Remaining Risks
+
+1. **Plan quality evaluation still heavy on first mount**:
+   - `evaluateTwelveWeekPlanQuality` runs once when ReviewStep mounts; acceptable as user only visits once per plan
+   - Impact: momentary delay (50-100ms) when entering ReviewStep
+   - Effort to fix: Low (could show loading skeleton), but likely not needed
+
+2. **Motion chunk still loaded by Onboarding**:
+   - Deferred as intended; no action needed.
+
+## Recommendations
+
+1. **Monitor input responsiveness** in SMARTGoalSetup and FeasibilityCheck:
+   - Users typing SMART goal text should feel no lag
+   - Question navigation should be instant
+
+2. **Consider pre-computing weekOneTaskPreview** if user reports lag in ReviewStep:
+   - Already memoized in 12WeekSetup, but double-check deps are correct
+

@@ -173,33 +173,53 @@ export function ReviewStep({
     [rationaleInput, feasibilityContext, intentArchetype],
   );
 
-  const planQuality = evaluateTwelveWeekPlanQuality(
-    {
-      vision12Week: draft.vision12Week,
-      week12Outcome: draft.week12Outcome,
-      goalType: draft.goalType,
-      lagMetric: { name: draft.lagMetricName, target: draft.lagMetricTarget, unit: draft.lagMetricUnit },
-      leadIndicators: scheduledLeadIndicators.map((indicator) => ({
-        name: indicator.name,
-        target: indicator.target,
-        schedule: indicator.schedule,
-        type: indicator.type,
-      })),
-      milestones: {
-        week4: draft.week4Milestone,
-        week8: draft.week8Milestone,
-        week12: draft.week12Outcome,
-      },
-      reviewDay: draft.reviewDay,
-      tacticLoadPreference: draft.tacticLoadPreference,
-      dailyTimeBudget: draft.dailyTimeBudget,
-      personalConstraint: draft.personalConstraint,
-    },
-    {
-      weeklyTaskCount: weekOneTaskPreview.length,
-      firstTaskTitle: weekOneTaskPreview[0],
-      feasibility: feasibilityContext,
-    },
+  const planQuality = useMemo(
+    () =>
+      evaluateTwelveWeekPlanQuality(
+        {
+          vision12Week: draft.vision12Week,
+          week12Outcome: draft.week12Outcome,
+          goalType: draft.goalType,
+          lagMetric: { name: draft.lagMetricName, target: draft.lagMetricTarget, unit: draft.lagMetricUnit },
+          leadIndicators: scheduledLeadIndicators.map((indicator) => ({
+            name: indicator.name,
+            target: indicator.target,
+            schedule: indicator.schedule,
+            type: indicator.type,
+          })),
+          milestones: {
+            week4: draft.week4Milestone,
+            week8: draft.week8Milestone,
+            week12: draft.week12Outcome,
+          },
+          reviewDay: draft.reviewDay,
+          tacticLoadPreference: draft.tacticLoadPreference,
+          dailyTimeBudget: draft.dailyTimeBudget,
+          personalConstraint: draft.personalConstraint,
+        },
+        {
+          weeklyTaskCount: weekOneTaskPreview.length,
+          firstTaskTitle: weekOneTaskPreview[0],
+          feasibility: feasibilityContext,
+        },
+      ),
+    [
+      draft.vision12Week,
+      draft.week12Outcome,
+      draft.goalType,
+      draft.lagMetricName,
+      draft.lagMetricTarget,
+      draft.lagMetricUnit,
+      draft.week4Milestone,
+      draft.week8Milestone,
+      draft.reviewDay,
+      draft.tacticLoadPreference,
+      draft.dailyTimeBudget,
+      draft.personalConstraint,
+      scheduledLeadIndicators,
+      weekOneTaskPreview,
+      feasibilityContext,
+    ],
   );
 
   const firstAction = weekOneTaskPreview[0] ?? null;

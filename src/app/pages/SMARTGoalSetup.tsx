@@ -1,6 +1,5 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { motion } from "motion/react";
 
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
@@ -398,12 +397,7 @@ export function SMARTGoalSetup() {
 
   return (
     <PageShell maxWidth="hero">
-      <motion.div
-        initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5 }}
-        className="space-y-5"
-      >
+      <div className={prefersReducedMotion ? "space-y-5" : "animate-fade-in-up space-y-5"}>
         <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} />
 
         <SmartGoalHero
@@ -460,7 +454,7 @@ export function SMARTGoalSetup() {
             </div>
           </details>
         </div>
-      </motion.div>
+      </div>
     </PageShell>
   );
 }

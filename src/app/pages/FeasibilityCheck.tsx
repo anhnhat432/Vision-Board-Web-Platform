@@ -1,5 +1,4 @@
 import { Compass, Sparkles, Target } from "lucide-react";
-import { motion } from "motion/react";
 import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import { useNavigate } from "react-router";
@@ -237,12 +236,7 @@ export function FeasibilityCheck() {
 
   return (
     <PageShell maxWidth="hero">
-      <motion.div
-        initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5 }}
-        className="space-y-6"
-      >
+      <div className={prefersReducedMotion ? "space-y-6" : "animate-fade-in-up space-y-6"}>
         <CoreFlowProgress currentStepId="feasibility" onExit={() => navigate("/")} />
 
         <Card className="hero-surface overflow-hidden border-0 text-white">
@@ -314,7 +308,7 @@ export function FeasibilityCheck() {
           targetRef={questionTopRef}
           headingRef={questionHeadingRef}
         />
-      </motion.div>
+      </div>
     </PageShell>
   );
 }

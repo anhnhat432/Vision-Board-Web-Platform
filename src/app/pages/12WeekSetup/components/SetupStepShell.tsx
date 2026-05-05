@@ -1,5 +1,4 @@
 import { useRef, useState, type ReactNode } from "react";
-import { motion } from "motion/react";
 import { ArrowLeft, ArrowRight, CheckCircle2, Flag, Lightbulb, Loader2 } from "lucide-react";
 
 import { Button } from "@/app/components/ui/button";
@@ -55,11 +54,9 @@ export function SetupStepShell({
   });
 
   return (
-    <motion.div
+    <div
       ref={stepShellRef}
-      initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.45 }}
+      className={prefersReducedMotion ? "" : "animate-fade-in-up"}
     >
       <Card>
         <CardHeader className="space-y-4">
@@ -159,6 +156,6 @@ export function SetupStepShell({
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }
