@@ -50,14 +50,14 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
       badge: "border-amber-200 bg-amber-50 text-amber-800",
       title: "border-amber-200/70 gradient-amber-title",
       panel: "border-amber-100/80 gradient-white-amber",
-      meter: "from-amber-400 via-orange-400 to-rose-400",
+      meter: "from-amber-400 via-orange-400 to-pink-400",
     },
     too_ambitious: {
-      glow: "bg-gradient-to-br from-rose-400/24 via-orange-300/14 to-transparent",
-      badge: "border-rose-200 bg-rose-50 text-rose-800",
-      title: "border-rose-200/70 gradient-rose-title",
-      panel: "border-rose-100/80 gradient-white-rose",
-      meter: "from-rose-400 via-fuchsia-400 to-orange-400",
+      glow: "bg-gradient-to-br from-amber-400/24 via-orange-300/14 to-transparent",
+      badge: "border-amber-200 bg-amber-50 text-amber-800",
+      title: "border-amber-200/70 gradient-amber-title",
+      panel: "border-amber-100/80 gradient-white-amber",
+      meter: "from-amber-400 via-orange-400 to-pink-400",
     },
   };
 
