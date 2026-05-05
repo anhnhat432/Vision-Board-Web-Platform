@@ -413,6 +413,11 @@ export function TwelveWeekTodayTab({
                     >
                       <span
                         className="-m-2 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center p-2"
+                        onClick={(e) => {
+                          if (!(e.target as HTMLElement).closest("button")) {
+                            onToggleTask(task.id, !task.completed);
+                          }
+                        }}
                       >
                         <Checkbox
                           checked={task.completed}
