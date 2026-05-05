@@ -790,7 +790,7 @@ export function TwelveWeekSetup() {
   };
 
   return (
-    <PageShell maxWidth="hero" className="space-y-6 sm:space-y-8">
+    <PageShell maxWidth="hero" className="space-y-6 sm:space-y-8 page-enter">
       <UpgradePaywallDialog
         open={isPaywallOpen}
         onOpenChange={setIsPaywallOpen}

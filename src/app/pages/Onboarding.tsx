@@ -110,7 +110,7 @@ export function Onboarding() {
       <div
         ref={flowTopRef}
         tabIndex={-1}
-        className="flow-shell min-h-screen px-4 py-4 focus:outline-none sm:px-6 sm:py-6 lg:px-8"
+        className="flow-shell min-h-screen px-4 py-4 focus:outline-none sm:px-6 sm:py-6 lg:px-8 page-enter"
       >
         <motion.div
           initial={{ opacity: 0, y: 24 }}
