@@ -13,20 +13,20 @@ const DEFAULT_BUTTON_STYLE = {
 } as React.CSSProperties;
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium tracking-normal transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-ring active:translate-y-0 active:scale-[0.985]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium tracking-normal transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-ring active:translate-y-0 active:scale-[0.985]",
   {
     variants: {
       variant: {
         default:
-          "border-transparent gradient-brand text-primary-foreground shadow-[0_18px_38px_-24px_rgba(109,40,217,0.52)] hover:shadow-[0_22px_44px_-24px_rgba(109,40,217,0.58)] hover:scale-[1.02]",
+          "border-transparent gradient-brand text-primary-foreground shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)] hover:shadow-[0_18px_40px_-22px_rgba(109,40,217,0.44)] hover:scale-[1.01]",
         destructive:
-          "border-transparent bg-destructive text-white shadow-[0_16px_34px_-24px_rgba(212,24,61,0.48)] hover:bg-destructive/90 hover:shadow-[0_20px_40px_-26px_rgba(212,24,61,0.54)] hover:scale-[1.02] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "border-transparent bg-destructive text-white shadow-[0_12px_28px_-20px_rgba(212,24,61,0.38)] hover:bg-destructive/90 hover:shadow-[0_16px_34px_-22px_rgba(212,24,61,0.44)] hover:scale-[1.01] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
-          "border-white/70 bg-white/78 text-foreground shadow-[0_12px_28px_-24px_rgba(15,23,42,0.2)] backdrop-blur-sm hover:border-white hover:bg-white hover:text-accent-foreground hover:shadow-[0_16px_32px_-24px_rgba(15,23,42,0.24)] hover:scale-[1.02] dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "border-slate-300 bg-white/78 text-foreground shadow-[0_10px_24px_-20px_rgba(15,23,42,0.16)] backdrop-blur-sm hover:border-slate-400 hover:bg-white hover:text-accent-foreground hover:shadow-[0_14px_28px_-20px_rgba(15,23,42,0.2)] hover:scale-[1.01] dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         secondary:
-          "border border-white/60 bg-secondary text-secondary-foreground shadow-[0_14px_28px_-24px_rgba(124,58,237,0.26)] hover:bg-secondary/95 hover:shadow-[0_18px_34px_-24px_rgba(124,58,237,0.3)] hover:scale-[1.02]",
+          "border border-white/60 bg-secondary text-secondary-foreground shadow-[0_10px_24px_-20px_rgba(124,58,237,0.2)] hover:bg-secondary/95 hover:shadow-[0_14px_30px_-22px_rgba(124,58,237,0.26)] hover:scale-[1.01]",
         ghost:
-          "text-slate-600 hover:bg-white/82 hover:text-slate-900 hover:shadow-[0_10px_22px_-24px_rgba(15,23,42,0.16)] hover:scale-[1.02] dark:hover:bg-accent/50",
+          "text-slate-600 hover:bg-white/82 hover:text-slate-900 hover:shadow-[0_8px_18px_-20px_rgba(15,23,42,0.14)] hover:scale-[1.01] dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

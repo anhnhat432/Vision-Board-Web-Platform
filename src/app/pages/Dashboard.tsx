@@ -797,11 +797,11 @@ function DashboardContent({
             Math.ceil((new Date(userData.subscription.renewsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
           );
           return (
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 flex flex-wrap items-center gap-3">
+            <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm flex flex-wrap items-center gap-3">
               <span>
                 <span className="font-semibold">Plus demo:</span> còn {daysLeft} ngày — dùng thử local, không thu tiền thật.
               </span>
-              <Button size="sm" variant="ghost" className="ml-auto shrink-0 text-slate-600 hover:bg-slate-100" onClick={() => navigate("/billing/plan")}>
+              <Button size="sm" variant="ghost" className="ml-auto shrink-0 text-amber-700 hover:bg-amber-100" onClick={() => navigate("/billing/plan")}>
                 Chi tiết
               </Button>
             </div>
@@ -873,7 +873,7 @@ function DashboardContent({
                       </div>
                     </div>
                     <Button
-                      className="w-full bg-primary text-white shadow-[0_18px_38px_-24px_rgba(109,40,217,0.52)] hover:shadow-[0_22px_44px_-24px_rgba(109,40,217,0.58)] hover:scale-[1.02] sm:w-auto"
+                      className="w-full bg-slate-950 text-white hover:bg-slate-900 sm:w-auto"
                       onClick={() => navigate("/12-week-system")}
                     >
                       Đánh dấu xong
@@ -931,7 +931,7 @@ function DashboardContent({
                       <div className="grid gap-4">
                         <div
                           data-tour-id="dashboard-start-card"
-                          className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 sm:p-5"
+                          className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5"
                         >
                           <div className="flex flex-wrap items-center justify-between gap-3">
                             <div>
@@ -946,7 +946,7 @@ function DashboardContent({
                             </div>
                             <Button
                               data-tour-id="dashboard-primary-action"
-                              className="w-full bg-slate-950 text-white shadow-sm hover:bg-slate-800 sm:w-auto"
+                              className="w-full gradient-brand text-white shadow-[0_18px_38px_-24px_rgba(109,40,217,0.52)] hover:shadow-[0_22px_44px_-24px_rgba(109,40,217,0.58)] hover:scale-[1.02] sm:w-auto"
                               onClick={() => navigate("/12-week-system")}
                             >
                               Mở trung tâm 12 tuần
@@ -1096,7 +1096,7 @@ function DashboardContent({
                         <Button
                           key={action.title}
                           variant="outline"
-                          className="group h-auto min-w-0 justify-start whitespace-normal rounded-[18px] border-slate-200 bg-slate-50/70 px-3.5 py-3.5 text-left shadow-none transition-all hover:border-slate-300 hover:bg-white"
+                          className="group h-auto min-w-0 justify-start whitespace-normal rounded-[18px] border-slate-200 bg-white px-3.5 py-3.5 text-left shadow-[0_10px_24px_-20px_rgba(15,23,42,0.18)] transition-colors hover:border-slate-300 hover:bg-white hover:shadow-[0_14px_28px_-20px_rgba(15,23,42,0.22)]"
                           onClick={action.onClick}
                         >
                           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-sm font-semibold text-white">
@@ -1129,7 +1129,7 @@ function DashboardContent({
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.04 * index }}
                       >
-                        <Card className="h-full border border-slate-200/80 bg-white/92 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.28)]">
+                        <Card className="h-full border border-slate-100 bg-white/88 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.18)]">
                           <CardHeader className="flex flex-row items-start justify-between pb-3">
                             <div>
                               <CardDescription className="text-xs font-medium text-slate-500">

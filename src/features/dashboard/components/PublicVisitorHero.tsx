@@ -46,7 +46,7 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
                     <UserPlus className="h-4 w-4" />
                     Đăng ký để sync sau
                   </Button>
-                  <Button variant="ghost" className="text-slate-700 hover:bg-slate-100" onClick={onSignIn}>
+                  <Button variant="outline" className="border-slate-200 bg-white text-slate-900 hover:bg-slate-50" onClick={onSignIn}>
                     <LogIn className="h-4 w-4" />
                     Đăng nhập
                   </Button>
