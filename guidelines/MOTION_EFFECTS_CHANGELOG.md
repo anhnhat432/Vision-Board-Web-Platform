@@ -406,3 +406,48 @@ npm run build              # ✅ Passed (built in 7.87s)
 | **Build** | ✅ (to be run) |
 | **Remaining noise** | Ambient orbs, cursor glow, 3D transforms still present |
 | **Next step** | Run typecheck, build, commit, push |
+
+---
+
+## 13. Third-Pass Fixes (Visual QA Follow-up)
+
+### 13.1 Dashboard.tsx Fixes
+| Line | Before | After | Impact |
+|---|---|---|---|
+| 820 | amber shadow 0.28 | amber shadow 0.24 | Softer warning |
+| 854 | hero shadow 0.32 | hero shadow 0.28 | Less heavy hero |
+| 888 | white card shadow 0.38 | white card shadow 0.28 | Calmer card |
+| 1079 | section shadow 0.28 | section shadow 0.22 | Lighter section |
+| 1099 | action item shadow 0.18/0.22 | action item shadow 0.16/0.20 | Subtler items |
+| 1192 | details shadow 0.32 | details shadow 0.28 | Less heavy |
+| 1271 | glass card shadow 0.32 | glass card shadow 0.28 | Calmer glass |
+| 1344 | card shadow 0.28 | card shadow 0.24 | Lighter card |
+| 1384 | amber flex shadow 0.25 | amber flex shadow 0.22 | Softer warning |
+| 1407,1556,1653 | card shadow 0.28 | card shadow 0.24 | Consistent calm cards |
+
+### 13.2 SmartGoalStepShell.tsx Fixes
+| Line | Before | After | Impact |
+|---|---|---|---|
+| 97 | violet shadow 0.25 | violet shadow 0.20 | Less violet glow |
+
+### 13.3 TwelveWeekTodayTab.tsx Fixes
+| Line | Before | After | Impact |
+|---|---|---|---|
+| 167 | amber card shadow 0.28 | amber card shadow 0.24 | Softer warning |
+| 268 | hero shadow 0.22 | hero shadow 0.18 | Less prominent hero |
+| 337 | queue card shadow 0.22 | queue card shadow 0.18 | Calmer queue |
+| 410 | task item shadow 0.20 | task item shadow 0.18 | Subtler tasks |
+| 618 | stats card shadow 0.18 | stats card shadow 0.16 | Lightest stats |
+
+---
+
+## 14. Summary of Third-Pass
+
+| Aspect | Result |
+|---|---|
+| **Files changed** | Dashboard.tsx, SmartGoalStepShell.tsx, TwelveWeekTodayTab.tsx |
+| **Shadow opacity** | Reduced by additional 10-20% on all cards |
+| **Cards affected** | 15+ cards/shadows reduced |
+| **TypeScript check** | To be run |
+| **Build** | To be run |
+| **Next step** | Run typecheck, build, visual QA again |

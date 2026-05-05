@@ -817,7 +817,7 @@ function DashboardContent({
 
       {activeSystem && reviewDueToday && (
         <Reveal>
-          <Card className="border-amber-200 bg-amber-50/92 shadow-[0_16px_40px_-28px_rgba(217,119,6,0.28)]">
+          <Card className="border-amber-200 bg-amber-50/92 shadow-[0_16px_40px_-28px_rgba(217,119,6,0.24)]">
             <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
               <div className="flex items-start gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
@@ -851,7 +851,7 @@ function DashboardContent({
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="space-y-4">
             {shouldShowMainDashboardCard && activeSystem && activeSystemTodayOpenTasks.length > 0 && (
-              <Card className="border-2 border-primary bg-white shadow-[0_16px_36px_-28px_rgba(79,70,229,0.32)]">
+              <Card className="border-2 border-primary bg-white shadow-[0_16px_36px_-28px_rgba(79,70,229,0.28)]">
                 <CardContent className="p-4 sm:p-5 lg:p-6">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-4 min-w-0">
@@ -885,7 +885,7 @@ function DashboardContent({
             )}
 
             {shouldShowMainDashboardCard && (
-              <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.38)]">
+              <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]">
                 <CardContent className="p-4 sm:p-6 lg:p-7">
                   <div className="space-y-5">
                     <div className="flex flex-wrap items-center gap-3">
@@ -1076,7 +1076,7 @@ function DashboardContent({
 
             {shouldShowTopSidebar && (
               <>
-                <section className="rounded-[24px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.28)] sm:p-5">
+                <section className="rounded-[24px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.22)] sm:p-5">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div className="min-w-0">
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Thứ tự nên đi</p>
@@ -1096,7 +1096,7 @@ function DashboardContent({
                         <Button
                           key={action.title}
                           variant="outline"
-                          className="group h-auto min-w-0 justify-start whitespace-normal rounded-[18px] border-slate-200 bg-white px-3.5 py-3.5 text-left shadow-[0_10px_24px_-20px_rgba(15,23,42,0.18)] transition-colors hover:border-slate-300 hover:bg-white hover:shadow-[0_14px_28px_-20px_rgba(15,23,42,0.22)]"
+                          className="group h-auto min-w-0 justify-start whitespace-normal rounded-[18px] border-slate-200 bg-white px-3.5 py-3.5 text-left shadow-[0_10px_24px_-20px_rgba(15,23,42,0.16)] transition-colors hover:border-slate-300 hover:bg-white hover:shadow-[0_14px_28px_-20px_rgba(15,23,42,0.20)]"
                           onClick={action.onClick}
                         >
                           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-sm font-semibold text-white">
@@ -1189,7 +1189,7 @@ function DashboardContent({
                 </ol>
               </EmptyState>
             ) : (
-              <details className="group rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)] sm:p-5 lg:p-6 open:sm:!block sm:!block" open>
+              <details className="group rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)] sm:p-5 lg:p-6 open:sm:!block sm:!block" open>
                 <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-3 sm:cursor-default">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Bảng thực thi</p>
@@ -1268,7 +1268,7 @@ function DashboardContent({
               ) : (
                 <Card
                   data-tour-id="dashboard-plan-card"
-                  className="glass-surface-gradient-border border-0 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)] ambient-glow"
+                  className="glass-surface-gradient-border border-0 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)] ambient-glow"
                 >
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-slate-950">
@@ -1341,7 +1341,7 @@ function DashboardContent({
 
               <Card
                 data-tour-id="dashboard-next-card"
-                className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]"
+                className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.24)]"
               >
                 <CardHeader>
                   <CardTitle className="text-slate-950">Đi tiếp ngay</CardTitle>
@@ -1381,7 +1381,7 @@ function DashboardContent({
 
       {!isPublicVisitor && userData.isHydratedFromDemo && (
         <Reveal>
-          <div className="flex flex-wrap items-center gap-4 rounded-[22px] border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-[0_20px_45px_-34px_rgba(217,119,6,0.25)]">
+          <div className="flex flex-wrap items-center gap-4 rounded-[22px] border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-[0_20px_45px_-34px_rgba(217,119,6,0.22)]">
             <Sparkles className="h-5 w-5 shrink-0 text-amber-600" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-amber-900">Dữ liệu đang hiển thị là ví dụ demo</p>
@@ -1404,7 +1404,7 @@ function DashboardContent({
       {shouldShowWorkspaceDetailGrid && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
           <Reveal>
-            <Card className="h-full border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]">
+            <Card className="h-full border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.24)]">
               <CardHeader>
                 <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                   <div className="min-w-0">
@@ -1553,7 +1553,7 @@ function DashboardContent({
           </Reveal>
 
           <Reveal>
-            <Card className="h-full border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]">
+            <Card className="h-full border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.24)]">
               <CardHeader>
                 <div className="flex items-center justify-between gap-4">
                   <div>

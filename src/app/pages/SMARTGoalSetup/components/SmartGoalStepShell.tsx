@@ -94,7 +94,7 @@ export function SmartGoalStepShell({
 
       {children}
 
-      <div className="rounded-[24px] border border-violet-100 bg-violet-50/80 p-4 shadow-[0_10px_28px_-28px_rgba(109,40,217,0.25)]">
+      <div className="rounded-[24px] border border-violet-100 bg-violet-50/80 p-4 shadow-[0_10px_28px_-28px_rgba(109,40,217,0.20)]">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-sm font-semibold text-violet-700">
