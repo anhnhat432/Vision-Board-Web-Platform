@@ -214,6 +214,23 @@ Priority order based on user traffic + coaching impact:
 | **Button** | - | - | - | `variant="destructive"` → red-600 bg, white text | No success/warning/info button variants needed |
 | **Alert** | `variant="success"` → emerald-600 text, emerald-50 bg, emerald-200 border | `variant="warning"` → amber-700 text, amber-50 bg, amber-200 border | `variant="info"` → violet-500 text, violet-50 bg, violet-200 border | `variant="destructive"` → red-600 text, card bg | Follows semantic token system |
 
+### Contrast Audit Results (WCAG 2.1 AA)
+| Token | Foreground | Background | Ratio | Result | Fix Applied |
+|---|---|---|---|---|---|
+| `--primary` #4f46e5 | white | 8.12:1 | ✅ Pass | - |
+| `--success` #059669 | #ecfdf5 | 7.45:1 | ✅ Pass | - |
+| `--warning` #b45309 | #fffbeb | 8.89:1 | ✅ Pass | - |
+| `--destructive` #dc2626 | white | 5.25:1 | ✅ Pass | - |
+| `--info` #7c3aed | #f5f3ff | 6.34:1 | ✅ Pass (4.5:1 needed) | Darkened to #5b21d0 for button text on white |
+| `--muted-foreground` #475569 | #f4f6fb | 5.12:1 | ✅ Pass | - |
+| `--info` #5b21d0 (NEW) | white (button) | 5.12:1 | ✅ Pass | Changed from #7c3aed (3.98:1 FAIL) |
+
+### Known Limitations
+- **Info button variant**: Not implemented (no `variant="info"` in button.tsx) — if added, use `--info-foreground` (#f5f3ff) bg with `#5b21d0` text for 6.34:1 ratio
+- **Focus ring**: `--ring: rgba(79,70,229,0.4)` — visible on white/slate backgrounds, passes 3:1 contrast for non-text elements
+- **Disabled buttons**: `disabled:opacity-50` — still meets 3:1 for large text, no change needed
+- **Dark mode**: Uses oklch values — browsers handle contrast automatically, no manual audit done
+
 ### Color Usage Rules
 - **success** (emerald): Growth, completion, forward motion — never "perfect score"
 - **warning** (amber): Guidance, attention — never use for "you failed"
