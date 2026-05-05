@@ -3,13 +3,7 @@ import { Navigate, createBrowserRouter } from "react-router";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RootLayout } from "./components/RootLayout";
-import { Achievements } from "./pages/Achievements";
-import { BillingPlan } from "./pages/BillingPlan";
 import { Dashboard } from "./pages/Dashboard";
-import { GoalTracker } from "./pages/GoalTracker";
-import { ReflectionJournal } from "./pages/ReflectionJournal";
-import { VisionBoardEditor } from "./pages/VisionBoardEditor";
-import { VisionBoardGallery } from "./pages/VisionBoardGallery";
 
 function lazyComponent<TModule extends Record<string, unknown>>(
   loader: () => Promise<TModule>,
@@ -117,7 +111,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "billing/plan",
-        Component: BillingPlan,
+        ...lazyRoute(() => import("./pages/BillingPlan"), "BillingPlan"),
       },
       {
         // Protected routes — require authentication
@@ -135,7 +129,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "vision-board/:id?",
-        Component: VisionBoardEditor,
+        ...lazyRoute(() => import("./pages/VisionBoardEditor"), "VisionBoardEditor"),
       },
       {
         path: "admin/orders",
@@ -143,7 +137,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "goals",
-        Component: GoalTracker,
+        ...lazyRoute(() => import("./pages/GoalTracker"), "GoalTracker"),
       },
       {
         path: "life-balance",
@@ -151,15 +145,15 @@ export const router = createBrowserRouter([
       },
       {
         path: "achievements",
-        Component: Achievements,
+        ...lazyRoute(() => import("./pages/Achievements"), "Achievements"),
       },
       {
         path: "journal",
-        Component: ReflectionJournal,
+        ...lazyRoute(() => import("./pages/ReflectionJournal"), "ReflectionJournal"),
       },
       {
         path: "gallery",
-        Component: VisionBoardGallery,
+        ...lazyRoute(() => import("./pages/VisionBoardGallery"), "VisionBoardGallery"),
       },
     ],
   },
