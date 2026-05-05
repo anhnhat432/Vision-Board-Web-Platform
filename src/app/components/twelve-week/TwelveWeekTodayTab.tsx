@@ -164,7 +164,7 @@ export function TwelveWeekTodayTab({
         />
       )}
       {missedTasks.length > 0 && (
-        <Card className="order-2 border border-amber-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(146,64,14,0.32)]">
+        <Card className="order-2 border border-amber-300/90 bg-white shadow-[0_18px_44px_-36px_rgba(146,64,14,0.38)]">
           <CardHeader>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -267,8 +267,8 @@ export function TwelveWeekTodayTab({
           data-testid="today-primary-hero"
           className={`order-1 rounded-[24px] border-2 p-4 shadow-[0_22px_50px_-34px_rgba(124,58,237,0.28)] sm:p-5 ${
             primaryTaskOverdue
-              ? "border-amber-200 bg-amber-50/72"
-              : "border-emerald-200 bg-white/96"
+              ? "border-amber-300 bg-amber-50/90"
+              : "border-emerald-300 bg-white"
           }`}
         >
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -293,7 +293,7 @@ export function TwelveWeekTodayTab({
               {isFirstWeek && (
                 <p
                   data-testid="today-first-week-encouragement"
-                  className="mt-2 text-sm leading-6 text-violet-800"
+                  className="mt-2 text-sm leading-6 text-violet-700"
                 >
                   Tuần đầu — bắt đầu nhỏ là quan trọng nhất. Không cần làm hết hôm nay, duy trì đến hết tuần.
                 </p>
@@ -426,8 +426,12 @@ export function TwelveWeekTodayTab({
                             Việc ưu tiên số 1
                           </p>
                         )}
-                        <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
-                          <div className="min-w-0">
+                        <div
+                          className={`flex min-w-0 flex-wrap items-start justify-between gap-3 ${
+                            isPrimaryTask && !task.completed ? "text-white" : ""
+                          }`}
+                        >
+                          <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
                               <p
                                 className={`min-w-0 max-w-full break-words font-medium ${
@@ -452,7 +456,13 @@ export function TwelveWeekTodayTab({
                               </Badge>
                             </div>
                             <p
-                              className={`mt-1 text-sm ${isPrimaryTask && !task.completed ? "text-slate-300" : "text-slate-500"}`}
+                              className={`mt-1 text-sm ${
+                                isPrimaryTask && !task.completed
+                                  ? "text-slate-200"
+                                  : task.completed
+                                    ? "text-slate-500"
+                                    : "text-slate-500"
+                              }`}
                             >
                               {task.leadIndicatorName}
                             </p>
@@ -461,11 +471,11 @@ export function TwelveWeekTodayTab({
                             variant="outline"
                             className={
                               isOverdue
-                                ? "border-amber-200 bg-amber-50 text-amber-800"
+                                ? "border-amber-300 bg-amber-50 text-amber-800"
                                 : task.completed
                                   ? "border-emerald-200 bg-emerald-50 text-emerald-800"
                                   : isPrimaryTask
-                                    ? "border-white/20 bg-white/10 text-white"
+                                    ? "border-white/30 bg-white/10 text-white/90"
                                     : "border-slate-200 bg-slate-50 text-slate-700"
                             }
                           >
