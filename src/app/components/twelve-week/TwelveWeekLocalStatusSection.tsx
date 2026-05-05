@@ -47,7 +47,7 @@ function getBackendBadgeClass(status: TwelveWeekSettingsTabProps["backendConnect
   if (!status.profileReady) return "border-violet-200 bg-violet-50 text-violet-800";
   if (status.syncing) return "border-sky-200 bg-sky-50 text-sky-800";
   if (status.syncStatus === "partial") return "border-amber-200 bg-amber-50 text-amber-800";
-  if (status.syncStatus === "error") return "border-red-200 bg-red-50 text-red-800";
+  if (status.syncStatus === "error") return "border-amber-200 bg-amber-50 text-amber-800";
   return "border-emerald-200 bg-emerald-50 text-emerald-800";
 }
 

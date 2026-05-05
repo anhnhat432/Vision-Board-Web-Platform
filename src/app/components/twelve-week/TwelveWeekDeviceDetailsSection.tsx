@@ -403,9 +403,9 @@ export function TwelveWeekDeviceDetailsSection({
               Bạn có thể tắt từng kênh ở phần &quot;Nhắc việc và quyền trên thiết bị&quot; bên trên.
             </p>
           </div>
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-red-700">Xóa toàn bộ dữ liệu</p>
-            <p className="mt-2 text-sm text-red-800">
+          <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-destructive">Xóa toàn bộ dữ liệu</p>
+            <p className="mt-2 text-sm text-destructive/90">
               Hành động này sẽ xóa vĩnh viễn tất cả dữ liệu local trên trình duyệt này: mục tiêu, nhật ký, check-in,
               cài đặt và gói mock. Không thể hoàn tác.
             </p>
@@ -553,8 +553,8 @@ export function TwelveWeekDeviceDetailsSection({
         </div>
       </ExpandableSection>
 
-      <div className="rounded-lg border border-red-300/70 bg-red-50 p-5 shadow-[0_18px_38px_-34px_rgba(220,38,38,0.18)]">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-red-600">Làm mới chu kỳ</p>
+      <div className="rounded-lg border border-amber-300/70 bg-amber-50 p-5 shadow-[0_18px_38px_-34px_rgba(217,119,6,0.18)]">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-600">Làm mới chu kỳ</p>
         <p className="mt-2 text-sm text-red-900">
           Bắt đầu lại tuần 1 từ tuần hiện tại, giữ nguyên outcome và tactic, nhưng làm mới việc, check-in và review của
           chu kỳ này.

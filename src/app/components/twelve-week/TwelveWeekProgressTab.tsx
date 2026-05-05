@@ -79,8 +79,8 @@ function getNarrativeStyle(level: ProgressTrendInterpretation["level"]): {
       };
     case "at_risk":
       return {
-        container: "border-rose-200 bg-rose-50/82",
-        badge: "border-rose-300 bg-white text-rose-800",
+        container: "border-amber-200 bg-amber-50/82",
+        badge: "border-amber-300 bg-white text-amber-800",
         badgeLabel: "Cần quay lại nhịp",
       };
     default:
@@ -166,7 +166,7 @@ export function TwelveWeekProgressTab({
                     {trend.trendDirection === "up" ? (
                       <ArrowUp className="mr-1 h-3 w-3 text-emerald-600" />
                     ) : trend.trendDirection === "down" ? (
-                      <ArrowDown className="mr-1 h-3 w-3 text-rose-600" />
+                      <ArrowDown className="mr-1 h-3 w-3 text-amber-600" />
                     ) : (
                       <Minus className="mr-1 h-3 w-3 text-slate-500" />
                     )}
@@ -460,7 +460,7 @@ export function TwelveWeekProgressTab({
                                     ? "bg-emerald-300"
                                     : cell.percent > 0
                                       ? "bg-amber-300"
-                                      : "bg-rose-300";
+                                      : "bg-amber-300";
 
                             return (
                               <div
@@ -602,7 +602,7 @@ export function TwelveWeekProgressTab({
                         item.trend === "up"
                           ? "bg-emerald-100 text-emerald-700"
                           : item.trend === "down"
-                            ? "bg-rose-100 text-rose-700"
+                            ? "bg-amber-100 text-amber-700"
                             : "bg-slate-100 text-slate-500"
                       }`}
                     >

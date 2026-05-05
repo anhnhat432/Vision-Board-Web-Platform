@@ -575,7 +575,7 @@ export function TwelveWeekWeekTab({
                           premiumInsight.status === "strong"
                             ? "bg-emerald-500"
                             : premiumInsight.status === "at_risk"
-                              ? "bg-red-400"
+                              ? "bg-amber-400"
                               : "bg-amber-400"
                         }`}
                       />
@@ -587,7 +587,7 @@ export function TwelveWeekWeekTab({
                         premiumInsight.status === "strong"
                           ? "border-emerald-200 bg-emerald-50 text-emerald-800"
                           : premiumInsight.status === "at_risk"
-                            ? "border-red-200 bg-red-50 text-red-800"
+                            ? "border-amber-200 bg-amber-50 text-amber-800"
                             : "border-amber-200 bg-amber-50 text-amber-800"
                       }
                     >
@@ -706,7 +706,7 @@ export function TwelveWeekWeekTab({
               </p>
               <Button
                 size="lg"
-                className="w-full shrink-0 sm:w-auto"
+                className="w-full shrink-0 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-blue-600 text-white hover:opacity-90 sm:w-auto"
                 onClick={handleSaveReviewClick}
                 disabled={isSavingReview}
                 aria-busy={isSavingReview}
