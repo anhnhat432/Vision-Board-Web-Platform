@@ -817,7 +817,7 @@ function DashboardContent({
 
       {activeSystem && reviewDueToday && (
         <Reveal>
-          <Card className="border-amber-200 bg-amber-50/92 shadow-[0_24px_55px_-34px_rgba(217,119,6,0.4)]">
+          <Card className="border-amber-200 bg-amber-50/92 shadow-[0_16px_40px_-28px_rgba(217,119,6,0.28)]">
             <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
               <div className="flex items-start gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
@@ -851,7 +851,7 @@ function DashboardContent({
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="space-y-4">
             {shouldShowMainDashboardCard && activeSystem && activeSystemTodayOpenTasks.length > 0 && (
-              <Card className="border-2 border-primary bg-white shadow-[0_20px_48px_-32px_rgba(79,70,229,0.42)]">
+              <Card className="border-2 border-primary bg-white shadow-[0_16px_36px_-28px_rgba(79,70,229,0.32)]">
                 <CardContent className="p-4 sm:p-5 lg:p-6">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-4 min-w-0">
@@ -946,7 +946,7 @@ function DashboardContent({
                             </div>
                             <Button
                               data-tour-id="dashboard-primary-action"
-                              className="w-full gradient-brand text-white shadow-[0_18px_38px_-24px_rgba(109,40,217,0.52)] hover:shadow-[0_22px_44px_-24px_rgba(109,40,217,0.58)] hover:scale-[1.02] sm:w-auto"
+                              className="w-full gradient-brand text-white shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)] hover:shadow-[0_18px_40px_-22px_rgba(109,40,217,0.44)] hover:scale-[1.01] sm:w-auto"
                               onClick={() => navigate("/12-week-system")}
                             >
                               Mở trung tâm 12 tuần

@@ -137,7 +137,7 @@ export function SetupStepShell({
             </Button>
             {isLastStep ? (
               <Button
-                className="w-full gradient-brand text-white shadow-[0_18px_38px_-24px_rgba(109,40,217,0.52)] hover:shadow-[0_22px_44px_-24px_rgba(109,40,217,0.58)] hover:scale-[1.02] sm:w-auto"
+                className="w-full gradient-brand text-white shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)] hover:shadow-[0_18px_40px_-22px_rgba(109,40,217,0.44)] hover:scale-[1.01] sm:w-auto"
                 onClick={handleSubmitClick}
                 size="lg"
                 disabled={isSubmitting}

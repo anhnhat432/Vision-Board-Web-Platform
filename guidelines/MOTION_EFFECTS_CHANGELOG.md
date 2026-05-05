@@ -326,3 +326,83 @@ npm run build              # ✅ Passed (built in 7.87s)
 | **CTAs** | Competing gradients | ONE gradient-brand per screen ✅ |
 | **Accessibility** | `prefers-reduced-motion` ✅ | `prefers-reduced-motion` ✅ (unchanged) |
 | **Feeling** | "SaaS landing page" | Calmer, more trustworthy (in progress) |
+
+---
+
+## 10. Second-Pass Fixes (Flashy Effects Reduction)
+
+### 10.1 Dashboard.tsx Fixes
+| Line | Before | After | Impact |
+|---|---|---|---|
+| 949 | shadow-brand 0.52/0.58, scale-[1.02] | shadow 0.38/0.44, scale-[1.01] | Less purple glow |
+| 820 | amber shadow 0.4 | amber shadow 0.28 | Softer warning |
+| 854 | hero shadow 0.42 | hero shadow 0.32 | Less heavy hero |
+
+### 10.2 SMARTGoalSetup Fixes
+| File | Before | After | Impact |
+|---|---|---|---|
+| SmartGoalStepShell.tsx:97 | violet shadow 0.35 | violet shadow 0.25 | Less violet glow |
+| SmartGoalStepShell.tsx:216 | shadow 0.52/0.58, scale-[1.02] | shadow 0.38/0.44, scale-[1.01] | Less purple glow |
+| SmartGoalStepShell.tsx:144 | transition-all | transition-colors | Performance |
+
+### 10.3 FeasibilityCheck Fixes
+| File | Before | After | Impact |
+|---|---|---|---|
+| ResultStep.tsx:439,464,489,509 | shadow 0.2 | shadow 0.14 | Less heavy white cards |
+
+### 10.4 12WeekSetup Fixes
+| File | Before | After | Impact |
+|---|---|---|---|
+| SetupStepShell.tsx:140,154 | shadow 0.52/0.58, scale-[1.02] | shadow 0.38/0.44, scale-[1.01] | Less purple glow |
+| OutcomeStep.tsx:244 | transition-all, shadow 0.48 | transition-colors, shadow 0.32 | Performance, less heavy |
+| OutcomeStep.tsx:386 | transition-all | transition-colors | Performance |
+
+### 10.5 TwelveWeekTodayTab.tsx Fixes
+| Line | Before | After | Impact |
+|---|---|---|---|
+| 312 | shadow 0.52/0.58, scale-[1.02] | shadow 0.38/0.44, scale-[1.01] | Less purple glow |
+| 677 | shadow 0.52/0.58, scale-[1.02] | shadow 0.38/0.44, scale-[1.01] | Less purple glow |
+| 167 | amber shadow 0.38 | amber shadow 0.28 | Softer warning |
+| 268 | hero shadow 0.28 | hero shadow 0.22 | Less heavy hero |
+| 337 | card shadow 0.22 | card shadow 0.16 | Lighter card |
+| 410 | card shadow 0.28 | card shadow 0.20 | Lighter card |
+
+---
+
+## 11. Remaining Visual Noise
+
+### 11.1 Still Present (Future Cleanup)
+| Issue | Location | Priority |
+|---|---|---|
+| `.ambient-orb` infinite float (16-20s) | theme.css | High |
+| `.cursor-glow` mouse tracking | theme.css, interactive-surface.tsx | High |
+| `.card-interactive-base` 3D transforms | theme.css | Medium |
+| `.hero-surface` 3D transforms | theme.css | Medium |
+| `.interactive-surface` 3D transforms | theme.css | Medium |
+| `transition-all` in 12+ files | Various .tsx files | Medium |
+| `@keyframes orb-float` | theme.css | Low |
+| `.spotlight-ring` animation | theme.css | Low |
+
+### 11.2 Manual Review Checklist
+- [ ] Dashboard: Verify cards have hierarchy without heavy shadows
+- [ ] SMARTGoalSetup: Verify CTAs still clear with reduced shadows
+- [ ] FeasibilityCheck: Verify result clarity with lighter cards
+- [ ] 12WeekSetup: Verify plan creation flow clear
+- [ ] Today Tab: Verify primary task still prominent
+- [ ] Week/Progress/Settings: Verify tab navigation clear
+- [ ] Run `npm run qa:visual-ux-ui` for screenshot review
+
+---
+
+## 12. Summary of Second-Pass
+
+| Aspect | Result |
+|---|---|
+| **Files changed** | Dashboard.tsx, SmartGoalStepShell.tsx, ResultStep.tsx, SetupStepShell.tsx, OutcomeStep.tsx, TwelveWeekTodayTab.tsx |
+| **Shadow opacity** | Reduced by additional 20-30% on flashy cards/buttons |
+| **Hover scale** | Reduced from 1.02 to 1.01 (50% less) |
+| **transition-all** | Replaced in 3 more locations |
+| **TypeScript check** | ✅ (to be run) |
+| **Build** | ✅ (to be run) |
+| **Remaining noise** | Ambient orbs, cursor glow, 3D transforms still present |
+| **Next step** | Run typecheck, build, commit, push |

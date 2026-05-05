@@ -241,9 +241,9 @@ export function OutcomeStep({
                     onClick={() => onTemplateSelect(template)}
                     aria-pressed={isSelected}
                     aria-label={templateAriaLabel}
-                    className={`rounded-[24px] border p-4 text-left transition-all ${
+                    className={`rounded-[24px] border p-4 text-left transition-colors ${
                       isSelected
-                        ? "border-slate-900 bg-slate-900 text-white shadow-[0_22px_50px_-32px_rgba(15,23,42,0.48)]"
+                        ? "border-slate-900 bg-slate-900 text-white shadow-[0_16px_36px_-28px_rgba(15,23,42,0.32)]"
                         : isLocked
                           ? "border-violet-200 bg-violet-50/86 hover:border-violet-300"
                           : "border-white/70 bg-white/84 hover:border-slate-300"
@@ -383,7 +383,7 @@ export function OutcomeStep({
                       type="button"
                       aria-pressed={isActive}
                       onClick={() => onPreferredDayToggle(dayIndex)}
-                      className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border px-4 py-2 text-sm font-medium transition-all ${
+                      className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                         isActive
                           ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
                           : "border-slate-300 bg-white text-slate-700 hover:border-emerald-400"

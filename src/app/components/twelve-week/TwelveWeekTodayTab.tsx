@@ -164,7 +164,7 @@ export function TwelveWeekTodayTab({
         />
       )}
       {missedTasks.length > 0 && (
-        <Card className="order-2 border border-amber-300/90 bg-white shadow-[0_18px_44px_-36px_rgba(146,64,14,0.38)]">
+        <Card className="order-2 border border-amber-300/90 bg-white shadow-[0_14px_34px_-28px_rgba(146,64,14,0.28)]">
           <CardHeader>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -265,7 +265,7 @@ export function TwelveWeekTodayTab({
       {primaryTask && (
         <div
           data-testid="today-primary-hero"
-          className={`order-1 rounded-[24px] border-2 p-4 shadow-[0_22px_50px_-34px_rgba(124,58,237,0.28)] sm:p-5 ${
+          className={`order-1 rounded-[24px] border-2 p-4 shadow-[0_16px_36px_-28px_rgba(124,58,237,0.22)] sm:p-5 ${
             primaryTaskOverdue
               ? "border-amber-300 bg-amber-50/90"
               : "border-emerald-300 bg-white"
@@ -309,7 +309,7 @@ export function TwelveWeekTodayTab({
             <Button
               data-testid="today-primary-mark-done"
               size="lg"
-              className="w-full gradient-brand text-white shadow-[0_18px_38px_-24px_rgba(109,40,217,0.52)] hover:shadow-[0_22px_44px_-24px_rgba(109,40,217,0.58)] hover:scale-[1.02]"
+              className="w-full gradient-brand text-white shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)] hover:shadow-[0_18px_40px_-22px_rgba(109,40,217,0.44)] hover:scale-[1.01]"
               onClick={() => onToggleTask(primaryTask.id, true)}
             >
               <Check className="h-4 w-4" />
@@ -407,7 +407,7 @@ export function TwelveWeekTodayTab({
                   return (
                     <div
                       key={task.id}
-                      className={`flex min-w-0 items-start gap-3 rounded-lg border p-3 shadow-[0_18px_38px_-34px_rgba(15,23,42,0.28)] sm:p-4 ${
+                      className={`flex min-w-0 items-start gap-3 rounded-lg border p-3 shadow-[0_14px_34px_-28px_rgba(15,23,42,0.20)] sm:p-4 ${
                         isPrimaryTask ? "border-slate-950 bg-slate-950" : "border-slate-200 bg-white"
                       }`}
                     >
@@ -674,7 +674,7 @@ export function TwelveWeekTodayTab({
               </div>
               <Button
                 size="lg"
-                className="w-full gradient-brand text-white shadow-[0_18px_38px_-24px_rgba(109,40,217,0.52)] hover:shadow-[0_22px_44px_-24px_rgba(109,40,217,0.58)] hover:scale-[1.02] sm:w-auto"
+                className="w-full gradient-brand text-white shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)] hover:shadow-[0_18px_40px_-22px_rgba(109,40,217,0.44)] hover:scale-[1.01] sm:w-auto"
                 onClick={handleSaveCheckInClick}
                 disabled={isSavingCheckIn}
                 aria-busy={isSavingCheckIn}
