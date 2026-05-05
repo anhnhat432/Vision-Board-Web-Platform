@@ -850,6 +850,40 @@ function DashboardContent({
       >
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="space-y-4">
+            {shouldShowMainDashboardCard && activeSystem && activeSystemTodayOpenTasks.length > 0 && (
+              <Card className="border-2 border-primary bg-white shadow-[0_20px_48px_-32px_rgba(79,70,229,0.42)]">
+                <CardContent className="p-4 sm:p-5 lg:p-6">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-[0_8px_20px_-12px_rgba(79,70,229,0.5)]">
+                        <CheckCircle2 className="h-6 w-6" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+                          Việc quan trọng nhất hôm nay
+                        </p>
+                        <h2 className="mt-1 text-lg font-bold text-slate-950 truncate">
+                          {activeSystemTodayOpenTasks[0].title}
+                        </h2>
+                        <p className="mt-1 text-xs text-slate-500">
+                          {activeSystemTodayOpenTasks.length > 1
+                            ? `Còn ${activeSystemTodayOpenTasks.length - 1} việc khác chờ sau đó`
+                            : "Đây là việc duy nhất hôm nay"}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      className="w-full bg-primary text-white shadow-[0_18px_38px_-24px_rgba(109,40,217,0.52)] hover:shadow-[0_22px_44px_-24px_rgba(109,40,217,0.58)] hover:scale-[1.02] sm:w-auto"
+                      onClick={() => navigate("/12-week-system")}
+                    >
+                      Đánh dấu xong
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {shouldShowMainDashboardCard && (
               <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.38)]">
                 <CardContent className="p-4 sm:p-6 lg:p-7">
@@ -859,16 +893,16 @@ function DashboardContent({
                         {isPublicVisitor ? "Trang chính" : "Hôm nay"}
                       </span>
                       {isPublicVisitor ? (
-                        <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
+                        <span title="Chế độ xem không cần đăng nhập, dùng thử các tính năng cơ bản" className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
                           {publicVisitorBadge}
                         </span>
                       ) : (
-                        <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
+                        <span title={`Gói hiện tại: ${getPlanLabel(currentPlanCode)} — xem quyền truy cập trong phần quản lý tài khoản`} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
                           Gói {getPlanLabel(currentPlanCode)}
                         </span>
                       )}
                       {activeSystem && activeSystemWeek && (
-                        <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
+                        <span title={`Tuần hiện tại trong chu kỳ 12 tuần (${getTwelveWeekCurrentWeek(activeSystem)}/${activeSystem.totalWeeks})`} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
                           Tuần {activeSystemWeek} của chu kỳ hiện tại
                         </span>
                       )}
@@ -1155,8 +1189,8 @@ function DashboardContent({
                 </ol>
               </EmptyState>
             ) : (
-              <section className="space-y-4 rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)] sm:p-5 lg:p-6">
-                <div className="flex flex-wrap items-end justify-between gap-3">
+              <details className="group rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)] sm:p-5 lg:p-6 open:sm:!block sm:!block" open>
+                <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-3 sm:cursor-default">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Bảng thực thi</p>
                     <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-950">
@@ -1166,12 +1200,16 @@ function DashboardContent({
                       Theo dõi tiến độ, nhịp thực thi và chỉ số dẫn của mục tiêu đang chạy.
                     </p>
                   </div>
-                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
-                    Dữ liệu chu kỳ hiện tại
-                  </span>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+                  <div className="flex items-center gap-3">
+                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
+                      Dữ liệu chu kỳ hiện tại
+                    </span>
+                    <svg className="h-4 w-4 text-slate-400 transition-transform group-open:rotate-180 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </summary>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
                   <GoalProgressCard
                     goalTitle={dashboardGoalTitle}
                     percent={goalProgressSnapshot.percent}
@@ -1200,6 +1238,7 @@ function DashboardContent({
                   </div>
                 </details>
 
+
                 {planLoading && !plan && (
                   <Card className="border border-slate-200 bg-white/80 shadow-sm">
                     <CardContent className="p-4 text-sm text-slate-500">
@@ -1213,7 +1252,7 @@ function DashboardContent({
                     <CardContent className="p-4 text-sm text-rose-700">{planError.message}</CardContent>
                   </Card>
                 )}
-              </section>
+              </details>
             )}
           </div>
         </motion.div>
