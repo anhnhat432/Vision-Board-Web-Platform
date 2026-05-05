@@ -267,8 +267,8 @@ export function TwelveWeekTodayTab({
           data-testid="today-primary-hero"
           className={`order-1 rounded-[24px] border-2 p-4 shadow-[0_22px_50px_-34px_rgba(124,58,237,0.28)] sm:p-5 ${
             primaryTaskOverdue
-              ? "border-amber-300 bg-amber-50/72"
-              : "border-violet-300 bg-white/96"
+              ? "border-amber-200 bg-amber-50/72"
+              : "border-emerald-200 bg-white/96"
           }`}
         >
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -309,6 +309,7 @@ export function TwelveWeekTodayTab({
             <Button
               data-testid="today-primary-mark-done"
               size="lg"
+              className="w-full gradient-brand text-white shadow-[0_18px_38px_-24px_rgba(109,40,217,0.52)] hover:shadow-[0_22px_44px_-24px_rgba(109,40,217,0.58)] hover:scale-[1.02]"
               onClick={() => onToggleTask(primaryTask.id, true)}
             >
               <Check className="h-4 w-4" />
@@ -431,7 +432,7 @@ export function TwelveWeekTodayTab({
                               <p
                                 className={`min-w-0 max-w-full break-words font-medium ${
                                   task.completed
-                                    ? "text-slate-400 line-through"
+                                    ? "text-emerald-400 line-through"
                                     : isPrimaryTask
                                       ? "text-white"
                                       : "text-slate-900"
@@ -440,7 +441,7 @@ export function TwelveWeekTodayTab({
                                 {task.title}
                               </p>
                               <Badge
-                                variant={task.isCore ? "default" : "outline"}
+                                variant={task.isCore ? "success" : "warning"}
                                 className={
                                   isPrimaryTask && !task.completed
                                     ? "border-white/20 bg-white/10 text-white hover:bg-white/10"
@@ -663,7 +664,7 @@ export function TwelveWeekTodayTab({
               </div>
               <Button
                 size="lg"
-                className="w-full sm:w-auto"
+                className="w-full gradient-brand text-white shadow-[0_18px_38px_-24px_rgba(109,40,217,0.52)] hover:shadow-[0_22px_44px_-24px_rgba(109,40,217,0.58)] hover:scale-[1.02] sm:w-auto"
                 onClick={handleSaveCheckInClick}
                 disabled={isSavingCheckIn}
                 aria-busy={isSavingCheckIn}
