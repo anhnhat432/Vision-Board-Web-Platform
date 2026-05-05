@@ -18,7 +18,7 @@ const DEFAULT_CARD_STYLE = {
 
 function Card({
   className,
-  interactive = true,
+  interactive = false,
   style,
   onPointerMove,
   onPointerLeave,
