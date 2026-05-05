@@ -116,7 +116,7 @@ export function ScheduleStep({
         </div>
       </div>
       <div className="space-y-4 rounded-[28px] border border-white/70 bg-white/72 p-5">
-        <div className="rounded-[22px] border border-violet-100 bg-violet-50/80 p-4">
+        <div className="rounded-[22px] border border-emerald-100 bg-emerald-50/80 p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">Việc lặp lại và chỉ số</p>
           <p className="mt-2 text-sm leading-7 text-slate-700">
             Việc lặp lại là việc bạn làm mỗi tuần. Chỉ số kết quả chính là con số dùng để nhìn lại xem chu kỳ có đi đúng

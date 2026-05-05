@@ -76,7 +76,7 @@ export function SetupStepShell({
                   aria-current={active ? "step" : undefined}
                   className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 transition-colors ${
                     active
-                      ? "border-slate-900 bg-slate-900 text-white"
+                      ? "border-violet-500 bg-violet-500 text-white"
                       : done
                         ? "border-emerald-200 bg-emerald-50 text-emerald-800 cursor-pointer hover:bg-emerald-100"
                         : "border-slate-200 bg-white text-slate-500"
@@ -87,7 +87,7 @@ export function SetupStepShell({
                     aria-hidden="true"
                     className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-semibold ${
                       active
-                        ? "bg-white text-slate-900"
+                        ? "bg-white text-violet-500"
                         : done
                           ? "bg-emerald-600 text-white"
                           : "bg-slate-100 text-slate-500"
@@ -137,7 +137,7 @@ export function SetupStepShell({
             </Button>
             {isLastStep ? (
               <Button
-                className="w-full sm:w-auto"
+                className="w-full gradient-brand text-white shadow-[0_18px_38px_-24px_rgba(109,40,217,0.52)] hover:shadow-[0_22px_44px_-24px_rgba(109,40,217,0.58)] hover:scale-[1.02] sm:w-auto"
                 onClick={handleSubmitClick}
                 size="lg"
                 disabled={isSubmitting}
@@ -151,7 +151,7 @@ export function SetupStepShell({
                 {isSubmitting ? "Đang tạo kế hoạch..." : "Tạo kế hoạch 12 tuần"}
               </Button>
             ) : (
-              <Button className="w-full sm:w-auto" onClick={onNext}>
+              <Button className="w-full sm:w-auto gradient-brand text-white shadow-[0_18px_38px_-24px_rgba(109,40,217,0.52)] hover:shadow-[0_22px_44px_-24px_rgba(109,40,217,0.58)] hover:scale-[1.02]" onClick={onNext}>
                 Tiếp tục
                 <ArrowRight className="h-4 w-4" />
               </Button>

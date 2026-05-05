@@ -124,14 +124,14 @@ export function LeadIndicatorsStep({
             key={indicator.id}
             className={`rounded-[24px] border p-5 ${
               indicator.type === "optional"
-                ? "border-slate-200 bg-slate-50/72"
-                : "border-emerald-200 bg-white/72 shadow-[0_14px_30px_-28px_rgba(16,185,129,0.32)]"
+                ? "border-amber-200 bg-amber-50/72"
+                : "border-emerald-200 bg-emerald-50/72 shadow-[0_14px_30px_-28px_rgba(16,185,129,0.32)]"
             }`}
           >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-sm font-semibold text-slate-900">Việc {index + 1}</p>
               <div className="flex items-center gap-2">
-                <Badge variant={indicator.type === "optional" ? "outline" : "default"}>
+                <Badge variant={indicator.type === "optional" ? "warning" : "success"}>
                   {indicator.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
                 </Badge>
                 {draft.leadIndicators.length > 2 && (
@@ -259,7 +259,7 @@ export function LeadIndicatorsStep({
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-slate-900">{group.name}</p>
-                  <Badge variant={group.type === "optional" ? "outline" : "default"} className="text-xs">
+                  <Badge variant={group.type === "optional" ? "warning" : "success"} className="text-xs">
                     {group.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
                   </Badge>
                 </div>

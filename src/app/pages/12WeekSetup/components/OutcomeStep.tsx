@@ -114,7 +114,7 @@ export function OutcomeStep({
             </div>
           </div>
         )}
-        <div className="space-y-4 rounded-[24px] border-2 border-slate-900/12 bg-white/82 p-4 shadow-[0_18px_40px_-32px_rgba(15,23,42,0.18)] sm:p-5">
+        <div className="space-y-4 rounded-[24px] border-2 border-emerald-200 bg-emerald-50/60 p-4 shadow-[0_18px_40px_-32px_rgba(16,185,129,0.18)] sm:p-5">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
               <p className="text-sm font-semibold text-slate-900">Chốt phần bắt buộc trước</p>

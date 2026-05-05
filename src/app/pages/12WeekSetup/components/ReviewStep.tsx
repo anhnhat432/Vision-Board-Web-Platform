@@ -37,7 +37,7 @@ interface ReviewStepProps {
 
 function getQualityBadgeStyle(level: PlanQualityLevel): string {
   if (level === "strong") return "border-emerald-300 bg-emerald-50 text-emerald-800";
-  if (level === "okay") return "border-sky-300 bg-sky-50 text-sky-800";
+  if (level === "okay") return "border-amber-300 bg-amber-50 text-amber-800";
   return "border-amber-300 bg-amber-50 text-amber-800";
 }
 
@@ -56,7 +56,7 @@ function getDimensionStatusMeta(status: PlanQualityLevel): {
     return { label: "Tốt", icon: CheckCircle2, textClass: "text-emerald-700" };
   }
   if (status === "okay") {
-    return { label: "Ổn", icon: CircleDot, textClass: "text-sky-700" };
+    return { label: "Ổn", icon: CircleDot, textClass: "text-amber-700" };
   }
   return { label: "Cần xem lại", icon: TriangleAlert, textClass: "text-amber-700" };
 }
@@ -350,7 +350,7 @@ export function ReviewStep({
               <li
                 key={indicator.id}
                 className={`flex flex-wrap items-center justify-between gap-2 rounded-2xl border px-3 py-2 ${
-                  indicator.type === "optional" ? "border-slate-200 bg-slate-50/80" : "border-emerald-200 bg-white/82"
+                  indicator.type === "optional" ? "border-amber-200 bg-amber-50/80" : "border-emerald-200 bg-emerald-50/80"
                 }`}
               >
                 <div className="min-w-0">
@@ -360,7 +360,7 @@ export function ReviewStep({
                     {formatScheduleDayLabels(indicator.schedule)}
                   </p>
                 </div>
-                <Badge variant={indicator.type === "optional" ? "outline" : "default"} className="text-xs">
+                <Badge variant={indicator.type === "optional" ? "warning" : "success"} className="text-xs">
                   {indicator.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
                 </Badge>
               </li>
@@ -424,7 +424,7 @@ export function ReviewStep({
             </ul>
 
             {planQuality.warnings.length > 0 && (
-              <div className="mt-4 rounded-2xl border border-amber-300 bg-white/86 p-3">
+              <div className="mt-4 rounded-2xl border border-amber-300 bg-amber-50/82 p-3">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">
                   Cảnh báo ({planQuality.warnings.length})
                 </p>
@@ -438,7 +438,7 @@ export function ReviewStep({
 
             {planQuality.suggestions.length > 0 && (
               <details
-                className="mt-3 rounded-2xl border border-white/70 bg-white/72 px-3 py-2"
+                className="mt-3 rounded-2xl border border-violet-200 bg-violet-50/72 px-3 py-2"
                 open={suggestionsOpen}
                 onToggle={() => setSuggestionsOpen(!suggestionsOpen)}
               >
