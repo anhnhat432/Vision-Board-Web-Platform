@@ -1,4 +1,4 @@
-﻿import type { ReactNode, RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import { motion } from "motion/react";
 import { useReducedMotion } from "../../../components/ui/use-reduced-motion";
 import { ArrowLeft, ArrowRight, CircleAlert, CheckCircle2, Lightbulb, Sparkles } from "lucide-react";
@@ -78,7 +78,7 @@ export function SmartGoalStepShell({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">{step.label}</p>
           <span className="text-xs font-medium text-slate-500">
-            Bước {stepIndex + 1}/{totalSteps}
+            Bu?c {stepIndex + 1}/{totalSteps}
           </span>
         </div>
         <h2
@@ -99,11 +99,11 @@ export function SmartGoalStepShell({
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-sm font-semibold text-violet-700">
               <Sparkles className="h-4 w-4" />
-              Gợi ý điền nhanh
+              G?i � di?n nhanh
             </div>
             <p className="mt-2 text-sm leading-6 text-slate-600">{starterPreview}</p>
             <p className="mt-1 text-xs leading-5 text-slate-500">
-              Dùng làm bản nháp rồi sửa cho đúng đời sống bạn.
+              D�ng l�m b?n nh�p r?i s?a cho d�ng d?i s?ng b?n.
             </p>
           </div>
           <Button
@@ -111,9 +111,9 @@ export function SmartGoalStepShell({
             variant="outline"
             className="w-full shrink-0 border-violet-200 bg-white text-violet-700 hover:bg-violet-50 sm:w-auto"
             onClick={onApplyStarter}
-            aria-label={`Dùng gợi ý cho bước ${step.label}`}
+            aria-label={`D�ng g?i � cho bu?c ${step.label}`}
           >
-            Dùng gợi ý
+            D�ng g?i �
           </Button>
         </div>
       </div>
@@ -121,9 +121,9 @@ export function SmartGoalStepShell({
       <div className="rounded-[24px] border border-slate-200 bg-white/82 p-4 shadow-[0_16px_36px_-34px_rgba(15,23,42,0.22)]">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold text-slate-950">Độ rõ của mục tiêu</p>
+            <p className="text-sm font-semibold text-slate-950">�? r� c?a m?c ti�u</p>
             <p className="mt-1 text-sm leading-6 text-slate-500">
-              Hoàn thành để mục tiêu sẵn sàng cho kế hoạch 12 tuần.
+              Ho�n th�nh d? m?c ti�u s?n s�ng cho k? ho?ch 12 tu?n.
             </p>
           </div>
           <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">
@@ -133,7 +133,7 @@ export function SmartGoalStepShell({
         <Progress
           value={clarityProgress}
           className="mt-4 h-2"
-          aria-label={`Độ rõ của mục tiêu: ${clarityDoneCount}/${clarityItems.length}`}
+          aria-label={`�? r� c?a m?c ti�u: ${clarityDoneCount}/${clarityItems.length}`}
         />
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
           {clarityItems.map((item) => (
@@ -144,13 +144,13 @@ export function SmartGoalStepShell({
               className={`rounded-2xl border px-3 py-3 text-left transition-all ${
                 item.done
                   ? "border-emerald-200 bg-emerald-50/80 hover:border-emerald-300"
-                  : "border-slate-200 bg-slate-50/80 hover:border-violet-200"
+                  : "border-amber-200 bg-amber-50/80 hover:border-amber-300"
               }`}
             >
               <div className="flex items-start gap-2">
                 <span
                   className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
-                    item.done ? "bg-emerald-600 text-white" : "bg-white text-slate-400"
+                    item.done ? "bg-emerald-600 text-white" : "bg-amber-50 text-amber-500"
                   }`}
                 >
                   {item.done ? <CheckCircle2 className="h-3.5 w-3.5" /> : <CircleAlert className="h-3.5 w-3.5" />}
@@ -186,16 +186,16 @@ export function SmartGoalStepShell({
       ) : null}
 
       {currentStepError ? (
-        <Alert className="border-rose-200 bg-rose-50/85 text-rose-700">
+        <Alert className="border-amber-200 bg-amber-50/85 text-rose-700">
           <CircleAlert className="h-4 w-4" />
-          <AlertTitle>Cần hoàn tất bước này</AlertTitle>
-          <AlertDescription className="text-rose-700/90">{currentStepError}</AlertDescription>
+          <AlertTitle>C?n ho�n t?t bu?c n�y</AlertTitle>
+          <AlertDescription className="text-amber-700/90">{currentStepError}</AlertDescription>
         </Alert>
       ) : null}
       {currentStepSoftWarning ? (
         <Alert className="border-amber-200 bg-amber-50/85 text-amber-700">
           <Lightbulb className="h-4 w-4" />
-          <AlertTitle>Gợi ý để mục tiêu rõ hơn</AlertTitle>
+          <AlertTitle>G?i � d? m?c ti�u r� hon</AlertTitle>
           <AlertDescription className="text-amber-700/90">{currentStepSoftWarning}</AlertDescription>
         </Alert>
       ) : null}
@@ -203,7 +203,7 @@ export function SmartGoalStepShell({
       <div className="flow-muted p-4">
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-            Tiếp tục viết mục tiêu
+            Ti?p t?c vi?t m?c ti�u
           </p>
           <p className="text-sm text-slate-600">{step.completionHint}</p>
         </div>
@@ -211,10 +211,10 @@ export function SmartGoalStepShell({
         <div className="mt-4 flex flex-col gap-3 sm:flex-row">
           <Button variant="outline" className="flex-1" onClick={onBack}>
             <ArrowLeft className="h-4 w-4" />
-            Quay lại
+            Quay l?i
           </Button>
-          <Button className="flex-1" onClick={onNext} disabled={!isCurrentStepValid}>
-            {stepIndex < totalSteps - 1 ? "Tiếp theo" : "Tiếp theo: kiểm tra tính thực tế"}
+          <Button className="flex-1 gradient-brand text-white shadow-[0_18px_38px_-24px_rgba(109,40,217,0.52)] hover:shadow-[0_22px_44px_-24px_rgba(109,40,217,0.58)] hover:scale-[1.02]" onClick={onNext} disabled={!isCurrentStepValid}>
+            {stepIndex < totalSteps - 1 ? "Ti?p theo" : "Ti?p theo: ki?m tra t�nh th?c t?"}
             <ArrowRight className="h-4 w-4" />
           </Button>
         </div>

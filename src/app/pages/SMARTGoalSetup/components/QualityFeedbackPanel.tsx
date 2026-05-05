@@ -41,11 +41,11 @@ const LEVEL_CONFIG: Record<
   },
   weak: {
     label: "Cần làm rõ",
-    border: "border-rose-200",
-    bg: "bg-rose-50/80",
-    badgeClass: "border-rose-200 bg-rose-50 text-rose-800",
+    border: "border-amber-200",
+    bg: "bg-amber-50/80",
+    badgeClass: "border-rose-200 bg-rose-50 text-amber-800",
     icon: AlertTriangle,
-    iconColor: "text-rose-600",
+    iconColor: "text-amber-600",
   },
 };
 
@@ -94,9 +94,9 @@ export function QualityFeedbackPanel({
           {topWarnings.map((warning) => (
             <div
               key={warning}
-              className="flex items-start gap-2 rounded-2xl border border-rose-100 bg-white/82 px-3 py-2.5"
+              className="flex items-start gap-2 rounded-2xl border border-amber-100 bg-white/82 px-3 py-2.5"
             >
-              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-rose-500" />
+              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-500" />
               <p className="text-sm leading-6 text-slate-700">{warning}</p>
             </div>
           ))}
@@ -108,9 +108,9 @@ export function QualityFeedbackPanel({
           {topSuggestions.map((suggestion) => (
             <div
               key={suggestion}
-              className="flex items-start gap-2 rounded-2xl border border-slate-100 bg-white/82 px-3 py-2.5"
+              className="flex items-start gap-2 rounded-2xl border border-violet-100 bg-white/82 px-3 py-2.5"
             >
-              <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
+              <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-500" />
               <p className="text-sm leading-6 text-slate-600">{suggestion}</p>
             </div>
           ))}
