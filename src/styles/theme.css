@@ -2115,6 +2115,22 @@
   }
 }
 
+/* Fade-in-up animation for static content (replaces motion.div for simple cases) */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
 @media (pointer: coarse) {
   /* Larger tap targets and simpler hover effects on touch devices */
   .card-interactive-base:hover,

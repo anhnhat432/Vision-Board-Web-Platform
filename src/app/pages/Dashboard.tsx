@@ -14,7 +14,6 @@ import {
   TrendingUp,
   UserPlus,
 } from "lucide-react";
-import { motion } from "motion/react";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 
@@ -848,7 +847,7 @@ function DashboardContent({
           shouldShowTopSidebar ? "grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,400px)]" : "grid gap-6"
         }
       >
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <div className="animate-fade-in-up">
           <div className="space-y-4">
             {shouldShowMainDashboardCard && activeSystem && activeSystemTodayOpenTasks.length > 0 && (
               <Card className="border-2 border-primary bg-white shadow-[0_16px_36px_-28px_rgba(79,70,229,0.28)]">
@@ -1123,11 +1122,10 @@ function DashboardContent({
                     const Icon = item.icon;
 
                     return (
-                      <motion.div
+                      <div
                         key={`top-${item.title}`}
-                        initial={{ opacity: 0, y: 18 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.04 * index }}
+                        className="animate-fade-in-up"
+                        style={{ animationDelay: `${0.04 * index}s` }}
                       >
                         <Card className="h-full border border-slate-100 bg-white/88 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.18)]">
                           <CardHeader className="flex flex-row items-start justify-between pb-3">
@@ -1147,7 +1145,7 @@ function DashboardContent({
                             <p className="text-sm text-slate-500">{item.note}</p>
                           </CardContent>
                         </Card>
-                      </motion.div>
+                      </div>
                     );
                   })}
                 </div>
@@ -1255,10 +1253,10 @@ function DashboardContent({
               </details>
             )}
           </div>
-        </motion.div>
+        </div>
 
         {shouldShowTopSidebar && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
+          <div className="animate-fade-in-up" style={{ animationDelay: '0.08s' }}>
             <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
               {isPublicVisitor ? (
                 <PublicVisitorAccountCard
@@ -1375,7 +1373,7 @@ function DashboardContent({
                 </CardContent>
               </Card>
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
 

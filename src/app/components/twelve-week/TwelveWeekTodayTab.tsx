@@ -1,5 +1,4 @@
-﻿import { motion } from "motion/react";
-import { useState } from "react";
+﻿import { useState } from "react";
 import { AlertTriangle, ArrowRight, CalendarClock, CalendarPlus, Check, Crown, Gauge, Inbox, Loader2, Sparkles, X } from "lucide-react";
 
 import type { RescueModeStatus } from "@/features/plan12week/logic";
@@ -331,7 +330,7 @@ export function TwelveWeekTodayTab({
       )}
 
       <div className="order-1 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.12fr)_380px]">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="min-w-0">
+        <div className="animate-fade-in-up min-w-0">
           <Card
             data-tour-id="system-today-queue"
             className="h-full min-w-0 overflow-hidden border border-slate-200/80 bg-white/92 shadow-[0_22px_54px_-40px_rgba(37,99,235,0.18)]"
@@ -608,12 +607,10 @@ export function TwelveWeekTodayTab({
               )}
             </CardContent>
           </Card>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.06 }}
-          className="min-w-0"
+        </div>
+        <div
+          className="animate-fade-in-up min-w-0"
+          style={{ animationDelay: '0.06s' }}
         >
           <Card className="h-full min-w-0 overflow-hidden border border-slate-200/80 bg-white/92 shadow-[0_22px_54px_-40px_rgba(124,58,237,0.16)]">
             <CardHeader className="min-w-0 space-y-0 pb-3">
@@ -704,7 +701,7 @@ export function TwelveWeekTodayTab({
               )}
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
