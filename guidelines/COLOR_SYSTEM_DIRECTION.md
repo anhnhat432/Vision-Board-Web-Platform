@@ -202,12 +202,31 @@ Priority order based on user traffic + coaching impact:
    - Added variant `warning`: uses `--warning`, `--warning-foreground` tokens
    - Added variant `info`: uses `--info`, `--info-foreground` tokens
 
+4. `src/app/components/ui/alert.tsx`
+   - Added variant `success`: uses `--success`, `--success-foreground`, `--success-border` tokens
+   - Added variant `warning`: uses `--warning`, `--warning-foreground`, `--warning-border` tokens
+   - Added variant `info`: uses `--info`, `--info-foreground`, `--info-border` tokens
+
+### Variant Rules Summary
+| Component | success | warning | info | destructive | Notes |
+|---|---|---|---|---|---|
+| **Badge** | `variant="success"` → emerald-600 bg, emerald-50 text | `variant="warning"` → amber-700 bg, amber-50 text | `variant="info"` → violet-500 bg, violet-50 text | `variant="destructive"` → red-600 bg, white text | All use gradient shadow |
+| **Button** | - | - | - | `variant="destructive"` → red-600 bg, white text | No success/warning/info button variants needed |
+| **Alert** | `variant="success"` → emerald-600 text, emerald-50 bg, emerald-200 border | `variant="warning"` → amber-700 text, amber-50 bg, amber-200 border | `variant="info"` → violet-500 text, violet-50 bg, violet-200 border | `variant="destructive"` → red-600 text, card bg | Follows semantic token system |
+
+### Color Usage Rules
+- **success** (emerald): Growth, completion, forward motion — never "perfect score"
+- **warning** (amber): Guidance, attention — never use for "you failed"
+- **info** (violet): Coaching insight, suggestions — supportive not alarming
+- **destructive** (red): Irreversible actions ONLY — delete, cancel, destroy
+- **muted** (slate): Local/demo status, metadata — never danger
+
 ### Commands Run
 - `npm run typecheck` — passed
 - `npm run build` — passed (built in 7.94s)
 
 ### Risks
-- **Low**: `badge.tsx` uses `bg-[color:var(--token)]` syntax — works in Tailwind v4, but verify browser support (all modern browsers support `color:` prefix in arbitrary values)
+- **Low**: `badge.tsx` and `alert.tsx` use `bg-[color:var(--token)]` syntax — works in Tailwind v4, modern browsers support `color:` prefix
 - **None**: `button.tsx` outline change is visual-only, no behavior change
 - **None**: theme.css tokens are additive (except `--destructive` and `--muted-foreground` which were explicit requirements)
 
