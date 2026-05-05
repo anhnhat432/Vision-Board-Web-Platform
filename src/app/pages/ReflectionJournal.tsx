@@ -317,7 +317,7 @@ export function ReflectionJournal() {
                 </div>
               </div>
 
-              <div className="hidden rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl xl:block">
+              <div className="hidden rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] xl:block">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Nhịp viết hiện tại</p>
                 {hasReflections ? (
                   <div className="mt-6 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
@@ -411,7 +411,7 @@ export function ReflectionJournal() {
                       key={item.value}
                       type="button"
                       onClick={() => setNewReflection({ ...newReflection, mood: item.value })}
-                      className={`rounded-[24px] border px-4 py-4 text-left transition-all ${
+                      className={`rounded-[24px] border px-4 py-4 text-left transition-colors transition-transform duration-150 ${
                         active ? item.activeClass : "border-white/70 bg-white/72 text-slate-500 hover:border-slate-200"
                       }`}
                     >

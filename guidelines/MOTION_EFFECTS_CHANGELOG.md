@@ -451,3 +451,86 @@ npm run build              # ✅ Passed (built in 7.87s)
 | **TypeScript check** | To be run |
 | **Build** | To be run |
 | **Next step** | Run typecheck, build, visual QA again |
+
+---
+
+## 15. Fourth-Pass Fixes (Prompt #3-4 Implementation)
+
+### 15.1 Prompt #3: Replace transition-all
+
+**Summary**: Replaced `transition-all` with specific transitions (`transition-colors`, `transition-transform`, `transition-shadow`) in 15+ files to improve performance and clarity.
+
+| File | Before | After | Impact |
+|------|--------|-------|--------|
+| badge.tsx | transition-all | transition-colors transition-transform duration-150 | Only animate colors and transform |
+| accordion.tsx | transition-all | transition-colors duration-150 | Only animate colors |
+| switch.tsx | transition-all | transition-colors duration-150 | Only animate colors |
+| navigation-menu.tsx (ChevronDownIcon) | transition duration-300 | transition-transform duration-150 | Consistent fast transform |
+| navigation-menu.tsx (NavigationMenuLink) | transition-all | transition-colors duration-150 | Only animate colors |
+| slider.tsx | transition-all | transition-transform transition-shadow duration-150 | Only transform and shadow |
+| input-otp.tsx | transition-all | transition-colors duration-150 | Only animate colors |
+| tabs.tsx | transition-all duration-300 | transition-colors transition-shadow transition-transform duration-150 | Specific properties |
+| sidebar.tsx (SidebarRail) | transition-all | transition-transform | Only transform for rail |
+| FeasibilityStepShell.tsx | transition-all | transition-colors transition-shadow duration-150 | Label hover (colors + shadow) |
+| LifeInsight.tsx (2×) | transition-all | transition-colors transition-transform duration-150 | Button/card hover |
+| SmartGoalHero.tsx | transition-all | transition-colors transition-shadow duration-150 | Step card hover |
+| GoalTracker.tsx | transition-all | transition-colors transition-shadow duration-150 | Search input focus |
+| RootLayout.tsx (4×) | transition-all / transition-all duration-200 | transition-opacity / transition-colors transition-transform duration-150 | Navigation buttons |
+| ReflectionJournal.tsx | transition-all | transition-colors transition-transform duration-150 | Mood picker hover |
+| VisionBoardEditor.tsx (2×) | transition-all | transition-colors transition-shadow duration-150 | Image/item hover |
+
+**Total**: 15 files, ~20 occurrences.
+
+### 15.2 Prompt #4: Remove backdrop blur from glass surfaces
+
+**Summary**: Removed `backdrop-blur-*` from decorative glass surfaces (cards, badges, buttons, tabs). Kept blur on functional overlays (modals, dropdowns, toasts).
+
+**Removed from** (21 instances):
+
+- AppErrorBoundary.tsx:79 (error card)
+- Achievements.tsx:143 (snapshot card)
+- LifeInsight.tsx:230 (snapshot card)
+- LifeBalance.tsx:255 (snapshot card) — kept modal overlay at line 188
+- VisionBoardEditor.tsx:240,252,710,924 (canvas cards, empty state)
+- FeasibilityCheck.tsx:284 (snapshot card)
+- OrderStatusPage.tsx:271 (order summary card)
+- OrderPage.tsx:418 (quick summary card)
+- ReflectionJournal.tsx:320 (snapshot card)
+- FeasibilityCheck/ResultStep.tsx:289,338,533 (result cards + sticky bar)
+- 12WeekSetup/SetupStepShell.tsx:130 (sticky footer)
+- TwelveWeekWeekTab.tsx:606 (premium lock overlay)
+- badge.tsx:15,25 (secondary & outline variants)
+- button.tsx:25 (outline variant)
+- tabs.tsx:29 (TabsList)
+- RootLayout.tsx:1046,1067,1079 (header utility buttons)
+- VisionBoardGallery.tsx:251,449,468 (snapshot card, image card, preview overlay)
+
+**Kept on** (functional overlays):
+
+- dialog.tsx:41,60 (modal backdrop & content)
+- select.tsx:68 (dropdown content)
+- sonner.tsx:21 (toast)
+- RootLayout.tsx:914 (dropdown menu content)
+- LifeBalance.tsx:188 (modal backdrop)
+
+### 15.3 Verification
+
+```bash
+npx tsc --noEmit   # ✅ Passed
+next build         # ✅ Passed (Errors: 0, Warnings: 0)
+```
+
+---
+
+## 16. Summary of Fourth-Pass
+
+| Aspect | Result |
+|---|---|
+| **Files changed** | 18 files total |
+| **transition-all replaced** | 15 files, ~20 occurrences |
+| **Backdrop blur removed** | 21 decorative instances |
+| **TypeScript check** | ✅ Passed |
+| **Build** | ✅ Passed |
+| **Remaining issues** | None for Prompt #3-4 |
+
+---

@@ -415,7 +415,7 @@ export function OrderPage() {
               </p>
             </div>
 
-            <div className="rounded-[32px] border border-white/14 bg-white/12 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+            <div className="rounded-[32px] border border-white/14 bg-white/12 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Tóm tắt nhanh</p>
               <div className="mt-4 space-y-2.5">
                 {summaryItems.map((item) => {

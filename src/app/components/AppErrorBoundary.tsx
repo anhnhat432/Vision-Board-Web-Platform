@@ -76,7 +76,7 @@ export function AppErrorBoundary() {
                 </div>
               </div>
 
-              <div className="rounded-[30px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+              <div className="rounded-[30px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/14 text-white">
                     <AlertTriangle className="h-5 w-5" />

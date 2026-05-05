@@ -191,7 +191,7 @@ describe("applyBackendProgressOverlay", () => {
     expect(overlaid.scoreboard[0]?.mainMetricProgress).toBe("Review-owned lag");
   });
 
-  it("restores task completion from matching backend metric logs when remote task status is stale", () => {
+  it("ID-based overlay takes precedence over metric-based overlay for mapped tasks", () => {
     const system = createSystem({
       taskInstances: [
         {
@@ -224,6 +224,31 @@ describe("applyBackendProgressOverlay", () => {
     ];
 
     const overlaid = applyBackendProgressOverlay(system, details, { local_task_1: "remote_task_1" });
+
+    expect(overlaid.taskInstances[0]?.completed).toBe(false);
+    expect(overlaid.weeklyReviews[0]?.completedLeadIndicators).toBe(0);
+  });
+
+  it("metric-based overlay still applies for unmapped tasks", () => {
+    const system = createSystem({
+      taskInstances: [
+        {
+          id: "local_task_1",
+          weekNumber: 1,
+          scheduledDate: "2026-04-01",
+          title: "Ship",
+          leadIndicatorName: "Ship",
+          isCore: true,
+          completed: false,
+          tacticId: "tactic_1",
+        },
+      ],
+    });
+    const details = createPlanDetails({
+      metrics: [createMetric("Ship", [{ id: "ship_1", date: "2026-04-01", value: 1, completed: true }])],
+    });
+
+    const overlaid = applyBackendProgressOverlay(system, details, {});
 
     expect(overlaid.taskInstances[0]?.completed).toBe(true);
     expect(overlaid.weeklyReviews[0]?.completedLeadIndicators).toBe(1);

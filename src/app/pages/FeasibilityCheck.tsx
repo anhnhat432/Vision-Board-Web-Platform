@@ -281,7 +281,7 @@ export function FeasibilityCheck() {
                 </div>
               </div>
 
-              <div className="hidden rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+              <div className="hidden rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
                 <div className="flex items-center justify-between text-sm text-white/72">
                   <span>
                     Câu hỏi {currentStep + 1} / {totalSteps}

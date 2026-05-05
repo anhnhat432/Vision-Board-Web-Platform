@@ -159,6 +159,7 @@ export function TwelveWeekSystem() {
     updateActiveSystemState,
     refreshSnapshotMeta,
     refreshBackendProgressOverlay,
+    invalidateOverlay,
     loadGoalData,
   } = useTwelveWeekSystemSnapshot();
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
@@ -374,6 +375,7 @@ export function TwelveWeekSystem() {
     commitSystemUpdate,
     updateActiveSystemState,
     refreshBackendProgressOverlay,
+    invalidateOverlay,
     refreshSnapshotMeta,
   });
 

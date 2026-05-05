@@ -140,7 +140,7 @@ export function Achievements() {
                 </div>
               </div>
 
-              <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+              <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Tình trạng hiện tại</p>
 
                 <div className="mt-6 space-y-4">

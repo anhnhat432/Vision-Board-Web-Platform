@@ -603,7 +603,7 @@ export function TwelveWeekWeekTab({
                         Gợi ý chỉnh tải: {premiumInsight.recommendedAdjustment}
                       </p>
                     </div>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-white/50 backdrop-blur-[2px]">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-white/50">
                       <Crown className="h-5 w-5 text-violet-500" />
                       <p className="mt-1 text-xs font-semibold text-violet-700">Chỉ dành cho Plus</p>
                     </div>

@@ -237,7 +237,7 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
     >
       <div className="group relative">
         {item.type === "image" && (
-          <div className="overflow-hidden rounded-[26px] border border-white/85 bg-white/90 p-2 shadow-[0_28px_50px_-34px_rgba(15,23,42,0.48)] backdrop-blur-2xl">
+          <div className="overflow-hidden rounded-[26px] border border-white/85 bg-white/90 p-2 shadow-[0_28px_50px_-34px_rgba(15,23,42,0.48)]">
             <ImageWithFallback
               src={item.content}
               alt="Phần tử bảng tầm nhìn"
@@ -249,7 +249,7 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
 
         {item.type === "quote" && (
           <div
-            className="rounded-[26px] border border-white/80 gradient-white-panel p-5 shadow-[0_28px_50px_-34px_rgba(15,23,42,0.45)] backdrop-blur-2xl"
+            className="rounded-[26px] border border-white/80 gradient-white-panel p-5 shadow-[0_28px_50px_-34px_rgba(15,23,42,0.45)]"
             style={{ width: `${item.width}px` }}
           >
             <div className="flex items-center gap-2 text-violet-600">
@@ -707,7 +707,7 @@ export function VisionBoardEditor() {
                   </p>
                 </div>
 
-                <div className="hidden xl:block rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+                <div className="hidden xl:block rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
                   <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">
                     Snapshot canvas
                   </p>
@@ -807,7 +807,7 @@ export function VisionBoardEditor() {
                       <button
                         key={img.label}
                         type="button"
-                        className="group relative overflow-hidden rounded-xl border border-white/70 transition-all hover:border-violet-300 hover:shadow-[0_8px_20px_-12px_rgba(109,40,217,0.3)]"
+                        className="group relative overflow-hidden rounded-xl border border-white/70 transition-colors transition-shadow duration-150 hover:border-violet-300 hover:shadow-[0_8px_20px_-12px_rgba(109,40,217,0.3)]"
                         onClick={() => handleAddCuratedImage(img.url)}
                       >
                         <ImageWithFallback
@@ -887,7 +887,7 @@ export function VisionBoardEditor() {
                         key={item}
                         type="button"
                         onClick={() => setIconName(item)}
-                        className={`rounded-[24px] border p-4 transition-all ${
+                        className={`rounded-[24px] border p-4 transition-colors transition-shadow duration-150 ${
                           isActive
                             ? "border-violet-300 bg-violet-50 text-violet-700 shadow-[0_18px_36px_-24px_rgba(109,40,217,0.35)]"
                             : "border-white/80 bg-white/72 text-slate-500 hover:border-violet-200 hover:text-violet-700"
@@ -921,7 +921,7 @@ export function VisionBoardEditor() {
 
                 {board.items.length === 0 ? (
                   <div className="absolute inset-0 flex items-center justify-center p-8">
-                    <div className="max-w-lg rounded-[32px] border border-white/80 bg-white/82 p-8 text-center shadow-[0_32px_70px_-40px_rgba(15,23,42,0.42)] backdrop-blur-2xl">
+                    <div className="max-w-lg rounded-[32px] border border-white/80 bg-white/82 p-8 text-center shadow-[0_32px_70px_-40px_rgba(15,23,42,0.42)]">
                       <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[24px] bg-violet-50 text-violet-700">
                         <Sparkles className="h-9 w-9" />
                       </div>

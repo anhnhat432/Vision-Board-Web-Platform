@@ -248,7 +248,7 @@ export function VisionBoardGallery() {
                 </div>
               </div>
 
-              <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-[32px] border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)] backdrop-blur-lg">
+              <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-[32px] border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Snapshot thư viện</p>
 
                 <div className="mt-4 space-y-3">
@@ -446,7 +446,7 @@ export function VisionBoardGallery() {
                                       }}
                                     >
                                       {item.type === "image" && (
-                                        <div className="rounded-[16px] border border-white/80 bg-white/88 p-1.5 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.18)] backdrop-blur-sm">
+                                        <div className="rounded-[16px] border border-white/80 bg-white/88 p-1.5 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.18)]">
                                           <ImageWithFallback
                                             src={item.content}
                                             alt="Phần tử bảng"
@@ -465,7 +465,7 @@ export function VisionBoardGallery() {
                                 </div>
                               )}
 
-                              <div className="preview-hover-overlay absolute inset-x-4 bottom-4 rounded-[20px] border border-white/18 bg-slate-900/38 px-4 py-3 text-white shadow-[0_14px_28px_-24px_rgba(15,23,42,0.34)] backdrop-blur-md">
+                              <div className="preview-hover-overlay absolute inset-x-4 bottom-4 rounded-[20px] border border-white/18 bg-slate-900/38 px-4 py-3 text-white shadow-[0_14px_28px_-24px_rgba(15,23,42,0.34)]">
                                 <div className="flex items-center justify-between gap-4">
                                   <div>
                                     <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-white/58">

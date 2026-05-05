@@ -227,7 +227,7 @@ export function LifeInsight() {
                 </div>
               </div>
 
-              <div className="hidden rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl">
+              <div className="hidden rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Snapshot hiện tại</p>
 
                 <div className="mt-6 space-y-4">
@@ -272,7 +272,7 @@ export function LifeInsight() {
                     key={area.name}
                     type="button"
                     onClick={() => setSelectedAreaName(area.name === lowestArea.name ? null : area.name)}
-                    className={`relative rounded-[18px] border p-4 text-left transition-all hover:-translate-y-0.5 ${
+                    className={`relative rounded-[18px] border p-4 text-left transition-colors transition-transform duration-150 hover:-translate-y-0.5 ${
                       isSelected
                         ? "border-violet-300 bg-violet-50 shadow-[0_8px_24px_-12px_rgba(109,40,217,0.35)]"
                         : "border-white/70 bg-white/72 hover:border-white hover:bg-white"
@@ -320,7 +320,7 @@ export function LifeInsight() {
                   <label
                     key={option.id}
                     data-intent-id={option.id}
-                    className={`cursor-pointer rounded-[18px] border p-4 text-left transition-all hover:-translate-y-0.5 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-violet-300 ${
+                    className={`cursor-pointer rounded-[18px] border p-4 text-left transition-colors transition-transform duration-150 hover:-translate-y-0.5 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-violet-300 ${
                       isSelected
                         ? "border-violet-300 bg-violet-50 shadow-[0_8px_24px_-12px_rgba(109,40,217,0.35)]"
                         : "border-white/70 bg-white/72 hover:border-white hover:bg-white"

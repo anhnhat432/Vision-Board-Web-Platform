@@ -286,7 +286,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   <p className="max-w-3xl text-sm leading-7 text-white/84 sm:text-base lg:text-lg">{result.summary}</p>
                 </div>
 
-                <div className="rounded-2xl border border-white/14 bg-white/10 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl sm:hidden">
+                <div className="rounded-2xl border border-white/14 bg-white/10 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] sm:hidden">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/58">
@@ -335,7 +335,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   {scoreCards.map((card) => (
                     <div
                       key={card.label}
-                      className="rounded-2xl border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] backdrop-blur-2xl"
+                      className="rounded-2xl border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]"
                     >
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/58">{card.label}</p>
                       <p
@@ -530,7 +530,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           in-hero buttons; visual users still see this sticky bar on small viewports. */}
       <div
         aria-hidden="true"
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-3 shadow-[0_-12px_32px_-20px_rgba(15,23,42,0.18)] backdrop-blur-md sm:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-3 shadow-[0_-12px_32px_-20px_rgba(15,23,42,0.18)] sm:hidden"
       >
         <div className="flex gap-2">
           <Button

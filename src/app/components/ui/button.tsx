@@ -22,7 +22,7 @@ const buttonVariants = cva(
         destructive:
           "border-transparent bg-destructive text-white shadow-[0_12px_28px_-20px_rgba(212,24,61,0.38)] hover:bg-destructive/90 hover:shadow-[0_16px_34px_-22px_rgba(212,24,61,0.44)] hover:scale-[1.01] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
-          "border-slate-300 bg-white/78 text-foreground shadow-[0_10px_24px_-20px_rgba(15,23,42,0.16)] backdrop-blur-sm hover:border-slate-400 hover:bg-white hover:text-accent-foreground hover:shadow-[0_14px_28px_-20px_rgba(15,23,42,0.2)] hover:scale-[1.01] dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "border-slate-300 bg-white/78 text-foreground shadow-[0_10px_24px_-20px_rgba(15,23,42,0.16)] hover:border-slate-400 hover:bg-white hover:text-accent-foreground hover:shadow-[0_14px_28px_-20px_rgba(15,23,42,0.2)] hover:scale-[1.01] dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         secondary:
           "border border-white/60 bg-secondary text-secondary-foreground shadow-[0_10px_24px_-20px_rgba(124,58,237,0.2)] hover:bg-secondary/95 hover:shadow-[0_14px_30px_-22px_rgba(124,58,237,0.26)] hover:scale-[1.01]",
         ghost:

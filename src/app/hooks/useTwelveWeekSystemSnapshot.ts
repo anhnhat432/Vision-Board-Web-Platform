@@ -191,6 +191,7 @@ export function useTwelveWeekSystemSnapshot() {
   const {
     effectiveSystem,
     refresh: refreshBackendProgressOverlay,
+    invalidateOverlay,
   } = useBackendProgressOverlay(activeGoal?.id ?? null, system);
 
   const currentWeek = effectiveSystem ? getTwelveWeekCurrentWeek(effectiveSystem) : 1;
@@ -462,6 +463,7 @@ export function useTwelveWeekSystemSnapshot() {
     updateActiveSystemState,
     refreshSnapshotMeta,
     refreshBackendProgressOverlay,
+    invalidateOverlay,
     loadGoalData,
   };
 }

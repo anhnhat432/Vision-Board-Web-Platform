@@ -1043,7 +1043,7 @@ function GoalTrackerContent({
                 placeholder="Tìm mục tiêu..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 bg-white/90 py-3 pl-11 pr-4 text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-violet-300 focus:ring-2 focus:ring-violet-200"
+                className="w-full rounded-lg border border-slate-200 bg-white/90 py-3 pl-11 pr-4 text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none transition-colors transition-shadow duration-150 focus:border-violet-300 focus:ring-2 focus:ring-violet-200"
               />
             </div>
           </div>

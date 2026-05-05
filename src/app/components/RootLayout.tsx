@@ -831,7 +831,7 @@ export function RootLayout() {
               <button
                 type="button"
                 onClick={() => navigateAppRoute("/")}
-                className="flex shrink-0 items-center gap-2.5 rounded-lg text-left transition-all duration-200 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
+                className="flex shrink-0 items-center gap-2.5 rounded-lg text-left transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
                 aria-label="Về trang chủ Dear Our Future"
               >
                 <div className="flex size-9 items-center justify-center rounded-xl" style={shellBadgeStyle}>
@@ -868,7 +868,7 @@ export function RootLayout() {
                       onPointerEnter={() => handlePrefetch(item.path)}
                       aria-current={active ? "page" : undefined}
                       title={item.label}
-                      className={`h-8 shrink-0 rounded-full px-3 text-[0.82rem] transition-all duration-200 active:scale-95 ${
+                      className={`h-8 shrink-0 rounded-full px-3 text-[0.82rem] transition-colors transition-transform duration-150 active:scale-95 ${
                         active
                           ? "text-white hover:text-white"
                           : "bg-transparent text-slate-600 shadow-none hover:bg-white/90 hover:text-slate-900"
@@ -892,7 +892,7 @@ export function RootLayout() {
                         aria-current={secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined}
                         aria-expanded={desktopMoreOpen}
                         aria-haspopup="menu"
-                        className={`h-8 shrink-0 rounded-full px-3 text-[0.82rem] transition-all duration-200 active:scale-95 ${
+                        className={`h-8 shrink-0 rounded-full px-3 text-[0.82rem] transition-colors transition-transform duration-150 active:scale-95 ${
                           isDesktopMoreNavActive
                             ? "text-white hover:text-white"
                             : "bg-transparent text-slate-500 shadow-none hover:bg-white/90 hover:text-slate-700"
@@ -1043,7 +1043,7 @@ export function RootLayout() {
               </span>
               <button
                 type="button"
-                className="hidden size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 backdrop-blur-sm transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300 sm:flex"
+                className="hidden size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300 sm:flex"
                 onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
                 aria-label={resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
               >
@@ -1064,7 +1064,7 @@ export function RootLayout() {
               ) : (
                 <button
                   type="button"
-                  className="flex size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 backdrop-blur-sm transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300"
+                  className="flex size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300"
                   onClick={() => {
                     setGuideUserData(getUserData());
                     setIsGuideOpen(true);
@@ -1076,7 +1076,7 @@ export function RootLayout() {
               )}
               <button
                 type="button"
-                className="flex size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 backdrop-blur-sm transition-colors active:scale-95 hover:bg-white"
+                className="flex size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 transition-colors active:scale-95 hover:bg-white"
                 onClick={() => setMobileMenuOpen((open) => !open)}
                 aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
                 aria-expanded={mobileMenuOpen}
@@ -1177,7 +1177,7 @@ export function RootLayout() {
                         setMobileMenuOpen(false);
                       }}
                       onFocus={() => handlePrefetch(item.path)}
-                      className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-sm font-medium tracking-normal transition-all active:scale-[0.98] ${
+                      className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-sm font-medium tracking-normal transition-transform duration-150 active:scale-[0.98] ${
                         active ? "text-white" : "text-slate-600 hover:bg-white/80 hover:text-slate-900"
                       }`}
                       style={active ? activeNavStyle : undefined}

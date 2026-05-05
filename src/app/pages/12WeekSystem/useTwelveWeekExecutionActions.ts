@@ -69,6 +69,7 @@ interface UseTwelveWeekExecutionActionsOptions {
   commitSystemUpdate: (nextSystem: TwelveWeekSystem) => TwelveWeekSystem;
   updateActiveSystemState: (updater: (system: TwelveWeekSystem) => TwelveWeekSystem) => void;
   refreshBackendProgressOverlay: () => void;
+  invalidateOverlay: () => void;
   refreshSnapshotMeta: () => void;
 }
 
@@ -170,6 +171,7 @@ export function useTwelveWeekExecutionActions({
   commitSystemUpdate,
   updateActiveSystemState,
   refreshBackendProgressOverlay,
+  invalidateOverlay,
   refreshSnapshotMeta,
 }: UseTwelveWeekExecutionActionsOptions) {
   const getLatestActiveSystem = () => {
@@ -186,6 +188,7 @@ export function useTwelveWeekExecutionActions({
     );
     const nextToggledTask = nextTaskInstances.find((task) => task.id === taskId);
 
+    invalidateOverlay();
     const savedSystem = commitSystemUpdate({
       ...system,
       taskInstances: nextTaskInstances,

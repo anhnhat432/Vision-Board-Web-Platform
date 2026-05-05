@@ -40,6 +40,7 @@ function buildTaskOverlayFromPlanDetails(
   });
 
   localTasks.forEach((task) => {
+    if (overlay.has(task.id)) return;
     const metricName = normalizeComparableText(task.leadIndicatorName || task.title);
     const taskDateKey = getCalendarDateKey(task.scheduledDate);
     if (!metricName || !taskDateKey) return;
@@ -285,6 +286,7 @@ interface BackendProgressOverlayResult {
   loading: boolean;
   hasBackendData: boolean;
   refresh: () => void;
+  invalidateOverlay: () => void;
 }
 
 export function useBackendProgressOverlay(
@@ -295,6 +297,7 @@ export function useBackendProgressOverlay(
   const [details, setDetails] = useState<PlanDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [hasBackendData, setHasBackendData] = useState(false);
+  const [overlayInvalidated, setOverlayInvalidated] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const lastFetchedPlanId = useRef<string | null>(null);
   const fetchDetailsRef = useRef<() => Promise<void>>(async () => {});
@@ -357,16 +360,26 @@ export function useBackendProgressOverlay(
     };
   }, [fetchDetails]);
 
+  useEffect(() => {
+    if (overlayInvalidated) {
+      setOverlayInvalidated(false);
+    }
+  }, [details]);
+
   const effectiveSystem = useMemo(() => {
-    if (!system || !goalId || !details) return system;
+    if (!system || !goalId || !details || overlayInvalidated) return system;
 
     const link = getPlanLink(goalId);
     return applyBackendProgressOverlay(system, details, link?.taskIdByLocalTaskId ?? {});
-  }, [details, goalId, system]);
+  }, [details, goalId, overlayInvalidated, system]);
 
   const refresh = useCallback(() => {
     lastFetchedPlanId.current = null;
     void fetchDetailsRef.current();
+  }, []);
+
+  const invalidateOverlay = useCallback(() => {
+    setOverlayInvalidated(true);
   }, []);
 
   return {
@@ -374,6 +387,7 @@ export function useBackendProgressOverlay(
     loading,
     hasBackendData,
     refresh,
+    invalidateOverlay,
   };
 }
 

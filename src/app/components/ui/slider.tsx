@@ -59,7 +59,7 @@ function Slider({
           data-slot="slider-thumb"
           // biome-ignore lint/suspicious/noArrayIndexKey: thumb position is stable and index-based in Radix slider.
           key={index}
-          className="block size-5 shrink-0 rounded-full bg-white border-2 shadow-[0_2px_8px_rgba(15,23,42,0.18),0_0_0_1px_rgba(15,23,42,0.06)] transition-all hover:scale-110 hover:shadow-[0_4px_14px_rgba(15,23,42,0.22)] focus-visible:scale-110 focus-visible:ring-4 focus-visible:ring-primary/30 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+          className="block size-5 shrink-0 rounded-full bg-white border-2 shadow-[0_2px_8px_rgba(15,23,42,0.18),0_0_0_1px_rgba(15,23,42,0.06)] transition-transform transition-shadow duration-150 hover:scale-110 hover:shadow-[0_4px_14px_rgba(15,23,42,0.22)] focus-visible:scale-110 focus-visible:ring-4 focus-visible:ring-primary/30 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
           style={
             trackColor
               ? { borderColor: trackColor }
