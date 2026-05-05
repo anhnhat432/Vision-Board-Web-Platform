@@ -15,6 +15,12 @@ const badgeVariants = cva(
           "border-[color-mix(in_srgb,var(--tone-shell-secondary)_22%,transparent)] bg-[color-mix(in_srgb,var(--tone-shell-secondary)_10%,rgba(255,255,255,0.72))] text-[color-mix(in_srgb,var(--tone-shell-primary)_90%,rgba(30,30,50,1))] backdrop-blur-sm [a&]:hover:bg-secondary/90",
         destructive:
           "border-transparent bg-destructive text-white shadow-[0_10px_24px_-18px_rgba(212,24,61,0.55)] [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+        success:
+          "border-transparent bg-[color:var(--success)] text-[color:var(--success-foreground)] shadow-[0_10px_24px_-18px_rgba(5,150,105,0.55)] [a&]:hover:bg-[color:var(--success)]/90",
+        warning:
+          "border-transparent bg-[color:var(--warning)] text-[color:var(--warning-foreground)] shadow-[0_10px_24px_-18px_rgba(180,83,9,0.55)] [a&]:hover:bg-[color:var(--warning)]/90",
+        info:
+          "border-transparent bg-[color:var(--info)] text-[color:var(--info-foreground)] shadow-[0_10px_24px_-18px_rgba(124,58,237,0.55)] [a&]:hover:bg-[color:var(--info)]/90",
         outline:
           "border-white/70 bg-white/72 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] backdrop-blur-xl [a&]:hover:bg-white [a&]:hover:text-accent-foreground",
       },
