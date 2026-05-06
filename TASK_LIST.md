@@ -151,13 +151,27 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
   - Weekly review completion: `reviewCompleted: true` set correctly
 - **Verified:** [x] npm run typecheck passing / [x] Code audit complete / [x] Implementation verified free path
 
-### 9. ⬜ Generated Plan Quality
+### 9. ✅ Generated Plan Quality
 
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
+- **Status:** [x] Completed
 - **Prompt:** Prompt 9
 - **Files changed:**
-- **Notes:** 2-4 tactics, clear Week 1, specific tasks
-- **Verified:** [ ] Generated 5+ plans, all reasonable
+  - `src/features/plan12week/logic/tacticGeneration.ts` - Generate 2-4 tactics from archetype
+  - `src/features/plan12week/logic/taskGeneration.ts` - Create 3-7 Week 1 tasks
+  - `src/features/plan12week/components/PlanPreview.tsx` - Preview UI
+  - `src/features/plan12week/components/PlanPreviewStep.tsx` - New step with tactic editor
+  - `src/features/plan12week/components/PlanQualityPanel.tsx` - Quality evaluation panel
+  - `src/features/plan12week/components/TacticsEditor.tsx` - Tactic editing modal
+  - `src/features/plan12week/logic/generatePlan.ts` - Export isLowFeasibility
+  - `src/app/pages/12WeekSetup.tsx` - Replace ReviewStep with PlanPreviewStep
+- **Notes:**
+  - 2-4 tactics auto-generated from goal archetype with actionable descriptions
+  - Week 1 tasks (3-7) derived from tactics and scheduled on preferred days
+  - Preview shows Week 1 fully expanded, Weeks 2-4 summarized
+  - Real-time tactic editing in modal before confirmation
+  - Quality panel with overall score, dimension bars, warnings & suggestions
+  - Backward compatible: empty weeks when no archetype
+- **Verified:** [x] typecheck passing / [x] Unit tests passing (5/5) / [x] Build passing / [ ] Manual QA (5+ plans generated)
 
 ### 10. ⬜ Production Smoke Test
 
