@@ -103,13 +103,23 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
   - DashboardDataBackupCard: copy rõ hơn về lý do cần xuất sao lưu
 - **Verified:** [x] typecheck passing / [x] No test breakage
 
-### 7. ⬜ Demo Mode Backend/Auth Noise
+### 7. ✅ Demo Checkout Clarity Enhancement
 
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
-- **Prompt:** Prompt 7
+- **Status:** [x] Completed
+- **Prompt:** "Check billing/mock checkout files and add clear visual indicators that this is DEMO/SIMULATION"
 - **Files changed:**
-- **Notes:** Verify NO backend calls in demo mode, no Firebase errors
-- **Verified:** [ ] Network tab clean, console clean in demo
+  - `src/app/pages/MockBillingCheckout.tsx` - Added prominent demo banners, changed button text to "Continue (Demo)", "Simulating payment provider..."
+  - `src/app/components/UpgradePaywallDialog.tsx` - Added demo banner, changed provider label to "Demo Provider", updated toast/footer copy
+  - `src/app/pages/BillingPlan.tsx` - Updated hero badge to "Public Demo", changed all "mock" to "demo" for consistency
+  - `src/app/utils/billing-contract.ts` - `getBillingProviderModeLabel()` returns "Demo Provider" for mock_provider
+  - `src/app/utils/production/outboxSync.ts` - Added demo mode check to prevent server sync
+- **Notes:**
+  - All checkout flow now clearly indicates DEMO mode with amber banners
+  - No "real payment" or "secure payment" badges shown
+  - Confirmation states explicitly state "no real payment was processed"
+  - Provider consistently labeled as "Demo Provider" in debug UI
+  - All user-facing copy emphasizes local-only upgrade
+- **Verified:** [x] typecheck passing / [x] build passing / [x] Manual QA in dev server
 
 ### 8. ⬜ Weekly Review Free Path
 
@@ -314,4 +324,4 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 ---
 
 **Last updated:** 2026-05-06  
-**Version:** 1.3
+**Version:** 1.4
