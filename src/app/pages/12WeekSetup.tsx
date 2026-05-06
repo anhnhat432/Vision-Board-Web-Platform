@@ -801,7 +801,7 @@ export function TwelveWeekSetup() {
     }
 
     toast.success("Kế hoạch 12 tuần đã sẵn sàng.", {
-      description: "Vào ngay màn Hôm nay để bắt đầu tuần đầu tiên.",
+      description: "Kế hoạch được lưu trên trình duyệt này. Vào ngay màn Hôm nay để bắt đầu tuần đầu tiên.",
     });
 
     navigate("/12-week-system");

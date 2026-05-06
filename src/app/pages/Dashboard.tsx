@@ -17,6 +17,7 @@ import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 
 import { toast } from "sonner";
+import { DataStorageInfo } from "../components/DataStorageInfo";
 import { DashboardDataBackupCard } from "@/features/dashboard/components/DashboardDataBackupCard";
 import { ExecutionScoreCard } from "@/features/dashboard/components/ExecutionScoreCard";
 import { GoalProgressCard } from "@/features/dashboard/components/GoalProgressCard";
@@ -958,6 +959,8 @@ function DashboardContent({
                   )}
                 </div>
 
+                {activeSystem && <DataStorageInfo variant="inline" className="mt-2" />}
+
                 {activeSystem && activeSystemWeekCompletion && activeSystemWeekRange ? (
                   <div className="grid gap-4">
                     <div
@@ -1758,9 +1761,12 @@ function DashboardContent({
         </div>
       )}
 
-      {/* Data Backup - Moved to Settings, shown here only if needed */}
+      {/* Data Backup + Storage Info */}
       {shouldShowWorkspaceDetailGrid && (
-        <div className="ops-section-secondary">
+        <div className="ops-section-secondary space-y-4">
+          <Reveal>
+            <DataStorageInfo variant="banner" />
+          </Reveal>
           <Reveal>
             <DashboardDataBackupCard
               importInputRef={importFileRef}

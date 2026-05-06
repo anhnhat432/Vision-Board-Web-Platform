@@ -1,6 +1,7 @@
 import { Suspense, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
+import { DataStorageInfo } from "../components/DataStorageInfo";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../components/ui/alert-dialog";
 import { useTwelveWeekSystemSnapshot } from "../hooks/useTwelveWeekSystemSnapshot";
 import { TabErrorBoundary } from "../components/TabErrorBoundary";
@@ -292,6 +293,8 @@ export function TwelveWeekSystemSettings() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <DataStorageInfo showSyncHint className="mb-6" />
 
       <TabErrorBoundary fallbackTitle="Cài đặt gặp lỗi">
         <Suspense fallback={<TwelveWeekTabFallback title="Đang mở tab Cài đặt" description="Phần chỉnh nhịp chu kỳ, dữ liệu local và quyền gói đang được tải." />}>
