@@ -33,6 +33,7 @@ import type {
 import { TwelveWeekInsightsCard } from "./TwelveWeekInsightsCard";
 import { TwelveWeekNextWeekRecommendationCard } from "./TwelveWeekNextWeekRecommendationCard";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
+import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
 
 interface WeekRange {
   start: string;
@@ -623,6 +624,7 @@ export function TwelveWeekWeekTab({
                 </div>
               )}
             </div>
+            {/* Required fields */}
             <div className="space-y-2">
               <Label htmlFor="weekly-best">1. Tuần này kết quả lớn nhất là gì?</Label>
               <Textarea
@@ -630,47 +632,6 @@ export function TwelveWeekWeekTab({
                 rows={3}
                 value={weeklyForm.biggestOutputThisWeek}
                 onChange={(event) => onWeeklyFormChange("biggestOutputThisWeek", event.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="weekly-obstacle">2. Điều gì cản trở nhiều nhất?</Label>
-              <Textarea
-                id="weekly-obstacle"
-                rows={3}
-                value={weeklyForm.mainObstacle}
-                onChange={(event) => onWeeklyFormChange("mainObstacle", event.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="weekly-keep">3. Việc nào tuần sau nên giữ?</Label>
-              <Textarea
-                id="weekly-keep"
-                rows={2}
-                value={weeklyForm.keepTactic}
-                placeholder="Việc nào đang chạy tốt — giữ nguyên cách làm."
-                onChange={(event) => onWeeklyFormChange("keepTactic", event.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="weekly-reduce">4. Việc nào nên giảm hoặc bỏ?</Label>
-              <Textarea
-                id="weekly-reduce"
-                rows={2}
-                value={weeklyForm.reduceTactic}
-                placeholder="Việc nào đang ngốn thời gian mà ít hiệu quả — giảm tải hoặc đổi lịch."
-                onChange={(event) => onWeeklyFormChange("reduceTactic", event.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="weekly-priority">5. Ưu tiên số 1 tuần sau là gì?</Label>
-              <Textarea
-                id="weekly-priority"
-                rows={3}
-                value={weeklyForm.nextWeekPriority}
-                placeholder={
-                  hasPremiumInsights ? suggestedNextWeekPlan.focus : "Ví dụ: chỉ giữ một ưu tiên thật rõ cho tuần sau."
-                }
-                onChange={(event) => onWeeklyFormChange("nextWeekPriority", event.target.value)}
               />
             </div>
             <div className="space-y-2">
@@ -692,6 +653,53 @@ export function TwelveWeekWeekTab({
               </Select>
               {intensityHint && <p className="text-xs leading-5 text-slate-500">{intensityHint}</p>}
             </div>
+
+            {/* Optional fields */}
+            <SecondaryPanel title="Chi tiết review thêm" collapsible defaultOpen={false}>
+              <div className="space-y-2">
+                <Label htmlFor="weekly-obstacle">2. Điều gì cản trở nhiều nhất?</Label>
+                <Textarea
+                  id="weekly-obstacle"
+                  rows={3}
+                  value={weeklyForm.mainObstacle}
+                  onChange={(event) => onWeeklyFormChange("mainObstacle", event.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="weekly-keep">3. Việc nào tuần sau nên giữ?</Label>
+                <Textarea
+                  id="weekly-keep"
+                  rows={2}
+                  value={weeklyForm.keepTactic}
+                  placeholder="Việc nào đang chạy tốt — giữ nguyên cách làm."
+                  onChange={(event) => onWeeklyFormChange("keepTactic", event.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="weekly-reduce">4. Việc nào nên giảm hoặc bỏ?</Label>
+                <Textarea
+                  id="weekly-reduce"
+                  rows={2}
+                  value={weeklyForm.reduceTactic}
+                  placeholder="Việc nào đang ngốn thời gian mà ít hiệu quả — giảm tải hoặc đổi lịch."
+                  onChange={(event) => onWeeklyFormChange("reduceTactic", event.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="weekly-priority">5. Ưu tiên số 1 tuần sau là gì?</Label>
+                <Textarea
+                  id="weekly-priority"
+                  rows={3}
+                  value={weeklyForm.nextWeekPriority}
+                  placeholder={
+                    hasPremiumInsights ? suggestedNextWeekPlan.focus : "Ví dụ: chỉ giữ một ưu tiên thật rõ cho tuần sau."
+                  }
+                  onChange={(event) => onWeeklyFormChange("nextWeekPriority", event.target.value)}
+                />
+              </div>
+            </SecondaryPanel>
+
+            {/* Review CTA */}
             <div
               className={`flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between ${
                 reviewDueToday
@@ -721,6 +729,25 @@ export function TwelveWeekWeekTab({
             </div>
           </CardContent>
         </Card>
+      </div>
+      {/* Sticky review CTA for mobile */}
+      <div className="md:hidden sticky bottom-0 z-10 bg-white/95 backdrop-blur-sm border-t p-4">
+        <Button
+          size="lg"
+          className="w-full gradient-brand text-white shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)]"
+          onClick={handleSaveReviewClick}
+          disabled={isSavingReview}
+          aria-busy={isSavingReview}
+        >
+          {isSavingReview ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              Đang chốt review...
+            </>
+          ) : (
+            "Chốt review tuần này"
+          )}
+        </Button>
       </div>
     </div>
   );

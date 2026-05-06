@@ -14,6 +14,7 @@ import { EmptyState } from "../states";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 import { formatCalendarDate } from "../../utils/storage";
 import type { TwelveWeekTaskInstance, TwelveWeekSystem, UniversalDailyCheckIn } from "../../utils/storage-types";
+import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
 import {
   MOOD_OPTIONS,
   type RescuePlanSummary,
@@ -690,18 +691,40 @@ export function TwelveWeekTodayTab({
                   "Lưu check-in hôm nay"
                 )}
               </Button>
-              {latestCheckIn && (
-                <div
-                  aria-live="polite"
-                  className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600"
-                >
-                  Check-in gần nhất: {formatCalendarDate(latestCheckIn.date)} • năng lượng{" "}
-                  {getMoodLabel((latestCheckIn.mood as DailyMood | undefined) ?? "steady")}
-                </div>
-              )}
+              <SecondaryPanel title="Lịch sử check-in" collapsible defaultOpen={false}>
+                {latestCheckIn && (
+                  <div
+                    aria-live="polite"
+                    className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600"
+                  >
+                    Check-in gần nhất: {formatCalendarDate(latestCheckIn.date)} • năng lượng{" "}
+                    {getMoodLabel((latestCheckIn.mood as DailyMood | undefined) ?? "steady")}
+                  </div>
+                )}
+              </SecondaryPanel>
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      {/* Sticky check-in CTA for mobile */}
+      <div className="md:hidden sticky bottom-0 z-10 bg-white/95 backdrop-blur-sm border-t p-4">
+        <Button
+          size="lg"
+          className="w-full gradient-brand text-white shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)]"
+          onClick={handleSaveCheckInClick}
+          disabled={isSavingCheckIn}
+          aria-busy={isSavingCheckIn}
+        >
+          {isSavingCheckIn ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              Đang lưu check-in...
+            </>
+          ) : (
+            "Lưu check-in hôm nay"
+          )}
+        </Button>
       </div>
     </div>
   );

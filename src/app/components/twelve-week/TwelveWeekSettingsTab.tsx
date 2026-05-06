@@ -2,12 +2,16 @@ import { FeedbackDialog } from "../FeedbackDialog";
 import { FunnelDiagnosticsPanel } from "./FunnelDiagnosticsPanel";
 import { TwelveWeekCycleSettingsPanel } from "./TwelveWeekCycleSettingsPanel";
 import { TwelveWeekDeviceAndSyncPanel } from "./TwelveWeekDeviceAndSyncPanel";
+import { TwelveWeekDeviceDetailsSection } from "./TwelveWeekDeviceDetailsSection";
+import { TwelveWeekLocalStatusSection } from "./TwelveWeekLocalStatusSection";
+import { TwelveWeekPlanAccessSection } from "./TwelveWeekPlanAccessSection";
+import { SectionBlock } from "@/app/components/layout/SectionBlock";
 import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
 
 export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
   return (
     <div className="space-y-6 pt-4">
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <SectionBlock title="Cài đặt mục tiêu" description="Tên mục tiêu, chu kỳ 12 tuần, ngày review, thời gian nhắc nhở">
         <TwelveWeekCycleSettingsPanel
           system={props.system}
           onReviewDayChange={props.onReviewDayChange}
@@ -17,6 +21,9 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           onTacticPriorityChange={props.onTacticPriorityChange}
           onTacticTypeChange={props.onTacticTypeChange}
         />
+      </SectionBlock>
+
+      <SectionBlock title="Đồng bộ, Dữ liệu & Thiết bị" description="Trạng thái kết nối, đồng bộ cloud, thông tin thiết bị, xuất dữ liệu và cài đặt cục bộ">
         <TwelveWeekDeviceAndSyncPanel
           activeGoalId={props.activeGoalId}
           backendConnectionStatus={props.backendConnectionStatus}
@@ -69,16 +76,19 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           onNavigateJournal={props.onNavigateJournal}
           onNavigateSetup={props.onNavigateSetup}
         />
-      </div>
-      <FunnelDiagnosticsPanel />
-      <div className="flex justify-end">
-        <FeedbackDialog
-          source="settings"
-          context="12_week_settings"
-          triggerLabel="Góp ý về demo"
-          triggerClassName="border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-        />
-      </div>
+      </SectionBlock>
+
+      <SectionBlock title="Chẩn đoán & Góp ý" description="Thông tin chẩn đoán nội bộ và gửi feedback">
+        <FunnelDiagnosticsPanel />
+        <div className="flex justify-end pt-4">
+          <FeedbackDialog
+            source="settings"
+            context="12_week_settings"
+            triggerLabel="Góp ý về demo"
+            triggerClassName="border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+          />
+        </div>
+      </SectionBlock>
     </div>
   );
 }
