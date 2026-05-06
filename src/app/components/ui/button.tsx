@@ -1,4 +1,9 @@
-import type * as React from "react";
+import {
+  forwardRef,
+  type ComponentProps,
+  type CSSProperties,
+  type PointerEvent,
+} from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { useReducedMotion } from "./use-reduced-motion";
@@ -10,7 +15,7 @@ const DEFAULT_BUTTON_STYLE = {
   "--button-shift-y": "0px",
   "--button-pointer-x": "0.5",
   "--button-pointer-y": "0.5",
-} as React.CSSProperties;
+} as CSSProperties;
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium tracking-normal transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-ring active:translate-y-0 active:scale-[0.985]",
@@ -43,19 +48,24 @@ const buttonVariants = cva(
   },
 );
 
-function Button({
-  className,
-  variant,
-  size,
-  asChild = false,
-  style,
-  onPointerMove,
-  onPointerLeave,
-  ...props
-}: React.ComponentProps<"button"> &
+type ButtonProps = ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
-  }) {
+  };
+
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  {
+    className,
+    variant,
+    size,
+    asChild = false,
+    style,
+    onPointerMove,
+    onPointerLeave,
+    ...props
+  },
+  ref,
+) {
   const prefersReducedMotion = useReducedMotion();
   const Comp = asChild ? Slot : "button";
   const magnetic = !prefersReducedMotion && variant !== "link";
@@ -71,7 +81,7 @@ function Button({
     element.dataset.buttonHovering = hovering ? "true" : "false";
   };
 
-  const handlePointerMove = (event: React.PointerEvent<HTMLElement>) => {
+  const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
     onPointerMove?.(event as never);
 
     if (
@@ -91,7 +101,7 @@ function Button({
     setPointer(event.currentTarget as HTMLElement, pointerX, pointerY, true);
   };
 
-  const handlePointerLeave = (event: React.PointerEvent<HTMLElement>) => {
+  const handlePointerLeave = (event: PointerEvent<HTMLElement>) => {
     onPointerLeave?.(event as never);
 
     if (!magnetic) return;
@@ -100,6 +110,7 @@ function Button({
 
   return (
     <Comp
+      ref={ref}
       data-slot="button"
       data-button-hovering="false"
       className={cn(
@@ -112,6 +123,6 @@ function Button({
       {...props}
     />
   );
-}
+});
 
 export { Button, buttonVariants };

@@ -36,7 +36,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
   clearArchivedOutbox,
   clearEventLog,
@@ -688,7 +687,7 @@ export function TwelveWeekSystem() {
       <div className="hidden md:flex justify-end mb-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2">
+            <Button type="button" variant="outline" className="gap-2">
               <MoreHorizontal className="h-4 w-4" />
               Thêm
             </Button>
@@ -988,6 +987,7 @@ export function TwelveWeekSystem() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
+                type="button"
                 variant={activeTab === "settings" ? "default" : "ghost"}
                 size="sm"
                 className="flex flex-col items-center justify-center h-full px-3 py-2 gap-1"
