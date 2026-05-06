@@ -78,13 +78,17 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
   - Code identifiers giữ nguyên tiếng Anh
 - **Verified:** [x] typecheck passing / [x] e2e test updated
 
-### 5. ⬜ Mock Checkout Trust Fix
+### 5. ✅ Mock Checkout Trust Fix
 
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
+- **Status:** [x] Completed
 - **Prompt:** Prompt 5
-- **Files changed:**
-- **Notes:** Must be clearly demo, not look like real payment
-- **Verified:** [ ] Mock flow tested, copy clear
+- **Files changed:** `src/app/pages/MockBillingCheckout.tsx`, `src/app/components/UpgradePaywallDialog.tsx`
+- **Notes:**
+  - MockBillingCheckout: banner, buttons, labels đều tiếng Việt rõ ràng
+  - UpgradePaywallDialog: banner, toast, footer, debug panel tiếng Việt
+  - Mọi copy user-facing đều nói rõ "không thu tiền thật" và "trình duyệt này"
+  - Nguồn gọi hiển thị tiếng Việt thay vì raw source code
+- **Verified:** [x] typecheck passing / [x] No test breakage
 
 ### 6. ✅ LocalStorage Clarity
 
@@ -310,4 +314,4 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 ---
 
 **Last updated:** 2026-05-06  
-**Version:** 1.2
+**Version:** 1.3
