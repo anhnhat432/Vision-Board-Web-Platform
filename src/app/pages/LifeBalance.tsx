@@ -23,6 +23,7 @@ import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { Slider } from "../components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
+import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { type LifeArea, getLifeAreaLabel, updateWheelOfLife } from "../utils/storage";
@@ -37,6 +38,14 @@ export function LifeBalance() {
   const [lifeAreas, setLifeAreas] = useState<LifeArea[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
   const lifeBalanceStartedRef = useRef(false);
+  const pageTopRef = useRef<HTMLDivElement | null>(null);
+
+  // Reset scroll on mount (for page navigation)
+  useScrollToTopOnChange(0, {
+    targetRef: pageTopRef,
+    focusRef: pageTopRef,
+    skipInitial: false,
+  });
 
   // Warn user before navigating away with unsaved changes
   const blocker = useBlocker(
@@ -182,7 +191,7 @@ export function LifeBalance() {
   if (!strongestArea || !weakestArea) return null;
 
   return (
-    <div className="space-y-8 pb-12">
+    <div ref={pageTopRef} className="space-y-8 pb-12">
       {/* Unsaved changes navigation blocker dialog */}
       {blocker.state === "blocked" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">

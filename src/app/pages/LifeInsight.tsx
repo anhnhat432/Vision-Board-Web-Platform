@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { ArrowRight, Check, Compass, Sparkles, Target, TrendingDown, TrendingUp } from "lucide-react";
@@ -10,6 +10,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
+import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { APP_STORAGE_KEYS, clearGoalPlanningDrafts, getLifeAreaLabel } from "../utils/storage";
@@ -28,6 +29,18 @@ export function LifeInsight() {
   const hasLifeBalance = hasRealLifeBalance(userData);
   const [selectedAreaName, setSelectedAreaName] = useState<string | null>(null);
   const [selectedIntent, setSelectedIntent] = useState<UserIntentId | null>(null);
+  const pageTopRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setSelectedIntent(getUserIntentId());
+  }, []);
+
+  // Reset scroll on mount (page navigation)
+  useScrollToTopOnChange(0, {
+    targetRef: pageTopRef,
+    focusRef: pageTopRef,
+    skipInitial: false,
+  });
 
   useEffect(() => {
     setSelectedIntent(getUserIntentId());
@@ -121,7 +134,7 @@ export function LifeInsight() {
   const scoreGapFromAverage = Math.max(0, averageScore - focusArea.score);
 
   return (
-    <div className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
+    <div ref={pageTopRef} className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
