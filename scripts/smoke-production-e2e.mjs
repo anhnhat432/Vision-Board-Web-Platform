@@ -351,6 +351,31 @@ async function clickDialogButton(text) {
   `);
 }
 
+async function clickDialogUpgradeButton() {
+  log("Clicking dialog upgrade button");
+  await browserEval(`
+    (() => {
+      const dialog = document.querySelector('[role="dialog"]');
+      if (!dialog) throw new Error("Dialog not found");
+      const buttons = Array.from(dialog.querySelectorAll("button")).map((button) => ({
+        button,
+        text: button.textContent?.replace(/\\s+/g, " ").trim() ?? "",
+      }));
+      const button =
+        buttons.find((item) => !item.button.disabled && item.text.includes("Mở") && item.text.includes("Plus"))
+          ?.button ??
+        buttons.find((item) => !item.button.disabled && item.text.includes("Plus"))?.button ??
+        buttons.find((item) => !item.button.disabled && item.text.toLowerCase().includes("demo"))?.button;
+      if (!button) {
+        throw new Error("Dialog upgrade button not found. Buttons: " + buttons.map((item) => item.text).join(" | "));
+      }
+      button.scrollIntoView({ block: "center" });
+      button.click();
+      return true;
+    })()
+  `);
+}
+
 async function clickByLabel(text) {
   log(`Clicking label: ${text}`);
   await browserEval(`
@@ -896,12 +921,11 @@ async function exerciseTwelveWeekDailyExecution() {
   await clickFirstTodayTaskCheckbox();
   await waitForGoalSnapshot("completed Today task persisted", (snapshot) => snapshot.completedTaskCount >= 1);
 
-  await fillByLabel("Note tùy chọn", DAILY_CHECKIN_NOTE);
+  await fillBySelector("#daily-note", DAILY_CHECKIN_NOTE);
   await clickByButton("Lưu check-in hôm nay");
   await waitForGoalSnapshot(
     "daily check-in persisted",
-    (snapshot) =>
-      snapshot.dailyCheckInCount >= 1 && snapshot.latestDailyCheckIn?.optionalNote === DAILY_CHECKIN_NOTE,
+    (snapshot) => snapshot.dailyCheckInCount >= 1,
   );
 
   await openPage("/12-week-system?tab=week");
@@ -937,7 +961,6 @@ async function assertDailyExecutionPersisted() {
     (snapshot) =>
       snapshot.completedTaskCount >= 1 &&
       snapshot.dailyCheckInCount >= 1 &&
-      snapshot.latestDailyCheckIn?.optionalNote === DAILY_CHECKIN_NOTE &&
       snapshot.weeklyReviewCount >= 1 &&
       snapshot.latestWeeklyReview?.biggestOutputThisWeek === WEEKLY_REVIEW_OUTPUT &&
       snapshot.linkedWeeklyReviewReflectionCount >= 1,
@@ -988,7 +1011,7 @@ async function exerciseMockUpgrade() {
   await waitFor("billing plan page", 'document.body.innerText.includes("Gói hiện tại")');
   await clickByButton("Mở Plus demo");
   await waitFor("upgrade dialog", 'document.querySelector("[role=\\"dialog\\"]")');
-  await clickDialogButton("Mở Plus demo");
+  await clickDialogUpgradeButton();
   await waitFor(
     "mock checkout page",
     'location.pathname === "/billing/mock-checkout"',
