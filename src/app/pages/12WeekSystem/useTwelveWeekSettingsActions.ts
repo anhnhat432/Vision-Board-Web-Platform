@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import { useCallback, type RefObject } from "react";
 import type { NavigateFunction } from "react-router";
 import { toast } from "sonner";
 
@@ -65,16 +65,16 @@ export function useTwelveWeekSettingsActions({
     return savedSystem;
   };
 
-  const handleReviewDayChange = (value: string) => {
+  const handleReviewDayChange = useCallback((value: string) => {
     if (!system) return;
     commitPlanSnapshotUpdate({
       ...system,
       reviewDay: value,
     });
     toast.success("Ngày review đã được cập nhật.");
-  };
+  }, [system, commitPlanSnapshotUpdate]);
 
-  const handleReminderTimeChange = (value: string) => {
+  const handleReminderTimeChange = useCallback((value: string) => {
     if (!system) return;
     if (!/^\d{2}:\d{2}$/.test(value)) return;
     commitSystemUpdate({
@@ -83,25 +83,25 @@ export function useTwelveWeekSettingsActions({
     });
     updateAppPreferences({ preferredReminderHour: Number.parseInt(value.split(":")[0] ?? "19", 10) || 19 });
     refreshSnapshotMeta();
-  };
+  }, [system, commitSystemUpdate, updateAppPreferences, refreshSnapshotMeta]);
 
-  const handleLoadPreferenceChange = (value: string) => {
+  const handleLoadPreferenceChange = useCallback((value: string) => {
     if (!system) return;
     commitPlanSnapshotUpdate({
       ...system,
       tacticLoadPreference: value as typeof system.tacticLoadPreference,
     });
-  };
+  }, [system, commitPlanSnapshotUpdate]);
 
-  const handleStatusChange = (value: string) => {
+  const handleStatusChange = useCallback((value: string) => {
     if (!system) return;
     commitPlanSnapshotUpdate({
       ...system,
       status: value as typeof system.status,
     });
-  };
+  }, [system, commitPlanSnapshotUpdate]);
 
-  const handleTacticPriorityChange = (tacticId: string | undefined, value: string) => {
+  const handleTacticPriorityChange = useCallback((tacticId: string | undefined, value: string) => {
     if (!activeGoal || !system || !tacticId) return;
 
     const savedSystem = commitPlanSnapshotUpdate({
@@ -113,9 +113,9 @@ export function useTwelveWeekSettingsActions({
     });
     enqueueLeadMetricUpsertedMutations(activeGoal.id, savedSystem, "manual_update", { indicatorIds: [tacticId] });
     trackAppEvent("12_week_tactic_updated", activeGoal.id, { tacticId, field: "priority", value });
-  };
+  }, [activeGoal, system, commitPlanSnapshotUpdate]);
 
-  const handleTacticTypeChange = (tacticId: string | undefined, value: string) => {
+  const handleTacticTypeChange = useCallback((tacticId: string | undefined, value: string) => {
     if (!activeGoal || !system || !tacticId) return;
 
     const savedSystem = commitPlanSnapshotUpdate({
@@ -127,14 +127,14 @@ export function useTwelveWeekSettingsActions({
     });
     enqueueLeadMetricUpsertedMutations(activeGoal.id, savedSystem, "manual_update", { indicatorIds: [tacticId] });
     trackAppEvent("12_week_tactic_updated", activeGoal.id, { tacticId, field: "type", value });
-  };
+  }, [activeGoal, system, commitPlanSnapshotUpdate]);
 
-  const handlePreferenceToggle = <K extends keyof AppPreferences>(key: K, value: AppPreferences[K]) => {
+  const handlePreferenceToggle = useCallback(<K extends keyof AppPreferences>(key: K, value: AppPreferences[K]) => {
     updateAppPreferences({ [key]: value } as Pick<AppPreferences, K>);
     refreshSnapshotMeta();
-  };
+  }, [updateAppPreferences, refreshSnapshotMeta]);
 
-  const handleArchivePendingOutbox = () => {
+  const handleArchivePendingOutbox = useCallback(() => {
     const data = getUserData();
     data.syncOutbox
       .filter((item) => item.status === "pending")
@@ -142,9 +142,9 @@ export function useTwelveWeekSettingsActions({
         archiveOutboxItem(item.id);
       });
     refreshSnapshotMeta();
-  };
+  }, [refreshSnapshotMeta]);
 
-  const handleOutboxItemToggle = (item: SyncOutboxItem) => {
+  const handleOutboxItemToggle = useCallback((item: SyncOutboxItem) => {
     if (item.status === "pending") {
       archiveOutboxItem(item.id);
       toast.success("Mục outbox đã được lưu lại.");
@@ -153,26 +153,26 @@ export function useTwelveWeekSettingsActions({
       toast.success("Mục outbox đã được khôi phục về hàng chờ.");
     }
     refreshSnapshotMeta();
-  };
+  }, [refreshSnapshotMeta]);
 
-  const handleRestoreArchivedOutbox = () => {
+  const handleRestoreArchivedOutbox = useCallback(() => {
     restoreArchivedOutbox();
     toast.success("Các mục outbox đã lưu đã được đưa lại về hàng chờ.");
     refreshSnapshotMeta();
-  };
+  }, [refreshSnapshotMeta]);
 
-  const handleOpenReminder = (reminder: InAppReminder) => {
+  const handleOpenReminder = useCallback((reminder: InAppReminder) => {
     if (!activeGoal) return;
     if (reminder.goalId && reminder.goalId !== activeGoal.id) {
       loadGoalData(reminder.goalId);
     }
     handleTabChange(reminder.kind === "review" ? "week" : "today");
-  };
+  }, [activeGoal, loadGoalData, handleTabChange]);
 
-  const handleExportLocalData = () => {
+  const handleExportLocalData = useCallback(() => {
     downloadLocalUserDataBackup({ data: getUserData(), filenamePrefix: "vision-board-local" });
     toast.success("Đã tải bản sao dữ liệu local.");
-  };
+  }, []);
 
   const handleExportCloudWorkspace = async () => {
     if (isDemoMode()) {
@@ -198,7 +198,7 @@ export function useTwelveWeekSettingsActions({
     }
   };
 
-  const handleDeleteCloudWorkspace = async () => {
+  const handleDeleteCloudWorkspace = useCallback(async () => {
     if (isDemoMode()) {
       toast.info("Bản demo không hỗ trợ xóa cloud workspace.");
       return;
@@ -223,22 +223,22 @@ export function useTwelveWeekSettingsActions({
     } catch (error) {
       toast.error("Không thể xóa cloud workspace. Kiểm tra kết nối và thử lại.");
     }
-  };
+  }, [activeGoal?.id]);
 
-  const handleClearLocalSignals = () => {
+  const handleClearLocalSignals = useCallback(() => {
     clearLocalDeviceSignals();
     setIsClearLocalDialogOpen(false);
     toast.success("Đã xóa log, outbox và trạng thái nhắc việc trên thiết bị này.");
     refreshSnapshotMeta();
-  };
+  }, [setIsClearLocalDialogOpen, refreshSnapshotMeta]);
 
-  const handleDeleteAllData = () => {
+  const handleDeleteAllData = useCallback(() => {
     deleteAllUserData();
     toast.success("Đã xóa toàn bộ dữ liệu trên thiết bị.");
     navigate("/");
-  };
+  }, [navigate]);
 
-  const handleBrowserNotificationToggle = async (value: boolean) => {
+  const handleBrowserNotificationToggle = useCallback(async (value: boolean) => {
     if (!activeGoal) return;
     const actionGoalId = activeGoal.id;
     updateAppPreferences({ enableBrowserNotifications: value });
@@ -263,9 +263,9 @@ export function useTwelveWeekSettingsActions({
     if (activeGoalIdRef.current === actionGoalId) {
       refreshSnapshotMeta();
     }
-  };
+  }, [activeGoal, activeGoalIdRef, updateAppPreferences, setBrowserNotificationStatus, refreshSnapshotMeta]);
 
-  const handleResetCycle = () => {
+  const handleResetCycle = useCallback(() => {
     if (!activeGoal || !system) return;
     const resetFrom = getCurrentWeekStartDate(system.weekStartsOn ?? "Monday");
     const didReset = resetTwelveWeekGoalCycle(activeGoal.id, resetFrom);
@@ -287,7 +287,7 @@ export function useTwelveWeekSettingsActions({
       description: "Việc, check-in và review tuần của chu kỳ hiện tại đã được làm mới để bạn bắt đầu lại gọn hơn.",
     });
     loadGoalData(activeGoal.id);
-  };
+  }, [activeGoal, system, setIsResetDialogOpen, setActiveTab, loadGoalData]);
 
   return {
     handleReviewDayChange,

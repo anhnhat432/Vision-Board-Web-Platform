@@ -1,5 +1,5 @@
 import type { RefObject } from "react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -50,7 +50,7 @@ export function useTwelveWeekBackendActions({
   const [isResolvingBackendPlanConflicts, setIsResolvingBackendPlanConflicts] = useState(false);
   const [lastBackendHydrationResult, setLastBackendHydrationResult] = useState<BackendPlanHydrationResult | null>(null);
 
-  const handleRunOutboxSync = async () => {
+  const handleRunOutboxSync = useCallback(async () => {
     if (!activeGoal || !system) return;
     const actionGoalId = activeGoal.id;
     if (isBackendProfileReady) {
@@ -96,9 +96,9 @@ export function useTwelveWeekBackendActions({
     }
 
     toast.error(snapshot.message);
-  };
+  }, [activeGoal, system, isBackendProfileReady, executionSyncActions, activeGoalIdRef, refreshBackendProgressOverlay, setLastSyncSnapshot, refreshSnapshotMeta]);
 
-  const handleHydrateBackendPlans = async () => {
+  const handleHydrateBackendPlans = useCallback(async () => {
     if (!activeGoal) return;
     if (!isBackendProfileReady) {
       toast.info("Đăng nhập và chờ backend profile sẵn sàng trước khi khôi phục dữ liệu.");
@@ -135,7 +135,7 @@ export function useTwelveWeekBackendActions({
     } finally {
       setIsHydratingBackendPlans(false);
     }
-  };
+  }, [activeGoal, isBackendProfileReady, lastBackendSyncKeyRef, loadGoalData, refreshBackendProgressOverlay, refreshSnapshotMeta]);
 
   const refreshBackendConflictReview = async (preferredGoalId: string, options?: { preserveSyncKey?: boolean }) => {
     const result = await hydrateTwelveWeekPlansFromBackend();
@@ -149,7 +149,7 @@ export function useTwelveWeekBackendActions({
     return result;
   };
 
-  const handleUseBackendPlanForConflicts = async (goalId: string) => {
+  const handleUseBackendPlanForConflicts = useCallback(async (goalId: string) => {
     if (isResolvingBackendPlanConflicts) return;
     setIsResolvingBackendPlanConflicts(true);
 
@@ -171,9 +171,9 @@ export function useTwelveWeekBackendActions({
     } finally {
       setIsResolvingBackendPlanConflicts(false);
     }
-  };
+  }, [isResolvingBackendPlanConflicts, refreshBackendConflictReview]);
 
-  const handleKeepLocalPlanForConflicts = async (goalId: string) => {
+  const handleKeepLocalPlanForConflicts = useCallback(async (goalId: string) => {
     if (!activeGoal || !system) return;
     if (isResolvingBackendPlanConflicts) return;
 
@@ -210,7 +210,7 @@ export function useTwelveWeekBackendActions({
     } finally {
       setIsResolvingBackendPlanConflicts(false);
     }
-  };
+  }, [activeGoal, system, isResolvingBackendPlanConflicts, executionSyncActions, lastBackendSyncKeyRef, loadGoalData, refreshBackendConflictReview]);
 
   return {
     isHydratingBackendPlans,

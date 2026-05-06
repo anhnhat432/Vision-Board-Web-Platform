@@ -1,4 +1,4 @@
-import type { Dispatch, RefObject, SetStateAction } from "react";
+import { useCallback, type Dispatch, type RefObject, type SetStateAction } from "react";
 import { toast } from "sonner";
 
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
@@ -179,7 +179,7 @@ export function useTwelveWeekExecutionActions({
     return getUserData().goals.find((goal) => goal.id === activeGoal.id)?.twelveWeekSystem ?? system;
   };
 
-  const handleToggleTask = async (taskId: string, completed: boolean) => {
+  const handleToggleTask = useCallback(async (taskId: string, completed: boolean) => {
     if (!activeGoal || !system) return;
     const actionGoalId = activeGoal.id;
     const toggledTask = system.taskInstances.find((task) => task.id === taskId);
@@ -276,9 +276,9 @@ export function useTwelveWeekExecutionActions({
       refreshBackendProgressOverlay();
       refreshSnapshotMeta();
     }
-  };
+  }, [activeGoal, system, executionSyncActions, commitSystemUpdate, invalidateOverlay, activeGoalIdRef, updateActiveSystemState, refreshBackendProgressOverlay, refreshSnapshotMeta]);
 
-  const handleSaveCheckIn = async () => {
+  const handleSaveCheckIn = useCallback(async () => {
     if (!activeGoal || !system) return;
     const actionGoalId = activeGoal.id;
     const actionDate = new Date();
@@ -334,9 +334,9 @@ export function useTwelveWeekExecutionActions({
     if (activeGoalIdRef.current === actionGoalId) {
       refreshSnapshotMeta();
     }
-  };
+  }, [activeGoal, system, dailyMood, dailyNote, executionSyncActions, commitSystemUpdate, activeGoalIdRef, refreshBackendProgressOverlay, refreshSnapshotMeta]);
 
-  const handleSaveWeeklyReview = async () => {
+  const handleSaveWeeklyReview = useCallback(async () => {
     if (!activeGoal || !system) return;
     const actionGoalId = activeGoal.id;
     const actionGoalTitle = activeGoal.title;
@@ -460,9 +460,9 @@ export function useTwelveWeekExecutionActions({
       refreshBackendProgressOverlay();
       refreshSnapshotMeta();
     }
-  };
+  }, [activeGoal, system, weeklyForm, hasPremiumReviewInsights, suggestedNextWeekPlan, executionSyncActions, commitSystemUpdate, activeGoalIdRef, refreshBackendProgressOverlay, refreshSnapshotMeta]);
 
-  const handleReentry = (mode: ReentryMode) => {
+  const handleReentry = useCallback((mode: ReentryMode) => {
     if (!activeGoal || !system) return;
     const reentryWeekNumber = getTwelveWeekCurrentWeek(system);
     const reentryWeekRange = getTwelveWeekWeekRange(system, reentryWeekNumber);
@@ -514,9 +514,9 @@ export function useTwelveWeekExecutionActions({
           : "Đã đẩy việc trễ sang tuần sau.",
     );
     refreshSnapshotMeta();
-  };
+  }, [activeGoal, system, commitSystemUpdate, refreshSnapshotMeta]);
 
-  const handleApplyRecommendedReentry = () => {
+  const handleApplyRecommendedReentry = useCallback(() => {
     if (!activeGoal || !system || !rescuePlanSummary) return;
     const reentryWeekNumber = getTwelveWeekCurrentWeek(system);
 
@@ -525,9 +525,9 @@ export function useTwelveWeekExecutionActions({
       weekNumber: String(reentryWeekNumber),
     });
     handleReentry(rescuePlanSummary.recommendedMode);
-  };
+  }, [activeGoal, system, rescuePlanSummary, handleReentry]);
 
-  const handleApplySuggestedPlan = () => {
+  const handleApplySuggestedPlan = useCallback(() => {
     if (!activeGoal || !system) return;
     const suggestedWeekNumber = getTwelveWeekCurrentWeek(system);
     setWeeklyForm((previousForm) => ({
@@ -542,7 +542,7 @@ export function useTwelveWeekExecutionActions({
     toast.success("Đã áp dụng gợi ý cho tuần sau.", {
       description: "Bạn có thể chỉnh lại thêm trước khi chốt review.",
     });
-  };
+  }, [activeGoal, system, suggestedNextWeekPlan, setWeeklyForm]);
 
   const REASON_TOAST_COPY: Record<OverdueTaskActionReason, string> = {
     ok: "",
@@ -574,7 +574,7 @@ export function useTwelveWeekExecutionActions({
     return true;
   }
 
-  const handleRescheduleTaskWithinWeek = (taskId: string): boolean => {
+  const handleRescheduleTaskWithinWeek = useCallback((taskId: string): boolean => {
     if (!activeGoal || !system) return false;
     const result = rescheduleTwelveWeekTaskWithinWeek(system, taskId);
     return applyOverdueTaskActionResult(
@@ -583,9 +583,9 @@ export function useTwelveWeekExecutionActions({
       "Đã dời sang ngày khác trong tuần này.",
       "12_week_task_rescheduled_within_week",
     );
-  };
+  }, [activeGoal, system]);
 
-  const handleRescheduleTaskToNextWeek = (taskId: string): boolean => {
+  const handleRescheduleTaskToNextWeek = useCallback((taskId: string): boolean => {
     if (!activeGoal || !system) return false;
     const result = rescheduleTwelveWeekTaskToNextWeek(system, taskId);
     return applyOverdueTaskActionResult(
@@ -594,9 +594,9 @@ export function useTwelveWeekExecutionActions({
       "Đã dời sang tuần sau.",
       "12_week_task_rescheduled_next_week",
     );
-  };
+  }, [activeGoal, system]);
 
-  const handleSkipNonCoreTask = (taskId: string): boolean => {
+  const handleSkipNonCoreTask = useCallback((taskId: string): boolean => {
     if (!activeGoal || !system) return false;
     const result = skipTwelveWeekNonCoreTask(system, taskId);
     return applyOverdueTaskActionResult(
@@ -605,7 +605,7 @@ export function useTwelveWeekExecutionActions({
       "Đã bỏ qua việc tùy chọn này.",
       "12_week_task_skipped_non_core",
     );
-  };
+  }, [activeGoal, system]);
 
   return {
     handleToggleTask,
