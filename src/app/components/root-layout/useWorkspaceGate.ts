@@ -55,7 +55,7 @@ export function resolveWorkspaceGateState({
     !demoMode &&
     isConfigured &&
     (!isPublicHome || hasUser) &&
-    (authLoading || userProfileLoading || backendHydrationLoading || isWaitingForProfile);
+    (authLoading || userProfileLoading || isWaitingForProfile);
   const workspaceGateStage: WorkspaceGateStage = shouldRedirectToLogin
     ? "redirect-login"
     : authLoading
