@@ -37,32 +37,22 @@ export function buildLoginRedirect(pathname: string, search: string, hash: strin
 
 export function resolveWorkspaceGateState({
   authLoading,
-  backendHydrationLoading,
   demoMode,
   isConfigured,
   pathname,
   user,
-  userProfile,
-  userProfileError,
-  userProfileLoading,
 }: UseWorkspaceGateOptions): WorkspaceGateState {
   const isPublicHome = isPublicHomePath(pathname);
   const hasUser = Boolean(user);
-  const isWaitingForProfile = hasUser && !userProfile && !userProfileError;
   const shouldRedirectToLogin =
     !demoMode && isConfigured && !authLoading && !hasUser && !isPublicHome && !isAuthProtectedPath(pathname);
   const shouldWaitForWorkspace =
-    !demoMode &&
-    isConfigured &&
-    (!isPublicHome || hasUser) &&
-    (authLoading || userProfileLoading || isWaitingForProfile);
+    !demoMode && isConfigured && (!isPublicHome || hasUser) && authLoading;
   const workspaceGateStage: WorkspaceGateStage = shouldRedirectToLogin
     ? "redirect-login"
     : authLoading
       ? "auth"
-      : userProfileLoading || isWaitingForProfile
-        ? "profile"
-        : "sync";
+      : "sync";
 
   return {
     shouldRedirectToLogin,

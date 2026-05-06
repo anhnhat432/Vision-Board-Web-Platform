@@ -205,6 +205,13 @@ function seedMeaningfulAnonymousData() {
   return data;
 }
 
+function seedAuthenticatedCompletedWorkspace(uid = "user_test") {
+  activateAuthenticatedUserData(uid);
+  const data = createFreshUserData();
+  data.onboardingCompleted = true;
+  saveUserData(data);
+}
+
 function renderAppShell(initialEntry: string) {
   const router = createMemoryRouter(
     [
@@ -289,7 +296,8 @@ describe("RootLayout onboarding redirect", () => {
     expect(router.state.location.pathname).toBe("/order");
   });
 
-  it("shows a workspace gate while an authenticated profile is loading", async () => {
+  it("keeps the workspace usable while an authenticated profile is loading", async () => {
+    seedAuthenticatedCompletedWorkspace();
     setAuthContext({
       user: { uid: "user_test", email: "test@example.com" },
       userProfile: null,
@@ -297,13 +305,13 @@ describe("RootLayout onboarding redirect", () => {
     });
     const { router } = renderAppShell("/goals");
 
-    expect(await screen.findByText("Đang mở workspace của bạn")).toBeInTheDocument();
-    expect(screen.queryByTestId("goals-page")).not.toBeInTheDocument();
+    expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
     expect(screen.queryByTestId("onboarding-page")).not.toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/goals");
   });
 
-  it("shows a workspace gate while backend data is hydrating", async () => {
+  it("keeps the workspace usable while backend data is hydrating", async () => {
+    seedAuthenticatedCompletedWorkspace();
     backendHydrationMock.value = {
       loading: true,
       result: null,
@@ -315,8 +323,7 @@ describe("RootLayout onboarding redirect", () => {
     });
     const { router } = renderAppShell("/goals");
 
-    expect(await screen.findByText("Đang đồng bộ dữ liệu")).toBeInTheDocument();
-    expect(screen.queryByTestId("goals-page")).not.toBeInTheDocument();
+    expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
     expect(screen.queryByTestId("onboarding-page")).not.toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/goals");
   });
@@ -362,7 +369,8 @@ describe("RootLayout onboarding redirect", () => {
     expect(router.state.location.pathname).toBe("/");
   });
 
-  it("waits for backend hydration on the public home page once a user is signed in", async () => {
+  it("keeps the public home usable while backend data is hydrating", async () => {
+    seedAuthenticatedCompletedWorkspace();
     backendHydrationMock.value = {
       loading: true,
       result: null,
@@ -374,8 +382,7 @@ describe("RootLayout onboarding redirect", () => {
     });
     const { router } = renderAppShell("/");
 
-    expect(await screen.findByText(/workspace/i)).toBeInTheDocument();
-    expect(screen.queryByTestId("home-page")).not.toBeInTheDocument();
+    expect(await screen.findByTestId("home-page")).toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/");
   });
 
