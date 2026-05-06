@@ -246,13 +246,16 @@ export function BillingPlan() {
           <div className="relative">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
               <CreditCard className="h-4 w-4" />
-              Gói demo & mock upgrade
+              Public Demo
             </div>
             <h1 className="mt-4 max-w-3xl text-2xl font-bold tracking-normal sm:text-3xl lg:text-4xl">
               Quản lý gói demo của bạn
             </h1>
             <p className="mt-2 max-w-2xl text-base leading-8 text-white/82">
               Mock checkout không thu tiền thật. Quyền Plus trong MVP 1 chỉ lưu local trên trình duyệt này.
+            </p>
+            <p className="mt-2 text-sm text-white/64">
+              Public demo - upgrade unlocks features locally on this device only.
             </p>
           </div>
         </CardContent>
@@ -363,9 +366,9 @@ export function BillingPlan() {
                 <p className="text-slate-500">Chu kỳ demo</p>
                 <p className="font-medium text-slate-900">
                   {subscription.billingCycle === "monthly"
-                    ? "Tháng (mock)"
+                    ? "Tháng (demo)"
                     : subscription.billingCycle === "quarterly"
-                      ? "Quý (mock)"
+                      ? "Quý (demo)"
                       : "Trọn chu kỳ demo"}
                 </p>
               </div>
@@ -394,7 +397,7 @@ export function BillingPlan() {
                           : "Dùng thử Plus local 7 ngày"}
                     </Button>
                     <p className="text-xs text-slate-500">
-                      Không cần thẻ. Mock upgrade không thu tiền thật và chỉ mở quyền trên trình duyệt này.
+                      Không cần thẻ. Demo upgrade không thu tiền thật và chỉ mở quyền trên trình duyệt này.
                     </p>
                   </div>
                 )}
@@ -403,14 +406,14 @@ export function BillingPlan() {
               <>
                 {isTrialing && trialDaysLeft !== null && (
                   <div className="w-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                    <span className="font-semibold">Plus demo local:</span> còn {trialDaysLeft} ngày — mock upgrade
+                    <span className="font-semibold">Plus demo local:</span> còn {trialDaysLeft} ngày — demo upgrade
                     không thu tiền thật.
                     <Button
                       size="sm"
                       className="mt-3 w-full sm:ml-3 sm:mt-0 sm:w-auto"
                       onClick={() => handleOpenUpgrade("plan")}
                     >
-                      Mở mock upgrade
+                      Mở Plus demo
                     </Button>
                   </div>
                 )}
@@ -505,7 +508,7 @@ export function BillingPlan() {
         <CardHeader>
           <CardTitle>Thao tác</CardTitle>
           <CardDescription>
-            Kiểm tra quyền local/mock, khôi phục mock upgrade hoặc quay lại trang chính.
+            Kiểm tra quyền local/demo, khôi phục demo upgrade hoặc quay lại trang chính.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -515,7 +518,7 @@ export function BillingPlan() {
               {isSyncing ? "Đang kiểm tra…" : "Kiểm tra quyền local"}
             </Button>
             <Button variant="outline" onClick={handleRestoreAccess} disabled={isRestoring}>
-              {isRestoring ? "Đang khôi phục…" : "Khôi phục mock upgrade"}
+              {isRestoring ? "Đang khôi phục…" : "Khôi phục demo upgrade"}
             </Button>
             <Button variant="outline" onClick={() => navigate("/")}>
               Quay lại bảng điều khiển
@@ -573,7 +576,7 @@ export function BillingPlan() {
       <Card className="flow-panel">
         <CardHeader>
           <CardTitle>So sánh các gói</CardTitle>
-          <CardDescription>So sánh Free với Plus demo. Mock checkout không thu tiền thật.</CardDescription>
+          <CardDescription>So sánh Free với Plus demo. Demo checkout không thu tiền thật.</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2">

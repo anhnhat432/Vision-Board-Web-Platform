@@ -1,5 +1,6 @@
 
 import { apiClient } from "@/lib/api/apiClient";
+import { isDemoMode } from "../app-mode";
 import { getUserData, saveUserData } from "../storage";
 import { LAST_OUTBOX_SYNC_KEY, OUTBOX_SYNC_ENDPOINT } from "./env";
 import { isOffline } from "./billingCore";
@@ -31,6 +32,16 @@ export function getLastOutboxSyncSnapshot(): OutboxSyncSnapshot | null {
 
 
 export async function syncPendingOutbox(): Promise<OutboxSyncSnapshot> {
+  if (isDemoMode()) {
+    return {
+      at: new Date().toISOString(),
+      status: "idle",
+      syncedCount: 0,
+      pendingCount: 0,
+      message: "Bản demo không đồng bộ hàng chờ lên server.",
+    };
+  }
+
   const MAX_RETRIES = 3;
   const RETRY_BACKOFF_HOURS = [1, 4, 24]; // hours before next retry after 1st, 2nd, 3rd failure
 

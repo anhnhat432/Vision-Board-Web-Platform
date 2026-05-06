@@ -93,7 +93,7 @@ export function getBillingProviderModeLabel(mode: BillingProviderMode): string {
     case "api_contract":
       return "API contract";
     case "mock_provider":
-      return "Mock provider";
+      return "Demo Provider";
     default:
       return "Local test";
   }
