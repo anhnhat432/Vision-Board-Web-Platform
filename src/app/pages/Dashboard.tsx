@@ -175,15 +175,16 @@ function DashboardContent({
   const progressViewedGoalIdRef = useRef<string | null>(null);
   const { currentPlanCode, currentPlanDefinition, entitlementKeys, premiumStatusItems } = usePlanEntitlements(userData);
   const demoMode = isDemoMode();
-  const isPublicVisitor = isConfigured && !user;
-  const shouldRequireAuthForPublicVisitor = isPublicVisitor && !demoMode;
-  const visibleGoals = isPublicVisitor ? [] : userData.goals;
-  const visibleWheelOfLife = isPublicVisitor ? [] : userData.currentWheelOfLife;
-  const visibleReflections = isPublicVisitor ? [] : userData.reflections;
-  const visibleVisionBoards = isPublicVisitor ? [] : userData.visionBoards;
-  const visibleActiveTwelveWeekGoal = isPublicVisitor ? null : activeTwelveWeekGoal;
+  const isSignedOut = !user;
+  const shouldRequireAuthForSignedOut = isSignedOut && !demoMode;
+  const isFreshDemoVisitor = demoMode && isSignedOut && userData.goals.length === 0;
+  const visibleGoals = isSignedOut ? [] : userData.goals;
+  const visibleWheelOfLife = isSignedOut ? [] : userData.currentWheelOfLife;
+  const visibleReflections = isSignedOut ? [] : userData.reflections;
+  const visibleVisionBoards = isSignedOut ? [] : userData.visionBoards;
+  const visibleActiveTwelveWeekGoal = isSignedOut ? null : activeTwelveWeekGoal;
   const hasRealLifeBalance =
-    !isPublicVisitor && userData.onboardingCompleted && visibleWheelOfLife.some((area) => area.score > 0);
+    !isSignedOut && userData.onboardingCompleted && visibleWheelOfLife.some((area) => area.score > 0);
   const { isUpgradeDialogOpen, setIsUpgradeDialogOpen, upgradeContext, recommendedPlan, openUpgradeDialog } =
     useUpgradeDialog({
       source: "dashboard",
@@ -199,7 +200,7 @@ function DashboardContent({
     navigate(buildLoginPath(mode, authDestination));
   };
   const handlePublicVisitorStart = () => {
-    if (shouldRequireAuthForPublicVisitor) {
+    if (shouldRequireAuthForSignedOut) {
       handleAuthNavigate("signup");
       return;
     }
@@ -330,8 +331,11 @@ function DashboardContent({
   const hasWorkspaceSignals =
     hasRealLifeBalance || visibleGoals.length > 0 || visibleVisionBoards.length > 0 || visibleReflections.length > 0;
 
-  const shouldShowMainDashboardCard = !isPublicVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
+  const shouldShowMainDashboardCard = !isSignedOut && !isFreshDemoVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
   const showMobileStickyCTA = shouldShowMainDashboardCard && activeSystem && activeSystemTodayOpenTasks.length > 0;
+  const shouldShowSetupGuide = !isSignedOut && !isFreshDemoVisitor && !activeSystem;
+  const shouldShowTopSidebar = !isSignedOut && !isFreshDemoVisitor && !activeSystem && hasWorkspaceSignals;
+  const shouldShowWorkspaceDetailGrid = !isSignedOut && !isFreshDemoVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
 
   useEffect(() => {
     if (landingViewedRef.current) return;
@@ -394,7 +398,7 @@ function DashboardContent({
     : "Pháº§n onboarding, má»¥c tiÃªu vÃ  káº¿ hoáº¡ch Ä‘á»u lÃ  dá»¯ liá»‡u cÃ¡ nhÃ¢n. ÄÄƒng kÃ½ trÆ°á»›c sáº½ giÃºp báº¡n lÆ°u láº¡i tiáº¿n trÃ¬nh vÃ  quay láº¡i Ä‘Ãºng workspace sau nÃ y.";
   const publicVisitorPrimaryLabel = demoMode ? "DÃ¹ng thá»­ khÃ´ng cáº§n Ä‘Äƒng nháº­p" : "ÄÄƒng kÃ½ miá»…n phÃ­";
 
-  const overviewCards = isPublicVisitor
+  const overviewCards = isSignedOut
     ? [
         {
           title: "Luá»“ng cá»‘t lÃµi",
@@ -456,7 +460,7 @@ function DashboardContent({
         },
       ];
 
-  const quickActions = isPublicVisitor
+  const quickActions = isSignedOut
     ? [
         {
           title: demoMode ? "TÃ¹y chá»n: Ä‘Äƒng kÃ½ Ä‘á»ƒ sync sau" : "ÄÄƒng kÃ½ Ä‘á»ƒ lÆ°u workspace",
@@ -507,13 +511,13 @@ function DashboardContent({
           onClick: () => navigate("/journal"),
         },
       ];
-  const quickActionIntro = isPublicVisitor
+  const quickActionIntro = isSignedOut
     ? "Má»™t ngÆ°á»i má»›i chá»‰ cáº§n Ä‘i theo má»™t Ä‘Æ°á»ng: hiá»ƒu hiá»‡n táº¡i, chá»n má»¥c tiÃªu, kiá»ƒm tra kháº£ thi, rá»“i cháº¡y 12 tuáº§n."
     : activeSystem
       ? "Äi theo thá»© tá»±: xá»­ lÃ½ viá»‡c hÃ´m nay, kiá»ƒm tra má»¥c tiÃªu, rá»“i ghi láº¡i Ä‘iá»u há»c Ä‘Æ°á»£c."
       : "Äi theo thá»© tá»±: táº¡o má»¥c tiÃªu, kiá»ƒm tra hÆ°á»›ng Ä‘i, rá»“i ghi láº¡i suy nghÄ© Ä‘áº§u tiÃªn.";
 
-  const attentionPanels = isPublicVisitor
+  const attentionPanels = isSignedOut
     ? [
         {
           eyebrow: "Äiá»ƒm báº¯t Ä‘áº§u",
@@ -662,14 +666,11 @@ function DashboardContent({
   const overdueCount = activeSystem ? activeSystemTodayTasks.filter((t) => !t.completed).length : 0;
   const activeTriggers = evaluateRescueTriggers({
     system: activeSystem,
-    subscription: isPublicVisitor ? null : (userData.subscription ?? null),
+    subscription: isSignedOut ? null : (userData.subscription ?? null),
     missedTasksCount: overdueCount,
     weekCompletionPercent: activeSystemWeekCompletion?.percent ?? 0,
   }).filter((t) => t.kind !== dismissedTrigger);
   const topTrigger = activeTriggers[0] ?? null;
-  const shouldShowSetupGuide = !isPublicVisitor && !activeSystem;
-  const shouldShowTopSidebar = !isPublicVisitor && !activeSystem && hasWorkspaceSignals;
-  const shouldShowWorkspaceDetailGrid = !isPublicVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
   // Signed-out visitors get their hero from `PublicVisitorHero` (rendered above);
   // skip the secondary dashboard card for them to avoid a double-hero.
   const dashboardTourSteps = shouldShowTopSidebar
@@ -690,7 +691,7 @@ function DashboardContent({
         source="dashboard"
         onCheckoutComplete={onReload}
       />
-      {isPublicVisitor ? (
+      {isSignedOut ? (
         <>
           <PublicVisitorHero
             isDemo={demoMode}
@@ -788,7 +789,7 @@ function DashboardContent({
         })()}
 
       {/* Trial countdown banner */}
-      {!isPublicVisitor &&
+      {!isSignedOut &&
         userData.subscription?.status === "trialing" &&
         userData.subscription.renewsAt &&
         new Date(userData.subscription.renewsAt) >= new Date() &&
@@ -895,22 +896,44 @@ function DashboardContent({
           </div>
         )}
 
+        {/* Demo Visitor Empty State - Fresh signed-out users see this instead of sample goals */}
+        {isFreshDemoVisitor && (
+          <Card className="border border-slate-200 bg-white shadow-sm">
+            <CardContent className="p-6 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
+                <Sparkles className="h-8 w-8 text-slate-600" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-950">Bắt đầu trải nghiệm</h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Đây là bản demo. Bạn có thể dùng thử các tính năng cơ bản mà không cần đăng nhập.
+                Hãy bắt đầu với Life Balance để tạo dữ liệu thực.
+              </p>
+              <Button
+                className="mt-4 bg-slate-950 text-white hover:bg-slate-800"
+                onClick={handlePublicVisitorStart}
+              >
+                Bắt đầu Life Balance
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Main Dashboard Card with PageHeader */}
         {shouldShowMainDashboardCard && (
           <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]">
             <CardContent className="p-4 sm:p-6 lg:p-7">
               <div className="space-y-5">
                 <PageHeader
-                  eyebrow={isPublicVisitor ? "Trang chÃ­nh" : "HÃ´m nay"}
+                  eyebrow={isSignedOut ? "Trang chÃ­nh" : "HÃ´m nay"}
                   title={
-                    isPublicVisitor
+                    isSignedOut
                       ? publicVisitorDashboardTitle
                       : activeSystem
                         ? `Quay láº¡i Ä‘Ãºng nhá»‹p cá»§a "${visibleActiveTwelveWeekGoal?.title ?? "chu ká»³ 12 tuáº§n hiá»‡n táº¡i"}".`
                         : setupStartTitle
                   }
                   description={
-                    isPublicVisitor
+                    isSignedOut
                       ? publicVisitorDashboardDescription
                       : activeSystem
                         ? activeSystemTodayOpenTasks.length > 0
@@ -920,7 +943,7 @@ function DashboardContent({
                   }
                 />
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {isPublicVisitor ? (
+                  {isSignedOut ? (
                     <span title="Cháº¿ Ä‘á»™ xem khÃ´ng cáº§n Ä‘Äƒng nháº­p, dÃ¹ng thá»­ cÃ¡c tÃ­nh nÄƒng cÆ¡ báº£n" className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
                       {publicVisitorBadge}
                     </span>
@@ -1050,23 +1073,23 @@ function DashboardContent({
                         className="rounded-[26px] border border-slate-200 bg-slate-50/80 p-5"
                       >
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                          {isPublicVisitor ? "Báº¯t Ä‘áº§u Ä‘Ãºng cÃ¡ch" : "Báº¯t Ä‘áº§u nhanh nháº¥t"}
+                          {isSignedOut ? "Báº¯t Ä‘áº§u Ä‘Ãºng cÃ¡ch" : "Báº¯t Ä‘áº§u nhanh nháº¥t"}
                         </p>
                         <h2 className="mt-2 text-2xl font-bold text-slate-950">
-                          {isPublicVisitor ? publicVisitorStartTitle : setupStartTitle}
+                          {isSignedOut ? publicVisitorStartTitle : setupStartTitle}
                         </h2>
                         <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
-                          {isPublicVisitor ? publicVisitorStartDescription : setupStartDescription}
+                          {isSignedOut ? publicVisitorStartDescription : setupStartDescription}
                         </p>
                         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                           <Button
                             data-tour-id="dashboard-primary-action"
                             className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
-                            onClick={() => (isPublicVisitor ? handlePublicVisitorStart() : navigate(setupPrimaryPath))}
+                            onClick={() => (isSignedOut ? handlePublicVisitorStart() : navigate(setupPrimaryPath))}
                           >
-                            {isPublicVisitor ? publicVisitorPrimaryLabel : setupPrimaryLabel}
+                            {isSignedOut ? publicVisitorPrimaryLabel : setupPrimaryLabel}
                           </Button>
-                          {isPublicVisitor ? (
+                          {isSignedOut ? (
                             <Button
                               variant="outline"
                               className="w-full border-slate-200 bg-white text-slate-900 sm:w-auto"
@@ -1128,7 +1151,7 @@ function DashboardContent({
                   <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-3 text-sm font-semibold text-slate-950 sm:cursor-default">
                     <span>Tá»•ng quan nhanh</span>
                     <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
-                      {isPublicVisitor ? "Luá»“ng cá»‘t lÃµi" : `${userData.goals.length} má»¥c tiÃªu`}
+                      {isSignedOut ? "Luá»“ng cá»‘t lÃµi" : `${userData.goals.length} má»¥c tiÃªu`}
                     </span>
                     <svg className="h-4 w-4 text-slate-400 transition-transform group-open:rotate-180 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -1151,7 +1174,7 @@ function DashboardContent({
                                   {item.title}
                                 </CardDescription>
                                 <CardTitle className="mt-2 text-3xl font-bold text-slate-950">
-                                  {isPublicVisitor ? item.value : <CountUp value={item.value} />}
+                                  {isSignedOut ? item.value : <CountUp value={item.value} />}
                                 </CardTitle>
                               </div>
                               <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${item.iconClass}`}>
@@ -1170,7 +1193,7 @@ function DashboardContent({
               </>
             )}
 
-            {isPublicVisitor ? null : !activeSystem ? (
+            {isSignedOut ? null : !activeSystem ? (
               <EmptyState
                 as="section"
                 align="left"
@@ -1274,7 +1297,7 @@ function DashboardContent({
         {shouldShowTopSidebar && (
           <div className="animate-fade-in-up" style={{ animationDelay: '0.08s' }}>
             <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-              {isPublicVisitor ? (
+              {isSignedOut ? (
                 <PublicVisitorAccountCard
                   onSignIn={() => handleAuthNavigate("signin")}
                   onSignUp={() => handleAuthNavigate("signup")}
@@ -1393,7 +1416,7 @@ function DashboardContent({
         )}
       </div>
 
-      {!isPublicVisitor && userData.isHydratedFromDemo && (
+      {!isSignedOut && userData.isHydratedFromDemo && (
         <Reveal>
           <div className="flex flex-wrap items-center gap-4 rounded-[22px] border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-[0_20px_45px_-34px_rgba(217,119,6,0.22)]">
             <Sparkles className="h-5 w-5 shrink-0 text-amber-600" />
@@ -1431,10 +1454,10 @@ function DashboardContent({
                   <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                     <div className="min-w-0">
                       <CardTitle className="text-slate-950">
-                        {isPublicVisitor ? "Luá»“ng má»¥c tiÃªu trong demo" : "Má»¥c tiÃªu gáº§n Ä‘Ã¢y"}
+                        {isSignedOut ? "Luá»“ng má»¥c tiÃªu trong demo" : "Má»¥c tiÃªu gáº§n Ä‘Ã¢y"}
                       </CardTitle>
                       <CardDescription className="text-slate-700">
-                        {isPublicVisitor
+                        {isSignedOut
                           ? "Tá»« má»™t mong muá»‘n rá»™ng, web sáº½ Ã©p láº¡i thÃ nh má»¥c tiÃªu rÃµ vÃ  káº¿ hoáº¡ch cÃ³ lá»‹ch."
                           : "Äá»§ Ã­t Ä‘á»ƒ báº¡n nhÃ¬n má»™t lÆ°á»£t lÃ  hiá»ƒu."}
                       </CardDescription>
@@ -1443,10 +1466,10 @@ function DashboardContent({
                       variant="ghost"
                       size="sm"
                       className="w-full sm:w-auto"
-                      onClick={() => (isPublicVisitor ? handleAuthNavigate("signup") : navigate("/life-insight"))}
+                      onClick={() => (isSignedOut ? handleAuthNavigate("signup") : navigate("/life-insight"))}
                     >
                       <Plus className="h-4 w-4" />
-                      {isPublicVisitor ? "ÄÄƒng kÃ½ Ä‘á»ƒ sync sau" : "Táº¡o má»¥c tiÃªu"}
+                      {isSignedOut ? "ÄÄƒng kÃ½ Ä‘á»ƒ sync sau" : "Táº¡o má»¥c tiÃªu"}
                     </Button>
                   </div>
                 </CardHeader>
@@ -1455,15 +1478,15 @@ function DashboardContent({
                     <div className="rounded-[24px] border border-dashed border-slate-300 bg-slate-50/80 px-6 py-10 text-center text-slate-500">
                       <Target className="mx-auto mb-4 h-12 w-12 text-slate-300" />
                       <p>
-                        {isPublicVisitor
+                        {isSignedOut
                           ? "Trong demo, báº¡n cÃ³ thá»ƒ Ä‘i qua Life Insight, SMART Goal vÃ  kiá»ƒm tra tÃ­nh thá»±c táº¿ mÃ  khÃ´ng cáº§n Ä‘Äƒng nháº­p."
                           : "ChÆ°a cÃ³ má»¥c tiÃªu nÃ o. HÃ£y báº¯t Ä‘áº§u báº±ng má»¥c tiÃªu Ä‘áº§u tiÃªn cá»§a báº¡n."}
                       </p>
                       <Button
                         className="mt-5 w-full sm:w-auto"
-                        onClick={() => (isPublicVisitor ? handleAuthNavigate("signup") : navigate("/life-insight"))}
+                        onClick={() => (isSignedOut ? handleAuthNavigate("signup") : navigate("/life-insight"))}
                       >
-                        {isPublicVisitor ? "ÄÄƒng kÃ½ Ä‘á»ƒ sync sau" : "Táº¡o má»¥c tiÃªu"}
+                        {isSignedOut ? "ÄÄƒng kÃ½ Ä‘á»ƒ sync sau" : "Táº¡o má»¥c tiÃªu"}
                       </Button>
                     </div>
                   ) : (
@@ -1580,10 +1603,10 @@ function DashboardContent({
                   <div className="flex items-center justify-between gap-4">
                     <div>
                       <CardTitle className="text-slate-950">
-                        {isPublicVisitor ? "BÃ¡nh xe cuá»™c sá»‘ng lÃ  bÆ°á»›c má»Ÿ Ä‘áº§u" : "BÃ¡nh xe cuá»™c sá»‘ng"}
+                        {isSignedOut ? "BÃ¡nh xe cuá»™c sá»‘ng lÃ  bÆ°á»›c má»Ÿ Ä‘áº§u" : "BÃ¡nh xe cuá»™c sá»‘ng"}
                       </CardTitle>
                       <CardDescription className="text-slate-700">
-                        {isPublicVisitor
+                        {isSignedOut
                           ? "NgÆ°á»i má»›i nÃªn cháº¥m 8 lÄ©nh vá»±c trÆ°á»›c khi chá»n má»¥c tiÃªu Æ°u tiÃªn."
                           : "NhÃ¬n nhanh bá»©c tranh tá»•ng quan hiá»‡n táº¡i."}
                       </CardDescription>
@@ -1613,7 +1636,7 @@ function DashboardContent({
                         <TrendingUp className="h-10 w-10 text-slate-300" />
                         <p className="mt-3 font-semibold text-slate-900">ChÆ°a cÃ³ dá»¯ liá»‡u bÃ¡nh xe cuá»™c sá»‘ng</p>
                         <p className="mt-1 max-w-sm text-sm leading-6 text-slate-500">
-                          {isPublicVisitor
+                          {isSignedOut
                             ? "Trong demo, báº¡n cÃ³ thá»ƒ báº¯t Ä‘áº§u Life Balance khÃ´ng cáº§n Ä‘Äƒng nháº­p. TÃ i khoáº£n/sync lÃ  lá»›p sau."
                             : "Báº¯t Ä‘áº§u báº±ng bÃ i Ä‘Ã¡nh giÃ¡ Life Balance Ä‘á»ƒ dashboard cÃ³ dá»¯ liá»‡u tháº­t thay vÃ¬ sá»‘ máº·c Ä‘á»‹nh."}
                         </p>
@@ -1624,14 +1647,14 @@ function DashboardContent({
                     <div className="rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm">
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Cáº§n Æ°u tiÃªn tiáº¿p</p>
                       <p className="mt-2 text-lg font-semibold text-slate-900">
-                        {isPublicVisitor
+                        {isSignedOut
                           ? "Chá»n sau Life Balance"
                           : weakestArea
                             ? getLifeAreaLabel(weakestArea.name)
                             : "ChÆ°a cÃ³ dá»¯ liá»‡u"}
                       </p>
                       <p className="mt-1 text-sm text-slate-500">
-                        {isPublicVisitor
+                        {isSignedOut
                           ? "Demo lÆ°u local trÃªn trÃ¬nh duyá»‡t nÃ y"
                           : weakestArea
                             ? `${weakestArea.score}/10`
@@ -1641,21 +1664,21 @@ function DashboardContent({
                     <Button
                       variant="outline"
                       className="h-auto w-full min-w-0 justify-start whitespace-normal rounded-[20px] border-slate-200 bg-white px-4 py-4 text-left shadow-sm hover:bg-slate-50"
-                      onClick={() => (isPublicVisitor ? handleAuthNavigate("signup") : navigate("/life-balance"))}
+                      onClick={() => (isSignedOut ? handleAuthNavigate("signup") : navigate("/life-balance"))}
                     >
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white">
                         <TrendingUp className="h-4 w-4" />
                       </div>
                       <div className="ml-3 min-w-0 flex-1">
                         <div className="line-clamp-2 break-words font-semibold text-slate-900">
-                          {isPublicVisitor
+                          {isSignedOut
                             ? "Báº¯t Ä‘áº§u báº±ng cÃ¢n báº±ng cuá»™c sá»‘ng"
                             : hasRealLifeBalance
                               ? "Má»Ÿ cÃ¢n báº±ng cuá»™c sá»‘ng"
                               : "Báº¯t Ä‘áº§u Ä‘Ã¡nh giÃ¡ cuá»™c sá»‘ng"}
                         </div>
                         <div className="mt-1 line-clamp-2 text-sm text-slate-500">
-                          {isPublicVisitor
+                          {isSignedOut
                             ? "ÄÄƒng kÃ½ chá»‰ khi muá»‘n thá»­ lá»›p sync sau."
                             : hasRealLifeBalance
                               ? "Xem chi tiáº¿t vÃ  cáº­p nháº­t láº¡i bÃ¡nh xe cuá»™c Ä‘á»i."
@@ -1672,7 +1695,7 @@ function DashboardContent({
       )}
 
       {/* Recent Reflections - Part of secondary content */}
-      {recentReflections.length > 0 && (
+      {!isFreshDemoVisitor && recentReflections.length > 0 && (
         <div className="ops-section-secondary">
           <Reveal>
             <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]">
@@ -1712,7 +1735,7 @@ function DashboardContent({
       )}
 
       {/* Demo Notice - Non-intrusive, at bottom */}
-      {!isPublicVisitor && userData.isHydratedFromDemo && (
+      {!isSignedOut && !isFreshDemoVisitor && userData.isHydratedFromDemo && (
         <div className="ops-section-notice">
           <Reveal>
             <div className="flex flex-wrap items-center gap-4 rounded-[22px] border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-[0_20px_45px_-34px_rgba(217,119,6,0.22)]">
