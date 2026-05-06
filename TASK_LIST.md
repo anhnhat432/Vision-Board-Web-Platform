@@ -82,13 +82,19 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 
 - **Status:** [x] Completed
 - **Prompt:** Prompt 5
-- **Files changed:** `src/app/pages/MockBillingCheckout.tsx`, `src/app/components/UpgradePaywallDialog.tsx`
+- **Files changed:**
+  - `src/app/pages/MockBillingCheckout.tsx` - Added prominent demo banners, button text "Continue (Demo)", "Simulating payment provider..."
+  - `src/app/components/UpgradePaywallDialog.tsx` - Added demo banner, "Demo Provider" label, updated toast/footer
+  - `src/app/pages/BillingPlan.tsx` - Updated hero badge "Public Demo", changed "mock" → "demo"
+  - `src/app/utils/billing-contract.ts` - `getBillingProviderModeLabel()` returns "Demo Provider"
+  - `src/app/utils/production/outboxSync.ts` - Added demo mode check to prevent server sync
 - **Notes:**
-  - MockBillingCheckout: banner, buttons, labels đều tiếng Việt rõ ràng
-  - UpgradePaywallDialog: banner, toast, footer, debug panel tiếng Việt
-  - Mọi copy user-facing đều nói rõ "không thu tiền thật" và "trình duyệt này"
-  - Nguồn gọi hiển thị tiếng Việt thay vì raw source code
-- **Verified:** [x] typecheck passing / [x] No test breakage
+  - All checkout flow clearly indicates DEMO mode with amber banners
+  - No "real payment" or "secure payment" badges
+  - Confirmation states: "no real payment was processed"
+  - Provider labeled "Demo Provider" in debug UI
+  - All user-facing copy emphasizes local-only upgrade
+- **Verified:** [x] typecheck passing / [x] build passing / [x] Manual QA
 
 ### 6. ✅ LocalStorage Clarity
 
@@ -103,23 +109,26 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
   - DashboardDataBackupCard: copy rõ hơn về lý do cần xuất sao lưu
 - **Verified:** [x] typecheck passing / [x] No test breakage
 
-### 7. ✅ Demo Checkout Clarity Enhancement
+### 7. ✅ Demo Mode Backend/Auth Noise
 
 - **Status:** [x] Completed
-- **Prompt:** "Check billing/mock checkout files and add clear visual indicators that this is DEMO/SIMULATION"
+- **Prompt:** "Review API client and auth integration: Verify NO backend calls in demo mode"
 - **Files changed:**
-  - `src/app/pages/MockBillingCheckout.tsx` - Added prominent demo banners, changed button text to "Continue (Demo)", "Simulating payment provider..."
-  - `src/app/components/UpgradePaywallDialog.tsx` - Added demo banner, changed provider label to "Demo Provider", updated toast/footer copy
-  - `src/app/pages/BillingPlan.tsx` - Updated hero badge to "Public Demo", changed all "mock" to "demo" for consistency
-  - `src/app/utils/billing-contract.ts` - `getBillingProviderModeLabel()` returns "Demo Provider" for mock_provider
-  - `src/app/utils/production/outboxSync.ts` - Added demo mode check to prevent server sync
+  - `src/lib/api/apiClient.ts` - Added `isDemoMode()` guard at start of `request()` to throw error and block all API calls
+  - `src/features/plan12week/hooks/usePlanExecutionSync.ts` - Added demo guard in `runAction` (returns null) and `syncLocalSnapshot` (returns "idle" with demo message)
+  - `src/features/plan12week/hooks/usePlanSetupSync.ts` - Already had `isDemoMode()` guard in `syncPlanForGoal`
+  - `src/app/utils/production/outboxSync.ts` - Already had demo guard returning idle status
+  - `src/lib/auth/firebase.ts` - `isFirebaseAuthEnabled()` returns false when Firebase config missing (demo mode)
+  - `src/app/components/ProtectedRoute.tsx` - Skips auth gate when `!isConfigured` (demo)
+  - `src/app/pages/LoginPage.tsx` - Shows "Firebase not configured" notice when `!isConfigured`
 - **Notes:**
-  - All checkout flow now clearly indicates DEMO mode with amber banners
-  - No "real payment" or "secure payment" badges shown
-  - Confirmation states explicitly state "no real payment was processed"
-  - Provider consistently labeled as "Demo Provider" in debug UI
-  - All user-facing copy emphasizes local-only upgrade
-- **Verified:** [x] typecheck passing / [x] build passing / [x] Manual QA in dev server
+  - All sync hooks short-circuit in demo mode without making backend calls
+  - API client blocks all fetch requests when `VITE_APP_MODE=demo`
+  - Firebase auth initialization returns `isConfigured=false` in demo (no Firebase env vars)
+  - ProtectedRoute allows all routes without auth in demo
+  - No Firebase initialization errors expected in console (config missing is handled)
+  - `.env.production` has `VITE_APP_MODE=demo` and no Firebase vars
+- **Verified:** [x] typecheck passing / [x] build passing / [x] All sync paths short-circuit in demo mode
 
 ### 8. ⬜ Weekly Review Free Path
 
