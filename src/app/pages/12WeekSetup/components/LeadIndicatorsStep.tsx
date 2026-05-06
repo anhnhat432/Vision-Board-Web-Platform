@@ -19,6 +19,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { formatScheduleDayLabels, validateLeadIndicatorDraft } from "../helpers";
 import type { IndicatorPreviewGroup } from "../helpers";
 import type { LeadIndicatorDraft, TwelveWeekSetupDraft } from "../types";
+import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
+import { useBreakpoint } from "@/app/hooks/useBreakpoint";
 
 interface LeadIndicatorsStepProps {
   draft: TwelveWeekSetupDraft;
@@ -60,65 +62,69 @@ export function LeadIndicatorsStep({
   const indicatorWarnings = draft.leadIndicators.map((indicator) =>
     validateLeadIndicatorDraft(indicator, validationOptions).warnings,
   );
-  // Read the stored onboarding intent once on mount. The component does not
-  // mutate intent, only consumes it for the example panel; storage is the
-  // single source of truth.
   const intentArchetype: GoalArchetype | null = useMemo(() => {
     const intent = getUserIntentId();
     if (!intent || !hasActionableArchetypeHint(intent)) return null;
     return getArchetypeForIntent(intent);
   }, []);
 
+  const isDesktop = useBreakpoint();
+
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-dashed border-slate-200 bg-slate-50/80 p-4">
-          <div>
-            <p className="text-sm font-semibold text-slate-900">Giữ 2-4 việc lặp lại cho cả chu kỳ</p>
-            <p className="mt-1 text-sm text-slate-500">
-              Việc chính được ưu tiên trong điểm tuần. Việc tùy chọn là phần thêm khi bạn còn sức.
-            </p>
-            <p className="mt-2 text-xs leading-6 text-slate-500">
-              Việc lặp lại là <strong>hành động bạn kiểm soát được</strong> — không phải kết quả cuối. Mỗi tuần, việc
-              hôm nay sẽ được tạo từ các việc này.
-            </p>
-          </div>
-          <Button type="button" variant="outline" onClick={onAddIndicator} disabled={draft.leadIndicators.length >= 4}>
-            Thêm việc
-          </Button>
+      {/* Explanation card - primary action */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-dashed border-slate-200 bg-slate-50/80 p-4">
+        <div>
+          <p className="text-sm font-semibold text-slate-900">Giữ 2-4 việc lặp lại cho cả chu kỳ</p>
+          <p className="mt-1 text-sm text-slate-500">
+            Việc chính được ưu tiên trong điểm tuần. Việc tùy chọn là phần thêm khi bạn còn sức.
+          </p>
+          <p className="mt-2 text-xs leading-6 text-slate-500">
+            Việc lặp lại là <strong>hành động bạn kiểm soát được</strong> — không phải kết quả cuối. Mỗi tuần, việc
+            hôm nay sẽ được tạo từ các việc này.
+          </p>
         </div>
+        <Button type="button" variant="outline" onClick={onAddIndicator} disabled={draft.leadIndicators.length >= 4}>
+          Thêm việc
+        </Button>
+      </div>
 
-        <details className="rounded-[24px] border border-sky-200 bg-sky-50/72 p-4">
-          <summary className="cursor-pointer list-none text-sm font-semibold text-sky-900">
-            Việc lặp lại là gì? Khác kết quả cuối thế nào?
-          </summary>
-          <div className="mt-3 grid gap-3 md:grid-cols-2">
-            <div className="rounded-2xl border border-emerald-200 bg-white/82 p-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Ví dụ tốt (kiểm soát được)</p>
-              <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
-                <li>• Viết draft 800 từ</li>
-                <li>• Tập gym 45 phút</li>
-                <li>• Gửi 5 email outreach</li>
-                <li>• Học flashcard tiếng Anh 30 phút</li>
-              </ul>
-            </div>
-            <div className="rounded-2xl border border-amber-200 bg-white/82 p-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Ví dụ chưa hợp (kết quả cuối)</p>
-              <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
-                <li>• Tăng 100 followers</li>
-                <li>• Giảm 5kg</li>
-                <li>• Có job mới</li>
-                <li>• Đạt IELTS 7.0</li>
-              </ul>
-              <p className="mt-2 text-xs leading-5 text-slate-500">
-                Đây là kết quả cuối — đo ở chỉ số chính, không phải việc tuần.
-              </p>
-            </div>
+      {/* What are lead indicators? */}
+      <SecondaryPanel title="Việc lặp lại là gì? Khác kết quả cuối thế nào?" collapsible defaultOpen={isDesktop}>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="rounded-2xl border border-emerald-200 bg-white/82 p-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Ví dụ tốt (kiểm soát được)</p>
+            <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
+              <li>• Viết draft 800 từ</li>
+              <li>• Tập gym 45 phút</li>
+              <li>• Gửi 5 email outreach</li>
+              <li>• Học flashcard tiếng Anh 30 phút</li>
+            </ul>
           </div>
-        </details>
+          <div className="rounded-2xl border border-amber-200 bg-white/82 p-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Ví dụ chưa hợp (kết quả cuối)</p>
+            <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
+              <li>• Tăng 100 followers</li>
+              <li>• Giảm 5kg</li>
+              <li>• Có job mới</li>
+              <li>• Đạt IELTS 7.0</li>
+            </ul>
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              Đây là kết quả cuối — đo ở chỉ số chính, không phải việc tuần.
+            </p>
+          </div>
+        </div>
+      </SecondaryPanel>
 
-        <GoalArchetypeExamples archetype={intentArchetype} variant="lead_indicator" />
+      {/* Goal archetype examples */}
+      {intentArchetype && (
+        <SecondaryPanel title="Ví dụ theo loại mục tiêu" collapsible={false}>
+          <GoalArchetypeExamples archetype={intentArchetype} variant="lead_indicator" />
+        </SecondaryPanel>
+      )}
 
+      {/* Indicator cards */}
+      <div className="space-y-4">
         {draft.leadIndicators.map((indicator, index) => (
           <div
             key={indicator.id}
@@ -225,70 +231,73 @@ export function LeadIndicatorsStep({
         ))}
       </div>
 
-      <div className="space-y-4 rounded-[28px] border border-white/70 bg-white/72 p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Xem trước tuần 1</p>
-        <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Cốt lõi / Tùy chọn</p>
-          <p className="mt-2 text-sm text-slate-600">
-            {coreCount} cốt lõi • {optionalCount} tùy chọn
-          </p>
-        </div>
-        {setupGuideSupport && setupGuideTemplate && (
-          <div className="rounded-[22px] border border-slate-900 bg-slate-950 p-4 text-white">
-            <p className="text-xs uppercase tracking-[0.16em] text-white/54">
-              {selectedTemplate ? "Tuần 1 theo khung đang dùng" : "Nếu đi theo khung gợi ý này"}
-            </p>
-            <p className="mt-2 text-base font-semibold">{setupGuideSupport.week1Headline}</p>
-            <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1Support}</p>
-            <p className="mt-3 rounded-2xl border border-white/12 bg-white/8 px-3 py-3 text-sm text-white/74">
-              {setupGuideSupport.week1CadenceHint}
+      {/* Week 1 preview */}
+      <SecondaryPanel title="Xem trước tuần 1" collapsible defaultOpen={isDesktop}>
+        <div className="rounded-[28px] border border-white/70 bg-white/72 p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Xem trước tuần 1</p>
+          <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
+            <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Cốt lõi / Tùy chọn</p>
+            <p className="mt-2 text-sm text-slate-600">
+              {coreCount} cốt lõi • {optionalCount} tùy chọn
             </p>
           </div>
-        )}
-        <p className="text-xs leading-5 text-slate-500">
-          Từ mỗi việc lặp lại bên trên, việc hôm nay sẽ được tạo vào các ngày sau:
-        </p>
-        <div className="space-y-3">
-          {weekOneTaskGroups.length === 0 ? (
-            <p className="text-sm text-slate-500">Thêm việc để thấy tuần đầu tiên sẽ trông như thế nào.</p>
-          ) : (
-            weekOneTaskGroups.map((group) => (
-              <div
-                key={group.id}
-                className="rounded-2xl border border-white/70 bg-slate-50/80 px-4 py-3"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-slate-900">{group.name}</p>
-                  <Badge variant={group.type === "optional" ? "warning" : "success"} className="text-xs">
-                    {group.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
-                  </Badge>
-                </div>
-                <p className="mt-1 text-xs text-slate-500">
-                  {group.taskTitles.length} việc / tuần • Lịch: {formatScheduleDayLabels(group.scheduleDays)}
-                </p>
-                {group.taskTitles.length > 0 && (
-                  <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-600">
-                    {group.taskTitles.map((title) => (
-                      <li key={title}>→ {title}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ))
+          {setupGuideSupport && setupGuideTemplate && (
+            <div className="rounded-[22px] border border-slate-900 bg-slate-950 p-4 text-white">
+              <p className="text-xs uppercase tracking-[0.16em] text-white/54">
+                {selectedTemplate ? "Tuần 1 theo khung đang dùng" : "Nếu đi theo khung gợi ý này"}
+              </p>
+              <p className="mt-2 text-base font-semibold">{setupGuideSupport.week1Headline}</p>
+              <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1Support}</p>
+              <p className="mt-3 rounded-2xl border border-white/12 bg-white/8 px-3 py-3 text-sm text-white/74">
+                {setupGuideSupport.week1CadenceHint}
+              </p>
+            </div>
           )}
-        </div>
-        {weekOneTaskWarning ? (
-          <p
-            role="status"
-            className="mt-2 flex items-start gap-1.5 text-xs leading-5 text-amber-700"
-          >
-            <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            <span>
-              <span className="font-semibold">Cảnh báo:</span> {weekOneTaskWarning}
-            </span>
+          <p className="mt-3 text-xs leading-5 text-slate-500">
+            Từ mỗi việc lặp lại bên trên, việc hôm nay sẽ được tạo vào các ngày sau:
           </p>
-        ) : null}
-      </div>
+          <div className="mt-3 space-y-2">
+            {weekOneTaskGroups.length === 0 ? (
+              <p className="text-sm text-slate-500">Thêm việc để thấy tuần đầu tiên sẽ trông như thế nào.</p>
+            ) : (
+              weekOneTaskGroups.map((group) => (
+                <div
+                  key={group.id}
+                  className="rounded-2xl border border-white/70 bg-slate-50/80 px-4 py-3"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-sm font-semibold text-slate-900">{group.name}</p>
+                    <Badge variant={group.type === "optional" ? "warning" : "success"} className="text-xs">
+                      {group.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
+                    </Badge>
+                  </div>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {group.taskTitles.length} việc / tuần • Lịch: {formatScheduleDayLabels(group.scheduleDays)}
+                  </p>
+                  {group.taskTitles.length > 0 && (
+                    <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-600">
+                      {group.taskTitles.map((title) => (
+                        <li key={title}>→ {title}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+          {weekOneTaskWarning ? (
+            <p
+              role="status"
+              className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-amber-700"
+            >
+              <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+              <span>
+                <span className="font-semibold">Cảnh báo:</span> {weekOneTaskWarning}
+              </span>
+            </p>
+          ) : null}
+        </div>
+      </SecondaryPanel>
     </div>
   );
 }

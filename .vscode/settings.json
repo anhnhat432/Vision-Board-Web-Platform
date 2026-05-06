@@ -1,3 +1,19 @@
 {
-  "js/ts.tsdk.path": "node_modules\\typescript\\lib"
+  "js/ts.tsdk.path": "node_modules\\typescript\\lib",
+  "files.exclude": {
+    "**/.claude/worktrees": true
+  },
+  "files.watcherExclude": {
+    "**/.claude/worktrees/**": true
+  },
+  "search.exclude": {
+    "**/.claude/worktrees": true
+  },
+  "tailwindCSS.files.exclude": [
+    "**/.git/**",
+    "**/node_modules/**",
+    "**/.hg/**",
+    "**/.svn/**",
+    "**/.claude/**"
+  ]
 }

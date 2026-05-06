@@ -1,0 +1,38 @@
+# Keep Claude Code, ripgrep, and file pickers focused on source files.
+
+# Dependencies and builds
+node_modules/
+backend/node_modules/
+dist/
+backend/dist/
+coverage/
+.vite/
+
+# Agent worktrees and generated agent state
+.claude/worktrees/
+.codex-worktrees/
+codex-backups/
+
+# QA, screenshots, and generated reports
+artifacts/
+screenshots/
+test-results/
+playwright-report/
+
+# Deployment/cache directories
+.vercel/
+.netlify/
+
+# Secrets and local env
+.env
+.env.local
+.env.*.local
+backend/.env
+backend/.env.local
+backend/.env.*.local
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+.DS_Store

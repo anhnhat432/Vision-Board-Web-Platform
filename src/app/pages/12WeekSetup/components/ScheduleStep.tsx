@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { LOAD_PREFERENCE_OPTIONS, REVIEW_DAYS } from "../constants";
 import { getLoadPreferenceLabel } from "../helpers";
 import type { TwelveWeekSetupDraft } from "../types";
+import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
+import { useBreakpoint } from "@/app/hooks/useBreakpoint";
 
 interface ScheduleStepProps {
   draft: TwelveWeekSetupDraft;
@@ -31,6 +33,8 @@ export function ScheduleStep({
   weekOneTaskWarning,
   onChange,
 }: ScheduleStepProps) {
+  const isDesktop = useBreakpoint();
+
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="space-y-5">
@@ -115,97 +119,121 @@ export function ScheduleStep({
           />
         </div>
       </div>
-      <div className="space-y-4 rounded-[28px] border border-white/70 bg-white/72 p-5">
-        <div className="rounded-[22px] border border-emerald-100 bg-emerald-50/80 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">Việc lặp lại và chỉ số</p>
-          <p className="mt-2 text-sm leading-7 text-slate-700">
+      <div className="space-y-6 rounded-[28px] border border-white/70 bg-white/72 p-5">
+        <SecondaryPanel title="Việc lặp lại và chỉ số" collapsible defaultOpen={isDesktop}>
+          <p className="text-sm leading-7 text-slate-700">
             Việc lặp lại là việc bạn làm mỗi tuần. Chỉ số kết quả chính là con số dùng để nhìn lại xem chu kỳ có đi đúng
             hướng không.
           </p>
-        </div>
-        <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-          <div className="flex items-center gap-2 text-slate-700">
-            <CalendarDays className="h-4 w-4" />
-            <p className="text-sm font-semibold">Chu kỳ 12 tuần</p>
-          </div>
-          <p className="mt-3 text-sm text-slate-600">
+        </SecondaryPanel>
+        <SecondaryPanel
+          icon={<CalendarDays className="h-4 w-4" />}
+          title="Chu kỳ 12 tuần"
+          collapsible
+          defaultOpen={isDesktop}
+        >
+          <p className="text-sm text-slate-600">
             {cycleStartDate} đến {cycleEndDate}
           </p>
-        </div>
+        </SecondaryPanel>
         {setupGuideSupport && setupGuideTemplate && (
-          <div className="rounded-[22px] border border-slate-900 bg-slate-950 p-4 text-white">
-            <p className="text-xs uppercase tracking-[0.16em] text-white/54">Nhịp nên giữ ở tuần 1</p>
-            <p className="mt-2 text-base font-semibold">{setupGuideSupport.week1Headline}</p>
-            <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1Support}</p>
-            <div className="mt-3 rounded-2xl border border-white/12 bg-white/8 p-3">
-              <p className="text-xs uppercase tracking-[0.16em] text-white/54">Gợi ý duy trì</p>
-              <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1CadenceHint}</p>
+          <SecondaryPanel
+            title="Nhịp tuần 1 theo khung"
+            collapsible
+            defaultOpen={isDesktop}
+          >
+            <div className="rounded-[22px] border border-slate-900 bg-slate-950 p-4 text-white">
+              <p className="text-xs uppercase tracking-[0.16em] text-white/54">Nhịp nên giữ ở tuần 1</p>
+              <p className="mt-2 text-base font-semibold">{setupGuideSupport.week1Headline}</p>
+              <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1Support}</p>
+              <div className="mt-3 rounded-2xl border border-white/12 bg-white/8 p-3">
+                <p className="text-xs uppercase tracking-[0.16em] text-white/54">Gợi ý duy trì</p>
+                <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1CadenceHint}</p>
+              </div>
             </div>
-          </div>
+          </SecondaryPanel>
         )}
         {setupGuideSupport && (
-          <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-            <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Ngày nhìn lại và mức tải tuần gợi ý</p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
-                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Nhìn lại</p>
-                <p className="mt-2 text-sm font-semibold text-slate-900">{draft.reviewDay}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{setupGuideSupport.recommendedReviewReason}</p>
-              </div>
-              <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
-                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Nhịp tuần</p>
-                <p className="mt-2 text-sm font-semibold text-slate-900">
-                  {getLoadPreferenceLabel(draft.tacticLoadPreference)}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{setupGuideSupport.recommendedLoadReason}</p>
+          <SecondaryPanel
+            title="Khuyến nghị từ khung"
+            collapsible
+            defaultOpen={isDesktop}
+          >
+            <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
+              <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Ngày nhìn lại và mức tải tuần gợi ý</p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
+                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Nhìn lại</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">{draft.reviewDay}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">{setupGuideSupport.recommendedReviewReason}</p>
+                </div>
+                <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
+                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Nhịp tuần</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">
+                    {getLoadPreferenceLabel(draft.tacticLoadPreference)}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">{setupGuideSupport.recommendedLoadReason}</p>
+                </div>
               </div>
             </div>
-          </div>
+          </SecondaryPanel>
         )}
         {(draft.week4Milestone || draft.week8Milestone) && (
-          <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-            <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Mốc gợi ý theo khung</p>
-            <div className="mt-3 space-y-3">
-              <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
-                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tuần 4</p>
-                <p className="mt-2 text-sm leading-7 text-slate-700">{draft.week4Milestone}</p>
-              </div>
-              <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
-                <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tuần 8</p>
-                <p className="mt-2 text-sm leading-7 text-slate-700">{draft.week8Milestone}</p>
+          <SecondaryPanel
+            title="Mốc quan trọng"
+            collapsible
+            defaultOpen={isDesktop}
+          >
+            <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
+              <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Mốc gợi ý theo khung</p>
+              <div className="mt-3 space-y-3">
+                <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
+                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tuần 4</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-700">{draft.week4Milestone}</p>
+                </div>
+                <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
+                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tuần 8</p>
+                  <p className="mt-2 text-sm leading-7 text-slate-700">{draft.week8Milestone}</p>
+                </div>
               </div>
             </div>
-          </div>
+          </SecondaryPanel>
         )}
-        <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
-          <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
-            {hasPreviewTasks ? "Những việc sẽ hiện ở màn Hôm nay" : "Tuần đầu nên mở bằng"}
-          </p>
-          <div className="mt-3 space-y-2">
-            {weekOneTaskPreview.length === 0 ? (
-              <p className="text-sm text-slate-500">
-                Khi bạn chốt khung hoặc thêm việc, tuần đầu sẽ hiện rõ các việc cần mở ở màn Hôm nay.
-              </p>
-            ) : (
-              weekOneTaskPreview.map((task) => (
-                <div key={task} className="rounded-2xl border border-white/70 bg-slate-50/80 px-4 py-3 text-sm text-slate-700">
-                  {task}
-                </div>
-              ))
-            )}
-          </div>
-          {weekOneTaskWarning ? (
-            <p
-              role="status"
-              className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-amber-700"
-            >
-              <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-              <span>
-                <span className="font-semibold">Cảnh báo:</span> {weekOneTaskWarning}
-              </span>
+        <SecondaryPanel
+          title="Xem trước tuần đầu"
+          collapsible
+          defaultOpen={isDesktop}
+        >
+          <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
+            <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
+              {hasPreviewTasks ? "Những việc sẽ hiện ở màn Hôm nay" : "Tuần đầu nên mở bằng"}
             </p>
-          ) : null}
-        </div>
+            <div className="mt-3 space-y-2">
+              {weekOneTaskPreview.length === 0 ? (
+                <p className="text-sm text-slate-500">
+                  Khi bạn chốt khung hoặc thêm việc, tuần đầu sẽ hiện rõ các việc cần mở ở màn Hôm nay.
+                </p>
+              ) : (
+                weekOneTaskPreview.map((task) => (
+                  <div key={task} className="rounded-2xl border border-white/70 bg-slate-50/80 px-4 py-3 text-sm text-slate-700">
+                    {task}
+                  </div>
+                ))
+              )}
+            </div>
+            {weekOneTaskWarning ? (
+              <p
+                role="status"
+                className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-amber-700"
+              >
+                <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <span>
+                  <span className="font-semibold">Cảnh báo:</span> {weekOneTaskWarning}
+                </span>
+              </p>
+            ) : null}
+          </div>
+        </SecondaryPanel>
       </div>
     </div>
   );

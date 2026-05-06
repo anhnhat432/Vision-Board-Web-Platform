@@ -38,6 +38,7 @@ import { useDashboardPlanLink } from "@/features/dashboard/hooks/useDashboardPla
 import { usePlan12Week } from "@/features/plan12week/hooks";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { FeedbackDialog } from "../components/FeedbackDialog";
+import { PageHeader } from "../components/layout/PageHeader";
 import { NewUserGuideBanner } from "../components/NewUserGuide";
 import { SpotlightTour, type SpotlightTourStep } from "../components/SpotlightTour";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
@@ -733,7 +734,6 @@ function DashboardContent({
           const s = severityStyles[topTrigger.severity];
           const ctaHref = topTrigger.kind === "trial_ending" ? "/billing/plan" : "/12-week-system";
           const ctaLabel = topTrigger.kind === "trial_ending" ? "Mở mock upgrade" : "Xem ngay";
-          // Fire analytics once when first rendered (effect not available here; use key trick)
           return (
             <Reveal key={topTrigger.kind}>
               <div
@@ -814,83 +814,96 @@ function DashboardContent({
         steps={dashboardTourSteps}
       />
 
-      {activeSystem && reviewDueToday && (
-        <Reveal>
-          <Card className="border-amber-200 bg-amber-50/92 shadow-[0_16px_40px_-28px_rgba(217,119,6,0.24)]">
-            <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
-                  <AlertTriangle className="h-5 w-5" />
+      {/* HERO SECTION: Promise + Primary CTA */}
+      <div className="ops-section-hero space-y-6">
+        {activeSystem && reviewDueToday && (
+          <Reveal>
+            <Card className="border-amber-200 bg-amber-50/92 shadow-[0_16px_40px_-28px_rgba(217,119,6,0.24)]">
+              <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+                    <AlertTriangle className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-700">
+                      Review đến hạn hôm nay
+                    </p>
+                    <h3 className="mt-1 text-2xl font-bold text-slate-950">Hôm nay là lúc chốt review tuần.</h3>
+                    <p className="mt-2 text-sm text-slate-600">
+                      {visibleActiveTwelveWeekGoal?.title}. Khóa tuần {activeSystemWeek} và quyết định nhịp cho tuần tiếp
+                      theo.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-700">
-                    Review đến hạn hôm nay
-                  </p>
-                  <h3 className="mt-1 text-2xl font-bold text-slate-950">Hôm nay là lúc chốt review tuần.</h3>
-                  <p className="mt-2 text-sm text-slate-600">
-                    {visibleActiveTwelveWeekGoal?.title}. Khóa tuần {activeSystemWeek} và quyết định nhịp cho tuần tiếp
-                    theo.
-                  </p>
+                <Button className="w-full min-w-[180px] sm:w-auto" onClick={() => navigate("/12-week-system")}>
+                  Mở review tuần
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+          </Reveal>
+        )}
+
+        {/* Primary Action Card - Most Important Thing */}
+        {shouldShowMainDashboardCard && activeSystem && activeSystemTodayOpenTasks.length > 0 && (
+          <Card className="border-2 border-primary bg-white shadow-[0_16px_36px_-28px_rgba(79,70,229,0.28)]">
+            <CardContent className="p-4 sm:p-5 lg:p-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-[0_8px_20px_-12px_rgba(79,70,229,0.5)]">
+                    <CheckCircle2 className="h-6 w-6" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+                      Việc quan trọng nhất hôm nay
+                    </p>
+                    <h2 className="mt-1 text-lg font-bold text-slate-950 truncate">
+                      {activeSystemTodayOpenTasks[0].title}
+                    </h2>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {activeSystemTodayOpenTasks.length > 1
+                        ? `Còn ${activeSystemTodayOpenTasks.length - 1} việc khác chờ sau đó`
+                        : "Đây là việc duy nhất hôm nay"}
+                    </p>
+                  </div>
                 </div>
+                <Button
+                  className="w-full bg-slate-950 text-white hover:bg-slate-900 sm:w-auto"
+                  onClick={() => navigate("/12-week-system")}
+                >
+                  Đánh dấu xong
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
               </div>
-              <Button className="w-full min-w-[180px] sm:w-auto" onClick={() => navigate("/12-week-system")}>
-                Mở review tuần
-                <ArrowRight className="h-4 w-4" />
-              </Button>
             </CardContent>
           </Card>
-        </Reveal>
-      )}
+        )}
 
-      <div
-        className={
-          shouldShowTopSidebar ? "grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,400px)]" : "grid gap-6"
-        }
-      >
-        <div className="animate-fade-in-up">
-          <div className="space-y-4">
-            {shouldShowMainDashboardCard && activeSystem && activeSystemTodayOpenTasks.length > 0 && (
-              <Card className="border-2 border-primary bg-white shadow-[0_16px_36px_-28px_rgba(79,70,229,0.28)]">
-                <CardContent className="p-4 sm:p-5 lg:p-6">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-[0_8px_20px_-12px_rgba(79,70,229,0.5)]">
-                        <CheckCircle2 className="h-6 w-6" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-                          Việc quan trọng nhất hôm nay
-                        </p>
-                        <h2 className="mt-1 text-lg font-bold text-slate-950 truncate">
-                          {activeSystemTodayOpenTasks[0].title}
-                        </h2>
-                        <p className="mt-1 text-xs text-slate-500">
-                          {activeSystemTodayOpenTasks.length > 1
-                            ? `Còn ${activeSystemTodayOpenTasks.length - 1} việc khác chờ sau đó`
-                            : "Đây là việc duy nhất hôm nay"}
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      className="w-full bg-slate-950 text-white hover:bg-slate-900 sm:w-auto"
-                      onClick={() => navigate("/12-week-system")}
-                    >
-                      Đánh dấu xong
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {shouldShowMainDashboardCard && (
-              <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]">
-                <CardContent className="p-4 sm:p-6 lg:p-7">
-                  <div className="space-y-5">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                        {isPublicVisitor ? "Trang chính" : "Hôm nay"}
-                      </span>
+        {/* Main Dashboard Card with PageHeader */}
+        {shouldShowMainDashboardCard && (
+          <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]">
+            <CardContent className="p-4 sm:p-6 lg:p-7">
+              <div className="space-y-5">
+                <PageHeader
+                  eyebrow={isPublicVisitor ? "Trang chính" : "Hôm nay"}
+                  title={
+                    isPublicVisitor
+                      ? publicVisitorDashboardTitle
+                      : activeSystem
+                        ? `Quay lại đúng nhịp của "${visibleActiveTwelveWeekGoal?.title ?? "chu kỳ 12 tuần hiện tại"}".`
+                        : setupStartTitle
+                  }
+                  description={
+                    isPublicVisitor
+                      ? publicVisitorDashboardDescription
+                      : activeSystem
+                        ? activeSystemTodayOpenTasks.length > 0
+                          ? `Tập trung vào ${activeSystemTodayOpenTasks.length} việc đang mở hôm nay trước khi xem tiến độ tuần.`
+                          : "Hôm nay không còn việc mở. Nếu còn thời gian, hãy xem lại tuần hoặc chuẩn bị review khi đến hạn."
+                        : setupStartDescription
+                  }
+                  actions={
+                    <div className="flex flex-wrap gap-2">
                       {isPublicVisitor ? (
                         <span title="Chế độ xem không cần đăng nhập, dùng thử các tính năng cơ bản" className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
                           {publicVisitorBadge}
@@ -906,52 +919,35 @@ function DashboardContent({
                         </span>
                       )}
                     </div>
+                  }
+                />
 
-                    <div className="space-y-3">
-                      <h1 className="max-w-3xl break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl gradient-text">
-                        {isPublicVisitor
-                          ? publicVisitorDashboardTitle
-                          : activeSystem
-                            ? `Quay lại đúng nhịp của "${visibleActiveTwelveWeekGoal?.title ?? "chu kỳ 12 tuần hiện tại"}".`
-                            : setupStartTitle}
-                      </h1>
-                      <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                        {isPublicVisitor
-                          ? publicVisitorDashboardDescription
-                          : activeSystem
-                            ? activeSystemTodayOpenTasks.length > 0
-                              ? `Tập trung vào ${activeSystemTodayOpenTasks.length} việc đang mở hôm nay trước khi xem tiến độ tuần.`
-                              : "Hôm nay không còn việc mở. Nếu còn thời gian, hãy xem lại tuần hoặc chuẩn bị review khi đến hạn."
-                            : setupStartDescription}
-                      </p>
-                    </div>
-
-                    {activeSystem && activeSystemWeekCompletion && activeSystemWeekRange ? (
-                      <div className="grid gap-4">
-                        <div
-                          data-tour-id="dashboard-start-card"
-                          className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5"
+                {activeSystem && activeSystemWeekCompletion && activeSystemWeekRange ? (
+                  <div className="grid gap-4">
+                    <div
+                      data-tour-id="dashboard-start-card"
+                      className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                            Làm tiếp ngay
+                          </p>
+                          <h2 className="mt-2 text-2xl font-bold text-slate-950">
+                            {activeSystemTodayOpenTasks.length > 0
+                              ? `${activeSystemTodayOpenTasks.length} việc đang mở hôm nay`
+                              : "Hôm nay đang khá gọn"}
+                          </h2>
+                        </div>
+                        <Button
+                          data-tour-id="dashboard-primary-action"
+                          className="w-full gradient-brand text-white shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)] hover:shadow-[0_18px_40px_-22px_rgba(109,40,217,0.44)] hover:scale-[1.01] sm:w-auto"
+                          onClick={() => navigate("/12-week-system")}
                         >
-                          <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div>
-                              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                                Làm tiếp ngay
-                              </p>
-                              <h2 className="mt-2 text-2xl font-bold text-slate-950">
-                                {activeSystemTodayOpenTasks.length > 0
-                                  ? `${activeSystemTodayOpenTasks.length} việc đang mở hôm nay`
-                                  : "Hôm nay đang khá gọn"}
-                              </h2>
-                            </div>
-                            <Button
-                              data-tour-id="dashboard-primary-action"
-                              className="w-full gradient-brand text-white shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)] hover:shadow-[0_18px_40px_-22px_rgba(109,40,217,0.44)] hover:scale-[1.01] sm:w-auto"
-                              onClick={() => navigate("/12-week-system")}
-                            >
-                              Mở trung tâm 12 tuần
-                              <ArrowRight className="h-4 w-4" />
-                            </Button>
-                          </div>
+                          Mở trung tâm 12 tuần
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      </div>
 
                           {activeSystemTaskPreview.length > 0 ? (
                             <div className="mt-4 space-y-3">
@@ -1076,15 +1072,11 @@ function DashboardContent({
             {shouldShowTopSidebar && (
               <>
                 <section className="rounded-[24px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.22)] sm:p-5">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Thứ tự nên đi</p>
-                      <h2 className="mt-1 text-base font-semibold text-slate-950 sm:text-lg">
-                        Một luồng chính, không phải ba lựa chọn ngang nhau.
-                      </h2>
-                    </div>
-                    <p className="max-w-xl text-sm leading-6 text-slate-600">{quickActionIntro}</p>
-                  </div>
+                  <PageHeader
+                    eyebrow="Thứ tự nên đi"
+                    title="Một luồng chính, không phải ba lựa chọn ngang nhau."
+                    description={quickActionIntro}
+                  />
 
                   <div className="mt-4 grid gap-3 md:grid-cols-3">
                     {quickActions.map((action, actionIndex) => {
@@ -1117,38 +1109,50 @@ function DashboardContent({
                   </div>
                 </section>
 
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-                  {overviewCards.map((item, index) => {
-                    const Icon = item.icon;
+                {/* Stats Cards - Collapsible on mobile */}
+                <details className="group rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)] sm:p-5 open:sm:!block sm:!block" open>
+                  <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-3 text-sm font-semibold text-slate-950 sm:cursor-default">
+                    <span>Tổng quan nhanh</span>
+                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
+                      {isPublicVisitor ? "Luồng cốt lõi" : `${userData.goals.length} mục tiêu`}
+                    </span>
+                    <svg className="h-4 w-4 text-slate-400 transition-transform group-open:rotate-180 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                    {overviewCards.map((item, index) => {
+                      const Icon = item.icon;
 
-                    return (
-                      <div
-                        key={`top-${item.title}`}
-                        className="animate-fade-in-up"
-                        style={{ animationDelay: `${0.04 * index}s` }}
-                      >
-                        <Card className="h-full border border-slate-100 bg-white/88 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.18)]">
-                          <CardHeader className="flex flex-row items-start justify-between pb-3">
-                            <div>
-                              <CardDescription className="text-xs font-medium text-slate-500">
-                                {item.title}
-                              </CardDescription>
-                              <CardTitle className="mt-2 text-3xl font-bold text-slate-950">
-                                {isPublicVisitor ? item.value : <CountUp value={item.value} />}
-                              </CardTitle>
-                            </div>
-                            <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${item.iconClass}`}>
-                              <Icon className="h-5 w-5" />
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-sm text-slate-500">{item.note}</p>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    );
-                  })}
-                </div>
+                      return (
+                        <div
+                          key={`top-${item.title}`}
+                          className="animate-fade-in-up"
+                          style={{ animationDelay: `${0.04 * index}s` }}
+                        >
+                          <Card className="h-full border border-slate-100 bg-white/88 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.18)]">
+                            <CardHeader className="flex flex-row items-start justify-between pb-3">
+                              <div>
+                                <CardDescription className="text-xs font-medium text-slate-500">
+                                  {item.title}
+                                </CardDescription>
+                                <CardTitle className="mt-2 text-3xl font-bold text-slate-950">
+                                  {isPublicVisitor ? item.value : <CountUp value={item.value} />}
+                                </CardTitle>
+                              </div>
+                              <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${item.iconClass}`}>
+                                <Icon className="h-5 w-5" />
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-sm text-slate-500">{item.note}</p>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </details>
               </>
             )}
 
@@ -1399,299 +1403,339 @@ function DashboardContent({
         </Reveal>
       )}
 
+      {/* SECONDARY SECTION: Workspace Details */}
       {shouldShowWorkspaceDetailGrid && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
-          <Reveal>
-            <Card className="h-full border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.24)]">
-              <CardHeader>
-                <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                  <div className="min-w-0">
-                    <CardTitle className="text-slate-950">
-                      {isPublicVisitor ? "Luồng mục tiêu trong demo" : "Mục tiêu gần đây"}
-                    </CardTitle>
-                    <CardDescription className="text-slate-700">
-                      {isPublicVisitor
-                        ? "Từ một mong muốn rộng, web sẽ ép lại thành mục tiêu rõ và kế hoạch có lịch."
-                        : "Đủ ít để bạn nhìn một lượt là hiểu."}
-                    </CardDescription>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full sm:w-auto"
-                    onClick={() => (isPublicVisitor ? handleAuthNavigate("signup") : navigate("/life-insight"))}
-                  >
-                    <Plus className="h-4 w-4" />
-                    {isPublicVisitor ? "Đăng ký để sync sau" : "Tạo mục tiêu"}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {recentGoals.length === 0 ? (
-                  <div className="rounded-[24px] border border-dashed border-slate-300 bg-slate-50/80 px-6 py-10 text-center text-slate-500">
-                    <Target className="mx-auto mb-4 h-12 w-12 text-slate-300" />
-                    <p>
-                      {isPublicVisitor
-                        ? "Trong demo, bạn có thể đi qua Life Insight, SMART Goal và kiểm tra tính thực tế mà không cần đăng nhập."
-                        : "Chưa có mục tiêu nào. Hãy bắt đầu bằng mục tiêu đầu tiên của bạn."}
-                    </p>
+        <div className="ops-section-secondary space-y-6">
+          <PageHeader
+            eyebrow="Chi tiết workspace"
+            title="Dữ liệu gần đây"
+            description="Xem nhanh mục tiêu, cân bằng cuộc sống và nhật ký của bạn."
+          />
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+            <Reveal>
+              <Card className="h-full border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.24)]">
+                <CardHeader>
+                  <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                    <div className="min-w-0">
+                      <CardTitle className="text-slate-950">
+                        {isPublicVisitor ? "Luồng mục tiêu trong demo" : "Mục tiêu gần đây"}
+                      </CardTitle>
+                      <CardDescription className="text-slate-700">
+                        {isPublicVisitor
+                          ? "Từ một mong muốn rộng, web sẽ ép lại thành mục tiêu rõ và kế hoạch có lịch."
+                          : "Đủ ít để bạn nhìn một lượt là hiểu."}
+                      </CardDescription>
+                    </div>
                     <Button
-                      className="mt-5 w-full sm:w-auto"
+                      variant="ghost"
+                      size="sm"
+                      className="w-full sm:w-auto"
                       onClick={() => (isPublicVisitor ? handleAuthNavigate("signup") : navigate("/life-insight"))}
                     >
+                      <Plus className="h-4 w-4" />
                       {isPublicVisitor ? "Đăng ký để sync sau" : "Tạo mục tiêu"}
                     </Button>
                   </div>
-                ) : (
-                  <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
-                    <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)_minmax(100px,0.5fr)] gap-4 border-b border-slate-200/80 bg-slate-50/90 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 lg:grid">
-                      <span>Mục tiêu</span>
-                      <span>Loại</span>
-                      <span>Tiến độ</span>
-                      <span className="text-right">Hành động</span>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {recentGoals.length === 0 ? (
+                    <div className="rounded-[24px] border border-dashed border-slate-300 bg-slate-50/80 px-6 py-10 text-center text-slate-500">
+                      <Target className="mx-auto mb-4 h-12 w-12 text-slate-300" />
+                      <p>
+                        {isPublicVisitor
+                          ? "Trong demo, bạn có thể đi qua Life Insight, SMART Goal và kiểm tra tính thực tế mà không cần đăng nhập."
+                          : "Chưa có mục tiêu nào. Hãy bắt đầu bằng mục tiêu đầu tiên của bạn."}
+                      </p>
+                      <Button
+                        className="mt-5 w-full sm:w-auto"
+                        onClick={() => (isPublicVisitor ? handleAuthNavigate("signup") : navigate("/life-insight"))}
+                      >
+                        {isPublicVisitor ? "Đăng ký để sync sau" : "Tạo mục tiêu"}
+                      </Button>
                     </div>
+                  ) : (
+                    <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
+                      <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)_minmax(100px,0.5fr)] gap-4 border-b border-slate-200/80 bg-slate-50/90 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 lg:grid">
+                        <span>Mục tiêu</span>
+                        <span>Loại</span>
+                        <span>Tiến độ</span>
+                        <span className="text-right">Hành động</span>
+                      </div>
 
-                    <div className="divide-y divide-slate-200/80">
-                      {recentGoals.map((goal) => {
-                        const progress = calculateGoalProgress(goal);
-                        const execution = getGoalExecutionStats(goal);
+                      <div className="divide-y divide-slate-200/80">
+                        {recentGoals.map((goal) => {
+                          const progress = calculateGoalProgress(goal);
+                          const execution = getGoalExecutionStats(goal);
 
-                        return (
-                          <div
-                            key={goal.id}
-                            className={`px-4 py-4 lg:px-5 ${goal.twelveWeekSystem ? "bg-violet-50/55" : "bg-white/40"}`}
-                          >
-                            <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)_minmax(100px,0.5fr)] lg:items-center">
-                              <div className="min-w-0">
-                                <div className="flex items-start gap-3">
-                                  <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white">
-                                    <Target className="h-4 w-4" />
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex flex-wrap items-center gap-2">
-                                      <h4 className="truncate font-semibold text-slate-900">{goal.title}</h4>
-                                      {goal.twelveWeekSystem && (
-                                        <span className="rounded-full bg-violet-100 px-3 py-1 text-[11px] font-semibold text-violet-700">
-                                          12 tuần
+                          return (
+                            <div
+                              key={goal.id}
+                              className={`px-4 py-4 lg:px-5 ${goal.twelveWeekSystem ? "bg-violet-50/55" : "bg-white/40"}`}
+                            >
+                              <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)_minmax(100px,0.5fr)] lg:items-center">
+                                <div className="min-w-0">
+                                  <div className="flex items-start gap-3">
+                                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white">
+                                      <Target className="h-4 w-4" />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <div className="flex flex-wrap items-center gap-2">
+                                        <h4 className="truncate font-semibold text-slate-900">{goal.title}</h4>
+                                        {goal.twelveWeekSystem && (
+                                          <span className="rounded-full bg-violet-100 px-3 py-1 text-[11px] font-semibold text-violet-700">
+                                            12 tuần
+                                          </span>
+                                        )}
+                                        {progress === 100 && (
+                                          <span className="rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-semibold text-emerald-700">
+                                            Hoàn thành
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="mt-1 flex flex-wrap gap-2 text-sm text-slate-500">
+                                        <span>{getLifeAreaLabel(goal.category)}</span>
+                                        {goal.deadline && <span>• Đích {formatCalendarDate(goal.deadline)}</span>}
+                                      </div>
+                                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500 lg:hidden">
+                                        <span className="rounded-full bg-slate-100 px-3 py-1">
+                                          {goal.twelveWeekSystem ? "Chu kỳ 12 tuần" : "Mục tiêu thường"}
                                         </span>
-                                      )}
-                                      {progress === 100 && (
-                                        <span className="rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-semibold text-emerald-700">
-                                          Hoàn thành
+                                        <span className="rounded-full bg-slate-100 px-3 py-1">
+                                          {execution.completed}/{execution.total} việc đã chốt
                                         </span>
-                                      )}
+                                        <span className="rounded-full bg-slate-100 px-3 py-1">{progress}% tiến độ</span>
+                                      </div>
                                     </div>
-                                    <div className="mt-1 flex flex-wrap gap-2 text-sm text-slate-500">
-                                      <span>{getLifeAreaLabel(goal.category)}</span>
-                                      {goal.deadline && <span>• Đích {formatCalendarDate(goal.deadline)}</span>}
-                                    </div>
-                                    <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500 lg:hidden">
-                                      <span className="rounded-full bg-slate-100 px-3 py-1">
-                                        {goal.twelveWeekSystem ? "Chu kỳ 12 tuần" : "Mục tiêu thường"}
-                                      </span>
-                                      <span className="rounded-full bg-slate-100 px-3 py-1">
-                                        {execution.completed}/{execution.total} việc đã chốt
-                                      </span>
-                                      <span className="rounded-full bg-slate-100 px-3 py-1">{progress}% tiến độ</span>
-                                    </div>
+                                    <CheckCircle2
+                                      aria-hidden="true"
+                                      className={`h-5 w-5 shrink-0 ${progress === 100 ? "text-emerald-600" : "text-slate-300"}`}
+                                    />
                                   </div>
-                                  <CheckCircle2
-                                    aria-hidden="true"
-                                    className={`h-5 w-5 shrink-0 ${progress === 100 ? "text-emerald-600" : "text-slate-300"}`}
-                                  />
                                 </div>
-                              </div>
 
-                              <div className="hidden min-w-0 lg:block">
-                                <p className="truncate text-sm font-semibold text-slate-900">
-                                  {goal.twelveWeekSystem ? "Chu kỳ 12 tuần" : "Mục tiêu thường"}
-                                </p>
-                                <p className="mt-1 truncate text-sm text-slate-500">
-                                  {goal.twelveWeekSystem
-                                    ? `Gói ${getPlanLabel(currentPlanCode)}`
-                                    : "Theo dõi tổng quan"}
-                                </p>
-                              </div>
-
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between text-sm">
-                                  <span className="font-semibold text-slate-900">{progress}%</span>
-                                  <span className="text-slate-500">
-                                    {execution.completed}/{execution.total} việc
-                                  </span>
+                                <div className="hidden min-w-0 lg:block">
+                                  <p className="truncate text-sm font-semibold text-slate-900">
+                                    {goal.twelveWeekSystem ? "Chu kỳ 12 tuần" : "Mục tiêu thường"}
+                                  </p>
+                                  <p className="mt-1 truncate text-sm text-slate-500">
+                                    {goal.twelveWeekSystem
+                                      ? `Gói ${getPlanLabel(currentPlanCode)}`
+                                      : "Theo dõi tổng quan"}
+                                  </p>
                                 </div>
-                                <Progress value={progress} className="h-2.5" />
-                                {goal.twelveWeekSystem && !entitlementKeys.includes("premium_review_insights") && (
-                                  <p className="text-xs font-medium text-violet-700">Phân tích review đang khóa</p>
-                                )}
-                              </div>
 
-                              <div className="flex flex-wrap gap-2 lg:justify-end">
-                                <Button
-                                  size="sm"
-                                  variant={goal.twelveWeekSystem ? "default" : "outline"}
-                                  className={goal.twelveWeekSystem ? "" : "border-white/70 bg-white hover:bg-slate-50"}
-                                  onClick={() => navigate(goal.twelveWeekSystem ? "/12-week-system" : "/goals")}
-                                  aria-label={
-                                    goal.twelveWeekSystem ? `Mở 12 tuần: ${goal.title}` : `Mở mục tiêu: ${goal.title}`
-                                  }
-                                >
-                                  {goal.twelveWeekSystem ? "Mở 12 tuần" : "Mở mục tiêu"}
-                                </Button>
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between text-sm">
+                                    <span className="font-semibold text-slate-900">{progress}%</span>
+                                    <span className="text-slate-500">
+                                      {execution.completed}/{execution.total} việc
+                                    </span>
+                                  </div>
+                                  <Progress value={progress} className="h-2.5" />
+                                  {goal.twelveWeekSystem && !entitlementKeys.includes("premium_review_insights") && (
+                                    <p className="text-xs font-medium text-violet-700">Phân tích review đang khóa</p>
+                                  )}
+                                </div>
+
+                                <div className="flex flex-wrap gap-2 lg:justify-end">
+                                  <Button
+                                    size="sm"
+                                    variant={goal.twelveWeekSystem ? "default" : "outline"}
+                                    className={goal.twelveWeekSystem ? "" : "border-white/70 bg-white hover:bg-slate-50"}
+                                    onClick={() => navigate(goal.twelveWeekSystem ? "/12-week-system" : "/goals")}
+                                    aria-label={
+                                      goal.twelveWeekSystem ? `Mở 12 tuần: ${goal.title}` : `Mở mục tiêu: ${goal.title}`
+                                    }
+                                  >
+                                    {goal.twelveWeekSystem ? "Mở 12 tuần" : "Mở mục tiêu"}
+                                  </Button>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </Reveal>
+
+            <Reveal>
+              <Card className="h-full border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.24)]">
+                <CardHeader>
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <CardTitle className="text-slate-950">
+                        {isPublicVisitor ? "Bánh xe cuộc sống là bước mở đầu" : "Bánh xe cuộc sống"}
+                      </CardTitle>
+                      <CardDescription className="text-slate-700">
+                        {isPublicVisitor
+                          ? "Người mới nên chấm 8 lĩnh vực trước khi chọn mục tiêu ưu tiên."
+                          : "Nhìn nhanh bức tranh tổng quan hiện tại."}
+                      </CardDescription>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Điểm trung bình</p>
+                      <p className="mt-1 text-3xl font-bold text-slate-900">
+                        <CountUp value={averageLifeScore} precision={1} />
+                      </p>
                     </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </Reveal>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+                    {radarData.length > 0 ? (
+                      <Suspense
+                        fallback={
+                          <div className="flex h-[300px] items-center justify-center rounded-[20px] bg-slate-100/88 text-sm text-slate-500">
+                            Đang tải biểu đồ cân bằng cuộc sống...
+                          </div>
+                        }
+                      >
+                        <DashboardLifeAreaRadar data={radarData} />
+                      </Suspense>
+                    ) : (
+                      <div className="flex h-[300px] flex-col items-center justify-center rounded-[20px] bg-slate-50 px-5 text-center">
+                        <TrendingUp className="h-10 w-10 text-slate-300" />
+                        <p className="mt-3 font-semibold text-slate-900">Chưa có dữ liệu bánh xe cuộc sống</p>
+                        <p className="mt-1 max-w-sm text-sm leading-6 text-slate-500">
+                          {isPublicVisitor
+                            ? "Trong demo, bạn có thể bắt đầu Life Balance không cần đăng nhập. Tài khoản/sync là lớp sau."
+                            : "Bắt đầu bằng bài đánh giá Life Balance để dashboard có dữ liệu thật thay vì số mặc định."}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Cần ưu tiên tiếp</p>
+                      <p className="mt-2 text-lg font-semibold text-slate-900">
+                        {isPublicVisitor
+                          ? "Chọn sau Life Balance"
+                          : weakestArea
+                            ? getLifeAreaLabel(weakestArea.name)
+                            : "Chưa có dữ liệu"}
+                      </p>
+                      <p className="mt-1 text-sm text-slate-500">
+                        {isPublicVisitor
+                          ? "Demo lưu local trên trình duyệt này"
+                          : weakestArea
+                            ? `${weakestArea.score}/10`
+                            : "--"}
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      className="h-auto w-full min-w-0 justify-start whitespace-normal rounded-[20px] border-slate-200 bg-white px-4 py-4 text-left shadow-sm hover:bg-slate-50"
+                      onClick={() => (isPublicVisitor ? handleAuthNavigate("signup") : navigate("/life-balance"))}
+                    >
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white">
+                        <TrendingUp className="h-4 w-4" />
+                      </div>
+                      <div className="ml-3 min-w-0 flex-1">
+                        <div className="line-clamp-2 break-words font-semibold text-slate-900">
+                          {isPublicVisitor
+                            ? "Bắt đầu bằng cân bằng cuộc sống"
+                            : hasRealLifeBalance
+                              ? "Mở cân bằng cuộc sống"
+                              : "Bắt đầu đánh giá cuộc sống"}
+                        </div>
+                        <div className="mt-1 line-clamp-2 text-sm text-slate-500">
+                          {isPublicVisitor
+                            ? "Đăng ký chỉ khi muốn thử lớp sync sau."
+                            : hasRealLifeBalance
+                              ? "Xem chi tiết và cập nhật lại bánh xe cuộc đời."
+                              : "Chấm điểm 8 lĩnh vực để mở đúng luồng mục tiêu."}
+                        </div>
+                      </div>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </Reveal>
+          </div>
+        </section>
+      )}
 
+      {/* Recent Reflections - Part of secondary content */}
+      {recentReflections.length > 0 && (
+        <div className="ops-section-secondary">
           <Reveal>
-            <Card className="h-full border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.24)]">
+            <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]">
               <CardHeader>
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <CardTitle className="text-slate-950">
-                      {isPublicVisitor ? "Bánh xe cuộc sống là bước mở đầu" : "Bánh xe cuộc sống"}
-                    </CardTitle>
+                    <CardTitle className="text-slate-950">Nhật ký gần đây</CardTitle>
                     <CardDescription className="text-slate-700">
-                      {isPublicVisitor
-                        ? "Người mới nên chấm 8 lĩnh vực trước khi chọn mục tiêu ưu tiên."
-                        : "Nhìn nhanh bức tranh tổng quan hiện tại."}
+                      Những suy ngẫm mới nhất trên hành trình của bạn.
                     </CardDescription>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Điểm trung bình</p>
-                    <p className="mt-1 text-3xl font-bold text-slate-900">
-                      <CountUp value={averageLifeScore} precision={1} />
-                    </p>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
-                  {radarData.length > 0 ? (
-                    <Suspense
-                      fallback={
-                        <div className="flex h-[300px] items-center justify-center rounded-[20px] bg-slate-100/88 text-sm text-slate-500">
-                          Đang tải biểu đồ cân bằng cuộc sống...
-                        </div>
-                      }
-                    >
-                      <DashboardLifeAreaRadar data={radarData} />
-                    </Suspense>
-                  ) : (
-                    <div className="flex h-[300px] flex-col items-center justify-center rounded-[20px] bg-slate-50 px-5 text-center">
-                      <TrendingUp className="h-10 w-10 text-slate-300" />
-                      <p className="mt-3 font-semibold text-slate-900">Chưa có dữ liệu bánh xe cuộc sống</p>
-                      <p className="mt-1 max-w-sm text-sm leading-6 text-slate-500">
-                        {isPublicVisitor
-                          ? "Trong demo, bạn có thể bắt đầu Life Balance không cần đăng nhập. Tài khoản/sync là lớp sau."
-                          : "Bắt đầu bằng bài đánh giá Life Balance để dashboard có dữ liệu thật thay vì số mặc định."}
-                      </p>
-                    </div>
-                  )}
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm">
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Cần ưu tiên tiếp</p>
-                    <p className="mt-2 text-lg font-semibold text-slate-900">
-                      {isPublicVisitor
-                        ? "Chọn sau Life Balance"
-                        : weakestArea
-                          ? getLifeAreaLabel(weakestArea.name)
-                          : "Chưa có dữ liệu"}
-                    </p>
-                    <p className="mt-1 text-sm text-slate-500">
-                      {isPublicVisitor
-                        ? "Demo lưu local trên trình duyệt này"
-                        : weakestArea
-                          ? `${weakestArea.score}/10`
-                          : "--"}
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    className="h-auto w-full min-w-0 justify-start whitespace-normal rounded-[20px] border-slate-200 bg-white px-4 py-4 text-left shadow-sm hover:bg-slate-50"
-                    onClick={() => (isPublicVisitor ? handleAuthNavigate("signup") : navigate("/life-balance"))}
-                  >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white">
-                      <TrendingUp className="h-4 w-4" />
-                    </div>
-                    <div className="ml-3 min-w-0 flex-1">
-                      <div className="line-clamp-2 break-words font-semibold text-slate-900">
-                        {isPublicVisitor
-                          ? "Bắt đầu bằng cân bằng cuộc sống"
-                          : hasRealLifeBalance
-                            ? "Mở cân bằng cuộc sống"
-                            : "Bắt đầu đánh giá cuộc sống"}
-                      </div>
-                      <div className="mt-1 line-clamp-2 text-sm text-slate-500">
-                        {isPublicVisitor
-                          ? "Đăng ký chỉ khi muốn thử lớp sync sau."
-                          : hasRealLifeBalance
-                            ? "Xem chi tiết và cập nhật lại bánh xe cuộc đời."
-                            : "Chấm điểm 8 lĩnh vực để mở đúng luồng mục tiêu."}
-                      </div>
-                    </div>
+                  <Button variant="ghost" size="sm" onClick={() => navigate("/journal")}>
+                    Xem tất cả
+                    <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>
+              </CardHeader>
+              <CardContent className="grid gap-4 lg:grid-cols-2">
+                {recentReflections.map((reflection, index) => (
+                  <div
+                    key={reflection.id}
+                    className={`rounded-[24px] border p-5 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.18)] ${
+                      index === 0 ? "border-slate-300 bg-slate-50" : "border-slate-200 bg-white"
+                    }`}
+                  >
+                    <div className="mb-3 flex items-start justify-between gap-4">
+                      <h4 className="min-w-0 truncate font-semibold text-slate-900">{reflection.title}</h4>
+                      <span className="text-xs font-medium text-slate-400">{formatCalendarDate(reflection.date)}</span>
+                    </div>
+                    <p className="line-clamp-3 text-sm text-slate-600">{reflection.content}</p>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </Reveal>
-        </div>
+        </section>
       )}
 
-      {recentReflections.length > 0 && (
-        <Reveal>
-          <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]">
-            <CardHeader>
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <CardTitle className="text-slate-950">Nhật ký gần đây</CardTitle>
-                  <CardDescription className="text-slate-700">
-                    Những suy ngẫm mới nhất trên hành trình của bạn.
-                  </CardDescription>
-                </div>
-                <Button variant="ghost" size="sm" onClick={() => navigate("/journal")}>
-                  Xem tất cả
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
+      {/* Demo Notice - Non-intrusive, at bottom */}
+      {!isPublicVisitor && userData.isHydratedFromDemo && (
+        <div className="ops-section-notice">
+          <Reveal>
+            <div className="flex flex-wrap items-center gap-4 rounded-[22px] border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-[0_20px_45px_-34px_rgba(217,119,6,0.22)]">
+              <Sparkles className="h-5 w-5 shrink-0 text-amber-600" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-amber-900">Dữ liệu đang hiển thị là ví dụ demo</p>
+                <p className="mt-0.5 text-sm text-amber-700">
+                  Cập nhật bánh xe cuộc sống của bạn để thay dữ liệu mẫu bằng thông tin thật.
+                </p>
               </div>
-            </CardHeader>
-            <CardContent className="grid gap-4 lg:grid-cols-2">
-              {recentReflections.map((reflection, index) => (
-                <div
-                  key={reflection.id}
-                  className={`rounded-[24px] border p-5 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.18)] ${
-                    index === 0 ? "border-slate-300 bg-slate-50" : "border-slate-200 bg-white"
-                  }`}
-                >
-                  <div className="mb-3 flex items-start justify-between gap-4">
-                    <h4 className="min-w-0 truncate font-semibold text-slate-900">{reflection.title}</h4>
-                    <span className="text-xs font-medium text-slate-400">{formatCalendarDate(reflection.date)}</span>
-                  </div>
-                  <p className="line-clamp-3 text-sm text-slate-600">{reflection.content}</p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </Reveal>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-amber-300 bg-white text-amber-800 hover:bg-amber-100"
+                onClick={() => navigate("/life-balance")}
+              >
+                Cập nhật ngay
+              </Button>
+            </div>
+          </Reveal>
+        </section>
       )}
 
+      {/* Data Backup - Moved to Settings, shown here only if needed */}
       {shouldShowWorkspaceDetailGrid && (
-        <Reveal>
-          <DashboardDataBackupCard
-            importInputRef={importFileRef}
-            onExport={handleExport}
-            onImport={handleImport}
-            onOpenImportPicker={() => importFileRef.current?.click()}
-          />
-        </Reveal>
+        <div className="ops-section-secondary">
+          <Reveal>
+            <DashboardDataBackupCard
+              importInputRef={importFileRef}
+              onExport={handleExport}
+              onImport={handleImport}
+              onOpenImportPicker={() => importFileRef.current?.click()}
+            />
+          </Reveal>
+        </section>
       )}
     </div>
   );
