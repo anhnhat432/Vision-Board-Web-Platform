@@ -1,4 +1,4 @@
-import {
+﻿import {
   AlertTriangle,
   ArrowRight,
   Award,
@@ -92,21 +92,21 @@ const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
   {
     id: "start",
     targetId: "dashboard-start-card",
-    title: "Bắt đầu từ khối này",
+    title: "Báº¯t Ä‘áº§u tá»« khá»‘i nÃ y",
     description:
-      "Nếu chưa có chu kỳ, hãy nhìn khối này trước. Đây là nơi dẫn bạn qua đúng flow: insight, SMART, kiểm tra tính thực tế rồi mới vào 12 tuần.",
+      "Náº¿u chÆ°a cÃ³ chu ká»³, hÃ£y nhÃ¬n khá»‘i nÃ y trÆ°á»›c. ÄÃ¢y lÃ  nÆ¡i dáº«n báº¡n qua Ä‘Ãºng flow: insight, SMART, kiá»ƒm tra tÃ­nh thá»±c táº¿ rá»“i má»›i vÃ o 12 tuáº§n.",
   },
   {
     id: "attention",
     targetId: "dashboard-next-card",
-    title: "Nhìn khối này trước khi quét cả màn",
-    description: "Phần 'Đi tiếp ngay' gom ba tín hiệu quan trọng nhất để bạn biết nên mở vào đâu tiếp theo.",
+    title: "NhÃ¬n khá»‘i nÃ y trÆ°á»›c khi quÃ©t cáº£ mÃ n",
+    description: "Pháº§n 'Äi tiáº¿p ngay' gom ba tÃ­n hiá»‡u quan trá»ng nháº¥t Ä‘á»ƒ báº¡n biáº¿t nÃªn má»Ÿ vÃ o Ä‘Ã¢u tiáº¿p theo.",
   },
   {
     id: "plan",
     targetId: "dashboard-plan-card",
-    title: "Phân biệt Free và Plus ở đây",
-    description: "Khối này cho biết bạn đang ở gói nào, quyền nào đã mở và chỗ để quản lý hoặc khôi phục lại nếu cần.",
+    title: "PhÃ¢n biá»‡t Free vÃ  Plus á»Ÿ Ä‘Ã¢y",
+    description: "Khá»‘i nÃ y cho biáº¿t báº¡n Ä‘ang á»Ÿ gÃ³i nÃ o, quyá»n nÃ o Ä‘Ã£ má»Ÿ vÃ  chá»— Ä‘á»ƒ quáº£n lÃ½ hoáº·c khÃ´i phá»¥c láº¡i náº¿u cáº§n.",
   },
 ];
 
@@ -222,7 +222,7 @@ function DashboardContent({
 
   const recentGoals = visibleGoals.slice(0, 3);
   const recentReflections = sortReflectionsByDateDesc(visibleReflections).slice(0, 2);
-  const dashboardGoalTitle = visibleActiveTwelveWeekGoal?.title ?? plan?.vision ?? "Mục tiêu hiện tại";
+  const dashboardGoalTitle = visibleActiveTwelveWeekGoal?.title ?? plan?.vision ?? "Má»¥c tiÃªu hiá»‡n táº¡i";
   const goalProgressSnapshot = useMemo(() => buildGoalProgressSnapshot(plan), [plan]);
   const currentWeekExecutionSnapshot = useMemo(() => buildCurrentWeekExecutionSnapshot(plan), [plan]);
   const weeklyProgressPoints = useMemo(() => buildWeeklyProgressPoints(plan), [plan]);
@@ -231,7 +231,7 @@ function DashboardContent({
 
   const handleExport = () => {
     downloadLocalUserDataBackup({ data: userData, filenamePrefix: "dear-our-future-backup" });
-    toast.success("Đã tải bản sao lưu dữ liệu.");
+    toast.success("ÄÃ£ táº£i báº£n sao lÆ°u dá»¯ liá»‡u.");
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -241,17 +241,17 @@ function DashboardContent({
     reader.onload = () => {
       const text = reader.result;
       if (typeof text !== "string") {
-        toast.error("Không đọc được file.");
+        toast.error("KhÃ´ng Ä‘á»c Ä‘Æ°á»£c file.");
         return;
       }
       const parsed = parseStoredUserData(text);
       if (!parsed) {
-        toast.error("File không hợp lệ hoặc bị hỏng.");
+        toast.error("File khÃ´ng há»£p lá»‡ hoáº·c bá»‹ há»ng.");
         return;
       }
       saveUserData(parsed);
       onReload();
-      toast.success("Đã khôi phục dữ liệu thành công!");
+      toast.success("ÄÃ£ khÃ´i phá»¥c dá»¯ liá»‡u thÃ nh cÃ´ng!");
     };
     reader.readAsText(file);
     e.target.value = "";
@@ -327,6 +327,11 @@ function DashboardContent({
       : [];
   const signedIn = Boolean(user);
   const hasLocalTwelveWeekSystem = Boolean(effectiveSystem);
+  const hasWorkspaceSignals =
+    hasRealLifeBalance || visibleGoals.length > 0 || visibleVisionBoards.length > 0 || visibleReflections.length > 0;
+
+  const shouldShowMainDashboardCard = !isPublicVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
+  const showMobileStickyCTA = shouldShowMainDashboardCard && activeSystem && activeSystemTodayOpenTasks.length > 0;
 
   useEffect(() => {
     if (landingViewedRef.current) return;
@@ -366,88 +371,86 @@ function DashboardContent({
       }))
     : [];
 
-  const hasWorkspaceSignals =
-    hasRealLifeBalance || visibleGoals.length > 0 || visibleVisionBoards.length > 0 || visibleReflections.length > 0;
   const setupPrimaryPath = hasRealLifeBalance ? "/life-insight" : "/onboarding";
-  const setupPrimaryLabel = hasRealLifeBalance ? "Tạo mục tiêu" : "Bắt đầu Life Balance";
+  const setupPrimaryLabel = hasRealLifeBalance ? "Táº¡o má»¥c tiÃªu" : "Báº¯t Ä‘áº§u Life Balance";
   const setupStartTitle = hasRealLifeBalance
-    ? "Đi qua insight rồi chốt mục tiêu SMART."
-    : "Chấm Life Balance trước để dashboard không bị rỗng.";
+    ? "Äi qua insight rá»“i chá»‘t má»¥c tiÃªu SMART."
+    : "Cháº¥m Life Balance trÆ°á»›c Ä‘á»ƒ dashboard khÃ´ng bá»‹ rá»—ng.";
   const setupStartDescription = hasRealLifeBalance
-    ? "Đây là funnel gốc của web: insight trước, SMART sau, rồi mới kiểm tra tính thực tế và vào hệ 12 tuần."
-    : "Bước này tạo dữ liệu thật cho các màn sau: Life Insight, SMART Goal, kiểm tra tính thực tế và kế hoạch 12 tuần.";
-  const publicVisitorBadge = demoMode ? "Bản demo lưu trên trình duyệt này" : "Đăng ký để lưu và đồng bộ dữ liệu";
+    ? "ÄÃ¢y lÃ  funnel gá»‘c cá»§a web: insight trÆ°á»›c, SMART sau, rá»“i má»›i kiá»ƒm tra tÃ­nh thá»±c táº¿ vÃ  vÃ o há»‡ 12 tuáº§n."
+    : "BÆ°á»›c nÃ y táº¡o dá»¯ liá»‡u tháº­t cho cÃ¡c mÃ n sau: Life Insight, SMART Goal, kiá»ƒm tra tÃ­nh thá»±c táº¿ vÃ  káº¿ hoáº¡ch 12 tuáº§n.";
+  const publicVisitorBadge = demoMode ? "Báº£n demo lÆ°u trÃªn trÃ¬nh duyá»‡t nÃ y" : "ÄÄƒng kÃ½ Ä‘á»ƒ lÆ°u vÃ  Ä‘á»“ng bá»™ dá»¯ liá»‡u";
   const publicVisitorDashboardTitle = demoMode
-    ? "Dùng thử flow MVP 1 ngay trên trình duyệt hiện tại."
-    : "Trang chính giúp bạn nhìn rõ luồng sản phẩm trước khi tạo tài khoản.";
+    ? "DÃ¹ng thá»­ flow MVP 1 ngay trÃªn trÃ¬nh duyá»‡t hiá»‡n táº¡i."
+    : "Trang chÃ­nh giÃºp báº¡n nhÃ¬n rÃµ luá»“ng sáº£n pháº©m trÆ°á»›c khi táº¡o tÃ i khoáº£n.";
   const publicVisitorDashboardDescription = demoMode
-    ? "Bạn có thể bắt đầu Onboarding, chấm Life Balance, chọn insight, tạo SMART goal và đi tới 12-week setup mà không cần đăng nhập. Bản demo lưu dữ liệu trên trình duyệt này; hãy export nếu muốn giữ bản sao."
-    : "Bạn có thể xem tổng quan ngay tại đây. Khi bắt đầu thật, hãy đăng ký để dữ liệu mục tiêu và kế hoạch không bị mất theo trình duyệt.";
+    ? "Báº¡n cÃ³ thá»ƒ báº¯t Ä‘áº§u Onboarding, cháº¥m Life Balance, chá»n insight, táº¡o SMART goal vÃ  Ä‘i tá»›i 12-week setup mÃ  khÃ´ng cáº§n Ä‘Äƒng nháº­p. Báº£n demo lÆ°u dá»¯ liá»‡u trÃªn trÃ¬nh duyá»‡t nÃ y; hÃ£y export náº¿u muá»‘n giá»¯ báº£n sao."
+    : "Báº¡n cÃ³ thá»ƒ xem tá»•ng quan ngay táº¡i Ä‘Ã¢y. Khi báº¯t Ä‘áº§u tháº­t, hÃ£y Ä‘Äƒng kÃ½ Ä‘á»ƒ dá»¯ liá»‡u má»¥c tiÃªu vÃ  káº¿ hoáº¡ch khÃ´ng bá»‹ máº¥t theo trÃ¬nh duyá»‡t.";
   const publicVisitorStartTitle = demoMode
-    ? "Dùng thử không cần đăng nhập."
-    : "Tạo tài khoản trước khi nhập dữ liệu thật.";
+    ? "DÃ¹ng thá»­ khÃ´ng cáº§n Ä‘Äƒng nháº­p."
+    : "Táº¡o tÃ i khoáº£n trÆ°á»›c khi nháº­p dá»¯ liá»‡u tháº­t.";
   const publicVisitorStartDescription = demoMode
-    ? "Bắt đầu bằng Onboarding hoặc Life Balance để trải nghiệm core flow MVP 1. Đăng nhập/sync là lớp sau, không bắt buộc cho demo."
-    : "Phần onboarding, mục tiêu và kế hoạch đều là dữ liệu cá nhân. Đăng ký trước sẽ giúp bạn lưu lại tiến trình và quay lại đúng workspace sau này.";
-  const publicVisitorPrimaryLabel = demoMode ? "Dùng thử không cần đăng nhập" : "Đăng ký miễn phí";
+    ? "Báº¯t Ä‘áº§u báº±ng Onboarding hoáº·c Life Balance Ä‘á»ƒ tráº£i nghiá»‡m core flow MVP 1. ÄÄƒng nháº­p/sync lÃ  lá»›p sau, khÃ´ng báº¯t buá»™c cho demo."
+    : "Pháº§n onboarding, má»¥c tiÃªu vÃ  káº¿ hoáº¡ch Ä‘á»u lÃ  dá»¯ liá»‡u cÃ¡ nhÃ¢n. ÄÄƒng kÃ½ trÆ°á»›c sáº½ giÃºp báº¡n lÆ°u láº¡i tiáº¿n trÃ¬nh vÃ  quay láº¡i Ä‘Ãºng workspace sau nÃ y.";
+  const publicVisitorPrimaryLabel = demoMode ? "DÃ¹ng thá»­ khÃ´ng cáº§n Ä‘Äƒng nháº­p" : "ÄÄƒng kÃ½ miá»…n phÃ­";
 
   const overviewCards = isPublicVisitor
     ? [
         {
-          title: "Luồng cốt lõi",
+          title: "Luá»“ng cá»‘t lÃµi",
           value: 7,
-          note: "từ cân bằng cuộc sống tới review tuần",
+          note: "tá»« cÃ¢n báº±ng cuá»™c sá»‘ng tá»›i review tuáº§n",
           icon: Target,
           iconClass: "bg-slate-950 text-white",
         },
         {
-          title: "Chu kỳ thực thi",
+          title: "Chu ká»³ thá»±c thi",
           value: 12,
-          note: "tuần để biến mục tiêu thành việc rõ ràng",
+          note: "tuáº§n Ä‘á»ƒ biáº¿n má»¥c tiÃªu thÃ nh viá»‡c rÃµ rÃ ng",
           icon: CalendarDays,
           iconClass: "bg-sky-100 text-sky-700",
         },
         {
-          title: "Tài khoản",
+          title: "TÃ i khoáº£n",
           value: 1,
-          note: demoMode ? "tùy chọn để sync sau, không bắt buộc" : "nơi đồng bộ mục tiêu và kế hoạch của bạn",
+          note: demoMode ? "tÃ¹y chá»n Ä‘á»ƒ sync sau, khÃ´ng báº¯t buá»™c" : "nÆ¡i Ä‘á»“ng bá»™ má»¥c tiÃªu vÃ  káº¿ hoáº¡ch cá»§a báº¡n",
           icon: UserPlus,
           iconClass: "bg-emerald-100 text-emerald-700",
         },
         {
           title: "Review",
           value: 1,
-          note: "nhịp nhìn lại mỗi tuần để không đi lệch",
+          note: "nhá»‹p nhÃ¬n láº¡i má»—i tuáº§n Ä‘á»ƒ khÃ´ng Ä‘i lá»‡ch",
           icon: BookOpen,
           iconClass: "bg-violet-100 text-violet-700",
         },
       ]
     : [
         {
-          title: "Mục tiêu đang theo",
+          title: "Má»¥c tiÃªu Ä‘ang theo",
           value: userData.goals.length,
-          note: `${completedGoalsCount} đã hoàn thành`,
+          note: `${completedGoalsCount} Ä‘Ã£ hoÃ n thÃ nh`,
           icon: Target,
           iconClass: "bg-slate-950 text-white",
         },
         {
-          title: "Việc đã chốt",
+          title: "Viá»‡c Ä‘Ã£ chá»‘t",
           value: completedTasks,
-          note: `trên tổng số ${totalTasks}`,
+          note: `trÃªn tá»•ng sá»‘ ${totalTasks}`,
           icon: TrendingUp,
           iconClass: "bg-sky-100 text-sky-700",
         },
         {
-          title: "Thành tựu",
+          title: "ThÃ nh tá»±u",
           value: userData.achievements.length,
-          note: "huy hiệu đã mở khóa",
+          note: "huy hiá»‡u Ä‘Ã£ má»Ÿ khÃ³a",
           icon: Award,
           iconClass: "bg-emerald-100 text-emerald-700",
         },
         {
-          title: "Nhật ký",
+          title: "Nháº­t kÃ½",
           value: userData.reflections.length,
-          note: journalStreak > 0 ? `streak ${journalStreak} ngày` : "bài viết đã lưu",
+          note: journalStreak > 0 ? `streak ${journalStreak} ngÃ y` : "bÃ i viáº¿t Ä‘Ã£ lÆ°u",
           icon: BookOpen,
           iconClass: "bg-violet-100 text-violet-700",
         },
@@ -456,91 +459,91 @@ function DashboardContent({
   const quickActions = isPublicVisitor
     ? [
         {
-          title: demoMode ? "Tùy chọn: đăng ký để sync sau" : "Đăng ký để lưu workspace",
+          title: demoMode ? "TÃ¹y chá»n: Ä‘Äƒng kÃ½ Ä‘á»ƒ sync sau" : "ÄÄƒng kÃ½ Ä‘á»ƒ lÆ°u workspace",
           description: demoMode
-            ? "Demo vẫn dùng được không cần đăng nhập. Tài khoản chỉ dành cho lớp lưu/sync sau này."
-            : "Tạo workspace riêng để lưu bánh xe cuộc sống, mục tiêu SMART và kế hoạch 12 tuần.",
+            ? "Demo váº«n dÃ¹ng Ä‘Æ°á»£c khÃ´ng cáº§n Ä‘Äƒng nháº­p. TÃ i khoáº£n chá»‰ dÃ nh cho lá»›p lÆ°u/sync sau nÃ y."
+            : "Táº¡o workspace riÃªng Ä‘á»ƒ lÆ°u bÃ¡nh xe cuá»™c sá»‘ng, má»¥c tiÃªu SMART vÃ  káº¿ hoáº¡ch 12 tuáº§n.",
           icon: UserPlus,
           onClick: () => handleAuthNavigate("signup"),
         },
         {
-          title: "Đăng nhập nếu đã có tài khoản",
+          title: "ÄÄƒng nháº­p náº¿u Ä‘Ã£ cÃ³ tÃ i khoáº£n",
           description: demoMode
-            ? "Không bắt buộc cho demo. Chỉ dùng khi bạn muốn thử lớp tài khoản/sync sau này."
-            : "Quay lại đúng dữ liệu đã đồng bộ: mục tiêu, tuần hiện tại và review gần nhất.",
+            ? "KhÃ´ng báº¯t buá»™c cho demo. Chá»‰ dÃ¹ng khi báº¡n muá»‘n thá»­ lá»›p tÃ i khoáº£n/sync sau nÃ y."
+            : "Quay láº¡i Ä‘Ãºng dá»¯ liá»‡u Ä‘Ã£ Ä‘á»“ng bá»™: má»¥c tiÃªu, tuáº§n hiá»‡n táº¡i vÃ  review gáº§n nháº¥t.",
           icon: LogIn,
           onClick: () => handleAuthNavigate("signin"),
         },
         {
-          title: demoMode ? "Demo có thể đi thẳng vào core flow" : "Đăng ký rồi đi theo luồng chính",
+          title: demoMode ? "Demo cÃ³ thá»ƒ Ä‘i tháº³ng vÃ o core flow" : "ÄÄƒng kÃ½ rá»“i Ä‘i theo luá»“ng chÃ­nh",
           description: demoMode
-            ? "CTA demo chính sẽ đưa bạn vào Life Balance mà không cần tài khoản."
-            : "Sau khi có workspace, bạn đi từ Life Balance, chọn insight, chốt mục tiêu SMART rồi mới vào 12 tuần.",
+            ? "CTA demo chÃ­nh sáº½ Ä‘Æ°a báº¡n vÃ o Life Balance mÃ  khÃ´ng cáº§n tÃ i khoáº£n."
+            : "Sau khi cÃ³ workspace, báº¡n Ä‘i tá»« Life Balance, chá»n insight, chá»‘t má»¥c tiÃªu SMART rá»“i má»›i vÃ o 12 tuáº§n.",
           icon: CalendarDays,
           onClick: () => handleAuthNavigate("signup"),
         },
       ]
     : [
         {
-          title: activeSystem ? "Mở trung tâm 12 tuần" : setupPrimaryLabel,
+          title: activeSystem ? "Má»Ÿ trung tÃ¢m 12 tuáº§n" : setupPrimaryLabel,
           description: activeSystem
-            ? "Vào thẳng hàng việc hôm nay."
+            ? "VÃ o tháº³ng hÃ ng viá»‡c hÃ´m nay."
             : hasRealLifeBalance
-              ? "Đi tiếp đúng thứ tự: insight, SMART, kiểm tra tính thực tế rồi mới vào 12 tuần."
-              : "Chấm Life Balance trước để có dữ liệu thật cho mục tiêu.",
+              ? "Äi tiáº¿p Ä‘Ãºng thá»© tá»±: insight, SMART, kiá»ƒm tra tÃ­nh thá»±c táº¿ rá»“i má»›i vÃ o 12 tuáº§n."
+              : "Cháº¥m Life Balance trÆ°á»›c Ä‘á»ƒ cÃ³ dá»¯ liá»‡u tháº­t cho má»¥c tiÃªu.",
           icon: CalendarDays,
           onClick: () => navigate(activeSystem ? "/12-week-system" : setupPrimaryPath),
         },
         {
-          title: "Mở mục tiêu",
-          description: "Xem tiến độ và hạn chót hiện tại.",
+          title: "Má»Ÿ má»¥c tiÃªu",
+          description: "Xem tiáº¿n Ä‘á»™ vÃ  háº¡n chÃ³t hiá»‡n táº¡i.",
           icon: Target,
           onClick: () => navigate("/goals"),
         },
         {
-          title: "Mở nhật ký",
-          description: "Ghi lại suy ngẫm gần đây.",
+          title: "Má»Ÿ nháº­t kÃ½",
+          description: "Ghi láº¡i suy ngáº«m gáº§n Ä‘Ã¢y.",
           icon: BookOpen,
           onClick: () => navigate("/journal"),
         },
       ];
   const quickActionIntro = isPublicVisitor
-    ? "Một người mới chỉ cần đi theo một đường: hiểu hiện tại, chọn mục tiêu, kiểm tra khả thi, rồi chạy 12 tuần."
+    ? "Má»™t ngÆ°á»i má»›i chá»‰ cáº§n Ä‘i theo má»™t Ä‘Æ°á»ng: hiá»ƒu hiá»‡n táº¡i, chá»n má»¥c tiÃªu, kiá»ƒm tra kháº£ thi, rá»“i cháº¡y 12 tuáº§n."
     : activeSystem
-      ? "Đi theo thứ tự: xử lý việc hôm nay, kiểm tra mục tiêu, rồi ghi lại điều học được."
-      : "Đi theo thứ tự: tạo mục tiêu, kiểm tra hướng đi, rồi ghi lại suy nghĩ đầu tiên.";
+      ? "Äi theo thá»© tá»±: xá»­ lÃ½ viá»‡c hÃ´m nay, kiá»ƒm tra má»¥c tiÃªu, rá»“i ghi láº¡i Ä‘iá»u há»c Ä‘Æ°á»£c."
+      : "Äi theo thá»© tá»±: táº¡o má»¥c tiÃªu, kiá»ƒm tra hÆ°á»›ng Ä‘i, rá»“i ghi láº¡i suy nghÄ© Ä‘áº§u tiÃªn.";
 
   const attentionPanels = isPublicVisitor
     ? [
         {
-          eyebrow: "Điểm bắt đầu",
-          title: demoMode ? "Đăng nhập không phải cổng chặn demo" : "Đừng vào thẳng 12 tuần khi mục tiêu còn mơ hồ",
+          eyebrow: "Äiá»ƒm báº¯t Ä‘áº§u",
+          title: demoMode ? "ÄÄƒng nháº­p khÃ´ng pháº£i cá»•ng cháº·n demo" : "Äá»«ng vÃ o tháº³ng 12 tuáº§n khi má»¥c tiÃªu cÃ²n mÆ¡ há»“",
           description: demoMode
-            ? "Bạn có thể dùng core flow ngay trên trình duyệt này. Đăng ký chỉ là lựa chọn để chuẩn bị sync sau."
-            : "Web này dẫn bạn từ bức tranh cuộc sống hiện tại tới một mục tiêu SMART đủ rõ, rồi mới chia thành kế hoạch 12 tuần.",
+            ? "Báº¡n cÃ³ thá»ƒ dÃ¹ng core flow ngay trÃªn trÃ¬nh duyá»‡t nÃ y. ÄÄƒng kÃ½ chá»‰ lÃ  lá»±a chá»n Ä‘á»ƒ chuáº©n bá»‹ sync sau."
+            : "Web nÃ y dáº«n báº¡n tá»« bá»©c tranh cuá»™c sá»‘ng hiá»‡n táº¡i tá»›i má»™t má»¥c tiÃªu SMART Ä‘á»§ rÃµ, rá»“i má»›i chia thÃ nh káº¿ hoáº¡ch 12 tuáº§n.",
           cardClass: "rounded-[22px] border border-slate-300 bg-slate-50/90 p-4 shadow-sm",
           eyebrowClass: "text-slate-500",
           titleClass: "text-slate-950",
           descriptionClass: "text-slate-600",
           buttonClass: "mt-4 bg-slate-950 text-white hover:bg-slate-800",
           buttonVariant: "outline" as const,
-          buttonLabel: demoMode ? "Đăng ký nếu muốn sync" : "Bắt đầu miễn phí",
+          buttonLabel: demoMode ? "ÄÄƒng kÃ½ náº¿u muá»‘n sync" : "Báº¯t Ä‘áº§u miá»…n phÃ­",
           icon: Target,
           onClick: () => handleAuthNavigate("signup"),
         },
         {
-          eyebrow: "Dữ liệu cá nhân",
-          title: demoMode ? "Sync là lớp sau của demo local-first" : "Đăng nhập để đồng bộ thay vì chỉ lưu trên máy",
+          eyebrow: "Dá»¯ liá»‡u cÃ¡ nhÃ¢n",
+          title: demoMode ? "Sync lÃ  lá»›p sau cá»§a demo local-first" : "ÄÄƒng nháº­p Ä‘á»ƒ Ä‘á»“ng bá»™ thay vÃ¬ chá»‰ lÆ°u trÃªn mÃ¡y",
           description: demoMode
-            ? "Bản demo hiện lưu trên trình duyệt này. Nếu muốn giữ bản sao, hãy export dữ liệu trước khi đổi máy hoặc xóa site data."
-            : "Khi có tài khoản, mục tiêu, kế hoạch và tiến độ được nối với workspace của bạn thay vì phụ thuộc vào trình duyệt hiện tại.",
+            ? "Báº£n demo hiá»‡n lÆ°u trÃªn trÃ¬nh duyá»‡t nÃ y. Náº¿u muá»‘n giá»¯ báº£n sao, hÃ£y export dá»¯ liá»‡u trÆ°á»›c khi Ä‘á»•i mÃ¡y hoáº·c xÃ³a site data."
+            : "Khi cÃ³ tÃ i khoáº£n, má»¥c tiÃªu, káº¿ hoáº¡ch vÃ  tiáº¿n Ä‘á»™ Ä‘Æ°á»£c ná»‘i vá»›i workspace cá»§a báº¡n thay vÃ¬ phá»¥ thuá»™c vÃ o trÃ¬nh duyá»‡t hiá»‡n táº¡i.",
           cardClass: "rounded-[22px] border border-slate-200 bg-white p-4 shadow-sm",
           eyebrowClass: "text-slate-400",
           titleClass: "text-slate-900",
           descriptionClass: "text-slate-600",
           buttonClass: "mt-4 border-slate-200 bg-white text-slate-900 hover:bg-slate-50",
           buttonVariant: "outline" as const,
-          buttonLabel: "Đăng nhập",
+          buttonLabel: "ÄÄƒng nháº­p",
           icon: LogIn,
           onClick: () => handleAuthNavigate("signin"),
         },
@@ -548,28 +551,28 @@ function DashboardContent({
     : activeSystem
       ? [
           {
-            eyebrow: "Chu kỳ đang chạy",
-            title: visibleActiveTwelveWeekGoal?.title ?? "Chu kỳ 12 tuần hiện tại",
+            eyebrow: "Chu ká»³ Ä‘ang cháº¡y",
+            title: visibleActiveTwelveWeekGoal?.title ?? "Chu ká»³ 12 tuáº§n hiá»‡n táº¡i",
             description:
               activeSystemTodayOpenTasks.length > 0
-                ? `${activeSystemTodayOpenTasks.length} việc đang mở hôm nay. Đi thẳng vào trung tâm để chạm tiếp đúng việc cần làm.`
-                : `Tuần ${activeSystemWeek}/${activeSystem.totalWeeks} đang khá gọn. Đây là lúc đẹp để nhìn lại tuần hoặc chuẩn bị review.`,
+                ? `${activeSystemTodayOpenTasks.length} viá»‡c Ä‘ang má»Ÿ hÃ´m nay. Äi tháº³ng vÃ o trung tÃ¢m Ä‘á»ƒ cháº¡m tiáº¿p Ä‘Ãºng viá»‡c cáº§n lÃ m.`
+                : `Tuáº§n ${activeSystemWeek}/${activeSystem.totalWeeks} Ä‘ang khÃ¡ gá»n. ÄÃ¢y lÃ  lÃºc Ä‘áº¹p Ä‘á»ƒ nhÃ¬n láº¡i tuáº§n hoáº·c chuáº©n bá»‹ review.`,
             cardClass: "rounded-[22px] border border-slate-300 bg-slate-50/90 p-4 shadow-sm",
             eyebrowClass: "text-slate-500",
             titleClass: "text-slate-950",
             descriptionClass: "text-slate-600",
             buttonClass: "mt-4 bg-slate-950 text-white hover:bg-slate-800",
             buttonVariant: "outline" as const,
-            buttonLabel: "Mở trung tâm 12 tuần",
+            buttonLabel: "Má»Ÿ trung tÃ¢m 12 tuáº§n",
             icon: CalendarDays,
             onClick: () => navigate("/12-week-system"),
           },
           {
-            eyebrow: "Review tuần",
-            title: reviewDueToday ? "Đến hạn hôm nay" : getReviewDayLabel(activeSystem.reviewDay),
+            eyebrow: "Review tuáº§n",
+            title: reviewDueToday ? "Äáº¿n háº¡n hÃ´m nay" : getReviewDayLabel(activeSystem.reviewDay),
             description: reviewDueToday
-              ? "Nên chốt trước khi sang nhịp tuần mới để dashboard quay về trạng thái gọn đầu."
-              : "Chu kỳ đang có ngày review cố định. Khi tới hạn, thẻ cảnh báo sẽ nổi lên ở đầu màn.",
+              ? "NÃªn chá»‘t trÆ°á»›c khi sang nhá»‹p tuáº§n má»›i Ä‘á»ƒ dashboard quay vá» tráº¡ng thÃ¡i gá»n Ä‘áº§u."
+              : "Chu ká»³ Ä‘ang cÃ³ ngÃ y review cá»‘ Ä‘á»‹nh. Khi tá»›i háº¡n, tháº» cáº£nh bÃ¡o sáº½ ná»•i lÃªn á»Ÿ Ä‘áº§u mÃ n.",
             cardClass: `rounded-[22px] border p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.42)] ${
               reviewDueToday ? "border-amber-200 bg-amber-50/92" : "border-slate-200 bg-white"
             }`,
@@ -580,23 +583,23 @@ function DashboardContent({
               ? "mt-4 border-amber-200 bg-white text-amber-800 hover:bg-amber-100"
               : "mt-4 border-slate-200 bg-white text-slate-900 hover:bg-slate-50",
             buttonVariant: "outline" as const,
-            buttonLabel: reviewDueToday ? "Chốt review tuần" : "Xem chu kỳ",
+            buttonLabel: reviewDueToday ? "Chá»‘t review tuáº§n" : "Xem chu ká»³",
             icon: AlertTriangle,
             onClick: () => navigate("/12-week-system"),
           },
           ...(weakestArea
             ? [
                 {
-                  eyebrow: "Lĩnh vực nên chăm lại",
+                  eyebrow: "LÄ©nh vá»±c nÃªn chÄƒm láº¡i",
                   title: getLifeAreaLabel(weakestArea.name),
-                  description: `Điểm hiện tại ${weakestArea.score}/10. Nếu hôm nay còn thời gian, đây là nơi đáng quay lại trước.`,
+                  description: `Äiá»ƒm hiá»‡n táº¡i ${weakestArea.score}/10. Náº¿u hÃ´m nay cÃ²n thá»i gian, Ä‘Ã¢y lÃ  nÆ¡i Ä‘Ã¡ng quay láº¡i trÆ°á»›c.`,
                   cardClass: "rounded-[22px] border border-slate-200 bg-white p-4 shadow-sm",
                   eyebrowClass: "text-slate-400",
                   titleClass: "text-slate-900",
                   descriptionClass: "text-slate-600",
                   buttonClass: "mt-4 border-slate-200 bg-white text-slate-900 hover:bg-slate-50",
                   buttonVariant: "outline" as const,
-                  buttonLabel: "Mở cân bằng cuộc sống",
+                  buttonLabel: "Má»Ÿ cÃ¢n báº±ng cuá»™c sá»‘ng",
                   icon: TrendingUp,
                   onClick: () => navigate("/life-balance"),
                 },
@@ -605,51 +608,51 @@ function DashboardContent({
         ]
       : [
           {
-            eyebrow: "Thiết lập nhịp 12 tuần",
-            title: "Chưa có chu kỳ đang chạy",
+            eyebrow: "Thiáº¿t láº­p nhá»‹p 12 tuáº§n",
+            title: "ChÆ°a cÃ³ chu ká»³ Ä‘ang cháº¡y",
             description:
-              "Tạo một chu kỳ để web luôn trả lời rõ hôm nay nên làm gì, tuần này đang ở đâu và review khi nào đến hạn.",
+              "Táº¡o má»™t chu ká»³ Ä‘á»ƒ web luÃ´n tráº£ lá»i rÃµ hÃ´m nay nÃªn lÃ m gÃ¬, tuáº§n nÃ y Ä‘ang á»Ÿ Ä‘Ã¢u vÃ  review khi nÃ o Ä‘áº¿n háº¡n.",
             cardClass: "rounded-[22px] border border-slate-300 bg-slate-50/90 p-4 shadow-sm",
             eyebrowClass: "text-slate-500",
             titleClass: "text-slate-950",
             descriptionClass: "text-slate-600",
             buttonClass: "mt-4 bg-slate-950 text-white hover:bg-slate-800",
             buttonVariant: "outline" as const,
-            buttonLabel: "Tạo mục tiêu",
+            buttonLabel: "Táº¡o má»¥c tiÃªu",
             icon: CalendarDays,
             onClick: () => navigate("/life-insight"),
           },
           ...(weakestArea
             ? [
                 {
-                  eyebrow: "Lĩnh vực nên chăm lại",
+                  eyebrow: "LÄ©nh vá»±c nÃªn chÄƒm láº¡i",
                   title: getLifeAreaLabel(weakestArea.name),
-                  description: `Điểm hiện tại ${weakestArea.score}/10. Nếu muốn bắt đầu nhẹ hơn, hãy cải thiện một góc nhỏ ở đây trước.`,
+                  description: `Äiá»ƒm hiá»‡n táº¡i ${weakestArea.score}/10. Náº¿u muá»‘n báº¯t Ä‘áº§u nháº¹ hÆ¡n, hÃ£y cáº£i thiá»‡n má»™t gÃ³c nhá» á»Ÿ Ä‘Ã¢y trÆ°á»›c.`,
                   cardClass: "rounded-[22px] border border-slate-200 bg-white p-4 shadow-sm",
                   eyebrowClass: "text-slate-400",
                   titleClass: "text-slate-900",
                   descriptionClass: "text-slate-600",
                   buttonClass: "mt-4 border-slate-200 bg-white text-slate-900 hover:bg-slate-50",
                   buttonVariant: "outline" as const,
-                  buttonLabel: "Mở cân bằng cuộc sống",
+                  buttonLabel: "Má»Ÿ cÃ¢n báº±ng cuá»™c sá»‘ng",
                   icon: TrendingUp,
                   onClick: () => navigate("/life-balance"),
                 },
               ]
             : []),
           {
-            eyebrow: "Bảng tầm nhìn",
-            title: latestVisionBoard ? latestVisionBoard.name : "Chưa có bảng tầm nhìn",
+            eyebrow: "Báº£ng táº§m nhÃ¬n",
+            title: latestVisionBoard ? latestVisionBoard.name : "ChÆ°a cÃ³ báº£ng táº§m nhÃ¬n",
             description: latestVisionBoard
-              ? `Năm ${latestVisionBoard.year} • ${latestVisionBoard.items.length} phần tử đang được lưu lại.`
-              : "Tạo một bảng tầm nhìn để trực quan hóa điều bạn đang hướng tới và quay lại nó dễ hơn mỗi ngày.",
+              ? `NÄƒm ${latestVisionBoard.year} â€¢ ${latestVisionBoard.items.length} pháº§n tá»­ Ä‘ang Ä‘Æ°á»£c lÆ°u láº¡i.`
+              : "Táº¡o má»™t báº£ng táº§m nhÃ¬n Ä‘á»ƒ trá»±c quan hÃ³a Ä‘iá»u báº¡n Ä‘ang hÆ°á»›ng tá»›i vÃ  quay láº¡i nÃ³ dá»… hÆ¡n má»—i ngÃ y.",
             cardClass: "rounded-[22px] border border-slate-200 bg-white p-4 shadow-sm",
             eyebrowClass: "text-slate-400",
             titleClass: "text-slate-900",
             descriptionClass: "text-slate-600",
             buttonClass: "mt-4 border-slate-200 bg-white text-slate-900 hover:bg-slate-50",
             buttonVariant: "outline" as const,
-            buttonLabel: latestVisionBoard ? "Mở thư viện tầm nhìn" : "Tạo bảng tầm nhìn",
+            buttonLabel: latestVisionBoard ? "Má»Ÿ thÆ° viá»‡n táº§m nhÃ¬n" : "Táº¡o báº£ng táº§m nhÃ¬n",
             icon: Images,
             onClick: () => navigate(latestVisionBoard ? "/gallery" : "/vision-board"),
           },
@@ -669,7 +672,6 @@ function DashboardContent({
   const shouldShowWorkspaceDetailGrid = !isPublicVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
   // Signed-out visitors get their hero from `PublicVisitorHero` (rendered above);
   // skip the secondary dashboard card for them to avoid a double-hero.
-  const shouldShowMainDashboardCard = !isPublicVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
   const dashboardTourSteps = shouldShowTopSidebar
     ? DASHBOARD_TOUR_STEPS
     : DASHBOARD_TOUR_STEPS.filter(
@@ -677,7 +679,7 @@ function DashboardContent({
       );
 
   return (
-    <div className="ops-shell ops-dashboard">
+    <div className={`ops-shell ops-dashboard ${showMobileStickyCTA ? 'pb-24' : ''}`}>
       <UpgradePaywallDialog
         open={isUpgradeDialogOpen}
         onOpenChange={setIsUpgradeDialogOpen}
@@ -733,7 +735,7 @@ function DashboardContent({
           } as const;
           const s = severityStyles[topTrigger.severity];
           const ctaHref = topTrigger.kind === "trial_ending" ? "/billing/plan" : "/12-week-system";
-          const ctaLabel = topTrigger.kind === "trial_ending" ? "Mở mock upgrade" : "Xem ngay";
+          const ctaLabel = topTrigger.kind === "trial_ending" ? "Má»Ÿ mock upgrade" : "Xem ngay";
           return (
             <Reveal key={topTrigger.kind}>
               <div
@@ -770,14 +772,14 @@ function DashboardContent({
                   <button
                     type="button"
                     className="text-xs opacity-60 hover:opacity-100 transition-opacity px-1"
-                    aria-label="Đóng thông báo"
+                    aria-label="ÄÃ³ng thÃ´ng bÃ¡o"
                     onClick={() => {
                       dismissRescueTrigger(topTrigger.kind);
                       trackRescueTriggerDismissed({ kind: topTrigger.kind, currentPlan: currentPlanCode });
                       setDismissedTrigger(topTrigger.kind);
                     }}
                   >
-                    ✕
+                    âœ•
                   </button>
                 </div>
               </div>
@@ -798,10 +800,10 @@ function DashboardContent({
           return (
             <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm flex flex-wrap items-center gap-3">
               <span>
-                <span className="font-semibold">Plus demo:</span> còn {daysLeft} ngày — dùng thử local, không thu tiền thật.
+                <span className="font-semibold">Plus demo:</span> cÃ²n {daysLeft} ngÃ y â€” dÃ¹ng thá»­ local, khÃ´ng thu tiá»n tháº­t.
               </span>
               <Button size="sm" variant="ghost" className="ml-auto shrink-0 text-amber-700 hover:bg-amber-100" onClick={() => navigate("/billing/plan")}>
-                Chi tiết
+                Chi tiáº¿t
               </Button>
             </div>
           );
@@ -809,8 +811,8 @@ function DashboardContent({
       <SpotlightTour
         open={isTourOpen}
         onOpenChange={setIsTourOpen}
-        title="Tour bảng điều khiển"
-        description="Ba điểm chính để người mới mở vào là biết nên bắt đầu từ đâu."
+        title="Tour báº£ng Ä‘iá»u khiá»ƒn"
+        description="Ba Ä‘iá»ƒm chÃ­nh Ä‘á»ƒ ngÆ°á»i má»›i má»Ÿ vÃ o lÃ  biáº¿t nÃªn báº¯t Ä‘áº§u tá»« Ä‘Ã¢u."
         steps={dashboardTourSteps}
       />
 
@@ -826,17 +828,17 @@ function DashboardContent({
                   </div>
                   <div>
                     <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-700">
-                      Review đến hạn hôm nay
+                      Review Ä‘áº¿n háº¡n hÃ´m nay
                     </p>
-                    <h3 className="mt-1 text-2xl font-bold text-slate-950">Hôm nay là lúc chốt review tuần.</h3>
+                    <h3 className="mt-1 text-2xl font-bold text-slate-950">HÃ´m nay lÃ  lÃºc chá»‘t review tuáº§n.</h3>
                     <p className="mt-2 text-sm text-slate-600">
-                      {visibleActiveTwelveWeekGoal?.title}. Khóa tuần {activeSystemWeek} và quyết định nhịp cho tuần tiếp
+                      {visibleActiveTwelveWeekGoal?.title}. KhÃ³a tuáº§n {activeSystemWeek} vÃ  quyáº¿t Ä‘á»‹nh nhá»‹p cho tuáº§n tiáº¿p
                       theo.
                     </p>
                   </div>
                 </div>
                 <Button className="w-full min-w-[180px] sm:w-auto" onClick={() => navigate("/12-week-system")}>
-                  Mở review tuần
+                  Má»Ÿ review tuáº§n
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </CardContent>
@@ -855,15 +857,15 @@ function DashboardContent({
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-                      Việc quan trọng nhất hôm nay
+                      Viá»‡c quan trá»ng nháº¥t hÃ´m nay
                     </p>
                     <h2 className="mt-1 text-lg font-bold text-slate-950 truncate">
                       {activeSystemTodayOpenTasks[0].title}
                     </h2>
                     <p className="mt-1 text-xs text-slate-500">
                       {activeSystemTodayOpenTasks.length > 1
-                        ? `Còn ${activeSystemTodayOpenTasks.length - 1} việc khác chờ sau đó`
-                        : "Đây là việc duy nhất hôm nay"}
+                        ? `CÃ²n ${activeSystemTodayOpenTasks.length - 1} viá»‡c khÃ¡c chá» sau Ä‘Ã³`
+                        : "ÄÃ¢y lÃ  viá»‡c duy nháº¥t hÃ´m nay"}
                     </p>
                   </div>
                 </div>
@@ -871,12 +873,26 @@ function DashboardContent({
                   className="w-full bg-slate-950 text-white hover:bg-slate-900 sm:w-auto"
                   onClick={() => navigate("/12-week-system")}
                 >
-                  Đánh dấu xong
+                  ÄÃ¡nh dáº¥u xong
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Mobile Sticky CTA Bar */}
+        {showMobileStickyCTA && (
+          <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/95 p-4 backdrop-blur supports-backdrop-blur:bg-white/90 md:hidden">
+            <Button
+              className="w-full shadow-lg"
+              size="lg"
+              onClick={() => navigate("/12-week-system")}
+            >
+              <CheckCircle2 className="mr-2 h-5 w-5" />
+              Đánh dấu xong - {activeSystemTodayOpenTasks.length} việc
+            </Button>
+          </div>
         )}
 
         {/* Main Dashboard Card with PageHeader */}
@@ -885,12 +901,12 @@ function DashboardContent({
             <CardContent className="p-4 sm:p-6 lg:p-7">
               <div className="space-y-5">
                 <PageHeader
-                  eyebrow={isPublicVisitor ? "Trang chính" : "Hôm nay"}
+                  eyebrow={isPublicVisitor ? "Trang chÃ­nh" : "HÃ´m nay"}
                   title={
                     isPublicVisitor
                       ? publicVisitorDashboardTitle
                       : activeSystem
-                        ? `Quay lại đúng nhịp của "${visibleActiveTwelveWeekGoal?.title ?? "chu kỳ 12 tuần hiện tại"}".`
+                        ? `Quay láº¡i Ä‘Ãºng nhá»‹p cá»§a "${visibleActiveTwelveWeekGoal?.title ?? "chu ká»³ 12 tuáº§n hiá»‡n táº¡i"}".`
                         : setupStartTitle
                   }
                   description={
@@ -898,29 +914,27 @@ function DashboardContent({
                       ? publicVisitorDashboardDescription
                       : activeSystem
                         ? activeSystemTodayOpenTasks.length > 0
-                          ? `Tập trung vào ${activeSystemTodayOpenTasks.length} việc đang mở hôm nay trước khi xem tiến độ tuần.`
-                          : "Hôm nay không còn việc mở. Nếu còn thời gian, hãy xem lại tuần hoặc chuẩn bị review khi đến hạn."
+                          ? `Táº­p trung vÃ o ${activeSystemTodayOpenTasks.length} viá»‡c Ä‘ang má»Ÿ hÃ´m nay trÆ°á»›c khi xem tiáº¿n Ä‘á»™ tuáº§n.`
+                          : "HÃ´m nay khÃ´ng cÃ²n viá»‡c má»Ÿ. Náº¿u cÃ²n thá»i gian, hÃ£y xem láº¡i tuáº§n hoáº·c chuáº©n bá»‹ review khi Ä‘áº¿n háº¡n."
                         : setupStartDescription
                   }
-                  actions={
-                    <div className="flex flex-wrap gap-2">
-                      {isPublicVisitor ? (
-                        <span title="Chế độ xem không cần đăng nhập, dùng thử các tính năng cơ bản" className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
-                          {publicVisitorBadge}
-                        </span>
-                      ) : (
-                        <span title={`Gói hiện tại: ${getPlanLabel(currentPlanCode)} — xem quyền truy cập trong phần quản lý tài khoản`} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
-                          Gói {getPlanLabel(currentPlanCode)}
-                        </span>
-                      )}
-                      {activeSystem && activeSystemWeek && (
-                        <span title={`Tuần hiện tại trong chu kỳ 12 tuần (${getTwelveWeekCurrentWeek(activeSystem)}/${activeSystem.totalWeeks})`} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
-                          Tuần {activeSystemWeek} của chu kỳ hiện tại
-                        </span>
-                      )}
-                    </div>
-                  }
                 />
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {isPublicVisitor ? (
+                    <span title="Cháº¿ Ä‘á»™ xem khÃ´ng cáº§n Ä‘Äƒng nháº­p, dÃ¹ng thá»­ cÃ¡c tÃ­nh nÄƒng cÆ¡ báº£n" className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
+                      {publicVisitorBadge}
+                    </span>
+                  ) : (
+                    <span title={`GÃ³i hiá»‡n táº¡i: ${getPlanLabel(currentPlanCode)} â€” xem quyá»n truy cáº­p trong pháº§n quáº£n lÃ½ tÃ i khoáº£n`} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
+                      GÃ³i {getPlanLabel(currentPlanCode)}
+                    </span>
+                  )}
+                  {activeSystem && activeSystemWeek && (
+                    <span title={`Tuáº§n hiá»‡n táº¡i trong chu ká»³ 12 tuáº§n (${getTwelveWeekCurrentWeek(activeSystem)}/${activeSystem.totalWeeks})`} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
+                      Tuáº§n {activeSystemWeek} cá»§a chu ká»³ hiá»‡n táº¡i
+                    </span>
+                  )}
+                </div>
 
                 {activeSystem && activeSystemWeekCompletion && activeSystemWeekRange ? (
                   <div className="grid gap-4">
@@ -931,12 +945,12 @@ function DashboardContent({
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
                           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                            Làm tiếp ngay
+                            LÃ m tiáº¿p ngay
                           </p>
                           <h2 className="mt-2 text-2xl font-bold text-slate-950">
                             {activeSystemTodayOpenTasks.length > 0
-                              ? `${activeSystemTodayOpenTasks.length} việc đang mở hôm nay`
-                              : "Hôm nay đang khá gọn"}
+                              ? `${activeSystemTodayOpenTasks.length} viá»‡c Ä‘ang má»Ÿ hÃ´m nay`
+                              : "HÃ´m nay Ä‘ang khÃ¡ gá»n"}
                           </h2>
                         </div>
                         <Button
@@ -944,7 +958,7 @@ function DashboardContent({
                           className="w-full gradient-brand text-white shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)] hover:shadow-[0_18px_40px_-22px_rgba(109,40,217,0.44)] hover:scale-[1.01] sm:w-auto"
                           onClick={() => navigate("/12-week-system")}
                         >
-                          Mở trung tâm 12 tuần
+                          Má»Ÿ trung tÃ¢m 12 tuáº§n
                           <ArrowRight className="h-4 w-4" />
                         </Button>
                       </div>
@@ -964,7 +978,7 @@ function DashboardContent({
                                   <div className="min-w-0 flex-1">
                                     <p className="truncate text-sm font-semibold text-slate-950">{task.title}</p>
                                     <p className="mt-1 text-xs text-slate-500">
-                                      {index === 0 ? "Việc nên chạm vào đầu tiên" : "Việc đang chờ phía sau"}
+                                      {index === 0 ? "Viá»‡c nÃªn cháº¡m vÃ o Ä‘áº§u tiÃªn" : "Viá»‡c Ä‘ang chá» phÃ­a sau"}
                                     </p>
                                   </div>
                                 </div>
@@ -972,10 +986,10 @@ function DashboardContent({
                             </div>
                           ) : (
                             <div className="mt-4 rounded-[22px] border border-slate-200 bg-white p-4">
-                              <p className="font-semibold text-slate-950">Bạn đã chốt xong phần mở của hôm nay.</p>
+                              <p className="font-semibold text-slate-950">Báº¡n Ä‘Ã£ chá»‘t xong pháº§n má»Ÿ cá»§a hÃ´m nay.</p>
                               <p className="mt-1 text-sm leading-7 text-slate-600">
-                                Nếu còn sức, hãy mở trung tâm 12 tuần để xem phần còn lại của tuần hoặc chốt review khi
-                                đến hạn.
+                                Náº¿u cÃ²n sá»©c, hÃ£y má»Ÿ trung tÃ¢m 12 tuáº§n Ä‘á»ƒ xem pháº§n cÃ²n láº¡i cá»§a tuáº§n hoáº·c chá»‘t review khi
+                                Ä‘áº¿n háº¡n.
                               </p>
                             </div>
                           )}
@@ -983,16 +997,16 @@ function DashboardContent({
                           <div className="mt-4 grid gap-2 sm:grid-cols-3">
                             <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-3">
                               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                Hôm nay
+                                HÃ´m nay
                               </p>
                               <p className="mt-1 text-xl font-bold text-slate-950">
                                 {activeSystemTodayOpenTasks.length}
                               </p>
-                              <p className="text-xs text-slate-500">{activeSystemTodayCompletedCount} việc đã chốt</p>
+                              <p className="text-xs text-slate-500">{activeSystemTodayCompletedCount} viá»‡c Ä‘Ã£ chá»‘t</p>
                             </div>
                             <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-3">
                               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                Tuần này
+                                Tuáº§n nÃ y
                               </p>
                               <div className="mt-1 flex items-center gap-3">
                                 <p className="text-xl font-bold text-slate-950">
@@ -1021,10 +1035,10 @@ function DashboardContent({
                                 Review
                               </p>
                               <p className="mt-1 text-base font-bold text-slate-950">
-                                {reviewDueToday ? "Đến hạn hôm nay" : getReviewDayLabel(activeSystem.reviewDay)}
+                                {reviewDueToday ? "Äáº¿n háº¡n hÃ´m nay" : getReviewDayLabel(activeSystem.reviewDay)}
                               </p>
                               <p className="text-xs text-slate-500">
-                                {reviewDueToday ? "Nên chốt trước tuần mới." : "Ngày cố định của chu kỳ."}
+                                {reviewDueToday ? "NÃªn chá»‘t trÆ°á»›c tuáº§n má»›i." : "NgÃ y cá»‘ Ä‘á»‹nh cá»§a chu ká»³."}
                               </p>
                             </div>
                           </div>
@@ -1036,7 +1050,7 @@ function DashboardContent({
                         className="rounded-[26px] border border-slate-200 bg-slate-50/80 p-5"
                       >
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                          {isPublicVisitor ? "Bắt đầu đúng cách" : "Bắt đầu nhanh nhất"}
+                          {isPublicVisitor ? "Báº¯t Ä‘áº§u Ä‘Ãºng cÃ¡ch" : "Báº¯t Ä‘áº§u nhanh nháº¥t"}
                         </p>
                         <h2 className="mt-2 text-2xl font-bold text-slate-950">
                           {isPublicVisitor ? publicVisitorStartTitle : setupStartTitle}
@@ -1058,7 +1072,7 @@ function DashboardContent({
                               className="w-full border-slate-200 bg-white text-slate-900 sm:w-auto"
                               onClick={() => handleAuthNavigate("signin")}
                             >
-                              Đăng nhập
+                              ÄÄƒng nháº­p
                             </Button>
                           ) : null}
                         </div>
@@ -1073,8 +1087,8 @@ function DashboardContent({
               <>
                 <section className="rounded-[24px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.22)] sm:p-5">
                   <PageHeader
-                    eyebrow="Thứ tự nên đi"
-                    title="Một luồng chính, không phải ba lựa chọn ngang nhau."
+                    eyebrow="Thá»© tá»± nÃªn Ä‘i"
+                    title="Má»™t luá»“ng chÃ­nh, khÃ´ng pháº£i ba lá»±a chá»n ngang nhau."
                     description={quickActionIntro}
                   />
 
@@ -1112,9 +1126,9 @@ function DashboardContent({
                 {/* Stats Cards - Collapsible on mobile */}
                 <details className="group rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)] sm:p-5 open:sm:!block sm:!block" open>
                   <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-3 text-sm font-semibold text-slate-950 sm:cursor-default">
-                    <span>Tổng quan nhanh</span>
+                    <span>Tá»•ng quan nhanh</span>
                     <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
-                      {isPublicVisitor ? "Luồng cốt lõi" : `${userData.goals.length} mục tiêu`}
+                      {isPublicVisitor ? "Luá»“ng cá»‘t lÃµi" : `${userData.goals.length} má»¥c tiÃªu`}
                     </span>
                     <svg className="h-4 w-4 text-slate-400 transition-transform group-open:rotate-180 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -1162,20 +1176,20 @@ function DashboardContent({
                 align="left"
                 headingLevel={2}
                 testId="fresh-workspace-empty-state"
-                eyebrow="Workspace mới"
-                title="Chưa có dữ liệu thực thi để hiển thị."
-                description="Dashboard sẽ chỉ hiện điểm, chuỗi ngày và chỉ số sau khi bạn tạo chu kỳ 12 tuần đầu tiên. Bây giờ nên đi từ Life Balance để có dữ liệu thật, rồi mới chốt mục tiêu SMART."
+                eyebrow="Workspace má»›i"
+                title="ChÆ°a cÃ³ dá»¯ liá»‡u thá»±c thi Ä‘á»ƒ hiá»ƒn thá»‹."
+                description="Dashboard sáº½ chá»‰ hiá»‡n Ä‘iá»ƒm, chuá»—i ngÃ y vÃ  chá»‰ sá»‘ sau khi báº¡n táº¡o chu ká»³ 12 tuáº§n Ä‘áº§u tiÃªn. BÃ¢y giá» nÃªn Ä‘i tá»« Life Balance Ä‘á»ƒ cÃ³ dá»¯ liá»‡u tháº­t, rá»“i má»›i chá»‘t má»¥c tiÃªu SMART."
                 actions={
                   <Button
                     className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
                     onClick={() => navigate("/onboarding")}
                   >
-                    Bắt đầu Life Balance
+                    Báº¯t Ä‘áº§u Life Balance
                   </Button>
                 }
               >
                 <ol className="grid gap-3 md:grid-cols-3">
-                  {["Chấm 8 lĩnh vực cuộc sống", "Chọn một insight ưu tiên", "Tạo SMART goal và chu kỳ 12 tuần"].map(
+                  {["Cháº¥m 8 lÄ©nh vá»±c cuá»™c sá»‘ng", "Chá»n má»™t insight Æ°u tiÃªn", "Táº¡o SMART goal vÃ  chu ká»³ 12 tuáº§n"].map(
                     (item, index) => (
                       <li key={item} className="rounded-[20px] border border-slate-200 bg-slate-50/80 p-4">
                         <div
@@ -1194,17 +1208,17 @@ function DashboardContent({
               <details className="group rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)] sm:p-5 lg:p-6 open:sm:!block sm:!block" open>
                 <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-3 sm:cursor-default">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Bảng thực thi</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Báº£ng thá»±c thi</p>
                     <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-950">
-                      Tổng quan hiệu suất 12 tuần
+                      Tá»•ng quan hiá»‡u suáº¥t 12 tuáº§n
                     </h2>
                     <p className="mt-1 text-sm text-slate-600">
-                      Theo dõi tiến độ, nhịp thực thi và chỉ số dẫn của mục tiêu đang chạy.
+                      Theo dÃµi tiáº¿n Ä‘á»™, nhá»‹p thá»±c thi vÃ  chá»‰ sá»‘ dáº«n cá»§a má»¥c tiÃªu Ä‘ang cháº¡y.
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
-                      Dữ liệu chu kỳ hiện tại
+                      Dá»¯ liá»‡u chu ká»³ hiá»‡n táº¡i
                     </span>
                     <svg className="h-4 w-4 text-slate-400 transition-transform group-open:rotate-180 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -1229,9 +1243,9 @@ function DashboardContent({
 
                 <details className="group rounded-[22px] border border-slate-200 bg-slate-50/70 p-4">
                   <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 text-sm font-semibold text-slate-950">
-                    <span>Phân tích mở rộng</span>
+                    <span>PhÃ¢n tÃ­ch má»Ÿ rá»™ng</span>
                     <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-500">
-                      Tiến độ theo tuần + chỉ số dẫn
+                      Tiáº¿n Ä‘á»™ theo tuáº§n + chá»‰ sá»‘ dáº«n
                     </span>
                   </summary>
                   <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
@@ -1244,7 +1258,7 @@ function DashboardContent({
                 {planLoading && !plan && (
                   <Card className="border border-slate-200 bg-white/80 shadow-sm">
                     <CardContent className="p-4 text-sm text-slate-500">
-                      Đang tải dữ liệu dashboard 12 tuần...
+                      Äang táº£i dá»¯ liá»‡u dashboard 12 tuáº§n...
                     </CardContent>
                   </Card>
                 )}
@@ -1256,8 +1270,6 @@ function DashboardContent({
                 )}
               </details>
             )}
-          </div>
-        </div>
 
         {shouldShowTopSidebar && (
           <div className="animate-fade-in-up" style={{ animationDelay: '0.08s' }}>
@@ -1274,15 +1286,15 @@ function DashboardContent({
                 >
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-slate-950">
-                      Kế hoạch hiện tại
+                      Káº¿ hoáº¡ch hiá»‡n táº¡i
                     </CardTitle>
                     <CardDescription className="text-slate-600">
-                      {getPlanLabel(currentPlanCode)} — {currentPlanDefinition.description}
+                      {getPlanLabel(currentPlanCode)} â€” {currentPlanDefinition.description}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Đang dùng</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Äang dÃ¹ng</p>
                       <p className="mt-2 text-3xl font-bold text-slate-950">{getPlanLabel(currentPlanCode)}</p>
                       <p className="mt-2 text-sm leading-7 text-slate-600">{currentPlanDefinition.description}</p>
                     </div>
@@ -1300,7 +1312,7 @@ function DashboardContent({
                                 : "border-slate-200 bg-slate-50 text-slate-500"
                             }`}
                           >
-                            {isUnlocked ? "Đang mở" : "Đang khóa"} · {getEntitlementLabel(key)}
+                            {isUnlocked ? "Äang má»Ÿ" : "Äang khÃ³a"} Â· {getEntitlementLabel(key)}
                           </span>
                         );
                       })}
@@ -1313,14 +1325,14 @@ function DashboardContent({
                             className="bg-slate-950 text-white hover:bg-slate-800"
                             onClick={() => openUpgradeDialog("plan", "PLUS")}
                           >
-                            Mở Plus demo
+                            Má»Ÿ Plus demo
                           </Button>
                           <Button
                             variant="outline"
                             className="border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
                             onClick={() => navigate(activeSystem ? "/12-week-system?tab=settings" : "/life-insight")}
                           >
-                            Xem Free đang có gì
+                            Xem Free Ä‘ang cÃ³ gÃ¬
                           </Button>
                         </>
                       ) : (
@@ -1329,13 +1341,13 @@ function DashboardContent({
                           className="border-slate-200 bg-white text-slate-900 hover:bg-slate-50 sm:col-span-2"
                           onClick={() => navigate(activeSystem ? "/12-week-system?tab=settings" : "/life-insight")}
                         >
-                          Quản lý gói và quyền
+                          Quáº£n lÃ½ gÃ³i vÃ  quyá»n
                         </Button>
                       )}
                     </div>
 
                     <p className="text-sm text-slate-500">
-                      Quyền Plus trong MVP 1 là mock/local trên trình duyệt này. Mock checkout không thu tiền thật.
+                      Quyá»n Plus trong MVP 1 lÃ  mock/local trÃªn trÃ¬nh duyá»‡t nÃ y. Mock checkout khÃ´ng thu tiá»n tháº­t.
                     </p>
                   </CardContent>
                 </Card>
@@ -1346,9 +1358,9 @@ function DashboardContent({
                 className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.24)]"
               >
                 <CardHeader>
-                  <CardTitle className="text-slate-950">Đi tiếp ngay</CardTitle>
+                  <CardTitle className="text-slate-950">Äi tiáº¿p ngay</CardTitle>
                   <CardDescription className="text-slate-700">
-                    Chỉ giữ hai tín hiệu quan trọng nhất để bạn quyết định nhanh.
+                    Chá»‰ giá»¯ hai tÃ­n hiá»‡u quan trá»ng nháº¥t Ä‘á»ƒ báº¡n quyáº¿t Ä‘á»‹nh nhanh.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
@@ -1386,9 +1398,9 @@ function DashboardContent({
           <div className="flex flex-wrap items-center gap-4 rounded-[22px] border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-[0_20px_45px_-34px_rgba(217,119,6,0.22)]">
             <Sparkles className="h-5 w-5 shrink-0 text-amber-600" />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-amber-900">Dữ liệu đang hiển thị là ví dụ demo</p>
+              <p className="text-sm font-semibold text-amber-900">Dá»¯ liá»‡u Ä‘ang hiá»ƒn thá»‹ lÃ  vÃ­ dá»¥ demo</p>
               <p className="mt-0.5 text-sm text-amber-700">
-                Cập nhật bánh xe cuộc sống của bạn để thay dữ liệu mẫu bằng thông tin thật.
+                Cáº­p nháº­t bÃ¡nh xe cuá»™c sá»‘ng cá»§a báº¡n Ä‘á»ƒ thay dá»¯ liá»‡u máº«u báº±ng thÃ´ng tin tháº­t.
               </p>
             </div>
             <Button
@@ -1397,7 +1409,7 @@ function DashboardContent({
               className="border-amber-300 bg-white text-amber-800 hover:bg-amber-100"
               onClick={() => navigate("/life-balance")}
             >
-              Cập nhật ngay
+              Cáº­p nháº­t ngay
             </Button>
           </div>
         </Reveal>
@@ -1407,9 +1419,9 @@ function DashboardContent({
       {shouldShowWorkspaceDetailGrid && (
         <div className="ops-section-secondary space-y-6">
           <PageHeader
-            eyebrow="Chi tiết workspace"
-            title="Dữ liệu gần đây"
-            description="Xem nhanh mục tiêu, cân bằng cuộc sống và nhật ký của bạn."
+            eyebrow="Chi tiáº¿t workspace"
+            title="Dá»¯ liá»‡u gáº§n Ä‘Ã¢y"
+            description="Xem nhanh má»¥c tiÃªu, cÃ¢n báº±ng cuá»™c sá»‘ng vÃ  nháº­t kÃ½ cá»§a báº¡n."
           />
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
@@ -1419,12 +1431,12 @@ function DashboardContent({
                   <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                     <div className="min-w-0">
                       <CardTitle className="text-slate-950">
-                        {isPublicVisitor ? "Luồng mục tiêu trong demo" : "Mục tiêu gần đây"}
+                        {isPublicVisitor ? "Luá»“ng má»¥c tiÃªu trong demo" : "Má»¥c tiÃªu gáº§n Ä‘Ã¢y"}
                       </CardTitle>
                       <CardDescription className="text-slate-700">
                         {isPublicVisitor
-                          ? "Từ một mong muốn rộng, web sẽ ép lại thành mục tiêu rõ và kế hoạch có lịch."
-                          : "Đủ ít để bạn nhìn một lượt là hiểu."}
+                          ? "Tá»« má»™t mong muá»‘n rá»™ng, web sáº½ Ã©p láº¡i thÃ nh má»¥c tiÃªu rÃµ vÃ  káº¿ hoáº¡ch cÃ³ lá»‹ch."
+                          : "Äá»§ Ã­t Ä‘á»ƒ báº¡n nhÃ¬n má»™t lÆ°á»£t lÃ  hiá»ƒu."}
                       </CardDescription>
                     </div>
                     <Button
@@ -1434,7 +1446,7 @@ function DashboardContent({
                       onClick={() => (isPublicVisitor ? handleAuthNavigate("signup") : navigate("/life-insight"))}
                     >
                       <Plus className="h-4 w-4" />
-                      {isPublicVisitor ? "Đăng ký để sync sau" : "Tạo mục tiêu"}
+                      {isPublicVisitor ? "ÄÄƒng kÃ½ Ä‘á»ƒ sync sau" : "Táº¡o má»¥c tiÃªu"}
                     </Button>
                   </div>
                 </CardHeader>
@@ -1444,23 +1456,23 @@ function DashboardContent({
                       <Target className="mx-auto mb-4 h-12 w-12 text-slate-300" />
                       <p>
                         {isPublicVisitor
-                          ? "Trong demo, bạn có thể đi qua Life Insight, SMART Goal và kiểm tra tính thực tế mà không cần đăng nhập."
-                          : "Chưa có mục tiêu nào. Hãy bắt đầu bằng mục tiêu đầu tiên của bạn."}
+                          ? "Trong demo, báº¡n cÃ³ thá»ƒ Ä‘i qua Life Insight, SMART Goal vÃ  kiá»ƒm tra tÃ­nh thá»±c táº¿ mÃ  khÃ´ng cáº§n Ä‘Äƒng nháº­p."
+                          : "ChÆ°a cÃ³ má»¥c tiÃªu nÃ o. HÃ£y báº¯t Ä‘áº§u báº±ng má»¥c tiÃªu Ä‘áº§u tiÃªn cá»§a báº¡n."}
                       </p>
                       <Button
                         className="mt-5 w-full sm:w-auto"
                         onClick={() => (isPublicVisitor ? handleAuthNavigate("signup") : navigate("/life-insight"))}
                       >
-                        {isPublicVisitor ? "Đăng ký để sync sau" : "Tạo mục tiêu"}
+                        {isPublicVisitor ? "ÄÄƒng kÃ½ Ä‘á»ƒ sync sau" : "Táº¡o má»¥c tiÃªu"}
                       </Button>
                     </div>
                   ) : (
                     <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
                       <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)_minmax(100px,0.5fr)] gap-4 border-b border-slate-200/80 bg-slate-50/90 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 lg:grid">
-                        <span>Mục tiêu</span>
-                        <span>Loại</span>
-                        <span>Tiến độ</span>
-                        <span className="text-right">Hành động</span>
+                        <span>Má»¥c tiÃªu</span>
+                        <span>Loáº¡i</span>
+                        <span>Tiáº¿n Ä‘á»™</span>
+                        <span className="text-right">HÃ nh Ä‘á»™ng</span>
                       </div>
 
                       <div className="divide-y divide-slate-200/80">
@@ -1484,27 +1496,27 @@ function DashboardContent({
                                         <h4 className="truncate font-semibold text-slate-900">{goal.title}</h4>
                                         {goal.twelveWeekSystem && (
                                           <span className="rounded-full bg-violet-100 px-3 py-1 text-[11px] font-semibold text-violet-700">
-                                            12 tuần
+                                            12 tuáº§n
                                           </span>
                                         )}
                                         {progress === 100 && (
                                           <span className="rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-semibold text-emerald-700">
-                                            Hoàn thành
+                                            HoÃ n thÃ nh
                                           </span>
                                         )}
                                       </div>
                                       <div className="mt-1 flex flex-wrap gap-2 text-sm text-slate-500">
                                         <span>{getLifeAreaLabel(goal.category)}</span>
-                                        {goal.deadline && <span>• Đích {formatCalendarDate(goal.deadline)}</span>}
+                                        {goal.deadline && <span>â€¢ ÄÃ­ch {formatCalendarDate(goal.deadline)}</span>}
                                       </div>
                                       <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500 lg:hidden">
                                         <span className="rounded-full bg-slate-100 px-3 py-1">
-                                          {goal.twelveWeekSystem ? "Chu kỳ 12 tuần" : "Mục tiêu thường"}
+                                          {goal.twelveWeekSystem ? "Chu ká»³ 12 tuáº§n" : "Má»¥c tiÃªu thÆ°á»ng"}
                                         </span>
                                         <span className="rounded-full bg-slate-100 px-3 py-1">
-                                          {execution.completed}/{execution.total} việc đã chốt
+                                          {execution.completed}/{execution.total} viá»‡c Ä‘Ã£ chá»‘t
                                         </span>
-                                        <span className="rounded-full bg-slate-100 px-3 py-1">{progress}% tiến độ</span>
+                                        <span className="rounded-full bg-slate-100 px-3 py-1">{progress}% tiáº¿n Ä‘á»™</span>
                                       </div>
                                     </div>
                                     <CheckCircle2
@@ -1516,12 +1528,12 @@ function DashboardContent({
 
                                 <div className="hidden min-w-0 lg:block">
                                   <p className="truncate text-sm font-semibold text-slate-900">
-                                    {goal.twelveWeekSystem ? "Chu kỳ 12 tuần" : "Mục tiêu thường"}
+                                    {goal.twelveWeekSystem ? "Chu ká»³ 12 tuáº§n" : "Má»¥c tiÃªu thÆ°á»ng"}
                                   </p>
                                   <p className="mt-1 truncate text-sm text-slate-500">
                                     {goal.twelveWeekSystem
-                                      ? `Gói ${getPlanLabel(currentPlanCode)}`
-                                      : "Theo dõi tổng quan"}
+                                      ? `GÃ³i ${getPlanLabel(currentPlanCode)}`
+                                      : "Theo dÃµi tá»•ng quan"}
                                   </p>
                                 </div>
 
@@ -1529,12 +1541,12 @@ function DashboardContent({
                                   <div className="flex items-center justify-between text-sm">
                                     <span className="font-semibold text-slate-900">{progress}%</span>
                                     <span className="text-slate-500">
-                                      {execution.completed}/{execution.total} việc
+                                      {execution.completed}/{execution.total} viá»‡c
                                     </span>
                                   </div>
                                   <Progress value={progress} className="h-2.5" />
                                   {goal.twelveWeekSystem && !entitlementKeys.includes("premium_review_insights") && (
-                                    <p className="text-xs font-medium text-violet-700">Phân tích review đang khóa</p>
+                                    <p className="text-xs font-medium text-violet-700">PhÃ¢n tÃ­ch review Ä‘ang khÃ³a</p>
                                   )}
                                 </div>
 
@@ -1545,10 +1557,10 @@ function DashboardContent({
                                     className={goal.twelveWeekSystem ? "" : "border-white/70 bg-white hover:bg-slate-50"}
                                     onClick={() => navigate(goal.twelveWeekSystem ? "/12-week-system" : "/goals")}
                                     aria-label={
-                                      goal.twelveWeekSystem ? `Mở 12 tuần: ${goal.title}` : `Mở mục tiêu: ${goal.title}`
+                                      goal.twelveWeekSystem ? `Má»Ÿ 12 tuáº§n: ${goal.title}` : `Má»Ÿ má»¥c tiÃªu: ${goal.title}`
                                     }
                                   >
-                                    {goal.twelveWeekSystem ? "Mở 12 tuần" : "Mở mục tiêu"}
+                                    {goal.twelveWeekSystem ? "Má»Ÿ 12 tuáº§n" : "Má»Ÿ má»¥c tiÃªu"}
                                   </Button>
                                 </div>
                               </div>
@@ -1568,16 +1580,16 @@ function DashboardContent({
                   <div className="flex items-center justify-between gap-4">
                     <div>
                       <CardTitle className="text-slate-950">
-                        {isPublicVisitor ? "Bánh xe cuộc sống là bước mở đầu" : "Bánh xe cuộc sống"}
+                        {isPublicVisitor ? "BÃ¡nh xe cuá»™c sá»‘ng lÃ  bÆ°á»›c má»Ÿ Ä‘áº§u" : "BÃ¡nh xe cuá»™c sá»‘ng"}
                       </CardTitle>
                       <CardDescription className="text-slate-700">
                         {isPublicVisitor
-                          ? "Người mới nên chấm 8 lĩnh vực trước khi chọn mục tiêu ưu tiên."
-                          : "Nhìn nhanh bức tranh tổng quan hiện tại."}
+                          ? "NgÆ°á»i má»›i nÃªn cháº¥m 8 lÄ©nh vá»±c trÆ°á»›c khi chá»n má»¥c tiÃªu Æ°u tiÃªn."
+                          : "NhÃ¬n nhanh bá»©c tranh tá»•ng quan hiá»‡n táº¡i."}
                       </CardDescription>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Điểm trung bình</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Äiá»ƒm trung bÃ¬nh</p>
                       <p className="mt-1 text-3xl font-bold text-slate-900">
                         <CountUp value={averageLifeScore} precision={1} />
                       </p>
@@ -1590,7 +1602,7 @@ function DashboardContent({
                       <Suspense
                         fallback={
                           <div className="flex h-[300px] items-center justify-center rounded-[20px] bg-slate-100/88 text-sm text-slate-500">
-                            Đang tải biểu đồ cân bằng cuộc sống...
+                            Äang táº£i biá»ƒu Ä‘á»“ cÃ¢n báº±ng cuá»™c sá»‘ng...
                           </div>
                         }
                       >
@@ -1599,28 +1611,28 @@ function DashboardContent({
                     ) : (
                       <div className="flex h-[300px] flex-col items-center justify-center rounded-[20px] bg-slate-50 px-5 text-center">
                         <TrendingUp className="h-10 w-10 text-slate-300" />
-                        <p className="mt-3 font-semibold text-slate-900">Chưa có dữ liệu bánh xe cuộc sống</p>
+                        <p className="mt-3 font-semibold text-slate-900">ChÆ°a cÃ³ dá»¯ liá»‡u bÃ¡nh xe cuá»™c sá»‘ng</p>
                         <p className="mt-1 max-w-sm text-sm leading-6 text-slate-500">
                           {isPublicVisitor
-                            ? "Trong demo, bạn có thể bắt đầu Life Balance không cần đăng nhập. Tài khoản/sync là lớp sau."
-                            : "Bắt đầu bằng bài đánh giá Life Balance để dashboard có dữ liệu thật thay vì số mặc định."}
+                            ? "Trong demo, báº¡n cÃ³ thá»ƒ báº¯t Ä‘áº§u Life Balance khÃ´ng cáº§n Ä‘Äƒng nháº­p. TÃ i khoáº£n/sync lÃ  lá»›p sau."
+                            : "Báº¯t Ä‘áº§u báº±ng bÃ i Ä‘Ã¡nh giÃ¡ Life Balance Ä‘á»ƒ dashboard cÃ³ dá»¯ liá»‡u tháº­t thay vÃ¬ sá»‘ máº·c Ä‘á»‹nh."}
                         </p>
                       </div>
                     )}
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Cần ưu tiên tiếp</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Cáº§n Æ°u tiÃªn tiáº¿p</p>
                       <p className="mt-2 text-lg font-semibold text-slate-900">
                         {isPublicVisitor
-                          ? "Chọn sau Life Balance"
+                          ? "Chá»n sau Life Balance"
                           : weakestArea
                             ? getLifeAreaLabel(weakestArea.name)
-                            : "Chưa có dữ liệu"}
+                            : "ChÆ°a cÃ³ dá»¯ liá»‡u"}
                       </p>
                       <p className="mt-1 text-sm text-slate-500">
                         {isPublicVisitor
-                          ? "Demo lưu local trên trình duyệt này"
+                          ? "Demo lÆ°u local trÃªn trÃ¬nh duyá»‡t nÃ y"
                           : weakestArea
                             ? `${weakestArea.score}/10`
                             : "--"}
@@ -1637,17 +1649,17 @@ function DashboardContent({
                       <div className="ml-3 min-w-0 flex-1">
                         <div className="line-clamp-2 break-words font-semibold text-slate-900">
                           {isPublicVisitor
-                            ? "Bắt đầu bằng cân bằng cuộc sống"
+                            ? "Báº¯t Ä‘áº§u báº±ng cÃ¢n báº±ng cuá»™c sá»‘ng"
                             : hasRealLifeBalance
-                              ? "Mở cân bằng cuộc sống"
-                              : "Bắt đầu đánh giá cuộc sống"}
+                              ? "Má»Ÿ cÃ¢n báº±ng cuá»™c sá»‘ng"
+                              : "Báº¯t Ä‘áº§u Ä‘Ã¡nh giÃ¡ cuá»™c sá»‘ng"}
                         </div>
                         <div className="mt-1 line-clamp-2 text-sm text-slate-500">
                           {isPublicVisitor
-                            ? "Đăng ký chỉ khi muốn thử lớp sync sau."
+                            ? "ÄÄƒng kÃ½ chá»‰ khi muá»‘n thá»­ lá»›p sync sau."
                             : hasRealLifeBalance
-                              ? "Xem chi tiết và cập nhật lại bánh xe cuộc đời."
-                              : "Chấm điểm 8 lĩnh vực để mở đúng luồng mục tiêu."}
+                              ? "Xem chi tiáº¿t vÃ  cáº­p nháº­t láº¡i bÃ¡nh xe cuá»™c Ä‘á»i."
+                              : "Cháº¥m Ä‘iá»ƒm 8 lÄ©nh vá»±c Ä‘á»ƒ má»Ÿ Ä‘Ãºng luá»“ng má»¥c tiÃªu."}
                         </div>
                       </div>
                     </Button>
@@ -1656,7 +1668,7 @@ function DashboardContent({
               </Card>
             </Reveal>
           </div>
-        </section>
+        </div>
       )}
 
       {/* Recent Reflections - Part of secondary content */}
@@ -1667,13 +1679,13 @@ function DashboardContent({
               <CardHeader>
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <CardTitle className="text-slate-950">Nhật ký gần đây</CardTitle>
+                    <CardTitle className="text-slate-950">Nháº­t kÃ½ gáº§n Ä‘Ã¢y</CardTitle>
                     <CardDescription className="text-slate-700">
-                      Những suy ngẫm mới nhất trên hành trình của bạn.
+                      Nhá»¯ng suy ngáº«m má»›i nháº¥t trÃªn hÃ nh trÃ¬nh cá»§a báº¡n.
                     </CardDescription>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => navigate("/journal")}>
-                    Xem tất cả
+                    Xem táº¥t cáº£
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -1696,7 +1708,7 @@ function DashboardContent({
               </CardContent>
             </Card>
           </Reveal>
-        </section>
+        </div>
       )}
 
       {/* Demo Notice - Non-intrusive, at bottom */}
@@ -1706,9 +1718,9 @@ function DashboardContent({
             <div className="flex flex-wrap items-center gap-4 rounded-[22px] border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-[0_20px_45px_-34px_rgba(217,119,6,0.22)]">
               <Sparkles className="h-5 w-5 shrink-0 text-amber-600" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-amber-900">Dữ liệu đang hiển thị là ví dụ demo</p>
+                <p className="text-sm font-semibold text-amber-900">Dá»¯ liá»‡u Ä‘ang hiá»ƒn thá»‹ lÃ  vÃ­ dá»¥ demo</p>
                 <p className="mt-0.5 text-sm text-amber-700">
-                  Cập nhật bánh xe cuộc sống của bạn để thay dữ liệu mẫu bằng thông tin thật.
+                  Cáº­p nháº­t bÃ¡nh xe cuá»™c sá»‘ng cá»§a báº¡n Ä‘á»ƒ thay dá»¯ liá»‡u máº«u báº±ng thÃ´ng tin tháº­t.
                 </p>
               </div>
               <Button
@@ -1717,11 +1729,11 @@ function DashboardContent({
                 className="border-amber-300 bg-white text-amber-800 hover:bg-amber-100"
                 onClick={() => navigate("/life-balance")}
               >
-                Cập nhật ngay
+                Cáº­p nháº­t ngay
               </Button>
             </div>
           </Reveal>
-        </section>
+        </div>
       )}
 
       {/* Data Backup - Moved to Settings, shown here only if needed */}
@@ -1735,7 +1747,7 @@ function DashboardContent({
               onOpenImportPicker={() => importFileRef.current?.click()}
             />
           </Reveal>
-        </section>
+        </div>
       )}
     </div>
   );

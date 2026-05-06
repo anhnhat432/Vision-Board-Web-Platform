@@ -4,6 +4,7 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Progress } from "../ui/progress";
+import { SectionBlock } from "../layout/SectionBlock";
 import { formatCalendarDate, getReviewDayLabel } from "../../utils/storage";
 import type { TwelveWeekSystem } from "../../utils/storage-types";
 import type { HeatmapCell, TacticBreakdownItem, WeekTrendPoint } from "../../utils/twelve-week-system-ui";
@@ -214,7 +215,13 @@ export function TwelveWeekProgressTab({
         />
       )}
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <SectionBlock
+        title="Tổng quan hiệu suất"
+        eyebrow="Performance"
+        collapsible
+        defaultOpen={true}
+      >
+        <div className="grid gap-4 md:grid-cols-3">
         <Card
           interactive={false}
           className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)]"
@@ -269,6 +276,7 @@ export function TwelveWeekProgressTab({
           </CardContent>
         </Card>
       </div>
+      </SectionBlock>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <Card

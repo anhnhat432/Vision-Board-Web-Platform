@@ -717,7 +717,7 @@ export function TwelveWeekSystem() {
                 : "Cài đặt: chỉnh nhịp chu kỳ, xuất dữ liệu hoặc xem trạng thái sync."}
         </p>
 
-        <TabsContent value="today" className="space-y-6 pt-4">
+        <TabsContent value="today" className="space-y-6 pt-4 max-h-[calc(100vh-200px)] overflow-y-auto">
           <TabErrorBoundary fallbackTitle="Tab Hôm nay gặp lỗi">
             <TaskBoard
               system={system}
@@ -766,7 +766,7 @@ export function TwelveWeekSystem() {
           </TabErrorBoundary>
         </TabsContent>
 
-        <TabsContent value="week" className="space-y-6 pt-4">
+        <TabsContent value="week" className="space-y-6 pt-4 max-h-[calc(100vh-200px)] overflow-y-auto">
           <TabErrorBoundary fallbackTitle="Tab Tuần gặp lỗi">
             <Suspense
               fallback={
@@ -816,7 +816,7 @@ export function TwelveWeekSystem() {
           </TabErrorBoundary>
         </TabsContent>
 
-        <TabsContent value="progress">
+        <TabsContent value="progress" className="space-y-6 pt-4 max-h-[calc(100vh-200px)] overflow-y-auto">
           <TabErrorBoundary fallbackTitle="Tab Tiến độ gặp lỗi">
             <Suspense
               fallback={
@@ -849,7 +849,7 @@ export function TwelveWeekSystem() {
           </TabErrorBoundary>
         </TabsContent>
 
-        <TabsContent value="settings">
+        <TabsContent value="settings" className="space-y-6 pt-4 max-h-[calc(100vh-200px)] overflow-y-auto">
           <TabErrorBoundary fallbackTitle="Tab Cài đặt gặp lỗi">
             <Suspense
               fallback={

@@ -26,6 +26,7 @@ For MVP 1, treat the app as a public demo for the 12-week execution system. The 
 - After a tool call completes, continue autonomously until implementation and verification are done. Do not stop after `Bash completed with no output` or wait for the user to ask "xong chưa".
 - If a shell command fails, inspect the error, adjust, and continue when safe. Report a blocker only when the task cannot be completed safely in the current scope.
 - On Windows, avoid Linux-only shell patterns such as `cat << EOF`; use file-edit tools for writes and PowerShell-native commands for read-only inspection or verification.
+- If a provider/API interruption stops the turn and the user says `continue`, `tiếp tục`, or similar, recover from the current repo state (`git status`, relevant files, latest errors) and continue the previous task without asking the user to restate it.
 
 ## Communication Style
 

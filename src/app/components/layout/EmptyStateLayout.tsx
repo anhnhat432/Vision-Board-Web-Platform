@@ -3,7 +3,6 @@ import { Button } from "../ui/button";
 
 import type * as React from "react";
 import { cn } from "../ui/utils";
-import { Button } from "../ui/button";
 
 interface EmptyStateLayoutProps {
   icon: React.ReactNode;
