@@ -130,13 +130,26 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
   - `.env.production` has `VITE_APP_MODE=demo` and no Firebase vars
 - **Verified:** [x] typecheck passing / [x] build passing / [x] All sync paths short-circuit in demo mode
 
-### 8. ⬜ Weekly Review Free Path
+### 8. ✅ Weekly Review Free Path
 
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
+- **Status:** [x] Completed
 - **Prompt:** Prompt 8
 - **Files changed:**
-- **Notes:** Basic review must be free, Plus only enhances
-- **Verified:** [ ] Can save review without upgrade
+  - `src/app/components/twelve-week/TwelveWeekWeekTab.tsx` - Verified no billing gates on save
+  - `src/app/pages/12WeekSystem/useTwelveWeekExecutionActions.ts` - Verified handleSaveWeeklyReview
+- **Notes:**
+  - ✅ Free users can: open Week tab, see all reflection prompts, save review, create reflection entry, mark week complete
+  - ✅ Premium features (advanced insights, auto-suggestions) are enhancement-only, NOT blocking
+  - ✅ Save button always enabled for all users (no upgrade prompts blocking)
+  - ✅ Only conditional render: `hasPremiumInsights` controls teaser vs full insights section (lines 475-625)
+  - ✅ Auto-fill suggestions for next week priority/workload decision are optional for Plus users only
+- **Audit results (2026-05-06):**
+  - `handleSaveWeeklyReview`: Only checks `hasAnyContent`, no billing checks
+  - Form fields: All visible, no conditional rendering based on entitlements
+  - Premium teaser: Blurred content with "Mở review Plus ngay" CTA - does not interfere with core flow
+  - Reflection journal entry: Created via `upsertReflection()` on every save
+  - Weekly review completion: `reviewCompleted: true` set correctly
+- **Verified:** [x] npm run typecheck passing / [x] Code audit complete / [x] Implementation verified free path
 
 ### 9. ⬜ Generated Plan Quality
 
