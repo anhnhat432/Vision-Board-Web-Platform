@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useBreakpoint } from "@/app/hooks/useBreakpoint";
 import { SecondaryPanel } from "@/app/components/layout";
-import { CheckCircle2, CircleAlert, CircleDot, Flag, Lightbulb, Sparkles, Target, TriangleAlert, Wrench } from "lucide-react";
+import { CheckCircle2, CircleAlert, Sparkles, Target, TriangleAlert, Wrench } from "lucide-react";
 
 import { Badge } from "@/app/components/ui/badge";
 import { Input } from "@/app/components/ui/input";
@@ -202,7 +202,7 @@ export function ReviewStep({
     ],
   );
 
-  const firstAction = weekOneTaskPreview[0] ?? null;
+    const _firstAction = weekOneTaskPreview[0] ?? null;
   const coreIndicators = scheduledLeadIndicators.filter((indicator) => indicator.type !== "optional");
   const optionalIndicators = scheduledLeadIndicators.filter((indicator) => indicator.type === "optional");
 

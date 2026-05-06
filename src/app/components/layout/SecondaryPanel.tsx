@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { cn } from "../ui/utils";
 
 interface SecondaryPanelProps {
@@ -56,7 +57,9 @@ export function SecondaryPanel({
         className
       )}
       onClick={collapsible ? toggle : undefined}
+      onKeyDown={collapsible ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } } : undefined}
       role={collapsible ? "button" : undefined}
+      tabIndex={collapsible ? 0 : undefined}
       aria-expanded={collapsible ? isOpen : undefined}
     >
       <div className="flex items-start justify-between gap-2">

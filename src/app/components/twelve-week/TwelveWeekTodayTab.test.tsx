@@ -352,8 +352,9 @@ describe("TwelveWeekTodayTab — rescue mode nudge", () => {
       .querySelector('[data-suggestion-id="pick-one-tiny-task"]') as HTMLElement | null;
     expect(li).not.toBeNull();
     const button = li!.querySelector("button");
-    expect(button).not.toBeNull();
-    await userEvent.click(button!);
+    const safeButton = button as HTMLElement;
+    expect(safeButton).not.toBeNull();
+    await userEvent.click(safeButton);
     expect(onPickTinyTask).toHaveBeenCalledTimes(1);
   });
 

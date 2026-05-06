@@ -48,7 +48,6 @@ export function LeadIndicatorsStep({
   setupGuideSupport,
   setupGuideTemplate,
   selectedTemplate,
-  weekOneTaskPreview,
   weekOneTaskWarning,
   weekOneTaskGroups,
   onAddIndicator,

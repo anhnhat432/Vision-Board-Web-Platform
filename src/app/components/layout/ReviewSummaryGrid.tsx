@@ -1,6 +1,5 @@
 "use client";
 
-import type * as React from "react";
 import { cn } from "../ui/utils";
 import { Badge } from "../ui/badge";
 
@@ -41,8 +40,8 @@ export function ReviewSummaryGrid({
         className
       )}
     >
-      {items.map((item, index) => (
-        <div key={index} className="space-y-1">
+      {items.map((item) => (
+        <div key={item.label} className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-foreground">{item.label}</span>
             {item.status && (

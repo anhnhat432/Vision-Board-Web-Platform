@@ -193,7 +193,7 @@ export function useTwelveWeekSettingsActions({
       window.URL.revokeObjectURL(url);
       trackAppEvent("cloud_workspace_exported", activeGoal?.id ?? "", { counts: JSON.stringify(data.counts) });
       toast.success("Đã tải bản sao cloud workspace.");
-    } catch (error) {
+    } catch (_error) {
       toast.error("Không thể export cloud workspace. Kiểm tra kết nối và thử lại.");
     }
   };
@@ -220,7 +220,7 @@ export function useTwelveWeekSettingsActions({
       toast.success("Đã xóa dữ liệu 12-week trên cloud.", {
         description: "Dữ liệu local, billing và tài khoản không bị ảnh hưởng.",
       });
-    } catch (error) {
+    } catch (_error) {
       toast.error("Không thể xóa cloud workspace. Kiểm tra kết nối và thử lại.");
     }
   }, [activeGoal?.id]);

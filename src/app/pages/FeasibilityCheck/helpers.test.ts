@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildResult, type BuildResultOptions } from "./helpers";
+import { buildResult } from "./helpers";
 
 // ---------------------------------------------------------------------------
 // Helpers — build answer sets for specific scenarios

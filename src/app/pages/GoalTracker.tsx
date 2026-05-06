@@ -654,6 +654,14 @@ function GoalTrackerContent({
                             handleToggleTask(goal.id, task.id);
                           }
                         }}
+                        onKeyDown={(e) => {
+                          if (!(e.target as HTMLElement).closest("button")) {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              handleToggleTask(goal.id, task.id);
+                            }
+                          }
+                        }}
                       >
                         <Checkbox
                           checked={task.completed}

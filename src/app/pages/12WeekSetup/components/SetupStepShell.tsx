@@ -79,6 +79,16 @@ export function SetupStepShell({
                         : "border-slate-200 bg-white text-slate-500"
                   }`}
                   onClick={done && onJumpToStep ? () => onJumpToStep(index) : undefined}
+                  onKeyDown={
+                    done && onJumpToStep
+                      ? (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onJumpToStep(index);
+                          }
+                        }
+                      : undefined
+                  }
                 >
                   <span
                     aria-hidden="true"

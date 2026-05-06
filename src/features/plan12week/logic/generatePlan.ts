@@ -1,7 +1,9 @@
 import type { GoalArchetype } from "@/lib/smart-goal";
 
 import { getArchetypeFirstAction, getArchetypePlanFullDefaults } from "./planArchetypeDefaults";
-import type { LeadMetric, Plan12Week, Week } from "../types/planTypes";
+import { generateTacticsFromArchetype, type GeneratedTactic, type WeekOneTask } from "./tacticGeneration";
+import { generateWeekOneTasks } from "./taskGeneration";
+import type { LeadMetric, Plan12Week, Week, Task } from "../types/planTypes";
 
 export interface Generate12WeekPlanInput {
   id: string;
@@ -35,9 +37,16 @@ export interface Generate12WeekPlanOptions {
    * a smaller week-1 first action so the plan stays startable.
    */
   feasibilityHint?: GeneratePlanFeasibilityHint;
+  /**
+   * User preferences for tactic generation
+   */
+  userPreferences?: {
+    tacticCount?: number;
+    dailyTimeBudget?: string;
+  };
 }
 
-function isLowFeasibility(hint: GeneratePlanFeasibilityHint | undefined): boolean {
+export function isLowFeasibility(hint: GeneratePlanFeasibilityHint | undefined): boolean {
   if (!hint) return false;
   if (hint.planLoad === "lighter") return true;
   if (hint.weeklyCapacity === "low") return true;
@@ -76,22 +85,41 @@ function buildArchetypeLeadMetrics(
 function buildArchetypeWeeks(
   goalArchetype: GoalArchetype,
   feasibilityHint: GeneratePlanFeasibilityHint | undefined,
+  userPreferences?: {
+    tacticCount?: number;
+    dailyTimeBudget?: string;
+  }
 ): Week[] {
   const defaults = getArchetypePlanFullDefaults(goalArchetype);
-  const leadMetrics = buildArchetypeLeadMetrics(defaults.leadIndicatorSuggestions);
   const lowFeasibility = isLowFeasibility(feasibilityHint);
   const firstAction = getArchetypeFirstAction(goalArchetype, { lowFeasibility });
+
+  // Generate tactics from archetype
+  const tactics = generateTacticsFromArchetype(goalArchetype, {
+    tacticCount: userPreferences?.tacticCount,
+    dailyTimeBudget: userPreferences?.dailyTimeBudget,
+    feasibilityHint: lowFeasibility ? "low" : "medium",
+  });
+
+  // Convert tactics to lead metrics
+  const leadMetrics = tacticsToLeadMetrics(tactics);
+
+  // Generate Week 1 tasks
+  const week1Start = new Date();
+  week1Start.setHours(0, 0, 0, 0);
+  const weekOneTasks = generateWeekOneTasks(tactics, week1Start);
+  const weekOneTasksAsTasks = weekOneTasksToTasks(weekOneTasks);
 
   return Array.from({ length: 12 }, (_, index) => {
     const weekNumber = index + 1;
     const week = createEmptyWeek(weekNumber);
 
-    // Seed week 1 with archetype focus + expectedOutput, first action, and lead metric suggestions
+    // Seed week 1 with archetype focus, tactics and tasks
     if (weekNumber === 1) {
       week.focus = defaults.weekOneFocus;
-      // Surface the concrete first action so user knows what to do in next 24-48h
       week.expectedOutput = `${defaults.weekOneExpectedOutput}\n\nViệc đầu tiên: ${firstAction}`;
       week.leadMetrics = leadMetrics;
+      week.tasks = weekOneTasksAsTasks;
       return week;
     }
 
@@ -108,13 +136,37 @@ function buildArchetypeWeeks(
   });
 }
 
+/**
+ * Convert GeneratedTactic array to LeadMetric array
+ */
+function tacticsToLeadMetrics(tactics: GeneratedTactic[]): LeadMetric[] {
+  return tactics.map((tactic) => ({
+    id: tactic.id,
+    name: tactic.name,
+    weeklyTarget: tactic.target,
+    logs: [],
+  }));
+}
+
+/**
+ * Convert WeekOneTask array to Task array (adds required status field)
+ */
+function weekOneTasksToTasks(tasks: WeekOneTask[]): Task[] {
+  return tasks.map((t) => ({
+    id: t.id,
+    title: t.title,
+    status: "todo" as const,
+    scheduledDate: t.scheduledDate,
+  }));
+}
+
 export function generate12WeekPlan(
   goal: Generate12WeekPlanInput,
   options?: Generate12WeekPlanOptions,
 ): Plan12Week {
   const goalArchetype = options?.goalArchetype;
   const weeks = goalArchetype
-    ? buildArchetypeWeeks(goalArchetype, options?.feasibilityHint)
+    ? buildArchetypeWeeks(goalArchetype, options?.feasibilityHint, options?.userPreferences)
     : Array.from({ length: 12 }, (_, index) => createEmptyWeek(index + 1));
 
   return {

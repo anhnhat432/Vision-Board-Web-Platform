@@ -364,7 +364,7 @@ export function useBackendProgressOverlay(
     if (overlayInvalidated) {
       setOverlayInvalidated(false);
     }
-  }, [details]);
+  }, [overlayInvalidated]);
 
   const effectiveSystem = useMemo(() => {
     if (!system || !goalId || !details || overlayInvalidated) return system;

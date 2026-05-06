@@ -1,10 +1,6 @@
 import { FeedbackDialog } from "../FeedbackDialog";
 import { FunnelDiagnosticsPanel } from "./FunnelDiagnosticsPanel";
 import { TwelveWeekCycleSettingsPanel } from "./TwelveWeekCycleSettingsPanel";
-import { TwelveWeekDeviceAndSyncPanel } from "./TwelveWeekDeviceAndSyncPanel";
-import { TwelveWeekDeviceDetailsSection } from "./TwelveWeekDeviceDetailsSection";
-import { TwelveWeekLocalStatusSection } from "./TwelveWeekLocalStatusSection";
-import { TwelveWeekPlanAccessSection } from "./TwelveWeekPlanAccessSection";
 import { SectionBlock } from "@/app/components/layout/SectionBlock";
 import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
 

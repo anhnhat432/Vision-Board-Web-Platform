@@ -1,6 +1,3 @@
-import { Button } from "../ui/button";
-"use client";
-
 import type * as React from "react";
 import { cn } from "../ui/utils";
 

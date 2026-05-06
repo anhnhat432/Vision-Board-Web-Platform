@@ -31,11 +31,6 @@ interface ResultStepProps {
 
 export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjustGoal }: ResultStepProps) {
   const prefersReducedMotion = useReducedMotion();
-  const iconMap: Record<ResultType, ReactNode> = {
-    realistic: <CheckCircle2 className="h-10 w-10 text-white" />,
-    challenging: <TrendingUp className="h-10 w-10 text-white" />,
-    too_ambitious: <AlertTriangle className="h-10 w-10 text-white" />,
-  };
 
   const styleMap: Record<ResultType, { glow: string; badge: string; title: string; panel: string; meter: string }> = {
     realistic: {

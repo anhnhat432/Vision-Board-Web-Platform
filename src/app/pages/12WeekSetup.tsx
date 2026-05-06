@@ -65,7 +65,7 @@ import { SetupStepShell } from "./12WeekSetup/components/SetupStepShell";
 import { OutcomeStep } from "./12WeekSetup/components/OutcomeStep";
 import { LeadIndicatorsStep } from "./12WeekSetup/components/LeadIndicatorsStep";
 import { ScheduleStep } from "./12WeekSetup/components/ScheduleStep";
-import { ReviewStep } from "./12WeekSetup/components/ReviewStep";
+import { PlanPreviewStep } from "@/features/plan12week/components/PlanPreviewStep";
 
 export function TwelveWeekSetup() {
   const navigate = useNavigate();
@@ -342,17 +342,17 @@ export function TwelveWeekSetup() {
       ? "Làm rõ kết quả bạn muốn chạm tới sau 12 tuần."
       : currentStep === 1
         ? "Chọn 2-4 việc bạn kiểm soát được và lặp lại được mỗi tuần."
-      : currentStep === 2
-        ? "Chốt ngày bắt đầu, ngày nhìn lại và chỉ số kết quả."
-        : "Kiểm tra lần cuối trước khi tạo kế hoạch.";
+        : currentStep === 2
+          ? "Chốt ngày bắt đầu, ngày nhìn lại và chỉ số kết quả."
+          : "Xem trước kế hoạch tự động, chỉnh sửa nếu cần và xác nhận.";
   const currentStepWhy =
     currentStep === 0
       ? "Kết quả rõ giúp biết khi nào về đích — và tránh đổi đích giữa chu kỳ vì cảm xúc."
       : currentStep === 1
         ? "Việc lặp lại là phần bạn kiểm soát được. Đo việc, không đo kết quả — kết quả tự đến khi việc đều."
-      : currentStep === 2
-        ? "Lịch và buổi nhìn lại cố định giúp duy trì khi động lực giảm — quan trọng hơn nội dung từng tuần."
-        : "Xác nhận lần cuối để chốt; vẫn sửa được sau khi tạo.";
+        : currentStep === 2
+          ? "Lịch và buổi nhìn lại cố định giúp duy trì khi động lực giảm — quan trọng hơn nội dung từng tuần."
+          : "Kế hoạch được tạo tự động từ mục tiêu và việc lặp lại. Bạn có thể xem trước tuần 1 với lịch cụ thể và chỉnh sửa trước khi xác nhận.";
 
   if (isLoading) {
     return (
@@ -935,17 +935,14 @@ export function TwelveWeekSetup() {
         )}
 
         {currentStep === 3 && (
-          <ReviewStep
-            smartGoal={smartGoal}
+          <PlanPreviewStep
             draft={draft}
+            smartGoal={smartGoal}
+            feasibility={feasibility}
             focusArea={focusArea}
             selectedTemplate={selectedTemplate}
-            setupGuideSupport={setupGuideSupport}
-            setupGuideTemplate={setupGuideTemplate}
-            weekOneTaskPreview={weekOneTaskPreview}
-            weekOneTaskWarning={weekOneTaskWarning}
-            feasibility={feasibility}
-            scheduledLeadIndicators={scheduledLeadIndicators}
+            onBack={handleBack}
+            onSubmit={handleSubmit}
             onChange={handleChange}
           />
         )}

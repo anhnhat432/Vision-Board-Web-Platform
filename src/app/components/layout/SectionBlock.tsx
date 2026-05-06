@@ -1,7 +1,8 @@
 import { Button } from "../ui/button";
 "use client";
 
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "../ui/utils";
 
