@@ -24,13 +24,13 @@ export function getPlanLabel(planCode: PricingPlanCode): string {
 export function getEntitlementLabel(key: EntitlementKey): string {
   switch (key) {
     case "premium_templates":
-      return "Template premium";
+      return "Mẫu nâng cao";
     case "premium_review_insights":
-      return "Insight review premium";
+      return "Phân tích review nâng cao";
     case "priority_reminders":
       return "Nhắc việc ưu tiên";
     case "advanced_analytics":
-      return "Analytics nâng cao";
+      return "Thống kê nâng cao";
     default:
       return key;
   }

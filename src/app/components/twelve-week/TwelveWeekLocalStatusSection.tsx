@@ -123,36 +123,36 @@ function isMutationQueueMergeReviewNeeded(result: MutationQueueSyncResult | null
 function getPullEntityKindLabel(kind: MutationQueueMergeReport["conflicts"][number]["kind"]): string {
   switch (kind) {
     case "goal":
-      return "Goal";
+      return "Mục tiêu";
     case "plan":
-      return "12-week plan";
+      return "Kế hoạch 12 tuần";
     case "week":
-      return "Week";
+      return "Tuần";
     case "task":
-      return "Task";
+      return "Việc";
     case "leadMetric":
-      return "Lead metric";
+      return "Việc lặp lại";
     case "dailyCheckIn":
-      return "Daily check-in";
+      return "Check-in hàng ngày";
     case "weeklyReview":
-      return "Weekly review";
+      return "Review tuần";
     default:
-      return "Workspace item";
+      return "Mục trong workspace";
   }
 }
 
 function getPullConflictReasonLabel(reason: MutationQueueMergeReport["conflicts"][number]["reason"]): string {
   switch (reason) {
     case "pending_local_mutation_cloud_newer":
-      return "Cloud changed after a pending local mutation.";
+      return "Đám mây đã thay đổi sau khi bạn cập nhật.";
     case "task_completion_differs":
-      return "Task completion differs.";
+      return "Trạng thái hoàn thành việc khác nhau.";
     case "daily_check_in_differs":
-      return "Daily check-in differs.";
+      return "Check-in hàng ngày khác nhau.";
     case "weekly_review_differs":
-      return "Weekly review differs.";
+      return "Review tuần khác nhau.";
     default:
-      return "Local and cloud differ.";
+      return "Dữ liệu máy và đám mây khác nhau.";
   }
 }
 
@@ -885,7 +885,7 @@ export function TwelveWeekLocalStatusSection({
           </p>
         </div>
         <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Outbox</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Hàng chờ gửi</p>
           <p className="mt-2 text-sm font-semibold text-slate-950">{pendingOutboxCount} chờ</p>
         </div>
       </div>

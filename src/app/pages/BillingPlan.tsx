@@ -553,15 +553,15 @@ export function BillingPlan() {
                 {billingStatus.providerLabel && ` (${billingStatus.providerLabel})`}
               </div>
               <div>
-                <span className="text-slate-400">Checkout: </span>
+                <span className="text-slate-400">Thanh toán: </span>
                 {getBillingReadinessLabel(billingStatus.checkoutReady)}
               </div>
               <div>
-                <span className="text-slate-400">Restore: </span>
+                <span className="text-slate-400">Khôi phục: </span>
                 {getBillingReadinessLabel(billingStatus.restoreReady)}
               </div>
               <div>
-                <span className="text-slate-400">Entitlement sync: </span>
+                <span className="text-slate-400">Đồng bộ quyền: </span>
                 {getBillingReadinessLabel(billingStatus.entitlementSyncReady)}
               </div>
             </div>

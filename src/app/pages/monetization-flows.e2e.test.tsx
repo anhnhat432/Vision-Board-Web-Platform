@@ -22,7 +22,7 @@ describe("monetization flows", () => {
     expect(screen.getByText("Bạn đang dùng gói miễn phí trên trình duyệt này.")).toBeInTheDocument();
 
     // Should show all 4 entitlement slots, all locked
-    expect(screen.getByText("Template premium")).toBeInTheDocument();
+    expect(screen.getByText("Mẫu nâng cao")).toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "Mở Plus demo" }).length).toBeGreaterThan(0);
   });
 

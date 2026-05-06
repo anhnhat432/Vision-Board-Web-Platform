@@ -286,7 +286,7 @@ export function TwelveWeekDeviceDetailsSection({
             <Switch
               checked={appPreferences.keepLocalOutbox}
               onCheckedChange={(value) => onPreferenceToggle("keepLocalOutbox", value)}
-              aria-label="Bật tắt outbox local"
+              aria-label="Bật tắt hàng chờ gửi"
             />
           </div>
         </div>
@@ -364,7 +364,7 @@ export function TwelveWeekDeviceDetailsSection({
           </Button>
         </div>
         <p className="mt-3 text-sm text-slate-500">
-          Sẽ xóa nhật ký sự kiện, outbox và trạng thái nhắc việc local. Dữ liệu chu kỳ 12 tuần và nhật ký vẫn được giữ
+          Sẽ xóa nhật ký sự kiện, hàng chờ gửi và trạng thái nhắc việc. Dữ liệu chu kỳ 12 tuần và nhật ký vẫn được giữ
           nguyên trên trình duyệt này.
         </p>
       </ExpandableSection>
@@ -395,7 +395,7 @@ export function TwelveWeekDeviceDetailsSection({
               Dữ liệu có thể được gửi đi
             </p>
             <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
-              <li>• Outbox đồng bộ (nếu bật keepLocalOutbox)</li>
+              <li>• Hàng chờ gửi (nếu bật giữ lại dữ liệu chờ)</li>
               <li>• Push subscription endpoint (nếu bật push)</li>
               <li>• Sự kiện analytics (nếu bật cho phép)</li>
             </ul>
@@ -417,8 +417,8 @@ export function TwelveWeekDeviceDetailsSection({
       </ExpandableSection>
 
       <ExpandableSection
-        title="Outbox, đồng bộ và nhắc việc"
-        description="Xem outbox local, trạng thái sync thử nghiệm và nhắc việc đang chờ. Demo không hứa cloud sync."
+        title="Hàng chờ gửi, đồng bộ và nhắc việc"
+        description="Xem hàng chờ gửi, trạng thái đồng bộ thử nghiệm và nhắc việc đang chờ. Demo không hứa đồng bộ đám mây."
       >
         <div className="grid gap-3">
           <div className="rounded-lg border border-sky-200 bg-sky-50 p-5">
@@ -441,7 +441,7 @@ export function TwelveWeekDeviceDetailsSection({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-700">
-                  Outbox trên thiết bị
+                  Hàng chờ gửi trên thiết bị
                 </p>
                 <p className="mt-2 text-3xl font-bold text-slate-950">{pendingOutboxCount} đang chờ</p>
                 <p className="text-sm text-slate-600">{archivedOutboxCount} mục đã lưu</p>
@@ -466,7 +466,7 @@ export function TwelveWeekDeviceDetailsSection({
                 Khôi phục mục đã lưu
               </Button>
               <Button variant="outline" className="w-full bg-white/90" onClick={onClearArchivedOutbox}>
-                Xóa outbox đã lưu
+                Xóa hàng chờ đã lưu
               </Button>
             </div>
           </div>
@@ -511,7 +511,7 @@ export function TwelveWeekDeviceDetailsSection({
         <div className="mt-3 rounded-lg border border-slate-200 bg-white p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Outbox gần đây</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Hàng chờ gần đây</p>
               <p className="mt-1 text-sm text-slate-600">3 mục mới nhất đang chờ hoặc đã được lưu lại.</p>
             </div>
             <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
@@ -521,7 +521,7 @@ export function TwelveWeekDeviceDetailsSection({
           <div className="mt-3 max-h-[360px] space-y-2 overflow-y-auto pr-1">
             {recentOutboxItems.length === 0 ? (
               <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-4 text-sm text-slate-600">
-                Chưa có mục nào trong outbox trên thiết bị.
+                Chưa có mục nào trong hàng chờ trên thiết bị.
               </div>
             ) : (
               recentOutboxItems.map((item) => (
@@ -556,7 +556,7 @@ export function TwelveWeekDeviceDetailsSection({
       <div className="rounded-lg border border-amber-300/70 bg-amber-50 p-5 shadow-[0_18px_38px_-34px_rgba(217,119,6,0.18)]">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-600">Làm mới chu kỳ</p>
         <p className="mt-2 text-sm text-red-900">
-          Bắt đầu lại tuần 1 từ tuần hiện tại, giữ nguyên outcome và tactic, nhưng làm mới việc, check-in và review của
+          Bắt đầu lại tuần 1 từ tuần hiện tại, giữ nguyên kết quả và việc lặp lại, nhưng làm mới việc hàng ngày, check-in và review của
           chu kỳ này.
         </p>
         <Button className="mt-3 w-full bg-white/90" variant="outline" onClick={onOpenResetDialog}>
