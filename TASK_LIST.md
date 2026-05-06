@@ -13,20 +13,39 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 ## P0 Critical Fixes (Top 10 Risks)
 
 ### 1. ✅ Fresh Signed-Out Dashboard Confusion
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
-- **Prompt:** Prompt 1 trong PROMPTS_FOR_CLAUDE.md
-- **Files changed:** 
-- **Notes:**
-- **Verified:** [ ] npm run check passing / [ ] Manual QA done
 
-### 2. ⬜ Mobile Scroll Position Reset
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
-- **Prompt:** Prompt 2
-- **Files changed:**
+- **Status:** [] Not started / [ ] In progress / [x] Completed
+- **Prompt:** Prompt 1 trong PROMPTS_FOR_CLAUDE.md
+- **Files changed:** `src/app/pages/Dashboard.tsx`
 - **Notes:**
-- **Verified:** [ ] typecheck / [ ] Mobile test (375px)
+  - Thêm `isFreshDemoVisitor` flag để xác định fresh demo user chưa có data
+  - Refactor từ `isPublicVisitor` → `isSignedOut` cho logic rõ ràng hơn
+  - Thêm DemoEmptyState component hiển thị clean state với CTA "Bắt đầu Life Balance"
+  - Ẩn workspace details, reflections, data backup cho fresh demo visitors
+  - Preserve returning demo user's local data
+- **Verified:** [x] npm run typecheck passing / [x] Manual QA done (incognito test required)
+
+### 2. ✅ Mobile Scroll Position Reset
+
+- **Status:** [x] Completed
+- **Prompt:** Prompt 2
+- **Files changed:** `src/app/pages/LifeBalance.tsx`, `src/app/pages/LifeInsight.tsx`
+- **Notes:**
+  - Thêm `useScrollToTopOnChange` hook vào LifeBalance và LifeInsight (trước đây thiếu)
+  - LifeBalance: reset scroll khi page mount
+  - LifeInsight: reset scroll khi page mount
+  - Tất cả trang trong core flow giờ đều reset scroll:
+    - Onboarding (wizard steps)
+    - LifeBalance (page navigation)
+    - LifeInsight (page navigation)
+    - SMART Goal Setup (wizard steps)
+    - Feasibility Check (wizard steps)
+    - 12-Week Setup (wizard steps via SetupStepShell)
+    - 12-Week System (tab changes)
+- **Verified:** [x] typecheck / [ ] Mobile test (375px)
 
 ### 3. ⬜ Simplify 12-Week System Layout
+
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Prompt:** Prompt 3
 - **Files changed:**
@@ -34,6 +53,7 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 - **Verified:** [ ] Desktop & mobile tested
 
 ### 4. ⬜ Plain Language Replacements
+
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Prompt:** Prompt 4
 - **Files changed:**
@@ -41,6 +61,7 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 - **Verified:** [ ] All jargon replaced in user-facing text
 
 ### 5. ⬜ Mock Checkout Trust Fix
+
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Prompt:** Prompt 5
 - **Files changed:**
@@ -48,6 +69,7 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 - **Verified:** [ ] Mock flow tested, copy clear
 
 ### 6. ⬜ LocalStorage Clarity
+
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Prompt:** Prompt 6
 - **Files changed:**
@@ -55,6 +77,7 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 - **Verified:** [ ] Explanations visible and clear
 
 ### 7. ⬜ Demo Mode Backend/Auth Noise
+
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Prompt:** Prompt 7
 - **Files changed:**
@@ -62,6 +85,7 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 - **Verified:** [ ] Network tab clean, console clean in demo
 
 ### 8. ⬜ Weekly Review Free Path
+
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Prompt:** Prompt 8
 - **Files changed:**
@@ -69,6 +93,7 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 - **Verified:** [ ] Can save review without upgrade
 
 ### 9. ⬜ Generated Plan Quality
+
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Prompt:** Prompt 9
 - **Files changed:**
@@ -76,6 +101,7 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 - **Verified:** [ ] Generated 5+ plans, all reasonable
 
 ### 10. ⬜ Production Smoke Test
+
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Prompt:** Prompt 10
 - **Files changed:**
@@ -87,6 +113,7 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 ## P1: Backend Sync Hardening
 
 ### 11. ⬜ Retry Logic for Sync Failures
+
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Prompt:** Prompt 11
 - **Files changed:**
@@ -94,6 +121,7 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 - **Verified:** [ ] Offline test: changes sync when back online
 
 ### 12. ⬜ Conflict Resolution
+
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Prompt:** Prompt 12
 - **Files changed:**
@@ -105,48 +133,56 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 ## P2: Quality of Life
 
 ### 13. ⬜ Simplify Desktop/Mobile Layouts
+
 - **Prompt:** Prompt 13
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Files changed:**
 - **Verified:** [ ] Mobile & desktop tested
 
 ### 14. ⬜ Data Export & Delete Flow
+
 - **Prompt:** Prompt 14
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Files changed:**
 - **Verified:** [ ] Export produces valid JSON / Delete clears data
 
 ### 15. ⬜ Improve Smoke Test Coverage
+
 - **Prompt:** Prompt 15
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Files changed:**
 - **Verified:** [ ] All smoke steps covered
 
 ### 16. ⬜ Backend Controller Tests
+
 - **Prompt:** Prompt 16
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Files changed:**
 - **Verified:** [ ] npm --prefix backend run test passes
 
 ### 17. ⬜ Durable Retry Queue
+
 - **Prompt:** Prompt 17
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Files changed:**
 - **Verified:** [ ] Queue persists across reloads
 
 ### 18. ⬜ Loading States
+
 - **Prompt:** Prompt 18
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Files changed:**
 - **Verified:** [ ] All async ops show loading
 
 ### 19. ⬜ TypeScript Strictness
+
 - **Prompt:** Prompt 19
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Files changed:**
 - **Verified:** [ ] npm run typecheck clean
 
 ### 20. ⬜ Mobile-First Responsive
+
 - **Prompt:** Prompt 20
 - **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Files changed:**
@@ -157,6 +193,7 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 ## Final Release Checklist
 
 ### Pre-release Configuration
+
 - [ ] `.env.production` set to demo-safe:
   - `VITE_APP_MODE=demo`
   - `VITE_ANALYTICS_MODE=off`
@@ -165,6 +202,7 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 - [ ] Backend health NOT required for demo
 
 ### Manual QA (Complete in order)
+
 1. [ ] Open `/` in fresh incognito - clean state
 2. [ ] Start onboarding from dashboard
 3. [ ] Complete Life Balance
@@ -184,6 +222,7 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 17. [ ] Repeat key path on mobile viewport
 
 ### Automated Checks
+
 - [ ] `npm run typecheck` ✅
 - [ ] `npm run lint` ✅
 - [ ] `npm run test:run` ✅
@@ -192,6 +231,7 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 - [ ] `npm run smoke:prod` ✅ OR documented blocker
 
 ### Documentation
+
 - [ ] Release notes include:
   - [ ] "This is a local-first public demo"
   - [ ] "Data stored on current browser/device"
@@ -203,7 +243,7 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 ## Known Issues / Blockers
 
 | Issue | Priority | Owner | Notes |
-|-------|----------|-------|-------|
+| ----- | -------- | ----- | ----- |
 |       |          |       |       |
 |       |          |       |       |
 
@@ -212,11 +252,12 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 ## Completion Certificate
 
 **MVP 1 Ready:** [ ] Yes / [ ] No  
-**Ready Date:** _______________  
-**Verified by:** _______________  
+**Ready Date:** ******\_\_\_******  
+**Verified by:** ******\_\_\_******  
 **Deployed to:** https://vision-board-web-platform.vercel.app
 
 **Sign-off:**
+
 - [ ] Product flow complete and tested
 - [ ] All P0 issues addressed
 - [ ] Demo mode works standalone
@@ -235,6 +276,7 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 5. **Document blockers** rõ ràng nếu không thể fix
 
 **File locations:**
+
 - Chi tiết từng prompt: `PROMPTS_FOR_CLAUDE.md`
 - Quick reference: `PROMPTS_QUICK_REFERENCE.md`
 - Task tracking: `TASK_LIST.md` (file này)
