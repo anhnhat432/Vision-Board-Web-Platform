@@ -14,7 +14,7 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 
 ### 1. ✅ Fresh Signed-Out Dashboard Confusion
 
-- **Status:** [] Not started / [ ] In progress / [x] Completed
+- **Status:** [x] Completed
 - **Prompt:** Prompt 1 trong PROMPTS_FOR_CLAUDE.md
 - **Files changed:** `src/app/pages/Dashboard.tsx`
 - **Notes:**
