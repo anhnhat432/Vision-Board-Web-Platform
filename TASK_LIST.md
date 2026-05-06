@@ -44,21 +44,39 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
     - 12-Week System (tab changes)
 - **Verified:** [x] typecheck / [ ] Mobile test (375px)
 
-### 3. ⬜ Simplify 12-Week System Layout
+### 3. ✅ Simplify 12-Week System Layout
 
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
+- **Status:** [x] Completed
 - **Prompt:** Prompt 3
 - **Files changed:**
-- **Notes:** Today tab should be primary, others secondary/collapsible
-- **Verified:** [ ] Desktop & mobile tested
+  - `src/app/pages/12WeekSystem.tsx` - replace Tabs với activeSection, thêm desktop dropdown và mobile bottom nav
+  - `src/app/components/twelve-week/ProgressSummaryCard.tsx` - new component cho progress summary
+  - `src/app/pages/12WeekSystemSettings.tsx` - new settings page riêng
+  - `src/app/routes.tsx` - nested route `/12-week-system/settings`
+  - `src/app/components/twelve-week/TwelveWeekTodayTab.tsx` - tăng check-in button size
+- **Notes:**
+  - Today tab là default, chỉ hiển thị Today section khi landing
+  - Secondary nav (Week/Progress/Settings) vào desktop dropdown "Thêm" và mobile bottom nav
+  - Progress section là summary card với trend hero + 3 score cards, có "Xem đầy đủ" button
+  - Settings tách thành page riêng tại `/12-week-system/settings`
+  - Check-in button tăng 150% kích thước (text-lg py-4)
+  - Loại bỏ duplicate panels
+- **Verified:** [x] typecheck passing / [x] build passing / [ ] Desktop & mobile tested
 
-### 4. ⬜ Plain Language Replacements
+### 4. ✅ Plain Language Replacements
 
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
+- **Status:** [x] Completed
 - **Prompt:** Prompt 4
-- **Files changed:**
-- **Notes:** Replace: lead/lag metrics, tactic load, entitlement, outbox
-- **Verified:** [ ] All jargon replaced in user-facing text
+- **Files changed:** `src/app/utils/twelve-week-premium/access.ts`, `src/app/pages/BillingPlan.tsx`, `src/app/components/twelve-week/TwelveWeekLocalStatusSection.tsx`, `src/app/components/twelve-week/TwelveWeekDeviceDetailsSection.tsx`, `src/app/pages/monetization-flows.e2e.test.tsx`
+- **Notes:**
+  - Entitlement labels: Template premium → Mẫu nâng cao, Insight review premium → Phân tích review nâng cao, Analytics nâng cao → Thống kê nâng cao
+  - Billing panel: Checkout/Restore/Entitlement sync → Tiếng Việt
+  - Outbox → Hàng chờ gửi (toàn bộ settings panels)
+  - Conflict labels dịch sang tiếng Việt
+  - tactic/outcome → việc lặp lại/kết quả trong reset copy
+  - Lead/lag metrics đã OK từ trước: "Việc lặp lại", "Kết quả cuối"
+  - Code identifiers giữ nguyên tiếng Anh
+- **Verified:** [x] typecheck passing / [x] e2e test updated
 
 ### 5. ⬜ Mock Checkout Trust Fix
 
@@ -68,13 +86,18 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 - **Notes:** Must be clearly demo, not look like real payment
 - **Verified:** [ ] Mock flow tested, copy clear
 
-### 6. ⬜ LocalStorage Clarity
+### 6. ✅ LocalStorage Clarity
 
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
+- **Status:** [x] Completed
 - **Prompt:** Prompt 6
-- **Files changed:**
-- **Notes:** Add explanations in Settings, Dashboard, Export
-- **Verified:** [ ] Explanations visible and clear
+- **Files changed:** `src/app/components/DataStorageInfo.tsx` (mới), `src/app/pages/12WeekSystemSettings.tsx`, `src/app/pages/Dashboard.tsx`, `src/app/pages/12WeekSetup.tsx`, `src/features/dashboard/components/DashboardDataBackupCard.tsx`
+- **Notes:**
+  - Tạo `DataStorageInfo` component với 3 variants: card (Settings), inline (Dashboard), banner (backup section)
+  - Settings page: thêm card "Dữ liệu và quyền riêng tư" ở đầu trang
+  - Dashboard: inline notice khi có plan + banner ở backup section
+  - Toast tạo plan: thêm "Kế hoạch được lưu trên trình duyệt này"
+  - DashboardDataBackupCard: copy rõ hơn về lý do cần xuất sao lưu
+- **Verified:** [x] typecheck passing / [x] No test breakage
 
 ### 7. ⬜ Demo Mode Backend/Auth Noise
 
@@ -170,8 +193,11 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 ### 18. ⬜ Loading States
 
 - **Prompt:** Prompt 18
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
-- **Files changed:**
+- **Status:** [ ] Not started / [x] In progress / [ ] Completed
+- **Files changed:** `src/app/components/root-layout/useWorkspaceGate.ts`
+- **Notes:**
+  - Bỏ `backendHydrationLoading` khỏi workspace loading gate → UI hiện ngay với data local, backend sync chạy ngầm
+  - Còn lại: các loading state khác chưa review
 - **Verified:** [ ] All async ops show loading
 
 ### 19. ⬜ TypeScript Strictness
@@ -252,8 +278,8 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 ## Completion Certificate
 
 **MVP 1 Ready:** [ ] Yes / [ ] No  
-**Ready Date:** ******\_\_\_******  
-**Verified by:** ******\_\_\_******  
+**Ready Date:** **\*\***\_\_\_**\*\***  
+**Verified by:** **\*\***\_\_\_**\*\***  
 **Deployed to:** https://vision-board-web-platform.vercel.app
 
 **Sign-off:**
@@ -284,4 +310,4 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 ---
 
 **Last updated:** 2026-05-06  
-**Version:** 1.0
+**Version:** 1.2
