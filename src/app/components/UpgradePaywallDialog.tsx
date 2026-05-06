@@ -95,8 +95,8 @@ export function UpgradePaywallDialog({
         toast.success(result.message, {
           description:
             result.providerMode === "mock_provider"
-              ? "Mock checkout không thu tiền thật; quyền mở local trên trình duyệt này."
-              : "Checkout sẽ tiếp tục ở provider đã cấu hình.",
+              ? "Thanh toán mô phỏng — không thu tiền thật. Gói được mở trên trình duyệt này."
+              : "Tiếp tục thanh toán tại nhà cung cấp.",
         });
       } else if (result.status === "already_active") {
         toast.info(result.message);
@@ -104,10 +104,10 @@ export function UpgradePaywallDialog({
         toast.success(result.message, {
           description:
             result.providerMode === "api_contract"
-              ? "Quyền đã được đồng bộ qua billing contract."
+              ? "Quyền đã được đồng bộ qua hệ thống thanh toán."
               : result.providerMode === "mock_provider"
-                ? "Mock checkout đã mở quyền local trên trình duyệt này, không thu tiền thật."
-                : "Đây là local checkout để thử flow; chưa thu tiền thật.",
+                ? "Mô phỏng hoàn tất. Gói được mở trên trình duyệt này — không thu tiền thật."
+                : "Đây là thanh toán thử nghiệm. Không có khoản thu thật.",
         });
       }
 
@@ -125,12 +125,21 @@ export function UpgradePaywallDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[calc(100vh-1rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] overflow-hidden border-0 gradient-shell p-0 shadow-[0_40px_90px_-40px_rgba(15,23,42,0.38)] sm:!max-w-4xl">
         <div className="max-h-[calc(100vh-1rem)] overflow-hidden rounded-[28px] sm:rounded-[30px]">
+          {/* Demo banner - only show in demo mode */}
+          {demoMode && (
+            <div className="border-b border-amber-400 bg-amber-50 px-5 py-3 sm:px-7">
+              <div className="flex items-center justify-center gap-2 text-amber-900">
+                <span className="font-semibold">⚡ BẢN DEMO</span>
+                <span className="text-amber-700">— Không thu tiền thật — Gói chỉ được mở trên trình duyệt này</span>
+              </div>
+            </div>
+          )}
           <div className="border-b border-white/70 gradient-dark-indigo px-5 py-6 text-white sm:px-7 sm:py-7">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="max-w-2xl">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/78">
                   <LockKeyhole className="h-3.5 w-3.5" />
-                  Plus cho hệ 12 tuần
+                  {demoMode ? "Demo — Nâng cấp Plus" : "Plus cho hệ 12 tuần"}
                 </div>
                 <DialogHeader className="mt-4 text-left">
                   <DialogTitle className="text-3xl font-bold leading-tight text-white">
@@ -167,29 +176,29 @@ export function UpgradePaywallDialog({
               {billingDebugUi && (
                 <div className="rounded-[26px] border border-slate-200 bg-slate-50/88 p-5">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Trạng thái billing demo
+                    Trạng thái thanh toán demo
                   </p>
                   <div className="mt-4 grid gap-2 sm:grid-cols-3">
                     <div className="rounded-[18px] border border-white/80 bg-white px-4 py-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Mode</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Chế độ</p>
                       <p className="mt-2 text-sm font-semibold text-slate-900">
                         {billingProviderStatus.mode === "api_contract"
                           ? "API contract"
                           : billingProviderStatus.mode === "mock_provider"
-                            ? "Mock provider"
-                            : "Local test"}
+                            ? "Nhà cung cấp demo"
+                            : "Thử nghiệm cục bộ"}
                       </p>
                     </div>
                     <div className="rounded-[18px] border border-white/80 bg-white px-4 py-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Checkout</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Thanh toán</p>
                       <p className="mt-2 text-sm font-semibold text-slate-900">
-                        {billingProviderStatus.checkoutReady ? "Sẵn sàng" : "Local fallback"}
+                        {billingProviderStatus.checkoutReady ? "Sẵn sàng" : "Dự phòng cục bộ"}
                       </p>
                     </div>
                     <div className="rounded-[18px] border border-white/80 bg-white px-4 py-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Restore</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Khôi phục</p>
                       <p className="mt-2 text-sm font-semibold text-slate-900">
-                        {billingProviderStatus.restoreReady ? "Sẵn sàng" : "Local fallback"}
+                        {billingProviderStatus.restoreReady ? "Sẵn sàng" : "Dự phòng cục bộ"}
                       </p>
                     </div>
                   </div>
@@ -268,10 +277,10 @@ export function UpgradePaywallDialog({
           <DialogFooter className="flex flex-col gap-3 border-t border-white/70 bg-white/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5">
             <p className="text-sm leading-7 text-slate-500">
               {demoMode
-                ? "Đây là bản demo: mock checkout không thu tiền thật và quyền Plus chỉ lưu trên trình duyệt này."
+                ? "BẢN DEMO: Không thu tiền thật. Gói chỉ được mở trên trình duyệt này."
                 : billingProviderStatus.mode === "api_contract"
-                  ? "Nếu host đã cấu hình billing thật, web sẽ chuyển bạn sang cổng thanh toán tương ứng ở bước tiếp theo."
-                  : "Bạn vẫn có thể tiếp tục với bản Free nếu chưa cần mở thêm lớp hỗ trợ lúc này."}
+                  ? "Bạn sẽ được chuyển đến nhà cung cấp thanh toán khi xác nhận."
+                  : "Bạn có thể dùng gói miễn phí nếu chưa cần tính năng nâng cao lúc này."}
             </p>
             <Button className="w-full sm:w-auto" variant="outline" onClick={() => onOpenChange(false)}>
               Để sau

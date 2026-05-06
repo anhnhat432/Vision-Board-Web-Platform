@@ -54,12 +54,26 @@ export function MockBillingCheckout() {
   if (!session) {
     return (
       <div className="space-y-6 pb-12">
+        {/* Demo banner */}
+        <div className="rounded-lg border-2 border-amber-400 bg-amber-50 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-200">
+              <span className="text-lg">⚡</span>
+            </div>
+            <div>
+              <p className="font-semibold text-amber-900">BẢN DEMO THANH TOÁN — KHÔNG THU TIỀN THẬT</p>
+              <p className="text-sm text-amber-800">
+                Đây là bản demo. Không có khoản thanh toán nào được xử lý. Đây chỉ là một bản thử nghiệm.
+              </p>
+            </div>
+          </div>
+        </div>
         <Card className="overflow-hidden border-0 gradient-dark-indigo text-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.52)]">
           <CardContent className="p-8 lg:p-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Bản demo mock checkout</p>
-            <h1 className="mt-3 text-4xl font-bold tracking-normal">Phiên checkout này không còn hợp lệ.</h1>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Thanh toán mô phỏng</p>
+            <h1 className="mt-3 text-4xl font-bold tracking-normal">Phiên thanh toán này không còn hợp lệ.</h1>
             <p className="mt-3 max-w-2xl text-base leading-8 text-white/74">
-              Có thể bạn đã hoàn tất, hủy phiên này trước đó, hoặc tab checkout đã mở quá lâu.
+              Có thể bạn đã hoàn tất, hủy phiên này trước đó, hoặc tab đã mở quá lâu.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Button
@@ -87,6 +101,21 @@ export function MockBillingCheckout() {
 
   return (
     <div className="space-y-8 pb-12">
+      {/* Demo banner */}
+      <div className="rounded-lg border-2 border-amber-400 bg-amber-50 px-4 py-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-200">
+            <span className="text-lg">⚡</span>
+          </div>
+          <div>
+            <p className="font-semibold text-amber-900">THANH TOÁN MÔ PHỎNG — KHÔNG THU TIỀN THẬT</p>
+            <p className="text-sm text-amber-800">
+              Đây là bản mô phỏng. Không có khoản thanh toán nào được xử lý. Gói chỉ được mở trên trình duyệt này.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <Card className="overflow-hidden border-0 gradient-dark-indigo text-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.52)]">
         <CardContent className="grid gap-6 p-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-10">
           <div className="space-y-5">
@@ -167,16 +196,16 @@ export function MockBillingCheckout() {
               <p className="mt-2 text-lg font-semibold text-slate-950">{getPlanLabel(session.planCode)}</p>
             </div>
             <div className="rounded-[22px] border border-slate-200 bg-slate-50 px-4 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Nguồn gọi</p>
-              <p className="mt-2 text-sm font-semibold text-slate-900">{session.source ?? "paywall_dialog"}</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Nguồn yêu cầu</p>
+              <p className="mt-2 text-sm font-semibold text-slate-900">{session.source === "paywall_dialog" || !session.source ? "Từ màn nâng cấp" : session.source === "settings" ? "Từ cài đặt" : session.source === "12_week_setup" ? "Từ thiết lập 12 tuần" : "Khác"}</p>
             </div>
             <div className="grid gap-2">
               <Button className="w-full" onClick={handleConfirm} disabled={isSubmitting}>
                 <Crown className="h-4 w-4" />
-                {isSubmitting ? "Đang xác nhận..." : `Xác nhận mở ${plan.name}`}
+                {isSubmitting ? "Đang mô phỏng thanh toán…" : "Xác nhận mở gói (demo)"}
               </Button>
               <Button variant="outline" className="w-full" onClick={handleCancel} disabled={isSubmitting}>
-                Hủy và quay lại
+                Huỷ bỏ
               </Button>
             </div>
           </CardContent>
