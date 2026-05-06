@@ -20,6 +20,7 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+const PROFILE_BOOTSTRAP_TIMEOUT_MS = 8_000;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { user, loading, error, login, logout, isConfigured } = useAuth();
@@ -51,8 +52,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUserProfileError(null);
 
     let cancelled = false;
+    let timedOut = false;
+    const controller = new AbortController();
+    const timeoutId = globalThis.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, PROFILE_BOOTSTRAP_TIMEOUT_MS);
 
-    post<UserProfile>("/auth/profile")
+    post<UserProfile>("/auth/profile", undefined, { signal: controller.signal })
       .then((profile) => {
         if (cancelled) return;
         setUserProfile(profile);
@@ -62,21 +69,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (cancelled) return;
         console.error("Failed to bootstrap user profile.", err);
         setUserProfile(null);
-        setUserProfileError(
-          err instanceof Error && err.message.trim().length > 0
-            ? err.message
-            : "Không thể nối backend profile.",
-        );
+        if (timedOut) {
+          setUserProfileError(
+            "Backend profile phản hồi quá lâu. App đã mở workspace local trước; bạn có thể thử nối backend lại sau.",
+          );
+        } else {
+          setUserProfileError(
+            err instanceof Error && err.message.trim().length > 0 ? err.message : "Không thể nối backend profile.",
+          );
+        }
         // Allow retry on next user change
         bootstrappedUid.current = null;
       })
       .finally(() => {
         if (cancelled) return;
+        globalThis.clearTimeout(timeoutId);
         setUserProfileLoading(false);
       });
 
     return () => {
       cancelled = true;
+      globalThis.clearTimeout(timeoutId);
+      controller.abort();
     };
   }, [user, profileRefreshIndex]);
 
