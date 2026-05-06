@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { BarChart3, CalendarDays, ListTodo, Settings2 } from "lucide-react";
+import { BarChart3, CalendarDays, ListTodo, Settings2, MoreHorizontal } from "lucide-react";
 
 import { useTwelveWeekSystemSnapshot } from "../hooks/useTwelveWeekSystemSnapshot";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
@@ -30,6 +30,12 @@ import {
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
 import { Button } from "../components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
   clearArchivedOutbox,
@@ -73,6 +79,7 @@ import {
   hasBackendSyncIssue as getHasBackendSyncIssue,
 } from "./12WeekSystem/helpers";
 import { PlanOverview, WeekEditor, WeeklyReview } from "./12WeekSystem/lazyTabs";
+import { ProgressSummaryCard } from "@/app/components/twelve-week/ProgressSummaryCard";
 import { useTwelveWeekBackendActions } from "./12WeekSystem/useTwelveWeekBackendActions";
 import { useTwelveWeekBillingActions } from "./12WeekSystem/useTwelveWeekBillingActions";
 import { useTwelveWeekExecutionActions } from "./12WeekSystem/useTwelveWeekExecutionActions";
@@ -165,6 +172,7 @@ export function TwelveWeekSystem() {
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [isClearLocalDialogOpen, setIsClearLocalDialogOpen] = useState(false);
   const [dismissedTriggerKind, setDismissedTriggerKind] = useState<string | null>(null);
+  const [showFullProgress, setShowFullProgress] = useState(false);
   const {
     loading: isManualCloudSyncing,
     lastResult: lastManualCloudSyncResult,
@@ -275,6 +283,12 @@ export function TwelveWeekSystem() {
     updateActiveSystemState(() => normalizedNextSystem);
     return normalizedNextSystem;
   };
+
+  useEffect(() => {
+    if (activeTab !== "progress") {
+      setShowFullProgress(false);
+    }
+  }, [activeTab]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -536,7 +550,7 @@ export function TwelveWeekSystem() {
   }
 
   return (
-    <div className="ops-shell ops-system">
+    <div className="ops-shell ops-system pb-20 md:pb-4">
       <UpgradePaywallDialog
         open={isUpgradeDialogOpen}
         onOpenChange={setIsUpgradeDialogOpen}
@@ -670,54 +684,36 @@ export function TwelveWeekSystem() {
         }}
       />
 
-      <div ref={tabsTopRef}>
-        <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList
-            data-tour-id="system-tabs"
-            aria-label="Điều hướng trung tâm 12 tuần"
-            className="sticky top-14 z-20 grid h-auto w-full grid-cols-4 gap-1 rounded-lg border border-slate-200 bg-white/95 p-1 shadow-sm sm:top-3"
-          >
-          <TabsTrigger
-            value="today"
-            className="min-h-12 min-w-0 shrink-0 flex-col justify-center gap-1 rounded-md px-2 py-2 text-xs leading-tight sm:min-h-11 sm:flex-row sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
-          >
-            <ListTodo className="h-4 w-4" />
-            Hôm nay
-          </TabsTrigger>
-          <TabsTrigger
-            value="week"
-            className="min-h-12 min-w-0 shrink-0 flex-col justify-center gap-1 rounded-md px-2 py-2 text-xs leading-tight sm:min-h-11 sm:flex-row sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
-          >
-            <CalendarDays className="h-4 w-4" />
-            Tuần
-          </TabsTrigger>
-          <TabsTrigger
-            value="progress"
-            className="min-h-12 min-w-0 shrink-0 flex-col justify-center gap-1 rounded-md px-2 py-2 text-xs leading-tight sm:min-h-11 sm:flex-row sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
-          >
-            <BarChart3 className="h-4 w-4" />
-            Tiến độ
-          </TabsTrigger>
-          <TabsTrigger
-            value="settings"
-            className="min-h-12 min-w-0 shrink-0 flex-col justify-center gap-1 rounded-md px-2 py-2 text-xs leading-tight sm:min-h-11 sm:flex-row sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
-          >
-            <Settings2 className="h-4 w-4" />
-            Cài đặt
-          </TabsTrigger>
-        </TabsList>
+      {/* Desktop secondary navigation dropdown */}
+      <div className="hidden md:flex justify-end mb-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="gap-2">
+              <MoreHorizontal className="h-4 w-4" />
+              Thêm
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleTabChange("settings")}>
+              <CalendarDays className="mr-2 h-4 w-4" />
+              Review tuần
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleTabChange("progress")}>
+              <BarChart3 className="mr-2 h-4 w-4" />
+              Tiến độ
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/12-week-system/settings")}>
+              <Settings2 className="mr-2 h-4 w-4" />
+              Cài đặt
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
-        <p className="mt-3 hidden px-1 text-xs leading-5 text-slate-500 sm:block">
-          {activeTab === "today"
-            ? "Hôm nay: tick việc và lưu một check-in ngắn để giữ nhịp."
-            : activeTab === "week"
-              ? "Tuần: chốt review tuần này và quyết định nhịp cho tuần sau."
-              : activeTab === "progress"
-                ? "Tiến độ: xem nhịp tuần này, điểm 12 tuần và bước tiếp theo nên làm."
-                : "Cài đặt: chỉnh nhịp chu kỳ, xuất dữ liệu hoặc xem trạng thái sync."}
-        </p>
-
-        <TabsContent value="today" className="space-y-6 pt-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+      {/* Main content sections */}
+      <div ref={tabsTopRef} className="pt-4">
+        {/* TODAY SECTION */}
+        {activeTab === "today" && (
           <TabErrorBoundary fallbackTitle="Tab Hôm nay gặp lỗi">
             <TaskBoard
               system={system}
@@ -764,9 +760,10 @@ export function TwelveWeekSystem() {
               onSkipNonCoreTask={handleSkipNonCoreTask}
             />
           </TabErrorBoundary>
-        </TabsContent>
+        )}
 
-        <TabsContent value="week" className="space-y-6 pt-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+        {/* WEEK SECTION */}
+        {activeTab === "week" && (
           <TabErrorBoundary fallbackTitle="Tab Tuần gặp lỗi">
             <Suspense
               fallback={
@@ -814,9 +811,10 @@ export function TwelveWeekSystem() {
               />
             </Suspense>
           </TabErrorBoundary>
-        </TabsContent>
+        )}
 
-        <TabsContent value="progress" className="space-y-6 pt-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+        {/* PROGRESS SECTION */}
+        {activeTab === "progress" && (
           <TabErrorBoundary fallbackTitle="Tab Tiến độ gặp lỗi">
             <Suspense
               fallback={
@@ -826,30 +824,55 @@ export function TwelveWeekSystem() {
                 />
               }
             >
-              <PlanOverview
-                system={system}
-                currentWeek={currentWeek}
-                currentWeekRange={currentWeekRange}
-                currentWeekScoreValue={currentWeekScoreValue}
-                averageScore={averageScore}
-                reviewDoneCount={reviewDoneCount}
-                weekCompletion={weekCompletion}
-                milestoneItems={milestoneItems}
-                hasAdvancedAnalytics={hasAdvancedAnalytics}
-                executionHeatmap={executionHeatmap}
-                weeklyTrend={weeklyTrend}
-                tacticBreakdown={tacticBreakdown}
-                reviewDueToday={reviewDueToday}
-                onOpenTodayTab={() => handleTabChange("today")}
-                onOpenWeekTab={() => handleTabChange("week")}
-                onNavigateToSetup={() => navigate("/life-insight")}
-                executionInsights={executionInsights}
-              />
+              {!showFullProgress ? (
+                <ProgressSummaryCard
+                  system={system}
+                  currentWeek={currentWeek}
+                  currentWeekRange={currentWeekRange}
+                  currentWeekScoreValue={currentWeekScoreValue}
+                  averageScore={averageScore}
+                  reviewDoneCount={reviewDoneCount}
+                  weekCompletion={weekCompletion}
+                  reviewDueToday={reviewDueToday}
+                  onOpenTodayTab={() => setActiveTab("today")}
+                  onOpenWeekTab={() => setActiveTab("week")}
+                  onNavigateToSetup={() => navigate("/life-insight")}
+                  onViewFull={() => setShowFullProgress(true)}
+                />
+              ) : (
+                <>
+                  <div className="flex justify-end mb-4">
+                    <Button variant="outline" onClick={() => setShowFullProgress(false)}>
+                      ← Quay lại tóm tắt
+                    </Button>
+                  </div>
+                  <PlanOverview
+                    system={system}
+                    currentWeek={currentWeek}
+                    currentWeekRange={currentWeekRange}
+                    currentWeekScoreValue={currentWeekScoreValue}
+                    averageScore={averageScore}
+                    reviewDoneCount={reviewDoneCount}
+                    weekCompletion={weekCompletion}
+                    milestoneItems={milestoneItems}
+                    hasAdvancedAnalytics={hasAdvancedAnalytics}
+                    executionHeatmap={executionHeatmap}
+                    weeklyTrend={weeklyTrend}
+                    tacticBreakdown={tacticBreakdown}
+                    reviewDueToday={reviewDueToday}
+                    onOpenTodayTab={() => setActiveTab("today")}
+                    onOpenWeekTab={() => setActiveTab("week")}
+                    onNavigateToSetup={() => navigate("/life-insight")}
+                    executionInsights={executionInsights}
+                  />
+                </>
+              )}
             </Suspense>
           </TabErrorBoundary>
-        </TabsContent>
+        )}
 
-        <TabsContent value="settings" className="space-y-6 pt-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+        {/* SETTINGS SECTION */}
+        {activeTab === "settings" && (
           <TabErrorBoundary fallbackTitle="Tab Cài đặt gặp lỗi">
             <Suspense
               fallback={
@@ -926,9 +949,66 @@ export function TwelveWeekSystem() {
               />
             </Suspense>
           </TabErrorBoundary>
-          </TabsContent>
-        </Tabs>
+        )}
       </div>
+
+      {/* Mobile bottom navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50 safe-area-inset-bottom">
+        <div className="flex items-center justify-around h-16">
+          <Button
+            variant={activeTab === "today" ? "default" : "ghost"}
+            size="sm"
+            className="flex flex-col items-center justify-center h-full px-3 py-2 gap-1"
+            onClick={() => handleTabChange("today")}
+          >
+            <ListTodo className={`h-5 w-5 ${activeTab === "today" ? "text-primary-foreground" : "text-slate-500"}`} />
+            <span className="text-xs font-medium">Hôm nay</span>
+          </Button>
+
+          <Button
+            variant={activeTab === "week" ? "default" : "ghost"}
+            size="sm"
+            className="flex flex-col items-center justify-center h-full px-3 py-2 gap-1"
+            onClick={() => handleTabChange("week")}
+          >
+            <CalendarDays className={`h-5 w-5 ${activeTab === "week" ? "text-primary-foreground" : "text-slate-500"}`} />
+            <span className="text-xs font-medium">Tuần</span>
+          </Button>
+
+          <Button
+            variant={activeTab === "progress" ? "default" : "ghost"}
+            size="sm"
+            className="flex flex-col items-center justify-center h-full px-3 py-2 gap-1"
+            onClick={() => handleTabChange("progress")}
+          >
+            <BarChart3 className={`h-5 w-5 ${activeTab === "progress" ? "text-primary-foreground" : "text-slate-500"}`} />
+            <span className="text-xs font-medium">Tiến độ</span>
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant={activeTab === "settings" ? "default" : "ghost"}
+                size="sm"
+                className="flex flex-col items-center justify-center h-full px-3 py-2 gap-1"
+              >
+                <MoreHorizontal className={`h-5 w-5 ${activeTab === "settings" ? "text-primary-foreground" : "text-slate-500"}`} />
+                <span className="text-xs font-medium">Thêm</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => navigate("/12-week-system/settings")}>
+                <Settings2 className="mr-2 h-4 w-4" />
+                Cài đặt
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </nav>
+
     </div>
   );
+}
+
+export function TwelveWeekSystemSettings() {
 }

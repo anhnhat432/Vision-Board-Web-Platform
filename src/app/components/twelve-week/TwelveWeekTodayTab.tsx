@@ -677,7 +677,7 @@ export function TwelveWeekTodayTab({
               </div>
               <Button
                 size="lg"
-                className="w-full gradient-brand text-white shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)] hover:shadow-[0_18px_40px_-22px_rgba(109,40,217,0.44)] hover:scale-[1.01] sm:w-auto"
+                className="w-full gradient-brand text-white text-lg py-4 shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)] hover:shadow-[0_18px_40px_-22px_rgba(109,40,217,0.44)] hover:scale-[1.01] sm:w-auto"
                 onClick={handleSaveCheckInClick}
                 disabled={isSavingCheckIn}
                 aria-busy={isSavingCheckIn}
@@ -711,7 +711,7 @@ export function TwelveWeekTodayTab({
       <div className="md:hidden sticky bottom-0 z-10 bg-white/95 backdrop-blur-sm border-t p-4">
         <Button
           size="lg"
-          className="w-full gradient-brand text-white shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)]"
+          className="w-full gradient-brand text-white text-lg py-4 shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)]"
           onClick={handleSaveCheckInClick}
           disabled={isSavingCheckIn}
           aria-busy={isSavingCheckIn}

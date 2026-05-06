@@ -32,10 +32,22 @@ const TwelveWeekSystemPage = lazy(async () => ({
   default: (await import("./pages/12WeekSystem")).TwelveWeekSystem,
 }));
 
+const TwelveWeekSystemSettingsPage = lazy(async () => ({
+  default: (await import("./pages/12WeekSystemSettings")).TwelveWeekSystemSettings,
+}));
+
 function TwelveWeekSystemRoute() {
   return (
     <Suspense fallback={<RouteHydrateFallback />}>
       <TwelveWeekSystemPage />
+    </Suspense>
+  );
+}
+
+function TwelveWeekSystemSettingsRoute() {
+  return (
+    <Suspense fallback={<RouteHydrateFallback />}>
+      <TwelveWeekSystemSettingsPage />
     </Suspense>
   );
 }
@@ -103,7 +115,10 @@ export const router = createBrowserRouter([
       },
       {
         path: "12-week-system",
-        Component: TwelveWeekSystemRoute,
+        children: [
+          { index: true, Component: TwelveWeekSystemRoute },
+          { path: "settings", Component: TwelveWeekSystemSettingsRoute },
+        ],
       },
       {
         path: "billing/mock-checkout",
