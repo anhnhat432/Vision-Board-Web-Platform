@@ -8,6 +8,7 @@ import { updateWeek, updateWeekReview } from "@/services/weekService";
 import type { AppError } from "@/types/api";
 import type { PlanDetails, Task, WeekDetails } from "@/types/plan";
 import type { TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
+import { isDemoMode } from "@/app/utils/app-mode";
 import { getCalendarDateKey } from "@/app/utils/storage-date-utils";
 import { getTwelveWeekCurrentWeek } from "@/app/utils/storage-twelve-week";
 import { DAILY_CHECKIN_METRIC_NAME } from "../constants/progressMetrics";
@@ -206,6 +207,11 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
   const enabled = options.enabled ?? true;
 
   const runAction = useCallback(async <T,>(action: () => Promise<T>): Promise<T | null> => {
+    if (isDemoMode()) {
+      console.debug("[Demo Mode] Skipped backend sync");
+      return null;
+    }
+
     setPendingRequests((count) => count + 1);
     setError(null);
 
@@ -513,6 +519,13 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
       skippedCount: 0,
       failedCount: 0,
     };
+
+    if (isDemoMode()) {
+      const snapshot = createSnapshot(counter, null, "idle");
+      snapshot.message = "Bản demo không đồng bộ dữ liệu 12-week lên backend.";
+      setLastSnapshot(snapshot);
+      return snapshot;
+    }
 
     if (!goalId || !system || !enabled) {
       const snapshot = createSnapshot(counter, null, "idle");

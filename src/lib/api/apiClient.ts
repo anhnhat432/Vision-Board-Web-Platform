@@ -1,5 +1,6 @@
 import { getFirebaseToken, getStoredFirebaseToken, logoutFirebase } from "@/lib/auth/firebase";
 import type { ApiErrorEnvelope, ApiSuccessEnvelope, AppError } from "@/types/api";
+import { isDemoMode } from "@/app/utils/app-mode";
 
 const DEFAULT_API_BASE_URL = "http://localhost:4000/api";
 const CONFIGURED_API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.trim() ?? "";
@@ -124,6 +125,10 @@ async function request<TResponse, TBody = unknown>(
   body?: TBody,
   options?: ApiRequestOptions,
 ): Promise<TResponse> {
+  if (isDemoMode()) {
+    throw new Error("API calls are disabled in demo mode");
+  }
+
   const token = (await getFirebaseToken().catch(() => null)) ?? getStoredFirebaseToken();
   const headers = new Headers(options?.headers ?? {});
 
