@@ -252,106 +252,136 @@ async function assertNoBrowserErrors() {
   }
 }
 
-async function pageAction(source) {
-  const result = await browserEval(`
+async function fillByLabel(labelText, value) {
+  log(`Filling label: ${labelText}`);
+  const selector = await browserEval(`
     (() => {
-      const normalize = (value) => String(value ?? "").replace(/\\s+/g, " ").trim().toLowerCase();
-      const setNativeValue = (element, value) => {
-        if (!element) throw new Error("Missing input element");
-        const prototype = Object.getPrototypeOf(element);
-        const descriptor = Object.getOwnPropertyDescriptor(prototype, "value");
-        if (descriptor?.set) descriptor.set.call(element, value);
-        else element.value = value;
-        element.dispatchEvent(new Event("input", { bubbles: true }));
-        element.dispatchEvent(new Event("change", { bubbles: true }));
-      };
-      const getInputByLabel = (labelText) => {
-        const target = normalize(labelText);
-        const label = Array.from(document.querySelectorAll("label")).find((item) =>
-          normalize(item.textContent).includes(target),
-        );
-        if (!label) throw new Error("Could not find label: " + labelText);
-        const id = label.getAttribute("for");
-        const element = id ? document.getElementById(id) : label.querySelector("input, textarea");
-        if (!element) throw new Error("Could not find input for label: " + labelText);
-        return element;
-      };
-      const fillLabel = (labelText, value) => {
-        setNativeValue(getInputByLabel(labelText), value);
-      };
-      const fillSelector = (selector, value) => {
-        setNativeValue(document.querySelector(selector), value);
-      };
-      const clickButton = (text) => {
-        const target = normalize(text);
-        const button = Array.from(document.querySelectorAll("button")).find((item) =>
-          normalize(item.innerText || item.textContent).includes(target),
-        );
-        if (!button) throw new Error("Could not find button: " + text);
-        if (button.disabled) throw new Error("Button is disabled: " + text);
-        button.scrollIntoView({ block: "center" });
-        button.click();
-      };
-      const clickLabel = (text) => {
-        const target = normalize(text);
-        const label = Array.from(document.querySelectorAll("label")).find((item) =>
-          normalize(item.textContent).includes(target),
-        );
-        if (label) {
-          label.scrollIntoView({ block: "center" });
-          label.click();
-          const id = label.getAttribute("for");
-          if (id) document.getElementById(id)?.click();
-          return;
-        }
-
-        const radio = Array.from(document.querySelectorAll('[role="radio"], input[type="radio"]')).find((item) =>
-          normalize(item.getAttribute("aria-label") || item.textContent).includes(target),
-        );
-        if (!radio) throw new Error("Could not find radio label: " + text);
-        radio.scrollIntoView({ block: "center" });
-        radio.click();
-      };
-      ${source}
-      return true;
+      const target = ${JSON.stringify(labelText.toLowerCase())};
+      const label = Array.from(document.querySelectorAll("label")).find((item) =>
+        item.textContent?.toLowerCase().includes(target),
+      );
+      if (!label) throw new Error("Label not found: " + ${JSON.stringify(labelText)});
+      const id = label.getAttribute("for");
+      if (id) return "#" + id;
+      const input = label.querySelector("input, textarea");
+      if (!input) throw new Error("No input for label: " + ${JSON.stringify(labelText)});
+      return null;
     })()
   `);
-
-  if (result !== true) {
-    throw new Error(`Page action failed: ${source}`);
+  if (selector) {
+    await runAgentBrowser(["fill", selector, value], { timeoutMs: 30_000 });
+  } else {
+    await browserEval(`
+      (() => {
+        const target = ${JSON.stringify(labelText.toLowerCase())};
+        const label = Array.from(document.querySelectorAll("label")).find((item) =>
+          item.textContent?.toLowerCase().includes(target),
+        );
+        const el = label?.querySelector("input, textarea");
+        if (!el) throw new Error("Input not found for label");
+        el.focus();
+        el.select?.();
+        document.execCommand("insertText", false, ${JSON.stringify(value)});
+        el.dispatchEvent(new InputEvent("input", { bubbles: true }));
+        return el.value;
+      })()
+    `);
+  }
+  const debug = await browserEval(`
+    (() => {
+      const target = ${JSON.stringify(labelText.toLowerCase())};
+      const label = Array.from(document.querySelectorAll("label")).find((item) =>
+        item.textContent?.toLowerCase().includes(target),
+      );
+      const input = label?.querySelector("input, textarea");
+      const buttons = Array.from(document.querySelectorAll("button"));
+      return {
+        inputValue: input?.value || "",
+        inputLength: input?.value?.length || 0,
+        buttonCount: buttons.length,
+        buttonTexts: buttons.map(b => b.textContent?.replace(/\\s+/g, " ").trim()),
+        buttonDisabled: buttons.map(b => b.disabled),
+      };
+    })()
+  `);
+  log(`Debug after fill: inputLength=${debug.inputLength}, buttonCount=${debug.buttonCount}, buttonTexts=${JSON.stringify(debug.buttonTexts)}`);
+  if (debug.inputLength === 0) {
+    log("WARNING: input appears empty after fill — React state may not have updated");
   }
 }
 
-async function clickButton(text) {
-  log(`Clicking button: ${text}`);
-  await pageAction(`clickButton(${JSON.stringify(text)});`);
-}
-
-async function fillLabel(label, value) {
-  log(`Filling label: ${label}`);
-  await pageAction(`fillLabel(${JSON.stringify(label)}, ${JSON.stringify(value)});`);
-}
-
-async function fillSelector(selector, value) {
+async function fillBySelector(selector, value) {
   log(`Filling selector: ${selector}`);
-  await pageAction(`fillSelector(${JSON.stringify(selector)}, ${JSON.stringify(value)});`);
+  await runAgentBrowser(["fill", selector, value], { timeoutMs: 30_000 });
 }
 
-async function clickLabel(text) {
+async function clickByButton(text) {
+  log(`Clicking button: ${text}`);
+  await browserEval(`
+    (() => {
+      const target = ${JSON.stringify(text)};
+      const button = Array.from(document.querySelectorAll("button")).find((item) =>
+        item.textContent?.replace(/\\s+/g, " ").trim().includes(target),
+      );
+      if (!button) throw new Error("Button not found: " + target);
+      if (button.disabled) throw new Error("Button is disabled: " + target);
+      button.scrollIntoView({ block: "center" });
+      button.click();
+      return true;
+    })()
+  `);
+}
+
+async function clickDialogButton(text) {
+  log(`Clicking dialog button: ${text}`);
+  await browserEval(`
+    (() => {
+      const target = ${JSON.stringify(text)};
+      const dialog = document.querySelector('[role="dialog"]');
+      if (!dialog) throw new Error("Dialog not found");
+      const button = Array.from(dialog.querySelectorAll("button")).find((item) =>
+        item.textContent?.replace(/\\s+/g, " ").trim().includes(target),
+      );
+      if (!button) throw new Error("Dialog button not found: " + target);
+      if (button.disabled) throw new Error("Dialog button is disabled: " + target);
+      button.scrollIntoView({ block: "center" });
+      button.click();
+      return true;
+    })()
+  `);
+}
+
+async function clickByLabel(text) {
   log(`Clicking label: ${text}`);
-  await pageAction(`clickLabel(${JSON.stringify(text)});`);
+  await browserEval(`
+    (() => {
+      const target = ${JSON.stringify(text)};
+      const label = Array.from(document.querySelectorAll("label")).find((item) =>
+        item.textContent?.replace(/\\s+/g, " ").trim().includes(target),
+      );
+      if (!label) throw new Error("Label not found: " + target);
+      label.scrollIntoView({ block: "center" });
+      label.click();
+      const id = label.getAttribute("for");
+      if (id) document.getElementById(id)?.click();
+      return true;
+    })()
+  `);
 }
 
 async function clickTab(text) {
   log(`Clicking tab: ${text}`);
-  await pageAction(`
-    const target = normalize(${JSON.stringify(text)});
-    const tab = Array.from(document.querySelectorAll('[role="tab"]')).find((item) =>
-      normalize(item.innerText || item.textContent).includes(target),
-    );
-    if (!tab) throw new Error("Could not find tab: " + ${JSON.stringify(text)});
-    tab.scrollIntoView({ block: "center" });
-    tab.click();
+  await browserEval(`
+    (() => {
+      const target = ${JSON.stringify(text)};
+      const tab = Array.from(document.querySelectorAll('[role="tab"], button')).find((item) =>
+        item.textContent?.replace(/\\s+/g, " ").trim().includes(target),
+      );
+      if (!tab) throw new Error("Tab not found: " + target);
+      tab.scrollIntoView({ block: "center" });
+      tab.click();
+      return true;
+    })()
   `);
 }
 
@@ -403,9 +433,9 @@ async function submitEmailAuth({
   await waitFor("login form", 'document.querySelector("#login-email") && document.querySelector("#login-password")');
 
   log(`${mode === "signup" ? "Creating" : "Signing in with"} ${accountLabel} ${email}`);
-  await fillSelector("#login-email", email);
-  await fillSelector("#login-password", password);
-  await clickButton(mode === "signup" ? "Tạo tài khoản" : "Đăng nhập");
+  await fillBySelector("#login-email", email);
+  await fillBySelector("#login-password", password);
+  await clickByButton(mode === "signup" ? "Tạo tài khoản" : "Đăng nhập");
   await sleep(300);
   const outcome = await waitForAuthOutcome(`authenticated ${nextPath} route`, nextPath, { timeoutMs });
 
@@ -475,7 +505,10 @@ async function runSignedOutSmoke() {
   await openPage("/");
   await clearBrowserStorage();
   await openPage("/");
-  await waitFor("public home", 'document.body.innerText.includes("Bắt đầu miễn phí")');
+  await waitFor(
+    "public home",
+    'document.body.innerText.includes("Trải nghiệm demo miễn phí") || document.body.innerText.includes("Đăng ký miễn phí")',
+  );
 
   const state = await getPageState();
   const forbiddenTexts = ["Ra mắt", "Duy trì", "Đi bộ", "Bánh xe cuộc sống"];
@@ -602,12 +635,15 @@ async function runOnboardingSmoke() {
   log("Checking onboarding CTA polish and mobile scroll reset");
   await runAgentBrowser(["set", "viewport", "390", "844"], { timeoutMs: 45_000 });
   await openPage("/onboarding");
-  await waitFor("onboarding welcome", 'document.body.innerText.includes("Bắt đầu đánh giá")');
+  await waitFor(
+    "onboarding welcome",
+    'document.body.innerText.includes("Khởi động hành trình định hướng cuộc sống") || document.body.innerText.includes("Đánh giá cân bằng") || document.body.innerText.includes("Chấm Life Balance")',
+  );
 
   const ctaState = await browserEval(`
     (() => {
       const button = Array.from(document.querySelectorAll("button")).find((item) =>
-        item.innerText.includes("Bắt đầu đánh giá"),
+        item.innerText.includes("Chấm Life Balance"),
       );
       return {
         found: Boolean(button),
@@ -617,13 +653,14 @@ async function runOnboardingSmoke() {
   `);
 
   if (!ctaState.found) throw new Error("Could not find onboarding start CTA");
-  if (!ctaState.className.includes("bg-violet-50") || ctaState.className.includes("bg-slate-950")) {
-    throw new Error(`Onboarding CTA class is not the polished light variant: ${ctaState.className}`);
+  if (!ctaState.className.includes("bg-violet-600") || ctaState.className.includes("bg-slate-950")) {
+    throw new Error(`Onboarding CTA class is not the primary violet variant: ${ctaState.className}`);
   }
 
   await browserEval("window.scrollTo(0, document.body.scrollHeight)");
-  await clickButton("Bắt đầu đánh giá");
+  await clickByButton("Chấm Life Balance");
   await waitFor("assessment screen", 'document.body.innerText.includes("Chấm điểm hiện tại")');
+  await waitFor("mobile scroll reset", "window.scrollY <= 8", { timeoutMs: 5_000, intervalMs: 100 });
 
   const afterClick = await getPageState();
   if (afterClick.scrollY > 8) {
@@ -632,40 +669,40 @@ async function runOnboardingSmoke() {
 }
 
 async function completeOnboarding() {
-  await clickButton("Hoàn thành đánh giá");
+  await clickByButton("Hoàn thành đánh giá");
   await waitFor("life insight route", 'location.pathname === "/life-insight"', { timeoutMs: 45_000 });
   await waitFor("life insight ready", 'document.body.innerText.includes("Tạo mục tiêu với")');
 }
 
 async function completeLifeInsight() {
-  await clickButton("Tạo mục tiêu với");
+  await clickByButton("Tạo mục tiêu với");
   await waitFor("smart goal route", 'location.pathname === "/smart-goal-setup"', { timeoutMs: 45_000 });
 }
 
 async function completeSmartGoal() {
   await waitFor("smart goal first step", 'document.body.innerText.includes("Câu trả lời của bạn")');
-  await fillLabel("Câu trả lời của bạn", GOAL_TITLE);
-  await clickButton("Tiếp theo");
+  await fillByLabel("Câu trả lời của bạn", GOAL_TITLE);
+  await clickByButton("Tiếp theo");
 
   await waitFor("smart metric step", 'document.body.innerText.includes("Con số hoặc dấu hiệu theo dõi")');
-  await fillLabel("Con số hoặc dấu hiệu theo dõi", "So tuan review hoan thanh");
-  await fillLabel("Mốc hiện tại", "0");
-  await fillLabel("Mốc mục tiêu", "12");
-  await clickButton("Tiếp theo");
+  await fillByLabel("Con số hoặc dấu hiệu theo dõi", "So tuan review hoan thanh");
+  await fillByLabel("Mốc hiện tại", "0");
+  await fillByLabel("Mốc mục tiêu", "12");
+  await clickByButton("Tiếp theo");
 
   await waitFor("smart resources step", 'document.body.innerText.includes("Thời gian mỗi tuần")');
-  await fillLabel("Thời gian mỗi tuần", "4");
-  await fillLabel("Kỹ năng cần có", "Lap ke hoach tuan va review ngan");
-  await fillLabel("Nguồn lực hỗ trợ", "Dashboard production va lich ca nhan");
-  await clickButton("Tiếp theo");
+  await fillByLabel("Thời gian mỗi tuần", "4");
+  await fillByLabel("Kỹ năng cần có", "Lap ke hoach tuan va review ngan");
+  await fillByLabel("Nguồn lực hỗ trợ", "Dashboard production va lich ca nhan");
+  await clickByButton("Tiếp theo");
 
   await waitFor("smart reason step", 'document.body.innerText.includes("Lý do bạn thật sự muốn")');
-  await fillLabel("Lý do bạn thật sự muốn theo đuổi", "Smoke test production cho core flow that.");
-  await fillLabel("Lĩnh vực cuộc sống liên quan", "Su nghiep");
-  await clickButton("Tiếp theo");
+  await fillByLabel("Lý do bạn thật sự muốn theo đuổi", "Smoke test production cho core flow that.");
+  await fillByLabel("Lĩnh vực cuộc sống liên quan", "Su nghiep");
+  await clickByButton("Tiếp theo");
 
   await waitFor("smart deadline step", 'document.body.innerText.includes("Số tuần mục tiêu")');
-  await clickButton("kiểm tra tính thực tế");
+  await clickByButton("kiểm tra tính thực tế");
   await waitFor("feasibility route", 'location.pathname === "/feasibility"', { timeoutMs: 45_000 });
 }
 
@@ -682,39 +719,31 @@ async function completeFeasibility() {
 
   for (const [index, answer] of answers.entries()) {
     await waitFor(`feasibility answer ${index + 1}`, `document.body.innerText.includes(${JSON.stringify(answer)})`);
-    await clickLabel(answer);
-    await clickButton(index === answers.length - 1 ? "Hoàn thành đánh giá" : "Tiếp theo");
+    await clickByLabel(answer);
+    await clickByButton(index === answers.length - 1 ? "Hoàn thành đánh giá" : "Tiếp theo");
   }
 
   await waitFor("feasibility result", 'document.body.innerText.includes("Tạo kế hoạch 12 tuần")');
-  await clickButton("Tạo kế hoạch 12 tuần");
+  await clickByButton("Tạo kế hoạch 12 tuần");
   await waitFor("12-week setup route", 'location.pathname === "/12-week-setup"', { timeoutMs: 45_000 });
 }
 
 async function completeTwelveWeekSetup() {
   await waitFor("12-week goal step", 'document.body.innerText.includes("Mục tiêu 12 tuần")');
-  await clickButton("Tiếp tục");
+  await clickByButton("Tiếp tục");
 
   await waitFor("12-week tactics step", 'document.body.innerText.includes("2-4 việc")');
-  await pageAction(`
-    const tacticInputs = Array.from(document.querySelectorAll("input")).filter((input) => {
-      const id = input.id;
-      const label = id ? document.querySelector(\`label[for="\${id}"]\`) : null;
-      return label?.textContent?.includes("Tên việc");
-    });
-    if (tacticInputs.length < 2) throw new Error("Expected at least 2 tactic inputs");
-    setNativeValue(tacticInputs[0], ${JSON.stringify(TACTIC_ONE)});
-    setNativeValue(tacticInputs[1], ${JSON.stringify(TACTIC_TWO)});
-  `);
-  await clickButton("Tiếp tục");
+  await fillBySelector("#tactic-name-0", TACTIC_ONE);
+  await fillBySelector("#tactic-name-1", TACTIC_TWO);
+  await clickByButton("Tiếp tục");
 
   await waitFor("12-week schedule step", 'document.body.innerText.includes("Tuần đầu tiên")');
-  await fillLabel("Mục tiêu", "12");
-  await fillLabel("Đơn vị của chỉ số", "tuan");
-  await clickButton("Tiếp tục");
+  await fillByLabel("Mục tiêu", "12");
+  await fillByLabel("Đơn vị của chỉ số", "tuan");
+  await clickByButton("Tiếp tục");
 
   await waitFor("12-week final step", 'document.body.innerText.includes("Chốt kế hoạch")');
-  await clickButton("Tạo kế hoạch 12 tuần");
+  await clickByButton("Tạo kế hoạch 12 tuần");
   await waitFor("12-week system route", 'location.pathname === "/12-week-system"', { timeoutMs: 75_000 });
 }
 
@@ -829,22 +858,25 @@ async function waitForGoalSnapshot(description, predicate, { timeoutMs = 45_000,
 
 async function clickFirstTodayTaskCheckbox() {
   log("Clicking first open task in Today queue");
-  await pageAction(`
-    const queue =
-      document.querySelector('[data-tour-id="system-today-queue"]') ||
-      Array.from(document.querySelectorAll('[data-slot="card"], section, div')).find((item) =>
-        normalize(item.textContent).includes("hàng việc hôm nay"),
-      );
-    if (!queue) throw new Error("Could not find Today task queue");
+  await browserEval(`
+    (() => {
+      const queue =
+        document.querySelector('[data-tour-id="system-today-queue"]') ||
+        Array.from(document.querySelectorAll('[data-slot="card"], section, div')).find((item) =>
+          item.textContent?.toLowerCase().includes("hàng việc hôm nay")
+        );
+      if (!queue) throw new Error("Could not find Today task queue");
 
-    const checkbox = Array.from(queue.querySelectorAll('[role="checkbox"], input[type="checkbox"]')).find((item) => {
-      if (item.disabled) return false;
-      if (item.matches?.('input[type="checkbox"]')) return !item.checked;
-      return item.getAttribute("aria-checked") !== "true";
-    });
-    if (!checkbox) throw new Error("Could not find an open Today task checkbox");
-    checkbox.scrollIntoView({ block: "center" });
-    checkbox.click();
+      const checkbox = Array.from(queue.querySelectorAll('[role="checkbox"], input[type="checkbox"]')).find((item) => {
+        if (item.disabled) return false;
+        if (item.matches?.('input[type="checkbox"]')) return !item.checked;
+        return item.getAttribute("aria-checked") !== "true";
+      });
+      if (!checkbox) throw new Error("Could not find an open Today task checkbox");
+      checkbox.scrollIntoView({ block: "center" });
+      checkbox.click();
+      return true;
+    })()
   `);
 }
 
@@ -864,8 +896,8 @@ async function exerciseTwelveWeekDailyExecution() {
   await clickFirstTodayTaskCheckbox();
   await waitForGoalSnapshot("completed Today task persisted", (snapshot) => snapshot.completedTaskCount >= 1);
 
-  await fillLabel("Note tùy chọn", DAILY_CHECKIN_NOTE);
-  await clickButton("Lưu check-in hôm nay");
+  await fillByLabel("Note tùy chọn", DAILY_CHECKIN_NOTE);
+  await clickByButton("Lưu check-in hôm nay");
   await waitForGoalSnapshot(
     "daily check-in persisted",
     (snapshot) =>
@@ -873,14 +905,16 @@ async function exerciseTwelveWeekDailyExecution() {
   );
 
   await openPage("/12-week-system?tab=week");
+  await waitFor("weekly review form ready", 'document.querySelector("#weekly-best")');
+  await clickByButton("Chi tiết review thêm");
   await waitFor(
-    "weekly review form ready",
-    'document.querySelector("#weekly-best") && document.querySelector("#weekly-obstacle") && document.querySelector("#weekly-priority")',
+    "weekly review detail fields ready",
+    'document.querySelector("#weekly-obstacle") && document.querySelector("#weekly-priority")',
   );
-  await fillLabel("Điều gì chạy tốt nhất", WEEKLY_REVIEW_OUTPUT);
-  await fillLabel("Điều gì cản trở", WEEKLY_REVIEW_OBSTACLE);
-  await fillLabel("Một ưu tiên duy nhất", WEEKLY_REVIEW_PRIORITY);
-  await clickButton("Chốt review tuần này");
+  await fillBySelector("#weekly-best", WEEKLY_REVIEW_OUTPUT);
+  await fillBySelector("#weekly-obstacle", WEEKLY_REVIEW_OBSTACLE);
+  await fillBySelector("#weekly-priority", WEEKLY_REVIEW_PRIORITY);
+  await clickByButton("Chốt review tuần này");
   await waitFor(
     "weekly review backend sync confirmation",
     'document.body.innerText.includes("Review tuần đã được chốt")',
@@ -948,6 +982,40 @@ async function reloadAndAssert() {
   await assertDailyExecutionPersisted();
 }
 
+async function exerciseMockUpgrade() {
+  log("Checking mock upgrade flow");
+  await openPage("/billing/plan");
+  await waitFor("billing plan page", 'document.body.innerText.includes("Gói hiện tại")');
+  await clickByButton("Mở Plus demo");
+  await waitFor("upgrade dialog", 'document.querySelector("[role=\\"dialog\\"]")');
+  await clickDialogButton("Mở Plus demo");
+  await waitFor(
+    "mock checkout page",
+    'location.pathname === "/billing/mock-checkout"',
+    { timeoutMs: 45_000 },
+  );
+  await clickByButton("Xác nhận mở gói (demo)");
+  await waitFor(
+    "mock upgrade local plan active",
+    `
+      (() => {
+        const raw = localStorage.getItem("visionboard_user_data");
+        if (!raw) return false;
+        try {
+          const data = JSON.parse(raw);
+          return data.subscription?.planCode === "PLUS" &&
+            data.subscription?.status === "active" &&
+            Array.isArray(data.entitlements) &&
+            data.entitlements.length > 0;
+        } catch {
+          return false;
+        }
+      })()
+    `,
+    { timeoutMs: 45_000 },
+  );
+}
+
 async function logoutAndLoginAgain() {
   log("Checking cleared session then login restores the same workspace");
   await clearBrowserStorage();
@@ -955,9 +1023,9 @@ async function logoutAndLoginAgain() {
   await waitFor("login route after clearing auth", 'location.pathname === "/login"', { timeoutMs: 45_000 });
   await waitFor("login form after clearing auth", 'document.querySelector("#login-email") && document.querySelector("#login-password")');
 
-  await fillSelector("#login-email", EMAIL);
-  await fillSelector("#login-password", PASSWORD);
-  await clickButton("Đăng nhập");
+  await fillBySelector("#login-email", EMAIL);
+  await fillBySelector("#login-password", PASSWORD);
+  await clickByButton("Đăng nhập");
   await waitFor("12-week system route after login", 'location.pathname === "/12-week-system"', { timeoutMs: 75_000 });
   await assertPersistedSystemLoaded();
   await assertDailyExecutionRestoredAfterLogin();
@@ -992,7 +1060,12 @@ async function main() {
     await runStep("12-week system", assertSystemLoaded);
     await runStep("Daily execution and weekly review", exerciseTwelveWeekDailyExecution);
     await runStep("Persistence after reload", reloadAndAssert);
-    await runStep("Logout/login persistence", logoutAndLoginAgain);
+    await runStep("Mock upgrade", exerciseMockUpgrade);
+    if (HAS_PROVIDED_CREDENTIALS) {
+      await runStep("Logout/login persistence", logoutAndLoginAgain);
+    } else {
+      log("Skipping logout/login persistence because PROD_SMOKE_EMAIL/PROD_SMOKE_PASSWORD were not provided");
+    }
     await runStep("Browser error scan", assertNoBrowserErrors);
     log("Production smoke passed");
   } finally {

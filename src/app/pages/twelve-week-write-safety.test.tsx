@@ -55,6 +55,19 @@ import {
 
 const INTEGRATION_TEST_TIMEOUT_MS = 10_000;
 
+function getPrimaryButton(name: string | RegExp) {
+  const [button] = screen.getAllByRole("button", { name });
+  expect(button).toBeInTheDocument();
+  return button;
+}
+
+async function openWeeklyReviewDetails(user: ReturnType<typeof userEvent.setup>) {
+  const trigger = await screen.findByRole("button", { name: /Chi tiết review thêm/i });
+  if (trigger && trigger.getAttribute("aria-expanded") !== "true") {
+    await user.click(trigger);
+  }
+}
+
 describe("12-week write-path safety", () => {
   beforeEach(() => {
     resetTestStorage();
@@ -158,7 +171,7 @@ describe("12-week write-path safety", () => {
 
     try {
       await user.type(noteInput, "Check-in still saves locally.");
-      await user.click(screen.getByRole("button", { name: /check-in/i }));
+      await user.click(getPrimaryButton(/check-in/i));
 
       await waitFor(() => {
         expect(readGoal(goalId).twelveWeekSystem?.dailyCheckIns[0]?.optionalNote).toBe(
@@ -178,7 +191,8 @@ describe("12-week write-path safety", () => {
 
     renderAppRoute("/12-week-system");
     const user = userEvent.setup();
-    await user.click(screen.getByRole("tab", { name: "Tuần" }));
+    await user.click(screen.getByRole("button", { name: "Tuần" }));
+    await openWeeklyReviewDetails(user);
     const bestInput = await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?");
     const obstacleInput = screen.getByLabelText("2. Điều gì cản trở nhiều nhất?");
     const priorityInput = screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?");
@@ -199,7 +213,7 @@ describe("12-week write-path safety", () => {
     });
 
     try {
-      await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
+      await user.click(getPrimaryButton("Chốt review tuần này"));
 
       await waitFor(() => {
         expect(syncWeeklyReviewMock).toHaveBeenCalledTimes(1);
@@ -231,7 +245,8 @@ describe("12-week write-path safety", () => {
     renderAppRoute("/12-week-system");
     const user = userEvent.setup();
 
-    await user.click(screen.getByRole("tab", { name: "Tuần" }));
+    await user.click(screen.getByRole("button", { name: "Tuần" }));
+    await openWeeklyReviewDetails(user);
     await user.type(
       await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?"),
       "Giữ được nhịp ship mỗi ngày.",
@@ -244,7 +259,7 @@ describe("12-week write-path safety", () => {
       screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?"),
       "Chốt xong command center trước.",
     );
-    await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
+    await user.click(getPrimaryButton("Chốt review tuần này"));
 
     await waitFor(() => {
       expect(syncWeeklyReviewMock).toHaveBeenCalledTimes(1);
@@ -283,7 +298,8 @@ describe("12-week write-path safety", () => {
     renderAppRoute("/12-week-system");
     const user = userEvent.setup();
 
-    await user.click(screen.getByRole("tab", { name: "Tuần" }));
+    await user.click(screen.getByRole("button", { name: "Tuần" }));
+    await openWeeklyReviewDetails(user);
     expect(screen.queryByLabelText("Reflection")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Adjustments")).not.toBeInTheDocument();
     await user.type(
@@ -298,7 +314,7 @@ describe("12-week write-path safety", () => {
       screen.getByLabelText(/ưu tiên số 1/i),
       "Giữ review hiển thị trong journal.",
     );
-    await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
+    await user.click(getPrimaryButton("Chốt review tuần này"));
 
     await waitFor(() => {
       expect(syncWeeklyReviewMock).toHaveBeenCalledTimes(1);

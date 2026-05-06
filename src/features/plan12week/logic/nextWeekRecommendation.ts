@@ -110,7 +110,7 @@ function clampPercent(value: number | null | undefined): number | null {
   return value;
 }
 
-function pushUnique<T>(list: T[], value: T): void {
+function _pushUnique<T>(list: T[], value: T): void {
   if (!list.includes(value)) list.push(value);
 }
 

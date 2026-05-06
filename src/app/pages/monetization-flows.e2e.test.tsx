@@ -17,7 +17,7 @@ describe("monetization flows", () => {
     });
     render(<RouterProvider router={router} />);
 
-    await screen.findByText("Gói demo & mock upgrade");
+    await screen.findByRole("heading", { name: "Quản lý gói demo của bạn" });
     expect(screen.getByText("Gói hiện tại")).toBeInTheDocument();
     expect(screen.getByText("Bạn đang dùng gói miễn phí trên trình duyệt này.")).toBeInTheDocument();
 
@@ -34,7 +34,7 @@ describe("monetization flows", () => {
     });
     render(<RouterProvider router={router} />);
 
-    await screen.findByText("Gói demo & mock upgrade");
+    await screen.findByRole("heading", { name: "Quản lý gói demo của bạn" });
     expect(screen.getByText("Bạn đang dùng Plus trên trình duyệt này.")).toBeInTheDocument();
     // Entitlements should show as active
     const activeItems = screen.getAllByText("Đang mở local");
@@ -53,7 +53,7 @@ describe("monetization flows", () => {
 
     // Paywall dialog should open
     await screen.findByRole("dialog");
-    expect(screen.getByText(/Plus cho hệ 12 tuần/i)).toBeInTheDocument();
+    expect(screen.getByText(/Demo — Nâng cấp Plus/i)).toBeInTheDocument();
   });
 
   it("mock checkout flow upgrades user to Plus", async () => {
@@ -77,7 +77,7 @@ describe("monetization flows", () => {
     const user = userEvent.setup();
 
     await screen.findByText("Checkout mô phỏng");
-    await user.click(screen.getByRole("button", { name: /Xác nhận mở Plus/i }));
+    await user.click(screen.getByRole("button", { name: /Xác nhận mở gói \(demo\)/i }));
 
     await waitFor(() => {
       expect(getCurrentPlan()).toBe("PLUS");
@@ -152,7 +152,7 @@ describe("monetization flows", () => {
     const { ui } = renderAppRoute(`${checkoutUrl.pathname}${checkoutUrl.search}`);
     const user = userEvent.setup();
     await screen.findByText("Checkout mô phỏng");
-    await user.click(screen.getByRole("button", { name: /Xác nhận mở Plus/i }));
+    await user.click(screen.getByRole("button", { name: /Xác nhận mở gói \(demo\)/i }));
     await waitFor(() => expect(getCurrentPlan()).toBe("PLUS"));
     ui.unmount();
 

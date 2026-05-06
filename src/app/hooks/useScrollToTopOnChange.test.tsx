@@ -92,7 +92,7 @@ describe("useScrollToTopOnChange", () => {
     await user.click(screen.getByRole("button", { name: "Next" }));
 
     await waitFor(() => {
-      expect(window.scrollTo).toHaveBeenCalledWith({ top: 428, left: 0, behavior: "auto" });
+      expect(window.scrollTo).toHaveBeenCalledWith({ top: 428, left: 0, behavior: "smooth" });
       expect(focusMock).toHaveBeenCalledWith({ preventScroll: true });
     });
   });

@@ -59,11 +59,11 @@ export function useTwelveWeekSettingsActions({
   setIsResetDialogOpen,
   navigate,
 }: UseTwelveWeekSettingsActionsOptions) {
-  const commitPlanSnapshotUpdate = (nextSystem: TwelveWeekSystem) => {
+  const commitPlanSnapshotUpdate = useCallback((nextSystem: TwelveWeekSystem) => {
     const savedSystem = commitSystemUpdate(nextSystem);
     if (activeGoal) enqueuePlanSnapshotUpdatedMutation(activeGoal.id, savedSystem, "manual_update");
     return savedSystem;
-  };
+  }, [activeGoal, commitSystemUpdate]);
 
   const handleReviewDayChange = useCallback((value: string) => {
     if (!system) return;
@@ -83,7 +83,7 @@ export function useTwelveWeekSettingsActions({
     });
     updateAppPreferences({ preferredReminderHour: Number.parseInt(value.split(":")[0] ?? "19", 10) || 19 });
     refreshSnapshotMeta();
-  }, [system, commitSystemUpdate, updateAppPreferences, refreshSnapshotMeta]);
+  }, [system, commitSystemUpdate, refreshSnapshotMeta]);
 
   const handleLoadPreferenceChange = useCallback((value: string) => {
     if (!system) return;
@@ -132,7 +132,7 @@ export function useTwelveWeekSettingsActions({
   const handlePreferenceToggle = useCallback(<K extends keyof AppPreferences>(key: K, value: AppPreferences[K]) => {
     updateAppPreferences({ [key]: value } as Pick<AppPreferences, K>);
     refreshSnapshotMeta();
-  }, [updateAppPreferences, refreshSnapshotMeta]);
+  }, [refreshSnapshotMeta]);
 
   const handleArchivePendingOutbox = useCallback(() => {
     const data = getUserData();
@@ -263,7 +263,7 @@ export function useTwelveWeekSettingsActions({
     if (activeGoalIdRef.current === actionGoalId) {
       refreshSnapshotMeta();
     }
-  }, [activeGoal, activeGoalIdRef, updateAppPreferences, setBrowserNotificationStatus, refreshSnapshotMeta]);
+  }, [activeGoal, activeGoalIdRef, setBrowserNotificationStatus, refreshSnapshotMeta]);
 
   const handleResetCycle = useCallback(() => {
     if (!activeGoal || !system) return;

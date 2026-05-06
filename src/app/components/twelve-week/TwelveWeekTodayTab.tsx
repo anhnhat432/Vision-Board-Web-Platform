@@ -422,6 +422,7 @@ export function TwelveWeekTodayTab({
                         aria-label={`Đánh dấu việc ${task.title}`}
                       >
                         <Checkbox
+                          aria-label={`Hoàn thành việc: ${task.title}`}
                           checked={task.completed}
                           onCheckedChange={(checked) => onToggleTask(task.id, checked === true)}
                         />

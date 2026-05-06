@@ -905,7 +905,7 @@ function DashboardContent({
               </div>
               <h2 className="text-xl font-bold text-slate-950">Bắt đầu trải nghiệm</h2>
               <p className="mt-2 text-sm text-slate-600">
-                �y l� b�n demo. B�n c� th� d�ng th� c�c t�nh nng c� b�n m� kh�ng c�n ng nh�p.
+                Đây là bản demo. Bạn có thể dùng thử các tính năng cơ bản mà không cần đăng nhập.
                 Hãy bắt đầu với Life Balance để tạo dữ liệu thực.
               </p>
               <Button

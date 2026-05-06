@@ -149,7 +149,7 @@ function evaluateOverdueTasks(input: RescueModeInput): TriggerContribution | nul
 }
 
 function evaluateNoCompletionStreak(
-  input: RescueModeInput,
+  _input: RescueModeInput,
   daysSinceLastCompletion: number | null,
   daysSincePlanStart: number | null,
 ): TriggerContribution | null {

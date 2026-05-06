@@ -50,7 +50,7 @@ export function PlanPreviewStep({
     const lowFeasibility = isLowFeasibility({
       planLoad: draft.tacticLoadPreference,
       weeklyCapacity: "medium",
-      bottleneckAxis: feasibility.bottleneck?.axis,
+      bottleneckAxis: _feasibility?.bottleneck?.axis,
     });
 
     // Get archetype defaults for focus and milestones if available
@@ -137,7 +137,7 @@ export function PlanPreviewStep({
     draft.dailyTimeBudget,
     draft.tacticLoadPreference,
     archetype,
-    feasibility.bottleneck?.axis,
+    _feasibility,
   ]);
 
   const handleEditTactics = useCallback(() => {

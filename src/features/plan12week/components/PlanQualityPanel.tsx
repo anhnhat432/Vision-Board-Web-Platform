@@ -3,7 +3,7 @@ import type { PlanQualityInput, PlanQualityContext } from "../logic/planQuality"
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Badge } from "@/app/components/ui/badge";
 import { Alert, AlertDescription } from "@/app/components/ui/alert";
-import { CheckCircle2, AlertCircle, Info, TrendingUp } from "lucide-react";
+import { AlertCircle, Info, TrendingUp } from "lucide-react";
 
 interface PlanQualityPanelProps {
   plan: {
@@ -115,8 +115,8 @@ export function PlanQualityPanel({ plan, context, className = "" }: PlanQualityP
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               <ul className="ml-4 list-disc space-y-1 text-sm">
-                {quality.warnings.map((warning, idx) => (
-                  <li key={idx}>{warning}</li>
+                {quality.warnings.map((warning) => (
+                  <li key={warning}>{warning}</li>
                 ))}
               </ul>
             </AlertDescription>
@@ -129,8 +129,8 @@ export function PlanQualityPanel({ plan, context, className = "" }: PlanQualityP
             <Info className="h-4 w-4 text-blue-600" />
             <AlertDescription>
               <ul className="ml-4 list-disc space-y-1 text-sm text-blue-900">
-                {quality.suggestions.map((suggestion, idx) => (
-                  <li key={idx}>{suggestion}</li>
+                {quality.suggestions.map((suggestion) => (
+                  <li key={suggestion}>{suggestion}</li>
                 ))}
               </ul>
             </AlertDescription>

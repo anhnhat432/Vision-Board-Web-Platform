@@ -1,6 +1,18 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/app/utils/app-mode", () => ({
+  getAppMode: () => "real",
+  isDemoMode: () => false,
+  isRealMode: () => true,
+  shouldSeedDemoData: () => false,
+  shouldShowBillingDebugUi: () => false,
+  shouldEnable12WeekMutationSync: () => true,
+  shouldEnable12WeekPullSync: () => true,
+  shouldEnable12WeekImportDryRun: () => true,
+  shouldEnable12WeekCloudImport: () => true,
+}));
+
 const fakeBackend = vi.hoisted(() => {
   type TaskStatus = "todo" | "doing" | "done";
 

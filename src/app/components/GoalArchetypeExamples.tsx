@@ -125,18 +125,18 @@ function pickPair(
   switch (variant) {
     case "goal":
       return [
-        { tone: "weak", label: "Phiên bản A", body: example.weakGoal },
-        { tone: "stronger", label: "Phiên bản B", body: example.strongerGoal },
+        { tone: "weak", label: "Mục tiêu chưa rõ", body: example.weakGoal },
+        { tone: "stronger", label: "Phiên bản rõ hơn", body: example.strongerGoal },
       ];
     case "metric":
       return [
-        { tone: "weak", label: "Phiên bản A", body: example.badMetric },
-        { tone: "stronger", label: "Phiên bản B", body: example.goodMetric },
+        { tone: "weak", label: "Chỉ số dễ ngộ nhận", body: example.badMetric },
+        { tone: "stronger", label: "Chỉ số đo được", body: example.goodMetric },
       ];
     case "lead_indicator":
       return [
-        { tone: "weak", label: "Phiên bản A", body: example.badLeadIndicator },
-        { tone: "stronger", label: "Phiên bản B", body: example.goodLeadIndicator },
+        { tone: "weak", label: "Việc nhầm thành kết quả", body: example.badLeadIndicator },
+        { tone: "stronger", label: "Việc lặp lại tốt", body: example.goodLeadIndicator },
       ];
   }
 }

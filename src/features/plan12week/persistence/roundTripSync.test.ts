@@ -3,9 +3,6 @@ import { describe, expect, it } from "vitest";
 import type {
   Goal,
   TwelveWeekSystem,
-  TwelveWeekTaskInstance,
-  UniversalDailyCheckIn,
-  UniversalWeeklyReview,
   UserData,
 } from "@/app/utils/storage-types";
 import type {
@@ -20,7 +17,6 @@ import type {
 } from "@/services/syncService";
 import type {
   TwelveWeekImportPayload,
-  TwelveWeekImportPlanPayload,
 } from "./twelveWeekImportPayload";
 import { createTwelveWeekImportPayload } from "./twelveWeekImportPayload";
 import { applyPulledWorkspaceToUserData } from "./pulledWorkspaceApply";

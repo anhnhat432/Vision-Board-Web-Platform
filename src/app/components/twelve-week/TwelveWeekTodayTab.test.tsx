@@ -265,8 +265,8 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
   it("calls onSaveCheckIn when 'Lưu check-in hôm nay' button is clicked", async () => {
     const onSaveCheckIn = vi.fn();
     render(<TwelveWeekTodayTab {...makeProps({ onSaveCheckIn })} />);
-    const button = screen.getByRole("button", { name: /Lưu check-in hôm nay/i });
-    await userEvent.click(button);
+    const buttons = screen.getAllByRole("button", { name: /Lưu check-in hôm nay/i });
+    await userEvent.click(buttons[0]);
     expect(onSaveCheckIn).toHaveBeenCalledTimes(1);
   });
 });

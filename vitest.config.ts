@@ -20,6 +20,7 @@ export default defineConfig({
       "**/.codex-worktrees/**",
       "**/.claude/worktrees/**",
       "backend/src/tests/**",
+      "e2e/**",
     ],
   },
 });

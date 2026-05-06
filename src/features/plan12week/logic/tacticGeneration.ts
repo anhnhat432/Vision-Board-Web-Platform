@@ -1,5 +1,4 @@
-import type { LeadIndicatorDraft } from "@/app/pages/12WeekSetup/types";
-import type { TacticType } from "@/app/utils/storage";
+
 
 /**
  * Generated tactic - actionable, measurable, time-bound recurring task
@@ -94,7 +93,7 @@ export const ARCHETYPE_TACTIC_SUGGESTIONS: Record<
     { name: "Giao tiếp có ý thức", target: 3, unit: "lần" },
     { name: "Lập kế hoạch cùng nhau", target: 1, unit: "lần" },
   ],
-  financial_management: [
+  financial_goal: [
     { name: "Track chi tiêu hàng ngày", target: 7, unit: "ngày" },
     { name: "Review budget và điều chỉnh", target: 1, unit: "lần" },
     { name: "Học về đầu tư/tài chính", target: 2, unit: "buổi" },
@@ -130,7 +129,7 @@ export function adjustTargetForFeasibility(
     case "low":
       return Math.max(1, Math.floor(baseTarget * 0.6));
     case "medium":
-      return Math.floor(baseTarget * 0.8);
+      return Math.max(1, Math.floor(baseTarget * 0.8));
     case "high":
       return Math.min(7, Math.ceil(baseTarget * 1.2));
     default:
@@ -224,8 +223,8 @@ export function generateTacticsFromArchetype(
     ? clampTacticCount(options.tacticCount)
     : randomTacticCount();
 
-  // Select tactics (shuffle then take first N)
-  const selected = shuffleArray(suggestions).slice(0, tacticCount);
+  // Keep the archetype's highest-signal tactics first so seeded plans are stable.
+  const selected = suggestions.slice(0, tacticCount);
 
   return selected.map((suggestion, index) => {
     const adjustedTarget = adjustTargetForFeasibility(
@@ -263,16 +262,4 @@ function randomTacticCount(): number {
   if (rand < 0.75) return 2;  // 30% chance
   if (rand < 0.95) return 4;  // 20% chance
   return 2;                   // 5% chance
-}
-
-/**
- * Shuffle array in place (Fisher-Yates)
- */
-function shuffleArray<T>(array: T[]): T[] {
-  const result = [...array];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
 }

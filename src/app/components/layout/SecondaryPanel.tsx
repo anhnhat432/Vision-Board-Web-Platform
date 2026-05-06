@@ -49,37 +49,48 @@ export function SecondaryPanel({
     }
   };
 
+  const headerContent = (
+    <>
+      <div className="flex items-start gap-2 flex-1">
+        {icon && <span className="mt-0.5 h-4 w-4 shrink-0">{icon}</span>}
+        <div className="flex-1">
+          <h4 className="text-sm font-semibold text-foreground">{title}</h4>
+          {collapsible && (
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {isOpen ? "Thu gọn" : "Xem thêm"}
+            </p>
+          )}
+        </div>
+      </div>
+      {collapsible && (
+        <span className="text-muted-foreground">
+          {isOpen ? "−" : "+"}
+        </span>
+      )}
+    </>
+  );
+
   return (
     <div
       className={cn(
         "rounded-xl border border-muted bg-muted/90 p-4",
-        collapsible && "cursor-pointer",
         className
       )}
-      onClick={collapsible ? toggle : undefined}
-      onKeyDown={collapsible ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } } : undefined}
-      role={collapsible ? "button" : undefined}
-      tabIndex={collapsible ? 0 : undefined}
-      aria-expanded={collapsible ? isOpen : undefined}
     >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-start gap-2 flex-1">
-          {icon && <span className="mt-0.5 h-4 w-4 shrink-0">{icon}</span>}
-          <div className="flex-1">
-            <h4 className="text-sm font-semibold text-foreground">{title}</h4>
-            {collapsible && (
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {isOpen ? "Thu gọn" : "Xem thêm"}
-              </p>
-            )}
-          </div>
+      {collapsible ? (
+        <button
+          type="button"
+          className="flex w-full items-start justify-between gap-2 text-left"
+          onClick={toggle}
+          aria-expanded={isOpen}
+        >
+          {headerContent}
+        </button>
+      ) : (
+        <div className="flex items-start justify-between gap-2">
+          {headerContent}
         </div>
-        {collapsible && (
-          <span className="text-muted-foreground">
-            {isOpen ? "−" : "+"}
-          </span>
-        )}
-      </div>
+      )}
       {(!collapsible || isOpen) && (
         <div className="mt-3 text-sm text-muted-foreground">
           {children}

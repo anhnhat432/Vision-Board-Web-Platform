@@ -168,7 +168,7 @@ describe("MeasurableStep — a11y", () => {
     const input = screen.getByLabelText("Con số hoặc dấu hiệu theo dõi");
     expect(input.getAttribute("aria-describedby")).toBe("smart-metric-name-hint");
     expect(document.getElementById("smart-metric-name-hint")?.textContent).toMatch(
-      /tiến lên hay đứng yên/i,
+      /tăng hay đứng yên/i,
     );
   });
 });

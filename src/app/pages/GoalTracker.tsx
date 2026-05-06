@@ -648,20 +648,7 @@ function GoalTrackerContent({
                     goal.tasks.map((task) => (
                       <div
                         key={task.id}
-                        className="group flex cursor-pointer items-center gap-3 rounded-[20px] border border-white/70 bg-slate-50/82 px-4 py-3"
-                        onClick={(e) => {
-                          if (!(e.target as HTMLElement).closest("button")) {
-                            handleToggleTask(goal.id, task.id);
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (!(e.target as HTMLElement).closest("button")) {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              handleToggleTask(goal.id, task.id);
-                            }
-                          }
-                        }}
+                        className="group flex items-center gap-3 rounded-[20px] border border-white/70 bg-slate-50/82 px-4 py-3"
                       >
                         <Checkbox
                           checked={task.completed}

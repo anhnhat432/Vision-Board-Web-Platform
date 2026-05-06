@@ -8,7 +8,6 @@ import {
   ShieldCheck,
   Sparkles,
   Target,
-  TrendingUp,
 } from "lucide-react";
 import { motion } from "motion/react";
 import type { ReactNode } from "react";

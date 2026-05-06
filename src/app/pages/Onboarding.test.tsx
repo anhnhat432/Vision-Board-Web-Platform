@@ -48,7 +48,7 @@ describe("Onboarding", () => {
 
     expect(await screen.findByRole("heading", { name: /Chấm điểm hiện tại/i })).toBeInTheDocument();
     await waitFor(() => {
-      expect(scrollToMock).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "auto" });
+      expect(scrollToMock).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "smooth" });
     });
 
     scrollToMock.mockRestore();

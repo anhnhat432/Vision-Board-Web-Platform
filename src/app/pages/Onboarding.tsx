@@ -57,7 +57,6 @@ export function Onboarding() {
   const [isDirty, setIsDirty] = useState(false);
 
   useScrollToTopOnChange(step, {
-    targetRef: flowTopRef,
     focusRef: flowTopRef,
     topOffset: 0,
   });

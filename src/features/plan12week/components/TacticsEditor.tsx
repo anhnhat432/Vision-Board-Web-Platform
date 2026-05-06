@@ -64,8 +64,9 @@ export function TacticsEditor({ tactics, onChange, onClose }: TacticsEditorProps
                 <div className="flex-1 space-y-3">
                   {/* Name */}
                   <div>
-                    <label className="text-sm font-medium mb-1 block">Tên việc</label>
+                    <label className="text-sm font-medium mb-1 block" htmlFor={`tactic-name-${idx}`}>Tên việc</label>
                     <Input
+                      id={`tactic-name-${idx}`}
                       value={tactic.name}
                       onChange={(e) => updateTactic(idx, { name: e.target.value })}
                       placeholder="Ví dụ: Viết 500 từ mỗi buổi sáng"
@@ -75,8 +76,9 @@ export function TacticsEditor({ tactics, onChange, onClose }: TacticsEditorProps
                   {/* Target and Unit */}
                   <div className="flex gap-3">
                     <div className="w-1/2">
-                      <label className="text-sm font-medium mb-1 block">Số lần/tuần</label>
+                      <label className="text-sm font-medium mb-1 block" htmlFor={`tactic-target-${idx}`}>Số lần/tuần</label>
                       <Input
+                        id={`tactic-target-${idx}`}
                         type="number"
                         min={1}
                         max={7}
@@ -85,8 +87,9 @@ export function TacticsEditor({ tactics, onChange, onClose }: TacticsEditorProps
                       />
                     </div>
                     <div className="w-1/2">
-                      <label className="text-sm font-medium mb-1 block">Đơn vị</label>
+                      <label className="text-sm font-medium mb-1 block" htmlFor={`tactic-unit-${idx}`}>Đơn vị</label>
                       <Input
+                        id={`tactic-unit-${idx}`}
                         value={tactic.unit}
                         onChange={(e) => updateTactic(idx, { unit: e.target.value })}
                         placeholder="lần, giờ, buổi..."
@@ -96,7 +99,7 @@ export function TacticsEditor({ tactics, onChange, onClose }: TacticsEditorProps
 
                   {/* Type */}
                   <div>
-                    <label className="text-sm font-medium mb-1 block">Loại việc</label>
+                    <label className="text-sm font-medium mb-1 block" htmlFor={`tactic-type-${idx}`}>Loại việc</label>
                     <Select
                       value={tactic.type}
                       onValueChange={(value: "core" | "optional") =>

@@ -72,7 +72,7 @@ function createEmptyWeek(weekNumber: number): Week {
   };
 }
 
-function buildArchetypeLeadMetrics(
+function _buildArchetypeLeadMetrics(
   suggestions: readonly string[],
 ): LeadMetric[] {
   return suggestions.map((name) => ({

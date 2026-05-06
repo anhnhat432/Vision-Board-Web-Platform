@@ -231,7 +231,7 @@ export function LeadIndicatorsStep({
       </div>
 
       {/* Week 1 preview */}
-      <SecondaryPanel title="Xem trước tuần 1" collapsible defaultOpen={isDesktop}>
+      <SecondaryPanel title="Xem trước tuần 1" collapsible defaultOpen={isDesktop || Boolean(weekOneTaskWarning)}>
         <div className="rounded-[28px] border border-white/70 bg-white/72 p-5">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Xem trước tuần 1</p>
           <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">

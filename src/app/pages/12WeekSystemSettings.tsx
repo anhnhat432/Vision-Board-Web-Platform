@@ -27,7 +27,6 @@ import {
   clearEventLog,
   updateGoal,
 } from "../utils/storage";
-import { applyPulledWorkspaceToUserData } from "@/features/plan12week/persistence/pulledWorkspaceApply";
 import {
   readMutationQueueStore,
   summarizeMutationQueueStore,

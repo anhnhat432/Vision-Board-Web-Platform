@@ -21,6 +21,19 @@ import {
 
 const INTEGRATION_TEST_TIMEOUT_MS = 10_000;
 
+function getPrimaryButton(name: string | RegExp) {
+  const [button] = screen.getAllByRole("button", { name });
+  expect(button).toBeInTheDocument();
+  return button;
+}
+
+async function openWeeklyReviewDetails(user: ReturnType<typeof userEvent.setup>) {
+  const trigger = await screen.findByRole("button", { name: /Chi tiết review thêm/i });
+  if (trigger && trigger.getAttribute("aria-expanded") !== "true") {
+    await user.click(trigger);
+  }
+}
+
 describe("12-week core flows", () => {
   beforeEach(() => {
     resetTestStorage();
@@ -197,7 +210,7 @@ describe("12-week core flows", () => {
 
     await user.click(within(taskListCard as HTMLElement).getAllByRole("checkbox")[0]);
     await user.type(screen.getByLabelText("Note tùy chọn"), "Mai bắt đầu từ việc này trước.");
-    await user.click(screen.getByRole("button", { name: "Lưu check-in hôm nay" }));
+    await user.click(getPrimaryButton("Lưu check-in hôm nay"));
 
     await waitFor(() => {
       const system = readGoal(goalId).twelveWeekSystem;
@@ -226,7 +239,7 @@ describe("12-week core flows", () => {
 
     const noteInput = await screen.findByRole("textbox", { name: /note/i });
     await user.type(noteInput, "First local check-in.");
-    await user.click(screen.getByRole("button", { name: /check-in/i }));
+    await user.click(getPrimaryButton(/check-in/i));
 
     await waitFor(() => {
       expect(readGoal(goalId).twelveWeekSystem?.dailyCheckIns[0]?.optionalNote).toBe("First local check-in.");
@@ -234,7 +247,7 @@ describe("12-week core flows", () => {
 
     await user.clear(noteInput);
     await user.type(noteInput, "Latest local check-in.");
-    await user.click(screen.getByRole("button", { name: /check-in/i }));
+    await user.click(getPrimaryButton(/check-in/i));
 
     await waitFor(() => {
       expect(readGoal(goalId).twelveWeekSystem?.dailyCheckIns[0]?.optionalNote).toBe("Latest local check-in.");
@@ -259,11 +272,12 @@ describe("12-week core flows", () => {
 
     await user.click(within(taskListCard as HTMLElement).getAllByRole("checkbox")[0]);
     await user.type(screen.getByLabelText("Note tùy chọn"), "Giữ task đã tick khi review tuần.");
-    await user.click(screen.getByRole("button", { name: "Lưu check-in hôm nay" }));
-    await user.click(screen.getByRole("tab", { name: "Tuần" }));
+    await user.click(getPrimaryButton("Lưu check-in hôm nay"));
+    await user.click(screen.getByRole("button", { name: "Tuần" }));
+    await openWeeklyReviewDetails(user);
     await user.type(await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?"), "Chốt được một việc thật.");
     await user.type(screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?"), "Giữ nhịp execution.");
-    await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
+    await user.click(getPrimaryButton("Chốt review tuần này"));
 
     await waitFor(() => {
       const system = readGoal(goalId).twelveWeekSystem;
@@ -279,11 +293,12 @@ describe("12-week core flows", () => {
     renderAppRoute("/12-week-system");
     const user = userEvent.setup();
 
-    await user.click(screen.getByRole("tab", { name: "Tuần" }));
+    await user.click(screen.getByRole("button", { name: "Tuần" }));
+    await openWeeklyReviewDetails(user);
     await user.type(await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?"), "Giữ được nhịp ship mỗi ngày.");
     await user.type(screen.getByLabelText("2. Điều gì cản trở nhiều nhất?"), "Bị phân tán vì đổi context.");
     await user.type(screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?"), "Chốt xong command center trước.");
-    await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
+    await user.click(getPrimaryButton("Chốt review tuần này"));
 
     await waitFor(() => {
       const system = readGoal(goalId).twelveWeekSystem;
@@ -310,14 +325,15 @@ describe("12-week core flows", () => {
       expect(weeklyMutation.payload.review.mainObstacle).toBe(review?.mainObstacle);
       expect(weeklyMutation.payload.review.nextWeekPriority).toBe(review?.nextWeekPriority);
     }
-  });
+  }, INTEGRATION_TEST_TIMEOUT_MS);
 
   it("saves keep/reduce tactic fields and shows the post-save summary card", async () => {
     const { goalId } = seedTwelveWeekGoal();
     renderAppRoute("/12-week-system");
     const user = userEvent.setup();
 
-    await user.click(screen.getByRole("tab", { name: "Tuần" }));
+    await user.click(screen.getByRole("button", { name: "Tuần" }));
+    await openWeeklyReviewDetails(user);
     await user.type(
       await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?"),
       "Đã ship 1 deliverable nhỏ.",
@@ -331,7 +347,7 @@ describe("12-week core flows", () => {
       screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?"),
       "Hoàn thành module sync trước thứ Tư.",
     );
-    await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
+    await user.click(getPrimaryButton("Chốt review tuần này"));
 
     await waitFor(() => {
       const review = readGoal(goalId).twelveWeekSystem?.weeklyReviews[0];
@@ -372,7 +388,8 @@ describe("12-week core flows", () => {
     renderAppRoute("/12-week-system");
     const user = userEvent.setup();
 
-    await user.click(screen.getByRole("tab", { name: "Tuần" }));
+    await user.click(screen.getByRole("button", { name: "Tuần" }));
+    await openWeeklyReviewDetails(user);
 
     // Existing legacy fields should hydrate the form
     expect(await screen.findByDisplayValue("Legacy output")).toBeInTheDocument();
@@ -394,14 +411,15 @@ describe("12-week core flows", () => {
     renderAppRoute("/12-week-system");
     const user = userEvent.setup();
 
-    await user.click(screen.getByRole("tab", { name: "Tuần" }));
+    await user.click(screen.getByRole("button", { name: "Tuần" }));
+    await openWeeklyReviewDetails(user);
     const bestInput = await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?");
     const obstacleInput = screen.getByLabelText("2. Điều gì cản trở nhiều nhất?");
     const priorityInput = screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?");
     await user.type(bestInput, "First weekly output.");
     await user.type(obstacleInput, "First obstacle.");
     await user.type(priorityInput, "First priority.");
-    await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
+    await user.click(getPrimaryButton("Chốt review tuần này"));
 
     await waitFor(() => {
       expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.biggestOutputThisWeek).toBe("First weekly output.");
@@ -411,7 +429,7 @@ describe("12-week core flows", () => {
     await user.type(bestInput, "Latest weekly output.");
     await user.clear(priorityInput);
     await user.type(priorityInput, "Latest priority.");
-    await user.click(screen.getByRole("button", { name: "Chốt review tuần này" }));
+    await user.click(getPrimaryButton("Chốt review tuần này"));
 
     await waitFor(() => {
       expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.biggestOutputThisWeek).toBe("Latest weekly output.");
@@ -445,7 +463,7 @@ describe("12-week core flows", () => {
     const user = userEvent.setup();
 
     await screen.findByText("Checkout mô phỏng");
-    await user.click(screen.getByRole("button", { name: /Xác nhận mở Plus/i }));
+    await user.click(screen.getByRole("button", { name: /Xác nhận mở gói \(demo\)/i }));
 
     await waitFor(() => {
       expect(getCurrentPlan()).toBe("PLUS");

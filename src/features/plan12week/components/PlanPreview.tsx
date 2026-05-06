@@ -1,11 +1,8 @@
-import { useState, useMemo, useCallback } from "react";
-import { Plus, Edit2, ChevronDown, ChevronRight } from "lucide-react";
+import { useState, useCallback } from "react";
+import { Edit2, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Badge } from "@/app/components/ui/badge";
-import { Input } from "@/app/components/ui/input";
-import { Textarea } from "@/app/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import { PlanQualityPanel } from "./PlanQualityPanel";
 import type { LeadIndicatorDraft } from "@/app/pages/12WeekSetup/types";
 import type { TwelveWeekSetupDraft } from "@/app/pages/12WeekSetup/types";

@@ -77,6 +77,18 @@ vi.mock("../persistence/planLinkStore", () => ({
   setRemoteTaskIdForGoal,
 }));
 
+vi.mock("@/app/utils/app-mode", () => ({
+  getAppMode: () => "real",
+  isDemoMode: () => false,
+  isRealMode: () => true,
+  shouldSeedDemoData: () => false,
+  shouldShowBillingDebugUi: () => false,
+  shouldEnable12WeekMutationSync: () => true,
+  shouldEnable12WeekPullSync: () => true,
+  shouldEnable12WeekImportDryRun: () => true,
+  shouldEnable12WeekCloudImport: () => true,
+}));
+
 import { DAILY_CHECKIN_METRIC_NAME } from "../constants/progressMetrics";
 import { detectBackendPlanConflicts } from "../persistence/backendConflictDetector";
 import type { TwelveWeekSystem } from "@/app/utils/storage-types";

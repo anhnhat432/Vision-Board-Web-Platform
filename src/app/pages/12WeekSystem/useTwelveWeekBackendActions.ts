@@ -137,17 +137,20 @@ export function useTwelveWeekBackendActions({
     }
   }, [activeGoal, isBackendProfileReady, lastBackendSyncKeyRef, loadGoalData, refreshBackendProgressOverlay, refreshSnapshotMeta]);
 
-  const refreshBackendConflictReview = async (preferredGoalId: string, options?: { preserveSyncKey?: boolean }) => {
-    const result = await hydrateTwelveWeekPlansFromBackend();
-    setLastBackendHydrationResult(result);
-    if (!options?.preserveSyncKey) {
-      lastBackendSyncKeyRef.current = null;
-    }
-    loadGoalData(result.latestGoalId ?? preferredGoalId);
-    refreshBackendProgressOverlay();
-    refreshSnapshotMeta();
-    return result;
-  };
+  const refreshBackendConflictReview = useCallback(
+    async (preferredGoalId: string, options?: { preserveSyncKey?: boolean }) => {
+      const result = await hydrateTwelveWeekPlansFromBackend();
+      setLastBackendHydrationResult(result);
+      if (!options?.preserveSyncKey) {
+        lastBackendSyncKeyRef.current = null;
+      }
+      loadGoalData(result.latestGoalId ?? preferredGoalId);
+      refreshBackendProgressOverlay();
+      refreshSnapshotMeta();
+      return result;
+    },
+    [lastBackendSyncKeyRef, loadGoalData, refreshBackendProgressOverlay, refreshSnapshotMeta],
+  );
 
   const handleUseBackendPlanForConflicts = useCallback(async (goalId: string) => {
     if (isResolvingBackendPlanConflicts) return;
