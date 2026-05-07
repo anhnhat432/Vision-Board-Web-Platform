@@ -1,7 +1,6 @@
 import { startTransition, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
-  CheckCircle2,
   ChevronDown,
   Compass,
   HardDrive,
@@ -826,8 +825,8 @@ export function RootLayout() {
         Bỏ qua điều hướng
       </a>
 
-      <header className="sticky top-0 z-40 px-4 pt-2 sm:top-4 sm:px-6 sm:pt-0 lg:px-8">
-        <div className="glass-surface mx-auto max-w-7xl rounded-lg px-3 py-2 sm:px-4 sm:py-2 shadow-[0_14px_28px_-24px_rgba(15,23,42,0.16)]">
+      <header className="sticky top-0 z-40 px-4 pt-2 sm:top-3 sm:px-6 sm:pt-0 lg:px-8">
+        <div className="glass-surface mx-auto max-w-5xl rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 shadow-[0_8px_24px_-16px_rgba(15,23,42,0.1)]">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 shrink-0 items-center gap-2">
               <button
@@ -856,7 +855,7 @@ export function RootLayout() {
             </div>
 
             <nav className="hidden flex-1 items-center justify-center md:flex">
-              <div className="flex flex-wrap items-center gap-1 rounded-full border border-white/75 bg-white/72 px-1.5 py-1 shadow-[0_6px_14px_-14px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.9)]">
+              <div className="flex flex-wrap items-center gap-0.5 rounded-full border border-slate-200/60 bg-slate-50/80 px-1.5 py-1">
                 {primaryNavItems.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.path);
@@ -954,25 +953,19 @@ export function RootLayout() {
               </div>
             </nav>
 
-            <div className="hidden shrink-0 items-center gap-1.5 md:flex">
+            <div className="hidden shrink-0 items-center gap-1 md:flex">
               {user ? (
-                <div
-                  className="flex max-w-[210px] items-center gap-2 rounded-full border border-white/75 bg-white/82 px-2.5 py-1.5 text-left text-slate-700 shadow-sm"
-                  title={userProfileError ?? accountLabel}
+                <button
+                  type="button"
+                  onClick={() => navigateAppRoute("/billing/plan")}
+                  className="flex max-w-[180px] items-center gap-2 rounded-full border border-slate-200/60 bg-slate-50/80 px-2.5 py-1.5 text-left text-slate-700 transition-colors hover:bg-white"
+                  title={accountLabel}
                 >
-                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
-                    <User2 className="h-3.5 w-3.5" />
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-slate-200/70 text-slate-600">
+                    <User2 className="h-3 w-3" />
                   </span>
-                  <span className="min-w-0">
-                    <span className="block truncate text-xs font-semibold leading-4">{accountLabel}</span>
-                    <span
-                      className={`mt-0.5 inline-flex max-w-full items-center gap-1 rounded-full px-1.5 py-0.5 text-[0.65rem] font-semibold leading-none ring-1 ${accountStatusClass}`}
-                    >
-                      <CheckCircle2 className="h-2.5 w-2.5 shrink-0" />
-                      <span className="truncate">{accountStatus}</span>
-                    </span>
-                  </span>
-                </div>
+                  <span className="truncate text-xs font-medium">{accountLabel}</span>
+                </button>
               ) : null}
               {!user ? (
                 <>
@@ -980,14 +973,14 @@ export function RootLayout() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleAuthNavigate("signin")}
-                    className="h-8 rounded-full border-white/75 bg-white/82 px-3 text-xs text-slate-700 shadow-sm hover:bg-white"
+                    className="h-8 rounded-full border-slate-200/60 bg-white/90 px-3 text-xs text-slate-700 hover:bg-white"
                   >
                     Đăng nhập
                   </Button>
                   <Button
                     size="sm"
                     onClick={() => handleAuthNavigate("signup")}
-                    className="h-8 rounded-full bg-slate-950 px-3 text-xs text-white shadow-sm hover:bg-slate-800"
+                    className="h-8 rounded-full bg-slate-900 px-3 text-xs text-white hover:bg-slate-800"
                   >
                     Đăng ký
                   </Button>
@@ -996,21 +989,9 @@ export function RootLayout() {
               {user ? (
                 <button
                   type="button"
-                  onClick={refreshUserProfile}
-                  disabled={!canRetryUserProfile}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-white/75 bg-white/82 text-slate-600 shadow-sm transition-colors hover:bg-white disabled:opacity-50 dark:border-white/10 dark:bg-white/6 dark:text-slate-300 dark:hover:bg-white/12"
-                  aria-label="Kiểm tra lại backend profile"
-                  title="Kiểm tra lại backend profile"
-                >
-                  <RefreshCw className={`h-3.5 w-3.5 ${userProfileLoading ? "animate-spin" : ""}`} />
-                </button>
-              ) : null}
-              {user ? (
-                <button
-                  type="button"
                   onClick={handleSignOut}
                   disabled={isSigningOut}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-white/75 bg-white/82 text-slate-600 shadow-sm transition-colors hover:bg-white disabled:opacity-50 dark:border-white/10 dark:bg-white/6 dark:text-slate-300 dark:hover:bg-white/12"
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
                   aria-label="Đăng xuất"
                   title="Đăng xuất"
                 >
@@ -1020,23 +1001,11 @@ export function RootLayout() {
               <button
                 type="button"
                 onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/75 bg-white/82 text-slate-600 shadow-sm transition-colors hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300 dark:hover:bg-white/12"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-300 dark:hover:bg-white/12"
                 aria-label={resolvedTheme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
               >
                 {resolvedTheme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
               </button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setGuideUserData(getUserData());
-                  setIsGuideOpen(true);
-                }}
-                className="h-8 rounded-full border-white/75 bg-white/82 px-3 text-xs text-slate-600 shadow-sm hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300 dark:hover:bg-white/12"
-              >
-                <Compass className="h-3.5 w-3.5" />
-                Hướng dẫn
-              </Button>
             </div>
 
             <div className="md:hidden flex min-w-0 items-center gap-2">
@@ -1091,7 +1060,7 @@ export function RootLayout() {
         </div>
 
         {mobileMenuOpen && (
-          <div id="mobile-nav-menu" className="mx-auto mt-2 max-w-7xl md:hidden">
+          <div id="mobile-nav-menu" className="mx-auto mt-2 max-w-5xl md:hidden">
             <div className="glass-surface rounded-[28px] p-3">
               <nav className="space-y-1" aria-label="Menu điều hướng">
                 {user ? (
@@ -1197,7 +1166,7 @@ export function RootLayout() {
       </header>
 
       <main
-        className={`relative z-10 mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 lg:px-8 ${
+        className={`relative z-10 mx-auto max-w-5xl px-4 pb-12 pt-6 sm:px-6 sm:pt-8 lg:px-8 ${
           isSignedOutVisitor ? "" : "main-content-mobile-pad"
         }`}
         id="main-content"
