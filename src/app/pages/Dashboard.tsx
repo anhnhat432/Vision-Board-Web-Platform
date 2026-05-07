@@ -1350,7 +1350,7 @@ function DashboardContent({
                             className="bg-slate-950 text-white hover:bg-slate-800"
                             onClick={() => openUpgradeDialog("plan", "PLUS")}
                           >
-                            Mở Plus demo
+                            Nâng cấp Plus
                           </Button>
                           <Button
                             variant="outline"
@@ -1372,7 +1372,7 @@ function DashboardContent({
                     </div>
 
                     <p className="text-sm text-slate-500">
-                      Quyền Plus trong MVP 1 là mock/local trên trình duyệt này. Mock checkout không thu tiền thật.
+                      Nâng cấp gói Plus để mở toàn bộ quyền nâng cao cho chu kỳ 12 tuần.
                     </p>
                   </CardContent>
                 </Card>

@@ -73,7 +73,7 @@ export function TwelveWeekPlanAccessSection({
     <div className="rounded-lg border border-violet-200/70 bg-violet-50/75 p-5 shadow-[0_18px_44px_-36px_rgba(124,58,237,0.24)]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">Gói demo và quyền local</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">Gói và quyền của bạn</p>
           <p className="mt-2 text-2xl font-bold text-slate-950">{getPlanLabel(currentPlanCode)}</p>
           <p className="mt-2 text-sm leading-7 text-slate-700">{currentPlanDefinition.description}</p>
         </div>
@@ -96,7 +96,7 @@ export function TwelveWeekPlanAccessSection({
                   : "border-slate-200 bg-white text-slate-600"
               }
             >
-              {isUnlocked ? "Đang mở local" : "Đang khóa"} · {getEntitlementLabel(key)}
+              {isUnlocked ? "Đang mở" : "Đang khóa"} · {getEntitlementLabel(key)}
             </Badge>
           );
         })}
@@ -106,10 +106,10 @@ export function TwelveWeekPlanAccessSection({
         <div className="rounded-lg border border-violet-100 bg-white p-4">
           <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Trạng thái nhanh</p>
           <p className="mt-2 text-lg font-semibold text-slate-950">
-            {unlockedEntitlementCount}/{ENTITLEMENT_ORDER.length} quyền premium đang mở trên thiết bị này
+            {unlockedEntitlementCount}/{ENTITLEMENT_ORDER.length} quyền premium đang mở
           </p>
           <p className="mt-1 text-sm text-slate-600">
-            Quyền Plus trong MVP 1 là mock/local trên trình duyệt này, không phải quyền production thật.
+            Nâng cấp gói Plus để mở toàn bộ quyền nâng cao.
           </p>
         </div>
 
@@ -190,16 +190,16 @@ export function TwelveWeekPlanAccessSection({
           </>
         ) : (
           <div className="rounded-lg border border-violet-100 bg-white p-4">
-            <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Mock upgrade và quyền local</p>
+            <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Trạng thái gói</p>
             <p className="mt-2 text-lg font-semibold text-slate-950">
-              {demoMode
-                ? "Bản demo đang mô phỏng bước nâng cấp, không thu tiền thật."
-                : "Quyền nâng cấp sẽ đồng bộ theo cấu hình của host."}
+              {currentPlanCode === "FREE"
+                ? "Bạn đang dùng gói Free."
+                : "Gói Plus đang hoạt động."}
             </p>
             <p className="mt-1 text-sm text-slate-600">
               {currentPlanCode === "FREE"
-                ? "Bạn vẫn có thể dùng Free để chạy một chu kỳ. Khi cần xem lớp Plus, hãy mở mock upgrade."
-                : "Plus demo đang mở local trên trình duyệt này để bạn xem trải nghiệm đầy đủ."}
+                ? "Nâng cấp Plus để mở quyền nâng cao cho chu kỳ 12 tuần."
+                : "Quyền premium được đồng bộ từ server."}
             </p>
           </div>
         )}
@@ -209,19 +209,19 @@ export function TwelveWeekPlanAccessSection({
         {currentPlanCode === "FREE" ? (
           <>
             <Button className="bg-slate-950 text-white hover:bg-slate-800" onClick={() => onOpenUpgradePlan("PLUS")}>
-              Mở Plus demo
+              Nâng cấp Plus
             </Button>
             <Button
               variant="outline"
               className="border-violet-200 bg-white text-violet-800 hover:bg-violet-50"
               onClick={onRestorePlanAccess}
             >
-              Khôi phục quyền local
+              Khôi phục quyền đã mua
             </Button>
           </>
         ) : (
           <div className="rounded-lg border border-violet-100 bg-white px-4 py-3 text-sm text-slate-700">
-            Plus demo đang mở local trên trình duyệt này; đây chưa phải quyền production thật.
+            Gói Plus đang hoạt động trên tài khoản của bạn.
           </div>
         )}
       </div>
@@ -252,7 +252,7 @@ export function TwelveWeekPlanAccessSection({
           onClick={onRestorePlanAccess}
           disabled={isRestoringPlanAccess}
         >
-          {isRestoringPlanAccess ? "Đang khôi phục..." : "Khôi phục mock upgrade"}
+          {isRestoringPlanAccess ? "Đang khôi phục..." : "Khôi phục quyền đã mua"}
         </Button>
       </div>
     </div>

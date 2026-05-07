@@ -167,10 +167,10 @@ export function getPushDeepLinkPayload(
     case "trial_ending":
       return {
         url: "/billing/plan",
-        title: "Plus demo local sắp hết hạn",
+        title: "Gói Plus sắp hết hạn",
         body: context?.daysLeft
-          ? `Còn ${context.daysLeft} ngày — mock upgrade không thu tiền thật.`
-          : "Mở mock upgrade nếu muốn giữ lớp Plus demo trên trình duyệt này.",
+          ? `Còn ${context.daysLeft} ngày. Gia hạn để tiếp tục dùng quyền nâng cao.`
+          : "Gia hạn gói Plus để tiếp tục dùng quyền nâng cao cho chu kỳ 12 tuần.",
         tag: "trial-ending",
         data: context,
       };

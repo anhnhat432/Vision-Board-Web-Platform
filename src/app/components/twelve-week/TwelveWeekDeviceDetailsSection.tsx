@@ -108,7 +108,7 @@ export function TwelveWeekDeviceDetailsSection({
   const [isPushSubscribed, setIsPushSubscribed] = useState(false);
   const [isPushLoading, setIsPushLoading] = useState(false);
   const localDataOnly = isDemoMode() || !backendConnectionStatus.signedIn;
-  const privacyBadgeLabel = localDataOnly ? "Local data only" : "Account data";
+  const privacyBadgeLabel = localDataOnly ? "Chỉ lưu trên thiết bị" : "Dữ liệu tài khoản";
   const deleteActionLabel = localDataOnly ? "Xóa toàn bộ dữ liệu local" : "Xóa tài khoản";
   const hasPushEntitlement = (() => {
     const sub = getUserData().subscription;

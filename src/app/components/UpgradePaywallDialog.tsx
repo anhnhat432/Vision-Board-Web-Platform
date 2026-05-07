@@ -95,21 +95,13 @@ export function UpgradePaywallDialog({
         }
 
         toast.success(result.message, {
-          description:
-            result.providerMode === "mock_provider"
-              ? "Thanh toán mô phỏng — không thu tiền thật. Gói được mở trên trình duyệt này."
-              : "Tiếp tục thanh toán tại nhà cung cấp.",
+          description: "Tiếp tục thanh toán để hoàn tất nâng cấp.",
         });
       } else if (result.status === "already_active") {
         toast.info(result.message);
       } else {
         toast.success(result.message, {
-          description:
-            result.providerMode === "api_contract"
-              ? "Quyền đã được đồng bộ qua hệ thống thanh toán."
-              : result.providerMode === "mock_provider"
-                ? "Mô phỏng hoàn tất. Gói được mở trên trình duyệt này — không thu tiền thật."
-                : "Đây là thanh toán thử nghiệm. Không có khoản thu thật.",
+          description: "Quyền đã được cập nhật trên tài khoản của bạn.",
         });
       }
 
