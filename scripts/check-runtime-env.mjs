@@ -62,6 +62,12 @@ const optionalBackendMonitoringKeys = [
   "SENTRY_TRACES_SAMPLE_RATE",
 ];
 
+const optionalBackendBackupKeys = [
+  "MONGODB_BACKUP_DIR",
+  "MONGODB_BACKUP_RETENTION_DAYS",
+  "MONGODUMP_BIN",
+];
+
 function getMode(argv) {
   const inlineMode = argv.find((arg) => arg.startsWith("--mode="));
   if (inlineMode) return inlineMode.slice("--mode=".length) || "development";
@@ -197,6 +203,8 @@ console.log("");
 printKeyStatus("Casso + VietQR billing requirements (BILLING_PROVIDER=casso or --casso-billing)", cassoBillingKeys, backendEnv.values);
 console.log("");
 printKeyStatus("Optional backend error monitoring", optionalBackendMonitoringKeys, backendEnv.values);
+console.log("");
+printKeyStatus("Optional MongoDB backup config", optionalBackendBackupKeys, backendEnv.values);
 console.log("");
 
 if (frontendAppMode !== "real") {

@@ -217,6 +217,38 @@ SENTRY_TRACES_SAMPLE_RATE=0.05
 
 Do not put private Sentry auth tokens in source files. The DSN can be set in Vercel and Render project environment variables.
 
+### Optional: MongoDB backups
+
+Atlas M0 does not include automatic backups. The repository includes a local backup script that uses MongoDB Database Tools `mongodump`.
+
+Install MongoDB Database Tools first, then verify without creating a dump:
+
+```powershell
+npm run backup:mongo:dry-run
+```
+
+Create a compressed archive:
+
+```powershell
+npm run backup:mongo
+```
+
+The script reads `MONGODB_URI` from the current shell first, then falls back to `backend/.env`. Archives are written to `backups/mongodb` by default, and `backups/` is ignored by git.
+
+Optional backend env:
+
+```env
+MONGODB_BACKUP_DIR=backups/mongodb
+MONGODB_BACKUP_RETENTION_DAYS=14
+MONGODUMP_BIN=mongodump
+```
+
+For production, run this from a trusted operator machine or a secure scheduled job that has access to `MONGODB_URI`. Do not upload unencrypted backups to public CI artifacts. To restore, test on staging first:
+
+```powershell
+mongorestore --uri "$env:MONGODB_URI" --archive="backups/mongodb/<backup>.archive.gz" --gzip
+```
+
 ### 5. Run the frontend
 
 ```powershell

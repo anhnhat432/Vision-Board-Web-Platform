@@ -522,6 +522,10 @@ npm install @sentry/react
 
 - Atlas M0 không có auto-backup
 - Viết script `mongodump` chạy hàng ngày (hoặc nâng M2 nếu cần auto-backup)
+- Script: `npm run backup:mongo`
+- Dry-run/check tool: `npm run backup:mongo:dry-run`
+- Backup ghi vào `backups/mongodb` mặc định; `backups/` không commit lên git.
+- Production: chạy từ máy/operator hoặc scheduled job bảo mật có `MONGODB_URI`; không upload backup chứa user data lên public CI artifact.
 
 ---
 
