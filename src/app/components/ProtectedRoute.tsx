@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from "react-router";
-import { Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 
 export function ProtectedRoute() {
@@ -8,9 +8,27 @@ export function ProtectedRoute() {
   const destination = `${location.pathname}${location.search}${location.hash}`;
   const loginPath = `/login?next=${encodeURIComponent(destination)}`;
 
-  // Firebase not configured (demo mode or missing env vars) — skip auth gate entirely
+  // Firebase not configured (missing env vars) — block access entirely
   if (!isConfigured) {
-    return <Outlet />;
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center px-6">
+        <div
+          role="alert"
+          className="w-full max-w-md rounded-2xl border border-amber-200 bg-amber-50/90 p-8 text-center shadow-lg"
+        >
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
+            <AlertTriangle className="h-7 w-7 text-amber-600" />
+          </div>
+          <h2 className="text-lg font-semibold text-amber-800">
+            Lỗi cấu hình hệ thống
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-amber-700">
+            Ứng dụng chưa được cấu hình đầy đủ. Vui lòng liên hệ quản trị viên để
+            được hỗ trợ.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   // Still resolving Firebase auth state — hold the layout space with a spinner

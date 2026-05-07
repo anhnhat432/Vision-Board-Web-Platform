@@ -140,15 +140,15 @@ export const router = createBrowserRouter([
             path: "order-status/:orderId?",
             ...lazyRoute(() => import("./pages/OrderStatusPage"), "OrderStatusPage"),
           },
+          {
+            path: "admin/orders",
+            ...lazyRoute(() => import("./pages/AdminOrdersPage"), "AdminOrdersPage"),
+          },
         ],
       },
       {
         path: "vision-board/:id?",
         ...lazyRoute(() => import("./pages/VisionBoardEditor"), "VisionBoardEditor"),
-      },
-      {
-        path: "admin/orders",
-        ...lazyRoute(() => import("./pages/AdminOrdersPage"), "AdminOrdersPage"),
       },
       {
         path: "goals",

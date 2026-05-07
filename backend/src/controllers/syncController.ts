@@ -1,6 +1,20 @@
 import type { Request, Response } from "express";
 
-import { syncMutationService } from "../services/syncMutationService";
+import {
+  MongoSyncMutationLogRepository,
+} from "../repositories/mongo/MongoSyncMutationLogRepository";
+import {
+  SyncMutationOrchestrator,
+  MongoSyncTaskMutationRepository,
+  MongoSyncWorkspaceMutationRepository,
+  TaskCompletedChangedHandler,
+  DailyCheckInUpsertHandler,
+  LeadMetricUpsertHandler,
+  WeeklyReviewUpsertHandler,
+  PlanSnapshotUpdatedHandler,
+  PlanSnapshotUpsertHandler,
+  TaskUpsertHandler,
+} from "../services/sync-mutations";
 import { twelveWeekPullService } from "../services/twelveWeekPullService";
 import { twelveWeekImportService } from "../services/twelveWeekImportService";
 import { twelveWeekImportValidationService } from "../services/twelveWeekImportValidationService";
@@ -8,9 +22,29 @@ import { twelveWeekWorkspaceService } from "../services/twelveWeekWorkspaceServi
 import { successResponse } from "../utils/apiResponse";
 import { requireAuthUser } from "./controllerHelpers";
 
+// ─── Orchestrator instance (singleton) ──────────────────────────
+
+const syncMutationOrchestrator = new SyncMutationOrchestrator(
+  new MongoSyncMutationLogRepository(),
+  new MongoSyncTaskMutationRepository(),
+  new MongoSyncWorkspaceMutationRepository(),
+);
+
+syncMutationOrchestrator.registerAll([
+  new TaskCompletedChangedHandler(),
+  new DailyCheckInUpsertHandler(),
+  new LeadMetricUpsertHandler(),
+  new WeeklyReviewUpsertHandler(),
+  new PlanSnapshotUpdatedHandler(),
+  new PlanSnapshotUpsertHandler(),
+  new TaskUpsertHandler(),
+]);
+
+// ─── Controller functions ───────────────────────────────────────
+
 export async function submitTwelveWeekMutations(req: Request, res: Response): Promise<void> {
   const user = requireAuthUser(req);
-  const result = await syncMutationService.submitMutationBatch(user.uid, req.body ?? {});
+  const result = await syncMutationOrchestrator.executeBatch(user.uid, req.body ?? {});
   res.status(200).json(successResponse(result));
 }
 

@@ -59,11 +59,12 @@ describe("ProtectedRoute", () => {
     expect(screen.getByTestId("login-next")).toHaveTextContent("/order?kit=vision#recipient");
   });
 
-  it("renders protected content when auth is unavailable for local demo mode", () => {
+  it("blocks access when auth is not configured (Firebase env missing)", () => {
     setAuthContext({ isConfigured: false });
 
     renderProtectedRoute();
 
-    expect(screen.getByText("Order form")).toBeInTheDocument();
+    expect(screen.getByText(/Lỗi cấu hình hệ thống/i)).toBeInTheDocument();
+    expect(screen.queryByText("Order form")).not.toBeInTheDocument();
   });
 });

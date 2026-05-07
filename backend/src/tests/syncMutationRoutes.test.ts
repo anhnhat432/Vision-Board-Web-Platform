@@ -7,8 +7,6 @@ import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
 import { syncRoutes } from "../routes/syncRoutes";
 import {
-  SyncMutationService,
-  syncMutationService,
   type AppliedTaskMutationEntity,
   type AppliedWorkspaceMutationEntity,
   type DailyCheckInUpsertApplyInput,
@@ -19,7 +17,8 @@ import {
   type SyncWorkspaceMutationRepository,
   type TaskCompletedChangedApplyInput,
   type WeeklyReviewUpsertApplyInput,
-} from "../services/syncMutationService";
+} from "../services/sync-mutations";
+import { SyncMutationService, syncMutationService } from "../services/syncMutationService";
 import {
   TwelveWeekImportService,
   twelveWeekImportService,
