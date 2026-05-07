@@ -16,6 +16,7 @@
     "node": "20.x"
   },
   "dependencies": {
+    "@sentry/node": "^10.52.0",
     "@vision-board/shared-types": "file:../shared-types",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",

@@ -7,6 +7,7 @@ import { env } from "./config/env";
 import { createCorsOptions, parseAllowedCorsOrigins } from "./middleware/corsOrigin";
 import { errorMiddleware } from "./middleware/errorMiddleware";
 import { notFoundMiddleware } from "./middleware/notFoundMiddleware";
+import { setupSentryErrorHandler } from "./monitoring/sentry";
 import { apiRoutes } from "./routes";
 
 const app = express();
@@ -32,6 +33,7 @@ app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 
 app.use("/api", apiRoutes);
 
+setupSentryErrorHandler(app);
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 

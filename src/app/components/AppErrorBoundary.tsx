@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { AlertTriangle, Home, RefreshCw, Sparkles } from "lucide-react";
 import { isRouteErrorResponse, useNavigate, useRouteError } from "react-router";
 
+import { captureFrontendException } from "@/lib/monitoring/sentry";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 
@@ -27,6 +29,16 @@ export function AppErrorBoundary() {
   const error = useRouteError();
   const errorCode = getErrorCode(error);
   const errorMessage = getErrorMessage(error);
+
+  useEffect(() => {
+    if (isRouteErrorResponse(error) && error.status < 500) return;
+
+    captureFrontendException(error, {
+      boundary: "AppErrorBoundary",
+      routeErrorCode: errorCode,
+      pathname: window.location.pathname,
+    });
+  }, [error, errorCode]);
 
   return (
     <div className="app-shell min-h-screen" data-route-tone="system">

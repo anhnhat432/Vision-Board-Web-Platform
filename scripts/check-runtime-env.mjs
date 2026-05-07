@@ -29,6 +29,13 @@ const optionalFrontendFirebaseKeys = [
   "VITE_FIREBASE_MEASUREMENT_ID",
 ];
 
+const optionalFrontendMonitoringKeys = [
+  "VITE_SENTRY_DSN",
+  "VITE_SENTRY_ENVIRONMENT",
+  "VITE_SENTRY_RELEASE",
+  "VITE_SENTRY_TRACES_SAMPLE_RATE",
+];
+
 const requiredBackendKeys = [
   "PORT",
   "MONGODB_URI",
@@ -46,6 +53,13 @@ const cassoBillingKeys = [
   "CASSO_BANK_NAME",
   "CASSO_ACCOUNT_NAME",
   "PLUS_PRICE_VND",
+];
+
+const optionalBackendMonitoringKeys = [
+  "SENTRY_DSN",
+  "SENTRY_ENVIRONMENT",
+  "SENTRY_RELEASE",
+  "SENTRY_TRACES_SAMPLE_RATE",
 ];
 
 function getMode(argv) {
@@ -176,9 +190,13 @@ printKeyStatus("Frontend backend-sync requirements", requiredFrontendForBackendS
 console.log("");
 printKeyStatus("Optional Firebase client keys", optionalFrontendFirebaseKeys, frontendEnv.values);
 console.log("");
+printKeyStatus("Optional frontend error monitoring", optionalFrontendMonitoringKeys, frontendEnv.values);
+console.log("");
 printKeyStatus("Backend local API requirements", requiredBackendKeys, backendEnv.values);
 console.log("");
 printKeyStatus("Casso + VietQR billing requirements (BILLING_PROVIDER=casso or --casso-billing)", cassoBillingKeys, backendEnv.values);
+console.log("");
+printKeyStatus("Optional backend error monitoring", optionalBackendMonitoringKeys, backendEnv.values);
 console.log("");
 
 if (frontendAppMode !== "real") {

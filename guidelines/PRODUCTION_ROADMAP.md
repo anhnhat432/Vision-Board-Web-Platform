@@ -508,11 +508,15 @@ cors({
 
 ```bash
 npm --prefix backend install @sentry/node
+npm install @sentry/react
 ```
 
 - Init Sentry trong server.ts
 - Capture unhandled errors
-- Frontend: `npm install @sentry/react`
+- Frontend capture runtime/route errors qua `AppErrorBoundary`
+- Optional env:
+  - Backend: `SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_TRACES_SAMPLE_RATE`
+  - Frontend: `VITE_SENTRY_DSN`, `VITE_SENTRY_ENVIRONMENT`, `VITE_SENTRY_TRACES_SAMPLE_RATE`
 
 ### 3.6 MongoDB backup
 

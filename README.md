@@ -195,6 +195,28 @@ VBABCDEFGH
 
 Do not set live Casso tokens or bank details in source files. Put them in Render/host environment variables.
 
+### Optional: error monitoring with Sentry
+
+Sentry is optional. If DSN values are blank, both apps run normally without sending events.
+
+Frontend env:
+
+```env
+VITE_SENTRY_DSN=https://...
+VITE_SENTRY_ENVIRONMENT=production
+VITE_SENTRY_TRACES_SAMPLE_RATE=0.02
+```
+
+Backend env:
+
+```env
+SENTRY_DSN=https://...
+SENTRY_ENVIRONMENT=production
+SENTRY_TRACES_SAMPLE_RATE=0.05
+```
+
+Do not put private Sentry auth tokens in source files. The DSN can be set in Vercel and Render project environment variables.
+
 ### 5. Run the frontend
 
 ```powershell
