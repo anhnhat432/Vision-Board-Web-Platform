@@ -6,6 +6,7 @@ import {
   isCorsOriginAllowed,
   parseAllowedCorsOrigins,
 } from "../middleware/corsOrigin";
+import { ApiError } from "../utils/apiError";
 
 describe("CORS origin config", () => {
   it("normalizes comma-separated allowed origins", () => {
@@ -54,11 +55,14 @@ describe("CORS origin config", () => {
       }
 
       options.origin("https://evil.example.com", (error) => {
-        if (error) {
+        try {
+          assert.ok(error instanceof ApiError);
+          assert.equal(error.statusCode, 403);
+          assert.equal(error.errorCode, "cors_origin_not_allowed");
           resolve();
-          return;
+        } catch (assertionError) {
+          reject(assertionError);
         }
-        reject(new Error("Expected CORS rejection."));
       });
     });
   });

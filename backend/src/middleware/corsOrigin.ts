@@ -1,5 +1,7 @@
 import type { CorsOptions } from "cors";
 
+import { ApiError } from "../utils/apiError";
+
 interface ParseCorsOriginOptions {
   nodeEnv?: string;
 }
@@ -64,7 +66,7 @@ export function createCorsOptions(allowedOrigins: readonly string[]): CorsOption
         return;
       }
 
-      callback(new Error("Not allowed by CORS"));
+      callback(new ApiError(403, "CORS origin is not allowed.", undefined, "cors_origin_not_allowed"));
     },
     credentials: true,
   };
