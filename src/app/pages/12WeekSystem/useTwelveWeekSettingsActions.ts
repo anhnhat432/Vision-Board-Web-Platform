@@ -7,9 +7,9 @@ import {
   requestBrowserNotificationPermission,
   sendTestBrowserNotification,
 } from "@/app/utils/production";
-import { downloadLocalUserDataBackup } from "@/app/utils/local-data-backup";
+import { downloadDataExport } from "@/app/utils/local-data-backup";
 import { isDemoMode } from "@/app/utils/app-mode";
-import { exportCloudWorkspace, deleteCloudWorkspace } from "@/services/syncService";
+import { exportCloudWorkspace, deleteCloudWorkspace, deleteAccount } from "@/services/syncService";
 import {
   type AppPreferences,
   type InAppReminder,
@@ -42,6 +42,9 @@ interface UseTwelveWeekSettingsActionsOptions {
   setBrowserNotificationStatus: (value: ReturnType<typeof getBrowserNotificationStatus>) => void;
   setIsClearLocalDialogOpen: (open: boolean) => void;
   setIsResetDialogOpen: (open: boolean) => void;
+  setIsDeleteDataDialogOpen: (open: boolean) => void;
+  setIsDeletingData: (loading: boolean) => void;
+  isSignedIn: boolean;
   navigate: NavigateFunction;
 }
 
@@ -57,6 +60,9 @@ export function useTwelveWeekSettingsActions({
   setBrowserNotificationStatus,
   setIsClearLocalDialogOpen,
   setIsResetDialogOpen,
+  setIsDeleteDataDialogOpen,
+  setIsDeletingData,
+  isSignedIn,
   navigate,
 }: UseTwelveWeekSettingsActionsOptions) {
   const commitPlanSnapshotUpdate = useCallback((nextSystem: TwelveWeekSystem) => {
@@ -170,9 +176,9 @@ export function useTwelveWeekSettingsActions({
   }, [activeGoal, loadGoalData, handleTabChange]);
 
   const handleExportLocalData = useCallback(() => {
-    downloadLocalUserDataBackup({ data: getUserData(), filenamePrefix: "vision-board-local" });
-    toast.success("Đã tải bản sao dữ liệu local.");
-  }, []);
+    downloadDataExport(getUserData(), activeGoal?.id ?? null);
+    toast.success("Đã tải bản xuất dữ liệu.");
+  }, [activeGoal?.id]);
 
   const handleExportCloudWorkspace = async () => {
     if (isDemoMode()) {
@@ -232,11 +238,32 @@ export function useTwelveWeekSettingsActions({
     refreshSnapshotMeta();
   }, [setIsClearLocalDialogOpen, refreshSnapshotMeta]);
 
-  const handleDeleteAllData = useCallback(() => {
-    deleteAllUserData();
-    toast.success("Đã xóa toàn bộ dữ liệu trên thiết bị.");
-    navigate("/");
-  }, [navigate]);
+  const handleDeleteAllData = useCallback(async () => {
+    const shouldDeleteRemoteAccount = !isDemoMode() && isSignedIn;
+    setIsDeletingData(true);
+
+    try {
+      const accountDeleteResult = shouldDeleteRemoteAccount ? await deleteAccount() : null;
+      deleteAllUserData();
+      setIsDeleteDataDialogOpen(false);
+
+      if (accountDeleteResult && !accountDeleteResult.firebaseAccountDeleted) {
+        toast.warning("Dữ liệu đã được xóa, nhưng Firebase account cần được kiểm tra lại.");
+      } else {
+        toast.success(shouldDeleteRemoteAccount ? "Đã xóa tài khoản và dữ liệu." : "Đã xóa toàn bộ dữ liệu local.");
+      }
+
+      navigate("/");
+    } catch (_error) {
+      toast.error("Không thể xóa dữ liệu lúc này. Hãy kiểm tra kết nối và thử lại.");
+    } finally {
+      setIsDeletingData(false);
+    }
+  }, [isSignedIn, navigate, setIsDeleteDataDialogOpen, setIsDeletingData]);
+
+  const handleOpenDeleteDataDialog = useCallback(() => {
+    setIsDeleteDataDialogOpen(true);
+  }, [setIsDeleteDataDialogOpen]);
 
   const handleBrowserNotificationToggle = useCallback(async (value: boolean) => {
     if (!activeGoal) return;
@@ -306,6 +333,7 @@ export function useTwelveWeekSettingsActions({
     handleDeleteCloudWorkspace,
     handleClearLocalSignals,
     handleDeleteAllData,
+    handleOpenDeleteDataDialog,
     handleBrowserNotificationToggle,
     handleResetCycle,
   };

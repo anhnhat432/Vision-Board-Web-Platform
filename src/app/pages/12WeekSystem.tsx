@@ -6,9 +6,11 @@ import { useTwelveWeekSystemSnapshot } from "../hooks/useTwelveWeekSystemSnapsho
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { useNetworkStatus } from "../hooks/useNetworkStatus";
 import { TabErrorBoundary } from "../components/TabErrorBoundary";
+import { DeleteDataConfirmationDialog } from "../components/twelve-week/DeleteDataConfirmationDialog";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import {
+  isDemoMode,
   isRealMode,
   shouldEnable12WeekMutationSync,
   shouldEnable12WeekPullSync,
@@ -170,7 +172,10 @@ export function TwelveWeekSystem() {
   } = useTwelveWeekSystemSnapshot();
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [isClearLocalDialogOpen, setIsClearLocalDialogOpen] = useState(false);
+  const [isDeleteDataDialogOpen, setIsDeleteDataDialogOpen] = useState(false);
+  const [isDeletingData, setIsDeletingData] = useState(false);
   const [dismissedTriggerKind, setDismissedTriggerKind] = useState<string | null>(null);
+  const demoMode = isDemoMode();
   const [showFullProgress, setShowFullProgress] = useState(false);
   const {
     loading: isManualCloudSyncing,
@@ -423,6 +428,9 @@ export function TwelveWeekSystem() {
     setBrowserNotificationStatus,
     setIsClearLocalDialogOpen,
     setIsResetDialogOpen,
+    setIsDeleteDataDialogOpen,
+    setIsDeletingData,
+    isSignedIn: Boolean(user),
     navigate,
   });
 
@@ -594,6 +602,15 @@ export function TwelveWeekSystem() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <DeleteDataConfirmationDialog
+        open={isDeleteDataDialogOpen}
+        onOpenChange={setIsDeleteDataDialogOpen}
+        isDemoMode={demoMode}
+        isSignedIn={Boolean(user)}
+        onConfirm={handleDeleteAllData}
+        isLoading={isDeletingData}
+      />
 
       <TwelveWeekDashboardHeader
         activeGoal={activeGoal}
@@ -932,6 +949,7 @@ export function TwelveWeekSystem() {
                 }}
                 onOpenClearLocalDialog={() => setIsClearLocalDialogOpen(true)}
                 onDeleteAllData={handleDeleteAllData}
+                onOpenDeleteDataDialog={() => setIsDeleteDataDialogOpen(true)}
                 onOpenResetDialog={() => setIsResetDialogOpen(true)}
                 onOpenUpgradePlan={(planCode) => handleOpenUpgradeDialog("plan", planCode)}
                 onSyncEntitlements={handleSyncEntitlements}

@@ -422,3 +422,14 @@ export function exportCloudWorkspace(): Promise<CloudWorkspaceExportResponse> {
 export function deleteCloudWorkspace(): Promise<CloudWorkspaceDeleteResponse> {
   return deleteRequest<CloudWorkspaceDeleteResponse>("/sync/12-week/workspace");
 }
+
+export interface AccountDeleteResponse {
+  deleted: boolean;
+  deletedAt: string;
+  firebaseAccountDeleted: boolean;
+  counts: Record<string, number>;
+}
+
+export function deleteAccount(): Promise<AccountDeleteResponse> {
+  return deleteRequest<AccountDeleteResponse>("/account/delete");
+}

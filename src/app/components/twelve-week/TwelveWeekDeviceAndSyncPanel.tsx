@@ -64,6 +64,7 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
 
         <TwelveWeekDeviceDetailsSection
           appPreferences={props.appPreferences}
+          backendConnectionStatus={props.backendConnectionStatus}
           funnelSteps={props.funnelSteps}
           monetizationSteps={props.monetizationSteps}
           browserNotificationStatus={props.browserNotificationStatus}
@@ -84,7 +85,7 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
           onClearEventLog={props.onClearEventLog}
           onClearArchivedOutbox={props.onClearArchivedOutbox}
           onOpenClearLocalDialog={props.onOpenClearLocalDialog}
-          onDeleteAllData={props.onDeleteAllData}
+          onOpenDeleteDataDialog={props.onOpenDeleteDataDialog}
           onOpenResetDialog={props.onOpenResetDialog}
           onNavigateGoals={props.onNavigateGoals}
           onNavigateJournal={props.onNavigateJournal}

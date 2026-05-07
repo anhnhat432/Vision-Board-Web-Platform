@@ -254,12 +254,25 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
   - Max 1 primary action per screen in setup flows
 - **Verified:** [x] npm run typecheck / [x] npm run build / [ ] Manual mobile/desktop test
 
-### 14. ⬜ Data Export & Delete Flow
+### 14. ✅ Data Export & Delete Flow
 
 - **Prompt:** Prompt 14
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
+- **Status:** [x] Completed
 - **Files changed:**
-- **Verified:** [ ] Export produces valid JSON / Delete clears data
+  - `src/app/components/twelve-week/TwelveWeekDeviceDetailsSection.tsx` - thêm Data & Privacy section trong Settings
+  - `src/app/components/twelve-week/DeleteDataConfirmationDialog.tsx` - confirmation dialog cho clear local/delete account
+  - `src/app/pages/12WeekSystem/useTwelveWeekSettingsActions.ts` - export JSON và delete/clear flow
+  - `src/app/pages/12WeekSystem.tsx`, `src/app/pages/12WeekSystemSettings.tsx` - mount delete dialog và loading state
+  - `src/app/utils/local-data-backup.ts` - export JSON format `exportVersion`, `exportedAt`, `goal`, `twelveWeekSystem`, `preferences`
+  - `src/services/syncService.ts` - frontend account delete API client
+  - `backend/src/controllers/accountController.ts`, `backend/src/routes/accountRoutes.ts`, `backend/src/routes/index.ts` - `DELETE /api/account/delete`
+  - `src/app/utils/local-data-backup.test.ts` - export/delete localStorage coverage
+- **Notes:**
+  - Demo mode is clearly labeled "Local data only"
+  - Demo delete clears localStorage and redirects home
+  - Real signed-in delete calls backend before clearing local data
+  - Backend deletes user-scoped data and attempts Firebase account deletion
+- **Verified:** [x] Export produces valid JSON / [x] Delete clears data / [x] npm run typecheck / [x] backend typecheck / [x] focused tests
 
 ### 15. ⬜ Improve Smoke Test Coverage
 

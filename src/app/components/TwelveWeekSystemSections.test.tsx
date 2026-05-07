@@ -192,6 +192,7 @@ describe("TwelveWeekSystemSections", () => {
         onClearArchivedOutbox={vi.fn()}
         onOpenClearLocalDialog={vi.fn()}
         onDeleteAllData={vi.fn()}
+        onOpenDeleteDataDialog={vi.fn()}
         onOpenResetDialog={vi.fn()}
         onOpenUpgradePlan={vi.fn()}
         onSyncEntitlements={vi.fn()}

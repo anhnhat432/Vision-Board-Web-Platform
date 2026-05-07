@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import { authMiddleware } from "../middleware/authMiddleware";
+import { accountRoutes } from "./accountRoutes";
 import { authRoutes } from "./authRoutes";
 import { billingRoutes } from "./billingRoutes";
 import { goalRoutes } from "./goalRoutes";
@@ -21,6 +22,7 @@ apiRoutes.use(healthRoutes);
 apiRoutes.use(webhookRoutes);
 apiRoutes.use(authMiddleware);
 apiRoutes.use(authRoutes);
+apiRoutes.use(accountRoutes);
 apiRoutes.use(billingRoutes);
 apiRoutes.use(goalRoutes);
 apiRoutes.use(orderRoutes);

@@ -6,6 +6,7 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Switch } from "../ui/switch";
 import { formatCalendarDate, getPushSubscription, getUserData } from "../../utils/storage";
+import { isDemoMode } from "../../utils/app-mode";
 import { requestPushPermissionAndSubscribe, unregisterPushSubscription } from "../../utils/production";
 import {
   formatDateTimeLabel,
@@ -20,6 +21,7 @@ import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
 type TwelveWeekDeviceDetailsSectionProps = Pick<
   TwelveWeekSettingsTabProps,
   | "appPreferences"
+  | "backendConnectionStatus"
   | "funnelSteps"
   | "monetizationSteps"
   | "browserNotificationStatus"
@@ -40,12 +42,13 @@ type TwelveWeekDeviceDetailsSectionProps = Pick<
   | "onClearEventLog"
   | "onClearArchivedOutbox"
   | "onOpenClearLocalDialog"
+  | "onOpenDeleteDataDialog"
   | "onOpenResetDialog"
   | "onNavigateGoals"
   | "onNavigateJournal"
   | "onNavigateSetup"
 > & {
-  onDeleteAllData: () => void;
+  onOpenDeleteDataDialog: () => void;
 };
 
 interface ExpandableSectionProps {
@@ -75,6 +78,7 @@ function ExpandableSection({ title, description, badge, children }: ExpandableSe
 
 export function TwelveWeekDeviceDetailsSection({
   appPreferences,
+  backendConnectionStatus,
   funnelSteps,
   monetizationSteps,
   browserNotificationStatus,
@@ -95,14 +99,17 @@ export function TwelveWeekDeviceDetailsSection({
   onClearEventLog,
   onClearArchivedOutbox,
   onOpenClearLocalDialog,
+  onOpenDeleteDataDialog,
   onOpenResetDialog,
-  onDeleteAllData,
   onNavigateGoals,
   onNavigateJournal,
   onNavigateSetup,
 }: TwelveWeekDeviceDetailsSectionProps) {
   const [isPushSubscribed, setIsPushSubscribed] = useState(false);
   const [isPushLoading, setIsPushLoading] = useState(false);
+  const localDataOnly = isDemoMode() || !backendConnectionStatus.signedIn;
+  const privacyBadgeLabel = localDataOnly ? "Local data only" : "Account data";
+  const deleteActionLabel = localDataOnly ? "Xóa toàn bộ dữ liệu local" : "Xóa tài khoản";
   const hasPushEntitlement = (() => {
     const sub = getUserData().subscription;
     if (!sub) return false;
@@ -370,15 +377,37 @@ export function TwelveWeekDeviceDetailsSection({
       </ExpandableSection>
 
       <ExpandableSection
-        title="Quyền riêng tư và dữ liệu"
+        title="Dữ liệu & quyền riêng tư"
         description="Hiểu dữ liệu nào đang lưu trên thiết bị, dữ liệu nào có thể được gửi đi, và xóa toàn bộ nếu cần."
         badge={
-          <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
-            Minh bạch
+          <Badge
+            variant="outline"
+            className={
+              localDataOnly
+                ? "border-amber-200 bg-amber-50 text-amber-800"
+                : "border-emerald-200 bg-emerald-50 text-emerald-700"
+            }
+          >
+            {privacyBadgeLabel}
           </Badge>
         }
       >
         <div className="space-y-4">
+          <div className="rounded-lg border border-slate-200 bg-white p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Data & Privacy</p>
+            <p className="mt-2 text-sm leading-6 text-slate-700">
+              Xuất bản JSON gồm mục tiêu hiện tại, hệ thống 12 tuần và cài đặt ứng dụng. Nếu xóa trong demo,
+              chỉ dữ liệu local trên trình duyệt này bị xóa.
+            </p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <Button variant="outline" className="bg-white/90" onClick={onExportLocalData}>
+                Xuất dữ liệu của tôi
+              </Button>
+              <Button variant="destructive" onClick={onOpenDeleteDataDialog}>
+                {deleteActionLabel}
+              </Button>
+            </div>
+          </div>
           <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
               Dữ liệu lưu trên thiết bị
@@ -409,8 +438,8 @@ export function TwelveWeekDeviceDetailsSection({
               Hành động này sẽ xóa vĩnh viễn tất cả dữ liệu local trên trình duyệt này: mục tiêu, nhật ký, check-in,
               cài đặt và gói mock. Không thể hoàn tác.
             </p>
-            <Button variant="destructive" className="mt-3 w-full" onClick={onDeleteAllData}>
-              Xóa toàn bộ dữ liệu trên thiết bị
+            <Button variant="destructive" className="mt-3 w-full" onClick={onOpenDeleteDataDialog}>
+              {deleteActionLabel}
             </Button>
           </div>
         </div>

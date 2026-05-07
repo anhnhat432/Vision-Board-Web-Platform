@@ -86,6 +86,7 @@ export interface TwelveWeekSettingsTabProps {
   onClearArchivedOutbox: () => void;
   onOpenClearLocalDialog: () => void;
   onDeleteAllData: () => void;
+  onOpenDeleteDataDialog: () => void;
   onOpenResetDialog: () => void;
   onOpenUpgradePlan: (planCode: Exclude<PricingPlanCode, "FREE">) => void;
   onSyncEntitlements: () => void;

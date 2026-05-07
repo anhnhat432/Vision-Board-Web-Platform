@@ -1,6 +1,7 @@
 import { Suspense, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
+import { DeleteDataConfirmationDialog } from "../components/twelve-week/DeleteDataConfirmationDialog";
 import { DataStorageInfo } from "../components/DataStorageInfo";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../components/ui/alert-dialog";
 import { useTwelveWeekSystemSnapshot } from "../hooks/useTwelveWeekSystemSnapshot";
@@ -14,6 +15,7 @@ import { useAuthContext } from "@/lib/auth/AuthContext";
 import { usePlanExecutionSync } from "@/features/plan12week/hooks";
 import { useNetworkStatus } from "../hooks/useNetworkStatus";
 import {
+  isDemoMode,
   isRealMode,
   shouldEnable12WeekMutationSync,
   shouldEnable12WeekPullSync,
@@ -74,6 +76,9 @@ export function TwelveWeekSystemSettings() {
 
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [isClearLocalDialogOpen, setIsClearLocalDialogOpen] = useState(false);
+  const [isDeleteDataDialogOpen, setIsDeleteDataDialogOpen] = useState(false);
+  const [isDeletingData, setIsDeletingData] = useState(false);
+  const demoMode = isDemoMode();
 
   const activeGoalIdRef = useRef<string | null>(activeGoal?.id ?? null);
   useEffect(() => {
@@ -197,6 +202,7 @@ export function TwelveWeekSystemSettings() {
     handleOutboxItemToggle,
     handleClearLocalSignals,
     handleDeleteAllData,
+    handleOpenDeleteDataDialog,
     handleResetCycle,
   } = useTwelveWeekSettingsActions({
     activeGoal,
@@ -210,6 +216,9 @@ export function TwelveWeekSystemSettings() {
     setBrowserNotificationStatus,
     setIsClearLocalDialogOpen,
     setIsResetDialogOpen,
+    setIsDeleteDataDialogOpen,
+    setIsDeletingData,
+    isSignedIn: Boolean(user),
     navigate,
   });
 
@@ -290,6 +299,15 @@ export function TwelveWeekSystemSettings() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <DeleteDataConfirmationDialog
+        open={isDeleteDataDialogOpen}
+        onOpenChange={setIsDeleteDataDialogOpen}
+        isDemoMode={demoMode}
+        isSignedIn={Boolean(user)}
+        onConfirm={handleDeleteAllData}
+        isLoading={isDeletingData}
+      />
+
       <DataStorageInfo showSyncHint className="mb-6" />
 
       <TabErrorBoundary fallbackTitle="Cài đặt gặp lỗi">
@@ -339,6 +357,7 @@ export function TwelveWeekSystemSettings() {
             onClearArchivedOutbox={handleClearArchivedOutbox}
             onOpenClearLocalDialog={() => setIsClearLocalDialogOpen(true)}
             onDeleteAllData={handleDeleteAllData}
+            onOpenDeleteDataDialog={handleOpenDeleteDataDialog}
             onOpenResetDialog={() => setIsResetDialogOpen(true)}
             onOpenUpgradePlan={(planCode) => handleOpenUpgradeDialog("plan", planCode)}
             onSyncEntitlements={handleSyncEntitlements}
