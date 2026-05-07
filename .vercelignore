@@ -1,0 +1,16 @@
+.git
+.github
+.vercel
+.claude
+.codex-worktrees
+.aider*
+artifacts
+codex-backups
+dist
+node_modules
+screenshots
+test-results
+*.log
+.env
+.env.local
+.env.*.local
