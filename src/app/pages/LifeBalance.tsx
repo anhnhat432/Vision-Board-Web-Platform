@@ -18,6 +18,7 @@ import { Button } from "../components/ui/button";
 import type { LifeBalanceHistoryChartPoint } from "../components/LifeBalanceHistoryChart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { CountUp } from "../components/ui/count-up";
+import { ProductVisual } from "../components/visuals/ProductVisual";
 import { Reveal } from "../components/ui/reveal";
 import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { Slider } from "../components/ui/slider";
@@ -265,6 +266,7 @@ export function LifeBalance() {
             </div>
 
             <div className="hidden xl:block rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+              <ProductVisual variant="balance" className="mb-5 min-h-[190px]" />
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Snapshot hiện tại</p>
 
               <div className="mt-6 space-y-4">

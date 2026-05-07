@@ -33,6 +33,7 @@ import { Checkbox } from "../components/ui/checkbox";
 import { CountUp } from "../components/ui/count-up";
 import { Input } from "../components/ui/input";
 import { LoadingSpinner } from "../components/ui/loading-spinner";
+import { ProductVisual } from "../components/visuals/ProductVisual";
 import { Progress } from "../components/ui/progress";
 import { Reveal } from "../components/ui/reveal";
 import { useBackendProgressOverlayMap } from "../hooks/useBackendProgressOverlay";
@@ -801,20 +802,23 @@ function GoalTrackerContent({
               </div>
             </div>
 
-            <div className={`rounded-lg border p-4 shadow-[0_16px_42px_-34px_rgba(15,23,42,0.34)] ${priority.tone}`}>
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/75">
-                  <PriorityIcon className="h-5 w-5" />
+            <div className="space-y-3">
+              <ProductVisual variant="execution" className="min-h-[170px]" />
+              <div className={`rounded-lg border p-4 shadow-[0_16px_42px_-34px_rgba(15,23,42,0.34)] ${priority.tone}`}>
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/75">
+                    <PriorityIcon className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] opacity-70">{priority.eyebrow}</p>
+                    <p className="mt-2 text-lg font-semibold leading-6">{priority.title}</p>
+                    <p className="mt-2 text-sm leading-6 opacity-75">{priority.note}</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] opacity-70">{priority.eyebrow}</p>
-                  <p className="mt-2 text-lg font-semibold leading-6">{priority.title}</p>
-                  <p className="mt-2 text-sm leading-6 opacity-75">{priority.note}</p>
-                </div>
+                <Button className="mt-4 w-full" variant="outline" onClick={handlePriorityAction}>
+                  {priority.cta}
+                </Button>
               </div>
-              <Button className="mt-4 w-full" variant="outline" onClick={handlePriorityAction}>
-                {priority.cta}
-              </Button>
             </div>
           </div>
 

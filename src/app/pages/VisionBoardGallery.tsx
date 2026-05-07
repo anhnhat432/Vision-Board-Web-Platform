@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { ProductVisual } from "../components/visuals/ProductVisual";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -249,6 +250,7 @@ export function VisionBoardGallery() {
               </div>
 
               <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-[32px] border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]">
+                <ProductVisual variant="vision" className="mb-5 min-h-[190px]" />
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Snapshot thư viện</p>
 
                 <div className="mt-4 space-y-3">

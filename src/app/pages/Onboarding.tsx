@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { ArrowLeft, ArrowRight, BarChart3, Check, Compass, Sparkles } from "lucide-react";
 
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
+import { ProductVisual } from "../components/visuals/ProductVisual";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Slider } from "../components/ui/slider";
@@ -203,6 +204,8 @@ export function Onboarding() {
                   <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">
                     Bạn sẽ nhận được gì
                   </p>
+
+                  <ProductVisual variant="moodboard" className="mt-5 min-h-[210px]" />
 
                   <div className="mt-6 space-y-4">
                     {[

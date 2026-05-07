@@ -4,6 +4,7 @@ import { AlertTriangle, CheckCircle2, Compass, Loader2, Sparkles, Target } from 
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
+import { ProductVisual } from "@/app/components/visuals/ProductVisual";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import {
   formatCalendarDate,
@@ -197,6 +198,7 @@ export function TwelveWeekDashboardHeader({
           </div>
 
           <div className="grid min-w-0 gap-2 sm:grid-cols-3 xl:w-[520px]">
+            <ProductVisual variant="execution" className="hidden min-h-[130px] sm:col-span-3 sm:block" />
             <div className="rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Còn cần làm</p>
               <p className="mt-1 text-2xl font-bold text-slate-950">{todayRemainingCount}</p>

@@ -2,6 +2,7 @@ import { ArrowRight, CheckCircle2, LogIn, Sparkles, UserPlus } from "lucide-reac
 
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
+import { ProductVisual } from "@/app/components/visuals/ProductVisual";
 
 interface PublicVisitorHeroProps {
   isDemo: boolean;
@@ -89,6 +90,7 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
           </div>
 
           <div className="flex flex-col rounded-lg border border-slate-200 bg-slate-50/82 p-4">
+            <ProductVisual variant="moodboard" className="mb-4 min-h-[200px]" />
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Luồng nên đi</p>
             <div className="mt-4 grid flex-1 gap-3">
               {FLOW_STEPS.map((step, index) => (

@@ -5,6 +5,7 @@ import { ArrowRight, Check, Compass, Sparkles, Target, TrendingDown, TrendingUp 
 
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
+import { ProductVisual } from "../components/visuals/ProductVisual";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
@@ -147,7 +148,7 @@ export function LifeInsight() {
           <CardContent className="relative p-5 sm:p-6 lg:p-10">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.1),_transparent_24%)] opacity-90" />
 
-            <div className="relative max-w-4xl">
+            <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
               <div className="space-y-5 sm:space-y-6">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Compass className="h-4 w-4" />
@@ -239,6 +240,8 @@ export function LifeInsight() {
                   </Button>
                 </div>
               </div>
+
+              <ProductVisual variant="balance" className="hidden min-h-[320px] xl:block" />
 
               <div className="hidden rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Snapshot hiện tại</p>

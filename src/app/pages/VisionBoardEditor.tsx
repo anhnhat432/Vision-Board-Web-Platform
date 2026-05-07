@@ -25,6 +25,7 @@ import {
 import { toast } from "sonner";
 
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { ProductVisual } from "../components/visuals/ProductVisual";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -708,6 +709,7 @@ export function VisionBoardEditor() {
                 </div>
 
                 <div className="hidden xl:block rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+                  <ProductVisual variant="vision" className="mb-5 min-h-[180px]" />
                   <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">
                     Snapshot canvas
                   </p>
@@ -921,6 +923,7 @@ export function VisionBoardEditor() {
                 {board.items.length === 0 ? (
                   <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
                     <div className="w-full max-w-md rounded-2xl border border-white/80 bg-white/86 p-5 text-center shadow-[0_32px_70px_-44px_rgba(15,23,42,0.42)] sm:p-7">
+                      <ProductVisual variant="vision" className="mx-auto mb-5 min-h-[150px] max-w-sm" />
                       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-violet-50 text-violet-700 sm:h-20 sm:w-20 sm:rounded-2xl">
                         <Sparkles className="h-8 w-8 sm:h-9 sm:w-9" />
                       </div>
