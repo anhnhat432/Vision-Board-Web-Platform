@@ -163,10 +163,13 @@ describe("monetization flows", () => {
     });
     expect(getCurrentPlan()).toBe("FREE");
 
-    // Restore via settings tab in 12WeekSystem
-    renderAppRoute("/12-week-system?tab=settings");
-    await screen.findByText("Cài đặt mục tiêu");
-    await user.click(screen.getByRole("button", { name: "Khôi phục mock upgrade" }));
+    // Restore from the billing page, not the user-facing 12-week settings page.
+    const router = createMemoryRouter([{ path: "/billing/plan", element: <BillingPlan /> }], {
+      initialEntries: ["/billing/plan"],
+    });
+    render(<RouterProvider router={router} />);
+    await screen.findByRole("heading", { name: "Quản lý gói demo của bạn" });
+    await user.click(screen.getByRole("button", { name: "Khôi phục demo upgrade" }));
 
     await waitFor(() => {
       expect(getCurrentPlan()).toBe("PLUS");

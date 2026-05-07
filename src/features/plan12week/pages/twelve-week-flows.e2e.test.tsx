@@ -446,7 +446,7 @@ describe("12-week core flows", () => {
     }
   });
 
-  it("completes mock checkout and restores access from settings", async () => {
+  it("completes mock checkout without exposing restore controls in settings", async () => {
     const { goalId } = seedTwelveWeekGoal();
     const checkout = await startCheckoutFlow({
       planCode: "PLUS",
@@ -482,11 +482,8 @@ describe("12-week core flows", () => {
 
     renderAppRoute("/12-week-system?tab=settings");
     await screen.findByText("Cài đặt mục tiêu");
-    await user.click(screen.getByRole("button", { name: "Khôi phục mock upgrade" }));
-
-    await waitFor(() => {
-      expect(getCurrentPlan()).toBe("PLUS");
-    });
-    expect(getCurrentEntitlementKeys()).toContain("premium_templates");
+    expect(screen.queryByText("Thiết bị, dữ liệu và đồng bộ")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Khôi phục mock upgrade" })).not.toBeInTheDocument();
+    expect(getCurrentPlan()).toBe("FREE");
   });
 });

@@ -210,10 +210,11 @@ describe("TwelveWeekSystemSections", () => {
     );
 
     expect(screen.getByText("Cài đặt chu kỳ")).toBeInTheDocument();
-    expect(screen.getByText("Đồng bộ backend")).toBeInTheDocument();
-    expect(screen.getByText("Đã đồng bộ")).toBeInTheDocument();
-    expect(screen.getByText("Bảng điều khiển local")).toBeInTheDocument();
+    expect(screen.getByText("Góp ý")).toBeInTheDocument();
     expect(screen.getByLabelText("Chọn ngày review")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Kiểm tra backend" })).toBeInTheDocument();
+    expect(screen.queryByText("Thiết bị, dữ liệu và đồng bộ")).not.toBeInTheDocument();
+    expect(screen.queryByText("Đồng bộ backend")).not.toBeInTheDocument();
+    expect(screen.queryByText("Bảng điều khiển local")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Kiểm tra backend" })).not.toBeInTheDocument();
   });
 });
