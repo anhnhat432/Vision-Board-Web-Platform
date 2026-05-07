@@ -7,6 +7,7 @@ const rootDir = process.cwd();
 const args = new Set(process.argv.slice(2));
 const fullStack = args.has("--full-stack");
 const skipHealth = args.has("--skip-health");
+const requireCassoBilling = args.has("--casso-billing") || getOptionValue(process.argv.slice(2), "--billing") === "casso";
 const healthTimeoutMs = Number(process.env.ENV_CHECK_HEALTH_TIMEOUT_MS ?? 15000);
 const mode = getMode(process.argv.slice(2));
 
@@ -57,6 +58,18 @@ function getMode(argv) {
   }
 
   return process.env.MODE || "development";
+}
+
+function getOptionValue(argv, name) {
+  const inlineOption = argv.find((arg) => arg.startsWith(`${name}=`));
+  if (inlineOption) return inlineOption.slice(name.length + 1).trim().toLowerCase();
+
+  const optionIndex = argv.indexOf(name);
+  if (optionIndex !== -1 && argv[optionIndex + 1]) {
+    return argv[optionIndex + 1].trim().toLowerCase();
+  }
+
+  return "";
 }
 
 function parseEnvFile(relativePath) {
@@ -154,6 +167,7 @@ const backendMissing = backendEnv.exists ? collectMissing(requiredBackendKeys, b
 console.log("Runtime environment check");
 console.log(`Mode: ${fullStack ? "full-stack" : "report-only"}`);
 console.log(`Vite env mode: ${mode}`);
+console.log(`Billing check: ${requireCassoBilling ? "casso" : "auto"}`);
 console.log(`Frontend env files: ${frontendEnv.loaded.length > 0 ? frontendEnv.loaded.join(", ") : "none"}`);
 console.log(`Backend env file: ${backendEnv.exists ? backendEnvFile : "missing"}`);
 console.log("");
@@ -164,7 +178,7 @@ printKeyStatus("Optional Firebase client keys", optionalFrontendFirebaseKeys, fr
 console.log("");
 printKeyStatus("Backend local API requirements", requiredBackendKeys, backendEnv.values);
 console.log("");
-printKeyStatus("Casso + VietQR billing requirements (only when BILLING_PROVIDER=casso)", cassoBillingKeys, backendEnv.values);
+printKeyStatus("Casso + VietQR billing requirements (BILLING_PROVIDER=casso or --casso-billing)", cassoBillingKeys, backendEnv.values);
 console.log("");
 
 if (frontendAppMode !== "real") {
@@ -192,10 +206,20 @@ const fullStackFailures = [
 ];
 
 const backendBillingProvider = backendEnv.values.BILLING_PROVIDER?.trim().toLowerCase();
-if (shouldRequireBackendSyncEnv && backendBillingProvider === "casso") {
+const cassoBillingExpected = requireCassoBilling || backendBillingProvider === "casso";
+if (shouldRequireBackendSyncEnv && cassoBillingExpected) {
   fullStackFailures.push(
     ...collectMissing(cassoBillingKeys, backendEnv.values).map((key) => `backend:${key}`),
   );
+
+  if (hasValue(backendEnv.values, "BILLING_PROVIDER") && backendBillingProvider !== "casso") {
+    fullStackFailures.push("backend:BILLING_PROVIDER(casso-required)");
+  }
+
+  const billingRepository = backendEnv.values.BILLING_REPOSITORY?.trim().toLowerCase();
+  if (hasValue(backendEnv.values, "BILLING_REPOSITORY") && billingRepository !== "mongo") {
+    fullStackFailures.push("backend:BILLING_REPOSITORY(mongo-required)");
+  }
 }
 
 if (fullStack && frontendAppMode !== "real") {

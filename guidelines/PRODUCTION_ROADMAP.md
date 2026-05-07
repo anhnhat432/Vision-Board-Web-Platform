@@ -1,4 +1,4 @@
-# Production Roadmap — 200 Users + VNPay Billing
+# Production Roadmap — 200 Users + Casso + VietQR Billing
 
 Last updated: 2026-05-07
 
@@ -7,7 +7,7 @@ Last updated: 2026-05-07
 Dự án chuyển từ **demo local-first** sang **production thật** với:
 
 - ~200 người dùng thật (sinh viên Việt Nam)
-- Thu phí Premium qua VNPay (QR / chuyển khoản ngân hàng)
+- Thu phí Premium qua Casso + VietQR (QR / chuyển khoản ngân hàng)
 - Gói Plus: 79k–149k VND / chu kỳ 12 tuần
 - Bắt buộc đăng nhập để lưu dữ liệu và thanh toán
 - Backend là source of truth cho billing và 12-week data
@@ -23,15 +23,15 @@ Dự án chuyển từ **demo local-first** sang **production thật** với:
     ↓
 [MongoDB Atlas — M0 free tier]
     ↓
-[VNPay] ←── webhook ──→ [POST /api/billing/webhook/vnpay]
+[Casso + VietQR] ←── webhook ──→ [POST /api/billing/webhook/casso]
 ```
 
 ## Điểm mạnh hiện tại (đã có sẵn)
 
 Backend đã có kiến trúc billing provider-agnostic rất tốt:
 
-- [x] `PaymentProviderAdapter` interface — chỉ cần implement cho VNPay
-- [x] `paymentProviderRegistry.ts` — đã có slot cho `vnpay` (hiện là placeholder)
+- [x] `PaymentProviderAdapter` interface — đã có adapter Casso + VietQR
+- [x] `paymentProviderRegistry.ts` — đã có `casso` và placeholder cho provider khác
 - [x] `BillingSubscriptionModel` — provider-agnostic, đã có entitlement grants
 - [x] `BillingEventModel` — idempotency tracking cho webhook
 - [x] `webhookController.ts` — signature verify → parse → upsert subscription
@@ -46,13 +46,13 @@ Backend đã có kiến trúc billing provider-agnostic rất tốt:
 
 ### Bắt buộc (Blocker)
 
-1. **VNPay payment adapter** — implement `PaymentProviderAdapter` cho VNPay
-2. **VNPay sandbox credentials** — đăng ký tài khoản sandbox VNPay
+1. **Casso production account + webhook** — liên kết tài khoản ngân hàng và lấy secure token
+2. **Casso live transfer test** — chuyển khoản test số nhỏ để xác nhận webhook/order/entitlement
 3. **Firebase project thật** — tạo project, bật Auth providers
 4. **MongoDB Atlas** — tạo cluster, whitelist IPs
 5. **Backend deploy trên Render** — env vars production
 6. **Frontend `.env.production` chuyển sang real mode**
-7. **Billing cycle "12_week"** — thêm vào `BillingCycle` type (hiện chỉ có monthly/quarterly/yearly/lifetime)
+7. **Production env verification** — `npm run env:check:casso` phải pass sau khi nhập env Render/Vercel
 
 ### Quan trọng (nên có trước launch)
 
@@ -145,7 +145,7 @@ Bước 4: Environment → thêm tất cả env vars:
   FIREBASE_CLIENT_EMAIL=...
   FIREBASE_PRIVATE_KEY="-----BEGIN..."
   FRONTEND_ORIGIN=https://your-app.vercel.app
-  BILLING_PROVIDER=casso  (sau khi implement xong, lúc đầu để mock)
+  BILLING_PROVIDER=casso
   NODE_ENV=production
 Bước 5: Deploy → verify /api/health returns OK
 ```
@@ -219,11 +219,12 @@ Bước 5: Lấy API key:
 **Env vars (Backend):**
 
 ```bash
-CASSO_API_KEY=AK_xxxxxxxxxxxxxxxxxxxxx
 CASSO_WEBHOOK_SECRET=your-random-secret-string-32chars
 CASSO_BANK_ACCOUNT=1234567890
 CASSO_BANK_NAME=MB
+CASSO_ACCOUNT_NAME=NGUYEN VAN A
 BILLING_PROVIDER=casso
+BILLING_REPOSITORY=mongo
 ```
 
 ### 2.2 Luồng thanh toán Casso + VietQR
@@ -574,7 +575,6 @@ FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxx@...
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 FRONTEND_ORIGIN=https://your-app.vercel.app
 BILLING_PROVIDER=casso
-CASSO_API_KEY=AK_xxxxxxxxxxxxxxxxxxxxx
 CASSO_WEBHOOK_SECRET=your-random-secret-string-32chars
 CASSO_BANK_ACCOUNT=1234567890
 CASSO_BANK_NAME=MB

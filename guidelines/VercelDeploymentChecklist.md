@@ -60,16 +60,18 @@ Mode này:
 - backend sync chỉ chạy sau khi Firebase configured, user đã đăng nhập và backend profile đã sẵn sàng
 - nếu thiếu Firebase env, Login page sẽ hiện notice cấu hình và backend sync sẽ bị bỏ qua
 
-### Mode C: Billing contract thật
+### Mode C: Casso + VietQR billing thật
 
-Phù hợp khi bạn đã có backend hoặc billing proxy.
+Phù hợp khi backend Render đã deploy, Firebase/MongoDB đã cấu hình và Casso webhook đã sẵn sàng.
 
 Thiết lập tối thiểu:
 
 - `VITE_ANALYTICS_MODE=ga4`
 - `VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX`
+- `VITE_APP_MODE=real`
+- `VITE_API_BASE_URL=https://your-backend.onrender.com/api`
 - `VITE_BILLING_PROVIDER_MODE=api_contract`
-- `VITE_BILLING_PROVIDER_LABEL=Stripe` hoặc tên provider bạn muốn hiện
+- `VITE_BILLING_PROVIDER_LABEL=Casso + VietQR`
 
 Chọn 1 trong 2 cách:
 

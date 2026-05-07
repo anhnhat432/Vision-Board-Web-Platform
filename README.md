@@ -303,8 +303,8 @@ Frontend production is configured for Vercel:
 - SPA rewrites: `vercel.json`
 - live alias: https://vision-board-web-platform.vercel.app
 
-The checked-in `.env.production` is intentionally demo-safe. A production deployment that should use real
-Firebase login and backend sync must set these Vercel env vars explicitly:
+The checked-in `.env.production` points at the production-style real-mode defaults used by the current deployment.
+Vercel project env vars should still be set explicitly so secrets and provider-specific values are owned by the host:
 
 - `VITE_APP_MODE=real`
 - `VITE_API_BASE_URL=https://your-backend.example.com/api`
@@ -312,6 +312,8 @@ Firebase login and backend sync must set these Vercel env vars explicitly:
 - `VITE_FIREBASE_AUTH_DOMAIN`
 - `VITE_FIREBASE_PROJECT_ID`
 - `VITE_FIREBASE_APP_ID`
+- `VITE_BILLING_PROVIDER_MODE=api_contract`
+- `VITE_BILLING_PROVIDER_LABEL=Casso + VietQR`
 
 Backend deployment is Render-ready:
 

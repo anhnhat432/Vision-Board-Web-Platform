@@ -18,6 +18,7 @@
     "check:all": "npm run check && npm run check:backend",
     "env:check": "node scripts/check-runtime-env.mjs",
     "env:check:full": "node scripts/check-runtime-env.mjs --full-stack",
+    "env:check:casso": "node scripts/check-runtime-env.mjs --full-stack --mode production --casso-billing",
     "visual:prod": "node scripts/visual-core-flow-qa.mjs",
     "qa:visual-ux-ui": "node scripts/visual-ux-ui-qa.mjs",
     "smoke:mvp1": "node scripts/smoke-mvp1-local-demo.mjs",
