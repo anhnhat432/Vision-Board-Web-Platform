@@ -10,7 +10,7 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent gradient-brand text-white shadow-[0_14px_32px_-20px_rgba(109,40,217,0.62)] [a&]:hover:opacity-92",
+          "border-transparent gradient-brand text-white shadow-[0_14px_32px_-20px_var(--tone-shell-shadow-strong)] [a&]:hover:opacity-92",
         secondary:
           "border-[color-mix(in_srgb,var(--tone-shell-secondary)_22%,transparent)] bg-[color-mix(in_srgb,var(--tone-shell-secondary)_10%,rgba(255,255,255,0.72))] text-[color-mix(in_srgb,var(--tone-shell-primary)_90%,rgba(30,30,50,1))] [a&]:hover:bg-secondary/90",
         destructive:
@@ -19,8 +19,7 @@ const badgeVariants = cva(
           "border-transparent bg-[color:var(--success)] text-[color:var(--success-foreground)] shadow-[0_10px_24px_-18px_rgba(5,150,105,0.55)] [a&]:hover:bg-[color:var(--success)]/90",
         warning:
           "border-transparent bg-[color:var(--warning)] text-[color:var(--warning-foreground)] shadow-[0_10px_24px_-18px_rgba(180,83,9,0.55)] [a&]:hover:bg-[color:var(--warning)]/90",
-        info:
-          "border-transparent bg-[color:var(--info)] text-[color:var(--info-foreground)] shadow-[0_10px_24px_-18px_rgba(124,58,237,0.55)] [a&]:hover:bg-[color:var(--info)]/90",
+        info: "border-transparent bg-[color:var(--info)] text-[color:var(--info-foreground)] shadow-[0_10px_24px_-18px_rgba(14,116,144,0.45)] [a&]:hover:bg-[color:var(--info)]/90",
         outline:
           "border-white/70 bg-white/72 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] [a&]:hover:bg-white [a&]:hover:text-accent-foreground",
       },
@@ -36,17 +35,10 @@ function Badge({
   variant,
   asChild = false,
   ...props
-}: React.ComponentProps<"span"> &
-  VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
+}: React.ComponentProps<"span"> & VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "span";
 
-  return (
-    <Comp
-      data-slot="badge"
-      className={cn(badgeVariants({ variant }), className)}
-      {...props}
-    />
-  );
+  return <Comp data-slot="badge" className={cn(badgeVariants({ variant }), className)} {...props} />;
 }
 
 export { Badge, badgeVariants };

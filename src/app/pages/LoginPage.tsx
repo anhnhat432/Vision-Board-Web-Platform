@@ -83,19 +83,14 @@ export function LoginPage() {
         <div className="ambient-orb ambient-orb--cyan" />
         <Card className="w-full max-w-sm">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-3 flex size-11 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600">
+            <div className="gradient-brand mx-auto mb-3 flex size-11 items-center justify-center rounded-xl shadow-[0_14px_30px_-20px_var(--tone-shell-shadow-strong)]">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <CardTitle>Dear Our Future</CardTitle>
-            <CardDescription>
-              Xác thực chưa được cấu hình trong môi trường này.
-            </CardDescription>
+            <CardDescription>Xác thực chưa được cấu hình trong môi trường này.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button
-              className="w-full"
-              onClick={() => navigate("/", { replace: true })}
-            >
+            <Button className="w-full" onClick={() => navigate("/", { replace: true })}>
               Về trang chủ
             </Button>
           </CardContent>
@@ -113,7 +108,7 @@ export function LoginPage() {
 
       <div className="relative z-10 w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 shadow-lg">
+          <div className="gradient-brand mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl shadow-[0_14px_30px_-20px_var(--tone-shell-shadow-strong)]">
             <Sparkles className="h-5.5 w-5.5 text-white" />
           </div>
           <h1 className="text-xl font-semibold tracking-tight text-slate-900">Dear Our Future</h1>
@@ -193,11 +188,7 @@ export function LoginPage() {
                   />
                 </div>
 
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={submitting || authLoading || !email || !password}
-                >
+                <Button type="submit" className="w-full" disabled={submitting || authLoading || !email || !password}>
                   {submitting ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : mode === "signin" ? (
@@ -228,7 +219,7 @@ export function LoginPage() {
               <button
                 type="button"
                 onClick={() => setMode("signup")}
-                className="font-medium text-violet-600 hover:underline"
+                className="font-medium text-primary hover:underline"
               >
                 Đăng ký
               </button>
@@ -239,7 +230,7 @@ export function LoginPage() {
               <button
                 type="button"
                 onClick={() => setMode("signin")}
-                className="font-medium text-violet-600 hover:underline"
+                className="font-medium text-primary hover:underline"
               >
                 Đăng nhập
               </button>

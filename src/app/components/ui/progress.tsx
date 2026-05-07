@@ -6,11 +6,7 @@ import { useReducedMotion } from "./use-reduced-motion";
 
 import { cn } from "./utils";
 
-function Progress({
-  className,
-  value,
-  ...props
-}: React.ComponentProps<typeof ProgressPrimitive.Root>) {
+function Progress({ className, value, ...props }: React.ComponentProps<typeof ProgressPrimitive.Root>) {
   const shouldReduceMotion = useReducedMotion();
   const safeValue = Math.max(0, Math.min(100, value ?? 0));
   const [displayValue, setDisplayValue] = React.useState(shouldReduceMotion ? safeValue : 0);
@@ -70,7 +66,7 @@ function Progress({
     >
       <ProgressPrimitive.Indicator
         data-slot="progress-indicator"
-        className="progress-indicator h-full rounded-full gradient-brand shadow-[0_10px_28px_-18px_rgba(109,40,217,0.62)]"
+        className="progress-indicator h-full rounded-full gradient-brand shadow-[0_10px_28px_-18px_var(--tone-shell-shadow-strong)]"
         style={{ width: `${displayValue}%` }}
       />
     </ProgressPrimitive.Root>

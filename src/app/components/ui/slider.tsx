@@ -18,12 +18,7 @@ function Slider({
   trackColor?: string;
 }) {
   const _values = React.useMemo(
-    () =>
-      Array.isArray(value)
-        ? value
-        : Array.isArray(defaultValue)
-          ? defaultValue
-          : [min, max],
+    () => (Array.isArray(value) ? value : Array.isArray(defaultValue) ? defaultValue : [min, max]),
     [value, defaultValue, min, max],
   );
 
@@ -46,11 +41,14 @@ function Slider({
       >
         <SliderPrimitive.Range
           data-slot="slider-range"
-          className="absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full rounded-full shadow-[0_1px_3px_rgba(79,70,229,0.28)]"
+          className="absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full rounded-full shadow-[0_1px_3px_rgba(14,116,144,0.24)]"
           style={
             trackColor
               ? { background: trackColor }
-              : { background: "linear-gradient(90deg, rgba(109,40,217,0.9) 0%, rgba(192,38,211,0.86) 50%, rgba(79,70,229,0.9) 100%)" }
+              : {
+                  background:
+                    "linear-gradient(90deg, rgba(37,99,235,0.92) 0%, rgba(8,145,178,0.9) 52%, rgba(16,185,129,0.88) 100%)",
+                }
           }
         />
       </SliderPrimitive.Track>
@@ -60,11 +58,7 @@ function Slider({
           // biome-ignore lint/suspicious/noArrayIndexKey: thumb position is stable and index-based in Radix slider.
           key={index}
           className="block size-5 shrink-0 rounded-full bg-white border-2 shadow-[0_2px_8px_rgba(15,23,42,0.18),0_0_0_1px_rgba(15,23,42,0.06)] transition-transform transition-shadow duration-150 hover:scale-110 hover:shadow-[0_4px_14px_rgba(15,23,42,0.22)] focus-visible:scale-110 focus-visible:ring-4 focus-visible:ring-primary/30 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
-          style={
-            trackColor
-              ? { borderColor: trackColor }
-              : { borderColor: "rgba(109,40,217,0.7)" }
-          }
+          style={trackColor ? { borderColor: trackColor } : { borderColor: "rgba(8,145,178,0.72)" }}
         />
       ))}
     </SliderPrimitive.Root>

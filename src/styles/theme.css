@@ -23,20 +23,20 @@
   --text-4xl--line-height: 1.12;
   --text-5xl: 2.75rem;
   --text-5xl--line-height: 1.08;
-  --background: #f4f6fb;
-  --foreground: #141c2e;
-  --card: rgba(255, 255, 255, 0.82);
-  --card-foreground: #141c2e;
+  --background: #f7f9fc;
+  --foreground: #111827;
+  --card: rgba(255, 255, 255, 0.9);
+  --card-foreground: #111827;
   --popover: rgba(255, 255, 255, 0.96);
-  --popover-foreground: #141c2e;
-  --primary: #4f46e5;
+  --popover-foreground: #111827;
+  --primary: #2563eb;
   --primary-foreground: #ffffff;
-  --secondary: rgba(237, 241, 255, 0.94);
-  --secondary-foreground: #2e3e8c;
-  --muted: rgba(234, 237, 245, 0.9);
+  --secondary: rgba(232, 244, 255, 0.92);
+  --secondary-foreground: #075985;
+  --muted: rgba(238, 242, 247, 0.9);
   --muted-foreground: #475569;
-  --accent: rgba(240, 244, 250, 0.86);
-  --accent-foreground: #141c2e;
+  --accent: rgba(236, 253, 245, 0.84);
+  --accent-foreground: #064e3b;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --success: #059669;
@@ -45,23 +45,23 @@
   --warning: #b45309;
   --warning-foreground: #fffbeb;
   --warning-border: #fde68a;
-  --info: #5b21d0;
-  --info-foreground: #f5f3ff;
-  --info-border: #ddd6fe;
-  --border: rgba(148, 163, 184, 0.18);
+  --info: #0e7490;
+  --info-foreground: #ecfeff;
+  --info-border: #a5f3fc;
+  --border: rgba(148, 163, 184, 0.22);
   --input: transparent;
   --input-background: rgba(255, 255, 255, 0.88);
   --switch-background: rgba(203, 213, 225, 0.95);
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: rgba(79, 70, 229, 0.4);
-  --surface-muted: #f8fafc;
-  --border-muted: #dbe3f1;
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --ring: rgba(37, 99, 235, 0.38);
+  --surface-muted: #f8fbfd;
+  --border-muted: #d8e4ef;
+  --chart-1: #2563eb;
+  --chart-2: #0d9488;
+  --chart-3: #f59e0b;
+  --chart-4: #e11d48;
+  --chart-5: #7c3aed;
   --cursor-x: 50vw;
   --cursor-y: 30vh;
   --cursor-glow-opacity: 0;
@@ -74,58 +74,58 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --tone-shell-primary: rgba(55, 48, 163, 0.98);
-  --tone-shell-secondary: rgba(79, 70, 229, 0.94);
-  --tone-shell-tertiary: rgba(14, 165, 233, 0.92);
-  --tone-shell-shadow: rgba(79, 70, 229, 0.46);
-  --tone-shell-shadow-strong: rgba(79, 70, 229, 0.58);
-  --tone-shell-ring: rgba(79, 70, 229, 0.08);
-  --tone-bg-left: rgba(99, 102, 241, 0.1);
-  --tone-bg-right: rgba(56, 189, 248, 0.08);
-  --tone-bg-bottom: rgba(45, 212, 191, 0.06);
-  --tone-overlay-left: rgba(99, 102, 241, 0.12);
-  --tone-overlay-right: rgba(56, 189, 248, 0.1);
-  --tone-cursor-a: rgba(99, 102, 241, 0.12);
-  --tone-cursor-b: rgba(56, 189, 248, 0.06);
-  --tone-hero-start: rgba(49, 46, 129, 0.98);
-  --tone-hero-mid: rgba(67, 56, 202, 0.95);
-  --tone-hero-accent: rgba(99, 102, 241, 0.9);
-  --tone-hero-end: rgba(14, 165, 233, 0.9);
-  --tone-hero-shadow: rgba(67, 56, 202, 0.42);
-  --tone-orb-a: rgba(99, 102, 241, 0.18);
-  --tone-orb-b: rgba(56, 189, 248, 0.14);
-  --tone-orb-c: rgba(45, 212, 191, 0.12);
+  --tone-shell-primary: rgba(30, 64, 175, 0.98);
+  --tone-shell-secondary: rgba(8, 145, 178, 0.94);
+  --tone-shell-tertiary: rgba(16, 185, 129, 0.9);
+  --tone-shell-shadow: rgba(8, 145, 178, 0.36);
+  --tone-shell-shadow-strong: rgba(30, 64, 175, 0.48);
+  --tone-shell-ring: rgba(8, 145, 178, 0.1);
+  --tone-bg-left: rgba(37, 99, 235, 0.08);
+  --tone-bg-right: rgba(6, 182, 212, 0.08);
+  --tone-bg-bottom: rgba(16, 185, 129, 0.06);
+  --tone-overlay-left: rgba(37, 99, 235, 0.08);
+  --tone-overlay-right: rgba(45, 212, 191, 0.08);
+  --tone-cursor-a: rgba(37, 99, 235, 0.1);
+  --tone-cursor-b: rgba(20, 184, 166, 0.06);
+  --tone-hero-start: rgba(23, 37, 84, 0.98);
+  --tone-hero-mid: rgba(30, 64, 175, 0.94);
+  --tone-hero-accent: rgba(8, 145, 178, 0.92);
+  --tone-hero-end: rgba(16, 185, 129, 0.88);
+  --tone-hero-shadow: rgba(30, 64, 175, 0.36);
+  --tone-orb-a: rgba(37, 99, 235, 0.12);
+  --tone-orb-b: rgba(6, 182, 212, 0.1);
+  --tone-orb-c: rgba(16, 185, 129, 0.08);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: #0b1120;
+  --foreground: #eef6ff;
+  --card: rgba(15, 23, 42, 0.9);
+  --card-foreground: #eef6ff;
+  --popover: rgba(15, 23, 42, 0.96);
+  --popover-foreground: #eef6ff;
+  --primary: #38bdf8;
+  --primary-foreground: #082f49;
+  --secondary: rgba(15, 118, 110, 0.18);
+  --secondary-foreground: #ccfbf1;
+  --muted: rgba(30, 41, 59, 0.82);
+  --muted-foreground: #a5b4c8;
+  --accent: rgba(20, 184, 166, 0.18);
+  --accent-foreground: #ccfbf1;
   --destructive: oklch(0.396 0.141 25.723);
   --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --surface-muted: rgba(30, 30, 44, 0.6);
-  --border-muted: rgba(255, 255, 255, 0.1);
+  --border: rgba(148, 163, 184, 0.18);
+  --input: rgba(15, 23, 42, 0.72);
+  --ring: rgba(56, 189, 248, 0.42);
+  --surface-muted: rgba(15, 23, 42, 0.72);
+  --border-muted: rgba(148, 163, 184, 0.18);
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
+  --chart-1: #60a5fa;
+  --chart-2: #2dd4bf;
+  --chart-3: #fbbf24;
+  --chart-4: #fb7185;
+  --chart-5: #a78bfa;
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -134,29 +134,29 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
-  --input-background: rgba(30, 30, 40, 0.82);
-  --switch-background: rgba(60, 60, 75, 0.95);
-  --tone-shell-primary: rgba(30, 27, 75, 0.98);
-  --tone-shell-secondary: rgba(55, 48, 163, 0.94);
-  --tone-shell-tertiary: rgba(6, 95, 160, 0.92);
-  --tone-shell-shadow: rgba(55, 48, 163, 0.48);
-  --tone-shell-shadow-strong: rgba(55, 48, 163, 0.6);
-  --tone-shell-ring: rgba(55, 48, 163, 0.12);
-  --tone-bg-left: rgba(67, 56, 202, 0.12);
-  --tone-bg-right: rgba(14, 165, 233, 0.1);
+  --input-background: rgba(15, 23, 42, 0.82);
+  --switch-background: rgba(51, 65, 85, 0.95);
+  --tone-shell-primary: rgba(30, 64, 175, 0.98);
+  --tone-shell-secondary: rgba(14, 116, 144, 0.94);
+  --tone-shell-tertiary: rgba(13, 148, 136, 0.92);
+  --tone-shell-shadow: rgba(14, 116, 144, 0.44);
+  --tone-shell-shadow-strong: rgba(30, 64, 175, 0.56);
+  --tone-shell-ring: rgba(56, 189, 248, 0.12);
+  --tone-bg-left: rgba(37, 99, 235, 0.12);
+  --tone-bg-right: rgba(45, 212, 191, 0.1);
   --tone-bg-bottom: rgba(20, 184, 166, 0.08);
-  --tone-overlay-left: rgba(67, 56, 202, 0.14);
-  --tone-overlay-right: rgba(14, 165, 233, 0.12);
-  --tone-cursor-a: rgba(67, 56, 202, 0.16);
-  --tone-cursor-b: rgba(14, 165, 233, 0.08);
-  --tone-hero-start: rgba(30, 27, 75, 0.98);
-  --tone-hero-mid: rgba(49, 46, 129, 0.95);
-  --tone-hero-accent: rgba(67, 56, 202, 0.9);
-  --tone-hero-end: rgba(6, 95, 160, 0.9);
-  --tone-hero-shadow: rgba(49, 46, 129, 0.44);
-  --tone-orb-a: rgba(67, 56, 202, 0.2);
-  --tone-orb-b: rgba(14, 165, 233, 0.16);
-  --tone-orb-c: rgba(20, 184, 166, 0.12);
+  --tone-overlay-left: rgba(37, 99, 235, 0.14);
+  --tone-overlay-right: rgba(45, 212, 191, 0.12);
+  --tone-cursor-a: rgba(37, 99, 235, 0.16);
+  --tone-cursor-b: rgba(45, 212, 191, 0.08);
+  --tone-hero-start: rgba(8, 47, 73, 0.98);
+  --tone-hero-mid: rgba(30, 64, 175, 0.95);
+  --tone-hero-accent: rgba(14, 116, 144, 0.92);
+  --tone-hero-end: rgba(13, 148, 136, 0.9);
+  --tone-hero-shadow: rgba(14, 116, 144, 0.42);
+  --tone-orb-a: rgba(37, 99, 235, 0.18);
+  --tone-orb-b: rgba(45, 212, 191, 0.14);
+  --tone-orb-c: rgba(16, 185, 129, 0.1);
 }
 
 @theme inline {
@@ -247,9 +247,9 @@
     letter-spacing: 0;
     background-image: linear-gradient(
       180deg,
-      #f8fafc 0%,
-      #f4f7fb 48%,
-      #f8fafc 100%
+      #fbfdff 0%,
+      #f4f8fb 46%,
+      #f8fbfd 100%
     );
     background-attachment: fixed;
     text-rendering: optimizeLegibility;
@@ -265,9 +265,9 @@
   .dark body {
     background-image: linear-gradient(
       180deg,
-      #0b1020 0%,
-      #101827 52%,
-      #0b1020 100%
+      #08111f 0%,
+      #0f1a2d 52%,
+      #08111f 100%
     );
   }
 
@@ -489,123 +489,123 @@
   }
 
   .app-shell[data-route-tone="journal"] {
-    --tone-shell-primary: rgba(146, 64, 14, 0.98);
-    --tone-shell-secondary: rgba(217, 119, 6, 0.94);
-    --tone-shell-tertiary: rgba(190, 24, 93, 0.84);
-    --tone-shell-shadow: rgba(180, 83, 9, 0.56);
-    --tone-shell-shadow-strong: rgba(146, 64, 14, 0.72);
-    --tone-shell-ring: rgba(217, 119, 6, 0.12);
-    --tone-bg-left: rgba(251, 191, 36, 0.16);
-    --tone-bg-right: rgba(251, 113, 133, 0.12);
-    --tone-bg-bottom: rgba(251, 146, 60, 0.14);
-    --tone-overlay-left: rgba(251, 191, 36, 0.18);
-    --tone-overlay-right: rgba(251, 146, 60, 0.16);
-    --tone-cursor-a: rgba(251, 191, 36, 0.2);
-    --tone-cursor-b: rgba(244, 114, 182, 0.12);
-    --tone-hero-start: rgba(120, 53, 15, 0.98);
-    --tone-hero-mid: rgba(180, 83, 9, 0.95);
-    --tone-hero-accent: rgba(217, 119, 6, 0.9);
-    --tone-hero-end: rgba(190, 24, 93, 0.82);
-    --tone-hero-shadow: rgba(180, 83, 9, 0.5);
-    --tone-orb-a: rgba(251, 191, 36, 0.26);
-    --tone-orb-b: rgba(251, 146, 60, 0.24);
-    --tone-orb-c: rgba(244, 114, 182, 0.2);
+    --tone-shell-primary: rgba(159, 18, 57, 0.98);
+    --tone-shell-secondary: rgba(225, 29, 72, 0.92);
+    --tone-shell-tertiary: rgba(245, 158, 11, 0.86);
+    --tone-shell-shadow: rgba(225, 29, 72, 0.42);
+    --tone-shell-shadow-strong: rgba(159, 18, 57, 0.56);
+    --tone-shell-ring: rgba(225, 29, 72, 0.1);
+    --tone-bg-left: rgba(244, 63, 94, 0.1);
+    --tone-bg-right: rgba(245, 158, 11, 0.08);
+    --tone-bg-bottom: rgba(20, 184, 166, 0.06);
+    --tone-overlay-left: rgba(244, 63, 94, 0.1);
+    --tone-overlay-right: rgba(245, 158, 11, 0.08);
+    --tone-cursor-a: rgba(244, 63, 94, 0.12);
+    --tone-cursor-b: rgba(245, 158, 11, 0.06);
+    --tone-hero-start: rgba(136, 19, 55, 0.98);
+    --tone-hero-mid: rgba(190, 18, 60, 0.94);
+    --tone-hero-accent: rgba(225, 29, 72, 0.9);
+    --tone-hero-end: rgba(245, 158, 11, 0.84);
+    --tone-hero-shadow: rgba(190, 18, 60, 0.38);
+    --tone-orb-a: rgba(244, 63, 94, 0.16);
+    --tone-orb-b: rgba(245, 158, 11, 0.12);
+    --tone-orb-c: rgba(20, 184, 166, 0.08);
   }
 
   .app-shell[data-route-tone="system"] {
     --tone-shell-primary: rgba(30, 64, 175, 0.98);
-    --tone-shell-secondary: rgba(8, 145, 178, 0.94);
-    --tone-shell-tertiary: rgba(5, 150, 105, 0.88);
-    --tone-shell-shadow: rgba(30, 64, 175, 0.58);
-    --tone-shell-shadow-strong: rgba(30, 64, 175, 0.74);
-    --tone-shell-ring: rgba(8, 145, 178, 0.12);
-    --tone-bg-left: rgba(59, 130, 246, 0.15);
-    --tone-bg-right: rgba(6, 182, 212, 0.12);
-    --tone-bg-bottom: rgba(16, 185, 129, 0.1);
-    --tone-overlay-left: rgba(59, 130, 246, 0.18);
-    --tone-overlay-right: rgba(34, 211, 238, 0.16);
-    --tone-cursor-a: rgba(59, 130, 246, 0.2);
-    --tone-cursor-b: rgba(20, 184, 166, 0.12);
+    --tone-shell-secondary: rgba(14, 116, 144, 0.94);
+    --tone-shell-tertiary: rgba(13, 148, 136, 0.9);
+    --tone-shell-shadow: rgba(14, 116, 144, 0.42);
+    --tone-shell-shadow-strong: rgba(30, 64, 175, 0.56);
+    --tone-shell-ring: rgba(14, 116, 144, 0.1);
+    --tone-bg-left: rgba(37, 99, 235, 0.1);
+    --tone-bg-right: rgba(6, 182, 212, 0.08);
+    --tone-bg-bottom: rgba(16, 185, 129, 0.06);
+    --tone-overlay-left: rgba(37, 99, 235, 0.1);
+    --tone-overlay-right: rgba(45, 212, 191, 0.08);
+    --tone-cursor-a: rgba(37, 99, 235, 0.12);
+    --tone-cursor-b: rgba(20, 184, 166, 0.08);
     --tone-hero-start: rgba(23, 37, 84, 0.98);
     --tone-hero-mid: rgba(30, 64, 175, 0.95);
     --tone-hero-accent: rgba(8, 145, 178, 0.92);
     --tone-hero-end: rgba(5, 150, 105, 0.88);
-    --tone-hero-shadow: rgba(30, 64, 175, 0.54);
-    --tone-orb-a: rgba(59, 130, 246, 0.26);
-    --tone-orb-b: rgba(34, 211, 238, 0.22);
-    --tone-orb-c: rgba(16, 185, 129, 0.2);
+    --tone-hero-shadow: rgba(30, 64, 175, 0.4);
+    --tone-orb-a: rgba(59, 130, 246, 0.16);
+    --tone-orb-b: rgba(34, 211, 238, 0.14);
+    --tone-orb-c: rgba(16, 185, 129, 0.1);
   }
 
   .app-shell[data-route-tone="achievements"] {
-    --tone-shell-primary: rgba(146, 64, 14, 0.98);
-    --tone-shell-secondary: rgba(217, 119, 6, 0.96);
-    --tone-shell-tertiary: rgba(245, 158, 11, 0.9);
-    --tone-shell-shadow: rgba(180, 83, 9, 0.58);
-    --tone-shell-shadow-strong: rgba(146, 64, 14, 0.76);
-    --tone-shell-ring: rgba(245, 158, 11, 0.12);
-    --tone-bg-left: rgba(245, 158, 11, 0.16);
-    --tone-bg-right: rgba(251, 191, 36, 0.14);
-    --tone-bg-bottom: rgba(251, 146, 60, 0.12);
-    --tone-overlay-left: rgba(245, 158, 11, 0.18);
-    --tone-overlay-right: rgba(251, 191, 36, 0.16);
-    --tone-cursor-a: rgba(245, 158, 11, 0.22);
-    --tone-cursor-b: rgba(251, 191, 36, 0.12);
-    --tone-hero-start: rgba(120, 53, 15, 0.98);
-    --tone-hero-mid: rgba(180, 83, 9, 0.96);
-    --tone-hero-accent: rgba(217, 119, 6, 0.92);
-    --tone-hero-end: rgba(245, 158, 11, 0.9);
-    --tone-hero-shadow: rgba(180, 83, 9, 0.54);
-    --tone-orb-a: rgba(245, 158, 11, 0.26);
-    --tone-orb-b: rgba(251, 191, 36, 0.24);
-    --tone-orb-c: rgba(251, 146, 60, 0.2);
+    --tone-shell-primary: rgba(13, 148, 136, 0.98);
+    --tone-shell-secondary: rgba(245, 158, 11, 0.94);
+    --tone-shell-tertiary: rgba(37, 99, 235, 0.86);
+    --tone-shell-shadow: rgba(13, 148, 136, 0.42);
+    --tone-shell-shadow-strong: rgba(13, 148, 136, 0.56);
+    --tone-shell-ring: rgba(245, 158, 11, 0.1);
+    --tone-bg-left: rgba(13, 148, 136, 0.1);
+    --tone-bg-right: rgba(245, 158, 11, 0.08);
+    --tone-bg-bottom: rgba(37, 99, 235, 0.06);
+    --tone-overlay-left: rgba(13, 148, 136, 0.1);
+    --tone-overlay-right: rgba(245, 158, 11, 0.08);
+    --tone-cursor-a: rgba(13, 148, 136, 0.12);
+    --tone-cursor-b: rgba(245, 158, 11, 0.06);
+    --tone-hero-start: rgba(19, 78, 74, 0.98);
+    --tone-hero-mid: rgba(13, 148, 136, 0.94);
+    --tone-hero-accent: rgba(245, 158, 11, 0.9);
+    --tone-hero-end: rgba(37, 99, 235, 0.84);
+    --tone-hero-shadow: rgba(13, 148, 136, 0.38);
+    --tone-orb-a: rgba(13, 148, 136, 0.16);
+    --tone-orb-b: rgba(245, 158, 11, 0.12);
+    --tone-orb-c: rgba(37, 99, 235, 0.08);
   }
 
   .app-shell[data-route-tone="balance"] {
     --tone-shell-primary: rgba(6, 95, 70, 0.98);
     --tone-shell-secondary: rgba(13, 148, 136, 0.94);
     --tone-shell-tertiary: rgba(14, 165, 233, 0.88);
-    --tone-shell-shadow: rgba(6, 95, 70, 0.54);
-    --tone-shell-shadow-strong: rgba(6, 95, 70, 0.72);
+    --tone-shell-shadow: rgba(6, 95, 70, 0.4);
+    --tone-shell-shadow-strong: rgba(6, 95, 70, 0.54);
     --tone-shell-ring: rgba(13, 148, 136, 0.12);
-    --tone-bg-left: rgba(16, 185, 129, 0.15);
-    --tone-bg-right: rgba(34, 211, 238, 0.13);
-    --tone-bg-bottom: rgba(14, 165, 233, 0.1);
-    --tone-overlay-left: rgba(16, 185, 129, 0.18);
-    --tone-overlay-right: rgba(34, 211, 238, 0.16);
-    --tone-cursor-a: rgba(16, 185, 129, 0.2);
-    --tone-cursor-b: rgba(14, 165, 233, 0.12);
+    --tone-bg-left: rgba(16, 185, 129, 0.1);
+    --tone-bg-right: rgba(34, 211, 238, 0.08);
+    --tone-bg-bottom: rgba(14, 165, 233, 0.06);
+    --tone-overlay-left: rgba(16, 185, 129, 0.1);
+    --tone-overlay-right: rgba(34, 211, 238, 0.08);
+    --tone-cursor-a: rgba(16, 185, 129, 0.12);
+    --tone-cursor-b: rgba(14, 165, 233, 0.06);
     --tone-hero-start: rgba(20, 83, 45, 0.98);
     --tone-hero-mid: rgba(6, 95, 70, 0.95);
     --tone-hero-accent: rgba(13, 148, 136, 0.92);
     --tone-hero-end: rgba(14, 165, 233, 0.88);
-    --tone-hero-shadow: rgba(6, 95, 70, 0.52);
-    --tone-orb-a: rgba(16, 185, 129, 0.26);
-    --tone-orb-b: rgba(34, 211, 238, 0.22);
-    --tone-orb-c: rgba(14, 165, 233, 0.2);
+    --tone-hero-shadow: rgba(6, 95, 70, 0.36);
+    --tone-orb-a: rgba(16, 185, 129, 0.16);
+    --tone-orb-b: rgba(34, 211, 238, 0.12);
+    --tone-orb-c: rgba(14, 165, 233, 0.08);
   }
 
   .app-shell[data-route-tone="vision"] {
     --tone-shell-primary: rgba(91, 33, 182, 0.98);
     --tone-shell-secondary: rgba(236, 72, 153, 0.88);
     --tone-shell-tertiary: rgba(59, 130, 246, 0.92);
-    --tone-shell-shadow: rgba(109, 40, 217, 0.58);
-    --tone-shell-shadow-strong: rgba(91, 33, 182, 0.74);
+    --tone-shell-shadow: rgba(109, 40, 217, 0.42);
+    --tone-shell-shadow-strong: rgba(91, 33, 182, 0.56);
     --tone-shell-ring: rgba(236, 72, 153, 0.1);
-    --tone-bg-left: rgba(168, 85, 247, 0.16);
-    --tone-bg-right: rgba(244, 114, 182, 0.12);
-    --tone-bg-bottom: rgba(59, 130, 246, 0.12);
-    --tone-overlay-left: rgba(168, 85, 247, 0.18);
-    --tone-overlay-right: rgba(59, 130, 246, 0.16);
-    --tone-cursor-a: rgba(168, 85, 247, 0.22);
-    --tone-cursor-b: rgba(59, 130, 246, 0.12);
+    --tone-bg-left: rgba(168, 85, 247, 0.1);
+    --tone-bg-right: rgba(244, 114, 182, 0.08);
+    --tone-bg-bottom: rgba(59, 130, 246, 0.06);
+    --tone-overlay-left: rgba(168, 85, 247, 0.1);
+    --tone-overlay-right: rgba(59, 130, 246, 0.08);
+    --tone-cursor-a: rgba(168, 85, 247, 0.12);
+    --tone-cursor-b: rgba(59, 130, 246, 0.06);
     --tone-hero-start: rgba(88, 28, 135, 0.98);
     --tone-hero-mid: rgba(109, 40, 217, 0.95);
     --tone-hero-accent: rgba(236, 72, 153, 0.88);
     --tone-hero-end: rgba(59, 130, 246, 0.9);
-    --tone-hero-shadow: rgba(109, 40, 217, 0.56);
-    --tone-orb-a: rgba(168, 85, 247, 0.28);
-    --tone-orb-b: rgba(244, 114, 182, 0.22);
-    --tone-orb-c: rgba(59, 130, 246, 0.22);
+    --tone-hero-shadow: rgba(109, 40, 217, 0.4);
+    --tone-orb-a: rgba(168, 85, 247, 0.16);
+    --tone-orb-b: rgba(244, 114, 182, 0.12);
+    --tone-orb-c: rgba(59, 130, 246, 0.1);
   }
 
   .app-shell::before {
@@ -617,23 +617,23 @@
     background:
       radial-gradient(
         ellipse at top left,
-        rgba(255, 255, 255, 0.56),
+        rgba(255, 255, 255, 0.68),
         transparent 32%
       ),
       radial-gradient(
         ellipse at 20% 10%,
         var(--tone-overlay-left),
-        transparent 22%
+        transparent 30%
       ),
       radial-gradient(
         ellipse at 86% 8%,
         var(--tone-overlay-right),
-        transparent 24%
+        transparent 32%
       ),
       linear-gradient(
         175deg,
-        rgba(255, 255, 255, 0.96) 0%,
-        rgba(244, 246, 251, 0.99) 100%
+        rgba(255, 255, 255, 0.98) 0%,
+        rgba(244, 248, 251, 0.99) 100%
       );
   }
 
@@ -644,12 +644,12 @@
     pointer-events: none;
     z-index: -1;
     background-image:
-      linear-gradient(rgba(15, 23, 42, 0.014) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(15, 23, 42, 0.014) 1px, transparent 1px);
-    background-size: 28px 28px;
+      linear-gradient(rgba(15, 23, 42, 0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15, 23, 42, 0.018) 1px, transparent 1px);
+    background-size: 32px 32px;
     mask-image: linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.18) 0%,
+      rgba(255, 255, 255, 0.14) 0%,
       transparent 60%
     );
   }
@@ -657,18 +657,18 @@
   .glass-surface {
     background: linear-gradient(
       160deg,
-      rgba(255, 255, 255, 0.94) 0%,
-      rgba(255, 255, 255, 0.86) 62%,
-      rgba(248, 250, 255, 0.82) 100%
+      rgba(255, 255, 255, 0.96) 0%,
+      rgba(255, 255, 255, 0.9) 62%,
+      rgba(245, 249, 252, 0.86) 100%
     );
-    border: 1px solid rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(203, 213, 225, 0.62);
     box-shadow:
       0 1px 0 rgba(255, 255, 255, 0.9) inset,
-      0 0 0 1px rgba(148, 163, 184, 0.06),
-      0 14px 32px -28px rgba(15, 23, 42, 0.14),
+      0 0 0 1px rgba(148, 163, 184, 0.08),
+      0 14px 34px -30px rgba(15, 23, 42, 0.18),
       0 4px 8px -8px rgba(15, 23, 42, 0.04);
-    backdrop-filter: blur(12px) saturate(1.1);
-    -webkit-backdrop-filter: blur(12px) saturate(1.1);
+    backdrop-filter: blur(14px) saturate(1.08);
+    -webkit-backdrop-filter: blur(14px) saturate(1.08);
     transition:
       transform 150ms ease,
       box-shadow 150ms ease,
@@ -680,10 +680,10 @@
     .glass-surface:not(.hero-surface):hover {
       box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.95) inset,
-        0 0 0 1px rgba(148, 163, 184, 0.08),
-        0 16px 36px -28px rgba(15, 23, 42, 0.16),
+        0 0 0 1px rgba(14, 116, 144, 0.1),
+        0 18px 38px -30px rgba(15, 23, 42, 0.2),
         0 6px 12px -8px rgba(15, 23, 42, 0.06);
-      border-color: rgba(255, 255, 255, 0.86);
+      border-color: rgba(14, 116, 144, 0.22);
       transform: translateY(-1px);
     }
   }
@@ -691,10 +691,10 @@
   .glass-surface-sm {
     background: linear-gradient(
       160deg,
-      rgba(255, 255, 255, 0.9),
-      rgba(255, 255, 255, 0.78)
+      rgba(255, 255, 255, 0.92),
+      rgba(246, 250, 252, 0.82)
     );
-    border: 1px solid rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(203, 213, 225, 0.56);
     box-shadow:
       0 1px 0 rgba(255, 255, 255, 0.88) inset,
       0 8px 20px -14px rgba(15, 23, 42, 0.12);
@@ -710,9 +710,9 @@
         padding-box,
       linear-gradient(
           160deg,
-          rgba(124, 58, 237, 0.6),
-          rgba(99, 102, 241, 0.4),
-          rgba(168, 85, 247, 0.5)
+          rgba(37, 99, 235, 0.42),
+          rgba(8, 145, 178, 0.36),
+          rgba(16, 185, 129, 0.34)
         )
         border-box;
     box-shadow:
@@ -729,9 +729,9 @@
           padding-box,
         linear-gradient(
             160deg,
-            rgba(124, 58, 237, 0.7),
-            rgba(99, 102, 241, 0.5),
-            rgba(168, 85, 247, 0.6)
+            rgba(37, 99, 235, 0.52),
+            rgba(8, 145, 178, 0.46),
+            rgba(16, 185, 129, 0.42)
           )
           border-box;
       box-shadow:
@@ -1266,9 +1266,9 @@
 
   .spotlight-card {
     position: relative;
-    border-color: rgba(192, 132, 252, 0.44);
+    border-color: rgba(14, 165, 233, 0.34);
     box-shadow:
-      0 34px 84px -42px rgba(109, 40, 217, 0.42),
+      0 34px 84px -42px rgba(14, 116, 144, 0.32),
       0 0 0 1px rgba(255, 255, 255, 0.72),
       inset 0 1px 0 rgba(255, 255, 255, 0.84);
   }
@@ -1285,11 +1285,11 @@
   .spotlight-badge {
     background: linear-gradient(
       135deg,
-      rgba(109, 40, 217, 0.96) 0%,
-      rgba(236, 72, 153, 0.88) 100%
+      rgba(37, 99, 235, 0.96) 0%,
+      rgba(20, 184, 166, 0.88) 100%
     );
     color: white;
-    box-shadow: 0 18px 36px -24px rgba(109, 40, 217, 0.58);
+    box-shadow: 0 18px 36px -24px rgba(14, 116, 144, 0.46);
   }
 
   .loading-stage {
@@ -1306,8 +1306,8 @@
     border-radius: 9999px;
     background: radial-gradient(
       circle,
-      rgba(168, 85, 247, 0.2) 0%,
-      rgba(168, 85, 247, 0) 72%
+      rgba(14, 165, 233, 0.16) 0%,
+      rgba(14, 165, 233, 0) 72%
     );
     filter: blur(20px);
   }
@@ -1318,8 +1318,8 @@
     border-radius: 9999px;
     background: linear-gradient(
       135deg,
-      rgba(109, 40, 217, 0.96) 0%,
-      rgba(59, 130, 246, 0.92) 100%
+      rgba(37, 99, 235, 0.96) 0%,
+      rgba(20, 184, 166, 0.9) 100%
     );
     animation: loading-bounce 1.1s ease-in-out infinite;
   }
@@ -1463,12 +1463,12 @@
     gap: 0.2rem;
     min-width: 0;
     width: 100%;
-    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-    border: 1px solid rgba(203, 213, 225, 0.82);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 250, 252, 0.94) 100%);
+    border: 1px solid rgba(203, 213, 225, 0.74);
     border-bottom: none;
     box-shadow:
       0 1px 0 rgba(255, 255, 255, 0.92) inset,
-      0 -18px 44px -18px rgba(15, 23, 42, 0.22),
+      0 -18px 44px -18px rgba(15, 23, 42, 0.18),
       0 -2px 10px rgba(15, 23, 42, 0.08);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -1502,10 +1502,10 @@
   }
 
   .bottom-nav-item[aria-current="page"] {
-    background: linear-gradient(180deg, #ffffff 0%, #eef6ff 100%);
+    background: linear-gradient(180deg, #ffffff 0%, #ecfeff 100%);
     box-shadow:
       0 1px 0 rgba(255, 255, 255, 0.95) inset,
-      0 4px 14px -6px rgba(15, 23, 42, 0.16);
+      0 4px 14px -6px rgba(14, 116, 144, 0.18);
   }
 
   .bottom-nav-icon {
@@ -1600,11 +1600,11 @@
     color: white;
     background: linear-gradient(
       135deg,
-      rgba(109, 40, 217, 0.96) 0%,
-      rgba(236, 72, 153, 0.88) 56%,
-      rgba(245, 158, 11, 0.92) 100%
+      rgba(37, 99, 235, 0.96) 0%,
+      rgba(8, 145, 178, 0.9) 56%,
+      rgba(245, 158, 11, 0.9) 100%
     );
-    box-shadow: 0 8px 20px -8px rgba(109, 40, 217, 0.5);
+    box-shadow: 0 8px 20px -8px rgba(14, 116, 144, 0.42);
   }
 
   /* ── Gradient card utility classes (light + dark) ──── */
@@ -1621,7 +1621,7 @@
     background: linear-gradient(
       135deg,
       rgba(15, 23, 42, 0.98) 0%,
-      rgba(49, 46, 129, 0.92) 100%
+      rgba(14, 116, 144, 0.9) 100%
     );
   }
   .gradient-dark-sky {
@@ -1641,23 +1641,23 @@
   .gradient-indigo-purple {
     background: linear-gradient(
       135deg,
-      rgba(49, 46, 129, 0.96) 0%,
-      rgba(76, 29, 149, 0.92) 100%
+      rgba(30, 64, 175, 0.96) 0%,
+      rgba(8, 145, 178, 0.9) 100%
     );
   }
   .gradient-brand {
     background: linear-gradient(
       135deg,
-      rgba(109, 40, 217, 0.98) 0%,
-      rgba(192, 38, 211, 0.94) 48%,
-      rgba(59, 130, 246, 0.96) 100%
+      rgba(37, 99, 235, 0.98) 0%,
+      rgba(8, 145, 178, 0.94) 54%,
+      rgba(16, 185, 129, 0.92) 100%
     );
   }
   .gradient-brand-icon {
     background: linear-gradient(
       135deg,
-      rgba(109, 40, 217, 0.96) 0%,
-      rgba(236, 72, 153, 0.88) 100%
+      rgba(37, 99, 235, 0.96) 0%,
+      rgba(20, 184, 166, 0.88) 100%
     );
   }
 
@@ -1710,8 +1710,8 @@
   .gradient-violet {
     background: linear-gradient(
       180deg,
-      rgba(245, 243, 255, 0.96) 0%,
-      rgba(233, 213, 255, 0.82) 100%
+      rgba(239, 246, 255, 0.96) 0%,
+      rgba(207, 250, 254, 0.72) 100%
     );
   }
   .dark .gradient-violet {
@@ -1740,8 +1740,8 @@
   .gradient-purple {
     background: linear-gradient(
       180deg,
-      rgba(250, 245, 255, 0.94) 0%,
-      rgba(243, 232, 255, 0.84) 100%
+      rgba(240, 249, 255, 0.94) 0%,
+      rgba(204, 251, 241, 0.7) 100%
     );
   }
   .dark .gradient-purple {
@@ -1800,8 +1800,8 @@
   .gradient-shell {
     background: linear-gradient(
       180deg,
-      rgba(248, 250, 252, 0.98) 0%,
-      rgba(241, 245, 249, 0.92) 100%
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(244, 248, 251, 0.92) 100%
     );
   }
   .dark .gradient-shell {
@@ -1830,8 +1830,8 @@
   .gradient-violet-pink {
     background: linear-gradient(
       135deg,
-      rgba(245, 243, 255, 0.95) 0%,
-      rgba(252, 231, 243, 0.78) 100%
+      rgba(239, 246, 255, 0.95) 0%,
+      rgba(204, 251, 241, 0.72) 100%
     );
   }
   .dark .gradient-violet-pink {
@@ -1949,8 +1949,8 @@
     background: linear-gradient(
       135deg,
       rgba(15, 23, 42, 0.98) 0%,
-      rgba(30, 41, 59, 0.96) 45%,
-      rgba(37, 99, 235, 0.84) 100%
+      rgba(14, 116, 144, 0.92) 54%,
+      rgba(13, 148, 136, 0.84) 100%
     );
   }
 
@@ -1973,23 +1973,23 @@
   .gradient-purple-vivid {
     background: linear-gradient(
       135deg,
-      rgba(76, 29, 149, 0.95) 0%,
-      rgba(109, 40, 217, 0.88) 100%
+      rgba(37, 99, 235, 0.95) 0%,
+      rgba(8, 145, 178, 0.88) 100%
     );
   }
 
   .gradient-violet-warm {
     background: linear-gradient(
       180deg,
-      rgba(245, 239, 255, 0.92) 0%,
-      rgba(233, 226, 255, 0.82) 100%
+      rgba(239, 246, 255, 0.92) 0%,
+      rgba(204, 251, 241, 0.72) 100%
     );
   }
   .dark .gradient-violet-warm {
     background: linear-gradient(
       180deg,
-      rgba(139, 92, 246, 0.16) 0%,
-      rgba(124, 58, 237, 0.08) 100%
+      rgba(37, 99, 235, 0.16) 0%,
+      rgba(20, 184, 166, 0.1) 100%
     );
   }
 
@@ -2011,15 +2011,15 @@
   .gradient-brand-subtle {
     background: linear-gradient(
       135deg,
-      rgba(109, 40, 217, 0.16) 0%,
-      rgba(236, 72, 153, 0.12) 100%
+      rgba(37, 99, 235, 0.14) 0%,
+      rgba(20, 184, 166, 0.12) 100%
     );
   }
   .dark .gradient-brand-subtle {
     background: linear-gradient(
       135deg,
-      rgba(109, 40, 217, 0.2) 0%,
-      rgba(236, 72, 153, 0.16) 100%
+      rgba(37, 99, 235, 0.2) 0%,
+      rgba(20, 184, 166, 0.16) 100%
     );
   }
 
@@ -2041,15 +2041,15 @@
   .gradient-violet-blue-icon {
     background: linear-gradient(
       135deg,
-      rgba(109, 40, 217, 0.12) 0%,
-      rgba(59, 130, 246, 0.14) 100%
+      rgba(37, 99, 235, 0.12) 0%,
+      rgba(20, 184, 166, 0.14) 100%
     );
   }
   .dark .gradient-violet-blue-icon {
     background: linear-gradient(
       135deg,
-      rgba(109, 40, 217, 0.2) 0%,
-      rgba(59, 130, 246, 0.2) 100%
+      rgba(37, 99, 235, 0.2) 0%,
+      rgba(20, 184, 166, 0.2) 100%
     );
   }
 
@@ -2412,7 +2412,7 @@
   .ops-system .gradient-dark,
   .ops-system .gradient-dark-blue-accent,
   .ops-system .gradient-dark-sky {
-    background: #172033 !important;
+    background: #123047 !important;
   }
 
   .ops-shell .gradient-slate,
@@ -2425,11 +2425,42 @@
   }
 
   .ops-system .gradient-purple-vivid {
-    background: #6d28d9 !important;
+    background: #0f766e !important;
   }
 
   .ops-system-panel [data-slot="card"] {
     border-color: rgba(203, 213, 225, 0.78);
+  }
+
+  .ops-system .bg-violet-50,
+  .ops-system .bg-violet-50\/70,
+  .ops-system .bg-violet-50\/75,
+  .ops-system .bg-violet-50\/85 {
+    background-color: rgba(239, 246, 255, 0.82) !important;
+  }
+
+  .ops-system .bg-violet-100 {
+    background-color: rgba(207, 250, 254, 0.82) !important;
+  }
+
+  .ops-system .bg-violet-600,
+  .ops-system .hover\:bg-violet-600:hover {
+    background-color: #2563eb !important;
+  }
+
+  .ops-system .border-violet-100,
+  .ops-system .border-violet-200,
+  .ops-system .border-violet-200\/70,
+  .ops-system .border-violet-300 {
+    border-color: rgba(14, 165, 233, 0.24) !important;
+  }
+
+  .ops-system .text-violet-500,
+  .ops-system .text-violet-600,
+  .ops-system .text-violet-700,
+  .ops-system .text-violet-800,
+  .ops-system .text-violet-900 {
+    color: #0369a1 !important;
   }
 
   .flow-shell {

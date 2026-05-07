@@ -1,9 +1,4 @@
-import {
-  forwardRef,
-  type ComponentProps,
-  type CSSProperties,
-  type PointerEvent,
-} from "react";
+import { forwardRef, type ComponentProps, type CSSProperties, type PointerEvent } from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { useReducedMotion } from "./use-reduced-motion";
@@ -23,13 +18,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent gradient-brand text-primary-foreground shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)] hover:shadow-[0_18px_40px_-22px_rgba(109,40,217,0.44)] hover:scale-[1.01]",
+          "border-transparent gradient-brand text-primary-foreground shadow-[0_14px_34px_-20px_var(--tone-shell-shadow)] hover:shadow-[0_18px_40px_-22px_var(--tone-shell-shadow-strong)] hover:scale-[1.01]",
         destructive:
           "border-transparent bg-destructive text-white shadow-[0_12px_28px_-20px_rgba(212,24,61,0.38)] hover:bg-destructive/90 hover:shadow-[0_16px_34px_-22px_rgba(212,24,61,0.44)] hover:scale-[1.01] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
           "border-slate-300 bg-white/78 text-foreground shadow-[0_10px_24px_-20px_rgba(15,23,42,0.16)] hover:border-slate-400 hover:bg-white hover:text-accent-foreground hover:shadow-[0_14px_28px_-20px_rgba(15,23,42,0.2)] hover:scale-[1.01] dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         secondary:
-          "border border-white/60 bg-secondary text-secondary-foreground shadow-[0_10px_24px_-20px_rgba(124,58,237,0.2)] hover:bg-secondary/95 hover:shadow-[0_14px_30px_-22px_rgba(124,58,237,0.26)] hover:scale-[1.01]",
+          "border border-white/60 bg-secondary text-secondary-foreground shadow-[0_10px_24px_-20px_var(--tone-shell-shadow)] hover:bg-secondary/95 hover:shadow-[0_14px_30px_-22px_var(--tone-shell-shadow)] hover:scale-[1.01]",
         ghost:
           "text-slate-600 hover:bg-white/82 hover:text-slate-900 hover:shadow-[0_8px_18px_-20px_rgba(15,23,42,0.14)] hover:scale-[1.01] dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
@@ -54,16 +49,7 @@ type ButtonProps = ComponentProps<"button"> &
   };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  {
-    className,
-    variant,
-    size,
-    asChild = false,
-    style,
-    onPointerMove,
-    onPointerLeave,
-    ...props
-  },
+  { className, variant, size, asChild = false, style, onPointerMove, onPointerLeave, ...props },
   ref,
 ) {
   const prefersReducedMotion = useReducedMotion();
@@ -84,11 +70,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
     onPointerMove?.(event as never);
 
-    if (
-      event.defaultPrevented ||
-      !magnetic ||
-      event.pointerType === "touch"
-    ) {
+    if (event.defaultPrevented || !magnetic || event.pointerType === "touch") {
       return;
     }
 
@@ -113,10 +95,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
       ref={ref}
       data-slot="button"
       data-button-hovering="false"
-      className={cn(
-        buttonVariants({ variant, size, className }),
-        magnetic && "button-magnetic",
-      )}
+      className={cn(buttonVariants({ variant, size, className }), magnetic && "button-magnetic")}
       style={{ ...DEFAULT_BUTTON_STYLE, ...style }}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
