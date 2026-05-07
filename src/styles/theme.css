@@ -245,12 +245,10 @@
     font-size: var(--text-base);
     line-height: var(--text-base--line-height);
     letter-spacing: 0;
-    background-image: linear-gradient(
-      180deg,
-      #fbfdff 0%,
-      #f4f8fb 46%,
-      #f8fbfd 100%
-    );
+    background-color: #eef5f7;
+    background-image:
+      linear-gradient(135deg, rgba(224, 242, 254, 0.62) 0%, rgba(255, 247, 237, 0.36) 42%, rgba(236, 253, 245, 0.52) 100%),
+      linear-gradient(180deg, #f4f9fb 0%, #eef5f7 46%, #f7f4fb 100%);
     background-attachment: fixed;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -615,26 +613,10 @@
     pointer-events: none;
     z-index: -2;
     background:
-      radial-gradient(
-        ellipse at top left,
-        rgba(255, 255, 255, 0.68),
-        transparent 32%
-      ),
-      radial-gradient(
-        ellipse at 20% 10%,
-        var(--tone-overlay-left),
-        transparent 30%
-      ),
-      radial-gradient(
-        ellipse at 86% 8%,
-        var(--tone-overlay-right),
-        transparent 32%
-      ),
-      linear-gradient(
-        175deg,
-        rgba(255, 255, 255, 0.98) 0%,
-        rgba(244, 248, 251, 0.99) 100%
-      );
+      linear-gradient(118deg, var(--tone-bg-left) 0%, rgba(255, 255, 255, 0) 34%),
+      linear-gradient(242deg, var(--tone-bg-right) 0%, rgba(255, 255, 255, 0) 38%),
+      linear-gradient(0deg, var(--tone-bg-bottom) 0%, rgba(255, 255, 255, 0) 34%),
+      linear-gradient(180deg, rgba(240, 247, 249, 0.92) 0%, rgba(247, 243, 251, 0.86) 48%, rgba(235, 248, 244, 0.9) 100%);
   }
 
   .app-shell::after {
@@ -644,13 +626,36 @@
     pointer-events: none;
     z-index: -1;
     background-image:
-      linear-gradient(rgba(15, 23, 42, 0.018) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(15, 23, 42, 0.018) 1px, transparent 1px);
-    background-size: 32px 32px;
+      linear-gradient(rgba(15, 23, 42, 0.026) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15, 23, 42, 0.022) 1px, transparent 1px),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 44%);
+    background-size: 32px 32px, 32px 32px, 100% 100%;
     mask-image: linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.14) 0%,
-      transparent 60%
+      rgba(255, 255, 255, 0.44) 0%,
+      rgba(255, 255, 255, 0.2) 46%,
+      transparent 100%
+    );
+  }
+
+  .dark .app-shell::before {
+    background:
+      linear-gradient(118deg, var(--tone-bg-left) 0%, rgba(15, 23, 42, 0) 38%),
+      linear-gradient(242deg, var(--tone-bg-right) 0%, rgba(15, 23, 42, 0) 42%),
+      linear-gradient(0deg, var(--tone-bg-bottom) 0%, rgba(15, 23, 42, 0) 34%),
+      linear-gradient(180deg, rgba(8, 17, 31, 0.98) 0%, rgba(15, 26, 45, 0.94) 52%, rgba(8, 17, 31, 0.98) 100%);
+  }
+
+  .dark .app-shell::after {
+    background-image:
+      linear-gradient(rgba(226, 232, 240, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(226, 232, 240, 0.03) 1px, transparent 1px),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0) 44%);
+    mask-image: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.32) 0%,
+      rgba(255, 255, 255, 0.16) 46%,
+      transparent 100%
     );
   }
 
