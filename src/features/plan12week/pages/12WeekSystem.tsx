@@ -651,7 +651,7 @@ export function TwelveWeekSystem() {
             Tạo lại chu kỳ
           </Button>
           <Button className="w-full bg-white sm:w-auto" variant="outline" onClick={() => handleTabChange("settings")}>
-            Mở cài đặt
+            Mở cài đặt chu kỳ
           </Button>
         </TwelveWeekDashboardNotice>
       )}
@@ -706,11 +706,11 @@ export function TwelveWeekSystem() {
           <DropdownMenuTrigger asChild>
             <Button type="button" variant="outline" className="gap-2">
               <MoreHorizontal className="h-4 w-4" />
-              Thêm
+              Khác
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleTabChange("settings")}>
+            <DropdownMenuItem onClick={() => handleTabChange("week")}>
               <CalendarDays className="mr-2 h-4 w-4" />
               Review tuần
             </DropdownMenuItem>
@@ -720,7 +720,7 @@ export function TwelveWeekSystem() {
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/12-week-system/settings")}>
               <Settings2 className="mr-2 h-4 w-4" />
-              Cài đặt
+              Cài đặt chu kỳ
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -889,11 +889,11 @@ export function TwelveWeekSystem() {
 
         {/* SETTINGS SECTION */}
         {activeTab === "settings" && (
-          <TabErrorBoundary fallbackTitle="Tab Cài đặt gặp lỗi">
+          <TabErrorBoundary fallbackTitle="Tab Cài đặt chu kỳ gặp lỗi">
             <Suspense
               fallback={
                 <TwelveWeekTabFallback
-                  title="Đang mở tab Cài đặt"
+                  title="Đang mở cài đặt chu kỳ"
                   description="Phần chỉnh nhịp chu kỳ, dữ liệu local và quyền gói đang được tải."
                 />
               }
@@ -1011,13 +1011,13 @@ export function TwelveWeekSystem() {
                 className="flex flex-col items-center justify-center h-full px-3 py-2 gap-1"
               >
                 <MoreHorizontal className={`h-5 w-5 ${activeTab === "settings" ? "text-primary-foreground" : "text-slate-500"}`} />
-                <span className="text-xs font-medium">Thêm</span>
+                <span className="text-xs font-medium">Khác</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => navigate("/12-week-system/settings")}>
                 <Settings2 className="mr-2 h-4 w-4" />
-                Cài đặt
+                Cài đặt chu kỳ
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

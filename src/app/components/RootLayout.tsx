@@ -8,6 +8,7 @@ import {
   Menu,
   Moon,
   RefreshCw,
+  Settings2,
   Sparkles,
   Sun,
   User2,
@@ -894,7 +895,7 @@ export function RootLayout() {
                         onClick={() => setDesktopMoreOpen((open) => !open)}
                       >
                         <Menu className="h-3.5 w-3.5" />
-                        <span>Thêm</span>
+                        <span>Khác</span>
                         <ChevronDown
                           className={`h-3.5 w-3.5 transition-transform ${desktopMoreOpen ? "rotate-180" : ""}`}
                         />
@@ -947,16 +948,25 @@ export function RootLayout() {
 
             <div className="hidden shrink-0 items-center gap-1 md:flex">
               {user ? (
-                <button
-                  type="button"
-                  onClick={() => navigateAppRoute("/billing/plan")}
-                  className="flex max-w-[180px] items-center gap-2 rounded-full border border-slate-200/60 bg-slate-50/80 px-2.5 py-1.5 text-left text-slate-700 transition-colors hover:bg-white"
+                <div
+                  className="flex max-w-[180px] items-center gap-2 rounded-full border border-slate-200/60 bg-slate-50/80 px-2.5 py-1.5 text-left text-slate-700"
                   title={accountLabel}
                 >
                   <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-slate-200/70 text-slate-600">
                     <User2 className="h-3 w-3" />
                   </span>
                   <span className="truncate text-xs font-medium">{accountLabel}</span>
+                </div>
+              ) : null}
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => navigateAppRoute("/billing/plan")}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/60 bg-white/82 text-slate-500 transition-colors hover:bg-white hover:text-slate-800 dark:border-white/12 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/16"
+                  aria-label="Mở cài đặt tài khoản"
+                  title="Cài đặt tài khoản"
+                >
+                  <Settings2 className="h-3.5 w-3.5" />
                 </button>
               ) : null}
               {!user ? (
@@ -1065,6 +1075,17 @@ export function RootLayout() {
                         <p className="truncate text-sm font-semibold text-slate-800">{accountLabel}</p>
                         <p className="mt-1 text-xs font-medium text-slate-500">{accountStatus}</p>
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          navigateAppRoute("/billing/plan");
+                        }}
+                        className="flex size-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600"
+                        aria-label="Mở cài đặt tài khoản"
+                      >
+                        <Settings2 className="h-4 w-4" />
+                      </button>
                       <button
                         type="button"
                         onClick={refreshUserProfile}
@@ -1214,7 +1235,7 @@ export function RootLayout() {
               type="button"
               className="bottom-nav-item"
               onClick={() => setMobileMenuOpen((open) => !open)}
-              aria-label="Thêm"
+              aria-label="Khác"
               aria-current={isMoreNavActive ? "page" : undefined}
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-nav-menu"
@@ -1226,7 +1247,7 @@ export function RootLayout() {
                 />
               </div>
               <span className={`bottom-nav-label ${isMoreNavActive ? "nav-label-active" : "text-slate-400"}`}>
-                Thêm
+                Khác
               </span>
             </button>
           </div>
