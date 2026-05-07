@@ -515,6 +515,38 @@ describe("BillingService.upsertSubscriptionFromProviderEvent", () => {
     assert.equal(events.length, 1);
   });
 
+  it("retries a provider event that was previously marked failed", async () => {
+    const subRepo = createMockSubscriptionRepo();
+    const eventRepo = createMockEventRepo();
+    let shouldFail = true;
+    const flakySubRepo: BillingSubscriptionRepository = {
+      ...subRepo,
+      async upsertFromProviderEvent(event) {
+        if (shouldFail) {
+          shouldFail = false;
+          throw new Error("temporary billing write failure");
+        }
+        return subRepo.upsertFromProviderEvent(event);
+      },
+    };
+    const service = new BillingService(flakySubRepo, eventRepo);
+    const event = makeProviderEvent({ providerEventId: "evt_retry_after_failure" });
+
+    await assert.rejects(
+      () => service.upsertSubscriptionFromProviderEvent(event),
+      /temporary billing write failure/,
+    );
+    assert.equal(eventRepo.getAll().length, 1);
+    assert.equal(eventRepo.getAll()[0].status, "failed");
+
+    const result = await service.upsertSubscriptionFromProviderEvent(event);
+
+    assert.equal(result.eventStatus, "processed");
+    assert.equal(eventRepo.getAll().length, 1);
+    assert.equal(eventRepo.getAll()[0].status, "processed");
+    assert.equal(result.subscription.planCode, "PLUS");
+  });
+
   it("updates subscription status when subscription_canceled event arrives", async () => {
     const { service } = createService();
 

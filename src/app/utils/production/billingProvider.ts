@@ -1,6 +1,11 @@
-
 import { getCurrentEntitlementKeys, getCurrentPlan, restorePlanAccessLocally, upgradePlanLocally } from "../storage";
-import type { BillingProvider, BillingProviderStatus, CustomerPortalResult } from "../billing-contract";
+import type {
+  BillingProvider,
+  BillingProviderStatus,
+  CustomerPortalResult,
+  RestoreAccessResult,
+} from "../billing-contract";
+import type { EntitlementKey, PricingPlanCode, SubscriptionStatus } from "../storage-types";
 import {
   BILLING_CHECKOUT_ENDPOINT,
   BILLING_ENTITLEMENT_SYNC_ENDPOINT,
@@ -13,6 +18,7 @@ import {
   getBillingProviderMode,
   getPlanRank,
   getProviderLabel,
+  isEntitlementKey,
   isOffline,
   postBillingContract,
 } from "./billingCore";
@@ -91,21 +97,22 @@ const localBillingProvider: BillingProvider = {
   }),
 };
 
-
 const apiContractBillingProvider: BillingProvider = {
   getStatus: getBillingProviderStatus,
   startCheckout: async (input) => {
     if (isOffline()) {
-      const fallbackResult = await localBillingProvider.startCheckout(input);
       return {
-        ...fallbackResult,
-        message: `${fallbackResult.message} Thiết bị đang offline nên dùng local checkout.`,
+        ok: false,
+        status: "offline",
+        providerMode: "api_contract",
+        planCode: getCurrentPlan(),
+        message: "Thiết bị đang offline nên chưa thể mở trang thanh toán.",
       };
     }
 
     // Prefer backend checkout-session endpoint via apiClient (real mode)
     const apiBaseConfigured = Boolean(
-      (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL?.trim()) || ""
+      (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL?.trim()) || "",
     );
 
     if (apiBaseConfigured) {
@@ -124,37 +131,44 @@ const apiContractBillingProvider: BillingProvider = {
           };
         }>("/billing/checkout-session", {
           planCode: input.planCode,
-          returnUrl: `${currentUrl}/billing?status=success&context=${encodeURIComponent(input.context ?? "plan")}`,
-          cancelUrl: `${currentUrl}/billing?status=cancel`,
-          billingCycle: "monthly",
+          returnUrl: `${currentUrl}/billing/plan?status=success&context=${encodeURIComponent(input.context ?? "plan")}`,
+          cancelUrl: `${currentUrl}/billing/plan?status=cancel`,
+          billingCycle: "twelve_week",
         });
 
         // CRITICAL: Do NOT unlock entitlement from checkout response.
         // The currentEntitlement in the response proves the backend
         // did not grant entitlement at checkout creation time.
+        const checkoutUrl =
+          result.provider === "casso"
+            ? `/billing/checkout/${encodeURIComponent(result.checkoutSessionId)}`
+            : result.checkoutUrl;
+
         return {
           ok: true,
           status: "redirect_required",
           providerMode: "api_contract",
           planCode: getCurrentPlan(),
-          checkoutUrl: result.checkoutUrl,
+          checkoutUrl,
           message: `Checkout session tạo thành công (${result.provider}). Chuyển hướng đến trang thanh toán.`,
         };
       } catch (error: unknown) {
-        // If backend checkout fails, fall through to legacy flow
-        const msg = error && typeof error === "object" && "message" in error
-          ? (error as { message: string }).message
-          : "Unknown error";
+        const msg =
+          error && typeof error === "object" && "message" in error
+            ? (error as { message: string }).message
+            : "Unknown error";
         console.warn("[billing] Backend checkout-session failed, trying legacy flow:", msg);
       }
     }
 
     // Legacy flow: use BILLING_CHECKOUT_ENDPOINT
     if (!BILLING_CHECKOUT_ENDPOINT) {
-      const fallbackResult = await localBillingProvider.startCheckout(input);
       return {
-        ...fallbackResult,
-        message: `${fallbackResult.message} Checkout provider chưa sẵn sàng nên web dùng local checkout fallback.`,
+        ok: false,
+        status: "not_configured",
+        providerMode: "api_contract",
+        planCode: getCurrentPlan(),
+        message: "Thanh toán thật chưa được cấu hình. Vui lòng cấu hình backend billing provider trước.",
       };
     }
 
@@ -189,8 +203,97 @@ const apiContractBillingProvider: BillingProvider = {
     };
   },
   syncEntitlements: async (goalId) => {
+    const apiBaseConfigured = Boolean(
+      (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL?.trim()) || "",
+    );
+
+    if (apiBaseConfigured) {
+      if (isOffline()) {
+        return {
+          ok: false,
+          status: "offline",
+          providerMode: "api_contract",
+          planCode: getCurrentPlan(),
+          entitlementKeys: getCurrentEntitlementKeys(),
+          message: "Thiết bị đang offline nên chưa thể đồng bộ quyền từ server.",
+        };
+      }
+
+      try {
+        const { apiClient } = await import("@/lib/api/apiClient");
+        const response = await apiClient.get<{
+          planCode: string;
+          status: string;
+          entitlements: string[];
+          currentPeriodEnd: string | null;
+          cancelAtPeriodEnd: boolean;
+        }>("/billing/entitlement");
+        const currentPlan = getCurrentPlan();
+        const currentEntitlementKeys = getCurrentEntitlementKeys();
+        const remotePlanCode = response.planCode as PricingPlanCode;
+        const remoteStatus = normalizeServerSubscriptionStatus(response.status);
+        const remoteEntitlementKeys = response.entitlements.filter((key): key is EntitlementKey =>
+          isEntitlementKey(key),
+        );
+        const { planCode, entitlementKeys } = applyBillingAccessPayload(
+          {
+            planCode: remotePlanCode,
+            subscription:
+              response.planCode === "FREE" || response.status === "none"
+                ? null
+                : {
+                    planCode: remotePlanCode,
+                    status: remoteStatus,
+                    renewsAt: response.currentPeriodEnd,
+                  },
+            entitlements: remoteEntitlementKeys,
+          },
+          "api_contract",
+        );
+
+        const isSamePlan = planCode === currentPlan;
+        const isSameEntitlements =
+          entitlementKeys.length === currentEntitlementKeys.length &&
+          entitlementKeys.every((key) => currentEntitlementKeys.includes(key));
+
+        return {
+          ok: true,
+          status: isSamePlan && isSameEntitlements ? "already_current" : "synced",
+          providerMode: "api_contract",
+          planCode,
+          entitlementKeys,
+          message:
+            isSamePlan && isSameEntitlements
+              ? "Quyền hiện tại đã khớp với server."
+              : `Đã đồng bộ gói ${planCode} và quyền premium từ server.`,
+        };
+      } catch (error: unknown) {
+        const msg =
+          error && typeof error === "object" && "message" in error
+            ? (error as { message: string }).message
+            : "Không thể đồng bộ quyền từ server.";
+        if (!BILLING_ENTITLEMENT_SYNC_ENDPOINT) {
+          return {
+            ok: false,
+            status: "error",
+            providerMode: "api_contract",
+            planCode: getCurrentPlan(),
+            entitlementKeys: getCurrentEntitlementKeys(),
+            message: msg,
+          };
+        }
+      }
+    }
+
     if (!BILLING_ENTITLEMENT_SYNC_ENDPOINT) {
-      return localBillingProvider.syncEntitlements(goalId);
+      return {
+        ok: false,
+        status: "not_configured",
+        providerMode: "api_contract",
+        planCode: getCurrentPlan(),
+        entitlementKeys: getCurrentEntitlementKeys(),
+        message: "Chưa cấu hình endpoint đồng bộ quyền premium.",
+      };
     }
 
     if (isOffline()) {
@@ -228,8 +331,43 @@ const apiContractBillingProvider: BillingProvider = {
     };
   },
   restoreAccess: async (goalId) => {
+    const apiBaseConfigured = Boolean(
+      (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL?.trim()) || "",
+    );
+
+    if (apiBaseConfigured && !BILLING_RESTORE_ENDPOINT) {
+      const beforePlan = getCurrentPlan();
+      const result = await apiContractBillingProvider.syncEntitlements(goalId);
+      const restoreStatus: RestoreAccessResult["status"] = result.ok
+        ? result.planCode === beforePlan
+          ? "already_active"
+          : "restored"
+        : result.status === "offline"
+          ? "offline"
+          : result.status === "not_configured"
+            ? "not_configured"
+            : result.status === "local_only"
+              ? "local_only"
+              : "error";
+      return {
+        ok: result.ok,
+        status: restoreStatus,
+        providerMode: "api_contract",
+        planCode: result.planCode,
+        entitlementKeys: result.entitlementKeys,
+        message: result.message,
+      };
+    }
+
     if (!BILLING_RESTORE_ENDPOINT) {
-      return localBillingProvider.restoreAccess(goalId);
+      return {
+        ok: false,
+        status: "not_configured",
+        providerMode: "api_contract",
+        planCode: getCurrentPlan(),
+        entitlementKeys: getCurrentEntitlementKeys(),
+        message: "Chưa cấu hình endpoint khôi phục quyền premium.",
+      };
     }
 
     if (isOffline()) {
@@ -262,6 +400,17 @@ const apiContractBillingProvider: BillingProvider = {
   },
 };
 
+function normalizeServerSubscriptionStatus(status: string): SubscriptionStatus {
+  switch (status) {
+    case "active":
+    case "trialing":
+    case "canceled":
+      return status;
+    default:
+      return "inactive";
+  }
+}
+
 export function getBillingProvider(): BillingProvider {
   switch (getBillingProviderMode()) {
     case "mock_provider":
@@ -275,6 +424,9 @@ export function getBillingProvider(): BillingProvider {
 
 export function getBillingProviderStatus(): BillingProviderStatus {
   const mode = getBillingProviderMode();
+  const apiBaseConfigured = Boolean(
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL?.trim()) || "",
+  );
 
   if (mode === "mock_provider") {
     return {
@@ -291,10 +443,10 @@ export function getBillingProviderStatus(): BillingProviderStatus {
     return {
       mode,
       providerLabel: getProviderLabel(mode),
-      checkoutReady: Boolean(BILLING_CHECKOUT_ENDPOINT),
-      manageBillingReady: Boolean(BILLING_PORTAL_ENDPOINT),
-      restoreReady: Boolean(BILLING_RESTORE_ENDPOINT),
-      entitlementSyncReady: Boolean(BILLING_ENTITLEMENT_SYNC_ENDPOINT),
+      checkoutReady: apiBaseConfigured || Boolean(BILLING_CHECKOUT_ENDPOINT),
+      manageBillingReady: apiBaseConfigured || Boolean(BILLING_PORTAL_ENDPOINT),
+      restoreReady: apiBaseConfigured || Boolean(BILLING_RESTORE_ENDPOINT),
+      entitlementSyncReady: apiBaseConfigured || Boolean(BILLING_ENTITLEMENT_SYNC_ENDPOINT),
     };
   }
 
@@ -324,13 +476,13 @@ export async function openBillingCustomerPortal(goalId?: string): Promise<Custom
 
   // Prefer backend customer-portal endpoint in real mode
   const apiBaseConfigured = Boolean(
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL?.trim()) || ""
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL?.trim()) || "",
   );
 
   if (apiBaseConfigured && status.mode === "api_contract") {
     try {
       const { apiClient } = await import("@/lib/api/apiClient");
-      const returnUrl = typeof window !== "undefined" ? `${window.location.origin}/billing` : "";
+      const returnUrl = typeof window !== "undefined" ? `${window.location.origin}/billing/plan` : "";
       const result = await apiClient.post<{
         supported: boolean;
         portalUrl?: string;
@@ -358,9 +510,10 @@ export async function openBillingCustomerPortal(goalId?: string): Promise<Custom
         message: result.message,
       };
     } catch (error: unknown) {
-      const msg = error && typeof error === "object" && "message" in error
-        ? (error as { message: string }).message
-        : "Unknown error";
+      const msg =
+        error && typeof error === "object" && "message" in error
+          ? (error as { message: string }).message
+          : "Unknown error";
       console.warn("[billing] Backend customer-portal failed:", msg);
       // Fall through to legacy/provider flow
     }
@@ -455,7 +608,7 @@ export async function cancelSubscriptionOnServer(): Promise<CancelSubscriptionRe
   }
 
   const apiBaseConfigured = Boolean(
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL?.trim()) || ""
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL?.trim()) || "",
   );
 
   if (!apiBaseConfigured) {
@@ -487,9 +640,10 @@ export async function cancelSubscriptionOnServer(): Promise<CancelSubscriptionRe
       currentEntitlement: result.currentEntitlement,
     };
   } catch (error: unknown) {
-    const msg = error && typeof error === "object" && "message" in error
-      ? (error as { message: string }).message
-      : "Không thể hủy gói lúc này.";
+    const msg =
+      error && typeof error === "object" && "message" in error
+        ? (error as { message: string }).message
+        : "Không thể hủy gói lúc này.";
     return {
       ok: false,
       status: "error",

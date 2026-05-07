@@ -20,3 +20,17 @@ services:
         sync: false
       - key: FRONTEND_ORIGIN
         sync: false
+      - key: BILLING_PROVIDER
+        value: casso
+      - key: BILLING_REPOSITORY
+        value: mongo
+      - key: CASSO_WEBHOOK_SECRET
+        sync: false
+      - key: CASSO_BANK_ACCOUNT
+        sync: false
+      - key: CASSO_BANK_NAME
+        sync: false
+      - key: CASSO_ACCOUNT_NAME
+        sync: false
+      - key: PLUS_PRICE_VND
+        sync: false

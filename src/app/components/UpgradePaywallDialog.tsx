@@ -80,7 +80,9 @@ export function UpgradePaywallDialog({
         recommendedPlan: recommendedPlan ?? paywallCopy.recommendedPlan,
       });
 
-      if (result.status === "redirect_required") {
+      if (!result.ok) {
+        toast.error(result.message);
+      } else if (result.status === "redirect_required") {
         if (result.checkoutUrl && typeof window !== "undefined") {
           const isSameOriginCheckout =
             result.checkoutUrl.startsWith("/") || result.checkoutUrl.startsWith(window.location.origin);
@@ -111,7 +113,7 @@ export function UpgradePaywallDialog({
         });
       }
 
-      if (result.status !== "redirect_required") {
+      if (result.ok && result.status !== "redirect_required") {
         onCheckoutComplete?.(result.planCode);
       }
 
@@ -240,7 +242,9 @@ export function UpgradePaywallDialog({
                     </div>
 
                     <div className="mt-5 rounded-[22px] border border-white/70 bg-white/90 px-4 py-4">
-                      <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Giá trong bản demo</p>
+                      <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
+                        {demoMode ? "Giá trong bản demo" : "Giá gói"}
+                      </p>
                       <p className="mt-2 text-3xl font-bold text-slate-950">{plan.priceLabel}</p>
                     </div>
 
@@ -263,10 +267,12 @@ export function UpgradePaywallDialog({
                       onClick={() => handleUpgrade(plan.code as Exclude<PricingPlanCode, "FREE">)}
                     >
                       {isCurrent
-                        ? "Đang dùng trên thiết bị này"
+                        ? demoMode
+                          ? "Đang dùng trên thiết bị này"
+                          : "Đang dùng"
                         : demoMode
                           ? `Mở ${plan.name} demo`
-                          : `Mở ${plan.name} để đi nhanh hơn`}
+                          : `Nâng cấp ${plan.name}`}
                     </Button>
                   </div>
                 );

@@ -1,5 +1,5 @@
 import { MongoPlanRepository } from "../repositories/mongo/MongoPlanRepository";
-import { MongoWeekRepository } from "../repositories/mongo/MongoWeekRepository";
+import { MongoWeekRepository, type WeekReviewData } from "../repositories/mongo/MongoWeekRepository";
 import { ApiError } from "../utils/apiError";
 import { requirePlanOwnership, requireWeekOwnership } from "./serviceGuards";
 
@@ -127,14 +127,17 @@ export class WeekService {
       weekId,
     );
     const review = validateWeeklyReviewPayload(payload, week.weekNumber);
-
-    return this.weekRepository.submitWeeklyReview(weekId, {
+    const reviewPayload: WeekReviewData = {
       weekNumber: review.weekNumber,
       executionScore: review.executionScore,
       reflection: review.reflection,
       adjustments: review.adjustments,
-      baseRevision: review.baseRevision,
-    });
+    };
+    if (review.baseRevision !== undefined) {
+      reviewPayload.baseRevision = review.baseRevision;
+    }
+
+    return this.weekRepository.submitWeeklyReview(weekId, reviewPayload);
   }
 }
 

@@ -237,13 +237,13 @@ describe("POST /api/billing/webhook/:provider", () => {
   });
 
   it("returns 200 for non-active provider (acknowledged, not processed)", async () => {
-    process.env.BILLING_PROVIDER = "stripe";
+    process.env.BILLING_PROVIDER = "casso";
     const body = createMockWebhookBody({
       userId: testUserId,
       eventId: uniqueEventId(),
     });
 
-    // Send to "payos" when active provider is "stripe"
+    // Send to "payos" when active provider is "casso"
     const response = await postWebhook(createWebhookTestApp(), "payos", body);
     assert.equal(response.status, 200);
     assert.ok((response.body.message as string).includes("not active"));

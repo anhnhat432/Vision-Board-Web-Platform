@@ -156,6 +156,45 @@ Health check:
 http://localhost:4000/api/health
 ```
 
+### Optional: real paid billing with Casso + VietQR
+
+The app supports a Casso + VietQR billing path. In real mode, the frontend creates a bank-transfer order through the backend, shows a VietQR checkout page, and premium entitlements are granted only after a verified Casso webhook marks the matching order as paid.
+
+Frontend env:
+
+```env
+VITE_APP_MODE=real
+VITE_API_BASE_URL=http://localhost:4000/api
+VITE_BILLING_PROVIDER_MODE=api_contract
+VITE_BILLING_PROVIDER_LABEL=Casso + VietQR
+```
+
+Backend env:
+
+```env
+BILLING_PROVIDER=casso
+BILLING_REPOSITORY=mongo
+CASSO_WEBHOOK_SECRET=replace-with-casso-secure-token
+CASSO_BANK_ACCOUNT=your-receiving-account-number
+CASSO_BANK_NAME=MB
+CASSO_ACCOUNT_NAME=NGUYEN VAN A
+PLUS_PRICE_VND=79000
+```
+
+Casso webhook endpoint:
+
+```text
+https://<your-backend-domain>/api/billing/webhook/casso
+```
+
+Configure Casso to send the `Secure-Token` header matching `CASSO_WEBHOOK_SECRET`. The transfer description must include the generated order code, for example:
+
+```text
+VBABCDEFGH
+```
+
+Do not set live Casso tokens or bank details in source files. Put them in Render/host environment variables.
+
 ### 5. Run the frontend
 
 ```powershell

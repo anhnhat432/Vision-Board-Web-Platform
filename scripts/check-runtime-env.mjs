@@ -37,6 +37,16 @@ const requiredBackendKeys = [
   "FRONTEND_ORIGIN",
 ];
 
+const cassoBillingKeys = [
+  "BILLING_PROVIDER",
+  "BILLING_REPOSITORY",
+  "CASSO_WEBHOOK_SECRET",
+  "CASSO_BANK_ACCOUNT",
+  "CASSO_BANK_NAME",
+  "CASSO_ACCOUNT_NAME",
+  "PLUS_PRICE_VND",
+];
+
 function getMode(argv) {
   const inlineMode = argv.find((arg) => arg.startsWith("--mode="));
   if (inlineMode) return inlineMode.slice("--mode=".length) || "development";
@@ -154,6 +164,8 @@ printKeyStatus("Optional Firebase client keys", optionalFrontendFirebaseKeys, fr
 console.log("");
 printKeyStatus("Backend local API requirements", requiredBackendKeys, backendEnv.values);
 console.log("");
+printKeyStatus("Casso + VietQR billing requirements (only when BILLING_PROVIDER=casso)", cassoBillingKeys, backendEnv.values);
+console.log("");
 
 if (frontendAppMode !== "real") {
   console.log("INFO    VITE_APP_MODE is demo. Firebase/backend sync env is optional and API health is skipped unless --full-stack is used.");
@@ -178,6 +190,13 @@ const fullStackFailures = [
   ...frontendMissing.map((key) => `frontend:${key}`),
   ...(shouldRequireBackendSyncEnv ? backendMissing.map((key) => `backend:${key}`) : []),
 ];
+
+const backendBillingProvider = backendEnv.values.BILLING_PROVIDER?.trim().toLowerCase();
+if (shouldRequireBackendSyncEnv && backendBillingProvider === "casso") {
+  fullStackFailures.push(
+    ...collectMissing(cassoBillingKeys, backendEnv.values).map((key) => `backend:${key}`),
+  );
+}
 
 if (fullStack && frontendAppMode !== "real") {
   fullStackFailures.push("frontend:VITE_APP_MODE(real-required)");

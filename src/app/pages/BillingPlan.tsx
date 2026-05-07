@@ -168,7 +168,11 @@ export function BillingPlan() {
   const handleCheckoutComplete = (planCode: PricingPlanCode) => {
     reloadUserData();
     if (planCode !== "FREE") {
-      toast.success(`Đã mở ${getPlanLabel(planCode)} demo trên trình duyệt này.`);
+      toast.success(
+        demoMode
+          ? `Đã mở ${getPlanLabel(planCode)} demo trên trình duyệt này.`
+          : `Đã cập nhật ${getPlanLabel(planCode)} trên tài khoản của bạn.`,
+      );
     }
   };
 
@@ -246,17 +250,21 @@ export function BillingPlan() {
           <div className="relative">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
               <CreditCard className="h-4 w-4" />
-              Public Demo
+              {demoMode ? "Public Demo" : "Premium"}
             </div>
             <h1 className="mt-4 max-w-3xl text-2xl font-bold tracking-normal sm:text-3xl lg:text-4xl">
-              Quản lý gói demo của bạn
+              {demoMode ? "Quản lý gói demo của bạn" : "Quản lý gói của bạn"}
             </h1>
             <p className="mt-2 max-w-2xl text-base leading-8 text-white/82">
-              Mock checkout không thu tiền thật. Quyền Plus trong MVP 1 chỉ lưu local trên trình duyệt này.
+              {demoMode
+                ? "Mock checkout không thu tiền thật. Quyền Plus trong MVP 1 chỉ lưu local trên trình duyệt này."
+                : "Nâng cấp, kiểm tra quyền premium và quản lý thanh toán cho tài khoản của bạn."}
             </p>
-            <p className="mt-2 text-sm text-white/64">
-              Public demo - upgrade unlocks features locally on this device only.
-            </p>
+            {demoMode && (
+              <p className="mt-2 text-sm text-white/64">
+                Public demo - upgrade unlocks features locally on this device only.
+              </p>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -269,7 +277,8 @@ export function BillingPlan() {
             <div>
               <p className="font-medium text-amber-900">Đang chờ xác nhận thanh toán</p>
               <p className="text-sm text-amber-700">
-                Thanh toán đang được xử lý. Quyền sẽ được cập nhật khi server xác nhận. Vui lòng đợi hoặc nhấn "Kiểm tra quyền" bên dưới.
+                Thanh toán đang được xử lý. Quyền sẽ được cập nhật khi server xác nhận. Vui lòng đợi hoặc nhấn "Kiểm tra
+                quyền" bên dưới.
               </p>
             </div>
           </CardContent>
@@ -294,9 +303,7 @@ export function BillingPlan() {
             <Shield className="h-5 w-5 text-red-600" />
             <div>
               <p className="font-medium text-red-900">Không thể kiểm tra thanh toán</p>
-              <p className="text-sm text-red-700">
-                Vui lòng nhấn "Kiểm tra quyền" bên dưới hoặc thử lại sau.
-              </p>
+              <p className="text-sm text-red-700">Vui lòng nhấn "Kiểm tra quyền" bên dưới hoặc thử lại sau.</p>
             </div>
             <Button variant="outline" size="sm" onClick={pollServerEntitlement}>
               Thử lại
@@ -314,8 +321,12 @@ export function BillingPlan() {
           </CardTitle>
           <CardDescription>
             {currentPlanCode === "FREE"
-              ? "Bạn đang dùng gói miễn phí trên trình duyệt này."
-              : `Bạn đang dùng ${currentPlanDefinition?.name ?? currentPlanCode} trên trình duyệt này.`}
+              ? demoMode
+                ? "Bạn đang dùng gói miễn phí trên trình duyệt này."
+                : "Bạn đang dùng gói miễn phí."
+              : demoMode
+                ? `Bạn đang dùng ${currentPlanDefinition?.name ?? currentPlanCode} trên trình duyệt này.`
+                : `Bạn đang dùng ${currentPlanDefinition?.name ?? currentPlanCode} trên tài khoản này.`}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -346,30 +357,40 @@ export function BillingPlan() {
                 <p className="text-slate-500">Trạng thái</p>
                 <p className="font-medium text-slate-900">
                   {subscription.status === "active"
-                    ? "Đang mở local"
+                    ? demoMode
+                      ? "Đang mở local"
+                      : "Đang hoạt động"
                     : subscription.status === "trialing"
-                      ? "Dùng thử local"
+                      ? demoMode
+                        ? "Dùng thử local"
+                        : "Đang dùng thử"
                       : subscription.status === "canceled"
                         ? "Đã hủy"
                         : "Không hoạt động"}
                 </p>
               </div>
               <div className="flow-muted p-4">
-                <p className="text-slate-500">Bắt đầu local</p>
+                <p className="text-slate-500">{demoMode ? "Bắt đầu local" : "Bắt đầu"}</p>
                 <p className="font-medium text-slate-900">{formatDate(subscription.startedAt)}</p>
               </div>
               <div className="flow-muted p-4">
-                <p className="text-slate-500">Mốc local</p>
+                <p className="text-slate-500">{demoMode ? "Mốc local" : "Gia hạn / hết hạn"}</p>
                 <p className="font-medium text-slate-900">{formatDate(subscription.renewsAt)}</p>
               </div>
               <div className="flow-muted p-4">
-                <p className="text-slate-500">Chu kỳ demo</p>
+                <p className="text-slate-500">{demoMode ? "Chu kỳ demo" : "Chu kỳ"}</p>
                 <p className="font-medium text-slate-900">
                   {subscription.billingCycle === "monthly"
-                    ? "Tháng (demo)"
+                    ? demoMode
+                      ? "Tháng (demo)"
+                      : "Tháng"
                     : subscription.billingCycle === "quarterly"
-                      ? "Quý (demo)"
-                      : "Trọn chu kỳ demo"}
+                      ? demoMode
+                        ? "Quý (demo)"
+                        : "Quý"
+                      : demoMode
+                        ? "Trọn chu kỳ demo"
+                        : "Trọn chu kỳ"}
                 </p>
               </div>
             </div>
@@ -380,9 +401,9 @@ export function BillingPlan() {
               <>
                 <Button className="w-full sm:w-auto" onClick={() => handleOpenUpgrade("plan")}>
                   <Sparkles className="mr-2 h-4 w-4" />
-                  Mở Plus demo
+                  {demoMode ? "Mở Plus demo" : "Nâng cấp Plus"}
                 </Button>
-                {!isTrialing && (
+                {demoMode && !isTrialing && (
                   <div className="flex w-full flex-col items-start gap-1 sm:w-auto">
                     <Button
                       variant="outline"
@@ -406,14 +427,15 @@ export function BillingPlan() {
               <>
                 {isTrialing && trialDaysLeft !== null && (
                   <div className="w-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                    <span className="font-semibold">Plus demo local:</span> còn {trialDaysLeft} ngày — demo upgrade
-                    không thu tiền thật.
+                    <span className="font-semibold">{demoMode ? "Plus demo local:" : "Plus trial:"}</span> còn{" "}
+                    {trialDaysLeft} ngày
+                    {demoMode ? " - demo upgrade không thu tiền thật." : " dùng thử."}
                     <Button
                       size="sm"
                       className="mt-3 w-full sm:ml-3 sm:mt-0 sm:w-auto"
                       onClick={() => handleOpenUpgrade("plan")}
                     >
-                      Mở Plus demo
+                      {demoMode ? "Mở Plus demo" : "Nâng cấp Plus"}
                     </Button>
                   </div>
                 )}
@@ -438,12 +460,7 @@ export function BillingPlan() {
                       Bạn vẫn giữ quyền truy cập cho đến hết chu kỳ hiện tại. Sau đó gói sẽ chuyển về Free.
                     </p>
                     <div className="mt-3 flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={handleCancelSubscription}
-                        disabled={isCanceling}
-                      >
+                      <Button size="sm" variant="destructive" onClick={handleCancelSubscription} disabled={isCanceling}>
                         {isCanceling ? "Đang hủy…" : "Xác nhận hủy"}
                       </Button>
                       <Button
@@ -470,7 +487,11 @@ export function BillingPlan() {
             <Shield className="h-5 w-5 text-emerald-600" />
             Quyền truy cập
           </CardTitle>
-          <CardDescription>{realMode ? "Quyền premium được quản lý bởi server." : "Các quyền premium đang mở local trên trình duyệt này."}</CardDescription>
+          <CardDescription>
+            {realMode
+              ? "Quyền premium được quản lý bởi server."
+              : "Các quyền premium đang mở local trên trình duyệt này."}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -494,7 +515,15 @@ export function BillingPlan() {
                     <p className={`text-sm font-medium ${isActive ? "text-emerald-900" : "text-slate-600"}`}>
                       {getEntitlementLabel(key)}
                     </p>
-                    <p className="text-xs text-slate-500">{isActive ? (realMode ? "Đang hoạt động" : "Đang mở local") : (realMode ? "Chưa kích hoạt" : "Chưa mở local")}</p>
+                    <p className="text-xs text-slate-500">
+                      {isActive
+                        ? realMode
+                          ? "Đang hoạt động"
+                          : "Đang mở local"
+                        : realMode
+                          ? "Chưa kích hoạt"
+                          : "Chưa mở local"}
+                    </p>
                   </div>
                 </div>
               );
@@ -508,17 +537,19 @@ export function BillingPlan() {
         <CardHeader>
           <CardTitle>Thao tác</CardTitle>
           <CardDescription>
-            Kiểm tra quyền local/demo, khôi phục demo upgrade hoặc quay lại trang chính.
+            {demoMode
+              ? "Kiểm tra quyền local/demo, khôi phục demo upgrade hoặc quay lại trang chính."
+              : "Kiểm tra quyền premium, khôi phục giao dịch đã mua hoặc quay lại trang chính."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" onClick={handleSyncEntitlements} disabled={isSyncing}>
               <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
-              {isSyncing ? "Đang kiểm tra…" : "Kiểm tra quyền local"}
+              {isSyncing ? "Đang kiểm tra…" : demoMode ? "Kiểm tra quyền local" : "Kiểm tra quyền premium"}
             </Button>
             <Button variant="outline" onClick={handleRestoreAccess} disabled={isRestoring}>
-              {isRestoring ? "Đang khôi phục…" : "Khôi phục demo upgrade"}
+              {isRestoring ? "Đang khôi phục…" : demoMode ? "Khôi phục demo upgrade" : "Khôi phục quyền đã mua"}
             </Button>
             <Button variant="outline" onClick={() => navigate("/")}>
               Quay lại bảng điều khiển
@@ -576,7 +607,9 @@ export function BillingPlan() {
       <Card className="flow-panel">
         <CardHeader>
           <CardTitle>So sánh các gói</CardTitle>
-          <CardDescription>So sánh Free với Plus demo. Demo checkout không thu tiền thật.</CardDescription>
+          <CardDescription>
+            {demoMode ? "So sánh Free với Plus demo. Demo checkout không thu tiền thật." : "So sánh Free với Plus."}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -609,7 +642,7 @@ export function BillingPlan() {
                 </ul>
                 {plan.code !== "FREE" && currentPlanCode === "FREE" && (
                   <Button className="mt-4 w-full" onClick={() => handleOpenUpgrade("plan")}>
-                    Mở Plus demo
+                    {demoMode ? "Mở Plus demo" : "Nâng cấp Plus"}
                   </Button>
                 )}
               </div>

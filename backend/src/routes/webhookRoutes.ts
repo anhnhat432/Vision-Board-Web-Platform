@@ -16,7 +16,7 @@ const webhookRoutes = Router();
 
 // Casso-specific webhook (matches PaymentOrders by bank transfer description)
 webhookRoutes.post("/billing/webhook/casso", asyncHandler(handleCassoWebhook));
-// Generic provider webhook (Stripe, PayOS, VNPay, mock, etc.)
+// Generic provider webhook (PayOS, VNPay, mock, etc.)
 webhookRoutes.post("/billing/webhook/:provider", asyncHandler(handleWebhook));
 
 export { webhookRoutes };

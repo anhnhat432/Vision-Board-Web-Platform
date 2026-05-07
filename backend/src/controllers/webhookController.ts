@@ -62,7 +62,7 @@ export async function handleWebhook(req: Request, res: Response): Promise<void> 
 
   // Validate provider matches configured provider
   const activeProviderId = getActiveProviderId();
-  if (providerParam !== activeProviderId && providerParam !== "mock") {
+  if (providerParam !== activeProviderId) {
     console.warn(
       `[webhook] Rejected: provider param "${providerParam}" does not match active provider "${activeProviderId}".`,
     );

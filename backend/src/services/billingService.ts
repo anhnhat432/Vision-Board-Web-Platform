@@ -275,25 +275,33 @@ export class BillingService {
       event.provider,
       event.providerEventId,
     );
-    if (existingEvent) {
+    if (existingEvent && existingEvent.status !== "failed") {
       const subscription =
         await this.subscriptionRepo.findLatestByUserId(event.userId);
+      if (!subscription) {
+        throw new Error(
+          `Duplicate billing event "${event.providerEventId}" has no matching subscription.`,
+        );
+      }
       return {
-        subscription: subscription!,
+        subscription,
         eventStatus: "duplicate",
         eventId: existingEvent.id,
       };
     }
 
-    // Create event log entry.
-    const billingEvent = await this.eventRepo.createEvent({
-      provider: event.provider,
-      providerEventId: event.providerEventId,
-      eventType: event.eventType,
-      userId: event.userId,
-      status: "received",
-      payloadHash: event.payloadHash,
-    });
+    // Create event log entry, or retry a previous failed event without
+    // creating a second idempotency record.
+    const billingEvent =
+      existingEvent ??
+      (await this.eventRepo.createEvent({
+        provider: event.provider,
+        providerEventId: event.providerEventId,
+        eventType: event.eventType,
+        userId: event.userId,
+        status: "received",
+        payloadHash: event.payloadHash,
+      }));
 
     try {
       // Upsert the subscription.

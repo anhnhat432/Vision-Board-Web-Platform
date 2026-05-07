@@ -1,11 +1,5 @@
 import type { MonetizationSource } from "./monetization-analytics";
-import type {
-  BillingProviderMode,
-  Entitlement,
-  EntitlementKey,
-  PricingPlanCode,
-  Subscription,
-} from "./storage-types";
+import type { BillingProviderMode, Entitlement, EntitlementKey, PricingPlanCode, Subscription } from "./storage-types";
 import type { PremiumFeatureContext } from "./twelve-week-premium";
 
 export interface BillingProviderStatus {
@@ -27,7 +21,7 @@ export interface CheckoutFlowInput {
 
 export interface CheckoutFlowResult {
   ok: boolean;
-  status: "upgraded" | "already_active" | "redirect_required";
+  status: "upgraded" | "already_active" | "redirect_required" | "not_configured" | "offline" | "error";
   providerMode: BillingProviderMode;
   planCode: PricingPlanCode;
   message: string;

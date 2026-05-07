@@ -1,6 +1,7 @@
 import { describe, it, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 
+import { createCassoPaymentAdapter } from "../services/cassoPaymentAdapter";
 import { createMockPaymentAdapter, createMockWebhookBody } from "../services/mockPaymentAdapter";
 import {
   getPaymentProviderAdapter,
@@ -373,17 +374,26 @@ describe("PaymentProviderAdapter", () => {
 });
 
 describe("PaymentProviderRegistry", () => {
-  const originalEnv = process.env.BILLING_PROVIDER;
+  const originalEnv = {
+    BILLING_PROVIDER: process.env.BILLING_PROVIDER,
+    CASSO_WEBHOOK_SECRET: process.env.CASSO_WEBHOOK_SECRET,
+    CASSO_BANK_ACCOUNT: process.env.CASSO_BANK_ACCOUNT,
+    CASSO_BANK_NAME: process.env.CASSO_BANK_NAME,
+    CASSO_ACCOUNT_NAME: process.env.CASSO_ACCOUNT_NAME,
+    PLUS_PRICE_VND: process.env.PLUS_PRICE_VND,
+  };
 
   beforeEach(() => {
     _resetAdapterCacheForTesting();
   });
 
   afterEach(() => {
-    if (originalEnv === undefined) {
-      delete process.env.BILLING_PROVIDER;
-    } else {
-      process.env.BILLING_PROVIDER = originalEnv;
+    for (const [key, value] of Object.entries(originalEnv)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
     }
     _resetAdapterCacheForTesting();
   });
@@ -401,11 +411,29 @@ describe("PaymentProviderRegistry", () => {
     assert.equal(adapter.providerId, "mock");
   });
 
-  it("returns placeholder for unconfigured stripe", () => {
-    process.env.BILLING_PROVIDER = "stripe";
+  it("returns unconfigured casso adapter when Casso env is missing", () => {
+    process.env.BILLING_PROVIDER = "casso";
+    delete process.env.CASSO_WEBHOOK_SECRET;
+    delete process.env.CASSO_BANK_ACCOUNT;
+    delete process.env.CASSO_BANK_NAME;
+    delete process.env.CASSO_ACCOUNT_NAME;
     const adapter = getPaymentProviderAdapter();
-    assert.equal(adapter.providerId, "stripe");
+    assert.equal(adapter.providerId, "casso");
     assert.equal(adapter.isConfigured, false);
+  });
+
+  it("returns configured casso adapter when Casso env is present", () => {
+    process.env.BILLING_PROVIDER = "casso";
+    process.env.CASSO_WEBHOOK_SECRET = "test-secret";
+    process.env.CASSO_BANK_ACCOUNT = "123456789";
+    process.env.CASSO_BANK_NAME = "MB";
+    process.env.CASSO_ACCOUNT_NAME = "VISION BOARD";
+    process.env.PLUS_PRICE_VND = "79000";
+
+    const adapter = getPaymentProviderAdapter();
+    assert.equal(adapter.providerId, "casso");
+    assert.equal(adapter.isConfigured, true);
+    assert.equal(isPaymentProviderReady(), true);
   });
 
   it("placeholder createCheckoutSession rejects with PaymentProviderNotConfiguredError", async () => {
@@ -448,13 +476,108 @@ describe("PaymentProviderRegistry", () => {
   });
 
   it("getActiveProviderId returns the env value", () => {
-    process.env.BILLING_PROVIDER = "stripe";
-    assert.equal(getActiveProviderId(), "stripe");
+    process.env.BILLING_PROVIDER = "casso";
+    assert.equal(getActiveProviderId(), "casso");
   });
 
   it("unknown BILLING_PROVIDER falls back to mock", () => {
     process.env.BILLING_PROVIDER = "unknown_provider";
     const adapter = getPaymentProviderAdapter();
     assert.equal(adapter.providerId, "mock");
+  });
+});
+
+describe("CassoPaymentAdapter", () => {
+  const originalEnv = {
+    CASSO_WEBHOOK_SECRET: process.env.CASSO_WEBHOOK_SECRET,
+    CASSO_BANK_ACCOUNT: process.env.CASSO_BANK_ACCOUNT,
+    CASSO_BANK_NAME: process.env.CASSO_BANK_NAME,
+    CASSO_ACCOUNT_NAME: process.env.CASSO_ACCOUNT_NAME,
+    PLUS_PRICE_VND: process.env.PLUS_PRICE_VND,
+  };
+
+  afterEach(() => {
+    for (const [key, value] of Object.entries(originalEnv)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+  });
+
+  function configureCassoEnv(): void {
+    process.env.CASSO_WEBHOOK_SECRET = "test-secret";
+    process.env.CASSO_BANK_ACCOUNT = "123456789";
+    process.env.CASSO_BANK_NAME = "MB";
+    process.env.CASSO_ACCOUNT_NAME = "VISION BOARD";
+    process.env.PLUS_PRICE_VND = "79000";
+  }
+
+  function makeCassoWebhookBody(): string {
+    return JSON.stringify({
+      error: 0,
+      data: [
+        {
+          id: 12345,
+          tid: "CAS12345",
+          description: "Thanh toan VBABCDEFGH",
+          amount: 79000,
+          when: new Date().toISOString(),
+        },
+      ],
+    });
+  }
+
+  it("verifies Casso Secure-Token header", () => {
+    configureCassoEnv();
+    const adapter = createCassoPaymentAdapter();
+
+    const valid = adapter.verifyWebhookSignature({
+      rawBody: makeCassoWebhookBody(),
+      headers: { "secure-token": "test-secret" },
+    });
+    assert.equal(valid.valid, true);
+
+    const invalid = adapter.verifyWebhookSignature({
+      rawBody: makeCassoWebhookBody(),
+      headers: { "secure-token": "wrong" },
+    });
+    assert.equal(invalid.valid, false);
+  });
+
+  it("rejects checkout creation when Casso env is missing", async () => {
+    delete process.env.CASSO_WEBHOOK_SECRET;
+    delete process.env.CASSO_BANK_ACCOUNT;
+    delete process.env.CASSO_BANK_NAME;
+    delete process.env.CASSO_ACCOUNT_NAME;
+    const adapter = createCassoPaymentAdapter();
+
+    await assert.rejects(
+      () =>
+        adapter.createCheckoutSession({
+          userId: "user_1",
+          planCode: "PLUS",
+          billingCycle: "twelve_week",
+          successUrl: "https://example.com/success",
+          cancelUrl: "https://example.com/cancel",
+        }),
+      PaymentProviderNotConfiguredError,
+    );
+  });
+
+  it("parses incoming Casso transfer into a normalized checkout event", () => {
+    configureCassoEnv();
+    const adapter = createCassoPaymentAdapter();
+    const event = adapter.parseWebhookEvent(makeCassoWebhookBody());
+
+    assert.equal(event.provider, "casso");
+    assert.equal(event.providerEventId, "casso_12345");
+    assert.equal(event.eventType, "checkout_completed");
+    assert.equal(event.providerSubscriptionId, "VBABCDEFGH");
+    assert.equal(event.planCode, "PLUS");
+    assert.equal(event.status, "active");
+    assert.equal(event.billingCycle, "twelve_week");
+    assert.ok(event.payloadHash.length > 0);
   });
 });

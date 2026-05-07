@@ -55,6 +55,7 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
   }
 
   let processedCount = 0;
+  let failedCount = 0;
 
   // Step 3: Process each transaction
   for (const tx of transactions) {
@@ -107,14 +108,9 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
       continue;
     }
 
-    // Step 8: Mark order completed
+    // Step 8: Upsert subscription via BillingService before marking the order
+    // completed. If this fails, Casso should retry and the order remains pending.
     const now = new Date();
-    order.status = "completed";
-    order.completedAt = now;
-    order.cassoTransactionId = cassoTxId || undefined;
-    await order.save();
-
-    // Step 9: Upsert subscription via BillingService
     const payloadHash = createHash("sha256")
       .update(JSON.stringify(tx))
       .digest("hex");
@@ -134,16 +130,30 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
         providerSubscriptionId: orderId,
       });
 
+      order.status = "completed";
+      order.completedAt = now;
+      order.cassoTransactionId = cassoTxId || undefined;
+      await order.save();
+
       console.info(
         `[casso-webhook] Order "${orderId}" completed. Subscription ${result.eventStatus}: ${result.subscription.id}`,
       );
       processedCount++;
     } catch (error: unknown) {
+      failedCount++;
       const msg = error instanceof Error ? error.message : "Unknown error";
       console.error(`[casso-webhook] Failed to upsert subscription for order "${orderId}": ${msg}`);
-      order.status = "failed";
-      await order.save();
     }
+  }
+
+  if (failedCount > 0) {
+    res.status(500).json({
+      success: false,
+      processedCount,
+      failedCount,
+      message: "Webhook processing failed for one or more matching transactions.",
+    });
+    return;
   }
 
   res.status(200).json({

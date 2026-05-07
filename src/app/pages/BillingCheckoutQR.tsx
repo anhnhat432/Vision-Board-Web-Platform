@@ -30,7 +30,7 @@ interface CheckoutSessionResponse {
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function formatVND(amount: number): string {
-  return new Intl.NumberFormat("vi-VN").format(amount) + "đ";
+  return `${new Intl.NumberFormat("vi-VN").format(amount)}đ`;
 }
 
 function formatCountdown(ms: number): string {
@@ -61,15 +61,12 @@ export function BillingCheckoutQR() {
     setCreating(true);
     setError(null);
     try {
-      const result = await apiClient.post<CheckoutSessionResponse>(
-        "/billing/checkout-session",
-        {
-          planCode: "PLUS",
-          billingCycle: "twelve_week",
-          returnUrl: `${window.location.origin}/billing/checkout`,
-          cancelUrl: `${window.location.origin}/billing/plan`,
-        },
-      );
+      const result = await apiClient.post<CheckoutSessionResponse>("/billing/checkout-session", {
+        planCode: "PLUS",
+        billingCycle: "twelve_week",
+        returnUrl: `${window.location.origin}/billing/checkout`,
+        cancelUrl: `${window.location.origin}/billing/plan`,
+      });
       if (result?.checkoutSessionId) {
         navigate(`/billing/checkout/${result.checkoutSessionId}`, { replace: true });
       }
@@ -84,9 +81,7 @@ export function BillingCheckoutQR() {
   // Fetch order status
   const fetchStatus = useCallback(async (oid: string) => {
     try {
-      const data = await apiClient.get<OrderStatusResponse>(
-        `/billing/order-status/${oid}`,
-      );
+      const data = await apiClient.get<OrderStatusResponse>(`/billing/order-status/${oid}`);
       if (data) {
         setOrder(data);
         if (data.expiresAt) {
@@ -151,12 +146,8 @@ export function BillingCheckoutQR() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
             <CheckCircle2 className="h-8 w-8 text-emerald-600" />
           </div>
-          <h2 className="text-xl font-bold text-emerald-800">
-            Thanh toán thành công!
-          </h2>
-          <p className="mt-2 text-sm text-emerald-700">
-            Gói Plus đã được kích hoạt. Chúc bạn có 12 tuần hiệu quả!
-          </p>
+          <h2 className="text-xl font-bold text-emerald-800">Thanh toán thành công!</h2>
+          <p className="mt-2 text-sm text-emerald-700">Gói Plus đã được kích hoạt. Chúc bạn có 12 tuần hiệu quả!</p>
           <button
             type="button"
             onClick={() => navigate("/12-week-system")}
@@ -178,12 +169,8 @@ export function BillingCheckoutQR() {
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
             <Clock className="h-8 w-8 text-amber-600" />
           </div>
-          <h2 className="text-xl font-bold text-amber-800">
-            Hết thời gian thanh toán
-          </h2>
-          <p className="mt-2 text-sm text-amber-700">
-            Đơn hàng đã hết hạn. Bạn có thể tạo đơn mới để tiếp tục.
-          </p>
+          <h2 className="text-xl font-bold text-amber-800">Hết thời gian thanh toán</h2>
+          <p className="mt-2 text-sm text-amber-700">Đơn hàng đã hết hạn. Bạn có thể tạo đơn mới để tiếp tục.</p>
           <button
             type="button"
             onClick={() => navigate("/billing/checkout")}
@@ -227,9 +214,7 @@ export function BillingCheckoutQR() {
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-          <p className="text-sm text-slate-500">
-            {creating ? "Đang tạo đơn hàng..." : "Đang tải..."}
-          </p>
+          <p className="text-sm text-slate-500">{creating ? "Đang tạo đơn hàng..." : "Đang tải..."}</p>
         </div>
       </div>
     );
@@ -245,9 +230,7 @@ export function BillingCheckoutQR() {
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
             <QrCode className="h-6 w-6 text-indigo-600" />
           </div>
-          <h1 className="text-xl font-bold text-slate-900">
-            Nâng cấp gói Plus
-          </h1>
+          <h1 className="text-xl font-bold text-slate-900">Nâng cấp gói Plus</h1>
           <p className="mt-1 text-2xl font-bold text-indigo-600">
             {formatVND(order.amount)}
             <span className="ml-1 text-sm font-normal text-slate-500">/ chu kỳ 12 tuần</span>
@@ -304,7 +287,8 @@ export function BillingCheckoutQR() {
         {/* Warning */}
         <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
           <p className="text-xs font-medium text-amber-800">
-            Quan trọng: Vui lòng <strong>không sửa nội dung chuyển khoản</strong>. Hệ thống sẽ tự động xác nhận dựa trên nội dung này.
+            Quan trọng: Vui lòng <strong>không sửa nội dung chuyển khoản</strong>. Hệ thống sẽ tự động xác nhận dựa trên
+            nội dung này.
           </p>
         </div>
 
@@ -312,15 +296,9 @@ export function BillingCheckoutQR() {
         <div className="mb-6 text-center">
           <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2">
             <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
-            <span className="text-sm font-medium text-indigo-700">
-              Đang chờ xác nhận...
-            </span>
+            <span className="text-sm font-medium text-indigo-700">Đang chờ xác nhận...</span>
           </div>
-          {timeLeft > 0 && (
-            <p className="mt-2 text-xs text-slate-500">
-              Còn {formatCountdown(timeLeft)} để thanh toán
-            </p>
-          )}
+          {timeLeft > 0 && <p className="mt-2 text-xs text-slate-500">Còn {formatCountdown(timeLeft)} để thanh toán</p>}
         </div>
 
         {/* Instructions */}
@@ -328,7 +306,9 @@ export function BillingCheckoutQR() {
           <h3 className="text-sm font-semibold text-slate-700">Hướng dẫn:</h3>
           <ol className="list-inside list-decimal space-y-1 text-sm text-slate-600">
             <li>Mở app ngân hàng trên điện thoại</li>
-            <li>Chọn <strong>Quét mã QR</strong> hoặc <strong>Chuyển khoản</strong></li>
+            <li>
+              Chọn <strong>Quét mã QR</strong> hoặc <strong>Chuyển khoản</strong>
+            </li>
             <li>Quét mã QR ở trên (thông tin sẽ được điền sẵn)</li>
             <li>Xác nhận chuyển khoản</li>
             <li>Hệ thống sẽ tự động kích hoạt gói Plus trong vài giây</li>
@@ -382,11 +362,7 @@ function InfoRow({
           className="rounded p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
           title="Sao chép"
         >
-          {isCopied ? (
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-          ) : (
-            <Copy className="h-3.5 w-3.5" />
-          )}
+          {isCopied ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
         </button>
       </div>
     </div>

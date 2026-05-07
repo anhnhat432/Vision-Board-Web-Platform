@@ -4,8 +4,8 @@ import { Schema, model } from "mongoose";
  * Provider-agnostic subscription model.
  *
  * This model stores the backend source of truth for a user's billing
- * subscription. It is designed to work with any future provider (Stripe,
- * Paddle, VNPay, MoMo, PayOS, etc.) without hardcoding provider-specific
+ * subscription. It is designed to work with supported providers (Casso,
+ * VNPay, MoMo, PayOS, etc.) without hardcoding provider-specific
  * fields.
  *
  * For MVP demo mode, subscriptions can be created with source "mock" or

@@ -237,11 +237,21 @@ describe("POST /api/billing/checkout-session", () => {
   beforeEach(() => {
     _resetAdapterCacheForTesting();
     delete process.env.BILLING_PROVIDER;
+    delete process.env.CASSO_WEBHOOK_SECRET;
+    delete process.env.CASSO_BANK_ACCOUNT;
+    delete process.env.CASSO_BANK_NAME;
+    delete process.env.CASSO_ACCOUNT_NAME;
+    delete process.env.PLUS_PRICE_VND;
   });
 
   afterEach(() => {
     _resetAdapterCacheForTesting();
     delete process.env.BILLING_PROVIDER;
+    delete process.env.CASSO_WEBHOOK_SECRET;
+    delete process.env.CASSO_BANK_ACCOUNT;
+    delete process.env.CASSO_BANK_NAME;
+    delete process.env.CASSO_ACCOUNT_NAME;
+    delete process.env.PLUS_PRICE_VND;
   });
 
   it("returns 401 when no auth token is provided", async () => {
@@ -325,7 +335,18 @@ describe("POST /api/billing/checkout-session", () => {
   });
 
   it("returns 503 when provider is configured but not implemented", async () => {
-    process.env.BILLING_PROVIDER = "stripe";
+    process.env.BILLING_PROVIDER = "payos";
+    const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/checkout-session", {
+      token: "checkout-token",
+      body: validBody,
+    });
+
+    assert.equal(response.status, 503);
+    assert.equal(response.body.errorCode, "provider_not_configured");
+  });
+
+  it("returns 503 when Casso provider env is missing", async () => {
+    process.env.BILLING_PROVIDER = "casso";
     const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/checkout-session", {
       token: "checkout-token",
       body: validBody,

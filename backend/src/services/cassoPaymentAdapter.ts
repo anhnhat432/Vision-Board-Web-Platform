@@ -27,6 +27,7 @@ import type {
   WebhookVerificationInput,
   WebhookVerificationResult,
 } from "./paymentProviderAdapter";
+import { PaymentProviderNotConfiguredError } from "./paymentProviderAdapter";
 import type { BillingSubscriptionStatus } from "./billingService";
 import { PaymentOrderModel } from "../models/PaymentOrderModel";
 
@@ -149,7 +150,15 @@ export function createCassoPaymentAdapter(): PaymentProviderAdapter {
     async createCheckoutSession(
       input: CreateCheckoutSessionInput,
     ): Promise<CheckoutSessionResult> {
+      if (!isCassoConfigured()) {
+        throw new PaymentProviderNotConfiguredError("casso");
+      }
+
       const config = getCassoConfig();
+      if (!Number.isFinite(config.plusPriceVnd) || config.plusPriceVnd < 1000) {
+        throw new PaymentProviderNotConfiguredError("casso");
+      }
+
       const bankBin = BANK_BIN_MAP[config.bankName] ?? config.bankName;
       const orderId = generateOrderId();
       const amount = config.plusPriceVnd;

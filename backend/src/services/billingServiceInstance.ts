@@ -1,9 +1,9 @@
 /**
  * Singleton BillingService instance.
  *
- * Currently wired with in-memory repositories so the billing domain
- * can be tested end-to-end without MongoDB. When the Mongo repository
- * implementations are added, swap the constructors here.
+ * Production is wired to Mongo repositories so paid entitlements survive
+ * server restarts. Tests and explicit local-memory runs can still use the
+ * in-memory repositories below.
  *
  * This file exists to decouple the service class from its repository
  * wiring, following the same pattern as syncMutationService.ts.
@@ -20,6 +20,7 @@ import {
   type BillingSubscriptionRepository,
   type ProviderSubscriptionEvent,
 } from "./billingService";
+import { createMongoBillingRepositories } from "../repositories/mongo/MongoBillingRepositories";
 
 // ─── In-Memory Repository (will be replaced by Mongo repositories) ───────────
 
@@ -189,7 +190,26 @@ function createInMemoryEventRepo(): BillingEventRepository {
 
 // ─── Singleton ───────────────────────────────────────────────────────────────
 
+function isRunningNodeTest(): boolean {
+  return process.argv.some((arg) => /\.test\.(js|ts)$/.test(arg));
+}
+
+function shouldUseMemoryBillingRepositories(): boolean {
+  const repositoryMode = process.env.BILLING_REPOSITORY?.trim().toLowerCase();
+  if (repositoryMode === "mongo") return false;
+  if (repositoryMode === "memory") return true;
+  if (process.env.NODE_ENV === "production") return false;
+  return process.env.NODE_ENV === "test" || isRunningNodeTest() || process.env.NODE_ENV !== "production";
+}
+
+const repositories = shouldUseMemoryBillingRepositories()
+  ? {
+      subscriptionRepo: createInMemorySubscriptionRepo(),
+      eventRepo: createInMemoryEventRepo(),
+    }
+  : createMongoBillingRepositories();
+
 export const billingService = new BillingService(
-  createInMemorySubscriptionRepo(),
-  createInMemoryEventRepo(),
+  repositories.subscriptionRepo,
+  repositories.eventRepo,
 );

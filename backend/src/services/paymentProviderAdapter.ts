@@ -2,7 +2,7 @@
  * Payment Provider Adapter — Provider-Agnostic Interface
  *
  * This module defines the adapter contract that any payment provider
- * (Stripe, PayOS, MoMo, VNPay, etc.) must implement to integrate
+ * (Casso, PayOS, MoMo, VNPay, etc.) must implement to integrate
  * with the billing domain.
  *
  * Design principles:
@@ -71,7 +71,7 @@ export interface WebhookVerificationResult {
  * The adapter transforms provider-specific payloads into this shape.
  */
 export interface NormalizedProviderEvent {
-  /** Provider name (e.g. "stripe", "payos", "momo"). */
+  /** Provider name (e.g. "casso", "payos", "momo"). */
   provider: string;
   /** Provider's unique event ID for idempotency. */
   providerEventId: string;
@@ -144,7 +144,7 @@ export type ProviderStatusMapper = (
  * a "not supported" result or throw a descriptive error.
  */
 export interface PaymentProviderAdapter {
-  /** Provider identifier (e.g. "stripe", "payos", "momo", "mock"). */
+  /** Provider identifier (e.g. "casso", "payos", "momo", "mock"). */
   readonly providerId: string;
 
   /** Whether this adapter is fully configured and ready to use. */
