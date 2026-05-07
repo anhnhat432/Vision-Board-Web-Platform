@@ -76,7 +76,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "12-week-setup",
-        ...lazyRoute(() => import("../features/plan12week/pages/12WeekSetup"), "TwelveWeekSetup"),
+        ...lazyRoute(() => import("../features/plan12week/pages/12WeekSetup.tsx"), "TwelveWeekSetup"),
       },
       {
         path: "12-week-dashboard",
@@ -95,7 +95,7 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            Component: lazy(() => import("../features/plan12week/pages/12WeekSystem").then((m) => ({ default: m.TwelveWeekSystem }))),
+            Component: lazy(() => import("../features/plan12week/pages/12WeekSystem.tsx").then((m) => ({ default: m.TwelveWeekSystem }))),
           },
           {
             path: "settings",

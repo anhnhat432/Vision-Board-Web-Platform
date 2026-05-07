@@ -27,7 +27,7 @@ import {
   updateWeekRevisionInLink,
 } from "../persistence/planLinkStore";
 import { usePlanSyncQueue } from "./usePlanSyncQueue";
-import type { SyncQueueItem, SyncStatus } from "../persistence/syncQueueStore";
+import type { SyncQueueItem, SyncType } from "../persistence/syncQueueStore";
 
 type SnapshotStatus = "idle" | "success" | "partial" | "error";
 
@@ -225,7 +225,6 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
   const [error, setError] = useState<AppError | null>(null);
   const [lastSnapshot, setLastSnapshot] = useState<PlanExecutionSyncSnapshot | null>(null);
   const [conflicts, setConflicts] = useState<ConflictInfo[]>([]);
-  const [syncQueueLoading, setSyncQueueLoading] = useState(false);
 
   // runAction wrapper for API calls with conflict detection
   const runAction = useCallback(async <T,>(action: () => Promise<T>, conflictMeta?: { entityType: ConflictInfo["entityType"]; entityId: string }): Promise<T | null> => {
@@ -482,63 +481,202 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     return Boolean(updatedWeek);
   }, [runAction]);
 
+  const syncTaskToggleNow = useCallback(async (taskId: string, completed: boolean): Promise<boolean> => {
+    if (!goalId || !system || isDemoMode()) return true;
+
+    const task = system.taskInstances.find((item) => item.id === taskId);
+    if (!task) return true;
+
+    const details = await ensurePlanDetails(goalId, system);
+    if (!details) return false;
+
+    const taskSyncResult = await syncTaskSnapshot(
+      goalId,
+      details,
+      { ...task, completed },
+      { allowStatusDowngrade: true },
+    );
+    if (taskSyncResult === "failed" || taskSyncResult === "conflict") return false;
+
+    if (!completed) return true;
+
+    const week = findWeekDetails(details, task.weekNumber);
+    if (!week) return true;
+
+    return syncCompletedTaskMetricForWeek(goalId, week.id, { ...task, completed });
+  }, [goalId, system, ensurePlanDetails, syncTaskSnapshot, syncCompletedTaskMetricForWeek]);
+
+  const syncDailyCheckInNow = useCallback(async (input: SyncDailyCheckInInput): Promise<boolean> => {
+    if (!goalId || !system || isDemoMode()) return true;
+
+    const details = await ensurePlanDetails(goalId, system);
+    if (!details) return false;
+
+    const weekId = getWeekIdForGoal(goalId, input.weekNumber) ?? findWeekDetails(details, input.weekNumber)?.id;
+    if (!weekId) return true;
+
+    return syncDailyCheckInForWeek(goalId, weekId, input);
+  }, [goalId, system, ensurePlanDetails, syncDailyCheckInForWeek]);
+
+  const syncWeeklyReviewNow = useCallback(async (input: SyncWeeklyReviewInput): Promise<boolean> => {
+    if (!goalId || !system || isDemoMode()) return true;
+
+    const details = await ensurePlanDetails(goalId, system);
+    if (!details) return false;
+
+    const weekId = getWeekIdForGoal(goalId, input.weekNumber) ?? findWeekDetails(details, input.weekNumber)?.id;
+    if (!weekId) return true;
+
+    return syncWeeklyReviewForWeek(weekId, input);
+  }, [goalId, system, ensurePlanDetails, syncWeeklyReviewForWeek]);
+
+  const syncPlanSnapshotNow = useCallback(async (
+    systemToSync: TwelveWeekSystem | null | undefined,
+  ): Promise<PlanExecutionSyncSnapshot> => {
+    const counter: SyncCounter = { syncedCount: 0, skippedCount: 0, failedCount: 0, conflictCount: 0 };
+
+    if (!goalId || !systemToSync || isDemoMode()) {
+      const snapshot = createSnapshot(counter, null, "idle");
+      setLastSnapshot(snapshot);
+      return snapshot;
+    }
+
+    const details = await ensurePlanDetails(goalId, systemToSync);
+    if (!details) {
+      counter.failedCount += 1;
+      const snapshot = createSnapshot(counter, null, "error");
+      setLastSnapshot(snapshot);
+      return snapshot;
+    }
+
+    for (const weekPlan of systemToSync.weeklyPlans) {
+      const week = findWeekDetails(details, weekPlan.weekNumber);
+      if (!week) {
+        counter.skippedCount += 1;
+        continue;
+      }
+
+      const focus = weekPlan.focus.trim();
+      const expectedOutput = weekPlan.milestone.trim();
+      if (week.focus === focus && week.expectedOutput === expectedOutput) {
+        counter.skippedCount += 1;
+        continue;
+      }
+
+      const updatedWeek = await runAction(
+        () => updateWeek(week.id, { focus, expectedOutput, baseRevision: getWeekRemoteRevision(goalId, week.id) }),
+        { entityType: "week", entityId: week.id },
+      );
+      if (updatedWeek) {
+        updateWeekRevisionInLink(goalId, updatedWeek.id, (updatedWeek as { revision?: number }).revision ?? 1);
+        counter.syncedCount += 1;
+      } else {
+        counter.failedCount += 1;
+      }
+    }
+
+    for (const task of systemToSync.taskInstances) {
+      const result = await syncTaskSnapshot(goalId, details, task);
+      if (result === "synced") {
+        counter.syncedCount += 1;
+      } else if (result === "skipped") {
+        counter.skippedCount += 1;
+      } else if (result === "conflict") {
+        counter.conflictCount += 1;
+      } else {
+        counter.failedCount += 1;
+      }
+
+      const weekId = getWeekIdForGoal(goalId, task.weekNumber) ?? findWeekDetails(details, task.weekNumber)?.id;
+      if (weekId && task.completed) {
+        const metricResult = await syncCompletedTaskMetricForWeek(goalId, weekId, task);
+        if (metricResult) {
+          counter.syncedCount += 1;
+        } else {
+          counter.failedCount += 1;
+        }
+      }
+    }
+
+    for (const checkIn of systemToSync.dailyCheckIns) {
+      const checkInDate = new Date(checkIn.date);
+      const weekNumber = getTwelveWeekCurrentWeek(
+        systemToSync,
+        Number.isFinite(checkInDate.valueOf()) ? checkInDate : new Date(),
+      );
+      const weekId = getWeekIdForGoal(goalId, weekNumber) ?? findWeekDetails(details, weekNumber)?.id;
+      if (!weekId) {
+        counter.skippedCount += 1;
+        continue;
+      }
+
+      const synced = await syncDailyCheckInForWeek(goalId, weekId, {
+        weekNumber,
+        date: checkIn.date,
+        didWorkToday: checkIn.didWorkToday,
+      });
+      if (synced) {
+        counter.syncedCount += 1;
+      } else {
+        counter.failedCount += 1;
+      }
+    }
+
+    for (const review of systemToSync.weeklyReviews.filter(hasReviewContent)) {
+      const weekId = getWeekIdForGoal(goalId, review.weekNumber) ?? findWeekDetails(details, review.weekNumber)?.id;
+      if (!weekId) {
+        counter.skippedCount += 1;
+        continue;
+      }
+
+      const synced = await syncWeeklyReviewForWeek(weekId, {
+        weekNumber: review.weekNumber,
+        executionScore: getReviewExecutionScore(systemToSync, review.weekNumber, review.leadCompletionPercent),
+        reflection: review.biggestOutputThisWeek.trim() || undefined,
+        adjustments: review.nextWeekPriority.trim() || undefined,
+      });
+      if (synced) {
+        counter.syncedCount += 1;
+      } else {
+        counter.failedCount += 1;
+      }
+    }
+
+    const snapshot = createSnapshot(counter, details.plan.id);
+    setLastSnapshot(snapshot);
+    return snapshot;
+  }, [
+    goalId,
+    ensurePlanDetails,
+    syncTaskSnapshot,
+    syncCompletedTaskMetricForWeek,
+    syncDailyCheckInForWeek,
+    syncWeeklyReviewForWeek,
+    runAction,
+  ]);
+
   // Internal executeSync function for queue processor
   const executeSyncInternal = useCallback(async (item: SyncQueueItem): Promise<unknown> => {
-    const { syncType, payload, entityId, entityType } = item;
+    const { syncType, payload } = item;
 
     switch (syncType) {
       case "task_completed": {
         const taskPayload = payload as { taskId: string; completed: boolean };
-        const task = system?.taskInstances.find((t) => t.id === taskPayload.taskId);
-        if (!task || !goalId || !system) return true;
-
-        const details = await ensurePlanDetails(goalId, system);
-        if (!details) return false;
-
-        const taskSyncResult = await syncTaskSnapshot(
-          goalId,
-          details,
-          { ...task, completed: taskPayload.completed },
-          { allowStatusDowngrade: true },
-        );
-        if (taskSyncResult === "failed") throw new Error("Task sync failed");
-
-        if (!taskPayload.completed) return true;
-
-        const week = findWeekDetails(details, task.weekNumber);
-        if (!week) return true;
-
-        const metricResult = await syncCompletedTaskMetricForWeek(goalId, week.id, { ...task, completed: taskPayload.completed });
-        if (!metricResult) throw new Error("Metric sync failed");
+        const result = await syncTaskToggleNow(taskPayload.taskId, taskPayload.completed);
+        if (!result) throw new Error("Task sync failed");
         return true;
       }
 
       case "daily_checkin": {
         const checkinPayload = payload as { weekNumber: number; date: string; didWorkToday: boolean };
-        if (!goalId || !system) return true;
-
-        const details = await ensurePlanDetails(goalId, system);
-        if (!details) return false;
-
-        const weekId = getWeekIdForGoal(goalId, checkinPayload.weekNumber) ?? findWeekDetails(details, checkinPayload.weekNumber)?.id;
-        if (!weekId) return true;
-
-        const result = await syncDailyCheckInForWeek(goalId, weekId, checkinPayload);
+        const result = await syncDailyCheckInNow(checkinPayload);
         if (!result) throw new Error("Daily check-in sync failed");
         return true;
       }
 
       case "weekly_review": {
         const reviewPayload = payload as { weekNumber: number; executionScore: number; reflection?: string; adjustments?: string };
-        if (!goalId || !system) return true;
-
-        const details = await ensurePlanDetails(goalId, system);
-        if (!details) return false;
-
-        const weekId = getWeekIdForGoal(goalId, reviewPayload.weekNumber) ?? findWeekDetails(details, reviewPayload.weekNumber)?.id;
-        if (!weekId) return true;
-
-        const result = await syncWeeklyReviewForWeek(weekId, reviewPayload);
+        const result = await syncWeeklyReviewNow(reviewPayload);
         if (!result) throw new Error("Weekly review sync failed");
         return true;
       }
@@ -546,99 +684,11 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
       case "plan_snapshot": {
         const snapshotPayload = payload as { system?: TwelveWeekSystem };
         const systemToSync = snapshotPayload.system ?? system;
-        if (!goalId || !systemToSync) return true;
-
-        const details = await ensurePlanDetails(goalId, systemToSync);
-        if (!details) return false;
-
-        let syncedCount = 0;
-        let failedCount = 0;
-
-        // Sync weekly plans
-        for (const weekPlan of systemToSync.weeklyPlans) {
-          const week = findWeekDetails(details, weekPlan.weekNumber);
-          if (!week) continue;
-
-          const focus = weekPlan.focus.trim();
-          const expectedOutput = weekPlan.milestone.trim();
-          if (week.focus === focus && week.expectedOutput === expectedOutput) continue;
-
-          const updatedWeek = await runAction(
-            () => updateWeek(week.id, { focus, expectedOutput, baseRevision: getWeekRemoteRevision(goalId, week.id) }),
-            { entityType: "week", entityId: week.id },
-          );
-          if (updatedWeek) {
-            updateWeekRevisionInLink(goalId, updatedWeek.id, (updatedWeek as { revision?: number }).revision ?? 1);
-            syncedCount++;
-          } else {
-            failedCount++;
-          }
+        const snapshot = await syncPlanSnapshotNow(systemToSync);
+        if (snapshot.failedCount > 0 || snapshot.status === "error") {
+          throw new Error(`Plan snapshot had ${snapshot.failedCount} failures`);
         }
-
-        // Sync tasks
-        for (const task of systemToSync.taskInstances) {
-          const result = await syncTaskSnapshot(goalId, details, task);
-          if (result === "failed" || result === "conflict") {
-            failedCount++;
-          } else {
-            syncedCount++;
-          }
-
-          const weekId = getWeekIdForGoal(goalId, task.weekNumber) ?? findWeekDetails(details, task.weekNumber)?.id;
-          if (weekId && task.completed) {
-            const metricResult = await syncCompletedTaskMetricForWeek(goalId, weekId, task);
-            if (metricResult) {
-              syncedCount++;
-            } else {
-              failedCount++;
-            }
-          }
-        }
-
-        // Sync check-ins
-        for (const checkIn of systemToSync.dailyCheckIns) {
-          const checkInDate = new Date(checkIn.date);
-          const weekNumber = getTwelveWeekCurrentWeek(
-            systemToSync,
-            Number.isFinite(checkInDate.valueOf()) ? checkInDate : new Date(),
-          );
-          const weekId = getWeekIdForGoal(goalId, weekNumber) ?? findWeekDetails(details, weekNumber)?.id;
-          if (!weekId) continue;
-
-          const synced = await syncDailyCheckInForWeek(goalId, weekId, {
-            weekNumber,
-            date: checkIn.date,
-            didWorkToday: checkIn.didWorkToday,
-          });
-          if (synced) {
-            syncedCount++;
-          } else {
-            failedCount++;
-          }
-        }
-
-        // Sync reviews
-        for (const review of systemToSync.weeklyReviews.filter(hasReviewContent)) {
-          const weekId = getWeekIdForGoal(goalId, review.weekNumber) ?? findWeekDetails(details, review.weekNumber)?.id;
-          if (!weekId) continue;
-
-          const synced = await syncWeeklyReviewForWeek(weekId, {
-            weekNumber: review.weekNumber,
-            executionScore: getReviewExecutionScore(systemToSync, review.weekNumber, review.leadCompletionPercent),
-            reflection: review.biggestOutputThisWeek.trim() || undefined,
-            adjustments: review.nextWeekPriority.trim() || undefined,
-          });
-          if (synced) {
-            syncedCount++;
-          } else {
-            failedCount++;
-          }
-        }
-
-        if (failedCount > 0) {
-          throw new Error(`Plan snapshot had ${failedCount} failures`);
-        }
-        return true;
+        return snapshot;
       }
 
       case "metric_upsert":
@@ -650,14 +700,11 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
         return true;
     }
   }, [
-    goalId,
     system,
-    ensurePlanDetails,
-    syncTaskSnapshot,
-    syncCompletedTaskMetricForWeek,
-    syncDailyCheckInForWeek,
-    syncWeeklyReviewForWeek,
-    runAction,
+    syncTaskToggleNow,
+    syncDailyCheckInNow,
+    syncWeeklyReviewNow,
+    syncPlanSnapshotNow,
   ]);
 
   // Use persistent sync queue — must be after executeSyncInternal is defined
@@ -669,52 +716,68 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
 
   const loading = pendingRequests > 0 || syncQueue.loading;
 
-  // Public enqueue function - wraps old action pattern
-  const enqueueSyncAction = useCallback(<T,>(
-    syncType: "task_completed" | "daily_checkin" | "weekly_review" | "plan_snapshot" | "metric_upsert",
+  const enqueueRetry = useCallback((
+    syncType: SyncType,
     payload: unknown,
     entityId?: string,
     entityType?: "task" | "checkin" | "review" | "plan"
-  ): Promise<T | null> => {
+  ): void => {
     if (!goalId || !enabled || isDemoMode()) {
-      return Promise.resolve(null);
+      return;
     }
 
-    return syncQueue.enqueueSyncAction(syncType, payload, entityId, entityType) as Promise<T | null>;
-  }, [goalId, enabled, syncQueue.enqueueSyncAction, executeSyncInternal]);
+    void syncQueue.enqueueSyncAction(syncType, payload, entityId, entityType);
+  }, [goalId, enabled, syncQueue.enqueueSyncAction]);
 
   // Sync task toggle action
-  const syncTaskToggle = useCallback((taskId: string, completed: boolean): Promise<boolean> => {
+  const syncTaskToggle = useCallback(async (taskId: string, completed: boolean): Promise<boolean> => {
     if (!goalId || !system || !enabled) return Promise.resolve(true);
 
-    return enqueueSyncAction<boolean>("task_completed", { taskId, completed }, taskId, "task") as Promise<boolean>;
-  }, [goalId, system, enabled, enqueueSyncAction]);
+    const synced = await syncTaskToggleNow(taskId, completed);
+    if (!synced) {
+      enqueueRetry("task_completed", { taskId, completed }, taskId, "task");
+    }
+    return synced;
+  }, [goalId, system, enabled, syncTaskToggleNow, enqueueRetry]);
 
   // Sync weekly review action
-  const syncWeeklyReview = useCallback((input: SyncWeeklyReviewInput): Promise<boolean> => {
+  const syncWeeklyReview = useCallback(async (input: SyncWeeklyReviewInput): Promise<boolean> => {
     if (!goalId || !system || !enabled) return Promise.resolve(true);
 
-    return enqueueSyncAction<boolean>("weekly_review", input, undefined, "review") as Promise<boolean>;
-  }, [goalId, system, enabled, enqueueSyncAction]);
+    const synced = await syncWeeklyReviewNow(input);
+    if (!synced) {
+      enqueueRetry("weekly_review", input, undefined, "review");
+    }
+    return synced;
+  }, [goalId, system, enabled, syncWeeklyReviewNow, enqueueRetry]);
 
   // Sync daily check-in action
-  const syncDailyCheckIn = useCallback((input: SyncDailyCheckInInput): Promise<boolean> => {
+  const syncDailyCheckIn = useCallback(async (input: SyncDailyCheckInInput): Promise<boolean> => {
     if (!goalId || !system || !enabled) return Promise.resolve(true);
 
-    return enqueueSyncAction<boolean>("daily_checkin", input, undefined, "checkin") as Promise<boolean>;
-  }, [goalId, system, enabled, enqueueSyncAction]);
+    const synced = await syncDailyCheckInNow(input);
+    if (!synced) {
+      enqueueRetry("daily_checkin", input, undefined, "checkin");
+    }
+    return synced;
+  }, [goalId, system, enabled, syncDailyCheckInNow, enqueueRetry]);
 
   // Sync local snapshot action
-  const syncLocalSnapshot = useCallback((input: SyncLocalSnapshotInput = {}): Promise<PlanExecutionSyncSnapshot> => {
+  const syncLocalSnapshot = useCallback(async (input: SyncLocalSnapshotInput = {}): Promise<PlanExecutionSyncSnapshot> => {
     if (!goalId || !system || !enabled) {
       const counter: SyncCounter = { syncedCount: 0, skippedCount: 0, failedCount: 0, conflictCount: 0 };
       const snapshot = createSnapshot(counter, null, "idle");
-      return Promise.resolve(snapshot);
+      setLastSnapshot(snapshot);
+      return snapshot;
     }
 
     const systemToSync = input.system ?? system;
-    return enqueueSyncAction<PlanExecutionSyncSnapshot>("plan_snapshot", { system: systemToSync }, undefined, "plan") as Promise<PlanExecutionSyncSnapshot>;
-  }, [goalId, system, enabled, enqueueSyncAction]);
+    const snapshot = await syncPlanSnapshotNow(systemToSync);
+    if (snapshot.failedCount > 0 || snapshot.status === "error") {
+      enqueueRetry("plan_snapshot", { system: systemToSync }, undefined, "plan");
+    }
+    return snapshot;
+  }, [goalId, system, enabled, syncPlanSnapshotNow, enqueueRetry]);
 
   const clearError = useCallback(() => {
     setError(null);

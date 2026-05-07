@@ -243,14 +243,19 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 - **Status:** [x] Completed
 - **Prompt:** Prompt 13
 - **Files changed:**
-  - `src/app/pages/Dashboard.tsx` - closed `Tổng quan nhanh` stats details by default (was always open), reduced secondary section spacing `space-y-6` → `space-y-5`
-  - `src/app/pages/Onboarding.tsx` - consolidated 3 action buttons to 2 (removed redundant "Xem bảng điều khiển" outline button), reduced `flex-wrap gap-3` to `flex-col gap-2`
+  - `src/app/pages/Dashboard.tsx` - reduced hero spacing (space-y-6→4), card padding, task progress height, grid gaps
+  - `src/app/pages/Onboarding.tsx` - tightened welcome hero and assessment sidebar spacing
+  - `src/app/pages/12WeekSetup.tsx` - reduced hero badges from 5 to 3, trimmed CardHeader space-y
+  - `src/app/pages/12WeekSetup/components/SetupStepShell.tsx` - CardHeader space-y-4→3, step label space-y-2→1
+  - `src/app/pages/SMARTGoalSetup/components/SmartGoalStepShell.tsx` - made 5-item clarity checklist collapsible via details/summary
+  - `src/app/pages/FeasibilityCheck/components/FeasibilityStepShell.tsx` - removed dead hidden card (~20 unused DOM nodes)
 - **Notes:**
   - Most pages already pass density audit: SMART Goal (step shell with clarity checklist, clear progress), Feasibility Check (4 steps with progress bar), 12WeekSetup (4 steps with step indicators), Onboarding assessment (clean slider layout), 12WeekSystem (already simplified in Prompt 3)
   - Dashboard had redundant stats (overview cards overlap with hero stats) and excessive 6-unit vertical spacing in secondary sections
   - Onboarding welcome had 3 buttons where 2 suffice (primary CTA + ghost save-draft)
   - Progressive disclosure: "Tổng quan nhanh" and "Phân tích mở rộng" are `details` elements already collapsed by default on mobile
   - Navigation clarity: all setup flows have step indicators ("Bước X / N") with Back/Next buttons
+  - SmartGoalStepShell clarity checklist: always-visible 5-item grid → collapsible details with inline progress bar
   - Max 1 primary action per screen in setup flows
 - **Verified:** [x] npm run typecheck / [x] npm run build / [ ] Manual mobile/desktop test
 

@@ -41,6 +41,20 @@ export interface MutationQueueManualSyncStatus {
   retryOnReconnectEnabled: boolean;
 }
 
+export interface PlanExecutionQueueStatus {
+  loading: boolean;
+  goalId: string | null;
+  queueSummary: {
+    totalCount: number;
+    pendingCount: number;
+    inFlightCount: number;
+    failedOrRetryableCount: number;
+    succeededCount: number;
+  };
+  lastError: { message: string; code: string } | null;
+  retryInSeconds: number | null;
+}
+
 export interface TwelveWeekSettingsTabProps {
   system: TwelveWeekSystem;
   backendConnectionStatus: BackendConnectionStatus;

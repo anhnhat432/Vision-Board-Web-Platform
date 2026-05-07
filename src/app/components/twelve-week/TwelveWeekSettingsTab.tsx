@@ -1,6 +1,7 @@
 import { FeedbackDialog } from "../FeedbackDialog";
 import { FunnelDiagnosticsPanel } from "./FunnelDiagnosticsPanel";
 import { TwelveWeekCycleSettingsPanel } from "./TwelveWeekCycleSettingsPanel";
+import { TwelveWeekDeviceAndSyncPanel } from "./TwelveWeekDeviceAndSyncPanel";
 import { SectionBlock } from "@/app/components/layout/SectionBlock";
 import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
 
@@ -18,6 +19,8 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           onTacticTypeChange={props.onTacticTypeChange}
         />
       </SectionBlock>
+
+      <TwelveWeekDeviceAndSyncPanel {...props} />
 
       <SectionBlock title="Chẩn đoán & Góp ý" description="Thông tin chẩn đoán nội bộ và gửi feedback">
         <FunnelDiagnosticsPanel />
