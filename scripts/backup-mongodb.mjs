@@ -17,7 +17,7 @@ const retentionDays = parsePositiveInt(
   getOptionValue("--retention-days") ?? process.env.MONGODB_BACKUP_RETENTION_DAYS,
   14,
 );
-const mongodumpBin = getOptionValue("--mongodump-bin") ?? process.env.MONGODUMP_BIN ?? "mongodump";
+const mongodumpBin = resolveMongodumpBin();
 
 function hasFlag(name) {
   return args.includes(name);
@@ -31,6 +31,19 @@ function getOptionValue(name) {
   if (index !== -1 && args[index + 1]) return args[index + 1].trim();
 
   return undefined;
+}
+
+function resolveMongodumpBin() {
+  const configuredBin = getOptionValue("--mongodump-bin") ?? process.env.MONGODUMP_BIN;
+  if (configuredBin?.trim()) return configuredBin.trim();
+
+  if (process.platform === "win32") {
+    const programFiles = process.env.ProgramFiles ?? "C:\\Program Files";
+    const defaultMongoToolsBin = path.join(programFiles, "MongoDB", "Tools", "100", "bin", "mongodump.exe");
+    if (existsSync(defaultMongoToolsBin)) return defaultMongoToolsBin;
+  }
+
+  return "mongodump";
 }
 
 function parsePositiveInt(rawValue, fallback) {
@@ -148,6 +161,7 @@ function printBackupPlan({ uri, archivePath }) {
   console.log(`Output directory: ${outputDir}`);
   console.log(`Archive path: ${archivePath}`);
   console.log(`Retention: ${noPrune ? "disabled" : `${retentionDays} day(s)`}`);
+  console.log(`mongodump: ${mongodumpBin}`);
 }
 
 function main() {
