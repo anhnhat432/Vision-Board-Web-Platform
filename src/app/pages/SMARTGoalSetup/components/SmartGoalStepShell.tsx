@@ -1,14 +1,12 @@
 import type { ReactNode, RefObject } from "react";
 import { motion } from "motion/react";
 import { useReducedMotion } from "../../../components/ui/use-reduced-motion";
-import { ArrowLeft, ArrowRight, CircleAlert, CheckCircle2, Lightbulb, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronDown, CircleAlert, Lightbulb, Sparkles } from "lucide-react";
 
 import type { QualityLevel } from "@/lib/smart-goal/quality";
 
 import { Alert, AlertDescription, AlertTitle } from "../../../components/ui/alert";
-import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
-import { Progress } from "../../../components/ui/progress";
 import { QualityFeedbackPanel } from "./QualityFeedbackPanel";
 import { ReviewStep } from "./ReviewStep";
 import type { GoalClarityItem, SmartGoalSummaryRow, SmartStepDefinition, SmartStepKey } from "../types";
@@ -118,23 +116,21 @@ export function SmartGoalStepShell({
         </div>
       </div>
 
-      <div className="rounded-[24px] border border-slate-200 bg-white/82 p-4 shadow-[0_16px_36px_-34px_rgba(15,23,42,0.22)]">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+      <details className="rounded-[24px] border border-slate-200 bg-white/82 p-4 shadow-[0_16px_36px_-34px_rgba(15,23,42,0.22)]">
+        <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 text-sm font-semibold text-slate-950">
           <div>
-            <p className="text-sm font-semibold text-slate-950">Độ rõ của mục tiêu</p>
-            <p className="mt-1 text-sm leading-6 text-slate-500">
-              Hoàn thành để mục tiêu sẵn sàng cho kế hoạch 12 tuần.
+            <p className="font-semibold text-slate-950">Độ rõ của mục tiêu</p>
+            <p className="mt-1 font-normal text-slate-500">
+              {clarityDoneCount}/{clarityItems.length} bước đã hoàn thành
             </p>
           </div>
-          <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">
-            {clarityDoneCount}/{clarityItems.length}
-          </Badge>
-        </div>
-        <Progress
-          value={clarityProgress}
-          className="mt-4 h-2"
-          aria-label={`Độ rõ của mục tiêu: ${clarityDoneCount}/${clarityItems.length}`}
-        />
+          <div className="flex items-center gap-3">
+            <div className="h-2 w-32 overflow-hidden rounded-full bg-slate-100">
+              <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${clarityProgress}%` }} />
+            </div>
+            <ChevronDown className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180" />
+          </div>
+        </summary>
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
           {clarityItems.map((item) => (
             <button
@@ -149,11 +145,11 @@ export function SmartGoalStepShell({
             >
               <div className="flex items-start gap-2">
                 <span
-                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
-                    item.done ? "bg-emerald-600 text-white" : "bg-amber-50 text-amber-500"
+                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                    item.done ? "bg-emerald-600 text-white" : "bg-amber-200 text-amber-700"
                   }`}
                 >
-                  {item.done ? <CheckCircle2 className="h-3.5 w-3.5" /> : <CircleAlert className="h-3.5 w-3.5" />}
+                  {item.done ? "✓" : "!"}
                 </span>
                 <span>
                   <span className="block text-sm font-semibold text-slate-900">{item.label}</span>
@@ -163,7 +159,7 @@ export function SmartGoalStepShell({
             </button>
           ))}
         </div>
-      </div>
+      </details>
 
       {showReview ? (
         <>

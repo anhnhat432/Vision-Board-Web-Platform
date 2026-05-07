@@ -126,29 +126,6 @@ export function FeasibilityStepShell({
           </motion.div>
         </CardContent>
       </Card>
-
-      <div className="hidden">
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Mục đích của bài này</p>
-            <div className="mt-5 space-y-3">
-              {[
-                "Trả lời theo lịch sống thật, không theo phiên bản lý tưởng.",
-                "Biết mục tiêu hiện tại đang vừa sức hay quá tải.",
-                "Nhìn rõ độ sẵn sàng trước khi bước vào kế hoạch 12 tuần.",
-                "Giảm rủi ro đặt mục tiêu nghe hay nhưng khó duy trì.",
-              ].map((item) => (
-                <div
-                  key={item}
-                  className="rounded-[20px] border border-white/70 bg-white/72 px-4 py-3 text-sm leading-7 text-slate-600"
-                >
-                  {item}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }

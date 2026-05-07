@@ -123,8 +123,8 @@ export function Onboarding() {
             <CardContent className="relative p-4 sm:p-6 lg:p-7 xl:p-8">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_24%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.1),_transparent_24%)] opacity-90" />
 
-              <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.12fr)_360px]">
-                <div className="space-y-5 sm:space-y-6">
+              <div className="relative grid gap-5 xl:grid-cols-[minmax(0,1.12fr)_360px]">
+                <div className="space-y-3 sm:space-y-4">
                   {isReturning && (
                     <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
                       <span className="font-semibold text-slate-950">Bạn đã hoàn thành onboarding rồi.</span> Điểm số
@@ -257,7 +257,7 @@ export function Onboarding() {
           <CardContent className="relative p-4 sm:p-6 lg:p-7">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.1),_transparent_26%)] opacity-90" />
 
-            <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-6">
+              <div className="relative grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-5">
               <div className="space-y-4 sm:space-y-5">
                 <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-sm text-slate-600">
                   <Compass className="h-4 w-4" />
@@ -390,7 +390,7 @@ export function Onboarding() {
                   </div>
                 </div>
 
-                <div className="mt-5 hidden gap-3 sm:grid sm:grid-cols-3 xl:grid-cols-1">
+                <div className="mt-5 hidden gap-2 sm:grid sm:grid-cols-2 xl:grid-cols-1">
                   <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Trung bình</p>
                     <p className="mt-1 text-xl font-bold text-slate-950">{averageScore.toFixed(1)}</p>

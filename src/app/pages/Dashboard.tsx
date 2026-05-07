@@ -818,7 +818,7 @@ function DashboardContent({
       />
 
       {/* HERO SECTION: Promise + Primary CTA */}
-      <div className="ops-section-hero space-y-6">
+      <div className="ops-section-hero space-y-4">
         {activeSystem && reviewDueToday && (
           <Reveal>
             <Card className="border-amber-200 bg-amber-50/92 shadow-[0_16px_40px_-28px_rgba(217,119,6,0.24)]">
@@ -921,8 +921,8 @@ function DashboardContent({
         {/* Main Dashboard Card with PageHeader */}
         {shouldShowMainDashboardCard && (
           <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]">
-            <CardContent className="p-4 sm:p-6 lg:p-7">
-              <div className="space-y-5">
+              <CardContent className="p-4 sm:p-5 lg:p-6">
+                <div className="space-y-4">
                 <PageHeader
                   eyebrow={isSignedOut ? "Trang chính" : "Hôm nay"}
                   title={
@@ -1108,16 +1108,16 @@ function DashboardContent({
               </Card>
             )}
 
-            {shouldShowTopSidebar && (
-              <>
-                <section className="rounded-[24px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.22)] sm:p-5">
-                  <PageHeader
-                    eyebrow="Thứ tự nên đi"
-                    title="Một luồng chính, không phải ba lựa chọn ngang nhau."
-                    description={quickActionIntro}
-                  />
+        {shouldShowTopSidebar && (
+          <>
+            <section className="rounded-[24px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.22)] sm:p-5">
+              <PageHeader
+                eyebrow="Thứ tự nên đi"
+                title="Một luồng chính, không phải ba lựa chọn ngang nhau."
+                description={quickActionIntro}
+              />
 
-                  <div className="mt-4 grid gap-3 md:grid-cols-3">
+              <div className="mt-3 grid gap-3 md:grid-cols-3">
                     {quickActions.map((action, actionIndex) => {
                       const Icon = action.icon;
                       const stepIndex = actionIndex + 1;
@@ -1442,14 +1442,14 @@ function DashboardContent({
 
       {/* SECONDARY SECTION: Workspace Details */}
       {shouldShowWorkspaceDetailGrid && (
-        <div className="ops-section-secondary space-y-5">
+        <div className="ops-section-secondary space-y-4">
           <PageHeader
             eyebrow="Chi tiết workspace"
             title="Dữ liệu gần đây"
             description="Xem nhanh mục tiêu, cân bằng cuộc sống và nhật ký của bạn."
           />
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
             <Reveal>
               <Card className="h-full border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.24)]">
                 <CardHeader>
@@ -1563,13 +1563,13 @@ function DashboardContent({
                                 </div>
 
                                 <div className="space-y-2">
-                                  <div className="flex items-center justify-between text-sm">
+                                  <div                               className="flex items-center justify-between text-sm">
                                     <span className="font-semibold text-slate-900">{progress}%</span>
                                     <span className="text-slate-500">
                                       {execution.completed}/{execution.total} việc
                                     </span>
                                   </div>
-                                  <Progress value={progress} className="h-2.5" />
+                                  <Progress value={progress} className="h-2" />
                                   {goal.twelveWeekSystem && !entitlementKeys.includes("premium_review_insights") && (
                                     <p className="text-xs font-medium text-violet-700">Phân tích review đang khóa</p>
                                   )}
@@ -1763,7 +1763,7 @@ function DashboardContent({
 
       {/* Data Backup + Storage Info */}
       {shouldShowWorkspaceDetailGrid && (
-        <div className="ops-section-secondary space-y-4">
+        <div className="ops-section-secondary space-y-3">
           <Reveal>
             <DataStorageInfo variant="banner" />
           </Reveal>

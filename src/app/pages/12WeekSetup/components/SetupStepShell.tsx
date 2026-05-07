@@ -59,7 +59,7 @@ export function SetupStepShell({
       className={prefersReducedMotion ? "" : "animate-fade-in-up"}
     >
       <Card>
-        <CardHeader className="space-y-4">
+        <CardHeader className="space-y-3">
           <ol
             className="flex flex-wrap items-center gap-1.5 text-xs"
             aria-label={`Bước ${currentStep + 1} trên ${stepCount}`}
@@ -107,7 +107,7 @@ export function SetupStepShell({
               );
             })}
           </ol>
-          <div className="space-y-2">
+          <div className="space-y-1">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
               Bước {currentStep + 1} / {stepCount}
             </p>

@@ -32,7 +32,6 @@ import {
   TWELVE_WEEK_TEMPLATE_CATALOG,
   buildAdaptiveTemplateRecommendation,
   buildAdaptiveTemplateSupport,
-  getPlanLabel,
   planSatisfiesRequirement,
   type TwelveWeekTemplateDefinition,
 } from "../utils/twelve-week-premium";
@@ -55,7 +54,6 @@ import {
   createIndicatorId,
   getCycleWeekStart,
   getFeasibilityDraftDefaults,
-  getPlanLoadLabel,
   getPreviewTasks,
   getPreviewTasksByIndicator,
   isPendingFeasibilityResult,
@@ -847,13 +845,7 @@ export function TwelveWeekSetup() {
                 </Badge>
                 <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
                   <Sparkles className="mr-1 h-3.5 w-3.5" />
-                  Độ sẵn sàng: {feasibility.adjustedScore}/20
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className="hidden rounded-full border-white/18 bg-white/12 px-4 py-2 text-white sm:inline-flex"
-                >
-                  Nhịp gợi ý: {getPlanLoadLabel(feasibility.planLoad)}
+                  Sẵn sàng: {feasibility.adjustedScore}/20
                 </Badge>
                 {feasibility.bottleneck && (
                   <Badge
@@ -863,12 +855,6 @@ export function TwelveWeekSetup() {
                     Cần chú ý: {feasibility.bottleneck.label}
                   </Badge>
                 )}
-                <Badge
-                  variant="outline"
-                  className="hidden rounded-full border-white/18 bg-white/12 px-4 py-2 text-white sm:inline-flex"
-                >
-                  Gói: {getPlanLabel(currentPlan)}
-                </Badge>
               </div>
             </div>
           </div>
