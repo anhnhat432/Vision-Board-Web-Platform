@@ -75,6 +75,10 @@ vi.mock("../persistence/planLinkStore", () => ({
   savePlanDetailsLink,
   setMetricIdForGoal,
   setRemoteTaskIdForGoal,
+  getTaskRemoteRevision: vi.fn().mockReturnValue(undefined),
+  getWeekRemoteRevision: vi.fn().mockReturnValue(undefined),
+  updateTaskRevisionInLink: vi.fn(),
+  updateWeekRevisionInLink: vi.fn(),
 }));
 
 vi.mock("@/app/utils/app-mode", () => ({
@@ -215,6 +219,8 @@ describe("usePlanExecutionSync.syncDailyCheckIn", () => {
       weekIdByNumber: { 1: "week_1" },
       metricIdByKey: {},
       taskIdByLocalTaskId: {},
+      weekRevisionById: {},
+      taskRevisionByRemoteId: {},
     });
     getPlan.mockResolvedValue(buildPlanDetails());
     getPlans.mockResolvedValue([]);
@@ -564,6 +570,8 @@ describe("usePlanExecutionSync.syncDailyCheckIn", () => {
       weekIdByNumber: { 1: "week_1" },
       metricIdByKey: {},
       taskIdByLocalTaskId: taskLinkMap,
+      weekRevisionById: {},
+      taskRevisionByRemoteId: {},
     });
     updateWeek.mockImplementation(async (_weekId, input) => {
       backendDetails.weeks[0].focus = input.focus ?? "";
@@ -616,6 +624,7 @@ describe("usePlanExecutionSync.syncDailyCheckIn", () => {
         title: "Write launch brief",
         status: "done",
         scheduledDate: "2026-04-01T00:00:00.000Z",
+        baseRevision: undefined,
       }),
     );
     expect(updateMetricLog).toHaveBeenCalledWith(

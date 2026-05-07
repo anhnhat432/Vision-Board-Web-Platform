@@ -1,12 +1,14 @@
 import type { Types } from "mongoose";
 
 import { WeekModel } from "../../models/WeekModel";
+import { ConflictError } from "../../utils/conflictError";
 
 export interface WeekReviewData {
   weekNumber: number;
   executionScore: number;
   reflection?: string;
   adjustments?: string;
+  baseRevision?: number;
 }
 
 export interface WeekEntity {
@@ -30,6 +32,7 @@ export interface CreateWeekData {
 export interface UpdateWeekData {
   focus?: string;
   expectedOutput?: string;
+  baseRevision?: number;
 }
 
 function getRequiredText(value: string | undefined, fallback: string): string {
@@ -99,7 +102,13 @@ export class MongoWeekRepository {
     const existing = await WeekModel.findById(id).lean();
     if (!existing) return null;
 
-    const normalizedUpdates: UpdateWeekData = {};
+    if (updates.baseRevision !== undefined && existing.revision != null) {
+      if (updates.baseRevision < existing.revision) {
+        throw new ConflictError(existing.revision, existing.updatedAt);
+      }
+    }
+
+    const normalizedUpdates: Record<string, unknown> = {};
     if (updates.focus !== undefined) {
       normalizedUpdates.focus = getRequiredText(updates.focus, existing.focus || `Week ${existing.weekNumber} focus`);
     }
@@ -109,10 +118,13 @@ export class MongoWeekRepository {
         existing.expectedOutput || `Week ${existing.weekNumber} expected output`,
       );
     }
+    if (updates.baseRevision !== undefined) {
+      delete (normalizedUpdates as Record<string, unknown>).baseRevision;
+    }
 
     const doc = await WeekModel.findByIdAndUpdate(
       id,
-      { $set: normalizedUpdates },
+      { $set: normalizedUpdates, $inc: { revision: 1 } },
       { new: true, runValidators: true },
     ).lean();
 
@@ -120,9 +132,18 @@ export class MongoWeekRepository {
   }
 
   async submitWeeklyReview(id: string, review: WeekReviewData): Promise<WeekEntity | null> {
+    const existing = await WeekModel.findById(id).lean();
+    if (!existing) return null;
+
+    if (review.baseRevision !== undefined && existing.revision != null) {
+      if (review.baseRevision < existing.revision) {
+        throw new ConflictError(existing.revision, existing.updatedAt);
+      }
+    }
+
     const doc = await WeekModel.findByIdAndUpdate(
       id,
-      { $set: { review } },
+      { $set: { review: { weekNumber: review.weekNumber, executionScore: review.executionScore, reflection: review.reflection, adjustments: review.adjustments } }, $inc: { revision: 1 } },
       { new: true, runValidators: true },
     ).lean();
 

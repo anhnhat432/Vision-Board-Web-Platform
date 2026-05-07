@@ -13,6 +13,7 @@ export interface UpdatePlanPayload {
   vision?: string;
   smartGoalId?: string;
   startDate?: string;
+  baseRevision?: number;
 }
 
 export function createPlan(payload: CreatePlanPayload): Promise<Plan> {

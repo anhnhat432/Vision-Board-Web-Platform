@@ -17,6 +17,7 @@ export interface UpdatePlanPayload {
   vision?: string;
   smartGoalId?: string;
   startDate?: string;
+  baseRevision?: number;
 }
 
 interface ValidatedCreatePlanPayload {
@@ -27,7 +28,7 @@ interface ValidatedCreatePlanPayload {
   totalWeeks: number;
 }
 
-const EDITABLE_PLAN_FIELDS = new Set(["vision", "smartGoalId", "startDate"]);
+const EDITABLE_PLAN_FIELDS = new Set(["vision", "smartGoalId", "startDate", "baseRevision"]);
 const PLAN_CREATE_FIELDS = new Set(["vision", "smartGoalId", "startDate", "initializeWeeks", "totalWeeks"]);
 const MIN_PLAN_WEEKS = 1;
 const MAX_PLAN_WEEKS = 12;
@@ -139,6 +140,13 @@ function validateUpdatePlanPayload(payload: unknown): UpdatePlanPayload {
     updates.startDate = validateIsoDate(payload.startDate, "startDate").toISOString();
   }
 
+  if ("baseRevision" in payload) {
+    if (typeof payload.baseRevision !== "number" || !Number.isInteger(payload.baseRevision) || payload.baseRevision < 0) {
+      throw new ApiError(400, "baseRevision must be a non-negative integer.");
+    }
+    updates.baseRevision = payload.baseRevision;
+  }
+
   if (Object.keys(updates).length === 0) {
     throw new ApiError(400, "Provide at least one plan field to update.");
   }
@@ -195,6 +203,7 @@ export class PlanService {
       vision: updates.vision,
       smartGoalId: updates.smartGoalId,
       startDate: updates.startDate ? new Date(updates.startDate) : undefined,
+      baseRevision: updates.baseRevision,
     });
     if (!updated) {
       throw new ApiError(404, "Plan not found.");

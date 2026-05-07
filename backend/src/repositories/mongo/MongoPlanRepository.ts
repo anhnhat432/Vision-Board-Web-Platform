@@ -1,6 +1,7 @@
 import { isValidObjectId, type Types } from "mongoose";
 
 import { PlanModel } from "../../models/PlanModel";
+import { ConflictError } from "../../utils/conflictError";
 
 export interface PlanEntity {
   id: string;
@@ -23,6 +24,7 @@ export interface UpdatePlanData {
   vision?: string;
   smartGoalId?: string;
   startDate?: Date;
+  baseRevision?: number;
 }
 
 function mapPlan(doc: {
@@ -70,9 +72,23 @@ export class MongoPlanRepository {
   }
 
   async updatePlan(id: string, updates: UpdatePlanData): Promise<PlanEntity | null> {
+    const existing = await PlanModel.findById(id).lean();
+    if (!existing) return null;
+
+    if (updates.baseRevision !== undefined && existing.revision != null) {
+      if (updates.baseRevision < existing.revision) {
+        throw new ConflictError(existing.revision, existing.updatedAt);
+      }
+    }
+
+    const updateOps: Record<string, unknown> = { ...updates };
+    if (updates.baseRevision !== undefined) {
+      delete updateOps.baseRevision;
+    }
+
     const doc = await PlanModel.findByIdAndUpdate(
       id,
-      { $set: updates },
+      { $set: updateOps, $inc: { revision: 1 } },
       { new: true, runValidators: true },
     ).lean();
 

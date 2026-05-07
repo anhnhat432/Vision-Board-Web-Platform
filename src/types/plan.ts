@@ -13,6 +13,7 @@ export interface Task {
   title: string;
   status: TaskStatus;
   scheduledDate?: string;
+  revision?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -40,6 +41,7 @@ export interface Week {
   weekNumber: number;
   focus: string;
   expectedOutput: string;
+  revision?: number;
   review?: WeekReview;
   createdAt: string;
   updatedAt: string;

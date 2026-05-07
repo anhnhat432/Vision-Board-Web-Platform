@@ -15,6 +15,9 @@ export interface ApiRequestOptions extends Omit<RequestInit, "method" | "body" |
 export interface ApiClientError extends AppError {
   details?: unknown;
   isNetworkError?: boolean;
+  conflict?: true;
+  currentRevision?: number;
+  serverUpdatedAt?: string;
 }
 
 type ResponseErrorInterceptor = (
@@ -25,7 +28,7 @@ const responseErrorInterceptors: ResponseErrorInterceptor[] = [];
 
 function toApiClientError(error: unknown): ApiClientError {
   if (error && typeof error === "object" && "message" in error) {
-    const withMessage = error as { message?: unknown; status?: unknown; details?: unknown; isNetworkError?: unknown };
+    const withMessage = error as { message?: unknown; status?: unknown; details?: unknown; isNetworkError?: unknown; conflict?: unknown; currentRevision?: unknown; serverUpdatedAt?: unknown };
     return {
       message:
         typeof withMessage.message === "string" && withMessage.message.trim().length > 0
@@ -35,6 +38,9 @@ function toApiClientError(error: unknown): ApiClientError {
       details: withMessage.details,
       isNetworkError:
         typeof withMessage.isNetworkError === "boolean" ? withMessage.isNetworkError : undefined,
+      conflict: withMessage.conflict === true ? true : undefined,
+      currentRevision: typeof withMessage.currentRevision === "number" ? withMessage.currentRevision : undefined,
+      serverUpdatedAt: typeof withMessage.serverUpdatedAt === "string" ? withMessage.serverUpdatedAt : undefined,
     };
   }
 
@@ -49,6 +55,9 @@ function createApiClientError(payload: ApiClientError): ApiClientError {
     status: payload.status,
     details: payload.details,
     isNetworkError: payload.isNetworkError,
+    conflict: payload.conflict,
+    currentRevision: payload.currentRevision,
+    serverUpdatedAt: payload.serverUpdatedAt,
   };
 }
 
@@ -161,10 +170,18 @@ async function request<TResponse, TBody = unknown>(
   const payload = await parseResponseBody(response);
 
   if (!response.ok) {
+    const isConflict = response.status === 409;
     const apiError = createApiClientError({
       message: getErrorMessageFromPayload(payload) ?? `Request failed with status ${response.status}.`,
       status: response.status,
       details: payload,
+      conflict: isConflict || undefined,
+      currentRevision: isConflict && payload && typeof payload === "object" && "currentRevision" in payload
+        ? (payload as { currentRevision?: number }).currentRevision
+        : undefined,
+      serverUpdatedAt: isConflict && payload && typeof payload === "object" && "serverUpdatedAt" in payload
+        ? String((payload as { serverUpdatedAt?: unknown }).serverUpdatedAt ?? "")
+        : undefined,
     });
 
     await runResponseErrorInterceptors(apiError);

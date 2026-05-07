@@ -1,6 +1,7 @@
 import type { Types } from "mongoose";
 
 import { TaskModel } from "../../models/TaskModel";
+import { ConflictError } from "../../utils/conflictError";
 
 export type TaskStatus = "todo" | "doing" | "done";
 
@@ -25,6 +26,7 @@ export interface UpdateTaskData {
   title?: string;
   status?: TaskStatus;
   scheduledDate?: Date;
+  baseRevision?: number;
 }
 
 function mapTask(doc: {
@@ -70,9 +72,23 @@ export class MongoTaskRepository {
   }
 
   async updateTask(id: string, updates: UpdateTaskData): Promise<TaskEntity | null> {
+    const existing = await TaskModel.findById(id).lean();
+    if (!existing) return null;
+
+    if (updates.baseRevision !== undefined && existing.revision != null) {
+      if (updates.baseRevision < existing.revision) {
+        throw new ConflictError(existing.revision, existing.updatedAt);
+      }
+    }
+
+    const updateOps: Record<string, unknown> = {};
+    if (updates.title !== undefined) updateOps.title = updates.title;
+    if (updates.status !== undefined) updateOps.status = updates.status;
+    if (updates.scheduledDate !== undefined) updateOps.scheduledDate = updates.scheduledDate;
+
     const doc = await TaskModel.findByIdAndUpdate(
       id,
-      { $set: updates },
+      { $set: updateOps, $inc: { revision: 1 } },
       { new: true, runValidators: true },
     ).lean();
 

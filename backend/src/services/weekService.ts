@@ -13,10 +13,11 @@ export interface SubmitWeeklyReviewPayload {
   executionScore: number;
   reflection?: string;
   adjustments?: string;
+  baseRevision?: number;
 }
 
 const EDITABLE_WEEK_FIELDS = new Set(["focus", "expectedOutput"]);
-const WEEK_REVIEW_FIELDS = new Set(["weekNumber", "executionScore", "reflection", "adjustments"]);
+const WEEK_REVIEW_FIELDS = new Set(["weekNumber", "executionScore", "reflection", "adjustments", "baseRevision"]);
 
 function isPayloadRecord(payload: unknown): payload is Record<string, unknown> {
   return Boolean(payload) && typeof payload === "object" && !Array.isArray(payload);
@@ -62,14 +63,14 @@ function validateUpdateWeekPayload(payload: unknown): UpdateWeekPayload {
   return updates;
 }
 
-function validateWeeklyReviewPayload(payload: unknown, fallbackWeekNumber: number): Required<SubmitWeeklyReviewPayload> {
+function validateWeeklyReviewPayload(payload: unknown, fallbackWeekNumber: number) {
   if (!isPayloadRecord(payload)) {
     throw new ApiError(400, "Request body must be an object.");
   }
 
   const unknownFields = Object.keys(payload).filter((field) => !WEEK_REVIEW_FIELDS.has(field));
   if (unknownFields.length > 0) {
-    throw new ApiError(400, "Only weekNumber, executionScore, reflection, and adjustments are accepted.", {
+    throw new ApiError(400, "Only weekNumber, executionScore, reflection, adjustments, and baseRevision are accepted.", {
       unknownFields,
     });
   }
@@ -81,11 +82,20 @@ function validateWeeklyReviewPayload(payload: unknown, fallbackWeekNumber: numbe
     throw new ApiError(400, "executionScore must be between 0 and 100.");
   }
 
+  const baseRevision = (() => {
+    if (!("baseRevision" in payload)) return undefined;
+    if (typeof payload.baseRevision !== "number" || !Number.isInteger(payload.baseRevision) || payload.baseRevision < 0) {
+      throw new ApiError(400, "baseRevision must be a non-negative integer.");
+    }
+    return payload.baseRevision;
+  })();
+
   return {
     weekNumber: payload.weekNumber === undefined ? fallbackWeekNumber : validateWeekNumber(payload.weekNumber),
     executionScore: payload.executionScore,
     reflection: validateOptionalString(payload.reflection, "reflection") ?? "",
     adjustments: validateOptionalString(payload.adjustments, "adjustments") ?? "",
+    baseRevision,
   };
 }
 
@@ -123,6 +133,7 @@ export class WeekService {
       executionScore: review.executionScore,
       reflection: review.reflection,
       adjustments: review.adjustments,
+      baseRevision: review.baseRevision,
     });
   }
 }

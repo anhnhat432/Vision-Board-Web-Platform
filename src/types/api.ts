@@ -1,3 +1,11 @@
+export interface ConflictError {
+  message: string;
+  conflict: true;
+  status: 409;
+  currentRevision: number;
+  serverUpdatedAt: string;
+}
+
 export interface AppError {
   message: string;
   status?: number;

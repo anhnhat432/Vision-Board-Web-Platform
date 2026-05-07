@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 
 import { toAppError } from "@/lib/api/apiClient";
+import type { ApiClientError } from "@/lib/api/apiClient";
 import { createMetric, getMetrics, logMetric, updateMetricLog } from "@/services/metricService";
 import { createPlan, getPlan, getPlans } from "@/services/planService";
 import { addTask, updateTask } from "@/services/taskService";
@@ -17,10 +18,13 @@ import {
   getMetricIdForGoal,
   getPlanLink,
   getRemoteTaskIdForGoal,
+  getTaskRemoteRevision,
   getWeekIdForGoal,
+  getWeekRemoteRevision,
   savePlanDetailsLink,
   setMetricIdForGoal,
   setRemoteTaskIdForGoal,
+  updateWeekRevisionInLink,
 } from "../persistence/planLinkStore";
 
 type SnapshotStatus = "idle" | "success" | "partial" | "error";
@@ -32,6 +36,13 @@ export interface PlanExecutionSyncSnapshot {
   skippedCount: number;
   failedCount: number;
   planId: string | null;
+  message: string;
+  conflictCount?: number;
+}
+
+export interface ConflictInfo {
+  entityType: "task" | "week" | "plan";
+  entityId: string;
   message: string;
 }
 
@@ -62,6 +73,7 @@ interface SyncCounter {
   syncedCount: number;
   skippedCount: number;
   failedCount: number;
+  conflictCount: number;
 }
 
 interface SyncTaskSnapshotOptions {
@@ -168,13 +180,15 @@ function hasReviewContent(review: TwelveWeekSystem["weeklyReviews"][number]): bo
 function createSnapshot(
   counter: SyncCounter,
   planId: string | null,
-  fallbackStatus: SnapshotStatus = "success",
-): PlanExecutionSyncSnapshot {
+    fallbackStatus: SnapshotStatus = "success",
+  ): PlanExecutionSyncSnapshot {
   const status: SnapshotStatus =
-    counter.failedCount > 0
+    counter.failedCount > 0 || counter.conflictCount > 0
       ? counter.syncedCount > 0
         ? "partial"
-        : "error"
+        : counter.conflictCount > 0
+          ? "partial"
+          : "error"
       : fallbackStatus;
 
   const message =
@@ -182,9 +196,11 @@ function createSnapshot(
       ? counter.syncedCount > 0
         ? `Đã đồng bộ ${counter.syncedCount} mục 12-week lên backend.`
         : "Backend đã sẵn sàng, chưa có mục 12-week mới cần đẩy lên."
-      : status === "partial"
-        ? `Đã đồng bộ ${counter.syncedCount} mục, còn ${counter.failedCount} mục cần thử lại.`
-        : "Chưa thể đồng bộ dữ liệu 12-week lên backend. Dữ liệu local vẫn được giữ nguyên.";
+      : status === "partial" && counter.conflictCount > 0
+        ? `Đã đồng bộ ${counter.syncedCount} mục, ${counter.conflictCount} mục bị xung đột (đã được cập nhật từ thiết bị khác).`
+        : counter.failedCount > 0
+          ? `Đã đồng bộ ${counter.syncedCount} mục, còn ${counter.failedCount} mục cần thử lại.`
+          : "Chưa thể đồng bộ dữ liệu 12-week lên backend. Dữ liệu local vẫn được giữ nguyên.";
 
   return {
     at: new Date().toISOString(),
@@ -192,6 +208,7 @@ function createSnapshot(
     syncedCount: counter.syncedCount,
     skippedCount: counter.skippedCount,
     failedCount: counter.failedCount,
+    conflictCount: counter.conflictCount,
     planId,
     message,
   };
@@ -201,12 +218,13 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
   const [pendingRequests, setPendingRequests] = useState(0);
   const [error, setError] = useState<AppError | null>(null);
   const [lastSnapshot, setLastSnapshot] = useState<PlanExecutionSyncSnapshot | null>(null);
+  const [conflicts, setConflicts] = useState<ConflictInfo[]>([]);
   const syncQueueRef = useRef<Promise<void>>(Promise.resolve());
 
   const loading = pendingRequests > 0;
   const enabled = options.enabled ?? true;
 
-  const runAction = useCallback(async <T,>(action: () => Promise<T>): Promise<T | null> => {
+  const runAction = useCallback(async <T,>(action: () => Promise<T>, conflictMeta?: { entityType: ConflictInfo["entityType"]; entityId: string }): Promise<T | null> => {
     if (isDemoMode()) {
       console.debug("[Demo Mode] Skipped backend sync");
       return null;
@@ -218,9 +236,20 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     try {
       return await action();
     } catch (nextError) {
-      const parsedError = toAppError(nextError);
-      setError(parsedError);
-      console.error("Failed to sync 12-week execution state.", nextError);
+      const parsedError = toAppError(nextError) as ApiClientError;
+      if (parsedError.status === 409 && conflictMeta) {
+        const conflict: ConflictInfo = {
+          entityType: conflictMeta.entityType,
+          entityId: conflictMeta.entityId,
+          message: parsedError.message || "Dữ liệu đã được cập nhật từ thiết bị khác.",
+        };
+        setConflicts((prev) => [...prev, conflict]);
+        setError({ message: conflict.message, status: 409 });
+        console.warn("[Conflict] Document updated on another device.", conflict);
+      } else {
+        setError(parsedError);
+        console.error("Failed to sync 12-week execution state.", nextError);
+      }
       return null;
     } finally {
       setPendingRequests((count) => Math.max(0, count - 1));
@@ -315,7 +344,7 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     details: PlanDetails,
     task: TwelveWeekTaskInstance,
     options: SyncTaskSnapshotOptions = {},
-  ): Promise<"synced" | "skipped" | "failed"> => {
+  ): Promise<"synced" | "skipped" | "failed" | "conflict"> => {
     const week = findWeekDetails(details, task.weekNumber);
     if (!week) return "skipped";
 
@@ -332,25 +361,32 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
       );
       if (!createdTask) return "failed";
 
-      setRemoteTaskIdForGoal(goalId, task.id, createdTask.id);
+      setRemoteTaskIdForGoal(goalId, task.id, createdTask.id, createdTask.revision);
       return "synced";
     }
 
-    setRemoteTaskIdForGoal(goalId, task.id, remoteTask.id);
+    const baseRevision = getTaskRemoteRevision(goalId, remoteTask.id) ?? remoteTask.revision;
+    setRemoteTaskIdForGoal(goalId, task.id, remoteTask.id, baseRevision);
 
     if (!shouldUpdateRemoteTask(remoteTask, task, options)) {
       return "skipped";
     }
 
-    const updatedTask = await runAction(() =>
-      updateTask(remoteTask.id, {
-        title: task.title,
-        status: getTargetRemoteTaskStatus(remoteTask, task, options),
-        scheduledDate: toIsoDate(task.scheduledDate),
-      }),
+    const updatedTask = await runAction(
+      () =>
+        updateTask(remoteTask.id, {
+          title: task.title,
+          status: getTargetRemoteTaskStatus(remoteTask, task, options),
+          scheduledDate: toIsoDate(task.scheduledDate),
+          baseRevision,
+        }),
+      { entityType: "task", entityId: remoteTask.id },
     );
 
-    return updatedTask ? "synced" : "failed";
+    if (!updatedTask) return "failed";
+
+    setRemoteTaskIdForGoal(goalId, task.id, updatedTask.id, updatedTask.revision);
+    return "synced";
   }, [runAction]);
 
   const syncDailyCheckInForWeek = useCallback(async (
@@ -518,6 +554,7 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
       syncedCount: 0,
       skippedCount: 0,
       failedCount: 0,
+      conflictCount: 0,
     };
 
     if (isDemoMode()) {
@@ -554,8 +591,12 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
         continue;
       }
 
-      const updatedWeek = await runAction(() => updateWeek(week.id, { focus, expectedOutput }));
+      const updatedWeek = await runAction(
+        () => updateWeek(week.id, { focus, expectedOutput, baseRevision: getWeekRemoteRevision(goalId, week.id) }),
+        { entityType: "week", entityId: week.id },
+      );
       if (updatedWeek) {
+        updateWeekRevisionInLink(goalId, updatedWeek.id, (updatedWeek as { revision?: number }).revision ?? 1);
         counter.syncedCount += 1;
       } else {
         counter.failedCount += 1;
@@ -564,10 +605,14 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
 
     for (const task of system.taskInstances) {
       const result = await syncTaskSnapshot(goalId, details, task);
-      counter[`${result}Count` as keyof SyncCounter] += 1;
+      if (result === "conflict") {
+        counter.conflictCount += 1;
+      } else {
+        counter[`${result}Count` as keyof SyncCounter] += 1;
+      }
 
       const weekId = getWeekIdForGoal(goalId, task.weekNumber) ?? findWeekDetails(details, task.weekNumber)?.id;
-      if (result !== "failed" && weekId && task.completed) {
+      if (result !== "failed" && result !== "conflict" && weekId && task.completed) {
         const metricSynced = await syncCompletedTaskMetricForWeek(goalId, weekId, task);
         counter[metricSynced ? "syncedCount" : "failedCount"] += 1;
       }
@@ -631,6 +676,10 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     setError(null);
   }, []);
 
+  const clearConflicts = useCallback(() => {
+    setConflicts([]);
+  }, []);
+
   const actions = useMemo(
     () => ({
       syncTaskToggle,
@@ -638,16 +687,18 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
       syncDailyCheckIn,
       syncLocalSnapshot,
       clearError,
+      clearConflicts,
     }),
-    [clearError, syncTaskToggle, syncWeeklyReview, syncDailyCheckIn, syncLocalSnapshot],
+    [clearError, clearConflicts, syncTaskToggle, syncWeeklyReview, syncDailyCheckIn, syncLocalSnapshot],
   );
 
   const data = useMemo(
     () => ({
       goalId: options.goalId ?? null,
       lastSnapshot,
+      conflicts,
     }),
-    [lastSnapshot, options.goalId],
+    [conflicts, lastSnapshot, options.goalId],
   );
 
   return {

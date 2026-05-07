@@ -11,6 +11,7 @@ export interface UpdateTaskPayload {
   title?: string;
   status?: TaskStatus;
   scheduledDate?: string;
+  baseRevision?: number;
 }
 
 export function addTask(weekId: string, payload: AddTaskPayload): Promise<Task> {

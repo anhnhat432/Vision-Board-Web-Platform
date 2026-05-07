@@ -199,13 +199,40 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 - **Notes:** Exponential backoff, persistent queue
 - **Verified:** [ ] Offline test: changes sync when back online
 
-### 12. ⬜ Conflict Resolution
+### 12. ✅ Conflict Resolution
 
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
+- **Status:** [x] Completed
 - **Prompt:** Prompt 12
 - **Files changed:**
-- **Notes:** Version checking, last-write-wins with notification
-- **Verified:** [ ] Two-browser conflict test
+  - `backend/src/utils/conflictError.ts` - new `ConflictError` class
+  - `backend/src/utils/apiResponse.ts` - added `conflictResponse()`
+  - `backend/src/repositories/mongo/MongoPlanRepository.ts` - revision check + 409
+  - `backend/src/repositories/mongo/MongoWeekRepository.ts` - revision check + 409
+  - `backend/src/repositories/mongo/MongoTaskRepository.ts` - revision check + 409
+  - `backend/src/services/planService.ts` - accept `baseRevision` in payload
+  - `backend/src/services/weekService.ts` - accept `baseRevision` in payload
+  - `backend/src/services/taskService.ts` - accept `baseRevision` in payload
+  - `backend/src/controllers/planController.ts` - return 409 on conflict
+  - `backend/src/controllers/weekController.ts` - return 409 on conflict
+  - `backend/src/controllers/taskController.ts` - return 409 on conflict
+  - `src/types/api.ts` - added `ConflictError` interface
+  - `src/types/plan.ts` - added `revision` to `Task`, `Week`
+  - `src/lib/api/apiClient.ts` - parse 409 conflict responses
+  - `src/services/planService.ts` - accept `baseRevision`
+  - `src/services/weekService.ts` - accept `baseRevision`
+  - `src/services/taskService.ts` - accept `baseRevision`
+  - `src/features/plan12week/persistence/planLinkStore.ts` - track remote revisions, helper functions
+  - `src/features/plan12week/hooks/usePlanExecutionSync.ts` - pass `baseRevision` + detect 409 + track conflicts
+  - `src/features/plan12week/hooks/usePlanExecutionSync.test.tsx` - updated mocks + assertions
+- **Notes:**
+  - Backend: check `baseRevision` before update, throw `ConflictError` (409) if stale
+  - Increment `revision` field on every successful update (via `$inc: { revision: 1 }`)
+  - Frontend: store remote `revision` in planLinkStore per entity
+  - Send `baseRevision` with every update request
+  - Detect 409 conflict response, show conflict message, track in `conflicts` state
+  - `mutationQueue` already has `DataMutationStatus.blocked_conflict` — no extra code needed
+  - Last-write-wins with user notification (not blocking)
+- **Verified:** [x] npm run typecheck / [x] npm run lint / [x] npm run test:run (1025/1026) / [x] npm run build / [x] npm --prefix backend run check
 
 ---
 

@@ -17,6 +17,7 @@ export interface UpdateTaskPayload {
   title?: string;
   status?: TaskStatus;
   scheduledDate?: string;
+  baseRevision?: number;
 }
 
 const VALID_TASK_STATUSES: TaskStatus[] = ["todo", "doing", "done"];
@@ -74,18 +75,25 @@ function validateAddTaskPayload(payload: unknown): { title: string; status?: Tas
   };
 }
 
-function validateUpdateTaskPayload(payload: unknown): { title?: string; status?: TaskStatus; scheduledDate?: Date } {
+function validateUpdateTaskPayload(payload: unknown): { title?: string; status?: TaskStatus; scheduledDate?: Date; baseRevision?: number } {
   if (!isPayloadRecord(payload)) {
     throw new ApiError(400, "Request body must be an object.");
   }
 
-  const updates = {
+  const updates: { title?: string; status?: TaskStatus; scheduledDate?: Date; baseRevision?: number } = {
     title: validateTaskTitle(payload.title, false),
     status: validateTaskStatus(payload.status),
     scheduledDate: validateOptionalDate(payload.scheduledDate, "scheduledDate"),
   };
 
-  if (updates.title === undefined && updates.status === undefined && updates.scheduledDate === undefined) {
+  if ("baseRevision" in payload) {
+    if (typeof payload.baseRevision !== "number" || !Number.isInteger(payload.baseRevision) || payload.baseRevision < 0) {
+      throw new ApiError(400, "baseRevision must be a non-negative integer.");
+    }
+    updates.baseRevision = payload.baseRevision;
+  }
+
+  if (updates.title === undefined && updates.status === undefined && updates.scheduledDate === undefined && updates.baseRevision === undefined) {
     throw new ApiError(400, "Provide at least one task field to update.");
   }
 
@@ -125,6 +133,7 @@ export class TaskService {
       title: updates.title,
       status: updates.status,
       scheduledDate: updates.scheduledDate,
+      baseRevision: updates.baseRevision,
     });
   }
 

@@ -4,6 +4,7 @@ import type { Week } from "@/types/plan";
 export interface UpdateWeekPayload {
   focus?: string;
   expectedOutput?: string;
+  baseRevision?: number;
 }
 
 export interface UpdateWeekReviewPayload {
@@ -11,6 +12,7 @@ export interface UpdateWeekReviewPayload {
   executionScore: number;
   reflection?: string;
   adjustments?: string;
+  baseRevision?: number;
 }
 
 export function getWeeks(planId: string): Promise<Week[]> {
