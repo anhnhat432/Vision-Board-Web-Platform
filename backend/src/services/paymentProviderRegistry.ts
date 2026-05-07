@@ -16,11 +16,14 @@
 
 import type { PaymentProviderAdapter } from "./paymentProviderAdapter";
 import { PaymentProviderNotConfiguredError } from "./paymentProviderAdapter";
+import { createCassoPaymentAdapter } from "./cassoPaymentAdapter";
 import { createMockPaymentAdapter } from "./mockPaymentAdapter";
+import { createStripePaymentAdapter } from "./stripePaymentAdapter";
 
 export type SupportedProviderId =
   | "mock"
   | "stripe"
+  | "casso"
   | "payos"
   | "momo"
   | "vnpay";
@@ -29,6 +32,7 @@ function getProviderIdFromEnv(): SupportedProviderId {
   const raw = process.env.BILLING_PROVIDER?.trim().toLowerCase();
   if (!raw || raw === "mock") return "mock";
   if (raw === "stripe") return "stripe";
+  if (raw === "casso") return "casso";
   if (raw === "payos") return "payos";
   if (raw === "momo") return "momo";
   if (raw === "vnpay") return "vnpay";
@@ -82,12 +86,14 @@ export function getPaymentProviderAdapter(): PaymentProviderAdapter {
       adapter = createMockPaymentAdapter();
       break;
 
-    // Future: import and configure real adapters here.
-    // case "stripe":
-    //   adapter = createStripeAdapter({ apiKey: process.env.STRIPE_SECRET_KEY, ... });
-    //   break;
-
     case "stripe":
+      adapter = createStripePaymentAdapter();
+      break;
+
+    case "casso":
+      adapter = createCassoPaymentAdapter();
+      break;
+
     case "payos":
     case "momo":
     case "vnpay":

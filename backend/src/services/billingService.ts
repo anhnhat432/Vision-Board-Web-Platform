@@ -24,7 +24,7 @@ export type BillingSubscriptionStatus =
   | "incomplete"
   | "unpaid";
 
-export type BillingCycle = "monthly" | "quarterly" | "yearly" | "lifetime";
+export type BillingCycle = "monthly" | "quarterly" | "yearly" | "lifetime" | "twelve_week";
 
 export type BillingSource = "mock" | "manual" | "provider";
 

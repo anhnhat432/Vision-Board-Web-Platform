@@ -25,7 +25,7 @@ export type BillingSubscriptionStatus =
   | "incomplete"
   | "unpaid";
 
-export type BillingCycle = "monthly" | "quarterly" | "yearly" | "lifetime";
+export type BillingCycle = "monthly" | "quarterly" | "yearly" | "lifetime" | "twelve_week";
 
 export type BillingSource = "mock" | "manual" | "provider";
 
@@ -104,7 +104,7 @@ const billingSubscriptionSchema = new Schema(
     billingCycle: {
       type: String,
       required: false,
-      enum: ["monthly", "quarterly", "yearly", "lifetime"],
+      enum: ["monthly", "quarterly", "yearly", "lifetime", "twelve_week"],
     },
     currentPeriodStart: {
       type: Date,

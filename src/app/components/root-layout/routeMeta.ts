@@ -65,6 +65,12 @@ export const ROUTE_META: RouteMeta[] = [
     tagline: "Giữ lại cảm xúc, bài học và những chuyển động tinh tế của hành trình.",
   },
   {
+    match: (pathname: string) => pathname.startsWith("/billing/checkout"),
+    label: "Thanh toán",
+    title: "Thanh toán nâng cấp – Dear Our Future",
+    tagline: "Quét mã QR để nâng cấp gói Plus.",
+  },
+  {
     match: (pathname: string) => pathname.startsWith("/billing/plan"),
     label: "Gói & thanh toán",
     title: "Gói & thanh toán – Dear Our Future",

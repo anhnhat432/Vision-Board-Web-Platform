@@ -116,6 +116,10 @@ export const router = createBrowserRouter([
         Component: ProtectedRoute,
         children: [
           {
+            path: "billing/checkout/:orderId?",
+            ...lazyRoute(() => import("./pages/BillingCheckoutQR"), "BillingCheckoutQR"),
+          },
+          {
             path: "order",
             ...lazyRoute(() => import("./pages/OrderPage"), "OrderPage"),
           },
