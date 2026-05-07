@@ -166,20 +166,13 @@ export function Onboarding() {
                     ))}
                   </div>
 
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-col gap-2 sm:flex-row">
                     <Button
                       className="w-full bg-violet-600 text-white shadow-[0_18px_38px_-28px_rgba(124,58,237,0.55)] hover:bg-violet-700 sm:w-auto"
                       onClick={handleStartAssessment}
                     >
                       Chấm Life Balance
                       <ArrowRight className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full border-slate-200 bg-white text-slate-900 hover:bg-slate-50 sm:w-auto"
-                      onClick={() => navigate("/")}
-                    >
-                      Xem bảng điều khiển
                     </Button>
                     <Button
                       variant="ghost"
@@ -189,7 +182,7 @@ export function Onboarding() {
                         navigate("/");
                       }}
                     >
-                      Lưu nháp và đi tiếp lúc khác
+                      Lưu nháp và quay lại sau
                     </Button>
                   </div>
 

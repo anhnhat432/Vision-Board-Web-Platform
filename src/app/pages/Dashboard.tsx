@@ -1149,7 +1149,7 @@ function DashboardContent({
                 </section>
 
                 {/* Stats Cards - Collapsible on mobile */}
-                <details className="group rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)] sm:p-5 open:sm:!block sm:!block" open>
+                <details className="group rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)] sm:p-5 sm:!block">
                   <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-3 text-sm font-semibold text-slate-950 sm:cursor-default">
                     <span>Tổng quan nhanh</span>
                     <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
@@ -1442,7 +1442,7 @@ function DashboardContent({
 
       {/* SECONDARY SECTION: Workspace Details */}
       {shouldShowWorkspaceDetailGrid && (
-        <div className="ops-section-secondary space-y-6">
+        <div className="ops-section-secondary space-y-5">
           <PageHeader
             eyebrow="Chi tiết workspace"
             title="Dữ liệu gần đây"

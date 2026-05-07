@@ -238,12 +238,21 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 
 ## P2: Quality of Life
 
-### 13. ⬜ Simplify Desktop/Mobile Layouts
+### 13. ✅ Simplify Desktop/Mobile Layouts
 
+- **Status:** [x] Completed
 - **Prompt:** Prompt 13
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
 - **Files changed:**
-- **Verified:** [ ] Mobile & desktop tested
+  - `src/app/pages/Dashboard.tsx` - closed `Tổng quan nhanh` stats details by default (was always open), reduced secondary section spacing `space-y-6` → `space-y-5`
+  - `src/app/pages/Onboarding.tsx` - consolidated 3 action buttons to 2 (removed redundant "Xem bảng điều khiển" outline button), reduced `flex-wrap gap-3` to `flex-col gap-2`
+- **Notes:**
+  - Most pages already pass density audit: SMART Goal (step shell with clarity checklist, clear progress), Feasibility Check (4 steps with progress bar), 12WeekSetup (4 steps with step indicators), Onboarding assessment (clean slider layout), 12WeekSystem (already simplified in Prompt 3)
+  - Dashboard had redundant stats (overview cards overlap with hero stats) and excessive 6-unit vertical spacing in secondary sections
+  - Onboarding welcome had 3 buttons where 2 suffice (primary CTA + ghost save-draft)
+  - Progressive disclosure: "Tổng quan nhanh" and "Phân tích mở rộng" are `details` elements already collapsed by default on mobile
+  - Navigation clarity: all setup flows have step indicators ("Bước X / N") with Back/Next buttons
+  - Max 1 primary action per screen in setup flows
+- **Verified:** [x] npm run typecheck / [x] npm run build / [ ] Manual mobile/desktop test
 
 ### 14. ⬜ Data Export & Delete Flow
 
