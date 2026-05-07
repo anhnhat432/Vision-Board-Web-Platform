@@ -44,6 +44,10 @@ function RedirectToTwelveWeekSystem() {
   return <Navigate to="/12-week-system" replace />;
 }
 
+function RedirectToBillingPlan() {
+  return <Navigate to="/billing/plan" replace />;
+}
+
 export const router = createBrowserRouter([
   {
     path: "/login",
@@ -106,6 +110,14 @@ export const router = createBrowserRouter([
       {
         path: "billing/mock-checkout",
         ...lazyRoute(() => import("./pages/MockBillingCheckout"), "MockBillingCheckout"),
+      },
+      {
+        path: "billing",
+        Component: RedirectToBillingPlan,
+      },
+      {
+        path: "account/billing",
+        Component: RedirectToBillingPlan,
       },
       {
         path: "billing/plan",

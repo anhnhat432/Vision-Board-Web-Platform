@@ -1,4 +1,5 @@
-import { CreditCard, Crown, Loader2, RefreshCw, Shield, Sparkles } from "lucide-react";
+import { apiClient, toAppError } from "@/lib/api/apiClient";
+import { CreditCard, Crown, LifeBuoy, Loader2, ReceiptText, RefreshCw, Shield, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
@@ -30,6 +31,79 @@ import {
 } from "../utils/twelve-week-premium";
 
 type CheckoutReturnStatus = "idle" | "pending" | "confirmed" | "failed";
+type PaymentOrderStatus = "pending" | "completed" | "expired" | "failed";
+
+interface PaymentHistoryOrder {
+  orderId: string;
+  planCode: string;
+  billingCycle: string;
+  amount: number;
+  currency: string;
+  status: PaymentOrderStatus;
+  provider: string;
+  createdAt: string | null;
+  completedAt: string | null;
+  expiresAt: string | null;
+}
+
+interface PaymentHistoryResponse {
+  orders: PaymentHistoryOrder[];
+}
+
+const BILLING_SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() ?? "";
+
+const PAYMENT_STATUS_LABELS: Record<PaymentOrderStatus, string> = {
+  pending: "Đang chờ",
+  completed: "Đã thanh toán",
+  expired: "Đã hết hạn",
+  failed: "Lỗi",
+};
+
+const PAYMENT_STATUS_CLASS_NAMES: Record<PaymentOrderStatus, string> = {
+  pending: "border-amber-200 bg-amber-50 text-amber-700",
+  completed: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  expired: "border-slate-200 bg-slate-50 text-slate-600",
+  failed: "border-red-200 bg-red-50 text-red-700",
+};
+
+function getPaymentStatusLabel(status: PaymentOrderStatus): string {
+  return PAYMENT_STATUS_LABELS[status] ?? "Không rõ";
+}
+
+function getPaymentStatusClassName(status: PaymentOrderStatus): string {
+  return PAYMENT_STATUS_CLASS_NAMES[status] ?? "border-slate-200 bg-slate-50 text-slate-600";
+}
+
+function getBillingCycleLabel(billingCycle: string): string {
+  return billingCycle === "twelve_week" ? "Chu kỳ 12 tuần" : billingCycle;
+}
+
+function formatPaymentAmount(amount: number, currency: string): string {
+  try {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: currency || "VND",
+      maximumFractionDigits: currency === "VND" ? 0 : 2,
+    }).format(amount);
+  } catch {
+    return `${amount.toLocaleString("vi-VN")} ${currency}`;
+  }
+}
+
+function formatPaymentDate(iso: string | null): string {
+  if (!iso) return "Chưa có";
+  try {
+    return new Intl.DateTimeFormat("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(iso));
+  } catch {
+    return iso;
+  }
+}
 
 export function BillingPlan() {
   const navigate = useNavigate();
@@ -37,6 +111,8 @@ export function BillingPlan() {
   const { userData: syncedUserData, reloadUserData } = useSyncedUserData();
   const userData = syncedUserData ?? getUserData();
   const { currentPlanCode, currentPlanDefinition, entitlementKeys, premiumStatusItems } = usePlanEntitlements(userData);
+  const demoMode = isDemoMode();
+  const realMode = isRealMode();
 
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
   const [upgradeContext, setUpgradeContext] = useState<PremiumFeatureContext>("plan");
@@ -47,10 +123,33 @@ export function BillingPlan() {
   const [isCanceling, setIsCanceling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [checkoutReturnStatus, setCheckoutReturnStatus] = useState<CheckoutReturnStatus>("idle");
+  const [paymentHistory, setPaymentHistory] = useState<PaymentHistoryOrder[]>([]);
+  const [isLoadingPaymentHistory, setIsLoadingPaymentHistory] = useState(false);
+  const [paymentHistoryError, setPaymentHistoryError] = useState<string | null>(null);
 
   // Handle checkout return URL
   const returnStatus = searchParams.get("status");
-  const isCheckoutReturn = returnStatus === "success" && isRealMode();
+  const isCheckoutReturn = returnStatus === "success" && realMode;
+
+  const loadPaymentHistory = useCallback(async () => {
+    if (!realMode) return;
+    setIsLoadingPaymentHistory(true);
+    setPaymentHistoryError(null);
+
+    try {
+      const response = await apiClient.get<PaymentHistoryResponse>("/billing/payment-history");
+      setPaymentHistory(response.orders);
+    } catch (error) {
+      setPaymentHistoryError(toAppError(error).message || "Không thể tải lịch sử thanh toán.");
+    } finally {
+      setIsLoadingPaymentHistory(false);
+    }
+  }, [realMode]);
+
+  useEffect(() => {
+    if (!realMode) return;
+    void loadPaymentHistory();
+  }, [realMode, loadPaymentHistory]);
 
   const pollServerEntitlement = useCallback(async () => {
     if (!isCheckoutReturn) return;
@@ -98,7 +197,6 @@ export function BillingPlan() {
     });
   }, [trialCtaExperiment]);
 
-  const demoMode = isDemoMode();
   const billingStatus = useMemo(() => getBillingProviderStatus(), []);
   const subscription = userData.subscription;
 
@@ -214,8 +312,6 @@ export function BillingPlan() {
     }
   };
 
-  const realMode = isRealMode();
-
   const handleCancelSubscription = async () => {
     setIsCanceling(true);
     try {
@@ -229,6 +325,36 @@ export function BillingPlan() {
     } finally {
       setIsCanceling(false);
       setShowCancelConfirm(false);
+    }
+  };
+
+  const handleRenewPlan = () => {
+    trackPaywallCtaClicked({
+      goalId: undefined,
+      context: "plan",
+      source: "settings",
+      currentPlan: currentPlanCode,
+      recommendedPlan: "PLUS",
+      targetPlan: "PLUS",
+      placement: "billing_plan_renew",
+    });
+    navigate("/billing/checkout");
+  };
+
+  const handleCopySupportMessage = async () => {
+    const latestOrderId = paymentHistory[0]?.orderId ?? "chưa có mã đơn";
+    const message = [
+      "Tôi cần hỗ trợ thanh toán Dear Our Future.",
+      `Mã đơn gần nhất: ${latestOrderId}`,
+      `Gói hiện tại: ${currentPlanCode}`,
+      "Tôi sẽ gửi kèm ảnh chuyển khoản nếu đã thanh toán.",
+    ].join("\n");
+
+    try {
+      await navigator.clipboard.writeText(message);
+      toast.success("Đã sao chép nội dung hỗ trợ.");
+    } catch {
+      toast.info("Không thể sao chép tự động. Bạn có thể gửi mã đơn và ảnh chuyển khoản cho hỗ trợ.");
     }
   };
 
@@ -439,6 +565,12 @@ export function BillingPlan() {
                     {isOpeningPortal ? "Đang mở…" : "Quản lý thanh toán"}
                   </Button>
                 )}
+                {realMode && (
+                  <Button onClick={handleRenewPlan}>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Gia hạn Plus
+                  </Button>
+                )}
                 {realMode && !showCancelConfirm && (
                   <Button
                     variant="outline"
@@ -474,6 +606,133 @@ export function BillingPlan() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Payment history */}
+      {realMode && (
+        <Card className="flow-panel">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ReceiptText className="h-5 w-5 text-sky-600" />
+              Lịch sử thanh toán
+            </CardTitle>
+            <CardDescription>
+              Các đơn VietQR gần đây của tài khoản này. Quyền Plus chỉ mở khi webhook xác nhận thanh toán thành công.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {isLoadingPaymentHistory && (
+              <div className="flow-muted flex items-center gap-3 p-4 text-sm text-slate-600">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Đang tải lịch sử thanh toán...
+              </div>
+            )}
+
+            {!isLoadingPaymentHistory && paymentHistoryError && (
+              <div className="flow-muted flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-red-700">{paymentHistoryError}</p>
+                <Button variant="outline" size="sm" onClick={loadPaymentHistory}>
+                  Thử lại
+                </Button>
+              </div>
+            )}
+
+            {!isLoadingPaymentHistory && !paymentHistoryError && paymentHistory.length === 0 && (
+              <div className="flow-muted p-4">
+                <p className="text-sm font-medium text-slate-900">Chưa có giao dịch nào.</p>
+                <p className="mt-1 text-sm text-slate-600">
+                  Khi bạn tạo mã VietQR, đơn thanh toán sẽ xuất hiện tại đây để theo dõi hoặc tiếp tục thanh toán.
+                </p>
+              </div>
+            )}
+
+            {!isLoadingPaymentHistory && !paymentHistoryError && paymentHistory.length > 0 && (
+              <div className="divide-y divide-slate-100 overflow-hidden rounded-lg border border-slate-100">
+                {paymentHistory.map((order) => (
+                  <div
+                    key={order.orderId}
+                    className="grid gap-3 bg-white/70 p-4 sm:grid-cols-[1fr_auto] sm:items-center"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-semibold text-slate-900">{order.orderId}</p>
+                        <Badge variant="outline" className={getPaymentStatusClassName(order.status)}>
+                          {getPaymentStatusLabel(order.status)}
+                        </Badge>
+                      </div>
+                      <p className="mt-1 text-sm text-slate-600">
+                        {getBillingCycleLabel(order.billingCycle)} · {formatPaymentDate(order.createdAt)}
+                      </p>
+                      {order.status === "completed" && (
+                        <p className="mt-1 text-xs text-emerald-700">
+                          Xác nhận lúc {formatPaymentDate(order.completedAt)}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 sm:justify-end">
+                      <p className="font-semibold text-slate-900">
+                        {formatPaymentAmount(order.amount, order.currency)}
+                      </p>
+                      {order.status === "pending" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => navigate(`/billing/checkout/${encodeURIComponent(order.orderId)}`)}
+                        >
+                          Tiếp tục thanh toán
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Billing support */}
+      {realMode && (
+        <Card className="flow-panel">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <LifeBuoy className="h-5 w-5 text-teal-600" />
+              Hỗ trợ thanh toán
+            </CardTitle>
+            <CardDescription>
+              Nếu đã chuyển khoản đúng nội dung nhưng Plus chưa mở sau vài phút, gửi mã đơn và ảnh chuyển khoản để kiểm
+              tra thủ công.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+            <div className="flow-muted p-4">
+              <p className="text-sm text-slate-500">Email hỗ trợ</p>
+              <p className="mt-1 font-medium text-slate-900">
+                {BILLING_SUPPORT_EMAIL || "Chưa cấu hình email hỗ trợ"}
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button variant="outline" onClick={handleCopySupportMessage}>
+                Sao chép nội dung hỗ trợ
+              </Button>
+              {BILLING_SUPPORT_EMAIL ? (
+                <Button asChild>
+                  <a
+                    href={`mailto:${BILLING_SUPPORT_EMAIL}?subject=${encodeURIComponent(
+                      "Hỗ trợ thanh toán Dear Our Future",
+                    )}`}
+                  >
+                    Liên hệ hỗ trợ
+                  </a>
+                </Button>
+              ) : (
+                <Button variant="outline" disabled>
+                  Chưa cấu hình email
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Entitlements */}
       <Card className="flow-panel">

@@ -386,6 +386,17 @@ describe("GET /api/billing/order-status/:orderId", () => {
   });
 });
 
+describe("GET /api/billing/payment-history", () => {
+  it("returns 401 when no auth token is provided", async () => {
+    const response = await requestJson(createBillingTestApp(), "GET", "/api/billing/payment-history", {
+      token: null,
+    });
+
+    assert.equal(response.status, 401);
+    assert.equal(response.body.success, false);
+  });
+});
+
 describe("POST /api/billing/customer-portal", () => {
   const portalUserId = "user_portal_test";
 

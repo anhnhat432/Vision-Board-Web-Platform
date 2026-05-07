@@ -15,6 +15,14 @@ import { ApiError } from "../utils/apiError";
 import { successResponse } from "../utils/apiResponse";
 import { requireAuthUser } from "./controllerHelpers";
 
+const PAYMENT_HISTORY_LIMIT = 20;
+
+function toIsoString(value: Date | string | null | undefined): string | null {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
 /**
  * GET /api/billing/order-status/:orderId
  */
@@ -54,6 +62,49 @@ export async function getOrderStatus(req: Request, res: Response): Promise<void>
       expiresAt: order.expiresAt?.toISOString() ?? null,
       completedAt: order.completedAt?.toISOString() ?? null,
       createdAt: order.createdAt?.toISOString() ?? null,
+    }),
+  );
+}
+
+/**
+ * GET /api/billing/payment-history
+ *
+ * Returns recent payment orders for the authenticated user.
+ * Sensitive bank and provider transaction details are intentionally omitted.
+ */
+export async function getPaymentHistory(req: Request, res: Response): Promise<void> {
+  const user = requireAuthUser(req);
+  const now = new Date();
+
+  await PaymentOrderModel.updateMany(
+    {
+      userId: user.uid,
+      status: "pending",
+      expiresAt: { $lt: now },
+    },
+    { $set: { status: "expired" } },
+  );
+
+  const orders = await PaymentOrderModel.find({ userId: user.uid })
+    .select("orderId planCode billingCycle amount currency status provider createdAt completedAt expiresAt")
+    .sort({ createdAt: -1 })
+    .limit(PAYMENT_HISTORY_LIMIT)
+    .lean();
+
+  res.status(200).json(
+    successResponse({
+      orders: orders.map((order) => ({
+        orderId: order.orderId,
+        planCode: order.planCode,
+        billingCycle: order.billingCycle,
+        amount: order.amount,
+        currency: order.currency,
+        status: order.status,
+        provider: order.provider,
+        createdAt: toIsoString(order.createdAt),
+        completedAt: toIsoString(order.completedAt),
+        expiresAt: toIsoString(order.expiresAt),
+      })),
     }),
   );
 }

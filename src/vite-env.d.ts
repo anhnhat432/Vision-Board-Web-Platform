@@ -16,6 +16,7 @@ interface ImportMetaEnv {
   readonly VITE_OUTBOX_SYNC_ENDPOINT?: string;
   readonly VITE_BILLING_PROVIDER_MODE?: string;
   readonly VITE_BILLING_PROVIDER_LABEL?: string;
+  readonly VITE_BILLING_SUPPORT_EMAIL?: string;
   readonly VITE_BILLING_API_BASE?: string;
   readonly VITE_BILLING_CHECKOUT_ENDPOINT?: string;
   readonly VITE_BILLING_PORTAL_ENDPOINT?: string;

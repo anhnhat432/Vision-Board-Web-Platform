@@ -222,6 +222,7 @@ function renderAppShell(initialEntry: string) {
         children: [
           { index: true, element: <div data-testid="home-page">Home page</div> },
           { path: "onboarding", element: <div data-testid="onboarding-page">Onboarding page</div> },
+          { path: "12-week-setup", element: <div data-testid="twelve-week-setup-page">12-week setup page</div> },
           { path: "goals", element: <div data-testid="goals-page">Goals page</div> },
           {
             element: <ProtectedRoute />,
@@ -344,7 +345,7 @@ describe("RootLayout onboarding redirect", () => {
 
   it("resets the viewport to the top when the app route changes", async () => {
     const scrollToMock = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
-    setAuthContext({ isConfigured: false });
+    appModeMock.isDemoMode.mockReturnValue(true);
     const { router } = renderAppShell("/goals");
 
     expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
@@ -393,6 +394,16 @@ describe("RootLayout onboarding redirect", () => {
     expect(router.state.location.pathname).toBe("/login");
     expect(router.state.location.search).toBe("?next=%2Fgoals");
     expect(router.state.location.state).toMatchObject({ from: "/goals" });
+  });
+
+  it("requires login before the 12-week setup route in real mode even when Firebase config is missing", async () => {
+    setAuthContext({ isConfigured: false });
+    const { router } = renderAppShell("/12-week-setup");
+
+    expect(await screen.findByTestId("login-page")).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/login");
+    expect(router.state.location.search).toBe("?next=%2F12-week-setup");
+    expect(router.state.location.state).toMatchObject({ from: "/12-week-setup" });
   });
 
   it("sends signed-in users to onboarding when setup is incomplete", async () => {

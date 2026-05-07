@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 import { cancelSubscription, createCheckoutSession, createCustomerPortal, getEntitlement } from "../controllers/billingController";
-import { getCheckoutInfo, getOrderStatus } from "../controllers/orderStatusController";
+import { getCheckoutInfo, getOrderStatus, getPaymentHistory } from "../controllers/orderStatusController";
 import { billingCheckoutRateLimiter, billingStatusRateLimiter } from "../middleware/rateLimiters";
 import {
   validateCheckoutSessionInput,
@@ -38,6 +38,7 @@ billingRoutes.get(
   validateOrderIdParam,
   asyncHandler(getOrderStatus),
 );
+billingRoutes.get("/billing/payment-history", billingStatusRateLimiter, asyncHandler(getPaymentHistory));
 billingRoutes.get("/billing/checkout-info", billingStatusRateLimiter, asyncHandler(getCheckoutInfo));
 
 export { billingRoutes };

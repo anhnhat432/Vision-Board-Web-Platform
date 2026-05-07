@@ -77,7 +77,8 @@ export const ROUTE_META: RouteMeta[] = [
     tagline: "Quản lý tài khoản, dữ liệu thiết bị và bản sao lưu.",
   },
   {
-    match: (pathname: string) => pathname.startsWith("/billing/plan"),
+    match: (pathname: string) =>
+      pathname === "/billing" || pathname.startsWith("/billing/plan") || pathname.startsWith("/account/billing"),
     label: "Gói & thanh toán",
     title: "Gói & thanh toán – Dear Our Future",
     tagline: "Xem gói hiện tại, quyền truy cập và thao tác thanh toán.",
