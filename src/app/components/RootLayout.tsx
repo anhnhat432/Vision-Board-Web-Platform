@@ -535,7 +535,7 @@ export function RootLayout() {
       : !isApiBaseUrlConfigured()
         ? "Kết nối tài khoản chưa được cấu hình cho workspace này."
         : !shouldEnable12WeekImportDryRun()
-          ? "Kiểm tra nhập dữ liệu tài khoản chưa được bật."
+          ? "Kiểm tra dữ liệu trước khi đồng bộ chưa được bật."
           : undefined;
 
   const handleValidateCloudImport = useCallback(async (): Promise<CloudImportDryRunResult> => {
@@ -563,7 +563,7 @@ export function RootLayout() {
     if (!shouldEnable12WeekImportDryRun()) {
       return {
         status: "skipped",
-        message: "Kiểm tra nhập dữ liệu tài khoản chưa được bật.",
+        message: "Kiểm tra dữ liệu trước khi đồng bộ chưa được bật.",
       };
     }
 
@@ -594,8 +594,8 @@ export function RootLayout() {
         status: report.status === "valid" ? "valid" : "invalid",
         message:
           report.status === "valid"
-            ? "Dữ liệu hợp lệ để nhập vào tài khoản. Chưa có dữ liệu nào bị thay đổi."
-            : "Dữ liệu chưa sẵn sàng để nhập vào tài khoản.",
+            ? "Dữ liệu hợp lệ để đồng bộ lên tài khoản. Chưa có dữ liệu nào bị thay đổi."
+            : "Dữ liệu chưa sẵn sàng để đồng bộ lên tài khoản.",
         report,
       };
     } catch (error) {
@@ -603,7 +603,7 @@ export function RootLayout() {
       if (report) {
         return {
           status: "invalid",
-          message: "Dữ liệu chưa sẵn sàng để nhập vào tài khoản.",
+          message: "Dữ liệu chưa sẵn sàng để đồng bộ lên tài khoản.",
           report,
         };
       }
@@ -624,7 +624,7 @@ export function RootLayout() {
       : !isApiBaseUrlConfigured()
         ? "Kết nối tài khoản chưa được cấu hình cho workspace này."
         : !shouldEnable12WeekCloudImport()
-          ? "Nhập dữ liệu tài khoản chưa được bật."
+          ? "Đồng bộ dữ liệu tài khoản chưa được bật."
           : undefined;
   const cloudImportAlreadyCompleted = Boolean(
     user?.uid && localDataMigrationCandidate && hasCompletedCloudImport(user.uid, localDataMigrationCandidate.fingerprint),
@@ -655,7 +655,7 @@ export function RootLayout() {
     if (!shouldEnable12WeekCloudImport()) {
       return {
         status: "skipped",
-        message: "Nhập dữ liệu tài khoản chưa được bật.",
+        message: "Đồng bộ dữ liệu tài khoản chưa được bật.",
       };
     }
 
@@ -665,7 +665,7 @@ export function RootLayout() {
     if (importPayloads.length === 0) {
       return {
         status: "skipped",
-        message: "Tài khoản trên trình duyệt này chưa có dữ liệu 12 tuần để nhập.",
+        message: "Tài khoản trên trình duyệt này chưa có dữ liệu 12 tuần để đồng bộ.",
       };
     }
 
@@ -707,12 +707,12 @@ export function RootLayout() {
         status: response.status,
         message:
           response.status === "applied"
-            ? "Dữ liệu đã được nhập vào tài khoản thành công."
+            ? "Dữ liệu đã được đồng bộ lên tài khoản thành công."
             : response.status === "duplicate"
-              ? "Dữ liệu này đã được nhập vào tài khoản trước đó."
+              ? "Dữ liệu này đã được đồng bộ lên tài khoản trước đó."
               : response.status === "partial"
-                ? "Nhập dữ liệu thành công một phần. Một số mục có thể chưa được lưu."
-                : response.message || "Nhập dữ liệu thất bại.",
+                ? "Đồng bộ dữ liệu thành công một phần. Một số mục có thể chưa được lưu."
+                : response.message || "Đồng bộ dữ liệu thất bại.",
         response,
       };
     } catch (error) {
@@ -726,7 +726,7 @@ export function RootLayout() {
         status: "error",
         message: isRecord(error) && typeof error.message === "string" && error.message.trim()
           ? error.message
-          : "Không thể nhập dữ liệu tài khoản lúc này. Dữ liệu trên thiết bị vẫn an toàn.",
+          : "Không thể đồng bộ dữ liệu tài khoản lúc này. Dữ liệu trên thiết bị vẫn an toàn.",
       };
     }
   }, [demoMode, localDataMigrationCandidate, user?.uid]);

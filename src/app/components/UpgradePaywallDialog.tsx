@@ -277,7 +277,7 @@ export function UpgradePaywallDialog({
               {demoMode
                 ? "Bản dùng thử không thu tiền thật. Gói chỉ được mở trên trình duyệt này."
                 : billingProviderStatus.mode === "api_contract"
-                  ? "Bạn sẽ được chuyển đến nhà cung cấp thanh toán khi xác nhận."
+                  ? `Bạn sẽ được chuyển đến trang thanh toán ${billingProviderStatus.providerLabel || "an toàn"} khi xác nhận.`
                   : "Bạn có thể dùng gói miễn phí nếu chưa cần tính năng nâng cao lúc này."}
             </p>
             <Button className="w-full sm:w-auto" variant="outline" onClick={() => onOpenChange(false)}>

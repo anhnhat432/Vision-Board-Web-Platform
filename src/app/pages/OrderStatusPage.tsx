@@ -28,6 +28,7 @@ import {
   type OrderStatus,
 } from "../utils/order-storage";
 import { formatCalendarDate } from "../utils/storage";
+import { isDemoMode } from "../utils/app-mode";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { getOrder as getBackendOrder, type ApiOrder } from "@/services/orderService";
 import { getBackendOrderId } from "@/lib/api/orderLinkStore";
@@ -104,6 +105,7 @@ export function OrderStatusPage() {
   const navigate = useNavigate();
   const params = useParams();
   const { user } = useAuthContext();
+  const demoMode = isDemoMode();
   const [order, setOrder] = useState<LocalOrder | null>(null);
   const [recentOrders, setRecentOrders] = useState<LocalOrder[]>([]);
   const [isBackendBacked, setIsBackendBacked] = useState(false);
@@ -452,23 +454,23 @@ export function OrderStatusPage() {
                 </div>
               )}
 
-              {!isBackendBacked && !isCancelled && (
+              {demoMode && !isBackendBacked && !isCancelled && (
               <div className="space-y-4 border-t border-slate-100 pt-5">
                 <div className="space-y-1">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Điều khiển demo</p>
-                  <p className="text-sm text-slate-600">Giữ phần mô phỏng riêng với timeline để thông tin trạng thái thật nổi bật hơn.</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Điều khiển trạng thái</p>
+                  <p className="text-sm text-slate-600">Phần này chỉ xuất hiện khi đơn chưa gắn backend.</p>
                 </div>
 
                 <div className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Demo trạng thái</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Cập nhật trạng thái</p>
                       <p className="mt-2 text-sm leading-7 text-slate-600">
-                        Chỉ dùng để mô phỏng tiến trình xử lý đơn trong local flow. Trạng thái sẽ được lưu ngay trong localStorage.
+                        Dùng để cập nhật đơn lưu trên thiết bị khi chưa có dữ liệu từ backend.
                       </p>
                     </div>
                     <Badge variant="outline" className="border-slate-200 bg-white text-slate-700">
-                      Local only
+                      Trên thiết bị
                     </Badge>
                   </div>
 

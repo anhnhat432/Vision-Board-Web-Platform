@@ -74,7 +74,7 @@ export const ROUTE_META: RouteMeta[] = [
     match: (pathname: string) => pathname.startsWith("/settings"),
     label: "Cài đặt",
     title: "Cài đặt – Dear Our Future",
-    tagline: "Quản lý tài khoản, dữ liệu local và bản sao lưu.",
+    tagline: "Quản lý tài khoản, dữ liệu thiết bị và bản sao lưu.",
   },
   {
     match: (pathname: string) => pathname.startsWith("/billing/plan"),

@@ -5,6 +5,7 @@
   BookOpen,
   CalendarDays,
   CheckCircle2,
+  Crown,
   Images,
   LogIn,
   Plus,
@@ -914,9 +915,19 @@ function DashboardContent({
                       {publicVisitorBadge}
                     </span>
                   ) : (
-                    <span title={`Gói hiện tại: ${getPlanLabel(currentPlanCode)} — xem quyền truy cập trong phần quản lý tài khoản`} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
-                      Gói {getPlanLabel(currentPlanCode)}
-                    </span>
+                    <button
+                      type="button"
+                      title={`Gói hiện tại: ${getPlanLabel(currentPlanCode)} — mở trang quản lý gói`}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2 ${
+                        currentPlanCode === "FREE"
+                          ? "border-slate-200 bg-white text-slate-600"
+                          : "border-violet-200 bg-violet-50 text-violet-800"
+                      }`}
+                      onClick={() => navigate("/billing/plan")}
+                    >
+                      <Crown className="h-3.5 w-3.5" />
+                      {currentPlanCode === "FREE" ? "Gói Free" : `${getPlanLabel(currentPlanCode)} đang hoạt động`}
+                    </button>
                   )}
                   {activeSystem && activeSystemWeek && (
                     <span title={`Tuần hiện tại trong chu kỳ 12 tuần (${getTwelveWeekCurrentWeek(activeSystem)}/${activeSystem.totalWeeks})`} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">

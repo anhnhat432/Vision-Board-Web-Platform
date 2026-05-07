@@ -19,13 +19,13 @@ export function DeleteDataConfirmationDialog({
   isLoading = false,
 }: DeleteDataConfirmationDialogProps) {
   const title = isDemoMode
-    ? "Xóa dữ liệu local?"
+    ? "Xóa dữ liệu trên thiết bị?"
     : isSignedIn
       ? "Xóa tài khoản và dữ liệu?"
       : "Xóa dữ liệu trên thiết bị?";
 
   const actionLabel = isDemoMode
-    ? "Xóa dữ liệu local"
+    ? "Xóa dữ liệu trên thiết bị"
     : isSignedIn
       ? "Xóa tài khoản và dữ liệu"
       : "Xóa dữ liệu trên thiết bị";
@@ -42,7 +42,7 @@ export function DeleteDataConfirmationDialog({
             {isDemoMode ? (
               <>
                 <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
-                  Local data only
+                  Chỉ trên thiết bị này
                 </span>{" "}
                 trên trình duyệt này sẽ bị xóa vĩnh viễn.
               </>
@@ -68,9 +68,9 @@ export function DeleteDataConfirmationDialog({
           <ul className="mt-2 space-y-1 text-sm text-rose-700">
             <li>• Mục tiêu và kế hoạch 12 tuần sẽ bị xóa</li>
             <li>• Nhật ký, review và check-in sẽ bị xóa</li>
-            {isSignedIn && !isDemoMode && <li>• Dữ liệu cloud sẽ bị xóa khỏi server</li>}
+            {isSignedIn && !isDemoMode && <li>• Dữ liệu tài khoản sẽ bị xóa khỏi hệ thống</li>}
             {isSignedIn && !isDemoMode && <li>• Tài khoản sẽ bị vô hiệu hóa</li>}
-            <li>• Cài đặt và gói mock sẽ bị xóa</li>
+            <li>• Cài đặt và trạng thái gói Plus sẽ bị xóa</li>
           </ul>
         </div>
 

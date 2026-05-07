@@ -167,6 +167,10 @@ VITE_APP_MODE=real
 VITE_API_BASE_URL=http://localhost:4000/api
 VITE_BILLING_PROVIDER_MODE=api_contract
 VITE_BILLING_PROVIDER_LABEL=Casso + VietQR
+VITE_ENABLE_12_WEEK_MUTATION_SYNC=true
+VITE_ENABLE_12_WEEK_PULL_SYNC=true
+VITE_ENABLE_12_WEEK_IMPORT_DRY_RUN=true
+VITE_ENABLE_12_WEEK_CLOUD_IMPORT=true
 ```
 
 Backend env:
@@ -368,6 +372,10 @@ Vercel project env vars should still be set explicitly so secrets and provider-s
 - `VITE_FIREBASE_APP_ID`
 - `VITE_BILLING_PROVIDER_MODE=api_contract`
 - `VITE_BILLING_PROVIDER_LABEL=Casso + VietQR`
+- `VITE_ENABLE_12_WEEK_MUTATION_SYNC=true`
+- `VITE_ENABLE_12_WEEK_PULL_SYNC=true`
+- `VITE_ENABLE_12_WEEK_IMPORT_DRY_RUN=true`
+- `VITE_ENABLE_12_WEEK_CLOUD_IMPORT=true`
 
 Backend deployment is Render-ready:
 

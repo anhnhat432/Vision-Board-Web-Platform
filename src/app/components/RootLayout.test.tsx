@@ -418,7 +418,7 @@ describe("RootLayout onboarding redirect", () => {
     renderAppShell("/");
 
     expect(await screen.findByTestId("onboarding-page")).toBeInTheDocument();
-    expect(screen.queryByText("Có dữ liệu trên trình duyệt này")).not.toBeInTheDocument();
+    expect(screen.queryByText("Chuyển dữ liệu cũ vào tài khoản?")).not.toBeInTheDocument();
   });
 
   it("shows the local data migration prompt when signed-in account has meaningful anonymous data", async () => {
@@ -430,7 +430,7 @@ describe("RootLayout onboarding redirect", () => {
 
     renderAppShell("/");
 
-    expect(await screen.findByText("Có dữ liệu trên trình duyệt này")).toBeInTheDocument();
+    expect(await screen.findByText("Chuyển dữ liệu cũ vào tài khoản?")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Nhập dữ liệu" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Xem dữ liệu" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Để sau" })).toBeInTheDocument();
@@ -447,10 +447,10 @@ describe("RootLayout onboarding redirect", () => {
 
     renderAppShell("/");
 
-    expect(await screen.findByText("Có dữ liệu trên trình duyệt này")).toBeInTheDocument();
+    expect(await screen.findByText("Chuyển dữ liệu cũ vào tài khoản?")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Nhập dữ liệu" }));
 
-    expect(await screen.findByText(/Đã copy dữ liệu vào tài khoản/)).toBeInTheDocument();
+    expect(await screen.findByText(/Đã chuyển dữ liệu vào tài khoản/)).toBeInTheDocument();
     expect(getUserData().goals.map((goal) => goal.title)).toEqual(anonymousData.goals.map((goal) => goal.title));
     expect(localStorage.getItem(getScopedUserDataStorageKey("user_test"))).toBe(rawAnonymousData);
     expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(rawAnonymousData);
@@ -468,7 +468,7 @@ describe("RootLayout onboarding redirect", () => {
 
     renderAppShell("/");
 
-    expect(await screen.findByText(/Có dữ liệu trên trình duyệt này/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Chuyển dữ liệu cũ vào tài khoản/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Kiểm tra dữ liệu" })).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: "Nhập dữ liệu" }));
@@ -493,7 +493,7 @@ describe("RootLayout onboarding redirect", () => {
         },
       }),
     );
-    expect(await screen.findByText(/Dữ liệu hợp lệ để nhập vào tài khoản/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Dữ liệu hợp lệ để đồng bộ lên tài khoản/i)).toBeInTheDocument();
     expect(window.dataLayer).toEqual([]);
     expect(window.gtag).not.toHaveBeenCalled();
   });
@@ -538,11 +538,11 @@ describe("RootLayout onboarding redirect", () => {
 
     renderAppShell("/");
 
-    expect(await screen.findByText(/Có dữ liệu trên trình duyệt này/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Chuyển dữ liệu cũ vào tài khoản/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Nhập dữ liệu" }));
     fireEvent.click(screen.getByRole("button", { name: "Kiểm tra dữ liệu" }));
 
-    expect(await screen.findByText(/Dữ liệu chưa sẵn sàng để nhập vào tài khoản/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Dữ liệu chưa sẵn sàng để đồng bộ lên tài khoản/i)).toBeInTheDocument();
     expect(screen.getByText(/workspace.goals\[0\]\.plan\.weeks is required/i)).toBeInTheDocument();
     expect(getUserData().goals.map((goal) => goal.title)).toEqual(anonymousData.goals.map((goal) => goal.title));
     expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(rawAnonymousData);
@@ -565,7 +565,7 @@ describe("RootLayout onboarding redirect", () => {
 
     renderAppShell("/");
 
-    expect(await screen.findByText("Có dữ liệu trên trình duyệt này")).toBeInTheDocument();
+    expect(await screen.findByText("Chuyển dữ liệu cũ vào tài khoản?")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Nhập dữ liệu" }));
 
     expect(await screen.findByText(/không ghi đè tự động/)).toBeInTheDocument();
@@ -584,11 +584,11 @@ describe("RootLayout onboarding redirect", () => {
 
     renderAppShell("/");
 
-    expect(await screen.findByText("Có dữ liệu trên trình duyệt này")).toBeInTheDocument();
+    expect(await screen.findByText("Chuyển dữ liệu cũ vào tài khoản?")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Để sau" }));
 
     await waitFor(() => {
-      expect(screen.queryByText("Có dữ liệu trên trình duyệt này")).not.toBeInTheDocument();
+      expect(screen.queryByText("Chuyển dữ liệu cũ vào tài khoản?")).not.toBeInTheDocument();
     });
     expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(rawAnonymousData);
   });
@@ -605,7 +605,7 @@ describe("RootLayout onboarding redirect", () => {
     expect(syncServiceMock.post12WeekImportValidation).not.toHaveBeenCalled();
 
     expect(await screen.findByTestId("home-page")).toBeInTheDocument();
-    expect(screen.queryByText("Có dữ liệu trên trình duyệt này")).not.toBeInTheDocument();
+    expect(screen.queryByText("Chuyển dữ liệu cũ vào tài khoản?")).not.toBeInTheDocument();
   });
 
   it("does not show the local data migration prompt while signed out", async () => {
@@ -615,6 +615,6 @@ describe("RootLayout onboarding redirect", () => {
     expect(syncServiceMock.post12WeekImportValidation).not.toHaveBeenCalled();
 
     expect(await screen.findByTestId("home-page")).toBeInTheDocument();
-    expect(screen.queryByText("Có dữ liệu trên trình duyệt này")).not.toBeInTheDocument();
+    expect(screen.queryByText("Chuyển dữ liệu cũ vào tài khoản?")).not.toBeInTheDocument();
   });
 });

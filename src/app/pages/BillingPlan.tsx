@@ -67,14 +67,14 @@ export function BillingPlan() {
       reloadUserData();
       if (result.ok && result.planCode !== "FREE") {
         setCheckoutReturnStatus("confirmed");
-        toast.success(`Đã xác nhận gói ${result.planCode} từ server.`);
+        toast.success(`Đã xác nhận gói ${result.planCode} trên tài khoản.`);
       } else {
         setCheckoutReturnStatus("pending");
-        toast.info("Thanh toán đang được xử lý. Quyền sẽ được cập nhật khi server xác nhận.");
+        toast.info("Thanh toán đang được xử lý. Quyền sẽ được cập nhật khi hệ thống xác nhận.");
       }
     } catch {
       setCheckoutReturnStatus("failed");
-      toast.error("Không thể kiểm tra quyền từ server. Vui lòng thử lại.");
+      toast.error("Không thể kiểm tra quyền trên tài khoản. Vui lòng thử lại.");
     }
   }, [isCheckoutReturn, searchParams, setSearchParams, reloadUserData]);
 
@@ -272,7 +272,7 @@ export function BillingPlan() {
             <div>
               <p className="font-medium text-amber-900">Đang chờ xác nhận thanh toán</p>
               <p className="text-sm text-amber-700">
-                Thanh toán đang được xử lý. Quyền sẽ được cập nhật khi server xác nhận. Vui lòng đợi hoặc nhấn "Kiểm tra
+                Thanh toán đang được xử lý. Quyền sẽ được cập nhật khi hệ thống xác nhận. Vui lòng đợi hoặc nhấn "Kiểm tra
                 quyền" bên dưới.
               </p>
             </div>
@@ -286,7 +286,7 @@ export function BillingPlan() {
             <div>
               <p className="font-medium text-emerald-900">Thanh toán đã xác nhận</p>
               <p className="text-sm text-emerald-700">
-                Quyền Plus đã được server xác nhận và kích hoạt trên tài khoản của bạn.
+                Quyền Plus đã được kích hoạt trên tài khoản của bạn.
               </p>
             </div>
           </CardContent>
@@ -422,7 +422,7 @@ export function BillingPlan() {
               <>
                 {isTrialing && trialDaysLeft !== null && (
                   <div className="w-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                    <span className="font-semibold">{demoMode ? "Plus dùng thử:" : "Plus trial:"}</span> còn{" "}
+                    <span className="font-semibold">Plus dùng thử:</span> còn{" "}
                     {trialDaysLeft} ngày
                     {demoMode ? " dùng thử." : " dùng thử."}
                     <Button
@@ -484,7 +484,7 @@ export function BillingPlan() {
           </CardTitle>
           <CardDescription>
             {realMode
-              ? "Quyền premium được quản lý bởi server."
+              ? "Quyền premium được quản lý qua tài khoản của bạn."
               : "Các quyền Plus đang mở trên trình duyệt này."}
           </CardDescription>
         </CardHeader>

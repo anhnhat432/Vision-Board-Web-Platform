@@ -72,6 +72,10 @@ Thiết lập tối thiểu:
 - `VITE_API_BASE_URL=https://your-backend.onrender.com/api`
 - `VITE_BILLING_PROVIDER_MODE=api_contract`
 - `VITE_BILLING_PROVIDER_LABEL=Casso + VietQR`
+- `VITE_ENABLE_12_WEEK_MUTATION_SYNC=true`
+- `VITE_ENABLE_12_WEEK_PULL_SYNC=true`
+- `VITE_ENABLE_12_WEEK_IMPORT_DRY_RUN=true`
+- `VITE_ENABLE_12_WEEK_CLOUD_IMPORT=true`
 
 Chọn 1 trong 2 cách:
 

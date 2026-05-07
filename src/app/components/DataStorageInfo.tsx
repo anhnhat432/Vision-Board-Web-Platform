@@ -1,4 +1,5 @@
 import { HardDrive, Info, Monitor } from "lucide-react";
+import { isDemoMode } from "../utils/app-mode";
 
 type DataStorageInfoVariant = "card" | "inline" | "banner";
 
@@ -13,11 +14,15 @@ export function DataStorageInfo({
   showSyncHint = false,
   className = "",
 }: DataStorageInfoProps) {
+  const demoMode = isDemoMode();
+
   if (variant === "inline") {
     return (
       <p className={`flex items-center gap-1.5 text-xs text-slate-500 ${className}`}>
         <Monitor className="h-3 w-3 shrink-0" />
-        Kế hoạch 12 tuần được lưu trên trình duyệt này.
+        {demoMode
+          ? "Kế hoạch 12 tuần được lưu trên trình duyệt này."
+          : "Kế hoạch 12 tuần đang gắn với tài khoản của bạn."}
       </p>
     );
   }
@@ -30,11 +35,12 @@ export function DataStorageInfo({
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
         <div className="min-w-0">
           <p className="text-sm font-medium text-sky-900">
-            Dữ liệu được lưu trên trình duyệt này
+            {demoMode ? "Dữ liệu được lưu trên trình duyệt này" : "Dữ liệu được gắn với tài khoản của bạn"}
           </p>
           <p className="mt-0.5 text-sm text-sky-700">
-            Nếu đổi thiết bị hoặc xóa dữ liệu trình duyệt, tiến độ sẽ bị mất. Hãy xuất bản sao
-            lưu nếu muốn giữ lại.
+            {demoMode
+              ? "Nếu đổi thiết bị hoặc xóa dữ liệu trình duyệt, tiến độ sẽ bị mất. Hãy xuất bản sao lưu nếu muốn giữ lại."
+              : "Ứng dụng vẫn giữ một bản trên thiết bị để thao tác nhanh và đồng bộ lại khi tài khoản sẵn sàng."}
           </p>
         </div>
       </div>
@@ -51,23 +57,28 @@ export function DataStorageInfo({
         </div>
         <div>
           <p className="text-sm font-semibold text-slate-900">Dữ liệu và quyền riêng tư</p>
-          <p className="text-xs text-slate-500">Dữ liệu lưu trên thiết bị</p>
+          <p className="text-xs text-slate-500">{demoMode ? "Dữ liệu lưu trên thiết bị" : "Dữ liệu tài khoản"}</p>
         </div>
       </div>
       <ul className="mt-4 space-y-2.5">
         <li className="flex items-start gap-2.5 text-sm leading-6 text-slate-700">
           <Monitor className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
-          Toàn bộ dữ liệu được lưu trên trình duyệt này. App chỉ đồng bộ lên tài khoản khi bạn đăng nhập.
+          {demoMode
+            ? "Toàn bộ dữ liệu được lưu trên trình duyệt này. App chỉ đồng bộ lên tài khoản khi bạn đăng nhập."
+            : "Dữ liệu được gắn với tài khoản; thiết bị vẫn giữ bản tạm để bạn dùng mượt khi mạng chập chờn."}
         </li>
         <li className="flex items-start gap-2.5 text-sm leading-6 text-slate-700">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
-          Đổi thiết bị, dùng trình duyệt khác hoặc xóa dữ liệu trình duyệt sẽ mất tiến độ. Hãy
-          xuất bản sao lưu thường xuyên.
+          {demoMode
+            ? "Đổi thiết bị, dùng trình duyệt khác hoặc xóa dữ liệu trình duyệt sẽ mất tiến độ. Hãy xuất bản sao lưu thường xuyên."
+            : "Nếu đổi thiết bị, hãy đăng nhập cùng tài khoản để khôi phục dữ liệu. Bạn vẫn có thể xuất bản sao lưu khi cần."}
         </li>
         {showSyncHint && (
           <li className="flex items-start gap-2.5 text-sm leading-6 text-slate-500">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-300" />
-            Đăng nhập để đồng bộ dữ liệu giữa các thiết bị (khi tính năng sẵn sàng).
+            {demoMode
+              ? "Đăng nhập để đồng bộ dữ liệu giữa các thiết bị khi dùng bản production."
+              : "Đồng bộ tài khoản chạy nền và không xóa dữ liệu trên thiết bị nếu gặp lỗi."}
           </li>
         )}
       </ul>

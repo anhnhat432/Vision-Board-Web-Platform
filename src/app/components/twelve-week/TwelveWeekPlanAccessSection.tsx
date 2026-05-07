@@ -5,6 +5,7 @@ import {
   getBillingProviderModeLabel,
   getBillingReadinessLabel,
 } from "../../utils/billing-contract";
+import { getUserData } from "../../utils/storage";
 import type { BillingProviderMode } from "../../utils/storage-types";
 import { getEntitlementLabel, getPlanDefinition, getPlanLabel } from "../../utils/twelve-week-premium";
 import { formatDateTimeLabel } from "../../utils/twelve-week-system-ui";
@@ -51,6 +52,47 @@ function getBillingSnapshotTone(
   return "border-rose-200 bg-rose-50/92 text-rose-900";
 }
 
+function formatPlanDate(value: string | null | undefined): string {
+  if (!value) return "Chưa có";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Không rõ";
+
+  return new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
+
+function getSubscriptionStatusLabel(status: string | undefined): string {
+  switch (status) {
+    case "active":
+      return "Đang hoạt động";
+    case "trialing":
+      return "Đang dùng thử";
+    case "canceled":
+      return "Đã hủy";
+    case "inactive":
+      return "Không hoạt động";
+    default:
+      return "Chưa có thông tin";
+  }
+}
+
+function getBillingCycleLabel(cycle: string | undefined): string {
+  switch (cycle) {
+    case "monthly":
+      return "Hàng tháng";
+    case "quarterly":
+      return "Hàng quý";
+    case "yearly":
+      return "Hàng năm";
+    default:
+      return "Chu kỳ 12 tuần";
+  }
+}
+
 export function TwelveWeekPlanAccessSection({
   currentPlanCode,
   entitlementKeys,
@@ -67,6 +109,9 @@ export function TwelveWeekPlanAccessSection({
   const currentPlanDefinition = getPlanDefinition(currentPlanCode);
   const billingDebugUi = shouldShowBillingDebugUi();
   const unlockedEntitlementCount = ENTITLEMENT_ORDER.filter((key) => entitlementKeys.includes(key)).length;
+  const subscription = getUserData().subscription;
+  const shouldShowSubscriptionDetails = currentPlanCode !== "FREE" || Boolean(subscription);
+  const renewalLabel = subscription?.status === "canceled" ? "Hiệu lực đến" : "Gia hạn / hết hạn";
 
   return (
     <div className="rounded-lg border border-violet-200/70 bg-violet-50/75 p-5 shadow-[0_18px_44px_-36px_rgba(124,58,237,0.24)]">
@@ -111,6 +156,27 @@ export function TwelveWeekPlanAccessSection({
             Nâng cấp gói Plus để mở toàn bộ quyền nâng cao.
           </p>
         </div>
+
+        {shouldShowSubscriptionDetails ? (
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="rounded-lg border border-violet-100 bg-white p-4">
+              <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Trạng thái</p>
+              <p className="mt-2 text-sm font-semibold text-slate-950">
+                {getSubscriptionStatusLabel(subscription?.status)}
+              </p>
+            </div>
+            <div className="rounded-lg border border-violet-100 bg-white p-4">
+              <p className="text-xs uppercase tracking-[0.16em] text-violet-700">{renewalLabel}</p>
+              <p className="mt-2 text-sm font-semibold text-slate-950">{formatPlanDate(subscription?.renewsAt)}</p>
+            </div>
+            <div className="rounded-lg border border-violet-100 bg-white p-4">
+              <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Chu kỳ</p>
+              <p className="mt-2 text-sm font-semibold text-slate-950">
+                {getBillingCycleLabel(subscription?.billingCycle)}
+              </p>
+            </div>
+          </div>
+        ) : null}
 
         {billingDebugUi ? (
           <>

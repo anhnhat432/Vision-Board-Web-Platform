@@ -162,6 +162,10 @@ Bước 1: Vercel project settings → Environment Variables:
   VITE_FIREBASE_APP_ID=...
   VITE_BILLING_PROVIDER_MODE=api_contract
   VITE_BILLING_PROVIDER_LABEL=Chuyển khoản ngân hàng
+  VITE_ENABLE_12_WEEK_MUTATION_SYNC=true
+  VITE_ENABLE_12_WEEK_PULL_SYNC=true
+  VITE_ENABLE_12_WEEK_IMPORT_DRY_RUN=true
+  VITE_ENABLE_12_WEEK_CLOUD_IMPORT=true
   VITE_ANALYTICS_MODE=off  (bật sau khi GA4 verified)
 Bước 2: Re-deploy
 Bước 3: Verify: đăng ký → đăng nhập → tạo plan → data sync backend
@@ -569,6 +573,10 @@ VITE_FIREBASE_PROJECT_ID=vision-board-production
 VITE_FIREBASE_APP_ID=1:...
 VITE_BILLING_PROVIDER_MODE=api_contract
 VITE_BILLING_PROVIDER_LABEL=Chuyển khoản ngân hàng
+VITE_ENABLE_12_WEEK_MUTATION_SYNC=true
+VITE_ENABLE_12_WEEK_PULL_SYNC=true
+VITE_ENABLE_12_WEEK_IMPORT_DRY_RUN=true
+VITE_ENABLE_12_WEEK_CLOUD_IMPORT=true
 VITE_ANALYTICS_MODE=off
 ```
 

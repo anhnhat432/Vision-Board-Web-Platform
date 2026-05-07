@@ -23,6 +23,9 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
     syncResultStatus === "conflict" ||
     syncResultStatus === "unsafe";
   const showAdvancedSync = shouldShowSyncDebugUi() || hasSyncAttention;
+  const storageDescription = props.backendConnectionStatus.signedIn
+    ? "Quản lý quyền Plus, nhắc việc và dữ liệu tài khoản. Bản trên thiết bị vẫn được giữ để thao tác offline và đồng bộ an toàn."
+    : "Quản lý quyền Plus, nhắc việc và dữ liệu đang lưu trên trình duyệt này. Các thao tác xóa đều cần xác nhận.";
 
   return (
     <Card
@@ -31,9 +34,7 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
     >
       <CardHeader>
         <CardTitle className="text-slate-950">Dữ liệu, nhắc việc và quyền Plus</CardTitle>
-        <CardDescription className="text-slate-600">
-          Quản lý quyền Plus, nhắc việc và dữ liệu đang lưu trên trình duyệt này. Các thao tác xóa đều cần xác nhận.
-        </CardDescription>
+        <CardDescription className="text-slate-600">{storageDescription}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <TwelveWeekPlanAccessSection
