@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   CheckCircle2,
@@ -164,7 +164,9 @@ export function RootLayout() {
 
       if (currentRouteKey === targetRouteKey) return;
 
-      navigate(path, { flushSync: true });
+      startTransition(() => {
+        navigate(path);
+      });
     },
     [currentRouteKey, navigate],
   );
