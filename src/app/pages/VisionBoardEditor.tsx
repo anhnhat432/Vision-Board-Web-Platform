@@ -909,29 +909,28 @@ export function VisionBoardEditor() {
           </DialogContent>
         </Dialog>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <Card className="overflow-hidden">
+        <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <Card className="min-w-0 overflow-hidden">
             <CardContent className="p-0">
               <div
-                className="relative min-h-[620px] overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.82),_transparent_24%),linear-gradient(135deg,_rgba(244,244,255,0.96)_0%,_rgba(251,244,255,0.94)_48%,_rgba(239,246,255,0.96)_100%)]"
-                style={{ aspectRatio: "16/9" }}
+                className="relative h-[520px] min-w-0 overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.82),_transparent_24%),linear-gradient(135deg,_rgba(244,244,255,0.96)_0%,_rgba(251,244,255,0.94)_48%,_rgba(239,246,255,0.96)_100%)] sm:h-[580px] lg:h-[620px] xl:h-[600px]"
               >
                 <div className="absolute inset-0 gradient-grid bg-[size:36px_36px] opacity-70" />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(168,85,247,0.14),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(56,189,248,0.14),_transparent_22%)]" />
 
                 {board.items.length === 0 ? (
-                  <div className="absolute inset-0 flex items-center justify-center p-8">
-                    <div className="max-w-lg rounded-[32px] border border-white/80 bg-white/82 p-8 text-center shadow-[0_32px_70px_-40px_rgba(15,23,42,0.42)]">
-                      <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[24px] bg-violet-50 text-violet-700">
-                        <Sparkles className="h-9 w-9" />
+                  <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
+                    <div className="w-full max-w-md rounded-2xl border border-white/80 bg-white/86 p-5 text-center shadow-[0_32px_70px_-44px_rgba(15,23,42,0.42)] sm:p-7">
+                      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-violet-50 text-violet-700 sm:h-20 sm:w-20 sm:rounded-2xl">
+                        <Sparkles className="h-8 w-8 sm:h-9 sm:w-9" />
                       </div>
-                      <h2 className="mt-6 text-3xl font-bold text-slate-900">
+                      <h2 className="mt-5 text-2xl font-bold text-slate-900 sm:mt-6 sm:text-3xl">
                         Canvas của bạn đang chờ câu chuyện đầu tiên
                       </h2>
                       <p className="mt-3 text-base text-slate-500">
                         Hãy bắt đầu bằng một hình ảnh đại diện, một câu nói khiến bạn rung động hoặc một biểu tượng để neo cảm xúc cho mục tiêu của mình.
                       </p>
-                      <Button className="mt-8" onClick={() => setIsAddingItem(true)}>
+                      <Button className="mt-6 w-full sm:mt-8 sm:w-auto" onClick={() => setIsAddingItem(true)}>
                         <Plus className="h-4 w-4" />
                         Thêm phần tử đầu tiên
                       </Button>
