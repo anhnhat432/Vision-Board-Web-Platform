@@ -816,7 +816,7 @@ export function RootLayout() {
       </a>
 
       <header className="sticky top-0 z-40 px-4 pt-2 sm:top-3 sm:px-6 sm:pt-0 lg:px-8">
-        <div className="glass-surface mx-auto max-w-5xl rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 shadow-[0_8px_24px_-16px_rgba(15,23,42,0.1)]">
+        <div className="glass-surface mx-auto max-w-6xl rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 shadow-[0_8px_24px_-16px_rgba(15,23,42,0.1)]">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 shrink-0 items-center gap-2">
               <button
@@ -829,7 +829,9 @@ export function RootLayout() {
                   <Sparkles className="h-4.5 w-4.5 text-white" />
                 </div>
                 <div className="min-w-0">
-                  <h1 className="truncate text-sm font-semibold tracking-normal text-slate-900">Dear Our Future</h1>
+                  <span className="block truncate text-sm font-semibold tracking-normal text-slate-900">
+                    Dear Our Future
+                  </span>
                 </div>
               </button>
 
@@ -970,7 +972,7 @@ export function RootLayout() {
                   <Button
                     size="sm"
                     onClick={() => handleAuthNavigate("signup")}
-                    className="h-8 rounded-full bg-slate-900 px-3 text-xs text-white hover:bg-slate-800"
+                    className="h-8 rounded-full px-3 text-xs"
                   >
                     Đăng ký
                   </Button>
@@ -1017,7 +1019,7 @@ export function RootLayout() {
               {isSignedOutVisitor ? (
                 <Button
                   size="sm"
-                  className="h-11 rounded-xl bg-slate-950 px-3 text-xs text-white shadow-sm hover:bg-slate-800"
+                  className="h-10 rounded-xl px-3 text-xs shadow-sm sm:h-11"
                   onClick={() => handleAuthNavigate("signup")}
                 >
                   Đăng ký
@@ -1050,7 +1052,7 @@ export function RootLayout() {
         </div>
 
         {mobileMenuOpen && (
-          <div id="mobile-nav-menu" className="mx-auto mt-2 max-w-5xl md:hidden">
+          <div id="mobile-nav-menu" className="mx-auto mt-2 max-w-6xl md:hidden">
             <div className="glass-surface rounded-[28px] p-3">
               <nav className="space-y-1" aria-label="Menu điều hướng">
                 {user ? (
@@ -1103,7 +1105,7 @@ export function RootLayout() {
                       Đăng nhập
                     </Button>
                     <Button
-                      className="w-full bg-slate-950 text-white hover:bg-slate-800"
+                      className="w-full"
                       onClick={() => {
                         setMobileMenuOpen(false);
                         handleAuthNavigate("signup");
@@ -1156,7 +1158,7 @@ export function RootLayout() {
       </header>
 
       <main
-        className={`relative z-10 mx-auto max-w-5xl px-4 pb-12 pt-6 sm:px-6 sm:pt-8 lg:px-8 ${
+        className={`relative z-10 mx-auto max-w-6xl px-4 pb-12 pt-5 sm:px-6 sm:pt-7 lg:px-8 ${
           isSignedOutVisitor ? "" : "main-content-mobile-pad"
         }`}
         id="main-content"

@@ -18,19 +18,19 @@ const FLOW_STEPS = [
 
 export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: PublicVisitorHeroProps) {
   return (
-    <Card className="overflow-hidden border border-slate-200/80 bg-white/94 shadow-[0_22px_60px_-42px_rgba(15,23,42,0.32)]">
-      <CardContent className="p-5 sm:p-6 lg:p-7">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)] lg:items-center">
-          <div className="min-w-0 space-y-4">
-            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+    <Card className="overflow-hidden border border-slate-200/80 bg-white/96 shadow-[0_24px_64px_-46px_rgba(15,23,42,0.34)]">
+      <CardContent className="p-4 sm:p-5 lg:p-6">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.72fr)] lg:items-stretch">
+          <div className="flex min-w-0 flex-col justify-center space-y-5 py-2">
+            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50/90 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
               <Sparkles className="h-3.5 w-3.5" />
               Trang chính
             </span>
             <div className="space-y-3">
-              <h1 className="max-w-3xl text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+              <h1 className="max-w-3xl text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl lg:max-w-2xl">
                 Biến tầm nhìn thành mục tiêu rõ ràng và kế hoạch 12 tuần có thể làm mỗi ngày.
               </h1>
-              <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
+              <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base lg:max-w-xl">
                 Dùng được ngay, không cần đăng nhập. Chấm cân bằng cuộc sống, chốt mục tiêu SMART, kiểm tra khả thi rồi
                 vào kế hoạch 12 tuần có việc cho từng ngày.
               </p>
@@ -38,7 +38,7 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
             <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               {isDemo ? (
                 <>
-                  <Button className="bg-slate-950 text-white hover:bg-slate-800" onClick={onStartDemo}>
+                  <Button className="w-full sm:w-auto" onClick={onStartDemo}>
                     <Sparkles className="h-4 w-4" />
                     Trải nghiệm demo miễn phí
                   </Button>
@@ -46,14 +46,18 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
                     <UserPlus className="h-4 w-4" />
                     Đăng ký để sync sau
                   </Button>
-                  <Button variant="outline" className="border-slate-200 bg-white text-slate-900 hover:bg-slate-50" onClick={onSignIn}>
+                  <Button
+                    variant="outline"
+                    className="border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                    onClick={onSignIn}
+                  >
                     <LogIn className="h-4 w-4" />
                     Đăng nhập
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button className="bg-slate-950 text-white hover:bg-slate-800" onClick={onSignUp}>
+                  <Button className="w-full sm:w-auto" onClick={onSignUp}>
                     <UserPlus className="h-4 w-4" />
                     Đăng ký miễn phí để lưu
                   </Button>
@@ -70,13 +74,28 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
                 muốn giữ bản sao.
               </p>
             ) : null}
+            <div className="grid gap-2 pt-1 sm:grid-cols-3">
+              {[
+                ["1 workspace", "lưu theo trình duyệt"],
+                ["12 tuần", "kế hoạch rõ từng ngày"],
+                ["Review", "giữ nhịp mỗi tuần"],
+              ].map(([value, label]) => (
+                <div key={value} className="rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2">
+                  <p className="text-sm font-bold text-slate-950">{value}</p>
+                  <p className="mt-0.5 text-xs leading-5 text-slate-500">{label}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
+          <div className="flex flex-col rounded-lg border border-slate-200 bg-slate-50/82 p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Luồng nên đi</p>
-            <div className="mt-4 space-y-3">
+            <div className="mt-4 grid flex-1 gap-3">
               {FLOW_STEPS.map((step, index) => (
-                <div key={step} className="flex items-center gap-3 rounded-[18px] bg-white px-3 py-3 shadow-sm">
+                <div
+                  key={step}
+                  className="flex min-h-16 items-center gap-3 rounded-lg border border-slate-200/70 bg-white px-3 py-3 shadow-[0_12px_30px_-26px_rgba(15,23,42,0.3)]"
+                >
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white">
                     {index + 1}
                   </div>
