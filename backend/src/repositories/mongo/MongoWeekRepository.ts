@@ -18,6 +18,7 @@ export interface WeekEntity {
   focus: string;
   expectedOutput: string;
   review?: WeekReviewData;
+  revision?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -46,6 +47,7 @@ function mapWeek(doc: {
   weekNumber: number;
   focus: string;
   expectedOutput: string;
+  revision?: number | null;
   review?:
     | {
         weekNumber: number;
@@ -63,6 +65,7 @@ function mapWeek(doc: {
     weekNumber: doc.weekNumber,
     focus: doc.focus,
     expectedOutput: doc.expectedOutput,
+    revision: doc.revision ?? undefined,
     review: doc.review
       ? {
           weekNumber: doc.review.weekNumber,

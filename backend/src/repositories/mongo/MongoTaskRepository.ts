@@ -11,6 +11,7 @@ export interface TaskEntity {
   title: string;
   status: TaskStatus;
   scheduledDate?: Date;
+  revision?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,6 +36,7 @@ function mapTask(doc: {
   title: string;
   status: TaskStatus;
   scheduledDate?: Date | null;
+  revision?: number | null;
   createdAt: Date;
   updatedAt: Date;
 }): TaskEntity {
@@ -44,6 +46,7 @@ function mapTask(doc: {
     title: doc.title,
     status: doc.status,
     scheduledDate: doc.scheduledDate ?? undefined,
+    revision: doc.revision ?? undefined,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   };

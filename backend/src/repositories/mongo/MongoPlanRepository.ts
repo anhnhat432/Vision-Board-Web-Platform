@@ -9,6 +9,7 @@ export interface PlanEntity {
   vision: string;
   smartGoalId?: string;
   startDate: Date;
+  revision?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,6 +34,7 @@ function mapPlan(doc: {
   vision: string;
   smartGoalId?: string | null;
   startDate: Date;
+  revision?: number | null;
   createdAt: Date;
   updatedAt: Date;
 }): PlanEntity {
@@ -42,6 +44,7 @@ function mapPlan(doc: {
     vision: doc.vision,
     smartGoalId: doc.smartGoalId ?? undefined,
     startDate: doc.startDate,
+    revision: doc.revision ?? undefined,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
   };
