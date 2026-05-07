@@ -261,6 +261,32 @@ describe("POST /api/billing/webhook/:provider", () => {
     assert.equal(response.status, 200);
     assert.equal(response.body.success, true);
   });
+
+  it("rejects malformed provider parameters before adapter lookup", async () => {
+    const body = createMockWebhookBody({
+      userId: "user_webhook_bad_provider",
+      eventId: uniqueEventId(),
+      subscriptionId: uniqueSubId(),
+    });
+
+    const response = await postWebhook(createWebhookTestApp(), "mock!", body);
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.errorCode, "invalid_provider");
+  });
+});
+
+describe("POST /api/billing/webhook/casso validation", () => {
+  it("rejects malformed Casso transaction payloads", async () => {
+    const response = await postWebhook(
+      createWebhookTestApp(),
+      "casso",
+      JSON.stringify({ error: 0, data: "not-an-array" }),
+    );
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.errorCode, "invalid_payload");
+  });
 });
 
 describe("Webhook signature verification", () => {

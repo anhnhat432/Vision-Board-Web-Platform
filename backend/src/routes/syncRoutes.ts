@@ -8,6 +8,7 @@ import {
   submitTwelveWeekMutations,
   validateTwelveWeekImport,
 } from "../controllers/syncController";
+import { validateJsonObjectBody } from "../middleware/requestValidation";
 import { asyncHandler } from "../utils/asyncHandler";
 
 const syncRoutes = Router();
@@ -19,12 +20,23 @@ const syncRoutes = Router();
  */
 syncRoutes.use(express.json({ limit: "1mb" }));
 
-syncRoutes.post("/sync/12-week/import", asyncHandler(importTwelveWeekWorkspace));
-syncRoutes.post("/sync/12-week/import/validate", asyncHandler(validateTwelveWeekImport));
-syncRoutes.post("/sync/12-week/mutations", asyncHandler(submitTwelveWeekMutations));
+syncRoutes.post(
+  "/sync/12-week/import",
+  validateJsonObjectBody,
+  asyncHandler(importTwelveWeekWorkspace),
+);
+syncRoutes.post(
+  "/sync/12-week/import/validate",
+  validateJsonObjectBody,
+  asyncHandler(validateTwelveWeekImport),
+);
+syncRoutes.post(
+  "/sync/12-week/mutations",
+  validateJsonObjectBody,
+  asyncHandler(submitTwelveWeekMutations),
+);
 syncRoutes.get("/sync/12-week/pull", asyncHandler(pullTwelveWeekWorkspace));
 syncRoutes.get("/sync/12-week/workspace/export", asyncHandler(exportTwelveWeekWorkspace));
 syncRoutes.delete("/sync/12-week/workspace", asyncHandler(deleteTwelveWeekWorkspace));
 
 export { syncRoutes };
-

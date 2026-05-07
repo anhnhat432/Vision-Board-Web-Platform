@@ -1,13 +1,19 @@
 import { Router } from "express";
 
 import { createPlan, getPlanById, getPlans, updatePlan } from "../controllers/planController";
+import { validateJsonObjectBody, validateObjectIdParam } from "../middleware/requestValidation";
 import { asyncHandler } from "../utils/asyncHandler";
 
 const planRoutes = Router();
 
-planRoutes.post("/plans", asyncHandler(createPlan));
+planRoutes.post("/plans", validateJsonObjectBody, asyncHandler(createPlan));
 planRoutes.get("/plans", asyncHandler(getPlans));
-planRoutes.patch("/plans/:id", asyncHandler(updatePlan));
-planRoutes.get("/plans/:id", asyncHandler(getPlanById));
+planRoutes.patch(
+  "/plans/:id",
+  validateObjectIdParam("id", "planId"),
+  validateJsonObjectBody,
+  asyncHandler(updatePlan),
+);
+planRoutes.get("/plans/:id", validateObjectIdParam("id", "planId"), asyncHandler(getPlanById));
 
 export { planRoutes };

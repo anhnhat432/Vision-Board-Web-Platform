@@ -19,10 +19,15 @@ function isValidHttpUrl(value: unknown): value is string {
   }
 }
 
-function isOriginAllowed(url: string, allowedOrigin: string | undefined): boolean {
-  if (!allowedOrigin) return true; // No origin restriction configured
+function isOriginAllowed(url: string, allowedOrigins: string | undefined): boolean {
+  if (!allowedOrigins) return true; // No origin restriction configured
   try {
-    return new URL(url).origin === new URL(allowedOrigin).origin;
+    const inputOrigin = new URL(url).origin;
+    return allowedOrigins
+      .split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean)
+      .some((origin) => new URL(origin).origin === inputOrigin);
   } catch {
     return false;
   }
@@ -97,7 +102,7 @@ export async function createCheckoutSession(req: Request, res: Response): Promis
     const session = await adapter.createCheckoutSession({
       userId: user.uid,
       planCode: planCode as "PLUS",
-      billingCycle: billingCycle ?? "monthly",
+      billingCycle: billingCycle ?? "twelve_week",
       successUrl: returnUrl,
       cancelUrl,
       locale,

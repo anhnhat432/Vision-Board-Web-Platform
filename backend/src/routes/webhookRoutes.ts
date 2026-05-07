@@ -10,13 +10,22 @@ import { Router } from "express";
 
 import { handleCassoWebhook } from "../controllers/cassoWebhookController";
 import { handleWebhook } from "../controllers/webhookController";
+import { validateCassoWebhookPayload, validateWebhookProviderParam } from "../middleware/requestValidation";
 import { asyncHandler } from "../utils/asyncHandler";
 
 const webhookRoutes = Router();
 
 // Casso-specific webhook (matches PaymentOrders by bank transfer description)
-webhookRoutes.post("/billing/webhook/casso", asyncHandler(handleCassoWebhook));
+webhookRoutes.post(
+  "/billing/webhook/casso",
+  validateCassoWebhookPayload,
+  asyncHandler(handleCassoWebhook),
+);
 // Generic provider webhook (PayOS, VNPay, mock, etc.)
-webhookRoutes.post("/billing/webhook/:provider", asyncHandler(handleWebhook));
+webhookRoutes.post(
+  "/billing/webhook/:provider",
+  validateWebhookProviderParam,
+  asyncHandler(handleWebhook),
+);
 
 export { webhookRoutes };

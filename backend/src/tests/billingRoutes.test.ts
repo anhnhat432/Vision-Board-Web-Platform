@@ -299,6 +299,22 @@ describe("POST /api/billing/checkout-session", () => {
     assert.equal(response.body.errorCode, "invalid_cancel_url");
   });
 
+  it("normalizes checkout input before creating a session", async () => {
+    const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/checkout-session", {
+      token: "checkout-token",
+      body: {
+        planCode: " plus ",
+        returnUrl: " https://example.com/billing?status=success ",
+        cancelUrl: " https://example.com/billing?status=cancel ",
+        billingCycle: "twelve_week",
+        locale: " vi-VN ",
+      },
+    });
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.success, true);
+  });
+
   it("creates a checkout session with mock provider and returns checkoutUrl", async () => {
     // BILLING_PROVIDER defaults to mock
     const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/checkout-session", {
@@ -358,6 +374,17 @@ describe("POST /api/billing/checkout-session", () => {
 });
 
 // ─── POST /api/billing/customer-portal Tests ─────────────────────────────────
+
+describe("GET /api/billing/order-status/:orderId", () => {
+  it("returns 400 for malformed order ids before database lookup", async () => {
+    const response = await requestJson(createBillingTestApp(), "GET", "/api/billing/order-status/not-valid", {
+      token: "checkout-token",
+    });
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.errorCode, "invalid_order_id");
+  });
+});
 
 describe("POST /api/billing/customer-portal", () => {
   const portalUserId = "user_portal_test";
