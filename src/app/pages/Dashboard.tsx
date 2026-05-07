@@ -56,6 +56,7 @@ import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useUpgradeDialog } from "../hooks/useUpgradeDialog";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { isDemoMode } from "../utils/app-mode";
+import { loadWithChunkReload } from "../utils/chunkLoad";
 import {
   trackRescueActionTaken,
   trackRescueTriggerDismissed,
@@ -83,10 +84,12 @@ import {
 import { getEntitlementLabel, getPlanLabel } from "../utils/twelve-week-premium";
 import { dismissRescueTrigger, evaluateRescueTriggers } from "../utils/twelve-week-system-ui";
 
-const DashboardLifeAreaRadar = lazy(async () => {
-  const module = await import("../components/DashboardLifeAreaRadar");
-  return { default: module.DashboardLifeAreaRadar };
-});
+const DashboardLifeAreaRadar = lazy(() =>
+  loadWithChunkReload(async () => {
+    const module = await import("../components/DashboardLifeAreaRadar");
+    return { default: module.DashboardLifeAreaRadar };
+  }),
+);
 
 const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
   {

@@ -25,12 +25,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
+import { loadWithChunkReload } from "../utils/chunkLoad";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { type LifeArea, getLifeAreaLabel, updateWheelOfLife } from "../utils/storage";
 
-const LifeBalanceHistoryChart = lazy(async () => ({
-  default: (await import("../components/LifeBalanceHistoryChart")).LifeBalanceHistoryChart,
-}));
+const LifeBalanceHistoryChart = lazy(() =>
+  loadWithChunkReload(async () => ({
+    default: (await import("../components/LifeBalanceHistoryChart")).LifeBalanceHistoryChart,
+  })),
+);
 
 export function LifeBalance() {
   const navigate = useNavigate();

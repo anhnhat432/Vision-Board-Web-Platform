@@ -491,16 +491,6 @@ export function RootLayout() {
                       ? "Đã đồng bộ"
                       : "Đã nối backend"
               : "Chờ profile";
-  const accountStatusClass =
-    userProfileError || backendPlanHydration.error
-      ? "bg-red-50 text-red-700 ring-red-200"
-      : backendHydrationStatus === "partial"
-        ? "bg-amber-50 text-amber-700 ring-amber-200"
-        : backendPlanHydration.loading
-          ? "bg-sky-50 text-sky-700 ring-sky-200"
-          : userProfile
-            ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
-            : "bg-slate-50 text-slate-600 ring-slate-200";
   const canRetryUserProfile = Boolean(user) && !userProfileLoading && (!userProfile || Boolean(userProfileError));
 
   const handleSignOut = async () => {

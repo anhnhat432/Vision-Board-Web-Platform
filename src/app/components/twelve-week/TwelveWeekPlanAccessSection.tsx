@@ -1,5 +1,5 @@
 import { Crown } from "lucide-react";
-import { isDemoMode, shouldShowBillingDebugUi } from "../../utils/app-mode";
+import { shouldShowBillingDebugUi } from "../../utils/app-mode";
 import {
   getBillingActionStatusLabel,
   getBillingProviderModeLabel,
@@ -65,7 +65,6 @@ export function TwelveWeekPlanAccessSection({
   onOpenBillingPortal,
 }: TwelveWeekPlanAccessSectionProps) {
   const currentPlanDefinition = getPlanDefinition(currentPlanCode);
-  const demoMode = isDemoMode();
   const billingDebugUi = shouldShowBillingDebugUi();
   const unlockedEntitlementCount = ENTITLEMENT_ORDER.filter((key) => entitlementKeys.includes(key)).length;
 

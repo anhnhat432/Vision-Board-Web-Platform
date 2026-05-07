@@ -4,13 +4,14 @@ import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RootLayout } from "./components/RootLayout";
 import { Dashboard } from "./pages/Dashboard";
+import { loadWithChunkReload } from "./utils/chunkLoad";
 
 function lazyComponent<TModule extends Record<string, unknown>>(
   loader: () => Promise<TModule>,
   exportName: keyof TModule,
 ) {
   return async () => {
-    const module = await loader();
+    const module = await loadWithChunkReload(loader);
     return {
       Component: module[exportName] as ComponentType,
     };
