@@ -272,19 +272,19 @@ describe("TwelveWeekLocalStatusSection", () => {
     expect(screen.getByText(/Chưa có dữ liệu nào bị ghi đè/i)).toBeInTheDocument();
     expect(screen.getByText("Launch cycle")).toBeInTheDocument();
     expect(screen.getByText("Trạng thái việc")).toBeInTheDocument();
-    expect(screen.getByText("Dùng bản backend:")).toBeInTheDocument();
-    expect(screen.getByText("Giữ bản local:")).toBeInTheDocument();
+    expect(screen.getByText("Dùng bản tài khoản:")).toBeInTheDocument();
+    expect(screen.getByText("Giữ bản thiết bị:")).toBeInTheDocument();
     expect(screen.getByText("done")).toBeInTheDocument();
     expect(screen.getByText("not done")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /Dùng bản backend/i }));
-    fireEvent.click(screen.getByRole("button", { name: /Giữ bản local/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Dùng bản tài khoản/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Giữ bản thiết bị/i }));
 
     expect(onUseBackendPlanForConflicts).toHaveBeenCalledWith("goal_1");
     expect(onKeepLocalPlanForConflicts).toHaveBeenCalledWith("goal_1");
   });
 
-  it("shows local-first copy and keeps manual queue sync disabled in demo mode", () => {
+  it("shows device-first copy and keeps manual queue sync disabled in demo mode", () => {
     const onRunMutationQueueSync = vi.fn();
 
     render(
@@ -318,8 +318,8 @@ describe("TwelveWeekLocalStatusSection", () => {
       />,
     );
 
-    expect(screen.getByText("Bản demo lưu trên trình duyệt này, không cần cloud sync.")).toBeInTheDocument();
-    const button = screen.getByRole("button", { name: /Đồng bộ cloud thủ công/i });
+    expect(screen.getByText("Bản dùng thử lưu trên trình duyệt này, không cần đồng bộ tài khoản.")).toBeInTheDocument();
+    const button = screen.getByRole("button", { name: /Đồng bộ tài khoản/i });
     expect(button).toBeDisabled();
 
     fireEvent.click(button);
@@ -360,8 +360,8 @@ describe("TwelveWeekLocalStatusSection", () => {
       />,
     );
 
-    expect(screen.getByText("Mutation sync đang tắt bằng feature flag.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Đồng bộ cloud thủ công/i })).toBeDisabled();
+    expect(screen.getByText("Đồng bộ thay đổi đang tắt.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Đồng bộ tài khoản/i })).toBeDisabled();
     expect(onRunMutationQueueSync).not.toHaveBeenCalled();
   });
 
@@ -399,8 +399,8 @@ describe("TwelveWeekLocalStatusSection", () => {
       />,
     );
 
-    expect(screen.getByText("Pull sync đang tắt bằng feature flag.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Đồng bộ cloud thủ công/i })).toBeDisabled();
+    expect(screen.getByText("Khôi phục dữ liệu tài khoản đang tắt.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Đồng bộ tài khoản/i })).toBeDisabled();
     expect(onRunMutationQueueSync).not.toHaveBeenCalled();
   });
 
@@ -438,8 +438,8 @@ describe("TwelveWeekLocalStatusSection", () => {
       />,
     );
 
-    expect(screen.getByText("Chưa cấu hình backend API để gửi queue.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Đồng bộ cloud thủ công/i })).toBeDisabled();
+    expect(screen.getByText("Chưa cấu hình API để gửi hàng chờ.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Đồng bộ tài khoản/i })).toBeDisabled();
     expect(onRunMutationQueueSync).not.toHaveBeenCalled();
   });
 
@@ -542,7 +542,7 @@ describe("TwelveWeekLocalStatusSection", () => {
     }
     expect(screen.getByText(/Bắt đầu sync gần nhất:/i)).toBeInTheDocument();
     expect(screen.getByText(/Kết thúc sync gần nhất:/i)).toBeInTheDocument();
-    expect(screen.getByText(/Đã gửi queue, pull 1 goal cloud/i)).toBeInTheDocument();
+    expect(screen.getByText(/Đã gửi hàng chờ, lấy 1 mục tiêu từ tài khoản/i)).toBeInTheDocument();
   });
 
   it("keeps manual queue sync disabled when signed out", () => {
@@ -585,8 +585,8 @@ describe("TwelveWeekLocalStatusSection", () => {
       />,
     );
 
-    expect(screen.getByText("Cần đăng nhập để gửi queue account.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Đồng bộ cloud thủ công/i })).toBeDisabled();
+    expect(screen.getByText("Cần đăng nhập để gửi hàng chờ lên tài khoản.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Đồng bộ tài khoản/i })).toBeDisabled();
     expect(onRunMutationQueueSync).not.toHaveBeenCalled();
   });
 
@@ -624,7 +624,7 @@ describe("TwelveWeekLocalStatusSection", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /Đồng bộ cloud thủ công/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Đồng bộ tài khoản/i }));
 
     expect(onRunMutationQueueSync).toHaveBeenCalledTimes(1);
   });
@@ -632,20 +632,20 @@ describe("TwelveWeekLocalStatusSection", () => {
   it("renders manual cloud sync conflict state with safe v1 actions", () => {
     renderConflictSection();
 
-    expect(screen.getByText("Có thay đổi trên trình duyệt này và trên cloud.")).toBeInTheDocument();
+    expect(screen.getByText("Có thay đổi trên trình duyệt này và trong tài khoản.")).toBeInTheDocument();
     expect(screen.getByText(/Ứng dụng chưa tự ghi đè để tránh mất dữ liệu/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Tải bản sao local/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Giữ bản local/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Tải bản sao dữ liệu/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Giữ bản trên thiết bị/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Thử lại đồng bộ/i })).toBeInTheDocument();
-    // Dùng bản cloud button is present but disabled when no pull response available
-    expect(screen.getByRole("button", { name: /Dùng bản cloud/i })).toBeInTheDocument();
+    // Dùng bản tài khoản button is present but disabled when no pull response available
+    expect(screen.getByRole("button", { name: /Dùng bản tài khoản/i })).toBeInTheDocument();
   });
 
   it("keeps local for now without mutating browser data", () => {
     renderConflictSection();
     window.localStorage.setItem("mvp2-local-sentinel", "keep-me");
 
-    fireEvent.click(screen.getByRole("button", { name: /Giữ bản local/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Giữ bản trên thiết bị/i }));
 
     expect(window.localStorage.getItem("mvp2-local-sentinel")).toBe("keep-me");
     expect(screen.getByText(/Không có dữ liệu nào bị xóa hoặc ghi đè/i)).toBeInTheDocument();
@@ -655,7 +655,7 @@ describe("TwelveWeekLocalStatusSection", () => {
     const onExportLocalData = vi.fn();
     renderConflictSection({ onExportLocalData });
 
-    fireEvent.click(screen.getByRole("button", { name: /Tải bản sao local/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Tải bản sao dữ liệu/i }));
 
     expect(onExportLocalData).toHaveBeenCalledTimes(1);
   });
@@ -673,8 +673,8 @@ describe("TwelveWeekLocalStatusSection", () => {
     renderConflictSection();
 
     fireEvent.click(screen.getByText("Xem chi tiết"));
-    fireEvent.click(screen.getByRole("button", { name: /Tải bản sao local/i }));
-    fireEvent.click(screen.getByRole("button", { name: /Giữ bản local/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Tải bản sao dữ liệu/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Giữ bản trên thiết bị/i }));
     fireEvent.click(screen.getByRole("button", { name: /Thử lại đồng bộ/i }));
 
     const serializedCalls = JSON.stringify(trackAnalyticsEvent.mock.calls);
@@ -722,25 +722,25 @@ describe("TwelveWeekLocalStatusSection", () => {
       />,
     );
 
-    expect(screen.getByText(/Dữ liệu local không bị xóa/i)).toBeInTheDocument();
+    expect(screen.getByText(/Dữ liệu trên thiết bị không bị xóa/i)).toBeInTheDocument();
   });
 
-  it("shows 'Dùng bản cloud' disabled when no pull response", () => {
+  it("shows 'Dùng bản tài khoản' disabled when no pull response", () => {
     renderConflictSection({ pullResponse: undefined });
 
-    const useCloudBtn = screen.getByRole("button", { name: /Dùng bản cloud/i });
+    const useCloudBtn = screen.getByRole("button", { name: /Dùng bản tài khoản/i });
     expect(useCloudBtn).toBeDisabled();
   });
 
-  it("shows 'Dùng bản cloud' disabled when pending local mutations exist", () => {
+  it("shows 'Dùng bản tài khoản' disabled when pending local mutations exist", () => {
     renderConflictSection({ unresolvedLocalMutationCount: 3 });
 
-    const useCloudBtn = screen.getByRole("button", { name: /Dùng bản cloud/i });
+    const useCloudBtn = screen.getByRole("button", { name: /Dùng bản tài khoản/i });
     expect(useCloudBtn).toBeDisabled();
-    expect(screen.getByText(/Không thể dùng bản cloud/i)).toBeInTheDocument();
+    expect(screen.getByText(/Không thể dùng bản tài khoản/i)).toBeInTheDocument();
   });
 
-  it("'Dùng bản cloud' button shows confirm dialog — does not apply without checkbox", () => {
+  it("'Dùng bản tài khoản' button shows confirm dialog — does not apply without checkbox", () => {
     const onUseCloudVersion = vi.fn();
     // Supply a pull response and zero pending mutations so the button is enabled
     renderConflictSection({
@@ -749,20 +749,20 @@ describe("TwelveWeekLocalStatusSection", () => {
       pullResponse: minimalPullResponse,
     });
 
-    fireEvent.click(screen.getByRole("button", { name: /Dùng bản cloud/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Dùng bản tài khoản/i }));
 
     // Confirm panel appears
-    expect(screen.getByText(/Xác nhận ghi đè dữ liệu local/i)).toBeInTheDocument();
+    expect(screen.getByText(/Xác nhận dùng dữ liệu từ tài khoản/i)).toBeInTheDocument();
 
     // Confirm button is still disabled before checkbox
-    const confirmBtn = screen.getByRole("button", { name: /Xác nhận dùng bản cloud/i });
+    const confirmBtn = screen.getByRole("button", { name: /Xác nhận dùng bản tài khoản/i });
     expect(confirmBtn).toBeDisabled();
 
     // callback NOT called
     expect(onUseCloudVersion).not.toHaveBeenCalled();
   });
 
-  it("'Dùng bản cloud' calls onUseCloudVersion only after confirm checkbox", () => {
+  it("'Dùng bản tài khoản' calls onUseCloudVersion only after confirm checkbox", () => {
     const onUseCloudVersion = vi.fn();
     renderConflictSection({
       onUseCloudVersion,
@@ -770,9 +770,9 @@ describe("TwelveWeekLocalStatusSection", () => {
       pullResponse: minimalPullResponse,
     });
 
-    fireEvent.click(screen.getByRole("button", { name: /Dùng bản cloud/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Dùng bản tài khoản/i }));
     fireEvent.click(screen.getByRole("checkbox"));
-    fireEvent.click(screen.getByRole("button", { name: /Xác nhận dùng bản cloud/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Xác nhận dùng bản tài khoản/i }));
 
     expect(onUseCloudVersion).toHaveBeenCalledTimes(1);
   });
@@ -780,9 +780,9 @@ describe("TwelveWeekLocalStatusSection", () => {
   it("tracks use_cloud_version action with safe counts only — no raw text", () => {
     renderConflictSection({ unresolvedLocalMutationCount: 0, pullResponse: minimalPullResponse });
 
-    fireEvent.click(screen.getByRole("button", { name: /Dùng bản cloud/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Dùng bản tài khoản/i }));
     fireEvent.click(screen.getByRole("checkbox"));
-    fireEvent.click(screen.getByRole("button", { name: /Xác nhận dùng bản cloud/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Xác nhận dùng bản tài khoản/i }));
 
     const serializedCalls = JSON.stringify(trackAnalyticsEvent.mock.calls);
     expect(serializedCalls).toContain("use_cloud_version");

@@ -101,7 +101,7 @@ export function useTwelveWeekBackendActions({
   const handleHydrateBackendPlans = useCallback(async () => {
     if (!activeGoal) return;
     if (!isBackendProfileReady) {
-      toast.info("Đăng nhập và chờ backend profile sẵn sàng trước khi khôi phục dữ liệu.");
+      toast.info("Đăng nhập và chờ hồ sơ tài khoản sẵn sàng trước khi khôi phục dữ liệu.");
       return;
     }
 
@@ -120,10 +120,10 @@ export function useTwelveWeekBackendActions({
         toast.info(result.message);
       } else if (result.hydratedCount + result.updatedCount > 0) {
         toast.success(
-          `Đã khôi phục ${result.hydratedCount} chu kỳ mới và cập nhật ${result.updatedCount} chu kỳ từ backend.`,
+          `Đã khôi phục ${result.hydratedCount} chu kỳ mới và cập nhật ${result.updatedCount} chu kỳ từ tài khoản.`,
         );
       } else {
-        toast.info("Đã kiểm tra backend. Chưa có chu kỳ 12-week mới cần khôi phục.");
+        toast.info("Đã kiểm tra tài khoản. Chưa có chu kỳ 12-week mới cần khôi phục.");
       }
 
       loadGoalData(result.latestGoalId ?? activeGoal.id);
@@ -131,7 +131,7 @@ export function useTwelveWeekBackendActions({
       refreshSnapshotMeta();
     } catch (error) {
       console.error("Failed to hydrate backend 12-week plans.", error);
-      toast.error("Không thể khôi phục dữ liệu 12-week từ backend lúc này.");
+      toast.error("Không thể khôi phục dữ liệu 12-week từ tài khoản lúc này.");
     } finally {
       setIsHydratingBackendPlans(false);
     }
@@ -159,18 +159,18 @@ export function useTwelveWeekBackendActions({
     try {
       const result = await applyBackendPlanSnapshotToLocal(goalId);
       if (result.status === "error") {
-        toast.error("Không thể áp dụng bản backend cho chu kỳ này lúc này.");
+        toast.error("Không thể áp dụng bản đã đồng bộ cho chu kỳ này lúc này.");
         return;
       }
 
-      toast.success("Đã dùng bản backend cho chu kỳ này.");
+      toast.success("Đã dùng bản đã đồng bộ cho chu kỳ này.");
       const reviewResult = await refreshBackendConflictReview(goalId);
       if (reviewResult.conflictCount > 0) {
         toast.info(reviewResult.message);
       }
     } catch (error) {
       console.error("Failed to apply backend plan snapshot.", error);
-      toast.error("Không thể áp dụng bản backend cho chu kỳ này lúc này.");
+      toast.error("Không thể áp dụng bản đã đồng bộ cho chu kỳ này lúc này.");
     } finally {
       setIsResolvingBackendPlanConflicts(false);
     }
@@ -182,7 +182,7 @@ export function useTwelveWeekBackendActions({
 
     if (goalId !== activeGoal.id) {
       loadGoalData(goalId);
-      toast.info("Đã mở chu kỳ này. Bấm Giữ local lần nữa để đẩy bản local lên backend.");
+      toast.info("Đã mở chu kỳ này. Bấm Giữ bản trên thiết bị lần nữa để đồng bộ lựa chọn này.");
       return;
     }
 
@@ -199,7 +199,7 @@ export function useTwelveWeekBackendActions({
       if (snapshot.status === "partial") {
         toast.info(snapshot.message);
       } else {
-        toast.success("Đã giữ bản local và đồng bộ lại lên backend.");
+        toast.success("Đã giữ bản trên thiết bị và đồng bộ lại.");
       }
 
       lastBackendSyncKeyRef.current = buildBackendSyncKey(goalId, localSystem);
@@ -209,7 +209,7 @@ export function useTwelveWeekBackendActions({
       }
     } catch (error) {
       console.error("Failed to keep local plan snapshot.", error);
-      toast.error("Không thể đồng bộ bản local lên backend lúc này.");
+      toast.error("Không thể đồng bộ bản trên thiết bị lúc này.");
     } finally {
       setIsResolvingBackendPlanConflicts(false);
     }

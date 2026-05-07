@@ -23,7 +23,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           <FeedbackDialog
             source="settings"
             context="12_week_settings"
-            triggerLabel="Góp ý về demo"
+            triggerLabel="Góp ý"
             triggerClassName="border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
           />
         </div>

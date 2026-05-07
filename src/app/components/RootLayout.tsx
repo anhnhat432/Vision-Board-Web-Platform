@@ -100,7 +100,7 @@ function getErrorMessage(error: unknown): string {
     return error.message;
   }
 
-  return "Không thể kiểm tra cloud import lúc này.";
+  return "Không thể kiểm tra dữ liệu tài khoản lúc này.";
 }
 
 function createImportValidationRequestId(): string {
@@ -471,15 +471,15 @@ export function RootLayout() {
   const accountLabel = userProfile?.displayName || user?.displayName || user?.email || "Khách";
   const backendHydrationStatus = backendPlanHydration.result?.status;
   const accountStatus = !isConfigured
-    ? "Demo local"
+    ? "Dùng thử"
     : authLoading
       ? "Đang kiểm tra"
       : !user
         ? "Chưa đăng nhập"
         : userProfileLoading
-          ? "Đang nối backend"
+          ? "Đang nối tài khoản"
           : userProfileError
-            ? "Lỗi profile"
+            ? "Lỗi hồ sơ"
             : userProfile
               ? backendPlanHydration.loading
                 ? "Đang đồng bộ"
@@ -487,9 +487,9 @@ export function RootLayout() {
                   ? "Lỗi đồng bộ"
                   : backendHydrationStatus === "partial"
                     ? "Đồng bộ một phần"
-                    : backendHydrationStatus === "success"
+                  : backendHydrationStatus === "success"
                       ? "Đã đồng bộ"
-                      : "Đã nối backend"
+                      : "Đã nối tài khoản"
               : "Chờ profile";
   const canRetryUserProfile = Boolean(user) && !userProfileLoading && (!userProfile || Boolean(userProfileError));
 
@@ -528,41 +528,41 @@ export function RootLayout() {
   const cloudImportDryRunEnabled =
     !demoMode && Boolean(user) && isApiBaseUrlConfigured() && shouldEnable12WeekImportDryRun();
   const cloudImportDryRunUnavailableReason = demoMode
-    ? "Demo mode chỉ lưu local trên trình duyệt này, không gọi cloud import."
+    ? "Bản dùng thử đang lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản."
     : !user
-      ? "Bạn cần đăng nhập trước khi kiểm tra cloud import."
+      ? "Bạn cần đăng nhập trước khi kiểm tra dữ liệu tài khoản."
       : !isApiBaseUrlConfigured()
-        ? "Backend API chưa được cấu hình cho workspace này."
+        ? "Kết nối tài khoản chưa được cấu hình cho workspace này."
         : !shouldEnable12WeekImportDryRun()
-          ? "Cloud import dry-run đang tắt bằng feature flag."
+          ? "Kiểm tra nhập dữ liệu tài khoản chưa được bật."
           : undefined;
 
   const handleValidateCloudImport = useCallback(async (): Promise<CloudImportDryRunResult> => {
     if (demoMode) {
       return {
         status: "skipped",
-        message: "Demo mode chỉ lưu local trên trình duyệt này, không gọi cloud import.",
+        message: "Bản dùng thử đang lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản.",
       };
     }
 
     if (!user?.uid) {
       return {
         status: "skipped",
-        message: "Bạn cần đăng nhập trước khi kiểm tra cloud import.",
+        message: "Bạn cần đăng nhập trước khi kiểm tra dữ liệu tài khoản.",
       };
     }
 
     if (!isApiBaseUrlConfigured()) {
       return {
         status: "skipped",
-        message: "Backend API chưa được cấu hình cho workspace này.",
+        message: "Kết nối tài khoản chưa được cấu hình cho workspace này.",
       };
     }
 
     if (!shouldEnable12WeekImportDryRun()) {
       return {
         status: "skipped",
-        message: "Cloud import dry-run đang tắt bằng feature flag.",
+        message: "Kiểm tra nhập dữ liệu tài khoản chưa được bật.",
       };
     }
 
@@ -572,7 +572,7 @@ export function RootLayout() {
     if (importPayloads.length === 0) {
       return {
         status: "skipped",
-        message: "Account scope trên trình duyệt này chưa có dữ liệu 12 tuần để kiểm tra.",
+        message: "Tài khoản trên trình duyệt này chưa có dữ liệu 12 tuần để kiểm tra.",
       };
     }
 
@@ -593,8 +593,8 @@ export function RootLayout() {
         status: report.status === "valid" ? "valid" : "invalid",
         message:
           report.status === "valid"
-            ? "Payload hợp lệ cho cloud import dry-run. Backend chưa ghi cloud data."
-            : "Backend báo payload chưa sẵn sàng cho cloud import.",
+            ? "Dữ liệu hợp lệ để nhập vào tài khoản. Chưa có dữ liệu nào bị thay đổi."
+            : "Dữ liệu chưa sẵn sàng để nhập vào tài khoản.",
         report,
       };
     } catch (error) {
@@ -602,7 +602,7 @@ export function RootLayout() {
       if (report) {
         return {
           status: "invalid",
-          message: "Backend báo payload chưa sẵn sàng cho cloud import.",
+          message: "Dữ liệu chưa sẵn sàng để nhập vào tài khoản.",
           report,
         };
       }
@@ -617,13 +617,13 @@ export function RootLayout() {
   const cloudImportEnabled =
     !demoMode && Boolean(user) && isApiBaseUrlConfigured() && shouldEnable12WeekCloudImport();
   const cloudImportUnavailableReason = demoMode
-    ? "Demo mode chỉ lưu local trên trình duyệt này, không gọi cloud import."
+    ? "Bản dùng thử đang lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản."
     : !user
-      ? "Bạn cần đăng nhập trước khi import cloud."
+      ? "Bạn cần đăng nhập trước khi nhập dữ liệu tài khoản."
       : !isApiBaseUrlConfigured()
-        ? "Backend API chưa được cấu hình cho workspace này."
+        ? "Kết nối tài khoản chưa được cấu hình cho workspace này."
         : !shouldEnable12WeekCloudImport()
-          ? "Cloud import chưa được bật bằng feature flag."
+          ? "Nhập dữ liệu tài khoản chưa được bật."
           : undefined;
   const cloudImportAlreadyCompleted = Boolean(
     user?.uid && localDataMigrationCandidate && hasCompletedCloudImport(user.uid, localDataMigrationCandidate.fingerprint),
@@ -633,28 +633,28 @@ export function RootLayout() {
     if (demoMode) {
       return {
         status: "skipped",
-        message: "Demo mode chỉ lưu local trên trình duyệt này, không gọi cloud import.",
+        message: "Bản dùng thử đang lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản.",
       };
     }
 
     if (!user?.uid) {
       return {
         status: "skipped",
-        message: "Bạn cần đăng nhập trước khi import cloud.",
+        message: "Bạn cần đăng nhập trước khi nhập dữ liệu tài khoản.",
       };
     }
 
     if (!isApiBaseUrlConfigured()) {
       return {
         status: "skipped",
-        message: "Backend API chưa được cấu hình cho workspace này.",
+        message: "Kết nối tài khoản chưa được cấu hình cho workspace này.",
       };
     }
 
     if (!shouldEnable12WeekCloudImport()) {
       return {
         status: "skipped",
-        message: "Cloud import chưa được bật bằng feature flag.",
+        message: "Nhập dữ liệu tài khoản chưa được bật.",
       };
     }
 
@@ -664,7 +664,7 @@ export function RootLayout() {
     if (importPayloads.length === 0) {
       return {
         status: "skipped",
-        message: "Account scope trên trình duyệt này chưa có dữ liệu 12 tuần để import.",
+        message: "Tài khoản trên trình duyệt này chưa có dữ liệu 12 tuần để nhập.",
       };
     }
 
@@ -706,12 +706,12 @@ export function RootLayout() {
         status: response.status,
         message:
           response.status === "applied"
-            ? "Dữ liệu đã được import lên cloud thành công."
+            ? "Dữ liệu đã được nhập vào tài khoản thành công."
             : response.status === "duplicate"
-              ? "Dữ liệu này đã được import lên cloud trước đó."
+              ? "Dữ liệu này đã được nhập vào tài khoản trước đó."
               : response.status === "partial"
-                ? "Import thành công một phần. Một số mục có thể chưa được ghi cloud."
-                : response.message || "Import thất bại.",
+                ? "Nhập dữ liệu thành công một phần. Một số mục có thể chưa được lưu."
+                : response.message || "Nhập dữ liệu thất bại.",
         response,
       };
     } catch (error) {
@@ -725,7 +725,7 @@ export function RootLayout() {
         status: "error",
         message: isRecord(error) && typeof error.message === "string" && error.message.trim()
           ? error.message
-          : "Không thể import cloud lúc này. Dữ liệu local vẫn an toàn.",
+          : "Không thể nhập dữ liệu tài khoản lúc này. Dữ liệu trên thiết bị vẫn an toàn.",
       };
     }
   }, [demoMode, localDataMigrationCandidate, user?.uid]);
@@ -792,7 +792,7 @@ export function RootLayout() {
             className="border-b border-amber-200 bg-amber-50/85 px-4 py-1.5 text-center text-[11px] font-medium text-amber-800 sm:px-6"
           >
             <HardDrive className="mr-1 inline h-3 w-3 align-text-bottom" />
-            Đang ở chế độ <strong>demo</strong> — dữ liệu chỉ lưu trên trình duyệt này. Có thể bấm{" "}
+            Bản dùng thử đang lưu dữ liệu trên trình duyệt này. Có thể bấm{" "}
             <span className="font-semibold">Tạm thoát</span> bất kỳ lúc nào để quay lại bảng điều khiển.
           </div>
         ) : null}
@@ -837,11 +837,11 @@ export function RootLayout() {
 
               {demoMode ? (
                 <span
-                  title="Đang ở chế độ demo — dữ liệu chỉ lưu trên trình duyệt hiện tại, không gửi lên server."
+                  title="Bản dùng thử đang lưu dữ liệu trên trình duyệt hiện tại."
                   className="hidden shrink-0 items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold leading-none text-amber-800 sm:inline-flex"
                 >
                   <HardDrive className="h-3 w-3" aria-hidden="true" />
-                  Demo · cục bộ
+                  Dùng thử
                 </span>
               ) : null}
             </div>
@@ -1070,7 +1070,7 @@ export function RootLayout() {
                         onClick={refreshUserProfile}
                         disabled={!canRetryUserProfile}
                         className="flex size-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 disabled:opacity-50"
-                        aria-label="Kiểm tra lại backend profile"
+                        aria-label="Kiểm tra lại hồ sơ tài khoản"
                       >
                         <RefreshCw className={`h-4 w-4 ${userProfileLoading ? "animate-spin" : ""}`} />
                       </button>

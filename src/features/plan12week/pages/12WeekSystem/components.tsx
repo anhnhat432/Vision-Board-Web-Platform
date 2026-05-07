@@ -179,8 +179,8 @@ export function TwelveWeekDashboardHeader({
                 {activeGoal.title}
               </h1>
               <p className="max-w-3xl text-sm leading-7 text-slate-600">
-                Bắt đầu từ tab Hôm nay: tick việc quan trọng nhất, lưu check-in, rồi mở Tuần để review. Bản demo lưu
-                trên trình duyệt này.
+                Bắt đầu từ tab Hôm nay: tick việc quan trọng nhất, lưu check-in, rồi mở Tuần để review. Dữ liệu đang
+                lưu trên trình duyệt này.
               </p>
             </div>
             <div className="flex flex-wrap gap-2 text-xs text-slate-500">

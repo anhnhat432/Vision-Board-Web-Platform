@@ -123,8 +123,8 @@ export function UpgradePaywallDialog({
           {demoMode && (
             <div className="border-b border-amber-400 bg-amber-50 px-5 py-3 sm:px-7">
               <div className="flex items-center justify-center gap-2 text-amber-900">
-                <span className="font-semibold">⚡ BẢN DEMO</span>
-                <span className="text-amber-700">— Không thu tiền thật — Gói chỉ được mở trên trình duyệt này</span>
+                <span className="font-semibold">Bản dùng thử</span>
+                <span className="text-amber-700">Không cần thanh toán thật. Quyền chỉ mở trên trình duyệt này.</span>
               </div>
             </div>
           )}
@@ -133,7 +133,7 @@ export function UpgradePaywallDialog({
               <div className="max-w-2xl">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/78">
                   <LockKeyhole className="h-3.5 w-3.5" />
-                  {demoMode ? "Demo — Nâng cấp Plus" : "Plus cho hệ 12 tuần"}
+                  {demoMode ? "Dùng thử Plus" : "Plus cho hệ 12 tuần"}
                 </div>
                 <DialogHeader className="mt-4 text-left">
                   <DialogTitle className="text-3xl font-bold leading-tight text-white">
@@ -170,7 +170,7 @@ export function UpgradePaywallDialog({
               {billingDebugUi && (
                 <div className="rounded-[26px] border border-slate-200 bg-slate-50/88 p-5">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Trạng thái thanh toán demo
+                    Trạng thái thanh toán
                   </p>
                   <div className="mt-4 grid gap-2 sm:grid-cols-3">
                     <div className="rounded-[18px] border border-white/80 bg-white px-4 py-3">
@@ -179,7 +179,7 @@ export function UpgradePaywallDialog({
                         {billingProviderStatus.mode === "api_contract"
                           ? "API contract"
                           : billingProviderStatus.mode === "mock_provider"
-                            ? "Nhà cung cấp demo"
+                            ? "Nhà cung cấp thử nghiệm"
                             : "Thử nghiệm cục bộ"}
                       </p>
                     </div>
@@ -235,7 +235,7 @@ export function UpgradePaywallDialog({
 
                     <div className="mt-5 rounded-[22px] border border-white/70 bg-white/90 px-4 py-4">
                       <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
-                        {demoMode ? "Giá trong bản demo" : "Giá gói"}
+                        Giá gói
                       </p>
                       <p className="mt-2 text-3xl font-bold text-slate-950">{plan.priceLabel}</p>
                     </div>
@@ -263,7 +263,7 @@ export function UpgradePaywallDialog({
                           ? "Đang dùng trên thiết bị này"
                           : "Đang dùng"
                         : demoMode
-                          ? `Mở ${plan.name} demo`
+                          ? `Mở ${plan.name}`
                           : `Nâng cấp ${plan.name}`}
                     </Button>
                   </div>
@@ -275,7 +275,7 @@ export function UpgradePaywallDialog({
           <DialogFooter className="flex flex-col gap-3 border-t border-white/70 bg-white/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5">
             <p className="text-sm leading-7 text-slate-500">
               {demoMode
-                ? "BẢN DEMO: Không thu tiền thật. Gói chỉ được mở trên trình duyệt này."
+                ? "Bản dùng thử không thu tiền thật. Gói chỉ được mở trên trình duyệt này."
                 : billingProviderStatus.mode === "api_contract"
                   ? "Bạn sẽ được chuyển đến nhà cung cấp thanh toán khi xác nhận."
                   : "Bạn có thể dùng gói miễn phí nếu chưa cần tính năng nâng cao lúc này."}

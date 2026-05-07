@@ -101,12 +101,34 @@ export function LoginPage() {
   }
 
   return (
-    <div className="app-shell flex min-h-screen items-center justify-center px-4">
+    <div className="app-shell flex min-h-screen items-center justify-center px-4 py-8 sm:py-12">
       <div className="ambient-orb ambient-orb--violet" />
       <div className="ambient-orb ambient-orb--cyan" />
       <div className="ambient-orb ambient-orb--rose" />
 
-      <div className="relative z-10 w-full max-w-sm">
+      <div className="relative z-10 grid w-full max-w-4xl gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.72fr)] lg:items-center">
+        <section className="hidden rounded-2xl border border-slate-200 bg-white/86 p-8 shadow-[0_24px_70px_-48px_rgba(15,23,42,0.36)] lg:block">
+          <div className="gradient-brand mb-5 flex size-12 items-center justify-center rounded-2xl shadow-[0_14px_30px_-20px_var(--tone-shell-shadow-strong)]">
+            <Sparkles className="h-5.5 w-5.5 text-white" />
+          </div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Dear Our Future</p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-950">
+            Mục tiêu, kế hoạch 12 tuần và review nằm trong một workspace.
+          </h2>
+          <div className="mt-6 grid gap-3 text-sm leading-6 text-slate-600">
+            {[
+              "Lưu tiến độ và tiếp tục trên thiết bị khác.",
+              "Đồng bộ kế hoạch 12 tuần khi tài khoản sẵn sàng.",
+              "Quản lý quyền Plus và thanh toán trong cùng tài khoản.",
+            ].map((item) => (
+              <div key={item} className="rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-3">
+                {item}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <div className="w-full max-w-sm justify-self-center lg:max-w-md">
         <div className="mb-8 text-center">
           <div className="gradient-brand mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl shadow-[0_14px_30px_-20px_var(--tone-shell-shadow-strong)]">
             <Sparkles className="h-5.5 w-5.5 text-white" />
@@ -237,6 +259,7 @@ export function LoginPage() {
             </>
           )}
         </p>
+        </div>
       </div>
 
       <Toaster />

@@ -446,7 +446,7 @@ describe("12-week core flows", () => {
     }
   });
 
-  it("completes mock checkout without exposing restore controls in settings", async () => {
+  it("completes trial checkout without exposing restore controls in settings", async () => {
     const { goalId } = seedTwelveWeekGoal();
     const checkout = await startCheckoutFlow({
       planCode: "PLUS",
@@ -463,8 +463,8 @@ describe("12-week core flows", () => {
     const checkoutRender = renderAppRoute(`${checkoutUrl.pathname}${checkoutUrl.search}`);
     const user = userEvent.setup();
 
-    await screen.findByText("Checkout mô phỏng");
-    await user.click(screen.getByRole("button", { name: /Xác nhận mở gói \(demo\)/i }));
+    await screen.findByText("Checkout dùng thử");
+    await user.click(screen.getByRole("button", { name: /Xác nhận mở gói/i }));
 
     await waitFor(() => {
       expect(getCurrentPlan()).toBe("PLUS");
@@ -483,7 +483,7 @@ describe("12-week core flows", () => {
     renderAppRoute("/12-week-system?tab=settings");
     await screen.findByText("Cài đặt mục tiêu");
     expect(screen.queryByText("Thiết bị, dữ liệu và đồng bộ")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Khôi phục mock upgrade" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Khôi phục quyền Plus" })).not.toBeInTheDocument();
     expect(getCurrentPlan()).toBe("FREE");
   });
 });

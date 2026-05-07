@@ -386,18 +386,18 @@ function DashboardContent({
   const setupStartDescription = hasRealLifeBalance
     ? "Đây là funnel gốc của web: insight trước, SMART sau, rồi mới kiểm tra tính thực tế và vào hệ 12 tuần."
     : "Bước này tạo dữ liệu thật cho các màn sau: Life Insight, SMART Goal, kiểm tra tính thực tế và kế hoạch 12 tuần.";
-  const publicVisitorBadge = demoMode ? "Bản demo lưu trên trình duyệt này" : "Đăng ký để lưu và đồng bộ dữ liệu";
+  const publicVisitorBadge = demoMode ? "Dữ liệu lưu trên trình duyệt hiện tại" : "Đăng ký để lưu và đồng bộ dữ liệu";
   const publicVisitorDashboardTitle = demoMode
-    ? "Dùng thử flow MVP 1 ngay trên trình duyệt hiện tại."
+    ? "Dùng thử luồng mục tiêu 12 tuần ngay trên trình duyệt hiện tại."
     : "Trang chính giúp bạn nhìn rõ luồng sản phẩm trước khi tạo tài khoản.";
   const publicVisitorDashboardDescription = demoMode
-    ? "Bạn có thể bắt đầu Onboarding, chấm Life Balance, chọn insight, tạo SMART goal và đi tới 12-week setup mà không cần đăng nhập. Bản demo lưu dữ liệu trên trình duyệt này; hãy export nếu muốn giữ bản sao."
+    ? "Bạn có thể bắt đầu Onboarding, chấm Life Balance, chọn insight, tạo SMART goal và đi tới setup 12 tuần mà không cần đăng nhập. Dữ liệu được lưu trên trình duyệt này; hãy xuất bản sao nếu muốn giữ lại."
     : "Bạn có thể xem tổng quan ngay tại đây. Khi bắt đầu thật, hãy đăng ký để dữ liệu mục tiêu và kế hoạch không bị mất theo trình duyệt.";
   const publicVisitorStartTitle = demoMode
     ? "Dùng thử không cần đăng nhập."
     : "Tạo tài khoản trước khi nhập dữ liệu thật.";
   const publicVisitorStartDescription = demoMode
-    ? "Bắt đầu bằng Onboarding hoặc Life Balance để trải nghiệm core flow MVP 1. Đăng nhập/sync là lớp sau, không bắt buộc cho demo."
+    ? "Bắt đầu bằng Onboarding hoặc Life Balance để trải nghiệm luồng chính. Đăng nhập là tùy chọn khi bạn muốn đồng bộ sau."
     : "Phần onboarding, mục tiêu và kế hoạch đều là dữ liệu cá nhân. Đăng ký trước sẽ giúp bạn lưu lại tiến trình và quay lại đúng workspace sau này.";
   const publicVisitorPrimaryLabel = demoMode ? "Dùng thử không cần đăng nhập" : "Đăng ký miễn phí";
 
@@ -420,7 +420,7 @@ function DashboardContent({
         {
           title: "Tài khoản",
           value: 1,
-          note: demoMode ? "tùy chọn để sync sau, không bắt buộc" : "nơi đồng bộ mục tiêu và kế hoạch của bạn",
+          note: demoMode ? "tùy chọn khi muốn đồng bộ sau" : "nơi đồng bộ mục tiêu và kế hoạch của bạn",
           icon: UserPlus,
           iconClass: "bg-emerald-100 text-emerald-700",
         },
@@ -466,9 +466,9 @@ function DashboardContent({
   const quickActions = isSignedOut
     ? [
         {
-          title: demoMode ? "Tùy chọn: đăng ký để sync sau" : "Đăng ký để lưu workspace",
+          title: demoMode ? "Tùy chọn: đăng ký để đồng bộ sau" : "Đăng ký để lưu workspace",
           description: demoMode
-            ? "Demo vẫn dùng được không cần đăng nhập. Tài khoản chỉ dành cho lớp lưu/sync sau này."
+            ? "Bạn vẫn dùng được không cần đăng nhập. Tài khoản chỉ cần khi muốn lưu và đồng bộ qua thiết bị khác."
             : "Tạo workspace riêng để lưu bánh xe cuộc sống, mục tiêu SMART và kế hoạch 12 tuần.",
           icon: UserPlus,
           onClick: () => handleAuthNavigate("signup"),
@@ -476,15 +476,15 @@ function DashboardContent({
         {
           title: "Đăng nhập nếu đã có tài khoản",
           description: demoMode
-            ? "Không bắt buộc cho demo. Chỉ dùng khi bạn muốn thử lớp tài khoản/sync sau này."
+            ? "Không bắt buộc. Chỉ dùng khi bạn muốn thử lớp tài khoản và đồng bộ sau này."
             : "Quay lại đúng dữ liệu đã đồng bộ: mục tiêu, tuần hiện tại và review gần nhất.",
           icon: LogIn,
           onClick: () => handleAuthNavigate("signin"),
         },
         {
-          title: demoMode ? "Demo có thể đi thẳng vào core flow" : "Đăng ký rồi đi theo luồng chính",
+          title: demoMode ? "Có thể đi thẳng vào luồng chính" : "Đăng ký rồi đi theo luồng chính",
           description: demoMode
-            ? "CTA demo chính sẽ đưa bạn vào Life Balance mà không cần tài khoản."
+            ? "Nút bắt đầu sẽ đưa bạn vào Life Balance mà không cần tài khoản."
             : "Sau khi có workspace, bạn đi từ Life Balance, chọn insight, chốt mục tiêu SMART rồi mới vào 12 tuần.",
           icon: CalendarDays,
           onClick: () => handleAuthNavigate("signup"),
@@ -524,9 +524,9 @@ function DashboardContent({
     ? [
         {
           eyebrow: "Điểm bắt đầu",
-          title: demoMode ? "Đăng nhập không phải cổng chặn demo" : "Đừng vào thẳng 12 tuần khi mục tiêu còn mơ hồ",
+          title: demoMode ? "Có thể bắt đầu ngay, không cần đăng nhập" : "Đừng vào thẳng 12 tuần khi mục tiêu còn mơ hồ",
           description: demoMode
-            ? "Bạn có thể dùng core flow ngay trên trình duyệt này. Đăng ký chỉ là lựa chọn để chuẩn bị sync sau."
+            ? "Bạn có thể dùng luồng chính ngay trên trình duyệt này. Đăng ký chỉ là lựa chọn khi muốn đồng bộ sau."
             : "Web này dẫn bạn từ bức tranh cuộc sống hiện tại tới một mục tiêu SMART đủ rõ, rồi mới chia thành kế hoạch 12 tuần.",
           cardClass: "rounded-[22px] border border-slate-300 bg-slate-50/90 p-4 shadow-sm",
           eyebrowClass: "text-slate-500",
@@ -534,15 +534,15 @@ function DashboardContent({
           descriptionClass: "text-slate-600",
           buttonClass: "mt-4 bg-slate-950 text-white hover:bg-slate-800",
           buttonVariant: "outline" as const,
-          buttonLabel: demoMode ? "Đăng ký nếu muốn sync" : "Bắt đầu miễn phí",
+          buttonLabel: demoMode ? "Đăng ký nếu muốn đồng bộ" : "Bắt đầu miễn phí",
           icon: Target,
           onClick: () => handleAuthNavigate("signup"),
         },
         {
           eyebrow: "Dữ liệu cá nhân",
-          title: demoMode ? "Sync là lớp sau của demo local-first" : "Đăng nhập để đồng bộ thay vì chỉ lưu trên máy",
+          title: demoMode ? "Dữ liệu đang lưu trên trình duyệt hiện tại" : "Đăng nhập để đồng bộ thay vì chỉ lưu trên máy",
           description: demoMode
-            ? "Bản demo hiện lưu trên trình duyệt này. Nếu muốn giữ bản sao, hãy export dữ liệu trước khi đổi máy hoặc xóa site data."
+            ? "Nếu muốn giữ bản sao, hãy xuất dữ liệu trước khi đổi máy hoặc xóa dữ liệu trình duyệt."
             : "Khi có tài khoản, mục tiêu, kế hoạch và tiến độ được nối với workspace của bạn thay vì phụ thuộc vào trình duyệt hiện tại.",
           cardClass: "rounded-[22px] border border-slate-200 bg-white p-4 shadow-sm",
           eyebrowClass: "text-slate-400",
@@ -739,7 +739,7 @@ function DashboardContent({
           } as const;
           const s = severityStyles[topTrigger.severity];
           const ctaHref = topTrigger.kind === "trial_ending" ? "/billing/plan" : "/12-week-system";
-          const ctaLabel = topTrigger.kind === "trial_ending" ? "Mở mock upgrade" : "Xem ngay";
+          const ctaLabel = topTrigger.kind === "trial_ending" ? "Mở Plus" : "Xem ngay";
           return (
             <Reveal key={topTrigger.kind}>
               <div
@@ -804,7 +804,7 @@ function DashboardContent({
           return (
             <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm flex flex-wrap items-center gap-3">
               <span>
-                <span className="font-semibold">Plus demo:</span> còn {daysLeft} ngày — dùng thử local, không thu tiền thật.
+                <span className="font-semibold">Plus dùng thử:</span> còn {daysLeft} ngày trên trình duyệt này.
               </span>
               <Button size="sm" variant="ghost" className="ml-auto shrink-0 text-amber-700 hover:bg-amber-100" onClick={() => navigate("/billing/plan")}>
                 Chi tiết
@@ -908,13 +908,10 @@ function DashboardContent({
               </div>
               <h2 className="text-xl font-bold text-slate-950">Bắt đầu trải nghiệm</h2>
               <p className="mt-2 text-sm text-slate-600">
-                Đây là bản demo. Bạn có thể dùng thử các tính năng cơ bản mà không cần đăng nhập.
+                Bạn có thể dùng thử các tính năng cơ bản mà không cần đăng nhập.
                 Hãy bắt đầu với Life Balance để tạo dữ liệu thực.
               </p>
-              <Button
-                className="mt-4 bg-slate-950 text-white hover:bg-slate-800"
-                onClick={handlePublicVisitorStart}
-              >
+              <Button className="mt-4" onClick={handlePublicVisitorStart}>
                 Bắt đầu Life Balance
               </Button>
             </CardContent>
@@ -1089,7 +1086,7 @@ function DashboardContent({
                         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                           <Button
                             data-tour-id="dashboard-primary-action"
-                            className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
+                            className="w-full sm:w-auto"
                             onClick={() => (isSignedOut ? handlePublicVisitorStart() : navigate(setupPrimaryPath))}
                           >
                             {isSignedOut ? publicVisitorPrimaryLabel : setupPrimaryLabel}
@@ -1426,7 +1423,7 @@ function DashboardContent({
           <div className="flex flex-wrap items-center gap-4 rounded-[22px] border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-[0_20px_45px_-34px_rgba(217,119,6,0.22)]">
             <Sparkles className="h-5 w-5 shrink-0 text-amber-600" />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-amber-900">Dữ liệu đang hiển thị là ví dụ demo</p>
+              <p className="text-sm font-semibold text-amber-900">Dữ liệu đang hiển thị là ví dụ mẫu</p>
               <p className="mt-0.5 text-sm text-amber-700">
                 Cập nhật bánh xe cuộc sống của bạn để thay dữ liệu mẫu bằng thông tin thật.
               </p>
@@ -1459,7 +1456,7 @@ function DashboardContent({
                   <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                     <div className="min-w-0">
                       <CardTitle className="text-slate-950">
-                        {isSignedOut ? "Luồng mục tiêu trong demo" : "Mục tiêu gần đây"}
+                        {isSignedOut ? "Luồng mục tiêu mẫu" : "Mục tiêu gần đây"}
                       </CardTitle>
                       <CardDescription className="text-slate-700">
                         {isSignedOut
@@ -1474,7 +1471,7 @@ function DashboardContent({
                       onClick={() => (isSignedOut ? handleAuthNavigate("signup") : navigate("/life-insight"))}
                     >
                       <Plus className="h-4 w-4" />
-                      {isSignedOut ? "Đăng ký để sync sau" : "Tạo mục tiêu"}
+                      {isSignedOut ? "Đăng ký để đồng bộ sau" : "Tạo mục tiêu"}
                     </Button>
                   </div>
                 </CardHeader>
@@ -1484,14 +1481,14 @@ function DashboardContent({
                       <Target className="mx-auto mb-4 h-12 w-12 text-slate-300" />
                       <p>
                         {isSignedOut
-                          ? "Trong demo, bạn có thể đi qua Life Insight, SMART Goal và kiểm tra tính thực tế mà không cần đăng nhập."
+                          ? "Bạn có thể đi qua Life Insight, SMART Goal và kiểm tra tính thực tế mà không cần đăng nhập."
                           : "Chưa có mục tiêu nào. Hãy bắt đầu bằng mục tiêu đầu tiên của bạn."}
                       </p>
                       <Button
                         className="mt-5 w-full sm:w-auto"
                         onClick={() => (isSignedOut ? handleAuthNavigate("signup") : navigate("/life-insight"))}
                       >
-                        {isSignedOut ? "Đăng ký để sync sau" : "Tạo mục tiêu"}
+                        {isSignedOut ? "Đăng ký để đồng bộ sau" : "Tạo mục tiêu"}
                       </Button>
                     </div>
                   ) : (
@@ -1642,7 +1639,7 @@ function DashboardContent({
                         <p className="mt-3 font-semibold text-slate-900">Chưa có dữ liệu bánh xe cuộc sống</p>
                         <p className="mt-1 max-w-sm text-sm leading-6 text-slate-500">
                           {isSignedOut
-                            ? "Trong demo, bạn có thể bắt đầu Life Balance không cần đăng nhập. Tài khoản/sync là lớp sau."
+                            ? "Bạn có thể bắt đầu Life Balance không cần đăng nhập. Tài khoản chỉ cần khi muốn đồng bộ sau."
                             : "Bắt đầu bằng bài đánh giá Life Balance để dashboard có dữ liệu thật thay vì số mặc định."}
                         </p>
                       </div>
@@ -1660,7 +1657,7 @@ function DashboardContent({
                       </p>
                       <p className="mt-1 text-sm text-slate-500">
                         {isSignedOut
-                          ? "Demo lưu local trên trình duyệt này"
+                          ? "Dữ liệu lưu trên trình duyệt này"
                           : weakestArea
                             ? `${weakestArea.score}/10`
                             : "--"}
@@ -1684,7 +1681,7 @@ function DashboardContent({
                         </div>
                         <div className="mt-1 line-clamp-2 text-sm text-slate-500">
                           {isSignedOut
-                            ? "Đăng ký chỉ khi muốn thử lớp sync sau."
+                            ? "Đăng ký chỉ khi muốn thử lớp đồng bộ sau."
                             : hasRealLifeBalance
                               ? "Xem chi tiết và cập nhật lại bánh xe cuộc đời."
                               : "Chấm điểm 8 lĩnh vực để mở đúng luồng mục tiêu."}
@@ -1746,7 +1743,7 @@ function DashboardContent({
             <div className="flex flex-wrap items-center gap-4 rounded-[22px] border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-[0_20px_45px_-34px_rgba(217,119,6,0.22)]">
               <Sparkles className="h-5 w-5 shrink-0 text-amber-600" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-amber-900">Dữ liệu đang hiển thị là ví dụ demo</p>
+                <p className="text-sm font-semibold text-amber-900">Dữ liệu đang hiển thị là ví dụ mẫu</p>
                 <p className="mt-0.5 text-sm text-amber-700">
                   Cập nhật bánh xe cuộc sống của bạn để thay dữ liệu mẫu bằng thông tin thật.
                 </p>

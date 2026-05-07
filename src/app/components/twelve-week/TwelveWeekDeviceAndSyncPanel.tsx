@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { shouldShowSyncDebugUi } from "../../utils/app-mode";
 import { TwelveWeekDeviceDetailsSection } from "./TwelveWeekDeviceDetailsSection";
 import { TwelveWeekLocalStatusSection } from "./TwelveWeekLocalStatusSection";
 import { TwelveWeekPlanAccessSection } from "./TwelveWeekPlanAccessSection";
@@ -16,16 +17,22 @@ type TwelveWeekDeviceAndSyncPanelProps = Omit<
 >;
 
 export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanelProps) {
+  const syncResultStatus = props.mutationQueueSyncStatus.lastResult?.status;
+  const hasSyncAttention =
+    (props.lastBackendHydrationResult?.conflictCount ?? 0) > 0 ||
+    syncResultStatus === "conflict" ||
+    syncResultStatus === "unsafe";
+  const showAdvancedSync = shouldShowSyncDebugUi() || hasSyncAttention;
+
   return (
     <Card
       interactive={false}
       className="border border-slate-200/80 bg-slate-50/80 shadow-[0_22px_54px_-40px_rgba(15,23,42,0.24)] lg:sticky lg:top-6"
     >
       <CardHeader>
-        <CardTitle className="text-slate-950">Thiết bị, dữ liệu và đồng bộ</CardTitle>
+        <CardTitle className="text-slate-950">Dữ liệu, nhắc việc và quyền Plus</CardTitle>
         <CardDescription className="text-slate-600">
-          Mục tiêu, review và check-in được lưu local trên trình duyệt này — vẫn dùng được khi offline. Đăng nhập và
-          đồng bộ cloud là lớp tùy chọn để phòng khi đổi máy. Mọi xóa đều có xác nhận trước.
+          Quản lý quyền Plus, nhắc việc và dữ liệu đang lưu trên trình duyệt này. Các thao tác xóa đều cần xác nhận.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -43,24 +50,26 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
           onOpenBillingPortal={props.onOpenBillingPortal}
         />
 
-        <TwelveWeekLocalStatusSection
-          activeGoalId={props.activeGoalId}
-          appPreferences={props.appPreferences}
-          backendConnectionStatus={props.backendConnectionStatus}
-          isHydratingBackendPlans={props.isHydratingBackendPlans}
-          isResolvingBackendPlanConflicts={props.isResolvingBackendPlanConflicts}
-          lastBackendHydrationResult={props.lastBackendHydrationResult}
-          mutationQueueSyncStatus={props.mutationQueueSyncStatus}
-          onExportLocalData={props.onExportLocalData}
-          onExportCloudWorkspace={props.onExportCloudWorkspace}
-          onDeleteCloudWorkspace={props.onDeleteCloudWorkspace}
-          onHydrateBackendPlans={props.onHydrateBackendPlans}
-          onRunMutationQueueSync={props.onRunMutationQueueSync}
-          onKeepLocalPlanForConflicts={props.onKeepLocalPlanForConflicts}
-          onUseBackendPlanForConflicts={props.onUseBackendPlanForConflicts}
-          onUseCloudVersion={props.onUseCloudVersion}
-          pendingOutboxCount={props.pendingOutboxCount}
-        />
+        {showAdvancedSync ? (
+          <TwelveWeekLocalStatusSection
+            activeGoalId={props.activeGoalId}
+            appPreferences={props.appPreferences}
+            backendConnectionStatus={props.backendConnectionStatus}
+            isHydratingBackendPlans={props.isHydratingBackendPlans}
+            isResolvingBackendPlanConflicts={props.isResolvingBackendPlanConflicts}
+            lastBackendHydrationResult={props.lastBackendHydrationResult}
+            mutationQueueSyncStatus={props.mutationQueueSyncStatus}
+            onExportLocalData={props.onExportLocalData}
+            onExportCloudWorkspace={props.onExportCloudWorkspace}
+            onDeleteCloudWorkspace={props.onDeleteCloudWorkspace}
+            onHydrateBackendPlans={props.onHydrateBackendPlans}
+            onRunMutationQueueSync={props.onRunMutationQueueSync}
+            onKeepLocalPlanForConflicts={props.onKeepLocalPlanForConflicts}
+            onUseBackendPlanForConflicts={props.onUseBackendPlanForConflicts}
+            onUseCloudVersion={props.onUseCloudVersion}
+            pendingOutboxCount={props.pendingOutboxCount}
+          />
+        ) : null}
 
         <TwelveWeekDeviceDetailsSection
           appPreferences={props.appPreferences}

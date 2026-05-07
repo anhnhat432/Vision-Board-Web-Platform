@@ -189,10 +189,10 @@ export function LocalDataMigrationPrompt({
           <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-2xl bg-sky-50 text-sky-700">
             <Database className="h-5 w-5" />
           </div>
-          <DialogTitle>Có dữ liệu local trên trình duyệt này</DialogTitle>
+          <DialogTitle>Có dữ liệu trên trình duyệt này</DialogTitle>
           <DialogDescription className="leading-6">
-            Bạn vừa đăng nhập. App sẽ không tự import hoặc ghi đè workspace account. Nếu chọn Import, dữ liệu
-            anonymous sẽ được copy vào workspace account trên trình duyệt này.
+            Bạn vừa đăng nhập. App sẽ không tự nhập hoặc ghi đè dữ liệu tài khoản. Nếu chọn nhập, dữ liệu
+            hiện có trên trình duyệt sẽ được copy vào tài khoản trên thiết bị này.
           </DialogDescription>
         </DialogHeader>
 
@@ -200,7 +200,7 @@ export function LocalDataMigrationPrompt({
           <div className="flex items-start gap-3">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
             <p className="leading-6">
-              Dữ liệu anonymous vẫn được giữ lại sau import. Bạn nên export backup trước khi import cloud.
+              Dữ liệu trên trình duyệt vẫn được giữ lại sau khi nhập. Bạn nên tải bản sao lưu trước khi tiếp tục.
             </p>
           </div>
         </div>
@@ -218,36 +218,35 @@ export function LocalDataMigrationPrompt({
           >
             {importSucceeded ? (
               <p>
-                Đã copy dữ liệu vào account scope trên trình duyệt này. Đây chưa phải cloud sync hoàn chỉnh, và bản
-                anonymous vẫn được giữ nguyên.
+                Đã copy dữ liệu vào tài khoản trên trình duyệt này. Bản dữ liệu cũ vẫn được giữ nguyên.
               </p>
             ) : importBlocked ? (
               <div className="space-y-2">
                 <p>
-                  Account này đã có dữ liệu local/account. Phase 1 sẽ không ghi đè tự động. Hãy review hoặc export dữ
-                  liệu trước khi merge thủ công ở phase sau.
+                  Tài khoản này đã có dữ liệu. App sẽ không ghi đè tự động. Hãy xem lại hoặc tải bản sao lưu
+                  trước khi gộp dữ liệu.
                 </p>
                 {accountSummaryItems.length > 0 ? (
                   <p className="text-xs font-medium">
-                    Dữ liệu account hiện có: {accountSummaryItems.join(", ")}.
+                    Dữ liệu tài khoản hiện có: {accountSummaryItems.join(", ")}.
                   </p>
                 ) : null}
               </div>
             ) : importResult.status === "fingerprint_mismatch" ? (
-              <p>Snapshot anonymous đã thay đổi. Hãy đóng prompt và mở lại trước khi import.</p>
+              <p>Dữ liệu trên trình duyệt đã thay đổi. Hãy đóng hộp thoại và mở lại trước khi nhập.</p>
             ) : importResult.status === "inactive_auth_scope" ? (
-              <p>Workspace account hiện tại chưa sẵn sàng. Dữ liệu anonymous vẫn được giữ nguyên.</p>
+              <p>Tài khoản hiện tại chưa sẵn sàng. Dữ liệu trên trình duyệt vẫn được giữ nguyên.</p>
             ) : (
-              <p>Không thể import lúc này. Dữ liệu anonymous vẫn được giữ nguyên, hãy thử lại sau.</p>
+              <p>Không thể nhập lúc này. Dữ liệu trên trình duyệt vẫn được giữ nguyên, hãy thử lại sau.</p>
             )}
           </div>
         ) : null}
 
         {showReview ? (
-          <section className="rounded-2xl border border-slate-200 bg-white p-4" aria-label="Local data summary">
+          <section className="rounded-2xl border border-slate-200 bg-white p-4" aria-label="Tóm tắt dữ liệu trên thiết bị">
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
               <Eye className="h-4 w-4 text-slate-500" />
-              Local data found
+              Dữ liệu tìm thấy
             </div>
             {summaryItems.length > 0 ? (
               <ul className="grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
@@ -258,35 +257,35 @@ export function LocalDataMigrationPrompt({
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-slate-600">Không có mục nào cần import trong snapshot này.</p>
+              <p className="text-sm text-slate-600">Không có mục nào cần nhập trong bản dữ liệu này.</p>
             )}
           </section>
         ) : null}
 
         {hasTwelveWeekData ? (
-          <section className="rounded-2xl border border-sky-100 bg-sky-50/70 p-4" aria-label="Cloud import">
+          <section className="rounded-2xl border border-sky-100 bg-sky-50/70 p-4" aria-label="Nhập dữ liệu tài khoản">
             <div className="flex items-start gap-3">
               <Cloud className="mt-0.5 h-4 w-4 shrink-0 text-sky-700" />
               <div className="min-w-0 flex-1 space-y-3">
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Import dữ liệu lên cloud</p>
+                  <p className="text-sm font-semibold text-slate-900">Nhập dữ liệu vào tài khoản</p>
                   <p className="mt-1 text-sm leading-6 text-slate-700">
-                    Gửi dữ liệu 12 tuần từ browser này lên backend account. Dữ liệu local/anonymous vẫn được giữ
-                    nguyên sau import.
+                    Gửi dữ liệu 12 tuần từ trình duyệt này vào tài khoản. Dữ liệu trên thiết bị vẫn được giữ
+                    nguyên sau khi nhập.
                   </p>
                 </div>
 
                 {!importSucceeded ? (
                   <p className="rounded-xl bg-white/75 px-3 py-2 text-xs font-medium text-slate-600">
-                    Hãy import local data vào account scope trên trình duyệt này trước khi import cloud.
+                    Hãy nhập dữ liệu trên thiết bị vào tài khoản trước khi đồng bộ lên tài khoản.
                   </p>
                 ) : !cloudImportEnabled ? (
                   <p className="rounded-xl bg-white/75 px-3 py-2 text-xs font-medium text-amber-700">
-                    {cloudImportUnavailableReason ?? "Cloud import chưa được bật cho workspace này."}
+                    {cloudImportUnavailableReason ?? "Nhập dữ liệu tài khoản chưa được bật cho workspace này."}
                   </p>
                 ) : cloudImportAlreadyCompleted && !cloudWriteSucceeded ? (
                   <p className="rounded-xl bg-white/75 px-3 py-2 text-xs font-medium text-emerald-700">
-                    Dữ liệu này đã được import lên cloud trước đó.
+                    Dữ liệu này đã được nhập vào tài khoản trước đó.
                   </p>
                 ) : null}
 
@@ -305,11 +304,11 @@ export function LocalDataMigrationPrompt({
                     <p className="font-medium">{cloudWriteResult.message}</p>
                     {cloudWriteSucceeded ? (
                       <p className="mt-1 text-xs">
-                        Dữ liệu đã được ghi lên cloud. Bản local/anonymous vẫn được giữ nguyên.
+                        Dữ liệu đã được ghi vào tài khoản. Bản trên thiết bị vẫn được giữ nguyên.
                       </p>
                     ) : (
                       <p className="mt-1 text-xs">
-                        Dữ liệu local không bị ảnh hưởng. Bạn có thể thử lại.
+                        Dữ liệu trên thiết bị không bị ảnh hưởng. Bạn có thể thử lại.
                       </p>
                     )}
                   </div>
@@ -318,10 +317,10 @@ export function LocalDataMigrationPrompt({
                 {/* Confirmation dialog inline */}
                 {showCloudImportConfirm && canRunCloudImport && !cloudWriteLoading ? (
                   <div className="rounded-xl border border-sky-200 bg-white p-3 space-y-3">
-                    <p className="text-sm font-medium text-slate-900">Xác nhận import cloud</p>
+                    <p className="text-sm font-medium text-slate-900">Xác nhận nhập dữ liệu</p>
                     <p className="text-xs leading-5 text-slate-600">
-                      Dữ liệu 12 tuần sẽ được gửi lên backend. Bản anonymous/local vẫn được giữ nguyên. Nên export
-                      backup trước khi tiếp tục.
+                      Dữ liệu 12 tuần sẽ được gửi vào tài khoản. Bản trên thiết bị vẫn được giữ nguyên. Nên tải
+                      bản sao lưu trước khi tiếp tục.
                     </p>
                     <div className="flex gap-2">
                       <Button
@@ -340,7 +339,7 @@ export function LocalDataMigrationPrompt({
                           onClick={onExportBackup}
                         >
                           <Download className="h-3.5 w-3.5" />
-                          Export backup
+                          Tải bản sao lưu
                         </Button>
                       ) : null}
                       <Button
@@ -349,7 +348,7 @@ export function LocalDataMigrationPrompt({
                         onClick={handleCloudImport}
                       >
                         <Upload className="h-3.5 w-3.5" />
-                        Xác nhận import
+                        Xác nhận nhập
                       </Button>
                     </div>
                   </div>
@@ -401,7 +400,7 @@ export function LocalDataMigrationPrompt({
                       className="bg-white"
                     >
                       {cloudImportChecking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Cloud className="h-4 w-4" />}
-                      Kiểm tra payload
+                      Kiểm tra dữ liệu
                     </Button>
                   ) : !cloudImportEnabled && cloudImportDryRunUnavailableReason ? null : null}
 
@@ -417,7 +416,7 @@ export function LocalDataMigrationPrompt({
                     ) : (
                       <Upload className="h-4 w-4" />
                     )}
-                    Import lên cloud
+                    Nhập vào tài khoản
                   </Button>
                 </div>
               </div>
@@ -428,7 +427,7 @@ export function LocalDataMigrationPrompt({
         <DialogFooter className="gap-2 sm:justify-between">
           <div className="flex gap-2">
             <Button type="button" variant="ghost" onClick={onSkip}>
-              {importSucceeded || cloudWriteSucceeded ? "Done" : "Skip for now"}
+              {importSucceeded || cloudWriteSucceeded ? "Xong" : "Để sau"}
             </Button>
             {cloudWriteSucceeded ? (
               <Button
@@ -440,7 +439,7 @@ export function LocalDataMigrationPrompt({
                 }}
               >
                 <ArrowRight className="h-4 w-4" />
-                Đi tới 12-week system
+                Đi tới hệ 12 tuần
               </Button>
             ) : null}
           </div>
@@ -448,14 +447,14 @@ export function LocalDataMigrationPrompt({
             {onExportBackup ? (
               <Button type="button" variant="outline" onClick={onExportBackup}>
                 <Download className="h-4 w-4" />
-                Export backup
+                Tải bản sao lưu
               </Button>
             ) : null}
             <Button type="button" variant="outline" onClick={() => setShowReview(true)}>
-              Review local data
+              Xem dữ liệu
             </Button>
             <Button type="button" onClick={handleImport} disabled={importSucceeded}>
-              Import local data
+              Nhập dữ liệu
             </Button>
           </div>
         </DialogFooter>

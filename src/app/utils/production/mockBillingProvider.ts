@@ -109,7 +109,7 @@ function buildMockBillingPayload(account: MockBillingProviderAccount): BillingAc
       externalSubscriptionId: account.subscriptionId,
     },
     entitlements: account.entitlements,
-    message: `Mock provider xác nhận gói ${account.planCode} đang mở local.`,
+    message: `Gói ${account.planCode} đang mở trên trình duyệt này.`,
   };
 }
 
@@ -137,7 +137,7 @@ export const mockBillingProvider: BillingProvider = {
         status: "already_active",
         providerMode: "mock_provider",
         planCode,
-        message: `Mock provider xác nhận gói ${planCode} đã sẵn sàng trên trình duyệt này.`,
+        message: `Gói ${planCode} đã sẵn sàng trên trình duyệt này.`,
       };
     }
 
@@ -147,7 +147,7 @@ export const mockBillingProvider: BillingProvider = {
         status: "already_active",
         providerMode: "mock_provider",
         planCode: currentPlan,
-        message: `Gói ${currentPlan} đã mở local trên thiết bị này.`,
+        message: `Gói ${currentPlan} đã mở trên thiết bị này.`,
       };
     }
 
@@ -171,7 +171,7 @@ export const mockBillingProvider: BillingProvider = {
       providerMode: "mock_provider",
       planCode: currentPlan,
       checkoutUrl: createMockCheckoutUrl(sessionId),
-      message: "Đã tạo mock checkout session. Flow này không thu tiền thật và hoàn tất ngay trên web.",
+      message: "Đã mở trang thanh toán dùng thử. Màn này không thu tiền thật và hoàn tất ngay trên web.",
     };
   },
   syncEntitlements: async (_goalId?: string) => {
@@ -186,8 +186,8 @@ export const mockBillingProvider: BillingProvider = {
         entitlementKeys: getCurrentEntitlementKeys(),
         message:
           getCurrentPlan() === "FREE"
-            ? "Mock provider hiện chưa có mock upgrade nào và web đang khớp ở gói Free."
-            : "Mock provider chưa có mock upgrade nào để đồng bộ. Web giữ nguyên trạng thái hiện tại.",
+            ? "Chưa có quyền Plus nào cần khôi phục và web đang ở gói Free."
+            : "Chưa có quyền Plus nào để đồng bộ. Web giữ nguyên trạng thái hiện tại.",
       };
     }
 
@@ -207,8 +207,8 @@ export const mockBillingProvider: BillingProvider = {
       entitlementKeys,
       message:
         isSamePlan && isSameEntitlements
-          ? "Quyền hiện tại đã khớp với mock provider."
-          : `Đã cập nhật gói ${planCode} và quyền local từ mock provider.`,
+          ? "Quyền hiện tại đã được cập nhật."
+          : `Đã cập nhật gói ${planCode} và quyền trên trình duyệt này.`,
     };
   },
   restoreAccess: async (_goalId?: string) => {
@@ -221,7 +221,7 @@ export const mockBillingProvider: BillingProvider = {
         providerMode: "mock_provider",
         planCode: getCurrentPlan(),
         entitlementKeys: getCurrentEntitlementKeys(),
-        message: "Mock provider chưa có mock upgrade nào để khôi phục.",
+        message: "Chưa có quyền Plus nào để khôi phục.",
       };
     }
 
@@ -236,8 +236,8 @@ export const mockBillingProvider: BillingProvider = {
       entitlementKeys,
       message:
         planCode === currentPlan
-          ? `Mock provider xác nhận gói ${planCode} vẫn đang mở local.`
-          : `Đã khôi phục quyền local ${planCode} từ mock provider.`,
+          ? `Gói ${planCode} vẫn đang mở trên trình duyệt này.`
+          : `Đã khôi phục quyền ${planCode} trên trình duyệt này.`,
     };
   },
   openCustomerPortal: async () => ({
@@ -245,7 +245,7 @@ export const mockBillingProvider: BillingProvider = {
     status: "local_only",
     providerMode: "mock_provider",
     providerLabel: getProviderLabel("mock_provider"),
-    message: "Mock provider chưa có cổng quản lý billing thật.",
+    message: "Bản dùng thử chưa có cổng quản lý thanh toán.",
   }),
 };
 
@@ -272,7 +272,7 @@ export function completeMockCheckoutSession(sessionId: string): MockCheckoutComp
       ok: false,
       planCode: getCurrentPlan(),
       returnUrl: "/12-week-system?tab=settings",
-      message: "Mock checkout session không còn hợp lệ.",
+      message: "Phiên thanh toán dùng thử không còn hợp lệ.",
     };
   }
 
@@ -309,6 +309,6 @@ export function completeMockCheckoutSession(sessionId: string): MockCheckoutComp
     ok: true,
     planCode: account.planCode,
     returnUrl: resolveAppReturnPath(session.returnUrl),
-    message: `Đã xác nhận mock checkout và mở gói ${account.planCode} local, không thu tiền thật.`,
+    message: `Đã mở gói ${account.planCode} trên trình duyệt này.`,
   };
 }

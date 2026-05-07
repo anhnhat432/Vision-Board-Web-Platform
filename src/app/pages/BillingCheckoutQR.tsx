@@ -223,107 +223,121 @@ export function BillingCheckoutQR() {
   // ─── Pending — QR checkout ──────────────────────────────────────────────
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-8">
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg sm:p-8">
-        {/* Header */}
-        <div className="mb-6 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
-            <QrCode className="h-6 w-6 text-indigo-600" />
-          </div>
-          <h1 className="text-xl font-bold text-slate-900">Nâng cấp gói Plus</h1>
-          <p className="mt-1 text-2xl font-bold text-indigo-600">
-            {formatVND(order.amount)}
-            <span className="ml-1 text-sm font-normal text-slate-500">/ chu kỳ 12 tuần</span>
-          </p>
-        </div>
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_24px_70px_-48px_rgba(15,23,42,0.38)]">
+        <div className="grid gap-0 lg:grid-cols-[minmax(320px,0.86fr)_minmax(0,1fr)]">
+          <section className="border-b border-slate-200 bg-slate-50/80 p-5 text-center sm:p-7 lg:border-b-0 lg:border-r">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100">
+              <QrCode className="h-6 w-6 text-indigo-600" />
+            </div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Thanh toán VietQR</p>
+            <h1 className="mt-2 text-xl font-bold text-slate-900">Nâng cấp gói Plus</h1>
+            <p className="mt-2 text-3xl font-bold text-indigo-600">
+              {formatVND(order.amount)}
+              <span className="ml-1 text-sm font-normal text-slate-500">/ chu kỳ 12 tuần</span>
+            </p>
 
-        {/* QR Code */}
-        <div className="mb-6 flex justify-center">
-          <div className="overflow-hidden rounded-xl border-2 border-indigo-100 bg-white p-2">
-            <img
-              src={order.qrDataUrl}
-              alt="Mã QR chuyển khoản"
-              className="h-56 w-56 object-contain sm:h-64 sm:w-64"
-              loading="eager"
-            />
-          </div>
-        </div>
+            <div className="mt-6 flex justify-center">
+              <div className="overflow-hidden rounded-xl border border-indigo-100 bg-white p-3 shadow-sm">
+                <img
+                  src={order.qrDataUrl}
+                  alt="Mã QR chuyển khoản"
+                  className="h-56 w-56 object-contain sm:h-64 sm:w-64"
+                  loading="eager"
+                />
+              </div>
+            </div>
 
-        {/* Bank info */}
-        <div className="mb-6 space-y-3 rounded-xl bg-slate-50 p-4">
-          <InfoRow
-            label="Ngân hàng"
-            value={order.bankName}
-            onCopy={() => copyToClipboard(order.bankName, "bank")}
-            isCopied={copied === "bank"}
-          />
-          <InfoRow
-            label="Số tài khoản"
-            value={order.bankAccount}
-            onCopy={() => copyToClipboard(order.bankAccount, "account")}
-            isCopied={copied === "account"}
-          />
-          <InfoRow
-            label="Chủ tài khoản"
-            value={order.accountName}
-            onCopy={() => copyToClipboard(order.accountName, "name")}
-            isCopied={copied === "name"}
-          />
-          <InfoRow
-            label="Số tiền"
-            value={formatVND(order.amount)}
-            onCopy={() => copyToClipboard(String(order.amount), "amount")}
-            isCopied={copied === "amount"}
-          />
-          <InfoRow
-            label="Nội dung CK"
-            value={order.orderId}
-            onCopy={() => copyToClipboard(order.orderId, "desc")}
-            isCopied={copied === "desc"}
-            highlight
-          />
-        </div>
+            <div className="mt-5 text-center">
+              <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2">
+                <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
+                <span className="text-sm font-medium text-indigo-700">Đang chờ xác nhận...</span>
+              </div>
+              {timeLeft > 0 && (
+                <p className="mt-2 text-xs text-slate-500">Còn {formatCountdown(timeLeft)} để thanh toán</p>
+              )}
+            </div>
+          </section>
 
-        {/* Warning */}
-        <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-          <p className="text-xs font-medium text-amber-800">
-            Quan trọng: Vui lòng <strong>không sửa nội dung chuyển khoản</strong>. Hệ thống sẽ tự động xác nhận dựa trên
-            nội dung này.
-          </p>
-        </div>
+          <section className="p-5 sm:p-7">
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-base font-bold text-slate-900">Thông tin chuyển khoản</h2>
+                <p className="mt-1 text-sm leading-6 text-slate-500">
+                  Chuyển đúng số tiền và giữ nguyên nội dung để hệ thống tự kích hoạt Plus sau khi nhận giao dịch.
+                </p>
+              </div>
 
-        {/* Countdown + status */}
-        <div className="mb-6 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2">
-            <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
-            <span className="text-sm font-medium text-indigo-700">Đang chờ xác nhận...</span>
-          </div>
-          {timeLeft > 0 && <p className="mt-2 text-xs text-slate-500">Còn {formatCountdown(timeLeft)} để thanh toán</p>}
-        </div>
+              <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <InfoRow
+                  label="Ngân hàng"
+                  value={order.bankName}
+                  onCopy={() => copyToClipboard(order.bankName, "bank")}
+                  isCopied={copied === "bank"}
+                />
+                <InfoRow
+                  label="Số tài khoản"
+                  value={order.bankAccount}
+                  onCopy={() => copyToClipboard(order.bankAccount, "account")}
+                  isCopied={copied === "account"}
+                />
+                <InfoRow
+                  label="Chủ tài khoản"
+                  value={order.accountName}
+                  onCopy={() => copyToClipboard(order.accountName, "name")}
+                  isCopied={copied === "name"}
+                />
+                <InfoRow
+                  label="Số tiền"
+                  value={formatVND(order.amount)}
+                  onCopy={() => copyToClipboard(String(order.amount), "amount")}
+                  isCopied={copied === "amount"}
+                />
+                <InfoRow
+                  label="Nội dung CK"
+                  value={order.orderId}
+                  onCopy={() => copyToClipboard(order.orderId, "desc")}
+                  isCopied={copied === "desc"}
+                  highlight
+                />
+              </div>
 
-        {/* Instructions */}
-        <div className="mb-6 space-y-2">
-          <h3 className="text-sm font-semibold text-slate-700">Hướng dẫn:</h3>
-          <ol className="list-inside list-decimal space-y-1 text-sm text-slate-600">
-            <li>Mở app ngân hàng trên điện thoại</li>
-            <li>
-              Chọn <strong>Quét mã QR</strong> hoặc <strong>Chuyển khoản</strong>
-            </li>
-            <li>Quét mã QR ở trên (thông tin sẽ được điền sẵn)</li>
-            <li>Xác nhận chuyển khoản</li>
-            <li>Hệ thống sẽ tự động kích hoạt gói Plus trong vài giây</li>
-          </ol>
-        </div>
+              <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                <p className="text-xs font-medium leading-5 text-amber-800">
+                  Quan trọng: Vui lòng <strong>không sửa nội dung chuyển khoản</strong>. Nếu nội dung khác mã đơn, giao
+                  dịch có thể cần kiểm tra thủ công.
+                </p>
+              </div>
 
-        {/* Cancel */}
-        <div className="text-center">
-          <button
-            type="button"
-            onClick={() => navigate("/billing/plan")}
-            className="text-sm font-medium text-slate-500 underline decoration-slate-300 transition hover:text-slate-700"
-          >
-            Hủy thanh toán
-          </button>
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold text-slate-700">Cách thanh toán</h3>
+                <ol className="grid gap-2 text-sm text-slate-600">
+                  {[
+                    "Mở app ngân hàng trên điện thoại.",
+                    "Chọn quét mã QR hoặc chuyển khoản.",
+                    "Kiểm tra số tiền và nội dung chuyển khoản.",
+                    "Xác nhận giao dịch và giữ trang này mở.",
+                    "Plus sẽ được kích hoạt sau khi hệ thống nhận thanh toán.",
+                  ].map((step, index) => (
+                    <li key={step} className="flex gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-semibold text-white">
+                        {index + 1}
+                      </span>
+                      <span className="leading-6">{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => navigate("/billing/plan")}
+                className="text-sm font-medium text-slate-500 underline decoration-slate-300 transition hover:text-slate-700"
+              >
+                Hủy thanh toán
+              </button>
+            </div>
+          </section>
         </div>
       </div>
     </div>
@@ -346,11 +360,11 @@ function InfoRow({
   highlight?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between gap-2">
+    <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
       <span className="text-xs text-slate-500">{label}</span>
-      <div className="flex items-center gap-1.5">
+      <div className="flex min-w-0 items-center gap-1.5">
         <span
-          className={`text-sm font-semibold ${
+          className={`min-w-0 break-all text-sm font-semibold ${
             highlight ? "rounded bg-indigo-100 px-2 py-0.5 text-indigo-700" : "text-slate-800"
           }`}
         >

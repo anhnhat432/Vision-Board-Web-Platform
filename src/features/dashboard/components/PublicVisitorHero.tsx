@@ -40,11 +40,11 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
                 <>
                   <Button className="w-full sm:w-auto" onClick={onStartDemo}>
                     <Sparkles className="h-4 w-4" />
-                    Trải nghiệm demo miễn phí
+                    Dùng thử miễn phí
                   </Button>
                   <Button variant="outline" className="border-slate-200 bg-white text-slate-900" onClick={onSignUp}>
                     <UserPlus className="h-4 w-4" />
-                    Đăng ký để sync sau
+                    Đăng ký để đồng bộ sau
                   </Button>
                   <Button
                     variant="outline"
@@ -70,8 +70,8 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
             </div>
             {isDemo ? (
               <p className="max-w-2xl text-xs leading-6 text-slate-500">
-                Dữ liệu demo/local được lưu trên trình duyệt hiện tại. Đăng ký là tuỳ chọn để đồng bộ sau — export nếu
-                muốn giữ bản sao.
+                Dữ liệu lưu trên trình duyệt hiện tại. Đăng ký là tuỳ chọn để đồng bộ sau; hãy xuất dữ liệu nếu muốn giữ
+                bản sao.
               </p>
             ) : null}
             <div className="grid gap-2 pt-1 sm:grid-cols-3">

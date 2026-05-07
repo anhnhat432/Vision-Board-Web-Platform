@@ -30,15 +30,15 @@ const CATEGORY_OPTIONS: Array<{ value: DemoFeedbackCategory; label: string }> = 
   { value: "twelve_week_setup", label: "Setup 12 tuần" },
   { value: "today_tasks", label: "Today tasks" },
   { value: "weekly_review", label: "Review tuần" },
-  { value: "mock_billing", label: "Mock upgrade" },
-  { value: "local_data", label: "Dữ liệu local" },
+  { value: "mock_billing", label: "Nâng cấp Plus" },
+  { value: "local_data", label: "Lưu dữ liệu" },
   { value: "other", label: "Khác" },
 ];
 
 export function FeedbackDialog({
   source,
   context,
-  triggerLabel = "Góp ý demo",
+  triggerLabel = "Góp ý",
   triggerClassName,
 }: FeedbackDialogProps) {
   const [open, setOpen] = useState(false);
@@ -82,8 +82,8 @@ export function FeedbackDialog({
 
     toast.success("Đã lưu góp ý trên trình duyệt này.", {
       description: result.savedLocally
-        ? "Nội dung góp ý không cần đăng nhập và không gửi raw text ra analytics ngoài."
-        : "Không lưu được localStorage, nhưng app vẫn không gửi raw text ra analytics ngoài.",
+        ? "Nội dung góp ý không cần đăng nhập và chỉ dùng để cải thiện trải nghiệm."
+        : "Không lưu được góp ý trên trình duyệt, nhưng app không gửi nội dung chi tiết ra công cụ phân tích ngoài.",
     });
   };
 
@@ -106,21 +106,21 @@ export function FeedbackDialog({
       </Button>
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Góp ý nhanh cho demo</DialogTitle>
+          <DialogTitle>Góp ý nhanh</DialogTitle>
           <DialogDescription>
-            Không cần đăng nhập. Raw feedback chỉ lưu local trên trình duyệt này; analytics ngoài chỉ nhận rating, nhóm
-            lỗi và độ dài nội dung.
+            Không cần đăng nhập. Nội dung bạn nhập chỉ được lưu trên trình duyệt này; công cụ phân tích ngoài chỉ nhận
+            điểm chấm và nhóm góp ý.
           </DialogDescription>
         </DialogHeader>
 
         {submitted ? (
           <div className="space-y-4">
             <div className="rounded-[24px] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm leading-6 text-emerald-900">
-              Cảm ơn bạn. Feedback đã được ghi nhận cho bản demo local-first.
+              Cảm ơn bạn. Góp ý đã được ghi nhận trên trình duyệt này.
             </div>
             <div className="rounded-[24px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-600">
               Nếu muốn gửi lại qua kênh riêng, bạn có thể sao chép nội dung vừa nhập. App không yêu cầu email và không
-              gọi backend bắt buộc.
+              bắt buộc kết nối tài khoản.
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={handleCopy} disabled={!copyText}>

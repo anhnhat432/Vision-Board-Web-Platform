@@ -210,7 +210,7 @@ describe("TwelveWeekSystemSections", () => {
     );
 
     expect(screen.getByText("Cài đặt chu kỳ")).toBeInTheDocument();
-    expect(screen.getByText("Góp ý")).toBeInTheDocument();
+    expect(screen.getAllByText("Góp ý").length).toBeGreaterThan(0);
     expect(screen.getByLabelText("Chọn ngày review")).toBeInTheDocument();
     expect(screen.queryByText("Thiết bị, dữ liệu và đồng bộ")).not.toBeInTheDocument();
     expect(screen.queryByText("Đồng bộ backend")).not.toBeInTheDocument();

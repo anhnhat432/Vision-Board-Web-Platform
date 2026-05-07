@@ -345,7 +345,7 @@ describe("authenticated new user core flow", () => {
       expect(router.state.location.pathname).toBe("/onboarding");
     });
     expect(screen.queryByText("Anonymous stale goal must stay hidden")).not.toBeInTheDocument();
-    await user.click(await screen.findByRole("button", { name: "Skip for now" }));
+    await user.click(await screen.findByRole("button", { name: "Để sau" }));
 
     await user.click(screen.getByRole("button", { name: "Chấm Life Balance" }));
     await user.click(await screen.findByRole("button", { name: "Hoàn thành đánh giá" }));

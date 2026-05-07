@@ -418,7 +418,7 @@ describe("RootLayout onboarding redirect", () => {
     renderAppShell("/");
 
     expect(await screen.findByTestId("onboarding-page")).toBeInTheDocument();
-    expect(screen.queryByText("Có dữ liệu local trên trình duyệt này")).not.toBeInTheDocument();
+    expect(screen.queryByText("Có dữ liệu trên trình duyệt này")).not.toBeInTheDocument();
   });
 
   it("shows the local data migration prompt when signed-in account has meaningful anonymous data", async () => {
@@ -430,10 +430,10 @@ describe("RootLayout onboarding redirect", () => {
 
     renderAppShell("/");
 
-    expect(await screen.findByText("Có dữ liệu local trên trình duyệt này")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Import local data" })).toBeEnabled();
-    expect(screen.getByRole("button", { name: "Review local data" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Skip for now" })).toBeInTheDocument();
+    expect(await screen.findByText("Có dữ liệu trên trình duyệt này")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Nhập dữ liệu" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Xem dữ liệu" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Để sau" })).toBeInTheDocument();
   });
 
   it("imports meaningful anonymous data into a fresh signed-in account scope", async () => {
@@ -447,10 +447,10 @@ describe("RootLayout onboarding redirect", () => {
 
     renderAppShell("/");
 
-    expect(await screen.findByText("Có dữ liệu local trên trình duyệt này")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Import local data" }));
+    expect(await screen.findByText("Có dữ liệu trên trình duyệt này")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Nhập dữ liệu" }));
 
-    expect(await screen.findByText(/Đã copy dữ liệu vào account scope/)).toBeInTheDocument();
+    expect(await screen.findByText(/Đã copy dữ liệu vào tài khoản/)).toBeInTheDocument();
     expect(getUserData().goals.map((goal) => goal.title)).toEqual(anonymousData.goals.map((goal) => goal.title));
     expect(localStorage.getItem(getScopedUserDataStorageKey("user_test"))).toBe(rawAnonymousData);
     expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(rawAnonymousData);
@@ -468,11 +468,11 @@ describe("RootLayout onboarding redirect", () => {
 
     renderAppShell("/");
 
-    expect(await screen.findByText(/Có dữ liệu local trên trình duyệt này/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Kiểm tra payload" })).toBeDisabled();
+    expect(await screen.findByText(/Có dữ liệu trên trình duyệt này/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Kiểm tra dữ liệu" })).toBeDisabled();
 
-    fireEvent.click(screen.getByRole("button", { name: "Import local data" }));
-    fireEvent.click(screen.getByRole("button", { name: "Kiểm tra payload" }));
+    fireEvent.click(screen.getByRole("button", { name: "Nhập dữ liệu" }));
+    fireEvent.click(screen.getByRole("button", { name: "Kiểm tra dữ liệu" }));
 
     await waitFor(() => {
       expect(syncServiceMock.post12WeekImportValidation).toHaveBeenCalledTimes(1);
@@ -493,12 +493,12 @@ describe("RootLayout onboarding redirect", () => {
         },
       }),
     );
-    expect(await screen.findByText(/Payload hợp lệ cho cloud import dry-run/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Dữ liệu hợp lệ để nhập vào tài khoản/i)).toBeInTheDocument();
     expect(window.dataLayer).toEqual([]);
     expect(window.gtag).not.toHaveBeenCalled();
   });
 
-  it("shows backend validation errors without deleting local data", async () => {
+  it("shows account validation errors without deleting browser data", async () => {
     const anonymousData = seedMeaningfulAnonymousTwelveWeekData();
     const rawAnonymousData = localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY);
     activateAuthenticatedUserData("user_test");
@@ -538,17 +538,17 @@ describe("RootLayout onboarding redirect", () => {
 
     renderAppShell("/");
 
-    expect(await screen.findByText(/Có dữ liệu local trên trình duyệt này/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Import local data" }));
-    fireEvent.click(screen.getByRole("button", { name: "Kiểm tra payload" }));
+    expect(await screen.findByText(/Có dữ liệu trên trình duyệt này/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Nhập dữ liệu" }));
+    fireEvent.click(screen.getByRole("button", { name: "Kiểm tra dữ liệu" }));
 
-    expect(await screen.findByText(/Backend báo payload chưa sẵn sàng cho cloud import/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Dữ liệu chưa sẵn sàng để nhập vào tài khoản/i)).toBeInTheDocument();
     expect(screen.getByText(/workspace.goals\[0\]\.plan\.weeks is required/i)).toBeInTheDocument();
     expect(getUserData().goals.map((goal) => goal.title)).toEqual(anonymousData.goals.map((goal) => goal.title));
     expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(rawAnonymousData);
   });
 
-  it("blocks local import when the signed-in account already has meaningful data", async () => {
+  it("blocks browser import when the signed-in account already has meaningful data", async () => {
     activateAuthenticatedUserData("user_test");
     saveUserData(createFreshUserData());
     const accountData = createFreshUserData();
@@ -565,16 +565,16 @@ describe("RootLayout onboarding redirect", () => {
 
     renderAppShell("/");
 
-    expect(await screen.findByText("Có dữ liệu local trên trình duyệt này")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Import local data" }));
+    expect(await screen.findByText("Có dữ liệu trên trình duyệt này")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Nhập dữ liệu" }));
 
-    expect(await screen.findByText(/sẽ không ghi đè tự động/)).toBeInTheDocument();
+    expect(await screen.findByText(/không ghi đè tự động/)).toBeInTheDocument();
     expect(getUserData().goals.map((goal) => goal.title)).toEqual(["Existing account goal"]);
     expect(localStorage.getItem(getScopedUserDataStorageKey("user_test"))).toBe(rawAccountData);
     expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toContain("Anonymous local goal");
   });
 
-  it("lets the user skip local data migration without deleting anonymous data", async () => {
+  it("lets the user skip browser data migration without deleting anonymous data", async () => {
     seedMeaningfulAnonymousData();
     const rawAnonymousData = localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY);
     setAuthContext({
@@ -584,11 +584,11 @@ describe("RootLayout onboarding redirect", () => {
 
     renderAppShell("/");
 
-    expect(await screen.findByText("Có dữ liệu local trên trình duyệt này")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Skip for now" }));
+    expect(await screen.findByText("Có dữ liệu trên trình duyệt này")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Để sau" }));
 
     await waitFor(() => {
-      expect(screen.queryByText("Có dữ liệu local trên trình duyệt này")).not.toBeInTheDocument();
+      expect(screen.queryByText("Có dữ liệu trên trình duyệt này")).not.toBeInTheDocument();
     });
     expect(localStorage.getItem(ANONYMOUS_USER_DATA_STORAGE_KEY)).toBe(rawAnonymousData);
   });
@@ -605,7 +605,7 @@ describe("RootLayout onboarding redirect", () => {
     expect(syncServiceMock.post12WeekImportValidation).not.toHaveBeenCalled();
 
     expect(await screen.findByTestId("home-page")).toBeInTheDocument();
-    expect(screen.queryByText("Có dữ liệu local trên trình duyệt này")).not.toBeInTheDocument();
+    expect(screen.queryByText("Có dữ liệu trên trình duyệt này")).not.toBeInTheDocument();
   });
 
   it("does not show the local data migration prompt while signed out", async () => {
@@ -615,6 +615,6 @@ describe("RootLayout onboarding redirect", () => {
     expect(syncServiceMock.post12WeekImportValidation).not.toHaveBeenCalled();
 
     expect(await screen.findByTestId("home-page")).toBeInTheDocument();
-    expect(screen.queryByText("Có dữ liệu local trên trình duyệt này")).not.toBeInTheDocument();
+    expect(screen.queryByText("Có dữ liệu trên trình duyệt này")).not.toBeInTheDocument();
   });
 });

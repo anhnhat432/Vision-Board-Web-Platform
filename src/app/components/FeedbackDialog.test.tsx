@@ -39,9 +39,9 @@ describe("FeedbackDialog", () => {
   it("submits signed-out demo feedback without requiring account info", async () => {
     render(<FeedbackDialog source="dashboard" context="dashboard" />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Góp ý demo" }));
+    fireEvent.click(screen.getByRole("button", { name: "Góp ý" }));
 
-    expect(screen.getByText("Góp ý nhanh cho demo")).toBeInTheDocument();
+    expect(screen.getByText("Góp ý nhanh")).toBeInTheDocument();
     expect(screen.queryByLabelText(/email/i)).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Gửi góp ý" })).toBeDisabled();
 
@@ -63,6 +63,6 @@ describe("FeedbackDialog", () => {
       confusingText: "Không rõ task quan trọng nhất.",
       nextHelpText: "Chỉ rõ bước tiếp theo.",
     });
-    expect(screen.getByText("Cảm ơn bạn. Feedback đã được ghi nhận cho bản demo local-first.")).toBeInTheDocument();
+    expect(screen.getByText("Cảm ơn bạn. Góp ý đã được ghi nhận trên trình duyệt này.")).toBeInTheDocument();
   });
 });

@@ -15,11 +15,11 @@ export function WorkspaceLoadingGate({ stage }: { stage: WorkspaceGateStage }) {
     },
     profile: {
       title: "Đang mở workspace của bạn",
-      description: "Mình đang nối profile backend để biết đây là người dùng mới hay người dùng đã có dữ liệu.",
+      description: "Mình đang mở hồ sơ tài khoản để biết đây là người dùng mới hay người dùng đã có dữ liệu.",
     },
     sync: {
       title: "Đang đồng bộ dữ liệu",
-      description: "Mình đang kiểm tra mục tiêu và kế hoạch 12 tuần đã lưu trên backend trước khi quyết định màn tiếp theo.",
+      description: "Mình đang kiểm tra mục tiêu và kế hoạch 12 tuần đã lưu trong tài khoản trước khi mở màn tiếp theo.",
     },
   };
   const copy = stageCopy[stage];
@@ -30,12 +30,12 @@ export function WorkspaceLoadingGate({ stage }: { stage: WorkspaceGateStage }) {
       active: stage === "auth" || stage === "redirect-login",
     },
     {
-      label: "Nối backend profile",
+      label: "Mở hồ sơ tài khoản",
       done: stage === "sync",
       active: stage === "profile",
     },
     {
-      label: "Đồng bộ workspace",
+      label: "Đồng bộ dữ liệu",
       done: false,
       active: stage === "sync",
     },

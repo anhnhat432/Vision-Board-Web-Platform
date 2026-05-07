@@ -168,7 +168,7 @@ export function TwelveWeekPlanAccessSection({
               )}`}
             >
               <div className="flex items-center justify-between gap-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em]">Khôi phục mock upgrade</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em]">Khôi phục quyền Plus</p>
                 <Badge variant="outline" className="border-current/20 bg-white/70 text-current">
                   {getBillingActionStatusLabel(lastRestoreAccessSnapshot?.status ?? "local_only")}
                 </Badge>
@@ -180,7 +180,7 @@ export function TwelveWeekPlanAccessSection({
               </p>
               <p className="mt-1 text-sm opacity-80">
                 {lastRestoreAccessSnapshot?.message ??
-                  "Dùng khi bạn đã từng mở mock upgrade và muốn lấy lại quyền local trên trình duyệt này."}
+                  "Dùng khi bạn đã từng mở Plus và muốn lấy lại quyền trên trình duyệt này."}
               </p>
               <p className="mt-3 text-xs uppercase tracking-[0.16em] opacity-60">
                 {lastRestoreAccessSnapshot ? formatDateTimeLabel(lastRestoreAccessSnapshot.at) : "Chưa chạy"}

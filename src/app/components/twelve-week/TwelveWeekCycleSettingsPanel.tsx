@@ -90,14 +90,14 @@ export function TwelveWeekCycleSettingsPanel({
                 <Clock3 className="h-3.5 w-3.5" />
                 Giờ nhắc
               </p>
-              <p className="mt-1 text-sm text-slate-600">Khung giờ local để nhắc check-in và review.</p>
+              <p className="mt-1 text-sm text-slate-600">Khung giờ trên thiết bị để nhắc check-in và review.</p>
             </div>
             <Input
               id="reminder-time"
               value={system.dailyReminderTime || "19:00"}
               onChange={(event) => onReminderTimeChange(event.target.value)}
               type="time"
-              aria-label="Chọn giờ nhắc local"
+              aria-label="Chọn giờ nhắc"
             />
           </div>
 

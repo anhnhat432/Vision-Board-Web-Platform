@@ -57,62 +57,62 @@ function getMutationQueueSyncBlocker(input: {
 }): string | null {
   const { backendConnectionStatus, mutationQueueSyncStatus } = input;
 
-  if (!mutationQueueSyncStatus.realMode) return "Bản demo lưu trên trình duyệt này, không cần cloud sync.";
-  if (!mutationQueueSyncStatus.featureEnabled) return "Mutation sync đang tắt bằng feature flag.";
-  if (!mutationQueueSyncStatus.pullFeatureEnabled) return "Pull sync đang tắt bằng feature flag.";
-  if (!mutationQueueSyncStatus.apiConfigured) return "Chưa cấu hình backend API để gửi queue.";
+  if (!mutationQueueSyncStatus.realMode) return "Bản dùng thử lưu trên trình duyệt này, không cần đồng bộ tài khoản.";
+  if (!mutationQueueSyncStatus.featureEnabled) return "Đồng bộ thay đổi đang tắt.";
+  if (!mutationQueueSyncStatus.pullFeatureEnabled) return "Khôi phục dữ liệu tài khoản đang tắt.";
+  if (!mutationQueueSyncStatus.apiConfigured) return "Chưa cấu hình API để gửi hàng chờ.";
   if (!backendConnectionStatus.authConfigured) return "Chưa cấu hình đăng nhập Firebase.";
   if (backendConnectionStatus.authLoading) return "Đang kiểm tra phiên đăng nhập.";
-  if (!backendConnectionStatus.signedIn) return "Cần đăng nhập để gửi queue account.";
-  if (!backendConnectionStatus.profileReady) return "Đang chờ backend profile sẵn sàng.";
+  if (!backendConnectionStatus.signedIn) return "Cần đăng nhập để gửi hàng chờ lên tài khoản.";
+  if (!backendConnectionStatus.profileReady) return "Đang chờ hồ sơ tài khoản sẵn sàng.";
 
   return null;
 }
 
 function getMutationQueueResultDescription(result: MutationQueueSyncResult | null): string {
   if (!result) {
-    return "Chưa chạy lần nào trong phiên này. Hành động này gửi queue, pull cloud workspace, rồi chỉ áp dụng nếu merge an toàn.";
+    return "Chưa chạy lần nào trong phiên này. Hành động này gửi các mục đang chờ, lấy dữ liệu tài khoản, rồi chỉ áp dụng khi an toàn.";
   }
 
   if (result.status === "applied") {
     const pulledGoalCount = result.pullResponse?.workspace.goals.length ?? 0;
-    return `Đã gửi queue, pull ${pulledGoalCount} goal cloud và áp dụng merge an toàn vào local.`;
+    return `Đã gửi hàng chờ, lấy ${pulledGoalCount} mục tiêu từ tài khoản và áp dụng dữ liệu an toàn vào thiết bị.`;
   }
 
   if (result.status === "drain_failed") {
-    return `${result.message} Dữ liệu local vẫn được giữ nguyên.`;
+    return `${result.message} Dữ liệu trên thiết bị vẫn được giữ nguyên.`;
   }
 
   if (result.status === "conflict") {
     const conflictCount = result.mergeReport?.summary.conflictCount ?? 0;
     const unresolvedCount = result.unresolvedLocalMutationCount ?? 0;
-    return `${result.message} Conflict: ${conflictCount}; local pending: ${unresolvedCount}.`;
+    return `${result.message} Khác biệt: ${conflictCount}; mục còn chờ trên thiết bị: ${unresolvedCount}.`;
   }
 
   if (result.status === "unsafe") {
     const summary = result.mergeReport?.summary;
     return summary
-      ? `${result.message} Cloud-only: ${summary.cloudOnlyCount}; local-only: ${summary.localOnlyCount}; missing IDs: ${summary.missingClientIdCount}.`
+      ? `${result.message} Chỉ có trên tài khoản: ${summary.cloudOnlyCount}; chỉ có trên thiết bị: ${summary.localOnlyCount}; thiếu mã liên kết: ${summary.missingClientIdCount}.`
       : result.message;
   }
 
   if (result.status === "error") {
-    return `${result.message} Dữ liệu local không bị xóa.`;
+    return `${result.message} Dữ liệu trên thiết bị không bị xóa.`;
   }
 
   switch (result.skipReason) {
     case "mutation_feature_disabled":
-      return "Mutation sync đang tắt bằng feature flag.";
+      return "Đồng bộ thay đổi đang tắt.";
     case "pull_feature_disabled":
-      return "Pull sync đang tắt bằng feature flag.";
+      return "Khôi phục dữ liệu tài khoản đang tắt.";
     case "demo_mode":
-      return "Demo mode không gọi backend protected endpoint.";
+      return "Bản dùng thử không gọi API tài khoản.";
     case "unauthenticated":
-      return "Chưa có account đã đăng nhập để chạy cloud sync.";
+      return "Cần đăng nhập để đồng bộ tài khoản.";
     case "api_not_configured":
-      return "Chưa cấu hình API backend.";
+      return "Chưa cấu hình API.";
     default:
-      return result.message || "Điều kiện cloud sync chưa sẵn sàng.";
+      return result.message || "Điều kiện đồng bộ chưa sẵn sàng.";
   }
 }
 
@@ -220,20 +220,20 @@ function getBackendStatusLabel(status: TwelveWeekSettingsTabProps["backendConnec
 }
 
 function getBackendStatusDescription(status: TwelveWeekSettingsTabProps["backendConnectionStatus"]): string {
-  if (!status.authConfigured) return "Backend chưa được cấu hình. Dữ liệu vẫn được giữ local trên thiết bị này.";
-  if (status.authLoading) return "Đang kiểm tra phiên đăng nhập trước khi nối backend.";
+  if (!status.authConfigured) return "Đồng bộ tài khoản chưa được cấu hình. Dữ liệu vẫn được giữ trên thiết bị này.";
+  if (status.authLoading) return "Đang kiểm tra phiên đăng nhập trước khi nối tài khoản.";
   if (!status.signedIn) return "Đăng nhập để đồng bộ tiến độ qua thiết bị khác.";
-  if (!status.profileReady) return "Đã có phiên đăng nhập, đang chờ backend profile sẵn sàng.";
-  if (status.syncing) return "Đang đồng bộ plan, task, check-in và review 12-week lên backend.";
+  if (!status.profileReady) return "Đã có phiên đăng nhập, đang chờ hồ sơ tài khoản sẵn sàng.";
+  if (status.syncing) return "Đang đồng bộ kế hoạch, việc, check-in và review 12 tuần lên tài khoản.";
   if (status.syncMessage) return status.syncMessage;
   return status.displayName || status.email
-    ? `Đang đồng bộ dưới tài khoản ${status.displayName || status.email}. Nếu local và backend khác nhau, web sẽ hỏi bạn trước khi ghi đè.`
-    : "Backend đã sẵn sàng. Nếu local và backend khác nhau, web sẽ hỏi bạn trước khi ghi đè.";
+    ? `Đang đồng bộ dưới tài khoản ${status.displayName || status.email}. Nếu dữ liệu hai nơi khác nhau, web sẽ hỏi bạn trước khi ghi đè.`
+    : "Đồng bộ tài khoản đã sẵn sàng. Nếu dữ liệu hai nơi khác nhau, web sẽ hỏi bạn trước khi ghi đè.";
 }
 
 function getBackendHydrationDescription(result: TwelveWeekSettingsTabProps["lastBackendHydrationResult"]): string {
   if (!result) {
-    return "Kiểm tra backend và chỉ kéo về những chu kỳ 12-week đang thiếu ở local. Nếu hai bên khác nhau, web sẽ yêu cầu bạn chọn nguồn dữ liệu trước.";
+    return "Kiểm tra tài khoản và chỉ khôi phục những chu kỳ 12 tuần đang thiếu trên thiết bị. Nếu hai bên khác nhau, web sẽ yêu cầu bạn chọn nguồn dữ liệu trước.";
   }
 
   if (result.status === "error") return result.message;
@@ -242,10 +242,10 @@ function getBackendHydrationDescription(result: TwelveWeekSettingsTabProps["last
     return `${result.message} Web đã tạm dừng tự đồng bộ cho các chu kỳ này.`;
   }
   if (result.hydratedCount + result.updatedCount > 0) {
-    return `Đã khôi phục ${result.hydratedCount} chu kỳ mới và cập nhật ${result.updatedCount} chu kỳ từ backend.`;
+    return `Đã khôi phục ${result.hydratedCount} chu kỳ mới và cập nhật ${result.updatedCount} chu kỳ từ tài khoản.`;
   }
 
-  return "Backend đã được kiểm tra, chưa có chu kỳ mới cần khôi phục.";
+  return "Tài khoản đã được kiểm tra, chưa có chu kỳ mới cần khôi phục.";
 }
 
 function getConflictKindLabel(kind: BackendConflict["kind"]): string {
@@ -388,33 +388,33 @@ function MutationQueueConflictResolutionPanel({
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
         <div className="min-w-0">
           <p className="text-sm font-semibold text-amber-950">
-            Có thay đổi trên trình duyệt này và trên cloud.
+            Có thay đổi trên trình duyệt này và trong tài khoản.
           </p>
           <p className="mt-1 text-xs leading-5 text-amber-800">
-            Ứng dụng chưa tự ghi đè để tránh mất dữ liệu. Nên export backup trước khi xử lý conflict.
+            Ứng dụng chưa tự ghi đè để tránh mất dữ liệu. Nên tải bản sao trước khi xử lý khác biệt.
           </p>
         </div>
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-5">
         <div className="rounded-lg border border-amber-200 bg-white px-3 py-2">
-          <p className="font-semibold uppercase tracking-[0.12em] text-amber-700">Conflict</p>
+          <p className="font-semibold uppercase tracking-[0.12em] text-amber-700">Khác biệt</p>
           <p className="mt-1 text-lg font-semibold text-slate-950">{report.summary.conflictCount}</p>
         </div>
         <div className="rounded-lg border border-amber-200 bg-white px-3 py-2">
-          <p className="font-semibold uppercase tracking-[0.12em] text-amber-700">Local only</p>
+          <p className="font-semibold uppercase tracking-[0.12em] text-amber-700">Chỉ trên máy</p>
           <p className="mt-1 text-lg font-semibold text-slate-950">{report.summary.localOnlyCount}</p>
         </div>
         <div className="rounded-lg border border-amber-200 bg-white px-3 py-2">
-          <p className="font-semibold uppercase tracking-[0.12em] text-amber-700">Cloud only</p>
+          <p className="font-semibold uppercase tracking-[0.12em] text-amber-700">Chỉ tài khoản</p>
           <p className="mt-1 text-lg font-semibold text-slate-950">{report.summary.cloudOnlyCount}</p>
         </div>
         <div className="rounded-lg border border-amber-200 bg-white px-3 py-2">
-          <p className="font-semibold uppercase tracking-[0.12em] text-amber-700">Missing IDs</p>
+          <p className="font-semibold uppercase tracking-[0.12em] text-amber-700">Thiếu liên kết</p>
           <p className="mt-1 text-lg font-semibold text-slate-950">{report.summary.missingClientIdCount}</p>
         </div>
         <div className="rounded-lg border border-amber-200 bg-white px-3 py-2">
-          <p className="font-semibold uppercase tracking-[0.12em] text-amber-700">Unsupported</p>
+          <p className="font-semibold uppercase tracking-[0.12em] text-amber-700">Cần kiểm tra</p>
           <p className="mt-1 text-lg font-semibold text-slate-950">{report.summary.unsupportedFieldCount}</p>
         </div>
       </div>
@@ -437,22 +437,24 @@ function MutationQueueConflictResolutionPanel({
                   <p className="mt-1">{getPullConflictReasonLabel(conflict.reason)}</p>
                 </div>
               ))}
-              {hiddenConflictCount > 0 ? <p>Còn {hiddenConflictCount} conflict khác.</p> : null}
+              {hiddenConflictCount > 0 ? <p>Còn {hiddenConflictCount} khác biệt khác.</p> : null}
             </div>
           ) : null}
           {report.localOnlyChanges.length > 0 ? (
             <p>Có {report.localOnlyChanges.length} mục chỉ có trên trình duyệt này.</p>
           ) : null}
-          {report.cloudOnlyChanges.length > 0 ? <p>Có {report.cloudOnlyChanges.length} mục chỉ có trên cloud.</p> : null}
+          {report.cloudOnlyChanges.length > 0 ? (
+            <p>Có {report.cloudOnlyChanges.length} mục chỉ có trong tài khoản.</p>
+          ) : null}
           {visibleUnsupportedFields.length > 0 ? (
             <div>
-              <p className="font-semibold text-slate-900">Field chưa tự merge:</p>
+              <p className="font-semibold text-slate-900">Mục chưa tự xử lý:</p>
               <ul className="mt-1 list-disc space-y-1 pl-4">
                 {visibleUnsupportedFields.map((field) => (
                   <li key={field.field}>{field.field}</li>
                 ))}
               </ul>
-              {hiddenUnsupportedCount > 0 ? <p className="mt-1">Còn {hiddenUnsupportedCount} field khác.</p> : null}
+              {hiddenUnsupportedCount > 0 ? <p className="mt-1">Còn {hiddenUnsupportedCount} mục khác.</p> : null}
             </div>
           ) : null}
         </div>
@@ -466,7 +468,7 @@ function MutationQueueConflictResolutionPanel({
           onClick={handleExport}
         >
           <FileDown className="mr-2 h-4 w-4" />
-          Tải bản sao local
+          Tải bản sao dữ liệu
         </Button>
         <Button
           type="button"
@@ -474,7 +476,7 @@ function MutationQueueConflictResolutionPanel({
           className="whitespace-normal border-amber-200 bg-white text-center text-slate-800 hover:bg-amber-50"
           onClick={handleKeepLocal}
         >
-          Giữ bản local
+          Giữ bản trên thiết bị
         </Button>
         <Button
           type="button"
@@ -494,24 +496,24 @@ function MutationQueueConflictResolutionPanel({
           onClick={handleShowCloudConfirm}
         >
           <CloudDownload className="mr-2 h-4 w-4" />
-          Dùng bản cloud
+          Dùng bản tài khoản
         </Button>
       </div>
 
       {!canUseCloudVersion && hasPendingLocalMutations ? (
         <p className="mt-2 text-xs leading-5 text-amber-800">
-          Không thể dùng bản cloud khi vẫn còn thay đổi local chưa gửi. Thử đồng bộ lại trước.
+          Không thể dùng bản tài khoản khi vẫn còn thay đổi trên thiết bị chưa gửi. Thử đồng bộ lại trước.
         </p>
       ) : null}
 
       {showCloudConfirm ? (
         <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3">
           <p className="text-sm font-semibold text-red-900">
-            Xác nhận ghi đè dữ liệu local bằng bản cloud
+            Xác nhận dùng dữ liệu từ tài khoản
           </p>
           <p className="mt-1 text-xs leading-5 text-red-800">
-            Hành động này sẽ thay thế toàn bộ dữ liệu 12-week trên thiết bị này bằng bản từ cloud.
-            Khuyên bạn export backup trước khi tiếp tục.
+            Hành động này sẽ thay thế toàn bộ dữ liệu 12 tuần trên thiết bị này bằng bản từ tài khoản.
+            Khuyên bạn tải bản sao trước khi tiếp tục.
           </p>
           <label className="mt-3 flex cursor-pointer items-start gap-2 text-xs text-red-800">
             <input
@@ -520,7 +522,7 @@ function MutationQueueConflictResolutionPanel({
               checked={confirmExported}
               onChange={(e) => setConfirmExported(e.target.checked)}
             />
-            <span>Tôi đã export backup hoặc chấp nhận mất dữ liệu local hiện tại.</span>
+            <span>Tôi đã tải bản sao hoặc chấp nhận thay dữ liệu hiện tại trên thiết bị.</span>
           </label>
           <div className="mt-3 flex gap-2">
             <Button
@@ -531,7 +533,7 @@ function MutationQueueConflictResolutionPanel({
               onClick={handleConfirmUseCloud}
             >
               <CloudDownload className="mr-2 h-4 w-4" />
-              Xác nhận dùng bản cloud
+              Xác nhận dùng bản tài khoản
             </Button>
             <Button
               type="button"
@@ -547,7 +549,7 @@ function MutationQueueConflictResolutionPanel({
 
       {keptLocal ? (
         <p className="mt-3 rounded-lg border border-amber-200 bg-white px-3 py-2 text-xs leading-5 text-amber-800">
-          Đã giữ bản local cho hiện tại. Không có dữ liệu nào bị xóa hoặc ghi đè.
+          Đã giữ bản trên thiết bị cho hiện tại. Không có dữ liệu nào bị xóa hoặc ghi đè.
         </p>
       ) : null}
     </div>
@@ -594,9 +596,9 @@ export function TwelveWeekLocalStatusSection({
     <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.22)]">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Bảng điều khiển local</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Đồng bộ tài khoản</p>
           <p className="mt-2 text-lg font-semibold text-slate-950">
-            Các tiện ích dưới đây chỉ tác động trên thiết bị hiện tại.
+            Các tiện ích dưới đây giúp kiểm tra và bảo vệ dữ liệu trước khi đồng bộ.
           </p>
         </div>
         <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">
@@ -606,7 +608,7 @@ export function TwelveWeekLocalStatusSection({
       <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Đồng bộ backend</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Đồng bộ tài khoản</p>
             <p className="mt-2 text-sm leading-6 text-slate-700">
               {getBackendStatusDescription(backendConnectionStatus)}
             </p>
@@ -620,11 +622,11 @@ export function TwelveWeekLocalStatusSection({
             <div className="min-w-0 space-y-1">
               <p className="text-sm leading-6 text-slate-700">
                 {isHydratingBackendPlans
-                  ? "Đang kiểm tra backend và khôi phục các chu kỳ còn thiếu."
+                  ? "Đang kiểm tra tài khoản và khôi phục các chu kỳ còn thiếu."
                   : getBackendHydrationDescription(lastBackendHydrationResult)}
               </p>
               <p className="text-xs leading-5 text-slate-500">
-                Hành động này không tự xóa dữ liệu local khi phát hiện khác biệt.
+                Hành động này không tự xóa dữ liệu trên thiết bị khi phát hiện khác biệt.
               </p>
             </div>
             <Button
@@ -635,7 +637,7 @@ export function TwelveWeekLocalStatusSection({
               onClick={onHydrateBackendPlans}
             >
               <CloudDownload className="mr-2 h-4 w-4" />
-              {isHydratingBackendPlans ? "Đang kiểm tra..." : "Kiểm tra backend"}
+              {isHydratingBackendPlans ? "Đang kiểm tra..." : "Kiểm tra dữ liệu tài khoản"}
             </Button>
           </div>
         </div>
@@ -646,7 +648,7 @@ export function TwelveWeekLocalStatusSection({
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-amber-950">Cần chọn nguồn dữ liệu</p>
                 <p className="mt-1 text-xs leading-5 text-amber-800">
-                  Local và backend đang khác nhau. Chưa có dữ liệu nào bị ghi đè; chọn bản muốn giữ cho từng chu kỳ
+                  Dữ liệu trên thiết bị và tài khoản đang khác nhau. Chưa có dữ liệu nào bị ghi đè; chọn bản muốn giữ cho từng chu kỳ
                   trước khi web tự đồng bộ tiếp.
                 </p>
               </div>
@@ -680,13 +682,13 @@ export function TwelveWeekLocalStatusSection({
                           <p className="mt-1 text-slate-500">{getConflictScopeLabel(conflict)}</p>
                         </div>
                         <div className="min-w-0 rounded-md bg-white p-2">
-                          <p className="font-semibold uppercase tracking-[0.12em] text-slate-400">Local</p>
+                          <p className="font-semibold uppercase tracking-[0.12em] text-slate-400">Thiết bị</p>
                           <p className="mt-1 break-words text-slate-800">
                             {getConflictValueLabel(conflict.localValue)}
                           </p>
                         </div>
                         <div className="min-w-0 rounded-md bg-white p-2">
-                          <p className="font-semibold uppercase tracking-[0.12em] text-slate-400">Backend</p>
+                          <p className="font-semibold uppercase tracking-[0.12em] text-slate-400">Tài khoản</p>
                           <p className="mt-1 break-words text-slate-800">
                             {getConflictValueLabel(conflict.backendValue)}
                           </p>
@@ -699,12 +701,12 @@ export function TwelveWeekLocalStatusSection({
                   </div>
                   <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
                     <div className="rounded-lg border border-slate-200 bg-slate-50 p-2 leading-5 text-slate-600">
-                      <span className="font-semibold text-slate-900">Dùng bản backend:</span> thay dữ liệu local của chu
-                      kỳ này bằng bản đang lưu trên backend.
+                      <span className="font-semibold text-slate-900">Dùng bản tài khoản:</span> thay dữ liệu trên thiết bị của chu
+                      kỳ này bằng bản đang lưu trong tài khoản.
                     </div>
                     <div className="rounded-lg border border-slate-200 bg-slate-50 p-2 leading-5 text-slate-600">
-                      <span className="font-semibold text-slate-900">Giữ bản local:</span> đẩy dữ liệu trên thiết bị này
-                      lên backend để dùng làm bản chính.
+                      <span className="font-semibold text-slate-900">Giữ bản thiết bị:</span> dùng dữ liệu trên thiết bị này
+                      làm bản chính.
                     </div>
                   </div>
                   <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end">
@@ -716,7 +718,7 @@ export function TwelveWeekLocalStatusSection({
                       onClick={() => onUseBackendPlanForConflicts(group.goalId)}
                     >
                       <CloudDownload className="mr-2 h-4 w-4" />
-                      Dùng bản backend
+                      Dùng bản tài khoản
                     </Button>
                     <Button
                       type="button"
@@ -726,7 +728,7 @@ export function TwelveWeekLocalStatusSection({
                       onClick={() => onKeepLocalPlanForConflicts(group.goalId)}
                     >
                       <CloudUpload className="mr-2 h-4 w-4" />
-                      {isActiveGoalConflict ? "Giữ bản local" : "Mở chu kỳ để giữ local"}
+                      {isActiveGoalConflict ? "Giữ bản thiết bị" : "Mở chu kỳ để giữ bản thiết bị"}
                     </Button>
                   </div>
                 </div>
@@ -739,7 +741,7 @@ export function TwelveWeekLocalStatusSection({
             <div className="min-w-0 space-y-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                  Mutation queue
+                  Hàng chờ đồng bộ
                 </p>
                 <Badge
                   variant="outline"
@@ -754,7 +756,7 @@ export function TwelveWeekLocalStatusSection({
               </div>
               <p className="text-sm leading-6 text-slate-700">
                 {mutationQueueBlocker ??
-                  "Gửi queue đang chờ, pull cloud workspace, rồi chỉ apply local merge nếu an toàn. Local vẫn là nguồn chính."}
+                  "Gửi các mục đang chờ, lấy dữ liệu tài khoản, rồi chỉ cập nhật thiết bị nếu an toàn. Dữ liệu trên thiết bị vẫn được ưu tiên."}
               </p>
               <div className="grid grid-cols-2 gap-2 pt-2 sm:grid-cols-4">
                 <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
@@ -808,12 +810,12 @@ export function TwelveWeekLocalStatusSection({
                 <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
                   <WifiOff className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
                   <p className="text-xs leading-5 text-amber-800">
-                    Trình duyệt đang offline. Thay đổi vẫn lưu local và sẽ sync khi có mạng.
+                    Trình duyệt đang offline. Thay đổi vẫn lưu trên thiết bị và sẽ đồng bộ khi có mạng.
                   </p>
                 </div>
               ) : null}
               <p className="text-xs leading-5 text-slate-500">
-                Dữ liệu local vẫn an toàn nếu backend fail; panel này chỉ dùng để kiểm thử MVP 2 real mode.
+                Dữ liệu trên thiết bị vẫn an toàn nếu đồng bộ lỗi; phần này chỉ dành cho kiểm thử nội bộ.
               </p>
               <p className="text-xs leading-5 text-slate-500">
                 {getMutationQueueResultDescription(mutationQueueSyncStatus.lastResult)}
@@ -835,7 +837,7 @@ export function TwelveWeekLocalStatusSection({
               onClick={onRunMutationQueueSync}
             >
               <RefreshCw className={`mr-2 h-4 w-4 ${mutationQueueSyncStatus.loading ? "animate-spin" : ""}`} />
-              {mutationQueueSyncStatus.loading ? "Đang đồng bộ..." : "Đồng bộ cloud thủ công"}
+              {mutationQueueSyncStatus.loading ? "Đang đồng bộ..." : "Đồng bộ tài khoản"}
             </Button>
             <div className="grid grid-cols-2 gap-2 pt-2">
               <Button
@@ -846,7 +848,7 @@ export function TwelveWeekLocalStatusSection({
                 onClick={onExportCloudWorkspace}
               >
                 <FileDown className="mr-2 h-4 w-4" />
-                Export cloud
+                Tải bản sao tài khoản
               </Button>
               <Button
                 type="button"
@@ -856,11 +858,12 @@ export function TwelveWeekLocalStatusSection({
                 onClick={onDeleteCloudWorkspace}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Xóa cloud
+                Xóa dữ liệu tài khoản
               </Button>
             </div>
             <p className="text-xs leading-5 text-slate-500">
-              Export cloud tải bản sao JSON workspace trên server. Xóa cloud chỉ xóa dữ liệu 12-week trên server, không xóa local, billing hay tài khoản.
+              Tải bản sao dữ liệu tài khoản dưới dạng JSON. Xóa dữ liệu tài khoản chỉ xóa dữ liệu 12 tuần trên server,
+              không xóa dữ liệu trên thiết bị, gói Plus hay tài khoản đăng nhập.
             </p>
           </div>
         </div>

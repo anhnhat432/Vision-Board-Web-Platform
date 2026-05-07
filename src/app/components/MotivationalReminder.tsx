@@ -17,6 +17,13 @@ const QUOTE_SUPPRESSED_ROUTES = [
   "/12-week-system",
 ];
 
+const REMINDER_OVERLAY_SUPPRESSED_ROUTES = [
+  "/billing",
+  "/gallery",
+  "/login",
+  "/vision-board",
+];
+
 function getReminderActionLabel(kind: "tasks" | "review" | "check-in"): string {
   if (kind === "review") return "Mở review tuần";
   if (kind === "check-in") return "Mở check-in";
@@ -31,6 +38,15 @@ export function MotivationalReminder() {
   const [reminder] = useState(() => getInAppReminders()[0] ?? null);
 
   useEffect(() => {
+    const suppressReminderOverlay = REMINDER_OVERLAY_SUPPRESSED_ROUTES.some((route) =>
+      location.pathname.startsWith(route),
+    );
+
+    if (suppressReminderOverlay) {
+      setShowReminder(false);
+      return;
+    }
+
     const isOnReminderTarget =
       reminder &&
       (location.pathname === reminder.href || (reminder.href !== "/" && location.pathname.startsWith(`${reminder.href}/`)));
@@ -66,22 +82,22 @@ export function MotivationalReminder() {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 50 }}
-      className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-3 right-3 z-50 sm:bottom-6 sm:left-auto sm:right-6 sm:w-full sm:max-w-md"
+      className="fixed bottom-[calc(5.75rem+env(safe-area-inset-bottom))] left-4 right-4 z-50 sm:bottom-6 sm:left-auto sm:right-6 sm:w-full sm:max-w-sm"
       role="status"
       aria-live="polite"
     >
-      <Card className="max-w-full overflow-hidden border-0 gradient-dark-teal text-white shadow-2xl">
-        <CardContent className="space-y-4 p-4">
+      <Card className="max-w-full overflow-hidden rounded-xl border border-white/10 gradient-dark-teal text-white shadow-[0_24px_54px_-34px_rgba(15,23,42,0.52)]">
+        <CardContent className="space-y-3 p-3.5 sm:p-4">
           {reminder ? (
-            <div className="flex items-start gap-3">
-              <BellRing className="mt-1 h-6 w-6 flex-shrink-0" />
+            <div className="flex items-start gap-2.5">
+              <BellRing className="mt-1 h-5 w-5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="break-words font-semibold">{reminder.title}</p>
-                <p className="mt-1 break-words text-sm text-white/82">{reminder.description}</p>
+                <p className="mt-1 line-clamp-2 break-words text-sm text-white/82">{reminder.description}</p>
                 <Button
                   size="sm"
                   variant="outline"
-                  className="hero-cta mt-3 border-white/18 bg-white text-slate-900 hover:bg-white/92"
+                  className="hero-cta mt-2 h-8 border-white/18 bg-white px-3 text-xs text-slate-900 hover:bg-white/92"
                   onClick={() => {
                     setShowReminder(false);
                     if (reminder.goalId) {
@@ -104,11 +120,11 @@ export function MotivationalReminder() {
               </button>
             </div>
           ) : (
-            <div className="flex items-start gap-3">
-              <Sparkles className="mt-1 h-6 w-6 flex-shrink-0" />
+            <div className="flex items-start gap-2.5">
+              <Sparkles className="mt-1 h-5 w-5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="font-semibold">Cảm hứng hôm nay</p>
-                <p className="text-sm italic text-white/90">"{quote}"</p>
+                <p className="line-clamp-2 text-sm italic text-white/90">"{quote}"</p>
               </div>
               <button
                 onClick={() => setShowReminder(false)}

@@ -109,7 +109,7 @@ export function TwelveWeekDeviceDetailsSection({
   const [isPushLoading, setIsPushLoading] = useState(false);
   const localDataOnly = isDemoMode() || !backendConnectionStatus.signedIn;
   const privacyBadgeLabel = localDataOnly ? "Chỉ lưu trên thiết bị" : "Dữ liệu tài khoản";
-  const deleteActionLabel = localDataOnly ? "Xóa toàn bộ dữ liệu local" : "Xóa tài khoản";
+  const deleteActionLabel = localDataOnly ? "Xóa toàn bộ dữ liệu" : "Xóa tài khoản";
   const hasPushEntitlement = (() => {
     const sub = getUserData().subscription;
     if (!sub) return false;
@@ -149,7 +149,7 @@ export function TwelveWeekDeviceDetailsSection({
     <>
       <ExpandableSection
         title="Nhắc việc và quyền trên thiết bị"
-        description="Bật tắt nhắc việc, thông báo và dữ liệu chỉ lưu trên trình duyệt này."
+        description="Quản lý nhắc việc, thông báo và các quyền đang mở trên thiết bị này."
       >
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-4">
@@ -167,7 +167,7 @@ export function TwelveWeekDeviceDetailsSection({
                   {appPreferences.enableInAppReminders ? "Đang bật" : "Đang tắt"}
                 </Badge>
               </div>
-              <p className="mt-1 text-sm text-slate-600">Hiện nhắc việc local cho việc, review và check-in.</p>
+              <p className="mt-1 text-sm text-slate-600">Hiện nhắc việc cho công việc, review và check-in.</p>
             </div>
             <Switch
               checked={appPreferences.enableInAppReminders}
@@ -228,7 +228,7 @@ export function TwelveWeekDeviceDetailsSection({
               <p className="mt-1 text-sm text-slate-600">
                 {hasPushEntitlement
                   ? "Nhận thông báo đẩy ngay cả khi trình duyệt đang đóng."
-                  : "Mở Plus demo để bật push notification trên thiết bị này. Mock upgrade không thu tiền thật."}
+                  : "Mở Plus để bật push notification trên thiết bị này."}
               </p>
             </div>
             {hasPushEntitlement ? (
@@ -267,7 +267,7 @@ export function TwelveWeekDeviceDetailsSection({
             <Switch
               checked={appPreferences.allowLocalAnalytics}
               onCheckedChange={(value) => onPreferenceToggle("allowLocalAnalytics", value)}
-              aria-label="Bật tắt phân tích local"
+              aria-label="Bật tắt phân tích trên thiết bị"
             />
           </div>
 
@@ -301,7 +301,7 @@ export function TwelveWeekDeviceDetailsSection({
 
       <ExpandableSection
         title="Hành trình 12 tuần"
-        description="Theo dõi 5 mốc quan trọng của flow thực thi ngay trên thiết bị này."
+        description="Theo dõi 5 mốc quan trọng của luồng thực thi ngay trên thiết bị này."
         badge={
           <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
             {funnelSteps.reduce((sum, step) => sum + step.count, 0)} sự kiện
@@ -327,8 +327,8 @@ export function TwelveWeekDeviceDetailsSection({
       </ExpandableSection>
 
       <ExpandableSection
-        title="Funnel nâng cấp"
-        description="Theo dõi mạch paywall từ lúc nhìn thấy tới khi mở gói và dùng giá trị premium."
+        title="Hành trình nâng cấp"
+        description="Theo dõi các bước từ lúc thấy quyền Plus tới khi mở gói và dùng tính năng nâng cao."
         badge={
           <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
             {monetizationSteps.reduce((sum, step) => sum + step.count, 0)} sự kiện
@@ -355,7 +355,7 @@ export function TwelveWeekDeviceDetailsSection({
 
       <ExpandableSection
         title="Dữ liệu trên thiết bị"
-        description="Bản demo lưu trên trình duyệt này. Hãy export dữ liệu nếu muốn giữ bản sao."
+        description="Dữ liệu đang được lưu trên trình duyệt này. Hãy xuất bản sao nếu muốn giữ lại."
         badge={
           <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
             Thiết bị này
@@ -367,7 +367,7 @@ export function TwelveWeekDeviceDetailsSection({
             Xuất dữ liệu
           </Button>
           <Button variant="outline" className="bg-white/90" onClick={onOpenClearLocalDialog}>
-            Xóa dấu vết local
+            Xóa dữ liệu tạm
           </Button>
         </div>
         <p className="mt-3 text-sm text-slate-500">
@@ -394,10 +394,10 @@ export function TwelveWeekDeviceDetailsSection({
       >
         <div className="space-y-4">
           <div className="rounded-lg border border-slate-200 bg-white p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Data & Privacy</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Quyền riêng tư</p>
             <p className="mt-2 text-sm leading-6 text-slate-700">
-              Xuất bản JSON gồm mục tiêu hiện tại, hệ thống 12 tuần và cài đặt ứng dụng. Nếu xóa trong demo,
-              chỉ dữ liệu local trên trình duyệt này bị xóa.
+              Xuất bản JSON gồm mục tiêu hiện tại, hệ thống 12 tuần và cài đặt ứng dụng. Nếu xóa dữ liệu, chỉ dữ liệu
+              đang lưu trên trình duyệt này bị xóa.
             </p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               <Button variant="outline" className="bg-white/90" onClick={onExportLocalData}>
@@ -415,8 +415,8 @@ export function TwelveWeekDeviceDetailsSection({
             <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
               <li>• Mục tiêu, tactic, check-in, review hàng tuần</li>
               <li>• Nhật ký phản tư và vision board</li>
-              <li>• Nhật ký sự kiện local (nếu bật)</li>
-              <li>• Cài đặt ưu tiên và trạng thái gói mock/local</li>
+              <li>• Nhật ký thao tác trên thiết bị (nếu bật)</li>
+              <li>• Cài đặt ưu tiên và trạng thái gói Plus trên thiết bị</li>
             </ul>
           </div>
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
@@ -435,8 +435,8 @@ export function TwelveWeekDeviceDetailsSection({
           <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-destructive">Xóa toàn bộ dữ liệu</p>
             <p className="mt-2 text-sm text-destructive/90">
-              Hành động này sẽ xóa vĩnh viễn tất cả dữ liệu local trên trình duyệt này: mục tiêu, nhật ký, check-in,
-              cài đặt và gói mock. Không thể hoàn tác.
+              Hành động này sẽ xóa vĩnh viễn tất cả dữ liệu đang lưu trên trình duyệt này: mục tiêu, nhật ký, check-in,
+              cài đặt và trạng thái gói Plus. Không thể hoàn tác.
             </p>
             <Button variant="destructive" className="mt-3 w-full" onClick={onOpenDeleteDataDialog}>
               {deleteActionLabel}
@@ -446,8 +446,8 @@ export function TwelveWeekDeviceDetailsSection({
       </ExpandableSection>
 
       <ExpandableSection
-        title="Hàng chờ gửi, đồng bộ và nhắc việc"
-        description="Xem hàng chờ gửi, trạng thái đồng bộ thử nghiệm và nhắc việc đang chờ. Demo không hứa đồng bộ đám mây."
+        title="Đồng bộ nâng cao và nhắc việc"
+        description="Xem các mục đang chờ gửi, trạng thái đồng bộ và nhắc việc đang chờ hiển thị."
       >
         <div className="grid gap-3">
           <div className="rounded-lg border border-sky-200 bg-sky-50 p-5">
@@ -462,7 +462,7 @@ export function TwelveWeekDeviceDetailsSection({
               </Badge>
             </div>
             <Button variant="outline" className="mt-4 w-full bg-white/90" onClick={onClearEventLog}>
-              Xóa log
+              Xóa nhật ký thao tác
             </Button>
           </div>
 
@@ -507,7 +507,7 @@ export function TwelveWeekDeviceDetailsSection({
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                 Nhắc việc đang hoạt động
               </p>
-              <p className="mt-1 text-sm text-slate-600">Danh sách nhắc việc local đang chờ được hiện.</p>
+              <p className="mt-1 text-sm text-slate-600">Danh sách nhắc việc đang chờ hiển thị.</p>
             </div>
             <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
               {activeReminders.length}

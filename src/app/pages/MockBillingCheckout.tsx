@@ -61,16 +61,16 @@ export function MockBillingCheckout() {
               <span className="text-lg">⚡</span>
             </div>
             <div>
-              <p className="font-semibold text-amber-900">BẢN DEMO THANH TOÁN — KHÔNG THU TIỀN THẬT</p>
+              <p className="font-semibold text-amber-900">Bản dùng thử thanh toán</p>
               <p className="text-sm text-amber-800">
-                Đây là bản demo. Không có khoản thanh toán nào được xử lý. Đây chỉ là một bản thử nghiệm.
+                Không có khoản thanh toán nào được xử lý trên màn này.
               </p>
             </div>
           </div>
         </div>
         <Card className="overflow-hidden border-0 gradient-dark-indigo text-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.52)]">
           <CardContent className="p-8 lg:p-10">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Thanh toán mô phỏng</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Thanh toán dùng thử</p>
             <h1 className="mt-3 text-4xl font-bold tracking-normal">Phiên thanh toán này không còn hợp lệ.</h1>
             <p className="mt-3 max-w-2xl text-base leading-8 text-white/74">
               Có thể bạn đã hoàn tất, hủy phiên này trước đó, hoặc tab đã mở quá lâu.
@@ -108,9 +108,9 @@ export function MockBillingCheckout() {
             <span className="text-lg">⚡</span>
           </div>
           <div>
-            <p className="font-semibold text-amber-900">THANH TOÁN MÔ PHỎNG — KHÔNG THU TIỀN THẬT</p>
+            <p className="font-semibold text-amber-900">Bản dùng thử thanh toán</p>
             <p className="text-sm text-amber-800">
-              Đây là bản mô phỏng. Không có khoản thanh toán nào được xử lý. Gói chỉ được mở trên trình duyệt này.
+              Không có khoản thanh toán nào được xử lý. Gói chỉ được mở trên trình duyệt này.
             </p>
           </div>
         </div>
@@ -121,13 +121,12 @@ export function MockBillingCheckout() {
           <div className="space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/78">
               <CreditCard className="h-3.5 w-3.5" />
-              Checkout mô phỏng
+              Checkout dùng thử
             </div>
             <div>
               <h1 className="text-4xl font-bold tracking-normal">Xác nhận mở gói {plan.name}</h1>
               <p className="mt-3 max-w-2xl text-base leading-8 text-white/74">
-                Đây là mock checkout để bạn test trọn flow nâng cấp. Không thu tiền thật, không cần thẻ và chưa nối
-                backend thanh toán thật.
+                Xác nhận để mở quyền Plus trên trình duyệt này. Không cần thẻ và không xử lý khoản thu thật.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -141,7 +140,7 @@ export function MockBillingCheckout() {
           </div>
 
           <div className="rounded-[28px] border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/56">Tóm tắt mock upgrade</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/56">Tóm tắt nâng cấp</p>
             <div className="mt-4 space-y-4">
               <div className="rounded-[22px] border border-white/12 bg-black/12 p-4">
                 <p className="text-xs uppercase tracking-[0.16em] text-white/56">Gói sẽ mở</p>
@@ -156,7 +155,7 @@ export function MockBillingCheckout() {
                     cập nhật lại trạng thái gói hiện tại.
                   </>
                 ) : (
-                  "Thiết bị này chưa có mock upgrade nào trước đó."
+                  "Thiết bị này chưa có gói Plus trước đó."
                 )}
               </div>
             </div>
@@ -169,7 +168,7 @@ export function MockBillingCheckout() {
           <CardHeader>
             <CardTitle className="text-slate-950">Bạn sẽ mở được gì ngay sau khi xác nhận</CardTitle>
             <CardDescription className="text-slate-700">
-              Bản demo chỉ cập nhật trạng thái gói và quyền local trên trình duyệt này.
+              Bản dùng thử chỉ cập nhật trạng thái gói và quyền trên trình duyệt này.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -184,10 +183,10 @@ export function MockBillingCheckout() {
 
         <Card className="border-0 gradient-white-panel shadow-[0_28px_70px_-40px_rgba(15,23,42,0.14)]">
           <CardHeader>
-            <CardTitle className="text-slate-950">Xác nhận bước mô phỏng</CardTitle>
+            <CardTitle className="text-slate-950">Xác nhận mở gói</CardTitle>
             <CardDescription className="text-slate-600">
-              Sau khi xác nhận, web sẽ quay lại màn trước đó và cập nhật trạng thái gói mock trên thiết bị này. Không có
-              khoản thu thật.
+              Sau khi xác nhận, web sẽ quay lại màn trước đó và cập nhật trạng thái Plus trên thiết bị này. Không có
+              khoản thu thật trên màn dùng thử.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -202,7 +201,7 @@ export function MockBillingCheckout() {
             <div className="grid gap-2">
               <Button className="w-full" onClick={handleConfirm} disabled={isSubmitting}>
                 <Crown className="h-4 w-4" />
-                {isSubmitting ? "Đang mô phỏng thanh toán…" : "Xác nhận mở gói (demo)"}
+                {isSubmitting ? "Đang mở gói..." : "Xác nhận mở gói"}
               </Button>
               <Button variant="outline" className="w-full" onClick={handleCancel} disabled={isSubmitting}>
                 Huỷ bỏ

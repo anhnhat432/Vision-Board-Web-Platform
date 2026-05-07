@@ -163,7 +163,7 @@ export function useTwelveWeekSettingsActions({
 
   const handleRestoreArchivedOutbox = useCallback(() => {
     restoreArchivedOutbox();
-    toast.success("Các mục outbox đã lưu đã được đưa lại về hàng chờ.");
+      toast.success("Các thay đổi chưa gửi đã được đưa lại vào hàng chờ đồng bộ.");
     refreshSnapshotMeta();
   }, [refreshSnapshotMeta]);
 
@@ -182,7 +182,7 @@ export function useTwelveWeekSettingsActions({
 
   const handleExportCloudWorkspace = async () => {
     if (isDemoMode()) {
-      toast.info("Bản demo không hỗ trợ export cloud. Dùng export local.");
+      toast.info("Bản dùng thử chưa bật xuất dữ liệu tài khoản. Hãy dùng bản xuất dữ liệu trên thiết bị.");
       return;
     }
     try {
@@ -191,28 +191,28 @@ export function useTwelveWeekSettingsActions({
       const url = window.URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `vision-board-cloud-${new Date().toISOString().slice(0, 10)}.json`;
+      anchor.download = `vision-board-account-${new Date().toISOString().slice(0, 10)}.json`;
       anchor.style.display = "none";
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();
       window.URL.revokeObjectURL(url);
       trackAppEvent("cloud_workspace_exported", activeGoal?.id ?? "", { counts: JSON.stringify(data.counts) });
-      toast.success("Đã tải bản sao cloud workspace.");
+      toast.success("Đã tải bản sao dữ liệu tài khoản.");
     } catch (_error) {
-      toast.error("Không thể export cloud workspace. Kiểm tra kết nối và thử lại.");
+      toast.error("Không thể xuất dữ liệu tài khoản. Kiểm tra kết nối và thử lại.");
     }
   };
 
   const handleDeleteCloudWorkspace = useCallback(async () => {
     if (isDemoMode()) {
-      toast.info("Bản demo không hỗ trợ xóa cloud workspace.");
+      toast.info("Bản dùng thử chưa bật xóa dữ liệu tài khoản.");
       return;
     }
     const confirmed = window.confirm(
-      "Bạn có chắc muốn xóa toàn bộ dữ liệu 12-week trên cloud?\n\n" +
-        "• Chỉ xóa dữ liệu workspace trên server (goal, plan, week, task, lead metric, check-in, review).\n" +
-        "• KHÔNG xóa dữ liệu local trên trình duyệt này.\n" +
+      "Bạn có chắc muốn xóa toàn bộ dữ liệu 12-week đã đồng bộ?\n\n" +
+        "• Chỉ xóa dữ liệu kế hoạch trong tài khoản (mục tiêu, kế hoạch, tuần, việc, chỉ số, check-in, review).\n" +
+        "• KHÔNG xóa dữ liệu trên trình duyệt này.\n" +
         "• KHÔNG xóa billing, subscription hay tài khoản.\n\n" +
         "Hành động này không thể hoàn tác.",
     );
@@ -223,11 +223,11 @@ export function useTwelveWeekSettingsActions({
         policy: result.policy,
         counts: JSON.stringify(result.counts),
       });
-      toast.success("Đã xóa dữ liệu 12-week trên cloud.", {
-        description: "Dữ liệu local, billing và tài khoản không bị ảnh hưởng.",
+      toast.success("Đã xóa dữ liệu 12-week đã đồng bộ.", {
+        description: "Dữ liệu trên thiết bị, quyền Plus và tài khoản không bị ảnh hưởng.",
       });
     } catch (_error) {
-      toast.error("Không thể xóa cloud workspace. Kiểm tra kết nối và thử lại.");
+      toast.error("Không thể xóa dữ liệu đã đồng bộ. Kiểm tra kết nối và thử lại.");
     }
   }, [activeGoal?.id]);
 
@@ -250,7 +250,7 @@ export function useTwelveWeekSettingsActions({
       if (accountDeleteResult && !accountDeleteResult.firebaseAccountDeleted) {
         toast.warning("Dữ liệu đã được xóa, nhưng Firebase account cần được kiểm tra lại.");
       } else {
-        toast.success(shouldDeleteRemoteAccount ? "Đã xóa tài khoản và dữ liệu." : "Đã xóa toàn bộ dữ liệu local.");
+        toast.success(shouldDeleteRemoteAccount ? "Đã xóa tài khoản và dữ liệu." : "Đã xóa toàn bộ dữ liệu trên thiết bị.");
       }
 
       navigate("/");

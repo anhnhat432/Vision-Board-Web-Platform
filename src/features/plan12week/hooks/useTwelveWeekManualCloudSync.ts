@@ -142,18 +142,18 @@ function isDrainFailure(result: MutationQueueSyncResult): boolean {
 
 function getDrainFailureMessage(result: MutationQueueSyncResult): string {
   if (result.status === "skipped" && result.skipReason === "offline") {
-    return "Trình duyệt đang offline. Đã dừng pull để giữ dữ liệu local an toàn.";
+    return "Trình duyệt đang offline. Đã dừng nhận dữ liệu để giữ bản trên thiết bị an toàn.";
   }
 
   if (result.status === "skipped") {
-    return "Mutation queue chưa đủ điều kiện gửi. Đã dừng pull để giữ dữ liệu local an toàn.";
+    return "Hàng chờ thay đổi chưa đủ điều kiện gửi. Đã dừng nhận dữ liệu để giữ bản trên thiết bị an toàn.";
   }
 
   if (result.status === "partial") {
     return `Queue chỉ sync được ${result.succeededCount}/${result.attemptedCount} thay đổi. Đã dừng pull để tránh ghi đè dữ liệu local.`;
   }
 
-  return "Chưa gửi được mutation queue. Đã dừng pull để giữ dữ liệu local an toàn.";
+  return "Chưa gửi được hàng chờ thay đổi. Đã dừng nhận dữ liệu để giữ bản trên thiết bị an toàn.";
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -191,7 +191,7 @@ export async function runTwelveWeekManualCloudSync(
   const apiConfigured = options.apiConfigured ?? isApiBaseUrlConfigured();
 
   if (!realMode) {
-    return createSkippedResult("demo_mode", "Bản demo lưu trên trình duyệt này, không cần cloud sync.");
+    return createSkippedResult("demo_mode", "Bản dùng thử đang lưu trên trình duyệt này, chưa cần đồng bộ tài khoản.");
   }
   if (!mutationFeatureEnabled) {
     return createSkippedResult("mutation_feature_disabled", "Mutation sync đang tắt bằng feature flag.");
@@ -200,10 +200,10 @@ export async function runTwelveWeekManualCloudSync(
     return createSkippedResult("pull_feature_disabled", "Pull sync đang tắt bằng feature flag.");
   }
   if (!authenticated || !ownerUid) {
-    return createSkippedResult("unauthenticated", "Cần đăng nhập để chạy manual cloud sync.");
+    return createSkippedResult("unauthenticated", "Cần đăng nhập để đồng bộ dữ liệu tài khoản.");
   }
   if (!apiConfigured) {
-    return createSkippedResult("api_not_configured", "Chưa cấu hình backend API cho cloud sync.");
+    return createSkippedResult("api_not_configured", "Chưa cấu hình kết nối tài khoản cho đồng bộ.");
   }
 
   try {
@@ -274,7 +274,7 @@ export async function runTwelveWeekManualCloudSync(
       return {
         status: "conflict",
         message:
-          "Vẫn còn thay đổi local chưa được backend xác nhận. Cloud pull đã được kiểm tra nhưng chưa áp dụng vào local.",
+          "Vẫn còn thay đổi trên thiết bị chưa được xác nhận. Dữ liệu tài khoản đã được kiểm tra nhưng chưa áp dụng.",
         drainResult,
         pullResponse,
         mergeReport,
@@ -289,8 +289,8 @@ export async function runTwelveWeekManualCloudSync(
         status: mergeReport.conflicts.length > 0 ? "conflict" : "unsafe",
         message:
           mergeReport.conflicts.length > 0
-            ? "Cloud và local đang có conflict. Chưa ghi đè dữ liệu local."
-            : "Cloud pull có dữ liệu chưa thể merge tự động. Chưa ghi đè dữ liệu local.",
+            ? "Dữ liệu tài khoản và thiết bị đang khác nhau. Chưa ghi đè bản trên thiết bị."
+            : "Có dữ liệu chưa thể gộp tự động. Chưa ghi đè bản trên thiết bị.",
         drainResult,
         pullResponse,
         mergeReport,
@@ -304,7 +304,7 @@ export async function runTwelveWeekManualCloudSync(
       recordErrorFn(ownerUid);
       return {
         status: "error",
-        message: "Không thể lưu bản merge vào localStorage. Dữ liệu local cũ vẫn được giữ.",
+        message: "Không thể lưu bản gộp vào trình duyệt. Dữ liệu cũ trên thiết bị vẫn được giữ.",
         drainResult,
         pullResponse,
         mergeReport,
@@ -317,7 +317,7 @@ export async function runTwelveWeekManualCloudSync(
 
     return {
       status: "applied",
-      message: "Đã gửi queue, pull cloud workspace và áp dụng merge an toàn vào local.",
+      message: "Đã gửi hàng chờ, nhận dữ liệu tài khoản và gộp an toàn vào thiết bị.",
       drainResult,
       pullResponse,
       mergeReport,
@@ -328,7 +328,7 @@ export async function runTwelveWeekManualCloudSync(
     recordErrorFn(ownerUid);
     return {
       status: "error",
-      message: "Manual cloud sync gặp lỗi. Dữ liệu local không bị xóa.",
+      message: "Đồng bộ thủ công gặp lỗi. Dữ liệu trên thiết bị không bị xóa.",
       error,
     };
   }

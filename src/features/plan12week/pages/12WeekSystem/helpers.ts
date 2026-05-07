@@ -85,7 +85,7 @@ export function getBackendSyncIssueMessage(
   return (
     backendConnectionStatus.syncMessage ||
     lastBackendHydrationResult?.message ||
-    "Dữ liệu trên thiết bị vẫn được giữ lại. Bạn có thể thử đồng bộ lại khi backend hoặc mạng ổn định hơn."
+    "Dữ liệu trên thiết bị vẫn được giữ lại. Bạn có thể thử đồng bộ lại khi tài khoản hoặc mạng ổn định hơn."
   );
 }
 
@@ -105,8 +105,8 @@ export function getSyncBadgeLabel(backendConnectionStatus: BackendConnectionStat
     : backendConnectionStatus.syncStatus === "success"
       ? "Đã lưu & đồng bộ"
       : backendConnectionStatus.syncStatus === "error" || backendConnectionStatus.syncStatus === "partial"
-        ? "Đã lưu local"
+        ? "Đã lưu trên thiết bị"
         : backendConnectionStatus.signedIn
-          ? "Backend sẵn sàng"
+          ? "Tài khoản sẵn sàng"
           : "Lưu trên thiết bị";
 }

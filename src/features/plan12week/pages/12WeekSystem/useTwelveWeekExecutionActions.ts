@@ -266,7 +266,7 @@ export function useTwelveWeekExecutionActions({
       toast.error(
         shouldRollbackTask
           ? "Không thể đồng bộ trạng thái việc. Mình đã hoàn tác thay đổi."
-          : "Không thể đồng bộ trạng thái việc. Mình giữ trạng thái local hiện tại.",
+          : "Chưa đồng bộ được trạng thái việc. Trạng thái trên thiết bị này vẫn được giữ lại.",
       );
       return;
     }
@@ -329,7 +329,7 @@ export function useTwelveWeekExecutionActions({
         refreshBackendProgressOverlay();
       }
     } else {
-      toast.info("Check-in đã lưu local. Sẽ tiếp tục đồng bộ khi backend sẵn sàng.");
+      toast.info("Check-in đã lưu trên thiết bị này. Sẽ tự đồng bộ khi tài khoản sẵn sàng.");
     }
     if (activeGoalIdRef.current === actionGoalId) {
       refreshSnapshotMeta();
@@ -443,7 +443,7 @@ export function useTwelveWeekExecutionActions({
     });
 
     if (!synced) {
-      toast.info("Review tuần đã lưu local. Sẽ tiếp tục đồng bộ khi backend sẵn sàng.");
+      toast.info("Review tuần đã lưu trên thiết bị này. Sẽ tự đồng bộ khi tài khoản sẵn sàng.");
       if (activeGoalIdRef.current === actionGoalId) {
         refreshSnapshotMeta();
       }

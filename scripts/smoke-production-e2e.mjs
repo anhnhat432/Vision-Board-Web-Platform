@@ -1009,7 +1009,7 @@ async function exerciseMockUpgrade() {
   log("Checking mock upgrade flow");
   await openPage("/billing/plan");
   await waitFor("billing plan page", 'document.body.innerText.includes("Gói hiện tại")');
-  await clickByButton("Mở Plus demo");
+  await clickByButton("Mở Plus");
   await waitFor("upgrade dialog", 'document.querySelector("[role=\\"dialog\\"]")');
   await clickDialogUpgradeButton();
   await waitFor(
@@ -1017,7 +1017,7 @@ async function exerciseMockUpgrade() {
     'location.pathname === "/billing/mock-checkout"',
     { timeoutMs: 45_000 },
   );
-  await clickByButton("Xác nhận mở gói (demo)");
+  await clickByButton("Xác nhận mở gói");
   await waitFor(
     "mock upgrade local plan active",
     `

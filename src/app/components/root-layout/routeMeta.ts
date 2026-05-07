@@ -86,13 +86,13 @@ export const ROUTE_META: RouteMeta[] = [
     match: (pathname: string) => pathname.startsWith("/order-status"),
     label: "Trạng thái đơn",
     title: "Trạng thái đơn – Dear Our Future",
-    tagline: "Theo dõi tiến trình đơn kit trong workspace local hiện tại.",
+    tagline: "Theo dõi tiến trình đơn kit trong workspace hiện tại.",
   },
   {
     match: (pathname: string) => pathname.startsWith("/order"),
     label: "Tạo đơn",
     title: "Tạo đơn – Dear Our Future",
-    tagline: "Chốt thông tin kit cá nhân hóa trước khi nối backend và fulfillment thật.",
+    tagline: "Chốt thông tin kit cá nhân hóa trước khi xử lý đơn.",
   },
 ];
 

@@ -114,8 +114,8 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
   const compact = variant === "compact";
   const title = userData.isHydratedFromDemo
     ? compact
-      ? "Khám phá web demo theo thứ tự này"
-      : "Nếu đang xem bản demo, cứ đi theo checklist này là hiểu web nhanh nhất."
+      ? "Khám phá web theo thứ tự này"
+      : "Nếu đang xem dữ liệu mẫu, cứ đi theo checklist này là hiểu web nhanh nhất."
     : compact
       ? "Đi tiếp theo đúng thứ tự này"
       : `Nếu mới vào web, cứ đi theo ${progress.totalSteps} bước này là đủ gọn.`;
@@ -160,7 +160,7 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
               </Badge>
               {userData.isHydratedFromDemo && (
                 <Badge variant="outline" className={demoBadgeClass}>
-                  Bạn đang ở bản demo
+                  Dữ liệu mẫu
                 </Badge>
               )}
             </div>
@@ -227,7 +227,7 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
           </div>
           <DialogTitle className="text-xl tracking-normal text-slate-950 sm:text-2xl">
             {userData.isHydratedFromDemo
-              ? "Khám phá bản demo theo checklist."
+              ? "Khám phá sản phẩm theo checklist."
               : `Đi web này theo ${progress.totalSteps} bước là dễ nhất.`}
           </DialogTitle>
           <DialogDescription className="text-sm leading-7 text-slate-600">

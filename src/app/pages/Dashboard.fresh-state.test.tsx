@@ -150,8 +150,8 @@ describe("Dashboard fresh workspace states", () => {
 
     renderDashboard();
 
-    const startButton = await screen.findByRole("button", { name: /Trải nghiệm demo miễn phí/i });
-    expect(screen.getByText(/Dữ liệu demo\/local được lưu trên trình duyệt hiện tại/i)).toBeInTheDocument();
+    const startButton = await screen.findByRole("button", { name: /Dùng thử miễn phí/i });
+    expect(screen.getByText(/Dữ liệu lưu trên trình duyệt hiện tại/i)).toBeInTheDocument();
 
     await user.click(startButton);
 

@@ -14,8 +14,8 @@ export const PLAN_DEFINITIONS: PricingPlanDefinition[] = [
     code: "PLUS",
     name: "Plus",
     shortLabel: "Plus",
-    priceLabel: "Demo 149.000đ / chu kỳ",
-    description: "Lớp Plus demo cho người muốn xem thử khung setup nhanh, nhịp giữ đều và gợi ý review tuần sau.",
+    priceLabel: "149.000đ / chu kỳ",
+    description: "Lớp Plus cho người muốn setup nhanh, giữ nhịp đều và có gợi ý review tuần sau.",
     highlights: [
       "Khung gợi ý thích nghi theo kiểu mục tiêu",
       "Review premium với gợi ý tuần sau",

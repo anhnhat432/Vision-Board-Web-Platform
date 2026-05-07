@@ -71,11 +71,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUserProfile(null);
         if (timedOut) {
           setUserProfileError(
-            "Backend profile phản hồi quá lâu. App đã mở workspace local trước; bạn có thể thử nối backend lại sau.",
+            "Hồ sơ tài khoản phản hồi quá lâu. App đã mở workspace trên thiết bị trước; bạn có thể thử nối lại sau.",
           );
         } else {
           setUserProfileError(
-            err instanceof Error && err.message.trim().length > 0 ? err.message : "Không thể nối backend profile.",
+            err instanceof Error && err.message.trim().length > 0 ? err.message : "Không thể mở hồ sơ tài khoản.",
           );
         }
         // Allow retry on next user change

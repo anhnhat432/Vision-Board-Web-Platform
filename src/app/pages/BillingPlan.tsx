@@ -8,7 +8,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
-import { isDemoMode, isRealMode } from "../utils/app-mode";
+import { isDemoMode, isRealMode, shouldShowBillingDebugUi } from "../utils/app-mode";
 import { getBillingProviderModeLabel, getBillingReadinessLabel } from "../utils/billing-contract";
 import { trackExperimentExposure, trackPaywallCtaClicked } from "../utils/monetization-analytics";
 import {
@@ -170,7 +170,7 @@ export function BillingPlan() {
     if (planCode !== "FREE") {
       toast.success(
         demoMode
-          ? `Đã mở ${getPlanLabel(planCode)} demo trên trình duyệt này.`
+          ? `Đã mở ${getPlanLabel(planCode)} trên trình duyệt này.`
           : `Đã cập nhật ${getPlanLabel(planCode)} trên tài khoản của bạn.`,
       );
     }
@@ -204,7 +204,7 @@ export function BillingPlan() {
     try {
       const granted = startTrialLocally("PLUS", 7);
       if (granted !== "FREE") {
-        toast.success("Đã kích hoạt Plus demo local 7 ngày.");
+        toast.success("Đã kích hoạt Plus dùng thử 7 ngày.");
         reloadUserData();
       } else {
         toast.info("Bạn đã có gói này rồi.");
@@ -250,21 +250,16 @@ export function BillingPlan() {
           <div className="relative">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
               <CreditCard className="h-4 w-4" />
-              {demoMode ? "Public Demo" : "Premium"}
+              {demoMode ? "Plus dùng thử" : "Premium"}
             </div>
             <h1 className="mt-4 max-w-3xl text-2xl font-bold tracking-normal sm:text-3xl lg:text-4xl">
-              {demoMode ? "Quản lý gói demo của bạn" : "Quản lý gói của bạn"}
+              {demoMode ? "Quản lý quyền Plus" : "Quản lý gói của bạn"}
             </h1>
             <p className="mt-2 max-w-2xl text-base leading-8 text-white/82">
               {demoMode
-                ? "Mock checkout không thu tiền thật. Quyền Plus trong MVP 1 chỉ lưu local trên trình duyệt này."
+                ? "Bạn có thể xem trước quyền Plus mà không thanh toán. Khi mở thanh toán thật, giao dịch sẽ được xác nhận qua trang checkout."
                 : "Nâng cấp, kiểm tra quyền premium và quản lý thanh toán cho tài khoản của bạn."}
             </p>
-            {demoMode && (
-              <p className="mt-2 text-sm text-white/64">
-                Public demo - upgrade unlocks features locally on this device only.
-              </p>
-            )}
           </div>
         </CardContent>
       </Card>
@@ -358,11 +353,11 @@ export function BillingPlan() {
                 <p className="font-medium text-slate-900">
                   {subscription.status === "active"
                     ? demoMode
-                      ? "Đang mở local"
+                      ? "Đang mở"
                       : "Đang hoạt động"
                     : subscription.status === "trialing"
                       ? demoMode
-                        ? "Dùng thử local"
+                        ? "Dùng thử"
                         : "Đang dùng thử"
                       : subscription.status === "canceled"
                         ? "Đã hủy"
@@ -370,26 +365,26 @@ export function BillingPlan() {
                 </p>
               </div>
               <div className="flow-muted p-4">
-                <p className="text-slate-500">{demoMode ? "Bắt đầu local" : "Bắt đầu"}</p>
+                <p className="text-slate-500">Bắt đầu</p>
                 <p className="font-medium text-slate-900">{formatDate(subscription.startedAt)}</p>
               </div>
               <div className="flow-muted p-4">
-                <p className="text-slate-500">{demoMode ? "Mốc local" : "Gia hạn / hết hạn"}</p>
+                <p className="text-slate-500">{demoMode ? "Hiệu lực đến" : "Gia hạn / hết hạn"}</p>
                 <p className="font-medium text-slate-900">{formatDate(subscription.renewsAt)}</p>
               </div>
               <div className="flow-muted p-4">
-                <p className="text-slate-500">{demoMode ? "Chu kỳ demo" : "Chu kỳ"}</p>
+                <p className="text-slate-500">Chu kỳ</p>
                 <p className="font-medium text-slate-900">
                   {subscription.billingCycle === "monthly"
                     ? demoMode
-                      ? "Tháng (demo)"
+                      ? "Tháng"
                       : "Tháng"
                     : subscription.billingCycle === "quarterly"
                       ? demoMode
-                        ? "Quý (demo)"
+                        ? "Quý"
                         : "Quý"
                       : demoMode
-                        ? "Trọn chu kỳ demo"
+                        ? "Trọn chu kỳ"
                         : "Trọn chu kỳ"}
                 </p>
               </div>
@@ -401,7 +396,7 @@ export function BillingPlan() {
               <>
                 <Button className="w-full sm:w-auto" onClick={() => handleOpenUpgrade("plan")}>
                   <Sparkles className="mr-2 h-4 w-4" />
-                  {demoMode ? "Mở Plus demo" : "Nâng cấp Plus"}
+                  {demoMode ? "Mở Plus" : "Nâng cấp Plus"}
                 </Button>
                 {demoMode && !isTrialing && (
                   <div className="flex w-full flex-col items-start gap-1 sm:w-auto">
@@ -414,11 +409,11 @@ export function BillingPlan() {
                       {isStartingTrial
                         ? "Đang kích hoạt…"
                         : trialCtaExperiment === "variant_a"
-                          ? "Bắt đầu Plus demo — 7 ngày local"
-                          : "Dùng thử Plus local 7 ngày"}
+                          ? "Bắt đầu Plus dùng thử 7 ngày"
+                          : "Dùng thử Plus 7 ngày"}
                     </Button>
                     <p className="text-xs text-slate-500">
-                      Không cần thẻ. Demo upgrade không thu tiền thật và chỉ mở quyền trên trình duyệt này.
+                      Không cần thẻ trong bản dùng thử. Quyền Plus sẽ mở trên trình duyệt này.
                     </p>
                   </div>
                 )}
@@ -427,15 +422,15 @@ export function BillingPlan() {
               <>
                 {isTrialing && trialDaysLeft !== null && (
                   <div className="w-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                    <span className="font-semibold">{demoMode ? "Plus demo local:" : "Plus trial:"}</span> còn{" "}
+                    <span className="font-semibold">{demoMode ? "Plus dùng thử:" : "Plus trial:"}</span> còn{" "}
                     {trialDaysLeft} ngày
-                    {demoMode ? " - demo upgrade không thu tiền thật." : " dùng thử."}
+                    {demoMode ? " dùng thử." : " dùng thử."}
                     <Button
                       size="sm"
                       className="mt-3 w-full sm:ml-3 sm:mt-0 sm:w-auto"
                       onClick={() => handleOpenUpgrade("plan")}
                     >
-                      {demoMode ? "Mở Plus demo" : "Nâng cấp Plus"}
+                      {demoMode ? "Mở Plus" : "Nâng cấp Plus"}
                     </Button>
                   </div>
                 )}
@@ -490,7 +485,7 @@ export function BillingPlan() {
           <CardDescription>
             {realMode
               ? "Quyền premium được quản lý bởi server."
-              : "Các quyền premium đang mở local trên trình duyệt này."}
+              : "Các quyền Plus đang mở trên trình duyệt này."}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -519,10 +514,10 @@ export function BillingPlan() {
                       {isActive
                         ? realMode
                           ? "Đang hoạt động"
-                          : "Đang mở local"
+                          : "Đang mở"
                         : realMode
                           ? "Chưa kích hoạt"
-                          : "Chưa mở local"}
+                          : "Chưa mở"}
                     </p>
                   </div>
                 </div>
@@ -538,7 +533,7 @@ export function BillingPlan() {
           <CardTitle>Thao tác</CardTitle>
           <CardDescription>
             {demoMode
-              ? "Kiểm tra quyền local/demo, khôi phục demo upgrade hoặc quay lại trang chính."
+              ? "Kiểm tra quyền Plus, khôi phục quyền đã mở hoặc quay lại trang chính."
               : "Kiểm tra quyền premium, khôi phục giao dịch đã mua hoặc quay lại trang chính."}
           </CardDescription>
         </CardHeader>
@@ -546,10 +541,10 @@ export function BillingPlan() {
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" onClick={handleSyncEntitlements} disabled={isSyncing}>
               <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
-              {isSyncing ? "Đang kiểm tra…" : demoMode ? "Kiểm tra quyền local" : "Kiểm tra quyền premium"}
+              {isSyncing ? "Đang kiểm tra…" : demoMode ? "Kiểm tra quyền Plus" : "Kiểm tra quyền premium"}
             </Button>
             <Button variant="outline" onClick={handleRestoreAccess} disabled={isRestoring}>
-              {isRestoring ? "Đang khôi phục…" : demoMode ? "Khôi phục demo upgrade" : "Khôi phục quyền đã mua"}
+              {isRestoring ? "Đang khôi phục…" : demoMode ? "Khôi phục quyền Plus" : "Khôi phục quyền đã mua"}
             </Button>
             <Button variant="outline" onClick={() => navigate("/")}>
               Quay lại bảng điều khiển
@@ -574,7 +569,7 @@ export function BillingPlan() {
       </Card>
 
       {/* Billing provider info (debug/demo) */}
-      {demoMode && (
+      {demoMode && shouldShowBillingDebugUi() && (
         <Card className="flow-panel">
           <CardHeader>
             <CardTitle className="text-sm">Thông tin billing provider</CardTitle>
@@ -608,7 +603,7 @@ export function BillingPlan() {
         <CardHeader>
           <CardTitle>So sánh các gói</CardTitle>
           <CardDescription>
-            {demoMode ? "So sánh Free với Plus demo. Demo checkout không thu tiền thật." : "So sánh Free với Plus."}
+            {demoMode ? "So sánh Free với Plus." : "So sánh Free với Plus."}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -642,7 +637,7 @@ export function BillingPlan() {
                 </ul>
                 {plan.code !== "FREE" && currentPlanCode === "FREE" && (
                   <Button className="mt-4 w-full" onClick={() => handleOpenUpgrade("plan")}>
-                    {demoMode ? "Mở Plus demo" : "Nâng cấp Plus"}
+                    {demoMode ? "Mở Plus" : "Nâng cấp Plus"}
                   </Button>
                 )}
               </div>

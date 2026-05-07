@@ -57,8 +57,7 @@ export function DataStorageInfo({
       <ul className="mt-4 space-y-2.5">
         <li className="flex items-start gap-2.5 text-sm leading-6 text-slate-700">
           <Monitor className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
-          Toàn bộ dữ liệu được lưu trên trình duyệt này (localStorage). Không gửi lên server nào
-          trừ khi bạn đăng nhập.
+          Toàn bộ dữ liệu được lưu trên trình duyệt này. App chỉ đồng bộ lên tài khoản khi bạn đăng nhập.
         </li>
         <li className="flex items-start gap-2.5 text-sm leading-6 text-slate-700">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />

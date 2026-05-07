@@ -381,9 +381,9 @@ export function evaluateRescueTriggers(input: {
       triggers.push({
         kind: "trial_ending",
         severity: daysLeft <= 1 ? "urgent" : "caution",
-        headline: `Còn ${timeLabel} để giữ lớp Plus demo local.`,
+        headline: `Còn ${timeLabel} để giữ quyền Plus dùng thử.`,
         detail:
-          "Sau khi hết thử, tính năng Plus demo sẽ về mức Free trên trình duyệt này. Mock upgrade không thu tiền thật.",
+          "Sau khi hết thử, quyền Plus sẽ về mức Free trên trình duyệt này.",
         surfacedAt: now.toISOString(),
       });
     }

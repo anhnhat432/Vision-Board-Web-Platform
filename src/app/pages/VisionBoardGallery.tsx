@@ -276,6 +276,7 @@ export function VisionBoardGallery() {
         </Card>
       </InteractiveSurface>
 
+      {userData.visionBoards.length > 0 && (
       <div className="stagger-hover-grid grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
         {[
           {
@@ -339,6 +340,7 @@ export function VisionBoardGallery() {
           );
         })}
       </div>
+      )}
 
       {userData.visionBoards.length === 0 ? (
         <Card className="overflow-hidden">

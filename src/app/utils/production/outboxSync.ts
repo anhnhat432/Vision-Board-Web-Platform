@@ -38,7 +38,7 @@ export async function syncPendingOutbox(): Promise<OutboxSyncSnapshot> {
       status: "idle",
       syncedCount: 0,
       pendingCount: 0,
-      message: "Bản demo không đồng bộ hàng chờ lên server.",
+      message: "Bản dùng thử đang giữ hàng chờ trên thiết bị này.",
     };
   }
 
@@ -83,7 +83,7 @@ export async function syncPendingOutbox(): Promise<OutboxSyncSnapshot> {
     const snapshot: OutboxSyncSnapshot = {
       ...baseSnapshot,
       status: "not_configured",
-      message: "Chưa cấu hình VITE_OUTBOX_SYNC_ENDPOINT nên web giữ outbox ở local.",
+      message: "Chưa bật điểm đồng bộ nên web giữ hàng chờ trên thiết bị này.",
     };
     persistSyncSnapshot(snapshot);
     return snapshot;

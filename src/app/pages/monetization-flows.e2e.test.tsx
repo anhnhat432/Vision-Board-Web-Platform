@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { renderAppRoute, resetTestStorage, seedTwelveWeekGoal, updateUserData } from "../../test/app-flow-helpers";
@@ -17,13 +17,13 @@ describe("monetization flows", () => {
     });
     render(<RouterProvider router={router} />);
 
-    await screen.findByRole("heading", { name: "Quản lý gói demo của bạn" });
+    await screen.findByRole("heading", { name: "Quản lý quyền Plus" });
     expect(screen.getByText("Gói hiện tại")).toBeInTheDocument();
     expect(screen.getByText("Bạn đang dùng gói miễn phí trên trình duyệt này.")).toBeInTheDocument();
 
     // Should show all 4 entitlement slots, all locked
     expect(screen.getByText("Mẫu nâng cao")).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "Mở Plus demo" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: "Mở Plus" }).length).toBeGreaterThan(0);
   });
 
   it("BillingPlan page shows active plan for Plus user", async () => {
@@ -34,10 +34,10 @@ describe("monetization flows", () => {
     });
     render(<RouterProvider router={router} />);
 
-    await screen.findByRole("heading", { name: "Quản lý gói demo của bạn" });
+    await screen.findByRole("heading", { name: "Quản lý quyền Plus" });
     expect(screen.getByText("Bạn đang dùng Plus trên trình duyệt này.")).toBeInTheDocument();
     // Entitlements should show as active
-    const activeItems = screen.getAllByText("Đang mở local");
+    const activeItems = screen.getAllByText("Đang mở");
     expect(activeItems.length).toBeGreaterThan(0);
   });
 
@@ -48,12 +48,12 @@ describe("monetization flows", () => {
     render(<RouterProvider router={router} />);
     const user = userEvent.setup();
 
-    const upgradeButtons = await screen.findAllByRole("button", { name: "Mở Plus demo" });
+    const upgradeButtons = await screen.findAllByRole("button", { name: "Mở Plus" });
     await user.click(upgradeButtons[0]);
 
     // Paywall dialog should open
-    await screen.findByRole("dialog");
-    expect(screen.getByText(/Demo — Nâng cấp Plus/i)).toBeInTheDocument();
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText(/Dùng thử Plus/i)).toBeInTheDocument();
   });
 
   it("mock checkout flow upgrades user to Plus", async () => {
@@ -76,8 +76,8 @@ describe("monetization flows", () => {
     const { ui } = renderAppRoute(`${checkoutUrl.pathname}${checkoutUrl.search}`);
     const user = userEvent.setup();
 
-    await screen.findByText("Checkout mô phỏng");
-    await user.click(screen.getByRole("button", { name: /Xác nhận mở gói \(demo\)/i }));
+    await screen.findByText("Checkout dùng thử");
+    await user.click(screen.getByRole("button", { name: /Xác nhận mở gói/i }));
 
     await waitFor(() => {
       expect(getCurrentPlan()).toBe("PLUS");
@@ -132,7 +132,7 @@ describe("monetization flows", () => {
 
     await screen.findByText("So sánh các gói");
     // Upgrade button in the plan comparison section
-    const upgradeButtons = screen.getAllByRole("button", { name: "Mở Plus demo" });
+    const upgradeButtons = screen.getAllByRole("button", { name: "Mở Plus" });
     expect(upgradeButtons.length).toBeGreaterThan(0);
   });
 
@@ -151,8 +151,8 @@ describe("monetization flows", () => {
     const checkoutUrl = new URL(checkout.checkoutUrl ?? "", "http://localhost");
     const { ui } = renderAppRoute(`${checkoutUrl.pathname}${checkoutUrl.search}`);
     const user = userEvent.setup();
-    await screen.findByText("Checkout mô phỏng");
-    await user.click(screen.getByRole("button", { name: /Xác nhận mở gói \(demo\)/i }));
+    await screen.findByText("Checkout dùng thử");
+    await user.click(screen.getByRole("button", { name: /Xác nhận mở gói/i }));
     await waitFor(() => expect(getCurrentPlan()).toBe("PLUS"));
     ui.unmount();
 
@@ -168,8 +168,8 @@ describe("monetization flows", () => {
       initialEntries: ["/billing/plan"],
     });
     render(<RouterProvider router={router} />);
-    await screen.findByRole("heading", { name: "Quản lý gói demo của bạn" });
-    await user.click(screen.getByRole("button", { name: "Khôi phục demo upgrade" }));
+    await screen.findByRole("heading", { name: "Quản lý quyền Plus" });
+    await user.click(screen.getByRole("button", { name: "Khôi phục quyền Plus" }));
 
     await waitFor(() => {
       expect(getCurrentPlan()).toBe("PLUS");
