@@ -1,4 +1,4 @@
-import { lazy, type ComponentType } from "react";
+import type { ComponentType } from "react";
 import { Navigate, createBrowserRouter } from "react-router";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -27,7 +27,6 @@ function RouteHydrateFallback() {
     </div>
   );
 }
-
 
 function lazyRoute<TModule extends Record<string, unknown>>(loader: () => Promise<TModule>, exportName: keyof TModule) {
   return {
@@ -95,11 +94,11 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            Component: lazy(() => import("../features/plan12week/pages/12WeekSystem.tsx").then((m) => ({ default: m.TwelveWeekSystem }))),
+            ...lazyRoute(() => import("../features/plan12week/pages/12WeekSystem.tsx"), "TwelveWeekSystem"),
           },
           {
             path: "settings",
-            Component: lazy(() => import("../features/plan12week/pages/12WeekSystemSettings").then((m) => ({ default: m.TwelveWeekSystemSettings }))),
+            ...lazyRoute(() => import("../features/plan12week/pages/12WeekSystemSettings"), "TwelveWeekSystemSettings"),
           },
         ],
       },
