@@ -52,4 +52,12 @@ describe("MotivationalReminder", () => {
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(localStorage.getItem("last_reminder_date")).toBeNull();
   });
+
+  it("does not cover the goals page", () => {
+    renderReminder("/goals");
+
+    expect(screen.queryByText(dueReminder.title)).not.toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(localStorage.getItem("last_reminder_date")).toBeNull();
+  });
 });

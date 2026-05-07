@@ -20,6 +20,7 @@ const QUOTE_SUPPRESSED_ROUTES = [
 const REMINDER_OVERLAY_SUPPRESSED_ROUTES = [
   "/billing",
   "/gallery",
+  "/goals",
   "/login",
   "/vision-board",
 ];
