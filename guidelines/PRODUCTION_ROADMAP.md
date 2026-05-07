@@ -145,7 +145,7 @@ Bước 4: Environment → thêm tất cả env vars:
   FIREBASE_CLIENT_EMAIL=...
   FIREBASE_PRIVATE_KEY="-----BEGIN..."
   FRONTEND_ORIGIN=https://your-app.vercel.app
-  BILLING_PROVIDER=vnpay  (sau khi implement xong, lúc đầu để mock)
+  BILLING_PROVIDER=casso  (sau khi implement xong, lúc đầu để mock)
   NODE_ENV=production
 Bước 5: Deploy → verify /api/health returns OK
 ```
@@ -161,7 +161,7 @@ Bước 1: Vercel project settings → Environment Variables:
   VITE_FIREBASE_PROJECT_ID=...
   VITE_FIREBASE_APP_ID=...
   VITE_BILLING_PROVIDER_MODE=api_contract
-  VITE_BILLING_PROVIDER_LABEL=VNPay
+  VITE_BILLING_PROVIDER_LABEL=Chuyển khoản ngân hàng
   VITE_ANALYTICS_MODE=off  (bật sau khi GA4 verified)
 Bước 2: Re-deploy
 Bước 3: Verify: đăng ký → đăng nhập → tạo plan → data sync backend
@@ -186,158 +186,275 @@ node scripts/check-runtime-env.mjs --full-stack
 
 ---
 
-## Phase 2: VNPay Integration
+## Phase 2: Casso + VietQR Integration
 
-**Mục tiêu:** User có thể thanh toán thật qua VNPay để mở gói Plus.
+**Mục tiêu:** User thanh toán thật qua chuyển khoản ngân hàng (QR code), backend tự động xác nhận qua Casso webhook.
 
-### 2.1 Đăng ký VNPay Sandbox
+**Tại sao chọn Casso + VietQR:**
+
+- Miễn phí hoàn toàn (free tier: 2 tài khoản ngân hàng)
+- Không cần giấy phép kinh doanh, chỉ cần tài khoản ngân hàng cá nhân
+- Đăng ký xong dùng luôn, không chờ duyệt
+- Real-time webhook khi có giao dịch vào tài khoản
+- VietQR chuẩn Napas — mọi app ngân hàng đều quét được
+
+### 2.1 Đăng ký Casso
 
 ```
-Bước 1: Vào https://sandbox.vnpayment.vn
-Bước 2: Đăng ký tài khoản merchant sandbox
-Bước 3: Lấy credentials:
-  - vnp_TmnCode (mã website)
-  - vnp_HashSecret (chuỗi bí mật)
-  - vnp_Url (URL thanh toán sandbox)
-  - vnp_ReturnUrl (URL trả về sau thanh toán — backend endpoint)
-Bước 4: Test thẻ sandbox: 9704198526191432198 / NGUYEN VAN A / 07/15 / OTP
+Bước 1: Vào https://app.casso.vn/register
+Bước 2: Đăng ký bằng email
+Bước 3: Liên kết tài khoản ngân hàng:
+  - Vào "Ngân hàng" → "Thêm ngân hàng"
+  - Chọn ngân hàng (MB, Vietcombank, Techcombank, ACB, ...)
+  - Xác thực qua app ngân hàng hoặc internet banking
+Bước 4: Cấu hình Webhook:
+  - Vào "Webhook" → "Thêm webhook"
+  - URL: https://your-backend.onrender.com/api/billing/webhook/casso
+  - Secure token: tạo chuỗi random dài (dùng làm signature verify)
+  - Events: Giao dịch tiền vào
+Bước 5: Lấy API key:
+  - Vào "Kết nối" → "API Keys" → copy API key
 ```
 
 **Env vars (Backend):**
 
 ```bash
-VNPAY_TMN_CODE=XXXXXXXX
-VNPAY_HASH_SECRET=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-VNPAY_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-VNPAY_RETURN_URL=https://your-backend.onrender.com/api/billing/vnpay-return
+CASSO_API_KEY=AK_xxxxxxxxxxxxxxxxxxxxx
+CASSO_WEBHOOK_SECRET=your-random-secret-string-32chars
+CASSO_BANK_ACCOUNT=1234567890
+CASSO_BANK_NAME=MB
+BILLING_PROVIDER=casso
 ```
 
-### 2.2 Implement VNPay Payment Adapter
+### 2.2 Luồng thanh toán Casso + VietQR
 
-**File cần tạo:** `backend/src/services/vnpayPaymentAdapter.ts`
+```
+┌─────────────────────────────────────────────────────────────┐
+│ 1. User click "Nâng cấp Plus"                              │
+│    → Frontend gọi POST /api/billing/checkout-session        │
+│                                                             │
+│ 2. Backend tạo PaymentOrder trong MongoDB:                  │
+│    - orderId: "VB" + random 8 chars (VD: VB3KF8M2NP)       │
+│    - userId, planCode, amount, status: "pending"            │
+│    - expiresAt: now + 30 phút                               │
+│                                                             │
+│ 3. Backend trả về:                                          │
+│    - orderId (= nội dung chuyển khoản)                      │
+│    - amount: 79000                                          │
+│    - bankAccount: "1234567890"                              │
+│    - bankName: "MB"                                         │
+│    - accountName: "NGUYEN VAN A"                            │
+│    - qrDataUrl: VietQR image URL                            │
+│                                                             │
+│ 4. Frontend hiện trang checkout:                            │
+│    - QR code lớn ở giữa                                    │
+│    - Thông tin: STK, ngân hàng, số tiền, nội dung CK       │
+│    - Countdown 30 phút                                      │
+│    - Poll GET /api/billing/order-status/:orderId mỗi 5s     │
+│                                                             │
+│ 5. User quét QR bằng app ngân hàng → chuyển khoản          │
+│    (QR đã nhúng sẵn STK + số tiền + nội dung)              │
+│                                                             │
+│ 6. Casso phát hiện giao dịch → POST webhook tới backend    │
+│    Payload: { amount, description, bankSubAccId, ... }      │
+│                                                             │
+│ 7. Backend webhook handler:                                 │
+│    - Verify secret token từ header                          │
+│    - Tìm PaymentOrder có orderId match description          │
+│    - Verify amount >= order amount                          │
+│    - Mark order "completed"                                 │
+│    - Upsert BillingSubscription → PLUS active              │
+│                                                             │
+│ 8. Frontend poll thấy order "completed"                     │
+│    → Hiện "Thanh toán thành công!" → redirect /12-week     │
+│    → GET /api/billing/entitlement → cập nhật quyền Plus    │
+└─────────────────────────────────────────────────────────────┘
+```
 
-Adapter cần implement `PaymentProviderAdapter` interface:
+### 2.3 Backend: PaymentOrder Model
+
+**File mới:** `backend/src/models/PaymentOrderModel.ts`
+
+```typescript
+Schema:
+  orderId: String (unique, indexed) — "VB" + 8 chars
+  userId: String (indexed)
+  planCode: "PLUS"
+  billingCycle: "twelve_week"
+  amount: Number (VND, e.g. 79000)
+  currency: "VND"
+  status: "pending" | "completed" | "expired" | "failed"
+  provider: "casso"
+  bankAccount: String
+  bankName: String
+  description: String (= orderId, dùng để match)
+  completedAt: Date (optional)
+  cassoTransactionId: String (optional, for idempotency)
+  expiresAt: Date
+  createdAt, updatedAt (timestamps)
+```
+
+### 2.4 Backend: Casso Payment Adapter
+
+**File mới:** `backend/src/services/cassoPaymentAdapter.ts`
+
+Implement `PaymentProviderAdapter` interface:
 
 ```
 createCheckoutSession(input):
-  1. Tạo orderId unique (format: VBOARD_{userId}_{timestamp})
-  2. Build VNPay payment URL với params:
-     - vnp_Version=2.1.0
-     - vnp_TmnCode=env
-     - vnp_Amount=giá * 100 (VNPay dùng đơn vị VND * 100)
-     - vnp_Command=pay
-     - vnp_CreateDate=yyyyMMddHHmmss
-     - vnp_CurrCode=VND
-     - vnp_IpAddr=user IP
-     - vnp_Locale=vn
-     - vnp_OrderInfo=Thanh toan goi Plus 12 tuan - Vision Board
-     - vnp_OrderType=subscription
-     - vnp_ReturnUrl=env
-     - vnp_TxnRef=orderId
-     - vnp_SecureHash=HMAC SHA512
-  3. Return { sessionId: orderId, checkoutUrl: vnpayUrl }
+  1. Tạo orderId unique: "VB" + nanoid(8).toUpperCase()
+  2. Tạo PaymentOrder trong DB (status: pending, expiresAt: +30min)
+  3. Build VietQR URL:
+     https://img.vietqr.io/image/{bankBin}-{accountNo}-compact2.png
+       ?amount={amount}
+       &addInfo={orderId}
+       &accountName={accountName}
+  4. Return {
+       sessionId: orderId,
+       checkoutUrl: "" (không redirect, frontend tự hiện QR),
+       qrDataUrl: vietQR URL,
+       bankAccount, bankName, accountName, amount, orderId
+     }
 
 verifyWebhookSignature(input):
-  1. Parse query params từ VNPay IPN/Return
-  2. Lấy vnp_SecureHash từ params
-  3. Remove vnp_SecureHash, vnp_SecureHashType từ params
-  4. Sort params alphabetically
-  5. HMAC SHA512 với HashSecret
-  6. So sánh hash → valid/invalid
+  1. Lấy header "secure-token" hoặc "Authorization"
+  2. So sánh với CASSO_WEBHOOK_SECRET
+  3. Match → valid, không match → invalid
 
 parseWebhookEvent(rawBody):
-  1. Parse VNPay response params
-  2. vnp_ResponseCode === "00" → checkout_completed
-  3. vnp_ResponseCode !== "00" → payment_failed
-  4. Map sang NormalizedProviderEvent
-
-mapSubscriptionStatus(status):
-  "00" → "active"
-  other → "incomplete"
+  1. Parse JSON body từ Casso webhook
+  2. Lấy trường "data" → array giao dịch
+  3. Mỗi giao dịch: { amount, description, when, ... }
+  4. Tìm orderId trong description (regex match "VB[A-Z0-9]{8}")
+  5. Map sang NormalizedProviderEvent:
+     - eventType: "checkout_completed"
+     - userId: lookup từ PaymentOrder by orderId
+     - planCode: "PLUS"
+     - status: "active"
 ```
 
-### 2.3 Thêm BillingCycle "twelve_week"
+### 2.5 Backend: Order status polling endpoint
+
+**Route mới:** `GET /api/billing/order-status/:orderId`
+
+```
+1. Auth required (chỉ owner xem được order của mình)
+2. Tìm PaymentOrder by orderId + userId
+3. Trả: { status, amount, expiresAt, completedAt }
+4. Frontend poll mỗi 5 giây để biết khi nào thanh toán xong
+```
+
+### 2.6 Backend: Casso webhook route
+
+**Route:** `POST /api/billing/webhook/casso`
+
+```
+Casso gọi khi có giao dịch tiền VÀO tài khoản:
+{
+  "error": 0,
+  "data": [
+    {
+      "id": 123456,
+      "tid": "FT24001234567",
+      "description": "VB3KF8M2NP",
+      "amount": 79000,
+      "cusum_balance": 5000000,
+      "when": "2026-05-07 15:30:00",
+      "bank_sub_acc_id": "1234567890"
+    }
+  ]
+}
+
+Handler:
+1. Verify secure-token header
+2. Iterate data[] array
+3. Cho mỗi transaction:
+   a. Extract orderId từ description (regex VB[A-Z0-9]{8})
+   b. Tìm PaymentOrder by orderId, status="pending"
+   c. Check amount >= order.amount
+   d. Mark order completed + save cassoTransactionId
+   e. Upsert BillingSubscription (PLUS, active, twelve_week cycle)
+   f. Grant entitlements
+4. Return { success: true }
+```
+
+### 2.7 Frontend: Checkout QR page
+
+**Route:** `/billing/checkout/:orderId`
+
+```
+UI:
+┌────────────────────────────────────┐
+│  Nâng cấp gói Plus                │
+│  79.000đ / chu kỳ 12 tuần         │
+│                                    │
+│  ┌────────────────────────┐        │
+│  │                        │        │
+│  │    [VietQR Image]      │        │
+│  │                        │        │
+│  └────────────────────────┘        │
+│                                    │
+│  Ngân hàng: MB Bank               │
+│  Số TK: 1234567890                 │
+│  Chủ TK: NGUYEN VAN A             │
+│  Số tiền: 79,000đ                 │
+│  Nội dung: VB3KF8M2NP             │
+│                                    │
+│  ⏱ Còn 28:45 để thanh toán        │
+│                                    │
+│  📱 Mở app ngân hàng              │
+│     → Quét mã QR ở trên           │
+│     → Xác nhận chuyển khoản       │
+│                                    │
+│  ⏳ Đang chờ xác nhận...          │
+│                                    │
+│  [Hủy thanh toán]                  │
+└────────────────────────────────────┘
+
+Logic:
+- Poll GET /api/billing/order-status/:orderId mỗi 5s
+- Khi status = "completed" → hiện confetti + "Chúc mừng!"
+  → sau 3s redirect /12-week-system
+- Khi countdown hết → hiện "Hết thời gian" + nút "Thử lại"
+```
+
+### 2.8 Thêm BillingCycle "twelve_week"
 
 **File:** `backend/src/models/BillingSubscriptionModel.ts`
 
 ```
 Thêm "twelve_week" vào BillingCycle type và schema enum.
+currentPeriodStart = now
+currentPeriodEnd = now + 12 weeks (84 ngày)
 ```
 
-**File:** `backend/src/services/billingService.ts`
+### 2.9 VietQR URL format
 
 ```
-Thêm pricing cho twelve_week cycle:
-PLUS twelve_week = 79000 VND (hoặc 149000 VND)
+Base: https://img.vietqr.io/image/{bankBin}-{accountNo}-compact2.png
+Params:
+  ?amount=79000
+  &addInfo=VB3KF8M2NP
+  &accountName=NGUYEN%20VAN%20A
+
+Ví dụ (MB Bank, bin=970422):
+https://img.vietqr.io/image/970422-1234567890-compact2.png?amount=79000&addInfo=VB3KF8M2NP&accountName=NGUYEN%20VAN%20A
 ```
 
-### 2.4 VNPay Return URL handler
+Bank BIN lookup: https://api.vietqr.io/v2/banks (public API, không cần key)
 
-**File cần tạo route:** `GET /api/billing/vnpay-return`
-
-```
-Flow:
-1. VNPay redirect user về URL này sau thanh toán
-2. Verify signature (dùng adapter.verifyWebhookSignature)
-3. Parse event (dùng adapter.parseWebhookEvent)
-4. Upsert subscription qua billingService
-5. Redirect user về frontend: https://app.vercel.app/billing/success hoặc /billing/failed
-```
-
-### 2.5 VNPay IPN (Instant Payment Notification)
-
-VNPay gọi server-to-server → dùng webhook route hiện tại:
+### 2.10 Testing checklist
 
 ```
-POST /api/billing/webhook/vnpay
-```
-
-Chỉ cần adapter đã implement → webhookController xử lý tự động.
-
-### 2.6 Frontend checkout flow update
-
-**File:** `src/app/utils/production/billingProvider.ts`
-
-```
-Khi VITE_BILLING_PROVIDER_MODE=api_contract:
-1. Frontend gọi POST /api/billing/checkout-session
-2. Backend trả checkoutUrl (VNPay payment page)
-3. Frontend redirect user tới checkoutUrl
-4. User thanh toán trên VNPay
-5. VNPay redirect về backend return URL
-6. Backend verify + upsert subscription
-7. Backend redirect về frontend /billing/success
-8. Frontend gọi GET /api/billing/entitlement → cập nhật quyền
-```
-
-### 2.7 Frontend billing success/failed pages
-
-**Tạo 2 route mới:**
-
-- `/billing/success` — hiện thông báo thanh toán thành công, gói đã mở
-- `/billing/failed` — hiện thông báo lỗi, nút thử lại
-
-### 2.8 Pricing UI update
-
-**File:** `src/app/utils/twelve-week-premium.ts`
-
-```
-Cập nhật PLAN_DEFINITIONS:
-- PLUS priceLabel: "79.000đ / chu kỳ 12 tuần" (hoặc giá bạn chọn)
-- Bỏ "Giá trong bản demo" → "Giá"
-- Bỏ "mock" references
-```
-
-### 2.9 Testing checklist
-
-```
-□ Sandbox test: tạo checkout → thanh toán thẻ test → redirect về app → gói mở
-□ IPN test: VNPay gọi webhook → subscription created trong MongoDB
-□ Entitlement test: sau thanh toán, GET /api/billing/entitlement trả PLUS
-□ Duplicate webhook: gửi IPN 2 lần → idempotent, không tạo subscription mới
-□ Failed payment: dùng thẻ lỗi → payment_failed → không mở gói
-□ Cancel: user hủy gói → giữ quyền đến hết chu kỳ
-□ Expired: sau 12 tuần → quyền tự động revoke
+□ Tạo order → QR hiển thị đúng (quét test bằng app bank)
+□ Chuyển khoản thật 1,000đ test → Casso webhook → order completed
+□ Frontend poll detect → hiện thành công
+□ Entitlement: GET /api/billing/entitlement trả PLUS
+□ Duplicate webhook: Casso gửi 2 lần → idempotent (cassoTransactionId)
+□ Expired order: sau 30 phút chưa thanh toán → status "expired"
+□ Wrong amount: chuyển thiếu tiền → không mở gói, log warning
+□ Wrong description: user nhập sai nội dung → không match → không mở gói
+□ Expired cycle: sau 12 tuần → quyền revoke (cron job hoặc check on-request)
 ```
 
 ---
@@ -408,7 +525,7 @@ npm --prefix backend install @sentry/node
 ### 4.1 Copy UI update
 
 - Bỏ tất cả "demo", "mock", "mô phỏng" khỏi UI khi `VITE_APP_MODE=real`
-- Checkout page: hiện giá thật, tên VNPay, không có banner cảnh báo demo
+- Checkout page: hiện QR thật, giá thật, không có banner cảnh báo demo
 - Settings: hiện gói hiện tại, ngày hết hạn, nút gia hạn
 - Dashboard: hiện trạng thái Premium rõ ràng
 
@@ -442,7 +559,7 @@ VITE_FIREBASE_AUTH_DOMAIN=vision-board-production.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=vision-board-production
 VITE_FIREBASE_APP_ID=1:...
 VITE_BILLING_PROVIDER_MODE=api_contract
-VITE_BILLING_PROVIDER_LABEL=VNPay
+VITE_BILLING_PROVIDER_LABEL=Chuyển khoản ngân hàng
 VITE_ANALYTICS_MODE=off
 ```
 
@@ -456,11 +573,13 @@ FIREBASE_PROJECT_ID=vision-board-production
 FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxx@...
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 FRONTEND_ORIGIN=https://your-app.vercel.app
-BILLING_PROVIDER=vnpay
-VNPAY_TMN_CODE=XXXXXXXX
-VNPAY_HASH_SECRET=XXXXXXXXXXXXXXXX
-VNPAY_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-VNPAY_RETURN_URL=https://your-backend.onrender.com/api/billing/vnpay-return
+BILLING_PROVIDER=casso
+CASSO_API_KEY=AK_xxxxxxxxxxxxxxxxxxxxx
+CASSO_WEBHOOK_SECRET=your-random-secret-string-32chars
+CASSO_BANK_ACCOUNT=1234567890
+CASSO_BANK_NAME=MB
+CASSO_ACCOUNT_NAME=NGUYEN VAN A
+PLUS_PRICE_VND=79000
 SENTRY_DSN=https://...  (optional)
 ```
 
@@ -468,28 +587,28 @@ SENTRY_DSN=https://...  (optional)
 
 ## Timeline ước tính
 
-| Phase | Thời gian | Output |
-|-------|-----------|--------|
-| Phase 1: Hạ tầng | 2-3 ngày | App chạy real mode, đăng nhập, sync backend |
-| Phase 2: VNPay | 3-5 ngày | Thanh toán thật qua VNPay sandbox |
-| Phase 3: Bảo mật | 1-2 ngày | Rate limit, CORS, Sentry |
-| Phase 4: UX | 2-3 ngày | Copy production, billing page, onboarding |
-| **VNPay production** | 1-2 tuần | Chờ VNPay duyệt tài khoản merchant thật |
+| Phase                   | Thời gian | Output                                      |
+| ----------------------- | --------- | ------------------------------------------- |
+| Phase 1: Hạ tầng        | 2-3 ngày  | App chạy real mode, đăng nhập, sync backend |
+| Phase 2: Casso + VietQR | 3-4 ngày  | Thanh toán thật qua chuyển khoản ngân hàng  |
+| Phase 3: Bảo mật        | 1-2 ngày  | Rate limit, CORS, Sentry                    |
+| Phase 4: UX             | 2-3 ngày  | Copy production, billing page, onboarding   |
 
-**Tổng: ~2-3 tuần** (song song VNPay duyệt merchant)
+**Tổng: ~8-12 ngày**
 
-> **Lưu ý quan trọng:** VNPay production cần đăng ký merchant thật, nộp giấy tờ doanh nghiệp/cá nhân, và chờ duyệt. Nên bắt đầu đăng ký ngay từ Phase 1.
+> **Ưu điểm Casso:** Không cần chờ duyệt merchant, đăng ký xong dùng luôn. Test bằng chuyển khoản thật (1,000đ).
 
 ---
 
 ## Rủi ro cần lưu ý
 
-1. **VNPay merchant approval** — có thể mất 1-2 tuần, nên đăng ký sớm
+1. **User nhập sai nội dung CK** — QR đã nhúng sẵn nội dung, nhưng user có thể sửa. Cần hướng dẫn rõ "không sửa nội dung"
 2. **Free tier MongoDB (M0)** — giới hạn 512MB storage, 500 connections. Đủ cho 200 users nhưng monitor usage
 3. **Render free tier** — cold start 30-60s nếu dùng free. Nên dùng Starter ($7/month) cho production
-4. **VNPay không hỗ trợ recurring billing** — cần tự quản lý gia hạn (nhắc user thanh toán lại khi hết 12 tuần)
-5. **Không có customer portal** — VNPay không có trang quản lý subscription như Stripe. Cần tự build
+4. **Casso free tier** — giới hạn 2 tài khoản ngân hàng. Đủ cho MVP
+5. **Không có recurring billing** — cần tự quản lý gia hạn (nhắc user thanh toán lại khi hết 12 tuần)
 6. **Firebase free tier** — 10K authentications/month, đủ cho 200 users
+7. **Casso webhook delay** — thường real-time (< 30s) nhưng có thể delay 1-2 phút trong một số trường hợp
 
 ---
 
@@ -499,7 +618,7 @@ Khi bạn sẵn sàng, báo tôi để bắt đầu từ task cụ thể:
 
 ```
 Phase 1 → "Bắt đầu Phase 1" (tôi sẽ chuẩn bị code cho real mode)
-Phase 2 → "Implement VNPay adapter" (tôi sẽ code adapter)
+Phase 2 → "Implement Casso adapter" (tôi sẽ code adapter + QR checkout page)
 Phase 3 → "Thêm security" (tôi sẽ thêm rate limit, helmet, CORS)
 Phase 4 → "Update UI production" (tôi sẽ bỏ demo copy, thêm billing page)
 ```
