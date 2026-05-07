@@ -16,11 +16,13 @@
     "node": "20.x"
   },
   "dependencies": {
+    "@vision-board/shared-types": "file:../shared-types",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "firebase-admin": "^13.1.0",
-    "mongoose": "^8.9.5"
+    "mongoose": "^8.9.5",
+    "vision-board-web-platform": "file:.."
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

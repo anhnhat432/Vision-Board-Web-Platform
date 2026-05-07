@@ -1,4 +1,4 @@
-import { Suspense, lazy, type ComponentType } from "react";
+import { lazy, type ComponentType } from "react";
 import { Navigate, createBrowserRouter } from "react-router";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -28,29 +28,6 @@ function RouteHydrateFallback() {
   );
 }
 
-const TwelveWeekSystemPage = lazy(async () => ({
-  default: (await import("./pages/12WeekSystem")).TwelveWeekSystem,
-}));
-
-const TwelveWeekSystemSettingsPage = lazy(async () => ({
-  default: (await import("./pages/12WeekSystemSettings")).TwelveWeekSystemSettings,
-}));
-
-function TwelveWeekSystemRoute() {
-  return (
-    <Suspense fallback={<RouteHydrateFallback />}>
-      <TwelveWeekSystemPage />
-    </Suspense>
-  );
-}
-
-function TwelveWeekSystemSettingsRoute() {
-  return (
-    <Suspense fallback={<RouteHydrateFallback />}>
-      <TwelveWeekSystemSettingsPage />
-    </Suspense>
-  );
-}
 
 function lazyRoute<TModule extends Record<string, unknown>>(loader: () => Promise<TModule>, exportName: keyof TModule) {
   return {
@@ -99,7 +76,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "12-week-setup",
-        ...lazyRoute(() => import("./pages/12WeekSetup"), "TwelveWeekSetup"),
+        ...lazyRoute(() => import("../features/plan12week/pages/12WeekSetup"), "TwelveWeekSetup"),
       },
       {
         path: "12-week-dashboard",
@@ -116,8 +93,14 @@ export const router = createBrowserRouter([
       {
         path: "12-week-system",
         children: [
-          { index: true, Component: TwelveWeekSystemRoute },
-          { path: "settings", Component: TwelveWeekSystemSettingsRoute },
+          {
+            index: true,
+            Component: lazy(() => import("../features/plan12week/pages/12WeekSystem").then((m) => ({ default: m.TwelveWeekSystem }))),
+          },
+          {
+            path: "settings",
+            Component: lazy(() => import("../features/plan12week/pages/12WeekSystemSettings").then((m) => ({ default: m.TwelveWeekSystemSettings }))),
+          },
         ],
       },
       {

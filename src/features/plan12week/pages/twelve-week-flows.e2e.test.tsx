@@ -7,8 +7,8 @@ import {
   getCurrentEntitlementKeys,
   getCurrentPlan,
   getUserData,
-} from "../utils/storage";
-import { startCheckoutFlow } from "../utils/production";
+} from '@/app/utils/storage';
+import { startCheckoutFlow } from '@/app/utils/production';
 import { listStoredPendingMutations } from "@/features/plan12week/persistence/mutationQueue";
 import {
   readGoal,
@@ -17,7 +17,7 @@ import {
   seedPendingSetupContext,
   seedTwelveWeekGoal,
   updateUserData,
-} from "../../test/app-flow-helpers";
+} from '@/test/app-flow-helpers';
 
 const INTEGRATION_TEST_TIMEOUT_MS = 10_000;
 
@@ -327,6 +327,7 @@ describe("12-week core flows", () => {
     }
   }, INTEGRATION_TEST_TIMEOUT_MS);
 
+  
   it("saves keep/reduce tactic fields and shows the post-save summary card", async () => {
     const { goalId } = seedTwelveWeekGoal();
     renderAppRoute("/12-week-system");

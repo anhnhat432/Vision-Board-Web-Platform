@@ -41,8 +41,8 @@ vi.mock("@/features/plan12week/hooks", async () => {
   };
 });
 
-import { getTwelveWeekCurrentWeek } from "../utils/storage-twelve-week";
-import { getUserData } from "../utils/storage";
+import { getTwelveWeekCurrentWeek } from '@/app/utils/storage-twelve-week';
+import { getUserData } from '@/app/utils/storage';
 import { listStoredPendingMutations } from "@/features/plan12week/persistence/mutationQueue";
 import { getUniversalWeeklyReviewExecutionScore } from "@/features/plan12week/persistence/reviewExecutionScore";
 import {
@@ -51,7 +51,7 @@ import {
   resetTestStorage,
   seedTwelveWeekGoal,
   updateUserData,
-} from "../../test/app-flow-helpers";
+} from '@/test/app-flow-helpers';
 
 const INTEGRATION_TEST_TIMEOUT_MS = 10_000;
 

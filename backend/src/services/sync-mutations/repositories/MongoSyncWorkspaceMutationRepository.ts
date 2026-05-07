@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 import { DailyCheckInModel } from "../../../models/DailyCheckInModel";
 import { LeadMetricModel } from "../../../models/LeadMetricModel";
 import { PlanModel } from "../../../models/PlanModel";
@@ -131,34 +133,49 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
     if (input.vision !== undefined) planSet.vision = input.vision;
     if (input.startDate !== undefined) planSet.startDate = input.startDate;
 
-    const updatedPlan = await PlanModel.findByIdAndUpdate(
-      planId,
-      { $set: planSet, $inc: { revision: 1 } },
-      { new: true, runValidators: true },
-    ).lean();
-    if (!updatedPlan) return null;
+    const session = await mongoose.startSession();
 
-    for (const week of input.weeks) {
-      const weekQuery: Record<string, unknown> = { planId };
-      if (week.clientWeekId) weekQuery.clientWeekId = week.clientWeekId;
-      else weekQuery.weekNumber = week.weekNumber;
+    try {
+      session.startTransaction();
 
-      const weekSet: Record<string, unknown> = {
-        clientPlanId: input.clientPlanId,
-        lastMutationId: input.mutationId,
-        syncUpdatedAt: input.syncUpdatedAt,
-      };
-      if (week.focus !== undefined) weekSet.focus = week.focus;
-      if (week.expectedOutput !== undefined) weekSet.expectedOutput = week.expectedOutput;
-
-      await WeekModel.findOneAndUpdate(
-        weekQuery,
-        { $set: weekSet, $inc: { revision: 1 } },
-        { runValidators: true },
+      const updatedPlan = await PlanModel.findByIdAndUpdate(
+        planId,
+        { $set: planSet, $inc: { revision: 1 } },
+        { new: true, runValidators: true, session },
       ).lean();
-    }
+      if (!updatedPlan) {
+        await session.abortTransaction();
+        return null;
+      }
 
-    return mapPlanDoc(updatedPlan as unknown as MongoPlanDoc);
+      for (const week of input.weeks) {
+        const weekQuery: Record<string, unknown> = { planId };
+        if (week.clientWeekId) weekQuery.clientWeekId = week.clientWeekId;
+        else weekQuery.weekNumber = week.weekNumber;
+
+        const weekSet: Record<string, unknown> = {
+          clientPlanId: input.clientPlanId,
+          lastMutationId: input.mutationId,
+          syncUpdatedAt: input.syncUpdatedAt,
+        };
+        if (week.focus !== undefined) weekSet.focus = week.focus;
+        if (week.expectedOutput !== undefined) weekSet.expectedOutput = week.expectedOutput;
+
+        await WeekModel.findOneAndUpdate(
+          weekQuery,
+          { $set: weekSet, $inc: { revision: 1 } },
+          { runValidators: true, session },
+        ).lean();
+      }
+
+      await session.commitTransaction();
+      return mapPlanDoc(updatedPlan as unknown as MongoPlanDoc);
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
   }
 
   async applyLeadMetricUpserted(
@@ -276,6 +293,7 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
       clientPlanId: ownedWeek.clientPlanId,
       weekNumber: ownedWeek.weekNumber,
     }).lean();
+
     const update = {
       userId,
       planId: ownedWeek.planId,
@@ -304,37 +322,55 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
       syncUpdatedAt: input.syncUpdatedAt,
     };
 
-    const updatedWeek = await WeekModel.findByIdAndUpdate(
-      ownedWeek.weekId,
-      {
-        $set: {
-          review: {
-            weekNumber: ownedWeek.weekNumber,
-            executionScore: input.executionScore,
-            reflection: input.biggestOutputThisWeek,
-            adjustments: input.nextWeekPriority,
+    const session = await mongoose.startSession();
+
+    try {
+      session.startTransaction();
+
+      const updatedWeek = await WeekModel.findByIdAndUpdate(
+        ownedWeek.weekId,
+        {
+          $set: {
+            review: {
+              weekNumber: ownedWeek.weekNumber,
+              executionScore: input.executionScore,
+              reflection: input.biggestOutputThisWeek,
+              adjustments: input.nextWeekPriority,
+            },
+            lastMutationId: input.mutationId,
+            syncUpdatedAt: input.syncUpdatedAt,
           },
-          lastMutationId: input.mutationId,
-          syncUpdatedAt: input.syncUpdatedAt,
+          $inc: { revision: 1 },
         },
-        $inc: { revision: 1 },
-      },
-      { new: true, runValidators: true },
-    ).lean();
-    if (!updatedWeek) return null;
-
-    if (existing) {
-      const doc = await WeekReviewModel.findByIdAndUpdate(
-        getDocId(existing as unknown as MongoWeekReviewDoc),
-        { $set: update, $inc: { revision: 1 } },
-        { new: true, runValidators: true },
+        { new: true, runValidators: true, session },
       ).lean();
+      if (!updatedWeek) {
+        await session.abortTransaction();
+        return null;
+      }
 
-      return doc ? mapWeekReviewDoc(doc as unknown as MongoWeekReviewDoc) : null;
+      let reviewDoc: MongoWeekReviewDoc | null = null;
+
+      if (existing) {
+        reviewDoc = await WeekReviewModel.findByIdAndUpdate(
+          getDocId(existing as unknown as MongoWeekReviewDoc),
+          { $set: update, $inc: { revision: 1 } },
+          { new: true, runValidators: true, session },
+        ).lean() as unknown as MongoWeekReviewDoc | null;
+      } else {
+        const created = await WeekReviewModel.create([update], { session });
+        reviewDoc = (Array.isArray(created) ? created[0] : created).toObject() as unknown as MongoWeekReviewDoc;
+      }
+
+      await session.commitTransaction();
+
+      return reviewDoc ? mapWeekReviewDoc(reviewDoc) : null;
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
     }
-
-    const doc = await WeekReviewModel.create(update);
-    return mapWeekReviewDoc(doc.toObject() as unknown as MongoWeekReviewDoc);
   }
 
   private async findOwnedWeek(

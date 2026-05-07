@@ -3,13 +3,13 @@ import { useNavigate } from "react-router";
 import { Compass, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
-import { CoreFlowGateState } from "../components/CoreFlowGateState";
-import { CoreFlowProgress } from "../components/CoreFlowProgress";
-import { PageShell } from "../components/PageShell";
-import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
-import { Badge } from "../components/ui/badge";
-import { Card, CardContent } from "../components/ui/card";
-import { trackAnalyticsEvent } from "../utils/analytics";
+import { CoreFlowGateState } from '@/app/components/CoreFlowGateState';
+import { CoreFlowProgress } from '@/app/components/CoreFlowProgress';
+import { PageShell } from '@/app/components/PageShell';
+import { UpgradePaywallDialog } from '@/app/components/UpgradePaywallDialog';
+import { Badge } from '@/app/components/ui/badge';
+import { Card, CardContent } from '@/app/components/ui/card';
+import { trackAnalyticsEvent } from '@/app/utils/analytics';
 import {
   APP_STORAGE_KEYS,
   type PricingPlanCode,
@@ -21,20 +21,20 @@ import {
   getUserData,
   parseCalendarDate,
   trackAppEvent,
-} from "../utils/storage";
-import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
+} from '@/app/utils/storage';
+import { getScoredLifeArea, hasRealLifeBalance } from '@/app/utils/core-flow-guard';
 import {
   trackPaywallCtaClicked,
   trackPremiumTemplateUnlockPrompted,
   trackTemplateApplied,
-} from "../utils/monetization-analytics";
+} from '@/app/utils/monetization-analytics';
 import {
   TWELVE_WEEK_TEMPLATE_CATALOG,
   buildAdaptiveTemplateRecommendation,
   buildAdaptiveTemplateSupport,
   planSatisfiesRequirement,
   type TwelveWeekTemplateDefinition,
-} from "../utils/twelve-week-premium";
+} from '@/app/utils/twelve-week-premium';
 import { parsePendingSMARTGoal, parseSmartGoal, type PendingSMARTGoal } from "@/lib/smart-goal";
 import { getWeeklyTaskWarning } from "@/features/plan12week/logic";
 import { usePlanSetupSync } from "@/features/plan12week/hooks";
@@ -43,7 +43,7 @@ import { enqueueLeadMetricUpsertedMutations } from "@/features/plan12week/persis
 import { createGoal, updateGoal } from "@/services/goalService";
 import { saveGoalLink } from "@/lib/api/goalLinkStore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { isDemoMode } from "../utils/app-mode";
+import { isDemoMode } from '@/app/utils/app-mode';
 import { STEPS } from "./12WeekSetup/constants";
 import {
   addDays,

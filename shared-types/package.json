@@ -1,0 +1,9 @@
+{
+  "name": "@vision-board/shared-types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types for Vision Board Web Platform (frontend & backend)",
+  "main": "index.ts",
+  "types": "index.ts",
+  "private": true,
+  "license": "UNLICENSED"
+}

@@ -46,7 +46,7 @@ vi.mock("@/services/planService", () => ({
 
 import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
 import { getBackendGoalId } from "@/lib/api/goalLinkStore";
-import { APP_STORAGE_KEYS, getUserData, saveUserData } from "../utils/storage";
+import { APP_STORAGE_KEYS, getUserData, saveUserData } from '@/app/utils/storage';
 import { TwelveWeekSetup } from "./12WeekSetup";
 
 const INTEGRATION_TEST_TIMEOUT_MS = 10_000;

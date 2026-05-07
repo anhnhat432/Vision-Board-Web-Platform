@@ -2,25 +2,25 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { BarChart3, CalendarDays, ListTodo, Settings2, MoreHorizontal } from "lucide-react";
 
-import { useTwelveWeekSystemSnapshot } from "../hooks/useTwelveWeekSystemSnapshot";
-import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
-import { useNetworkStatus } from "../hooks/useNetworkStatus";
-import { TabErrorBoundary } from "../components/TabErrorBoundary";
-import { DeleteDataConfirmationDialog } from "../components/twelve-week/DeleteDataConfirmationDialog";
-import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
-import { trackAnalyticsEvent } from "../utils/analytics";
+import { useTwelveWeekSystemSnapshot } from "@/app/hooks/useTwelveWeekSystemSnapshot";
+import { useScrollToTopOnChange } from "@/app/hooks/useScrollToTopOnChange";
+import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
+import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
+import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/DeleteDataConfirmationDialog";
+import { UpgradePaywallDialog } from '@/app/components/UpgradePaywallDialog';
+import { trackAnalyticsEvent } from '@/app/utils/analytics';
 import {
   isDemoMode,
   isRealMode,
   shouldEnable12WeekMutationSync,
   shouldEnable12WeekPullSync,
-} from "../utils/app-mode";
+} from '@/app/utils/app-mode';
 import {
   trackPremiumInsightOpened,
   trackRescueActionTaken,
   trackRescueTriggerDismissed,
   trackRescueTriggerFired,
-} from "../utils/monetization-analytics";
+} from '@/app/utils/monetization-analytics';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,14 +30,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../components/ui/alert-dialog";
-import { Button } from "../components/ui/button";
+} from "@/app/components/ui/alert-dialog";
+import { Button } from "@/app/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "../components/ui/dropdown-menu";
+} from "@/app/components/ui/dropdown-menu";
 import {
   clearArchivedOutbox,
   clearEventLog,
@@ -45,14 +45,14 @@ import {
   getUserData,
   saveUserData,
   updateGoal,
-} from "../utils/storage";
-import { dismissRescueTrigger } from "../utils/twelve-week-system-ui";
-import type { TwelveWeekSystem as TwelveWeekSystemModel } from "../utils/storage-types";
+} from '@/app/utils/storage';
+import { dismissRescueTrigger } from "@/app/utils/twelve-week-system-ui";
+import type { TwelveWeekSystem as TwelveWeekSystemModel } from '@/app/utils/storage-types';
 import {
   buildDerivedScoreboard,
   getDefaultScoreboard,
   getTwelveWeekCurrentWeek,
-} from "../utils/storage-twelve-week";
+} from '@/app/utils/storage-twelve-week';
 import { TaskBoard } from "@/features/plan12week/components/TaskBoard";
 import { usePlanExecutionSync } from "@/features/plan12week/hooks";
 import { useTwelveWeekManualCloudSync } from "@/features/plan12week/hooks/useTwelveWeekManualCloudSync";
