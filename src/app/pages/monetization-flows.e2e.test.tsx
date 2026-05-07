@@ -165,7 +165,7 @@ describe("monetization flows", () => {
 
     // Restore via settings tab in 12WeekSystem
     renderAppRoute("/12-week-system?tab=settings");
-    await screen.findByText("Thiết bị, dữ liệu và đồng bộ");
+    await screen.findByText("Cài đặt mục tiêu");
     await user.click(screen.getByRole("button", { name: "Khôi phục mock upgrade" }));
 
     await waitFor(() => {
