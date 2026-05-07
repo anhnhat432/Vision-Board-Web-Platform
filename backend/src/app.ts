@@ -4,6 +4,7 @@ import type { Request } from "express";
 import helmet from "helmet";
 
 import { env } from "./config/env";
+import { createCorsOptions, parseAllowedCorsOrigins } from "./middleware/corsOrigin";
 import { errorMiddleware } from "./middleware/errorMiddleware";
 import { notFoundMiddleware } from "./middleware/notFoundMiddleware";
 import { apiRoutes } from "./routes";
@@ -11,29 +12,12 @@ import { apiRoutes } from "./routes";
 const app = express();
 app.set("trust proxy", 1);
 
-const allowedOrigins = env.FRONTEND_ORIGIN.split(",")
-  .map((origin) => origin.trim())
-  .filter((origin) => origin.length > 0);
+const allowedOrigins = parseAllowedCorsOrigins(env.FRONTEND_ORIGIN, {
+  nodeEnv: process.env.NODE_ENV,
+});
 
 app.use(helmet());
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) {
-        callback(null, true);
-        return;
-      }
-
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-        return;
-      }
-
-      callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true,
-  }),
-);
+app.use(cors(createCorsOptions(allowedOrigins)));
 app.use(
   express.json({
     limit: "2mb",
