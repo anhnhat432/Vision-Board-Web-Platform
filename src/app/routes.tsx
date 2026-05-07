@@ -112,6 +112,10 @@ export const router = createBrowserRouter([
         ...lazyRoute(() => import("./pages/BillingPlan"), "BillingPlan"),
       },
       {
+        path: "settings",
+        ...lazyRoute(() => import("./pages/SettingsPage"), "SettingsPage"),
+      },
+      {
         // Protected routes — require authentication
         Component: ProtectedRoute,
         children: [

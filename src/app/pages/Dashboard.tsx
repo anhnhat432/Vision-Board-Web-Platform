@@ -16,9 +16,7 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 
-import { toast } from "sonner";
 import { DataStorageInfo } from "../components/DataStorageInfo";
-import { DashboardDataBackupCard } from "@/features/dashboard/components/DashboardDataBackupCard";
 import { ExecutionScoreCard } from "@/features/dashboard/components/ExecutionScoreCard";
 import { GoalProgressCard } from "@/features/dashboard/components/GoalProgressCard";
 import { MetricsSummary } from "@/features/dashboard/components/MetricsSummary";
@@ -62,7 +60,6 @@ import {
   trackRescueTriggerDismissed,
   trackRescueTriggerFired,
 } from "../utils/monetization-analytics";
-import { downloadLocalUserDataBackup } from "../utils/local-data-backup";
 import {
   calculateGoalProgress,
   formatCalendarDate,
@@ -76,8 +73,6 @@ import {
   getTwelveWeekWeekCompletion,
   getTwelveWeekWeekRange,
   isTwelveWeekReviewDueToday,
-  parseStoredUserData,
-  saveUserData,
   sortReflectionsByDateDesc,
   type UserData,
 } from "../utils/storage";
@@ -173,7 +168,6 @@ function DashboardContent({
   const location = useLocation();
   const { isConfigured, user } = useAuthContext();
   const [dismissedTrigger, setDismissedTrigger] = useState<string | null>(null);
-  const importFileRef = useRef<HTMLInputElement>(null);
   const landingViewedRef = useRef(false);
   const progressViewedGoalIdRef = useRef<string | null>(null);
   const { currentPlanCode, currentPlanDefinition, entitlementKeys, premiumStatusItems } = usePlanEntitlements(userData);
@@ -232,34 +226,6 @@ function DashboardContent({
   const weeklyProgressPoints = useMemo(() => buildWeeklyProgressPoints(plan), [plan]);
   const weeklyStreak = useMemo(() => calculateWeeklyStreak(weeklyProgressPoints), [weeklyProgressPoints]);
   const leadMetricsSummary = useMemo(() => buildLeadMetricsSummary(plan), [plan]);
-
-  const handleExport = () => {
-    downloadLocalUserDataBackup({ data: userData, filenamePrefix: "dear-our-future-backup" });
-    toast.success("Đã tải bản sao lưu dữ liệu.");
-  };
-
-  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const text = reader.result;
-      if (typeof text !== "string") {
-        toast.error("Không đọc được file.");
-        return;
-      }
-      const parsed = parseStoredUserData(text);
-      if (!parsed) {
-        toast.error("File không hợp lệ hoặc bị hỏng.");
-        return;
-      }
-      saveUserData(parsed);
-      onReload();
-      toast.success("Đã khôi phục dữ liệu thành công!");
-    };
-    reader.readAsText(file);
-    e.target.value = "";
-  };
 
   const latestVisionBoard = visibleVisionBoards[visibleVisionBoards.length - 1];
   const completedGoalsCount = visibleGoals.filter((goal) => calculateGoalProgress(goal) === 100).length;
@@ -1761,22 +1727,6 @@ function DashboardContent({
         </div>
       )}
 
-      {/* Data Backup + Storage Info */}
-      {shouldShowWorkspaceDetailGrid && (
-        <div className="ops-section-secondary space-y-3">
-          <Reveal>
-            <DataStorageInfo variant="banner" />
-          </Reveal>
-          <Reveal>
-            <DashboardDataBackupCard
-              importInputRef={importFileRef}
-              onExport={handleExport}
-              onImport={handleImport}
-              onOpenImportPicker={() => importFileRef.current?.click()}
-            />
-          </Reveal>
-        </div>
-      )}
     </div>
   );
 }

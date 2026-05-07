@@ -961,7 +961,7 @@ export function RootLayout() {
               {user ? (
                 <button
                   type="button"
-                  onClick={() => navigateAppRoute("/billing/plan")}
+                  onClick={() => navigateAppRoute("/settings")}
                   className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/60 bg-white/82 text-slate-500 transition-colors hover:bg-white hover:text-slate-800 dark:border-white/12 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/16"
                   aria-label="Mở cài đặt tài khoản"
                   title="Cài đặt tài khoản"
@@ -1079,7 +1079,7 @@ export function RootLayout() {
                         type="button"
                         onClick={() => {
                           setMobileMenuOpen(false);
-                          navigateAppRoute("/billing/plan");
+                          navigateAppRoute("/settings");
                         }}
                         className="flex size-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600"
                         aria-label="Mở cài đặt tài khoản"
