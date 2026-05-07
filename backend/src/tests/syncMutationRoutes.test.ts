@@ -7,6 +7,13 @@ import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
 import { syncRoutes } from "../routes/syncRoutes";
 import {
+  DailyCheckInUpsertHandler,
+  LeadMetricUpsertHandler,
+  PlanSnapshotUpdatedHandler,
+  PlanSnapshotUpsertHandler,
+  TaskCompletedChangedHandler,
+  TaskUpsertHandler,
+  WeeklyReviewUpsertHandler,
   type AppliedTaskMutationEntity,
   type AppliedWorkspaceMutationEntity,
   type DailyCheckInUpsertApplyInput,
@@ -755,6 +762,15 @@ function installServiceMocks(): Restorer {
     syncTaskFixture.repository,
     syncWorkspaceFixture.repository,
   );
+  routedService.registerAll([
+    new TaskCompletedChangedHandler(),
+    new DailyCheckInUpsertHandler(),
+    new LeadMetricUpsertHandler(),
+    new WeeklyReviewUpsertHandler(),
+    new PlanSnapshotUpdatedHandler(),
+    new PlanSnapshotUpsertHandler(),
+    new TaskUpsertHandler(),
+  ]);
   const routedImportService = new TwelveWeekImportService(createTwelveWeekImportRepository());
   const restoreMutationService = replaceMethod(
     syncMutationService,
@@ -1411,7 +1427,7 @@ describe("12-week sync mutation route", () => {
     assert.equal(syncTaskFixture?.getTask("64f000000000000000000003")?.status, "todo");
   });
 
-  it("logs unsupported allowed mutation kinds without crashing", async () => {
+  it("applies plan_snapshot_upsert aliases without crashing", async () => {
     const response = await requestJson(createRouteTestApp(), "POST", "/api/sync/12-week/mutations", {
       body: {
         batchId: "batch_unsupported_1",
@@ -1431,12 +1447,12 @@ describe("12-week sync mutation route", () => {
     const data = getBatchResult(response);
 
     assert.equal(response.status, 200);
-    assert.equal(data.status, "accepted");
-    assert.equal(data.appliedCount, 0);
-    assert.equal(data.skippedCount, 1);
+    assert.equal(data.status, "applied");
+    assert.equal(data.appliedCount, 1);
+    assert.equal(data.skippedCount, 0);
     assert.equal(data.failedCount, 0);
-    assert.equal(data.accepted[0].status, "accepted");
-    assert.equal(data.accepted[0].reason, "unsupported_not_applied");
+    assert.equal(data.accepted[0].status, "applied");
+    assert.equal(data.accepted[0].entityType, "plan");
   });
 
   it("applies daily_check_in_upserted by plan, week, and date", async () => {

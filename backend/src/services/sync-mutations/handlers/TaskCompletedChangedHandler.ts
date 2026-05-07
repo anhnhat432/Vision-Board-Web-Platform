@@ -28,7 +28,7 @@ export class TaskCompletedChangedHandler implements MutationHandlerStrategy {
         type: "task_completed_changed",
         status: "failed_validation",
         entityType: "task",
-        reason: "Missing or invalid 'completed' field — must be boolean.",
+        reason: "completed must be a boolean.",
         syncErrorCode: "invalid_payload",
       };
     }

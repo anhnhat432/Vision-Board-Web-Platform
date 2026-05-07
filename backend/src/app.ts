@@ -1,6 +1,7 @@
 import cors from "cors";
 import express from "express";
 import type { Request } from "express";
+import helmet from "helmet";
 
 import { env } from "./config/env";
 import { errorMiddleware } from "./middleware/errorMiddleware";
@@ -8,10 +9,13 @@ import { notFoundMiddleware } from "./middleware/notFoundMiddleware";
 import { apiRoutes } from "./routes";
 
 const app = express();
+app.set("trust proxy", 1);
+
 const allowedOrigins = env.FRONTEND_ORIGIN.split(",")
   .map((origin) => origin.trim())
   .filter((origin) => origin.length > 0);
 
+app.use(helmet());
 app.use(
   cors({
     origin: (origin, callback) => {

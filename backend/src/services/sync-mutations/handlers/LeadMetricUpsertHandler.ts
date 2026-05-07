@@ -137,7 +137,7 @@ export class LeadMetricUpsertHandler implements MutationHandlerStrategy {
         status: "failed_not_found",
         entityType: "lead_metric",
         clientId: payload.clientMetricId,
-        reason: "lead_metric_not_found_or_week_not_owned",
+        reason: "week_not_found_or_not_owned",
         message: "Lead metric could not be applied — week not found or not owned.",
         syncErrorCode: "ownership_denied",
       };

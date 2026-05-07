@@ -1,27 +1,6 @@
 import type { MutationHandlerStrategy, HandlerApplyContext } from "../MutationHandlerStrategy";
 import type { HandlerResult, SyncMutationType } from "../types";
 
-/**
- * Handler xử lý mutation daily_check_in_upserted / daily_checkin_upsert.
- *
- * Payload shape:
- * {
- *   clientPlanId: string;         // required
- *   clientWeekId?: string;
- *   clientGoalId?: string;
- *   clientCheckInId?: string;
- *   weekNumber: number;           // required
- *   localDate: string;            // required (ISO date string)
- *   didWorkToday: boolean;        // required
- *   whichLeadIndicatorWorkedOn?: string;
- *   amountDone?: string;
- *   outputCreated?: string;
- *   obstacleOrIssue?: string;
- *   dailySelfRating?: number;
- *   optionalNote?: string;
- *   mood?: "low" | "steady" | "high";
- * }
- */
 export class DailyCheckInUpsertHandler implements MutationHandlerStrategy {
   readonly mutationType: SyncMutationType = "daily_check_in_upserted";
 
@@ -29,94 +8,110 @@ export class DailyCheckInUpsertHandler implements MutationHandlerStrategy {
     const { userId, mutation, processedAt, workspaceRepo } = context;
     const { payload, mutationId } = mutation;
 
-    // ─── Validation ───────────────────────────────────────────
-    if (typeof payload.clientPlanId !== "string" || payload.clientPlanId.length === 0) {
+    const checkIn = (typeof payload.checkIn === "object" && payload.checkIn !== null && !Array.isArray(payload.checkIn)
+      ? payload.checkIn
+      : {}) as Record<string, unknown>;
+
+    const getString = (key: string): string | undefined => {
+      const value = typeof payload[key] === "string" ? payload[key] : checkIn[key];
+      return typeof value === "string" && value.length > 0 ? value : undefined;
+    };
+    const getNumber = (key: string): number | undefined => {
+      const value = typeof payload[key] === "number" ? payload[key] : checkIn[key];
+      return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+    };
+    const getBoolean = (key: string): boolean | undefined => {
+      const value = typeof payload[key] === "boolean" ? payload[key] : checkIn[key];
+      return typeof value === "boolean" ? value : undefined;
+    };
+
+    const clientPlanId = getString("clientPlanId");
+    const weekNumber = getNumber("weekNumber");
+    const localDate = getString("localDate") ?? getString("date");
+    const didWorkToday = getBoolean("didWorkToday");
+
+    if (!clientPlanId) {
       return {
         mutationId,
         type: "daily_check_in_upserted",
         status: "failed_validation",
         entityType: "daily_check_in",
-        reason: "Missing or invalid 'clientPlanId' — must be a non-empty string.",
+        reason: "Missing or invalid 'clientPlanId' - must be a non-empty string.",
         syncErrorCode: "invalid_payload",
       };
     }
 
-    if (typeof payload.weekNumber !== "number" || !Number.isFinite(payload.weekNumber)) {
+    if (typeof weekNumber !== "number" || !Number.isInteger(weekNumber) || weekNumber < 1 || weekNumber > 12) {
       return {
         mutationId,
         type: "daily_check_in_upserted",
         status: "failed_validation",
         entityType: "daily_check_in",
-        reason: "Missing or invalid 'weekNumber' — must be a finite number.",
+        reason: "weekNumber must be an integer between 1 and 12.",
         syncErrorCode: "invalid_payload",
       };
     }
 
-    if (typeof payload.localDate !== "string" || payload.localDate.length === 0) {
+    if (!localDate) {
       return {
         mutationId,
         type: "daily_check_in_upserted",
         status: "failed_validation",
         entityType: "daily_check_in",
-        reason: "Missing or invalid 'localDate' — must be a non-empty string.",
+        reason: "date must be a valid date.",
         syncErrorCode: "invalid_payload",
       };
     }
 
-    if (typeof payload.didWorkToday !== "boolean") {
+    const parsedLocalDate = new Date(`${localDate}T00:00:00.000Z`);
+    if (
+      !/^\d{4}-\d{2}-\d{2}$/.test(localDate) ||
+      !Number.isFinite(parsedLocalDate.valueOf()) ||
+      parsedLocalDate.toISOString().slice(0, 10) !== localDate
+    ) {
       return {
         mutationId,
         type: "daily_check_in_upserted",
         status: "failed_validation",
         entityType: "daily_check_in",
-        reason: "Missing or invalid 'didWorkToday' — must be boolean.",
+        reason: "date must be a valid date.",
         syncErrorCode: "invalid_payload",
       };
     }
 
-    // ─── Extract optional fields ──────────────────────────────
-    const clientGoalId =
-      typeof payload.clientGoalId === "string" && payload.clientGoalId.length > 0
-        ? payload.clientGoalId
-        : undefined;
+    if (typeof didWorkToday !== "boolean") {
+      return {
+        mutationId,
+        type: "daily_check_in_upserted",
+        status: "failed_validation",
+        entityType: "daily_check_in",
+        reason: "didWorkToday must be a boolean.",
+        syncErrorCode: "invalid_payload",
+      };
+    }
 
-    const clientWeekId =
-      typeof payload.clientWeekId === "string" && payload.clientWeekId.length > 0
-        ? payload.clientWeekId
-        : undefined;
-
-    const clientCheckInId =
-      typeof payload.clientCheckInId === "string" && payload.clientCheckInId.length > 0
-        ? payload.clientCheckInId
-        : undefined;
-
-    const whichLeadIndicatorWorkedOn =
-      typeof payload.whichLeadIndicatorWorkedOn === "string" ? payload.whichLeadIndicatorWorkedOn : undefined;
-    const amountDone = typeof payload.amountDone === "string" ? payload.amountDone : undefined;
-    const outputCreated = typeof payload.outputCreated === "string" ? payload.outputCreated : undefined;
-    const obstacleOrIssue = typeof payload.obstacleOrIssue === "string" ? payload.obstacleOrIssue : undefined;
-    const optionalNote = typeof payload.optionalNote === "string" ? payload.optionalNote : undefined;
-
-    const dailySelfRating =
-      typeof payload.dailySelfRating === "number" && Number.isFinite(payload.dailySelfRating)
-        ? payload.dailySelfRating
-        : undefined;
-
+    const clientGoalId = getString("clientGoalId");
+    const clientWeekId = getString("clientWeekId");
+    const clientCheckInId = getString("clientCheckInId");
+    const whichLeadIndicatorWorkedOn = getString("whichLeadIndicatorWorkedOn");
+    const amountDone = getString("amountDone");
+    const outputCreated = getString("outputCreated");
+    const obstacleOrIssue = getString("obstacleOrIssue");
+    const optionalNote = getString("optionalNote");
+    const dailySelfRating = getNumber("dailySelfRating");
+    const rawMood = payload.mood ?? checkIn.mood;
     const mood: "low" | "steady" | "high" | undefined =
-      payload.mood === "low" || payload.mood === "steady" || payload.mood === "high"
-        ? payload.mood
-        : undefined;
+      rawMood === "low" || rawMood === "steady" || rawMood === "high" ? rawMood : undefined;
 
-    // ─── Apply ────────────────────────────────────────────────
     const applied = await workspaceRepo.applyDailyCheckInUpserted(userId, {
       mutationId,
       clientGoalId,
-      clientPlanId: payload.clientPlanId,
+      clientPlanId,
       clientWeekId,
       clientCheckInId,
-      weekNumber: payload.weekNumber,
-      localDate: payload.localDate,
-      didWorkToday: payload.didWorkToday,
+      weekNumber,
+      localDate,
+      didWorkToday,
       whichLeadIndicatorWorkedOn,
       amountDone,
       outputCreated,
@@ -127,7 +122,6 @@ export class DailyCheckInUpsertHandler implements MutationHandlerStrategy {
       syncUpdatedAt: processedAt,
     });
 
-    // ─── Result ───────────────────────────────────────────────
     if (!applied) {
       return {
         mutationId,
@@ -135,8 +129,8 @@ export class DailyCheckInUpsertHandler implements MutationHandlerStrategy {
         status: "failed_not_found",
         entityType: "daily_check_in",
         clientId: clientCheckInId,
-        reason: "daily_check_in_not_found_or_week_not_owned",
-        message: "Daily check-in could not be applied — week not found or not owned.",
+        reason: "week_not_found_or_not_owned",
+        message: "Daily check-in parent week was not found for this authenticated user.",
         syncErrorCode: "ownership_denied",
       };
     }

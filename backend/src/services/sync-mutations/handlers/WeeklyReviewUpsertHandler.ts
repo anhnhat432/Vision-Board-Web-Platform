@@ -39,13 +39,18 @@ export class WeeklyReviewUpsertHandler implements MutationHandlerStrategy {
       };
     }
 
-    if (typeof payload.weekNumber !== "number" || !Number.isFinite(payload.weekNumber)) {
+    if (
+      typeof payload.weekNumber !== "number" ||
+      !Number.isInteger(payload.weekNumber) ||
+      payload.weekNumber < 1 ||
+      payload.weekNumber > 12
+    ) {
       return {
         mutationId,
         type: "weekly_review_upserted",
         status: "failed_validation",
         entityType: "weekly_review",
-        reason: "Missing or invalid 'weekNumber'.",
+        reason: "weekNumber must be an integer between 1 and 12.",
         syncErrorCode: "invalid_payload",
       };
     }

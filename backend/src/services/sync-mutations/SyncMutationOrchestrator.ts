@@ -16,10 +16,10 @@ import { ApiError } from "../../utils/apiError";
 
 // ─── Constants (from syncMutationService.ts) ──────────────────
 
-const MAX_MUTATION_ID_LENGTH = 128;
-const MAX_CLIENT_ID_LENGTH = 256;
-const MAX_IDEMPOTENCY_KEY_LENGTH = 128;
-const MAX_BATCH_ID_LENGTH = 128;
+const MAX_MUTATION_ID_LENGTH = 240;
+const MAX_CLIENT_ID_LENGTH = 120;
+const MAX_IDEMPOTENCY_KEY_LENGTH = 240;
+const MAX_BATCH_ID_LENGTH = 240;
 const MAX_MUTATIONS_PER_BATCH = 100;
 
 const ALLOWED_MUTATION_TYPES = new Set<string>(SYNC_MUTATION_TYPES);

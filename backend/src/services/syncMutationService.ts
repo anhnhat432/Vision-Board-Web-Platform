@@ -29,6 +29,13 @@ import {
   SyncMutationOrchestrator,
   MongoSyncTaskMutationRepository,
   MongoSyncWorkspaceMutationRepository,
+  TaskCompletedChangedHandler,
+  DailyCheckInUpsertHandler,
+  LeadMetricUpsertHandler,
+  WeeklyReviewUpsertHandler,
+  PlanSnapshotUpdatedHandler,
+  PlanSnapshotUpsertHandler,
+  TaskUpsertHandler,
 } from "./sync-mutations";
 import { MongoSyncMutationLogRepository } from "../repositories/mongo/MongoSyncMutationLogRepository";
 
@@ -38,3 +45,13 @@ export const syncMutationService = new SyncMutationOrchestrator(
   new MongoSyncTaskMutationRepository(),
   new MongoSyncWorkspaceMutationRepository(),
 );
+
+syncMutationService.registerAll([
+  new TaskCompletedChangedHandler(),
+  new DailyCheckInUpsertHandler(),
+  new LeadMetricUpsertHandler(),
+  new WeeklyReviewUpsertHandler(),
+  new PlanSnapshotUpdatedHandler(),
+  new PlanSnapshotUpsertHandler(),
+  new TaskUpsertHandler(),
+]);
