@@ -8,7 +8,6 @@ import {
   ChevronDown,
   ChevronUp,
   Clock3,
-  Package,
   Plus,
   Search,
   Target,
@@ -131,18 +130,21 @@ function GoalTrackerContent({
   const [searchQuery, setSearchQuery] = useState("");
   const { currentPlanCode, hasPremiumReviewInsights } = usePlanEntitlements(userData);
 
-  // Compute twelveWeekGoals early so we can pass goalId to the upgrade dialog
-  const goals = [...userData.goals].sort((left, right) => {
-    const leftProgress = calculateGoalProgress(left);
-    const rightProgress = calculateGoalProgress(right);
-    if ((leftProgress === 100) !== (rightProgress === 100)) {
-      return leftProgress === 100 ? 1 : -1;
-    }
-    const leftDays = getCalendarDayDifference(left.deadline) ?? Number.MAX_SAFE_INTEGER;
-    const rightDays = getCalendarDayDifference(right.deadline) ?? Number.MAX_SAFE_INTEGER;
-    if (leftDays !== rightDays) return leftDays - rightDays;
-    return left.title.localeCompare(right.title, "vi");
-  });
+  const goals = useMemo(
+    () =>
+      [...userData.goals].sort((left, right) => {
+        const leftProgress = calculateGoalProgress(left);
+        const rightProgress = calculateGoalProgress(right);
+        if ((leftProgress === 100) !== (rightProgress === 100)) {
+          return leftProgress === 100 ? 1 : -1;
+        }
+        const leftDays = getCalendarDayDifference(left.deadline) ?? Number.MAX_SAFE_INTEGER;
+        const rightDays = getCalendarDayDifference(right.deadline) ?? Number.MAX_SAFE_INTEGER;
+        if (leftDays !== rightDays) return leftDays - rightDays;
+        return left.title.localeCompare(right.title, "vi");
+      }),
+    [userData.goals],
+  );
   const backendSystemsByGoalId = useBackendProgressOverlayMap(
     useMemo(
       () =>
@@ -174,8 +176,11 @@ function GoalTrackerContent({
   const hasRealLifeBalance = userData.onboardingCompleted && userData.currentWheelOfLife.some((area) => area.score > 0);
   const goalFlowStartHref = hasRealLifeBalance ? "/life-insight" : "/onboarding";
   const goalFlowStartLabel = hasRealLifeBalance ? "Tạo mục tiêu từ insight" : "Bắt đầu Life Balance";
-  const twelveWeekGoals = effectiveGoals.filter((goal) => Boolean(goal.twelveWeekSystem));
-  const standardGoals = effectiveGoals.filter((goal) => !goal.twelveWeekSystem);
+  const twelveWeekGoals = useMemo(
+    () => effectiveGoals.filter((goal) => Boolean(goal.twelveWeekSystem)),
+    [effectiveGoals],
+  );
+  const standardGoals = useMemo(() => effectiveGoals.filter((goal) => !goal.twelveWeekSystem), [effectiveGoals]);
 
   const filteredTwelveWeekGoals = useMemo(() => {
     if (!searchQuery.trim()) return twelveWeekGoals;
@@ -195,15 +200,6 @@ function GoalTrackerContent({
     localStorage.setItem(APP_STORAGE_KEYS.latest12WeekGoalId, goalId);
     localStorage.setItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId, goalId);
     navigate("/12-week-system");
-  };
-
-  const openOrderFlow = (goalId?: string) => {
-    if (goalId) {
-      navigate("/order", { state: { goalId } });
-      return;
-    }
-
-    navigate("/order");
   };
 
   const handleStartGuidedGoalFlow = () => {
@@ -576,18 +572,6 @@ function GoalTrackerContent({
                     >
                       Mở nhật ký tuần
                     </Button>
-                    <Button
-                      variant="outline"
-                      className={`w-full sm:w-auto ${
-                        systemReviewDueToday
-                          ? "border-amber-200 bg-white text-amber-800 hover:bg-amber-100"
-                          : "border-white/12 bg-white/10 text-white hover:bg-white/16"
-                      }`}
-                      onClick={() => openOrderFlow(goal.id)}
-                    >
-                      <Package className="h-4 w-4" />
-                      Tạo kit từ mục tiêu này
-                    </Button>
                   </div>
                 </div>
 
@@ -749,10 +733,6 @@ function GoalTrackerContent({
                       Thêm việc
                     </Button>
                   )}
-                  <Button variant="outline" className="w-full" onClick={() => openOrderFlow(goal.id)}>
-                    <Package className="h-4 w-4" />
-                    Tạo kit từ mục tiêu này
-                  </Button>
                 </div>
               </div>
             )}
@@ -816,12 +796,6 @@ function GoalTrackerContent({
                   <Button variant="outline" className="w-full sm:w-auto" onClick={() => openTwelveWeekCenter(twelveWeekGoals[0].id)}>
                     <Zap className="h-4 w-4" />
                     Mở 12 tuần
-                  </Button>
-                )}
-                {hasGoals && (
-                  <Button variant="outline" className="w-full sm:w-auto" onClick={() => openOrderFlow(goals[0]?.id)}>
-                    <Package className="h-4 w-4" />
-                    Tạo kit
                   </Button>
                 )}
               </div>
