@@ -458,28 +458,42 @@ async function run() {
       assertNoVisibleFailure(text, "progress tab");
     });
 
-    await step("Mock upgrade completes locally", async () => {
-      await page.goto(`${BASE_URL}/billing/plan`, { waitUntil: "domcontentloaded" });
-      await page.getByRole("button", { name: /Plus demo/i }).first().click();
-      const dialog = page.locator('[role="dialog"]');
-      await dialog.waitFor();
-      await clickDialogUpgradeButton(page);
-      await page.waitForURL(/\/billing\/mock-checkout\?session=/, { timeout: DEFAULT_TIMEOUT_MS });
-      await page.getByRole("button", { name: /\(demo\)/i }).click();
+    await step("Production billing management loads", async () => {
+      await page.goto(`${BASE_URL}/billing`, { waitUntil: "domcontentloaded" });
+      if (await waitForLoginRedirect(page, 2_000)) {
+        authWasRequired = true;
+        await authenticateIfRequired(page, "/billing");
+        await page.goto(`${BASE_URL}/billing`, { waitUntil: "domcontentloaded" });
+      }
+
       await page.waitForFunction(() => {
-        const raw = localStorage.getItem("visionboard_user_data");
-        if (!raw) return false;
-        const data = JSON.parse(raw);
-        return data.subscription?.planCode === "PLUS" && data.subscription?.status === "active";
+        const text = document.body.innerText;
+        return (
+          location.pathname === "/billing/plan" &&
+          text.includes("Gói hiện tại") &&
+          text.includes("Lịch sử thanh toán") &&
+          text.includes("Hỗ trợ thanh toán") &&
+          (text.includes("Nâng cấp Plus") || text.includes("Gia hạn Plus"))
+        );
+      });
+      await page.waitForFunction(() => {
+        const text = document.body.innerText;
+        return (
+          text.includes("Chưa có giao dịch") ||
+          text.includes("Đang chờ") ||
+          text.includes("Đã thanh toán") ||
+          text.includes("Không thể tải lịch sử thanh toán")
+        );
       });
 
-      const account = await page.evaluate(() => {
-        const raw = localStorage.getItem("visionboard_mock_billing_account");
-        return raw ? JSON.parse(raw) : null;
-      });
-
-      if (account?.planCode !== "PLUS" || account?.status !== "active") {
-        throw new Error("Mock billing account was not activated locally");
+      const text = await getBodyText(page);
+      assertNoMojibake(text, "billing management");
+      assertNoVisibleFailure(text, "billing management");
+      if (text.includes("Không thể tải lịch sử thanh toán")) {
+        throw new Error("Billing payment history endpoint failed on production");
+      }
+      if (/Plus demo|Checkout dùng thử|mock checkout/i.test(text)) {
+        throw new Error("Production billing page still shows demo/mock billing copy");
       }
     });
 

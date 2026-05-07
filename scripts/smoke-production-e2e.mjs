@@ -1005,38 +1005,41 @@ async function reloadAndAssert() {
   await assertDailyExecutionPersisted();
 }
 
-async function exerciseMockUpgrade() {
-  log("Checking mock upgrade flow");
-  await openPage("/billing/plan");
-  await waitFor("billing plan page", 'document.body.innerText.includes("Gói hiện tại")');
-  await clickByButton("Mở Plus");
-  await waitFor("upgrade dialog", 'document.querySelector("[role=\\"dialog\\"]")');
-  await clickDialogUpgradeButton();
+async function exerciseBillingManagement() {
+  log("Checking production billing management page");
+  await openPage("/billing");
   await waitFor(
-    "mock checkout page",
-    'location.pathname === "/billing/mock-checkout"',
-    { timeoutMs: 45_000 },
-  );
-  await clickByButton("Xác nhận mở gói");
-  await waitFor(
-    "mock upgrade local plan active",
+    "billing management page",
     `
-      (() => {
-        const raw = localStorage.getItem("visionboard_user_data");
-        if (!raw) return false;
-        try {
-          const data = JSON.parse(raw);
-          return data.subscription?.planCode === "PLUS" &&
-            data.subscription?.status === "active" &&
-            Array.isArray(data.entitlements) &&
-            data.entitlements.length > 0;
-        } catch {
-          return false;
-        }
-      })()
+      location.pathname === "/billing/plan" &&
+      document.body.innerText.includes("Gói hiện tại") &&
+      document.body.innerText.includes("Lịch sử thanh toán") &&
+      document.body.innerText.includes("Hỗ trợ thanh toán") &&
+      (
+        document.body.innerText.includes("Nâng cấp Plus") ||
+        document.body.innerText.includes("Gia hạn Plus")
+      )
     `,
-    { timeoutMs: 45_000 },
+    { timeoutMs: 75_000 },
   );
+  await waitFor(
+    "billing payment history state",
+    `
+      document.body.innerText.includes("Chưa có giao dịch") ||
+      document.body.innerText.includes("Đang chờ") ||
+      document.body.innerText.includes("Đã thanh toán") ||
+      document.body.innerText.includes("Không thể tải lịch sử thanh toán")
+    `,
+    { timeoutMs: 75_000 },
+  );
+
+  const text = await browserEval("document.body.innerText");
+  if (text.includes("Không thể tải lịch sử thanh toán")) {
+    throw new Error("Billing payment history endpoint failed on production");
+  }
+  if (/Plus demo|Checkout dùng thử|mock checkout/i.test(text)) {
+    throw new Error("Production billing page still shows demo/mock billing copy");
+  }
 }
 
 async function logoutAndLoginAgain() {
@@ -1083,7 +1086,7 @@ async function main() {
     await runStep("12-week system", assertSystemLoaded);
     await runStep("Daily execution and weekly review", exerciseTwelveWeekDailyExecution);
     await runStep("Persistence after reload", reloadAndAssert);
-    await runStep("Mock upgrade", exerciseMockUpgrade);
+    await runStep("Billing management", exerciseBillingManagement);
     if (HAS_PROVIDED_CREDENTIALS) {
       await runStep("Logout/login persistence", logoutAndLoginAgain);
     } else {
