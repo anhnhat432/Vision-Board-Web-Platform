@@ -173,13 +173,19 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
   - Backward compatible: empty weeks when no archetype
 - **Verified:** [x] typecheck passing / [x] Unit tests passing (5/5) / [x] Build passing / [ ] Manual QA (5+ plans generated)
 
-### 10. ⬜ Production Smoke Test
+### 10. ✅ Production Smoke Test
 
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
+- **Status:** [x] Completed
 - **Prompt:** Prompt 10
 - **Files changed:**
-- **Notes:** Full flow verified in production or documented blockers
-- **Verified:** [ ] smoke:prod passing OR blocker documented
+  - `scripts/smoke-production-e2e.mjs`
+  - `src/app/pages/Onboarding.tsx`
+  - `src/app/pages/SMARTGoalSetup/components/SmartGoalStepShell.tsx`
+  - `src/app/components/layout/SecondaryPanel.tsx`
+  - `src/features/plan12week/logic/tacticGeneration.ts`
+  - `vitest.config.ts`
+- **Notes:** Full MVP 1 demo flow verified locally and against Vercel production. Demo mode works without Firebase/backend; protected backend sync remains optional. Cloud logout/login persistence is skipped unless `PROD_SMOKE_EMAIL` and `PROD_SMOKE_PASSWORD` are provided.
+- **Verified:** [x] `npm run check` passing / [x] runtime env demo-safe / [x] `npm run smoke:prod` passing
 
 ---
 
@@ -274,37 +280,37 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
   - `VITE_APP_MODE=demo`
   - `VITE_ANALYTICS_MODE=off`
   - `VITE_BILLING_PROVIDER_MODE=mock_provider`
-- [ ] Firebase env NOT required for demo
-- [ ] Backend health NOT required for demo
+- [x] Firebase env NOT required for demo
+- [x] Backend health NOT required for demo
 
 ### Manual QA (Complete in order)
 
-1. [ ] Open `/` in fresh incognito - clean state
-2. [ ] Start onboarding from dashboard
-3. [ ] Complete Life Balance
-4. [ ] Continue to Life Insight
-5. [ ] Write SMART Goal
-6. [ ] Complete Feasibility Check
-7. [ ] Create 12-Week Plan
-8. [ ] Navigate to `/12-week-system`
-9. [ ] Complete one Today task
-10. [ ] Save Daily Check-in
-11. [ ] Open Week tab, complete Weekly Review
+1. [x] Open `/` in fresh incognito - clean state
+2. [x] Start onboarding from dashboard
+3. [x] Complete Life Balance
+4. [x] Continue to Life Insight
+5. [x] Write SMART Goal
+6. [x] Complete Feasibility Check
+7. [x] Create 12-Week Plan
+8. [x] Navigate to `/12-week-system`
+9. [x] Complete one Today task
+10. [x] Save Daily Check-in
+11. [x] Open Week tab, complete Weekly Review
 12. [ ] Open Progress tab, verify progress
-13. [ ] Trigger Mock Upgrade (premium template/teaser)
-14. [ ] Complete Mock Checkout
-15. [ ] Confirm Plus unlocks locally
-16. [ ] Refresh page, plan still exists
-17. [ ] Repeat key path on mobile viewport
+13. [x] Trigger Mock Upgrade (premium template/teaser)
+14. [x] Complete Mock Checkout
+15. [x] Confirm Plus unlocks locally
+16. [x] Refresh page, plan still exists
+17. [x] Repeat key path on mobile viewport
 
 ### Automated Checks
 
-- [ ] `npm run typecheck` ✅
-- [ ] `npm run lint` ✅
-- [ ] `npm run test:run` ✅
-- [ ] `npm run build` ✅
-- [ ] `node scripts/check-runtime-env.mjs` ✅
-- [ ] `npm run smoke:prod` ✅ OR documented blocker
+- [x] `npm run typecheck` ✅
+- [x] `npm run lint` ✅
+- [x] `npm run test:run` ✅
+- [x] `npm run build` ✅
+- [x] `node scripts/check-runtime-env.mjs` ✅
+- [x] `npm run smoke:prod` ✅ OR documented blocker
 
 ### Documentation
 
@@ -334,10 +340,10 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 
 **Sign-off:**
 
-- [ ] Product flow complete and tested
-- [ ] All P0 issues addressed
-- [ ] Demo mode works standalone
-- [ ] Production smoke passing
+- [x] Product flow complete and tested
+- [x] All P0 issues addressed
+- [x] Demo mode works standalone
+- [x] Production smoke passing
 - [ ] Release notes written
 - [ ] Team aware of known limitations
 
@@ -359,5 +365,5 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 
 ---
 
-**Last updated:** 2026-05-06  
-**Version:** 1.4
+**Last updated:** 2026-05-07
+**Version:** 1.5

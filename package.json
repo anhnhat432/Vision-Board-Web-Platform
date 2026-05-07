@@ -22,6 +22,7 @@
     "qa:visual-ux-ui": "node scripts/visual-ux-ui-qa.mjs",
     "smoke:mvp1": "node scripts/smoke-mvp1-local-demo.mjs",
     "smoke:core-quality": "node scripts/smoke-core-quality.mjs",
+    "smoke:prod:quick": "node scripts/smoke-production-quick.mjs",
     "smoke:prod": "node scripts/smoke-production-e2e.mjs",
     "smoke:mvp2-sync": "node scripts/smoke-mvp2-sync-staging.mjs",
     "smoke:mvp2-sync:staging": "node scripts/smoke-mvp2-sync-staging.mjs"
