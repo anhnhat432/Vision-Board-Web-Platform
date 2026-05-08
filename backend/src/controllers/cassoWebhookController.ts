@@ -20,24 +20,84 @@ import { PaymentOrderModel } from "../models/PaymentOrderModel";
 import { UserModel } from "../models/UserModel";
 import type { CassoWebhookPayload, CassoTransaction } from "../services/cassoPaymentAdapter";
 import { sendBillingPaymentConfirmedEmail } from "../services/emailNotificationService";
-import { createHash } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 
 const TWELVE_WEEKS_MS = 12 * 7 * 24 * 60 * 60 * 1000;
-const ORDER_ID_REGEX = /VB[A-Z0-9]{8}/;
+const ORDER_ID_REGEX = /VB[A-Z0-9]{8}/i;
 
 function extractOrderId(description: string): string | null {
   const match = description.match(ORDER_ID_REGEX);
-  return match ? match[0] : null;
+  return match ? match[0].toUpperCase() : null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function sortObjectDeep(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sortObjectDeep);
+  if (!isRecord(value)) return value;
+
+  return Object.keys(value)
+    .sort()
+    .reduce<Record<string, unknown>>((sorted, key) => {
+      sorted[key] = sortObjectDeep(value[key]);
+      return sorted;
+    }, {});
+}
+
+function normalizeSignatureHeader(value: string): string {
+  const trimmed = value.trim();
+  if (trimmed.includes("=")) {
+    return trimmed.split("=").pop()?.trim() ?? trimmed;
+  }
+  return trimmed;
+}
+
+function safeEqual(a: string, b: string): boolean {
+  const aBuffer = Buffer.from(a);
+  const bBuffer = Buffer.from(b);
+  return aBuffer.length === bBuffer.length && timingSafeEqual(aBuffer, bBuffer);
+}
+
+function getHeaderValue(req: Request, name: string): string {
+  const value = req.headers[name.toLowerCase()];
+  if (Array.isArray(value)) return value[0] ?? "";
+  return typeof value === "string" ? value : "";
+}
+
+function getRawWebhookPayload(req: Request): unknown {
+  const rawBody = (req as Request & { rawBody?: Buffer }).rawBody;
+  if (!rawBody || rawBody.length === 0) return req.body;
+
+  try {
+    return JSON.parse(rawBody.toString("utf-8")) as unknown;
+  } catch {
+    return req.body;
+  }
+}
+
+function verifyCassoWebhookSignature(req: Request, expectedSecret: string): boolean {
+  const secureToken = getHeaderValue(req, "secure-token");
+  if (secureToken && safeEqual(secureToken, expectedSecret)) return true;
+
+  const authorization = getHeaderValue(req, "authorization").replace(/^Bearer\s+/i, "").trim();
+  if (authorization && safeEqual(authorization, expectedSecret)) return true;
+
+  const cassoSignature = normalizeSignatureHeader(getHeaderValue(req, "x-casso-signature"));
+  if (!cassoSignature) return false;
+
+  const sortedPayload = JSON.stringify(sortObjectDeep(getRawWebhookPayload(req)));
+  const expectedSignature = createHmac("sha512", expectedSecret).update(sortedPayload).digest("hex");
+  return safeEqual(cassoSignature, expectedSignature);
 }
 
 export async function handleCassoWebhook(req: Request, res: Response): Promise<void> {
   // Step 1: Verify secret token
   const expectedSecret = process.env.CASSO_WEBHOOK_SECRET?.trim() ?? "";
-  const headerToken =
-    (req.headers["secure-token"] as string | undefined) ?? "";
 
-  if (!expectedSecret || headerToken !== expectedSecret) {
-    console.warn("[casso-webhook] Invalid or missing Secure-Token header.");
+  if (!expectedSecret || !verifyCassoWebhookSignature(req, expectedSecret)) {
+    console.warn("[casso-webhook] Invalid or missing Casso webhook signature.");
     res.status(401).json({ success: false, message: "Invalid webhook signature." });
     return;
   }
@@ -61,7 +121,7 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
 
   // Step 3: Process each transaction
   for (const tx of transactions) {
-    const cassoTxId = String(tx.id ?? tx.tid ?? "");
+    const cassoTxId = String(tx.id ?? tx.tid ?? tx.reference ?? "");
     const description = tx.description ?? "";
     const amount = tx.amount ?? 0;
 

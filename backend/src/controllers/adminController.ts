@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 
+import { billingService } from "../services/billingServiceInstance";
 import { BillingEventModel } from "../models/BillingEventModel";
 import { BillingSubscriptionModel } from "../models/BillingSubscriptionModel";
 import { OrderModel } from "../models/OrderModel";
@@ -10,11 +11,13 @@ import {
   hashEmailPayload,
   sendBillingExpirationReminderEmail,
 } from "../services/emailNotificationService";
+import { ApiError } from "../utils/apiError";
 import { successResponse } from "../utils/apiResponse";
 
 const DEFAULT_EXPIRING_REMINDER_DAYS = 7;
 const MAX_EXPIRING_REMINDER_DAYS = 30;
 const MAX_REMINDERS_PER_RUN = 100;
+const TWELVE_WEEKS_MS = 12 * 7 * 24 * 60 * 60 * 1000;
 
 type UserRole = "user" | "admin";
 
@@ -283,6 +286,81 @@ export async function sendExpiringBillingReminders(req: Request, res: Response, 
           failed,
         },
         "Billing reminder run completed.",
+      ),
+    );
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function completePaymentOrderManually(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const orderId = req.params.orderId?.trim().toUpperCase();
+    const order = await PaymentOrderModel.findOne({ orderId });
+
+    if (!order) {
+      throw new ApiError(404, "Payment order not found.", undefined, "payment_order_not_found");
+    }
+
+    if (order.status === "completed") {
+      res.status(200).json(
+        successResponse(
+          {
+            orderId: order.orderId,
+            status: order.status,
+            completedAt: order.completedAt?.toISOString() ?? null,
+            eventStatus: "already_completed",
+          },
+          "Payment order is already completed.",
+        ),
+      );
+      return;
+    }
+
+    if (order.status !== "pending" && order.status !== "expired" && order.status !== "failed") {
+      throw new ApiError(409, "Payment order cannot be manually completed.", undefined, "invalid_payment_order_status");
+    }
+
+    const now = new Date();
+    const currentPeriodEnd = new Date(now.getTime() + TWELVE_WEEKS_MS);
+    const eventPayloadHash = hashEmailPayload(
+      JSON.stringify({
+        orderId: order.orderId,
+        userId: order.userId,
+        amount: order.amount,
+        status: "manual_completed",
+      }),
+    );
+
+    const result = await billingService.upsertSubscriptionFromProviderEvent({
+      provider: "manual",
+      providerEventId: `manual_payment_${order.orderId}`,
+      eventType: "manual_checkout_completed",
+      payloadHash: eventPayloadHash,
+      userId: order.userId,
+      planCode: "PLUS",
+      status: "active",
+      billingCycle: "twelve_week",
+      currentPeriodStart: now,
+      currentPeriodEnd,
+      providerSubscriptionId: order.orderId,
+    });
+
+    order.status = "completed";
+    order.completedAt = now;
+    order.cassoTransactionId = order.cassoTransactionId ?? `manual_${now.getTime()}`;
+    await order.save();
+
+    res.status(200).json(
+      successResponse(
+        {
+          orderId: order.orderId,
+          status: order.status,
+          completedAt: order.completedAt?.toISOString() ?? null,
+          subscriptionId: result.subscription.id,
+          eventStatus: result.eventStatus,
+        },
+        "Payment order completed manually.",
       ),
     );
   } catch (error) {

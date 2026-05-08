@@ -19,6 +19,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
+  adminCompletePaymentOrderManually,
   adminGetOverview,
   adminSendExpiringBillingReminders,
   type AdminOverview,
@@ -164,7 +165,15 @@ function OrderActions({
   );
 }
 
-function RecentPaymentList({ payments }: { payments: AdminPaymentOrderSummary[] }) {
+function RecentPaymentList({
+  busyOrderId,
+  onManualComplete,
+  payments,
+}: {
+  busyOrderId: string | null;
+  onManualComplete: (orderId: string) => void;
+  payments: AdminPaymentOrderSummary[];
+}) {
   if (payments.length === 0) {
     return <p className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">Chưa có đơn thanh toán VietQR.</p>;
   }
@@ -182,6 +191,19 @@ function RecentPaymentList({ payments }: { payments: AdminPaymentOrderSummary[] 
           <Badge variant="outline" className={PAYMENT_STATUS_COLORS[payment.status]}>
             {payment.status}
           </Badge>
+          {payment.status === "pending" || payment.status === "expired" ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="rounded-full"
+              disabled={busyOrderId === payment.orderId}
+              onClick={() => onManualComplete(payment.orderId)}
+            >
+              {busyOrderId === payment.orderId ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
+              Đã nhận tiền
+            </Button>
+          ) : null}
         </div>
       ))}
     </div>
@@ -221,6 +243,7 @@ export function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyOrderId, setBusyOrderId] = useState<string | null>(null);
+  const [busyPaymentOrderId, setBusyPaymentOrderId] = useState<string | null>(null);
   const [reminderLoading, setReminderLoading] = useState(false);
 
   const isAdmin = userProfile?.role === "admin";
@@ -266,6 +289,21 @@ export function AdminOrdersPage() {
       toast.error(getErrorMessage(err, "Không thể gửi reminder lúc này."));
     } finally {
       setReminderLoading(false);
+    }
+  };
+
+  const handleManualCompletePayment = async (orderId: string) => {
+    if (!window.confirm(`Đánh dấu đơn ${orderId} là đã nhận tiền và mở Plus?`)) return;
+
+    setBusyPaymentOrderId(orderId);
+    try {
+      const result = await adminCompletePaymentOrderManually(orderId);
+      toast.success(`Đã mở Plus cho đơn ${result.orderId}.`);
+      void loadAdminData();
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Không thể hoàn tất đơn thanh toán."));
+    } finally {
+      setBusyPaymentOrderId(null);
     }
   };
 
@@ -427,7 +465,11 @@ export function AdminOrdersPage() {
             <CardDescription>Các order Casso/VietQR mới nhất.</CardDescription>
           </CardHeader>
           <CardContent>
-            <RecentPaymentList payments={overview?.recentPayments ?? []} />
+            <RecentPaymentList
+              busyOrderId={busyPaymentOrderId}
+              onManualComplete={handleManualCompletePayment}
+              payments={overview?.recentPayments ?? []}
+            />
           </CardContent>
         </Card>
 

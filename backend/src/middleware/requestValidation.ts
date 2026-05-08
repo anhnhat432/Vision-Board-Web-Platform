@@ -177,6 +177,9 @@ function sanitizeCassoTransaction(value: unknown, index: number): BodyRecord {
   const tid = validateOptionalShortString(transaction.tid, `data[${index}].tid`);
   if (tid !== undefined) transaction.tid = tid;
 
+  const reference = validateOptionalShortString(transaction.reference, `data[${index}].reference`);
+  if (reference !== undefined) transaction.reference = reference;
+
   const bankSubAccountId = validateOptionalShortString(
     transaction.bank_sub_acc_id,
     `data[${index}].bank_sub_acc_id`,
@@ -302,15 +305,13 @@ export const validateCassoWebhookPayload: RequestHandler = (req, _res, next) => 
   }
 
   if (body.data !== undefined) {
-    if (!Array.isArray(body.data)) {
-      throw new ApiError(400, "Casso payload data must be an array.", undefined, "invalid_payload");
-    }
+    const transactions = Array.isArray(body.data) ? body.data : [body.data];
 
-    if (body.data.length > MAX_CASSO_TRANSACTIONS) {
+    if (transactions.length > MAX_CASSO_TRANSACTIONS) {
       throw new ApiError(400, "Casso payload contains too many transactions.", undefined, "invalid_payload");
     }
 
-    body.data = body.data.map(sanitizeCassoTransaction);
+    body.data = transactions.map(sanitizeCassoTransaction);
   }
 
   next();

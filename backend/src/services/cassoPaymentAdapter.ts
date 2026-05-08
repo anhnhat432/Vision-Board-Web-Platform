@@ -88,7 +88,7 @@ function isCassoConfigured(): boolean {
 
 const ORDER_ID_PREFIX = "VB";
 const ORDER_ID_LENGTH = 8;
-const ORDER_ID_REGEX = /VB[A-Z0-9]{8}/;
+const ORDER_ID_REGEX = /VB[A-Z0-9]{8}/i;
 const ORDER_EXPIRY_MINUTES = 30;
 const TWELVE_WEEKS_MS = 12 * 7 * 24 * 60 * 60 * 1000;
 
@@ -120,7 +120,7 @@ function buildVietQrUrl(
 
 function extractOrderIdFromDescription(description: string): string | null {
   const match = description.match(ORDER_ID_REGEX);
-  return match ? match[0] : null;
+  return match ? match[0].toUpperCase() : null;
 }
 
 // ─── Casso webhook payload types ────────────────────────────────────────────
@@ -128,6 +128,7 @@ function extractOrderIdFromDescription(description: string): string | null {
 interface CassoTransaction {
   id: number;
   tid?: string;
+  reference?: string;
   description: string;
   amount: number;
   cusum_balance?: number;

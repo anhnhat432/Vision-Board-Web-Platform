@@ -71,6 +71,14 @@ export interface AdminReminderRunResult {
   failed: number;
 }
 
+export interface AdminManualCompletePaymentResult {
+  orderId: string;
+  status: "completed";
+  completedAt: string | null;
+  subscriptionId?: string;
+  eventStatus: "processed" | "duplicate" | "failed" | "already_completed";
+}
+
 export function adminGetOverview(): Promise<AdminOverview> {
   return get<AdminOverview>("/admin/overview");
 }
@@ -79,4 +87,8 @@ export function adminSendExpiringBillingReminders(
   payload: AdminReminderRequest = {},
 ): Promise<AdminReminderRunResult> {
   return post<AdminReminderRunResult, AdminReminderRequest>("/admin/billing/reminders/expiring", payload);
+}
+
+export function adminCompletePaymentOrderManually(orderId: string): Promise<AdminManualCompletePaymentResult> {
+  return post<AdminManualCompletePaymentResult>(`/admin/billing/payment-orders/${orderId}/complete`, {});
 }
