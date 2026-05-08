@@ -224,7 +224,10 @@ Bước 5: Lấy API key:
 **Env vars (Backend):**
 
 ```bash
-CASSO_WEBHOOK_SECRET=your-random-secret-string-32chars
+CASSO_WEBHOOK_SECRET=your-casso-webhook-v2-checksum-key
+# Optional if separated:
+# CASSO_WEBHOOK_CHECKSUM_KEY=your-casso-webhook-v2-checksum-key
+# CASSO_SECURE_TOKEN=your-legacy-secure-token
 CASSO_BANK_ACCOUNT=1234567890
 CASSO_BANK_NAME=MB
 CASSO_ACCOUNT_NAME=NGUYEN VAN A

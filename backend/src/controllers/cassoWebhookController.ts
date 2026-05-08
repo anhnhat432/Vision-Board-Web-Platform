@@ -87,28 +87,80 @@ function getRawWebhookPayload(req: Request): unknown {
   }
 }
 
+function getCassoSignatureSecrets(): string[] {
+  return [
+    process.env.CASSO_WEBHOOK_CHECKSUM_KEY,
+    process.env.CASSO_CHECKSUM_KEY,
+    process.env.CASSO_WEBHOOK_SECRET,
+  ]
+    .map((value) => value?.trim() ?? "")
+    .filter(Boolean);
+}
+
+function getCassoSecureTokens(): string[] {
+  return [
+    process.env.CASSO_SECURE_TOKEN,
+    process.env.CASSO_WEBHOOK_SECRET,
+  ]
+    .map((value) => value?.trim() ?? "")
+    .filter(Boolean);
+}
+
 function verifyCassoWebhookSignature(req: Request, expectedSecret: string): boolean {
   const secureToken = getHeaderValue(req, "secure-token");
-  if (secureToken && safeEqual(secureToken, expectedSecret)) return true;
+  if (secureToken && getCassoSecureTokens().some((token) => safeEqual(secureToken, token))) return true;
 
   const authorization = getHeaderValue(req, "authorization").replace(/^Bearer\s+/i, "").trim();
-  if (authorization && safeEqual(authorization, expectedSecret)) return true;
+  if (authorization && getCassoSecureTokens().some((token) => safeEqual(authorization, token))) return true;
 
   const cassoSignature = parseCassoSignatureHeader(getHeaderValue(req, "x-casso-signature"));
   if (!cassoSignature) return false;
 
   const sortedPayload = JSON.stringify(sortObjectDeep(getRawWebhookPayload(req)));
   const signedPayload = cassoSignature.timestamp ? `${cassoSignature.timestamp}.${sortedPayload}` : sortedPayload;
-  const expectedSignature = createHmac("sha512", expectedSecret).update(signedPayload).digest("hex");
-  return safeEqual(cassoSignature.signature, expectedSignature);
+  return getCassoSignatureSecrets().some((secret) => {
+    const expectedSignature = createHmac("sha512", secret).update(signedPayload).digest("hex");
+    return safeEqual(cassoSignature.signature, expectedSignature);
+  });
+}
+
+export async function getCassoWebhookHealth(_req: Request, res: Response): Promise<void> {
+  const signatureSecrets = getCassoSignatureSecrets();
+  const secureTokens = getCassoSecureTokens();
+
+  res.status(200).json({
+    success: true,
+    data: {
+      provider: "casso",
+      configured: signatureSecrets.length > 0 || secureTokens.length > 0,
+      accepts: {
+        secureToken: secureTokens.length > 0,
+        xCassoSignature: signatureSecrets.length > 0,
+      },
+      routes: [
+        "/api/billing/webhook/casso",
+        "/api/webhook/casso",
+      ],
+    },
+  });
 }
 
 export async function handleCassoWebhook(req: Request, res: Response): Promise<void> {
   // Step 1: Verify secret token
-  const expectedSecret = process.env.CASSO_WEBHOOK_SECRET?.trim() ?? "";
+  const expectedSecret = process.env.CASSO_WEBHOOK_SECRET?.trim()
+    || process.env.CASSO_WEBHOOK_CHECKSUM_KEY?.trim()
+    || process.env.CASSO_CHECKSUM_KEY?.trim()
+    || process.env.CASSO_SECURE_TOKEN?.trim()
+    || "";
 
   if (!expectedSecret || !verifyCassoWebhookSignature(req, expectedSecret)) {
-    console.warn("[casso-webhook] Invalid or missing Casso webhook signature.");
+    console.warn("[casso-webhook] Invalid or missing Casso webhook signature.", {
+      hasSecureToken: Boolean(getHeaderValue(req, "secure-token")),
+      hasXCassoSignature: Boolean(getHeaderValue(req, "x-casso-signature")),
+      hasAuthorization: Boolean(getHeaderValue(req, "authorization")),
+      signatureSecretConfigured: getCassoSignatureSecrets().length > 0,
+      secureTokenConfigured: getCassoSecureTokens().length > 0,
+    });
     res.status(401).json({ success: false, message: "Invalid webhook signature." });
     return;
   }
