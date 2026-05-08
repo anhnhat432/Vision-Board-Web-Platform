@@ -414,6 +414,29 @@ describe("resolveActiveEntitlementKeys", () => {
     assert.equal(keys.length, 1);
     assert.equal(keys[0], "advanced_analytics");
   });
+
+  it("returns empty array when the subscription period has expired", () => {
+    const past = new Date("2020-01-01T00:00:00Z");
+    const sub: BillingSubscriptionEntity = {
+      id: "sub_expired_period",
+      userId: userA,
+      planCode: "PLUS",
+      status: "active",
+      provider: "casso",
+      source: "provider",
+      currentPeriodEnd: past,
+      entitlements: [
+        { key: "premium_templates", grantedAt: new Date() },
+        { key: "premium_review_insights", grantedAt: new Date() },
+        { key: "priority_reminders", grantedAt: new Date() },
+        { key: "advanced_analytics", grantedAt: new Date() },
+      ],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    assert.deepEqual(resolveActiveEntitlementKeys(sub), []);
+  });
 });
 
 // ─── Service Tests ───────────────────────────────────────────────────────────
@@ -472,6 +495,26 @@ describe("BillingService.getCurrentEntitlementForUser", () => {
     assert.equal(snapshotA.activeKeys.length, 4);
     assert.equal(snapshotB.planCode, "FREE");
     assert.deepEqual(snapshotB.activeKeys, []);
+  });
+
+  it("returns no active keys after a PLUS period ends", async () => {
+    const { service } = createService();
+
+    await service.upsertSubscriptionFromProviderEvent(
+      makeProviderEvent({
+        providerEventId: "evt_expired_period_test",
+        providerSubscriptionId: "prov_sub_expired_period",
+        billingCycle: "twelve_week",
+        currentPeriodStart: new Date("2019-10-01T00:00:00Z"),
+        currentPeriodEnd: new Date("2020-01-01T00:00:00Z"),
+      }),
+    );
+
+    const snapshot = await service.getCurrentEntitlementForUser(userA);
+
+    assert.equal(snapshot.planCode, "PLUS");
+    assert.equal(snapshot.status, "active");
+    assert.deepEqual(snapshot.activeKeys, []);
   });
 });
 

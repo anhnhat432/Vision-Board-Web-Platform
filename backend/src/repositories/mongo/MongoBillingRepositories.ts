@@ -67,10 +67,11 @@ function buildEntitlementGrants(
   planCode: BillingPlanCode,
   status: BillingSubscriptionStatus,
   grantedAt: Date,
+  expiresAt?: Date,
 ): BillingSubscriptionEntity["entitlements"] {
   if (planCode !== "PLUS") return [];
   if (status !== "active" && status !== "trialing") return [];
-  return PLUS_ENTITLEMENT_KEYS.map((key) => ({ key, grantedAt }));
+  return PLUS_ENTITLEMENT_KEYS.map((key) => ({ key, grantedAt, expiresAt }));
 }
 
 function toSubscriptionEntity(doc: LeanSubscription): BillingSubscriptionEntity {
@@ -152,6 +153,7 @@ export class MongoBillingSubscriptionRepository
       event.planCode,
       event.status,
       now,
+      event.currentPeriodEnd,
     );
 
     const update = {

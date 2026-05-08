@@ -177,9 +177,13 @@ export function resolveActiveEntitlementKeys(
   if (subscription.planCode === "FREE") return [];
   if (!ACTIVE_STATUSES.has(subscription.status)) return [];
 
+  const now = new Date();
+  if (subscription.currentPeriodEnd && subscription.currentPeriodEnd < now) {
+    return [];
+  }
+
   // If subscription has explicit entitlement grants, filter them.
   if (subscription.entitlements.length > 0) {
-    const now = new Date();
     return subscription.entitlements
       .filter((grant) => {
         if (grant.revokedAt) return false;

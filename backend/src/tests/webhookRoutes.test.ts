@@ -4,6 +4,8 @@ import { describe, it, beforeEach, afterEach } from "node:test";
 import express, { type Express } from "express";
 
 import { errorMiddleware } from "../middleware/errorMiddleware";
+import { PaymentOrderModel, type PaymentOrderStatus } from "../models/PaymentOrderModel";
+import { UserModel } from "../models/UserModel";
 import { webhookRoutes } from "../routes/webhookRoutes";
 import { billingService } from "../services/billingServiceInstance";
 import {
@@ -20,6 +22,35 @@ interface JsonResponse {
   status: number;
   body: Record<string, unknown>;
 }
+
+interface MockCassoPaymentOrder {
+  orderId: string;
+  userId: string;
+  amount: number;
+  currency: string;
+  status: PaymentOrderStatus;
+  expiresAt: Date;
+  completedAt?: Date;
+  cassoTransactionId?: string;
+  saveCalls: number;
+  save(): Promise<MockCassoPaymentOrder>;
+}
+
+type MockableModel = {
+  findOne: unknown;
+};
+
+const originalPaymentOrderFindOne = PaymentOrderModel.findOne;
+const originalUserFindOne = UserModel.findOne;
+
+afterEach(() => {
+  (PaymentOrderModel as unknown as MockableModel).findOne = originalPaymentOrderFindOne;
+  (UserModel as unknown as MockableModel).findOne = originalUserFindOne;
+  delete process.env.CASSO_WEBHOOK_SECRET;
+  delete process.env.CASSO_WEBHOOK_CHECKSUM_KEY;
+  delete process.env.CASSO_CHECKSUM_KEY;
+  delete process.env.CASSO_SECURE_TOKEN;
+});
 
 /**
  * Create a test app that mounts webhook routes WITHOUT auth middleware,
@@ -74,6 +105,81 @@ async function postWebhook(
 }
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
+
+function createMockCassoPaymentOrder(overrides: Partial<MockCassoPaymentOrder> = {}): MockCassoPaymentOrder {
+  const order: MockCassoPaymentOrder = {
+    orderId: "VBQA000001",
+    userId: "user_casso_webhook",
+    amount: 2000,
+    currency: "VND",
+    status: "pending",
+    expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+    saveCalls: 0,
+    async save() {
+      this.saveCalls++;
+      return this;
+    },
+    ...overrides,
+  };
+
+  return order;
+}
+
+function createCassoWebhookBody(input: { orderId?: string; amount: number; transactionId: string }): string {
+  return JSON.stringify({
+    error: 0,
+    data: [
+      {
+        id: input.transactionId,
+        tid: input.transactionId,
+        description: input.orderId ? `Thanh toan ${input.orderId}` : "Thanh toan sai noi dung",
+        amount: input.amount,
+        when: "2026-05-08 12:00:00",
+      },
+    ],
+  });
+}
+
+function mockCassoPersistence(order: MockCassoPaymentOrder | null): { paymentOrderQueries: unknown[] } {
+  const paymentOrderQueries: unknown[] = [];
+
+  (PaymentOrderModel as unknown as MockableModel).findOne = async (query: unknown) => {
+    paymentOrderQueries.push(query);
+    const filters = query as Record<string, unknown>;
+
+    if ("cassoTransactionId" in filters) {
+      return null;
+    }
+
+    if (
+      order &&
+      filters.orderId === order.orderId &&
+      filters.status === "pending" &&
+      order.status === "pending"
+    ) {
+      return order;
+    }
+
+    return null;
+  };
+
+  (UserModel as unknown as MockableModel).findOne = () => ({
+    select() {
+      return {
+        async lean() {
+          return null;
+        },
+      };
+    },
+  });
+
+  return { paymentOrderQueries };
+}
+
+function cassoHeaders(): Record<string, string> {
+  process.env.CASSO_WEBHOOK_SECRET = "casso_test_secret";
+  return { "secure-token": "casso_test_secret" };
+}
 
 describe("POST /api/billing/webhook/:provider", () => {
   const testUserId = "user_webhook_test";
@@ -286,6 +392,125 @@ describe("POST /api/billing/webhook/casso validation", () => {
 
     assert.equal(response.status, 400);
     assert.equal(response.body.errorCode, "invalid_payload");
+  });
+});
+
+describe("POST /api/billing/webhook/casso payment matching", () => {
+  it("does not grant PLUS twice for a duplicate Casso webhook", async () => {
+    const userId = `user_casso_duplicate_${Date.now()}`;
+    const order = createMockCassoPaymentOrder({
+      orderId: "VBDUP00001",
+      userId,
+      amount: 2000,
+    });
+    mockCassoPersistence(order);
+    const body = createCassoWebhookBody({
+      orderId: order.orderId,
+      amount: 2000,
+      transactionId: `tx_dup_${Date.now()}`,
+    });
+
+    const first = await postWebhook(createWebhookTestApp(), "casso", body, cassoHeaders());
+
+    assert.equal(first.status, 200);
+    assert.equal(first.body.processedCount, 1);
+    assert.equal(order.status, "completed");
+    assert.equal(order.saveCalls, 1);
+
+    const firstSnapshot = await billingService.getCurrentEntitlementForUser(userId);
+    assert.equal(firstSnapshot.planCode, "PLUS");
+    assert.equal(firstSnapshot.activeKeys.length, 4);
+
+    const second = await postWebhook(createWebhookTestApp(), "casso", body, cassoHeaders());
+    const secondSnapshot = await billingService.getCurrentEntitlementForUser(userId);
+
+    assert.equal(second.status, 200);
+    assert.equal(second.body.processedCount, 0);
+    assert.deepEqual(secondSnapshot.activeKeys, firstSnapshot.activeKeys);
+    assert.equal(order.saveCalls, 1);
+  });
+
+  it("does not grant PLUS when transferred amount is too low", async () => {
+    const userId = `user_casso_underpaid_${Date.now()}`;
+    const order = createMockCassoPaymentOrder({
+      orderId: "VBLOW00001",
+      userId,
+      amount: 2000,
+    });
+    mockCassoPersistence(order);
+
+    const response = await postWebhook(
+      createWebhookTestApp(),
+      "casso",
+      createCassoWebhookBody({
+        orderId: order.orderId,
+        amount: 1000,
+        transactionId: `tx_low_${Date.now()}`,
+      }),
+      cassoHeaders(),
+    );
+    const snapshot = await billingService.getCurrentEntitlementForUser(userId);
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.processedCount, 0);
+    assert.equal(order.status, "pending");
+    assert.equal(order.saveCalls, 0);
+    assert.equal(snapshot.planCode, "FREE");
+    assert.deepEqual(snapshot.activeKeys, []);
+  });
+
+  it("does not grant PLUS when transfer description has no order id", async () => {
+    const order = createMockCassoPaymentOrder({
+      orderId: "VBMISS001",
+      userId: `user_casso_wrong_description_${Date.now()}`,
+    });
+    const { paymentOrderQueries } = mockCassoPersistence(order);
+
+    const response = await postWebhook(
+      createWebhookTestApp(),
+      "casso",
+      createCassoWebhookBody({
+        amount: 2000,
+        transactionId: `tx_wrong_desc_${Date.now()}`,
+      }),
+      cassoHeaders(),
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.processedCount, 0);
+    assert.equal(order.status, "pending");
+    assert.equal(order.saveCalls, 0);
+    assert.equal(paymentOrderQueries.length, 0);
+  });
+
+  it("expires a stale pending order without granting PLUS", async () => {
+    const userId = `user_casso_expired_${Date.now()}`;
+    const order = createMockCassoPaymentOrder({
+      orderId: "VBEXP00001",
+      userId,
+      amount: 2000,
+      expiresAt: new Date(Date.now() - 1000),
+    });
+    mockCassoPersistence(order);
+
+    const response = await postWebhook(
+      createWebhookTestApp(),
+      "casso",
+      createCassoWebhookBody({
+        orderId: order.orderId,
+        amount: 2000,
+        transactionId: `tx_expired_${Date.now()}`,
+      }),
+      cassoHeaders(),
+    );
+    const snapshot = await billingService.getCurrentEntitlementForUser(userId);
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.processedCount, 0);
+    assert.equal(order.status, "expired");
+    assert.equal(order.saveCalls, 1);
+    assert.equal(snapshot.planCode, "FREE");
+    assert.deepEqual(snapshot.activeKeys, []);
   });
 });
 
