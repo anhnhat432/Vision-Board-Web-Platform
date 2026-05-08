@@ -1,1069 +1,798 @@
 #!/usr/bin/env node
 
-import { spawn } from "node:child_process";
+import { chromium } from "playwright";
 
 const BASE_URL = (process.env.PROD_SMOKE_URL ?? "https://vision-board-web-platform.vercel.app").replace(/\/$/, "");
 const TIMESTAMP = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
-const GENERATED_EMAIL = `codex.qa+smoke-${TIMESTAMP}@example.com`;
-const GENERATED_PASSWORD = `CodexSmoke${TIMESTAMP}!`;
+const GENERATED_EMAIL = `codex.qa+full-smoke-${TIMESTAMP}@example.com`;
+const GENERATED_PASSWORD = `CodexFullSmoke${TIMESTAMP}!`;
 const EMAIL = process.env.PROD_SMOKE_EMAIL?.trim() || GENERATED_EMAIL;
 const PASSWORD = process.env.PROD_SMOKE_PASSWORD || GENERATED_PASSWORD;
 const HAS_PROVIDED_CREDENTIALS = Boolean(process.env.PROD_SMOKE_EMAIL && process.env.PROD_SMOKE_PASSWORD);
-const FRESH_EMAIL =
-  process.env.PROD_SMOKE_FRESH_EMAIL?.trim() ||
-  (HAS_PROVIDED_CREDENTIALS ? deriveTaggedEmail(EMAIL, "fresh") : `codex.qa+fresh-${TIMESTAMP}@example.com`);
-const FRESH_PASSWORD = process.env.PROD_SMOKE_FRESH_PASSWORD || PASSWORD;
 const AUTH_MODE_OVERRIDE = process.env.PROD_SMOKE_AUTH_MODE?.trim().toLowerCase();
 const AUTH_MODE = AUTH_MODE_OVERRIDE || (HAS_PROVIDED_CREDENTIALS ? "signin" : "signup");
-const GOAL_TITLE = `QA smoke production ${TIMESTAMP}`;
-const TACTIC_ONE = `Review tuan QA ${TIMESTAMP}`;
-const TACTIC_TWO = `Hoan thanh viec QA ${TIMESTAMP}`;
-const DAILY_CHECKIN_NOTE = `Daily check-in QA ${TIMESTAMP}`;
-const WEEKLY_REVIEW_OUTPUT = `Da tick task va luu check-in QA ${TIMESTAMP}`;
-const WEEKLY_REVIEW_OBSTACLE = `Can giu smoke ngan gon QA ${TIMESTAMP}`;
-const WEEKLY_REVIEW_PRIORITY = `Mo daily execution truoc QA ${TIMESTAMP}`;
+const DEFAULT_TIMEOUT_MS = Number(process.env.PROD_SMOKE_TIMEOUT_MS ?? 90_000);
+const SKIP_CHECKOUT = process.env.PROD_SMOKE_SKIP_CHECKOUT === "1";
+
+const GOAL_ID = `goal_full_smoke_${TIMESTAMP}`;
+const GOAL_TITLE = `Full production smoke ${TIMESTAMP}`;
+const TACTIC_TITLE = "Review execution rhythm";
+const TODAY_TASK_TITLE = `Full smoke today task ${TIMESTAMP}`;
+const CHECKIN_NOTE = `Full smoke check-in ${TIMESTAMP}`;
+const WEEKLY_REVIEW_OUTPUT = `Full smoke weekly review ${TIMESTAMP}`;
 
 function log(message) {
   console.log(`[prod-smoke] ${message}`);
 }
 
-function deriveTaggedEmail(email, tag) {
-  const value = email.trim();
-  const atIndex = value.lastIndexOf("@");
-  if (atIndex <= 0 || atIndex === value.length - 1) {
-    return `codex.qa+${tag}@example.com`;
-  }
-
-  const local = value.slice(0, atIndex).replace(/\+.*$/, "");
-  const domain = value.slice(atIndex + 1);
-  return `${local}+${tag}@${domain}`;
+async function step(label, action) {
+  const startedAt = Date.now();
+  log(`START ${label}`);
+  await action();
+  log(`PASS ${label} (${Date.now() - startedAt}ms)`);
 }
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function formatDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
-function killProcessTree(child) {
-  if (!child.pid) return;
-
-  if (process.platform === "win32") {
-    spawn("taskkill.exe", ["/pid", String(child.pid), "/T", "/F"], {
-      stdio: "ignore",
-      windowsHide: true,
-    });
-    return;
-  }
-
-  child.kill("SIGTERM");
+function addDays(date, days) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
 }
 
-function quoteCmdArg(value) {
-  return `"${String(value).replace(/"/g, '\\"')}"`;
+function normalizeText(text) {
+  return String(text)
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/\u0111/g, "d")
+    .replace(/\u0110/g, "d")
+    .toLowerCase();
 }
 
-function runAgentBrowser(args, { input, timeoutMs = 60_000 } = {}) {
-  return new Promise((resolve, reject) => {
-    const command = process.platform === "win32" ? "cmd.exe" : "npx";
-    const commandArgs =
-      process.platform === "win32"
-        ? ["/d", "/s", "/c", ["npx.cmd", "agent-browser", ...args.map(quoteCmdArg)].join(" ")]
-        : ["agent-browser", ...args];
-    const child = spawn(command, commandArgs, {
-      cwd: process.cwd(),
-      stdio: ["pipe", "pipe", "pipe"],
-      windowsVerbatimArguments: process.platform === "win32",
-      windowsHide: true,
-    });
+function createFullSmokeUserData() {
+  const now = new Date();
+  const today = formatDate(now);
+  const endDate = formatDate(addDays(now, 83));
+  const createdAt = now.toISOString();
 
-    let stdout = "";
-    let stderr = "";
-    let settled = false;
-    const settle = (callback, value) => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timeout);
-      callback(value);
+  const weeklyPlans = Array.from({ length: 12 }, (_, index) => {
+    const weekNumber = index + 1;
+    return {
+      weekNumber,
+      phaseName: weekNumber <= 4 ? "Foundation" : weekNumber <= 8 ? "Build" : "Finish",
+      focus: weekNumber === 1 ? "Keep the production smoke plan active" : `Week ${weekNumber} production rhythm`,
+      milestone: weekNumber === 4 || weekNumber === 8 || weekNumber === 12 ? `Milestone week ${weekNumber}` : "",
+      completed: false,
     };
-    const timeout = setTimeout(() => {
-      killProcessTree(child);
-      settle(reject, new Error(`agent-browser ${args.join(" ")} timed out after ${timeoutMs}ms`));
-    }, timeoutMs);
-
-    child.stdout.on("data", (chunk) => {
-      stdout += chunk.toString();
-    });
-    child.stderr.on("data", (chunk) => {
-      stderr += chunk.toString();
-    });
-    child.on("error", (error) => {
-      settle(reject, error);
-    });
-    const finish = (code) => {
-      if (code !== 0) {
-        settle(reject, new Error(`agent-browser ${args.join(" ")} failed with code ${code}\n${stderr || stdout}`));
-        return;
-      }
-      settle(resolve, { stdout, stderr });
-    };
-
-    child.on("exit", (code) => {
-      setTimeout(() => finish(code), 25);
-    });
-    child.on("close", (code) => {
-      finish(code);
-    });
-
-    if (input) {
-      child.stdin.write(input);
-    }
-    child.stdin.end();
   });
+
+  const scoreboard = Array.from({ length: 12 }, (_, index) => ({
+    weekNumber: index + 1,
+    leadCompletionPercent: index === 0 ? 25 : 0,
+    mainMetricProgress: index === 0 ? "1/12" : "",
+    outputDone: index === 0 ? "Production smoke output" : "",
+    reviewDone: false,
+    weeklyScore: index === 0 ? 24 : 0,
+  }));
+
+  return {
+    storageVersion: 5,
+    userId: "full_smoke_user",
+    wheelOfLifeHistory: [],
+    currentWheelOfLife: [
+      { name: "Finance", score: 6, color: "#10b981" },
+      { name: "Health", score: 6, color: "#ef4444" },
+      { name: "Career", score: 6, color: "#8b5cf6" },
+    ],
+    goals: [
+      {
+        id: GOAL_ID,
+        category: "Finance",
+        title: GOAL_TITLE,
+        description: "Seeded full smoke goal for production route and sync checks.",
+        deadline: endDate,
+        tasks: [{ id: "task_goal_full", title: TODAY_TASK_TITLE, completed: false }],
+        feasibilityResult: "challenging",
+        readinessScore: 18,
+        focusArea: "Finance",
+        createdAt,
+        twelveWeekSystem: {
+          goalType: "Finance",
+          vision12Week: GOAL_TITLE,
+          lagMetric: { name: "Completed reviews", unit: "reviews", target: "12", currentValue: "1" },
+          leadIndicators: [
+            {
+              id: "tactic_full_review",
+              name: TACTIC_TITLE,
+              target: "1",
+              unit: "review/day",
+              type: "core",
+              priority: 1,
+              schedule: [0, 1, 2, 3, 4, 5, 6],
+            },
+          ],
+          milestones: {
+            week4: "First four weeks reviewed",
+            week8: "Execution rhythm stable",
+            week12: "Twelve reviews completed",
+          },
+          successEvidence: "The 12-week system opens with a seeded production plan.",
+          reviewDay: "Sunday",
+          week12Outcome: "Twelve reviews completed",
+          weeklyActions: [TACTIC_TITLE],
+          successMetric: "Completed reviews",
+          startDate: today,
+          endDate,
+          timezone: "Asia/Ho_Chi_Minh",
+          weekStartsOn: "Monday",
+          status: "active",
+          dailyReminderTime: "19:00",
+          tacticLoadPreference: "balanced",
+          preferredDays: [0, 1, 2, 3, 4, 5, 6],
+          personalConstraint: "consistency",
+          reentryCount: 0,
+          currentWeek: 1,
+          totalWeeks: 12,
+          weeklyPlans,
+          taskInstances: [
+            {
+              id: "task_full_today",
+              weekNumber: 1,
+              scheduledDate: today,
+              title: TODAY_TASK_TITLE,
+              leadIndicatorName: TACTIC_TITLE,
+              isCore: true,
+              completed: false,
+              tacticId: "tactic_full_review",
+            },
+          ],
+          dailyCheckIns: [],
+          weeklyReviews: [],
+          scoreboard,
+        },
+      },
+    ],
+    visionBoards: [],
+    achievements: [],
+    reflections: [],
+    eventLog: [],
+    syncOutbox: [],
+    appPreferences: {
+      allowLocalAnalytics: false,
+      enableInAppReminders: true,
+      enableBrowserNotifications: false,
+      keepLocalOutbox: true,
+      preferredReminderHour: 19,
+    },
+    subscription: null,
+    entitlements: [],
+    onboardingCompleted: true,
+    isHydratedFromDemo: false,
+    experimentAssignments: [],
+    emailReminderSchedule: [],
+    pushSubscription: null,
+    privacyConsents: [],
+  };
 }
 
-function parseEvalResult(output) {
-  const value = output.trim();
-  if (!value) return null;
+async function fetchWithTimeout(url) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
 
   try {
-    return JSON.parse(value);
-  } catch {
-    return value;
-  }
-}
-
-async function browserEval(source, options) {
-  const result = await runAgentBrowser(["eval", "--stdin"], {
-    ...options,
-    input: source,
-  });
-  return parseEvalResult(result.stdout);
-}
-
-async function clearBrowserStorage() {
-  log("Clearing browser storage");
-  await browserEval(`
-    (async () => {
-      localStorage.clear();
-      sessionStorage.clear();
-
-      for (const cookie of document.cookie.split(";")) {
-        const name = cookie.split("=")[0]?.trim();
-        if (name) {
-          document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-        }
-      }
-
-      if (indexedDB.databases) {
-        const databases = await indexedDB.databases();
-        await Promise.all(
-          databases
-            .map((database) => database.name)
-            .filter(Boolean)
-            .map(
-              (name) =>
-                new Promise((resolve) => {
-                  const request = indexedDB.deleteDatabase(name);
-                  request.onsuccess = () => resolve(true);
-                  request.onerror = () => resolve(false);
-                  request.onblocked = () => resolve(false);
-                }),
-            ),
-        );
-      }
-
-      return true;
-    })()
-  `);
-}
-
-async function openPage(pathOrUrl) {
-  const url = pathOrUrl.startsWith("http") ? pathOrUrl : `${BASE_URL}${pathOrUrl}`;
-  log(`Opening ${url}`);
-  await runAgentBrowser(["open", url], { timeoutMs: 90_000 });
-  log(`Waiting for network idle on ${url}`);
-  await runAgentBrowser(["wait", "--load", "networkidle"], { timeoutMs: 90_000 });
-}
-
-async function waitFor(description, source, { timeoutMs = 45_000, intervalMs = 700 } = {}) {
-  log(`Waiting for ${description}`);
-  const startedAt = Date.now();
-  let lastValue;
-
-  while (Date.now() - startedAt < timeoutMs) {
-    lastValue = await browserEval(`
-      (() => {
-        try {
-          return Boolean(${source});
-        } catch {
-          return false;
-        }
-      })()
-    `);
-
-    if (lastValue) return;
-    await sleep(intervalMs);
-  }
-
-  const diagnostics = await getPageState();
-  throw new Error(
-    `Timed out waiting for ${description}. Last value: ${String(lastValue)}\n` +
-      `URL: ${diagnostics.url}\nText: ${diagnostics.text.slice(0, 900)}`,
-  );
-}
-
-async function getPageState() {
-  return browserEval(`
-    (() => ({
-      url: location.href,
-      path: location.pathname,
-      scrollY: Math.round(window.scrollY),
-      text: document.body.innerText,
-      apiResources: performance
-        .getEntriesByType("resource")
-        .filter((entry) => entry.name.includes("/api/"))
-        .map((entry) => entry.name),
-    }))()
-  `);
-}
-
-function assertTextIncludes(state, expected, context) {
-  if (state.text.includes(expected)) return;
-  throw new Error(`${context} is missing expected text: ${expected}\nURL: ${state.url}\nText: ${state.text.slice(0, 900)}`);
-}
-
-function assertTextExcludes(state, forbidden, context) {
-  if (!state.text.includes(forbidden)) return;
-  throw new Error(`${context} includes forbidden text: ${forbidden}\nURL: ${state.url}\nText: ${state.text.slice(0, 900)}`);
-}
-
-function assertNoFreshWorkspaceLeaks(state, context) {
-  const forbiddenTexts = ["Ra mắt", "Duy trì", "Đi bộ 8", "Bánh xe cuộc sống là bước mở đầu"];
-  const leakedText = forbiddenTexts.find((text) => state.text.includes(text));
-  if (leakedText) {
-    throw new Error(`${context} leaks stale/demo workspace text: ${leakedText}\nURL: ${state.url}\nText: ${state.text.slice(0, 900)}`);
-  }
-}
-
-async function assertNoBrowserErrors() {
-  const { stdout } = await runAgentBrowser(["errors"], { timeoutMs: 30_000 });
-  const errors = stdout.trim();
-  if (errors) {
-    throw new Error(`Browser console/page errors detected:\n${errors}`);
-  }
-}
-
-async function fillByLabel(labelText, value) {
-  log(`Filling label: ${labelText}`);
-  const selector = await browserEval(`
-    (() => {
-      const target = ${JSON.stringify(labelText.toLowerCase())};
-      const label = Array.from(document.querySelectorAll("label")).find((item) =>
-        item.textContent?.toLowerCase().includes(target),
-      );
-      if (!label) throw new Error("Label not found: " + ${JSON.stringify(labelText)});
-      const id = label.getAttribute("for");
-      if (id) return "#" + id;
-      const input = label.querySelector("input, textarea");
-      if (!input) throw new Error("No input for label: " + ${JSON.stringify(labelText)});
-      return null;
-    })()
-  `);
-  if (selector) {
-    await runAgentBrowser(["fill", selector, value], { timeoutMs: 30_000 });
-  } else {
-    await browserEval(`
-      (() => {
-        const target = ${JSON.stringify(labelText.toLowerCase())};
-        const label = Array.from(document.querySelectorAll("label")).find((item) =>
-          item.textContent?.toLowerCase().includes(target),
-        );
-        const el = label?.querySelector("input, textarea");
-        if (!el) throw new Error("Input not found for label");
-        el.focus();
-        el.select?.();
-        document.execCommand("insertText", false, ${JSON.stringify(value)});
-        el.dispatchEvent(new InputEvent("input", { bubbles: true }));
-        return el.value;
-      })()
-    `);
-  }
-  const debug = await browserEval(`
-    (() => {
-      const target = ${JSON.stringify(labelText.toLowerCase())};
-      const label = Array.from(document.querySelectorAll("label")).find((item) =>
-        item.textContent?.toLowerCase().includes(target),
-      );
-      const input = label?.querySelector("input, textarea");
-      const buttons = Array.from(document.querySelectorAll("button"));
-      return {
-        inputValue: input?.value || "",
-        inputLength: input?.value?.length || 0,
-        buttonCount: buttons.length,
-        buttonTexts: buttons.map(b => b.textContent?.replace(/\\s+/g, " ").trim()),
-        buttonDisabled: buttons.map(b => b.disabled),
-      };
-    })()
-  `);
-  log(`Debug after fill: inputLength=${debug.inputLength}, buttonCount=${debug.buttonCount}, buttonTexts=${JSON.stringify(debug.buttonTexts)}`);
-  if (debug.inputLength === 0) {
-    log("WARNING: input appears empty after fill — React state may not have updated");
-  }
-}
-
-async function fillBySelector(selector, value) {
-  log(`Filling selector: ${selector}`);
-  await runAgentBrowser(["fill", selector, value], { timeoutMs: 30_000 });
-}
-
-async function clickByButton(text) {
-  log(`Clicking button: ${text}`);
-  await browserEval(`
-    (() => {
-      const target = ${JSON.stringify(text)};
-      const button = Array.from(document.querySelectorAll("button")).find((item) =>
-        item.textContent?.replace(/\\s+/g, " ").trim().includes(target),
-      );
-      if (!button) throw new Error("Button not found: " + target);
-      if (button.disabled) throw new Error("Button is disabled: " + target);
-      button.scrollIntoView({ block: "center" });
-      button.click();
-      return true;
-    })()
-  `);
-}
-
-async function clickDialogButton(text) {
-  log(`Clicking dialog button: ${text}`);
-  await browserEval(`
-    (() => {
-      const target = ${JSON.stringify(text)};
-      const dialog = document.querySelector('[role="dialog"]');
-      if (!dialog) throw new Error("Dialog not found");
-      const button = Array.from(dialog.querySelectorAll("button")).find((item) =>
-        item.textContent?.replace(/\\s+/g, " ").trim().includes(target),
-      );
-      if (!button) throw new Error("Dialog button not found: " + target);
-      if (button.disabled) throw new Error("Dialog button is disabled: " + target);
-      button.scrollIntoView({ block: "center" });
-      button.click();
-      return true;
-    })()
-  `);
-}
-
-async function clickDialogUpgradeButton() {
-  log("Clicking dialog upgrade button");
-  await browserEval(`
-    (() => {
-      const dialog = document.querySelector('[role="dialog"]');
-      if (!dialog) throw new Error("Dialog not found");
-      const buttons = Array.from(dialog.querySelectorAll("button")).map((button) => ({
-        button,
-        text: button.textContent?.replace(/\\s+/g, " ").trim() ?? "",
-      }));
-      const button =
-        buttons.find((item) => !item.button.disabled && item.text.includes("Mở") && item.text.includes("Plus"))
-          ?.button ??
-        buttons.find((item) => !item.button.disabled && item.text.includes("Plus"))?.button ??
-        buttons.find((item) => !item.button.disabled && item.text.toLowerCase().includes("demo"))?.button;
-      if (!button) {
-        throw new Error("Dialog upgrade button not found. Buttons: " + buttons.map((item) => item.text).join(" | "));
-      }
-      button.scrollIntoView({ block: "center" });
-      button.click();
-      return true;
-    })()
-  `);
-}
-
-async function clickByLabel(text) {
-  log(`Clicking label: ${text}`);
-  await browserEval(`
-    (() => {
-      const target = ${JSON.stringify(text)};
-      const label = Array.from(document.querySelectorAll("label")).find((item) =>
-        item.textContent?.replace(/\\s+/g, " ").trim().includes(target),
-      );
-      if (!label) throw new Error("Label not found: " + target);
-      label.scrollIntoView({ block: "center" });
-      label.click();
-      const id = label.getAttribute("for");
-      if (id) document.getElementById(id)?.click();
-      return true;
-    })()
-  `);
-}
-
-async function clickTab(text) {
-  log(`Clicking tab: ${text}`);
-  await browserEval(`
-    (() => {
-      const target = ${JSON.stringify(text)};
-      const tab = Array.from(document.querySelectorAll('[role="tab"], button')).find((item) =>
-        item.textContent?.replace(/\\s+/g, " ").trim().includes(target),
-      );
-      if (!tab) throw new Error("Tab not found: " + target);
-      tab.scrollIntoView({ block: "center" });
-      tab.click();
-      return true;
-    })()
-  `);
-}
-
-async function runStep(label, task) {
-  log(label);
-  await task();
-}
-
-async function waitForAuthOutcome(description, nextPath, { timeoutMs = 70_000, intervalMs = 700 } = {}) {
-  log(`Waiting for ${description}`);
-  const startedAt = Date.now();
-  let lastValue;
-
-  while (Date.now() - startedAt < timeoutMs) {
-    lastValue = await browserEval(`
-      (() => {
-        const alert = document.querySelector('[role="alert"]');
-        return {
-          path: location.pathname,
-          ok: location.pathname === ${JSON.stringify(nextPath)},
-          errorText: alert?.textContent?.replace(/\\s+/g, " ").trim() || "",
-        };
-      })()
-    `);
-
-    if (lastValue?.ok) return { ok: true, path: lastValue.path, errorText: "" };
-    if (lastValue?.errorText) return { ok: false, path: lastValue.path, errorText: lastValue.errorText };
-    await sleep(intervalMs);
-  }
-
-  const diagnostics = await getPageState();
-  throw new Error(
-    `Timed out waiting for ${description}. Last value: ${JSON.stringify(lastValue)}\n` +
-      `URL: ${diagnostics.url}\nText: ${diagnostics.text.slice(0, 900)}`,
-  );
-}
-
-async function submitEmailAuth({
-  mode,
-  email,
-  password,
-  nextPath = "/onboarding",
-  accountLabel = "QA account",
-  allowAuthError = false,
-  timeoutMs = 70_000,
-}) {
-  const modeQuery = mode === "signup" ? "mode=signup&" : "";
-  await openPage(`/login?${modeQuery}next=${encodeURIComponent(nextPath)}`);
-  await waitFor("login form", 'document.querySelector("#login-email") && document.querySelector("#login-password")');
-
-  log(`${mode === "signup" ? "Creating" : "Signing in with"} ${accountLabel} ${email}`);
-  await fillBySelector("#login-email", email);
-  await fillBySelector("#login-password", password);
-  await clickByButton(mode === "signup" ? "Tạo tài khoản" : "Đăng nhập");
-  await sleep(300);
-  const outcome = await waitForAuthOutcome(`authenticated ${nextPath} route`, nextPath, { timeoutMs });
-
-  if (!outcome.ok && !allowAuthError) {
-    throw new Error(`Email auth failed for ${accountLabel}: ${outcome.errorText || "unknown auth error"}`);
-  }
-
-  return outcome;
-}
-
-async function authenticate({ mode, email, password, nextPath = "/onboarding", accountLabel = "QA account" }) {
-  const outcome = await submitEmailAuth({ mode, email, password, nextPath, accountLabel });
-  if (!outcome.ok) {
-    throw new Error(`Email auth failed for ${accountLabel}: ${outcome.errorText || "unknown auth error"}`);
-  }
-}
-
-function isExistingAccountAuthError(message) {
-  const normalized = String(message ?? "").toLowerCase();
-  return (
-    normalized.includes("đã có tài khoản") ||
-    normalized.includes("da co tai khoan") ||
-    normalized.includes("already") ||
-    normalized.includes("email-already")
-  );
-}
-
-async function authenticateReusableEmailAccount({ email, password, nextPath = "/onboarding", accountLabel }) {
-  const signupOutcome = await submitEmailAuth({
-    mode: "signup",
-    email,
-    password,
-    nextPath,
-    accountLabel,
-    allowAuthError: true,
-    timeoutMs: 30_000,
-  });
-
-  if (signupOutcome.ok) return;
-
-  if (!isExistingAccountAuthError(signupOutcome.errorText)) {
-    throw new Error(`Could not create reusable ${accountLabel}: ${signupOutcome.errorText || "unknown auth error"}`);
-  }
-
-  log(`${accountLabel} already exists; signing in instead`);
-  await authenticate({
-    mode: "signin",
-    email,
-    password,
-    nextPath,
-    accountLabel,
-  });
-}
-
-async function signInOrSignUp() {
-  await authenticate({
-    mode: AUTH_MODE,
-    email: EMAIL,
-    password: PASSWORD,
-    nextPath: "/onboarding",
-    accountLabel: "QA account",
-  });
-}
-
-async function runSignedOutSmoke() {
-  log("Checking signed-out public home");
-  await openPage("/");
-  await clearBrowserStorage();
-  await openPage("/");
-  await waitFor(
-    "public home",
-    'document.body.innerText.includes("Trải nghiệm demo miễn phí") || document.body.innerText.includes("Đăng ký miễn phí")',
-  );
-
-  const state = await getPageState();
-  const forbiddenTexts = ["Ra mắt", "Duy trì", "Đi bộ", "Bánh xe cuộc sống"];
-  const leakedText = forbiddenTexts.find((text) => state.text.includes(text));
-  if (leakedText) throw new Error(`Signed-out public home leaks personal/demo text: ${leakedText}`);
-  if (state.text.includes("MỤC TIÊU") && state.text.includes("HÀNH ĐỘNG")) {
-    throw new Error("Signed-out public home renders a personal goal table");
-  }
-  if (state.apiResources.length > 0) {
-    throw new Error(`Signed-out public home called API resources: ${state.apiResources.join(", ")}`);
-  }
-}
-
-async function seedFreshLocalWorkspace() {
-  log("Seeding zero-score fresh workspace state");
-  const result = await browserEval(`
-    (() => {
-      const mainKey = "visionboard_user_data";
-      const raw = localStorage.getItem(mainKey);
-      if (!raw) return { ok: false, reason: "Missing user data snapshot" };
-
-      let data;
-      try {
-        data = JSON.parse(raw);
-      } catch {
-        return { ok: false, reason: "User data snapshot is not valid JSON" };
-      }
-
-      data.isHydratedFromDemo = false;
-      data.onboardingCompleted = true;
-      data.goals = [];
-      data.reflections = [];
-      data.visionBoards = [];
-      data.wheelOfLifeHistory = [];
-      data.eventLog = [];
-      data.syncOutbox = [];
-      data.inAppReminders = [];
-      data.currentWheelOfLife = Array.isArray(data.currentWheelOfLife)
-        ? data.currentWheelOfLife.map((area) => ({ ...area, score: 0 }))
-        : [];
-
-      const serialized = JSON.stringify(data);
-      localStorage.setItem(mainKey, serialized);
-
-      const scopedKeys = [];
-      for (let index = 0; index < localStorage.length; index += 1) {
-        const key = localStorage.key(index);
-        if (key?.startsWith(mainKey + ":auth:")) scopedKeys.push(key);
-      }
-      scopedKeys.forEach((key) => localStorage.setItem(key, serialized));
-
-      [
-        "selected_focus_area",
-        "pending_smart_goal",
-        "pending_feasibility_result",
-        "pending_feasibility_answers",
-        "pending_12_week_setup_draft",
-        "pending_12_week_plan_draft",
-        "latest_12_week_goal_id",
-        "latest_12_week_system_goal_id",
-        "latest_12_week_plan_goal_id",
-        "readiness_level",
-        "readiness_score",
-        "visionboard_new_user_guide_dismissed",
-        "visionboard_new_user_guide_seen_at",
-      ].forEach((key) => localStorage.removeItem(key));
-
-      window.dispatchEvent(new CustomEvent("visionboard:user-data-updated"));
-
-      return {
-        ok: true,
-        goals: data.goals.length,
-        reflections: data.reflections.length,
-        scoredAreas: data.currentWheelOfLife.filter((area) => area.score > 0).length,
-      };
-    })()
-  `);
-
-  if (!result?.ok) {
-    throw new Error(`Could not seed fresh local workspace: ${result?.reason ?? "unknown error"}`);
-  }
-}
-
-async function runFreshAuthenticatedWorkspaceSmoke() {
-  try {
-    await clearBrowserStorage();
-    await authenticateReusableEmailAccount({
-      email: FRESH_EMAIL,
-      password: FRESH_PASSWORD,
-      nextPath: "/onboarding",
-      accountLabel: "fresh reusable QA account",
+    return await fetch(url, {
+      redirect: "follow",
+      signal: controller.signal,
     });
-    await seedFreshLocalWorkspace();
-
-    await openPage("/");
-    await waitFor("fresh dashboard empty state", 'document.querySelector("[data-testid=\\"fresh-workspace-empty-state\\"]")');
-    let state = await getPageState();
-    assertTextIncludes(state, "Chưa có dữ liệu thực thi để hiển thị.", "fresh dashboard");
-    assertTextIncludes(state, "0/6 bước đã xong", "fresh dashboard guide");
-    assertTextIncludes(state, "Đánh giá cân bằng", "fresh dashboard guide");
-    assertNoFreshWorkspaceLeaks(state, "fresh dashboard");
-
-    await openPage("/goals");
-    await waitFor("fresh goals empty state", 'document.querySelector("[data-testid=\\"goaltracker-fresh-empty-state\\"]")');
-    state = await getPageState();
-    assertTextIncludes(state, "Chưa có mục tiêu nào trong workspace của bạn", "fresh goals");
-    assertTextIncludes(state, "Bắt đầu Life Balance", "fresh goals");
-    assertNoFreshWorkspaceLeaks(state, "fresh goals");
-
-    await openPage("/journal");
-    await waitFor("fresh journal empty state", 'document.querySelector("[data-testid=\\"journal-fresh-empty-state\\"]")');
-    state = await getPageState();
-    assertTextIncludes(state, "Chưa có trang nhật ký nào được mở ra", "fresh journal");
-    assertTextIncludes(state, "Bắt đầu Life Balance", "fresh journal");
-    assertTextExcludes(state, "Tổng số nhật ký", "fresh journal");
-    assertTextExcludes(state, "Tổng số bài", "fresh journal");
-    assertNoFreshWorkspaceLeaks(state, "fresh journal");
   } finally {
-    await clearBrowserStorage().catch(() => undefined);
+    clearTimeout(timeout);
   }
 }
 
-async function runOnboardingSmoke() {
-  log("Checking onboarding CTA polish and mobile scroll reset");
-  await runAgentBrowser(["set", "viewport", "390", "844"], { timeoutMs: 45_000 });
-  await openPage("/onboarding");
-  await waitFor(
-    "onboarding welcome",
-    'document.body.innerText.includes("Khởi động hành trình định hướng cuộc sống") || document.body.innerText.includes("Đánh giá cân bằng") || document.body.innerText.includes("Chấm Life Balance")',
-  );
+async function assertSpaRoute(path) {
+  const url = new URL(path, BASE_URL).href;
+  const response = await fetchWithTimeout(url);
+  const text = await response.text();
 
-  const ctaState = await browserEval(`
-    (() => {
-      const button = Array.from(document.querySelectorAll("button")).find((item) =>
-        item.innerText.includes("Chấm Life Balance"),
-      );
-      return {
-        found: Boolean(button),
-        className: button?.className ?? "",
-      };
-    })()
-  `);
-
-  if (!ctaState.found) throw new Error("Could not find onboarding start CTA");
-  if (!ctaState.className.includes("bg-violet-600") || ctaState.className.includes("bg-slate-950")) {
-    throw new Error(`Onboarding CTA class is not the primary violet variant: ${ctaState.className}`);
+  if (!response.ok) {
+    throw new Error(`${path} returned HTTP ${response.status}`);
   }
 
-  await browserEval("window.scrollTo(0, document.body.scrollHeight)");
-  await clickByButton("Chấm Life Balance");
-  await waitFor("assessment screen", 'document.body.innerText.includes("Chấm điểm hiện tại")');
-  await waitFor("mobile scroll reset", "window.scrollY <= 8", { timeoutMs: 5_000, intervalMs: 100 });
-
-  const afterClick = await getPageState();
-  if (afterClick.scrollY > 8) {
-    throw new Error(`Onboarding assessment did not reset to top on mobile. scrollY=${afterClick.scrollY}`);
+  if (!text.includes('<div id="root"')) {
+    throw new Error(`${path} did not return the Vite SPA shell`);
   }
 }
 
-async function completeOnboarding() {
-  await clickByButton("Hoàn thành đánh giá");
-  await waitFor("life insight route", 'location.pathname === "/life-insight"', { timeoutMs: 45_000 });
-  await waitFor("life insight ready", 'document.body.innerText.includes("Tạo mục tiêu với")');
+async function getBodyText(page) {
+  return page.locator("body").innerText({ timeout: DEFAULT_TIMEOUT_MS });
 }
 
-async function completeLifeInsight() {
-  await clickByButton("Tạo mục tiêu với");
-  await waitFor("smart goal route", 'location.pathname === "/smart-goal-setup"', { timeoutMs: 45_000 });
+async function getDiagnostics(page) {
+  const text = await getBodyText(page).catch(() => "");
+  return `URL: ${page.url()}\nText: ${text.slice(0, 1_500)}`;
 }
 
-async function completeSmartGoal() {
-  await waitFor("smart goal first step", 'document.body.innerText.includes("Câu trả lời của bạn")');
-  await fillByLabel("Câu trả lời của bạn", GOAL_TITLE);
-  await clickByButton("Tiếp theo");
-
-  await waitFor("smart metric step", 'document.body.innerText.includes("Con số hoặc dấu hiệu theo dõi")');
-  await fillByLabel("Con số hoặc dấu hiệu theo dõi", "So tuan review hoan thanh");
-  await fillByLabel("Mốc hiện tại", "0");
-  await fillByLabel("Mốc mục tiêu", "12");
-  await clickByButton("Tiếp theo");
-
-  await waitFor("smart resources step", 'document.body.innerText.includes("Thời gian mỗi tuần")');
-  await fillByLabel("Thời gian mỗi tuần", "4");
-  await fillByLabel("Kỹ năng cần có", "Lap ke hoach tuan va review ngan");
-  await fillByLabel("Nguồn lực hỗ trợ", "Dashboard production va lich ca nhan");
-  await clickByButton("Tiếp theo");
-
-  await waitFor("smart reason step", 'document.body.innerText.includes("Lý do bạn thật sự muốn")');
-  await fillByLabel("Lý do bạn thật sự muốn theo đuổi", "Smoke test production cho core flow that.");
-  await fillByLabel("Lĩnh vực cuộc sống liên quan", "Su nghiep");
-  await clickByButton("Tiếp theo");
-
-  await waitFor("smart deadline step", 'document.body.innerText.includes("Số tuần mục tiêu")');
-  await clickByButton("kiểm tra tính thực tế");
-  await waitFor("feasibility route", 'location.pathname === "/feasibility"', { timeoutMs: 45_000 });
-}
-
-async function completeFeasibility() {
-  const answers = [
-    "3-5 giờ mỗi tuần",
-    "Còn khá tốt và chủ động được",
-    "Đủ để bắt đầu ngay",
-    "Rất thực tế",
-    "Hiện chưa thấy trở ngại lớn",
-    "Đã có khung giờ khá cố định",
-    "Cam kết hoàn toàn",
+function assertNoMojibake(text, label) {
+  const markers = [
+    "\u00c3",
+    "\u00c4",
+    "\u00c2",
+    "\u00c6",
+    "\u00e1\u00ba",
+    "\u00e1\u00bb",
+    "\u00e2\u20ac",
   ];
+  const marker = markers.find((item) => text.includes(item));
 
-  for (const [index, answer] of answers.entries()) {
-    await waitFor(`feasibility answer ${index + 1}`, `document.body.innerText.includes(${JSON.stringify(answer)})`);
-    await clickByLabel(answer);
-    await clickByButton(index === answers.length - 1 ? "Hoàn thành đánh giá" : "Tiếp theo");
+  if (marker) {
+    const index = text.indexOf(marker);
+    const context = text.slice(Math.max(0, index - 120), index + 180);
+    throw new Error(`${label} appears to contain mojibake marker ${JSON.stringify(marker)}\nContext: ${context}`);
   }
-
-  await waitFor("feasibility result", 'document.body.innerText.includes("Tạo kế hoạch 12 tuần")');
-  await clickByButton("Tạo kế hoạch 12 tuần");
-  await waitFor("12-week setup route", 'location.pathname === "/12-week-setup"', { timeoutMs: 45_000 });
 }
 
-async function completeTwelveWeekSetup() {
-  await waitFor("12-week goal step", 'document.body.innerText.includes("Mục tiêu 12 tuần")');
-  await clickByButton("Tiếp tục");
+function assertNoVisibleFailure(text, label) {
+  const normalized = normalizeText(text);
+  const normalizedMarkers = [
+    "trang nay vua gap loi",
+    "tab cai dat gap loi",
+    "phan nay khong tai duoc",
+    "khong the tai lich su thanh toan",
+  ];
+  const rawMarkers = [
+    "API Error",
+    "Cannot read properties",
+    "Failed to fetch dynamically imported module",
+    "Provider is temporarily unavailable",
+    "Something went wrong",
+    "Unexpected token",
+  ];
+  const normalizedMarker = normalizedMarkers.find((item) => normalized.includes(item));
+  const rawMarker = rawMarkers.find((item) => text.includes(item));
 
-  await waitFor("12-week tactics step", 'document.body.innerText.includes("2-4 việc")');
-  await fillBySelector("#tactic-name-0", TACTIC_ONE);
-  await fillBySelector("#tactic-name-1", TACTIC_TWO);
-  await clickByButton("Tiếp tục");
-
-  await waitFor("12-week schedule step", 'document.body.innerText.includes("Tuần đầu tiên")');
-  await fillByLabel("Mục tiêu", "12");
-  await fillByLabel("Đơn vị của chỉ số", "tuan");
-  await clickByButton("Tiếp tục");
-
-  await waitFor("12-week final step", 'document.body.innerText.includes("Chốt kế hoạch")');
-  await clickByButton("Tạo kế hoạch 12 tuần");
-  await waitFor("12-week system route", 'location.pathname === "/12-week-system"', { timeoutMs: 75_000 });
+  if (normalizedMarker || rawMarker) {
+    throw new Error(`${label} shows failure text: ${normalizedMarker ?? rawMarker}`);
+  }
 }
 
-async function assertSystemLoaded({ requireTactics = true } = {}) {
-  await waitFor(
-    requireTactics ? "12-week system with created goal and tasks" : "12-week system with persisted goal",
-    `
-      document.body.innerText.includes(${JSON.stringify(GOAL_TITLE)}) &&
-      (${JSON.stringify(!requireTactics)} ||
-        (document.body.innerText.includes(${JSON.stringify(TACTIC_ONE)}) &&
-          document.body.innerText.includes(${JSON.stringify(TACTIC_TWO)})))
-    `,
-    { timeoutMs: 75_000 },
-  );
+function assertNoRealBillingDemoCopy(text) {
+  const normalized = normalizeText(text);
+  const forbidden = ["plus demo", "mock checkout", "checkout dung thu", "mo phong", "quyen local"];
+  const marker = forbidden.find((item) => normalized.includes(item));
+  if (marker) {
+    throw new Error(`Production billing still shows demo/mock copy: ${marker}`);
+  }
 }
 
-async function getCreatedGoalSnapshot() {
-  return browserEval(`
-    (() => {
-      const mainKey = "visionboard_user_data";
-      const keys = [mainKey];
-      for (let index = 0; index < localStorage.length; index += 1) {
-        const key = localStorage.key(index);
-        if (key?.startsWith(mainKey + ":auth:")) keys.push(key);
-      }
-
-      const seenKeys = Array.from(new Set(keys));
-      const snapshots = seenKeys
-        .map((key) => {
-          const raw = localStorage.getItem(key);
-          if (!raw) return null;
-          try {
-            return { key, data: JSON.parse(raw) };
-          } catch {
-            return null;
-          }
-        })
-        .filter(Boolean);
-
-      const matching = snapshots
-        .map((snapshot) => {
-          const goal = Array.isArray(snapshot.data.goals)
-            ? snapshot.data.goals.find((item) => item?.title?.includes(${JSON.stringify(GOAL_TITLE)}))
-            : null;
-          if (!goal?.twelveWeekSystem) return null;
-
-          const system = goal.twelveWeekSystem;
-          const completedTasks = Array.isArray(system.taskInstances)
-            ? system.taskInstances.filter((task) => task.completed)
-            : [];
-          const dailyCheckIns = Array.isArray(system.dailyCheckIns) ? system.dailyCheckIns : [];
-          const weeklyReviews = Array.isArray(system.weeklyReviews) ? system.weeklyReviews : [];
-          const linkedReflections = Array.isArray(snapshot.data.reflections)
-            ? snapshot.data.reflections.filter(
-                (item) => item.entryType === "weekly-review" && item.linkedGoalId === goal.id,
-              )
-            : [];
-
-          return {
-            key: snapshot.key,
-            goalId: goal.id,
-            title: goal.title,
-            taskCount: Array.isArray(system.taskInstances) ? system.taskInstances.length : 0,
-            completedTaskCount: completedTasks.length,
-            completedTaskTitles: completedTasks.map((task) => task.title),
-            dailyCheckInCount: dailyCheckIns.length,
-            latestDailyCheckIn: dailyCheckIns[0] ?? null,
-            weeklyReviewCount: weeklyReviews.length,
-            latestWeeklyReview: weeklyReviews[weeklyReviews.length - 1] ?? null,
-            linkedWeeklyReviewReflectionCount: linkedReflections.length,
-            linkedWeeklyReviewReflectionTitles: linkedReflections.map((item) => item.title),
-          };
-        })
-        .filter(Boolean);
-
-      return matching[0] ?? {
-        key: null,
-        goalId: null,
-        title: null,
-        taskCount: 0,
-        completedTaskCount: 0,
-        completedTaskTitles: [],
-        dailyCheckInCount: 0,
-        latestDailyCheckIn: null,
-        weeklyReviewCount: 0,
-        latestWeeklyReview: null,
-        linkedWeeklyReviewReflectionCount: 0,
-        linkedWeeklyReviewReflectionTitles: [],
-      };
-    })()
-  `);
+async function assertCleanPage(page, label) {
+  const text = await getBodyText(page);
+  assertNoMojibake(text, label);
+  assertNoVisibleFailure(text, label);
 }
 
-async function waitForGoalSnapshot(description, predicate, { timeoutMs = 45_000, intervalMs = 700 } = {}) {
-  log(`Waiting for ${description}`);
+async function assertNoHorizontalOverflow(page, label) {
+  const result = await page.evaluate(() => {
+    const doc = document.documentElement;
+    const overflow = doc.scrollWidth - doc.clientWidth;
+    const offenders = Array.from(document.querySelectorAll("body *"))
+      .filter((element) => {
+        const rect = element.getBoundingClientRect();
+        return rect.width > 0 && rect.right - document.documentElement.clientWidth > 8;
+      })
+      .slice(0, 5)
+      .map((element) => ({
+        tag: element.tagName.toLowerCase(),
+        className: String(element.getAttribute("class") ?? "").slice(0, 120),
+        text: String(element.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 120),
+      }));
+    return { clientWidth: doc.clientWidth, scrollWidth: doc.scrollWidth, overflow, offenders };
+  });
+
+  if (result.overflow > 8) {
+    throw new Error(`${label} has horizontal overflow: ${JSON.stringify(result, null, 2)}`);
+  }
+}
+
+function isApiUrl(urlValue) {
+  try {
+    const url = new URL(urlValue);
+    return url.pathname.startsWith("/api/") || url.hostname.includes("onrender.com");
+  } catch {
+    return false;
+  }
+}
+
+function installNetworkRecorder(page) {
+  const apiEvents = [];
+  const requestFailures = [];
+
+  page.on("response", (response) => {
+    const url = response.url();
+    if (!isApiUrl(url)) return;
+    apiEvents.push({
+      at: Date.now(),
+      method: response.request().method(),
+      status: response.status(),
+      url,
+    });
+  });
+
+  page.on("requestfailed", (request) => {
+    const url = request.url();
+    if (!isApiUrl(url)) return;
+    requestFailures.push({
+      at: Date.now(),
+      method: request.method(),
+      url,
+      errorText: request.failure()?.errorText ?? "request failed",
+    });
+  });
+
+  return { apiEvents, requestFailures };
+}
+
+async function waitForCondition(label, predicate, timeoutMs = DEFAULT_TIMEOUT_MS, intervalMs = 500) {
   const startedAt = Date.now();
-  let lastSnapshot = null;
+  let lastValue;
 
   while (Date.now() - startedAt < timeoutMs) {
-    lastSnapshot = await getCreatedGoalSnapshot();
-    if (predicate(lastSnapshot)) return lastSnapshot;
-    await sleep(intervalMs);
+    lastValue = await predicate();
+    if (lastValue) return lastValue;
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }
 
-  const state = await getPageState();
-  throw new Error(
-    `Timed out waiting for ${description}.\n` +
-      `Last snapshot: ${JSON.stringify(lastSnapshot, null, 2)}\n` +
-      `URL: ${state.url}\nText: ${state.text.slice(0, 900)}`,
+  throw new Error(`Timed out waiting for ${label}. Last value: ${JSON.stringify(lastValue)}`);
+}
+
+async function waitForApiSuccess(apiEvents, pattern, label, options = {}) {
+  const after = options.after ?? 0;
+  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+
+  return waitForCondition(
+    label,
+    () => {
+      const failed = apiEvents.find((event) => event.at >= after && pattern.test(event.url) && event.status >= 400);
+      if (failed) {
+        throw new Error(`${label} failed with HTTP ${failed.status}: ${failed.method} ${failed.url}`);
+      }
+
+      return apiEvents.find(
+        (event) => event.at >= after && pattern.test(event.url) && event.status >= 200 && event.status < 300,
+      );
+    },
+    timeoutMs,
   );
 }
 
-async function clickFirstTodayTaskCheckbox() {
-  log("Clicking first open task in Today queue");
-  await browserEval(`
-    (() => {
-      const queue =
-        document.querySelector('[data-tour-id="system-today-queue"]') ||
-        Array.from(document.querySelectorAll('[data-slot="card"], section, div')).find((item) =>
-          item.textContent?.toLowerCase().includes("hàng việc hôm nay")
-        );
-      if (!queue) throw new Error("Could not find Today task queue");
-
-      const checkbox = Array.from(queue.querySelectorAll('[role="checkbox"], input[type="checkbox"]')).find((item) => {
-        if (item.disabled) return false;
-        if (item.matches?.('input[type="checkbox"]')) return !item.checked;
-        return item.getAttribute("aria-checked") !== "true";
-      });
-      if (!checkbox) throw new Error("Could not find an open Today task checkbox");
-      checkbox.scrollIntoView({ block: "center" });
-      checkbox.click();
-      return true;
-    })()
-  `);
+function getRecentRateLimit(apiEvents, after) {
+  return apiEvents.find((event) => event.at >= after && event.status === 429);
 }
 
-async function exerciseTwelveWeekDailyExecution() {
-  await assertSystemLoaded();
-
-  const initialSnapshot = await waitForGoalSnapshot(
-    "created 12-week system storage snapshot",
-    (snapshot) => snapshot.goalId && snapshot.taskCount > 0,
-  );
-  if (initialSnapshot.completedTaskCount > 0) {
-    throw new Error(`Expected fresh daily execution state, got completed tasks: ${initialSnapshot.completedTaskCount}`);
-  }
-
-  await clickTab("Hôm nay");
-  await waitFor("Today queue ready", 'document.body.innerText.includes("Hàng việc hôm nay")');
-  await clickFirstTodayTaskCheckbox();
-  await waitForGoalSnapshot("completed Today task persisted", (snapshot) => snapshot.completedTaskCount >= 1);
-
-  await fillBySelector("#daily-note", DAILY_CHECKIN_NOTE);
-  await clickByButton("Lưu check-in hôm nay");
-  await waitForGoalSnapshot(
-    "daily check-in persisted",
-    (snapshot) => snapshot.dailyCheckInCount >= 1,
-  );
-
-  await openPage("/12-week-system?tab=week");
-  await waitFor("weekly review form ready", 'document.querySelector("#weekly-best")');
-  await clickByButton("Chi tiết review thêm");
-  await waitFor(
-    "weekly review detail fields ready",
-    'document.querySelector("#weekly-obstacle") && document.querySelector("#weekly-priority")',
-  );
-  await fillBySelector("#weekly-best", WEEKLY_REVIEW_OUTPUT);
-  await fillBySelector("#weekly-obstacle", WEEKLY_REVIEW_OBSTACLE);
-  await fillBySelector("#weekly-priority", WEEKLY_REVIEW_PRIORITY);
-  await clickByButton("Chốt review tuần này");
-  await waitFor(
-    "weekly review backend sync confirmation",
-    'document.body.innerText.includes("Review tuần đã được chốt")',
-    { timeoutMs: 90_000 },
-  );
-  await waitForGoalSnapshot(
-    "weekly review and linked journal persisted",
-    (snapshot) =>
-      snapshot.weeklyReviewCount >= 1 &&
-      snapshot.latestWeeklyReview?.biggestOutputThisWeek === WEEKLY_REVIEW_OUTPUT &&
-      snapshot.latestWeeklyReview?.mainObstacle === WEEKLY_REVIEW_OBSTACLE &&
-      snapshot.latestWeeklyReview?.nextWeekPriority === WEEKLY_REVIEW_PRIORITY &&
-      snapshot.linkedWeeklyReviewReflectionCount >= 1,
-  );
-}
-
-async function assertDailyExecutionPersisted() {
-  await waitForGoalSnapshot(
-    "daily execution state after reload",
-    (snapshot) =>
-      snapshot.completedTaskCount >= 1 &&
-      snapshot.dailyCheckInCount >= 1 &&
-      snapshot.weeklyReviewCount >= 1 &&
-      snapshot.latestWeeklyReview?.biggestOutputThisWeek === WEEKLY_REVIEW_OUTPUT &&
-      snapshot.linkedWeeklyReviewReflectionCount >= 1,
-    { timeoutMs: 75_000 },
-  );
-}
-
-async function assertDailyExecutionRestoredAfterLogin() {
-  await waitForGoalSnapshot(
-    "same daily execution state after fresh login",
-    (snapshot) =>
-      snapshot.title?.includes(GOAL_TITLE) &&
-      snapshot.completedTaskCount >= 1 &&
-      snapshot.dailyCheckInCount >= 1 &&
-      snapshot.latestDailyCheckIn?.didWorkToday === true &&
-      snapshot.weeklyReviewCount >= 1 &&
-      snapshot.latestWeeklyReview?.biggestOutputThisWeek === WEEKLY_REVIEW_OUTPUT &&
-      snapshot.latestWeeklyReview?.nextWeekPriority === WEEKLY_REVIEW_PRIORITY,
-    { timeoutMs: 90_000 },
-  );
-}
-
-async function assertPersistedSystemLoaded() {
-  await waitFor(
-    "persisted 12-week system after login",
-    `
-      document.body.innerText.includes("Hệ 12 tuần") &&
-      (document.body.innerText.includes("Chu kỳ đang chạy") || document.body.innerText.includes("Nhịp 12 tuần")) &&
-      document.body.innerText.includes(${JSON.stringify(GOAL_TITLE)}) &&
-      (document.body.innerText.includes("Đã nối") || document.body.innerText.includes("Đã lưu"))
-    `,
-    { timeoutMs: 75_000 },
-  );
-}
-
-async function reloadAndAssert() {
-  log("Reloading 12-week system and checking persisted data");
-  await browserEval("location.reload()");
-  await runAgentBrowser(["wait", "--load", "networkidle"], { timeoutMs: 90_000 });
-  await waitFor("reloaded 12-week system route", 'location.pathname === "/12-week-system"', { timeoutMs: 75_000 });
-  await assertSystemLoaded();
-  await assertDailyExecutionPersisted();
-}
-
-async function exerciseBillingManagement() {
-  log("Checking production billing management page");
-  await openPage("/billing");
-  await waitFor(
-    "billing management page",
-    `
-      location.pathname === "/billing/plan" &&
-      document.body.innerText.includes("Gói hiện tại") &&
-      document.body.innerText.includes("Lịch sử thanh toán") &&
-      document.body.innerText.includes("Hỗ trợ thanh toán") &&
-      (
-        document.body.innerText.includes("Nâng cấp Plus") ||
-        document.body.innerText.includes("Gia hạn Plus")
-      )
-    `,
-    { timeoutMs: 75_000 },
-  );
-  await waitFor(
-    "billing payment history state",
-    `
-      document.body.innerText.includes("Chưa có giao dịch") ||
-      document.body.innerText.includes("Đang chờ") ||
-      document.body.innerText.includes("Đã thanh toán") ||
-      document.body.innerText.includes("Không thể tải lịch sử thanh toán")
-    `,
-    { timeoutMs: 75_000 },
-  );
-
-  const text = await browserEval("document.body.innerText");
-  if (text.includes("Không thể tải lịch sử thanh toán")) {
-    throw new Error("Billing payment history endpoint failed on production");
-  }
-  if (/Plus demo|Checkout dùng thử|mock checkout/i.test(text)) {
-    throw new Error("Production billing page still shows demo/mock billing copy");
+async function waitForPath(page, expectedPath, label, apiEvents, after, timeoutMs = DEFAULT_TIMEOUT_MS) {
+  try {
+    return await waitForCondition(
+      label,
+      () => {
+        const rateLimited = getRecentRateLimit(apiEvents, after);
+        if (rateLimited) {
+          throw new Error(`${label} hit HTTP 429 rate limit: ${rateLimited.method} ${rateLimited.url}`);
+        }
+        return new URL(page.url()).pathname === expectedPath;
+      },
+      timeoutMs,
+    );
+  } catch (error) {
+    throw new Error(`${error.message}\n${await getDiagnostics(page)}`);
   }
 }
 
-async function logoutAndLoginAgain() {
-  log("Checking cleared session then login restores the same workspace");
-  await clearBrowserStorage();
-  await openPage("/login?next=%2F12-week-system");
-  await waitFor("login route after clearing auth", 'location.pathname === "/login"', { timeoutMs: 45_000 });
-  await waitFor("login form after clearing auth", 'document.querySelector("#login-email") && document.querySelector("#login-password")');
-
-  await fillBySelector("#login-email", EMAIL);
-  await fillBySelector("#login-password", PASSWORD);
-  await clickByButton("Đăng nhập");
-  await waitFor("12-week system route after login", 'location.pathname === "/12-week-system"', { timeoutMs: 75_000 });
-  await assertPersistedSystemLoaded();
-  await assertDailyExecutionRestoredAfterLogin();
+async function waitForBodyText(page, predicate, label, apiEvents, after, timeoutMs = DEFAULT_TIMEOUT_MS) {
+  try {
+    return await waitForCondition(
+      label,
+      async () => {
+        const rateLimited = getRecentRateLimit(apiEvents, after);
+        if (rateLimited) {
+          throw new Error(`${label} hit HTTP 429 rate limit: ${rateLimited.method} ${rateLimited.url}`);
+        }
+        const text = await getBodyText(page);
+        return predicate(text) ? text : false;
+      },
+      timeoutMs,
+    );
+  } catch (error) {
+    throw new Error(`${error.message}\n${await getDiagnostics(page)}`);
+  }
 }
 
-async function main() {
+async function submitEmailAuth(page, { mode, nextPath }) {
+  const modeQuery = mode === "signup" ? "mode=signup&" : "";
+  await page.goto(`${BASE_URL}/login?${modeQuery}next=${encodeURIComponent(nextPath)}`, {
+    waitUntil: "domcontentloaded",
+  });
+  await page.locator("#login-email").fill(EMAIL);
+  await page.locator("#login-password").fill(PASSWORD);
+  await page.locator('form button[type="submit"]').click();
+  await page.waitForFunction(
+    (expectedPath) => location.pathname === expectedPath || Boolean(document.querySelector('[role="alert"]')),
+    nextPath,
+    { timeout: DEFAULT_TIMEOUT_MS },
+  );
+
+  if (new URL(page.url()).pathname === nextPath) {
+    return { ok: true, errorText: "" };
+  }
+
+  return {
+    ok: false,
+    errorText: await page.locator('[role="alert"]').innerText().catch(() => ""),
+  };
+}
+
+async function authenticate(page, nextPath = "/12-week-system") {
   if (!["signin", "signup"].includes(AUTH_MODE)) {
-    throw new Error('PROD_SMOKE_AUTH_MODE must be either "signin" or "signup" when provided');
+    throw new Error(`PROD_SMOKE_AUTH_MODE must be "signin" or "signup", got ${AUTH_MODE}`);
   }
   if (AUTH_MODE === "signin" && !HAS_PROVIDED_CREDENTIALS) {
     throw new Error("PROD_SMOKE_EMAIL and PROD_SMOKE_PASSWORD are required when PROD_SMOKE_AUTH_MODE=signin");
   }
+
+  log(`${AUTH_MODE === "signup" ? "Creating" : "Signing in with"} production smoke account ${EMAIL}`);
+  let outcome = await submitEmailAuth(page, { mode: AUTH_MODE, nextPath });
+
+  if (!outcome.ok && AUTH_MODE === "signup") {
+    log(`Signup did not complete (${outcome.errorText || "unknown error"}); trying signin`);
+    outcome = await submitEmailAuth(page, { mode: "signin", nextPath });
+  }
+
+  if (!outcome.ok) {
+    throw new Error(`Email auth failed: ${outcome.errorText || "unknown error"}`);
+  }
+}
+
+async function seedFullSmokeData(page) {
+  const userData = createFullSmokeUserData();
+  await page.evaluate(
+    ({ serializedUserData, goalId }) => {
+      const authOwnerUid = localStorage.getItem("visionboard_user_data:auth_owner_uid");
+      localStorage.clear();
+      sessionStorage.clear();
+      localStorage.setItem("visionboard_user_data", serializedUserData);
+      localStorage.setItem("latest_12_week_goal_id", goalId);
+      localStorage.setItem("latest_12_week_system_goal_id", goalId);
+      localStorage.setItem("latest_12_week_plan_goal_id", goalId);
+
+      if (authOwnerUid) {
+        localStorage.setItem("visionboard_user_data:auth_owner_uid", authOwnerUid);
+        localStorage.setItem(`visionboard_user_data:auth:${encodeURIComponent(authOwnerUid)}`, serializedUserData);
+      }
+    },
+    {
+      serializedUserData: JSON.stringify(userData),
+      goalId: GOAL_ID,
+    },
+  );
+}
+
+async function waitForSystemLoaded(page) {
+  try {
+    await page.waitForFunction(
+      ({ goalTitle, tacticTitle }) =>
+        document.body.innerText.includes(goalTitle) && document.body.innerText.includes(tacticTitle),
+      { goalTitle: GOAL_TITLE, tacticTitle: TACTIC_TITLE },
+      { timeout: DEFAULT_TIMEOUT_MS },
+    );
+  } catch (error) {
+    throw new Error(`12-week system did not render the seeded plan.\n${await getDiagnostics(page)}\n${error.message}`);
+  }
+}
+
+async function getGoalSnapshot(page) {
+  return page.evaluate(
+    ({ goalId, goalTitle }) => {
+      const keys = ["visionboard_user_data"];
+      for (let index = 0; index < localStorage.length; index += 1) {
+        const key = localStorage.key(index);
+        if (key?.startsWith("visionboard_user_data:auth:")) keys.push(key);
+      }
+
+      for (const key of Array.from(new Set(keys))) {
+        const raw = localStorage.getItem(key);
+        if (!raw) continue;
+
+        try {
+          const data = JSON.parse(raw);
+          const goal = Array.isArray(data.goals)
+            ? data.goals.find((item) => item?.id === goalId || item?.title?.includes(goalTitle))
+            : null;
+          const system = goal?.twelveWeekSystem;
+          if (!system) continue;
+
+          const taskInstances = Array.isArray(system.taskInstances) ? system.taskInstances : [];
+          const dailyCheckIns = Array.isArray(system.dailyCheckIns) ? system.dailyCheckIns : [];
+          const weeklyReviews = Array.isArray(system.weeklyReviews) ? system.weeklyReviews : [];
+
+          return {
+            key,
+            title: goal.title,
+            taskCount: taskInstances.length,
+            completedTaskCount: taskInstances.filter((task) => task.completed).length,
+            dailyCheckInCount: dailyCheckIns.length,
+            latestDailyCheckIn: dailyCheckIns[dailyCheckIns.length - 1] ?? null,
+            weeklyReviewCount: weeklyReviews.length,
+            latestWeeklyReview: weeklyReviews[weeklyReviews.length - 1] ?? null,
+          };
+        } catch {
+          continue;
+        }
+      }
+
+      return null;
+    },
+    { goalId: GOAL_ID, goalTitle: GOAL_TITLE },
+  );
+}
+
+async function waitForGoalSnapshot(page, label, predicate, timeoutMs = DEFAULT_TIMEOUT_MS) {
+  const startedAt = Date.now();
+  let lastSnapshot = null;
+
+  while (Date.now() - startedAt < timeoutMs) {
+    lastSnapshot = await getGoalSnapshot(page);
+    if (lastSnapshot && predicate(lastSnapshot)) return lastSnapshot;
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }
+
+  throw new Error(
+    `Timed out waiting for ${label}.\nLast snapshot: ${JSON.stringify(lastSnapshot, null, 2)}\n${await getDiagnostics(
+      page,
+    )}`,
+  );
+}
+
+async function clickButtonByNormalizedText(page, normalizedNeedle) {
+  const clicked = await page.evaluate((needle) => {
+    const normalize = (value) =>
+      String(value)
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .replace(/\u0111/g, "d")
+        .replace(/\u0110/g, "d")
+        .toLowerCase();
+    const button = Array.from(document.querySelectorAll("button")).find((candidate) => {
+      const text = normalize(candidate.textContent ?? "");
+      return !candidate.disabled && text.includes(needle);
+    });
+    if (!button) return false;
+    button.scrollIntoView({ block: "center" });
+    button.click();
+    return true;
+  }, normalizedNeedle);
+
+  if (!clicked) {
+    throw new Error(`Could not find enabled button containing normalized text: ${normalizedNeedle}`);
+  }
+}
+
+async function clickFirstTodayTaskCheckbox(page) {
+  await page.locator('[data-tour-id="system-today-queue"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  const clicked = await page.evaluate(() => {
+    const queue = document.querySelector('[data-tour-id="system-today-queue"]');
+    if (!queue) return false;
+    const candidates = Array.from(queue.querySelectorAll('[role="checkbox"], input[type="checkbox"]'));
+    const checkbox = candidates.find((item) => {
+      if (item.disabled) return false;
+      if (item.matches?.('input[type="checkbox"]')) return !item.checked;
+      return item.getAttribute("aria-checked") !== "true";
+    });
+    if (!checkbox) return false;
+    checkbox.scrollIntoView({ block: "center" });
+    checkbox.click();
+    return true;
+  });
+
+  if (!clicked) {
+    throw new Error("Could not find an open Today task checkbox");
+  }
+}
+
+async function getSyncQueueSummary(page) {
+  return page.evaluate((goalId) => {
+    const raw = localStorage.getItem(`twelve_week_sync_queue:${goalId}`);
+    if (!raw) {
+      return { totalCount: 0, pendingCount: 0, inFlightCount: 0, failedOrRetryableCount: 0, succeededCount: 0 };
+    }
+
+    try {
+      const parsed = JSON.parse(raw);
+      const items = Array.isArray(parsed.items) ? parsed.items : [];
+      return {
+        totalCount: items.length,
+        pendingCount: items.filter((item) => item.status === "pending").length,
+        inFlightCount: items.filter((item) => item.status === "in_flight").length,
+        failedOrRetryableCount: items.filter(
+          (item) => item.status === "retry_scheduled" || item.status === "failed_terminal",
+        ).length,
+        succeededCount: items.filter((item) => item.status === "succeeded").length,
+      };
+    } catch {
+      return { totalCount: 0, pendingCount: 0, inFlightCount: 0, failedOrRetryableCount: 0, succeededCount: 0 };
+    }
+  }, GOAL_ID);
+}
+
+async function waitForSyncQueueIdle(page) {
+  return waitForCondition(
+    "12-week sync queue idle",
+    async () => {
+      const summary = await getSyncQueueSummary(page);
+      if (
+        summary.pendingCount === 0 &&
+        summary.inFlightCount === 0 &&
+        summary.failedOrRetryableCount === 0
+      ) {
+        return summary;
+      }
+      return false;
+    },
+    60_000,
+  );
+}
+
+async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
+  await page.goto(`${BASE_URL}/12-week-system`, { waitUntil: "domcontentloaded" });
+  await seedFullSmokeData(page);
+  await page.goto(`${BASE_URL}/12-week-system`, { waitUntil: "domcontentloaded" });
+  await waitForSystemLoaded(page);
+  await assertCleanPage(page, "12-week system");
+
+  const syncStartedAt = Date.now();
+
+  await clickFirstTodayTaskCheckbox(page);
+  await waitForGoalSnapshot(page, "completed Today task in local storage", (snapshot) => {
+    return snapshot.completedTaskCount >= 1;
+  });
+
+  await page.locator("#daily-note").fill(CHECKIN_NOTE);
+  await clickButtonByNormalizedText(page, "luu check-in hom nay");
+  await waitForGoalSnapshot(page, "daily check-in in local storage", (snapshot) => {
+    return snapshot.dailyCheckInCount >= 1;
+  });
+
+  await page.goto(`${BASE_URL}/12-week-system?tab=week`, { waitUntil: "domcontentloaded" });
+  await page.locator("#weekly-best").fill(WEEKLY_REVIEW_OUTPUT);
+  await clickButtonByNormalizedText(page, "chot review tuan nay");
+  await waitForGoalSnapshot(page, "weekly review in local storage", (snapshot) => {
+    return (
+      snapshot.weeklyReviewCount >= 1 &&
+      snapshot.latestWeeklyReview?.biggestOutputThisWeek === WEEKLY_REVIEW_OUTPUT
+    );
+  });
+
+  await waitForApiSuccess(apiEvents, /\/api\/(plans|tasks|weeks|metrics)(?:\/|$)/, "12-week backend sync", {
+    after: syncStartedAt,
+    timeoutMs: DEFAULT_TIMEOUT_MS,
+  });
+  await waitForSyncQueueIdle(page);
+
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await waitForSystemLoaded(page);
+  await waitForGoalSnapshot(page, "12-week state persisted after reload", (snapshot) => {
+    return (
+      snapshot.completedTaskCount >= 1 &&
+      snapshot.dailyCheckInCount >= 1 &&
+      snapshot.latestDailyCheckIn?.optionalNote === CHECKIN_NOTE &&
+      snapshot.weeklyReviewCount >= 1 &&
+      snapshot.latestWeeklyReview?.biggestOutputThisWeek === WEEKLY_REVIEW_OUTPUT
+    );
+  });
+  await assertNoHorizontalOverflow(page, "12-week desktop");
+}
+
+async function exerciseBilling(page, apiEvents) {
+  const billingStartedAt = Date.now();
+  await seedFullSmokeData(page);
+  await page.goto(`${BASE_URL}/billing`, { waitUntil: "domcontentloaded" });
+  await waitForPath(page, "/billing/plan", "billing plan route", apiEvents, billingStartedAt);
+  await waitForBodyText(page, (text) => text.includes("Plus"), "billing Plus copy", apiEvents, billingStartedAt);
+  await waitForApiSuccess(apiEvents, /\/api\/billing\/payment-history(?:\?|$)/, "billing payment history", {
+    after: billingStartedAt,
+    timeoutMs: DEFAULT_TIMEOUT_MS,
+  });
+
+  const text = await getBodyText(page);
+  assertNoMojibake(text, "billing plan");
+  assertNoVisibleFailure(text, "billing plan");
+  assertNoRealBillingDemoCopy(text);
+  await assertNoHorizontalOverflow(page, "billing desktop");
+
+  if (SKIP_CHECKOUT) {
+    log("Skipping checkout QR creation because PROD_SMOKE_SKIP_CHECKOUT=1");
+    return;
+  }
+
+  const checkoutStartedAt = Date.now();
+  await seedFullSmokeData(page);
+  await page.goto(`${BASE_URL}/billing/checkout`, { waitUntil: "domcontentloaded" });
+  await waitForApiSuccess(apiEvents, /\/api\/billing\/checkout-session(?:\?|$)/, "billing checkout session", {
+    after: checkoutStartedAt,
+    timeoutMs: DEFAULT_TIMEOUT_MS,
+  });
+  await waitForCondition(
+    "checkout order route",
+    () => {
+      const rateLimited = getRecentRateLimit(apiEvents, checkoutStartedAt);
+      if (rateLimited) {
+        throw new Error(`checkout order route hit HTTP 429 rate limit: ${rateLimited.method} ${rateLimited.url}`);
+      }
+      return /^\/billing\/checkout\/VB[A-Z0-9]{8,12}$/.test(new URL(page.url()).pathname);
+    },
+    DEFAULT_TIMEOUT_MS,
+  ).catch(async (error) => {
+    throw new Error(`${error.message}\n${await getDiagnostics(page)}`);
+  });
+  await waitForApiSuccess(apiEvents, /\/api\/billing\/order-status\/VB[A-Z0-9]{8,12}(?:\?|$)/, "billing order status", {
+    after: checkoutStartedAt,
+    timeoutMs: DEFAULT_TIMEOUT_MS,
+  });
+  await waitForCondition(
+    "checkout QR content",
+    async () => {
+      const rateLimited = getRecentRateLimit(apiEvents, checkoutStartedAt);
+      if (rateLimited) {
+        throw new Error(`checkout QR content hit HTTP 429 rate limit: ${rateLimited.method} ${rateLimited.url}`);
+      }
+      return page.evaluate(() => {
+        const textContent = document.body.innerText;
+        const hasOrderId = /VB[A-Z0-9]{8,12}/.test(textContent);
+        const hasQrImage = Array.from(document.images).some((image) => image.src.includes("vietqr"));
+        return textContent.includes("VietQR") && hasOrderId && hasQrImage;
+      });
+    },
+    DEFAULT_TIMEOUT_MS,
+  ).catch(async (error) => {
+    throw new Error(`${error.message}\n${await getDiagnostics(page)}`);
+  });
+
+  const checkoutText = await getBodyText(page);
+  assertNoMojibake(checkoutText, "billing checkout");
+  assertNoVisibleFailure(checkoutText, "billing checkout");
+  await assertNoHorizontalOverflow(page, "checkout desktop");
+}
+
+async function exerciseResponsiveQa(page) {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${BASE_URL}/12-week-system?tab=progress`, { waitUntil: "domcontentloaded" });
+  await page.locator('[data-testid="progress-trend-hero"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  await waitForSystemLoaded(page);
+  await assertCleanPage(page, "12-week mobile progress");
+  await assertNoHorizontalOverflow(page, "12-week mobile progress");
+
+  await page.goto(`${BASE_URL}/billing/plan`, { waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => document.body.innerText.includes("Plus"), { timeout: DEFAULT_TIMEOUT_MS });
+  await assertCleanPage(page, "billing mobile");
+  await assertNoHorizontalOverflow(page, "billing mobile");
+}
+
+async function run() {
+  const browser = await chromium.launch({ headless: true });
+  const context = await browser.newContext({
+    locale: "vi-VN",
+    timezoneId: "Asia/Ho_Chi_Minh",
+    viewport: { width: 1366, height: 900 },
+  });
+  const page = await context.newPage();
+  const pageErrors = [];
+  const { apiEvents, requestFailures } = installNetworkRecorder(page);
+
+  page.setDefaultTimeout(DEFAULT_TIMEOUT_MS);
+  page.setDefaultNavigationTimeout(DEFAULT_TIMEOUT_MS);
+  page.on("pageerror", (error) => pageErrors.push(error.message));
 
   log(`Target: ${BASE_URL}`);
   if (!HAS_PROVIDED_CREDENTIALS) {
@@ -1071,36 +800,61 @@ async function main() {
   }
 
   try {
-    await runStep("Resetting browser session", async () => {
-      await runAgentBrowser(["close"], { timeoutMs: 30_000 }).catch(() => undefined);
+    await step("SPA shell and protected-route rewrite", async () => {
+      await assertSpaRoute("/");
+      await assertSpaRoute("/12-week-system");
+      await assertSpaRoute("/billing/checkout");
     });
-    await runStep("Signed-out home", runSignedOutSmoke);
-    await runStep("Fresh authenticated workspace", runFreshAuthenticatedWorkspaceSmoke);
-    await runStep("Authentication", signInOrSignUp);
-    await runStep("Onboarding mobile polish", runOnboardingSmoke);
-    await runStep("Life balance assessment", completeOnboarding);
-    await runStep("Life insight", completeLifeInsight);
-    await runStep("SMART goal setup", completeSmartGoal);
-    await runStep("Feasibility check", completeFeasibility);
-    await runStep("12-week setup", completeTwelveWeekSetup);
-    await runStep("12-week system", assertSystemLoaded);
-    await runStep("Daily execution and weekly review", exerciseTwelveWeekDailyExecution);
-    await runStep("Persistence after reload", reloadAndAssert);
-    await runStep("Billing management", exerciseBillingManagement);
-    if (HAS_PROVIDED_CREDENTIALS) {
-      await runStep("Logout/login persistence", logoutAndLoginAgain);
-    } else {
-      log("Skipping logout/login persistence because PROD_SMOKE_EMAIL/PROD_SMOKE_PASSWORD were not provided");
+
+    await step("Signed-out home loads cleanly", async () => {
+      await page.goto(`${BASE_URL}/`, { waitUntil: "domcontentloaded" });
+      await page.evaluate(() => {
+        localStorage.clear();
+        sessionStorage.clear();
+      });
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page.waitForFunction(() => document.body.innerText.includes("Dear Our Future"));
+      await assertCleanPage(page, "signed-out home");
+      await assertNoHorizontalOverflow(page, "signed-out home desktop");
+    });
+
+    await step("Authentication", async () => {
+      await authenticate(page, "/12-week-system");
+      await assertCleanPage(page, "authenticated workspace");
+    });
+
+    await step("12-week save, reload, and backend sync", async () => {
+      await exerciseTwelveWeekSaveReloadAndSync(page, apiEvents);
+    });
+
+    await step("Billing management and Casso VietQR checkout", async () => {
+      await exerciseBilling(page, apiEvents);
+    });
+
+    await step("Responsive desktop/mobile QA", async () => {
+      await exerciseResponsiveQa(page);
+    });
+
+    if (requestFailures.length > 0) {
+      throw new Error(`API request failures:\n${requestFailures.map((item) => JSON.stringify(item)).join("\n")}`);
     }
-    await runStep("Browser error scan", assertNoBrowserErrors);
+
+    const severeApiFailures = apiEvents.filter((event) => event.status === 429 || event.status >= 500);
+    if (severeApiFailures.length > 0) {
+      throw new Error(`Severe API failures:\n${severeApiFailures.map((item) => JSON.stringify(item)).join("\n")}`);
+    }
+
+    if (pageErrors.length > 0) {
+      throw new Error(`Browser page errors:\n${pageErrors.join("\n")}`);
+    }
+
     log("Production smoke passed");
   } finally {
-    await clearBrowserStorage().catch(() => undefined);
-    await runAgentBrowser(["close"], { timeoutMs: 30_000 }).catch(() => undefined);
+    await browser.close();
   }
 }
 
-main().catch((error) => {
+run().catch((error) => {
   console.error(`[prod-smoke] FAILED: ${error instanceof Error ? error.message : String(error)}`);
   process.exitCode = 1;
 });

@@ -66,7 +66,7 @@ export const generalApiRateLimiter = createLimiter({
 export const authProfileRateLimiter = createLimiter({
   keyPrefix: "auth-profile",
   windowMs: FIFTEEN_MINUTES_MS,
-  limit: 30,
+  limit: 120,
   keyGenerator: userOrIpKey,
 });
 
