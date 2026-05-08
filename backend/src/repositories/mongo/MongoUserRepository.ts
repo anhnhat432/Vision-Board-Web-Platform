@@ -74,25 +74,36 @@ function mapUser(doc: {
 export class MongoUserRepository {
   async findOrCreate(uid: string, email: string, displayName: string): Promise<UserEntity> {
     const normalizedEmail = email.toLowerCase().trim();
+    if (!normalizedEmail) {
+      throw new ApiError(
+        400,
+        "Authenticated user email is required to create a profile.",
+        undefined,
+        "missing_auth_email",
+      );
+    }
+
     const shouldPromoteToAdmin = isConfiguredAdminEmail(normalizedEmail);
     const setFields: Record<string, unknown> = {
       email: normalizedEmail,
       displayName: getDisplayName(displayName, normalizedEmail),
     };
+    const setOnInsertFields: Record<string, unknown> = {
+      onboardingCompletedAt: null,
+      avatarUrl: null,
+      locale: "vi",
+    };
 
     if (shouldPromoteToAdmin) {
       setFields.role = "admin";
+    } else {
+      setOnInsertFields.role = "user";
     }
 
     const doc = await UserModel.findOneAndUpdate(
       { firebaseUid: uid },
       {
-        $setOnInsert: {
-          role: "user",
-          onboardingCompletedAt: null,
-          avatarUrl: null,
-          locale: "vi",
-        },
+        $setOnInsert: setOnInsertFields,
         $set: setFields,
       },
       { upsert: true, new: true, runValidators: true },
