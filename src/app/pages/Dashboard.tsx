@@ -48,6 +48,7 @@ import { CountUp } from "../components/ui/count-up";
 import { Progress } from "../components/ui/progress";
 import { Reveal } from "../components/ui/reveal";
 import { Skeleton } from "../components/ui/skeleton";
+import { useIsMobile } from "../components/ui/use-mobile";
 import { useBackendProgressOverlay } from "../hooks/useBackendProgressOverlay";
 import { usePageTour } from "../hooks/usePageTour";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
@@ -86,6 +87,74 @@ const DashboardLifeAreaRadar = lazy(() =>
     return { default: module.DashboardLifeAreaRadar };
   }),
 );
+
+type DashboardRadarDatum = {
+  subject: string;
+  value: number;
+  fullMark: number;
+};
+
+function useDeferredVisibility<TElement extends HTMLElement>(rootMargin = "240px") {
+  const ref = useRef<TElement | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (isVisible) return;
+
+    const element = ref.current;
+    if (!element) return;
+
+    if (typeof IntersectionObserver === "undefined") {
+      setIsVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        setIsVisible(true);
+        observer.disconnect();
+      },
+      { rootMargin },
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [isVisible, rootMargin]);
+
+  return { ref, isVisible };
+}
+
+function DeferredDashboardLifeAreaRadar({ data }: { data: DashboardRadarDatum[] }) {
+  const { ref, isVisible } = useDeferredVisibility<HTMLDivElement>();
+
+  return (
+    <div ref={ref}>
+      {isVisible ? (
+        <Suspense
+          fallback={
+            <div className="flex h-[300px] items-center justify-center rounded-xl bg-slate-100/88 text-sm text-slate-500">
+              Đang tải biểu đồ cân bằng cuộc sống...
+            </div>
+          }
+        >
+          <DashboardLifeAreaRadar data={data} />
+        </Suspense>
+      ) : (
+        <div
+          data-testid="dashboard-radar-deferred"
+          className="flex h-[300px] flex-col items-center justify-center rounded-xl bg-slate-50 px-5 text-center"
+        >
+          <TrendingUp className="h-10 w-10 text-slate-300" />
+          <p className="mt-3 font-semibold text-slate-900">Biểu đồ sẽ tải khi bạn kéo tới đây.</p>
+          <p className="mt-1 max-w-sm text-sm leading-6 text-slate-500">
+            Dashboard giữ phần đầu nhẹ hơn; dữ liệu cân bằng vẫn nằm ở đây khi cần xem.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
   {
@@ -165,6 +234,7 @@ function DashboardContent({
   setIsTourOpen: (open: boolean) => void;
   onReload: () => void;
 }) {
+  const isMobileViewport = useIsMobile();
   const navigate = useNavigate();
   const location = useLocation();
   const { isConfigured, user } = useAuthContext();
@@ -819,7 +889,7 @@ function DashboardContent({
 
         {/* Primary Action Card - Most Important Thing */}
         {shouldShowMainDashboardCard && activeSystem && activeSystemTodayOpenTasks.length > 0 && (
-          <Card className="border border-primary bg-white shadow-lg">
+          <Card data-testid="dashboard-primary-action-card" className="border-2 border-primary bg-white shadow-lg">
             <CardContent className="p-5 sm:p-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4 min-w-0">
@@ -830,9 +900,12 @@ function DashboardContent({
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
                       Việc quan trọng nhất hôm nay
                     </p>
-                    <h2 className="mt-1 text-lg font-bold text-slate-950 truncate">
+                    <h2 className="mt-1 text-lg font-bold text-slate-950 sm:text-xl">
                       {activeSystemTodayOpenTasks[0].title}
                     </h2>
+                    <p className="mt-2 text-sm font-medium leading-6 text-emerald-700">
+                      Chỉ cần xong việc này là hôm nay đã đủ. Phần còn lại mở sau.
+                    </p>
                     <p className="mt-1 text-xs text-slate-500">
                       {activeSystemTodayOpenTasks.length > 1
                         ? `Còn ${activeSystemTodayOpenTasks.length - 1} việc khác chờ sau đó`
@@ -844,7 +917,7 @@ function DashboardContent({
                   className="w-full bg-slate-950 text-white hover:bg-slate-900 sm:w-auto"
                   onClick={() => navigate("/12-week-system")}
                 >
-                  Đánh dấu xong
+                  Mở và đánh dấu xong
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -887,7 +960,7 @@ function DashboardContent({
 
         {/* Main Dashboard Card with PageHeader */}
         {shouldShowMainDashboardCard && (
-          <Card className="border border-slate-200/80 bg-white/92 shadow-sm">
+          <Card data-testid="dashboard-main-card" className="border border-slate-200/80 bg-white/92 shadow-sm">
               <CardContent className="p-5 sm:p-6">
                 <div className="space-y-4">
                 <PageHeader
@@ -1203,7 +1276,11 @@ function DashboardContent({
                 </ol>
               </EmptyState>
             ) : (
-              <details className="group rounded-2xl border border-slate-200/80 bg-white/92 p-5 shadow-sm sm:p-6 open:sm:!block sm:!block" open>
+              <details
+                data-testid="dashboard-execution-board"
+                className="group rounded-2xl border border-slate-200/80 bg-white/92 p-5 shadow-sm sm:p-6 open:sm:!block sm:!block"
+                open={!isMobileViewport}
+              >
                 <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-3 sm:cursor-default">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Bảng thực thi</p>
@@ -1212,6 +1289,12 @@ function DashboardContent({
                     </h2>
                     <p className="mt-1 text-sm text-slate-600">
                       Theo dõi tiến độ, nhịp thực thi và chỉ số dẫn của mục tiêu đang chạy.
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-slate-700 sm:hidden">
+                      Tuần {activeSystemWeek || currentWeekExecutionSnapshot.weekNumber || 1}:{" "}
+                      {activeSystemWeekCompletion?.completed ?? currentWeekExecutionSnapshot.completedTasks}/
+                      {activeSystemWeekCompletion?.total ?? currentWeekExecutionSnapshot.totalTasks} việc —{" "}
+                      {activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore}% lead completion
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -1597,15 +1680,7 @@ function DashboardContent({
                 <CardContent className="space-y-4">
                   <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                     {radarData.length > 0 ? (
-                      <Suspense
-                        fallback={
-                          <div className="flex h-[300px] items-center justify-center rounded-xl bg-slate-100/88 text-sm text-slate-500">
-                            Đang tải biểu đồ cân bằng cuộc sống...
-                          </div>
-                        }
-                      >
-                        <DashboardLifeAreaRadar data={radarData} />
-                      </Suspense>
+                      <DeferredDashboardLifeAreaRadar data={radarData} />
                     ) : (
                       <div className="flex h-[300px] flex-col items-center justify-center rounded-xl bg-slate-50 px-5 text-center">
                         <TrendingUp className="h-10 w-10 text-slate-300" />
