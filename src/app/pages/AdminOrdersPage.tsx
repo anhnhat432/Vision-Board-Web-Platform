@@ -30,6 +30,7 @@ import {
   adminSendExpiringBillingReminders,
   type AdminOverview,
   type AdminPaymentOrderSummary,
+  type AdminReminderRunResult,
   type AdminUserSummary,
 } from "@/services/adminService";
 import {
@@ -443,6 +444,57 @@ function RecentUserList({ users }: { users: AdminUserSummary[] }) {
   );
 }
 
+function BillingReminderPanel({
+  loading,
+  onRun,
+  overview,
+  result,
+}: {
+  loading: boolean;
+  onRun: () => void;
+  overview: AdminOverview | null;
+  result: AdminReminderRunResult | null;
+}) {
+  const emailConfigured = overview?.email.configured ?? false;
+  const expiringCount = overview?.summary.expiringSoonSubscriptions ?? 0;
+
+  return (
+    <Card className="border-0 shadow-[0_24px_60px_-38px_rgba(15,23,42,0.2)]">
+      <CardContent className="grid gap-5 p-5 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="flex gap-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
+            <Bell className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-base font-semibold text-slate-950">Nhắc gia hạn Plus</p>
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              {expiringCount > 0
+                ? `${expiringCount.toLocaleString("vi-VN")} gói Plus sẽ hết hạn trong 7 ngày.`
+                : "Không có gói Plus nào sắp hết hạn trong 7 ngày."}{" "}
+              Email provider: {emailConfigured ? "đã cấu hình" : overview?.email.reason ?? "chưa cấu hình"}.
+            </p>
+            {result ? (
+              <p className="mt-2 text-xs leading-5 text-slate-500">
+                Lần chạy gần nhất: quét {result.scanned}, gửi {result.sent}, trùng {result.duplicate}, bỏ qua{" "}
+                {result.skipped}, lỗi {result.failed}.
+              </p>
+            ) : null}
+          </div>
+        </div>
+        <Button
+          type="button"
+          className="gap-2 rounded-full"
+          disabled={loading || !emailConfigured || expiringCount === 0}
+          onClick={onRun}
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}
+          Gửi email nhắc hạn
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function AdminOrdersPage() {
   const navigate = useNavigate();
   const {
@@ -465,6 +517,7 @@ export function AdminOrdersPage() {
   const [busyOrderId, setBusyOrderId] = useState<string | null>(null);
   const [busyPaymentOrderId, setBusyPaymentOrderId] = useState<string | null>(null);
   const [reminderLoading, setReminderLoading] = useState(false);
+  const [reminderResult, setReminderResult] = useState<AdminReminderRunResult | null>(null);
 
   const isAdmin = userProfile?.role === "admin";
 
@@ -537,6 +590,7 @@ export function AdminOrdersPage() {
     setReminderLoading(true);
     try {
       const result = await adminSendExpiringBillingReminders({ daysAhead: 7 });
+      setReminderResult(result);
       if (!result.configured) {
         toast.info(`Email chưa cấu hình: ${result.email.reason ?? result.email.provider}`);
         return;
@@ -742,6 +796,13 @@ export function AdminOrdersPage() {
           />
         </div>
       ) : null}
+
+      <BillingReminderPanel
+        loading={reminderLoading}
+        onRun={handleReminderRun}
+        overview={overview}
+        result={reminderResult}
+      />
 
       <section className="grid gap-4 lg:grid-cols-2">
         <Card className="border-0 shadow-[0_24px_60px_-38px_rgba(15,23,42,0.2)]">

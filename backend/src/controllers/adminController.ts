@@ -125,8 +125,17 @@ function normalizeManualCompletionNote(value: unknown): string | undefined {
 
 function serializeSubscription(subscription: LeanSubscriptionSummary | undefined) {
   if (!subscription) return null;
+  const isExpired =
+    subscription.currentPeriodEnd &&
+    Number.isFinite(subscription.currentPeriodEnd.valueOf()) &&
+    subscription.currentPeriodEnd < new Date();
+  const hasActiveAccess =
+    subscription.planCode === "PLUS" &&
+    (subscription.status === "active" || subscription.status === "trialing") &&
+    !isExpired;
+
   return {
-    planCode: subscription.planCode,
+    planCode: hasActiveAccess ? subscription.planCode : "FREE",
     status: subscription.status,
     provider: subscription.provider,
     billingCycle: subscription.billingCycle,
@@ -242,7 +251,11 @@ export async function getAdminOverview(_req: Request, res: Response, next: NextF
     ] = await Promise.all([
       UserModel.countDocuments(),
       UserModel.countDocuments({ role: "admin" }),
-      BillingSubscriptionModel.countDocuments({ planCode: "PLUS", status: "active" }),
+      BillingSubscriptionModel.countDocuments({
+        planCode: "PLUS",
+        status: "active",
+        $or: [{ currentPeriodEnd: { $exists: false } }, { currentPeriodEnd: null }, { currentPeriodEnd: { $gte: now } }],
+      }),
       BillingSubscriptionModel.countDocuments({
         planCode: "PLUS",
         status: "active",

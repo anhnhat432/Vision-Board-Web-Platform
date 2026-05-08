@@ -22,10 +22,19 @@ export function getCurrentPlanFromData(userData: UserData, persistOnExpiry?: Per
   if (sub?.status === "active" || sub?.status === "trialing") {
     if (sub.renewsAt && new Date(sub.renewsAt) < new Date()) {
       sub.status = "canceled";
+      userData.entitlements = [];
       persistOnExpiry?.();
       return "FREE";
     }
     return normalizePlanCode(sub.planCode);
+  }
+
+  if (sub) {
+    if ((userData.entitlements ?? []).length > 0) {
+      userData.entitlements = [];
+      persistOnExpiry?.();
+    }
+    return "FREE";
   }
 
   const highestEntitledPlan = (userData.entitlements ?? []).reduce<PricingPlanCode>(
@@ -42,6 +51,7 @@ export function hasEntitlementInData(key: EntitlementKey, userData: UserData): b
 }
 
 export function getCurrentEntitlementKeysFromData(userData: UserData): EntitlementKey[] {
+  if (getCurrentPlanFromData(userData) === "FREE") return [];
   return Array.from(new Set((userData.entitlements ?? []).map((entitlement) => entitlement.key)));
 }
 

@@ -237,10 +237,12 @@ export class BillingService {
     }
 
     const activeKeys = resolveActiveEntitlementKeys(subscription);
+    const planCode: BillingPlanCode =
+      activeKeys.length > 0 ? subscription.planCode : "FREE";
 
     return {
       userId,
-      planCode: subscription.planCode,
+      planCode,
       status: subscription.status,
       activeKeys,
       source: subscription.source,

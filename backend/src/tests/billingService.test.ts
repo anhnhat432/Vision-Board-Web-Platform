@@ -479,7 +479,7 @@ describe("BillingService.getCurrentEntitlementForUser", () => {
 
     const snapshot = await service.getCurrentEntitlementForUser(userA);
 
-    assert.equal(snapshot.planCode, "PLUS");
+    assert.equal(snapshot.planCode, "FREE");
     assert.equal(snapshot.status, "canceled");
     assert.deepEqual(snapshot.activeKeys, []);
   });
@@ -512,7 +512,7 @@ describe("BillingService.getCurrentEntitlementForUser", () => {
 
     const snapshot = await service.getCurrentEntitlementForUser(userA);
 
-    assert.equal(snapshot.planCode, "PLUS");
+    assert.equal(snapshot.planCode, "FREE");
     assert.equal(snapshot.status, "active");
     assert.deepEqual(snapshot.activeKeys, []);
   });

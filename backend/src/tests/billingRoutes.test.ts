@@ -188,7 +188,7 @@ describe("GET /api/billing/entitlement", () => {
 
     assert.equal(response.status, 200);
     const data = response.body.data as Record<string, unknown>;
-    assert.equal(data.planCode, "PLUS");
+    assert.equal(data.planCode, "FREE");
     assert.equal(data.status, "canceled");
     assert.deepEqual(data.entitlements, []);
   });

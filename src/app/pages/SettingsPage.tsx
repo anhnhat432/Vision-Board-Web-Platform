@@ -1,6 +1,6 @@
 import type { ChangeEvent } from "react";
 import { useRef, useState } from "react";
-import { CalendarDays, CloudDownload, CreditCard, Loader2, User2 } from "lucide-react";
+import { AlertTriangle, CalendarDays, CloudDownload, CreditCard, Loader2, RefreshCw, User2 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { DashboardDataBackupCard } from "@/features/dashboard/components/DashboardDataBackupCard";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useAuthContext } from "@/lib/auth/AuthContext";
+import { formatBillingExpiryDate, getBillingExpiryInfo } from "../utils/billing-expiry";
 import { downloadLocalUserDataBackup } from "../utils/local-data-backup";
 import { getUserData, parseStoredUserData, saveUserData } from "../utils/storage";
 import { exportAccountData } from "@/services/syncService";
@@ -43,6 +44,9 @@ export function SettingsPage() {
   const { isConfigured, user, userProfile } = useAuthContext();
   const { userData: syncedUserData, reloadUserData } = useSyncedUserData();
   const userData = syncedUserData ?? getUserData();
+  const expiryInfo = getBillingExpiryInfo(userData.subscription);
+  const shouldShowExpiryNotice =
+    userData.subscription?.planCode === "PLUS" && (expiryInfo.isExpiringSoon || expiryInfo.isExpired);
   const accountLabel = userProfile?.displayName || user?.displayName || user?.email || "Khách";
   const accountStatus = !isConfigured
     ? "Đang dùng demo local"
@@ -120,7 +124,33 @@ export function SettingsPage() {
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]" aria-label="Cài đặt nhanh">
-        <Card className="glass-surface-sm rounded-2xl border shadow-none">
+        {shouldShowExpiryNotice && (
+          <Card className="glass-surface-sm rounded-[24px] border-amber-200 bg-amber-50/80 shadow-none lg:col-span-2">
+            <CardContent className="grid gap-4 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
+              <div className="flex gap-3">
+                <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-600" />
+                <div>
+                  <p className="text-sm font-semibold text-amber-950">
+                    {expiryInfo.isExpired
+                      ? "Gói Plus đã hết hạn"
+                      : `Gói Plus còn ${expiryInfo.daysLeft ?? 0} ngày`}
+                  </p>
+                  <p className="mt-1 text-sm leading-6 text-amber-800">
+                    {expiryInfo.isExpired
+                      ? "Gia hạn để mở lại quyền Plus trên tài khoản này."
+                      : `Chu kỳ hiện tại hết hạn ngày ${formatBillingExpiryDate(expiryInfo.expiresAt)}.`}
+                  </p>
+                </div>
+              </div>
+              <Button className="gap-2 rounded-full" onClick={() => navigate("/billing/plan")}>
+                <RefreshCw className="h-4 w-4" />
+                Mở trang gia hạn
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        <Card className="glass-surface-sm rounded-[24px] border shadow-none">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <User2 className="h-4 w-4 text-slate-500" />
@@ -148,7 +178,7 @@ export function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="glass-surface-sm rounded-2xl border shadow-none">
+        <Card className="glass-surface-sm rounded-[24px] border shadow-none">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Lối tắt cài đặt</CardTitle>
             <CardDescription>Mở đúng khu vực khi cần chỉnh chu kỳ hoặc gói truy cập.</CardDescription>

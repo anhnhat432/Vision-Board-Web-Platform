@@ -75,6 +75,13 @@ Coverage:
 
 Live Casso payment cannot be fully smoke-tested without an actual bank transfer or a signed Casso webhook from Casso. The backend safety cases above cover the webhook logic; run one small real transfer before final public launch if possible.
 
+## Plus expiration reminders
+
+- Billing and Settings show an in-app renewal notice when a PLUS period has 7 days or fewer left.
+- Admin orders screen has a reminder panel for sending 7-day renewal emails.
+- Reminder email sending is idempotent per subscription/date through `BillingEvent`, so rerunning the admin action does not spam the same user on the same expiry date.
+- Email sending requires `EMAIL_PROVIDER=resend`, `EMAIL_FROM`, and `RESEND_API_KEY` on Render.
+
 ## Operational risks
 
 Render free cold start:

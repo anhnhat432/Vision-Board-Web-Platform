@@ -109,6 +109,29 @@ describe("monetization flows", () => {
     expect(keys).toContain("advanced_analytics");
   });
 
+  it("entitlement gating: expired Plus subscription revokes local access", () => {
+    const grantedAt = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString();
+    const renewsAt = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+    updateUserData((data) => {
+      data.subscription = {
+        planCode: "PLUS",
+        status: "active",
+        billingCycle: "season-pass",
+        startedAt: grantedAt,
+        renewsAt,
+      };
+      data.entitlements = [
+        { key: "premium_templates", sourcePlan: "PLUS", grantedAt },
+        { key: "premium_review_insights", sourcePlan: "PLUS", grantedAt },
+      ];
+    });
+
+    expect(getCurrentPlan()).toBe("FREE");
+    expect(getCurrentEntitlementKeys()).toHaveLength(0);
+    expect(getUserData().subscription?.status).toBe("canceled");
+  });
+
   it("paywall: already active plan returns already_active status", async () => {
     seedTwelveWeekGoal({ planCode: "PLUS" });
     expect(getCurrentPlan()).toBe("PLUS");

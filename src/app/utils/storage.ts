@@ -216,9 +216,15 @@ function normalizeReflection(reflection: Reflection): Reflection {
 function normalizeUserData(data: UserData): UserData {
   const subscription = data.subscription ?? null;
   const entitlements = Array.isArray(data.entitlements) ? data.entitlements : [];
+  const subscriptionIsActive = subscription?.status === "active" || subscription?.status === "trialing";
+  const subscriptionExpired = Boolean(
+    subscription?.renewsAt && Number.isFinite(new Date(subscription.renewsAt).valueOf()) && new Date(subscription.renewsAt) < new Date(),
+  );
   const normalizedEntitlements =
-    subscription?.status === "active" && entitlements.length === 0
+    subscriptionIsActive && !subscriptionExpired && entitlements.length === 0
       ? getEntitlementsForPlan(subscription.planCode, subscription.startedAt)
+      : subscription && (!subscriptionIsActive || subscriptionExpired)
+        ? []
       : entitlements;
 
   return {

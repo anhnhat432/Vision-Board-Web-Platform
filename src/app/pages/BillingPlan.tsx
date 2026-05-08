@@ -1,5 +1,5 @@
 import { apiClient, toAppError } from "@/lib/api/apiClient";
-import { CreditCard, Crown, LifeBuoy, Loader2, ReceiptText, RefreshCw, Shield, Sparkles } from "lucide-react";
+import { AlertTriangle, CreditCard, Crown, LifeBuoy, Loader2, ReceiptText, RefreshCw, Shield, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { isDemoMode, isRealMode, shouldShowBillingDebugUi } from "../utils/app-mode";
+import { formatBillingExpiryDate, getBillingExpiryInfo } from "../utils/billing-expiry";
 import { getBillingProviderModeLabel, getBillingReadinessLabel } from "../utils/billing-contract";
 import { trackExperimentExposure, trackPaywallCtaClicked } from "../utils/monetization-analytics";
 import {
@@ -199,6 +200,7 @@ export function BillingPlan() {
 
   const billingStatus = useMemo(() => getBillingProviderStatus(), []);
   const subscription = userData.subscription;
+  const expiryInfo = useMemo(() => getBillingExpiryInfo(subscription), [subscription]);
 
   const lastEntitlementSync = useMemo(() => getLastEntitlementSyncSnapshot(), []);
   const lastRestoreAccess = useMemo(() => getLastRestoreAccessSnapshot(), []);
@@ -287,7 +289,11 @@ export function BillingPlan() {
     }
   };
 
-  const isExpired = subscription?.renewsAt && new Date(subscription.renewsAt) < new Date();
+  const isExpired = expiryInfo.isExpired;
+  const shouldShowExpiryNotice =
+    realMode &&
+    subscription?.planCode === "PLUS" &&
+    (expiryInfo.isExpiringSoon || expiryInfo.isExpired);
 
   const isTrialing = subscription?.status === "trialing" && !isExpired;
 
@@ -428,6 +434,32 @@ export function BillingPlan() {
             </div>
             <Button variant="outline" size="sm" onClick={pollServerEntitlement}>
               Thử lại
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {shouldShowExpiryNotice && (
+        <Card className={isExpired ? "border-red-200 bg-red-50" : "border-amber-200 bg-amber-50"}>
+          <CardContent className="grid gap-4 p-4 sm:grid-cols-[1fr_auto] sm:items-center">
+            <div className="flex gap-3">
+              <AlertTriangle className={`mt-0.5 h-5 w-5 ${isExpired ? "text-red-600" : "text-amber-600"}`} />
+              <div>
+                <p className={`font-medium ${isExpired ? "text-red-900" : "text-amber-900"}`}>
+                  {isExpired
+                    ? "Gói Plus đã hết hạn"
+                    : `Gói Plus còn ${expiryInfo.daysLeft ?? 0} ngày`}
+                </p>
+                <p className={`mt-1 text-sm leading-6 ${isExpired ? "text-red-700" : "text-amber-700"}`}>
+                  {isExpired
+                    ? "Quyền Plus đã được thu hồi. Gia hạn để mở lại mẫu nâng cao, review insight và thống kê."
+                    : `Chu kỳ hiện tại hết hạn ngày ${formatBillingExpiryDate(expiryInfo.expiresAt)}. Gia hạn sớm để không bị gián đoạn quyền Plus.`}
+                </p>
+              </div>
+            </div>
+            <Button onClick={handleRenewPlan}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Gia hạn Plus
             </Button>
           </CardContent>
         </Card>
