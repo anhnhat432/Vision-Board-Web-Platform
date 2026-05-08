@@ -40,16 +40,24 @@ export function resolveWorkspaceGateState({
   demoMode,
   pathname,
   user,
+  userProfile,
+  userProfileError,
+  userProfileLoading,
 }: UseWorkspaceGateOptions): WorkspaceGateState {
   const isPublicHome = isPublicHomePath(pathname);
   const hasUser = Boolean(user);
   const shouldRedirectToLogin =
     !demoMode && !authLoading && !hasUser && !isPublicHome && !isAuthProtectedPath(pathname);
-  const shouldWaitForWorkspace = !demoMode && (!isPublicHome || hasUser) && authLoading;
+  const shouldWaitForAuth = !demoMode && (!isPublicHome || hasUser) && authLoading;
+  const shouldWaitForProfile =
+    !demoMode && !authLoading && hasUser && (userProfileLoading || (!userProfile && !userProfileError));
+  const shouldWaitForWorkspace = shouldWaitForAuth || shouldWaitForProfile;
   const workspaceGateStage: WorkspaceGateStage = shouldRedirectToLogin
     ? "redirect-login"
-    : authLoading
+    : shouldWaitForAuth
       ? "auth"
+      : shouldWaitForProfile
+        ? "profile"
       : "sync";
 
   return {

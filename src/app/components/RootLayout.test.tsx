@@ -39,6 +39,7 @@ const backendHydrationMock = vi.hoisted(() => ({
 }));
 const productionMock = vi.hoisted(() => ({
   maybeShowBrowserReminderNotification: vi.fn(),
+  syncEntitlementsWithProvider: vi.fn(),
   syncPendingOutbox: vi.fn(),
 }));
 
@@ -72,6 +73,7 @@ vi.mock("@/services/syncService", () => ({
 
 vi.mock("../utils/production", () => ({
   maybeShowBrowserReminderNotification: productionMock.maybeShowBrowserReminderNotification,
+  syncEntitlementsWithProvider: productionMock.syncEntitlementsWithProvider,
   syncPendingOutbox: productionMock.syncPendingOutbox,
 }));
 
@@ -273,6 +275,15 @@ describe("RootLayout onboarding redirect", () => {
       normalizedClientIdsCount: 8,
     });
     productionMock.maybeShowBrowserReminderNotification.mockClear();
+    productionMock.syncEntitlementsWithProvider.mockReset();
+    productionMock.syncEntitlementsWithProvider.mockResolvedValue({
+      ok: true,
+      status: "already_current",
+      providerMode: "api_contract",
+      planCode: "FREE",
+      entitlementKeys: [],
+      message: "No premium entitlement.",
+    });
     productionMock.syncPendingOutbox.mockClear();
     setAuthContext();
   });
@@ -297,7 +308,7 @@ describe("RootLayout onboarding redirect", () => {
     expect(router.state.location.pathname).toBe("/order");
   });
 
-  it("keeps the workspace usable while an authenticated profile is loading", async () => {
+  it("waits for the authenticated profile before opening the workspace", async () => {
     seedAuthenticatedCompletedWorkspace();
     setAuthContext({
       user: { uid: "user_test", email: "test@example.com" },
@@ -306,8 +317,8 @@ describe("RootLayout onboarding redirect", () => {
     });
     const { router } = renderAppShell("/goals");
 
-    expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
-    expect(screen.queryByTestId("onboarding-page")).not.toBeInTheDocument();
+    expect(await screen.findByText("Đang mở workspace của bạn")).toBeInTheDocument();
+    expect(screen.queryByTestId("goals-page")).not.toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/goals");
   });
 
