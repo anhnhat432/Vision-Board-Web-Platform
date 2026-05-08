@@ -66,6 +66,7 @@ const PAYMENT_STATUS_COLORS: Record<AdminPaymentOrderSummary["status"], string> 
   expired: "border-slate-200 bg-slate-50 text-slate-600",
   failed: "border-rose-200 bg-rose-50 text-rose-800",
 };
+const ADMIN_LOAD_TIMEOUT_MS = 18_000;
 
 function getErrorMessage(error: unknown, fallback: string): string {
   if (error && typeof error === "object" && "message" in error) {
@@ -93,6 +94,19 @@ function formatDate(iso: string | undefined): string {
 
 function formatVnd(value: number): string {
   return `${value.toLocaleString("vi-VN")}đ`;
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timeoutId = window.setTimeout(() => {
+      reject(new Error(message));
+    }, timeoutMs);
+
+    promise
+      .then(resolve)
+      .catch(reject)
+      .finally(() => window.clearTimeout(timeoutId));
+  });
 }
 
 function SummaryCard({
@@ -237,7 +251,14 @@ function RecentUserList({ users }: { users: AdminUserSummary[] }) {
 
 export function AdminOrdersPage() {
   const navigate = useNavigate();
-  const { user, userProfile, authLoading } = useAuthContext();
+  const {
+    authLoading,
+    refreshUserProfile,
+    user,
+    userProfile,
+    userProfileError,
+    userProfileLoading,
+  } = useAuthContext();
   const [overview, setOverview] = useState<AdminOverview | null>(null);
   const [orders, setOrders] = useState<ApiOrder[]>([]);
   const [loading, setLoading] = useState(true);
@@ -253,7 +274,11 @@ export function AdminOrdersPage() {
     setError(null);
 
     try {
-      const [overviewData, orderData] = await Promise.all([adminGetOverview(), adminGetOrders()]);
+      const [overviewData, orderData] = await withTimeout(
+        Promise.all([adminGetOverview(), adminGetOrders()]),
+        ADMIN_LOAD_TIMEOUT_MS,
+        "Backend admin phản hồi quá lâu. Render có thể đang cold start; hãy thử lại sau vài giây.",
+      );
       setOverview(overviewData);
       setOrders(orderData);
     } catch (err) {
@@ -265,6 +290,7 @@ export function AdminOrdersPage() {
 
   useEffect(() => {
     if (authLoading) return;
+    if (userProfileLoading) return;
 
     if (!user || !isAdmin) {
       setLoading(false);
@@ -272,7 +298,7 @@ export function AdminOrdersPage() {
     }
 
     void loadAdminData();
-  }, [authLoading, isAdmin, loadAdminData, user]);
+  }, [authLoading, isAdmin, loadAdminData, user, userProfileLoading]);
 
   const handleReminderRun = async () => {
     setReminderLoading(true);
@@ -348,10 +374,30 @@ export function AdminOrdersPage() {
     );
   }
 
-  if (!userProfile) {
+  if (userProfileLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+      </div>
+    );
+  }
+
+  if (!userProfile) {
+    return (
+      <div className="space-y-8 pb-12">
+        <Card className="border-0 bg-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.28)]">
+          <CardContent className="p-10 text-center lg:p-14">
+            <ShieldAlert className="mx-auto h-12 w-12 text-amber-500" />
+            <h1 className="mt-6 text-2xl font-bold text-slate-900">Không tải được quyền admin</h1>
+            <p className="mx-auto mt-3 max-w-xl text-base leading-7 text-slate-500">
+              {userProfileError ||
+                "Backend chưa trả profile cho tài khoản này. Kiểm tra Render đã deploy, VITE_API_BASE_URL trỏ đúng backend và ADMIN_EMAILS có email admin."}
+            </p>
+            <Button className="mt-6" variant="outline" onClick={refreshUserProfile}>
+              Thử lại
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }

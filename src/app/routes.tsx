@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import { Navigate, createBrowserRouter } from "react-router";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
+import { AdminLayout } from "./components/admin/AdminLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RootLayout } from "./components/RootLayout";
 import { Dashboard } from "./pages/Dashboard";
@@ -48,10 +49,29 @@ function RedirectToBillingPlan() {
   return <Navigate to="/billing/plan" replace />;
 }
 
+function RedirectToAdminOrders() {
+  return <Navigate to="/admin/orders" replace />;
+}
+
 export const router = createBrowserRouter([
   {
     path: "/login",
     ...lazyRoute(() => import("./pages/LoginPage"), "LoginPage"),
+  },
+  {
+    path: "/admin",
+    Component: AdminLayout,
+    errorElement: <AppErrorBoundary />,
+    children: [
+      {
+        index: true,
+        Component: RedirectToAdminOrders,
+      },
+      {
+        path: "orders",
+        ...lazyRoute(() => import("./pages/AdminOrdersPage"), "AdminOrdersPage"),
+      },
+    ],
   },
   {
     path: "/",
@@ -142,10 +162,6 @@ export const router = createBrowserRouter([
           {
             path: "order-status/:orderId?",
             ...lazyRoute(() => import("./pages/OrderStatusPage"), "OrderStatusPage"),
-          },
-          {
-            path: "admin/orders",
-            ...lazyRoute(() => import("./pages/AdminOrdersPage"), "AdminOrdersPage"),
           },
         ],
       },

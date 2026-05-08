@@ -184,6 +184,11 @@ export function RootLayout() {
   }, []);
 
   useEffect(() => {
+    if (userProfile?.role === "admin") {
+      navigate("/admin/orders", { replace: true });
+      return;
+    }
+
     if (shouldRedirectToLogin) {
       const { destination, loginPath } = buildLoginRedirect(location.pathname, location.search, location.hash);
       navigate(loginPath, { replace: true, state: { from: destination } });
@@ -211,6 +216,7 @@ export function RootLayout() {
     shouldRedirectToLogin,
     shouldWaitForWorkspace,
     user,
+    userProfile?.role,
   ]);
 
   useEffect(() => {
