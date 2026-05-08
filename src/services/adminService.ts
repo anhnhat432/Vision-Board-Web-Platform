@@ -32,9 +32,25 @@ export interface AdminPaymentOrderSummary {
   currency: string;
   status: "pending" | "completed" | "expired" | "failed";
   provider: string;
+  bankAccount?: string;
+  bankName?: string;
+  accountName?: string;
+  description?: string;
+  cassoTransactionId?: string;
+  manualCompletedBy?: string;
+  manualCompletedAt?: string;
+  manualCompletionNote?: string;
   createdAt?: string;
   completedAt?: string;
   expiresAt?: string;
+  updatedAt?: string;
+  user: {
+    firebaseUid: string;
+    email: string;
+    displayName: string;
+    role: "user" | "admin";
+    createdAt?: string;
+  } | null;
 }
 
 export interface AdminOverview {
@@ -71,10 +87,32 @@ export interface AdminReminderRunResult {
   failed: number;
 }
 
+export interface AdminPaymentOrderListResponse {
+  generatedAt: string;
+  query: string;
+  status: AdminPaymentOrderSummary["status"] | "all";
+  limit: number;
+  total: number;
+  items: AdminPaymentOrderSummary[];
+}
+
+export interface AdminPaymentOrderListParams {
+  q?: string;
+  status?: AdminPaymentOrderSummary["status"] | "all";
+  limit?: number;
+}
+
+export interface AdminManualCompletePaymentPayload {
+  manualCompletionNote?: string;
+}
+
 export interface AdminManualCompletePaymentResult {
   orderId: string;
   status: "completed";
   completedAt: string | null;
+  manualCompletedBy?: string | null;
+  manualCompletedAt?: string | null;
+  manualCompletionNote?: string | null;
   subscriptionId?: string;
   eventStatus: "processed" | "duplicate" | "failed" | "already_completed";
 }
@@ -83,12 +121,30 @@ export function adminGetOverview(): Promise<AdminOverview> {
   return get<AdminOverview>("/admin/overview");
 }
 
+export function adminListPaymentOrders(
+  params: AdminPaymentOrderListParams = {},
+): Promise<AdminPaymentOrderListResponse> {
+  const searchParams = new URLSearchParams();
+  if (params.q?.trim()) searchParams.set("q", params.q.trim());
+  if (params.status && params.status !== "all") searchParams.set("status", params.status);
+  if (params.limit) searchParams.set("limit", String(params.limit));
+
+  const query = searchParams.toString();
+  return get<AdminPaymentOrderListResponse>(`/admin/billing/payment-orders${query ? `?${query}` : ""}`);
+}
+
 export function adminSendExpiringBillingReminders(
   payload: AdminReminderRequest = {},
 ): Promise<AdminReminderRunResult> {
   return post<AdminReminderRunResult, AdminReminderRequest>("/admin/billing/reminders/expiring", payload);
 }
 
-export function adminCompletePaymentOrderManually(orderId: string): Promise<AdminManualCompletePaymentResult> {
-  return post<AdminManualCompletePaymentResult>(`/admin/billing/payment-orders/${orderId}/complete`, {});
+export function adminCompletePaymentOrderManually(
+  orderId: string,
+  payload: AdminManualCompletePaymentPayload = {},
+): Promise<AdminManualCompletePaymentResult> {
+  return post<AdminManualCompletePaymentResult, AdminManualCompletePaymentPayload>(
+    `/admin/billing/payment-orders/${orderId}/complete`,
+    payload,
+  );
 }

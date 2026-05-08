@@ -1,10 +1,16 @@
 import type { Request, Response, NextFunction } from "express";
+import type { FilterQuery } from "mongoose";
 
+import { requireAuthUser } from "./controllerHelpers";
 import { billingService } from "../services/billingServiceInstance";
 import { BillingEventModel } from "../models/BillingEventModel";
 import { BillingSubscriptionModel } from "../models/BillingSubscriptionModel";
 import { OrderModel } from "../models/OrderModel";
-import { PaymentOrderModel } from "../models/PaymentOrderModel";
+import {
+  PaymentOrderModel,
+  type PaymentOrderDocument,
+  type PaymentOrderStatus,
+} from "../models/PaymentOrderModel";
 import { UserModel } from "../models/UserModel";
 import {
   getEmailRuntimeStatus,
@@ -17,7 +23,12 @@ import { successResponse } from "../utils/apiResponse";
 const DEFAULT_EXPIRING_REMINDER_DAYS = 7;
 const MAX_EXPIRING_REMINDER_DAYS = 30;
 const MAX_REMINDERS_PER_RUN = 100;
+const DEFAULT_PAYMENT_ORDER_LIMIT = 50;
+const MAX_PAYMENT_ORDER_LIMIT = 100;
+const MAX_PAYMENT_ORDER_SEARCH_LENGTH = 120;
+const MAX_MANUAL_COMPLETION_NOTE_LENGTH = 500;
 const TWELVE_WEEKS_MS = 12 * 7 * 24 * 60 * 60 * 1000;
+const PAYMENT_ORDER_STATUSES = new Set<PaymentOrderStatus>(["pending", "completed", "expired", "failed"]);
 
 type UserRole = "user" | "admin";
 
@@ -49,9 +60,18 @@ interface LeanPaymentOrderSummary {
   currency: string;
   status: string;
   provider: string;
+  bankAccount?: string;
+  bankName?: string;
+  accountName?: string;
+  description?: string;
+  cassoTransactionId?: string;
+  manualCompletedBy?: string;
+  manualCompletedAt?: Date;
+  manualCompletionNote?: string;
   createdAt?: Date;
   completedAt?: Date;
   expiresAt?: Date;
+  updatedAt?: Date;
 }
 
 function parseDaysAhead(value: unknown): number {
@@ -69,6 +89,40 @@ function isDuplicateKeyError(error: unknown): boolean {
   return Boolean(error && typeof error === "object" && "code" in error && error.code === 11000);
 }
 
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function parsePaymentOrderLimit(value: unknown): number {
+  const parsed = typeof value === "string" ? Number(value.trim()) : typeof value === "number" ? value : NaN;
+  if (!Number.isFinite(parsed)) return DEFAULT_PAYMENT_ORDER_LIMIT;
+  return Math.min(Math.max(Math.floor(parsed), 1), MAX_PAYMENT_ORDER_LIMIT);
+}
+
+function normalizePaymentOrderSearch(value: unknown): string {
+  if (typeof value !== "string") return "";
+  return value.trim().slice(0, MAX_PAYMENT_ORDER_SEARCH_LENGTH);
+}
+
+function normalizePaymentOrderStatus(value: unknown): PaymentOrderStatus | "all" {
+  if (typeof value !== "string") return "all";
+  const normalized = value.trim().toLowerCase();
+  return PAYMENT_ORDER_STATUSES.has(normalized as PaymentOrderStatus)
+    ? (normalized as PaymentOrderStatus)
+    : "all";
+}
+
+function normalizeManualCompletionNote(value: unknown): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== "string") {
+    throw new ApiError(400, "manualCompletionNote must be a string.", undefined, "invalid_payload");
+  }
+
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return undefined;
+  return trimmed.slice(0, MAX_MANUAL_COMPLETION_NOTE_LENGTH);
+}
+
 function serializeSubscription(subscription: LeanSubscriptionSummary | undefined) {
   if (!subscription) return null;
   return {
@@ -78,6 +132,93 @@ function serializeSubscription(subscription: LeanSubscriptionSummary | undefined
     billingCycle: subscription.billingCycle,
     currentPeriodEnd: subscription.currentPeriodEnd,
   };
+}
+
+function serializeUserSummary(user: LeanUserSummary | undefined) {
+  if (!user) return null;
+  return {
+    firebaseUid: user.firebaseUid,
+    email: user.email,
+    displayName: user.displayName ?? "",
+    role: user.role,
+    createdAt: user.createdAt,
+  };
+}
+
+function serializePaymentOrder(order: LeanPaymentOrderSummary, userById: Map<string, LeanUserSummary>) {
+  return {
+    orderId: order.orderId,
+    userId: order.userId,
+    planCode: order.planCode,
+    billingCycle: order.billingCycle,
+    amount: order.amount,
+    currency: order.currency,
+    status: order.status,
+    provider: order.provider,
+    bankAccount: order.bankAccount,
+    bankName: order.bankName,
+    accountName: order.accountName,
+    description: order.description,
+    cassoTransactionId: order.cassoTransactionId,
+    manualCompletedBy: order.manualCompletedBy,
+    manualCompletedAt: order.manualCompletedAt,
+    manualCompletionNote: order.manualCompletionNote,
+    createdAt: order.createdAt,
+    completedAt: order.completedAt,
+    expiresAt: order.expiresAt,
+    updatedAt: order.updatedAt,
+    user: serializeUserSummary(userById.get(order.userId)),
+  };
+}
+
+async function getUserMapByFirebaseIds(userIds: string[]): Promise<Map<string, LeanUserSummary>> {
+  const uniqueUserIds = [...new Set(userIds.filter(Boolean))];
+  if (uniqueUserIds.length === 0) return new Map();
+
+  const users = await UserModel.find({ firebaseUid: { $in: uniqueUserIds } })
+    .select("firebaseUid email displayName role createdAt")
+    .lean<LeanUserSummary[]>();
+
+  return new Map(users.map((user) => [user.firebaseUid, user]));
+}
+
+async function buildPaymentOrderFilter(
+  status: PaymentOrderStatus | "all",
+  search: string,
+): Promise<FilterQuery<PaymentOrderDocument>> {
+  const filter: FilterQuery<PaymentOrderDocument> = {};
+
+  if (status !== "all") {
+    filter.status = status;
+  }
+
+  if (!search) return filter;
+
+  const escapedSearch = escapeRegex(search);
+  const searchRegex = new RegExp(escapedSearch, "i");
+  const matchedUsers = await UserModel.find({
+    $or: [
+      { firebaseUid: searchRegex },
+      { email: searchRegex },
+      { displayName: searchRegex },
+    ],
+  })
+    .select("firebaseUid")
+    .limit(50)
+    .lean<Array<Pick<LeanUserSummary, "firebaseUid">>>();
+
+  const userIds = matchedUsers.map((user) => user.firebaseUid);
+  filter.$or = [
+    { orderId: searchRegex },
+    { userId: searchRegex },
+    { description: searchRegex },
+    { cassoTransactionId: searchRegex },
+  ];
+  if (userIds.length > 0) {
+    filter.$or.push({ userId: { $in: userIds } });
+  }
+
+  return filter;
 }
 
 export async function getAdminOverview(_req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -116,7 +257,9 @@ export async function getAdminOverview(_req: Request, res: Response, next: NextF
         .limit(12)
         .lean<LeanUserSummary[]>(),
       PaymentOrderModel.find()
-        .select("orderId userId planCode billingCycle amount currency status provider createdAt completedAt expiresAt")
+        .select(
+          "orderId userId planCode billingCycle amount currency status provider bankAccount bankName accountName description cassoTransactionId manualCompletedBy manualCompletedAt manualCompletionNote createdAt completedAt expiresAt updatedAt",
+        )
         .sort({ createdAt: -1 })
         .limit(12)
         .lean<LeanPaymentOrderSummary[]>(),
@@ -143,6 +286,7 @@ export async function getAdminOverview(_req: Request, res: Response, next: NextF
         subscriptionByUserId.set(subscription.userId, subscription);
       }
     }
+    const paymentUserById = await getUserMapByFirebaseIds(recentPayments.map((payment) => payment.userId));
 
     res.status(200).json(
       successResponse(
@@ -168,9 +312,46 @@ export async function getAdminOverview(_req: Request, res: Response, next: NextF
             createdAt: user.createdAt,
             subscription: serializeSubscription(subscriptionByUserId.get(user.firebaseUid)),
           })),
-          recentPayments,
+          recentPayments: recentPayments.map((payment) => serializePaymentOrder(payment, paymentUserById)),
         },
         "Admin overview loaded.",
+      ),
+    );
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getAdminPaymentOrders(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const status = normalizePaymentOrderStatus(req.query.status);
+    const query = normalizePaymentOrderSearch(req.query.q ?? req.query.query ?? req.query.search);
+    const limit = parsePaymentOrderLimit(req.query.limit);
+    const filter = await buildPaymentOrderFilter(status, query);
+
+    const [total, orders] = await Promise.all([
+      PaymentOrderModel.countDocuments(filter),
+      PaymentOrderModel.find(filter)
+        .select(
+          "orderId userId planCode billingCycle amount currency status provider bankAccount bankName accountName description cassoTransactionId manualCompletedBy manualCompletedAt manualCompletionNote createdAt completedAt expiresAt updatedAt",
+        )
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .lean<LeanPaymentOrderSummary[]>(),
+    ]);
+    const userById = await getUserMapByFirebaseIds(orders.map((order) => order.userId));
+
+    res.status(200).json(
+      successResponse(
+        {
+          generatedAt: new Date().toISOString(),
+          query,
+          status,
+          limit,
+          total,
+          items: orders.map((order) => serializePaymentOrder(order, userById)),
+        },
+        "Admin payment orders loaded.",
       ),
     );
   } catch (error) {
@@ -295,7 +476,11 @@ export async function sendExpiringBillingReminders(req: Request, res: Response, 
 
 export async function completePaymentOrderManually(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    const adminUser = requireAuthUser(req);
     const orderId = req.params.orderId?.trim().toUpperCase();
+    const manualCompletionNote = normalizeManualCompletionNote(
+      req.body?.manualCompletionNote ?? req.body?.adminNote ?? req.body?.note,
+    );
     const order = await PaymentOrderModel.findOne({ orderId });
 
     if (!order) {
@@ -309,6 +494,9 @@ export async function completePaymentOrderManually(req: Request, res: Response, 
             orderId: order.orderId,
             status: order.status,
             completedAt: order.completedAt?.toISOString() ?? null,
+            manualCompletedBy: order.manualCompletedBy ?? null,
+            manualCompletedAt: order.manualCompletedAt?.toISOString() ?? null,
+            manualCompletionNote: order.manualCompletionNote ?? null,
             eventStatus: "already_completed",
           },
           "Payment order is already completed.",
@@ -329,6 +517,7 @@ export async function completePaymentOrderManually(req: Request, res: Response, 
         userId: order.userId,
         amount: order.amount,
         status: "manual_completed",
+        note: manualCompletionNote,
       }),
     );
 
@@ -349,6 +538,11 @@ export async function completePaymentOrderManually(req: Request, res: Response, 
     order.status = "completed";
     order.completedAt = now;
     order.cassoTransactionId = order.cassoTransactionId ?? `manual_${now.getTime()}`;
+    order.manualCompletedBy = adminUser.uid;
+    order.manualCompletedAt = now;
+    if (manualCompletionNote !== undefined) {
+      order.manualCompletionNote = manualCompletionNote;
+    }
     await order.save();
 
     res.status(200).json(
@@ -357,6 +551,9 @@ export async function completePaymentOrderManually(req: Request, res: Response, 
           orderId: order.orderId,
           status: order.status,
           completedAt: order.completedAt?.toISOString() ?? null,
+          manualCompletedBy: order.manualCompletedBy ?? null,
+          manualCompletedAt: order.manualCompletedAt?.toISOString() ?? null,
+          manualCompletionNote: order.manualCompletionNote ?? null,
           subscriptionId: result.subscription.id,
           eventStatus: result.eventStatus,
         },

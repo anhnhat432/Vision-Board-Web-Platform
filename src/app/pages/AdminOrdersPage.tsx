@@ -1,12 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
   Bell,
+  CheckCircle2,
   ClipboardList,
   CreditCard,
   Loader2,
   Package,
+  RefreshCw,
+  Search,
   ShieldAlert,
   Users,
   WalletCards,
@@ -17,10 +20,13 @@ import { toast } from "sonner";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
   adminCompletePaymentOrderManually,
   adminGetOverview,
+  adminListPaymentOrders,
   adminSendExpiringBillingReminders,
   type AdminOverview,
   type AdminPaymentOrderSummary,
@@ -66,6 +72,19 @@ const PAYMENT_STATUS_COLORS: Record<AdminPaymentOrderSummary["status"], string> 
   expired: "border-slate-200 bg-slate-50 text-slate-600",
   failed: "border-rose-200 bg-rose-50 text-rose-800",
 };
+const PAYMENT_STATUS_LABELS: Record<AdminPaymentOrderSummary["status"], string> = {
+  pending: "Chờ xác nhận",
+  completed: "Đã mở Plus",
+  expired: "Hết hạn",
+  failed: "Thất bại",
+};
+const PAYMENT_STATUS_FILTERS: Array<AdminPaymentOrderSummary["status"] | "all"> = [
+  "all",
+  "pending",
+  "completed",
+  "expired",
+  "failed",
+];
 const ADMIN_LOAD_TIMEOUT_MS = 18_000;
 
 function getErrorMessage(error: unknown, fallback: string): string {
@@ -203,7 +222,7 @@ function RecentPaymentList({
             </p>
           </div>
           <Badge variant="outline" className={PAYMENT_STATUS_COLORS[payment.status]}>
-            {payment.status}
+            {PAYMENT_STATUS_LABELS[payment.status]}
           </Badge>
           {payment.status === "pending" || payment.status === "expired" ? (
             <Button
@@ -221,6 +240,181 @@ function RecentPaymentList({
         </div>
       ))}
     </div>
+  );
+}
+
+function getPaymentOwnerLabel(payment: AdminPaymentOrderSummary): string {
+  return payment.user?.email || payment.user?.displayName || payment.userId;
+}
+
+function PaymentRecoveryPanel({
+  busyOrderId,
+  loading,
+  onManualComplete,
+  onRefresh,
+  onSearch,
+  payments,
+  query,
+  status,
+  total,
+}: {
+  busyOrderId: string | null;
+  loading: boolean;
+  onManualComplete: (orderId: string) => void;
+  onRefresh: () => void;
+  onSearch: (query: string, status: AdminPaymentOrderSummary["status"] | "all") => void;
+  payments: AdminPaymentOrderSummary[];
+  query: string;
+  status: AdminPaymentOrderSummary["status"] | "all";
+  total: number;
+}) {
+  const [draftQuery, setDraftQuery] = useState(query);
+  const [draftStatus, setDraftStatus] = useState<AdminPaymentOrderSummary["status"] | "all">(status);
+
+  useEffect(() => {
+    setDraftQuery(query);
+  }, [query]);
+
+  useEffect(() => {
+    setDraftStatus(status);
+  }, [status]);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    onSearch(draftQuery, draftStatus);
+  };
+
+  return (
+    <Card className="border-0 shadow-[0_24px_60px_-38px_rgba(15,23,42,0.22)]">
+      <CardHeader className="gap-4">
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+              Khôi phục thanh toán VietQR
+            </CardTitle>
+            <CardDescription>
+              Dùng khi người dùng đã chuyển tiền nhưng Casso không match được nội dung chuyển khoản.
+            </CardDescription>
+          </div>
+          <Button type="button" variant="outline" className="rounded-full" disabled={loading} onClick={onRefresh}>
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+            Tải lại
+          </Button>
+        </div>
+
+        <form className="grid gap-3 lg:grid-cols-[1fr_180px_auto]" onSubmit={handleSubmit}>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Input
+              className="pl-11"
+              value={draftQuery}
+              onChange={(event) => setDraftQuery(event.target.value)}
+              placeholder="Tìm order code, email, user id, mã giao dịch"
+            />
+          </div>
+          <Select
+            value={draftStatus}
+            onValueChange={(value) => setDraftStatus(value as AdminPaymentOrderSummary["status"] | "all")}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Trạng thái" />
+            </SelectTrigger>
+            <SelectContent>
+              {PAYMENT_STATUS_FILTERS.map((item) => (
+                <SelectItem key={item} value={item}>
+                  {item === "all" ? "Tất cả" : PAYMENT_STATUS_LABELS[item]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button type="submit" className="rounded-full" disabled={loading}>
+            Tìm
+          </Button>
+        </form>
+      </CardHeader>
+
+      <CardContent>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500">
+          <span>
+            Hiển thị {payments.length.toLocaleString("vi-VN")} / {total.toLocaleString("vi-VN")} đơn
+          </span>
+          <span>Chỉ bấm mở Plus sau khi đã đối chiếu số tiền trong app ngân hàng/Casso.</span>
+        </div>
+
+        {payments.length === 0 ? (
+          <p className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">Không tìm thấy payment order phù hợp.</p>
+        ) : (
+          <div className="overflow-hidden rounded-3xl border border-slate-100">
+            <div className="hidden grid-cols-[1.1fr_1.2fr_0.8fr_0.8fr_1fr] gap-4 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 lg:grid">
+              <span>Order</span>
+              <span>User</span>
+              <span>Số tiền</span>
+              <span>Trạng thái</span>
+              <span className="text-right">Hành động</span>
+            </div>
+            <div className="divide-y divide-slate-100 bg-white">
+              {payments.map((payment) => {
+                const canComplete = payment.status === "pending" || payment.status === "expired" || payment.status === "failed";
+                return (
+                  <div
+                    key={payment.orderId}
+                    className="grid gap-3 px-4 py-4 text-sm lg:grid-cols-[1.1fr_1.2fr_0.8fr_0.8fr_1fr] lg:items-center"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-mono text-xs font-semibold text-slate-950">{payment.orderId}</p>
+                      <p className="mt-1 text-xs text-slate-500">Tạo: {formatDate(payment.createdAt)}</p>
+                      {payment.cassoTransactionId ? (
+                        <p className="mt-1 truncate text-xs text-slate-400">TX: {payment.cassoTransactionId}</p>
+                      ) : null}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-slate-800">{getPaymentOwnerLabel(payment)}</p>
+                      <p className="mt-1 truncate text-xs text-slate-500">{payment.userId}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">{formatVnd(payment.amount)}</p>
+                      <p className="mt-1 text-xs text-slate-500">{payment.bankName ?? "VietQR"}</p>
+                    </div>
+                    <div>
+                      <Badge variant="outline" className={PAYMENT_STATUS_COLORS[payment.status]}>
+                        {PAYMENT_STATUS_LABELS[payment.status]}
+                      </Badge>
+                      {payment.manualCompletedBy ? (
+                        <p className="mt-2 text-xs text-slate-500">Manual: {payment.manualCompletedBy}</p>
+                      ) : null}
+                    </div>
+                    <div className="flex flex-wrap justify-start gap-2 lg:justify-end">
+                      {canComplete ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="rounded-full"
+                          disabled={busyOrderId === payment.orderId}
+                          onClick={() => onManualComplete(payment.orderId)}
+                        >
+                          {busyOrderId === payment.orderId ? (
+                            <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                          ) : null}
+                          Mở Plus thủ công
+                        </Button>
+                      ) : (
+                        <span className="text-xs text-slate-400">Đã xử lý</span>
+                      )}
+                    </div>
+                    {payment.manualCompletionNote ? (
+                      <p className="rounded-2xl bg-slate-50 px-3 py-2 text-xs text-slate-500 lg:col-span-5">
+                        Ghi chú: {payment.manualCompletionNote}
+                      </p>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -261,6 +455,11 @@ export function AdminOrdersPage() {
   } = useAuthContext();
   const [overview, setOverview] = useState<AdminOverview | null>(null);
   const [orders, setOrders] = useState<ApiOrder[]>([]);
+  const [paymentOrders, setPaymentOrders] = useState<AdminPaymentOrderSummary[]>([]);
+  const [paymentOrdersTotal, setPaymentOrdersTotal] = useState(0);
+  const [paymentOrdersQuery, setPaymentOrdersQuery] = useState("");
+  const [paymentOrdersStatus, setPaymentOrdersStatus] = useState<AdminPaymentOrderSummary["status"] | "all">("all");
+  const [paymentOrdersLoading, setPaymentOrdersLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyOrderId, setBusyOrderId] = useState<string | null>(null);
@@ -288,6 +487,26 @@ export function AdminOrdersPage() {
     }
   }, []);
 
+  const loadPaymentOrders = useCallback(
+    async (nextQuery: string, nextStatus: AdminPaymentOrderSummary["status"] | "all") => {
+      setPaymentOrdersLoading(true);
+      try {
+        const result = await adminListPaymentOrders({
+          q: nextQuery,
+          status: nextStatus,
+          limit: 50,
+        });
+        setPaymentOrders(result.items);
+        setPaymentOrdersTotal(result.total);
+      } catch (err) {
+        toast.error(getErrorMessage(err, "Không thể tải danh sách thanh toán VietQR."));
+      } finally {
+        setPaymentOrdersLoading(false);
+      }
+    },
+    [],
+  );
+
   useEffect(() => {
     if (authLoading) return;
     if (userProfileLoading) return;
@@ -298,7 +517,21 @@ export function AdminOrdersPage() {
     }
 
     void loadAdminData();
-  }, [authLoading, isAdmin, loadAdminData, user, userProfileLoading]);
+    void loadPaymentOrders("", "all");
+  }, [authLoading, isAdmin, loadAdminData, loadPaymentOrders, user, userProfileLoading]);
+
+  const handlePaymentOrderSearch = (
+    nextQuery: string,
+    nextStatus: AdminPaymentOrderSummary["status"] | "all",
+  ) => {
+    setPaymentOrdersQuery(nextQuery);
+    setPaymentOrdersStatus(nextStatus);
+    void loadPaymentOrders(nextQuery, nextStatus);
+  };
+
+  const handlePaymentOrderRefresh = () => {
+    void loadPaymentOrders(paymentOrdersQuery, paymentOrdersStatus);
+  };
 
   const handleReminderRun = async () => {
     setReminderLoading(true);
@@ -319,13 +552,19 @@ export function AdminOrdersPage() {
   };
 
   const handleManualCompletePayment = async (orderId: string) => {
+    const manualCompletionNote = window.prompt(
+      `Ghi chú đối chiếu cho đơn ${orderId}`,
+      "Đã đối chiếu giao dịch tiền vào trong Casso/app ngân hàng.",
+    );
+    if (manualCompletionNote === null) return;
     if (!window.confirm(`Đánh dấu đơn ${orderId} là đã nhận tiền và mở Plus?`)) return;
 
     setBusyPaymentOrderId(orderId);
     try {
-      const result = await adminCompletePaymentOrderManually(orderId);
+      const result = await adminCompletePaymentOrderManually(orderId, { manualCompletionNote });
       toast.success(`Đã mở Plus cho đơn ${result.orderId}.`);
       void loadAdminData();
+      void loadPaymentOrders(paymentOrdersQuery, paymentOrdersStatus);
     } catch (err) {
       toast.error(getErrorMessage(err, "Không thể hoàn tất đơn thanh toán."));
     } finally {
@@ -529,6 +768,18 @@ export function AdminOrdersPage() {
           </CardContent>
         </Card>
       </section>
+
+      <PaymentRecoveryPanel
+        busyOrderId={busyPaymentOrderId}
+        loading={paymentOrdersLoading}
+        onManualComplete={handleManualCompletePayment}
+        onRefresh={handlePaymentOrderRefresh}
+        onSearch={handlePaymentOrderSearch}
+        payments={paymentOrders}
+        query={paymentOrdersQuery}
+        status={paymentOrdersStatus}
+        total={paymentOrdersTotal}
+      />
 
       <section className="space-y-4">
         <div>

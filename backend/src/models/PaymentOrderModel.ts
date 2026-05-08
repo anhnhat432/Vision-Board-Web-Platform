@@ -33,6 +33,9 @@ export interface PaymentOrderEntity {
   qrDataUrl: string;
   completedAt?: Date;
   cassoTransactionId?: string;
+  manualCompletedBy?: string;
+  manualCompletedAt?: Date;
+  manualCompletionNote?: string;
   expiresAt: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -119,6 +122,22 @@ const paymentOrderSchema = new Schema(
       required: false,
       trim: true,
     },
+    manualCompletedBy: {
+      type: String,
+      required: false,
+      trim: true,
+      index: true,
+    },
+    manualCompletedAt: {
+      type: Date,
+      required: false,
+    },
+    manualCompletionNote: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 500,
+    },
     expiresAt: {
       type: Date,
       required: true,
@@ -154,6 +173,9 @@ export type PaymentOrderDocument = Document & {
   qrDataUrl: string;
   completedAt?: Date;
   cassoTransactionId?: string;
+  manualCompletedBy?: string;
+  manualCompletedAt?: Date;
+  manualCompletionNote?: string;
   expiresAt: Date;
   createdAt: Date;
   updatedAt: Date;

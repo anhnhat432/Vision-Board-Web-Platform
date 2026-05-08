@@ -161,7 +161,7 @@ export class MongoBillingSubscriptionRepository
       planCode: event.planCode,
       status: event.status,
       provider: event.provider,
-      source: "provider" as BillingSource,
+      source: event.provider === "manual" ? ("manual" as BillingSource) : ("provider" as BillingSource),
       providerCustomerId: event.providerCustomerId,
       providerSubscriptionId: event.providerSubscriptionId,
       billingCycle: event.billingCycle,
