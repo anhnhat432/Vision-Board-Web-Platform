@@ -63,7 +63,7 @@ function BoardPreviewIcon({ content }: { content: string }) {
   const Icon = ICON_COMPONENTS[content as IconName] ?? Sparkles;
 
   return (
-    <div className="flex h-9 w-9 items-center justify-center rounded-full gradient-violet-pink text-white shadow-[0_14px_28px_-20px_rgba(109,40,217,0.62)]">
+    <div className="flex h-9 w-9 items-center justify-center rounded-full gradient-violet-pink text-white shadow-lg">
       <Icon className="h-4 w-4" />
     </div>
   );
@@ -249,7 +249,7 @@ export function VisionBoardGallery() {
                 </div>
               </div>
 
-              <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-2xl border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]">
+              <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-2xl border border-white/14 bg-white/10 p-5 shadow-sm">
                 <ProductVisual variant="vision" className="mb-5 min-h-[190px]" />
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Snapshot thư viện</p>
 
@@ -450,7 +450,7 @@ export function VisionBoardGallery() {
                                       }}
                                     >
                                       {item.type === "image" && (
-                                        <div className="rounded-2xl border border-white/80 bg-white/88 p-1.5 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.18)]">
+                                        <div className="rounded-2xl border border-white/80 bg-white/88 p-1.5 shadow-sm">
                                           <ImageWithFallback
                                             src={item.content}
                                             alt="Phần tử bảng"
@@ -459,7 +459,7 @@ export function VisionBoardGallery() {
                                         </div>
                                       )}
                                       {item.type === "quote" && (
-                                        <div className="rounded-xl border border-white/80 bg-white/90 px-3 py-2 text-[10px] italic leading-4 text-slate-700 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.18)]">
+                                        <div className="rounded-xl border border-white/80 bg-white/90 px-3 py-2 text-[10px] italic leading-4 text-slate-700 shadow-sm">
                                           {item.content}
                                         </div>
                                       )}
@@ -469,7 +469,7 @@ export function VisionBoardGallery() {
                                 </div>
                               )}
 
-                              <div className="preview-hover-overlay absolute inset-x-4 bottom-4 rounded-xl border border-white/18 bg-slate-900/38 px-4 py-3 text-white shadow-[0_14px_28px_-24px_rgba(15,23,42,0.34)]">
+                              <div className="preview-hover-overlay absolute inset-x-4 bottom-4 rounded-xl border border-white/18 bg-slate-900/38 px-4 py-3 text-white shadow-lg">
                                 <div className="flex items-center justify-between gap-4">
                                   <div>
                                     <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-white/58">

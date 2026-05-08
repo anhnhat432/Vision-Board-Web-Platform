@@ -140,7 +140,7 @@ export function Achievements() {
                 </div>
               </div>
 
-              <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+              <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-2xl border border-white/14 bg-white/12 p-6 shadow-sm">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Tình trạng hiện tại</p>
 
                 <div className="mt-6 space-y-4">
@@ -298,7 +298,7 @@ export function Achievements() {
                   <Card className="overflow-hidden">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl gradient-amber-icon text-amber-700 shadow-[0_18px_36px_-28px_rgba(245,158,11,0.42)]">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl gradient-amber-icon text-amber-700 shadow-lg">
                           <Icon className="h-8 w-8" />
                         </div>
                         <div className="min-w-0 flex-1">

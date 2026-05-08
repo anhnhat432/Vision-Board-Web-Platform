@@ -153,11 +153,14 @@ export function TwelveWeekDashboardHeader({
   onOpenGoals,
 }: TwelveWeekDashboardHeaderProps) {
   return (
-    <Card className="border border-slate-200/80 bg-white/92 shadow-sm">
-      <CardContent className="p-5 sm:p-6">
+    <Card className="ops-surface overflow-hidden border border-slate-200/80 bg-white/94 shadow-sm ring-1 ring-white/70">
+      <CardContent className="p-5 sm:p-6 lg:p-7">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0 flex-1 space-y-3">
             <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="rounded-full border-violet-200 bg-violet-50 px-3 py-1.5 text-violet-700">
+                Nhịp 12 tuần
+              </Badge>
               <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50 px-3 py-1.5 text-slate-600">
                 <Target className="mr-1 h-3.5 w-3.5" />
                 Tuần {currentWeek}/{system.totalWeeks}
@@ -193,14 +196,14 @@ export function TwelveWeekDashboardHeader({
             </div>
           </div>
 
-          <div className="grid min-w-0 gap-3 sm:grid-cols-3 xl:w-[520px]">
-            <ProductVisual variant="execution" className="hidden min-h-[130px] sm:col-span-3 sm:block" />
-            <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+          <div className="grid min-w-0 gap-3 sm:grid-cols-3 xl:w-[540px]">
+            <ProductVisual variant="execution" className="hidden min-h-[136px] rounded-xl border border-slate-200/70 bg-slate-50/72 sm:col-span-3 sm:block" />
+            <div className="ops-metric-tile rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Còn cần làm</p>
               <p className="mt-1 text-2xl font-bold text-slate-950">{todayRemainingCount}</p>
               <p className="text-xs text-slate-500">{todayCompletedCount} việc đã chốt hôm nay</p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
+            <div className="ops-metric-tile rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tuần này</p>
               <p className="mt-1 text-2xl font-bold text-slate-950">{weekCompletion.percent}%</p>
               <p className="text-xs text-slate-500">
@@ -211,7 +214,7 @@ export function TwelveWeekDashboardHeader({
             </div>
             <div
               className={`rounded-xl border px-4 py-3 ${
-                reviewDueToday ? "border-amber-200 bg-amber-50/90" : "border-slate-200 bg-slate-50/80"
+                reviewDueToday ? "border-amber-200 bg-amber-50/90 shadow-sm" : "ops-metric-tile border-slate-200 bg-slate-50/80 shadow-sm"
               }`}
             >
               <p

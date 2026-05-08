@@ -153,7 +153,7 @@ export function ProgressSummaryCard({
           </CardContent>
         </Card>
 
-        <Card interactive={false} className="border border-sky-200/80 bg-sky-50/70 shadow-[0_18px_44px_-36px_rgba(37,99,235,0.28)]">
+        <Card interactive={false} className="border border-sky-200/80 bg-sky-50/70 shadow-lg">
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
               <BarChart3 className="h-3.5 w-3.5" />
@@ -164,7 +164,7 @@ export function ProgressSummaryCard({
           </CardContent>
         </Card>
 
-        <Card interactive={false} className="border border-emerald-200/80 bg-emerald-50/70 shadow-[0_18px_44px_-36px_rgba(5,150,105,0.24)]">
+        <Card interactive={false} className="border border-emerald-200/80 bg-emerald-50/70 shadow-lg">
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
               <Flag className="h-3.5 w-3.5" />

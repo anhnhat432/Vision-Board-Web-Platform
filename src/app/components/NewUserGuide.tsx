@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { ArrowRight, CheckCircle2, Compass, Sparkles } from "lucide-react";
 
@@ -56,7 +56,7 @@ function StepList({ userData }: { userData: UserData }) {
             step.completed
               ? "border-emerald-200 bg-emerald-50/90"
               : step.id === progress.nextStep?.id
-                ? "border-sky-200 bg-sky-50/90 shadow-[0_14px_32px_-28px_rgba(14,165,233,0.55)]"
+                ? "border-sky-200 bg-sky-50/90 shadow-lg"
                 : "border-slate-200 bg-white"
           }`}
         >

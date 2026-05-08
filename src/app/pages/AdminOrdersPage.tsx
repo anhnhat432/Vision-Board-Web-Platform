@@ -141,7 +141,7 @@ function SummaryCard({
   detail: string;
 }) {
   return (
-    <Card className="border-0 shadow-[0_20px_50px_-36px_rgba(15,23,42,0.22)]">
+    <Card className="border-0 shadow-lg">
       <CardContent className="flex items-start gap-4 p-5">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
           <Icon className="h-5 w-5" />
@@ -286,7 +286,7 @@ function PaymentRecoveryPanel({
   };
 
   return (
-    <Card className="border-0 shadow-[0_24px_60px_-38px_rgba(15,23,42,0.22)]">
+    <Card className="border-0 shadow-lg">
       <CardHeader className="gap-4">
         <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
           <div>
@@ -459,7 +459,7 @@ function BillingReminderPanel({
   const expiringCount = overview?.summary.expiringSoonSubscriptions ?? 0;
 
   return (
-    <Card className="border-0 shadow-[0_24px_60px_-38px_rgba(15,23,42,0.2)]">
+    <Card className="border-0 shadow-lg">
       <CardContent className="grid gap-5 p-5 lg:grid-cols-[1fr_auto] lg:items-center">
         <div className="flex gap-4">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
@@ -653,7 +653,7 @@ export function AdminOrdersPage() {
   if (!user) {
     return (
       <div className="space-y-8 pb-12">
-        <Card className="border-0 shadow-[0_28px_70px_-38px_rgba(15,23,42,0.18)]">
+        <Card className="border-0 shadow-2xl">
           <CardContent className="p-10 text-center lg:p-14">
             <ShieldAlert className="mx-auto h-12 w-12 text-slate-400" />
             <h1 className="mt-6 text-2xl font-bold text-slate-900">Yêu cầu đăng nhập</h1>
@@ -678,7 +678,7 @@ export function AdminOrdersPage() {
   if (!userProfile) {
     return (
       <div className="space-y-8 pb-12">
-        <Card className="border-0 bg-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.28)]">
+        <Card className="border-0 bg-white shadow-2xl">
           <CardContent className="p-10 text-center lg:p-14">
             <ShieldAlert className="mx-auto h-12 w-12 text-amber-500" />
             <h1 className="mt-6 text-2xl font-bold text-slate-900">Không tải được quyền admin</h1>
@@ -698,7 +698,7 @@ export function AdminOrdersPage() {
   if (!isAdmin) {
     return (
       <div className="space-y-8 pb-12">
-        <Card className="border-0 shadow-[0_28px_70px_-38px_rgba(15,23,42,0.18)]">
+        <Card className="border-0 shadow-2xl">
           <CardContent className="p-10 text-center lg:p-14">
             <ShieldAlert className="mx-auto h-12 w-12 text-rose-400" />
             <h1 className="mt-6 text-2xl font-bold text-slate-900">Không có quyền truy cập</h1>
@@ -723,7 +723,7 @@ export function AdminOrdersPage() {
   if (error) {
     return (
       <div className="space-y-8 pb-12">
-        <Card className="border-0 shadow-[0_28px_70px_-38px_rgba(15,23,42,0.18)]">
+        <Card className="border-0 shadow-2xl">
           <CardContent className="p-10 text-center lg:p-14">
             <p className="text-base text-rose-600">{error}</p>
             <Button className="mt-6" variant="outline" onClick={() => void loadAdminData()}>
@@ -805,7 +805,7 @@ export function AdminOrdersPage() {
       />
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <Card className="border-0 shadow-[0_24px_60px_-38px_rgba(15,23,42,0.2)]">
+        <Card className="border-0 shadow-lg">
           <CardHeader>
             <CardTitle className="text-base">Thanh toán VietQR gần đây</CardTitle>
             <CardDescription>Các order Casso/VietQR mới nhất.</CardDescription>
@@ -819,7 +819,7 @@ export function AdminOrdersPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-[0_24px_60px_-38px_rgba(15,23,42,0.2)]">
+        <Card className="border-0 shadow-lg">
           <CardHeader>
             <CardTitle className="text-base">User mới</CardTitle>
             <CardDescription>Email provider: {overview?.email.configured ? "đã cấu hình" : "chưa cấu hình"}</CardDescription>
@@ -849,7 +849,7 @@ export function AdminOrdersPage() {
         </div>
 
         {orders.length === 0 ? (
-          <Card className="border-0 shadow-[0_28px_70px_-38px_rgba(15,23,42,0.18)]">
+          <Card className="border-0 shadow-2xl">
             <CardContent className="p-10 text-center lg:p-14">
               <ClipboardList className="mx-auto h-12 w-12 text-slate-300" />
               <h3 className="mt-6 text-xl font-semibold text-slate-900">Chưa có đơn hàng nào</h3>
@@ -859,7 +859,7 @@ export function AdminOrdersPage() {
         ) : (
           <div className="space-y-4">
             {orders.map((order) => (
-              <Card key={order.id} className="border-0 shadow-[0_24px_55px_-34px_rgba(15,23,42,0.18)]">
+              <Card key={order.id} className="border-0 shadow-lg">
                 <CardHeader className="pb-3">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">

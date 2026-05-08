@@ -1,4 +1,4 @@
-﻿import {
+import {
   AlertTriangle,
   ArrowRight,
   Award,
@@ -547,7 +547,7 @@ function DashboardContent({
             description: reviewDueToday
               ? "Nên chốt trước khi sang nhịp tuần mới để dashboard quay về trạng thái gọn đầu."
               : "Chu kỳ đang có ngày review cố định. Khi tới hạn, thẻ cảnh báo sẽ nổi lên ở đầu màn.",
-            cardClass: `rounded-2xl border p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.42)] ${
+            cardClass: `rounded-2xl border p-4 shadow-sm ${
               reviewDueToday ? "border-amber-200 bg-amber-50/92" : "border-slate-200 bg-white"
             }`,
             eyebrowClass: reviewDueToday ? "text-amber-700" : "text-slate-400",
@@ -791,7 +791,7 @@ function DashboardContent({
       <div className="ops-section-hero space-y-4">
         {activeSystem && reviewDueToday && (
           <Reveal>
-            <Card className="border-amber-200 bg-amber-50/92 shadow-[0_16px_40px_-28px_rgba(217,119,6,0.24)]">
+            <Card className="border-amber-200 bg-amber-50/92 shadow-lg">
               <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-start gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
@@ -819,11 +819,11 @@ function DashboardContent({
 
         {/* Primary Action Card - Most Important Thing */}
         {shouldShowMainDashboardCard && activeSystem && activeSystemTodayOpenTasks.length > 0 && (
-          <Card className="border border-primary bg-white shadow-[0_16px_36px_-28px_rgba(79,70,229,0.28)]">
+          <Card className="border border-primary bg-white shadow-lg">
             <CardContent className="p-5 sm:p-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-[0_8px_20px_-12px_rgba(79,70,229,0.5)]">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-lg">
                     <CheckCircle2 className="h-6 w-6" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -942,7 +942,7 @@ function DashboardContent({
                   <div className="grid gap-4">
                     <div
                       data-tour-id="dashboard-start-card"
-                      className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5"
+                      className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
@@ -957,7 +957,7 @@ function DashboardContent({
                         </div>
                         <Button
                           data-tour-id="dashboard-primary-action"
-                          className="w-full gradient-brand text-white shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)] hover:shadow-[0_18px_40px_-22px_rgba(109,40,217,0.44)] hover:scale-[1.01] sm:w-auto"
+                          className="w-full gradient-brand text-white shadow-lg hover:shadow-xl hover:scale-[1.01] sm:w-auto"
                           onClick={() => navigate("/12-week-system")}
                         >
                           Mở trung tâm 12 tuần
@@ -1393,7 +1393,7 @@ function DashboardContent({
 
       {!isSignedOut && userData.isHydratedFromDemo && (
         <Reveal>
-          <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-[0_20px_45px_-34px_rgba(217,119,6,0.22)]">
+          <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-lg">
             <Sparkles className="h-5 w-5 shrink-0 text-amber-600" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-amber-900">Dữ liệu đang hiển thị là ví dụ mẫu</p>
@@ -1713,7 +1713,7 @@ function DashboardContent({
       {!isSignedOut && !isFreshDemoVisitor && userData.isHydratedFromDemo && (
         <div className="ops-section-notice">
           <Reveal>
-            <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-[0_20px_45px_-34px_rgba(217,119,6,0.22)]">
+            <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-lg">
               <Sparkles className="h-5 w-5 shrink-0 text-amber-600" />
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-amber-900">Dữ liệu đang hiển thị là ví dụ mẫu</p>

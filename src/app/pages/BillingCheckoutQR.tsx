@@ -284,7 +284,7 @@ export function BillingCheckoutQR() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_24px_70px_-48px_rgba(15,23,42,0.38)]">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
         <div className="grid gap-0 lg:grid-cols-[minmax(320px,0.86fr)_minmax(0,1fr)]">
           <section className="border-b border-slate-200 bg-slate-50/80 p-5 text-center sm:p-7 lg:border-b-0 lg:border-r">
             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100">

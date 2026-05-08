@@ -92,7 +92,7 @@ export function SmartGoalStepShell({
 
       {children}
 
-      <div className="rounded-2xl border border-violet-100 bg-violet-50/80 p-4 shadow-[0_10px_28px_-28px_rgba(109,40,217,0.20)]">
+      <div className="rounded-2xl border border-violet-100 bg-violet-50/80 p-4 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-sm font-semibold text-violet-700">
@@ -116,7 +116,7 @@ export function SmartGoalStepShell({
         </div>
       </div>
 
-      <details className="rounded-2xl border border-slate-200 bg-white/82 p-4 shadow-[0_16px_36px_-34px_rgba(15,23,42,0.22)]">
+      <details className="rounded-2xl border border-slate-200 bg-white/82 p-4 shadow-sm">
         <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 text-sm font-semibold text-slate-950">
           <div>
             <p className="font-semibold text-slate-950">Độ rõ của mục tiêu</p>
@@ -209,7 +209,7 @@ export function SmartGoalStepShell({
             <ArrowLeft className="h-4 w-4" />
             Quay lại
           </Button>
-          <Button className="flex-1 gradient-brand text-white shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)] hover:shadow-[0_18px_40px_-22px_rgba(109,40,217,0.44)] hover:scale-[1.01]" onClick={onNext} disabled={!isCurrentStepValid}>
+          <Button className="flex-1 gradient-brand text-white shadow-lg hover:shadow-xl hover:scale-[1.01]" onClick={onNext} disabled={!isCurrentStepValid}>
             {stepIndex < totalSteps - 1 ? "Tiếp theo" : "Tiếp theo: kiểm tra tính thực tế"}
             <ArrowRight className="h-4 w-4" />
           </Button>

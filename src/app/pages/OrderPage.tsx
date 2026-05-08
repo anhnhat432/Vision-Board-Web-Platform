@@ -415,7 +415,7 @@ export function OrderPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/14 bg-white/12 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+            <div className="rounded-2xl border border-white/14 bg-white/12 p-5 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Tóm tắt nhanh</p>
               <div className="mt-4 space-y-2.5">
                 {summaryItems.map((item) => {
@@ -439,7 +439,7 @@ export function OrderPage() {
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <Card className="border-0 shadow-[0_24px_55px_-34px_rgba(15,23,42,0.18)]">
+        <Card className="border-0 shadow-lg">
           <CardHeader>
             <CardTitle>Tạo đơn mới</CardTitle>
             <CardDescription>Giữ form gọn, rõ và dễ quét trong bước local-first đầu tiên.</CardDescription>
@@ -669,7 +669,7 @@ export function OrderPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-[0_24px_55px_-34px_rgba(15,23,42,0.18)]">
+        <Card className="border-0 shadow-lg">
           <CardHeader>
             <CardTitle>Phạm vi của bước này</CardTitle>
             <CardDescription>Giữ implementation an toàn và nhỏ, chỉ phục vụ local order flow hiện tại.</CardDescription>

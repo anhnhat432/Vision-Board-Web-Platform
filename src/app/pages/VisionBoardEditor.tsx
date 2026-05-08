@@ -238,7 +238,7 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
     >
       <div className="group relative">
         {item.type === "image" && (
-          <div className="overflow-hidden rounded-2xl border border-white/85 bg-white/90 p-2 shadow-[0_28px_50px_-34px_rgba(15,23,42,0.48)]">
+          <div className="overflow-hidden rounded-2xl border border-white/85 bg-white/90 p-2 shadow-2xl">
             <ImageWithFallback
               src={item.content}
               alt="Phần tử bảng tầm nhìn"
@@ -250,7 +250,7 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
 
         {item.type === "quote" && (
           <div
-            className="rounded-2xl border border-white/80 gradient-white-panel p-5 shadow-[0_28px_50px_-34px_rgba(15,23,42,0.45)]"
+            className="rounded-2xl border border-white/80 gradient-white-panel p-5 shadow-2xl"
             style={{ width: `${item.width}px` }}
           >
             <div className="flex items-center gap-2 text-violet-600">
@@ -264,7 +264,7 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
         )}
 
         {item.type === "icon" && (
-          <div className="flex h-24 w-24 items-center justify-center rounded-2xl gradient-violet-pink text-white shadow-[0_28px_50px_-32px_rgba(109,40,217,0.62)]">
+          <div className="flex h-24 w-24 items-center justify-center rounded-2xl gradient-violet-pink text-white shadow-2xl">
             <Icon className="h-10 w-10" />
           </div>
         )}
@@ -708,7 +708,7 @@ export function VisionBoardEditor() {
                   </p>
                 </div>
 
-                <div className="hidden xl:block rounded-2xl border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+                <div className="hidden xl:block rounded-2xl border border-white/14 bg-white/12 p-6 shadow-sm">
                   <ProductVisual variant="vision" className="mb-5 min-h-[180px]" />
                   <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">
                     Snapshot canvas
@@ -809,7 +809,7 @@ export function VisionBoardEditor() {
                       <button
                         key={img.label}
                         type="button"
-                        className="group relative overflow-hidden rounded-xl border border-white/70 transition-colors transition-shadow duration-150 hover:border-violet-300 hover:shadow-[0_8px_20px_-12px_rgba(109,40,217,0.3)]"
+                        className="group relative overflow-hidden rounded-xl border border-white/70 transition-colors transition-shadow duration-150 hover:border-violet-300 hover:shadow-md"
                         onClick={() => handleAddCuratedImage(img.url)}
                       >
                         <ImageWithFallback
@@ -891,7 +891,7 @@ export function VisionBoardEditor() {
                         onClick={() => setIconName(item)}
                         className={`rounded-2xl border p-4 transition-colors transition-shadow duration-150 ${
                           isActive
-                            ? "border-violet-300 bg-violet-50 text-violet-700 shadow-[0_18px_36px_-24px_rgba(109,40,217,0.35)]"
+                            ? "border-violet-300 bg-violet-50 text-violet-700 shadow-lg"
                             : "border-white/80 bg-white/72 text-slate-500 hover:border-violet-200 hover:text-violet-700"
                         }`}
                       >
@@ -922,7 +922,7 @@ export function VisionBoardEditor() {
 
                 {board.items.length === 0 ? (
                   <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
-                    <div className="w-full max-w-md rounded-2xl border border-white/80 bg-white/86 p-5 text-center shadow-[0_32px_70px_-44px_rgba(15,23,42,0.42)] sm:p-7">
+                    <div className="w-full max-w-md rounded-2xl border border-white/80 bg-white/86 p-5 text-center shadow-2xl sm:p-7">
                       <ProductVisual variant="vision" className="mx-auto mb-5 min-h-[150px] max-w-sm" />
                       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-violet-50 text-violet-700 sm:h-20 sm:w-20 sm:rounded-2xl">
                         <Sparkles className="h-8 w-8 sm:h-9 sm:w-9" />

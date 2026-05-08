@@ -59,14 +59,14 @@ function Progress({ className, value, ...props }: React.ComponentProps<typeof Pr
     <ProgressPrimitive.Root
       data-slot="progress"
       className={cn(
-        "progress-shell relative h-2.5 w-full overflow-hidden rounded-full border border-white/60 bg-white/72 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)]",
+        "progress-shell relative h-2.5 w-full overflow-hidden rounded-full border border-white/60 bg-white/72 shadow-sm",
         className,
       )}
       {...props}
     >
       <ProgressPrimitive.Indicator
         data-slot="progress-indicator"
-        className="progress-indicator h-full rounded-full gradient-brand shadow-[0_10px_28px_-18px_var(--tone-shell-shadow-strong)]"
+        className="progress-indicator h-full rounded-full gradient-brand shadow-sm"
         style={{ width: `${displayValue}%` }}
       />
     </ProgressPrimitive.Root>

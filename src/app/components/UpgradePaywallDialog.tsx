@@ -153,7 +153,7 @@ export function UpgradePaywallDialog({
 
           <div className="grid max-h-[calc(100vh-14rem)] gap-6 overflow-y-auto px-5 py-5 sm:px-7 sm:py-7 xl:grid-cols-[minmax(0,1fr)_360px]">
             <div className="min-w-0 space-y-4">
-              <div className="rounded-2xl border border-white/70 bg-white/82 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.45)]">
+              <div className="rounded-2xl border border-white/70 bg-white/82 p-5 shadow-sm">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                   Điều Plus giúp bạn ngay lúc này
                 </p>

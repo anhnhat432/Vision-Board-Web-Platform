@@ -26,7 +26,7 @@ export class TabErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <Card className="border border-red-200/70 bg-red-50/80 shadow-[0_22px_60px_-36px_rgba(220,38,38,0.12)]">
+        <Card className="border border-red-200/70 bg-red-50/80 shadow-lg">
           <CardContent className="flex min-h-[220px] flex-col items-center justify-center gap-3 p-6 text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-red-400">
               {this.props.fallbackTitle ?? "Đã có lỗi xảy ra"}

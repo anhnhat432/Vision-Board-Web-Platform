@@ -280,7 +280,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   <p className="max-w-3xl text-sm leading-7 text-white/84 sm:text-base lg:text-lg">{result.summary}</p>
                 </div>
 
-                <div className="rounded-2xl border border-white/14 bg-white/10 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] sm:hidden">
+                <div className="rounded-2xl border border-white/14 bg-white/10 p-4 shadow-sm sm:hidden">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/58">
@@ -329,7 +329,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   {scoreCards.map((card) => (
                     <div
                       key={card.label}
-                      className="rounded-2xl border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]"
+                      className="rounded-2xl border border-white/14 bg-white/10 p-5 shadow-sm"
                     >
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/58">{card.label}</p>
                       <p
@@ -376,7 +376,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                 ) : null}
               </div>
 
-              <div className="rounded-2xl border border-slate-200/80 bg-white/82 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
+              <div className="rounded-2xl border border-slate-200/80 bg-white/82 p-4 shadow-sm">
                 <div className="flex items-start gap-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-white">
                     <Sparkles className="h-4 w-4" />
@@ -430,7 +430,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               </CardContent>
             </Card>
 
-            <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.2)] lg:rounded-2xl lg:p-6">
+            <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-lg lg:rounded-2xl lg:p-6">
               <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                 Xem 7 góc nhìn
               </summary>
@@ -455,7 +455,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               </div>
             </details>
 
-            <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.2)] lg:rounded-2xl lg:p-6">
+            <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-lg lg:rounded-2xl lg:p-6">
               <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                 Xem mục tiêu đã viết
               </summary>
@@ -480,7 +480,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               </div>
             </details>
 
-            <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.2)] lg:rounded-2xl lg:p-6">
+            <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-lg lg:rounded-2xl lg:p-6">
               <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                 Xem nhịp triển khai gợi ý
               </summary>
@@ -500,7 +500,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             </details>
           </div>
 
-          <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.2)] lg:rounded-2xl lg:p-6">
+          <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-lg lg:rounded-2xl lg:p-6">
             <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
               Xem lý do đằng sau kết quả
             </summary>
@@ -524,7 +524,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           in-hero buttons; visual users still see this sticky bar on small viewports. */}
       <div
         aria-hidden="true"
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-3 shadow-[0_-12px_32px_-20px_rgba(15,23,42,0.18)] sm:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-3 shadow-2xl sm:hidden"
       >
         <div className="flex gap-2">
           <Button

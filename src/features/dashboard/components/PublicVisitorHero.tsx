@@ -19,10 +19,10 @@ const FLOW_STEPS = [
 
 export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: PublicVisitorHeroProps) {
   return (
-    <Card className="overflow-hidden border border-slate-200/80 bg-white/96 shadow-sm">
-      <CardContent className="p-4 sm:p-5 lg:p-6">
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.72fr)] lg:items-stretch">
-          <div className="flex min-w-0 flex-col justify-center space-y-5 py-2">
+    <Card className="ops-surface overflow-hidden border border-slate-200/80 bg-white/94 shadow-sm ring-1 ring-white/70">
+      <CardContent className="p-5 sm:p-6 lg:p-7">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(320px,0.72fr)] lg:items-stretch">
+          <div className="flex min-w-0 flex-col justify-center space-y-5">
             <span className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50/90 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
               <Sparkles className="h-3.5 w-3.5" />
               Trang chính
@@ -81,7 +81,7 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
                 ["12 tuần", "kế hoạch rõ từng ngày"],
                 ["Review", "giữ nhịp mỗi tuần"],
               ].map(([value, label]) => (
-                <div key={value} className="rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2">
+                <div key={value} className="ops-metric-tile rounded-xl border border-slate-200 bg-slate-50/72 px-3 py-2.5">
                   <p className="text-sm font-bold text-slate-950">{value}</p>
                   <p className="mt-0.5 text-xs leading-5 text-slate-500">{label}</p>
                 </div>
@@ -89,14 +89,14 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
             </div>
           </div>
 
-          <div className="flex flex-col rounded-lg border border-slate-200 bg-slate-50/82 p-4">
+          <div className="ops-surface-muted flex min-w-0 flex-col rounded-xl border border-slate-200 bg-slate-50/82 p-4">
             <ProductVisual variant="moodboard" className="mb-4 min-h-[200px]" />
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Luồng nên đi</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Luồng nên đi</p>
             <div className="mt-4 grid flex-1 gap-3">
               {FLOW_STEPS.map((step, index) => (
                 <div
                   key={step}
-                  className="flex min-h-16 items-center gap-3 rounded-lg border border-slate-200/70 bg-white px-3 py-3 shadow-sm"
+                  className="flex min-h-16 items-center gap-3 rounded-xl border border-slate-200/70 bg-white px-3 py-3 shadow-sm"
                 >
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white">
                     {index + 1}

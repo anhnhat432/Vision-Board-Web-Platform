@@ -141,7 +141,7 @@ export function OrderStatusPage() {
   if (!order) {
     return (
       <div className="space-y-8 pb-12">
-        <Card className="overflow-hidden border-0 gradient-slate shadow-[0_28px_70px_-38px_rgba(15,23,42,0.18)]">
+        <Card className="overflow-hidden border-0 gradient-slate shadow-2xl">
           <CardContent className="p-10 text-center lg:p-14">
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-900 text-white">
               <ClipboardList className="h-10 w-10" />
@@ -270,7 +270,7 @@ export function OrderStatusPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/14 bg-white/12 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+            <div className="rounded-2xl border border-white/14 bg-white/12 p-5 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Tóm tắt đơn</p>
               <div className="mt-4 grid gap-2.5">
                 {summaryItems.map((item) => {
@@ -295,7 +295,7 @@ export function OrderStatusPage() {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-6">
-          <Card className="border-0 shadow-[0_24px_55px_-34px_rgba(15,23,42,0.18)]">
+          <Card className="border-0 shadow-lg">
             <CardHeader>
               <CardTitle>Chi tiết đơn</CardTitle>
               <CardDescription>Những thông tin chính của đơn, người nhận và kit được gom lại để dễ quét nhanh.</CardDescription>
@@ -393,7 +393,7 @@ export function OrderStatusPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-[0_24px_55px_-34px_rgba(15,23,42,0.18)]">
+          <Card className="border-0 shadow-lg">
             <CardHeader>
               <CardTitle>Tiến trình đơn</CardTitle>
               <CardDescription>Timeline nhỏ cho local order flow hiện tại, bao gồm đầy đủ 4 bước từ chờ xác nhận đến đã giao.</CardDescription>
@@ -501,7 +501,7 @@ export function OrderStatusPage() {
         </div>
 
         <div className="space-y-6">
-          <Card className="border-0 shadow-[0_24px_55px_-34px_rgba(15,23,42,0.18)]">
+          <Card className="border-0 shadow-lg">
             <CardHeader>
               <CardTitle>Đơn gần đây</CardTitle>
               <CardDescription>Giữ local order flow gọn và cho phép mở nhanh lại các đơn vừa tạo.</CardDescription>

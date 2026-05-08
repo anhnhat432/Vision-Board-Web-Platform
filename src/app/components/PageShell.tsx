@@ -50,7 +50,7 @@ interface PageShellProps {
 
 export function PageShell({ children, maxWidth = "lg", className, outerClassName }: PageShellProps) {
   return (
-    <div className={cn("min-h-screen px-4 py-6 sm:px-6 sm:py-8 lg:px-8", outerClassName)}>
+    <div className={cn("min-h-screen px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-9", outerClassName)}>
       <div className={cn("mx-auto w-full", PAGE_SHELL_MAX_WIDTH[maxWidth], className)}>{children}</div>
     </div>
   );

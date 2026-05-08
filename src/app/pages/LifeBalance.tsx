@@ -199,7 +199,7 @@ export function LifeBalance() {
       {/* Unsaved changes navigation blocker dialog */}
       {blocker.state === "blocked" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="mx-4 w-full max-w-sm rounded-2xl border border-white/70 bg-white p-6 shadow-[0_32px_80px_-24px_rgba(15,23,42,0.35)]">
+          <div className="mx-4 w-full max-w-sm rounded-2xl border border-white/70 bg-white p-6 shadow-2xl">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
               <AlertTriangle className="h-6 w-6" />
             </div>
@@ -265,7 +265,7 @@ export function LifeBalance() {
               </div>
             </div>
 
-            <div className="hidden xl:block rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+            <div className="hidden xl:block rounded-2xl border border-white/14 bg-white/12 p-6 shadow-sm">
               <ProductVisual variant="balance" className="mb-5 min-h-[190px]" />
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Snapshot hiện tại</p>
 
@@ -302,9 +302,9 @@ export function LifeBalance() {
       <Reveal delay={0.02}>
         <Card
           data-testid="life-balance-next-step-card"
-          className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]"
+          className="border border-slate-200/80 bg-white/92 shadow-lg"
         >
-          <CardContent className="p-4 sm:p-5">
+          <CardContent className="p-5 sm:p-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
@@ -486,7 +486,7 @@ export function LifeBalance() {
                         <div className="flex items-center justify-between gap-4">
                           <div className="flex items-center gap-3">
                             <div
-                              className="h-4 w-4 rounded-full shadow-[0_0_0_6px_rgba(255,255,255,0.85)] dark:shadow-[0_0_0_6px_rgba(0,0,0,0.35)]"
+                              className="h-4 w-4 rounded-full ring-4 ring-white/85 dark:ring-black/35"
                               style={{ backgroundColor: area.color }}
                             />
                             <div>

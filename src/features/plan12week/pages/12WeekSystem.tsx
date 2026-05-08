@@ -970,12 +970,12 @@ export function TwelveWeekSystem() {
       </div>
 
       {/* Mobile bottom navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50 safe-area-inset-bottom">
-        <div className="flex items-center justify-around h-16">
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/94 px-2 pb-[max(env(safe-area-inset-bottom),0.25rem)] pt-2 shadow-2xl backdrop-blur md:hidden">
+        <div className="flex h-14 items-center justify-around gap-1">
           <Button
             variant={activeTab === "today" ? "default" : "ghost"}
             size="sm"
-            className="flex flex-col items-center justify-center h-full px-3 py-2 gap-1"
+            className="flex h-full flex-1 flex-col items-center justify-center gap-1 px-3 py-2 shadow-none"
             onClick={() => handleTabChange("today")}
           >
             <ListTodo className={`h-5 w-5 ${activeTab === "today" ? "text-primary-foreground" : "text-slate-500"}`} />
@@ -985,7 +985,7 @@ export function TwelveWeekSystem() {
           <Button
             variant={activeTab === "week" ? "default" : "ghost"}
             size="sm"
-            className="flex flex-col items-center justify-center h-full px-3 py-2 gap-1"
+            className="flex h-full flex-1 flex-col items-center justify-center gap-1 px-3 py-2 shadow-none"
             onClick={() => handleTabChange("week")}
           >
             <CalendarDays className={`h-5 w-5 ${activeTab === "week" ? "text-primary-foreground" : "text-slate-500"}`} />
@@ -995,7 +995,7 @@ export function TwelveWeekSystem() {
           <Button
             variant={activeTab === "progress" ? "default" : "ghost"}
             size="sm"
-            className="flex flex-col items-center justify-center h-full px-3 py-2 gap-1"
+            className="flex h-full flex-1 flex-col items-center justify-center gap-1 px-3 py-2 shadow-none"
             onClick={() => handleTabChange("progress")}
           >
             <BarChart3 className={`h-5 w-5 ${activeTab === "progress" ? "text-primary-foreground" : "text-slate-500"}`} />
@@ -1008,7 +1008,7 @@ export function TwelveWeekSystem() {
                 type="button"
                 variant={activeTab === "settings" ? "default" : "ghost"}
                 size="sm"
-                className="flex flex-col items-center justify-center h-full px-3 py-2 gap-1"
+                className="flex h-full flex-1 flex-col items-center justify-center gap-1 px-3 py-2 shadow-none"
               >
                 <MoreHorizontal className={`h-5 w-5 ${activeTab === "settings" ? "text-primary-foreground" : "text-slate-500"}`} />
                 <span className="text-xs font-medium">Khác</span>

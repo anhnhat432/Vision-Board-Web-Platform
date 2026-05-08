@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Crown } from "lucide-react";
 
 import { CalendarCheck, CheckCircle2, ClipboardCheck, Flag, Layers, Loader2, TrendingUp } from "lucide-react";
@@ -182,7 +182,7 @@ export function TwelveWeekWeekTab({
         </Card>
         <Card
           interactive={false}
-          className="border border-sky-200/80 bg-sky-50/70 shadow-[0_18px_44px_-36px_rgba(37,99,235,0.28)]"
+          className="border border-sky-200/80 bg-sky-50/70 shadow-lg"
         >
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
@@ -199,8 +199,8 @@ export function TwelveWeekWeekTab({
           interactive={false}
           className={
             reviewDueToday
-              ? "border border-amber-200/80 bg-amber-50/80 shadow-[0_18px_44px_-36px_rgba(217,119,6,0.28)]"
-              : "border border-emerald-200/80 bg-emerald-50/70 shadow-[0_18px_44px_-36px_rgba(5,150,105,0.24)]"
+              ? "border border-amber-200/80 bg-amber-50/80 shadow-lg"
+              : "border border-emerald-200/80 bg-emerald-50/70 shadow-lg"
           }
         >
           <CardContent className="p-5">
@@ -734,7 +734,7 @@ export function TwelveWeekWeekTab({
       <div className="md:hidden sticky bottom-0 z-10 bg-white/95 backdrop-blur-sm border-t p-4">
         <Button
           size="lg"
-          className="w-full gradient-brand text-white shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)]"
+          className="w-full gradient-brand text-white shadow-lg"
           onClick={handleSaveReviewClick}
           disabled={isSavingReview}
           aria-busy={isSavingReview}

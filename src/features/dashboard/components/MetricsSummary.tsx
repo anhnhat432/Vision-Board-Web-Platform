@@ -1,8 +1,8 @@
 import { memo } from "react";
 import { Activity, ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import type { MetricSummaryItem } from "@/features/dashboard/helpers/dashboardInsights";
+import { DashboardInsightCard } from "./DashboardInsightCard";
 
 interface MetricsSummaryProps {
   items: MetricSummaryItem[];
@@ -34,51 +34,43 @@ function getTrendLabel(trend: MetricSummaryItem["trend"]): string {
 
 function MetricsSummaryComponent({ items }: MetricsSummaryProps) {
   return (
-    <Card className="h-full border-0 bg-gradient-to-br from-white via-white to-emerald-50/70 shadow-[0_24px_48px_-34px_rgba(22,163,74,0.28)]">
-      <CardHeader className="space-y-3 pb-2">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
-            <Activity className="h-5 w-5" />
-          </div>
-          <div>
-            <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Tóm tắt chỉ số dẫn</CardDescription>
-            <CardTitle className="mt-1 text-base font-semibold text-slate-900">Hiệu suất tactic</CardTitle>
-          </div>
+    <DashboardInsightCard
+      eyebrow="Tóm tắt chỉ số dẫn"
+      icon={Activity}
+      title="Hiệu suất tactic"
+      tone="emerald"
+    >
+      {items.length === 0 ? (
+        <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-sm">
+          <p className="text-sm text-slate-500">Chưa có log chỉ số cho chu kỳ này.</p>
         </div>
-      </CardHeader>
-      <CardContent className="pt-1">
-        {items.length === 0 ? (
-          <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4">
-            <p className="text-sm text-slate-500">Chưa có log chỉ số cho chu kỳ này.</p>
-          </div>
-        ) : (
-          <div className="space-y-2.5">
-            {items.map((item) => (
-              <div
-                key={item.name}
-                className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white/85 px-3 py-2.5"
-              >
-                <div className="min-w-0">
-                  <p className="line-clamp-2 break-words text-sm font-semibold leading-5 text-slate-900">
-                    {item.name}
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    Tuần này {item.currentWeekValue} · Trước đó {item.previousWeekValue}
-                  </p>
-                </div>
-                <div className="ml-3 flex shrink-0 items-center gap-2">
-                  <span className="text-sm font-semibold text-slate-900">{item.totalValue}</span>
-                  <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${getTrendPill(item.trend)}`}>
-                    <TrendIcon trend={item.trend} />
-                    {getTrendLabel(item.trend)}
-                  </span>
-                </div>
+      ) : (
+        <div className="space-y-2.5">
+          {items.map((item) => (
+            <div
+              key={item.name}
+              className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white/85 px-3 py-2.5 shadow-sm"
+            >
+              <div className="min-w-0">
+                <p className="line-clamp-2 break-words text-sm font-semibold leading-5 text-slate-900">
+                  {item.name}
+                </p>
+                <p className="text-xs text-slate-500">
+                  Tuần này {item.currentWeekValue} · Trước đó {item.previousWeekValue}
+                </p>
               </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              <div className="ml-3 flex shrink-0 items-center gap-2">
+                <span className="text-sm font-semibold text-slate-900">{item.totalValue}</span>
+                <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${getTrendPill(item.trend)}`}>
+                  <TrendIcon trend={item.trend} />
+                  {getTrendLabel(item.trend)}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </DashboardInsightCard>
   );
 }
 

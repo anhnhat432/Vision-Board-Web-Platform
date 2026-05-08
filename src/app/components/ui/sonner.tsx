@@ -18,18 +18,18 @@ const Toaster = ({ ...props }: ToasterProps) => {
       toastOptions={{
         classNames: {
           toast:
-            "group toast rounded-2xl border border-white/70 bg-white/90 backdrop-blur-xl shadow-[0_24px_56px_-24px_rgba(15,23,42,0.32)] text-slate-900 text-sm font-medium",
+            "group toast rounded-2xl border border-white/70 bg-white/90 backdrop-blur-xl shadow-2xl text-slate-900 text-sm font-medium",
           description: "text-slate-500 text-[0.82rem]",
           actionButton: "rounded-full bg-primary text-primary-foreground text-xs font-semibold px-3",
           cancelButton: "rounded-full bg-white/60 text-slate-500 text-xs font-semibold px-3",
           success:
-            "border-emerald-200/60 bg-emerald-50/90 shadow-[0_24px_56px_-24px_rgba(16,185,129,0.32)]",
+            "border-emerald-200/60 bg-emerald-50/90 shadow-lg",
           error:
-            "border-red-200/60 bg-red-50/90 shadow-[0_24px_56px_-24px_rgba(239,68,68,0.28)]",
+            "border-red-200/60 bg-red-50/90 shadow-lg",
           warning:
-            "border-amber-200/60 bg-amber-50/90 shadow-[0_24px_56px_-24px_rgba(245,158,11,0.28)]",
+            "border-amber-200/60 bg-amber-50/90 shadow-lg",
           info:
-            "border-sky-200/60 bg-sky-50/90 shadow-[0_24px_56px_-24px_rgba(14,165,233,0.28)]",
+            "border-sky-200/60 bg-sky-50/90 shadow-lg",
         },
       }}
       style={

@@ -18,15 +18,15 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent gradient-brand text-primary-foreground shadow-[0_14px_34px_-20px_var(--tone-shell-shadow)] hover:shadow-[0_18px_40px_-22px_var(--tone-shell-shadow-strong)] hover:scale-[1.01]",
+          "border-transparent gradient-brand text-primary-foreground shadow-lg hover:shadow-xl hover:scale-[1.01]",
         destructive:
-          "border-transparent bg-destructive text-white shadow-[0_12px_28px_-20px_rgba(212,24,61,0.38)] hover:bg-destructive/90 hover:shadow-[0_16px_34px_-22px_rgba(212,24,61,0.44)] hover:scale-[1.01] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "border-transparent bg-destructive text-white shadow-lg hover:bg-destructive/90 hover:shadow-xl hover:scale-[1.01] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
-          "border-slate-300 bg-white/78 text-foreground shadow-[0_10px_24px_-20px_rgba(15,23,42,0.16)] hover:border-slate-400 hover:bg-white hover:text-accent-foreground hover:shadow-[0_14px_28px_-20px_rgba(15,23,42,0.2)] hover:scale-[1.01] dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "border-slate-300 bg-white/78 text-foreground shadow-sm hover:border-slate-400 hover:bg-white hover:text-accent-foreground hover:shadow-md hover:scale-[1.01] dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         secondary:
-          "border border-white/60 bg-secondary text-secondary-foreground shadow-[0_10px_24px_-20px_var(--tone-shell-shadow)] hover:bg-secondary/95 hover:shadow-[0_14px_30px_-22px_var(--tone-shell-shadow)] hover:scale-[1.01]",
+          "border border-white/60 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/95 hover:shadow-md hover:scale-[1.01]",
         ghost:
-          "text-slate-600 hover:bg-white/82 hover:text-slate-900 hover:shadow-[0_8px_18px_-20px_rgba(15,23,42,0.14)] hover:scale-[1.01] dark:hover:bg-accent/50",
+          "text-slate-600 hover:bg-white/82 hover:text-slate-900 hover:shadow-sm hover:scale-[1.01] dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

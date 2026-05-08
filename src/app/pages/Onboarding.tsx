@@ -169,7 +169,7 @@ export function Onboarding() {
 
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <Button
-                      className="w-full bg-violet-600 text-white shadow-[0_18px_38px_-28px_rgba(124,58,237,0.55)] hover:bg-violet-700 sm:w-auto"
+                      className="w-full bg-violet-600 text-white shadow-lg hover:bg-violet-700 sm:w-auto"
                       onClick={handleStartAssessment}
                     >
                       Chấm Life Balance
@@ -317,7 +317,7 @@ export function Onboarding() {
 
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <Card className="flow-panel overflow-hidden">
-            <CardContent className="space-y-3 p-4 sm:p-5 lg:p-6">
+            <CardContent className="space-y-3 p-5 sm:p-6">
               <div className="hidden rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600 sm:block">
                 Kéo từng lĩnh vực từ <span className="font-semibold text-slate-950">1</span> đến{" "}
                 <span className="font-semibold text-slate-950">10</span>. Điểm thấp là nơi cần chú ý, điểm cao là nơi
@@ -335,7 +335,7 @@ export function Onboarding() {
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <div
-                        className="h-3.5 w-3.5 shrink-0 rounded-full shadow-[0_0_0_5px_rgba(255,255,255,0.82)]"
+                        className="h-3.5 w-3.5 shrink-0 rounded-full ring-4 ring-white/80"
                         style={{ backgroundColor: area.color }}
                       />
                       <h3 className="text-base font-semibold text-slate-900 sm:text-lg">
@@ -344,7 +344,7 @@ export function Onboarding() {
                     </div>
 
                     <div
-                      className="min-w-14 rounded-full px-3 py-1.5 text-center text-sm font-semibold text-white shadow-[0_18px_35px_-24px_rgba(15,23,42,0.45)]"
+                      className="min-w-14 rounded-full px-3 py-1.5 text-center text-sm font-semibold text-white shadow-lg"
                       style={{ backgroundColor: area.color }}
                     >
                       <AnimatePresence mode="popLayout">

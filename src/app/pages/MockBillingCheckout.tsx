@@ -68,7 +68,7 @@ export function MockBillingCheckout() {
             </div>
           </div>
         </div>
-        <Card className="overflow-hidden border-0 gradient-dark-indigo text-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.52)]">
+        <Card className="overflow-hidden border-0 gradient-dark-indigo text-white shadow-2xl">
           <CardContent className="p-8 lg:p-10">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Thanh toán dùng thử</p>
             <h1 className="mt-3 text-4xl font-bold tracking-normal">Phiên thanh toán này không còn hợp lệ.</h1>
@@ -116,7 +116,7 @@ export function MockBillingCheckout() {
         </div>
       </div>
 
-      <Card className="overflow-hidden border-0 gradient-dark-indigo text-white shadow-[0_28px_70px_-38px_rgba(15,23,42,0.52)]">
+      <Card className="overflow-hidden border-0 gradient-dark-indigo text-white shadow-2xl">
         <CardContent className="grid gap-6 p-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-10">
           <div className="space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/78">
@@ -139,7 +139,7 @@ export function MockBillingCheckout() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]">
+          <div className="rounded-2xl border border-white/14 bg-white/10 p-5 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/56">Tóm tắt nâng cấp</p>
             <div className="mt-4 space-y-4">
               <div className="rounded-2xl border border-white/12 bg-black/12 p-4">
@@ -164,7 +164,7 @@ export function MockBillingCheckout() {
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <Card className="border-0 gradient-violet shadow-[0_28px_70px_-40px_rgba(124,58,237,0.2)]">
+        <Card className="border-0 gradient-violet shadow-xl">
           <CardHeader>
             <CardTitle className="text-slate-950">Bạn sẽ mở được gì ngay sau khi xác nhận</CardTitle>
             <CardDescription className="text-slate-700">
@@ -181,7 +181,7 @@ export function MockBillingCheckout() {
           </CardContent>
         </Card>
 
-        <Card className="border-0 gradient-white-panel shadow-[0_28px_70px_-40px_rgba(15,23,42,0.14)]">
+        <Card className="border-0 gradient-white-panel shadow-xl">
           <CardHeader>
             <CardTitle className="text-slate-950">Xác nhận mở gói</CardTitle>
             <CardDescription className="text-slate-600">

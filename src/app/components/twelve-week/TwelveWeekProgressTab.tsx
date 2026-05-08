@@ -244,7 +244,7 @@ export function TwelveWeekProgressTab({
 
         <Card
           interactive={false}
-          className="border border-sky-200/80 bg-sky-50/70 shadow-[0_18px_44px_-36px_rgba(37,99,235,0.28)]"
+          className="border border-sky-200/80 bg-sky-50/70 shadow-lg"
         >
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
@@ -258,7 +258,7 @@ export function TwelveWeekProgressTab({
 
         <Card
           interactive={false}
-          className="border border-emerald-200/80 bg-emerald-50/70 shadow-[0_18px_44px_-36px_rgba(5,150,105,0.24)]"
+          className="border border-emerald-200/80 bg-emerald-50/70 shadow-lg"
         >
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
@@ -509,7 +509,7 @@ export function TwelveWeekProgressTab({
           {weeklyTrend.length > 0 && (
             <Card
               interactive={false}
-              className="border border-sky-200/80 bg-sky-50/70 shadow-[0_18px_44px_-36px_rgba(37,99,235,0.28)]"
+              className="border border-sky-200/80 bg-sky-50/70 shadow-lg"
             >
               <CardHeader>
                 <CardTitle className="text-slate-950">Xu hướng thực thi theo tuần</CardTitle>
@@ -527,7 +527,7 @@ export function TwelveWeekProgressTab({
                         key={point.weekNumber}
                         className={`rounded-lg border p-4 ${
                           isCurrent
-                            ? "border-sky-300 bg-white shadow-[0_8px_25px_-12px_rgba(37,99,235,0.25)]"
+                            ? "border-sky-300 bg-white shadow-md"
                             : "border-slate-200 bg-white/80"
                         }`}
                       >
@@ -569,7 +569,7 @@ export function TwelveWeekProgressTab({
           {tacticBreakdown.length > 0 && (
             <Card
               interactive={false}
-              className="border border-emerald-200/80 bg-emerald-50/70 shadow-[0_18px_44px_-36px_rgba(5,150,105,0.24)]"
+              className="border border-emerald-200/80 bg-emerald-50/70 shadow-lg"
             >
               <CardHeader>
                 <CardTitle className="text-slate-950">Phân tích theo việc lặp lại</CardTitle>
@@ -631,7 +631,7 @@ export function TwelveWeekProgressTab({
       ) : (
         <Card
           interactive={false}
-          className="border border-violet-200/70 bg-violet-50 shadow-[0_18px_44px_-36px_rgba(124,58,237,0.24)]"
+          className="border border-violet-200/70 bg-violet-50 shadow-lg"
         >
           <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-violet-100 text-violet-600">

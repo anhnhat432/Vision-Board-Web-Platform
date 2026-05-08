@@ -317,7 +317,7 @@ export function ReflectionJournal() {
                 </div>
               </div>
 
-              <div className="hidden rounded-2xl border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] xl:block">
+              <div className="hidden rounded-2xl border border-white/14 bg-white/12 p-6 shadow-sm xl:block">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Nhịp viết hiện tại</p>
                 {hasReflections ? (
                   <div className="mt-6 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">

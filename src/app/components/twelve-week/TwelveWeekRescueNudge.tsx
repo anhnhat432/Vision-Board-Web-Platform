@@ -72,7 +72,7 @@ export function TwelveWeekRescueNudge(props: TwelveWeekRescueNudgeProps) {
     <div
       data-testid={variant === "today" ? "today-rescue-nudge" : "week-rescue-nudge"}
       data-rescue-severity={status.severity}
-      className={`order-1 rounded-xl border p-4 sm:p-5 ${accent}`}
+      className={`order-1 rounded-xl border p-5 sm:p-6 ${accent}`}
     >
       <div className="flex items-start gap-3">
         <span

@@ -130,7 +130,7 @@ export function LeadIndicatorsStep({
             className={`rounded-2xl border p-5 ${
               indicator.type === "optional"
                 ? "border-amber-200 bg-amber-50/72"
-                : "border-emerald-200 bg-emerald-50/72 shadow-[0_14px_30px_-28px_rgba(16,185,129,0.32)]"
+                : "border-emerald-200 bg-emerald-50/72 shadow-sm"
             }`}
           >
             <div className="flex flex-wrap items-center justify-between gap-3">

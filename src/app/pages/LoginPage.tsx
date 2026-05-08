@@ -125,7 +125,7 @@ export function LoginPage() {
         <div className="ambient-orb ambient-orb--cyan" />
         <Card className="w-full max-w-sm">
           <CardHeader className="text-center">
-            <div className="gradient-brand mx-auto mb-3 flex size-11 items-center justify-center rounded-xl shadow-[0_14px_30px_-20px_var(--tone-shell-shadow-strong)]">
+            <div className="gradient-brand mx-auto mb-3 flex size-11 items-center justify-center rounded-xl shadow-lg">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <CardTitle>Dear Our Future</CardTitle>
@@ -149,8 +149,8 @@ export function LoginPage() {
       <div className="ambient-orb ambient-orb--rose" />
 
       <div className="relative z-10 grid w-full max-w-4xl gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.72fr)] lg:items-center">
-        <section className="hidden rounded-2xl border border-slate-200 bg-white/86 p-8 shadow-[0_24px_70px_-48px_rgba(15,23,42,0.36)] lg:block">
-          <div className="gradient-brand mb-5 flex size-12 items-center justify-center rounded-2xl shadow-[0_14px_30px_-20px_var(--tone-shell-shadow-strong)]">
+        <section className="hidden rounded-2xl border border-slate-200 bg-white/86 p-8 shadow-2xl lg:block">
+          <div className="gradient-brand mb-5 flex size-12 items-center justify-center rounded-2xl shadow-lg">
             <Sparkles className="h-5.5 w-5.5 text-white" />
           </div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Dear Our Future</p>
@@ -172,7 +172,7 @@ export function LoginPage() {
 
         <div className="w-full max-w-sm justify-self-center lg:max-w-md">
         <div className="mb-8 text-center">
-          <div className="gradient-brand mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl shadow-[0_14px_30px_-20px_var(--tone-shell-shadow-strong)]">
+          <div className="gradient-brand mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl shadow-lg">
             <Sparkles className="h-5.5 w-5.5 text-white" />
           </div>
           <h1 className="text-xl font-semibold tracking-tight text-slate-900">Dear Our Future</h1>
@@ -335,7 +335,7 @@ function LoginStatusCard({
     <div className="app-shell flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-sm">
         <CardContent className="p-7 text-center">
-          <div className="gradient-brand mx-auto flex size-12 items-center justify-center rounded-2xl shadow-[0_14px_30px_-20px_var(--tone-shell-shadow-strong)]">
+          <div className="gradient-brand mx-auto flex size-12 items-center justify-center rounded-2xl shadow-lg">
             {icon}
           </div>
           <h1 className="mt-5 text-xl font-semibold tracking-tight text-slate-950">{title}</h1>

@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -804,7 +804,7 @@ function GoalTrackerContent({
 
             <div className="space-y-3">
               <ProductVisual variant="execution" className="min-h-[170px]" />
-              <div className={`rounded-lg border p-4 shadow-[0_16px_42px_-34px_rgba(15,23,42,0.34)] ${priority.tone}`}>
+              <div className={`rounded-lg border p-4 shadow-sm ${priority.tone}`}>
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/75">
                     <PriorityIcon className="h-5 w-5" />
@@ -848,7 +848,7 @@ function GoalTrackerContent({
 
       <div data-tour-id="goaltracker-goals">
         {hasGoals && (
-          <div className="mb-5 rounded-lg border border-slate-200 bg-white/92 p-4 shadow-[0_18px_44px_-38px_rgba(15,23,42,0.28)] sm:p-5">
+          <div className="mb-5 rounded-lg border border-slate-200 bg-white/92 p-4 shadow-lg sm:p-5">
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-center">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Danh sách</p>

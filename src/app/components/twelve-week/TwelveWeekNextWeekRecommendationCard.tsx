@@ -54,7 +54,7 @@ export function TwelveWeekNextWeekRecommendationCard({
       data-testid="next-week-recommendation"
       data-recommendation={recommendation.recommendation}
       data-confidence={recommendation.confidence}
-      className={`rounded-xl border p-4 sm:p-5 ${accent}`}
+      className={`rounded-xl border p-5 sm:p-6 ${accent}`}
     >
       <div className="flex items-start gap-3">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/82 text-slate-700">

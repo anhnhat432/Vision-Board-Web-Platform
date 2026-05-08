@@ -45,7 +45,7 @@ export function TwelveWeekCycleSettingsPanel({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="rounded-lg border border-sky-200 bg-sky-50 p-5 shadow-[0_18px_38px_-34px_rgba(37,99,235,0.24)]">
+        <div className="rounded-lg border border-sky-200 bg-sky-50 p-5 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
@@ -238,11 +238,11 @@ export function TwelveWeekCycleSettingsPanel({
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-300">Bắt đầu</p>
             <p className="mt-2 text-xl font-bold text-white">{formatCalendarDate(system.startDate)}</p>
           </div>
-          <div className="rounded-lg border border-sky-200 bg-sky-50 p-5 shadow-[0_18px_38px_-34px_rgba(37,99,235,0.18)]">
+          <div className="rounded-lg border border-sky-200 bg-sky-50 p-5 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">Kết thúc</p>
             <p className="mt-2 text-xl font-bold text-slate-950">{formatCalendarDate(system.endDate)}</p>
           </div>
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 shadow-[0_18px_38px_-34px_rgba(217,119,6,0.16)]">
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">Số lần quay lại nhịp</p>
             <p className="mt-2 text-xl font-bold text-slate-950">{system.reentryCount ?? 0} lần</p>
           </div>

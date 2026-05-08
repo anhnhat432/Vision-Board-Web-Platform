@@ -68,7 +68,7 @@ interface EmptyStateProps {
 }
 
 const CARD_CLASSES =
-  "rounded-2xl border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)] sm:p-5 lg:p-6";
+  "rounded-2xl border border-slate-200/80 bg-white/92 p-5 shadow-lg sm:p-6";
 const DASHED_CLASSES = "rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-8";
 
 export function EmptyState({

@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Flame } from "lucide-react";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
+import { DashboardInsightCard } from "./DashboardInsightCard";
 
 interface StreakCardProps {
   streak: number;
@@ -10,30 +10,21 @@ interface StreakCardProps {
 
 function StreakCardComponent({ streak, threshold = 70 }: StreakCardProps) {
   return (
-    <Card className="h-full border-0 bg-gradient-to-br from-white via-white to-amber-50/80 shadow-[0_24px_48px_-34px_rgba(217,119,6,0.35)]">
-      <CardHeader className="space-y-3 pb-2">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
-            <Flame className="h-5 w-5" />
-          </div>
-          <div>
-            <CardDescription className="text-xs uppercase tracking-[0.16em] text-slate-500">Chuỗi tuần đều</CardDescription>
-            <CardTitle className="mt-1 text-base font-semibold text-slate-900">Nhịp nhất quán</CardTitle>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-3 pt-1">
-        <div className="flex items-end justify-between">
-          <p className="text-3xl font-bold tracking-tight text-slate-900">{streak}</p>
-          <span className="rounded-full border border-amber-200 bg-white/90 px-2.5 py-1 text-xs font-medium text-amber-700">
-            Ngưỡng {threshold}%
-          </span>
-        </div>
-        <p className="text-sm text-slate-600">
-          Chuỗi tuần dài nhất giữ được mức thực thi khỏe.
-        </p>
-      </CardContent>
-    </Card>
+    <DashboardInsightCard
+      contentClassName="space-y-3"
+      eyebrow="Chuỗi tuần đều"
+      icon={Flame}
+      title="Nhịp nhất quán"
+      tone="amber"
+    >
+      <div className="flex items-end justify-between gap-3">
+        <p className="text-3xl font-bold tracking-tight text-slate-950">{streak}</p>
+        <span className="rounded-full border border-amber-200/80 bg-white/90 px-2.5 py-1 text-xs font-medium text-amber-700 shadow-sm">
+          Ngưỡng {threshold}%
+        </span>
+      </div>
+      <p className="text-sm leading-6 text-slate-600">Chuỗi tuần dài nhất giữ được mức thực thi khỏe.</p>
+    </DashboardInsightCard>
   );
 }
 

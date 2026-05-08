@@ -5,23 +5,23 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "./utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center justify-center rounded-full border px-3 py-1 text-[0.72rem] font-semibold w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1.5 tracking-[0.01em] [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-colors transition-transform duration-150 overflow-hidden shadow-[0_10px_28px_-24px_rgba(15,23,42,0.28)] hover:scale-[1.04] hover:-translate-y-px",
+  "inline-flex items-center justify-center rounded-full border px-3 py-1 text-[0.72rem] font-semibold w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1.5 tracking-[0.01em] [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-colors transition-transform duration-150 overflow-hidden shadow-sm hover:scale-[1.04] hover:-translate-y-px",
   {
     variants: {
       variant: {
         default:
-          "border-transparent gradient-brand text-white shadow-[0_14px_32px_-20px_var(--tone-shell-shadow-strong)] [a&]:hover:opacity-92",
+          "border-transparent gradient-brand text-white shadow-lg [a&]:hover:opacity-92",
         secondary:
           "border-[color-mix(in_srgb,var(--tone-shell-secondary)_22%,transparent)] bg-[color-mix(in_srgb,var(--tone-shell-secondary)_10%,rgba(255,255,255,0.72))] text-[color-mix(in_srgb,var(--tone-shell-primary)_90%,rgba(30,30,50,1))] [a&]:hover:bg-secondary/90",
         destructive:
-          "border-transparent bg-destructive text-white shadow-[0_10px_24px_-18px_rgba(212,24,61,0.55)] [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "border-transparent bg-destructive text-white shadow-sm [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         success:
-          "border-transparent bg-[color:var(--success)] text-[color:var(--success-foreground)] shadow-[0_10px_24px_-18px_rgba(5,150,105,0.55)] [a&]:hover:bg-[color:var(--success)]/90",
+          "border-transparent bg-[color:var(--success)] text-[color:var(--success-foreground)] shadow-sm [a&]:hover:bg-[color:var(--success)]/90",
         warning:
-          "border-transparent bg-[color:var(--warning)] text-[color:var(--warning-foreground)] shadow-[0_10px_24px_-18px_rgba(180,83,9,0.55)] [a&]:hover:bg-[color:var(--warning)]/90",
-        info: "border-transparent bg-[color:var(--info)] text-[color:var(--info-foreground)] shadow-[0_10px_24px_-18px_rgba(14,116,144,0.45)] [a&]:hover:bg-[color:var(--info)]/90",
+          "border-transparent bg-[color:var(--warning)] text-[color:var(--warning-foreground)] shadow-sm [a&]:hover:bg-[color:var(--warning)]/90",
+        info: "border-transparent bg-[color:var(--info)] text-[color:var(--info-foreground)] shadow-sm [a&]:hover:bg-[color:var(--info)]/90",
         outline:
-          "border-white/70 bg-white/72 text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] [a&]:hover:bg-white [a&]:hover:text-accent-foreground",
+          "border-white/70 bg-white/72 text-foreground shadow-sm [a&]:hover:bg-white [a&]:hover:text-accent-foreground",
       },
     },
     defaultVariants: {

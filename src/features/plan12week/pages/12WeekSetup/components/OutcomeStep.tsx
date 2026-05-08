@@ -111,7 +111,7 @@ export function OutcomeStep({
       )}
 
       {/* Required fields card */}
-      <div className="rounded-2xl border-2 border-emerald-200 bg-emerald-50/60 p-4 sm:p-5 shadow-[0_18px_40px_-32px_rgba(16,185,129,0.18)]">
+      <div className="rounded-2xl border-2 border-emerald-200 bg-emerald-50/60 p-5 sm:p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
             <p className="text-sm font-semibold text-slate-900">Chốt phần bắt buộc trước</p>
@@ -250,7 +250,7 @@ export function OutcomeStep({
       {/* Template selection */}
       <SecondaryPanel title="Bắt đầu nhanh bằng khung gợi ý" collapsible defaultOpen={isDesktop}>
         {recommendedTemplate && adaptiveTemplateRecommendation && (
-          <div className="rounded-2xl border border-sky-200 gradient-sky p-4 shadow-[0_18px_40px_-34px_rgba(37,99,235,0.18)]">
+          <div className="rounded-2xl border border-sky-200 gradient-sky p-4 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
@@ -317,7 +317,7 @@ export function OutcomeStep({
                   aria-label={templateAriaLabel}
                   className={`rounded-2xl border p-4 text-left transition-colors ${
                     isSelected
-                      ? "border-slate-900 bg-slate-900 text-white shadow-[0_16px_36px_-28px_rgba(15,23,42,0.32)]"
+                      ? "border-slate-900 bg-slate-900 text-white shadow-lg"
                       : isLocked
                         ? "border-violet-200 bg-violet-50/86 hover:border-violet-300"
                         : "border-white/70 bg-white/84 hover:border-slate-300"

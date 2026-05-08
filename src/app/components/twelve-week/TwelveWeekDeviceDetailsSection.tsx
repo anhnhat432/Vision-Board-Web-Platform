@@ -60,7 +60,7 @@ interface ExpandableSectionProps {
 
 function ExpandableSection({ title, description, badge, children }: ExpandableSectionProps) {
   return (
-    <details className="group rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-[0_16px_36px_-32px_rgba(15,23,42,0.18)]">
+    <details className="group rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-sm">
       <summary className="flex cursor-pointer list-none items-start justify-between gap-4 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2">
         <div>
           <p className="text-sm font-semibold text-slate-950">{title}</p>
@@ -582,7 +582,7 @@ export function TwelveWeekDeviceDetailsSection({
         </div>
       </ExpandableSection>
 
-      <div className="rounded-lg border border-amber-300/70 bg-amber-50 p-5 shadow-[0_18px_38px_-34px_rgba(217,119,6,0.18)]">
+      <div className="rounded-lg border border-amber-300/70 bg-amber-50 p-5 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-600">Làm mới chu kỳ</p>
         <p className="mt-2 text-sm text-red-900">
           Bắt đầu lại tuần 1 từ tuần hiện tại, giữ nguyên kết quả và việc lặp lại, nhưng làm mới việc hàng ngày, check-in và review của

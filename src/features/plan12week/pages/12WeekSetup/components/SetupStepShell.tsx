@@ -58,10 +58,10 @@ export function SetupStepShell({
       ref={stepShellRef}
       className={prefersReducedMotion ? "" : "animate-fade-in-up"}
     >
-      <Card>
-        <CardHeader className="space-y-3">
+      <Card className="ops-surface overflow-hidden border border-slate-200/80 bg-white/94 shadow-sm ring-1 ring-white/70">
+        <CardHeader className="space-y-4 pb-3">
           <ol
-            className="flex flex-wrap items-center gap-1.5 text-xs"
+            className="flex flex-wrap items-center gap-1.5 rounded-xl border border-slate-200/80 bg-slate-50/72 p-2 text-xs"
             aria-label={`Bước ${currentStep + 1} trên ${stepCount}`}
           >
             {STEPS.map((step, index) => {
@@ -107,6 +107,12 @@ export function SetupStepShell({
               );
             })}
           </ol>
+          <div className="h-1.5 overflow-hidden rounded-full bg-slate-100" aria-hidden="true">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-violet-500 via-sky-500 to-emerald-500 transition-all duration-300"
+              style={{ width: `${((currentStep + 1) / stepCount) * 100}%` }}
+            />
+          </div>
           <div className="space-y-1">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
               Bước {currentStep + 1} / {stepCount}
@@ -144,7 +150,7 @@ export function SetupStepShell({
             </Button>
             {isLastStep ? (
               <Button
-                className="w-full gradient-brand text-white shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)] hover:shadow-[0_18px_40px_-22px_rgba(109,40,217,0.44)] hover:scale-[1.01] sm:w-auto"
+                className="w-full gradient-brand text-white shadow-lg hover:shadow-xl hover:scale-[1.01] sm:w-auto"
                 onClick={handleSubmitClick}
                 size="lg"
                 disabled={isSubmitting}
@@ -158,7 +164,7 @@ export function SetupStepShell({
                 {isSubmitting ? "Đang tạo kế hoạch..." : "Tạo kế hoạch 12 tuần"}
               </Button>
             ) : (
-              <Button className="w-full sm:w-auto gradient-brand text-white shadow-[0_18px_38px_-24px_rgba(109,40,217,0.52)] hover:shadow-[0_22px_44px_-24px_rgba(109,40,217,0.58)] hover:scale-[1.02]" onClick={onNext}>
+              <Button className="w-full sm:w-auto gradient-brand text-white shadow-lg hover:shadow-xl hover:scale-[1.02]" onClick={onNext}>
                 Tiếp tục
                 <ArrowRight className="h-4 w-4" />
               </Button>

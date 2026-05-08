@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { AlertTriangle, ArrowRight, CalendarClock, CalendarPlus, Check, Crown, Gauge, Inbox, Loader2, Sparkles, X } from "lucide-react";
 
 import type { RescueModeStatus } from "@/features/plan12week/logic";
@@ -164,7 +164,7 @@ export function TwelveWeekTodayTab({
         />
       )}
       {missedTasks.length > 0 && (
-        <Card className="order-2 border border-amber-300/90 bg-white shadow-[0_14px_34px_-28px_rgba(146,64,14,0.24)]">
+        <Card className="order-2 border border-amber-300/90 bg-white shadow-lg">
           <CardHeader>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -265,7 +265,7 @@ export function TwelveWeekTodayTab({
       {primaryTask && (
         <div
           data-testid="today-primary-hero"
-          className={`order-1 rounded-2xl border p-5 shadow-[0_16px_36px_-28px_rgba(124,58,237,0.14)] sm:p-6 ${
+          className={`order-1 rounded-2xl border p-5 shadow-sm sm:p-6 ${
             primaryTaskOverdue
               ? "border-amber-300 bg-amber-50/90"
               : "border-emerald-300 bg-white"
@@ -309,7 +309,7 @@ export function TwelveWeekTodayTab({
             <Button
               data-testid="today-primary-mark-done"
               size="lg"
-              className="w-full gradient-brand text-white shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)] hover:shadow-[0_18px_40px_-22px_rgba(109,40,217,0.44)] hover:scale-[1.01]"
+              className="w-full gradient-brand text-white shadow-lg hover:shadow-xl hover:scale-[1.01]"
               onClick={() => onToggleTask(primaryTask.id, true)}
             >
               <Check className="h-4 w-4" />
@@ -679,7 +679,7 @@ export function TwelveWeekTodayTab({
               </div>
               <Button
                 size="lg"
-                className="w-full gradient-brand text-white text-lg py-4 shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)] hover:shadow-[0_18px_40px_-22px_rgba(109,40,217,0.44)] hover:scale-[1.01] sm:w-auto"
+                className="w-full gradient-brand text-white text-lg py-4 shadow-lg hover:shadow-xl hover:scale-[1.01] sm:w-auto"
                 onClick={handleSaveCheckInClick}
                 disabled={isSavingCheckIn}
                 aria-busy={isSavingCheckIn}
@@ -713,7 +713,7 @@ export function TwelveWeekTodayTab({
       <div className="md:hidden sticky bottom-0 z-10 bg-white/95 backdrop-blur-sm border-t p-4">
         <Button
           size="lg"
-          className="w-full gradient-brand text-white text-lg py-4 shadow-[0_14px_34px_-20px_rgba(109,40,217,0.38)]"
+          className="w-full gradient-brand text-white text-lg py-4 shadow-lg"
           onClick={handleSaveCheckInClick}
           disabled={isSavingCheckIn}
           aria-busy={isSavingCheckIn}
