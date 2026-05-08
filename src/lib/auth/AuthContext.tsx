@@ -20,7 +20,32 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-const PROFILE_BOOTSTRAP_TIMEOUT_MS = 8_000;
+const PROFILE_BOOTSTRAP_TIMEOUT_MS = 20_000;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function getProfileBootstrapErrorMessage(error: unknown, timedOut: boolean): string {
+  if (timedOut) {
+    return "Backend phản hồi quá lâu khi mở hồ sơ tài khoản. Nếu Render vừa ngủ, đợi vài giây rồi bấm Thử lại.";
+  }
+
+  if (error instanceof Error && error.message.trim().length > 0) {
+    return error.message;
+  }
+
+  if (isRecord(error)) {
+    const message = typeof error.message === "string" ? error.message.trim() : "";
+    const status = typeof error.status === "number" ? error.status : null;
+
+    if (message && status) return `${message} (HTTP ${status})`;
+    if (message) return message;
+    if (status) return `Không thể mở hồ sơ tài khoản. Backend trả HTTP ${status}.`;
+  }
+
+  return "Không thể mở hồ sơ tài khoản. Vui lòng kiểm tra kết nối backend và thử lại.";
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { user, loading, error, login, logout, isConfigured } = useAuth();
@@ -70,13 +95,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error("Failed to bootstrap user profile.", err);
         setUserProfile(null);
         if (timedOut) {
-          setUserProfileError(
-            "Hồ sơ tài khoản phản hồi quá lâu. App đã mở workspace trên thiết bị trước; bạn có thể thử nối lại sau.",
-          );
+          setUserProfileError(getProfileBootstrapErrorMessage(err, true));
         } else {
-          setUserProfileError(
-            err instanceof Error && err.message.trim().length > 0 ? err.message : "Không thể mở hồ sơ tài khoản.",
-          );
+          setUserProfileError(getProfileBootstrapErrorMessage(err, false));
         }
         // Allow retry on next user change
         bootstrappedUid.current = null;

@@ -10,23 +10,29 @@ function AdminStatusCard({
   action,
   description,
   icon,
+  secondaryAction,
   title,
 }: {
   action?: ReactNode;
   description: string;
   icon: ReactNode;
+  secondaryAction?: ReactNode;
   title: string;
 }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-10 text-slate-100">
-      <Card className="w-full max-w-md border-white/10 bg-white/[0.06] shadow-[0_30px_90px_-50px_rgba(15,23,42,0.75)] backdrop-blur">
+      <Card
+        className="w-full max-w-md border-white/10 text-slate-100 shadow-[0_30px_90px_-50px_rgba(15,23,42,0.75)] backdrop-blur"
+        style={{ backgroundColor: "rgba(15, 23, 42, 0.96)" }}
+      >
         <CardContent className="p-8 text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-white">
             {icon}
           </div>
           <h1 className="mt-5 text-xl font-bold text-white">{title}</h1>
-          <p className="mt-3 text-sm leading-6 text-slate-300">{description}</p>
+          <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-300">{description}</p>
           {action ? <div className="mt-6 flex flex-wrap justify-center gap-3">{action}</div> : null}
+          {secondaryAction ? <div className="mt-3 flex flex-wrap justify-center gap-3">{secondaryAction}</div> : null}
         </CardContent>
       </Card>
     </div>
@@ -90,12 +96,23 @@ export function AdminLayout() {
         title="Không tải được profile"
         description={
           userProfileError ||
-          "Không thể tải profile admin. Kiểm tra Render backend đã deploy và biến ADMIN_EMAILS đã set đúng email admin."
+          "Không thể tải profile admin. Kiểm tra Render backend đã deploy và Firebase Admin env đang đúng."
         }
         action={
           <Button type="button" variant="secondary" className="gap-2" onClick={refreshUserProfile}>
             <RefreshCw className="h-4 w-4" />
             Thử lại
+          </Button>
+        }
+        secondaryAction={
+          <Button
+            type="button"
+            variant="ghost"
+            className="gap-2 text-slate-300 hover:bg-white/10 hover:text-white"
+            onClick={() => void logout()}
+          >
+            <LogOut className="h-4 w-4" />
+            Đăng xuất
           </Button>
         }
       />
