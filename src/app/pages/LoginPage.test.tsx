@@ -16,10 +16,13 @@ function setAuthContext(overrides: Record<string, unknown> = {}) {
   authContextMock.useAuthContext.mockReturnValue({
     user: null,
     userProfile: null,
+    userProfileLoading: false,
+    userProfileError: null,
     authLoading: false,
     error: null,
     login: vi.fn().mockResolvedValue(null),
     logout: vi.fn().mockResolvedValue(undefined),
+    refreshUserProfile: vi.fn(),
     isConfigured: true,
     ...overrides,
   });
@@ -51,7 +54,10 @@ describe("LoginPage", () => {
   });
 
   it("redirects an authenticated user back to the requested route", async () => {
-    setAuthContext({ user: { uid: "user_test" } });
+    setAuthContext({
+      user: { uid: "user_test" },
+      userProfile: { id: "profile_test", email: "test@example.com", role: "user" },
+    });
 
     render(
       <MemoryRouter initialEntries={[{ pathname: "/login", state: { from: "/order?kit=vision#recipient" } }]}>
@@ -66,7 +72,10 @@ describe("LoginPage", () => {
   });
 
   it("uses the login next query when navigation state is unavailable", async () => {
-    setAuthContext({ user: { uid: "user_test" } });
+    setAuthContext({
+      user: { uid: "user_test" },
+      userProfile: { id: "profile_test", email: "test@example.com", role: "user" },
+    });
 
     render(
       <MemoryRouter initialEntries={["/login?next=%2Forder%3Fkit%3Dvision%23recipient"]}>
@@ -92,7 +101,10 @@ describe("LoginPage", () => {
   });
 
   it("ignores unsafe login next redirects", async () => {
-    setAuthContext({ user: { uid: "user_test" } });
+    setAuthContext({
+      user: { uid: "user_test" },
+      userProfile: { id: "profile_test", email: "test@example.com", role: "user" },
+    });
 
     render(
       <MemoryRouter initialEntries={["/login?next=%2F%2Fevil.example"]}>
@@ -104,5 +116,23 @@ describe("LoginPage", () => {
     );
 
     expect(await screen.findByTestId("destination")).toHaveTextContent("/");
+  });
+
+  it("sends authenticated admin users directly to the admin console", async () => {
+    setAuthContext({
+      user: { uid: "admin_test" },
+      userProfile: { id: "profile_admin", email: "admin@example.com", role: "admin" },
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/admin/orders" element={<DestinationProbe />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByTestId("destination")).toHaveTextContent("/admin/orders");
   });
 });

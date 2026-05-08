@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router";
-import { AlertCircle, Loader2, Sparkles } from "lucide-react";
+import { AlertCircle, Loader2, LogOut, RefreshCw, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "../components/ui/button";
@@ -28,7 +28,18 @@ function normalizeRedirectPath(from: unknown): string | null {
 }
 
 export function LoginPage() {
-  const { user, authLoading, error, login, isConfigured } = useAuthContext();
+  const {
+    user,
+    userProfile,
+    userProfileError,
+    userProfileLoading,
+    authLoading,
+    error,
+    login,
+    logout,
+    refreshUserProfile,
+    isConfigured,
+  } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
   const stateRedirect = normalizeRedirectPath((location.state as Record<string, unknown> | null)?.from);
@@ -48,9 +59,46 @@ export function LoginPage() {
     setMode(getInitialLoginMode(location.search));
   }, [location.search]);
 
-  // If already authenticated, send to destination immediately
+  // If already authenticated, wait for backend profile so admin accounts can
+  // land directly in the admin console instead of the normal user workspace.
   if (!authLoading && user) {
-    return <Navigate to={redirectTo} replace />;
+    if (userProfile?.role === "admin") {
+      return <Navigate to="/admin/orders" replace />;
+    }
+
+    if (userProfile) {
+      return <Navigate to={redirectTo} replace />;
+    }
+
+    if (userProfileLoading || !userProfileError) {
+      return (
+        <LoginStatusCard
+          icon={<Loader2 className="h-5 w-5 animate-spin text-white" />}
+          title="Đang mở tài khoản"
+          description="Backend đang kiểm tra hồ sơ và quyền truy cập trước khi chuyển trang."
+        />
+      );
+    }
+
+    return (
+      <LoginStatusCard
+        icon={<AlertCircle className="h-5 w-5 text-amber-600" />}
+        title="Không tải được hồ sơ"
+        description={userProfileError}
+        action={
+          <>
+            <Button type="button" className="gap-2" onClick={refreshUserProfile}>
+              <RefreshCw className="h-4 w-4" />
+              Thử lại
+            </Button>
+            <Button type="button" variant="outline" className="gap-2" onClick={() => void logout()}>
+              <LogOut className="h-4 w-4" />
+              Đăng xuất
+            </Button>
+          </>
+        }
+      />
+    );
   }
 
   async function handleEmailSubmit(e: React.FormEvent) {
@@ -61,7 +109,7 @@ export function LoginPage() {
     setSubmitting(false);
 
     if (result) {
-      navigate(redirectTo, { replace: true });
+      refreshUserProfile();
     }
   }
 
@@ -71,7 +119,7 @@ export function LoginPage() {
     setSubmitting(false);
 
     if (result) {
-      navigate(redirectTo, { replace: true });
+      refreshUserProfile();
     }
   }
 
@@ -262,6 +310,34 @@ export function LoginPage() {
         </div>
       </div>
 
+      <Toaster />
+    </div>
+  );
+}
+
+function LoginStatusCard({
+  action,
+  description,
+  icon,
+  title,
+}: {
+  action?: React.ReactNode;
+  description: string;
+  icon: React.ReactNode;
+  title: string;
+}) {
+  return (
+    <div className="app-shell flex min-h-screen items-center justify-center px-4">
+      <Card className="w-full max-w-sm">
+        <CardContent className="p-7 text-center">
+          <div className="gradient-brand mx-auto flex size-12 items-center justify-center rounded-2xl shadow-[0_14px_30px_-20px_var(--tone-shell-shadow-strong)]">
+            {icon}
+          </div>
+          <h1 className="mt-5 text-xl font-semibold tracking-tight text-slate-950">{title}</h1>
+          <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
+          {action ? <div className="mt-6 flex flex-wrap justify-center gap-3">{action}</div> : null}
+        </CardContent>
+      </Card>
       <Toaster />
     </div>
   );
