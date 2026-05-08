@@ -45,11 +45,12 @@ export function MotivationalReminder() {
   const [reminder] = useState(() => getInAppReminders()[0] ?? null);
 
   useEffect(() => {
+    const suppressPublicHomeOverlay = location.pathname === "/";
     const suppressReminderOverlay = REMINDER_OVERLAY_SUPPRESSED_ROUTES.some((route) =>
       location.pathname.startsWith(route),
     );
 
-    if (suppressReminderOverlay) {
+    if (suppressPublicHomeOverlay || suppressReminderOverlay) {
       setShowReminder(false);
       return;
     }

@@ -97,6 +97,18 @@ function makeProps(overrides: Partial<TodayTabProps> = {}): TodayTabProps {
 }
 
 describe("TwelveWeekTodayTab — primary task hero", () => {
+  it("renders the compact mobile status strip before the hero and work grid", () => {
+    render(<TwelveWeekTodayTab {...makeProps()} />);
+
+    const strip = screen.getByTestId("today-mobile-compact-strip");
+    const hero = screen.getByTestId("today-primary-hero");
+    const workGrid = screen.getByTestId("today-main-work-grid");
+
+    expect(strip).toHaveClass("order-0", "grid-cols-3", "sm:hidden");
+    expect(strip.compareDocumentPosition(hero)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(hero.compareDocumentPosition(workGrid)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
   it("renders 'Việc quan trọng nhất hôm nay' headline when there is an open primary task", () => {
     render(<TwelveWeekTodayTab {...makeProps()} />);
     expect(screen.getByTestId("today-primary-hero")).toBeInTheDocument();
@@ -269,6 +281,11 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
     await userEvent.click(buttons[0]);
     expect(onSaveCheckIn).toHaveBeenCalledTimes(1);
   });
+
+  it("renders a single save check-in CTA to avoid duplicate mobile actions", () => {
+    render(<TwelveWeekTodayTab {...makeProps()} />);
+    expect(screen.getAllByRole("button", { name: /Lưu check-in hôm nay/i })).toHaveLength(1);
+  });
 });
 
 describe("TwelveWeekTodayTab — rescue mode nudge", () => {
@@ -313,6 +330,16 @@ describe("TwelveWeekTodayTab — rescue mode nudge", () => {
     const nudge = screen.getByTestId("today-rescue-nudge");
     expect(nudge).toBeInTheDocument();
     expect(nudge).toHaveAttribute("data-rescue-severity", "gentle");
+  });
+
+  it("keeps the primary task hero before rescue guidance and check-in", () => {
+    render(<TwelveWeekTodayTab {...makeProps({ rescueStatus: { ...baseStatus } })} />);
+    const hero = screen.getByTestId("today-primary-hero");
+    const nudge = screen.getByTestId("today-rescue-nudge");
+    const checkInHeading = screen.getByText("Check-in 30 giây");
+
+    expect(hero.compareDocumentPosition(nudge)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(hero.compareDocumentPosition(checkInHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it("shows at least one suggestion in the rescue nudge", () => {

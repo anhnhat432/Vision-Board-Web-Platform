@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { BarChart3, CalendarDays, ListTodo, Settings2, MoreHorizontal } from "lucide-react";
+import { BarChart3, CalendarDays, ListTodo, Settings2, MoreHorizontal, type LucideIcon } from "lucide-react";
 
 import { useTwelveWeekSystemSnapshot } from "@/app/hooks/useTwelveWeekSystemSnapshot";
 import { useScrollToTopOnChange } from "@/app/hooks/useScrollToTopOnChange";
@@ -96,6 +96,13 @@ const emptyMutationQueueSummary = {
   lastDrainStartedAt: null,
   lastDrainFinishedAt: null,
 };
+
+const TWELVE_WEEK_SECTION_TABS = [
+  { value: "today", label: "Hôm nay", icon: ListTodo },
+  { value: "week", label: "Tuần", icon: CalendarDays },
+  { value: "progress", label: "Tiến độ", icon: BarChart3 },
+  { value: "settings", label: "Cài đặt", icon: Settings2 },
+] satisfies Array<{ value: string; label: string; icon: LucideIcon }>;
 
 export function TwelveWeekSystem() {
   const navigate = useNavigate();
@@ -700,31 +707,36 @@ export function TwelveWeekSystem() {
         }}
       />
 
-      {/* Desktop secondary navigation dropdown */}
-      <div className="hidden md:flex justify-end mb-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button type="button" variant="outline" className="gap-2">
-              <MoreHorizontal className="h-4 w-4" />
-              Khác
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleTabChange("week")}>
-              <CalendarDays className="mr-2 h-4 w-4" />
-              Review tuần
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleTabChange("progress")}>
-              <BarChart3 className="mr-2 h-4 w-4" />
-              Tiến độ
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/12-week-system/settings")}>
-              <Settings2 className="mr-2 h-4 w-4" />
-              Cài đặt chu kỳ
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      <nav className="hidden md:block" aria-label="Điều hướng hệ 12 tuần">
+        <div
+          role="tablist"
+          aria-label="Điều hướng hệ 12 tuần"
+          className="inline-flex max-w-full items-center gap-1 rounded-full border border-white/70 bg-white/86 p-1 shadow-sm"
+        >
+          {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => {
+            const selected = activeTab === value;
+
+            return (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                aria-label={`Mở tab ${label}`}
+                className={`inline-flex h-10 items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors ${
+                  selected
+                    ? "bg-slate-950 text-white shadow-md"
+                    : "text-slate-600 hover:bg-white hover:text-slate-950"
+                }`}
+                onClick={() => handleTabChange(value)}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
 
       {/* Main content sections */}
       <div ref={tabsTopRef} className="pt-4">

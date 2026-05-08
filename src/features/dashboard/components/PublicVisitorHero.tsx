@@ -59,14 +59,6 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
                     <UserPlus className="h-4 w-4" />
                     Đăng ký để đồng bộ sau
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
-                    onClick={onSignIn}
-                  >
-                    <LogIn className="h-4 w-4" />
-                    Đăng nhập
-                  </Button>
                 </>
               ) : (
                 <>

@@ -153,9 +153,9 @@ export function TwelveWeekDashboardHeader({
   onOpenGoals,
 }: TwelveWeekDashboardHeaderProps) {
   return (
-    <Card className="ops-surface overflow-hidden border border-slate-200/80 bg-white/94 shadow-sm ring-1 ring-white/70">
-      <CardContent className="p-5 sm:p-6 lg:p-7">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+    <Card className="ops-surface overflow-hidden rounded-xl border border-slate-200/80 bg-white/94 shadow-sm ring-1 ring-white/70 sm:rounded-2xl">
+      <CardContent className="p-4 sm:p-6 lg:p-7">
+        <div className="flex flex-col gap-3 sm:gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0 flex-1 space-y-3">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline" className="rounded-full border-violet-200 bg-violet-50 px-3 py-1.5 text-violet-700">
@@ -175,10 +175,10 @@ export function TwelveWeekDashboardHeader({
               )}
             </div>
             <div className="space-y-2">
-              <h1 className="line-clamp-2 max-w-4xl break-words text-xl font-bold tracking-normal text-slate-950 sm:text-2xl">
+              <h1 className="line-clamp-2 max-w-4xl break-words text-lg font-bold tracking-normal text-slate-950 sm:text-2xl">
                 {activeGoal.title}
               </h1>
-              <p className="max-w-3xl text-sm leading-7 text-slate-600">
+              <p data-testid="twelve-week-header-description" className="hidden max-w-3xl text-sm leading-7 text-slate-600 sm:block">
                 Bắt đầu từ tab Hôm nay: tick việc quan trọng nhất, lưu check-in, rồi mở Tuần để review. Dữ liệu đang
                 lưu trên trình duyệt này.
               </p>
@@ -196,43 +196,46 @@ export function TwelveWeekDashboardHeader({
             </div>
           </div>
 
-          <div className="grid min-w-0 gap-3 sm:grid-cols-3 xl:w-[540px]">
+          <div
+            data-testid="twelve-week-header-metrics"
+            className="hidden min-w-0 grid-cols-3 gap-2 sm:grid sm:gap-3 xl:w-[540px]"
+          >
             <ProductVisual variant="execution" className="hidden min-h-[136px] rounded-xl border border-slate-200/70 bg-slate-50/72 sm:col-span-3 sm:block" />
-            <div className="ops-metric-tile rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Còn cần làm</p>
-              <p className="mt-1 text-2xl font-bold text-slate-950">{todayRemainingCount}</p>
-              <p className="text-xs text-slate-500">{todayCompletedCount} việc đã chốt hôm nay</p>
+            <div className="ops-metric-tile rounded-lg border border-slate-200 bg-slate-50/80 px-2 py-2 shadow-sm sm:rounded-xl sm:px-4 sm:py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 sm:text-xs sm:tracking-[0.14em]">Còn làm</p>
+              <p className="mt-1 text-xl font-bold text-slate-950 sm:text-2xl">{todayRemainingCount}</p>
+              <p className="hidden text-xs text-slate-500 sm:block">{todayCompletedCount} việc đã chốt hôm nay</p>
             </div>
-            <div className="ops-metric-tile rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 shadow-sm">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tuần này</p>
-              <p className="mt-1 text-2xl font-bold text-slate-950">{weekCompletion.percent}%</p>
-              <p className="text-xs text-slate-500">
+            <div className="ops-metric-tile rounded-lg border border-slate-200 bg-slate-50/80 px-2 py-2 shadow-sm sm:rounded-xl sm:px-4 sm:py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 sm:text-xs sm:tracking-[0.14em]">Tuần</p>
+              <p className="mt-1 text-xl font-bold text-slate-950 sm:text-2xl">{weekCompletion.percent}%</p>
+              <p className="hidden text-xs text-slate-500 sm:block">
                 {currentWeekRange
                   ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
                   : "Đang chạy"}
               </p>
             </div>
             <div
-              className={`rounded-xl border px-4 py-3 ${
+              className={`rounded-lg border px-2 py-2 sm:rounded-xl sm:px-4 sm:py-3 ${
                 reviewDueToday ? "border-amber-200 bg-amber-50/90 shadow-sm" : "ops-metric-tile border-slate-200 bg-slate-50/80 shadow-sm"
               }`}
             >
               <p
-                className={`text-xs font-semibold uppercase tracking-[0.14em] ${
+                className={`text-[10px] font-semibold uppercase tracking-[0.12em] sm:text-xs sm:tracking-[0.14em] ${
                   reviewDueToday ? "text-amber-700" : "text-slate-500"
                 }`}
               >
                 Review
               </p>
-              <p className="mt-1 truncate text-base font-bold text-slate-950">
+              <p className="mt-1 truncate text-sm font-bold text-slate-950 sm:text-base">
                 {reviewDueToday ? "Hôm nay" : getReviewDayLabel(system.reviewDay)}
               </p>
-              <p className="text-xs text-slate-500">{reviewStatusLabel}</p>
+              <p className="hidden text-xs text-slate-500 sm:block">{reviewStatusLabel}</p>
             </div>
           </div>
         </div>
 
-        <div className="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4 lg:flex-row lg:items-center lg:justify-between">
+        <div data-testid="twelve-week-header-actions" className="mt-4 hidden flex-col gap-3 border-t border-slate-200 pt-4 sm:flex lg:flex-row lg:items-center lg:justify-between">
           <p className="min-w-0 text-sm leading-6 text-slate-600">
             {reviewDueToday
               ? "Việc tiếp theo: chốt review tuần trước khi mở việc mới."

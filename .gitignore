@@ -2,6 +2,7 @@ node_modules/
 dist/
 .codex-worktrees/
 .claude/
+.superpowers/
 .DS_Store
 *.log
 codex-backups/

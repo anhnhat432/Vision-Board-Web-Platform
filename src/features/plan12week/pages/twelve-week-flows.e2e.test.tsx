@@ -159,6 +159,17 @@ describe("12-week core flows", () => {
     expect(getUserData().eventLog.some((event) => event.type === "12_week_task_completed")).toBe(true);
   });
 
+  it("shows the 12-week sections as top-level tabs on the command center", async () => {
+    seedTwelveWeekGoal();
+    renderAppRoute("/12-week-system");
+
+    const tablist = await screen.findByRole("tablist", { name: /Điều hướng hệ 12 tuần/i });
+    expect(within(tablist).getByRole("tab", { name: /Hôm nay/i })).toHaveAttribute("aria-selected", "true");
+    expect(within(tablist).getByRole("tab", { name: /Tuần/i })).toBeInTheDocument();
+    expect(within(tablist).getByRole("tab", { name: /Tiến độ/i })).toBeInTheDocument();
+    expect(within(tablist).getByRole("tab", { name: /Cài đặt/i })).toBeInTheDocument();
+  });
+
   it("compacts repeated task toggles to the latest queued state", async () => {
     const { goalId } = seedTwelveWeekGoal();
     renderAppRoute("/12-week-system");

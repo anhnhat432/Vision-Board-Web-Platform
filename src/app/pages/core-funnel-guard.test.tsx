@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -147,15 +147,41 @@ describe("core funnel guards", () => {
     expect(router.state.location.pathname).toBe("/life-insight");
   });
 
-  it.each([
-    "/feasibility",
-    "/12-week-setup",
-  ])("redirects %s to onboarding when only stale draft data exists", async (initialEntry) => {
+  it("shows a recovery gate on Feasibility when only stale draft data exists", async () => {
     seedStaleGoalDrafts();
-    const { router } = renderCoreFunnel(initialEntry);
 
-    await waitFor(() => {
-      expect(router.state.location.pathname).toBe("/onboarding");
-    });
+    renderCoreFunnel("/feasibility");
+
+    expect(
+      await screen.findByRole("heading", { name: "Hoàn thành Life Balance trước khi kiểm tra tính khả thi" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Bắt đầu Life Balance" })).toBeInTheDocument();
+  });
+
+  it("shows a recovery gate on 12-week setup when feasibility is missing", async () => {
+    seedRealLifeBalanceWithoutInsight();
+    localStorage.setItem(APP_STORAGE_KEYS.selectedFocusArea, "Career");
+    localStorage.setItem(
+      APP_STORAGE_KEYS.pendingSmartGoal,
+      JSON.stringify({
+        focusArea: "Career",
+        specific: "Ra mắt hệ thống review cá nhân",
+        measurable: "12 tuần review hoàn chỉnh",
+        achievable: "6 giờ mỗi tuần",
+        relevant: "Giữ nhịp thực thi dài hạn",
+        timeBound: "Trong 12 tuần tới",
+      }),
+    );
+
+    const user = userEvent.setup();
+    const { router } = renderCoreFunnel("/12-week-setup");
+
+    expect(
+      await screen.findByRole("heading", { name: "Kiểm tra tính khả thi trước khi tạo kế hoạch 12 tuần" }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Mở kiểm tra tính khả thi" }));
+
+    expect(router.state.location.pathname).toBe("/feasibility");
   });
 });

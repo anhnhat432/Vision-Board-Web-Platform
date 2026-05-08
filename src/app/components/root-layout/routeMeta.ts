@@ -23,6 +23,36 @@ export const ROUTE_META: RouteMeta[] = [
     tagline: "Thấy rõ quỹ đạo phát triển của mình, không chỉ những việc cần làm hôm nay.",
   },
   {
+    match: (pathname: string) => pathname === "/onboarding",
+    label: "Onboarding",
+    title: "Onboarding – Dear Our Future",
+    tagline: "Tạo điểm bắt đầu đủ rõ trước khi chọn trọng tâm và viết mục tiêu.",
+  },
+  {
+    match: (pathname: string) => pathname === "/life-insight",
+    label: "Life Insight",
+    title: "Life Insight – Dear Our Future",
+    tagline: "Chọn một trọng tâm từ dữ liệu cân bằng để không bắt đầu quá rộng.",
+  },
+  {
+    match: (pathname: string) => pathname === "/smart-goal-setup",
+    label: "SMART Goal",
+    title: "SMART Goal – Dear Our Future",
+    tagline: "Biến trọng tâm thành mục tiêu rõ kết quả, chỉ số, lý do và thời hạn.",
+  },
+  {
+    match: (pathname: string) => pathname === "/feasibility",
+    label: "Kiểm tra tính khả thi",
+    title: "Kiểm tra tính khả thi – Dear Our Future",
+    tagline: "Đo mức sẵn sàng trước khi biến mục tiêu thành kế hoạch 12 tuần.",
+  },
+  {
+    match: (pathname: string) => pathname === "/12-week-setup",
+    label: "Thiết lập 12 tuần",
+    title: "Thiết lập 12 tuần – Dear Our Future",
+    tagline: "Chốt kết quả, việc lặp lại, lịch nhìn lại và tuần đầu tiên.",
+  },
+  {
     match: (pathname: string) => pathname.startsWith("/goals"),
     label: "Mục tiêu",
     title: "Mục tiêu – Dear Our Future",
@@ -113,6 +143,7 @@ export function getRouteTone(pathname: string): string {
   if (pathname.startsWith("/onboarding") || pathname.startsWith("/life-balance") || pathname.startsWith("/life-insight")) {
     return "balance";
   }
+  if (pathname.startsWith("/smart-goal-setup") || pathname.startsWith("/feasibility")) return "system";
   if (pathname.startsWith("/goals")) return "system";
   if (pathname.startsWith("/12-week")) return "system";
   if (pathname.startsWith("/vision-board") || pathname.startsWith("/gallery")) return "vision";

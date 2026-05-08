@@ -28,17 +28,19 @@ import { QUESTIONS } from "./FeasibilityCheck/constants";
 import { buildResult } from "./FeasibilityCheck/helpers";
 import type { PendingFeasibilityResult, ResultData } from "./FeasibilityCheck/types";
 
+type FeasibilitySetupState = "checking" | "needs_life_balance" | "needs_life_insight" | "needs_smart_goal" | "ready";
+
 export function FeasibilityCheck() {
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
   const hasGuardedRef = useRef(false);
+  const [setupState, setSetupState] = useState<FeasibilitySetupState>("checking");
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [focusArea, setFocusArea] = useState<string>("");
   const [wheelScore, setWheelScore] = useState<number | null>(null);
   const [pendingGoal, setPendingGoal] = useState<PendingSMARTGoal | null>(null);
   const [result, setResult] = useState<ResultData | null>(null);
-  const [isInitializing, setIsInitializing] = useState(true);
   const questionTopRef = useRef<HTMLDivElement | null>(null);
   const questionHeadingRef = useRef<HTMLHeadingElement | null>(null);
   const smartGoalQualityLevelRef: MutableRefObject<SmartGoalQualityBridge | undefined> = useRef(undefined);
@@ -53,16 +55,17 @@ export function FeasibilityCheck() {
     const data = getUserData();
 
     if (!hasRealLifeBalance(data)) {
-      toast.info("Hoàn thành bước cân bằng cuộc sống trước.");
-      setIsInitializing(false);
-      navigate("/onboarding");
+      setSetupState("needs_life_balance");
       return;
     }
 
-    if (!storedFocusArea || !draft) {
-      toast.info("Hoàn thành bước viết mục tiêu trước.");
-      setIsInitializing(false);
-      navigate("/smart-goal-setup");
+    if (!storedFocusArea) {
+      setSetupState("needs_life_insight");
+      return;
+    }
+
+    if (!draft) {
+      setSetupState("needs_smart_goal");
       return;
     }
 
@@ -70,9 +73,7 @@ export function FeasibilityCheck() {
     try {
       parsedDraft = JSON.parse(draft);
     } catch {
-      toast.info("Bản nháp mục tiêu không hợp lệ. Kiểm tra lại.");
-      setIsInitializing(false);
-      navigate("/smart-goal-setup");
+      setSetupState("needs_smart_goal");
       return;
     }
 
@@ -93,34 +94,30 @@ export function FeasibilityCheck() {
     const normalizedPendingGoal = parsePendingSMARTGoal(normalizedSmartGoal ?? parsedDraft, storedFocusArea);
 
     if (!normalizedPendingGoal) {
-      toast.info("Bản nháp mục tiêu chưa hoàn chỉnh.");
-      setIsInitializing(false);
-      navigate("/smart-goal-setup");
+      setSetupState("needs_smart_goal");
       return;
     }
 
     const areaData = getScoredLifeArea(data, storedFocusArea);
 
     if (!areaData) {
-      toast.info("Hoàn thành bước chọn trọng tâm trước.");
-      setIsInitializing(false);
-      navigate("/life-insight");
+      setSetupState("needs_life_insight");
       return;
     }
 
     setFocusArea(storedFocusArea);
     setWheelScore(areaData.score);
     setPendingGoal(normalizedPendingGoal);
-    setIsInitializing(false);
-  }, [navigate]);
+    setSetupState("ready");
+  }, []);
 
   useScrollToTopOnChange(currentStep, {
     targetRef: questionTopRef,
     focusRef: questionHeadingRef,
-    enabled: !isInitializing && Boolean(pendingGoal && wheelScore !== null && !result),
+    enabled: setupState === "ready" && Boolean(pendingGoal && wheelScore !== null && !result),
   });
 
-  if (isInitializing) {
+  if (setupState === "checking") {
     return (
       <CoreFlowGateState
         currentStepId="feasibility"
@@ -128,6 +125,51 @@ export function FeasibilityCheck() {
         title="Đang chuẩn bị phần kiểm tra tính khả thi"
         description="Đang đọc lại mục tiêu và dữ liệu trọng tâm trước khi bắt đầu."
         loading
+      />
+    );
+  }
+
+  if (setupState === "needs_life_balance") {
+    return (
+      <CoreFlowGateState
+        currentStepId="life_balance"
+        eyebrow="Kiểm tra"
+        title="Hoàn thành Life Balance trước khi kiểm tra tính khả thi"
+        description="Phần kiểm tra cần điểm cân bằng thật để biết mục tiêu đang dựa trên khu vực nào. Hãy hoàn thành bước đánh giá trước, rồi quay lại kiểm tra."
+        actionLabel="Bắt đầu Life Balance"
+        onAction={() => navigate("/onboarding")}
+        secondaryActionLabel="Về bảng điều khiển"
+        onSecondaryAction={() => navigate("/")}
+      />
+    );
+  }
+
+  if (setupState === "needs_life_insight") {
+    return (
+      <CoreFlowGateState
+        currentStepId="life_insight"
+        eyebrow="Kiểm tra"
+        title="Chọn trọng tâm trước khi kiểm tra tính khả thi"
+        description="Bạn đã có dữ liệu cân bằng nhưng chưa có trọng tâm hợp lệ. Chọn một lĩnh vực ưu tiên để phần kiểm tra hiểu đúng bối cảnh mục tiêu."
+        actionLabel="Mở Life Insight"
+        onAction={() => navigate("/life-insight")}
+        secondaryActionLabel="Bắt đầu Life Balance"
+        onSecondaryAction={() => navigate("/onboarding")}
+      />
+    );
+  }
+
+  if (setupState === "needs_smart_goal") {
+    return (
+      <CoreFlowGateState
+        currentStepId="smart_goal"
+        eyebrow="Kiểm tra"
+        title="Viết SMART Goal trước khi kiểm tra tính khả thi"
+        description="Phần kiểm tra cần một mục tiêu đủ rõ về kết quả, chỉ số, mức cam kết và thời hạn. Quay lại bước viết mục tiêu để hoàn thiện bản nháp."
+        actionLabel="Quay lại viết mục tiêu"
+        onAction={() => navigate("/smart-goal-setup")}
+        secondaryActionLabel="Mở Life Insight"
+        onSecondaryAction={() => navigate("/life-insight")}
       />
     );
   }

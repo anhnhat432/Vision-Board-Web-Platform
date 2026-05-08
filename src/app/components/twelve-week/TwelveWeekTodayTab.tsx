@@ -102,6 +102,7 @@ export function TwelveWeekTodayTab({
   currentWeekTasksCount,
   todayDateKey,
   todayCompletedCount,
+  todayRemainingCount,
   overdueOpenCount,
   optionalOpenThisWeekCount,
   hasPlanTasks = currentWeekTasksCount > 0 || todayQueue.length > 0,
@@ -152,19 +153,31 @@ export function TwelveWeekTodayTab({
   };
 
   return (
-    <div className="ops-system-panel flex min-w-0 flex-col gap-5">
-      {rescueStatus && rescueStatus.severity !== "none" && (
-        <TwelveWeekRescueNudge
-          status={rescueStatus}
-          variant="today"
-          onPickTinyTask={onPickTinyTask}
-          onQuickCheckIn={onSaveCheckIn}
-          onOpenWeekTab={onOpenWeekTab}
-          onReviewPlan={onReviewPlan ?? onNavigateToSetup}
-        />
-      )}
+    <div className="ops-system-panel flex min-w-0 flex-col gap-3 sm:gap-5">
+      <div
+        data-testid="today-mobile-compact-strip"
+        className="order-0 grid grid-cols-3 gap-2 rounded-xl border border-slate-200 bg-white/92 p-2.5 shadow-sm sm:hidden"
+      >
+        <div className="min-w-0 rounded-lg bg-slate-50 px-2 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">Còn</p>
+          <p className="mt-0.5 text-lg font-bold text-slate-950">{todayRemainingCount}</p>
+        </div>
+        <div className="min-w-0 rounded-lg bg-slate-50 px-2 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">Tuần</p>
+          <p className="mt-0.5 text-lg font-bold text-slate-950">{weekCompletion.percent}%</p>
+        </div>
+        <div className={`min-w-0 rounded-lg px-2 py-2 ${reviewDueToday ? "bg-amber-50" : "bg-violet-50"}`}>
+          <p className={`text-[10px] font-semibold uppercase tracking-[0.12em] ${reviewDueToday ? "text-amber-700" : "text-violet-700"}`}>
+            {reviewDueToday ? "Review" : "Xong"}
+          </p>
+          <p className="mt-0.5 truncate text-lg font-bold text-slate-950">
+            {reviewDueToday ? "Hôm nay" : `${todayCompletedCount}/${checkInTotal}`}
+          </p>
+        </div>
+      </div>
+
       {missedTasks.length > 0 && (
-        <Card className="order-2 border border-amber-300/90 bg-white shadow-lg">
+        <Card data-testid="today-overdue-recovery" className="order-4 border border-amber-300/90 bg-white shadow-lg">
           <CardHeader>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -265,7 +278,7 @@ export function TwelveWeekTodayTab({
       {primaryTask && (
         <div
           data-testid="today-primary-hero"
-          className={`order-1 rounded-2xl border p-5 shadow-sm sm:p-6 ${
+          className={`order-1 rounded-xl border p-4 shadow-sm sm:rounded-2xl sm:p-6 ${
             primaryTaskOverdue
               ? "border-amber-300 bg-amber-50/90"
               : "border-emerald-300 bg-white"
@@ -305,11 +318,11 @@ export function TwelveWeekTodayTab({
               </Badge>
             )}
           </div>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-2 sm:mt-4">
             <Button
               data-testid="today-primary-mark-done"
               size="lg"
-              className="w-full gradient-brand text-white shadow-lg hover:shadow-xl hover:scale-[1.01]"
+              className="w-full gradient-brand text-white shadow-lg hover:shadow-xl hover:scale-[1.01] sm:w-auto"
               onClick={() => onToggleTask(primaryTask.id, true)}
             >
               <Check className="h-4 w-4" />
@@ -330,13 +343,13 @@ export function TwelveWeekTodayTab({
         </div>
       )}
 
-      <div className="order-1 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.12fr)_380px]">
+      <div data-testid="today-main-work-grid" className="order-2 grid min-w-0 gap-3 sm:gap-5 lg:grid-cols-[minmax(0,1.12fr)_380px]">
         <div className="animate-fade-in-up min-w-0">
           <Card
             data-tour-id="system-today-queue"
-            className="h-full min-w-0 overflow-hidden border border-slate-200/80 bg-white/92 shadow-sm"
+            className="h-full min-w-0 overflow-hidden rounded-xl border border-slate-200/80 bg-white/92 shadow-sm sm:rounded-2xl"
           >
-            <CardHeader className="min-w-0 space-y-0 pb-3">
+            <CardHeader className="min-w-0 space-y-0 px-4 pt-4 pb-2 sm:px-7 sm:pt-7 sm:pb-3">
               <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <CardTitle className="break-words text-slate-950">Hàng việc hôm nay</CardTitle>
@@ -349,7 +362,7 @@ export function TwelveWeekTodayTab({
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="min-w-0 space-y-3 pt-0">
+            <CardContent className="min-w-0 space-y-3 px-4 pt-0 pb-4 sm:px-7 sm:pb-7">
               {todayQueue.length === 0 ? (
                 hasPlanTasks ? (
                   <EmptyState
@@ -609,8 +622,8 @@ export function TwelveWeekTodayTab({
           className="animate-fade-in-up min-w-0"
           style={{ animationDelay: '0.06s' }}
         >
-          <Card className="h-full min-w-0 overflow-hidden border border-slate-200/80 bg-white/92 shadow-sm">
-            <CardHeader className="min-w-0 space-y-0 pb-3">
+          <Card className="h-full min-w-0 overflow-hidden rounded-xl border border-slate-200/80 bg-white/92 shadow-sm sm:rounded-2xl">
+            <CardHeader className="min-w-0 space-y-0 px-4 pt-4 pb-2 sm:px-7 sm:pt-7 sm:pb-3">
               <div className="flex min-w-0 items-start justify-between gap-3">
                 <div className="min-w-0">
                   <CardTitle className="flex items-center gap-2 break-words text-slate-950">
@@ -626,7 +639,7 @@ export function TwelveWeekTodayTab({
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="min-w-0 space-y-4 pt-0">
+            <CardContent className="min-w-0 space-y-3 px-4 pt-0 pb-4 sm:space-y-4 sm:px-7 sm:pb-7">
               <div className="space-y-3">
                 <Label id="daily-mood-label">Năng lượng hôm nay</Label>
                 <div
@@ -673,7 +686,7 @@ export function TwelveWeekTodayTab({
               </div>
               <Button
                 size="lg"
-                className="w-full gradient-brand text-white text-lg py-4 shadow-lg hover:shadow-xl hover:scale-[1.01] sm:w-auto"
+                className="w-full gradient-brand py-3 text-base text-white shadow-lg hover:shadow-xl hover:scale-[1.01] sm:w-auto sm:py-4 sm:text-lg"
                 onClick={handleSaveCheckInClick}
                 disabled={isSavingCheckIn}
                 aria-busy={isSavingCheckIn}
@@ -703,25 +716,18 @@ export function TwelveWeekTodayTab({
         </div>
       </div>
 
-      {/* Sticky check-in CTA for mobile */}
-      <div className="md:hidden sticky bottom-0 z-10 bg-white/95 backdrop-blur-sm border-t p-4">
-        <Button
-          size="lg"
-          className="w-full gradient-brand text-white text-lg py-4 shadow-lg"
-          onClick={handleSaveCheckInClick}
-          disabled={isSavingCheckIn}
-          aria-busy={isSavingCheckIn}
-        >
-          {isSavingCheckIn ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              Đang lưu check-in...
-            </>
-          ) : (
-            "Lưu check-in hôm nay"
-          )}
-        </Button>
-      </div>
+      {rescueStatus && rescueStatus.severity !== "none" && (
+        <div className="order-5">
+          <TwelveWeekRescueNudge
+            status={rescueStatus}
+            variant="today"
+            onPickTinyTask={onPickTinyTask}
+            onQuickCheckIn={onSaveCheckIn}
+            onOpenWeekTab={onOpenWeekTab}
+            onReviewPlan={onReviewPlan ?? onNavigateToSetup}
+          />
+        </div>
+      )}
     </div>
   );
 }

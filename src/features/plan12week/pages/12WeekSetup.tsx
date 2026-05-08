@@ -65,12 +65,15 @@ import { LeadIndicatorsStep } from "./12WeekSetup/components/LeadIndicatorsStep"
 import { ScheduleStep } from "./12WeekSetup/components/ScheduleStep";
 import { PlanPreviewStep } from "@/features/plan12week/components/PlanPreviewStep";
 
+type TwelveWeekSetupGate = "none" | "needs_life_balance" | "needs_life_insight" | "needs_smart_goal" | "needs_feasibility";
+
 export function TwelveWeekSetup() {
   const navigate = useNavigate();
   const { actions: planSetupActions } = usePlanSetupSync();
   const auth = useAuthContext();
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [setupGate, setSetupGate] = useState<TwelveWeekSetupGate>("none");
   const [currentPlan, setCurrentPlan] = useState<PricingPlanCode>(getCurrentPlan());
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const [pendingTemplateId, setPendingTemplateId] = useState<string | null>(null);
@@ -100,9 +103,8 @@ export function TwelveWeekSetup() {
   useEffect(() => {
     const data = getUserData();
     if (!hasRealLifeBalance(data)) {
-      toast.info("Hoàn thành bước cân bằng cuộc sống trước.");
+      setSetupGate("needs_life_balance");
       setIsLoading(false);
-      navigate("/onboarding");
       return;
     }
 
@@ -110,127 +112,153 @@ export function TwelveWeekSetup() {
     const pendingSmartGoal = localStorage.getItem(APP_STORAGE_KEYS.pendingSmartGoal);
     const pendingFeasibilityResult = localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
 
-    if (!selectedFocusArea || !pendingSmartGoal || !pendingFeasibilityResult) {
-      toast.info("Hoàn thành bước viết mục tiêu và kiểm tra tính thực tế trước.");
+    if (!selectedFocusArea) {
+      setSetupGate("needs_life_insight");
       setIsLoading(false);
-      navigate("/smart-goal-setup");
       return;
     }
 
-    try {
-      const parsedSmartGoalValue = JSON.parse(pendingSmartGoal);
-      const normalizedSmartGoal = parseSmartGoal(parsedSmartGoalValue, selectedFocusArea);
-      if (normalizedSmartGoal) {
-        localStorage.setItem(APP_STORAGE_KEYS.pendingSmartGoal, JSON.stringify(normalizedSmartGoal));
-      }
-
-      const parsedSmartGoal = parsePendingSMARTGoal(normalizedSmartGoal ?? parsedSmartGoalValue, selectedFocusArea);
-      const parsedFeasibility = JSON.parse(pendingFeasibilityResult);
-      const savedDraft = localStorage.getItem(APP_STORAGE_KEYS.pending12WeekSetupDraft);
-
-      if (!parsedSmartGoal || !isPendingFeasibilityResult(parsedFeasibility)) {
-        throw new Error("invalid-draft");
-      }
-
-      if (!getScoredLifeArea(data, selectedFocusArea)) {
-        toast.info("Chọn lại trọng tâm từ dữ liệu cân bằng thật.");
-        setIsLoading(false);
-        navigate("/life-insight");
-        return;
-      }
-
-      const feasibilityDefaults = getFeasibilityDraftDefaults(parsedFeasibility);
-      const setupPlan = getCurrentPlan();
-      setFocusArea(selectedFocusArea);
-      setSmartGoal(parsedSmartGoal);
-      setFeasibility(parsedFeasibility);
-      setCurrentPlan(setupPlan);
-
-      setDraft((previousDraft) => {
-        const baseDraft = {
-          ...previousDraft,
-          vision12Week:
-            previousDraft.vision12Week ||
-            `Trong 12 tuần tới, tôi muốn biến mục tiêu "${parsedSmartGoal.specific}" thành một nhịp thực thi rõ ràng.`,
-          week12Outcome: previousDraft.week12Outcome || parsedSmartGoal.measurable || parsedSmartGoal.specific,
-          lagMetricName: previousDraft.lagMetricName || parsedSmartGoal.measurable || "Chỉ số kết quả chính",
-          tacticLoadPreference:
-            previousDraft.tacticLoadPreference === "balanced"
-              ? feasibilityDefaults.tacticLoadPreference
-              : previousDraft.tacticLoadPreference,
-          dailyTimeBudget: previousDraft.dailyTimeBudget || feasibilityDefaults.dailyTimeBudget,
-          personalConstraint: previousDraft.personalConstraint || feasibilityDefaults.personalConstraint,
-        };
-
-        if (!savedDraft) return baseDraft;
-
-        try {
-          const parsedDraft = JSON.parse(savedDraft) as Partial<TwelveWeekSetupDraft>;
-          return {
-            ...baseDraft,
-            ...parsedDraft,
-            templateId: parsedDraft.templateId ?? "",
-            tacticLoadPreference:
-              parsedDraft.tacticLoadPreference === "lighter" || parsedDraft.tacticLoadPreference === "push"
-                ? parsedDraft.tacticLoadPreference
-                : "balanced",
-            dailyTimeBudget: parsedDraft.dailyTimeBudget ?? "",
-            preferredDays: Array.isArray(parsedDraft.preferredDays) ? parsedDraft.preferredDays : [],
-            personalConstraint:
-              parsedDraft.personalConstraint === "time" ||
-              parsedDraft.personalConstraint === "motivation" ||
-              parsedDraft.personalConstraint === "consistency" ||
-              parsedDraft.personalConstraint === "complexity"
-                ? parsedDraft.personalConstraint
-                : "",
-            leadIndicators:
-              Array.isArray(parsedDraft.leadIndicators) && parsedDraft.leadIndicators.length > 0
-                ? parsedDraft.leadIndicators.map((indicator) => ({
-                    id: typeof indicator?.id === "string" && indicator.id ? indicator.id : createIndicatorId(),
-                    name: indicator?.name ?? "",
-                    target: indicator?.target ?? "1",
-                    unit: indicator?.unit ?? "lần/tuần",
-                    type: indicator?.type === "optional" ? "optional" : "core",
-                    cadence:
-                      indicator?.cadence === "frontload" || indicator?.cadence === "backload"
-                        ? indicator.cadence
-                        : "spread",
-                  }))
-                : baseDraft.leadIndicators,
-          };
-        } catch {
-          return baseDraft;
-        }
-      });
-
-      if (!savedDraft) {
-        trackAnalyticsEvent(
-          "twelve_week_setup_started",
-          {
-            source: "12_week_setup",
-            current_plan: setupPlan,
-            entry_mode: "smart_goal_handoff",
-            template_tier: "none",
-            has_saved_draft: false,
-          },
-          {
-            legacyEventName: "12_week_setup_started",
-            legacyPayload: {
-              focusArea: selectedFocusArea,
-              readinessScore: String(parsedFeasibility.adjustedScore),
-            },
-          },
-        );
-      }
-    } catch {
-      toast.info("Dữ liệu tạm chưa hợp lệ. Quay lại bước trước.");
+    if (!pendingSmartGoal) {
+      setSetupGate("needs_smart_goal");
       setIsLoading(false);
-      navigate("/smart-goal-setup");
       return;
+    }
+
+    if (!pendingFeasibilityResult) {
+      setSetupGate("needs_feasibility");
+      setIsLoading(false);
+      return;
+    }
+
+    let parsedSmartGoalValue: unknown;
+    try {
+      parsedSmartGoalValue = JSON.parse(pendingSmartGoal);
+    } catch {
+      setSetupGate("needs_smart_goal");
+      setIsLoading(false);
+      return;
+    }
+
+    const normalizedSmartGoal = parseSmartGoal(parsedSmartGoalValue, selectedFocusArea);
+    if (normalizedSmartGoal) {
+      localStorage.setItem(APP_STORAGE_KEYS.pendingSmartGoal, JSON.stringify(normalizedSmartGoal));
+    }
+
+    const parsedSmartGoal = parsePendingSMARTGoal(normalizedSmartGoal ?? parsedSmartGoalValue, selectedFocusArea);
+    if (!parsedSmartGoal) {
+      setSetupGate("needs_smart_goal");
+      setIsLoading(false);
+      return;
+    }
+
+    let parsedFeasibility: unknown;
+    try {
+      parsedFeasibility = JSON.parse(pendingFeasibilityResult);
+    } catch {
+      setSetupGate("needs_feasibility");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!isPendingFeasibilityResult(parsedFeasibility)) {
+      setSetupGate("needs_feasibility");
+      setIsLoading(false);
+      return;
+    }
+
+    if (!getScoredLifeArea(data, selectedFocusArea)) {
+      setSetupGate("needs_life_insight");
+      setIsLoading(false);
+      return;
+    }
+
+    const savedDraft = localStorage.getItem(APP_STORAGE_KEYS.pending12WeekSetupDraft);
+    const feasibilityDefaults = getFeasibilityDraftDefaults(parsedFeasibility);
+    const setupPlan = getCurrentPlan();
+    setFocusArea(selectedFocusArea);
+    setSmartGoal(parsedSmartGoal);
+    setFeasibility(parsedFeasibility);
+    setCurrentPlan(setupPlan);
+
+    setDraft((previousDraft) => {
+      const baseDraft = {
+        ...previousDraft,
+        vision12Week:
+          previousDraft.vision12Week ||
+          `Trong 12 tuần tới, tôi muốn biến mục tiêu "${parsedSmartGoal.specific}" thành một nhịp thực thi rõ ràng.`,
+        week12Outcome: previousDraft.week12Outcome || parsedSmartGoal.measurable || parsedSmartGoal.specific,
+        lagMetricName: previousDraft.lagMetricName || parsedSmartGoal.measurable || "Chỉ số kết quả chính",
+        tacticLoadPreference:
+          previousDraft.tacticLoadPreference === "balanced"
+            ? feasibilityDefaults.tacticLoadPreference
+            : previousDraft.tacticLoadPreference,
+        dailyTimeBudget: previousDraft.dailyTimeBudget || feasibilityDefaults.dailyTimeBudget,
+        personalConstraint: previousDraft.personalConstraint || feasibilityDefaults.personalConstraint,
+      };
+
+      if (!savedDraft) return baseDraft;
+
+      try {
+        const parsedDraft = JSON.parse(savedDraft) as Partial<TwelveWeekSetupDraft>;
+        return {
+          ...baseDraft,
+          ...parsedDraft,
+          templateId: parsedDraft.templateId ?? "",
+          tacticLoadPreference:
+            parsedDraft.tacticLoadPreference === "lighter" || parsedDraft.tacticLoadPreference === "push"
+              ? parsedDraft.tacticLoadPreference
+              : "balanced",
+          dailyTimeBudget: parsedDraft.dailyTimeBudget ?? "",
+          preferredDays: Array.isArray(parsedDraft.preferredDays) ? parsedDraft.preferredDays : [],
+          personalConstraint:
+            parsedDraft.personalConstraint === "time" ||
+            parsedDraft.personalConstraint === "motivation" ||
+            parsedDraft.personalConstraint === "consistency" ||
+            parsedDraft.personalConstraint === "complexity"
+              ? parsedDraft.personalConstraint
+              : "",
+          leadIndicators:
+            Array.isArray(parsedDraft.leadIndicators) && parsedDraft.leadIndicators.length > 0
+              ? parsedDraft.leadIndicators.map((indicator) => ({
+                  id: typeof indicator?.id === "string" && indicator.id ? indicator.id : createIndicatorId(),
+                  name: indicator?.name ?? "",
+                  target: indicator?.target ?? "1",
+                  unit: indicator?.unit ?? "lần/tuần",
+                  type: indicator?.type === "optional" ? "optional" : "core",
+                  cadence:
+                    indicator?.cadence === "frontload" || indicator?.cadence === "backload"
+                      ? indicator.cadence
+                      : "spread",
+                }))
+              : baseDraft.leadIndicators,
+        };
+      } catch {
+        return baseDraft;
+      }
+    });
+
+    if (!savedDraft) {
+      trackAnalyticsEvent(
+        "twelve_week_setup_started",
+        {
+          source: "12_week_setup",
+          current_plan: setupPlan,
+          entry_mode: "smart_goal_handoff",
+          template_tier: "none",
+          has_saved_draft: false,
+        },
+        {
+          legacyEventName: "12_week_setup_started",
+          legacyPayload: {
+            focusArea: selectedFocusArea,
+            readinessScore: String(parsedFeasibility.adjustedScore),
+          },
+        },
+      );
     }
 
     setIsLoading(false);
-  }, [navigate]);
+  }, []);
 
   const saveTimeoutRef = useRef<number | null>(null);
 
@@ -364,15 +392,77 @@ export function TwelveWeekSetup() {
     );
   }
 
+  if (setupGate === "needs_life_balance") {
+    return (
+      <CoreFlowGateState
+        currentStepId="life_balance"
+        eyebrow="Thiết lập 12 tuần"
+        title="Hoàn thành Life Balance trước khi tạo kế hoạch 12 tuần"
+        description="Kế hoạch 12 tuần cần điểm cân bằng thật để biết mục tiêu đang gắn với lĩnh vực nào. Hãy bắt đầu từ đánh giá cân bằng rồi quay lại flow chính."
+        actionLabel="Bắt đầu Life Balance"
+        onAction={() => navigate("/onboarding")}
+        secondaryActionLabel="Về bảng điều khiển"
+        onSecondaryAction={() => navigate("/")}
+      />
+    );
+  }
+
+  if (setupGate === "needs_life_insight") {
+    return (
+      <CoreFlowGateState
+        currentStepId="life_insight"
+        eyebrow="Thiết lập 12 tuần"
+        title="Chọn trọng tâm trước khi tạo kế hoạch 12 tuần"
+        description="Bạn cần một trọng tâm hợp lệ từ Life Insight để kế hoạch 12 tuần không bị quá rộng hoặc lệch khỏi dữ liệu cân bằng."
+        actionLabel="Mở Life Insight"
+        onAction={() => navigate("/life-insight")}
+        secondaryActionLabel="Bắt đầu Life Balance"
+        onSecondaryAction={() => navigate("/onboarding")}
+      />
+    );
+  }
+
+  if (setupGate === "needs_smart_goal") {
+    return (
+      <CoreFlowGateState
+        currentStepId="smart_goal"
+        eyebrow="Thiết lập 12 tuần"
+        title="Viết SMART Goal trước khi tạo kế hoạch 12 tuần"
+        description="Kế hoạch cần mục tiêu đủ rõ về kết quả, chỉ số và thời hạn. Hoàn thiện SMART Goal trước, sau đó kiểm tra tính khả thi và quay lại thiết lập."
+        actionLabel="Quay lại viết mục tiêu"
+        onAction={() => navigate("/smart-goal-setup")}
+        secondaryActionLabel="Mở Life Insight"
+        onSecondaryAction={() => navigate("/life-insight")}
+      />
+    );
+  }
+
+  if (setupGate === "needs_feasibility") {
+    return (
+      <CoreFlowGateState
+        currentStepId="feasibility"
+        eyebrow="Thiết lập 12 tuần"
+        title="Kiểm tra tính khả thi trước khi tạo kế hoạch 12 tuần"
+        description="Bạn đã có mục tiêu, nhưng cần kết quả kiểm tra để chọn tải việc, lịch review và mức cam kết phù hợp cho 12 tuần đầu."
+        actionLabel="Mở kiểm tra tính khả thi"
+        onAction={() => navigate("/feasibility")}
+        secondaryActionLabel="Quay lại viết mục tiêu"
+        onSecondaryAction={() => navigate("/smart-goal-setup")}
+      />
+    );
+  }
+
   if (!smartGoal || !feasibility) {
     return (
       <CoreFlowGateState
         currentStepId="feasibility"
         eyebrow="Thiết lập 12 tuần"
-        title="Thiếu dữ liệu để thiết lập 12 tuần"
-        description="Hoàn thành bước viết mục tiêu và kiểm tra tính thực tế trước khi tạo kế hoạch."
-        actionLabel="Quay lại viết mục tiêu"
-        onAction={() => navigate("/smart-goal-setup")}
+        title="Kiểm tra tính khả thi trước khi tạo kế hoạch 12 tuần"
+        description="Bạn đã có mục tiêu, nhưng cần kết quả kiểm tra để chọn tải việc, lịch review và mức cam kết phù hợp cho 12 tuần đầu."
+        actionLabel="Mở kiểm tra tính khả thi"
+        onAction={() => navigate("/feasibility")}
+        secondaryActionLabel="Quay lại viết mục tiêu"
+        onSecondaryAction={() => navigate("/smart-goal-setup")}
       />
     );
   }
