@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router";
 import { CheckCircle2, Clock, Copy, Loader2, QrCode, RefreshCw, XCircle } from "lucide-react";
 
 import { apiClient } from "@/lib/api/apiClient";
+import { syncEntitlementsWithProvider } from "../utils/production";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -26,6 +27,8 @@ interface CheckoutSessionResponse {
   expiresAt?: string;
   provider: string;
 }
+
+type EntitlementSyncStatus = "idle" | "syncing" | "synced" | "failed";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -52,9 +55,12 @@ export function BillingCheckoutQR() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [entitlementSyncStatus, setEntitlementSyncStatus] = useState<EntitlementSyncStatus>("idle");
+  const [entitlementSyncMessage, setEntitlementSyncMessage] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const autoSyncedOrderRef = useRef<string | null>(null);
 
   // Create a new order if no orderId in URL
   const createOrder = useCallback(async () => {
@@ -137,9 +143,50 @@ export function BillingCheckoutQR() {
     });
   }, []);
 
+  const syncCompletedOrderAccess = useCallback(async () => {
+    if (!order || order.status !== "completed") return false;
+
+    setEntitlementSyncStatus("syncing");
+    setEntitlementSyncMessage(null);
+
+    const result = await syncEntitlementsWithProvider();
+    if (result.ok && result.planCode !== "FREE") {
+      setEntitlementSyncStatus("synced");
+      setEntitlementSyncMessage(result.message);
+      return true;
+    }
+
+    setEntitlementSyncStatus("failed");
+    setEntitlementSyncMessage(
+      result.message ||
+        "Đã nhận thanh toán nhưng chưa cập nhật được quyền Plus trên thiết bị này. Vui lòng thử lại.",
+    );
+    return false;
+  }, [order]);
+
+  useEffect(() => {
+    if (order?.status !== "completed") return;
+    if (autoSyncedOrderRef.current === order.orderId) return;
+
+    autoSyncedOrderRef.current = order.orderId;
+    void syncCompletedOrderAccess();
+  }, [order?.orderId, order?.status, syncCompletedOrderAccess]);
+
+  const handleCompletedOrderContinue = useCallback(async () => {
+    if (entitlementSyncStatus !== "synced") {
+      const synced = await syncCompletedOrderAccess();
+      if (!synced) return;
+    }
+
+    navigate("/12-week-system");
+  }, [entitlementSyncStatus, navigate, syncCompletedOrderAccess]);
+
   // ─── Success state ──────────────────────────────────────────────────────
 
   if (order?.status === "completed") {
+    const isSyncingEntitlement = entitlementSyncStatus === "syncing";
+    const syncFailed = entitlementSyncStatus === "failed";
+
     return (
       <div className="mx-auto max-w-md px-4 py-12">
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-8 text-center shadow-lg">
@@ -147,13 +194,26 @@ export function BillingCheckoutQR() {
             <CheckCircle2 className="h-8 w-8 text-emerald-600" />
           </div>
           <h2 className="text-xl font-bold text-emerald-800">Thanh toán thành công!</h2>
-          <p className="mt-2 text-sm text-emerald-700">Gói Plus đã được kích hoạt. Chúc bạn có 12 tuần hiệu quả!</p>
+          <p className="mt-2 text-sm text-emerald-700">
+            {isSyncingEntitlement
+              ? "Đã nhận thanh toán. Đang cập nhật quyền Plus trên tài khoản của bạn..."
+              : syncFailed
+                ? "Đã nhận thanh toán, nhưng thiết bị này chưa lấy được quyền Plus từ server."
+                : "Gói Plus đã được kích hoạt. Chúc bạn có 12 tuần hiệu quả!"}
+          </p>
+          {entitlementSyncMessage && (
+            <p className={`mt-3 text-xs leading-5 ${syncFailed ? "text-amber-700" : "text-emerald-700"}`}>
+              {entitlementSyncMessage}
+            </p>
+          )}
           <button
             type="button"
-            onClick={() => navigate("/12-week-system")}
-            className="mt-6 rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-700"
+            onClick={handleCompletedOrderContinue}
+            disabled={isSyncingEntitlement}
+            className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            Bắt đầu ngay
+            {isSyncingEntitlement && <Loader2 className="h-4 w-4 animate-spin" />}
+            {isSyncingEntitlement ? "Đang cập nhật..." : syncFailed ? "Đồng bộ lại quyền Plus" : "Bắt đầu ngay"}
           </button>
         </div>
       </div>

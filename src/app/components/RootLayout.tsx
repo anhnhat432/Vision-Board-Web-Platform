@@ -15,8 +15,15 @@ import {
   X,
 } from "lucide-react";
 import { useLocation, useNavigate, useOutlet } from "react-router";
-import { maybeShowBrowserReminderNotification, syncPendingOutbox } from "../utils/production";
-import { exportUserDataSnapshot, getUserData, initializeUserData, trackAppEvent, USER_DATA_UPDATED_EVENT_NAME } from "../utils/storage";
+import { maybeShowBrowserReminderNotification, syncEntitlementsWithProvider, syncPendingOutbox } from "../utils/production";
+import {
+  exportUserDataSnapshot,
+  getCurrentPlan,
+  getUserData,
+  initializeUserData,
+  trackAppEvent,
+  USER_DATA_UPDATED_EVENT_NAME,
+} from "../utils/storage";
 import { canSendRemoteAnalytics } from "../utils/analytics";
 import {
   getNewUserGuideProgress,
@@ -142,6 +149,7 @@ export function RootLayout() {
   const [localDataMigrationCandidate, setLocalDataMigrationCandidate] =
     useState<LocalDataMigrationCandidate | null>(null);
   const [isLocalDataMigrationPromptOpen, setIsLocalDataMigrationPromptOpen] = useState(false);
+  const entitlementAutoSyncScopeRef = useRef<string | null>(null);
 
   const routeScrollKey = `${location.pathname}${location.search}`;
   const currentRouteKey = `${routeScrollKey}${location.hash}`;
@@ -227,6 +235,34 @@ export function RootLayout() {
       document.title = getRouteMeta(location.pathname).title ?? "Dear Our Future";
     }
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (demoMode || !isConfigured || !isApiBaseUrlConfigured() || !user || !userProfile) return;
+    if (userProfile.role === "admin") return;
+
+    const scopeKey = userProfile.id || user.uid;
+    if (entitlementAutoSyncScopeRef.current === scopeKey) return;
+
+    const currentData = getUserData();
+    if (getCurrentPlan(currentData) !== "FREE") {
+      entitlementAutoSyncScopeRef.current = scopeKey;
+      return;
+    }
+
+    entitlementAutoSyncScopeRef.current = scopeKey;
+    let cancelled = false;
+
+    syncEntitlementsWithProvider().then((result) => {
+      if (cancelled) return;
+      if (result.ok && result.planCode !== "FREE") {
+        setGuideUserData(getUserData());
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [demoMode, isConfigured, user, userProfile]);
 
   useEffect(() => {
     if (!canSendRemoteAnalytics() || typeof window === "undefined" || typeof window.gtag !== "function") {
