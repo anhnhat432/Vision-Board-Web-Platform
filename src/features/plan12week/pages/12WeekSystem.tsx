@@ -557,7 +557,7 @@ export function TwelveWeekSystem() {
   }
 
   return (
-    <div className="ops-shell ops-system pb-20 md:pb-4">
+    <div className="ops-shell ops-system pb-28 md:pb-4">
       <UpgradePaywallDialog
         open={isUpgradeDialogOpen}
         onOpenChange={setIsUpgradeDialogOpen}

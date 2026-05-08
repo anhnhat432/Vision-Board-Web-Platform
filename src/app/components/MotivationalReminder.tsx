@@ -19,10 +19,16 @@ const QUOTE_SUPPRESSED_ROUTES = [
 
 const REMINDER_OVERLAY_SUPPRESSED_ROUTES = [
   "/billing",
+  "/feasibility",
   "/gallery",
   "/goals",
+  "/journal",
+  "/life-balance",
+  "/life-insight",
   "/login",
+  "/smart-goal-setup",
   "/vision-board",
+  "/12-week-setup",
 ];
 
 function getReminderActionLabel(kind: "tasks" | "review" | "check-in"): string {
@@ -83,22 +89,22 @@ export function MotivationalReminder() {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 50 }}
-      className="fixed bottom-[calc(5.75rem+env(safe-area-inset-bottom))] left-4 right-4 z-50 sm:bottom-6 sm:left-auto sm:right-6 sm:w-full sm:max-w-sm"
+      className="fixed bottom-4 left-3 right-3 z-50 sm:bottom-6 sm:left-auto sm:right-6 sm:w-full sm:max-w-sm"
       role="status"
       aria-live="polite"
     >
       <Card className="max-w-full overflow-hidden rounded-xl border border-white/10 gradient-dark-teal text-white shadow-lg">
-        <CardContent className="space-y-3 p-3.5 sm:p-4">
+        <CardContent className="space-y-2.5 p-3 sm:space-y-3 sm:p-4">
           {reminder ? (
             <div className="flex items-start gap-2.5">
               <BellRing className="mt-1 h-5 w-5 flex-shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="break-words font-semibold">{reminder.title}</p>
-                <p className="mt-1 line-clamp-2 break-words text-sm text-white/82">{reminder.description}</p>
+                <p className="mt-1 hidden line-clamp-2 break-words text-sm text-white/82 sm:block">{reminder.description}</p>
                 <Button
                   size="sm"
                   variant="outline"
-                  className="hero-cta mt-2 h-8 border-white/18 bg-white px-3 text-xs text-slate-900 hover:bg-white/92"
+                  className="hero-cta mt-2 h-10 border-white/18 bg-white px-3 text-xs text-slate-900 hover:bg-white/92"
                   onClick={() => {
                     setShowReminder(false);
                     if (reminder.goalId) {
@@ -113,7 +119,7 @@ export function MotivationalReminder() {
               </div>
               <button
                 onClick={() => setShowReminder(false)}
-                className="rounded-full p-1 text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
                 aria-label="Đóng nhắc việc"
                 type="button"
               >
@@ -129,7 +135,7 @@ export function MotivationalReminder() {
               </div>
               <button
                 onClick={() => setShowReminder(false)}
-                className="rounded-full p-1 text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
                 aria-label="Đóng thông điệp"
                 type="button"
               >

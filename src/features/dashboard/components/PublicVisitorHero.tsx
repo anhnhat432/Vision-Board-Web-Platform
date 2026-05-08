@@ -18,6 +18,21 @@ const FLOW_STEPS = [
 ];
 
 export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: PublicVisitorHeroProps) {
+  const heroDescription = isDemo
+    ? "Dùng được ngay, không cần đăng nhập. Chấm cân bằng cuộc sống, chốt mục tiêu SMART, kiểm tra khả thi rồi vào kế hoạch 12 tuần có việc cho từng ngày."
+    : "Đăng ký hoặc đăng nhập để lưu workspace, đồng bộ kế hoạch và tiếp tục flow 12 tuần trên thiết bị khác.";
+  const heroStats = isDemo
+    ? [
+        ["1 workspace", "lưu theo trình duyệt"],
+        ["12 tuần", "kế hoạch rõ từng ngày"],
+        ["Review", "giữ nhịp mỗi tuần"],
+      ]
+    : [
+        ["Tài khoản", "lưu và đồng bộ"],
+        ["12 tuần", "kế hoạch rõ từng ngày"],
+        ["Review", "giữ nhịp mỗi tuần"],
+      ];
+
   return (
     <Card className="ops-surface overflow-hidden border border-slate-200/80 bg-white/94 shadow-sm ring-1 ring-white/70">
       <CardContent className="p-5 sm:p-6 lg:p-7">
@@ -31,10 +46,7 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
               <h1 className="max-w-3xl text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl lg:max-w-2xl">
                 Biến tầm nhìn thành mục tiêu rõ ràng và kế hoạch 12 tuần có thể làm mỗi ngày.
               </h1>
-              <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base lg:max-w-xl">
-                Dùng được ngay, không cần đăng nhập. Chấm cân bằng cuộc sống, chốt mục tiêu SMART, kiểm tra khả thi rồi
-                vào kế hoạch 12 tuần có việc cho từng ngày.
-              </p>
+              <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base lg:max-w-xl">{heroDescription}</p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               {isDemo ? (
@@ -76,11 +88,7 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
               </p>
             ) : null}
             <div className="grid gap-2 pt-1 sm:grid-cols-3">
-              {[
-                ["1 workspace", "lưu theo trình duyệt"],
-                ["12 tuần", "kế hoạch rõ từng ngày"],
-                ["Review", "giữ nhịp mỗi tuần"],
-              ].map(([value, label]) => (
+              {heroStats.map(([value, label]) => (
                 <div key={value} className="ops-metric-tile rounded-xl border border-slate-200 bg-slate-50/72 px-3 py-2.5">
                   <p className="text-sm font-bold text-slate-950">{value}</p>
                   <p className="mt-0.5 text-xs leading-5 text-slate-500">{label}</p>

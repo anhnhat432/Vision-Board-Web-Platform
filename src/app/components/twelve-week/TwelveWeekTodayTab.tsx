@@ -411,22 +411,16 @@ export function TwelveWeekTodayTab({
                         isPrimaryTask ? "border-slate-950 bg-slate-950" : "border-slate-200 bg-white"
                       }`}
                     >
-                      <button
-                        type="button"
-                        className="-m-2 inline-flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center p-2"
-                        onClick={(e) => {
-                          if (!(e.target as HTMLElement).closest("button")) {
-                            onToggleTask(task.id, !task.completed);
-                          }
-                        }}
-                        aria-label={`Đánh dấu việc ${task.title}`}
-                      >
-                        <Checkbox
-                          aria-label={`Hoàn thành việc: ${task.title}`}
-                          checked={task.completed}
-                          onCheckedChange={(checked) => onToggleTask(task.id, checked === true)}
-                        />
-                      </button>
+                      <Checkbox
+                        aria-label={`Hoàn thành việc: ${task.title}`}
+                        checked={task.completed}
+                        className={`-m-2 mt-0 h-11 w-11 rounded-full ${
+                          isPrimaryTask
+                            ? "border-white/30 bg-white/10 text-white data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-slate-950"
+                            : "border-slate-200 bg-white"
+                        }`}
+                        onCheckedChange={(checked) => onToggleTask(task.id, checked === true)}
+                      />
                       <div className="min-w-0 flex-1">
                         {isPrimaryTask && (
                           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-300">

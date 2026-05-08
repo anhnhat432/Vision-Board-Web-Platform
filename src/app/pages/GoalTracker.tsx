@@ -433,7 +433,7 @@ function GoalTrackerContent({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 rounded-2xl text-white/60 hover:bg-white/10 hover:text-red-300"
+                className="h-11 w-11 rounded-xl text-white/60 hover:bg-white/10 hover:text-red-300"
                 onClick={() => setGoalToDelete(goal.id)}
                 aria-label={`Xóa mục tiêu ${goal.title}`}
               >
@@ -676,7 +676,7 @@ function GoalTrackerContent({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-9 w-9 rounded-2xl opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
+                          className="h-11 w-11 rounded-xl opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
                           onClick={() => handleDeleteTask(goal.id, task.id)}
                           aria-label={`Xóa việc ${task.title}`}
                         >

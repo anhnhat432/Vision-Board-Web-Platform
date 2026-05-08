@@ -284,22 +284,20 @@ export function ReflectionJournal() {
       </AlertDialog>
 
       <Dialog open={isAddingReflection} onOpenChange={setIsAddingReflection}>
-        <Card className="hero-surface overflow-hidden border-0 text-white">
-          <CardContent className="relative p-5 sm:p-6 lg:p-8">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
-
-            <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
-              <div className="space-y-6">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+        <Card className="ops-surface overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-sm">
+          <CardContent className="relative p-5 sm:p-6">
+            <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50/90 px-3 py-1.5 text-xs font-semibold text-slate-600">
                   <NotebookPen className="h-4 w-4" />
                   Nhật ký phản tư
                 </div>
 
-                <div className="space-y-4">
-                  <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+                <div className="space-y-3">
+                  <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl">
                     Một nơi đủ đẹp và đủ yên để bạn nhìn lại, gọi tên cảm xúc và giữ lại những điều đáng nhớ.
                   </h1>
-                  <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
+                  <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                     Nhật ký ở đây không chỉ để lưu chữ. Nó là nơi gom lại bài học, cảm xúc, những chuyển động nhỏ và cả
                     cách bạn đang lớn lên qua từng ngày.
                   </p>
@@ -308,7 +306,7 @@ export function ReflectionJournal() {
                 <div className="flex flex-wrap gap-3">
                   <Button
                     variant="outline"
-                    className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92"
+                    className="border-slate-950 bg-slate-950 text-white hover:bg-slate-800 hover:text-white"
                     onClick={() => setIsAddingReflection(true)}
                   >
                     <Plus className="h-4 w-4" />
@@ -317,31 +315,31 @@ export function ReflectionJournal() {
                 </div>
               </div>
 
-              <div className="hidden rounded-2xl border border-white/14 bg-white/12 p-6 shadow-sm xl:block">
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Nhịp viết hiện tại</p>
+              <div className="hidden rounded-xl border border-slate-200 bg-slate-50/80 p-4 shadow-sm lg:block">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Nhịp viết hiện tại</p>
                 {hasReflections ? (
-                  <div className="mt-6 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+                  <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                     {[
                       { label: "Tổng số bài", value: userData.reflections.length, note: "đã lưu trong hành trình" },
                       { label: "Tháng này", value: monthlyCount, note: "bài viết trong tháng hiện tại" },
                       { label: "Tâm trạng gần nhất", value: recentMood.label, note: "tín hiệu cảm xúc mới nhất" },
                     ].map((item) => (
-                      <div key={item.label} className="rounded-2xl border border-white/10 bg-black/12 px-4 py-4">
-                        <p className="text-xs uppercase tracking-[0.18em] text-white/55">{item.label}</p>
-                        <p className="mt-2 text-2xl font-bold text-white">
+                      <div key={item.label} className="rounded-xl border border-slate-200 bg-white px-4 py-4">
+                        <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
+                        <p className="mt-2 text-2xl font-bold text-slate-950">
                           {typeof item.value === "number" ? <CountUp value={item.value} /> : item.value}
                         </p>
-                        <p className="mt-1 text-sm text-white/68">{item.note}</p>
+                        <p className="mt-1 text-sm text-slate-500">{item.note}</p>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="mt-6 rounded-2xl border border-white/12 bg-black/12 px-5 py-6">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/14 text-white">
+                  <div className="mt-4 rounded-xl border border-slate-200 bg-white px-5 py-6">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
                       <BookOpen className="h-6 w-6" />
                     </div>
-                    <p className="mt-4 text-xl font-bold text-white">Chưa có nhật ký nào</p>
-                    <p className="mt-2 text-sm leading-7 text-white/72">
+                    <p className="mt-4 text-xl font-bold text-slate-950">Chưa có nhật ký nào</p>
+                    <p className="mt-2 text-sm leading-7 text-slate-600">
                       Dữ liệu thật sẽ xuất hiện sau bài viết đầu tiên hoặc sau review tuần trong chu kỳ 12 tuần.
                     </p>
                   </div>
@@ -642,6 +640,7 @@ export function ReflectionJournal() {
                   <Button
                     key={item.value}
                     size="sm"
+                    className="h-11"
                     variant={filterType === item.value ? "default" : "outline"}
                     onClick={() => setFilterType(item.value)}
                   >
@@ -661,6 +660,7 @@ export function ReflectionJournal() {
                     <Button
                       key={mood}
                       size="sm"
+                      className="h-11"
                       variant={filterMood === mood ? "default" : "outline"}
                       onClick={() => setFilterMood(mood)}
                       title={fullLabels[mood]}
@@ -743,7 +743,7 @@ export function ReflectionJournal() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-10 w-10 rounded-2xl text-slate-500 hover:text-red-600"
+                            className="h-11 w-11 rounded-xl text-slate-500 hover:text-red-600"
                             aria-label={`Xóa nhật ký ${reflection.title}`}
                             onClick={() => handleDeleteReflection(reflection.id)}
                           >

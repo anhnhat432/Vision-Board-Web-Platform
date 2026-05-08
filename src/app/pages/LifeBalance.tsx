@@ -228,20 +228,20 @@ export function LifeBalance() {
           </div>
         </div>
       )}
-      <Card className="hero-surface overflow-hidden border-0 text-white">
-        <CardContent className="relative p-5 sm:p-6 lg:p-8">
-          <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
-            <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+      <Card className="ops-surface overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-sm">
+        <CardContent className="relative p-5 sm:p-6">
+          <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50/90 px-3 py-1.5 text-xs font-semibold text-slate-600">
                 <Compass className="h-4 w-4" />
                 Life Balance Center
               </div>
 
-              <div className="space-y-4">
-                <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+              <div className="space-y-3">
+                <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl">
                   Theo dõi và tinh chỉnh bánh xe cuộc sống của bạn như một hệ điều hành cá nhân.
                 </h1>
-                <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
+                <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                   Trang này giúp bạn nhìn rõ mặt bằng hiện tại, cập nhật điểm số theo cảm nhận thật và theo dõi sự thay
                   đổi qua thời gian để ưu tiên đúng nơi cần thiết.
                 </p>
@@ -251,44 +251,44 @@ export function LifeBalance() {
                 {hasChanges ? (
                   <Button
                     variant="outline"
-                    className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92"
+                    className="border-slate-950 bg-slate-950 text-white hover:bg-slate-800 hover:text-white"
                     onClick={handleSave}
                   >
                     <Save className="h-4 w-4" />
                     Lưu thay đổi
                   </Button>
                 ) : (
-                  <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                  <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50 px-4 py-2 text-slate-600">
                     Không có thay đổi chưa lưu
                   </Badge>
                 )}
               </div>
             </div>
 
-            <div className="hidden xl:block rounded-2xl border border-white/14 bg-white/12 p-6 shadow-sm">
-              <ProductVisual variant="balance" className="mb-5 min-h-[190px]" />
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Snapshot hiện tại</p>
+            <div className="hidden rounded-xl border border-slate-200 bg-slate-50/80 p-4 shadow-sm lg:block">
+              <ProductVisual variant="balance" className="mb-4 min-h-[160px]" />
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Snapshot hiện tại</p>
 
-              <div className="mt-6 space-y-4">
-                <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-white/55">Điểm cân bằng chung</p>
-                  <p className="mt-2 text-3xl font-bold text-white">
+              <div className="mt-4 space-y-3">
+                <div className="rounded-xl border border-slate-200 bg-white p-4">
+                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Điểm cân bằng chung</p>
+                  <p className="mt-2 text-3xl font-bold text-slate-950">
                     <CountUp value={averageScore} precision={1} />
-                    <span className="text-white/68">/10</span>
+                    <span className="text-slate-400">/10</span>
                   </p>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-white/55">Khía cạnh mạnh nhất</p>
-                  <p className="mt-2 text-xl font-bold text-white">{getLifeAreaLabel(strongestArea.name)}</p>
-                  <p className="mt-1 text-sm text-white/68">
+                <div className="rounded-xl border border-slate-200 bg-white p-4">
+                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Khía cạnh mạnh nhất</p>
+                  <p className="mt-2 text-xl font-bold text-slate-950">{getLifeAreaLabel(strongestArea.name)}</p>
+                  <p className="mt-1 text-sm text-slate-500">
                     <CountUp value={strongestArea.score} />
                     <span>/10</span>
                   </p>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-white/55">Nên ưu tiên tiếp theo</p>
-                  <p className="mt-2 text-xl font-bold text-white">{getLifeAreaLabel(weakestArea.name)}</p>
-                  <p className="mt-1 text-sm text-white/68">
+                <div className="rounded-xl border border-slate-200 bg-white p-4">
+                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Nên ưu tiên tiếp theo</p>
+                  <p className="mt-2 text-xl font-bold text-slate-950">{getLifeAreaLabel(weakestArea.name)}</p>
+                  <p className="mt-1 text-sm text-slate-500">
                     <CountUp value={weakestArea.score} />
                     <span>/10</span>
                   </p>

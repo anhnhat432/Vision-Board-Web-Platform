@@ -144,40 +144,38 @@ export function LifeInsight() {
       >
         <CoreFlowProgress currentStepId="life_insight" />
 
-        <Card className="hero-surface overflow-hidden border-0 text-white">
-          <CardContent className="relative p-5 sm:p-6 lg:p-10">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.1),_transparent_24%)] opacity-90" />
-
-            <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-              <div className="space-y-5 sm:space-y-6">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+        <Card className="ops-surface overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-sm">
+          <CardContent className="relative p-5 sm:p-6">
+            <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50/90 px-3 py-1.5 text-xs font-semibold text-slate-600">
                   <Compass className="h-4 w-4" />
                   Life Insight
                 </div>
 
-                <div className="space-y-4">
-                  <h1 className="max-w-3xl text-3xl font-bold tracking-normal sm:text-4xl lg:text-5xl">
+                <div className="space-y-3">
+                  <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl">
                     Bạn đã có một tín hiệu rất rõ về nơi mình nên ưu tiên tiếp theo.
                   </h1>
-                  <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
+                  <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                     Hệ thống gợi ý lĩnh vực có điểm thấp nhất. Bạn cũng có thể chọn lại bên dưới nếu muốn tập trung vào
                     một khu vực khác phù hợp hơn với lúc này.
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                  <Badge variant="outline" className="rounded-full border-violet-200 bg-violet-50 px-4 py-2 text-violet-700">
                     <Target className="mr-1 h-3.5 w-3.5" />
                     Ưu tiên: {getLifeAreaLabel(focusArea.name)}
                   </Badge>
-                  <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                  <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50 px-4 py-2 text-slate-600">
                     <TrendingUp className="mr-1 h-3.5 w-3.5" />
                     Điểm trung bình: {averageScore.toFixed(1)}/10
                   </Badge>
                   {isCustomSelection && (
                     <Badge
                       variant="outline"
-                      className="rounded-full border-amber-300/50 bg-amber-400/20 px-4 py-2 text-white"
+                      className="rounded-full border-amber-200 bg-amber-50 px-4 py-2 text-amber-700"
                     >
                       Bạn đã chọn thủ công
                     </Badge>
@@ -186,37 +184,37 @@ export function LifeInsight() {
 
                 <div
                   data-testid="life-insight-recommendation-card"
-                  className="grid gap-3 rounded-2xl border border-white/14 bg-white/12 p-4 shadow-sm sm:grid-cols-[minmax(0,1.35fr)_minmax(220px,0.65fr)]"
+                  className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4 shadow-sm sm:grid-cols-[minmax(0,1.35fr)_minmax(220px,0.65fr)]"
                 >
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/58">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                       Vì sao chọn trọng tâm này?
                     </p>
-                    <h2 className="mt-2 text-xl font-bold text-white">
+                    <h2 className="mt-2 text-xl font-bold text-slate-950">
                       {isCustomSelection
                         ? `Bạn đang chọn ${focusAreaLabel} thay cho gợi ý ${lowestAreaLabel}.`
                         : `${focusAreaLabel} là điểm thấp nhất trong bánh xe hiện tại.`}
                     </h2>
-                    <p className="mt-2 text-sm leading-7 text-white/74">
+                    <p className="mt-2 text-sm leading-7 text-slate-600">
                       Dùng một lĩnh vực đủ cụ thể giúp bước SMART Goal không bị rộng. Sau khi chọn xong, phần tiếp theo
                       sẽ ép trọng tâm này thành mục tiêu đo được và có thời hạn.
                     </p>
                   </div>
 
                   <div className="grid gap-2 text-sm">
-                    <div className="rounded-xl border border-white/10 bg-black/12 px-4 py-3">
-                      <p className="text-white/56">Điểm hiện tại</p>
-                      <p className="mt-1 text-lg font-bold text-white">{focusArea.score}/10</p>
+                    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                      <p className="text-slate-500">Điểm hiện tại</p>
+                      <p className="mt-1 text-lg font-bold text-slate-950">{focusArea.score}/10</p>
                     </div>
-                    <div className="rounded-xl border border-white/10 bg-black/12 px-4 py-3">
-                      <p className="text-white/56">Lệch so với trung bình</p>
-                      <p className="mt-1 text-lg font-bold text-white">
+                    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                      <p className="text-slate-500">Lệch so với trung bình</p>
+                      <p className="mt-1 text-lg font-bold text-slate-950">
                         {scoreGapFromAverage > 0 ? `-${scoreGapFromAverage.toFixed(1)}` : "0.0"}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-white/10 bg-black/12 px-4 py-3">
-                      <p className="text-white/56">Lực đỡ hiện có</p>
-                      <p className="mt-1 font-semibold text-white">{strongestAreaLabel}</p>
+                    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                      <p className="text-slate-500">Lực đỡ hiện có</p>
+                      <p className="mt-1 font-semibold text-slate-950">{strongestAreaLabel}</p>
                     </div>
                   </div>
                 </div>
@@ -225,7 +223,7 @@ export function LifeInsight() {
                   <Button
                     data-testid="life-insight-primary-cta"
                     variant="outline"
-                    className="hero-cta w-full justify-center border-white/18 bg-white text-slate-900 hover:bg-white/92 sm:w-auto"
+                    className="w-full justify-center border-slate-950 bg-slate-950 text-white hover:bg-slate-800 hover:text-white sm:w-auto"
                     onClick={handleStartGoalSetup}
                   >
                     Tạo mục tiêu với {getLifeAreaLabel(focusArea.name)}
@@ -233,7 +231,7 @@ export function LifeInsight() {
                   </Button>
                   <Button
                     variant="outline"
-                    className="border-white/18 bg-white/12 text-white hover:bg-white/18 hover:text-white"
+                    className="w-full border-slate-200 bg-white text-slate-700 hover:bg-slate-50 sm:w-auto"
                     onClick={() => navigate("/")}
                   >
                     Về bảng điều khiển
@@ -241,7 +239,7 @@ export function LifeInsight() {
                 </div>
               </div>
 
-              <ProductVisual variant="balance" className="hidden min-h-[320px] xl:block" />
+              <ProductVisual variant="balance" className="hidden min-h-[220px] lg:block" />
 
               <div className="hidden rounded-2xl border border-white/14 bg-white/12 p-6 shadow-sm">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Snapshot hiện tại</p>
