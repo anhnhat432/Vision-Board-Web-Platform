@@ -33,7 +33,7 @@ export function TwelveWeekCycleSettingsPanel({
     <Card
       data-tour-id="system-settings-panel"
       interactive={false}
-      className="border border-slate-200/80 bg-white/92 shadow-[0_22px_54px_-40px_rgba(15,23,42,0.26)]"
+      className="border border-slate-200/80 bg-white/92 shadow-sm"
     >
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-slate-950">
@@ -166,7 +166,7 @@ export function TwelveWeekCycleSettingsPanel({
             {system.leadIndicators.map((indicator, index) => (
               <div
                 key={indicator.id || indicator.name}
-                className={`grid gap-4 rounded-lg border p-5 shadow-[0_18px_38px_-34px_rgba(15,23,42,0.22)] md:grid-cols-[minmax(0,1fr)_150px_140px] ${
+                className={`grid gap-4 rounded-lg border p-5 shadow-sm md:grid-cols-[minmax(0,1fr)_150px_140px] ${
                   indicator.type === "optional" ? "border-amber-200 bg-amber-50" : "border-emerald-200 bg-white"
                 }`}
               >
@@ -234,7 +234,7 @@ export function TwelveWeekCycleSettingsPanel({
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">
-          <div className="rounded-lg border border-slate-200 bg-slate-950 p-5 text-white shadow-[0_18px_38px_-34px_rgba(15,23,42,0.35)]">
+          <div className="rounded-lg border border-slate-200 bg-slate-950 p-5 text-white shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-300">Bắt đầu</p>
             <p className="mt-2 text-xl font-bold text-white">{formatCalendarDate(system.startDate)}</p>
           </div>

@@ -22,7 +22,7 @@ function AdminStatusCard({
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-10 text-slate-100">
       <Card
-        className="w-full max-w-md border-white/10 text-slate-100 shadow-[0_30px_90px_-50px_rgba(15,23,42,0.75)] backdrop-blur"
+        className="w-full max-w-md border-white/10 text-slate-100 shadow-lg backdrop-blur"
         style={{ backgroundColor: "rgba(15, 23, 42, 0.96)" }}
       >
         <CardContent className="p-8 text-center">

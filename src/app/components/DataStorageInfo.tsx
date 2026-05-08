@@ -49,7 +49,7 @@ export function DataStorageInfo({
 
   return (
     <div
-      className={`rounded-[22px] border border-slate-200 bg-white/92 p-5 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.12)] ${className}`}
+      className={`rounded-2xl border border-slate-200 bg-white/92 p-5 shadow-sm ${className}`}
     >
       <div className="flex items-center gap-2.5">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100">

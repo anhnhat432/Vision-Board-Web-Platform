@@ -425,7 +425,7 @@ function GoalTrackerContent({
     return (
       <Card key={goal.id} className="flow-panel overflow-hidden">
         <CardContent className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)]">
-          <div className="rounded-[26px] gradient-dark p-5 text-white">
+          <div className="rounded-2xl gradient-dark p-5 text-white">
             <div className="flex items-start justify-between gap-3">
               <Badge className="text-white" style={{ backgroundColor: areaMeta?.color ?? "#7c3aed" }}>
                 {progress}%
@@ -526,7 +526,7 @@ function GoalTrackerContent({
             {system ? (
               <div className="space-y-4">
                 <div
-                  className={`rounded-[26px] border p-5 ${
+                  className={`rounded-2xl border p-5 ${
                     systemReviewDueToday
                       ? "border-amber-200 bg-amber-50/92"
                       : "border-slate-900/10 gradient-dark-indigo text-white"
@@ -576,7 +576,7 @@ function GoalTrackerContent({
                   </div>
                 </div>
 
-                <div className="rounded-[26px] border border-violet-200/70 bg-white/78 p-5">
+                <div className="rounded-2xl border border-violet-200/70 bg-white/78 p-5">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-600">
@@ -611,24 +611,24 @@ function GoalTrackerContent({
                     )}
                   </div>
                   <div className="mt-4 grid gap-3 md:grid-cols-4">
-                    <div className="rounded-[20px] border border-white/80 bg-slate-50/88 p-4">
+                    <div className="rounded-xl border border-white/80 bg-slate-50/88 p-4">
                       <p className="text-xs uppercase tracking-[0.14em] text-slate-400">Tuần</p>
                       <p className="mt-2 text-2xl font-bold text-slate-900">
                         {execution.currentWeek ?? system.currentWeek}
                         <span className="text-slate-400">/{system.totalWeeks}</span>
                       </p>
                     </div>
-                    <div className="rounded-[20px] border border-white/80 bg-slate-50/88 p-4">
+                    <div className="rounded-xl border border-white/80 bg-slate-50/88 p-4">
                       <p className="text-xs uppercase tracking-[0.14em] text-slate-400">Tiến độ tuần</p>
                       <p className="mt-2 text-2xl font-bold text-slate-900">
                         {execution.weekCompletion?.percent ?? 0}%
                       </p>
                     </div>
-                    <div className="rounded-[20px] border border-white/80 bg-slate-50/88 p-4">
+                    <div className="rounded-xl border border-white/80 bg-slate-50/88 p-4">
                       <p className="text-xs uppercase tracking-[0.14em] text-slate-400">Tactic</p>
                       <p className="mt-2 text-2xl font-bold text-slate-900">{getTwelveWeekTacticCount(system)}</p>
                     </div>
-                    <div className="rounded-[20px] border border-white/80 bg-slate-50/88 p-4">
+                    <div className="rounded-xl border border-white/80 bg-slate-50/88 p-4">
                       <p className="text-xs uppercase tracking-[0.14em] text-slate-400">Review</p>
                       <p className="mt-2 text-sm font-semibold text-slate-900">
                         {execution.reviewDueToday
@@ -642,7 +642,7 @@ function GoalTrackerContent({
                 </div>
               </div>
             ) : (
-              <div className="rounded-[26px] border border-white/60 bg-white/80 p-5">
+              <div className="rounded-2xl border border-white/60 bg-white/80 p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="text-lg font-semibold text-slate-900">Danh sách việc</p>
@@ -654,14 +654,14 @@ function GoalTrackerContent({
                 </div>
                 <div className="mt-4 space-y-3">
                   {goal.tasks.length === 0 ? (
-                    <div className="rounded-[22px] border border-dashed border-slate-200 bg-slate-50/80 px-5 py-7 text-center text-sm text-slate-500">
+                    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-5 py-7 text-center text-sm text-slate-500">
                       Chưa có việc nào. Hãy thêm bước đầu tiên để biến mục tiêu này thành hành động cụ thể.
                     </div>
                   ) : (
                     goal.tasks.map((task) => (
                       <div
                         key={task.id}
-                        className="group flex items-center gap-3 rounded-[20px] border border-white/70 bg-slate-50/82 px-4 py-3"
+                        className="group flex items-center gap-3 rounded-xl border border-white/70 bg-slate-50/82 px-4 py-3"
                       >
                         <Checkbox
                           checked={task.completed}
@@ -686,7 +686,7 @@ function GoalTrackerContent({
                     ))
                   )}
                 </div>
-                <div className="mt-4 rounded-[22px] border border-slate-200 bg-slate-50/82 p-4">
+                <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50/82 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Việc kế tiếp</p>
                   <p className="mt-2 text-base font-semibold text-slate-900">
                     {standardNextTask

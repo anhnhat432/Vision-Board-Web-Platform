@@ -13,7 +13,7 @@ interface ReviewStepProps {
 
 export function ReviewStep({ clarityDoneCount, clarityItemCount, summaryRows, onJumpToStep }: ReviewStepProps) {
   return (
-    <div className="rounded-[24px] border border-emerald-200 bg-emerald-50/80 p-4">
+    <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-slate-950">Tóm tắt trước khi kiểm tra</p>

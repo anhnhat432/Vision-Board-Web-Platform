@@ -45,7 +45,7 @@ export function FeasibilityStepShell({
             transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
             className="space-y-6"
           >
-            <div className="rounded-[28px] gradient-violet-pink p-4 sm:p-6">
+            <div className="rounded-2xl gradient-violet-pink p-4 sm:p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">
                 {currentQuestion.axisLabel} · Câu hỏi {currentStep + 1}/{totalSteps}
               </p>
@@ -81,7 +81,7 @@ export function FeasibilityStepShell({
                 >
                   <Label
                     htmlFor={option.value}
-                    className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-[24px] border px-4 py-3 transition-colors transition-shadow duration-150 sm:gap-4 sm:px-5 sm:py-4 ${
+                    className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 transition-colors transition-shadow duration-150 sm:gap-4 sm:px-5 sm:py-4 ${
                       selectedAnswer === option.value
                         ? "border-violet-300 bg-violet-50/90 shadow-[0_18px_36px_-28px_rgba(109,40,217,0.35)]"
                         : "border-white/70 bg-white/72 hover:border-violet-200"

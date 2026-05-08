@@ -30,7 +30,7 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
   return (
     <Card
       interactive={false}
-      className="border border-slate-200/80 bg-slate-50/80 shadow-[0_22px_54px_-40px_rgba(15,23,42,0.24)] lg:sticky lg:top-6"
+      className="border border-slate-200/80 bg-slate-50/80 shadow-sm lg:sticky lg:top-6"
     >
       <CardHeader>
         <CardTitle className="text-slate-950">Dữ liệu, nhắc việc và quyền Plus</CardTitle>

@@ -44,7 +44,7 @@ export function WorkspaceLoadingGate({ stage }: { stage: WorkspaceGateStage }) {
   return (
     <div className="app-shell flex min-h-screen items-center justify-center px-4" data-route-tone="default">
       <div className="relative z-10 w-full max-w-md">
-        <div className="rounded-lg border border-slate-200/80 bg-white/94 p-6 text-center shadow-[0_22px_60px_-40px_rgba(15,23,42,0.38)] sm:p-7">
+        <div className="rounded-lg border border-slate-200/80 bg-white/94 p-6 text-center shadow-sm sm:p-7">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-50 text-violet-700">
             <RefreshCw className="h-6 w-6 animate-spin" />
           </div>

@@ -92,7 +92,7 @@ export function CoreFlowProgress({
   return (
     <section
       aria-label="Tiến độ đường chính"
-      className={`rounded-lg border border-slate-200/80 bg-white/92 px-3.5 py-3 shadow-[0_16px_38px_-34px_rgba(15,23,42,0.32)] sm:px-4 ${className}`}
+      className={`rounded-lg border border-slate-200/80 bg-white/92 px-3.5 py-3 shadow-sm sm:px-4 ${className}`}
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
         <div className="flex shrink-0 flex-wrap items-center gap-2">

@@ -87,7 +87,7 @@ export function MotivationalReminder() {
       role="status"
       aria-live="polite"
     >
-      <Card className="max-w-full overflow-hidden rounded-xl border border-white/10 gradient-dark-teal text-white shadow-[0_24px_54px_-34px_rgba(15,23,42,0.52)]">
+      <Card className="max-w-full overflow-hidden rounded-xl border border-white/10 gradient-dark-teal text-white shadow-lg">
         <CardContent className="space-y-3 p-3.5 sm:p-4">
           {reminder ? (
             <div className="flex items-start gap-2.5">

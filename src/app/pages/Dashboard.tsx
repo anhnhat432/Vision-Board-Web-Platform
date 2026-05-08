@@ -117,23 +117,23 @@ export function Dashboard() {
     return (
       <div className="ops-shell ops-dashboard">
         {/* Hero card skeleton */}
-        <Skeleton className="h-56 rounded-[28px]" />
+        <Skeleton className="h-56 rounded-2xl" />
         {/* Quick action tiles skeleton */}
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-20 rounded-[22px]" />
+            <Skeleton key={i} className="h-20 rounded-2xl" />
           ))}
         </div>
         {/* Stat cards skeleton */}
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-28 rounded-[22px]" />
+            <Skeleton key={i} className="h-28 rounded-2xl" />
           ))}
         </div>
         {/* Content cards skeleton */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Skeleton className="h-48 rounded-[28px]" />
-          <Skeleton className="h-48 rounded-[28px]" />
+        <div className="grid gap-5 lg:grid-cols-2">
+          <Skeleton className="h-48 rounded-2xl" />
+          <Skeleton className="h-48 rounded-2xl" />
         </div>
       </div>
     );
@@ -495,7 +495,7 @@ function DashboardContent({
           description: demoMode
             ? "Bạn có thể dùng luồng chính ngay trên trình duyệt này. Đăng ký chỉ là lựa chọn khi muốn đồng bộ sau."
             : "Web này dẫn bạn từ bức tranh cuộc sống hiện tại tới một mục tiêu SMART đủ rõ, rồi mới chia thành kế hoạch 12 tuần.",
-          cardClass: "rounded-[22px] border border-slate-300 bg-slate-50/90 p-4 shadow-sm",
+          cardClass: "rounded-2xl border border-slate-300 bg-slate-50/90 p-4 shadow-sm",
           eyebrowClass: "text-slate-500",
           titleClass: "text-slate-950",
           descriptionClass: "text-slate-600",
@@ -511,7 +511,7 @@ function DashboardContent({
           description: demoMode
             ? "Nếu muốn giữ bản sao, hãy xuất dữ liệu trước khi đổi máy hoặc xóa dữ liệu trình duyệt."
             : "Khi có tài khoản, mục tiêu, kế hoạch và tiến độ được nối với workspace của bạn thay vì phụ thuộc vào trình duyệt hiện tại.",
-          cardClass: "rounded-[22px] border border-slate-200 bg-white p-4 shadow-sm",
+          cardClass: "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm",
           eyebrowClass: "text-slate-400",
           titleClass: "text-slate-900",
           descriptionClass: "text-slate-600",
@@ -531,7 +531,7 @@ function DashboardContent({
               activeSystemTodayOpenTasks.length > 0
                 ? `${activeSystemTodayOpenTasks.length} việc đang mở hôm nay. Đi thẳng vào trung tâm để chạm tiếp đúng việc cần làm.`
                 : `Tuần ${activeSystemWeek}/${activeSystem.totalWeeks} đang khá gọn. Đây là lúc đẹp để nhìn lại tuần hoặc chuẩn bị review.`,
-            cardClass: "rounded-[22px] border border-slate-300 bg-slate-50/90 p-4 shadow-sm",
+            cardClass: "rounded-2xl border border-slate-300 bg-slate-50/90 p-4 shadow-sm",
             eyebrowClass: "text-slate-500",
             titleClass: "text-slate-950",
             descriptionClass: "text-slate-600",
@@ -547,7 +547,7 @@ function DashboardContent({
             description: reviewDueToday
               ? "Nên chốt trước khi sang nhịp tuần mới để dashboard quay về trạng thái gọn đầu."
               : "Chu kỳ đang có ngày review cố định. Khi tới hạn, thẻ cảnh báo sẽ nổi lên ở đầu màn.",
-            cardClass: `rounded-[22px] border p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.42)] ${
+            cardClass: `rounded-2xl border p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.42)] ${
               reviewDueToday ? "border-amber-200 bg-amber-50/92" : "border-slate-200 bg-white"
             }`,
             eyebrowClass: reviewDueToday ? "text-amber-700" : "text-slate-400",
@@ -567,7 +567,7 @@ function DashboardContent({
                   eyebrow: "Lĩnh vực nên chăm lại",
                   title: getLifeAreaLabel(weakestArea.name),
                   description: `Điểm hiện tại ${weakestArea.score}/10. Nếu hôm nay còn thời gian, đây là nơi đáng quay lại trước.`,
-                  cardClass: "rounded-[22px] border border-slate-200 bg-white p-4 shadow-sm",
+                  cardClass: "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm",
                   eyebrowClass: "text-slate-400",
                   titleClass: "text-slate-900",
                   descriptionClass: "text-slate-600",
@@ -586,7 +586,7 @@ function DashboardContent({
             title: "Chưa có chu kỳ đang chạy",
             description:
               "Tạo một chu kỳ để web luôn trả lời rõ hôm nay nên làm gì, tuần này đang ở đâu và review khi nào đến hạn.",
-            cardClass: "rounded-[22px] border border-slate-300 bg-slate-50/90 p-4 shadow-sm",
+            cardClass: "rounded-2xl border border-slate-300 bg-slate-50/90 p-4 shadow-sm",
             eyebrowClass: "text-slate-500",
             titleClass: "text-slate-950",
             descriptionClass: "text-slate-600",
@@ -602,7 +602,7 @@ function DashboardContent({
                   eyebrow: "Lĩnh vực nên chăm lại",
                   title: getLifeAreaLabel(weakestArea.name),
                   description: `Điểm hiện tại ${weakestArea.score}/10. Nếu muốn bắt đầu nhẹ hơn, hãy cải thiện một góc nhỏ ở đây trước.`,
-                  cardClass: "rounded-[22px] border border-slate-200 bg-white p-4 shadow-sm",
+                  cardClass: "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm",
                   eyebrowClass: "text-slate-400",
                   titleClass: "text-slate-900",
                   descriptionClass: "text-slate-600",
@@ -620,7 +620,7 @@ function DashboardContent({
             description: latestVisionBoard
               ? `Năm ${latestVisionBoard.year} • ${latestVisionBoard.items.length} phần tử đang được lưu lại.`
               : "Tạo một bảng tầm nhìn để trực quan hóa điều bạn đang hướng tới và quay lại nó dễ hơn mỗi ngày.",
-            cardClass: "rounded-[22px] border border-slate-200 bg-white p-4 shadow-sm",
+            cardClass: "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm",
             eyebrowClass: "text-slate-400",
             titleClass: "text-slate-900",
             descriptionClass: "text-slate-600",
@@ -819,8 +819,8 @@ function DashboardContent({
 
         {/* Primary Action Card - Most Important Thing */}
         {shouldShowMainDashboardCard && activeSystem && activeSystemTodayOpenTasks.length > 0 && (
-          <Card className="border-2 border-primary bg-white shadow-[0_16px_36px_-28px_rgba(79,70,229,0.28)]">
-            <CardContent className="p-4 sm:p-5 lg:p-6">
+          <Card className="border border-primary bg-white shadow-[0_16px_36px_-28px_rgba(79,70,229,0.28)]">
+            <CardContent className="p-5 sm:p-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4 min-w-0">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-[0_8px_20px_-12px_rgba(79,70,229,0.5)]">
@@ -887,8 +887,8 @@ function DashboardContent({
 
         {/* Main Dashboard Card with PageHeader */}
         {shouldShowMainDashboardCard && (
-          <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]">
-              <CardContent className="p-4 sm:p-5 lg:p-6">
+          <Card className="border border-slate-200/80 bg-white/92 shadow-sm">
+              <CardContent className="p-5 sm:p-6">
                 <div className="space-y-4">
                 <PageHeader
                   eyebrow={isSignedOut ? "Trang chính" : "Hôm nay"}
@@ -970,7 +970,7 @@ function DashboardContent({
                               {activeSystemTaskPreview.map((task, index) => (
                                 <div
                                   key={task.id}
-                                  className={`flex items-center gap-4 rounded-[22px] border px-4 py-4 ${
+                                  className={`flex items-center gap-4 rounded-2xl border px-4 py-4 ${
                                     index === 0 ? "border-slate-300 bg-white" : "border-slate-200 bg-white/80"
                                   }`}
                                 >
@@ -987,7 +987,7 @@ function DashboardContent({
                               ))}
                             </div>
                           ) : (
-                            <div className="mt-4 rounded-[22px] border border-slate-200 bg-white p-4">
+                            <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
                               <p className="font-semibold text-slate-950">Bạn đã chốt xong phần mở của hôm nay.</p>
                               <p className="mt-1 text-sm leading-7 text-slate-600">
                                 Nếu còn sức, hãy mở trung tâm 12 tuần để xem phần còn lại của tuần hoặc chốt review khi
@@ -997,7 +997,7 @@ function DashboardContent({
                           )}
 
                           <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                            <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-3">
+                            <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
                               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
                                 Hôm nay
                               </p>
@@ -1006,7 +1006,7 @@ function DashboardContent({
                               </p>
                               <p className="text-xs text-slate-500">{activeSystemTodayCompletedCount} việc đã chốt</p>
                             </div>
-                            <div className="rounded-[18px] border border-slate-200 bg-white px-4 py-3">
+                            <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
                               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
                                 Tuần này
                               </p>
@@ -1025,7 +1025,7 @@ function DashboardContent({
                               </p>
                             </div>
                             <div
-                              className={`rounded-[18px] border px-4 py-3 ${
+                              className={`rounded-xl border px-4 py-3 ${
                                 reviewDueToday ? "border-amber-200 bg-amber-50" : "border-slate-200 bg-white"
                               }`}
                             >
@@ -1049,7 +1049,7 @@ function DashboardContent({
                     ) : (
                       <div
                         data-tour-id="dashboard-start-card"
-                        className="rounded-[26px] border border-slate-200 bg-slate-50/80 p-5"
+                        className="rounded-2xl border border-slate-200 bg-slate-50/80 p-5"
                       >
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                           {isSignedOut ? "Bắt đầu đúng cách" : "Bắt đầu nhanh nhất"}
@@ -1087,29 +1087,25 @@ function DashboardContent({
 
         {shouldShowTopSidebar && (
           <>
-            <section className="rounded-[24px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.22)] sm:p-5">
+            <section className="rounded-2xl border border-slate-200/80 bg-white/92 p-5 shadow-sm sm:p-6">
               <PageHeader
                 eyebrow="Thứ tự nên đi"
                 title="Một luồng chính, không phải ba lựa chọn ngang nhau."
                 description={quickActionIntro}
               />
 
-              <div className="mt-3 grid gap-3 md:grid-cols-3">
-                    {quickActions.map((action, actionIndex) => {
+              <div className="mt-3 grid gap-5 md:grid-cols-3">
+                    {quickActions.map((action) => {
                       const Icon = action.icon;
-                      const stepIndex = actionIndex + 1;
 
                       return (
                         <Button
                           key={action.title}
                           variant="outline"
-                          className="group h-auto min-w-0 justify-start whitespace-normal rounded-[18px] border-slate-200 bg-white px-3.5 py-3.5 text-left shadow-[0_10px_24px_-20px_rgba(15,23,42,0.16)] transition-colors hover:border-slate-300 hover:bg-white hover:shadow-[0_14px_28px_-20px_rgba(15,23,42,0.20)]"
+                          className="group h-auto min-w-0 justify-start whitespace-normal rounded-2xl border-slate-200 bg-white px-4 py-4 text-left shadow-sm transition-colors hover:border-slate-300 hover:bg-white hover:shadow"
                           onClick={action.onClick}
                         >
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-sm font-semibold text-white">
-                            {stepIndex}
-                          </div>
-                          <div className="ml-3 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white text-slate-700 ring-1 ring-slate-200 transition-colors group-hover:text-slate-950">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition-colors group-hover:bg-slate-200 group-hover:text-slate-950">
                             <Icon className="h-4 w-4" />
                           </div>
                           <div className="ml-3 min-w-0 flex-1">
@@ -1126,7 +1122,7 @@ function DashboardContent({
                 </section>
 
                 {/* Stats Cards - Collapsible on mobile */}
-                <details className="group rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)] sm:p-5 sm:!block">
+                <details className="group rounded-2xl border border-slate-200/80 bg-white/92 p-5 shadow-sm sm:p-6 sm:!block">
                   <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-3 text-sm font-semibold text-slate-950 sm:cursor-default">
                     <span>Tổng quan nhanh</span>
                     <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
@@ -1136,7 +1132,7 @@ function DashboardContent({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </summary>
-                  <div className="mt-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="mt-5 grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                     {overviewCards.map((item, index) => {
                       const Icon = item.icon;
 
@@ -1146,17 +1142,17 @@ function DashboardContent({
                           className="animate-fade-in-up"
                           style={{ animationDelay: `${0.04 * index}s` }}
                         >
-                          <Card className="h-full border border-slate-100 bg-white/88 shadow-[0_10px_24px_-20px_rgba(15,23,42,0.18)]">
+                          <Card className="h-full border border-slate-100 bg-white/88 shadow-sm">
                             <CardHeader className="flex flex-row items-start justify-between pb-3">
                               <div>
                                 <CardDescription className="text-xs font-medium text-slate-500">
                                   {item.title}
                                 </CardDescription>
-                                <CardTitle className="mt-2 text-3xl font-bold text-slate-950">
+                                <CardTitle className="mt-2 text-2xl font-bold text-slate-950">
                                   {isSignedOut ? item.value : <CountUp value={item.value} />}
                                 </CardTitle>
                               </div>
-                              <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${item.iconClass}`}>
+                              <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${item.iconClass}`}>
                                 <Icon className="h-5 w-5" />
                               </div>
                             </CardHeader>
@@ -1193,7 +1189,7 @@ function DashboardContent({
                 <ol className="grid gap-3 md:grid-cols-3">
                   {["Chấm 8 lĩnh vực cuộc sống", "Chọn một insight ưu tiên", "Tạo SMART goal và chu kỳ 12 tuần"].map(
                     (item, index) => (
-                      <li key={item} className="rounded-[20px] border border-slate-200 bg-slate-50/80 p-4">
+                      <li key={item} className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
                         <div
                           aria-hidden="true"
                           className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white"
@@ -1207,7 +1203,7 @@ function DashboardContent({
                 </ol>
               </EmptyState>
             ) : (
-              <details className="group rounded-[26px] border border-slate-200/80 bg-white/92 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)] sm:p-5 lg:p-6 open:sm:!block sm:!block" open>
+              <details className="group rounded-2xl border border-slate-200/80 bg-white/92 p-5 shadow-sm sm:p-6 open:sm:!block sm:!block" open>
                 <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-3 sm:cursor-default">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Bảng thực thi</p>
@@ -1227,7 +1223,7 @@ function DashboardContent({
                     </svg>
                   </div>
                 </summary>
-                <div className="mt-4 grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
+                <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3">
                   <GoalProgressCard
                     goalTitle={dashboardGoalTitle}
                     percent={goalProgressSnapshot.percent}
@@ -1243,14 +1239,14 @@ function DashboardContent({
                   <StreakCard streak={weeklyStreak} />
                 </div>
 
-                <details className="group rounded-[22px] border border-slate-200 bg-slate-50/70 p-4">
+                <details className="group rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
                   <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 text-sm font-semibold text-slate-950">
                     <span>Phân tích mở rộng</span>
                     <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-500">
                       Tiến độ theo tuần + chỉ số dẫn
                     </span>
                   </summary>
-                  <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
+                  <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
                     <WeeklyProgressChart points={weeklyProgressPoints} />
                     <MetricsSummary items={leadMetricsSummary} />
                   </div>
@@ -1284,7 +1280,7 @@ function DashboardContent({
               ) : (
                 <Card
                   data-tour-id="dashboard-plan-card"
-                  className="glass-surface-gradient-border border-0 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)] ambient-glow"
+                  className="glass-surface-gradient-border border-0 bg-white/92 shadow-sm ambient-glow"
                 >
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-slate-950">
@@ -1295,7 +1291,7 @@ function DashboardContent({
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Đang dùng</p>
                       <p className="mt-2 text-3xl font-bold text-slate-950">{getPlanLabel(currentPlanCode)}</p>
                       <p className="mt-2 text-sm leading-7 text-slate-600">{currentPlanDefinition.description}</p>
@@ -1357,7 +1353,7 @@ function DashboardContent({
 
               <Card
                 data-tour-id="dashboard-next-card"
-                className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.24)]"
+                className="border border-slate-200/80 bg-white/92 shadow-sm"
               >
                 <CardHeader>
                   <CardTitle className="text-slate-950">Đi tiếp ngay</CardTitle>
@@ -1397,7 +1393,7 @@ function DashboardContent({
 
       {!isSignedOut && userData.isHydratedFromDemo && (
         <Reveal>
-          <div className="flex flex-wrap items-center gap-4 rounded-[22px] border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-[0_20px_45px_-34px_rgba(217,119,6,0.22)]">
+          <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-[0_20px_45px_-34px_rgba(217,119,6,0.22)]">
             <Sparkles className="h-5 w-5 shrink-0 text-amber-600" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-amber-900">Dữ liệu đang hiển thị là ví dụ mẫu</p>
@@ -1428,7 +1424,7 @@ function DashboardContent({
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
             <Reveal>
-              <Card className="h-full border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.24)]">
+              <Card className="h-full border border-slate-200/80 bg-white/92 shadow-sm">
                 <CardHeader>
                   <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                     <div className="min-w-0">
@@ -1454,7 +1450,7 @@ function DashboardContent({
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {recentGoals.length === 0 ? (
-                    <div className="rounded-[24px] border border-dashed border-slate-300 bg-slate-50/80 px-6 py-10 text-center text-slate-500">
+                    <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/80 px-6 py-10 text-center text-slate-500">
                       <Target className="mx-auto mb-4 h-12 w-12 text-slate-300" />
                       <p>
                         {isSignedOut
@@ -1469,7 +1465,7 @@ function DashboardContent({
                       </Button>
                     </div>
                   ) : (
-                    <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm">
+                    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                       <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)_minmax(100px,0.5fr)] gap-4 border-b border-slate-200/80 bg-slate-50/90 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 lg:grid">
                         <span>Mục tiêu</span>
                         <span>Loại</span>
@@ -1577,7 +1573,7 @@ function DashboardContent({
             </Reveal>
 
             <Reveal>
-              <Card className="h-full border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.24)]">
+              <Card className="h-full border border-slate-200/80 bg-white/92 shadow-sm">
                 <CardHeader>
                   <div className="flex items-center justify-between gap-4">
                     <div>
@@ -1599,11 +1595,11 @@ function DashboardContent({
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="rounded-[24px] border border-slate-200 bg-white p-4 shadow-sm">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                     {radarData.length > 0 ? (
                       <Suspense
                         fallback={
-                          <div className="flex h-[300px] items-center justify-center rounded-[20px] bg-slate-100/88 text-sm text-slate-500">
+                          <div className="flex h-[300px] items-center justify-center rounded-xl bg-slate-100/88 text-sm text-slate-500">
                             Đang tải biểu đồ cân bằng cuộc sống...
                           </div>
                         }
@@ -1611,7 +1607,7 @@ function DashboardContent({
                         <DashboardLifeAreaRadar data={radarData} />
                       </Suspense>
                     ) : (
-                      <div className="flex h-[300px] flex-col items-center justify-center rounded-[20px] bg-slate-50 px-5 text-center">
+                      <div className="flex h-[300px] flex-col items-center justify-center rounded-xl bg-slate-50 px-5 text-center">
                         <TrendingUp className="h-10 w-10 text-slate-300" />
                         <p className="mt-3 font-semibold text-slate-900">Chưa có dữ liệu bánh xe cuộc sống</p>
                         <p className="mt-1 max-w-sm text-sm leading-6 text-slate-500">
@@ -1623,7 +1619,7 @@ function DashboardContent({
                     )}
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-[20px] border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Cần ưu tiên tiếp</p>
                       <p className="mt-2 text-lg font-semibold text-slate-900">
                         {isSignedOut
@@ -1642,7 +1638,7 @@ function DashboardContent({
                     </div>
                     <Button
                       variant="outline"
-                      className="h-auto w-full min-w-0 justify-start whitespace-normal rounded-[20px] border-slate-200 bg-white px-4 py-4 text-left shadow-sm hover:bg-slate-50"
+                      className="h-auto w-full min-w-0 justify-start whitespace-normal rounded-xl border-slate-200 bg-white px-4 py-4 text-left shadow-sm hover:bg-slate-50"
                       onClick={() => (isSignedOut ? handleAuthNavigate("signup") : navigate("/life-balance"))}
                     >
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white">
@@ -1677,7 +1673,7 @@ function DashboardContent({
       {!isFreshDemoVisitor && recentReflections.length > 0 && (
         <div className="ops-section-secondary">
           <Reveal>
-            <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]">
+            <Card className="border border-slate-200/80 bg-white/92 shadow-sm">
               <CardHeader>
                 <div className="flex items-center justify-between gap-4">
                   <div>
@@ -1696,7 +1692,7 @@ function DashboardContent({
                 {recentReflections.map((reflection, index) => (
                   <div
                     key={reflection.id}
-                    className={`rounded-[24px] border p-5 shadow-[0_20px_40px_-34px_rgba(15,23,42,0.18)] ${
+                    className={`rounded-2xl border p-5 shadow-sm ${
                       index === 0 ? "border-slate-300 bg-slate-50" : "border-slate-200 bg-white"
                     }`}
                   >
@@ -1717,7 +1713,7 @@ function DashboardContent({
       {!isSignedOut && !isFreshDemoVisitor && userData.isHydratedFromDemo && (
         <div className="ops-section-notice">
           <Reveal>
-            <div className="flex flex-wrap items-center gap-4 rounded-[22px] border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-[0_20px_45px_-34px_rgba(217,119,6,0.22)]">
+            <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-[0_20px_45px_-34px_rgba(217,119,6,0.22)]">
               <Sparkles className="h-5 w-5 shrink-0 text-amber-600" />
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-amber-900">Dữ liệu đang hiển thị là ví dụ mẫu</p>

@@ -19,7 +19,7 @@ const FLOW_STEPS = [
 
 export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: PublicVisitorHeroProps) {
   return (
-    <Card className="overflow-hidden border border-slate-200/80 bg-white/96 shadow-[0_24px_64px_-46px_rgba(15,23,42,0.34)]">
+    <Card className="overflow-hidden border border-slate-200/80 bg-white/96 shadow-sm">
       <CardContent className="p-4 sm:p-5 lg:p-6">
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.72fr)] lg:items-stretch">
           <div className="flex min-w-0 flex-col justify-center space-y-5 py-2">
@@ -96,7 +96,7 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
               {FLOW_STEPS.map((step, index) => (
                 <div
                   key={step}
-                  className="flex min-h-16 items-center gap-3 rounded-lg border border-slate-200/70 bg-white px-3 py-3 shadow-[0_12px_30px_-26px_rgba(15,23,42,0.3)]"
+                  className="flex min-h-16 items-center gap-3 rounded-lg border border-slate-200/70 bg-white px-3 py-3 shadow-sm"
                 >
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white">
                     {index + 1}

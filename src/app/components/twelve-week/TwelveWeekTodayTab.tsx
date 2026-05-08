@@ -193,7 +193,7 @@ export function TwelveWeekTodayTab({
                     {currentWeekTasksCount} việc còn mở trong tuần này.
                   </p>
                 </div>
-                <div className="rounded-lg border border-violet-200 bg-violet-50 p-4 shadow-[0_18px_40px_-34px_rgba(109,40,217,0.18)]">
+                <div className="rounded-lg border border-violet-200 bg-violet-50 p-4 shadow-sm">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
@@ -235,7 +235,7 @@ export function TwelveWeekTodayTab({
                 {rescueModes.map((mode) => (
                   <div
                     key={mode}
-                    className="rounded-lg border border-slate-200 bg-white p-4 shadow-[0_18px_38px_-34px_rgba(15,23,42,0.16)]"
+                    className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm"
                   >
                     <p className="text-sm font-semibold text-slate-950">{getReentryModeLabel(mode)}</p>
                     <p className="mt-2 text-sm leading-7 text-slate-600">
@@ -265,7 +265,7 @@ export function TwelveWeekTodayTab({
       {primaryTask && (
         <div
           data-testid="today-primary-hero"
-          className={`order-1 rounded-[24px] border-2 p-4 shadow-[0_16px_36px_-28px_rgba(124,58,237,0.18)] sm:p-5 ${
+          className={`order-1 rounded-2xl border p-5 shadow-[0_16px_36px_-28px_rgba(124,58,237,0.14)] sm:p-6 ${
             primaryTaskOverdue
               ? "border-amber-300 bg-amber-50/90"
               : "border-emerald-300 bg-white"
@@ -334,7 +334,7 @@ export function TwelveWeekTodayTab({
         <div className="animate-fade-in-up min-w-0">
           <Card
             data-tour-id="system-today-queue"
-            className="h-full min-w-0 overflow-hidden border border-slate-200/80 bg-white/92 shadow-[0_22px_54px_-40px_rgba(37,99,235,0.18)]"
+            className="h-full min-w-0 overflow-hidden border border-slate-200/80 bg-white/92 shadow-sm"
           >
             <CardHeader className="min-w-0 space-y-0 pb-3">
               <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
@@ -407,7 +407,7 @@ export function TwelveWeekTodayTab({
                   return (
                     <div
                       key={task.id}
-                      className={`flex min-w-0 items-start gap-3 rounded-lg border p-3 shadow-[0_14px_34px_-28px_rgba(15,23,42,0.18)] sm:p-4 ${
+                      className={`flex min-w-0 items-start gap-3 rounded-xl border p-4 shadow-sm ${
                         isPrimaryTask ? "border-slate-950 bg-slate-950" : "border-slate-200 bg-white"
                       }`}
                     >
@@ -615,7 +615,7 @@ export function TwelveWeekTodayTab({
           className="animate-fade-in-up min-w-0"
           style={{ animationDelay: '0.06s' }}
         >
-          <Card className="h-full min-w-0 overflow-hidden border border-slate-200/80 bg-white/92 shadow-[0_22px_54px_-40px_rgba(124,58,237,0.16)]">
+          <Card className="h-full min-w-0 overflow-hidden border border-slate-200/80 bg-white/92 shadow-sm">
             <CardHeader className="min-w-0 space-y-0 pb-3">
               <div className="flex min-w-0 items-start justify-between gap-3">
                 <div className="min-w-0">

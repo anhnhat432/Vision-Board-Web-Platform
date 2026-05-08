@@ -224,7 +224,7 @@ export function TwelveWeekProgressTab({
         <div className="grid gap-4 md:grid-cols-3">
         <Card
           interactive={false}
-          className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)]"
+          className="border border-slate-200/80 bg-white/92 shadow-sm"
         >
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -281,7 +281,7 @@ export function TwelveWeekProgressTab({
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <Card
           interactive={false}
-          className="border border-slate-200/80 bg-white/92 shadow-[0_22px_54px_-40px_rgba(15,23,42,0.28)]"
+          className="border border-slate-200/80 bg-white/92 shadow-sm"
         >
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-slate-950">
@@ -305,7 +305,7 @@ export function TwelveWeekProgressTab({
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {system.scoreboard.map((week) => {
                 const isCurrentWeek = week.weekNumber === currentWeek;
                 const isReviewed = week.reviewDone;
@@ -313,7 +313,7 @@ export function TwelveWeekProgressTab({
                 return (
                   <div
                     key={week.weekNumber}
-                    className={`rounded-lg border p-5 shadow-[0_18px_38px_-34px_rgba(15,23,42,0.28)] ${
+                    className={`rounded-xl border p-4 shadow-sm ${
                       isCurrentWeek
                         ? "border-slate-950 bg-slate-950 text-white"
                         : isReviewed
@@ -392,7 +392,7 @@ export function TwelveWeekProgressTab({
 
         <Card
           interactive={false}
-          className="border border-slate-200/80 bg-slate-50/80 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.26)]"
+          className="border border-slate-200/80 bg-slate-50/80 shadow-sm"
         >
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-slate-950">
@@ -433,7 +433,7 @@ export function TwelveWeekProgressTab({
           {executionHeatmap.length > 0 && (
             <Card
               interactive={false}
-              className="border border-slate-200/80 bg-white/92 shadow-[0_22px_54px_-40px_rgba(15,23,42,0.28)]"
+              className="border border-slate-200/80 bg-white/92 shadow-sm"
             >
               <CardHeader>
                 <CardTitle className="text-slate-950">Bản đồ thực thi</CardTitle>

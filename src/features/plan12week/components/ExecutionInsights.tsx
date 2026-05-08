@@ -14,7 +14,7 @@ export function ExecutionInsights({
   adaptiveSuggestion,
 }: ExecutionInsightsProps) {
   return (
-    <Card className="border-0 bg-white/85 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.32)]">
+    <Card className="border-0 bg-white/85 shadow-sm">
       <CardHeader className="pb-2">
         <CardTitle className="text-base text-slate-900">Execution Insights</CardTitle>
       </CardHeader>

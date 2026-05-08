@@ -99,7 +99,7 @@ export function Achievements() {
 
   return (
     <div className="space-y-8 pb-12">
-      <InteractiveSurface className="rounded-[28px]" intensity={9} translate={22}>
+      <InteractiveSurface className="rounded-2xl" intensity={9} translate={22}>
         <Card interactive={false} className="hero-surface overflow-hidden border-0 text-white">
           <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
@@ -144,7 +144,7 @@ export function Achievements() {
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Tình trạng hiện tại</p>
 
                 <div className="mt-6 space-y-4">
-                  <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
+                  <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-white/55">Đã mở khóa</p>
                     <p className="mt-2 text-3xl font-bold text-white">
                       <CountUp value={userData.achievements.length} />
@@ -152,14 +152,14 @@ export function Achievements() {
                     </p>
                   </div>
 
-                  <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
+                  <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-white/55">Tiến độ bộ sưu tập</p>
                     <p className="mt-2 text-3xl font-bold text-white">
                       <CountUp value={completionRate} suffix="%" />
                     </p>
                   </div>
 
-                  <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
+                  <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-white/55">Mới nhất</p>
                     <p className="mt-2 text-lg font-semibold text-white">
                       {latestAchievement
@@ -251,7 +251,7 @@ export function Achievements() {
         <Reveal delay={0.04}>
           <Card className="overflow-hidden">
             <CardContent className="p-10 text-center lg:p-14">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] bg-amber-50 text-amber-700">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
                 <Trophy className="h-10 w-10" />
               </div>
               <h2 className="mt-6 text-3xl font-bold text-slate-900">Chưa có huy hiệu nào được mở khóa</h2>
@@ -298,7 +298,7 @@ export function Achievements() {
                   <Card className="overflow-hidden">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-[24px] gradient-amber-icon text-amber-700 shadow-[0_18px_36px_-28px_rgba(245,158,11,0.42)]">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl gradient-amber-icon text-amber-700 shadow-[0_18px_36px_-28px_rgba(245,158,11,0.42)]">
                           <Icon className="h-8 w-8" />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -334,7 +334,7 @@ export function Achievements() {
           </CardHeader>
           <CardContent>
             {lockedAchievements.length === 0 ? (
-              <div className="rounded-[24px] border border-emerald-200 bg-emerald-50/80 p-5 text-sm text-emerald-900">
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-5 text-sm text-emerald-900">
                 Bạn đã mở khóa toàn bộ bộ thành tựu hiện có. Đây là một cột mốc rất đẹp.
               </div>
             ) : (
@@ -345,9 +345,9 @@ export function Achievements() {
                   return (
                     <div
                       key={achievement.key}
-                      className="flex items-start gap-4 rounded-[24px] border border-white/70 bg-white/72 p-5"
+                      className="flex items-start gap-4 rounded-2xl border border-white/70 bg-white/72 p-5"
                     >
-                      <div className="flex h-14 w-14 items-center justify-center rounded-[20px] bg-slate-100 text-slate-400">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
                         <Icon className="h-7 w-7" />
                       </div>
                       <div className="min-w-0 flex-1">

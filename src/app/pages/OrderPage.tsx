@@ -415,14 +415,14 @@ export function OrderPage() {
               </p>
             </div>
 
-            <div className="rounded-[32px] border border-white/14 bg-white/12 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+            <div className="rounded-2xl border border-white/14 bg-white/12 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Tóm tắt nhanh</p>
               <div className="mt-4 space-y-2.5">
                 {summaryItems.map((item) => {
                   const Icon = item.icon;
 
                   return (
-                    <div key={item.label} className="rounded-[24px] border border-white/10 bg-black/12 px-4 py-3.5">
+                    <div key={item.label} className="rounded-2xl border border-white/10 bg-black/12 px-4 py-3.5">
                       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
                         <Icon className="h-3.5 w-3.5" />
                         {item.label}
@@ -492,7 +492,7 @@ export function OrderPage() {
                 </div>
               </div>
 
-              <div className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-4">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Tóm tắt cấu hình hiện tại
                 </p>
@@ -643,7 +643,7 @@ export function OrderPage() {
               </Alert>
             ) : null}
 
-            <div className="rounded-[22px] border border-slate-200 bg-slate-50/70 p-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
               <div className="space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Hoàn tất bước tạo đơn
@@ -675,21 +675,21 @@ export function OrderPage() {
             <CardDescription>Giữ implementation an toàn và nhỏ, chỉ phục vụ local order flow hiện tại.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2.5">
-            <div className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Lưu dữ liệu</p>
               <p className="mt-2 text-sm leading-7 text-slate-600">
                 Đơn được lưu cục bộ bằng localStorage trong bước triển khai đầu tiên.
               </p>
             </div>
 
-            <div className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Chưa xử lý backend</p>
               <p className="mt-2 text-sm leading-7 text-slate-600">
                 Chưa có thanh toán thật, fulfillment thật, đồng bộ nhiều thiết bị hoặc xử lý đơn ở phía admin.
               </p>
             </div>
 
-            <div className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Đi tiếp sau khi tạo</p>
               <p className="mt-2 text-sm leading-7 text-slate-600">
                 Bạn có thể mở trang trạng thái đơn để xem timeline, chi tiết kit và chuyển trạng thái demo cục bộ.

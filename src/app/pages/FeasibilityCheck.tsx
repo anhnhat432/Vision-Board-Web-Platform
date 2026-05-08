@@ -275,7 +275,7 @@ export function FeasibilityCheck() {
                 </div>
               </div>
 
-              <div className="hidden rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+              <div className="hidden rounded-2xl border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
                 <div className="flex items-center justify-between text-sm text-white/72">
                   <span>
                     Câu hỏi {currentStep + 1} / {totalSteps}
@@ -284,11 +284,11 @@ export function FeasibilityCheck() {
                 </div>
                 <Progress value={progressPercentage} className="mt-3 h-2.5 bg-white/20" />
 
-                <div className="mt-6 rounded-[24px] border border-white/10 bg-black/12 p-4">
+                <div className="mt-6 rounded-2xl border border-white/10 bg-black/12 p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-white/55">Mục tiêu đã viết</p>
                   <p className="mt-2 text-lg font-semibold text-white">{pendingGoal.specific}</p>
                 </div>
-                <div className="mt-4 rounded-[24px] border border-white/10 bg-black/12 p-4">
+                <div className="mt-4 rounded-2xl border border-white/10 bg-black/12 p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-white/55">Khung thời gian</p>
                   <p className="mt-2 text-sm font-semibold text-white">{pendingGoal.timeBound}</p>
                 </div>

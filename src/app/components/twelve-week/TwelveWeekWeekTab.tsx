@@ -170,7 +170,7 @@ export function TwelveWeekWeekTab({
       <div className="grid gap-4 md:grid-cols-3">
         <Card
           interactive={false}
-          className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)]"
+          className="border border-slate-200/80 bg-white/92 shadow-sm"
         >
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -212,7 +212,7 @@ export function TwelveWeekWeekTab({
               <CalendarCheck className="h-3.5 w-3.5" />
               Review tuần
             </p>
-            <p className="mt-3 text-2xl font-bold text-slate-950">
+            <p className="mt-3 text-3xl font-bold text-slate-950">
               {reviewDueToday ? "Hôm nay" : getReviewDayLabel(system.reviewDay)}
             </p>
             <p className="mt-1 text-sm text-slate-600">{reviewStatusLabel}</p>
@@ -221,7 +221,7 @@ export function TwelveWeekWeekTab({
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
-        <Card className="h-full border border-slate-200/80 bg-white/92 shadow-[0_22px_54px_-40px_rgba(99,102,241,0.22)]">
+        <Card className="h-full border border-slate-200/80 bg-white/92 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-slate-950">
               <Layers className="h-5 w-5 text-indigo-600" />
@@ -315,7 +315,7 @@ export function TwelveWeekWeekTab({
 
         <Card
           data-tour-id="system-week-review"
-          className="h-full border border-slate-200/80 bg-white/92 shadow-[0_22px_54px_-40px_rgba(168,85,247,0.18)]"
+          className="h-full border border-slate-200/80 bg-white/92 shadow-sm"
         >
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-slate-950">
@@ -358,7 +358,7 @@ export function TwelveWeekWeekTab({
             {summaryReview && (
               <div
                 data-testid="weekly-review-summary"
-                className={`rounded-lg border p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] ${
+                className={`rounded-lg border p-4 shadow-sm ${
                   scoreInterpretation.level === "strong"
                     ? "border-emerald-200 bg-emerald-50/82"
                     : scoreInterpretation.level === "okay"
@@ -473,7 +473,7 @@ export function TwelveWeekWeekTab({
               <p className="mt-3 text-sm text-slate-500">Chỉ số chính: {currentLagMetricValue || "Chưa cập nhật"}</p>
             </div>
             <div
-              className={`rounded-lg border p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] ${
+              className={`rounded-lg border p-4 shadow-sm ${
                 hasPremiumInsights ? "border-sky-200 bg-sky-50" : "border-violet-200 bg-violet-50"
               }`}
             >
@@ -516,7 +516,7 @@ export function TwelveWeekWeekTab({
                       <p className="mt-2 text-sm leading-7 text-slate-800">{premiumInsight.coachNote}</p>
                     </div>
                   </div>
-                  <div className="rounded-lg border border-sky-200 bg-white p-4 shadow-[0_18px_40px_-34px_rgba(2,132,199,0.18)]">
+                  <div className="rounded-lg border border-sky-200 bg-white p-4 shadow-sm">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">

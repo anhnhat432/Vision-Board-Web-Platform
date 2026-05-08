@@ -139,15 +139,15 @@ export function MockBillingCheckout() {
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]">
+          <div className="rounded-2xl border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/56">Tóm tắt nâng cấp</p>
             <div className="mt-4 space-y-4">
-              <div className="rounded-[22px] border border-white/12 bg-black/12 p-4">
+              <div className="rounded-2xl border border-white/12 bg-black/12 p-4">
                 <p className="text-xs uppercase tracking-[0.16em] text-white/56">Gói sẽ mở</p>
                 <p className="mt-2 text-3xl font-bold text-white">{plan.name}</p>
                 <p className="mt-1 text-sm text-white/72">{plan.priceLabel}</p>
               </div>
-              <div className="rounded-[22px] border border-white/12 bg-white/8 p-4 text-sm text-white/72">
+              <div className="rounded-2xl border border-white/12 bg-white/8 p-4 text-sm text-white/72">
                 {existingAccount ? (
                   <>
                     Thiết bị này đang có gói{" "}
@@ -173,7 +173,7 @@ export function MockBillingCheckout() {
           </CardHeader>
           <CardContent className="space-y-3">
             {plan.highlights.map((feature) => (
-              <div key={feature} className="flex gap-3 rounded-[20px] border border-white/70 bg-white/86 px-4 py-3">
+              <div key={feature} className="flex gap-3 rounded-xl border border-white/70 bg-white/86 px-4 py-3">
                 <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />
                 <p className="text-sm leading-7 text-slate-700">{feature}</p>
               </div>
@@ -190,11 +190,11 @@ export function MockBillingCheckout() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-[22px] border border-slate-200 bg-slate-50 px-4 py-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Gói sẽ được mở</p>
               <p className="mt-2 text-lg font-semibold text-slate-950">{getPlanLabel(session.planCode)}</p>
             </div>
-            <div className="rounded-[22px] border border-slate-200 bg-slate-50 px-4 py-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Nguồn yêu cầu</p>
               <p className="mt-2 text-sm font-semibold text-slate-900">{session.source === "paywall_dialog" || !session.source ? "Từ màn nâng cấp" : session.source === "settings" ? "Từ cài đặt" : session.source === "12_week_setup" ? "Từ thiết lập 12 tuần" : "Khác"}</p>
             </div>

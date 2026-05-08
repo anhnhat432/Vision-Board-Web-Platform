@@ -44,7 +44,7 @@ export function FunnelDiagnosticsPanel({ enabled, snapshot }: FunnelDiagnosticsP
   return (
     <section
       data-testid="funnel-diagnostics-panel"
-      className="rounded-[24px] border border-slate-300 bg-slate-50/80 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.18)] sm:p-5"
+      className="rounded-2xl border border-slate-300 bg-slate-50/80 p-4 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.18)] sm:p-5"
     >
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">

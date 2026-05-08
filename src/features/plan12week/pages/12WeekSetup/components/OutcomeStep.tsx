@@ -65,7 +65,7 @@ export function OutcomeStep({
             {planRationaleReasons.map((reason) => (
               <li
                 key={reason.id}
-                className="rounded-[18px] border border-violet-200 bg-white/82 p-3"
+                className="rounded-xl border border-violet-200 bg-white/82 p-3"
               >
                 <p className="text-sm font-semibold text-slate-950">{reason.title}</p>
                 <p className="mt-1 text-xs leading-5 text-slate-600">{reason.detail}</p>
@@ -73,7 +73,7 @@ export function OutcomeStep({
             ))}
           </ul>
           {feasibility.smartGoalQualityNote && (
-            <div className="mt-3 rounded-[18px] border border-amber-200 bg-amber-50/82 px-4 py-3">
+            <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50/82 px-4 py-3">
               <p className="text-sm leading-6 text-amber-800">{feasibility.smartGoalQualityNote}</p>
             </div>
           )}
@@ -84,7 +84,7 @@ export function OutcomeStep({
       {(feasibility.bottleneck || feasibility.firstWeekGuidance || feasibility.scopeRecommendation) && (
         <SecondaryPanel title="Gợi ý từ bước kiểm tra" collapsible defaultOpen={isDesktop}>
           <div className="grid gap-3 md:grid-cols-3">
-            <div className="rounded-[18px] border border-amber-200 bg-white/76 p-3">
+            <div className="rounded-xl border border-amber-200 bg-white/76 p-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Cần chú ý</p>
               <p className="mt-1 text-sm font-semibold text-slate-950">
                 {feasibility.bottleneck?.label ?? "Chưa có"}
@@ -93,13 +93,13 @@ export function OutcomeStep({
                 <p className="mt-2 text-xs leading-5 text-slate-600">{feasibility.bottleneck.action}</p>
               )}
             </div>
-            <div className="rounded-[18px] border border-amber-200 bg-white/76 p-3">
+            <div className="rounded-xl border border-amber-200 bg-white/76 p-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Tuần 1</p>
               <p className="mt-1 text-sm leading-6 text-slate-700">
                 {feasibility.firstWeekGuidance ?? "Giữ tuần đầu vừa sức để tạo nhịp."}
               </p>
             </div>
-            <div className="rounded-[18px] border border-amber-200 bg-white/76 p-3">
+            <div className="rounded-xl border border-amber-200 bg-white/76 p-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Mức tải</p>
               <p className="mt-1 text-sm font-semibold text-slate-950">{getPlanLoadLabel(feasibility.planLoad)}</p>
               <p className="mt-2 text-xs leading-5 text-slate-600">
@@ -111,7 +111,7 @@ export function OutcomeStep({
       )}
 
       {/* Required fields card */}
-      <div className="rounded-[24px] border-2 border-emerald-200 bg-emerald-50/60 p-4 sm:p-5 shadow-[0_18px_40px_-32px_rgba(16,185,129,0.18)]">
+      <div className="rounded-2xl border-2 border-emerald-200 bg-emerald-50/60 p-4 sm:p-5 shadow-[0_18px_40px_-32px_rgba(16,185,129,0.18)]">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
             <p className="text-sm font-semibold text-slate-900">Chốt phần bắt buộc trước</p>
@@ -161,7 +161,7 @@ export function OutcomeStep({
 
       {/* Personalization panel */}
       {selectedTemplate && (
-        <div className="space-y-4 rounded-[28px] border border-emerald-200 gradient-emerald p-5">
+        <div className="space-y-4 rounded-2xl border border-emerald-200 gradient-emerald p-5">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
               Cá nhân hóa khung
@@ -250,7 +250,7 @@ export function OutcomeStep({
       {/* Template selection */}
       <SecondaryPanel title="Bắt đầu nhanh bằng khung gợi ý" collapsible defaultOpen={isDesktop}>
         {recommendedTemplate && adaptiveTemplateRecommendation && (
-          <div className="rounded-[24px] border border-sky-200 gradient-sky p-4 shadow-[0_18px_40px_-34px_rgba(37,99,235,0.18)]">
+          <div className="rounded-2xl border border-sky-200 gradient-sky p-4 shadow-[0_18px_40px_-34px_rgba(37,99,235,0.18)]">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
@@ -271,12 +271,12 @@ export function OutcomeStep({
               {selectedTemplate?.id === recommendedTemplate.id ? "Đang dùng khung gợi ý" : "Dùng khung gợi ý này"}
             </Button>
             {recommendedTemplateSupport && (
-              <details className="mt-4 rounded-[20px] border border-sky-200 bg-white/72 px-4 py-3">
+              <details className="mt-4 rounded-xl border border-sky-200 bg-white/72 px-4 py-3">
                 <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                   Xem gợi ý tuần 1 và nhịp giữ
                 </summary>
                 <div className="mt-3 grid gap-3">
-                  <div className="rounded-[20px] border border-sky-200 bg-white/86 p-4">
+                  <div className="rounded-xl border border-sky-200 bg-white/86 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
                       Tuần 1 nên thắng ở đâu
                     </p>
@@ -285,7 +285,7 @@ export function OutcomeStep({
                     </p>
                     <p className="mt-2 text-sm leading-7 text-slate-600">{recommendedTemplateSupport.week1Support}</p>
                   </div>
-                  <div className="rounded-[20px] border border-sky-200 bg-white/86 p-4">
+                  <div className="rounded-xl border border-sky-200 bg-white/86 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">Nhịp nên giữ</p>
                     <p className="mt-2 text-sm leading-7 text-slate-600">
                       {recommendedTemplateSupport.week1CadenceHint}
@@ -296,7 +296,7 @@ export function OutcomeStep({
             )}
           </div>
         )}
-        <details className="mt-4 rounded-[20px] border border-dashed border-slate-200 bg-white/72 px-4 py-3">
+        <details className="mt-4 rounded-xl border border-dashed border-slate-200 bg-white/72 px-4 py-3">
           <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
             Xem tất cả khung mẫu
           </summary>
@@ -315,7 +315,7 @@ export function OutcomeStep({
                   onClick={() => onTemplateSelect(template)}
                   aria-pressed={isSelected}
                   aria-label={templateAriaLabel}
-                  className={`rounded-[24px] border p-4 text-left transition-colors ${
+                  className={`rounded-2xl border p-4 text-left transition-colors ${
                     isSelected
                       ? "border-slate-900 bg-slate-900 text-white shadow-[0_16px_36px_-28px_rgba(15,23,42,0.32)]"
                       : isLocked
@@ -357,7 +357,7 @@ export function OutcomeStep({
                     {template.description}
                   </p>
                   <div
-                    className={`mt-3 rounded-[20px] border px-3 py-3 text-sm leading-6 ${
+                    className={`mt-3 rounded-xl border px-3 py-3 text-sm leading-6 ${
                       isSelected ? "border-white/12 bg-white/8 text-white/82" : "border-white/70 bg-white/72 text-slate-600"
                     }`}
                   >
@@ -371,7 +371,7 @@ export function OutcomeStep({
                     <p className="mt-2">{template.bestFor}</p>
                   </div>
                   <div
-                    className={`mt-3 rounded-[20px] border px-3 py-3 text-sm leading-6 ${
+                    className={`mt-3 rounded-xl border px-3 py-3 text-sm leading-6 ${
                       isSelected ? "border-white/12 bg-white/8 text-white/82" : "border-white/70 bg-white/72 text-slate-600"
                     }`}
                   >
@@ -422,7 +422,7 @@ export function OutcomeStep({
       {/* Selected template */}
       {selectedTemplate && (
         <SecondaryPanel title="Khung đang dùng" collapsible defaultOpen={isDesktop}>
-          <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
+          <div className="rounded-2xl border border-white/70 bg-white/78 p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Khung đang dùng</p>
@@ -445,16 +445,16 @@ export function OutcomeStep({
       )}
 
       {/* Smart goal details */}
-      <details className="rounded-[22px] border border-dashed border-slate-200 bg-white/72 p-4">
+      <details className="rounded-2xl border border-dashed border-slate-200 bg-white/72 p-4">
         <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
           Xem mục tiêu đã viết
         </summary>
         <div className="mt-4 space-y-3">
-          <div className="rounded-[18px] border border-white/70 bg-white/86 p-4">
+          <div className="rounded-xl border border-white/70 bg-white/86 p-4">
             <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Mục tiêu cụ thể</p>
             <p className="mt-2 text-sm leading-7 text-slate-700">{smartGoal.specific}</p>
           </div>
-          <div className="rounded-[18px] border border-white/70 bg-white/86 p-4">
+          <div className="rounded-xl border border-white/70 bg-white/86 p-4">
             <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Cách đo kết quả</p>
             <p className="mt-2 text-sm leading-7 text-slate-700">{smartGoal.measurable}</p>
           </div>

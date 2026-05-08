@@ -76,7 +76,7 @@ export function SmartGoalHero({
                 return (
                   <div
                     key={step.key}
-                    className={`rounded-[22px] border px-4 py-3 transition-colors transition-shadow duration-150 ${
+                    className={`rounded-2xl border px-4 py-3 transition-colors transition-shadow duration-150 ${
                       active
                         ? "border-slate-300 bg-slate-100"
                         : done

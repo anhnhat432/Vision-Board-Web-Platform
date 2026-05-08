@@ -238,11 +238,11 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
     >
       <div className="group relative">
         {item.type === "image" && (
-          <div className="overflow-hidden rounded-[26px] border border-white/85 bg-white/90 p-2 shadow-[0_28px_50px_-34px_rgba(15,23,42,0.48)]">
+          <div className="overflow-hidden rounded-2xl border border-white/85 bg-white/90 p-2 shadow-[0_28px_50px_-34px_rgba(15,23,42,0.48)]">
             <ImageWithFallback
               src={item.content}
               alt="Phần tử bảng tầm nhìn"
-              className="rounded-[20px] shadow-sm"
+              className="rounded-xl shadow-sm"
               style={{ width: `${item.width - 16}px` }}
             />
           </div>
@@ -250,7 +250,7 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
 
         {item.type === "quote" && (
           <div
-            className="rounded-[26px] border border-white/80 gradient-white-panel p-5 shadow-[0_28px_50px_-34px_rgba(15,23,42,0.45)]"
+            className="rounded-2xl border border-white/80 gradient-white-panel p-5 shadow-[0_28px_50px_-34px_rgba(15,23,42,0.45)]"
             style={{ width: `${item.width}px` }}
           >
             <div className="flex items-center gap-2 text-violet-600">
@@ -264,7 +264,7 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
         )}
 
         {item.type === "icon" && (
-          <div className="flex h-24 w-24 items-center justify-center rounded-[28px] gradient-violet-pink text-white shadow-[0_28px_50px_-32px_rgba(109,40,217,0.62)]">
+          <div className="flex h-24 w-24 items-center justify-center rounded-2xl gradient-violet-pink text-white shadow-[0_28px_50px_-32px_rgba(109,40,217,0.62)]">
             <Icon className="h-10 w-10" />
           </div>
         )}
@@ -708,7 +708,7 @@ export function VisionBoardEditor() {
                   </p>
                 </div>
 
-                <div className="hidden xl:block rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+                <div className="hidden xl:block rounded-2xl border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
                   <ProductVisual variant="vision" className="mb-5 min-h-[180px]" />
                   <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">
                     Snapshot canvas
@@ -722,7 +722,7 @@ export function VisionBoardEditor() {
                     ].map((item) => (
                       <div
                         key={item.label}
-                        className="rounded-[24px] border border-white/10 bg-black/12 px-4 py-4"
+                        className="rounded-2xl border border-white/10 bg-black/12 px-4 py-4"
                       >
                         <p className="text-xs uppercase tracking-[0.18em] text-white/55">{item.label}</p>
                         <p className="mt-2 text-3xl font-bold text-white">{item.value}</p>
@@ -889,13 +889,13 @@ export function VisionBoardEditor() {
                         key={item}
                         type="button"
                         onClick={() => setIconName(item)}
-                        className={`rounded-[24px] border p-4 transition-colors transition-shadow duration-150 ${
+                        className={`rounded-2xl border p-4 transition-colors transition-shadow duration-150 ${
                           isActive
                             ? "border-violet-300 bg-violet-50 text-violet-700 shadow-[0_18px_36px_-24px_rgba(109,40,217,0.35)]"
                             : "border-white/80 bg-white/72 text-slate-500 hover:border-violet-200 hover:text-violet-700"
                         }`}
                       >
-                        <div className="flex h-12 w-12 items-center justify-center rounded-[18px] gradient-brand-subtle">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl gradient-brand-subtle">
                           <Icon className="h-6 w-6" />
                         </div>
                         <div className="mt-3 text-sm font-semibold">{item}</div>
@@ -957,7 +957,7 @@ export function VisionBoardEditor() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-[20px] bg-violet-50 text-violet-700">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-50 text-violet-700">
                     <LayoutGrid className="h-6 w-6" />
                   </div>
                   <div>
@@ -976,7 +976,7 @@ export function VisionBoardEditor() {
                   ].map((item) => (
                     <div
                       key={item.label}
-                      className="flex items-center justify-between rounded-[22px] border border-white/70 bg-white/72 px-4 py-3"
+                      className="flex items-center justify-between rounded-2xl border border-white/70 bg-white/72 px-4 py-3"
                     >
                       <span className="text-sm font-medium text-slate-600">{item.label}</span>
                       <span className={`rounded-full px-3 py-1 text-sm font-semibold ${item.color}`}>
@@ -991,7 +991,7 @@ export function VisionBoardEditor() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-[20px] bg-sky-50 text-sky-700">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-50 text-sky-700">
                     <Palette className="h-6 w-6" />
                   </div>
                   <div>
@@ -1011,7 +1011,7 @@ export function VisionBoardEditor() {
                   ].map((item) => (
                     <div
                       key={item}
-                      className="rounded-[20px] border border-white/70 bg-white/72 px-4 py-3 text-sm leading-7 text-slate-600"
+                      className="rounded-xl border border-white/70 bg-white/72 px-4 py-3 text-sm leading-7 text-slate-600"
                     >
                       {item}
                     </div>
@@ -1023,7 +1023,7 @@ export function VisionBoardEditor() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-[20px] bg-emerald-50 text-emerald-700">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
                     <Save className="h-6 w-6" />
                   </div>
                   <div>

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { AlertTriangle, CheckCircle2, Compass, Loader2, Sparkles, Target } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Loader2, Sparkles, Target } from "lucide-react";
 
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
@@ -34,7 +34,7 @@ interface WeekCompletionSummary {
 
 export function TwelveWeekTabFallback({ title, description }: { title: string; description: string }) {
   return (
-    <Card className="border border-white/70 bg-white/80 shadow-[0_22px_60px_-36px_rgba(15,23,42,0.32)]">
+    <Card className="border border-white/70 bg-white/80 shadow-sm">
       <CardContent className="flex min-h-[220px] flex-col justify-center gap-3 p-6 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{title}</p>
         <p className="text-base font-semibold text-slate-900">Đang mở phần này...</p>
@@ -60,9 +60,9 @@ export function TwelveWeekDashboardState({
   const Icon = kind === "loading" ? Loader2 : Sparkles;
 
   return (
-    <Card className="overflow-hidden border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.34)]">
+    <Card className="overflow-hidden border border-slate-200/80 bg-white/92 shadow-sm">
       <CardContent className="p-8 text-center sm:p-10 lg:p-14">
-        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] bg-violet-50 text-violet-700">
+        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-violet-50 text-violet-700">
           <Icon className={`h-10 w-10 ${kind === "loading" ? "animate-spin" : ""}`} />
         </div>
         <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{eyebrow}</p>
@@ -153,15 +153,11 @@ export function TwelveWeekDashboardHeader({
   onOpenGoals,
 }: TwelveWeekDashboardHeaderProps) {
   return (
-    <Card className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.3)]">
-      <CardContent className="p-4 sm:p-5 lg:p-6">
+    <Card className="border border-slate-200/80 bg-white/92 shadow-sm">
+      <CardContent className="p-5 sm:p-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0 flex-1 space-y-3">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50 px-3 py-1.5 text-slate-600">
-                <Compass className="mr-1 h-3.5 w-3.5" />
-                Nhịp 12 tuần
-              </Badge>
               <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50 px-3 py-1.5 text-slate-600">
                 <Target className="mr-1 h-3.5 w-3.5" />
                 Tuần {currentWeek}/{system.totalWeeks}
@@ -176,7 +172,7 @@ export function TwelveWeekDashboardHeader({
               )}
             </div>
             <div className="space-y-2">
-              <h1 className="max-w-4xl break-words text-xl font-bold tracking-normal text-slate-950 sm:text-2xl">
+              <h1 className="line-clamp-2 max-w-4xl break-words text-xl font-bold tracking-normal text-slate-950 sm:text-2xl">
                 {activeGoal.title}
               </h1>
               <p className="max-w-3xl text-sm leading-7 text-slate-600">
@@ -197,14 +193,14 @@ export function TwelveWeekDashboardHeader({
             </div>
           </div>
 
-          <div className="grid min-w-0 gap-2 sm:grid-cols-3 xl:w-[520px]">
+          <div className="grid min-w-0 gap-3 sm:grid-cols-3 xl:w-[520px]">
             <ProductVisual variant="execution" className="hidden min-h-[130px] sm:col-span-3 sm:block" />
-            <div className="rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-3">
+            <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Còn cần làm</p>
               <p className="mt-1 text-2xl font-bold text-slate-950">{todayRemainingCount}</p>
               <p className="text-xs text-slate-500">{todayCompletedCount} việc đã chốt hôm nay</p>
             </div>
-            <div className="rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-3">
+            <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tuần này</p>
               <p className="mt-1 text-2xl font-bold text-slate-950">{weekCompletion.percent}%</p>
               <p className="text-xs text-slate-500">
@@ -214,7 +210,7 @@ export function TwelveWeekDashboardHeader({
               </p>
             </div>
             <div
-              className={`rounded-lg border px-4 py-3 ${
+              className={`rounded-xl border px-4 py-3 ${
                 reviewDueToday ? "border-amber-200 bg-amber-50/90" : "border-slate-200 bg-slate-50/80"
               }`}
             >
@@ -271,7 +267,7 @@ export function TwelveWeekGoalSwitcher({
   if (allGoals.length <= 1) return null;
 
   return (
-    <details className="group rounded-xl border border-slate-200 bg-white/88 px-4 py-3 shadow-[0_14px_34px_-30px_rgba(15,23,42,0.2)]">
+    <details className="group rounded-xl border border-slate-200 bg-white/88 px-4 py-3 shadow-sm">
       <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 text-sm font-semibold text-slate-900">
         <span>Đổi chu kỳ 12 tuần khác</span>
         <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">

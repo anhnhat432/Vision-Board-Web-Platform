@@ -41,7 +41,7 @@ export function PlanProgress({ weeks, totalWeeks = 12 }: PlanProgressProps) {
   const progress = Math.round((completedWeeks / totalWeeks) * 100);
 
   return (
-    <Card className="border-0 bg-white/85 shadow-[0_24px_54px_-34px_rgba(15,23,42,0.32)]">
+    <Card className="border-0 bg-white/85 shadow-sm">
       <CardHeader className="space-y-2 pb-3">
         <CardTitle className="text-lg text-slate-900">12 Week Progress</CardTitle>
         <p className="text-sm text-slate-600">

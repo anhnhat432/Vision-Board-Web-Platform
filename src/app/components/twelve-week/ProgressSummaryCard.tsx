@@ -136,7 +136,7 @@ export function ProgressSummaryCard({
       </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card interactive={false} className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)]">
+        <Card interactive={false} className="border border-slate-200/80 bg-white/92 shadow-sm">
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
               <CalendarDays className="h-3.5 w-3.5" />

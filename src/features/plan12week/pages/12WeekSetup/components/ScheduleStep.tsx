@@ -119,7 +119,7 @@ export function ScheduleStep({
           />
         </div>
       </div>
-      <div className="space-y-6 rounded-[28px] border border-white/70 bg-white/72 p-5">
+      <div className="space-y-6 rounded-2xl border border-white/70 bg-white/72 p-5">
         <SecondaryPanel title="Việc lặp lại và chỉ số" collapsible defaultOpen={isDesktop}>
           <p className="text-sm leading-7 text-slate-700">
             Việc lặp lại là việc bạn làm mỗi tuần. Chỉ số kết quả chính là con số dùng để nhìn lại xem chu kỳ có đi đúng
@@ -142,7 +142,7 @@ export function ScheduleStep({
             collapsible
             defaultOpen={isDesktop}
           >
-            <div className="rounded-[22px] border border-slate-900 bg-slate-950 p-4 text-white">
+            <div className="rounded-2xl border border-slate-900 bg-slate-950 p-4 text-white">
               <p className="text-xs uppercase tracking-[0.16em] text-white/54">Nhịp nên giữ ở tuần 1</p>
               <p className="mt-2 text-base font-semibold">{setupGuideSupport.week1Headline}</p>
               <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1Support}</p>
@@ -159,7 +159,7 @@ export function ScheduleStep({
             collapsible
             defaultOpen={isDesktop}
           >
-            <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
+            <div className="rounded-2xl border border-white/70 bg-white/78 p-4">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Ngày nhìn lại và mức tải tuần gợi ý</p>
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
@@ -184,7 +184,7 @@ export function ScheduleStep({
             collapsible
             defaultOpen={isDesktop}
           >
-            <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
+            <div className="rounded-2xl border border-white/70 bg-white/78 p-4">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Mốc gợi ý theo khung</p>
               <div className="mt-3 space-y-3">
                 <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
@@ -204,7 +204,7 @@ export function ScheduleStep({
           collapsible
           defaultOpen={isDesktop}
         >
-          <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
+          <div className="rounded-2xl border border-white/70 bg-white/78 p-4">
             <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
               {hasPreviewTasks ? "Những việc sẽ hiện ở màn Hôm nay" : "Tuần đầu nên mở bằng"}
             </p>

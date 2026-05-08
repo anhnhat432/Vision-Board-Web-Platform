@@ -96,7 +96,7 @@ function Card({
       data-slot="card"
       data-card-hovering="false"
       className={cn(
-        "glass-surface text-card-foreground flex flex-col gap-6 rounded-[28px]",
+        "glass-surface text-card-foreground flex flex-col gap-6 rounded-2xl",
         isInteractive && "card-interactive-base",
         className,
       )}

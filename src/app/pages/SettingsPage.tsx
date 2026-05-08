@@ -120,7 +120,7 @@ export function SettingsPage() {
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]" aria-label="Cài đặt nhanh">
-        <Card className="glass-surface-sm rounded-[24px] border shadow-none">
+        <Card className="glass-surface-sm rounded-2xl border shadow-none">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <User2 className="h-4 w-4 text-slate-500" />
@@ -148,7 +148,7 @@ export function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="glass-surface-sm rounded-[24px] border shadow-none">
+        <Card className="glass-surface-sm rounded-2xl border shadow-none">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Lối tắt cài đặt</CardTitle>
             <CardDescription>Mở đúng khu vực khi cần chỉnh chu kỳ hoặc gói truy cập.</CardDescription>

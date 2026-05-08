@@ -173,7 +173,7 @@ export function LifeBalance() {
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
         <div className="relative">
           <div className="absolute -inset-4 animate-pulse rounded-full border-2 border-dashed border-violet-200" />
-          <div className="flex h-20 w-20 items-center justify-center rounded-[28px] bg-violet-50 text-violet-600">
+          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
             <CompassIcon className="h-9 w-9" />
           </div>
         </div>
@@ -199,8 +199,8 @@ export function LifeBalance() {
       {/* Unsaved changes navigation blocker dialog */}
       {blocker.state === "blocked" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="mx-4 w-full max-w-sm rounded-[28px] border border-white/70 bg-white p-6 shadow-[0_32px_80px_-24px_rgba(15,23,42,0.35)]">
-            <div className="flex h-12 w-12 items-center justify-center rounded-[20px] bg-amber-50 text-amber-600">
+          <div className="mx-4 w-full max-w-sm rounded-2xl border border-white/70 bg-white p-6 shadow-[0_32px_80px_-24px_rgba(15,23,42,0.35)]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
               <AlertTriangle className="h-6 w-6" />
             </div>
             <h3 className="mt-4 text-lg font-bold text-slate-900">Bạn có thay đổi chưa lưu</h3>
@@ -270,14 +270,14 @@ export function LifeBalance() {
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Snapshot hiện tại</p>
 
               <div className="mt-6 space-y-4">
-                <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
+                <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-white/55">Điểm cân bằng chung</p>
                   <p className="mt-2 text-3xl font-bold text-white">
                     <CountUp value={averageScore} precision={1} />
                     <span className="text-white/68">/10</span>
                   </p>
                 </div>
-                <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
+                <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-white/55">Khía cạnh mạnh nhất</p>
                   <p className="mt-2 text-xl font-bold text-white">{getLifeAreaLabel(strongestArea.name)}</p>
                   <p className="mt-1 text-sm text-white/68">
@@ -285,7 +285,7 @@ export function LifeBalance() {
                     <span>/10</span>
                   </p>
                 </div>
-                <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
+                <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-white/55">Nên ưu tiên tiếp theo</p>
                   <p className="mt-2 text-xl font-bold text-white">{getLifeAreaLabel(weakestArea.name)}</p>
                   <p className="mt-1 text-sm text-white/68">
@@ -430,7 +430,7 @@ export function LifeBalance() {
 
                   <div className="mt-4 grid gap-3 md:grid-cols-2">
                     <div
-                      className="rounded-[24px] border p-4"
+                      className="rounded-2xl border p-4"
                       style={{
                         borderColor: `${strongestArea.color}33`,
                         background: `${strongestArea.color}12`,
@@ -451,7 +451,7 @@ export function LifeBalance() {
                     </div>
 
                     <div
-                      className="rounded-[24px] border p-4"
+                      className="rounded-2xl border p-4"
                       style={{
                         borderColor: `${weakestArea.color}33`,
                         background: `${weakestArea.color}12`,
@@ -482,7 +482,7 @@ export function LifeBalance() {
                   </CardHeader>
                   <CardContent className="space-y-5">
                     {lifeAreas.map((area, index) => (
-                      <div key={area.name} className="rounded-[24px] border border-white/70 bg-white/72 p-4">
+                      <div key={area.name} className="rounded-2xl border border-white/70 bg-white/72 p-4">
                         <div className="flex items-center justify-between gap-4">
                           <div className="flex items-center gap-3">
                             <div
@@ -560,7 +560,7 @@ export function LifeBalance() {
                 {historicalData.length > 0 ? (
                   <Suspense
                     fallback={
-                      <div className="rounded-[24px] border border-white/70 bg-white/72 py-12 text-center text-slate-500">
+                      <div className="rounded-2xl border border-white/70 bg-white/72 py-12 text-center text-slate-500">
                         <Calendar className="mx-auto mb-3 h-12 w-12 opacity-50" />
                         <p>Đang mở biểu đồ lịch sử...</p>
                         <p className="mt-1 text-sm">Dữ liệu xu hướng sẽ hiện ra ngay sau khi tải xong.</p>
@@ -570,7 +570,7 @@ export function LifeBalance() {
                     <LifeBalanceHistoryChart data={historicalData} />
                   </Suspense>
                 ) : (
-                  <div className="rounded-[24px] border border-white/70 bg-white/72 py-12 text-center text-slate-500">
+                  <div className="rounded-2xl border border-white/70 bg-white/72 py-12 text-center text-slate-500">
                     <Calendar className="mx-auto mb-3 h-12 w-12 opacity-50" />
                     <p>Chưa có dữ liệu lịch sử.</p>
                     <p className="mt-1 text-sm">Hãy lưu một vài lần cập nhật để bắt đầu thấy xu hướng.</p>

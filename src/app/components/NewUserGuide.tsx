@@ -123,8 +123,8 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
     ? "Bản hiện tại đã có dữ liệu mẫu sẵn. Hãy dùng checklist này như đường đi ngắn nhất để nhìn rõ flow thật của sản phẩm."
     : "Website này dễ dùng hơn nhiều nếu bạn đi đúng flow: mục tiêu rõ, chu kỳ rõ, rồi mới nhìn hôm nay và review tuần.";
   const surfaceClass = compact
-    ? "max-w-full overflow-hidden border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.28)]"
-    : "max-w-full overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.34)]";
+    ? "max-w-full overflow-hidden border border-slate-200/80 bg-white/92 shadow-sm"
+    : "max-w-full overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-sm";
   const contentClass = compact ? "p-4" : "p-5 sm:p-6 lg:p-7";
   const layoutClass = compact
     ? "grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] lg:items-center"

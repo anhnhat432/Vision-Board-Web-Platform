@@ -317,7 +317,7 @@ export function ReflectionJournal() {
                 </div>
               </div>
 
-              <div className="hidden rounded-[32px] border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] xl:block">
+              <div className="hidden rounded-2xl border border-white/14 bg-white/12 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] xl:block">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Nhịp viết hiện tại</p>
                 {hasReflections ? (
                   <div className="mt-6 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
@@ -326,7 +326,7 @@ export function ReflectionJournal() {
                       { label: "Tháng này", value: monthlyCount, note: "bài viết trong tháng hiện tại" },
                       { label: "Tâm trạng gần nhất", value: recentMood.label, note: "tín hiệu cảm xúc mới nhất" },
                     ].map((item) => (
-                      <div key={item.label} className="rounded-[24px] border border-white/10 bg-black/12 px-4 py-4">
+                      <div key={item.label} className="rounded-2xl border border-white/10 bg-black/12 px-4 py-4">
                         <p className="text-xs uppercase tracking-[0.18em] text-white/55">{item.label}</p>
                         <p className="mt-2 text-2xl font-bold text-white">
                           {typeof item.value === "number" ? <CountUp value={item.value} /> : item.value}
@@ -336,8 +336,8 @@ export function ReflectionJournal() {
                     ))}
                   </div>
                 ) : (
-                  <div className="mt-6 rounded-[24px] border border-white/12 bg-black/12 px-5 py-6">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-white/14 text-white">
+                  <div className="mt-6 rounded-2xl border border-white/12 bg-black/12 px-5 py-6">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/14 text-white">
                       <BookOpen className="h-6 w-6" />
                     </div>
                     <p className="mt-4 text-xl font-bold text-white">Chưa có nhật ký nào</p>
@@ -411,11 +411,11 @@ export function ReflectionJournal() {
                       key={item.value}
                       type="button"
                       onClick={() => setNewReflection({ ...newReflection, mood: item.value })}
-                      className={`rounded-[24px] border px-4 py-4 text-left transition-colors transition-transform duration-150 ${
+                      className={`rounded-2xl border px-4 py-4 text-left transition-colors transition-transform duration-150 ${
                         active ? item.activeClass : "border-white/70 bg-white/72 text-slate-500 hover:border-slate-200"
                       }`}
                     >
-                      <div className="flex h-12 w-12 items-center justify-center rounded-[18px] bg-white/70">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/70">
                         <Icon className="h-6 w-6" />
                       </div>
                       <div className="mt-3 text-sm font-semibold">{item.label}</div>
@@ -456,7 +456,7 @@ export function ReflectionJournal() {
               </p>
             </div>
 
-            <div className="rounded-[24px] border border-white/70 bg-white/72 p-4">
+            <div className="rounded-2xl border border-white/70 bg-white/72 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Gợi ý bắt đầu</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {JOURNAL_PROMPTS.map((prompt) => (
@@ -565,7 +565,7 @@ export function ReflectionJournal() {
         <Reveal delay={0.04}>
           <Card className="overflow-hidden" data-testid="journal-fresh-empty-state">
             <CardContent className="p-10 text-center lg:p-14">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] bg-violet-50 text-violet-700">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-violet-50 text-violet-700">
                 <BookOpen className="h-10 w-10" />
               </div>
               <h2 className="mt-6 text-3xl font-bold text-slate-900">Chưa có trang nhật ký nào được mở ra</h2>
@@ -674,7 +674,7 @@ export function ReflectionJournal() {
             </div>
 
             {filteredReflections.length === 0 && sortedReflections.length > 0 && (
-              <div className="rounded-[24px] border border-dashed border-slate-200 bg-slate-50/80 px-5 py-8 text-center text-sm text-slate-500">
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-5 py-8 text-center text-sm text-slate-500">
                 Không tìm thấy nhật ký nào phù hợp với bộ lọc hiện tại.
               </div>
             )}
@@ -751,7 +751,7 @@ export function ReflectionJournal() {
                           </Button>
                         </div>
 
-                        <div className="mt-5 rounded-[24px] border border-white/70 bg-white/72 p-5">
+                        <div className="mt-5 rounded-2xl border border-white/70 bg-white/72 p-5">
                           <p className="whitespace-pre-wrap text-sm leading-8 text-slate-600">{reflection.content}</p>
                         </div>
                         {reflection.entryType === "weekly-review" && reflection.linkedGoalId && (
@@ -774,7 +774,7 @@ export function ReflectionJournal() {
             <Card>
               <CardContent className="p-6">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Streak hiện tại</p>
-                <div className="mt-4 flex items-center gap-3 rounded-[20px] border border-violet-200 bg-violet-50 px-4 py-4">
+                <div className="mt-4 flex items-center gap-3 rounded-xl border border-violet-200 bg-violet-50 px-4 py-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-violet-100 text-violet-700">
                     <Sparkles className="h-5 w-5" />
                   </div>
@@ -817,7 +817,7 @@ export function ReflectionJournal() {
                   ].map((item) => (
                     <div
                       key={item.label}
-                      className="flex items-center justify-between rounded-[20px] border border-white/70 bg-white/72 px-4 py-3"
+                      className="flex items-center justify-between rounded-xl border border-white/70 bg-white/72 px-4 py-3"
                     >
                       <span className="text-sm font-medium text-slate-600">{item.label}</span>
                       <span className={`rounded-full border px-3 py-1 text-sm font-semibold ${item.className}`}>
@@ -836,7 +836,7 @@ export function ReflectionJournal() {
                   {JOURNAL_PROMPTS.map((prompt) => (
                     <div
                       key={prompt}
-                      className="rounded-[20px] border border-white/70 bg-white/72 px-4 py-3 text-sm leading-7 text-slate-600"
+                      className="rounded-xl border border-white/70 bg-white/72 px-4 py-3 text-sm leading-7 text-slate-600"
                     >
                       {prompt}
                     </div>

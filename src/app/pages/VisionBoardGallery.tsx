@@ -198,7 +198,7 @@ export function VisionBoardGallery() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <InteractiveSurface className="rounded-[28px]" intensity={4} translate={10} shine={false}>
+      <InteractiveSurface className="rounded-2xl" intensity={4} translate={10} shine={false}>
         <Card interactive={false} className="hero-surface overflow-hidden border-0 text-white">
           <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.12),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.08),_transparent_22%)] opacity-55" />
@@ -249,20 +249,20 @@ export function VisionBoardGallery() {
                 </div>
               </div>
 
-              <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-[32px] border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]">
+              <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-2xl border border-white/14 bg-white/10 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]">
                 <ProductVisual variant="vision" className="mb-5 min-h-[190px]" />
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Snapshot thư viện</p>
 
                 <div className="mt-4 space-y-3">
-                  <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
+                  <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-white/55">Tổng số bảng</p>
                     <p className="mt-2 text-3xl font-bold text-white">{userData.visionBoards.length}</p>
                   </div>
-                  <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
+                  <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-white/55">Tổng số phần tử</p>
                     <p className="mt-2 text-3xl font-bold text-white">{totalItems}</p>
                   </div>
-                  <div className="rounded-[24px] border border-white/10 bg-black/12 p-4">
+                  <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-white/55">Board gần nhất</p>
                     <p className="mt-2 text-lg font-semibold text-white">
                       {latestBoard ? latestBoard.name : "Chưa có board nào"}
@@ -347,7 +347,7 @@ export function VisionBoardGallery() {
       {userData.visionBoards.length === 0 ? (
         <Card className="overflow-hidden">
           <CardContent className="p-10 text-center lg:p-14">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] bg-violet-50 text-violet-700">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-violet-50 text-violet-700">
               <Images className="h-10 w-10" />
             </div>
             <h2 className="mt-6 text-3xl font-bold text-slate-900">Thư viện của bạn vẫn còn trống</h2>
@@ -365,7 +365,7 @@ export function VisionBoardGallery() {
           {years.map((year) => (
             <section key={year} className="space-y-5">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-[20px] bg-violet-50 text-violet-700">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-50 text-violet-700">
                   <Calendar className="h-6 w-6" />
                 </div>
                 <div className="space-y-1">
@@ -389,7 +389,7 @@ export function VisionBoardGallery() {
                       transition={{ delay: index * 0.03, duration: 0.24 }}
                     >
                       <InteractiveSurface
-                        className="preview-hover-card group rounded-[28px]"
+                        className="preview-hover-card group rounded-2xl"
                         intensity={4}
                         translate={8}
                         shine={false}
@@ -427,7 +427,7 @@ export function VisionBoardGallery() {
 
                           <CardContent className="space-y-5 pt-0">
                             <div
-                              className="relative overflow-hidden rounded-[24px] border border-white/80 bg-[linear-gradient(180deg,_rgba(248,250,252,0.98)_0%,_rgba(241,245,249,0.96)_100%)]"
+                              className="relative overflow-hidden rounded-2xl border border-white/80 bg-[linear-gradient(180deg,_rgba(248,250,252,0.98)_0%,_rgba(241,245,249,0.96)_100%)]"
                               style={{ aspectRatio: "16/10" }}
                             >
                               <div className="absolute inset-0 gradient-grid bg-[size:30px_30px] opacity-28" />
@@ -450,16 +450,16 @@ export function VisionBoardGallery() {
                                       }}
                                     >
                                       {item.type === "image" && (
-                                        <div className="rounded-[16px] border border-white/80 bg-white/88 p-1.5 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.18)]">
+                                        <div className="rounded-2xl border border-white/80 bg-white/88 p-1.5 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.18)]">
                                           <ImageWithFallback
                                             src={item.content}
                                             alt="Phần tử bảng"
-                                            className="rounded-[12px] shadow-sm w-full h-auto"
+                                            className="rounded-xl shadow-sm w-full h-auto"
                                           />
                                         </div>
                                       )}
                                       {item.type === "quote" && (
-                                        <div className="rounded-[14px] border border-white/80 bg-white/90 px-3 py-2 text-[10px] italic leading-4 text-slate-700 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.18)]">
+                                        <div className="rounded-xl border border-white/80 bg-white/90 px-3 py-2 text-[10px] italic leading-4 text-slate-700 shadow-[0_10px_20px_-18px_rgba(15,23,42,0.18)]">
                                           {item.content}
                                         </div>
                                       )}
@@ -469,7 +469,7 @@ export function VisionBoardGallery() {
                                 </div>
                               )}
 
-                              <div className="preview-hover-overlay absolute inset-x-4 bottom-4 rounded-[20px] border border-white/18 bg-slate-900/38 px-4 py-3 text-white shadow-[0_14px_28px_-24px_rgba(15,23,42,0.34)]">
+                              <div className="preview-hover-overlay absolute inset-x-4 bottom-4 rounded-xl border border-white/18 bg-slate-900/38 px-4 py-3 text-white shadow-[0_14px_28px_-24px_rgba(15,23,42,0.34)]">
                                 <div className="flex items-center justify-between gap-4">
                                   <div>
                                     <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-white/58">
@@ -487,15 +487,15 @@ export function VisionBoardGallery() {
                             </div>
 
                             <div className="grid grid-cols-3 gap-3">
-                              <div className="rounded-[20px] border border-white/70 bg-white/72 p-3 text-center">
+                              <div className="rounded-xl border border-white/70 bg-white/72 p-3 text-center">
                                 <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Ảnh</p>
                                 <p className="mt-2 text-xl font-bold text-slate-900">{imageCount}</p>
                               </div>
-                              <div className="rounded-[20px] border border-white/70 bg-white/72 p-3 text-center">
+                              <div className="rounded-xl border border-white/70 bg-white/72 p-3 text-center">
                                 <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Quote</p>
                                 <p className="mt-2 text-xl font-bold text-slate-900">{quoteCount}</p>
                               </div>
-                              <div className="rounded-[20px] border border-white/70 bg-white/72 p-3 text-center">
+                              <div className="rounded-xl border border-white/70 bg-white/72 p-3 text-center">
                                 <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Icon</p>
                                 <p className="mt-2 text-xl font-bold text-slate-900">{iconCount}</p>
                               </div>

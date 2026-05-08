@@ -73,7 +73,7 @@ export function QualityFeedbackPanel({
           : "Cần bổ sung câu mục tiêu và mốc đích để tiếp tục.";
 
   return (
-    <div className={`rounded-[24px] border ${config.border} ${config.bg} p-4`}>
+    <div className={`rounded-2xl border ${config.border} ${config.bg} p-4`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-2">
           <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${config.iconColor} ${level === "strong" ? "check-bounce" : ""}`} />

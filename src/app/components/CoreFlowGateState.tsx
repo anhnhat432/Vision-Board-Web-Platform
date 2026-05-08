@@ -32,7 +32,7 @@ export function CoreFlowGateState({
       <div className="mx-auto w-full max-w-4xl space-y-4">
         <CoreFlowProgress currentStepId={currentStepId} />
 
-        <Card className="overflow-hidden border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.34)]">
+        <Card className="overflow-hidden border border-slate-200/80 bg-white/92 shadow-sm">
           <CardContent className="p-7 text-center sm:p-9">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-50 text-violet-700">
               {loading ? <Loader2 className="h-7 w-7 animate-spin" /> : <Compass className="h-7 w-7" />}

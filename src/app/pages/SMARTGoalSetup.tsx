@@ -437,7 +437,7 @@ export function SMARTGoalSetup() {
             </CardContent>
           </Card>
 
-          <details className="mt-5 rounded-[24px] border border-dashed border-slate-200 bg-white/78 p-4 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.24)]">
+          <details className="mt-5 rounded-2xl border border-dashed border-slate-200 bg-white/78 p-4 shadow-[0_18px_42px_-36px_rgba(15,23,42,0.24)]">
             <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
               Xem lại mục tiêu đang viết
             </summary>

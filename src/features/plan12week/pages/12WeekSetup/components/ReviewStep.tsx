@@ -209,7 +209,7 @@ export function ReviewStep({
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {/* 1. Summary - primary */}
-      <div className="rounded-[24px] border border-white/70 bg-white/72 p-5">
+      <div className="rounded-2xl border border-white/70 bg-white/72 p-5">
         <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tóm tắt kế hoạch</p>
         <h3 className="mt-3 text-xl font-semibold text-slate-900">{smartGoal.specific}</h3>
         <p className="mt-3 text-sm leading-7 text-slate-600">{draft.vision12Week}</p>
@@ -223,7 +223,7 @@ export function ReviewStep({
       </div>
 
       {/* 2. Outcome - primary */}
-      <section className="rounded-[24px] border-2 border-emerald-200 bg-emerald-50/60 p-5">
+      <section className="rounded-2xl border-2 border-emerald-200 bg-emerald-50/60 p-5">
         <div className="flex items-center gap-2">
           <Target className="h-4 w-4 text-emerald-700" aria-hidden="true" />
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">Kết quả 12 tuần</p>
@@ -246,7 +246,7 @@ export function ReviewStep({
       </section>
 
       {/* 3. Milestones - primary */}
-      <section className="rounded-[24px] border border-white/70 bg-white/72 p-5">
+      <section className="rounded-2xl border border-white/70 bg-white/72 p-5">
         <div className="flex items-center gap-2">
           <Flag className="h-4 w-4 text-slate-600" aria-hidden="true" />
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Cột mốc giữa chu kỳ</p>
@@ -257,7 +257,7 @@ export function ReviewStep({
             { label: "Tuần 8", value: draft.week8Milestone },
             { label: "Tuần 12", value: draft.week12Outcome },
           ].map((milestone) => (
-            <div key={milestone.label} className="rounded-[18px] border border-white/70 bg-slate-50/80 p-3">
+            <div key={milestone.label} className="rounded-xl border border-white/70 bg-slate-50/80 p-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{milestone.label}</p>
               <p className="mt-2 text-sm leading-6 text-slate-700">
                 {milestone.value.trim() || (
@@ -272,7 +272,7 @@ export function ReviewStep({
       </section>
 
       {/* 4. Lead indicators - primary */}
-      <section className="rounded-[24px] border border-white/70 bg-white/72 p-5">
+      <section className="rounded-2xl border border-white/70 bg-white/72 p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Việc lặp lại mỗi tuần</p>
           <span className="text-xs text-slate-500">
@@ -308,7 +308,7 @@ export function ReviewStep({
 
       {/* 5. Quality panel - secondary (collapsible) */}
       <SecondaryPanel title="Chất lượng kế hoạch" collapsible defaultOpen={isDesktop}>
-        <div className="rounded-[24px] border p-5">
+        <div className="rounded-2xl border p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -391,7 +391,7 @@ export function ReviewStep({
         collapsible
         defaultOpen={isDesktop}
       >
-        <div className="rounded-[24px] border border-violet-200 bg-violet-50/76 p-5">
+        <div className="rounded-2xl border border-violet-200 bg-violet-50/76 p-5">
           <p className="mt-2 text-xs leading-6 text-violet-900/72">
             Tổng hợp từ kết quả kiểm tra, nhịp tuần, việc lặp lại và cột mốc. Đây là gợi ý — kế hoạch không bảo
             đảm thành công, nhưng giúp bạn biết vì sao nên thử cách này trước.
@@ -457,7 +457,7 @@ export function ReviewStep({
           collapsible
           defaultOpen={isDesktop}
         >
-          <div className="rounded-[24px] border border-white/70 bg-white/72 p-5">
+          <div className="rounded-2xl border border-white/70 bg-white/72 p-5">
             <div className="mt-3 grid gap-2 md:grid-cols-2">
               {weekOneTaskPreview.map((task) => (
                 <div
@@ -480,7 +480,7 @@ export function ReviewStep({
           collapsible
           defaultOpen={isDesktop}
         >
-          <div className="rounded-[24px] border border-white/70 bg-white/72 p-5">
+          <div className="rounded-2xl border border-white/70 bg-white/72 p-5">
             <p className="mt-2 text-base font-semibold text-slate-900">{setupGuideSupport.week1Headline}</p>
             <p className="mt-2 text-sm leading-7 text-slate-600">{setupGuideSupport.week1Support}</p>
           </div>
@@ -493,7 +493,7 @@ export function ReviewStep({
         collapsible
         defaultOpen={isDesktop}
       >
-        <div className="rounded-[24px] border border-dashed border-slate-200 bg-slate-50/80 p-5">
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 p-5">
           <div className="space-y-4">
             <div className="grid gap-3 md:grid-cols-2">
               <div className="space-y-2">

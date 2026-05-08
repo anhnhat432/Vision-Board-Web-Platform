@@ -115,10 +115,10 @@ export function FeedbackDialog({
 
         {submitted ? (
           <div className="space-y-4">
-            <div className="rounded-[24px] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm leading-6 text-emerald-900">
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm leading-6 text-emerald-900">
               Cảm ơn bạn. Góp ý đã được ghi nhận trên trình duyệt này.
             </div>
-            <div className="rounded-[24px] border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-600">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-600">
               Nếu muốn gửi lại qua kênh riêng, bạn có thể sao chép nội dung vừa nhập. App không yêu cầu email và không
               bắt buộc kết nối tài khoản.
             </div>

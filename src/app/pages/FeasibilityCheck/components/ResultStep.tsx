@@ -430,13 +430,13 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               </CardContent>
             </Card>
 
-            <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.2)] lg:rounded-[28px] lg:p-6">
+            <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.2)] lg:rounded-2xl lg:p-6">
               <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                 Xem 7 góc nhìn
               </summary>
               <div className="mt-4 space-y-3">
                 {result.axisScores.map((axis) => (
-                  <div key={axis.axis} className="rounded-[20px] border border-slate-200 bg-slate-50/80 p-3">
+                  <div key={axis.axis} className="rounded-xl border border-slate-200 bg-slate-50/80 p-3">
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-sm font-semibold text-slate-900">{axis.label}</p>
                       <span className="text-sm font-semibold text-slate-600">
@@ -455,7 +455,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               </div>
             </details>
 
-            <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.2)] lg:rounded-[28px] lg:p-6">
+            <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.2)] lg:rounded-2xl lg:p-6">
               <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                 Xem mục tiêu đã viết
               </summary>
@@ -480,7 +480,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               </div>
             </details>
 
-            <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.2)] lg:rounded-[28px] lg:p-6">
+            <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.2)] lg:rounded-2xl lg:p-6">
               <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                 Xem nhịp triển khai gợi ý
               </summary>
@@ -500,14 +500,14 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             </details>
           </div>
 
-          <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.2)] lg:rounded-[28px] lg:p-6">
+          <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.2)] lg:rounded-2xl lg:p-6">
             <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
               Xem lý do đằng sau kết quả
             </summary>
             <div className="mt-4 space-y-4">
               <h2 className="text-xl font-bold tracking-normal text-slate-900">{copy.guideTitle}</h2>
               <p className="text-sm leading-7 text-slate-600">{copy.guideBody}</p>
-              <div className="rounded-[20px] border border-slate-200 bg-slate-50/80 p-4">
+              <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                   Nguyên tắc lập kế hoạch
                 </p>

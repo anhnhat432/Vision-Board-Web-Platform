@@ -72,7 +72,7 @@ export function LeadIndicatorsStep({
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Explanation card - primary action */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[24px] border border-dashed border-slate-200 bg-slate-50/80 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 p-4">
         <div>
           <p className="text-sm font-semibold text-slate-900">Giữ 2-4 việc lặp lại cho cả chu kỳ</p>
           <p className="mt-1 text-sm text-slate-500">
@@ -127,7 +127,7 @@ export function LeadIndicatorsStep({
         {draft.leadIndicators.map((indicator, index) => (
           <div
             key={indicator.id}
-            className={`rounded-[24px] border p-5 ${
+            className={`rounded-2xl border p-5 ${
               indicator.type === "optional"
                 ? "border-amber-200 bg-amber-50/72"
                 : "border-emerald-200 bg-emerald-50/72 shadow-[0_14px_30px_-28px_rgba(16,185,129,0.32)]"
@@ -232,16 +232,16 @@ export function LeadIndicatorsStep({
 
       {/* Week 1 preview */}
       <SecondaryPanel title="Xem trước tuần 1" collapsible defaultOpen={isDesktop || Boolean(weekOneTaskWarning)}>
-        <div className="rounded-[28px] border border-white/70 bg-white/72 p-5">
+        <div className="rounded-2xl border border-white/70 bg-white/72 p-5">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Xem trước tuần 1</p>
-          <div className="rounded-[22px] border border-white/70 bg-white/78 p-4">
+          <div className="rounded-2xl border border-white/70 bg-white/78 p-4">
             <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Cốt lõi / Tùy chọn</p>
             <p className="mt-2 text-sm text-slate-600">
               {coreCount} cốt lõi • {optionalCount} tùy chọn
             </p>
           </div>
           {setupGuideSupport && setupGuideTemplate && (
-            <div className="rounded-[22px] border border-slate-900 bg-slate-950 p-4 text-white">
+            <div className="rounded-2xl border border-slate-900 bg-slate-950 p-4 text-white">
               <p className="text-xs uppercase tracking-[0.16em] text-white/54">
                 {selectedTemplate ? "Tuần 1 theo khung đang dùng" : "Nếu đi theo khung gợi ý này"}
               </p>

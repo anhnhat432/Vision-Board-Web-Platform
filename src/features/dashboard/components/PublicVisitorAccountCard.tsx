@@ -18,7 +18,7 @@ export function PublicVisitorAccountCard({ onSignIn, onSignUp }: PublicVisitorAc
   return (
     <Card
       data-tour-id="dashboard-plan-card"
-      className="border border-slate-200/80 bg-white/92 shadow-[0_18px_44px_-36px_rgba(15,23,42,0.32)]"
+      className="border border-slate-200/80 bg-white/92 shadow-sm"
     >
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-slate-950">
@@ -30,7 +30,7 @@ export function PublicVisitorAccountCard({ onSignIn, onSignUp }: PublicVisitorAc
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-3 rounded-[24px] border border-slate-200 bg-slate-50/80 p-4">
+        <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
           {ACCOUNT_BENEFITS.map((benefit) => (
             <div key={benefit} className="flex items-start gap-3">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />

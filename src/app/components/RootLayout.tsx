@@ -878,7 +878,7 @@ export function RootLayout() {
       </a>
 
       <header className="sticky top-0 z-40 px-4 pt-2 sm:top-3 sm:px-6 sm:pt-0 lg:px-8">
-        <div className="glass-surface mx-auto max-w-6xl rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 shadow-[0_8px_24px_-16px_rgba(15,23,42,0.1)]">
+        <div className="glass-surface mx-auto max-w-6xl rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 shrink-0 items-center gap-2">
               <button
@@ -966,7 +966,7 @@ export function RootLayout() {
                         <div
                           role="menu"
                           aria-label="Mục khác"
-                          className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-lg border border-slate-200 bg-white/96 p-2 shadow-[0_24px_60px_-34px_rgba(15,23,42,0.32)] backdrop-blur-xl"
+                          className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-lg border border-slate-200 bg-white/96 p-2 shadow-lg backdrop-blur-xl"
                         >
                           <div className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                             Mục khác
@@ -1124,7 +1124,7 @@ export function RootLayout() {
 
         {mobileMenuOpen && (
           <div id="mobile-nav-menu" className="mx-auto mt-2 max-w-6xl md:hidden">
-            <div className="glass-surface rounded-[28px] p-3">
+            <div className="glass-surface rounded-2xl p-3">
               <nav className="space-y-1" aria-label="Menu điều hướng">
                 {user ? (
                   <div className="mb-2 rounded-2xl border border-white/72 bg-white/82 px-4 py-3 text-left">

@@ -27,7 +27,7 @@ export function ExecutionFeedback({ score }: ExecutionFeedbackProps) {
   const suggestion = generateExecutionSuggestion(score);
 
   return (
-    <Card className="border border-slate-200 bg-white/88 shadow-[0_22px_48px_-36px_rgba(15,23,42,0.3)]">
+    <Card className="border border-slate-200 bg-white/88 shadow-sm">
       <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Phản hồi thực thi</p>
