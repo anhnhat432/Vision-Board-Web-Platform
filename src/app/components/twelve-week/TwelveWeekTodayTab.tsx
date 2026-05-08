@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, ArrowRight, CalendarClock, CalendarPlus, Check, Crown, Gauge, Inbox, Loader2, Sparkles, X } from "lucide-react";
+import { AlertTriangle, ArrowRight, CalendarClock, CalendarPlus, Check, CheckCircle2, Crown, Gauge, Inbox, Loader2, Sparkles, X } from "lucide-react";
 
 import type { RescueModeStatus } from "@/features/plan12week/logic";
 
@@ -152,6 +152,74 @@ export function TwelveWeekTodayTab({
     }
   };
 
+  const todayCheckIn = latestCheckIn?.date === todayDateKey ? latestCheckIn : null;
+  const hasSavedTodayCheckIn = Boolean(todayCheckIn);
+  const nextActionState = (() => {
+    if (!hasPlanTasks) {
+      return {
+        key: "setup-needed",
+        title: "Chu kỳ này cần được tạo lại",
+        description: hasLeadMetrics
+          ? "Kế hoạch có chỉ số lặp lại nhưng chưa có việc để chạy. Mở Setup để tạo lại hàng việc."
+          : "Chu kỳ chưa có việc lặp lại. Mở Setup để thêm 2-4 việc cốt lõi trước.",
+        actionLabel: hasLeadMetrics ? "Mở Setup để chỉnh" : "Đi tới Setup",
+        onAction: onNavigateToSetup,
+      };
+    }
+
+    if (reviewDueToday && hasSavedTodayCheckIn) {
+      return {
+        key: "review-due",
+        title: "Hôm nay nên chốt review tuần",
+        description: "Check-in đã lưu. Mở tab Tuần để khóa lại bài học và ưu tiên tuần sau.",
+        actionLabel: "Mở tab Tuần",
+        onAction: onOpenWeekTab,
+      };
+    }
+
+    if (primaryTask) {
+      return {
+        key: "primary-task",
+        title: "Bước tiếp theo: việc ưu tiên số 1",
+        description: primaryTask.title,
+        actionLabel: "Đánh dấu xong",
+        onAction: () => onToggleTask(primaryTask.id, true),
+      };
+    }
+
+    if (!hasSavedTodayCheckIn && (primaryTaskCompletedToday || todayCompletedCount > 0 || todayQueue.length === 0)) {
+      return {
+        key: "check-in",
+        title: "Chốt ngày hôm nay bằng check-in ngắn",
+        description: "Việc chính đã đi qua. Lưu năng lượng và một ghi chú ngắn để ngày mai tiếp tục nhanh hơn.",
+        actionLabel: "Lưu check-in",
+        onAction: handleSaveCheckInClick,
+      };
+    }
+
+    if (hasSavedTodayCheckIn) {
+      return {
+        key: "day-closed",
+        title: "Hôm nay đã được chốt",
+        description: reviewDueToday
+          ? "Bước tiếp theo là mở tab Tuần để review."
+          : "Giữ nhịp như vậy. Lần tới quay lại tab Hôm nay để tiếp tục việc mới.",
+        actionLabel: reviewDueToday ? "Mở tab Tuần" : "Xem tiến độ",
+        onAction: reviewDueToday ? onOpenWeekTab : undefined,
+      };
+    }
+
+    return {
+      key: "clear-day",
+      title: reviewDueToday ? "Hôm nay là ngày review" : "Hôm nay đang gọn",
+      description: reviewDueToday
+        ? "Nếu không còn việc cần làm, mở tab Tuần để chốt review."
+        : "Không có việc nào đang chờ. Bạn có thể lưu check-in hoặc xem lại tuần.",
+      actionLabel: reviewDueToday ? "Mở tab Tuần" : "Lưu check-in",
+      onAction: reviewDueToday ? onOpenWeekTab : handleSaveCheckInClick,
+    };
+  })();
+
   return (
     <div className="ops-system-panel flex min-w-0 flex-col gap-3 sm:gap-5">
       <div
@@ -173,6 +241,29 @@ export function TwelveWeekTodayTab({
           <p className="mt-0.5 truncate text-lg font-bold text-slate-950">
             {reviewDueToday ? "Hôm nay" : `${todayCompletedCount}/${checkInTotal}`}
           </p>
+        </div>
+      </div>
+
+      <div
+        data-testid="today-next-action-panel"
+        data-state={nextActionState.key}
+        className="order-1 rounded-xl border border-slate-200 bg-white/92 p-4 shadow-sm sm:rounded-2xl sm:p-5"
+      >
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <Sparkles className="h-3.5 w-3.5 text-violet-600" />
+              Bước tiếp theo
+            </p>
+            <p className="mt-2 text-base font-semibold text-slate-950 sm:text-lg">{nextActionState.title}</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600">{nextActionState.description}</p>
+          </div>
+          {nextActionState.onAction ? (
+            <Button className="w-full shrink-0 sm:w-auto" onClick={nextActionState.onAction}>
+              {nextActionState.actionLabel}
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
+          ) : null}
         </div>
       </div>
 
@@ -278,7 +369,7 @@ export function TwelveWeekTodayTab({
       {primaryTask && (
         <div
           data-testid="today-primary-hero"
-          className={`order-1 rounded-xl border p-4 shadow-sm sm:rounded-2xl sm:p-6 ${
+          className={`order-2 rounded-xl border p-4 shadow-sm sm:rounded-2xl sm:p-6 ${
             primaryTaskOverdue
               ? "border-amber-300 bg-amber-50/90"
               : "border-emerald-300 bg-white"
@@ -343,7 +434,7 @@ export function TwelveWeekTodayTab({
         </div>
       )}
 
-      <div data-testid="today-main-work-grid" className="order-2 grid min-w-0 gap-3 sm:gap-5 lg:grid-cols-[minmax(0,1.12fr)_380px]">
+      <div data-testid="today-main-work-grid" className="order-3 grid min-w-0 gap-3 sm:gap-5 lg:grid-cols-[minmax(0,1.12fr)_380px]">
         <div className="animate-fade-in-up min-w-0">
           <Card
             data-tour-id="system-today-queue"
@@ -640,6 +731,21 @@ export function TwelveWeekTodayTab({
               </div>
             </CardHeader>
             <CardContent className="min-w-0 space-y-3 px-4 pt-0 pb-4 sm:space-y-4 sm:px-7 sm:pb-7">
+              {todayCheckIn && (
+                <div
+                  data-testid="today-check-in-saved"
+                  className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900"
+                >
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
+                  <div>
+                    <p className="font-semibold">Check-in hôm nay đã lưu</p>
+                    <p className="mt-1 leading-6">
+                      {formatCalendarDate(todayCheckIn.date)} - năng lượng{" "}
+                      {getMoodLabel((todayCheckIn.mood as DailyMood | undefined) ?? "steady")}
+                    </p>
+                  </div>
+                </div>
+              )}
               <div className="space-y-3">
                 <Label id="daily-mood-label">Năng lượng hôm nay</Label>
                 <div
@@ -700,6 +806,17 @@ export function TwelveWeekTodayTab({
                   "Lưu check-in hôm nay"
                 )}
               </Button>
+              {reviewDueToday && onOpenWeekTab && (
+                <Button
+                  data-testid="today-check-in-open-week"
+                  variant="outline"
+                  className="w-full bg-white sm:w-auto"
+                  onClick={onOpenWeekTab}
+                >
+                  Mở tab Tuần để review
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Button>
+              )}
               <SecondaryPanel title="Lịch sử check-in" collapsible defaultOpen={false}>
                 {latestCheckIn && (
                   <div

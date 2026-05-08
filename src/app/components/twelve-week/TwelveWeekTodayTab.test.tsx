@@ -48,6 +48,20 @@ function makeSystem(): TwelveWeekSystem {
   };
 }
 
+function makeCheckIn(overrides: Partial<UniversalDailyCheckIn> = {}): UniversalDailyCheckIn {
+  return {
+    date: overrides.date ?? "2026-05-02",
+    didWorkToday: overrides.didWorkToday ?? true,
+    whichLeadIndicatorWorkedOn: overrides.whichLeadIndicatorWorkedOn ?? "Viet blog",
+    amountDone: overrides.amountDone ?? "1 draft",
+    outputCreated: overrides.outputCreated ?? "Draft",
+    obstacleOrIssue: overrides.obstacleOrIssue ?? "",
+    dailySelfRating: overrides.dailySelfRating ?? 4,
+    optionalNote: overrides.optionalNote ?? "",
+    mood: overrides.mood ?? "steady",
+  };
+}
+
 function makeProps(overrides: Partial<TodayTabProps> = {}): TodayTabProps {
   const todayQueue = overrides.todayQueue ?? [makeTask()];
   const firstPriorityTask =
@@ -199,7 +213,7 @@ describe("TwelveWeekTodayTab — empty Today state", () => {
       />,
     );
 
-    const cta = screen.getByRole("button", { name: /Mở tab Tuần/i });
+    const cta = screen.getAllByRole("button", { name: /Mở tab Tuần/i })[0];
     await userEvent.click(cta);
     expect(onOpenWeekTab).toHaveBeenCalledTimes(1);
   });
@@ -218,7 +232,7 @@ describe("TwelveWeekTodayTab — empty Today state", () => {
       />,
     );
 
-    const cta = screen.getByRole("button", { name: /Đi tới Setup/i });
+    const cta = screen.getAllByRole("button", { name: /Đi tới Setup/i })[0];
     await userEvent.click(cta);
     expect(onNavigateToSetup).toHaveBeenCalledTimes(1);
   });
@@ -235,11 +249,57 @@ describe("TwelveWeekTodayTab — empty Today state", () => {
         })}
       />,
     );
-    expect(screen.getByRole("button", { name: /Mở Setup để chỉnh/i })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /Mở Setup để chỉnh/i }).length).toBeGreaterThan(0);
   });
 });
 
 describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
+  it("shows a next-action panel for the open primary task", () => {
+    render(<TwelveWeekTodayTab {...makeProps()} />);
+
+    const panel = screen.getByTestId("today-next-action-panel");
+    expect(panel).toHaveTextContent("800");
+    expect(panel).toHaveAttribute("data-state", "primary-task");
+  });
+
+  it("shows same-day check-in as saved and ignores older check-ins", () => {
+    const { rerender } = render(
+      <TwelveWeekTodayTab
+        {...makeProps({
+          latestCheckIn: makeCheckIn({ date: "2026-05-02", mood: "high" }),
+        })}
+      />,
+    );
+
+    expect(screen.getByTestId("today-check-in-saved")).toHaveTextContent("2026");
+
+    rerender(
+      <TwelveWeekTodayTab
+        {...makeProps({
+          latestCheckIn: makeCheckIn({ date: "2026-05-01", mood: "high" }),
+        })}
+      />,
+    );
+
+    expect(screen.queryByTestId("today-check-in-saved")).toBeNull();
+  });
+
+  it("offers a Week handoff from the check-in card when review is due", async () => {
+    const onOpenWeekTab = vi.fn();
+    render(
+      <TwelveWeekTodayTab
+        {...makeProps({
+          reviewDueToday: true,
+          onOpenWeekTab,
+          latestCheckIn: makeCheckIn(),
+        })}
+      />,
+    );
+
+    await userEvent.click(screen.getByTestId("today-check-in-open-week"));
+    expect(onOpenWeekTab).toHaveBeenCalledTimes(1);
+  });
+
   it("shows the 'Việc chính đã xong' nudge when primary task is completed", () => {
     const completed = makeTask({ completed: true });
     render(
@@ -627,8 +687,8 @@ describe("TwelveWeekTodayTab — preserves existing markers", () => {
   it("does not duplicate the primary task title between hero and queue", () => {
     render(<TwelveWeekTodayTab {...makeProps()} />);
     const occurrences = screen.getAllByText("Viết draft 800 từ");
-    // Once in hero, once in queue card — exactly 2
-    expect(occurrences).toHaveLength(2);
+    // Once in next-action panel, once in hero, once in queue card.
+    expect(occurrences).toHaveLength(3);
   });
 
   it("does not duplicate the lead indicator name copy on mobile (single hero hint, single queue line)", () => {
