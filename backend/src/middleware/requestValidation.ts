@@ -299,10 +299,12 @@ export const validateProfilePatchInput: RequestHandler = (req, _res, next) => {
 
 export const validateCassoWebhookPayload: RequestHandler = (req, _res, next) => {
   const body = requireJsonObjectBody(req);
+  const errorCode = typeof body.error === "string" ? Number(body.error.trim()) : body.error;
 
-  if (typeof body.error !== "number" || !Number.isFinite(body.error)) {
+  if (typeof errorCode !== "number" || !Number.isFinite(errorCode)) {
     throw new ApiError(400, "Casso payload error code must be a number.", undefined, "invalid_payload");
   }
+  body.error = errorCode;
 
   if (body.data !== undefined) {
     const transactions = Array.isArray(body.data) ? body.data : [body.data];

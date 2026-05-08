@@ -31,6 +31,20 @@ function getDisplayName(displayName: string, email: string): string {
   return emailName || "User";
 }
 
+function getConfiguredAdminEmails(): Set<string> {
+  const raw = process.env.ADMIN_EMAILS ?? process.env.ADMIN_EMAIL ?? "";
+  return new Set(
+    raw
+      .split(",")
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean),
+  );
+}
+
+function isConfiguredAdminEmail(email: string): boolean {
+  return getConfiguredAdminEmails().has(email.trim().toLowerCase());
+}
+
 function mapUser(doc: {
   _id: Types.ObjectId;
   firebaseUid: string;
@@ -60,6 +74,16 @@ function mapUser(doc: {
 export class MongoUserRepository {
   async findOrCreate(uid: string, email: string, displayName: string): Promise<UserEntity> {
     const normalizedEmail = email.toLowerCase().trim();
+    const shouldPromoteToAdmin = isConfiguredAdminEmail(normalizedEmail);
+    const setFields: Record<string, unknown> = {
+      email: normalizedEmail,
+      displayName: getDisplayName(displayName, normalizedEmail),
+    };
+
+    if (shouldPromoteToAdmin) {
+      setFields.role = "admin";
+    }
+
     const doc = await UserModel.findOneAndUpdate(
       { firebaseUid: uid },
       {
@@ -69,10 +93,7 @@ export class MongoUserRepository {
           avatarUrl: null,
           locale: "vi",
         },
-        $set: {
-          email: normalizedEmail,
-          displayName: getDisplayName(displayName, normalizedEmail),
-        },
+        $set: setFields,
       },
       { upsert: true, new: true, runValidators: true },
     ).lean();

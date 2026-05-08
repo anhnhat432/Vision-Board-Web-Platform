@@ -46,12 +46,22 @@ function sortObjectDeep(value: unknown): unknown {
     }, {});
 }
 
-function normalizeSignatureHeader(value: string): string {
+function parseCassoSignatureHeader(value: string): { timestamp?: string; signature: string } | null {
   const trimmed = value.trim();
-  if (trimmed.includes("=")) {
-    return trimmed.split("=").pop()?.trim() ?? trimmed;
+  if (!trimmed) return null;
+
+  const parts = new Map(
+    trimmed.split(",").map((part) => {
+      const [key, ...rest] = part.split("=");
+      return [key?.trim().toLowerCase() ?? "", rest.join("=").trim()];
+    }),
+  );
+  const signature = parts.get("v1") || parts.get("signature");
+  if (signature) {
+    return { timestamp: parts.get("t") || parts.get("timestamp"), signature };
   }
-  return trimmed;
+
+  return { signature: trimmed };
 }
 
 function safeEqual(a: string, b: string): boolean {
@@ -84,12 +94,13 @@ function verifyCassoWebhookSignature(req: Request, expectedSecret: string): bool
   const authorization = getHeaderValue(req, "authorization").replace(/^Bearer\s+/i, "").trim();
   if (authorization && safeEqual(authorization, expectedSecret)) return true;
 
-  const cassoSignature = normalizeSignatureHeader(getHeaderValue(req, "x-casso-signature"));
+  const cassoSignature = parseCassoSignatureHeader(getHeaderValue(req, "x-casso-signature"));
   if (!cassoSignature) return false;
 
   const sortedPayload = JSON.stringify(sortObjectDeep(getRawWebhookPayload(req)));
-  const expectedSignature = createHmac("sha512", expectedSecret).update(sortedPayload).digest("hex");
-  return safeEqual(cassoSignature, expectedSignature);
+  const signedPayload = cassoSignature.timestamp ? `${cassoSignature.timestamp}.${sortedPayload}` : sortedPayload;
+  const expectedSignature = createHmac("sha512", expectedSecret).update(signedPayload).digest("hex");
+  return safeEqual(cassoSignature.signature, expectedSignature);
 }
 
 export async function handleCassoWebhook(req: Request, res: Response): Promise<void> {

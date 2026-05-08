@@ -594,6 +594,7 @@ FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxx@...
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 FRONTEND_ORIGIN=https://your-app.vercel.app
 BILLING_PROVIDER=casso
+ADMIN_EMAILS=admin@example.com  (optional, comma-separated)
 CASSO_WEBHOOK_SECRET=your-random-secret-string-32chars
 CASSO_BANK_ACCOUNT=1234567890
 CASSO_BANK_NAME=MB
