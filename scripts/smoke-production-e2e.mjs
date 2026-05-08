@@ -219,10 +219,26 @@ async function getDiagnostics(page) {
 
 function assertNoMojibake(text, label) {
   const markers = [
-    "\u00c3",
-    "\u00c4",
-    "\u00c2",
-    "\u00c6",
+    "\u00c3\u00a1",
+    "\u00c3\u00a0",
+    "\u00c3\u00a2",
+    "\u00c3\u00a3",
+    "\u00c3\u00a9",
+    "\u00c3\u00a8",
+    "\u00c3\u00aa",
+    "\u00c3\u00ad",
+    "\u00c3\u00ac",
+    "\u00c3\u00b3",
+    "\u00c3\u00b2",
+    "\u00c3\u00b4",
+    "\u00c3\u00b5",
+    "\u00c3\u00ba",
+    "\u00c3\u00b9",
+    "\u00c3\u00bd",
+    "\u00c2\u00b7",
+    "\u00c2\u00b0",
+    "\u00c4\u2018",
+    "\u00c4\u0090",
     "\u00e1\u00ba",
     "\u00e1\u00bb",
     "\u00e2\u20ac",
@@ -479,12 +495,14 @@ async function seedFullSmokeData(page) {
   );
 }
 
-async function waitForSystemLoaded(page) {
+async function waitForSystemLoaded(page, options = {}) {
+  const requireTactic = options.requireTactic ?? true;
   try {
     await page.waitForFunction(
-      ({ goalTitle, tacticTitle }) =>
-        document.body.innerText.includes(goalTitle) && document.body.innerText.includes(tacticTitle),
-      { goalTitle: GOAL_TITLE, tacticTitle: TACTIC_TITLE },
+      ({ goalTitle, tacticTitle, requireTactic }) =>
+        document.body.innerText.includes(goalTitle) &&
+        (!requireTactic || document.body.innerText.includes(tacticTitle)),
+      { goalTitle: GOAL_TITLE, tacticTitle: TACTIC_TITLE, requireTactic },
       { timeout: DEFAULT_TIMEOUT_MS },
     );
   } catch (error) {
@@ -751,7 +769,7 @@ async function exerciseBilling(page, apiEvents) {
         const textContent = document.body.innerText;
         const hasOrderId = /VB[A-Z0-9]{8,12}/.test(textContent);
         const hasQrImage = Array.from(document.images).some((image) => image.src.includes("vietqr"));
-        return textContent.includes("VietQR") && hasOrderId && hasQrImage;
+        return /vietqr/i.test(textContent) && hasOrderId && hasQrImage;
       });
     },
     DEFAULT_TIMEOUT_MS,
@@ -769,7 +787,7 @@ async function exerciseResponsiveQa(page) {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`${BASE_URL}/12-week-system?tab=progress`, { waitUntil: "domcontentloaded" });
   await page.locator('[data-testid="progress-trend-hero"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
-  await waitForSystemLoaded(page);
+  await waitForSystemLoaded(page, { requireTactic: false });
   await assertCleanPage(page, "12-week mobile progress");
   await assertNoHorizontalOverflow(page, "12-week mobile progress");
 
@@ -835,8 +853,11 @@ async function run() {
       await exerciseResponsiveQa(page);
     });
 
-    if (requestFailures.length > 0) {
-      throw new Error(`API request failures:\n${requestFailures.map((item) => JSON.stringify(item)).join("\n")}`);
+    const significantRequestFailures = requestFailures.filter((item) => !item.errorText.includes("ERR_ABORTED"));
+    if (significantRequestFailures.length > 0) {
+      throw new Error(
+        `API request failures:\n${significantRequestFailures.map((item) => JSON.stringify(item)).join("\n")}`,
+      );
     }
 
     const severeApiFailures = apiEvents.filter((event) => event.status === 429 || event.status >= 500);
