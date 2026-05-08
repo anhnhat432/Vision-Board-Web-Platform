@@ -430,6 +430,19 @@ export interface AccountDeleteResponse {
   counts: Record<string, number>;
 }
 
+export interface AccountExportResponse {
+  generatedAt: string;
+  version: number;
+  userId: string;
+  profile: unknown;
+  data: Record<string, unknown[]>;
+  counts: Record<string, number>;
+}
+
+export function exportAccountData(): Promise<AccountExportResponse> {
+  return get<AccountExportResponse>("/account/export");
+}
+
 export function deleteAccount(): Promise<AccountDeleteResponse> {
   return deleteRequest<AccountDeleteResponse>("/account/delete");
 }

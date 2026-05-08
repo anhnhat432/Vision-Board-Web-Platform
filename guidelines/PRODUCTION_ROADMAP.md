@@ -1,6 +1,6 @@
 # Production Roadmap — 200 Users + Casso + VietQR Billing
 
-Last updated: 2026-05-07
+Last updated: 2026-05-08
 
 ## Tổng quan
 
@@ -65,10 +65,10 @@ Backend đã có kiến trúc billing provider-agnostic rất tốt:
 
 ### Nên có (sau launch nếu kịp)
 
-14. **Email notification** — xác nhận thanh toán, hết hạn
-15. **Account data export** — GDPR-style
-16. **Analytics** — GA4 verified
-17. **Admin dashboard** — xem users, revenue
+14. [x] **Email notification** — xác nhận thanh toán, hết hạn
+15. [x] **Account data export** — GDPR-style
+16. [x] **Analytics** — GA4 verified
+17. [x] **Admin dashboard** — xem users, revenue
 
 ---
 
@@ -580,6 +580,7 @@ VITE_ENABLE_12_WEEK_PULL_SYNC=true
 VITE_ENABLE_12_WEEK_IMPORT_DRY_RUN=true
 VITE_ENABLE_12_WEEK_CLOUD_IMPORT=true
 VITE_ANALYTICS_MODE=off
+VITE_GA_MEASUREMENT_ID=G-...  (optional when VITE_ANALYTICS_MODE=ga4)
 ```
 
 ### Backend (Render Environment)
@@ -599,6 +600,11 @@ CASSO_BANK_NAME=MB
 CASSO_ACCOUNT_NAME=NGUYEN VAN A
 PLUS_PRICE_VND=79000
 SENTRY_DSN=https://...  (optional)
+EMAIL_PROVIDER=disabled  (set to resend when email is ready)
+RESEND_API_KEY=re_...  (optional)
+EMAIL_FROM="Dear Our Future <support@example.com>"  (optional)
+EMAIL_REPLY_TO=support@example.com  (optional)
+BILLING_SUPPORT_EMAIL=support@example.com  (optional)
 ```
 
 ---

@@ -16,10 +16,10 @@
 
     window.dataLayer = window.dataLayer ?? [];
     window.gtag = (...args: unknown[]) => {
-      window.dataLayer?.push({ event: args[0], ...(typeof args[1] === "string" ? { target: args[1] } : {}), ...(args[2] != null && typeof args[2] === "object" ? (args[2] as Record<string, unknown>) : {}) });
+      window.dataLayer?.push(args as unknown as Record<string, unknown> & { event?: unknown });
     };
     window.gtag("js", new Date());
-    window.gtag("config", gaMeasurementId);
+    window.gtag("config", gaMeasurementId, { send_page_view: false });
   }
 
   const rootElement = document.getElementById("root");

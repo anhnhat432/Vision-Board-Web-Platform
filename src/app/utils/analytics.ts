@@ -4,7 +4,7 @@ import type { PremiumFeatureContext } from "./twelve-week-premium";
 
 declare global {
   interface Window {
-    dataLayer?: Array<Record<string, unknown>>;
+    dataLayer?: Array<Record<string, unknown> & { event?: unknown }>;
     gtag?: (...args: unknown[]) => void;
   }
 }

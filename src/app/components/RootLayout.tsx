@@ -17,6 +17,7 @@ import {
 import { useLocation, useNavigate, useOutlet } from "react-router";
 import { maybeShowBrowserReminderNotification, syncPendingOutbox } from "../utils/production";
 import { exportUserDataSnapshot, getUserData, initializeUserData, trackAppEvent, USER_DATA_UPDATED_EVENT_NAME } from "../utils/storage";
+import { canSendRemoteAnalytics } from "../utils/analytics";
 import {
   getNewUserGuideProgress,
   hasSeenNewUserGuide,
@@ -220,6 +221,24 @@ export function RootLayout() {
       document.title = getRouteMeta(location.pathname).title ?? "Dear Our Future";
     }
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!canSendRemoteAnalytics() || typeof window === "undefined" || typeof window.gtag !== "function") {
+      return;
+    }
+
+    const route = `${location.pathname}${location.search}${location.hash}`;
+    const timeoutId = window.setTimeout(() => {
+      window.gtag?.("event", "page_view", {
+        app: "vision_board_web",
+        page_path: route,
+        page_title: document.title,
+        signed_in: Boolean(user),
+      });
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [location.hash, location.pathname, location.search, user]);
 
   useEffect(() => {
     if (!desktopMoreOpen) return;

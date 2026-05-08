@@ -1,6 +1,6 @@
 import type { ChangeEvent } from "react";
-import { useRef } from "react";
-import { CalendarDays, CreditCard, User2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { CalendarDays, CloudDownload, CreditCard, Loader2, User2 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -13,10 +13,33 @@ import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { downloadLocalUserDataBackup } from "../utils/local-data-backup";
 import { getUserData, parseStoredUserData, saveUserData } from "../utils/storage";
+import { exportAccountData } from "@/services/syncService";
+
+function downloadJsonFile(payload: unknown, filename: string): void {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (error && typeof error === "object" && "message" in error) {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === "string" && message.trim()) return message;
+  }
+
+  return fallback;
+}
 
 export function SettingsPage() {
   const navigate = useNavigate();
   const importFileRef = useRef<HTMLInputElement>(null);
+  const [isExportingAccount, setIsExportingAccount] = useState(false);
   const { isConfigured, user, userProfile } = useAuthContext();
   const { userData: syncedUserData, reloadUserData } = useSyncedUserData();
   const userData = syncedUserData ?? getUserData();
@@ -30,6 +53,25 @@ export function SettingsPage() {
   const handleExport = () => {
     downloadLocalUserDataBackup({ data: userData, filenamePrefix: "dear-our-future-backup" });
     toast.success("Đã tải bản sao lưu dữ liệu.");
+  };
+
+  const handleAccountExport = async () => {
+    if (!isConfigured || !user) {
+      toast.error("Bạn cần đăng nhập để xuất dữ liệu tài khoản trên cloud.");
+      return;
+    }
+
+    setIsExportingAccount(true);
+    try {
+      const exported = await exportAccountData();
+      const dateSlug = exported.generatedAt.slice(0, 10) || new Date().toISOString().slice(0, 10);
+      downloadJsonFile(exported, `dear-our-future-account-export-${dateSlug}.json`);
+      toast.success("Đã tải bản xuất dữ liệu tài khoản.");
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Không thể xuất dữ liệu tài khoản lúc này."));
+    } finally {
+      setIsExportingAccount(false);
+    }
   };
 
   const handleImport = (event: ChangeEvent<HTMLInputElement>) => {
@@ -89,6 +131,20 @@ export function SettingsPage() {
           <CardContent>
             <p className="truncate text-sm font-semibold text-slate-900">{accountLabel}</p>
             <p className="mt-1 truncate text-sm text-slate-500">{accountStatus}</p>
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-5 w-full gap-2 rounded-full"
+              disabled={!isConfigured || !user || isExportingAccount}
+              onClick={handleAccountExport}
+            >
+              {isExportingAccount ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <CloudDownload className="h-4 w-4" />
+              )}
+              Xuất dữ liệu tài khoản
+            </Button>
           </CardContent>
         </Card>
 

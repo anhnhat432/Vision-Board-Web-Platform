@@ -8,6 +8,7 @@ import {
   webhookRateLimiter,
 } from "../middleware/rateLimiters";
 import { accountRoutes } from "./accountRoutes";
+import { adminRoutes } from "./adminRoutes";
 import { authRoutes } from "./authRoutes";
 import { billingRoutes } from "./billingRoutes";
 import { goalRoutes } from "./goalRoutes";
@@ -30,6 +31,7 @@ apiRoutes.use(authMiddleware);
 apiRoutes.use(generalApiRateLimiter);
 apiRoutes.use(authProfileRateLimiter, authRoutes);
 apiRoutes.use(accountRoutes);
+apiRoutes.use(adminRoutes);
 apiRoutes.use(billingRoutes);
 apiRoutes.use(goalRoutes);
 apiRoutes.use(orderRoutes);
