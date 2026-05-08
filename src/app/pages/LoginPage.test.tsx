@@ -135,4 +135,22 @@ describe("LoginPage", () => {
 
     expect(await screen.findByTestId("destination")).toHaveTextContent("/admin/orders");
   });
+
+  it("does not show a visible account-opening card while waiting for profile routing", () => {
+    setAuthContext({
+      user: { uid: "user_pending_profile" },
+      userProfile: null,
+      userProfileLoading: true,
+      userProfileError: null,
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.queryByText("Đang mở tài khoản")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Đang chuyển trang theo quyền tài khoản.");
+  });
 });

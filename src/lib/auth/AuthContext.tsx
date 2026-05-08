@@ -20,7 +20,9 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-const PROFILE_BOOTSTRAP_TIMEOUT_MS = 20_000;
+const PROFILE_BOOTSTRAP_TIMEOUT_MS = 60_000;
+const PROFILE_BOOTSTRAP_MAX_ATTEMPTS = 3;
+const PROFILE_BOOTSTRAP_RETRY_DELAYS_MS = [1_200, 2_500] as const;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -28,7 +30,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function getProfileBootstrapErrorMessage(error: unknown, timedOut: boolean): string {
   if (timedOut) {
-    return "Backend phản hồi quá lâu khi mở hồ sơ tài khoản. Nếu Render vừa ngủ, đợi vài giây rồi bấm Thử lại.";
+    return "Backend chưa mở được hồ sơ tài khoản sau vài lần thử. Hãy bấm Thử lại hoặc đăng xuất rồi đăng nhập lại.";
   }
 
   if (error instanceof Error && error.message.trim().length > 0) {
@@ -45,6 +47,50 @@ function getProfileBootstrapErrorMessage(error: unknown, timedOut: boolean): str
   }
 
   return "Không thể mở hồ sơ tài khoản. Vui lòng kiểm tra kết nối backend và thử lại.";
+}
+
+function getErrorStatus(error: unknown): number | null {
+  if (!isRecord(error)) return null;
+  return typeof error.status === "number" ? error.status : null;
+}
+
+function isNetworkError(error: unknown): boolean {
+  return isRecord(error) && error.isNetworkError === true;
+}
+
+function shouldRetryProfileBootstrap(error: unknown, timedOut: boolean): boolean {
+  if (timedOut || isNetworkError(error)) return true;
+
+  const status = getErrorStatus(error);
+  return status !== null && status >= 500;
+}
+
+function waitForProfileRetry(attemptIndex: number): Promise<void> {
+  const fallbackDelay = PROFILE_BOOTSTRAP_RETRY_DELAYS_MS[PROFILE_BOOTSTRAP_RETRY_DELAYS_MS.length - 1] ?? 0;
+  const delay = PROFILE_BOOTSTRAP_RETRY_DELAYS_MS[attemptIndex] ?? fallbackDelay;
+  if (delay <= 0) return Promise.resolve();
+
+  return new Promise((resolve) => {
+    globalThis.setTimeout(resolve, delay);
+  });
+}
+
+async function requestUserProfileWithTimeout(): Promise<{ profile: UserProfile; timedOut: false }> {
+  let timedOut = false;
+  const controller = new AbortController();
+  const timeoutId = globalThis.setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, PROFILE_BOOTSTRAP_TIMEOUT_MS);
+
+  try {
+    const profile = await post<UserProfile>("/auth/profile", undefined, { signal: controller.signal });
+    return { profile, timedOut: false };
+  } catch (error) {
+    throw { error, timedOut };
+  } finally {
+    globalThis.clearTimeout(timeoutId);
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -77,41 +123,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUserProfileError(null);
 
     let cancelled = false;
-    let timedOut = false;
-    const controller = new AbortController();
-    const timeoutId = globalThis.setTimeout(() => {
-      timedOut = true;
-      controller.abort();
-    }, PROFILE_BOOTSTRAP_TIMEOUT_MS);
 
-    post<UserProfile>("/auth/profile", undefined, { signal: controller.signal })
-      .then((profile) => {
-        if (cancelled) return;
-        setUserProfile(profile);
-        setUserProfileError(null);
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return;
-        console.error("Failed to bootstrap user profile.", err);
-        setUserProfile(null);
-        if (timedOut) {
-          setUserProfileError(getProfileBootstrapErrorMessage(err, true));
-        } else {
-          setUserProfileError(getProfileBootstrapErrorMessage(err, false));
+    async function bootstrapProfile() {
+      let lastError: unknown = null;
+      let lastTimedOut = false;
+
+      for (let attempt = 0; attempt < PROFILE_BOOTSTRAP_MAX_ATTEMPTS; attempt++) {
+        try {
+          const result = await requestUserProfileWithTimeout();
+          if (cancelled) return;
+          setUserProfile(result.profile);
+          setUserProfileError(null);
+          return;
+        } catch (thrown: unknown) {
+          if (cancelled) return;
+
+          const error = isRecord(thrown) && "error" in thrown ? thrown.error : thrown;
+          const timedOut = isRecord(thrown) && thrown.timedOut === true;
+          lastError = error;
+          lastTimedOut = timedOut;
+
+          const hasAttemptsLeft = attempt < PROFILE_BOOTSTRAP_MAX_ATTEMPTS - 1;
+          if (hasAttemptsLeft && shouldRetryProfileBootstrap(error, timedOut)) {
+            await waitForProfileRetry(attempt);
+            if (cancelled) return;
+            continue;
+          }
+
+          break;
         }
-        // Allow retry on next user change
-        bootstrappedUid.current = null;
-      })
-      .finally(() => {
-        if (cancelled) return;
-        globalThis.clearTimeout(timeoutId);
-        setUserProfileLoading(false);
-      });
+      }
+
+      if (cancelled) return;
+      console.error("Failed to bootstrap user profile.", lastError);
+      setUserProfile(null);
+      setUserProfileError(getProfileBootstrapErrorMessage(lastError, lastTimedOut));
+      // Allow retry on next user change
+      bootstrappedUid.current = null;
+    }
+
+    bootstrapProfile().finally(() => {
+      if (cancelled) return;
+      setUserProfileLoading(false);
+    });
 
     return () => {
       cancelled = true;
-      globalThis.clearTimeout(timeoutId);
-      controller.abort();
     };
   }, [user, profileRefreshIndex]);
 

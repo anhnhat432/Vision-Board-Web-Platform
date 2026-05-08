@@ -71,13 +71,7 @@ export function LoginPage() {
     }
 
     if (userProfileLoading || !userProfileError) {
-      return (
-        <LoginStatusCard
-          icon={<Loader2 className="h-5 w-5 animate-spin text-white" />}
-          title="Đang mở tài khoản"
-          description="Backend đang kiểm tra hồ sơ và quyền truy cập trước khi chuyển trang."
-        />
-      );
+      return <LoginRedirectGate />;
     }
 
     return (
@@ -310,6 +304,17 @@ export function LoginPage() {
         </div>
       </div>
 
+      <Toaster />
+    </div>
+  );
+}
+
+function LoginRedirectGate() {
+  return (
+    <div className="app-shell min-h-screen px-4" data-route-tone="default">
+      <span className="sr-only" role="status" aria-live="polite">
+        Đang chuyển trang theo quyền tài khoản.
+      </span>
       <Toaster />
     </div>
   );
