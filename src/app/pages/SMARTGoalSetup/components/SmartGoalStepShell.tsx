@@ -76,7 +76,7 @@ export function SmartGoalStepShell({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">{step.label}</p>
           <span className="text-xs font-medium text-slate-500">
-            Bu?c {stepIndex + 1}/{totalSteps}
+            Bước {stepIndex + 1}/{totalSteps}
           </span>
         </div>
         <h2

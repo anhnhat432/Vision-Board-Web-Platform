@@ -3,6 +3,7 @@
 import { Badge } from "../../../components/ui/badge";
 import { Card, CardContent } from "../../../components/ui/card";
 import { Progress } from "../../../components/ui/progress";
+import type { SmartGoalStarter } from "../../../utils/smart-goal-starters";
 import { getLifeAreaLabel } from "../../../utils/storage";
 import { SMART_STEPS } from "../constants";
 import { getStepValidationError } from "../helpers";
@@ -15,6 +16,7 @@ interface SmartGoalHeroProps {
   completedCount: number;
   totalSteps: number;
   progressPercentage: number;
+  smartGoalStarter: SmartGoalStarter;
 }
 
 export function SmartGoalHero({
@@ -24,13 +26,16 @@ export function SmartGoalHero({
   completedCount,
   totalSteps,
   progressPercentage,
+  smartGoalStarter,
 }: SmartGoalHeroProps) {
+  const focusAreaLabel = getLifeAreaLabel(focusArea);
+
   return (
     <Card className="hero-surface overflow-hidden border-0 text-white glass-surface-gradient-border ambient-glow">
       <CardContent className="relative p-5 sm:p-6 lg:p-7">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
 
-        <div className="relative max-w-4xl">
+        <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
           <div className="space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
               <Compass className="h-4 w-4" />
@@ -50,12 +55,33 @@ export function SmartGoalHero({
             <div className="flex flex-wrap gap-3">
               <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
                 <Target className="mr-1 h-3.5 w-3.5" />
-                Liên kết với: {getLifeAreaLabel(focusArea)}
+                Liên kết với: {focusAreaLabel}
               </Badge>
               <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
                 <Sparkles className="mr-1 h-3.5 w-3.5" />
                 Hoàn thành: {completedCount}/{totalSteps}
               </Badge>
+            </div>
+          </div>
+
+          <div
+            data-testid="smart-goal-handoff-card"
+            className="rounded-lg border border-white/18 bg-white/12 p-4 text-white shadow-sm"
+          >
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/62">Life Insight đã chọn</p>
+            <p className="mt-2 text-2xl font-bold">{focusAreaLabel}</p>
+            <p className="mt-2 text-sm leading-6 text-white/78">
+              Bắt đầu từ insight này, rồi biến nó thành một kết quả đo được trong {smartGoalStarter.targetWeeks} tuần.
+            </p>
+            <div className="mt-4 space-y-2">
+              <div className="rounded-lg border border-white/14 bg-black/10 px-3 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/52">Chỉ số gợi ý</p>
+                <p className="mt-1 text-sm font-semibold text-white">{smartGoalStarter.metricName}</p>
+              </div>
+              <div className="rounded-lg border border-white/14 bg-black/10 px-3 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/52">Khung thực thi</p>
+                <p className="mt-1 text-sm font-semibold text-white">{smartGoalStarter.targetWeeks} tuần</p>
+              </div>
             </div>
           </div>
 

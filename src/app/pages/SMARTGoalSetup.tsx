@@ -158,10 +158,13 @@ export function SMARTGoalSetup() {
     [smartData],
   );
   const currentStepError = getStepValidationError(currentStepKey, smartData);
-  const isCurrentStepValid = currentStepError === null;
+  const hasMinimumGoalStatement = smartData.specific.goal_statement.trim().length >= 10;
+  const isCurrentStepValid =
+    currentStepError === null && (currentStepKey !== "timeBound" || hasMinimumGoalStatement);
   const currentStepHasDraftContent = hasStepDraftContent(currentStepKey, smartData);
   const currentStarterPreview = getSmartGoalStarterPreview(currentStepKey, smartGoalStarter);
-  const shouldShowCurrentStepError = currentStepError !== null && currentStepHasDraftContent;
+  const shouldShowCurrentStepError =
+    currentStepError !== null && (currentStepKey === "specific" || currentStepHasDraftContent);
   const liveSmartGoal = useMemo(() => buildSmartGoalFromFormData(smartData, focusArea), [smartData, focusArea]);
   const qualityResult = useMemo(() => evaluateSmartGoalQuality(liveSmartGoal), [liveSmartGoal]);
   const currentStepSoftWarning =
@@ -186,11 +189,15 @@ export function SMARTGoalSetup() {
   });
 
   const handleGoToFeasibility = () => {
+    const specificGoalStatement = smartData.specific.goal_statement.trim();
     const measurableTarget = parseNumberInput(smartData.measurable.target_value);
     const weeklyHours = parseNumberInput(smartData.achievable.weekly_time_commitment_hours);
     const measurableBaseline = parseNumberInput(smartData.measurable.baseline_value);
     const targetWeeks = parseNumberInput(smartData.timeBound.target_weeks);
 
+    if (specificGoalStatement.length < 10) {
+      return;
+    }
     if (measurableTarget === undefined || weeklyHours === undefined) {
       return;
     }
@@ -407,6 +414,7 @@ export function SMARTGoalSetup() {
           completedCount={completedCount}
           totalSteps={totalSteps}
           progressPercentage={progressPercentage}
+          smartGoalStarter={smartGoalStarter}
         />
 
         <div ref={stepTopRef} className="mx-auto max-w-4xl">
