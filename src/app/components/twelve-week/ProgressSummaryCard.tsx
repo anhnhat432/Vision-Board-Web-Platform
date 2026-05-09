@@ -72,14 +72,16 @@ export function ProgressSummaryCard({
   onNavigateToSetup,
   onViewFull,
 }: ProgressSummaryCardProps) {
-  const previousWeekEntry = system.scoreboard.find((entry) => entry.weekNumber === currentWeek - 1);
+  const boundedTotalWeeks = Math.max(system.totalWeeks, 1);
+  const boundedCurrentWeek = Math.min(Math.max(currentWeek, 1), boundedTotalWeeks);
+  const previousWeekEntry = system.scoreboard.find((entry) => entry.weekNumber === boundedCurrentWeek - 1);
   const previousWeekScore =
     previousWeekEntry && previousWeekEntry.weeklyScore > 0 ? previousWeekEntry.weeklyScore : null;
   const hasAnyTasks = system.scoreboard.some((entry) => entry.weeklyScore > 0) || system.taskInstances.length > 0;
 
   const trend = interpretProgressTrend({
-    currentWeek,
-    totalWeeks: system.totalWeeks,
+    currentWeek: boundedCurrentWeek,
+    totalWeeks: boundedTotalWeeks,
     currentWeekScore: currentWeekScoreValue,
     previousWeekScore,
     averageScore,
@@ -99,11 +101,13 @@ export function ProgressSummaryCard({
   const reviewedWeeks = new Set(
     system.weeklyReviews.filter((review) => review.reviewCompleted).map((review) => review.weekNumber),
   );
-  const milestoneWeeks = new Set([4, 8, 12].filter((weekNumber) => weekNumber <= system.totalWeeks));
-  const cycleWeeks = Array.from({ length: system.totalWeeks }, (_, index) => index + 1);
-  const nextMilestoneWeek = cycleWeeks.find((weekNumber) => milestoneWeeks.has(weekNumber) && weekNumber >= currentWeek);
-  const nextMilestoneLabel = nextMilestoneWeek ? `Week ${nextMilestoneWeek}` : `Week ${system.totalWeeks}`;
-  const currentPhaseTargetWeek = nextMilestoneWeek ?? system.totalWeeks;
+  const milestoneWeeks = new Set([4, 8, 12].filter((weekNumber) => weekNumber <= boundedTotalWeeks));
+  const cycleWeeks = Array.from({ length: boundedTotalWeeks }, (_, index) => index + 1);
+  const nextMilestoneWeek = cycleWeeks.find(
+    (weekNumber) => milestoneWeeks.has(weekNumber) && weekNumber >= boundedCurrentWeek,
+  );
+  const nextMilestoneLabel = nextMilestoneWeek ? `Week ${nextMilestoneWeek}` : `Week ${boundedTotalWeeks}`;
+  const currentPhaseTargetWeek = nextMilestoneWeek ?? boundedTotalWeeks;
   const currentPhaseLabel = `Build toward Week ${currentPhaseTargetWeek}`;
 
   return (
@@ -163,7 +167,7 @@ export function ProgressSummaryCard({
               Tuần đang chạy
             </p>
             <div className="mt-3">
-              <p className="text-3xl font-bold text-slate-950">Tuần {currentWeek}</p>
+              <p className="text-3xl font-bold text-slate-950">Tuần {boundedCurrentWeek}</p>
               <p className="mt-1 text-sm text-slate-600">
                 {currentWeekRange
                   ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
@@ -191,7 +195,9 @@ export function ProgressSummaryCard({
               Review đã khóa
             </p>
             <p className="mt-3 text-3xl font-bold text-slate-950">
-              {isEarlyState ? `Tuần ${currentWeek}/${system.totalWeeks}` : `${reviewDoneCount}/${system.totalWeeks}`}
+              {isEarlyState
+                ? `Tuần ${boundedCurrentWeek}/${boundedTotalWeeks}`
+                : `${reviewDoneCount}/${boundedTotalWeeks}`}
             </p>
             <p className="mt-1 text-sm text-slate-600">
               {isEarlyState
@@ -210,7 +216,9 @@ export function ProgressSummaryCard({
                 <Target className="h-3.5 w-3.5" />
                 Bản đồ chu kỳ
               </p>
-              <p className="mt-2 text-base font-semibold text-slate-950">Đường chạy 12 tuần</p>
+              <p className="mt-2 text-base font-semibold text-slate-950">
+                Đường chạy {boundedTotalWeeks} tuần
+              </p>
               <p className="mt-1 text-sm leading-6 text-slate-600">
                 Tuần hiện tại, review đã chốt và các mốc checkpoint được gom lại trong một hàng.
               </p>
@@ -233,9 +241,16 @@ export function ProgressSummaryCard({
 
           <div data-testid="progress-12-week-timeline" className="grid grid-cols-6 gap-2 sm:grid-cols-12">
             {cycleWeeks.map((weekNumber) => {
-              const isCurrent = weekNumber === currentWeek;
+              const isCurrent = weekNumber === boundedCurrentWeek;
               const isReviewed = reviewedWeeks.has(weekNumber);
               const isMilestone = milestoneWeeks.has(weekNumber);
+              const weekLabelParts = [
+                `Tuần ${weekNumber}`,
+                isCurrent ? "tuần hiện tại" : null,
+                isReviewed ? "đã chốt review" : null,
+                isMilestone ? "mốc checkpoint" : null,
+              ];
+              const weekLabel = weekLabelParts.filter(Boolean).join(", ");
 
               return (
                 <div
@@ -244,6 +259,7 @@ export function ProgressSummaryCard({
                   data-reviewed={isReviewed ? "true" : "false"}
                   data-milestone={isMilestone ? "true" : "false"}
                   aria-current={isCurrent ? "step" : undefined}
+                  aria-label={weekLabel}
                   className={`min-h-14 rounded-lg border px-2 py-2 text-center text-xs ${
                     isCurrent
                       ? "border-slate-950 bg-slate-950 text-white"

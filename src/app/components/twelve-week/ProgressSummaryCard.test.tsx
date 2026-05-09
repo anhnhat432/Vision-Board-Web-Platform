@@ -85,7 +85,28 @@ describe("ProgressSummaryCard cycle timeline", () => {
     expect(within(timeline).getByTestId("progress-week-1")).toHaveAttribute("data-reviewed", "true");
     expect(within(timeline).getByTestId("progress-week-4")).toHaveAttribute("data-milestone", "true");
     expect(screen.getByTestId("progress-current-milestone")).toHaveTextContent("Week 8");
-    expect(screen.getByTestId("progress-next-milestone")).toHaveTextContent("8");
+    expect(screen.getByTestId("progress-next-milestone")).toHaveTextContent("Week 8");
+  });
+
+  it("bounds timeline display to the configured cycle length", () => {
+    render(
+      <ProgressSummaryCard
+        system={makeSystem({ totalWeeks: 8, currentWeek: 13, weeklyReviews: [] })}
+        currentWeek={13}
+        currentWeekRange={null}
+        currentWeekScoreValue={62}
+        averageScore={70}
+        reviewDoneCount={0}
+        weekCompletion={{ completed: 0, total: 0, percent: 0 }}
+      />,
+    );
+
+    const timeline = screen.getByTestId("progress-12-week-timeline");
+    expect(screen.getByText(/8 tuần/)).toBeInTheDocument();
+    expect(within(timeline).getByTestId("progress-week-8")).toHaveAttribute("aria-current", "step");
+    expect(within(timeline).getByTestId("progress-week-8")).toHaveAccessibleName(/tuần hiện tại/);
+    expect(within(timeline).getByTestId("progress-week-1")).toHaveAttribute("data-reviewed", "false");
+    expect(within(timeline).queryByTestId("progress-week-12")).not.toBeInTheDocument();
   });
 
   it("routes the progress next action to Week when review is due", async () => {
