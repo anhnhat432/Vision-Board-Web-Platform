@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { CalendarCheck, CheckCircle2, ClipboardCheck, Crown, Flag, Layers, Loader2, TrendingUp } from "lucide-react";
 
 import { Badge } from "../ui/badge";
@@ -31,6 +31,7 @@ import { TwelveWeekInsightsCard } from "./TwelveWeekInsightsCard";
 import { NextWeekCommitmentsEditor } from "./NextWeekCommitmentsEditor";
 import { TwelveWeekNextWeekRecommendationCard } from "./TwelveWeekNextWeekRecommendationCard";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
+import { SectionBlock } from "../layout/SectionBlock";
 
 interface WeekRange {
   start: string;
@@ -289,7 +290,7 @@ export function TwelveWeekWeekTab({
   };
 
   return (
-    <div className="space-y-6 pt-4 pb-24 md:pb-0">
+    <div className="stack-section pt-4 pb-24 md:pb-0">
       {rescueStatus && rescueStatus.severity !== "none" && (
         <TwelveWeekRescueNudge
           status={rescueStatus}
@@ -300,7 +301,8 @@ export function TwelveWeekWeekTab({
           onReviewPlan={onApplySuggestedPlan}
         />
       )}
-      <div className="grid gap-4 md:grid-cols-3">
+      <SectionBlock title="Tóm tắt tuần hiện tại" headerVisuallyHidden>
+        <div className="grid gap-[var(--space-stack)] md:grid-cols-3">
         <Card
           interactive={false}
           className="border border-slate-200/80 bg-white/92 shadow-sm"
@@ -310,7 +312,7 @@ export function TwelveWeekWeekTab({
               <Flag className="h-3.5 w-3.5" />
               Một câu để nhớ
             </p>
-            <p className="mt-3 text-lg font-semibold leading-8 text-slate-950">{currentPlanFocus}</p>
+            <p className="mt-[var(--space-inline)] text-lg font-semibold leading-8 text-slate-950">{currentPlanFocus}</p>
           </CardContent>
         </Card>
         <Card
@@ -324,7 +326,7 @@ export function TwelveWeekWeekTab({
             </p>
             <p
               data-testid="weekly-lead-score"
-              className={`mt-3 font-bold text-slate-950 ${
+              className={`mt-[var(--space-inline)] font-bold text-slate-950 ${
                 weekCompletion.isEmpty ? "text-lg leading-7" : "text-3xl"
               }`}
             >
@@ -337,7 +339,7 @@ export function TwelveWeekWeekTab({
             </p>
             {!weekCompletion.isEmpty && (
               <p className="mt-2 flex items-center gap-2 text-xs font-semibold text-slate-600">
-                <span className={`h-2.5 w-2.5 rounded-full ${scoreTone.marker}`} />
+                <span className={`h-2.5 w-2.5 rounded-[var(--r-pill)] ${scoreTone.marker}`} />
                 Chuẩn tuần: 85%
               </p>
             )}
@@ -360,15 +362,17 @@ export function TwelveWeekWeekTab({
               <CalendarCheck className="h-3.5 w-3.5" />
               Review tuần
             </p>
-            <p className="mt-3 text-3xl font-bold text-slate-950">
+            <p className="mt-[var(--space-inline)] text-3xl font-bold text-slate-950">
               {reviewDueToday ? "Hôm nay" : getReviewDayLabel(system.reviewDay)}
             </p>
             <p className="mt-1 text-sm text-slate-600">{reviewStatusLabel}</p>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </SectionBlock>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_420px]">
+      <SectionBlock title="Review và cam kết tuần" headerVisuallyHidden>
+        <div className="grid gap-[var(--space-section)] lg:grid-cols-[minmax(0,1fr)_420px]">
         <Card className="h-full border border-slate-200/80 bg-white/92 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-slate-950">
@@ -381,16 +385,16 @@ export function TwelveWeekWeekTab({
                 : "Chu kỳ hiện tại"}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+          <CardContent className="stack-stack">
+            <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Ưu tiên tuần</p>
               <p className="mt-2 text-lg font-semibold text-slate-900">{currentPlanFocus}</p>
               {currentPlanMilestone && (
-                <p className="mt-3 text-sm text-slate-600">Cột mốc đang nhắm tới: {currentPlanMilestone}</p>
+                <p className="mt-[var(--space-inline)] text-sm text-slate-600">Cột mốc đang nhắm tới: {currentPlanMilestone}</p>
               )}
             </div>
             <div className="grid gap-4 lg:grid-cols-2">
-              <div className="rounded-lg border border-emerald-200 bg-emerald-50/70 p-5">
+              <div className="rounded-[var(--r-control)] border border-emerald-200 bg-emerald-50/70 p-5">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Cốt lõi trước</p>
@@ -400,16 +404,16 @@ export function TwelveWeekWeekTab({
                   </div>
                   <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">{coreIndicators.length}</Badge>
                 </div>
-                <div className="mt-4 space-y-3">
+                <div className="mt-4 stack-tight">
                   {coreIndicators.length === 0 ? (
-                    <div className="rounded-lg border border-emerald-100 bg-white px-4 py-4 text-sm leading-6 text-slate-500">
+                    <div className="rounded-[var(--r-control)] border border-emerald-100 bg-white px-4 py-4 text-sm leading-6 text-slate-500">
                       Chưa có việc cốt lõi. Khi việc lặp lại được thêm, phần này sẽ cho bạn biết việc nào cần làm trước.
                     </div>
                   ) : (
                     coreIndicators.map((indicator) => (
                       <div
                         key={indicator.id || indicator.name}
-                        className="rounded-lg border border-emerald-100 bg-white px-4 py-3"
+                        className="rounded-[var(--r-control)] border border-emerald-100 bg-white px-4 py-3"
                       >
                         <p className="font-medium text-slate-900">{indicator.name}</p>
                         <p className="mt-1 text-sm text-slate-500">
@@ -421,7 +425,7 @@ export function TwelveWeekWeekTab({
                 </div>
               </div>
 
-              <div className="rounded-lg border border-amber-200 bg-amber-50/70 p-5">
+              <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50/70 p-5">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">
@@ -437,16 +441,16 @@ export function TwelveWeekWeekTab({
                     {optionalIndicators.length}
                   </Badge>
                 </div>
-                <div className="mt-4 space-y-3">
+                <div className="mt-4 stack-tight">
                   {optionalIndicators.length === 0 ? (
-                    <div className="rounded-lg border border-amber-100 bg-white px-4 py-4 text-sm text-slate-500">
+                    <div className="rounded-[var(--r-control)] border border-amber-100 bg-white px-4 py-4 text-sm text-slate-500">
                       Tuần này bạn chỉ cần giữ các việc cốt lõi là đủ.
                     </div>
                   ) : (
                     optionalIndicators.map((indicator) => (
                       <div
                         key={indicator.id || indicator.name}
-                        className="rounded-lg border border-amber-100 bg-white px-4 py-3"
+                        className="rounded-[var(--r-control)] border border-amber-100 bg-white px-4 py-3"
                       >
                         <p className="font-medium text-slate-900">{indicator.name}</p>
                         <p className="mt-1 text-sm text-slate-500">
@@ -474,9 +478,9 @@ export function TwelveWeekWeekTab({
               WAM 4 câu: score, cam kết, insight và cam kết tuần tới.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="stack-stack">
             <div
-              className={`rounded-lg border p-4 ${reviewDueToday ? "border-amber-200 bg-amber-50/80" : "border-slate-200 bg-slate-50"}`}
+              className={`rounded-[var(--r-control)] border p-4 ${reviewDueToday ? "border-amber-200 bg-amber-50/80" : "border-slate-200 bg-slate-50"}`}
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -509,7 +513,7 @@ export function TwelveWeekWeekTab({
                   key={item.key}
                   data-testid={`weekly-review-step-${item.key}`}
                   data-done={item.done ? "true" : "false"}
-                  className={`rounded-lg border px-3 py-3 text-sm ${
+                  className={`rounded-[var(--r-control)] border px-3 py-3 text-sm ${
                     item.done
                       ? "border-emerald-200 bg-emerald-50 text-emerald-900"
                       : "border-slate-200 bg-slate-50 text-slate-600"
@@ -525,7 +529,7 @@ export function TwelveWeekWeekTab({
             {summaryReview && (
               <div
                 data-testid="weekly-review-summary"
-                className={`rounded-lg border p-4 shadow-sm ${
+                className={`rounded-[var(--r-control)] border p-4 shadow-sm ${
                   scoreInterpretation.level === "strong"
                     ? "border-emerald-200 bg-emerald-50/82"
                     : scoreInterpretation.level === "okay"
@@ -546,25 +550,25 @@ export function TwelveWeekWeekTab({
                     {getWorkloadDecisionLabel(summaryReview.workloadDecision)}
                   </Badge>
                 </div>
-                <div className="mt-3 grid gap-2 md:grid-cols-2">
-                  <div className="rounded-lg border border-white/82 bg-white/82 px-3 py-2">
+                <div className="mt-[var(--space-inline)] grid gap-2 md:grid-cols-2">
+                  <div className="rounded-[var(--r-control)] border border-white/82 bg-white/82 px-3 py-2">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Score</p>
                     <p className="mt-1 text-sm leading-5 text-slate-700">{summaryReview.leadCompletionPercent}% Lead Score</p>
                   </div>
-                  <div className="rounded-lg border border-white/82 bg-white/82 px-3 py-2">
+                  <div className="rounded-[var(--r-control)] border border-white/82 bg-white/82 px-3 py-2">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Cam kết tuần qua</p>
                     <p className="mt-1 text-sm leading-5 text-slate-700">
                       Đã giữ {summaryCommitmentsKept.length}/{summaryCommitmentTotal} cam kết
                     </p>
                   </div>
                   {summaryInsights && (
-                    <div className="rounded-lg border border-white/82 bg-white/82 px-3 py-2 md:col-span-2">
+                    <div className="rounded-[var(--r-control)] border border-white/82 bg-white/82 px-3 py-2 md:col-span-2">
                       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Insight tuần sau</p>
                       <p className="mt-1 text-sm leading-5 text-slate-700">{summaryInsights}</p>
                     </div>
                   )}
                   {summaryNextWeekCommitments.length > 0 && (
-                    <div className="rounded-lg border border-violet-200/70 bg-white/82 px-3 py-2 md:col-span-2">
+                    <div className="rounded-[var(--r-control)] border border-violet-200/70 bg-white/82 px-3 py-2 md:col-span-2">
                       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-violet-700">
                         Cam kết tuần tới
                       </p>
@@ -572,7 +576,7 @@ export function TwelveWeekWeekTab({
                         {summaryNextWeekCommitments.map((commitment) => (
                           <span
                             key={commitment}
-                            className="rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-800"
+                            className="rounded-[var(--r-pill)] border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-800"
                           >
                             {commitment}
                           </span>
@@ -611,12 +615,12 @@ export function TwelveWeekWeekTab({
                 onCelebrate={onOpenTodayTab}
               />
             )}
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-4">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-lg border border-white/80 bg-white px-3 py-3">
+                <div className="rounded-[var(--r-control)] border border-white/80 bg-white px-3 py-3">
                   <div className="flex items-center justify-between text-sm text-slate-500">
                     <span>Lead Score</span>
-                    <span className={`h-2.5 w-2.5 rounded-full ${scoreTone.marker}`} />
+                    <span className={`h-2.5 w-2.5 rounded-[var(--r-pill)] ${scoreTone.marker}`} />
                   </div>
                   {weekCompletion.isEmpty ? (
                     <p className="mt-2 text-sm font-semibold text-slate-700">Chưa có dữ liệu lead</p>
@@ -625,10 +629,10 @@ export function TwelveWeekWeekTab({
                       {leadScoreValue}%
                     </p>
                   )}
-                  <Progress value={weekCompletion.isEmpty ? 0 : leadScoreValue} className="mt-3 h-2.5" />
+                  <Progress value={weekCompletion.isEmpty ? 0 : leadScoreValue} className="mt-[var(--space-inline)] h-2.5" />
                 </div>
                 {lagScoreValue !== null && (
-                  <div className="rounded-lg border border-white/80 bg-white px-3 py-3">
+                  <div className="rounded-[var(--r-control)] border border-white/80 bg-white px-3 py-3">
                     <div className="flex items-center justify-between text-sm text-slate-500">
                       <span>Lag Score</span>
                       <span>{system.lagMetric.name}</span>
@@ -636,24 +640,24 @@ export function TwelveWeekWeekTab({
                     <p data-testid="weekly-lag-score" className="mt-2 text-2xl font-bold text-slate-950">
                       {lagScoreValue}%
                     </p>
-                    <Progress value={lagScoreValue} className="mt-3 h-2.5" />
+                    <Progress value={lagScoreValue} className="mt-[var(--space-inline)] h-2.5" />
                   </div>
                 )}
               </div>
               <div
                 data-testid="weekly-score-interpretation"
-                className={`mt-3 rounded-lg border px-3 py-2 ${scoreTone.panel}`}
+                className={`mt-[var(--space-inline)] rounded-[var(--r-control)] border px-3 py-2 ${scoreTone.panel}`}
               >
                 <p className={`flex items-center gap-2 text-sm font-semibold ${scoreTone.text}`}>
-                  <span className={`h-2.5 w-2.5 rounded-full ${scoreTone.marker}`} />
+                  <span className={`h-2.5 w-2.5 rounded-[var(--r-pill)] ${scoreTone.marker}`} />
                   {scoreInterpretation.headline}
                 </p>
                 <p className="mt-1 text-xs leading-5 text-slate-600">{scoreInterpretation.advice}</p>
               </div>
-              <p className="mt-3 text-sm text-slate-500">Chỉ số chính: {lagMetricValue || "Chưa cập nhật"}</p>
+              <p className="mt-[var(--space-inline)] text-sm text-slate-500">Chỉ số chính: {lagMetricValue || "Chưa cập nhật"}</p>
             </div>
             <div
-              className={`rounded-lg border p-4 shadow-sm ${
+              className={`rounded-[var(--r-control)] border p-4 shadow-sm ${
                 hasPremiumInsights ? "border-sky-200 bg-sky-50" : "border-violet-200 bg-violet-50"
               }`}
             >
@@ -683,20 +687,20 @@ export function TwelveWeekWeekTab({
               </div>
 
               {hasPremiumInsights ? (
-                <div className="mt-4 space-y-3">
+                <div className="mt-4 stack-tight">
                   <div className="grid gap-3 md:grid-cols-2">
-                    <div className="rounded-lg border border-sky-100 bg-white p-4">
+                    <div className="rounded-[var(--r-control)] border border-sky-100 bg-white p-4">
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                         Gợi ý chỉnh tải
                       </p>
                       <p className="mt-2 text-sm leading-7 text-slate-800">{premiumInsight.recommendedAdjustment}</p>
                     </div>
-                    <div className="rounded-lg border border-sky-100 bg-white p-4">
+                    <div className="rounded-[var(--r-control)] border border-sky-100 bg-white p-4">
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Gợi ý ngắn</p>
                       <p className="mt-2 text-sm leading-7 text-slate-800">{premiumInsight.coachNote}</p>
                     </div>
                   </div>
-                  <div className="rounded-lg border border-sky-200 bg-white p-4 shadow-sm">
+                  <div className="rounded-[var(--r-control)] border border-sky-200 bg-white p-4 shadow-sm">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -712,7 +716,7 @@ export function TwelveWeekWeekTab({
                       </Badge>
                     </div>
                     <div className="mt-4 grid gap-3 md:grid-cols-2">
-                      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                      <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-4">
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Giữ chắc</p>
                         <div className="mt-2 flex flex-wrap gap-2">
                           {suggestedNextWeekPlan.protectTactics.map((item) => (
@@ -722,7 +726,7 @@ export function TwelveWeekWeekTab({
                           ))}
                         </div>
                       </div>
-                      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                      <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-4">
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                           {suggestedNextWeekPlan.secondaryTrackLabel}
                         </p>
@@ -747,12 +751,12 @@ export function TwelveWeekWeekTab({
                   </div>
                 </div>
               ) : (
-                <div className="mt-4 space-y-3">
+                <div className="mt-4 stack-tight">
                   {/* Status indicator — always computed, shown as teaser */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-violet-100 bg-white px-4 py-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--r-control)] border border-violet-100 bg-white px-4 py-3">
                     <div className="flex items-center gap-2">
                       <div
-                        className={`h-2 w-2 rounded-full ${
+                        className={`h-2 w-2 rounded-[var(--r-pill)] ${
                           premiumInsight.status === "strong"
                             ? "bg-emerald-500"
                             : premiumInsight.status === "at_risk"
@@ -776,7 +780,7 @@ export function TwelveWeekWeekTab({
                     </Badge>
                   </div>
                   {/* Blurred content preview */}
-                  <div className="relative overflow-hidden rounded-lg border border-violet-200 bg-white p-4">
+                  <div className="relative overflow-hidden rounded-[var(--r-control)] border border-violet-200 bg-white p-4">
                     <div className="pointer-events-none select-none blur-[3px] opacity-60">
                       <p className="text-sm font-semibold text-slate-900">{premiumInsight.headline}</p>
                       <p className="mt-2 text-sm leading-6 text-slate-600 line-clamp-2">{premiumInsight.summary}</p>
@@ -784,12 +788,12 @@ export function TwelveWeekWeekTab({
                         Gợi ý chỉnh tải: {premiumInsight.recommendedAdjustment}
                       </p>
                     </div>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-white/50">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[var(--r-control)] bg-white/50">
                       <Crown className="h-5 w-5 text-violet-500" />
                       <p className="mt-1 text-xs font-semibold text-violet-700">Chỉ dành cho Plus</p>
                     </div>
                   </div>
-                  <div className="rounded-lg border border-violet-200/70 bg-white p-4">
+                  <div className="rounded-[var(--r-control)] border border-violet-200/70 bg-white p-4">
                     <p className="text-sm font-semibold text-slate-950">
                       Mở Plus để đọc phân tích đầy đủ và ra ngay kế hoạch tuần sau đủ gọn để làm.
                     </p>
@@ -806,7 +810,7 @@ export function TwelveWeekWeekTab({
             </div>
             <div
               data-testid="wam-section-score"
-              className="rounded-lg border border-sky-200 bg-sky-50/70 px-4 py-4"
+              className="rounded-[var(--r-control)] border border-sky-200 bg-sky-50/70 px-4 py-4"
             >
               <Label className="text-sm font-semibold text-slate-950">1. Score tuần qua bao nhiêu %?</Label>
               <p className="mt-2 text-3xl font-bold text-slate-950">
@@ -821,17 +825,17 @@ export function TwelveWeekWeekTab({
 
             <div
               data-testid="wam-section-commitments"
-              className="rounded-lg border border-slate-200 bg-white px-4 py-4"
+              className="rounded-[var(--r-control)] border border-slate-200 bg-white px-4 py-4"
             >
               <Label className="text-sm font-semibold text-slate-950">
                 2. Cam kết nào tôi đã giữ? Cam kết nào bỏ lỡ?
               </Label>
               {previousCommitments.length === 0 ? (
-                <div className="mt-3 rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
+                <div className="mt-[var(--space-inline)] rounded-[var(--r-control)] border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
                   Tuần đầu chưa có cam kết tuần trước. Hãy đặt cam kết tuần tới ở câu 4.
                 </div>
               ) : (
-                <div className="mt-3 space-y-3">
+                <div className="mt-[var(--space-inline)] stack-tight">
                   {previousCommitments.map((commitment) => {
                     const currentStatus = weeklyForm.commitmentStatuses[commitment] ?? "unanswered";
                     const commitmentQuote = getCommitmentQuoteForPreviousCommitment(system, commitment);
@@ -842,12 +846,12 @@ export function TwelveWeekWeekTab({
                       });
 
                     return (
-                      <div key={commitment} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+                      <div key={commitment} className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-3">
                         <p className="text-sm font-medium text-slate-900">{commitment}</p>
                         {commitmentQuote ? (
                           <p className="mt-1 text-xs italic leading-5 text-slate-500">{commitmentQuote}</p>
                         ) : null}
-                        <div className="mt-3 flex flex-wrap gap-2">
+                        <div className="mt-[var(--space-inline)] flex flex-wrap gap-2">
                           <Button
                             type="button"
                             variant="outline"
@@ -885,7 +889,7 @@ export function TwelveWeekWeekTab({
 
             <div
               data-testid="wam-section-insights"
-              className="rounded-lg border border-slate-200 bg-white px-4 py-4"
+              className="rounded-[var(--r-control)] border border-slate-200 bg-white px-4 py-4"
             >
               <Label htmlFor="weekly-insights">3. Insight/learning gì cần áp dụng tuần sau?</Label>
               <Textarea
@@ -900,7 +904,7 @@ export function TwelveWeekWeekTab({
 
             <div
               data-testid="wam-section-next-commitments"
-              className="rounded-lg border border-violet-200 bg-violet-50/50 px-4 py-4"
+              className="rounded-[var(--r-control)] border border-violet-200 bg-violet-50/50 px-4 py-4"
             >
               <Label htmlFor="weekly-next-commitments">4. Cam kết của tuần tới là gì?</Label>
               <NextWeekCommitmentsEditor
@@ -915,11 +919,11 @@ export function TwelveWeekWeekTab({
             {/* Review CTA */}
             <div
               data-testid="weekly-review-readiness"
-              className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"
+              className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="font-semibold text-slate-950">Mức sẵn sàng review</p>
-                <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700">
+                <span className="rounded-[var(--r-pill)] border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700">
                   {reviewReadyCount}/4
                 </span>
               </div>
@@ -932,7 +936,7 @@ export function TwelveWeekWeekTab({
               </p>
             </div>
             <div
-              className={`flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between ${
+              className={`flex flex-col gap-3 rounded-[var(--r-control)] border p-4 sm:flex-row sm:items-center sm:justify-between ${
                 reviewDueToday
                   ? "border-amber-300 bg-amber-50"
                   : "border-slate-200 bg-slate-50"
@@ -960,7 +964,8 @@ export function TwelveWeekWeekTab({
             </div>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </SectionBlock>
       {/* Sticky review CTA for mobile */}
       <div
         data-testid="weekly-review-mobile-sticky-cta"

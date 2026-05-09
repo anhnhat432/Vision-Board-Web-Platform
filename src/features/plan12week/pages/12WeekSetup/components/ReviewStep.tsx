@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+﻿import { useMemo, useState, useEffect } from "react";
 import { useBreakpoint } from "@/app/hooks/useBreakpoint";
 import { SecondaryPanel } from "@/app/components/layout";
 import { CheckCircle2, CircleAlert, CircleDot, Flag, Target, TriangleAlert, Wrench } from "lucide-react";
@@ -218,12 +218,12 @@ export function ReviewStep({
   const optionalIndicators = scheduledLeadIndicators.filter((indicator) => indicator.type === "optional");
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-4xl stack-section">
       {/* 1. Summary - primary */}
-      <div className="rounded-2xl border border-white/70 bg-white/72 p-5">
+      <div className="rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5">
         <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tóm tắt kế hoạch</p>
-        <h3 className="mt-3 text-xl font-semibold text-slate-900">{smartGoal.specific}</h3>
-        <p className="mt-3 text-sm leading-7 text-slate-600">{draft.vision12Week}</p>
+        <h3 className="mt-[var(--space-inline)] text-xl font-semibold text-slate-900">{smartGoal.specific}</h3>
+        <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">{draft.vision12Week}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Badge variant="outline">{getGoalTypeLabel(draft.goalType)}</Badge>
           <Badge variant="outline">{getLifeAreaLabel(focusArea)}</Badge>
@@ -234,18 +234,18 @@ export function ReviewStep({
       </div>
 
       {/* 2. Outcome - primary */}
-      <section className="rounded-2xl border-2 border-emerald-200 bg-emerald-50/60 p-5">
+      <section className="rounded-[var(--r-card)] border-2 border-emerald-200 bg-emerald-50/60 p-5">
         <div className="flex items-center gap-2">
           <Target className="h-4 w-4 text-emerald-700" aria-hidden="true" />
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">Kết quả 12 tuần</p>
         </div>
-        <p className="mt-3 text-base leading-7 text-slate-900">
+        <p className="mt-[var(--space-inline)] text-base leading-7 text-slate-900">
           {draft.week12Outcome.trim() || (
             <span className="italic text-slate-400">Chưa điền - quay lại bước 1 để bổ sung.</span>
           )}
         </p>
         {(draft.lagMetricName.trim() || draft.lagMetricTarget.trim()) && (
-          <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/86 px-3 py-1 text-sm text-slate-700">
+          <div className="mt-[var(--space-inline)] inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-emerald-200 bg-white/86 px-3 py-1 text-sm text-slate-700">
             <span className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Đo bằng</span>
             <span>
               {draft.lagMetricName || "-"}
@@ -257,7 +257,7 @@ export function ReviewStep({
       </section>
 
       {/* 3. Milestones - primary */}
-      <section className="rounded-2xl border border-white/70 bg-white/72 p-5">
+      <section className="rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5">
         <div className="flex items-center gap-2">
           <Flag className="h-4 w-4 text-slate-600" aria-hidden="true" />
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Cột mốc giữa chu kỳ</p>
@@ -268,7 +268,7 @@ export function ReviewStep({
             { label: "Tuần 8", value: draft.week8Milestone },
             { label: "Tuần 12", value: draft.week12Outcome },
           ].map((milestone) => (
-            <div key={milestone.label} className="rounded-xl border border-white/70 bg-slate-50/80 p-3">
+            <div key={milestone.label} className="rounded-[var(--r-tile)] border border-white/70 bg-slate-50/80 p-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{milestone.label}</p>
               <p className="mt-2 text-sm leading-6 text-slate-700">
                 {milestone.value.trim() || (
@@ -283,7 +283,7 @@ export function ReviewStep({
       </section>
 
       {/* 4. Lead indicators - primary */}
-      <section className="rounded-2xl border border-white/70 bg-white/72 p-5">
+      <section className="rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Việc lặp lại mỗi tuần</p>
           <span className="text-xs text-slate-500">
@@ -291,13 +291,13 @@ export function ReviewStep({
           </span>
         </div>
         {scheduledLeadIndicators.length === 0 ? (
-          <p className="mt-3 text-sm text-slate-500">Chưa có việc nào được chốt.</p>
+          <p className="mt-[var(--space-inline)] text-sm text-slate-500">Chưa có việc nào được chốt.</p>
         ) : (
-          <ul className="mt-3 space-y-2">
+          <ul className="mt-[var(--space-inline)] space-y-2">
             {scheduledLeadIndicators.map((indicator) => (
               <li
                 key={indicator.id}
-                className={`flex flex-wrap items-center justify-between gap-2 rounded-2xl border px-3 py-2 ${
+                className={`flex flex-wrap items-center justify-between gap-2 rounded-[var(--r-card)] border px-3 py-2 ${
                   indicator.type === "optional" ? "border-amber-200 bg-amber-50/80" : "border-emerald-200 bg-emerald-50/80"
                 }`}
               >
@@ -319,7 +319,7 @@ export function ReviewStep({
 
       {/* 5. Quality panel - secondary (collapsible) */}
       <SecondaryPanel title="Chất lượng kế hoạch" collapsible defaultOpen={isDesktop}>
-        <div className="rounded-2xl border p-5">
+        <div className="rounded-[var(--r-card)] border p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -331,7 +331,7 @@ export function ReviewStep({
               <p className="mt-1 text-sm text-slate-600">Đây là gợi ý - bạn vẫn có thể tạo kế hoạch.</p>
             </div>
             <span
-              className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${getQualityBadgeStyle(
+              className={`rounded-[var(--r-pill)] border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${getQualityBadgeStyle(
                 planQuality.level,
               )}`}
             >
@@ -347,7 +347,7 @@ export function ReviewStep({
               return (
                 <li
                   key={dimension.id}
-                  className="flex items-center justify-between rounded-2xl border border-white/70 bg-white/82 px-3 py-2"
+                  className="flex items-center justify-between rounded-[var(--r-card)] border border-white/70 bg-white/82 px-3 py-2"
                 >
                   <span className="text-sm text-slate-700">{dimension.label}</span>
                   <span
@@ -365,7 +365,7 @@ export function ReviewStep({
           </ul>
 
           {planQuality.warnings.length > 0 && (
-            <div className="mt-4 rounded-2xl border border-amber-300 bg-amber-50/82 p-3">
+            <div className="mt-4 rounded-[var(--r-card)] border border-amber-300 bg-amber-50/82 p-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">
                 Cảnh báo ({planQuality.warnings.length})
               </p>
@@ -379,7 +379,7 @@ export function ReviewStep({
 
           {planQuality.suggestions.length > 0 && (
             <details
-              className="mt-3 rounded-2xl border border-violet-200 bg-violet-50/72 px-3 py-2"
+              className="mt-[var(--space-inline)] rounded-[var(--r-card)] border border-violet-200 bg-violet-50/72 px-3 py-2"
               open={suggestionsOpen}
               onToggle={() => setSuggestionsOpen(!suggestionsOpen)}
             >
@@ -402,7 +402,7 @@ export function ReviewStep({
         collapsible
         defaultOpen={isDesktop}
       >
-        <div className="rounded-2xl border border-violet-200 bg-violet-50/76 p-5">
+        <div className="rounded-[var(--r-card)] border border-violet-200 bg-violet-50/76 p-5">
           <p className="mt-2 text-xs leading-6 text-violet-900/72">
             Tổng hợp từ kết quả kiểm tra, nhịp tuần, việc lặp lại và cột mốc. Đây là gợi ý — kế hoạch không bảo
             đảm thành công, nhưng giúp bạn biết vì sao nên thử cách này trước.
@@ -413,7 +413,7 @@ export function ReviewStep({
               <li
                 key={reason.id}
                 data-reason-id={reason.id}
-                className="rounded-2xl border border-white/70 bg-white/82 px-3 py-2"
+                className="rounded-[var(--r-card)] border border-white/70 bg-white/82 px-3 py-2"
               >
                 <span aria-hidden="true">• </span>
                 {reason.text}
@@ -424,7 +424,7 @@ export function ReviewStep({
           {planRationale.warnings.length > 0 && (
             <div
               data-testid="plan-rationale-warnings"
-              className="mt-3 rounded-2xl border border-amber-200 bg-amber-50/82 p-3"
+              className="mt-[var(--space-inline)] rounded-[var(--r-card)] border border-amber-200 bg-amber-50/82 p-3"
             >
               <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-amber-800">
                 <CircleAlert className="h-3.5 w-3.5" aria-hidden="true" />
@@ -443,7 +443,7 @@ export function ReviewStep({
           {planRationale.adjustments.length > 0 && (
             <div
               data-testid="plan-rationale-adjustments"
-              className="mt-3 rounded-2xl border border-sky-200 bg-sky-50/82 p-3"
+              className="mt-[var(--space-inline)] rounded-[var(--r-card)] border border-sky-200 bg-sky-50/82 p-3"
             >
               <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-sky-800">
                 <Wrench className="h-3.5 w-3.5" aria-hidden="true" />
@@ -468,18 +468,18 @@ export function ReviewStep({
           collapsible
           defaultOpen={isDesktop}
         >
-          <div className="rounded-2xl border border-white/70 bg-white/72 p-5">
-            <div className="mt-3 grid gap-2 md:grid-cols-2">
+          <div className="rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5">
+            <div className="mt-[var(--space-inline)] grid gap-2 md:grid-cols-2">
               {weekOneTaskPreview.map((task) => (
                 <div
                   key={task}
-                  className="rounded-2xl border border-white/70 bg-slate-50/80 px-3 py-2 text-sm text-slate-700"
+                  className="rounded-[var(--r-card)] border border-white/70 bg-slate-50/80 px-3 py-2 text-sm text-slate-700"
                 >
                   {task}
                 </div>
               ))}
             </div>
-            {weekOneTaskWarning ? <p className="mt-3 text-xs text-amber-600">{weekOneTaskWarning}</p> : null}
+            {weekOneTaskWarning ? <p className="mt-[var(--space-inline)] text-xs text-amber-600">{weekOneTaskWarning}</p> : null}
           </div>
         </SecondaryPanel>
       )}
@@ -491,7 +491,7 @@ export function ReviewStep({
           collapsible
           defaultOpen={isDesktop}
         >
-          <div className="rounded-2xl border border-white/70 bg-white/72 p-5">
+          <div className="rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5">
             <p className="mt-2 text-base font-semibold text-slate-900">{setupGuideSupport.week1Headline}</p>
             <p className="mt-2 text-sm leading-7 text-slate-600">{setupGuideSupport.week1Support}</p>
           </div>
@@ -504,8 +504,8 @@ export function ReviewStep({
         collapsible
         defaultOpen={isDesktop}
       >
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 p-5">
-          <div className="space-y-4">
+        <div className="rounded-[var(--r-card)] border border-dashed border-slate-200 bg-slate-50/80 p-5">
+          <div className="stack-stack">
             <div className="grid gap-3 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="milestone-week-4">Mốc tuần 4</Label>

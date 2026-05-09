@@ -54,7 +54,7 @@ export function SecondaryPanel({
       <div className="flex items-start gap-2 flex-1">
         {icon && <span className="mt-0.5 h-4 w-4 shrink-0">{icon}</span>}
         <div className="flex-1">
-          <h4 className="text-sm font-semibold text-foreground">{title}</h4>
+          <h3 className="text-sm font-semibold text-foreground">{title}</h3>
           {collapsible && (
             <p className="text-xs text-muted-foreground mt-0.5">
               {isOpen ? "Thu gọn" : "Xem thêm"}
@@ -73,7 +73,7 @@ export function SecondaryPanel({
   return (
     <div
       className={cn(
-        "rounded-xl border border-muted bg-muted/90 p-4",
+        "rounded-[var(--r-tile)] border border-muted bg-muted/90 p-4",
         className
       )}
     >

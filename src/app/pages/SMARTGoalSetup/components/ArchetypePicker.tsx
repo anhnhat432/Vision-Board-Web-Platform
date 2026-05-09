@@ -1,4 +1,4 @@
-import { Wand2 } from "lucide-react";
+﻿import { Wand2 } from "lucide-react";
 
 import {
   type GoalArchetype,
@@ -43,7 +43,7 @@ export function ArchetypePicker({
   onResetToInferred,
 }: ArchetypePickerProps) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white/85 p-4">
+    <div className="rounded-[var(--r-card)] border border-slate-200 bg-white/85 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <Label htmlFor="smart-archetype-select" className="text-sm font-semibold text-slate-900">
@@ -67,7 +67,7 @@ export function ArchetypePicker({
           </Button>
         )}
       </div>
-      <div className="mt-3">
+      <div className="mt-[var(--space-inline)]">
         <Select value={archetype} onValueChange={(value) => onChange(value as GoalArchetype)}>
           <SelectTrigger
             id="smart-archetype-select"

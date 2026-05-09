@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type React from "react";
 import { useBeforeUnload, useBlocker, useNavigate, useParams } from "react-router";
 import {
@@ -25,6 +25,7 @@ import {
 import { toast } from "sonner";
 
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { SectionBlock } from "../components/layout/SectionBlock";
 import { ProductVisual } from "../components/visuals/ProductVisual";
 import {
   AlertDialog,
@@ -238,11 +239,11 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
     >
       <div className="group relative">
         {item.type === "image" && (
-          <div className="overflow-hidden rounded-2xl border border-white/85 bg-white/90 p-2 shadow-2xl">
+          <div className="overflow-hidden rounded-[var(--r-card)] border border-white/85 bg-white/90 p-2 shadow-2xl">
             <ImageWithFallback
               src={item.content}
               alt="Phần tử bảng tầm nhìn"
-              className="rounded-xl shadow-sm"
+              className="rounded-[var(--r-tile)] shadow-sm"
               style={{ width: `${item.width - 16}px` }}
             />
           </div>
@@ -250,7 +251,7 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
 
         {item.type === "quote" && (
           <div
-            className="rounded-2xl border border-white/80 gradient-white-panel p-5 shadow-2xl"
+            className="rounded-[var(--r-card)] border border-white/80 gradient-white-panel p-5 shadow-2xl"
             style={{ width: `${item.width}px` }}
           >
             <div className="flex items-center gap-2 text-violet-600">
@@ -259,12 +260,12 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
                 Quote
               </span>
             </div>
-            <p className="mt-3 text-sm leading-7 text-slate-700">{item.content}</p>
+            <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-700">{item.content}</p>
           </div>
         )}
 
         {item.type === "icon" && (
-          <div className="flex h-24 w-24 items-center justify-center rounded-2xl gradient-violet-pink text-white shadow-2xl">
+          <div className="flex h-24 w-24 items-center justify-center rounded-[var(--r-tile)] gradient-violet-pink text-white shadow-2xl">
             <Icon className="h-10 w-10" />
           </div>
         )}
@@ -272,7 +273,7 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
         <Button
           size="icon"
           variant="destructive"
-          className="absolute -right-2 -top-2 h-8 w-8 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
+          className="absolute -right-2 -top-2 h-8 w-8 rounded-[var(--r-pill)] opacity-0 transition-opacity group-hover:opacity-100"
           onClick={() => onDelete(item.id)}
         >
           <Trash2 className="h-3.5 w-3.5" />
@@ -609,7 +610,7 @@ export function VisionBoardEditor() {
   if (!board) return null;
 
   return (
-      <div className="space-y-8 pb-12">
+      <div className="stack-section pb-12">
         <AlertDialog
           open={blocker.state === "blocked"}
           onOpenChange={(open) => {
@@ -650,14 +651,14 @@ export function VisionBoardEditor() {
             <CardContent className="relative p-5 sm:p-6 lg:p-8">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_22%)] opacity-90" />
 
-              <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
-                <div className="space-y-6">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+              <div className="relative grid gap-[var(--space-section)] xl:grid-cols-[minmax(0,1.15fr)_360px]">
+                <div className="stack-section">
+                  <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                     <Wand2 className="h-4 w-4" />
                     Dear Our Future Studio
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="stack-stack">
                     <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
                       Dựng một không gian hình ảnh khiến mục tiêu của bạn trở nên chạm được mỗi ngày.
                     </h1>
@@ -708,7 +709,7 @@ export function VisionBoardEditor() {
                   </p>
                 </div>
 
-                <div className="hidden xl:block rounded-2xl border border-white/14 bg-white/12 p-6 shadow-sm">
+                <div className="hidden xl:block rounded-[var(--r-card)] border border-white/14 bg-white/12 p-6 shadow-sm">
                   <ProductVisual variant="vision" className="mb-5 min-h-[180px]" />
                   <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">
                     Snapshot canvas
@@ -722,7 +723,7 @@ export function VisionBoardEditor() {
                     ].map((item) => (
                       <div
                         key={item.label}
-                        className="rounded-2xl border border-white/10 bg-black/12 px-4 py-4"
+                        className="rounded-[var(--r-card)] border border-white/10 bg-black/12 px-4 py-4"
                       >
                         <p className="text-xs uppercase tracking-[0.18em] text-white/55">{item.label}</p>
                         <p className="mt-2 text-3xl font-bold text-white">{item.value}</p>
@@ -759,8 +760,8 @@ export function VisionBoardEditor() {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="image" className="space-y-5 pt-4">
-                <div className="space-y-3">
+              <TabsContent value="image" className="stack-stack pt-4">
+                <div className="stack-tight">
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                     <Upload className="h-4 w-4" />
                     Tải ảnh từ thiết bị
@@ -783,7 +784,7 @@ export function VisionBoardEditor() {
                   <p className="text-xs text-slate-400">Hỗ trợ JPG, PNG, WEBP, GIF — tối đa 5 MB (ảnh sẽ được nén tự động)</p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="stack-tight">
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                     <Link2 className="h-4 w-4" />
                     Dán URL hình ảnh
@@ -799,17 +800,17 @@ export function VisionBoardEditor() {
                   </Button>
                 </div>
 
-                <div className="space-y-3">
+                <div className="stack-tight">
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                     <Image className="h-4 w-4" />
                     Chọn từ thư viện gợi ý
                   </div>
-                  <div className="grid max-h-52 grid-cols-3 gap-2 overflow-y-auto rounded-xl sm:grid-cols-4">
+                  <div className="grid max-h-52 grid-cols-3 gap-2 overflow-y-auto rounded-[var(--r-tile)] sm:grid-cols-4">
                     {CURATED_IMAGES.map((img) => (
                       <button
                         key={img.label}
                         type="button"
-                        className="group relative overflow-hidden rounded-xl border border-white/70 transition-colors transition-shadow duration-150 hover:border-violet-300 hover:shadow-md"
+                        className="group relative overflow-hidden rounded-[var(--r-tile)] border border-white/70 transition-colors transition-shadow duration-150 hover:border-violet-300 hover:shadow-md"
                         onClick={() => handleAddCuratedImage(img.url)}
                       >
                         <ImageWithFallback
@@ -825,7 +826,7 @@ export function VisionBoardEditor() {
                   </div>
                 </div>
 
-                <div className="space-y-3">
+                <div className="stack-tight">
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                     <Globe className="h-4 w-4" />
                     Tìm theo vibe
@@ -854,7 +855,7 @@ export function VisionBoardEditor() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="quote" className="space-y-5 pt-4">
+              <TabsContent value="quote" className="stack-stack pt-4">
                 <Textarea
                   rows={4}
                   placeholder="Viết một câu nhắc nhở bạn muốn nhìn thấy mỗi ngày..."
@@ -878,7 +879,7 @@ export function VisionBoardEditor() {
                 </Button>
               </TabsContent>
 
-              <TabsContent value="icon" className="space-y-5 pt-4">
+              <TabsContent value="icon" className="stack-stack pt-4">
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {ICON_OPTIONS.map((item) => {
                     const Icon = ICON_COMPONENTS[item];
@@ -889,16 +890,16 @@ export function VisionBoardEditor() {
                         key={item}
                         type="button"
                         onClick={() => setIconName(item)}
-                        className={`rounded-2xl border p-4 transition-colors transition-shadow duration-150 ${
+                        className={`rounded-[var(--r-card)] border p-4 transition-colors transition-shadow duration-150 ${
                           isActive
                             ? "border-violet-300 bg-violet-50 text-violet-700 shadow-lg"
                             : "border-white/80 bg-white/72 text-slate-500 hover:border-violet-200 hover:text-violet-700"
                         }`}
                       >
-                        <div className="flex h-12 w-12 items-center justify-center rounded-xl gradient-brand-subtle">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] gradient-brand-subtle">
                           <Icon className="h-6 w-6" />
                         </div>
-                        <div className="mt-3 text-sm font-semibold">{item}</div>
+                        <div className="mt-[var(--space-inline)] text-sm font-semibold">{item}</div>
                       </button>
                     );
                   })}
@@ -911,7 +912,7 @@ export function VisionBoardEditor() {
           </DialogContent>
         </Dialog>
 
-        <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid min-w-0 items-start gap-[var(--space-section)] xl:grid-cols-[minmax(0,1fr)_320px]">
           <Card className="min-w-0 overflow-hidden">
             <CardContent className="p-0">
               <div
@@ -922,15 +923,15 @@ export function VisionBoardEditor() {
 
                 {board.items.length === 0 ? (
                   <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
-                    <div className="w-full max-w-md rounded-2xl border border-white/80 bg-white/86 p-5 text-center shadow-2xl sm:p-7">
+                    <div className="w-full max-w-md rounded-[var(--r-card)] border border-white/80 bg-white/86 p-5 text-center shadow-2xl sm:p-7">
                       <ProductVisual variant="vision" className="mx-auto mb-5 min-h-[150px] max-w-sm" />
-                      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-violet-50 text-violet-700 sm:h-20 sm:w-20 sm:rounded-2xl">
+                      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700 sm:h-20 sm:w-20 sm:rounded-[var(--r-tile)]">
                         <Sparkles className="h-8 w-8 sm:h-9 sm:w-9" />
                       </div>
-                      <h2 className="mt-5 text-2xl font-bold text-slate-900 sm:mt-6 sm:text-3xl">
+                      <h2 className="mt-[var(--space-stack)] text-2xl font-bold text-slate-900 sm:mt-6 sm:text-3xl">
                         Canvas của bạn đang chờ câu chuyện đầu tiên
                       </h2>
-                      <p className="mt-3 text-base text-slate-500">
+                      <p className="mt-[var(--space-inline)] text-base text-slate-500">
                         Hãy bắt đầu bằng một hình ảnh đại diện, một câu nói khiến bạn rung động hoặc một biểu tượng để neo cảm xúc cho mục tiêu của mình.
                       </p>
                       <Button className="mt-6 w-full sm:mt-8 sm:w-auto" onClick={() => setIsAddingItem(true)}>
@@ -953,11 +954,12 @@ export function VisionBoardEditor() {
             </CardContent>
           </Card>
 
-          <div className="space-y-6 xl:sticky xl:top-28">
+          <SectionBlock title="Công cụ board" headerVisuallyHidden className="xl:sticky xl:top-28">
+            <div className="stack-stack">
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-50 text-violet-700">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700">
                     <LayoutGrid className="h-6 w-6" />
                   </div>
                   <div>
@@ -968,7 +970,7 @@ export function VisionBoardEditor() {
                   </div>
                 </div>
 
-                <div className="mt-5 space-y-3">
+                <div className="mt-[var(--space-stack)] stack-tight">
                   {[
                     { label: "Hình ảnh", value: boardStats.images, color: "bg-violet-50 text-violet-700" },
                     { label: "Quote", value: boardStats.quotes, color: "bg-amber-50 text-amber-700" },
@@ -976,10 +978,10 @@ export function VisionBoardEditor() {
                   ].map((item) => (
                     <div
                       key={item.label}
-                      className="flex items-center justify-between rounded-2xl border border-white/70 bg-white/72 px-4 py-3"
+                      className="flex items-center justify-between rounded-[var(--r-card)] border border-white/70 bg-white/72 px-4 py-3"
                     >
                       <span className="text-sm font-medium text-slate-600">{item.label}</span>
-                      <span className={`rounded-full px-3 py-1 text-sm font-semibold ${item.color}`}>
+                      <span className={`rounded-[var(--r-pill)] px-3 py-1 text-sm font-semibold ${item.color}`}>
                         {item.value}
                       </span>
                     </div>
@@ -991,7 +993,7 @@ export function VisionBoardEditor() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-50 text-sky-700">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-sky-50 text-sky-700">
                     <Palette className="h-6 w-6" />
                   </div>
                   <div>
@@ -1002,7 +1004,7 @@ export function VisionBoardEditor() {
                   </div>
                 </div>
 
-                <div className="mt-5 space-y-3">
+                <div className="mt-[var(--space-stack)] stack-tight">
                   {[
                     "Đặt hình ảnh quan trọng nhất ở trung tâm hoặc góc trái trên.",
                     "Dùng 1-2 quote đủ mạnh thay vì quá nhiều chữ trên canvas.",
@@ -1011,7 +1013,7 @@ export function VisionBoardEditor() {
                   ].map((item) => (
                     <div
                       key={item}
-                      className="rounded-xl border border-white/70 bg-white/72 px-4 py-3 text-sm leading-7 text-slate-600"
+                      className="rounded-[var(--r-tile)] border border-white/70 bg-white/72 px-4 py-3 text-sm leading-7 text-slate-600"
                     >
                       {item}
                     </div>
@@ -1023,7 +1025,7 @@ export function VisionBoardEditor() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-emerald-50 text-emerald-700">
                     <Save className="h-6 w-6" />
                   </div>
                   <div>
@@ -1034,7 +1036,7 @@ export function VisionBoardEditor() {
                   </div>
                 </div>
 
-                <div className="mt-5 flex flex-col gap-3">
+                <div className="mt-[var(--space-stack)] flex flex-col gap-3">
                   <Button onClick={handleSave} disabled={!boardName.trim()}>
                     <Save className="h-4 w-4" />
                     Lưu bảng tầm nhìn
@@ -1046,7 +1048,8 @@ export function VisionBoardEditor() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+            </div>
+          </SectionBlock>
         </div>
       </div>
   );

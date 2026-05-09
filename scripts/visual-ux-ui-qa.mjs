@@ -35,9 +35,26 @@ const TIMESTAMP = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
 const OUTPUT_DIR = path.resolve(process.env.UX_UI_QA_OUTPUT_DIR ?? `artifacts/visual-ux-ui/${TIMESTAMP}`);
 const SESSION = process.env.UX_UI_QA_SESSION ?? `ux-ui-qa-${TIMESTAMP}`;
 
+function parseViewportEnv(name, fallback) {
+  const raw = process.env[name];
+  if (!raw) return fallback;
+
+  const match = raw.match(/^(\d+)x(\d+)$/i);
+  if (!match) {
+    console.warn(`[ux-ui-qa] WARN ${name} must use WIDTHxHEIGHT format; using ${fallback.width}x${fallback.height}.`);
+    return fallback;
+  }
+
+  return {
+    ...fallback,
+    width: Number(match[1]),
+    height: Number(match[2]),
+  };
+}
+
 const VIEWPORTS = {
-  desktop: { name: "desktop", width: 1440, height: 1000 },
-  mobile: { name: "mobile", width: 390, height: 844 },
+  desktop: parseViewportEnv("UX_UI_QA_DESKTOP_VIEWPORT", { name: "desktop", width: 1440, height: 1000 }),
+  mobile: parseViewportEnv("UX_UI_QA_MOBILE_VIEWPORT", { name: "mobile", width: 390, height: 844 }),
 };
 const ACTION_VIEWPORT = VIEWPORTS.desktop;
 
@@ -423,6 +440,43 @@ async function seedFunnelState({ overdue = false } = {}) {
         smartGoalQualityLevel: "okay",
       };
 
+      const pending12WeekSetupDraft = {
+        templateId: "",
+        goalType: "Personal Growth",
+        vision12Week: ${JSON.stringify(SMART_GOAL_TITLE)},
+        week12Outcome: "Complete a stable visual QA cycle.",
+        lagMetricName: "completed review weeks",
+        lagMetricTarget: "12",
+        lagMetricUnit: "weeks",
+        leadIndicators: [
+          {
+            id: tacticOneId,
+            name: ${JSON.stringify(TACTIC_ONE)},
+            target: "1",
+            unit: "time/week",
+            type: "core",
+            cadence: "spread",
+          },
+          {
+            id: tacticTwoId,
+            name: ${JSON.stringify(TACTIC_TWO)},
+            target: "1",
+            unit: "time/week",
+            type: "core",
+            cadence: "spread",
+          },
+        ],
+        startDate: dateKey(today),
+        reviewDay: "Sunday",
+        tacticLoadPreference: "balanced",
+        week4Milestone: "Week 4 rhythm is visible.",
+        week8Milestone: "Week 8 review habit is stable.",
+        successEvidence: "The visual QA loop reaches review without backend.",
+        dailyTimeBudget: "30",
+        preferredDays: [todayOffset],
+        personalConstraint: "time",
+      };
+
       const weeklyPlans = Array.from({ length: totalWeeks }, (_, index) => ({
         weekNumber: index + 1,
         phaseName: index < 4 ? "Foundation" : index < 8 ? "Build" : "Finish",
@@ -546,6 +600,7 @@ async function seedFunnelState({ overdue = false } = {}) {
       localStorage.setItem("latest_12_week_system_goal_id", goalId);
       localStorage.setItem("pending_smart_goal", JSON.stringify(pendingSmartGoal));
       localStorage.setItem("pending_feasibility_result", JSON.stringify(pendingFeasibilityResult));
+      localStorage.setItem("pending_12_week_setup_draft", JSON.stringify(pending12WeekSetupDraft));
       localStorage.setItem("selected_focus_area", "Personal Growth");
       localStorage.removeItem("backend_goal_links");
       localStorage.removeItem("backend_plan_links");
@@ -569,6 +624,7 @@ async function seedEmptyState() {
       localStorage.removeItem("latest_12_week_system_goal_id");
       localStorage.removeItem("pending_smart_goal");
       localStorage.removeItem("pending_feasibility_result");
+      localStorage.removeItem("pending_12_week_setup_draft");
       window.dispatchEvent(new CustomEvent("visionboard:user-data-updated"));
       return true;
     })()

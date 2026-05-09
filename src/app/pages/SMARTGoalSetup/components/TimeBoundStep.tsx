@@ -20,7 +20,7 @@ export function TimeBoundStep({ smartData, setSmartData }: TimeBoundStepProps) {
   const targetDateInvalid = smartData.timeBound.mode === "date" && smartData.timeBound.target_date.trim().length === 0;
 
   return (
-    <div className="space-y-5">
+    <div className="stack-stack">
       <div className="space-y-1">
         <p className="text-sm text-slate-600">
           Chọn cách chốt thời hạn phù hợp với bạn.

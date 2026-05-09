@@ -13,7 +13,7 @@ interface ReviewStepProps {
 
 export function ReviewStep({ clarityDoneCount, clarityItemCount, summaryRows, onJumpToStep }: ReviewStepProps) {
   return (
-    <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-4">
+    <div className="rounded-[var(--r-card)] border border-emerald-200 bg-emerald-50/80 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-slate-950">Tóm tắt trước khi kiểm tra</p>
@@ -25,9 +25,9 @@ export function ReviewStep({ clarityDoneCount, clarityItemCount, summaryRows, on
           Sẵn sàng: {clarityDoneCount}/{clarityItemCount}
         </Badge>
       </div>
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 stack-tight">
         {summaryRows.map((row) => (
-          <div key={row.key} className="rounded-2xl border border-white/80 bg-white/82 p-3">
+          <div key={row.key} className="rounded-[var(--r-card)] border border-white/80 bg-white/82 p-3">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{row.label}</p>

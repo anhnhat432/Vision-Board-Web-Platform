@@ -1,4 +1,4 @@
-import { Crown } from "lucide-react";
+﻿import { Crown } from "lucide-react";
 import { shouldShowBillingDebugUi } from "../../utils/app-mode";
 import {
   getBillingActionStatusLabel,
@@ -114,14 +114,14 @@ export function TwelveWeekPlanAccessSection({
   const renewalLabel = subscription?.status === "canceled" ? "Hiệu lực đến" : "Gia hạn / hết hạn";
 
   return (
-    <div className="rounded-lg border border-violet-200/70 bg-violet-50/75 p-5 shadow-lg">
+    <div className="rounded-[var(--r-control)] border border-violet-200/70 bg-violet-50/75 p-5 shadow-lg">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">Gói và quyền của bạn</p>
           <p className="mt-2 text-2xl font-bold text-slate-950">{getPlanLabel(currentPlanCode)}</p>
           <p className="mt-2 text-sm leading-7 text-slate-700">{currentPlanDefinition.description}</p>
         </div>
-        <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-violet-200 bg-white text-violet-700">
+        <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-control)] border border-violet-200 bg-white text-violet-700">
           <Crown className="h-5 w-5" />
         </div>
       </div>
@@ -147,7 +147,7 @@ export function TwelveWeekPlanAccessSection({
       </div>
 
       <div className="mt-4 grid gap-3">
-        <div className="rounded-lg border border-violet-100 bg-white p-4">
+        <div className="rounded-[var(--r-control)] border border-violet-100 bg-white p-4">
           <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Trạng thái nhanh</p>
           <p className="mt-2 text-lg font-semibold text-slate-950">
             {unlockedEntitlementCount}/{ENTITLEMENT_ORDER.length} quyền premium đang mở
@@ -159,17 +159,17 @@ export function TwelveWeekPlanAccessSection({
 
         {shouldShowSubscriptionDetails ? (
           <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg border border-violet-100 bg-white p-4">
+            <div className="rounded-[var(--r-control)] border border-violet-100 bg-white p-4">
               <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Trạng thái</p>
               <p className="mt-2 text-sm font-semibold text-slate-950">
                 {getSubscriptionStatusLabel(subscription?.status)}
               </p>
             </div>
-            <div className="rounded-lg border border-violet-100 bg-white p-4">
+            <div className="rounded-[var(--r-control)] border border-violet-100 bg-white p-4">
               <p className="text-xs uppercase tracking-[0.16em] text-violet-700">{renewalLabel}</p>
               <p className="mt-2 text-sm font-semibold text-slate-950">{formatPlanDate(subscription?.renewsAt)}</p>
             </div>
-            <div className="rounded-lg border border-violet-100 bg-white p-4">
+            <div className="rounded-[var(--r-control)] border border-violet-100 bg-white p-4">
               <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Chu kỳ</p>
               <p className="mt-2 text-sm font-semibold text-slate-950">
                 {getBillingCycleLabel(subscription?.billingCycle)}
@@ -180,14 +180,14 @@ export function TwelveWeekPlanAccessSection({
 
         {billingDebugUi ? (
           <>
-            <div className="rounded-lg border border-violet-100 bg-white p-4">
+            <div className="rounded-[var(--r-control)] border border-violet-100 bg-white p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Billing contract</p>
                 <Badge variant="outline" className="border-violet-200 bg-violet-50 text-violet-800">
                   {getBillingProviderModeLabel(billingProviderStatus.mode)}
                 </Badge>
               </div>
-              <div className="mt-3 space-y-1 text-sm text-slate-700">
+              <div className="mt-[var(--space-inline)] space-y-1 text-sm text-slate-700">
                 <p>Provider: {billingProviderStatus.providerLabel}</p>
                 <p>Checkout: {getBillingReadinessLabel(billingProviderStatus.checkoutReady, "Local fallback")}</p>
                 <p>Restore: {getBillingReadinessLabel(billingProviderStatus.restoreReady, "Local fallback")}</p>
@@ -202,7 +202,7 @@ export function TwelveWeekPlanAccessSection({
             </div>
 
             <div
-              className={`rounded-lg border px-4 py-4 ${getBillingSnapshotTone(
+              className={`rounded-[var(--r-control)] border px-4 py-4 ${getBillingSnapshotTone(
                 lastEntitlementSyncSnapshot?.providerMode ?? "local_test",
                 lastEntitlementSyncSnapshot?.status ?? "local_only",
               )}`}
@@ -213,7 +213,7 @@ export function TwelveWeekPlanAccessSection({
                   {getBillingActionStatusLabel(lastEntitlementSyncSnapshot?.status ?? "local_only")}
                 </Badge>
               </div>
-              <p className="mt-3 text-sm font-semibold">
+              <p className="mt-[var(--space-inline)] text-sm font-semibold">
                 {lastEntitlementSyncSnapshot
                   ? `${lastEntitlementSyncSnapshot.planCode} · ${lastEntitlementSyncSnapshot.entitlementCount} quyền`
                   : "Chưa có lần kiểm tra nào"}
@@ -222,13 +222,13 @@ export function TwelveWeekPlanAccessSection({
                 {lastEntitlementSyncSnapshot?.message ??
                   "Khi kiểm tra, web sẽ đọc lại trạng thái quyền từ provider hoặc local fallback."}
               </p>
-              <p className="mt-3 text-xs uppercase tracking-[0.16em] opacity-60">
+              <p className="mt-[var(--space-inline)] text-xs uppercase tracking-[0.16em] opacity-60">
                 {lastEntitlementSyncSnapshot ? formatDateTimeLabel(lastEntitlementSyncSnapshot.at) : "Chưa chạy"}
               </p>
             </div>
 
             <div
-              className={`rounded-lg border px-4 py-4 ${getBillingSnapshotTone(
+              className={`rounded-[var(--r-control)] border px-4 py-4 ${getBillingSnapshotTone(
                 lastRestoreAccessSnapshot?.providerMode ?? "local_test",
                 lastRestoreAccessSnapshot?.status ?? "local_only",
               )}`}
@@ -239,7 +239,7 @@ export function TwelveWeekPlanAccessSection({
                   {getBillingActionStatusLabel(lastRestoreAccessSnapshot?.status ?? "local_only")}
                 </Badge>
               </div>
-              <p className="mt-3 text-sm font-semibold">
+              <p className="mt-[var(--space-inline)] text-sm font-semibold">
                 {lastRestoreAccessSnapshot
                   ? `${lastRestoreAccessSnapshot.planCode} · ${lastRestoreAccessSnapshot.entitlementCount} quyền`
                   : "Chưa có lần khôi phục nào"}
@@ -248,13 +248,13 @@ export function TwelveWeekPlanAccessSection({
                 {lastRestoreAccessSnapshot?.message ??
                   "Dùng khi bạn đã từng mở Plus và muốn lấy lại quyền trên trình duyệt này."}
               </p>
-              <p className="mt-3 text-xs uppercase tracking-[0.16em] opacity-60">
+              <p className="mt-[var(--space-inline)] text-xs uppercase tracking-[0.16em] opacity-60">
                 {lastRestoreAccessSnapshot ? formatDateTimeLabel(lastRestoreAccessSnapshot.at) : "Chưa chạy"}
               </p>
             </div>
           </>
         ) : (
-          <div className="rounded-lg border border-violet-100 bg-white p-4">
+          <div className="rounded-[var(--r-control)] border border-violet-100 bg-white p-4">
             <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Trạng thái gói</p>
             <p className="mt-2 text-lg font-semibold text-slate-950">
               {currentPlanCode === "FREE"
@@ -285,7 +285,7 @@ export function TwelveWeekPlanAccessSection({
             </Button>
           </>
         ) : (
-          <div className="rounded-lg border border-violet-100 bg-white px-4 py-3 text-sm text-slate-700">
+          <div className="rounded-[var(--r-control)] border border-violet-100 bg-white px-4 py-3 text-sm text-slate-700">
             Gói Plus đang hoạt động trên tài khoản của bạn.
           </div>
         )}

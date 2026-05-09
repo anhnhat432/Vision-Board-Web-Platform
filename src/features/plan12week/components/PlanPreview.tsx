@@ -95,13 +95,13 @@ export function PlanPreview({
         <CardContent>
           {week1 && (
             <div className="space-y-4">
-              <div className="rounded-md bg-muted p-3">
+              <div className="rounded-[var(--r-control)] bg-muted p-3">
                 <p className="text-sm font-medium">Trọng tâm:</p>
                 <p className="text-sm text-muted-foreground">{week1.focus}</p>
               </div>
 
               {week1.expectedOutput && (
-                <div className="rounded-md bg-muted p-3">
+                <div className="rounded-[var(--r-control)] bg-muted p-3">
                   <p className="text-sm font-medium">Kết quả dự kiến:</p>
                   <p className="text-sm text-muted-foreground whitespace-pre-line">
                     {week1.expectedOutput}
@@ -115,13 +115,13 @@ export function PlanPreview({
                   {week1.tasks.map((task, idx) => (
                     <div
                       key={task.id}
-                      className={`flex items-start gap-3 rounded-md border p-3 ${
+                      className={`flex items-start gap-3 rounded-[var(--r-control)] border p-3 ${
                         task.title.startsWith("[CỐT LỖI]")
                           ? "border-orange-200 bg-orange-50"
                           : "border-gray-200"
                       }`}
                     >
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-primary text-xs font-medium text-primary-foreground">
                         {idx + 1}
                       </span>
                       <div className="flex-1">
@@ -154,7 +154,7 @@ export function PlanPreview({
         <CardContent>
           <div className="space-y-3">
             {weeks24.map((week) => (
-              <div key={week.weekNumber} className="rounded-md border p-3">
+              <div key={week.weekNumber} className="rounded-[var(--r-control)] border p-3">
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium">Tuần {week.weekNumber}</h4>
                   <Button
@@ -201,7 +201,7 @@ export function PlanPreview({
             {draft.leadIndicators.map((indicator: LeadIndicatorDraft, idx: number) => (
               <div
                 key={indicator.id}
-                className={`flex items-center justify-between rounded-md border p-3 ${
+                className={`flex items-center justify-between rounded-[var(--r-control)] border p-3 ${
                   idx < 2 ? "border-green-200 bg-green-50" : "border-gray-200"
                 }`}
               >

@@ -42,7 +42,7 @@ function ExecutionScoreCardComponent({
           <p className={`text-3xl font-bold tracking-tight ${getScoreTone(executionScore)}`}>{executionScore}%</p>
           <p className="text-xs text-slate-500">{getScoreLabel(executionScore)}</p>
         </div>
-        <div className="rounded-xl border border-sky-200/80 bg-white/90 px-3 py-1.5 text-right shadow-sm">
+        <div className="rounded-[var(--r-tile)] border border-sky-200/80 bg-white/90 px-3 py-1.5 text-right shadow-sm">
           <p className="text-sm font-semibold text-slate-900">
             {completedTasks}/{totalTasks || 0}
           </p>

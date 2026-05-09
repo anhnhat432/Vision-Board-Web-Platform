@@ -733,7 +733,7 @@ export function TwelveWeekSystem() {
             "Viết SMART goal và kiểm tra tính thực tế.",
             "Chốt việc giữ nhịp, chỉ số và ngày review tuần.",
           ].map((item, index) => (
-            <div key={item} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            <div key={item} className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
               <span className="mr-2 font-semibold text-slate-950">0{index + 1}</span>
               {item}
             </div>
@@ -840,6 +840,7 @@ export function TwelveWeekSystem() {
           }
         >
           <Button
+            variant="secondary"
             className="w-full border-slate-950 bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
             onClick={() => navigate("/life-insight")}
           >
@@ -858,6 +859,7 @@ export function TwelveWeekSystem() {
           description={`${backendSyncIssueMessage} Các thay đổi hiện tại vẫn được giữ trên thiết bị này.`}
         >
           <Button
+            variant="destructive"
             className="w-full border-rose-900 bg-rose-900 text-white hover:bg-rose-800 sm:w-auto"
             disabled={isBackendSyncing}
             onClick={handleRunOutboxSync}
@@ -899,7 +901,7 @@ export function TwelveWeekSystem() {
         <div
           role="tablist"
           aria-label="Điều hướng hệ 12 tuần"
-          className="inline-flex max-w-full items-center gap-1 rounded-full border border-white/70 bg-white/86 p-1 shadow-sm"
+          className="inline-flex max-w-full items-center gap-1 rounded-[var(--r-pill)] border border-white/70 bg-white/86 p-1 shadow-sm"
         >
           {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => {
             const selected = activeTab === value;
@@ -911,7 +913,7 @@ export function TwelveWeekSystem() {
                 role="tab"
                 aria-selected={selected}
                 aria-label={`Mở tab ${label}`}
-                className={`inline-flex h-10 items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors ${
+                className={`inline-flex h-10 items-center justify-center gap-2 rounded-[var(--r-pill)] px-4 text-sm font-semibold transition-colors ${
                   selected
                     ? "bg-slate-950 text-white shadow-md"
                     : "text-slate-600 hover:bg-white hover:text-slate-950"

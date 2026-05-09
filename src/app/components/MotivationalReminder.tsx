@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { getInAppReminders, getRandomMotivationalQuote } from "../utils/storage";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
+import { useReducedMotion } from "./ui/use-reduced-motion";
 
 const QUOTE_SUPPRESSED_ROUTES = [
   "/onboarding",
@@ -40,6 +41,7 @@ function getReminderActionLabel(kind: "tasks" | "review" | "check-in"): string {
 export function MotivationalReminder() {
   const navigate = useNavigate();
   const location = useLocation();
+  const prefersReducedMotion = useReducedMotion();
   const [quote, setQuote] = useState("");
   const [showReminder, setShowReminder] = useState(false);
   const [reminder] = useState(() => getInAppReminders()[0] ?? null);
@@ -85,16 +87,8 @@ export function MotivationalReminder() {
 
   if (!showReminder) return null;
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 50 }}
-      className="fixed bottom-4 left-3 right-3 z-50 sm:bottom-6 sm:left-auto sm:right-6 sm:w-full sm:max-w-sm"
-      role="status"
-      aria-live="polite"
-    >
-      <Card className="max-w-full overflow-hidden rounded-xl border border-white/10 gradient-dark-teal text-white shadow-lg">
+  const content = (
+      <Card className="max-w-full overflow-hidden rounded-[var(--r-tile)] border border-white/10 gradient-dark-teal text-white shadow-lg">
         <CardContent className="space-y-2.5 p-3 sm:space-y-3 sm:p-4">
           {reminder ? (
             <div className="flex items-start gap-2.5">
@@ -120,7 +114,7 @@ export function MotivationalReminder() {
               </div>
               <button
                 onClick={() => setShowReminder(false)}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-pill)] text-white/80 transition hover:bg-white/10 hover:text-white"
                 aria-label="Đóng nhắc việc"
                 type="button"
               >
@@ -136,7 +130,7 @@ export function MotivationalReminder() {
               </div>
               <button
                 onClick={() => setShowReminder(false)}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-pill)] text-white/80 transition hover:bg-white/10 hover:text-white"
                 aria-label="Đóng thông điệp"
                 type="button"
               >
@@ -146,6 +140,29 @@ export function MotivationalReminder() {
           )}
         </CardContent>
       </Card>
+  );
+
+  const className =
+    "fixed bottom-4 left-3 right-3 z-50 sm:bottom-6 sm:left-auto sm:right-6 sm:w-full sm:max-w-sm";
+
+  if (prefersReducedMotion) {
+    return (
+      <div className={className} role="status" aria-live="polite">
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 50 }}
+      className={className}
+      role="status"
+      aria-live="polite"
+    >
+      {content}
     </motion.div>
   );
 }

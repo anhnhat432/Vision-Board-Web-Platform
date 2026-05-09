@@ -8,7 +8,7 @@ export type EmptyStateHeadingLevel = 2 | 3 | 4;
 
 interface EmptyStateProps {
   /**
-   * Optional leading icon. Rendered inside a neutral rounded badge. The icon
+   * Optional leading icon. Rendered inside a neutral rounded-[var(--r-control)] badge. The icon
    * itself should be a lucide-react icon node or any ReactNode.
    */
   icon?: ReactNode;
@@ -68,8 +68,8 @@ interface EmptyStateProps {
 }
 
 const CARD_CLASSES =
-  "rounded-2xl border border-slate-200/80 bg-white/92 p-5 shadow-lg sm:p-6";
-const DASHED_CLASSES = "rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-8";
+  "rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-5 shadow-lg sm:p-6";
+const DASHED_CLASSES = "rounded-[var(--r-control)] border border-dashed border-slate-300 bg-slate-50 px-6 py-8";
 
 export function EmptyState({
   icon,
@@ -108,7 +108,7 @@ export function EmptyState({
       {icon ? (
         <div
           className={cn(
-            "flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-700",
+            "flex h-12 w-12 items-center justify-center rounded-[var(--r-pill)] bg-slate-100 text-slate-700",
             blockAlignClass,
           )}
           aria-hidden="true"

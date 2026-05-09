@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import {
   CalendarDays,
   CheckCircle2,
@@ -140,14 +140,14 @@ export function OrderStatusPage() {
 
   if (!order) {
     return (
-      <div className="space-y-8 pb-12">
+      <div className="stack-section pb-12">
         <Card className="overflow-hidden border-0 gradient-slate shadow-2xl">
           <CardContent className="p-10 text-center lg:p-14">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-900 text-white">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-slate-900 text-white">
               <ClipboardList className="h-10 w-10" />
             </div>
             <h1 className="mt-6 text-3xl font-bold text-slate-900">Chưa có đơn nào trong workspace của bạn</h1>
-            <p className="mx-auto mt-3 max-w-2xl text-base text-slate-500">
+            <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-slate-500">
               Hiện chưa tìm thấy đơn theo mã đang mở. Bạn có thể tạo đơn mới hoặc quay lại flow mục tiêu để chọn hướng đi tiếp theo.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -235,17 +235,17 @@ export function OrderStatusPage() {
   ];
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="stack-section pb-12">
       <Card className="hero-surface overflow-hidden border-0 text-white">
         <CardContent className="relative p-5 sm:p-6 lg:p-8">
           <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_320px]">
-            <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+            <div className="stack-section">
+              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                 <Truck className="h-4 w-4" />
                 Theo dõi đơn hàng
               </div>
 
-              <div className="space-y-4">
+              <div className="stack-stack">
                 <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
                   Theo dõi trạng thái đơn kit hiện tại.
                 </h1>
@@ -255,10 +255,10 @@ export function OrderStatusPage() {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
                   {getOrderStatusLabel(order.status)}
                 </Badge>
-                <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
                   {getKitTypeLabel(order.kitType)}
                 </Badge>
               </div>
@@ -270,14 +270,14 @@ export function OrderStatusPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/14 bg-white/12 p-5 shadow-sm">
+            <div className="rounded-[var(--r-card)] border border-white/14 bg-white/12 p-5 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Tóm tắt đơn</p>
               <div className="mt-4 grid gap-2.5">
                 {summaryItems.map((item) => {
                   const Icon = item.icon;
 
                   return (
-                    <div key={item.label} className="rounded-2xl border border-white/10 bg-black/12 px-4 py-3.5">
+                    <div key={item.label} className="rounded-[var(--r-card)] border border-white/10 bg-black/12 px-4 py-3.5">
                       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
                         <Icon className="h-3.5 w-3.5" />
                         {item.label}
@@ -294,26 +294,26 @@ export function OrderStatusPage() {
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="space-y-6">
+        <div className="stack-section">
           <Card className="border-0 shadow-lg">
             <CardHeader>
               <CardTitle>Chi tiết đơn</CardTitle>
               <CardDescription>Những thông tin chính của đơn, người nhận và kit được gom lại để dễ quét nhanh.</CardDescription>
             </CardHeader>
 
-            <CardContent className="space-y-6">
+            <CardContent className="stack-section">
               <div className="space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Mục tiêu & kit</p>
                 <p className="text-sm text-slate-600">Giữ phần định hướng và cấu hình kit ở cùng một cụm để quét nhanh hơn.</p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     <Target className="h-3.5 w-3.5" />
                     Mục tiêu đang gắn
                   </div>
-                  <p className="mt-3 text-base font-semibold text-slate-900">
+                  <p className="mt-[var(--space-inline)] text-base font-semibold text-slate-900">
                     {hasGoalLink ? order.goalTitle : "Đơn này chưa gắn mục tiêu"}
                   </p>
                   <p className="mt-1 text-sm leading-7 text-slate-600">
@@ -323,12 +323,12 @@ export function OrderStatusPage() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     <Package className="h-3.5 w-3.5" />
                     Cấu hình kit
                   </div>
-                  <p className="mt-3 text-base font-semibold text-slate-900">{getKitTypeLabel(order.kitType)}</p>
+                  <p className="mt-[var(--space-inline)] text-base font-semibold text-slate-900">{getKitTypeLabel(order.kitType)}</p>
                   <p className="mt-1 text-sm leading-7 text-slate-600">
                     {hasKeywords ? `${order.keywords.length} keyword đã được lưu cùng đơn này.` : "Chưa có keyword cụ thể cho kit."}
                   </p>
@@ -341,12 +341,12 @@ export function OrderStatusPage() {
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="rounded-[var(--r-card)] border border-slate-200 bg-white p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     <Mail className="h-3.5 w-3.5" />
                     Người nhận
                   </div>
-                  <p className="mt-3 text-sm font-semibold text-slate-900">{order.fullName}</p>
+                  <p className="mt-[var(--space-inline)] text-sm font-semibold text-slate-900">{order.fullName}</p>
                   <p className="mt-1 text-sm text-slate-600">{order.email}</p>
                   <div className="mt-1 flex items-center gap-2 text-sm text-slate-600">
                     <Phone className="h-3.5 w-3.5" />
@@ -354,30 +354,30 @@ export function OrderStatusPage() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="rounded-[var(--r-card)] border border-slate-200 bg-white p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     <MapPin className="h-3.5 w-3.5" />
                     Địa chỉ giao
                   </div>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">{order.shippingAddress}</p>
+                  <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">{order.shippingAddress}</p>
                 </div>
               </div>
 
               {(hasKeywords || hasNote) && (
-                <div className="space-y-4 border-t border-slate-100 pt-5">
+                <div className="stack-stack border-t border-slate-100 pt-5">
                   <div className="space-y-1">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Keyword & ghi chú</p>
                     <p className="text-sm text-slate-600">Những thông tin tinh chỉnh cho kit được gom riêng để đỡ lẫn với thông tin giao hàng.</p>
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                  <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
                     <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                       <Package className="h-3.5 w-3.5" />
                       Ghi chú cho kit
                     </div>
 
                     {hasKeywords && (
-                      <div className="mt-3 flex flex-wrap gap-2">
+                      <div className="mt-[var(--space-inline)] flex flex-wrap gap-2">
                         {order.keywords.map((keyword) => (
                           <Badge key={keyword} variant="outline" className="border-slate-200 bg-white text-slate-700">
                             {keyword}
@@ -386,7 +386,7 @@ export function OrderStatusPage() {
                       </div>
                     )}
 
-                    {hasNote && <p className="mt-3 text-sm leading-7 text-slate-600">{order.note}</p>}
+                    {hasNote && <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">{order.note}</p>}
                   </div>
                 </div>
               )}
@@ -399,7 +399,7 @@ export function OrderStatusPage() {
               <CardDescription>Timeline nhỏ cho local order flow hiện tại, bao gồm đầy đủ 4 bước từ chờ xác nhận đến đã giao.</CardDescription>
             </CardHeader>
 
-            <CardContent className="space-y-6">
+            <CardContent className="stack-section">
               {ORDER_TIMELINE_STEPS.map((step, index) => {
                 const Icon = step.icon;
                 const isCompleted = index < visualTimelineStep;
@@ -409,12 +409,12 @@ export function OrderStatusPage() {
                 return (
                   <div
                     key={step.status}
-                    className={`flex items-start gap-4 rounded-2xl border px-4 py-4 ${
+                    className={`flex items-start gap-4 rounded-[var(--r-card)] border px-4 py-4 ${
                       isActive ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-white"
                     }`}
                   >
                     <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] ${
                         isActive ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-400"
                       }`}
                     >
@@ -446,7 +446,7 @@ export function OrderStatusPage() {
               })}
 
               {isCancelled && (
-                <div className="rounded-2xl border border-rose-200 bg-rose-50/80 p-4">
+                <div className="rounded-[var(--r-card)] border border-rose-200 bg-rose-50/80 p-4">
                   <p className="text-sm font-semibold text-rose-800">Đơn này đã bị huỷ.</p>
                   <p className="mt-1 text-sm leading-7 text-rose-700/80">
                     Bạn có thể tạo đơn mới nếu vẫn muốn đặt kit.
@@ -455,13 +455,13 @@ export function OrderStatusPage() {
               )}
 
               {demoMode && !isBackendBacked && !isCancelled && (
-              <div className="space-y-4 border-t border-slate-100 pt-5">
+              <div className="stack-stack border-t border-slate-100 pt-5">
                 <div className="space-y-1">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Điều khiển trạng thái</p>
                   <p className="text-sm text-slate-600">Phần này chỉ xuất hiện khi đơn chưa gắn backend.</p>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+                <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Cập nhật trạng thái</p>
@@ -500,19 +500,19 @@ export function OrderStatusPage() {
           </Card>
         </div>
 
-        <div className="space-y-6">
+        <div className="stack-section">
           <Card className="border-0 shadow-lg">
             <CardHeader>
               <CardTitle>Đơn gần đây</CardTitle>
               <CardDescription>Giữ local order flow gọn và cho phép mở nhanh lại các đơn vừa tạo.</CardDescription>
             </CardHeader>
 
-            <CardContent className="space-y-3">
+            <CardContent className="stack-tight">
               {recentOrders.slice(0, 5).map((item) => (
                 <button
                   key={item.id}
                   type="button"
-                  className={`w-full rounded-2xl border px-4 py-4 text-left transition-colors ${
+                  className={`w-full rounded-[var(--r-card)] border px-4 py-4 text-left transition-colors ${
                     item.id === order.id ? "border-sky-200 bg-sky-50" : "border-slate-200 bg-white hover:bg-slate-50"
                   }`}
                   onClick={() => navigate(`/order-status/${item.id}`)}

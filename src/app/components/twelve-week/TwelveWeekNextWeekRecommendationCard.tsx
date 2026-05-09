@@ -1,4 +1,4 @@
-import { ArrowRight, Compass, ShieldCheck } from "lucide-react";
+﻿import { ArrowRight, Compass, ShieldCheck } from "lucide-react";
 
 import type {
   NextWeekAdjustment,
@@ -54,10 +54,10 @@ export function TwelveWeekNextWeekRecommendationCard({
       data-testid="next-week-recommendation"
       data-recommendation={recommendation.recommendation}
       data-confidence={recommendation.confidence}
-      className={`rounded-xl border p-5 sm:p-6 ${accent}`}
+      className={`rounded-[var(--r-tile)] border p-5 sm:p-6 ${accent}`}
     >
       <div className="flex items-start gap-3">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/82 text-slate-700">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-white/82 text-slate-700">
           <Compass className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1">
@@ -80,7 +80,7 @@ export function TwelveWeekNextWeekRecommendationCard({
           </p>
           <p className="mt-1 text-sm leading-6 text-slate-700">{recommendation.body}</p>
 
-          <div className="mt-3 rounded-lg border border-white/82 bg-white/82 px-3 py-2">
+          <div className="mt-[var(--space-inline)] rounded-[var(--r-control)] border border-white/82 bg-white/82 px-3 py-2">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
               Khung ưu tiên tuần sau
             </p>
@@ -94,7 +94,7 @@ export function TwelveWeekNextWeekRecommendationCard({
 
           <div
             data-testid="next-week-recommendation-control-note"
-            className="mt-3 flex items-start gap-2 rounded-lg border border-white/60 bg-white/72 px-3 py-2 text-xs leading-5 text-slate-600"
+            className="mt-[var(--space-inline)] flex items-start gap-2 rounded-[var(--r-control)] border border-white/60 bg-white/72 px-3 py-2 text-xs leading-5 text-slate-600"
           >
             <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500" />
             <span>
@@ -103,7 +103,7 @@ export function TwelveWeekNextWeekRecommendationCard({
             </span>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
+          <div className="mt-[var(--space-inline)] flex flex-wrap items-center gap-2">
             {onAcceptRecommendation && (
               <Button
                 size="sm"

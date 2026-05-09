@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+﻿import { useMemo } from "react";
 import { Activity, ShieldCheck } from "lucide-react";
 
 import {
@@ -44,25 +44,25 @@ export function FunnelDiagnosticsPanel({ enabled, snapshot }: FunnelDiagnosticsP
   return (
     <section
       data-testid="funnel-diagnostics-panel"
-      className="rounded-2xl border border-slate-300 bg-slate-50/80 p-4 shadow-sm sm:p-5"
+      className="rounded-[var(--r-card)] border border-slate-300 bg-slate-50/80 p-4 shadow-sm sm:p-5"
     >
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-200 text-slate-700">
+          <span className="flex h-7 w-7 items-center justify-center rounded-[var(--r-pill)] bg-slate-200 text-slate-700">
             <Activity className="h-4 w-4" aria-hidden="true" />
           </span>
           <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-700">
             Funnel diagnostics (dev)
           </p>
         </div>
-        <span className="rounded-full border border-slate-300 bg-white px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-slate-600">
+        <span className="rounded-[var(--r-pill)] border border-slate-300 bg-white px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-slate-600">
           Local-only
         </span>
       </header>
 
       <p
         data-testid="funnel-diagnostics-privacy-note"
-        className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-slate-600"
+        className="mt-[var(--space-inline)] flex items-start gap-1.5 text-xs leading-5 text-slate-600"
       >
         <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-700" aria-hidden="true" />
         <span>
@@ -147,7 +147,7 @@ export function FunnelDiagnosticsPanel({ enabled, snapshot }: FunnelDiagnosticsP
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div data-section={title} className="mt-4 rounded-2xl border border-white/72 bg-white/82 p-3">
+    <div data-section={title} className="mt-4 rounded-[var(--r-card)] border border-white/72 bg-white/82 p-3">
       <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-slate-500">{title}</p>
       <dl className="mt-2 grid gap-1 sm:grid-cols-2">{children}</dl>
     </div>
@@ -156,7 +156,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Row({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/70 bg-white/72 px-2.5 py-1.5">
+    <div className="flex items-center justify-between gap-3 rounded-[var(--r-tile)] border border-slate-200/70 bg-white/72 px-2.5 py-1.5">
       <dt className="text-xs text-slate-600">{label}</dt>
       <dd className="text-xs font-semibold text-slate-900">{value}</dd>
     </div>

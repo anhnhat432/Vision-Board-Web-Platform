@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { CalendarDays, Clock3, Flag, ListChecks, SlidersHorizontal } from "lucide-react";
 
 import {
@@ -83,8 +83,8 @@ export function TwelveWeekCycleSettingsPanel({
             Chỉnh nhịp review, mức tải và thứ tự việc lặp lại để hợp với cách bạn làm thật ngoài đời.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="rounded-lg border border-sky-200 bg-sky-50 p-5 shadow-sm">
+        <CardContent className="stack-section">
+          <div className="rounded-[var(--r-control)] border border-sky-200 bg-sky-50 p-5 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
@@ -101,7 +101,7 @@ export function TwelveWeekCycleSettingsPanel({
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <div className="stack-tight rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-4">
               <div>
                 <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   <CalendarDays className="h-3.5 w-3.5" />
@@ -123,7 +123,7 @@ export function TwelveWeekCycleSettingsPanel({
               </Select>
             </div>
 
-            <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <div className="stack-tight rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-4">
               <div>
                 <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   <Clock3 className="h-3.5 w-3.5" />
@@ -140,7 +140,7 @@ export function TwelveWeekCycleSettingsPanel({
               />
             </div>
 
-            <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <div className="stack-tight rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-4">
               <div>
                 <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   <ListChecks className="h-3.5 w-3.5" />
@@ -164,7 +164,7 @@ export function TwelveWeekCycleSettingsPanel({
               </Select>
             </div>
 
-            <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <div className="stack-tight rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-4">
               <div>
                 <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   <Flag className="h-3.5 w-3.5" />
@@ -189,7 +189,7 @@ export function TwelveWeekCycleSettingsPanel({
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+          <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Thứ tự việc lặp lại</p>
@@ -201,11 +201,11 @@ export function TwelveWeekCycleSettingsPanel({
                 {system.leadIndicators.length} việc
               </Badge>
             </div>
-            <div className="mt-4 space-y-4">
+            <div className="mt-4 stack-stack">
               {system.leadIndicators.map((indicator, index) => (
                 <div
                   key={indicator.id || indicator.name}
-                  className={`grid gap-4 rounded-lg border p-5 shadow-sm md:grid-cols-[minmax(0,1fr)_150px_140px] ${
+                  className={`grid gap-4 rounded-[var(--r-control)] border p-5 shadow-sm md:grid-cols-[minmax(0,1fr)_150px_140px] ${
                     indicator.type === "optional" ? "border-amber-200 bg-amber-50" : "border-emerald-200 bg-white"
                   }`}
                 >
@@ -273,15 +273,15 @@ export function TwelveWeekCycleSettingsPanel({
           </div>
 
           <div className="grid gap-3 md:grid-cols-3">
-            <div className="rounded-lg border border-slate-200 bg-slate-950 p-5 text-white shadow-sm">
+            <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-950 p-5 text-white shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-300">Bắt đầu</p>
               <p className="mt-2 text-xl font-bold text-white">{formatCalendarDate(system.startDate)}</p>
             </div>
-            <div className="rounded-lg border border-sky-200 bg-sky-50 p-5 shadow-sm">
+            <div className="rounded-[var(--r-control)] border border-sky-200 bg-sky-50 p-5 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">Kết thúc</p>
               <p className="mt-2 text-xl font-bold text-slate-950">{formatCalendarDate(system.endDate)}</p>
             </div>
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 shadow-sm">
+            <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50 p-5 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">Số lần quay lại nhịp</p>
               <p className="mt-2 text-xl font-bold text-slate-950">{system.reentryCount ?? 0} lần</p>
             </div>

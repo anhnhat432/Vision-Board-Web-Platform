@@ -59,7 +59,7 @@ export function TacticsEditor({ tactics, onChange, onClose }: TacticsEditorProps
 
         <CardContent className="space-y-6 pb-6">
           {localTactics.map((tactic, idx) => (
-            <div key={tactic.id} className="rounded-md border p-4 space-y-4">
+            <div key={tactic.id} className="rounded-[var(--r-control)] border p-4 space-y-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 space-y-3">
                   {/* Name */}

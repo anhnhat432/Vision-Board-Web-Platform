@@ -34,7 +34,7 @@ export function CoreFlowGateState({
 
         <Card className="overflow-hidden border border-slate-200/80 bg-white/92 shadow-sm">
           <CardContent className="p-7 text-center sm:p-9">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-50 text-violet-700">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700">
               {loading ? <Loader2 className="h-7 w-7 animate-spin" /> : <Compass className="h-7 w-7" />}
             </div>
             <p className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{eyebrow}</p>

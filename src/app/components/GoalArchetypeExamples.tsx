@@ -64,7 +64,7 @@ export function GoalArchetypeExamples({
       data-variant={variant}
       data-archetype={archetype}
       className={[
-        "rounded-2xl border border-violet-200 bg-violet-50/72 p-3 text-left",
+        "rounded-[var(--r-card)] border border-violet-200 bg-violet-50/72 p-3 text-left",
         className ?? "",
       ]
         .filter(Boolean)
@@ -84,8 +84,8 @@ export function GoalArchetypeExamples({
             data-tone={entry.tone}
             className={
               entry.tone === "weak"
-                ? "rounded-xl border border-rose-200 bg-rose-50/70 px-3 py-2.5 text-sm leading-6 text-rose-950"
-                : "rounded-xl border border-emerald-200 bg-emerald-50/70 px-3 py-2.5 text-sm leading-6 text-emerald-950"
+                ? "rounded-[var(--r-tile)] border border-rose-200 bg-rose-50/70 px-3 py-2.5 text-sm leading-6 text-rose-950"
+                : "rounded-[var(--r-tile)] border border-emerald-200 bg-emerald-50/70 px-3 py-2.5 text-sm leading-6 text-emerald-950"
             }
           >
             <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em]">
@@ -103,7 +103,7 @@ export function GoalArchetypeExamples({
       {variant === "lead_indicator" && (
         <p
           data-testid="goal-archetype-week1-starter"
-          className="mt-3 rounded-xl border border-sky-200 bg-sky-50/70 px-3 py-2.5 text-sm leading-6 text-sky-900"
+          className="mt-3 rounded-[var(--r-tile)] border border-sky-200 bg-sky-50/70 px-3 py-2.5 text-sm leading-6 text-sky-900"
         >
           <span className="font-semibold">Việc bắt đầu cho tuần 1:</span> {example.week1StarterTask}
         </p>

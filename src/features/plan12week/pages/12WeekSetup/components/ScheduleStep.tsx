@@ -1,4 +1,4 @@
-import { AlertTriangle, CalendarDays } from "lucide-react";
+﻿import { AlertTriangle, CalendarDays } from "lucide-react";
 
 import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
 import { formatDateInputValue } from "@/app/utils/storage";
@@ -52,8 +52,8 @@ export function ScheduleStep({
     .join(" ");
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <div className="space-y-5">
+    <div className="mx-auto max-w-4xl stack-section">
+      <div className="stack-stack">
         <div className="grid gap-3 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="cycle-start-date">Ngày bắt đầu chu kỳ</Label>
@@ -149,7 +149,7 @@ export function ScheduleStep({
           />
         </div>
       </div>
-      <div className="space-y-6 rounded-2xl border border-white/70 bg-white/72 p-5">
+      <div className="stack-section rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5">
         <SecondaryPanel title="Việc lặp lại và chỉ số" collapsible defaultOpen={isDesktop}>
           <p className="text-sm leading-7 text-slate-700">
             Việc lặp lại là việc bạn làm mỗi tuần. Chỉ số kết quả chính là con số dùng để nhìn lại xem chu kỳ có đi đúng
@@ -172,11 +172,11 @@ export function ScheduleStep({
             collapsible
             defaultOpen={isDesktop}
           >
-            <div className="rounded-2xl border border-slate-900 bg-slate-950 p-4 text-white">
+            <div className="rounded-[var(--r-card)] border border-slate-900 bg-slate-950 p-4 text-white">
               <p className="text-xs uppercase tracking-[0.16em] text-white/54">Nhịp nên giữ ở tuần 1</p>
               <p className="mt-2 text-base font-semibold">{setupGuideSupport.week1Headline}</p>
               <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1Support}</p>
-              <div className="mt-3 rounded-2xl border border-white/12 bg-white/8 p-3">
+              <div className="mt-[var(--space-inline)] rounded-[var(--r-card)] border border-white/12 bg-white/8 p-3">
                 <p className="text-xs uppercase tracking-[0.16em] text-white/54">Gợi ý duy trì</p>
                 <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1CadenceHint}</p>
               </div>
@@ -189,15 +189,15 @@ export function ScheduleStep({
             collapsible
             defaultOpen={isDesktop}
           >
-            <div className="rounded-2xl border border-white/70 bg-white/78 p-4">
+            <div className="rounded-[var(--r-card)] border border-white/70 bg-white/78 p-4">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Ngày nhìn lại và mức tải tuần gợi ý</p>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
+              <div className="mt-[var(--space-inline)] grid gap-3 sm:grid-cols-2">
+                <div className="rounded-[var(--r-card)] border border-white/70 bg-slate-50/80 p-3">
                   <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Nhìn lại</p>
                   <p className="mt-2 text-sm font-semibold text-slate-900">{draft.reviewDay}</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600">{setupGuideSupport.recommendedReviewReason}</p>
                 </div>
-                <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
+                <div className="rounded-[var(--r-card)] border border-white/70 bg-slate-50/80 p-3">
                   <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Nhịp tuần</p>
                   <p className="mt-2 text-sm font-semibold text-slate-900">
                     {getLoadPreferenceLabel(draft.tacticLoadPreference)}
@@ -214,14 +214,14 @@ export function ScheduleStep({
             collapsible
             defaultOpen={isDesktop}
           >
-            <div className="rounded-2xl border border-white/70 bg-white/78 p-4">
+            <div className="rounded-[var(--r-card)] border border-white/70 bg-white/78 p-4">
               <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Mốc gợi ý theo khung</p>
-              <div className="mt-3 space-y-3">
-                <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
+              <div className="mt-[var(--space-inline)] stack-tight">
+                <div className="rounded-[var(--r-card)] border border-white/70 bg-slate-50/80 p-3">
                   <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tuần 4</p>
                   <p className="mt-2 text-sm leading-7 text-slate-700">{draft.week4Milestone}</p>
                 </div>
-                <div className="rounded-2xl border border-white/70 bg-slate-50/80 p-3">
+                <div className="rounded-[var(--r-card)] border border-white/70 bg-slate-50/80 p-3">
                   <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tuần 8</p>
                   <p className="mt-2 text-sm leading-7 text-slate-700">{draft.week8Milestone}</p>
                 </div>
@@ -234,18 +234,18 @@ export function ScheduleStep({
           collapsible
           defaultOpen={isDesktop}
         >
-          <div className="rounded-2xl border border-white/70 bg-white/78 p-4">
+          <div className="rounded-[var(--r-card)] border border-white/70 bg-white/78 p-4">
             <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
               {hasPreviewTasks ? "Những việc sẽ hiện ở màn Hôm nay" : "Tuần đầu nên mở bằng"}
             </p>
-            <div className="mt-3 space-y-2">
+            <div className="mt-[var(--space-inline)] space-y-2">
               {weekOneTaskPreview.length === 0 ? (
                 <p className="text-sm text-slate-500">
                   Khi bạn chốt khung hoặc thêm việc, tuần đầu sẽ hiện rõ các việc cần mở ở màn Hôm nay.
                 </p>
               ) : (
                 weekOneTaskPreview.map((task) => (
-                  <div key={task} className="rounded-2xl border border-white/70 bg-slate-50/80 px-4 py-3 text-sm text-slate-700">
+                  <div key={task} className="rounded-[var(--r-card)] border border-white/70 bg-slate-50/80 px-4 py-3 text-sm text-slate-700">
                     {task}
                   </div>
                 ))
@@ -254,7 +254,7 @@ export function ScheduleStep({
             {weekOneTaskWarning ? (
               <p
                 role="status"
-                className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-amber-700"
+                className="mt-[var(--space-inline)] flex items-start gap-1.5 text-xs leading-5 text-amber-700"
               >
                 <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                 <span>

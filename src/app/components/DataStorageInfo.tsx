@@ -30,7 +30,7 @@ export function DataStorageInfo({
   if (variant === "banner") {
     return (
       <div
-        className={`flex items-start gap-3 rounded-2xl border border-sky-200 bg-sky-50/80 px-4 py-3 ${className}`}
+        className={`flex items-start gap-3 rounded-[var(--r-card)] border border-sky-200 bg-sky-50/80 px-4 py-3 ${className}`}
       >
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
         <div className="min-w-0">
@@ -49,10 +49,10 @@ export function DataStorageInfo({
 
   return (
     <div
-      className={`rounded-2xl border border-slate-200 bg-white/92 p-5 shadow-sm ${className}`}
+      className={`rounded-[var(--r-card)] border border-slate-200 bg-white/92 p-5 shadow-sm ${className}`}
     >
       <div className="flex items-center gap-2.5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100">
+        <div className="flex h-9 w-9 items-center justify-center rounded-[var(--r-tile)] bg-slate-100">
           <HardDrive className="h-4 w-4 text-slate-600" />
         </div>
         <div>

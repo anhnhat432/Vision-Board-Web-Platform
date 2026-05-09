@@ -50,7 +50,7 @@ export function MeasurableStep({
     targetNotAboveBaseline;
 
   return (
-    <div className="space-y-5">
+    <div className="stack-stack">
       <div className="space-y-2">
         <Label htmlFor="smart-metric-name" className="text-base">
           Con số hoặc dấu hiệu theo dõi
@@ -83,7 +83,7 @@ export function MeasurableStep({
             data-testid="smart-intent-metric-hint"
             id="smart-metric-intent-hint"
             role="note"
-            className="flex items-start gap-2 rounded-2xl border border-sky-200 bg-sky-50/82 px-3 py-2.5 text-sm leading-6 text-sky-900"
+            className="flex items-start gap-2 rounded-[var(--r-card)] border border-sky-200 bg-sky-50/82 px-3 py-2.5 text-sm leading-6 text-sky-900"
           >
             <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" aria-hidden="true" />
             <span>

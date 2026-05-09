@@ -1,4 +1,4 @@
-import { FeedbackDialog } from "../FeedbackDialog";
+﻿import { FeedbackDialog } from "../FeedbackDialog";
 import { TwelveWeekCycleSettingsPanel } from "./TwelveWeekCycleSettingsPanel";
 import { WeeklyTimeBlocksPanel } from "./WeeklyTimeBlocksPanel";
 import { SectionBlock } from "@/app/components/layout/SectionBlock";
@@ -6,7 +6,7 @@ import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
 
 export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
   return (
-    <div className="space-y-6 pt-4">
+    <div className="stack-section pt-4">
       <SectionBlock title="Cài đặt mục tiêu" description="Tên mục tiêu, chu kỳ 12 tuần, ngày review, thời gian nhắc nhở">
         <TwelveWeekCycleSettingsPanel
           system={props.system}

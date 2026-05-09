@@ -70,7 +70,7 @@ export function InlineStatusMessage({
       role={role}
       data-testid={testId}
       className={cn(
-        "flex items-start gap-2 rounded-lg border px-3 py-2 text-sm leading-6",
+        "flex items-start gap-2 rounded-[var(--r-control)] border px-3 py-2 text-sm leading-6",
         TONE_CLASS[tone],
         className,
       )}

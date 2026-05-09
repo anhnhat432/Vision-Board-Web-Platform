@@ -1,9 +1,10 @@
-import { ArrowLeft, Save, Sparkles } from "lucide-react";
+﻿import { ArrowLeft, Save, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import { PageShell } from "../components/PageShell";
+import { SectionBlock } from "../components/layout/SectionBlock";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Label } from "../components/ui/label";
@@ -112,22 +113,24 @@ export function AspirationalVision() {
   };
 
   return (
-    <PageShell maxWidth="hero" className="space-y-6 page-enter">
-      <Card className="border border-slate-200 bg-white/94 shadow-sm">
-        <CardHeader className="space-y-3">
-          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700">
+    <PageShell maxWidth="hero" className="stack-section page-enter">
+      <h1 className="sr-only">Tầm nhìn 3 năm</h1>
+      <SectionBlock title="Biểu mẫu tầm nhìn 3 năm" headerVisuallyHidden>
+        <Card className="border border-slate-200 bg-white/94 shadow-sm">
+        <CardHeader className="stack-stack">
+          <div className="inline-flex w-fit items-center gap-2 rounded-[var(--r-pill)] border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700">
             <Sparkles className="h-3.5 w-3.5" />
             Discipline #4
           </div>
           <div>
-            <CardTitle className="text-2xl">Tầm nhìn 3 năm</CardTitle>
+            <CardTitle as="h2" className="text-2xl">Tầm nhìn 3 năm</CardTitle>
             <CardDescription className="mt-2 max-w-3xl leading-7">
               Viết phần aspirational vision riêng với mục tiêu 12 tuần. Phần này không bắt buộc, nhưng giúp mỗi cycle ngắn hạn bám vào một hướng dài hơn.
             </CardDescription>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-2">
+        <CardContent className="stack-section">
+          <div className="stack-tight">
             <Label htmlFor="aspirational-summary">Tóm tắt tầm nhìn 3 năm</Label>
             <Textarea
               id="aspirational-summary"
@@ -154,7 +157,7 @@ export function AspirationalVision() {
                   type="button"
                   aria-pressed={horizonYears === year}
                   onClick={() => setHorizonYears(year as 3 | 5)}
-                  className={`rounded-full border px-4 py-2 text-sm font-medium ${
+                  className={`rounded-[var(--r-pill)] border px-4 py-2 text-sm font-medium ${
                     horizonYears === year
                       ? "border-slate-950 bg-slate-950 text-white"
                       : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
@@ -166,7 +169,7 @@ export function AspirationalVision() {
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="stack-tight">
             <div>
               <h2 className="text-base font-semibold text-slate-950">Các mảng đời sống</h2>
               <p className="mt-1 text-sm text-slate-600">Điền ít nhất một mảng. Các mảng còn lại có thể để trống.</p>
@@ -203,7 +206,8 @@ export function AspirationalVision() {
             </Button>
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      </SectionBlock>
     </PageShell>
   );
 }

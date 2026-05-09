@@ -1,4 +1,4 @@
-import { CalendarClock, Clock3, Pencil, Sparkles } from "lucide-react";
+﻿import { CalendarClock, Clock3, Pencil, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import {
@@ -148,12 +148,12 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
           )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="stack-stack">
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-7">
           {blocksByDay.map(({ day, blocks }) => (
-            <div key={day} className="min-h-36 rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <div key={day} className="min-h-36 rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-3">
               <p className="text-sm font-semibold text-slate-950">{DAY_LABELS[day]}</p>
-              <div className="mt-3 space-y-2">
+              <div className="mt-[var(--space-inline)] space-y-2">
                 {blocks.length === 0 ? (
                   <p className="text-xs leading-5 text-slate-500">Chưa có block.</p>
                 ) : (
@@ -161,7 +161,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
                     <div
                       key={block.id}
                       data-testid="weekly-time-block-chip"
-                      className={`rounded-lg border px-3 py-2 text-xs shadow-sm ${TYPE_CHIP_CLASS[block.type]}`}
+                      className={`rounded-[var(--r-control)] border px-3 py-2 text-xs shadow-sm ${TYPE_CHIP_CLASS[block.type]}`}
                     >
                       <p className="font-semibold">{TYPE_LABELS[block.type]}</p>
                       <p className="mt-1 flex items-center gap-1">
@@ -192,7 +192,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
 
         <div className="grid gap-3 md:grid-cols-3">
           {(["strategic", "buffer", "breakout"] as const).map((type) => (
-            <div key={type} className="rounded-lg border border-slate-200 bg-white p-4">
+            <div key={type} className="rounded-[var(--r-control)] border border-slate-200 bg-white p-4">
               <Badge variant="outline" className={TYPE_CHIP_CLASS[type]}>
                 {TYPE_LABELS[type]}
               </Badge>
@@ -209,7 +209,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
             <DialogDescription>Chỉnh ngày, giờ bắt đầu và thời lượng. App sẽ chặn block trùng giờ trong cùng ngày.</DialogDescription>
           </DialogHeader>
           {editingDraft ? (
-            <div className="space-y-4">
+            <div className="stack-stack">
               <div className="space-y-2">
                 <Label htmlFor="time-block-day">Ngày trong tuần</Label>
                 <Select

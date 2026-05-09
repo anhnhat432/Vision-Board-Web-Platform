@@ -1,4 +1,4 @@
-import type { ReactNode, RefObject } from "react";
+﻿import type { ReactNode, RefObject } from "react";
 import { motion } from "motion/react";
 import { useReducedMotion } from "../../../components/ui/use-reduced-motion";
 import { ArrowLeft, ArrowRight, ChevronDown, CircleAlert, Lightbulb, Sparkles } from "lucide-react";
@@ -70,7 +70,7 @@ export function SmartGoalStepShell({
       initial={prefersReducedMotion ? false : { opacity: 0, x: 18 }}
       animate={{ opacity: 1, x: 0 }}
       transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
-      className="space-y-6"
+      className="stack-section"
     >
       <div className="flow-muted p-4 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -82,17 +82,17 @@ export function SmartGoalStepShell({
         <h2
           ref={headingRef}
           tabIndex={-1}
-          className="mt-2 text-2xl font-bold leading-tight text-slate-900 focus:outline-none sm:mt-3 sm:text-3xl"
+          className="mt-2 text-2xl font-bold leading-tight text-slate-900 focus:outline-none sm:mt-[var(--space-inline)] sm:text-3xl"
         >
           {step.title}
         </h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600 sm:mt-3 sm:text-base sm:leading-7">{step.description}</p>
-        <div className="flow-panel mt-3 px-4 py-3 text-sm text-slate-600 sm:mt-4">{step.coaching}</div>
+        <p className="mt-2 text-sm leading-6 text-slate-600 sm:mt-[var(--space-inline)] sm:text-base sm:leading-7">{step.description}</p>
+        <div className="flow-panel mt-[var(--space-inline)] px-4 py-3 text-sm text-slate-600 sm:mt-4">{step.coaching}</div>
       </div>
 
       {children}
 
-      <div className="rounded-2xl border border-violet-100 bg-violet-50/80 p-4 shadow-sm">
+      <div className="rounded-[var(--r-card)] border border-violet-100 bg-violet-50/80 p-4 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-sm font-semibold text-violet-700">
@@ -116,7 +116,7 @@ export function SmartGoalStepShell({
         </div>
       </div>
 
-      <details className="rounded-2xl border border-slate-200 bg-white/82 p-4 shadow-sm">
+      <details className="rounded-[var(--r-card)] border border-slate-200 bg-white/82 p-4 shadow-sm">
         <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 text-sm font-semibold text-slate-950">
           <div>
             <p className="font-semibold text-slate-950">Độ rõ của mục tiêu</p>
@@ -125,8 +125,8 @@ export function SmartGoalStepShell({
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="h-2 w-32 overflow-hidden rounded-full bg-slate-100">
-              <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${clarityProgress}%` }} />
+            <div className="h-2 w-32 overflow-hidden rounded-[var(--r-pill)] bg-slate-100">
+              <div className="h-full rounded-[var(--r-pill)] bg-emerald-500 transition-all" style={{ width: `${clarityProgress}%` }} />
             </div>
             <ChevronDown className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180" />
           </div>
@@ -137,7 +137,7 @@ export function SmartGoalStepShell({
               key={item.id}
               type="button"
               onClick={() => onJumpToStep(item.stepKey)}
-              className={`rounded-2xl border px-3 py-3 text-left transition-colors ${
+              className={`rounded-[var(--r-card)] border px-3 py-3 text-left transition-colors ${
                 item.done
                   ? "border-emerald-200 bg-emerald-50/80 hover:border-emerald-300"
                   : "border-amber-200 bg-amber-50/80 hover:border-amber-300"
@@ -145,7 +145,7 @@ export function SmartGoalStepShell({
             >
               <div className="flex items-start gap-2">
                 <span
-                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                  className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-[var(--r-pill)] text-xs font-bold ${
                     item.done ? "bg-emerald-600 text-white" : "bg-amber-200 text-amber-700"
                   }`}
                 >
@@ -204,7 +204,7 @@ export function SmartGoalStepShell({
           <p className="text-sm text-slate-600">{step.completionHint}</p>
         </div>
 
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+        <div className="mt-[var(--space-section)] flex flex-col gap-[var(--space-inline)] sm:flex-row">
           <Button variant="outline" className="flex-1" onClick={onBack}>
             <ArrowLeft className="h-4 w-4" />
             Quay lại

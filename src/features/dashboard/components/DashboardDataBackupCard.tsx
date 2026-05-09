@@ -18,17 +18,17 @@ export function DashboardDataBackupCard({
   onOpenImportPicker,
 }: DashboardDataBackupCardProps) {
   return (
-    <Card className="glass-surface-sm rounded-2xl border shadow-none">
+    <Card className="glass-surface-sm rounded-[var(--r-card)] border shadow-none">
       <CardHeader className="pb-3">
         <CardTitle className="text-base">Sao lưu dữ liệu</CardTitle>
         <CardDescription>Dữ liệu lưu trên trình duyệt này. Xuất bản sao lưu để không mất tiến độ khi đổi thiết bị hoặc xóa dữ liệu trình duyệt.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-wrap gap-3">
-        <Button variant="outline" className="gap-2 rounded-full" onClick={onExport}>
+        <Button variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={onExport}>
           <Download className="h-4 w-4" />
           Xuất bản sao lưu
         </Button>
-        <Button variant="outline" className="gap-2 rounded-full" onClick={onOpenImportPicker}>
+        <Button variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={onOpenImportPicker}>
           <Upload className="h-4 w-4" />
           Nhập dữ liệu
         </Button>

@@ -25,7 +25,7 @@ function WeeklyProgressChartComponent({ points }: WeeklyProgressChartProps) {
       tone="blue"
     >
       {points.length === 0 ? (
-        <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-sm">
+        <div className="rounded-[var(--r-tile)] border border-slate-200/80 bg-white/80 p-4 shadow-sm">
           <p className="text-sm text-slate-500">Chưa có dữ liệu thực thi theo tuần.</p>
         </div>
       ) : (
@@ -33,7 +33,7 @@ function WeeklyProgressChartComponent({ points }: WeeklyProgressChartProps) {
           {points.map((point) => (
             <div
               key={point.weekNumber}
-              className="rounded-xl border border-slate-200/80 bg-white/85 px-3 py-2.5 shadow-sm"
+              className="rounded-[var(--r-tile)] border border-slate-200/80 bg-white/85 px-3 py-2.5 shadow-sm"
             >
               <div className="mb-2 flex items-center justify-between gap-2">
                 <span className="text-sm font-semibold text-slate-800">Tuần {point.weekNumber}</span>
@@ -41,7 +41,7 @@ function WeeklyProgressChartComponent({ points }: WeeklyProgressChartProps) {
                   <span className="text-xs text-slate-500">
                     {point.completedTasks}/{point.totalTasks || 0}
                   </span>
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${getProgressTone(point.executionScore)}`}>
+                  <span className={`rounded-[var(--r-pill)] px-2 py-0.5 text-xs font-semibold ${getProgressTone(point.executionScore)}`}>
                     {point.executionScore}%
                   </span>
                 </div>

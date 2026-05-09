@@ -46,7 +46,7 @@ export function LocalOnlyNotice({
         role="status"
         data-testid={testId}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600",
+          "inline-flex items-center gap-1.5 rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600",
           className,
         )}
       >
@@ -61,13 +61,13 @@ export function LocalOnlyNotice({
       role="status"
       data-testid={testId}
       className={cn(
-        "flex flex-col gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700 sm:flex-row sm:items-center",
+        "flex flex-col gap-3 rounded-[var(--r-tile)] border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700 sm:flex-row sm:items-center",
         className,
       )}
     >
       <div className="flex items-start gap-2">
         <div
-          className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white text-slate-600 ring-1 ring-slate-200"
+          className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--r-control)] bg-white text-slate-600 ring-1 ring-slate-200"
           aria-hidden="true"
         >
           <Laptop className="h-3.5 w-3.5" />

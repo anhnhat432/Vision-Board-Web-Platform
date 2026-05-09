@@ -1,4 +1,4 @@
-import {
+﻿import {
   AlertTriangle,
   ArrowRight,
   Award,
@@ -38,6 +38,7 @@ import { usePlan12Week } from "@/features/plan12week/hooks";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { FeedbackDialog } from "../components/FeedbackDialog";
 import { PageHeader } from "../components/layout/PageHeader";
+import { SectionBlock } from "../components/layout/SectionBlock";
 import { NewUserGuideBanner } from "../components/NewUserGuide";
 import { SpotlightTour, type SpotlightTourStep } from "../components/SpotlightTour";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
@@ -133,7 +134,7 @@ function DeferredDashboardLifeAreaRadar({ data }: { data: DashboardRadarDatum[] 
       {isVisible ? (
         <Suspense
           fallback={
-            <div className="flex h-[300px] items-center justify-center rounded-xl bg-slate-100/88 text-sm text-slate-500">
+            <div className="flex h-[300px] items-center justify-center rounded-[var(--r-tile)] bg-muted text-sm text-muted-foreground">
               Đang tải biểu đồ cân bằng cuộc sống...
             </div>
           }
@@ -143,11 +144,11 @@ function DeferredDashboardLifeAreaRadar({ data }: { data: DashboardRadarDatum[] 
       ) : (
         <div
           data-testid="dashboard-radar-deferred"
-          className="flex h-[300px] flex-col items-center justify-center rounded-xl bg-slate-50 px-5 text-center"
+          className="flex h-[300px] flex-col items-center justify-center rounded-[var(--r-tile)] bg-muted px-5 text-center"
         >
-          <TrendingUp className="h-10 w-10 text-slate-300" />
-          <p className="mt-3 font-semibold text-slate-900">Biểu đồ sẽ tải khi bạn kéo tới đây.</p>
-          <p className="mt-1 max-w-sm text-sm leading-6 text-slate-500">
+          <TrendingUp className="h-10 w-10 text-muted-foreground/45" />
+          <p className="mt-[var(--space-inline)] font-semibold text-foreground">Biểu đồ sẽ tải khi bạn kéo tới đây.</p>
+          <p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">
             Dashboard giữ phần đầu nhẹ hơn; dữ liệu cân bằng vẫn nằm ở đây khi cần xem.
           </p>
         </div>
@@ -186,23 +187,23 @@ export function Dashboard() {
     return (
       <div className="ops-shell ops-dashboard">
         {/* Hero card skeleton */}
-        <Skeleton className="h-56 rounded-2xl" />
+        <Skeleton className="h-56 rounded-[var(--r-card)]" />
         {/* Quick action tiles skeleton */}
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-[var(--space-stack)] md:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-20 rounded-2xl" />
+            <Skeleton key={i} className="h-20 rounded-[var(--r-card)]" />
           ))}
         </div>
         {/* Stat cards skeleton */}
-        <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-[var(--space-stack)] grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-28 rounded-2xl" />
+            <Skeleton key={i} className="h-28 rounded-[var(--r-card)]" />
           ))}
         </div>
         {/* Content cards skeleton */}
-        <div className="grid gap-5 lg:grid-cols-2">
-          <Skeleton className="h-48 rounded-2xl" />
-          <Skeleton className="h-48 rounded-2xl" />
+        <div className="grid gap-[var(--space-stack)] lg:grid-cols-2">
+          <Skeleton className="h-48 rounded-[var(--r-card)]" />
+          <Skeleton className="h-48 rounded-[var(--r-card)]" />
         </div>
       </div>
     );
@@ -446,28 +447,28 @@ function DashboardContent({
           value: 7,
           note: "từ cân bằng cuộc sống tới review tuần",
           icon: Target,
-          iconClass: "bg-slate-950 text-white",
+          iconClass: "bg-foreground text-white",
         },
         {
           title: "Chu kỳ thực thi",
           value: 12,
           note: "tuần để biến mục tiêu thành việc rõ ràng",
           icon: CalendarDays,
-          iconClass: "bg-sky-100 text-sky-700",
+          iconClass: "bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)]",
         },
         {
           title: "Tài khoản",
           value: 1,
           note: demoMode ? "tùy chọn khi muốn đồng bộ sau" : "nơi đồng bộ mục tiêu và kế hoạch của bạn",
           icon: UserPlus,
-          iconClass: "bg-emerald-100 text-emerald-700",
+          iconClass: "bg-[color:var(--color-success-bg)] text-[color:var(--color-success-fg)]",
         },
         {
           title: "Review",
           value: 1,
           note: "nhịp nhìn lại mỗi tuần để không đi lệch",
           icon: BookOpen,
-          iconClass: "bg-violet-100 text-violet-700",
+          iconClass: "bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)]",
         },
       ]
     : [
@@ -476,28 +477,28 @@ function DashboardContent({
           value: userData.goals.length,
           note: `${completedGoalsCount} đã hoàn thành`,
           icon: Target,
-          iconClass: "bg-slate-950 text-white",
+          iconClass: "bg-foreground text-white",
         },
         {
           title: "Việc đã chốt",
           value: completedTasks,
           note: `trên tổng số ${totalTasks}`,
           icon: TrendingUp,
-          iconClass: "bg-sky-100 text-sky-700",
+          iconClass: "bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)]",
         },
         {
           title: "Thành tựu",
           value: userData.achievements.length,
           note: "huy hiệu đã mở khóa",
           icon: Award,
-          iconClass: "bg-emerald-100 text-emerald-700",
+          iconClass: "bg-[color:var(--color-success-bg)] text-[color:var(--color-success-fg)]",
         },
         {
           title: "Nhật ký",
           value: userData.reflections.length,
           note: journalStreak > 0 ? `streak ${journalStreak} ngày` : "bài viết đã lưu",
           icon: BookOpen,
-          iconClass: "bg-violet-100 text-violet-700",
+          iconClass: "bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)]",
         },
       ];
 
@@ -566,11 +567,11 @@ function DashboardContent({
           description: demoMode
             ? "Bạn có thể dùng luồng chính ngay trên trình duyệt này. Đăng ký chỉ là lựa chọn khi muốn đồng bộ sau."
             : "Web này dẫn bạn từ bức tranh cuộc sống hiện tại tới một mục tiêu SMART đủ rõ, rồi mới chia thành kế hoạch 12 tuần.",
-          cardClass: "rounded-2xl border border-slate-300 bg-slate-50/90 p-4 shadow-sm",
-          eyebrowClass: "text-slate-500",
-          titleClass: "text-slate-950",
-          descriptionClass: "text-slate-600",
-          buttonClass: "mt-4 bg-slate-950 text-white hover:bg-slate-800",
+          cardClass: "rounded-[var(--r-card)] border border-border bg-muted p-4 shadow-sm",
+          eyebrowClass: "text-muted-foreground",
+          titleClass: "text-foreground",
+          descriptionClass: "text-muted-foreground",
+          buttonClass: "mt-4 bg-foreground text-white hover:bg-foreground/90",
           buttonVariant: "outline" as const,
           buttonLabel: demoMode ? "Đăng ký nếu muốn đồng bộ" : "Bắt đầu miễn phí",
           icon: Target,
@@ -582,11 +583,11 @@ function DashboardContent({
           description: demoMode
             ? "Nếu muốn giữ bản sao, hãy xuất dữ liệu trước khi đổi máy hoặc xóa dữ liệu trình duyệt."
             : "Khi có tài khoản, mục tiêu, kế hoạch và tiến độ được nối với workspace của bạn thay vì phụ thuộc vào trình duyệt hiện tại.",
-          cardClass: "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm",
-          eyebrowClass: "text-slate-400",
-          titleClass: "text-slate-900",
-          descriptionClass: "text-slate-600",
-          buttonClass: "mt-4 border-slate-200 bg-white text-slate-900 hover:bg-slate-50",
+          cardClass: "rounded-[var(--r-card)] border border-border bg-white p-4 shadow-sm",
+          eyebrowClass: "text-muted-foreground",
+          titleClass: "text-foreground",
+          descriptionClass: "text-muted-foreground",
+          buttonClass: "mt-4 border-border bg-white text-foreground hover:bg-muted",
           buttonVariant: "outline" as const,
           buttonLabel: "Đăng nhập",
           icon: LogIn,
@@ -602,11 +603,11 @@ function DashboardContent({
               activeSystemTodayOpenTasks.length > 0
                 ? `${activeSystemTodayOpenTasks.length} việc đang mở hôm nay. Đi thẳng vào trung tâm để chạm tiếp đúng việc cần làm.`
                 : `Tuần ${activeSystemWeek}/${activeSystem.totalWeeks} đang khá gọn. Đây là lúc đẹp để nhìn lại tuần hoặc chuẩn bị review.`,
-            cardClass: "rounded-2xl border border-slate-300 bg-slate-50/90 p-4 shadow-sm",
-            eyebrowClass: "text-slate-500",
-            titleClass: "text-slate-950",
-            descriptionClass: "text-slate-600",
-            buttonClass: "mt-4 bg-slate-950 text-white hover:bg-slate-800",
+            cardClass: "rounded-[var(--r-card)] border border-border bg-muted p-4 shadow-sm",
+            eyebrowClass: "text-muted-foreground",
+            titleClass: "text-foreground",
+            descriptionClass: "text-muted-foreground",
+            buttonClass: "mt-4 bg-foreground text-white hover:bg-foreground/90",
             buttonVariant: "outline" as const,
             buttonLabel: "Mở trung tâm 12 tuần",
             icon: CalendarDays,
@@ -618,15 +619,15 @@ function DashboardContent({
             description: reviewDueToday
               ? "Nên chốt trước khi sang nhịp tuần mới để dashboard quay về trạng thái gọn đầu."
               : "Chu kỳ đang có ngày review cố định. Khi tới hạn, thẻ cảnh báo sẽ nổi lên ở đầu màn.",
-            cardClass: `rounded-2xl border p-4 shadow-sm ${
-              reviewDueToday ? "border-amber-200 bg-amber-50/92" : "border-slate-200 bg-white"
+            cardClass: `rounded-[var(--r-card)] border p-4 shadow-sm ${
+              reviewDueToday ? "border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)]" : "border-border bg-white"
             }`,
-            eyebrowClass: reviewDueToday ? "text-amber-700" : "text-slate-400",
-            titleClass: "text-slate-900",
-            descriptionClass: "text-slate-600",
+            eyebrowClass: reviewDueToday ? "text-[color:var(--color-warning-fg)]" : "text-muted-foreground",
+            titleClass: "text-foreground",
+            descriptionClass: "text-muted-foreground",
             buttonClass: reviewDueToday
-              ? "mt-4 border-amber-200 bg-white text-amber-800 hover:bg-amber-100"
-              : "mt-4 border-slate-200 bg-white text-slate-900 hover:bg-slate-50",
+              ? "mt-4 border-[color:var(--color-warning-border)] bg-white text-[color:var(--color-warning-fg)] hover:bg-[color:var(--color-warning-bg)]"
+              : "mt-4 border-border bg-white text-foreground hover:bg-muted",
             buttonVariant: "outline" as const,
             buttonLabel: reviewDueToday ? "Chốt review tuần" : "Xem chu kỳ",
             icon: AlertTriangle,
@@ -638,11 +639,11 @@ function DashboardContent({
                   eyebrow: "Lĩnh vực nên chăm lại",
                   title: getLifeAreaLabel(weakestArea.name),
                   description: `Điểm hiện tại ${weakestArea.score}/10. Nếu hôm nay còn thời gian, đây là nơi đáng quay lại trước.`,
-                  cardClass: "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm",
-                  eyebrowClass: "text-slate-400",
-                  titleClass: "text-slate-900",
-                  descriptionClass: "text-slate-600",
-                  buttonClass: "mt-4 border-slate-200 bg-white text-slate-900 hover:bg-slate-50",
+                  cardClass: "rounded-[var(--r-card)] border border-border bg-white p-4 shadow-sm",
+                  eyebrowClass: "text-muted-foreground",
+                  titleClass: "text-foreground",
+                  descriptionClass: "text-muted-foreground",
+                  buttonClass: "mt-4 border-border bg-white text-foreground hover:bg-muted",
                   buttonVariant: "outline" as const,
                   buttonLabel: "Mở cân bằng cuộc sống",
                   icon: TrendingUp,
@@ -657,11 +658,11 @@ function DashboardContent({
             title: "Chưa có chu kỳ đang chạy",
             description:
               "Tạo một chu kỳ để web luôn trả lời rõ hôm nay nên làm gì, tuần này đang ở đâu và review khi nào đến hạn.",
-            cardClass: "rounded-2xl border border-slate-300 bg-slate-50/90 p-4 shadow-sm",
-            eyebrowClass: "text-slate-500",
-            titleClass: "text-slate-950",
-            descriptionClass: "text-slate-600",
-            buttonClass: "mt-4 bg-slate-950 text-white hover:bg-slate-800",
+            cardClass: "rounded-[var(--r-card)] border border-border bg-muted p-4 shadow-sm",
+            eyebrowClass: "text-muted-foreground",
+            titleClass: "text-foreground",
+            descriptionClass: "text-muted-foreground",
+            buttonClass: "mt-4 bg-foreground text-white hover:bg-foreground/90",
             buttonVariant: "outline" as const,
             buttonLabel: "Tạo mục tiêu",
             icon: CalendarDays,
@@ -673,11 +674,11 @@ function DashboardContent({
                   eyebrow: "Lĩnh vực nên chăm lại",
                   title: getLifeAreaLabel(weakestArea.name),
                   description: `Điểm hiện tại ${weakestArea.score}/10. Nếu muốn bắt đầu nhẹ hơn, hãy cải thiện một góc nhỏ ở đây trước.`,
-                  cardClass: "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm",
-                  eyebrowClass: "text-slate-400",
-                  titleClass: "text-slate-900",
-                  descriptionClass: "text-slate-600",
-                  buttonClass: "mt-4 border-slate-200 bg-white text-slate-900 hover:bg-slate-50",
+                  cardClass: "rounded-[var(--r-card)] border border-border bg-white p-4 shadow-sm",
+                  eyebrowClass: "text-muted-foreground",
+                  titleClass: "text-foreground",
+                  descriptionClass: "text-muted-foreground",
+                  buttonClass: "mt-4 border-border bg-white text-foreground hover:bg-muted",
                   buttonVariant: "outline" as const,
                   buttonLabel: "Mở cân bằng cuộc sống",
                   icon: TrendingUp,
@@ -691,11 +692,11 @@ function DashboardContent({
             description: latestVisionBoard
               ? `Năm ${latestVisionBoard.year} • ${latestVisionBoard.items.length} phần tử đang được lưu lại.`
               : "Tạo một bảng tầm nhìn để trực quan hóa điều bạn đang hướng tới và quay lại nó dễ hơn mỗi ngày.",
-            cardClass: "rounded-2xl border border-slate-200 bg-white p-4 shadow-sm",
-            eyebrowClass: "text-slate-400",
-            titleClass: "text-slate-900",
-            descriptionClass: "text-slate-600",
-            buttonClass: "mt-4 border-slate-200 bg-white text-slate-900 hover:bg-slate-50",
+            cardClass: "rounded-[var(--r-card)] border border-border bg-white p-4 shadow-sm",
+            eyebrowClass: "text-muted-foreground",
+            titleClass: "text-foreground",
+            descriptionClass: "text-muted-foreground",
+            buttonClass: "mt-4 border-border bg-white text-foreground hover:bg-muted",
             buttonVariant: "outline" as const,
             buttonLabel: latestVisionBoard ? "Mở thư viện tầm nhìn" : "Tạo bảng tầm nhìn",
             icon: Images,
@@ -722,6 +723,7 @@ function DashboardContent({
 
   return (
     <div className={`ops-shell ops-dashboard ${showMobileStickyCTA ? 'pb-24' : ''}`}>
+      {!isSignedOut ? <h1 className="sr-only">Bảng điều khiển</h1> : null}
       <UpgradePaywallDialog
         open={isUpgradeDialogOpen}
         onOpenChange={setIsUpgradeDialogOpen}
@@ -744,7 +746,7 @@ function DashboardContent({
             <FeedbackDialog
               source="dashboard"
               context="dashboard"
-              triggerClassName="border-slate-200 bg-white/80 text-slate-700 hover:bg-white"
+              triggerClassName="border-border bg-white/80 text-muted-foreground hover:bg-white"
             />
           </div>
         </>
@@ -757,22 +759,22 @@ function DashboardContent({
         (() => {
           const severityStyles = {
             urgent: {
-              wrapper: "border-rose-200 bg-rose-50",
-              icon: "bg-rose-100 text-rose-600",
-              headline: "text-rose-800",
-              detail: "text-rose-700",
+              wrapper: "border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)]",
+              icon: "bg-[color:var(--color-danger-bg)] text-[color:var(--color-danger-fg)]",
+              headline: "text-[color:var(--color-danger-fg)]",
+              detail: "text-[color:var(--color-danger-fg)]",
             },
             caution: {
-              wrapper: "border-amber-200 bg-amber-50",
-              icon: "bg-amber-100 text-amber-600",
-              headline: "text-amber-800",
-              detail: "text-amber-700",
+              wrapper: "border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)]",
+              icon: "bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning-fg)]",
+              headline: "text-[color:var(--color-warning-fg)]",
+              detail: "text-[color:var(--color-warning-fg)]",
             },
             watch: {
-              wrapper: "border-slate-200 bg-slate-50",
-              icon: "bg-slate-100 text-slate-500",
-              headline: "text-slate-800",
-              detail: "text-slate-600",
+              wrapper: "border-border bg-muted",
+              icon: "bg-muted text-muted-foreground",
+              headline: "text-muted-foreground",
+              detail: "text-muted-foreground",
             },
           } as const;
           const s = severityStyles[topTrigger.severity];
@@ -781,7 +783,7 @@ function DashboardContent({
           return (
             <Reveal key={topTrigger.kind}>
               <div
-                className={`rounded-xl border px-4 py-3 text-sm flex flex-wrap items-start gap-3 ${s.wrapper}`}
+                className={`rounded-[var(--r-tile)] border px-4 py-3 text-sm flex flex-wrap items-start gap-3 ${s.wrapper}`}
                 onAnimationStart={() => {
                   trackRescueTriggerFired({
                     kind: topTrigger.kind,
@@ -790,7 +792,7 @@ function DashboardContent({
                   });
                 }}
               >
-                <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${s.icon}`}>
+                <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--r-pill)] ${s.icon}`}>
                   <AlertTriangle className="h-3.5 w-3.5" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -799,6 +801,7 @@ function DashboardContent({
                 </div>
                 <div className="flex shrink-0 items-center gap-2 ml-auto">
                   <Button
+                    variant="secondary"
                     size="sm"
                     onClick={() => {
                       trackRescueActionTaken({
@@ -840,31 +843,31 @@ function DashboardContent({
             Math.ceil((new Date(userData.subscription.renewsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
           );
           return (
-            <div className="rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm flex flex-wrap items-center gap-3">
+            <div className="rounded-[var(--r-tile)] border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] px-4 py-3 text-sm flex flex-wrap items-center gap-3">
               <span>
                 <span className="font-semibold">Plus dùng thử:</span> còn {daysLeft} ngày trên trình duyệt này.
               </span>
-              <Button size="sm" variant="ghost" className="ml-auto shrink-0 text-amber-700 hover:bg-amber-100" onClick={() => navigate("/billing/plan")}>
+              <Button size="sm" variant="ghost" className="ml-auto shrink-0 text-[color:var(--color-warning-fg)] hover:bg-[color:var(--color-warning-bg)]" onClick={() => navigate("/billing/plan")}>
                 Chi tiết
               </Button>
             </div>
           );
         })()}
       {!isSignedOut && (
-        <Card className="border border-violet-200 bg-white/94 shadow-sm">
+        <Card className="border border-[color:var(--color-info-border)] bg-white/94 shadow-sm">
           <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">Tầm nhìn 3 năm</p>
-              <h2 className="mt-2 text-xl font-bold text-slate-950">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--color-info-fg)]">Tầm nhìn 3 năm</p>
+              <h2 className="mt-2 text-xl font-bold text-foreground">
                 {aspirationalVision ? "Tầm nhìn dài hạn đã được neo lại" : "Hình dung hướng đi trước khi chạy 12 tuần"}
               </h2>
-              <p className="mt-2 line-clamp-2 max-w-3xl text-sm leading-6 text-slate-600">
+              <p className="mt-2 line-clamp-2 max-w-3xl text-sm leading-6 text-muted-foreground">
                 {aspirationalVision
                   ? aspirationalVision.summary
                   : "Discipline #4 của 12 Week Year khuyên tách tầm nhìn 3 năm khỏi mục tiêu 12 tuần để mỗi cycle có điểm tựa rõ hơn."}
               </p>
             </div>
-            <Button className="w-full sm:w-auto" variant={aspirationalVision ? "outline" : "default"} onClick={() => navigate("/vision")}>
+            <Button className="w-full sm:w-auto" variant={aspirationalVision ? "outline" : "secondary"} onClick={() => navigate("/vision")}>
               {aspirationalVision ? "Sửa tầm nhìn 3 năm" : "Hình dung tầm nhìn 3 năm"}
               <ArrowRight className="h-4 w-4" />
             </Button>
@@ -880,27 +883,27 @@ function DashboardContent({
       />
 
       {/* HERO SECTION: Promise + Primary CTA */}
-      <div className="ops-section-hero space-y-4">
+      <SectionBlock title="Hôm nay và bước tiếp theo" headerVisuallyHidden className="ops-section-hero">
         {activeSystem && reviewDueToday && (
           <Reveal>
-            <Card className="border-amber-200 bg-amber-50/92 shadow-lg">
+            <Card className="border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] shadow-lg">
               <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-start gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning-fg)]">
                     <AlertTriangle className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-amber-700">
+                    <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[color:var(--color-warning-fg)]">
                       Review đến hạn hôm nay
                     </p>
-                    <h3 className="mt-1 text-2xl font-bold text-slate-950">Hôm nay là lúc chốt review tuần.</h3>
-                    <p className="mt-2 text-sm text-slate-600">
+                    <h3 className="mt-1 text-2xl font-bold text-foreground">Hôm nay là lúc chốt review tuần.</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">
                       {visibleActiveTwelveWeekGoal?.title}. Khóa tuần {activeSystemWeek} và quyết định nhịp cho tuần tiếp
                       theo.
                     </p>
                   </div>
                 </div>
-                <Button className="w-full min-w-[180px] sm:w-auto" onClick={() => navigate("/12-week-system")}>
+                <Button variant="secondary" className="w-full min-w-[180px] sm:w-auto" onClick={() => navigate("/12-week-system")}>
                   Mở review tuần
                   <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -915,20 +918,20 @@ function DashboardContent({
             <CardContent className="p-5 sm:p-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-lg">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-primary text-white shadow-lg">
                     <CheckCircle2 className="h-6 w-6" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
                       Việc quan trọng nhất hôm nay
                     </p>
-                    <h2 className="mt-1 text-lg font-bold text-slate-950 sm:text-xl">
+                    <h2 className="mt-1 text-lg font-bold text-foreground sm:text-xl">
                       {activeSystemTodayOpenTasks[0].title}
                     </h2>
-                    <p className="mt-2 text-sm font-medium leading-6 text-emerald-700">
+                    <p className="mt-2 text-sm font-medium leading-6 text-[color:var(--color-success-fg)]">
                       Chỉ cần xong việc này là hôm nay đã đủ. Phần còn lại mở sau.
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {activeSystemTodayOpenTasks.length > 1
                         ? `Còn ${activeSystemTodayOpenTasks.length - 1} việc khác chờ sau đó`
                         : "Đây là việc duy nhất hôm nay"}
@@ -936,7 +939,8 @@ function DashboardContent({
                   </div>
                 </div>
                 <Button
-                  className="w-full bg-slate-950 text-white hover:bg-slate-900 sm:w-auto"
+                  variant="secondary"
+                  className="w-full bg-foreground text-white hover:bg-foreground sm:w-auto"
                   onClick={() => navigate("/12-week-system")}
                 >
                   Mở và đánh dấu xong
@@ -951,6 +955,7 @@ function DashboardContent({
         {showMobileStickyCTA && (
           <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/95 p-4 backdrop-blur supports-backdrop-blur:bg-white/90 md:hidden">
             <Button
+              variant="secondary"
               className="w-full shadow-lg"
               size="lg"
               onClick={() => navigate("/12-week-system")}
@@ -963,17 +968,17 @@ function DashboardContent({
 
         {/* Demo Visitor Empty State - Fresh signed-out users see this instead of sample goals */}
         {isFreshDemoVisitor && (
-          <Card className="border border-slate-200 bg-white shadow-sm">
+          <Card className="border border-border bg-white shadow-sm">
             <CardContent className="p-6 text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-                <Sparkles className="h-8 w-8 text-slate-600" />
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[var(--r-tile)] bg-muted">
+                <Sparkles className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h2 className="text-xl font-bold text-slate-950">Bắt đầu trải nghiệm</h2>
-              <p className="mt-2 text-sm text-slate-600">
+              <h2 className="text-xl font-bold text-foreground">Bắt đầu trải nghiệm</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
                 Bạn có thể dùng thử các tính năng cơ bản mà không cần đăng nhập.
                 Hãy bắt đầu với Life Balance để tạo dữ liệu thực.
               </p>
-              <Button className="mt-4" onClick={handlePublicVisitorStart}>
+              <Button variant="secondary" className="mt-4" onClick={handlePublicVisitorStart}>
                 Bắt đầu Life Balance
               </Button>
             </CardContent>
@@ -982,9 +987,9 @@ function DashboardContent({
 
         {/* Main Dashboard Card with PageHeader */}
         {shouldShowMainDashboardCard && (
-          <Card data-testid="dashboard-main-card" className="border border-slate-200/80 bg-white/92 shadow-sm">
+          <Card data-testid="dashboard-main-card" className="border border-border bg-white/92 shadow-sm">
               <CardContent className="p-5 sm:p-6">
-                <div className="space-y-4">
+                <div className="stack-stack">
                 <PageHeader
                   eyebrow={isSignedOut ? "Trang chính" : "Hôm nay"}
                   title={
@@ -1004,19 +1009,19 @@ function DashboardContent({
                         : setupStartDescription
                   }
                 />
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-[var(--space-inline)] flex flex-wrap gap-2">
                   {isSignedOut ? (
-                    <span title="Chế độ xem không cần đăng nhập, dùng thử các tính năng cơ bản" className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
+                    <span title="Chế độ xem không cần đăng nhập, dùng thử các tính năng cơ bản" className="rounded-[var(--r-pill)] border border-border bg-white px-3 py-1.5 text-sm text-muted-foreground">
                       {publicVisitorBadge}
                     </span>
                   ) : (
                     <button
                       type="button"
                       title={`Gói hiện tại: ${getPlanLabel(currentPlanCode)} — mở trang quản lý gói`}
-                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2 ${
+                      className={`inline-flex items-center gap-1.5 rounded-[var(--r-pill)] border px-3 py-1.5 text-sm font-medium transition hover:-translate-y-0.5 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                         currentPlanCode === "FREE"
-                          ? "border-slate-200 bg-white text-slate-600"
-                          : "border-violet-200 bg-violet-50 text-violet-800"
+                          ? "border-border bg-white text-muted-foreground"
+                          : "border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)]"
                       }`}
                       onClick={() => navigate("/billing/plan")}
                     >
@@ -1025,7 +1030,7 @@ function DashboardContent({
                     </button>
                   )}
                   {activeSystem && activeSystemWeek && (
-                    <span title={`Tuần hiện tại trong chu kỳ 12 tuần (${getTwelveWeekCurrentWeek(activeSystem)}/${activeSystem.totalWeeks})`} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
+                    <span title={`Tuần hiện tại trong chu kỳ 12 tuần (${getTwelveWeekCurrentWeek(activeSystem)}/${activeSystem.totalWeeks})`} className="rounded-[var(--r-pill)] border border-border bg-white px-3 py-1.5 text-sm text-muted-foreground">
                       Tuần {activeSystemWeek} của chu kỳ hiện tại
                     </span>
                   )}
@@ -1037,14 +1042,14 @@ function DashboardContent({
                   <div className="grid gap-4">
                     <div
                       data-tour-id="dashboard-start-card"
-                      className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6"
+                      className="rounded-[var(--r-card)] border border-border bg-white p-5 sm:p-6"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                             Làm tiếp ngay
                           </p>
-                          <h2 className="mt-2 text-2xl font-bold text-slate-950">
+                          <h2 className="mt-2 text-2xl font-bold text-foreground">
                             {activeSystemTodayOpenTasks.length > 0
                               ? `${activeSystemTodayOpenTasks.length} việc đang mở hôm nay`
                               : "Hôm nay đang khá gọn"}
@@ -1052,7 +1057,7 @@ function DashboardContent({
                         </div>
                         <Button
                           data-tour-id="dashboard-primary-action"
-                          className="w-full gradient-brand text-white shadow-lg hover:shadow-xl hover:scale-[1.01] sm:w-auto"
+                          className="w-full sm:w-auto"
                           onClick={() => navigate("/12-week-system")}
                         >
                           Mở trung tâm 12 tuần
@@ -1061,20 +1066,20 @@ function DashboardContent({
                       </div>
 
                           {activeSystemTaskPreview.length > 0 ? (
-                            <div className="mt-4 space-y-3">
+                            <div className="mt-4 stack-tight">
                               {activeSystemTaskPreview.map((task, index) => (
                                 <div
                                   key={task.id}
-                                  className={`flex items-center gap-4 rounded-2xl border px-4 py-4 ${
-                                    index === 0 ? "border-slate-300 bg-white" : "border-slate-200 bg-white/80"
+                                  className={`flex items-center gap-4 rounded-[var(--r-card)] border px-4 py-4 ${
+                                    index === 0 ? "border-border bg-white" : "border-border bg-white/80"
                                   }`}
                                 >
-                                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-950 text-sm font-semibold text-white">
+                                  <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] bg-foreground text-sm font-semibold text-white">
                                     {index + 1}
                                   </div>
                                   <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-semibold text-slate-950">{task.title}</p>
-                                    <p className="mt-1 text-xs text-slate-500">
+                                    <p className="truncate text-sm font-semibold text-foreground">{task.title}</p>
+                                    <p className="mt-1 text-xs text-muted-foreground">
                                       {index === 0 ? "Việc nên chạm vào đầu tiên" : "Việc đang chờ phía sau"}
                                     </p>
                                   </div>
@@ -1082,9 +1087,9 @@ function DashboardContent({
                               ))}
                             </div>
                           ) : (
-                            <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
-                              <p className="font-semibold text-slate-950">Bạn đã chốt xong phần mở của hôm nay.</p>
-                              <p className="mt-1 text-sm leading-7 text-slate-600">
+                            <div className="mt-4 rounded-[var(--r-card)] border border-border bg-white p-4">
+                              <p className="font-semibold text-foreground">Bạn đã chốt xong phần mở của hôm nay.</p>
+                              <p className="mt-1 text-sm leading-7 text-muted-foreground">
                                 Nếu còn sức, hãy mở trung tâm 12 tuần để xem phần còn lại của tuần hoặc chốt review khi
                                 đến hạn.
                               </p>
@@ -1092,49 +1097,49 @@ function DashboardContent({
                           )}
 
                           <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                            <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-                              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                            <div className="rounded-[var(--r-tile)] border border-border bg-white px-4 py-3">
+                              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                                 Hôm nay
                               </p>
-                              <p className="mt-1 text-xl font-bold text-slate-950">
+                              <p className="mt-1 text-xl font-bold text-foreground">
                                 {activeSystemTodayOpenTasks.length}
                               </p>
-                              <p className="text-xs text-slate-500">{activeSystemTodayCompletedCount} việc đã chốt</p>
+                              <p className="text-xs text-muted-foreground">{activeSystemTodayCompletedCount} việc đã chốt</p>
                             </div>
-                            <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-                              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                            <div className="rounded-[var(--r-tile)] border border-border bg-white px-4 py-3">
+                              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                                 Tuần này
                               </p>
                               <div className="mt-1 flex items-center gap-3">
-                                <p className="text-xl font-bold text-slate-950">
+                                <p className="text-xl font-bold text-foreground">
                                   {activeSystemWeekCompletion.percent}%
                                 </p>
                                 <Progress
                                   value={activeSystemWeekCompletion.percent}
-                                  className="h-2 flex-1 bg-slate-100"
+                                  className="h-2 flex-1 bg-muted"
                                 />
                               </div>
-                              <p className="mt-1 text-xs text-slate-500">
+                              <p className="mt-1 text-xs text-muted-foreground">
                                 {formatCalendarDate(activeSystemWeekRange.start)} -{" "}
                                 {formatCalendarDate(activeSystemWeekRange.end)}
                               </p>
                             </div>
                             <div
-                              className={`rounded-xl border px-4 py-3 ${
-                                reviewDueToday ? "border-amber-200 bg-amber-50" : "border-slate-200 bg-white"
+                              className={`rounded-[var(--r-tile)] border px-4 py-3 ${
+                                reviewDueToday ? "border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)]" : "border-border bg-white"
                               }`}
                             >
                               <p
                                 className={`text-xs font-semibold uppercase tracking-[0.14em] ${
-                                  reviewDueToday ? "text-amber-700" : "text-slate-500"
+                                  reviewDueToday ? "text-[color:var(--color-warning-fg)]" : "text-muted-foreground"
                                 }`}
                               >
                                 Review
                               </p>
-                              <p className="mt-1 text-base font-bold text-slate-950">
+                              <p className="mt-1 text-base font-bold text-foreground">
                                 {reviewDueToday ? "Đến hạn hôm nay" : getReviewDayLabel(activeSystem.reviewDay)}
                               </p>
-                              <p className="text-xs text-slate-500">
+                              <p className="text-xs text-muted-foreground">
                                 {reviewDueToday ? "Nên chốt trước tuần mới." : "Ngày cố định của chu kỳ."}
                               </p>
                             </div>
@@ -1144,20 +1149,21 @@ function DashboardContent({
                     ) : (
                       <div
                         data-tour-id="dashboard-start-card"
-                        className="rounded-2xl border border-slate-200 bg-slate-50/80 p-5"
+                        className="rounded-[var(--r-card)] border border-border bg-muted p-5"
                       >
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                           {isSignedOut ? "Bắt đầu đúng cách" : "Bắt đầu nhanh nhất"}
                         </p>
-                        <h2 className="mt-2 text-2xl font-bold text-slate-950">
+                        <h2 className="mt-2 text-2xl font-bold text-foreground">
                           {isSignedOut ? publicVisitorStartTitle : setupStartTitle}
                         </h2>
-                        <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
+                        <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">
                           {isSignedOut ? publicVisitorStartDescription : setupStartDescription}
                         </p>
                         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                           <Button
                             data-tour-id="dashboard-primary-action"
+                            variant="secondary"
                             className="w-full sm:w-auto"
                             onClick={() => (isSignedOut ? handlePublicVisitorStart() : navigate(setupPrimaryPath))}
                           >
@@ -1166,7 +1172,7 @@ function DashboardContent({
                           {isSignedOut ? (
                             <Button
                               variant="outline"
-                              className="w-full border-slate-200 bg-white text-slate-900 sm:w-auto"
+                              className="w-full border-border bg-white text-foreground sm:w-auto"
                               onClick={() => handleAuthNavigate("signin")}
                             >
                               Đăng nhập
@@ -1182,14 +1188,14 @@ function DashboardContent({
 
         {shouldShowTopSidebar && (
           <>
-            <section className="rounded-2xl border border-slate-200/80 bg-white/92 p-5 shadow-sm sm:p-6">
+            <section className="rounded-[var(--r-card)] border border-border bg-white/92 p-5 shadow-sm sm:p-6">
               <PageHeader
                 eyebrow="Thứ tự nên đi"
                 title="Một luồng chính, không phải ba lựa chọn ngang nhau."
                 description={quickActionIntro}
               />
 
-              <div className="mt-3 grid gap-5 md:grid-cols-3">
+              <div className="mt-[var(--space-inline)] grid gap-[var(--space-stack)] md:grid-cols-3">
                     {quickActions.map((action) => {
                       const Icon = action.icon;
 
@@ -1197,19 +1203,19 @@ function DashboardContent({
                         <Button
                           key={action.title}
                           variant="outline"
-                          className="group h-auto min-w-0 justify-start whitespace-normal rounded-2xl border-slate-200 bg-white px-4 py-4 text-left shadow-sm transition-colors hover:border-slate-300 hover:bg-white hover:shadow"
+                          className="group h-auto min-w-0 justify-start whitespace-normal rounded-[var(--r-card)] border-border bg-white px-4 py-4 text-left shadow-sm transition-colors hover:border-border hover:bg-white hover:shadow"
                           onClick={action.onClick}
                         >
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition-colors group-hover:bg-slate-200 group-hover:text-slate-950">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-muted text-muted-foreground transition-colors group-hover:bg-muted group-hover:text-foreground">
                             <Icon className="h-4 w-4" />
                           </div>
                           <div className="ml-3 min-w-0 flex-1">
-                            <div className="line-clamp-2 break-words text-sm font-semibold leading-5 text-slate-900 sm:text-base">
+                            <div className="line-clamp-2 break-words text-sm font-semibold leading-5 text-foreground sm:text-base">
                               {action.title}
                             </div>
-                            <div className="mt-1 line-clamp-2 text-sm text-slate-500">{action.description}</div>
+                            <div className="mt-1 line-clamp-2 text-sm text-muted-foreground">{action.description}</div>
                           </div>
-                          <ArrowRight className="ml-2 h-4 w-4 shrink-0 text-slate-300 transition-colors group-hover:text-slate-700" />
+                          <ArrowRight className="ml-2 h-4 w-4 shrink-0 text-muted-foreground/45 transition-colors group-hover:text-muted-foreground" />
                         </Button>
                       );
                     })}
@@ -1217,17 +1223,17 @@ function DashboardContent({
                 </section>
 
                 {/* Stats Cards - Collapsible on mobile */}
-                <details className="group rounded-2xl border border-slate-200/80 bg-white/92 p-5 shadow-sm sm:p-6 sm:!block">
-                  <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-3 text-sm font-semibold text-slate-950 sm:cursor-default">
+                <details className="group rounded-[var(--r-card)] border border-border bg-white/92 p-5 shadow-sm sm:p-6 sm:!block">
+                  <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-3 text-sm font-semibold text-foreground sm:cursor-default">
                     <span>Tổng quan nhanh</span>
-                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
+                    <span className="rounded-[var(--r-pill)] border border-border bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
                       {isSignedOut ? "Luồng cốt lõi" : `${userData.goals.length} mục tiêu`}
                     </span>
-                    <svg aria-hidden="true" className="h-4 w-4 text-slate-400 transition-transform group-open:rotate-180 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </summary>
-                  <div className="mt-5 grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="mt-[var(--space-stack)] grid gap-[var(--space-stack)] grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                     {overviewCards.map((item, index) => {
                       const Icon = item.icon;
 
@@ -1237,22 +1243,22 @@ function DashboardContent({
                           className="animate-fade-in-up"
                           style={{ animationDelay: `${0.04 * index}s` }}
                         >
-                          <Card className="h-full border border-slate-100 bg-white/88 shadow-sm">
+                          <Card className="h-full border border-border bg-white/88 shadow-sm">
                             <CardHeader className="flex flex-row items-start justify-between pb-3">
                               <div>
-                                <CardDescription className="text-xs font-medium text-slate-500">
+                                <CardDescription className="text-xs font-medium text-muted-foreground">
                                   {item.title}
                                 </CardDescription>
-                                <CardTitle className="mt-2 text-2xl font-bold text-slate-950">
+                                <CardTitle className="mt-2 text-2xl font-bold text-foreground">
                                   {isSignedOut ? item.value : <CountUp value={item.value} />}
                                 </CardTitle>
                               </div>
-                              <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${item.iconClass}`}>
+                              <div className={`flex h-9 w-9 items-center justify-center rounded-[var(--r-tile)] ${item.iconClass}`}>
                                 <Icon className="h-5 w-5" />
                               </div>
                             </CardHeader>
                             <CardContent>
-                              <p className="text-sm text-slate-500">{item.note}</p>
+                              <p className="text-sm text-muted-foreground">{item.note}</p>
                             </CardContent>
                           </Card>
                         </div>
@@ -1274,7 +1280,8 @@ function DashboardContent({
                 description="Dashboard sẽ chỉ hiện điểm, chuỗi ngày và chỉ số sau khi bạn tạo chu kỳ 12 tuần đầu tiên. Bây giờ nên đi từ Life Balance để có dữ liệu thật, rồi mới chốt mục tiêu SMART."
                 actions={
                   <Button
-                    className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
+                    variant="secondary"
+                    className="w-full bg-foreground text-white hover:bg-foreground/90 sm:w-auto"
                     onClick={() => navigate("/onboarding")}
                   >
                     Bắt đầu Life Balance
@@ -1284,14 +1291,14 @@ function DashboardContent({
                 <ol className="grid gap-3 md:grid-cols-3">
                   {["Chấm 8 lĩnh vực cuộc sống", "Chọn một insight ưu tiên", "Tạo SMART goal và chu kỳ 12 tuần"].map(
                     (item, index) => (
-                      <li key={item} className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+                      <li key={item} className="rounded-[var(--r-tile)] border border-border bg-muted p-4">
                         <div
                           aria-hidden="true"
-                          className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white"
+                          className="flex h-9 w-9 items-center justify-center rounded-[var(--r-pill)] bg-foreground text-sm font-semibold text-white"
                         >
                           {index + 1}
                         </div>
-                        <p className="mt-3 text-sm font-semibold leading-6 text-slate-900">{item}</p>
+                        <p className="mt-[var(--space-inline)] text-sm font-semibold leading-6 text-foreground">{item}</p>
                       </li>
                     ),
                   )}
@@ -1300,19 +1307,19 @@ function DashboardContent({
             ) : (
               <details
                 data-testid="dashboard-execution-board"
-                className="group rounded-2xl border border-slate-200/80 bg-white/92 p-5 shadow-sm sm:p-6 open:sm:!block sm:!block"
+                className="group rounded-[var(--r-card)] border border-border bg-white/92 p-5 shadow-sm sm:p-6 open:sm:!block sm:!block"
                 open={!isMobileViewport}
               >
                 <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-3 sm:cursor-default">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Bảng thực thi</p>
-                    <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-950">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Bảng thực thi</p>
+                    <h2 className="mt-1 text-2xl font-bold tracking-tight text-foreground">
                       Tổng quan hiệu suất 12 tuần
                     </h2>
-                    <p className="mt-1 text-sm text-slate-600">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Theo dõi tiến độ, nhịp thực thi và chỉ số dẫn của mục tiêu đang chạy.
                     </p>
-                    <p className="mt-2 text-sm font-medium text-slate-700 sm:hidden">
+                    <p className="mt-2 text-sm font-medium text-muted-foreground sm:hidden">
                       Tuần {activeSystemWeek || currentWeekExecutionSnapshot.weekNumber || 1}:{" "}
                       {activeSystemWeekCompletion?.completed ?? currentWeekExecutionSnapshot.completedTasks}/
                       {activeSystemWeekCompletion?.total ?? currentWeekExecutionSnapshot.totalTasks} việc —{" "}
@@ -1320,15 +1327,15 @@ function DashboardContent({
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
+                    <span className="rounded-[var(--r-pill)] border border-border bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
                       Dữ liệu chu kỳ hiện tại
                     </span>
-                    <svg aria-hidden="true" className="h-4 w-4 text-slate-400 transition-transform group-open:rotate-180 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg aria-hidden="true" className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180 sm:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </div>
                 </summary>
-                <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3">
+                <div className="mt-[var(--space-stack)] grid gap-[var(--space-stack)] sm:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3">
                   <GoalProgressCard
                     goalTitle={dashboardGoalTitle}
                     percent={goalProgressSnapshot.percent}
@@ -1344,14 +1351,14 @@ function DashboardContent({
                   <StreakCard streak={weeklyStreak} />
                 </div>
 
-                <details className="group rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
-                  <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 text-sm font-semibold text-slate-950">
+                <details className="group rounded-[var(--r-card)] border border-border bg-muted p-5">
+                  <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 text-sm font-semibold text-foreground">
                     <span>Phân tích mở rộng</span>
-                    <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-500">
+                    <span className="rounded-[var(--r-pill)] border border-border bg-white px-3 py-1 text-xs font-medium text-muted-foreground">
                       Tiến độ theo tuần + chỉ số dẫn
                     </span>
                   </summary>
-                  <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
+                  <div className="mt-[var(--space-stack)] grid gap-[var(--space-stack)] xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
                     <WeeklyProgressChart points={weeklyProgressPoints} />
                     <MetricsSummary items={leadMetricsSummary} />
                   </div>
@@ -1359,16 +1366,16 @@ function DashboardContent({
 
 
                 {planLoading && !plan && (
-                  <Card className="border border-slate-200 bg-white/80 shadow-sm">
-                    <CardContent className="p-4 text-sm text-slate-500">
+                  <Card className="border border-border bg-white/80 shadow-sm">
+                    <CardContent className="p-4 text-sm text-muted-foreground">
                       Đang tải dữ liệu dashboard 12 tuần...
                     </CardContent>
                   </Card>
                 )}
 
                 {planError && (
-                  <Card className="border border-rose-200 bg-rose-50 shadow-sm">
-                    <CardContent className="p-4 text-sm text-rose-700">{planError.message}</CardContent>
+                  <Card className="border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] shadow-sm">
+                    <CardContent className="p-4 text-sm text-[color:var(--color-danger-fg)]">{planError.message}</CardContent>
                   </Card>
                 )}
               </details>
@@ -1376,7 +1383,7 @@ function DashboardContent({
 
         {shouldShowTopSidebar && (
           <div className="animate-fade-in-up" style={{ animationDelay: '0.08s' }}>
-            <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+            <div className="stack-section lg:sticky lg:top-24 lg:self-start">
               {isSignedOut ? (
                 <PublicVisitorAccountCard
                   onSignIn={() => handleAuthNavigate("signin")}
@@ -1388,18 +1395,18 @@ function DashboardContent({
                   className="glass-surface-gradient-border border-0 bg-white/92 shadow-sm ambient-glow"
                 >
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-slate-950">
+                    <CardTitle className="flex items-center gap-2 text-foreground">
                       Kế hoạch hiện tại
                     </CardTitle>
-                    <CardDescription className="text-slate-600">
+                    <CardDescription className="text-muted-foreground">
                       {getPlanLabel(currentPlanCode)} — {currentPlanDefinition.description}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Đang dùng</p>
-                      <p className="mt-2 text-3xl font-bold text-slate-950">{getPlanLabel(currentPlanCode)}</p>
-                      <p className="mt-2 text-sm leading-7 text-slate-600">{currentPlanDefinition.description}</p>
+                  <CardContent className="stack-stack">
+                    <div className="rounded-[var(--r-card)] border border-border bg-muted p-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Đang dùng</p>
+                      <p className="mt-2 text-3xl font-bold text-foreground">{getPlanLabel(currentPlanCode)}</p>
+                      <p className="mt-2 text-sm leading-7 text-muted-foreground">{currentPlanDefinition.description}</p>
                     </div>
 
                     <div className="flex flex-wrap gap-2">
@@ -1409,10 +1416,10 @@ function DashboardContent({
                         return (
                           <span
                             key={key}
-                            className={`rounded-full border px-3 py-1.5 text-xs font-medium ${
+                            className={`rounded-[var(--r-pill)] border px-3 py-1.5 text-xs font-medium ${
                               isUnlocked
-                                ? "border-emerald-200/70 bg-emerald-50 text-emerald-900"
-                                : "border-slate-200 bg-slate-50 text-slate-500"
+                                ? "border-[color:var(--color-success-border)] bg-[color:var(--color-success-bg)] text-[color:var(--color-success-fg)]"
+                                : "border-border bg-muted text-muted-foreground"
                             }`}
                           >
                             {isUnlocked ? "Đang mở" : "Đang khóa"} · {getEntitlementLabel(key)}
@@ -1425,14 +1432,15 @@ function DashboardContent({
                       {currentPlanCode === "FREE" ? (
                         <>
                           <Button
-                            className="bg-slate-950 text-white hover:bg-slate-800"
+                            variant="secondary"
+                            className="bg-foreground text-white hover:bg-foreground/90"
                             onClick={() => openUpgradeDialog("plan", "PLUS")}
                           >
                             Nâng cấp Plus
                           </Button>
                           <Button
                             variant="outline"
-                            className="border-slate-200 bg-white text-slate-900 hover:bg-slate-50"
+                            className="border-border bg-white text-foreground hover:bg-muted"
                             onClick={() => navigate(activeSystem ? "/12-week-system?tab=settings" : "/life-insight")}
                           >
                             Xem Free đang có gì
@@ -1441,7 +1449,7 @@ function DashboardContent({
                       ) : (
                         <Button
                           variant="outline"
-                          className="border-slate-200 bg-white text-slate-900 hover:bg-slate-50 sm:col-span-2"
+                          className="border-border bg-white text-foreground hover:bg-muted sm:col-span-2"
                           onClick={() => navigate(activeSystem ? "/12-week-system?tab=settings" : "/life-insight")}
                         >
                           Quản lý gói và quyền
@@ -1449,7 +1457,7 @@ function DashboardContent({
                       )}
                     </div>
 
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted-foreground">
                       Nâng cấp gói Plus để mở toàn bộ quyền nâng cao cho chu kỳ 12 tuần.
                     </p>
                   </CardContent>
@@ -1458,21 +1466,21 @@ function DashboardContent({
 
               <Card
                 data-tour-id="dashboard-next-card"
-                className="border border-slate-200/80 bg-white/92 shadow-sm"
+                className="border border-border bg-white/92 shadow-sm"
               >
                 <CardHeader>
-                  <CardTitle className="text-slate-950">Đi tiếp ngay</CardTitle>
-                  <CardDescription className="text-slate-700">
+                  <CardTitle className="text-foreground">Đi tiếp ngay</CardTitle>
+                  <CardDescription className="text-muted-foreground">
                     Chỉ giữ hai tín hiệu quan trọng nhất để bạn quyết định nhanh.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="stack-tight">
                   {dashboardAttentionPanels.map((panel) => {
                     const Icon = panel.icon;
                     return (
                       <div key={panel.eyebrow} className={panel.cardClass}>
                         <div className="flex items-start gap-3">
-                          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
+                          <div className="flex h-11 w-11 items-center justify-center rounded-[var(--r-tile)] bg-muted text-muted-foreground">
                             <Icon className="h-5 w-5" />
                           </div>
                           <div className="min-w-0 flex-1">
@@ -1494,22 +1502,22 @@ function DashboardContent({
             </div>
           </div>
         )}
-      </div>
+      </SectionBlock>
 
       {!isSignedOut && userData.isHydratedFromDemo && (
         <Reveal>
-          <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-lg">
-            <Sparkles className="h-5 w-5 shrink-0 text-amber-600" />
+          <div className="flex flex-wrap items-center gap-4 rounded-[var(--r-card)] border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] px-5 py-4 shadow-lg">
+            <Sparkles className="h-5 w-5 shrink-0 text-[color:var(--color-warning-fg)]" />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-amber-900">Dữ liệu đang hiển thị là ví dụ mẫu</p>
-              <p className="mt-0.5 text-sm text-amber-700">
+              <p className="text-sm font-semibold text-[color:var(--color-warning-fg)]">Dữ liệu đang hiển thị là ví dụ mẫu</p>
+              <p className="mt-0.5 text-sm text-[color:var(--color-warning-fg)]">
                 Cập nhật bánh xe cuộc sống của bạn để thay dữ liệu mẫu bằng thông tin thật.
               </p>
             </div>
             <Button
               variant="outline"
               size="sm"
-              className="border-amber-300 bg-white text-amber-800 hover:bg-amber-100"
+              className="border-[color:var(--color-warning-border)] bg-white text-[color:var(--color-warning-fg)] hover:bg-[color:var(--color-warning-bg)]"
               onClick={() => navigate("/life-balance")}
             >
               Cập nhật ngay
@@ -1520,7 +1528,7 @@ function DashboardContent({
 
       {/* SECONDARY SECTION: Workspace Details */}
       {shouldShowWorkspaceDetailGrid && (
-        <div className="ops-section-secondary space-y-4">
+        <SectionBlock title="Dữ liệu gần đây" headerVisuallyHidden className="ops-section-secondary">
           <PageHeader
             eyebrow="Chi tiết workspace"
             title="Dữ liệu gần đây"
@@ -1529,14 +1537,14 @@ function DashboardContent({
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
             <Reveal>
-              <Card className="h-full border border-slate-200/80 bg-white/92 shadow-sm">
+              <Card className="h-full border border-border bg-white/92 shadow-sm">
                 <CardHeader>
                   <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                     <div className="min-w-0">
-                      <CardTitle className="text-slate-950">
+                      <CardTitle className="text-foreground">
                         {isSignedOut ? "Luồng mục tiêu mẫu" : "Mục tiêu gần đây"}
                       </CardTitle>
-                      <CardDescription className="text-slate-700">
+                      <CardDescription className="text-muted-foreground">
                         {isSignedOut
                           ? "Từ một mong muốn rộng, web sẽ ép lại thành mục tiêu rõ và kế hoạch có lịch."
                           : "Đủ ít để bạn nhìn một lượt là hiểu."}
@@ -1553,32 +1561,33 @@ function DashboardContent({
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="stack-stack">
                   {recentGoals.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/80 px-6 py-10 text-center text-slate-500">
-                      <Target className="mx-auto mb-4 h-12 w-12 text-slate-300" />
+                    <div className="rounded-[var(--r-card)] border border-dashed border-border bg-muted px-6 py-10 text-center text-muted-foreground">
+                      <Target className="mx-auto mb-4 h-12 w-12 text-muted-foreground/45" />
                       <p>
                         {isSignedOut
                           ? "Bạn có thể đi qua Life Insight, SMART Goal và kiểm tra tính thực tế mà không cần đăng nhập."
                           : "Chưa có mục tiêu nào. Hãy bắt đầu bằng mục tiêu đầu tiên của bạn."}
                       </p>
                       <Button
-                        className="mt-5 w-full sm:w-auto"
+                        variant="secondary"
+                        className="mt-[var(--space-stack)] w-full sm:w-auto"
                         onClick={() => (isSignedOut ? handleAuthNavigate("signup") : navigate("/life-insight"))}
                       >
                         {isSignedOut ? "Đăng ký để đồng bộ sau" : "Tạo mục tiêu"}
                       </Button>
                     </div>
                   ) : (
-                    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                      <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)_minmax(100px,0.5fr)] gap-4 border-b border-slate-200/80 bg-slate-50/90 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400 lg:grid">
+                    <div className="overflow-hidden rounded-[var(--r-card)] border border-border bg-white shadow-sm">
+                      <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)_minmax(100px,0.5fr)] gap-4 border-b border-border bg-muted px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground lg:grid">
                         <span>Mục tiêu</span>
                         <span>Loại</span>
                         <span>Tiến độ</span>
                         <span className="text-right">Hành động</span>
                       </div>
 
-                      <div className="divide-y divide-slate-200/80">
+                      <div className="divide-y divide-border">
                         {recentGoals.map((goal) => {
                           const progress = calculateGoalProgress(goal);
                           const execution = getGoalExecutionStats(goal);
@@ -1586,54 +1595,54 @@ function DashboardContent({
                           return (
                             <div
                               key={goal.id}
-                              className={`px-4 py-4 lg:px-5 ${goal.twelveWeekSystem ? "bg-violet-50/55" : "bg-white/40"}`}
+                              className={`px-4 py-4 lg:px-5 ${goal.twelveWeekSystem ? "bg-[color:var(--color-info-bg)]" : "bg-white/40"}`}
                             >
                               <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)_minmax(100px,0.5fr)] lg:items-center">
                                 <div className="min-w-0">
                                   <div className="flex items-start gap-3">
-                                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white">
+                                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-foreground text-white">
                                       <Target className="h-4 w-4" />
                                     </div>
                                     <div className="min-w-0 flex-1">
                                       <div className="flex flex-wrap items-center gap-2">
-                                        <h4 className="truncate font-semibold text-slate-900">{goal.title}</h4>
+                                        <p className="truncate font-semibold text-foreground">{goal.title}</p>
                                         {goal.twelveWeekSystem && (
-                                          <span className="rounded-full bg-violet-100 px-3 py-1 text-[11px] font-semibold text-violet-700">
+                                          <span className="rounded-[var(--r-pill)] bg-[color:var(--color-info-bg)] px-3 py-1 text-[11px] font-semibold text-[color:var(--color-info-fg)]">
                                             12 tuần
                                           </span>
                                         )}
                                         {progress === 100 && (
-                                          <span className="rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-semibold text-emerald-700">
+                                          <span className="rounded-[var(--r-pill)] bg-[color:var(--color-success-bg)] px-3 py-1 text-[11px] font-semibold text-[color:var(--color-success-fg)]">
                                             Hoàn thành
                                           </span>
                                         )}
                                       </div>
-                                      <div className="mt-1 flex flex-wrap gap-2 text-sm text-slate-500">
+                                      <div className="mt-1 flex flex-wrap gap-2 text-sm text-muted-foreground">
                                         <span>{getLifeAreaLabel(goal.category)}</span>
                                         {goal.deadline && <span>• Đích {formatCalendarDate(goal.deadline)}</span>}
                                       </div>
-                                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500 lg:hidden">
-                                        <span className="rounded-full bg-slate-100 px-3 py-1">
+                                      <div className="mt-[var(--space-inline)] flex flex-wrap gap-2 text-xs text-muted-foreground lg:hidden">
+                                        <span className="rounded-[var(--r-pill)] bg-muted px-3 py-1">
                                           {goal.twelveWeekSystem ? "Chu kỳ 12 tuần" : "Mục tiêu thường"}
                                         </span>
-                                        <span className="rounded-full bg-slate-100 px-3 py-1">
+                                        <span className="rounded-[var(--r-pill)] bg-muted px-3 py-1">
                                           {execution.completed}/{execution.total} việc đã chốt
                                         </span>
-                                        <span className="rounded-full bg-slate-100 px-3 py-1">{progress}% tiến độ</span>
+                                        <span className="rounded-[var(--r-pill)] bg-muted px-3 py-1">{progress}% tiến độ</span>
                                       </div>
                                     </div>
                                     <CheckCircle2
                                       aria-hidden="true"
-                                      className={`h-5 w-5 shrink-0 ${progress === 100 ? "text-emerald-600" : "text-slate-300"}`}
+                                      className={`h-5 w-5 shrink-0 ${progress === 100 ? "text-[color:var(--color-success-fg)]" : "text-muted-foreground/45"}`}
                                     />
                                   </div>
                                 </div>
 
                                 <div className="hidden min-w-0 lg:block">
-                                  <p className="truncate text-sm font-semibold text-slate-900">
+                                  <p className="truncate text-sm font-semibold text-foreground">
                                     {goal.twelveWeekSystem ? "Chu kỳ 12 tuần" : "Mục tiêu thường"}
                                   </p>
-                                  <p className="mt-1 truncate text-sm text-slate-500">
+                                  <p className="mt-1 truncate text-sm text-muted-foreground">
                                     {goal.twelveWeekSystem
                                       ? `Gói ${getPlanLabel(currentPlanCode)}`
                                       : "Theo dõi tổng quan"}
@@ -1642,22 +1651,22 @@ function DashboardContent({
 
                                 <div className="space-y-2">
                                   <div                               className="flex items-center justify-between text-sm">
-                                    <span className="font-semibold text-slate-900">{progress}%</span>
-                                    <span className="text-slate-500">
+                                    <span className="font-semibold text-foreground">{progress}%</span>
+                                    <span className="text-muted-foreground">
                                       {execution.completed}/{execution.total} việc
                                     </span>
                                   </div>
                                   <Progress value={progress} className="h-2" />
                                   {goal.twelveWeekSystem && !entitlementKeys.includes("premium_review_insights") && (
-                                    <p className="text-xs font-medium text-violet-700">Phân tích review đang khóa</p>
+                                    <p className="text-xs font-medium text-[color:var(--color-info-fg)]">Phân tích review đang khóa</p>
                                   )}
                                 </div>
 
                                 <div className="flex flex-wrap gap-2 lg:justify-end">
                                   <Button
                                     size="sm"
-                                    variant={goal.twelveWeekSystem ? "default" : "outline"}
-                                    className={goal.twelveWeekSystem ? "" : "border-white/70 bg-white hover:bg-slate-50"}
+                                    variant={goal.twelveWeekSystem ? "secondary" : "outline"}
+                                    className={goal.twelveWeekSystem ? "" : "border-white/70 bg-white hover:bg-muted"}
                                     onClick={() => navigate(goal.twelveWeekSystem ? "/12-week-system" : "/goals")}
                                     aria-label={
                                       goal.twelveWeekSystem ? `Mở 12 tuần: ${goal.title}` : `Mở mục tiêu: ${goal.title}`
@@ -1678,36 +1687,36 @@ function DashboardContent({
             </Reveal>
 
             <Reveal>
-              <Card className="h-full border border-slate-200/80 bg-white/92 shadow-sm">
+              <Card className="h-full border border-border bg-white/92 shadow-sm">
                 <CardHeader>
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <CardTitle className="text-slate-950">
+                      <CardTitle className="text-foreground">
                         {isSignedOut ? "Bánh xe cuộc sống là bước mở đầu" : "Bánh xe cuộc sống"}
                       </CardTitle>
-                      <CardDescription className="text-slate-700">
+                      <CardDescription className="text-muted-foreground">
                         {isSignedOut
                           ? "Người mới nên chấm 8 lĩnh vực trước khi chọn mục tiêu ưu tiên."
                           : "Nhìn nhanh bức tranh tổng quan hiện tại."}
                       </CardDescription>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Điểm trung bình</p>
-                      <p className="mt-1 text-3xl font-bold text-slate-900">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Điểm trung bình</p>
+                      <p className="mt-1 text-3xl font-bold text-foreground">
                         <CountUp value={averageLifeScore} precision={1} />
                       </p>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <CardContent className="stack-stack">
+                  <div className="rounded-[var(--r-card)] border border-border bg-white p-4 shadow-sm">
                     {radarData.length > 0 ? (
                       <DeferredDashboardLifeAreaRadar data={radarData} />
                     ) : (
-                      <div className="flex h-[300px] flex-col items-center justify-center rounded-xl bg-slate-50 px-5 text-center">
-                        <TrendingUp className="h-10 w-10 text-slate-300" />
-                        <p className="mt-3 font-semibold text-slate-900">Chưa có dữ liệu bánh xe cuộc sống</p>
-                        <p className="mt-1 max-w-sm text-sm leading-6 text-slate-500">
+                      <div className="flex h-[300px] flex-col items-center justify-center rounded-[var(--r-tile)] bg-muted px-5 text-center">
+                        <TrendingUp className="h-10 w-10 text-muted-foreground/45" />
+                        <p className="mt-[var(--space-inline)] font-semibold text-foreground">Chưa có dữ liệu bánh xe cuộc sống</p>
+                        <p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">
                           {isSignedOut
                             ? "Bạn có thể bắt đầu Life Balance không cần đăng nhập. Tài khoản chỉ cần khi muốn đồng bộ sau."
                             : "Bắt đầu bằng bài đánh giá Life Balance để dashboard có dữ liệu thật thay vì số mặc định."}
@@ -1716,16 +1725,16 @@ function DashboardContent({
                     )}
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Cần ưu tiên tiếp</p>
-                      <p className="mt-2 text-lg font-semibold text-slate-900">
+                    <div className="rounded-[var(--r-tile)] border border-border bg-white p-4 shadow-sm">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Cần ưu tiên tiếp</p>
+                      <p className="mt-2 text-lg font-semibold text-foreground">
                         {isSignedOut
                           ? "Chọn sau Life Balance"
                           : weakestArea
                             ? getLifeAreaLabel(weakestArea.name)
                             : "Chưa có dữ liệu"}
                       </p>
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-1 text-sm text-muted-foreground">
                         {isSignedOut
                           ? "Dữ liệu lưu trên trình duyệt này"
                           : weakestArea
@@ -1735,21 +1744,21 @@ function DashboardContent({
                     </div>
                     <Button
                       variant="outline"
-                      className="h-auto w-full min-w-0 justify-start whitespace-normal rounded-xl border-slate-200 bg-white px-4 py-4 text-left shadow-sm hover:bg-slate-50"
+                      className="h-auto w-full min-w-0 justify-start whitespace-normal rounded-[var(--r-tile)] border-border bg-white px-4 py-4 text-left shadow-sm hover:bg-muted"
                       onClick={() => (isSignedOut ? handleAuthNavigate("signup") : navigate("/life-balance"))}
                     >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-950 text-white">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-foreground text-white">
                         <TrendingUp className="h-4 w-4" />
                       </div>
                       <div className="ml-3 min-w-0 flex-1">
-                        <div className="line-clamp-2 break-words font-semibold text-slate-900">
+                        <div className="line-clamp-2 break-words font-semibold text-foreground">
                           {isSignedOut
                             ? "Bắt đầu bằng cân bằng cuộc sống"
                             : hasRealLifeBalance
                               ? "Mở cân bằng cuộc sống"
                               : "Bắt đầu đánh giá cuộc sống"}
                         </div>
-                        <div className="mt-1 line-clamp-2 text-sm text-slate-500">
+                        <div className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                           {isSignedOut
                             ? "Đăng ký chỉ khi muốn thử lớp đồng bộ sau."
                             : hasRealLifeBalance
@@ -1763,19 +1772,19 @@ function DashboardContent({
               </Card>
             </Reveal>
           </div>
-        </div>
+        </SectionBlock>
       )}
 
       {/* Recent Reflections - Part of secondary content */}
       {!isFreshDemoVisitor && recentReflections.length > 0 && (
-        <div className="ops-section-secondary">
+        <SectionBlock title="Nhật ký gần đây" headerVisuallyHidden className="ops-section-secondary">
           <Reveal>
-            <Card className="border border-slate-200/80 bg-white/92 shadow-sm">
+            <Card className="border border-border bg-white/92 shadow-sm">
               <CardHeader>
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <CardTitle className="text-slate-950">Nhật ký gần đây</CardTitle>
-                    <CardDescription className="text-slate-700">
+                    <CardTitle className="text-foreground">Nhật ký gần đây</CardTitle>
+                    <CardDescription className="text-muted-foreground">
                       Những suy ngẫm mới nhất trên hành trình của bạn.
                     </CardDescription>
                   </div>
@@ -1789,39 +1798,39 @@ function DashboardContent({
                 {recentReflections.map((reflection, index) => (
                   <div
                     key={reflection.id}
-                    className={`rounded-2xl border p-5 shadow-sm ${
-                      index === 0 ? "border-slate-300 bg-slate-50" : "border-slate-200 bg-white"
+                    className={`rounded-[var(--r-card)] border p-5 shadow-sm ${
+                      index === 0 ? "border-border bg-muted" : "border-border bg-white"
                     }`}
                   >
                     <div className="mb-3 flex items-start justify-between gap-4">
-                      <h4 className="min-w-0 truncate font-semibold text-slate-900">{reflection.title}</h4>
-                      <span className="text-xs font-medium text-slate-400">{formatCalendarDate(reflection.date)}</span>
+                      <p className="min-w-0 truncate font-semibold text-foreground">{reflection.title}</p>
+                      <span className="text-xs font-medium text-muted-foreground">{formatCalendarDate(reflection.date)}</span>
                     </div>
-                    <p className="line-clamp-3 text-sm text-slate-600">{reflection.content}</p>
+                    <p className="line-clamp-3 text-sm text-muted-foreground">{reflection.content}</p>
                   </div>
                 ))}
               </CardContent>
             </Card>
           </Reveal>
-        </div>
+        </SectionBlock>
       )}
 
       {/* Demo Notice - Non-intrusive, at bottom */}
       {!isSignedOut && !isFreshDemoVisitor && userData.isHydratedFromDemo && (
         <div className="ops-section-notice">
           <Reveal>
-            <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-amber-200 bg-amber-50/92 px-5 py-4 shadow-lg">
-              <Sparkles className="h-5 w-5 shrink-0 text-amber-600" />
+            <div className="flex flex-wrap items-center gap-4 rounded-[var(--r-card)] border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] px-5 py-4 shadow-lg">
+              <Sparkles className="h-5 w-5 shrink-0 text-[color:var(--color-warning-fg)]" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-amber-900">Dữ liệu đang hiển thị là ví dụ mẫu</p>
-                <p className="mt-0.5 text-sm text-amber-700">
+                <p className="text-sm font-semibold text-[color:var(--color-warning-fg)]">Dữ liệu đang hiển thị là ví dụ mẫu</p>
+                <p className="mt-0.5 text-sm text-[color:var(--color-warning-fg)]">
                   Cập nhật bánh xe cuộc sống của bạn để thay dữ liệu mẫu bằng thông tin thật.
                 </p>
               </div>
               <Button
                 variant="outline"
                 size="sm"
-                className="border-amber-300 bg-white text-amber-800 hover:bg-amber-100"
+                className="border-[color:var(--color-warning-border)] bg-white text-[color:var(--color-warning-fg)] hover:bg-[color:var(--color-warning-bg)]"
                 onClick={() => navigate("/life-balance")}
               >
                 Cập nhật ngay

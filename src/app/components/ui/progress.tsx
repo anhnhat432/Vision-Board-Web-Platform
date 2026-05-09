@@ -59,14 +59,15 @@ function Progress({ className, value, ...props }: React.ComponentProps<typeof Pr
     <ProgressPrimitive.Root
       data-slot="progress"
       className={cn(
-        "progress-shell relative h-2.5 w-full overflow-hidden rounded-full border border-white/60 bg-white/72 shadow-sm",
+        "progress-shell relative h-2.5 w-full overflow-hidden rounded-[var(--r-pill)] border border-white/60 bg-white/72 shadow-sm",
         className,
       )}
       {...props}
+      aria-label={props["aria-label"] ?? (props["aria-labelledby"] ? undefined : "Tiến độ")}
     >
       <ProgressPrimitive.Indicator
         data-slot="progress-indicator"
-        className="progress-indicator h-full rounded-full gradient-brand shadow-sm"
+        className="progress-indicator h-full rounded-[var(--r-pill)] gradient-brand shadow-sm"
         style={{ width: `${displayValue}%` }}
       />
     </ProgressPrimitive.Root>

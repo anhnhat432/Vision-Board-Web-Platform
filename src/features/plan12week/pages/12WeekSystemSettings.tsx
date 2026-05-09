@@ -250,6 +250,7 @@ export function TwelveWeekSystemSettings() {
 
   return (
     <div className="ops-shell ops-system pt-4">
+      <h1 className="sr-only">Cài đặt hệ 12 tuần</h1>
       <UpgradePaywallDialog
         open={isUpgradeDialogOpen}
         onOpenChange={setIsUpgradeDialogOpen}

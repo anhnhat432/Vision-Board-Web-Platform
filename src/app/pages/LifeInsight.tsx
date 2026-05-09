@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { ArrowRight, Check, Compass, Sparkles, Target, TrendingDown, TrendingUp } from "lucide-react";
@@ -19,6 +19,7 @@ import {
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
+import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
@@ -51,6 +52,26 @@ function getPendingSmartGoalStatement(): string {
   }
 
   return "";
+}
+
+function LifeInsightPageMotion({ children }: { children: ReactNode }) {
+  const prefersReducedMotion = useReducedMotion();
+  const className = "mx-auto w-full max-w-6xl stack-section";
+
+  if (prefersReducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
 }
 
 export function LifeInsight() {
@@ -198,24 +219,19 @@ export function LifeInsight() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="mx-auto w-full max-w-6xl space-y-6"
-      >
+      <LifeInsightPageMotion>
         <CoreFlowProgress currentStepId="life_insight" />
 
         <Card className="ops-surface overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-sm">
           <CardContent className="relative p-5 sm:p-6">
             <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-              <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50/90 px-3 py-1.5 text-xs font-semibold text-slate-600">
+              <div className="stack-stack">
+                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-slate-200 bg-slate-50/90 px-3 py-1.5 text-xs font-semibold text-slate-600">
                   <Compass className="h-4 w-4" />
                   Life Insight
                 </div>
 
-                <div className="space-y-3">
+                <div className="stack-tight">
                   <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl">
                     Bạn đã có một tín hiệu rất rõ về nơi mình nên ưu tiên tiếp theo.
                   </h1>
@@ -228,14 +244,14 @@ export function LifeInsight() {
                 <div className="flex flex-wrap gap-3">
                   <Badge
                     variant="outline"
-                    className="rounded-full border-violet-200 bg-violet-50 px-4 py-2 text-violet-700"
+                    className="rounded-[var(--r-pill)] border-violet-200 bg-violet-50 px-4 py-2 text-violet-700"
                   >
                     <Target className="mr-1 h-3.5 w-3.5" />
                     Ưu tiên: {getLifeAreaLabel(focusArea.name)}
                   </Badge>
                   <Badge
                     variant="outline"
-                    className="rounded-full border-slate-200 bg-slate-50 px-4 py-2 text-slate-600"
+                    className="rounded-[var(--r-pill)] border-slate-200 bg-slate-50 px-4 py-2 text-slate-600"
                   >
                     <TrendingUp className="mr-1 h-3.5 w-3.5" />
                     Điểm trung bình: {averageScore.toFixed(1)}/10
@@ -243,7 +259,7 @@ export function LifeInsight() {
                   {isCustomSelection && (
                     <Badge
                       variant="outline"
-                      className="rounded-full border-amber-200 bg-amber-50 px-4 py-2 text-amber-700"
+                      className="rounded-[var(--r-pill)] border-amber-200 bg-amber-50 px-4 py-2 text-amber-700"
                     >
                       Bạn đã chọn thủ công
                     </Badge>
@@ -252,7 +268,7 @@ export function LifeInsight() {
 
                 <div
                   data-testid="life-insight-decision-card"
-                  className="grid gap-3 rounded-xl border border-violet-200 bg-violet-50/85 p-4 shadow-sm lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)]"
+                  className="grid gap-3 rounded-[var(--r-tile)] border border-violet-200 bg-violet-50/85 p-4 shadow-sm lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)]"
                 >
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
@@ -269,18 +285,18 @@ export function LifeInsight() {
                   </div>
 
                   <div className="grid gap-2 text-sm">
-                    <div className="rounded-lg border border-white bg-white/85 px-4 py-3">
+                    <div className="rounded-[var(--r-control)] border border-white bg-white/85 px-4 py-3">
                       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Trọng tâm</p>
                       <p className="mt-1 font-bold text-slate-950">
                         {focusAreaLabel} · {focusArea.score}/10
                       </p>
                     </div>
-                    <div className="rounded-lg border border-white bg-white/85 px-4 py-3">
+                    <div className="rounded-[var(--r-control)] border border-white bg-white/85 px-4 py-3">
                       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Gợi ý SMART</p>
                       <p className="mt-1 font-semibold text-slate-950">{smartGoalStarter.metricName}</p>
                       <p className="mt-1 text-xs leading-5 text-slate-500">{smartGoalStarter.specificGoalStatement}</p>
                     </div>
-                    <div className="rounded-lg border border-white bg-white/85 px-4 py-3">
+                    <div className="rounded-[var(--r-control)] border border-white bg-white/85 px-4 py-3">
                       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Điểm tựa</p>
                       <p className="mt-1 font-semibold text-slate-950">{strongestAreaLabel}</p>
                     </div>
@@ -289,7 +305,7 @@ export function LifeInsight() {
 
                 <div
                   data-testid="life-insight-recommendation-card"
-                  className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4 shadow-sm sm:grid-cols-[minmax(0,1.35fr)_minmax(220px,0.65fr)]"
+                  className="grid gap-3 rounded-[var(--r-tile)] border border-slate-200 bg-slate-50/80 p-4 shadow-sm sm:grid-cols-[minmax(0,1.35fr)_minmax(220px,0.65fr)]"
                 >
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -307,17 +323,17 @@ export function LifeInsight() {
                   </div>
 
                   <div className="grid gap-2 text-sm">
-                    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                    <div className="rounded-[var(--r-tile)] border border-slate-200 bg-white px-4 py-3">
                       <p className="text-slate-500">Điểm hiện tại</p>
                       <p className="mt-1 text-lg font-bold text-slate-950">{focusArea.score}/10</p>
                     </div>
-                    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                    <div className="rounded-[var(--r-tile)] border border-slate-200 bg-white px-4 py-3">
                       <p className="text-slate-500">Lệch so với trung bình</p>
                       <p className="mt-1 text-lg font-bold text-slate-950">
                         {scoreGapFromAverage > 0 ? `-${scoreGapFromAverage.toFixed(1)}` : "0.0"}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                    <div className="rounded-[var(--r-tile)] border border-slate-200 bg-white px-4 py-3">
                       <p className="text-slate-500">Lực đỡ hiện có</p>
                       <p className="mt-1 font-semibold text-slate-950">{strongestAreaLabel}</p>
                     </div>
@@ -346,21 +362,21 @@ export function LifeInsight() {
 
               <ProductVisual variant="balance" className="hidden min-h-[220px] lg:block" />
 
-              <div className="hidden rounded-2xl border border-white/14 bg-white/12 p-6 shadow-sm">
+              <div className="hidden rounded-[var(--r-card)] border border-white/14 bg-white/12 p-6 shadow-sm">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Snapshot hiện tại</p>
 
-                <div className="mt-6 space-y-4">
-                  <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
+                <div className="mt-6 stack-stack">
+                  <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-white/55">Đang tập trung vào</p>
                     <p className="mt-2 text-2xl font-bold text-white">{getLifeAreaLabel(focusArea.name)}</p>
                     <p className="mt-1 text-sm text-white/68">{focusArea.score}/10</p>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
+                  <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-white/55">Điểm mạnh hiện tại</p>
                     <p className="mt-2 text-2xl font-bold text-white">{getLifeAreaLabel(strongestArea.name)}</p>
                     <p className="mt-1 text-sm text-white/68">{strongestArea.score}/10</p>
                   </div>
-                  <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
+                  <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-white/55">Thông điệp</p>
                     <p className="mt-2 text-sm leading-7 text-white/74">
                       Đừng cố sửa mọi thứ cùng lúc. Chỉ cần chọn một điểm yếu nhất, rồi biến nó thành một hướng đi đủ rõ
@@ -373,16 +389,16 @@ export function LifeInsight() {
           </CardContent>
         </Card>
 
-        <div className="mx-auto max-w-5xl space-y-5">
-          <details className="rounded-2xl border border-white/70 bg-white/82 p-5 shadow-lg lg:p-6">
+        <div className="mx-auto max-w-5xl stack-stack">
+          <details className="rounded-[var(--r-card)] border border-white/70 bg-white/82 p-5 shadow-lg lg:p-6">
             <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
               Đổi lĩnh vực trọng tâm
             </summary>
-            <p className="mt-3 text-sm leading-7 text-slate-600">
+            <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">
               Hệ thống gợi ý <strong>{getLifeAreaLabel(lowestArea.name)}</strong> vì đây là điểm thấp nhất. Nếu lúc này
               bạn muốn ưu tiên khu vực khác, chọn lại bên dưới.
             </p>
-            <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-[var(--space-stack)] grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
               {lifeAreas.map((area) => {
                 const isSelected = focusArea.name === area.name;
                 const isRecommended = area.name === lowestArea.name;
@@ -391,22 +407,22 @@ export function LifeInsight() {
                     key={area.name}
                     type="button"
                     onClick={() => setSelectedAreaName(area.name === lowestArea.name ? null : area.name)}
-                    className={`relative rounded-xl border p-4 text-left transition-colors transition-transform duration-150 hover:-translate-y-0.5 ${
+                    className={`relative rounded-[var(--r-tile)] border p-4 text-left transition-colors transition-transform duration-150 hover:-translate-y-0.5 ${
                       isSelected
                         ? "border-violet-300 bg-violet-50 shadow-md"
                         : "border-white/70 bg-white/72 hover:border-white hover:bg-white"
                     }`}
                   >
                     {isRecommended && (
-                      <span className="absolute -top-2 left-3 rounded-full bg-violet-600 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-white">
+                      <span className="absolute -top-2 left-3 rounded-[var(--r-pill)] bg-violet-600 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-white">
                         Gợi ý
                       </span>
                     )}
                     <div className="flex items-center justify-between gap-2">
-                      <div className="h-3 w-3 rounded-full" style={{ backgroundColor: area.color }} />
+                      <div className="h-3 w-3 rounded-[var(--r-pill)]" style={{ backgroundColor: area.color }} />
                       {isSelected && <Check className="h-4 w-4 text-violet-600" />}
                     </div>
-                    <p className="mt-3 text-sm font-semibold text-slate-900">{getLifeAreaLabel(area.name)}</p>
+                    <p className="mt-[var(--space-inline)] text-sm font-semibold text-slate-900">{getLifeAreaLabel(area.name)}</p>
                     <p className="mt-1 text-xs font-medium" style={{ color: area.color }}>
                       {area.score}/10
                     </p>
@@ -418,20 +434,20 @@ export function LifeInsight() {
 
           <details
             data-testid="life-insight-intent-picker"
-            className="rounded-2xl border border-white/70 bg-white/82 p-5 shadow-lg lg:p-6"
+            className="rounded-[var(--r-card)] border border-white/70 bg-white/82 p-5 shadow-lg lg:p-6"
             open={selectedIntent !== null}
           >
             <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
               Bạn đang muốn làm điều gì trong 12 tuần tới?
             </summary>
-            <p className="mt-3 text-sm leading-7 text-slate-600">
+            <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">
               Chọn một mô tả gần nhất để app gợi ý cho sát hơn. Không bắt buộc — bạn có thể bỏ qua, thay đổi hoặc xoá
               bất cứ lúc nào.
             </p>
             <div
               role="radiogroup"
               aria-label="Chọn điều bạn muốn làm trong 12 tuần tới"
-              className="mt-5 grid gap-2 sm:grid-cols-2"
+              className="mt-[var(--space-stack)] grid gap-2 sm:grid-cols-2"
             >
               {intentOptions.map((option) => {
                 const isSelected = selectedIntent === option.id;
@@ -439,7 +455,7 @@ export function LifeInsight() {
                   <label
                     key={option.id}
                     data-intent-id={option.id}
-                    className={`cursor-pointer rounded-xl border p-4 text-left transition-colors transition-transform duration-150 hover:-translate-y-0.5 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-violet-300 ${
+                    className={`cursor-pointer rounded-[var(--r-tile)] border p-4 text-left transition-colors transition-transform duration-150 hover:-translate-y-0.5 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-violet-300 ${
                       isSelected
                         ? "border-violet-300 bg-violet-50 shadow-md"
                         : "border-white/70 bg-white/72 hover:border-white hover:bg-white"
@@ -478,18 +494,18 @@ export function LifeInsight() {
             )}
           </details>
 
-          <details className="rounded-2xl border border-white/70 bg-white/82 p-5 shadow-lg lg:p-6">
+          <details className="rounded-[var(--r-card)] border border-white/70 bg-white/82 p-5 shadow-lg lg:p-6">
             <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
               Xem bức tranh tổng thể
             </summary>
-            <p className="mt-3 text-sm leading-7 text-slate-600">
+            <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">
               Biểu đồ này cho thấy toàn bộ bánh xe cuộc sống hiện tại để bạn không nhìn một chiều.
             </p>
-            <SimpleRadarChart className="mx-auto mt-5 max-w-[460px]" data={radarData} height={320} fillOpacity={0.2} />
+            <SimpleRadarChart className="mx-auto mt-[var(--space-stack)] max-w-[460px]" data={radarData} height={320} fillOpacity={0.2} />
 
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               <div
-                className="rounded-xl border p-4"
+                className="rounded-[var(--r-tile)] border p-4"
                 style={{
                   borderColor: `${lowestArea.color}33`,
                   background: `${lowestArea.color}12`,
@@ -499,12 +515,12 @@ export function LifeInsight() {
                   <TrendingDown className="h-4 w-4" />
                   <p className="text-xs font-semibold uppercase tracking-[0.16em]">Nút thắt hiện tại</p>
                 </div>
-                <p className="mt-3 text-lg font-semibold text-slate-900">{getLifeAreaLabel(lowestArea.name)}</p>
+                <p className="mt-[var(--space-inline)] text-lg font-semibold text-slate-900">{getLifeAreaLabel(lowestArea.name)}</p>
                 <p className="mt-1 text-sm text-slate-600">Đây là khu vực nên trở thành trọng tâm tiếp theo.</p>
               </div>
 
               <div
-                className="rounded-xl border p-4"
+                className="rounded-[var(--r-tile)] border p-4"
                 style={{
                   borderColor: `${strongestArea.color}33`,
                   background: `${strongestArea.color}12`,
@@ -514,7 +530,7 @@ export function LifeInsight() {
                   <Sparkles className="h-4 w-4" />
                   <p className="text-xs font-semibold uppercase tracking-[0.16em]">Lực đỡ hiện có</p>
                 </div>
-                <p className="mt-3 text-lg font-semibold text-slate-900">{getLifeAreaLabel(strongestArea.name)}</p>
+                <p className="mt-[var(--space-inline)] text-lg font-semibold text-slate-900">{getLifeAreaLabel(strongestArea.name)}</p>
                 <p className="mt-1 text-sm text-slate-600">Tận dụng điểm mạnh này để kéo khu vực đang yếu lên cùng.</p>
               </div>
             </div>
@@ -538,7 +554,7 @@ export function LifeInsight() {
             </CardContent>
           </Card>
         </div>
-      </motion.div>
+      </LifeInsightPageMotion>
     </div>
   );
 }

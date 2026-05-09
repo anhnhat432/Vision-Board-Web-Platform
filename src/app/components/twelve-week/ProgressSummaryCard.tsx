@@ -1,4 +1,4 @@
-import {
+﻿import {
   ArrowDown,
   ArrowRight,
   ArrowUp,
@@ -151,7 +151,7 @@ export function ProgressSummaryCard({
       : `Week ${currentPhaseStartWeek} -> Week ${currentPhaseEndWeek}`;
 
   return (
-    <div className="space-y-6 pt-4">
+    <div className="stack-section pt-4">
       <Card interactive={false} data-testid="progress-trend-hero" className={`border ${narrativeStyle.container}`}>
         <CardContent className="p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -162,9 +162,9 @@ export function ProgressSummaryCard({
               </p>
               <p className="mt-2 text-base font-semibold text-slate-950 sm:text-lg">{trend.headline}</p>
               <p className="mt-1 text-sm leading-6 text-slate-700">{trend.advice}</p>
-              <div className="mt-3 flex flex-wrap items-center gap-2">
+              <div className="mt-[var(--space-inline)] flex flex-wrap items-center gap-2">
                 {trend.weekOverWeekDelta !== null && (
-                  <span className="inline-flex items-center rounded-full border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700">
+                  <span className="inline-flex items-center rounded-[var(--r-pill)] border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700">
                     {trend.trendDirection === "up" ? (
                       <ArrowUp className="mr-1 h-3 w-3 text-emerald-600" />
                     ) : trend.trendDirection === "down" ? (
@@ -178,17 +178,17 @@ export function ProgressSummaryCard({
                 )}
               </div>
               {nextActionHandler && (
-                <div className="mt-4 rounded-lg border border-slate-900/10 bg-white/86 p-3">
+                <div className="mt-4 rounded-[var(--r-control)] border border-slate-900/10 bg-white/86 p-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tiếp theo nên làm</p>
                   <p className="mt-1 text-sm leading-6 text-slate-800">{nextActionSuggestion.label}</p>
-                  <Button size="lg" className="mt-3 w-full sm:w-auto" onClick={nextActionHandler}>
+                  <Button size="lg" className="mt-[var(--space-inline)] w-full sm:w-auto" onClick={nextActionHandler}>
                     {nextActionSuggestion.buttonLabel}
                     <ArrowRight className="ml-1 h-4 w-4" />
                   </Button>
                 </div>
               )}
             </div>
-            <span className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${narrativeStyle.badge}`}>
+            <span className={`shrink-0 rounded-[var(--r-pill)] border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${narrativeStyle.badge}`}>
               {narrativeStyle.badgeLabel}
             </span>
           </div>
@@ -202,7 +202,7 @@ export function ProgressSummaryCard({
               <CalendarDays className="h-3.5 w-3.5" />
               Tuần đang chạy
             </p>
-            <div className="mt-3">
+            <div className="mt-[var(--space-inline)]">
               <p className="text-3xl font-bold text-slate-950">Tuần {boundedCurrentWeek}</p>
               <p className="mt-1 text-sm text-slate-600">
                 {currentWeekRange
@@ -219,7 +219,7 @@ export function ProgressSummaryCard({
               <BarChart3 className="h-3.5 w-3.5" />
               Điểm hiện tại
             </p>
-            <p className="mt-3 text-3xl font-bold text-slate-950">{currentWeekScoreValue}</p>
+            <p className="mt-[var(--space-inline)] text-3xl font-bold text-slate-950">{currentWeekScoreValue}</p>
             <p className="mt-1 text-sm text-slate-600">Trung bình toàn chu kỳ: {averageScore}</p>
           </CardContent>
         </Card>
@@ -230,7 +230,7 @@ export function ProgressSummaryCard({
               <Flag className="h-3.5 w-3.5" />
               Review đã khóa
             </p>
-            <p className="mt-3 text-3xl font-bold text-slate-950">
+            <p className="mt-[var(--space-inline)] text-3xl font-bold text-slate-950">
               {isEarlyState
                 ? `Tuần ${boundedCurrentWeek}/${boundedTotalWeeks}`
                 : `${reviewDoneCount}/${boundedTotalWeeks}`}
@@ -245,7 +245,7 @@ export function ProgressSummaryCard({
       </div>
 
       <Card interactive={false} className="border border-slate-200/80 bg-white/92 shadow-sm">
-        <CardContent className="space-y-4 p-5">
+        <CardContent className="stack-stack p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -262,13 +262,13 @@ export function ProgressSummaryCard({
             <div className="flex flex-wrap gap-2">
               <div
                 data-testid="progress-current-milestone"
-                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
+                className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
               >
                 Hiện tại: <span className="font-semibold text-slate-950">{currentPhaseLabel}</span>
               </div>
               <div
                 data-testid="progress-next-milestone"
-                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
+                className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
               >
                 Mốc tiếp theo: <span className="font-semibold text-slate-950">{nextMilestoneLabel}</span>
               </div>
@@ -296,7 +296,7 @@ export function ProgressSummaryCard({
                   data-milestone={isMilestone ? "true" : "false"}
                   aria-current={isCurrent ? "step" : undefined}
                   aria-label={weekLabel}
-                  className={`min-h-14 rounded-lg border px-2 py-2 text-center text-xs ${
+                  className={`min-h-14 rounded-[var(--r-control)] border px-2 py-2 text-center text-xs ${
                     isCurrent
                       ? "border-slate-950 bg-slate-950 text-white"
                       : isReviewed
@@ -316,7 +316,7 @@ export function ProgressSummaryCard({
             })}
           </ol>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700">
+          <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700">
             {reviewDueToday
               ? "Bước tiếp theo: mở tab Tuần và chốt review trước khi thêm việc mới."
               : "Bước tiếp theo: quay lại Hôm nay và giữ một việc cụ thể trước mắt."}

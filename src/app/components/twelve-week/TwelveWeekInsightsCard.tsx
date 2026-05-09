@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+﻿import type { ReactElement } from "react";
 import { ArrowRight, ChevronUp, Lightbulb, ShieldAlert, Sparkles } from "lucide-react";
 
 import type {
@@ -88,11 +88,11 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
     <section
       data-testid="execution-insights-card"
       data-insight-count={insights.length}
-      className="rounded-lg border border-slate-200/82 bg-white/92 p-4 shadow-sm sm:p-5"
+      className="rounded-[var(--r-control)] border border-slate-200/82 bg-white/92 p-4 shadow-sm sm:p-5"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-indigo-700">
+          <span className="flex h-7 w-7 items-center justify-center rounded-[var(--r-pill)] bg-indigo-100 text-indigo-700">
             <ChevronUp className="h-4 w-4" />
           </span>
           <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-700">{title}</p>
@@ -102,13 +102,13 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
         </Badge>
       </div>
 
-      <ul data-testid="execution-insights-list" className="mt-3 grid gap-3">
+      <ul data-testid="execution-insights-list" className="mt-[var(--space-inline)] grid gap-3">
         {insights.map((insight) => (
           <li
             key={insight.id}
             data-insight-id={insight.id}
             data-insight-severity={insight.severity}
-            className={`rounded-lg border p-3 ${SEVERITY_ACCENT[insight.severity]}`}
+            className={`rounded-[var(--r-control)] border p-3 ${SEVERITY_ACCENT[insight.severity]}`}
           >
             <div className="flex items-start gap-3">
               <span className="mt-0.5 shrink-0">{SEVERITY_ICON[insight.severity]}</span>
@@ -127,7 +127,7 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
       </ul>
 
       {nextActionCallback && nextAction.id !== "no_action" && (
-        <div className="mt-4 flex flex-wrap items-start justify-between gap-3 rounded-lg border border-indigo-200 bg-indigo-50/72 p-3">
+        <div className="mt-4 flex flex-wrap items-start justify-between gap-3 rounded-[var(--r-control)] border border-indigo-200 bg-indigo-50/72 p-3">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700">
               Gợi ý hành động tiếp theo

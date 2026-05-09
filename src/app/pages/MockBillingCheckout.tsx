@@ -1,4 +1,4 @@
-import { CreditCard, Crown, ShieldCheck } from "lucide-react";
+﻿import { CreditCard, Crown, ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
@@ -54,11 +54,11 @@ export function MockBillingCheckout() {
 
   if (!session) {
     return (
-      <div className="space-y-6 pb-12">
+      <div className="stack-section pb-12">
         {/* Demo banner */}
-        <div className="rounded-lg border-2 border-amber-400 bg-amber-50 px-4 py-3">
+        <div className="rounded-[var(--r-control)] border-2 border-amber-400 bg-amber-50 px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-200">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-amber-200">
               <span className="text-lg">⚡</span>
             </div>
             <div>
@@ -72,8 +72,8 @@ export function MockBillingCheckout() {
         <Card className="overflow-hidden border-0 gradient-dark-indigo text-white shadow-2xl">
           <CardContent className="p-8 lg:p-10">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Thanh toán dùng thử</p>
-            <h1 className="mt-3 text-4xl font-bold tracking-normal">Phiên thanh toán này không còn hợp lệ.</h1>
-            <p className="mt-3 max-w-2xl text-base leading-8 text-white/74">
+            <h1 className="mt-[var(--space-inline)] text-4xl font-bold tracking-normal">Phiên thanh toán này không còn hợp lệ.</h1>
+            <p className="mt-[var(--space-inline)] max-w-2xl text-base leading-8 text-white/74">
               Có thể bạn đã hoàn tất, hủy phiên này trước đó, hoặc tab đã mở quá lâu.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
@@ -101,11 +101,11 @@ export function MockBillingCheckout() {
   const paywallCopy = getPaywallCopy(session.context);
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="stack-section pb-12">
       {/* Demo banner */}
-      <div className="rounded-lg border-2 border-amber-400 bg-amber-50 px-4 py-3">
+      <div className="rounded-[var(--r-control)] border-2 border-amber-400 bg-amber-50 px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-200">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-amber-200">
             <span className="text-lg">⚡</span>
           </div>
           <div>
@@ -119,14 +119,14 @@ export function MockBillingCheckout() {
 
       <Card className="overflow-hidden border-0 gradient-dark-indigo text-white shadow-2xl">
         <CardContent className="grid gap-6 p-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-10">
-          <div className="space-y-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/78">
+          <div className="stack-stack">
+            <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/78">
               <CreditCard className="h-3.5 w-3.5" />
               Checkout dùng thử
             </div>
             <div>
               <h1 className="text-4xl font-bold tracking-normal">Xác nhận mở gói {plan.name}</h1>
-              <p className="mt-3 max-w-2xl text-base leading-8 text-white/74">
+              <p className="mt-[var(--space-inline)] max-w-2xl text-base leading-8 text-white/74">
                 Xác nhận để mở quyền Plus trên trình duyệt này. Không cần thẻ và không xử lý khoản thu thật.
               </p>
             </div>
@@ -140,15 +140,15 @@ export function MockBillingCheckout() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-white/14 bg-white/10 p-5 shadow-sm">
+          <div className="rounded-[var(--r-card)] border border-white/14 bg-white/10 p-5 shadow-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/56">Tóm tắt nâng cấp</p>
-            <div className="mt-4 space-y-4">
-              <div className="rounded-2xl border border-white/12 bg-black/12 p-4">
+            <div className="mt-4 stack-stack">
+              <div className="rounded-[var(--r-card)] border border-white/12 bg-black/12 p-4">
                 <p className="text-xs uppercase tracking-[0.16em] text-white/56">Gói sẽ mở</p>
                 <p className="mt-2 text-3xl font-bold text-white">{plan.name}</p>
                 <p className="mt-1 text-sm text-white/72">{plan.priceLabel}</p>
               </div>
-              <div className="rounded-2xl border border-white/12 bg-white/8 p-4 text-sm text-white/72">
+              <div className="rounded-[var(--r-card)] border border-white/12 bg-white/8 p-4 text-sm text-white/72">
                 {existingAccount ? (
                   <>
                     Thiết bị này đang có gói{" "}
@@ -172,9 +172,9 @@ export function MockBillingCheckout() {
               Bản dùng thử chỉ cập nhật trạng thái gói và quyền trên trình duyệt này.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="stack-tight">
             {plan.highlights.map((feature) => (
-              <div key={feature} className="flex gap-3 rounded-xl border border-white/70 bg-white/86 px-4 py-3">
+              <div key={feature} className="flex gap-3 rounded-[var(--r-tile)] border border-white/70 bg-white/86 px-4 py-3">
                 <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />
                 <p className="text-sm leading-7 text-slate-700">{feature}</p>
               </div>
@@ -190,12 +190,12 @@ export function MockBillingCheckout() {
               khoản thu thật trên màn dùng thử.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+          <CardContent className="stack-stack">
+            <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50 px-4 py-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Gói sẽ được mở</p>
               <p className="mt-2 text-lg font-semibold text-slate-950">{getPlanLabel(session.planCode)}</p>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+            <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50 px-4 py-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Nguồn yêu cầu</p>
               <p className="mt-2 text-sm font-semibold text-slate-900">{session.source === "paywall_dialog" || !session.source ? "Từ màn nâng cấp" : session.source === "settings" ? "Từ cài đặt" : session.source === "12_week_setup" ? "Từ thiết lập 12 tuần" : "Khác"}</p>
             </div>

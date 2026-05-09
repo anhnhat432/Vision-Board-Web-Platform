@@ -96,7 +96,7 @@ function Card({
       data-slot="card"
       data-card-hovering="false"
       className={cn(
-        "glass-surface text-card-foreground flex flex-col gap-6 rounded-2xl",
+        "glass-surface text-card-foreground flex flex-col gap-6 rounded-[var(--r-card)]",
         isInteractive && "card-interactive-base",
         className,
       )}
@@ -121,9 +121,13 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+type CardTitleProps = React.ComponentPropsWithoutRef<"h3"> & {
+  as?: "h2" | "h3" | "h4";
+};
+
+function CardTitle({ className, as: Heading = "h3", ...props }: CardTitleProps) {
   return (
-    <h3
+    <Heading
       data-slot="card-title"
       className={cn("leading-tight tracking-normal", className)}
       {...props}

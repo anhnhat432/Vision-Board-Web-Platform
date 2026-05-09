@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 import { AlertTriangle, CheckCircle2, Loader2, Sparkles, Target } from "lucide-react";
 
 import { Badge } from "@/app/components/ui/badge";
@@ -62,12 +62,12 @@ export function TwelveWeekDashboardState({
   return (
     <Card className="overflow-hidden border border-slate-200/80 bg-white/92 shadow-sm">
       <CardContent className="p-8 text-center sm:p-10 lg:p-14">
-        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-violet-50 text-violet-700">
+        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700">
           <Icon className={`h-10 w-10 ${kind === "loading" ? "animate-spin" : ""}`} />
         </div>
         <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{eyebrow}</p>
-        <h2 className="mt-3 text-2xl font-bold tracking-normal text-slate-900 sm:text-3xl">{title}</h2>
-        <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-500 sm:text-base" role="status">
+        <h1 className="mt-[var(--space-inline)] text-2xl font-bold tracking-normal text-slate-900 sm:text-3xl">{title}</h1>
+        <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-sm leading-7 text-slate-500 sm:text-base" role="status">
           {description}
         </p>
         {children}
@@ -102,9 +102,9 @@ export function TwelveWeekDashboardNotice({
         : "bg-amber-100 text-amber-700";
 
   return (
-    <div role={tone === "success" ? "status" : "alert"} className={`rounded-xl border px-4 py-4 ${toneClass}`}>
+    <div role={tone === "success" ? "status" : "alert"} className={`rounded-[var(--r-tile)] border px-4 py-4 ${toneClass}`}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconClass}`}>
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-control)] ${iconClass}`}>
           <Icon className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
@@ -153,23 +153,23 @@ export function TwelveWeekDashboardHeader({
   onOpenGoals,
 }: TwelveWeekDashboardHeaderProps) {
   return (
-    <Card className="ops-surface overflow-hidden rounded-xl border border-slate-200/80 bg-white/94 shadow-sm ring-1 ring-white/70 sm:rounded-2xl">
+    <Card className="ops-surface overflow-hidden rounded-[var(--r-tile)] border border-slate-200/80 bg-white/94 shadow-sm ring-1 ring-white/70 sm:rounded-[var(--r-card)]">
       <CardContent className="p-4 sm:p-6 lg:p-7">
         <div className="flex flex-col gap-3 sm:gap-5 xl:flex-row xl:items-start xl:justify-between">
-          <div className="min-w-0 flex-1 space-y-3">
+          <div className="min-w-0 flex-1 stack-tight">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="rounded-full border-violet-200 bg-violet-50 px-3 py-1.5 text-violet-700">
+              <Badge variant="outline" className="rounded-[var(--r-pill)] border-violet-200 bg-violet-50 px-3 py-1.5 text-violet-700">
                 Nhịp 12 tuần
               </Badge>
-              <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50 px-3 py-1.5 text-slate-600">
+              <Badge variant="outline" className="rounded-[var(--r-pill)] border-slate-200 bg-slate-50 px-3 py-1.5 text-slate-600">
                 <Target className="mr-1 h-3.5 w-3.5" />
                 Tuần {currentWeek}/{system.totalWeeks}
               </Badge>
-              <Badge variant="outline" className={`rounded-full px-3 py-1.5 ${syncBadgeClass}`}>
+              <Badge variant="outline" className={`rounded-[var(--r-pill)] px-3 py-1.5 ${syncBadgeClass}`}>
                 {syncBadgeLabel}
               </Badge>
               {reviewDueToday && (
-                <Badge variant="outline" className="rounded-full border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-800">
+                <Badge variant="outline" className="rounded-[var(--r-pill)] border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-800">
                   Review hôm nay
                 </Badge>
               )}
@@ -183,13 +183,13 @@ export function TwelveWeekDashboardHeader({
                 lưu trên trình duyệt này.
               </p>
             </div>
-            <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-              <span className="rounded-full bg-slate-100 px-3 py-1">
+            <div className="flex flex-wrap gap-2 text-xs text-slate-700">
+              <span className="rounded-[var(--r-pill)] bg-slate-100 px-3 py-1">
                 {getLifeAreaLabel(activeGoal.focusArea || activeGoal.category)}
               </span>
-              <span className="rounded-full bg-slate-100 px-3 py-1">Gói {getPlanLabel(activePlanCode)}</span>
+              <span className="rounded-[var(--r-pill)] bg-slate-100 px-3 py-1">Gói {getPlanLabel(activePlanCode)}</span>
               {activeGoal.feasibilityResult && (
-                <span className="rounded-full bg-slate-100 px-3 py-1">
+                <span className="rounded-[var(--r-pill)] bg-slate-100 px-3 py-1">
                   {getFeasibilityResultLabel(activeGoal.feasibilityResult)}
                 </span>
               )}
@@ -200,13 +200,13 @@ export function TwelveWeekDashboardHeader({
             data-testid="twelve-week-header-metrics"
             className="hidden min-w-0 grid-cols-3 gap-2 sm:grid sm:gap-3 xl:w-[540px]"
           >
-            <ProductVisual variant="execution" className="hidden min-h-[136px] rounded-xl border border-slate-200/70 bg-slate-50/72 sm:col-span-3 sm:block" />
-            <div className="ops-metric-tile rounded-lg border border-slate-200 bg-slate-50/80 px-2 py-2 shadow-sm sm:rounded-xl sm:px-4 sm:py-3">
+            <ProductVisual variant="execution" className="hidden min-h-[136px] rounded-[var(--r-tile)] border border-slate-200/70 bg-slate-50/72 sm:col-span-3 sm:block" />
+            <div className="ops-metric-tile rounded-[var(--r-control)] border border-slate-200 bg-slate-50/80 px-2 py-2 shadow-sm sm:rounded-[var(--r-tile)] sm:px-4 sm:py-3">
               <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 sm:text-xs sm:tracking-[0.14em]">Còn làm</p>
               <p className="mt-1 text-xl font-bold text-slate-950 sm:text-2xl">{todayRemainingCount}</p>
               <p className="hidden text-xs text-slate-500 sm:block">{todayCompletedCount} việc đã chốt hôm nay</p>
             </div>
-            <div className="ops-metric-tile rounded-lg border border-slate-200 bg-slate-50/80 px-2 py-2 shadow-sm sm:rounded-xl sm:px-4 sm:py-3">
+            <div className="ops-metric-tile rounded-[var(--r-control)] border border-slate-200 bg-slate-50/80 px-2 py-2 shadow-sm sm:rounded-[var(--r-tile)] sm:px-4 sm:py-3">
               <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 sm:text-xs sm:tracking-[0.14em]">Tuần</p>
               <p className="mt-1 text-xl font-bold text-slate-950 sm:text-2xl">{weekCompletion.percent}%</p>
               <p className="hidden text-xs text-slate-500 sm:block">
@@ -216,7 +216,7 @@ export function TwelveWeekDashboardHeader({
               </p>
             </div>
             <div
-              className={`rounded-lg border px-2 py-2 sm:rounded-xl sm:px-4 sm:py-3 ${
+              className={`rounded-[var(--r-control)] border px-2 py-2 sm:rounded-[var(--r-tile)] sm:px-4 sm:py-3 ${
                 reviewDueToday ? "border-amber-200 bg-amber-50/90 shadow-sm" : "ops-metric-tile border-slate-200 bg-slate-50/80 shadow-sm"
               }`}
             >
@@ -244,7 +244,7 @@ export function TwelveWeekDashboardHeader({
                 : "Hôm nay đang gọn. Bạn có thể lưu check-in hoặc xem lại tab Tuần."}
           </p>
           <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-            <Button className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto" onClick={onOpenFocusTab}>
+            <Button variant="secondary" className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto" onClick={onOpenFocusTab}>
               {reviewDueToday ? "Mở review tuần" : "Xem việc hôm nay"}
             </Button>
             <Button
@@ -273,14 +273,14 @@ export function TwelveWeekGoalSwitcher({
   if (allGoals.length <= 1) return null;
 
   return (
-    <details className="group rounded-xl border border-slate-200 bg-white/88 px-4 py-3 shadow-sm">
+    <details className="group rounded-[var(--r-tile)] border border-slate-200 bg-white/88 px-4 py-3 shadow-sm">
       <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 text-sm font-semibold text-slate-900">
         <span>Đổi chu kỳ 12 tuần khác</span>
-        <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
+        <span className="rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
           {allGoals.length} chu kỳ
         </span>
       </summary>
-      <div className="mt-3 space-y-3 border-t border-slate-200 pt-3">
+      <div className="mt-[var(--space-inline)] stack-tight border-t border-slate-200 pt-3">
         <p className="text-sm leading-6 text-slate-600">
           App đang ưu tiên chu kỳ active mới nhất; chỉ mở lại chu kỳ cũ khi cần đối chiếu.
         </p>
@@ -347,12 +347,12 @@ export function TwelveWeekRescueTriggerBanner({
   return (
     <div
       role="alert"
-      className={`rounded-xl border px-4 py-3 text-sm ${style.wrapper}`}
+      className={`rounded-[var(--r-tile)] border px-4 py-3 text-sm ${style.wrapper}`}
       onAnimationStart={() => onTriggerFired(trigger)}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
         <div className="flex min-w-0 flex-1 items-start gap-3">
-          <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${style.icon}`}>
+          <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--r-pill)] ${style.icon}`}>
             <AlertTriangle className="h-3.5 w-3.5" />
           </div>
           <div className="min-w-0 flex-1">
@@ -362,6 +362,7 @@ export function TwelveWeekRescueTriggerBanner({
         </div>
         <div className="flex w-full shrink-0 items-center gap-2 sm:ml-auto sm:w-auto">
           <Button
+            variant="secondary"
             size="sm"
             className="flex-1 sm:flex-none"
             onClick={() => {

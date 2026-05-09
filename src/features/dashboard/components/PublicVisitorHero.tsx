@@ -38,7 +38,7 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
       <CardContent className="p-5 sm:p-6 lg:p-7">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(320px,0.72fr)] lg:items-stretch">
           <div className="flex min-w-0 flex-col justify-center space-y-5">
-            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50/90 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+            <span className="inline-flex w-fit items-center gap-2 rounded-[var(--r-pill)] border border-slate-200 bg-slate-50/90 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
               <Sparkles className="h-3.5 w-3.5" />
               Trang chính
             </span>
@@ -81,7 +81,7 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
             ) : null}
             <div className="grid gap-2 pt-1 sm:grid-cols-3">
               {heroStats.map(([value, label]) => (
-                <div key={value} className="ops-metric-tile rounded-xl border border-slate-200 bg-slate-50/72 px-3 py-2.5">
+                <div key={value} className="ops-metric-tile rounded-[var(--r-tile)] border border-slate-200 bg-slate-50/72 px-3 py-2.5">
                   <p className="text-sm font-bold text-slate-950">{value}</p>
                   <p className="mt-0.5 text-xs leading-5 text-slate-500">{label}</p>
                 </div>
@@ -89,16 +89,16 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
             </div>
           </div>
 
-          <div className="ops-surface-muted flex min-w-0 flex-col rounded-xl border border-slate-200 bg-slate-50/82 p-4">
+          <div className="ops-surface-muted flex min-w-0 flex-col rounded-[var(--r-tile)] border border-slate-200 bg-slate-50/82 p-4">
             <ProductVisual variant="moodboard" className="mb-4 min-h-[200px]" />
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Luồng nên đi</p>
             <div className="mt-4 grid flex-1 gap-3">
               {FLOW_STEPS.map((step, index) => (
                 <div
                   key={step}
-                  className="flex min-h-16 items-center gap-3 rounded-xl border border-slate-200/70 bg-white px-3 py-3 shadow-sm"
+                  className="flex min-h-16 items-center gap-3 rounded-[var(--r-tile)] border border-slate-200/70 bg-white px-3 py-3 shadow-sm"
                 >
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-slate-950 text-sm font-semibold text-white">
                     {index + 1}
                   </div>
                   <span className="min-w-0 text-sm font-medium leading-6 text-slate-800">{step}</span>

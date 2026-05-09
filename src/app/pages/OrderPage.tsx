@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { CircleAlert, ClipboardList, Package, Sparkles, Truck } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -381,17 +381,17 @@ export function OrderPage() {
   ];
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="stack-section pb-12">
       <Card className="hero-surface overflow-hidden border-0 text-white">
         <CardContent className="relative p-5 sm:p-6 lg:p-8">
           <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_320px]">
-            <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+            <div className="stack-section">
+              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                 <Package className="h-4 w-4" />
                 Tạo đơn kit
               </div>
 
-              <div className="space-y-4">
+              <div className="stack-stack">
                 <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
                   Tạo đơn kit cá nhân hóa từ mục tiêu hiện tại.
                 </h1>
@@ -402,10 +402,10 @@ export function OrderPage() {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
                   {getKitTypeLabel(form.kitType)}
                 </Badge>
-                <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
                   {selectedGoal ? "Đã gắn mục tiêu" : "Đơn độc lập"}
                 </Badge>
               </div>
@@ -415,14 +415,14 @@ export function OrderPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl border border-white/14 bg-white/12 p-5 shadow-sm">
+            <div className="rounded-[var(--r-card)] border border-white/14 bg-white/12 p-5 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Tóm tắt nhanh</p>
               <div className="mt-4 space-y-2.5">
                 {summaryItems.map((item) => {
                   const Icon = item.icon;
 
                   return (
-                    <div key={item.label} className="rounded-2xl border border-white/10 bg-black/12 px-4 py-3.5">
+                    <div key={item.label} className="rounded-[var(--r-card)] border border-white/10 bg-black/12 px-4 py-3.5">
                       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
                         <Icon className="h-3.5 w-3.5" />
                         {item.label}
@@ -445,8 +445,8 @@ export function OrderPage() {
             <CardDescription>Giữ form gọn, rõ và dễ quét trong bước local-first đầu tiên.</CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-6">
-            <div className="space-y-4">
+          <CardContent className="stack-section">
+            <div className="stack-stack">
               <div className="space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                   Mục tiêu & cấu hình kit
@@ -492,7 +492,7 @@ export function OrderPage() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+              <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Tóm tắt cấu hình hiện tại
                 </p>
@@ -500,7 +500,7 @@ export function OrderPage() {
                   {selectedGoal ? selectedGoal.title : "Đơn này chưa gắn mục tiêu cụ thể"}
                 </p>
                 <p className="mt-1 text-sm leading-7 text-slate-600">{suggestedKitSummary}</p>
-                <div className="mt-3 space-y-1 border-t border-slate-200/80 pt-3">
+                <div className="mt-[var(--space-inline)] space-y-1 border-t border-slate-200/80 pt-3">
                   <p className="text-sm text-slate-500">{flowSourceSummary}</p>
                   {referenceBoard ? (
                     <p className="text-sm text-slate-500">Board tham chiếu: {referenceBoard.name}</p>
@@ -509,7 +509,7 @@ export function OrderPage() {
               </div>
             </div>
 
-            <div className="space-y-4 border-t border-slate-100 pt-6">
+            <div className="stack-stack border-t border-slate-100 pt-6">
               <div className="space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Người nhận</p>
                 <p className="text-sm text-slate-600">
@@ -576,7 +576,7 @@ export function OrderPage() {
               </div>
             </div>
 
-            <div className="space-y-4 border-t border-slate-100 pt-6">
+            <div className="stack-stack border-t border-slate-100 pt-6">
               <div className="space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Nội dung giao kit</p>
                 <p className="text-sm text-slate-600">
@@ -643,7 +643,7 @@ export function OrderPage() {
               </Alert>
             ) : null}
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
+            <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/70 p-4">
               <div className="space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Hoàn tất bước tạo đơn
@@ -675,21 +675,21 @@ export function OrderPage() {
             <CardDescription>Giữ implementation an toàn và nhỏ, chỉ phục vụ local order flow hiện tại.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2.5">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+            <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Lưu dữ liệu</p>
               <p className="mt-2 text-sm leading-7 text-slate-600">
                 Đơn được lưu cục bộ bằng localStorage trong bước triển khai đầu tiên.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+            <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Chưa xử lý backend</p>
               <p className="mt-2 text-sm leading-7 text-slate-600">
                 Chưa có thanh toán thật, fulfillment thật, đồng bộ nhiều thiết bị hoặc xử lý đơn ở phía admin.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+            <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Đi tiếp sau khi tạo</p>
               <p className="mt-2 text-sm leading-7 text-slate-600">
                 Bạn có thể mở trang trạng thái đơn để xem timeline, chi tiết kit và chuyển trạng thái demo cục bộ.

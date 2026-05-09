@@ -1,9 +1,10 @@
-import { apiClient, toAppError } from "@/lib/api/apiClient";
+﻿import { apiClient, toAppError } from "@/lib/api/apiClient";
 import { AlertTriangle, CreditCard, Crown, LifeBuoy, Loader2, ReceiptText, RefreshCw, Shield, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
+import { SectionBlock } from "../components/layout/SectionBlock";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -371,7 +372,7 @@ export function BillingPlan() {
   };
 
   return (
-    <div className="flow-shell space-y-5 pb-12">
+    <div className="flow-shell stack-section pb-12">
       <UpgradePaywallDialog
         open={isUpgradeDialogOpen}
         onOpenChange={setIsUpgradeDialogOpen}
@@ -388,7 +389,7 @@ export function BillingPlan() {
         <CardContent className="relative p-5 sm:p-6 lg:p-8">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_22%)] opacity-90" />
           <div className="relative">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+            <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
               <CreditCard className="h-4 w-4" />
               {demoMode ? "Plus dùng thử" : "Premium"}
             </div>
@@ -474,7 +475,8 @@ export function BillingPlan() {
       )}
 
       {/* Current plan */}
-      <Card className="flow-panel">
+      <SectionBlock title="Khu vực gói đang dùng" headerVisuallyHidden>
+        <Card className="flow-panel">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Crown className="h-5 w-5 text-violet-600" />
@@ -490,7 +492,7 @@ export function BillingPlan() {
                 : `Bạn đang dùng ${currentPlanDefinition?.name ?? currentPlanCode} trên tài khoản này.`}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="stack-stack">
           <div className="flex flex-wrap items-center gap-3">
             <Badge
               variant="outline"
@@ -587,13 +589,13 @@ export function BillingPlan() {
             ) : (
               <>
                 {isTrialing && trialDaysLeft !== null && (
-                  <div className="w-full rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  <div className="w-full rounded-[var(--r-control)] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
                     <span className="font-semibold">Plus dùng thử:</span> còn{" "}
                     {trialDaysLeft} ngày
                     {demoMode ? " dùng thử." : " dùng thử."}
                     <Button
                       size="sm"
-                      className="mt-3 w-full sm:ml-3 sm:mt-0 sm:w-auto"
+                      className="mt-[var(--space-inline)] w-full sm:ml-3 sm:mt-0 sm:w-auto"
                       onClick={() => handleOpenUpgrade("plan")}
                     >
                       {demoMode ? "Mở Plus" : "Nâng cấp Plus"}
@@ -621,12 +623,12 @@ export function BillingPlan() {
                   </Button>
                 )}
                 {showCancelConfirm && (
-                  <div className="w-full rounded-lg border border-red-200 bg-red-50 p-4">
+                  <div className="w-full rounded-[var(--r-control)] border border-red-200 bg-red-50 p-4">
                     <p className="text-sm font-medium text-red-900">Bạn có chắc muốn hủy gói Plus?</p>
                     <p className="mt-1 text-xs text-red-700">
                       Bạn vẫn giữ quyền truy cập cho đến hết chu kỳ hiện tại. Sau đó gói sẽ chuyển về Free.
                     </p>
-                    <div className="mt-3 flex gap-2">
+                    <div className="mt-[var(--space-inline)] flex gap-2">
                       <Button size="sm" variant="destructive" onClick={handleCancelSubscription} disabled={isCanceling}>
                         {isCanceling ? "Đang hủy…" : "Xác nhận hủy"}
                       </Button>
@@ -645,11 +647,13 @@ export function BillingPlan() {
             )}
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      </SectionBlock>
 
       {/* Payment history */}
       {realMode && (
-        <Card className="flow-panel">
+        <SectionBlock title="Khu vực lịch sử thanh toán" headerVisuallyHidden>
+          <Card className="flow-panel">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ReceiptText className="h-5 w-5 text-sky-600" />
@@ -659,7 +663,7 @@ export function BillingPlan() {
               Các đơn VietQR gần đây của tài khoản này. Quyền Plus chỉ mở khi webhook xác nhận thanh toán thành công.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="stack-stack">
             {isLoadingPaymentHistory && (
               <div className="flow-muted flex items-center gap-3 p-4 text-sm text-slate-600">
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -686,7 +690,7 @@ export function BillingPlan() {
             )}
 
             {!isLoadingPaymentHistory && !paymentHistoryError && paymentHistory.length > 0 && (
-              <div className="divide-y divide-slate-100 overflow-hidden rounded-lg border border-slate-100">
+              <div className="divide-y divide-slate-100 overflow-hidden rounded-[var(--r-control)] border border-slate-100">
                 {paymentHistory.map((order) => (
                   <div
                     key={order.orderId}
@@ -727,12 +731,14 @@ export function BillingPlan() {
               </div>
             )}
           </CardContent>
-        </Card>
+          </Card>
+        </SectionBlock>
       )}
 
       {/* Billing support */}
       {realMode && (
-        <Card className="flow-panel">
+        <SectionBlock title="Khu vực hỗ trợ thanh toán" headerVisuallyHidden>
+          <Card className="flow-panel">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <LifeBuoy className="h-5 w-5 text-teal-600" />
@@ -771,11 +777,13 @@ export function BillingPlan() {
               )}
             </div>
           </CardContent>
-        </Card>
+          </Card>
+        </SectionBlock>
       )}
 
       {/* Entitlements */}
-      <Card className="flow-panel">
+      <SectionBlock title="Khu vực quyền truy cập" headerVisuallyHidden>
+        <Card className="flow-panel">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-emerald-600" />
@@ -794,12 +802,12 @@ export function BillingPlan() {
               return (
                 <div
                   key={key}
-                  className={`flex items-center gap-3 rounded-lg border p-4 ${
+                  className={`flex items-center gap-3 rounded-[var(--r-control)] border p-4 ${
                     isActive ? "border-emerald-200 bg-emerald-50/60" : "border-slate-100 bg-slate-50/50"
                   }`}
                 >
                   <div
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--r-pill)] text-sm font-semibold ${
                       isActive ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-500"
                     }`}
                   >
@@ -824,10 +832,12 @@ export function BillingPlan() {
             })}
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      </SectionBlock>
 
       {/* Actions */}
-      <Card className="flow-panel">
+      <SectionBlock title="Khu vực thao tác gói" headerVisuallyHidden>
+        <Card className="flow-panel">
         <CardHeader>
           <CardTitle>Thao tác</CardTitle>
           <CardDescription>
@@ -836,7 +846,7 @@ export function BillingPlan() {
               : "Kiểm tra quyền premium, khôi phục giao dịch đã mua hoặc quay lại trang chính."}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="stack-stack">
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" onClick={handleSyncEntitlements} disabled={isSyncing}>
               <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
@@ -865,7 +875,8 @@ export function BillingPlan() {
             </div>
           )}
         </CardContent>
-      </Card>
+        </Card>
+      </SectionBlock>
 
       {/* Billing provider info (debug/demo) */}
       {demoMode && shouldShowBillingDebugUi() && (
@@ -898,7 +909,8 @@ export function BillingPlan() {
       )}
 
       {/* Compare plans */}
-      <Card className="flow-panel">
+      <SectionBlock title="Khu vực so sánh gói" headerVisuallyHidden>
+        <Card className="flow-panel">
         <CardHeader>
           <CardTitle>So sánh các gói</CardTitle>
           <CardDescription>
@@ -910,7 +922,7 @@ export function BillingPlan() {
             {PLAN_DEFINITIONS.map((plan) => (
               <div
                 key={plan.code}
-                className={`rounded-lg border p-5 ${
+                className={`rounded-[var(--r-control)] border p-5 ${
                   plan.code === currentPlanCode
                     ? "border-violet-300 bg-violet-50/50"
                     : "border-slate-100 bg-slate-50/30"
@@ -926,7 +938,7 @@ export function BillingPlan() {
                 </div>
                 <p className="mt-1 text-xl font-bold text-slate-900">{plan.priceLabel}</p>
                 <p className="mt-2 text-sm text-slate-600">{plan.description}</p>
-                <ul className="mt-3 space-y-1.5">
+                <ul className="mt-[var(--space-inline)] space-y-1.5">
                   {plan.highlights.map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-slate-700">
                       <span className="mt-0.5 text-emerald-600">✓</span>
@@ -943,7 +955,8 @@ export function BillingPlan() {
             ))}
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      </SectionBlock>
     </div>
   );
 }

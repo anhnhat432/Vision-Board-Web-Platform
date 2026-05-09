@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+﻿import { useMemo } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import {
@@ -20,6 +20,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { CountUp } from "../components/ui/count-up";
 import { InteractiveSurface } from "../components/ui/interactive-surface";
 import { Reveal } from "../components/ui/reveal";
+import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { calculateGoalProgress } from "../utils/storage";
 
@@ -75,6 +76,7 @@ const ACHIEVEMENT_ORDER = Object.keys(ACHIEVEMENT_COPY);
 
 export function Achievements() {
   const navigate = useNavigate();
+  const prefersReducedMotion = useReducedMotion();
   const { userData } = useSyncedUserData();
 
   const sortedAchievements = useMemo(() => {
@@ -98,20 +100,20 @@ export function Achievements() {
   const latestAchievement = sortedAchievements[0];
 
   return (
-    <div className="space-y-8 pb-12">
-      <InteractiveSurface className="rounded-2xl" intensity={9} translate={22}>
+    <div className="stack-section pb-12">
+      <InteractiveSurface className="rounded-[var(--r-card)]" intensity={9} translate={22}>
         <Card interactive={false} className="hero-surface overflow-hidden border-0 text-white">
           <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
 
             <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
-              <div className="space-y-6">
-                <div className="interactive-layer interactive-layer--soft inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+              <div className="stack-section">
+                <div className="interactive-layer interactive-layer--soft inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Trophy className="h-4 w-4" />
                   Trophy Room
                 </div>
 
-                <div className="space-y-4">
+                <div className="stack-stack">
                   <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
                     Mọi cột mốc nhỏ bạn mở khóa ở đây đều là bằng chứng rằng hành trình đang thật sự diễn ra.
                   </h1>
@@ -140,11 +142,11 @@ export function Achievements() {
                 </div>
               </div>
 
-              <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-2xl border border-white/14 bg-white/12 p-6 shadow-sm">
+              <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-[var(--r-card)] border border-white/14 bg-white/12 p-6 shadow-sm">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Tình trạng hiện tại</p>
 
-                <div className="mt-6 space-y-4">
-                  <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
+                <div className="mt-6 stack-stack">
+                  <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-white/55">Đã mở khóa</p>
                     <p className="mt-2 text-3xl font-bold text-white">
                       <CountUp value={userData.achievements.length} />
@@ -152,14 +154,14 @@ export function Achievements() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
+                  <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-white/55">Tiến độ bộ sưu tập</p>
                     <p className="mt-2 text-3xl font-bold text-white">
                       <CountUp value={completionRate} suffix="%" />
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-white/10 bg-black/12 p-4">
+                  <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
                     <p className="text-xs uppercase tracking-[0.16em] text-white/55">Mới nhất</p>
                     <p className="mt-2 text-lg font-semibold text-white">
                       {latestAchievement
@@ -216,9 +218,9 @@ export function Achievements() {
             return (
               <motion.div
                 key={item.title}
-                initial={{ opacity: 0, y: 18 }}
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.08 * index }}
+                transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.08 * index }}
               >
                 <Card className="relative overflow-hidden">
                   <div
@@ -227,12 +229,12 @@ export function Achievements() {
                   <CardHeader className="relative flex flex-row items-start justify-between pb-3">
                     <div>
                       <CardDescription>{item.title}</CardDescription>
-                      <CardTitle className="mt-2 text-4xl">
+                      <p className="mt-2 text-4xl font-bold leading-tight tracking-normal text-slate-900">
                         <CountUp value={item.value} />
-                      </CardTitle>
+                      </p>
                     </div>
                     <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${item.color}`}
+                      className={`flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-gradient-to-br ${item.color}`}
                     >
                       <Icon className="h-5 w-5" />
                     </div>
@@ -251,11 +253,11 @@ export function Achievements() {
         <Reveal delay={0.04}>
           <Card className="overflow-hidden">
             <CardContent className="p-10 text-center lg:p-14">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
+              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-amber-50 text-amber-700">
                 <Trophy className="h-10 w-10" />
               </div>
               <h2 className="mt-6 text-3xl font-bold text-slate-900">Chưa có huy hiệu nào được mở khóa</h2>
-              <p className="mx-auto mt-3 max-w-2xl text-base text-slate-500">
+              <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-slate-500">
                 Cột mốc đầu tiên thường đến rất nhanh. Hãy bắt đầu bằng một mục tiêu, một board tầm nhìn hoặc một bài
                 viết phản tư.
               </p>
@@ -273,7 +275,7 @@ export function Achievements() {
           </Card>
         </Reveal>
       ) : (
-        <Reveal delay={0.04} className="space-y-4">
+        <Reveal delay={0.04} className="stack-stack">
           <div>
             <h2 className="text-2xl font-bold text-slate-900">Đã mở khóa</h2>
             <p className="mt-1 text-sm text-slate-500">Những cột mốc bạn đã thực sự chạm tới trên hành trình này.</p>
@@ -291,14 +293,14 @@ export function Achievements() {
               return (
                 <motion.div
                   key={achievement.id}
-                  initial={{ opacity: 0, scale: 0.96 }}
+                  initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.96 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.05 }}
+                  transition={prefersReducedMotion ? { duration: 0 } : { delay: index * 0.05 }}
                 >
                   <Card className="overflow-hidden">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl gradient-amber-icon text-amber-700 shadow-lg">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-[var(--r-tile)] gradient-amber-icon text-amber-700 shadow-lg">
                           <Icon className="h-8 w-8" />
                         </div>
                         <div className="min-w-0 flex-1">
@@ -306,7 +308,7 @@ export function Achievements() {
                             <h3 className="text-xl font-bold text-slate-900">{localized.title}</h3>
                             <Badge
                               variant="outline"
-                              className="rounded-full border-amber-200 bg-amber-50 px-3 py-1 text-amber-700"
+                              className="rounded-[var(--r-pill)] border-amber-200 bg-amber-50 px-3 py-1 text-amber-700"
                             >
                               Đã mở khóa
                             </Badge>
@@ -329,12 +331,12 @@ export function Achievements() {
       <Reveal delay={0.08}>
         <Card>
           <CardHeader>
-            <CardTitle>Còn đang chờ mở khóa</CardTitle>
+            <CardTitle as="h2">Còn đang chờ mở khóa</CardTitle>
             <CardDescription>Những cột mốc tiếp theo để bạn có thêm động lực và hướng tiến rõ ràng.</CardDescription>
           </CardHeader>
           <CardContent>
             {lockedAchievements.length === 0 ? (
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-5 text-sm text-emerald-900">
+              <div className="rounded-[var(--r-card)] border border-emerald-200 bg-emerald-50/80 p-5 text-sm text-emerald-900">
                 Bạn đã mở khóa toàn bộ bộ thành tựu hiện có. Đây là một cột mốc rất đẹp.
               </div>
             ) : (
@@ -345,17 +347,17 @@ export function Achievements() {
                   return (
                     <div
                       key={achievement.key}
-                      className="flex items-start gap-4 rounded-2xl border border-white/70 bg-white/72 p-5"
+                      className="flex items-start gap-4 rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5"
                     >
-                      <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-[var(--r-tile)] bg-slate-100 text-slate-400">
                         <Icon className="h-7 w-7" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h4 className="font-semibold text-slate-700">{achievement.title}</h4>
+                          <h3 className="font-semibold text-slate-700">{achievement.title}</h3>
                           <Badge
                             variant="outline"
-                            className="rounded-full border-slate-200 bg-slate-50 px-3 py-1 text-slate-500"
+                            className="rounded-[var(--r-pill)] border-slate-200 bg-slate-50 px-3 py-1 text-slate-500"
                           >
                             <LockKeyhole className="mr-1 h-3.5 w-3.5" />
                             Locked

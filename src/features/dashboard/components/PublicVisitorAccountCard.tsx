@@ -30,7 +30,7 @@ export function PublicVisitorAccountCard({ onSignIn, onSignUp }: PublicVisitorAc
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
+        <div className="space-y-3 rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
           {ACCOUNT_BENEFITS.map((benefit) => (
             <div key={benefit} className="flex items-start gap-3">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />

@@ -372,6 +372,17 @@ describe("RootLayout onboarding redirect", () => {
     scrollToMock.mockRestore();
   });
 
+  it("keeps the skip link connected to main content on guided routes", async () => {
+    appModeMock.isDemoMode.mockReturnValue(true);
+    renderAppShell("/onboarding");
+
+    expect(await screen.findByTestId("onboarding-page")).toBeInTheDocument();
+    const skipLink = document.querySelector<HTMLAnchorElement>('a.skip-to-content[href="#main-content"]');
+    expect(skipLink).toBeInTheDocument();
+    expect(skipLink).toHaveAttribute("href", "#main-content");
+    expect(document.querySelector("main#main-content")).toBeInTheDocument();
+  });
+
   it("does not block the public home page while auth is loading", async () => {
     setAuthContext({ authLoading: true });
     const { router } = renderAppShell("/");

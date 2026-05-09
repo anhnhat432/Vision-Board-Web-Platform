@@ -274,4 +274,22 @@ describe("Card heading semantics — a11y", () => {
     const heading = screen.getByRole("heading", { name: "Tựa thẻ mẫu" });
     expect(heading.tagName).toBe("H3");
   });
+
+  it("allows pages to promote or demote CardTitle without changing visual classes", () => {
+    render(
+      <>
+        <CardTitle as="h2" className="text-lg">
+          Page section card
+        </CardTitle>
+        <CardTitle as="h4" className="text-sm">
+          Nested card
+        </CardTitle>
+      </>,
+    );
+
+    const sectionHeading = screen.getByRole("heading", { level: 2, name: "Page section card" });
+    const nestedHeading = screen.getByRole("heading", { level: 4, name: "Nested card" });
+    expect(sectionHeading).toHaveClass("text-lg");
+    expect(nestedHeading).toHaveClass("text-sm");
+  });
 });

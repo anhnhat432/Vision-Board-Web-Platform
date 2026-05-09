@@ -53,7 +53,7 @@ export function AppErrorBoundary() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
             <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_320px]">
               <div className="space-y-6">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Sparkles className="h-4 w-4" />
                   Dear Our Future
                 </div>
@@ -88,9 +88,9 @@ export function AppErrorBoundary() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-white/14 bg-white/12 p-6 shadow-sm">
+              <div className="rounded-[var(--r-card)] border border-white/14 bg-white/12 p-6 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/14 text-white">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-[var(--r-tile)] bg-white/14 text-white">
                     <AlertTriangle className="h-5 w-5" />
                   </div>
                   <div>
@@ -99,13 +99,13 @@ export function AppErrorBoundary() {
                   </div>
                 </div>
 
-                <div className="mt-6 rounded-2xl border border-white/12 bg-black/12 p-4">
+                <div className="mt-6 rounded-[var(--r-card)] border border-white/12 bg-black/12 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/55">Mô tả</p>
                   <p className="mt-2 text-sm leading-7 text-white/82">{errorMessage}</p>
                 </div>
 
                 {import.meta.env.DEV && error instanceof Error ? (
-                  <div className="mt-4 rounded-2xl border border-white/12 bg-black/18 p-4">
+                  <div className="mt-4 rounded-[var(--r-card)] border border-white/12 bg-black/18 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/55">Chi tiết dev</p>
                     <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs leading-6 text-white/72">
                       {error.stack || error.message}

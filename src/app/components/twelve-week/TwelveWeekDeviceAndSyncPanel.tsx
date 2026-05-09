@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+﻿import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { shouldShowSyncDebugUi } from "../../utils/app-mode";
 import { TwelveWeekDeviceDetailsSection } from "./TwelveWeekDeviceDetailsSection";
 import { TwelveWeekLocalStatusSection } from "./TwelveWeekLocalStatusSection";
@@ -36,7 +36,7 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
         <CardTitle className="text-slate-950">Dữ liệu, nhắc việc và quyền Plus</CardTitle>
         <CardDescription className="text-slate-600">{storageDescription}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="stack-stack">
         <TwelveWeekPlanAccessSection
           currentPlanCode={props.currentPlanCode}
           entitlementKeys={props.entitlementKeys}

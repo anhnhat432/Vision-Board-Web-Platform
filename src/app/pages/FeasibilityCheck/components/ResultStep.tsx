@@ -1,4 +1,4 @@
-import {
+﻿import {
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
@@ -245,7 +245,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
         initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5 }}
-        className="mx-auto w-full max-w-6xl space-y-4 sm:space-y-6"
+        className="mx-auto w-full max-w-6xl stack-stack sm:stack-section"
       >
         <CoreFlowProgress currentStepId="feasibility" />
 
@@ -253,25 +253,25 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           <CardContent className="relative p-4 sm:p-6 lg:p-9">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.12),_transparent_24%),linear-gradient(135deg,_rgba(255,255,255,0.08)_0%,_rgba(255,255,255,0)_58%)] opacity-95" />
             <div
-              className={`absolute -right-12 top-10 hidden h-72 w-72 rounded-full blur-3xl sm:block ${styles.glow}`}
+              className={`absolute -right-12 top-10 hidden h-72 w-72 rounded-[var(--r-pill)] blur-3xl sm:block ${styles.glow}`}
             />
-            <div className="absolute -left-16 bottom-0 hidden h-56 w-56 rounded-full bg-white/8 blur-3xl sm:block" />
+            <div className="absolute -left-16 bottom-0 hidden h-56 w-56 rounded-[var(--r-pill)] bg-white/8 blur-3xl sm:block" />
 
             <div className="relative max-w-4xl">
-              <div className="space-y-4 sm:space-y-6">
+              <div className="stack-stack sm:stack-section">
                 <div className="flex flex-wrap gap-3">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+                  <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                     <ShieldCheck className="h-4 w-4" />
                     Kết quả kiểm tra
                   </div>
-                  <Badge variant="outline" className="rounded-full border-white/18 bg-white/10 px-4 py-1.5 text-white">
+                  <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/10 px-4 py-1.5 text-white">
                     <Target className="mr-1 h-3.5 w-3.5" />
                     {getLifeAreaLabel(focusArea)}
                   </Badge>
                 </div>
 
-                <div className="space-y-4">
-                  <div className={`inline-flex rounded-full border px-4 py-2 text-sm font-semibold ${styles.badge}`}>
+                <div className="stack-stack">
+                  <div className={`inline-flex rounded-[var(--r-pill)] border px-4 py-2 text-sm font-semibold ${styles.badge}`}>
                     {copy.statusLabel}
                   </div>
                   <h1 className="max-w-3xl text-2xl font-bold tracking-normal sm:text-4xl lg:text-5xl">
@@ -280,7 +280,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   <p className="max-w-3xl text-sm leading-7 text-white/84 sm:text-base lg:text-lg">{result.summary}</p>
                 </div>
 
-                <div className="rounded-2xl border border-white/14 bg-white/10 p-4 shadow-sm sm:hidden">
+                <div className="rounded-[var(--r-card)] border border-white/14 bg-white/10 p-4 shadow-sm sm:hidden">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/58">
@@ -288,17 +288,17 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                       </p>
                       <p className="mt-2 text-3xl font-bold text-white">{fitScore}%</p>
                     </div>
-                    <div className="rounded-full border border-white/18 bg-white/12 px-3 py-1.5 text-sm font-semibold text-white">
+                    <div className="rounded-[var(--r-pill)] border border-white/18 bg-white/12 px-3 py-1.5 text-sm font-semibold text-white">
                       {result.wheelScore}/10
                     </div>
                   </div>
-                  <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/12">
+                  <div className="mt-4 h-2 overflow-hidden rounded-[var(--r-pill)] bg-white/12">
                     <div
-                      className={`h-full rounded-full bg-gradient-to-r ${styles.meter}`}
+                      className={`h-full rounded-[var(--r-pill)] bg-gradient-to-r ${styles.meter}`}
                       style={{ width: `${fitScore}%` }}
                     />
                   </div>
-                  <div className="mt-3 grid gap-2 text-sm leading-6 text-white/74">
+                  <div className="mt-[var(--space-inline)] grid gap-2 text-sm leading-6 text-white/74">
                     <p>
                       <span className="font-semibold text-white">Cần chú ý:</span> {result.bottleneck.label}
                     </p>
@@ -329,23 +329,23 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   {scoreCards.map((card) => (
                     <div
                       key={card.label}
-                      className="rounded-2xl border border-white/14 bg-white/10 p-5 shadow-sm"
+                      className="rounded-[var(--r-card)] border border-white/14 bg-white/10 p-5 shadow-sm"
                     >
                       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/58">{card.label}</p>
                       <p
-                        className={`mt-3 font-bold text-white ${
+                        className={`mt-[var(--space-inline)] font-bold text-white ${
                           card.label === "Phần cần chú ý nhất" ? "text-xl leading-7" : "text-3xl"
                         }`}
                       >
                         {card.value}
                       </p>
-                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/12">
+                      <div className="mt-4 h-2 overflow-hidden rounded-[var(--r-pill)] bg-white/12">
                         <div
-                          className={`h-full rounded-full bg-gradient-to-r ${styles.meter}`}
+                          className={`h-full rounded-[var(--r-pill)] bg-gradient-to-r ${styles.meter}`}
                           style={{ width: `${card.progress}%` }}
                         />
                       </div>
-                      <p className="mt-3 text-sm leading-6 text-white/68">{card.note}</p>
+                      <p className="mt-[var(--space-inline)] text-sm leading-6 text-white/68">{card.note}</p>
                     </div>
                   ))}
                 </div>
@@ -355,30 +355,30 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           </CardContent>
         </Card>
 
-        <div className="space-y-5">
+        <div className="stack-stack">
           <Card className={`overflow-hidden ${styles.panel}`}>
-            <CardContent className="space-y-5 p-5 lg:p-6">
+            <CardContent className="stack-stack p-5 lg:p-6">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/82 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-slate-200/80 bg-white/82 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
                   <Compass className="h-3.5 w-3.5" />
                   Hướng đi tiếp theo
                 </div>
                 <h2 className="mt-4 text-xl font-bold tracking-normal text-slate-900 sm:text-2xl">
                   {result.type === "too_ambitious" ? "Thu nhỏ rồi đi tiếp." : "Đây là hướng nên đi tiếp."}
                 </h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{copy.statusHint}</p>
-                <p className="mt-3 text-base font-semibold leading-7 text-slate-900">{result.recommendation}</p>
+                <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">{copy.statusHint}</p>
+                <p className="mt-[var(--space-inline)] text-base font-semibold leading-7 text-slate-900">{result.recommendation}</p>
 
                 {result.smartGoalQualityNote ? (
-                  <div className="mt-3 rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3">
+                  <div className="mt-[var(--space-inline)] rounded-[var(--r-card)] border border-amber-200 bg-amber-50/80 px-4 py-3">
                     <p className="text-sm leading-6 text-amber-800">{result.smartGoalQualityNote}</p>
                   </div>
                 ) : null}
               </div>
 
-              <div className="rounded-2xl border border-slate-200/80 bg-white/82 p-4 shadow-sm">
+              <div className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/82 p-4 shadow-sm">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-white">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-slate-900 text-white">
                     <Sparkles className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -386,10 +386,10 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                         Tuần 1 nên thế nào
                       </p>
-                      <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
+                      <span className="rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
                         Mức tải: {planLoadLabel[result.planLoad]}
                       </span>
-                      <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
+                      <span className="rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
                         Quỹ thời gian: {capacityLabel[result.weeklyCapacity]}
                       </span>
                     </div>
@@ -398,17 +398,17 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-slate-200/80 bg-white/82 p-4">
+              <div className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/82 p-4">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-slate-700" />
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                     Nên làm trước khi tạo kế hoạch
                   </p>
                 </div>
-                <ol className="mt-3 space-y-2.5">
+                <ol className="mt-[var(--space-inline)] space-y-2.5">
                   {copy.nextMoves.map((item, index) => (
                     <li key={item} className="flex items-start gap-3">
-                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
+                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-slate-900 text-xs font-semibold text-white">
                         {index + 1}
                       </span>
                       <p className="text-sm leading-6 text-slate-700">{item}</p>
@@ -419,33 +419,33 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             </CardContent>
           </Card>
 
-          <div className="grid gap-4 lg:grid-cols-3 lg:gap-5">
+          <div className="grid gap-[var(--space-stack)] lg:grid-cols-3">
             <Card className={`hidden overflow-hidden lg:block ${styles.title}`}>
               <CardContent className="p-5 lg:p-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Lĩnh vực trọng tâm</p>
-                <p className="mt-3 text-2xl font-bold text-slate-900">{getLifeAreaLabel(focusArea)}</p>
-                <p className="mt-3 text-sm leading-6 text-slate-600">
+                <p className="mt-[var(--space-inline)] text-2xl font-bold text-slate-900">{getLifeAreaLabel(focusArea)}</p>
+                <p className="mt-[var(--space-inline)] text-sm leading-6 text-slate-600">
                   Đây là phần đời sống đang tác động trực tiếp tới độ khả thi của mục tiêu này.
                 </p>
               </CardContent>
             </Card>
 
-            <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-lg lg:rounded-2xl lg:p-6">
+            <details className="rounded-[var(--r-card)] border border-white/70 bg-white/82 p-4 shadow-lg lg:rounded-[var(--r-card)] lg:p-6">
               <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                 Xem 7 góc nhìn
               </summary>
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 stack-tight">
                 {result.axisScores.map((axis) => (
-                  <div key={axis.axis} className="rounded-xl border border-slate-200 bg-slate-50/80 p-3">
+                  <div key={axis.axis} className="rounded-[var(--r-tile)] border border-slate-200 bg-slate-50/80 p-3">
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-sm font-semibold text-slate-900">{axis.label}</p>
                       <span className="text-sm font-semibold text-slate-600">
                         {axis.score}/{axis.maxScore}
                       </span>
                     </div>
-                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
+                    <div className="mt-2 h-2 overflow-hidden rounded-[var(--r-pill)] bg-slate-200">
                       <div
-                        className={`h-full rounded-full bg-gradient-to-r ${styles.meter}`}
+                        className={`h-full rounded-[var(--r-pill)] bg-gradient-to-r ${styles.meter}`}
                         style={{ width: `${axis.percent}%` }}
                       />
                     </div>
@@ -455,13 +455,13 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               </div>
             </details>
 
-            <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-lg lg:rounded-2xl lg:p-6">
+            <details className="rounded-[var(--r-card)] border border-white/70 bg-white/82 p-4 shadow-lg lg:rounded-[var(--r-card)] lg:p-6">
               <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                 Xem mục tiêu đã viết
               </summary>
-              <div className="mt-4 space-y-4">
+              <div className="mt-4 stack-stack">
                 <p className="text-base font-semibold leading-7 text-slate-900">{pendingGoal.specific}</p>
-                <div className="space-y-3 text-sm leading-6 text-slate-600">
+                <div className="stack-tight text-sm leading-6 text-slate-600">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Thời hạn</p>
                     <p className="mt-1">{pendingGoal.timeBound}</p>
@@ -480,14 +480,14 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               </div>
             </details>
 
-            <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-lg lg:rounded-2xl lg:p-6">
+            <details className="rounded-[var(--r-card)] border border-white/70 bg-white/82 p-4 shadow-lg lg:rounded-[var(--r-card)] lg:p-6">
               <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                 Xem nhịp triển khai gợi ý
               </summary>
-              <div className="mt-4 space-y-4">
+              <div className="mt-4 stack-stack">
                 {copy.weeklyRhythm.map((item, index) => (
                   <div key={item.label} className="flex gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl border border-violet-200 bg-violet-50 text-xs font-semibold text-violet-700">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--r-tile)] border border-violet-200 bg-violet-50 text-xs font-semibold text-violet-700">
                       {index + 1}
                     </div>
                     <div>
@@ -500,14 +500,14 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             </details>
           </div>
 
-          <details className="rounded-2xl border border-white/70 bg-white/82 p-4 shadow-lg lg:rounded-2xl lg:p-6">
+          <details className="rounded-[var(--r-card)] border border-white/70 bg-white/82 p-4 shadow-lg lg:rounded-[var(--r-card)] lg:p-6">
             <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
               Xem lý do đằng sau kết quả
             </summary>
-            <div className="mt-4 space-y-4">
+            <div className="mt-4 stack-stack">
               <h2 className="text-xl font-bold tracking-normal text-slate-900">{copy.guideTitle}</h2>
               <p className="text-sm leading-7 text-slate-600">{copy.guideBody}</p>
-              <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+              <div className="rounded-[var(--r-tile)] border border-slate-200 bg-slate-50/80 p-4">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                   Nguyên tắc lập kế hoạch
                 </p>

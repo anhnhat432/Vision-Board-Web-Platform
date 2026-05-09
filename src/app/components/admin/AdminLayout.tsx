@@ -26,7 +26,7 @@ function AdminStatusCard({
         style={{ backgroundColor: "rgba(15, 23, 42, 0.96)" }}
       >
         <CardContent className="p-8 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-white">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[var(--r-tile)] bg-white/10 text-white">
             {icon}
           </div>
           <h1 className="mt-5 text-xl font-bold text-white">{title}</h1>
@@ -155,7 +155,7 @@ export function AdminLayout() {
       <header className="sticky top-0 z-30 border-b border-white/10 bg-slate-950/92 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-cyan-400 text-slate-950">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-cyan-400 text-slate-950">
               <ShieldCheck className="h-5 w-5" />
             </span>
             <div className="min-w-0">

@@ -1,4 +1,4 @@
-import type { ChangeEvent } from "react";
+﻿import type { ChangeEvent } from "react";
 import { useRef, useState } from "react";
 import { AlertTriangle, CalendarDays, CloudDownload, CreditCard, Loader2, RefreshCw, User2 } from "lucide-react";
 import { useNavigate } from "react-router";
@@ -107,13 +107,14 @@ export function SettingsPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+      <h1 className="sr-only">Tài khoản và dữ liệu</h1>
       <PageHeader
         eyebrow="Cài đặt"
         title="Tài khoản và dữ liệu"
         description="Quản lý dữ liệu lưu trên trình duyệt, bản sao lưu và các lối tắt cài đặt quan trọng."
       />
 
-      <section className="space-y-3" aria-label="Dữ liệu và sao lưu">
+      <section className="stack-tight" aria-label="Dữ liệu và sao lưu">
         <DataStorageInfo variant="banner" />
         <DashboardDataBackupCard
           importInputRef={importFileRef}
@@ -125,7 +126,7 @@ export function SettingsPage() {
 
       <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]" aria-label="Cài đặt nhanh">
         {shouldShowExpiryNotice && (
-          <Card className="glass-surface-sm rounded-2xl border-amber-200 bg-amber-50/80 shadow-none lg:col-span-2">
+          <Card className="glass-surface-sm rounded-[var(--r-card)] border-amber-200 bg-amber-50/80 shadow-none lg:col-span-2">
             <CardContent className="grid gap-4 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
               <div className="flex gap-3">
                 <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-600" />
@@ -142,7 +143,7 @@ export function SettingsPage() {
                   </p>
                 </div>
               </div>
-              <Button className="gap-2 rounded-full" onClick={() => navigate("/billing/plan")}>
+              <Button className="gap-2 rounded-[var(--r-control)]" onClick={() => navigate("/billing/plan")}>
                 <RefreshCw className="h-4 w-4" />
                 Mở trang gia hạn
               </Button>
@@ -150,7 +151,7 @@ export function SettingsPage() {
           </Card>
         )}
 
-        <Card className="glass-surface-sm rounded-2xl border shadow-none">
+        <Card className="glass-surface-sm rounded-[var(--r-card)] border shadow-none">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <User2 className="h-4 w-4 text-slate-500" />
@@ -164,7 +165,7 @@ export function SettingsPage() {
             <Button
               type="button"
               variant="outline"
-              className="mt-5 w-full gap-2 rounded-full"
+              className="mt-[var(--space-stack)] w-full gap-2 rounded-[var(--r-control)]"
               disabled={!isConfigured || !user || isExportingAccount}
               onClick={handleAccountExport}
             >
@@ -178,17 +179,17 @@ export function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="glass-surface-sm rounded-2xl border shadow-none">
+        <Card className="glass-surface-sm rounded-[var(--r-card)] border shadow-none">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Lối tắt cài đặt</CardTitle>
             <CardDescription>Mở đúng khu vực khi cần chỉnh chu kỳ hoặc gói truy cập.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">
-            <Button variant="outline" className="gap-2 rounded-full" onClick={() => navigate("/12-week-system/settings")}>
+            <Button variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={() => navigate("/12-week-system/settings")}>
               <CalendarDays className="h-4 w-4" />
               Cài đặt chu kỳ
             </Button>
-            <Button variant="outline" className="gap-2 rounded-full" onClick={() => navigate("/billing/plan")}>
+            <Button variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={() => navigate("/billing/plan")}>
               <CreditCard className="h-4 w-4" />
               Gói & thanh toán
             </Button>

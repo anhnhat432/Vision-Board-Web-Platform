@@ -63,7 +63,7 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
     <div
       role="note"
       aria-label={`${VARIANT_TITLE[variant]} (${archetypeLabel})`}
-      className={`rounded-2xl border p-4 ${VARIANT_BG[variant]}`}
+      className={`rounded-[var(--r-card)] border p-4 ${VARIANT_BG[variant]}`}
       data-archetype={archetype}
       data-archetype-hint-variant={variant}
     >

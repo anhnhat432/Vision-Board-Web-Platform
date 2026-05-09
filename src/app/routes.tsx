@@ -22,7 +22,7 @@ function lazyComponent<TModule extends Record<string, unknown>>(
 function RouteHydrateFallback() {
   return (
     <div className="flex min-h-[360px] items-center justify-center px-6 py-12" role="status" aria-live="polite">
-      <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white/90 p-6 text-center shadow-sm">
+      <div className="w-full max-w-md rounded-[var(--r-control)] border border-slate-200 bg-white/90 p-6 text-center shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Dear Our Future</p>
         <p className="mt-3 text-base font-semibold text-slate-900">Đang mở trang...</p>
       </div>

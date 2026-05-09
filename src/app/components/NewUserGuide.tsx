@@ -52,7 +52,7 @@ function StepList({ userData }: { userData: UserData }) {
       {progress.steps.map((step, index) => (
         <div
           key={step.id}
-          className={`rounded-lg border px-4 py-4 ${
+          className={`rounded-[var(--r-control)] border px-4 py-4 ${
             step.completed
               ? "border-emerald-200 bg-emerald-50/90"
               : step.id === progress.nextStep?.id
@@ -62,7 +62,7 @@ function StepList({ userData }: { userData: UserData }) {
         >
           <div className="flex items-start gap-3">
             <div
-              className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold ${
+              className={`mt-0.5 flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] text-sm font-semibold ${
                 step.completed
                   ? "bg-emerald-600 text-white"
                   : step.id === progress.nextStep?.id
@@ -192,14 +192,14 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
           </div>
 
           {!compact && (
-            <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50/80 p-4">
+            <div className="space-y-3 rounded-[var(--r-control)] border border-slate-200 bg-slate-50/80 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Trạng thái hiện tại</p>
               <StepList userData={userData} />
             </div>
           )}
 
           {compact && nextStep && (
-            <div className="rounded-lg border border-slate-200 bg-slate-50/80 p-4">
+            <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50/80 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Bước nên làm tiếp</p>
               <p className="mt-2 text-base font-semibold text-slate-950">{nextStep.title}</p>
               <p className="mt-2 line-clamp-2 text-sm leading-7 text-slate-600">{nextStep.description}</p>
@@ -221,7 +221,7 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[88vh] max-w-[calc(100%-1rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <div className="inline-flex w-fit items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+          <div className="inline-flex w-fit items-center gap-2 rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
             <Sparkles className="h-3.5 w-3.5" />
             Hướng dẫn sử dụng
           </div>
@@ -238,7 +238,7 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
         </DialogHeader>
 
         {userData.isHydratedFromDemo && (
-          <div className="rounded-lg border border-amber-200 bg-amber-50/90 p-4 text-sm leading-7 text-amber-900">
+          <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50/90 p-4 text-sm leading-7 text-amber-900">
             Dữ liệu hiện tại là dữ liệu mẫu để bạn xem nhanh sản phẩm. Khi chuyển sang bản thật, flow chuẩn vẫn là: đo
             bánh xe cuộc đời, chốt insight, viết SMART goal, kiểm tra tính thực tế rồi mới vào chu kỳ 12 tuần.
           </div>

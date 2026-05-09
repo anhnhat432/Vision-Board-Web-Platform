@@ -1,4 +1,4 @@
-import { Compass, Sparkles, Target } from "lucide-react";
+﻿import { Compass, Sparkles, Target } from "lucide-react";
 import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import { useNavigate } from "react-router";
@@ -288,7 +288,7 @@ export function FeasibilityCheck() {
 
   return (
     <PageShell maxWidth="hero">
-      <div className={prefersReducedMotion ? "space-y-6" : "animate-fade-in-up space-y-6"}>
+      <div className={prefersReducedMotion ? "stack-section" : "animate-fade-in-up stack-section"}>
         <CoreFlowProgress currentStepId="feasibility" onExit={() => navigate("/")} />
 
         <Card className="hero-surface overflow-hidden border-0 text-white">
@@ -296,13 +296,13 @@ export function FeasibilityCheck() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
 
             <div className="relative max-w-4xl">
-              <div className="space-y-5 sm:space-y-6">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+              <div className="stack-stack sm:stack-section">
+                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Compass className="h-4 w-4" />
                   Kiểm tra tính thực tế
                 </div>
 
-                <div className="space-y-3 sm:space-y-4">
+                <div className="stack-tight sm:stack-stack">
                   <h1 className="max-w-3xl text-2xl font-bold leading-tight tracking-normal sm:text-4xl lg:text-5xl">
                     Mục tiêu này có thực tế với bạn lúc này không?
                   </h1>
@@ -316,31 +316,31 @@ export function FeasibilityCheck() {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                  <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
                     <Target className="mr-1 h-3.5 w-3.5" />
                     {getLifeAreaLabel(focusArea)}
                   </Badge>
-                  <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                  <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
                     <Sparkles className="mr-1 h-3.5 w-3.5" />
                     Điểm hiện tại: {wheelScore}/10
                   </Badge>
                 </div>
               </div>
 
-              <div className="hidden rounded-2xl border border-white/14 bg-white/12 p-6 shadow-sm">
+              <div className="hidden rounded-[var(--r-card)] border border-white/14 bg-white/12 p-6 shadow-sm">
                 <div className="flex items-center justify-between text-sm text-white/72">
                   <span>
                     Câu hỏi {currentStep + 1} / {totalSteps}
                   </span>
                   <span>{Math.round(progressPercentage)}%</span>
                 </div>
-                <Progress value={progressPercentage} className="mt-3 h-2.5 bg-white/20" />
+                <Progress value={progressPercentage} className="mt-[var(--space-inline)] h-2.5 bg-white/20" />
 
-                <div className="mt-6 rounded-2xl border border-white/10 bg-black/12 p-4">
+                <div className="mt-6 rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-white/55">Mục tiêu đã viết</p>
                   <p className="mt-2 text-lg font-semibold text-white">{pendingGoal.specific}</p>
                 </div>
-                <div className="mt-4 rounded-2xl border border-white/10 bg-black/12 p-4">
+                <div className="mt-4 rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-white/55">Khung thời gian</p>
                   <p className="mt-2 text-sm font-semibold text-white">{pendingGoal.timeBound}</p>
                 </div>

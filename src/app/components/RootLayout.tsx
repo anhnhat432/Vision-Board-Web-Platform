@@ -76,6 +76,7 @@ import { WorkspaceLoadingGate } from "./root-layout/WorkspaceLoadingGate";
 import { buildLoginRedirect, isAuthProtectedPath, useWorkspaceGate } from "./root-layout/useWorkspaceGate";
 import { Button } from "./ui/button";
 import { Toaster } from "./ui/sonner";
+import { useReducedMotion } from "./ui/use-reduced-motion";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -824,8 +825,7 @@ export function RootLayout() {
     />
   );
 
-  const prefersReducedMotion =
-    typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const prefersReducedMotion = useReducedMotion();
 
   const pageTransition = prefersReducedMotion
     ? ({
@@ -840,6 +840,17 @@ export function RootLayout() {
         exit: { opacity: 0, y: -4 },
         transition: { duration: 0.24, ease: [0.22, 1, 0.36, 1] },
       } as const);
+  const pageTransitionContent = prefersReducedMotion ? (
+    <div key={location.pathname} className="page-transition-shell">
+      {outlet}
+    </div>
+  ) : (
+    <AnimatePresence initial={false}>
+      <motion.div key={location.pathname} className="page-transition-shell" {...pageTransition}>
+        {outlet}
+      </motion.div>
+    </AnimatePresence>
+  );
 
   if (shouldShowWorkspaceGate) {
     return <WorkspaceLoadingGate stage={workspaceGateStage} />;
@@ -848,6 +859,9 @@ export function RootLayout() {
   if (GUIDED_PATHS.has(location.pathname)) {
     return (
       <div className="app-shell min-h-screen" data-route-tone={routeTone}>
+        <a href="#main-content" className="skip-to-content">
+          Bỏ qua điều hướng
+        </a>
         {demoMode ? (
           <div
             role="note"
@@ -858,15 +872,11 @@ export function RootLayout() {
             <span className="font-semibold">Tạm thoát</span> bất kỳ lúc nào để quay lại bảng điều khiển.
           </div>
         ) : null}
-        <div className="relative z-10">
-          <AnimatePresence initial={false}>
-            <motion.div key={location.pathname} className="page-transition-shell" {...pageTransition}>
-              {outlet}
-            </motion.div>
-          </AnimatePresence>
+        <main id="main-content" className="relative z-10" aria-label="Nội dung trang">
+          {pageTransitionContent}
           {localDataMigrationPrompt}
           <Toaster />
-        </div>
+        </main>
       </div>
     );
   }
@@ -878,16 +888,16 @@ export function RootLayout() {
       </a>
 
       <header className="sticky top-0 z-40 px-4 pt-2 sm:top-3 sm:px-6 sm:pt-0 lg:px-8">
-        <div className="glass-surface mx-auto max-w-6xl rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 shadow-sm">
+        <div className="glass-surface mx-auto max-w-6xl rounded-[var(--r-tile)] px-3 py-2 sm:px-4 sm:py-2.5 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 shrink-0 items-center gap-2">
               <button
                 type="button"
                 onClick={() => navigateAppRoute("/")}
-                className="flex shrink-0 items-center gap-2.5 rounded-lg text-left transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
+                className="flex shrink-0 items-center gap-2.5 rounded-[var(--r-control)] text-left transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
                 aria-label="Về trang chủ Dear Our Future"
               >
-                <div className="flex size-9 items-center justify-center rounded-xl" style={shellBadgeStyle}>
+                <div className="flex size-9 items-center justify-center rounded-[var(--r-tile)]" style={shellBadgeStyle}>
                   <Sparkles className="h-4.5 w-4.5 text-white" />
                 </div>
                 <div className="min-w-0">
@@ -900,7 +910,7 @@ export function RootLayout() {
               {demoMode ? (
                 <span
                   title="Bản dùng thử đang lưu dữ liệu trên trình duyệt hiện tại."
-                  className="hidden shrink-0 items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold leading-none text-amber-800 sm:inline-flex"
+                  className="hidden shrink-0 items-center gap-1 rounded-[var(--r-pill)] border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold leading-none text-amber-800 sm:inline-flex"
                 >
                   <HardDrive className="h-3 w-3" aria-hidden="true" />
                   Dùng thử
@@ -909,7 +919,7 @@ export function RootLayout() {
             </div>
 
             <nav className="hidden flex-1 items-center justify-center md:flex">
-              <div className="flex flex-wrap items-center gap-0.5 rounded-full border border-slate-200/60 bg-slate-50/80 px-1.5 py-1">
+              <div className="flex flex-wrap items-center gap-0.5 rounded-[var(--r-pill)] border border-slate-200/60 bg-slate-50/80 px-1.5 py-1">
                 {primaryNavItems.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.path);
@@ -923,7 +933,7 @@ export function RootLayout() {
                       onPointerEnter={() => handlePrefetch(item.path)}
                       aria-current={active ? "page" : undefined}
                       title={item.label}
-                      className={`h-8 shrink-0 rounded-full px-3 text-[0.82rem] transition-colors transition-transform duration-150 active:scale-95 ${
+                      className={`h-8 shrink-0 rounded-[var(--r-pill)] px-3 text-[0.82rem] transition-colors transition-transform duration-150 active:scale-95 ${
                         active
                           ? "text-white hover:text-white"
                           : "bg-transparent text-slate-600 shadow-none hover:bg-white/90 hover:text-slate-900"
@@ -947,7 +957,7 @@ export function RootLayout() {
                         aria-current={secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined}
                         aria-expanded={desktopMoreOpen}
                         aria-haspopup="menu"
-                        className={`h-8 shrink-0 rounded-full px-3 text-[0.82rem] transition-colors transition-transform duration-150 active:scale-95 ${
+                        className={`h-8 shrink-0 rounded-[var(--r-pill)] px-3 text-[0.82rem] transition-colors transition-transform duration-150 active:scale-95 ${
                           isDesktopMoreNavActive
                             ? "text-white hover:text-white"
                             : "bg-transparent text-slate-500 shadow-none hover:bg-white/90 hover:text-slate-700"
@@ -966,7 +976,7 @@ export function RootLayout() {
                         <div
                           role="menu"
                           aria-label="Mục khác"
-                          className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-lg border border-slate-200 bg-white/96 p-2 shadow-lg backdrop-blur-xl"
+                          className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-[var(--r-control)] border border-slate-200 bg-white/96 p-2 shadow-lg backdrop-blur-xl"
                         >
                           <div className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                             Mục khác
@@ -987,7 +997,7 @@ export function RootLayout() {
                                   setDesktopMoreOpen(false);
                                   navigateAppRoute(item.path);
                                 }}
-                                className={`my-1 flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium tracking-normal outline-none transition-colors ${
+                                className={`my-1 flex w-full cursor-pointer items-center gap-2 rounded-[var(--r-control)] px-3 py-2.5 text-left text-sm font-medium tracking-normal outline-none transition-colors ${
                                   active
                                     ? "text-white focus:text-white"
                                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-950 focus:bg-slate-50 focus:text-slate-950"
@@ -1010,10 +1020,10 @@ export function RootLayout() {
             <div className="hidden shrink-0 items-center gap-1 md:flex">
               {user ? (
                 <div
-                  className="flex max-w-[180px] items-center gap-2 rounded-full border border-slate-200/60 bg-slate-50/80 px-2.5 py-1.5 text-left text-slate-700"
+                  className="flex max-w-[180px] items-center gap-2 rounded-[var(--r-pill)] border border-slate-200/60 bg-slate-50/80 px-2.5 py-1.5 text-left text-slate-700"
                   title={accountLabel}
                 >
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-slate-200/70 text-slate-600">
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-slate-200/70 text-slate-600">
                     <User2 className="h-3 w-3" />
                   </span>
                   <span className="truncate text-xs font-medium">{accountLabel}</span>
@@ -1023,7 +1033,7 @@ export function RootLayout() {
                 <button
                   type="button"
                   onClick={() => navigateAppRoute("/settings")}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200/60 bg-white/82 text-slate-500 transition-colors hover:bg-white hover:text-slate-800 dark:border-white/12 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/16"
+                  className="flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] border border-slate-200/60 bg-white/82 text-slate-500 transition-colors hover:bg-white hover:text-slate-800 dark:border-white/12 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/16"
                   aria-label="Mở cài đặt tài khoản"
                   title="Cài đặt tài khoản"
                 >
@@ -1036,14 +1046,15 @@ export function RootLayout() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleAuthNavigate("signin")}
-                    className="h-8 rounded-full border-slate-200/60 bg-white/90 px-3 text-xs text-slate-700 hover:bg-white"
+                    className="h-8 rounded-[var(--r-pill)] border-slate-200/60 bg-white/90 px-3 text-xs text-slate-700 hover:bg-white"
                   >
                     Đăng nhập
                   </Button>
                   <Button
+                    variant="secondary"
                     size="sm"
                     onClick={() => handleAuthNavigate("signup")}
-                    className="h-8 rounded-full px-3 text-xs"
+                    className="h-8 rounded-[var(--r-pill)] px-3 text-xs"
                   >
                     Đăng ký
                   </Button>
@@ -1054,7 +1065,7 @@ export function RootLayout() {
                   type="button"
                   onClick={handleSignOut}
                   disabled={isSigningOut}
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
+                  className="flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
                   aria-label="Đăng xuất"
                   title="Đăng xuất"
                 >
@@ -1064,7 +1075,7 @@ export function RootLayout() {
               <button
                 type="button"
                 onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-300 dark:hover:bg-white/12"
+                className="flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-300 dark:hover:bg-white/12"
                 aria-label={resolvedTheme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
               >
                 {resolvedTheme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
@@ -1077,7 +1088,7 @@ export function RootLayout() {
               </span>
               <button
                 type="button"
-                className="hidden size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300 sm:flex"
+                className="hidden size-11 items-center justify-center rounded-[var(--r-tile)] border border-white/72 bg-white/76 text-slate-700 transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300 sm:flex"
                 onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
                 aria-label={resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
               >
@@ -1089,8 +1100,9 @@ export function RootLayout() {
               </button>
               {isSignedOutVisitor ? (
                 <Button
+                  variant="secondary"
                   size="sm"
-                  className="h-10 rounded-xl px-3 text-xs shadow-sm sm:h-11"
+                  className="h-10 rounded-[var(--r-tile)] px-3 text-xs shadow-sm sm:h-11"
                   onClick={() => handleAuthNavigate("signup")}
                 >
                   Đăng ký
@@ -1098,7 +1110,7 @@ export function RootLayout() {
               ) : (
                 <button
                   type="button"
-                  className="flex size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300"
+                  className="flex size-11 items-center justify-center rounded-[var(--r-tile)] border border-white/72 bg-white/76 text-slate-700 transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300"
                   onClick={() => {
                     setGuideUserData(getUserData());
                     setIsGuideOpen(true);
@@ -1110,7 +1122,7 @@ export function RootLayout() {
               )}
               <button
                 type="button"
-                className="flex size-11 items-center justify-center rounded-xl border border-white/72 bg-white/76 text-slate-700 transition-colors active:scale-95 hover:bg-white"
+                className="flex size-11 items-center justify-center rounded-[var(--r-tile)] border border-white/72 bg-white/76 text-slate-700 transition-colors active:scale-95 hover:bg-white"
                 onClick={() => setMobileMenuOpen((open) => !open)}
                 aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
                 aria-expanded={mobileMenuOpen}
@@ -1124,12 +1136,12 @@ export function RootLayout() {
 
         {mobileMenuOpen && (
           <div id="mobile-nav-menu" className="mx-auto mt-2 max-w-6xl md:hidden">
-            <div className="glass-surface rounded-2xl p-3">
+            <div className="glass-surface rounded-[var(--r-card)] p-3">
               <nav className="space-y-1" aria-label="Menu điều hướng">
                 {user ? (
-                  <div className="mb-2 rounded-2xl border border-white/72 bg-white/82 px-4 py-3 text-left">
+                  <div className="mb-2 rounded-[var(--r-card)] border border-white/72 bg-white/82 px-4 py-3 text-left">
                     <div className="flex items-center gap-3">
-                      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-slate-100 text-slate-600">
                         <User2 className="h-5 w-5" />
                       </span>
                       <div className="min-w-0 flex-1">
@@ -1142,7 +1154,7 @@ export function RootLayout() {
                           setMobileMenuOpen(false);
                           navigateAppRoute("/settings");
                         }}
-                        className="flex size-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600"
+                        className="flex size-9 items-center justify-center rounded-[var(--r-tile)] border border-slate-200 bg-white text-slate-600"
                         aria-label="Mở cài đặt tài khoản"
                       >
                         <Settings2 className="h-4 w-4" />
@@ -1151,7 +1163,7 @@ export function RootLayout() {
                         type="button"
                         onClick={refreshUserProfile}
                         disabled={!canRetryUserProfile}
-                        className="flex size-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 disabled:opacity-50"
+                        className="flex size-9 items-center justify-center rounded-[var(--r-tile)] border border-slate-200 bg-white text-slate-600 disabled:opacity-50"
                         aria-label="Kiểm tra lại hồ sơ tài khoản"
                       >
                         <RefreshCw className={`h-4 w-4 ${userProfileLoading ? "animate-spin" : ""}`} />
@@ -1163,7 +1175,7 @@ export function RootLayout() {
                           void handleSignOut();
                         }}
                         disabled={isSigningOut}
-                        className="flex size-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 disabled:opacity-50"
+                        className="flex size-9 items-center justify-center rounded-[var(--r-tile)] border border-slate-200 bg-white text-slate-600 disabled:opacity-50"
                         aria-label="Đăng xuất"
                       >
                         <LogOut className="h-4 w-4" />
@@ -1175,7 +1187,7 @@ export function RootLayout() {
                   </div>
                 ) : null}
                 {!user ? (
-                  <div className="mb-2 grid grid-cols-2 gap-2 rounded-2xl border border-white/72 bg-white/82 p-2">
+                  <div className="mb-2 grid grid-cols-2 gap-2 rounded-[var(--r-card)] border border-white/72 bg-white/82 p-2">
                     <Button
                       variant="outline"
                       className="w-full border-slate-200 bg-white text-slate-900"
@@ -1187,6 +1199,7 @@ export function RootLayout() {
                       Đăng nhập
                     </Button>
                     <Button
+                      variant="secondary"
                       className="w-full"
                       onClick={() => {
                         setMobileMenuOpen(false);
@@ -1204,7 +1217,7 @@ export function RootLayout() {
                     setIsGuideOpen(true);
                     setMobileMenuOpen(false);
                   }}
-                  className="mb-2 flex w-full items-center gap-3 rounded-2xl border border-white/72 bg-white/82 px-4 py-3 text-left text-sm font-medium tracking-normal text-slate-700"
+                  className="mb-2 flex w-full items-center gap-3 rounded-[var(--r-control)] border border-white/72 bg-white/82 px-4 py-3 text-left text-sm font-medium tracking-normal text-slate-700"
                 >
                   <Compass className="h-5 w-5" />
                   <span>Hướng dẫn sử dụng</span>
@@ -1222,7 +1235,7 @@ export function RootLayout() {
                         setMobileMenuOpen(false);
                       }}
                       onFocus={() => handlePrefetch(item.path)}
-                      className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-sm font-medium tracking-normal transition-transform duration-150 active:scale-[0.98] ${
+                      className={`flex w-full items-center gap-3 rounded-[var(--r-control)] px-4 py-3.5 text-left text-sm font-medium tracking-normal transition-transform duration-150 active:scale-[0.98] ${
                         active ? "text-white" : "text-slate-600 hover:bg-white/80 hover:text-slate-900"
                       }`}
                       style={active ? activeNavStyle : undefined}
@@ -1250,11 +1263,7 @@ export function RootLayout() {
         <div className="sr-only" aria-live="polite" aria-atomic="true" role="status">
           {pageMeta.label}
         </div>
-        <AnimatePresence initial={false}>
-          <motion.div key={location.pathname} className="page-transition-shell" {...pageTransition}>
-            {outlet}
-          </motion.div>
-        </AnimatePresence>
+        {pageTransitionContent}
       </main>
 
       {!isSignedOutVisitor ? (

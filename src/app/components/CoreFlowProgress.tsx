@@ -92,7 +92,7 @@ export function CoreFlowProgress({
   return (
     <section
       aria-label="Tiến độ đường chính"
-      className={`rounded-lg border border-slate-200/80 bg-white/92 px-3.5 py-3 shadow-sm sm:px-4 ${className}`}
+      className={`rounded-[var(--r-control)] border border-slate-200/80 bg-white/92 px-3.5 py-3 shadow-sm sm:px-4 ${className}`}
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
         <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -111,7 +111,7 @@ export function CoreFlowProgress({
               onClick={onExit}
               title={exitTooltip}
               aria-label={exitTooltip}
-              className="h-7 rounded-full border border-slate-200 bg-white px-2.5 text-[11px] font-medium text-slate-600 shadow-sm hover:bg-slate-50 hover:text-slate-900"
+              className="h-7 rounded-[var(--r-pill)] border border-slate-200 bg-white px-2.5 text-[11px] font-medium text-slate-600 shadow-sm hover:bg-slate-50 hover:text-slate-900"
             >
               <LogOut className="mr-1 h-3 w-3" />
               {exitLabel}
@@ -134,9 +134,9 @@ export function CoreFlowProgress({
           <Progress value={progressValue} aria-label={`Tiến độ đường chính: ${progressLabel}%`} />
         </div>
 
-        <div className="rounded-lg border border-slate-200 bg-slate-50/85 px-3 py-2 lg:w-[280px]">
+        <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50/85 px-3 py-2 lg:w-[280px]">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-slate-700 shadow-sm">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-white text-slate-700 shadow-sm">
               <ArrowRight className="h-4 w-4" />
             </div>
             <div className="min-w-0">

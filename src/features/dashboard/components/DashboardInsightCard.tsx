@@ -60,7 +60,7 @@ export function DashboardInsightCard({
     <Card className={cn("ops-surface h-full overflow-hidden shadow-sm ring-1 ring-white/70", toneClass.card, className)}>
       <CardHeader className="space-y-3 pb-2">
         <div className="flex min-w-0 items-center gap-3">
-          <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ring-1", toneClass.icon)}>
+          <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] ring-1", toneClass.icon)}>
             <Icon className="h-5 w-5" />
           </div>
           <div className="min-w-0">

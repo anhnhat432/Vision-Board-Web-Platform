@@ -21,7 +21,7 @@ export function RelevantStep({
   const motivationInvalid = smartData.relevant.motivation_reason.trim().length < 15;
 
   return (
-    <div className="space-y-5">
+    <div className="stack-stack">
       <div className="space-y-2">
         <Label htmlFor="smart-relevant-reason" className="text-base">
           Lý do bạn thật sự muốn theo đuổi

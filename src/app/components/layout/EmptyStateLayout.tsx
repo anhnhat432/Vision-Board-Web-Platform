@@ -37,11 +37,11 @@ export function EmptyStateLayout({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-6 rounded-2xl border border-slate-200 bg-white/92 p-12 text-center",
+        "flex flex-col items-center justify-center gap-6 rounded-[var(--r-card)] border border-slate-200 bg-white/92 p-12 text-center",
         className
       )}
     >
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+      <div className="flex h-16 w-16 items-center justify-center rounded-[var(--r-tile)] bg-muted">
         {icon}
       </div>
       <div className="space-y-2 max-w-md">

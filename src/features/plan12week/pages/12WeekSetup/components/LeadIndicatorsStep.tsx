@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { AlertTriangle } from "lucide-react";
 
 import type { GoalArchetype } from "@/lib/smart-goal";
@@ -133,9 +133,9 @@ export function LeadIndicatorsStep({
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-4xl stack-section">
       {/* Explanation card - primary action */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--r-card)] border border-dashed border-slate-200 bg-slate-50/80 p-4">
         <div>
           <p className="text-sm font-semibold text-slate-900">Giữ 2-4 việc lặp lại cho cả chu kỳ</p>
           <p className="mt-1 text-sm text-slate-500">
@@ -154,7 +154,7 @@ export function LeadIndicatorsStep({
       {/* What are lead indicators? */}
       <SecondaryPanel title="Việc lặp lại là gì? Khác kết quả cuối thế nào?" collapsible defaultOpen={isDesktop}>
         <div className="grid gap-3 md:grid-cols-2">
-          <div className="rounded-2xl border border-emerald-200 bg-white/82 p-3">
+          <div className="rounded-[var(--r-card)] border border-emerald-200 bg-white/82 p-3">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Ví dụ tốt (kiểm soát được)</p>
             <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
               <li>• Viết draft 800 từ</li>
@@ -163,7 +163,7 @@ export function LeadIndicatorsStep({
               <li>• Học flashcard tiếng Anh 30 phút</li>
             </ul>
           </div>
-          <div className="rounded-2xl border border-amber-200 bg-white/82 p-3">
+          <div className="rounded-[var(--r-card)] border border-amber-200 bg-white/82 p-3">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Ví dụ chưa hợp (kết quả cuối)</p>
             <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
               <li>• Tăng 100 followers</li>
@@ -186,11 +186,11 @@ export function LeadIndicatorsStep({
       )}
 
       {/* Indicator cards */}
-      <div className="space-y-4">
+      <div className="stack-stack">
         {draft.leadIndicators.map((indicator, index) => (
           <div
             key={indicator.id}
-            className={`rounded-2xl border p-5 ${
+            className={`rounded-[var(--r-card)] border p-5 ${
               indicator.type === "optional"
                 ? "border-amber-200 bg-amber-50/72"
                 : "border-emerald-200 bg-emerald-50/72 shadow-sm"
@@ -295,7 +295,7 @@ export function LeadIndicatorsStep({
                 </div>
               </div>
             </div>
-            <div className="mt-4 rounded-2xl border border-white/70 bg-white/72 p-4">
+            <div className="mt-4 rounded-[var(--r-card)] border border-white/70 bg-white/72 p-4">
               <Button
                 type="button"
                 variant="ghost"
@@ -336,7 +336,7 @@ export function LeadIndicatorsStep({
             </div>
             {indicatorWarnings[index]?.length > 0 && (
               <ul
-                className="mt-3 space-y-1 rounded-2xl border border-amber-200 bg-amber-50/82 px-3 py-2 text-xs leading-5 text-amber-800"
+                className="mt-[var(--space-inline)] space-y-1 rounded-[var(--r-card)] border border-amber-200 bg-amber-50/82 px-3 py-2 text-xs leading-5 text-amber-800"
                 aria-label={`Cảnh báo cho việc ${index + 1}`}
               >
                 {indicatorWarnings[index].map((warning) => (
@@ -350,37 +350,37 @@ export function LeadIndicatorsStep({
 
       {/* Week 1 preview */}
       <SecondaryPanel title="Xem trước tuần 1" collapsible defaultOpen={isDesktop || Boolean(weekOneTaskWarning)}>
-        <div className="rounded-2xl border border-white/70 bg-white/72 p-5">
+        <div className="rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Xem trước tuần 1</p>
-          <div className="rounded-2xl border border-white/70 bg-white/78 p-4">
+          <div className="rounded-[var(--r-card)] border border-white/70 bg-white/78 p-4">
             <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Cốt lõi / Tùy chọn</p>
             <p className="mt-2 text-sm text-slate-600">
               {coreCount} cốt lõi • {optionalCount} tùy chọn
             </p>
           </div>
           {setupGuideSupport && setupGuideTemplate && (
-            <div className="rounded-2xl border border-slate-900 bg-slate-950 p-4 text-white">
+            <div className="rounded-[var(--r-card)] border border-slate-900 bg-slate-950 p-4 text-white">
               <p className="text-xs uppercase tracking-[0.16em] text-white/54">
                 {selectedTemplate ? "Tuần 1 theo khung đang dùng" : "Nếu đi theo khung gợi ý này"}
               </p>
               <p className="mt-2 text-base font-semibold">{setupGuideSupport.week1Headline}</p>
               <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1Support}</p>
-              <p className="mt-3 rounded-2xl border border-white/12 bg-white/8 px-3 py-3 text-sm text-white/74">
+              <p className="mt-[var(--space-inline)] rounded-[var(--r-card)] border border-white/12 bg-white/8 px-3 py-3 text-sm text-white/74">
                 {setupGuideSupport.week1CadenceHint}
               </p>
             </div>
           )}
-          <p className="mt-3 text-xs leading-5 text-slate-500">
+          <p className="mt-[var(--space-inline)] text-xs leading-5 text-slate-500">
             Từ mỗi việc lặp lại bên trên, việc hôm nay sẽ được tạo vào các ngày sau:
           </p>
-          <div className="mt-3 space-y-2">
+          <div className="mt-[var(--space-inline)] space-y-2">
             {weekOneTaskGroups.length === 0 ? (
               <p className="text-sm text-slate-500">Thêm việc để thấy tuần đầu tiên sẽ trông như thế nào.</p>
             ) : (
               weekOneTaskGroups.map((group) => (
                 <div
                   key={group.id}
-                  className="rounded-2xl border border-white/70 bg-slate-50/80 px-4 py-3"
+                  className="rounded-[var(--r-card)] border border-white/70 bg-slate-50/80 px-4 py-3"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="text-sm font-semibold text-slate-900">{group.name}</p>
@@ -405,7 +405,7 @@ export function LeadIndicatorsStep({
           {weekOneTaskWarning ? (
             <p
               role="status"
-              className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-amber-700"
+              className="mt-[var(--space-inline)] flex items-start gap-1.5 text-xs leading-5 text-amber-700"
             >
               <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               <span>

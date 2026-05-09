@@ -1,4 +1,4 @@
-import {
+﻿import {
   ArrowDown,
   ArrowRight,
   ArrowUp,
@@ -257,7 +257,7 @@ export function TwelveWeekProgressTab({
   const averageLeadScore = getAverageLeadScore(system);
 
   return (
-    <div className="space-y-6 pt-4">
+    <div className="stack-section pt-4">
       <Card
         interactive={false}
         data-testid="progress-trend-hero"
@@ -272,7 +272,7 @@ export function TwelveWeekProgressTab({
               </p>
               <p className="mt-2 text-base font-semibold text-slate-950 sm:text-lg">{trend.headline}</p>
               <p className="mt-1 text-sm leading-6 text-slate-700">{trend.advice}</p>
-              <div className="mt-3 flex flex-wrap items-center gap-2">
+              <div className="mt-[var(--space-inline)] flex flex-wrap items-center gap-2">
                 {trend.weekOverWeekDelta !== null && (
                   <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
                     {trend.trendDirection === "up" ? (
@@ -288,12 +288,12 @@ export function TwelveWeekProgressTab({
                 )}
               </div>
               {nextActionHandler && (
-                <div className="mt-4 rounded-lg border border-slate-900/10 bg-white/86 p-3">
+                <div className="mt-4 rounded-[var(--r-control)] border border-slate-900/10 bg-white/86 p-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
                     Tiếp theo nên làm
                   </p>
                   <p className="mt-1 text-sm leading-6 text-slate-800">{nextActionSuggestion.label}</p>
-                  <Button size="lg" className="mt-3 w-full sm:w-auto" onClick={nextActionHandler}>
+                  <Button size="lg" className="mt-[var(--space-inline)] w-full sm:w-auto" onClick={nextActionHandler}>
                     {nextActionSuggestion.buttonLabel}
                     <ArrowRight className="ml-1 h-4 w-4" />
                   </Button>
@@ -301,7 +301,7 @@ export function TwelveWeekProgressTab({
               )}
             </div>
             <span
-              className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${narrativeStyle.badge}`}
+              className={`shrink-0 rounded-[var(--r-pill)] border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${narrativeStyle.badge}`}
             >
               {narrativeStyle.badgeLabel}
             </span>
@@ -328,7 +328,7 @@ export function TwelveWeekProgressTab({
         collapsible
         defaultOpen={true}
       >
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-[var(--space-stack)] md:grid-cols-3">
         <Card
           interactive={false}
           className="border border-slate-200/80 bg-white/92 shadow-sm"
@@ -338,7 +338,7 @@ export function TwelveWeekProgressTab({
               <CalendarDays className="h-3.5 w-3.5" />
               Tuần đang chạy
             </p>
-            <div className="mt-3">
+            <div className="mt-[var(--space-inline)]">
               <p className="text-3xl font-bold text-slate-950">Tuần {currentWeek}</p>
               <p className="mt-1 text-sm text-slate-600">
                 {currentWeekRange
@@ -358,13 +358,13 @@ export function TwelveWeekProgressTab({
               <BarChart3 className="h-3.5 w-3.5" />
               Lead progress
             </p>
-            <div className="mt-3 flex items-start justify-between gap-3">
+            <div className="mt-[var(--space-inline)] flex items-start justify-between gap-3">
               <p className="text-3xl font-bold text-slate-950">Lead trung bình {averageLeadScore}%</p>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-sky-200 bg-white text-sky-700 shadow-sm"
+                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--r-pill)] border border-sky-200 bg-white text-sky-700 shadow-sm"
                     aria-label="Tại sao 85%?"
                   >
                     <CircleHelp className="h-4 w-4" />
@@ -388,7 +388,7 @@ export function TwelveWeekProgressTab({
               <Flag className="h-3.5 w-3.5" />
               Tuần đã hoàn thành
             </p>
-            <p className="mt-3 text-3xl font-bold text-slate-950">
+            <p className="mt-[var(--space-inline)] text-3xl font-bold text-slate-950">
               Đã hoàn thành {reviewDoneCount}/{system.totalWeeks} tuần
             </p>
             <p className="mt-1 text-sm text-slate-600">
@@ -401,7 +401,7 @@ export function TwelveWeekProgressTab({
       </div>
       </SectionBlock>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid gap-[var(--space-section)] lg:grid-cols-[minmax(0,1fr)_360px]">
         <Card
           interactive={false}
           className="border border-slate-200/80 bg-white/92 shadow-sm"
@@ -415,8 +415,8 @@ export function TwelveWeekProgressTab({
               Mỗi tuần được chấm từ hành vi thật: mức hoàn thành việc cốt lõi, check-in, đúng lịch và review.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-5">
-            <div className="rounded-lg border border-sky-200 bg-sky-50 p-5">
+          <CardContent className="stack-stack">
+            <div className="rounded-[var(--r-control)] border border-sky-200 bg-sky-50 p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold text-slate-950">Tuần {currentWeek} đang là trọng tâm</p>
@@ -428,7 +428,7 @@ export function TwelveWeekProgressTab({
               </div>
             </div>
 
-            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-[var(--space-stack)] md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {system.scoreboard.map((week) => {
                 const isCurrentWeek = week.weekNumber === currentWeek;
                 const isReviewed = week.reviewDone;
@@ -436,7 +436,7 @@ export function TwelveWeekProgressTab({
                 return (
                   <div
                     key={week.weekNumber}
-                    className={`rounded-xl border p-4 shadow-sm ${
+                    className={`rounded-[var(--r-tile)] border p-4 shadow-sm ${
                       isCurrentWeek
                         ? "border-slate-950 bg-slate-950 text-white"
                         : isReviewed
@@ -471,7 +471,7 @@ export function TwelveWeekProgressTab({
                       </Badge>
                     </div>
 
-                    <div className="mt-4 space-y-3">
+                    <div className="mt-4 stack-tight">
                       <div>
                         <div
                           className={`flex items-center justify-between text-sm ${
@@ -490,7 +490,7 @@ export function TwelveWeekProgressTab({
                       </div>
 
                       <div
-                        className={`rounded-lg border px-4 py-3 ${
+                        className={`rounded-[var(--r-control)] border px-4 py-3 ${
                           isCurrentWeek ? "border-white/10 bg-white/8" : "border-slate-200 bg-white"
                         }`}
                       >
@@ -527,15 +527,15 @@ export function TwelveWeekProgressTab({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="rounded-lg border border-slate-200 bg-white p-5">
-              <div className="space-y-5">
+            <div className="rounded-[var(--r-control)] border border-slate-200 bg-white p-5">
+              <div className="stack-stack">
                 {milestoneItems.map((item, index) => {
                   const isLastItem = index === milestoneItems.length - 1;
 
                   return (
                     <div key={item.label} className={`relative pl-12 ${isLastItem ? "" : "pb-5"}`}>
                       {!isLastItem && <div className="absolute left-[17px] top-9 h-full w-px bg-slate-300/70" />}
-                      <div className="absolute left-0 top-0 flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 text-sm font-semibold text-white">
+                      <div className="absolute left-0 top-0 flex h-9 w-9 items-center justify-center rounded-[var(--r-control)] bg-slate-900 text-sm font-semibold text-white">
                         {index + 1}
                       </div>
                       <p className="pt-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -552,7 +552,7 @@ export function TwelveWeekProgressTab({
       </div>
 
       {hasAdvancedAnalytics ? (
-        <div className="space-y-6">
+        <div className="stack-section">
           {executionHeatmap.length > 0 && (
             <Card
               interactive={false}
@@ -596,7 +596,7 @@ export function TwelveWeekProgressTab({
                             return (
                               <div
                                 key={cell.dateKey}
-                                className={`h-9 w-9 rounded-lg ${cellClass} ${
+                                className={`h-9 w-9 rounded-[var(--r-control)] ${cellClass} ${
                                   weekNumber === currentWeek ? "ring-2 ring-sky-300" : ""
                                 }`}
                                 title={`${cell.dateKey}: ${cell.completed}/${cell.total} xong`}
@@ -606,21 +606,21 @@ export function TwelveWeekProgressTab({
                         </div>
                       );
                     })}
-                    <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] text-slate-500">
+                    <div className="mt-[var(--space-inline)] flex flex-wrap items-center gap-3 text-[10px] text-slate-500">
                       <span className="flex items-center gap-1">
-                        <span className="inline-block h-3 w-3 rounded bg-emerald-500" /> &gt;=80%
+                        <span className="inline-block h-3 w-3 rounded-[var(--r-control)] bg-emerald-500" /> &gt;=80%
                       </span>
                       <span className="flex items-center gap-1">
-                        <span className="inline-block h-3 w-3 rounded bg-emerald-300" /> 50-79%
+                        <span className="inline-block h-3 w-3 rounded-[var(--r-control)] bg-emerald-300" /> 50-79%
                       </span>
                       <span className="flex items-center gap-1">
-                        <span className="inline-block h-3 w-3 rounded bg-amber-300" /> 1-49%
+                        <span className="inline-block h-3 w-3 rounded-[var(--r-control)] bg-amber-300" /> 1-49%
                       </span>
                       <span className="flex items-center gap-1">
-                        <span className="inline-block h-3 w-3 rounded bg-rose-300" /> 0%
+                        <span className="inline-block h-3 w-3 rounded-[var(--r-control)] bg-rose-300" /> 0%
                       </span>
                       <span className="flex items-center gap-1">
-                        <span className="inline-block h-3 w-3 rounded bg-slate-100 ring-1 ring-slate-200" /> Trống
+                        <span className="inline-block h-3 w-3 rounded-[var(--r-control)] bg-slate-100 ring-1 ring-slate-200" /> Trống
                       </span>
                     </div>
                   </div>
@@ -641,14 +641,14 @@ export function TwelveWeekProgressTab({
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className="stack-tight">
                   {weeklyTrend.map((point) => {
                     const isCurrent = point.weekNumber === currentWeek;
 
                     return (
                       <div
                         key={point.weekNumber}
-                        className={`rounded-lg border p-4 ${
+                        className={`rounded-[var(--r-control)] border p-4 ${
                           isCurrent
                             ? "border-sky-300 bg-white shadow-md"
                             : "border-slate-200 bg-white/80"
@@ -665,7 +665,7 @@ export function TwelveWeekProgressTab({
                           </div>
                           <span className="text-sm font-semibold text-slate-900">{point.score} điểm</span>
                         </div>
-                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        <div className="mt-[var(--space-inline)] grid gap-2 sm:grid-cols-2">
                           <div>
                             <div className="flex items-center justify-between text-xs text-slate-600">
                               <span>Cốt lõi</span>
@@ -700,11 +700,11 @@ export function TwelveWeekProgressTab({
                   Chi tiết hoàn thành và xu hướng từng việc lặp lại đến tuần {currentWeek}.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="stack-tight">
                 {tacticBreakdown.map((item) => (
                   <div
                     key={item.tacticId}
-                    className="flex items-center gap-4 rounded-lg border border-emerald-100 bg-white px-4 py-4"
+                    className="flex items-center gap-4 rounded-[var(--r-control)] border border-emerald-100 bg-white px-4 py-4"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
@@ -729,7 +729,7 @@ export function TwelveWeekProgressTab({
                       </p>
                     </div>
                     <div
-                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-control)] ${
                         item.trend === "up"
                           ? "bg-emerald-100 text-emerald-700"
                           : item.trend === "down"
@@ -757,7 +757,7 @@ export function TwelveWeekProgressTab({
           className="border border-violet-200/70 bg-violet-50 shadow-lg"
         >
           <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-violet-100 text-violet-600">
+            <div className="flex h-14 w-14 items-center justify-center rounded-[var(--r-control)] bg-violet-100 text-violet-600">
               <Lock className="h-6 w-6" />
             </div>
             <div>

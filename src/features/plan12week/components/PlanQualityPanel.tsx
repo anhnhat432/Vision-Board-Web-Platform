@@ -89,7 +89,7 @@ export function PlanQualityPanel({ plan, context, className = "" }: PlanQualityP
                 className="flex flex-col items-center gap-0.5"
                 title={dim.label}
               >
-                <div className="h-2 w-6 rounded-full bg-gray-200 overflow-hidden">
+                <div className="h-2 w-6 rounded-[var(--r-pill)] bg-gray-200 overflow-hidden">
                   <div
                     className={`h-full ${
                       dim.status === "strong"
@@ -138,13 +138,13 @@ export function PlanQualityPanel({ plan, context, className = "" }: PlanQualityP
         )}
 
         {/* Dimension details (optional) */}
-        <div className="rounded-md border p-3">
+        <div className="rounded-[var(--r-control)] border p-3">
           <h4 className="mb-2 text-sm font-medium">Chi tiết điểm từng tiêu chí:</h4>
           <div className="grid grid-cols-2 gap-2 text-xs">
             {quality.dimensions.map((dim) => (
               <div
                 key={dim.id}
-                className={`flex items-center justify-between rounded px-2 py-1 ${
+                className={`flex items-center justify-between rounded-[var(--r-control)] px-2 py-1 ${
                   dim.status === "strong"
                     ? "bg-green-50"
                     : dim.status === "okay"

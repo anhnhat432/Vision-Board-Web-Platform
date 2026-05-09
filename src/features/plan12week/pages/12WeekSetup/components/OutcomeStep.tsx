@@ -1,4 +1,4 @@
-import type { PendingSMARTGoal } from "@/lib/smart-goal";
+﻿import type { PendingSMARTGoal } from "@/lib/smart-goal";
 import type {
   AdaptiveTemplateRecommendation,
   AdaptiveTemplateSupport,
@@ -61,20 +61,20 @@ export function OutcomeStep({
     : "";
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="mx-auto max-w-4xl stack-section">
       {/* Plan rationale reasons */}
       {planRationaleReasons.length > 0 && (
         <SecondaryPanel title="Vì sao kế hoạch này được đề xuất" collapsible defaultOpen={isDesktop}>
           <ul className="grid gap-2 md:grid-cols-2">
             {planRationaleReasons.map((reason) => (
-              <li key={reason.id} className="rounded-xl border border-violet-200 bg-white/82 p-3">
+              <li key={reason.id} className="rounded-[var(--r-tile)] border border-violet-200 bg-white/82 p-3">
                 <p className="text-sm font-semibold text-slate-950">{reason.title}</p>
                 <p className="mt-1 text-xs leading-5 text-slate-600">{reason.detail}</p>
               </li>
             ))}
           </ul>
           {feasibility.smartGoalQualityNote && (
-            <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50/82 px-4 py-3">
+            <div className="mt-[var(--space-inline)] rounded-[var(--r-tile)] border border-amber-200 bg-amber-50/82 px-4 py-3">
               <p className="text-sm leading-6 text-amber-800">{feasibility.smartGoalQualityNote}</p>
             </div>
           )}
@@ -85,20 +85,20 @@ export function OutcomeStep({
       {(feasibility.bottleneck || feasibility.firstWeekGuidance || feasibility.scopeRecommendation) && (
         <SecondaryPanel title="Gợi ý từ bước kiểm tra" collapsible defaultOpen={isDesktop}>
           <div className="grid gap-3 md:grid-cols-3">
-            <div className="rounded-xl border border-amber-200 bg-white/76 p-3">
+            <div className="rounded-[var(--r-tile)] border border-amber-200 bg-white/76 p-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Cần chú ý</p>
               <p className="mt-1 text-sm font-semibold text-slate-950">{feasibility.bottleneck?.label ?? "Chưa có"}</p>
               {feasibility.bottleneck?.action && (
                 <p className="mt-2 text-xs leading-5 text-slate-600">{feasibility.bottleneck.action}</p>
               )}
             </div>
-            <div className="rounded-xl border border-amber-200 bg-white/76 p-3">
+            <div className="rounded-[var(--r-tile)] border border-amber-200 bg-white/76 p-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Tuần 1</p>
               <p className="mt-1 text-sm leading-6 text-slate-700">
                 {feasibility.firstWeekGuidance ?? "Giữ tuần đầu vừa sức để tạo nhịp."}
               </p>
             </div>
-            <div className="rounded-xl border border-amber-200 bg-white/76 p-3">
+            <div className="rounded-[var(--r-tile)] border border-amber-200 bg-white/76 p-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Mức tải</p>
               <p className="mt-1 text-sm font-semibold text-slate-950">{getPlanLoadLabel(feasibility.planLoad)}</p>
               <p className="mt-2 text-xs leading-5 text-slate-600">
@@ -110,7 +110,7 @@ export function OutcomeStep({
       )}
 
       {/* Required fields card */}
-      <div className="rounded-2xl border-2 border-emerald-200 bg-emerald-50/60 p-5 sm:p-6 shadow-sm">
+      <div className="rounded-[var(--r-card)] border-2 border-emerald-200 bg-emerald-50/60 p-5 sm:p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
             <p className="text-sm font-semibold text-slate-900">Chốt phần bắt buộc trước</p>
@@ -124,7 +124,7 @@ export function OutcomeStep({
           </Badge>
         </div>
         {lagMetricPreview ? (
-          <div className="rounded-xl border border-emerald-200 bg-white/78 px-4 py-3">
+          <div className="rounded-[var(--r-tile)] border border-emerald-200 bg-white/78 px-4 py-3">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Chỉ số kết quả</p>
             <p className="mt-1 text-sm font-semibold text-slate-950">{lagMetricPreview}</p>
           </div>
@@ -174,7 +174,7 @@ export function OutcomeStep({
 
       {/* Personalization panel */}
       {selectedTemplate && (
-        <div className="space-y-4 rounded-2xl border border-emerald-200 gradient-emerald p-5">
+        <div className="stack-stack rounded-[var(--r-card)] border border-emerald-200 gradient-emerald p-5">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Cá nhân hóa khung</p>
             <p className="mt-1 text-sm text-slate-600">
@@ -209,7 +209,7 @@ export function OutcomeStep({
                     type="button"
                     aria-pressed={isActive}
                     onClick={() => onPreferredDayToggle(dayIndex)}
-                    className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                    className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-[var(--r-pill)] border px-4 py-2 text-sm font-medium transition-colors ${
                       isActive
                         ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
                         : "border-slate-300 bg-white text-slate-700 hover:border-emerald-400"
@@ -261,7 +261,7 @@ export function OutcomeStep({
       {/* Template selection */}
       <SecondaryPanel title="Bắt đầu nhanh bằng khung gợi ý" collapsible defaultOpen={isDesktop}>
         {recommendedTemplate && adaptiveTemplateRecommendation && (
-          <div className="rounded-2xl border border-sky-200 gradient-sky p-4 shadow-sm">
+          <div className="rounded-[var(--r-card)] border border-sky-200 gradient-sky p-4 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">Gợi ý cho mục tiêu này</p>
@@ -280,12 +280,12 @@ export function OutcomeStep({
               {selectedTemplate?.id === recommendedTemplate.id ? "Đang dùng khung gợi ý" : "Dùng khung gợi ý này"}
             </Button>
             {recommendedTemplateSupport && (
-              <details className="mt-4 rounded-xl border border-sky-200 bg-white/72 px-4 py-3">
+              <details className="mt-4 rounded-[var(--r-tile)] border border-sky-200 bg-white/72 px-4 py-3">
                 <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                   Xem gợi ý tuần 1 và nhịp giữ
                 </summary>
-                <div className="mt-3 grid gap-3">
-                  <div className="rounded-xl border border-sky-200 bg-white/86 p-4">
+                <div className="mt-[var(--space-inline)] grid gap-3">
+                  <div className="rounded-[var(--r-tile)] border border-sky-200 bg-white/86 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
                       Tuần 1 nên thắng ở đâu
                     </p>
@@ -294,7 +294,7 @@ export function OutcomeStep({
                     </p>
                     <p className="mt-2 text-sm leading-7 text-slate-600">{recommendedTemplateSupport.week1Support}</p>
                   </div>
-                  <div className="rounded-xl border border-sky-200 bg-white/86 p-4">
+                  <div className="rounded-[var(--r-tile)] border border-sky-200 bg-white/86 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">Nhịp nên giữ</p>
                     <p className="mt-2 text-sm leading-7 text-slate-600">
                       {recommendedTemplateSupport.week1CadenceHint}
@@ -305,7 +305,7 @@ export function OutcomeStep({
             )}
           </div>
         )}
-        <details className="mt-4 rounded-xl border border-dashed border-slate-200 bg-white/72 px-4 py-3">
+        <details className="mt-4 rounded-[var(--r-tile)] border border-dashed border-slate-200 bg-white/72 px-4 py-3">
           <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
             Xem tất cả khung mẫu
           </summary>
@@ -324,7 +324,7 @@ export function OutcomeStep({
                   onClick={() => onTemplateSelect(template)}
                   aria-pressed={isSelected}
                   aria-label={templateAriaLabel}
-                  className={`rounded-2xl border p-4 text-left transition-colors ${
+                  className={`rounded-[var(--r-card)] border p-4 text-left transition-colors ${
                     isSelected
                       ? "border-slate-900 bg-slate-900 text-white shadow-lg"
                       : isLocked
@@ -366,11 +366,11 @@ export function OutcomeStep({
                       {isSelected ? "Đang dùng" : isLocked ? "Đang khóa" : "Sẵn sàng"}
                     </Badge>
                   </div>
-                  <p className={`mt-3 text-sm leading-7 ${isSelected ? "text-white/84" : "text-slate-600"}`}>
+                  <p className={`mt-[var(--space-inline)] text-sm leading-7 ${isSelected ? "text-white/84" : "text-slate-600"}`}>
                     {template.description}
                   </p>
                   <div
-                    className={`mt-3 rounded-xl border px-3 py-3 text-sm leading-6 ${
+                    className={`mt-[var(--space-inline)] rounded-[var(--r-tile)] border px-3 py-3 text-sm leading-6 ${
                       isSelected
                         ? "border-white/12 bg-white/8 text-white/82"
                         : "border-white/70 bg-white/72 text-slate-600"
@@ -386,7 +386,7 @@ export function OutcomeStep({
                     <p className="mt-2">{template.bestFor}</p>
                   </div>
                   <div
-                    className={`mt-3 rounded-xl border px-3 py-3 text-sm leading-6 ${
+                    className={`mt-[var(--space-inline)] rounded-[var(--r-tile)] border px-3 py-3 text-sm leading-6 ${
                       isSelected
                         ? "border-white/12 bg-white/8 text-white/82"
                         : "border-white/70 bg-white/72 text-slate-600"
@@ -445,7 +445,7 @@ export function OutcomeStep({
       {/* Selected template */}
       {selectedTemplate && (
         <SecondaryPanel title="Khung đang dùng" collapsible defaultOpen={isDesktop}>
-          <div className="rounded-2xl border border-white/70 bg-white/78 p-4">
+          <div className="rounded-[var(--r-card)] border border-white/70 bg-white/78 p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Khung đang dùng</p>
@@ -468,16 +468,16 @@ export function OutcomeStep({
       )}
 
       {/* Smart goal details */}
-      <details className="rounded-2xl border border-dashed border-slate-200 bg-white/72 p-4">
+      <details className="rounded-[var(--r-card)] border border-dashed border-slate-200 bg-white/72 p-4">
         <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
           Xem mục tiêu đã viết
         </summary>
-        <div className="mt-4 space-y-3">
-          <div className="rounded-xl border border-white/70 bg-white/86 p-4">
+        <div className="mt-4 stack-tight">
+          <div className="rounded-[var(--r-tile)] border border-white/70 bg-white/86 p-4">
             <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Mục tiêu cụ thể</p>
             <p className="mt-2 text-sm leading-7 text-slate-700">{smartGoal.specific}</p>
           </div>
-          <div className="rounded-xl border border-white/70 bg-white/86 p-4">
+          <div className="rounded-[var(--r-tile)] border border-white/70 bg-white/86 p-4">
             <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Cách đo kết quả</p>
             <p className="mt-2 text-sm leading-7 text-slate-700">{smartGoal.measurable}</p>
           </div>

@@ -115,10 +115,10 @@ export function FeedbackDialog({
 
         {submitted ? (
           <div className="space-y-4">
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm leading-6 text-emerald-900">
+            <div className="rounded-[var(--r-card)] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm leading-6 text-emerald-900">
               Cảm ơn bạn. Góp ý đã được ghi nhận trên trình duyệt này.
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-600">
+            <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-600">
               Nếu muốn gửi lại qua kênh riêng, bạn có thể sao chép nội dung vừa nhập. App không yêu cầu email và không
               bắt buộc kết nối tài khoản.
             </div>
@@ -144,7 +144,7 @@ export function FeedbackDialog({
                     key={value}
                     type="button"
                     variant={rating === value ? "default" : "outline"}
-                    className="h-10 rounded-2xl px-0"
+                    className="h-10 rounded-[var(--r-control)] px-0"
                     aria-pressed={rating === value}
                     aria-label={`${value} điểm`}
                     onClick={() => setRating(value)}
@@ -166,7 +166,7 @@ export function FeedbackDialog({
                     type="button"
                     variant={feedbackCategory === option.value ? "secondary" : "outline"}
                     size="sm"
-                    className="rounded-2xl"
+                    className="rounded-[var(--r-card)]"
                     aria-pressed={feedbackCategory === option.value}
                     onClick={() => setFeedbackCategory(option.value)}
                   >

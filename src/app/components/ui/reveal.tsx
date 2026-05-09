@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import type { HTMLMotionProps } from "motion/react";
 
@@ -33,6 +33,18 @@ export function Reveal({
   });
 
   const visible = shouldReduceMotion || isInView;
+
+  if (shouldReduceMotion) {
+    return (
+      <div
+        ref={ref}
+        className={cn("reveal-block", className)}
+        {...(props as HTMLAttributes<HTMLDivElement>)}
+      >
+        {children}
+      </div>
+    );
+  }
 
   return (
     <motion.div

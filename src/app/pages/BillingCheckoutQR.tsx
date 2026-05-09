@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { CheckCircle2, Clock, Copy, Loader2, QrCode, RefreshCw, XCircle } from "lucide-react";
 
@@ -189,8 +189,8 @@ export function BillingCheckoutQR() {
 
     return (
       <div className="mx-auto max-w-md px-4 py-12">
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-8 text-center shadow-lg">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+        <div className="rounded-[var(--r-card)] border border-emerald-200 bg-emerald-50/80 p-8 text-center shadow-lg">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[var(--r-pill)] bg-emerald-100">
             <CheckCircle2 className="h-8 w-8 text-emerald-600" />
           </div>
           <h2 className="text-xl font-bold text-emerald-800">Thanh toán thành công!</h2>
@@ -202,7 +202,7 @@ export function BillingCheckoutQR() {
                 : "Gói Plus đã được kích hoạt. Chúc bạn có 12 tuần hiệu quả!"}
           </p>
           {entitlementSyncMessage && (
-            <p className={`mt-3 text-xs leading-5 ${syncFailed ? "text-amber-700" : "text-emerald-700"}`}>
+            <p className={`mt-[var(--space-inline)] text-xs leading-5 ${syncFailed ? "text-amber-700" : "text-emerald-700"}`}>
               {entitlementSyncMessage}
             </p>
           )}
@@ -210,7 +210,7 @@ export function BillingCheckoutQR() {
             type="button"
             onClick={handleCompletedOrderContinue}
             disabled={isSyncingEntitlement}
-            className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
+            className="mt-6 inline-flex items-center justify-center gap-2 rounded-[var(--r-tile)] bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isSyncingEntitlement && <Loader2 className="h-4 w-4 animate-spin" />}
             {isSyncingEntitlement ? "Đang cập nhật..." : syncFailed ? "Đồng bộ lại quyền Plus" : "Bắt đầu ngay"}
@@ -225,8 +225,8 @@ export function BillingCheckoutQR() {
   if (order?.status === "expired" || (order?.status === "pending" && timeLeft <= 0 && order?.expiresAt)) {
     return (
       <div className="mx-auto max-w-md px-4 py-12">
-        <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-8 text-center shadow-lg">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+        <div className="rounded-[var(--r-card)] border border-amber-200 bg-amber-50/80 p-8 text-center shadow-lg">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[var(--r-pill)] bg-amber-100">
             <Clock className="h-8 w-8 text-amber-600" />
           </div>
           <h2 className="text-xl font-bold text-amber-800">Hết thời gian thanh toán</h2>
@@ -234,7 +234,7 @@ export function BillingCheckoutQR() {
           <button
             type="button"
             onClick={() => navigate("/billing/checkout")}
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-amber-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-amber-700"
+            className="mt-6 inline-flex items-center gap-2 rounded-[var(--r-tile)] bg-amber-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-amber-700"
           >
             <RefreshCw className="h-4 w-4" />
             Tạo đơn mới
@@ -249,8 +249,8 @@ export function BillingCheckoutQR() {
   if (error && !order) {
     return (
       <div className="mx-auto max-w-md px-4 py-12">
-        <div className="rounded-2xl border border-red-200 bg-red-50/80 p-8 text-center shadow-lg">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+        <div className="rounded-[var(--r-card)] border border-red-200 bg-red-50/80 p-8 text-center shadow-lg">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[var(--r-pill)] bg-red-100">
             <XCircle className="h-8 w-8 text-red-500" />
           </div>
           <h2 className="text-lg font-bold text-red-800">Có lỗi xảy ra</h2>
@@ -258,7 +258,7 @@ export function BillingCheckoutQR() {
           <button
             type="button"
             onClick={() => navigate("/billing/plan")}
-            className="mt-6 rounded-xl bg-slate-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-slate-700"
+            className="mt-6 rounded-[var(--r-tile)] bg-slate-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-slate-700"
           >
             Quay lại
           </button>
@@ -284,10 +284,10 @@ export function BillingCheckoutQR() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+      <div className="overflow-hidden rounded-[var(--r-card)] border border-slate-200 bg-white shadow-2xl">
         <div className="grid gap-0 lg:grid-cols-[minmax(320px,0.86fr)_minmax(0,1fr)]">
           <section className="border-b border-slate-200 bg-slate-50/80 p-5 text-center sm:p-7 lg:border-b-0 lg:border-r">
-            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-indigo-100">
               <QrCode className="h-6 w-6 text-indigo-600" />
             </div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Thanh toán VietQR</p>
@@ -298,7 +298,7 @@ export function BillingCheckoutQR() {
             </p>
 
             <div className="mt-6 flex justify-center">
-              <div className="overflow-hidden rounded-xl border border-indigo-100 bg-white p-3 shadow-sm">
+              <div className="overflow-hidden rounded-[var(--r-tile)] border border-indigo-100 bg-white p-3 shadow-sm">
                 <img
                   src={order.qrDataUrl}
                   alt="Mã QR chuyển khoản"
@@ -308,8 +308,8 @@ export function BillingCheckoutQR() {
               </div>
             </div>
 
-            <div className="mt-5 text-center">
-              <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-2">
+            <div className="mt-[var(--space-stack)] text-center">
+              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] bg-indigo-50 px-4 py-2">
                 <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
                 <span className="text-sm font-medium text-indigo-700">Đang chờ xác nhận...</span>
               </div>
@@ -320,7 +320,7 @@ export function BillingCheckoutQR() {
           </section>
 
           <section className="p-5 sm:p-7">
-            <div className="space-y-4">
+            <div className="stack-stack">
               <div>
                 <h2 className="text-base font-bold text-slate-900">Thông tin chuyển khoản</h2>
                 <p className="mt-1 text-sm leading-6 text-slate-500">
@@ -328,7 +328,7 @@ export function BillingCheckoutQR() {
                 </p>
               </div>
 
-              <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="stack-tight rounded-[var(--r-tile)] border border-slate-200 bg-slate-50 p-4">
                 <InfoRow
                   label="Ngân hàng"
                   value={order.bankName}
@@ -362,7 +362,7 @@ export function BillingCheckoutQR() {
                 />
               </div>
 
-              <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+              <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50 px-4 py-3">
                 <p className="text-xs font-medium leading-5 text-amber-800">
                   Quan trọng: Vui lòng <strong>không sửa nội dung chuyển khoản</strong>. Nếu nội dung khác mã đơn, giao
                   dịch có thể cần kiểm tra thủ công.
@@ -379,8 +379,8 @@ export function BillingCheckoutQR() {
                     "Xác nhận giao dịch và giữ trang này mở.",
                     "Plus sẽ được kích hoạt sau khi hệ thống nhận thanh toán.",
                   ].map((step, index) => (
-                    <li key={step} className="flex gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-semibold text-white">
+                    <li key={step} className="flex gap-3 rounded-[var(--r-control)] border border-slate-200 bg-white px-3 py-2">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-slate-950 text-xs font-semibold text-white">
                         {index + 1}
                       </span>
                       <span className="leading-6">{step}</span>
@@ -425,7 +425,7 @@ function InfoRow({
       <div className="flex min-w-0 items-center gap-1.5">
         <span
           className={`min-w-0 break-all text-sm font-semibold ${
-            highlight ? "rounded bg-indigo-100 px-2 py-0.5 text-indigo-700" : "text-slate-800"
+            highlight ? "rounded-[var(--r-control)] bg-indigo-100 px-2 py-0.5 text-indigo-700" : "text-slate-800"
           }`}
         >
           {value}
@@ -433,7 +433,7 @@ function InfoRow({
         <button
           type="button"
           onClick={onCopy}
-          className="rounded p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+          className="rounded-[var(--r-control)] p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
           title="Sao chép"
         >
           {isCopied ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}

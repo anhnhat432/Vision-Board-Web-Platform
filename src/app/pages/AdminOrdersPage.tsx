@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+﻿import { useCallback, useEffect, useState, type FormEvent } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
@@ -143,7 +143,7 @@ function SummaryCard({
   return (
     <Card className="border-0 shadow-lg">
       <CardContent className="flex items-start gap-4 p-5">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-slate-100 text-slate-700">
           <Icon className="h-5 w-5" />
         </span>
         <div className="min-w-0">
@@ -209,7 +209,7 @@ function RecentPaymentList({
   payments: AdminPaymentOrderSummary[];
 }) {
   if (payments.length === 0) {
-    return <p className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">Chưa có đơn thanh toán VietQR.</p>;
+    return <p className="rounded-[var(--r-card)] bg-slate-50 p-4 text-sm text-slate-500">Chưa có đơn thanh toán VietQR.</p>;
   }
 
   return (
@@ -230,7 +230,7 @@ function RecentPaymentList({
               type="button"
               size="sm"
               variant="outline"
-              className="rounded-full"
+              className="rounded-[var(--r-control)]"
               disabled={busyOrderId === payment.orderId}
               onClick={() => onManualComplete(payment.orderId)}
             >
@@ -298,7 +298,7 @@ function PaymentRecoveryPanel({
               Dùng khi người dùng đã chuyển tiền nhưng Casso không match được nội dung chuyển khoản.
             </CardDescription>
           </div>
-          <Button type="button" variant="outline" className="rounded-full" disabled={loading} onClick={onRefresh}>
+          <Button type="button" variant="outline" className="rounded-[var(--r-control)]" disabled={loading} onClick={onRefresh}>
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
             Tải lại
           </Button>
@@ -329,7 +329,7 @@ function PaymentRecoveryPanel({
               ))}
             </SelectContent>
           </Select>
-          <Button type="submit" className="rounded-full" disabled={loading}>
+          <Button type="submit" className="rounded-[var(--r-control)]" disabled={loading}>
             Tìm
           </Button>
         </form>
@@ -344,9 +344,9 @@ function PaymentRecoveryPanel({
         </div>
 
         {payments.length === 0 ? (
-          <p className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">Không tìm thấy payment order phù hợp.</p>
+          <p className="rounded-[var(--r-card)] bg-slate-50 p-4 text-sm text-slate-500">Không tìm thấy payment order phù hợp.</p>
         ) : (
-          <div className="overflow-hidden rounded-3xl border border-slate-100">
+          <div className="overflow-hidden rounded-[var(--r-card)] border border-slate-100">
             <div className="hidden grid-cols-[1.1fr_1.2fr_0.8fr_0.8fr_1fr] gap-4 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 lg:grid">
               <span>Order</span>
               <span>User</span>
@@ -390,7 +390,7 @@ function PaymentRecoveryPanel({
                         <Button
                           type="button"
                           size="sm"
-                          className="rounded-full"
+                          className="rounded-[var(--r-control)]"
                           disabled={busyOrderId === payment.orderId}
                           onClick={() => onManualComplete(payment.orderId)}
                         >
@@ -404,7 +404,7 @@ function PaymentRecoveryPanel({
                       )}
                     </div>
                     {payment.manualCompletionNote ? (
-                      <p className="rounded-2xl bg-slate-50 px-3 py-2 text-xs text-slate-500 lg:col-span-5">
+                      <p className="rounded-[var(--r-card)] bg-slate-50 px-3 py-2 text-xs text-slate-500 lg:col-span-5">
                         Ghi chú: {payment.manualCompletionNote}
                       </p>
                     ) : null}
@@ -421,7 +421,7 @@ function PaymentRecoveryPanel({
 
 function RecentUserList({ users }: { users: AdminUserSummary[] }) {
   if (users.length === 0) {
-    return <p className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-500">Chưa có user.</p>;
+    return <p className="rounded-[var(--r-card)] bg-slate-50 p-4 text-sm text-slate-500">Chưa có user.</p>;
   }
 
   return (
@@ -462,7 +462,7 @@ function BillingReminderPanel({
     <Card className="border-0 shadow-lg">
       <CardContent className="grid gap-5 p-5 lg:grid-cols-[1fr_auto] lg:items-center">
         <div className="flex gap-4">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-700">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-amber-50 text-amber-700">
             <Bell className="h-5 w-5" />
           </span>
           <div className="min-w-0">
@@ -483,7 +483,7 @@ function BillingReminderPanel({
         </div>
         <Button
           type="button"
-          className="gap-2 rounded-full"
+          className="gap-2 rounded-[var(--r-pill)]"
           disabled={loading || !emailConfigured || expiringCount === 0}
           onClick={onRun}
         >
@@ -652,12 +652,12 @@ export function AdminOrdersPage() {
 
   if (!user) {
     return (
-      <div className="space-y-8 pb-12">
+      <div className="stack-section pb-12">
         <Card className="border-0 shadow-2xl">
           <CardContent className="p-10 text-center lg:p-14">
             <ShieldAlert className="mx-auto h-12 w-12 text-slate-400" />
             <h1 className="mt-6 text-2xl font-bold text-slate-900">Yêu cầu đăng nhập</h1>
-            <p className="mt-3 text-base text-slate-500">Bạn cần đăng nhập để truy cập trang quản trị.</p>
+            <p className="mt-[var(--space-inline)] text-base text-slate-500">Bạn cần đăng nhập để truy cập trang quản trị.</p>
             <Button className="mt-6" onClick={() => navigate("/login")}>
               Đăng nhập
             </Button>
@@ -677,12 +677,12 @@ export function AdminOrdersPage() {
 
   if (!userProfile) {
     return (
-      <div className="space-y-8 pb-12">
+      <div className="stack-section pb-12">
         <Card className="border-0 bg-white shadow-2xl">
           <CardContent className="p-10 text-center lg:p-14">
             <ShieldAlert className="mx-auto h-12 w-12 text-amber-500" />
             <h1 className="mt-6 text-2xl font-bold text-slate-900">Không tải được quyền admin</h1>
-            <p className="mx-auto mt-3 max-w-xl text-base leading-7 text-slate-500">
+            <p className="mx-auto mt-[var(--space-inline)] max-w-xl text-base leading-7 text-slate-500">
               {userProfileError ||
                 "Backend chưa trả profile cho tài khoản này. Kiểm tra Render đã deploy, VITE_API_BASE_URL trỏ đúng backend và ADMIN_EMAILS có email admin."}
             </p>
@@ -697,12 +697,12 @@ export function AdminOrdersPage() {
 
   if (!isAdmin) {
     return (
-      <div className="space-y-8 pb-12">
+      <div className="stack-section pb-12">
         <Card className="border-0 shadow-2xl">
           <CardContent className="p-10 text-center lg:p-14">
             <ShieldAlert className="mx-auto h-12 w-12 text-rose-400" />
             <h1 className="mt-6 text-2xl font-bold text-slate-900">Không có quyền truy cập</h1>
-            <p className="mt-3 text-base text-slate-500">Trang này chỉ dành cho quản trị viên.</p>
+            <p className="mt-[var(--space-inline)] text-base text-slate-500">Trang này chỉ dành cho quản trị viên.</p>
             <Button className="mt-6" variant="outline" onClick={() => navigate("/")}>
               Quay về trang chủ
             </Button>
@@ -722,7 +722,7 @@ export function AdminOrdersPage() {
 
   if (error) {
     return (
-      <div className="space-y-8 pb-12">
+      <div className="stack-section pb-12">
         <Card className="border-0 shadow-2xl">
           <CardContent className="p-10 text-center lg:p-14">
             <p className="text-base text-rose-600">{error}</p>
@@ -738,18 +738,18 @@ export function AdminOrdersPage() {
   const summary = overview?.summary;
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="stack-section pb-12">
       <Card className="hero-surface overflow-hidden border-0 text-white">
         <CardContent className="p-5 sm:p-6 lg:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+            <div className="stack-stack">
+              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                 <BarChart3 className="h-4 w-4" />
                 Quản trị vận hành
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Users, billing và đơn hàng</h1>
-                <p className="mt-3 max-w-3xl text-base leading-8 text-white/82">
+                <p className="mt-[var(--space-inline)] max-w-3xl text-base leading-8 text-white/82">
                   Theo dõi user, doanh thu VietQR, trạng thái email và xử lý đơn in từ một màn hình.
                 </p>
               </div>
@@ -757,7 +757,7 @@ export function AdminOrdersPage() {
             <Button
               type="button"
               variant="secondary"
-              className="gap-2 rounded-full bg-white text-slate-900 hover:bg-white/92"
+              className="gap-2 rounded-[var(--r-pill)] bg-white text-slate-900 hover:bg-white/92"
               disabled={reminderLoading}
               onClick={handleReminderRun}
             >
@@ -842,7 +842,7 @@ export function AdminOrdersPage() {
         total={paymentOrdersTotal}
       />
 
-      <section className="space-y-4">
+      <section className="stack-stack">
         <div>
           <h2 className="text-xl font-bold text-slate-950">Đơn in vision board</h2>
           <p className="mt-1 text-sm text-slate-500">{orders.length} đơn. Chọn hành động để chuyển trạng thái.</p>
@@ -853,11 +853,11 @@ export function AdminOrdersPage() {
             <CardContent className="p-10 text-center lg:p-14">
               <ClipboardList className="mx-auto h-12 w-12 text-slate-300" />
               <h3 className="mt-6 text-xl font-semibold text-slate-900">Chưa có đơn hàng nào</h3>
-              <p className="mt-3 text-sm text-slate-500">Đơn hàng từ người dùng sẽ xuất hiện ở đây khi có.</p>
+              <p className="mt-[var(--space-inline)] text-sm text-slate-500">Đơn hàng từ người dùng sẽ xuất hiện ở đây khi có.</p>
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="stack-stack">
             {orders.map((order) => (
               <Card key={order.id} className="border-0 shadow-lg">
                 <CardHeader className="pb-3">
@@ -873,7 +873,7 @@ export function AdminOrdersPage() {
                     </Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="stack-stack">
                   <div className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
                     <div>
                       <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Mã đơn</span>
@@ -896,7 +896,7 @@ export function AdminOrdersPage() {
                   </div>
 
                   {order.note ? (
-                    <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3">
+                    <div className="rounded-[var(--r-tile)] border border-slate-100 bg-slate-50/60 px-4 py-3">
                       <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Ghi chú</p>
                       <p className="mt-1 text-sm text-slate-600">{order.note}</p>
                     </div>

@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
+﻿import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 import { motion } from "motion/react";
 import type { Ref } from "react";
 
@@ -45,9 +45,9 @@ export function FeasibilityStepShell({
             initial={prefersReducedMotion ? false : { opacity: 0, x: 18 }}
             animate={{ opacity: 1, x: 0 }}
             transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
-            className="space-y-6"
+            className="stack-section"
           >
-            <div className="rounded-2xl gradient-violet-pink p-4 sm:p-6">
+            <div className="rounded-[var(--r-card)] gradient-violet-pink p-4 sm:p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">
                 {currentQuestion.axisLabel} · Câu hỏi {currentStep + 1}/{totalSteps}
               </p>
@@ -58,13 +58,13 @@ export function FeasibilityStepShell({
                 ref={headingRef}
                 id={`feasibility-question-${currentQuestion.id}`}
                 tabIndex={-1}
-                className="mt-2 text-xl font-bold leading-tight text-slate-900 focus:outline-none sm:mt-3 sm:text-3xl"
+                className="mt-2 text-xl font-bold leading-tight text-slate-900 focus:outline-none sm:mt-[var(--space-inline)] sm:text-3xl"
               >
                 {currentQuestion.question}
               </h2>
               <p
                 id={`feasibility-question-${currentQuestion.id}-helper`}
-                className="mt-2 text-sm leading-6 text-slate-600 sm:mt-3 sm:leading-7"
+                className="mt-2 text-sm leading-6 text-slate-600 sm:mt-[var(--space-inline)] sm:leading-7"
               >
                 {currentQuestion.helper}
               </p>
@@ -75,7 +75,7 @@ export function FeasibilityStepShell({
               onValueChange={onAnswerChange}
               aria-labelledby={`feasibility-question-${currentQuestion.id}`}
               aria-describedby={`feasibility-question-${currentQuestion.id}-helper`}
-              className="space-y-3"
+              className="stack-tight"
             >
               {currentQuestion.options.map((option, index) => (
                 <motion.div
@@ -86,7 +86,7 @@ export function FeasibilityStepShell({
                 >
                   <Label
                     htmlFor={option.value}
-                    className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 transition-colors transition-shadow duration-150 sm:gap-4 sm:px-5 sm:py-4 ${
+                    className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-[var(--r-card)] border px-4 py-3 transition-colors transition-shadow duration-150 sm:gap-4 sm:px-5 sm:py-4 ${
                       selectedAnswer === option.value
                         ? "border-violet-300 bg-violet-50/90 shadow-lg"
                         : "border-white/70 bg-white/72 hover:border-violet-200"
@@ -102,7 +102,7 @@ export function FeasibilityStepShell({
               ))}
             </RadioGroup>
 
-            <div className="space-y-2">
+            <div className="stack-tight">
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Button variant="outline" className="flex-1" onClick={onBack}>
                   <ArrowLeft className="h-4 w-4" />

@@ -1,4 +1,4 @@
-import { Heart, RefreshCcw } from "lucide-react";
+﻿import { Heart, RefreshCcw } from "lucide-react";
 
 import type {
   RescueModeStatus,
@@ -72,11 +72,11 @@ export function TwelveWeekRescueNudge(props: TwelveWeekRescueNudgeProps) {
     <div
       data-testid={variant === "today" ? "today-rescue-nudge" : "week-rescue-nudge"}
       data-rescue-severity={status.severity}
-      className={`order-1 rounded-xl border p-5 sm:p-6 ${accent}`}
+      className={`order-1 rounded-[var(--r-tile)] border p-5 sm:p-6 ${accent}`}
     >
       <div className="flex items-start gap-3">
         <span
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--r-pill)] ${
             variant === "today" ? "bg-violet-100 text-violet-700" : "bg-amber-100 text-amber-800"
           }`}
         >
@@ -102,7 +102,7 @@ export function TwelveWeekRescueNudge(props: TwelveWeekRescueNudgeProps) {
               data-testid={
                 variant === "today" ? "today-rescue-suggestions" : "week-rescue-suggestions"
               }
-              className="mt-3 grid gap-2"
+              className="mt-[var(--space-inline)] grid gap-2"
             >
               {suggestions.map((suggestion: RescueSuggestion) => {
                 const callback = getCallbackForSuggestion(suggestion.id, props);
@@ -110,7 +110,7 @@ export function TwelveWeekRescueNudge(props: TwelveWeekRescueNudgeProps) {
                   <li
                     key={suggestion.id}
                     data-suggestion-id={suggestion.id}
-                    className="rounded-lg border border-white/82 bg-white/82 px-3 py-2"
+                    className="rounded-[var(--r-control)] border border-white/82 bg-white/82 px-3 py-2"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
@@ -123,7 +123,7 @@ export function TwelveWeekRescueNudge(props: TwelveWeekRescueNudgeProps) {
                           variant="outline"
                           className="shrink-0 bg-white"
                           onClick={callback}
-                          aria-label={suggestion.title}
+                          aria-label={`Làm: ${suggestion.title}`}
                         >
                           <RefreshCcw className="mr-1 h-3.5 w-3.5" />
                           Làm

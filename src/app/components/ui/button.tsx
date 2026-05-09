@@ -13,18 +13,18 @@ const DEFAULT_BUTTON_STYLE = {
 } as CSSProperties;
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium tracking-normal transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-ring active:translate-y-0 active:scale-[0.985]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--r-control)] text-sm font-medium tracking-normal transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-ring active:translate-y-0 active:scale-[0.985]",
   {
     variants: {
       variant: {
         default:
-          "border-transparent gradient-brand text-primary-foreground shadow-lg hover:shadow-xl hover:scale-[1.01]",
+          "border-transparent gradient-brand text-primary-foreground shadow-none hover:shadow-[0_18px_38px_-24px_var(--tone-shell-shadow-strong)] hover:scale-[1.01]",
         destructive:
           "border-transparent bg-destructive text-white shadow-lg hover:bg-destructive/90 hover:shadow-xl hover:scale-[1.01] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
-          "border-slate-300 bg-white/78 text-foreground shadow-sm hover:border-slate-400 hover:bg-white hover:text-accent-foreground hover:shadow-md hover:scale-[1.01] dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+          "border-slate-300 bg-white text-slate-900 shadow-sm hover:border-slate-400 hover:bg-slate-50 hover:text-slate-950 hover:shadow-md hover:scale-[1.01] dark:bg-input/30 dark:border-input dark:text-foreground dark:hover:bg-input/50",
         secondary:
-          "border border-white/60 bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/95 hover:shadow-md hover:scale-[1.01]",
+          "border border-slate-950 bg-slate-950 text-white shadow-sm hover:bg-slate-800 hover:shadow-md hover:scale-[1.01]",
         ghost:
           "text-slate-600 hover:bg-white/82 hover:text-slate-900 hover:shadow-sm hover:scale-[1.01] dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
@@ -33,7 +33,7 @@ const buttonVariants = cva(
         default: "h-11 px-5 py-2.5 has-[>svg]:px-4",
         sm: "h-10 gap-1.5 px-4 has-[>svg]:px-3",
         lg: "h-12 px-7 text-base has-[>svg]:px-5",
-        icon: "size-10 rounded-2xl",
+        icon: "size-10",
       },
     },
     defaultVariants: {

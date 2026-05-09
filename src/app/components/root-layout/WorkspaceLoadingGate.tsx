@@ -44,8 +44,8 @@ export function WorkspaceLoadingGate({ stage }: { stage: WorkspaceGateStage }) {
   return (
     <div className="app-shell flex min-h-screen items-center justify-center px-4" data-route-tone="default">
       <div className="relative z-10 w-full max-w-md">
-        <div className="rounded-lg border border-slate-200/80 bg-white/94 p-6 text-center shadow-sm sm:p-7">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-50 text-violet-700">
+        <div className="rounded-[var(--r-control)] border border-slate-200/80 bg-white/94 p-6 text-center shadow-sm sm:p-7">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700">
             <RefreshCw className="h-6 w-6 animate-spin" />
           </div>
           <p className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
@@ -60,7 +60,7 @@ export function WorkspaceLoadingGate({ stage }: { stage: WorkspaceGateStage }) {
             {steps.map((step) => (
               <div
                 key={step.label}
-                className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm ${
+                className={`flex items-center gap-3 rounded-[var(--r-control)] border px-3 py-2.5 text-sm ${
                   step.done
                     ? "border-emerald-200 bg-emerald-50 text-emerald-800"
                     : step.active
@@ -69,7 +69,7 @@ export function WorkspaceLoadingGate({ stage }: { stage: WorkspaceGateStage }) {
                 }`}
               >
                 <div
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--r-pill)] ${
                     step.done
                       ? "bg-emerald-600 text-white"
                       : step.active

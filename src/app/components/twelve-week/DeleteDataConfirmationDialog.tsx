@@ -34,14 +34,14 @@ export function DeleteDataConfirmationDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader className="items-center text-center">
-          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-rose-100">
+          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-[var(--r-pill)] bg-rose-100">
             <Trash2 className="h-7 w-7 text-rose-600" />
           </div>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>
             {isDemoMode ? (
               <>
-                <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                <span className="rounded-[var(--r-control)] bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
                   Chỉ trên thiết bị này
                 </span>{" "}
                 trên trình duyệt này sẽ bị xóa vĩnh viễn.
@@ -60,7 +60,7 @@ export function DeleteDataConfirmationDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3">
+        <div className="rounded-[var(--r-control)] border border-rose-200 bg-rose-50 px-4 py-3">
           <p className="text-sm font-semibold text-rose-800">Hành động này không thể hoàn tác.</p>
           <p className="mt-1 text-sm font-semibold text-rose-800">
             Tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn.

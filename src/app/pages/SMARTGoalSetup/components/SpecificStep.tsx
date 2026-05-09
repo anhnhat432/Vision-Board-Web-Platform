@@ -45,8 +45,8 @@ export function SpecificStep({
   const activeInferredArchetype = inferredArchetype ?? activeArchetype;
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-3">
+    <div className="stack-stack">
+      <div className="stack-tight">
         <Label htmlFor="smart-specific" className="text-base">
           Câu trả lời của bạn
         </Label>

@@ -30,7 +30,7 @@ function GoalProgressCardComponent({
           <p className="text-3xl font-bold tracking-tight text-slate-950">{percent}%</p>
           <p className="text-xs text-slate-500">Tiến độ tổng thể</p>
         </div>
-        <div className="rounded-xl border border-violet-200/80 bg-white/90 px-3 py-1.5 text-right shadow-sm">
+        <div className="rounded-[var(--r-tile)] border border-violet-200/80 bg-white/90 px-3 py-1.5 text-right shadow-sm">
           <p className="text-sm font-semibold text-slate-900">
             {completedTasks}/{totalTasks || 0}
           </p>

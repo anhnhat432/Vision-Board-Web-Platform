@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
@@ -409,7 +409,7 @@ export function SMARTGoalSetup() {
 
   return (
     <PageShell maxWidth="hero">
-      <div className={prefersReducedMotion ? "space-y-5" : "animate-fade-in-up space-y-5"}>
+      <div className={prefersReducedMotion ? "stack-stack" : "animate-fade-in-up stack-stack"}>
         <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} />
         {!isVisionPromptDismissed && (
           <Card className="border border-violet-200 bg-violet-50/80 shadow-sm">
@@ -478,12 +478,12 @@ export function SMARTGoalSetup() {
             </CardContent>
           </Card>
 
-          <details className="mt-5 rounded-2xl border border-dashed border-slate-200 bg-white/78 p-4 shadow-lg">
+          <details className="mt-[var(--space-stack)] rounded-[var(--r-card)] border border-dashed border-slate-200 bg-white/78 p-4 shadow-lg">
             <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
               Xem lại mục tiêu đang viết
             </summary>
 
-            <div className="mt-4 space-y-3">
+            <div className="mt-4 stack-tight">
               {SMART_STEPS.map((step) => (
                 <div key={step.key} className="flow-muted p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{step.label}</p>

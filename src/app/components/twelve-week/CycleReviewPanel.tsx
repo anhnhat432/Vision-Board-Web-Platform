@@ -1,4 +1,4 @@
-import { BarChart3, CheckCircle2, Flag, RefreshCw, Save, Trophy } from "lucide-react";
+﻿import { BarChart3, CheckCircle2, Flag, RefreshCw, Save, Trophy } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { calculateCycleSummary } from "@/features/plan12week/logic/cycleReview";
@@ -26,7 +26,7 @@ function sanitizeLessons(lessons: readonly string[]): string[] {
 }
 
 function EmptyListItem({ children }: { children: string }) {
-  return <li className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">{children}</li>;
+  return <li className="rounded-[var(--r-control)] border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">{children}</li>;
 }
 
 export function CycleReviewPanel({
@@ -55,7 +55,7 @@ export function CycleReviewPanel({
   };
 
   return (
-    <section data-testid="cycle-review-panel" className="space-y-6">
+    <section data-testid="cycle-review-panel" className="stack-section">
       <Card className="border border-emerald-200 bg-white shadow-sm">
         <CardHeader>
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -63,7 +63,7 @@ export function CycleReviewPanel({
               <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-800">
                 Cycle {system.cycleNumber ?? 1}
               </Badge>
-              <CardTitle className="mt-3 text-2xl text-slate-950">Cycle 12 tuần đã kết thúc</CardTitle>
+              <CardTitle className="mt-[var(--space-inline)] text-2xl text-slate-950">Cycle 12 tuần đã kết thúc</CardTitle>
               <p className="mt-2 max-w-3xl text-sm leading-7 text-slate-600">
                 Đây là tuần 13: nhìn lại cycle cũ, chốt bài học, rồi chuẩn bị cycle tiếp theo cho mục tiêu
                 {" "}
@@ -75,9 +75,9 @@ export function CycleReviewPanel({
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="stack-section">
           {aspirationalVisionSummary ? (
-            <div className="rounded-lg border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-950">
+            <div className="rounded-[var(--r-control)] border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-950">
               <p className="font-semibold">Cycle này đã đưa bạn gần hơn với vision 3 năm chưa?</p>
               <p className="mt-1 text-violet-900/80">{aspirationalVisionSummary}</p>
             </div>
@@ -85,23 +85,23 @@ export function CycleReviewPanel({
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {kpis.map(({ label, value, icon: Icon }) => (
-              <div key={label} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <div key={label} className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-4">
                 <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
                   <Icon className="h-3.5 w-3.5 text-emerald-700" />
                   {label}
                 </p>
-                <p className="mt-3 text-3xl font-bold text-slate-950">{value}</p>
+                <p className="mt-[var(--space-inline)] text-3xl font-bold text-slate-950">{value}</p>
               </div>
             ))}
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <div className="space-y-3">
+            <div className="stack-tight">
               <h2 className="text-base font-semibold text-slate-950">Biggest wins</h2>
               <ul className="space-y-2">
                 {summary.biggestWins.length > 0 ? (
                   summary.biggestWins.map((win) => (
-                    <li key={win} className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                    <li key={win} className="rounded-[var(--r-control)] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
                       {win}
                     </li>
                   ))
@@ -110,12 +110,12 @@ export function CycleReviewPanel({
                 )}
               </ul>
             </div>
-            <div className="space-y-3">
+            <div className="stack-tight">
               <h2 className="text-base font-semibold text-slate-950">Top adjustments</h2>
               <ul className="space-y-2">
                 {summary.topAdjustments.length > 0 ? (
                   summary.topAdjustments.map((adjustment) => (
-                    <li key={adjustment} className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    <li key={adjustment} className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                       {adjustment}
                     </li>
                   ))
@@ -126,7 +126,7 @@ export function CycleReviewPanel({
             </div>
           </div>
 
-          <div className="space-y-3 rounded-lg border border-slate-200 bg-white p-4">
+          <div className="stack-tight rounded-[var(--r-control)] border border-slate-200 bg-white p-4">
             <h2 className="text-base font-semibold text-slate-950">3 bài học lớn nhất</h2>
             <div className="grid gap-3 md:grid-cols-3">
               {LESSON_FIELD_IDS.map((lessonId, index) => {

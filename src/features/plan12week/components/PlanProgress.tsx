@@ -54,7 +54,7 @@ export function PlanProgress({ weeks, totalWeeks = 12 }: PlanProgressProps) {
           {weekSlots.map((week) => (
             <div
               key={week.weekNumber}
-              className={`rounded-xl px-2 py-2 text-center ${getWeekToneClass(week.executionScore)} ${
+              className={`rounded-[var(--r-tile)] px-2 py-2 text-center ${getWeekToneClass(week.executionScore)} ${
                 week.completed ? "opacity-100" : "opacity-45"
               }`}
             >

@@ -147,7 +147,7 @@ export function UpgradePaywallDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[calc(100vh-1rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] overflow-hidden border-0 gradient-shell p-0 shadow-2xl sm:!max-w-4xl">
-        <div className="max-h-[calc(100vh-1rem)] overflow-hidden rounded-2xl sm:rounded-2xl">
+        <div className="max-h-[calc(100vh-1rem)] overflow-hidden rounded-[var(--r-card)] sm:rounded-[var(--r-card)]">
           {/* Demo banner - only show in demo mode */}
           {demoMode && (
             <div className="border-b border-amber-400 bg-amber-50 px-5 py-3 sm:px-7">
@@ -160,7 +160,7 @@ export function UpgradePaywallDialog({
           <div className="border-b border-white/70 gradient-dark-indigo px-5 py-6 text-white sm:px-7 sm:py-7">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="max-w-2xl">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/78">
+                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/78">
                   <LockKeyhole className="h-3.5 w-3.5" />
                   {demoMode ? "Dùng thử Plus" : "Plus cho hệ 12 tuần"}
                 </div>
@@ -173,7 +173,7 @@ export function UpgradePaywallDialog({
                   </DialogDescription>
                 </DialogHeader>
               </div>
-              <div className="rounded-2xl border border-white/12 bg-white/10 px-4 py-4 text-left sm:text-right">
+              <div className="rounded-[var(--r-card)] border border-white/12 bg-white/10 px-4 py-4 text-left sm:text-right">
                 <p className="text-xs uppercase tracking-[0.16em] text-white/56">Gói hiện tại</p>
                 <p className="mt-2 text-2xl font-bold text-white">{getPlanLabel(currentPlan)}</p>
               </div>
@@ -182,13 +182,13 @@ export function UpgradePaywallDialog({
 
           <div className="grid max-h-[calc(100vh-14rem)] gap-6 overflow-y-auto px-5 py-5 sm:px-7 sm:py-7 xl:grid-cols-[minmax(0,1fr)_360px]">
             <div className="min-w-0 space-y-4">
-              <div className="rounded-2xl border border-white/70 bg-white/82 p-5 shadow-sm">
+              <div className="rounded-[var(--r-card)] border border-white/70 bg-white/82 p-5 shadow-sm">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                   Điều Plus giúp bạn ngay lúc này
                 </p>
                 <div className="mt-4 space-y-3">
                   {paywallCopy.bullets.map((bullet) => (
-                    <div key={bullet} className="flex gap-3 rounded-xl border border-slate-100 bg-white px-4 py-3">
+                    <div key={bullet} className="flex gap-3 rounded-[var(--r-tile)] border border-slate-100 bg-white px-4 py-3">
                       <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-violet-500" />
                       <p className="text-sm leading-7 text-slate-700">{bullet}</p>
                     </div>
@@ -197,12 +197,12 @@ export function UpgradePaywallDialog({
               </div>
 
               {billingDebugUi && (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/88 p-5">
+                <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/88 p-5">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                     Trạng thái thanh toán
                   </p>
                   <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                    <div className="rounded-xl border border-white/80 bg-white px-4 py-3">
+                    <div className="rounded-[var(--r-tile)] border border-white/80 bg-white px-4 py-3">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Chế độ</p>
                       <p className="mt-2 text-sm font-semibold text-slate-900">
                         {billingProviderStatus.mode === "api_contract"
@@ -212,13 +212,13 @@ export function UpgradePaywallDialog({
                             : "Thử nghiệm cục bộ"}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-white/80 bg-white px-4 py-3">
+                    <div className="rounded-[var(--r-tile)] border border-white/80 bg-white px-4 py-3">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Thanh toán</p>
                       <p className="mt-2 text-sm font-semibold text-slate-900">
                         {billingProviderStatus.checkoutReady ? "Sẵn sàng" : "Dự phòng cục bộ"}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-white/80 bg-white px-4 py-3">
+                    <div className="rounded-[var(--r-tile)] border border-white/80 bg-white px-4 py-3">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Khôi phục</p>
                       <p className="mt-2 text-sm font-semibold text-slate-900">
                         {billingProviderStatus.restoreReady ? "Sẵn sàng" : "Dự phòng cục bộ"}
@@ -238,7 +238,7 @@ export function UpgradePaywallDialog({
                 return (
                   <div
                     key={plan.code}
-                    className={`rounded-2xl border p-5 shadow-sm ${
+                    className={`rounded-[var(--r-card)] border p-5 shadow-sm ${
                       isRecommended ? "border-violet-300 gradient-violet" : "border-white/70 bg-white/88"
                     }`}
                   >
@@ -257,12 +257,12 @@ export function UpgradePaywallDialog({
                         </div>
                         <p className="mt-2 text-sm leading-7 text-slate-600">{plan.description}</p>
                       </div>
-                      <div className="rounded-2xl border border-slate-200 bg-white/90 p-3 text-slate-900">
+                      <div className="rounded-[var(--r-card)] border border-slate-200 bg-white/90 p-3 text-slate-900">
                         <Crown className="h-5 w-5 text-violet-600" />
                       </div>
                     </div>
 
-                    <div className="mt-5 rounded-2xl border border-white/70 bg-white/90 px-4 py-4">
+                    <div className="mt-5 rounded-[var(--r-card)] border border-white/70 bg-white/90 px-4 py-4">
                       <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
                         Giá gói
                       </p>
@@ -273,7 +273,7 @@ export function UpgradePaywallDialog({
                       {plan.highlights.map((feature) => (
                         <div
                           key={feature}
-                          className="flex gap-3 rounded-xl border border-slate-100 bg-white/92 px-4 py-3"
+                          className="flex gap-3 rounded-[var(--r-tile)] border border-slate-100 bg-white/92 px-4 py-3"
                         >
                           <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-violet-500" />
                           <p className="text-sm leading-7 text-slate-700">{feature}</p>

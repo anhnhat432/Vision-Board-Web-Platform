@@ -1036,7 +1036,7 @@ export function TwelveWeekSetup() {
   };
 
   return (
-    <PageShell maxWidth="hero" className="space-y-6 sm:space-y-8 page-enter">
+    <PageShell maxWidth="hero" className="stack-section sm:stack-section page-enter">
       <UpgradePaywallDialog
         open={isPaywallOpen}
         onOpenChange={setIsPaywallOpen}
@@ -1084,12 +1084,12 @@ export function TwelveWeekSetup() {
         <CardContent className="relative p-5 sm:p-6 lg:p-10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_22%)] opacity-90" />
           <div className="relative max-w-4xl">
-            <div className="space-y-4 sm:space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+            <div className="stack-stack sm:stack-section">
+              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                 <Compass className="h-4 w-4" />
                 Thiết lập 12 tuần
               </div>
-              <div className="space-y-4">
+              <div className="stack-stack">
                 <h1 className="gradient-text max-w-3xl text-2xl font-bold tracking-normal sm:text-4xl lg:text-5xl">
                   Chốt chu kỳ 12 tuần gọn, rõ và vào việc ngay.
                 </h1>
@@ -1098,18 +1098,18 @@ export function TwelveWeekSetup() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 sm:gap-3">
-                <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
                   <Target className="mr-1 h-3.5 w-3.5" />
                   Ưu tiên: {getLifeAreaLabel(focusArea)}
                 </Badge>
-                <Badge variant="outline" className="rounded-full border-white/18 bg-white/12 px-4 py-2 text-white">
+                <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
                   <Sparkles className="mr-1 h-3.5 w-3.5" />
                   Sẵn sàng: {feasibility.adjustedScore}/20
                 </Badge>
                 {feasibility.bottleneck && (
                   <Badge
                     variant="outline"
-                    className="hidden rounded-full border-white/18 bg-white/12 px-4 py-2 text-white sm:inline-flex"
+                    className="hidden rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white sm:inline-flex"
                   >
                     Cần chú ý: {feasibility.bottleneck.label}
                   </Badge>

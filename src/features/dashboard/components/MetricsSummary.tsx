@@ -41,7 +41,7 @@ function MetricsSummaryComponent({ items }: MetricsSummaryProps) {
       tone="emerald"
     >
       {items.length === 0 ? (
-        <div className="rounded-xl border border-slate-200/80 bg-white/80 p-4 shadow-sm">
+        <div className="rounded-[var(--r-tile)] border border-slate-200/80 bg-white/80 p-4 shadow-sm">
           <p className="text-sm text-slate-500">Chưa có log chỉ số cho chu kỳ này.</p>
         </div>
       ) : (
@@ -49,7 +49,7 @@ function MetricsSummaryComponent({ items }: MetricsSummaryProps) {
           {items.map((item) => (
             <div
               key={item.name}
-              className="flex items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white/85 px-3 py-2.5 shadow-sm"
+              className="flex items-center justify-between gap-3 rounded-[var(--r-tile)] border border-slate-200/80 bg-white/85 px-3 py-2.5 shadow-sm"
             >
               <div className="min-w-0">
                 <p className="line-clamp-2 break-words text-sm font-semibold leading-5 text-slate-900">
@@ -61,7 +61,7 @@ function MetricsSummaryComponent({ items }: MetricsSummaryProps) {
               </div>
               <div className="ml-3 flex shrink-0 items-center gap-2">
                 <span className="text-sm font-semibold text-slate-900">{item.totalValue}</span>
-                <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${getTrendPill(item.trend)}`}>
+                <span className={`inline-flex items-center gap-1 rounded-[var(--r-pill)] border px-2 py-0.5 text-xs font-medium ${getTrendPill(item.trend)}`}>
                   <TrendIcon trend={item.trend} />
                   {getTrendLabel(item.trend)}
                 </span>

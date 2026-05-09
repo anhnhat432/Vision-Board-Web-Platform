@@ -26,7 +26,7 @@ export function AchievableStep({
   const weeklyHoursInvalid = parsedWeeklyHours === undefined || parsedWeeklyHours <= 0;
 
   return (
-    <div className="space-y-5">
+    <div className="stack-stack">
       <div className="space-y-2">
         <Label htmlFor="smart-weekly-hours" className="text-base">
           Thời gian mỗi tuần

@@ -14,9 +14,9 @@ export function ProtectedRoute() {
       <div className="flex min-h-[60vh] items-center justify-center px-6">
         <div
           role="alert"
-          className="w-full max-w-md rounded-2xl border border-amber-200 bg-amber-50/90 p-8 text-center shadow-lg"
+          className="w-full max-w-md rounded-[var(--r-card)] border border-amber-200 bg-amber-50/90 p-8 text-center shadow-lg"
         >
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[var(--r-pill)] bg-amber-100">
             <AlertTriangle className="h-7 w-7 text-amber-600" />
           </div>
           <h2 className="text-lg font-semibold text-amber-800">
