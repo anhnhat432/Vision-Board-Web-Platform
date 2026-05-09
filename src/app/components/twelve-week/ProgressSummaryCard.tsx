@@ -239,7 +239,7 @@ export function ProgressSummaryCard({
             </div>
           </div>
 
-          <div data-testid="progress-12-week-timeline" className="grid grid-cols-6 gap-2 sm:grid-cols-12">
+          <ol data-testid="progress-12-week-timeline" className="grid list-none grid-cols-6 gap-2 p-0 sm:grid-cols-12">
             {cycleWeeks.map((weekNumber) => {
               const isCurrent = weekNumber === boundedCurrentWeek;
               const isReviewed = reviewedWeeks.has(weekNumber);
@@ -253,7 +253,7 @@ export function ProgressSummaryCard({
               const weekLabel = weekLabelParts.filter(Boolean).join(", ");
 
               return (
-                <div
+                <li
                   key={weekNumber}
                   data-testid={`progress-week-${weekNumber}`}
                   data-reviewed={isReviewed ? "true" : "false"}
@@ -275,10 +275,10 @@ export function ProgressSummaryCard({
                     {isReviewed && <CheckCircle2 className="h-3 w-3" />}
                     {isMilestone ? "M" : isReviewed ? "Xong" : isCurrent ? "Nay" : ""}
                   </p>
-                </div>
+                </li>
               );
             })}
-          </div>
+          </ol>
 
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700">
             {reviewDueToday
