@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = "dof-mvp1-shell-v2";
+const CACHE_NAME = "vbweb-2026-05-09";
 const PRECACHE_URLS = ["/index.html"];
 
 self.addEventListener("install", (event) => {
