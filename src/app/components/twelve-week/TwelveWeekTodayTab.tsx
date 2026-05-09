@@ -188,9 +188,7 @@ export function TwelveWeekTodayTab({
       return {
         key: "review-due",
         title: "Hôm nay nên chốt review tuần",
-        description: "Check-in đã lưu. Mở tab Tuần để khóa lại bài học và ưu tiên tuần sau.",
-        actionLabel: "Mở tab Tuần",
-        onAction: onOpenWeekTab,
+        description: "Check-in đã lưu. Dùng nút review trong thẻ check-in để khóa lại bài học và ưu tiên tuần sau.",
       };
     }
 
@@ -474,7 +472,7 @@ export function TwelveWeekTodayTab({
                         : "Lưu check-in ngắn ở bên cạnh, hoặc mở tab Tuần để chuẩn bị review."
                     }
                     actions={
-                      onOpenWeekTab ? (
+                      onOpenWeekTab && !reviewDueToday ? (
                         <Button variant="outline" onClick={onOpenWeekTab} className="bg-white">
                           Mở tab Tuần
                           <ArrowRight className="ml-1 h-4 w-4" />

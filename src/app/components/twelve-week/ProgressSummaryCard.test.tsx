@@ -84,6 +84,7 @@ describe("ProgressSummaryCard cycle timeline", () => {
     expect(within(timeline).getByTestId("progress-week-5")).toHaveAttribute("aria-current", "step");
     expect(within(timeline).getByTestId("progress-week-1")).toHaveAttribute("data-reviewed", "true");
     expect(within(timeline).getByTestId("progress-week-4")).toHaveAttribute("data-milestone", "true");
+    expect(screen.getByTestId("progress-current-milestone")).toHaveTextContent("Week 4");
     expect(screen.getByTestId("progress-current-milestone")).toHaveTextContent("Week 8");
     expect(screen.getByTestId("progress-next-milestone")).toHaveTextContent("Week 8");
   });

@@ -317,6 +317,28 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
     expect(onSaveCheckIn).not.toHaveBeenCalled();
   });
 
+  it("keeps a single Week handoff after check-in is saved on review day", () => {
+    const onOpenWeekTab = vi.fn();
+    render(
+      <TwelveWeekTodayTab
+        {...makeProps({
+          todayQueue: [],
+          firstPriorityTask: null,
+          hasPlanTasks: true,
+          reviewDueToday: true,
+          onOpenWeekTab,
+          latestCheckIn: makeCheckIn(),
+        })}
+      />,
+    );
+
+    const panel = screen.getByTestId("today-next-action-panel");
+    expect(panel).toHaveAttribute("data-state", "review-due");
+    expect(within(panel).queryByRole("button", { name: /Mở tab Tuần/i })).toBeNull();
+    expect(screen.getAllByRole("button", { name: /Mở tab Tuần/i })).toHaveLength(1);
+    expect(screen.getByTestId("today-check-in-open-week")).toBeInTheDocument();
+  });
+
   it("shows the 'Việc chính đã xong' nudge when primary task is completed", () => {
     const completed = makeTask({ completed: true });
     render(

@@ -101,14 +101,20 @@ export function ProgressSummaryCard({
   const reviewedWeeks = new Set(
     system.weeklyReviews.filter((review) => review.reviewCompleted).map((review) => review.weekNumber),
   );
-  const milestoneWeeks = new Set([4, 8, 12].filter((weekNumber) => weekNumber <= boundedTotalWeeks));
+  const milestoneWeekList = [4, 8, 12].filter((weekNumber) => weekNumber <= boundedTotalWeeks);
+  const milestoneWeeks = new Set(milestoneWeekList);
   const cycleWeeks = Array.from({ length: boundedTotalWeeks }, (_, index) => index + 1);
-  const nextMilestoneWeek = cycleWeeks.find(
-    (weekNumber) => milestoneWeeks.has(weekNumber) && weekNumber >= boundedCurrentWeek,
-  );
+  const nextMilestoneWeek = milestoneWeekList.find((weekNumber) => weekNumber >= boundedCurrentWeek);
   const nextMilestoneLabel = nextMilestoneWeek ? `Week ${nextMilestoneWeek}` : `Week ${boundedTotalWeeks}`;
-  const currentPhaseTargetWeek = nextMilestoneWeek ?? boundedTotalWeeks;
-  const currentPhaseLabel = `Build toward Week ${currentPhaseTargetWeek}`;
+  const previousMilestoneWeek = [...milestoneWeekList]
+    .reverse()
+    .find((weekNumber) => weekNumber < boundedCurrentWeek);
+  const currentPhaseStartWeek = previousMilestoneWeek ?? boundedCurrentWeek;
+  const currentPhaseEndWeek = nextMilestoneWeek ?? boundedTotalWeeks;
+  const currentPhaseLabel =
+    currentPhaseStartWeek === currentPhaseEndWeek
+      ? `Week ${currentPhaseStartWeek}`
+      : `Week ${currentPhaseStartWeek} -> Week ${currentPhaseEndWeek}`;
 
   return (
     <div className="space-y-6 pt-4">
