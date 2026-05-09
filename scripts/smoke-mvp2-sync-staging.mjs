@@ -38,7 +38,6 @@ const GOAL_TITLE = `${TEST_PREFIX} Sync staging smoke`;
 const TACTIC_ONE = `${TEST_PREFIX} Today task`;
 const TACTIC_TWO = `${TEST_PREFIX} Weekly review`;
 const DAILY_NOTE = `${TEST_PREFIX} Daily check-in`;
-const WEEKLY_REVIEW_OUTPUT = `${TEST_PREFIX} smoke task done`;
 const WEEKLY_REVIEW_OBSTACLE = `${TEST_PREFIX} no blockers`;
 const WEEKLY_REVIEW_PRIORITY = `${TEST_PREFIX} finish smoke`;
 
@@ -489,27 +488,26 @@ async function stepWeeklyReview() {
   await clickTab("Tuần");
   await waitFor(
     "Week tab",
-    'document.body.innerText.includes("Review") || document.querySelector("#weekly-best")',
+    'document.querySelector("#weekly-insights") && document.querySelector("#weekly-next-commitments")',
     { timeoutMs: 10_000 },
   ).catch(async () => {
     log("Tab click did not switch to Week; opening the Week tab URL directly");
     await openPage("/12-week-system?tab=week");
     await waitFor(
       "Week tab URL",
-      'document.body.innerText.includes("Review") || document.querySelector("#weekly-best")',
+      'document.querySelector("#weekly-insights") && document.querySelector("#weekly-next-commitments")',
     );
   });
   const hasForm = await browserEval(
-    'Boolean(document.querySelector("#weekly-best") && document.querySelector("#weekly-obstacle") && document.querySelector("#weekly-priority"))',
+    'Boolean(document.querySelector("#weekly-insights") && document.querySelector("#weekly-next-commitments"))',
   );
   if (!hasForm) {
     log("Weekly review form not visible; skipping");
     skipped.push("weekly-review");
     return;
   }
-  await fill("#weekly-best", WEEKLY_REVIEW_OUTPUT);
-  await fill("#weekly-obstacle", WEEKLY_REVIEW_OBSTACLE);
-  await fill("#weekly-priority", WEEKLY_REVIEW_PRIORITY);
+  await fill("#weekly-insights", WEEKLY_REVIEW_OBSTACLE);
+  await fill("#weekly-next-commitments", WEEKLY_REVIEW_PRIORITY);
   await clickButton(["Chốt review tuần này", "chot review tuan nay"]);
   await waitForSnapshot(
     "weekly review saved",

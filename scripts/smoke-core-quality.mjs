@@ -28,11 +28,8 @@ const GOAL_TITLE = `Core quality smoke ${TIMESTAMP}`;
 const TACTIC_ONE = `Daily smoke action ${TIMESTAMP}`;
 const TACTIC_TWO = `Smoke review tactic ${TIMESTAMP}`;
 const DAILY_CHECKIN_NOTE = `Smoke daily check-in ${TIMESTAMP}`;
-const WEEKLY_REVIEW_OUTPUT = `Smoke weekly output ${TIMESTAMP}`;
 const WEEKLY_REVIEW_OBSTACLE = `Smoke weekly obstacle ${TIMESTAMP}`;
 const WEEKLY_REVIEW_PRIORITY = `Smoke priority next week ${TIMESTAMP}`;
-const WEEKLY_REVIEW_KEEP = `Smoke keep tactic ${TIMESTAMP}`;
-const WEEKLY_REVIEW_REDUCE = `Smoke reduce tactic ${TIMESTAMP}`;
 
 function log(message) {
   console.log(`[core-quality] ${message}`);
@@ -627,43 +624,36 @@ async function saveWeeklyReview() {
   await clickTab("tuan");
   await waitFor(
     "weekly review form",
-    'document.querySelector("#weekly-best") && document.querySelector("#weekly-obstacle") && document.querySelector("#weekly-priority")',
+    `document.querySelector('[data-testid="wam-section-score"]') && document.querySelector('[data-testid="wam-section-commitments"]') && document.querySelector('[data-testid="wam-section-insights"]') && document.querySelector('[data-testid="wam-section-next-commitments"]') && document.querySelector("#weekly-insights") && document.querySelector("#weekly-next-commitments")`,
     { timeoutMs: 30_000 },
   ).catch(async () => {
     await openPage("/12-week-system?tab=week");
     await waitFor(
       "weekly review form (direct URL)",
-      'document.querySelector("#weekly-best") && document.querySelector("#weekly-priority")',
+      `document.querySelector('[data-testid="wam-section-score"]') && document.querySelector('[data-testid="wam-section-commitments"]') && document.querySelector('[data-testid="wam-section-insights"]') && document.querySelector('[data-testid="wam-section-next-commitments"]') && document.querySelector("#weekly-next-commitments")`,
     );
   });
 
-  await fill("#weekly-best", WEEKLY_REVIEW_OUTPUT);
-  await clickButton("chi tiet review them").catch(() => undefined);
-  if (await browserEval('Boolean(document.querySelector("#weekly-obstacle"))')) {
-    await fill("#weekly-obstacle", WEEKLY_REVIEW_OBSTACLE);
-  }
-  if (await browserEval('Boolean(document.querySelector("#weekly-keep"))')) {
-    await fill("#weekly-keep", WEEKLY_REVIEW_KEEP);
-  }
-  if (await browserEval('Boolean(document.querySelector("#weekly-reduce"))')) {
-    await fill("#weekly-reduce", WEEKLY_REVIEW_REDUCE);
-  }
-  await fill("#weekly-priority", WEEKLY_REVIEW_PRIORITY);
+  await fill("#weekly-insights", WEEKLY_REVIEW_OBSTACLE);
+  await fill("#weekly-next-commitments", WEEKLY_REVIEW_PRIORITY);
   await clickButton("chot review tuan nay");
 
   await waitForSnapshot(
     "weekly review persisted",
     (snapshot) =>
       (snapshot.system?.weeklyReviewCount ?? 0) >= 1 &&
-      snapshot.system?.latestWeeklyReview?.biggestOutputThisWeek === WEEKLY_REVIEW_OUTPUT,
+      snapshot.system?.latestWeeklyReview?.insights === WEEKLY_REVIEW_OBSTACLE &&
+      snapshot.system?.latestWeeklyReview?.nextWeekCommitments?.includes(WEEKLY_REVIEW_PRIORITY),
     { timeoutMs: 45_000 },
   );
 
   // Summary card should now be on screen
-  const hasSummary = await browserEval(
-    `Boolean(document.querySelector('[data-testid="weekly-review-summary"]'))`,
-  );
+  const hasSummary = await browserEval(`Boolean(document.querySelector('[data-testid="weekly-review-summary"]'))`);
   if (!hasSummary) fail("Weekly review summary card (data-testid='weekly-review-summary') did not render.");
+  const summaryText = await browserEval(
+    `document.querySelector('[data-testid="weekly-review-summary"]')?.innerText ?? ""`,
+  );
+  if (!summaryText.includes("Đã giữ")) fail("Weekly review summary did not include WAM commitment summary.");
   log("✓ Weekly review saved + summary card rendered");
 }
 

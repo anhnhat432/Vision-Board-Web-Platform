@@ -11,6 +11,7 @@ import type {
   TwelveWeekSystem,
   TwelveWeekTaskInstance,
   UniversalScoreboardWeek,
+  UniversalWeeklyReview,
   UserData,
   WeeklyPlanEntry,
 } from "./storage-types";
@@ -222,6 +223,58 @@ function syncScoreboard(
     const existingWeek = existingScoreboard.find((week) => week.weekNumber === fallbackWeek.weekNumber);
     return existingWeek ? { ...fallbackWeek, ...existingWeek } : fallbackWeek;
   });
+}
+
+function normalizeTextArray(values: unknown): string[] {
+  if (!Array.isArray(values)) return [];
+  return values.filter((value): value is string => typeof value === "string").map((value) => value.trim()).filter(Boolean);
+}
+
+function firstNonEmptyText(...values: unknown[]): string | undefined {
+  for (const value of values) {
+    if (typeof value !== "string") continue;
+    const normalized = value.trim();
+    if (normalized) return normalized;
+  }
+  return undefined;
+}
+
+function normalizeWeeklyReview(review: UniversalWeeklyReview): UniversalWeeklyReview {
+  const legacyReview = review as UniversalWeeklyReview & {
+    reflection?: string;
+    adjustments?: string;
+  };
+  const insights = firstNonEmptyText(
+    legacyReview.insights,
+    legacyReview.reflection,
+    legacyReview.biggestOutputThisWeek,
+  );
+  const nextWeekCommitments = normalizeTextArray(legacyReview.nextWeekCommitments);
+  const legacyNextWeekCommitment = firstNonEmptyText(legacyReview.adjustments, legacyReview.nextWeekPriority);
+
+  return {
+    ...review,
+    commitmentsKept: normalizeTextArray(legacyReview.commitmentsKept),
+    commitmentsMissed: normalizeTextArray(legacyReview.commitmentsMissed),
+    insights,
+    nextWeekCommitments:
+      nextWeekCommitments.length > 0 ? nextWeekCommitments : legacyNextWeekCommitment ? [legacyNextWeekCommitment] : [],
+    executionScore: legacyReview.executionScore ?? review.leadCompletionPercent,
+    reflection: legacyReview.reflection ?? insights,
+    adjustments: legacyReview.adjustments ?? legacyNextWeekCommitment,
+  };
+}
+
+function migrateGoalWeeklyReviews(goal: Goal): Goal {
+  if (!goal.twelveWeekSystem?.weeklyReviews) return goal;
+
+  return {
+    ...goal,
+    twelveWeekSystem: {
+      ...goal.twelveWeekSystem,
+      weeklyReviews: goal.twelveWeekSystem.weeklyReviews.map(normalizeWeeklyReview),
+    },
+  };
 }
 
 function getReviewDayIndex(reviewDay: string): number {
@@ -860,7 +913,7 @@ export function migrateLegacyUserData(
   data: UserData,
   currentStorageVersion: number,
 ): UserData {
-  const migratedGoals = data.goals.map(migrateLegacyPlanToSystem);
+  const migratedGoals = data.goals.map((goal) => migrateGoalWeeklyReviews(migrateLegacyPlanToSystem(goal)));
   const hasChanges =
     migratedGoals.some((goal, index) => goal !== data.goals[index]) ||
     (data.storageVersion || 0) < currentStorageVersion;
@@ -921,7 +974,7 @@ export function normalizeGoal(goal: Goal): Goal {
     taskInstances: Array.isArray(baseSystem.taskInstances) ? baseSystem.taskInstances : [],
     weeklyPlans: Array.isArray(baseSystem.weeklyPlans) ? baseSystem.weeklyPlans : [],
     dailyCheckIns: Array.isArray(baseSystem.dailyCheckIns) ? baseSystem.dailyCheckIns : [],
-    weeklyReviews: Array.isArray(baseSystem.weeklyReviews) ? baseSystem.weeklyReviews : [],
+    weeklyReviews: Array.isArray(baseSystem.weeklyReviews) ? baseSystem.weeklyReviews.map(normalizeWeeklyReview) : [],
     scoreboard: Array.isArray(baseSystem.scoreboard) ? baseSystem.scoreboard : [],
   };
 

@@ -114,6 +114,10 @@ function mapApiWeek(week: ApiPlanWeekDetail | ApiWeek): Week {
       ? {
           weekNumber: week.review.weekNumber,
           leadScore: week.review.executionScore,
+          commitmentsKept: [],
+          commitmentsMissed: [],
+          nextWeekCommitments: week.review.adjustments ? [week.review.adjustments] : [],
+          insights: week.review.reflection,
           executionScore: week.review.executionScore,
           reflection: week.review.reflection,
           adjustments: week.review.adjustments,
@@ -736,6 +740,10 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
             ? {
                 weekNumber: updatedWeek.review.weekNumber,
                 leadScore: updatedWeek.review.executionScore,
+                commitmentsKept: [],
+                commitmentsMissed: [],
+                nextWeekCommitments: updatedWeek.review.adjustments ? [updatedWeek.review.adjustments] : [],
+                insights: updatedWeek.review.reflection,
                 executionScore: updatedWeek.review.executionScore,
                 reflection: updatedWeek.review.reflection,
                 adjustments: updatedWeek.review.adjustments,

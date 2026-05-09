@@ -6,7 +6,7 @@ export const USER_DATA_UPDATED_EVENT_NAME = "visionboard:user-data-updated";
 export const STORAGE_KEY = USER_DATA_STORAGE_KEY;
 export const AUTH_OWNER_STORAGE_KEY = `${USER_DATA_STORAGE_KEY}:auth_owner_uid`;
 export const ANONYMOUS_USER_DATA_STORAGE_KEY = `${USER_DATA_STORAGE_KEY}:anonymous`;
-export const CURRENT_STORAGE_VERSION = 5;
+export const CURRENT_STORAGE_VERSION = 6;
 
 export const BACKEND_LINK_STORAGE_KEYS = [
   "backend_goal_links",

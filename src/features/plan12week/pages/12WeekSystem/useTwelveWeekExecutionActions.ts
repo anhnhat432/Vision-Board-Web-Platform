@@ -41,7 +41,7 @@ import { enqueueStoredMutation } from "@/features/plan12week/persistence/mutatio
 import { enqueuePlanSnapshotUpdatedMutation } from "@/features/plan12week/persistence/planSnapshotMutation";
 import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
 import { getTodayQueueForSystem } from "./helpers";
-import type { WeeklyReviewForm } from "./types";
+import type { WeeklyCommitmentStatus, WeeklyReviewForm } from "./types";
 
 interface ExecutionSyncActions {
   syncTaskToggle: (taskId: string, completed: boolean) => Promise<boolean>;
@@ -154,6 +154,31 @@ function enqueueWeeklyReviewUpsertedMutation(
   } catch {
     // Queueing is a best-effort sidecar. The local-first weekly review save stays authoritative.
   }
+}
+
+function normalizeCommitmentList(values: readonly string[] | undefined): string[] {
+  if (!Array.isArray(values)) return [];
+  return values.map((value) => value.trim()).filter(Boolean);
+}
+
+function parseCommitmentInput(value: string): string[] {
+  return value
+    .split(/\r?\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 5);
+}
+
+function getReviewNextWeekCommitments(review: UniversalWeeklyReview | null | undefined): string[] {
+  const commitments = normalizeCommitmentList(review?.nextWeekCommitments);
+  if (commitments.length > 0) return commitments;
+
+  const legacyPriority = review?.nextWeekPriority?.trim();
+  return legacyPriority ? [legacyPriority] : [];
+}
+
+function isCommitmentAnswered(status: WeeklyCommitmentStatus | undefined): boolean {
+  return status === "kept" || status === "missed" || status === "not_set";
 }
 
 export function useTwelveWeekExecutionActions({
@@ -346,6 +371,9 @@ export function useTwelveWeekExecutionActions({
       weeklyForm.keepTactic.trim() ||
       weeklyForm.reduceTactic.trim() ||
       weeklyForm.nextWeekPriority.trim() ||
+      weeklyForm.insights.trim() ||
+      weeklyForm.nextWeekCommitmentsInput.trim() ||
+      Object.values(weeklyForm.commitmentStatuses).some(isCommitmentAnswered) ||
       weeklyForm.lagProgressValue.trim();
     if (!hasAnyContent) {
       toast.error("Cần điền ít nhất một mục trước khi chốt review.");
@@ -354,8 +382,37 @@ export function useTwelveWeekExecutionActions({
     const latestSystem = getLatestActiveSystem() ?? system;
     const reviewWeekNumber = getTwelveWeekCurrentWeek(latestSystem);
     const reviewWeekCompletion = getTwelveWeekWeekCompletion(latestSystem, reviewWeekNumber);
-    const nextWeekPriorityValue =
-      weeklyForm.nextWeekPriority.trim() || (hasPremiumReviewInsights ? suggestedNextWeekPlan.focus : "");
+    const previousReview = latestSystem.weeklyReviews.find((review) => review.weekNumber === reviewWeekNumber - 1);
+    const previousCommitments = getReviewNextWeekCommitments(previousReview);
+    const unansweredCommitment = previousCommitments.find(
+      (commitment) => !isCommitmentAnswered(weeklyForm.commitmentStatuses[commitment]),
+    );
+    if (unansweredCommitment) {
+      toast.error("Cần phân loại mọi cam kết tuần trước trước khi chốt review.");
+      return;
+    }
+
+    const nextWeekCommitments = parseCommitmentInput(
+      weeklyForm.nextWeekCommitmentsInput.trim() ||
+        weeklyForm.nextWeekPriority.trim() ||
+        (hasPremiumReviewInsights ? suggestedNextWeekPlan.focus : ""),
+    );
+    if (nextWeekCommitments.length === 0) {
+      toast.error("Cần đặt ít nhất một cam kết tuần tới trước khi chốt review.");
+      return;
+    }
+
+    const commitmentsKept = previousCommitments.filter(
+      (commitment) => weeklyForm.commitmentStatuses[commitment] === "kept",
+    );
+    const commitmentsMissed = previousCommitments.filter(
+      (commitment) => weeklyForm.commitmentStatuses[commitment] === "missed",
+    );
+    const insightsValue =
+      weeklyForm.insights.trim() ||
+      weeklyForm.mainObstacle.trim() ||
+      weeklyForm.biggestOutputThisWeek.trim();
+    const nextWeekPriorityValue = nextWeekCommitments[0] ?? "";
     const workloadDecisionValue =
       weeklyForm.workloadDecision || (hasPremiumReviewInsights ? suggestedNextWeekPlan.workloadDecision : "keep same");
     const keepTacticTrimmed = weeklyForm.keepTactic.trim();
@@ -364,17 +421,28 @@ export function useTwelveWeekExecutionActions({
       weekNumber: reviewWeekNumber,
       leadCompletionPercent: reviewWeekCompletion.percent,
       lagProgressValue: weeklyForm.lagProgressValue.trim(),
-      biggestOutputThisWeek: weeklyForm.biggestOutputThisWeek.trim(),
-      mainObstacle: weeklyForm.mainObstacle.trim(),
+      biggestOutputThisWeek:
+        weeklyForm.biggestOutputThisWeek.trim() ||
+        (commitmentsKept.length > 0 ? commitmentsKept.join(", ") : ""),
+      mainObstacle:
+        weeklyForm.mainObstacle.trim() ||
+        (commitmentsMissed.length > 0 ? commitmentsMissed.join(", ") : ""),
       nextWeekPriority: nextWeekPriorityValue,
       workloadDecision: workloadDecisionValue,
       reviewCompleted: true,
       progressScore: Math.max(5, Math.round(reviewWeekCompletion.percent / 20)),
       disciplineScore: Math.max(5, Math.round(reviewWeekCompletion.percent / 20)),
       focusScore: reviewWeekCompletion.percent >= 70 ? 8 : 6,
-      improvementScore: weeklyForm.mainObstacle.trim() ? 8 : 6,
-      outputQualityScore: weeklyForm.biggestOutputThisWeek.trim() ? 8 : 6,
+      improvementScore: insightsValue ? 8 : 6,
+      outputQualityScore: commitmentsKept.length > 0 || weeklyForm.biggestOutputThisWeek.trim() ? 8 : 6,
       completedLeadIndicators: reviewWeekCompletion.completed,
+      commitmentsKept,
+      commitmentsMissed,
+      insights: insightsValue,
+      nextWeekCommitments,
+      executionScore: reviewWeekCompletion.percent,
+      reflection: insightsValue,
+      adjustments: nextWeekPriorityValue,
       ...(keepTacticTrimmed ? { keepTactic: keepTacticTrimmed } : {}),
       ...(reduceTacticTrimmed ? { reduceTactic: reduceTacticTrimmed } : {}),
     };
@@ -398,9 +466,11 @@ export function useTwelveWeekExecutionActions({
       date: formatDateInputValue(new Date()),
       title: `Review tuần - ${actionGoalTitle} - tuần ${reviewWeekNumber}`,
       content: [
-        `Điều hiệu quả: ${weeklyForm.biggestOutputThisWeek.trim() || "--"}`,
-        `Điều cản trở: ${weeklyForm.mainObstacle.trim() || "--"}`,
-        `Ưu tiên tuần sau: ${nextWeekPriorityValue || "--"}`,
+        `Score tuần qua: ${reviewWeekCompletion.percent}%`,
+        `Cam kết đã giữ: ${commitmentsKept.join(", ") || "--"}`,
+        `Cam kết bỏ lỡ: ${commitmentsMissed.join(", ") || "--"}`,
+        `Insight tuần sau: ${insightsValue || "--"}`,
+        `Cam kết tuần tới: ${nextWeekCommitments.join(", ")}`,
         `Quyết định: ${getWorkloadDecisionLabel(workloadDecisionValue)}`,
         hasPremiumReviewInsights ? `Gợi ý hệ thống: ${suggestedNextWeekPlan.firstMove}` : "",
       ]
@@ -438,7 +508,7 @@ export function useTwelveWeekExecutionActions({
     const synced = await executionSyncActions.syncWeeklyReview({
       weekNumber: reviewWeekNumber,
       executionScore: reviewExecutionScore,
-      reflection: weeklyForm.biggestOutputThisWeek.trim() || undefined,
+      reflection: insightsValue || undefined,
       adjustments: nextWeekPriorityValue || undefined,
     });
 
@@ -452,7 +522,9 @@ export function useTwelveWeekExecutionActions({
 
     toast.success("Review tuần đã được chốt.", {
       description:
-        hasPremiumReviewInsights && weeklyForm.nextWeekPriority.trim().length === 0
+        hasPremiumReviewInsights &&
+        weeklyForm.nextWeekCommitmentsInput.trim().length === 0 &&
+        weeklyForm.nextWeekPriority.trim().length === 0
           ? "Mình đã dùng luôn gợi ý Plus để khóa ưu tiên tuần sau cho bạn."
           : "Tuần sau giờ đã có ưu tiên đủ rõ để bắt đầu gọn hơn.",
     });
@@ -533,6 +605,9 @@ export function useTwelveWeekExecutionActions({
     setWeeklyForm((previousForm) => ({
       ...previousForm,
       nextWeekPriority: suggestedNextWeekPlan.focus,
+      nextWeekCommitmentsInput: previousForm.nextWeekCommitmentsInput.trim()
+        ? previousForm.nextWeekCommitmentsInput
+        : suggestedNextWeekPlan.focus,
       workloadDecision: suggestedNextWeekPlan.workloadDecision,
     }));
     trackAppEvent("12_week_review_suggestion_applied", activeGoal.id, {

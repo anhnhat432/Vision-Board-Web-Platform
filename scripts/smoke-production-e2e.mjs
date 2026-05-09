@@ -20,6 +20,7 @@ const TACTIC_TITLE = "Review execution rhythm";
 const TODAY_TASK_TITLE = `Full smoke today task ${TIMESTAMP}`;
 const CHECKIN_NOTE = `Full smoke check-in ${TIMESTAMP}`;
 const WEEKLY_REVIEW_OUTPUT = `Full smoke weekly review ${TIMESTAMP}`;
+const WEEKLY_REVIEW_PRIORITY = `Full smoke next commitment ${TIMESTAMP}`;
 
 function log(message) {
   console.log(`[prod-smoke] ${message}`);
@@ -683,12 +684,15 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
   });
 
   await page.goto(`${BASE_URL}/12-week-system?tab=week`, { waitUntil: "domcontentloaded" });
-  await page.locator("#weekly-best").fill(WEEKLY_REVIEW_OUTPUT);
+  await page.locator('[data-testid="wam-section-score"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  await page.locator("#weekly-insights").fill(WEEKLY_REVIEW_OUTPUT);
+  await page.locator("#weekly-next-commitments").fill(WEEKLY_REVIEW_PRIORITY);
   await clickButtonByNormalizedText(page, "chot review tuan nay");
   await waitForGoalSnapshot(page, "weekly review in local storage", (snapshot) => {
     return (
       snapshot.weeklyReviewCount >= 1 &&
-      snapshot.latestWeeklyReview?.biggestOutputThisWeek === WEEKLY_REVIEW_OUTPUT
+      snapshot.latestWeeklyReview?.insights === WEEKLY_REVIEW_OUTPUT &&
+      snapshot.latestWeeklyReview?.nextWeekCommitments?.includes(WEEKLY_REVIEW_PRIORITY)
     );
   });
 
@@ -706,7 +710,8 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
       snapshot.dailyCheckInCount >= 1 &&
       snapshot.latestDailyCheckIn?.optionalNote === CHECKIN_NOTE &&
       snapshot.weeklyReviewCount >= 1 &&
-      snapshot.latestWeeklyReview?.biggestOutputThisWeek === WEEKLY_REVIEW_OUTPUT
+      snapshot.latestWeeklyReview?.insights === WEEKLY_REVIEW_OUTPUT &&
+      snapshot.latestWeeklyReview?.nextWeekCommitments?.includes(WEEKLY_REVIEW_PRIORITY)
     );
   });
   await assertNoHorizontalOverflow(page, "12-week desktop");

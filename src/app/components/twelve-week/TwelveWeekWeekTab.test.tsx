@@ -9,7 +9,7 @@ import { TwelveWeekWeekTab } from "./TwelveWeekWeekTab";
 
 type WeekTabProps = ComponentProps<typeof TwelveWeekWeekTab>;
 
-function makeSystem(): TwelveWeekSystem {
+function makeSystem(overrides: Partial<TwelveWeekSystem> = {}): TwelveWeekSystem {
   return {
     goalType: "Project Completion",
     vision12Week: "Ship execution UX",
@@ -31,6 +31,7 @@ function makeSystem(): TwelveWeekSystem {
     dailyCheckIns: [],
     weeklyReviews: [],
     scoreboard: [],
+    ...overrides,
   };
 }
 
@@ -73,6 +74,9 @@ function makeProps(overrides: Partial<WeekTabProps> = {}): WeekTabProps {
       keepTactic: "",
       reduceTactic: "",
       nextWeekPriority: "",
+      commitmentStatuses: {},
+      insights: "",
+      nextWeekCommitmentsInput: "",
       workloadDecision: "",
     },
     onWeeklyFormChange: vi.fn(),
@@ -84,7 +88,7 @@ function makeProps(overrides: Partial<WeekTabProps> = {}): WeekTabProps {
 }
 
 describe("TwelveWeekWeekTab review flow", () => {
-  it("shows three review steps and a readiness summary", () => {
+  it("shows four WAM review steps and a readiness summary", () => {
     render(
       <TwelveWeekWeekTab
         {...makeProps({
@@ -95,26 +99,28 @@ describe("TwelveWeekWeekTab review flow", () => {
             keepTactic: "",
             reduceTactic: "",
             nextWeekPriority: "Keep the core loop simple.",
+            commitmentStatuses: {},
+            insights: "Keep the loop visible.",
+            nextWeekCommitmentsInput: "Keep the core loop simple.",
             workloadDecision: "keep same",
           },
         })}
       />,
     );
 
-    expect(screen.getByTestId("weekly-review-step-result")).toHaveAttribute("data-done", "true");
-    expect(screen.getByTestId("weekly-review-step-load")).toHaveAttribute("data-done", "true");
-    expect(screen.getByTestId("weekly-review-step-priority")).toHaveAttribute("data-done", "true");
-    expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent("3/3");
+    expect(screen.getByTestId("weekly-review-step-score")).toHaveAttribute("data-done", "true");
+    expect(screen.getByTestId("weekly-review-step-commitments")).toHaveAttribute("data-done", "true");
+    expect(screen.getByTestId("weekly-review-step-insights")).toHaveAttribute("data-done", "true");
+    expect(screen.getByTestId("weekly-review-step-next")).toHaveAttribute("data-done", "true");
+    expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent("4/4");
   });
 
-  it("keeps optional review fields collapsed by default", () => {
+  it("renders WAM answer fields directly", () => {
     render(<TwelveWeekWeekTab {...makeProps()} />);
 
-    expect(screen.getByRole("button", { name: /chi tiết review thêm/i })).toHaveAttribute("aria-expanded", "false");
-    expect(screen.getByLabelText(/ưu tiên số 1/i)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/cản trở nhiều nhất/i)).toBeNull();
-    expect(screen.queryByLabelText(/tuần sau nên giữ/i)).toBeNull();
-    expect(screen.queryByLabelText(/nên giảm hoặc bỏ/i)).toBeNull();
+    expect(screen.getByLabelText(/insight\/learning/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/cam kết của tuần tới/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/ưu tiên số 1/i)).toBeNull();
   });
 
   it("shows an empty-week message instead of a percent when there are no tasks", () => {
@@ -126,7 +132,7 @@ describe("TwelveWeekWeekTab review flow", () => {
       />,
     );
 
-    expect(screen.getByText("Chưa có việc trong tuần này")).toBeInTheDocument();
+    expect(screen.getAllByText("Chưa có việc trong tuần này").length).toBeGreaterThan(0);
     expect(screen.queryByText("0%")).not.toBeInTheDocument();
   });
 
@@ -149,5 +155,83 @@ describe("TwelveWeekWeekTab review flow", () => {
 
     expect(screen.getByTestId("weekly-lead-score")).toHaveTextContent("80%");
     expect(screen.getByTestId("weekly-lag-score")).toHaveTextContent("100%");
+  });
+
+  it("renders the 4-question WAM form and a friendly first-week empty state", () => {
+    render(<TwelveWeekWeekTab {...makeProps({ system: makeSystem({ currentWeek: 1 }) })} />);
+
+    expect(screen.getByTestId("wam-section-score")).toBeInTheDocument();
+    expect(screen.getByTestId("wam-section-commitments")).toBeInTheDocument();
+    expect(screen.getByTestId("wam-section-insights")).toBeInTheDocument();
+    expect(screen.getByTestId("wam-section-next-commitments")).toBeInTheDocument();
+    expect(screen.getByText(/tuần đầu chưa có cam kết tuần trước/i)).toBeInTheDocument();
+  });
+
+  it("requires every previous commitment to be classified before submit", () => {
+    const system = makeSystem({
+      currentWeek: 2,
+      weeklyReviews: [
+        {
+          weekNumber: 1,
+          leadCompletionPercent: 80,
+          lagProgressValue: "25",
+          biggestOutputThisWeek: "Week 1 output",
+          mainObstacle: "",
+          nextWeekPriority: "Publish draft",
+          workloadDecision: "keep same",
+          reviewCompleted: true,
+          progressScore: 4,
+          disciplineScore: 4,
+          focusScore: 6,
+          improvementScore: 6,
+          outputQualityScore: 6,
+          commitmentsKept: [],
+          commitmentsMissed: [],
+          insights: "Ship smaller.",
+          nextWeekCommitments: ["Publish draft"],
+        },
+      ],
+    });
+
+    render(<TwelveWeekWeekTab {...makeProps({ system })} />);
+
+    expect(screen.getByText("Publish draft")).toBeInTheDocument();
+    for (const button of screen.getAllByRole("button", { name: /chốt review tuần này/i })) {
+      expect(button).toBeDisabled();
+    }
+  });
+
+  it("summarizes WAM answers after review submit", () => {
+    render(
+      <TwelveWeekWeekTab
+        {...makeProps({
+          currentReview: {
+            weekNumber: 2,
+            leadCompletionPercent: 80,
+            lagProgressValue: "25",
+            biggestOutputThisWeek: "Legacy output",
+            mainObstacle: "",
+            nextWeekPriority: "Ship next",
+            workloadDecision: "keep same",
+            reviewCompleted: true,
+            progressScore: 4,
+            disciplineScore: 4,
+            focusScore: 6,
+            improvementScore: 6,
+            outputQualityScore: 6,
+            commitmentsKept: ["Publish draft"],
+            commitmentsMissed: ["Send update"],
+            insights: "Protect morning focus.",
+            nextWeekCommitments: ["Ship next"],
+          },
+        })}
+      />,
+    );
+
+    const summary = screen.getByTestId("weekly-review-summary");
+    expect(summary).toHaveTextContent("Score");
+    expect(summary).toHaveTextContent("Đã giữ 1/2 cam kết");
+    expect(summary).toHaveTextContent("Protect morning focus.");
+    expect(summary).toHaveTextContent("Ship next");
   });
 });

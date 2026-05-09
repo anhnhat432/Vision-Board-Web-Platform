@@ -8,11 +8,14 @@ import {
   getTwelveWeekTodayTasks,
   getTwelveWeekWeekCompletion,
   getWeekTaskBreakdown,
+  migrateLegacyUserData,
   rescheduleTwelveWeekTaskToNextWeek,
   rescheduleTwelveWeekTaskWithinWeek,
   skipTwelveWeekNonCoreTask,
   sortTwelveWeekGoalsForSelection,
 } from "./storage-twelve-week";
+import { CURRENT_STORAGE_VERSION, DEFAULT_APP_PREFERENCES, MOTIVATIONAL_QUOTES } from "./storage-constants";
+import { createEmptyUserData } from "./storage-demo-data";
 import type { Goal, TwelveWeekSystem, TwelveWeekTaskInstance } from "./storage-types";
 
 function createSystem(overrides: Partial<TwelveWeekSystem> = {}): TwelveWeekSystem {
@@ -328,5 +331,53 @@ describe("Skipped tasks excluded from queries", () => {
     expect(completion.total).toBe(2);
     expect(completion.completed).toBe(1);
     expect(completion.percent).toBe(50);
+  });
+});
+
+describe("weekly review storage migration", () => {
+  it("migrates legacy weekly review fields into WAM commitment fields", () => {
+    const data = createEmptyUserData({
+      currentStorageVersion: CURRENT_STORAGE_VERSION - 1,
+      defaultAppPreferences: DEFAULT_APP_PREFERENCES,
+      motivationalQuotes: MOTIVATIONAL_QUOTES,
+    });
+    data.goals.push(
+      createGoal("goal-with-legacy-review", "2026-05-01T00:00:00.000Z", {
+        weeklyReviews: [
+          {
+            weekNumber: 1,
+            leadCompletionPercent: 80,
+            lagProgressValue: "40",
+            biggestOutputThisWeek: "Legacy output",
+            mainObstacle: "Legacy obstacle",
+            nextWeekPriority: "Legacy priority",
+            workloadDecision: "keep same",
+            reviewCompleted: true,
+            progressScore: 4,
+            disciplineScore: 4,
+            focusScore: 6,
+            improvementScore: 6,
+            outputQualityScore: 6,
+            completedLeadIndicators: 2,
+            keepTactic: "Keep review ritual",
+            reduceTactic: "Reduce meetings",
+          },
+        ],
+      }),
+    );
+
+    const migrated = migrateLegacyUserData(data, CURRENT_STORAGE_VERSION);
+    const review = migrated.goals[0]?.twelveWeekSystem?.weeklyReviews[0];
+
+    expect(migrated.storageVersion).toBe(CURRENT_STORAGE_VERSION);
+    expect(review).toMatchObject({
+      commitmentsKept: [],
+      commitmentsMissed: [],
+      insights: "Legacy output",
+      nextWeekCommitments: ["Legacy priority"],
+      executionScore: 80,
+      reflection: "Legacy output",
+      adjustments: "Legacy priority",
+    });
   });
 });

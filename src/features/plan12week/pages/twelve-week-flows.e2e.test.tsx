@@ -27,11 +27,21 @@ function getPrimaryButton(name: string | RegExp) {
   return button;
 }
 
-async function openWeeklyReviewDetails(user: ReturnType<typeof userEvent.setup>) {
-  const trigger = await screen.findByRole("button", { name: /Chi tiết review thêm/i });
-  if (trigger && trigger.getAttribute("aria-expanded") !== "true") {
-    await user.click(trigger);
-  }
+async function openWeeklyReviewDetails(_user: ReturnType<typeof userEvent.setup>) {
+  await screen.findByTestId("wam-section-next-commitments");
+}
+
+async function typeWamReview(
+  user: ReturnType<typeof userEvent.setup>,
+  input: { insights: string; nextWeekCommitments: string },
+) {
+  await openWeeklyReviewDetails(user);
+  const insightsInput = document.querySelector("#weekly-insights");
+  const commitmentsInput = document.querySelector("#weekly-next-commitments");
+  expect(insightsInput).toBeInTheDocument();
+  expect(commitmentsInput).toBeInTheDocument();
+  await user.type(insightsInput as HTMLElement, input.insights);
+  await user.type(commitmentsInput as HTMLElement, input.nextWeekCommitments);
 }
 
 describe("12-week core flows", () => {
@@ -285,9 +295,10 @@ describe("12-week core flows", () => {
     await user.type(screen.getByLabelText("Note tùy chọn"), "Giữ task đã tick khi review tuần.");
     await user.click(getPrimaryButton("Lưu check-in hôm nay"));
     await user.click(screen.getByRole("button", { name: "Tuần" }));
-    await openWeeklyReviewDetails(user);
-    await user.type(await screen.findByLabelText(/kết quả lớn nhất/i), "Chốt được một việc thật.");
-    await user.type(screen.getByLabelText(/ưu tiên số 1 tuần sau/i), "Giữ nhịp execution.");
+    await typeWamReview(user, {
+      insights: "Chốt được một việc thật.",
+      nextWeekCommitments: "Giữ nhịp execution.",
+    });
     await user.click(getPrimaryButton("Chốt review tuần này"));
 
     await waitFor(() => {
@@ -305,10 +316,10 @@ describe("12-week core flows", () => {
     const user = userEvent.setup();
 
     await user.click(screen.getByRole("button", { name: "Tuần" }));
-    await openWeeklyReviewDetails(user);
-    await user.type(await screen.findByLabelText(/kết quả lớn nhất/i), "Giữ được nhịp ship mỗi ngày.");
-    await user.type(screen.getByLabelText(/cản trở nhiều nhất/i), "Bị phân tán vì đổi context.");
-    await user.type(screen.getByLabelText(/ưu tiên số 1 tuần sau/i), "Chốt xong command center trước.");
+    await typeWamReview(user, {
+      insights: "Bị phân tán vì đổi context.",
+      nextWeekCommitments: "Chốt xong command center trước.",
+    });
     await user.click(getPrimaryButton("Chốt review tuần này"));
 
     await waitFor(() => {
@@ -322,7 +333,7 @@ describe("12-week core flows", () => {
     );
 
     expect(reflection).toBeDefined();
-    expect(reflection?.content).toContain("Giữ được nhịp ship mỗi ngày.");
+    expect(reflection?.content).toContain("Bị phân tán vì đổi context.");
 
     const weeklyMutation = listStoredPendingMutations(null).find((item) => item.kind === "weekly_review_upserted");
     const review = readGoal(goalId).twelveWeekSystem?.weeklyReviews[0];
@@ -339,32 +350,22 @@ describe("12-week core flows", () => {
   }, INTEGRATION_TEST_TIMEOUT_MS);
 
   
-  it("saves keep/reduce tactic fields and shows the post-save summary card", async () => {
+  it("saves WAM fields and shows the post-save summary card", async () => {
     const { goalId } = seedTwelveWeekGoal();
     renderAppRoute("/12-week-system");
     const user = userEvent.setup();
 
     await user.click(screen.getByRole("button", { name: "Tuần" }));
-    await openWeeklyReviewDetails(user);
-    await user.type(
-      await screen.findByLabelText(/kết quả lớn nhất/i),
-      "Đã ship 1 deliverable nhỏ.",
-    );
-    await user.type(screen.getByLabelText(/tuần sau nên giữ/i), "Giữ buổi review thứ Năm.");
-    await user.type(
-      screen.getByLabelText(/nên giảm hoặc bỏ/i),
-      "Giảm thời gian họp dài cuối tuần.",
-    );
-    await user.type(
-      screen.getByLabelText(/ưu tiên số 1 tuần sau/i),
-      "Hoàn thành module sync trước thứ Tư.",
-    );
+    await typeWamReview(user, {
+      insights: "Giữ buổi review thứ Năm.",
+      nextWeekCommitments: "Hoàn thành module sync trước thứ Tư.",
+    });
     await user.click(getPrimaryButton("Chốt review tuần này"));
 
     await waitFor(() => {
       const review = readGoal(goalId).twelveWeekSystem?.weeklyReviews[0];
-      expect(review?.keepTactic).toBe("Giữ buổi review thứ Năm.");
-      expect(review?.reduceTactic).toBe("Giảm thời gian họp dài cuối tuần.");
+      expect(review?.insights).toBe("Giữ buổi review thứ Năm.");
+      expect(review?.nextWeekCommitments).toContain("Hoàn thành module sync trước thứ Tư.");
       expect(review?.reviewCompleted).toBe(true);
     });
 
@@ -403,16 +404,12 @@ describe("12-week core flows", () => {
     await user.click(screen.getByRole("button", { name: "Tuần" }));
     await openWeeklyReviewDetails(user);
 
-    // Existing legacy fields should hydrate the form
+    // Existing legacy fields should hydrate the WAM form
     expect(await screen.findByDisplayValue("Legacy output")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("Legacy obstacle")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Legacy priority")).toBeInTheDocument();
 
-    // New keep/reduce fields render empty for legacy reviews
-    const keepInput = screen.getByLabelText(/tuần sau nên giữ/i) as HTMLTextAreaElement;
-    const reduceInput = screen.getByLabelText(/nên giảm hoặc bỏ/i) as HTMLTextAreaElement;
-    expect(keepInput.value).toBe("");
-    expect(reduceInput.value).toBe("");
+    // Old optional obstacle field is no longer rendered in the WAM form.
+    expect(screen.queryByDisplayValue("Legacy obstacle")).toBeNull();
 
     // Summary card still renders since reviewCompleted === true
     expect(screen.getByTestId("weekly-review-summary")).toBeInTheDocument();
@@ -424,38 +421,39 @@ describe("12-week core flows", () => {
     const user = userEvent.setup();
 
     await user.click(screen.getByRole("button", { name: "Tuần" }));
-    await openWeeklyReviewDetails(user);
-    const bestInput = await screen.findByLabelText(/kết quả lớn nhất/i);
-    const obstacleInput = screen.getByLabelText(/cản trở nhiều nhất/i);
-    const priorityInput = screen.getByLabelText(/ưu tiên số 1 tuần sau/i);
-    await user.type(bestInput, "First weekly output.");
-    await user.type(obstacleInput, "First obstacle.");
-    await user.type(priorityInput, "First priority.");
+    await typeWamReview(user, {
+      insights: "First weekly insight.",
+      nextWeekCommitments: "First priority.",
+    });
     await user.click(getPrimaryButton("Chốt review tuần này"));
 
     await waitFor(() => {
-      expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.biggestOutputThisWeek).toBe("First weekly output.");
+      expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.insights).toBe("First weekly insight.");
     });
 
-    await user.clear(bestInput);
-    await user.type(bestInput, "Latest weekly output.");
-    await user.clear(priorityInput);
-    await user.type(priorityInput, "Latest priority.");
+    const insightsInput = document.querySelector("#weekly-insights");
+    const commitmentsInput = document.querySelector("#weekly-next-commitments");
+    expect(insightsInput).toBeInTheDocument();
+    expect(commitmentsInput).toBeInTheDocument();
+    await user.clear(insightsInput as HTMLElement);
+    await user.type(insightsInput as HTMLElement, "Latest weekly insight.");
+    await user.clear(commitmentsInput as HTMLElement);
+    await user.type(commitmentsInput as HTMLElement, "Latest priority.");
     await user.click(getPrimaryButton("Chốt review tuần này"));
 
     await waitFor(() => {
-      expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.biggestOutputThisWeek).toBe("Latest weekly output.");
+      expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.insights).toBe("Latest weekly insight.");
     });
 
     const weeklyMutations = listStoredPendingMutations(null).filter((item) => item.kind === "weekly_review_upserted");
     expect(weeklyMutations).toHaveLength(1);
     expect(weeklyMutations[0].supersedes).toHaveLength(1);
     if (weeklyMutations[0].kind === "weekly_review_upserted") {
-      expect(weeklyMutations[0].payload.review.biggestOutputThisWeek).toBe("Latest weekly output.");
+      expect(weeklyMutations[0].payload.review.insights).toBe("Latest weekly insight.");
       expect(weeklyMutations[0].payload.review.nextWeekPriority).toBe("Latest priority.");
       expect(weeklyMutations[0].payload.executionScore).toEqual(expect.any(Number));
     }
-  });
+  }, INTEGRATION_TEST_TIMEOUT_MS);
 
   it("completes trial checkout without exposing restore controls in settings", async () => {
     const { goalId } = seedTwelveWeekGoal();

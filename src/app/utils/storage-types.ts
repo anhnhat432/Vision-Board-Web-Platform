@@ -101,6 +101,13 @@ export interface UniversalWeeklyReview {
   improvementScore: number;
   outputQualityScore: number;
   completedLeadIndicators?: number;
+  commitmentsKept?: string[];
+  commitmentsMissed?: string[];
+  insights?: string;
+  nextWeekCommitments?: string[];
+  executionScore?: number;
+  reflection?: string;
+  adjustments?: string;
   /** Việc nào tuần sau nên giữ — added in Weekly Review v2 (optional, backwards-compat). */
   keepTactic?: string;
   /** Việc nào tuần sau nên giảm hoặc bỏ — added in Weekly Review v2 (optional, backwards-compat). */

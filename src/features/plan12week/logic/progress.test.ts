@@ -19,6 +19,9 @@ function makePlan(reviewScores: number[]): Plan12Week {
       review: {
         weekNumber: index + 1,
         leadScore: score,
+        commitmentsKept: [],
+        commitmentsMissed: [],
+        nextWeekCommitments: [],
         executionScore: score,
       },
     })),

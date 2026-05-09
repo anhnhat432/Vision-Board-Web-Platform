@@ -1,14 +1,11 @@
 import { useState } from "react";
-import { Crown } from "lucide-react";
-
-import { CalendarCheck, CheckCircle2, ClipboardCheck, Flag, Layers, Loader2, TrendingUp } from "lucide-react";
+import { CalendarCheck, CheckCircle2, ClipboardCheck, Crown, Flag, Layers, Loader2, TrendingUp } from "lucide-react";
 
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Label } from "../ui/label";
 import { Progress } from "../ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import { formatCalendarDate, getReviewDayLabel } from "../../utils/storage";
 import type {
@@ -22,7 +19,7 @@ import {
   type SuggestedNextWeekPlan,
   type WeeklyReviewPremiumInsight,
 } from "../../utils/twelve-week-premium";
-import { WORKLOAD_OPTIONS, getWorkloadDecisionLabel } from "../../utils/twelve-week-system-ui";
+import { getWorkloadDecisionLabel } from "../../utils/twelve-week-system-ui";
 import { calculateLagScore, interpretWeeklyExecutionScore } from "@/features/plan12week/logic";
 import type {
   ExecutionInsight,
@@ -33,7 +30,6 @@ import type {
 import { TwelveWeekInsightsCard } from "./TwelveWeekInsightsCard";
 import { TwelveWeekNextWeekRecommendationCard } from "./TwelveWeekNextWeekRecommendationCard";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
-import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
 
 interface WeekRange {
   start: string;
@@ -54,8 +50,13 @@ interface TwelveWeekWeeklyReviewForm {
   keepTactic: string;
   reduceTactic: string;
   nextWeekPriority: string;
+  commitmentStatuses: Record<string, WeeklyCommitmentStatus>;
+  insights: string;
+  nextWeekCommitmentsInput: string;
   workloadDecision: "keep same" | "reduce slightly" | "increase slightly" | "";
 }
+
+type WeeklyCommitmentStatus = "kept" | "missed" | "not_set" | "unanswered";
 
 interface TwelveWeekWeekTabProps {
   system: TwelveWeekSystem;
@@ -75,7 +76,10 @@ interface TwelveWeekWeekTabProps {
   suggestedNextWeekPlan: SuggestedNextWeekPlan;
   weeklyForm: TwelveWeekWeeklyReviewForm;
   currentReview?: UniversalWeeklyReview | null;
-  onWeeklyFormChange: (field: keyof TwelveWeekWeeklyReviewForm, value: string) => void;
+  onWeeklyFormChange: <K extends keyof TwelveWeekWeeklyReviewForm>(
+    field: K,
+    value: TwelveWeekWeeklyReviewForm[K],
+  ) => void;
   onApplySuggestedPlan: () => void;
   onOpenPremiumInsights: () => void;
   onSaveWeeklyReview: () => void;
@@ -104,13 +108,6 @@ interface TwelveWeekWeekTabProps {
   weeklyReflectionInsights?: ReadonlyArray<ExecutionInsight>;
 }
 
-function getWorkloadIntensityHint(value: TwelveWeekWeeklyReviewForm["workloadDecision"]): string {
-  if (value === "reduce slightly") return "Nhẹ hơn — giảm tải để khôi phục nhịp.";
-  if (value === "increase slightly") return "Đẩy nhanh — tăng nhẹ một việc quan trọng.";
-  if (value === "keep same") return "Giữ nguyên — chạy như tuần này.";
-  return "";
-}
-
 function getLeadScoreTone(level: ReturnType<typeof interpretWeeklyExecutionScore>["level"]): {
   marker: string;
   panel: string;
@@ -136,6 +133,37 @@ function getLeadScoreTone(level: ReturnType<typeof interpretWeeklyExecutionScore
         text: "text-rose-800",
       };
   }
+}
+
+function normalizeCommitmentList(values: readonly string[] | undefined): string[] {
+  if (!Array.isArray(values)) return [];
+  return values.map((value) => value.trim()).filter(Boolean);
+}
+
+function parseCommitmentInput(value: string): string[] {
+  return value
+    .split(/\r?\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 5);
+}
+
+function getReviewNextWeekCommitments(review: UniversalWeeklyReview | null | undefined): string[] {
+  const commitments = normalizeCommitmentList(review?.nextWeekCommitments);
+  if (commitments.length > 0) return commitments;
+
+  const legacyPriority = review?.nextWeekPriority?.trim();
+  return legacyPriority ? [legacyPriority] : [];
+}
+
+function isCommitmentAnswered(status: WeeklyCommitmentStatus | undefined): boolean {
+  return status === "kept" || status === "missed" || status === "not_set";
+}
+
+function getCommitmentButtonClass(isActive: boolean): string {
+  return isActive
+    ? "border-slate-950 bg-slate-950 text-white hover:bg-slate-900"
+    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50";
 }
 
 export function TwelveWeekWeekTab({
@@ -182,31 +210,49 @@ export function TwelveWeekWeekTab({
           system.totalWeeks,
         )
       : null;
+  const previousReview = system.weeklyReviews.find((review) => review.weekNumber === system.currentWeek - 1);
+  const previousCommitments = getReviewNextWeekCommitments(previousReview);
+  const allPreviousCommitmentsAnswered =
+    previousCommitments.length === 0 ||
+    previousCommitments.every((commitment) => isCommitmentAnswered(weeklyForm.commitmentStatuses[commitment]));
+  const nextWeekCommitments = parseCommitmentInput(weeklyForm.nextWeekCommitmentsInput || weeklyForm.nextWeekPriority);
+  const hasNextWeekCommitment = nextWeekCommitments.length > 0;
   const reviewIsCompleted = Boolean(currentReview?.reviewCompleted);
   const summaryReview = reviewIsCompleted ? currentReview ?? null : null;
-  const intensityHint = getWorkloadIntensityHint(weeklyForm.workloadDecision);
+  const summaryCommitmentsKept = normalizeCommitmentList(summaryReview?.commitmentsKept);
+  const summaryCommitmentsMissed = normalizeCommitmentList(summaryReview?.commitmentsMissed);
+  const summaryCommitmentTotal = summaryCommitmentsKept.length + summaryCommitmentsMissed.length;
+  const summaryInsights =
+    summaryReview?.insights?.trim() || summaryReview?.reflection?.trim() || summaryReview?.biggestOutputThisWeek?.trim();
+  const summaryNextWeekCommitments = getReviewNextWeekCommitments(summaryReview);
   const [isSavingReview, setIsSavingReview] = useState(false);
   const reviewReadinessItems = [
     {
-      key: "result",
-      label: "Kết quả",
-      done: weeklyForm.biggestOutputThisWeek.trim().length > 0,
+      key: "score",
+      label: "Score",
+      done: true,
     },
     {
-      key: "load",
-      label: "Mức tải",
-      done: weeklyForm.workloadDecision.trim().length > 0,
+      key: "commitments",
+      label: "Cam kết",
+      done: allPreviousCommitmentsAnswered,
     },
     {
-      key: "priority",
-      label: "Ưu tiên",
-      done: weeklyForm.nextWeekPriority.trim().length > 0,
+      key: "insights",
+      label: "Insight",
+      done: weeklyForm.insights.trim().length > 0,
+    },
+    {
+      key: "next",
+      label: "Tuần tới",
+      done: hasNextWeekCommitment,
     },
   ];
   const reviewReadyCount = reviewReadinessItems.filter((item) => item.done).length;
+  const canSubmitWeeklyReview = allPreviousCommitmentsAnswered && hasNextWeekCommitment;
 
   const handleSaveReviewClick = async () => {
-    if (isSavingReview) return;
+    if (isSavingReview || !canSubmitWeeklyReview) return;
     setIsSavingReview(true);
     try {
       await Promise.resolve(onSaveWeeklyReview());
@@ -398,7 +444,7 @@ export function TwelveWeekWeekTab({
               Review tuần
             </CardTitle>
             <CardDescription className="text-slate-700">
-              Chốt 3 phần: kết quả, mức tải và ưu tiên tuần sau.
+              WAM 4 câu: score, cam kết, insight và cam kết tuần tới.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -430,7 +476,7 @@ export function TwelveWeekWeekTab({
                 </Badge>
               </div>
             </div>
-            <div data-testid="weekly-review-flow" className="grid gap-2 sm:grid-cols-3">
+            <div data-testid="weekly-review-flow" className="grid gap-2 sm:grid-cols-4">
               {reviewReadinessItems.map((item, index) => (
                 <div
                   key={item.key}
@@ -474,34 +520,37 @@ export function TwelveWeekWeekTab({
                   </Badge>
                 </div>
                 <div className="mt-3 grid gap-2 md:grid-cols-2">
-                  {summaryReview.biggestOutputThisWeek && (
-                    <div className="rounded-lg border border-white/82 bg-white/82 px-3 py-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Kết quả chính</p>
-                      <p className="mt-1 text-sm leading-5 text-slate-700">{summaryReview.biggestOutputThisWeek}</p>
+                  <div className="rounded-lg border border-white/82 bg-white/82 px-3 py-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Score</p>
+                    <p className="mt-1 text-sm leading-5 text-slate-700">{summaryReview.leadCompletionPercent}% Lead Score</p>
+                  </div>
+                  <div className="rounded-lg border border-white/82 bg-white/82 px-3 py-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Cam kết tuần qua</p>
+                    <p className="mt-1 text-sm leading-5 text-slate-700">
+                      Đã giữ {summaryCommitmentsKept.length}/{summaryCommitmentTotal} cam kết
+                    </p>
+                  </div>
+                  {summaryInsights && (
+                    <div className="rounded-lg border border-white/82 bg-white/82 px-3 py-2 md:col-span-2">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Insight tuần sau</p>
+                      <p className="mt-1 text-sm leading-5 text-slate-700">{summaryInsights}</p>
                     </div>
                   )}
-                  {summaryReview.mainObstacle && (
-                    <div className="rounded-lg border border-white/82 bg-white/82 px-3 py-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Cản trở</p>
-                      <p className="mt-1 text-sm leading-5 text-slate-700">{summaryReview.mainObstacle}</p>
-                    </div>
-                  )}
-                  {summaryReview.keepTactic && (
-                    <div className="rounded-lg border border-emerald-200/70 bg-white/82 px-3 py-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Giữ</p>
-                      <p className="mt-1 text-sm leading-5 text-slate-700">{summaryReview.keepTactic}</p>
-                    </div>
-                  )}
-                  {summaryReview.reduceTactic && (
-                    <div className="rounded-lg border border-amber-200/70 bg-white/82 px-3 py-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Giảm / bỏ</p>
-                      <p className="mt-1 text-sm leading-5 text-slate-700">{summaryReview.reduceTactic}</p>
-                    </div>
-                  )}
-                  {summaryReview.nextWeekPriority && (
+                  {summaryNextWeekCommitments.length > 0 && (
                     <div className="rounded-lg border border-violet-200/70 bg-white/82 px-3 py-2 md:col-span-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-violet-700">Ưu tiên tuần sau</p>
-                      <p className="mt-1 text-sm leading-5 text-slate-700">{summaryReview.nextWeekPriority}</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-violet-700">
+                        Cam kết tuần tới
+                      </p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {summaryNextWeekCommitments.map((commitment) => (
+                          <span
+                            key={commitment}
+                            className="rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-800"
+                          >
+                            {commitment}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -728,80 +777,129 @@ export function TwelveWeekWeekTab({
                 </div>
               )}
             </div>
-            {/* Required fields */}
-            <div className="space-y-2">
-              <Label htmlFor="weekly-best">1. Tuần này kết quả lớn nhất là gì?</Label>
-              <Textarea
-                id="weekly-best"
-                rows={3}
-                value={weeklyForm.biggestOutputThisWeek}
-                onChange={(event) => onWeeklyFormChange("biggestOutputThisWeek", event.target.value)}
-              />
+            <div
+              data-testid="wam-section-score"
+              className="rounded-lg border border-sky-200 bg-sky-50/70 px-4 py-4"
+            >
+              <Label className="text-sm font-semibold text-slate-950">1. Score tuần qua bao nhiêu %?</Label>
+              <p className="mt-2 text-3xl font-bold text-slate-950">
+                {weekCompletion.isEmpty ? "Chưa có việc trong tuần này" : `${leadScoreValue}%`}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                {weekCompletion.isEmpty
+                  ? "Score sẽ tự tính khi tuần có tactic được cam kết."
+                  : `Auto từ Lead Score: ${weekCompletion.completed}/${weekCompletion.total} tactic đã hoàn thành.`}
+              </p>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="weekly-decision">2. Tuần sau muốn nhẹ hơn, giữ nguyên hay đẩy nhanh?</Label>
-              <Select
-                value={weeklyForm.workloadDecision}
-                onValueChange={(value) => onWeeklyFormChange("workloadDecision", value)}
-              >
-                <SelectTrigger id="weekly-decision" aria-label="Chọn quyết định cho tuần sau">
-                  <SelectValue placeholder="Chọn mức tải cho tuần sau" />
-                </SelectTrigger>
-                <SelectContent>
-                  {WORKLOAD_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {intensityHint && <p className="text-xs leading-5 text-slate-500">{intensityHint}</p>}
+
+            <div
+              data-testid="wam-section-commitments"
+              className="rounded-lg border border-slate-200 bg-white px-4 py-4"
+            >
+              <Label className="text-sm font-semibold text-slate-950">
+                2. Cam kết nào tôi đã giữ? Cam kết nào bỏ lỡ?
+              </Label>
+              {previousCommitments.length === 0 ? (
+                <div className="mt-3 rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
+                  Tuần đầu chưa có cam kết tuần trước. Hãy đặt cam kết tuần tới ở câu 4.
+                </div>
+              ) : (
+                <div className="mt-3 space-y-3">
+                  {previousCommitments.map((commitment) => {
+                    const currentStatus = weeklyForm.commitmentStatuses[commitment] ?? "unanswered";
+                    const setStatus = (status: WeeklyCommitmentStatus) =>
+                      onWeeklyFormChange("commitmentStatuses", {
+                        ...weeklyForm.commitmentStatuses,
+                        [commitment]: status,
+                      });
+
+                    return (
+                      <div key={commitment} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+                        <p className="text-sm font-medium text-slate-900">{commitment}</p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className={getCommitmentButtonClass(currentStatus === "kept")}
+                            onClick={() => setStatus("kept")}
+                          >
+                            Đã giữ
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className={getCommitmentButtonClass(currentStatus === "missed")}
+                            onClick={() => setStatus("missed")}
+                          >
+                            Bỏ lỡ
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className={getCommitmentButtonClass(currentStatus === "not_set")}
+                            onClick={() => setStatus("not_set")}
+                          >
+                            Không đặt
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="weekly-priority">3. Ưu tiên số 1 tuần sau là gì?</Label>
+
+            <div
+              data-testid="wam-section-insights"
+              className="rounded-lg border border-slate-200 bg-white px-4 py-4"
+            >
+              <Label htmlFor="weekly-insights">3. Insight/learning gì cần áp dụng tuần sau?</Label>
               <Textarea
-                id="weekly-priority"
+                id="weekly-insights"
                 rows={3}
-                value={weeklyForm.nextWeekPriority}
-                placeholder={
-                  hasPremiumInsights ? suggestedNextWeekPlan.focus : "Ví dụ: chỉ giữ một ưu tiên thật rõ cho tuần sau."
-                }
-                onChange={(event) => onWeeklyFormChange("nextWeekPriority", event.target.value)}
+                className="mt-2"
+                value={weeklyForm.insights}
+                placeholder="Ví dụ: chỉ giữ 1 block deep work trước khi thêm việc phụ."
+                onChange={(event) => onWeeklyFormChange("insights", event.target.value)}
               />
             </div>
 
-            {/* Optional fields */}
-            <SecondaryPanel title="Chi tiết review thêm" collapsible defaultOpen={false}>
-              <div className="space-y-2">
-                <Label htmlFor="weekly-obstacle">Điều gì cản trở nhiều nhất?</Label>
-                <Textarea
-                  id="weekly-obstacle"
-                  rows={3}
-                  value={weeklyForm.mainObstacle}
-                  onChange={(event) => onWeeklyFormChange("mainObstacle", event.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="weekly-keep">Việc nào tuần sau nên giữ?</Label>
-                <Textarea
-                  id="weekly-keep"
-                  rows={2}
-                  value={weeklyForm.keepTactic}
-                  placeholder="Việc nào đang chạy tốt — giữ nguyên cách làm."
-                  onChange={(event) => onWeeklyFormChange("keepTactic", event.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="weekly-reduce">Việc nào nên giảm hoặc bỏ?</Label>
-                <Textarea
-                  id="weekly-reduce"
-                  rows={2}
-                  value={weeklyForm.reduceTactic}
-                  placeholder="Việc nào đang ngốn thời gian mà ít hiệu quả — giảm tải hoặc đổi lịch."
-                  onChange={(event) => onWeeklyFormChange("reduceTactic", event.target.value)}
-                />
-              </div>
-            </SecondaryPanel>
+            <div
+              data-testid="wam-section-next-commitments"
+              className="rounded-lg border border-violet-200 bg-violet-50/50 px-4 py-4"
+            >
+              <Label htmlFor="weekly-next-commitments">4. Cam kết của tuần tới là gì?</Label>
+              <Textarea
+                id="weekly-next-commitments"
+                rows={4}
+                className="mt-2 bg-white"
+                value={weeklyForm.nextWeekCommitmentsInput}
+                placeholder={
+                  hasPremiumInsights
+                    ? suggestedNextWeekPlan.focus
+                    : "Mỗi dòng một cam kết. Ví dụ: hoàn tất bản nháp đầu tiên."
+                }
+                onChange={(event) => onWeeklyFormChange("nextWeekCommitmentsInput", event.target.value)}
+              />
+              <p className="mt-2 text-xs leading-5 text-slate-600">
+                Đây sẽ là tactic chính tuần sau. Tối đa 5 cam kết.
+              </p>
+              {nextWeekCommitments.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {nextWeekCommitments.map((commitment) => (
+                    <span
+                      key={commitment}
+                      className="rounded-full border border-violet-200 bg-white px-3 py-1 text-xs font-semibold text-violet-800"
+                    >
+                      {commitment}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Review CTA */}
             <div
@@ -811,11 +909,11 @@ export function TwelveWeekWeekTab({
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="font-semibold text-slate-950">Mức sẵn sàng review</p>
                 <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700">
-                  {reviewReadyCount}/3
+                  {reviewReadyCount}/4
                 </span>
               </div>
               <p className="mt-1 leading-6">
-                Chốt kết quả, mức tải và ưu tiên tuần sau trước khi đóng review.
+                Chốt đủ WAM 4 câu trước khi đóng review tuần.
               </p>
             </div>
             <div
@@ -834,7 +932,7 @@ export function TwelveWeekWeekTab({
                 size="lg"
                 className="w-full shrink-0 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-blue-600 text-white hover:opacity-90 sm:w-auto"
                 onClick={handleSaveReviewClick}
-                disabled={isSavingReview}
+                disabled={isSavingReview || !canSubmitWeeklyReview}
                 aria-busy={isSavingReview}
               >
                 {isSavingReview ? (
@@ -857,7 +955,7 @@ export function TwelveWeekWeekTab({
           size="lg"
           className="w-full gradient-brand text-white shadow-lg"
           onClick={handleSaveReviewClick}
-          disabled={isSavingReview}
+          disabled={isSavingReview || !canSubmitWeeklyReview}
           aria-busy={isSavingReview}
         >
           {isSavingReview ? (

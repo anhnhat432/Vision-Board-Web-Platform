@@ -10,7 +10,6 @@ const GOAL_TITLE = `MVP1 local demo smoke ${TIMESTAMP}`;
 const TACTIC_ONE = `Smoke today task ${TIMESTAMP}`;
 const TACTIC_TWO = `Smoke weekly review ${TIMESTAMP}`;
 const DAILY_CHECKIN_NOTE = `MVP1 smoke daily check-in ${TIMESTAMP}`;
-const WEEKLY_REVIEW_OUTPUT = `MVP1 smoke task completed ${TIMESTAMP}`;
 const WEEKLY_REVIEW_OBSTACLE = `Keep the demo smoke short ${TIMESTAMP}`;
 const WEEKLY_REVIEW_PRIORITY = `Open progress after saving ${TIMESTAMP}`;
 
@@ -848,27 +847,30 @@ async function exerciseTodayAndReviewTabs() {
   }
 
   await clickTab("tuan");
-  await waitFor("Week tab", `${bodyIncludes("review")} || document.querySelector("#weekly-best")`, {
+  await waitFor("Week tab", `document.querySelector("#weekly-insights") && document.querySelector("#weekly-next-commitments")`, {
     timeoutMs: 8_000,
   }).catch(async () => {
     log("Tab click did not switch to Week; opening the Week tab URL directly");
     await openPage("/12-week-system?tab=week");
-    await waitFor("Week tab URL", `${bodyIncludes("review")} || document.querySelector("#weekly-best")`);
+    await waitFor(
+      "Week tab URL",
+      `document.querySelector("#weekly-insights") && document.querySelector("#weekly-next-commitments")`,
+    );
   });
   const hasWeeklyReviewForm = await browserEval(
-    'Boolean(document.querySelector("#weekly-best") && document.querySelector("#weekly-obstacle") && document.querySelector("#weekly-priority"))',
+    'Boolean(document.querySelector("#weekly-insights") && document.querySelector("#weekly-next-commitments"))',
   );
 
   if (hasWeeklyReviewForm) {
-    await fill("#weekly-best", WEEKLY_REVIEW_OUTPUT);
-    await fill("#weekly-obstacle", WEEKLY_REVIEW_OBSTACLE);
-    await fill("#weekly-priority", WEEKLY_REVIEW_PRIORITY);
+    await fill("#weekly-insights", WEEKLY_REVIEW_OBSTACLE);
+    await fill("#weekly-next-commitments", WEEKLY_REVIEW_PRIORITY);
     await clickButton("chot review tuan nay");
     await waitForGoalSnapshot(
       "weekly review persisted",
       (snapshot) =>
         snapshot.weeklyReviewCount >= 1 &&
-        snapshot.latestWeeklyReview?.biggestOutputThisWeek === WEEKLY_REVIEW_OUTPUT,
+        snapshot.latestWeeklyReview?.insights === WEEKLY_REVIEW_OBSTACLE &&
+        snapshot.latestWeeklyReview?.nextWeekCommitments?.includes(WEEKLY_REVIEW_PRIORITY),
       { timeoutMs: 75_000 },
     );
   }

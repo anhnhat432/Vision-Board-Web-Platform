@@ -61,15 +61,23 @@ function getPrimaryButton(name: string | RegExp) {
   return button;
 }
 
-async function openWeeklyReviewDetails(user: ReturnType<typeof userEvent.setup>) {
-  const trigger = await screen.findByRole(
-    "button",
-    { name: /Chi tiết review thêm/i },
-    { timeout: INTEGRATION_TEST_TIMEOUT_MS },
-  );
-  if (trigger && trigger.getAttribute("aria-expanded") !== "true") {
-    await user.click(trigger);
-  }
+async function openWeeklyReviewDetails(_user: ReturnType<typeof userEvent.setup>) {
+  await screen.findByTestId("wam-section-next-commitments", undefined, {
+    timeout: INTEGRATION_TEST_TIMEOUT_MS,
+  });
+}
+
+async function typeWamReview(
+  user: ReturnType<typeof userEvent.setup>,
+  input: { insights: string; nextWeekCommitments: string },
+) {
+  await openWeeklyReviewDetails(user);
+  const insightsInput = document.querySelector("#weekly-insights");
+  const commitmentsInput = document.querySelector("#weekly-next-commitments");
+  expect(insightsInput).toBeInTheDocument();
+  expect(commitmentsInput).toBeInTheDocument();
+  await user.type(insightsInput as HTMLElement, input.insights);
+  await user.type(commitmentsInput as HTMLElement, input.nextWeekCommitments);
 }
 
 describe("12-week write-path safety", () => {
@@ -196,13 +204,10 @@ describe("12-week write-path safety", () => {
     renderAppRoute("/12-week-system");
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "Tuần" }));
-    await openWeeklyReviewDetails(user);
-    const bestInput = await screen.findByLabelText(/kết quả lớn nhất/i);
-    const obstacleInput = screen.getByLabelText(/cản trở nhiều nhất/i);
-    const priorityInput = screen.getByLabelText(/ưu tiên số 1 tuần sau/i);
-    await user.type(bestInput, "Weekly review still saves locally.");
-    await user.type(obstacleInput, "Queue storage is full.");
-    await user.type(priorityInput, "Keep the local review.");
+    await typeWamReview(user, {
+      insights: "Weekly review still saves locally.",
+      nextWeekCommitments: "Keep the local review.",
+    });
 
     const originalSetItem = Storage.prototype.setItem;
     const setItemSpy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(function (
@@ -229,7 +234,7 @@ describe("12-week write-path safety", () => {
         (item) => item.entryType === "weekly-review" && item.linkedGoalId === goalId,
       );
 
-      expect(system?.weeklyReviews[0]?.biggestOutputThisWeek).toBe("Weekly review still saves locally.");
+      expect(system?.weeklyReviews[0]?.insights).toBe("Weekly review still saves locally.");
       expect(reflection?.content).toContain("Weekly review still saves locally.");
       expect(listStoredPendingMutations(null)).toEqual([]);
     } finally {
@@ -250,19 +255,10 @@ describe("12-week write-path safety", () => {
     const user = userEvent.setup();
 
     await user.click(screen.getByRole("button", { name: "Tuần" }));
-    await openWeeklyReviewDetails(user);
-    await user.type(
-      await screen.findByLabelText(/kết quả lớn nhất/i),
-      "Giữ được nhịp ship mỗi ngày.",
-    );
-    await user.type(
-      screen.getByLabelText(/cản trở nhiều nhất/i),
-      "Bị phân tán vì đổi context.",
-    );
-    await user.type(
-      screen.getByLabelText(/ưu tiên số 1 tuần sau/i),
-      "Chốt xong command center trước.",
-    );
+    await typeWamReview(user, {
+      insights: "Bị phân tán vì đổi context.",
+      nextWeekCommitments: "Chốt xong command center trước.",
+    });
     await user.click(getPrimaryButton("Chốt review tuần này"));
 
     await waitFor(() => {
@@ -306,18 +302,10 @@ describe("12-week write-path safety", () => {
     await openWeeklyReviewDetails(user);
     expect(screen.queryByLabelText("Reflection")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Adjustments")).not.toBeInTheDocument();
-    await user.type(
-      await screen.findByLabelText(/kết quả lớn nhất/i),
-      "Hoàn thành review local trước khi backend kịp trả lời.",
-    );
-    await user.type(
-      screen.getByLabelText(/cản trở nhiều nhất/i),
-      "Backend đang chậm.",
-    );
-    await user.type(
-      screen.getByLabelText(/ưu tiên số 1 tuần sau/i),
-      "Giữ review hiển thị trong journal.",
-    );
+    await typeWamReview(user, {
+      insights: "Hoàn thành review local trước khi backend kịp trả lời.",
+      nextWeekCommitments: "Giữ review hiển thị trong journal.",
+    });
     await user.click(getPrimaryButton("Chốt review tuần này"));
 
     await waitFor(() => {

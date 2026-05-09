@@ -27,8 +27,12 @@ export type WeekReview = {
   weekNumber: number;
   leadScore: number;
   lagScore?: number;
+  commitmentsKept: string[];
+  commitmentsMissed: string[];
+  insights?: string;
+  nextWeekCommitments: string[];
   /** Legacy alias for leadScore. Keep while older callers migrate. */
-  executionScore: number;
+  executionScore?: number;
   reflection?: string;
   adjustments?: string;
 };
