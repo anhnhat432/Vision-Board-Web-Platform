@@ -50,6 +50,13 @@ describe("life insight flow", () => {
     expect(recommendationCard).toHaveTextContent("Vì sao chọn trọng tâm này?");
     expect(recommendationCard).toHaveTextContent("4/10");
 
+    const decisionCard = await screen.findByTestId("life-insight-decision-card");
+    expect(decisionCard).toHaveTextContent("Quyết định tiếp theo");
+    expect(decisionCard).toHaveTextContent("Sức khỏe");
+    expect(decisionCard).toHaveTextContent("Duy trì 3 buổi vận động mỗi tuần");
+    expect(decisionCard).toHaveTextContent("Số buổi vận động mỗi tuần");
+
+    expect(screen.getByTestId("life-insight-primary-cta")).toHaveTextContent("Tạo SMART Goal từ quyết định này");
     await user.click(screen.getByTestId("life-insight-primary-cta"));
 
     await waitFor(() => {

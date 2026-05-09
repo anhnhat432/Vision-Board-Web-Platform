@@ -14,6 +14,7 @@ import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
+import { getSmartGoalStarter } from "../utils/smart-goal-starters";
 import { APP_STORAGE_KEYS, clearGoalPlanningDrafts, getLifeAreaLabel } from "../utils/storage";
 import {
   clearUserIntent,
@@ -95,6 +96,8 @@ export function LifeInsight() {
     [lifeAreas],
   );
 
+  const smartGoalStarter = useMemo(() => (focusArea ? getSmartGoalStarter(focusArea.name) : null), [focusArea]);
+
   if (!userData) {
     return (
       <CoreFlowGateState
@@ -107,7 +110,7 @@ export function LifeInsight() {
     );
   }
 
-  if (!hasLifeBalance || !lowestArea || !strongestArea || !focusArea) {
+  if (!hasLifeBalance || !lowestArea || !strongestArea || !focusArea || !smartGoalStarter) {
     return (
       <CoreFlowGateState
         currentStepId="life_balance"
@@ -183,6 +186,43 @@ export function LifeInsight() {
                 </div>
 
                 <div
+                  data-testid="life-insight-decision-card"
+                  className="grid gap-3 rounded-xl border border-violet-200 bg-violet-50/85 p-4 shadow-sm lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)]"
+                >
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
+                      Quyết định tiếp theo
+                    </p>
+                    <h2 className="mt-2 text-xl font-bold text-slate-950">
+                      Tạo SMART Goal cho {focusAreaLabel} trong khung 12 tuần.
+                    </h2>
+                    <p className="mt-2 text-sm leading-7 text-slate-600">
+                      {isCustomSelection
+                        ? `Bạn đang ưu tiên thủ công ${focusAreaLabel}; gợi ý hệ thống vẫn là ${lowestAreaLabel}.`
+                        : `${focusAreaLabel} đang là điểm thấp nhất, nên đây là nơi đáng biến thành mục tiêu rõ trước.`}
+                    </p>
+                  </div>
+
+                  <div className="grid gap-2 text-sm">
+                    <div className="rounded-lg border border-white bg-white/85 px-4 py-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Trọng tâm</p>
+                      <p className="mt-1 font-bold text-slate-950">
+                        {focusAreaLabel} · {focusArea.score}/10
+                      </p>
+                    </div>
+                    <div className="rounded-lg border border-white bg-white/85 px-4 py-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Gợi ý SMART</p>
+                      <p className="mt-1 font-semibold text-slate-950">{smartGoalStarter.metricName}</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">{smartGoalStarter.specificGoalStatement}</p>
+                    </div>
+                    <div className="rounded-lg border border-white bg-white/85 px-4 py-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Điểm tựa</p>
+                      <p className="mt-1 font-semibold text-slate-950">{strongestAreaLabel}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div
                   data-testid="life-insight-recommendation-card"
                   className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4 shadow-sm sm:grid-cols-[minmax(0,1.35fr)_minmax(220px,0.65fr)]"
                 >
@@ -226,7 +266,7 @@ export function LifeInsight() {
                     className="w-full justify-center border-slate-950 bg-slate-950 text-white hover:bg-slate-800 hover:text-white sm:w-auto"
                     onClick={handleStartGoalSetup}
                   >
-                    Tạo mục tiêu với {getLifeAreaLabel(focusArea.name)}
+                    Tạo SMART Goal từ quyết định này
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                   <Button
@@ -431,7 +471,7 @@ export function LifeInsight() {
                 </p>
               </div>
               <Button className="w-full sm:w-auto" onClick={handleStartGoalSetup}>
-                Tạo mục tiêu với {getLifeAreaLabel(focusArea.name)}
+                Tạo SMART Goal từ quyết định này
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </CardContent>
