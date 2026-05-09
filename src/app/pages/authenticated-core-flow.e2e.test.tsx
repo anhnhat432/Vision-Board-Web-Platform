@@ -354,7 +354,7 @@ describe("authenticated new user core flow", () => {
     expect(getUserData().onboardingCompleted).toBe(true);
     expect(getUserData().goals).toEqual([]);
 
-    await user.click(screen.getAllByRole("button", { name: /Tạo mục tiêu với/i })[0]);
+    await user.click(screen.getByTestId("life-insight-primary-cta"));
     await fillSmartGoal(user);
     await completeFeasibility(user);
     await completeTwelveWeekSetup(user);
