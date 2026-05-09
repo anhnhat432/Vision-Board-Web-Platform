@@ -29,12 +29,14 @@ import {
   getActiveTwelveWeekGoal as getActiveTwelveWeekGoalFromModule,
   getGoalExecutionStats as getGoalExecutionStatsFromModule,
   getTwelveWeekCurrentWeek as getTwelveWeekCurrentWeekFromModule,
+  getTwelveWeekCycleWeekNumber as getTwelveWeekCycleWeekNumberFromModule,
   getTwelveWeekMissedTasks as getTwelveWeekMissedTasksFromModule,
   getTwelveWeekTacticCount as getTwelveWeekTacticCountFromModule,
   getTwelveWeekTasksForWeek as getTwelveWeekTasksForWeekFromModule,
   getTwelveWeekTodayTasks as getTwelveWeekTodayTasksFromModule,
   getTwelveWeekWeekCompletion as getTwelveWeekWeekCompletionFromModule,
   getTwelveWeekWeekRange as getTwelveWeekWeekRangeFromModule,
+  isTwelveWeekCycleReviewPhase as isTwelveWeekCycleReviewPhaseFromModule,
   isTwelveWeekReviewDueToday as isTwelveWeekReviewDueTodayFromModule,
   migrateLegacyUserData as migrateLegacyUserDataFromModule,
   normalizeGoal as normalizeGoalFromModule,
@@ -205,11 +207,18 @@ function createFreshUserData(): UserData {
 }
 
 function normalizeReflection(reflection: Reflection): Reflection {
+  const entryType =
+    reflection.entryType === "weekly-review" || reflection.entryType === "cycleReview"
+      ? reflection.entryType
+      : "freeform";
+
   return {
     ...reflection,
-    entryType: reflection.entryType === "weekly-review" ? "weekly-review" : "freeform",
+    entryType,
     linkedGoalId: reflection.linkedGoalId,
     linkedWeekNumber: reflection.linkedWeekNumber,
+    cycleId: reflection.cycleId,
+    finalLagPercent: reflection.finalLagPercent,
   };
 }
 
@@ -297,6 +306,14 @@ export function isTwelveWeekReviewDueToday(system: TwelveWeekSystem, referenceDa
 
 export function getTwelveWeekCurrentWeek(system: TwelveWeekSystem, referenceDate = new Date()): number {
   return getTwelveWeekCurrentWeekFromModule(system, referenceDate);
+}
+
+export function getTwelveWeekCycleWeekNumber(system: TwelveWeekSystem, referenceDate = new Date()): number {
+  return getTwelveWeekCycleWeekNumberFromModule(system, referenceDate);
+}
+
+export function isTwelveWeekCycleReviewPhase(system: TwelveWeekSystem, referenceDate = new Date()): boolean {
+  return isTwelveWeekCycleReviewPhaseFromModule(system, referenceDate);
 }
 
 export function getTwelveWeekWeekRange(system: TwelveWeekSystem, weekNumber: number): { start: string; end: string } {

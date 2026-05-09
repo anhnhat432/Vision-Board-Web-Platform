@@ -19,8 +19,8 @@ export function upsertReflectionInData(
     (item) =>
       item.entryType === reflection.entryType &&
       item.linkedGoalId === reflection.linkedGoalId &&
-      item.linkedWeekNumber === reflection.linkedWeekNumber &&
-      Boolean(reflection.entryType === "weekly-review"),
+      ((reflection.entryType === "weekly-review" && item.linkedWeekNumber === reflection.linkedWeekNumber) ||
+        (reflection.entryType === "cycleReview" && item.cycleId === reflection.cycleId)),
   );
 
   if (existingIndex >= 0) {

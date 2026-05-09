@@ -29,6 +29,8 @@ export type {
   PlanQualityResult,
 } from "./planQuality";
 export { calculateCycleCompletionRate, calculateLeadProgress, calculatePlanProgress } from "./progress";
+export { calculateCycleSummary } from "./cycleReview";
+export type { CycleSummary } from "./cycleReview";
 export {
   getExecutionInsights,
   getNextActionFromInsights,

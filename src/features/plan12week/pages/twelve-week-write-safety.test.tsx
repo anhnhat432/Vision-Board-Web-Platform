@@ -77,7 +77,7 @@ async function typeWamReview(
   expect(insightsInput).toBeInTheDocument();
   expect(commitmentsInput).toBeInTheDocument();
   await user.type(insightsInput as HTMLElement, input.insights);
-  await user.type(commitmentsInput as HTMLElement, input.nextWeekCommitments);
+  await user.type(commitmentsInput as HTMLElement, `${input.nextWeekCommitments}{Enter}`);
 }
 
 describe("12-week write-path safety", () => {

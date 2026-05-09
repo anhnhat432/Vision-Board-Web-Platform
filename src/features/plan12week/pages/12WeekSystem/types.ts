@@ -11,6 +11,6 @@ export interface WeeklyReviewForm {
   nextWeekPriority: string;
   commitmentStatuses: Record<string, WeeklyCommitmentStatus>;
   insights: string;
-  nextWeekCommitmentsInput: string;
+  nextWeekCommitments: string[];
   workloadDecision: UniversalWeeklyReview["workloadDecision"];
 }

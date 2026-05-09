@@ -28,6 +28,7 @@ import type {
 } from "@/features/plan12week/logic";
 
 import { TwelveWeekInsightsCard } from "./TwelveWeekInsightsCard";
+import { NextWeekCommitmentsEditor } from "./NextWeekCommitmentsEditor";
 import { TwelveWeekNextWeekRecommendationCard } from "./TwelveWeekNextWeekRecommendationCard";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 
@@ -52,7 +53,7 @@ interface TwelveWeekWeeklyReviewForm {
   nextWeekPriority: string;
   commitmentStatuses: Record<string, WeeklyCommitmentStatus>;
   insights: string;
-  nextWeekCommitmentsInput: string;
+  nextWeekCommitments: string[];
   workloadDecision: "keep same" | "reduce slightly" | "increase slightly" | "";
 }
 
@@ -140,14 +141,6 @@ function normalizeCommitmentList(values: readonly string[] | undefined): string[
   return values.map((value) => value.trim()).filter(Boolean);
 }
 
-function parseCommitmentInput(value: string): string[] {
-  return value
-    .split(/\r?\n|,/)
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .slice(0, 5);
-}
-
 function getReviewNextWeekCommitments(review: UniversalWeeklyReview | null | undefined): string[] {
   const commitments = normalizeCommitmentList(review?.nextWeekCommitments);
   if (commitments.length > 0) return commitments;
@@ -215,7 +208,7 @@ export function TwelveWeekWeekTab({
   const allPreviousCommitmentsAnswered =
     previousCommitments.length === 0 ||
     previousCommitments.every((commitment) => isCommitmentAnswered(weeklyForm.commitmentStatuses[commitment]));
-  const nextWeekCommitments = parseCommitmentInput(weeklyForm.nextWeekCommitmentsInput || weeklyForm.nextWeekPriority);
+  const nextWeekCommitments = normalizeCommitmentList(weeklyForm.nextWeekCommitments).slice(0, 5);
   const hasNextWeekCommitment = nextWeekCommitments.length > 0;
   const reviewIsCompleted = Boolean(currentReview?.reviewCompleted);
   const summaryReview = reviewIsCompleted ? currentReview ?? null : null;
@@ -872,32 +865,12 @@ export function TwelveWeekWeekTab({
               className="rounded-lg border border-violet-200 bg-violet-50/50 px-4 py-4"
             >
               <Label htmlFor="weekly-next-commitments">4. Cam kết của tuần tới là gì?</Label>
-              <Textarea
-                id="weekly-next-commitments"
-                rows={4}
-                className="mt-2 bg-white"
-                value={weeklyForm.nextWeekCommitmentsInput}
-                placeholder={
-                  hasPremiumInsights
-                    ? suggestedNextWeekPlan.focus
-                    : "Mỗi dòng một cam kết. Ví dụ: hoàn tất bản nháp đầu tiên."
-                }
-                onChange={(event) => onWeeklyFormChange("nextWeekCommitmentsInput", event.target.value)}
+              <NextWeekCommitmentsEditor
+                value={nextWeekCommitments}
+                onChange={(next) => onWeeklyFormChange("nextWeekCommitments", next)}
               />
-              <p className="mt-2 text-xs leading-5 text-slate-600">
-                Đây sẽ là tactic chính tuần sau. Tối đa 5 cam kết.
-              </p>
-              {nextWeekCommitments.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {nextWeekCommitments.map((commitment) => (
-                    <span
-                      key={commitment}
-                      className="rounded-full border border-violet-200 bg-white px-3 py-1 text-xs font-semibold text-violet-800"
-                    >
-                      {commitment}
-                    </span>
-                  ))}
-                </div>
+              {hasPremiumInsights && nextWeekCommitments.length === 0 && (
+                <p className="mt-2 text-xs leading-5 text-slate-600">Gợi ý Plus: {suggestedNextWeekPlan.focus}</p>
               )}
             </div>
 

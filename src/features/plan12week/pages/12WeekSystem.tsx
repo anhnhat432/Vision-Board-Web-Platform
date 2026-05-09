@@ -1,12 +1,14 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { BarChart3, CalendarDays, ListTodo, Settings2, MoreHorizontal, type LucideIcon } from "lucide-react";
+import { toast } from "sonner";
 
 import { useTwelveWeekSystemSnapshot } from "@/app/hooks/useTwelveWeekSystemSnapshot";
 import { useScrollToTopOnChange } from "@/app/hooks/useScrollToTopOnChange";
 import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
 import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/DeleteDataConfirmationDialog";
+import { CycleReviewPanel } from "@/app/components/twelve-week/CycleReviewPanel";
 import { UpgradePaywallDialog } from '@/app/components/UpgradePaywallDialog';
 import { trackAnalyticsEvent } from '@/app/utils/analytics';
 import {
@@ -41,18 +43,25 @@ import {
 import {
   clearArchivedOutbox,
   clearEventLog,
+  APP_STORAGE_KEYS,
   formatDateInputValue,
   getUserData,
   saveUserData,
   updateGoal,
+  upsertReflection,
 } from '@/app/utils/storage';
 import { dismissRescueTrigger } from "@/app/utils/twelve-week-system-ui";
 import type { TwelveWeekSystem as TwelveWeekSystemModel } from '@/app/utils/storage-types';
 import {
   buildDerivedScoreboard,
+  getCycleEndDate,
   getDefaultScoreboard,
+  getStartOfWeek,
   getTwelveWeekCurrentWeek,
+  isTwelveWeekCycleReviewPhase,
+  syncWeeklyPlans,
 } from '@/app/utils/storage-twelve-week';
+import type { CycleSummary } from "@/features/plan12week/logic/cycleReview";
 import { TaskBoard } from "@/features/plan12week/components/TaskBoard";
 import { usePlanExecutionSync } from "@/features/plan12week/hooks";
 import { useTwelveWeekManualCloudSync } from "@/features/plan12week/hooks/useTwelveWeekManualCloudSync";
@@ -103,6 +112,43 @@ const TWELVE_WEEK_SECTION_TABS = [
   { value: "progress", label: "Tiến độ", icon: BarChart3 },
   { value: "settings", label: "Cài đặt", icon: Settings2 },
 ] satisfies Array<{ value: string; label: string; icon: LucideIcon }>;
+
+function getCycleId(goalId: string, system: TwelveWeekSystemModel): string {
+  return `${goalId}:cycle:${system.cycleNumber ?? 1}`;
+}
+
+function getLatestContinuingCommitments(system: TwelveWeekSystemModel): string[] {
+  return [...system.weeklyReviews]
+    .sort((left, right) => right.weekNumber - left.weekNumber)
+    .flatMap((review) => review.nextWeekCommitments?.length ? review.nextWeekCommitments : review.nextWeekPriority ? [review.nextWeekPriority] : [])
+    .map((commitment) => commitment.trim())
+    .filter(Boolean)
+    .slice(0, 5);
+}
+
+function buildCycleReviewContent(input: {
+  summary: CycleSummary;
+  lessons: string[];
+  continuingCommitments: string[];
+}): string {
+  const { summary, lessons, continuingCommitments } = input;
+  return [
+    `Lag cuối cycle: ${summary.finalLagPercent}%`,
+    `Lead trung bình: ${summary.averageLeadScore}%`,
+    `Tỷ lệ giữ cam kết: ${summary.commitmentsKeptRate}%`,
+    `Số tuần đạt 85%+: ${summary.weeksWith85Plus}/12`,
+    summary.biggestWins.length > 0 ? `Biggest wins:\n${summary.biggestWins.map((item) => `- ${item}`).join("\n")}` : "",
+    summary.topAdjustments.length > 0
+      ? `Top adjustments:\n${summary.topAdjustments.map((item) => `- ${item}`).join("\n")}`
+      : "",
+    lessons.length > 0 ? `3 bài học lớn nhất:\n${lessons.map((item) => `- ${item}`).join("\n")}` : "",
+    continuingCommitments.length > 0
+      ? `Cam kết tiếp tục:\n${continuingCommitments.map((item) => `- ${item}`).join("\n")}`
+      : "",
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+}
 
 export function TwelveWeekSystem() {
   const navigate = useNavigate();
@@ -293,6 +339,146 @@ export function TwelveWeekSystem() {
     });
     updateActiveSystemState(() => normalizedNextSystem);
     return normalizedNextSystem;
+  };
+
+  const isCycleReviewMode = Boolean(system && isTwelveWeekCycleReviewPhase(system));
+
+  const handleSaveCycleReview = (input: { lessons: string[]; summary: CycleSummary }) => {
+    if (!activeGoal || !system) return;
+    const continuingCommitments = getLatestContinuingCommitments(system);
+    const content = buildCycleReviewContent({
+      summary: input.summary,
+      lessons: input.lessons,
+      continuingCommitments,
+    });
+
+    upsertReflection({
+      date: formatDateInputValue(new Date()),
+      title: `Cycle review - ${activeGoal.title} - cycle ${system.cycleNumber ?? 1}`,
+      content,
+      mood: input.summary.averageLeadScore >= 85 ? "happy" : input.summary.averageLeadScore >= 65 ? "neutral" : "sad",
+      entryType: "cycleReview",
+      linkedGoalId: activeGoal.id,
+      cycleId: getCycleId(activeGoal.id, system),
+      finalLagPercent: input.summary.finalLagPercent,
+    });
+    refreshSnapshotMeta();
+    toast.success("Báo cáo cycle đã được lưu.");
+  };
+
+  const handleStartNewCycle = (input: { lessons: string[]; summary: CycleSummary }) => {
+    if (!activeGoal || !system) return;
+
+    handleSaveCycleReview(input);
+
+    const totalWeeks = system.totalWeeks || 12;
+    const nextStartDate = getStartOfWeek(new Date(), system.weekStartsOn ?? "Monday");
+    const nextEndDate = getCycleEndDate(nextStartDate, totalWeeks);
+    const nextStartKey = formatDateInputValue(nextStartDate);
+    const nextEndKey = formatDateInputValue(nextEndDate);
+    const nextCycleNumber = (system.cycleNumber ?? 1) + 1;
+    const continuingCommitments = getLatestContinuingCommitments(system);
+    const setupSuccessEvidence = [
+      system.successEvidence,
+      continuingCommitments.length > 0 ? `Tiếp tục: ${continuingCommitments.join("; ")}` : "",
+      input.lessons.length > 0 ? `Bài học cycle trước: ${input.lessons.join("; ")}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+
+    const nextSystem: TwelveWeekSystemModel = {
+      ...system,
+      cycleNumber: nextCycleNumber,
+      startDate: nextStartKey,
+      endDate: nextEndKey,
+      status: "active",
+      currentWeek: 1,
+      reentryCount: 0,
+      weeklyPlans: syncWeeklyPlans(system.weeklyPlans, totalWeeks, system.week12Outcome).map((plan, index) => ({
+        ...plan,
+        completed: false,
+        focus: index === 0 && continuingCommitments.length > 0
+          ? `Tiếp tục: ${continuingCommitments.slice(0, 3).join("; ")}`
+          : plan.focus,
+      })),
+      taskInstances: [],
+      dailyCheckIns: [],
+      weeklyReviews: [],
+      scoreboard: getDefaultScoreboard(totalWeeks),
+    };
+
+    const focusArea = activeGoal.focusArea || activeGoal.category || "Career";
+    localStorage.setItem(APP_STORAGE_KEYS.selectedFocusArea, focusArea);
+    localStorage.setItem(
+      APP_STORAGE_KEYS.pendingSmartGoal,
+      JSON.stringify({
+        focusArea,
+        specific: activeGoal.title,
+        measurable: `${system.lagMetric.name || "Chỉ số kết quả chính"} đạt ${system.lagMetric.target || "mục tiêu"} ${system.lagMetric.unit || ""}`.trim(),
+        achievable: "Dùng lại nhịp đã học từ cycle trước và chỉnh tải theo bài học mới.",
+        relevant: activeGoal.description || system.vision12Week,
+        timeBound: "Trong 12 tuần tới",
+      }),
+    );
+    localStorage.setItem(
+      APP_STORAGE_KEYS.pendingFeasibilityResult,
+      JSON.stringify({
+        resultType: "realistic",
+        resultTitle: "Sẵn sàng cho cycle mới",
+        resultSummary: "Cycle trước đã có dữ liệu thực tế để tinh chỉnh nhịp tiếp theo.",
+        recommendation: "Giữ các tactic còn hiệu quả, giảm phần thường bị bỏ lỡ và bắt đầu lại từ tuần 1.",
+        readinessScore: 16,
+        adjustedScore: 16,
+        wheelScore: 7,
+        planLoad: system.tacticLoadPreference ?? "balanced",
+      }),
+    );
+    localStorage.setItem(
+      APP_STORAGE_KEYS.pending12WeekSetupDraft,
+      JSON.stringify({
+        templateId: system.templateId ?? "",
+        goalType: system.goalType,
+        vision12Week: system.vision12Week,
+        week12Outcome: system.week12Outcome,
+        lagMetricName: system.lagMetric.name,
+        lagMetricTarget: system.lagMetric.target,
+        lagMetricUnit: system.lagMetric.unit,
+        leadIndicators: system.leadIndicators.map((indicator, index) => ({
+          id: indicator.id ?? `cycle_${nextCycleNumber}_indicator_${index + 1}`,
+          name: indicator.name,
+          target: indicator.target || "1",
+          unit: indicator.unit || "lần/tuần",
+          type: indicator.type === "optional" ? "optional" : "core",
+          cadence: "spread",
+        })),
+        startDate: nextStartKey,
+        reviewDay: system.reviewDay,
+        tacticLoadPreference: system.tacticLoadPreference ?? "balanced",
+        week4Milestone: system.milestones.week4,
+        week8Milestone: system.milestones.week8,
+        successEvidence: setupSuccessEvidence,
+        dailyTimeBudget: "",
+        preferredDays: system.preferredDays ?? [],
+        personalConstraint: system.personalConstraint ?? "",
+      }),
+    );
+
+    updateGoal(activeGoal.id, {
+      twelveWeekSystem: nextSystem,
+      deadline: nextEndKey,
+    });
+    localStorage.setItem(APP_STORAGE_KEYS.latest12WeekGoalId, activeGoal.id);
+    localStorage.setItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId, activeGoal.id);
+    const savedSystem = getUserData().goals.find((goal) => goal.id === activeGoal.id)?.twelveWeekSystem;
+    if (savedSystem) {
+      updateActiveSystemState(() => savedSystem);
+    }
+    refreshSnapshotMeta();
+    loadGoalData(activeGoal.id);
+    toast.success("Cycle mới đã sẵn sàng.", {
+      description: "Mục tiêu cũ được giữ nguyên, nhịp tuần đã reset về tuần 1 và Setup đã có pre-fill từ cycle trước.",
+    });
+    navigate("/12-week-setup");
   };
 
   useEffect(() => {
@@ -740,8 +926,18 @@ export function TwelveWeekSystem() {
 
       {/* Main content sections */}
       <div ref={tabsTopRef} className="pt-4">
+        {isCycleReviewMode && activeTab !== "settings" && (
+          <CycleReviewPanel
+            goal={activeGoal}
+            system={system}
+            onSaveCycleReview={handleSaveCycleReview}
+            onStartNewCycle={handleStartNewCycle}
+            onOpenSettings={() => handleTabChange("settings")}
+          />
+        )}
+
         {/* TODAY SECTION */}
-        {activeTab === "today" && (
+        {!isCycleReviewMode && activeTab === "today" && (
           <TabErrorBoundary fallbackTitle="Tab Hôm nay gặp lỗi">
             <TaskBoard
               system={system}
@@ -791,7 +987,7 @@ export function TwelveWeekSystem() {
         )}
 
         {/* WEEK SECTION */}
-        {activeTab === "week" && (
+        {!isCycleReviewMode && activeTab === "week" && (
           <TabErrorBoundary fallbackTitle="Tab Tuần gặp lỗi">
             <Suspense
               fallback={
@@ -842,7 +1038,7 @@ export function TwelveWeekSystem() {
         )}
 
         {/* PROGRESS SECTION */}
-        {activeTab === "progress" && (
+        {!isCycleReviewMode && activeTab === "progress" && (
           <TabErrorBoundary fallbackTitle="Tab Tiến độ gặp lỗi">
             <Suspense
               fallback={

@@ -269,6 +269,27 @@ async function fill(selector, value) {
 }
 
 // ── Auth ──────────────────────────────────────────────────────────
+async function pressKey(selector, key) {
+  await pageAction(`
+    (() => {
+      const element = document.querySelector(${JSON.stringify(selector)});
+      if (!element) throw new Error("Missing form element");
+      element.focus();
+      element.dispatchEvent(new KeyboardEvent("keydown", {
+        key: ${JSON.stringify(key)},
+        code: ${JSON.stringify(key)},
+        bubbles: true,
+        cancelable: true
+      }));
+    })();
+  `);
+}
+
+async function addNextWeekCommitment(value) {
+  await fill("#weekly-next-commitments", value);
+  await pressKey("#weekly-next-commitments", "Enter");
+}
+
 async function authenticate() {
   if (SKIP_AUTH) {
     log("SKIP_AUTH=true, skipping login");
@@ -507,7 +528,7 @@ async function stepWeeklyReview() {
     return;
   }
   await fill("#weekly-insights", WEEKLY_REVIEW_OBSTACLE);
-  await fill("#weekly-next-commitments", WEEKLY_REVIEW_PRIORITY);
+  await addNextWeekCommitment(WEEKLY_REVIEW_PRIORITY);
   await clickButton(["Chốt review tuần này", "chot review tuan nay"]);
   await waitForSnapshot(
     "weekly review saved",

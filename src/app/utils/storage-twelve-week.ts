@@ -59,6 +59,22 @@ function inferSystemStartDate(system: TwelveWeekSystem): Date {
   return addCalendarDays(inferredToday, (currentWeek - 1) * -7);
 }
 
+function getUnclampedTwelveWeekNumber(system: TwelveWeekSystem, referenceDate = new Date()): number {
+  const startDate = inferSystemStartDate(system);
+  const calculatedWeek =
+    Math.floor((getCalendarDayIndex(referenceDate) - getCalendarDayIndex(startDate)) / 7) + 1;
+
+  return Math.max(system.currentWeek || 1, calculatedWeek, 1);
+}
+
+export function getTwelveWeekCycleWeekNumber(system: TwelveWeekSystem, referenceDate = new Date()): number {
+  return getUnclampedTwelveWeekNumber(system, referenceDate);
+}
+
+export function isTwelveWeekCycleReviewPhase(system: TwelveWeekSystem, referenceDate = new Date()): boolean {
+  return system.status === "completed" || getUnclampedTwelveWeekNumber(system, referenceDate) > (system.totalWeeks || 12);
+}
+
 export function getCycleEndDate(startDate: Date, totalWeeks: number): Date {
   return addCalendarDays(startDate, totalWeeks * 7 - 1);
 }
@@ -525,11 +541,7 @@ export function getTwelveWeekCurrentWeek(system: TwelveWeekSystem, referenceDate
     return system.totalWeeks;
   }
 
-  const startDate = inferSystemStartDate(system);
-  const calculatedWeek =
-    Math.floor((getCalendarDayIndex(referenceDate) - getCalendarDayIndex(startDate)) / 7) + 1;
-
-  return clampNumber(Math.max(system.currentWeek || 1, calculatedWeek), 1, system.totalWeeks);
+  return clampNumber(getUnclampedTwelveWeekNumber(system, referenceDate), 1, system.totalWeeks);
 }
 
 export function getTwelveWeekWeekRange(
@@ -558,6 +570,8 @@ export function getTwelveWeekTodayTasks(
   system: TwelveWeekSystem,
   referenceDate = new Date(),
 ): TwelveWeekTaskInstance[] {
+  if (isTwelveWeekCycleReviewPhase(system, referenceDate)) return [];
+
   const dateKey = formatDateInputValue(referenceDate);
   const priorityMap = new Map(
     system.leadIndicators.map((indicator, index) => {
@@ -584,6 +598,8 @@ export function getTwelveWeekMissedTasks(
   system: TwelveWeekSystem,
   referenceDate = new Date(),
 ): TwelveWeekTaskInstance[] {
+  if (isTwelveWeekCycleReviewPhase(system, referenceDate)) return [];
+
   const currentWeek = getTwelveWeekCurrentWeek(system, referenceDate);
   const todayKey = formatDateInputValue(referenceDate);
   const priorityMap = new Map(
@@ -875,6 +891,7 @@ export function migrateLegacyPlanToSystem(goal: Goal): Goal {
     twelveWeekSystem: {
       goalType: "legacy-plan",
       vision12Week: goal.description || goal.title,
+      cycleNumber: 1,
       lagMetric: {
         name: legacyPlan.successMetric || "Chỉ số kết quả chính",
         unit: "",
@@ -942,6 +959,7 @@ export function normalizeGoal(goal: Goal): Goal {
     ...baseSystem,
     goalType: baseSystem.goalType || "custom-goal",
     vision12Week: baseSystem.vision12Week || goal.description || goal.title,
+    cycleNumber: Math.max(1, Math.round(baseSystem.cycleNumber ?? 1)),
     lagMetric: baseSystem.lagMetric ?? {
       name: baseSystem.successMetric || "Chỉ số kết quả chính",
       unit: "",
@@ -985,12 +1003,18 @@ export function normalizeGoal(goal: Goal): Goal {
     startDate: formatDateInputValue(normalizedStartDate),
     endDate: formatDateInputValue(normalizedEndDate),
   });
-  const currentWeek = getTwelveWeekCurrentWeek({
+  const systemForDerivedState = {
     ...systemWithDefaults,
     startDate: formatDateInputValue(normalizedStartDate),
     endDate: formatDateInputValue(normalizedEndDate),
     taskInstances,
-  });
+  };
+  const cycleWeekNumber = getTwelveWeekCycleWeekNumber(systemForDerivedState);
+  const isCycleReview = isTwelveWeekCycleReviewPhase(systemForDerivedState);
+  const currentWeek = isCycleReview
+    ? Math.max(cycleWeekNumber, totalWeeks + 1)
+    : getTwelveWeekCurrentWeek(systemForDerivedState);
+  const status = isCycleReview ? "completed" : systemWithDefaults.status;
 
   return {
     ...goal,
@@ -999,6 +1023,7 @@ export function normalizeGoal(goal: Goal): Goal {
       ...systemWithDefaults,
       startDate: formatDateInputValue(normalizedStartDate),
       endDate: formatDateInputValue(normalizedEndDate),
+      status,
       currentWeek,
       weeklyPlans: syncWeeklyPlans(systemWithDefaults.weeklyPlans, totalWeeks, systemWithDefaults.week12Outcome),
       scoreboard: syncDerivedScoreboard(
@@ -1006,6 +1031,7 @@ export function normalizeGoal(goal: Goal): Goal {
           ...systemWithDefaults,
           startDate: formatDateInputValue(normalizedStartDate),
           endDate: formatDateInputValue(normalizedEndDate),
+          status,
           currentWeek,
           taskInstances,
         },

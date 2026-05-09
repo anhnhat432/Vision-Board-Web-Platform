@@ -754,6 +754,7 @@ export function TwelveWeekSetup() {
       twelveWeekSystem: {
         goalType: draft.goalType,
         vision12Week: draft.vision12Week.trim(),
+        cycleNumber: 1,
         templateId: selectedTemplate?.id,
         templateName: selectedTemplate?.name,
         lagMetric: {

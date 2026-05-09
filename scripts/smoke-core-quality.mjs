@@ -269,6 +269,27 @@ async function fill(selector, value) {
   await pageAction(`fillSelector(${JSON.stringify(selector)}, ${JSON.stringify(value)});`);
 }
 
+async function pressKey(selector, key) {
+  await pageAction(`
+    (() => {
+      const element = document.querySelector(${JSON.stringify(selector)});
+      if (!element) throw new Error("Missing form element");
+      element.focus();
+      element.dispatchEvent(new KeyboardEvent("keydown", {
+        key: ${JSON.stringify(key)},
+        code: ${JSON.stringify(key)},
+        bubbles: true,
+        cancelable: true
+      }));
+    })();
+  `);
+}
+
+async function addNextWeekCommitment(value) {
+  await fill("#weekly-next-commitments", value);
+  await pressKey("#weekly-next-commitments", "Enter");
+}
+
 // ---------------------------------------------------------------------------
 // Seed: a deterministic SMART goal + feasibility result + 12-week system
 // ---------------------------------------------------------------------------
@@ -635,7 +656,7 @@ async function saveWeeklyReview() {
   });
 
   await fill("#weekly-insights", WEEKLY_REVIEW_OBSTACLE);
-  await fill("#weekly-next-commitments", WEEKLY_REVIEW_PRIORITY);
+  await addNextWeekCommitment(WEEKLY_REVIEW_PRIORITY);
   await clickButton("chot review tuan nay");
 
   await waitForSnapshot(

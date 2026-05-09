@@ -1,6 +1,7 @@
-import type { ComponentProps } from "react";
+import { useState, type ComponentProps } from "react";
 import "@testing-library/jest-dom/vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import type { TwelveWeekSystem } from "@/app/utils/storage-types";
@@ -76,7 +77,7 @@ function makeProps(overrides: Partial<WeekTabProps> = {}): WeekTabProps {
       nextWeekPriority: "",
       commitmentStatuses: {},
       insights: "",
-      nextWeekCommitmentsInput: "",
+      nextWeekCommitments: [],
       workloadDecision: "",
     },
     onWeeklyFormChange: vi.fn(),
@@ -85,6 +86,27 @@ function makeProps(overrides: Partial<WeekTabProps> = {}): WeekTabProps {
     onSaveWeeklyReview: vi.fn(),
     ...overrides,
   };
+}
+
+function StatefulWeekTab({ initialCommitments = [] }: { initialCommitments?: string[] }) {
+  const baseProps = makeProps();
+  const [weeklyForm, setWeeklyForm] = useState({
+    ...baseProps.weeklyForm,
+    nextWeekCommitments: initialCommitments,
+  });
+
+  return (
+    <TwelveWeekWeekTab
+      {...baseProps}
+      weeklyForm={weeklyForm}
+      onWeeklyFormChange={(field, value) =>
+        setWeeklyForm((previousForm) => ({
+          ...previousForm,
+          [field]: value,
+        }))
+      }
+    />
+  );
 }
 
 describe("TwelveWeekWeekTab review flow", () => {
@@ -101,7 +123,7 @@ describe("TwelveWeekWeekTab review flow", () => {
             nextWeekPriority: "Keep the core loop simple.",
             commitmentStatuses: {},
             insights: "Keep the loop visible.",
-            nextWeekCommitmentsInput: "Keep the core loop simple.",
+            nextWeekCommitments: ["Keep the core loop simple."],
             workloadDecision: "keep same",
           },
         })}
@@ -121,6 +143,63 @@ describe("TwelveWeekWeekTab review flow", () => {
     expect(screen.getByLabelText(/insight\/learning/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/cam kết của tuần tới/i)).toBeInTheDocument();
     expect(screen.queryByLabelText(/ưu tiên số 1/i)).toBeNull();
+  });
+
+  it("adds a next-week commitment chip with Enter and clears the input", async () => {
+    const user = userEvent.setup();
+    render(<StatefulWeekTab />);
+
+    const input = screen.getByLabelText(/cam kết của tuần tới/i);
+    await user.type(input, "Plan a{Enter}");
+
+    expect(screen.getByLabelText("Cam kết: Plan a")).toBeInTheDocument();
+    expect(input).toHaveValue("");
+  });
+
+  it("does not add a case-insensitive duplicate commitment and flags the existing chip", async () => {
+    const user = userEvent.setup();
+    render(<StatefulWeekTab initialCommitments={["Plan a"]} />);
+
+    const input = screen.getByLabelText(/cam kết của tuần tới/i);
+    await user.type(input, "plan A{Enter}");
+
+    expect(screen.getAllByLabelText("Cam kết: Plan a")).toHaveLength(1);
+    expect(screen.getByLabelText("Cam kết: Plan a")).toHaveAttribute("data-state", "duplicate");
+    expect(input).toHaveFocus();
+  });
+
+  it("removes a next-week commitment chip from the editor", async () => {
+    const user = userEvent.setup();
+    render(<StatefulWeekTab initialCommitments={["Plan a"]} />);
+
+    await user.click(screen.getByRole("button", { name: "Xóa cam kết: Plan a" }));
+
+    expect(screen.queryByLabelText("Cam kết: Plan a")).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/cam kết của tuần tới/i)).toBeEnabled();
+  });
+
+  it("caps next-week commitments at five and shows the max-items hint", async () => {
+    render(<StatefulWeekTab />);
+
+    const input = screen.getByLabelText(/cam kết của tuần tới/i);
+    fireEvent.change(input, { target: { value: "Plan 1,Plan 2,Plan 3,Plan 4,Plan 5,Plan 6," } });
+
+    expect(screen.getByLabelText("Cam kết: Plan 5")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Cam kết: Plan 6")).not.toBeInTheDocument();
+    expect(input).toBeDisabled();
+    expect(screen.getByText("Đã đạt tối đa 5 cam kết. Xoá bớt chip để thêm mới.")).toBeInTheDocument();
+  });
+
+  it("removes the last next-week commitment when Backspace is pressed in an empty input", async () => {
+    const user = userEvent.setup();
+    render(<StatefulWeekTab initialCommitments={["Plan a", "Plan b"]} />);
+
+    const input = screen.getByLabelText(/cam kết của tuần tới/i);
+    await user.click(input);
+    await user.keyboard("{Backspace}");
+
+    expect(screen.getByLabelText("Cam kết: Plan a")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Cam kết: Plan b")).not.toBeInTheDocument();
   });
 
   it("shows an empty-week message instead of a percent when there are no tasks", () => {

@@ -687,6 +687,7 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
   await page.locator('[data-testid="wam-section-score"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
   await page.locator("#weekly-insights").fill(WEEKLY_REVIEW_OUTPUT);
   await page.locator("#weekly-next-commitments").fill(WEEKLY_REVIEW_PRIORITY);
+  await page.locator("#weekly-next-commitments").press("Enter");
   await clickButtonByNormalizedText(page, "chot review tuan nay");
   await waitForGoalSnapshot(page, "weekly review in local storage", (snapshot) => {
     return (

@@ -3,12 +3,15 @@ import { describe, expect, it } from "vitest";
 import {
   getActiveTwelveWeekGoal,
   getDefaultScoreboard,
+  getTwelveWeekCycleWeekNumber,
   getTwelveWeekCurrentWeek,
   getTwelveWeekMissedTasks,
   getTwelveWeekTodayTasks,
   getTwelveWeekWeekCompletion,
   getWeekTaskBreakdown,
+  isTwelveWeekCycleReviewPhase,
   migrateLegacyUserData,
+  normalizeGoal,
   rescheduleTwelveWeekTaskToNextWeek,
   rescheduleTwelveWeekTaskWithinWeek,
   skipTwelveWeekNonCoreTask,
@@ -335,6 +338,25 @@ describe("Skipped tasks excluded from queries", () => {
 });
 
 describe("weekly review storage migration", () => {
+  it("normalizes week 13 systems into completed cycle-review state with cycle number", () => {
+    const goal = createGoal("week-13-cycle", "2026-05-01T00:00:00.000Z", {
+      currentWeek: 13,
+      status: "active",
+      cycleNumber: undefined,
+    });
+
+    const normalized = normalizeGoal(goal);
+    const system = normalized.twelveWeekSystem;
+
+    expect(system?.cycleNumber).toBe(1);
+    expect(system?.status).toBe("completed");
+    expect(system?.currentWeek).toBe(13);
+    expect(system && getTwelveWeekCycleWeekNumber(system)).toBeGreaterThan(12);
+    expect(system && isTwelveWeekCycleReviewPhase(system)).toBe(true);
+    expect(system && getTwelveWeekTodayTasks(system)).toEqual([]);
+    expect(system && getTwelveWeekMissedTasks(system)).toEqual([]);
+  });
+
   it("migrates legacy weekly review fields into WAM commitment fields", () => {
     const data = createEmptyUserData({
       currentStorageVersion: CURRENT_STORAGE_VERSION - 1,

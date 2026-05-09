@@ -372,7 +372,7 @@ export function useTwelveWeekExecutionActions({
       weeklyForm.reduceTactic.trim() ||
       weeklyForm.nextWeekPriority.trim() ||
       weeklyForm.insights.trim() ||
-      weeklyForm.nextWeekCommitmentsInput.trim() ||
+      weeklyForm.nextWeekCommitments.length > 0 ||
       Object.values(weeklyForm.commitmentStatuses).some(isCommitmentAnswered) ||
       weeklyForm.lagProgressValue.trim();
     if (!hasAnyContent) {
@@ -392,11 +392,11 @@ export function useTwelveWeekExecutionActions({
       return;
     }
 
-    const nextWeekCommitments = parseCommitmentInput(
-      weeklyForm.nextWeekCommitmentsInput.trim() ||
-        weeklyForm.nextWeekPriority.trim() ||
-        (hasPremiumReviewInsights ? suggestedNextWeekPlan.focus : ""),
-    );
+    const normalizedFormCommitments = normalizeCommitmentList(weeklyForm.nextWeekCommitments).slice(0, 5);
+    const nextWeekCommitments =
+      normalizedFormCommitments.length > 0
+        ? normalizedFormCommitments
+        : parseCommitmentInput(weeklyForm.nextWeekPriority.trim());
     if (nextWeekCommitments.length === 0) {
       toast.error("Cần đặt ít nhất một cam kết tuần tới trước khi chốt review.");
       return;
@@ -500,7 +500,11 @@ export function useTwelveWeekExecutionActions({
           weekNumber: String(reviewWeekNumber),
           score: String(reviewExecutionScore),
           decision: workloadDecisionValue || "keep same",
-          usedSuggestedPlan: String(hasPremiumReviewInsights && weeklyForm.nextWeekPriority.trim().length === 0),
+          usedSuggestedPlan: String(
+            hasPremiumReviewInsights &&
+              weeklyForm.nextWeekCommitments.length === 0 &&
+              weeklyForm.nextWeekPriority.trim().length === 0,
+          ),
         },
       },
     );
@@ -523,7 +527,7 @@ export function useTwelveWeekExecutionActions({
     toast.success("Review tuần đã được chốt.", {
       description:
         hasPremiumReviewInsights &&
-        weeklyForm.nextWeekCommitmentsInput.trim().length === 0 &&
+        weeklyForm.nextWeekCommitments.length === 0 &&
         weeklyForm.nextWeekPriority.trim().length === 0
           ? "Mình đã dùng luôn gợi ý Plus để khóa ưu tiên tuần sau cho bạn."
           : "Tuần sau giờ đã có ưu tiên đủ rõ để bắt đầu gọn hơn.",
@@ -605,9 +609,10 @@ export function useTwelveWeekExecutionActions({
     setWeeklyForm((previousForm) => ({
       ...previousForm,
       nextWeekPriority: suggestedNextWeekPlan.focus,
-      nextWeekCommitmentsInput: previousForm.nextWeekCommitmentsInput.trim()
-        ? previousForm.nextWeekCommitmentsInput
-        : suggestedNextWeekPlan.focus,
+      nextWeekCommitments:
+        previousForm.nextWeekCommitments.length > 0
+          ? previousForm.nextWeekCommitments
+          : [suggestedNextWeekPlan.focus],
       workloadDecision: suggestedNextWeekPlan.workloadDecision,
     }));
     trackAppEvent("12_week_review_suggestion_applied", activeGoal.id, {

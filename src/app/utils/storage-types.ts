@@ -146,6 +146,7 @@ export interface TwelveWeekTaskInstance {
 export interface TwelveWeekSystem {
   goalType: string;
   vision12Week: string;
+  cycleNumber?: number;
   templateId?: string;
   templateName?: string;
   lagMetric: LagMetric;
@@ -235,9 +236,11 @@ export interface Reflection {
   title: string;
   content: string;
   mood?: string;
-  entryType?: "freeform" | "weekly-review";
+  entryType?: "freeform" | "weekly-review" | "cycleReview";
   linkedGoalId?: string;
   linkedWeekNumber?: number;
+  cycleId?: string;
+  finalLagPercent?: number;
 }
 
 export interface TrackingEvent {

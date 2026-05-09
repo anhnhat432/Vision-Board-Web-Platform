@@ -21,6 +21,33 @@ import {
 
 const INTEGRATION_TEST_TIMEOUT_MS = 10_000;
 
+function makeCycleReview(weekNumber: number, leadScore: number) {
+  return {
+    weekNumber,
+    leadCompletionPercent: leadScore,
+    lagProgressValue: String(weekNumber * 8),
+    biggestOutputThisWeek: `Output tuần ${weekNumber}`,
+    mainObstacle: weekNumber % 2 === 0 ? "Bỏ lỡ review cuối tuần" : "",
+    nextWeekPriority: weekNumber === 12 ? "Tiếp tục ship mỗi sáng" : `Cam kết tuần ${weekNumber + 1}`,
+    workloadDecision: "keep same" as const,
+    reviewCompleted: true,
+    progressScore: 7,
+    disciplineScore: 7,
+    focusScore: 7,
+    improvementScore: 7,
+    outputQualityScore: 7,
+    completedLeadIndicators: 2,
+    leadScore,
+    commitmentsKept: ["Giữ nhịp việc cốt lõi"],
+    commitmentsMissed: weekNumber % 2 === 0 ? ["Bỏ lỡ review cuối tuần"] : [],
+    insights: `Insight tuần ${weekNumber}`,
+    nextWeekCommitments: weekNumber === 12 ? ["Tiếp tục ship mỗi sáng"] : [`Cam kết tuần ${weekNumber + 1}`],
+    executionScore: leadScore,
+    reflection: `Insight tuần ${weekNumber}`,
+    adjustments: weekNumber === 12 ? "Tiếp tục ship mỗi sáng" : `Cam kết tuần ${weekNumber + 1}`,
+  };
+}
+
 function getPrimaryButton(name: string | RegExp) {
   const [button] = screen.getAllByRole("button", { name });
   expect(button).toBeInTheDocument();
@@ -41,7 +68,7 @@ async function typeWamReview(
   expect(insightsInput).toBeInTheDocument();
   expect(commitmentsInput).toBeInTheDocument();
   await user.type(insightsInput as HTMLElement, input.insights);
-  await user.type(commitmentsInput as HTMLElement, input.nextWeekCommitments);
+  await user.type(commitmentsInput as HTMLElement, `${input.nextWeekCommitments}{Enter}`);
 }
 
 describe("12-week core flows", () => {
@@ -179,6 +206,87 @@ describe("12-week core flows", () => {
     expect(within(tablist).getByRole("tab", { name: /Tiến độ/i })).toBeInTheDocument();
     expect(within(tablist).getByRole("tab", { name: /Cài đặt/i })).toBeInTheDocument();
   });
+
+  it("renders the cycle review panel instead of the task list when the cycle reaches week 13", async () => {
+    const { goalId } = seedTwelveWeekGoal();
+    updateUserData((data) => {
+      const goal = data.goals.find((item) => item.id === goalId);
+      if (!goal?.twelveWeekSystem) return;
+      goal.twelveWeekSystem.currentWeek = 13;
+      goal.twelveWeekSystem.status = "active";
+      goal.twelveWeekSystem.lagMetric = {
+        ...goal.twelveWeekSystem.lagMetric,
+        target: "100",
+        currentValue: "92",
+      };
+      goal.twelveWeekSystem.weeklyReviews = Array.from({ length: 12 }, (_, index) =>
+        makeCycleReview(index + 1, index % 3 === 0 ? 90 : 70),
+      );
+    });
+
+    renderAppRoute("/12-week-system");
+
+    expect(await screen.findByRole("heading", { name: "Cycle 12 tuần đã kết thúc" })).toBeInTheDocument();
+    expect(screen.getByTestId("cycle-review-panel")).toBeInTheDocument();
+    expect(screen.queryByText("Hàng việc hôm nay")).not.toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(readGoal(goalId).twelveWeekSystem?.status).toBe("completed");
+    });
+  }, INTEGRATION_TEST_TIMEOUT_MS);
+
+  it("starts a new cycle from the cycle review panel without creating a new goal", async () => {
+    const { goalId } = seedTwelveWeekGoal();
+    updateUserData((data) => {
+      const goal = data.goals.find((item) => item.id === goalId);
+      if (!goal?.twelveWeekSystem) return;
+      goal.twelveWeekSystem.currentWeek = 13;
+      goal.twelveWeekSystem.status = "active";
+      goal.twelveWeekSystem.weeklyReviews = Array.from({ length: 12 }, (_, index) =>
+        makeCycleReview(index + 1, index % 2 === 0 ? 90 : 70),
+      );
+      goal.twelveWeekSystem.taskInstances = goal.twelveWeekSystem.taskInstances.map((task) => ({
+        ...task,
+        completed: true,
+        completedAt: new Date().toISOString(),
+      }));
+    });
+
+    const { router } = renderAppRoute("/12-week-system");
+    const user = userEvent.setup();
+
+    await screen.findByRole("heading", { name: "Cycle 12 tuần đã kết thúc" });
+    await user.type(screen.getByLabelText("Bài học lớn nhất 1"), "Tiếp tục giữ review cuối tuần.");
+    await user.click(screen.getByRole("button", { name: "Lưu báo cáo cycle" }));
+
+    await waitFor(() => {
+      const reflection = getUserData().reflections.find(
+        (item) => item.entryType === "cycleReview" && item.linkedGoalId === goalId,
+      );
+      expect(reflection?.content).toContain("Tiếp tục giữ review cuối tuần.");
+      expect(reflection?.finalLagPercent).toEqual(expect.any(Number));
+    });
+
+    await user.click(screen.getByRole("button", { name: "Bắt đầu cycle mới" }));
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/12-week-setup");
+    });
+
+    const goal = readGoal(goalId);
+    const nextSystem = goal.twelveWeekSystem;
+    expect(getUserData().goals).toHaveLength(1);
+    expect(nextSystem?.cycleNumber).toBe(2);
+    expect(nextSystem?.status).toBe("active");
+    expect(nextSystem?.currentWeek).toBe(1);
+    expect(nextSystem?.weeklyReviews).toHaveLength(0);
+    expect(nextSystem?.dailyCheckIns).toHaveLength(0);
+    expect(nextSystem?.taskInstances.every((task) => !task.completed)).toBe(true);
+    expect(localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId)).toBe(goalId);
+
+    const pendingDraft = JSON.parse(localStorage.getItem(APP_STORAGE_KEYS.pending12WeekSetupDraft) ?? "{}");
+    expect(pendingDraft.successEvidence).toContain("Tiếp tục ship mỗi sáng");
+  }, INTEGRATION_TEST_TIMEOUT_MS);
 
   it("compacts repeated task toggles to the latest queued state", async () => {
     const { goalId } = seedTwelveWeekGoal();
@@ -406,7 +514,7 @@ describe("12-week core flows", () => {
 
     // Existing legacy fields should hydrate the WAM form
     expect(await screen.findByDisplayValue("Legacy output")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("Legacy priority")).toBeInTheDocument();
+    expect(screen.getByLabelText("Cam kết: Legacy priority")).toBeInTheDocument();
 
     // Old optional obstacle field is no longer rendered in the WAM form.
     expect(screen.queryByDisplayValue("Legacy obstacle")).toBeNull();
@@ -437,8 +545,8 @@ describe("12-week core flows", () => {
     expect(commitmentsInput).toBeInTheDocument();
     await user.clear(insightsInput as HTMLElement);
     await user.type(insightsInput as HTMLElement, "Latest weekly insight.");
-    await user.clear(commitmentsInput as HTMLElement);
-    await user.type(commitmentsInput as HTMLElement, "Latest priority.");
+    await user.click(screen.getByRole("button", { name: "Xóa cam kết: First priority." }));
+    await user.type(commitmentsInput as HTMLElement, "Latest priority.{Enter}");
     await user.click(getPrimaryButton("Chốt review tuần này"));
 
     await waitFor(() => {
