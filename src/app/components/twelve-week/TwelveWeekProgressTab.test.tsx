@@ -62,9 +62,6 @@ describe("TwelveWeekProgressTab", () => {
 
     expect(screen.getByText("Lead trung bình 80%")).toBeInTheDocument();
     expect(screen.getByText("Đã hoàn thành 2/12 tuần")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Tại sao 85%?" })).toHaveAttribute(
-      "title",
-      "Theo phương pháp 12 Week Year, đạt 85% cam kết hàng tuần là chỉ số dẫn dắt mạnh nhất tới mục tiêu",
-    );
+    expect(screen.getByRole("button", { name: "Tại sao 85%?" })).not.toHaveAttribute("title");
   });
 });

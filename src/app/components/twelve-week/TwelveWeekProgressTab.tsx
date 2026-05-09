@@ -287,7 +287,6 @@ export function TwelveWeekProgressTab({
                     type="button"
                     className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-sky-200 bg-white text-sky-700 shadow-sm"
                     aria-label="Tại sao 85%?"
-                    title={WEEKLY_EXECUTION_TARGET_TOOLTIP}
                   >
                     <CircleHelp className="h-4 w-4" />
                   </button>
