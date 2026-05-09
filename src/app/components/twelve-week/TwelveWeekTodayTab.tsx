@@ -91,6 +91,15 @@ interface TwelveWeekTodayTabProps {
   onRescheduleTaskToNextWeek?: (taskId: string) => void;
   onSkipNonCoreTask?: (taskId: string) => void;
 }
+
+interface TodayNextActionState {
+  key: "setup-needed" | "review-due" | "primary-task" | "check-in" | "day-closed" | "clear-day";
+  title: string;
+  description: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}
+
 export function TwelveWeekTodayTab({
   currentWeek,
   reviewDueToday,
@@ -154,7 +163,7 @@ export function TwelveWeekTodayTab({
 
   const todayCheckIn = latestCheckIn?.date === todayDateKey ? latestCheckIn : null;
   const hasSavedTodayCheckIn = Boolean(todayCheckIn);
-  const nextActionState = (() => {
+  const nextActionState: TodayNextActionState = (() => {
     if (!hasPlanTasks) {
       return {
         key: "setup-needed",
@@ -167,6 +176,14 @@ export function TwelveWeekTodayTab({
       };
     }
 
+    if (primaryTask) {
+      return {
+        key: "primary-task",
+        title: "Việc ưu tiên đang ở ngay bên dưới",
+        description: "Bắt đầu từ thẻ việc quan trọng nhất rồi tick xong ở đó.",
+      };
+    }
+
     if (reviewDueToday && hasSavedTodayCheckIn) {
       return {
         key: "review-due",
@@ -174,16 +191,6 @@ export function TwelveWeekTodayTab({
         description: "Check-in đã lưu. Mở tab Tuần để khóa lại bài học và ưu tiên tuần sau.",
         actionLabel: "Mở tab Tuần",
         onAction: onOpenWeekTab,
-      };
-    }
-
-    if (primaryTask) {
-      return {
-        key: "primary-task",
-        title: "Bước tiếp theo: việc ưu tiên số 1",
-        description: primaryTask.title,
-        actionLabel: "Đánh dấu xong",
-        onAction: () => onToggleTask(primaryTask.id, true),
       };
     }
 
@@ -258,7 +265,7 @@ export function TwelveWeekTodayTab({
             <p className="mt-2 text-base font-semibold text-slate-950 sm:text-lg">{nextActionState.title}</p>
             <p className="mt-1 text-sm leading-6 text-slate-600">{nextActionState.description}</p>
           </div>
-          {nextActionState.onAction ? (
+          {nextActionState.onAction && nextActionState.actionLabel ? (
             <Button className="w-full shrink-0 sm:w-auto" onClick={nextActionState.onAction}>
               {nextActionState.actionLabel}
               <ArrowRight className="ml-1 h-4 w-4" />

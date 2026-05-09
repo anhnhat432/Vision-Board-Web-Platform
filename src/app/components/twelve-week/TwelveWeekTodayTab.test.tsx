@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -258,8 +258,22 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
     render(<TwelveWeekTodayTab {...makeProps()} />);
 
     const panel = screen.getByTestId("today-next-action-panel");
-    expect(panel).toHaveTextContent("800");
     expect(panel).toHaveAttribute("data-state", "primary-task");
+    expect(panel).not.toHaveTextContent("Viết draft 800 từ");
+    expect(within(panel).queryByRole("button", { name: /Đánh dấu xong/i })).toBeNull();
+  });
+
+  it("keeps the next-action panel on primary work when review is due and check-in is saved", () => {
+    render(
+      <TwelveWeekTodayTab
+        {...makeProps({
+          reviewDueToday: true,
+          latestCheckIn: makeCheckIn(),
+        })}
+      />,
+    );
+
+    expect(screen.getByTestId("today-next-action-panel")).toHaveAttribute("data-state", "primary-task");
   });
 
   it("shows same-day check-in as saved and ignores older check-ins", () => {
@@ -286,11 +300,13 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
 
   it("offers a Week handoff from the check-in card when review is due", async () => {
     const onOpenWeekTab = vi.fn();
+    const onSaveCheckIn = vi.fn();
     render(
       <TwelveWeekTodayTab
         {...makeProps({
           reviewDueToday: true,
           onOpenWeekTab,
+          onSaveCheckIn,
           latestCheckIn: makeCheckIn(),
         })}
       />,
@@ -298,6 +314,7 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
 
     await userEvent.click(screen.getByTestId("today-check-in-open-week"));
     expect(onOpenWeekTab).toHaveBeenCalledTimes(1);
+    expect(onSaveCheckIn).not.toHaveBeenCalled();
   });
 
   it("shows the 'Việc chính đã xong' nudge when primary task is completed", () => {
@@ -687,8 +704,8 @@ describe("TwelveWeekTodayTab — preserves existing markers", () => {
   it("does not duplicate the primary task title between hero and queue", () => {
     render(<TwelveWeekTodayTab {...makeProps()} />);
     const occurrences = screen.getAllByText("Viết draft 800 từ");
-    // Once in next-action panel, once in hero, once in queue card.
-    expect(occurrences).toHaveLength(3);
+    // Once in hero, once in queue card.
+    expect(occurrences).toHaveLength(2);
   });
 
   it("does not duplicate the lead indicator name copy on mobile (single hero hint, single queue line)", () => {
