@@ -6,8 +6,10 @@ import {
   buildPlanRationaleReasons,
   formatScheduleDayLabels,
   getFeasibilityDraftDefaults,
+  getLeadIndicatorTargetValidationError,
   getPreviewTasks,
   getPreviewTasksByIndicator,
+  parseTargetFrequency,
   validateLeadIndicatorDraft,
 } from "./helpers";
 import type {
@@ -72,6 +74,30 @@ function buildOptions(
 }
 
 describe("12-week setup plan load guards", () => {
+  it("parses zero or invalid target frequency as null", () => {
+    expect(parseTargetFrequency("0")).toBeNull();
+    expect(parseTargetFrequency({ target: "0" })).toBeNull();
+    expect(parseTargetFrequency("-1")).toBeNull();
+    expect(parseTargetFrequency("abc")).toBeNull();
+    expect(parseTargetFrequency("2")).toBe(2);
+  });
+
+  it("does not silently schedule an invalid zero target as one weekly task", () => {
+    const scheduled = buildLeadIndicatorSchedules(
+      [makeIndicator("Zero target", "0"), makeIndicator("Review loop", "1")],
+      buildOptions("balanced", "1h"),
+    );
+
+    expect(scheduled.find((indicator) => indicator.name === "Zero target")?.schedule).toEqual([]);
+  });
+
+  it("returns a field-specific validation error for invalid target frequency", () => {
+    const error = getLeadIndicatorTargetValidationError(makeIndicator("Zero target", "0"), 0);
+
+    expect(error).toContain("1");
+    expect(error).toContain("Zero target");
+  });
+
   it("keeps lighter plus low time budget to one weekly task per tactic", () => {
     const indicators = [
       makeIndicator("Focus block"),

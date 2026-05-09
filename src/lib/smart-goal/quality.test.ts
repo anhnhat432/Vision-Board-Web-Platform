@@ -340,6 +340,30 @@ describe("canProceedToFeasibility", () => {
     expect(result.canProceedToFeasibility).toBe(false);
   });
 
+  it("returns false when goal statement has fewer than 10 meaningful characters", () => {
+    const goal = makeGoal({
+      specific: {
+        goal_statement: "   abc   ",
+      },
+      measurable: {
+        metric_name: "Weekly output",
+        target_value: 8,
+      },
+      achievable: {
+        weekly_time_commitment_hours: 3,
+        required_skills: [],
+        support_resources: [],
+      },
+      relevant: {
+        motivation_reason: "Important for the next 12 weeks.",
+      },
+      time_bound: { target_weeks: 12 },
+    });
+
+    const result = evaluateSmartGoalQuality(goal);
+    expect(result.canProceedToFeasibility).toBe(false);
+  });
+
   it("returns true for a minimal but valid goal", () => {
     const goal = makeGoal({
       specific: {

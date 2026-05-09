@@ -7,6 +7,7 @@ import {
   getTwelveWeekMissedTasks,
   getTwelveWeekTodayTasks,
   getTwelveWeekWeekCompletion,
+  getWeekTaskBreakdown,
   rescheduleTwelveWeekTaskToNextWeek,
   rescheduleTwelveWeekTaskWithinWeek,
   skipTwelveWeekNonCoreTask,
@@ -280,6 +281,23 @@ describe("skipTwelveWeekNonCoreTask", () => {
 });
 
 describe("Skipped tasks excluded from queries", () => {
+  it("marks an empty week as empty with 0 percent", () => {
+    const system = createSystemWithTasks([]);
+
+    const breakdown = getWeekTaskBreakdown(system, 1);
+    expect(breakdown.total).toBe(0);
+    expect(breakdown.rate).toBe(0);
+    expect(breakdown.overallPercent).toBe(0);
+    expect(breakdown.isEmpty).toBe(true);
+
+    expect(getTwelveWeekWeekCompletion(system, 1)).toEqual({
+      completed: 0,
+      total: 0,
+      percent: 0,
+      isEmpty: true,
+    });
+  });
+
   it("excludes skipped tasks from getTwelveWeekMissedTasks", () => {
     const system = createSystemWithTasks([
       makeTask({ id: "task_opt", isCore: false, skipped: true, scheduledDate: "2026-03-03" }),

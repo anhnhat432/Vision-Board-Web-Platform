@@ -38,6 +38,7 @@ export interface SmartGoalQualityResult {
 // ---------------------------------------------------------------------------
 
 const MIN_STATEMENT_LENGTH = 20;
+const MIN_FEASIBILITY_STATEMENT_LENGTH = 10;
 const MIN_MOTIVATION_LENGTH = 15;
 const GOOD_STATEMENT_WORD_COUNT = 8;
 const GOOD_MOTIVATION_WORD_COUNT = 6;
@@ -485,8 +486,9 @@ export function evaluateSmartGoalQuality(goal: SmartGoal): SmartGoalQualityResul
   const level: QualityLevel =
     overallScore >= 70 ? "strong" : overallScore >= 40 ? "okay" : "weak";
 
-  // Lenient gate: user can proceed if they have at least a goal statement and a target value
-  const hasGoalStatement = goal.specific.goal_statement.trim().length > 0;
+  // Lenient gate: user can proceed if they have a meaningful statement and a target value.
+  const hasGoalStatement =
+    goal.specific.goal_statement.trim().length >= MIN_FEASIBILITY_STATEMENT_LENGTH;
   const hasTargetValue = Number.isFinite(goal.measurable.target_value) && goal.measurable.target_value > 0;
   const canProceedToFeasibility = hasGoalStatement && hasTargetValue && overallScore >= 20;
 

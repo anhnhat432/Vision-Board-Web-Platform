@@ -638,7 +638,10 @@ async function saveWeeklyReview() {
   });
 
   await fill("#weekly-best", WEEKLY_REVIEW_OUTPUT);
-  await fill("#weekly-obstacle", WEEKLY_REVIEW_OBSTACLE);
+  await clickButton("chi tiet review them").catch(() => undefined);
+  if (await browserEval('Boolean(document.querySelector("#weekly-obstacle"))')) {
+    await fill("#weekly-obstacle", WEEKLY_REVIEW_OBSTACLE);
+  }
   if (await browserEval('Boolean(document.querySelector("#weekly-keep"))')) {
     await fill("#weekly-keep", WEEKLY_REVIEW_KEEP);
   }

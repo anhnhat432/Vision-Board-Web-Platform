@@ -174,9 +174,23 @@ export interface ScheduledLeadIndicatorDraft extends LeadIndicatorDraft {
   schedule: number[];
 }
 
-function parseTargetFrequency(target: string): number {
-  const parsedTarget = Number.parseInt(target, 10);
-  return Number.isFinite(parsedTarget) && parsedTarget > 0 ? Math.min(parsedTarget, 7) : 1;
+export function parseTargetFrequency(targetInput: string | Pick<LeadIndicatorDraft, "target">): number | null {
+  const target = typeof targetInput === "string" ? targetInput : targetInput.target;
+  const normalizedTarget = target.trim();
+  if (!/^\d+$/.test(normalizedTarget)) return null;
+
+  const parsedTarget = Number.parseInt(normalizedTarget, 10);
+  return Number.isFinite(parsedTarget) && parsedTarget > 0 ? Math.min(parsedTarget, 7) : null;
+}
+
+export function getLeadIndicatorTargetValidationError(
+  indicator: LeadIndicatorDraft,
+  index: number,
+): string | null {
+  if (parseTargetFrequency(indicator) !== null) return null;
+
+  const label = indicator.name.trim() || `#${index + 1}`;
+  return `Tần suất của việc lặp lại ${index + 1} (${label}) phải là số dương.`;
 }
 
 function normalizePreferredDays(preferredDays: number[] | undefined): number[] {
@@ -227,6 +241,8 @@ export function buildScheduleOffsets(
 ): number[] {
   const preferredDays = normalizePreferredDays(options.preferredDays);
   const requestedFrequency = parseTargetFrequency(target);
+  if (requestedFrequency === null) return [];
+
   const cappedFrequency = Math.max(
     1,
     Math.min(requestedFrequency, options.maxFrequency ?? requestedFrequency, preferredDays.length || 7),
@@ -325,15 +341,16 @@ export function buildLeadIndicatorSchedules(
     const remainingIndicators = validIndicators.length - index - 1;
     const reservedForRemainingIndicators = Math.max(0, remainingIndicators);
     const maxForCurrentIndicator = Math.max(1, remainingWeeklyTasks - reservedForRemainingIndicators);
-    const frequency = Math.min(
-      parseTargetFrequency(indicator.target),
-      maxTasksPerTactic,
-      maxForCurrentIndicator,
-    );
-    const schedule = buildScheduleOffsets(indicator.target, indicator.cadence, {
-      maxFrequency: frequency,
-      preferredDays: options.preferredDays,
-    });
+    const parsedFrequency = parseTargetFrequency(indicator.target);
+    const frequency =
+      parsedFrequency === null ? 0 : Math.min(parsedFrequency, maxTasksPerTactic, maxForCurrentIndicator);
+    const schedule =
+      frequency > 0
+        ? buildScheduleOffsets(indicator.target, indicator.cadence, {
+            maxFrequency: frequency,
+            preferredDays: options.preferredDays,
+          })
+        : [];
 
     remainingWeeklyTasks = Math.max(0, remainingWeeklyTasks - schedule.length);
 
@@ -443,10 +460,11 @@ export function validateLeadIndicatorDraft(
     }
   }
 
-  const parsedTarget = Number.parseInt(indicator.target, 10);
-  if (!indicator.target || !Number.isFinite(parsedTarget) || parsedTarget <= 0) {
+  const parsedTarget = parseTargetFrequency(indicator.target);
+  const rawTarget = Number.parseInt(indicator.target.trim(), 10);
+  if (parsedTarget === null) {
     warnings.push("Tần suất phải là số dương (ví dụ: 2 hoặc 3).");
-  } else if (parsedTarget > 7) {
+  } else if (rawTarget > 7) {
     warnings.push("Tần suất tối đa là 7 lần/tuần (mỗi ngày một lần).");
   } else {
     const maxTasksPerTactic =

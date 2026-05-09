@@ -267,28 +267,32 @@ function getWeekDateKeys(system: TwelveWeekSystem, weekNumber: number): string[]
   return Array.from({ length: 7 }, (_, index) => formatDateInputValue(addCalendarDays(startDate, index)));
 }
 
-function getWeekTaskBreakdown(system: TwelveWeekSystem, weekNumber: number) {
-  const tasks = getTwelveWeekTasksForWeek(system, weekNumber);
+export function getWeekTaskBreakdown(system: TwelveWeekSystem, weekNumber: number) {
+  const tasks = getTwelveWeekTasksForWeek(system, weekNumber).filter((task) => !task.skipped);
   const coreTasks = tasks.filter((task) => task.isCore);
   const optionalTasks = tasks.filter((task) => !task.isCore);
+  const completed = tasks.filter((task) => task.completed).length;
+  const coreCompleted = coreTasks.filter((task) => task.completed).length;
+  const optionalCompleted = optionalTasks.filter((task) => task.completed).length;
+  const isEmpty = tasks.length === 0;
 
   const getPercent = (completed: number, total: number) =>
-    total === 0 ? 100 : Math.round((completed / total) * 100);
+    total === 0 ? (isEmpty ? 0 : 100) : Math.round((completed / total) * 100);
+  const overallPercent = isEmpty ? 0 : getPercent(completed, tasks.length);
 
   return {
     tasks,
     coreTotal: coreTasks.length,
-    coreCompleted: coreTasks.filter((task) => task.completed).length,
+    coreCompleted,
     optionalTotal: optionalTasks.length,
-    optionalCompleted: optionalTasks.filter((task) => task.completed).length,
+    optionalCompleted,
     total: tasks.length,
-    completed: tasks.filter((task) => task.completed).length,
-    corePercent: getPercent(coreTasks.filter((task) => task.completed).length, coreTasks.length),
-    optionalPercent: getPercent(
-      optionalTasks.filter((task) => task.completed).length,
-      optionalTasks.length,
-    ),
-    overallPercent: getPercent(tasks.filter((task) => task.completed).length, tasks.length),
+    completed,
+    corePercent: getPercent(coreCompleted, coreTasks.length),
+    optionalPercent: getPercent(optionalCompleted, optionalTasks.length),
+    overallPercent,
+    rate: overallPercent,
+    isEmpty,
   };
 }
 
@@ -553,15 +557,17 @@ export function getTwelveWeekMissedTasks(
 export function getTwelveWeekWeekCompletion(
   system: TwelveWeekSystem,
   weekNumber: number,
-): { completed: number; total: number; percent: number } {
+): { completed: number; total: number; percent: number; isEmpty: boolean } {
   const tasks = getTwelveWeekTasksForWeek(system, weekNumber).filter((task) => !task.skipped);
   const completed = tasks.filter((task) => task.completed).length;
   const total = tasks.length;
+  const isEmpty = total === 0;
 
   return {
     completed,
     total,
-    percent: total === 0 ? 0 : Math.round((completed / total) * 100),
+    percent: isEmpty ? 0 : Math.round((completed / total) * 100),
+    isEmpty,
   };
 }
 

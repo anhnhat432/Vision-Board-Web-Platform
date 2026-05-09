@@ -117,6 +117,19 @@ describe("TwelveWeekWeekTab review flow", () => {
     expect(screen.queryByLabelText(/nên giảm hoặc bỏ/i)).toBeNull();
   });
 
+  it("shows an empty-week message instead of a percent when there are no tasks", () => {
+    render(
+      <TwelveWeekWeekTab
+        {...makeProps({
+          weekCompletion: { completed: 0, total: 0, percent: 0, isEmpty: true },
+        })}
+      />,
+    );
+
+    expect(screen.getByText("Chưa có việc trong tuần này")).toBeInTheDocument();
+    expect(screen.queryByText("0%")).not.toBeInTheDocument();
+  });
+
   it("keeps the mobile sticky CTA above the bottom navigation", () => {
     render(<TwelveWeekWeekTab {...makeProps()} />);
 

@@ -68,7 +68,7 @@ export function SpecificStep({
         />
         <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500">
           <p id="smart-specific-hint">Viết kết quả cụ thể mà bạn có thể nhìn thấy hoặc kiểm chứng.</p>
-          <p id="smart-specific-counter">{specificLength}/20 ký tự tối thiểu</p>
+          <p id="smart-specific-counter">{specificLength}/10 ký tự tối thiểu</p>
         </div>
       </div>
 

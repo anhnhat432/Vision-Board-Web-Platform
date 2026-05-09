@@ -44,6 +44,7 @@ interface WeekCompletionSummary {
   completed: number;
   total: number;
   percent: number;
+  isEmpty?: boolean;
 }
 
 interface TwelveWeekWeeklyReviewForm {
@@ -207,9 +208,17 @@ export function TwelveWeekWeekTab({
               <TrendingUp className="h-3.5 w-3.5" />
               Tiến độ tuần
             </p>
-            <p className="mt-3 text-3xl font-bold text-slate-950">{weekCompletion.percent}%</p>
+            <p
+              className={`mt-3 font-bold text-slate-950 ${
+                weekCompletion.isEmpty ? "text-lg leading-7" : "text-3xl"
+              }`}
+            >
+              {weekCompletion.isEmpty ? "Chưa có việc trong tuần này" : `${weekCompletion.percent}%`}
+            </p>
             <p className="mt-1 text-sm text-slate-600">
-              {weekCompletion.completed}/{weekCompletion.total} việc đã chốt
+              {weekCompletion.isEmpty
+                ? "Khi có việc lặp lại, tiến độ tuần sẽ bắt đầu tính."
+                : `${weekCompletion.completed}/${weekCompletion.total} việc đã chốt`}
             </p>
           </CardContent>
         </Card>

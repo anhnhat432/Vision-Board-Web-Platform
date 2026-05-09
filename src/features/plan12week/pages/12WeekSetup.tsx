@@ -54,6 +54,7 @@ import {
   createIndicatorId,
   getCycleWeekStart,
   getFeasibilityDraftDefaults,
+  getLeadIndicatorTargetValidationError,
   getPreviewTasks,
   getPreviewTasksByIndicator,
   isPendingFeasibilityResult,
@@ -673,6 +674,16 @@ export function TwelveWeekSetup() {
   };
 
   const validateCurrentStep = () => {
+    const invalidTargetError = draft.leadIndicators
+      .map((indicator, index) => getLeadIndicatorTargetValidationError(indicator, index))
+      .find((error): error is string => error !== null);
+
+    if (currentStep >= 1 && invalidTargetError) {
+      toast.error(invalidTargetError);
+      if (currentStep !== 1) setCurrentStep(1);
+      return false;
+    }
+
     if (currentStep === 0 && (!draft.goalType || !draft.vision12Week.trim() || !draft.week12Outcome.trim())) {
       toast.error("Làm rõ kết quả 12 tuần trước.");
       return false;

@@ -193,8 +193,8 @@ export function hasStepDraftContent(stepKey: SmartStepKey, smartData: SMARTData)
 export function getStepValidationError(stepKey: SmartStepKey, smartData: SMARTData): string | null {
   if (stepKey === "specific") {
     const value = smartData.specific.goal_statement.trim();
-    if (value.length < 20) {
-      return "Tối thiểu 20 ký tự để mục tiêu đủ rõ.";
+    if (value.length < 10) {
+      return "Mục tiêu cụ thể cần ít nhất 10 ký tự có nghĩa";
     }
     return null;
   }
