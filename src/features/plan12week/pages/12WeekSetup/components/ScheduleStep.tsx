@@ -1,11 +1,12 @@
 import { AlertTriangle, CalendarDays } from "lucide-react";
 
 import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
+import { formatDateInputValue } from "@/app/utils/storage";
 import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import { LOAD_PREFERENCE_OPTIONS, REVIEW_DAYS } from "../constants";
-import { getLoadPreferenceLabel } from "../helpers";
+import { getLoadPreferenceLabel, getStartDateValidation } from "../helpers";
 import type { TwelveWeekSetupDraft } from "../types";
 import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
 import { useBreakpoint } from "@/app/hooks/useBreakpoint";
@@ -19,6 +20,7 @@ interface ScheduleStepProps {
   hasPreviewTasks: boolean;
   weekOneTaskPreview: string[];
   weekOneTaskWarning: string | null;
+  todayDateKey?: string;
   onChange: <K extends keyof TwelveWeekSetupDraft>(key: K, value: TwelveWeekSetupDraft[K]) => void;
 }
 
@@ -31,9 +33,23 @@ export function ScheduleStep({
   hasPreviewTasks,
   weekOneTaskPreview,
   weekOneTaskWarning,
+  todayDateKey,
   onChange,
 }: ScheduleStepProps) {
   const isDesktop = useBreakpoint();
+  const localTodayDateKey = todayDateKey ?? formatDateInputValue(new Date());
+  const referenceDate = new Date(`${localTodayDateKey}T00:00:00`);
+  const startDateValidation = getStartDateValidation(
+    draft.startDate,
+    Number.isNaN(referenceDate.getTime()) ? new Date() : referenceDate,
+  );
+  const startDateDescription = [
+    "cycle-start-date-helper",
+    startDateValidation.error ? "cycle-start-date-error" : null,
+    startDateValidation.warning ? "cycle-start-date-warning" : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -45,9 +61,23 @@ export function ScheduleStep({
               id="cycle-start-date"
               type="date"
               value={draft.startDate}
+              min={localTodayDateKey}
+              aria-invalid={Boolean(startDateValidation.error)}
+              aria-describedby={startDateDescription}
+              className={startDateValidation.error ? "border-rose-300 focus-visible:ring-rose-200" : undefined}
               onChange={(event) => onChange("startDate", event.target.value)}
             />
-            <p className="text-xs text-slate-500">Kế hoạch sẽ canh chu kỳ về Thứ Hai để việc và điểm tuần khớp nhau.</p>
+            {startDateValidation.error ? (
+              <p id="cycle-start-date-error" role="alert" className="text-xs font-medium text-rose-700">
+                {startDateValidation.error}
+              </p>
+            ) : null}
+            {startDateValidation.warning ? (
+              <p id="cycle-start-date-warning" role="status" className="text-xs font-medium text-amber-700">
+                {startDateValidation.warning}
+              </p>
+            ) : null}
+            <p id="cycle-start-date-helper" className="text-xs text-slate-500">Kế hoạch sẽ canh chu kỳ về Thứ Hai để việc và điểm tuần khớp nhau.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="review-day">Ngày nhìn lại hằng tuần</Label>

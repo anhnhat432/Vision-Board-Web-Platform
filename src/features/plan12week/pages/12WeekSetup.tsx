@@ -55,9 +55,13 @@ import {
   getCycleWeekStart,
   getFeasibilityDraftDefaults,
   getLeadIndicatorTargetValidationError,
+  getLeadIndicatorUnitValidationError,
+  getMilestoneValidationError,
   getPreviewTasks,
   getPreviewTasksByIndicator,
+  getStartDateValidation,
   isPendingFeasibilityResult,
+  normalizeReviewDay,
 } from "./12WeekSetup/helpers";
 import type { LeadIndicatorDraft, PendingFeasibilityResult, TwelveWeekSetupDraft } from "./12WeekSetup/types";
 import { SetupStepShell } from "./12WeekSetup/components/SetupStepShell";
@@ -201,10 +205,17 @@ export function TwelveWeekSetup() {
 
       try {
         const parsedDraft = JSON.parse(savedDraft) as Partial<TwelveWeekSetupDraft>;
+        const normalizedReviewDay = normalizeReviewDay(parsedDraft.reviewDay);
+        if (normalizedReviewDay.changed && parsedDraft.reviewDay !== undefined) {
+          console.info("Invalid 12-week setup reviewDay draft reset to Sunday.", {
+            reviewDay: parsedDraft.reviewDay,
+          });
+        }
         return {
           ...baseDraft,
           ...parsedDraft,
           templateId: parsedDraft.templateId ?? "",
+          reviewDay: normalizedReviewDay.value,
           tacticLoadPreference:
             parsedDraft.tacticLoadPreference === "lighter" || parsedDraft.tacticLoadPreference === "push"
               ? parsedDraft.tacticLoadPreference
@@ -475,6 +486,52 @@ export function TwelveWeekSetup() {
       ? previewTasks
       : (setupGuideSupport?.personalizedTactics.map((tactic) => tactic.name).slice(0, 4) ?? []);
   const weekOneTaskWarning = getWeeklyTaskWarning(weekOneTaskPreview.length);
+  const invalidTargetError =
+    draft.leadIndicators
+      .map((indicator, index) => getLeadIndicatorTargetValidationError(indicator, index))
+      .find((error): error is string => error !== null) ?? null;
+  const invalidUnitError =
+    draft.leadIndicators
+      .map((indicator, index) => getLeadIndicatorUnitValidationError(indicator, index))
+      .find((error): error is string => error !== null) ?? null;
+  const startDateValidation = getStartDateValidation(draft.startDate);
+  const normalizedDraftReviewDay = normalizeReviewDay(draft.reviewDay);
+  const milestoneError = getMilestoneValidationError({
+    week4: draft.week4Milestone,
+    week8: draft.week8Milestone,
+    week12: draft.week12Outcome,
+  });
+  const currentStepValidationError = (() => {
+    if (currentStep === 0) {
+      if (!draft.goalType || !draft.vision12Week.trim()) return "Làm rõ kết quả 12 tuần trước.";
+      return milestoneError;
+    }
+
+    if (currentStep === 1) {
+      if (validIndicators.length < 2 || validIndicators.length > 4) {
+        return "Giữ từ 2 đến 4 việc lặp lại để bước này gọn và dễ giữ nhịp.";
+      }
+      return invalidTargetError ?? invalidUnitError;
+    }
+
+    if (currentStep === 2) {
+      if (!draft.lagMetricName.trim() || !draft.startDate || !draft.reviewDay) {
+        return "Chốt chỉ số chính, ngày bắt đầu và ngày nhìn lại.";
+      }
+      if (!draft.reviewDay || normalizedDraftReviewDay.changed) return "Chọn ngày nhìn lại hợp lệ.";
+      return startDateValidation.error;
+    }
+
+    if (!draft.goalType || !draft.vision12Week.trim()) return "Làm rõ kết quả 12 tuần trước.";
+    if (validIndicators.length < 2 || validIndicators.length > 4) {
+      return "Giữ từ 2 đến 4 việc lặp lại để bước này gọn và dễ giữ nhịp.";
+    }
+    if (!draft.lagMetricName.trim() || !draft.startDate || !draft.reviewDay) {
+      return "Chốt chỉ số chính, ngày bắt đầu và ngày nhìn lại.";
+    }
+    if (!draft.reviewDay || normalizedDraftReviewDay.changed) return "Chọn ngày nhìn lại hợp lệ.";
+    return invalidTargetError ?? invalidUnitError ?? startDateValidation.error ?? milestoneError;
+  })();
 
   const applyTemplate = (template: TwelveWeekTemplateDefinition, announce = true) => {
     const nextPlan = getCurrentPlan();
@@ -674,28 +731,22 @@ export function TwelveWeekSetup() {
   };
 
   const validateCurrentStep = () => {
-    const invalidTargetError = draft.leadIndicators
-      .map((indicator, index) => getLeadIndicatorTargetValidationError(indicator, index))
-      .find((error): error is string => error !== null);
-
-    if (currentStep >= 1 && invalidTargetError) {
-      toast.error(invalidTargetError);
-      if (currentStep !== 1) setCurrentStep(1);
-      return false;
-    }
-
-    if (currentStep === 0 && (!draft.goalType || !draft.vision12Week.trim() || !draft.week12Outcome.trim())) {
-      toast.error("Làm rõ kết quả 12 tuần trước.");
-      return false;
-    }
-
-    if (currentStep === 1 && (validIndicators.length < 2 || validIndicators.length > 4)) {
-      toast.error("Giữ từ 2 đến 4 việc lặp lại để bước này gọn và dễ giữ nhịp.");
-      return false;
-    }
-
-    if (currentStep === 2 && (!draft.lagMetricName.trim() || !draft.startDate || !draft.reviewDay)) {
-      toast.error("Chốt chỉ số chính, ngày bắt đầu và ngày nhìn lại.");
+    if (currentStepValidationError) {
+      toast.error(currentStepValidationError);
+      if (
+        currentStep !== 1 &&
+        (currentStepValidationError === invalidTargetError || currentStepValidationError === invalidUnitError)
+      ) {
+        setCurrentStep(1);
+      } else if (
+        currentStep !== 2 &&
+        (currentStepValidationError === startDateValidation.error ||
+          currentStepValidationError === "Chọn ngày nhìn lại hợp lệ.")
+      ) {
+        setCurrentStep(2);
+      } else if (currentStep !== 0 && currentStepValidationError === milestoneError) {
+        setCurrentStep(0);
+      }
       return false;
     }
 
@@ -767,7 +818,7 @@ export function TwelveWeekSetup() {
           id: indicator.id,
           name: indicator.name.trim(),
           target: indicator.target.trim() || "1",
-          unit: indicator.unit.trim() || "lần/tuần",
+          unit: indicator.unit.trim(),
           type: indicator.type,
           schedule: indicator.schedule,
         })),
@@ -973,6 +1024,9 @@ export function TwelveWeekSetup() {
         onNext={handleNext}
         onSubmit={handleSubmit}
         onJumpToStep={handleJumpToStep}
+        stepError={currentStepValidationError}
+        isNextDisabled={Boolean(currentStepValidationError)}
+        isSubmitDisabled={Boolean(currentStepValidationError)}
       >
         {currentStep === 0 && (
           <OutcomeStep
@@ -1032,6 +1086,8 @@ export function TwelveWeekSetup() {
             onBack={handleBack}
             onSubmit={handleSubmit}
             onChange={handleChange}
+            validationMessage={currentStepValidationError}
+            canConfirm={!currentStepValidationError}
           />
         )}
       </SetupStepShell>

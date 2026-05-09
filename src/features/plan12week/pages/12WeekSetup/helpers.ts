@@ -15,6 +15,12 @@ export function getReviewDayLabel(value: string): string {
   return REVIEW_DAYS.find((option) => option.value === value)?.label ?? value;
 }
 
+export function normalizeReviewDay(value: unknown): { value: string; changed: boolean } {
+  const rawValue = typeof value === "string" ? value : "";
+  const isValid = REVIEW_DAYS.some((day) => day.value === rawValue);
+  return isValid ? { value: rawValue, changed: false } : { value: "Sunday", changed: true };
+}
+
 export function getPlanLoadLabel(value: PlanLoadRecommendation | undefined): string {
   if (value === "lighter") return "Nhẹ hơn";
   if (value === "push") return "Đẩy nhẹ";
@@ -191,6 +197,74 @@ export function getLeadIndicatorTargetValidationError(
 
   const label = indicator.name.trim() || `#${index + 1}`;
   return `Tần suất của việc lặp lại ${index + 1} (${label}) phải là số dương.`;
+}
+
+export function getLeadIndicatorUnitValidationError(
+  indicator: LeadIndicatorDraft,
+  index: number,
+): string | null {
+  if (indicator.unit.trim().length > 0) return null;
+
+  const label = indicator.name.trim() || `#${index + 1}`;
+  return `Đơn vị của việc lặp lại ${index + 1} (${label}) không được trống. Gợi ý: lần, phút, trang, buổi.`;
+}
+
+function toLocalDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseDateKey(value: string): Date | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const [year, month, day] = value.split("-").map(Number);
+  const parsed = new Date(year, month - 1, day);
+  if (
+    parsed.getFullYear() !== year ||
+    parsed.getMonth() !== month - 1 ||
+    parsed.getDate() !== day
+  ) {
+    return null;
+  }
+  parsed.setHours(0, 0, 0, 0);
+  return parsed;
+}
+
+export function getStartDateValidation(
+  startDate: string,
+  referenceDate = new Date(),
+): { error: string | null; warning: string | null } {
+  const todayKey = toLocalDateKey(referenceDate);
+  const parsedStartDate = parseDateKey(startDate);
+  if (!parsedStartDate) {
+    return { error: "Chọn ngày bắt đầu hợp lệ", warning: null };
+  }
+  if (startDate < todayKey) {
+    return { error: "Ngày bắt đầu không được ở quá khứ", warning: null };
+  }
+
+  const today = parseDateKey(todayKey);
+  if (!today) return { error: null, warning: null };
+  const daysFromToday = Math.round((parsedStartDate.getTime() - today.getTime()) / 86_400_000);
+  if (daysFromToday > 30) {
+    return {
+      error: null,
+      warning: "Ngày bắt đầu cách hiện tại hơn 30 ngày. Hãy chắc chắn đây là chủ ý.",
+    };
+  }
+
+  return { error: null, warning: null };
+}
+
+export function getMilestoneValidationError(input: {
+  week4: string;
+  week8: string;
+  week12: string;
+}): string | null {
+  return [input.week4, input.week8, input.week12].some((value) => value.trim().length > 0)
+    ? null
+    : "Đặt ít nhất 1 cột mốc kiểm tra để cycle có nhịp";
 }
 
 function normalizePreferredDays(preferredDays: number[] | undefined): number[] {
@@ -476,8 +550,9 @@ export function validateLeadIndicatorDraft(
     }
   }
 
-  if (!indicator.unit.trim()) {
-    warnings.push("Thêm đơn vị (ví dụ: buổi, lần, bài) để việc hiển thị rõ.");
+  const unitError = getLeadIndicatorUnitValidationError(indicator, 0);
+  if (unitError) {
+    warnings.push("đơn vị không được trống. Gợi ý: lần, phút, trang, buổi.");
   }
 
   return { warnings };

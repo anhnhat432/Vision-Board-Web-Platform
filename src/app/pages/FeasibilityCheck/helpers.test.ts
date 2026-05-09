@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { buildResult } from "./helpers";
+import { buildResult, getAnsweredQuestionCount, hasCompleteFeasibilityAnswers } from "./helpers";
+import { QUESTIONS } from "./constants";
 
 // ---------------------------------------------------------------------------
 // Helpers — build answer sets for specific scenarios
@@ -125,6 +126,20 @@ describe("high capacity + clear goal", () => {
   it("recommendation contains actionable pre-plan step", () => {
     const result = buildResult(highCapacityClearGoal(), 8);
     expect(result.recommendation).toContain("Trước khi tạo kế hoạch 12 tuần");
+  });
+});
+
+describe("feasibility answer completion validation", () => {
+  it("requires every question to have a non-null answer", () => {
+    const completeAnswers = highCapacityClearGoal();
+    const missingAnswers = { ...completeAnswers };
+    delete missingAnswers[QUESTIONS[0].id];
+    const nullAnswers = { ...completeAnswers, [QUESTIONS[1].id]: null };
+
+    expect(getAnsweredQuestionCount(completeAnswers)).toBe(QUESTIONS.length);
+    expect(hasCompleteFeasibilityAnswers(completeAnswers)).toBe(true);
+    expect(hasCompleteFeasibilityAnswers(missingAnswers)).toBe(false);
+    expect(hasCompleteFeasibilityAnswers(nullAnswers)).toBe(false);
   });
 });
 

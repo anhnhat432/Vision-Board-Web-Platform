@@ -24,6 +24,17 @@ export interface BuildResultOptions {
   goalArchetype?: GoalArchetype;
 }
 
+export function getAnsweredQuestionCount(answers: Record<number, string | null | undefined>): number {
+  return QUESTIONS.filter((question) => {
+    const answer = answers[question.id];
+    return typeof answer === "string" && answer.trim().length > 0;
+  }).length;
+}
+
+export function hasCompleteFeasibilityAnswers(answers: Record<number, string | null | undefined>): boolean {
+  return getAnsweredQuestionCount(answers) === QUESTIONS.length;
+}
+
 function getWheelPenalty(score: number): number {
   if (score <= 3) return 3;
   if (score <= 5) return 2;

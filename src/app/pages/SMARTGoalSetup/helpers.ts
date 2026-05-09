@@ -216,7 +216,7 @@ export function getStepValidationError(stepKey: SmartStepKey, smartData: SMARTDa
     if (baselineInput) {
       const baselineValue = parseNumberInput(baselineInput);
       if (baselineValue !== undefined && targetValue <= baselineValue) {
-        return "Mốc mục tiêu phải lớn hơn mốc hiện tại.";
+        return "Mục tiêu cần lớn hơn baseline";
       }
     }
 

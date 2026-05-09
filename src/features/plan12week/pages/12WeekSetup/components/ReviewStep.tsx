@@ -20,7 +20,13 @@ import {
   type PlanQualityLevel,
 } from "@/features/plan12week/logic";
 import type { PendingSMARTGoal } from "@/lib/smart-goal";
-import { formatScheduleDayLabels, getGoalTypeLabel, getLoadPreferenceLabel, getReviewDayLabel } from "../helpers";
+import {
+  formatScheduleDayLabels,
+  getGoalTypeLabel,
+  getLoadPreferenceLabel,
+  getMilestoneValidationError,
+  getReviewDayLabel,
+} from "../helpers";
 import type { LeadIndicatorDraft, PendingFeasibilityResult, TwelveWeekSetupDraft } from "../types";
 
 interface ReviewStepProps {
@@ -91,6 +97,11 @@ export function ReviewStep({
   }, [suggestionsOpen]);
 
   const isDesktop = useBreakpoint();
+  const milestoneError = getMilestoneValidationError({
+    week4: draft.week4Milestone,
+    week8: draft.week8Milestone,
+    week12: draft.week12Outcome,
+  });
 
   const intentArchetype = useMemo(() => {
     const intent = getUserIntentId();
@@ -501,6 +512,9 @@ export function ReviewStep({
                 <Input
                   id="milestone-week-4"
                   value={draft.week4Milestone}
+                  aria-invalid={Boolean(milestoneError)}
+                  aria-describedby={milestoneError ? "milestone-validation-error" : undefined}
+                  className={milestoneError ? "border-rose-300 focus-visible:ring-rose-200" : undefined}
                   onChange={(event) => onChange("week4Milestone", event.target.value)}
                 />
               </div>
@@ -509,10 +523,18 @@ export function ReviewStep({
                 <Input
                   id="milestone-week-8"
                   value={draft.week8Milestone}
+                  aria-invalid={Boolean(milestoneError)}
+                  aria-describedby={milestoneError ? "milestone-validation-error" : undefined}
+                  className={milestoneError ? "border-rose-300 focus-visible:ring-rose-200" : undefined}
                   onChange={(event) => onChange("week8Milestone", event.target.value)}
                 />
               </div>
             </div>
+            {milestoneError ? (
+              <p id="milestone-validation-error" role="alert" className="text-xs font-medium text-rose-700">
+                {milestoneError}
+              </p>
+            ) : null}
             <div className="space-y-2">
               <Label htmlFor="success-evidence">Bằng chứng thành công muốn thấy</Label>
               <Textarea

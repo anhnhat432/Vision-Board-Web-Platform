@@ -13,6 +13,7 @@ interface FeasibilityStepShellProps {
   currentQuestion: Question;
   currentStep: number;
   totalSteps: number;
+  answeredQuestionCount?: number;
   selectedAnswer: string | undefined;
   onAnswerChange: (value: string) => void;
   onBack: () => void;
@@ -25,6 +26,7 @@ export function FeasibilityStepShell({
   currentQuestion,
   currentStep,
   totalSteps,
+  answeredQuestionCount = 0,
   selectedAnswer,
   onAnswerChange,
   onBack,
@@ -48,6 +50,9 @@ export function FeasibilityStepShell({
             <div className="rounded-2xl gradient-violet-pink p-4 sm:p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">
                 {currentQuestion.axisLabel} · Câu hỏi {currentStep + 1}/{totalSteps}
+              </p>
+              <p className="mt-2 text-xs font-medium text-violet-700">
+                {answeredQuestionCount}/{totalSteps} câu đã trả lời
               </p>
               <h2
                 ref={headingRef}

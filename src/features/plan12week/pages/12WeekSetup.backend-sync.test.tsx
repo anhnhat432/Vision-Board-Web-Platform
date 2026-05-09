@@ -46,7 +46,7 @@ vi.mock("@/services/planService", () => ({
 
 import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
 import { getBackendGoalId } from "@/lib/api/goalLinkStore";
-import { APP_STORAGE_KEYS, getUserData, saveUserData } from '@/app/utils/storage';
+import { APP_STORAGE_KEYS, formatDateInputValue, getUserData, saveUserData } from '@/app/utils/storage';
 import { TwelveWeekSetup } from "./12WeekSetup";
 
 const INTEGRATION_TEST_TIMEOUT_MS = 10_000;
@@ -120,6 +120,7 @@ function buildPlanDetails(planId = "backend_plan_1", smartGoalId = "backend_goal
 }
 
 function seedReadyTwelveWeekSetup() {
+  const todayDateKey = formatDateInputValue(new Date());
   const data = getUserData();
   data.onboardingCompleted = true;
   data.goals = [];
@@ -207,7 +208,7 @@ function seedReadyTwelveWeekSetup() {
           cadence: "spread",
         },
       ],
-      startDate: "2026-04-06",
+      startDate: todayDateKey,
       reviewDay: "Sunday",
       tacticLoadPreference: "balanced",
       week4Milestone: "Giữ được 4 tuần đầu.",

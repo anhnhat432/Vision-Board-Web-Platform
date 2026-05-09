@@ -16,7 +16,7 @@ import { Label } from "@/app/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import { Textarea } from "@/app/components/ui/textarea";
 import { GOAL_TYPES } from "../constants";
-import { buildPlanRationaleReasons, getPlanLoadLabel } from "../helpers";
+import { buildPlanRationaleReasons, getMilestoneValidationError, getPlanLoadLabel } from "../helpers";
 import type { PendingFeasibilityResult, TwelveWeekSetupDraft } from "../types";
 import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
 import { useBreakpoint } from "@/app/hooks/useBreakpoint";
@@ -55,6 +55,11 @@ export function OutcomeStep({
 }: OutcomeStepProps) {
   const planRationaleReasons = buildPlanRationaleReasons(feasibility);
   const isDesktop = useBreakpoint();
+  const milestoneError = getMilestoneValidationError({
+    week4: draft.week4Milestone,
+    week8: draft.week8Milestone,
+    week12: draft.week12Outcome,
+  });
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -154,8 +159,16 @@ export function OutcomeStep({
             id="week-12-outcome"
             rows={2}
             value={draft.week12Outcome}
+            aria-invalid={Boolean(milestoneError)}
+            aria-describedby={milestoneError ? "week-12-outcome-error" : undefined}
+            className={milestoneError ? "border-rose-300 focus-visible:ring-rose-200" : undefined}
             onChange={(event) => onChange("week12Outcome", event.target.value)}
           />
+          {milestoneError ? (
+            <p id="week-12-outcome-error" role="alert" className="text-xs font-medium text-rose-700">
+              {milestoneError}
+            </p>
+          ) : null}
         </div>
       </div>
 

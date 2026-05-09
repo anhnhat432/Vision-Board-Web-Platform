@@ -49,4 +49,24 @@ describe("MeasurableStep — intent metric hint", () => {
       expect.arrayContaining(["smart-metric-name-hint", "smart-metric-intent-hint"]),
     );
   });
+
+  it("marks target invalid and shows copy when target is not larger than baseline", () => {
+    const setSmartData = vi.fn();
+    render(
+      <MeasurableStep
+        smartData={makeSmartData({
+          measurable: {
+            metric_name: "Số bài viết",
+            baseline_value: "10",
+            target_value: "10",
+          },
+        })}
+        setSmartData={setSmartData}
+        currentStepHasDraftContent
+      />,
+    );
+
+    expect(screen.getByLabelText("Mốc mục tiêu")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByText("Mục tiêu cần lớn hơn baseline")).toBeInTheDocument();
+  });
 });

@@ -43,9 +43,11 @@ export function MeasurableStep({
   const parsedTargetValue = parseNumberInput(smartData.measurable.target_value);
   const metricNameMissing = smartData.measurable.metric_name.trim().length === 0;
   const baselineInvalid = smartData.measurable.baseline_value.trim().length > 0 && parsedBaselineValue === undefined;
+  const targetNotAboveBaseline =
+    parsedBaselineValue !== undefined && parsedTargetValue !== undefined && parsedTargetValue <= parsedBaselineValue;
   const targetInvalid =
     parsedTargetValue === undefined ||
-    (parsedBaselineValue !== undefined && parsedTargetValue !== undefined && parsedTargetValue <= parsedBaselineValue);
+    targetNotAboveBaseline;
 
   return (
     <div className="space-y-5">
@@ -132,7 +134,13 @@ export function MeasurableStep({
               }))
             }
             aria-invalid={targetInvalid && currentStepHasDraftContent}
+            aria-describedby={targetNotAboveBaseline ? "smart-target-error" : undefined}
           />
+          {targetNotAboveBaseline ? (
+            <p id="smart-target-error" className="text-xs font-medium text-rose-700">
+              Mục tiêu cần lớn hơn baseline
+            </p>
+          ) : null}
         </div>
       </div>
       <p className="text-sm text-slate-500">

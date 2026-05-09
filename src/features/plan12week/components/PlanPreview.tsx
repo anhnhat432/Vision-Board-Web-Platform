@@ -29,6 +29,10 @@ interface PlanPreviewProps {
   onBack: () => void;
   /** Loading state */
   loading?: boolean;
+  /** Field-specific validation message that blocks confirmation */
+  validationMessage?: string | null;
+  /** Whether the current preview can be confirmed */
+  canConfirm?: boolean;
 }
 
 export function PlanPreview({
@@ -38,6 +42,8 @@ export function PlanPreview({
   onConfirm,
   onBack,
   loading = false,
+  validationMessage,
+  canConfirm = true,
 }: PlanPreviewProps) {
   const [expandedWeeks, setExpandedWeeks] = useState<Set<number>>(new Set([2, 3, 4]));
 
@@ -231,9 +237,16 @@ export function PlanPreview({
         <Button variant="outline" onClick={onBack} disabled={loading}>
           Quay lại sửa
         </Button>
-        <Button onClick={onConfirm} disabled={loading}>
+        <div className="flex flex-col items-end gap-2">
+          {validationMessage ? (
+            <p role="alert" className="max-w-md text-right text-sm font-medium text-rose-700">
+              {validationMessage}
+            </p>
+          ) : null}
+        <Button onClick={onConfirm} disabled={loading || !canConfirm}>
           {loading ? "Đang tạo..." : "Xác nhận tạo kế hoạch"}
         </Button>
+        </div>
       </div>
     </div>
   );

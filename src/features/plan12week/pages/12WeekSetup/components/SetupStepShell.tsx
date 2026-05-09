@@ -18,6 +18,9 @@ interface SetupStepShellProps {
   onNext: () => void;
   onSubmit: () => void;
   onJumpToStep?: (stepIndex: number) => void;
+  stepError?: string | null;
+  isNextDisabled?: boolean;
+  isSubmitDisabled?: boolean;
 }
 
 export function SetupStepShell({
@@ -31,6 +34,9 @@ export function SetupStepShell({
   onNext,
   onSubmit,
   onJumpToStep,
+  stepError,
+  isNextDisabled = false,
+  isSubmitDisabled = false,
 }: SetupStepShellProps) {
   const isLastStep = currentStep >= stepCount - 1;
   const stepShellRef = useRef<HTMLDivElement | null>(null);
@@ -136,6 +142,11 @@ export function SetupStepShell({
         </CardHeader>
         <CardContent className="space-y-6">
           {children}
+          {stepError ? (
+            <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+              {stepError}
+            </p>
+          ) : null}
 
           <div
             className={`flex flex-col justify-between gap-3 border-t border-white/70 pt-4 sm:flex-row sm:static ${
@@ -153,7 +164,7 @@ export function SetupStepShell({
                 className="w-full gradient-brand text-white shadow-lg hover:shadow-xl hover:scale-[1.01] sm:w-auto"
                 onClick={handleSubmitClick}
                 size="lg"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isSubmitDisabled}
                 aria-busy={isSubmitting}
               >
                 {isSubmitting ? (
@@ -164,7 +175,11 @@ export function SetupStepShell({
                 {isSubmitting ? "Đang tạo kế hoạch..." : "Tạo kế hoạch 12 tuần"}
               </Button>
             ) : (
-              <Button className="w-full sm:w-auto gradient-brand text-white shadow-lg hover:shadow-xl hover:scale-[1.02]" onClick={onNext}>
+              <Button
+                className="w-full sm:w-auto gradient-brand text-white shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                onClick={onNext}
+                disabled={isNextDisabled}
+              >
                 Tiếp tục
                 <ArrowRight className="h-4 w-4" />
               </Button>

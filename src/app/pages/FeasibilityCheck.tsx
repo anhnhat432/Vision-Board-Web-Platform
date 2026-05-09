@@ -25,7 +25,7 @@ import { APP_STORAGE_KEYS, getLifeAreaLabel, getUserData } from "../utils/storag
 import { FeasibilityStepShell } from "./FeasibilityCheck/components/FeasibilityStepShell";
 import { ResultStep } from "./FeasibilityCheck/components/ResultStep";
 import { QUESTIONS } from "./FeasibilityCheck/constants";
-import { buildResult } from "./FeasibilityCheck/helpers";
+import { buildResult, getAnsweredQuestionCount, hasCompleteFeasibilityAnswers } from "./FeasibilityCheck/helpers";
 import type { PendingFeasibilityResult, ResultData } from "./FeasibilityCheck/types";
 
 type FeasibilitySetupState = "checking" | "needs_life_balance" | "needs_life_insight" | "needs_smart_goal" | "ready";
@@ -191,6 +191,7 @@ export function FeasibilityCheck() {
   const totalSteps = QUESTIONS.length;
   const progressPercentage = ((currentStep + 1) / totalSteps) * 100;
   const selectedAnswer = answers[currentQuestion.id];
+  const answeredQuestionCount = getAnsweredQuestionCount(answers);
 
   const handleAnswerChange = (value: string) => {
     setAnswers({ ...answers, [currentQuestion.id]: value });
@@ -206,8 +207,14 @@ export function FeasibilityCheck() {
   };
 
   const handleNext = () => {
+    if (!selectedAnswer) return;
+
     if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
+      return;
+    }
+
+    if (!hasCompleteFeasibilityAnswers(answers)) {
       return;
     }
 
@@ -343,6 +350,7 @@ export function FeasibilityCheck() {
           currentQuestion={currentQuestion}
           currentStep={currentStep}
           totalSteps={totalSteps}
+          answeredQuestionCount={answeredQuestionCount}
           selectedAnswer={selectedAnswer}
           onAnswerChange={handleAnswerChange}
           onBack={handleBack}

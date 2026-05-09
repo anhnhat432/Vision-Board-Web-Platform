@@ -7,8 +7,12 @@ import {
   formatScheduleDayLabels,
   getFeasibilityDraftDefaults,
   getLeadIndicatorTargetValidationError,
+  getLeadIndicatorUnitValidationError,
+  getMilestoneValidationError,
   getPreviewTasks,
   getPreviewTasksByIndicator,
+  getStartDateValidation,
+  normalizeReviewDay,
   parseTargetFrequency,
   validateLeadIndicatorDraft,
 } from "./helpers";
@@ -96,6 +100,40 @@ describe("12-week setup plan load guards", () => {
 
     expect(error).toContain("1");
     expect(error).toContain("Zero target");
+  });
+
+  it("blocks an empty lead indicator unit with concrete unit examples", () => {
+    expect(getLeadIndicatorUnitValidationError(makeIndicator("Deep work", "2", "core"), 0)).toBeNull();
+
+    const missingUnit = makeIndicator("Deep work", "2", "core");
+    missingUnit.unit = "";
+
+    expect(getLeadIndicatorUnitValidationError(missingUnit, 0)).toBe(
+      "Đơn vị của việc lặp lại 1 (Deep work) không được trống. Gợi ý: lần, phút, trang, buổi.",
+    );
+  });
+
+  it("validates start date against local today and warns beyond 30 days", () => {
+    expect(getStartDateValidation("2026-05-08", new Date("2026-05-09T12:00:00+07:00"))).toEqual({
+      error: "Ngày bắt đầu không được ở quá khứ",
+      warning: null,
+    });
+    expect(getStartDateValidation("2026-06-15", new Date("2026-05-09T12:00:00+07:00"))).toEqual({
+      error: null,
+      warning: "Ngày bắt đầu cách hiện tại hơn 30 ngày. Hãy chắc chắn đây là chủ ý.",
+    });
+  });
+
+  it("normalizes invalid reviewDay drafts back to Sunday and reports it", () => {
+    expect(normalizeReviewDay("Funday")).toEqual({ value: "Sunday", changed: true });
+    expect(normalizeReviewDay("Monday")).toEqual({ value: "Monday", changed: false });
+  });
+
+  it("requires at least one week 4, 8, or 12 milestone", () => {
+    expect(getMilestoneValidationError({ week4: "", week8: "   ", week12: "" })).toBe(
+      "Đặt ít nhất 1 cột mốc kiểm tra để cycle có nhịp",
+    );
+    expect(getMilestoneValidationError({ week4: "", week8: "", week12: "Launch beta" })).toBeNull();
   });
 
   it("keeps lighter plus low time budget to one weekly task per tactic", () => {

@@ -118,4 +118,29 @@ describe("LeadIndicatorsStep — archetype example panel", () => {
     );
     expect(screen.queryByTestId("goal-archetype-examples")).toBeNull();
   });
+
+  it("marks the unit field invalid when a lead indicator has no unit", () => {
+    render(
+      <LeadIndicatorsStep
+        draft={makeDraft([
+          makeIndicator({ id: "a", name: "Deep work", target: "2", unit: "" }),
+          makeIndicator({ id: "b", name: "Weekly review", target: "1", unit: "buổi" }),
+        ])}
+        coreCount={2}
+        optionalCount={0}
+        setupGuideSupport={null}
+        setupGuideTemplate={null}
+        selectedTemplate={null}
+        weekOneTaskPreview={[]}
+        weekOneTaskWarning={null}
+        weekOneTaskGroups={[]}
+        onAddIndicator={noop}
+        onRemoveIndicator={noop}
+        onIndicatorChange={noop}
+      />,
+    );
+
+    expect(screen.getAllByLabelText("Đơn vị")[0]).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByText(/Gợi ý: lần, phút, trang, buổi/)).toBeInTheDocument();
+  });
 });

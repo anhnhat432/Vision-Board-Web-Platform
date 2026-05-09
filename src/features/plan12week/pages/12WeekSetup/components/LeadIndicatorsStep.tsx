@@ -16,7 +16,12 @@ import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
-import { formatScheduleDayLabels, validateLeadIndicatorDraft } from "../helpers";
+import {
+  formatScheduleDayLabels,
+  getLeadIndicatorTargetValidationError,
+  getLeadIndicatorUnitValidationError,
+  validateLeadIndicatorDraft,
+} from "../helpers";
 import type { IndicatorPreviewGroup } from "../helpers";
 import type { LeadIndicatorDraft, TwelveWeekSetupDraft } from "../types";
 import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
@@ -58,8 +63,16 @@ export function LeadIndicatorsStep({
     tacticLoadPreference: draft.tacticLoadPreference,
     dailyTimeBudget: draft.dailyTimeBudget,
   };
-  const indicatorWarnings = draft.leadIndicators.map((indicator) =>
-    validateLeadIndicatorDraft(indicator, validationOptions).warnings,
+  const indicatorTargetErrors = draft.leadIndicators.map((indicator, index) =>
+    getLeadIndicatorTargetValidationError(indicator, index),
+  );
+  const indicatorUnitErrors = draft.leadIndicators.map((indicator, index) =>
+    getLeadIndicatorUnitValidationError(indicator, index),
+  );
+  const indicatorWarnings = draft.leadIndicators.map((indicator, index) =>
+    validateLeadIndicatorDraft(indicator, validationOptions).warnings.filter(
+      (warning) => !indicatorUnitErrors[index] || !warning.toLocaleLowerCase("vi-VN").includes("đơn vị"),
+    ),
   );
   const intentArchetype: GoalArchetype | null = useMemo(() => {
     const intent = getUserIntentId();
@@ -183,18 +196,34 @@ export function LeadIndicatorsStep({
                   <Input
                     id={`tactic-target-${index}`}
                     value={indicator.target}
+                    aria-invalid={Boolean(indicatorTargetErrors[index])}
+                    aria-describedby={indicatorTargetErrors[index] ? `tactic-target-${index}-error` : undefined}
+                    className={indicatorTargetErrors[index] ? "border-rose-300 focus-visible:ring-rose-200" : undefined}
                     onChange={(event) => onIndicatorChange(index, "target", event.target.value)}
                     placeholder="Ví dụ: 2"
                   />
+                  {indicatorTargetErrors[index] ? (
+                    <p id={`tactic-target-${index}-error`} role="alert" className="text-xs font-medium text-rose-700">
+                      {indicatorTargetErrors[index]}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor={`tactic-unit-${index}`}>Đơn vị</Label>
                   <Input
                     id={`tactic-unit-${index}`}
                     value={indicator.unit}
+                    aria-invalid={Boolean(indicatorUnitErrors[index])}
+                    aria-describedby={indicatorUnitErrors[index] ? `tactic-unit-${index}-error` : undefined}
+                    className={indicatorUnitErrors[index] ? "border-rose-300 focus-visible:ring-rose-200" : undefined}
                     onChange={(event) => onIndicatorChange(index, "unit", event.target.value)}
                     placeholder="buổi, bài, lần..."
                   />
+                  {indicatorUnitErrors[index] ? (
+                    <p id={`tactic-unit-${index}-error`} role="alert" className="text-xs font-medium text-rose-700">
+                      {indicatorUnitErrors[index]}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor={`tactic-cadence-${index}`}>Nhịp</Label>

@@ -7,6 +7,7 @@ import {
   createInitialSMARTData,
   getQualityScoreBucket,
   getStepQualityHint,
+  getStepValidationError,
 } from "./helpers";
 import type { SMARTData } from "./types";
 
@@ -82,6 +83,23 @@ describe("buildSmartGoalFromFormData", () => {
     expect(goal.achievable.required_skills.length).toBeGreaterThan(0);
     expect(goal.achievable.support_resources.length).toBeGreaterThan(0);
     expect(goal.time_bound.target_weeks).toBe(12);
+  });
+});
+
+describe("SMART measurable validation", () => {
+  it("blocks a target that is not larger than baseline with field-specific copy", () => {
+    const error = getStepValidationError(
+      "measurable",
+      makeFormData({
+        measurable: {
+          metric_name: "Số bài viết",
+          baseline_value: "10",
+          target_value: "10",
+        },
+      }),
+    );
+
+    expect(error).toBe("Mục tiêu cần lớn hơn baseline");
   });
 });
 

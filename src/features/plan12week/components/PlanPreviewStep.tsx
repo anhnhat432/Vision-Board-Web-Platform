@@ -19,6 +19,8 @@ interface PlanPreviewStepProps {
   onBack: () => void;
   onSubmit: () => void;
   onChange: <K extends keyof TwelveWeekSetupDraft>(key: K, value: TwelveWeekSetupDraft[K]) => void;
+  validationMessage?: string | null;
+  canConfirm?: boolean;
 }
 
 export function PlanPreviewStep({
@@ -30,6 +32,8 @@ export function PlanPreviewStep({
   onBack,
   onSubmit,
   onChange,
+  validationMessage,
+  canConfirm = true,
 }: PlanPreviewStepProps) {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [localDraft, setLocalDraft] = useState<TwelveWeekSetupDraft>(draft);
@@ -174,6 +178,8 @@ export function PlanPreviewStep({
         onEditTactics={handleEditTactics}
         onConfirm={handleConfirm}
         onBack={onBack}
+        validationMessage={validationMessage}
+        canConfirm={canConfirm}
       />
 
       {isEditorOpen && (
