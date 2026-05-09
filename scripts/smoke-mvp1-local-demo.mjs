@@ -387,12 +387,12 @@ async function assertSignedOutHome() {
 
   assertTextIncludesAny(
     state,
-    ["trai nghiem demo mien phi", "dung thu khong can dang nhap", "bat dau life balance"],
+    ["trai nghiem demo mien phi", "dung thu mien phi", "dung duoc ngay khong can dang nhap"],
     "signed-out dashboard",
   );
   assertTextIncludesAny(
     state,
-    ["du lieu demo/local duoc luu tren trinh duyet hien tai", "local luu tren trinh duyet"],
+    ["du lieu demo/local duoc luu tren trinh duyet hien tai", "du lieu luu tren trinh duyet hien tai"],
     "signed-out dashboard local-storage disclosure",
   );
   assertTextExcludes(
@@ -403,7 +403,7 @@ async function assertSignedOutHome() {
 }
 
 async function startDemoFlowFromDashboard() {
-  await clickButton(["trai nghiem demo mien phi", "dung thu khong can dang nhap", "bat dau life balance"]);
+  await clickButton(["trai nghiem demo mien phi", "dung thu mien phi", "bat dau life balance"]);
   await waitFor(
     "local-first core flow route",
     'location.pathname === "/onboarding" || location.pathname === "/life-balance"',
