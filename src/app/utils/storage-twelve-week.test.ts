@@ -12,6 +12,7 @@ import {
   isTwelveWeekCycleReviewPhase,
   migrateLegacyUserData,
   normalizeGoal,
+  regenerateUpcomingTaskInstances,
   rescheduleTwelveWeekTaskToNextWeek,
   rescheduleTwelveWeekTaskWithinWeek,
   skipTwelveWeekNonCoreTask,
@@ -334,6 +335,60 @@ describe("Skipped tasks excluded from queries", () => {
     expect(completion.total).toBe(2);
     expect(completion.completed).toBe(1);
     expect(completion.percent).toBe(50);
+  });
+});
+
+describe("regenerateUpcomingTaskInstances", () => {
+  it("rebuilds current and future task dates after review day changes while preserving reviewed weeks", () => {
+    const system = createSystem({
+      currentWeek: 2,
+      reviewDay: "Friday",
+      leadIndicators: [
+        {
+          id: "tactic_1",
+          name: "Ship",
+          target: "2",
+          unit: "times/week",
+          type: "core",
+          priority: 1,
+          schedule: [1, 4],
+        },
+      ],
+      taskInstances: [
+        makeTask({ id: "tw_task_1_tactic_1_0", weekNumber: 1, scheduledDate: "2026-03-03", tacticId: "tactic_1" }),
+        makeTask({ id: "tw_task_1_tactic_1_1", weekNumber: 1, scheduledDate: "2026-03-06", tacticId: "tactic_1" }),
+        makeTask({ id: "tw_task_2_tactic_1_0", weekNumber: 2, scheduledDate: "2026-03-10", tacticId: "tactic_1" }),
+        makeTask({ id: "tw_task_2_tactic_1_1", weekNumber: 2, scheduledDate: "2026-03-13", tacticId: "tactic_1" }),
+      ],
+      weeklyReviews: [
+        {
+          weekNumber: 1,
+          leadCompletionPercent: 100,
+          lagProgressValue: "",
+          biggestOutputThisWeek: "",
+          mainObstacle: "",
+          nextWeekPriority: "",
+          workloadDecision: "keep same",
+          reviewCompleted: true,
+          progressScore: 5,
+          disciplineScore: 5,
+          focusScore: 5,
+          improvementScore: 5,
+          outputQualityScore: 5,
+        },
+      ],
+    });
+
+    const regenerated = regenerateUpcomingTaskInstances(system, { currentWeek: 2 });
+
+    expect(regenerated.taskInstances.filter((task) => task.weekNumber === 1).map((task) => task.scheduledDate)).toEqual([
+      "2026-03-03",
+      "2026-03-06",
+    ]);
+    expect(regenerated.taskInstances.filter((task) => task.weekNumber === 2).map((task) => task.scheduledDate)).toEqual([
+      "2026-03-10",
+      "2026-03-12",
+    ]);
   });
 });
 

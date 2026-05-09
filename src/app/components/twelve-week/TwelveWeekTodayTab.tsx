@@ -808,7 +808,7 @@ export function TwelveWeekTodayTab({
                     Đang lưu check-in...
                   </>
                 ) : (
-                  "Lưu check-in hôm nay"
+                  hasSavedTodayCheckIn ? "Cập nhật check-in hôm nay" : "Lưu check-in hôm nay"
                 )}
               </Button>
               {reviewDueToday && onOpenWeekTab && (

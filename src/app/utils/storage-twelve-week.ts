@@ -10,6 +10,7 @@ import type {
   TacticType,
   TwelveWeekSystem,
   TwelveWeekTaskInstance,
+  UniversalDailyCheckIn,
   UniversalScoreboardWeek,
   UniversalWeeklyReview,
   UserData,
@@ -139,6 +140,38 @@ function normalizeScheduleOffsets(
   }
 
   return getTaskOffsetsForFrequency(frequency);
+}
+
+function getReviewDayOffset(reviewDay: string, weekStartsOn: TwelveWeekSystem["weekStartsOn"]): number {
+  return (getReviewDayIndex(reviewDay) - getWeekStartOffset(weekStartsOn) + 7) % 7;
+}
+
+function getReviewAwareScheduleOffsets(indicator: LeadIndicator, system: TwelveWeekSystem): number[] {
+  const baseOffsets = normalizeScheduleOffsets(indicator.schedule, indicator.target || "1", system.preferredDays);
+  const reviewOffset = getReviewDayOffset(system.reviewDay, system.weekStartsOn ?? "Monday");
+  const maxWorkOffset = reviewOffset === 0 ? 6 : reviewOffset - 1;
+  const desiredCount = Math.min(baseOffsets.length, maxWorkOffset + 1);
+  if (desiredCount <= 0) return [];
+
+  const selected = new Set<number>();
+  baseOffsets
+    .filter((offset) => offset <= maxWorkOffset)
+    .slice(0, desiredCount)
+    .forEach((offset) => {
+      selected.add(offset);
+    });
+
+  const candidates = [
+    ...baseOffsets.map((offset) => Math.min(offset, maxWorkOffset)),
+    ...Array.from({ length: maxWorkOffset + 1 }, (_, index) => maxWorkOffset - index),
+  ];
+
+  for (const candidate of candidates) {
+    if (selected.size >= desiredCount) break;
+    selected.add(candidate);
+  }
+
+  return Array.from(selected).sort((left, right) => left - right);
 }
 
 function keepGeneratedTaskOutOfPast(startDate: Date, totalWeeks: number, weekNumber: number, generatedDate: string) {
@@ -278,6 +311,18 @@ function normalizeWeeklyReview(review: UniversalWeeklyReview): UniversalWeeklyRe
     executionScore: legacyReview.executionScore ?? review.leadCompletionPercent,
     reflection: legacyReview.reflection ?? insights,
     adjustments: legacyReview.adjustments ?? legacyNextWeekCommitment,
+  };
+}
+
+function normalizeDailyCheckIn(checkIn: UniversalDailyCheckIn): UniversalDailyCheckIn {
+  const updatedCount =
+    typeof checkIn.updatedCount === "number" && Number.isFinite(checkIn.updatedCount) && checkIn.updatedCount > 0
+      ? Math.round(checkIn.updatedCount)
+      : undefined;
+
+  return {
+    ...checkIn,
+    updatedCount,
   };
 }
 
@@ -470,7 +515,10 @@ export function buildDerivedScoreboard(
   return syncDerivedScoreboard(system, existingScoreboard);
 }
 
-function buildTaskInstances(system: TwelveWeekSystem): TwelveWeekTaskInstance[] {
+function buildTaskInstances(
+  system: TwelveWeekSystem,
+  options: { preserveExistingSchedule?: boolean; reviewAwareSchedule?: boolean } = {},
+): TwelveWeekTaskInstance[] {
   const startDate = inferSystemStartDate(system);
   const leadIndicators =
     system.leadIndicators.length > 0
@@ -497,11 +545,13 @@ function buildTaskInstances(system: TwelveWeekSystem): TwelveWeekTaskInstance[] 
 
     leadIndicators.forEach((indicator, indicatorIndex) => {
       const frequency = getLeadTargetCount(indicator.target);
-      const offsets = normalizeScheduleOffsets(
-        indicator.schedule,
-        indicator.target,
-        system.preferredDays,
-      );
+      const offsets = options.reviewAwareSchedule
+        ? getReviewAwareScheduleOffsets(indicator, system)
+        : normalizeScheduleOffsets(
+            indicator.schedule,
+            indicator.target,
+            system.preferredDays,
+          );
 
       offsets.forEach((offset, slotIndex) => {
         const tacticId = indicator.id || buildLeadIndicatorId(indicator.name, indicatorIndex);
@@ -509,12 +559,15 @@ function buildTaskInstances(system: TwelveWeekSystem): TwelveWeekTaskInstance[] 
         const existing = previousInstances.get(id);
         const title = frequency === 1 ? indicator.name : `${indicator.name} ${slotIndex + 1}`;
         const generatedDate = formatDateInputValue(addCalendarDays(weekStart, offset));
-        const scheduledDate = existing?.scheduledDate || keepGeneratedTaskOutOfPast(
-          startDate,
-          system.totalWeeks,
-          weekNumber,
-          generatedDate,
-        );
+        const scheduledDate =
+          options.preserveExistingSchedule !== false && existing?.scheduledDate
+            ? existing.scheduledDate
+            : keepGeneratedTaskOutOfPast(
+                startDate,
+                system.totalWeeks,
+                weekNumber,
+                generatedDate,
+              );
 
         nextInstances.push({
           id,
@@ -534,6 +587,51 @@ function buildTaskInstances(system: TwelveWeekSystem): TwelveWeekTaskInstance[] 
   }
 
   return nextInstances;
+}
+
+export function regenerateUpcomingTaskInstances(
+  system: TwelveWeekSystem,
+  options: { currentWeek?: number } = {},
+): TwelveWeekSystem {
+  const currentWeek = clampNumber(options.currentWeek ?? system.currentWeek ?? getTwelveWeekCurrentWeek(system), 1, system.totalWeeks);
+  const protectedWeeks = new Set<number>();
+
+  for (let weekNumber = 1; weekNumber < currentWeek; weekNumber += 1) {
+    protectedWeeks.add(weekNumber);
+  }
+
+  system.weeklyReviews
+    .filter((review) => review.reviewCompleted)
+    .forEach((review) => {
+      protectedWeeks.add(review.weekNumber);
+    });
+  system.scoreboard
+    .filter((week) => week.reviewDone)
+    .forEach((week) => {
+      protectedWeeks.add(week.weekNumber);
+    });
+
+  const regeneratedTasks = buildTaskInstances(system, {
+    preserveExistingSchedule: false,
+    reviewAwareSchedule: true,
+  });
+  const protectedTasks = system.taskInstances.filter((task) => protectedWeeks.has(task.weekNumber));
+  const upcomingTasks = regeneratedTasks.filter((task) => !protectedWeeks.has(task.weekNumber));
+  const taskInstances = [...protectedTasks, ...upcomingTasks].sort(
+    (left, right) =>
+      left.weekNumber - right.weekNumber ||
+      left.scheduledDate.localeCompare(right.scheduledDate) ||
+      left.title.localeCompare(right.title),
+  );
+  const nextSystem = {
+    ...system,
+    taskInstances,
+  };
+
+  return {
+    ...nextSystem,
+    scoreboard: syncDerivedScoreboard(nextSystem, system.scoreboard),
+  };
 }
 
 export function getTwelveWeekCurrentWeek(system: TwelveWeekSystem, referenceDate = new Date()): number {
@@ -991,7 +1089,7 @@ export function normalizeGoal(goal: Goal): Goal {
     reentryCount: baseSystem.reentryCount ?? 0,
     taskInstances: Array.isArray(baseSystem.taskInstances) ? baseSystem.taskInstances : [],
     weeklyPlans: Array.isArray(baseSystem.weeklyPlans) ? baseSystem.weeklyPlans : [],
-    dailyCheckIns: Array.isArray(baseSystem.dailyCheckIns) ? baseSystem.dailyCheckIns : [],
+    dailyCheckIns: Array.isArray(baseSystem.dailyCheckIns) ? baseSystem.dailyCheckIns.map(normalizeDailyCheckIn) : [],
     weeklyReviews: Array.isArray(baseSystem.weeklyReviews) ? baseSystem.weeklyReviews.map(normalizeWeeklyReview) : [],
     scoreboard: Array.isArray(baseSystem.scoreboard) ? baseSystem.scoreboard : [],
   };

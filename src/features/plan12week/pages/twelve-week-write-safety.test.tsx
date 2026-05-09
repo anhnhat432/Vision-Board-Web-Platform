@@ -83,6 +83,7 @@ async function typeWamReview(
 describe("12-week write-path safety", () => {
   beforeEach(() => {
     resetTestStorage();
+    window.confirm = vi.fn(() => true);
     syncTaskToggleMock.mockReset();
     syncWeeklyReviewMock.mockReset();
     syncDailyCheckInMock.mockReset();

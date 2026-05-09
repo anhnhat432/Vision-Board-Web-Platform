@@ -62,11 +62,21 @@ export function getLatestDailyCheckIn(goal: Goal | null): UniversalDailyCheckIn 
   const checkIns = goal?.twelveWeekSystem?.dailyCheckIns ?? [];
   if (checkIns.length === 0) return null;
 
-  return [...checkIns].sort((left, right) => {
-    const leftKey = getCalendarDateKey(left.date) ?? left.date;
-    const rightKey = getCalendarDateKey(right.date) ?? right.date;
-    return rightKey.localeCompare(leftKey) || right.date.localeCompare(left.date);
-  })[0];
+  return checkIns
+    .map((checkIn, index) => ({ checkIn, index }))
+    .sort((left, right) => {
+      const leftKey = getCalendarDateKey(left.checkIn.date) ?? left.checkIn.date;
+      const rightKey = getCalendarDateKey(right.checkIn.date) ?? right.checkIn.date;
+      const leftUpdateCount = left.checkIn.updatedCount ?? 0;
+      const rightUpdateCount = right.checkIn.updatedCount ?? 0;
+
+      return (
+        rightKey.localeCompare(leftKey) ||
+        rightUpdateCount - leftUpdateCount ||
+        right.checkIn.date.localeCompare(left.checkIn.date) ||
+        left.index - right.index
+      );
+    })[0]?.checkIn ?? null;
 }
 
 export function addDaysToDateKey(dateKey: string, amount: number): string {

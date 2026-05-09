@@ -61,6 +61,7 @@ type WeeklyCommitmentStatus = "kept" | "missed" | "not_set" | "unanswered";
 
 interface TwelveWeekWeekTabProps {
   system: TwelveWeekSystem;
+  currentWeekNumber?: number;
   currentWeekRange: WeekRange | null;
   currentPlanFocus: string;
   currentPlanMilestone: string;
@@ -161,6 +162,7 @@ function getCommitmentButtonClass(isActive: boolean): string {
 
 export function TwelveWeekWeekTab({
   system,
+  currentWeekNumber,
   currentWeekRange,
   currentPlanFocus,
   currentPlanMilestone,
@@ -188,6 +190,13 @@ export function TwelveWeekWeekTab({
   onAcceptNextWeekRecommendation,
   weeklyReflectionInsights,
 }: TwelveWeekWeekTabProps) {
+  const reviewWeekNumber = system.currentWeek;
+  const currentWeekLimit = Math.min(
+    Math.max(currentWeekNumber ?? system.currentWeek, 1),
+    Math.max(system.totalWeeks, 1),
+  );
+  const isFutureReviewWeek = reviewWeekNumber > currentWeekLimit;
+  const shouldConfirmEarlyReview = reviewWeekNumber === currentWeekLimit && !reviewDueToday;
   const leadScoreValue = currentReview?.leadCompletionPercent ?? weekCompletion.percent;
   const scoreInterpretation = interpretWeeklyExecutionScore(leadScoreValue);
   const scoreTone = getLeadScoreTone(scoreInterpretation.level);
@@ -203,7 +212,7 @@ export function TwelveWeekWeekTab({
           system.totalWeeks,
         )
       : null;
-  const previousReview = system.weeklyReviews.find((review) => review.weekNumber === system.currentWeek - 1);
+  const previousReview = system.weeklyReviews.find((review) => review.weekNumber === reviewWeekNumber - 1);
   const previousCommitments = getReviewNextWeekCommitments(previousReview);
   const allPreviousCommitmentsAnswered =
     previousCommitments.length === 0 ||
@@ -242,10 +251,12 @@ export function TwelveWeekWeekTab({
     },
   ];
   const reviewReadyCount = reviewReadinessItems.filter((item) => item.done).length;
-  const canSubmitWeeklyReview = allPreviousCommitmentsAnswered && hasNextWeekCommitment;
+  const canSubmitWeeklyReview = allPreviousCommitmentsAnswered && hasNextWeekCommitment && !isFutureReviewWeek;
 
   const handleSaveReviewClick = async () => {
     if (isSavingReview || !canSubmitWeeklyReview) return;
+    if (isFutureReviewWeek) return;
+    if (shouldConfirmEarlyReview && !window.confirm("Tuần chưa hết, vẫn lưu sớm?")) return;
     setIsSavingReview(true);
     try {
       await Promise.resolve(onSaveWeeklyReview());
@@ -886,7 +897,11 @@ export function TwelveWeekWeekTab({
                 </span>
               </div>
               <p className="mt-1 leading-6">
-                Chốt đủ WAM 4 câu trước khi đóng review tuần.
+                {isFutureReviewWeek
+                  ? "Không thể chốt tuần tương lai. Hãy quay lại tuần hiện tại trước khi lưu review."
+                  : shouldConfirmEarlyReview
+                    ? "Tuần chưa tới ngày review chính thức. Khi lưu sớm, bạn sẽ cần xác nhận thêm một lần."
+                    : "Chốt đủ WAM 4 câu trước khi đóng review tuần."}
               </p>
             </div>
             <div

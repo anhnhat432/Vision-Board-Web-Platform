@@ -84,6 +84,8 @@ export interface UniversalDailyCheckIn {
   dailySelfRating: number;
   optionalNote: string;
   mood?: "low" | "steady" | "high";
+  /** Same-day edits are appended as new entries; higher count wins for display. */
+  updatedCount?: number;
 }
 
 export interface UniversalWeeklyReview {

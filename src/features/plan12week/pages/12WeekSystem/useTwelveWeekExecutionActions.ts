@@ -317,6 +317,11 @@ export function useTwelveWeekExecutionActions({
       .filter((task) => task.completed)
       .map((task) => task.title)
       .join(", ");
+    const sameDayCheckIns = latestSystem.dailyCheckIns.filter((item) => getCalendarDateKey(item.date) === todayKey);
+    const updatedCount = sameDayCheckIns.reduce(
+      (maxCount, item) => Math.max(maxCount, item.updatedCount ?? 1),
+      0,
+    ) + 1;
     const dailyCheckIn: UniversalDailyCheckIn = {
       date: todayKey,
       didWorkToday: completedTodayCount > 0 || dailyNote.trim().length > 0,
@@ -327,12 +332,12 @@ export function useTwelveWeekExecutionActions({
       dailySelfRating: getMoodScore(dailyMood),
       optionalNote: dailyNote.trim(),
       mood: dailyMood,
+      updatedCount,
     };
 
-    const filteredCheckIns = latestSystem.dailyCheckIns.filter((item) => getCalendarDateKey(item.date) !== todayKey);
     commitSystemUpdate({
       ...latestSystem,
-      dailyCheckIns: [dailyCheckIn, ...filteredCheckIns].slice(0, 120),
+      dailyCheckIns: [dailyCheckIn, ...latestSystem.dailyCheckIns].slice(0, 120),
     });
 
     enqueueDailyCheckInUpsertedMutation(actionGoalId, syncWeekNumber, dailyCheckIn);

@@ -120,7 +120,7 @@ describe("ProgressSummaryCard cycle timeline", () => {
         currentWeekScoreValue={62}
         averageScore={70}
         reviewDoneCount={1}
-        weekCompletion={{ completed: 2, total: 5, percent: 40 }}
+        weekCompletion={{ completed: 5, total: 5, percent: 100 }}
         reviewDueToday
         onOpenWeekTab={onOpenWeekTab}
       />,

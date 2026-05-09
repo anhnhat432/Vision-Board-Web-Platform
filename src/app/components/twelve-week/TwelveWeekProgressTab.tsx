@@ -62,6 +62,8 @@ interface TwelveWeekProgressTabProps {
   reviewDueToday?: boolean;
   onOpenTodayTab?: () => void;
   onOpenWeekTab?: () => void;
+  onOpenSettingsTab?: () => void;
+  onOpenCycleReview?: () => void;
   onNavigateToSetup?: () => void;
   /**
    * Optional execution insights computed by `getExecutionInsights`. When
@@ -69,6 +71,65 @@ interface TwelveWeekProgressTabProps {
    * the trend hero. When omitted or empty, no card renders (backwards compat).
    */
   executionInsights?: ReadonlyArray<ExecutionInsight>;
+}
+
+export type ProgressNextActionTarget = "cycle_review" | "today" | "week" | "settings";
+
+export interface ProgressNextActionSuggestionInput {
+  currentWeek: number;
+  totalWeeks: number;
+  hasOpenTasksThisWeek: boolean;
+  reviewDueToday: boolean;
+  hasReviewedCurrentWeek: boolean;
+  hasAnyTasks: boolean;
+}
+
+export interface ProgressNextActionSuggestion {
+  target: ProgressNextActionTarget;
+  label: string;
+  buttonLabel: string;
+}
+
+export function getProgressNextActionSuggestion(
+  input: ProgressNextActionSuggestionInput,
+): ProgressNextActionSuggestion {
+  if (input.currentWeek > input.totalWeeks) {
+    return {
+      target: "cycle_review",
+      label: "Mở Cycle Review",
+      buttonLabel: "Mở Cycle Review",
+    };
+  }
+
+  if (input.hasOpenTasksThisWeek) {
+    return {
+      target: "today",
+      label: "Hoàn thành việc cốt lõi hôm nay",
+      buttonLabel: "Mở tab Hôm nay",
+    };
+  }
+
+  if (input.reviewDueToday && !input.hasReviewedCurrentWeek) {
+    return {
+      target: "week",
+      label: "Mở Weekly Review",
+      buttonLabel: "Mở tab Tuần",
+    };
+  }
+
+  if (input.hasReviewedCurrentWeek) {
+    return {
+      target: "week",
+      label: "Chuẩn bị tuần sau",
+      buttonLabel: "Mở tab Tuần",
+    };
+  }
+
+  return {
+    target: "settings",
+    label: input.hasAnyTasks ? "Hoàn thành việc cốt lõi hôm nay" : "Hoàn tất setup ở Settings",
+    buttonLabel: input.hasAnyTasks ? "Mở tab Hôm nay" : "Mở Settings",
+  };
 }
 
 function getNarrativeStyle(level: ProgressTrendInterpretation["level"]): {
@@ -111,12 +172,18 @@ function getNarrativeStyle(level: ProgressTrendInterpretation["level"]): {
 }
 
 function pickNextActionHandler(
-  level: ProgressTrendInterpretation["level"],
-  reviewDueToday: boolean,
-  callbacks: { onOpenTodayTab?: () => void; onOpenWeekTab?: () => void; onNavigateToSetup?: () => void },
+  suggestion: ProgressNextActionSuggestion,
+  callbacks: {
+    onOpenTodayTab?: () => void;
+    onOpenWeekTab?: () => void;
+    onOpenSettingsTab?: () => void;
+    onOpenCycleReview?: () => void;
+    onNavigateToSetup?: () => void;
+  },
 ): (() => void) | undefined {
-  if (level === "no_data") return callbacks.onNavigateToSetup;
-  if (reviewDueToday) return callbacks.onOpenWeekTab;
+  if (suggestion.target === "cycle_review") return callbacks.onOpenCycleReview ?? callbacks.onOpenWeekTab;
+  if (suggestion.target === "week") return callbacks.onOpenWeekTab;
+  if (suggestion.target === "settings") return callbacks.onOpenSettingsTab ?? callbacks.onNavigateToSetup;
   return callbacks.onOpenTodayTab;
 }
 
@@ -146,6 +213,8 @@ export function TwelveWeekProgressTab({
   reviewDueToday = false,
   onOpenTodayTab,
   onOpenWeekTab,
+  onOpenSettingsTab,
+  onOpenCycleReview,
   onNavigateToSetup,
   executionInsights,
 }: TwelveWeekProgressTabProps) {
@@ -153,6 +222,18 @@ export function TwelveWeekProgressTab({
   const previousWeekScore =
     previousWeekEntry && previousWeekEntry.weeklyScore > 0 ? previousWeekEntry.weeklyScore : null;
   const hasAnyTasks = system.scoreboard.some((entry) => entry.weeklyScore > 0) || system.taskInstances.length > 0;
+  const currentWeekScoreboardEntry = system.scoreboard.find((entry) => entry.weekNumber === currentWeek);
+  const hasReviewedCurrentWeek =
+    currentWeekScoreboardEntry?.reviewDone ||
+    Boolean(system.weeklyReviews.find((review) => review.weekNumber === currentWeek)?.reviewCompleted);
+  const nextActionSuggestion = getProgressNextActionSuggestion({
+    currentWeek,
+    totalWeeks: system.totalWeeks,
+    hasOpenTasksThisWeek: weekCompletion.total > 0 && weekCompletion.completed < weekCompletion.total,
+    reviewDueToday,
+    hasReviewedCurrentWeek,
+    hasAnyTasks,
+  });
 
   const trend = interpretProgressTrend({
     currentWeek,
@@ -165,9 +246,11 @@ export function TwelveWeekProgressTab({
     hasAnyTasks,
   });
   const narrativeStyle = getNarrativeStyle(trend.level);
-  const nextActionHandler = pickNextActionHandler(trend.level, reviewDueToday, {
+  const nextActionHandler = pickNextActionHandler(nextActionSuggestion, {
     onOpenTodayTab,
     onOpenWeekTab,
+    onOpenSettingsTab,
+    onOpenCycleReview,
     onNavigateToSetup,
   });
   const isEarlyState = trend.level === "early" || trend.level === "no_data";
@@ -209,13 +292,9 @@ export function TwelveWeekProgressTab({
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
                     Tiếp theo nên làm
                   </p>
-                  <p className="mt-1 text-sm leading-6 text-slate-800">{trend.nextAction}</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-800">{nextActionSuggestion.label}</p>
                   <Button size="lg" className="mt-3 w-full sm:w-auto" onClick={nextActionHandler}>
-                    {trend.level === "no_data"
-                      ? "Mở Setup"
-                      : reviewDueToday
-                        ? "Mở tab Tuần"
-                        : "Mở tab Hôm nay"}
+                    {nextActionSuggestion.buttonLabel}
                     <ArrowRight className="ml-1 h-4 w-4" />
                   </Button>
                 </div>

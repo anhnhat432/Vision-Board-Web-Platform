@@ -688,6 +688,9 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
   await page.locator("#weekly-insights").fill(WEEKLY_REVIEW_OUTPUT);
   await page.locator("#weekly-next-commitments").fill(WEEKLY_REVIEW_PRIORITY);
   await page.locator("#weekly-next-commitments").press("Enter");
+  await page.evaluate(() => {
+    window.confirm = () => true;
+  });
   await clickButtonByNormalizedText(page, "chot review tuan nay");
   await waitForGoalSnapshot(page, "weekly review in local storage", (snapshot) => {
     return (

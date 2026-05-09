@@ -221,6 +221,74 @@ describe("TwelveWeekWeekTab review flow", () => {
     expect(screen.getByTestId("weekly-review-mobile-sticky-cta")).toHaveClass("bottom-20");
   });
 
+  it("blocks weekly review submit for a future week number", async () => {
+    const user = userEvent.setup();
+    const onSaveWeeklyReview = vi.fn();
+
+    render(
+      <TwelveWeekWeekTab
+        {...makeProps({
+          system: makeSystem({ currentWeek: 99 }),
+          weeklyForm: {
+            lagProgressValue: "",
+            biggestOutputThisWeek: "",
+            mainObstacle: "",
+            keepTactic: "",
+            reduceTactic: "",
+            nextWeekPriority: "",
+            commitmentStatuses: {},
+            insights: "Keep the review small.",
+            nextWeekCommitments: ["Plan next week"],
+            workloadDecision: "keep same",
+          },
+          onSaveWeeklyReview,
+        })}
+      />,
+    );
+
+    await user.click(screen.getAllByRole("button", { name: /chốt review tuần này/i })[0]);
+
+    expect(onSaveWeeklyReview).not.toHaveBeenCalled();
+    expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent(/không thể chốt tuần tương lai/i);
+  });
+
+  it("asks for confirmation before saving the current week early", async () => {
+    const user = userEvent.setup();
+    const onSaveWeeklyReview = vi.fn();
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValueOnce(false).mockReturnValueOnce(true);
+
+    render(
+      <TwelveWeekWeekTab
+        {...makeProps({
+          reviewDueToday: false,
+          weeklyForm: {
+            lagProgressValue: "",
+            biggestOutputThisWeek: "",
+            mainObstacle: "",
+            keepTactic: "",
+            reduceTactic: "",
+            nextWeekPriority: "",
+            commitmentStatuses: {},
+            insights: "Keep the review small.",
+            nextWeekCommitments: ["Plan next week"],
+            workloadDecision: "keep same",
+          },
+          onSaveWeeklyReview,
+        })}
+      />,
+    );
+
+    const saveButton = screen.getAllByRole("button", { name: /chốt review tuần này/i })[0];
+    await user.click(saveButton);
+    expect(onSaveWeeklyReview).not.toHaveBeenCalled();
+
+    await user.click(saveButton);
+    expect(confirmSpy).toHaveBeenCalledWith("Tuần chưa hết, vẫn lưu sớm?");
+    expect(onSaveWeeklyReview).toHaveBeenCalledTimes(1);
+
+    confirmSpy.mockRestore();
+  });
+
   it("shows lead as the weekly hero score and lag progress beside it", () => {
     render(
       <TwelveWeekWeekTab

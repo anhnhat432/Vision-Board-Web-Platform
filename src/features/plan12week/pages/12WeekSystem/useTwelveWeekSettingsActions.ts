@@ -27,6 +27,7 @@ import {
 } from "@/app/utils/storage";
 import type { Goal, TwelveWeekSystem } from "@/app/utils/storage-types";
 import { getCurrentWeekStartDate } from "@/app/utils/twelve-week-system-ui";
+import { regenerateUpcomingTaskInstances } from "@/app/utils/storage-twelve-week";
 import { enqueueLeadMetricUpsertedMutations } from "@/features/plan12week/persistence/leadMetricMutation";
 import { enqueuePlanSnapshotUpdatedMutation } from "@/features/plan12week/persistence/planSnapshotMutation";
 
@@ -73,10 +74,12 @@ export function useTwelveWeekSettingsActions({
 
   const handleReviewDayChange = useCallback((value: string) => {
     if (!system) return;
-    commitPlanSnapshotUpdate({
-      ...system,
-      reviewDay: value,
-    });
+    commitPlanSnapshotUpdate(
+      regenerateUpcomingTaskInstances({
+        ...system,
+        reviewDay: value,
+      }),
+    );
     toast.success("Ngày review đã được cập nhật.");
   }, [system, commitPlanSnapshotUpdate]);
 

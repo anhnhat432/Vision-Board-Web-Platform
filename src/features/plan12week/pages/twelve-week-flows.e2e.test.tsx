@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { vi } from "vitest";
 
 import {
   APP_STORAGE_KEYS,
@@ -74,6 +75,7 @@ async function typeWamReview(
 describe("12-week core flows", () => {
   beforeEach(() => {
     resetTestStorage();
+    window.confirm = vi.fn(() => true);
   });
 
   it("creates a 12-week system from setup and routes into the command center", async () => {
@@ -372,6 +374,7 @@ describe("12-week core flows", () => {
 
     await waitFor(() => {
       expect(readGoal(goalId).twelveWeekSystem?.dailyCheckIns[0]?.optionalNote).toBe("First local check-in.");
+      expect(readGoal(goalId).twelveWeekSystem?.dailyCheckIns[0]?.updatedCount).toBe(1);
     });
 
     await user.clear(noteInput);
@@ -379,7 +382,11 @@ describe("12-week core flows", () => {
     await user.click(getPrimaryButton(/check-in/i));
 
     await waitFor(() => {
-      expect(readGoal(goalId).twelveWeekSystem?.dailyCheckIns[0]?.optionalNote).toBe("Latest local check-in.");
+      const checkIns = readGoal(goalId).twelveWeekSystem?.dailyCheckIns ?? [];
+      expect(checkIns[0]?.optionalNote).toBe("Latest local check-in.");
+      expect(checkIns[0]?.updatedCount).toBe(2);
+      expect(checkIns[1]?.optionalNote).toBe("First local check-in.");
+      expect(checkIns).toHaveLength(2);
     });
 
     const dailyMutations = listStoredPendingMutations(null).filter((item) => item.kind === "daily_check_in_upserted");

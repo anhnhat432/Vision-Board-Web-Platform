@@ -298,6 +298,19 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
     expect(screen.queryByTestId("today-check-in-saved")).toBeNull();
   });
 
+  it("changes the check-in CTA label when today already has a saved check-in", () => {
+    render(
+      <TwelveWeekTodayTab
+        {...makeProps({
+          latestCheckIn: makeCheckIn({ date: "2026-05-02", mood: "high", optionalNote: "First note" }),
+        })}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /Cập nhật check-in hôm nay/i })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^Lưu check-in hôm nay$/i })).not.toBeInTheDocument();
+  });
+
   it("offers a Week handoff from the check-in card when review is due", async () => {
     const onOpenWeekTab = vi.fn();
     const onSaveCheckIn = vi.fn();

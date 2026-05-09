@@ -16,6 +16,7 @@ import { Card, CardContent } from "../ui/card";
 import type { TwelveWeekSystem } from "../../utils/storage-types";
 import { interpretProgressTrend, type ProgressTrendInterpretation } from "@/features/plan12week/logic";
 import { formatCalendarDate } from "../../utils/storage";
+import { getProgressNextActionSuggestion, type ProgressNextActionSuggestion } from "./TwelveWeekProgressTab";
 
 interface WeekRange {
   start: string;
@@ -39,6 +40,8 @@ interface ProgressSummaryCardProps {
   reviewDueToday?: boolean;
   onOpenTodayTab?: () => void;
   onOpenWeekTab?: () => void;
+  onOpenSettingsTab?: () => void;
+  onOpenCycleReview?: () => void;
   onNavigateToSetup?: () => void;
   onViewFull?: () => void;
 }
@@ -58,6 +61,22 @@ function getNarrativeStyle(level: ProgressTrendInterpretation["level"]) {
   }
 }
 
+function pickNextActionHandler(
+  suggestion: ProgressNextActionSuggestion,
+  callbacks: {
+    onOpenTodayTab?: () => void;
+    onOpenWeekTab?: () => void;
+    onOpenSettingsTab?: () => void;
+    onOpenCycleReview?: () => void;
+    onNavigateToSetup?: () => void;
+  },
+): (() => void) | undefined {
+  if (suggestion.target === "cycle_review") return callbacks.onOpenCycleReview ?? callbacks.onOpenWeekTab;
+  if (suggestion.target === "week") return callbacks.onOpenWeekTab;
+  if (suggestion.target === "settings") return callbacks.onOpenSettingsTab ?? callbacks.onNavigateToSetup;
+  return callbacks.onOpenTodayTab;
+}
+
 export function ProgressSummaryCard({
   system,
   currentWeek,
@@ -69,6 +88,8 @@ export function ProgressSummaryCard({
   reviewDueToday = false,
   onOpenTodayTab,
   onOpenWeekTab,
+  onOpenSettingsTab,
+  onOpenCycleReview,
   onNavigateToSetup,
   onViewFull,
 }: ProgressSummaryCardProps) {
@@ -90,12 +111,25 @@ export function ProgressSummaryCard({
     hasAnyTasks,
   });
   const narrativeStyle = getNarrativeStyle(trend.level);
-  const nextActionHandler =
-    trend.level === "no_data"
-      ? onNavigateToSetup
-      : reviewDueToday
-        ? onOpenWeekTab
-        : onOpenTodayTab;
+  const currentWeekScoreboardEntry = system.scoreboard.find((entry) => entry.weekNumber === currentWeek);
+  const hasReviewedCurrentWeek =
+    currentWeekScoreboardEntry?.reviewDone ||
+    Boolean(system.weeklyReviews.find((review) => review.weekNumber === currentWeek)?.reviewCompleted);
+  const nextActionSuggestion = getProgressNextActionSuggestion({
+    currentWeek,
+    totalWeeks: boundedTotalWeeks,
+    hasOpenTasksThisWeek: weekCompletion.total > 0 && weekCompletion.completed < weekCompletion.total,
+    reviewDueToday,
+    hasReviewedCurrentWeek,
+    hasAnyTasks,
+  });
+  const nextActionHandler = pickNextActionHandler(nextActionSuggestion, {
+    onOpenTodayTab,
+    onOpenWeekTab,
+    onOpenSettingsTab,
+    onOpenCycleReview,
+    onNavigateToSetup,
+  });
 
   const isEarlyState = trend.level === "early" || trend.level === "no_data";
   const reviewedWeeks = new Set(
@@ -146,13 +180,9 @@ export function ProgressSummaryCard({
               {nextActionHandler && (
                 <div className="mt-4 rounded-lg border border-slate-900/10 bg-white/86 p-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tiếp theo nên làm</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-800">{trend.nextAction}</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-800">{nextActionSuggestion.label}</p>
                   <Button size="lg" className="mt-3 w-full sm:w-auto" onClick={nextActionHandler}>
-                    {trend.level === "no_data"
-                      ? "Mở Setup"
-                      : reviewDueToday
-                        ? "Mở tab Tuần"
-                        : "Mở tab Hôm nay"}
+                    {nextActionSuggestion.buttonLabel}
                     <ArrowRight className="ml-1 h-4 w-4" />
                   </Button>
                 </div>

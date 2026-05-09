@@ -885,6 +885,7 @@ async function exerciseTodayAndReviewTabs() {
   if (hasWeeklyReviewForm) {
     await fill("#weekly-insights", WEEKLY_REVIEW_OBSTACLE);
     await addNextWeekCommitment(WEEKLY_REVIEW_PRIORITY);
+    await browserEval("window.__smokeOriginalWeeklyReviewConfirm = window.confirm; window.confirm = () => true;");
     await clickButton("chot review tuan nay");
     await waitForGoalSnapshot(
       "weekly review persisted",

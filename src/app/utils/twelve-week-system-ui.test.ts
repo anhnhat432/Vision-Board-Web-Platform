@@ -2,6 +2,7 @@ import {
   buildRescuePlanSummary,
   evaluateRescueTriggers,
   dismissRescueTrigger,
+  getLatestDailyCheckIn,
   isRescueTriggerDismissed,
   getOutboxSummaryText,
   getOutboxTypeLabel,
@@ -12,6 +13,41 @@ import type { SyncOutboxItem, TwelveWeekTaskInstance, TwelveWeekSystem } from ".
 describe("twelve-week-system-ui helpers", () => {
   beforeEach(() => {
     localStorage.clear();
+  });
+
+  it("returns the latest same-day check-in by updatedCount", () => {
+    const goal = {
+      twelveWeekSystem: {
+        dailyCheckIns: [
+          {
+            date: "2026-05-09",
+            didWorkToday: true,
+            whichLeadIndicatorWorkedOn: "Deep work",
+            amountDone: "1/2",
+            outputCreated: "Draft",
+            obstacleOrIssue: "",
+            dailySelfRating: 4,
+            optionalNote: "First note",
+            mood: "steady",
+            updatedCount: 1,
+          },
+          {
+            date: "2026-05-09",
+            didWorkToday: true,
+            whichLeadIndicatorWorkedOn: "Deep work",
+            amountDone: "2/2",
+            outputCreated: "Draft",
+            obstacleOrIssue: "",
+            dailySelfRating: 5,
+            optionalNote: "Latest note",
+            mood: "high",
+            updatedCount: 2,
+          },
+        ],
+      },
+    };
+
+    expect(getLatestDailyCheckIn(goal as never)?.optionalNote).toBe("Latest note");
   });
 
   it("maps workload decisions to readable labels", () => {

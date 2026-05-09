@@ -1060,6 +1060,8 @@ export function TwelveWeekSystem() {
                   reviewDueToday={reviewDueToday}
                   onOpenTodayTab={() => setActiveTab("today")}
                   onOpenWeekTab={() => setActiveTab("week")}
+                  onOpenSettingsTab={() => setActiveTab("settings")}
+                  onOpenCycleReview={() => setActiveTab("progress")}
                   onNavigateToSetup={() => navigate("/life-insight")}
                   onViewFull={() => setShowFullProgress(true)}
                 />
@@ -1086,6 +1088,8 @@ export function TwelveWeekSystem() {
                     reviewDueToday={reviewDueToday}
                     onOpenTodayTab={() => setActiveTab("today")}
                     onOpenWeekTab={() => setActiveTab("week")}
+                    onOpenSettingsTab={() => setActiveTab("settings")}
+                    onOpenCycleReview={() => setActiveTab("progress")}
                     onNavigateToSetup={() => navigate("/life-insight")}
                     executionInsights={executionInsights}
                   />

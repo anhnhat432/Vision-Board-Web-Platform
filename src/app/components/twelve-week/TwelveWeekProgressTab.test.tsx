@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import type { TwelveWeekSystem } from "@/app/utils/storage-types";
 
-import { TwelveWeekProgressTab } from "./TwelveWeekProgressTab";
+import { TwelveWeekProgressTab, getProgressNextActionSuggestion } from "./TwelveWeekProgressTab";
 
 type ProgressTabProps = ComponentProps<typeof TwelveWeekProgressTab>;
 
@@ -63,5 +63,81 @@ describe("TwelveWeekProgressTab", () => {
     expect(screen.getByText("Lead trung bình 80%")).toBeInTheDocument();
     expect(screen.getByText("Đã hoàn thành 2/12 tuần")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Tại sao 85%?" })).not.toHaveAttribute("title");
+  });
+  it.each([
+    [
+      "cycle review phase",
+      {
+        currentWeek: 13,
+        totalWeeks: 12,
+        hasOpenTasksThisWeek: false,
+        reviewDueToday: false,
+        hasReviewedCurrentWeek: false,
+        hasAnyTasks: true,
+      },
+      "Mở Cycle Review",
+    ],
+    [
+      "open work this week",
+      {
+        currentWeek: 4,
+        totalWeeks: 12,
+        hasOpenTasksThisWeek: true,
+        reviewDueToday: true,
+        hasReviewedCurrentWeek: false,
+        hasAnyTasks: true,
+      },
+      "Hoàn thành việc cốt lõi hôm nay",
+    ],
+    [
+      "review due",
+      {
+        currentWeek: 4,
+        totalWeeks: 12,
+        hasOpenTasksThisWeek: false,
+        reviewDueToday: true,
+        hasReviewedCurrentWeek: false,
+        hasAnyTasks: true,
+      },
+      "Mở Weekly Review",
+    ],
+    [
+      "review completed",
+      {
+        currentWeek: 4,
+        totalWeeks: 12,
+        hasOpenTasksThisWeek: false,
+        reviewDueToday: false,
+        hasReviewedCurrentWeek: true,
+        hasAnyTasks: true,
+      },
+      "Chuẩn bị tuần sau",
+    ],
+    [
+      "review due but already completed",
+      {
+        currentWeek: 4,
+        totalWeeks: 12,
+        hasOpenTasksThisWeek: false,
+        reviewDueToday: true,
+        hasReviewedCurrentWeek: true,
+        hasAnyTasks: true,
+      },
+      "Chuẩn bị tuần sau",
+    ],
+    [
+      "no tasks",
+      {
+        currentWeek: 4,
+        totalWeeks: 12,
+        hasOpenTasksThisWeek: false,
+        reviewDueToday: false,
+        hasReviewedCurrentWeek: false,
+        hasAnyTasks: false,
+      },
+      "Hoàn tất setup ở Settings",
+    ],
+  ])("maps next action for %s", (_caseName, input, expectedLabel) => {
+    expect(getProgressNextActionSuggestion(input).label).toBe(expectedLabel);
   });
 });

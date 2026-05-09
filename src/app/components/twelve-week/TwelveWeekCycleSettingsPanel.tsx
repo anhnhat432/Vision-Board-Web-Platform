@@ -29,6 +29,13 @@ export function TwelveWeekCycleSettingsPanel({
   onTacticPriorityChange,
   onTacticTypeChange,
 }: TwelveWeekCycleSettingsPanelProps) {
+  const handleReviewDayChange = (value: string) => {
+    if (value === system.reviewDay) return;
+    const confirmed = window.confirm("Đổi review day sẽ điều chỉnh lịch task các tuần còn lại. Tiếp tục?");
+    if (!confirmed) return;
+    onReviewDayChange(value);
+  };
+
   return (
     <Card
       data-tour-id="system-settings-panel"
@@ -70,7 +77,7 @@ export function TwelveWeekCycleSettingsPanel({
               </p>
               <p className="mt-1 text-sm text-slate-600">Ngày bạn muốn khóa tuần và tự đánh giá lại nhịp.</p>
             </div>
-            <Select value={system.reviewDay} onValueChange={onReviewDayChange}>
+            <Select value={system.reviewDay} onValueChange={handleReviewDayChange}>
               <SelectTrigger id="review-day" aria-label="Chọn ngày review">
                 <SelectValue placeholder="Chọn ngày review" />
               </SelectTrigger>
