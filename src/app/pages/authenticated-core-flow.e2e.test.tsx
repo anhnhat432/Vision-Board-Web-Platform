@@ -340,14 +340,14 @@ describe("authenticated new user core flow", () => {
     const user = userEvent.setup();
     const { router, ui } = renderAuthenticatedCoreFlow("/");
 
-    expect(await screen.findByText(/Tạo một điểm bắt đầu đủ rõ/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Bắt đầu bằng 8 lĩnh vực/i)).toBeInTheDocument();
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/onboarding");
     });
     expect(screen.queryByText("Anonymous stale goal must stay hidden")).not.toBeInTheDocument();
     await user.click(await screen.findByRole("button", { name: "Để sau" }));
 
-    await user.click(screen.getByRole("button", { name: "Chấm Life Balance" }));
+    await user.click(screen.getByRole("button", { name: /Bắt đầu chấm 8 lĩnh vực/i }));
     await user.click(await screen.findByRole("button", { name: "Hoàn thành đánh giá" }));
 
     expect(await screen.findByText(/Bạn đã có một tín hiệu rất rõ/i)).toBeInTheDocument();
