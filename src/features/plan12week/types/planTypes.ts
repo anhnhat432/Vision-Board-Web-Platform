@@ -25,6 +25,9 @@ export type LeadMetric = {
 
 export type WeekReview = {
   weekNumber: number;
+  leadScore: number;
+  lagScore?: number;
+  /** Legacy alias for leadScore. Keep while older callers migrate. */
   executionScore: number;
   reflection?: string;
   adjustments?: string;

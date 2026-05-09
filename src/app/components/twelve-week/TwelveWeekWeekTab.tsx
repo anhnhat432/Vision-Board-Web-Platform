@@ -23,7 +23,7 @@ import {
   type WeeklyReviewPremiumInsight,
 } from "../../utils/twelve-week-premium";
 import { WORKLOAD_OPTIONS, getWorkloadDecisionLabel } from "../../utils/twelve-week-system-ui";
-import { interpretWeeklyExecutionScore } from "@/features/plan12week/logic";
+import { calculateLagScore, interpretWeeklyExecutionScore } from "@/features/plan12week/logic";
 import type {
   ExecutionInsight,
   NextWeekRecommendation,
@@ -110,6 +110,34 @@ function getWorkloadIntensityHint(value: TwelveWeekWeeklyReviewForm["workloadDec
   if (value === "keep same") return "Giữ nguyên — chạy như tuần này.";
   return "";
 }
+
+function getLeadScoreTone(level: ReturnType<typeof interpretWeeklyExecutionScore>["level"]): {
+  marker: string;
+  panel: string;
+  text: string;
+} {
+  switch (level) {
+    case "strong":
+      return {
+        marker: "bg-emerald-500",
+        panel: "border-emerald-200 bg-emerald-50",
+        text: "text-emerald-800",
+      };
+    case "okay":
+      return {
+        marker: "bg-amber-400",
+        panel: "border-amber-200 bg-amber-50",
+        text: "text-amber-800",
+      };
+    default:
+      return {
+        marker: "bg-rose-500",
+        panel: "border-rose-200 bg-rose-50",
+        text: "text-rose-800",
+      };
+  }
+}
+
 export function TwelveWeekWeekTab({
   system,
   currentWeekRange,
@@ -117,7 +145,6 @@ export function TwelveWeekWeekTab({
   currentPlanMilestone,
   reviewDueToday,
   reviewStatusLabel,
-  currentScoreValue,
   weekCompletion,
   currentLagMetricValue,
   coreIndicators,
@@ -140,7 +167,21 @@ export function TwelveWeekWeekTab({
   onAcceptNextWeekRecommendation,
   weeklyReflectionInsights,
 }: TwelveWeekWeekTabProps) {
-  const scoreInterpretation = interpretWeeklyExecutionScore(currentScoreValue);
+  const leadScoreValue = currentReview?.leadCompletionPercent ?? weekCompletion.percent;
+  const scoreInterpretation = interpretWeeklyExecutionScore(leadScoreValue);
+  const scoreTone = getLeadScoreTone(scoreInterpretation.level);
+  const lagMetricValue = currentLagMetricValue || system.lagMetric.currentValue;
+  const lagScoreValue =
+    system.lagMetric.target.trim().length > 0
+      ? calculateLagScore(
+          {
+            target: system.lagMetric.target,
+            currentValue: lagMetricValue,
+          },
+          system.currentWeek,
+          system.totalWeeks,
+        )
+      : null;
   const reviewIsCompleted = Boolean(currentReview?.reviewCompleted);
   const summaryReview = reviewIsCompleted ? currentReview ?? null : null;
   const intensityHint = getWorkloadIntensityHint(weeklyForm.workloadDecision);
@@ -206,20 +247,27 @@ export function TwelveWeekWeekTab({
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
               <TrendingUp className="h-3.5 w-3.5" />
-              Tiến độ tuần
+              Lead tuần này
             </p>
             <p
+              data-testid="weekly-lead-score"
               className={`mt-3 font-bold text-slate-950 ${
                 weekCompletion.isEmpty ? "text-lg leading-7" : "text-3xl"
               }`}
             >
-              {weekCompletion.isEmpty ? "Chưa có việc trong tuần này" : `${weekCompletion.percent}%`}
+              {weekCompletion.isEmpty ? "Chưa có việc trong tuần này" : `${leadScoreValue}%`}
             </p>
             <p className="mt-1 text-sm text-slate-600">
               {weekCompletion.isEmpty
-                ? "Khi có việc lặp lại, tiến độ tuần sẽ bắt đầu tính."
+                ? "Khi có việc lặp lại, Lead Score sẽ bắt đầu tính."
                 : `${weekCompletion.completed}/${weekCompletion.total} việc đã chốt`}
             </p>
+            {!weekCompletion.isEmpty && (
+              <p className="mt-2 flex items-center gap-2 text-xs font-semibold text-slate-600">
+                <span className={`h-2.5 w-2.5 rounded-full ${scoreTone.marker}`} />
+                Chuẩn tuần: 85%
+              </p>
+            )}
           </CardContent>
         </Card>
         <Card
@@ -488,35 +536,45 @@ export function TwelveWeekWeekTab({
               />
             )}
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-center justify-between text-sm text-slate-500">
-                <span>Điểm tự động</span>
-                <span className="font-semibold text-slate-700">{currentScoreValue}</span>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-lg border border-white/80 bg-white px-3 py-3">
+                  <div className="flex items-center justify-between text-sm text-slate-500">
+                    <span>Lead Score</span>
+                    <span className={`h-2.5 w-2.5 rounded-full ${scoreTone.marker}`} />
+                  </div>
+                  {weekCompletion.isEmpty ? (
+                    <p className="mt-2 text-sm font-semibold text-slate-700">Chưa có dữ liệu lead</p>
+                  ) : (
+                    <p data-testid="weekly-lead-score-detail" className="mt-2 text-2xl font-bold text-slate-950">
+                      {leadScoreValue}%
+                    </p>
+                  )}
+                  <Progress value={weekCompletion.isEmpty ? 0 : leadScoreValue} className="mt-3 h-2.5" />
+                </div>
+                {lagScoreValue !== null && (
+                  <div className="rounded-lg border border-white/80 bg-white px-3 py-3">
+                    <div className="flex items-center justify-between text-sm text-slate-500">
+                      <span>Lag Score</span>
+                      <span>{system.lagMetric.name}</span>
+                    </div>
+                    <p data-testid="weekly-lag-score" className="mt-2 text-2xl font-bold text-slate-950">
+                      {lagScoreValue}%
+                    </p>
+                    <Progress value={lagScoreValue} className="mt-3 h-2.5" />
+                  </div>
+                )}
               </div>
-              <Progress value={currentScoreValue} className="mt-3 h-2.5" />
               <div
                 data-testid="weekly-score-interpretation"
-                className={`mt-3 rounded-lg border px-3 py-2 ${
-                  scoreInterpretation.level === "strong"
-                    ? "border-emerald-200 bg-emerald-50"
-                    : scoreInterpretation.level === "okay"
-                      ? "border-sky-200 bg-sky-50"
-                      : "border-amber-200 bg-amber-50"
-                }`}
+                className={`mt-3 rounded-lg border px-3 py-2 ${scoreTone.panel}`}
               >
-                <p
-                  className={`text-sm font-semibold ${
-                    scoreInterpretation.level === "strong"
-                      ? "text-emerald-800"
-                      : scoreInterpretation.level === "okay"
-                        ? "text-sky-800"
-                        : "text-amber-800"
-                  }`}
-                >
+                <p className={`flex items-center gap-2 text-sm font-semibold ${scoreTone.text}`}>
+                  <span className={`h-2.5 w-2.5 rounded-full ${scoreTone.marker}`} />
                   {scoreInterpretation.headline}
                 </p>
                 <p className="mt-1 text-xs leading-5 text-slate-600">{scoreInterpretation.advice}</p>
               </div>
-              <p className="mt-3 text-sm text-slate-500">Chỉ số chính: {currentLagMetricValue || "Chưa cập nhật"}</p>
+              <p className="mt-3 text-sm text-slate-500">Chỉ số chính: {lagMetricValue || "Chưa cập nhật"}</p>
             </div>
             <div
               className={`rounded-lg border p-4 shadow-sm ${

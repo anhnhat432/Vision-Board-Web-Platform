@@ -25,7 +25,7 @@ import { calculateExecutionScore } from "../logic/executionScore";
 import { calculateGoalProgress } from "../logic/goalProgress";
 import { logLeadMetric as appendLeadMetricLog } from "../logic/leadMetrics";
 import { calculatePlanInsights } from "../logic/planInsights";
-import { calculatePlanProgress } from "../logic/progress";
+import { calculateCycleCompletionRate, calculateLeadProgress } from "../logic/progress";
 import { calculateMetricStreak } from "../logic/streak";
 import { getWeeklyTaskWarning } from "../logic/taskConstraints";
 import { createWeeklyReview } from "../logic/weeklyReview";
@@ -113,6 +113,7 @@ function mapApiWeek(week: ApiPlanWeekDetail | ApiWeek): Week {
     review: week.review
       ? {
           weekNumber: week.review.weekNumber,
+          leadScore: week.review.executionScore,
           executionScore: week.review.executionScore,
           reflection: week.review.reflection,
           adjustments: week.review.adjustments,
@@ -327,7 +328,8 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
 
   const allTasks = useMemo(() => plan?.weeks.flatMap((week) => week.tasks) ?? [], [plan]);
   const executionScore = useMemo(() => calculateExecutionScore(allTasks), [allTasks]);
-  const planProgress = useMemo(() => (plan ? calculatePlanProgress(plan) : 0), [plan]);
+  const planProgress = useMemo(() => (plan ? calculateLeadProgress(plan) : 0), [plan]);
+  const cycleCompletionRate = useMemo(() => (plan ? calculateCycleCompletionRate(plan) : 0), [plan]);
   const goalProgressPercent = useMemo(() => calculateGoalProgress(goalProgress), [goalProgress]);
 
   const getWeekId = useCallback((weekNumber: number): string | null => {
@@ -733,6 +735,7 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
           review: updatedWeek.review
             ? {
                 weekNumber: updatedWeek.review.weekNumber,
+                leadScore: updatedWeek.review.executionScore,
                 executionScore: updatedWeek.review.executionScore,
                 reflection: updatedWeek.review.reflection,
                 adjustments: updatedWeek.review.adjustments,
@@ -831,6 +834,7 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
     plan,
     executionScore,
     planProgress,
+    cycleCompletionRate,
     goalProgress,
     goalProgressPercent,
   } as const;
@@ -856,6 +860,7 @@ export function usePlan12Week(initialPlan: Plan12Week | null = null) {
     getPlanInsights,
     executionScore,
     planProgress,
+    cycleCompletionRate,
     goalProgress,
     goalProgressPercent,
     setGoalProgress,

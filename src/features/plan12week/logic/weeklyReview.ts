@@ -1,6 +1,6 @@
 import type { Task, Week, WeekReview } from "../types/planTypes";
 
-import { calculateExecutionScore } from "./executionScore";
+import { calculateLagScore, calculateLeadScore, type LagMetric } from "./executionScore";
 
 function normalizeOptionalText(value: string | undefined): string | undefined {
   const normalized = value?.trim();
@@ -12,10 +12,17 @@ export function createWeeklyReview(
   tasks: Task[],
   reflection?: string,
   adjustments?: string,
+  lagMetric?: LagMetric,
+  totalWeeks = 12,
 ): WeekReview {
+  const leadScore = calculateLeadScore(tasks);
+  const lagScore = lagMetric ? calculateLagScore(lagMetric, week.weekNumber, totalWeeks) : undefined;
+
   return {
     weekNumber: week.weekNumber,
-    executionScore: calculateExecutionScore(tasks),
+    leadScore,
+    lagScore,
+    executionScore: leadScore,
     reflection: normalizeOptionalText(reflection),
     adjustments: normalizeOptionalText(adjustments),
   };

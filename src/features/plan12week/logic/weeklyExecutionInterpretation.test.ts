@@ -1,27 +1,37 @@
 import { describe, expect, it } from "vitest";
 
-import { interpretWeeklyExecutionScore } from "./weeklyExecutionInterpretation";
+import { interpretWeeklyExecutionScore, WEEKLY_EXECUTION_TARGET } from "./weeklyExecutionInterpretation";
 
 describe("interpretWeeklyExecutionScore", () => {
-  it("returns 'strong' level for scores >= 80", () => {
-    const result = interpretWeeklyExecutionScore(80);
+  it("uses 85 as the weekly execution target", () => {
+    expect(WEEKLY_EXECUTION_TARGET).toBe(85);
+  });
+
+  it("returns 'strong' level for scores >= 85", () => {
+    const result = interpretWeeklyExecutionScore(85);
     expect(result.level).toBe("strong");
     expect(result.suggestedWorkload).toBe("keep same");
-    expect(result.headline).toContain("80/100");
+    expect(result.headline).toContain("85/100");
   });
 
-  it("returns 'okay' level for scores between 50 and 79", () => {
-    const result = interpretWeeklyExecutionScore(60);
+  it("returns 'okay' level for scores between 65 and 84", () => {
+    const result = interpretWeeklyExecutionScore(84);
     expect(result.level).toBe("okay");
     expect(result.suggestedWorkload).toBe("keep same");
-    expect(result.headline).toContain("60/100");
+    expect(result.headline).toContain("84/100");
   });
 
-  it("returns 'at_risk' level for scores below 50", () => {
-    const result = interpretWeeklyExecutionScore(30);
+  it("keeps 65 in the okay band", () => {
+    const result = interpretWeeklyExecutionScore(65);
+    expect(result.level).toBe("okay");
+    expect(result.headline).toContain("65/100");
+  });
+
+  it("returns 'at_risk' level for scores below 65", () => {
+    const result = interpretWeeklyExecutionScore(64);
     expect(result.level).toBe("at_risk");
     expect(result.suggestedWorkload).toBe("reduce slightly");
-    expect(result.headline).toContain("30/100");
+    expect(result.headline).toContain("64/100");
   });
 
   it("clamps scores below 0 to 0", () => {

@@ -1,7 +1,7 @@
 export { generateAdaptiveSuggestion } from "./adaptivePlanning";
 export { analyzeExecutionPatterns } from "./behaviorInsights";
 export { generateExecutionSuggestion, interpretExecutionScore } from "./executionFeedback";
-export { calculateExecutionScore } from "./executionScore";
+export { calculateExecutionScore, calculateLagScore, calculateLeadScore } from "./executionScore";
 export { calculateGoalProgress } from "./goalProgress";
 export { generate12WeekPlan } from "./generatePlan";
 export type { Generate12WeekPlanInput, Generate12WeekPlanOptions } from "./generatePlan";
@@ -28,7 +28,7 @@ export type {
   PlanQualityLevel,
   PlanQualityResult,
 } from "./planQuality";
-export { calculatePlanProgress } from "./progress";
+export { calculateCycleCompletionRate, calculateLeadProgress, calculatePlanProgress } from "./progress";
 export {
   getExecutionInsights,
   getNextActionFromInsights,
@@ -100,5 +100,5 @@ export {
   type WeeklyCapacityBand,
 } from "./planQuality";
 export { createWeeklyReview } from "./weeklyReview";
-export { interpretWeeklyExecutionScore } from "./weeklyExecutionInterpretation";
+export { interpretWeeklyExecutionScore, WEEKLY_EXECUTION_TARGET } from "./weeklyExecutionInterpretation";
 export type { WeeklyExecutionInterpretation, WeeklyExecutionLevel } from "./weeklyExecutionInterpretation";

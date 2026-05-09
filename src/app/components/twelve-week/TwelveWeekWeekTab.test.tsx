@@ -135,4 +135,19 @@ describe("TwelveWeekWeekTab review flow", () => {
 
     expect(screen.getByTestId("weekly-review-mobile-sticky-cta")).toHaveClass("bottom-20");
   });
+
+  it("shows lead as the weekly hero score and lag progress beside it", () => {
+    render(
+      <TwelveWeekWeekTab
+        {...makeProps({
+          currentScoreValue: 20,
+          weekCompletion: { completed: 4, total: 5, percent: 80 },
+          currentLagMetricValue: "25",
+        })}
+      />,
+    );
+
+    expect(screen.getByTestId("weekly-lead-score")).toHaveTextContent("80%");
+    expect(screen.getByTestId("weekly-lag-score")).toHaveTextContent("100%");
+  });
 });

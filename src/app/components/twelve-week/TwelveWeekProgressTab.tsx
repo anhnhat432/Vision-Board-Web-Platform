@@ -1,9 +1,23 @@
-import { ArrowDown, ArrowRight, ArrowUp, BarChart3, CalendarDays, Flag, Lock, Minus, Sparkles, Target, TrendingUp } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowRight,
+  ArrowUp,
+  BarChart3,
+  CalendarDays,
+  CircleHelp,
+  Flag,
+  Lock,
+  Minus,
+  Sparkles,
+  Target,
+  TrendingUp,
+} from "lucide-react";
 
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Progress } from "../ui/progress";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { SectionBlock } from "../layout/SectionBlock";
 import { formatCalendarDate, getReviewDayLabel } from "../../utils/storage";
 import type { TwelveWeekSystem } from "../../utils/storage-types";
@@ -12,6 +26,9 @@ import { interpretProgressTrend, type ProgressTrendInterpretation } from "@/feat
 import type { ExecutionInsight } from "@/features/plan12week/logic";
 
 import { TwelveWeekInsightsCard } from "./TwelveWeekInsightsCard";
+
+const WEEKLY_EXECUTION_TARGET_TOOLTIP =
+  "Theo phương pháp 12 Week Year, đạt 85% cam kết hàng tuần là chỉ số dẫn dắt mạnh nhất tới mục tiêu";
 
 interface WeekRange {
   start: string;
@@ -103,6 +120,16 @@ function pickNextActionHandler(
   return callbacks.onOpenTodayTab;
 }
 
+function getAverageLeadScore(system: TwelveWeekSystem): number {
+  const reviewedWeeks = system.scoreboard.filter((week) => week.reviewDone);
+  if (reviewedWeeks.length === 0) return 0;
+
+  return Math.round(
+    reviewedWeeks.reduce((sum, week) => sum + Math.max(0, Math.min(100, week.leadCompletionPercent)), 0) /
+      reviewedWeeks.length,
+  );
+}
+
 export function TwelveWeekProgressTab({
   system,
   currentWeek,
@@ -144,6 +171,7 @@ export function TwelveWeekProgressTab({
     onNavigateToSetup,
   });
   const isEarlyState = trend.level === "early" || trend.level === "no_data";
+  const averageLeadScore = getAverageLeadScore(system);
 
   return (
     <div className="space-y-6 pt-4">
@@ -249,10 +277,27 @@ export function TwelveWeekProgressTab({
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
               <BarChart3 className="h-3.5 w-3.5" />
-              Điểm hiện tại
+              Lead progress
             </p>
-            <p className="mt-3 text-3xl font-bold text-slate-950">{currentWeekScoreValue}</p>
-            <p className="mt-1 text-sm text-slate-600">Trung bình toàn chu kỳ: {averageScore}</p>
+            <div className="mt-3 flex items-start justify-between gap-3">
+              <p className="text-3xl font-bold text-slate-950">Lead trung bình {averageLeadScore}%</p>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-sky-200 bg-white text-sky-700 shadow-sm"
+                    aria-label="Tại sao 85%?"
+                    title={WEEKLY_EXECUTION_TARGET_TOOLTIP}
+                  >
+                    <CircleHelp className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent sideOffset={8}>{WEEKLY_EXECUTION_TARGET_TOOLTIP}</TooltipContent>
+              </Tooltip>
+            </div>
+            <p className="mt-1 text-sm text-slate-600">
+              Tuần hiện tại: {currentWeekScoreValue}% lead. Điểm hệ cũ: {averageScore}
+            </p>
           </CardContent>
         </Card>
 
@@ -263,10 +308,10 @@ export function TwelveWeekProgressTab({
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
               <Flag className="h-3.5 w-3.5" />
-              Review đã khóa
+              Tuần đã hoàn thành
             </p>
             <p className="mt-3 text-3xl font-bold text-slate-950">
-              {isEarlyState ? `Tuần ${currentWeek}/${system.totalWeeks}` : `${reviewDoneCount}/${system.totalWeeks}`}
+              Đã hoàn thành {reviewDoneCount}/{system.totalWeeks} tuần
             </p>
             <p className="mt-1 text-sm text-slate-600">
               {isEarlyState
