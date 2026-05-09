@@ -193,9 +193,9 @@ describe("12-week write-path safety", () => {
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "Tuần" }));
     await openWeeklyReviewDetails(user);
-    const bestInput = await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?");
-    const obstacleInput = screen.getByLabelText("2. Điều gì cản trở nhiều nhất?");
-    const priorityInput = screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?");
+    const bestInput = await screen.findByLabelText(/kết quả lớn nhất/i);
+    const obstacleInput = screen.getByLabelText(/cản trở nhiều nhất/i);
+    const priorityInput = screen.getByLabelText(/ưu tiên số 1 tuần sau/i);
     await user.type(bestInput, "Weekly review still saves locally.");
     await user.type(obstacleInput, "Queue storage is full.");
     await user.type(priorityInput, "Keep the local review.");
@@ -248,15 +248,15 @@ describe("12-week write-path safety", () => {
     await user.click(screen.getByRole("button", { name: "Tuần" }));
     await openWeeklyReviewDetails(user);
     await user.type(
-      await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?"),
+      await screen.findByLabelText(/kết quả lớn nhất/i),
       "Giữ được nhịp ship mỗi ngày.",
     );
     await user.type(
-      screen.getByLabelText("2. Điều gì cản trở nhiều nhất?"),
+      screen.getByLabelText(/cản trở nhiều nhất/i),
       "Bị phân tán vì đổi context.",
     );
     await user.type(
-      screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?"),
+      screen.getByLabelText(/ưu tiên số 1 tuần sau/i),
       "Chốt xong command center trước.",
     );
     await user.click(getPrimaryButton("Chốt review tuần này"));
@@ -311,7 +311,7 @@ describe("12-week write-path safety", () => {
       "Backend đang chậm.",
     );
     await user.type(
-      screen.getByLabelText(/ưu tiên số 1/i),
+      screen.getByLabelText(/ưu tiên số 1 tuần sau/i),
       "Giữ review hiển thị trong journal.",
     );
     await user.click(getPrimaryButton("Chốt review tuần này"));

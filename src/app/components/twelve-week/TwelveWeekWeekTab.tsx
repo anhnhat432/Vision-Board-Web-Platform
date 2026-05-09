@@ -341,7 +341,7 @@ export function TwelveWeekWeekTab({
               Review tuần
             </CardTitle>
             <CardDescription className="text-slate-700">
-              Chỉ 3 câu phản tư và 1 quyết định cho tuần sau.
+              Chốt 3 phần: kết quả, mức tải và ưu tiên tuần sau.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -672,7 +672,7 @@ export function TwelveWeekWeekTab({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="weekly-decision">Tuần sau muốn nhẹ hơn, giữ nguyên hay đẩy nhanh?</Label>
+              <Label htmlFor="weekly-decision">2. Tuần sau muốn nhẹ hơn, giữ nguyên hay đẩy nhanh?</Label>
               <Select
                 value={weeklyForm.workloadDecision}
                 onValueChange={(value) => onWeeklyFormChange("workloadDecision", value)}
@@ -691,7 +691,7 @@ export function TwelveWeekWeekTab({
               {intensityHint && <p className="text-xs leading-5 text-slate-500">{intensityHint}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="weekly-priority">5. Ưu tiên số 1 tuần sau là gì?</Label>
+              <Label htmlFor="weekly-priority">3. Ưu tiên số 1 tuần sau là gì?</Label>
               <Textarea
                 id="weekly-priority"
                 rows={3}
@@ -706,7 +706,7 @@ export function TwelveWeekWeekTab({
             {/* Optional fields */}
             <SecondaryPanel title="Chi tiết review thêm" collapsible defaultOpen={false}>
               <div className="space-y-2">
-                <Label htmlFor="weekly-obstacle">2. Điều gì cản trở nhiều nhất?</Label>
+                <Label htmlFor="weekly-obstacle">Điều gì cản trở nhiều nhất?</Label>
                 <Textarea
                   id="weekly-obstacle"
                   rows={3}
@@ -715,7 +715,7 @@ export function TwelveWeekWeekTab({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="weekly-keep">3. Việc nào tuần sau nên giữ?</Label>
+                <Label htmlFor="weekly-keep">Việc nào tuần sau nên giữ?</Label>
                 <Textarea
                   id="weekly-keep"
                   rows={2}
@@ -725,7 +725,7 @@ export function TwelveWeekWeekTab({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="weekly-reduce">4. Việc nào nên giảm hoặc bỏ?</Label>
+                <Label htmlFor="weekly-reduce">Việc nào nên giảm hoặc bỏ?</Label>
                 <Textarea
                   id="weekly-reduce"
                   rows={2}

@@ -111,10 +111,10 @@ describe("TwelveWeekWeekTab review flow", () => {
     render(<TwelveWeekWeekTab {...makeProps()} />);
 
     expect(screen.getByRole("button", { name: /chi tiết review thêm/i })).toHaveAttribute("aria-expanded", "false");
-    expect(screen.getByLabelText(/^5\./i)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/^2\./i)).toBeNull();
-    expect(screen.queryByLabelText(/^3\./i)).toBeNull();
-    expect(screen.queryByLabelText(/^4\./i)).toBeNull();
+    expect(screen.getByLabelText(/ưu tiên số 1/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/cản trở nhiều nhất/i)).toBeNull();
+    expect(screen.queryByLabelText(/tuần sau nên giữ/i)).toBeNull();
+    expect(screen.queryByLabelText(/nên giảm hoặc bỏ/i)).toBeNull();
   });
 
   it("keeps the mobile sticky CTA above the bottom navigation", () => {

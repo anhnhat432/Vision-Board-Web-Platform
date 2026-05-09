@@ -286,8 +286,8 @@ describe("12-week core flows", () => {
     await user.click(getPrimaryButton("Lưu check-in hôm nay"));
     await user.click(screen.getByRole("button", { name: "Tuần" }));
     await openWeeklyReviewDetails(user);
-    await user.type(await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?"), "Chốt được một việc thật.");
-    await user.type(screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?"), "Giữ nhịp execution.");
+    await user.type(await screen.findByLabelText(/kết quả lớn nhất/i), "Chốt được một việc thật.");
+    await user.type(screen.getByLabelText(/ưu tiên số 1 tuần sau/i), "Giữ nhịp execution.");
     await user.click(getPrimaryButton("Chốt review tuần này"));
 
     await waitFor(() => {
@@ -306,9 +306,9 @@ describe("12-week core flows", () => {
 
     await user.click(screen.getByRole("button", { name: "Tuần" }));
     await openWeeklyReviewDetails(user);
-    await user.type(await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?"), "Giữ được nhịp ship mỗi ngày.");
-    await user.type(screen.getByLabelText("2. Điều gì cản trở nhiều nhất?"), "Bị phân tán vì đổi context.");
-    await user.type(screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?"), "Chốt xong command center trước.");
+    await user.type(await screen.findByLabelText(/kết quả lớn nhất/i), "Giữ được nhịp ship mỗi ngày.");
+    await user.type(screen.getByLabelText(/cản trở nhiều nhất/i), "Bị phân tán vì đổi context.");
+    await user.type(screen.getByLabelText(/ưu tiên số 1 tuần sau/i), "Chốt xong command center trước.");
     await user.click(getPrimaryButton("Chốt review tuần này"));
 
     await waitFor(() => {
@@ -347,16 +347,16 @@ describe("12-week core flows", () => {
     await user.click(screen.getByRole("button", { name: "Tuần" }));
     await openWeeklyReviewDetails(user);
     await user.type(
-      await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?"),
+      await screen.findByLabelText(/kết quả lớn nhất/i),
       "Đã ship 1 deliverable nhỏ.",
     );
-    await user.type(screen.getByLabelText("3. Việc nào tuần sau nên giữ?"), "Giữ buổi review thứ Năm.");
+    await user.type(screen.getByLabelText(/tuần sau nên giữ/i), "Giữ buổi review thứ Năm.");
     await user.type(
-      screen.getByLabelText("4. Việc nào nên giảm hoặc bỏ?"),
+      screen.getByLabelText(/nên giảm hoặc bỏ/i),
       "Giảm thời gian họp dài cuối tuần.",
     );
     await user.type(
-      screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?"),
+      screen.getByLabelText(/ưu tiên số 1 tuần sau/i),
       "Hoàn thành module sync trước thứ Tư.",
     );
     await user.click(getPrimaryButton("Chốt review tuần này"));
@@ -409,8 +409,8 @@ describe("12-week core flows", () => {
     expect(screen.getByDisplayValue("Legacy priority")).toBeInTheDocument();
 
     // New keep/reduce fields render empty for legacy reviews
-    const keepInput = screen.getByLabelText("3. Việc nào tuần sau nên giữ?") as HTMLTextAreaElement;
-    const reduceInput = screen.getByLabelText("4. Việc nào nên giảm hoặc bỏ?") as HTMLTextAreaElement;
+    const keepInput = screen.getByLabelText(/tuần sau nên giữ/i) as HTMLTextAreaElement;
+    const reduceInput = screen.getByLabelText(/nên giảm hoặc bỏ/i) as HTMLTextAreaElement;
     expect(keepInput.value).toBe("");
     expect(reduceInput.value).toBe("");
 
@@ -425,9 +425,9 @@ describe("12-week core flows", () => {
 
     await user.click(screen.getByRole("button", { name: "Tuần" }));
     await openWeeklyReviewDetails(user);
-    const bestInput = await screen.findByLabelText("1. Tuần này kết quả lớn nhất là gì?");
-    const obstacleInput = screen.getByLabelText("2. Điều gì cản trở nhiều nhất?");
-    const priorityInput = screen.getByLabelText("5. Ưu tiên số 1 tuần sau là gì?");
+    const bestInput = await screen.findByLabelText(/kết quả lớn nhất/i);
+    const obstacleInput = screen.getByLabelText(/cản trở nhiều nhất/i);
+    const priorityInput = screen.getByLabelText(/ưu tiên số 1 tuần sau/i);
     await user.type(bestInput, "First weekly output.");
     await user.type(obstacleInput, "First obstacle.");
     await user.type(priorityInput, "First priority.");
