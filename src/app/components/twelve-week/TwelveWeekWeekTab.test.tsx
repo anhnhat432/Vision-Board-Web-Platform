@@ -50,6 +50,7 @@ function makeProps(overrides: Partial<WeekTabProps> = {}): WeekTabProps {
     currentPlanCode: "FREE",
     hasPremiumInsights: false,
     premiumInsight: {
+      status: "watch",
       headline: "Upgrade insight",
       summary: "Premium summary",
       recommendedAdjustment: "Keep the load stable",
@@ -110,7 +111,10 @@ describe("TwelveWeekWeekTab review flow", () => {
     render(<TwelveWeekWeekTab {...makeProps()} />);
 
     expect(screen.getByRole("button", { name: /chi tiết review thêm/i })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByLabelText(/^5\./i)).toBeInTheDocument();
     expect(screen.queryByLabelText(/^2\./i)).toBeNull();
+    expect(screen.queryByLabelText(/^3\./i)).toBeNull();
+    expect(screen.queryByLabelText(/^4\./i)).toBeNull();
   });
 
   it("keeps the mobile sticky CTA above the bottom navigation", () => {

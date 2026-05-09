@@ -690,6 +690,18 @@ export function TwelveWeekWeekTab({
               </Select>
               {intensityHint && <p className="text-xs leading-5 text-slate-500">{intensityHint}</p>}
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="weekly-priority">5. Ưu tiên số 1 tuần sau là gì?</Label>
+              <Textarea
+                id="weekly-priority"
+                rows={3}
+                value={weeklyForm.nextWeekPriority}
+                placeholder={
+                  hasPremiumInsights ? suggestedNextWeekPlan.focus : "Ví dụ: chỉ giữ một ưu tiên thật rõ cho tuần sau."
+                }
+                onChange={(event) => onWeeklyFormChange("nextWeekPriority", event.target.value)}
+              />
+            </div>
 
             {/* Optional fields */}
             <SecondaryPanel title="Chi tiết review thêm" collapsible defaultOpen={false}>
@@ -720,18 +732,6 @@ export function TwelveWeekWeekTab({
                   value={weeklyForm.reduceTactic}
                   placeholder="Việc nào đang ngốn thời gian mà ít hiệu quả — giảm tải hoặc đổi lịch."
                   onChange={(event) => onWeeklyFormChange("reduceTactic", event.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="weekly-priority">5. Ưu tiên số 1 tuần sau là gì?</Label>
-                <Textarea
-                  id="weekly-priority"
-                  rows={3}
-                  value={weeklyForm.nextWeekPriority}
-                  placeholder={
-                    hasPremiumInsights ? suggestedNextWeekPlan.focus : "Ví dụ: chỉ giữ một ưu tiên thật rõ cho tuần sau."
-                  }
-                  onChange={(event) => onWeeklyFormChange("nextWeekPriority", event.target.value)}
                 />
               </div>
             </SecondaryPanel>
