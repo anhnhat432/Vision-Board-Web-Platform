@@ -92,6 +92,13 @@ export type {
 export { calculateMetricStreak } from "./streak";
 export { getWeeklyTaskWarning, isTaskCountInRecommendedRange } from "./taskConstraints";
 export {
+  getDefaultTimeBlocks,
+  getUpcomingStrategicBlock,
+  TIME_BLOCK_DAYS,
+  validateTimeBlocks,
+} from "./timeBlocks";
+export type { TimeBlockValidationResult } from "./timeBlocks";
+export {
   assessPlanQuality,
   assessWeekOneLoad,
   type AssessPlanQualityInput,

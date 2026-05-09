@@ -178,6 +178,7 @@ describe("TwelveWeekSystemSections", () => {
         onStatusChange={vi.fn()}
         onTacticPriorityChange={vi.fn()}
         onTacticTypeChange={vi.fn()}
+        onTimeBlocksChange={vi.fn()}
         onPreferenceToggle={vi.fn()}
         onArchivePendingOutbox={vi.fn()}
         onRestoreArchivedOutbox={vi.fn()}

@@ -1,6 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { TwelveWeekTodayTab } from "./TwelveWeekTodayTab";
 import type { TwelveWeekTaskInstance, TwelveWeekSystem, UniversalDailyCheckIn } from "@/app/utils/storage-types";
@@ -170,6 +170,41 @@ describe("TwelveWeekTodayTab — primary task hero", () => {
       />,
     );
     expect(screen.queryByTestId("today-primary-hero")).toBeNull();
+  });
+});
+
+describe("TwelveWeekTodayTab — Performance Time Blocking", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("shows the Strategic Block nudge when the block starts within two hours", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 4, 5, 7, 30));
+
+    render(
+      <TwelveWeekTodayTab
+        {...makeProps({
+          system: {
+            ...makeSystem(),
+            weeklyTimeBlocks: [
+              {
+                id: "strategic_1",
+                type: "strategic",
+                dayOfWeek: "Tuesday",
+                startTime: "09:00",
+                durationMinutes: 180,
+              },
+            ],
+          },
+          todayDateKey: "2026-05-05",
+        })}
+      />,
+    );
+
+    expect(
+      screen.getByText("Sắp tới giờ Strategic Block. Đóng tab phụ, chọn 1 việc cốt lõi."),
+    ).toBeInTheDocument();
   });
 });
 

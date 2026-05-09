@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AlertTriangle, ArrowRight, CalendarClock, CalendarPlus, Check, CheckCircle2, Crown, Gauge, Inbox, Loader2, Sparkles, X } from "lucide-react";
 
 import type { RescueModeStatus } from "@/features/plan12week/logic";
+import { getUpcomingStrategicBlock } from "@/features/plan12week/logic/timeBlocks";
 
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -101,6 +102,7 @@ interface TodayNextActionState {
 }
 
 export function TwelveWeekTodayTab({
+  system,
   currentWeek,
   reviewDueToday,
   weekCompletion,
@@ -150,6 +152,7 @@ export function TwelveWeekTodayTab({
   );
   const isFirstWeek = currentWeek === 1;
   const [isSavingCheckIn, setIsSavingCheckIn] = useState(false);
+  const upcomingStrategicBlock = getUpcomingStrategicBlock(system.weeklyTimeBlocks, new Date());
 
   const handleSaveCheckInClick = async () => {
     if (isSavingCheckIn) return;
@@ -248,6 +251,28 @@ export function TwelveWeekTodayTab({
           </p>
         </div>
       </div>
+
+      {upcomingStrategicBlock ? (
+        <div
+          data-testid="strategic-block-nudge"
+          className="order-1 rounded-xl border border-emerald-200 bg-emerald-50/92 p-4 text-emerald-950 shadow-sm sm:rounded-2xl sm:p-5"
+        >
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">
+                <CalendarClock className="h-3.5 w-3.5" />
+                Performance Time Blocking
+              </p>
+              <p className="mt-2 text-sm font-semibold leading-6 sm:text-base">
+                Sắp tới giờ Strategic Block. Đóng tab phụ, chọn 1 việc cốt lõi.
+              </p>
+            </div>
+            <Badge variant="outline" className="w-fit border-emerald-200 bg-white text-emerald-800">
+              {upcomingStrategicBlock.startTime} · {upcomingStrategicBlock.durationMinutes} phút
+            </Badge>
+          </div>
+        </div>
+      ) : null}
 
       <div
         data-testid="today-next-action-panel"

@@ -645,4 +645,25 @@ describe("12-week core flows", () => {
     expect(screen.queryByRole("button", { name: "Khôi phục quyền Plus" })).not.toBeInTheDocument();
     expect(getCurrentPlan()).toBe("FREE");
   });
+
+  it("persists default weekly time blocks from Settings across reload", async () => {
+    const { goalId } = seedTwelveWeekGoal();
+    const firstRender = renderAppRoute("/12-week-system?tab=settings");
+    const user = userEvent.setup();
+
+    await screen.findByText("Lịch tuần tham chiếu");
+    await user.click(screen.getByRole("button", { name: "Dùng gợi ý mặc định" }));
+
+    await waitFor(() => {
+      expect(readGoal(goalId).twelveWeekSystem?.weeklyTimeBlocks).toHaveLength(4);
+    });
+    expect(screen.getAllByTestId("weekly-time-block-chip")).toHaveLength(4);
+    expect(screen.getAllByText("Strategic Block").length).toBeGreaterThan(0);
+
+    firstRender.ui.unmount();
+    renderAppRoute("/12-week-system?tab=settings");
+
+    await screen.findByText("Lịch tuần tham chiếu");
+    expect(screen.getAllByTestId("weekly-time-block-chip")).toHaveLength(4);
+  }, INTEGRATION_TEST_TIMEOUT_MS);
 });

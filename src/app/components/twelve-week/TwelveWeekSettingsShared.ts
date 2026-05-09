@@ -10,6 +10,7 @@ import type {
   InAppReminder,
   PricingPlanCode,
   SyncOutboxItem,
+  TimeBlock,
   TwelveWeekSystem,
 } from "../../utils/storage-types";
 
@@ -86,6 +87,7 @@ export interface TwelveWeekSettingsTabProps {
   onStatusChange: (value: string) => void;
   onTacticPriorityChange: (tacticId: string | undefined, value: string) => void;
   onTacticTypeChange: (tacticId: string | undefined, value: string) => void;
+  onTimeBlocksChange: (blocks: TimeBlock[]) => void;
   onPreferenceToggle: <K extends keyof AppPreferences>(key: K, value: AppPreferences[K]) => void;
   onArchivePendingOutbox: () => void;
   onRestoreArchivedOutbox: () => void;

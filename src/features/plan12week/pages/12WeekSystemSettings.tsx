@@ -191,6 +191,7 @@ export function TwelveWeekSystemSettings() {
     handleStatusChange,
     handleTacticPriorityChange,
     handleTacticTypeChange,
+    handleTimeBlocksChange,
     handlePreferenceToggle,
     handleArchivePendingOutbox,
     handleRestoreArchivedOutbox,
@@ -343,6 +344,7 @@ export function TwelveWeekSystemSettings() {
             onStatusChange={handleStatusChange}
             onTacticPriorityChange={handleTacticPriorityChange}
             onTacticTypeChange={handleTacticTypeChange}
+            onTimeBlocksChange={handleTimeBlocksChange}
             onPreferenceToggle={handlePreferenceToggle}
             onArchivePendingOutbox={handleArchivePendingOutbox}
             onRestoreArchivedOutbox={handleRestoreArchivedOutbox}

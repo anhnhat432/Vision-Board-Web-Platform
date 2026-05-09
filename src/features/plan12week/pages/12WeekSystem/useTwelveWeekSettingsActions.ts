@@ -25,9 +25,10 @@ import {
   trackAppEvent,
   updateAppPreferences,
 } from "@/app/utils/storage";
-import type { Goal, TwelveWeekSystem } from "@/app/utils/storage-types";
+import type { Goal, TimeBlock, TwelveWeekSystem } from "@/app/utils/storage-types";
 import { getCurrentWeekStartDate } from "@/app/utils/twelve-week-system-ui";
 import { regenerateUpcomingTaskInstances } from "@/app/utils/storage-twelve-week";
+import { validateTimeBlocks } from "@/features/plan12week/logic/timeBlocks";
 import { enqueueLeadMetricUpsertedMutations } from "@/features/plan12week/persistence/leadMetricMutation";
 import { enqueuePlanSnapshotUpdatedMutation } from "@/features/plan12week/persistence/planSnapshotMutation";
 
@@ -137,6 +138,22 @@ export function useTwelveWeekSettingsActions({
     enqueueLeadMetricUpsertedMutations(activeGoal.id, savedSystem, "manual_update", { indicatorIds: [tacticId] });
     trackAppEvent("12_week_tactic_updated", activeGoal.id, { tacticId, field: "type", value });
   }, [activeGoal, system, commitPlanSnapshotUpdate]);
+
+  const handleTimeBlocksChange = useCallback((blocks: TimeBlock[]) => {
+    if (!system) return;
+
+    const validation = validateTimeBlocks(blocks);
+    if (!validation.isValid) {
+      toast.error(validation.errors[0] ?? "Lịch tuần tham chiếu chưa hợp lệ.");
+      return;
+    }
+
+    commitPlanSnapshotUpdate({
+      ...system,
+      weeklyTimeBlocks: blocks,
+    });
+    toast.success("Lịch tuần tham chiếu đã được lưu.");
+  }, [system, commitPlanSnapshotUpdate]);
 
   const handlePreferenceToggle = useCallback(<K extends keyof AppPreferences>(key: K, value: AppPreferences[K]) => {
     updateAppPreferences({ [key]: value } as Pick<AppPreferences, K>);
@@ -326,6 +343,7 @@ export function useTwelveWeekSettingsActions({
     handleStatusChange,
     handleTacticPriorityChange,
     handleTacticTypeChange,
+    handleTimeBlocksChange,
     handlePreferenceToggle,
     handleArchivePendingOutbox,
     handleOutboxItemToggle,

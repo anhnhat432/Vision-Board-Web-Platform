@@ -1,5 +1,6 @@
 import { FeedbackDialog } from "../FeedbackDialog";
 import { TwelveWeekCycleSettingsPanel } from "./TwelveWeekCycleSettingsPanel";
+import { WeeklyTimeBlocksPanel } from "./WeeklyTimeBlocksPanel";
 import { SectionBlock } from "@/app/components/layout/SectionBlock";
 import type { TwelveWeekSettingsTabProps } from "./TwelveWeekSettingsShared";
 
@@ -15,6 +16,16 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
           onStatusChange={props.onStatusChange}
           onTacticPriorityChange={props.onTacticPriorityChange}
           onTacticTypeChange={props.onTacticTypeChange}
+        />
+      </SectionBlock>
+
+      <SectionBlock
+        title="Lịch tuần tham chiếu"
+        description="Performance Time Blocking gọn cho MVP: deep work, buffer và nghỉ chủ động trong tuần."
+      >
+        <WeeklyTimeBlocksPanel
+          value={props.system.weeklyTimeBlocks ?? []}
+          onChange={props.onTimeBlocksChange}
         />
       </SectionBlock>
 

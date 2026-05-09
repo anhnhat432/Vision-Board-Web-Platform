@@ -145,6 +145,26 @@ export interface TwelveWeekTaskInstance {
   skipped?: boolean;
 }
 
+export type TimeBlockType = "strategic" | "buffer" | "breakout";
+
+export type TimeBlockDayOfWeek =
+  | "Monday"
+  | "Tuesday"
+  | "Wednesday"
+  | "Thursday"
+  | "Friday"
+  | "Saturday"
+  | "Sunday";
+
+export interface TimeBlock {
+  id: string;
+  type: TimeBlockType;
+  dayOfWeek: TimeBlockDayOfWeek;
+  startTime: string;
+  durationMinutes: number;
+  note?: string;
+}
+
 export interface TwelveWeekSystem {
   goalType: string;
   vision12Week: string;
@@ -176,6 +196,7 @@ export interface TwelveWeekSystem {
   dailyCheckIns: UniversalDailyCheckIn[];
   weeklyReviews: UniversalWeeklyReview[];
   scoreboard: UniversalScoreboardWeek[];
+  weeklyTimeBlocks?: TimeBlock[];
   dailyUpdates?: DailyUpdate[];
   legacyWeeklyReviews?: WeeklyReview[];
   legacyScoreboard?: ScoreboardWeek[];
