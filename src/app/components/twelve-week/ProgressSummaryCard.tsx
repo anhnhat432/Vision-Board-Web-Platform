@@ -1,4 +1,15 @@
-import { ArrowDown, ArrowRight, ArrowUp, BarChart3, CalendarDays, Flag, Minus, Sparkles } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowRight,
+  ArrowUp,
+  BarChart3,
+  CalendarDays,
+  CheckCircle2,
+  Flag,
+  Minus,
+  Sparkles,
+  Target,
+} from "lucide-react";
 
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
@@ -85,6 +96,13 @@ export function ProgressSummaryCard({
         : onOpenTodayTab;
 
   const isEarlyState = trend.level === "early" || trend.level === "no_data";
+  const reviewedWeeks = new Set(
+    system.weeklyReviews.filter((review) => review.reviewCompleted).map((review) => review.weekNumber),
+  );
+  const milestoneWeeks = new Set([4, 8, 12].filter((weekNumber) => weekNumber <= system.totalWeeks));
+  const cycleWeeks = Array.from({ length: system.totalWeeks }, (_, index) => index + 1);
+  const nextMilestoneWeek = cycleWeeks.find((weekNumber) => milestoneWeeks.has(weekNumber) && weekNumber >= currentWeek);
+  const nextMilestoneLabel = nextMilestoneWeek ? `Week ${nextMilestoneWeek}` : `Week ${system.totalWeeks}`;
 
   return (
     <div className="space-y-6 pt-4">
@@ -181,6 +199,68 @@ export function ProgressSummaryCard({
           </CardContent>
         </Card>
       </div>
+
+      <Card interactive={false} className="border border-slate-200/80 bg-white/92 shadow-sm">
+        <CardContent className="space-y-4 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <Target className="h-3.5 w-3.5" />
+                Bản đồ chu kỳ
+              </p>
+              <p className="mt-2 text-base font-semibold text-slate-950">Đường chạy 12 tuần</p>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                Tuần hiện tại, review đã chốt và các mốc checkpoint được gom lại trong một hàng.
+              </p>
+            </div>
+            <div
+              data-testid="progress-next-milestone"
+              className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
+            >
+              Mốc tiếp theo: <span className="font-semibold text-slate-950">{nextMilestoneLabel}</span>
+            </div>
+          </div>
+
+          <div data-testid="progress-12-week-timeline" className="grid grid-cols-6 gap-2 sm:grid-cols-12">
+            {cycleWeeks.map((weekNumber) => {
+              const isCurrent = weekNumber === currentWeek;
+              const isReviewed = reviewedWeeks.has(weekNumber);
+              const isMilestone = milestoneWeeks.has(weekNumber);
+
+              return (
+                <div
+                  key={weekNumber}
+                  data-testid={`progress-week-${weekNumber}`}
+                  data-reviewed={isReviewed ? "true" : "false"}
+                  data-milestone={isMilestone ? "true" : "false"}
+                  aria-current={isCurrent ? "step" : undefined}
+                  className={`min-h-14 rounded-lg border px-2 py-2 text-center text-xs ${
+                    isCurrent
+                      ? "border-slate-950 bg-slate-950 text-white"
+                      : isReviewed
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                        : isMilestone
+                          ? "border-violet-200 bg-violet-50 text-violet-800"
+                          : "border-slate-200 bg-slate-50 text-slate-600"
+                  }`}
+                >
+                  <p className="font-semibold">W{weekNumber}</p>
+                  <p className="mt-1 flex items-center justify-center gap-1">
+                    {isReviewed && <CheckCircle2 className="h-3 w-3" />}
+                    {isMilestone ? "M" : isReviewed ? "Xong" : isCurrent ? "Nay" : ""}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700">
+            {reviewDueToday
+              ? "Bước tiếp theo: mở tab Tuần và chốt review trước khi thêm việc mới."
+              : "Bước tiếp theo: quay lại Hôm nay và giữ một việc cụ thể trước mắt."}
+          </div>
+        </CardContent>
+      </Card>
 
       {onViewFull && (
         <div className="flex justify-center">
