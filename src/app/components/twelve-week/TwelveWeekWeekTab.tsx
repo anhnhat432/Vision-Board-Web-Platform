@@ -144,6 +144,24 @@ export function TwelveWeekWeekTab({
   const summaryReview = reviewIsCompleted ? currentReview ?? null : null;
   const intensityHint = getWorkloadIntensityHint(weeklyForm.workloadDecision);
   const [isSavingReview, setIsSavingReview] = useState(false);
+  const reviewReadinessItems = [
+    {
+      key: "result",
+      label: "Kết quả",
+      done: weeklyForm.biggestOutputThisWeek.trim().length > 0,
+    },
+    {
+      key: "load",
+      label: "Mức tải",
+      done: weeklyForm.workloadDecision.trim().length > 0,
+    },
+    {
+      key: "priority",
+      label: "Ưu tiên",
+      done: weeklyForm.nextWeekPriority.trim().length > 0,
+    },
+  ];
+  const reviewReadyCount = reviewReadinessItems.filter((item) => item.done).length;
 
   const handleSaveReviewClick = async () => {
     if (isSavingReview) return;
@@ -156,7 +174,7 @@ export function TwelveWeekWeekTab({
   };
 
   return (
-    <div className="space-y-6 pt-4">
+    <div className="space-y-6 pt-4 pb-24 md:pb-0">
       {rescueStatus && rescueStatus.severity !== "none" && (
         <TwelveWeekRescueNudge
           status={rescueStatus}
@@ -354,6 +372,25 @@ export function TwelveWeekWeekTab({
                   {reviewDueToday ? "Nên chốt hôm nay" : "Chưa đến hạn"}
                 </Badge>
               </div>
+            </div>
+            <div data-testid="weekly-review-flow" className="grid gap-2 sm:grid-cols-3">
+              {reviewReadinessItems.map((item, index) => (
+                <div
+                  key={item.key}
+                  data-testid={`weekly-review-step-${item.key}`}
+                  data-done={item.done ? "true" : "false"}
+                  className={`rounded-lg border px-3 py-3 text-sm ${
+                    item.done
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+                      : "border-slate-200 bg-slate-50 text-slate-600"
+                  }`}
+                >
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em]">
+                    {index + 1}. {item.label}
+                  </p>
+                  <p className="mt-1 font-medium">{item.done ? "Đã có" : "Đang mở"}</p>
+                </div>
+              ))}
             </div>
             {summaryReview && (
               <div
@@ -701,6 +738,20 @@ export function TwelveWeekWeekTab({
 
             {/* Review CTA */}
             <div
+              data-testid="weekly-review-readiness"
+              className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="font-semibold text-slate-950">Mức sẵn sàng review</p>
+                <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700">
+                  {reviewReadyCount}/3
+                </span>
+              </div>
+              <p className="mt-1 leading-6">
+                Chốt kết quả, mức tải và ưu tiên tuần sau trước khi đóng review.
+              </p>
+            </div>
+            <div
               className={`flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between ${
                 reviewDueToday
                   ? "border-amber-300 bg-amber-50"
@@ -731,7 +782,10 @@ export function TwelveWeekWeekTab({
         </Card>
       </div>
       {/* Sticky review CTA for mobile */}
-      <div className="md:hidden sticky bottom-0 z-10 bg-white/95 backdrop-blur-sm border-t p-4">
+      <div
+        data-testid="weekly-review-mobile-sticky-cta"
+        className="md:hidden sticky bottom-20 z-40 border-t bg-white/95 p-4 backdrop-blur-sm"
+      >
         <Button
           size="lg"
           className="w-full gradient-brand text-white shadow-lg"
