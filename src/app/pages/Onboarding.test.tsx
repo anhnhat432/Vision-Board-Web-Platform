@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getUserData, saveUserData } from "../utils/storage";
+import { getUserData, LIFE_AREAS, saveUserData } from "../utils/storage";
 import { Onboarding } from "./Onboarding";
 
 function mockMobileViewport() {
@@ -26,6 +26,11 @@ function mockMobileViewport() {
 describe("Onboarding", () => {
   beforeEach(() => {
     localStorage.clear();
+    const data = getUserData();
+    data.onboardingCompleted = false;
+    data.currentWheelOfLife = LIFE_AREAS.map((area) => ({ ...area, score: 0 }));
+    data.wheelOfLifeHistory = [];
+    saveUserData(data);
     mockMobileViewport();
   });
 
@@ -39,7 +44,7 @@ describe("Onboarding", () => {
       </MemoryRouter>,
     );
 
-    const startButton = await screen.findByRole("button", { name: /Chấm Life Balance/i });
+    const startButton = await screen.findByRole("button", { name: /Bắt đầu chấm 8 lĩnh vực/i });
     expect(startButton).toHaveClass("bg-violet-600");
     expect(startButton).not.toHaveClass("bg-slate-950");
 
@@ -67,11 +72,64 @@ describe("Onboarding", () => {
       </MemoryRouter>,
     );
 
-    await user.click(await screen.findByRole("button", { name: /Chấm Life Balance/i }));
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm 8 lĩnh vực/i }));
     await user.click(await screen.findByRole("button", { name: /Hoàn thành đánh giá/i }));
 
     await waitFor(() => {
       expect(getUserData().currentWheelOfLife.some((area) => area.score > 0)).toBe(true);
     });
+  });
+
+  it("frames onboarding as a short eight-area scoring step", async () => {
+    render(
+      <MemoryRouter>
+        <Onboarding />
+      </MemoryRouter>,
+    );
+
+    expect((await screen.findAllByText(/8 lĩnh vực/i)).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/khoảng 3 phút/i).length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: /Bắt đầu chấm 8 lĩnh vực/i })).toBeInTheDocument();
+  });
+
+  it("shows returning users that existing scores will be updated", async () => {
+    const data = getUserData();
+    data.onboardingCompleted = true;
+    data.currentWheelOfLife = data.currentWheelOfLife.map((area, index) => ({
+      ...area,
+      score: index === 0 ? 8 : 6,
+    }));
+    saveUserData(data);
+
+    render(
+      <MemoryRouter>
+        <Onboarding />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/Cập nhật điểm hiện tại/i)).toBeInTheDocument();
+    expect(screen.getByText(/không tạo lại từ đầu/i)).toBeInTheDocument();
+  });
+
+  it("shows live assessment summary and reviewed count", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter>
+        <Onboarding />
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm 8 lĩnh vực/i }));
+    const summary = await screen.findByTestId("onboarding-assessment-summary");
+    expect(summary).toHaveTextContent("0/8");
+
+    const firstSlider = screen.getAllByRole("slider")[0];
+    firstSlider.focus();
+    await user.keyboard("{ArrowRight}");
+
+    expect(summary).toHaveTextContent("1/8");
+    expect(summary).toHaveTextContent(/Điểm trung bình/i);
+    expect(summary).toHaveTextContent(/Ưu tiên/i);
   });
 });
