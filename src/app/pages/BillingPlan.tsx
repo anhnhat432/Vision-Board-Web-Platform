@@ -20,6 +20,7 @@ import {
   getLastRestoreAccessSnapshot,
   openBillingCustomerPortal,
   restorePlanAccess,
+  resolveAppReturnPath,
   syncEntitlementsWithProvider,
 } from "../utils/production";
 import { getOrAssignExperimentVariant, getUserData, markExperimentExposed, startTrialLocally } from "../utils/storage";
@@ -114,6 +115,10 @@ export function BillingPlan() {
   const { currentPlanCode, currentPlanDefinition, entitlementKeys, premiumStatusItems } = usePlanEntitlements(userData);
   const demoMode = isDemoMode();
   const realMode = isRealMode();
+  const billingReturnUrl = useMemo(
+    () => resolveAppReturnPath(searchParams.get("returnTo") ?? "/12-week-system?tab=settings"),
+    [searchParams],
+  );
 
   const [isUpgradeDialogOpen, setIsUpgradeDialogOpen] = useState(false);
   const [upgradeContext, setUpgradeContext] = useState<PremiumFeatureContext>("plan");
@@ -273,6 +278,7 @@ export function BillingPlan() {
           ? `Đã mở ${getPlanLabel(planCode)} trên trình duyệt này.`
           : `Đã cập nhật ${getPlanLabel(planCode)} trên tài khoản của bạn.`,
       );
+      navigate(billingReturnUrl);
     }
   };
 
@@ -372,6 +378,8 @@ export function BillingPlan() {
         context={upgradeContext}
         currentPlan={currentPlanCode}
         source="settings"
+        checkoutMode="checkout"
+        returnUrl={billingReturnUrl}
         onCheckoutComplete={handleCheckoutComplete}
       />
 

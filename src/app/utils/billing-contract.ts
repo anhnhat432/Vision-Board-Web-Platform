@@ -17,6 +17,7 @@ export interface CheckoutFlowInput {
   goalId?: string;
   source?: MonetizationSource;
   recommendedPlan?: PricingPlanCode;
+  returnUrl?: string;
 }
 
 export interface CheckoutFlowResult {

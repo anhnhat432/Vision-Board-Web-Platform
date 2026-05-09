@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = "vbweb-2026-05-09b";
+const CACHE_NAME = "vbweb-2026-05-09c";
 const PRECACHE_URLS = ["/index.html"];
 
 self.addEventListener("install", (event) => {

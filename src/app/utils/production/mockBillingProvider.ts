@@ -161,7 +161,7 @@ export const mockBillingProvider: BillingProvider = {
       source: input.source,
       recommendedPlan: input.recommendedPlan ? normalizePlanCode(input.recommendedPlan) : input.recommendedPlan,
       createdAt: new Date().toISOString(),
-      returnUrl: buildReturnUrl(),
+      returnUrl: input.returnUrl ?? buildReturnUrl(),
     };
     writeMockCheckoutSession(session);
 

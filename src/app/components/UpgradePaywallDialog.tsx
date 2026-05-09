@@ -15,6 +15,20 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 
+const DEFAULT_BILLING_RETURN_PATH = "/12-week-system?tab=settings";
+
+export function getCurrentUpgradeOriginPath(): string {
+  if (typeof window === "undefined") return DEFAULT_BILLING_RETURN_PATH;
+  return `${window.location.pathname || "/"}${window.location.search}`;
+}
+
+export function buildBillingPlanUpgradePath(originPath: string): string {
+  const safeOriginPath = originPath.trim() || DEFAULT_BILLING_RETURN_PATH;
+  return `/billing/plan?returnTo=${encodeURIComponent(safeOriginPath)}`;
+}
+
+type UpgradeCheckoutMode = "billing_plan" | "checkout";
+
 interface UpgradePaywallDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -26,6 +40,8 @@ interface UpgradePaywallDialogProps {
   recommendedPlan?: PricingPlanCode;
   source?: MonetizationSource;
   onCheckoutComplete?: (planCode: PricingPlanCode) => void;
+  checkoutMode?: UpgradeCheckoutMode;
+  returnUrl?: string;
 }
 
 export function UpgradePaywallDialog({
@@ -39,8 +55,11 @@ export function UpgradePaywallDialog({
   recommendedPlan,
   source = "paywall_dialog",
   onCheckoutComplete,
+  checkoutMode = "billing_plan",
+  returnUrl,
 }: UpgradePaywallDialogProps) {
   const [isUpgrading, setIsUpgrading] = useState(false);
+  const [originPath, setOriginPath] = useState(() => getCurrentUpgradeOriginPath());
   const paywallCopy = useMemo(() => getPaywallCopy(context), [context]);
   const billingProviderStatus = useMemo(() => getBillingProviderStatus(), []);
   const billingDebugUi = shouldShowBillingDebugUi();
@@ -49,6 +68,7 @@ export function UpgradePaywallDialog({
   useEffect(() => {
     if (!open) return;
 
+    setOriginPath(getCurrentUpgradeOriginPath());
     trackPaywallViewed({
       goalId,
       context,
@@ -72,12 +92,21 @@ export function UpgradePaywallDialog({
         placement: "paywall_dialog_plan_card",
       });
 
+      if (checkoutMode === "billing_plan") {
+        if (typeof window !== "undefined") {
+          window.location.assign(buildBillingPlanUpgradePath(originPath));
+        }
+        onOpenChange(false);
+        return;
+      }
+
       const result = await startCheckoutFlow({
         planCode,
         context,
         goalId,
         source,
         recommendedPlan: recommendedPlan ?? paywallCopy.recommendedPlan,
+        returnUrl: returnUrl ?? DEFAULT_BILLING_RETURN_PATH,
       });
 
       if (!result.ok) {

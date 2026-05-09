@@ -37,15 +37,16 @@ export function MockBillingCheckout() {
 
     try {
       const result = completeMockCheckoutSession(sessionId);
+      const resolvedReturnPath = resolveAppReturnPath(session?.returnUrl ?? result.returnUrl);
 
       if (!result.ok) {
         toast.error(result.message);
-        navigate(result.returnUrl);
+        navigate(resolvedReturnPath);
         return;
       }
 
       toast.success(result.message);
-      navigate(result.returnUrl);
+      navigate(resolvedReturnPath);
     } finally {
       setIsSubmitting(false);
     }

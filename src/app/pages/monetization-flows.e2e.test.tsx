@@ -1,14 +1,16 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
+import { buildBillingPlanUpgradePath, getCurrentUpgradeOriginPath } from "../components/UpgradePaywallDialog";
 import { renderAppRoute, resetTestStorage, seedTwelveWeekGoal, updateUserData } from "../../test/app-flow-helpers";
-import { startCheckoutFlow } from "../utils/production";
+import { getMockCheckoutSession, startCheckoutFlow } from "../utils/production";
 import { getCurrentEntitlementKeys, getCurrentPlan, getUserData } from "../utils/storage";
 import { BillingPlan } from "./BillingPlan";
 
 describe("monetization flows", () => {
   beforeEach(() => {
     resetTestStorage();
+    window.history.pushState({}, "", "/");
   });
 
   it("BillingPlan page renders current plan and entitlements for free user", async () => {
@@ -56,6 +58,16 @@ describe("monetization flows", () => {
     expect(within(dialog).getByText(/Dùng thử Plus/i)).toBeInTheDocument();
   });
 
+  it("captures the paywall opening path as the BillingPlan returnTo", () => {
+    window.history.pushState({}, "", "/12-week-setup?step=template");
+    const originPath = getCurrentUpgradeOriginPath();
+
+    expect(originPath).toBe("/12-week-setup?step=template");
+    expect(buildBillingPlanUpgradePath(originPath)).toBe(
+      "/billing/plan?returnTo=%2F12-week-setup%3Fstep%3Dtemplate",
+    );
+  });
+
   it("mock checkout flow upgrades user to Plus", async () => {
     const { goalId } = seedTwelveWeekGoal();
 
@@ -87,6 +99,37 @@ describe("monetization flows", () => {
     expect(getCurrentEntitlementKeys()).toContain("premium_review_insights");
     expect(getCurrentEntitlementKeys()).toContain("priority_reminders");
     expect(getCurrentEntitlementKeys()).toContain("advanced_analytics");
+
+    ui.unmount();
+  });
+
+  it("mock checkout returns to the explicit feature returnUrl after confirm", async () => {
+    const { goalId } = seedTwelveWeekGoal();
+
+    const checkout = await startCheckoutFlow({
+      planCode: "PLUS",
+      context: "review",
+      goalId,
+      source: "paywall_dialog",
+      recommendedPlan: "PLUS",
+      returnUrl: "/12-week-system?tab=week",
+    });
+
+    const checkoutUrl = new URL(checkout.checkoutUrl ?? "", "http://localhost");
+    const sessionId = checkoutUrl.searchParams.get("session") ?? "";
+    expect(getMockCheckoutSession(sessionId)?.returnUrl).toBe("/12-week-system?tab=week");
+
+    const { router, ui } = renderAppRoute(`${checkoutUrl.pathname}${checkoutUrl.search}`);
+    const user = userEvent.setup();
+
+    await screen.findByText("Checkout dùng thử");
+    await user.click(screen.getByRole("button", { name: /Xác nhận mở gói/i }));
+
+    await waitFor(() => {
+      expect(getCurrentPlan()).toBe("PLUS");
+    });
+    expect(router.state.location.pathname).toBe("/12-week-system");
+    expect(router.state.location.search).toBe("?tab=week");
 
     ui.unmount();
   });
