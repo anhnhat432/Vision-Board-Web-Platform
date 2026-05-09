@@ -44,21 +44,19 @@ export function LifeBalance() {
   const lifeBalanceStartedRef = useRef(false);
   const pageTopRef = useRef<HTMLDivElement | null>(null);
 
-  // Reset scroll on mount (for page navigation)
   useScrollToTopOnChange(0, {
     targetRef: pageTopRef,
     focusRef: pageTopRef,
     skipInitial: false,
   });
 
-  // Warn user before navigating away with unsaved changes
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) => hasChanges && currentLocation.pathname !== nextLocation.pathname,
   );
 
   useEffect(() => {
     if (!userData || hasChanges) return;
-    setLifeAreas([...userData.currentWheelOfLife]);
+    setLifeAreas(userData.currentWheelOfLife.map((area) => ({ ...area })));
   }, [hasChanges, userData]);
 
   useEffect(() => {
@@ -74,53 +72,6 @@ export function LifeBalance() {
       has_existing_scores: hasExistingScores,
     });
   }, [userData]);
-
-  const handleScoreChange = (index: number, value: number[]) => {
-    const updated = [...lifeAreas];
-    updated[index] = { ...updated[index], score: value[0] };
-    setLifeAreas(updated);
-    setHasChanges(true);
-  };
-
-  const handleSave = () => {
-    updateWheelOfLife(lifeAreas);
-    if (strongestArea && weakestArea) {
-      trackAnalyticsEvent("life_balance_completed", {
-        source: "life_balance",
-        area_count: lifeAreas.length,
-        average_score: Number(averageScore.toFixed(1)),
-        weakest_area: getLifeAreaLabel(weakestArea.name),
-        strongest_area: getLifeAreaLabel(strongestArea.name),
-      });
-    }
-    toast.success("Đã cập nhật cân bằng cuộc sống!", {
-      description: "Điểm số bánh xe cuộc sống của bạn đã được lưu.",
-    });
-    setHasChanges(false);
-    reloadUserData();
-  };
-
-  const handleContinueToInsight = () => {
-    if (hasChanges) {
-      updateWheelOfLife(lifeAreas);
-      if (strongestArea && weakestArea) {
-        trackAnalyticsEvent("life_balance_completed", {
-          source: "life_balance",
-          area_count: lifeAreas.length,
-          average_score: Number(averageScore.toFixed(1)),
-          weakest_area: getLifeAreaLabel(weakestArea.name),
-          strongest_area: getLifeAreaLabel(strongestArea.name),
-        });
-      }
-      toast.success("Đã lưu Life Balance trước khi mở Life Insight.");
-      setHasChanges(false);
-      reloadUserData();
-      window.setTimeout(() => navigate("/life-insight"), 0);
-      return;
-    }
-
-    navigate("/life-insight");
-  };
 
   const radarData = useMemo(
     () =>
@@ -166,14 +117,63 @@ export function LifeBalance() {
   }, [userData]);
 
   const hasLifeBalanceData = hasRealLifeBalance(userData);
+  const balanceTone =
+    averageScore < 5
+      ? "Mặt bằng hiện tại còn thấp. Hãy chọn một lĩnh vực nhỏ để tạo lực kéo trước."
+      : averageScore < 7
+        ? "Bạn đã có nền ổn định. Điểm thấp nhất là nơi đáng chuyển thành Life Insight ngay."
+        : "Nền hiện tại khá tốt. Life Insight nên tập trung vào điểm lệch để duy trì đà.";
 
-  // Empty state: onboarding not yet completed or wheel not set with real scores.
+  const trackCompletion = () => {
+    if (!strongestArea || !weakestArea) return;
+
+    trackAnalyticsEvent("life_balance_completed", {
+      source: "life_balance",
+      area_count: lifeAreas.length,
+      average_score: Number(averageScore.toFixed(1)),
+      weakest_area: getLifeAreaLabel(weakestArea.name),
+      strongest_area: getLifeAreaLabel(strongestArea.name),
+    });
+  };
+
+  const saveLifeBalance = () => {
+    updateWheelOfLife(lifeAreas);
+    trackCompletion();
+    setHasChanges(false);
+    reloadUserData();
+  };
+
+  const handleScoreChange = (index: number, value: number[]) => {
+    const updated = [...lifeAreas];
+    updated[index] = { ...updated[index], score: value[0] };
+    setLifeAreas(updated);
+    setHasChanges(true);
+  };
+
+  const handleSave = () => {
+    saveLifeBalance();
+    toast.success("Đã cập nhật Life Balance", {
+      description: "Điểm mới đã được lưu vào bánh xe cuộc sống của bạn.",
+    });
+  };
+
+  const handleContinueToInsight = () => {
+    if (hasChanges) {
+      saveLifeBalance();
+      toast.success("Đã lưu Life Balance trước khi mở Life Insight.");
+      window.setTimeout(() => navigate("/life-insight"), 0);
+      return;
+    }
+
+    navigate("/life-insight");
+  };
+
   if (!userData || !hasLifeBalanceData) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
         <div className="relative">
           <div className="absolute -inset-4 animate-pulse rounded-full border-2 border-dashed border-violet-200" />
-          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
+          <div className="flex h-20 w-20 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
             <CompassIcon className="h-9 w-9" />
           </div>
         </div>
@@ -196,11 +196,10 @@ export function LifeBalance() {
 
   return (
     <div ref={pageTopRef} className="space-y-8 pb-12">
-      {/* Unsaved changes navigation blocker dialog */}
       {blocker.state === "blocked" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="mx-4 w-full max-w-sm rounded-2xl border border-white/70 bg-white p-6 shadow-2xl">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+          <div className="mx-4 w-full max-w-sm rounded-lg border border-white/70 bg-white p-6 shadow-2xl">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
               <AlertTriangle className="h-6 w-6" />
             </div>
             <h3 className="mt-4 text-lg font-bold text-slate-900">Bạn có thay đổi chưa lưu</h3>
@@ -210,7 +209,7 @@ export function LifeBalance() {
             <div className="mt-6 flex flex-col gap-3">
               <Button
                 onClick={() => {
-                  updateWheelOfLife(lifeAreas);
+                  saveLifeBalance();
                   toast.success("Đã lưu trước khi rời trang.");
                   blocker.proceed();
                 }}
@@ -228,6 +227,7 @@ export function LifeBalance() {
           </div>
         </div>
       )}
+
       <Card className="ops-surface overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-sm">
         <CardContent className="relative p-5 sm:p-6">
           <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -239,11 +239,11 @@ export function LifeBalance() {
 
               <div className="space-y-3">
                 <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl">
-                  Theo dõi và tinh chỉnh bánh xe cuộc sống của bạn như một hệ điều hành cá nhân.
+                  Cập nhật bánh xe cuộc sống để chọn đúng trọng tâm tiếp theo.
                 </h1>
                 <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                  Trang này giúp bạn nhìn rõ mặt bằng hiện tại, cập nhật điểm số theo cảm nhận thật và theo dõi sự thay
-                  đổi qua thời gian để ưu tiên đúng nơi cần thiết.
+                  Mỗi điểm bạn chỉnh sẽ cập nhật ngay phần tín hiệu bên dưới. Sau đó bạn có thể lưu riêng hoặc lưu rồi
+                  mở Life Insight để chọn vấn đề đáng ưu tiên nhất.
                 </p>
               </div>
 
@@ -265,28 +265,28 @@ export function LifeBalance() {
               </div>
             </div>
 
-            <div className="hidden rounded-xl border border-slate-200 bg-slate-50/80 p-4 shadow-sm lg:block">
+            <div className="hidden rounded-lg border border-slate-200 bg-slate-50/80 p-4 shadow-sm lg:block">
               <ProductVisual variant="balance" className="mb-4 min-h-[160px]" />
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Snapshot hiện tại</p>
 
               <div className="mt-4 space-y-3">
-                <div className="rounded-xl border border-slate-200 bg-white p-4">
+                <div className="rounded-lg border border-slate-200 bg-white p-4">
                   <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Điểm cân bằng chung</p>
                   <p className="mt-2 text-3xl font-bold text-slate-950">
                     <CountUp value={averageScore} precision={1} />
                     <span className="text-slate-400">/10</span>
                   </p>
                 </div>
-                <div className="rounded-xl border border-slate-200 bg-white p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Khía cạnh mạnh nhất</p>
+                <div className="rounded-lg border border-slate-200 bg-white p-4">
+                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Mạnh nhất</p>
                   <p className="mt-2 text-xl font-bold text-slate-950">{getLifeAreaLabel(strongestArea.name)}</p>
                   <p className="mt-1 text-sm text-slate-500">
                     <CountUp value={strongestArea.score} />
                     <span>/10</span>
                   </p>
                 </div>
-                <div className="rounded-xl border border-slate-200 bg-white p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Nên ưu tiên tiếp theo</p>
+                <div className="rounded-lg border border-slate-200 bg-white p-4">
+                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Nên ưu tiên</p>
                   <p className="mt-2 text-xl font-bold text-slate-950">{getLifeAreaLabel(weakestArea.name)}</p>
                   <p className="mt-1 text-sm text-slate-500">
                     <CountUp value={weakestArea.score} />
@@ -305,27 +305,57 @@ export function LifeBalance() {
           className="border border-slate-200/80 bg-white/92 shadow-lg"
         >
           <CardContent className="p-5 sm:p-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Tiếp theo trong luồng chính
-                </p>
-                <h2 className="mt-1 text-xl font-bold text-slate-950">
-                  Chọn một Life Insight trước khi viết mục tiêu.
-                </h2>
-                <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
-                  Dùng điểm đang lệch nhất để chọn đúng trọng tâm, rồi mới chuyển sang SMART Goal và kế hoạch 12 tuần.
-                </p>
-                {hasChanges && (
-                  <p className="mt-2 text-sm font-medium text-amber-700">
-                    Bạn có thay đổi chưa lưu. Khi đi tiếp, hệ thống sẽ lưu điểm mới trước.
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+              <div data-testid="life-balance-signal-summary" className="space-y-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                    Tiếp theo trong luồng chính
                   </p>
+                  <h2 className="mt-1 text-xl font-bold text-slate-950">Tín hiệu từ Life Balance</h2>
+                  <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
+                    {balanceTone} Life Insight sẽ dùng tín hiệu này để nối sang SMART Goal và kế hoạch 12 tuần.
+                  </p>
+                  {hasChanges && (
+                    <p className="mt-2 text-sm font-medium text-amber-700">
+                      Bạn đang xem tín hiệu từ điểm mới chưa lưu. Khi đi tiếp, hệ thống sẽ lưu điểm này trước.
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div
+                    data-testid="life-balance-signal-weakest"
+                    className="rounded-lg border border-amber-200 bg-amber-50 p-4"
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Ưu tiên</p>
+                    <p className="mt-2 text-lg font-bold text-slate-950">{getLifeAreaLabel(weakestArea.name)}</p>
+                    <p className="mt-1 text-sm font-semibold text-amber-800">{weakestArea.score}/10</p>
+                  </div>
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Trung bình</p>
+                    <p className="mt-2 text-lg font-bold text-slate-950">{averageScore.toFixed(1)}/10</p>
+                    <p className="mt-1 text-sm text-slate-500">mặt bằng hiện tại</p>
+                  </div>
+                  <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Điểm tựa</p>
+                    <p className="mt-2 text-lg font-bold text-slate-950">{getLifeAreaLabel(strongestArea.name)}</p>
+                    <p className="mt-1 text-sm font-semibold text-emerald-800">{strongestArea.score}/10</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex w-full flex-col gap-3 sm:w-auto">
+                <Button className="w-full sm:w-auto" onClick={handleContinueToInsight}>
+                  {hasChanges ? "Lưu và xem Life Insight" : "Mở Life Insight"}
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+                {hasChanges && (
+                  <Button variant="outline" className="w-full sm:w-auto" onClick={handleSave}>
+                    <Save className="h-4 w-4" />
+                    Chỉ lưu điểm
+                  </Button>
                 )}
               </div>
-              <Button className="w-full sm:w-auto" onClick={handleContinueToInsight}>
-                Mở Life Insight
-                <ArrowRight className="h-4 w-4" />
-              </Button>
             </div>
           </CardContent>
         </Card>
@@ -388,7 +418,7 @@ export function LifeBalance() {
                       </CardTitle>
                     </div>
                     <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${item.color}`}
+                      className={`flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${item.color}`}
                     >
                       <Icon className="h-5 w-5" />
                     </div>
@@ -430,7 +460,7 @@ export function LifeBalance() {
 
                   <div className="mt-4 grid gap-3 md:grid-cols-2">
                     <div
-                      className="rounded-2xl border p-4"
+                      className="rounded-lg border p-4"
                       style={{
                         borderColor: `${strongestArea.color}33`,
                         background: `${strongestArea.color}12`,
@@ -451,7 +481,7 @@ export function LifeBalance() {
                     </div>
 
                     <div
-                      className="rounded-2xl border p-4"
+                      className="rounded-lg border p-4"
                       style={{
                         borderColor: `${weakestArea.color}33`,
                         background: `${weakestArea.color}12`,
@@ -482,7 +512,7 @@ export function LifeBalance() {
                   </CardHeader>
                   <CardContent className="space-y-5">
                     {lifeAreas.map((area, index) => (
-                      <div key={area.name} className="rounded-2xl border border-white/70 bg-white/72 p-4">
+                      <div key={area.name} className="rounded-lg border border-white/70 bg-white/72 p-4">
                         <div className="flex items-center justify-between gap-4">
                           <div className="flex items-center gap-3">
                             <div
@@ -560,7 +590,7 @@ export function LifeBalance() {
                 {historicalData.length > 0 ? (
                   <Suspense
                     fallback={
-                      <div className="rounded-2xl border border-white/70 bg-white/72 py-12 text-center text-slate-500">
+                      <div className="rounded-lg border border-white/70 bg-white/72 py-12 text-center text-slate-500">
                         <Calendar className="mx-auto mb-3 h-12 w-12 opacity-50" />
                         <p>Đang mở biểu đồ lịch sử...</p>
                         <p className="mt-1 text-sm">Dữ liệu xu hướng sẽ hiện ra ngay sau khi tải xong.</p>
@@ -570,7 +600,7 @@ export function LifeBalance() {
                     <LifeBalanceHistoryChart data={historicalData} />
                   </Suspense>
                 ) : (
-                  <div className="rounded-2xl border border-white/70 bg-white/72 py-12 text-center text-slate-500">
+                  <div className="rounded-lg border border-white/70 bg-white/72 py-12 text-center text-slate-500">
                     <Calendar className="mx-auto mb-3 h-12 w-12 opacity-50" />
                     <p>Chưa có dữ liệu lịch sử.</p>
                     <p className="mt-1 text-sm">Hãy lưu một vài lần cập nhật để bắt đầu thấy xu hướng.</p>

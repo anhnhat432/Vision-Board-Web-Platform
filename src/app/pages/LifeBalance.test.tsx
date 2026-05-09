@@ -78,9 +78,45 @@ describe("LifeBalance", () => {
     const nextStepCard = await screen.findByTestId("life-balance-next-step-card");
     expect(nextStepCard).toHaveTextContent("Tiếp theo trong luồng chính");
     expect(nextStepCard).toHaveTextContent("Life Insight");
+    expect(within(nextStepCard).getByRole("button", { name: /Mở Life Insight/i })).toBeInTheDocument();
 
     await user.click(within(nextStepCard).getByRole("button", { name: /Mở Life Insight/i }));
 
     expect(router.state.location.pathname).toBe("/life-insight");
+  });
+
+  it("updates the signal summary from unsaved in-memory score edits", async () => {
+    const user = userEvent.setup();
+    seedRealLifeBalance();
+    renderLifeBalance();
+
+    const summary = await screen.findByTestId("life-balance-signal-summary");
+    expect(summary).toHaveTextContent("Tín hiệu từ Life Balance");
+    expect(screen.getByTestId("life-balance-signal-weakest")).toHaveTextContent("Mối quan hệ");
+    expect(screen.getByTestId("life-balance-signal-weakest")).toHaveTextContent("4/10");
+
+    const firstSlider = screen.getAllByRole("slider")[0];
+    firstSlider.focus();
+    await user.keyboard("{Home}");
+
+    expect(screen.getByTestId("life-balance-signal-weakest")).toHaveTextContent("Sự nghiệp");
+    expect(screen.getByTestId("life-balance-signal-weakest")).toHaveTextContent("1/10");
+    expect(screen.getByRole("button", { name: /Lưu và xem Life Insight/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Chỉ lưu điểm/i })).toBeInTheDocument();
+  });
+
+  it("saves edited scores before opening Life Insight from the primary CTA", async () => {
+    const user = userEvent.setup();
+    seedRealLifeBalance();
+    const { router } = renderLifeBalance();
+
+    const firstSlider = (await screen.findAllByRole("slider"))[0];
+    firstSlider.focus();
+    await user.keyboard("{Home}");
+
+    await user.click(screen.getByRole("button", { name: /Lưu và xem Life Insight/i }));
+
+    expect(router.state.location.pathname).toBe("/life-insight");
+    expect(getUserData().currentWheelOfLife[0]?.score).toBe(1);
   });
 });
