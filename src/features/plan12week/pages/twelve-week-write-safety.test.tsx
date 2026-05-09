@@ -62,7 +62,11 @@ function getPrimaryButton(name: string | RegExp) {
 }
 
 async function openWeeklyReviewDetails(user: ReturnType<typeof userEvent.setup>) {
-  const trigger = await screen.findByRole("button", { name: /Chi tiết review thêm/i });
+  const trigger = await screen.findByRole(
+    "button",
+    { name: /Chi tiết review thêm/i },
+    { timeout: INTEGRATION_TEST_TIMEOUT_MS },
+  );
   if (trigger && trigger.getAttribute("aria-expanded") !== "true") {
     await user.click(trigger);
   }
