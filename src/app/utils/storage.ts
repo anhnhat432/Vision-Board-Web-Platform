@@ -3,6 +3,8 @@
 import type {
   Achievement,
   AppPreferences,
+  AspirationalVision,
+  AspirationalVisionArea,
   EntitlementKey,
   ExperimentVariantId,
   FunnelStepSummary,
@@ -115,6 +117,9 @@ import {
 export type {
   Achievement,
   AppPreferences,
+  AspirationalVision,
+  AspirationalVisionArea,
+  AspirationalVisionLifeArea,
   DailyUpdate,
   FunnelStepSummary,
   Goal,
@@ -222,6 +227,61 @@ function normalizeReflection(reflection: Reflection): Reflection {
   };
 }
 
+const ASPIRATIONAL_VISION_AREAS = new Set<AspirationalVisionArea>([
+  "health",
+  "career",
+  "relationships",
+  "finance",
+  "personal",
+  "family",
+  "other",
+]);
+
+function normalizeAspirationalVision(value: unknown): AspirationalVision | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+
+  const record = value as Partial<AspirationalVision>;
+  if (
+    typeof record.id !== "string" ||
+    record.id.trim().length === 0 ||
+    (record.horizonYears !== 3 && record.horizonYears !== 5) ||
+    typeof record.summary !== "string" ||
+    record.summary.trim().length === 0 ||
+    typeof record.createdAt !== "string" ||
+    typeof record.updatedAt !== "string"
+  ) {
+    return undefined;
+  }
+
+  const lifeAreas = Array.isArray(record.lifeAreas)
+    ? record.lifeAreas
+        .map((area) => {
+          if (!area || typeof area !== "object" || Array.isArray(area)) return null;
+          const areaRecord = area as { area?: unknown; statement?: unknown };
+          if (typeof areaRecord.area !== "string" || !ASPIRATIONAL_VISION_AREAS.has(areaRecord.area as AspirationalVisionArea)) {
+            return null;
+          }
+          if (typeof areaRecord.statement !== "string") return null;
+          const statement = areaRecord.statement.trim();
+          if (!statement) return null;
+          return {
+            area: areaRecord.area as AspirationalVisionArea,
+            statement,
+          };
+        })
+        .filter((area): area is AspirationalVision["lifeAreas"][number] => area !== null)
+    : [];
+
+  return {
+    id: record.id.trim(),
+    horizonYears: record.horizonYears,
+    summary: record.summary.trim(),
+    lifeAreas,
+    createdAt: record.createdAt,
+    updatedAt: record.updatedAt,
+  };
+}
+
 function normalizeUserData(data: UserData): UserData {
   const subscription = data.subscription ?? null;
   const entitlements = Array.isArray(data.entitlements) ? data.entitlements : [];
@@ -249,6 +309,7 @@ function normalizeUserData(data: UserData): UserData {
       ...DEFAULT_APP_PREFERENCES,
       ...(data.appPreferences ?? {}),
     },
+    aspirationalVision: normalizeAspirationalVision(data.aspirationalVision),
     subscription,
     entitlements: normalizedEntitlements,
   };

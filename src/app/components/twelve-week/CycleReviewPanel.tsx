@@ -16,6 +16,7 @@ interface CycleReviewPanelProps {
   onSaveCycleReview: (input: { lessons: string[]; summary: CycleSummary }) => void;
   onStartNewCycle: (input: { lessons: string[]; summary: CycleSummary }) => void;
   onOpenSettings: () => void;
+  aspirationalVisionSummary?: string | null;
 }
 
 const LESSON_FIELD_IDS = ["lesson-one", "lesson-two", "lesson-three"] as const;
@@ -34,6 +35,7 @@ export function CycleReviewPanel({
   onSaveCycleReview,
   onStartNewCycle,
   onOpenSettings,
+  aspirationalVisionSummary,
 }: CycleReviewPanelProps) {
   const [lessons, setLessons] = useState(["", "", ""]);
   const summary = useMemo(
@@ -74,6 +76,13 @@ export function CycleReviewPanel({
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
+          {aspirationalVisionSummary ? (
+            <div className="rounded-lg border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-950">
+              <p className="font-semibold">Cycle này đã đưa bạn gần hơn với vision 3 năm chưa?</p>
+              <p className="mt-1 text-violet-900/80">{aspirationalVisionSummary}</p>
+            </div>
+          ) : null}
+
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             {kpis.map(({ label, value, icon: Icon }) => (
               <div key={label} className="rounded-lg border border-slate-200 bg-slate-50 p-4">

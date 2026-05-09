@@ -1,5 +1,5 @@
 ﻿import { useEffect, useMemo, useCallback, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Compass, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
@@ -8,6 +8,7 @@ import { CoreFlowProgress } from '@/app/components/CoreFlowProgress';
 import { PageShell } from '@/app/components/PageShell';
 import { UpgradePaywallDialog } from '@/app/components/UpgradePaywallDialog';
 import { Badge } from '@/app/components/ui/badge';
+import { Button } from '@/app/components/ui/button';
 import { Card, CardContent } from '@/app/components/ui/card';
 import { trackAnalyticsEvent } from '@/app/utils/analytics';
 import {
@@ -44,6 +45,7 @@ import { createGoal, updateGoal } from "@/services/goalService";
 import { saveGoalLink } from "@/lib/api/goalLinkStore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { isDemoMode } from '@/app/utils/app-mode';
+import type { AspirationalVision as AspirationalVisionModel } from "@/app/utils/storage-types";
 import { STEPS } from "./12WeekSetup/constants";
 import {
   addDays,
@@ -85,6 +87,8 @@ export function TwelveWeekSetup() {
   const [focusArea, setFocusArea] = useState("");
   const [smartGoal, setSmartGoal] = useState<PendingSMARTGoal | null>(null);
   const [feasibility, setFeasibility] = useState<PendingFeasibilityResult | null>(null);
+  const [aspirationalVision, setAspirationalVision] = useState<AspirationalVisionModel | null>(null);
+  const [isVisionPromptDismissed, setIsVisionPromptDismissed] = useState(false);
   const [draft, setDraft] = useState<TwelveWeekSetupDraft>({
     templateId: "",
     goalType: "Personal Growth",
@@ -107,6 +111,8 @@ export function TwelveWeekSetup() {
 
   useEffect(() => {
     const data = getUserData();
+    setAspirationalVision(data.aspirationalVision ?? null);
+
     if (!hasRealLifeBalance(data)) {
       setSetupGate("needs_life_balance");
       setIsLoading(false);
@@ -794,6 +800,7 @@ export function TwelveWeekSetup() {
         .filter(Boolean)
         .join("\n\n"),
       deadline: cycleEndDate,
+      aspirationalVisionId: aspirationalVision?.id,
       tasks: previewTasks.slice(0, 4).map((taskTitle, index) => ({
         id: `task_${Date.now()}_${index}`,
         title: taskTitle,
@@ -973,6 +980,35 @@ export function TwelveWeekSetup() {
       />
 
       <CoreFlowProgress currentStepId="twelve_week_setup" onExit={() => navigate("/")} />
+
+      {!isVisionPromptDismissed && (
+        <Card className="border border-violet-200 bg-violet-50/80 shadow-sm">
+          <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              {aspirationalVision ? (
+                <p className="text-sm leading-6 text-violet-950">
+                  <span className="font-semibold">Mục tiêu này phục vụ tầm nhìn 3 năm:</span>{" "}
+                  {aspirationalVision.summary}
+                </p>
+              ) : (
+                <p className="text-sm leading-6 text-violet-950">
+                  Bạn đang đặt mục tiêu 12 tuần. Phương pháp gốc khuyên gắn với tầm nhìn 3 năm.
+                </p>
+              )}
+            </div>
+            {!aspirationalVision && (
+              <div className="flex shrink-0 flex-wrap gap-2">
+                <Button asChild size="sm" variant="outline" className="bg-white">
+                  <Link to="/vision">Điền 2 phút →</Link>
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setIsVisionPromptDismissed(true)}>
+                  Bỏ qua
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="hero-surface overflow-hidden border-0 text-white glass-surface-gradient-border ambient-glow">
         <CardContent className="relative p-5 sm:p-6 lg:p-10">

@@ -80,10 +80,21 @@ describe("12-week core flows", () => {
 
   it("creates a 12-week system from setup and routes into the command center", async () => {
     seedPendingSetupContext();
+    updateUserData((data) => {
+      data.aspirationalVision = {
+        id: "vision_3y_1",
+        horizonYears: 3,
+        summary: "Ba năm tới tôi có một sản phẩm ổn định và nhịp làm việc bền vững.",
+        lifeAreas: [],
+        createdAt: "2026-05-09T00:00:00.000Z",
+        updatedAt: "2026-05-09T00:00:00.000Z",
+      };
+    });
     const { router } = renderAppRoute("/12-week-setup");
     const user = userEvent.setup();
 
     await screen.findByRole("heading", { name: "Mục tiêu 12 tuần" });
+    expect(screen.getByText(/Mục tiêu này phục vụ tầm nhìn 3 năm:/)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
 
     const tacticInputs = await screen.findAllByLabelText("Tên việc");
@@ -109,6 +120,7 @@ describe("12-week core flows", () => {
 
     expect(data.goals).toHaveLength(1);
     expect(createdSystem).toBeDefined();
+    expect(data.goals[0]?.aspirationalVisionId).toBe("vision_3y_1");
     expect(weekOneTasks.length).toBeGreaterThan(0);
     expect(weekOneTasks.every((task) => task.scheduledDate >= todayKey)).toBe(true);
     expect(localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId)).toBe(data.goals[0]?.id);
@@ -134,6 +146,20 @@ describe("12-week core flows", () => {
       expect(leadMetricMutations[0].payload.clientMetricId).toContain(":metric:");
       expect(leadMetricMutations[0].payload.weeklyTarget).toBeGreaterThanOrEqual(0);
     }
+  }, 10_000);
+
+  it("shows a soft 3-year vision prompt in 12-week setup without blocking the flow", async () => {
+    seedPendingSetupContext();
+
+    renderAppRoute("/12-week-setup");
+
+    await screen.findByRole("heading", { name: "Mục tiêu 12 tuần" });
+    expect(
+      screen.getByText("Bạn đang đặt mục tiêu 12 tuần. Phương pháp gốc khuyên gắn với tầm nhìn 3 năm."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Điền 2 phút →" })).toHaveAttribute("href", "/vision");
+    expect(screen.getByRole("button", { name: "Bỏ qua" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Tiếp tục" })).toBeEnabled();
   }, 10_000);
 
   it("shows a clear next action when no 12-week plan exists", async () => {
@@ -247,6 +273,14 @@ describe("12-week core flows", () => {
       goal.twelveWeekSystem.weeklyReviews = Array.from({ length: 12 }, (_, index) =>
         makeCycleReview(index + 1, index % 2 === 0 ? 90 : 70),
       );
+      data.aspirationalVision = {
+        id: "vision_3y_1",
+        horizonYears: 3,
+        summary: "Ba năm tới tôi sống khỏe và làm việc sâu hơn.",
+        lifeAreas: [],
+        createdAt: "2026-05-09T00:00:00.000Z",
+        updatedAt: "2026-05-09T00:00:00.000Z",
+      };
       goal.twelveWeekSystem.taskInstances = goal.twelveWeekSystem.taskInstances.map((task) => ({
         ...task,
         completed: true,
@@ -258,6 +292,7 @@ describe("12-week core flows", () => {
     const user = userEvent.setup();
 
     await screen.findByRole("heading", { name: "Cycle 12 tuần đã kết thúc" });
+    expect(screen.getByText("Cycle này đã đưa bạn gần hơn với vision 3 năm chưa?")).toBeInTheDocument();
     await user.type(screen.getByLabelText("Bài học lớn nhất 1"), "Tiếp tục giữ review cuối tuần.");
     await user.click(screen.getByRole("button", { name: "Lưu báo cáo cycle" }));
 

@@ -198,6 +198,7 @@ export interface Goal {
   description: string;
   deadline: string;
   tasks: Task[];
+  aspirationalVisionId?: string;
   feasibilityResult?: string;
   readinessScore?: number;
   focusArea?: string;
@@ -393,6 +394,29 @@ export interface FunnelStepSummary {
   lastSeenAt: string | null;
 }
 
+export type AspirationalVisionArea =
+  | "health"
+  | "career"
+  | "relationships"
+  | "finance"
+  | "personal"
+  | "family"
+  | "other";
+
+export interface AspirationalVisionLifeArea {
+  area: AspirationalVisionArea;
+  statement: string;
+}
+
+export interface AspirationalVision {
+  id: string;
+  horizonYears: 3 | 5;
+  summary: string;
+  lifeAreas: AspirationalVisionLifeArea[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface UserData {
   storageVersion: number;
   userId: string;
@@ -405,6 +429,7 @@ export interface UserData {
   eventLog: TrackingEvent[];
   syncOutbox: SyncOutboxItem[];
   appPreferences: AppPreferences;
+  aspirationalVision?: AspirationalVision;
   subscription?: Subscription | null;
   entitlements?: Entitlement[];
   lastMotivationalQuote?: string;

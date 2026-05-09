@@ -99,6 +99,10 @@ export const router = createBrowserRouter([
         ...lazyRoute(() => import("./pages/SMARTGoalSetup"), "SMARTGoalSetup"),
       },
       {
+        path: "vision",
+        ...lazyRoute(() => import("./pages/AspirationalVision"), "AspirationalVision"),
+      },
+      {
         path: "12-week-setup",
         ...lazyRoute(() => import("../features/plan12week/pages/12WeekSetup.tsx"), "TwelveWeekSetup"),
       },

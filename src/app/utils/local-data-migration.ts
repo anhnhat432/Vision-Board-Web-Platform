@@ -12,6 +12,7 @@ import {
 import { createDemoUserData } from "./storage-demo-data";
 import { getScopedUserDataStorageKey, readActiveAuthOwnerUid } from "./storage-auth-scope";
 import type {
+  AspirationalVision,
   Goal,
   Reflection,
   TwelveWeekSystem,
@@ -154,6 +155,16 @@ function createComparableReflection(reflection: Reflection): ComparableValue {
   };
 }
 
+function createComparableAspirationalVision(vision: AspirationalVision | undefined): ComparableValue | null {
+  if (!vision) return null;
+
+  return {
+    horizonYears: vision.horizonYears,
+    summary: vision.summary,
+    lifeAreas: [...vision.lifeAreas].sort((left, right) => left.area.localeCompare(right.area)),
+  };
+}
+
 function createComparableWheelHistory(wheelHistory: WheelOfLifeRecord[]): Array<Omit<WheelOfLifeRecord, "date">> {
   return [...wheelHistory]
     .sort(compareWheelRecords)
@@ -167,6 +178,7 @@ function createComparableUserWorkSnapshot(data: UserData): ComparableValue {
     goals: [...data.goals].sort(compareById).map(createComparableGoal),
     visionBoards: [...data.visionBoards].sort(compareById).map(createComparableVisionBoard),
     reflections: [...data.reflections].sort(compareById).map(createComparableReflection),
+    aspirationalVision: createComparableAspirationalVision(data.aspirationalVision),
     wheelOfLifeHistory: createComparableWheelHistory(data.wheelOfLifeHistory),
     currentWheelOfLife: data.currentWheelOfLife,
     onboardingCompleted: data.onboardingCompleted,
@@ -237,6 +249,12 @@ function hasMeaningfulReflection(reflection: Reflection): boolean {
   return hasText(reflection.title) || hasText(reflection.content);
 }
 
+function hasMeaningfulAspirationalVision(vision: AspirationalVision | undefined): boolean {
+  if (!vision) return false;
+
+  return hasText(vision.summary) || vision.lifeAreas.some((area) => hasText(area.statement));
+}
+
 export function hasMeaningfulLocalWork(data: UserData): boolean {
   if (isUntouchedSeededDemoData(data)) return false;
 
@@ -244,6 +262,7 @@ export function hasMeaningfulLocalWork(data: UserData): boolean {
     data.goals.some(hasMeaningfulGoal) ||
     data.visionBoards.some(hasMeaningfulVisionBoard) ||
     data.reflections.some(hasMeaningfulReflection) ||
+    hasMeaningfulAspirationalVision(data.aspirationalVision) ||
     hasRealWheelScores(data)
   );
 }
@@ -484,4 +503,3 @@ export function hasCompletedCloudImport(
 
   return readPromptState()[authUid]?.includes(`${CLOUD_IMPORT_COMPLETED_PREFIX}${snapshotFingerprint}`) ?? false;
 }
-

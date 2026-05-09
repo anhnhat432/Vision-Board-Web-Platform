@@ -83,6 +83,20 @@ describe("hasMeaningfulLocalWork", () => {
     expect(hasMeaningfulLocalWork(data)).toBe(true);
   });
 
+  it("returns true for an aspirational vision", () => {
+    const data = createFreshUserData();
+    data.aspirationalVision = {
+      id: "vision_3y_1",
+      horizonYears: 3,
+      summary: "Ba năm tới tôi sống khoẻ hơn, làm việc sâu hơn và giữ nhịp gia đình bền hơn.",
+      lifeAreas: [{ area: "health", statement: "Tôi có sức bền tốt và duy trì vận động đều." }],
+      createdAt: "2026-05-09T00:00:00.000Z",
+      updatedAt: "2026-05-09T00:00:00.000Z",
+    };
+
+    expect(hasMeaningfulLocalWork(data)).toBe(true);
+  });
+
   it("returns true for a real 12-week system", () => {
     const data = createFreshUserData();
     data.goals.push(
@@ -353,4 +367,3 @@ describe("cloud import tracking", () => {
     markCloudImportCompleted("uid", "");
   });
 });
-

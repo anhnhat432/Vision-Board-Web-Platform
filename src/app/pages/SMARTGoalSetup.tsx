@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { PageShell } from "../components/PageShell";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { Card, CardContent } from "../components/ui/card";
+import { Button } from "../components/ui/button";
 import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
 import { getSmartGoalStarter, getSmartGoalStarterPreview } from "../utils/smart-goal-starters";
 import { APP_STORAGE_KEYS, getUserData } from "../utils/storage";
+import type { AspirationalVision as AspirationalVisionModel } from "../utils/storage-types";
 import {
   buildSmartGoal,
   evaluateSmartGoalQuality,
@@ -63,11 +65,14 @@ export function SMARTGoalSetup() {
   const [smartData, setSmartData] = useState<SMARTData>(createInitialSMARTData());
   const [userIntent, setUserIntentState] = useState<UserIntentId | null>(null);
   const [archetypeOverride, setArchetypeOverride] = useState<GoalArchetype | null>(null);
+  const [aspirationalVision, setAspirationalVision] = useState<AspirationalVisionModel | null>(null);
+  const [isVisionPromptDismissed, setIsVisionPromptDismissed] = useState(false);
   const stepTopRef = useRef<HTMLDivElement | null>(null);
   const stepHeadingRef = useRef<HTMLHeadingElement | null>(null);
 
   useEffect(() => {
     const data = getUserData();
+    setAspirationalVision(data.aspirationalVision ?? null);
     if (!hasRealLifeBalance(data)) {
       setSetupState("needs_life_balance");
       return;
@@ -406,6 +411,34 @@ export function SMARTGoalSetup() {
     <PageShell maxWidth="hero">
       <div className={prefersReducedMotion ? "space-y-5" : "animate-fade-in-up space-y-5"}>
         <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} />
+        {!isVisionPromptDismissed && (
+          <Card className="border border-violet-200 bg-violet-50/80 shadow-sm">
+            <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                {aspirationalVision ? (
+                  <p className="text-sm leading-6 text-violet-950">
+                    <span className="font-semibold">Mục tiêu này phục vụ tầm nhìn 3 năm:</span>{" "}
+                    {aspirationalVision.summary}
+                  </p>
+                ) : (
+                  <p className="text-sm leading-6 text-violet-950">
+                    Bạn đang đặt mục tiêu 12 tuần. Phương pháp gốc khuyên gắn với tầm nhìn 3 năm.
+                  </p>
+                )}
+              </div>
+              {!aspirationalVision && (
+                <div className="flex shrink-0 flex-wrap gap-2">
+                  <Button asChild size="sm" variant="outline" className="bg-white">
+                    <Link to="/vision">Điền 2 phút →</Link>
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setIsVisionPromptDismissed(true)}>
+                    Bỏ qua
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         <SmartGoalHero
           focusArea={focusArea}

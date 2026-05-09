@@ -242,6 +242,7 @@ export function TwelveWeekSystem() {
     },
   });
   const networkStatusInfo = useNetworkStatus();
+  const aspirationalVisionSummary = getUserData().aspirationalVision?.summary ?? null;
 
   const handleUseCloudVersion = () => {
     const pullResponse = lastManualCloudSyncResult?.pullResponse;
@@ -933,6 +934,7 @@ export function TwelveWeekSystem() {
             onSaveCycleReview={handleSaveCycleReview}
             onStartNewCycle={handleStartNewCycle}
             onOpenSettings={() => handleTabChange("settings")}
+            aspirationalVisionSummary={aspirationalVisionSummary}
           />
         )}
 

@@ -250,6 +250,7 @@ function DashboardContent({
   const visibleWheelOfLife = isSignedOut ? [] : userData.currentWheelOfLife;
   const visibleReflections = isSignedOut ? [] : userData.reflections;
   const visibleVisionBoards = isSignedOut ? [] : userData.visionBoards;
+  const aspirationalVision = isSignedOut ? null : (userData.aspirationalVision ?? null);
   const visibleActiveTwelveWeekGoal = isSignedOut ? null : activeTwelveWeekGoal;
   const hasRealLifeBalance =
     !isSignedOut && userData.onboardingCompleted && visibleWheelOfLife.some((area) => area.score > 0);
@@ -849,6 +850,27 @@ function DashboardContent({
             </div>
           );
         })()}
+      {!isSignedOut && (
+        <Card className="border border-violet-200 bg-white/94 shadow-sm">
+          <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">Tầm nhìn 3 năm</p>
+              <h2 className="mt-2 text-xl font-bold text-slate-950">
+                {aspirationalVision ? "Tầm nhìn dài hạn đã được neo lại" : "Hình dung hướng đi trước khi chạy 12 tuần"}
+              </h2>
+              <p className="mt-2 line-clamp-2 max-w-3xl text-sm leading-6 text-slate-600">
+                {aspirationalVision
+                  ? aspirationalVision.summary
+                  : "Discipline #4 của 12 Week Year khuyên tách tầm nhìn 3 năm khỏi mục tiêu 12 tuần để mỗi cycle có điểm tựa rõ hơn."}
+              </p>
+            </div>
+            <Button className="w-full sm:w-auto" variant={aspirationalVision ? "outline" : "default"} onClick={() => navigate("/vision")}>
+              {aspirationalVision ? "Sửa tầm nhìn 3 năm" : "Hình dung tầm nhìn 3 năm"}
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </CardContent>
+        </Card>
+      )}
       <SpotlightTour
         open={isTourOpen}
         onOpenChange={setIsTourOpen}
