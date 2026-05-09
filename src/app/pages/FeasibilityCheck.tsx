@@ -218,10 +218,12 @@ export function FeasibilityCheck() {
       return;
     }
 
-    setResult(buildResult(answers, wheelScore, {
-      smartGoalQualityLevel: smartGoalQualityLevelRef.current,
-      goalArchetype: goalArchetypeRef.current,
-    }));
+    setResult(
+      buildResult(answers, wheelScore, {
+        smartGoalQualityLevel: smartGoalQualityLevelRef.current,
+        goalArchetype: goalArchetypeRef.current,
+      }),
+    );
   };
 
   const handleContinueToPlan = () => {
@@ -245,6 +247,7 @@ export function FeasibilityCheck() {
       scopeRecommendation: result.scopeRecommendation,
       smartGoalQualityLevel: result.smartGoalQualityLevel,
       smartGoalQualityNote: result.smartGoalQualityNote,
+      savedAt: new Date().toISOString(),
     };
 
     localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityResult, JSON.stringify(pendingFeasibilityResult));

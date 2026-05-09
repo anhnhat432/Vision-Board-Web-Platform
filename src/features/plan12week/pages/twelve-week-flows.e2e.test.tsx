@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { toast } from "sonner";
 import { vi } from "vitest";
 
 import {
@@ -8,8 +9,8 @@ import {
   getCurrentEntitlementKeys,
   getCurrentPlan,
   getUserData,
-} from '@/app/utils/storage';
-import { startCheckoutFlow } from '@/app/utils/production';
+} from "@/app/utils/storage";
+import { startCheckoutFlow } from "@/app/utils/production";
 import { listStoredPendingMutations } from "@/features/plan12week/persistence/mutationQueue";
 import {
   readGoal,
@@ -18,7 +19,7 @@ import {
   seedPendingSetupContext,
   seedTwelveWeekGoal,
   updateUserData,
-} from '@/test/app-flow-helpers';
+} from "@/test/app-flow-helpers";
 
 const INTEGRATION_TEST_TIMEOUT_MS = 10_000;
 
@@ -126,7 +127,9 @@ describe("12-week core flows", () => {
     expect(localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId)).toBe(data.goals[0]?.id);
 
     const snapshotMutation = listStoredPendingMutations(null).find((item) => item.kind === "plan_snapshot_updated");
-    expect(snapshotMutation).toEqual(expect.objectContaining({ kind: "plan_snapshot_updated", goalId: data.goals[0]?.id }));
+    expect(snapshotMutation).toEqual(
+      expect.objectContaining({ kind: "plan_snapshot_updated", goalId: data.goals[0]?.id }),
+    );
     if (snapshotMutation?.kind === "plan_snapshot_updated") {
       expect(snapshotMutation.payload.reason).toBe("setup");
       expect(snapshotMutation.payload.clientPlanId).toBe(`${data.goals[0]?.id}:12-week-system`);
@@ -160,6 +163,54 @@ describe("12-week core flows", () => {
     expect(screen.getByRole("link", { name: "Điền 2 phút →" })).toHaveAttribute("href", "/vision");
     expect(screen.getByRole("button", { name: "Bỏ qua" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Tiếp tục" })).toBeEnabled();
+  }, 10_000);
+
+  it("sends corrupt saved feasibility results back to feasibility with a clear toast", async () => {
+    seedPendingSetupContext();
+    localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityResult, "{xxx");
+    const toastSpy = vi.spyOn(toast, "error");
+    const { router } = renderAppRoute("/12-week-setup");
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/feasibility");
+    });
+    expect(toastSpy).toHaveBeenCalledWith("Kết quả feasibility cũ không đọc được, làm lại nhanh");
+    expect(localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult)).toBeNull();
+  }, 10_000);
+
+  it("carries the SMART metric unit into the 12-week lag metric preview", async () => {
+    seedPendingSetupContext();
+    localStorage.setItem(
+      APP_STORAGE_KEYS.pendingSmartGoal,
+      JSON.stringify({
+        focusArea: "Career",
+        specific: {
+          goal_statement: "Tăng sức bền bằng cách hoàn thành nhiều lần push-ups hơn.",
+        },
+        measurable: {
+          metric_name: "Push-ups",
+          metric_unit: "reps",
+          baseline_value: 20,
+          target_value: 60,
+        },
+        achievable: {
+          weekly_time_commitment_hours: 4,
+          required_skills: [],
+          support_resources: [],
+        },
+        relevant: {
+          motivation_reason: "Tôi muốn cơ thể khoẻ hơn.",
+        },
+        time_bound: {
+          target_weeks: 12,
+        },
+        created_at: "2026-05-09T00:00:00.000Z",
+      }),
+    );
+
+    renderAppRoute("/12-week-setup");
+
+    expect(await screen.findByText("Push-ups (reps)")).toBeInTheDocument();
   }, 10_000);
 
   it("shows a clear next action when no 12-week plan exists", async () => {
@@ -235,95 +286,103 @@ describe("12-week core flows", () => {
     expect(within(tablist).getByRole("tab", { name: /Cài đặt/i })).toBeInTheDocument();
   });
 
-  it("renders the cycle review panel instead of the task list when the cycle reaches week 13", async () => {
-    const { goalId } = seedTwelveWeekGoal();
-    updateUserData((data) => {
-      const goal = data.goals.find((item) => item.id === goalId);
-      if (!goal?.twelveWeekSystem) return;
-      goal.twelveWeekSystem.currentWeek = 13;
-      goal.twelveWeekSystem.status = "active";
-      goal.twelveWeekSystem.lagMetric = {
-        ...goal.twelveWeekSystem.lagMetric,
-        target: "100",
-        currentValue: "92",
-      };
-      goal.twelveWeekSystem.weeklyReviews = Array.from({ length: 12 }, (_, index) =>
-        makeCycleReview(index + 1, index % 3 === 0 ? 90 : 70),
-      );
-    });
+  it(
+    "renders the cycle review panel instead of the task list when the cycle reaches week 13",
+    async () => {
+      const { goalId } = seedTwelveWeekGoal();
+      updateUserData((data) => {
+        const goal = data.goals.find((item) => item.id === goalId);
+        if (!goal?.twelveWeekSystem) return;
+        goal.twelveWeekSystem.currentWeek = 13;
+        goal.twelveWeekSystem.status = "active";
+        goal.twelveWeekSystem.lagMetric = {
+          ...goal.twelveWeekSystem.lagMetric,
+          target: "100",
+          currentValue: "92",
+        };
+        goal.twelveWeekSystem.weeklyReviews = Array.from({ length: 12 }, (_, index) =>
+          makeCycleReview(index + 1, index % 3 === 0 ? 90 : 70),
+        );
+      });
 
-    renderAppRoute("/12-week-system");
+      renderAppRoute("/12-week-system");
 
-    expect(await screen.findByRole("heading", { name: "Cycle 12 tuần đã kết thúc" })).toBeInTheDocument();
-    expect(screen.getByTestId("cycle-review-panel")).toBeInTheDocument();
-    expect(screen.queryByText("Hàng việc hôm nay")).not.toBeInTheDocument();
+      expect(await screen.findByRole("heading", { name: "Cycle 12 tuần đã kết thúc" })).toBeInTheDocument();
+      expect(screen.getByTestId("cycle-review-panel")).toBeInTheDocument();
+      expect(screen.queryByText("Hàng việc hôm nay")).not.toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(readGoal(goalId).twelveWeekSystem?.status).toBe("completed");
-    });
-  }, INTEGRATION_TEST_TIMEOUT_MS);
+      await waitFor(() => {
+        expect(readGoal(goalId).twelveWeekSystem?.status).toBe("completed");
+      });
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 
-  it("starts a new cycle from the cycle review panel without creating a new goal", async () => {
-    const { goalId } = seedTwelveWeekGoal();
-    updateUserData((data) => {
-      const goal = data.goals.find((item) => item.id === goalId);
-      if (!goal?.twelveWeekSystem) return;
-      goal.twelveWeekSystem.currentWeek = 13;
-      goal.twelveWeekSystem.status = "active";
-      goal.twelveWeekSystem.weeklyReviews = Array.from({ length: 12 }, (_, index) =>
-        makeCycleReview(index + 1, index % 2 === 0 ? 90 : 70),
-      );
-      data.aspirationalVision = {
-        id: "vision_3y_1",
-        horizonYears: 3,
-        summary: "Ba năm tới tôi sống khỏe và làm việc sâu hơn.",
-        lifeAreas: [],
-        createdAt: "2026-05-09T00:00:00.000Z",
-        updatedAt: "2026-05-09T00:00:00.000Z",
-      };
-      goal.twelveWeekSystem.taskInstances = goal.twelveWeekSystem.taskInstances.map((task) => ({
-        ...task,
-        completed: true,
-        completedAt: new Date().toISOString(),
-      }));
-    });
+  it(
+    "starts a new cycle from the cycle review panel without creating a new goal",
+    async () => {
+      const { goalId } = seedTwelveWeekGoal();
+      updateUserData((data) => {
+        const goal = data.goals.find((item) => item.id === goalId);
+        if (!goal?.twelveWeekSystem) return;
+        goal.twelveWeekSystem.currentWeek = 13;
+        goal.twelveWeekSystem.status = "active";
+        goal.twelveWeekSystem.weeklyReviews = Array.from({ length: 12 }, (_, index) =>
+          makeCycleReview(index + 1, index % 2 === 0 ? 90 : 70),
+        );
+        data.aspirationalVision = {
+          id: "vision_3y_1",
+          horizonYears: 3,
+          summary: "Ba năm tới tôi sống khỏe và làm việc sâu hơn.",
+          lifeAreas: [],
+          createdAt: "2026-05-09T00:00:00.000Z",
+          updatedAt: "2026-05-09T00:00:00.000Z",
+        };
+        goal.twelveWeekSystem.taskInstances = goal.twelveWeekSystem.taskInstances.map((task) => ({
+          ...task,
+          completed: true,
+          completedAt: new Date().toISOString(),
+        }));
+      });
 
-    const { router } = renderAppRoute("/12-week-system");
-    const user = userEvent.setup();
+      const { router } = renderAppRoute("/12-week-system");
+      const user = userEvent.setup();
 
-    await screen.findByRole("heading", { name: "Cycle 12 tuần đã kết thúc" });
-    expect(screen.getByText("Cycle này đã đưa bạn gần hơn với vision 3 năm chưa?")).toBeInTheDocument();
-    await user.type(screen.getByLabelText("Bài học lớn nhất 1"), "Tiếp tục giữ review cuối tuần.");
-    await user.click(screen.getByRole("button", { name: "Lưu báo cáo cycle" }));
+      await screen.findByRole("heading", { name: "Cycle 12 tuần đã kết thúc" });
+      expect(screen.getByText("Cycle này đã đưa bạn gần hơn với vision 3 năm chưa?")).toBeInTheDocument();
+      await user.type(screen.getByLabelText("Bài học lớn nhất 1"), "Tiếp tục giữ review cuối tuần.");
+      await user.click(screen.getByRole("button", { name: "Lưu báo cáo cycle" }));
 
-    await waitFor(() => {
-      const reflection = getUserData().reflections.find(
-        (item) => item.entryType === "cycleReview" && item.linkedGoalId === goalId,
-      );
-      expect(reflection?.content).toContain("Tiếp tục giữ review cuối tuần.");
-      expect(reflection?.finalLagPercent).toEqual(expect.any(Number));
-    });
+      await waitFor(() => {
+        const reflection = getUserData().reflections.find(
+          (item) => item.entryType === "cycleReview" && item.linkedGoalId === goalId,
+        );
+        expect(reflection?.content).toContain("Tiếp tục giữ review cuối tuần.");
+        expect(reflection?.finalLagPercent).toEqual(expect.any(Number));
+      });
 
-    await user.click(screen.getByRole("button", { name: "Bắt đầu cycle mới" }));
+      await user.click(screen.getByRole("button", { name: "Bắt đầu cycle mới" }));
 
-    await waitFor(() => {
-      expect(router.state.location.pathname).toBe("/12-week-setup");
-    });
+      await waitFor(() => {
+        expect(router.state.location.pathname).toBe("/12-week-setup");
+      });
 
-    const goal = readGoal(goalId);
-    const nextSystem = goal.twelveWeekSystem;
-    expect(getUserData().goals).toHaveLength(1);
-    expect(nextSystem?.cycleNumber).toBe(2);
-    expect(nextSystem?.status).toBe("active");
-    expect(nextSystem?.currentWeek).toBe(1);
-    expect(nextSystem?.weeklyReviews).toHaveLength(0);
-    expect(nextSystem?.dailyCheckIns).toHaveLength(0);
-    expect(nextSystem?.taskInstances.every((task) => !task.completed)).toBe(true);
-    expect(localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId)).toBe(goalId);
+      const goal = readGoal(goalId);
+      const nextSystem = goal.twelveWeekSystem;
+      expect(getUserData().goals).toHaveLength(1);
+      expect(nextSystem?.cycleNumber).toBe(2);
+      expect(nextSystem?.status).toBe("active");
+      expect(nextSystem?.currentWeek).toBe(1);
+      expect(nextSystem?.weeklyReviews).toHaveLength(0);
+      expect(nextSystem?.dailyCheckIns).toHaveLength(0);
+      expect(nextSystem?.taskInstances.every((task) => !task.completed)).toBe(true);
+      expect(localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId)).toBe(goalId);
 
-    const pendingDraft = JSON.parse(localStorage.getItem(APP_STORAGE_KEYS.pending12WeekSetupDraft) ?? "{}");
-    expect(pendingDraft.successEvidence).toContain("Tiếp tục ship mỗi sáng");
-  }, INTEGRATION_TEST_TIMEOUT_MS);
+      const pendingDraft = JSON.parse(localStorage.getItem(APP_STORAGE_KEYS.pending12WeekSetupDraft) ?? "{}");
+      expect(pendingDraft.successEvidence).toContain("Tiếp tục ship mỗi sáng");
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 
   it("compacts repeated task toggles to the latest queued state", async () => {
     const { goalId } = seedTwelveWeekGoal();
@@ -433,177 +492,247 @@ describe("12-week core flows", () => {
     }
   });
 
-  it("keeps daily execution state when a weekly review is submitted after check-in", async () => {
-    const { goalId } = seedTwelveWeekGoal();
-    renderAppRoute("/12-week-system");
-    const user = userEvent.setup();
+  it(
+    "keeps only the five latest daily check-in entries after the seventh same-day save",
+    async () => {
+      const { goalId } = seedTwelveWeekGoal();
+      const todayKey = formatDateInputValue(new Date());
+      updateUserData((data) => {
+        const goal = data.goals.find((item) => item.id === goalId);
+        if (!goal?.twelveWeekSystem) return;
 
-    const taskListCard = (await screen.findByText("Hàng việc hôm nay")).closest("[data-slot='card']");
-    expect(taskListCard).not.toBeNull();
+        goal.twelveWeekSystem.dailyCheckIns = Array.from({ length: 6 }, (_, index) => {
+          const version = 6 - index;
+          return {
+            date: todayKey,
+            didWorkToday: true,
+            whichLeadIndicatorWorkedOn: "Ship một phần việc cốt lõi",
+            amountDone: "1/2 việc",
+            outputCreated: "",
+            obstacleOrIssue: "",
+            dailySelfRating: 3,
+            optionalNote: `Local check-in ${version}`,
+            mood: "steady",
+            updatedCount: version,
+          };
+        });
+      });
+      renderAppRoute("/12-week-system");
+      const user = userEvent.setup();
 
-    await user.click(within(taskListCard as HTMLElement).getAllByRole("checkbox")[0]);
-    await user.type(screen.getByLabelText("Note tùy chọn"), "Giữ task đã tick khi review tuần.");
-    await user.click(getPrimaryButton("Lưu check-in hôm nay"));
-    await user.click(screen.getByRole("button", { name: "Tuần" }));
-    await typeWamReview(user, {
-      insights: "Chốt được một việc thật.",
-      nextWeekCommitments: "Giữ nhịp execution.",
-    });
-    await user.click(getPrimaryButton("Chốt review tuần này"));
+      const noteInput = await screen.findByRole("textbox", { name: /note/i });
+      await user.clear(noteInput);
+      await user.type(noteInput, "Local check-in 7");
+      await user.click(getPrimaryButton(/check-in/i));
 
-    await waitFor(() => {
-      const system = readGoal(goalId).twelveWeekSystem;
-      const completedCount = system?.taskInstances.filter((item) => item.completed).length ?? 0;
-      expect(completedCount).toBeGreaterThan(0);
-      expect(system?.dailyCheckIns[0]?.optionalNote).toBe("Giữ task đã tick khi review tuần.");
-      expect(system?.weeklyReviews).toHaveLength(1);
-    });
-  }, INTEGRATION_TEST_TIMEOUT_MS);
+      let checkInNotes: string[] = [];
+      await waitFor(() => {
+        const checkInsForToday =
+          readGoal(goalId).twelveWeekSystem?.dailyCheckIns.filter((item) => item.date === todayKey) ?? [];
+        expect(checkInsForToday).toHaveLength(5);
+        checkInNotes = checkInsForToday.map((item) => item.optionalNote);
+      });
+      expect(checkInNotes).toEqual([
+        "Local check-in 7",
+        "Local check-in 6",
+        "Local check-in 5",
+        "Local check-in 4",
+        "Local check-in 3",
+      ]);
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 
-  it("submits the weekly review and writes the linked journal entry", async () => {
-    const { goalId } = seedTwelveWeekGoal();
-    renderAppRoute("/12-week-system");
-    const user = userEvent.setup();
+  it(
+    "keeps daily execution state when a weekly review is submitted after check-in",
+    async () => {
+      const { goalId } = seedTwelveWeekGoal();
+      renderAppRoute("/12-week-system");
+      const user = userEvent.setup();
 
-    await user.click(screen.getByRole("button", { name: "Tuần" }));
-    await typeWamReview(user, {
-      insights: "Bị phân tán vì đổi context.",
-      nextWeekCommitments: "Chốt xong command center trước.",
-    });
-    await user.click(getPrimaryButton("Chốt review tuần này"));
+      const taskListCard = (await screen.findByText("Hàng việc hôm nay")).closest("[data-slot='card']");
+      expect(taskListCard).not.toBeNull();
 
-    await waitFor(() => {
-      const system = readGoal(goalId).twelveWeekSystem;
-      expect(system?.weeklyReviews).toHaveLength(1);
-    });
+      await user.click(within(taskListCard as HTMLElement).getAllByRole("checkbox")[0]);
+      await user.type(screen.getByLabelText("Note tùy chọn"), "Giữ task đã tick khi review tuần.");
+      await user.click(getPrimaryButton("Lưu check-in hôm nay"));
+      await user.click(screen.getByRole("button", { name: "Tuần" }));
+      await typeWamReview(user, {
+        insights: "Chốt được một việc thật.",
+        nextWeekCommitments: "Giữ nhịp execution.",
+      });
+      await user.click(getPrimaryButton("Chốt review tuần này"));
 
-    const data = getUserData();
-    const reflection = data.reflections.find(
-      (item) => item.entryType === "weekly-review" && item.linkedGoalId === goalId,
-    );
+      await waitFor(() => {
+        const system = readGoal(goalId).twelveWeekSystem;
+        const completedCount = system?.taskInstances.filter((item) => item.completed).length ?? 0;
+        expect(completedCount).toBeGreaterThan(0);
+        expect(system?.dailyCheckIns[0]?.optionalNote).toBe("Giữ task đã tick khi review tuần.");
+        expect(system?.weeklyReviews).toHaveLength(1);
+      });
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 
-    expect(reflection).toBeDefined();
-    expect(reflection?.content).toContain("Bị phân tán vì đổi context.");
+  it(
+    "submits the weekly review and writes the linked journal entry",
+    async () => {
+      const { goalId } = seedTwelveWeekGoal();
+      renderAppRoute("/12-week-system");
+      const user = userEvent.setup();
 
-    const weeklyMutation = listStoredPendingMutations(null).find((item) => item.kind === "weekly_review_upserted");
-    const review = readGoal(goalId).twelveWeekSystem?.weeklyReviews[0];
-    expect(weeklyMutation).toEqual(expect.objectContaining({ kind: "weekly_review_upserted", goalId }));
-    if (weeklyMutation?.kind === "weekly_review_upserted") {
-      expect(weeklyMutation.payload.clientPlanId).toBe(`${goalId}:12-week-system`);
-      expect(weeklyMutation.payload.clientWeekId).toBe(`${goalId}:week:${weeklyMutation.payload.weekNumber}`);
-      expect(weeklyMutation.payload.executionScore).toEqual(expect.any(Number));
-      expect(weeklyMutation.payload.review.reviewCompleted).toBe(true);
-      expect(weeklyMutation.payload.review.biggestOutputThisWeek).toBe(review?.biggestOutputThisWeek);
-      expect(weeklyMutation.payload.review.mainObstacle).toBe(review?.mainObstacle);
-      expect(weeklyMutation.payload.review.nextWeekPriority).toBe(review?.nextWeekPriority);
-    }
-  }, INTEGRATION_TEST_TIMEOUT_MS);
+      await user.click(screen.getByRole("button", { name: "Tuần" }));
+      await typeWamReview(user, {
+        insights: "Bị phân tán vì đổi context.",
+        nextWeekCommitments: "Chốt xong command center trước.",
+      });
+      await user.click(getPrimaryButton("Chốt review tuần này"));
 
-  
-  it("saves WAM fields and shows the post-save summary card", async () => {
-    const { goalId } = seedTwelveWeekGoal();
-    renderAppRoute("/12-week-system");
-    const user = userEvent.setup();
+      await waitFor(() => {
+        const system = readGoal(goalId).twelveWeekSystem;
+        expect(system?.weeklyReviews).toHaveLength(1);
+      });
 
-    await user.click(screen.getByRole("button", { name: "Tuần" }));
-    await typeWamReview(user, {
-      insights: "Giữ buổi review thứ Năm.",
-      nextWeekCommitments: "Hoàn thành module sync trước thứ Tư.",
-    });
-    await user.click(getPrimaryButton("Chốt review tuần này"));
+      const data = getUserData();
+      const reflection = data.reflections.find(
+        (item) => item.entryType === "weekly-review" && item.linkedGoalId === goalId,
+      );
 
-    await waitFor(() => {
+      expect(reflection).toBeDefined();
+      expect(reflection?.content).toContain("Bị phân tán vì đổi context.");
+
+      const weeklyMutation = listStoredPendingMutations(null).find((item) => item.kind === "weekly_review_upserted");
       const review = readGoal(goalId).twelveWeekSystem?.weeklyReviews[0];
-      expect(review?.insights).toBe("Giữ buổi review thứ Năm.");
-      expect(review?.nextWeekCommitments).toContain("Hoàn thành module sync trước thứ Tư.");
-      expect(review?.reviewCompleted).toBe(true);
-    });
+      expect(weeklyMutation).toEqual(expect.objectContaining({ kind: "weekly_review_upserted", goalId }));
+      if (weeklyMutation?.kind === "weekly_review_upserted") {
+        expect(weeklyMutation.payload.clientPlanId).toBe(`${goalId}:12-week-system`);
+        expect(weeklyMutation.payload.clientWeekId).toBe(`${goalId}:week:${weeklyMutation.payload.weekNumber}`);
+        expect(weeklyMutation.payload.executionScore).toEqual(expect.any(Number));
+        expect(weeklyMutation.payload.review.reviewCompleted).toBe(true);
+        expect(weeklyMutation.payload.review.biggestOutputThisWeek).toBe(review?.biggestOutputThisWeek);
+        expect(weeklyMutation.payload.review.mainObstacle).toBe(review?.mainObstacle);
+        expect(weeklyMutation.payload.review.nextWeekPriority).toBe(review?.nextWeekPriority);
+      }
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 
-    expect(await screen.findByTestId("weekly-review-summary")).toBeInTheDocument();
-    expect(screen.getByTestId("weekly-score-interpretation")).toBeInTheDocument();
-  }, INTEGRATION_TEST_TIMEOUT_MS);
+  it(
+    "saves WAM fields and shows the post-save summary card",
+    async () => {
+      const { goalId } = seedTwelveWeekGoal();
+      renderAppRoute("/12-week-system");
+      const user = userEvent.setup();
 
-  it("loads a legacy review without keep/reduce fields without breaking the form", async () => {
-    const { goalId } = seedTwelveWeekGoal();
-    updateUserData((data) => {
-      const goal = data.goals.find((item) => item.id === goalId);
-      if (!goal?.twelveWeekSystem) return;
-      goal.twelveWeekSystem.weeklyReviews = [
-        {
-          weekNumber: 1,
-          leadCompletionPercent: 60,
-          lagProgressValue: "Legacy progress",
-          biggestOutputThisWeek: "Legacy output",
-          mainObstacle: "Legacy obstacle",
-          nextWeekPriority: "Legacy priority",
-          workloadDecision: "keep same",
-          reviewCompleted: true,
-          progressScore: 6,
-          disciplineScore: 6,
-          focusScore: 7,
-          improvementScore: 6,
-          outputQualityScore: 6,
-          completedLeadIndicators: 3,
-        },
-      ];
-    });
+      await user.click(screen.getByRole("button", { name: "Tuần" }));
+      await typeWamReview(user, {
+        insights: "Giữ buổi review thứ Năm.",
+        nextWeekCommitments: "Hoàn thành module sync trước thứ Tư.",
+      });
+      await user.click(getPrimaryButton("Chốt review tuần này"));
 
-    renderAppRoute("/12-week-system");
-    const user = userEvent.setup();
+      await waitFor(() => {
+        const review = readGoal(goalId).twelveWeekSystem?.weeklyReviews[0];
+        expect(review?.insights).toBe("Giữ buổi review thứ Năm.");
+        expect(review?.nextWeekCommitments).toContain("Hoàn thành module sync trước thứ Tư.");
+        expect(review?.reviewCompleted).toBe(true);
+      });
 
-    await user.click(screen.getByRole("button", { name: "Tuần" }));
-    await openWeeklyReviewDetails(user);
+      expect(await screen.findByTestId("weekly-review-summary")).toBeInTheDocument();
+      expect(screen.getByTestId("weekly-score-interpretation")).toBeInTheDocument();
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 
-    // Existing legacy fields should hydrate the WAM form
-    expect(await screen.findByDisplayValue("Legacy output")).toBeInTheDocument();
-    expect(screen.getByLabelText("Cam kết: Legacy priority")).toBeInTheDocument();
+  it(
+    "loads a legacy review without keep/reduce fields without breaking the form",
+    async () => {
+      const { goalId } = seedTwelveWeekGoal();
+      updateUserData((data) => {
+        const goal = data.goals.find((item) => item.id === goalId);
+        if (!goal?.twelveWeekSystem) return;
+        goal.twelveWeekSystem.weeklyReviews = [
+          {
+            weekNumber: 1,
+            leadCompletionPercent: 60,
+            lagProgressValue: "Legacy progress",
+            biggestOutputThisWeek: "Legacy output",
+            mainObstacle: "Legacy obstacle",
+            nextWeekPriority: "Legacy priority",
+            workloadDecision: "keep same",
+            reviewCompleted: true,
+            progressScore: 6,
+            disciplineScore: 6,
+            focusScore: 7,
+            improvementScore: 6,
+            outputQualityScore: 6,
+            completedLeadIndicators: 3,
+          },
+        ];
+      });
 
-    // Old optional obstacle field is no longer rendered in the WAM form.
-    expect(screen.queryByDisplayValue("Legacy obstacle")).toBeNull();
+      renderAppRoute("/12-week-system");
+      const user = userEvent.setup();
 
-    // Summary card still renders since reviewCompleted === true
-    expect(screen.getByTestId("weekly-review-summary")).toBeInTheDocument();
-  }, INTEGRATION_TEST_TIMEOUT_MS);
+      await user.click(screen.getByRole("button", { name: "Tuần" }));
+      await openWeeklyReviewDetails(user);
 
-  it("compacts repeated weekly reviews for the same week to the latest queued payload", async () => {
-    const { goalId } = seedTwelveWeekGoal();
-    renderAppRoute("/12-week-system");
-    const user = userEvent.setup();
+      // Existing legacy fields should hydrate the WAM form
+      expect(await screen.findByDisplayValue("Legacy output")).toBeInTheDocument();
+      expect(screen.getByLabelText("Cam kết: Legacy priority")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Tuần" }));
-    await typeWamReview(user, {
-      insights: "First weekly insight.",
-      nextWeekCommitments: "First priority.",
-    });
-    await user.click(getPrimaryButton("Chốt review tuần này"));
+      // Old optional obstacle field is no longer rendered in the WAM form.
+      expect(screen.queryByDisplayValue("Legacy obstacle")).toBeNull();
 
-    await waitFor(() => {
-      expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.insights).toBe("First weekly insight.");
-    });
+      // Summary card still renders since reviewCompleted === true
+      expect(screen.getByTestId("weekly-review-summary")).toBeInTheDocument();
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 
-    const insightsInput = document.querySelector("#weekly-insights");
-    const commitmentsInput = document.querySelector("#weekly-next-commitments");
-    expect(insightsInput).toBeInTheDocument();
-    expect(commitmentsInput).toBeInTheDocument();
-    await user.clear(insightsInput as HTMLElement);
-    await user.type(insightsInput as HTMLElement, "Latest weekly insight.");
-    await user.click(screen.getByRole("button", { name: "Xóa cam kết: First priority." }));
-    await user.type(commitmentsInput as HTMLElement, "Latest priority.{Enter}");
-    await user.click(getPrimaryButton("Chốt review tuần này"));
+  it(
+    "compacts repeated weekly reviews for the same week to the latest queued payload",
+    async () => {
+      const { goalId } = seedTwelveWeekGoal();
+      renderAppRoute("/12-week-system");
+      const user = userEvent.setup();
 
-    await waitFor(() => {
-      expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.insights).toBe("Latest weekly insight.");
-    });
+      await user.click(screen.getByRole("button", { name: "Tuần" }));
+      await typeWamReview(user, {
+        insights: "First weekly insight.",
+        nextWeekCommitments: "First priority.",
+      });
+      await user.click(getPrimaryButton("Chốt review tuần này"));
 
-    const weeklyMutations = listStoredPendingMutations(null).filter((item) => item.kind === "weekly_review_upserted");
-    expect(weeklyMutations).toHaveLength(1);
-    expect(weeklyMutations[0].supersedes).toHaveLength(1);
-    if (weeklyMutations[0].kind === "weekly_review_upserted") {
-      expect(weeklyMutations[0].payload.review.insights).toBe("Latest weekly insight.");
-      expect(weeklyMutations[0].payload.review.nextWeekPriority).toBe("Latest priority.");
-      expect(weeklyMutations[0].payload.executionScore).toEqual(expect.any(Number));
-    }
-  }, INTEGRATION_TEST_TIMEOUT_MS);
+      await waitFor(() => {
+        expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.insights).toBe("First weekly insight.");
+      });
+
+      const insightsInput = document.querySelector("#weekly-insights");
+      const commitmentsInput = document.querySelector("#weekly-next-commitments");
+      expect(insightsInput).toBeInTheDocument();
+      expect(commitmentsInput).toBeInTheDocument();
+      await user.clear(insightsInput as HTMLElement);
+      await user.type(insightsInput as HTMLElement, "Latest weekly insight.");
+      await user.click(screen.getByRole("button", { name: "Xóa cam kết: First priority." }));
+      await user.type(commitmentsInput as HTMLElement, "Latest priority.{Enter}");
+      await user.click(getPrimaryButton("Chốt review tuần này"));
+
+      await waitFor(() => {
+        expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.insights).toBe("Latest weekly insight.");
+      });
+
+      const weeklyMutations = listStoredPendingMutations(null).filter((item) => item.kind === "weekly_review_upserted");
+      expect(weeklyMutations).toHaveLength(1);
+      expect(weeklyMutations[0].supersedes).toHaveLength(1);
+      if (weeklyMutations[0].kind === "weekly_review_upserted") {
+        expect(weeklyMutations[0].payload.review.insights).toBe("Latest weekly insight.");
+        expect(weeklyMutations[0].payload.review.nextWeekPriority).toBe("Latest priority.");
+        expect(weeklyMutations[0].payload.executionScore).toEqual(expect.any(Number));
+      }
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 
   it("completes trial checkout without exposing restore controls in settings", async () => {
     const { goalId } = seedTwelveWeekGoal();
@@ -646,24 +775,28 @@ describe("12-week core flows", () => {
     expect(getCurrentPlan()).toBe("FREE");
   });
 
-  it("persists default weekly time blocks from Settings across reload", async () => {
-    const { goalId } = seedTwelveWeekGoal();
-    const firstRender = renderAppRoute("/12-week-system?tab=settings");
-    const user = userEvent.setup();
+  it(
+    "persists default weekly time blocks from Settings across reload",
+    async () => {
+      const { goalId } = seedTwelveWeekGoal();
+      const firstRender = renderAppRoute("/12-week-system?tab=settings");
+      const user = userEvent.setup();
 
-    await screen.findByText("Lịch tuần tham chiếu");
-    await user.click(screen.getByRole("button", { name: "Dùng gợi ý mặc định" }));
+      await screen.findByText("Lịch tuần tham chiếu");
+      await user.click(screen.getByRole("button", { name: "Dùng gợi ý mặc định" }));
 
-    await waitFor(() => {
-      expect(readGoal(goalId).twelveWeekSystem?.weeklyTimeBlocks).toHaveLength(4);
-    });
-    expect(screen.getAllByTestId("weekly-time-block-chip")).toHaveLength(4);
-    expect(screen.getAllByText("Strategic Block").length).toBeGreaterThan(0);
+      await waitFor(() => {
+        expect(readGoal(goalId).twelveWeekSystem?.weeklyTimeBlocks).toHaveLength(4);
+      });
+      expect(screen.getAllByTestId("weekly-time-block-chip")).toHaveLength(4);
+      expect(screen.getAllByText("Strategic Block").length).toBeGreaterThan(0);
 
-    firstRender.ui.unmount();
-    renderAppRoute("/12-week-system?tab=settings");
+      firstRender.ui.unmount();
+      renderAppRoute("/12-week-system?tab=settings");
 
-    await screen.findByText("Lịch tuần tham chiếu");
-    expect(screen.getAllByTestId("weekly-time-block-chip")).toHaveLength(4);
-  }, INTEGRATION_TEST_TIMEOUT_MS);
+      await screen.findByText("Lịch tuần tham chiếu");
+      expect(screen.getAllByTestId("weekly-time-block-chip")).toHaveLength(4);
+    },
+    INTEGRATION_TEST_TIMEOUT_MS,
+  );
 });

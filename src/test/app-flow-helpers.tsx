@@ -284,6 +284,7 @@ export function renderAppRoute(initialEntry: string): {
       { path: "/life-balance", element: <Placeholder title="Life Balance" /> },
       { path: "/life-insight", element: <LifeInsight /> },
       { path: "/smart-goal-setup", element: <Placeholder title="SMART Goal" /> },
+      { path: "/feasibility", element: <Placeholder title="Feasibility" /> },
       { path: "/goals", element: <Placeholder title="Goals" /> },
       { path: "/journal", element: <Placeholder title="Journal" /> },
       { path: "/12-week-setup", element: <TwelveWeekSetup /> },

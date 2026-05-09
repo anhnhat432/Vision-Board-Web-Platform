@@ -67,11 +67,7 @@ function createSystem(overrides: Partial<TwelveWeekSystem> = {}): TwelveWeekSyst
   };
 }
 
-function createGoal(
-  id: string,
-  createdAt: string,
-  systemOverrides: Partial<TwelveWeekSystem> = {},
-): Goal {
+function createGoal(id: string, createdAt: string, systemOverrides: Partial<TwelveWeekSystem> = {}): Goal {
   return {
     id,
     category: "Career",
@@ -128,11 +124,9 @@ describe("sortTwelveWeekGoalsForSelection", () => {
     const newestPaused = createGoal("newest-paused", "2026-04-25T00:00:00.000Z", { status: "paused" });
     const olderActive = createGoal("older-active", "2026-04-01T00:00:00.000Z", { status: "active" });
 
-    expect(sortTwelveWeekGoalsForSelection([newerCompleted, newestPaused, olderActive]).map((goal) => goal.id)).toEqual([
-      "older-active",
-      "newest-paused",
-      "newer-completed",
-    ]);
+    expect(sortTwelveWeekGoalsForSelection([newerCompleted, newestPaused, olderActive]).map((goal) => goal.id)).toEqual(
+      ["older-active", "newest-paused", "newer-completed"],
+    );
   });
 });
 
@@ -158,9 +152,7 @@ function createSystemWithTasks(tasks: TwelveWeekTaskInstance[]): TwelveWeekSyste
 
 describe("rescheduleTwelveWeekTaskWithinWeek", () => {
   it("moves an overdue task to today (within current week range)", () => {
-    const system = createSystemWithTasks([
-      makeTask({ id: "task_a", weekNumber: 1, scheduledDate: "2026-03-03" }),
-    ]);
+    const system = createSystemWithTasks([makeTask({ id: "task_a", weekNumber: 1, scheduledDate: "2026-03-03" })]);
     const today = new Date(2026, 2, 5); // Mar 5, week 1 (Mar 2 - Mar 8)
     const result = rescheduleTwelveWeekTaskWithinWeek(system, "task_a", today);
 
@@ -183,9 +175,7 @@ describe("rescheduleTwelveWeekTaskWithinWeek", () => {
   });
 
   it("refuses when there is no room left in the current week", () => {
-    const system = createSystemWithTasks([
-      makeTask({ id: "task_a", weekNumber: 1, scheduledDate: "2026-03-08" }),
-    ]);
+    const system = createSystemWithTasks([makeTask({ id: "task_a", weekNumber: 1, scheduledDate: "2026-03-08" })]);
     // Today is Sunday, last day of week 1 → no later day available within week
     const today = new Date(2026, 2, 8);
     const result = rescheduleTwelveWeekTaskWithinWeek(system, "task_a", today);
@@ -212,9 +202,7 @@ describe("rescheduleTwelveWeekTaskWithinWeek", () => {
 
 describe("rescheduleTwelveWeekTaskToNextWeek", () => {
   it("moves a task into the first day of next week and bumps weekNumber", () => {
-    const system = createSystemWithTasks([
-      makeTask({ id: "task_a", weekNumber: 2, scheduledDate: "2026-03-10" }),
-    ]);
+    const system = createSystemWithTasks([makeTask({ id: "task_a", weekNumber: 2, scheduledDate: "2026-03-10" })]);
     const result = rescheduleTwelveWeekTaskToNextWeek(system, "task_a");
 
     expect(result.applied).toBe(true);
@@ -225,9 +213,7 @@ describe("rescheduleTwelveWeekTaskToNextWeek", () => {
   });
 
   it("refuses when current week is the final week of the cycle", () => {
-    const system = createSystemWithTasks([
-      makeTask({ id: "task_a", weekNumber: 12, scheduledDate: "2026-05-20" }),
-    ]);
+    const system = createSystemWithTasks([makeTask({ id: "task_a", weekNumber: 12, scheduledDate: "2026-05-20" })]);
     const result = rescheduleTwelveWeekTaskToNextWeek(system, "task_a");
 
     expect(result.applied).toBe(false);
@@ -235,9 +221,7 @@ describe("rescheduleTwelveWeekTaskToNextWeek", () => {
   });
 
   it("refuses when task is already skipped", () => {
-    const system = createSystemWithTasks([
-      makeTask({ id: "task_a", weekNumber: 2, skipped: true, isCore: false }),
-    ]);
+    const system = createSystemWithTasks([makeTask({ id: "task_a", weekNumber: 2, skipped: true, isCore: false })]);
     const result = rescheduleTwelveWeekTaskToNextWeek(system, "task_a");
 
     expect(result.applied).toBe(false);
@@ -247,9 +231,7 @@ describe("rescheduleTwelveWeekTaskToNextWeek", () => {
 
 describe("skipTwelveWeekNonCoreTask", () => {
   it("skips a non-core task", () => {
-    const system = createSystemWithTasks([
-      makeTask({ id: "task_opt", isCore: false }),
-    ]);
+    const system = createSystemWithTasks([makeTask({ id: "task_opt", isCore: false })]);
     const result = skipTwelveWeekNonCoreTask(system, "task_opt");
 
     expect(result.applied).toBe(true);
@@ -267,9 +249,7 @@ describe("skipTwelveWeekNonCoreTask", () => {
   });
 
   it("refuses when task is already skipped", () => {
-    const system = createSystemWithTasks([
-      makeTask({ id: "task_opt", isCore: false, skipped: true }),
-    ]);
+    const system = createSystemWithTasks([makeTask({ id: "task_opt", isCore: false, skipped: true })]);
     const result = skipTwelveWeekNonCoreTask(system, "task_opt");
 
     expect(result.applied).toBe(false);
@@ -277,9 +257,7 @@ describe("skipTwelveWeekNonCoreTask", () => {
   });
 
   it("refuses when task is already completed", () => {
-    const system = createSystemWithTasks([
-      makeTask({ id: "task_opt", isCore: false, completed: true }),
-    ]);
+    const system = createSystemWithTasks([makeTask({ id: "task_opt", isCore: false, completed: true })]);
     const result = skipTwelveWeekNonCoreTask(system, "task_opt");
 
     expect(result.applied).toBe(false);
@@ -381,18 +359,96 @@ describe("regenerateUpcomingTaskInstances", () => {
 
     const regenerated = regenerateUpcomingTaskInstances(system, { currentWeek: 2 });
 
-    expect(regenerated.taskInstances.filter((task) => task.weekNumber === 1).map((task) => task.scheduledDate)).toEqual([
-      "2026-03-03",
-      "2026-03-06",
-    ]);
-    expect(regenerated.taskInstances.filter((task) => task.weekNumber === 2).map((task) => task.scheduledDate)).toEqual([
-      "2026-03-10",
-      "2026-03-12",
-    ]);
+    expect(regenerated.taskInstances.filter((task) => task.weekNumber === 1).map((task) => task.scheduledDate)).toEqual(
+      ["2026-03-03", "2026-03-06"],
+    );
+    expect(regenerated.taskInstances.filter((task) => task.weekNumber === 2).map((task) => task.scheduledDate)).toEqual(
+      ["2026-03-10", "2026-03-12"],
+    );
   });
 });
 
 describe("weekly review storage migration", () => {
+  it("loads v7 daily check-ins without updatedCount", () => {
+    const data = createEmptyUserData({
+      currentStorageVersion: 7,
+      defaultAppPreferences: DEFAULT_APP_PREFERENCES,
+      motivationalQuotes: MOTIVATIONAL_QUOTES,
+    });
+    data.goals.push(
+      createGoal("goal-with-v7-checkin", "2026-05-01T00:00:00.000Z", {
+        dailyCheckIns: [
+          {
+            date: "2026-05-09",
+            mood: "steady",
+          },
+        ] as unknown as TwelveWeekSystem["dailyCheckIns"],
+      }),
+    );
+
+    const migrated = migrateLegacyUserData(data, CURRENT_STORAGE_VERSION);
+    const checkIn = migrated.goals[0]?.twelveWeekSystem?.dailyCheckIns[0];
+
+    expect(migrated.storageVersion).toBe(CURRENT_STORAGE_VERSION);
+    expect(checkIn).toMatchObject({
+      date: "2026-05-09",
+      mood: "steady",
+    });
+    expect(checkIn?.updatedCount).toBeUndefined();
+  });
+
+  it("migrates v6 storage directly to v8 WAM reviews and daily check-ins", () => {
+    const data = createEmptyUserData({
+      currentStorageVersion: 6,
+      defaultAppPreferences: DEFAULT_APP_PREFERENCES,
+      motivationalQuotes: MOTIVATIONAL_QUOTES,
+    });
+    data.goals.push(
+      createGoal("goal-with-v6-review", "2026-05-01T00:00:00.000Z", {
+        dailyCheckIns: [
+          {
+            date: "2026-05-09",
+            mood: "steady",
+          },
+        ] as unknown as TwelveWeekSystem["dailyCheckIns"],
+        weeklyReviews: [
+          {
+            weekNumber: 1,
+            leadCompletionPercent: 75,
+            lagProgressValue: "30",
+            biggestOutputThisWeek: "Legacy win",
+            mainObstacle: "Legacy miss",
+            nextWeekPriority: "Keep focus block",
+            workloadDecision: "keep same",
+            reviewCompleted: true,
+            progressScore: 4,
+            disciplineScore: 4,
+            focusScore: 5,
+            improvementScore: 5,
+            outputQualityScore: 5,
+            completedLeadIndicators: 2,
+          },
+        ],
+      }),
+    );
+
+    const migrated = migrateLegacyUserData(data, CURRENT_STORAGE_VERSION);
+    const system = migrated.goals[0]?.twelveWeekSystem;
+    const review = system?.weeklyReviews[0];
+
+    expect(migrated.storageVersion).toBe(CURRENT_STORAGE_VERSION);
+    expect(system?.dailyCheckIns[0]?.date).toBe("2026-05-09");
+    expect(review).toMatchObject({
+      commitmentsKept: [],
+      commitmentsMissed: [],
+      insights: "Legacy win",
+      nextWeekCommitments: ["Keep focus block"],
+      executionScore: 75,
+      reflection: "Legacy win",
+      adjustments: "Keep focus block",
+    });
+  });
+
   it("normalizes week 13 systems into completed cycle-review state with cycle number", () => {
     const goal = createGoal("week-13-cycle", "2026-05-01T00:00:00.000Z", {
       currentWeek: 13,

@@ -4,11 +4,7 @@ import type {
   AdaptiveTemplateSupport,
   TwelveWeekTemplateDefinition,
 } from "@/app/utils/twelve-week-premium";
-import {
-  TWELVE_WEEK_TEMPLATE_CATALOG,
-  getPlanLabel,
-  planSatisfiesRequirement,
-} from "@/app/utils/twelve-week-premium";
+import { TWELVE_WEEK_TEMPLATE_CATALOG, getPlanLabel, planSatisfiesRequirement } from "@/app/utils/twelve-week-premium";
 import type { PricingPlanCode } from "@/app/utils/storage";
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
@@ -60,6 +56,9 @@ export function OutcomeStep({
     week8: draft.week8Milestone,
     week12: draft.week12Outcome,
   });
+  const lagMetricPreview = draft.lagMetricName.trim()
+    ? `${draft.lagMetricName.trim()}${draft.lagMetricUnit.trim() ? ` (${draft.lagMetricUnit.trim()})` : ""}`
+    : "";
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -68,10 +67,7 @@ export function OutcomeStep({
         <SecondaryPanel title="Vì sao kế hoạch này được đề xuất" collapsible defaultOpen={isDesktop}>
           <ul className="grid gap-2 md:grid-cols-2">
             {planRationaleReasons.map((reason) => (
-              <li
-                key={reason.id}
-                className="rounded-xl border border-violet-200 bg-white/82 p-3"
-              >
+              <li key={reason.id} className="rounded-xl border border-violet-200 bg-white/82 p-3">
                 <p className="text-sm font-semibold text-slate-950">{reason.title}</p>
                 <p className="mt-1 text-xs leading-5 text-slate-600">{reason.detail}</p>
               </li>
@@ -91,9 +87,7 @@ export function OutcomeStep({
           <div className="grid gap-3 md:grid-cols-3">
             <div className="rounded-xl border border-amber-200 bg-white/76 p-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Cần chú ý</p>
-              <p className="mt-1 text-sm font-semibold text-slate-950">
-                {feasibility.bottleneck?.label ?? "Chưa có"}
-              </p>
+              <p className="mt-1 text-sm font-semibold text-slate-950">{feasibility.bottleneck?.label ?? "Chưa có"}</p>
               {feasibility.bottleneck?.action && (
                 <p className="mt-2 text-xs leading-5 text-slate-600">{feasibility.bottleneck.action}</p>
               )}
@@ -129,6 +123,12 @@ export function OutcomeStep({
             Bắt buộc
           </Badge>
         </div>
+        {lagMetricPreview ? (
+          <div className="rounded-xl border border-emerald-200 bg-white/78 px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Chỉ số kết quả</p>
+            <p className="mt-1 text-sm font-semibold text-slate-950">{lagMetricPreview}</p>
+          </div>
+        ) : null}
         <div className="space-y-2">
           <Label htmlFor="goal-type">Loại mục tiêu</Label>
           <Select value={draft.goalType} onValueChange={(value) => onChange("goalType", value)}>
@@ -176,9 +176,7 @@ export function OutcomeStep({
       {selectedTemplate && (
         <div className="space-y-4 rounded-2xl border border-emerald-200 gradient-emerald p-5">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
-              Cá nhân hóa khung
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Cá nhân hóa khung</p>
             <p className="mt-1 text-sm text-slate-600">
               Trả lời nhanh 3 câu để khung tự điều chỉnh số việc và nhịp phù hợp.
             </p>
@@ -266,9 +264,7 @@ export function OutcomeStep({
           <div className="rounded-2xl border border-sky-200 gradient-sky p-4 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
-                  Gợi ý cho mục tiêu này
-                </p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">Gợi ý cho mục tiêu này</p>
                 <p className="mt-2 text-lg font-semibold text-slate-950">{recommendedTemplate.name}</p>
                 <p className="mt-2 text-sm leading-7 text-slate-600">{adaptiveTemplateRecommendation.reason}</p>
               </div>
@@ -361,7 +357,11 @@ export function OutcomeStep({
                     </div>
                     <Badge
                       variant="outline"
-                      className={isSelected ? "border-white/15 bg-white/10 text-white" : "border-slate-300 bg-white text-slate-700"}
+                      className={
+                        isSelected
+                          ? "border-white/15 bg-white/10 text-white"
+                          : "border-slate-300 bg-white text-slate-700"
+                      }
                     >
                       {isSelected ? "Đang dùng" : isLocked ? "Đang khóa" : "Sẵn sàng"}
                     </Badge>
@@ -371,7 +371,9 @@ export function OutcomeStep({
                   </p>
                   <div
                     className={`mt-3 rounded-xl border px-3 py-3 text-sm leading-6 ${
-                      isSelected ? "border-white/12 bg-white/8 text-white/82" : "border-white/70 bg-white/72 text-slate-600"
+                      isSelected
+                        ? "border-white/12 bg-white/8 text-white/82"
+                        : "border-white/70 bg-white/72 text-slate-600"
                     }`}
                   >
                     <p
@@ -385,7 +387,9 @@ export function OutcomeStep({
                   </div>
                   <div
                     className={`mt-3 rounded-xl border px-3 py-3 text-sm leading-6 ${
-                      isSelected ? "border-white/12 bg-white/8 text-white/82" : "border-white/70 bg-white/72 text-slate-600"
+                      isSelected
+                        ? "border-white/12 bg-white/8 text-white/82"
+                        : "border-white/70 bg-white/72 text-slate-600"
                     }`}
                   >
                     <p
@@ -402,7 +406,11 @@ export function OutcomeStep({
                       <Badge
                         key={`${template.id}_${item}`}
                         variant="outline"
-                        className={isSelected ? "border-white/15 bg-white/10 text-white" : "border-slate-200 bg-slate-50 text-slate-700"}
+                        className={
+                          isSelected
+                            ? "border-white/15 bg-white/10 text-white"
+                            : "border-slate-200 bg-slate-50 text-slate-700"
+                        }
                       >
                         {item}
                       </Badge>
@@ -411,7 +419,11 @@ export function OutcomeStep({
                       <Badge
                         key={`${template.id}_${tactic.name}`}
                         variant="outline"
-                        className={isSelected ? "border-white/15 bg-white/10 text-white" : "border-slate-200 bg-slate-50 text-slate-700"}
+                        className={
+                          isSelected
+                            ? "border-white/15 bg-white/10 text-white"
+                            : "border-slate-200 bg-slate-50 text-slate-700"
+                        }
                       >
                         {tactic.name}
                       </Badge>
@@ -419,9 +431,7 @@ export function OutcomeStep({
                   </div>
                   {isLocked && (
                     <div className="mt-4 flex items-center justify-between border-t border-violet-200/60 pt-3">
-                      <span className="text-xs font-semibold text-violet-700">
-                        Cần gói Plus để dùng khung này
-                      </span>
+                      <span className="text-xs font-semibold text-violet-700">Cần gói Plus để dùng khung này</span>
                       <span className="text-xs font-semibold text-violet-600">Mở khóa →</span>
                     </div>
                   )}

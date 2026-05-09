@@ -6,6 +6,16 @@ import { ArrowRight, Check, Compass, Sparkles, Target, TrendingDown, TrendingUp 
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { ProductVisual } from "../components/visuals/ProductVisual";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
@@ -24,6 +34,25 @@ import {
   type UserIntentId,
 } from "../utils/user-intent";
 
+function getPendingSmartGoalStatement(): string {
+  const rawDraft = localStorage.getItem(APP_STORAGE_KEYS.pendingSmartGoal);
+  if (!rawDraft) return "";
+
+  try {
+    const parsedDraft = JSON.parse(rawDraft) as {
+      specific?: string | { goal_statement?: unknown };
+    };
+    if (typeof parsedDraft.specific === "string") return parsedDraft.specific.trim();
+    if (parsedDraft.specific && typeof parsedDraft.specific.goal_statement === "string") {
+      return parsedDraft.specific.goal_statement.trim();
+    }
+  } catch {
+    return "";
+  }
+
+  return "";
+}
+
 export function LifeInsight() {
   const navigate = useNavigate();
   const { userData } = useSyncedUserData();
@@ -31,6 +60,7 @@ export function LifeInsight() {
   const hasLifeBalance = hasRealLifeBalance(userData);
   const [selectedAreaName, setSelectedAreaName] = useState<string | null>(null);
   const [selectedIntent, setSelectedIntent] = useState<UserIntentId | null>(null);
+  const [pendingFocusAreaName, setPendingFocusAreaName] = useState<string | null>(null);
   const pageTopRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -125,10 +155,27 @@ export function LifeInsight() {
     );
   }
 
-  const handleStartGoalSetup = () => {
+  const continueToGoalSetup = (areaName: string) => {
     clearGoalPlanningDrafts();
-    localStorage.setItem(APP_STORAGE_KEYS.selectedFocusArea, focusArea.name);
+    localStorage.setItem(APP_STORAGE_KEYS.selectedFocusArea, areaName);
     navigate("/smart-goal-setup");
+  };
+
+  const handleStartGoalSetup = () => {
+    const currentDraftFocusArea = localStorage.getItem(APP_STORAGE_KEYS.selectedFocusArea);
+    const isChangingFocusArea = Boolean(currentDraftFocusArea && currentDraftFocusArea !== focusArea.name);
+    if (isChangingFocusArea && getPendingSmartGoalStatement().length > 0) {
+      setPendingFocusAreaName(focusArea.name);
+      return;
+    }
+
+    continueToGoalSetup(focusArea.name);
+  };
+
+  const handleConfirmDraftClear = () => {
+    const nextFocusAreaName = pendingFocusAreaName ?? focusArea.name;
+    setPendingFocusAreaName(null);
+    continueToGoalSetup(nextFocusAreaName);
   };
 
   const isCustomSelection = selectedAreaName !== null && selectedAreaName !== lowestArea.name;
@@ -139,6 +186,18 @@ export function LifeInsight() {
 
   return (
     <div ref={pageTopRef} className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
+      <AlertDialog open={pendingFocusAreaName !== null} onOpenChange={(open) => !open && setPendingFocusAreaName(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Bạn có draft mục tiêu chưa lưu</AlertDialogTitle>
+            <AlertDialogDescription>Đổi mảng đời sẽ xoá draft hiện tại. Tiếp tục?</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Giữ draft</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDraftClear}>Xoá draft và đổi area</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -167,11 +226,17 @@ export function LifeInsight() {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  <Badge variant="outline" className="rounded-full border-violet-200 bg-violet-50 px-4 py-2 text-violet-700">
+                  <Badge
+                    variant="outline"
+                    className="rounded-full border-violet-200 bg-violet-50 px-4 py-2 text-violet-700"
+                  >
                     <Target className="mr-1 h-3.5 w-3.5" />
                     Ưu tiên: {getLifeAreaLabel(focusArea.name)}
                   </Badge>
-                  <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50 px-4 py-2 text-slate-600">
+                  <Badge
+                    variant="outline"
+                    className="rounded-full border-slate-200 bg-slate-50 px-4 py-2 text-slate-600"
+                  >
                     <TrendingUp className="mr-1 h-3.5 w-3.5" />
                     Điểm trung bình: {averageScore.toFixed(1)}/10
                   </Badge>
@@ -450,9 +515,7 @@ export function LifeInsight() {
                   <p className="text-xs font-semibold uppercase tracking-[0.16em]">Lực đỡ hiện có</p>
                 </div>
                 <p className="mt-3 text-lg font-semibold text-slate-900">{getLifeAreaLabel(strongestArea.name)}</p>
-                <p className="mt-1 text-sm text-slate-600">
-                  Tận dụng điểm mạnh này để kéo khu vực đang yếu lên cùng.
-                </p>
+                <p className="mt-1 text-sm text-slate-600">Tận dụng điểm mạnh này để kéo khu vực đang yếu lên cùng.</p>
               </div>
             </div>
           </details>
@@ -460,9 +523,7 @@ export function LifeInsight() {
           <Card>
             <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between lg:p-6">
               <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Trọng tâm hiện tại
-                </p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Trọng tâm hiện tại</p>
                 <p className="mt-2 text-lg font-semibold text-slate-900">
                   {getLifeAreaLabel(focusArea.name)} ({focusArea.score}/10)
                 </p>

@@ -3,14 +3,14 @@ import { Link, useNavigate } from "react-router";
 import { Compass, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
-import { CoreFlowGateState } from '@/app/components/CoreFlowGateState';
-import { CoreFlowProgress } from '@/app/components/CoreFlowProgress';
-import { PageShell } from '@/app/components/PageShell';
-import { UpgradePaywallDialog } from '@/app/components/UpgradePaywallDialog';
-import { Badge } from '@/app/components/ui/badge';
-import { Button } from '@/app/components/ui/button';
-import { Card, CardContent } from '@/app/components/ui/card';
-import { trackAnalyticsEvent } from '@/app/utils/analytics';
+import { CoreFlowGateState } from "@/app/components/CoreFlowGateState";
+import { CoreFlowProgress } from "@/app/components/CoreFlowProgress";
+import { PageShell } from "@/app/components/PageShell";
+import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
+import { Badge } from "@/app/components/ui/badge";
+import { Button } from "@/app/components/ui/button";
+import { Card, CardContent } from "@/app/components/ui/card";
+import { trackAnalyticsEvent } from "@/app/utils/analytics";
 import {
   APP_STORAGE_KEYS,
   type PricingPlanCode,
@@ -22,20 +22,20 @@ import {
   getUserData,
   parseCalendarDate,
   trackAppEvent,
-} from '@/app/utils/storage';
-import { getScoredLifeArea, hasRealLifeBalance } from '@/app/utils/core-flow-guard';
+} from "@/app/utils/storage";
+import { getScoredLifeArea, hasRealLifeBalance } from "@/app/utils/core-flow-guard";
 import {
   trackPaywallCtaClicked,
   trackPremiumTemplateUnlockPrompted,
   trackTemplateApplied,
-} from '@/app/utils/monetization-analytics';
+} from "@/app/utils/monetization-analytics";
 import {
   TWELVE_WEEK_TEMPLATE_CATALOG,
   buildAdaptiveTemplateRecommendation,
   buildAdaptiveTemplateSupport,
   planSatisfiesRequirement,
   type TwelveWeekTemplateDefinition,
-} from '@/app/utils/twelve-week-premium';
+} from "@/app/utils/twelve-week-premium";
 import { parsePendingSMARTGoal, parseSmartGoal, type PendingSMARTGoal } from "@/lib/smart-goal";
 import { getWeeklyTaskWarning } from "@/features/plan12week/logic";
 import { usePlanSetupSync } from "@/features/plan12week/hooks";
@@ -44,7 +44,7 @@ import { enqueueLeadMetricUpsertedMutations } from "@/features/plan12week/persis
 import { createGoal, updateGoal } from "@/services/goalService";
 import { saveGoalLink } from "@/lib/api/goalLinkStore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { isDemoMode } from '@/app/utils/app-mode';
+import { isDemoMode } from "@/app/utils/app-mode";
 import type { AspirationalVision as AspirationalVisionModel } from "@/app/utils/storage-types";
 import { STEPS } from "./12WeekSetup/constants";
 import {
@@ -72,7 +72,29 @@ import { LeadIndicatorsStep } from "./12WeekSetup/components/LeadIndicatorsStep"
 import { ScheduleStep } from "./12WeekSetup/components/ScheduleStep";
 import { PlanPreviewStep } from "@/features/plan12week/components/PlanPreviewStep";
 
-type TwelveWeekSetupGate = "none" | "needs_life_balance" | "needs_life_insight" | "needs_smart_goal" | "needs_feasibility";
+type TwelveWeekSetupGate =
+  | "none"
+  | "needs_life_balance"
+  | "needs_life_insight"
+  | "needs_smart_goal"
+  | "needs_feasibility";
+
+const FEASIBILITY_RESULT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+function getSmartGoalMetricUnit(normalizedSmartGoal: ReturnType<typeof parseSmartGoal>): string {
+  return normalizedSmartGoal?.measurable?.metric_unit?.trim() ?? "";
+}
+
+function getSmartGoalMetricName(normalizedSmartGoal: ReturnType<typeof parseSmartGoal>): string {
+  return normalizedSmartGoal?.measurable?.metric_name?.trim() ?? "";
+}
+
+function isFeasibilityResultStale(savedAt: string | undefined, now = new Date()): boolean {
+  if (!savedAt) return false;
+  const savedAtDate = new Date(savedAt);
+  if (Number.isNaN(savedAtDate.getTime())) return false;
+  return now.getTime() - savedAtDate.getTime() > FEASIBILITY_RESULT_MAX_AGE_MS;
+}
 
 export function TwelveWeekSetup() {
   const navigate = useNavigate();
@@ -165,7 +187,11 @@ export function TwelveWeekSetup() {
     let parsedFeasibility: unknown;
     try {
       parsedFeasibility = JSON.parse(pendingFeasibilityResult);
-    } catch {
+    } catch (error) {
+      console.warn("Pending feasibility result could not be parsed.", error);
+      localStorage.removeItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
+      toast.error("Kết quả feasibility cũ không đọc được, làm lại nhanh");
+      navigate("/feasibility");
       setSetupGate("needs_feasibility");
       setIsLoading(false);
       return;
@@ -177,6 +203,19 @@ export function TwelveWeekSetup() {
       return;
     }
 
+    if (isFeasibilityResultStale(parsedFeasibility.savedAt)) {
+      toast.warning("Kết quả feasibility hơi cũ, làm lại để dữ liệu chính xác?", {
+        action: {
+          label: "Làm lại",
+          onClick: () => navigate("/feasibility"),
+        },
+        cancel: {
+          label: "Dùng tạm",
+          onClick: () => undefined,
+        },
+      });
+    }
+
     if (!getScoredLifeArea(data, selectedFocusArea)) {
       setSetupGate("needs_life_insight");
       setIsLoading(false);
@@ -186,6 +225,8 @@ export function TwelveWeekSetup() {
     const savedDraft = localStorage.getItem(APP_STORAGE_KEYS.pending12WeekSetupDraft);
     const feasibilityDefaults = getFeasibilityDraftDefaults(parsedFeasibility);
     const setupPlan = getCurrentPlan();
+    const smartGoalMetricName = getSmartGoalMetricName(normalizedSmartGoal);
+    const smartGoalMetricUnit = getSmartGoalMetricUnit(normalizedSmartGoal);
     setFocusArea(selectedFocusArea);
     setSmartGoal(parsedSmartGoal);
     setFeasibility(parsedFeasibility);
@@ -198,7 +239,9 @@ export function TwelveWeekSetup() {
           previousDraft.vision12Week ||
           `Trong 12 tuần tới, tôi muốn biến mục tiêu "${parsedSmartGoal.specific}" thành một nhịp thực thi rõ ràng.`,
         week12Outcome: previousDraft.week12Outcome || parsedSmartGoal.measurable || parsedSmartGoal.specific,
-        lagMetricName: previousDraft.lagMetricName || parsedSmartGoal.measurable || "Chỉ số kết quả chính",
+        lagMetricName:
+          previousDraft.lagMetricName || smartGoalMetricName || parsedSmartGoal.measurable || "Chỉ số kết quả chính",
+        lagMetricUnit: previousDraft.lagMetricUnit || smartGoalMetricUnit,
         tacticLoadPreference:
           previousDraft.tacticLoadPreference === "balanced"
             ? feasibilityDefaults.tacticLoadPreference
@@ -227,6 +270,7 @@ export function TwelveWeekSetup() {
               ? parsedDraft.tacticLoadPreference
               : "balanced",
           dailyTimeBudget: parsedDraft.dailyTimeBudget ?? "",
+          lagMetricUnit: parsedDraft.lagMetricUnit?.trim() ? parsedDraft.lagMetricUnit : baseDraft.lagMetricUnit,
           preferredDays: Array.isArray(parsedDraft.preferredDays) ? parsedDraft.preferredDays : [],
           personalConstraint:
             parsedDraft.personalConstraint === "time" ||
@@ -276,7 +320,7 @@ export function TwelveWeekSetup() {
     }
 
     setIsLoading(false);
-  }, []);
+  }, [navigate]);
 
   const saveTimeoutRef = useRef<number | null>(null);
 
@@ -301,11 +345,14 @@ export function TwelveWeekSetup() {
     };
   }, [draft, feasibility, isLoading, smartGoal]);
 
-  const handleJumpToStep = useCallback((stepIndex: number) => {
-    if (stepIndex < currentStep) {
-      setCurrentStep(stepIndex);
-    }
-  }, [currentStep]);
+  const handleJumpToStep = useCallback(
+    (stepIndex: number) => {
+      if (stepIndex < currentStep) {
+        setCurrentStep(stepIndex);
+      }
+    },
+    [currentStep],
+  );
 
   const validIndicators = useMemo(
     () => draft.leadIndicators.filter((indicator) => indicator.name.trim().length > 0),

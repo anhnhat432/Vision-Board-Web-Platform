@@ -107,11 +107,7 @@ function enqueueTaskCompletionChangedMutation(goalId: string, task: TwelveWeekTa
   }
 }
 
-function enqueueDailyCheckInUpsertedMutation(
-  goalId: string,
-  weekNumber: number,
-  checkIn: UniversalDailyCheckIn,
-): void {
+function enqueueDailyCheckInUpsertedMutation(goalId: string, weekNumber: number, checkIn: UniversalDailyCheckIn): void {
   try {
     const planLink = getPlanLink(goalId);
     enqueueStoredMutation({
@@ -204,104 +200,119 @@ export function useTwelveWeekExecutionActions({
     return getUserData().goals.find((goal) => goal.id === activeGoal.id)?.twelveWeekSystem ?? system;
   }, [activeGoal, system]);
 
-  const handleToggleTask = useCallback(async (taskId: string, completed: boolean) => {
-    if (!activeGoal || !system) return;
-    const actionGoalId = activeGoal.id;
-    const toggledTask = system.taskInstances.find((task) => task.id === taskId);
-    const nextTaskInstances = system.taskInstances.map((task) =>
-      task.id === taskId ? { ...task, completed, completedAt: completed ? new Date().toISOString() : undefined } : task,
-    );
-    const nextToggledTask = nextTaskInstances.find((task) => task.id === taskId);
-
-    invalidateOverlay();
-    const savedSystem = commitSystemUpdate({
-      ...system,
-      taskInstances: nextTaskInstances,
-    });
-
-    if (nextToggledTask) {
-      enqueueTaskCompletionChangedMutation(actionGoalId, nextToggledTask);
-      enqueueLeadMetricUpsertedMutations(actionGoalId, savedSystem, "task_progress", {
-        weekNumbers: [nextToggledTask.weekNumber],
-        indicatorIds: nextToggledTask.tacticId ? [nextToggledTask.tacticId] : undefined,
-        indicatorNames: [nextToggledTask.leadIndicatorName],
-      });
-    }
-
-    if (completed) {
-      trackAnalyticsEvent(
-        "today_task_completed",
-        {
-          source: "12_week_system",
-          week_number: toggledTask?.weekNumber ?? getTwelveWeekCurrentWeek(system),
-          is_core: Boolean(toggledTask?.isCore),
-        },
-        {
-          goalId: actionGoalId,
-          legacyEventName: "12_week_task_completed",
-          legacyPayload: {
-            weekNumber: String(toggledTask?.weekNumber ?? getTwelveWeekCurrentWeek(system)),
-            taskId,
-          },
-        },
+  const handleToggleTask = useCallback(
+    async (taskId: string, completed: boolean) => {
+      if (!activeGoal || !system) return;
+      const actionGoalId = activeGoal.id;
+      const toggledTask = system.taskInstances.find((task) => task.id === taskId);
+      const nextTaskInstances = system.taskInstances.map((task) =>
+        task.id === taskId
+          ? { ...task, completed, completedAt: completed ? new Date().toISOString() : undefined }
+          : task,
       );
-    }
+      const nextToggledTask = nextTaskInstances.find((task) => task.id === taskId);
 
-    const synced = await executionSyncActions.syncTaskToggle(taskId, completed);
-    if (!synced) {
-      const latestGoal = getUserData().goals.find((goal) => goal.id === actionGoalId);
-      const latestSystem = latestGoal?.twelveWeekSystem;
-      const latestTask = latestSystem?.taskInstances.find((task) => task.id === taskId);
-      const shouldRollbackTask = Boolean(latestSystem && latestTask && latestTask.completed === completed);
-      if (latestSystem && shouldRollbackTask) {
-        const rollbackSystem = {
-          ...latestSystem,
-          taskInstances: latestSystem.taskInstances.map((task) =>
-            task.id === taskId
-              ? {
-                  ...task,
-                  completed: toggledTask?.completed ?? false,
-                  completedAt: toggledTask?.completedAt,
-                }
-              : task,
-          ),
-        };
-        const normalizedRollbackSystem = {
-          ...rollbackSystem,
-          scoreboard: buildDerivedScoreboard(rollbackSystem, getDefaultScoreboard(rollbackSystem.totalWeeks)),
-        };
+      invalidateOverlay();
+      const savedSystem = commitSystemUpdate({
+        ...system,
+        taskInstances: nextTaskInstances,
+      });
 
-        updateGoal(actionGoalId, {
-          twelveWeekSystem: normalizedRollbackSystem,
+      if (nextToggledTask) {
+        enqueueTaskCompletionChangedMutation(actionGoalId, nextToggledTask);
+        enqueueLeadMetricUpsertedMutations(actionGoalId, savedSystem, "task_progress", {
+          weekNumbers: [nextToggledTask.weekNumber],
+          indicatorIds: nextToggledTask.tacticId ? [nextToggledTask.tacticId] : undefined,
+          indicatorNames: [nextToggledTask.leadIndicatorName],
         });
-        if (activeGoalIdRef.current === actionGoalId) {
-          updateActiveSystemState(() => normalizedRollbackSystem);
-        }
-        const rollbackTask = normalizedRollbackSystem.taskInstances.find((task) => task.id === taskId);
-        if (rollbackTask) {
-          enqueueTaskCompletionChangedMutation(actionGoalId, rollbackTask);
-          enqueueLeadMetricUpsertedMutations(actionGoalId, normalizedRollbackSystem, "task_progress", {
-            weekNumbers: [rollbackTask.weekNumber],
-            indicatorIds: rollbackTask.tacticId ? [rollbackTask.tacticId] : undefined,
-            indicatorNames: [rollbackTask.leadIndicatorName],
-          });
-        }
       }
 
-      toast.error(
-        shouldRollbackTask
-          ? "Không thể đồng bộ trạng thái việc. Mình đã hoàn tác thay đổi."
-          : "Chưa đồng bộ được trạng thái việc. Trạng thái trên thiết bị này vẫn được giữ lại.",
-      );
-      return;
-    }
+      if (completed) {
+        trackAnalyticsEvent(
+          "today_task_completed",
+          {
+            source: "12_week_system",
+            week_number: toggledTask?.weekNumber ?? getTwelveWeekCurrentWeek(system),
+            is_core: Boolean(toggledTask?.isCore),
+          },
+          {
+            goalId: actionGoalId,
+            legacyEventName: "12_week_task_completed",
+            legacyPayload: {
+              weekNumber: String(toggledTask?.weekNumber ?? getTwelveWeekCurrentWeek(system)),
+              taskId,
+            },
+          },
+        );
+      }
 
-    toast.success(completed ? "Việc đã được chốt." : "Việc đã được mở lại.");
-    if (activeGoalIdRef.current === actionGoalId) {
-      refreshBackendProgressOverlay();
-      refreshSnapshotMeta();
-    }
-  }, [activeGoal, system, executionSyncActions, commitSystemUpdate, invalidateOverlay, activeGoalIdRef, updateActiveSystemState, refreshBackendProgressOverlay, refreshSnapshotMeta]);
+      const synced = await executionSyncActions.syncTaskToggle(taskId, completed);
+      if (!synced) {
+        const latestGoal = getUserData().goals.find((goal) => goal.id === actionGoalId);
+        const latestSystem = latestGoal?.twelveWeekSystem;
+        const latestTask = latestSystem?.taskInstances.find((task) => task.id === taskId);
+        const shouldRollbackTask = Boolean(latestSystem && latestTask && latestTask.completed === completed);
+        if (latestSystem && shouldRollbackTask) {
+          const rollbackSystem = {
+            ...latestSystem,
+            taskInstances: latestSystem.taskInstances.map((task) =>
+              task.id === taskId
+                ? {
+                    ...task,
+                    completed: toggledTask?.completed ?? false,
+                    completedAt: toggledTask?.completedAt,
+                  }
+                : task,
+            ),
+          };
+          const normalizedRollbackSystem = {
+            ...rollbackSystem,
+            scoreboard: buildDerivedScoreboard(rollbackSystem, getDefaultScoreboard(rollbackSystem.totalWeeks)),
+          };
+
+          updateGoal(actionGoalId, {
+            twelveWeekSystem: normalizedRollbackSystem,
+          });
+          if (activeGoalIdRef.current === actionGoalId) {
+            updateActiveSystemState(() => normalizedRollbackSystem);
+          }
+          const rollbackTask = normalizedRollbackSystem.taskInstances.find((task) => task.id === taskId);
+          if (rollbackTask) {
+            enqueueTaskCompletionChangedMutation(actionGoalId, rollbackTask);
+            enqueueLeadMetricUpsertedMutations(actionGoalId, normalizedRollbackSystem, "task_progress", {
+              weekNumbers: [rollbackTask.weekNumber],
+              indicatorIds: rollbackTask.tacticId ? [rollbackTask.tacticId] : undefined,
+              indicatorNames: [rollbackTask.leadIndicatorName],
+            });
+          }
+        }
+
+        toast.error(
+          shouldRollbackTask
+            ? "Không thể đồng bộ trạng thái việc. Mình đã hoàn tác thay đổi."
+            : "Chưa đồng bộ được trạng thái việc. Trạng thái trên thiết bị này vẫn được giữ lại.",
+        );
+        return;
+      }
+
+      toast.success(completed ? "Việc đã được chốt." : "Việc đã được mở lại.");
+      if (activeGoalIdRef.current === actionGoalId) {
+        refreshBackendProgressOverlay();
+        refreshSnapshotMeta();
+      }
+    },
+    [
+      activeGoal,
+      system,
+      executionSyncActions,
+      commitSystemUpdate,
+      invalidateOverlay,
+      activeGoalIdRef,
+      updateActiveSystemState,
+      refreshBackendProgressOverlay,
+      refreshSnapshotMeta,
+    ],
+  );
 
   const handleSaveCheckIn = useCallback(async () => {
     if (!activeGoal || !system) return;
@@ -318,10 +329,7 @@ export function useTwelveWeekExecutionActions({
       .map((task) => task.title)
       .join(", ");
     const sameDayCheckIns = latestSystem.dailyCheckIns.filter((item) => getCalendarDateKey(item.date) === todayKey);
-    const updatedCount = sameDayCheckIns.reduce(
-      (maxCount, item) => Math.max(maxCount, item.updatedCount ?? 1),
-      0,
-    ) + 1;
+    const updatedCount = sameDayCheckIns.reduce((maxCount, item) => Math.max(maxCount, item.updatedCount ?? 1), 0) + 1;
     const dailyCheckIn: UniversalDailyCheckIn = {
       date: todayKey,
       didWorkToday: completedTodayCount > 0 || dailyNote.trim().length > 0,
@@ -335,9 +343,14 @@ export function useTwelveWeekExecutionActions({
       updatedCount,
     };
 
+    const sameDayCheckInHistory = latestSystem.dailyCheckIns
+      .filter((item) => getCalendarDateKey(item.date) === todayKey)
+      .slice(0, 4);
+    const otherDayCheckIns = latestSystem.dailyCheckIns.filter((item) => getCalendarDateKey(item.date) !== todayKey);
+
     commitSystemUpdate({
       ...latestSystem,
-      dailyCheckIns: [dailyCheckIn, ...latestSystem.dailyCheckIns].slice(0, 120),
+      dailyCheckIns: [dailyCheckIn, ...sameDayCheckInHistory, ...otherDayCheckIns].slice(0, 120),
     });
 
     enqueueDailyCheckInUpsertedMutation(actionGoalId, syncWeekNumber, dailyCheckIn);
@@ -364,7 +377,18 @@ export function useTwelveWeekExecutionActions({
     if (activeGoalIdRef.current === actionGoalId) {
       refreshSnapshotMeta();
     }
-  }, [activeGoal, system, dailyMood, dailyNote, executionSyncActions, commitSystemUpdate, activeGoalIdRef, refreshBackendProgressOverlay, refreshSnapshotMeta, getLatestActiveSystem]);
+  }, [
+    activeGoal,
+    system,
+    dailyMood,
+    dailyNote,
+    executionSyncActions,
+    commitSystemUpdate,
+    activeGoalIdRef,
+    refreshBackendProgressOverlay,
+    refreshSnapshotMeta,
+    getLatestActiveSystem,
+  ]);
 
   const handleSaveWeeklyReview = useCallback(async () => {
     if (!activeGoal || !system) return;
@@ -414,9 +438,7 @@ export function useTwelveWeekExecutionActions({
       (commitment) => weeklyForm.commitmentStatuses[commitment] === "missed",
     );
     const insightsValue =
-      weeklyForm.insights.trim() ||
-      weeklyForm.mainObstacle.trim() ||
-      weeklyForm.biggestOutputThisWeek.trim();
+      weeklyForm.insights.trim() || weeklyForm.mainObstacle.trim() || weeklyForm.biggestOutputThisWeek.trim();
     const nextWeekPriorityValue = nextWeekCommitments[0] ?? "";
     const workloadDecisionValue =
       weeklyForm.workloadDecision || (hasPremiumReviewInsights ? suggestedNextWeekPlan.workloadDecision : "keep same");
@@ -427,11 +449,9 @@ export function useTwelveWeekExecutionActions({
       leadCompletionPercent: reviewWeekCompletion.percent,
       lagProgressValue: weeklyForm.lagProgressValue.trim(),
       biggestOutputThisWeek:
-        weeklyForm.biggestOutputThisWeek.trim() ||
-        (commitmentsKept.length > 0 ? commitmentsKept.join(", ") : ""),
+        weeklyForm.biggestOutputThisWeek.trim() || (commitmentsKept.length > 0 ? commitmentsKept.join(", ") : ""),
       mainObstacle:
-        weeklyForm.mainObstacle.trim() ||
-        (commitmentsMissed.length > 0 ? commitmentsMissed.join(", ") : ""),
+        weeklyForm.mainObstacle.trim() || (commitmentsMissed.length > 0 ? commitmentsMissed.join(", ") : ""),
       nextWeekPriority: nextWeekPriorityValue,
       workloadDecision: workloadDecisionValue,
       reviewCompleted: true,
@@ -541,61 +561,78 @@ export function useTwelveWeekExecutionActions({
       refreshBackendProgressOverlay();
       refreshSnapshotMeta();
     }
-  }, [activeGoal, system, weeklyForm, hasPremiumReviewInsights, suggestedNextWeekPlan, executionSyncActions, commitSystemUpdate, activeGoalIdRef, refreshBackendProgressOverlay, refreshSnapshotMeta, getLatestActiveSystem]);
+  }, [
+    activeGoal,
+    system,
+    weeklyForm,
+    hasPremiumReviewInsights,
+    suggestedNextWeekPlan,
+    executionSyncActions,
+    commitSystemUpdate,
+    activeGoalIdRef,
+    refreshBackendProgressOverlay,
+    refreshSnapshotMeta,
+    getLatestActiveSystem,
+  ]);
 
-  const handleReentry = useCallback((mode: ReentryMode) => {
-    if (!activeGoal || !system) return;
-    const reentryWeekNumber = getTwelveWeekCurrentWeek(system);
-    const reentryWeekRange = getTwelveWeekWeekRange(system, reentryWeekNumber);
-    const reentryMissedTasks = getTwelveWeekMissedTasks(system);
-    const todayKey = formatDateInputValue(new Date());
-    const weekEnd = reentryWeekRange.end;
-    const nextWeekStart = addDaysToDateKey(weekEnd, 1);
-    const targets =
-      mode === "restart"
-        ? Array.from({ length: 4 }, (_, index) => addDaysToDateKey(todayKey, index))
-        : mode === "lighten"
-          ? [weekEnd, addDaysToDateKey(weekEnd, -1), addDaysToDateKey(weekEnd, -2)].filter((value) => value >= todayKey)
-          : Array.from({ length: 4 }, (_, index) => addDaysToDateKey(nextWeekStart, index));
+  const handleReentry = useCallback(
+    (mode: ReentryMode) => {
+      if (!activeGoal || !system) return;
+      const reentryWeekNumber = getTwelveWeekCurrentWeek(system);
+      const reentryWeekRange = getTwelveWeekWeekRange(system, reentryWeekNumber);
+      const reentryMissedTasks = getTwelveWeekMissedTasks(system);
+      const todayKey = formatDateInputValue(new Date());
+      const weekEnd = reentryWeekRange.end;
+      const nextWeekStart = addDaysToDateKey(weekEnd, 1);
+      const targets =
+        mode === "restart"
+          ? Array.from({ length: 4 }, (_, index) => addDaysToDateKey(todayKey, index))
+          : mode === "lighten"
+            ? [weekEnd, addDaysToDateKey(weekEnd, -1), addDaysToDateKey(weekEnd, -2)].filter(
+                (value) => value >= todayKey,
+              )
+            : Array.from({ length: 4 }, (_, index) => addDaysToDateKey(nextWeekStart, index));
 
-    let moved = 0;
-    const nextTaskInstances = system.taskInstances.map((task) => {
-      const isMissed = reentryMissedTasks.some((item) => item.id === task.id);
-      const isOptionalThisWeek =
-        mode === "lighten" &&
-        task.weekNumber === reentryWeekNumber &&
-        !task.isCore &&
-        !task.completed &&
-        task.scheduledDate <= weekEnd;
-      if (!isMissed && !isOptionalThisWeek) return task;
+      let moved = 0;
+      const nextTaskInstances = system.taskInstances.map((task) => {
+        const isMissed = reentryMissedTasks.some((item) => item.id === task.id);
+        const isOptionalThisWeek =
+          mode === "lighten" &&
+          task.weekNumber === reentryWeekNumber &&
+          !task.isCore &&
+          !task.completed &&
+          task.scheduledDate <= weekEnd;
+        if (!isMissed && !isOptionalThisWeek) return task;
 
-      const date = targets[Math.min(moved, Math.max(targets.length - 1, 0))] ?? todayKey;
-      moved += 1;
-      return {
-        ...task,
-        scheduledDate: date,
-        rescheduledFrom: task.rescheduledFrom ?? task.scheduledDate,
-      };
-    });
+        const date = targets[Math.min(moved, Math.max(targets.length - 1, 0))] ?? todayKey;
+        moved += 1;
+        return {
+          ...task,
+          scheduledDate: date,
+          rescheduledFrom: task.rescheduledFrom ?? task.scheduledDate,
+        };
+      });
 
-    const nextSystem = commitSystemUpdate({
-      ...system,
-      tacticLoadPreference: mode === "lighten" ? "lighter" : system.tacticLoadPreference,
-      reentryCount: (system.reentryCount ?? 0) + 1,
-      taskInstances: nextTaskInstances,
-    });
-    enqueuePlanSnapshotUpdatedMutation(activeGoal.id, nextSystem, "reentry");
+      const nextSystem = commitSystemUpdate({
+        ...system,
+        tacticLoadPreference: mode === "lighten" ? "lighter" : system.tacticLoadPreference,
+        reentryCount: (system.reentryCount ?? 0) + 1,
+        taskInstances: nextTaskInstances,
+      });
+      enqueuePlanSnapshotUpdatedMutation(activeGoal.id, nextSystem, "reentry");
 
-    trackAppEvent("12_week_reentry_used", activeGoal.id, { mode, weekNumber: String(reentryWeekNumber) });
-    toast.success(
-      mode === "restart"
-        ? "Đã sắp lại để bắt đầu lại tuần này."
-        : mode === "lighten"
-          ? "Đã giảm tải cho phần còn lại của tuần."
-          : "Đã đẩy việc trễ sang tuần sau.",
-    );
-    refreshSnapshotMeta();
-  }, [activeGoal, system, commitSystemUpdate, refreshSnapshotMeta]);
+      trackAppEvent("12_week_reentry_used", activeGoal.id, { mode, weekNumber: String(reentryWeekNumber) });
+      toast.success(
+        mode === "restart"
+          ? "Đã sắp lại để bắt đầu lại tuần này."
+          : mode === "lighten"
+            ? "Đã giảm tải cho phần còn lại của tuần."
+            : "Đã đẩy việc trễ sang tuần sau.",
+      );
+      refreshSnapshotMeta();
+    },
+    [activeGoal, system, commitSystemUpdate, refreshSnapshotMeta],
+  );
 
   const handleApplyRecommendedReentry = useCallback(() => {
     if (!activeGoal || !system || !rescuePlanSummary) return;
@@ -615,9 +652,7 @@ export function useTwelveWeekExecutionActions({
       ...previousForm,
       nextWeekPriority: suggestedNextWeekPlan.focus,
       nextWeekCommitments:
-        previousForm.nextWeekCommitments.length > 0
-          ? previousForm.nextWeekCommitments
-          : [suggestedNextWeekPlan.focus],
+        previousForm.nextWeekCommitments.length > 0 ? previousForm.nextWeekCommitments : [suggestedNextWeekPlan.focus],
       workloadDecision: suggestedNextWeekPlan.workloadDecision,
     }));
     trackAppEvent("12_week_review_suggestion_applied", activeGoal.id, {
@@ -629,15 +664,18 @@ export function useTwelveWeekExecutionActions({
     });
   }, [activeGoal, system, suggestedNextWeekPlan, setWeeklyForm]);
 
-  const REASON_TOAST_COPY = useMemo((): Record<OverdueTaskActionReason, string> => ({
-    ok: "",
-    task_not_found: "Không tìm thấy việc này — có thể đã được cập nhật ở nơi khác.",
-    task_already_completed: "Việc này đã chốt rồi.",
-    task_already_skipped: "Việc này đã bỏ qua trước đó.",
-    no_room_in_current_week: "Tuần này đã hết ngày để dời. Hãy dời sang tuần sau.",
-    no_next_week_available: "Đây là tuần cuối — không còn tuần sau để dời.",
-    core_task_cannot_skip: "Việc cốt lõi không thể bỏ. Hãy dời lịch hoặc làm phiên bản nhỏ hơn.",
-  }), []);
+  const REASON_TOAST_COPY = useMemo(
+    (): Record<OverdueTaskActionReason, string> => ({
+      ok: "",
+      task_not_found: "Không tìm thấy việc này — có thể đã được cập nhật ở nơi khác.",
+      task_already_completed: "Việc này đã chốt rồi.",
+      task_already_skipped: "Việc này đã bỏ qua trước đó.",
+      no_room_in_current_week: "Tuần này đã hết ngày để dời. Hãy dời sang tuần sau.",
+      no_next_week_available: "Đây là tuần cuối — không còn tuần sau để dời.",
+      core_task_cannot_skip: "Việc cốt lõi không thể bỏ. Hãy dời lịch hoặc làm phiên bản nhỏ hơn.",
+    }),
+    [],
+  );
 
   const applyOverdueTaskActionResult = useCallback(
     (
@@ -661,38 +699,47 @@ export function useTwelveWeekExecutionActions({
     [commitSystemUpdate, REASON_TOAST_COPY],
   );
 
-  const handleRescheduleTaskWithinWeek = useCallback((taskId: string): boolean => {
-    if (!activeGoal || !system) return false;
-    const result = rescheduleTwelveWeekTaskWithinWeek(system, taskId);
-    return applyOverdueTaskActionResult(
-      activeGoal.id,
-      result,
-      "Đã dời sang ngày khác trong tuần này.",
-      "12_week_task_rescheduled_within_week",
-    );
-  }, [activeGoal, system, applyOverdueTaskActionResult]);
+  const handleRescheduleTaskWithinWeek = useCallback(
+    (taskId: string): boolean => {
+      if (!activeGoal || !system) return false;
+      const result = rescheduleTwelveWeekTaskWithinWeek(system, taskId);
+      return applyOverdueTaskActionResult(
+        activeGoal.id,
+        result,
+        "Đã dời sang ngày khác trong tuần này.",
+        "12_week_task_rescheduled_within_week",
+      );
+    },
+    [activeGoal, system, applyOverdueTaskActionResult],
+  );
 
-  const handleRescheduleTaskToNextWeek = useCallback((taskId: string): boolean => {
-    if (!activeGoal || !system) return false;
-    const result = rescheduleTwelveWeekTaskToNextWeek(system, taskId);
-    return applyOverdueTaskActionResult(
-      activeGoal.id,
-      result,
-      "Đã dời sang tuần sau.",
-      "12_week_task_rescheduled_next_week",
-    );
-  }, [activeGoal, system, applyOverdueTaskActionResult]);
+  const handleRescheduleTaskToNextWeek = useCallback(
+    (taskId: string): boolean => {
+      if (!activeGoal || !system) return false;
+      const result = rescheduleTwelveWeekTaskToNextWeek(system, taskId);
+      return applyOverdueTaskActionResult(
+        activeGoal.id,
+        result,
+        "Đã dời sang tuần sau.",
+        "12_week_task_rescheduled_next_week",
+      );
+    },
+    [activeGoal, system, applyOverdueTaskActionResult],
+  );
 
-  const handleSkipNonCoreTask = useCallback((taskId: string): boolean => {
-    if (!activeGoal || !system) return false;
-    const result = skipTwelveWeekNonCoreTask(system, taskId);
-    return applyOverdueTaskActionResult(
-      activeGoal.id,
-      result,
-      "Đã bỏ qua việc tùy chọn này.",
-      "12_week_task_skipped_non_core",
-    );
-  }, [activeGoal, system, applyOverdueTaskActionResult]);
+  const handleSkipNonCoreTask = useCallback(
+    (taskId: string): boolean => {
+      if (!activeGoal || !system) return false;
+      const result = skipTwelveWeekNonCoreTask(system, taskId);
+      return applyOverdueTaskActionResult(
+        activeGoal.id,
+        result,
+        "Đã bỏ qua việc tùy chọn này.",
+        "12_week_task_skipped_non_core",
+      );
+    },
+    [activeGoal, system, applyOverdueTaskActionResult],
+  );
 
   return {
     handleToggleTask,

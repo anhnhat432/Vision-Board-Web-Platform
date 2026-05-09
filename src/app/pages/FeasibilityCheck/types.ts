@@ -49,6 +49,7 @@ export interface ResultData {
   scopeRecommendation: string;
   smartGoalQualityLevel?: SmartGoalQualityBridge;
   smartGoalQualityNote?: string;
+  savedAt?: string;
 }
 
 export interface PendingFeasibilityResult {
@@ -69,4 +70,5 @@ export interface PendingFeasibilityResult {
   scopeRecommendation: string;
   smartGoalQualityLevel?: SmartGoalQualityBridge;
   smartGoalQualityNote?: string;
+  savedAt?: string;
 }

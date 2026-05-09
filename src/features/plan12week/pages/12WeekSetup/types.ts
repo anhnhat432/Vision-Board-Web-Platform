@@ -34,6 +34,7 @@ export interface PendingFeasibilityResult {
   scopeRecommendation?: string;
   smartGoalQualityLevel?: "weak" | "okay" | "strong";
   smartGoalQualityNote?: string;
+  savedAt?: string;
 }
 
 export interface LeadIndicatorDraft {
