@@ -138,3 +138,12 @@ export function restorePlanAccessLocallyInData(
 
   return currentPlan;
 }
+
+export function resetBillingAccessInData(userData: UserData): boolean {
+  const hadBillingAccess = Boolean(userData.subscription) || (userData.entitlements ?? []).length > 0;
+
+  userData.subscription = null;
+  userData.entitlements = [];
+
+  return hadBillingAccess;
+}

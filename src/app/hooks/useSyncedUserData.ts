@@ -2,6 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 
 import { getUserData, USER_DATA_STORAGE_KEY, USER_DATA_UPDATED_EVENT_NAME, type UserData } from "../utils/storage";
 
+function isUserDataStorageEventKey(key: string | null): boolean {
+  return key === null || key === USER_DATA_STORAGE_KEY || key.startsWith(`${USER_DATA_STORAGE_KEY}:auth:`);
+}
+
 export function useSyncedUserData(): {
   userData: UserData | null;
   reloadUserData: () => void;
@@ -18,7 +22,7 @@ export function useSyncedUserData(): {
     reloadUserData();
 
     const handleStorage = (event: StorageEvent) => {
-      if (event.key === null || event.key === USER_DATA_STORAGE_KEY) {
+      if (isUserDataStorageEventKey(event.key)) {
         reloadUserData();
       }
     };

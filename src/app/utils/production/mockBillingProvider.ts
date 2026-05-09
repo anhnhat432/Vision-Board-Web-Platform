@@ -1,6 +1,6 @@
 import type { BillingAccessContractPayload, BillingProvider, CheckoutFlowInput } from "../billing-contract";
 import { type MonetizationSource, trackCheckoutCompleted } from "../monetization-analytics";
-import { getCurrentEntitlementKeys, getCurrentPlan } from "../storage";
+import { getCurrentEntitlementKeys, getCurrentPlan, getUserData, saveUserData } from "../storage";
 import type { BillingCycle, Entitlement, PricingPlanCode } from "../storage-types";
 import { getEntitlementsForPlan, normalizePlanCode } from "../twelve-week-premium";
 import {
@@ -59,10 +59,12 @@ function writeMockBillingAccount(account: MockBillingProviderAccount | null): vo
 
   if (!account) {
     localStorage.removeItem(MOCK_BILLING_ACCOUNT_KEY);
+    saveUserData(getUserData());
     return;
   }
 
   localStorage.setItem(MOCK_BILLING_ACCOUNT_KEY, JSON.stringify(account));
+  saveUserData(getUserData());
 }
 
 function getMockSessionKey(sessionId: string): string {
