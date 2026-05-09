@@ -103,6 +103,8 @@ export function ProgressSummaryCard({
   const cycleWeeks = Array.from({ length: system.totalWeeks }, (_, index) => index + 1);
   const nextMilestoneWeek = cycleWeeks.find((weekNumber) => milestoneWeeks.has(weekNumber) && weekNumber >= currentWeek);
   const nextMilestoneLabel = nextMilestoneWeek ? `Week ${nextMilestoneWeek}` : `Week ${system.totalWeeks}`;
+  const currentPhaseTargetWeek = nextMilestoneWeek ?? system.totalWeeks;
+  const currentPhaseLabel = `Build toward Week ${currentPhaseTargetWeek}`;
 
   return (
     <div className="space-y-6 pt-4">
@@ -213,11 +215,19 @@ export function ProgressSummaryCard({
                 Tuần hiện tại, review đã chốt và các mốc checkpoint được gom lại trong một hàng.
               </p>
             </div>
-            <div
-              data-testid="progress-next-milestone"
-              className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
-            >
-              Mốc tiếp theo: <span className="font-semibold text-slate-950">{nextMilestoneLabel}</span>
+            <div className="flex flex-wrap gap-2">
+              <div
+                data-testid="progress-current-milestone"
+                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
+              >
+                Hiện tại: <span className="font-semibold text-slate-950">{currentPhaseLabel}</span>
+              </div>
+              <div
+                data-testid="progress-next-milestone"
+                className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
+              >
+                Mốc tiếp theo: <span className="font-semibold text-slate-950">{nextMilestoneLabel}</span>
+              </div>
             </div>
           </div>
 

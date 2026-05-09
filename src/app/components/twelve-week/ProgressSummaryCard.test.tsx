@@ -52,7 +52,16 @@ function makeSystem(overrides: Partial<TwelveWeekSystem> = {}): TwelveWeekSystem
         outputQualityScore: 7,
       },
     ],
-    scoreboard: [{ weekNumber: 1, leadCompletionPercent: 80, weeklyScore: 72, mainMetricProgress: "10%" }],
+    scoreboard: [
+      {
+        weekNumber: 1,
+        leadCompletionPercent: 80,
+        weeklyScore: 72,
+        mainMetricProgress: "10%",
+        outputDone: "Started",
+        reviewDone: true,
+      },
+    ],
     ...overrides,
   };
 }
@@ -75,6 +84,7 @@ describe("ProgressSummaryCard cycle timeline", () => {
     expect(within(timeline).getByTestId("progress-week-5")).toHaveAttribute("aria-current", "step");
     expect(within(timeline).getByTestId("progress-week-1")).toHaveAttribute("data-reviewed", "true");
     expect(within(timeline).getByTestId("progress-week-4")).toHaveAttribute("data-milestone", "true");
+    expect(screen.getByTestId("progress-current-milestone")).toHaveTextContent("Week 8");
     expect(screen.getByTestId("progress-next-milestone")).toHaveTextContent("8");
   });
 
