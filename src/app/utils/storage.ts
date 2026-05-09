@@ -125,6 +125,7 @@ export type {
   Goal,
   InAppReminder,
   LagMetric,
+  LeadIndicatorCommitment,
   LeadIndicator,
   LifeArea,
   Milestones,

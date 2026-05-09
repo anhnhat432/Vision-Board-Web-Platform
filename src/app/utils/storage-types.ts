@@ -50,6 +50,15 @@ export interface LagMetric {
 
 export type TacticType = "core" | "optional";
 
+export interface LeadIndicatorCommitment {
+  want: string;
+  cost: string;
+  means: string;
+  tradeoff: string;
+  reward: string;
+  filledAt?: string;
+}
+
 export interface LeadIndicator {
   id?: string;
   name: string;
@@ -58,6 +67,7 @@ export interface LeadIndicator {
   type?: TacticType;
   priority?: number;
   schedule?: number[];
+  commitment?: LeadIndicatorCommitment;
 }
 
 export interface Milestones {

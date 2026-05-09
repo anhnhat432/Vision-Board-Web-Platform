@@ -150,6 +150,29 @@ function getReviewNextWeekCommitments(review: UniversalWeeklyReview | null | und
   return legacyPriority ? [legacyPriority] : [];
 }
 
+function truncateCommitmentQuote(value: string, maxLength = 80): string {
+  const trimmed = value.trim();
+  if (trimmed.length <= maxLength) return trimmed;
+  return `${trimmed.slice(0, Math.max(0, maxLength - 3)).trimEnd()}...`;
+}
+
+function getCommitmentQuoteForPreviousCommitment(system: TwelveWeekSystem, commitment: string): string | null {
+  const normalizedCommitment = commitment.trim().toLocaleLowerCase("vi-VN");
+  if (!normalizedCommitment) return null;
+
+  const indicator = system.leadIndicators.find((leadIndicator) => {
+    const indicatorName = leadIndicator.name.trim().toLocaleLowerCase("vi-VN");
+    return (
+      indicatorName === normalizedCommitment ||
+      normalizedCommitment.includes(indicatorName) ||
+      indicatorName.includes(normalizedCommitment)
+    );
+  });
+  const want = indicator?.commitment?.want?.trim();
+
+  return want ? `« ${truncateCommitmentQuote(want)} »` : null;
+}
+
 function isCommitmentAnswered(status: WeeklyCommitmentStatus | undefined): boolean {
   return status === "kept" || status === "missed" || status === "not_set";
 }
@@ -811,6 +834,7 @@ export function TwelveWeekWeekTab({
                 <div className="mt-3 space-y-3">
                   {previousCommitments.map((commitment) => {
                     const currentStatus = weeklyForm.commitmentStatuses[commitment] ?? "unanswered";
+                    const commitmentQuote = getCommitmentQuoteForPreviousCommitment(system, commitment);
                     const setStatus = (status: WeeklyCommitmentStatus) =>
                       onWeeklyFormChange("commitmentStatuses", {
                         ...weeklyForm.commitmentStatuses,
@@ -820,6 +844,9 @@ export function TwelveWeekWeekTab({
                     return (
                       <div key={commitment} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
                         <p className="text-sm font-medium text-slate-900">{commitment}</p>
+                        {commitmentQuote ? (
+                          <p className="mt-1 text-xs italic leading-5 text-slate-500">{commitmentQuote}</p>
+                        ) : null}
                         <div className="mt-3 flex flex-wrap gap-2">
                           <Button
                             type="button"

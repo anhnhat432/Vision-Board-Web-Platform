@@ -9,6 +9,7 @@ import {
   getTwelveWeekTodayTasks,
   getTwelveWeekWeekCompletion,
   getWeekTaskBreakdown,
+  hasFilledCommitment,
   isTwelveWeekCycleReviewPhase,
   migrateLegacyUserData,
   normalizeGoal,
@@ -313,6 +314,60 @@ describe("Skipped tasks excluded from queries", () => {
     expect(completion.total).toBe(2);
     expect(completion.completed).toBe(1);
     expect(completion.percent).toBe(50);
+  });
+});
+
+describe("hasFilledCommitment", () => {
+  it("returns false when commitment is missing or empty", () => {
+    expect(hasFilledCommitment({ name: "Ship", target: "1", unit: "lần/tuần" })).toBe(false);
+    expect(
+      hasFilledCommitment({
+        name: "Ship",
+        target: "1",
+        unit: "lần/tuần",
+        commitment: {
+          want: "",
+          cost: " ",
+          means: "",
+          tradeoff: "",
+          reward: "",
+        },
+      }),
+    ).toBe(false);
+  });
+
+  it("returns true when at least one commitment answer is filled", () => {
+    expect(
+      hasFilledCommitment({
+        name: "Ship",
+        target: "1",
+        unit: "lần/tuần",
+        commitment: {
+          want: "Tôi muốn có nhịp ship đều.",
+          cost: "",
+          means: "",
+          tradeoff: "",
+          reward: "",
+        },
+      }),
+    ).toBe(true);
+  });
+
+  it("returns true when all five commitment answers are filled", () => {
+    expect(
+      hasFilledCommitment({
+        name: "Ship",
+        target: "1",
+        unit: "lần/tuần",
+        commitment: {
+          want: "Muốn ship đều.",
+          cost: "Dậy sớm hơn.",
+          means: "Block lịch sáng.",
+          tradeoff: "Giảm lướt mạng.",
+          reward: "Một buổi nghỉ.",
+        },
+      }),
+    ).toBe(true);
   });
 });
 

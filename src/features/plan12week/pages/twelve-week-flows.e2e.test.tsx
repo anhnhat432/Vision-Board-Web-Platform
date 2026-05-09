@@ -457,6 +457,45 @@ describe("12-week core flows", () => {
     }
   });
 
+  it("shows tactic commitment reminders in Today and Weekly Review", async () => {
+    const { goalId } = seedTwelveWeekGoal();
+    updateUserData((data) => {
+      const goal = data.goals.find((item) => item.id === goalId);
+      const system = goal?.twelveWeekSystem;
+      if (!system) return;
+
+      system.currentWeek = 2;
+      system.leadIndicators[0] = {
+        ...system.leadIndicators[0],
+        commitment: {
+          want: "Tôi muốn ship đều vì đây là lời hứa với chính mình.",
+          cost: "Dành sáng thứ Hai cho deep work.",
+          means: "Mở task đầu tiên trước 9h.",
+          tradeoff: "Giảm họp phụ.",
+          reward: "Một buổi nghỉ chủ động.",
+          filledAt: "2026-05-09T00:00:00.000Z",
+        },
+      };
+      system.weeklyReviews = [
+        {
+          ...makeCycleReview(1, 90),
+          nextWeekCommitments: [system.leadIndicators[0].name],
+          adjustments: system.leadIndicators[0].name,
+        },
+      ];
+    });
+
+    renderAppRoute("/12-week-system");
+    const user = userEvent.setup();
+
+    expect(await screen.findAllByText("« Tôi muốn ship đều vì đây là lời hứa với chính mình. »")).not.toHaveLength(0);
+
+    await user.click(screen.getByRole("button", { name: "Tuần" }));
+
+    const commitmentsSection = await screen.findByTestId("wam-section-commitments");
+    expect(commitmentsSection).toHaveTextContent("Tôi muốn ship đều vì đây là lời hứa với chính mình.");
+  }, INTEGRATION_TEST_TIMEOUT_MS);
+
   it("compacts repeated daily check-ins for the same day to the latest queued payload", async () => {
     const { goalId } = seedTwelveWeekGoal();
     renderAppRoute("/12-week-system");

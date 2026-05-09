@@ -101,6 +101,24 @@ interface TodayNextActionState {
   onAction?: () => void;
 }
 
+function truncateCommitmentReminder(value: string, maxLength = 80): string {
+  const trimmed = value.trim();
+  if (trimmed.length <= maxLength) return trimmed;
+  return `${trimmed.slice(0, Math.max(0, maxLength - 3)).trimEnd()}...`;
+}
+
+function getTaskCommitmentQuote(system: TwelveWeekSystem, task: TwelveWeekTaskInstance): string | null {
+  const normalizedTaskName = task.leadIndicatorName.trim().toLocaleLowerCase("vi-VN");
+  const indicator =
+    system.leadIndicators.find((leadIndicator) => task.tacticId && leadIndicator.id === task.tacticId) ??
+    system.leadIndicators.find(
+      (leadIndicator) => leadIndicator.name.trim().toLocaleLowerCase("vi-VN") === normalizedTaskName,
+    );
+  const want = indicator?.commitment?.want?.trim();
+
+  return want ? `« ${truncateCommitmentReminder(want)} »` : null;
+}
+
 export function TwelveWeekTodayTab({
   system,
   currentWeek,
@@ -146,6 +164,7 @@ export function TwelveWeekTodayTab({
   const rescueModes: ReentryMode[] = ["restart", "lighten", "push"];
   const checkInTotal = todayQueue.length || currentWeekTasksCount || 1;
   const primaryTask = firstPriorityTask && !firstPriorityTask.completed ? firstPriorityTask : null;
+  const primaryTaskCommitmentQuote = primaryTask ? getTaskCommitmentQuote(system, primaryTask) : null;
   const primaryTaskOverdue = Boolean(primaryTask && primaryTask.scheduledDate < todayDateKey);
   const primaryTaskCompletedToday = Boolean(
     firstPriorityTask?.completed && todayQueue.some((task) => task.id === firstPriorityTask.id),
@@ -421,6 +440,9 @@ export function TwelveWeekTodayTab({
                     ? `Thuộc nhóm việc lặp lại '${primaryTask.leadIndicatorName}'. Bắt đầu nhỏ — xong việc này là tuần 1 đã khởi động đúng hướng.`
                     : `Thuộc nhóm việc lặp lại '${primaryTask.leadIndicatorName}'. Xong việc này là tuần đã đi đúng hướng.`}
               </p>
+              {primaryTaskCommitmentQuote ? (
+                <p className="mt-2 text-sm italic leading-6 text-slate-600">{primaryTaskCommitmentQuote}</p>
+              ) : null}
               <p className="mt-2 text-sm font-medium text-emerald-700">
                 Chỉ cần xong việc này là hôm nay đã đủ. Phần còn lại để sau.
               </p>
@@ -537,6 +559,10 @@ export function TwelveWeekTodayTab({
                       : task.scheduledDate === todayDateKey
                         ? "Hôm nay"
                         : formatCalendarDate(task.scheduledDate);
+                  const taskCommitmentQuote = getTaskCommitmentQuote(system, task);
+                  const showTaskCommitmentQuote = Boolean(
+                    taskCommitmentQuote && !(isPrimaryTask && primaryTaskCommitmentQuote),
+                  );
 
                   return (
                     <div
@@ -601,6 +627,15 @@ export function TwelveWeekTodayTab({
                             >
                               {task.leadIndicatorName}
                             </p>
+                            {showTaskCommitmentQuote ? (
+                              <p
+                                className={`mt-1 text-xs italic leading-5 ${
+                                  isPrimaryTask && !task.completed ? "text-slate-300" : "text-slate-500"
+                                }`}
+                              >
+                                {taskCommitmentQuote}
+                              </p>
+                            ) : null}
                           </div>
                           <Badge
                             variant="outline"

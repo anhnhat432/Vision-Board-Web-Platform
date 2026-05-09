@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { AlertTriangle } from "lucide-react";
 
 import type { GoalArchetype } from "@/lib/smart-goal";
@@ -16,6 +16,7 @@ import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
+import { Textarea } from "@/app/components/ui/textarea";
 import {
   formatScheduleDayLabels,
   getLeadIndicatorTargetValidationError,
@@ -44,6 +45,47 @@ interface LeadIndicatorsStepProps {
     key: K,
     value: LeadIndicatorDraft[K],
   ) => void;
+}
+
+const COMMITMENT_FIELDS = [
+  {
+    key: "want",
+    label: "Tôi thực sự muốn điều này vì...",
+  },
+  {
+    key: "cost",
+    label: "Tôi sẵn sàng trả giá gì...",
+  },
+  {
+    key: "means",
+    label: "Tôi sẽ làm thế nào (cụ thể)...",
+  },
+  {
+    key: "tradeoff",
+    label: "Tôi sẽ phải bỏ qua/giảm điều gì...",
+  },
+  {
+    key: "reward",
+    label: "Tôi sẽ tự thưởng gì khi giữ được...",
+  },
+] as const;
+
+function normalizeCommitmentChange(
+  current: LeadIndicatorDraft["commitment"],
+  key: (typeof COMMITMENT_FIELDS)[number]["key"],
+  value: string,
+): LeadIndicatorDraft["commitment"] {
+  const next = {
+    want: current?.want ?? "",
+    cost: current?.cost ?? "",
+    means: current?.means ?? "",
+    tradeoff: current?.tradeoff ?? "",
+    reward: current?.reward ?? "",
+    [key]: value,
+  };
+
+  const hasAnyAnswer = COMMITMENT_FIELDS.some((field) => next[field.key].trim().length > 0);
+  return hasAnyAnswer ? { ...next, filledAt: new Date().toISOString() } : undefined;
 }
 
 export function LeadIndicatorsStep({
@@ -81,6 +123,14 @@ export function LeadIndicatorsStep({
   }, []);
 
   const isDesktop = useBreakpoint();
+  const [expandedCommitments, setExpandedCommitments] = useState<Record<string, boolean>>({});
+
+  const toggleCommitmentEditor = (indicatorId: string) => {
+    setExpandedCommitments((previous) => ({
+      ...previous,
+      [indicatorId]: !previous[indicatorId],
+    }));
+  };
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -244,6 +294,45 @@ export function LeadIndicatorsStep({
                   </Select>
                 </div>
               </div>
+            </div>
+            <div className="mt-4 rounded-2xl border border-white/70 bg-white/72 p-4">
+              <Button
+                type="button"
+                variant="ghost"
+                className="h-auto w-full justify-between px-0 py-0 text-left text-sm font-semibold text-slate-900 hover:bg-transparent"
+                aria-expanded={Boolean(expandedCommitments[indicator.id])}
+                aria-controls={`tactic-commitment-${index}`}
+                onClick={() => toggleCommitmentEditor(indicator.id)}
+              >
+                <span>Cam kết với chính mình (tuỳ chọn)</span>
+                <span className="text-xs font-medium text-slate-500">
+                  {expandedCommitments[indicator.id] ? "Thu gọn" : "Mở"}
+                </span>
+              </Button>
+              <p className="mt-2 text-xs leading-5 text-slate-500">
+                Điền 5 câu này giúp bạn rõ tại sao mình cam kết. Sách 12 Week Year cho thấy người trả lời được 5 câu ít bỏ cuộc giữa cycle hơn 60%.
+              </p>
+              {expandedCommitments[indicator.id] ? (
+                <div id={`tactic-commitment-${index}`} className="mt-4 grid gap-3">
+                  {COMMITMENT_FIELDS.map((field) => (
+                    <div key={field.key} className="space-y-2">
+                      <Label htmlFor={`tactic-commitment-${field.key}-${index}`}>{field.label}</Label>
+                      <Textarea
+                        id={`tactic-commitment-${field.key}-${index}`}
+                        rows={3}
+                        value={indicator.commitment?.[field.key] ?? ""}
+                        onChange={(event) =>
+                          onIndicatorChange(
+                            index,
+                            "commitment",
+                            normalizeCommitmentChange(indicator.commitment, field.key, event.target.value),
+                          )
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
             {indicatorWarnings[index]?.length > 0 && (
               <ul

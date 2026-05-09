@@ -7,6 +7,7 @@ import {
 import type {
   Goal,
   LeadIndicator,
+  LeadIndicatorCommitment,
   TacticType,
   TwelveWeekSystem,
   TwelveWeekTaskInstance,
@@ -92,6 +93,31 @@ function getLeadTargetCount(target: string): number {
 function buildLeadIndicatorId(name: string, index: number): string {
   const normalizedName = name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
   return `tactic_${normalizedName || "item"}_${index + 1}`;
+}
+
+const COMMITMENT_FIELDS = ["want", "cost", "means", "tradeoff", "reward"] as const;
+
+function normalizeCommitmentValue(value: unknown): LeadIndicatorCommitment | undefined {
+  if (!value || typeof value !== "object") return undefined;
+
+  const source = value as Partial<Record<(typeof COMMITMENT_FIELDS)[number] | "filledAt", unknown>>;
+  const commitment: LeadIndicatorCommitment = {
+    want: typeof source.want === "string" ? source.want : "",
+    cost: typeof source.cost === "string" ? source.cost : "",
+    means: typeof source.means === "string" ? source.means : "",
+    tradeoff: typeof source.tradeoff === "string" ? source.tradeoff : "",
+    reward: typeof source.reward === "string" ? source.reward : "",
+  };
+
+  if (typeof source.filledAt === "string" && source.filledAt.trim()) {
+    commitment.filledAt = source.filledAt;
+  }
+
+  return COMMITMENT_FIELDS.some((field) => commitment[field].trim().length > 0) ? commitment : undefined;
+}
+
+export function hasFilledCommitment(indicator: Partial<LeadIndicator>): boolean {
+  return Boolean(normalizeCommitmentValue(indicator.commitment));
 }
 
 function getTaskOffsetsForFrequency(frequency: number): number[] {
@@ -194,6 +220,8 @@ function keepGeneratedTaskOutOfPast(startDate: Date, totalWeeks: number, weekNum
 }
 
 function normalizeLeadIndicator(indicator: LeadIndicator, index: number): LeadIndicator {
+  const normalizedCommitment = normalizeCommitmentValue(indicator.commitment);
+
   return {
     ...indicator,
     id: indicator.id || buildLeadIndicatorId(indicator.name || "", index),
@@ -203,6 +231,7 @@ function normalizeLeadIndicator(indicator: LeadIndicator, index: number): LeadIn
     type: indicator.type === "optional" ? "optional" : "core",
     priority: clampNumber(indicator.priority ?? index + 1, 1, 7),
     schedule: normalizeScheduleOffsets(indicator.schedule, indicator.target || "1"),
+    commitment: normalizedCommitment,
   };
 }
 

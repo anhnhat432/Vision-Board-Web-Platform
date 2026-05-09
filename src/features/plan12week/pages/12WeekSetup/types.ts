@@ -1,4 +1,4 @@
-import type { TacticType } from "@/app/utils/storage";
+import type { LeadIndicatorCommitment, TacticType } from "@/app/utils/storage";
 
 export type ResultType = "realistic" | "challenging" | "too_ambitious";
 export type PlanLoadRecommendation = "lighter" | "balanced" | "push";
@@ -44,6 +44,7 @@ export interface LeadIndicatorDraft {
   unit: string;
   type: TacticType;
   cadence: "spread" | "frontload" | "backload";
+  commitment?: LeadIndicatorCommitment;
 }
 
 export interface TwelveWeekSetupDraft {

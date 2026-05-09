@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/app/components/ui/card";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
 import {
   APP_STORAGE_KEYS,
+  type LeadIndicatorCommitment,
   type PricingPlanCode,
   addGoal,
   clearGoalPlanningDrafts,
@@ -80,6 +81,26 @@ type TwelveWeekSetupGate =
   | "needs_feasibility";
 
 const FEASIBILITY_RESULT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+const COMMITMENT_FIELDS = ["want", "cost", "means", "tradeoff", "reward"] as const;
+
+function normalizeIndicatorCommitmentDraft(value: unknown): LeadIndicatorCommitment | undefined {
+  if (!value || typeof value !== "object") return undefined;
+
+  const source = value as Partial<Record<(typeof COMMITMENT_FIELDS)[number] | "filledAt", unknown>>;
+  const commitment: LeadIndicatorCommitment = {
+    want: typeof source.want === "string" ? source.want : "",
+    cost: typeof source.cost === "string" ? source.cost : "",
+    means: typeof source.means === "string" ? source.means : "",
+    tradeoff: typeof source.tradeoff === "string" ? source.tradeoff : "",
+    reward: typeof source.reward === "string" ? source.reward : "",
+  };
+
+  if (typeof source.filledAt === "string" && source.filledAt.trim()) {
+    commitment.filledAt = source.filledAt;
+  }
+
+  return COMMITMENT_FIELDS.some((field) => commitment[field].trim().length > 0) ? commitment : undefined;
+}
 
 function getSmartGoalMetricUnit(normalizedSmartGoal: ReturnType<typeof parseSmartGoal>): string {
   return normalizedSmartGoal?.measurable?.metric_unit?.trim() ?? "";
@@ -291,6 +312,7 @@ export function TwelveWeekSetup() {
                     indicator?.cadence === "frontload" || indicator?.cadence === "backload"
                       ? indicator.cadence
                       : "spread",
+                  commitment: normalizeIndicatorCommitmentDraft(indicator?.commitment),
                 }))
               : baseDraft.leadIndicators,
         };
@@ -875,6 +897,7 @@ export function TwelveWeekSetup() {
           unit: indicator.unit.trim(),
           type: indicator.type,
           schedule: indicator.schedule,
+          commitment: normalizeIndicatorCommitmentDraft(indicator.commitment),
         })),
         milestones: {
           week4: draft.week4Milestone.trim(),
