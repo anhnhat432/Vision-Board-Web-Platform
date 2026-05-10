@@ -340,7 +340,11 @@ describe("authenticated new user core flow", () => {
     const user = userEvent.setup();
     const { router, ui } = renderAuthenticatedCoreFlow("/");
 
-    expect(await screen.findByText(/Bắt đầu bằng 8 lĩnh vực/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        (_content, element) => element?.tagName === "H1" && /Bắt đầu bằng\s*8 lĩnh vực/i.test(element.textContent ?? ""),
+      ),
+    ).toBeInTheDocument();
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/onboarding");
     });
