@@ -1,0 +1,165 @@
+import assert from "node:assert/strict";
+import { afterEach, describe, it, mock } from "node:test";
+import type { Request, Response } from "express";
+
+import { handleCassoWebhook } from "../controllers/cassoWebhookController";
+import * as backendMonitoring from "../monitoring/sentry";
+import { PaymentOrderModel, type PaymentOrderStatus } from "../models/PaymentOrderModel";
+import { UserModel } from "../models/UserModel";
+
+interface MockResponse {
+  statusCode: number;
+  body: unknown;
+  status(code: number): MockResponse;
+  json(body: unknown): MockResponse;
+}
+
+interface MockCassoPaymentOrder {
+  orderId: string;
+  userId: string;
+  amount: number;
+  currency: string;
+  status: PaymentOrderStatus;
+  expiresAt: Date;
+  completedAt?: Date;
+  cassoTransactionId?: string;
+  saveCalls: number;
+  save(): Promise<MockCassoPaymentOrder>;
+}
+
+type MockableModel = {
+  findOne: unknown;
+};
+
+const originalPaymentOrderFindOne = PaymentOrderModel.findOne;
+const originalUserFindOne = UserModel.findOne;
+
+function createResponse(): MockResponse {
+  return {
+    statusCode: 200,
+    body: undefined,
+    status(code: number) {
+      this.statusCode = code;
+      return this;
+    },
+    json(body: unknown) {
+      this.body = body;
+      return this;
+    },
+  };
+}
+
+function createRequest(body: unknown, headers: Record<string, string> = {}): Request {
+  return {
+    body,
+    headers,
+  } as Request;
+}
+
+function createOrder(overrides: Partial<MockCassoPaymentOrder> = {}): MockCassoPaymentOrder {
+  return {
+    orderId: "VBLOG00001",
+    userId: "user_casso_logging",
+    amount: 2000,
+    currency: "VND",
+    status: "pending",
+    expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+    saveCalls: 0,
+    async save() {
+      this.saveCalls++;
+      return this;
+    },
+    ...overrides,
+  };
+}
+
+function createPayload(input: { orderId?: string; amount?: number; transactionId?: string } = {}) {
+  return {
+    error: 0,
+    data: [
+      {
+        id: input.transactionId ?? "tx_logging_1",
+        tid: input.transactionId ?? "tx_logging_1",
+        description: input.orderId ? `Thanh toan ${input.orderId}` : "Thanh toan khong co ma don",
+        amount: input.amount ?? 2000,
+        when: "2026-05-10 12:00:00",
+      },
+    ],
+  };
+}
+
+function mockPersistence(order: MockCassoPaymentOrder | null): void {
+  (PaymentOrderModel as unknown as MockableModel).findOne = async (query: unknown) => {
+    const filters = query as Record<string, unknown>;
+    if ("cassoTransactionId" in filters) return null;
+    if (order && filters.orderId === order.orderId && filters.status === "pending") return order;
+    return null;
+  };
+
+  (UserModel as unknown as MockableModel).findOne = () => ({
+    select() {
+      return {
+        async lean() {
+          return { email: "paid@example.test", displayName: "Paid User" };
+        },
+      };
+    },
+  });
+}
+
+afterEach(() => {
+  mock.restoreAll();
+  (PaymentOrderModel as unknown as MockableModel).findOne = originalPaymentOrderFindOne;
+  (UserModel as unknown as MockableModel).findOne = originalUserFindOne;
+  delete process.env.CASSO_WEBHOOK_SECRET;
+});
+
+describe("Casso webhook security logging", () => {
+  it("captures signature mismatches with sanitized context", async () => {
+    process.env.CASSO_WEBHOOK_SECRET = "expected-secret";
+    const capture = mock.method(backendMonitoring, "captureBackendException", () => undefined);
+    const response = createResponse();
+
+    await handleCassoWebhook(
+      createRequest(createPayload({ orderId: "VBLOG00001" }), { "secure-token": "wrong-secret" }),
+      response as unknown as Response,
+    );
+
+    assert.equal(response.statusCode, 401);
+    assert.equal(capture.mock.callCount(), 1);
+    const [, rawContext] = capture.mock.calls[0].arguments;
+    const context = rawContext as { tags?: Record<string, unknown>; extra?: Record<string, unknown> };
+    assert.equal(context?.tags?.event, "casso_webhook_signature_mismatch");
+    assert.equal(context?.extra?.hasSecureToken, true);
+    assert.equal(context?.extra?.signatureSecretConfigured, true);
+  });
+
+  it("logs successful Casso payment processing as a structured event", async () => {
+    process.env.CASSO_WEBHOOK_SECRET = "expected-secret";
+    const order = createOrder();
+    mockPersistence(order);
+    const info = mock.method(console, "info", () => undefined);
+    const response = createResponse();
+
+    await handleCassoWebhook(
+      createRequest(createPayload({ orderId: order.orderId, amount: 2000, transactionId: "tx_success_1" }), {
+        "secure-token": "expected-secret",
+      }),
+      response as unknown as Response,
+    );
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(order.status, "completed");
+    const structuredSuccess = info.mock.calls
+      .map((call) => call.arguments[0])
+      .find((arg): arg is Record<string, unknown> => {
+        return Boolean(arg) && typeof arg === "object" && (arg as Record<string, unknown>).event === "casso_webhook_success";
+      });
+    assert.ok(structuredSuccess);
+    assert.equal(structuredSuccess.transactionId, "tx_success_1");
+    assert.equal(structuredSuccess.accountId, order.orderId);
+    assert.equal(structuredSuccess.amount, 2000);
+    assert.equal(structuredSuccess.planCode, "PLUS");
+    assert.equal(structuredSuccess.userId, order.userId);
+  });
+});

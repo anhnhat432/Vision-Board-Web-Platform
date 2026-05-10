@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 
+import { captureBackendException } from "../monitoring/sentry";
 import { ApiError } from "../utils/apiError";
 
 export interface TokenVerifier {
@@ -41,11 +42,42 @@ export function createAuthMiddleware(tokenVerifier: TokenVerifier) {
       next();
     } catch (error) {
       if (error instanceof ApiError) {
+        const context = {
+          event: "auth_failed",
+          reason: error.errorCode ?? "missing_or_invalid_bearer_token",
+          path: req.path,
+          method: req.method,
+          ip: req.ip,
+        };
+        console.warn("[auth]", context);
+        captureBackendException(error, {
+          tags: {
+            event: "auth_failed",
+            reason: context.reason,
+          },
+          extra: context,
+        });
         next(error);
         return;
       }
 
-      next(new ApiError(401, "Unauthorized: Token verification failed."));
+      const authError = new ApiError(401, "Unauthorized: Token verification failed.");
+      const context = {
+        event: "auth_failed",
+        reason: "token_verification_failed",
+        path: req.path,
+        method: req.method,
+        ip: req.ip,
+      };
+      console.warn("[auth]", context);
+      captureBackendException(error, {
+        tags: {
+          event: "auth_failed",
+          reason: context.reason,
+        },
+        extra: context,
+      });
+      next(authError);
     }
   };
 }

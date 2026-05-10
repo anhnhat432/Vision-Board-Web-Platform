@@ -16,6 +16,7 @@
 import type { Request, Response } from "express";
 
 import { billingService } from "../services/billingServiceInstance";
+import * as backendMonitoring from "../monitoring/sentry";
 import { PaymentOrderModel } from "../models/PaymentOrderModel";
 import { UserModel } from "../models/UserModel";
 import type { CassoWebhookPayload, CassoTransaction } from "../services/cassoPaymentAdapter";
@@ -24,6 +25,24 @@ import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 
 const TWELVE_WEEKS_MS = 12 * 7 * 24 * 60 * 60 * 1000;
 const ORDER_ID_REGEX = /VB[A-Z0-9]{8}/i;
+
+function captureCassoWebhookFailure(
+  event: string,
+  message: string,
+  extra: Record<string, unknown> = {},
+): void {
+  backendMonitoring.captureBackendException(new Error(message), {
+    tags: {
+      event,
+      provider: "casso",
+    },
+    extra: {
+      event,
+      provider: "casso",
+      ...extra,
+    },
+  });
+}
 
 function extractOrderId(description: string): string | null {
   const match = description.match(ORDER_ID_REGEX);
@@ -154,13 +173,19 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
     || "";
 
   if (!expectedSecret || !verifyCassoWebhookSignature(req, expectedSecret)) {
-    console.warn("[casso-webhook] Invalid or missing Casso webhook signature.", {
+    const context = {
       hasSecureToken: Boolean(getHeaderValue(req, "secure-token")),
       hasXCassoSignature: Boolean(getHeaderValue(req, "x-casso-signature")),
       hasAuthorization: Boolean(getHeaderValue(req, "authorization")),
       signatureSecretConfigured: getCassoSignatureSecrets().length > 0,
       secureTokenConfigured: getCassoSecureTokens().length > 0,
-    });
+    };
+    console.warn("[casso-webhook] Invalid or missing Casso webhook signature.", context);
+    captureCassoWebhookFailure(
+      "casso_webhook_signature_mismatch",
+      "Invalid or missing Casso webhook signature.",
+      context,
+    );
     res.status(401).json({ success: false, message: "Invalid webhook signature." });
     return;
   }
@@ -168,7 +193,16 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
   // Step 2: Parse payload
   const payload: CassoWebhookPayload = req.body;
   if (payload.error !== 0 || !Array.isArray(payload.data)) {
-    console.warn("[casso-webhook] Payload has error or missing data array.", { error: payload.error });
+    const context = {
+      error: payload.error,
+      hasDataArray: Array.isArray(payload.data),
+    };
+    console.warn("[casso-webhook] Payload has error or missing data array.", context);
+    captureCassoWebhookFailure(
+      "casso_webhook_invalid_payload",
+      "Casso webhook payload has error or missing data array.",
+      context,
+    );
     res.status(200).json({ success: true, message: "Acknowledged (error payload)." });
     return;
   }
@@ -197,18 +231,7 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
       continue;
     }
 
-    // Step 4: Find matching pending PaymentOrder
-    const order = await PaymentOrderModel.findOne({
-      orderId,
-      status: "pending",
-    });
-
-    if (!order) {
-      console.info(`[casso-webhook] Transaction ${cassoTxId}: no pending order for "${orderId}". Skipping.`);
-      continue;
-    }
-
-    // Step 5: Check idempotency (same Casso transaction already processed)
+    // Step 4: Check idempotency (same Casso transaction already processed)
     if (cassoTxId) {
       const duplicate = await PaymentOrderModel.findOne({ cassoTransactionId: cassoTxId });
       if (duplicate) {
@@ -217,10 +240,41 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
       }
     }
 
+    // Step 5: Find matching pending PaymentOrder
+    const order = await PaymentOrderModel.findOne({
+      orderId,
+      status: "pending",
+    });
+
+    if (!order) {
+      const context = {
+        transactionId: cassoTxId,
+        accountId: orderId,
+        amount,
+      };
+      console.warn("[casso-webhook] No pending order matched Casso transaction.", context);
+      captureCassoWebhookFailure(
+        "casso_webhook_account_mismatch",
+        "No pending payment order matched Casso webhook transaction.",
+        context,
+      );
+      continue;
+    }
+
     // Step 6: Verify amount
     if (amount < order.amount) {
-      console.warn(
-        `[casso-webhook] Transaction ${cassoTxId}: amount ${amount} < order amount ${order.amount} for "${orderId}". Skipping.`,
+      const context = {
+        transactionId: cassoTxId,
+        accountId: orderId,
+        amount,
+        expectedAmount: order.amount,
+        userId: order.userId,
+      };
+      console.warn("[casso-webhook] Casso transaction amount is below expected order amount.", context);
+      captureCassoWebhookFailure(
+        "casso_webhook_amount_mismatch",
+        "Casso transaction amount is below expected order amount.",
+        context,
       );
       continue;
     }
@@ -279,14 +333,35 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
         console.warn(`[casso-webhook] Payment email skipped for order "${orderId}":`, emailError);
       }
 
-      console.info(
-        `[casso-webhook] Order "${orderId}" completed. Subscription ${result.eventStatus}: ${result.subscription.id}`,
-      );
+      console.info({
+        event: "casso_webhook_success",
+        transactionId: cassoTxId,
+        accountId: orderId,
+        amount,
+        planCode: "PLUS",
+        userId: order.userId,
+        subscriptionId: result.subscription.id,
+        eventStatus: result.eventStatus,
+      });
       processedCount++;
     } catch (error: unknown) {
       failedCount++;
       const msg = error instanceof Error ? error.message : "Unknown error";
-      console.error(`[casso-webhook] Failed to upsert subscription for order "${orderId}": ${msg}`);
+      const context = {
+        transactionId: cassoTxId,
+        accountId: orderId,
+        amount,
+        planCode: "PLUS",
+        userId: order.userId,
+      };
+      console.error("[casso-webhook] Failed to upsert subscription for order.", { ...context, error: msg });
+      backendMonitoring.captureBackendException(error, {
+        tags: {
+          event: "casso_webhook_subscription_upsert_failed",
+          provider: "casso",
+        },
+        extra: context,
+      });
     }
   }
 

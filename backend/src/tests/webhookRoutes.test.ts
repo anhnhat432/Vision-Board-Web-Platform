@@ -148,6 +148,9 @@ function mockCassoPersistence(order: MockCassoPaymentOrder | null): { paymentOrd
     const filters = query as Record<string, unknown>;
 
     if ("cassoTransactionId" in filters) {
+      if (order && filters.cassoTransactionId === order.cassoTransactionId) {
+        return order;
+      }
       return null;
     }
 

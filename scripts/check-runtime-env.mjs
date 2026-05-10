@@ -207,6 +207,14 @@ console.log("");
 printKeyStatus("Optional MongoDB backup config", optionalBackendBackupKeys, backendEnv.values);
 console.log("");
 
+if (fullStack && !hasValue(frontendEnv.values, "VITE_SENTRY_DSN")) {
+  console.log("WARN    VITE_SENTRY_DSN is missing. Frontend errors will not be captured in Sentry.");
+}
+
+if (fullStack && !hasValue(backendEnv.values, "SENTRY_DSN")) {
+  console.log("WARN    SENTRY_DSN is missing. Backend errors will not be captured in Sentry.");
+}
+
 if (frontendAppMode !== "real") {
   console.log("INFO    VITE_APP_MODE is demo. Firebase/backend sync env is optional and API health is skipped unless --full-stack is used.");
 }

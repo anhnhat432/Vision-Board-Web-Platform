@@ -17,7 +17,11 @@ const allowedOrigins = parseAllowedCorsOrigins(env.FRONTEND_ORIGIN, {
   nodeEnv: process.env.NODE_ENV,
 });
 
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  contentSecurityPolicy: false,
+}));
 app.use(cors(createCorsOptions(allowedOrigins)));
 app.use(
   express.json({
