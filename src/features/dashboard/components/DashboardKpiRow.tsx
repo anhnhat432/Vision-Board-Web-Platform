@@ -40,15 +40,15 @@ export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, 
   ];
 
   return (
-    <div data-testid="dashboard-kpi-row" className="grid gap-[var(--space-stack)] sm:grid-cols-2 lg:grid-cols-4">
+    <div data-testid="dashboard-kpi-row" className="grid grid-cols-2 gap-2 sm:gap-[var(--space-stack)] lg:grid-cols-4">
       {items.map((item) => (
         <div
           key={item.label}
-          className="min-h-20 rounded-[var(--r-tile)] bg-white/92 p-4 ring-1 ring-slate-200"
+          className="min-h-[74px] rounded-[var(--r-tile)] bg-white/92 p-3 ring-1 ring-slate-200 sm:min-h-20 sm:p-4"
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{item.label}</p>
-          <p className="mt-2 text-2xl font-bold text-foreground">{item.value}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{item.note}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:text-xs sm:tracking-[0.16em]">{item.label}</p>
+          <p className="mt-1 text-xl font-bold text-foreground sm:mt-2 sm:text-2xl">{item.value}</p>
+          <p className="mt-1 hidden text-xs text-muted-foreground sm:block">{item.note}</p>
         </div>
       ))}
     </div>

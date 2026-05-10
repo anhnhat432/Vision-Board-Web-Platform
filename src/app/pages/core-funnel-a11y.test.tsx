@@ -9,15 +9,24 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
 
 import { Card, CardHeader, CardTitle } from "../components/ui/card";
 import { FeasibilityStepShell } from "./FeasibilityCheck/components/FeasibilityStepShell";
+import { ResultStep } from "./FeasibilityCheck/components/ResultStep";
 import { LeadIndicatorsStep } from "./12WeekSetup/components/LeadIndicatorsStep";
 import { MeasurableStep } from "./SMARTGoalSetup/components/MeasurableStep";
 import { SmartGoalStepShell } from "./SMARTGoalSetup/components/SmartGoalStepShell";
 import { SpecificStep } from "./SMARTGoalSetup/components/SpecificStep";
-import type { Question } from "./FeasibilityCheck/types";
+import { PlanPreview } from "@/features/plan12week/components/PlanPreview";
+import { ReviewStep as TwelveWeekReviewStep } from "@/features/plan12week/pages/12WeekSetup/components/ReviewStep";
+import type {
+  LeadIndicatorDraft as FeatureLeadIndicatorDraft,
+  TwelveWeekSetupDraft as FeatureTwelveWeekSetupDraft,
+} from "@/features/plan12week/pages/12WeekSetup/types";
+import type { PendingSMARTGoal } from "@/lib/smart-goal";
+import type { Question, ResultData } from "./FeasibilityCheck/types";
 import type { LeadIndicatorDraft, TwelveWeekSetupDraft } from "./12WeekSetup/types";
 import type { SMARTData, SmartStepDefinition } from "./SMARTGoalSetup/types";
 
@@ -29,6 +38,138 @@ function makeSmartData(overrides: Partial<SMARTData> = {}): SMARTData {
     relevant: { motivation_reason: "", life_dimension_alignment: "" },
     timeBound: { mode: "weeks", target_date: "", target_weeks: "" },
     ...overrides,
+  };
+}
+
+function setViewportWidth(width: number) {
+  Object.defineProperty(window, "innerWidth", { configurable: true, value: width });
+}
+
+function makePendingSmartGoal(): PendingSMARTGoal {
+  return {
+    focusArea: "Career",
+    specific: "Ship a focused writing portfolio",
+    measurable: "Publish 6 portfolio pieces",
+    achievable: "Write 5 hours each week",
+    relevant: "Build a better career path",
+    timeBound: "12 weeks",
+  };
+}
+
+function makeFeasibilityResult(): ResultData {
+  return {
+    type: "realistic",
+    title: "Đủ thực tế để bắt đầu",
+    summary: "Bạn có đủ nền để chạy một chu kỳ 12 tuần gọn.",
+    recommendation: "Giữ tuần đầu nhẹ và đo được.",
+    readinessScore: 16,
+    adjustedScore: 17,
+    wheelScore: 7,
+    diagnosticScore: 14,
+    maxDiagnosticScore: 20,
+    axisScores: [
+      {
+        axis: "time",
+        label: "Thời gian",
+        score: 3,
+        maxScore: 4,
+        percent: 75,
+        diagnostic: "Có đủ khung giờ để bắt đầu.",
+      },
+      {
+        axis: "energy",
+        label: "Năng lượng",
+        score: 4,
+        maxScore: 4,
+        percent: 100,
+        diagnostic: "Năng lượng hiện tại ổn.",
+      },
+    ],
+    bottleneck: {
+      axis: "time",
+      label: "Thời gian",
+      score: 3,
+      action: "Giữ lịch tuần đầu thật gọn.",
+    },
+    planLoad: "balanced",
+    weeklyCapacity: "medium",
+    firstWeekGuidance: "Bắt đầu bằng 2 việc lặp lại.",
+    scopeRecommendation: "Chọn một kết quả chính cho chu kỳ này.",
+  };
+}
+
+function makeFeatureIndicator(overrides: Partial<FeatureLeadIndicatorDraft> = {}): FeatureLeadIndicatorDraft {
+  return {
+    id: overrides.id ?? "lead_1",
+    name: overrides.name ?? "Viết 3 phiên làm việc sâu",
+    target: overrides.target ?? "3",
+    unit: overrides.unit ?? "phiên/tuần",
+    type: overrides.type ?? "core",
+    cadence: overrides.cadence ?? "spread",
+    commitment: overrides.commitment,
+  };
+}
+
+function makeFeatureSetupDraft(): FeatureTwelveWeekSetupDraft {
+  return {
+    templateId: "",
+    goalType: "Project Completion",
+    vision12Week: "Tạo portfolio rõ ràng để ứng tuyển.",
+    week12Outcome: "Portfolio có 6 bài chất lượng.",
+    lagMetricName: "Bài portfolio",
+    lagMetricTarget: "6",
+    lagMetricUnit: "bài",
+    leadIndicators: [makeFeatureIndicator()],
+    startDate: "2026-05-04",
+    reviewDay: "Sunday",
+    tacticLoadPreference: "balanced",
+    week4Milestone: "Có 2 bài nháp",
+    week8Milestone: "Có 4 bài hoàn chỉnh",
+    successEvidence: "Portfolio được public.",
+    dailyTimeBudget: "45 phút",
+    preferredDays: [1, 3, 5],
+    personalConstraint: "time",
+  };
+}
+
+function makePreviewPlan(draft = makeFeatureSetupDraft()) {
+  const leadMetrics = draft.leadIndicators.map((indicator) => ({
+    name: indicator.name,
+    weeklyTarget: Number.parseInt(indicator.target, 10) || 1,
+  }));
+
+  return {
+    vision: draft.vision12Week,
+    weeks: [
+      {
+        weekNumber: 1,
+        focus: "Báº¯t Ä‘áº§u gá»n vÃ  rÃµ.",
+        expectedOutput: "Báº£n nhÃ¡p Ä‘áº§u tiÃªn.",
+        leadMetrics,
+        tasks: [{ id: "task_1", title: "[Cá»T Lá»–I] Viáº¿t outline", scheduledDate: "2026-05-10" }],
+      },
+      {
+        weekNumber: 2,
+        focus: "Giá»¯ nhá»‹p.",
+        expectedOutput: "Báº£n nhÃ¡p thá»© hai.",
+        leadMetrics,
+        tasks: [],
+      },
+      {
+        weekNumber: 3,
+        focus: "Tinh chá»‰nh.",
+        expectedOutput: "Feedback Ä‘áº§u tiÃªn.",
+        leadMetrics,
+        tasks: [],
+      },
+      {
+        weekNumber: 4,
+        focus: "Chá»‘t má»‘c 4 tuáº§n.",
+        expectedOutput: "2 bÃ i nhÃ¡p.",
+        leadMetrics,
+        tasks: [],
+      },
+    ],
   };
 }
 
@@ -89,6 +230,167 @@ describe("FeasibilityStepShell — a11y", () => {
     expect(describedBy).toBe("feasibility-question-1-helper");
     const helper = document.getElementById(describedBy ?? "");
     expect(helper?.textContent).toContain("giờ thực tế");
+  });
+});
+
+describe("Feasibility ResultStep — mobile detail disclosure", () => {
+  it("keeps the result hero and primary CTA visible while mobile details are collapsed behind one CTA", () => {
+    setViewportWidth(375);
+
+    render(
+      <ResultStep
+        result={makeFeasibilityResult()}
+        focusArea="Career"
+        pendingGoal={makePendingSmartGoal()}
+        onContinue={() => {}}
+        onAdjustGoal={() => {}}
+      />,
+    );
+
+    expect(screen.getByRole("heading", { level: 1, name: "Đủ thực tế để bắt đầu" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /Tạo kế hoạch 12 tuần/i }).length).toBeGreaterThan(0);
+    const detailsTrigger = screen.getByRole("button", { name: "Mở chi tiết" });
+    expect(detailsTrigger).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getAllByRole("button", { name: "Mở chi tiết" })).toHaveLength(1);
+  });
+
+  it("expands detailed feasibility analysis by default on desktop", () => {
+    setViewportWidth(1024);
+
+    render(
+      <ResultStep
+        result={makeFeasibilityResult()}
+        focusArea="Career"
+        pendingGoal={makePendingSmartGoal()}
+        onContinue={() => {}}
+        onAdjustGoal={() => {}}
+      />,
+    );
+
+    const detailsTrigger = screen.getByRole("button", { name: "Phân tích chi tiết" });
+    expect(detailsTrigger).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("Hướng đi tiếp theo")).toBeInTheDocument();
+    expect(screen.getByText("Xem 7 góc nhìn")).toBeInTheDocument();
+    expect(screen.getByText("Xem nhịp triển khai gợi ý")).toBeInTheDocument();
+  });
+});
+
+describe("TwelveWeekSetup ReviewStep — accordion", () => {
+  it("renders the four review panels as one-at-a-time mobile accordion panels", async () => {
+    setViewportWidth(375);
+    const user = userEvent.setup();
+    const draft = makeFeatureSetupDraft();
+    const leadIndicator = makeFeatureIndicator();
+
+    render(
+      <TwelveWeekReviewStep
+        smartGoal={makePendingSmartGoal()}
+        draft={draft}
+        focusArea="Career"
+        selectedTemplate={null}
+        setupGuideSupport={null}
+        setupGuideTemplate={null}
+        weekOneTaskPreview={["Viết outline bài đầu tiên"]}
+        weekOneTaskWarning={null}
+        feasibility={null}
+        scheduledLeadIndicators={[{ ...leadIndicator, schedule: [1, 3, 5] }]}
+        onChange={() => {}}
+      />,
+    );
+
+    const outcome = screen.getByRole("button", { name: "Outcome summary" });
+    const indicators = screen.getByRole("button", { name: "Lead indicators preview" });
+    const schedule = screen.getByRole("button", { name: "Schedule preview" });
+    const tactics = screen.getByRole("button", { name: "Tactics list" });
+
+    expect(outcome).toHaveAttribute("aria-expanded", "false");
+    expect(indicators).toHaveAttribute("aria-expanded", "false");
+    expect(schedule).toHaveAttribute("aria-expanded", "false");
+    expect(tactics).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(indicators);
+    expect(indicators).toHaveAttribute("aria-expanded", "true");
+    expect(outcome).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(schedule);
+    expect(schedule).toHaveAttribute("aria-expanded", "true");
+    expect(indicators).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("opens the outcome summary panel by default on desktop", () => {
+    setViewportWidth(1024);
+    const draft = makeFeatureSetupDraft();
+    const leadIndicator = makeFeatureIndicator();
+
+    render(
+      <TwelveWeekReviewStep
+        smartGoal={makePendingSmartGoal()}
+        draft={draft}
+        focusArea="Career"
+        selectedTemplate={null}
+        setupGuideSupport={null}
+        setupGuideTemplate={null}
+        weekOneTaskPreview={["Viết outline bài đầu tiên"]}
+        weekOneTaskWarning={null}
+        feasibility={null}
+        scheduledLeadIndicators={[{ ...leadIndicator, schedule: [1, 3, 5] }]}
+        onChange={() => {}}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Outcome summary" })).toHaveAttribute("aria-expanded", "true");
+  });
+});
+
+describe("TwelveWeekSetup PlanPreview — accordion", () => {
+  it("renders the actual setup preview as collapsed single-open accordion on mobile", async () => {
+    setViewportWidth(375);
+    const user = userEvent.setup();
+    const draft = makeFeatureSetupDraft();
+
+    render(
+      <PlanPreview
+        draft={draft}
+        previewPlan={makePreviewPlan(draft)}
+        onEditTactics={() => {}}
+        onConfirm={() => {}}
+        onBack={() => {}}
+      />,
+    );
+
+    const outcome = screen.getByRole("button", { name: "Outcome summary" });
+    const indicators = screen.getByRole("button", { name: "Lead indicators preview" });
+    const schedule = screen.getByRole("button", { name: "Schedule preview" });
+    const tactics = screen.getByRole("button", { name: "Tactics list" });
+
+    expect(outcome).toHaveAttribute("aria-expanded", "false");
+    expect(indicators).toHaveAttribute("aria-expanded", "false");
+    expect(schedule).toHaveAttribute("aria-expanded", "false");
+    expect(tactics).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(indicators);
+    expect(indicators).toHaveAttribute("aria-expanded", "true");
+
+    await user.click(schedule);
+    expect(schedule).toHaveAttribute("aria-expanded", "true");
+    expect(indicators).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("opens the actual setup preview outcome summary by default on desktop", () => {
+    setViewportWidth(1024);
+    const draft = makeFeatureSetupDraft();
+
+    render(
+      <PlanPreview
+        draft={draft}
+        previewPlan={makePreviewPlan(draft)}
+        onEditTactics={() => {}}
+        onConfirm={() => {}}
+        onBack={() => {}}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Outcome summary" })).toHaveAttribute("aria-expanded", "true");
   });
 });
 

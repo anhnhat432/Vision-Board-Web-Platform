@@ -13,9 +13,11 @@ import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import type { PendingSMARTGoal } from "@/lib/smart-goal";
 import { CoreFlowProgress } from "../../../components/CoreFlowProgress";
+import { useBreakpoint } from "../../../hooks/useBreakpoint";
 import { useReducedMotion } from "../../../components/ui/use-reduced-motion";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../../../components/ui/collapsible";
 import { PrimaryActionCard } from "../../../components/layout/PrimaryActionCard";
 import { Card, CardContent } from "../../../components/ui/card";
 import { getLifeAreaLabel } from "../../../utils/storage";
@@ -31,6 +33,7 @@ interface ResultStepProps {
 
 export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjustGoal }: ResultStepProps) {
   const prefersReducedMotion = useReducedMotion();
+  const isDesktop = useBreakpoint();
 
   const styleMap: Record<ResultType, { glow: string; badge: string; title: string; panel: string; meter: string }> = {
     realistic: {
@@ -273,7 +276,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               </Button>
               <Button
                 variant="outline"
-                className="border-white/24 bg-white/10 text-white hover:bg-white/16 hover:text-white"
+                className="hidden border-white/24 bg-white/10 text-white hover:bg-white/16 hover:text-white sm:inline-flex"
                 onClick={onAdjustGoal}
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -348,82 +351,97 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           </div>
         </PrimaryActionCard>
 
-        <div className="stack-stack">
-          <Card className={`overflow-hidden ${styles.panel} border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200`}>
-            <CardContent className="stack-stack p-5 lg:p-6">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-slate-200/80 bg-white/82 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                  <Compass className="h-3.5 w-3.5" />
-                  Hướng đi tiếp theo
-                </div>
-                <h2 className="mt-4 text-xl font-bold tracking-normal text-slate-900 sm:text-2xl">
-                  {result.type === "too_ambitious" ? "Thu nhỏ rồi đi tiếp." : "Đây là hướng nên đi tiếp."}
-                </h2>
-                <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">{copy.statusHint}</p>
-                <p className="mt-[var(--space-inline)] text-base font-semibold leading-7 text-slate-900">{result.recommendation}</p>
-
-                {result.smartGoalQualityNote ? (
-                  <div className="mt-[var(--space-inline)] rounded-[var(--r-card)] border border-amber-200 bg-amber-50/80 px-4 py-3">
-                    <p className="text-sm leading-6 text-amber-800">{result.smartGoalQualityNote}</p>
+        <Collapsible
+          key={isDesktop ? "feasibility-details-desktop" : "feasibility-details-mobile"}
+          defaultOpen={isDesktop}
+          className="stack-stack"
+        >
+          <CollapsibleTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full justify-between border-slate-200 bg-white/92 text-slate-900 shadow-sm sm:w-auto"
+            >
+              {isDesktop ? "Phân tích chi tiết" : "Mở chi tiết"}
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="stack-stack data-[state=closed]:hidden">
+            <Card className={`overflow-hidden ${styles.panel} border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200`}>
+              <CardContent className="stack-stack p-5 lg:p-6">
+                <div>
+                  <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-slate-200/80 bg-white/82 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
+                    <Compass className="h-3.5 w-3.5" />
+                    Hướng đi tiếp theo
                   </div>
-                ) : null}
-              </div>
+                  <h2 className="mt-4 text-xl font-bold tracking-normal text-slate-900 sm:text-2xl">
+                    {result.type === "too_ambitious" ? "Thu nhỏ rồi đi tiếp." : "Đây là hướng nên đi tiếp."}
+                  </h2>
+                  <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">{copy.statusHint}</p>
+                  <p className="mt-[var(--space-inline)] text-base font-semibold leading-7 text-slate-900">{result.recommendation}</p>
 
-              <div className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/82 p-4 shadow-sm">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-slate-900 text-white">
-                    <Sparkles className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                        Tuần 1 nên thế nào
-                      </p>
-                      <span className="rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
-                        Mức tải: {planLoadLabel[result.planLoad]}
-                      </span>
-                      <span className="rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
-                        Quỹ thời gian: {capacityLabel[result.weeklyCapacity]}
-                      </span>
+                  {result.smartGoalQualityNote ? (
+                    <div className="mt-[var(--space-inline)] rounded-[var(--r-card)] border border-amber-200 bg-amber-50/80 px-4 py-3">
+                      <p className="text-sm leading-6 text-amber-800">{result.smartGoalQualityNote}</p>
                     </div>
-                    <p className="mt-2 text-sm font-semibold leading-6 text-slate-900">{result.firstWeekGuidance}</p>
+                  ) : null}
+                </div>
+
+                <div className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/82 p-4 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-slate-900 text-white">
+                      <Sparkles className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                          Tuần 1 nên thế nào
+                        </p>
+                        <span className="rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
+                          Mức tải: {planLoadLabel[result.planLoad]}
+                        </span>
+                        <span className="rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
+                          Quỹ thời gian: {capacityLabel[result.weeklyCapacity]}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm font-semibold leading-6 text-slate-900">{result.firstWeekGuidance}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/82 p-4">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-slate-700" />
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                    Nên làm trước khi tạo kế hoạch
-                  </p>
+                <div className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/82 p-4">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-slate-700" />
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      Nên làm trước khi tạo kế hoạch
+                    </p>
+                  </div>
+                  <ol className="mt-[var(--space-inline)] stack-tight">
+                    {copy.nextMoves.map((item, index) => (
+                      <li key={item} className="flex items-start gap-3">
+                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-slate-900 text-xs font-semibold text-white">
+                          {index + 1}
+                        </span>
+                        <p className="text-sm leading-6 text-slate-700">{item}</p>
+                      </li>
+                    ))}
+                  </ol>
                 </div>
-                <ol className="mt-[var(--space-inline)] stack-tight">
-                  {copy.nextMoves.map((item, index) => (
-                    <li key={item} className="flex items-start gap-3">
-                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-slate-900 text-xs font-semibold text-white">
-                        {index + 1}
-                      </span>
-                      <p className="text-sm leading-6 text-slate-700">{item}</p>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="grid gap-[var(--space-stack)] lg:grid-cols-3">
-            <Card className={`hidden overflow-hidden lg:block ${styles.title} border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200`}>
-              <CardContent className="p-5 lg:p-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Lĩnh vực trọng tâm</p>
-                <p className="mt-[var(--space-inline)] text-2xl font-bold text-slate-900">{getLifeAreaLabel(focusArea)}</p>
-                <p className="mt-[var(--space-inline)] text-sm leading-6 text-slate-600">
-                  Đây là phần đời sống đang tác động trực tiếp tới độ khả thi của mục tiêu này.
-                </p>
               </CardContent>
             </Card>
 
-            <details className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 lg:rounded-[var(--r-card)] lg:p-6">
+            <div className="grid gap-[var(--space-stack)] lg:grid-cols-3">
+              <Card className={`hidden overflow-hidden lg:block ${styles.title} border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200`}>
+                <CardContent className="p-5 lg:p-6">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Lĩnh vực trọng tâm</p>
+                  <p className="mt-[var(--space-inline)] text-2xl font-bold text-slate-900">{getLifeAreaLabel(focusArea)}</p>
+                  <p className="mt-[var(--space-inline)] text-sm leading-6 text-slate-600">
+                    Đây là phần đời sống đang tác động trực tiếp tới độ khả thi của mục tiêu này.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <details className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 lg:rounded-[var(--r-card)] lg:p-6">
               <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                 Xem 7 góc nhìn
               </summary>
@@ -446,9 +464,9 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   </div>
                 ))}
               </div>
-            </details>
+              </details>
 
-            <details className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 lg:rounded-[var(--r-card)] lg:p-6">
+              <details className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 lg:rounded-[var(--r-card)] lg:p-6">
               <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                 Xem mục tiêu đã viết
               </summary>
@@ -471,9 +489,9 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   </div>
                 </div>
               </div>
-            </details>
+              </details>
 
-            <details className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 lg:rounded-[var(--r-card)] lg:p-6">
+              <details className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 lg:rounded-[var(--r-card)] lg:p-6">
               <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                 Xem nhịp triển khai gợi ý
               </summary>
@@ -490,10 +508,10 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                   </div>
                 ))}
               </div>
-            </details>
-          </div>
+              </details>
+            </div>
 
-          <details className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 lg:rounded-[var(--r-card)] lg:p-6">
+            <details className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 lg:rounded-[var(--r-card)] lg:p-6">
             <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
               Xem lý do đằng sau kết quả
             </summary>
@@ -508,8 +526,9 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                 <p className="mt-2 text-sm leading-6 text-slate-600">{result.bottleneck.action}</p>
               </div>
             </div>
-          </details>
-        </div>
+            </details>
+          </CollapsibleContent>
+        </Collapsible>
       </motion.div>
 
       {/* Mobile-only sticky bottom CTA bar — guided path, no bottom-nav conflict.

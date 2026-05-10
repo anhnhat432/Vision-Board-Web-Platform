@@ -4,6 +4,7 @@ import { SecondaryPanel } from "@/app/components/layout";
 import { CheckCircle2, CircleAlert, CircleDot, Flag, Target, TriangleAlert, Wrench } from "lucide-react";
 
 import { Badge } from "@/app/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/app/components/ui/accordion";
 import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
 import { Textarea } from "@/app/components/ui/textarea";
@@ -219,103 +220,161 @@ export function ReviewStep({
 
   return (
     <div className="mx-auto max-w-4xl stack-section">
-      {/* 1. Summary - primary */}
-      <div className="rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5">
-        <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tóm tắt kế hoạch</p>
-        <h3 className="mt-[var(--space-inline)] text-xl font-semibold text-slate-900">{smartGoal.specific}</h3>
-        <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">{draft.vision12Week}</p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Badge variant="outline">{getGoalTypeLabel(draft.goalType)}</Badge>
-          <Badge variant="outline">{getLifeAreaLabel(focusArea)}</Badge>
-          <Badge variant="outline">Nhìn lại {getReviewDayLabel(draft.reviewDay)}</Badge>
-          <Badge variant="outline">Nhịp {getLoadPreferenceLabel(draft.tacticLoadPreference)}</Badge>
-          {selectedTemplate && <Badge variant="outline">Khung {selectedTemplate.name}</Badge>}
-        </div>
-      </div>
+      <Accordion
+        key={isDesktop ? "review-desktop" : "review-mobile"}
+        type="single"
+        collapsible
+        defaultValue={isDesktop ? "outcome-summary" : undefined}
+        className="grid gap-3"
+      >
+        <AccordionItem
+          value="outcome-summary"
+          className="rounded-[var(--r-card)] border border-white/70 bg-white/72 px-5"
+        >
+          <AccordionTrigger className="text-base font-semibold text-slate-900 hover:no-underline">
+            Outcome summary
+          </AccordionTrigger>
+          <AccordionContent className="stack-stack pb-5">
+            <div>
+              <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tóm tắt kế hoạch</p>
+              <h3 className="mt-[var(--space-inline)] text-xl font-semibold text-slate-900">{smartGoal.specific}</h3>
+              <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">{draft.vision12Week}</p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Badge variant="outline">{getGoalTypeLabel(draft.goalType)}</Badge>
+                <Badge variant="outline">{getLifeAreaLabel(focusArea)}</Badge>
+                <Badge variant="outline">Nhìn lại {getReviewDayLabel(draft.reviewDay)}</Badge>
+                <Badge variant="outline">Nhịp {getLoadPreferenceLabel(draft.tacticLoadPreference)}</Badge>
+                {selectedTemplate && <Badge variant="outline">Khung {selectedTemplate.name}</Badge>}
+              </div>
+            </div>
 
-      {/* 2. Outcome - primary */}
-      <section className="rounded-[var(--r-card)] border-2 border-emerald-200 bg-emerald-50/60 p-5">
-        <div className="flex items-center gap-2">
-          <Target className="h-4 w-4 text-emerald-700" aria-hidden="true" />
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">Kết quả 12 tuần</p>
-        </div>
-        <p className="mt-[var(--space-inline)] text-base leading-7 text-slate-900">
-          {draft.week12Outcome.trim() || (
-            <span className="italic text-slate-400">Chưa điền - quay lại bước 1 để bổ sung.</span>
-          )}
-        </p>
-        {(draft.lagMetricName.trim() || draft.lagMetricTarget.trim()) && (
-          <div className="mt-[var(--space-inline)] inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-emerald-200 bg-white/86 px-3 py-1 text-sm text-slate-700">
-            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Đo bằng</span>
-            <span>
-              {draft.lagMetricName || "-"}
-              {draft.lagMetricTarget ? ` · ${draft.lagMetricTarget}` : ""}
-              {draft.lagMetricUnit ? ` ${draft.lagMetricUnit}` : ""}
-            </span>
-          </div>
-        )}
-      </section>
-
-      {/* 3. Milestones - primary */}
-      <section className="rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5">
-        <div className="flex items-center gap-2">
-          <Flag className="h-4 w-4 text-slate-600" aria-hidden="true" />
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Cột mốc giữa chu kỳ</p>
-        </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          {[
-            { label: "Tuần 4", value: draft.week4Milestone },
-            { label: "Tuần 8", value: draft.week8Milestone },
-            { label: "Tuần 12", value: draft.week12Outcome },
-          ].map((milestone) => (
-            <div key={milestone.label} className="rounded-[var(--r-tile)] border border-white/70 bg-slate-50/80 p-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{milestone.label}</p>
-              <p className="mt-2 text-sm leading-6 text-slate-700">
-                {milestone.value.trim() || (
-                  <span className="italic text-slate-400">
-                    Chưa có - bạn có thể thêm trong phần nâng cao bên dưới.
-                  </span>
+            <div className="rounded-[var(--r-card)] border-2 border-emerald-200 bg-emerald-50/60 p-5">
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4 text-emerald-700" aria-hidden="true" />
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">Kết quả 12 tuần</p>
+              </div>
+              <p className="mt-[var(--space-inline)] text-base leading-7 text-slate-900">
+                {draft.week12Outcome.trim() || (
+                  <span className="italic text-slate-400">Chưa điền - quay lại bước 1 để bổ sung.</span>
                 )}
               </p>
+              {(draft.lagMetricName.trim() || draft.lagMetricTarget.trim()) && (
+                <div className="mt-[var(--space-inline)] inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-emerald-200 bg-white/86 px-3 py-1 text-sm text-slate-700">
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Đo bằng</span>
+                  <span>
+                    {draft.lagMetricName || "-"}
+                    {draft.lagMetricTarget ? ` · ${draft.lagMetricTarget}` : ""}
+                    {draft.lagMetricUnit ? ` ${draft.lagMetricUnit}` : ""}
+                  </span>
+                </div>
+              )}
             </div>
-          ))}
-        </div>
-      </section>
+          </AccordionContent>
+        </AccordionItem>
 
-      {/* 4. Lead indicators - primary */}
-      <section className="rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Việc lặp lại mỗi tuần</p>
-          <span className="text-xs text-slate-500">
-            {coreIndicators.length} cốt lõi · {optionalIndicators.length} tùy chọn
-          </span>
-        </div>
-        {scheduledLeadIndicators.length === 0 ? (
-          <p className="mt-[var(--space-inline)] text-sm text-slate-500">Chưa có việc nào được chốt.</p>
-        ) : (
-          <ul className="mt-[var(--space-inline)] stack-tight">
-            {scheduledLeadIndicators.map((indicator) => (
-              <li
-                key={indicator.id}
-                className={`flex flex-wrap items-center justify-between gap-2 rounded-[var(--r-card)] border px-3 py-2 ${
-                  indicator.type === "optional" ? "border-amber-200 bg-amber-50/80" : "border-emerald-200 bg-emerald-50/80"
-                }`}
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900">{indicator.name || "-"}</p>
-                  <p className="text-xs text-slate-500">
-                    {indicator.target || "1"} {indicator.unit || "lần/tuần"} ·{" "}
-                    {formatScheduleDayLabels(indicator.schedule)}
+        <AccordionItem
+          value="lead-indicators-preview"
+          className="rounded-[var(--r-card)] border border-white/70 bg-white/72 px-5"
+        >
+          <AccordionTrigger className="text-base font-semibold text-slate-900 hover:no-underline">
+            Lead indicators preview
+          </AccordionTrigger>
+          <AccordionContent className="pb-5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Việc lặp lại mỗi tuần</p>
+              <span className="text-xs text-slate-500">
+                {coreIndicators.length} cốt lõi · {optionalIndicators.length} tùy chọn
+              </span>
+            </div>
+            {scheduledLeadIndicators.length === 0 ? (
+              <p className="mt-[var(--space-inline)] text-sm text-slate-500">Chưa có việc nào được chốt.</p>
+            ) : (
+              <ul className="mt-[var(--space-inline)] stack-tight">
+                {scheduledLeadIndicators.map((indicator) => (
+                  <li
+                    key={indicator.id}
+                    className={`flex flex-wrap items-center justify-between gap-2 rounded-[var(--r-card)] border px-3 py-2 ${
+                      indicator.type === "optional" ? "border-amber-200 bg-amber-50/80" : "border-emerald-200 bg-emerald-50/80"
+                    }`}
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-900">{indicator.name || "-"}</p>
+                      <p className="text-xs text-slate-500">
+                        {indicator.target || "1"} {indicator.unit || "lần/tuần"} ·{" "}
+                        {formatScheduleDayLabels(indicator.schedule)}
+                      </p>
+                    </div>
+                    <Badge variant={indicator.type === "optional" ? "warning" : "success"} className="text-xs">
+                      {indicator.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
+                    </Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem
+          value="schedule-preview"
+          className="rounded-[var(--r-card)] border border-white/70 bg-white/72 px-5"
+        >
+          <AccordionTrigger className="text-base font-semibold text-slate-900 hover:no-underline">
+            Schedule preview
+          </AccordionTrigger>
+          <AccordionContent className="pb-5">
+            <div className="flex items-center gap-2">
+              <Flag className="h-4 w-4 text-slate-600" aria-hidden="true" />
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Cột mốc giữa chu kỳ</p>
+            </div>
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              {[
+                { label: "Tuần 4", value: draft.week4Milestone },
+                { label: "Tuần 8", value: draft.week8Milestone },
+                { label: "Tuần 12", value: draft.week12Outcome },
+              ].map((milestone) => (
+                <div key={milestone.label} className="rounded-[var(--r-tile)] border border-white/70 bg-slate-50/80 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{milestone.label}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">
+                    {milestone.value.trim() || (
+                      <span className="italic text-slate-400">
+                        Chưa có - bạn có thể thêm trong phần nâng cao bên dưới.
+                      </span>
+                    )}
                   </p>
                 </div>
-                <Badge variant={indicator.type === "optional" ? "warning" : "success"} className="text-xs">
-                  {indicator.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
-                </Badge>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem
+          value="tactics-list"
+          className="rounded-[var(--r-card)] border border-white/70 bg-white/72 px-5"
+        >
+          <AccordionTrigger className="text-base font-semibold text-slate-900 hover:no-underline">
+            Tactics list
+          </AccordionTrigger>
+          <AccordionContent className="pb-5">
+            {weekOneTaskPreview.length > 0 ? (
+              <>
+                <div className="grid gap-2 md:grid-cols-2">
+                  {weekOneTaskPreview.map((task) => (
+                    <div
+                      key={task}
+                      className="rounded-[var(--r-card)] border border-white/70 bg-slate-50/80 px-3 py-2 text-sm text-slate-700"
+                    >
+                      {task}
+                    </div>
+                  ))}
+                </div>
+                {weekOneTaskWarning ? <p className="mt-[var(--space-inline)] text-xs text-amber-600">{weekOneTaskWarning}</p> : null}
+              </>
+            ) : (
+              <p className="text-sm text-slate-500">Chưa có việc tuần 1 để xem trước.</p>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {/* 5. Quality panel - secondary (collapsible) */}
       <SecondaryPanel title="Chất lượng kế hoạch" collapsible defaultOpen={isDesktop}>
@@ -460,29 +519,6 @@ export function ReviewStep({
           )}
         </div>
       </SecondaryPanel>
-
-      {/* 7. Week 1 tasks - secondary (collapsible) */}
-      {weekOneTaskPreview.length > 0 && (
-        <SecondaryPanel
-          title="Toàn bộ việc tuần 1"
-          collapsible
-          defaultOpen={isDesktop}
-        >
-          <div className="rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5">
-            <div className="mt-[var(--space-inline)] grid gap-2 md:grid-cols-2">
-              {weekOneTaskPreview.map((task) => (
-                <div
-                  key={task}
-                  className="rounded-[var(--r-card)] border border-white/70 bg-slate-50/80 px-3 py-2 text-sm text-slate-700"
-                >
-                  {task}
-                </div>
-              ))}
-            </div>
-            {weekOneTaskWarning ? <p className="mt-[var(--space-inline)] text-xs text-amber-600">{weekOneTaskWarning}</p> : null}
-          </div>
-        </SecondaryPanel>
-      )}
 
       {/* 8. Template support - secondary (collapsible) */}
       {setupGuideSupport && setupGuideTemplate && (

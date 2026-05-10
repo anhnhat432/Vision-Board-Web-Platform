@@ -40,7 +40,7 @@ import { CountUp } from "../components/ui/count-up";
 import { Progress } from "../components/ui/progress";
 import { Reveal } from "../components/ui/reveal";
 import { Skeleton } from "../components/ui/skeleton";
-import { useIsMobile } from "../components/ui/use-mobile";
+import { useBreakpoint } from "../hooks/useBreakpoint";
 import { useBackendProgressOverlay } from "../hooks/useBackendProgressOverlay";
 import { usePageTour } from "../hooks/usePageTour";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
@@ -225,7 +225,8 @@ function DashboardContent({
   setIsTourOpen: (open: boolean) => void;
   onReload: () => void;
 }) {
-  const isMobileViewport = useIsMobile();
+  const isDesktopViewport = useBreakpoint();
+  const isMobileViewport = !isDesktopViewport;
   const navigate = useNavigate();
   const location = useLocation();
   const { isConfigured, user } = useAuthContext();
@@ -461,7 +462,7 @@ function DashboardContent({
       ) : null}
 
       {/* Rescue trigger nudge banner */}
-      {topTrigger &&
+      {isDesktopViewport && topTrigger &&
         (() => {
           const severityStyles = {
             urgent: {
@@ -615,7 +616,7 @@ function DashboardContent({
                   </div>
                 )}
 
-                <div className="flex flex-col gap-3 border-t border-border pt-4 text-sm sm:flex-row sm:flex-wrap sm:items-center">
+                <div className="hidden flex-col gap-3 border-t border-border pt-4 text-sm sm:flex sm:flex-row sm:flex-wrap sm:items-center">
                   <span className="font-semibold text-foreground">Tầm nhìn 3 năm</span>
                   <Button
                     variant="outline"
@@ -647,15 +648,10 @@ function DashboardContent({
 
           {shouldShowSetupGuide && <NewUserGuideBanner userData={userData} variant="compact" />}
 
-          <SectionBlock title="Mục tiêu đang chạy" description="Chuẩn bị slot 1-3 mục tiêu cho cùng một cycle.">
-            <DashboardActiveGoalsList
-              goals={dashboardActiveGoals}
-              onSelectGoal={(goal) => navigate(goal.twelveWeekSystem ? "/12-week-system" : "/goals")}
-              onAddGoal={() => navigate("/life-insight")}
-            />
-          </SectionBlock>
-
-          <SectionBlock title="Nhịp 12 tuần" description="Bốn tín hiệu đủ để biết cycle đang chạy gọn hay cần chỉnh.">
+          <SectionBlock
+            title="Nhịp 12 tuần"
+            description={isDesktopViewport ? "Bốn tín hiệu đủ để biết cycle đang chạy gọn hay cần chỉnh." : undefined}
+          >
             <DashboardKpiRow
               leadAverage={dashboardKpiLeadAverage}
               currentWeek={dashboardKpiCurrentWeek}
@@ -664,6 +660,66 @@ function DashboardContent({
               wheelScore={averageLifeScore}
             />
           </SectionBlock>
+
+          <SectionBlock
+            title="Mục tiêu đang chạy"
+            description={isDesktopViewport ? "Chuẩn bị slot 1-3 mục tiêu cho cùng một cycle." : undefined}
+          >
+            <DashboardActiveGoalsList
+              goals={dashboardActiveGoals}
+              onSelectGoal={(goal) => navigate(goal.twelveWeekSystem ? "/12-week-system" : "/goals")}
+              onAddGoal={() => navigate("/life-insight")}
+            />
+          </SectionBlock>
+
+          {isMobileViewport && topTrigger ? (
+            <SectionBlock
+              title="Cảnh báo tuần này"
+              density="compact"
+              collapsible
+              defaultOpen={false}
+            >
+              <div className="rounded-[var(--r-tile)] border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] px-4 py-3 text-sm">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--color-warning-fg)]" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold text-[color:var(--color-warning-fg)]">{topTrigger.headline}</p>
+                    <p className="mt-1 text-xs leading-5 text-[color:var(--color-warning-fg)]">{topTrigger.detail}</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    className="bg-slate-950 text-white hover:bg-slate-800"
+                    onClick={() => {
+                      trackRescueActionTaken({
+                        kind: topTrigger.kind,
+                        action: topTrigger.kind === "trial_ending" ? "upgrade" : "navigate_system",
+                        currentPlan: currentPlanCode,
+                      });
+                      navigate(topTrigger.kind === "trial_ending" ? "/billing/plan" : "/12-week-system");
+                    }}
+                  >
+                    {topTrigger.kind === "trial_ending" ? "Mở Plus" : "Xem ngay"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-[color:var(--color-warning-fg)] hover:bg-[color:var(--color-warning-bg)]"
+                    onClick={() => {
+                      dismissRescueTrigger(topTrigger.kind);
+                      trackRescueTriggerDismissed({ kind: topTrigger.kind, currentPlan: currentPlanCode });
+                      setDismissedTrigger(topTrigger.kind);
+                    }}
+                  >
+                    Đóng
+                  </Button>
+                </div>
+              </div>
+            </SectionBlock>
+          ) : null}
 
           {!activeSystem ? (
             <EmptyState
@@ -701,7 +757,13 @@ function DashboardContent({
               </ol>
             </EmptyState>
           ) : (
-            <SectionBlock title="Tóm tắt tuần này" density="compact">
+            <SectionBlock
+              key={isDesktopViewport ? "dashboard-week-summary-desktop" : "dashboard-week-summary-mobile"}
+              title="Tóm tắt tuần này"
+              density="compact"
+              collapsible={isMobileViewport}
+              defaultOpen={isDesktopViewport}
+            >
               <Card data-testid="dashboard-main-card" className="border border-border bg-white/92 shadow-sm">
                 <CardContent className="p-5 sm:p-6">
                   <div className="grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
@@ -823,7 +885,14 @@ function DashboardContent({
 
       {/* SECONDARY SECTION: Workspace Details */}
       {shouldShowWorkspaceDetailGrid && (
-        <SectionBlock title="Dữ liệu gần đây" headerVisuallyHidden className="ops-section-secondary">
+        <SectionBlock
+          key={isDesktopViewport ? "dashboard-workspace-details-desktop" : "dashboard-workspace-details-mobile"}
+          title="Dữ liệu gần đây"
+          headerVisuallyHidden={isDesktopViewport}
+          collapsible={isMobileViewport}
+          defaultOpen={isDesktopViewport}
+          className="ops-section-secondary"
+        >
           <PageHeader
             eyebrow="Chi tiết workspace"
             title="Dữ liệu gần đây"
@@ -1072,7 +1141,14 @@ function DashboardContent({
 
       {/* Recent Reflections - Part of secondary content */}
       {!isFreshDemoVisitor && recentReflections.length > 0 && (
-        <SectionBlock title="Nhật ký gần đây" headerVisuallyHidden className="ops-section-secondary">
+        <SectionBlock
+          key={isDesktopViewport ? "dashboard-reflections-desktop" : "dashboard-reflections-mobile"}
+          title="Nhật ký gần đây"
+          headerVisuallyHidden={isDesktopViewport}
+          collapsible={isMobileViewport}
+          defaultOpen={isDesktopViewport}
+          className="ops-section-secondary"
+        >
           <Reveal>
             <Card className="border border-border bg-white/92 shadow-sm">
               <CardHeader>

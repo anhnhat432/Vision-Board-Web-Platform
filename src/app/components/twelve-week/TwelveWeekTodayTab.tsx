@@ -187,6 +187,10 @@ export function TwelveWeekTodayTab({
 
   const todayCheckIn = latestCheckIn?.date === todayDateKey ? latestCheckIn : null;
   const hasSavedTodayCheckIn = Boolean(todayCheckIn);
+  const savedDailyMood = (todayCheckIn?.mood as DailyMood | undefined) ?? "steady";
+  const savedDailyNote = todayCheckIn?.optionalNote?.trim() ?? "";
+  const hasUnsavedDailyCheckInEdits = dailyMood !== savedDailyMood || dailyNote.trim() !== savedDailyNote;
+  const showMobileStickyCheckIn = !hasSavedTodayCheckIn && hasUnsavedDailyCheckInEdits;
   const nextActionState: TodayNextActionState = (() => {
     if (!hasPlanTasks) {
       return {
@@ -912,6 +916,30 @@ export function TwelveWeekTodayTab({
           />
         </div>
       )}
+
+      {showMobileStickyCheckIn ? <div aria-hidden="true" className="order-last sm:hidden mb-20" /> : null}
+
+      {showMobileStickyCheckIn ? (
+        <div className="sm:hidden fixed inset-x-0 bottom-0 z-30 z-[60] border-t border-slate-200 bg-white/96 backdrop-blur p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+          <Button
+            size="lg"
+            variant="secondary"
+            className="w-full py-3 text-base"
+            onClick={handleSaveCheckInClick}
+            disabled={isSavingCheckIn}
+            aria-busy={isSavingCheckIn}
+          >
+            {isSavingCheckIn ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                Đang lưu check-in...
+              </>
+            ) : (
+              "Lưu check-in hôm nay"
+            )}
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }

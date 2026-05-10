@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -163,15 +163,20 @@ describe("Dashboard active 12-week system UX", () => {
     expect(primaryCard.compareDocumentPosition(mainCard)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  it("keeps the execution board collapsed by default on mobile", async () => {
+  it("orders mobile signed-in dashboard as hero, KPI, goals, then collapsed remaining sections", async () => {
     Object.defineProperty(window, "innerWidth", { configurable: true, value: 390 });
     seedActiveDashboard();
     renderDashboard();
 
-    const executionBoard = await screen.findByTestId("dashboard-execution-board");
+    const hero = await screen.findByTestId("dashboard-primary-action-card");
+    const kpiRow = await screen.findByTestId("dashboard-kpi-row");
+    const goalsHeading = screen.getByRole("heading", { name: "Mục tiêu đang chạy" });
 
-    await waitFor(() => expect(executionBoard).not.toHaveAttribute("open"));
-    expect(executionBoard).toHaveTextContent(/Tuần \d+: \d+\/\d+ việc/i);
+    expect(hero.compareDocumentPosition(kpiRow)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(kpiRow.compareDocumentPosition(goalsHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(screen.getByText("Launch a focused dashboard")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Tóm tắt tuần này" })).toBeInTheDocument();
+    expect(screen.queryByTestId("dashboard-main-card")).toBeNull();
   });
 
   it("defers the life balance radar until its section is visible", async () => {

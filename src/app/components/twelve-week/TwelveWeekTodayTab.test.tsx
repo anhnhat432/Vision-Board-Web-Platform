@@ -433,6 +433,49 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
     render(<TwelveWeekTodayTab {...makeProps()} />);
     expect(screen.getAllByRole("button", { name: /Lưu check-in hôm nay/i })).toHaveLength(1);
   });
+
+  it("shows a sticky mobile check-in CTA only while today's check-in form has unsaved edits", () => {
+    const { rerender } = render(
+      <TwelveWeekTodayTab
+        {...makeProps({
+          dailyNote: "Có một ý cần nhớ",
+          latestCheckIn: null,
+        })}
+      />,
+    );
+
+    const stickyButton = screen
+      .getAllByRole("button", { name: /^Lưu check-in hôm nay$/i })
+      .find((button) => button.closest(".fixed.inset-x-0.bottom-0"));
+    expect(stickyButton).toBeInTheDocument();
+    expect(stickyButton?.closest("div")).toHaveClass(
+      "sm:hidden",
+      "fixed",
+      "inset-x-0",
+      "bottom-0",
+      "z-30",
+      "border-t",
+      "border-slate-200",
+      "bg-white/96",
+      "backdrop-blur",
+      "p-3",
+    );
+
+    rerender(
+      <TwelveWeekTodayTab
+        {...makeProps({
+          dailyNote: "Có một ý cần nhớ",
+          latestCheckIn: makeCheckIn({ date: "2026-05-02", optionalNote: "Có một ý cần nhớ" }),
+        })}
+      />,
+    );
+
+    expect(
+      screen
+        .queryAllByRole("button", { name: /^Lưu check-in hôm nay$/i })
+        .find((button) => button.closest(".fixed.inset-x-0.bottom-0")),
+    ).toBeUndefined();
+  });
 });
 
 describe("TwelveWeekTodayTab — rescue mode nudge", () => {
