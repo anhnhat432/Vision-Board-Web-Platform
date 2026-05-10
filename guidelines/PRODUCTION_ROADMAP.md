@@ -10,10 +10,10 @@ Last updated: 2026-05-10
 | Phase 1.2 MongoDB Atlas | ✅ Done | M0 cluster reachable. Backend connects through `MONGODB_URI`. |
 | Phase 1.3 Backend Render | ✅ Done | `/api/health` returns 200. `/api/billing/checkout-session` correctly returns 401 without auth. |
 | Phase 1.4 Frontend Vercel real mode | ✅ Done | `VITE_APP_MODE=real`, `VITE_BILLING_PROVIDER_MODE=api_contract`, `VITE_BILLING_PROVIDER_LABEL=Chuyển khoản ngân hàng` set on Vercel Production scope. |
-| Phase 1.5 Verification | ⚠ Partial | Code-side smoke and `/api/health` confirmed. A live transaction smoke against Casso webhook is still pending. |
-| Phase 2 Casso + VietQR | ✅ Code complete | `BillingCheckoutQR` page, Casso adapter, webhook route, VietQR routing in `billingProvider.ts` and `BillingPlan.tsx` are wired. Live transaction test still pending. |
+| Phase 1.5 Verification | OK Done | Live Casso/VietQR transaction smoke on 2026-05-10: real bank transfer cleared, webhook fired, entitlement granted, Plus active. |
+| Phase 2 Casso + VietQR | OK Live verified | `BillingCheckoutQR` page, Casso adapter, webhook route, VietQR routing in `billingProvider.ts` and `BillingPlan.tsx` wired and confirmed end-to-end with a real bank transfer on 2026-05-10. |
 | Phase 3 Bảo mật | ⚠ Partial | `helmet`, `express-rate-limit`, `@sentry/node`, `@sentry/react` installed. Rate limiters mounted in `backend/src/middleware/rateLimiters.ts`. CORS, env enforcement, and full Sentry init still need a final pass. |
-| Phase 4 UX cho production | ⚠ Partial | Auto-sync, conflict dialog, sync pill, first-login restore landed. Copy review for `demo`/`mock`/`mô phỏng` strings under real mode and onboarding-must-login decisions still pending. |
+| Phase 4 UX cho production | OK Done | Auto-sync, conflict dialog, sync pill, first-login restore landed. Real-mode copy audit + `RealModeLoginGate` for 12-week setup landed in `d1241a9`. |
 
 Auto-sync batch (2026-05-10) added on top of the original roadmap:
 
