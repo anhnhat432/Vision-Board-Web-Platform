@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Edit2, ChevronDown, ChevronRight } from "lucide-react";
+import { CalendarDays, ChevronDown, ChevronRight, Edit2, Target, Zap } from "lucide-react";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { Badge } from "@/app/components/ui/badge";
@@ -37,6 +37,39 @@ interface PlanPreviewProps {
   canConfirm?: boolean;
 }
 
+const TIMELINE_PHASES = [
+  {
+    label: "Ramp",
+    weekStart: 1,
+    weekEnd: 4,
+    tileClassName:
+      "border-violet-200 bg-violet-50 text-violet-800 hover:border-violet-300 dark:border-violet-500/30 dark:bg-violet-950/30 dark:text-violet-100",
+    activeClassName:
+      "border-violet-500 bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20 dark:from-violet-500 dark:to-fuchsia-500",
+  },
+  {
+    label: "Peak",
+    weekStart: 5,
+    weekEnd: 8,
+    tileClassName:
+      "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-800 hover:border-fuchsia-300 dark:border-fuchsia-500/30 dark:bg-fuchsia-950/30 dark:text-fuchsia-100",
+    activeClassName:
+      "border-fuchsia-500 bg-gradient-to-br from-fuchsia-600 to-rose-500 text-white shadow-lg shadow-fuchsia-500/20 dark:from-fuchsia-500 dark:to-rose-400",
+  },
+  {
+    label: "Harvest",
+    weekStart: 9,
+    weekEnd: 12,
+    tileClassName:
+      "border-emerald-200 bg-emerald-50 text-emerald-800 hover:border-emerald-300 dark:border-emerald-500/30 dark:bg-emerald-950/30 dark:text-emerald-100",
+    activeClassName:
+      "border-emerald-500 bg-gradient-to-br from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/20 dark:from-emerald-500 dark:to-teal-500",
+  },
+];
+
+const getTimelinePhase = (weekNumber: number) =>
+  TIMELINE_PHASES.find((phase) => weekNumber >= phase.weekStart && weekNumber <= phase.weekEnd) ?? TIMELINE_PHASES[0];
+
 export function PlanPreview({
   draft,
   previewPlan,
@@ -48,6 +81,7 @@ export function PlanPreview({
   canConfirm = true,
 }: PlanPreviewProps) {
   const [expandedWeeks, setExpandedWeeks] = useState<Set<number>>(new Set([2, 3, 4]));
+  const [selectedTimelineWeek, setSelectedTimelineWeek] = useState(1);
   const isDesktop = useBreakpoint();
 
   const toggleWeekExpansion = useCallback((weekNum: number) => {
@@ -65,11 +99,15 @@ export function PlanPreview({
   const week1 = previewPlan.weeks.find((w) => w.weekNumber === 1);
   const weeks24 = previewPlan.weeks.filter((w) => w.weekNumber >= 2 && w.weekNumber <= 4);
   const weekOneLeadMetrics = week1?.leadMetrics ?? [];
+  const selectedTimelineWeekData =
+    previewPlan.weeks.find((week) => week.weekNumber === selectedTimelineWeek) ?? previewPlan.weeks[0];
+  const selectedTimelinePhase = getTimelinePhase(selectedTimelineWeekData?.weekNumber ?? 1);
+  const totalWeekOneTasks = week1?.tasks.length ?? 0;
   const accordionItemClass = "rounded-[var(--r-card)] border border-slate-200 bg-white/92 px-5 shadow-sm";
   const accordionTriggerClass = "text-base font-semibold text-slate-900 hover:no-underline";
 
   return (
-    <div className="space-y-6">
+    <div className="stack-section">
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold">Xem trÆ°á»›c káº¿ hoáº¡ch 12 tuáº§n</h2>
@@ -77,6 +115,94 @@ export function PlanPreview({
           Kiá»ƒm tra láº¡i káº¿ hoáº¡ch trÆ°á»›c khi xÃ¡c nháº­n táº¡o. Báº¡n cÃ³ thá»ƒ chá»‰nh sá»­a cÃ¡c viá»‡c láº·p láº¡i.
         </p>
       </div>
+
+      <section className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm dark:border-slate-700/70 dark:bg-slate-950/70">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 dark:from-violet-950/70 dark:to-fuchsia-950/50 dark:text-violet-200">
+              <CalendarDays className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div>
+              <h3 className="text-base font-semibold text-slate-950 dark:text-slate-50">Timeline 12 tuần</h3>
+              <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Ramp 4 tuần đầu, Peak 4 tuần giữa, Harvest 4 tuần cuối. Chọn từng tuần để xem nhịp dự kiến.
+              </p>
+            </div>
+          </div>
+          <Badge variant="brand" className="shrink-0">
+            12 tuần
+          </Badge>
+        </div>
+        <div className="mt-4 grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-12">
+          {previewPlan.weeks.map((week) => {
+            const phase = getTimelinePhase(week.weekNumber);
+            const isSelected = selectedTimelineWeekData?.weekNumber === week.weekNumber;
+
+            return (
+              <button
+                key={week.weekNumber}
+                type="button"
+                aria-pressed={isSelected}
+                onClick={() => setSelectedTimelineWeek(week.weekNumber)}
+                className={`rounded-[var(--r-tile)] border px-2 py-3 text-center text-xs font-semibold transition-colors ${
+                  isSelected ? phase.activeClassName : phase.tileClassName
+                }`}
+              >
+                <span className="block text-sm">W{week.weekNumber}</span>
+                <span className="mt-1 block text-[11px] opacity-80">{phase.label}</span>
+              </button>
+            );
+          })}
+        </div>
+        {selectedTimelineWeekData ? (
+          <div className="mt-4 rounded-[var(--r-tile)] border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700/70 dark:bg-slate-900/60">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-sm font-semibold text-slate-950 dark:text-slate-50">
+                Tuần {selectedTimelineWeekData.weekNumber} · {selectedTimelinePhase.label}
+              </p>
+              <Badge variant={selectedTimelineWeekData.weekNumber <= 4 ? "brand" : "neutral"}>
+                {selectedTimelineWeekData.tasks.length > 0
+                  ? `${selectedTimelineWeekData.tasks.length} việc tuần này`
+                  : `${selectedTimelineWeekData.leadMetrics.length} lead indicators`}
+              </Badge>
+            </div>
+            <div className="mt-3 stack-tight text-sm leading-6 text-slate-700 dark:text-slate-300">
+              {selectedTimelineWeekData.tasks.length > 0 ? (
+                selectedTimelineWeekData.tasks.slice(0, 3).map((task) => (
+                  <p key={task.id} className="rounded-[var(--r-control)] bg-white/82 px-3 py-2 dark:bg-slate-950/70">
+                    {task.title}
+                  </p>
+                ))
+              ) : (
+                <p className="rounded-[var(--r-control)] bg-white/82 px-3 py-2 dark:bg-slate-950/70">
+                  Tuần này giữ cùng nhịp lead indicators và dùng review tuần để điều chỉnh tải.
+                </p>
+              )}
+            </div>
+          </div>
+        ) : null}
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-[var(--r-tile)] border border-violet-200 bg-violet-50/70 p-3 dark:border-violet-500/30 dark:bg-violet-950/30">
+            <Target className="h-4 w-4 text-violet-700 dark:text-violet-200" aria-hidden="true" />
+            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-violet-700 dark:text-violet-200">Output</p>
+            <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-slate-50">1 mục tiêu 12 tuần</p>
+          </div>
+          <div className="rounded-[var(--r-tile)] border border-emerald-200 bg-emerald-50/70 p-3 dark:border-emerald-500/30 dark:bg-emerald-950/30">
+            <Zap className="h-4 w-4 text-emerald-700 dark:text-emerald-200" aria-hidden="true" />
+            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-200">Lead</p>
+            <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-slate-50">
+              {weekOneLeadMetrics.length} việc lặp lại
+            </p>
+          </div>
+          <div className="rounded-[var(--r-tile)] border border-amber-200 bg-amber-50/70 p-3 dark:border-amber-500/30 dark:bg-amber-950/30">
+            <CalendarDays className="h-4 w-4 text-amber-700 dark:text-amber-200" aria-hidden="true" />
+            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-amber-700 dark:text-amber-200">Week 1</p>
+            <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-slate-50">
+              {totalWeekOneTasks} việc đầu tiên
+            </p>
+          </div>
+        </div>
+      </section>
 
       <Accordion
         key={isDesktop ? "plan-preview-desktop" : "plan-preview-mobile"}

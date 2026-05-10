@@ -110,7 +110,7 @@ export function OutcomeStep({
       )}
 
       {/* Required fields card */}
-      <div className="rounded-[var(--r-card)] border-2 border-emerald-200 bg-emerald-50/60 p-5 sm:p-6 shadow-sm">
+      <div className="relative overflow-hidden rounded-[var(--r-card)] border border-emerald-200 bg-emerald-50/60 p-5 shadow-sm before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-violet-600 before:to-fuchsia-600 dark:border-emerald-500/30 dark:bg-emerald-950/25 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
             <p className="text-sm font-semibold text-slate-900">Chốt phần bắt buộc trước</p>
@@ -129,7 +129,7 @@ export function OutcomeStep({
             <p className="mt-1 text-sm font-semibold text-slate-950">{lagMetricPreview}</p>
           </div>
         ) : null}
-        <div className="stack-tight">
+        <div className="stack-tight rounded-[var(--r-tile)] border border-white/72 bg-white/72 p-3 dark:border-slate-700/60 dark:bg-slate-950/45">
           <Label htmlFor="goal-type">Loại mục tiêu</Label>
           <Select value={draft.goalType} onValueChange={(value) => onChange("goalType", value)}>
             <SelectTrigger id="goal-type" aria-label="Chọn loại mục tiêu">
@@ -144,7 +144,7 @@ export function OutcomeStep({
             </SelectContent>
           </Select>
         </div>
-        <div className="stack-tight">
+        <div className="stack-tight rounded-[var(--r-tile)] border border-white/72 bg-white/72 p-3 dark:border-slate-700/60 dark:bg-slate-950/45">
           <Label htmlFor="vision-12-week">Tầm nhìn 12 tuần</Label>
           <Textarea
             id="vision-12-week"
@@ -153,7 +153,7 @@ export function OutcomeStep({
             onChange={(event) => onChange("vision12Week", event.target.value)}
           />
         </div>
-        <div className="stack-tight">
+        <div className="stack-tight rounded-[var(--r-tile)] border border-white/72 bg-white/72 p-3 dark:border-slate-700/60 dark:bg-slate-950/45">
           <Label htmlFor="week-12-outcome">Kết quả muốn chạm tới ở tuần 12</Label>
           <Textarea
             id="week-12-outcome"

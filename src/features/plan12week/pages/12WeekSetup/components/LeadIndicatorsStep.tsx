@@ -190,10 +190,10 @@ export function LeadIndicatorsStep({
         {draft.leadIndicators.map((indicator, index) => (
           <div
             key={indicator.id}
-            className={`rounded-[var(--r-card)] border p-5 ${
+            className={`relative overflow-hidden rounded-[var(--r-card)] border p-5 before:absolute before:left-0 before:top-0 before:h-full before:w-1 ${
               indicator.type === "optional"
-                ? "border-amber-200 bg-amber-50/72"
-                : "border-emerald-200 bg-emerald-50/72 shadow-sm"
+                ? "border-amber-200 bg-amber-50/72 before:bg-gradient-to-b before:from-amber-500 before:to-orange-500 dark:border-amber-500/30 dark:bg-amber-950/25"
+                : "border-emerald-200 bg-emerald-50/72 shadow-sm before:bg-gradient-to-b before:from-emerald-600 before:to-teal-600 dark:border-emerald-500/30 dark:bg-emerald-950/25"
             }`}
           >
             <div className="flex flex-wrap items-center justify-between gap-3">

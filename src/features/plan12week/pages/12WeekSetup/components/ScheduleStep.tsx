@@ -53,7 +53,7 @@ export function ScheduleStep({
 
   return (
     <div className="mx-auto max-w-4xl stack-section">
-      <div className="stack-stack">
+      <div className="stack-stack relative overflow-hidden rounded-[var(--r-card)] border border-teal-200 bg-teal-50/45 p-5 shadow-sm before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-teal-600 before:to-cyan-600 dark:border-teal-500/30 dark:bg-teal-950/25">
         <div className="grid gap-3 md:grid-cols-2">
           <div className="stack-tight">
             <Label htmlFor="cycle-start-date">Ngày bắt đầu chu kỳ</Label>
