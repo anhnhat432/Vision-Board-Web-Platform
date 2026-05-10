@@ -50,10 +50,10 @@ export function DashboardActiveGoalsList({
             return (
               <article
                 key={goal.id}
-                className="rounded-[var(--r-card)] bg-white/92 p-5 ring-1 ring-slate-200"
+                className="card-hover-lift rounded-[var(--r-card)] bg-white/92 p-5 ring-1 ring-slate-200/70 dark:bg-slate-900/70 dark:ring-slate-700"
               >
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-foreground text-white">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 shadow-sm dark:from-violet-950/50 dark:to-fuchsia-950/40 dark:text-violet-200">
                     <Target className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -67,14 +67,14 @@ export function DashboardActiveGoalsList({
                     <span className="font-medium text-muted-foreground">Lead score tuần này</span>
                     <span className="font-semibold text-foreground">{leadScore}%</span>
                   </div>
-                  <Progress value={leadScore} className="h-2" />
+                  <Progress value={leadScore} className="h-2 bg-slate-100" />
                 </div>
 
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="mt-[var(--space-stack)] w-full justify-between border-border bg-white text-foreground hover:bg-muted"
+                  className="mt-[var(--space-stack)] w-full justify-between border-violet-200/70 bg-white text-violet-700 hover:bg-violet-50 dark:border-violet-400/20 dark:bg-slate-900 dark:text-violet-200"
                   onClick={() => onSelectGoal(goal)}
                 >
                   Mở
@@ -85,7 +85,7 @@ export function DashboardActiveGoalsList({
           })}
         </div>
       ) : (
-        <div className="rounded-[var(--r-card)] bg-white/92 p-5 ring-1 ring-slate-200">
+        <div className="rounded-[var(--r-card)] bg-white/92 p-5 ring-1 ring-slate-200/70 dark:bg-slate-900/70 dark:ring-slate-700">
           <p className="font-semibold text-foreground">Chưa có mục tiêu đang chạy.</p>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
             Dashboard sẽ gọn hơn sau khi bạn chọn một mục tiêu và tạo cycle 12 tuần đầu tiên.
@@ -96,7 +96,7 @@ export function DashboardActiveGoalsList({
       <Button
         type="button"
         variant="outline"
-        className="w-full justify-center border-border bg-white text-foreground hover:bg-muted sm:w-auto"
+        className="w-full justify-center border-border bg-white text-foreground hover:bg-muted sm:w-auto dark:bg-slate-900"
         onClick={onAddGoal}
         disabled={isAtLimit}
         title={isAtLimit ? "Đã đạt giới hạn 3 goals/cycle (theo 12 Week Year)" : "Thêm mục tiêu vào cycle"}

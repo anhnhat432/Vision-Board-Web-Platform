@@ -3,11 +3,14 @@ import {
   ArrowRight,
   CalendarDays,
   CheckCircle2,
+  Compass,
   Crown,
+  Flame,
   Plus,
   Sparkles,
   Target,
   TrendingUp,
+  Zap,
 } from "lucide-react";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
@@ -168,6 +171,111 @@ const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
     description: "Khối này cho biết bạn đang ở gói nào, quyền nào đã mở và chỗ để quản lý hoặc khôi phục lại nếu cần.",
   },
 ];
+
+function getDashboardGreeting(now = new Date()) {
+  const hour = now.getHours();
+
+  if (hour >= 5 && hour <= 11) {
+    return {
+      label: "Chào buổi sáng",
+      surfaceClass:
+        "bg-gradient-to-br from-amber-50 to-orange-100 border-amber-200/70 dark:from-amber-950/35 dark:to-orange-950/30 dark:border-amber-400/20",
+      textClass: "text-amber-700 dark:text-amber-200",
+    };
+  }
+
+  if (hour >= 12 && hour <= 17) {
+    return {
+      label: "Chào buổi chiều",
+      surfaceClass:
+        "bg-gradient-to-br from-sky-50 to-blue-100 border-sky-200/70 dark:from-sky-950/35 dark:to-blue-950/30 dark:border-sky-400/20",
+      textClass: "text-sky-700 dark:text-sky-200",
+    };
+  }
+
+  return {
+    label: "Chào buổi tối",
+    surfaceClass:
+      "bg-gradient-to-br from-violet-50 to-indigo-100 border-violet-200/70 dark:from-violet-950/35 dark:to-indigo-950/30 dark:border-violet-400/20",
+    textClass: "text-indigo-700 dark:text-indigo-200",
+  };
+}
+
+function getDashboardDisplayName(user: ReturnType<typeof useAuthContext>["user"]) {
+  const displayName = user?.displayName?.trim();
+  if (displayName) return displayName.split(/\s+/)[0];
+
+  const emailName = user?.email?.split("@")[0]?.trim();
+  return emailName || "bạn";
+}
+
+function getTaskVisual(task: { title: string; leadIndicatorName?: string; isCore?: boolean }) {
+  const lowerTitle = task.title.toLowerCase();
+
+  if (lowerTitle.includes("check")) {
+    return {
+      icon: Compass,
+      label: "Check-in",
+      iconClass:
+        "bg-gradient-to-br from-teal-100 to-cyan-100 text-teal-700 dark:from-teal-950/50 dark:to-cyan-950/40 dark:text-teal-200",
+    };
+  }
+
+  if (task.leadIndicatorName || task.isCore) {
+    return {
+      icon: Zap,
+      label: "Lead",
+      iconClass:
+        "bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 dark:from-amber-950/50 dark:to-orange-950/40 dark:text-amber-200",
+    };
+  }
+
+  return {
+    icon: Target,
+    label: "Output",
+    iconClass:
+      "bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 dark:from-violet-950/50 dark:to-fuchsia-950/40 dark:text-violet-200",
+  };
+}
+
+function DashboardWeekProgressRing({ value }: { value: number }) {
+  const safeValue = Math.max(0, Math.min(100, Math.round(value)));
+  const radius = 54;
+  const circumference = 2 * Math.PI * radius;
+  const dashOffset = circumference - (safeValue / 100) * circumference;
+
+  return (
+    <div className="glass-surface-sm flex min-h-[180px] flex-col items-center justify-center rounded-[var(--r-card)] p-5 ring-1 ring-slate-200/70">
+      <div className="relative h-36 w-36">
+        <svg className="h-full w-full -rotate-90" viewBox="0 0 140 140" aria-hidden="true">
+          <defs>
+            <linearGradient id="dashboard-week-ring" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stopColor="#7c3aed" />
+              <stop offset="55%" stopColor="#c026d3" />
+              <stop offset="100%" stopColor="#f43f5e" />
+            </linearGradient>
+          </defs>
+          <circle cx="70" cy="70" r={radius} fill="none" stroke="rgb(226 232 240)" strokeWidth="12" />
+          <circle
+            cx="70"
+            cy="70"
+            r={radius}
+            fill="none"
+            stroke="url(#dashboard-week-ring)"
+            strokeDasharray={circumference}
+            strokeDashoffset={dashOffset}
+            strokeLinecap="round"
+            strokeWidth="12"
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+          <p className="count-up text-3xl font-bold tabular-nums text-slate-950">{safeValue}%</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tuần này</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function Dashboard() {
   const { userData, reloadUserData } = useSyncedUserData();
@@ -364,6 +472,9 @@ function DashboardContent({
   const dashboardKpiCurrentWeek = activeSystemWeek ?? currentWeekExecutionSnapshot.weekNumber ?? null;
   const dashboardKpiTotalWeeks = effectiveSystem?.totalWeeks ?? 12;
   const dashboardKpiStreak = weeklyStreak > 0 ? weeklyStreak : journalStreak;
+  const dashboardGreeting = getDashboardGreeting();
+  const dashboardDisplayName = getDashboardDisplayName(user);
+  const dashboardOpenTaskCount = activeSystemTodayOpenTasks.length;
   const signedIn = Boolean(user);
   const hasLocalTwelveWeekSystem = Boolean(effectiveSystem);
   const hasWorkspaceSignals =
@@ -579,10 +690,13 @@ function DashboardContent({
               hero
               titleAs="h2"
               density="compact"
+              className={dashboardGreeting.surfaceClass}
               eyebrow={dashboardNextAction.eyebrow}
-              title={dashboardNextAction.title}
-              description={dashboardNextAction.description}
+              title={`${dashboardGreeting.label}, ${dashboardDisplayName}`}
+              description={`Tuần ${dashboardKpiCurrentWeek ?? "--"}/${dashboardKpiTotalWeeks} — còn ${dashboardOpenTaskCount} việc hôm nay`}
               icon={<CalendarDays className="h-4 w-4" />}
+              titleClassName={`text-3xl font-bold leading-[1.08] tracking-tight sm:text-4xl lg:text-5xl ${dashboardGreeting.textClass}`}
+              descriptionClassName="count-up text-sm font-semibold tabular-nums text-slate-700 sm:text-base"
               headerClassName="relative z-10"
               actionClassName="relative z-10"
               action={
@@ -598,6 +712,25 @@ function DashboardContent({
               }
             >
               <div className="stack-stack">
+                <div className="flex flex-wrap items-start justify-between gap-3 rounded-[var(--r-tile)] bg-white/82 p-4 ring-1 ring-slate-200/70 dark:bg-slate-900/60 dark:ring-slate-700">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
+                      {dashboardNextAction.title}
+                    </p>
+                    <p className="mt-1 text-sm leading-6 text-slate-700">{dashboardNextAction.description}</p>
+                  </div>
+                  <span
+                    className={`inline-flex shrink-0 items-center gap-2 rounded-[var(--r-pill)] px-3 py-1.5 text-xs font-bold ${
+                      dashboardKpiStreak >= 7
+                        ? "bg-gradient-to-r from-orange-500 to-rose-500 text-white shadow-lg shadow-rose-500/25 ring-4 ring-rose-500/10 motion-safe:animate-pulse"
+                        : "bg-slate-100 text-slate-700 ring-1 ring-slate-200"
+                    }`}
+                  >
+                    <Flame className="h-3.5 w-3.5" />
+                    {dashboardKpiStreak} ngày
+                  </span>
+                </div>
+
                 {activeSystem && activeSystemTodayOpenTasks.length > 0 && (
                   <div data-tour-id="dashboard-start-card" className="rounded-[var(--r-tile)] bg-white/88 p-4 ring-1 ring-slate-200">
                     <div className="flex items-start gap-3">
@@ -675,6 +808,94 @@ function DashboardContent({
             />
           </SectionBlock>
 
+          {activeSystem && (
+            <SectionBlock
+              title="Việc hôm nay"
+              description={isDesktopViewport ? "Nhìn nhanh những việc tạo lực đẩy tuần này. Mở Today để đánh dấu và check-in." : undefined}
+            >
+              <div className="grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1fr)_190px]">
+                {activeSystemTodayTasks.length > 0 ? (
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {activeSystemTodayTasks.slice(0, 4).map((task) => {
+                      const visual = getTaskVisual(task);
+                      const Icon = visual.icon;
+                      const weekPercent = activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore;
+
+                      return (
+                        <button
+                          key={task.id}
+                          type="button"
+                          className="card-hover-lift group rounded-[var(--r-tile)] border border-slate-200/70 bg-white/92 p-4 text-left shadow-sm transition-colors hover:border-violet-200 hover:bg-violet-50/45 dark:border-slate-700 dark:bg-slate-900/70"
+                          onClick={() => navigate("/12-week-system?tab=today")}
+                          aria-label={`${task.completed ? "Đã hoàn thành" : "Mở Today để xử lý"}: ${task.title}`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div
+                              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-control)] shadow-sm ${visual.iconClass}`}
+                            >
+                              <Icon className="h-4 w-4" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                    {visual.label}
+                                  </p>
+                                  <h3 className="mt-1 line-clamp-2 text-sm font-semibold leading-6 text-slate-950">
+                                    {task.title}
+                                  </h3>
+                                </div>
+                                <span
+                                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--r-pill)] transition-transform group-hover:scale-105 ${
+                                    task.completed
+                                      ? "bg-gradient-to-br from-violet-600 to-emerald-600 text-white shadow-sm"
+                                      : "border border-slate-300 bg-white text-slate-400"
+                                  }`}
+                                >
+                                  {task.completed ? <CheckCircle2 className="h-4 w-4" /> : null}
+                                </span>
+                              </div>
+                              <p className="mt-1 text-xs text-slate-500">
+                                Tuần {task.weekNumber}
+                                {task.scheduledDate ? ` · ${formatCalendarDate(task.scheduledDate)}` : ""}
+                              </p>
+                              <div className="mt-3 h-1.5 overflow-hidden rounded-[var(--r-pill)] bg-slate-100">
+                                <div
+                                  className="h-full rounded-[var(--r-pill)] bg-gradient-to-r from-violet-600 to-fuchsia-600"
+                                  style={{ width: `${Math.max(0, Math.min(100, weekPercent))}%` }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="rounded-[var(--r-card)] border border-dashed border-violet-200/80 bg-gradient-to-br from-violet-50 to-fuchsia-50 p-6 text-center dark:border-violet-400/20 dark:from-violet-950/35 dark:to-fuchsia-950/25">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[var(--r-tile)] bg-white text-violet-700 shadow-sm">
+                      <Plus className="h-6 w-6" />
+                    </div>
+                    <h3 className="mt-4 text-base font-semibold text-slate-950">Hôm nay là ngày để bắt đầu nhỏ.</h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      Click + để thêm task đầu tiên trong trung tâm 12 tuần.
+                    </p>
+                    <Button
+                      className="mt-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700"
+                      onClick={() => navigate("/12-week-system?tab=today")}
+                    >
+                      Mở Today
+                    </Button>
+                  </div>
+                )}
+
+                <DashboardWeekProgressRing
+                  value={activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore}
+                />
+              </div>
+            </SectionBlock>
+          )}
+
           {isMobileViewport && topTrigger ? (
             <SectionBlock
               title="Cảnh báo tuần này"
@@ -736,7 +957,7 @@ function DashboardContent({
               actions={
                 <Button
                   variant="secondary"
-                  className="w-full bg-foreground text-white hover:bg-foreground/90 sm:w-auto"
+                  className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
                   onClick={() => navigate("/onboarding")}
                 >
                   Bắt đầu Life Balance
