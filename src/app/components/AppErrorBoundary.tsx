@@ -42,7 +42,6 @@ export function AppErrorBoundary() {
 
   return (
     <div className="app-shell min-h-screen" data-route-tone="system">
-      <div className="cursor-glow" />
       <div className="ambient-orb ambient-orb--violet" />
       <div className="ambient-orb ambient-orb--cyan" />
       <div className="ambient-orb ambient-orb--rose" />

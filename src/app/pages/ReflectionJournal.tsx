@@ -1,6 +1,5 @@
 ﻿import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { AnimatePresence, motion } from "motion/react";
 import {
   ArrowRight,
   BookOpen,
@@ -33,7 +32,6 @@ import { Card, CardContent, CardDescription, CardHeader } from "../components/ui
 import { CountUp } from "../components/ui/count-up";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
-import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { Label } from "../components/ui/label";
 import { Reveal } from "../components/ui/reveal";
 import { Textarea } from "../components/ui/textarea";
@@ -96,7 +94,6 @@ function getMoodConfig(mood?: string) {
 
 export function ReflectionJournal() {
   const navigate = useNavigate();
-  const prefersReducedMotion = useReducedMotion();
   const { userData, reloadUserData } = useSyncedUserData();
   const [isAddingReflection, setIsAddingReflection] = useState(false);
   const [newReflection, setNewReflection] = useState({
@@ -523,16 +520,11 @@ export function ReflectionJournal() {
                 icon: Sparkles,
                 color: "from-amber-500/18 to-orange-500/10 text-amber-700",
               },
-            ].map((item, index) => {
+            ].map((item) => {
               const Icon = item.icon;
 
               return (
-                <motion.div
-                  key={item.title}
-                  initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.08 * index }}
-                >
+                <div key={item.title}>
                   <Card className="relative overflow-hidden">
                     <div
                       className={`absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
@@ -554,7 +546,7 @@ export function ReflectionJournal() {
                       <p className="text-sm text-slate-500">{item.note}</p>
                     </CardContent>
                   </Card>
-                </motion.div>
+                </div>
               );
             })}
           </div>
@@ -682,22 +674,13 @@ export function ReflectionJournal() {
               </div>
             )}
 
-            <AnimatePresence>
-              {filteredReflections.map((reflection, index) => {
+            <div className="contents">
+              {filteredReflections.map((reflection) => {
                 const mood = getMoodConfig(reflection.mood);
                 const linkedGoal = reflection.linkedGoalId ? goalsById.get(reflection.linkedGoalId) : null;
 
                 return (
-                  <motion.div
-                    key={reflection.id}
-                    layout
-                    initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={
-                      prefersReducedMotion ? { duration: 0 } : { delay: index * 0.05, duration: 0.25 }
-                    }
-                  >
+                  <div key={reflection.id}>
                     <Card className="overflow-hidden">
                       <CardContent className="p-6 lg:p-7">
                         <div className="flex items-start justify-between gap-4">
@@ -769,10 +752,10 @@ export function ReflectionJournal() {
                         )}
                       </CardContent>
                     </Card>
-                  </motion.div>
+                  </div>
                 );
               })}
-            </AnimatePresence>
+            </div>
           </div>
 
           <div className="stack-section xl:sticky xl:top-28">

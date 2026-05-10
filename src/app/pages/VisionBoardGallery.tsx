@@ -1,6 +1,5 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { motion } from "motion/react";
 import {
   Calendar,
   Edit,
@@ -36,7 +35,6 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { InteractiveSurface } from "../components/ui/interactive-surface";
-import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { deleteVisionBoard, getUserData, saveUserData, type VisionBoard } from "../utils/storage";
 import { useAuthContext } from "@/lib/auth/AuthContext";
@@ -73,7 +71,6 @@ function BoardPreviewIcon({ content }: { content: string }) {
 export function VisionBoardGallery() {
   const navigate = useNavigate();
   const location = useLocation();
-  const prefersReducedMotion = useReducedMotion();
   const { user } = useAuthContext();
   const { userData, reloadUserData } = useSyncedUserData();
   const [boardToDelete, setBoardToDelete] = useState<string | null>(null);
@@ -201,7 +198,7 @@ export function VisionBoardGallery() {
       </AlertDialog>
 
       <InteractiveSurface className="rounded-[var(--r-card)]" intensity={4} translate={10} shine={false}>
-        <Card interactive={false} className="hero-surface overflow-hidden border-0 text-white">
+        <Card className="hero-surface overflow-hidden border-0 text-white">
           <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.12),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.08),_transparent_22%)] opacity-55" />
 
@@ -311,16 +308,11 @@ export function VisionBoardGallery() {
             icon: ImageIcon,
             color: "from-emerald-500/18 to-teal-500/10 text-emerald-700",
           },
-        ].map((item, index) => {
+        ].map((item) => {
           const Icon = item.icon;
 
           return (
-            <motion.div
-              key={item.title}
-              initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.04 * index, duration: 0.22 }}
-            >
+            <div key={item.title}>
               <Card className="relative gap-4 overflow-hidden">
                 <div
                   className={`absolute inset-x-6 top-0 h-14 rounded-b-[24px] bg-gradient-to-br ${item.color} opacity-65 blur-xl`}
@@ -340,7 +332,7 @@ export function VisionBoardGallery() {
                   <p className="text-sm text-slate-500">{item.note}</p>
                 </CardContent>
               </Card>
-            </motion.div>
+            </div>
           );
         })}
       </div>
@@ -377,29 +369,21 @@ export function VisionBoardGallery() {
               </div>
 
               <div className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {boardsByYear[year].map((board, index) => {
+                {boardsByYear[year].map((board) => {
                   const imageCount = board.items.filter((item) => item.type === "image").length;
                   const quoteCount = board.items.filter((item) => item.type === "quote").length;
                   const iconCount = board.items.filter((item) => item.type === "icon").length;
                   const isSpotlight = spotlightBoardId === board.id;
 
                   return (
-                    <motion.div
-                      key={board.id}
-                      initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-                      animate={isSpotlight ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
-                      transition={prefersReducedMotion ? { duration: 0 } : { delay: index * 0.03, duration: 0.24 }}
-                    >
+                    <div key={board.id}>
                       <InteractiveSurface
                         className="preview-hover-card group rounded-[var(--r-card)]"
                         intensity={4}
                         translate={8}
                         shine={false}
                       >
-                        <Card
-                          interactive={false}
-                          className={isSpotlight ? "spotlight-card gap-5 overflow-hidden" : "gap-5 overflow-hidden"}
-                        >
+                        <Card className={isSpotlight ? "spotlight-card gap-5 overflow-hidden" : "gap-5 overflow-hidden"}>
                           <CardHeader className="pb-0">
                             <div className="flex items-start justify-between gap-3">
                               <div>
@@ -531,7 +515,7 @@ export function VisionBoardGallery() {
                           </CardContent>
                         </Card>
                       </InteractiveSurface>
-                    </motion.div>
+                    </div>
                   );
                 })}
               </div>

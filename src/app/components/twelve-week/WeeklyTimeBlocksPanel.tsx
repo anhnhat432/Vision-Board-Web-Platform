@@ -128,7 +128,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
   };
 
   return (
-    <Card className="border border-slate-200/80 bg-white/92 shadow-sm" interactive={false}>
+    <Card className="border border-slate-200/80 bg-white/92 shadow-sm">
       <CardHeader>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>

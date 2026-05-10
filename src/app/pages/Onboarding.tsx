@@ -55,7 +55,6 @@ function OnboardingPageMotion({ children }: { children: ReactNode }) {
 
 export function Onboarding() {
   const navigate = useNavigate();
-  const prefersReducedMotion = useReducedMotion();
   const [step, setStep] = useState<OnboardingStep>("welcome");
   const [isReturning, setIsReturning] = useState(false);
   const [lifeAreas, setLifeAreas] = useState<LifeArea[]>(LIFE_AREAS.map((area) => ({ ...area, score: 5 })));
@@ -305,11 +304,8 @@ export function Onboarding() {
           <Card className="flow-panel overflow-hidden">
             <CardContent className="stack-tight p-5 sm:p-6">
               {lifeAreas.map((area, index) => (
-                <motion.div
+                <div
                   key={area.name}
-                  initial={prefersReducedMotion ? false : { opacity: 0, x: -18 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={prefersReducedMotion ? { duration: 0 } : { delay: index * 0.05 }}
                   className="rounded-[var(--r-tile)] border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
                 >
                   <div className="flex items-center justify-between gap-3">
@@ -343,7 +339,7 @@ export function Onboarding() {
                       aria-label={`Điểm ${getLifeAreaLabel(area.name)}`}
                     />
                   </div>
-                </motion.div>
+                </div>
               ))}
             </CardContent>
           </Card>

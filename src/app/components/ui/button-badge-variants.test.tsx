@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
 
 import { badgeVariants } from "./badge";
-import { buttonVariants } from "./button";
+import { Button, buttonVariants } from "./button";
 import { Card } from "./card";
 import { Dialog, DialogContent, DialogTitle } from "./dialog";
 import { Input } from "./input";
@@ -25,6 +25,20 @@ describe("UI primitive visual hierarchy", () => {
     expect(outline).toContain("border-slate-300");
     expect(outline).toContain("bg-white");
     expect(outline).toContain("text-slate-900");
+  });
+
+  it("limits button magnetic motion to the primary hierarchy", () => {
+    render(
+      <>
+        <Button>Primary action</Button>
+        <Button variant="secondary">Secondary action</Button>
+        <Button variant="outline">Outline action</Button>
+      </>,
+    );
+
+    expect(document.querySelector("button:nth-of-type(1)")?.className).toContain("button-magnetic");
+    expect(document.querySelector("button:nth-of-type(2)")?.className).not.toContain("button-magnetic");
+    expect(document.querySelector("button:nth-of-type(3)")?.className).not.toContain("button-magnetic");
   });
 
   it("maps badge status variants to semantic color tokens", () => {

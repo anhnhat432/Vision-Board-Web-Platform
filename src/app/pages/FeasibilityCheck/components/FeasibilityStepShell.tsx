@@ -93,13 +93,8 @@ export function FeasibilityStepShell({
                 aria-describedby={`feasibility-question-${currentQuestion.id}-helper`}
                 className="stack-tight"
               >
-                {currentQuestion.options.map((option, index) => (
-                  <motion.div
-                    key={option.value}
-                    initial={prefersReducedMotion ? false : { opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={prefersReducedMotion ? { duration: 0 } : { delay: index * 0.05 }}
-                  >
+                {currentQuestion.options.map((option) => (
+                  <div key={option.value}>
                     <Label
                       htmlFor={option.value}
                       className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-[var(--r-card)] border px-4 py-3 transition-colors transition-shadow duration-150 sm:gap-4 sm:px-5 sm:py-4 ${
@@ -114,7 +109,7 @@ export function FeasibilityStepShell({
                       </div>
                       {selectedAnswer === option.value && <CheckCircle2 className="h-5 w-5 shrink-0 text-violet-600" />}
                     </Label>
-                  </motion.div>
+                  </div>
                 ))}
               </RadioGroup>
             </SectionBlock>

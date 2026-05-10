@@ -1,6 +1,5 @@
 ﻿import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import { useBlocker, useNavigate } from "react-router";
-import { motion } from "motion/react";
 import {
   AlertTriangle,
   ArrowRight,
@@ -20,7 +19,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { CountUp } from "../components/ui/count-up";
 import { ProductVisual } from "../components/visuals/ProductVisual";
 import { Reveal } from "../components/ui/reveal";
-import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { Slider } from "../components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
@@ -39,7 +37,6 @@ const LifeBalanceHistoryChart = lazy(() =>
 
 export function LifeBalance() {
   const navigate = useNavigate();
-  const prefersReducedMotion = useReducedMotion();
   const { userData, reloadUserData } = useSyncedUserData();
   const [lifeAreas, setLifeAreas] = useState<LifeArea[]>([]);
   const [hasChanges, setHasChanges] = useState(false);
@@ -394,16 +391,11 @@ export function LifeBalance() {
               icon: Calendar,
               color: "from-sky-500/18 to-cyan-500/10 text-sky-700 dark:text-sky-400",
             },
-          ].map((item, index) => {
+          ].map((item) => {
             const Icon = item.icon;
 
             return (
-              <motion.div
-                key={item.title}
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.08 * index }}
-              >
+              <div key={item.title}>
                 <Card className="relative overflow-hidden">
                   <div
                     className={`absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
@@ -429,7 +421,7 @@ export function LifeBalance() {
                     <p className="text-sm text-slate-500">{item.note}</p>
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             );
           })}
         </div>

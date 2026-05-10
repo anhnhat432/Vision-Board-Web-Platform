@@ -1,6 +1,5 @@
 ﻿import { useMemo } from "react";
 import { useNavigate } from "react-router";
-import { motion } from "motion/react";
 import {
   Award,
   BookOpen,
@@ -20,7 +19,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { CountUp } from "../components/ui/count-up";
 import { InteractiveSurface } from "../components/ui/interactive-surface";
 import { Reveal } from "../components/ui/reveal";
-import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { calculateGoalProgress } from "../utils/storage";
 
@@ -76,7 +74,6 @@ const ACHIEVEMENT_ORDER = Object.keys(ACHIEVEMENT_COPY);
 
 export function Achievements() {
   const navigate = useNavigate();
-  const prefersReducedMotion = useReducedMotion();
   const { userData } = useSyncedUserData();
 
   const sortedAchievements = useMemo(() => {
@@ -102,7 +99,7 @@ export function Achievements() {
   return (
     <div className="stack-section pb-12">
       <InteractiveSurface className="rounded-[var(--r-card)]" intensity={9} translate={22}>
-        <Card interactive={false} className="hero-surface overflow-hidden border-0 text-white">
+        <Card className="hero-surface overflow-hidden border-0 text-white">
           <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
 
@@ -212,16 +209,11 @@ export function Achievements() {
               icon: BookOpen,
               color: "from-emerald-500/18 to-teal-500/10 text-emerald-700",
             },
-          ].map((item, index) => {
+          ].map((item) => {
             const Icon = item.icon;
 
             return (
-              <motion.div
-                key={item.title}
-                initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.08 * index }}
-              >
+              <div key={item.title}>
                 <Card className="relative overflow-hidden">
                   <div
                     className={`absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
@@ -243,7 +235,7 @@ export function Achievements() {
                     <p className="text-sm text-slate-500">{item.note}</p>
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             );
           })}
         </div>
@@ -282,7 +274,7 @@ export function Achievements() {
           </div>
 
           <div className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {sortedAchievements.map((achievement, index) => {
+            {sortedAchievements.map((achievement) => {
               const localized = ACHIEVEMENT_COPY[achievement.title] ?? {
                 title: achievement.title,
                 description: achievement.description,
@@ -291,12 +283,7 @@ export function Achievements() {
               const Icon = ICON_MAP[localized.icon] ?? Trophy;
 
               return (
-                <motion.div
-                  key={achievement.id}
-                  initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={prefersReducedMotion ? { duration: 0 } : { delay: index * 0.05 }}
-                >
+                <div key={achievement.id}>
                   <Card className="overflow-hidden">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
@@ -321,7 +308,7 @@ export function Achievements() {
                       </div>
                     </CardContent>
                   </Card>
-                </motion.div>
+                </div>
               );
             })}
           </div>

@@ -71,7 +71,6 @@ export function TwelveWeekCycleSettingsPanel({
       </AlertDialog>
       <Card
         data-tour-id="system-settings-panel"
-        interactive={false}
         className="border border-slate-200/80 bg-white/92 shadow-sm"
       >
         <CardHeader>

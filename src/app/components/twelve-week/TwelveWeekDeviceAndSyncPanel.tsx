@@ -28,10 +28,7 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
     : "Quản lý quyền Plus, nhắc việc và dữ liệu đang lưu trên trình duyệt này. Các thao tác xóa đều cần xác nhận.";
 
   return (
-    <Card
-      interactive={false}
-      className="border border-slate-200/80 bg-slate-50/80 shadow-sm lg:sticky lg:top-6"
-    >
+    <Card className="border border-slate-200/80 bg-slate-50/80 shadow-sm lg:sticky lg:top-6">
       <CardHeader>
         <CardTitle className="text-slate-950">Dữ liệu, nhắc việc và quyền Plus</CardTitle>
         <CardDescription className="text-slate-600">{storageDescription}</CardDescription>

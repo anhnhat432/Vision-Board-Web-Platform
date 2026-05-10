@@ -328,10 +328,7 @@ export function TwelveWeekProgressTab({
         defaultOpen={true}
       >
         <div className="grid gap-[var(--space-stack)] md:grid-cols-3">
-        <Card
-          interactive={false}
-          className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
-        >
+        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
               <CalendarDays className="h-3.5 w-3.5" />
@@ -348,10 +345,7 @@ export function TwelveWeekProgressTab({
           </CardContent>
         </Card>
 
-        <Card
-          interactive={false}
-          className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
-        >
+        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
               <BarChart3 className="h-3.5 w-3.5" />
@@ -378,10 +372,7 @@ export function TwelveWeekProgressTab({
           </CardContent>
         </Card>
 
-        <Card
-          interactive={false}
-          className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
-        >
+        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
               <Flag className="h-3.5 w-3.5" />
@@ -401,10 +392,7 @@ export function TwelveWeekProgressTab({
       </SectionBlock>
 
       <div className="grid gap-[var(--space-section)] lg:grid-cols-[minmax(0,1fr)_360px]">
-        <Card
-          interactive={false}
-          className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
-        >
+        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-slate-950">
               <BarChart3 className="h-5 w-5 text-sky-700" />
@@ -508,10 +496,7 @@ export function TwelveWeekProgressTab({
           </CardContent>
         </Card>
 
-        <Card
-          interactive={false}
-          className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
-        >
+        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-slate-950">
               <Target className="h-5 w-5 text-indigo-600" />
@@ -549,10 +534,7 @@ export function TwelveWeekProgressTab({
       {hasAdvancedAnalytics ? (
         <div className="stack-section">
           {executionHeatmap.length > 0 && (
-            <Card
-              interactive={false}
-              className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
-            >
+            <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
               <CardHeader>
                 <CardTitle className="text-slate-950">Bản đồ thực thi</CardTitle>
                 <CardDescription className="text-slate-700">
@@ -625,10 +607,7 @@ export function TwelveWeekProgressTab({
           )}
 
           {weeklyTrend.length > 0 && (
-            <Card
-              interactive={false}
-              className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
-            >
+            <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
               <CardHeader>
                 <CardTitle className="text-slate-950">Xu hướng thực thi theo tuần</CardTitle>
                 <CardDescription className="text-slate-600">
@@ -685,10 +664,7 @@ export function TwelveWeekProgressTab({
           )}
 
           {tacticBreakdown.length > 0 && (
-            <Card
-              interactive={false}
-              className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
-            >
+            <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
               <CardHeader>
                 <CardTitle className="text-slate-950">Phân tích theo việc lặp lại</CardTitle>
                 <CardDescription className="text-slate-600">
@@ -747,10 +723,7 @@ export function TwelveWeekProgressTab({
           )}
         </div>
       ) : (
-        <Card
-          interactive={false}
-          className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
-        >
+        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
           <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-[var(--r-control)] bg-violet-100 text-violet-600">
               <Lock className="h-6 w-6" />

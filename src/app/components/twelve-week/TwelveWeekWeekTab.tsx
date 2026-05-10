@@ -303,10 +303,7 @@ export function TwelveWeekWeekTab({
       )}
       <SectionBlock title="Tóm tắt tuần hiện tại" headerVisuallyHidden>
         <div className="grid gap-[var(--space-stack)] md:grid-cols-3">
-        <Card
-          interactive={false}
-          className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
-        >
+        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
               <Flag className="h-3.5 w-3.5" />
@@ -315,10 +312,7 @@ export function TwelveWeekWeekTab({
             <p className="mt-[var(--space-inline)] text-lg font-semibold leading-8 text-slate-950">{currentPlanFocus}</p>
           </CardContent>
         </Card>
-        <Card
-          interactive={false}
-          className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
-        >
+        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
               <TrendingUp className="h-3.5 w-3.5" />
@@ -345,10 +339,7 @@ export function TwelveWeekWeekTab({
             )}
           </CardContent>
         </Card>
-        <Card
-          interactive={false}
-          className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
-        >
+        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
           <CardContent className="p-5">
             <p
               className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] ${

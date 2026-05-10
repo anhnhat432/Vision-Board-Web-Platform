@@ -54,7 +54,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
 ) {
   const prefersReducedMotion = useReducedMotion();
   const Comp = asChild ? Slot : "button";
-  const magnetic = !prefersReducedMotion && variant !== "link";
+  const isPrimaryVariant = variant === undefined || variant === "default";
+  const magnetic = !prefersReducedMotion && isPrimaryVariant;
 
   const setPointer = (element: HTMLElement, x: number, y: number, hovering: boolean) => {
     const shiftX = ((x - 0.5) * 5).toFixed(2);

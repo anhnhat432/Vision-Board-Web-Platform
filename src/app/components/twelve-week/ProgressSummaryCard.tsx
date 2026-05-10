@@ -152,7 +152,7 @@ export function ProgressSummaryCard({
 
   return (
     <div className="stack-section pt-4">
-      <Card interactive={false} data-testid="progress-trend-hero" className={`border ${narrativeStyle.container}`}>
+      <Card data-testid="progress-trend-hero" className={`border ${narrativeStyle.container}`}>
         <CardContent className="p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
@@ -196,7 +196,7 @@ export function ProgressSummaryCard({
       </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card interactive={false} className="border border-slate-200/80 bg-white/92 shadow-sm">
+        <Card className="border border-slate-200/80 bg-white/92 shadow-sm">
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
               <CalendarDays className="h-3.5 w-3.5" />
@@ -213,7 +213,7 @@ export function ProgressSummaryCard({
           </CardContent>
         </Card>
 
-        <Card interactive={false} className="border border-sky-200/80 bg-sky-50/70 shadow-lg">
+        <Card className="border border-sky-200/80 bg-sky-50/70 shadow-lg">
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
               <BarChart3 className="h-3.5 w-3.5" />
@@ -224,7 +224,7 @@ export function ProgressSummaryCard({
           </CardContent>
         </Card>
 
-        <Card interactive={false} className="border border-emerald-200/80 bg-emerald-50/70 shadow-lg">
+        <Card className="border border-emerald-200/80 bg-emerald-50/70 shadow-lg">
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
               <Flag className="h-3.5 w-3.5" />
@@ -244,7 +244,7 @@ export function ProgressSummaryCard({
         </Card>
       </div>
 
-      <Card interactive={false} className="border border-slate-200/80 bg-white/92 shadow-sm">
+      <Card className="border border-slate-200/80 bg-white/92 shadow-sm">
         <CardContent className="stack-stack p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>

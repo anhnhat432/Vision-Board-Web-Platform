@@ -1,6 +1,5 @@
 ﻿import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { AnimatePresence, motion } from "motion/react";
 import {
   AlertTriangle,
   CalendarDays,
@@ -37,7 +36,6 @@ import { SectionBlock } from "../components/layout/SectionBlock";
 import { ProductVisual } from "../components/visuals/ProductVisual";
 import { Progress } from "../components/ui/progress";
 import { Reveal } from "../components/ui/reveal";
-import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { useBackendProgressOverlayMap } from "../hooks/useBackendProgressOverlay";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
@@ -129,7 +127,6 @@ function GoalTrackerContent({
   onReload: () => void;
 }) {
   const navigate = useNavigate();
-  const prefersReducedMotion = useReducedMotion();
   const [expandedGoals, setExpandedGoals] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const { currentPlanCode, hasPremiumReviewInsights } = usePlanEntitlements(userData);
@@ -937,20 +934,9 @@ function GoalTrackerContent({
                   </Badge>
                 </div>
                 <div className="stack-stack">
-                  <AnimatePresence>
-                    {filteredTwelveWeekGoals.map((goal) => (
-                      <motion.div
-                        key={goal.id}
-                        layout
-                        initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: prefersReducedMotion ? 0 : 0.25 }}
-                      >
-                        {renderGoalCard(goal)}
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
+                  {filteredTwelveWeekGoals.map((goal) => (
+                    <div key={goal.id}>{renderGoalCard(goal)}</div>
+                  ))}
                 </div>
               </SectionBlock>
             )}
@@ -977,20 +963,9 @@ function GoalTrackerContent({
                   </Badge>
                 </div>
                 <div className="stack-stack">
-                  <AnimatePresence>
-                    {filteredStandardGoals.map((goal) => (
-                      <motion.div
-                        key={goal.id}
-                        layout
-                        initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: prefersReducedMotion ? 0 : 0.25 }}
-                      >
-                        {renderGoalCard(goal)}
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
+                  {filteredStandardGoals.map((goal) => (
+                    <div key={goal.id}>{renderGoalCard(goal)}</div>
+                  ))}
                 </div>
               </SectionBlock>
             )}
