@@ -74,7 +74,7 @@ export const QUESTIONS: Question[] = [
         value: "resources_basic",
         label: "Có nền cơ bản nhưng còn nhiều lỗ hổng",
         score: 2,
-        diagnostic: "Kế hoạch nên chừa chỗ cho học và thử nghiệm.",
+        diagnostic: "Kế hoạch nên chừa chỗ cho học và điều chỉnh.",
       },
       {
         value: "resources_mostly_ready",

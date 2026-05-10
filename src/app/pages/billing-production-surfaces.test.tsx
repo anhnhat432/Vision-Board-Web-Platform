@@ -3,7 +3,22 @@ import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-function stubRealBillingEnv(providerLabel = "Stripe") {
+function stubRealBillingEnv(
+  providerLabel = "Stripe",
+  entitlement: {
+    planCode: string;
+    status: string;
+    entitlements: string[];
+    currentPeriodEnd?: string | null;
+    cancelAtPeriodEnd?: boolean;
+  } = {
+    planCode: "FREE",
+    status: "none",
+    entitlements: [],
+    currentPeriodEnd: null,
+    cancelAtPeriodEnd: false,
+  },
+) {
   vi.resetModules();
   vi.stubEnv("VITE_APP_MODE", "real");
   vi.stubEnv("VITE_BILLING_PROVIDER_MODE", "api_contract");
@@ -11,7 +26,19 @@ function stubRealBillingEnv(providerLabel = "Stripe") {
   vi.stubEnv("VITE_API_BASE_URL", "https://api.example.test");
   vi.doMock("@/lib/api/apiClient", () => ({
     apiClient: {
-      get: vi.fn().mockResolvedValue({ orders: [] }),
+      get: vi.fn((path: string) => {
+        if (path === "/billing/entitlement") {
+          return Promise.resolve({
+            planCode: entitlement.planCode,
+            status: entitlement.status,
+            entitlements: entitlement.entitlements,
+            currentPeriodEnd: entitlement.currentPeriodEnd ?? null,
+            cancelAtPeriodEnd: entitlement.cancelAtPeriodEnd ?? false,
+          });
+        }
+
+        return Promise.resolve({ orders: [] });
+      }),
       post: vi.fn().mockResolvedValue({
         checkoutSessionId: "checkout_test",
         checkoutUrl: "https://checkout.example.test/session",
@@ -137,5 +164,31 @@ describe("production billing surfaces", () => {
       expect(router.state.location.pathname).toBe("/billing/checkout");
     });
     expect(await screen.findByTestId("vietqr-checkout-page")).toBeInTheDocument();
+  }, UI_TEST_TIMEOUT_MS);
+
+  it("shows a 12-week plan CTA after a confirmed real checkout return", async () => {
+    stubRealBillingEnv("Stripe", {
+      planCode: "PLUS",
+      status: "active",
+      entitlements: ["premium_templates", "premium_review_insights"],
+      currentPeriodEnd: "2026-06-01T00:00:00.000Z",
+      cancelAtPeriodEnd: false,
+    });
+    const { BillingPlan } = await import("./BillingPlan");
+
+    const router = createMemoryRouter(
+      [
+        { path: "/billing/plan", element: <BillingPlan /> },
+        { path: "/12-week-system", element: <div data-testid="twelve-week-system-page">12-week system</div> },
+      ],
+      {
+        initialEntries: ["/billing/plan?status=success&context=plan"],
+      },
+    );
+    render(<RouterProvider router={router} />);
+
+    expect(await screen.findByText("Thanh toán đã xác nhận")).toBeInTheDocument();
+    const startPlanLink = screen.getByRole("link", { name: "Bắt đầu 12-week plan" });
+    expect(startPlanLink).toHaveAttribute("href", "/12-week-system");
   }, UI_TEST_TIMEOUT_MS);
 });

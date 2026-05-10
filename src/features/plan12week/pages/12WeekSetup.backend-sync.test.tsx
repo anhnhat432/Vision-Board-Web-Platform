@@ -92,6 +92,21 @@ function setAuthNotConfigured() {
   });
 }
 
+function setAuthSignedOut() {
+  authContext.useAuthContext.mockReturnValue({
+    user: null,
+    userProfile: null,
+    userProfileLoading: false,
+    userProfileError: null,
+    authLoading: false,
+    error: null,
+    login: vi.fn(),
+    logout: vi.fn(),
+    refreshUserProfile: vi.fn(),
+    isConfigured: true,
+  });
+}
+
 function buildPlanDetails(planId = "backend_plan_1", smartGoalId = "backend_goal_1") {
   return {
     plan: {
@@ -290,6 +305,32 @@ describe("12-week setup backend sync", () => {
     expect(createPlan).not.toHaveBeenCalled();
     expect(updateGoal).not.toHaveBeenCalled();
   }, INTEGRATION_TEST_TIMEOUT_MS);
+
+  it("requires login before opening setup in real mode when signed out", async () => {
+    appMode.value = "real";
+    setAuthSignedOut();
+    seedReadyTwelveWeekSetup();
+
+    const router = createMemoryRouter(
+      [
+        { path: "/12-week-setup", element: <TwelveWeekSetup /> },
+        { path: "/login", element: <div>Login</div> },
+        { path: "/", element: <div>Home</div> },
+      ],
+      { initialEntries: ["/12-week-setup"] },
+    );
+
+    render(<RouterProvider router={router} />);
+
+    expect(await screen.findByRole("heading", { name: "Đăng nhập để bắt đầu" })).toBeInTheDocument();
+    expect(screen.getByText(/Phiên bản đầy đủ lưu kế hoạch 12 tuần lên tài khoản/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Đăng nhập với Google" })).toHaveAttribute(
+      "href",
+      "/login?next=%2F12-week-setup",
+    );
+    expect(screen.getByRole("link", { name: "Quay về trang chính" })).toHaveAttribute("href", "/");
+    expect(screen.queryByRole("heading", { name: "Mục tiêu 12 tuần" })).not.toBeInTheDocument();
+  });
 
   it("creates backend goal, syncs plan with backend goal id, stores links, then updates goal with plan id", async () => {
     seedReadyTwelveWeekSetup();

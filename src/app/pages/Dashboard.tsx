@@ -552,7 +552,10 @@ function DashboardContent({
           return (
             <div className="rounded-[var(--r-tile)] border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] px-4 py-3 text-sm flex flex-wrap items-center gap-3">
               <span>
-                <span className="font-semibold">Plus dùng thử:</span> còn {daysLeft} ngày trên trình duyệt này.
+                <span className="font-semibold">
+                  {demoMode ? "Plus dùng thử:" : "Plus đang trong thời gian ưu đãi:"}
+                </span>{" "}
+                còn {daysLeft} ngày {demoMode ? "trên trình duyệt này" : "trên tài khoản này"}.
               </span>
               <Button size="sm" variant="ghost" className="ml-auto shrink-0 text-[color:var(--color-warning-fg)] hover:bg-[color:var(--color-warning-bg)]" onClick={() => navigate("/billing/plan")}>
                 Chi tiết

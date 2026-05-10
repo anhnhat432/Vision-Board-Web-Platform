@@ -534,7 +534,7 @@ export function OrderPage() {
                   {showInlineErrors && fieldErrors.fullName ? (
                     <p className="text-sm text-rose-600">Vui lòng nhập họ và tên người nhận.</p>
                   ) : (
-                    <p className="text-sm text-slate-500">Dùng tên người nhận để dễ đối chiếu đơn demo.</p>
+                    <p className="text-sm text-slate-500">Dùng tên người nhận để dễ đối chiếu đơn.</p>
                   )}
                 </div>
 
@@ -571,7 +571,7 @@ export function OrderPage() {
                   placeholder="090..."
                 />
                 <p className="text-sm text-slate-500">
-                  Thêm số điện thoại nếu bạn muốn trang trạng thái đủ thông tin hơn cho demo.
+                  Thêm số điện thoại nếu bạn muốn trang trạng thái đủ thông tin hơn.
                 </p>
               </div>
             </div>
@@ -692,7 +692,7 @@ export function OrderPage() {
             <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Đi tiếp sau khi tạo</p>
               <p className="mt-2 text-sm leading-7 text-slate-600">
-                Bạn có thể mở trang trạng thái đơn để xem timeline, chi tiết kit và chuyển trạng thái demo cục bộ.
+                Bạn có thể mở trang trạng thái đơn để xem timeline, chi tiết kit và chuyển trạng thái cục bộ.
               </p>
             </div>
           </CardContent>

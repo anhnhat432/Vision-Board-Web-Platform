@@ -20,7 +20,7 @@ interface WorkspaceGateState {
 }
 
 export function isAuthProtectedPath(pathname: string): boolean {
-  return pathname === "/order" || pathname.startsWith("/order-status");
+  return pathname === "/12-week-setup" || pathname === "/order" || pathname.startsWith("/order-status");
 }
 
 export function isPublicHomePath(pathname: string): boolean {

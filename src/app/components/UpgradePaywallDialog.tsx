@@ -210,8 +210,8 @@ export function UpgradePaywallDialog({
                         {billingProviderStatus.mode === "api_contract"
                           ? "API contract"
                           : billingProviderStatus.mode === "mock_provider"
-                            ? "Nhà cung cấp thử nghiệm"
-                            : "Thử nghiệm cục bộ"}
+                            ? "Provider nội bộ"
+                            : "Cục bộ"}
                       </p>
                     </div>
                     <div className="rounded-[var(--r-tile)] border border-white/80 bg-white px-4 py-3">

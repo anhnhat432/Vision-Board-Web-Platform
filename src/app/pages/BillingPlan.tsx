@@ -1,7 +1,7 @@
 ﻿import { apiClient, toAppError } from "@/lib/api/apiClient";
 import { AlertTriangle, CreditCard, Crown, LifeBuoy, Loader2, ReceiptText, RefreshCw, Shield, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { PrimaryActionCard } from "../components/layout/PrimaryActionCard";
@@ -452,14 +452,19 @@ export function BillingPlan() {
       )}
       {checkoutReturnStatus === "confirmed" && (
         <Card className="border-emerald-200 bg-emerald-50">
-          <CardContent className="flex items-center gap-3 p-4">
-            <Shield className="h-5 w-5 text-emerald-600" />
-            <div>
-              <p className="font-medium text-emerald-900">Thanh toán đã xác nhận</p>
-              <p className="text-sm text-emerald-700">
-                Quyền Plus đã được kích hoạt trên tài khoản của bạn.
-              </p>
+          <CardContent className="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center">
+            <div className="flex items-center gap-3">
+              <Shield className="h-5 w-5 text-emerald-600" />
+              <div>
+                <p className="font-medium text-emerald-900">Thanh toán đã xác nhận</p>
+                <p className="text-sm text-emerald-700">
+                  Quyền Plus đã được kích hoạt trên tài khoản của bạn.
+                </p>
+              </div>
             </div>
+            <Button asChild size="sm" className="w-full sm:w-auto">
+              <Link to="/12-week-system">Bắt đầu 12-week plan</Link>
+            </Button>
           </CardContent>
         </Card>
       )}
@@ -591,7 +596,7 @@ export function BillingPlan() {
                     : subscription?.status === "trialing"
                       ? demoMode
                         ? "Dùng thử"
-                        : "Đang dùng thử"
+                        : "Đang trong thời gian ưu đãi"
                       : subscription?.status === "canceled"
                         ? "Đã hủy"
                         : subscription
@@ -645,9 +650,12 @@ export function BillingPlan() {
               <>
                 {isTrialing && trialDaysLeft !== null && (
                   <div className="w-full rounded-[var(--r-control)] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                    <span className="font-semibold">Plus dùng thử:</span> còn{" "}
+                    <span className="font-semibold">
+                      {demoMode ? "Plus dùng thử:" : "Plus đang trong thời gian ưu đãi:"}
+                    </span>{" "}
+                    còn{" "}
                     {trialDaysLeft} ngày
-                    {demoMode ? " dùng thử." : " dùng thử."}
+                    {demoMode ? " dùng thử." : " ưu đãi."}
                     <Button
                       size="sm"
                       className="mt-[var(--space-inline)] w-full sm:ml-3 sm:mt-0 sm:w-auto"

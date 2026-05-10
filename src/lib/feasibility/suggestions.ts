@@ -17,7 +17,7 @@ export function generateSuggestions(scores: DimensionScores): string[] {
   }
 
   if (getDimensionStatus(scores.readiness) === "weak") {
-    suggestions.push("Bắt đầu bằng thói quen nhỏ hơn theo thử nghiệm 2 tuần trước khi khóa kế hoạch 12 tuần.");
+    suggestions.push("Bắt đầu bằng thói quen nhỏ hơn trong 2 tuần trước khi khóa kế hoạch 12 tuần.");
   }
 
   if (getDimensionStatus(scores.risk) === "weak") {

@@ -70,7 +70,7 @@ function getSubscriptionStatusLabel(status: string | undefined): string {
     case "active":
       return "Đang hoạt động";
     case "trialing":
-      return "Đang dùng thử";
+      return "Đang trong thời gian ưu đãi";
     case "canceled":
       return "Đã hủy";
     case "inactive":

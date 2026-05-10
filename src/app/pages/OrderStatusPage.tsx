@@ -86,7 +86,7 @@ const ORDER_TIMELINE_STEPS: ReadonlyArray<{
   },
   {
     status: "printing",
-    description: "Kit đang được chuẩn bị nội dung và xử lý ở bước in của flow demo.",
+    description: "Kit đang được chuẩn bị nội dung và xử lý ở bước in.",
     icon: Package,
   },
   {
@@ -96,7 +96,7 @@ const ORDER_TIMELINE_STEPS: ReadonlyArray<{
   },
   {
     status: "delivered",
-    description: "Đơn đã được đánh dấu giao thành công trong flow demo cục bộ.",
+    description: "Đơn đã được đánh dấu giao thành công trong flow cục bộ.",
     icon: CheckCircle2,
   },
 ];
@@ -250,7 +250,7 @@ export function OrderStatusPage() {
                   Theo dõi trạng thái đơn kit hiện tại.
                 </h1>
                 <p className="max-w-3xl text-base leading-8 text-white/82 lg:text-lg">
-                  Trang này gom lại thông tin chính của đơn, kit và tiến trình giao hiện tại. Flow vẫn là local-only, nhưng đã đủ rõ để demo và review trải nghiệm đặt đơn.
+                  Trang này gom lại thông tin chính của đơn, kit và tiến trình giao hiện tại. Flow vẫn là local-only, nhưng đã đủ rõ để review trải nghiệm đặt đơn.
                 </p>
               </div>
 
@@ -486,7 +486,7 @@ export function OrderStatusPage() {
                       </>
                     ) : (
                       <>
-                        <p className="text-sm text-slate-600">Đơn đã ở bước cuối cùng của flow demo.</p>
+                        <p className="text-sm text-slate-600">Đơn đã ở bước cuối cùng của flow cục bộ.</p>
                         <Button type="button" size="sm" variant="outline" disabled>
                           Đã hoàn tất
                         </Button>

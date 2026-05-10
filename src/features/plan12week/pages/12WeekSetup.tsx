@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { CoreFlowGateState } from "@/app/components/CoreFlowGateState";
 import { CoreFlowProgress } from "@/app/components/CoreFlowProgress";
 import { PageShell } from "@/app/components/PageShell";
+import { RealModeLoginGate } from "@/app/components/RealModeLoginGate";
 import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
@@ -45,7 +46,7 @@ import { enqueueLeadMetricUpsertedMutations } from "@/features/plan12week/persis
 import { createGoal, updateGoal } from "@/services/goalService";
 import { saveGoalLink } from "@/lib/api/goalLinkStore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { isDemoMode } from "@/app/utils/app-mode";
+import { isDemoMode, isRealMode } from "@/app/utils/app-mode";
 import type { AspirationalVision as AspirationalVisionModel } from "@/app/utils/storage-types";
 import { STEPS } from "./12WeekSetup/constants";
 import {
@@ -466,6 +467,22 @@ export function TwelveWeekSetup() {
         : currentStep === 2
           ? "Lịch và buổi nhìn lại cố định giúp duy trì khi động lực giảm — quan trọng hơn nội dung từng tuần."
           : "Kế hoạch được tạo tự động từ mục tiêu và việc lặp lại. Bạn có thể xem trước tuần 1 với lịch cụ thể và chỉnh sửa trước khi xác nhận.";
+
+  if (isRealMode() && auth.authLoading) {
+    return (
+      <CoreFlowGateState
+        currentStepId="twelve_week_setup"
+        eyebrow="Thiết lập 12 tuần"
+        title="Đang kiểm tra tài khoản"
+        description="Phiên bản đầy đủ cần xác nhận đăng nhập trước khi bắt đầu kế hoạch 12 tuần."
+        loading
+      />
+    );
+  }
+
+  if (isRealMode() && !auth.user) {
+    return <RealModeLoginGate target="12WeekSetup" />;
+  }
 
   if (isLoading) {
     return (

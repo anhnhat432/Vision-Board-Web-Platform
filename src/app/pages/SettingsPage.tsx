@@ -49,7 +49,7 @@ export function SettingsPage() {
     userData.subscription?.planCode === "PLUS" && (expiryInfo.isExpiringSoon || expiryInfo.isExpired);
   const accountLabel = userProfile?.displayName || user?.displayName || user?.email || "Khách";
   const accountStatus = !isConfigured
-    ? "Đang dùng demo local"
+    ? "Đang dùng dữ liệu cục bộ"
     : user
       ? userProfile?.email || user.email || "Đã đăng nhập"
       : "Chưa đăng nhập";

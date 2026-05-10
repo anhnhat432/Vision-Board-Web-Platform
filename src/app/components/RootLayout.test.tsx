@@ -650,14 +650,12 @@ describe("RootLayout onboarding redirect", () => {
     expect(router.state.location.state).toMatchObject({ from: "/goals" });
   });
 
-  it("requires login before the 12-week setup route in real mode even when Firebase config is missing", async () => {
+  it("lets the 12-week setup route render its own real-mode login gate", async () => {
     setAuthContext({ isConfigured: false });
     const { router } = renderAppShell("/12-week-setup");
 
-    expect(await screen.findByTestId("login-page")).toBeInTheDocument();
-    expect(router.state.location.pathname).toBe("/login");
-    expect(router.state.location.search).toBe("?next=%2F12-week-setup");
-    expect(router.state.location.state).toMatchObject({ from: "/12-week-setup" });
+    expect(await screen.findByTestId("twelve-week-setup-page")).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/12-week-setup");
   });
 
   it("sends signed-in users to onboarding when setup is incomplete", async () => {
