@@ -144,3 +144,82 @@ Với tình trạng dự án bây giờ, cách an toàn nhất là deploy theo `
 
 Khi cần login và backend sync thật thì chuyển sang `Mode B` sau khi Firebase/Vercel env đã đầy đủ.
 Khi có backend billing thật thì mới chuyển sang `Mode C`.
+
+## 7. Required production env vars before soft launch
+
+Frontend env on Vercel:
+
+- `VITE_APP_MODE=real`
+- `VITE_API_BASE_URL=https://vision-board-web-platform.onrender.com/api`
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_APP_ID`
+- `VITE_BILLING_PROVIDER_MODE=api_contract`
+- `VITE_BILLING_PROVIDER_LABEL`
+- `VITE_ENABLE_12_WEEK_MUTATION_SYNC=true`
+- `VITE_ENABLE_12_WEEK_PULL_SYNC=true`
+- `VITE_SENTRY_DSN`
+- `VITE_SENTRY_ENVIRONMENT=production`
+- `VITE_SENTRY_RELEASE`
+
+Backend env on Render:
+
+- `NODE_ENV=production`
+- `PORT`
+- `MONGODB_URI`
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_CLIENT_EMAIL`
+- `FIREBASE_PRIVATE_KEY`
+- `FRONTEND_ORIGIN=https://vision-board-web-platform.vercel.app`
+- `BILLING_PROVIDER=casso`
+- `BILLING_REPOSITORY=mongo`
+- `CASSO_WEBHOOK_SECRET`
+- `CASSO_BANK_ACCOUNT`
+- `CASSO_BANK_NAME`
+- `CASSO_ACCOUNT_NAME`
+- `PLUS_PRICE_VND`
+- `SENTRY_DSN`
+- `SENTRY_ENVIRONMENT=production`
+- `SENTRY_RELEASE`
+
+Do not commit any real value from this list. Set production values only in Vercel, Render, Firebase, MongoDB Atlas, Casso, and Sentry dashboards.
+
+## 8. Security verification
+
+Run local env checks before deploy:
+
+```bash
+node scripts/check-runtime-env.mjs
+node scripts/check-runtime-env.mjs --full-stack --casso-billing
+```
+
+Expected behavior:
+
+- Dev/report mode may warn about missing Sentry and backend env, but must not require Sentry.
+- Full-stack mode fails when MongoDB, Firebase Admin, or required Casso billing env is missing.
+- Full-stack mode warns, but does not fail, when `SENTRY_DSN` or `VITE_SENTRY_DSN` is missing.
+
+After Vercel preview deploy, verify HTTP security headers:
+
+```bash
+curl -I https://<vercel-preview-url>.vercel.app
+```
+
+Expected headers:
+
+- `X-Frame-Options: DENY`
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+- `Content-Security-Policy` with `frame-ancestors 'none'`
+
+Sentry smoke check:
+
+1. Set `SENTRY_DSN` on Render and `VITE_SENTRY_DSN` on Vercel.
+2. Trigger one known failing backend request in staging, for example an authenticated endpoint with an invalid bearer token.
+3. Confirm Sentry receives an `auth_failed` event with method/path context and without raw request body.
+4. Trigger one Casso webhook request with an invalid secure token in staging.
+5. Confirm Sentry receives `casso_webhook_signature_mismatch`.
+
+If Firebase popup login breaks after CSP is enabled, check the browser console first and add only the exact Firebase origin that is blocked.

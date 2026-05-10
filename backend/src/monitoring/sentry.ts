@@ -3,6 +3,7 @@ import type { Express } from "express";
 
 const DEFAULT_TRACES_SAMPLE_RATE = 0.05;
 const DEFAULT_FLUSH_TIMEOUT_MS = 2000;
+type BackendCaptureContext = Parameters<typeof Sentry.captureException>[1];
 
 function parseSampleRate(rawValue: string | undefined, fallback: number): number {
   if (!rawValue) return fallback;
@@ -20,7 +21,12 @@ function optionalEnv(name: string): string | undefined {
 
 function initializeSentry(): boolean {
   const dsn = optionalEnv("SENTRY_DSN");
-  if (!dsn) return false;
+  if (!dsn) {
+    if (process.env.NODE_ENV === "production") {
+      console.warn("WARNING: Sentry disabled in production because SENTRY_DSN is not configured.");
+    }
+    return false;
+  }
 
   Sentry.init({
     dsn,
@@ -48,9 +54,9 @@ export function setupSentryErrorHandler(app: Express): void {
   Sentry.setupExpressErrorHandler(app);
 }
 
-export function captureBackendException(error: unknown): void {
+export function captureBackendException(error: unknown, context?: BackendCaptureContext): void {
   if (!sentryEnabled || !Sentry.isEnabled()) return;
-  Sentry.captureException(error);
+  Sentry.captureException(error, context);
 }
 
 export async function flushSentry(timeoutMs = DEFAULT_FLUSH_TIMEOUT_MS): Promise<void> {

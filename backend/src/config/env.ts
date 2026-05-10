@@ -2,7 +2,12 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-function getRequiredEnv(name: string): string {
+export function getOptionalEnv(name: string): string | undefined {
+  const value = process.env[name]?.trim();
+  return value ? value : undefined;
+}
+
+export function getRequiredEnv(name: string): string {
   const value = process.env[name];
 
   if (!value || value.trim().length === 0) {
@@ -10,6 +15,12 @@ function getRequiredEnv(name: string): string {
   }
 
   return value;
+}
+
+export function getRequiredEnvInProduction(name: string): string | undefined {
+  const nodeEnv = process.env.NODE_ENV ?? "development";
+  if (nodeEnv !== "production") return getOptionalEnv(name);
+  return getRequiredEnv(name);
 }
 
 function parsePort(rawPort: string | undefined): number {
@@ -23,15 +34,21 @@ function parsePort(rawPort: string | undefined): number {
   return parsed;
 }
 
+const nodeEnv = process.env.NODE_ENV ?? "development";
+const billingProvider = getOptionalEnv("BILLING_PROVIDER")?.toLowerCase();
 const rawPrivateKey = getRequiredEnv("FIREBASE_PRIVATE_KEY");
 
 export const env = {
+  NODE_ENV: nodeEnv,
   PORT: parsePort(process.env.PORT),
   MONGODB_URI: getRequiredEnv("MONGODB_URI"),
   FIREBASE_PROJECT_ID: getRequiredEnv("FIREBASE_PROJECT_ID"),
   FIREBASE_CLIENT_EMAIL: getRequiredEnv("FIREBASE_CLIENT_EMAIL"),
   FIREBASE_PRIVATE_KEY: rawPrivateKey.replace(/\\n/g, "\n"),
   FRONTEND_ORIGIN: getRequiredEnv("FRONTEND_ORIGIN"),
+  SENTRY_DSN: getOptionalEnv("SENTRY_DSN"),
+  CASSO_WEBHOOK_SECRET:
+    billingProvider === "casso" ? getRequiredEnvInProduction("CASSO_WEBHOOK_SECRET") : getOptionalEnv("CASSO_WEBHOOK_SECRET"),
 };
 
 export type Env = typeof env;
