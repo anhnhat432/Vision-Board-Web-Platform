@@ -1,5 +1,4 @@
 import {
-  createContext,
   startTransition,
   type ReactNode,
   useCallback,
@@ -56,7 +55,7 @@ import {
   createTwelveWeekImportPayload,
   type TwelveWeekImportPayload,
 } from "@/features/plan12week/persistence/twelveWeekImportPayload";
-import { useAutoCloudSync, type AutoCloudSyncState } from "@/features/plan12week/hooks/useAutoCloudSync";
+import { useAutoCloudSync } from "@/features/plan12week/hooks/useAutoCloudSync";
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
@@ -75,6 +74,8 @@ import {
   type CloudImportDryRunResult,
   type CloudImportResult,
 } from "./root-layout/LocalDataMigrationPrompt";
+import { AutoCloudConflictDialog } from "./root-layout/AutoCloudConflictDialog";
+import { AutoCloudSyncContext } from "./root-layout/AutoCloudSyncContext";
 import {
   buildAuthPath,
   getNavItemsForState,
@@ -98,7 +99,7 @@ import {
 import { Toaster } from "./ui/sonner";
 import { useReducedMotion } from "./ui/use-reduced-motion";
 
-export const AutoCloudSyncContext = createContext<AutoCloudSyncState | null>(null);
+export { AutoCloudSyncContext } from "./root-layout/AutoCloudSyncContext";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -166,9 +167,12 @@ export function RootLayout() {
   const autoCloudSyncContextValue = useMemo(() => autoCloudSyncState, [autoCloudSyncState]);
   const renderWithAutoCloudSync = useCallback(
     (content: ReactNode) => (
-      <AutoCloudSyncContext.Provider value={autoCloudSyncContextValue}>{content}</AutoCloudSyncContext.Provider>
+      <AutoCloudSyncContext.Provider value={autoCloudSyncContextValue}>
+        {content}
+        {!demoMode && user ? <AutoCloudConflictDialog /> : null}
+      </AutoCloudSyncContext.Provider>
     ),
-    [autoCloudSyncContextValue],
+    [autoCloudSyncContextValue, demoMode, user],
   );
   const { resolvedTheme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

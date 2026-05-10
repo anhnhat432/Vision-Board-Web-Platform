@@ -3,9 +3,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
 import { USER_DATA_UPDATED_EVENT_NAME } from "@/app/utils/storage-constants";
 import { isRealMode, shouldEnable12WeekMutationSync, shouldEnable12WeekPullSync } from "@/app/utils/app-mode";
+import { getUserData, saveUserData } from "@/app/utils/storage";
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { readMutationQueueStore, summarizeMutationQueueStore } from "../persistence/mutationQueue";
+import {
+  type DataMutationItem,
+  readMutationQueueStore,
+  summarizeMutationQueueStore,
+  writeMutationQueueStore,
+} from "../persistence/mutationQueue";
+import { clearPullCursor } from "../persistence/pullCursorStore";
+import { applyPulledWorkspaceToUserData } from "../persistence/pulledWorkspaceApply";
 import {
   sendPending12WeekMutations,
   type MutationQueueSyncResult,
@@ -28,6 +36,8 @@ export interface AutoCloudSyncState {
   conflictPending: boolean;
   triggerSyncNow: () => Promise<TwelveWeekManualCloudSyncResult | null>;
   triggerDrainOnly: () => Promise<MutationQueueSyncResult | null>;
+  resolveConflictKeepLocal: () => Promise<void>;
+  resolveConflictUseCloud: () => Promise<void>;
 }
 
 export interface UseAutoCloudSyncOptions {
@@ -61,6 +71,78 @@ function hasElapsedSince(timestamp: number | null, minimumMs: number): boolean {
 
 function shouldWarnForDrainResult(result: MutationQueueSyncResult | null): boolean {
   return result?.status === "partial" || result?.status === "error";
+}
+
+function getConflictMutationIds(result: TwelveWeekManualCloudSyncResult | null): Set<string> {
+  return new Set(
+    (result?.mergeReport?.conflicts ?? [])
+      .map((conflict) => conflict.mutationId)
+      .filter((mutationId): mutationId is string => Boolean(mutationId)),
+  );
+}
+
+function isConflictMutation(item: DataMutationItem, conflictMutationIds: ReadonlySet<string>): boolean {
+  if (conflictMutationIds.has(item.id)) return true;
+  return conflictMutationIds.size === 0 && item.status === "blocked_conflict";
+}
+
+function markConflictMutationsForLocalResolution(
+  ownerUid: string,
+  result: TwelveWeekManualCloudSyncResult | null,
+): boolean {
+  const store = readMutationQueueStore(ownerUid);
+  const conflictMutationIds = getConflictMutationIds(result);
+  let changed = false;
+  const now = new Date().toISOString();
+
+  const items = store.items.map((item) => {
+    if (item.ownerUid !== ownerUid || !isConflictMutation(item, conflictMutationIds)) return item;
+    changed = true;
+    return {
+      ...item,
+      status: "pending" as const,
+      error: undefined,
+      nextRetryAt: undefined,
+      updatedAt: now,
+    };
+  });
+
+  if (!changed) return false;
+  return writeMutationQueueStore(
+    {
+      ...store,
+      updatedAt: now,
+      items,
+    },
+  );
+}
+
+function archiveConflictMutations(ownerUid: string, result: TwelveWeekManualCloudSyncResult | null): boolean {
+  const store = readMutationQueueStore(ownerUid);
+  const conflictMutationIds = getConflictMutationIds(result);
+  let changed = false;
+  const now = new Date().toISOString();
+
+  const items = store.items.map((item) => {
+    if (item.ownerUid !== ownerUid || !isConflictMutation(item, conflictMutationIds)) return item;
+    changed = true;
+    return {
+      ...item,
+      status: "archived" as const,
+      error: undefined,
+      nextRetryAt: undefined,
+      updatedAt: now,
+    };
+  });
+
+  if (!changed) return false;
+  return writeMutationQueueStore(
+    {
+      ...store,
+      updatedAt: now,
+      items,
+    },
+  );
 }
 
 export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoCloudSyncState {
@@ -220,6 +302,34 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     refreshPendingCount,
   ]);
 
+  const effectiveLastResult = manualSyncLastResult ?? lastResult;
+
+  const resolveConflictKeepLocal = useCallback(async () => {
+    if (!ownerUid) return;
+
+    markConflictMutationsForLocalResolution(ownerUid, effectiveLastResult);
+    refreshPendingCount();
+    lastDrainStartedAtRef.current = null;
+    await triggerDrainOnly();
+  }, [effectiveLastResult, ownerUid, refreshPendingCount, triggerDrainOnly]);
+
+  const resolveConflictUseCloud = useCallback(async () => {
+    if (!ownerUid) return;
+    const pullResponse = effectiveLastResult?.pullResponse;
+    if (!pullResponse?.workspace) return;
+
+    const localData = getUserData();
+    const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, {});
+    const didWrite = saveUserData(nextData);
+    if (!didWrite) return;
+
+    archiveConflictMutations(ownerUid, effectiveLastResult);
+    clearPullCursor(ownerUid);
+    refreshPendingCount();
+    lastSyncStartedAtRef.current = null;
+    await triggerSyncNow();
+  }, [effectiveLastResult, ownerUid, refreshPendingCount, triggerSyncNow]);
+
   useEffect(() => {
     const previousUserUid = previousUserUidRef.current;
 
@@ -314,8 +424,6 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     };
   }, [drainSyncReady, mutationDebounceMs, ownerUid, triggerDrainOnly]);
 
-  const effectiveLastResult = manualSyncLastResult ?? lastResult;
-
   return useMemo(
     () => ({
       loading: manualSyncLoading || autoLoading || drainLoading,
@@ -326,6 +434,8 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
       conflictPending: isBlockingResult(effectiveLastResult),
       triggerSyncNow,
       triggerDrainOnly,
+      resolveConflictKeepLocal,
+      resolveConflictUseCloud,
     }),
     [
       effectiveLastResult,
@@ -335,6 +445,8 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
       manualSyncLoading,
       networkStatusInfo.isOnline,
       pendingCount,
+      resolveConflictKeepLocal,
+      resolveConflictUseCloud,
       triggerDrainOnly,
       triggerSyncNow,
     ],

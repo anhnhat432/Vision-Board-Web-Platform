@@ -14,6 +14,7 @@ import { createEmptyUserData } from "../utils/storage-demo-data";
 import { activateAuthenticatedUserData, getUserData, saveUserData } from "../utils/storage";
 import { getScopedUserDataStorageKey } from "../utils/storage-auth-scope";
 import type { Goal, UserData } from "../utils/storage-types";
+import type { AutoCloudSyncState } from "@/features/plan12week/hooks/useAutoCloudSync";
 
 const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
@@ -40,10 +41,14 @@ const backendHydrationMock = vi.hoisted(() => ({
 const autoCloudSyncMock = vi.hoisted(() => {
   const triggerSyncNow = vi.fn();
   const triggerDrainOnly = vi.fn();
+  const resolveConflictKeepLocal = vi.fn();
+  const resolveConflictUseCloud = vi.fn();
   return {
+    resolveConflictKeepLocal,
+    resolveConflictUseCloud,
     triggerDrainOnly,
     triggerSyncNow,
-    useAutoCloudSync: vi.fn(() => ({
+    useAutoCloudSync: vi.fn<() => AutoCloudSyncState>(() => ({
       loading: false,
       lastResult: null,
       lastSyncedAt: null,
@@ -52,6 +57,8 @@ const autoCloudSyncMock = vi.hoisted(() => {
       conflictPending: false,
       triggerSyncNow,
       triggerDrainOnly,
+      resolveConflictKeepLocal,
+      resolveConflictUseCloud,
     })),
   };
 });
@@ -480,6 +487,51 @@ describe("RootLayout onboarding redirect", () => {
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/billing/plan");
     });
+  });
+
+  it("mounts the global auto cloud conflict dialog for signed-in users", async () => {
+    seedAuthenticatedCompletedWorkspace();
+    autoCloudSyncMock.useAutoCloudSync.mockReturnValue({
+      loading: false,
+      lastResult: {
+        status: "conflict",
+        message: "Needs review.",
+        mergeReport: {
+          safeToApply: false,
+          localOnlyChanges: [],
+          cloudOnlyChanges: [],
+          conflicts: [],
+          missingClientIds: [],
+          unsupportedFields: [],
+          summary: {
+            localEntityCount: 0,
+            cloudEntityCount: 0,
+            localOnlyCount: 0,
+            cloudOnlyCount: 0,
+            conflictCount: 0,
+            missingClientIdCount: 0,
+            unsupportedFieldCount: 0,
+          },
+        },
+      },
+      lastSyncedAt: "2026-05-10T10:00:00.000Z",
+      pendingCount: 1,
+      online: true,
+      conflictPending: true,
+      triggerSyncNow: autoCloudSyncMock.triggerSyncNow,
+      triggerDrainOnly: autoCloudSyncMock.triggerDrainOnly,
+      resolveConflictKeepLocal: autoCloudSyncMock.resolveConflictKeepLocal,
+      resolveConflictUseCloud: autoCloudSyncMock.resolveConflictUseCloud,
+    });
+    setAuthContext({
+      user: { uid: "user_test", email: "test@example.com" },
+      userProfile: { id: "profile_test", email: "test@example.com" },
+    });
+
+    renderAppShell("/goals");
+
+    expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
+    expect(await screen.findByText("Dữ liệu giữa thiết bị và tài khoản đang khác nhau")).toBeInTheDocument();
   });
 
   it("sends public app routes to login before onboarding when signed out", async () => {

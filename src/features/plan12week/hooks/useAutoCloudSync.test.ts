@@ -33,6 +33,19 @@ const mutationSenderMock = vi.hoisted(() => ({
   sendPending12WeekMutations: vi.fn(),
 }));
 
+const storageMock = vi.hoisted(() => ({
+  getUserData: vi.fn(),
+  saveUserData: vi.fn(),
+}));
+
+const pulledWorkspaceApplyMock = vi.hoisted(() => ({
+  applyPulledWorkspaceToUserData: vi.fn(),
+}));
+
+const pullCursorStoreMock = vi.hoisted(() => ({
+  clearPullCursor: vi.fn(),
+}));
+
 const networkStatusMock = vi.hoisted(() => ({
   state: {
     status: "online",
@@ -48,7 +61,18 @@ const networkStatusMock = vi.hoisted(() => ({
 
 const queueMock = vi.hoisted(() => ({
   pendingCount: 0,
-  readMutationQueueStore: vi.fn(() => ({ items: [] })),
+  store: {
+    version: 1,
+    ownerUid: "firebase_uid_1",
+    deviceId: "device_1",
+    updatedAt: "2026-05-10T10:00:00.000Z",
+    items: [] as Array<Record<string, unknown>>,
+  },
+  readMutationQueueStore: vi.fn(() => queueMock.store),
+  writeMutationQueueStore: vi.fn((store: typeof queueMock.store) => {
+    queueMock.store = store;
+    return true;
+  }),
   summarizeMutationQueueStore: vi.fn(() => ({
     totalCount: 0,
     pendingCount: queueMock.pendingCount,
@@ -74,6 +98,11 @@ vi.mock("@/lib/api/apiClient", () => ({
   isApiBaseUrlConfigured: apiClientMock.isApiBaseUrlConfigured,
 }));
 
+vi.mock("@/app/utils/storage", () => ({
+  getUserData: storageMock.getUserData,
+  saveUserData: storageMock.saveUserData,
+}));
+
 vi.mock("@/app/hooks/useNetworkStatus", () => ({
   useNetworkStatus: networkStatusMock.useNetworkStatus,
 }));
@@ -86,9 +115,18 @@ vi.mock("../persistence/mutationQueueSender", () => ({
   sendPending12WeekMutations: mutationSenderMock.sendPending12WeekMutations,
 }));
 
+vi.mock("../persistence/pulledWorkspaceApply", () => ({
+  applyPulledWorkspaceToUserData: pulledWorkspaceApplyMock.applyPulledWorkspaceToUserData,
+}));
+
+vi.mock("../persistence/pullCursorStore", () => ({
+  clearPullCursor: pullCursorStoreMock.clearPullCursor,
+}));
+
 vi.mock("../persistence/mutationQueue", () => ({
   readMutationQueueStore: queueMock.readMutationQueueStore,
   summarizeMutationQueueStore: queueMock.summarizeMutationQueueStore,
+  writeMutationQueueStore: queueMock.writeMutationQueueStore,
 }));
 
 const appliedResult: TwelveWeekManualCloudSyncResult = {
@@ -100,6 +138,83 @@ const conflictResult: TwelveWeekManualCloudSyncResult = {
   status: "conflict",
   message: "Needs review.",
 };
+
+const conflictResultWithMutation = {
+  status: "conflict",
+  message: "Needs review.",
+  mergeReport: {
+    safeToApply: false,
+    localOnlyChanges: [],
+    cloudOnlyChanges: [],
+    conflicts: [
+      {
+        kind: "task",
+        source: "local",
+        clientId: "task_1",
+        path: "goals.goal_1.tasks.task_1",
+        message: "Cloud record changed after an unresolved local mutation for the same entity.",
+        mutationId: "mutation_conflict_1",
+        reason: "pending_local_mutation_cloud_newer",
+      },
+    ],
+    missingClientIds: [],
+    unsupportedFields: [],
+    summary: {
+      localEntityCount: 1,
+      cloudEntityCount: 1,
+      localOnlyCount: 0,
+      cloudOnlyCount: 0,
+      conflictCount: 1,
+      missingClientIdCount: 0,
+      unsupportedFieldCount: 0,
+    },
+  },
+  pullResponse: {
+    serverTime: "2026-05-10T10:00:00.000Z",
+    mode: "full",
+    cursor: null,
+    nextCursor: "cursor_cloud",
+    hasMore: false,
+    cursorStatus: "not_provided",
+    warnings: [],
+    workspace: {
+      goals: [],
+      plans: [],
+      weeks: [],
+      tasks: [],
+      leadMetrics: [],
+      dailyCheckIns: [],
+      weeklyReviews: [],
+    },
+    changes: {
+      goals: [],
+      plans: [],
+      weeks: [],
+      tasks: [],
+      leadMetrics: [],
+      dailyCheckIns: [],
+      weeklyReviews: [],
+    },
+    tombstones: {
+      goals: [],
+      plans: [],
+      weeks: [],
+      tasks: [],
+      leadMetrics: [],
+      dailyCheckIns: [],
+      weeklyReviews: [],
+    },
+    counts: {
+      goals: 0,
+      plans: 0,
+      weeks: 0,
+      tasks: 0,
+      leadMetrics: 0,
+      dailyCheckIns: 0,
+      weeklyReviews: 0,
+    },
+  },
+} as TwelveWeekManualCloudSyncResult;
 
 const drainSuccessResult = {
   status: "success",
@@ -143,6 +258,13 @@ describe("useAutoCloudSync", () => {
     setSignedOut();
     visibilityState = "visible";
     queueMock.pendingCount = 0;
+    queueMock.store = {
+      version: 1,
+      ownerUid: "firebase_uid_1",
+      deviceId: "device_1",
+      updatedAt: "2026-05-10T10:00:00.000Z",
+      items: [],
+    };
     vi.clearAllMocks();
     vi.useRealTimers();
     vi.spyOn(console, "log").mockImplementation(() => undefined);
@@ -178,6 +300,9 @@ describe("useAutoCloudSync", () => {
       syncNow: manualSyncMock.syncNow,
     }));
     mutationSenderMock.sendPending12WeekMutations.mockResolvedValue(drainSuccessResult);
+    storageMock.getUserData.mockReturnValue({ goals: [] });
+    storageMock.saveUserData.mockReturnValue(true);
+    pulledWorkspaceApplyMock.applyPulledWorkspaceToUserData.mockReturnValue({ goals: [{ id: "cloud_goal" }] });
   });
 
   it("skips when not in real mode", () => {
@@ -438,5 +563,142 @@ describe("useAutoCloudSync", () => {
       expect(result.current.conflictPending).toBe(true);
     });
     expect(result.current.lastResult?.status).toBe("conflict");
+  });
+
+  it("resolves keep-local conflicts by re-queueing conflict mutations and draining them", async () => {
+    queueMock.pendingCount = 1;
+    queueMock.store = {
+      version: 1,
+      ownerUid: "firebase_uid_keep",
+      deviceId: "device_1",
+      updatedAt: "2026-05-10T10:00:00.000Z",
+      items: [
+        {
+          id: "mutation_conflict_1",
+          idempotencyKey: "key_1",
+          collapseKey: "task:goal_1:task_1",
+          kind: "task_completed_changed",
+          status: "blocked_conflict",
+          createdAt: "2026-05-10T09:59:00.000Z",
+          updatedAt: "2026-05-10T10:00:00.000Z",
+          attemptCount: 1,
+          maxAttempts: 7,
+          ownerUid: "firebase_uid_keep",
+          goalId: "goal_1",
+          error: {
+            code: "sync_conflict",
+            message: "Conflict",
+            lastSeenAt: "2026-05-10T10:00:00.000Z",
+            retryable: false,
+          },
+          payload: {
+            taskId: "task_1",
+            weekNumber: 1,
+            completed: true,
+            scheduledDate: "2026-05-10",
+          },
+        },
+      ],
+    };
+    setSignedIn("firebase_uid_keep");
+    manualSyncMock.useTwelveWeekManualCloudSync.mockImplementation(() => ({
+      loading: false,
+      lastResult: conflictResultWithMutation,
+      syncNow: manualSyncMock.syncNow,
+    }));
+
+    const { result } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 30_000 }));
+    await flushMicrotasks();
+    manualSyncMock.syncNow.mockClear();
+
+    await act(async () => {
+      await result.current.resolveConflictKeepLocal();
+    });
+
+    expect(queueMock.writeMutationQueueStore).toHaveBeenCalled();
+    expect(queueMock.store.items[0]?.status).toBe("pending");
+    expect(queueMock.store.items[0]?.error).toBeUndefined();
+    expect(mutationSenderMock.sendPending12WeekMutations).toHaveBeenCalledTimes(1);
+    expect(manualSyncMock.syncNow).not.toHaveBeenCalled();
+  });
+
+  it("resolves use-cloud conflicts by applying the pulled workspace, saving, clearing cursor, and syncing", async () => {
+    const localData = { goals: [{ id: "local_goal" }] };
+    const cloudData = { goals: [{ id: "cloud_goal" }] };
+    storageMock.getUserData.mockReturnValue(localData);
+    pulledWorkspaceApplyMock.applyPulledWorkspaceToUserData.mockReturnValue(cloudData);
+    setSignedIn("firebase_uid_cloud");
+    manualSyncMock.useTwelveWeekManualCloudSync.mockImplementation(() => ({
+      loading: false,
+      lastResult: conflictResultWithMutation,
+      syncNow: manualSyncMock.syncNow,
+    }));
+
+    const { result } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 30_000 }));
+    await flushMicrotasks();
+    manualSyncMock.syncNow.mockClear();
+
+    await act(async () => {
+      await result.current.resolveConflictUseCloud();
+    });
+
+    expect(pulledWorkspaceApplyMock.applyPulledWorkspaceToUserData).toHaveBeenCalledWith(
+      localData,
+      conflictResultWithMutation.pullResponse,
+      expect.any(Object),
+    );
+    expect(storageMock.saveUserData).toHaveBeenCalledWith(cloudData);
+    expect(pullCursorStoreMock.clearPullCursor).toHaveBeenCalledWith("firebase_uid_cloud");
+    expect(manualSyncMock.syncNow).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not archive conflict mutations when applying the account version cannot be saved", async () => {
+    queueMock.store = {
+      version: 1,
+      ownerUid: "firebase_uid_cloud",
+      deviceId: "device_1",
+      updatedAt: "2026-05-10T10:00:00.000Z",
+      items: [
+        {
+          id: "mutation_conflict_1",
+          idempotencyKey: "key_1",
+          collapseKey: "task:goal_1:task_1",
+          kind: "task_completed_changed",
+          status: "blocked_conflict",
+          createdAt: "2026-05-10T09:59:00.000Z",
+          updatedAt: "2026-05-10T10:00:00.000Z",
+          attemptCount: 1,
+          maxAttempts: 7,
+          ownerUid: "firebase_uid_cloud",
+          goalId: "goal_1",
+          payload: {
+            taskId: "task_1",
+            weekNumber: 1,
+            completed: true,
+            scheduledDate: "2026-05-10",
+          },
+        },
+      ],
+    };
+    storageMock.saveUserData.mockReturnValue(false);
+    setSignedIn("firebase_uid_cloud");
+    manualSyncMock.useTwelveWeekManualCloudSync.mockImplementation(() => ({
+      loading: false,
+      lastResult: conflictResultWithMutation,
+      syncNow: manualSyncMock.syncNow,
+    }));
+
+    const { result } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 30_000 }));
+    await flushMicrotasks();
+    manualSyncMock.syncNow.mockClear();
+
+    await act(async () => {
+      await result.current.resolveConflictUseCloud();
+    });
+
+    expect(queueMock.writeMutationQueueStore).not.toHaveBeenCalled();
+    expect(queueMock.store.items[0]?.status).toBe("blocked_conflict");
+    expect(pullCursorStoreMock.clearPullCursor).not.toHaveBeenCalled();
+    expect(manualSyncMock.syncNow).not.toHaveBeenCalled();
   });
 });
