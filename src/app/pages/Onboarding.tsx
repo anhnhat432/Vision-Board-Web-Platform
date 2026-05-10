@@ -1,7 +1,7 @@
 ﻿import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
-import { ArrowLeft, ArrowRight, BarChart3, Check, Compass, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, BarChart3, Check, Compass, Heart, Sparkles, Target } from "lucide-react";
 
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { ProductVisual } from "../components/visuals/ProductVisual";
@@ -18,16 +18,25 @@ type OnboardingStep = "welcome" | "assessment";
 
 const JOURNEY_STEPS = [
   {
+    icon: Heart,
     title: "Chấm 8 lĩnh vực",
     description: "Nhìn nhanh sức khỏe hiện tại của từng phần trong cuộc sống.",
+    iconClass:
+      "bg-gradient-to-br from-rose-100 to-pink-100 text-rose-600 dark:from-rose-950/50 dark:to-pink-950/40 dark:text-rose-200",
   },
   {
+    icon: Compass,
     title: "Chọn trọng tâm",
     description: "Dữ liệu này mở Life Insight để chọn đúng nơi nên ưu tiên.",
+    iconClass:
+      "bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 dark:from-violet-950/50 dark:to-fuchsia-950/40 dark:text-violet-200",
   },
   {
+    icon: Target,
     title: "Đi tiếp tới SMART Goal",
     description: "Trọng tâm được chuyển thành mục tiêu rõ và kế hoạch 12 tuần.",
+    iconClass:
+      "bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-700 dark:from-emerald-950/50 dark:to-teal-950/40 dark:text-emerald-200",
   },
 ];
 
@@ -55,6 +64,7 @@ function OnboardingPageMotion({ children }: { children: ReactNode }) {
 
 export function Onboarding() {
   const navigate = useNavigate();
+  const prefersReducedMotion = useReducedMotion();
   const [step, setStep] = useState<OnboardingStep>("welcome");
   const [isReturning, setIsReturning] = useState(false);
   const [lifeAreas, setLifeAreas] = useState<LifeArea[]>(LIFE_AREAS.map((area) => ({ ...area, score: 5 })));
@@ -160,9 +170,13 @@ export function Onboarding() {
 
                   <div className="stack-tight">
                     <h1 className="max-w-3xl text-2xl font-bold tracking-normal text-slate-950 sm:text-3xl lg:text-4xl">
+                      {isReturning ? "Cập nhật lại " : "Bắt đầu bằng "}
+                      <span className="bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
+                        8 lĩnh vực
+                      </span>
                       {isReturning
-                        ? "Cập nhật lại 8 lĩnh vực để insight bám sát cuộc sống hiện tại hơn."
-                        : "Bắt đầu bằng 8 lĩnh vực để biết nên ưu tiên điều gì trước."}
+                        ? " để insight bám sát cuộc sống hiện tại hơn."
+                        : " để biết nên ưu tiên điều gì trước."}
                     </h1>
                     <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base lg:text-lg">
                       Chỉ khoảng 3 phút để chấm điểm hiện tại. Kết quả sẽ nối thẳng sang Life Insight, SMART Goal
@@ -183,7 +197,7 @@ export function Onboarding() {
 
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <Button
-                      className="w-full bg-violet-600 text-white shadow-lg hover:bg-violet-700 sm:w-auto"
+                      className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
                       onClick={handleStartAssessment}
                     >
                       Bắt đầu chấm 8 lĩnh vực
@@ -202,15 +216,34 @@ export function Onboarding() {
                   </div>
 
                   <div className="grid gap-3 md:grid-cols-3">
-                    {JOURNEY_STEPS.map((item, index) => (
-                      <div key={item.title} className="rounded-[var(--r-tile)] border border-slate-200 bg-slate-50 p-4">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-[var(--r-control)] bg-white text-sm font-semibold text-slate-700 shadow-sm">
-                          0{index + 1}
-                        </div>
-                        <h3 className="mt-[var(--space-inline)] text-base font-semibold text-slate-950">{item.title}</h3>
-                        <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
-                      </div>
-                    ))}
+                    {JOURNEY_STEPS.map((item, index) => {
+                      const Icon = item.icon;
+
+                      return (
+                        <motion.div
+                          key={item.title}
+                          initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
+                          animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+                          transition={{ duration: 0.32, delay: index * 0.06, ease: "easeOut" }}
+                          className="rounded-[var(--r-tile)] border border-violet-100/80 bg-white/82 p-4 shadow-sm dark:border-violet-400/15 dark:bg-slate-900/60"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-[0.68rem] font-bold uppercase tracking-[0.16em] text-slate-400">
+                              Bước 0{index + 1}
+                            </span>
+                            <div
+                              className={`flex h-10 w-10 items-center justify-center rounded-[var(--r-control)] shadow-sm ${item.iconClass}`}
+                            >
+                              <Icon className="h-5 w-5" />
+                            </div>
+                          </div>
+                          <h3 className="mt-[var(--space-inline)] text-base font-semibold text-slate-950">
+                            {item.title}
+                          </h3>
+                          <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -256,7 +289,11 @@ export function Onboarding() {
                   Chấm 8 lĩnh vực
                 </div>
                 <h1 className="max-w-3xl text-2xl font-bold tracking-normal text-slate-950 sm:text-3xl lg:text-4xl">
-                  Chấm điểm hiện tại để biết chính xác nơi bạn nên bắt đầu.
+                  Chấm điểm hiện tại để biết chính xác{" "}
+                  <span className="bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
+                    nơi bạn nên bắt đầu
+                  </span>
+                  .
                 </h1>
                 <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                   Kéo từng lĩnh vực từ 1 đến 10. Summary bên cạnh cập nhật ngay để bạn thấy tín hiệu trước khi lưu.
@@ -279,12 +316,12 @@ export function Onboarding() {
                       {reviewedAreaCount}/{lifeAreas.length}
                     </p>
                   </div>
-                  <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50 p-3">
+                  <div className="rounded-[var(--r-control)] border border-amber-200/70 bg-gradient-to-br from-amber-50 to-orange-50 p-3 dark:border-amber-400/20 dark:from-amber-950/40 dark:to-orange-950/35">
                     <p className="text-amber-700">Ưu tiên</p>
                     <p className="mt-1 font-semibold text-amber-950">{getLifeAreaLabel(growthArea.name)}</p>
                     <p className="text-sm text-amber-800">{growthArea.score}/10</p>
                   </div>
-                  <div className="rounded-[var(--r-control)] border border-emerald-200 bg-emerald-50 p-3">
+                  <div className="rounded-[var(--r-control)] border border-emerald-200/70 bg-gradient-to-br from-emerald-50 to-teal-50 p-3 dark:border-emerald-400/20 dark:from-emerald-950/40 dark:to-teal-950/35">
                     <p className="text-emerald-700">Mạnh nhất</p>
                     <p className="mt-1 font-semibold text-emerald-950">{getLifeAreaLabel(strongestArea.name)}</p>
                     <p className="text-sm text-emerald-800">{strongestArea.score}/10</p>
@@ -306,7 +343,7 @@ export function Onboarding() {
               {lifeAreas.map((area, index) => (
                 <div
                   key={area.name}
-                  className="rounded-[var(--r-tile)] border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
+                  className="card-hover-lift rounded-[var(--r-tile)] border border-slate-200 bg-white p-3 shadow-sm sm:p-4 dark:border-slate-700 dark:bg-slate-900/70"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -364,7 +401,10 @@ export function Onboarding() {
                     <ArrowLeft className="h-4 w-4" />
                     Quay lại giới thiệu
                   </Button>
-                  <Button onClick={handleComplete}>
+                  <Button
+                    className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30 hover:from-violet-700 hover:to-fuchsia-700"
+                    onClick={handleComplete}
+                  >
                     Hoàn thành đánh giá
                     <ArrowRight className="h-4 w-4" />
                   </Button>

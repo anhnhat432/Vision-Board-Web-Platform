@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router";
-import { AlertCircle, Loader2, LogOut, RefreshCw, Sparkles } from "lucide-react";
+import { motion } from "motion/react";
+import { AlertCircle, Compass, Loader2, LogOut, RefreshCw, ShieldCheck, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "../components/ui/button";
@@ -8,9 +9,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Toaster } from "../components/ui/sonner";
+import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 
 type LoginMode = "signin" | "signup";
+
+const TRUST_FEATURES = [
+  {
+    icon: Target,
+    label: "Mục tiêu rõ",
+  },
+  {
+    icon: Compass,
+    label: "Lộ trình 12 tuần",
+  },
+  {
+    icon: ShieldCheck,
+    label: "Dữ liệu an toàn",
+  },
+];
+
+const WORKSPACE_PROMISES = [
+  "Lưu tiến độ và tiếp tục trên thiết bị khác.",
+  "Đồng bộ kế hoạch 12 tuần khi tài khoản sẵn sàng.",
+  "Quản lý quyền Plus và thanh toán trong cùng tài khoản.",
+];
 
 function getInitialLoginMode(search: string): LoginMode {
   return new URLSearchParams(search).get("mode") === "signup" ? "signup" : "signin";
@@ -28,6 +51,7 @@ function normalizeRedirectPath(from: unknown): string | null {
 }
 
 export function LoginPage() {
+  const prefersReducedMotion = useReducedMotion();
   const {
     user,
     userProfile,
@@ -120,7 +144,7 @@ export function LoginPage() {
   if (!isConfigured) {
     // Firebase not configured — show a notice instead of a broken form
     return (
-      <div className="app-shell flex min-h-screen items-center justify-center px-4">
+      <div className="app-shell flex min-h-screen items-center justify-center px-4" data-route-tone="vision">
         <div className="ambient-orb ambient-orb--violet" />
         <div className="ambient-orb ambient-orb--cyan" />
         <Card className="w-full max-w-sm">
@@ -128,7 +152,7 @@ export function LoginPage() {
             <div className="gradient-brand mx-auto mb-3 flex size-11 items-center justify-center rounded-[var(--r-tile)] shadow-lg">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
-            <CardTitle>Dear Our Future</CardTitle>
+            <CardTitle>Bắt đầu hành trình</CardTitle>
             <CardDescription>Xác thực chưa được cấu hình trong môi trường này.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -143,45 +167,102 @@ export function LoginPage() {
   }
 
   return (
-    <div className="app-shell flex min-h-screen items-center justify-center px-4 py-8 sm:py-12">
+    <div className="app-shell flex min-h-screen items-center justify-center px-4 py-8 sm:py-12" data-route-tone="vision">
       <div className="ambient-orb ambient-orb--violet" />
       <div className="ambient-orb ambient-orb--cyan" />
       <div className="ambient-orb ambient-orb--rose" />
 
-      <div className="relative z-10 grid w-full max-w-4xl gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.72fr)] lg:items-center">
-        <section className="hidden rounded-[var(--r-card)] border border-slate-200 bg-white/86 p-8 shadow-2xl lg:block">
-          <div className="gradient-brand mb-5 flex size-12 items-center justify-center rounded-[var(--r-tile)] shadow-lg">
+      <div className="relative z-10 grid w-full max-w-5xl gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.72fr)] lg:items-center">
+        <motion.section
+          initial={prefersReducedMotion ? false : "hidden"}
+          animate={prefersReducedMotion ? undefined : "show"}
+          variants={{
+            hidden: { opacity: 0, y: 18 },
+            show: {
+              opacity: 1,
+              y: 0,
+              transition: { duration: 0.36, ease: "easeOut", staggerChildren: 0.08 },
+            },
+          }}
+          className="glass-surface-gradient-border hidden p-8 shadow-2xl lg:block"
+        >
+          <motion.div
+            variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+            className="gradient-brand mb-5 flex size-12 items-center justify-center rounded-[var(--r-tile)] shadow-lg"
+          >
             <Sparkles className="h-5.5 w-5.5 text-white" />
-          </div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Dear Our Future</p>
-          <p className="mt-[var(--space-inline)] text-3xl font-bold tracking-tight text-slate-950">
-            Mục tiêu, kế hoạch 12 tuần và review nằm trong một workspace.
-          </p>
-          <div className="mt-6 grid gap-3 text-sm leading-6 text-slate-600">
-            {[
-              "Lưu tiến độ và tiếp tục trên thiết bị khác.",
-              "Đồng bộ kế hoạch 12 tuần khi tài khoản sẵn sàng.",
-              "Quản lý quyền Plus và thanh toán trong cùng tài khoản.",
-            ].map((item) => (
-              <div key={item} className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50/80 px-4 py-3">
+          </motion.div>
+          <motion.p
+            variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+            className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300"
+          >
+            Dear Our Future
+          </motion.p>
+          <motion.p
+            variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+            className="mt-[var(--space-inline)] text-4xl font-bold leading-[1.08] tracking-tight text-slate-950 xl:text-[2.75rem] dark:text-white"
+          >
+            Biến mục tiêu thành{" "}
+            <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-transparent">
+              12 tuần hành động
+            </span>{" "}
+            trong một workspace.
+          </motion.p>
+          <motion.div
+            variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+            className="mt-6 flex flex-wrap gap-2"
+          >
+            {TRUST_FEATURES.map(({ icon: Icon, label }) => (
+              <span
+                key={label}
+                className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-violet-200/70 bg-gradient-to-r from-violet-100 to-fuchsia-100 px-3 py-1.5 text-xs font-semibold text-violet-800 shadow-sm dark:border-violet-400/20 dark:from-violet-950/70 dark:to-fuchsia-950/60 dark:text-violet-100"
+              >
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </span>
+            ))}
+          </motion.div>
+          <motion.div
+            variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+            className="mt-6 grid gap-3 text-sm leading-6 text-slate-600 dark:text-slate-200"
+          >
+            {WORKSPACE_PROMISES.map((item) => (
+              <div
+                key={item}
+                className="rounded-[var(--r-control)] border border-slate-200/70 bg-white/70 px-4 py-3 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/60"
+              >
                 {item}
               </div>
             ))}
-          </div>
-        </section>
+          </motion.div>
+          <motion.div
+            variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+            className="mt-5 flex items-start gap-3 rounded-[var(--r-control)] border border-emerald-200/70 bg-emerald-50/85 px-4 py-3 text-sm leading-6 text-emerald-800 dark:border-emerald-400/20 dark:bg-emerald-950/40 dark:text-emerald-100"
+          >
+            <ShieldCheck className="mt-0.5 h-4 w-4 flex-none" />
+            <p>Đăng nhập an toàn qua Firebase. Không lưu mật khẩu trên thiết bị.</p>
+          </motion.div>
+        </motion.section>
 
         <div className="w-full max-w-sm justify-self-center lg:max-w-md">
         <div className="mb-8 text-center">
           <div className="gradient-brand mx-auto mb-3 flex size-12 items-center justify-center rounded-[var(--r-tile)] shadow-lg">
             <Sparkles className="h-5.5 w-5.5 text-white" />
           </div>
-          <h1 className="text-xl font-semibold tracking-tight text-slate-900">Dear Our Future</h1>
+          <h1 className="text-xl font-semibold tracking-tight text-slate-900">
+            {mode === "signin" ? "Chào mừng quay lại" : "Bắt đầu hành trình"}
+          </h1>
           <p className="mt-1 text-sm text-slate-500">
             {mode === "signin" ? "Đăng nhập để tiếp tục hành trình." : "Tạo tài khoản để bắt đầu."}
           </p>
         </div>
 
-        <Card>
+        <div className="mb-4 flex items-start gap-3 rounded-[var(--r-control)] border border-emerald-200/70 bg-emerald-50/90 px-4 py-3 text-sm leading-6 text-emerald-800 shadow-sm lg:hidden">
+          <ShieldCheck className="mt-0.5 h-4 w-4 flex-none" />
+          <p>Đăng nhập an toàn qua Firebase. Không lưu mật khẩu trên thiết bị.</p>
+        </div>
+
+        <Card className="glass-surface-gradient-border">
           <CardContent className="pt-6 pb-5">
             <div className="stack-stack">
               {/* Google */}
@@ -266,7 +347,7 @@ export function LoginPage() {
               {error ? (
                 <div
                   role="alert"
-                  className="flex gap-2 rounded-[var(--r-control)] border border-red-200 bg-red-50 px-3 py-2 text-sm leading-5 text-red-700"
+                  className="flex gap-2 rounded-[var(--r-control)] border border-rose-200/70 bg-gradient-to-br from-rose-50 to-red-50 px-3 py-2 text-sm leading-5 text-rose-700 dark:border-rose-400/25 dark:from-rose-950/40 dark:to-red-950/35 dark:text-rose-100"
                 >
                   <AlertCircle className="mt-0.5 h-4 w-4 flex-none" aria-hidden="true" />
                   <p className="min-w-0 break-words">{error}</p>
@@ -283,7 +364,7 @@ export function LoginPage() {
               <button
                 type="button"
                 onClick={() => setMode("signup")}
-                className="font-medium text-primary hover:underline"
+                className="font-medium text-violet-700 hover:text-violet-800 hover:underline dark:text-violet-200 dark:hover:text-violet-100"
               >
                 Đăng ký
               </button>
@@ -294,7 +375,7 @@ export function LoginPage() {
               <button
                 type="button"
                 onClick={() => setMode("signin")}
-                className="font-medium text-primary hover:underline"
+                className="font-medium text-violet-700 hover:text-violet-800 hover:underline dark:text-violet-200 dark:hover:text-violet-100"
               >
                 Đăng nhập
               </button>
