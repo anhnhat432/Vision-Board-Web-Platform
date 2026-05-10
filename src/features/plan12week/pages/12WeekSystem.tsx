@@ -113,6 +113,64 @@ const TWELVE_WEEK_SECTION_TABS = [
   { value: "settings", label: "Cài đặt", icon: Settings2 },
 ] satisfies Array<{ value: string; label: string; icon: LucideIcon }>;
 
+function getExecutionPhaseInfo(currentWeek: number) {
+  if (currentWeek <= 4) {
+    return {
+      label: "Ramp",
+      badgeClassName:
+        "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/30 dark:bg-violet-950/35 dark:text-violet-200",
+      textClassName: "text-violet-700 dark:text-violet-200",
+      barClassName: "from-violet-600 to-fuchsia-600 dark:from-violet-400 dark:to-fuchsia-400",
+    };
+  }
+
+  if (currentWeek <= 8) {
+    return {
+      label: "Peak",
+      badgeClassName:
+        "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700 dark:border-fuchsia-500/30 dark:bg-fuchsia-950/35 dark:text-fuchsia-200",
+      textClassName: "text-fuchsia-700 dark:text-fuchsia-200",
+      barClassName: "from-fuchsia-600 to-rose-500 dark:from-fuchsia-400 dark:to-rose-400",
+    };
+  }
+
+  return {
+    label: "Harvest",
+    badgeClassName:
+      "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/35 dark:text-emerald-200",
+    textClassName: "text-emerald-700 dark:text-emerald-200",
+    barClassName: "from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400",
+  };
+}
+
+function getExecutionSyncPillClass(syncStatus: string) {
+  if (syncStatus === "success") {
+    return {
+      pill: "border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-800 dark:border-emerald-500/30 dark:from-emerald-950/45 dark:to-teal-950/30 dark:text-emerald-100",
+      dot: "bg-emerald-500",
+    };
+  }
+
+  if (syncStatus === "error" || syncStatus === "partial") {
+    return {
+      pill: "border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 text-amber-800 dark:border-amber-500/30 dark:from-amber-950/45 dark:to-orange-950/30 dark:text-amber-100",
+      dot: "bg-amber-500",
+    };
+  }
+
+  if (syncStatus === "syncing") {
+    return {
+      pill: "border-sky-200 bg-gradient-to-r from-sky-50 to-cyan-50 text-sky-800 dark:border-sky-500/30 dark:from-sky-950/45 dark:to-cyan-950/30 dark:text-sky-100",
+      dot: "bg-sky-500",
+    };
+  }
+
+  return {
+    pill: "border-slate-200 bg-gradient-to-r from-slate-50 to-white text-slate-600 dark:border-slate-700 dark:from-slate-900 dark:to-slate-950 dark:text-slate-300",
+    dot: "bg-slate-400",
+  };
+}
+
 function getCycleId(goalId: string, system: TwelveWeekSystemModel): string {
   return `${goalId}:cycle:${system.cycleNumber ?? 1}`;
 }
@@ -673,6 +731,8 @@ export function TwelveWeekSystem() {
   const backendSyncIssueMessage = getBackendSyncIssueMessage(backendConnectionStatus, lastBackendHydrationResult);
   const syncBadgeClass = getSyncBadgeClass(backendConnectionStatus);
   const syncBadgeLabel = getSyncBadgeLabel(backendConnectionStatus);
+  const phaseInfo = getExecutionPhaseInfo(currentWeek);
+  const syncPillClass = getExecutionSyncPillClass(backendConnectionStatus.syncStatus);
 
   useEffect(() => {
     const localSystem = activeGoal?.twelveWeekSystem ?? null;
@@ -897,11 +957,12 @@ export function TwelveWeekSystem() {
         }}
       />
 
-      <nav className="hidden md:block" aria-label="Điều hướng hệ 12 tuần">
-        <div
-          role="tablist"
+      <nav className="sticky top-3 z-30 hidden md:block" aria-label="Điều hướng hệ 12 tuần">
+        <div className="flex max-w-full items-center justify-between gap-3 rounded-[var(--r-card)] border border-white/70 bg-white/88 p-2 shadow-lg shadow-slate-900/5 backdrop-blur dark:border-slate-700/70 dark:bg-slate-950/86">
+          <div
+            role="tablist"
           aria-label="Điều hướng hệ 12 tuần"
-          className="inline-flex max-w-full items-center gap-1 rounded-[var(--r-pill)] border border-white/70 bg-white/86 p-1 shadow-sm"
+            className="inline-flex max-w-full items-center gap-1 rounded-[var(--r-pill)] bg-slate-100/90 p-1 dark:bg-slate-900"
         >
           {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => {
             const selected = activeTab === value;
@@ -915,8 +976,8 @@ export function TwelveWeekSystem() {
                 aria-label={`Mở tab ${label}`}
                 className={`inline-flex h-10 items-center justify-center gap-2 rounded-[var(--r-pill)] px-4 text-sm font-semibold transition-colors ${
                   selected
-                    ? "bg-slate-950 text-white shadow-md"
-                    : "text-slate-600 hover:bg-white hover:text-slate-950"
+                    ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20"
+                    : "text-slate-600 hover:bg-white hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
                 }`}
                 onClick={() => handleTabChange(value)}
               >
@@ -924,7 +985,19 @@ export function TwelveWeekSystem() {
                 <span>{label}</span>
               </button>
             );
-          })}
+            })}
+          </div>
+
+          <div className="flex min-w-0 items-center gap-2">
+            <span className={`inline-flex shrink-0 items-center gap-2 rounded-[var(--r-pill)] border px-3 py-2 text-xs font-semibold ${phaseInfo.badgeClassName}`}>
+              <span className={`h-2 w-2 rounded-[var(--r-pill)] bg-gradient-to-r ${phaseInfo.barClassName}`} aria-hidden="true" />
+              Tuần {currentWeek}/{system.totalWeeks} - {phaseInfo.label}
+            </span>
+            <span className={`inline-flex shrink-0 items-center gap-2 rounded-[var(--r-pill)] border px-3 py-2 text-xs font-semibold ${syncPillClass.pill}`}>
+              <span className={`h-2 w-2 rounded-[var(--r-pill)] ${syncPillClass.dot}`} aria-hidden="true" />
+              {syncBadgeLabel}
+            </span>
+          </div>
         </div>
       </nav>
 
@@ -1193,7 +1266,9 @@ export function TwelveWeekSystem() {
           <Button
             variant={activeTab === "today" ? "default" : "ghost"}
             size="sm"
-            className="flex h-full flex-1 flex-col items-center justify-center gap-1 px-3 py-2 shadow-none"
+            className={`flex h-full flex-1 flex-col items-center justify-center gap-1 px-3 py-2 shadow-none ${
+              activeTab === "today" ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20" : ""
+            }`}
             onClick={() => handleTabChange("today")}
           >
             <ListTodo className={`h-5 w-5 ${activeTab === "today" ? "text-primary-foreground" : "text-slate-500"}`} />
@@ -1203,7 +1278,9 @@ export function TwelveWeekSystem() {
           <Button
             variant={activeTab === "week" ? "default" : "ghost"}
             size="sm"
-            className="flex h-full flex-1 flex-col items-center justify-center gap-1 px-3 py-2 shadow-none"
+            className={`flex h-full flex-1 flex-col items-center justify-center gap-1 px-3 py-2 shadow-none ${
+              activeTab === "week" ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20" : ""
+            }`}
             onClick={() => handleTabChange("week")}
           >
             <CalendarDays className={`h-5 w-5 ${activeTab === "week" ? "text-primary-foreground" : "text-slate-500"}`} />
@@ -1213,7 +1290,9 @@ export function TwelveWeekSystem() {
           <Button
             variant={activeTab === "progress" ? "default" : "ghost"}
             size="sm"
-            className="flex h-full flex-1 flex-col items-center justify-center gap-1 px-3 py-2 shadow-none"
+            className={`flex h-full flex-1 flex-col items-center justify-center gap-1 px-3 py-2 shadow-none ${
+              activeTab === "progress" ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20" : ""
+            }`}
             onClick={() => handleTabChange("progress")}
           >
             <BarChart3 className={`h-5 w-5 ${activeTab === "progress" ? "text-primary-foreground" : "text-slate-500"}`} />
@@ -1226,7 +1305,9 @@ export function TwelveWeekSystem() {
                 type="button"
                 variant={activeTab === "settings" ? "default" : "ghost"}
                 size="sm"
-                className="flex h-full flex-1 flex-col items-center justify-center gap-1 px-3 py-2 shadow-none"
+                className={`flex h-full flex-1 flex-col items-center justify-center gap-1 px-3 py-2 shadow-none ${
+                  activeTab === "settings" ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20" : ""
+                }`}
               >
                 <MoreHorizontal className={`h-5 w-5 ${activeTab === "settings" ? "text-primary-foreground" : "text-slate-500"}`} />
                 <span className="text-xs font-medium">Khác</span>

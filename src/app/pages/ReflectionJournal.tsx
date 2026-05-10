@@ -61,6 +61,7 @@ const JOURNAL_PROMPTS = [
   "Điều gì hôm nay khiến bạn tự hào về bản thân?",
   "Một điều bạn muốn làm tốt hơn vào ngày mai là gì?",
   "Bạn đang học được điều gì từ chặng đường hiện tại?",
+  "Tuần sau bạn muốn giữ lại một nhịp nhỏ nào?",
 ];
 
 function getMoodConfig(mood?: string) {
@@ -90,6 +91,30 @@ function getMoodConfig(mood?: string) {
         badge: "border-slate-200 bg-slate-50 text-slate-600",
       };
   }
+}
+
+function getJournalPhaseTone(weekNumber?: number) {
+  if (!weekNumber || weekNumber <= 4) {
+    return {
+      stripe: "bg-gradient-to-b from-violet-500 to-fuchsia-500",
+      soft: "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/30 dark:bg-violet-950/35 dark:text-violet-200",
+      bar: "from-violet-500 to-fuchsia-500",
+    };
+  }
+
+  if (weekNumber <= 8) {
+    return {
+      stripe: "bg-gradient-to-b from-fuchsia-500 to-rose-500",
+      soft: "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700 dark:border-fuchsia-500/30 dark:bg-fuchsia-950/35 dark:text-fuchsia-200",
+      bar: "from-fuchsia-500 to-rose-500",
+    };
+  }
+
+  return {
+    stripe: "bg-gradient-to-b from-emerald-500 to-teal-500",
+    soft: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/35 dark:text-emerald-200",
+    bar: "from-emerald-500 to-teal-500",
+  };
 }
 
 export function ReflectionJournal() {
@@ -196,6 +221,7 @@ export function ReflectionJournal() {
       { happy: 0, neutral: 0, sad: 0 },
     );
   }, [sortedReflections, userData]);
+  const moodTotal = moodCounts.happy + moodCounts.neutral + moodCounts.sad;
 
   const weeklyReviewCount = useMemo(
     () => sortedReflections.filter((reflection) => reflection.entryType === "weekly-review").length,
@@ -294,7 +320,10 @@ export function ReflectionJournal() {
 
                 <div className="stack-tight">
                   <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl">
-                    Một nơi đủ đẹp và đủ yên để bạn nhìn lại, gọi tên cảm xúc và giữ lại những điều đáng nhớ.
+                    <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-transparent">
+                      Tuần này bạn nhìn lại
+                    </span>{" "}
+                    đủ sâu để giữ bài học, cảm xúc và những điều đáng nhớ.
                   </h1>
                   <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                     Nhật ký ở đây không chỉ để lưu chữ. Nó là nơi gom lại bài học, cảm xúc, những chuyển động nhỏ và cả
@@ -305,7 +334,7 @@ export function ReflectionJournal() {
                 <div className="flex flex-wrap gap-3">
                   <Button
                     variant="outline"
-                    className="border-slate-950 bg-slate-950 text-white hover:bg-slate-800 hover:text-white"
+                    className="border-transparent bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 hover:text-white"
                     onClick={() => setIsAddingReflection(true)}
                   >
                     <Plus className="h-4 w-4" />
@@ -408,8 +437,8 @@ export function ReflectionJournal() {
                       key={item.value}
                       type="button"
                       onClick={() => setNewReflection({ ...newReflection, mood: item.value })}
-                      className={`rounded-[var(--r-card)] border px-4 py-4 text-left transition-colors transition-transform duration-150 ${
-                        active ? item.activeClass : "border-white/70 bg-white/72 text-slate-500 hover:border-slate-200"
+                      className={`card-hover-lift rounded-[var(--r-card)] border px-4 py-4 text-left transition-colors transition-transform duration-150 ${
+                        active ? item.activeClass : "border-white/70 bg-white/72 text-slate-500 hover:border-slate-200 dark:border-slate-700/70 dark:bg-slate-900/70"
                       }`}
                     >
                       <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-white/70">
@@ -453,14 +482,22 @@ export function ReflectionJournal() {
               </p>
             </div>
 
-            <div className="rounded-[var(--r-card)] border border-white/70 bg-white/72 p-4">
+            <div className="rounded-[var(--r-card)] border border-violet-100/80 bg-gradient-to-br from-violet-50 to-fuchsia-50 p-4 dark:border-violet-500/20 dark:from-violet-950/35 dark:to-fuchsia-950/20">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Gợi ý bắt đầu</p>
               <div className="mt-[var(--space-inline)] flex flex-wrap gap-2">
-                {JOURNAL_PROMPTS.map((prompt) => (
+                {JOURNAL_PROMPTS.map((prompt, index) => (
                   <Button
                     key={prompt}
                     variant="outline"
                     size="sm"
+                    className={
+                      [
+                        "border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-500/30 dark:from-emerald-950/40 dark:to-teal-950/25 dark:text-emerald-200",
+                        "border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 text-amber-700 hover:bg-amber-50 dark:border-amber-500/30 dark:from-amber-950/40 dark:to-orange-950/25 dark:text-amber-200",
+                        "border-violet-200 bg-gradient-to-br from-violet-50 to-fuchsia-50 text-violet-700 hover:bg-violet-50 dark:border-violet-500/30 dark:from-violet-950/40 dark:to-fuchsia-950/25 dark:text-violet-200",
+                        "border-rose-200 bg-gradient-to-br from-rose-50 to-pink-50 text-rose-700 hover:bg-rose-50 dark:border-rose-500/30 dark:from-rose-950/40 dark:to-pink-950/25 dark:text-rose-200",
+                      ][index]
+                    }
                     onClick={() =>
                       setNewReflection((prev) => ({
                         ...prev,
@@ -475,7 +512,7 @@ export function ReflectionJournal() {
             </div>
 
             <Button
-              className="w-full"
+              className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 motion-safe:hover:scale-[1.01] hover:from-violet-700 hover:to-fuchsia-700"
               onClick={handleAddReflection}
               disabled={!newReflection.title || !newReflection.content}
             >
@@ -525,7 +562,7 @@ export function ReflectionJournal() {
 
               return (
                 <div key={item.title}>
-                  <Card className="relative overflow-hidden">
+                  <Card className="glass-surface-sm card-hover-lift relative overflow-hidden border border-slate-200/70 bg-white/92 dark:border-slate-700/70 dark:bg-slate-950/70">
                     <div
                       className={`absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
                     />
@@ -544,6 +581,14 @@ export function ReflectionJournal() {
                     </CardHeader>
                     <CardContent className="relative">
                       <p className="text-sm text-slate-500">{item.note}</p>
+                      {typeof item.value === "number" ? (
+                        <div className="mt-4 h-1.5 overflow-hidden rounded-[var(--r-pill)] bg-slate-100 dark:bg-slate-800">
+                          <div
+                            className={`h-full rounded-[var(--r-pill)] bg-gradient-to-r ${item.color}`}
+                            style={{ width: `${Math.min(100, Math.max(12, item.value * 18))}%` }}
+                          />
+                        </div>
+                      ) : null}
                     </CardContent>
                   </Card>
                 </div>
@@ -555,10 +600,13 @@ export function ReflectionJournal() {
 
       {sortedReflections.length === 0 ? (
         <Reveal delay={0.04}>
-          <Card className="overflow-hidden" data-testid="journal-fresh-empty-state">
+          <Card className="overflow-hidden border border-violet-100/80 bg-gradient-to-br from-white to-violet-50/60 dark:border-violet-500/20 dark:from-slate-950 dark:to-violet-950/20" data-testid="journal-fresh-empty-state">
             <CardContent className="p-10 text-center lg:p-14">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700">
-                <BookOpen className="h-10 w-10" />
+              <div className="mx-auto grid h-24 w-24 place-items-center rounded-[var(--r-card)] bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 shadow-lg shadow-violet-500/10 dark:from-violet-950/60 dark:to-fuchsia-950/40 dark:text-violet-200">
+                <div className="relative">
+                  <BookOpen className="h-10 w-10" />
+                  <Sparkles className="absolute -right-3 -top-3 h-5 w-5 text-rose-500" />
+                </div>
               </div>
               <h2 className="mt-6 text-3xl font-bold text-slate-900">Chưa có trang nhật ký nào được mở ra</h2>
               <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-slate-500">
@@ -566,7 +614,10 @@ export function ReflectionJournal() {
                 nếu hôm nay đã có điều cần ghi lại.
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
-                <Button onClick={() => navigate("/onboarding")}>
+                <Button
+                  className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700"
+                  onClick={() => navigate("/onboarding")}
+                >
                   Bắt đầu Life Balance
                   <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -583,7 +634,7 @@ export function ReflectionJournal() {
           <div className="stack-stack">
             <h2 className="sr-only">Nhật ký đã lưu</h2>
             {latestWeeklyReview && (
-              <Card className="overflow-hidden border-sky-200 gradient-sky-slate">
+              <Card className="overflow-hidden border-violet-200 bg-gradient-to-br from-violet-50 to-fuchsia-50 shadow-sm dark:border-violet-500/30 dark:from-violet-950/35 dark:to-fuchsia-950/20">
                 <CardContent className="p-6">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
@@ -604,7 +655,10 @@ export function ReflectionJournal() {
                       </p>
                     </div>
                     {latestWeeklyReview.linkedGoalId && (
-                      <Button onClick={() => openLinkedCycle(latestWeeklyReview.linkedGoalId)}>
+                      <Button
+                        className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700"
+                        onClick={() => openLinkedCycle(latestWeeklyReview.linkedGoalId)}
+                      >
                         Mở chu kỳ 12 tuần
                         <ArrowRight className="h-4 w-4" />
                       </Button>
@@ -678,10 +732,12 @@ export function ReflectionJournal() {
               {filteredReflections.map((reflection) => {
                 const mood = getMoodConfig(reflection.mood);
                 const linkedGoal = reflection.linkedGoalId ? goalsById.get(reflection.linkedGoalId) : null;
+                const phaseTone = getJournalPhaseTone(reflection.linkedWeekNumber);
 
                 return (
                   <div key={reflection.id}>
-                    <Card className="overflow-hidden">
+                    <Card className="card-hover-lift relative overflow-hidden border border-slate-200/70 bg-white/92 dark:border-slate-700/70 dark:bg-slate-950/70">
+                      <div className={`absolute inset-y-0 left-0 w-1 ${phaseTone.stripe}`} aria-hidden="true" />
                       <CardContent className="p-6 lg:p-7">
                         <div className="flex items-start justify-between gap-4">
                           <div className="min-w-0 flex-1">
@@ -702,7 +758,7 @@ export function ReflectionJournal() {
                               {reflection.linkedWeekNumber && (
                                 <Badge
                                   variant="outline"
-                                  className="rounded-[var(--r-pill)] border-white/80 bg-white px-3 py-1.5 text-slate-600"
+                                  className={`rounded-[var(--r-pill)] px-3 py-1.5 ${phaseTone.soft}`}
                                 >
                                   Tuần {reflection.linkedWeekNumber}
                                 </Badge>
@@ -791,26 +847,37 @@ export function ReflectionJournal() {
                       label: "Vui vẻ",
                       value: moodCounts.happy,
                       className: "border-emerald-200 bg-emerald-50 text-emerald-700",
+                      barClassName: "from-emerald-500 to-teal-500",
                     },
                     {
                       label: "Bình thường",
                       value: moodCounts.neutral,
                       className: "border-amber-200 bg-amber-50 text-amber-700",
+                      barClassName: "from-amber-500 to-orange-500",
                     },
                     {
                       label: "Suy tư",
                       value: moodCounts.sad,
                       className: "border-sky-200 bg-sky-50 text-sky-700",
+                      barClassName: "from-rose-500 to-pink-500",
                     },
                   ].map((item) => (
                     <div
                       key={item.label}
-                      className="flex items-center justify-between rounded-[var(--r-tile)] border border-white/70 bg-white/72 px-4 py-3"
+                      className="rounded-[var(--r-tile)] border border-white/70 bg-white/72 px-4 py-3 dark:border-slate-700/70 dark:bg-slate-900/70"
                     >
-                      <span className="text-sm font-medium text-slate-600">{item.label}</span>
-                      <span className={`rounded-[var(--r-pill)] border px-3 py-1 text-sm font-semibold ${item.className}`}>
-                        <CountUp value={item.value} />
-                      </span>
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">{item.label}</span>
+                        <span className={`rounded-[var(--r-pill)] border px-3 py-1 text-sm font-semibold ${item.className}`}>
+                          <CountUp value={item.value} />
+                        </span>
+                      </div>
+                      <div className="mt-3 h-1.5 overflow-hidden rounded-[var(--r-pill)] bg-slate-100 dark:bg-slate-800">
+                        <div
+                          className={`h-full rounded-[var(--r-pill)] bg-gradient-to-r ${item.barClassName}`}
+                          style={{ width: `${moodTotal > 0 ? Math.max(8, Math.round((item.value / moodTotal) * 100)) : 8}%` }}
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -831,7 +898,10 @@ export function ReflectionJournal() {
                   ))}
                 </div>
 
-                <Button className="mt-6 w-full" onClick={() => setIsAddingReflection(true)}>
+                <Button
+                  className="mt-6 w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700"
+                  onClick={() => setIsAddingReflection(true)}
+                >
                   <Plus className="h-4 w-4" />
                   Viết thêm một trang mới
                 </Button>
