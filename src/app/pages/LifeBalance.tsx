@@ -238,7 +238,11 @@ export function LifeBalance() {
 
               <div className="stack-tight">
                 <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl">
-                  Cập nhật bánh xe cuộc sống để chọn đúng trọng tâm tiếp theo.
+                  Cập nhật{" "}
+                  <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-transparent">
+                    8 lĩnh vực sống
+                  </span>{" "}
+                  để chọn đúng trọng tâm tiếp theo.
                 </h1>
                 <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                   Mỗi điểm bạn chỉnh sẽ cập nhật ngay phần tín hiệu bên dưới. Sau đó bạn có thể lưu riêng hoặc lưu rồi
@@ -250,7 +254,7 @@ export function LifeBalance() {
                 {hasChanges ? (
                   <Button
                     variant="outline"
-                    className="border-slate-950 bg-slate-950 text-white hover:bg-slate-800 hover:text-white"
+                    className="border-violet-600 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 hover:text-white"
                     onClick={handleSave}
                   >
                     <Save className="h-4 w-4" />
@@ -324,7 +328,7 @@ export function LifeBalance() {
                 <div className="grid gap-3 sm:grid-cols-3">
                   <div
                     data-testid="life-balance-signal-weakest"
-                    className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50 p-4"
+                    className="rounded-[var(--r-control)] border border-amber-200/70 bg-gradient-to-br from-amber-50 to-orange-50 p-4 dark:border-amber-400/20 dark:from-amber-950/40 dark:to-orange-950/35"
                   >
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Ưu tiên</p>
                     <p className="mt-2 text-lg font-bold text-slate-950">{getLifeAreaLabel(weakestArea.name)}</p>
@@ -335,7 +339,7 @@ export function LifeBalance() {
                     <p className="mt-2 text-lg font-bold text-slate-950">{averageScore.toFixed(1)}/10</p>
                     <p className="mt-1 text-sm text-slate-500">mặt bằng hiện tại</p>
                   </div>
-                  <div className="rounded-[var(--r-control)] border border-emerald-200 bg-emerald-50 p-4">
+                  <div className="rounded-[var(--r-control)] border border-emerald-200/70 bg-gradient-to-br from-emerald-50 to-teal-50 p-4 dark:border-emerald-400/20 dark:from-emerald-950/40 dark:to-teal-950/35">
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Điểm tựa</p>
                     <p className="mt-2 text-lg font-bold text-slate-950">{getLifeAreaLabel(strongestArea.name)}</p>
                     <p className="mt-1 text-sm font-semibold text-emerald-800">{strongestArea.score}/10</p>
@@ -344,7 +348,7 @@ export function LifeBalance() {
               </div>
 
               <div className="flex w-full flex-col gap-3 sm:w-auto">
-                <Button className="w-full sm:w-auto" onClick={handleContinueToInsight}>
+                <Button className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto" onClick={handleContinueToInsight}>
                   {hasChanges ? "Lưu và xem Life Insight" : "Mở Life Insight"}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -506,7 +510,10 @@ export function LifeBalance() {
                   </CardHeader>
                   <CardContent className="stack-stack">
                     {lifeAreas.map((area, index) => (
-                      <div key={area.name} className="rounded-[var(--r-control)] border border-white/70 bg-white/72 p-4">
+                      <div
+                        key={area.name}
+                        className="card-hover-lift rounded-[var(--r-control)] border border-white/70 bg-white/72 p-4"
+                      >
                         <div className="flex items-center justify-between gap-4">
                           <div className="flex items-center gap-3">
                             <div
@@ -560,7 +567,7 @@ export function LifeBalance() {
                             Lưu lại để cập nhật bánh xe hiện tại và thêm một mốc vào lịch sử theo dõi.
                           </p>
                         </div>
-                        <Button onClick={handleSave}>
+                        <Button className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700" onClick={handleSave}>
                           <Save className="h-4 w-4" />
                           Lưu thay đổi
                         </Button>

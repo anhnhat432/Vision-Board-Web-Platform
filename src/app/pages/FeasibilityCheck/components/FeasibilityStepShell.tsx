@@ -121,7 +121,7 @@ export function FeasibilityStepShell({
                   Quay lại
                 </Button>
                 <Button
-                  className="flex-1"
+                  className="flex-1 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700"
                   onClick={onNext}
                   disabled={!selectedAnswer}
                   aria-describedby={!selectedAnswer ? `feasibility-question-${currentQuestion.id}-next-hint` : undefined}

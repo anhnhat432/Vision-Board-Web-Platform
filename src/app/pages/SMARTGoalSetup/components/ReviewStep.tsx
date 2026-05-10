@@ -31,7 +31,15 @@ export function ReviewStep({ clarityDoneCount, clarityItemCount, summaryRows, on
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{row.label}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-700">{row.value}</p>
+                <p
+                  className={`mt-2 text-sm leading-6 ${
+                    row.key === "specific"
+                      ? "bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text font-semibold text-transparent"
+                      : "text-slate-700"
+                  }`}
+                >
+                  {row.value}
+                </p>
               </div>
               <Button
                 type="button"

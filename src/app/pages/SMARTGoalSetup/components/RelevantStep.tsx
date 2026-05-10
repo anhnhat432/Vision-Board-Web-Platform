@@ -22,7 +22,7 @@ export function RelevantStep({
 
   return (
     <div className="stack-stack">
-      <div className="stack-tight">
+      <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-rose-200 bg-white/86 p-4 shadow-sm before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-rose-500 before:to-pink-500 dark:border-rose-500/30 dark:bg-slate-950/55">
         <Label htmlFor="smart-relevant-reason" className="text-base">
           Lý do bạn thật sự muốn theo đuổi
         </Label>
@@ -46,7 +46,7 @@ export function RelevantStep({
           Viết đủ cụ thể để khi mệt vẫn nhớ vì sao mục tiêu này đáng giữ.
         </p>
       </div>
-      <div className="stack-tight">
+      <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-rose-100 bg-white/82 p-4 before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-rose-300 dark:border-rose-500/20 dark:bg-slate-950/45">
         <Label htmlFor="smart-life-alignment">Lĩnh vực cuộc sống liên quan (tuỳ chọn)</Label>
         <Input
           id="smart-life-alignment"

@@ -1,14 +1,28 @@
 ﻿import type { ReactNode, RefObject } from "react";
 import { motion } from "motion/react";
 import { useReducedMotion } from "../../../components/ui/use-reduced-motion";
-import { ArrowLeft, ArrowRight, ChevronDown, CircleAlert, Lightbulb, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  BarChart3,
+  ChevronDown,
+  CircleAlert,
+  Clock,
+  Compass,
+  Heart,
+  HelpCircle,
+  Lightbulb,
+  Sparkles,
+  Target,
+  type LucideIcon,
+} from "lucide-react";
 
 import type { QualityLevel } from "@/lib/smart-goal/quality";
 
 import { Alert, AlertDescription, AlertTitle } from "../../../components/ui/alert";
 import { Button } from "../../../components/ui/button";
 import { SectionBlock } from "../../../components/layout/SectionBlock";
-import { WizardStepPip } from "../../../components/layout/WizardStepPip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../../components/ui/tooltip";
 import { QualityFeedbackPanel } from "./QualityFeedbackPanel";
 import { ReviewStep } from "./ReviewStep";
 import { SMART_STEPS } from "../constants";
@@ -44,19 +58,67 @@ interface SmartGoalStepShellProps {
   onNext: () => void;
 }
 
-const SMART_STEP_SHORT_LABELS: Record<SmartStepKey, string> = {
-  specific: "Rõ",
-  measurable: "Đo",
-  achievable: "Khả thi",
-  relevant: "Lý do",
-  timeBound: "Mốc",
+const SMART_STEP_VISUALS: Record<
+  SmartStepKey,
+  {
+    letter: string;
+    icon: LucideIcon;
+    tone: string;
+    activeTone: string;
+    iconTone: string;
+  }
+> = {
+  specific: {
+    letter: "S",
+    icon: Target,
+    tone:
+      "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/30 dark:bg-violet-950/30 dark:text-violet-200",
+    activeTone:
+      "border-violet-500 bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20",
+    iconTone:
+      "bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 dark:from-violet-950/70 dark:to-fuchsia-950/50 dark:text-violet-200",
+  },
+  measurable: {
+    letter: "M",
+    icon: BarChart3,
+    tone:
+      "border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-500/30 dark:bg-cyan-950/30 dark:text-cyan-200",
+    activeTone:
+      "border-cyan-500 bg-gradient-to-br from-cyan-600 to-sky-600 text-white shadow-lg shadow-cyan-500/20",
+    iconTone:
+      "bg-gradient-to-br from-cyan-100 to-sky-100 text-cyan-700 dark:from-cyan-950/70 dark:to-sky-950/50 dark:text-cyan-200",
+  },
+  achievable: {
+    letter: "A",
+    icon: Compass,
+    tone:
+      "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/30 dark:text-emerald-200",
+    activeTone:
+      "border-emerald-500 bg-gradient-to-br from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/20",
+    iconTone:
+      "bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-700 dark:from-emerald-950/70 dark:to-teal-950/50 dark:text-emerald-200",
+  },
+  relevant: {
+    letter: "R",
+    icon: Heart,
+    tone:
+      "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/30 dark:bg-rose-950/30 dark:text-rose-200",
+    activeTone:
+      "border-rose-500 bg-gradient-to-br from-rose-500 to-pink-500 text-white shadow-lg shadow-rose-500/20",
+    iconTone:
+      "bg-gradient-to-br from-rose-100 to-pink-100 text-rose-700 dark:from-rose-950/70 dark:to-pink-950/50 dark:text-rose-200",
+  },
+  timeBound: {
+    letter: "T",
+    icon: Clock,
+    tone:
+      "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-950/30 dark:text-amber-200",
+    activeTone:
+      "border-amber-500 bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20",
+    iconTone:
+      "bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 dark:from-amber-950/70 dark:to-orange-950/50 dark:text-amber-200",
+  },
 };
-
-const SMART_STEP_PIP_STEPS = SMART_STEPS.map((smartStep) => ({
-  id: smartStep.key,
-  label: smartStep.label,
-  shortLabel: SMART_STEP_SHORT_LABELS[smartStep.key],
-}));
 
 export function SmartGoalStepShell({
   stepIndex,
@@ -86,6 +148,8 @@ export function SmartGoalStepShell({
       onJumpToStep(nextStep.key);
     }
   };
+  const currentStepVisual = SMART_STEP_VISUALS[step.key];
+  const CurrentStepIcon = currentStepVisual.icon;
 
   return (
     <motion.div
@@ -97,25 +161,100 @@ export function SmartGoalStepShell({
     >
       <SectionBlock title={`Nội dung bước ${stepIndex + 1}`} headerVisuallyHidden density="default">
         <div className="flow-muted p-4 sm:p-6">
-          <div className="stack-tight">
-            <WizardStepPip
-              steps={SMART_STEP_PIP_STEPS}
-              currentStep={stepIndex}
-              onJumpToStep={handleWizardJump}
-              ariaLabel={`Bước ${stepIndex + 1} trên ${totalSteps}`}
-              mobileMode="compact"
-            />
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">{step.label}</p>
+          <div className="sticky top-3 z-20 rounded-[var(--r-card)] border border-slate-200/80 bg-white/90 p-2 shadow-sm backdrop-blur dark:border-slate-700/70 dark:bg-slate-950/88">
+            <div className="mb-2 flex items-center justify-between gap-3 px-1">
+              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                Bước {stepIndex + 1}/{totalSteps}
+              </span>
+              <span className="truncate text-xs font-semibold text-slate-900">{step.label}</span>
+            </div>
+            <ol aria-label={`Bước ${stepIndex + 1} trên ${totalSteps}`} className="grid grid-cols-5 gap-2">
+              {SMART_STEPS.map((smartStep, index) => {
+                const visual = SMART_STEP_VISUALS[smartStep.key];
+                const Icon = visual.icon;
+                const isActive = index === stepIndex;
+                const isDone = index < stepIndex;
+                const canJump = index <= stepIndex;
+
+                return (
+                  <li key={smartStep.key} aria-current={isActive ? "step" : undefined}>
+                    <button
+                      type="button"
+                      disabled={!canJump}
+                      onClick={() => handleWizardJump(index)}
+                      className={`flex h-full w-full flex-col items-center gap-1 rounded-[var(--r-control)] border px-2 py-2 text-xs font-semibold transition-colors ${
+                        isActive ? visual.activeTone : visual.tone
+                      } ${!canJump ? "cursor-default opacity-60" : "hover:border-violet-300"}`}
+                    >
+                      <span
+                        className={`flex h-8 w-8 items-center justify-center rounded-[var(--r-tile)] ${
+                          isActive ? "bg-white/18 text-white" : visual.iconTone
+                        }`}
+                        aria-hidden="true"
+                      >
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <span className="text-sm font-bold">{visual.letter}</span>
+                      <span className="hidden truncate text-[11px] sm:block">{smartStep.label}</span>
+                      {isDone ? <span className="sr-only">đã hoàn thành</span> : null}
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+            <div
+              role="progressbar"
+              aria-label="Tiến độ SMART Goal"
+              aria-valuemin={1}
+              aria-valuemax={totalSteps}
+              aria-valuenow={stepIndex + 1}
+              className="mt-2 h-1.5 overflow-hidden rounded-[var(--r-pill)] bg-slate-200/80 dark:bg-slate-800"
+            >
+              <div
+                className="h-full rounded-[var(--r-pill)] bg-gradient-to-r from-violet-600 to-fuchsia-600 transition-[width] duration-300 ease-out dark:from-violet-400 dark:to-fuchsia-400"
+                style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}
+              />
+            </div>
           </div>
-          <h2
-            ref={headingRef}
-            tabIndex={-1}
-            className="mt-2 text-2xl font-bold leading-tight text-slate-900 focus:outline-none sm:mt-[var(--space-inline)] sm:text-3xl"
-          >
-            {step.title}
-          </h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600 sm:mt-[var(--space-inline)] sm:text-base sm:leading-7">{step.description}</p>
-          <div className="flow-panel mt-[var(--space-inline)] px-4 py-3 text-sm text-slate-600 sm:mt-4">{step.coaching}</div>
+          <div className="mt-[var(--space-stack)] grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1fr)_200px]">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">{step.label}</p>
+              <h2
+                ref={headingRef}
+                tabIndex={-1}
+                className="mt-2 text-2xl font-bold leading-tight text-slate-900 focus:outline-none sm:mt-[var(--space-inline)] sm:text-3xl"
+              >
+                {step.title}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600 sm:mt-[var(--space-inline)] sm:text-base sm:leading-7">
+                {step.description}
+              </p>
+            </div>
+            <div className={`rounded-[var(--r-card)] border p-4 ${currentStepVisual.tone}`}>
+              <div className={`flex h-11 w-11 items-center justify-center rounded-[var(--r-tile)] ${currentStepVisual.iconTone}`}>
+                <CurrentStepIcon className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] opacity-70">
+                SMART · {currentStepVisual.letter}
+              </p>
+              <p className="mt-1 text-sm font-semibold leading-6">{step.completionHint}</p>
+            </div>
+          </div>
+          <div className="mt-[var(--space-inline)] flex items-center justify-between gap-3 rounded-[var(--r-tile)] border border-sky-200 bg-sky-50/72 px-3 py-2.5 text-sm leading-6 text-sky-900 dark:border-sky-500/30 dark:bg-sky-950/30 dark:text-sky-100 sm:mt-4">
+            <span className="font-semibold">Gợi ý nhanh</span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] border border-sky-200 bg-white/82 text-sky-700 hover:bg-sky-100 dark:border-sky-500/30 dark:bg-sky-950/50 dark:text-sky-100"
+                  aria-label={`Xem gợi ý cho bước ${step.label}`}
+                >
+                  <HelpCircle className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs text-sm leading-6">{step.coaching}</TooltipContent>
+            </Tooltip>
+          </div>
         </div>
 
         {children}
@@ -238,7 +377,13 @@ export function SmartGoalStepShell({
             <ArrowLeft className="h-4 w-4" />
             Quay lại
           </Button>
-          <Button className="flex-1 gradient-brand text-white shadow-lg hover:shadow-xl hover:scale-[1.01]" onClick={onNext} disabled={!isCurrentStepValid}>
+          <Button
+            className={`flex-1 overflow-hidden gradient-brand text-white shadow-lg motion-safe:hover:scale-[1.01] hover:shadow-xl ${
+              stepIndex < totalSteps - 1 ? "" : "shimmer"
+            }`}
+            onClick={onNext}
+            disabled={!isCurrentStepValid}
+          >
             {stepIndex < totalSteps - 1 ? "Tiếp theo" : "Tiếp theo: kiểm tra tính thực tế"}
             <ArrowRight className="h-4 w-4" />
           </Button>

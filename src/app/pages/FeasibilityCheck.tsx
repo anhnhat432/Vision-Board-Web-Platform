@@ -304,7 +304,11 @@ export function FeasibilityCheck() {
 
                 <div className="stack-tight sm:stack-stack">
                   <h1 className="max-w-4xl text-2xl font-bold leading-tight tracking-normal sm:text-4xl lg:text-5xl">
-                    Mục tiêu này có thực tế với bạn lúc này không?
+                    Mục tiêu này có{" "}
+                    <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-transparent dark:from-violet-200 dark:via-fuchsia-200 dark:to-rose-200">
+                      khả thi
+                    </span>{" "}
+                    với bạn lúc này không?
                   </h1>
                   <p className="hidden max-w-2xl text-base leading-8 text-white/82 sm:block lg:text-lg">
                     Không phải bài kiểm tra chặn lại — giúp bạn biết nên giữ nguyên, chia nhỏ hay điều chỉnh mục tiêu
