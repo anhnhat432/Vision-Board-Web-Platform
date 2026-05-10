@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import { AutoCloudSyncContext } from "./AutoCloudSyncContext";
+import { AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME } from "./SyncStatusPill";
 
 const ENTITY_LABELS: Record<string, string> = {
   goal: "Mục tiêu",
@@ -69,6 +70,18 @@ export function AutoCloudConflictDialog() {
     setShowUseCloudConfirm(false);
     setResolvingAction(null);
   }, [conflictKey]);
+
+  useEffect(() => {
+    const handleOpenRequest = () => {
+      setDismissedConflictKey(null);
+      setShowUseCloudConfirm(false);
+    };
+
+    window.addEventListener(AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME, handleOpenRequest);
+    return () => {
+      window.removeEventListener(AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME, handleOpenRequest);
+    };
+  }, []);
 
   if (!autoSyncState || !conflictKey) return null;
 

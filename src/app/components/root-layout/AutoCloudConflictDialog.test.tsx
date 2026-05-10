@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AutoCloudSyncContext } from "./AutoCloudSyncContext";
 import { AutoCloudConflictDialog } from "./AutoCloudConflictDialog";
+import { AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME } from "./SyncStatusPill";
 import type { AutoCloudSyncState } from "@/features/plan12week/hooks/useAutoCloudSync";
 
 const storageMock = vi.hoisted(() => ({
@@ -57,6 +58,7 @@ const conflictResult = {
 function createAutoSyncState(overrides: Partial<AutoCloudSyncState> = {}): AutoCloudSyncState {
   return {
     loading: false,
+    syncing: false,
     lastResult: conflictResult as AutoCloudSyncState["lastResult"],
     lastSyncedAt: "2026-05-10T10:00:00.000Z",
     pendingCount: 1,
@@ -133,5 +135,21 @@ describe("AutoCloudConflictDialog", () => {
 
     expect(screen.queryByText("Dữ liệu giữa thiết bị và tài khoản đang khác nhau")).not.toBeInTheDocument();
     expect(state.conflictPending).toBe(true);
+  });
+
+  it("reopens when the header conflict pill requests the dialog", async () => {
+    const state = createAutoSyncState();
+    renderDialog(state);
+
+    const postponeButton = screen.getAllByRole("button").find((button) => button.textContent?.includes("sau"));
+    expect(postponeButton).toBeDefined();
+    fireEvent.click(postponeButton as HTMLButtonElement);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    fireEvent(window, new CustomEvent(AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME));
+
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
   });
 });

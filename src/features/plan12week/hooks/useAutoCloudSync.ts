@@ -29,6 +29,7 @@ const VISIBILITY_SYNC_DEBOUNCE_MS = 300;
 
 export interface AutoCloudSyncState {
   loading: boolean;
+  syncing: boolean;
   lastResult: TwelveWeekManualCloudSyncResult | null;
   lastSyncedAt: string | null;
   pendingCount: number;
@@ -427,6 +428,7 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
   return useMemo(
     () => ({
       loading: manualSyncLoading || autoLoading || drainLoading,
+      syncing: manualSyncLoading || autoLoading || drainLoading,
       lastResult: effectiveLastResult,
       lastSyncedAt,
       pendingCount,

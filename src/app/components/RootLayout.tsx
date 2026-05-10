@@ -76,6 +76,7 @@ import {
 } from "./root-layout/LocalDataMigrationPrompt";
 import { AutoCloudConflictDialog } from "./root-layout/AutoCloudConflictDialog";
 import { AutoCloudSyncContext } from "./root-layout/AutoCloudSyncContext";
+import { SyncStatusPill } from "./root-layout/SyncStatusPill";
 import {
   buildAuthPath,
   getNavItemsForState,
@@ -626,12 +627,15 @@ export function RootLayout() {
                 <p className="mt-1 truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
                   {accountEmail || accountLabel}
                 </p>
-                <Badge
-                  variant="outline"
-                  className="mt-2 rounded-[var(--r-pill)] border-violet-200 bg-violet-50 px-2 py-0.5 text-[11px] text-violet-700"
-                >
-                  {accountPlanLabel}
-                </Badge>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <Badge
+                    variant="outline"
+                    className="rounded-[var(--r-pill)] border-violet-200 bg-violet-50 px-2 py-0.5 text-[11px] text-violet-700"
+                  >
+                    {accountPlanLabel}
+                  </Badge>
+                  {!demoMode ? <SyncStatusPill compact={isMobile} /> : null}
+                </div>
               </div>
             </div>
           </DropdownMenuLabel>

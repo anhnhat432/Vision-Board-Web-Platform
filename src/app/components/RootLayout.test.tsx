@@ -55,6 +55,7 @@ const autoCloudSyncMock = vi.hoisted(() => {
       pendingCount: 0,
       online: true,
       conflictPending: false,
+      syncing: false,
       triggerSyncNow,
       triggerDrainOnly,
       resolveConflictKeepLocal,
@@ -336,6 +337,23 @@ describe("RootLayout onboarding redirect", () => {
       message: "No premium entitlement.",
     });
     productionMock.syncPendingOutbox.mockClear();
+    autoCloudSyncMock.triggerSyncNow.mockClear();
+    autoCloudSyncMock.triggerDrainOnly.mockClear();
+    autoCloudSyncMock.resolveConflictKeepLocal.mockClear();
+    autoCloudSyncMock.resolveConflictUseCloud.mockClear();
+    autoCloudSyncMock.useAutoCloudSync.mockImplementation(() => ({
+      loading: false,
+      syncing: false,
+      lastResult: null,
+      lastSyncedAt: null,
+      pendingCount: 0,
+      online: true,
+      conflictPending: false,
+      triggerSyncNow: autoCloudSyncMock.triggerSyncNow,
+      triggerDrainOnly: autoCloudSyncMock.triggerDrainOnly,
+      resolveConflictKeepLocal: autoCloudSyncMock.resolveConflictKeepLocal,
+      resolveConflictUseCloud: autoCloudSyncMock.resolveConflictUseCloud,
+    }));
     setAuthContext();
   });
 
@@ -460,8 +478,21 @@ describe("RootLayout onboarding redirect", () => {
     expect(router.state.location.pathname).toBe("/");
   });
 
-  it("shows an authenticated account dropdown and compact footer without sync status copy", async () => {
+  it("shows an authenticated account dropdown with the sync status pill", async () => {
     seedPlusSubscription();
+    autoCloudSyncMock.useAutoCloudSync.mockReturnValue({
+      loading: false,
+      syncing: false,
+      lastResult: null,
+      lastSyncedAt: "2026-05-10T09:55:00.000Z",
+      pendingCount: 0,
+      online: true,
+      conflictPending: false,
+      triggerSyncNow: autoCloudSyncMock.triggerSyncNow,
+      triggerDrainOnly: autoCloudSyncMock.triggerDrainOnly,
+      resolveConflictKeepLocal: autoCloudSyncMock.resolveConflictKeepLocal,
+      resolveConflictUseCloud: autoCloudSyncMock.resolveConflictUseCloud,
+    });
     setAuthContext({
       user: { uid: "user_test", email: "plus@example.com", displayName: "Plus User" },
       userProfile: { id: "profile_test", email: "plus@example.com", displayName: "Plus User" },
@@ -478,10 +509,10 @@ describe("RootLayout onboarding redirect", () => {
 
     expect(await screen.findByRole("menu")).toBeInTheDocument();
     expect(screen.getByText("Plus")).toBeInTheDocument();
+    expect(screen.getByText(/Đồng bộ/)).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: "Settings" })).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: "Quản lý subscription" })).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: "Logout" })).toBeInTheDocument();
-    expect(screen.queryByText(/Đang đồng bộ|Đã đồng bộ|sync/i)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("menuitem", { name: "Quản lý subscription" }));
     await waitFor(() => {
@@ -518,6 +549,7 @@ describe("RootLayout onboarding redirect", () => {
       pendingCount: 1,
       online: true,
       conflictPending: true,
+      syncing: false,
       triggerSyncNow: autoCloudSyncMock.triggerSyncNow,
       triggerDrainOnly: autoCloudSyncMock.triggerDrainOnly,
       resolveConflictKeepLocal: autoCloudSyncMock.resolveConflictKeepLocal,
@@ -532,6 +564,66 @@ describe("RootLayout onboarding redirect", () => {
 
     expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
     expect(await screen.findByText("Dữ liệu giữa thiết bị và tài khoản đang khác nhau")).toBeInTheDocument();
+  });
+
+  it("shows the sync status pill in the mobile account dropdown", async () => {
+    seedPlusSubscription();
+    autoCloudSyncMock.useAutoCloudSync.mockReturnValue({
+      loading: false,
+      syncing: false,
+      lastResult: null,
+      lastSyncedAt: null,
+      pendingCount: 2,
+      online: true,
+      conflictPending: false,
+      triggerSyncNow: autoCloudSyncMock.triggerSyncNow,
+      triggerDrainOnly: autoCloudSyncMock.triggerDrainOnly,
+      resolveConflictKeepLocal: autoCloudSyncMock.resolveConflictKeepLocal,
+      resolveConflictUseCloud: autoCloudSyncMock.resolveConflictUseCloud,
+    });
+    setAuthContext({
+      user: { uid: "user_test", email: "plus@example.com", displayName: "Plus User" },
+      userProfile: { id: "profile_test", email: "plus@example.com", displayName: "Plus User" },
+    });
+
+    renderAppShell("/goals");
+
+    expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
+    const accountMenuTriggers = screen.getAllByTitle("plus@example.com");
+    fireEvent.pointerDown(accountMenuTriggers[1], { button: 0 });
+
+    expect(await screen.findByRole("menu")).toBeInTheDocument();
+    expect(screen.getByText(/^2 /)).toBeInTheDocument();
+  });
+
+  it("does not render the sync status pill in demo mode", async () => {
+    appModeMock.isDemoMode.mockReturnValue(true);
+    seedPlusSubscription();
+    autoCloudSyncMock.useAutoCloudSync.mockReturnValue({
+      loading: false,
+      syncing: false,
+      lastResult: null,
+      lastSyncedAt: null,
+      pendingCount: 7,
+      online: true,
+      conflictPending: false,
+      triggerSyncNow: autoCloudSyncMock.triggerSyncNow,
+      triggerDrainOnly: autoCloudSyncMock.triggerDrainOnly,
+      resolveConflictKeepLocal: autoCloudSyncMock.resolveConflictKeepLocal,
+      resolveConflictUseCloud: autoCloudSyncMock.resolveConflictUseCloud,
+    });
+    setAuthContext({
+      user: { uid: "user_test", email: "plus@example.com", displayName: "Plus User" },
+      userProfile: { id: "profile_test", email: "plus@example.com", displayName: "Plus User" },
+    });
+
+    renderAppShell("/goals");
+
+    expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
+    fireEvent.pointerDown(screen.getAllByTitle("plus@example.com")[0], { button: 0 });
+
+    expect(await screen.findByRole("menu")).toBeInTheDocument();
+    expect(screen.queryByText(/^7 /)).not.toBeInTheDocument();
   });
 
   it("sends public app routes to login before onboarding when signed out", async () => {
