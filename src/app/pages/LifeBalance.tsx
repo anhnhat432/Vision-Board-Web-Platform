@@ -537,7 +537,7 @@ export function LifeBalance() {
                           </span>
                         </div>
 
-                        <div className="mt-4 space-y-2">
+                        <div className="mt-4 stack-tight">
                           <Slider
                             value={[area.score]}
                             onValueChange={(value) => handleScoreChange(index, value)}

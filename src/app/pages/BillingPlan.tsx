@@ -861,7 +861,7 @@ export function BillingPlan() {
           </div>
 
           {(lastEntitlementSync || lastRestoreAccess) && (
-            <div className="space-y-2 text-xs text-slate-500">
+            <div className="stack-tight text-xs text-slate-500">
               {lastEntitlementSync && (
                 <p>
                   Kiểm tra quyền gần nhất: {formatDate(lastEntitlementSync.at)} — {lastEntitlementSync.message}
@@ -938,7 +938,7 @@ export function BillingPlan() {
                 </div>
                 <p className="mt-1 text-xl font-bold text-slate-900">{plan.priceLabel}</p>
                 <p className="mt-2 text-sm text-slate-600">{plan.description}</p>
-                <ul className="mt-[var(--space-inline)] space-y-1.5">
+                <ul className="mt-[var(--space-inline)] stack-tight">
                   {plan.highlights.map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-slate-700">
                       <span className="mt-0.5 text-emerald-600">✓</span>

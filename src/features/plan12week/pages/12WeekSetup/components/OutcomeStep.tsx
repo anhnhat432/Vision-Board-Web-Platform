@@ -129,7 +129,7 @@ export function OutcomeStep({
             <p className="mt-1 text-sm font-semibold text-slate-950">{lagMetricPreview}</p>
           </div>
         ) : null}
-        <div className="space-y-2">
+        <div className="stack-tight">
           <Label htmlFor="goal-type">Loại mục tiêu</Label>
           <Select value={draft.goalType} onValueChange={(value) => onChange("goalType", value)}>
             <SelectTrigger id="goal-type" aria-label="Chọn loại mục tiêu">
@@ -144,7 +144,7 @@ export function OutcomeStep({
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-2">
+        <div className="stack-tight">
           <Label htmlFor="vision-12-week">Tầm nhìn 12 tuần</Label>
           <Textarea
             id="vision-12-week"
@@ -153,7 +153,7 @@ export function OutcomeStep({
             onChange={(event) => onChange("vision12Week", event.target.value)}
           />
         </div>
-        <div className="space-y-2">
+        <div className="stack-tight">
           <Label htmlFor="week-12-outcome">Kết quả muốn chạm tới ở tuần 12</Label>
           <Textarea
             id="week-12-outcome"
@@ -181,7 +181,7 @@ export function OutcomeStep({
               Trả lời nhanh 3 câu để khung tự điều chỉnh số việc và nhịp phù hợp.
             </p>
           </div>
-          <div className="space-y-2">
+          <div className="stack-tight">
             <Label htmlFor="daily-time-budget">Mỗi ngày bạn có thể dành bao lâu?</Label>
             <Select
               value={draft.dailyTimeBudget}
@@ -198,7 +198,7 @@ export function OutcomeStep({
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
+          <div className="stack-tight">
             <Label>Những ngày nào bạn muốn tập trung?</Label>
             <div className="flex flex-wrap gap-2">
               {(["T2", "T3", "T4", "T5", "T6", "T7", "CN"] as const).map((dayLabel, dayIndex) => {
@@ -226,7 +226,7 @@ export function OutcomeStep({
                 : `Đã chọn ${draft.preferredDays.length} ngày.`}
             </p>
           </div>
-          <div className="space-y-2">
+          <div className="stack-tight">
             <Label htmlFor="personal-constraint">Trở ngại lớn nhất hiện tại?</Label>
             <Select
               value={draft.personalConstraint}

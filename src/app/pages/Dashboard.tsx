@@ -1649,7 +1649,7 @@ function DashboardContent({
                                   </p>
                                 </div>
 
-                                <div className="space-y-2">
+                                <div className="stack-tight">
                                   <div                               className="flex items-center justify-between text-sm">
                                     <span className="font-semibold text-foreground">{progress}%</span>
                                     <span className="text-muted-foreground">

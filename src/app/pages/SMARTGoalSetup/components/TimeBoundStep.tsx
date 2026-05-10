@@ -21,7 +21,7 @@ export function TimeBoundStep({ smartData, setSmartData }: TimeBoundStepProps) {
 
   return (
     <div className="stack-stack">
-      <div className="space-y-1">
+      <div className="stack-tight">
         <p className="text-sm text-slate-600">
           Chọn cách chốt thời hạn phù hợp với bạn.
         </p>
@@ -61,7 +61,7 @@ export function TimeBoundStep({ smartData, setSmartData }: TimeBoundStepProps) {
       </div>
 
       {smartData.timeBound.mode === "weeks" ? (
-        <div className="space-y-2">
+        <div className="stack-tight">
           <Label htmlFor="smart-target-weeks" className="text-base">
             Số tuần mục tiêu
           </Label>
@@ -87,7 +87,7 @@ export function TimeBoundStep({ smartData, setSmartData }: TimeBoundStepProps) {
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="stack-tight">
           <Label htmlFor="smart-target-date" className="text-base">
             Ngày mục tiêu
           </Label>

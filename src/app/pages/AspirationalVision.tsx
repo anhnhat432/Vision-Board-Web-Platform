@@ -148,7 +148,7 @@ export function AspirationalVision() {
             ) : null}
           </div>
 
-          <div className="space-y-2">
+          <div className="stack-tight">
             <p className="text-sm font-medium text-slate-900">Khoảng thời gian</p>
             <div className="flex flex-wrap gap-2">
               {[3, 5].map((year) => (
@@ -176,7 +176,7 @@ export function AspirationalVision() {
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               {LIFE_AREA_FIELDS.map(({ area, label, placeholder }) => (
-                <div key={area} className="space-y-2">
+                <div key={area} className="stack-tight">
                   <Label htmlFor={`aspirational-${area}`}>{label}</Label>
                   <Textarea
                     id={`aspirational-${area}`}

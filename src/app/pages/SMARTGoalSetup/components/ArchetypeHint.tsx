@@ -42,7 +42,7 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
   } else if (variant === "leadAction") {
     Icon = Sparkles;
     body = (
-      <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
+      <ul className="list-disc stack-tight pl-5 text-sm leading-6 text-slate-700">
         {planDefaults.recommendedLeadIndicators.map((indicator) => (
           <li key={indicator}>{indicator}</li>
         ))}
@@ -51,7 +51,7 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
   } else {
     Icon = TriangleAlert;
     body = (
-      <ul className="list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
+      <ul className="list-disc stack-tight pl-5 text-sm leading-6 text-slate-700">
         {hints.antiPatterns.slice(0, 3).map((pattern) => (
           <li key={pattern}>{pattern}</li>
         ))}

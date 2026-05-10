@@ -293,7 +293,7 @@ export function ReviewStep({
         {scheduledLeadIndicators.length === 0 ? (
           <p className="mt-[var(--space-inline)] text-sm text-slate-500">Chưa có việc nào được chốt.</p>
         ) : (
-          <ul className="mt-[var(--space-inline)] space-y-2">
+          <ul className="mt-[var(--space-inline)] stack-tight">
             {scheduledLeadIndicators.map((indicator) => (
               <li
                 key={indicator.id}
@@ -369,7 +369,7 @@ export function ReviewStep({
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">
                 Cảnh báo ({planQuality.warnings.length})
               </p>
-              <ul className="mt-2 space-y-1 text-sm leading-6 text-amber-900">
+              <ul className="mt-2 stack-tight text-sm leading-6 text-amber-900">
                 {planQuality.warnings.map((warning) => (
                   <li key={warning}>• {warning}</li>
                 ))}
@@ -386,7 +386,7 @@ export function ReviewStep({
               <summary className="cursor-pointer list-none text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
                 Gợi ý cải thiện ({planQuality.suggestions.length})
               </summary>
-              <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
+              <ul className="mt-2 stack-tight text-sm leading-6 text-slate-700">
                 {planQuality.suggestions.map((suggestion) => (
                   <li key={suggestion}>• {suggestion}</li>
                 ))}
@@ -408,7 +408,7 @@ export function ReviewStep({
             đảm thành công, nhưng giúp bạn biết vì sao nên thử cách này trước.
           </p>
 
-          <ul data-testid="plan-rationale-reasons" className="mt-4 space-y-2 text-sm leading-6 text-slate-800">
+          <ul data-testid="plan-rationale-reasons" className="mt-4 stack-tight text-sm leading-6 text-slate-800">
             {planRationale.reasons.map((reason) => (
               <li
                 key={reason.id}
@@ -430,7 +430,7 @@ export function ReviewStep({
                 <CircleAlert className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Lưu ý cần biết</span>
               </p>
-              <ul className="mt-2 space-y-1 text-sm leading-6 text-amber-900">
+              <ul className="mt-2 stack-tight text-sm leading-6 text-amber-900">
                 {planRationale.warnings.map((warning) => (
                   <li key={warning.id} data-warning-id={warning.id}>
                     • {warning.text}
@@ -449,7 +449,7 @@ export function ReviewStep({
                 <Wrench className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Nếu bạn thấy chưa khớp, có thể đổi</span>
               </p>
-              <ul className="mt-2 space-y-1 text-sm leading-6 text-sky-900">
+              <ul className="mt-2 stack-tight text-sm leading-6 text-sky-900">
                 {planRationale.adjustments.map((adjustment) => (
                   <li key={adjustment.id} data-adjustment-id={adjustment.id}>
                     • {adjustment.text}
@@ -507,7 +507,7 @@ export function ReviewStep({
         <div className="rounded-[var(--r-card)] border border-dashed border-slate-200 bg-slate-50/80 p-5">
           <div className="stack-stack">
             <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-2">
+              <div className="stack-tight">
                 <Label htmlFor="milestone-week-4">Mốc tuần 4</Label>
                 <Input
                   id="milestone-week-4"
@@ -518,7 +518,7 @@ export function ReviewStep({
                   onChange={(event) => onChange("week4Milestone", event.target.value)}
                 />
               </div>
-              <div className="space-y-2">
+              <div className="stack-tight">
                 <Label htmlFor="milestone-week-8">Mốc tuần 8</Label>
                 <Input
                   id="milestone-week-8"
@@ -535,7 +535,7 @@ export function ReviewStep({
                 {milestoneError}
               </p>
             ) : null}
-            <div className="space-y-2">
+            <div className="stack-tight">
               <Label htmlFor="success-evidence">Bằng chứng thành công muốn thấy</Label>
               <Textarea
                 id="success-evidence"

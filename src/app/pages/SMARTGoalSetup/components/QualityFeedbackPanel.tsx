@@ -90,7 +90,7 @@ export function QualityFeedbackPanel({
       <Progress value={overallScore} className="mt-4 h-2" aria-label={`Chất lượng mục tiêu: ${overallScore}/100`} />
 
       {topWarnings.length > 0 && (
-        <div className="mt-4 space-y-2">
+        <div className="mt-4 stack-tight">
           {topWarnings.map((warning) => (
             <div
               key={warning}
@@ -104,7 +104,7 @@ export function QualityFeedbackPanel({
       )}
 
       {topSuggestions.length > 0 && (
-        <div className="mt-[var(--space-inline)] space-y-2">
+        <div className="mt-[var(--space-inline)] stack-tight">
           {topSuggestions.map((suggestion) => (
             <div
               key={suggestion}

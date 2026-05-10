@@ -156,7 +156,7 @@ export function LeadIndicatorsStep({
         <div className="grid gap-3 md:grid-cols-2">
           <div className="rounded-[var(--r-card)] border border-emerald-200 bg-white/82 p-3">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Ví dụ tốt (kiểm soát được)</p>
-            <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
+            <ul className="mt-2 stack-tight text-sm leading-6 text-slate-700">
               <li>• Viết draft 800 từ</li>
               <li>• Tập gym 45 phút</li>
               <li>• Gửi 5 email outreach</li>
@@ -165,7 +165,7 @@ export function LeadIndicatorsStep({
           </div>
           <div className="rounded-[var(--r-card)] border border-amber-200 bg-white/82 p-3">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Ví dụ chưa hợp (kết quả cuối)</p>
-            <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
+            <ul className="mt-2 stack-tight text-sm leading-6 text-slate-700">
               <li>• Tăng 100 followers</li>
               <li>• Giảm 5kg</li>
               <li>• Có job mới</li>
@@ -216,7 +216,7 @@ export function LeadIndicatorsStep({
               </div>
             </div>
             <div className="mt-4 grid gap-3">
-              <div className="space-y-2">
+              <div className="stack-tight">
                 <Label htmlFor={`tactic-name-${index}`}>Tên việc</Label>
                 <Input
                   id={`tactic-name-${index}`}
@@ -226,7 +226,7 @@ export function LeadIndicatorsStep({
                 />
               </div>
               <div className="grid gap-3 md:grid-cols-2">
-                <div className="space-y-2">
+                <div className="stack-tight">
                   <Label htmlFor={`tactic-type-${index}`}>Loại</Label>
                   <Select
                     value={indicator.type}
@@ -241,7 +241,7 @@ export function LeadIndicatorsStep({
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
+                <div className="stack-tight">
                   <Label htmlFor={`tactic-target-${index}`}>Tần suất / tuần</Label>
                   <Input
                     id={`tactic-target-${index}`}
@@ -258,7 +258,7 @@ export function LeadIndicatorsStep({
                     </p>
                   ) : null}
                 </div>
-                <div className="space-y-2">
+                <div className="stack-tight">
                   <Label htmlFor={`tactic-unit-${index}`}>Đơn vị</Label>
                   <Input
                     id={`tactic-unit-${index}`}
@@ -275,7 +275,7 @@ export function LeadIndicatorsStep({
                     </p>
                   ) : null}
                 </div>
-                <div className="space-y-2">
+                <div className="stack-tight">
                   <Label htmlFor={`tactic-cadence-${index}`}>Nhịp</Label>
                   <Select
                     value={indicator.cadence}
@@ -315,7 +315,7 @@ export function LeadIndicatorsStep({
               {expandedCommitments[indicator.id] ? (
                 <div id={`tactic-commitment-${index}`} className="mt-4 grid gap-3">
                   {COMMITMENT_FIELDS.map((field) => (
-                    <div key={field.key} className="space-y-2">
+                    <div key={field.key} className="stack-tight">
                       <Label htmlFor={`tactic-commitment-${field.key}-${index}`}>{field.label}</Label>
                       <Textarea
                         id={`tactic-commitment-${field.key}-${index}`}
@@ -336,7 +336,7 @@ export function LeadIndicatorsStep({
             </div>
             {indicatorWarnings[index]?.length > 0 && (
               <ul
-                className="mt-[var(--space-inline)] space-y-1 rounded-[var(--r-card)] border border-amber-200 bg-amber-50/82 px-3 py-2 text-xs leading-5 text-amber-800"
+                className="mt-[var(--space-inline)] stack-tight rounded-[var(--r-card)] border border-amber-200 bg-amber-50/82 px-3 py-2 text-xs leading-5 text-amber-800"
                 aria-label={`Cảnh báo cho việc ${index + 1}`}
               >
                 {indicatorWarnings[index].map((warning) => (
@@ -373,7 +373,7 @@ export function LeadIndicatorsStep({
           <p className="mt-[var(--space-inline)] text-xs leading-5 text-slate-500">
             Từ mỗi việc lặp lại bên trên, việc hôm nay sẽ được tạo vào các ngày sau:
           </p>
-          <div className="mt-[var(--space-inline)] space-y-2">
+          <div className="mt-[var(--space-inline)] stack-tight">
             {weekOneTaskGroups.length === 0 ? (
               <p className="text-sm text-slate-500">Thêm việc để thấy tuần đầu tiên sẽ trông như thế nào.</p>
             ) : (
@@ -392,7 +392,7 @@ export function LeadIndicatorsStep({
                     {group.taskTitles.length} việc / tuần • Lịch: {formatScheduleDayLabels(group.scheduleDays)}
                   </p>
                   {group.taskTitles.length > 0 && (
-                    <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-600">
+                    <ul className="mt-2 stack-tight text-xs leading-5 text-slate-600">
                       {group.taskTitles.map((title) => (
                         <li key={title}>→ {title}</li>
                       ))}

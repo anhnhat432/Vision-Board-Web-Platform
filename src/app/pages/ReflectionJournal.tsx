@@ -361,7 +361,7 @@ export function ReflectionJournal() {
 
           <div className="mt-4 grid gap-5">
             <div className="grid gap-5 md:grid-cols-2">
-              <div className="space-y-2">
+              <div className="stack-tight">
                 <Label>Ngày</Label>
                 <Input
                   type="date"
@@ -370,7 +370,7 @@ export function ReflectionJournal() {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="stack-tight">
                 <Label>Tiêu đề</Label>
                 <Input
                   placeholder="Ví dụ: Một ngày tôi lấy lại được nhịp"
@@ -380,7 +380,7 @@ export function ReflectionJournal() {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="stack-tight">
               <Label>Hôm nay bạn đang cảm thấy thế nào?</Label>
               <div className="grid gap-3 sm:grid-cols-3">
                 {[
@@ -425,7 +425,7 @@ export function ReflectionJournal() {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="stack-tight">
               <div className="flex items-center justify-between">
                 <Label>Nội dung</Label>
                 <span
@@ -622,7 +622,7 @@ export function ReflectionJournal() {
               </Card>
             )}
 
-            <div className="stack-tight sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
+            <div className="stack-tight sm:[&>*+*]:mt-0 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
               <div className="relative min-w-[200px] flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input

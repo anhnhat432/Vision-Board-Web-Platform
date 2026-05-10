@@ -22,7 +22,7 @@ export function RelevantStep({
 
   return (
     <div className="stack-stack">
-      <div className="space-y-2">
+      <div className="stack-tight">
         <Label htmlFor="smart-relevant-reason" className="text-base">
           Lý do bạn thật sự muốn theo đuổi
         </Label>
@@ -46,7 +46,7 @@ export function RelevantStep({
           Viết đủ cụ thể để khi mệt vẫn nhớ vì sao mục tiêu này đáng giữ.
         </p>
       </div>
-      <div className="space-y-2">
+      <div className="stack-tight">
         <Label htmlFor="smart-life-alignment">Lĩnh vực cuộc sống liên quan (tuỳ chọn)</Label>
         <Input
           id="smart-life-alignment"

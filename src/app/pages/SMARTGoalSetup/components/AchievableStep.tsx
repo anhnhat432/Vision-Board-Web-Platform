@@ -27,7 +27,7 @@ export function AchievableStep({
 
   return (
     <div className="stack-stack">
-      <div className="space-y-2">
+      <div className="stack-tight">
         <Label htmlFor="smart-weekly-hours" className="text-base">
           Thời gian mỗi tuần
         </Label>
@@ -52,7 +52,7 @@ export function AchievableStep({
         <p className="text-sm text-slate-500">Chỉ đếm thời gian bạn giữ được đều — không phải lúc lý tưởng.</p>
       </div>
 
-      <div className="space-y-2">
+      <div className="stack-tight">
         <Label htmlFor="smart-required-skills">Kỹ năng cần có</Label>
         <Textarea
           id="smart-required-skills"
@@ -74,7 +74,7 @@ export function AchievableStep({
         </p>
       </div>
 
-      <div className="space-y-2">
+      <div className="stack-tight">
         <Label htmlFor="smart-support-resources">Nguồn lực hỗ trợ</Label>
         <Textarea
           id="smart-support-resources"

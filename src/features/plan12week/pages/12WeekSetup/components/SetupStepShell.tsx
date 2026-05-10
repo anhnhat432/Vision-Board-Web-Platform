@@ -2,6 +2,7 @@
 import { ArrowLeft, ArrowRight, CheckCircle2, Flag, Lightbulb, Loader2 } from "lucide-react";
 
 import { Button } from "@/app/components/ui/button";
+import { SectionBlock } from "@/app/components/layout/SectionBlock";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { useReducedMotion } from "@/app/components/ui/use-reduced-motion";
 import { useScrollToTopOnChange } from "@/app/hooks/useScrollToTopOnChange";
@@ -119,7 +120,7 @@ export function SetupStepShell({
               style={{ width: `${((currentStep + 1) / stepCount) * 100}%` }}
             />
           </div>
-          <div className="space-y-1">
+          <div className="stack-tight">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
               Bước {currentStep + 1} / {stepCount}
             </p>
@@ -141,12 +142,14 @@ export function SetupStepShell({
           )}
         </CardHeader>
         <CardContent className="stack-section">
-          {children}
-          {stepError ? (
-            <p role="alert" className="rounded-[var(--r-tile)] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
-              {stepError}
-            </p>
-          ) : null}
+          <SectionBlock title={`Nội dung bước ${currentStep + 1}`} headerVisuallyHidden density="default">
+            {children}
+            {stepError ? (
+              <p role="alert" className="rounded-[var(--r-tile)] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+                {stepError}
+              </p>
+            ) : null}
+          </SectionBlock>
 
           <div
             className={`flex flex-col justify-between gap-[var(--space-inline)] border-t border-white/70 pt-[var(--space-section)] sm:flex-row sm:static ${

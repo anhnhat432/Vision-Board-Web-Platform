@@ -405,7 +405,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                     Nên làm trước khi tạo kế hoạch
                   </p>
                 </div>
-                <ol className="mt-[var(--space-inline)] space-y-2.5">
+                <ol className="mt-[var(--space-inline)] stack-tight">
                   {copy.nextMoves.map((item, index) => (
                     <li key={item} className="flex items-start gap-3">
                       <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-slate-900 text-xs font-semibold text-white">

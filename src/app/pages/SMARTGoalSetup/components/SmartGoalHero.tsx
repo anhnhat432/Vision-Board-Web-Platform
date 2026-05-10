@@ -73,7 +73,7 @@ export function SmartGoalHero({
             <p className="mt-2 text-sm leading-6 text-white/78">
               Bắt đầu từ insight này, rồi biến nó thành một kết quả đo được trong {smartGoalStarter.targetWeeks} tuần.
             </p>
-            <div className="mt-4 space-y-2">
+            <div className="mt-4 stack-tight">
               <div className="rounded-[var(--r-control)] border border-white/14 bg-black/10 px-3 py-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/52">Chỉ số gợi ý</p>
                 <p className="mt-1 text-sm font-semibold text-white">{smartGoalStarter.metricName}</p>

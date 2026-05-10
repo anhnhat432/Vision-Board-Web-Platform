@@ -730,7 +730,7 @@ export function TwelveWeekWeekTab({
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                           {suggestedNextWeekPlan.secondaryTrackLabel}
                         </p>
-                        <div className="mt-2 space-y-2">
+                        <div className="mt-2 stack-tight">
                           {suggestedNextWeekPlan.secondaryTrackItems.map((item) => (
                             <p key={item} className="text-sm leading-6 text-slate-700">
                               {item}

@@ -363,14 +363,14 @@ export function VisionBoardGallery() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-10">
+        <div className="stack-section">
           {years.map((year) => (
             <section key={year} className="stack-stack">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700">
                   <Calendar className="h-6 w-6" />
                 </div>
-                <div className="space-y-1">
+                <div className="stack-tight">
                   <h2 className="text-2xl font-bold text-slate-900">{year}</h2>
                   <p className="text-sm text-slate-500">{boardsByYear[year].length} bảng được lưu trong năm này.</p>
                 </div>

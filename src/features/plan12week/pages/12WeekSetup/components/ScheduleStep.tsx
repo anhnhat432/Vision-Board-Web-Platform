@@ -55,7 +55,7 @@ export function ScheduleStep({
     <div className="mx-auto max-w-4xl stack-section">
       <div className="stack-stack">
         <div className="grid gap-3 md:grid-cols-2">
-          <div className="space-y-2">
+          <div className="stack-tight">
             <Label htmlFor="cycle-start-date">Ngày bắt đầu chu kỳ</Label>
             <Input
               id="cycle-start-date"
@@ -79,7 +79,7 @@ export function ScheduleStep({
             ) : null}
             <p id="cycle-start-date-helper" className="text-xs text-slate-500">Kế hoạch sẽ canh chu kỳ về Thứ Hai để việc và điểm tuần khớp nhau.</p>
           </div>
-          <div className="space-y-2">
+          <div className="stack-tight">
             <Label htmlFor="review-day">Ngày nhìn lại hằng tuần</Label>
             <Select value={draft.reviewDay} onValueChange={(value) => onChange("reviewDay", value)}>
               <SelectTrigger id="review-day" aria-label="Chọn ngày nhìn lại hằng tuần">
@@ -95,7 +95,7 @@ export function ScheduleStep({
             </Select>
           </div>
         </div>
-        <div className="space-y-2">
+        <div className="stack-tight">
           <Label htmlFor="week-load-preference">Nhịp tuần mặc định</Label>
           <Select
             value={draft.tacticLoadPreference}
@@ -119,7 +119,7 @@ export function ScheduleStep({
           </p>
         </div>
         <div className="grid gap-3 md:grid-cols-3">
-          <div className="space-y-2 md:col-span-2">
+          <div className="stack-tight md:col-span-2">
             <Label htmlFor="lag-metric-name">Chỉ số kết quả chính</Label>
             <Input
               id="lag-metric-name"
@@ -129,7 +129,7 @@ export function ScheduleStep({
             />
             <p className="text-xs text-slate-500">Đây là chỉ số kết quả cuối chu kỳ, khác với việc hằng tuần.</p>
           </div>
-          <div className="space-y-2">
+          <div className="stack-tight">
             <Label htmlFor="lag-metric-target">Mục tiêu</Label>
             <Input
               id="lag-metric-target"
@@ -139,7 +139,7 @@ export function ScheduleStep({
             />
           </div>
         </div>
-        <div className="space-y-2">
+        <div className="stack-tight">
           <Label htmlFor="lag-metric-unit">Đơn vị của chỉ số</Label>
           <Input
             id="lag-metric-unit"
@@ -238,7 +238,7 @@ export function ScheduleStep({
             <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
               {hasPreviewTasks ? "Những việc sẽ hiện ở màn Hôm nay" : "Tuần đầu nên mở bằng"}
             </p>
-            <div className="mt-[var(--space-inline)] space-y-2">
+            <div className="mt-[var(--space-inline)] stack-tight">
               {weekOneTaskPreview.length === 0 ? (
                 <p className="text-sm text-slate-500">
                   Khi bạn chốt khung hoặc thêm việc, tuần đầu sẽ hiện rõ các việc cần mở ở màn Hôm nay.

@@ -566,7 +566,7 @@ export function TwelveWeekProgressTab({
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
-                  <div className="min-w-[320px] space-y-2">
+                  <div className="min-w-[320px] stack-tight">
                     <div className="flex gap-1 pl-10">
                       {["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map((day) => (
                         <div key={day} className="w-9 text-center text-[10px] font-medium text-slate-500">

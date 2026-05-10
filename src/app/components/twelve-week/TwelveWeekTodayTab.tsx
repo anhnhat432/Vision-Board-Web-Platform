@@ -494,7 +494,7 @@ export function TwelveWeekTodayTab({
             data-tour-id="system-today-queue"
             className="h-full min-w-0 overflow-hidden rounded-[var(--r-tile)] border border-border bg-white/92 shadow-sm sm:rounded-[var(--r-card)]"
           >
-            <CardHeader className="min-w-0 space-y-0 px-4 pt-4 pb-2 sm:px-7 sm:pt-7 sm:pb-3">
+            <CardHeader className="min-w-0 [&>*+*]:mt-0 px-4 pt-4 pb-2 sm:px-7 sm:pt-7 sm:pb-3">
               <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <CardTitle as="h2" className="break-words text-foreground">Hàng việc hôm nay</CardTitle>
@@ -735,7 +735,7 @@ export function TwelveWeekTodayTab({
                     </span>
                   </summary>
                   <p className="mt-2 text-sm text-muted-foreground">Xong việc số 1 rồi mới mở danh sách này.</p>
-                  <div className="mt-[var(--space-inline)] space-y-2">
+                  <div className="mt-[var(--space-inline)] stack-tight">
                     {secondaryPreviewTasks.map((task, index) => (
                       <div
                         key={task.id}
@@ -781,7 +781,7 @@ export function TwelveWeekTodayTab({
           style={{ animationDelay: '0.06s' }}
         >
           <Card className="h-full min-w-0 overflow-hidden rounded-[var(--r-tile)] border border-border bg-white/92 shadow-sm sm:rounded-[var(--r-card)]">
-            <CardHeader className="min-w-0 space-y-0 px-4 pt-4 pb-2 sm:px-7 sm:pt-7 sm:pb-3">
+            <CardHeader className="min-w-0 [&>*+*]:mt-0 px-4 pt-4 pb-2 sm:px-7 sm:pt-7 sm:pb-3">
               <div className="flex min-w-0 items-start justify-between gap-3">
                 <div className="min-w-0">
                   <CardTitle as="h2" className="flex items-center gap-2 break-words text-foreground">
@@ -847,7 +847,7 @@ export function TwelveWeekTodayTab({
                   ))}
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="stack-tight">
                 <Label htmlFor="daily-note">Note tùy chọn</Label>
                 <Textarea
                   id="daily-note"

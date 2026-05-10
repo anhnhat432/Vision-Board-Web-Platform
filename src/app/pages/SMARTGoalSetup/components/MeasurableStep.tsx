@@ -51,7 +51,7 @@ export function MeasurableStep({
 
   return (
     <div className="stack-stack">
-      <div className="space-y-2">
+      <div className="stack-tight">
         <Label htmlFor="smart-metric-name" className="text-base">
           Con số hoặc dấu hiệu theo dõi
         </Label>
@@ -94,7 +94,7 @@ export function MeasurableStep({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="space-y-2">
+        <div className="stack-tight">
           <Label htmlFor="smart-baseline">Mốc hiện tại (tuỳ chọn)</Label>
           <Input
             id="smart-baseline"
@@ -115,7 +115,7 @@ export function MeasurableStep({
             aria-invalid={baselineInvalid}
           />
         </div>
-        <div className="space-y-2">
+        <div className="stack-tight">
           <Label htmlFor="smart-target">Mốc mục tiêu</Label>
           <Input
             id="smart-target"

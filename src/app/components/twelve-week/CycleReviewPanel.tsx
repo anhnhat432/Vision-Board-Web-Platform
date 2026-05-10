@@ -98,7 +98,7 @@ export function CycleReviewPanel({
           <div className="grid gap-4 lg:grid-cols-2">
             <div className="stack-tight">
               <h2 className="text-base font-semibold text-slate-950">Biggest wins</h2>
-              <ul className="space-y-2">
+              <ul className="stack-tight">
                 {summary.biggestWins.length > 0 ? (
                   summary.biggestWins.map((win) => (
                     <li key={win} className="rounded-[var(--r-control)] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
@@ -112,7 +112,7 @@ export function CycleReviewPanel({
             </div>
             <div className="stack-tight">
               <h2 className="text-base font-semibold text-slate-950">Top adjustments</h2>
-              <ul className="space-y-2">
+              <ul className="stack-tight">
                 {summary.topAdjustments.length > 0 ? (
                   summary.topAdjustments.map((adjustment) => (
                     <li key={adjustment} className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
@@ -132,7 +132,7 @@ export function CycleReviewPanel({
               {LESSON_FIELD_IDS.map((lessonId, index) => {
                 const lesson = lessons[index] ?? "";
                 return (
-                  <div key={lessonId} className="space-y-2">
+                  <div key={lessonId} className="stack-tight">
                     <Label htmlFor={`cycle-lesson-${index + 1}`}>Bài học lớn nhất {index + 1}</Label>
                     <Textarea
                       id={`cycle-lesson-${index + 1}`}
