@@ -1,5 +1,5 @@
 ﻿import type { ReactNode } from "react";
-import { AlertTriangle, CheckCircle2, Loader2, Sparkles, Target } from "lucide-react";
+import { AlertTriangle, CalendarDays, CheckCircle2, Flame, Loader2, Sparkles, Target, TrendingUp, Zap } from "lucide-react";
 
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
@@ -30,6 +30,42 @@ interface WeekCompletionSummary {
   completed: number;
   total: number;
   percent: number;
+}
+
+function getHeaderPhaseInfo(currentWeek: number) {
+  if (currentWeek <= 4) {
+    return {
+      label: "Ramp",
+      badgeClassName:
+        "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/30 dark:bg-violet-950/35 dark:text-violet-200",
+      tileClassName:
+        "border-violet-200 bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:border-violet-500/30 dark:from-violet-950/40 dark:to-fuchsia-950/25",
+      iconClassName:
+        "bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 dark:from-violet-950/70 dark:to-fuchsia-950/50 dark:text-violet-200",
+    };
+  }
+
+  if (currentWeek <= 8) {
+    return {
+      label: "Peak",
+      badgeClassName:
+        "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700 dark:border-fuchsia-500/30 dark:bg-fuchsia-950/35 dark:text-fuchsia-200",
+      tileClassName:
+        "border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-rose-50 dark:border-fuchsia-500/30 dark:from-fuchsia-950/40 dark:to-rose-950/25",
+      iconClassName:
+        "bg-gradient-to-br from-fuchsia-100 to-rose-100 text-fuchsia-700 dark:from-fuchsia-950/70 dark:to-rose-950/50 dark:text-fuchsia-200",
+    };
+  }
+
+  return {
+    label: "Harvest",
+    badgeClassName:
+      "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/35 dark:text-emerald-200",
+    tileClassName:
+      "border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 dark:border-emerald-500/30 dark:from-emerald-950/40 dark:to-teal-950/25",
+    iconClassName:
+      "bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-700 dark:from-emerald-950/70 dark:to-teal-950/50 dark:text-emerald-200",
+  };
 }
 
 export function TwelveWeekTabFallback({ title, description }: { title: string; description: string }) {
@@ -152,8 +188,10 @@ export function TwelveWeekDashboardHeader({
   onOpenFocusTab,
   onOpenGoals,
 }: TwelveWeekDashboardHeaderProps) {
+  const phaseInfo = getHeaderPhaseInfo(currentWeek);
+
   return (
-    <Card className="ops-surface overflow-hidden rounded-[var(--r-tile)] border border-slate-200/80 bg-white/94 shadow-sm ring-1 ring-white/70 sm:rounded-[var(--r-card)]">
+    <Card className="glass-surface-sm overflow-hidden rounded-[var(--r-tile)] border border-violet-100/80 bg-white/94 shadow-sm ring-1 ring-white/70 sm:rounded-[var(--r-card)]">
       <CardContent className="p-4 sm:p-6 lg:p-7">
         <div className="flex flex-col gap-3 sm:gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0 flex-1 stack-tight">
@@ -161,11 +199,12 @@ export function TwelveWeekDashboardHeader({
               <Badge variant="outline" className="rounded-[var(--r-pill)] border-violet-200 bg-violet-50 px-3 py-1.5 text-violet-700">
                 Nhịp 12 tuần
               </Badge>
-              <Badge variant="outline" className="rounded-[var(--r-pill)] border-slate-200 bg-slate-50 px-3 py-1.5 text-slate-600">
+              <Badge variant="outline" className={`rounded-[var(--r-pill)] px-3 py-1.5 ${phaseInfo.badgeClassName}`}>
                 <Target className="mr-1 h-3.5 w-3.5" />
-                Tuần {currentWeek}/{system.totalWeeks}
+                Tuần {currentWeek}/{system.totalWeeks} - {phaseInfo.label}
               </Badge>
               <Badge variant="outline" className={`rounded-[var(--r-pill)] px-3 py-1.5 ${syncBadgeClass}`}>
+                <span className="mr-1.5 inline-block h-2 w-2 rounded-[var(--r-pill)] bg-current opacity-70" aria-hidden="true" />
                 {syncBadgeLabel}
               </Badge>
               {reviewDueToday && (
@@ -201,14 +240,20 @@ export function TwelveWeekDashboardHeader({
             className="hidden min-w-0 grid-cols-3 gap-2 sm:grid sm:gap-3 xl:w-[540px]"
           >
             <ProductVisual variant="execution" className="hidden min-h-[136px] rounded-[var(--r-tile)] border border-slate-200/70 bg-slate-50/72 sm:col-span-3 sm:block" />
-            <div className="ops-metric-tile rounded-[var(--r-control)] border border-slate-200 bg-slate-50/80 px-2 py-2 shadow-sm sm:rounded-[var(--r-tile)] sm:px-4 sm:py-3">
+            <div className="glass-surface-sm rounded-[var(--r-control)] border border-amber-200/70 bg-gradient-to-br from-amber-50 to-orange-50 px-2 py-2 shadow-sm sm:rounded-[var(--r-tile)] sm:px-4 sm:py-3 dark:border-amber-500/30 dark:from-amber-950/35 dark:to-orange-950/25">
+              <span className="mb-2 flex h-8 w-8 items-center justify-center rounded-[var(--r-control)] bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 dark:from-amber-950/70 dark:to-orange-950/50 dark:text-amber-200">
+                <Zap className="h-4 w-4" aria-hidden="true" />
+              </span>
               <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 sm:text-xs sm:tracking-[0.14em]">Còn làm</p>
-              <p className="mt-1 text-xl font-bold text-slate-950 sm:text-2xl">{todayRemainingCount}</p>
+              <p className="count-up mt-1 text-xl font-bold tabular-nums text-slate-950 sm:text-2xl">{todayRemainingCount}</p>
               <p className="hidden text-xs text-slate-500 sm:block">{todayCompletedCount} việc đã chốt hôm nay</p>
             </div>
-            <div className="ops-metric-tile rounded-[var(--r-control)] border border-slate-200 bg-slate-50/80 px-2 py-2 shadow-sm sm:rounded-[var(--r-tile)] sm:px-4 sm:py-3">
+            <div className="glass-surface-sm rounded-[var(--r-control)] border border-emerald-200/70 bg-gradient-to-br from-emerald-50 to-teal-50 px-2 py-2 shadow-sm sm:rounded-[var(--r-tile)] sm:px-4 sm:py-3 dark:border-emerald-500/30 dark:from-emerald-950/35 dark:to-teal-950/25">
+              <span className="mb-2 flex h-8 w-8 items-center justify-center rounded-[var(--r-control)] bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-700 dark:from-emerald-950/70 dark:to-teal-950/50 dark:text-emerald-200">
+                <TrendingUp className="h-4 w-4" aria-hidden="true" />
+              </span>
               <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 sm:text-xs sm:tracking-[0.14em]">Tuần</p>
-              <p className="mt-1 text-xl font-bold text-slate-950 sm:text-2xl">{weekCompletion.percent}%</p>
+              <p className="count-up mt-1 text-xl font-bold tabular-nums text-slate-950 sm:text-2xl">{weekCompletion.percent}%</p>
               <p className="hidden text-xs text-slate-500 sm:block">
                 {currentWeekRange
                   ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
@@ -216,13 +261,24 @@ export function TwelveWeekDashboardHeader({
               </p>
             </div>
             <div
-              className={`rounded-[var(--r-control)] border px-2 py-2 sm:rounded-[var(--r-tile)] sm:px-4 sm:py-3 ${
-                reviewDueToday ? "border-amber-200 bg-amber-50/90 shadow-sm" : "ops-metric-tile border-slate-200 bg-slate-50/80 shadow-sm"
+              className={`rounded-[var(--r-control)] border px-2 py-2 shadow-sm sm:rounded-[var(--r-tile)] sm:px-4 sm:py-3 ${
+                reviewDueToday
+                  ? "border-rose-200 bg-gradient-to-br from-rose-50 to-pink-50 dark:border-rose-500/30 dark:from-rose-950/35 dark:to-pink-950/25"
+                  : phaseInfo.tileClassName
               }`}
             >
+              <span
+                className={`mb-2 flex h-8 w-8 items-center justify-center rounded-[var(--r-control)] ${
+                  reviewDueToday
+                    ? "bg-gradient-to-br from-rose-100 to-pink-100 text-rose-700 dark:from-rose-950/70 dark:to-pink-950/50 dark:text-rose-200"
+                    : phaseInfo.iconClassName
+                }`}
+              >
+                {reviewDueToday ? <Flame className="h-4 w-4" aria-hidden="true" /> : <CalendarDays className="h-4 w-4" aria-hidden="true" />}
+              </span>
               <p
                 className={`text-[10px] font-semibold uppercase tracking-[0.12em] sm:text-xs sm:tracking-[0.14em] ${
-                  reviewDueToday ? "text-amber-700" : "text-slate-500"
+                  reviewDueToday ? "text-rose-700 dark:text-rose-200" : "text-slate-500"
                 }`}
               >
                 Review
