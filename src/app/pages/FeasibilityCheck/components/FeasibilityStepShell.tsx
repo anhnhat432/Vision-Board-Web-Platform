@@ -6,6 +6,7 @@ import { Button } from "../../../components/ui/button";
 import { useReducedMotion } from "../../../components/ui/use-reduced-motion";
 import { Card, CardContent } from "../../../components/ui/card";
 import { SectionBlock } from "../../../components/layout/SectionBlock";
+import { WizardStepPip } from "../../../components/layout/WizardStepPip";
 import { Label } from "../../../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
 import type { Question } from "../types";
@@ -36,6 +37,12 @@ export function FeasibilityStepShell({
   headingRef,
 }: FeasibilityStepShellProps) {
   const prefersReducedMotion = useReducedMotion();
+  const wizardStepCount = totalSteps + 1;
+  const feasibilityStepPips = Array.from({ length: wizardStepCount }, (_, index) =>
+    index < totalSteps
+      ? { id: `question-${index + 1}`, label: `Câu ${index + 1}`, shortLabel: `Q${index + 1}` }
+      : { id: "result", label: "Kết quả", shortLabel: "KQ" },
+  );
 
   return (
     <div ref={targetRef} className="mx-auto max-w-4xl">
@@ -50,8 +57,15 @@ export function FeasibilityStepShell({
           >
             <SectionBlock title={`Nội dung câu hỏi ${currentStep + 1}`} headerVisuallyHidden density="default">
               <div className="rounded-[var(--r-card)] gradient-violet-pink p-4 sm:p-6">
+                <WizardStepPip
+                  steps={feasibilityStepPips}
+                  currentStep={currentStep}
+                  ariaLabel={`Bước ${currentStep + 1} trên ${wizardStepCount}`}
+                  mobileMode="compact"
+                  className="mb-[var(--space-stack)]"
+                />
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">
-                  {currentQuestion.axisLabel} · Câu hỏi {currentStep + 1}/{totalSteps}
+                  {currentQuestion.axisLabel}
                 </p>
                 <p className="mt-2 text-xs font-medium text-violet-700">
                   {answeredQuestionCount}/{totalSteps} câu đã trả lời

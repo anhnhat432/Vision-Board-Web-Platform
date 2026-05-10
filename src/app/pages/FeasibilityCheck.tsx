@@ -303,7 +303,7 @@ export function FeasibilityCheck() {
                 </div>
 
                 <div className="stack-tight sm:stack-stack">
-                  <h1 className="max-w-3xl text-2xl font-bold leading-tight tracking-normal sm:text-4xl lg:text-5xl">
+                  <h1 className="max-w-4xl text-2xl font-bold leading-tight tracking-normal sm:text-4xl lg:text-5xl">
                     Mục tiêu này có thực tế với bạn lúc này không?
                   </h1>
                   <p className="hidden max-w-2xl text-base leading-8 text-white/82 sm:block lg:text-lg">

@@ -8,8 +8,10 @@ import type { QualityLevel } from "@/lib/smart-goal/quality";
 import { Alert, AlertDescription, AlertTitle } from "../../../components/ui/alert";
 import { Button } from "../../../components/ui/button";
 import { SectionBlock } from "../../../components/layout/SectionBlock";
+import { WizardStepPip } from "../../../components/layout/WizardStepPip";
 import { QualityFeedbackPanel } from "./QualityFeedbackPanel";
 import { ReviewStep } from "./ReviewStep";
+import { SMART_STEPS } from "../constants";
 import type { GoalClarityItem, SmartGoalSummaryRow, SmartStepDefinition, SmartStepKey } from "../types";
 
 interface QualityFeedbackData {
@@ -42,6 +44,20 @@ interface SmartGoalStepShellProps {
   onNext: () => void;
 }
 
+const SMART_STEP_SHORT_LABELS: Record<SmartStepKey, string> = {
+  specific: "Rõ",
+  measurable: "Đo",
+  achievable: "Khả thi",
+  relevant: "Lý do",
+  timeBound: "Mốc",
+};
+
+const SMART_STEP_PIP_STEPS = SMART_STEPS.map((smartStep) => ({
+  id: smartStep.key,
+  label: smartStep.label,
+  shortLabel: SMART_STEP_SHORT_LABELS[smartStep.key],
+}));
+
 export function SmartGoalStepShell({
   stepIndex,
   totalSteps,
@@ -64,6 +80,12 @@ export function SmartGoalStepShell({
   onNext,
 }: SmartGoalStepShellProps) {
   const prefersReducedMotion = useReducedMotion();
+  const handleWizardJump = (index: number) => {
+    const nextStep = SMART_STEPS[index];
+    if (nextStep) {
+      onJumpToStep(nextStep.key);
+    }
+  };
 
   return (
     <motion.div
@@ -75,11 +97,15 @@ export function SmartGoalStepShell({
     >
       <SectionBlock title={`Nội dung bước ${stepIndex + 1}`} headerVisuallyHidden density="default">
         <div className="flow-muted p-4 sm:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="stack-tight">
+            <WizardStepPip
+              steps={SMART_STEP_PIP_STEPS}
+              currentStep={stepIndex}
+              onJumpToStep={handleWizardJump}
+              ariaLabel={`Bước ${stepIndex + 1} trên ${totalSteps}`}
+              mobileMode="compact"
+            />
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">{step.label}</p>
-            <span className="text-xs font-medium text-slate-500">
-              Bước {stepIndex + 1}/{totalSteps}
-            </span>
           </div>
           <h2
             ref={headingRef}

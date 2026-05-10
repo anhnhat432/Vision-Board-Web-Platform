@@ -1,8 +1,9 @@
 ﻿import { useRef, useState, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, CheckCircle2, Flag, Lightbulb, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Flag, Lightbulb, Loader2 } from "lucide-react";
 
 import { Button } from "@/app/components/ui/button";
 import { SectionBlock } from "@/app/components/layout/SectionBlock";
+import { WizardStepPip } from "@/app/components/layout/WizardStepPip";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
 import { useReducedMotion } from "@/app/components/ui/use-reduced-motion";
 import { useScrollToTopOnChange } from "@/app/hooks/useScrollToTopOnChange";
@@ -67,62 +68,16 @@ export function SetupStepShell({
     >
       <Card className="ops-surface overflow-hidden border border-slate-200/80 bg-white/94 shadow-sm ring-1 ring-white/70">
         <CardHeader className="stack-stack pb-3">
-          <ol
-            className="flex flex-wrap items-center gap-1.5 rounded-[var(--r-tile)] border border-slate-200/80 bg-slate-50/72 p-2 text-xs"
-            aria-label={`Bước ${currentStep + 1} trên ${stepCount}`}
-          >
-            {STEPS.map((step, index) => {
-              const active = index === currentStep;
-              const done = index < currentStep;
-              return (
-                <li
-                  key={step.id}
-                  aria-current={active ? "step" : undefined}
-                  className={`flex items-center gap-1.5 rounded-[var(--r-pill)] border px-2.5 py-1 transition-colors ${
-                    active
-                      ? "border-violet-500 bg-violet-500 text-white"
-                      : done
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-800 cursor-pointer hover:bg-emerald-100"
-                        : "border-slate-200 bg-white text-slate-500"
-                  }`}
-                  onClick={done && onJumpToStep ? () => onJumpToStep(index) : undefined}
-                  onKeyDown={
-                    done && onJumpToStep
-                      ? (e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            onJumpToStep(index);
-                          }
-                        }
-                      : undefined
-                  }
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`flex h-4 w-4 items-center justify-center rounded-[var(--r-pill)] text-[10px] font-semibold ${
-                      active
-                        ? "bg-white text-violet-500"
-                        : done
-                          ? "bg-emerald-600 text-white"
-                          : "bg-slate-100 text-slate-500"
-                    }`}
-                  >
-                    {done ? <CheckCircle2 className="h-3 w-3" /> : index + 1}
-                  </span>
-                  <span className="font-medium">{step.label}</span>
-                </li>
-              );
-            })}
-          </ol>
-          <div className="h-1.5 overflow-hidden rounded-[var(--r-pill)] bg-slate-100" aria-hidden="true">
-            <div
-              className="h-full rounded-[var(--r-pill)] bg-gradient-to-r from-violet-500 via-sky-500 to-emerald-500 transition-all duration-300"
-              style={{ width: `${((currentStep + 1) / stepCount) * 100}%` }}
-            />
-          </div>
+          <WizardStepPip
+            steps={STEPS}
+            currentStep={currentStep}
+            onJumpToStep={onJumpToStep}
+            ariaLabel={`Bước ${currentStep + 1} trên ${stepCount}`}
+            mobileMode="full"
+          />
           <div className="stack-tight">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-              Bước {currentStep + 1} / {stepCount}
+              {STEPS[currentStep]?.label}
             </p>
             <CardTitle>
               <span ref={titleFocusRef} tabIndex={-1} className="block focus:outline-none">
