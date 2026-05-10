@@ -31,6 +31,16 @@ interface ResultStepProps {
   onAdjustGoal: () => void;
 }
 
+function getAxisTone(percent: number): { bar: string; border: string } {
+  if (percent >= 80) {
+    return { bar: "from-emerald-600 to-teal-600", border: "#059669" };
+  }
+  if (percent >= 60) {
+    return { bar: "from-amber-500 to-orange-500", border: "#f59e0b" };
+  }
+  return { bar: "from-rose-500 to-pink-500", border: "#f43f5e" };
+}
+
 export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjustGoal }: ResultStepProps) {
   const prefersReducedMotion = useReducedMotion();
   const isDesktop = useBreakpoint();
@@ -208,6 +218,15 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
   const copy = resultCopy[result.type];
   const fitScore = Math.max(0, Math.min(100, Math.round((result.adjustedScore / 20) * 100)));
   const readinessPercent = Math.max(0, Math.min(100, Math.round((result.readinessScore / 20) * 100)));
+  const scoreCircleRadius = 70;
+  const scoreCircleCircumference = 2 * Math.PI * scoreCircleRadius;
+  const scoreCircleOffset = scoreCircleCircumference * (1 - fitScore / 100);
+  const recommendationToneClass =
+    fitScore >= 80
+      ? "border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-teal-50 dark:border-emerald-500/30 dark:from-emerald-950/35 dark:to-teal-950/25"
+      : fitScore >= 60
+        ? "border-amber-200/80 bg-gradient-to-br from-amber-50 to-orange-50 dark:border-amber-500/30 dark:from-amber-950/35 dark:to-orange-950/25"
+        : "border-rose-200/80 bg-gradient-to-br from-rose-50 to-pink-50 dark:border-rose-500/30 dark:from-rose-950/35 dark:to-pink-950/25";
   const planLoadLabel: Record<PlanLoadRecommendation, string> = {
     lighter: "Nhẹ hơn",
     balanced: "Cân bằng",
@@ -295,6 +314,43 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             </Badge>
           </div>
 
+          <div className="flex flex-col gap-4 rounded-[var(--r-card)] border border-white/14 bg-white/10 p-4 shadow-sm sm:flex-row sm:items-center">
+            <div className="relative mx-auto size-40 shrink-0 sm:mx-0">
+              <svg className="-rotate-90" width="160" height="160" viewBox="0 0 160 160" aria-hidden="true">
+                <defs>
+                  <linearGradient id="feasibility-score-gradient" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stopColor="#7c3aed" />
+                    <stop offset="55%" stopColor="#c026d3" />
+                    <stop offset="100%" stopColor="#ec4899" />
+                  </linearGradient>
+                </defs>
+                <circle cx="80" cy="80" r={scoreCircleRadius} fill="none" stroke="rgba(226,232,240,0.32)" strokeWidth="12" />
+                <circle
+                  cx="80"
+                  cy="80"
+                  r={scoreCircleRadius}
+                  fill="none"
+                  stroke="url(#feasibility-score-gradient)"
+                  strokeDasharray={scoreCircleCircumference}
+                  strokeDashoffset={scoreCircleOffset}
+                  strokeLinecap="round"
+                  strokeWidth="12"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <p className="count-up text-4xl font-bold tabular-nums text-white">{fitScore}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/62">/100</p>
+              </div>
+            </div>
+            <div className="min-w-0 text-center sm:text-left">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/58">Điểm khả thi</p>
+              <p className="mt-2 text-lg font-semibold leading-7 text-white">{copy.statusHint}</p>
+              <p className="mt-2 text-sm leading-6 text-white/72">
+                Score này kết hợp câu trả lời kiểm tra, điểm Life Balance và độ rõ của SMART Goal.
+              </p>
+            </div>
+          </div>
+
           <div className="rounded-[var(--r-card)] border border-white/14 bg-white/10 p-4 shadow-sm sm:hidden">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -367,7 +423,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="stack-stack data-[state=closed]:hidden">
-            <Card className={`overflow-hidden ${styles.panel} border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200`}>
+            <Card className={`overflow-hidden ${styles.panel} ${recommendationToneClass} shadow-sm ring-1 ring-slate-200`}>
               <CardContent className="stack-stack p-5 lg:p-6">
                 <div>
                   <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-slate-200/80 bg-white/82 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
@@ -446,23 +502,31 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                 Xem 7 góc nhìn
               </summary>
               <div className="mt-4 stack-tight">
-                {result.axisScores.map((axis) => (
-                  <div key={axis.axis} className="rounded-[var(--r-tile)] border border-slate-200 bg-slate-50/80 p-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold text-slate-900">{axis.label}</p>
-                      <span className="text-sm font-semibold text-slate-600">
-                        {axis.score}/{axis.maxScore}
-                      </span>
+                {result.axisScores.map((axis) => {
+                  const axisTone = getAxisTone(axis.percent);
+
+                  return (
+                    <div
+                      key={axis.axis}
+                      className="card-hover-lift rounded-[var(--r-tile)] border border-l-4 border-slate-200 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-950/55"
+                      style={{ borderLeftColor: axisTone.border }}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-semibold text-slate-900">{axis.label}</p>
+                        <span className="text-sm font-semibold text-slate-600">
+                          {axis.score}/{axis.maxScore}
+                        </span>
+                      </div>
+                      <div className="mt-2 h-2 overflow-hidden rounded-[var(--r-pill)] bg-slate-200 dark:bg-slate-800">
+                        <div
+                          className={`h-full rounded-[var(--r-pill)] bg-gradient-to-r ${axisTone.bar}`}
+                          style={{ width: `${axis.percent}%` }}
+                        />
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{axis.diagnostic}</p>
                     </div>
-                    <div className="mt-2 h-2 overflow-hidden rounded-[var(--r-pill)] bg-slate-200">
-                      <div
-                        className={`h-full rounded-[var(--r-pill)] bg-gradient-to-r ${styles.meter}`}
-                        style={{ width: `${axis.percent}%` }}
-                      />
-                    </div>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">{axis.diagnostic}</p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               </details>
 

@@ -233,7 +233,11 @@ export function LifeInsight() {
 
                 <div className="stack-tight">
                   <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl">
-                    Bạn đã có một tín hiệu rất rõ về nơi mình nên ưu tiên tiếp theo.
+                    Bạn đã có một tín hiệu rất rõ.{" "}
+                    <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-transparent">
+                      Đây là 3 trọng tâm hiện ra
+                    </span>{" "}
+                    để chọn bước tiếp theo.
                   </h1>
                   <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                     Hệ thống gợi ý lĩnh vực có điểm thấp nhất. Bạn cũng có thể chọn lại bên dưới nếu muốn tập trung vào
@@ -343,16 +347,15 @@ export function LifeInsight() {
                 <div className="flex flex-wrap gap-3">
                   <Button
                     data-testid="life-insight-primary-cta"
-                    variant="outline"
-                    className="w-full justify-center border-slate-950 bg-slate-950 text-white hover:bg-slate-800 hover:text-white sm:w-auto"
+                    className="w-full justify-center bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
                     onClick={handleStartGoalSetup}
                   >
                     Tạo SMART Goal từ quyết định này
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                   <Button
-                    variant="outline"
-                    className="w-full border-slate-200 bg-white text-slate-700 hover:bg-slate-50 sm:w-auto"
+                    variant="ghost"
+                    className="w-full text-violet-700 hover:bg-violet-50 hover:text-violet-800 dark:text-violet-200 dark:hover:bg-violet-950/40 sm:w-auto"
                     onClick={() => navigate("/")}
                   >
                     Về bảng điều khiển
@@ -407,11 +410,12 @@ export function LifeInsight() {
                     key={area.name}
                     type="button"
                     onClick={() => setSelectedAreaName(area.name === lowestArea.name ? null : area.name)}
-                    className={`relative rounded-[var(--r-tile)] border p-4 text-left transition-colors transition-transform duration-150 hover:-translate-y-0.5 ${
+                    className={`card-hover-lift glass-surface-sm relative overflow-hidden rounded-[var(--r-tile)] border border-l-4 p-4 text-left transition-colors transition-transform duration-150 ${
                       isSelected
-                        ? "border-violet-300 bg-violet-50 shadow-md"
-                        : "border-white/70 bg-white/72 hover:border-white hover:bg-white"
+                        ? "border-violet-300 bg-violet-50 shadow-md dark:bg-violet-950/30"
+                        : "border-white/70 bg-white/72 hover:border-white hover:bg-white dark:bg-slate-950/50"
                     }`}
+                    style={{ borderLeftColor: area.color }}
                   >
                     {isRecommended && (
                       <span className="absolute -top-2 left-3 rounded-[var(--r-pill)] bg-violet-600 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-white">
@@ -419,7 +423,15 @@ export function LifeInsight() {
                       </span>
                     )}
                     <div className="flex items-center justify-between gap-2">
-                      <div className="h-3 w-3 rounded-[var(--r-pill)]" style={{ backgroundColor: area.color }} />
+                      <div
+                        className="flex h-9 w-9 items-center justify-center rounded-[var(--r-tile)]"
+                        style={{
+                          background: `linear-gradient(135deg, ${area.color}24, ${area.color}12)`,
+                          color: area.color,
+                        }}
+                      >
+                        <Target className="h-4 w-4" aria-hidden="true" />
+                      </div>
                       {isSelected && <Check className="h-4 w-4 text-violet-600" />}
                     </div>
                     <p className="mt-[var(--space-inline)] text-sm font-semibold text-slate-900">{getLifeAreaLabel(area.name)}</p>
@@ -547,7 +559,10 @@ export function LifeInsight() {
                   Tiếp theo là biến trọng tâm này thành một mục tiêu SMART đủ rõ để hành động.
                 </p>
               </div>
-              <Button className="w-full sm:w-auto" onClick={handleStartGoalSetup}>
+              <Button
+                className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
+                onClick={handleStartGoalSetup}
+              >
                 Tạo SMART Goal từ quyết định này
                 <ArrowRight className="h-4 w-4" />
               </Button>

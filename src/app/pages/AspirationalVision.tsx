@@ -1,4 +1,5 @@
 ﻿import { ArrowLeft, Save, Sparkles } from "lucide-react";
+import { motion } from "motion/react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -10,6 +11,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
+import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { getUserData, saveUserData } from "../utils/storage";
 import type { AspirationalVisionArea } from "../utils/storage-types";
 
@@ -60,6 +62,7 @@ function createVisionId(): string {
 
 export function AspirationalVision() {
   const navigate = useNavigate();
+  const prefersReducedMotion = useReducedMotion();
   const storedVision = useMemo(() => getUserData().aspirationalVision, []);
   const [summary, setSummary] = useState(storedVision?.summary ?? "");
   const [horizonYears, setHorizonYears] = useState<3 | 5>(storedVision?.horizonYears ?? 3);
@@ -115,8 +118,14 @@ export function AspirationalVision() {
 
   return (
     <PageShell maxWidth="hero" className="stack-section page-enter">
-      <h1 className="sr-only">Tầm nhìn 3 năm</h1>
-      <SectionBlock title="Biểu mẫu tầm nhìn 3 năm" headerVisuallyHidden>
+      <motion.div
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.36, ease: "easeOut" }}
+        className="stack-section"
+      >
+        <h1 className="sr-only">Tầm nhìn 3 năm</h1>
+        <SectionBlock title="Biểu mẫu tầm nhìn 3 năm" headerVisuallyHidden>
         <PrimaryActionCard
           hero
           tone="violet"
@@ -127,7 +136,7 @@ export function AspirationalVision() {
           titleAs="h2"
           description="Viết phần aspirational vision riêng với mục tiêu 12 tuần. Phần này không bắt buộc, nhưng giúp mỗi cycle ngắn hạn bám vào một hướng dài hơn."
           className="text-white"
-          titleClassName="text-2xl font-semibold text-white"
+          titleClassName="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-2xl font-semibold text-transparent dark:from-violet-200 dark:via-fuchsia-200 dark:to-rose-200"
           descriptionClassName="max-w-3xl leading-7 text-white/78"
         />
         <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
@@ -198,7 +207,11 @@ export function AspirationalVision() {
           </div>
 
           <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row">
-            <Button type="button" className="w-full sm:w-auto" onClick={handleSubmit}>
+            <Button
+              type="button"
+              className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
+              onClick={handleSubmit}
+            >
               <Save className="h-4 w-4" />
               Lưu tầm nhìn 3 năm
             </Button>
@@ -209,7 +222,8 @@ export function AspirationalVision() {
           </div>
         </CardContent>
         </Card>
-      </SectionBlock>
+        </SectionBlock>
+      </motion.div>
     </PageShell>
   );
 }

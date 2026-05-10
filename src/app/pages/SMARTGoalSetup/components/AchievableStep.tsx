@@ -27,7 +27,7 @@ export function AchievableStep({
 
   return (
     <div className="stack-stack">
-      <div className="stack-tight">
+      <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-emerald-200 bg-white/86 p-4 shadow-sm before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-emerald-600 before:to-teal-600 dark:border-emerald-500/30 dark:bg-slate-950/55">
         <Label htmlFor="smart-weekly-hours" className="text-base">
           Thời gian mỗi tuần
         </Label>
@@ -52,7 +52,7 @@ export function AchievableStep({
         <p className="text-sm text-slate-500">Chỉ đếm thời gian bạn giữ được đều — không phải lúc lý tưởng.</p>
       </div>
 
-      <div className="stack-tight">
+      <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-emerald-100 bg-white/82 p-4 before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-emerald-300 dark:border-emerald-500/20 dark:bg-slate-950/45">
         <Label htmlFor="smart-required-skills">Kỹ năng cần có</Label>
         <Textarea
           id="smart-required-skills"
@@ -74,7 +74,7 @@ export function AchievableStep({
         </p>
       </div>
 
-      <div className="stack-tight">
+      <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-emerald-100 bg-white/82 p-4 before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-teal-300 dark:border-emerald-500/20 dark:bg-slate-950/45">
         <Label htmlFor="smart-support-resources">Nguồn lực hỗ trợ</Label>
         <Textarea
           id="smart-support-resources"

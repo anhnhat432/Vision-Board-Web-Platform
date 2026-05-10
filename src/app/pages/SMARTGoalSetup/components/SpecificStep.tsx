@@ -46,7 +46,7 @@ export function SpecificStep({
 
   return (
     <div className="stack-stack">
-      <div className="stack-tight">
+      <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-violet-200 bg-white/86 p-4 shadow-sm before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-violet-600 before:to-fuchsia-600 dark:border-violet-500/30 dark:bg-slate-950/55">
         <Label htmlFor="smart-specific" className="text-base">
           Câu trả lời của bạn
         </Label>

@@ -51,7 +51,7 @@ export function MeasurableStep({
 
   return (
     <div className="stack-stack">
-      <div className="stack-tight">
+      <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-cyan-200 bg-white/86 p-4 shadow-sm before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-cyan-600 before:to-sky-600 dark:border-cyan-500/30 dark:bg-slate-950/55">
         <Label htmlFor="smart-metric-name" className="text-base">
           Con số hoặc dấu hiệu theo dõi
         </Label>
@@ -94,7 +94,7 @@ export function MeasurableStep({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="stack-tight">
+        <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-cyan-100 bg-white/82 p-4 before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-cyan-300 dark:border-cyan-500/20 dark:bg-slate-950/45">
           <Label htmlFor="smart-baseline">Mốc hiện tại (tuỳ chọn)</Label>
           <Input
             id="smart-baseline"
@@ -115,7 +115,7 @@ export function MeasurableStep({
             aria-invalid={baselineInvalid}
           />
         </div>
-        <div className="stack-tight">
+        <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-cyan-100 bg-white/82 p-4 before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-sky-400 dark:border-cyan-500/20 dark:bg-slate-950/45">
           <Label htmlFor="smart-target">Mốc mục tiêu</Label>
           <Input
             id="smart-target"
