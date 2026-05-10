@@ -39,7 +39,9 @@ const backendHydrationMock = vi.hoisted(() => ({
 }));
 const autoCloudSyncMock = vi.hoisted(() => {
   const triggerSyncNow = vi.fn();
+  const triggerDrainOnly = vi.fn();
   return {
+    triggerDrainOnly,
     triggerSyncNow,
     useAutoCloudSync: vi.fn(() => ({
       loading: false,
@@ -49,6 +51,7 @@ const autoCloudSyncMock = vi.hoisted(() => {
       online: true,
       conflictPending: false,
       triggerSyncNow,
+      triggerDrainOnly,
     })),
   };
 });
