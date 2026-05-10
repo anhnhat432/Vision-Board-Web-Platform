@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { AutoCloudSyncContext } from "./AutoCloudSyncContext";
+import { AutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import { AutoCloudConflictDialog } from "./AutoCloudConflictDialog";
 import { AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME } from "./SyncStatusPill";
 import type { AutoCloudSyncState } from "@/features/plan12week/hooks/useAutoCloudSync";

@@ -1,8 +1,7 @@
-import { useContext } from "react";
 import type { ReactNode } from "react";
 import { AlertTriangle, CheckCircle2, Clock3, Loader2, Upload, WifiOff } from "lucide-react";
 
-import { AutoCloudSyncContext } from "./AutoCloudSyncContext";
+import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 
 export const AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME = "visionboard:auto-cloud-conflict-dialog-open";
 
@@ -56,8 +55,7 @@ function getTooltip(state: SyncPillState, relativeTime: string | null, pendingCo
 }
 
 export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
-  const syncState = useContext(AutoCloudSyncContext);
-  if (!syncState) return null;
+  const syncState = useAutoCloudSyncContext();
 
   const relativeTime = formatRelativeSyncTime(syncState.lastSyncedAt);
   const state = getSyncState({

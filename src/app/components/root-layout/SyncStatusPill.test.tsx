@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { AutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import type { AutoCloudSyncState } from "@/features/plan12week/hooks/useAutoCloudSync";
-import { AutoCloudSyncContext } from "./AutoCloudSyncContext";
 import { AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME, SyncStatusPill } from "./SyncStatusPill";
 
 function createSyncState(overrides: Partial<AutoCloudSyncState> = {}): AutoCloudSyncState {
@@ -85,11 +85,5 @@ describe("SyncStatusPill", () => {
     expect(listener).toHaveBeenCalledTimes(1);
 
     window.removeEventListener(AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME, listener);
-  });
-
-  it("does not render without auto sync context", () => {
-    renderPill(null);
-
-    expect(screen.queryByText("Chưa đồng bộ")).not.toBeInTheDocument();
   });
 });

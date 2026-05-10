@@ -3,3 +3,4 @@ export { usePlanSetupSync } from "./usePlanSetupSync";
 export { usePlanExecutionSync } from "./usePlanExecutionSync";
 export { useMutationQueueSync } from "./useMutationQueueSync";
 export { useAutoCloudSync, type AutoCloudSyncState } from "./useAutoCloudSync";
+export { AutoCloudSyncProvider, useAutoCloudSyncContext } from "./AutoCloudSyncProvider";

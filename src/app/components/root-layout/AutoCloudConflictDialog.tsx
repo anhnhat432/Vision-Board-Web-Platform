@@ -1,19 +1,12 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Download, ExternalLink, Loader2, Monitor, RotateCcw } from "lucide-react";
 import { useNavigate } from "react-router";
 
 import { exportUserDataSnapshot } from "@/app/utils/storage";
+import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import type { AutoCloudSyncState } from "@/features/plan12week/hooks/useAutoCloudSync";
 import { Button } from "../ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
-import { AutoCloudSyncContext } from "./AutoCloudSyncContext";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
 import { AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME } from "./SyncStatusPill";
 
 const ENTITY_LABELS: Record<string, string> = {
@@ -53,7 +46,7 @@ function downloadBackupJson(): void {
 }
 
 export function AutoCloudConflictDialog() {
-  const autoSyncState = useContext(AutoCloudSyncContext);
+  const autoSyncState = useAutoCloudSyncContext();
   const navigate = useNavigate();
   const [dismissedConflictKey, setDismissedConflictKey] = useState<string | null>(null);
   const [showUseCloudConfirm, setShowUseCloudConfirm] = useState(false);
@@ -83,7 +76,7 @@ export function AutoCloudConflictDialog() {
     };
   }, []);
 
-  if (!autoSyncState || !conflictKey) return null;
+  if (!conflictKey) return null;
 
   const handleKeepLocal = async () => {
     setResolvingAction("keepLocal");
@@ -175,18 +168,21 @@ export function AutoCloudConflictDialog() {
             Để sau
           </Button>
           <div className="flex flex-col-reverse gap-2 sm:flex-row">
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={handleKeepLocal}
-              disabled={Boolean(resolvingAction)}
-            >
-              {resolvingAction === "keepLocal" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Monitor className="h-4 w-4" />}
+            <Button type="button" variant="destructive" onClick={handleKeepLocal} disabled={Boolean(resolvingAction)}>
+              {resolvingAction === "keepLocal" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Monitor className="h-4 w-4" />
+              )}
               Giữ trên thiết bị này
             </Button>
             {showUseCloudConfirm ? (
               <Button type="button" onClick={handleUseCloud} disabled={Boolean(resolvingAction)}>
-                {resolvingAction === "useCloud" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                {resolvingAction === "useCloud" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
                 Tải backup và lấy bản tài khoản
               </Button>
             ) : (
