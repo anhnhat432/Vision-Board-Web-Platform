@@ -6,7 +6,10 @@ import { useReducedMotion } from "./use-reduced-motion";
 
 import { cn } from "./utils";
 
-function Progress({ className, value, ...props }: React.ComponentProps<typeof ProgressPrimitive.Root>) {
+const Progress = React.forwardRef<
+  React.ComponentRef<typeof ProgressPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>
+>(({ className, value, ...props }, ref) => {
   const shouldReduceMotion = useReducedMotion();
   const safeValue = Math.max(0, Math.min(100, value ?? 0));
   const [displayValue, setDisplayValue] = React.useState(shouldReduceMotion ? safeValue : 0);
@@ -57,6 +60,7 @@ function Progress({ className, value, ...props }: React.ComponentProps<typeof Pr
 
   return (
     <ProgressPrimitive.Root
+      ref={ref}
       data-slot="progress"
       className={cn(
         "progress-shell relative h-2.5 w-full overflow-hidden rounded-[var(--r-pill)] border border-white/60 bg-white/72 shadow-sm",
@@ -72,6 +76,7 @@ function Progress({ className, value, ...props }: React.ComponentProps<typeof Pr
       />
     </ProgressPrimitive.Root>
   );
-}
+});
+Progress.displayName = ProgressPrimitive.Root.displayName;
 
 export { Progress };
