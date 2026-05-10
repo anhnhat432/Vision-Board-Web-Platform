@@ -5,3 +5,4 @@ export { SecondaryPanel } from "./SecondaryPanel";
 export { ReviewSummaryGrid } from "./ReviewSummaryGrid";
 export { EmptyStateLayout } from "./EmptyStateLayout";
 export { StatusRow } from "./StatusRow";
+export { WizardStepPip } from "./WizardStepPip";
