@@ -37,6 +37,21 @@ const backendHydrationMock = vi.hoisted(() => ({
     error: null,
   },
 }));
+const autoCloudSyncMock = vi.hoisted(() => {
+  const triggerSyncNow = vi.fn();
+  return {
+    triggerSyncNow,
+    useAutoCloudSync: vi.fn(() => ({
+      loading: false,
+      lastResult: null,
+      lastSyncedAt: null,
+      pendingCount: 0,
+      online: true,
+      conflictPending: false,
+      triggerSyncNow,
+    })),
+  };
+});
 const productionMock = vi.hoisted(() => ({
   maybeShowBrowserReminderNotification: vi.fn(),
   syncEntitlementsWithProvider: vi.fn(),
@@ -45,6 +60,10 @@ const productionMock = vi.hoisted(() => ({
 
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
+}));
+
+vi.mock("@/features/plan12week/hooks/useAutoCloudSync", () => ({
+  useAutoCloudSync: autoCloudSyncMock.useAutoCloudSync,
 }));
 
 vi.mock("../hooks/useBackendPlanHydration", () => ({

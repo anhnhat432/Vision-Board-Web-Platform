@@ -1,4 +1,14 @@
-import { startTransition, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  createContext,
+  startTransition,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { AnimatePresence, motion } from "motion/react";
 import {
   ChevronDown,
@@ -46,6 +56,7 @@ import {
   createTwelveWeekImportPayload,
   type TwelveWeekImportPayload,
 } from "@/features/plan12week/persistence/twelveWeekImportPayload";
+import { useAutoCloudSync, type AutoCloudSyncState } from "@/features/plan12week/hooks/useAutoCloudSync";
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
@@ -86,6 +97,8 @@ import {
 } from "./ui/dropdown-menu";
 import { Toaster } from "./ui/sonner";
 import { useReducedMotion } from "./ui/use-reduced-motion";
+
+export const AutoCloudSyncContext = createContext<AutoCloudSyncState | null>(null);
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -149,6 +162,14 @@ export function RootLayout() {
     enabled: !demoMode && isConfigured && Boolean(userProfile),
     scopeKey: userProfile?.id ?? null,
   });
+  const autoCloudSyncState = useAutoCloudSync();
+  const autoCloudSyncContextValue = useMemo(() => autoCloudSyncState, [autoCloudSyncState]);
+  const renderWithAutoCloudSync = useCallback(
+    (content: ReactNode) => (
+      <AutoCloudSyncContext.Provider value={autoCloudSyncContextValue}>{content}</AutoCloudSyncContext.Provider>
+    ),
+    [autoCloudSyncContextValue],
+  );
   const { resolvedTheme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMoreOpen, setDesktopMoreOpen] = useState(false);
@@ -929,7 +950,7 @@ export function RootLayout() {
   );
 
   if (GUIDED_PATHS.has(location.pathname)) {
-    return (
+    return renderWithAutoCloudSync(
       <div className="app-shell min-h-screen" data-route-tone={routeTone}>
         <a href="#main-content" className="skip-to-content">
           Bỏ qua điều hướng
@@ -949,11 +970,11 @@ export function RootLayout() {
           {localDataMigrationPrompt}
           <Toaster />
         </main>
-      </div>
+      </div>,
     );
   }
 
-  return (
+  return renderWithAutoCloudSync(
     <div className="app-shell min-h-screen" data-route-tone={routeTone}>
       <a href="#main-content" className="skip-to-content">
         Bỏ qua điều hướng
@@ -1382,6 +1403,6 @@ export function RootLayout() {
       <NewUserGuideDialog open={isGuideOpen} onOpenChange={setIsGuideOpen} userData={guideUserData} />
       {localDataMigrationPrompt}
       <Toaster />
-    </div>
+    </div>,
   );
 }
