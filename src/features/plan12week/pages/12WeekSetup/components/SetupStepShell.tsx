@@ -1,10 +1,24 @@
 ﻿import { useRef, useState, type ReactNode } from "react";
-import { ArrowLeft, ArrowRight, Flag, Lightbulb, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarDays,
+  CheckCircle2,
+  Flag,
+  HelpCircle,
+  Lightbulb,
+  ListChecks,
+  Loader2,
+  Target,
+  type LucideIcon,
+} from "lucide-react";
 
 import { Button } from "@/app/components/ui/button";
 import { SectionBlock } from "@/app/components/layout/SectionBlock";
 import { WizardStepPip } from "@/app/components/layout/WizardStepPip";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/app/components/ui/tooltip";
 import { useReducedMotion } from "@/app/components/ui/use-reduced-motion";
 import { useScrollToTopOnChange } from "@/app/hooks/useScrollToTopOnChange";
 import { STEPS } from "../constants";
@@ -24,6 +38,51 @@ interface SetupStepShellProps {
   isNextDisabled?: boolean;
   isSubmitDisabled?: boolean;
 }
+
+const STEP_VISUALS: Array<{
+  icon: LucideIcon;
+  eyebrow: string;
+  caption: string;
+  panelClassName: string;
+  iconClassName: string;
+}> = [
+  {
+    icon: Target,
+    eyebrow: "Output",
+    caption: "Chốt kết quả đủ rõ để 12 tuần có điểm đến.",
+    panelClassName:
+      "border-violet-200/80 bg-gradient-to-br from-violet-50 to-fuchsia-50 text-violet-900 dark:border-violet-500/30 dark:from-violet-950/50 dark:to-fuchsia-950/30 dark:text-violet-100",
+    iconClassName:
+      "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20 dark:shadow-violet-950/30",
+  },
+  {
+    icon: ListChecks,
+    eyebrow: "Lead",
+    caption: "Giữ vài việc lặp lại mà bạn thật sự kiểm soát được.",
+    panelClassName:
+      "border-amber-200/80 bg-gradient-to-br from-amber-50 to-orange-50 text-amber-900 dark:border-amber-500/30 dark:from-amber-950/45 dark:to-orange-950/30 dark:text-amber-100",
+    iconClassName:
+      "bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20 dark:shadow-amber-950/30",
+  },
+  {
+    icon: CalendarDays,
+    eyebrow: "Rhythm",
+    caption: "Đặt ngày bắt đầu, nhịp tuần và lịch nhìn lại cố định.",
+    panelClassName:
+      "border-teal-200/80 bg-gradient-to-br from-teal-50 to-cyan-50 text-teal-900 dark:border-teal-500/30 dark:from-teal-950/45 dark:to-cyan-950/30 dark:text-teal-100",
+    iconClassName:
+      "bg-gradient-to-br from-teal-600 to-cyan-600 text-white shadow-lg shadow-teal-500/20 dark:shadow-teal-950/30",
+  },
+  {
+    icon: CheckCircle2,
+    eyebrow: "Confirm",
+    caption: "Soát lần cuối để bước vào tuần đầu không bị mơ hồ.",
+    panelClassName:
+      "border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-900 dark:border-emerald-500/30 dark:from-emerald-950/45 dark:to-teal-950/30 dark:text-emerald-100",
+    iconClassName:
+      "bg-gradient-to-br from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/20 dark:shadow-emerald-950/30",
+  },
+];
 
 export function SetupStepShell({
   title,
@@ -45,6 +104,9 @@ export function SetupStepShell({
   const titleFocusRef = useRef<HTMLSpanElement | null>(null);
   const prefersReducedMotion = useReducedMotion();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const progressPercent = ((currentStep + 1) / stepCount) * 100;
+  const visual = STEP_VISUALS[currentStep] ?? STEP_VISUALS[0];
+  const StepIcon = visual.icon;
 
   const handleSubmitClick = async () => {
     if (isSubmitting) return;
@@ -66,33 +128,101 @@ export function SetupStepShell({
       ref={stepShellRef}
       className={prefersReducedMotion ? "" : "animate-fade-in-up"}
     >
-      <Card className="ops-surface overflow-hidden border border-slate-200/80 bg-white/94 shadow-sm ring-1 ring-white/70">
+      <Card className="ops-surface relative overflow-hidden border border-slate-200/80 bg-white/94 shadow-sm ring-1 ring-white/70">
         <CardHeader className="stack-stack pb-3">
-          <WizardStepPip
-            steps={STEPS}
-            currentStep={currentStep}
-            onJumpToStep={onJumpToStep}
-            ariaLabel={`Bước ${currentStep + 1} trên ${stepCount}`}
-            mobileMode="full"
-          />
-          <div className="stack-tight">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-              {STEPS[currentStep]?.label}
-            </p>
-            <CardTitle>
-              <span ref={titleFocusRef} tabIndex={-1} className="block focus:outline-none">
-                {title}
-              </span>
-            </CardTitle>
-            <CardDescription>{description}</CardDescription>
+          <div className="sticky top-3 z-20 rounded-[var(--r-card)] border border-slate-200/80 bg-white/90 p-2 shadow-sm backdrop-blur dark:border-slate-700/80 dark:bg-slate-950/88">
+            <div className="sm:hidden">
+              <Select
+                value={String(currentStep)}
+                onValueChange={(value) => {
+                  const nextStep = Number(value);
+                  if (Number.isInteger(nextStep) && nextStep < currentStep) {
+                    onJumpToStep?.(nextStep);
+                  }
+                }}
+              >
+                <SelectTrigger aria-label="Chọn bước đã hoàn thành">
+                  <SelectValue placeholder="Chọn bước" />
+                </SelectTrigger>
+                <SelectContent>
+                  {STEPS.map((step, index) => (
+                    <SelectItem
+                      key={step.id}
+                      value={String(index)}
+                      disabled={index > currentStep || (!onJumpToStep && index !== currentStep)}
+                    >
+                      Bước {index + 1}: {step.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <WizardStepPip
+              steps={STEPS}
+              currentStep={currentStep}
+              onJumpToStep={onJumpToStep}
+              ariaLabel={`Bước ${currentStep + 1} trên ${stepCount}`}
+              mobileMode="full"
+              className="hidden sm:block"
+            />
+            <div
+              role="progressbar"
+              aria-label="Tiến độ thiết lập 12 tuần"
+              aria-valuemin={1}
+              aria-valuemax={stepCount}
+              aria-valuenow={currentStep + 1}
+              className="mt-2 h-1.5 overflow-hidden rounded-[var(--r-pill)] bg-slate-200/80 dark:bg-slate-800"
+            >
+              <div
+                className="h-full rounded-[var(--r-pill)] bg-gradient-to-r from-violet-600 to-fuchsia-600 transition-[width] duration-300 ease-out dark:from-violet-400 dark:to-fuchsia-400"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
+          <div className="grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1fr)_220px] lg:items-stretch">
+            <div className="stack-tight">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                {STEPS[currentStep]?.label}
+              </p>
+              <CardTitle>
+                <span ref={titleFocusRef} tabIndex={-1} className="block focus:outline-none">
+                  {title}
+                </span>
+              </CardTitle>
+              <CardDescription>{description}</CardDescription>
+            </div>
+            <div className={`rounded-[var(--r-card)] border p-4 ${visual.panelClassName}`}>
+              <div
+                className={`flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] ${visual.iconClassName}`}
+              >
+                <StepIcon className="h-6 w-6" aria-hidden="true" />
+              </div>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] opacity-70">{visual.eyebrow}</p>
+              <p className="mt-1 text-sm font-semibold leading-6">{visual.caption}</p>
+            </div>
           </div>
           {whyThisMatters && (
-            <div className="flex items-start gap-2 rounded-[var(--r-card)] border border-sky-200 bg-sky-50/72 px-3 py-2.5 text-sm leading-6 text-sky-900">
+            <div className="flex items-center justify-between gap-3 rounded-[var(--r-tile)] border border-sky-200 bg-sky-50/72 px-3 py-2.5 text-sm leading-6 text-sky-900 dark:border-sky-500/30 dark:bg-sky-950/30 dark:text-sky-100">
               <Lightbulb className="mt-0.5 h-4 w-4 flex-shrink-0 text-sky-700" aria-hidden="true" />
-              <div>
-                <span className="font-semibold">Vì sao bước này quan trọng: </span>
-                <span className="text-sky-900/86">{whyThisMatters}</span>
+              <div className="min-w-0 flex-1">
+                <span className="font-semibold">Gợi ý nhanh: </span>
+                <span className="text-sky-900/86 dark:text-sky-100/86">giữ câu trả lời cụ thể, đo được và vừa sức.</span>
               </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] border border-sky-200 bg-white/82 text-sky-700 hover:bg-sky-100 dark:border-sky-500/30 dark:bg-sky-950/50 dark:text-sky-100"
+                    aria-label="Xem vì sao bước này quan trọng"
+                  >
+                    <HelpCircle className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs text-sm leading-6">
+                  <span className="font-semibold">Vì sao bước này quan trọng: </span>
+                  {whyThisMatters}
+                </TooltipContent>
+              </Tooltip>
             </div>
           )}
         </CardHeader>
@@ -119,14 +249,14 @@ export function SetupStepShell({
             </Button>
             {isLastStep ? (
               <Button
-                className="w-full gradient-brand text-white shadow-lg hover:shadow-xl hover:scale-[1.01] sm:w-auto"
+                className="w-full gradient-brand text-white shadow-lg motion-safe:hover:scale-[1.01] hover:shadow-xl sm:w-auto"
                 onClick={handleSubmitClick}
                 size="lg"
                 disabled={isSubmitting || isSubmitDisabled}
                 aria-busy={isSubmitting}
               >
                 {isSubmitting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                  <Loader2 className={prefersReducedMotion ? "h-4 w-4" : "h-4 w-4 animate-spin"} aria-hidden="true" />
                 ) : (
                   <Flag className="h-4 w-4" />
                 )}
@@ -134,7 +264,7 @@ export function SetupStepShell({
               </Button>
             ) : (
               <Button
-                className="w-full sm:w-auto gradient-brand text-white shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                className="w-full gradient-brand text-white shadow-lg motion-safe:hover:scale-[1.02] hover:shadow-xl sm:w-auto"
                 onClick={onNext}
                 disabled={isNextDisabled}
               >
@@ -144,6 +274,25 @@ export function SetupStepShell({
             )}
           </div>
         </CardContent>
+        {isSubmitting ? (
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-white/88 px-4 backdrop-blur-sm dark:bg-slate-950/82">
+            <div className="w-full max-w-md rounded-[var(--r-card)] border border-emerald-200/80 bg-white p-5 text-center shadow-2xl dark:border-emerald-500/30 dark:bg-slate-950">
+              <div className="shimmer mb-4 h-2 rounded-[var(--r-pill)] bg-emerald-100 dark:bg-emerald-950/50" />
+              <Loader2
+                className={`mx-auto h-8 w-8 text-emerald-600 dark:text-emerald-300 ${
+                  prefersReducedMotion ? "" : "animate-spin"
+                }`}
+                aria-hidden="true"
+              />
+              <p className="mt-3 text-base font-semibold text-slate-950 dark:text-slate-50">
+                Đang chuẩn bị 12 tuần của bạn...
+              </p>
+              <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Hệ thống đang chốt tuần đầu, việc lặp lại và nhịp review.
+              </p>
+            </div>
+          </div>
+        ) : null}
       </Card>
     </div>
   );
