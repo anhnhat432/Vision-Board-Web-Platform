@@ -1,4 +1,5 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -111,5 +112,30 @@ describe("production billing surfaces", () => {
       expect(router.state.location.pathname).toBe("/billing/plan");
     });
     expect(await screen.findByTestId("billing-plan-page")).toBeInTheDocument();
+  }, UI_TEST_TIMEOUT_MS);
+
+  it("routes the real Plus upgrade CTA to the VietQR checkout page", async () => {
+    stubRealBillingEnv("Casso + VietQR");
+    const { BillingPlan } = await import("./BillingPlan");
+    const user = userEvent.setup();
+
+    const router = createMemoryRouter(
+      [
+        { path: "/billing/plan", element: <BillingPlan /> },
+        { path: "/billing/checkout", element: <div data-testid="vietqr-checkout-page">VietQR checkout</div> },
+      ],
+      {
+        initialEntries: ["/billing/plan"],
+      },
+    );
+    render(<RouterProvider router={router} />);
+
+    await screen.findByRole("heading", { name: "Gói hiện tại" });
+    await user.click(screen.getAllByRole("button", { name: "Nâng cấp Plus" })[0]);
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/billing/checkout");
+    });
+    expect(await screen.findByTestId("vietqr-checkout-page")).toBeInTheDocument();
   }, UI_TEST_TIMEOUT_MS);
 });

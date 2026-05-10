@@ -233,6 +233,12 @@ export function BillingPlan() {
       targetPlan: "PLUS",
       placement: "billing_plan_page",
     });
+
+    if (realMode) {
+      navigate("/billing/checkout");
+      return;
+    }
+
     setUpgradeContext(context);
     setIsUpgradeDialogOpen(true);
   };
