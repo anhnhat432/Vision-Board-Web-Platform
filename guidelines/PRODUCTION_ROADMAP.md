@@ -6,14 +6,14 @@ Last updated: 2026-05-10
 
 | Phase | Status | Notes |
 | --- | --- | --- |
-| Phase 1.1 Firebase project | OK Done | Firebase project linked. Frontend env keys in `.env.local` and Vercel project. Backend Admin SDK env on Render. |
-| Phase 1.2 MongoDB Atlas | OK Done | M0 cluster reachable. Backend connects through `MONGODB_URI`. |
-| Phase 1.3 Backend Render | OK Done | `/api/health` returns 200. `/api/billing/checkout-session` correctly returns 401 without auth. |
-| Phase 1.4 Frontend Vercel real mode | OK Done | `VITE_APP_MODE=real`, `VITE_BILLING_PROVIDER_MODE=api_contract`, `VITE_BILLING_PROVIDER_LABEL=Chuyen khoan ngan hang` set on Vercel Production scope. |
-| Phase 1.5 Verification | Partial | Code-side smoke and `/api/health` confirmed. A live transaction smoke against Casso webhook is still pending. |
-| Phase 2 Casso + VietQR | OK Code complete | `BillingCheckoutQR` page, Casso adapter, webhook route, VietQR routing in `billingProvider.ts` and `BillingPlan.tsx` are wired. Live transaction test still pending. |
-| Phase 3 Bao mat | Partial | `helmet`, `express-rate-limit`, `@sentry/node`, `@sentry/react` installed. Rate limiters mounted in `backend/src/middleware/rateLimiters.ts`. CORS, env enforcement, and full Sentry init still need a final pass. |
-| Phase 4 UX cho production | Partial | Auto-sync, conflict dialog, sync pill, first-login restore landed. Copy review for `demo`/`mock`/`mo phong` strings under real mode and onboarding-must-login decisions still pending. |
+| Phase 1.1 Firebase project | ✅ Done | Firebase project linked. Frontend env keys in `.env.local` and Vercel project. Backend Admin SDK env on Render. |
+| Phase 1.2 MongoDB Atlas | ✅ Done | M0 cluster reachable. Backend connects through `MONGODB_URI`. |
+| Phase 1.3 Backend Render | ✅ Done | `/api/health` returns 200. `/api/billing/checkout-session` correctly returns 401 without auth. |
+| Phase 1.4 Frontend Vercel real mode | ✅ Done | `VITE_APP_MODE=real`, `VITE_BILLING_PROVIDER_MODE=api_contract`, `VITE_BILLING_PROVIDER_LABEL=Chuyển khoản ngân hàng` set on Vercel Production scope. |
+| Phase 1.5 Verification | ⚠ Partial | Code-side smoke and `/api/health` confirmed. A live transaction smoke against Casso webhook is still pending. |
+| Phase 2 Casso + VietQR | ✅ Code complete | `BillingCheckoutQR` page, Casso adapter, webhook route, VietQR routing in `billingProvider.ts` and `BillingPlan.tsx` are wired. Live transaction test still pending. |
+| Phase 3 Bảo mật | ⚠ Partial | `helmet`, `express-rate-limit`, `@sentry/node`, `@sentry/react` installed. Rate limiters mounted in `backend/src/middleware/rateLimiters.ts`. CORS, env enforcement, and full Sentry init still need a final pass. |
+| Phase 4 UX cho production | ⚠ Partial | Auto-sync, conflict dialog, sync pill, first-login restore landed. Copy review for `demo`/`mock`/`mô phỏng` strings under real mode and onboarding-must-login decisions still pending. |
 
 Auto-sync batch (2026-05-10) added on top of the original roadmap:
 
