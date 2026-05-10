@@ -72,7 +72,6 @@ import {
   WARM_PREFETCH_ROUTE_PATHS,
 } from "./root-layout/navConfig";
 import { GUIDED_PATHS, getRouteMeta, getRouteTone } from "./root-layout/routeMeta";
-import { WorkspaceLoadingGate } from "./root-layout/WorkspaceLoadingGate";
 import { buildLoginRedirect, isAuthProtectedPath, useWorkspaceGate } from "./root-layout/useWorkspaceGate";
 import { Button } from "./ui/button";
 import { Toaster } from "./ui/sonner";
@@ -154,18 +153,17 @@ export function RootLayout() {
 
   const routeScrollKey = `${location.pathname}${location.search}`;
   const currentRouteKey = `${routeScrollKey}${location.hash}`;
-  const { shouldRedirectToLogin, shouldShowWorkspaceGate, shouldWaitForWorkspace, workspaceGateStage } =
-    useWorkspaceGate({
-      authLoading,
-      backendHydrationLoading: backendPlanHydration.loading,
-      demoMode,
-      isConfigured,
-      pathname: location.pathname,
-      user,
-      userProfile,
-      userProfileError,
-      userProfileLoading,
-    });
+  const { shouldRedirectToLogin, shouldShowWorkspaceGate, shouldWaitForWorkspace } = useWorkspaceGate({
+    authLoading,
+    backendHydrationLoading: backendPlanHydration.loading,
+    demoMode,
+    isConfigured,
+    pathname: location.pathname,
+    user,
+    userProfile,
+    userProfileError,
+    userProfileLoading,
+  });
 
   const navigateAppRoute = useCallback(
     (path: string) => {
@@ -851,10 +849,6 @@ export function RootLayout() {
       </motion.div>
     </AnimatePresence>
   );
-
-  if (shouldShowWorkspaceGate) {
-    return <WorkspaceLoadingGate stage={workspaceGateStage} />;
-  }
 
   if (GUIDED_PATHS.has(location.pathname)) {
     return (

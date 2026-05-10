@@ -308,7 +308,7 @@ describe("RootLayout onboarding redirect", () => {
     expect(router.state.location.pathname).toBe("/order");
   });
 
-  it("waits for the authenticated profile before opening the workspace", async () => {
+  it("does not show the workspace loading gate while the authenticated profile is loading", async () => {
     seedAuthenticatedCompletedWorkspace();
     setAuthContext({
       user: { uid: "user_test", email: "test@example.com" },
@@ -317,8 +317,8 @@ describe("RootLayout onboarding redirect", () => {
     });
     const { router } = renderAppShell("/goals");
 
-    expect(await screen.findByText("Đang mở workspace của bạn")).toBeInTheDocument();
-    expect(screen.queryByTestId("goals-page")).not.toBeInTheDocument();
+    expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
+    expect(screen.queryByText("Đang mở workspace của bạn")).not.toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/goals");
   });
 
