@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last reviewed: 2026-04-29
+Last reviewed: 2026-05-10
 
 Purpose: this file records the current code-backed state of Vision Board Web Platform so humans and AI coding agents do not assume features are more complete than they are.
 
@@ -13,7 +13,7 @@ The current product is local-first. Most user-facing data is still persisted in 
 Important documentation nuance:
 
 - `README.md` correctly describes the product as full-stack, but the current architecture is still local-first with selective backend sync.
-- `.env.production` is intentionally demo-safe. It sets `VITE_APP_MODE=demo`, so Vercel production can run without Firebase or backend sync unless project-level env vars override it.
+- `.env.production` in repo is set to `VITE_APP_MODE=real` and `VITE_BILLING_PROVIDER_MODE=api_contract`. Vercel project-level env vars still win at build time, so the live deployment mode depends on those overrides. The MVP 1 demo override path is preserved through the rollback steps in `MVP_1_RELEASE_CHECKLIST.md`.
 - `backend/package.json` requires Node `20.x`; some local and CI commands may use Node 22 and can show engine warnings.
 
 ## 2. Core user flow
@@ -121,8 +121,13 @@ Implemented in the frontend:
 - Local-first goals, progress, reviews, achievements, reminders, and app preferences.
 - Auth-scoped local data handling.
 - Paywall UI, pricing-plan concepts, entitlements, mock checkout, and monetization events.
+- Real Plus upgrade routing to the VietQR Casso checkout page when the billing provider mode is `api_contract` and the backend returns a `casso` provider session.
 - Login page behavior for configured and unconfigured Firebase.
 - Production smoke e2e workflow configuration.
+- Automatic 12-week cloud sync mounted in `RootLayout` via `useAutoCloudSync` and `AutoCloudSyncProvider`. Triggers cover initial app load, login transitions, periodic interval, tab visibility regain, network reconnect, and post-mutation debounced drain. Real mode + signed-in + API configured + feature flags on are required; demo mode and signed-out users skip every trigger.
+- Global auto-sync conflict dialog (`AutoCloudConflictDialog`) that surfaces when the merge report flags conflict or unsafe overwrite. Offers keep-local, use-cloud (with backup snapshot first), or postpone, and links to Settings for full detail.
+- Header `SyncStatusPill` in the account dropdown showing live sync state (synced relative time, syncing, offline, pending count, conflict).
+- First-login cloud restore toast (`FirstLoginRestoreToast`) that fires once when the user signs in on a fresh device and the cloud workspace is applied to empty local storage.
 
 Implemented in backend:
 
@@ -134,8 +139,8 @@ Implemented in backend:
 
 Implemented tests:
 
-- There are 41 frontend/backend-adjacent test files under `src`.
-- Coverage includes local storage, auth scoping, onboarding, dashboard fresh state, life balance/insight, SMART goal helpers, feasibility scoring, 12-week setup sync, 12-week execution sync, monetization flows, protected routes, and authenticated core flow.
+- There are 120+ frontend/backend-adjacent test files under `src` covering 1,200+ tests as of 2026-05-10.
+- Coverage includes local storage, auth scoping, onboarding, dashboard fresh state, life balance/insight, SMART goal helpers, feasibility scoring, 12-week setup sync, 12-week execution sync, monetization flows, protected routes, authenticated core flow, automatic cloud sync triggers, conflict dialog, sync status pill, and first-login restore toast.
 - Production smoke e2e exists in `.github/workflows/production-smoke-e2e.yml` and runs `npm run smoke:prod` with required GitHub secrets.
 
 ## 6. What is mock/demo only
@@ -143,8 +148,8 @@ Implemented tests:
 These areas should not be described as fully production-ready:
 
 - Demo mode does not require Firebase, backend, MongoDB, or real billing.
-- `.env.production` defaults to demo mode even though it contains a backend API URL.
-- Billing checkout is mock/provider-contract oriented unless real provider endpoints are supplied externally.
+- `.env.production` in repo now points at real mode, but Vercel/Render dashboard env overrides decide the actual deployed mode at build time.
+- Mock checkout is still used when the billing provider mode is `mock_provider`. Real Casso/VietQR routing only kicks in when the frontend env is `api_contract` and the backend returns a `casso` provider session.
 - Local analytics/outbox is not the same as a durable server-side analytics pipeline.
 - Many product areas still rely on browser localStorage as the primary source of truth.
 - Some backend route surfaces exist before the whole product has been migrated to backend-first data ownership.
@@ -155,15 +160,13 @@ These areas should not be described as fully production-ready:
 Not fully implemented or not proven production-ready:
 
 - Full backend-as-source-of-truth for every product area.
-- Durable conflict resolution across multiple devices and concurrent sessions.
-- Complete retry queue for all failed backend sync operations.
-- Real payment provider integration owned end-to-end by this repo.
-- Real subscription webhooks and server-side entitlement authority.
+- Field-complete round-trip restore for plan setup metadata, lead metric history logs, and tombstones; the auto-sync path applies the supported subset only.
+- Real payment provider integration that has been live-tested end-to-end against a Casso webhook in production traffic. The code path exists and the production switch has been wired, but a verified live transaction smoke run is still pending.
 - Complete production analytics pipeline with verified GA4 setup.
 - Full account lifecycle features such as export, delete account, and server-side data cleanup.
 - End-to-end monitoring, alerting, and error reporting for production incidents.
 - Backend tests that cover every controller/service path.
-- Security hardening beyond the current Firebase token guard and env checks.
+- Security hardening beyond the current Firebase token guard, helmet, and rate limiter middleware.
 
 ## 8. Known risks
 
@@ -286,11 +289,11 @@ P0:
 
 P1:
 
-- Harden backend sync retry/conflict behavior for 12-week execution.
+- Run a live Casso/VietQR transaction smoke against the production webhook to confirm entitlement is granted end-to-end.
 - Add backend tests for goal/plan/week/task/metric controller paths.
 - Simplify crowded desktop and mobile layouts in the core flow.
 - Add clearer production monitoring around failed sync and auth/profile bootstrap.
-- Decide whether billing is mock-only for MVP or implement real provider/webhook flow.
+- Extend auto-sync coverage to lead metric log history, tombstones, and field-complete plan setup metadata.
 
 P2:
 

@@ -1,8 +1,37 @@
 # MVP 2 Sync Implementation Status
 
-Last reviewed: 2026-05-02
+Last reviewed: 2026-05-10
 
 Status: implementation truth document. This document exists to prevent future prompts, agents, or release notes from implying that MVP 2 cloud sync is complete.
+
+## 0. Update 2026-05-10 — Auto-Sync Batch Wired
+
+The previous body of this document repeatedly says the sender/pull/apply flow is "manual Settings only" and "not auto-running from the app UI". That is no longer accurate after the 2026-05-10 auto-sync batch landed on `main`. The body sections below were not rewritten in place to keep the historical record intact; treat this section as the current truth when claims conflict.
+
+What changed:
+
+- `src/features/plan12week/hooks/useAutoCloudSync.ts` is mounted in `RootLayout` via `AutoCloudSyncProvider`. It calls `runTwelveWeekManualCloudSync` on initial app load, on login transitions, on a periodic interval, on tab visibility regain, on network reconnect, and as a debounced drain after mutation events.
+- `AutoCloudConflictDialog` surfaces conflict and unsafe merge results globally without forcing the user to navigate to Settings.
+- `SyncStatusPill` renders live sync state in the account dropdown.
+- `FirstLoginRestoreToast` fires once when a fresh-device login receives an applied cloud workspace into empty local storage.
+- Settings still keeps the manual "Đồng bộ cloud thủ công" action; it is now redundant for the happy path but remains the explicit recovery surface for conflict and unsafe states and for users who prefer manual control.
+
+What stays true and unchanged:
+
+- All gates from the original sender/pull pipeline still apply: real mode, signed-in, profile ready, API base configured, `VITE_ENABLE_12_WEEK_MUTATION_SYNC=true`, `VITE_ENABLE_12_WEEK_PULL_SYNC=true`. Demo mode and signed-out users still skip every trigger.
+- The merge report and `safeToApply` rule still gate destructive overwrite. Auto-sync never silently overwrites local data; it surfaces the conflict dialog and waits for an explicit user choice.
+- Field-complete restore is not done. Plan setup metadata, lead metric history logs, tombstones, and revisions still apply only the supported subset. Auto-sync inherits those limitations from the underlying pull and apply paths.
+- Pull cursor is still v1 incremental with full-pull fallback on invalid or unsupported deltas.
+
+What is still not done:
+
+- Lead metric log history sync.
+- Tombstone sync for deletes across plan/week/task/metric.
+- Field-level merge UI for fine-grained conflict resolution.
+- Bulk multi-account or admin-side sync paths.
+- Live multi-device end-to-end test using real Firebase + real backend + real MongoDB beyond the existing automated test suite.
+
+Do not publicly claim multi-device restore is reliable, sync is conflict-proof, or that all local 12-week fields are now stored in backend domain models. The auto-sync batch makes the existing partial sync surface usable without manual clicking; it does not extend the underlying domain coverage.
 
 ## 1. Executive Summary
 
