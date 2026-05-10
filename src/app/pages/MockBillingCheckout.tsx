@@ -1,14 +1,16 @@
 ﻿import { CreditCard, Crown, ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { Navigate, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { getAppMode } from "../utils/app-mode";
 import {
   cancelMockCheckoutSession,
   completeMockCheckoutSession,
+  getBillingProviderStatus,
   getMockBillingAccount,
   getMockCheckoutSession,
   resolveAppReturnPath,
@@ -19,9 +21,15 @@ export function MockBillingCheckout() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const appMode = getAppMode();
+  const billingProviderMode = getBillingProviderStatus().mode;
   const sessionId = searchParams.get("session") ?? "";
   const session = useMemo(() => getMockCheckoutSession(sessionId), [sessionId]);
   const existingAccount = useMemo(() => getMockBillingAccount(), []);
+
+  if (appMode !== "demo" && billingProviderMode !== "mock_provider") {
+    return <Navigate to="/billing/plan" replace />;
+  }
 
   const returnPath = resolveAppReturnPath(session?.returnUrl);
 

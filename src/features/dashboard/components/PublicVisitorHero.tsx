@@ -75,8 +75,8 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
             </div>
             {isDemo ? (
               <p className="max-w-2xl text-xs leading-6 text-slate-500">
-                Workspace lưu trên trình duyệt này. Đăng ký là tuỳ chọn nếu muốn lưu lâu dài. Có thể xuất dữ liệu trong
-                Settings.
+                Bắt đầu demo ngay trên trình duyệt này. Đăng ký khi bạn muốn gắn tiến độ với tài khoản. Có thể xuất dữ
+                liệu trong Settings.
               </p>
             ) : null}
             <div className="grid gap-2 pt-1 sm:grid-cols-3">

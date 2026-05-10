@@ -413,11 +413,10 @@ async function assertSignedOutHome() {
   assertTextIncludesAny(
     state,
     [
-      "workspace luu tren trinh duyet nay",
-      "du lieu demo/local duoc luu tren trinh duyet hien tai",
-      "du lieu luu tren trinh duyet hien tai",
+      "bat dau demo ngay tren trinh duyet nay",
+      "dang ky khi ban muon gan tien do voi tai khoan",
     ],
-    "signed-out dashboard local-storage disclosure",
+    "signed-out dashboard demo disclosure",
   );
   assertTextExcludes(
     state,

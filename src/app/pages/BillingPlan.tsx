@@ -6,6 +6,16 @@ import { toast } from "sonner";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { PrimaryActionCard } from "../components/layout/PrimaryActionCard";
 import { SectionBlock } from "../components/layout/SectionBlock";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -48,6 +58,7 @@ interface PaymentHistoryOrder {
   createdAt: string | null;
   completedAt: string | null;
   expiresAt: string | null;
+  invoiceUrl?: string | null;
 }
 
 interface PaymentHistoryResponse {
@@ -297,6 +308,20 @@ export function BillingPlan() {
     }
   };
 
+  const currentPlanName = currentPlanDefinition?.name ?? getPlanLabel(currentPlanCode);
+  const providerLabel = billingStatus.providerLabel || getBillingProviderModeLabel(billingStatus.mode);
+  const isPaidPlan = currentPlanCode !== "FREE";
+  const renewalLabel =
+    isPaidPlan && subscription?.renewsAt
+      ? `Gia hạn ngày ${formatDate(subscription.renewsAt)}`
+      : isPaidPlan
+        ? "Gia hạn ngày Đang chuẩn bị"
+        : null;
+  const cancelEffectiveDate =
+    subscription?.renewsAt && formatDate(subscription.renewsAt) !== "—"
+      ? formatDate(subscription.renewsAt)
+      : "ngày kết thúc chu kỳ hiện tại";
+
   const isExpired = expiryInfo.isExpired;
   const shouldShowExpiryNotice =
     realMode &&
@@ -361,7 +386,7 @@ export function BillingPlan() {
       "Tôi cần hỗ trợ thanh toán Dear Our Future.",
       `Mã đơn gần nhất: ${latestOrderId}`,
       `Gói hiện tại: ${currentPlanCode}`,
-      "Tôi sẽ gửi kèm ảnh chuyển khoản nếu đã thanh toán.",
+      "Tôi sẽ gửi kèm mã giao dịch hoặc hóa đơn provider nếu có.",
     ].join("\n");
 
     try {
@@ -475,23 +500,47 @@ export function BillingPlan() {
 
       {/* Current plan */}
       <SectionBlock title="Khu vực gói đang dùng" headerVisuallyHidden>
-        <Card className="flow-panel">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Crown className="h-5 w-5 text-violet-600" />
-            Gói hiện tại
-          </CardTitle>
-          <CardDescription>
-            {currentPlanCode === "FREE"
+        <PrimaryActionCard
+          className="flow-panel"
+          tone={currentPlanCode === "FREE" ? "primary" : "violet"}
+          title="Gói hiện tại"
+          titleAs="h2"
+          titleClassName="text-2xl font-bold text-slate-950"
+          eyebrow="Tài khoản"
+          icon={<Crown className="h-4 w-4" />}
+          description={
+            currentPlanCode === "FREE"
               ? demoMode
                 ? "Bạn đang dùng gói miễn phí trên trình duyệt này."
                 : "Bạn đang dùng gói miễn phí."
               : demoMode
-                ? `Bạn đang dùng ${currentPlanDefinition?.name ?? currentPlanCode} trên trình duyệt này.`
-                : `Bạn đang dùng ${currentPlanDefinition?.name ?? currentPlanCode} trên tài khoản này.`}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="stack-stack">
+                ? `Bạn đang dùng ${currentPlanName} trên trình duyệt này.`
+                : `Bạn đang dùng ${currentPlanName} trên tài khoản này.`
+          }
+          action={
+            currentPlanCode === "FREE" ? (
+              <Button className="w-full gradient-brand text-white sm:w-auto" onClick={() => handleOpenUpgrade("plan")}>
+                <Sparkles className="mr-2 h-4 w-4" />
+                Nâng cấp Plus
+              </Button>
+            ) : realMode || billingStatus.manageBillingReady ? (
+              <Button
+                variant="outline"
+                onClick={handleOpenPortal}
+                disabled={isOpeningPortal || !billingStatus.manageBillingReady}
+              >
+                <CreditCard className="mr-2 h-4 w-4" />
+                {billingStatus.manageBillingReady
+                  ? isOpeningPortal
+                    ? "Đang mở…"
+                    : "Quản lý subscription"
+                  : "Đang chuẩn bị"}
+              </Button>
+            ) : null
+          }
+          actionClassName="pt-1"
+          contentClassName="stack-stack"
+        >
           <div className="flex flex-wrap items-center gap-3">
             <Badge
               variant="outline"
@@ -501,7 +550,7 @@ export function BillingPlan() {
                   : "border-slate-200 bg-slate-50 px-4 py-2 text-slate-700"
               }
             >
-              {currentPlanDefinition?.name ?? currentPlanCode}
+              {currentPlanName}
             </Badge>
             {currentPlanDefinition && (
               <span className="text-sm text-slate-500">{currentPlanDefinition.priceLabel}</span>
@@ -513,46 +562,53 @@ export function BillingPlan() {
             )}
           </div>
 
-          {subscription && (
+          {isPaidPlan && (
             <div className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
               <div className="flow-muted p-4">
-                <p className="text-slate-500">Trạng thái</p>
-                <p className="font-medium text-slate-900">
-                  {subscription.status === "active"
-                    ? demoMode
-                      ? "Đang mở"
-                      : "Đang hoạt động"
-                    : subscription.status === "trialing"
-                      ? demoMode
-                        ? "Dùng thử"
-                        : "Đang dùng thử"
-                      : subscription.status === "canceled"
-                        ? "Đã hủy"
-                        : "Không hoạt động"}
+                <p className="text-slate-500">Gia hạn</p>
+                <p className="font-medium text-slate-900">{renewalLabel}</p>
+              </div>
+              <div className="flow-muted p-4">
+                <p className="text-slate-500">Provider</p>
+                <p className="flex items-center gap-2 font-medium text-slate-900">
+                  <CreditCard className="h-4 w-4 text-slate-500" />
+                  Thanh toán qua {providerLabel}
                 </p>
               </div>
               <div className="flow-muted p-4">
-                <p className="text-slate-500">Bắt đầu</p>
-                <p className="font-medium text-slate-900">{formatDate(subscription.startedAt)}</p>
-              </div>
-              <div className="flow-muted p-4">
-                <p className="text-slate-500">{demoMode ? "Hiệu lực đến" : "Gia hạn / hết hạn"}</p>
-                <p className="font-medium text-slate-900">{formatDate(subscription.renewsAt)}</p>
+                <p className="text-slate-500">Trạng thái</p>
+                <p className="font-medium text-slate-900">
+                  {subscription?.status === "active"
+                    ? demoMode
+                      ? "Đang mở"
+                      : "Đang hoạt động"
+                    : subscription?.status === "trialing"
+                      ? demoMode
+                        ? "Dùng thử"
+                        : "Đang dùng thử"
+                      : subscription?.status === "canceled"
+                        ? "Đã hủy"
+                        : subscription
+                          ? "Không hoạt động"
+                          : "Đang chuẩn bị"}
+                </p>
               </div>
               <div className="flow-muted p-4">
                 <p className="text-slate-500">Chu kỳ</p>
                 <p className="font-medium text-slate-900">
-                  {subscription.billingCycle === "monthly"
+                  {subscription?.billingCycle === "monthly"
                     ? demoMode
                       ? "Tháng"
                       : "Tháng"
-                    : subscription.billingCycle === "quarterly"
+                    : subscription?.billingCycle === "quarterly"
                       ? demoMode
                         ? "Quý"
                         : "Quý"
-                      : demoMode
+                      : subscription
+                        ? demoMode
                         ? "Trọn chu kỳ"
-                        : "Trọn chu kỳ"}
+                          : "Trọn chu kỳ"
+                        : "Đang chuẩn bị"}
                 </p>
               </div>
             </div>
@@ -560,31 +616,25 @@ export function BillingPlan() {
 
           <div className="grid gap-3 pt-2 sm:flex sm:flex-wrap">
             {currentPlanCode === "FREE" ? (
-              <>
-                <Button className="w-full sm:w-auto" onClick={() => handleOpenUpgrade("plan")}>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  {demoMode ? "Mở Plus" : "Nâng cấp Plus"}
-                </Button>
-                {demoMode && !isTrialing && (
-                  <div className="flex w-full flex-col items-start gap-1 sm:w-auto">
-                    <Button
-                      variant="outline"
-                      className="w-full sm:w-auto"
-                      onClick={handleStartTrial}
-                      disabled={isStartingTrial}
-                    >
-                      {isStartingTrial
-                        ? "Đang kích hoạt…"
-                        : trialCtaExperiment === "variant_a"
-                          ? "Bắt đầu Plus dùng thử 7 ngày"
-                          : "Dùng thử Plus 7 ngày"}
-                    </Button>
-                    <p className="text-xs text-slate-500">
-                      Không cần thẻ trong bản dùng thử. Quyền Plus sẽ mở trên trình duyệt này.
-                    </p>
-                  </div>
-                )}
-              </>
+              demoMode && !isTrialing && (
+                <div className="flex w-full flex-col items-start gap-1 sm:w-auto">
+                  <Button
+                    variant="outline"
+                    className="w-full sm:w-auto"
+                    onClick={handleStartTrial}
+                    disabled={isStartingTrial}
+                  >
+                    {isStartingTrial
+                      ? "Đang kích hoạt…"
+                      : trialCtaExperiment === "variant_a"
+                        ? "Bắt đầu Plus dùng thử 7 ngày"
+                        : "Dùng thử Plus 7 ngày"}
+                  </Button>
+                  <p className="text-xs text-slate-500">
+                    Không cần thẻ trong bản dùng thử. Quyền Plus sẽ mở trên trình duyệt này.
+                  </p>
+                </div>
+              )
             ) : (
               <>
                 {isTrialing && trialDaysLeft !== null && (
@@ -601,11 +651,6 @@ export function BillingPlan() {
                     </Button>
                   </div>
                 )}
-                {(billingStatus.manageBillingReady || realMode) && (
-                  <Button variant="outline" onClick={handleOpenPortal} disabled={isOpeningPortal}>
-                    {isOpeningPortal ? "Đang mở…" : "Quản lý thanh toán"}
-                  </Button>
-                )}
                 {realMode && (
                   <Button onClick={handleRenewPlan}>
                     <RefreshCw className="mr-2 h-4 w-4" />
@@ -621,32 +666,33 @@ export function BillingPlan() {
                     Hủy gói
                   </Button>
                 )}
-                {showCancelConfirm && (
-                  <div className="w-full rounded-[var(--r-control)] border border-red-200 bg-red-50 p-4">
-                    <p className="text-sm font-medium text-red-900">Bạn có chắc muốn hủy gói Plus?</p>
-                    <p className="mt-1 text-xs text-red-700">
-                      Bạn vẫn giữ quyền truy cập cho đến hết chu kỳ hiện tại. Sau đó gói sẽ chuyển về Free.
-                    </p>
-                    <div className="mt-[var(--space-inline)] flex gap-2">
-                      <Button size="sm" variant="destructive" onClick={handleCancelSubscription} disabled={isCanceling}>
-                        {isCanceling ? "Đang hủy…" : "Xác nhận hủy"}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setShowCancelConfirm(false)}
-                        disabled={isCanceling}
-                      >
-                        Giữ gói
-                      </Button>
-                    </div>
-                  </div>
-                )}
               </>
             )}
           </div>
-        </CardContent>
-        </Card>
+        </PrimaryActionCard>
+        <AlertDialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Huỷ subscription?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Plus sẽ hết hạn sau {cancelEffectiveDate}, dữ liệu giữ nguyên.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isCanceling}>Giữ Plus</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-red-600 text-white hover:bg-red-700"
+                disabled={isCanceling}
+                onClick={(event) => {
+                  event.preventDefault();
+                  void handleCancelSubscription();
+                }}
+              >
+                {isCanceling ? "Đang huỷ…" : "Xác nhận huỷ"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </SectionBlock>
 
       {/* Payment history */}
@@ -659,7 +705,7 @@ export function BillingPlan() {
               Lịch sử thanh toán
             </CardTitle>
             <CardDescription>
-              Các đơn VietQR gần đây của tài khoản này. Quyền Plus chỉ mở khi webhook xác nhận thanh toán thành công.
+              Các giao dịch gần đây của tài khoản này qua provider đang cấu hình.
             </CardDescription>
           </CardHeader>
           <CardContent className="stack-stack">
@@ -683,7 +729,7 @@ export function BillingPlan() {
               <div className="flow-muted p-4">
                 <p className="text-sm font-medium text-slate-900">Chưa có giao dịch nào.</p>
                 <p className="mt-1 text-sm text-slate-600">
-                  Khi bạn tạo mã VietQR, đơn thanh toán sẽ xuất hiện tại đây để theo dõi hoặc tiếp tục thanh toán.
+                  Khi provider gửi lịch sử thanh toán, giao dịch và hóa đơn sẽ xuất hiện tại đây.
                 </p>
               </div>
             )}
@@ -724,6 +770,17 @@ export function BillingPlan() {
                           Tiếp tục thanh toán
                         </Button>
                       )}
+                      {order.invoiceUrl ? (
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={order.invoiceUrl} target="_blank" rel="noreferrer">
+                            Xem hóa đơn
+                          </a>
+                        </Button>
+                      ) : order.status === "completed" ? (
+                        <Button variant="outline" size="sm" disabled>
+                          Hóa đơn đang chuẩn bị
+                        </Button>
+                      ) : null}
                     </div>
                   </div>
                 ))}
@@ -744,8 +801,7 @@ export function BillingPlan() {
               Hỗ trợ thanh toán
             </CardTitle>
             <CardDescription>
-              Nếu đã chuyển khoản đúng nội dung nhưng Plus chưa mở sau vài phút, gửi mã đơn và ảnh chuyển khoản để kiểm
-              tra thủ công.
+              Nếu provider đã xác nhận thanh toán nhưng Plus chưa mở sau vài phút, gửi mã đơn để kiểm tra thủ công.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">

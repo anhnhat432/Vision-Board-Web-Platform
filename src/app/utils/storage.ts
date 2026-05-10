@@ -169,6 +169,8 @@ export {
   USER_DATA_UPDATED_EVENT_NAME,
 } from "./storage-constants";
 
+const LEGACY_TRUST_BADGE_DISMISSED_KEY = "trust_badge_dismissed_v1";
+
 let _cachedUserData: UserData | null = null;
 let _cachedRawHash: string | null = null;
 
@@ -200,6 +202,10 @@ function notifyUserDataUpdated(): void {
 function resetUserDataCache(): void {
   _cachedUserData = null;
   _cachedRawHash = null;
+}
+
+function removeLegacyTrustBadgeDismissal(): void {
+  localStorage.removeItem(LEGACY_TRUST_BADGE_DISMISSED_KEY);
 }
 
 function setUserDataCache(data: UserData, rawHash: string): void {
@@ -457,6 +463,7 @@ export function getFeasibilityResultLabel(result: string): string {
 }
 
 export function initializeUserData(): UserData {
+  removeLegacyTrustBadgeDismissal();
   const demoMode = shouldSeedDemoData();
   const existingData = localStorage.getItem(STORAGE_KEY);
 

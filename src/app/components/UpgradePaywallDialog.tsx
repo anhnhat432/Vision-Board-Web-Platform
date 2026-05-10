@@ -1,4 +1,4 @@
-import { Crown, LockKeyhole, Sparkles } from "lucide-react";
+import { CreditCard, Crown, LockKeyhole, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { isDemoMode, shouldShowBillingDebugUi } from "../utils/app-mode";
@@ -64,6 +64,8 @@ export function UpgradePaywallDialog({
   const billingProviderStatus = useMemo(() => getBillingProviderStatus(), []);
   const billingDebugUi = shouldShowBillingDebugUi();
   const demoMode = isDemoMode();
+  const providerLabel = billingProviderStatus.providerLabel || "provider";
+  const upgradeFeatureLabel = paywallCopy.bullets[0] ?? paywallCopy.title;
 
   useEffect(() => {
     if (!open) return;
@@ -256,6 +258,12 @@ export function UpgradePaywallDialog({
                           )}
                         </div>
                         <p className="mt-2 text-sm leading-7 text-slate-600">{plan.description}</p>
+                        {!demoMode && (
+                          <p className="mt-2 text-sm leading-7 text-slate-600">
+                            Nâng cấp {plan.name} để mở khoá {upgradeFeatureLabel.toLowerCase()} — gia hạn theo chu kỳ
+                            thanh toán hàng tháng/năm theo cấu hình provider.
+                          </p>
+                        )}
                       </div>
                       <div className="rounded-[var(--r-card)] border border-slate-200 bg-white/90 p-3 text-slate-900">
                         <Crown className="h-5 w-5 text-violet-600" />
@@ -267,6 +275,12 @@ export function UpgradePaywallDialog({
                         Giá gói
                       </p>
                       <p className="mt-2 text-3xl font-bold text-slate-950">{plan.priceLabel}</p>
+                      {!demoMode && (
+                        <p className="mt-2 flex items-center gap-2 text-sm font-medium text-slate-700">
+                          <CreditCard className="h-4 w-4 text-slate-500" />
+                          Thanh toán qua {providerLabel}
+                        </p>
+                      )}
                     </div>
 
                     <div className="mt-4 space-y-2">
@@ -282,9 +296,9 @@ export function UpgradePaywallDialog({
                     </div>
 
                     <Button
-                      className="mt-5 w-full"
+                      className={`mt-5 w-full ${!isCurrent ? "gradient-brand text-white" : ""}`}
                       disabled={isUpgrading}
-                      variant={isCurrent ? "outline" : isRecommended ? "default" : "outline"}
+                      variant={isCurrent ? "outline" : "default"}
                       onClick={() => handleUpgrade(plan.code as Exclude<PricingPlanCode, "FREE">)}
                     >
                       {isCurrent

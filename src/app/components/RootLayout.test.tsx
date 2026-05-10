@@ -214,6 +214,26 @@ function seedAuthenticatedCompletedWorkspace(uid = "user_test") {
   saveUserData(data);
 }
 
+function seedPlusSubscription(uid = "user_test") {
+  activateAuthenticatedUserData(uid);
+  const data = createFreshUserData();
+  const grantedAt = "2026-05-01T00:00:00.000Z";
+  data.onboardingCompleted = true;
+  data.subscription = {
+    planCode: "PLUS",
+    status: "active",
+    billingCycle: "monthly",
+    startedAt: grantedAt,
+    renewsAt: "2026-06-01T00:00:00.000Z",
+    providerMode: "api_contract",
+  };
+  data.entitlements = [
+    { key: "premium_templates", sourcePlan: "PLUS", grantedAt },
+    { key: "premium_review_insights", sourcePlan: "PLUS", grantedAt },
+  ];
+  saveUserData(data);
+}
+
 function renderAppShell(initialEntry: string) {
   const router = createMemoryRouter(
     [
@@ -226,6 +246,8 @@ function renderAppShell(initialEntry: string) {
           { path: "onboarding", element: <div data-testid="onboarding-page">Onboarding page</div> },
           { path: "12-week-setup", element: <div data-testid="twelve-week-setup-page">12-week setup page</div> },
           { path: "goals", element: <div data-testid="goals-page">Goals page</div> },
+          { path: "settings", element: <div data-testid="settings-page">Settings page</div> },
+          { path: "billing/plan", element: <div data-testid="billing-plan-page">Billing plan page</div> },
           {
             element: <ProtectedRoute />,
             children: [{ path: "order", element: <div data-testid="order-page">Order page</div> }],
@@ -407,6 +429,35 @@ describe("RootLayout onboarding redirect", () => {
 
     expect(await screen.findByTestId("home-page")).toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/");
+  });
+
+  it("shows an authenticated account dropdown and compact footer without sync status copy", async () => {
+    seedPlusSubscription();
+    setAuthContext({
+      user: { uid: "user_test", email: "plus@example.com", displayName: "Plus User" },
+      userProfile: { id: "profile_test", email: "plus@example.com", displayName: "Plus User" },
+    });
+
+    const { router } = renderAppShell("/goals");
+
+    expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
+    expect(screen.getByText("v1.0")).toBeInTheDocument();
+    expect(screen.getByText("plus@example.com")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Cài đặt" })).toHaveAttribute("href", "/settings");
+
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Mở menu tài khoản" }), { button: 0 });
+
+    expect(await screen.findByRole("menu")).toBeInTheDocument();
+    expect(screen.getByText("Plus")).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Settings" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Quản lý subscription" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Logout" })).toBeInTheDocument();
+    expect(screen.queryByText(/Đang đồng bộ|Đã đồng bộ|sync/i)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("menuitem", { name: "Quản lý subscription" }));
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/billing/plan");
+    });
   });
 
   it("sends public app routes to login before onboarding when signed out", async () => {
