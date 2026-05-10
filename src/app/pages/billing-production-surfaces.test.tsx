@@ -24,37 +24,56 @@ function stubRealBillingEnv(
   vi.stubEnv("VITE_BILLING_PROVIDER_MODE", "api_contract");
   vi.stubEnv("VITE_BILLING_PROVIDER_LABEL", providerLabel);
   vi.stubEnv("VITE_API_BASE_URL", "https://api.example.test");
-  vi.doMock("@/lib/api/apiClient", () => ({
-    apiClient: {
-      get: vi.fn((path: string) => {
-        if (path === "/billing/entitlement") {
-          return Promise.resolve({
-            planCode: entitlement.planCode,
-            status: entitlement.status,
-            entitlements: entitlement.entitlements,
-            currentPeriodEnd: entitlement.currentPeriodEnd ?? null,
-            cancelAtPeriodEnd: entitlement.cancelAtPeriodEnd ?? false,
-          });
-        }
+  const apiClient = {
+    get: vi.fn((path: string) => {
+      if (path === "/billing/entitlement") {
+        return Promise.resolve({
+          planCode: entitlement.planCode,
+          status: entitlement.status,
+          entitlements: entitlement.entitlements,
+          currentPeriodEnd: entitlement.currentPeriodEnd ?? null,
+          cancelAtPeriodEnd: entitlement.cancelAtPeriodEnd ?? false,
+        });
+      }
 
-        return Promise.resolve({ orders: [] });
-      }),
-      post: vi.fn().mockResolvedValue({
-        checkoutSessionId: "checkout_test",
-        checkoutUrl: "https://checkout.example.test/session",
-        provider: providerLabel,
-        currentEntitlement: {
-          planCode: "FREE",
-          status: "none",
-          entitlements: [],
-        },
-      }),
-    },
+      if (path.startsWith("/billing/public-order-status/")) {
+        return Promise.resolve({
+          orderId: "checkout_test",
+          status: "pending",
+          amount: 79000,
+          currency: "VND",
+          bankAccount: "123456789",
+          bankName: "MB",
+          accountName: "DEAR OUR FUTURE",
+          qrDataUrl: "https://img.vietqr.io/image/970422-123456789-compact2.png",
+          expiresAt: "2099-05-10T10:30:00.000Z",
+          completedAt: null,
+          createdAt: "2026-05-10T10:00:00.000Z",
+        });
+      }
+
+      return Promise.resolve({ orders: [] });
+    }),
+    post: vi.fn().mockResolvedValue({
+      checkoutSessionId: "checkout_test",
+      checkoutUrl: "https://checkout.example.test/session",
+      provider: providerLabel,
+      currentEntitlement: {
+        planCode: "FREE",
+        status: "none",
+        entitlements: [],
+      },
+    }),
+  };
+  vi.doMock("@/lib/api/apiClient", () => ({
+    apiClient,
     isApiBaseUrlConfigured: () => true,
     toAppError: (error: unknown) => ({
       message: error instanceof Error ? error.message : "Không thể tải dữ liệu.",
     }),
   }));
+
+  return apiClient;
 }
 
 const UI_TEST_TIMEOUT_MS = 10_000;
@@ -63,6 +82,7 @@ describe("production billing surfaces", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
     vi.doUnmock("@/lib/api/apiClient");
+    vi.doUnmock("@/lib/auth/AuthContext");
     localStorage.clear();
   });
 
@@ -164,6 +184,34 @@ describe("production billing surfaces", () => {
       expect(router.state.location.pathname).toBe("/billing/checkout");
     });
     expect(await screen.findByTestId("vietqr-checkout-page")).toBeInTheDocument();
+  }, UI_TEST_TIMEOUT_MS);
+
+  it("creates a public VietQR checkout session when the visitor is signed out", async () => {
+    const apiClient = stubRealBillingEnv("Casso + VietQR");
+    vi.doMock("@/lib/auth/AuthContext", () => ({
+      useAuthContext: () => ({
+        user: null,
+        authLoading: false,
+      }),
+    }));
+    const { BillingCheckoutQR } = await import("./BillingCheckoutQR");
+
+    const router = createMemoryRouter([{ path: "/billing/checkout/:orderId?", element: <BillingCheckoutQR /> }], {
+      initialEntries: ["/billing/checkout"],
+    });
+    render(<RouterProvider router={router} />);
+
+    await waitFor(() => {
+      expect(apiClient.post).toHaveBeenCalledWith(
+        "/billing/public-checkout-session",
+        expect.objectContaining({
+          planCode: "PLUS",
+          clientUserId: expect.any(String),
+        }),
+      );
+    });
+    expect(await screen.findByText("Thanh toán VietQR")).toBeInTheDocument();
+    expect(screen.getByText("MB")).toBeInTheDocument();
   }, UI_TEST_TIMEOUT_MS);
 
   it("shows a 12-week plan CTA after a confirmed real checkout return", async () => {

@@ -1,17 +1,44 @@
 import { Router } from "express";
 
-import { cancelSubscription, createCheckoutSession, createCustomerPortal, getEntitlement } from "../controllers/billingController";
-import { getCheckoutInfo, getOrderStatus, getPaymentHistory } from "../controllers/orderStatusController";
+import {
+  cancelSubscription,
+  createCheckoutSession,
+  createCustomerPortal,
+  createPublicCheckoutSession,
+  getEntitlement,
+} from "../controllers/billingController";
+import {
+  getCheckoutInfo,
+  getOrderStatus,
+  getPaymentHistory,
+  getPublicOrderStatus,
+} from "../controllers/orderStatusController";
 import { billingCheckoutRateLimiter, billingStatusRateLimiter } from "../middleware/rateLimiters";
 import {
   validateCheckoutSessionInput,
   validateCustomerPortalInput,
   validateOptionalJsonObjectBody,
   validateOrderIdParam,
+  validatePublicCheckoutSessionInput,
 } from "../middleware/requestValidation";
 import { asyncHandler } from "../utils/asyncHandler";
 
 const billingRoutes = Router();
+const publicBillingRoutes = Router();
+
+publicBillingRoutes.post(
+  "/billing/public-checkout-session",
+  billingCheckoutRateLimiter,
+  validatePublicCheckoutSessionInput,
+  asyncHandler(createPublicCheckoutSession),
+);
+publicBillingRoutes.get(
+  "/billing/public-order-status/:orderId",
+  billingStatusRateLimiter,
+  validateOrderIdParam,
+  asyncHandler(getPublicOrderStatus),
+);
+publicBillingRoutes.get("/billing/checkout-info", billingStatusRateLimiter, asyncHandler(getCheckoutInfo));
 
 billingRoutes.get("/billing/entitlement", billingStatusRateLimiter, asyncHandler(getEntitlement));
 billingRoutes.post(
@@ -39,6 +66,5 @@ billingRoutes.get(
   asyncHandler(getOrderStatus),
 );
 billingRoutes.get("/billing/payment-history", billingStatusRateLimiter, asyncHandler(getPaymentHistory));
-billingRoutes.get("/billing/checkout-info", billingStatusRateLimiter, asyncHandler(getCheckoutInfo));
 
-export { billingRoutes };
+export { billingRoutes, publicBillingRoutes };

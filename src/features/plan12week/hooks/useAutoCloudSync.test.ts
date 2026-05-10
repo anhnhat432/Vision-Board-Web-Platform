@@ -617,16 +617,76 @@ describe("useAutoCloudSync", () => {
     expect(result.current.firstLoginRestoreSummary).toBeNull();
   });
 
-  it("marks conflictPending when the last result is a conflict", async () => {
+  it("keeps cloud conflicts non-blocking for the app shell", async () => {
     setSignedIn("firebase_uid_conflict");
     manualSyncMock.syncNow.mockResolvedValue(conflictResult);
 
     const { result } = renderHook(() => useAutoCloudSync());
 
     await waitFor(() => {
-      expect(result.current.conflictPending).toBe(true);
+      expect(result.current.lastResult?.status).toBe("conflict");
     });
+    expect(result.current.conflictPending).toBe(false);
+  });
+
+  it("auto-keeps local changes by re-queueing conflict mutations and draining them", async () => {
+    queueMock.pendingCount = 1;
+    queueMock.store = {
+      version: 1,
+      ownerUid: "firebase_uid_auto_keep",
+      deviceId: "device_1",
+      updatedAt: "2026-05-10T10:00:00.000Z",
+      items: [
+        {
+          id: "mutation_conflict_1",
+          idempotencyKey: "key_1",
+          collapseKey: "task:goal_1:task_1",
+          kind: "task_completed_changed",
+          status: "blocked_conflict",
+          createdAt: "2026-05-10T09:59:00.000Z",
+          updatedAt: "2026-05-10T10:00:00.000Z",
+          attemptCount: 1,
+          maxAttempts: 7,
+          ownerUid: "firebase_uid_auto_keep",
+          goalId: "goal_1",
+          error: {
+            code: "sync_conflict",
+            message: "Conflict",
+            lastSeenAt: "2026-05-10T10:00:00.000Z",
+            retryable: false,
+          },
+          payload: {
+            taskId: "task_1",
+            weekNumber: 1,
+            completed: true,
+            scheduledDate: "2026-05-10",
+          },
+        },
+      ],
+    };
+    setSignedIn("firebase_uid_auto_keep");
+    manualSyncMock.syncNow.mockResolvedValue(conflictResultWithMutation);
+
+    const { result } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 30_000 }));
+
+    await waitFor(() => {
+      expect(mutationSenderMock.sendPending12WeekMutations).toHaveBeenCalledTimes(1);
+    });
+
     expect(result.current.lastResult?.status).toBe("conflict");
+    expect(result.current.conflictPending).toBe(false);
+    expect(queueMock.writeMutationQueueStore).toHaveBeenCalled();
+    expect(queueMock.store.items[0]?.status).toBe("pending");
+    expect(queueMock.store.items[0]?.error).toBeUndefined();
+    expect(mutationSenderMock.sendPending12WeekMutations).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ownerUid: "firebase_uid_auto_keep",
+        authenticated: true,
+        realMode: true,
+        apiConfigured: true,
+        online: true,
+      }),
+    );
   });
 
   it("resolves keep-local conflicts by re-queueing conflict mutations and draining them", async () => {

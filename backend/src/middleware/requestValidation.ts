@@ -16,6 +16,8 @@ const SUPPORTED_BILLING_CYCLES = new Set<BillingCycle>([
 const SUPPORTED_CHECKOUT_PLANS = new Set(["PLUS"]);
 const MAX_URL_LENGTH = 2048;
 const MAX_LOCALE_LENGTH = 20;
+const MAX_CLIENT_USER_ID_LENGTH = 128;
+const CLIENT_USER_ID_REGEX = /^[A-Za-z0-9._:-]{4,128}$/;
 const MAX_PROFILE_PATCH_FIELDS = 12;
 const MAX_CASSO_TRANSACTIONS = 100;
 const MAX_CASSO_DESCRIPTION_LENGTH = 512;
@@ -112,6 +114,19 @@ function normalizeBillingCycle(value: unknown): BillingCycle {
   }
 
   return normalized;
+}
+
+function normalizeClientUserId(value: unknown): string {
+  if (typeof value !== "string") {
+    throw new ApiError(400, "clientUserId is required.", undefined, "invalid_client_user_id");
+  }
+
+  const trimmed = value.trim();
+  if (trimmed.length === 0 || trimmed.length > MAX_CLIENT_USER_ID_LENGTH || !CLIENT_USER_ID_REGEX.test(trimmed)) {
+    throw new ApiError(400, "clientUserId is invalid.", undefined, "invalid_client_user_id");
+  }
+
+  return trimmed;
 }
 
 function normalizeStringField(
@@ -268,6 +283,27 @@ export const validateCheckoutSessionInput: RequestHandler = (req, _res, next) =>
     cancelUrl: normalizeHttpUrl(body.cancelUrl, "cancelUrl"),
     billingCycle: normalizeBillingCycle(body.billingCycle),
     locale: normalizeOptionalLocale(body.locale),
+  };
+
+  next();
+};
+
+export const validatePublicCheckoutSessionInput: RequestHandler = (req, _res, next) => {
+  const body = requireJsonObjectBody(req);
+  const planCode = typeof body.planCode === "string" ? body.planCode.trim().toUpperCase() : "";
+
+  if (!SUPPORTED_CHECKOUT_PLANS.has(planCode)) {
+    throw new ApiError(400, "Invalid planCode. Allowed: PLUS.", undefined, "invalid_plan_code");
+  }
+
+  req.body = {
+    ...body,
+    planCode,
+    returnUrl: normalizeHttpUrl(body.returnUrl, "returnUrl"),
+    cancelUrl: normalizeHttpUrl(body.cancelUrl, "cancelUrl"),
+    billingCycle: normalizeBillingCycle(body.billingCycle),
+    locale: normalizeOptionalLocale(body.locale),
+    clientUserId: normalizeClientUserId(body.clientUserId),
   };
 
   next();

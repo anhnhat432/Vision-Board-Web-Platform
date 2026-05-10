@@ -3,7 +3,9 @@ import { useNavigate, useParams } from "react-router";
 import { CheckCircle2, Clock, Copy, Loader2, QrCode, RefreshCw, XCircle } from "lucide-react";
 
 import { apiClient } from "@/lib/api/apiClient";
+import { useAuthContext } from "@/lib/auth/AuthContext";
 import { syncEntitlementsWithProvider } from "../utils/production";
+import { getUserData, upgradePlanLocally } from "../utils/storage";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -49,6 +51,7 @@ function formatCountdown(ms: number): string {
 export function BillingCheckoutQR() {
   const { orderId: paramOrderId } = useParams<{ orderId?: string }>();
   const navigate = useNavigate();
+  const { authLoading, user } = useAuthContext();
 
   const [order, setOrder] = useState<OrderStatusResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -64,15 +67,22 @@ export function BillingCheckoutQR() {
 
   // Create a new order if no orderId in URL
   const createOrder = useCallback(async () => {
+    if (authLoading) return;
+
     setCreating(true);
     setError(null);
     try {
-      const result = await apiClient.post<CheckoutSessionResponse>("/billing/checkout-session", {
-        planCode: "PLUS",
-        billingCycle: "twelve_week",
-        returnUrl: `${window.location.origin}/billing/checkout`,
-        cancelUrl: `${window.location.origin}/billing/plan`,
-      });
+      const isPublicCheckout = !user;
+      const result = await apiClient.post<CheckoutSessionResponse>(
+        isPublicCheckout ? "/billing/public-checkout-session" : "/billing/checkout-session",
+        {
+          planCode: "PLUS",
+          billingCycle: "twelve_week",
+          returnUrl: `${window.location.origin}/billing/checkout`,
+          cancelUrl: `${window.location.origin}/billing/plan`,
+          ...(isPublicCheckout ? { clientUserId: getUserData().userId } : {}),
+        },
+      );
       if (result?.checkoutSessionId) {
         navigate(`/billing/checkout/${result.checkoutSessionId}`, { replace: true });
       }
@@ -82,12 +92,14 @@ export function BillingCheckoutQR() {
     } finally {
       setCreating(false);
     }
-  }, [navigate]);
+  }, [authLoading, navigate, user]);
 
   // Fetch order status
   const fetchStatus = useCallback(async (oid: string) => {
     try {
-      const data = await apiClient.get<OrderStatusResponse>(`/billing/order-status/${oid}`);
+      const data = await apiClient.get<OrderStatusResponse>(
+        user ? `/billing/order-status/${oid}` : `/billing/public-order-status/${oid}`,
+      );
       if (data) {
         setOrder(data);
         if (data.expiresAt) {
@@ -104,10 +116,12 @@ export function BillingCheckoutQR() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   // Init: create or fetch
   useEffect(() => {
+    if (authLoading) return;
+
     if (!paramOrderId) {
       createOrder();
       return;
@@ -118,7 +132,7 @@ export function BillingCheckoutQR() {
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [paramOrderId, createOrder, fetchStatus]);
+  }, [authLoading, paramOrderId, createOrder, fetchStatus]);
 
   // Countdown timer
   useEffect(() => {
@@ -149,6 +163,13 @@ export function BillingCheckoutQR() {
     setEntitlementSyncStatus("syncing");
     setEntitlementSyncMessage(null);
 
+    if (!user) {
+      const planCode = upgradePlanLocally("PLUS");
+      setEntitlementSyncStatus("synced");
+      setEntitlementSyncMessage(`Đã mở gói ${planCode} trên thiết bị này.`);
+      return true;
+    }
+
     const result = await syncEntitlementsWithProvider();
     if (result.ok && result.planCode !== "FREE") {
       setEntitlementSyncStatus("synced");
@@ -162,7 +183,7 @@ export function BillingCheckoutQR() {
         "Đã nhận thanh toán nhưng chưa cập nhật được quyền Plus trên thiết bị này. Vui lòng thử lại.",
     );
     return false;
-  }, [order]);
+  }, [order, user]);
 
   useEffect(() => {
     if (order?.status !== "completed") return;

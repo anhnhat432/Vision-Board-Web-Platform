@@ -33,6 +33,10 @@ function isOriginAllowed(url: string, allowedOrigins: string | undefined): boole
   }
 }
 
+function getPublicCheckoutUserId(clientUserId: string): string {
+  return `public:${clientUserId}`;
+}
+
 /**
  * GET /api/billing/entitlement
  *
@@ -125,6 +129,73 @@ export async function createCheckoutSession(req: Request, res: Response): Promis
           status: snapshot.status,
           entitlements: snapshot.activeKeys,
         },
+      }),
+    );
+  } catch (error) {
+    if (error instanceof PaymentProviderNotConfiguredError) {
+      throw new ApiError(503, error.message, undefined, "provider_not_configured");
+    }
+    throw error;
+  }
+}
+
+/**
+ * POST /api/billing/public-checkout-session
+ *
+ * Creates a local-first checkout session for visitors who are not signed in.
+ * Entitlements are still only granted after a verified provider event; the
+ * frontend unlocks the local device after polling a completed order.
+ */
+export async function createPublicCheckoutSession(req: Request, res: Response): Promise<void> {
+  const { planCode, returnUrl, cancelUrl, billingCycle, locale, clientUserId } = req.body ?? {};
+
+  if (!planCode || typeof planCode !== "string" || !ALLOWED_PLAN_CODES.has(planCode)) {
+    throw new ApiError(
+      400,
+      `Invalid planCode. Allowed: ${[...ALLOWED_PLAN_CODES].join(", ")}.`,
+      undefined,
+      "invalid_plan_code",
+    );
+  }
+
+  if (!isValidHttpUrl(returnUrl)) {
+    throw new ApiError(400, "returnUrl is required and must be a valid HTTP/HTTPS URL.", undefined, "invalid_return_url");
+  }
+  if (!isValidHttpUrl(cancelUrl)) {
+    throw new ApiError(400, "cancelUrl is required and must be a valid HTTP/HTTPS URL.", undefined, "invalid_cancel_url");
+  }
+  if (typeof clientUserId !== "string" || !clientUserId.trim()) {
+    throw new ApiError(400, "clientUserId is required.", undefined, "invalid_client_user_id");
+  }
+
+  const frontendOrigin = process.env.FRONTEND_ORIGIN?.trim();
+  if (frontendOrigin) {
+    if (!isOriginAllowed(returnUrl, frontendOrigin)) {
+      throw new ApiError(400, "returnUrl origin does not match allowed frontend origin.", undefined, "origin_mismatch");
+    }
+    if (!isOriginAllowed(cancelUrl, frontendOrigin)) {
+      throw new ApiError(400, "cancelUrl origin does not match allowed frontend origin.", undefined, "origin_mismatch");
+    }
+  }
+
+  const adapter = getPaymentProviderAdapter();
+
+  try {
+    const session = await adapter.createCheckoutSession({
+      userId: getPublicCheckoutUserId(clientUserId.trim()),
+      planCode: planCode as "PLUS",
+      billingCycle: billingCycle ?? "twelve_week",
+      successUrl: returnUrl,
+      cancelUrl,
+      locale,
+    });
+
+    res.status(200).json(
+      successResponse({
+        checkoutSessionId: session.sessionId,
+        checkoutUrl: session.checkoutUrl,
+        provider: adapter.providerId,
+        expiresAt: session.expiresAt,
       }),
     );
   } catch (error) {

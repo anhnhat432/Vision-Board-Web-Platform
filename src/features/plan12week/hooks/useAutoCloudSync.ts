@@ -53,6 +53,11 @@ export interface UseAutoCloudSyncOptions {
   mutationDebounceMs?: number;
 }
 
+interface DrainPendingMutationsOptions {
+  allowDuringFullSync?: boolean;
+  bypassRateLimit?: boolean;
+}
+
 function getQueuePendingCount(ownerUid: string | null): number {
   if (!ownerUid) return 0;
   return summarizeMutationQueueStore(readMutationQueueStore(ownerUid)).pendingCount;
@@ -241,88 +246,21 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     setFirstLoginRestoreSummary(null);
   }, [fullSyncEnabled, ownerUid]);
 
-  const triggerSyncNow = useCallback(async () => {
-    if (fullSyncEnabled && ownerUid && userProfileReady && !networkStatusInfo.isOnline) {
-      const result: TwelveWeekManualCloudSyncResult = {
-        status: "skipped",
-        skipReason: "offline",
-        message: "Dang offline. Hang cho thay doi se duoc gui khi ket noi lai.",
-      };
-      setLastResult(result);
-      refreshPendingCount();
-      return result;
-    }
-
-    if (!fullSyncBaseReady || !isDocumentVisible() || !ownerUid) {
-      refreshPendingCount();
-      return null;
-    }
-
-    if (inFlightRef.current) return inFlightRef.current;
-    if (drainInFlightRef.current) return null;
-    if (!hasElapsedSince(lastSyncStartedAtRef.current, minSyncIntervalMs)) return null;
-
-    const localWasEmptyBeforeSync = isLocalDataEmptyForFirstLoginRestore(getUserData());
-
-    console.log("[auto-sync] starting", { ownerUid });
-    lastSyncStartedAtRef.current = Date.now();
-    setAutoLoading(true);
-
-    const request = runManualSyncNow()
-      .then((result) => {
-        setLastResult(result);
-        setLastSyncedAt(new Date().toISOString());
-        refreshPendingCount();
-
-        if (localWasEmptyBeforeSync && result.status === "applied" && (result.appliedGoalCount ?? 0) > 0) {
-          const summary = summarizeFirstLoginRestore(getUserData(), result);
-          if (summary.goalCount > 0) {
-            setFirstLoginRestoreSummary(summary);
-          }
-        }
-
-        if (shouldWarnForResult(result)) {
-          console.warn("[auto-sync] finished with attention needed", {
-            status: result.status,
-            message: result.message,
-          });
-        }
-
-        return result;
-      })
-      .finally(() => {
-        inFlightRef.current = null;
-        setAutoLoading(false);
-      });
-
-    inFlightRef.current = request;
-    return request;
-  }, [
-    fullSyncBaseReady,
-    fullSyncEnabled,
-    minSyncIntervalMs,
-    networkStatusInfo.isOnline,
-    ownerUid,
-    refreshPendingCount,
-    runManualSyncNow,
-    userProfileReady,
-  ]);
-
-  triggerSyncNowRef.current = triggerSyncNow;
-
-  const triggerDrainOnly = useCallback(async () => {
+  const drainPendingMutations = useCallback(async (drainOptions: DrainPendingMutationsOptions = {}) => {
     if (!drainSyncBaseReady || !isDocumentVisible() || !ownerUid) {
       refreshPendingCount();
       return null;
     }
 
-    if (inFlightRef.current) return null;
+    if (!drainOptions.allowDuringFullSync && inFlightRef.current) return null;
     if (drainInFlightRef.current) return drainInFlightRef.current;
 
     const currentPendingCount = getQueuePendingCount(ownerUid);
     setPendingCount(currentPendingCount);
     if (currentPendingCount <= 0) return null;
-    if (!hasElapsedSince(lastDrainStartedAtRef.current, minSyncIntervalMs)) return null;
+    if (!drainOptions.bypassRateLimit && !hasElapsedSince(lastDrainStartedAtRef.current, minSyncIntervalMs)) {
+      return null;
+    }
 
     console.log("[auto-sync] drain-only starting", { ownerUid, pendingCount: currentPendingCount });
     lastDrainStartedAtRef.current = Date.now();
@@ -372,6 +310,94 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     refreshPendingCount,
   ]);
 
+  const autoResolveKeepLocalConflicts = useCallback(
+    async (result: TwelveWeekManualCloudSyncResult) => {
+      if (!isBlockingResult(result) || !ownerUid) return;
+
+      const changed = markConflictMutationsForLocalResolution(ownerUid, result);
+      refreshPendingCount();
+      if (!changed) return;
+
+      lastDrainStartedAtRef.current = null;
+      await drainPendingMutations({ allowDuringFullSync: true, bypassRateLimit: true });
+    },
+    [drainPendingMutations, ownerUid, refreshPendingCount],
+  );
+
+  const triggerSyncNow = useCallback(async () => {
+    if (fullSyncEnabled && ownerUid && userProfileReady && !networkStatusInfo.isOnline) {
+      const result: TwelveWeekManualCloudSyncResult = {
+        status: "skipped",
+        skipReason: "offline",
+        message: "Dang offline. Hang cho thay doi se duoc gui khi ket noi lai.",
+      };
+      setLastResult(result);
+      refreshPendingCount();
+      return result;
+    }
+
+    if (!fullSyncBaseReady || !isDocumentVisible() || !ownerUid) {
+      refreshPendingCount();
+      return null;
+    }
+
+    if (inFlightRef.current) return inFlightRef.current;
+    if (drainInFlightRef.current) return null;
+    if (!hasElapsedSince(lastSyncStartedAtRef.current, minSyncIntervalMs)) return null;
+
+    const localWasEmptyBeforeSync = isLocalDataEmptyForFirstLoginRestore(getUserData());
+
+    console.log("[auto-sync] starting", { ownerUid });
+    lastSyncStartedAtRef.current = Date.now();
+    setAutoLoading(true);
+
+    const request = runManualSyncNow()
+      .then(async (result) => {
+        setLastResult(result);
+        setLastSyncedAt(new Date().toISOString());
+        refreshPendingCount();
+
+        if (localWasEmptyBeforeSync && result.status === "applied" && (result.appliedGoalCount ?? 0) > 0) {
+          const summary = summarizeFirstLoginRestore(getUserData(), result);
+          if (summary.goalCount > 0) {
+            setFirstLoginRestoreSummary(summary);
+          }
+        }
+
+        if (shouldWarnForResult(result)) {
+          console.warn("[auto-sync] finished with attention needed", {
+            status: result.status,
+            message: result.message,
+          });
+        }
+
+        await autoResolveKeepLocalConflicts(result);
+
+        return result;
+      })
+      .finally(() => {
+        inFlightRef.current = null;
+        setAutoLoading(false);
+      });
+
+    inFlightRef.current = request;
+    return request;
+  }, [
+    fullSyncBaseReady,
+    fullSyncEnabled,
+    autoResolveKeepLocalConflicts,
+    minSyncIntervalMs,
+    networkStatusInfo.isOnline,
+    ownerUid,
+    refreshPendingCount,
+    runManualSyncNow,
+    userProfileReady,
+  ]);
+
+  triggerSyncNowRef.current = triggerSyncNow;
+
+  const triggerDrainOnly = useCallback(() => drainPendingMutations(), [drainPendingMutations]);
+
   const effectiveLastResult = manualSyncLastResult ?? lastResult;
 
   const resolveConflictKeepLocal = useCallback(async () => {
@@ -380,8 +406,8 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     markConflictMutationsForLocalResolution(ownerUid, effectiveLastResult);
     refreshPendingCount();
     lastDrainStartedAtRef.current = null;
-    await triggerDrainOnly();
-  }, [effectiveLastResult, ownerUid, refreshPendingCount, triggerDrainOnly]);
+    await drainPendingMutations({ bypassRateLimit: true });
+  }, [drainPendingMutations, effectiveLastResult, ownerUid, refreshPendingCount]);
 
   const resolveConflictUseCloud = useCallback(async () => {
     if (!ownerUid) return;
@@ -502,7 +528,7 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
       lastSyncedAt,
       pendingCount,
       online: networkStatusInfo.isOnline,
-      conflictPending: isBlockingResult(effectiveLastResult),
+      conflictPending: false,
       firstLoginRestoreSummary,
       triggerSyncNow,
       triggerDrainOnly,

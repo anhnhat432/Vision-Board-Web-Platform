@@ -23,6 +23,10 @@ export function isAuthProtectedPath(pathname: string): boolean {
   return pathname === "/12-week-setup" || pathname === "/order" || pathname.startsWith("/order-status");
 }
 
+export function isPublicCheckoutPath(pathname: string): boolean {
+  return pathname === "/billing/checkout" || pathname.startsWith("/billing/checkout/");
+}
+
 export function isPublicHomePath(pathname: string): boolean {
   return pathname === "/";
 }
@@ -45,9 +49,10 @@ export function resolveWorkspaceGateState({
   userProfileLoading,
 }: UseWorkspaceGateOptions): WorkspaceGateState {
   const isPublicHome = isPublicHomePath(pathname);
+  const canRenderWhileSignedOut = isPublicHome || isAuthProtectedPath(pathname) || isPublicCheckoutPath(pathname);
   const hasUser = Boolean(user);
   const shouldRedirectToLogin =
-    !demoMode && !authLoading && !hasUser && !isPublicHome && !isAuthProtectedPath(pathname);
+    !demoMode && !authLoading && !hasUser && !canRenderWhileSignedOut;
   const shouldWaitForAuth = !demoMode && (!isPublicHome || hasUser) && authLoading;
   const shouldWaitForProfile =
     !demoMode && !authLoading && hasUser && (userProfileLoading || (!userProfile && !userProfileError));

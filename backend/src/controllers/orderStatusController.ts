@@ -23,6 +23,41 @@ function toIsoString(value: Date | string | null | undefined): string | null {
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
+function serializeOrder(order: {
+  orderId: string;
+  status: string;
+  amount: number;
+  currency: string;
+  bankAccount: string;
+  bankName: string;
+  accountName: string;
+  qrDataUrl: string;
+  expiresAt?: Date | string | null;
+  completedAt?: Date | string | null;
+  createdAt?: Date | string | null;
+}) {
+  return {
+    orderId: order.orderId,
+    status: order.status,
+    amount: order.amount,
+    currency: order.currency,
+    bankAccount: order.bankAccount,
+    bankName: order.bankName,
+    accountName: order.accountName,
+    qrDataUrl: order.qrDataUrl,
+    expiresAt: toIsoString(order.expiresAt),
+    completedAt: toIsoString(order.completedAt),
+    createdAt: toIsoString(order.createdAt),
+  };
+}
+
+async function expirePendingOrderIfNeeded(order: { status: string; expiresAt?: Date | null; save: () => Promise<unknown> }) {
+  if (order.status === "pending" && order.expiresAt && new Date() > order.expiresAt) {
+    order.status = "expired";
+    await order.save();
+  }
+}
+
 /**
  * GET /api/billing/order-status/:orderId
  */
@@ -43,27 +78,32 @@ export async function getOrderStatus(req: Request, res: Response): Promise<void>
     throw new ApiError(404, "Không tìm thấy đơn hàng.", undefined, "order_not_found");
   }
 
-  // Auto-expire if past expiresAt and still pending
-  if (order.status === "pending" && order.expiresAt && new Date() > order.expiresAt) {
-    order.status = "expired";
-    await order.save();
+  await expirePendingOrderIfNeeded(order);
+
+  res.status(200).json(successResponse(serializeOrder(order)));
+}
+
+/**
+ * GET /api/billing/public-order-status/:orderId
+ */
+export async function getPublicOrderStatus(req: Request, res: Response): Promise<void> {
+  const { orderId } = req.params;
+
+  if (!orderId || typeof orderId !== "string" || orderId.length < 4) {
+    throw new ApiError(400, "orderId không hợp lệ.", undefined, "invalid_order_id");
   }
 
-  res.status(200).json(
-    successResponse({
-      orderId: order.orderId,
-      status: order.status,
-      amount: order.amount,
-      currency: order.currency,
-      bankAccount: order.bankAccount,
-      bankName: order.bankName,
-      accountName: order.accountName,
-      qrDataUrl: order.qrDataUrl,
-      expiresAt: order.expiresAt?.toISOString() ?? null,
-      completedAt: order.completedAt?.toISOString() ?? null,
-      createdAt: order.createdAt?.toISOString() ?? null,
-    }),
-  );
+  const order = await PaymentOrderModel.findOne({
+    orderId: orderId.trim().toUpperCase(),
+  });
+
+  if (!order) {
+    throw new ApiError(404, "Không tìm thấy đơn hàng.", undefined, "order_not_found");
+  }
+
+  await expirePendingOrderIfNeeded(order);
+
+  res.status(200).json(successResponse(serializeOrder(order)));
 }
 
 /**

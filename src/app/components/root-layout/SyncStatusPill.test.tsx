@@ -1,9 +1,9 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import type { AutoCloudSyncState } from "@/features/plan12week/hooks/useAutoCloudSync";
-import { AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME, SyncStatusPill } from "./SyncStatusPill";
+import { SyncStatusPill } from "./SyncStatusPill";
 
 function createSyncState(overrides: Partial<AutoCloudSyncState> = {}): AutoCloudSyncState {
   return {
@@ -44,7 +44,6 @@ describe("SyncStatusPill", () => {
 
   it.each([
     ["syncing", createSyncState({ syncing: true, loading: true }), "Đang đồng bộ"],
-    ["conflict", createSyncState({ conflictPending: true }), "Có xung đột"],
     ["offline", createSyncState({ online: false }), "Đợi mạng"],
     ["pending", createSyncState({ pendingCount: 3 }), "3 chờ gửi"],
     ["ok", createSyncState({ lastSyncedAt: "2026-05-10T09:55:00.000Z" }), "Đồng bộ 5 phút trước"],
@@ -64,28 +63,15 @@ describe("SyncStatusPill", () => {
     expect(pill?.getAttribute("title")).not.toMatch(/đa thiết bị|tự đồng bộ/i);
   });
 
-  it("dispatches the conflict dialog event only when clicked in conflict state", () => {
-    const listener = vi.fn();
-    window.addEventListener(AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME, listener);
-
-    const { rerender } = render(
-      <AutoCloudSyncContext.Provider value={createSyncState({ conflictPending: true })}>
-        <SyncStatusPill />
-      </AutoCloudSyncContext.Provider>,
+  it("keeps conflict state invisible to regular users", () => {
+    renderPill(
+      createSyncState({
+        conflictPending: true,
+        lastSyncedAt: "2026-05-10T09:59:30.000Z",
+      }),
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Có xung đột" }));
-    expect(listener).toHaveBeenCalledTimes(1);
-
-    rerender(
-      <AutoCloudSyncContext.Provider value={createSyncState({ lastSyncedAt: "2026-05-10T09:59:30.000Z" })}>
-        <SyncStatusPill />
-      </AutoCloudSyncContext.Provider>,
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: "Đồng bộ vừa xong" }));
-    expect(listener).toHaveBeenCalledTimes(1);
-
-    window.removeEventListener(AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME, listener);
+    expect(screen.queryByText("Có xung đột")).not.toBeInTheDocument();
+    expect(screen.getByText("Đồng bộ vừa xong")).toBeInTheDocument();
   });
 });

@@ -10,7 +10,7 @@ import {
 import { accountRoutes } from "./accountRoutes";
 import { adminRoutes } from "./adminRoutes";
 import { authRoutes } from "./authRoutes";
-import { billingRoutes } from "./billingRoutes";
+import { billingRoutes, publicBillingRoutes } from "./billingRoutes";
 import { goalRoutes } from "./goalRoutes";
 import { healthRoutes } from "./healthRoutes";
 import { metricRoutes } from "./metricRoutes";
@@ -27,6 +27,7 @@ const apiRoutes = Router();
 // Webhook routes BEFORE auth — providers use signature verification, not Firebase auth.
 apiRoutes.use(healthRateLimiter, healthRoutes);
 apiRoutes.use(webhookRateLimiter, webhookRoutes);
+apiRoutes.use(publicBillingRoutes);
 apiRoutes.use(authMiddleware);
 apiRoutes.use(generalApiRateLimiter);
 apiRoutes.use(authProfileRateLimiter, authRoutes);

@@ -1,7 +1,6 @@
 import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME } from "@/app/components/root-layout/SyncStatusPill";
 import {
   createMockBackend,
   dispatchUserDataUpdated,
@@ -132,14 +131,6 @@ async function drainDeviceToCloud(device: TwoDevice, backend: ReturnType<typeof 
   mounted.unmount();
 }
 
-function findButtonByText(fragment: string): HTMLButtonElement {
-  const button = screen
-    .getAllByRole("button")
-    .find((candidate): candidate is HTMLButtonElement => candidate.textContent?.includes(fragment) ?? false);
-  if (!button) throw new Error(`Button containing "${fragment}" was not found.`);
-  return button;
-}
-
 describe("two-device 12-week auto-sync integration", () => {
   beforeEach(() => {
     cleanup();
@@ -237,7 +228,7 @@ describe("two-device 12-week auto-sync integration", () => {
     expect(mounted.getLatestState()?.firstLoginRestoreSummary).toBeNull();
   });
 
-  it("surfaces concurrent edit conflicts and lets the user postpone, keep local, or use cloud", async () => {
+  it("auto-resolves concurrent edits by keeping the current device usable", async () => {
     const backend = createMockBackend();
     configureBackend(backend);
 
@@ -263,46 +254,19 @@ describe("two-device 12-week auto-sync integration", () => {
 
     restoreLocalStorage(device2ConflictSnapshot);
     setSignedIn(UID);
-    const keepLocalMount = device2.mountProvider({ includeConflictDialog: true });
+    const keepLocalMount = device2.mountProvider();
 
     await waitFor(() => {
-      expect(keepLocalMount.getLatestState()?.conflictPending).toBe(true);
-      expect(screen.getByRole("dialog")).toBeInTheDocument();
+      expect(keepLocalMount.getLatestState()?.lastResult?.status).toBe("conflict");
     });
-
-    fireEvent.click(findButtonByText("sau"));
+    expect(keepLocalMount.getLatestState()?.conflictPending).toBe(false);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    fireEvent(window, new CustomEvent(AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME));
-    await waitFor(() => {
-      expect(screen.getByRole("dialog")).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: "Giữ trên thiết bị này" }));
 
     await waitFor(() => {
       expect(backend.getSnapshot().goals[0]?.title).toBe("B");
     });
     expect(getAppliedMutationKinds(device2)).toContain("plan_snapshot_updated");
     keepLocalMount.unmount();
-
-    const cloudGoalC = makeTwelveWeekGoal({ title: "C" });
-    backend.replaceFromUserData({ ...device2.getUserData(), goals: [cloudGoalC] });
-    restoreLocalStorage(device2ConflictSnapshot);
-    setSignedIn(UID);
-
-    const useCloudMount = device2.mountProvider({ includeConflictDialog: true });
-    await waitFor(() => {
-      expect(useCloudMount.getLatestState()?.conflictPending).toBe(true);
-      expect(screen.getByRole("dialog")).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByRole("button", { name: "Lấy bản tài khoản" }));
-    fireEvent.click(screen.getByRole("button", { name: "Tải backup và lấy bản tài khoản" }));
-
-    await waitFor(() => {
-      expect(device2.getUserData().goals[0]?.title).toBe("C");
-    });
-    expect(HTMLAnchorElement.prototype.click).toHaveBeenCalled();
   });
 
   it("keeps an offline queue pending, reports offline skip, and drains after reconnect", async () => {

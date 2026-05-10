@@ -148,6 +148,10 @@ export const router = createBrowserRouter([
         ...lazyRoute(() => import("./pages/BillingPlan"), "BillingPlan"),
       },
       {
+        path: "billing/checkout/:orderId?",
+        ...lazyRoute(() => import("./pages/BillingCheckoutQR"), "BillingCheckoutQR"),
+      },
+      {
         path: "settings",
         ...lazyRoute(() => import("./pages/SettingsPage"), "SettingsPage"),
       },
@@ -155,10 +159,6 @@ export const router = createBrowserRouter([
         // Protected routes — require authentication
         Component: ProtectedRoute,
         children: [
-          {
-            path: "billing/checkout/:orderId?",
-            ...lazyRoute(() => import("./pages/BillingCheckoutQR"), "BillingCheckoutQR"),
-          },
           {
             path: "order",
             ...lazyRoute(() => import("./pages/OrderPage"), "OrderPage"),

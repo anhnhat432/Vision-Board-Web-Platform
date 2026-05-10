@@ -5,7 +5,7 @@ import express, { type Express } from "express";
 
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
-import { billingRoutes } from "../routes/billingRoutes";
+import { billingRoutes, publicBillingRoutes } from "../routes/billingRoutes";
 import { billingService } from "../services/billingServiceInstance";
 import { _resetAdapterCacheForTesting } from "../services/paymentProviderRegistry";
 
@@ -23,6 +23,7 @@ interface JsonResponse {
 function createBillingTestApp(): Express {
   const app = express();
   app.use(express.json());
+  app.use("/api", publicBillingRoutes);
   app.use(
     "/api",
     createAuthMiddleware({
@@ -375,10 +376,65 @@ describe("POST /api/billing/checkout-session", () => {
 
 // ─── POST /api/billing/customer-portal Tests ─────────────────────────────────
 
+describe("POST /api/billing/public-checkout-session", () => {
+  const validBody = {
+    planCode: "PLUS",
+    returnUrl: "https://example.com/billing?status=success",
+    cancelUrl: "https://example.com/billing?status=cancel",
+    clientUserId: "local_browser_user",
+  };
+
+  beforeEach(() => {
+    _resetAdapterCacheForTesting();
+    delete process.env.BILLING_PROVIDER;
+    delete process.env.CASSO_WEBHOOK_SECRET;
+    delete process.env.CASSO_BANK_ACCOUNT;
+    delete process.env.CASSO_BANK_NAME;
+    delete process.env.CASSO_ACCOUNT_NAME;
+    delete process.env.PLUS_PRICE_VND;
+  });
+
+  afterEach(() => {
+    _resetAdapterCacheForTesting();
+    delete process.env.BILLING_PROVIDER;
+    delete process.env.CASSO_WEBHOOK_SECRET;
+    delete process.env.CASSO_BANK_ACCOUNT;
+    delete process.env.CASSO_BANK_NAME;
+    delete process.env.CASSO_ACCOUNT_NAME;
+    delete process.env.PLUS_PRICE_VND;
+  });
+
+  it("creates a checkout session without requiring a Firebase token", async () => {
+    const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/public-checkout-session", {
+      token: null,
+      body: validBody,
+    });
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.success, true);
+
+    const data = response.body.data as Record<string, unknown>;
+    assert.ok(typeof data.checkoutSessionId === "string");
+    assert.ok(typeof data.checkoutUrl === "string");
+    assert.equal(data.provider, "mock");
+  });
+});
+
 describe("GET /api/billing/order-status/:orderId", () => {
   it("returns 400 for malformed order ids before database lookup", async () => {
     const response = await requestJson(createBillingTestApp(), "GET", "/api/billing/order-status/not-valid", {
       token: "checkout-token",
+    });
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.errorCode, "invalid_order_id");
+  });
+});
+
+describe("GET /api/billing/public-order-status/:orderId", () => {
+  it("validates malformed order ids without requiring a Firebase token", async () => {
+    const response = await requestJson(createBillingTestApp(), "GET", "/api/billing/public-order-status/not-valid", {
+      token: null,
     });
 
     assert.equal(response.status, 400);

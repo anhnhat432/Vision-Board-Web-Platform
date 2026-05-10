@@ -69,7 +69,6 @@ import {
   type CloudImportDryRunResult,
   type CloudImportResult,
 } from "./root-layout/LocalDataMigrationPrompt";
-import { AutoCloudConflictDialog } from "./root-layout/AutoCloudConflictDialog";
 import { FirstLoginRestoreToast } from "./root-layout/FirstLoginRestoreToast";
 import { SyncStatusPill } from "./root-layout/SyncStatusPill";
 import {
@@ -81,7 +80,7 @@ import {
   WARM_PREFETCH_ROUTE_PATHS,
 } from "./root-layout/navConfig";
 import { GUIDED_PATHS, getRouteMeta, getRouteTone } from "./root-layout/routeMeta";
-import { buildLoginRedirect, isAuthProtectedPath, useWorkspaceGate } from "./root-layout/useWorkspaceGate";
+import { buildLoginRedirect, isAuthProtectedPath, isPublicCheckoutPath, useWorkspaceGate } from "./root-layout/useWorkspaceGate";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import {
@@ -228,7 +227,7 @@ export function RootLayout() {
     const userData = getUserData();
     setGuideUserData(userData);
 
-    if (!demoMode && isAuthProtectedPath(location.pathname)) return;
+    if (!demoMode && (isAuthProtectedPath(location.pathname) || isPublicCheckoutPath(location.pathname))) return;
 
     if (!demoMode && user && !userData.onboardingCompleted && location.pathname !== "/onboarding") {
       navigate("/onboarding");
@@ -962,7 +961,6 @@ export function RootLayout() {
           </main>
         </div>
         {!demoMode && user ? <FirstLoginRestoreToast /> : null}
-        {!demoMode && user ? <AutoCloudConflictDialog /> : null}
       </AutoCloudSyncProvider>
     );
   }
@@ -1406,7 +1404,6 @@ export function RootLayout() {
         <Toaster />
       </div>
       {!demoMode && user ? <FirstLoginRestoreToast /> : null}
-      {!demoMode && user ? <AutoCloudConflictDialog /> : null}
     </AutoCloudSyncProvider>
   );
 }

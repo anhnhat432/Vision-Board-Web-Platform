@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
-import { AlertTriangle, CheckCircle2, Clock3, Loader2, Upload, WifiOff } from "lucide-react";
+import { CheckCircle2, Clock3, Loader2, Upload, WifiOff } from "lucide-react";
 
 import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 
 export const AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME = "visionboard:auto-cloud-conflict-dialog-open";
 
-type SyncPillState = "syncing" | "conflict" | "offline" | "pending" | "ok" | "idle";
+type SyncPillState = "syncing" | "offline" | "pending" | "ok" | "idle";
 
 interface SyncStatusPillProps {
   compact?: boolean;
@@ -28,13 +28,11 @@ function formatRelativeSyncTime(value: string | null): string | null {
 
 function getSyncState(input: {
   syncing: boolean;
-  conflictPending: boolean;
   online: boolean;
   pendingCount: number;
   lastSyncedAt: string | null;
 }): SyncPillState {
   if (input.syncing) return "syncing";
-  if (input.conflictPending) return "conflict";
   if (!input.online) return "offline";
   if (input.pendingCount > 0) return "pending";
   if (input.lastSyncedAt) return "ok";
@@ -47,7 +45,6 @@ function getPendingCopy(count: number): string {
 
 function getTooltip(state: SyncPillState, relativeTime: string | null, pendingCount: number): string {
   if (state === "syncing") return `Đang kiểm tra cập nhật, ${getPendingCopy(pendingCount)}.`;
-  if (state === "conflict") return `Có xung đột cần xử lý, ${getPendingCopy(pendingCount)}.`;
   if (state === "offline") return `Đang đợi mạng, ${getPendingCopy(pendingCount)}.`;
 
   const timeCopy = relativeTime ? `Cập nhật ${relativeTime}` : "Chưa có lần cập nhật";
@@ -60,7 +57,6 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
   const relativeTime = formatRelativeSyncTime(syncState.lastSyncedAt);
   const state = getSyncState({
     syncing: syncState.syncing,
-    conflictPending: syncState.conflictPending,
     online: syncState.online,
     pendingCount: syncState.pendingCount,
     lastSyncedAt: syncState.lastSyncedAt,
@@ -75,11 +71,6 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
       icon: <Loader2 className="h-3 w-3 animate-spin" />,
       label: "Đang đồng bộ",
       tone: "border-sky-200 bg-sky-50 text-sky-700",
-    },
-    conflict: {
-      icon: <AlertTriangle className="h-3 w-3" />,
-      label: "Có xung đột",
-      tone: "border-red-200 bg-red-50 text-red-700",
     },
     offline: {
       icon: <WifiOff className="h-3 w-3" />,
@@ -103,20 +94,12 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
     },
   } satisfies Record<SyncPillState, { icon: ReactNode; label: string; tone: string }>;
 
-  const handleClick = () => {
-    if (state !== "conflict") return;
-    window.dispatchEvent(new CustomEvent(AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME));
-  };
-
   return (
     <button
       type="button"
-      className={`${baseClass} ${sizeClass} ${config[state].tone} ${
-        state === "conflict" ? "cursor-pointer hover:bg-red-100" : "cursor-default"
-      }`}
+      className={`${baseClass} ${sizeClass} ${config[state].tone} cursor-default`}
       title={tooltip}
       aria-label={config[state].label}
-      onClick={handleClick}
     >
       {config[state].icon}
       <span className="truncate">{config[state].label}</span>

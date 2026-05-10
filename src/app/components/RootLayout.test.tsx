@@ -282,6 +282,7 @@ function renderAppShell(initialEntry: string) {
           { path: "goals", element: <div data-testid="goals-page">Goals page</div> },
           { path: "settings", element: <div data-testid="settings-page">Settings page</div> },
           { path: "billing/plan", element: <div data-testid="billing-plan-page">Billing plan page</div> },
+          { path: "billing/checkout/:orderId?", element: <div data-testid="billing-checkout-page">Checkout page</div> },
           {
             element: <ProtectedRoute />,
             children: [{ path: "order", element: <div data-testid="order-page">Order page</div> }],
@@ -529,7 +530,7 @@ describe("RootLayout onboarding redirect", () => {
     });
   });
 
-  it("mounts the global auto cloud conflict dialog for signed-in users", async () => {
+  it("does not interrupt signed-in users with the auto cloud conflict dialog", async () => {
     seedAuthenticatedCompletedWorkspace();
     autoCloudSyncMock.useAutoCloudSync.mockReturnValue({
       loading: false,
@@ -574,7 +575,9 @@ describe("RootLayout onboarding redirect", () => {
     renderAppShell("/goals");
 
     expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
-    expect(await screen.findByText("Dữ liệu giữa thiết bị và tài khoản đang khác nhau")).toBeInTheDocument();
+    expect(screen.queryByText("Dữ liệu giữa thiết bị và tài khoản đang khác nhau")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Giữ trên thiết bị này" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Lấy bản tài khoản" })).not.toBeInTheDocument();
   });
 
   it("shows the sync status pill in the mobile account dropdown", async () => {
@@ -648,6 +651,14 @@ describe("RootLayout onboarding redirect", () => {
     expect(router.state.location.pathname).toBe("/login");
     expect(router.state.location.search).toBe("?next=%2Fgoals");
     expect(router.state.location.state).toMatchObject({ from: "/goals" });
+  });
+
+  it("keeps signed-out visitors on the Plus checkout page", async () => {
+    const { router } = renderAppShell("/billing/checkout");
+
+    expect(await screen.findByTestId("billing-checkout-page")).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/billing/checkout");
+    expect(screen.queryByTestId("login-page")).not.toBeInTheDocument();
   });
 
   it("lets the 12-week setup route render its own real-mode login gate", async () => {
