@@ -1,4 +1,5 @@
-﻿import { FeedbackDialog } from "../FeedbackDialog";
+import { FeedbackDialog } from "../FeedbackDialog";
+import { DataStorageInfo } from "../DataStorageInfo";
 import { TwelveWeekCycleSettingsPanel } from "./TwelveWeekCycleSettingsPanel";
 import { WeeklyTimeBlocksPanel } from "./WeeklyTimeBlocksPanel";
 import { SectionBlock } from "@/app/components/layout/SectionBlock";
@@ -23,10 +24,14 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
         title="Lịch tuần tham chiếu"
         description="Performance Time Blocking gọn cho MVP: deep work, buffer và nghỉ chủ động trong tuần."
       >
-        <WeeklyTimeBlocksPanel
-          value={props.system.weeklyTimeBlocks ?? []}
-          onChange={props.onTimeBlocksChange}
-        />
+        <WeeklyTimeBlocksPanel value={props.system.weeklyTimeBlocks ?? []} onChange={props.onTimeBlocksChange} />
+      </SectionBlock>
+
+      <SectionBlock
+        title="Sao lưu dữ liệu"
+        description="Xuất hoặc nhập bản sao local-first của cycle khi bạn cần đổi trình duyệt hoặc giữ bản dự phòng."
+      >
+        <DataStorageInfo variant="inline" />
       </SectionBlock>
 
       <SectionBlock title="Góp ý" description="Gửi phản hồi để cải thiện trải nghiệm 12 tuần.">
