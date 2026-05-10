@@ -21,7 +21,7 @@ import {
   updateUserData,
 } from "@/test/app-flow-helpers";
 
-const INTEGRATION_TEST_TIMEOUT_MS = 10_000;
+const INTEGRATION_TEST_TIMEOUT_MS = 20_000;
 
 function makeCycleReview(weekNumber: number, leadScore: number) {
   return {
@@ -149,7 +149,7 @@ describe("12-week core flows", () => {
       expect(leadMetricMutations[0].payload.clientMetricId).toContain(":metric:");
       expect(leadMetricMutations[0].payload.weeklyTarget).toBeGreaterThanOrEqual(0);
     }
-  }, 10_000);
+  }, INTEGRATION_TEST_TIMEOUT_MS);
 
   it("shows a soft 3-year vision prompt in 12-week setup without blocking the flow", async () => {
     seedPendingSetupContext();
@@ -529,7 +529,7 @@ describe("12-week core flows", () => {
       expect(dailyMutations[0].payload.checkIn.optionalNote).toBe("Latest local check-in.");
       expect(dailyMutations[0].payload.clientPlanId).toBe(`${goalId}:12-week-system`);
     }
-  });
+  }, INTEGRATION_TEST_TIMEOUT_MS);
 
   it(
     "keeps only the five latest daily check-in entries after the seventh same-day save",

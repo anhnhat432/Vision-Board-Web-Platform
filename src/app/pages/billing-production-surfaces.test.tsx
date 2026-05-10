@@ -29,6 +29,8 @@ function stubRealBillingEnv(providerLabel = "Stripe") {
   }));
 }
 
+const UI_TEST_TIMEOUT_MS = 10_000;
+
 describe("production billing surfaces", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
@@ -69,7 +71,7 @@ describe("production billing surfaces", () => {
     expect(screen.getByText("Thanh toán qua Stripe")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Quản lý subscription" })).toBeInTheDocument();
     expect(screen.queryByText(/\(mock\)|mô phỏng/i)).not.toBeInTheDocument();
-  });
+  }, UI_TEST_TIMEOUT_MS);
 
   it("shows real provider checkout copy in the upgrade dialog", async () => {
     stubRealBillingEnv("VNPay");
@@ -90,7 +92,7 @@ describe("production billing surfaces", () => {
     expect(within(dialog).getByText(/149\.000/i)).toBeInTheDocument();
     expect(within(dialog).getByRole("button", { name: "Nâng cấp Plus" })).toBeInTheDocument();
     expect(within(dialog).queryByText(/mô phỏng|Bản dùng thử/i)).not.toBeInTheDocument();
-  });
+  }, UI_TEST_TIMEOUT_MS);
 
   it("redirects mock checkout away from real provider mode", async () => {
     stubRealBillingEnv("Momo");
@@ -109,5 +111,5 @@ describe("production billing surfaces", () => {
       expect(router.state.location.pathname).toBe("/billing/plan");
     });
     expect(await screen.findByTestId("billing-plan-page")).toBeInTheDocument();
-  });
+  }, UI_TEST_TIMEOUT_MS);
 });

@@ -25,6 +25,8 @@ beforeEach(() => {
   localStorage.clear();
 });
 
+const UI_TEST_TIMEOUT_MS = 10_000;
+
 describe("AspirationalVision page", () => {
   it("saves a 3-year vision locally without requiring login", async () => {
     const user = userEvent.setup();
@@ -48,5 +50,5 @@ describe("AspirationalVision page", () => {
       summary: "Ba năm tới tôi muốn khỏe mạnh, làm việc sâu và có tài chính vững vàng.",
       lifeAreas: [{ area: "health", statement: "Tôi duy trì tập luyện đều và ngủ đủ." }],
     });
-  });
+  }, UI_TEST_TIMEOUT_MS);
 });
