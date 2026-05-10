@@ -13,10 +13,12 @@ const autoCloudSyncMock = vi.hoisted(() => {
     pendingCount: 4,
     online: true,
     conflictPending: false,
+    firstLoginRestoreSummary: null,
     triggerSyncNow: vi.fn(),
     triggerDrainOnly: vi.fn(),
     resolveConflictKeepLocal: vi.fn(),
     resolveConflictUseCloud: vi.fn(),
+    clearFirstLoginRestoreSummary: vi.fn(),
   };
 
   return {

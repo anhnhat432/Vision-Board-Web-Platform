@@ -70,6 +70,7 @@ import {
   type CloudImportResult,
 } from "./root-layout/LocalDataMigrationPrompt";
 import { AutoCloudConflictDialog } from "./root-layout/AutoCloudConflictDialog";
+import { FirstLoginRestoreToast } from "./root-layout/FirstLoginRestoreToast";
 import { SyncStatusPill } from "./root-layout/SyncStatusPill";
 import {
   buildAuthPath,
@@ -960,6 +961,7 @@ export function RootLayout() {
             <Toaster />
           </main>
         </div>
+        {!demoMode && user ? <FirstLoginRestoreToast /> : null}
         {!demoMode && user ? <AutoCloudConflictDialog /> : null}
       </AutoCloudSyncProvider>
     );
@@ -1403,6 +1405,7 @@ export function RootLayout() {
         {localDataMigrationPrompt}
         <Toaster />
       </div>
+      {!demoMode && user ? <FirstLoginRestoreToast /> : null}
       {!demoMode && user ? <AutoCloudConflictDialog /> : null}
     </AutoCloudSyncProvider>
   );

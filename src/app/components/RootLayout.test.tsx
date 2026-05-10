@@ -43,7 +43,9 @@ const autoCloudSyncMock = vi.hoisted(() => {
   const triggerDrainOnly = vi.fn();
   const resolveConflictKeepLocal = vi.fn();
   const resolveConflictUseCloud = vi.fn();
+  const clearFirstLoginRestoreSummary = vi.fn();
   return {
+    clearFirstLoginRestoreSummary,
     resolveConflictKeepLocal,
     resolveConflictUseCloud,
     triggerDrainOnly,
@@ -56,10 +58,12 @@ const autoCloudSyncMock = vi.hoisted(() => {
       online: true,
       conflictPending: false,
       syncing: false,
+      firstLoginRestoreSummary: null,
       triggerSyncNow,
       triggerDrainOnly,
       resolveConflictKeepLocal,
       resolveConflictUseCloud,
+      clearFirstLoginRestoreSummary,
     })),
   };
 });
@@ -341,6 +345,7 @@ describe("RootLayout onboarding redirect", () => {
     autoCloudSyncMock.triggerDrainOnly.mockClear();
     autoCloudSyncMock.resolveConflictKeepLocal.mockClear();
     autoCloudSyncMock.resolveConflictUseCloud.mockClear();
+    autoCloudSyncMock.clearFirstLoginRestoreSummary.mockClear();
     autoCloudSyncMock.useAutoCloudSync.mockImplementation(() => ({
       loading: false,
       syncing: false,
@@ -349,10 +354,12 @@ describe("RootLayout onboarding redirect", () => {
       pendingCount: 0,
       online: true,
       conflictPending: false,
+      firstLoginRestoreSummary: null,
       triggerSyncNow: autoCloudSyncMock.triggerSyncNow,
       triggerDrainOnly: autoCloudSyncMock.triggerDrainOnly,
       resolveConflictKeepLocal: autoCloudSyncMock.resolveConflictKeepLocal,
       resolveConflictUseCloud: autoCloudSyncMock.resolveConflictUseCloud,
+      clearFirstLoginRestoreSummary: autoCloudSyncMock.clearFirstLoginRestoreSummary,
     }));
     setAuthContext();
   });
@@ -488,10 +495,12 @@ describe("RootLayout onboarding redirect", () => {
       pendingCount: 0,
       online: true,
       conflictPending: false,
+      firstLoginRestoreSummary: null,
       triggerSyncNow: autoCloudSyncMock.triggerSyncNow,
       triggerDrainOnly: autoCloudSyncMock.triggerDrainOnly,
       resolveConflictKeepLocal: autoCloudSyncMock.resolveConflictKeepLocal,
       resolveConflictUseCloud: autoCloudSyncMock.resolveConflictUseCloud,
+      clearFirstLoginRestoreSummary: autoCloudSyncMock.clearFirstLoginRestoreSummary,
     });
     setAuthContext({
       user: { uid: "user_test", email: "plus@example.com", displayName: "Plus User" },
@@ -549,11 +558,13 @@ describe("RootLayout onboarding redirect", () => {
       pendingCount: 1,
       online: true,
       conflictPending: true,
+      firstLoginRestoreSummary: null,
       syncing: false,
       triggerSyncNow: autoCloudSyncMock.triggerSyncNow,
       triggerDrainOnly: autoCloudSyncMock.triggerDrainOnly,
       resolveConflictKeepLocal: autoCloudSyncMock.resolveConflictKeepLocal,
       resolveConflictUseCloud: autoCloudSyncMock.resolveConflictUseCloud,
+      clearFirstLoginRestoreSummary: autoCloudSyncMock.clearFirstLoginRestoreSummary,
     });
     setAuthContext({
       user: { uid: "user_test", email: "test@example.com" },
@@ -576,10 +587,12 @@ describe("RootLayout onboarding redirect", () => {
       pendingCount: 2,
       online: true,
       conflictPending: false,
+      firstLoginRestoreSummary: null,
       triggerSyncNow: autoCloudSyncMock.triggerSyncNow,
       triggerDrainOnly: autoCloudSyncMock.triggerDrainOnly,
       resolveConflictKeepLocal: autoCloudSyncMock.resolveConflictKeepLocal,
       resolveConflictUseCloud: autoCloudSyncMock.resolveConflictUseCloud,
+      clearFirstLoginRestoreSummary: autoCloudSyncMock.clearFirstLoginRestoreSummary,
     });
     setAuthContext({
       user: { uid: "user_test", email: "plus@example.com", displayName: "Plus User" },
@@ -607,10 +620,12 @@ describe("RootLayout onboarding redirect", () => {
       pendingCount: 7,
       online: true,
       conflictPending: false,
+      firstLoginRestoreSummary: null,
       triggerSyncNow: autoCloudSyncMock.triggerSyncNow,
       triggerDrainOnly: autoCloudSyncMock.triggerDrainOnly,
       resolveConflictKeepLocal: autoCloudSyncMock.resolveConflictKeepLocal,
       resolveConflictUseCloud: autoCloudSyncMock.resolveConflictUseCloud,
+      clearFirstLoginRestoreSummary: autoCloudSyncMock.clearFirstLoginRestoreSummary,
     });
     setAuthContext({
       user: { uid: "user_test", email: "plus@example.com", displayName: "Plus User" },

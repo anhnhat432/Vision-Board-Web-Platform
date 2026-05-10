@@ -4,6 +4,7 @@ import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
 import { USER_DATA_UPDATED_EVENT_NAME } from "@/app/utils/storage-constants";
 import { isRealMode, shouldEnable12WeekMutationSync, shouldEnable12WeekPullSync } from "@/app/utils/app-mode";
 import { getUserData, saveUserData } from "@/app/utils/storage";
+import type { UserData } from "@/app/utils/storage-types";
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
@@ -14,11 +15,14 @@ import {
 } from "../persistence/mutationQueue";
 import { clearPullCursor } from "../persistence/pullCursorStore";
 import { applyPulledWorkspaceToUserData } from "../persistence/pulledWorkspaceApply";
-import {
-  sendPending12WeekMutations,
-  type MutationQueueSyncResult,
-} from "../persistence/mutationQueueSender";
+import { sendPending12WeekMutations, type MutationQueueSyncResult } from "../persistence/mutationQueueSender";
 import { type TwelveWeekManualCloudSyncResult, useTwelveWeekManualCloudSync } from "./useTwelveWeekManualCloudSync";
+
+export interface FirstLoginRestoreSummary {
+  goalCount: number;
+  checkInCount: number;
+  weeklyReviewCount: number;
+}
 
 const DEFAULT_INTERVAL_MS = 5 * 60_000;
 const DEFAULT_MIN_SYNC_INTERVAL_MS = 30_000;
@@ -35,10 +39,12 @@ export interface AutoCloudSyncState {
   pendingCount: number;
   online: boolean;
   conflictPending: boolean;
+  firstLoginRestoreSummary: FirstLoginRestoreSummary | null;
   triggerSyncNow: () => Promise<TwelveWeekManualCloudSyncResult | null>;
   triggerDrainOnly: () => Promise<MutationQueueSyncResult | null>;
   resolveConflictKeepLocal: () => Promise<void>;
   resolveConflictUseCloud: () => Promise<void>;
+  clearFirstLoginRestoreSummary: () => void;
 }
 
 export interface UseAutoCloudSyncOptions {
@@ -72,6 +78,34 @@ function hasElapsedSince(timestamp: number | null, minimumMs: number): boolean {
 
 function shouldWarnForDrainResult(result: MutationQueueSyncResult | null): boolean {
   return result?.status === "partial" || result?.status === "error";
+}
+
+function isLocalDataEmptyForFirstLoginRestore(data: Pick<UserData, "goals"> | null | undefined): boolean {
+  return !Array.isArray(data?.goals) || data.goals.length === 0;
+}
+
+function summarizeFirstLoginRestore(
+  data: Pick<UserData, "goals">,
+  result: TwelveWeekManualCloudSyncResult,
+): FirstLoginRestoreSummary {
+  const localSummary = data.goals.reduce<FirstLoginRestoreSummary>(
+    (summary, goal) => {
+      const system = goal.twelveWeekSystem;
+
+      return {
+        goalCount: summary.goalCount + 1,
+        checkInCount: summary.checkInCount + (system?.dailyCheckIns.length ?? 0),
+        weeklyReviewCount: summary.weeklyReviewCount + (system?.weeklyReviews.length ?? 0),
+      };
+    },
+    { goalCount: 0, checkInCount: 0, weeklyReviewCount: 0 },
+  );
+
+  return {
+    goalCount: Math.max(localSummary.goalCount, result.appliedGoalCount ?? 0, result.pullResponse?.counts.goals ?? 0),
+    checkInCount: Math.max(localSummary.checkInCount, result.pullResponse?.counts.dailyCheckIns ?? 0),
+    weeklyReviewCount: Math.max(localSummary.weeklyReviewCount, result.pullResponse?.counts.weeklyReviews ?? 0),
+  };
 }
 
 function getConflictMutationIds(result: TwelveWeekManualCloudSyncResult | null): Set<string> {
@@ -109,13 +143,11 @@ function markConflictMutationsForLocalResolution(
   });
 
   if (!changed) return false;
-  return writeMutationQueueStore(
-    {
-      ...store,
-      updatedAt: now,
-      items,
-    },
-  );
+  return writeMutationQueueStore({
+    ...store,
+    updatedAt: now,
+    items,
+  });
 }
 
 function archiveConflictMutations(ownerUid: string, result: TwelveWeekManualCloudSyncResult | null): boolean {
@@ -137,13 +169,11 @@ function archiveConflictMutations(ownerUid: string, result: TwelveWeekManualClou
   });
 
   if (!changed) return false;
-  return writeMutationQueueStore(
-    {
-      ...store,
-      updatedAt: now,
-      items,
-    },
-  );
+  return writeMutationQueueStore({
+    ...store,
+    updatedAt: now,
+    items,
+  });
 }
 
 export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoCloudSyncState {
@@ -180,6 +210,7 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
   const [autoLoading, setAutoLoading] = useState(false);
   const [drainLoading, setDrainLoading] = useState(false);
   const [pendingCount, setPendingCount] = useState(() => (drainSyncEnabled ? getQueuePendingCount(ownerUid) : 0));
+  const [firstLoginRestoreSummary, setFirstLoginRestoreSummary] = useState<FirstLoginRestoreSummary | null>(null);
   const inFlightRef = useRef<Promise<TwelveWeekManualCloudSyncResult | null> | null>(null);
   const drainInFlightRef = useRef<Promise<MutationQueueSyncResult | null> | null>(null);
   const previousUserUidRef = useRef<string | null>(null);
@@ -197,9 +228,18 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     setPendingCount(drainSyncEnabled ? getQueuePendingCount(ownerUid) : 0);
   }, [drainSyncEnabled, ownerUid]);
 
+  const clearFirstLoginRestoreSummary = useCallback(() => {
+    setFirstLoginRestoreSummary(null);
+  }, []);
+
   useEffect(() => {
     refreshPendingCount();
   }, [refreshPendingCount]);
+
+  useEffect(() => {
+    if (fullSyncEnabled && ownerUid) return;
+    setFirstLoginRestoreSummary(null);
+  }, [fullSyncEnabled, ownerUid]);
 
   const triggerSyncNow = useCallback(async () => {
     if (!fullSyncBaseReady || !isDocumentVisible() || !ownerUid) {
@@ -211,6 +251,8 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     if (drainInFlightRef.current) return null;
     if (!hasElapsedSince(lastSyncStartedAtRef.current, minSyncIntervalMs)) return null;
 
+    const localWasEmptyBeforeSync = isLocalDataEmptyForFirstLoginRestore(getUserData());
+
     console.log("[auto-sync] starting", { ownerUid });
     lastSyncStartedAtRef.current = Date.now();
     setAutoLoading(true);
@@ -220,6 +262,13 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
         setLastResult(result);
         setLastSyncedAt(new Date().toISOString());
         refreshPendingCount();
+
+        if (localWasEmptyBeforeSync && result.status === "applied" && (result.appliedGoalCount ?? 0) > 0) {
+          const summary = summarizeFirstLoginRestore(getUserData(), result);
+          if (summary.goalCount > 0) {
+            setFirstLoginRestoreSummary(summary);
+          }
+        }
 
         if (shouldWarnForResult(result)) {
           console.warn("[auto-sync] finished with attention needed", {
@@ -434,15 +483,19 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
       pendingCount,
       online: networkStatusInfo.isOnline,
       conflictPending: isBlockingResult(effectiveLastResult),
+      firstLoginRestoreSummary,
       triggerSyncNow,
       triggerDrainOnly,
       resolveConflictKeepLocal,
       resolveConflictUseCloud,
+      clearFirstLoginRestoreSummary,
     }),
     [
+      clearFirstLoginRestoreSummary,
       effectiveLastResult,
       autoLoading,
       drainLoading,
+      firstLoginRestoreSummary,
       lastSyncedAt,
       manualSyncLoading,
       networkStatusInfo.isOnline,

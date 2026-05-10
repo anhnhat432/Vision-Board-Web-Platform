@@ -553,6 +553,70 @@ describe("useAutoCloudSync", () => {
     });
   });
 
+  it("sets a first-login restore summary when empty local data receives applied cloud goals", async () => {
+    const restoredData = {
+      goals: [
+        {
+          id: "goal_cloud_1",
+          twelveWeekSystem: {
+            dailyCheckIns: [{ date: "2026-05-10" }, { date: "2026-05-11" }],
+            weeklyReviews: [{ weekNumber: 1 }],
+          },
+        },
+        {
+          id: "goal_cloud_2",
+          twelveWeekSystem: {
+            dailyCheckIns: [{ date: "2026-05-12" }],
+            weeklyReviews: [],
+          },
+        },
+      ],
+    };
+    storageMock.getUserData.mockReturnValue({ goals: [] });
+    manualSyncMock.syncNow.mockImplementation(async () => {
+      storageMock.getUserData.mockReturnValue(restoredData);
+      return {
+        ...appliedResult,
+        appliedGoalCount: 2,
+      };
+    });
+    setSignedIn("firebase_uid_restore");
+
+    const { result } = renderHook(() => useAutoCloudSync());
+
+    await waitFor(() => {
+      expect(result.current.firstLoginRestoreSummary).toEqual({
+        goalCount: 2,
+        checkInCount: 3,
+        weeklyReviewCount: 1,
+      });
+    });
+
+    act(() => {
+      result.current.clearFirstLoginRestoreSummary();
+    });
+
+    expect(result.current.firstLoginRestoreSummary).toBeNull();
+  });
+
+  it("does not set a first-login restore summary when local data already has goals", async () => {
+    storageMock.getUserData.mockReturnValue({
+      goals: [{ id: "local_goal_existing" }],
+    });
+    manualSyncMock.syncNow.mockResolvedValue({
+      ...appliedResult,
+      appliedGoalCount: 2,
+    });
+    setSignedIn("firebase_uid_existing_local");
+
+    const { result } = renderHook(() => useAutoCloudSync());
+
+    await waitFor(() => {
+      expect(result.current.lastResult?.status).toBe("applied");
+    });
+    expect(result.current.firstLoginRestoreSummary).toBeNull();
+  });
+
   it("marks conflictPending when the last result is a conflict", async () => {
     setSignedIn("firebase_uid_conflict");
     manualSyncMock.syncNow.mockResolvedValue(conflictResult);

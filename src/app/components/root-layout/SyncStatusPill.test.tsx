@@ -14,10 +14,12 @@ function createSyncState(overrides: Partial<AutoCloudSyncState> = {}): AutoCloud
     pendingCount: 0,
     online: true,
     conflictPending: false,
+    firstLoginRestoreSummary: null,
     triggerSyncNow: vi.fn(),
     triggerDrainOnly: vi.fn(),
     resolveConflictKeepLocal: vi.fn(),
     resolveConflictUseCloud: vi.fn(),
+    clearFirstLoginRestoreSummary: vi.fn(),
     ...overrides,
   };
 }
