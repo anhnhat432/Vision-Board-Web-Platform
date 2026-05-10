@@ -161,7 +161,7 @@ Not fully implemented or not proven production-ready:
 
 - Full backend-as-source-of-truth for every product area.
 - Field-complete round-trip restore for plan setup metadata, lead metric history logs, and tombstones; the auto-sync path applies the supported subset only.
-- Real payment provider integration that has been live-tested end-to-end against a Casso webhook in production traffic. The code path exists and the production switch has been wired, but a verified live transaction smoke run is still pending.
+- Live Casso/VietQR transaction was smoke-tested end-to-end on 2026-05-10: real bank transfer cleared, webhook fired, entitlement granted, Plus plan activated. The integration is now considered live-verified for the small smoke amount; production scale-up to 200 users still needs a watch-and-monitor period.
 - Complete production analytics pipeline with verified GA4 setup.
 - Full account lifecycle features such as export, delete account, and server-side data cleanup.
 - End-to-end monitoring, alerting, and error reporting for production incidents.
@@ -289,7 +289,6 @@ P0:
 
 P1:
 
-- Run a live Casso/VietQR transaction smoke against the production webhook to confirm entitlement is granted end-to-end.
 - Add backend tests for goal/plan/week/task/metric controller paths.
 - Simplify crowded desktop and mobile layouts in the core flow.
 - Add clearer production monitoring around failed sync and auth/profile bootstrap.
