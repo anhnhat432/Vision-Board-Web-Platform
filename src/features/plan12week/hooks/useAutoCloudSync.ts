@@ -242,6 +242,17 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
   }, [fullSyncEnabled, ownerUid]);
 
   const triggerSyncNow = useCallback(async () => {
+    if (fullSyncEnabled && ownerUid && userProfileReady && !networkStatusInfo.isOnline) {
+      const result: TwelveWeekManualCloudSyncResult = {
+        status: "skipped",
+        skipReason: "offline",
+        message: "Dang offline. Hang cho thay doi se duoc gui khi ket noi lai.",
+      };
+      setLastResult(result);
+      refreshPendingCount();
+      return result;
+    }
+
     if (!fullSyncBaseReady || !isDocumentVisible() || !ownerUid) {
       refreshPendingCount();
       return null;
@@ -286,7 +297,16 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
 
     inFlightRef.current = request;
     return request;
-  }, [fullSyncBaseReady, minSyncIntervalMs, ownerUid, refreshPendingCount, runManualSyncNow]);
+  }, [
+    fullSyncBaseReady,
+    fullSyncEnabled,
+    minSyncIntervalMs,
+    networkStatusInfo.isOnline,
+    ownerUid,
+    refreshPendingCount,
+    runManualSyncNow,
+    userProfileReady,
+  ]);
 
   triggerSyncNowRef.current = triggerSyncNow;
 

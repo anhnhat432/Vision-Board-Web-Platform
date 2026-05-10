@@ -41,6 +41,7 @@ export type TwelveWeekManualCloudSyncSkipReason =
   | "demo_mode"
   | "unauthenticated"
   | "api_not_configured"
+  | "offline"
   | "mutation_feature_disabled"
   | "pull_feature_disabled";
 
@@ -204,6 +205,10 @@ export async function runTwelveWeekManualCloudSync(
   }
   if (!apiConfigured) {
     return createSkippedResult("api_not_configured", "Chưa cấu hình kết nối tài khoản cho đồng bộ.");
+  }
+
+  if (options.online === false) {
+    return createSkippedResult("offline", "Dang offline. Hang cho thay doi se duoc gui khi ket noi lai.");
   }
 
   try {
