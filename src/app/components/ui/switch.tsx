@@ -1,16 +1,20 @@
 "use client";
 
-import type * as React from "react";
+import * as React from "react";
 import * as SwitchPrimitive from "@radix-ui/react-switch";
 
 import { cn } from "./utils";
 
-function Switch({
+const Switch = React.forwardRef<
+  React.ComponentRef<typeof SwitchPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>
+>(({
   className,
   ...props
-}: React.ComponentProps<typeof SwitchPrimitive.Root>) {
+}, ref) => {
   return (
     <SwitchPrimitive.Root
+      ref={ref}
       data-slot="switch"
       className={cn(
         "peer data-[state=checked]:bg-primary data-[state=unchecked]:bg-switch-background focus-visible:border-ring focus-visible:ring-ring/50 dark:data-[state=unchecked]:bg-input/80 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-[var(--r-pill)] border border-transparent transition-colors duration-150 outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50",
@@ -26,6 +30,7 @@ function Switch({
       />
     </SwitchPrimitive.Root>
   );
-}
+});
+Switch.displayName = SwitchPrimitive.Root.displayName;
 
 export { Switch };

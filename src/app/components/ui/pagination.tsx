@@ -1,4 +1,4 @@
-import type * as React from "react";
+import * as React from "react";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -41,14 +41,15 @@ type PaginationLinkProps = {
 } & Pick<React.ComponentProps<typeof Button>, "size"> &
   React.ComponentProps<"a">;
 
-function PaginationLink({
+const PaginationLink = React.forwardRef<HTMLAnchorElement, PaginationLinkProps>(({
   className,
   isActive,
   size = "icon",
   ...props
-}: PaginationLinkProps) {
+}, ref) => {
   return (
     <a
+      ref={ref}
       aria-current={isActive ? "page" : undefined}
       data-slot="pagination-link"
       data-active={isActive}
@@ -62,7 +63,8 @@ function PaginationLink({
       {...props}
     />
   );
-}
+});
+PaginationLink.displayName = "PaginationLink";
 
 function PaginationPrevious({
   className,

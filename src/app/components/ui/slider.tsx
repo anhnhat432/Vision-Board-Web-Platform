@@ -5,7 +5,13 @@ import * as SliderPrimitive from "@radix-ui/react-slider";
 
 import { cn } from "./utils";
 
-function Slider({
+const Slider = React.forwardRef<
+  React.ComponentRef<typeof SliderPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> & {
+    /** Optional inline color for the filled range (e.g. a life-area hex color) */
+    trackColor?: string;
+  }
+>(({
   className,
   defaultValue,
   value,
@@ -13,10 +19,7 @@ function Slider({
   max = 100,
   trackColor,
   ...props
-}: React.ComponentProps<typeof SliderPrimitive.Root> & {
-  /** Optional inline color for the filled range (e.g. a life-area hex color) */
-  trackColor?: string;
-}) {
+}, ref) => {
   const _values = React.useMemo(
     () => (Array.isArray(value) ? value : Array.isArray(defaultValue) ? defaultValue : [min, max]),
     [value, defaultValue, min, max],
@@ -24,6 +27,7 @@ function Slider({
 
   return (
     <SliderPrimitive.Root
+      ref={ref}
       data-slot="slider"
       defaultValue={defaultValue}
       value={value}
@@ -63,6 +67,7 @@ function Slider({
       ))}
     </SliderPrimitive.Root>
   );
-}
+});
+Slider.displayName = SliderPrimitive.Root.displayName;
 
 export { Slider };
