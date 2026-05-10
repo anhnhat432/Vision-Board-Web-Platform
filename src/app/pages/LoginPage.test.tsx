@@ -136,7 +136,7 @@ describe("LoginPage", () => {
     expect(await screen.findByTestId("destination")).toHaveTextContent("/admin/orders");
   });
 
-  it("does not show a visible account-opening card while waiting for profile routing", () => {
+  it("redirects authenticated users while profile routing is still loading", async () => {
     setAuthContext({
       user: { uid: "user_pending_profile" },
       userProfile: null,
@@ -145,12 +145,14 @@ describe("LoginPage", () => {
     });
 
     render(
-      <MemoryRouter initialEntries={["/login"]}>
-        <LoginPage />
+      <MemoryRouter initialEntries={["/login?next=%2F12-week-system"]}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/12-week-system" element={<DestinationProbe />} />
+        </Routes>
       </MemoryRouter>,
     );
 
-    expect(screen.queryByText("Đang mở tài khoản")).not.toBeInTheDocument();
-    expect(screen.getByRole("status")).toHaveTextContent("Đang chuyển trang theo quyền tài khoản.");
+    expect(await screen.findByTestId("destination")).toHaveTextContent("/12-week-system");
   });
 });

@@ -95,7 +95,7 @@ export function LoginPage() {
     }
 
     if (userProfileLoading || !userProfileError) {
-      return <LoginRedirectGate />;
+      return <Navigate to={redirectTo} replace />;
     }
 
     return (
@@ -385,17 +385,6 @@ export function LoginPage() {
         </div>
       </div>
 
-      <Toaster />
-    </div>
-  );
-}
-
-function LoginRedirectGate() {
-  return (
-    <div className="app-shell min-h-screen px-4" data-route-tone="default">
-      <span className="sr-only" role="status" aria-live="polite">
-        Đang chuyển trang theo quyền tài khoản.
-      </span>
       <Toaster />
     </div>
   );
