@@ -1,7 +1,7 @@
 ﻿import { CheckCircle2, Compass, Sparkles, Target } from "lucide-react";
 
 import { Badge } from "../../../components/ui/badge";
-import { Card, CardContent } from "../../../components/ui/card";
+import { PrimaryActionCard } from "../../../components/layout/PrimaryActionCard";
 import { Progress } from "../../../components/ui/progress";
 import type { SmartGoalStarter } from "../../../utils/smart-goal-starters";
 import { getLifeAreaLabel } from "../../../utils/storage";
@@ -31,27 +31,21 @@ export function SmartGoalHero({
   const focusAreaLabel = getLifeAreaLabel(focusArea);
 
   return (
-    <Card className="hero-surface overflow-hidden border-0 text-white glass-surface-gradient-border ambient-glow">
-      <CardContent className="relative p-5 sm:p-6 lg:p-7">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
-
-        <div className="relative grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+    <PrimaryActionCard
+      hero
+      tone="violet"
+      eyebrow="Viết mục tiêu rõ"
+      icon={<Compass className="h-4 w-4" />}
+      eyebrowClassName="text-white/72"
+      title="Biến trọng tâm thành mục tiêu rõ, đo được, đủ thực tế."
+      titleAs="h1"
+      description="5 câu hỏi: kết quả, chỉ số, điều kiện, lý do và mốc thời gian. Sau đó sang kiểm tra tính thực tế."
+      className="overflow-hidden text-white glass-surface-gradient-border ambient-glow"
+      titleClassName="gradient-text max-w-3xl text-3xl font-bold tracking-normal lg:text-4xl"
+      descriptionClassName="max-w-2xl text-base leading-8 text-white/82 lg:text-lg"
+      contentClassName="relative grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start"
+    >
           <div className="stack-stack">
-            <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
-              <Compass className="h-4 w-4" />
-              Viết mục tiêu rõ
-            </div>
-
-            <div className="stack-stack">
-              <h1 className="gradient-text max-w-3xl text-3xl font-bold tracking-normal lg:text-4xl">
-                Biến trọng tâm thành mục tiêu rõ, đo được, đủ thực tế.
-              </h1>
-              <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
-                5 câu hỏi: kết quả, chỉ số, điều kiện, lý do và mốc thời gian. Sau đó sang kiểm tra tính thực
-                tế.
-              </p>
-            </div>
-
             <div className="flex flex-wrap gap-3">
               <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
                 <Target className="mr-1 h-3.5 w-3.5" />
@@ -132,8 +126,6 @@ export function SmartGoalHero({
               })}
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+    </PrimaryActionCard>
   );
 }

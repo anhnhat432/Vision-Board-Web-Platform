@@ -4,9 +4,9 @@ import { useMemo, useState } from "react";
 import { calculateCycleSummary } from "@/features/plan12week/logic/cycleReview";
 import type { CycleSummary } from "@/features/plan12week/logic/cycleReview";
 import type { Goal, TwelveWeekSystem } from "@/app/utils/storage-types";
-import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { PrimaryActionCard } from "../layout/PrimaryActionCard";
+import { Card, CardContent } from "../ui/card";
 import { Label } from "../ui/label";
 import { Textarea } from "../ui/textarea";
 
@@ -56,45 +56,63 @@ export function CycleReviewPanel({
 
   return (
     <section data-testid="cycle-review-panel" className="stack-section">
-      <Card className="border border-emerald-200 bg-white shadow-sm">
-        <CardHeader>
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-800">
-                Cycle {system.cycleNumber ?? 1}
-              </Badge>
-              <CardTitle className="mt-[var(--space-inline)] text-2xl text-slate-950">Cycle 12 tuần đã kết thúc</CardTitle>
-              <p className="mt-2 max-w-3xl text-sm leading-7 text-slate-600">
-                Đây là tuần 13: nhìn lại cycle cũ, chốt bài học, rồi chuẩn bị cycle tiếp theo cho mục tiêu
-                {" "}
-                <span className="font-semibold text-slate-900">{goal.title}</span>.
-              </p>
-            </div>
-            <Button variant="outline" className="bg-white" onClick={onOpenSettings}>
+      <PrimaryActionCard
+        hero
+        tone="emerald"
+        eyebrow={`Cycle ${system.cycleNumber ?? 1} đã kết thúc`}
+        icon={<Trophy className="h-4 w-4" />}
+        eyebrowClassName="text-white/72"
+        title="Cycle 12 tuần đã kết thúc"
+        titleAs="h2"
+        description={`Đây là tuần 13: nhìn lại cycle cũ, chốt bài học, rồi chuẩn bị cycle tiếp theo cho mục tiêu ${goal.title}.`}
+        titleClassName="text-2xl font-semibold text-white"
+        descriptionClassName="max-w-3xl text-sm leading-7 text-white/78"
+        contentClassName="stack-stack"
+        actionClassName="flex flex-col gap-3 sm:flex-row"
+        action={
+          <>
+            <Button
+              className="w-full bg-white text-slate-950 hover:bg-white/90 sm:w-auto"
+              onClick={() => onStartNewCycle({ lessons: sanitizedLessons, summary })}
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Bắt đầu cycle mới
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full border-white/24 bg-white/10 text-white hover:bg-white/16 hover:text-white sm:w-auto"
+              onClick={onOpenSettings}
+            >
               Mở cài đặt
             </Button>
+          </>
+        }
+      >
+        {aspirationalVisionSummary ? (
+          <div className="rounded-[var(--r-control)] border border-white/14 bg-white/10 px-4 py-3 text-sm text-white/82">
+            <p className="font-semibold text-white">Cycle này đã đưa bạn gần hơn với vision 3 năm chưa?</p>
+            <p className="mt-1 text-white/72">{aspirationalVisionSummary}</p>
           </div>
-        </CardHeader>
-        <CardContent className="stack-section">
-          {aspirationalVisionSummary ? (
-            <div className="rounded-[var(--r-control)] border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-950">
-              <p className="font-semibold">Cycle này đã đưa bạn gần hơn với vision 3 năm chưa?</p>
-              <p className="mt-1 text-violet-900/80">{aspirationalVisionSummary}</p>
-            </div>
-          ) : null}
+        ) : null}
+      </PrimaryActionCard>
 
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {kpis.map(({ label, value, icon: Icon }) => (
-              <div key={label} className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-4">
-                <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                  <Icon className="h-3.5 w-3.5 text-emerald-700" />
-                  {label}
-                </p>
-                <p className="mt-[var(--space-inline)] text-3xl font-bold text-slate-950">{value}</p>
-              </div>
-            ))}
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {kpis.map(({ label, value, icon: Icon }) => (
+          <div
+            key={label}
+            className="rounded-[var(--r-control)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200"
+          >
+            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <Icon className="h-3.5 w-3.5 text-emerald-700" />
+              {label}
+            </p>
+            <p className="mt-[var(--space-inline)] text-3xl font-bold text-slate-950">{value}</p>
           </div>
+        ))}
+      </div>
 
+      <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
+        <CardContent className="stack-section p-5">
           <div className="grid gap-4 lg:grid-cols-2">
             <div className="stack-tight">
               <h2 className="text-base font-semibold text-slate-950">Biggest wins</h2>
@@ -149,19 +167,12 @@ export function CycleReviewPanel({
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button
+              variant="secondary"
               className="w-full sm:w-auto"
               onClick={() => onSaveCycleReview({ lessons: sanitizedLessons, summary })}
             >
               <Save className="mr-2 h-4 w-4" />
               Lưu báo cáo cycle
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full bg-white sm:w-auto"
-              onClick={() => onStartNewCycle({ lessons: sanitizedLessons, summary })}
-            >
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Bắt đầu cycle mới
             </Button>
           </div>
         </CardContent>

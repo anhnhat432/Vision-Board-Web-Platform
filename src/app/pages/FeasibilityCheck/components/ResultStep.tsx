@@ -16,6 +16,7 @@ import { CoreFlowProgress } from "../../../components/CoreFlowProgress";
 import { useReducedMotion } from "../../../components/ui/use-reduced-motion";
 import { Badge } from "../../../components/ui/badge";
 import { Button } from "../../../components/ui/button";
+import { PrimaryActionCard } from "../../../components/layout/PrimaryActionCard";
 import { Card, CardContent } from "../../../components/ui/card";
 import { getLifeAreaLabel } from "../../../utils/storage";
 import type { PlanLoadRecommendation, ResultData, ResultType, WeeklyCapacity } from "../types";
@@ -249,114 +250,106 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
       >
         <CoreFlowProgress currentStepId="feasibility" />
 
-        <Card className="hero-surface overflow-hidden border-0 text-white">
-          <CardContent className="relative p-4 sm:p-6 lg:p-9">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.18),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(255,255,255,0.12),_transparent_24%),linear-gradient(135deg,_rgba(255,255,255,0.08)_0%,_rgba(255,255,255,0)_58%)] opacity-95" />
-            <div
-              className={`absolute -right-12 top-10 hidden h-72 w-72 rounded-[var(--r-pill)] blur-3xl sm:block ${styles.glow}`}
-            />
-            <div className="absolute -left-16 bottom-0 hidden h-56 w-56 rounded-[var(--r-pill)] bg-white/8 blur-3xl sm:block" />
-
-            <div className="relative max-w-4xl">
-              <div className="stack-stack sm:stack-section">
-                <div className="flex flex-wrap gap-3">
-                  <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
-                    <ShieldCheck className="h-4 w-4" />
-                    Kết quả kiểm tra
-                  </div>
-                  <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/10 px-4 py-1.5 text-white">
-                    <Target className="mr-1 h-3.5 w-3.5" />
-                    {getLifeAreaLabel(focusArea)}
-                  </Badge>
-                </div>
-
-                <div className="stack-stack">
-                  <div className={`inline-flex rounded-[var(--r-pill)] border px-4 py-2 text-sm font-semibold ${styles.badge}`}>
-                    {copy.statusLabel}
-                  </div>
-                  <h1 className="max-w-3xl text-2xl font-bold tracking-normal sm:text-4xl lg:text-5xl">
-                    {result.title}
-                  </h1>
-                  <p className="max-w-3xl text-sm leading-7 text-white/84 sm:text-base lg:text-lg">{result.summary}</p>
-                </div>
-
-                <div className="rounded-[var(--r-card)] border border-white/14 bg-white/10 p-4 shadow-sm sm:hidden">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/58">
-                        Mức phù hợp hiện tại
-                      </p>
-                      <p className="mt-2 text-3xl font-bold text-white">{fitScore}%</p>
-                    </div>
-                    <div className="rounded-[var(--r-pill)] border border-white/18 bg-white/12 px-3 py-1.5 text-sm font-semibold text-white">
-                      {result.wheelScore}/10
-                    </div>
-                  </div>
-                  <div className="mt-4 h-2 overflow-hidden rounded-[var(--r-pill)] bg-white/12">
-                    <div
-                      className={`h-full rounded-[var(--r-pill)] bg-gradient-to-r ${styles.meter}`}
-                      style={{ width: `${fitScore}%` }}
-                    />
-                  </div>
-                  <div className="mt-[var(--space-inline)] grid gap-2 text-sm leading-6 text-white/74">
-                    <p>
-                      <span className="font-semibold text-white">Cần chú ý:</span> {result.bottleneck.label}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-white">Mức tải gợi ý:</span> {planLoadLabel[result.planLoad]}{" "}
-                      · {capacityLabel[result.weeklyCapacity]}
-                    </p>
-                    <p>{result.firstWeekGuidance}</p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-3 sm:max-w-xl sm:flex-row">
-                  <Button className="bg-white text-slate-950 hover:bg-white/90" onClick={onContinue}>
-                    {result.type === "too_ambitious" ? "Tạo kế hoạch 12 tuần nhỏ hơn" : "Tạo kế hoạch 12 tuần"}
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="border-white/24 bg-white/10 text-white hover:bg-white/16 hover:text-white"
-                    onClick={onAdjustGoal}
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                    Sửa mục tiêu
-                  </Button>
-                </div>
-
-                <div className="hidden gap-4 sm:grid md:grid-cols-3">
-                  {scoreCards.map((card) => (
-                    <div
-                      key={card.label}
-                      className="rounded-[var(--r-card)] border border-white/14 bg-white/10 p-5 shadow-sm"
-                    >
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/58">{card.label}</p>
-                      <p
-                        className={`mt-[var(--space-inline)] font-bold text-white ${
-                          card.label === "Phần cần chú ý nhất" ? "text-xl leading-7" : "text-3xl"
-                        }`}
-                      >
-                        {card.value}
-                      </p>
-                      <div className="mt-4 h-2 overflow-hidden rounded-[var(--r-pill)] bg-white/12">
-                        <div
-                          className={`h-full rounded-[var(--r-pill)] bg-gradient-to-r ${styles.meter}`}
-                          style={{ width: `${card.progress}%` }}
-                        />
-                      </div>
-                      <p className="mt-[var(--space-inline)] text-sm leading-6 text-white/68">{card.note}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
+        <PrimaryActionCard
+          hero
+          tone={result.type === "realistic" ? "emerald" : "amber"}
+          eyebrow="Kết quả kiểm tra"
+          icon={<ShieldCheck className="h-4 w-4" />}
+          eyebrowClassName="text-white/72"
+          title={result.title}
+          titleAs="h1"
+          description={result.summary}
+          className="overflow-hidden text-white glass-surface-gradient-border ambient-glow"
+          headerClassName="relative z-10 max-w-4xl"
+          titleClassName="max-w-3xl text-2xl font-bold tracking-normal text-white sm:text-4xl lg:text-5xl"
+          descriptionClassName="max-w-3xl text-sm leading-7 text-white/84 sm:text-base lg:text-lg"
+          contentClassName="relative z-10 max-w-4xl stack-stack sm:stack-section"
+          actionClassName="relative z-10 flex flex-col gap-3 sm:max-w-xl sm:flex-row"
+          action={
+            <>
+              <Button className="bg-white text-slate-950 hover:bg-white/90" onClick={onContinue}>
+                {result.type === "too_ambitious" ? "Tạo kế hoạch 12 tuần nhỏ hơn" : "Tạo kế hoạch 12 tuần"}
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                className="border-white/24 bg-white/10 text-white hover:bg-white/16 hover:text-white"
+                onClick={onAdjustGoal}
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Sửa mục tiêu
+              </Button>
+            </>
+          }
+        >
+          <div className="flex flex-wrap gap-3">
+            <div className={`inline-flex rounded-[var(--r-pill)] border px-4 py-2 text-sm font-semibold ${styles.badge}`}>
+              {copy.statusLabel}
             </div>
-          </CardContent>
-        </Card>
+            <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/10 px-4 py-1.5 text-white">
+              <Target className="mr-1 h-3.5 w-3.5" />
+              {getLifeAreaLabel(focusArea)}
+            </Badge>
+          </div>
+
+          <div className="rounded-[var(--r-card)] border border-white/14 bg-white/10 p-4 shadow-sm sm:hidden">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/58">
+                  Mức phù hợp hiện tại
+                </p>
+                <p className="mt-2 text-3xl font-bold text-white">{fitScore}%</p>
+              </div>
+              <div className="rounded-[var(--r-pill)] border border-white/18 bg-white/12 px-3 py-1.5 text-sm font-semibold text-white">
+                {result.wheelScore}/10
+              </div>
+            </div>
+            <div className="mt-4 h-2 overflow-hidden rounded-[var(--r-pill)] bg-white/12">
+              <div
+                className={`h-full rounded-[var(--r-pill)] bg-gradient-to-r ${styles.meter}`}
+                style={{ width: `${fitScore}%` }}
+              />
+            </div>
+            <div className="mt-[var(--space-inline)] grid gap-2 text-sm leading-6 text-white/74">
+              <p>
+                <span className="font-semibold text-white">Cần chú ý:</span> {result.bottleneck.label}
+              </p>
+              <p>
+                <span className="font-semibold text-white">Mức tải gợi ý:</span> {planLoadLabel[result.planLoad]}{" "}
+                · {capacityLabel[result.weeklyCapacity]}
+              </p>
+              <p>{result.firstWeekGuidance}</p>
+            </div>
+          </div>
+
+          <div className="hidden gap-4 sm:grid md:grid-cols-3">
+            {scoreCards.map((card) => (
+              <div
+                key={card.label}
+                className="rounded-[var(--r-card)] border border-white/14 bg-white/10 p-5 shadow-sm"
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/58">{card.label}</p>
+                <p
+                  className={`mt-[var(--space-inline)] font-bold text-white ${
+                    card.label === "Phần cần chú ý nhất" ? "text-xl leading-7" : "text-3xl"
+                  }`}
+                >
+                  {card.value}
+                </p>
+                <div className="mt-4 h-2 overflow-hidden rounded-[var(--r-pill)] bg-white/12">
+                  <div
+                    className={`h-full rounded-[var(--r-pill)] bg-gradient-to-r ${styles.meter}`}
+                    style={{ width: `${card.progress}%` }}
+                  />
+                </div>
+                <p className="mt-[var(--space-inline)] text-sm leading-6 text-white/68">{card.note}</p>
+              </div>
+            ))}
+          </div>
+        </PrimaryActionCard>
 
         <div className="stack-stack">
-          <Card className={`overflow-hidden ${styles.panel}`}>
+          <Card className={`overflow-hidden ${styles.panel} border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200`}>
             <CardContent className="stack-stack p-5 lg:p-6">
               <div>
                 <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-slate-200/80 bg-white/82 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
@@ -420,7 +413,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           </Card>
 
           <div className="grid gap-[var(--space-stack)] lg:grid-cols-3">
-            <Card className={`hidden overflow-hidden lg:block ${styles.title}`}>
+            <Card className={`hidden overflow-hidden lg:block ${styles.title} border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200`}>
               <CardContent className="p-5 lg:p-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Lĩnh vực trọng tâm</p>
                 <p className="mt-[var(--space-inline)] text-2xl font-bold text-slate-900">{getLifeAreaLabel(focusArea)}</p>
@@ -430,7 +423,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               </CardContent>
             </Card>
 
-            <details className="rounded-[var(--r-card)] border border-white/70 bg-white/82 p-4 shadow-lg lg:rounded-[var(--r-card)] lg:p-6">
+            <details className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 lg:rounded-[var(--r-card)] lg:p-6">
               <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                 Xem 7 góc nhìn
               </summary>
@@ -455,7 +448,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               </div>
             </details>
 
-            <details className="rounded-[var(--r-card)] border border-white/70 bg-white/82 p-4 shadow-lg lg:rounded-[var(--r-card)] lg:p-6">
+            <details className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 lg:rounded-[var(--r-card)] lg:p-6">
               <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                 Xem mục tiêu đã viết
               </summary>
@@ -480,7 +473,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               </div>
             </details>
 
-            <details className="rounded-[var(--r-card)] border border-white/70 bg-white/82 p-4 shadow-lg lg:rounded-[var(--r-card)] lg:p-6">
+            <details className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 lg:rounded-[var(--r-card)] lg:p-6">
               <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
                 Xem nhịp triển khai gợi ý
               </summary>
@@ -500,7 +493,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             </details>
           </div>
 
-          <details className="rounded-[var(--r-card)] border border-white/70 bg-white/82 p-4 shadow-lg lg:rounded-[var(--r-card)] lg:p-6">
+          <details className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 lg:rounded-[var(--r-card)] lg:p-6">
             <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
               Xem lý do đằng sau kết quả
             </summary>

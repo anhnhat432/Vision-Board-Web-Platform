@@ -15,6 +15,7 @@ import { EmptyState } from "../states";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 import { formatCalendarDate } from "../../utils/storage";
 import type { TwelveWeekTaskInstance, TwelveWeekSystem, UniversalDailyCheckIn } from "../../utils/storage-types";
+import { PrimaryActionCard } from "@/app/components/layout/PrimaryActionCard";
 import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
 import { SectionBlock } from "@/app/components/layout/SectionBlock";
 import {
@@ -252,7 +253,7 @@ export function TwelveWeekTodayTab({
     <div className="ops-system-panel flex min-w-0 flex-col gap-[var(--space-inline)] sm:gap-[var(--space-stack)]">
       <div
         data-testid="today-mobile-compact-strip"
-        className="order-0 grid grid-cols-3 gap-2 rounded-[var(--r-tile)] border border-border bg-white/92 p-2.5 shadow-sm sm:hidden"
+        className="order-0 grid grid-cols-3 gap-2 rounded-[var(--r-tile)] border border-border bg-white/92 p-2.5 shadow-sm ring-1 ring-slate-200 sm:hidden"
       >
         <div className="min-w-0 rounded-[var(--r-control)] bg-muted px-2 py-2">
           <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Còn</p>
@@ -297,7 +298,7 @@ export function TwelveWeekTodayTab({
       <div
         data-testid="today-next-action-panel"
         data-state={nextActionState.key}
-        className="order-1 rounded-[var(--r-tile)] border border-border bg-white/92 p-4 shadow-sm sm:rounded-[var(--r-card)] sm:p-5"
+        className="order-1 rounded-[var(--r-tile)] border border-border bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 sm:rounded-[var(--r-card)] sm:p-5"
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
@@ -318,7 +319,7 @@ export function TwelveWeekTodayTab({
       </div>
 
       {missedTasks.length > 0 && (
-        <Card data-testid="today-overdue-recovery" className="order-4 border border-[color:var(--color-warning-border)] bg-white shadow-lg">
+        <Card data-testid="today-overdue-recovery" className="order-4 border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
           <CardHeader>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
@@ -417,74 +418,71 @@ export function TwelveWeekTodayTab({
       )}
 
       {primaryTask && (
-        <div
+        <PrimaryActionCard
           data-testid="today-primary-hero"
-          className={`order-2 rounded-[var(--r-tile)] border p-4 shadow-sm sm:rounded-[var(--r-card)] sm:p-6 ${
+          hero
+          tone={primaryTaskOverdue ? "amber" : "emerald"}
+          eyebrow={isFirstWeek ? "Việc đầu tiên của tuần 1" : "Việc quan trọng nhất hôm nay"}
+          icon={<Sparkles className="h-3.5 w-3.5" />}
+          eyebrowClassName="text-white/72"
+          title={primaryTask.title}
+          description={
             primaryTaskOverdue
-              ? "border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)]"
-              : "border-[color:var(--color-success-border)] bg-white"
-          }`}
-        >
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[color:var(--color-info-fg)]">
-                <Sparkles className="h-3.5 w-3.5" />
-                {isFirstWeek ? "Việc đầu tiên của tuần 1" : "Việc quan trọng nhất hôm nay"}
-              </p>
-              <p className="mt-2 break-words text-lg font-semibold text-foreground sm:text-xl">
-                {primaryTask.title}
-              </p>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                {primaryTaskOverdue
-                  ? `Việc này đang trễ — hôm nay làm phiên bản gọn nhất, đừng bỏ luôn. Làm đều '${primaryTask.leadIndicatorName}' quan trọng hơn làm hết.`
-                  : isFirstWeek
-                    ? `Thuộc nhóm việc lặp lại '${primaryTask.leadIndicatorName}'. Bắt đầu nhỏ — xong việc này là tuần 1 đã khởi động đúng hướng.`
-                    : `Thuộc nhóm việc lặp lại '${primaryTask.leadIndicatorName}'. Xong việc này là tuần đã đi đúng hướng.`}
-              </p>
-              {primaryTaskCommitmentQuote ? (
-                <p className="mt-2 text-sm italic leading-6 text-muted-foreground">{primaryTaskCommitmentQuote}</p>
-              ) : null}
-              <p className="mt-2 text-sm font-medium text-[color:var(--color-success-fg)]">
-                Chỉ cần xong việc này là hôm nay đã đủ. Phần còn lại để sau.
-              </p>
-              {isFirstWeek && (
-                <p
-                  data-testid="today-first-week-encouragement"
-                  className="mt-2 text-sm leading-6 text-[color:var(--color-info-fg)]"
-                >
-                  Tuần đầu — bắt đầu nhỏ là quan trọng nhất. Không cần làm hết hôm nay, duy trì đến hết tuần.
-                </p>
-              )}
-            </div>
-            {primaryTaskOverdue && (
-              <Badge variant="outline" className="border-[color:var(--color-warning-border)] bg-white text-[color:var(--color-warning-fg)]">
-                Đang trễ
-              </Badge>
-            )}
-          </div>
-          <div className="mt-[var(--space-inline)] flex flex-wrap gap-2 sm:mt-4">
-            <Button
-              data-testid="today-primary-mark-done"
-              size="lg"
-              className="w-full sm:w-auto"
-              onClick={() => onToggleTask(primaryTask.id, true)}
-            >
-              <Check className="h-4 w-4" />
-              Đánh dấu xong
-            </Button>
-            {primaryTaskOverdue && onRescheduleTaskWithinWeek && (
+              ? `Việc này đang trễ — hôm nay làm phiên bản gọn nhất, đừng bỏ luôn. Làm đều '${primaryTask.leadIndicatorName}' quan trọng hơn làm hết.`
+              : isFirstWeek
+                ? `Thuộc nhóm việc lặp lại '${primaryTask.leadIndicatorName}'. Bắt đầu nhỏ — xong việc này là tuần 1 đã khởi động đúng hướng.`
+                : `Thuộc nhóm việc lặp lại '${primaryTask.leadIndicatorName}'. Xong việc này là tuần đã đi đúng hướng.`
+          }
+          titleClassName="break-words text-lg font-semibold text-white sm:text-xl"
+          descriptionClassName="text-sm leading-6 text-white/78"
+          contentClassName="stack-tight"
+          actionClassName="flex flex-wrap gap-2"
+          className={`order-2 ${primaryTaskOverdue ? "bg-[color:var(--color-warning-bg)]" : "bg-white"}`}
+          action={
+            <>
               <Button
-                variant="outline"
+                data-testid="today-primary-mark-done"
                 size="lg"
-                className="bg-white"
-                onClick={() => onRescheduleTaskWithinWeek(primaryTask.id)}
+                className="w-full sm:w-auto"
+                onClick={() => onToggleTask(primaryTask.id, true)}
               >
-                <CalendarClock className="h-4 w-4" />
-                Dời sang ngày khác trong tuần
+                <Check className="h-4 w-4" />
+                Đánh dấu xong
               </Button>
-            )}
-          </div>
-        </div>
+              {primaryTaskOverdue && onRescheduleTaskWithinWeek && (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="bg-white"
+                  onClick={() => onRescheduleTaskWithinWeek(primaryTask.id)}
+                >
+                  <CalendarClock className="h-4 w-4" />
+                  Dời sang ngày khác trong tuần
+                </Button>
+              )}
+            </>
+          }
+        >
+          {primaryTaskOverdue && (
+            <Badge variant="outline" className="border-[color:var(--color-warning-border)] bg-white text-[color:var(--color-warning-fg)]">
+              Đang trễ
+            </Badge>
+          )}
+          {primaryTaskCommitmentQuote ? (
+            <p className="text-sm italic leading-6 text-white/74">{primaryTaskCommitmentQuote}</p>
+          ) : null}
+          <p className="text-sm font-medium text-white">
+            Chỉ cần xong việc này là hôm nay đã đủ. Phần còn lại để sau.
+          </p>
+          {isFirstWeek && (
+            <p
+              data-testid="today-first-week-encouragement"
+              className="text-sm leading-6 text-white/74"
+            >
+              Tuần đầu — bắt đầu nhỏ là quan trọng nhất. Không cần làm hết hôm nay, duy trì đến hết tuần.
+            </p>
+          )}
+        </PrimaryActionCard>
       )}
 
       <SectionBlock title="Hàng việc và check-in hôm nay" headerVisuallyHidden className="order-3">
@@ -492,7 +490,7 @@ export function TwelveWeekTodayTab({
         <div className="animate-fade-in-up min-w-0">
           <Card
             data-tour-id="system-today-queue"
-            className="h-full min-w-0 overflow-hidden rounded-[var(--r-tile)] border border-border bg-white/92 shadow-sm sm:rounded-[var(--r-card)]"
+            className="h-full min-w-0 overflow-hidden rounded-[var(--r-tile)] border border-border bg-white/92 shadow-sm ring-1 ring-slate-200 sm:rounded-[var(--r-card)]"
           >
             <CardHeader className="min-w-0 [&>*+*]:mt-0 px-4 pt-4 pb-2 sm:px-7 sm:pt-7 sm:pb-3">
               <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
@@ -780,7 +778,7 @@ export function TwelveWeekTodayTab({
           className="animate-fade-in-up min-w-0"
           style={{ animationDelay: '0.06s' }}
         >
-          <Card className="h-full min-w-0 overflow-hidden rounded-[var(--r-tile)] border border-border bg-white/92 shadow-sm sm:rounded-[var(--r-card)]">
+          <Card className="h-full min-w-0 overflow-hidden rounded-[var(--r-tile)] border border-border bg-white/92 shadow-sm ring-1 ring-slate-200 sm:rounded-[var(--r-card)]">
             <CardHeader className="min-w-0 [&>*+*]:mt-0 px-4 pt-4 pb-2 sm:px-7 sm:pt-7 sm:pb-3">
               <div className="flex min-w-0 items-start justify-between gap-3">
                 <div className="min-w-0">

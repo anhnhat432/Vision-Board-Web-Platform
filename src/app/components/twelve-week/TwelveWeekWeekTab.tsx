@@ -305,7 +305,7 @@ export function TwelveWeekWeekTab({
         <div className="grid gap-[var(--space-stack)] md:grid-cols-3">
         <Card
           interactive={false}
-          className="border border-slate-200/80 bg-white/92 shadow-sm"
+          className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
         >
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
@@ -317,7 +317,7 @@ export function TwelveWeekWeekTab({
         </Card>
         <Card
           interactive={false}
-          className="border border-sky-200/80 bg-sky-50/70 shadow-lg"
+          className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
         >
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
@@ -347,11 +347,7 @@ export function TwelveWeekWeekTab({
         </Card>
         <Card
           interactive={false}
-          className={
-            reviewDueToday
-              ? "border border-amber-200/80 bg-amber-50/80 shadow-lg"
-              : "border border-emerald-200/80 bg-emerald-50/70 shadow-lg"
-          }
+          className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
         >
           <CardContent className="p-5">
             <p
@@ -373,7 +369,7 @@ export function TwelveWeekWeekTab({
 
       <SectionBlock title="Review và cam kết tuần" headerVisuallyHidden>
         <div className="grid gap-[var(--space-section)] lg:grid-cols-[minmax(0,1fr)_420px]">
-        <Card className="h-full border border-slate-200/80 bg-white/92 shadow-sm">
+        <Card className="h-full border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-slate-950">
               <Layers className="h-5 w-5 text-indigo-600" />
@@ -467,7 +463,7 @@ export function TwelveWeekWeekTab({
 
         <Card
           data-tour-id="system-week-review"
-          className="h-full border border-slate-200/80 bg-white/92 shadow-sm"
+          className="h-full border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
         >
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-slate-950">

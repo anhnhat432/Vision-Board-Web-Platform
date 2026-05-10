@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
+import { PrimaryActionCard } from "../components/layout/PrimaryActionCard";
 import { SectionBlock } from "../components/layout/SectionBlock";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -385,25 +386,23 @@ export function BillingPlan() {
       />
 
       {/* Hero */}
-      <Card className="hero-surface flow-surface overflow-hidden">
-        <CardContent className="relative p-5 sm:p-6 lg:p-8">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_22%)] opacity-90" />
-          <div className="relative">
-            <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
-              <CreditCard className="h-4 w-4" />
-              {demoMode ? "Plus dùng thử" : "Premium"}
-            </div>
-            <h1 className="mt-4 max-w-3xl text-2xl font-bold tracking-normal sm:text-3xl lg:text-4xl">
-              {demoMode ? "Quản lý quyền Plus" : "Quản lý gói của bạn"}
-            </h1>
-            <p className="mt-2 max-w-2xl text-base leading-8 text-white/82">
-              {demoMode
-                ? "Bạn có thể xem trước quyền Plus mà không thanh toán. Khi mở thanh toán thật, giao dịch sẽ được xác nhận qua trang checkout."
-                : "Nâng cấp, kiểm tra quyền premium và quản lý thanh toán cho tài khoản của bạn."}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <PrimaryActionCard
+        hero
+        tone="violet"
+        eyebrow={demoMode ? "Plus dùng thử" : "Premium"}
+        icon={<CreditCard className="h-4 w-4" />}
+        eyebrowClassName="text-white/72"
+        title={demoMode ? "Quản lý quyền Plus" : "Quản lý gói của bạn"}
+        titleAs="h1"
+        description={
+          demoMode
+            ? "Bạn có thể xem trước quyền Plus mà không thanh toán. Khi mở thanh toán thật, giao dịch sẽ được xác nhận qua trang checkout."
+            : "Nâng cấp, kiểm tra quyền premium và quản lý thanh toán cho tài khoản của bạn."
+        }
+        className="flow-surface overflow-hidden text-white"
+        titleClassName="max-w-3xl text-2xl font-bold tracking-normal text-white sm:text-3xl lg:text-4xl"
+        descriptionClassName="max-w-2xl text-base leading-8 text-white/82"
+      />
 
       {/* Checkout return status */}
       {checkoutReturnStatus === "pending" && (

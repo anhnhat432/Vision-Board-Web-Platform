@@ -4,9 +4,10 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import { PageShell } from "../components/PageShell";
+import { PrimaryActionCard } from "../components/layout/PrimaryActionCard";
 import { SectionBlock } from "../components/layout/SectionBlock";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Card, CardContent } from "../components/ui/card";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { getUserData, saveUserData } from "../utils/storage";
@@ -116,19 +117,20 @@ export function AspirationalVision() {
     <PageShell maxWidth="hero" className="stack-section page-enter">
       <h1 className="sr-only">Tầm nhìn 3 năm</h1>
       <SectionBlock title="Biểu mẫu tầm nhìn 3 năm" headerVisuallyHidden>
-        <Card className="border border-slate-200 bg-white/94 shadow-sm">
-        <CardHeader className="stack-stack">
-          <div className="inline-flex w-fit items-center gap-2 rounded-[var(--r-pill)] border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700">
-            <Sparkles className="h-3.5 w-3.5" />
-            Discipline #4
-          </div>
-          <div>
-            <CardTitle as="h2" className="text-2xl">Tầm nhìn 3 năm</CardTitle>
-            <CardDescription className="mt-2 max-w-3xl leading-7">
-              Viết phần aspirational vision riêng với mục tiêu 12 tuần. Phần này không bắt buộc, nhưng giúp mỗi cycle ngắn hạn bám vào một hướng dài hơn.
-            </CardDescription>
-          </div>
-        </CardHeader>
+        <PrimaryActionCard
+          hero
+          tone="violet"
+          eyebrow="Tầm nhìn 3 năm"
+          icon={<Sparkles className="h-3.5 w-3.5" />}
+          eyebrowClassName="text-white/72"
+          title="Tầm nhìn 3 năm"
+          titleAs="h2"
+          description="Viết phần aspirational vision riêng với mục tiêu 12 tuần. Phần này không bắt buộc, nhưng giúp mỗi cycle ngắn hạn bám vào một hướng dài hơn."
+          className="text-white"
+          titleClassName="text-2xl font-semibold text-white"
+          descriptionClassName="max-w-3xl leading-7 text-white/78"
+        />
+        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
         <CardContent className="stack-section">
           <div className="stack-tight">
             <Label htmlFor="aspirational-summary">Tóm tắt tầm nhìn 3 năm</Label>
