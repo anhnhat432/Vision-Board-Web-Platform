@@ -116,7 +116,7 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
     weekOneTacticLoadHint: "lighter",
     reviewPrompt: "Tuần này ngủ đủ không? Form có ổn không? Có cần ngày nghỉ thêm không?",
     antiPatterns: [
-      "Tuần 1 push PR hoặc tăng tải mạnh — nguy cơ chấn thương sớm.",
+      "Tuần 1 cố lập kỷ lục hoặc tăng tải mạnh — nguy cơ chấn thương sớm.",
       "Không có ngày nghỉ có chủ đích trong tuần.",
       "Đặt mục tiêu giảm cân/lên cơ nhanh hơn mức an toàn (> 1kg/tuần).",
     ],

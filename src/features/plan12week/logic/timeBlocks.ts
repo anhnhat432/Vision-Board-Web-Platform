@@ -33,7 +33,7 @@ export function getDefaultTimeBlocks(): TimeBlock[] {
       dayOfWeek: "Tuesday",
       startTime: "09:00",
       durationMinutes: 180,
-      note: "Deep work cho tactic quan trọng nhất",
+      note: "Làm sâu cho việc quan trọng nhất",
     },
     {
       id: "timeblock_buffer_wednesday_1400",
@@ -49,7 +49,7 @@ export function getDefaultTimeBlocks(): TimeBlock[] {
       dayOfWeek: "Friday",
       startTime: "14:00",
       durationMinutes: 45,
-      note: "Dọn inbox và follow-up cuối tuần",
+      note: "Dọn hộp thư và theo dõi tiếp cuối tuần",
     },
     {
       id: "timeblock_breakout_saturday_1500",

@@ -31,13 +31,13 @@ export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, 
       icon: TrendingUp,
       label: "Tỷ lệ tạo kết quả",
       value: formatPercent(leadAverage),
-      note: "lead completion",
+      note: "hoàn thành việc lặp lại",
       iconClass:
         "bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-700 dark:from-emerald-950/50 dark:to-teal-950/40 dark:text-emerald-200",
     },
     {
       icon: Zap,
-      label: "Lead pace",
+      label: "Nhịp việc lặp lại",
       value: formatWheelScore(wheelScore),
       note: "điểm cuộc sống",
       iconClass:
