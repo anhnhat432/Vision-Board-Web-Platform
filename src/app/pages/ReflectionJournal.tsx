@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { CelebrationBurst, EmptyJournalIllustration } from "../components/illustrations";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -345,6 +346,7 @@ export function ReflectionJournal() {
 
               <div className="hidden rounded-[var(--r-tile)] border border-slate-200 bg-slate-50/80 p-4 shadow-sm lg:block">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Nhịp viết hiện tại</p>
+                <CelebrationBurst className="mx-auto mt-3 w-32 text-violet-500" />
                 {hasReflections ? (
                   <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                     {[
@@ -602,6 +604,7 @@ export function ReflectionJournal() {
         <Reveal delay={0.04}>
           <Card className="overflow-hidden border border-violet-100/80 bg-gradient-to-br from-white to-violet-50/60 dark:border-violet-500/20 dark:from-slate-950 dark:to-violet-950/20" data-testid="journal-fresh-empty-state">
             <CardContent className="p-10 text-center lg:p-14">
+              <EmptyJournalIllustration className="mx-auto mb-4 w-44 text-violet-500 sm:w-56" />
               <div className="mx-auto grid h-24 w-24 place-items-center rounded-[var(--r-card)] bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 shadow-lg shadow-violet-500/10 dark:from-violet-950/60 dark:to-fuchsia-950/40 dark:text-violet-200">
                 <div className="relative">
                   <BookOpen className="h-10 w-10" />

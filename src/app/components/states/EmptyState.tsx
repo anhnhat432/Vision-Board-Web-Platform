@@ -13,6 +13,11 @@ interface EmptyStateProps {
    */
   icon?: ReactNode;
   /**
+   * Optional decorative illustration shown above the icon badge.
+   * Use components from src/app/components/illustrations/ for consistent style.
+   */
+  illustration?: ReactNode;
+  /**
    * Small uppercase label shown above the title. Use for short scope hints
    * like "Workspace mới" or "Chu kỳ 12 tuần".
    */
@@ -73,6 +78,7 @@ const DASHED_CLASSES = "rounded-[var(--r-control)] border border-dashed border-s
 
 export function EmptyState({
   icon,
+  illustration,
   eyebrow,
   title,
   description,
@@ -105,6 +111,11 @@ export function EmptyState({
       data-testid={testId}
       className={cn("space-y-4", variantClass, alignClass, className)}
     >
+      {illustration ? (
+        <div className={cn("w-32 max-w-full sm:w-40", blockAlignClass)} aria-hidden="true">
+          {illustration}
+        </div>
+      ) : null}
       {icon ? (
         <div
           className={cn(
