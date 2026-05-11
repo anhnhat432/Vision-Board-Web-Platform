@@ -17,7 +17,7 @@ import { Button } from "../components/ui/button";
 import type { LifeBalanceHistoryChartPoint } from "../components/LifeBalanceHistoryChart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { CountUp } from "../components/ui/count-up";
-import { LifeBalanceWheelIllustration } from "../components/illustrations";
+import { LifeBalanceWheelIllustration, getLifeAreaIcon } from "../components/illustrations";
 import { ProductVisual } from "../components/visuals/ProductVisual";
 import { Reveal } from "../components/ui/reveal";
 import { SimpleRadarChart } from "../components/SimpleRadarChart";
@@ -514,51 +514,56 @@ export function LifeBalance() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="stack-stack">
-                    {lifeAreas.map((area, index) => (
-                      <div
-                        key={area.name}
-                        className="card-hover-lift rounded-[var(--r-control)] border border-white/70 bg-white/72 p-4"
-                      >
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className="h-4 w-4 rounded-[var(--r-pill)] ring-4 ring-white/85 dark:ring-black/35"
-                              style={{ backgroundColor: area.color }}
+                    {lifeAreas.map((area, index) => {
+                      const AreaIcon = getLifeAreaIcon(area.name);
+
+                      return (
+                        <div
+                          key={area.name}
+                          className="card-hover-lift rounded-[var(--r-control)] border border-white/70 bg-white/72 p-4"
+                        >
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                              <AreaIcon className="h-7 w-7 shrink-0" style={{ color: area.color }} />
+                              <div
+                                className="h-4 w-4 rounded-[var(--r-pill)] ring-4 ring-white/85 dark:ring-black/35"
+                                style={{ backgroundColor: area.color }}
+                              />
+                              <div>
+                                <p className="font-semibold text-slate-900">{getLifeAreaLabel(area.name)}</p>
+                                <p className="text-sm text-slate-500">
+                                  {area.score <= 4
+                                    ? "Đang cần thêm sự chăm sóc."
+                                    : area.score <= 7
+                                      ? "Có nền nhưng vẫn còn dư địa cải thiện."
+                                      : "Đây đang là một khu vực ổn định."}
+                                </p>
+                              </div>
+                            </div>
+                            <span className="text-2xl font-bold" style={{ color: area.color }}>
+                              {area.score}
+                            </span>
+                          </div>
+
+                          <div className="mt-4 stack-tight">
+                            <Slider
+                              value={[area.score]}
+                              onValueChange={(value) => handleScoreChange(index, value)}
+                              min={1}
+                              max={10}
+                              step={1}
+                              className="w-full"
+                              trackColor={area.color}
+                              aria-label={`Điểm ${getLifeAreaLabel(area.name)}`}
                             />
-                            <div>
-                              <p className="font-semibold text-slate-900">{getLifeAreaLabel(area.name)}</p>
-                              <p className="text-sm text-slate-500">
-                                {area.score <= 4
-                                  ? "Đang cần thêm sự chăm sóc."
-                                  : area.score <= 7
-                                    ? "Có nền nhưng vẫn còn dư địa cải thiện."
-                                    : "Đây đang là một khu vực ổn định."}
-                              </p>
+                            <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.14em] text-slate-400">
+                              <span>Cần chú ý</span>
+                              <span>Xuất sắc</span>
                             </div>
                           </div>
-                          <span className="text-2xl font-bold" style={{ color: area.color }}>
-                            {area.score}
-                          </span>
                         </div>
-
-                        <div className="mt-4 stack-tight">
-                          <Slider
-                            value={[area.score]}
-                            onValueChange={(value) => handleScoreChange(index, value)}
-                            min={1}
-                            max={10}
-                            step={1}
-                            className="w-full"
-                            trackColor={area.color}
-                            aria-label={`Điểm ${getLifeAreaLabel(area.name)}`}
-                          />
-                          <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.14em] text-slate-400">
-                            <span>Cần chú ý</span>
-                            <span>Xuất sắc</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </CardContent>
                 </Card>
 

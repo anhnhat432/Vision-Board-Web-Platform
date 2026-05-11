@@ -5,7 +5,7 @@ import { ArrowRight, Check, Compass, Sparkles, Target, TrendingDown, TrendingUp 
 
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
-import { LifeInsightIllustration } from "../components/illustrations";
+import { LifeInsightIllustration, getLifeAreaIcon } from "../components/illustrations";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -407,6 +407,7 @@ export function LifeInsight() {
               {lifeAreas.map((area) => {
                 const isSelected = focusArea.name === area.name;
                 const isRecommended = area.name === lowestArea.name;
+                const AreaIcon = getLifeAreaIcon(area.name);
                 return (
                   <button
                     key={area.name}
@@ -425,14 +426,17 @@ export function LifeInsight() {
                       </span>
                     )}
                     <div className="flex items-center justify-between gap-2">
-                      <div
-                        className="flex h-9 w-9 items-center justify-center rounded-[var(--r-tile)]"
-                        style={{
-                          background: `linear-gradient(135deg, ${area.color}24, ${area.color}12)`,
-                          color: area.color,
-                        }}
-                      >
-                        <Target className="h-4 w-4" aria-hidden="true" />
+                      <div className="flex items-center gap-2">
+                        <AreaIcon className="h-7 w-7 shrink-0" style={{ color: area.color }} />
+                        <div
+                          className="flex h-9 w-9 items-center justify-center rounded-[var(--r-tile)]"
+                          style={{
+                            background: `linear-gradient(135deg, ${area.color}24, ${area.color}12)`,
+                            color: area.color,
+                          }}
+                        >
+                          <Target className="h-4 w-4" aria-hidden="true" />
+                        </div>
                       </div>
                       {isSelected && <Check className="h-4 w-4 text-violet-600" />}
                     </div>

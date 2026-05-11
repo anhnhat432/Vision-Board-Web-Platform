@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { ArrowLeft, ArrowRight, BarChart3, Check, Compass, Heart, Sparkles, Target } from "lucide-react";
 
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
-import { LifeBalanceWheelIllustration, WelcomeIllustration } from "../components/illustrations";
+import { LifeBalanceWheelIllustration, WelcomeIllustration, getLifeAreaIcon } from "../components/illustrations";
 import { ProductVisual } from "../components/visuals/ProductVisual";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
@@ -344,44 +344,49 @@ export function Onboarding() {
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <Card className="flow-panel overflow-hidden">
             <CardContent className="stack-tight p-5 sm:p-6">
-              {lifeAreas.map((area, index) => (
-                <div
-                  key={area.name}
-                  className="card-hover-lift rounded-[var(--r-tile)] border border-slate-200 bg-white p-3 shadow-sm sm:p-4 dark:border-slate-700 dark:bg-slate-900/70"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
+              {lifeAreas.map((area, index) => {
+                const AreaIcon = getLifeAreaIcon(area.name);
+
+                return (
+                  <div
+                    key={area.name}
+                    className="card-hover-lift rounded-[var(--r-tile)] border border-slate-200 bg-white p-3 shadow-sm sm:p-4 dark:border-slate-700 dark:bg-slate-900/70"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <AreaIcon className="h-6 w-6 shrink-0" style={{ color: area.color }} />
+                        <div
+                          className="h-3.5 w-3.5 shrink-0 rounded-[var(--r-pill)] ring-4 ring-slate-100"
+                          style={{ backgroundColor: area.color }}
+                        />
+                        <h3 className="text-base font-semibold text-slate-900 sm:text-lg">
+                          {getLifeAreaLabel(area.name)}
+                        </h3>
+                      </div>
+
                       <div
-                        className="h-3.5 w-3.5 shrink-0 rounded-[var(--r-pill)] ring-4 ring-slate-100"
+                        className="min-w-14 rounded-[var(--r-pill)] px-3 py-1.5 text-center text-sm font-semibold text-white shadow-sm"
                         style={{ backgroundColor: area.color }}
+                      >
+                        {area.score}/10
+                      </div>
+                    </div>
+
+                    <div className="mt-[var(--space-inline)]">
+                      <Slider
+                        value={[area.score]}
+                        onValueChange={(value) => handleScoreChangeWrapped(index, value)}
+                        min={1}
+                        max={10}
+                        step={1}
+                        className="w-full"
+                        trackColor={area.color}
+                        aria-label={`Điểm ${getLifeAreaLabel(area.name)}`}
                       />
-                      <h3 className="text-base font-semibold text-slate-900 sm:text-lg">
-                        {getLifeAreaLabel(area.name)}
-                      </h3>
-                    </div>
-
-                    <div
-                      className="min-w-14 rounded-[var(--r-pill)] px-3 py-1.5 text-center text-sm font-semibold text-white shadow-sm"
-                      style={{ backgroundColor: area.color }}
-                    >
-                      {area.score}/10
                     </div>
                   </div>
-
-                  <div className="mt-[var(--space-inline)]">
-                    <Slider
-                      value={[area.score]}
-                      onValueChange={(value) => handleScoreChangeWrapped(index, value)}
-                      min={1}
-                      max={10}
-                      step={1}
-                      className="w-full"
-                      trackColor={area.color}
-                      aria-label={`Điểm ${getLifeAreaLabel(area.name)}`}
-                    />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </CardContent>
           </Card>
 
