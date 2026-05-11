@@ -30,7 +30,7 @@ function buildReadableOutboxSummary(type: string, metadata?: Record<string, stri
 
   switch (type) {
     case "paywall_viewed":
-      return `Mở màn nâng cấp từ ${metadata.source ?? "--"} · ngữ cảnh ${metadata.context ?? "--"} · gợi ý ${metadata.recommendedPlan ?? "--"}`;
+      return `Hiển thị giao diện nâng cấp từ ${metadata.source ?? "--"} · ngữ cảnh ${metadata.context ?? "--"} · gợi ý ${metadata.recommendedPlan ?? "--"}`;
     case "paywall_cta_clicked":
       return `Bấm nút ${metadata.placement ?? "--"} từ ${metadata.source ?? "--"} · gói muốn mở ${metadata.targetPlan ?? "--"}`;
     case "paywall_checkout_started":
@@ -42,7 +42,7 @@ function buildReadableOutboxSummary(type: string, metadata?: Record<string, stri
     case "premium_template_applied":
       return `Áp dụng mẫu ${metadata.templateName ?? metadata.templateId ?? "--"} · ${metadata.tier ?? "free"}`;
     case "premium_insight_opened":
-      return `Đã mở góc nhìn Plus ở tuần ${metadata.weekNumber ?? "--"} từ ${metadata.source ?? "--"}`;
+      return `Đã mở góc nhìn cao cấp ở tuần ${metadata.weekNumber ?? "--"} từ ${metadata.source ?? "--"}`;
     default:
       return buildOutboxSummary(type, metadata);
   }

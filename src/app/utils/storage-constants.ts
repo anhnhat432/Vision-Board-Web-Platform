@@ -91,13 +91,13 @@ export const TWELVE_WEEK_FUNNEL_STEPS = [
 export const TWELVE_WEEK_MONETIZATION_STEPS = [
   {
     id: "paywall_viewed",
-    label: "Mở màn nâng cấp",
-    description: "Người dùng đã nhìn thấy màn nâng cấp trong một ngữ cảnh cụ thể.",
+    label: "Hiển thị giao diện nâng cấp",
+    description: "Người dùng đã nhìn thấy lời mời nâng cấp trong một ngữ cảnh cụ thể.",
   },
   {
     id: "paywall_cta_clicked",
     label: "Bấm nút nâng cấp",
-    description: "Người dùng bấm một nút dẫn tới màn nâng cấp hoặc bước nâng cấp tiếp theo.",
+    description: "Người dùng bấm một nút dẫn tới lời mời nâng cấp hoặc bước nâng cấp tiếp theo.",
   },
   {
     id: "paywall_checkout_started",
@@ -116,8 +116,8 @@ export const TWELVE_WEEK_MONETIZATION_STEPS = [
   },
   {
     id: "premium_insight_opened",
-    label: "Mở góc nhìn Plus",
-    description: "Người dùng đã mở phần góc nhìn review Plus trong tab tuần.",
+    label: "Mở góc nhìn cao cấp",
+    description: "Người dùng đã mở phần góc nhìn ôn lại cao cấp trong tab tuần.",
   },
 ] as const;
 
