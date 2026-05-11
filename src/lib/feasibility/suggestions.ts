@@ -6,7 +6,7 @@ const MAX_SUGGESTIONS = 4;
 
 const FALLBACK_SUGGESTIONS = [
   "Giữ tuần đầu thật gọn để tạo nhịp ổn định trước khi tăng tải.",
-  "Tập trung vào một outcome chính và review ngắn hàng tuần để theo dõi tiến độ.",
+  "Tập trung vào một kết quả chính và review ngắn hàng tuần để theo dõi tiến độ.",
 ] as const;
 
 export function generateSuggestions(scores: DimensionScores): string[] {

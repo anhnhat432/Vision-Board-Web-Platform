@@ -216,7 +216,7 @@ export function getStepValidationError(stepKey: SmartStepKey, smartData: SMARTDa
     if (baselineInput) {
       const baselineValue = parseNumberInput(baselineInput);
       if (baselineValue !== undefined && targetValue <= baselineValue) {
-        return "Mục tiêu cần lớn hơn baseline";
+        return "Mục tiêu cần lớn hơn mốc hiện tại";
       }
     }
 
@@ -285,7 +285,7 @@ const DIMENSION_HINTS: Partial<Record<QualityDimension, string>> = {
     "Gợi ý: dùng động từ kết quả rõ ràng như đạt, hoàn thành, xây dựng để mục tiêu có hướng.",
   measurableClarity: "Gợi ý: thêm đơn vị đo giúp chỉ số rõ ràng hơn.",
   baselineTargetQuality:
-    "Gợi ý: thêm mốc hiện tại (baseline) để đánh giá khoảng cách cần vượt qua.",
+    "Gợi ý: thêm mốc hiện tại để đánh giá khoảng cách cần vượt qua.",
   resourceSupportClarity:
     "Gợi ý: thêm kỹ năng và nguồn hỗ trợ giúp kiểm tra tính khả thi chính xác hơn.",
   relevanceMotivation:

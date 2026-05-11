@@ -120,8 +120,8 @@ export function LifeBalance() {
     averageScore < 5
       ? "Mặt bằng hiện tại còn thấp. Hãy chọn một lĩnh vực nhỏ để tạo lực kéo trước."
       : averageScore < 7
-        ? "Bạn đã có nền ổn định. Điểm thấp nhất là nơi đáng chuyển thành Life Insight ngay."
-        : "Nền hiện tại khá tốt. Life Insight nên tập trung vào điểm lệch để duy trì đà.";
+        ? "Bạn đã có nền ổn định. Điểm thấp nhất là nơi đáng chuyển thành Góc nhìn cuộc sống ngay."
+        : "Nền hiện tại khá tốt. Góc nhìn cuộc sống nên tập trung vào điểm lệch để duy trì đà.";
 
   const trackCompletion = () => {
     if (!strongestArea || !weakestArea) return;
@@ -151,7 +151,7 @@ export function LifeBalance() {
 
   const handleSave = () => {
     saveLifeBalance();
-    toast.success("Đã cập nhật Life Balance", {
+    toast.success("Đã cập nhật Cân bằng cuộc sống", {
       description: "Điểm mới đã được lưu vào bánh xe cuộc sống của bạn.",
     });
   };
@@ -159,7 +159,7 @@ export function LifeBalance() {
   const handleContinueToInsight = () => {
     if (hasChanges) {
       saveLifeBalance();
-      toast.success("Đã lưu Life Balance trước khi mở Life Insight.");
+      toast.success("Đã lưu Cân bằng cuộc sống trước khi mở Góc nhìn cuộc sống.");
       window.setTimeout(() => navigate("/life-insight"), 0);
       return;
     }
@@ -233,7 +233,7 @@ export function LifeBalance() {
             <div className="stack-stack">
               <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-slate-200 bg-slate-50/90 px-3 py-1.5 text-xs font-semibold text-slate-600">
                 <Compass className="h-4 w-4" />
-                Life Balance Center
+                Trung tâm Cân bằng cuộc sống
               </div>
 
               <div className="stack-tight">
@@ -246,7 +246,7 @@ export function LifeBalance() {
                 </h1>
                 <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                   Mỗi điểm bạn chỉnh sẽ cập nhật ngay phần tín hiệu bên dưới. Sau đó bạn có thể lưu riêng hoặc lưu rồi
-                  mở Life Insight để chọn vấn đề đáng ưu tiên nhất.
+                  mở Góc nhìn cuộc sống để chọn vấn đề đáng ưu tiên nhất.
                 </p>
               </div>
 
@@ -314,9 +314,9 @@ export function LifeBalance() {
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
                     Tiếp theo trong luồng chính
                   </p>
-                  <h2 className="mt-1 text-xl font-bold text-slate-950">Tín hiệu từ Life Balance</h2>
+                  <h2 className="mt-1 text-xl font-bold text-slate-950">Tín hiệu từ Cân bằng cuộc sống</h2>
                   <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
-                    {balanceTone} Life Insight sẽ dùng tín hiệu này để nối sang SMART Goal và kế hoạch 12 tuần.
+                    {balanceTone} Góc nhìn cuộc sống sẽ dùng tín hiệu này để nối sang mục tiêu SMART và kế hoạch 12 tuần.
                   </p>
                   {hasChanges && (
                     <p className="mt-2 text-sm font-medium text-amber-700">
@@ -349,7 +349,7 @@ export function LifeBalance() {
 
               <div className="flex w-full flex-col gap-3 sm:w-auto">
                 <Button className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto" onClick={handleContinueToInsight}>
-                  {hasChanges ? "Lưu và xem Life Insight" : "Mở Life Insight"}
+                  {hasChanges ? "Lưu và xem Góc nhìn cuộc sống" : "Mở Góc nhìn cuộc sống"}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
                 {hasChanges && (

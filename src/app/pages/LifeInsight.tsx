@@ -153,8 +153,8 @@ export function LifeInsight() {
     return (
       <CoreFlowGateState
         currentStepId="life_insight"
-        eyebrow="Life Insight"
-        title="Đang tải dữ liệu insight"
+        eyebrow="Góc nhìn cuộc sống"
+        title="Đang tải dữ liệu góc nhìn"
         description="Mình đang đọc dữ liệu bánh xe cuộc sống để gợi ý lĩnh vực bạn nên ưu tiên tiếp theo."
         loading
       />
@@ -165,12 +165,12 @@ export function LifeInsight() {
     return (
       <CoreFlowGateState
         currentStepId="life_balance"
-        eyebrow="Life Insight"
+        eyebrow="Góc nhìn cuộc sống"
         title="Chưa có dữ liệu cân bằng cuộc sống"
-        description="Trước khi tạo SMART Goal, bạn cần hoàn thành Life Balance để hệ thống biết nên ưu tiên khu vực nào."
-        actionLabel="Đi tới Onboarding"
+        description="Trước khi tạo mục tiêu SMART, bạn cần hoàn thành Cân bằng cuộc sống để hệ thống biết nên ưu tiên khu vực nào."
+        actionLabel="Đi tới Bắt đầu"
         onAction={() => navigate("/onboarding")}
-        secondaryActionLabel="Mở Life Balance"
+        secondaryActionLabel="Mở Cân bằng cuộc sống"
         onSecondaryAction={() => navigate("/life-balance")}
       />
     );
@@ -210,12 +210,12 @@ export function LifeInsight() {
       <AlertDialog open={pendingFocusAreaName !== null} onOpenChange={(open) => !open && setPendingFocusAreaName(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Bạn có draft mục tiêu chưa lưu</AlertDialogTitle>
-            <AlertDialogDescription>Đổi mảng đời sẽ xoá draft hiện tại. Tiếp tục?</AlertDialogDescription>
+            <AlertDialogTitle>Bạn có bản nháp mục tiêu chưa lưu</AlertDialogTitle>
+            <AlertDialogDescription>Đổi lĩnh vực sẽ xoá bản nháp hiện tại. Tiếp tục?</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Giữ draft</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDraftClear}>Xoá draft và đổi area</AlertDialogAction>
+            <AlertDialogCancel>Giữ bản nháp</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDraftClear}>Xoá bản nháp và đổi lĩnh vực</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -228,7 +228,7 @@ export function LifeInsight() {
               <div className="stack-stack">
                 <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-slate-200 bg-slate-50/90 px-3 py-1.5 text-xs font-semibold text-slate-600">
                   <Compass className="h-4 w-4" />
-                  Life Insight
+                  Góc nhìn cuộc sống
                 </div>
 
                 <div className="stack-tight">
@@ -279,7 +279,7 @@ export function LifeInsight() {
                       Quyết định tiếp theo
                     </p>
                     <h2 className="mt-2 text-xl font-bold text-slate-950">
-                      Tạo SMART Goal cho {focusAreaLabel} trong khung 12 tuần.
+                      Tạo mục tiêu SMART cho {focusAreaLabel} trong khung 12 tuần.
                     </h2>
                     <p className="mt-2 text-sm leading-7 text-slate-600">
                       {isCustomSelection
@@ -321,7 +321,7 @@ export function LifeInsight() {
                         : `${focusAreaLabel} là điểm thấp nhất trong bánh xe hiện tại.`}
                     </h2>
                     <p className="mt-2 text-sm leading-7 text-slate-600">
-                      Dùng một lĩnh vực đủ cụ thể giúp bước SMART Goal không bị rộng. Sau khi chọn xong, phần tiếp theo
+                      Dùng một lĩnh vực đủ cụ thể giúp bước mục tiêu SMART không bị rộng. Sau khi chọn xong, phần tiếp theo
                       sẽ ép trọng tâm này thành mục tiêu đo được và có thời hạn.
                     </p>
                   </div>
@@ -350,7 +350,7 @@ export function LifeInsight() {
                     className="w-full justify-center bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
                     onClick={handleStartGoalSetup}
                   >
-                    Tạo SMART Goal từ quyết định này
+                    Tạo mục tiêu SMART từ quyết định này
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                   <Button
@@ -563,7 +563,7 @@ export function LifeInsight() {
                 className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
                 onClick={handleStartGoalSetup}
               >
-                Tạo SMART Goal từ quyết định này
+                Tạo mục tiêu SMART từ quyết định này
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </CardContent>
