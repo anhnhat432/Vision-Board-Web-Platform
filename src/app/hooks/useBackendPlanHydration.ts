@@ -213,7 +213,7 @@ function getIndicatorSchedule(details: PlanDetails, indicatorName: string): numb
 }
 
 function createLeadIndicator(details: PlanDetails, name: string, index: number, weeklyTarget = 0): LeadIndicator {
-  const normalizedName = name.trim() || `Backend tactic ${index + 1}`;
+  const normalizedName = name.trim() || `Chiến thuật trên máy chủ ${index + 1}`;
   return {
     id: `tactic_backend_${slugify(normalizedName, String(index + 1))}_${index + 1}`,
     name: normalizedName,
@@ -613,14 +613,14 @@ function createHydrationResult(
 
   const message =
     status === "success"
-      ? "Kế hoạch từ tài khoản đã được khôi phục về thiết bị này."
+      ? "Đã khôi phục kế hoạch từ máy chủ về thiết bị này."
       : status === "partial"
-        ? "Một số kế hoạch từ tài khoản đã được khôi phục, nhưng vẫn có vài kế hoạch chưa tải được."
+        ? "Đã khôi phục một phần kế hoạch, vài mục chưa tải được."
         : status === "error"
-          ? "Chưa thể khôi phục kế hoạch từ tài khoản về thiết bị này."
+          ? "Không thể khôi phục kế hoạch từ máy chủ."
           : result.conflictCount > 0
-            ? `${result.conflictCount} khác biệt giữa thiết bị và tài khoản cần xem lại.`
-          : "Không có kế hoạch nào cần khôi phục về thiết bị này.";
+            ? `${result.conflictCount} khác biệt giữa thiết bị và máy chủ cần xem lại.`
+          : "Không có kế hoạch nào cần đồng bộ về thiết bị.";
 
   return {
     ...result,
@@ -865,7 +865,7 @@ export function useBackendPlanHydration(
       })
       .catch((nextError: unknown) => {
         if (cancelled) return;
-        const parsedError = nextError instanceof Error ? nextError : new Error("Backend hydration failed.");
+        const parsedError = nextError instanceof Error ? nextError : new Error("Không tải được dữ liệu từ máy chủ.");
         console.error("Failed to hydrate backend 12-week plans.", nextError);
         setError(parsedError);
         setStatus("done");

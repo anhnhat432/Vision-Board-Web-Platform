@@ -196,8 +196,8 @@ function createSnapshot(
   const message =
     status === "success"
       ? counter.syncedCount > 0
-        ? `Đã đồng bộ ${counter.syncedCount} mục 12-week lên backend.`
-        : "Máy chủ đã sẵn sàng, chưa có mục 12 tuần mới cần đẩy lên."
+        ? `Đã đồng bộ ${counter.syncedCount} mục 12 tuần lên máy chủ.`
+        : "Máy chủ đã sẵn sàng, chưa có mục 12 tuần mới cần gửi lên."
       : status === "partial" && counter.conflictCount > 0
         ? `Đã đồng bộ ${counter.syncedCount} mục, ${counter.conflictCount} mục bị xung đột (đã được cập nhật từ thiết bị khác).`
         : counter.failedCount > 0

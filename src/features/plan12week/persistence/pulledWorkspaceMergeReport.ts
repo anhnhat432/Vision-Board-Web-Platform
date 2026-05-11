@@ -489,7 +489,7 @@ function buildPendingMutationConflicts(
           clientId,
           cloudId: cloudEntity.cloudId,
           path: cloudEntity.path,
-          message: "Bản trên tài khoản đã đổi trong khi thiết bị vẫn còn thay đổi chưa gửi cho cùng mục này.",
+          message: "Bản trên máy chủ đã đổi trong khi bạn chưa đồng bộ thay đổi cục bộ.",
           mutationId: item.id,
           reason: "pending_local_mutation_cloud_newer" as const,
           localUpdatedAt: item.updatedAt,
@@ -524,7 +524,7 @@ function buildMatchedCloudChanges(
       localId: localEntity.localId,
       cloudId: cloudEntity.cloudId,
       path: cloudEntity.path,
-      message: "Bản trên tài khoản khác với bản hiện có trên thiết bị.",
+      message: "Giá trị từ máy chủ khác với giá trị trên thiết bị.",
       cloudSyncUpdatedAt: cloudEntity.syncUpdatedAt,
     });
   });
@@ -553,7 +553,7 @@ function buildValueDiffConflicts(
       localId: localEntity.localId,
       cloudId: cloudEntity.cloudId,
       path: cloudEntity.path,
-      message: "Dữ liệu trên thiết bị và trên tài khoản đang khác nhau ở mục đã đủ thông tin đồng bộ.",
+      message: "Giá trị trên thiết bị và trên máy chủ đang khác nhau.",
       reason,
       cloudSyncUpdatedAt: cloudEntity.syncUpdatedAt,
     });
@@ -574,7 +574,7 @@ function buildLocalOnlyChanges(
       clientId: entity.clientId,
       localId: entity.localId,
       path: entity.path,
-      message: "Mục trên thiết bị chưa có trong dữ liệu vừa lấy từ tài khoản.",
+      message: "Mục trên thiết bị chưa có trên máy chủ.",
     }));
 }
 
@@ -590,7 +590,7 @@ function buildCloudOnlyChanges(
       clientId: entity.clientId,
       cloudId: entity.cloudId,
       path: entity.path,
-      message: "Mục trên tài khoản chưa có trong dữ liệu hiện tại trên thiết bị.",
+      message: "Mục trên máy chủ chưa có trên thiết bị.",
       cloudSyncUpdatedAt: entity.syncUpdatedAt,
     }));
 }

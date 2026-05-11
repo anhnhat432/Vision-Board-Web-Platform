@@ -113,7 +113,7 @@ function buildLeadIndicators(input: {
   const indicatorsById = new Map<string, LeadIndicator>();
 
   for (const metric of input.leadMetrics) {
-    const name = metric.name?.trim() || "Việc lặp lại trên tài khoản";
+    const name = metric.name?.trim() || "Việc lặp lại trên máy chủ";
     const id = metric.leadIndicatorId?.trim() || `tactic_cloud_${slugify(name, String(indicatorsById.size + 1))}`;
     if (indicatorsById.has(id)) continue;
 
@@ -132,7 +132,7 @@ function buildLeadIndicators(input: {
 
   const groupedTasks = new Map<string, { name: string; id: string; isCore: boolean; countByWeek: Map<number, number> }>();
   input.tasks.forEach((task, index) => {
-    const name = task.leadIndicatorName?.trim() || task.title?.trim() || "Việc lặp lại trên tài khoản";
+    const name = task.leadIndicatorName?.trim() || task.title?.trim() || "Việc lặp lại trên máy chủ";
     const id = getIndicatorIdFromTask(task, index);
     const existing = groupedTasks.get(id) ?? {
       id,
@@ -162,7 +162,7 @@ function buildTaskInstances(tasks: TwelveWeekPulledTask[], totalWeeks: number): 
       id: task.clientTaskId?.trim() || `cloud_task_${index + 1}`,
       weekNumber: clampWeekNumber(task.weekNumber, totalWeeks),
       scheduledDate: normalizeDateKey(task.scheduledDate),
-      title: task.title?.trim() || "Việc trên tài khoản",
+      title: task.title?.trim() || "Việc trên máy chủ",
       leadIndicatorName: task.leadIndicatorName?.trim() || "",
       isCore: task.isCore !== false,
       completed: task.status === "done",
@@ -426,7 +426,7 @@ function buildPulledGoal(input: {
       input.pulledGoal?.description?.trim() ||
       input.pulledGoal?.title?.trim() ||
       input.existingGoal?.twelveWeekSystem?.vision12Week ||
-      "Không gian làm việc trên tài khoản",
+      "Bản trên máy chủ",
     lagMetric: input.existingGoal?.twelveWeekSystem?.lagMetric ?? {
       name: leadIndicators[0]?.name ?? "Tiến độ chính",
       unit: "",
@@ -467,8 +467,8 @@ function buildPulledGoal(input: {
 
   const baseGoal: Goal = {
     id: clientGoalId,
-    category: input.pulledGoal?.category?.trim() || input.existingGoal?.category || "Tài khoản",
-    title: input.pulledGoal?.title?.trim() || input.existingGoal?.title || "Mục tiêu 12 tuần trên tài khoản",
+    category: input.pulledGoal?.category?.trim() || input.existingGoal?.category || "Máy chủ",
+    title: input.pulledGoal?.title?.trim() || input.existingGoal?.title || "Mục tiêu 12 tuần trên máy chủ",
     description: input.pulledGoal?.description?.trim() || input.existingGoal?.description || "",
     deadline: normalizeDateKey(input.pulledGoal?.deadline) || input.existingGoal?.deadline || "",
     tasks: buildGoalTaskSummary(input.pulledGoal?.tasks),

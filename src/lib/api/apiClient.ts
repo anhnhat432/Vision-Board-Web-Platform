@@ -135,7 +135,7 @@ async function request<TResponse, TBody = unknown>(
   options?: ApiRequestOptions,
 ): Promise<TResponse> {
   if (isDemoMode()) {
-    throw new Error("Kết nối tài khoản không khả dụng trong chế độ thử.");
+    throw new Error("Các yêu cầu API bị tắt trong chế độ thử.");
   }
 
   const token = (await getFirebaseToken().catch(() => null)) ?? getStoredFirebaseToken();
@@ -159,7 +159,7 @@ async function request<TResponse, TBody = unknown>(
     });
   } catch (networkError) {
     const apiError = createApiClientError({
-      message: "Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.",
+      message: "Lỗi kết nối mạng. Kiểm tra mạng rồi thử lại.",
       isNetworkError: true,
       details: networkError,
     });
@@ -192,7 +192,7 @@ async function request<TResponse, TBody = unknown>(
     const apiPayload = payload as ApiSuccessEnvelope<TResponse> | ApiErrorEnvelope;
     if (apiPayload.success === false) {
       const apiError = createApiClientError({
-        message: apiPayload.message || "API request failed.",
+        message: apiPayload.message || "Không gửi được yêu cầu. Thử lại sau.",
         status: response.status,
         details: apiPayload.details,
       });

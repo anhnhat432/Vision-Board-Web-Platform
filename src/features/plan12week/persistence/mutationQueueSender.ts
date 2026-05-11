@@ -112,7 +112,7 @@ function getFailureInput(result: TwelveWeekMutationResult | null, fallbackMessag
   if (status === "conflict") {
     return {
       code: result?.reason ?? "sync_conflict",
-      message: result?.message ?? "Đồng bộ thay đổi báo có xung đột.",
+      message: result?.message ?? "Phát hiện xung đột khi đồng bộ. Vui lòng thử lại.",
       httpStatus: 409,
       retryable: false,
     };
@@ -121,7 +121,7 @@ function getFailureInput(result: TwelveWeekMutationResult | null, fallbackMessag
   if (status === "failed_validation") {
     return {
       code: result?.reason ?? "sync_validation_failed",
-      message: result?.message ?? "Thay đổi chưa vượt qua kiểm tra của máy chủ.",
+      message: result?.message ?? "Dữ liệu gửi đi không hợp lệ, máy chủ từ chối.",
       httpStatus: 400,
       retryable: false,
     };
@@ -229,10 +229,10 @@ export async function sendPending12WeekMutations(
       }
 
       const failure = result
-        ? getFailureInput(result, "Đồng bộ thay đổi chưa thành công.")
+        ? getFailureInput(result, "Đồng bộ thất bại, sẽ thử lại sau.")
         : {
             code: "missing_sync_result",
-            message: "Phản hồi từ máy chủ chưa có kết quả cho thay đổi này.",
+            message: "Máy chủ không trả về kết quả cho thay đổi này.",
             retryable: true,
           };
       const inFlightItem = latestStore.items.find((candidate) => candidate.id === item.id);
