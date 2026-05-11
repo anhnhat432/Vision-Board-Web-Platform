@@ -768,7 +768,7 @@ export function TwelveWeekLocalStatusSection({
                   <p className="mt-1 text-lg font-semibold text-slate-950">{queueSummary.inFlightCount}</p>
                 </div>
                 <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Lỗi/retry</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Lỗi/thử lại</p>
                   <p className="mt-1 text-lg font-semibold text-slate-950">{queueSummary.failedOrRetryableCount}</p>
                 </div>
                 <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
@@ -810,7 +810,7 @@ export function TwelveWeekLocalStatusSection({
                 <div className="flex items-start gap-2 rounded-[var(--r-control)] border border-amber-200 bg-amber-50 px-3 py-2">
                   <WifiOff className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
                   <p className="text-xs leading-5 text-amber-800">
-                    Trình duyệt đang offline. Thay đổi vẫn lưu trên thiết bị và sẽ đồng bộ khi có mạng.
+                    Trình duyệt đang mất mạng. Thay đổi vẫn lưu trên thiết bị và sẽ đồng bộ khi có mạng.
                   </p>
                 </div>
               ) : null}

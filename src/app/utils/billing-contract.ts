@@ -105,7 +105,7 @@ export function getBillingActionStatusLabel(status: BillingActionSnapshot["statu
     case "local_only":
       return "Local only";
     case "offline":
-      return "Đang offline";
+      return "Đang mất mạng";
     case "not_configured":
       return "Chưa cấu hình";
     default:

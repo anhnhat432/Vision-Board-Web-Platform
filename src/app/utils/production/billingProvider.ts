@@ -106,7 +106,7 @@ const apiContractBillingProvider: BillingProvider = {
         status: "offline",
         providerMode: "api_contract",
         planCode: getCurrentPlan(),
-        message: "Thiết bị đang offline nên chưa thể mở trang thanh toán.",
+        message: "Thiết bị đang mất mạng nên chưa thể mở trang thanh toán.",
       };
     }
 
@@ -215,7 +215,7 @@ const apiContractBillingProvider: BillingProvider = {
           providerMode: "api_contract",
           planCode: getCurrentPlan(),
           entitlementKeys: getCurrentEntitlementKeys(),
-          message: "Thiết bị đang offline nên chưa thể đồng bộ quyền từ tài khoản.",
+          message: "Thiết bị đang mất mạng nên chưa thể đồng bộ quyền từ tài khoản.",
         };
       }
 
@@ -303,7 +303,7 @@ const apiContractBillingProvider: BillingProvider = {
         providerMode: "api_contract",
         planCode: getCurrentPlan(),
         entitlementKeys: getCurrentEntitlementKeys(),
-        message: "Thiết bị đang offline nên chưa thể đồng bộ quyền từ đơn vị thanh toán.",
+        message: "Thiết bị đang mất mạng nên chưa thể đồng bộ quyền từ đơn vị thanh toán.",
       };
     }
 
@@ -377,7 +377,7 @@ const apiContractBillingProvider: BillingProvider = {
         providerMode: "api_contract",
         planCode: getCurrentPlan(),
         entitlementKeys: getCurrentEntitlementKeys(),
-        message: "Thiết bị đang offline nên chưa thể khôi phục giao dịch từ đơn vị thanh toán.",
+        message: "Thiết bị đang mất mạng nên chưa thể khôi phục giao dịch từ đơn vị thanh toán.",
       };
     }
 
@@ -470,7 +470,7 @@ export async function openBillingCustomerPortal(goalId?: string): Promise<Custom
       status: "offline",
       providerMode: status.mode,
       providerLabel: status.providerLabel,
-      message: "Thiết bị đang offline nên chưa thể mở cổng quản lý thanh toán.",
+      message: "Thiết bị đang mất mạng nên chưa thể mở cổng quản lý thanh toán.",
     };
   }
 
@@ -603,7 +603,7 @@ export async function cancelSubscriptionOnServer(): Promise<CancelSubscriptionRe
     return {
       ok: false,
       status: "offline",
-      message: "Thiết bị đang offline. Vui lòng thử lại khi có kết nối.",
+      message: "Thiết bị đang mất mạng. Vui lòng thử lại khi có kết nối.",
     };
   }
 

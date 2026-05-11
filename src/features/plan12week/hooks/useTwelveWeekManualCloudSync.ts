@@ -143,7 +143,7 @@ function isDrainFailure(result: MutationQueueSyncResult): boolean {
 
 function getDrainFailureMessage(result: MutationQueueSyncResult): string {
   if (result.status === "skipped" && result.skipReason === "offline") {
-    return "Trình duyệt đang offline. Đã dừng nhận dữ liệu để giữ bản trên thiết bị an toàn.";
+    return "Trình duyệt đang mất mạng. Đã dừng nhận dữ liệu để giữ bản trên thiết bị an toàn.";
   }
 
   if (result.status === "skipped") {
@@ -208,7 +208,7 @@ export async function runTwelveWeekManualCloudSync(
   }
 
   if (options.online === false) {
-    return createSkippedResult("offline", "Dang offline. Hang cho thay doi se duoc gui khi ket noi lai.");
+    return createSkippedResult("offline", "Đang mất mạng. Hàng chờ thay đổi sẽ được gửi khi kết nối lại.");
   }
 
   try {

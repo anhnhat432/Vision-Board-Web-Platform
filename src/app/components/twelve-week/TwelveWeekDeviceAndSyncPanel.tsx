@@ -24,7 +24,7 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
     syncResultStatus === "unsafe";
   const showAdvancedSync = shouldShowSyncDebugUi() || hasSyncAttention;
   const storageDescription = props.backendConnectionStatus.signedIn
-    ? "Quản lý quyền Plus, nhắc việc và dữ liệu tài khoản. Bản trên thiết bị vẫn được giữ để thao tác offline và đồng bộ an toàn."
+    ? "Quản lý quyền Plus, nhắc việc và dữ liệu tài khoản. Bản trên thiết bị vẫn được giữ để dùng khi mất mạng và đồng bộ an toàn."
     : "Quản lý quyền Plus, nhắc việc và dữ liệu đang lưu trên trình duyệt này. Các thao tác xóa đều cần xác nhận.";
 
   return (
