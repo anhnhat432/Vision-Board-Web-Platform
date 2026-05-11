@@ -1,5 +1,6 @@
 ﻿import { type SyntheticEvent, useCallback, useState } from "react";
 import { AlertTriangle, CloudDownload, CloudUpload, FileDown, RefreshCw, Trash2, WifiOff } from "lucide-react";
+import { CloudSyncIllustration } from "../illustrations";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
@@ -601,9 +602,12 @@ export function TwelveWeekLocalStatusSection({
             Các tiện ích dưới đây giúp kiểm tra và bảo vệ dữ liệu trước khi đồng bộ.
           </p>
         </div>
-        <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">
-          Thiết bị này
-        </Badge>
+        <div className="flex shrink-0 items-center gap-3">
+          <CloudSyncIllustration className="hidden w-28 text-violet-500 opacity-70 sm:block" />
+          <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">
+            Thiết bị này
+          </Badge>
+        </div>
       </div>
       <div className="mt-4 rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-4 py-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
