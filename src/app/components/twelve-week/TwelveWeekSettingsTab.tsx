@@ -22,7 +22,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
 
       <SectionBlock
         title="Lịch tuần tham chiếu"
-        description="Chặn thời gian gọn cho MVP: làm việc sâu, khoảng đệm và nghỉ chủ động trong tuần."
+        description="Khung làm việc tối ưu (bản gọn): chuyên sâu, dự phòng và nghỉ chủ động trong tuần."
       >
         <WeeklyTimeBlocksPanel value={props.system.weeklyTimeBlocks ?? []} onChange={props.onTimeBlocksChange} />
       </SectionBlock>

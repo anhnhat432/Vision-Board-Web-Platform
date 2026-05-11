@@ -92,7 +92,7 @@ export const TWELVE_WEEK_TEMPLATE_CATALOG: TwelveWeekTemplateDefinition[] = [
     description: "Khung Plus cho mục tiêu cần tạo đầu ra rõ mỗi tuần, không chỉ bận mà không tiến.",
     bestFor: "Khi bạn cần mỗi tuần phải có thứ gì đó được hoàn tất, nộp, đăng, gửi hoặc hoàn thành.",
     whyItWorks: "Mọi tactic đều bị kéo về một đầu ra chính, nên tuần không bị nuốt bởi việc phụ.",
-    firstWeekWin: "Tuần đầu đã có slot tạo đầu ra, slot hoàn thiện và một nhịp follow-up nhẹ để đóng vòng.",
+    firstWeekWin: "Tuần đầu đã có slot tạo đầu ra, slot hoàn thiện và một nhịp theo dõi nhẹ để đóng vòng.",
     idealFor: ["Ra đầu ra", "Hoàn tất dự án", "Chốt phần việc"],
     goalType: "Project Completion",
     reviewDay: "Friday",
@@ -109,7 +109,7 @@ export const TWELVE_WEEK_TEMPLATE_CATALOG: TwelveWeekTemplateDefinition[] = [
     tactics: [
       { name: "Tạo bản nháp hoặc phiên bản đầu", target: "2", unit: "phiên/tuần", type: "core", cadence: "frontload" },
       { name: "Hoàn thiện để chốt đầu ra", target: "2", unit: "phiên/tuần", type: "core", cadence: "backload" },
-      { name: "Follow-up hoặc công bố", target: "1", unit: "lần/tuần", type: "optional", cadence: "spread" },
+      { name: "Theo dõi tiếp hoặc công bố", target: "1", unit: "lần/tuần", type: "optional", cadence: "spread" },
     ],
   },
   {
@@ -195,7 +195,7 @@ export const TWELVE_WEEK_TEMPLATE_CATALOG: TwelveWeekTemplateDefinition[] = [
     successEvidence: "Bạn ngồi vào buổi học là biết ngay hôm nay sẽ nắm thêm phần nào và kiểm tra bằng cách nào.",
     tactics: [
       { name: "Buổi học chủ động mới", target: "3", unit: "buổi/tuần", type: "core", cadence: "spread" },
-      { name: "Ôn và consolidate", target: "2", unit: "lần/tuần", type: "core", cadence: "backload" },
+      { name: "Ôn và củng cố", target: "2", unit: "lần/tuần", type: "core", cadence: "backload" },
       {
         name: "Kiểm tra mức hiểu (quiz/flashcard)",
         target: "1",

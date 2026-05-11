@@ -163,7 +163,7 @@ export function buildAdaptiveTemplateSupport(input: {
           },
           {
             ...input.template.tactics[2],
-            name: `Follow-up hoặc công bố cho ${goalLabel}`,
+            name: `Theo dõi tiếp hoặc công bố cho ${goalLabel}`,
             target: adaptTargetCount(input.template.tactics[2].target, input.readinessScore, "optional"),
           },
         ],
@@ -228,7 +228,7 @@ export function buildAdaptiveTemplateSupport(input: {
           },
           {
             ...input.template.tactics[1],
-            name: "Ôn và consolidate nội dung đã học",
+            name: "Ôn và củng cố nội dung đã học",
             target: adaptTargetCount(input.template.tactics[1].target, input.readinessScore, "core"),
           },
           {

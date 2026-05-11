@@ -494,7 +494,7 @@ const QUALITY_HINTS: Record<GoalArchetype, ArchetypeQualityHints> = {
     recommendedMetric:
       "Số đề thi thử hoàn thành + điểm thử, không phải mức điểm cuối (điểm dạng band là chỉ số phi tuyến).",
     antiPatterns: [
-      "Đặt mục tiêu là mức điểm cụ thể trong thời gian quá ngắn — kiểm tra tính khả thi sẽ báo quá tham vọng.",
+      "Đặt mục tiêu là band/level cụ thể trong thời gian quá ngắn — Kiểm tra tính khả thi sẽ đánh dấu là quá tham vọng.",
       "Học dàn trải 4 kỹ năng cùng lúc — nên ưu tiên kỹ năng yếu nhất tuần đầu.",
       "Không làm đề thi thử, chỉ học lý thuyết.",
     ],
@@ -503,7 +503,7 @@ const QUALITY_HINTS: Record<GoalArchetype, ArchetypeQualityHints> = {
     recommendedMetric:
       "Số phần việc/tính năng đã hoàn tất, hoặc số phiên góp ý từ người dùng, không phải 'hoàn thành dự án' chung chung.",
     antiPatterns: [
-      "Đặt 'ra mắt MVP' tuần 12 mà không có cột mốc tuần 4 và 8.",
+      "Đặt 'phát hành MVP' tuần 12 mà không có cột mốc tuần 4 và 8.",
       "Không có buổi góp ý với người dùng — tự làm một mình trong khoảng trống.",
       "Phạm vi phình to giữa chu kỳ, mất tập trung.",
     ],
@@ -611,8 +611,8 @@ const PLAN_DEFAULTS: Record<GoalArchetype, ArchetypePlanDefaults> = {
   },
   creative_output: {
     recommendedLeadIndicators: [
-      "Buổi sáng tác/bản nháp",
-      "Buổi sửa",
+      "Buổi sáng tác / bản nháp",
+      "Buổi chỉnh sửa",
       "Lịch xuất bản (đăng bài/tải lên)",
     ],
     weekOneStart:

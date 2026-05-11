@@ -75,7 +75,7 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
     ],
     milestoneTemplates: {
       week4: "Hoàn thành 1 dự án nhỏ làm kết quả đầu tiên.",
-      week8: "Ship phiên bản thứ 2 sau khi nhận feedback.",
+      week8: "Phát hành phiên bản thứ 2 sau khi nhận góp ý.",
       week12: "Có portfolio hoặc 3-4 sản phẩm thực hành đo được.",
     },
     weekOneFocus: "Chọn 1 dự án nhỏ làm kết quả đầu tiên, bắt đầu vòng góp ý.",
@@ -99,7 +99,7 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
   health_fitness: {
     leadIndicatorSuggestions: [
       "Buổi cardio chính",
-      "Buổi strength",
+      "Buổi tập sức mạnh",
       "Vận động linh hoạt / phục hồi ngắn",
     ],
     milestoneTemplates: {
@@ -215,25 +215,25 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
   project_completion: {
     leadIndicatorSuggestions: [
       "Build session",
-      "User interview / feedback",
+      "Phỏng vấn / góp ý người dùng",
       "Hoàn tất review hoặc bản thử nội bộ",
     ],
     milestoneTemplates: {
-      week4: "Ship được 50% scope MVP và có phản hồi từ user đầu tiên.",
-      week8: "Đạt 80% scope MVP, đã fix dependency blocker, có 2 feedback session.",
+      week4: "Phát hành được 50% phạm vi MVP và có phản hồi từ người dùng đầu tiên.",
+      week8: "Đạt 80% phạm vi MVP, đã gỡ phần phụ thuộc đang chặn, có 2 buổi góp ý.",
       week12: "Ra mắt MVP v1 công khai hoặc nội bộ với chỉ số được đo rõ.",
     },
-    weekOneFocus: "Chốt MVP scope + danh sách dependencies + lịch user feedback.",
+    weekOneFocus: "Chốt phạm vi MVP + danh sách phần phụ thuộc + lịch góp ý người dùng.",
     weekOneExpectedOutput: "Tài liệu phạm vi + danh sách phụ thuộc + 1 phiên xây dựng khởi động.",
     firstAction: {
-      standard: "Viết scope document 5-10 dòng cho MVP trong 24h tới (mục tiêu, in-scope, out-of-scope).",
-      lowFeasibility: "Hôm nay viết 3 dòng scope: MVP làm gì, không làm gì, ai dùng đầu tiên. 10 phút là đủ.",
+      standard: "Viết tài liệu phạm vi 5-10 dòng cho MVP trong 24h tới (mục tiêu, trong phạm vi, ngoài phạm vi).",
+      lowFeasibility: "Hôm nay viết 3 dòng phạm vi: MVP làm gì, không làm gì, ai dùng đầu tiên. 10 phút là đủ.",
     },
     weekOneTacticLoadHint: "balanced",
     reviewPrompt: "Tuần này hoàn tất được gì? Có phụ thuộc nào đang chặn?",
     antiPatterns: [
-      "Đặt ra mắt MVP tuần 12 mà không có cột mốc rõ ở tuần 4 và 8.",
-      "Build trong vacuum không có session feedback người dùng.",
+      "Đặt phát hành MVP tuần 12 mà không có cột mốc rõ ở tuần 4 và 8.",
+      "Làm trong khoảng trống, không có buổi góp ý với người dùng.",
       "Phạm vi phình to giữa chu kỳ, mất tập trung.",
     ],
     requiredSignals: {
@@ -248,21 +248,21 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
     ],
     milestoneTemplates: {
       week4: "Giữ chuỗi ngày thói quen chính ≥ 21 ngày phiên bản dễ.",
-      week8: "Tăng cường độ habit lên mức mục tiêu, môi trường đã ổn định.",
+      week8: "Tăng cường độ thói quen lên mức mục tiêu, môi trường đã ổn định.",
       week12: "Thói quen tự chạy, không cần ý chí — môi trường + tín hiệu bắt đầu đã khóa.",
     },
-    weekOneFocus: "Chọn habit phiên bản 2 phút, gắn cue cụ thể vào routine có sẵn.",
-    weekOneExpectedOutput: "Streak 5-7 ngày phiên bản dễ + cue đã được test.",
+    weekOneFocus: "Chọn thói quen phiên bản 2 phút, gắn tín hiệu cụ thể vào nhịp quen thuộc có sẵn.",
+    weekOneExpectedOutput: "Chuỗi ngày 5-7 ngày phiên bản dễ + tín hiệu đã được thử.",
     firstAction: {
-      standard: "Đặt cue cụ thể (sau cà phê / trước đánh răng) và làm habit phiên bản 2 phút ngay hôm nay.",
-      lowFeasibility: "Hôm nay làm habit phiên bản 1 phút sau 1 routine có sẵn. Quan trọng là bấm khởi động.",
+      standard: "Đặt tín hiệu cụ thể (sau cà phê / trước đánh răng) và làm thói quen phiên bản 2 phút ngay hôm nay.",
+      lowFeasibility: "Hôm nay làm thói quen phiên bản 1 phút sau 1 nhịp quen thuộc có sẵn. Quan trọng là bấm khởi động.",
     },
     weekOneTacticLoadHint: "lighter",
-    reviewPrompt: "Streak còn giữ được không? Cue nào đang hoạt động tốt nhất?",
+    reviewPrompt: "Chuỗi ngày còn giữ được không? Tín hiệu nào đang hoạt động tốt nhất?",
     antiPatterns: [
       "Thói quen tuần 1 quá khó — không xây được chuỗi ngày ban đầu.",
-      "Nhiều habit cùng lúc — chọn 1 habit chính.",
-      "Không có cue/trigger gắn với routine có sẵn.",
+      "Nhiều thói quen cùng lúc — chọn 1 thói quen chính.",
+      "Không có tín hiệu kích hoạt gắn với nhịp quen thuộc có sẵn.",
     ],
     requiredSignals: {
       leadIndicatorKeywords: ["habit", "cue", "2 phút", "2 phut", "routine", "streak", "môi trường", "moi truong", "ghi chú", "ghi chu", "daily", "hằng ngày", "hang ngay", "trigger"],
@@ -272,25 +272,25 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
   creative_output: {
     leadIndicatorSuggestions: [
       "Buổi sáng tác / bản nháp",
-      "Buổi sửa",
+      "Buổi chỉnh sửa",
       "Lịch xuất bản (post / upload)",
     ],
     milestoneTemplates: {
-      week4: "Xuất bản 4 tác phẩm rough, cadence đã hình thành.",
-      week8: "Đã có 8 tác phẩm + 1 vòng feedback công khai.",
-      week12: "Có body of work 10-12 tác phẩm, cadence ổn định.",
+      week4: "Phát hành 4 tác phẩm bản nháp, nhịp xuất bản đã hình thành.",
+      week8: "Đã có 8 tác phẩm + 1 vòng góp ý công khai.",
+      week12: "Có bộ tác phẩm 10-12 bài, nhịp xuất bản ổn định.",
     },
-    weekOneFocus: "Ship 1 tác phẩm rough tuần đầu. Bỏ qua tham vọng perfect.",
-    weekOneExpectedOutput: "1 bài/tác phẩm đã publish + lịch xuất bản tuần kế tiếp.",
+    weekOneFocus: "Phát hành 1 tác phẩm bản nháp tuần đầu. Bỏ qua tham vọng hoàn hảo.",
+    weekOneExpectedOutput: "1 bài/tác phẩm đã phát hành + lịch xuất bản tuần kế tiếp.",
     firstAction: {
       standard: "Viết bản nháp thô cho 1 tác phẩm trong 48h tới và đặt lịch xuất bản cuối tuần.",
-      lowFeasibility: "Hôm nay viết 100-200 chữ rough hoặc làm 1 sketch nhỏ. Chưa cần publish.",
+      lowFeasibility: "Hôm nay viết 100-200 chữ bản nháp hoặc làm 1 phác thảo nhỏ. Chưa cần phát hành.",
     },
     weekOneTacticLoadHint: "balanced",
-    reviewPrompt: "Tuần này publish được gì? Có bị block bởi 'chưa đủ tốt' không?",
+    reviewPrompt: "Tuần này phát hành được gì? Có bị kẹt bởi 'chưa đủ tốt' không?",
     antiPatterns: [
       "Chỉ có chỉ số 'viết tốt hơn' — không đếm được.",
-      "Đăng dồn cuối kỳ, không có cadence xuất bản đều.",
+      "Đăng dồn cuối kỳ, không có nhịp xuất bản đều.",
       "Sửa mãi, không đưa ra bản hoàn tất.",
     ],
     requiredSignals: {
