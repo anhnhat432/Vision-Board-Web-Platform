@@ -30,6 +30,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Checkbox } from "../components/ui/checkbox";
 import { CountUp } from "../components/ui/count-up";
+import { EmptyGoalIllustration } from "../components/illustrations";
 import { Input } from "../components/ui/input";
 import { LoadingSpinner } from "../components/ui/loading-spinner";
 import { SectionBlock } from "../components/layout/SectionBlock";
@@ -880,6 +881,7 @@ function GoalTrackerContent({
               className="flow-panel overflow-hidden"
             >
               <CardContent className="p-10 text-center lg:p-14">
+                <EmptyGoalIllustration className="mx-auto mb-4 w-44 text-violet-500 sm:w-56" />
                 <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-control)] bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)]">
                   <Target className="h-10 w-10" />
                 </div>

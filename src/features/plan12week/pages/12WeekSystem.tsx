@@ -9,6 +9,11 @@ import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
 import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/DeleteDataConfirmationDialog";
 import { CycleReviewPanel } from "@/app/components/twelve-week/CycleReviewPanel";
+import {
+  PhaseHarvestIllustration,
+  PhasePeakIllustration,
+  PhaseRampIllustration,
+} from "@/app/components/illustrations";
 import { UpgradePaywallDialog } from '@/app/components/UpgradePaywallDialog';
 import { trackAnalyticsEvent } from '@/app/utils/analytics';
 import {
@@ -141,6 +146,18 @@ function getExecutionPhaseInfo(currentWeek: number) {
     textClassName: "text-emerald-700 dark:text-emerald-200",
     barClassName: "from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400",
   };
+}
+
+function getExecutionPhaseIllustration(currentWeek: number) {
+  if (currentWeek <= 4) {
+    return <PhaseRampIllustration className="h-7 w-7 text-violet-500" />;
+  }
+
+  if (currentWeek <= 8) {
+    return <PhasePeakIllustration className="h-7 w-7 text-fuchsia-500" />;
+  }
+
+  return <PhaseHarvestIllustration className="h-7 w-7 text-emerald-500" />;
 }
 
 function getExecutionSyncPillClass(syncStatus: string) {
@@ -732,6 +749,7 @@ export function TwelveWeekSystem() {
   const syncBadgeClass = getSyncBadgeClass(backendConnectionStatus);
   const syncBadgeLabel = getSyncBadgeLabel(backendConnectionStatus);
   const phaseInfo = getExecutionPhaseInfo(currentWeek);
+  const phaseIllustration = getExecutionPhaseIllustration(currentWeek);
   const syncPillClass = getExecutionSyncPillClass(backendConnectionStatus.syncStatus);
 
   useEffect(() => {
@@ -990,7 +1008,7 @@ export function TwelveWeekSystem() {
 
           <div className="flex min-w-0 items-center gap-2">
             <span className={`inline-flex shrink-0 items-center gap-2 rounded-[var(--r-pill)] border px-3 py-2 text-xs font-semibold ${phaseInfo.badgeClassName}`}>
-              <span className={`h-2 w-2 rounded-[var(--r-pill)] bg-gradient-to-r ${phaseInfo.barClassName}`} aria-hidden="true" />
+              {phaseIllustration}
               Tuần {currentWeek}/{system.totalWeeks} - {phaseInfo.label}
             </span>
             <span className={`inline-flex shrink-0 items-center gap-2 rounded-[var(--r-pill)] border px-3 py-2 text-xs font-semibold ${syncPillClass.pill}`}>

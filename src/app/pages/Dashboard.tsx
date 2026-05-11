@@ -31,6 +31,7 @@ import { useDashboardPlanLink } from "@/features/dashboard/hooks/useDashboardPla
 import { usePlan12Week } from "@/features/plan12week/hooks";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { FeedbackDialog } from "../components/FeedbackDialog";
+import { EmptyGoalIllustration, HeroOrbitIllustration } from "../components/illustrations";
 import { PageHeader } from "../components/layout/PageHeader";
 import { SectionBlock } from "../components/layout/SectionBlock";
 import { NewUserGuideBanner } from "../components/NewUserGuide";
@@ -712,6 +713,9 @@ function DashboardContent({
               }
             >
               <div className="stack-stack">
+                <div className="hidden justify-end xl:flex">
+                  <HeroOrbitIllustration className="-mb-10 -mt-12 w-44 text-violet-500 opacity-80" />
+                </div>
                 <div className="flex flex-wrap items-start justify-between gap-3 rounded-[var(--r-tile)] bg-white/82 p-4 ring-1 ring-slate-200/70 dark:bg-slate-900/60 dark:ring-slate-700">
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
@@ -954,6 +958,7 @@ function DashboardContent({
               eyebrow="Workspace mới"
               title="Chưa có dữ liệu thực thi để hiển thị."
               description="Dashboard sẽ chỉ hiện điểm, chuỗi ngày và chỉ số sau khi bạn tạo chu kỳ 12 tuần đầu tiên. Bây giờ nên đi từ Life Balance để có dữ liệu thật, rồi mới chốt mục tiêu SMART."
+              illustration={<EmptyGoalIllustration className="w-full text-violet-500" />}
               actions={
                 <Button
                   variant="secondary"

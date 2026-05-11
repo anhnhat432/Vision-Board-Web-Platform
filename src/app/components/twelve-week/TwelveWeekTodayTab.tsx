@@ -11,6 +11,7 @@ import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
 import { Progress } from "../ui/progress";
 import { Textarea } from "../ui/textarea";
+import { EmptyTaskIllustration } from "../illustrations";
 import { EmptyState } from "../states";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 import { formatCalendarDate } from "../../utils/storage";
@@ -515,6 +516,7 @@ export function TwelveWeekTodayTab({
                   <EmptyState
                     variant="dashed"
                     testId="today-empty-state"
+                    illustration={<EmptyTaskIllustration className="w-full text-violet-500" />}
                     icon={<Check className="h-5 w-5" />}
                     title={reviewDueToday ? "Tuần đã sẵn sàng để chốt review" : "Hết việc hôm nay"}
                     description={
@@ -535,6 +537,7 @@ export function TwelveWeekTodayTab({
                   <EmptyState
                     variant="dashed"
                     testId="today-empty-state"
+                    illustration={<EmptyTaskIllustration className="w-full text-violet-500" />}
                     icon={<Inbox className="h-5 w-5" />}
                     title="Chưa có việc nào trong chu kỳ này"
                     description={

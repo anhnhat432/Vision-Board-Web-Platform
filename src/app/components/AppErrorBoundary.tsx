@@ -3,6 +3,7 @@ import { AlertTriangle, Home, RefreshCw, Sparkles } from "lucide-react";
 import { isRouteErrorResponse, useNavigate, useRouteError } from "react-router";
 
 import { captureFrontendException } from "@/lib/monitoring/sentry";
+import { CelebrationBurst } from "./illustrations";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 
@@ -88,6 +89,7 @@ export function AppErrorBoundary() {
               </div>
 
               <div className="rounded-[var(--r-card)] border border-white/14 bg-white/12 p-6 shadow-sm">
+                <CelebrationBurst className="mx-auto mb-4 w-32 text-white/85" />
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-[var(--r-tile)] bg-white/14 text-white">
                     <AlertTriangle className="h-5 w-5" />

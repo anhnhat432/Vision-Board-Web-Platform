@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { ProductVisual } from "../components/visuals/ProductVisual";
+import { VisionMapIllustration } from "../components/illustrations";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -249,7 +249,7 @@ export function VisionBoardGallery() {
               </div>
 
               <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-[var(--r-card)] border border-white/14 bg-white/10 p-5 shadow-sm">
-                <ProductVisual variant="vision" className="mb-5 min-h-[190px]" />
+                <VisionMapIllustration className="mb-5 w-full text-white/85" />
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Snapshot thư viện</p>
 
                 <div className="mt-4 stack-tight">
@@ -341,6 +341,7 @@ export function VisionBoardGallery() {
       {userData.visionBoards.length === 0 ? (
         <Card className="overflow-hidden">
           <CardContent className="p-10 text-center lg:p-14">
+            <VisionMapIllustration className="mx-auto mb-4 w-56 text-violet-500 sm:w-64" />
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700">
               <Images className="h-10 w-10" />
             </div>
