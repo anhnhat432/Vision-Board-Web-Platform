@@ -219,7 +219,7 @@ export function BillingCheckoutQR() {
             {isSyncingEntitlement
               ? "Đã nhận thanh toán. Đang cập nhật quyền Plus trên tài khoản của bạn..."
               : syncFailed
-                ? "Đã nhận thanh toán, nhưng thiết bị này chưa lấy được quyền Plus từ server."
+                ? "Đã nhận thanh toán, nhưng thiết bị này chưa lấy được quyền Plus từ tài khoản."
                 : "Gói Plus đã được kích hoạt. Chúc bạn có 12 tuần hiệu quả!"}
           </p>
           {entitlementSyncMessage && (

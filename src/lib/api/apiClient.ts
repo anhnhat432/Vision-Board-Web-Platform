@@ -135,7 +135,7 @@ async function request<TResponse, TBody = unknown>(
   options?: ApiRequestOptions,
 ): Promise<TResponse> {
   if (isDemoMode()) {
-    throw new Error("API calls are disabled in demo mode");
+    throw new Error("Kết nối tài khoản không khả dụng trong chế độ thử.");
   }
 
   const token = (await getFirebaseToken().catch(() => null)) ?? getStoredFirebaseToken();
@@ -159,7 +159,7 @@ async function request<TResponse, TBody = unknown>(
     });
   } catch (networkError) {
     const apiError = createApiClientError({
-      message: "Network error. Please check your connection and try again.",
+      message: "Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.",
       isNetworkError: true,
       details: networkError,
     });
@@ -172,7 +172,7 @@ async function request<TResponse, TBody = unknown>(
   if (!response.ok) {
     const isConflict = response.status === 409;
     const apiError = createApiClientError({
-      message: getErrorMessageFromPayload(payload) ?? `Request failed with status ${response.status}.`,
+      message: getErrorMessageFromPayload(payload) ?? `Yêu cầu không thành công (mã ${response.status}).`,
       status: response.status,
       details: payload,
       conflict: isConflict || undefined,

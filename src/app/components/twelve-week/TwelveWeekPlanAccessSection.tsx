@@ -150,7 +150,7 @@ export function TwelveWeekPlanAccessSection({
         <div className="rounded-[var(--r-control)] border border-violet-100 bg-white p-4">
           <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Trạng thái nhanh</p>
           <p className="mt-2 text-lg font-semibold text-slate-950">
-            {unlockedEntitlementCount}/{ENTITLEMENT_ORDER.length} quyền premium đang mở
+            {unlockedEntitlementCount}/{ENTITLEMENT_ORDER.length} quyền Plus đang mở
           </p>
           <p className="mt-1 text-sm text-slate-600">
             Nâng cấp gói Plus để mở toàn bộ quyền nâng cao.
@@ -188,12 +188,12 @@ export function TwelveWeekPlanAccessSection({
                 </Badge>
               </div>
               <div className="mt-[var(--space-inline)] space-y-1 text-sm text-slate-700">
-                <p>Provider: {billingProviderStatus.providerLabel}</p>
+                <p>Đơn vị thanh toán: {billingProviderStatus.providerLabel}</p>
                 <p>Thanh toán: {getBillingReadinessLabel(billingProviderStatus.checkoutReady, "Dự phòng trên thiết bị")}</p>
-                <p>Restore: {getBillingReadinessLabel(billingProviderStatus.restoreReady, "Local fallback")}</p>
+                <p>Khôi phục: {getBillingReadinessLabel(billingProviderStatus.restoreReady, "Dự phòng trên thiết bị")}</p>
                 <p>
                   Kiểm tra quyền:{" "}
-                  {getBillingReadinessLabel(billingProviderStatus.entitlementSyncReady, "Local fallback")}
+                  {getBillingReadinessLabel(billingProviderStatus.entitlementSyncReady, "Dự phòng trên thiết bị")}
                 </p>
                 <p>
                   Cổng quản lý: {getBillingReadinessLabel(billingProviderStatus.manageBillingReady, "Chưa cấu hình")}
@@ -208,7 +208,7 @@ export function TwelveWeekPlanAccessSection({
               )}`}
             >
               <div className="flex items-center justify-between gap-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em]">Kiểm tra quyền local</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em]">Kiểm tra quyền trên thiết bị</p>
                 <Badge variant="outline" className="border-current/20 bg-white/70 text-current">
                   {getBillingActionStatusLabel(lastEntitlementSyncSnapshot?.status ?? "local_only")}
                 </Badge>
@@ -220,7 +220,7 @@ export function TwelveWeekPlanAccessSection({
               </p>
               <p className="mt-1 text-sm opacity-80">
                 {lastEntitlementSyncSnapshot?.message ??
-                  "Khi kiểm tra, web sẽ đọc lại trạng thái quyền từ provider hoặc local fallback."}
+                  "Khi kiểm tra, web sẽ đọc lại trạng thái quyền từ đơn vị thanh toán hoặc bản dự phòng trên thiết bị."}
               </p>
               <p className="mt-[var(--space-inline)] text-xs uppercase tracking-[0.16em] opacity-60">
                 {lastEntitlementSyncSnapshot ? formatDateTimeLabel(lastEntitlementSyncSnapshot.at) : "Chưa chạy"}
@@ -264,7 +264,7 @@ export function TwelveWeekPlanAccessSection({
             <p className="mt-1 text-sm text-slate-600">
               {currentPlanCode === "FREE"
                 ? "Nâng cấp Plus để mở quyền nâng cao cho chu kỳ 12 tuần."
-                : "Quyền premium được đồng bộ từ server."}
+                : "Quyền nâng cao được đồng bộ từ tài khoản."}
             </p>
           </div>
         )}

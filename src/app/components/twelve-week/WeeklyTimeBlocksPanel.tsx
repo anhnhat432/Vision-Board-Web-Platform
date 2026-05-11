@@ -31,14 +31,14 @@ interface TimeBlockDraft {
 }
 
 const TYPE_LABELS: Record<TimeBlockType, string> = {
-  strategic: "Strategic Block",
-  buffer: "Buffer Block",
-  breakout: "Breakout Block",
+  strategic: "Khung chiến lược",
+  buffer: "Khung đệm",
+  breakout: "Khung tách khỏi việc",
 };
 
 const TYPE_DESCRIPTIONS: Record<TimeBlockType, string> = {
-  strategic: "3 giờ deep work cho tactic quan trọng nhất.",
-  buffer: "30-60 phút xử lý email, admin, việc rời rạc.",
+  strategic: "3 giờ làm sâu cho việc lặp lại quan trọng nhất.",
+  buffer: "30-60 phút xử lý email, việc hành chính nhỏ, việc rời rạc.",
   breakout: "3 giờ nghỉ chủ động, tách khỏi công việc.",
 };
 

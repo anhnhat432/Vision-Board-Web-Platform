@@ -303,7 +303,7 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
         "review_missing",
         "warning",
         "Tuần trước chưa có review",
-        "3 phút phản tư cho tuần trước sẽ giúp bạn quyết định nhịp tuần này nhẹ hơn — không cần dài, chỉ cần chốt.",
+        "3 phút nhìn lại tuần trước sẽ giúp bạn quyết định nhịp tuần này nhẹ hơn — không cần dài, chỉ cần chốt.",
         "open_week_review",
         {
           weekNumber: metrics.weekNumber,
@@ -543,7 +543,7 @@ export function getWeeklyReflectionInsights(
 
 const NEXT_ACTION_LIBRARY: Record<ExecutionInsightNextActionId, Omit<ExecutionInsightNextAction, "id">> = {
   open_today: {
-    label: "Mở Today",
+    label: "Mở Hôm nay",
     hint: "Xem việc đầu tiên hôm nay và bắt đầu nhỏ.",
   },
   open_week_review: {

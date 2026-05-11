@@ -30,7 +30,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function getProfileBootstrapErrorMessage(error: unknown, timedOut: boolean): string {
   if (timedOut) {
-    return "Backend chưa mở được hồ sơ tài khoản sau vài lần thử. Hãy bấm Thử lại hoặc đăng xuất rồi đăng nhập lại.";
+    return "Máy chủ chưa mở được hồ sơ tài khoản sau vài lần thử. Hãy bấm Thử lại hoặc đăng xuất rồi đăng nhập lại.";
   }
 
   if (error instanceof Error && error.message.trim().length > 0) {
@@ -43,10 +43,10 @@ function getProfileBootstrapErrorMessage(error: unknown, timedOut: boolean): str
 
     if (message && status) return `${message} (HTTP ${status})`;
     if (message) return message;
-    if (status) return `Không thể mở hồ sơ tài khoản. Backend trả HTTP ${status}.`;
+    if (status) return `Không thể mở hồ sơ tài khoản. Máy chủ trả HTTP ${status}.`;
   }
 
-  return "Không thể mở hồ sơ tài khoản. Vui lòng kiểm tra kết nối backend và thử lại.";
+  return "Không thể mở hồ sơ tài khoản. Vui lòng kiểm tra kết nối máy chủ và thử lại.";
 }
 
 function getErrorStatus(error: unknown): number | null {

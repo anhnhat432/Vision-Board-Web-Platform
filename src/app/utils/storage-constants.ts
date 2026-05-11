@@ -91,33 +91,33 @@ export const TWELVE_WEEK_FUNNEL_STEPS = [
 export const TWELVE_WEEK_MONETIZATION_STEPS = [
   {
     id: "paywall_viewed",
-    label: "Mở paywall",
-    description: "Người dùng đã nhìn thấy paywall nâng cấp trong một ngữ cảnh cụ thể.",
+    label: "Mở màn nâng cấp",
+    description: "Người dùng đã nhìn thấy màn nâng cấp trong một ngữ cảnh cụ thể.",
   },
   {
     id: "paywall_cta_clicked",
-    label: "Bấm CTA nâng cấp",
-    description: "Người dùng bấm một CTA dẫn tới paywall hoặc bước nâng cấp tiếp theo.",
+    label: "Bấm nút nâng cấp",
+    description: "Người dùng bấm một nút dẫn tới màn nâng cấp hoặc bước nâng cấp tiếp theo.",
   },
   {
     id: "paywall_checkout_started",
-    label: "Bắt đầu checkout",
+    label: "Bắt đầu thanh toán",
     description: "Người dùng bắt đầu bước mở gói trên thiết bị hiện tại.",
   },
   {
     id: "paywall_checkout_completed",
-    label: "Hoàn tất checkout",
-    description: "Thiết bị đã mở gói thành công trong flow local-first hiện tại.",
+    label: "Hoàn tất thanh toán",
+    description: "Thiết bị đã mở gói thành công trong luồng trên thiết bị hiện tại.",
   },
   {
     id: "premium_template_applied",
-    label: "Áp dụng template",
-    description: "Một template premium hoặc free đã được áp dụng vào setup.",
+    label: "Áp dụng mẫu",
+    description: "Một mẫu Plus hoặc miễn phí đã được áp dụng vào setup.",
   },
   {
     id: "premium_insight_opened",
-    label: "Mở insight premium",
-    description: "Người dùng đã mở phần insight review premium trong tab tuần.",
+    label: "Mở góc nhìn Plus",
+    description: "Người dùng đã mở phần góc nhìn review Plus trong tab tuần.",
   },
 ] as const;
 

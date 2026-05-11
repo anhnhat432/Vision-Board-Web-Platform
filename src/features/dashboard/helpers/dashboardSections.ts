@@ -40,9 +40,9 @@ export function getDashboardNextAction(state: DashboardNextActionInput): Dashboa
   if (state.currentWeek && state.totalWeeks && state.currentWeek > state.totalWeeks) {
     return {
       eyebrow: "Việc tiếp theo nên làm",
-      title: "Cycle đã kết thúc, review tổng",
+      title: "Chu kỳ đã kết thúc, review tổng",
       description: "12 tuần đã khép lại. Hãy chốt review chu kỳ trước khi mở nhịp mới.",
-      ctaLabel: "Mở Cycle Review",
+      ctaLabel: "Mở review chu kỳ",
       ctaTarget: "/12-week-system",
     };
   }
@@ -61,8 +61,8 @@ export function getDashboardNextAction(state: DashboardNextActionInput): Dashboa
     return {
       eyebrow: "Việc tiếp theo nên làm",
       title: "Có việc cốt lõi hôm nay",
-      description: "Mở Today và xử lý việc quan trọng nhất trước khi nhìn sang các surface khác.",
-      ctaLabel: "Mở Today",
+      description: "Mở Hôm nay và xử lý việc quan trọng nhất trước khi nhìn sang các khu vực khác.",
+      ctaLabel: "Mở Hôm nay",
       ctaTarget: "/12-week-system?tab=today",
     };
   }
@@ -70,7 +70,7 @@ export function getDashboardNextAction(state: DashboardNextActionInput): Dashboa
   return {
     eyebrow: "Việc tiếp theo nên làm",
     title: state.hasReviewedCurrentWeek ? "Tiếp tục chu kỳ" : "Mở nhịp 12 tuần",
-    description: "Cycle đang ổn. Vào trung tâm 12 tuần để xem Today, tuần hiện tại và tiến độ khi cần.",
+    description: "Chu kỳ đang ổn. Vào trung tâm 12 tuần để xem Hôm nay, tuần hiện tại và tiến độ khi cần.",
     ctaLabel: "Mở 12 tuần",
     ctaTarget: "/12-week-system",
   };

@@ -243,7 +243,7 @@ export function VisionBoardGallery() {
                     className="border-white/18 bg-white/10 text-white hover:bg-white/16 hover:text-white"
                     onClick={() => navigate("/")}
                   >
-                    Về bảng điều khiển
+                    Về Trang chính
                   </Button>
                 </div>
               </div>

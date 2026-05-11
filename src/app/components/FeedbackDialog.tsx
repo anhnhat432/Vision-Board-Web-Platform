@@ -182,7 +182,7 @@ export function FeedbackDialog({
                 id="demo-feedback-confusing"
                 value={confusingText}
                 maxLength={500}
-                placeholder="Ví dụ: không rõ bước tiếp theo, setup 12 tuần dài, tab Today chưa dễ hiểu..."
+                placeholder="Ví dụ: không rõ bước tiếp theo, Setup 12 tuần dài, tab Hôm nay chưa dễ hiểu..."
                 onChange={(event) => setConfusingText(event.target.value)}
               />
               <p className="text-xs leading-5 text-slate-500">

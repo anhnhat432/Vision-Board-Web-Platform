@@ -544,7 +544,7 @@ function DashboardContent({
 
   return (
     <div className={`ops-shell ops-dashboard ${showMobileStickyCTA ? 'pb-24' : ''}`}>
-      {!isSignedOut ? <h1 className="sr-only">Bảng điều khiển</h1> : null}
+      {!isSignedOut ? <h1 className="sr-only">Trang chính</h1> : null}
       <UpgradePaywallDialog
         open={isUpgradeDialogOpen}
         onOpenChange={setIsUpgradeDialogOpen}
@@ -678,7 +678,7 @@ function DashboardContent({
       <SpotlightTour
         open={isTourOpen}
         onOpenChange={setIsTourOpen}
-        title="Tour bảng điều khiển"
+        title="Tour Trang chính"
         description="Ba điểm chính để người mới mở vào là biết nên bắt đầu từ đâu."
         steps={dashboardTourSteps}
       />
@@ -815,7 +815,7 @@ function DashboardContent({
           {activeSystem && (
             <SectionBlock
               title="Việc hôm nay"
-              description={isDesktopViewport ? "Nhìn nhanh những việc tạo lực đẩy tuần này. Mở Today để đánh dấu và check-in." : undefined}
+              description={isDesktopViewport ? "Nhìn nhanh những việc tạo lực đẩy tuần này. Mở Hôm nay để đánh dấu và check-in." : undefined}
             >
               <div className="grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1fr)_190px]">
                 {activeSystemTodayTasks.length > 0 ? (
@@ -888,7 +888,7 @@ function DashboardContent({
                       className="mt-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700"
                       onClick={() => navigate("/12-week-system?tab=today")}
                     >
-                      Mở Today
+                      Mở Hôm nay
                     </Button>
                   </div>
                 )}
@@ -1009,7 +1009,7 @@ function DashboardContent({
                         Tuần {activeSystemWeek ?? currentWeekExecutionSnapshot.weekNumber}:{" "}
                         {activeSystemWeekCompletion?.completed ?? currentWeekExecutionSnapshot.completedTasks}/
                         {activeSystemWeekCompletion?.total ?? currentWeekExecutionSnapshot.totalTasks} việc —{" "}
-                        {activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore}% lead completion
+                        {activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore}% việc lặp lại
                       </p>
                     </div>
                     <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
@@ -1048,7 +1048,7 @@ function DashboardContent({
                       Tuần {activeSystemWeek ?? currentWeekExecutionSnapshot.weekNumber}:{" "}
                       {activeSystemWeekCompletion?.completed ?? currentWeekExecutionSnapshot.completedTasks}/
                       {activeSystemWeekCompletion?.total ?? currentWeekExecutionSnapshot.totalTasks} việc —{" "}
-                      {activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore}% lead completion
+                      {activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore}% việc lặp lại
                     </p>
                   </div>
                   <span className="rounded-[var(--r-pill)] border border-border bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">

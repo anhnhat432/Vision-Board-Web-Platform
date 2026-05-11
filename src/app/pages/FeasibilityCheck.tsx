@@ -134,11 +134,11 @@ export function FeasibilityCheck() {
       <CoreFlowGateState
         currentStepId="life_balance"
         eyebrow="Kiểm tra"
-        title="Hoàn thành Life Balance trước khi kiểm tra tính khả thi"
+        title="Hoàn thành Cân bằng cuộc sống trước khi kiểm tra tính khả thi"
         description="Phần kiểm tra cần điểm cân bằng thật để biết mục tiêu đang dựa trên khu vực nào. Hãy hoàn thành bước đánh giá trước, rồi quay lại kiểm tra."
-        actionLabel="Bắt đầu Life Balance"
+        actionLabel="Bắt đầu Cân bằng cuộc sống"
         onAction={() => navigate("/onboarding")}
-        secondaryActionLabel="Về bảng điều khiển"
+        secondaryActionLabel="Về Trang chính"
         onSecondaryAction={() => navigate("/")}
       />
     );
@@ -151,9 +151,9 @@ export function FeasibilityCheck() {
         eyebrow="Kiểm tra"
         title="Chọn trọng tâm trước khi kiểm tra tính khả thi"
         description="Bạn đã có dữ liệu cân bằng nhưng chưa có trọng tâm hợp lệ. Chọn một lĩnh vực ưu tiên để phần kiểm tra hiểu đúng bối cảnh mục tiêu."
-        actionLabel="Mở Life Insight"
+        actionLabel="Mở góc nhìn cuộc sống"
         onAction={() => navigate("/life-insight")}
-        secondaryActionLabel="Bắt đầu Life Balance"
+        secondaryActionLabel="Bắt đầu Cân bằng cuộc sống"
         onSecondaryAction={() => navigate("/onboarding")}
       />
     );
@@ -164,11 +164,11 @@ export function FeasibilityCheck() {
       <CoreFlowGateState
         currentStepId="smart_goal"
         eyebrow="Kiểm tra"
-        title="Viết SMART Goal trước khi kiểm tra tính khả thi"
+        title="Viết mục tiêu SMART trước khi kiểm tra tính khả thi"
         description="Phần kiểm tra cần một mục tiêu đủ rõ về kết quả, chỉ số, mức cam kết và thời hạn. Quay lại bước viết mục tiêu để hoàn thiện bản nháp."
         actionLabel="Quay lại viết mục tiêu"
         onAction={() => navigate("/smart-goal-setup")}
-        secondaryActionLabel="Mở Life Insight"
+        secondaryActionLabel="Mở góc nhìn cuộc sống"
         onSecondaryAction={() => navigate("/life-insight")}
       />
     );

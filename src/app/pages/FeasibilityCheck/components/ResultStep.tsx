@@ -346,7 +346,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/58">Điểm khả thi</p>
               <p className="mt-2 text-lg font-semibold leading-7 text-white">{copy.statusHint}</p>
               <p className="mt-2 text-sm leading-6 text-white/72">
-                Score này kết hợp câu trả lời kiểm tra, điểm Life Balance và độ rõ của SMART Goal.
+                Điểm này kết hợp câu trả lời kiểm tra, điểm Cân bằng cuộc sống và độ rõ của mục tiêu SMART.
               </p>
             </div>
           </div>

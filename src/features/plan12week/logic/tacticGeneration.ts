@@ -67,17 +67,17 @@ export const ARCHETYPE_TACTIC_SUGGESTIONS: Record<
   ],
   habit_building: [
     { name: "Thực hành thói quen mới [thói quen]", target: 5, unit: "lần" },
-    { name: "Track và ghi nhật ký tiến độ", target: 1, unit: "lần" },
-    { name: "Review và điều chỉnh approach", target: 1, unit: "lần" },
+    { name: "Theo dõi và ghi nhật ký tiến độ", target: 1, unit: "lần" },
+    { name: "Review và điều chỉnh cách làm", target: 1, unit: "lần" },
   ],
   business_growth: [
     { name: "Call/email khách hàng tiềm năng", target: 3, unit: "lần" },
     { name: "Phát triển sản phẩm/dịch vụ", target: 4, unit: "buổi" },
-    { name: "Marketing và outreach", target: 3, unit: "lần" },
-    { name: "Track metrics và phân tích dữ liệu", target: 2, unit: "lần" },
+    { name: "Marketing và chủ động liên hệ", target: 3, unit: "lần" },
+    { name: "Theo dõi chỉ số và phân tích dữ liệu", target: 2, unit: "lần" },
   ],
   career_advancement: [
-    { name: "Network với colleagues/mentors", target: 2, unit: "lần" },
+    { name: "Kết nối với đồng nghiệp/mentor", target: 2, unit: "lần" },
     { name: "Học skill liên quan đến promotion", target: 3, unit: "buổi" },
     { name: "Document achievements", target: 1, unit: "lần" },
     { name: "Chuẩn bị cho review meeting", target: 1, unit: "lần" },
@@ -105,7 +105,7 @@ export const ARCHETYPE_TACTIC_SUGGESTIONS: Record<
  */
 const DEFAULT_SUGGESTIONS = [
   { name: "Làm việc trên mục tiêu chính", target: 4, unit: "lần" },
-  { name: "Track và review tiến độ", target: 2, unit: "lần" },
+  { name: "Theo dõi và review tiến độ", target: 2, unit: "lần" },
   { name: "Học hỏi và cải thiện", target: 3, unit: "buổi" },
 ];
 

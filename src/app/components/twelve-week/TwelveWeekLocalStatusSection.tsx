@@ -60,8 +60,8 @@ function getMutationQueueSyncBlocker(input: {
   if (!mutationQueueSyncStatus.realMode) return "Bản dùng thử lưu trên trình duyệt này, không cần đồng bộ tài khoản.";
   if (!mutationQueueSyncStatus.featureEnabled) return "Đồng bộ thay đổi đang tắt.";
   if (!mutationQueueSyncStatus.pullFeatureEnabled) return "Khôi phục dữ liệu tài khoản đang tắt.";
-  if (!mutationQueueSyncStatus.apiConfigured) return "Chưa cấu hình API để gửi hàng chờ.";
-  if (!backendConnectionStatus.authConfigured) return "Chưa cấu hình đăng nhập Firebase.";
+  if (!mutationQueueSyncStatus.apiConfigured) return "Chưa cấu hình kết nối tài khoản để gửi hàng chờ.";
+  if (!backendConnectionStatus.authConfigured) return "Chưa cấu hình đăng nhập.";
   if (backendConnectionStatus.authLoading) return "Đang kiểm tra phiên đăng nhập.";
   if (!backendConnectionStatus.signedIn) return "Cần đăng nhập để gửi hàng chờ lên tài khoản.";
   if (!backendConnectionStatus.profileReady) return "Đang chờ hồ sơ tài khoản sẵn sàng.";
@@ -261,7 +261,7 @@ function getConflictKindLabel(kind: BackendConflict["kind"]): string {
     case "task_schedule":
       return "Lịch việc";
     case "linked_task_missing_backend":
-      return "Việc đã link";
+      return "Việc đã liên kết";
     case "daily_checkin":
       return "Check-in ngày";
     case "weekly_review_output":
@@ -796,11 +796,11 @@ export function TwelveWeekLocalStatusSection({
                         ? "text-emerald-700"
                         : "text-slate-500"
                   }`}>
-                    {mutationQueueSyncStatus.networkStatus === "offline" ? "Offline" : mutationQueueSyncStatus.networkStatus === "online" ? "Online" : "Không rõ"}
+                    {mutationQueueSyncStatus.networkStatus === "offline" ? "Mất mạng" : mutationQueueSyncStatus.networkStatus === "online" ? "Có mạng" : "Không rõ"}
                   </p>
                 </div>
                 <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Tự retry khi online</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Tự thử lại khi có mạng</p>
                   <p className="mt-1 text-sm font-semibold text-slate-950">
                     {mutationQueueSyncStatus.retryOnReconnectEnabled ? "Bật" : "Tắt"}
                   </p>
@@ -862,7 +862,7 @@ export function TwelveWeekLocalStatusSection({
               </Button>
             </div>
             <p className="text-xs leading-5 text-slate-500">
-              Tải bản sao dữ liệu tài khoản dưới dạng JSON. Xóa dữ liệu tài khoản chỉ xóa dữ liệu 12 tuần trên server,
+              Tải bản sao dữ liệu tài khoản dưới dạng JSON. Xóa dữ liệu tài khoản chỉ xóa dữ liệu 12 tuần trên tài khoản,
               không xóa dữ liệu trên thiết bị, gói Plus hay tài khoản đăng nhập.
             </p>
           </div>

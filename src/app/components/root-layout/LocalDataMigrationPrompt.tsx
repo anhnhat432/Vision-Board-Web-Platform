@@ -60,7 +60,7 @@ function buildSummaryItems(summary: LocalDataMigrationSummary): string[] {
     formatCount(summary.dailyCheckInCount, "check-in ngày"),
     formatCount(summary.weeklyReviewCount, "review tuần"),
     formatCount(summary.wheelRecordCount, "bản cân bằng cuộc sống"),
-    formatCount(summary.reflectionCount, "ghi chú phản tư"),
+    formatCount(summary.reflectionCount, "ghi chú nhìn lại"),
     formatCount(summary.visionBoardCount, "bảng tầm nhìn"),
   ].filter((item) => !item.startsWith("0 "));
 }

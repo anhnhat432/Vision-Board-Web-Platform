@@ -976,7 +976,7 @@ export function RootLayout() {
             >
               <HardDrive className="mr-1 inline h-3 w-3 align-text-bottom" />
               Bản dùng thử đang lưu dữ liệu trên trình duyệt này. Có thể bấm{" "}
-              <span className="font-semibold">Tạm thoát</span> bất kỳ lúc nào để quay lại bảng điều khiển.
+              <span className="font-semibold">Tạm thoát</span> bất kỳ lúc nào để quay lại Trang chính.
             </div>
           ) : null}
           <main id="main-content" className="relative z-10" aria-label="Nội dung trang">

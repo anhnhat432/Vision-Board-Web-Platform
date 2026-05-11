@@ -352,7 +352,7 @@ export function TwelveWeekProgressTab({
               Tiến độ việc lặp lại
             </p>
             <div className="mt-[var(--space-inline)] flex items-start justify-between gap-3">
-              <p className="text-3xl font-bold text-slate-950">Lead trung bình {averageLeadScore}%</p>
+              <p className="text-3xl font-bold text-slate-950">Việc lặp lại trung bình {averageLeadScore}%</p>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
@@ -367,7 +367,7 @@ export function TwelveWeekProgressTab({
               </Tooltip>
             </div>
             <p className="mt-1 text-sm text-slate-600">
-              Tuần hiện tại: {currentWeekScoreValue}% lead. Điểm hệ cũ: {averageScore}
+              Tuần hiện tại: {currentWeekScoreValue}% việc lặp lại. Điểm hệ cũ: {averageScore}
             </p>
           </CardContent>
         </Card>

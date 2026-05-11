@@ -219,11 +219,11 @@ export function OrderPage() {
 
     if (!selectedGoal) {
       if (referenceBoard) {
-        return `Kit đang lấy ngữ cảnh ban đầu từ vision board "${referenceBoard.name}" để gợi ý keyword và ghi chú.`;
+        return `Kit đang lấy ngữ cảnh ban đầu từ vision board "${referenceBoard.name}" để gợi ý từ khóa và ghi chú.`;
       }
 
       if (pendingGoalDraft?.specific) {
-        return "Kit đang gợi ý từ mục tiêu bạn vừa xây dựng trong flow hiện tại. Bạn có thể chỉnh lại toàn bộ nội dung trước khi tạo đơn.";
+        return "Kit đang gợi ý từ mục tiêu bạn vừa xây dựng trong luồng hiện tại. Bạn có thể chỉnh lại toàn bộ nội dung trước khi tạo đơn.";
       }
 
       return "Đơn này sẽ được tạo như một kit độc lập, chưa liên kết với mục tiêu cụ thể nào.";
@@ -241,22 +241,22 @@ export function OrderPage() {
   }, [pendingGoalDraft, referenceBoard, selectedGoal]);
   const flowSourceSummary = useMemo(() => {
     if (selectedGoal && referenceBoard) {
-      return `Bạn đang đi tiếp từ mục tiêu và board tham chiếu hiện có. Sau khi tạo đơn, trang trạng thái sẽ giữ nguyên ngữ cảnh này.`;
+      return `Bạn đang đi tiếp từ mục tiêu và vision board tham chiếu hiện có. Sau khi tạo đơn, trang trạng thái sẽ giữ nguyên ngữ cảnh này.`;
     }
 
     if (selectedGoal) {
-      return "Bạn đang đi tiếp từ flow mục tiêu. Order page đã tự gắn mục tiêu này cho đơn hiện tại.";
+      return "Bạn đang đi tiếp từ luồng mục tiêu. Trang tạo đơn đã tự gắn mục tiêu này cho đơn hiện tại.";
     }
 
     if (referenceBoard) {
-      return "Bạn đang đi tiếp từ vision board. Các gợi ý keyword và ghi chú đã được lấy sang đơn hiện tại.";
+      return "Bạn đang đi tiếp từ vision board. Các gợi ý từ khóa và ghi chú đã được lấy sang đơn hiện tại.";
     }
 
     if (pendingGoalDraft) {
-      return "Bạn đang đi tiếp từ flow goal hiện tại. Đơn này vẫn có thể chỉnh tay trước khi lưu local.";
+      return "Bạn đang đi tiếp từ luồng mục tiêu hiện tại. Đơn này vẫn có thể chỉnh tay trước khi lưu trên thiết bị.";
     }
 
-    return "Đây là một đơn local độc lập. Bạn có thể tự chọn goal hoặc tạo đơn ngay từ trạng thái hiện tại.";
+    return "Đây là một đơn độc lập trên thiết bị. Bạn có thể tự chọn mục tiêu hoặc tạo đơn ngay từ trạng thái hiện tại.";
   }, [pendingGoalDraft, referenceBoard, selectedGoal]);
 
   const keywordList = useMemo(
@@ -369,13 +369,13 @@ export function OrderPage() {
     {
       label: "Liên kết mục tiêu",
       value: selectedGoal ? "Đã gắn mục tiêu" : "Đơn độc lập",
-      note: selectedGoal ? selectedGoal.title : "Bạn vẫn có thể tạo kit mà không gắn vào goal.",
+      note: selectedGoal ? selectedGoal.title : "Bạn vẫn có thể tạo kit mà không gắn vào mục tiêu.",
       icon: Sparkles,
     },
     {
       label: "Trạng thái tạo mới",
       value: "Chờ xác nhận",
-      note: "Đơn được lưu cục bộ bằng localStorage ở bước này.",
+      note: "Đơn được lưu trên thiết bị ở bước này.",
       icon: Truck,
     },
   ];
@@ -396,8 +396,8 @@ export function OrderPage() {
                   Tạo đơn kit cá nhân hóa từ mục tiêu hiện tại.
                 </h1>
                 <p className="max-w-3xl text-base leading-8 text-white/82 lg:text-lg">
-                  Đây là bước local-first tối thiểu để chốt nhu cầu, người nhận và định hướng kit. Chưa kết nối backend
-                  hay fulfillment thật, nhưng đủ để nhóm kiểm tra flow đặt đơn sớm.
+                  Đây là bước tối thiểu để chốt nhu cầu, người nhận và định hướng kit. Chưa kết nối xử lý đơn thật,
+                  nhưng đủ để nhóm kiểm tra luồng đặt đơn sớm.
                 </p>
               </div>
 
@@ -411,7 +411,7 @@ export function OrderPage() {
               </div>
 
               <p className="max-w-2xl text-sm leading-7 text-white/70">
-                Sau khi tạo, bạn có thể xem lại đơn gần nhất hoặc theo dõi trạng thái ngay trong flow Order hiện tại.
+                Sau khi tạo, bạn có thể xem lại đơn gần nhất hoặc theo dõi trạng thái ngay trong luồng đơn hiện tại.
               </p>
             </div>
 
@@ -442,7 +442,7 @@ export function OrderPage() {
         <Card className="border-0 shadow-lg">
           <CardHeader>
             <CardTitle>Tạo đơn mới</CardTitle>
-            <CardDescription>Giữ form gọn, rõ và dễ quét trong bước local-first đầu tiên.</CardDescription>
+            <CardDescription>Giữ biểu mẫu gọn, rõ và dễ quét trong bước lưu trên thiết bị đầu tiên.</CardDescription>
           </CardHeader>
 
           <CardContent className="stack-section">
@@ -678,14 +678,14 @@ export function OrderPage() {
             <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Lưu dữ liệu</p>
               <p className="mt-2 text-sm leading-7 text-slate-600">
-                Đơn được lưu cục bộ bằng localStorage trong bước triển khai đầu tiên.
+                Đơn được lưu trên thiết bị trong bước triển khai đầu tiên.
               </p>
             </div>
 
             <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Chưa xử lý backend</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Chưa xử lý trên máy chủ</p>
               <p className="mt-2 text-sm leading-7 text-slate-600">
-                Chưa có thanh toán thật, fulfillment thật, đồng bộ nhiều thiết bị hoặc xử lý đơn ở phía admin.
+                Chưa có thanh toán thật, chuẩn bị đơn thật, đồng bộ nhiều thiết bị hoặc xử lý đơn ở phía quản trị.
               </p>
             </div>
 

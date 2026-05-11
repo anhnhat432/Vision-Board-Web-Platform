@@ -78,7 +78,7 @@ export function FunnelDiagnosticsPanel({ enabled, snapshot }: FunnelDiagnosticsP
 
       <Section title="Funnel steps">
         <Row label="Đã hoàn tất bước bắt đầu" value={boolText(data.steps.onboardingCompleted)} />
-        <Row label="Real life balance" value={boolText(data.steps.hasRealLifeBalance)} />
+          <Row label="Cân bằng cuộc sống thật" value={boolText(data.steps.hasRealLifeBalance)} />
         <Row label="Focus area chosen" value={boolText(data.steps.hasFocusArea)} />
         <Row label="Mục tiêu SMART đang chờ" value={boolText(data.steps.hasPendingSmartGoal)} />
         <Row label="Kiểm tra tính khả thi đang chờ" value={boolText(data.steps.hasPendingFeasibility)} />
@@ -89,7 +89,7 @@ export function FunnelDiagnosticsPanel({ enabled, snapshot }: FunnelDiagnosticsP
       <Section title="SMART quality">
         <Row label="Present" value={boolText(data.smart.present)} />
         <Row label="Quality level" value={data.smart.qualityLevel ?? "—"} />
-        <Row label="Score bucket" value={data.smart.overallScoreBucket ?? "—"} />
+          <Row label="Nhóm điểm" value={data.smart.overallScoreBucket ?? "—"} />
         <Row label="Has measurable target" value={nullableBool(data.smart.hasMeasurableTarget)} />
         <Row label="Có mốc hiện tại" value={nullableBool(data.smart.hasBaseline)} />
         <Row label="Weekly hours bucket" value={data.smart.weeklyHoursBucket ?? "—"} />
@@ -98,7 +98,7 @@ export function FunnelDiagnosticsPanel({ enabled, snapshot }: FunnelDiagnosticsP
       <Section title="Kiểm tra tính khả thi">
         <Row label="Present" value={boolText(data.feasibility.present)} />
         <Row label="Result type" value={data.feasibility.resultType ?? "—"} />
-        <Row label="Adjusted score bucket" value={data.feasibility.adjustedScoreBucket ?? "—"} />
+          <Row label="Nhóm điểm đã chỉnh" value={data.feasibility.adjustedScoreBucket ?? "—"} />
         <Row label="Bottleneck axis" value={data.feasibility.bottleneckAxis ?? "—"} />
         <Row label="Plan load" value={data.feasibility.planLoad ?? "—"} />
         <Row label="Weekly capacity" value={data.feasibility.weeklyCapacity ?? "—"} />
@@ -107,7 +107,7 @@ export function FunnelDiagnosticsPanel({ enabled, snapshot }: FunnelDiagnosticsP
       <Section title="Plan quality">
         <Row label="Present" value={boolText(data.plan.present)} />
         <Row label="Quality level" value={data.plan.qualityLevel ?? "—"} />
-        <Row label="Score bucket" value={data.plan.overallScoreBucket ?? "—"} />
+          <Row label="Nhóm điểm" value={data.plan.overallScoreBucket ?? "—"} />
         <Row label="Việc lặp lại" value={String(data.plan.leadIndicatorCount)} />
         <Row label="Core indicators" value={String(data.plan.coreIndicatorCount)} />
         <Row label="Optional indicators" value={String(data.plan.optionalIndicatorCount)} />
@@ -135,7 +135,7 @@ export function FunnelDiagnosticsPanel({ enabled, snapshot }: FunnelDiagnosticsP
               : "—"
           }
         />
-        <Row label="Review due today" value={boolText(data.execution.reviewDueToday)} />
+        <Row label="Review đến hạn hôm nay" value={boolText(data.execution.reviewDueToday)} />
       </Section>
 
       <p className="mt-4 text-[0.65rem] uppercase tracking-[0.18em] text-slate-500">

@@ -159,7 +159,7 @@ export function LeadIndicatorsStep({
             <ul className="mt-2 stack-tight text-sm leading-6 text-slate-700">
               <li>• Viết bản nháp 800 từ</li>
               <li>• Tập gym 45 phút</li>
-              <li>• Gửi 5 email outreach</li>
+              <li>• Gửi 5 email chủ động liên hệ</li>
               <li>• Học flashcard tiếng Anh 30 phút</li>
             </ul>
           </div>
@@ -222,7 +222,7 @@ export function LeadIndicatorsStep({
                   id={`tactic-name-${index}`}
                   value={indicator.name}
                   onChange={(event) => onIndicatorChange(index, "name", event.target.value)}
-                  placeholder="Ví dụ: viết 3 bài, tập 2 buổi, gửi 5 outreach..."
+                  placeholder="Ví dụ: viết 3 bài, tập 2 buổi, gửi 5 lời nhắn chủ động..."
                 />
               </div>
               <div className="grid gap-3 md:grid-cols-2">

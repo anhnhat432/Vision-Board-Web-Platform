@@ -73,7 +73,7 @@ export async function syncPendingOutbox(): Promise<OutboxSyncSnapshot> {
     const snapshot: OutboxSyncSnapshot = {
       ...baseSnapshot,
       status: "offline",
-      message: "Thiết bị đang offline. Outbox sẽ được thử lại khi có mạng.",
+      message: "Thiết bị đang mất mạng. Hàng chờ sẽ được thử lại khi có mạng.",
     };
     persistSyncSnapshot(snapshot);
     return snapshot;
@@ -146,9 +146,9 @@ export async function syncPendingOutbox(): Promise<OutboxSyncSnapshot> {
     status: syncedCount === 0 ? "error" : remainingPendingCount === 0 ? "success" : "partial",
     message:
       syncedCount === 0
-        ? "Không thể gửi outbox tới endpoint đã cấu hình."
+        ? "Không thể gửi hàng chờ tới điểm đồng bộ đã cấu hình."
         : remainingPendingCount === 0
-          ? "Đã đồng bộ toàn bộ outbox đang chờ."
+          ? "Đã đồng bộ toàn bộ hàng chờ."
           : "Đã đồng bộ một phần. Một số mục vẫn đang chờ thử lại.",
   };
   persistSyncSnapshot(snapshot);

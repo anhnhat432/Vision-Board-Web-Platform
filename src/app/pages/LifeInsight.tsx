@@ -358,7 +358,7 @@ export function LifeInsight() {
                     className="w-full text-violet-700 hover:bg-violet-50 hover:text-violet-800 dark:text-violet-200 dark:hover:bg-violet-950/40 sm:w-auto"
                     onClick={() => navigate("/")}
                   >
-                    Về bảng điều khiển
+                    Về Trang chính
                   </Button>
                 </div>
               </div>

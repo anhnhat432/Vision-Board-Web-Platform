@@ -45,7 +45,7 @@ export function CycleReviewPanel({
   const sanitizedLessons = sanitizeLessons(lessons);
   const kpis = [
     { label: "Lag cuối cycle", value: `${summary.finalLagPercent}%`, icon: Trophy },
-    { label: "Lead trung bình", value: `${summary.averageLeadScore}%`, icon: BarChart3 },
+    { label: "Việc lặp lại trung bình", value: `${summary.averageLeadScore}%`, icon: BarChart3 },
     { label: "Giữ cam kết", value: `${summary.commitmentsKeptRate}%`, icon: CheckCircle2 },
     { label: "Tuần đạt 85%+", value: `${summary.weeksWith85Plus}/12`, icon: Flag },
   ];
@@ -64,7 +64,7 @@ export function CycleReviewPanel({
         eyebrowClassName="text-white/72"
         title="Cycle 12 tuần đã kết thúc"
         titleAs="h2"
-        description={`Đây là tuần 13: nhìn lại cycle cũ, chốt bài học, rồi chuẩn bị cycle tiếp theo cho mục tiêu ${goal.title}.`}
+        description={`Đây là tuần 13: nhìn lại chu kỳ cũ, chốt bài học, rồi chuẩn bị chu kỳ tiếp theo cho mục tiêu ${goal.title}.`}
         titleClassName="text-2xl font-semibold text-white"
         descriptionClassName="max-w-3xl text-sm leading-7 text-white/78"
         contentClassName="stack-stack"

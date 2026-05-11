@@ -117,7 +117,7 @@ export function TwelveWeekNextWeekRecommendationCard({
             )}
             {onOpenTodayTab && (
               <Button size="sm" variant="ghost" onClick={onOpenTodayTab}>
-                Mở Today
+                Mở Hôm nay
               </Button>
             )}
           </div>

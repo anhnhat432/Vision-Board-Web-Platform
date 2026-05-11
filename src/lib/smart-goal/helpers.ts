@@ -377,7 +377,7 @@ function formatAchievable(goal: SmartGoal): string {
     Number.isFinite(goal.achievable.weekly_time_commitment_hours) &&
     goal.achievable.weekly_time_commitment_hours > 0
   ) {
-    parts.push(`${formatNumber(goal.achievable.weekly_time_commitment_hours)} gio/tuan`);
+    parts.push(`${formatNumber(goal.achievable.weekly_time_commitment_hours)} giờ/tuần`);
   }
 
   const requiredSkills = goal.achievable.required_skills
@@ -385,7 +385,7 @@ function formatAchievable(goal: SmartGoal): string {
     .filter((item) => item.length > 0);
 
   if (requiredSkills.length > 0) {
-    parts.push(`Ky nang: ${requiredSkills.join(", ")}`);
+    parts.push(`Kỹ năng: ${requiredSkills.join(", ")}`);
   }
 
   const supportResources = goal.achievable.support_resources
@@ -393,7 +393,7 @@ function formatAchievable(goal: SmartGoal): string {
     .filter((item) => item.length > 0);
 
   if (supportResources.length > 0) {
-    parts.push(`Ho tro: ${supportResources.join(", ")}`);
+    parts.push(`Hỗ trợ: ${supportResources.join(", ")}`);
   }
 
   return parts.join(". ");
@@ -401,14 +401,14 @@ function formatAchievable(goal: SmartGoal): string {
 
 function formatTimeBound(goal: SmartGoal): string {
   if (goal.time_bound.target_date) {
-    return `Moc den ${goal.time_bound.target_date}`;
+    return `Mốc đến ${goal.time_bound.target_date}`;
   }
 
   if (
     goal.time_bound.target_weeks !== undefined &&
     Number.isFinite(goal.time_bound.target_weeks)
   ) {
-    return `Trong ${formatNumber(goal.time_bound.target_weeks)} tuan`;
+    return `Trong ${formatNumber(goal.time_bound.target_weeks)} tuần`;
   }
 
   return "";

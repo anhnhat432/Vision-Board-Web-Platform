@@ -29,7 +29,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
 
       <SectionBlock
         title="Sao lưu dữ liệu"
-        description="Xuất hoặc nhập bản sao local-first của cycle khi bạn cần đổi trình duyệt hoặc giữ bản dự phòng."
+        description="Xuất hoặc nhập bản sao trên thiết bị của chu kỳ khi bạn cần đổi trình duyệt hoặc giữ bản dự phòng."
       >
         <DataStorageInfo variant="inline" />
       </SectionBlock>

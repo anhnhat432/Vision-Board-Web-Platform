@@ -81,7 +81,7 @@ const ORDER_TIMELINE_STEPS: ReadonlyArray<{
 }> = [
   {
     status: "pending",
-    description: "Đơn đã được ghi nhận trong local workspace và chờ xác nhận.",
+    description: "Đơn đã được ghi nhận trong không gian làm việc trên thiết bị này và chờ xác nhận.",
     icon: ClipboardList,
   },
   {
@@ -91,12 +91,12 @@ const ORDER_TIMELINE_STEPS: ReadonlyArray<{
   },
   {
     status: "shipping",
-    description: "Kit đã sẵn sàng đi giao trong local order flow hiện tại.",
+    description: "Kit đã sẵn sàng đi giao trong luồng đơn hiện tại.",
     icon: Truck,
   },
   {
     status: "delivered",
-    description: "Đơn đã được đánh dấu giao thành công trong flow cục bộ.",
+    description: "Đơn đã được đánh dấu giao thành công trong luồng trên thiết bị này.",
     icon: CheckCircle2,
   },
 ];
@@ -146,9 +146,9 @@ export function OrderStatusPage() {
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-slate-900 text-white">
               <ClipboardList className="h-10 w-10" />
             </div>
-            <h1 className="mt-6 text-3xl font-bold text-slate-900">Chưa có đơn nào trong workspace của bạn</h1>
+            <h1 className="mt-6 text-3xl font-bold text-slate-900">Chưa có đơn nào trong không gian làm việc của bạn</h1>
             <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-slate-500">
-              Hiện chưa tìm thấy đơn theo mã đang mở. Bạn có thể tạo đơn mới hoặc quay lại flow mục tiêu để chọn hướng đi tiếp theo.
+              Hiện chưa tìm thấy đơn theo mã đang mở. Bạn có thể tạo đơn mới hoặc quay lại luồng mục tiêu để chọn hướng đi tiếp theo.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Button onClick={() => navigate("/order")}>
@@ -156,7 +156,7 @@ export function OrderStatusPage() {
                 Tạo đơn kit
               </Button>
               <Button variant="outline" onClick={() => navigate("/goals")}>
-                Quay lại flow mục tiêu
+                Quay lại luồng mục tiêu
               </Button>
             </div>
           </CardContent>
@@ -458,7 +458,7 @@ export function OrderStatusPage() {
               <div className="stack-stack border-t border-slate-100 pt-5">
                 <div className="space-y-1">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Điều khiển trạng thái</p>
-                  <p className="text-sm text-slate-600">Phần này chỉ xuất hiện khi đơn chưa gắn backend.</p>
+                  <p className="text-sm text-slate-600">Phần này chỉ xuất hiện khi đơn chưa gắn máy chủ.</p>
                 </div>
 
                 <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
@@ -466,7 +466,7 @@ export function OrderStatusPage() {
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Cập nhật trạng thái</p>
                       <p className="mt-2 text-sm leading-7 text-slate-600">
-                        Dùng để cập nhật đơn lưu trên thiết bị khi chưa có dữ liệu từ backend.
+                        Dùng để cập nhật đơn lưu trên thiết bị khi chưa có dữ liệu từ máy chủ.
                       </p>
                     </div>
                     <Badge variant="outline" className="border-slate-200 bg-white text-slate-700">

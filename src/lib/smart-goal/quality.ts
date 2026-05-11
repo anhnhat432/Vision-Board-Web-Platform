@@ -201,7 +201,7 @@ function evaluateBaselineTargetQuality(goal: SmartGoal): DimensionEval {
     }
   } else {
     suggestions.push(
-      "Thêm mốc hiện tại (baseline) để hệ thống đánh giá khoảng cách cần vượt qua.",
+      "Thêm mốc hiện tại để hệ thống đánh giá khoảng cách cần vượt qua.",
     );
   }
 
@@ -622,7 +622,7 @@ function checkTimeBound(goal: SmartGoal): boolean {
 
 const CLARITY_CHECK_LABELS: Record<GoalClarityDimensionId, string> = {
   outcome_verb: "Câu mục tiêu có động từ kết quả rõ (đạt, hoàn thành, ra mắt, duy trì...)",
-  measurable_target: "Có chỉ số đo và con số mục tiêu lớn hơn baseline",
+  measurable_target: "Có chỉ số đo và con số mục tiêu lớn hơn mốc hiện tại",
   achievable_weekly_hours: "Quỹ thời gian mỗi tuần hợp lý (1-60 giờ)",
   relevant_motivation: "Lý do quan trọng đủ rõ",
   time_bound: "Có deadline (số tuần hoặc ngày cụ thể)",
@@ -665,7 +665,7 @@ const SUGGESTION_BY_CLARITY_DIMENSION: Record<GoalClarityDimensionId, string> = 
   outcome_verb:
     "Thêm động từ kết quả rõ vào câu mục tiêu (ví dụ: đạt, hoàn thành, ra mắt, duy trì, chạm mốc).",
   measurable_target:
-    "Thêm chỉ số đo và một con số mục tiêu rõ ràng. Nếu có baseline, target phải lớn hơn baseline.",
+    "Thêm chỉ số đo và một con số mục tiêu rõ ràng. Nếu có mốc hiện tại, mốc mục tiêu phải lớn hơn mốc hiện tại.",
   achievable_weekly_hours:
     "Đặt quỹ thời gian mỗi tuần trong khoảng 1-60 giờ. Quá ít sẽ không tạo nhịp; quá nhiều khó duy trì.",
   relevant_motivation:

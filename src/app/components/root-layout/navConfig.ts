@@ -20,7 +20,7 @@ export interface NavItem {
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { path: "/", label: "Bảng điều khiển", compactLabel: "Điều khiển", icon: LayoutDashboard },
+  { path: "/", label: "Trang chính", compactLabel: "Chính", icon: LayoutDashboard },
   { path: "/goals", label: "Mục tiêu", compactLabel: "Mục tiêu", icon: Target },
   { path: "/12-week-system", label: "Hệ thống 12 tuần", compactLabel: "12 tuần", icon: CalendarDays },
   { path: "/vision-board", label: "Bảng tầm nhìn", compactLabel: "Tầm nhìn", icon: Sparkles },

@@ -92,7 +92,7 @@ const ICON_COMPONENTS = {
 type IconName = keyof typeof ICON_COMPONENTS;
 
 const ICON_OPTIONS = Object.keys(ICON_COMPONENTS) as IconName[];
-const IMAGE_SUGGESTIONS = ["luxury workspace", "healthy morning", "freedom travel", "dream home"];
+const IMAGE_SUGGESTIONS = ["không gian làm việc đẹp", "buổi sáng khỏe mạnh", "du lịch tự do", "ngôi nhà mơ ước"];
 const QUOTE_SUGGESTIONS = [
   "Mỗi ngày tiến một chút vẫn là tiến lên.",
   "Kỷ luật là cây cầu nối tầm nhìn với kết quả.",
@@ -100,18 +100,18 @@ const QUOTE_SUGGESTIONS = [
 ];
 
 const CURATED_IMAGES: Array<{ label: string; url: string }> = [
-  { label: "Workspace", url: "https://picsum.photos/seed/vision-workspace/480/360" },
-  { label: "Sunrise", url: "https://picsum.photos/seed/vision-sunrise/480/360" },
-  { label: "Travel", url: "https://picsum.photos/seed/vision-freedom-travel/480/360" },
-  { label: "Home", url: "https://picsum.photos/seed/vision-dream-home/480/360" },
-  { label: "Fitness", url: "https://picsum.photos/seed/vision-fitness-run/480/360" },
-  { label: "Nature", url: "https://picsum.photos/seed/vision-nature-forest/480/360" },
-  { label: "City", url: "https://picsum.photos/seed/vision-city-skyline/480/360" },
-  { label: "Beach", url: "https://picsum.photos/seed/vision-ocean-beach/480/360" },
-  { label: "Books", url: "https://picsum.photos/seed/vision-books-study/480/360" },
-  { label: "Food", url: "https://picsum.photos/seed/vision-healthy-food/480/360" },
-  { label: "Art", url: "https://picsum.photos/seed/vision-creative-art/480/360" },
-  { label: "Garden", url: "https://picsum.photos/seed/vision-garden-bloom/480/360" },
+  { label: "Không gian", url: "https://picsum.photos/seed/vision-workspace/480/360" },
+  { label: "Bình minh", url: "https://picsum.photos/seed/vision-sunrise/480/360" },
+  { label: "Du lịch", url: "https://picsum.photos/seed/vision-freedom-travel/480/360" },
+  { label: "Nhà", url: "https://picsum.photos/seed/vision-dream-home/480/360" },
+  { label: "Vận động", url: "https://picsum.photos/seed/vision-fitness-run/480/360" },
+  { label: "Thiên nhiên", url: "https://picsum.photos/seed/vision-nature-forest/480/360" },
+  { label: "Thành phố", url: "https://picsum.photos/seed/vision-city-skyline/480/360" },
+  { label: "Biển", url: "https://picsum.photos/seed/vision-ocean-beach/480/360" },
+  { label: "Sách", url: "https://picsum.photos/seed/vision-books-study/480/360" },
+  { label: "Ẩm thực", url: "https://picsum.photos/seed/vision-healthy-food/480/360" },
+  { label: "Nghệ thuật", url: "https://picsum.photos/seed/vision-creative-art/480/360" },
+  { label: "Vườn", url: "https://picsum.photos/seed/vision-garden-bloom/480/360" },
 ];
 
 // Upload hardening constants — module scope so they are not recreated on each render
@@ -719,7 +719,7 @@ export function VisionBoardEditor() {
                     {[
                       { label: "Tổng phần tử", value: board.items.length, note: "đang có trên canvas" },
                       { label: "Hình ảnh", value: boardStats.images, note: "nguồn cảm hứng trực quan" },
-                      { label: "Quote + icon", value: boardStats.quotes + boardStats.icons, note: "điểm nhấn cảm xúc" },
+                      { label: "Trích dẫn + biểu tượng", value: boardStats.quotes + boardStats.icons, note: "điểm nhấn cảm xúc" },
                     ].map((item) => (
                       <div
                         key={item.label}
@@ -973,8 +973,8 @@ export function VisionBoardEditor() {
                 <div className="mt-[var(--space-stack)] stack-tight">
                   {[
                     { label: "Hình ảnh", value: boardStats.images, color: "bg-violet-50 text-violet-700" },
-                    { label: "Quote", value: boardStats.quotes, color: "bg-amber-50 text-amber-700" },
-                    { label: "Icon", value: boardStats.icons, color: "bg-sky-50 text-sky-700" },
+                    { label: "Trích dẫn", value: boardStats.quotes, color: "bg-amber-50 text-amber-700" },
+                    { label: "Biểu tượng", value: boardStats.icons, color: "bg-sky-50 text-sky-700" },
                   ].map((item) => (
                     <div
                       key={item.label}

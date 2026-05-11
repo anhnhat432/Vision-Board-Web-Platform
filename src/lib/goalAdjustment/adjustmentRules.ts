@@ -28,9 +28,9 @@ export const applyCapacityRule: GoalAdjustmentRule = ({
 
   return createSuggestion({
     type: "reduce_frequency",
-    title: "Reduce Weekly Workload",
+    title: "Giảm tải tuần",
     description:
-      "Capacity is currently limited. Reduce weekly workload and keep a lighter execution rhythm.",
+      "Sức chứa hiện tại đang thấp. Giảm tải tuần và giữ nhịp thực hiện nhẹ hơn.",
     priority: getPriorityForDimension("capacity", weakestDimension),
   });
 };
@@ -43,9 +43,9 @@ export const applyReadinessRule: GoalAdjustmentRule = ({
 
   return createSuggestion({
     type: "split_into_phases",
-    title: "Start With A Smaller Habit",
+    title: "Bắt đầu bằng thói quen nhỏ hơn",
     description:
-      "Readiness is low. Start with a smaller habit first, then scale into the full goal.",
+      "Mức sẵn sàng đang thấp. Bắt đầu bằng một thói quen nhỏ trước, rồi mở rộng dần tới mục tiêu đầy đủ.",
     priority: getPriorityForDimension("readiness", weakestDimension),
   });
 };
@@ -58,9 +58,9 @@ export const applyRiskRule: GoalAdjustmentRule = ({
 
   return createSuggestion({
     type: "reduce_scope",
-    title: "Reduce Risk Exposure",
+    title: "Giảm rủi ro",
     description:
-      "Risk is high. Identify obstacles early and prepare backup strategies before scaling effort.",
+      "Rủi ro đang cao. Nhận diện điểm cản sớm và chuẩn bị phương án dự phòng trước khi tăng sức.",
     priority: getPriorityForDimension("risk", weakestDimension),
   });
 };
@@ -73,9 +73,9 @@ export const applyContextRule: GoalAdjustmentRule = ({
 
   return createSuggestion({
     type: "delay_start",
-    title: "Adjust Goal Timing",
+    title: "Điều chỉnh thời điểm",
     description:
-      "Current context is not supportive enough. Adjust timing to reduce conflicts with life priorities.",
+      "Bối cảnh hiện tại chưa đủ thuận. Điều chỉnh thời điểm để giảm xung đột với các ưu tiên cuộc sống.",
     priority: getPriorityForDimension("context", weakestDimension),
   });
 };
@@ -87,8 +87,8 @@ export const applyLowScoreRule: GoalAdjustmentRule = ({
 
   return createSuggestion({
     type: "reduce_scope",
-    title: "Recalibrate Goal Before Planning",
-    description: "Consider reducing the scope of this goal or delaying the start.",
+    title: "Chỉnh lại mục tiêu trước khi lập kế hoạch",
+    description: "Cân nhắc giảm phạm vi mục tiêu này hoặc lùi thời điểm bắt đầu.",
     priority: 3,
   });
 };

@@ -4,11 +4,11 @@ import type { PricingPlanDefinition, TwelveWeekTemplateDefinition } from "./type
 export const PLAN_DEFINITIONS: PricingPlanDefinition[] = [
   {
     code: "FREE",
-    name: "Free",
-    shortLabel: "Free",
+    name: "Miễn phí",
+    shortLabel: "Miễn phí",
     priceLabel: "0đ",
     description: "Đủ để bạn chạy một chu kỳ 12 tuần hoàn chỉnh và biết hôm nay cần làm gì.",
-    highlights: ["1 chu kỳ 12 tuần", "Today queue + check-in", "Review tuần cơ bản"],
+    highlights: ["1 chu kỳ 12 tuần", "Danh sách Hôm nay + check-in", "Review tuần cơ bản"],
   },
   {
     code: "PLUS",
@@ -18,8 +18,8 @@ export const PLAN_DEFINITIONS: PricingPlanDefinition[] = [
     description: "Lớp Plus cho người muốn setup nhanh, giữ nhịp đều và có gợi ý review tuần sau.",
     highlights: [
       "Khung gợi ý thích nghi theo kiểu mục tiêu",
-      "Review premium với gợi ý tuần sau",
-      "Nhắc việc ưu tiên + analytics nâng cao",
+      "Review Plus với gợi ý tuần sau",
+      "Nhắc việc ưu tiên + phân tích nâng cao",
     ],
   },
 ];

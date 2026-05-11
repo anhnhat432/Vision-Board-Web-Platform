@@ -93,15 +93,15 @@ function addCalendarDays(date: Date, days: number): Date {
 }
 
 function getPhaseName(weekNumber: number): string {
-  if (weekNumber <= 4) return "Foundation";
-  if (weekNumber <= 8) return "Build / Acceleration";
-  return "Finish / Execution";
+  if (weekNumber <= 4) return "Nền tảng";
+  if (weekNumber <= 8) return "Xây nhịp / tăng tốc";
+  return "Hoàn tất / thực hiện";
 }
 
 function getDefaultWeeklyFocus(weekNumber: number): string {
-  if (weekNumber <= 4) return "Build the foundation and keep the core actions moving.";
-  if (weekNumber <= 8) return "Increase output and reinforce what is already working.";
-  return "Finish the highest-value outputs and close the cycle deliberately.";
+  if (weekNumber <= 4) return "Xây nền và giữ các hành động cốt lõi chạy đều.";
+  if (weekNumber <= 8) return "Tăng kết quả và củng cố những gì đang hiệu quả.";
+  return "Hoàn tất các kết quả giá trị nhất và khép chu kỳ có chủ đích.";
 }
 
 function getDateKey(value: string | undefined, fallback: string): string {
@@ -444,14 +444,14 @@ export function buildHydratedGoalFromPlanDetails(
     getWeekOutput(weekByNumber, totalWeeks) ||
     details.plan.vision?.trim() ||
     apiGoal?.title?.trim() ||
-    "Restored backend cycle";
+    "Chu kỳ đã khôi phục";
   const leadIndicators = deriveLeadIndicators(details);
 
   const baseSystem: TwelveWeekSystem = {
     goalType: apiGoal?.focusArea || apiGoal?.category || "backend-plan",
     vision12Week: details.plan.vision?.trim() || apiGoal?.description?.trim() || apiGoal?.title?.trim() || week12Outcome,
     lagMetric: {
-      name: leadIndicators[0]?.name ?? "Main progress",
+      name: leadIndicators[0]?.name ?? "Tiến độ chính",
       unit: "",
       target: "",
       currentValue: "",
@@ -613,14 +613,14 @@ function createHydrationResult(
 
   const message =
     status === "success"
-      ? "Backend plans were restored to this device."
+      ? "Kế hoạch từ tài khoản đã được khôi phục về thiết bị này."
       : status === "partial"
-        ? "Some backend plans were restored, but a few could not be loaded."
+        ? "Một số kế hoạch từ tài khoản đã được khôi phục, nhưng vẫn có vài kế hoạch chưa tải được."
         : status === "error"
-          ? "Backend plans could not be restored to this device."
+          ? "Chưa thể khôi phục kế hoạch từ tài khoản về thiết bị này."
           : result.conflictCount > 0
-            ? `${result.conflictCount} local/backend differences need review.`
-          : "No backend plans needed local hydration.";
+            ? `${result.conflictCount} khác biệt giữa thiết bị và tài khoản cần xem lại.`
+          : "Không có kế hoạch nào cần khôi phục về thiết bị này.";
 
   return {
     ...result,
