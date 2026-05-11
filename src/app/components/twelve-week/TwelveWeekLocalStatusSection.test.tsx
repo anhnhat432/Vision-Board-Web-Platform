@@ -533,7 +533,7 @@ describe("TwelveWeekLocalStatusSection", () => {
     for (const [label, value] of [
       ["Chờ đồng bộ", "3"],
       ["Đang gửi", "1"],
-      ["Lỗi/retry", "2"],
+      ["Lỗi/thử lại", "2"],
       ["Đã nhận", "4"],
     ] as const) {
       const card = screen.getByText(label).closest("div");
