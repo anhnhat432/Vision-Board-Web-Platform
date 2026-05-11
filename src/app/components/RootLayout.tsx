@@ -79,7 +79,7 @@ import {
   prefetchRoute,
   WARM_PREFETCH_ROUTE_PATHS,
 } from "./root-layout/navConfig";
-import { GUIDED_PATHS, getRouteMeta, getRouteTone } from "./root-layout/routeMeta";
+import { GUIDED_PATHS, getRouteMeta, getRouteTone as getFallbackRouteTone } from "./root-layout/routeMeta";
 import { buildLoginRedirect, isAuthProtectedPath, isPublicCheckoutPath, useWorkspaceGate } from "./root-layout/useWorkspaceGate";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -135,6 +135,29 @@ function createImportValidationRequestId(): string {
 
 function createCloudImportId(): string {
   return `cloud_import_${Date.now().toString(36)}`;
+}
+
+function getRouteTone(pathname: string): string | undefined {
+  if (pathname.startsWith("/login")) return "onboarding";
+  if (pathname.startsWith("/onboarding")) return "onboarding";
+  if (pathname === "/") return "dashboard";
+  if (pathname.startsWith("/12-week-setup")) return "setup";
+  if (pathname.startsWith("/12-week-system")) return "system";
+  if (pathname.startsWith("/smart-goal-setup")) return "setup";
+  if (pathname.startsWith("/feasibility")) return "setup";
+  if (pathname.startsWith("/life-insight")) return "setup";
+  if (pathname.startsWith("/life-balance")) return "balance";
+  if (pathname.startsWith("/vision")) return "vision";
+  if (pathname.startsWith("/journal")) return "journal";
+  if (pathname.startsWith("/achievements")) return "achievements";
+  if (pathname.startsWith("/billing")) return "billing";
+  if (pathname.startsWith("/settings")) return "settings";
+  if (pathname.startsWith("/gallery")) return "vision";
+  if (pathname.startsWith("/vision-board")) return "vision";
+  if (pathname.startsWith("/goals")) return "system";
+
+  const fallbackTone = getFallbackRouteTone(pathname);
+  return fallbackTone === "default" ? undefined : fallbackTone;
 }
 
 export function RootLayout() {

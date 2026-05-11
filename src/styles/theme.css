@@ -96,15 +96,15 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --tone-shell-primary: rgba(30, 64, 175, 0.98);
-  --tone-shell-secondary: rgba(8, 145, 178, 0.94);
-  --tone-shell-tertiary: rgba(16, 185, 129, 0.9);
-  --tone-shell-shadow: rgba(8, 145, 178, 0.36);
-  --tone-shell-shadow-strong: rgba(30, 64, 175, 0.48);
-  --tone-shell-ring: rgba(8, 145, 178, 0.1);
-  --tone-bg-left: rgba(37, 99, 235, 0.08);
-  --tone-bg-right: rgba(6, 182, 212, 0.08);
-  --tone-bg-bottom: rgba(16, 185, 129, 0.06);
+  --tone-shell-primary: rgba(124, 58, 237, 0.96);
+  --tone-shell-secondary: rgba(217, 70, 239, 0.92);
+  --tone-shell-tertiary: rgba(244, 114, 182, 0.86);
+  --tone-shell-shadow: rgba(124, 58, 237, 0.42);
+  --tone-shell-shadow-strong: rgba(124, 58, 237, 0.56);
+  --tone-shell-ring: rgba(217, 70, 239, 0.1);
+  --tone-bg-left: rgba(167, 139, 250, 0.1);
+  --tone-bg-right: rgba(232, 121, 249, 0.08);
+  --tone-bg-bottom: rgba(244, 114, 182, 0.06);
   --tone-overlay-left: rgba(37, 99, 235, 0.08);
   --tone-overlay-right: rgba(45, 212, 191, 0.08);
   --tone-cursor-a: rgba(37, 99, 235, 0.1);
@@ -114,9 +114,9 @@
   --tone-hero-accent: rgba(8, 145, 178, 0.92);
   --tone-hero-end: rgba(16, 185, 129, 0.88);
   --tone-hero-shadow: rgba(30, 64, 175, 0.36);
-  --tone-orb-a: rgba(37, 99, 235, 0.12);
-  --tone-orb-b: rgba(6, 182, 212, 0.1);
-  --tone-orb-c: rgba(16, 185, 129, 0.08);
+  --tone-orb-a: rgba(124, 58, 237, 0.12);
+  --tone-orb-b: rgba(217, 70, 239, 0.1);
+  --tone-orb-c: rgba(244, 114, 182, 0.08);
 }
 
 .dark {
@@ -162,15 +162,15 @@
   --sidebar-ring: oklch(0.439 0 0);
   --input-background: rgba(15, 23, 42, 0.82);
   --switch-background: rgba(51, 65, 85, 0.95);
-  --tone-shell-primary: rgba(30, 64, 175, 0.98);
-  --tone-shell-secondary: rgba(14, 116, 144, 0.94);
-  --tone-shell-tertiary: rgba(13, 148, 136, 0.92);
-  --tone-shell-shadow: rgba(14, 116, 144, 0.44);
-  --tone-shell-shadow-strong: rgba(30, 64, 175, 0.56);
-  --tone-shell-ring: rgba(56, 189, 248, 0.12);
-  --tone-bg-left: rgba(37, 99, 235, 0.12);
-  --tone-bg-right: rgba(45, 212, 191, 0.1);
-  --tone-bg-bottom: rgba(20, 184, 166, 0.08);
+  --tone-shell-primary: rgba(124, 58, 237, 0.96);
+  --tone-shell-secondary: rgba(217, 70, 239, 0.9);
+  --tone-shell-tertiary: rgba(244, 114, 182, 0.82);
+  --tone-shell-shadow: rgba(124, 58, 237, 0.46);
+  --tone-shell-shadow-strong: rgba(124, 58, 237, 0.6);
+  --tone-shell-ring: rgba(217, 70, 239, 0.12);
+  --tone-bg-left: rgba(124, 58, 237, 0.16);
+  --tone-bg-right: rgba(217, 70, 239, 0.12);
+  --tone-bg-bottom: rgba(244, 114, 182, 0.1);
   --tone-overlay-left: rgba(37, 99, 235, 0.14);
   --tone-overlay-right: rgba(45, 212, 191, 0.12);
   --tone-cursor-a: rgba(37, 99, 235, 0.16);
@@ -180,9 +180,9 @@
   --tone-hero-accent: rgba(14, 116, 144, 0.92);
   --tone-hero-end: rgba(13, 148, 136, 0.9);
   --tone-hero-shadow: rgba(14, 116, 144, 0.42);
-  --tone-orb-a: rgba(37, 99, 235, 0.18);
-  --tone-orb-b: rgba(45, 212, 191, 0.14);
-  --tone-orb-c: rgba(16, 185, 129, 0.1);
+  --tone-orb-a: rgba(124, 58, 237, 0.2);
+  --tone-orb-b: rgba(217, 70, 239, 0.16);
+  --tone-orb-c: rgba(244, 114, 182, 0.12);
 }
 
 @theme inline {
@@ -563,27 +563,27 @@
   }
 
   .app-shell[data-route-tone="system"] {
-    --tone-shell-primary: rgba(30, 64, 175, 0.98);
-    --tone-shell-secondary: rgba(14, 116, 144, 0.94);
-    --tone-shell-tertiary: rgba(13, 148, 136, 0.9);
-    --tone-shell-shadow: rgba(14, 116, 144, 0.42);
-    --tone-shell-shadow-strong: rgba(30, 64, 175, 0.56);
-    --tone-shell-ring: rgba(14, 116, 144, 0.1);
-    --tone-bg-left: rgba(37, 99, 235, 0.1);
-    --tone-bg-right: rgba(6, 182, 212, 0.08);
-    --tone-bg-bottom: rgba(16, 185, 129, 0.06);
-    --tone-overlay-left: rgba(37, 99, 235, 0.1);
-    --tone-overlay-right: rgba(45, 212, 191, 0.08);
-    --tone-cursor-a: rgba(37, 99, 235, 0.12);
+    --tone-shell-primary: rgba(124, 58, 237, 0.96);
+    --tone-shell-secondary: rgba(217, 70, 239, 0.92);
+    --tone-shell-tertiary: rgba(20, 184, 166, 0.88);
+    --tone-shell-shadow: rgba(124, 58, 237, 0.42);
+    --tone-shell-shadow-strong: rgba(124, 58, 237, 0.56);
+    --tone-shell-ring: rgba(217, 70, 239, 0.1);
+    --tone-bg-left: rgba(167, 139, 250, 0.1);
+    --tone-bg-right: rgba(232, 121, 249, 0.08);
+    --tone-bg-bottom: rgba(20, 184, 166, 0.06);
+    --tone-overlay-left: rgba(167, 139, 250, 0.1);
+    --tone-overlay-right: rgba(20, 184, 166, 0.08);
+    --tone-cursor-a: rgba(124, 58, 237, 0.12);
     --tone-cursor-b: rgba(20, 184, 166, 0.08);
-    --tone-hero-start: rgba(23, 37, 84, 0.98);
-    --tone-hero-mid: rgba(30, 64, 175, 0.95);
-    --tone-hero-accent: rgba(8, 145, 178, 0.92);
-    --tone-hero-end: rgba(5, 150, 105, 0.88);
-    --tone-hero-shadow: rgba(30, 64, 175, 0.4);
-    --tone-orb-a: rgba(59, 130, 246, 0.16);
-    --tone-orb-b: rgba(34, 211, 238, 0.14);
-    --tone-orb-c: rgba(16, 185, 129, 0.1);
+    --tone-hero-start: rgba(88, 28, 135, 0.98);
+    --tone-hero-mid: rgba(124, 58, 237, 0.95);
+    --tone-hero-accent: rgba(217, 70, 239, 0.9);
+    --tone-hero-end: rgba(20, 184, 166, 0.88);
+    --tone-hero-shadow: rgba(124, 58, 237, 0.4);
+    --tone-orb-a: rgba(124, 58, 237, 0.14);
+    --tone-orb-b: rgba(217, 70, 239, 0.12);
+    --tone-orb-c: rgba(20, 184, 166, 0.09);
   }
 
   .app-shell[data-route-tone="achievements"] {
@@ -658,57 +658,166 @@
     --tone-orb-c: rgba(59, 130, 246, 0.1);
   }
 
+  .app-shell[data-route-tone="onboarding"] {
+    --tone-shell-primary: rgba(124, 58, 237, 0.96);
+    --tone-shell-secondary: rgba(217, 70, 239, 0.92);
+    --tone-shell-tertiary: rgba(244, 114, 182, 0.86);
+    --tone-shell-shadow: rgba(124, 58, 237, 0.42);
+    --tone-shell-shadow-strong: rgba(124, 58, 237, 0.56);
+    --tone-shell-ring: rgba(217, 70, 239, 0.1);
+    --tone-bg-left: rgba(167, 139, 250, 0.12);
+    --tone-bg-right: rgba(232, 121, 249, 0.1);
+    --tone-bg-bottom: rgba(244, 114, 182, 0.08);
+    --tone-orb-a: rgba(124, 58, 237, 0.14);
+    --tone-orb-b: rgba(217, 70, 239, 0.12);
+    --tone-orb-c: rgba(244, 114, 182, 0.1);
+  }
+
+  .app-shell[data-route-tone="dashboard"] {
+    --tone-shell-primary: rgba(124, 58, 237, 0.96);
+    --tone-shell-secondary: rgba(217, 70, 239, 0.9);
+    --tone-shell-tertiary: rgba(34, 211, 238, 0.86);
+    --tone-shell-shadow: rgba(124, 58, 237, 0.4);
+    --tone-shell-shadow-strong: rgba(124, 58, 237, 0.54);
+    --tone-shell-ring: rgba(34, 211, 238, 0.1);
+    --tone-bg-left: rgba(167, 139, 250, 0.1);
+    --tone-bg-right: rgba(232, 121, 249, 0.08);
+    --tone-bg-bottom: rgba(34, 211, 238, 0.06);
+    --tone-orb-a: rgba(124, 58, 237, 0.12);
+    --tone-orb-b: rgba(217, 70, 239, 0.1);
+    --tone-orb-c: rgba(34, 211, 238, 0.08);
+  }
+
+  .app-shell[data-route-tone="setup"] {
+    --tone-shell-primary: rgba(99, 102, 241, 0.96);
+    --tone-shell-secondary: rgba(124, 58, 237, 0.92);
+    --tone-shell-tertiary: rgba(217, 70, 239, 0.86);
+    --tone-shell-shadow: rgba(99, 102, 241, 0.42);
+    --tone-shell-shadow-strong: rgba(99, 102, 241, 0.56);
+    --tone-shell-ring: rgba(124, 58, 237, 0.1);
+    --tone-bg-left: rgba(129, 140, 248, 0.1);
+    --tone-bg-right: rgba(167, 139, 250, 0.08);
+    --tone-bg-bottom: rgba(232, 121, 249, 0.06);
+    --tone-orb-a: rgba(99, 102, 241, 0.12);
+    --tone-orb-b: rgba(124, 58, 237, 0.1);
+    --tone-orb-c: rgba(217, 70, 239, 0.08);
+  }
+
+  .app-shell[data-route-tone="billing"] {
+    --tone-shell-primary: rgba(245, 158, 11, 0.96);
+    --tone-shell-secondary: rgba(251, 113, 133, 0.92);
+    --tone-shell-tertiary: rgba(244, 63, 94, 0.86);
+    --tone-shell-shadow: rgba(245, 158, 11, 0.42);
+    --tone-shell-shadow-strong: rgba(245, 158, 11, 0.56);
+    --tone-shell-ring: rgba(251, 113, 133, 0.1);
+    --tone-bg-left: rgba(252, 211, 77, 0.1);
+    --tone-bg-right: rgba(251, 113, 133, 0.08);
+    --tone-bg-bottom: rgba(244, 63, 94, 0.06);
+    --tone-orb-a: rgba(245, 158, 11, 0.12);
+    --tone-orb-b: rgba(251, 113, 133, 0.1);
+    --tone-orb-c: rgba(244, 63, 94, 0.08);
+  }
+
+  .app-shell[data-route-tone="settings"] {
+    --tone-shell-primary: rgba(100, 116, 139, 0.96);
+    --tone-shell-secondary: rgba(124, 58, 237, 0.84);
+    --tone-shell-tertiary: rgba(20, 184, 166, 0.82);
+    --tone-shell-shadow: rgba(100, 116, 139, 0.36);
+    --tone-shell-shadow-strong: rgba(100, 116, 139, 0.5);
+    --tone-shell-ring: rgba(124, 58, 237, 0.1);
+    --tone-bg-left: rgba(148, 163, 184, 0.08);
+    --tone-bg-right: rgba(167, 139, 250, 0.06);
+    --tone-bg-bottom: rgba(94, 234, 212, 0.05);
+    --tone-orb-a: rgba(100, 116, 139, 0.1);
+    --tone-orb-b: rgba(124, 58, 237, 0.08);
+    --tone-orb-c: rgba(20, 184, 166, 0.06);
+  }
+
   .app-shell::before {
     content: "";
     position: fixed;
     inset: 0;
-    pointer-events: none;
     z-index: -2;
+    pointer-events: none;
     background:
-      linear-gradient(118deg, var(--tone-bg-left) 0%, rgba(255, 255, 255, 0) 34%),
-      linear-gradient(242deg, var(--tone-bg-right) 0%, rgba(255, 255, 255, 0) 38%),
-      linear-gradient(0deg, var(--tone-bg-bottom) 0%, rgba(255, 255, 255, 0) 34%),
-      linear-gradient(180deg, rgba(240, 247, 249, 0.92) 0%, rgba(247, 243, 251, 0.86) 48%, rgba(235, 248, 244, 0.9) 100%);
+      radial-gradient(
+        ellipse 70% 60% at 18% 22%,
+        var(--tone-bg-left) 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 60% 50% at 82% 18%,
+        var(--tone-bg-right) 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 90% 50% at 50% 95%,
+        var(--tone-bg-bottom) 0%,
+        transparent 60%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(250, 247, 254, 0.94) 0%,
+        rgba(247, 243, 251, 0.88) 48%,
+        rgba(252, 246, 250, 0.92) 100%
+      );
   }
 
   .app-shell::after {
     content: "";
     position: fixed;
     inset: 0;
-    pointer-events: none;
     z-index: -1;
+    pointer-events: none;
     background-image:
-      linear-gradient(rgba(15, 23, 42, 0.026) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(15, 23, 42, 0.022) 1px, transparent 1px),
-      linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 44%);
-    background-size: 32px 32px, 32px 32px, 100% 100%;
-    mask-image: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.44) 0%,
-      rgba(255, 255, 255, 0.2) 46%,
-      transparent 100%
-    );
+      radial-gradient(
+        circle 380px at 12% 28%,
+        var(--tone-orb-a) 0%,
+        transparent 65%
+      ),
+      radial-gradient(
+        circle 320px at 88% 72%,
+        var(--tone-orb-b) 0%,
+        transparent 65%
+      );
+    animation: ambient-drift 32s ease-in-out infinite alternate;
+  }
+
+  @keyframes ambient-drift {
+    0% {
+      transform: translate3d(0, 0, 0) scale(1);
+      opacity: 0.85;
+    }
+
+    50% {
+      transform: translate3d(2.5%, -1.5%, 0) scale(1.05);
+      opacity: 1;
+    }
+
+    100% {
+      transform: translate3d(-1.5%, 2%, 0) scale(0.98);
+      opacity: 0.92;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .app-shell::after {
+      animation: none;
+    }
   }
 
   .dark .app-shell::before {
     background:
-      linear-gradient(118deg, var(--tone-bg-left) 0%, rgba(15, 23, 42, 0) 38%),
-      linear-gradient(242deg, var(--tone-bg-right) 0%, rgba(15, 23, 42, 0) 42%),
-      linear-gradient(0deg, var(--tone-bg-bottom) 0%, rgba(15, 23, 42, 0) 34%),
+      radial-gradient(ellipse 70% 60% at 18% 22%, var(--tone-bg-left) 0%, rgba(15, 23, 42, 0) 55%),
+      radial-gradient(ellipse 60% 50% at 82% 18%, var(--tone-bg-right) 0%, rgba(15, 23, 42, 0) 55%),
+      radial-gradient(ellipse 90% 50% at 50% 95%, var(--tone-bg-bottom) 0%, rgba(15, 23, 42, 0) 60%),
       linear-gradient(180deg, rgba(8, 17, 31, 0.98) 0%, rgba(15, 26, 45, 0.94) 52%, rgba(8, 17, 31, 0.98) 100%);
   }
 
   .dark .app-shell::after {
     background-image:
-      linear-gradient(rgba(226, 232, 240, 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(226, 232, 240, 0.03) 1px, transparent 1px),
-      linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0) 44%);
-    mask-image: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.32) 0%,
-      rgba(255, 255, 255, 0.16) 46%,
-      transparent 100%
-    );
+      radial-gradient(circle 380px at 12% 28%, var(--tone-orb-a) 0%, transparent 65%),
+      radial-gradient(circle 320px at 88% 72%, var(--tone-orb-b) 0%, transparent 65%);
   }
 
   .glass-surface {
