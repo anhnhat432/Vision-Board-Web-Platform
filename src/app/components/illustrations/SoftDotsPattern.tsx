@@ -1,5 +1,17 @@
 import { useIllustrationId, type AmbientIllustrationProps } from "./utils";
 
+const SOFT_DOTS = Array.from({ length: 100 }, (_, dotIndex) => {
+  const row = Math.floor(dotIndex / 10);
+  const col = dotIndex % 10;
+
+  return {
+    id: `soft-dot-${dotIndex}`,
+    cx: 18 + col * 18,
+    cy: 18 + row * 18,
+    r: row + col > 13 ? 1.8 : 2.6,
+  };
+});
+
 export function SoftDotsPattern({ className, ...rest }: AmbientIllustrationProps) {
   const fadeId = useIllustrationId("soft-dots-fade");
 
@@ -20,17 +32,9 @@ export function SoftDotsPattern({ className, ...rest }: AmbientIllustrationProps
           <stop offset="1" stopColor="currentColor" stopOpacity="0.03" />
         </radialGradient>
       </defs>
-      {Array.from({ length: 10 }, (_, row) =>
-        Array.from({ length: 10 }, (_, col) => (
-          <circle
-            key={`${row}-${col}`}
-            cx={18 + col * 18}
-            cy={18 + row * 18}
-            r={row + col > 13 ? 1.8 : 2.6}
-            fill={`url(#${fadeId})`}
-          />
-        )),
-      )}
+      {SOFT_DOTS.map((dot) => (
+        <circle key={dot.id} cx={dot.cx} cy={dot.cy} r={dot.r} fill={`url(#${fadeId})`} />
+      ))}
     </svg>
   );
 }
