@@ -23,13 +23,13 @@ export const NAV_ITEMS: NavItem[] = [
   { path: "/", label: "Trang chính", compactLabel: "Chính", icon: LayoutDashboard },
   { path: "/goals", label: "Mục tiêu", compactLabel: "Mục tiêu", icon: Target },
   { path: "/12-week-system", label: "Hệ thống 12 tuần", compactLabel: "12 tuần", icon: CalendarDays },
-  { path: "/vision-board", label: "Bảng tầm nhìn", compactLabel: "Tầm nhìn", icon: Sparkles },
+  { path: "/vision-board", label: "Vision board", compactLabel: "Vision", icon: Sparkles },
   { path: "/gallery", label: "Thư viện", compactLabel: "Thư viện", icon: Images },
   { path: "/life-balance", label: "Cân bằng cuộc sống", compactLabel: "Cân bằng", icon: TrendingUp },
   { path: "/achievements", label: "Thành tựu", compactLabel: "Thành tựu", icon: Award },
   { path: "/journal", label: "Nhật ký", compactLabel: "Nhật ký", icon: BookOpen },
   { path: "/billing/plan", label: "Gói & thanh toán", compactLabel: "Gói", icon: CreditCard },
-  { path: "/order-status", label: "My Orders", compactLabel: "My Orders", icon: Package },
+  { path: "/order-status", label: "Đơn hàng", compactLabel: "Đơn hàng", icon: Package },
 ];
 
 export const PRIMARY_NAV_PATHS = new Set(["/", "/goals", "/12-week-system", "/vision-board"]);
@@ -38,7 +38,7 @@ export const MOBILE_NAV_LABELS: Record<string, string> = {
   "/": "Tổng quan",
   "/goals": "Mục tiêu",
   "/12-week-system": "12 tuần",
-  "/vision-board": "Tầm nhìn",
+  "/vision-board": "Vision",
 };
 export const SIGNED_OUT_HOME_NAV_ITEM: NavItem = {
   ...NAV_ITEMS[0],

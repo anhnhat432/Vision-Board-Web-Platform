@@ -34,7 +34,7 @@ export const TWELVE_WEEK_TEMPLATE_CATALOG: TwelveWeekTemplateDefinition[] = [
   {
     id: "steady-focus-reset",
     name: "Quay lại nhịp gọn",
-    subtitle: "Khung gợi ý Free",
+    subtitle: "Khung gợi ý miễn phí",
     description: "Dành cho lúc bạn cần cắt loãng, quay lại nhịp và làm ít nhưng chắc.",
     bestFor: "Lúc bạn vừa bị rơi nhịp, đang ôm quá tay, hoặc muốn một chu kỳ thật gọn để quay lại.",
     whyItWorks: "Khung này thắng bằng độ đều. Bạn chỉ giữ vài nhịp lặp đơn giản nên rất khó vỡ tuần đầu.",
@@ -60,7 +60,7 @@ export const TWELVE_WEEK_TEMPLATE_CATALOG: TwelveWeekTemplateDefinition[] = [
   {
     id: "study-sprint-basics",
     name: "Đều và bền",
-    subtitle: "Khung gợi ý Free",
+    subtitle: "Khung gợi ý miễn phí",
     description: "Khi mục tiêu cần tiến đều từng tuần, không cần nước rút mạnh nhưng phải tích lũy thật.",
     bestFor: "Khi bạn muốn giữ nhịp bền, không cần tăng tốc mạnh nhưng vẫn phải thấy tiến triển đều.",
     whyItWorks: "Khung này cân giữa tiến độ chính và một vòng rà lại nhẹ, nên tuần nào cũng có bước tiến thật.",

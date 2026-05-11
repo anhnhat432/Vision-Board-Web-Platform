@@ -39,7 +39,7 @@ export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, 
       icon: Zap,
       label: "Lead pace",
       value: formatWheelScore(wheelScore),
-      note: "life score",
+      note: "điểm cuộc sống",
       iconClass:
         "bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 dark:from-amber-950/50 dark:to-orange-950/40 dark:text-amber-200",
     },

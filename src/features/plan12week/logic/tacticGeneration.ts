@@ -94,7 +94,7 @@ export const ARCHETYPE_TACTIC_SUGGESTIONS: Record<
     { name: "Lập kế hoạch cùng nhau", target: 1, unit: "lần" },
   ],
   financial_goal: [
-    { name: "Track chi tiêu hàng ngày", target: 7, unit: "ngày" },
+    { name: "Theo dõi chi tiêu hằng ngày", target: 7, unit: "ngày" },
     { name: "Review budget và điều chỉnh", target: 1, unit: "lần" },
     { name: "Học về đầu tư/tài chính", target: 2, unit: "buổi" },
   ],

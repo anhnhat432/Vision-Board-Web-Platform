@@ -258,7 +258,7 @@ export function TwelveWeekPlanAccessSection({
             <p className="text-xs uppercase tracking-[0.16em] text-violet-700">Trạng thái gói</p>
             <p className="mt-2 text-lg font-semibold text-slate-950">
               {currentPlanCode === "FREE"
-                ? "Bạn đang dùng gói Free."
+                ? "Bạn đang dùng gói Miễn phí."
                 : "Gói Plus đang hoạt động."}
             </p>
             <p className="mt-1 text-sm text-slate-600">

@@ -574,7 +574,7 @@ export function RootLayout() {
   const accountEmail = user?.email || userProfile?.email || "";
   const currentAccountPlanCode = getCurrentPlan(guideUserData);
   const accountPlanLabel =
-    currentAccountPlanCode === "PRO" ? "Pro" : currentAccountPlanCode === "PLUS" ? "Plus" : "Free";
+    currentAccountPlanCode === "PRO" ? "Pro" : currentAccountPlanCode === "PLUS" ? "Plus" : "Miễn phí";
   const accountAvatarLabel = (accountLabel || accountEmail || "A").trim().slice(0, 1).toUpperCase();
   const accountStatus = userProfileError ? "Lỗi hồ sơ" : accountEmail || "Tài khoản đã đăng nhập";
   const canRetryUserProfile = Boolean(user) && !userProfileLoading && (!userProfile || Boolean(userProfileError));
@@ -659,7 +659,7 @@ export function RootLayout() {
             onSelect={() => navigateAppRoute("/billing/plan")}
           >
             <CreditCard className="h-4 w-4" />
-            Quản lý subscription
+            Quản lý gói
           </DropdownMenuItem>
           <DropdownMenuSeparator className="bg-slate-100" />
           <DropdownMenuItem
@@ -670,7 +670,7 @@ export function RootLayout() {
             }}
           >
             <LogOut className="h-4 w-4" />
-            Logout
+            Đăng xuất
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

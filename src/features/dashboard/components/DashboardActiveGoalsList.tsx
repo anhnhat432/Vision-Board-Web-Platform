@@ -64,7 +64,7 @@ export function DashboardActiveGoalsList({
 
                 <div className="mt-[var(--space-stack)] stack-tight">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-muted-foreground">Lead score tuần này</span>
+                    <span className="font-medium text-muted-foreground">Điểm việc lặp lại tuần này</span>
                     <span className="font-semibold text-foreground">{leadScore}%</span>
                   </div>
                   <Progress value={leadScore} className="h-2 bg-slate-100" />

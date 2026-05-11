@@ -983,7 +983,7 @@ export function BillingPlan() {
         <CardHeader>
           <CardTitle>So sánh các gói</CardTitle>
           <CardDescription>
-            {demoMode ? "So sánh Free với Plus." : "So sánh Free với Plus."}
+            {demoMode ? "So sánh Miễn phí với Plus." : "So sánh Miễn phí với Plus."}
           </CardDescription>
         </CardHeader>
         <CardContent>
