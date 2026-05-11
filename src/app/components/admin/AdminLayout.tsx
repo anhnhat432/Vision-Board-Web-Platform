@@ -60,7 +60,7 @@ export function AdminLayout() {
       <AdminStatusCard
         icon={<AlertTriangle className="h-7 w-7 text-amber-300" />}
         title="Chưa cấu hình đăng nhập"
-        description="Admin console cần Firebase Auth và backend production để kiểm soát hệ thống."
+        description="Trang quản trị cần Firebase Auth và backend production để kiểm soát hệ thống."
       />
     );
   }
@@ -70,7 +70,7 @@ export function AdminLayout() {
       <AdminStatusCard
         icon={<Loader2 className="h-7 w-7 animate-spin text-slate-300" />}
         title="Đang kiểm tra đăng nhập"
-        description="Hệ thống đang xác thực phiên admin hiện tại."
+        description="Hệ thống đang xác thực phiên quản trị hiện tại."
       />
     );
   }
@@ -83,8 +83,8 @@ export function AdminLayout() {
     return (
       <AdminStatusCard
         icon={<Loader2 className="h-7 w-7 animate-spin text-slate-300" />}
-        title="Đang tải quyền admin"
-        description="Backend đang kiểm tra profile và role của tài khoản này."
+        title="Đang tải quyền quản trị"
+        description="Hệ thống đang kiểm tra hồ sơ và vai trò của tài khoản này."
       />
     );
   }
@@ -93,10 +93,10 @@ export function AdminLayout() {
     return (
       <AdminStatusCard
         icon={<AlertTriangle className="h-7 w-7 text-amber-300" />}
-        title="Không tải được profile"
+        title="Không tải được hồ sơ"
         description={
           userProfileError ||
-          "Không thể tải profile admin. Kiểm tra Render backend đã deploy và Firebase Admin env đang đúng."
+          "Không thể tải hồ sơ quản trị. Kiểm tra Render backend đã deploy và Firebase Admin env đang đúng."
         }
         action={
           <Button type="button" variant="secondary" className="gap-2" onClick={refreshUserProfile}>
@@ -123,8 +123,8 @@ export function AdminLayout() {
     return (
       <AdminStatusCard
         icon={<AlertTriangle className="h-7 w-7 text-rose-300" />}
-        title="Không có quyền admin"
-        description="Tài khoản này không nằm trong ADMIN_EMAILS trên Render, hoặc profile chưa được refresh sau khi bạn set env."
+        title="Không có quyền quản trị"
+        description="Tài khoản này không nằm trong ADMIN_EMAILS trên Render, hoặc hồ sơ chưa được làm mới sau khi bạn cập nhật env."
         action={
           <>
             <Button type="button" variant="secondary" className="gap-2" onClick={refreshUserProfile}>

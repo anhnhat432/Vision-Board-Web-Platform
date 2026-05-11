@@ -46,7 +46,7 @@ function getProfileBootstrapErrorMessage(error: unknown, timedOut: boolean): str
     if (status) return `Không thể mở hồ sơ tài khoản. Máy chủ trả HTTP ${status}.`;
   }
 
-  return "Không thể mở hồ sơ tài khoản. Vui lòng kiểm tra kết nối máy chủ và thử lại.";
+  return "Không thể mở hồ sơ tài khoản. Vui lòng kiểm tra kết nối tới máy chủ và thử lại.";
 }
 
 function getErrorStatus(error: unknown): number | null {

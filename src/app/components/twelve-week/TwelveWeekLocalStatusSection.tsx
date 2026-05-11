@@ -211,7 +211,7 @@ function getBackendStatusLabel(status: TwelveWeekSettingsTabProps["backendConnec
   if (!status.authConfigured) return "Chưa cấu hình";
   if (status.authLoading) return "Đang kiểm tra";
   if (!status.signedIn) return "Chưa đăng nhập";
-  if (!status.profileReady) return "Đang nối hồ sơ";
+  if (!status.profileReady) return "Đang kết nối hồ sơ";
   if (status.syncing) return "Đang đồng bộ";
   if (status.syncStatus === "success") return "Đã đồng bộ";
   if (status.syncStatus === "partial") return "Đồng bộ một phần";
