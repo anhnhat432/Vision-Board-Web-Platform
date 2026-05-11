@@ -33,6 +33,7 @@ import { useAuthContext } from "@/lib/auth/AuthContext";
 import { FeedbackDialog } from "../components/FeedbackDialog";
 import {
   EmptyGoalIllustration,
+  EmptyHintArrow,
   HeroOrbitIllustration,
   SoftDotsPattern,
   WavyDividerIllustration,
@@ -967,14 +968,18 @@ function DashboardContent({
               title="Chưa có dữ liệu thực thi để hiển thị."
               description="Trang chính sẽ chỉ hiện điểm, chuỗi ngày và chỉ số sau khi bạn tạo chu kỳ 12 tuần đầu tiên. Bây giờ nên đi từ Cân bằng cuộc sống để có dữ liệu thật, rồi mới chốt mục tiêu SMART."
               illustration={<EmptyGoalIllustration className="w-full text-violet-500" />}
+              className="relative overflow-hidden"
               actions={
-                <Button
+                <>
+                  <EmptyHintArrow className="pointer-events-none absolute bottom-24 right-[18%] hidden h-10 w-10 text-fuchsia-500 opacity-65 sm:block" />
+                  <Button
                   variant="secondary"
                   className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
                   onClick={() => navigate("/onboarding")}
                 >
                   Bắt đầu Cân bằng cuộc sống
-                </Button>
+                  </Button>
+                </>
               }
             >
               <ol className="grid gap-3 md:grid-cols-3">

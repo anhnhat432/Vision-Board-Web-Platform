@@ -30,7 +30,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Checkbox } from "../components/ui/checkbox";
 import { CountUp } from "../components/ui/count-up";
-import { EmptyGoalIllustration, getGoalArchetypeIcon } from "../components/illustrations";
+import { EmptyGoalIllustration, EmptyHintArrow, getGoalArchetypeIcon } from "../components/illustrations";
 import { Input } from "../components/ui/input";
 import { LoadingSpinner } from "../components/ui/loading-spinner";
 import { SectionBlock } from "../components/layout/SectionBlock";
@@ -882,7 +882,7 @@ function GoalTrackerContent({
             <Card
               data-testid="goaltracker-fresh-empty-state"
               data-tour-id="goaltracker-empty-state"
-              className="flow-panel overflow-hidden"
+              className="flow-panel relative overflow-hidden"
             >
               <CardContent className="p-10 text-center lg:p-14">
                 <EmptyGoalIllustration className="mx-auto mb-4 w-44 text-violet-500 sm:w-56" />
@@ -896,6 +896,7 @@ function GoalTrackerContent({
                   Bắt đầu bằng Cân bằng cuộc sống để có dữ liệu thật, sau đó chọn Góc nhìn cuộc sống, viết mục tiêu
                   SMART, kiểm tra tính khả thi rồi mới tạo chu kỳ 12 tuần.
                 </p>
+                <EmptyHintArrow className="pointer-events-none absolute bottom-28 right-[18%] hidden h-10 w-10 text-fuchsia-500 opacity-65 sm:block" />
                 <Button className="mt-8 w-full sm:w-auto" onClick={handleStartGuidedGoalFlow}>
                   <Target className="h-4 w-4" />
                   {goalFlowStartLabel}
