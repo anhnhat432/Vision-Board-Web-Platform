@@ -11,7 +11,7 @@ import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
 import { Progress } from "../ui/progress";
 import { Textarea } from "../ui/textarea";
-import { EmptyTaskIllustration } from "../illustrations";
+import { EmptyTaskIllustration, TaskDoneIcon, TaskInProgressIcon, TaskTodoIcon } from "../illustrations";
 import { EmptyState } from "../states";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 import { formatCalendarDate } from "../../utils/storage";
@@ -559,6 +559,7 @@ export function TwelveWeekTodayTab({
                 todayQueue.map((task) => {
                   const isOverdue = !task.completed && task.scheduledDate < todayDateKey;
                   const isPrimaryTask = firstPriorityTask?.id === task.id && !task.completed;
+                  const TaskStateIcon = task.completed ? TaskDoneIcon : isPrimaryTask ? TaskInProgressIcon : TaskTodoIcon;
                   const statusLabel = task.completed
                     ? "Đã chốt"
                     : isOverdue
@@ -601,6 +602,15 @@ export function TwelveWeekTodayTab({
                         >
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
+                              <TaskStateIcon
+                                className={`h-4 w-4 shrink-0 ${
+                                  isPrimaryTask && !task.completed
+                                    ? "text-white"
+                                    : task.completed
+                                      ? "text-[color:var(--color-success-fg)]"
+                                      : "text-violet-500"
+                                }`}
+                              />
                               <p
                                 className={`min-w-0 max-w-full break-words font-medium ${
                                   task.completed

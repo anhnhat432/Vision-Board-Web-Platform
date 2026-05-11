@@ -32,7 +32,7 @@ import { NextWeekCommitmentsEditor } from "./NextWeekCommitmentsEditor";
 import { TwelveWeekNextWeekRecommendationCard } from "./TwelveWeekNextWeekRecommendationCard";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 import { SectionBlock } from "../layout/SectionBlock";
-import { WeeklyReviewIllustration } from "../illustrations";
+import { TaskDoneIcon, TaskInProgressIcon, TaskTodoIcon, WeeklyReviewIllustration } from "../illustrations";
 
 interface WeekRange {
   start: string;
@@ -403,7 +403,10 @@ export function TwelveWeekWeekTab({
                         key={indicator.id || indicator.name}
                         className="rounded-[var(--r-control)] border border-emerald-100 bg-white px-4 py-3"
                       >
-                        <p className="font-medium text-slate-900">{indicator.name}</p>
+                        <p className="flex items-center gap-2 font-medium text-slate-900">
+                          <TaskTodoIcon className="h-4 w-4 shrink-0 text-emerald-600" />
+                          {indicator.name}
+                        </p>
                         <p className="mt-1 text-sm text-slate-500">
                           {indicator.target || "1"} {indicator.unit || "lần/tuần"}
                         </p>
@@ -440,7 +443,10 @@ export function TwelveWeekWeekTab({
                         key={indicator.id || indicator.name}
                         className="rounded-[var(--r-control)] border border-amber-100 bg-white px-4 py-3"
                       >
-                        <p className="font-medium text-slate-900">{indicator.name}</p>
+                        <p className="flex items-center gap-2 font-medium text-slate-900">
+                          <TaskTodoIcon className="h-4 w-4 shrink-0 text-amber-600" />
+                          {indicator.name}
+                        </p>
                         <p className="mt-1 text-sm text-slate-500">
                           {indicator.target || "1"} {indicator.unit || "lần/tuần"}
                         </p>
@@ -497,23 +503,28 @@ export function TwelveWeekWeekTab({
               </div>
             </div>
             <div data-testid="weekly-review-flow" className="grid gap-2 sm:grid-cols-4">
-              {reviewReadinessItems.map((item, index) => (
-                <div
-                  key={item.key}
-                  data-testid={`weekly-review-step-${item.key}`}
-                  data-done={item.done ? "true" : "false"}
-                  className={`rounded-[var(--r-control)] border px-3 py-3 text-sm ${
-                    item.done
-                      ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-                      : "border-slate-200 bg-slate-50 text-slate-600"
-                  }`}
-                >
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em]">
-                    {index + 1}. {item.label}
-                  </p>
-                  <p className="mt-1 font-medium">{item.done ? "Đã có" : "Đang mở"}</p>
-                </div>
-              ))}
+              {reviewReadinessItems.map((item, index) => {
+                const TaskStateIcon = item.done ? TaskDoneIcon : TaskInProgressIcon;
+
+                return (
+                  <div
+                    key={item.key}
+                    data-testid={`weekly-review-step-${item.key}`}
+                    data-done={item.done ? "true" : "false"}
+                    className={`rounded-[var(--r-control)] border px-3 py-3 text-sm ${
+                      item.done
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+                        : "border-slate-200 bg-slate-50 text-slate-600"
+                    }`}
+                  >
+                    <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em]">
+                      <TaskStateIcon className="h-4 w-4 shrink-0" />
+                      {index + 1}. {item.label}
+                    </p>
+                    <p className="mt-1 font-medium">{item.done ? "Đã có" : "Đang mở"}</p>
+                  </div>
+                );
+              })}
             </div>
             {summaryReview && (
               <div
