@@ -4,6 +4,7 @@ import { CheckCircle2, Clock, Copy, Loader2, QrCode, RefreshCw, XCircle } from "
 
 import { apiClient } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
+import { BillingPlusIllustration } from "../components/illustrations";
 import { syncEntitlementsWithProvider } from "../utils/production";
 import { getUserData, upgradePlanLocally } from "../utils/storage";
 
@@ -342,11 +343,14 @@ export function BillingCheckoutQR() {
 
           <section className="p-5 sm:p-7">
             <div className="stack-stack">
-              <div>
-                <h2 className="text-base font-bold text-slate-900">Thông tin chuyển khoản</h2>
-                <p className="mt-1 text-sm leading-6 text-slate-500">
-                  Chuyển đúng số tiền và giữ nguyên nội dung để hệ thống tự kích hoạt Plus sau khi nhận giao dịch.
-                </p>
+              <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+                <div>
+                  <h2 className="text-base font-bold text-slate-900">Thông tin chuyển khoản</h2>
+                  <p className="mt-1 text-sm leading-6 text-slate-500">
+                    Chuyển đúng số tiền và giữ nguyên nội dung để hệ thống tự kích hoạt Plus sau khi nhận giao dịch.
+                  </p>
+                </div>
+                <BillingPlusIllustration className="hidden w-24 text-indigo-500 opacity-70 sm:block" />
               </div>
 
               <div className="stack-tight rounded-[var(--r-tile)] border border-slate-200 bg-slate-50 p-4">

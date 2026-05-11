@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 
+import { BillingPlusIllustration } from "../components/illustrations";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -79,6 +80,7 @@ export function MockBillingCheckout() {
         </div>
         <Card className="overflow-hidden border-0 gradient-dark-indigo text-white shadow-2xl">
           <CardContent className="p-8 lg:p-10">
+            <BillingPlusIllustration className="mb-4 w-28 text-white opacity-50" />
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Thanh toán dùng thử</p>
             <h1 className="mt-[var(--space-inline)] text-4xl font-bold tracking-normal">Phiên thanh toán này không còn hợp lệ.</h1>
             <p className="mt-[var(--space-inline)] max-w-2xl text-base leading-8 text-white/74">
@@ -149,6 +151,7 @@ export function MockBillingCheckout() {
           </div>
 
           <div className="rounded-[var(--r-card)] border border-white/14 bg-white/10 p-5 shadow-sm">
+            <BillingPlusIllustration className="mb-3 w-24 text-white opacity-55" />
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/56">Tóm tắt nâng cấp</p>
             <div className="mt-4 stack-stack">
               <div className="rounded-[var(--r-card)] border border-white/12 bg-black/12 p-4">
