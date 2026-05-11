@@ -11,6 +11,7 @@ import {
   PLAN_DEFINITIONS,
   type PremiumFeatureContext,
 } from "../utils/twelve-week-premium";
+import { BillingPlusIllustration } from "./illustrations";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
@@ -176,6 +177,7 @@ export function UpgradePaywallDialog({
                 </DialogHeader>
               </div>
               <div className="rounded-[var(--r-card)] border border-white/12 bg-white/10 px-4 py-4 text-left sm:text-right">
+                <BillingPlusIllustration className="mb-2 ml-auto hidden w-20 text-white opacity-70 sm:block" />
                 <p className="text-xs uppercase tracking-[0.16em] text-white/56">Gói hiện tại</p>
                 <p className="mt-2 text-2xl font-bold text-white">{getPlanLabel(currentPlan)}</p>
               </div>

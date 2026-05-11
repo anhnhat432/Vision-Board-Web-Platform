@@ -14,6 +14,7 @@ import {
 import type { SmartGoalQualityBridge } from "./FeasibilityCheck/types";
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
+import { FeasibilityScaleIllustration } from "../components/illustrations";
 import { PageShell } from "../components/PageShell";
 import { Badge } from "../components/ui/badge";
 import { Card, CardContent } from "../components/ui/card";
@@ -294,6 +295,7 @@ export function FeasibilityCheck() {
         <Card className="hero-surface overflow-hidden border-0 text-white">
           <CardContent className="relative p-5 sm:p-6 lg:p-10">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
+            <FeasibilityScaleIllustration className="pointer-events-none absolute -right-4 bottom-4 hidden w-56 text-white opacity-30 lg:block" />
 
             <div className="relative max-w-4xl">
               <div className="stack-stack sm:stack-section">

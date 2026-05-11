@@ -32,6 +32,7 @@ import { NextWeekCommitmentsEditor } from "./NextWeekCommitmentsEditor";
 import { TwelveWeekNextWeekRecommendationCard } from "./TwelveWeekNextWeekRecommendationCard";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 import { SectionBlock } from "../layout/SectionBlock";
+import { WeeklyReviewIllustration } from "../illustrations";
 
 interface WeekRange {
   start: string;
@@ -466,6 +467,7 @@ export function TwelveWeekWeekTab({
             </CardDescription>
           </CardHeader>
           <CardContent className="stack-stack">
+            <WeeklyReviewIllustration className="mx-auto w-32 text-violet-500 opacity-75 sm:w-36" />
             <div
               className={`rounded-[var(--r-control)] border p-4 ${reviewDueToday ? "border-amber-200 bg-amber-50/80" : "border-slate-200 bg-slate-50"}`}
             >

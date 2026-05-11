@@ -5,7 +5,7 @@ import { ArrowRight, Check, Compass, Sparkles, Target, TrendingDown, TrendingUp 
 
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
-import { ProductVisual } from "../components/visuals/ProductVisual";
+import { LifeInsightIllustration } from "../components/illustrations";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -363,7 +363,9 @@ export function LifeInsight() {
                 </div>
               </div>
 
-              <ProductVisual variant="balance" className="hidden min-h-[220px] lg:block" />
+              <div className="pointer-events-none hidden min-h-[220px] items-center justify-center lg:flex" aria-hidden="true">
+                <LifeInsightIllustration className="w-56 text-violet-500 opacity-85 dark:opacity-65" />
+              </div>
 
               <div className="hidden rounded-[var(--r-card)] border border-white/14 bg-white/12 p-6 shadow-sm">
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Snapshot hiện tại</p>

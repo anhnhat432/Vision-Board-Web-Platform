@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
+import { EmptyOrdersIllustration } from "../components/illustrations";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -416,6 +417,7 @@ export function OrderPage() {
             </div>
 
             <div className="rounded-[var(--r-card)] border border-white/14 bg-white/12 p-5 shadow-sm">
+              <EmptyOrdersIllustration className="mb-3 hidden w-24 text-white opacity-50 sm:block" />
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Tóm tắt nhanh</p>
               <div className="mt-4 space-y-2.5">
                 {summaryItems.map((item) => {

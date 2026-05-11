@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
+import { BillingPlusIllustration, SoftDotsPattern } from "../components/illustrations";
 import { PrimaryActionCard } from "../components/layout/PrimaryActionCard";
 import { SectionBlock } from "../components/layout/SectionBlock";
 import {
@@ -433,7 +434,10 @@ export function BillingPlan() {
         className="flow-surface overflow-hidden text-white"
         titleClassName="max-w-3xl text-2xl font-bold tracking-normal text-white sm:text-3xl lg:text-4xl"
         descriptionClassName="max-w-2xl text-base leading-8 text-white/82"
-      />
+        contentClassName="pointer-events-none hidden justify-end lg:flex"
+      >
+        <BillingPlusIllustration className="-my-8 w-56 text-white opacity-35" />
+      </PrimaryActionCard>
 
       {/* Checkout return status */}
       {checkoutReturnStatus === "pending" && (
@@ -991,12 +995,18 @@ export function BillingPlan() {
             {PLAN_DEFINITIONS.map((plan) => (
               <div
                 key={plan.code}
-                className={`rounded-[var(--r-control)] border p-5 ${
+                className={`relative overflow-hidden rounded-[var(--r-control)] border p-5 ${
                   plan.code === currentPlanCode
                     ? "border-violet-300 bg-violet-50/50"
                     : "border-slate-100 bg-slate-50/30"
                 }`}
               >
+                {plan.code !== "FREE" && (
+                  <>
+                    <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 w-40 text-violet-500 opacity-25" />
+                    <BillingPlusIllustration className="pointer-events-none absolute -right-8 -top-8 w-28 text-violet-500 opacity-20" />
+                  </>
+                )}
                 <div className="flex items-center gap-2">
                   <h3 className="text-lg font-semibold text-slate-900">{plan.name}</h3>
                   {plan.code === currentPlanCode && (

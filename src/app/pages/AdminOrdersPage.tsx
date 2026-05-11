@@ -17,6 +17,7 @@ import {
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
+import { EmptyOrdersIllustration } from "../components/illustrations";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -851,6 +852,7 @@ export function AdminOrdersPage() {
         {orders.length === 0 ? (
           <Card className="border-0 shadow-2xl">
             <CardContent className="p-10 text-center lg:p-14">
+              <EmptyOrdersIllustration className="mx-auto mb-4 w-40 text-violet-500 opacity-80" />
               <ClipboardList className="mx-auto h-12 w-12 text-slate-300" />
               <h3 className="mt-6 text-xl font-semibold text-slate-900">Chưa có đơn hàng nào</h3>
               <p className="mt-[var(--space-inline)] text-sm text-slate-500">Đơn hàng từ người dùng sẽ xuất hiện ở đây khi có.</p>

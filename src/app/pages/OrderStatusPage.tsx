@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
 
+import { EmptyOrdersIllustration } from "../components/illustrations";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -143,6 +144,7 @@ export function OrderStatusPage() {
       <div className="stack-section pb-12">
         <Card className="overflow-hidden border-0 gradient-slate shadow-2xl">
           <CardContent className="p-10 text-center lg:p-14">
+            <EmptyOrdersIllustration className="mx-auto mb-4 w-40 text-violet-500 opacity-80" />
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-slate-900 text-white">
               <ClipboardList className="h-10 w-10" />
             </div>
@@ -271,6 +273,7 @@ export function OrderStatusPage() {
             </div>
 
             <div className="rounded-[var(--r-card)] border border-white/14 bg-white/12 p-5 shadow-sm">
+              <EmptyOrdersIllustration className="mb-3 hidden w-24 text-white opacity-50 sm:block" />
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Tóm tắt đơn</p>
               <div className="mt-4 grid gap-2.5">
                 {summaryItems.map((item) => {

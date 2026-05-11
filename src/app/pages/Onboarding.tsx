@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { ArrowLeft, ArrowRight, BarChart3, Check, Compass, Heart, Sparkles, Target } from "lucide-react";
 
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
-import { WelcomeIllustration } from "../components/illustrations";
+import { LifeBalanceWheelIllustration, WelcomeIllustration } from "../components/illustrations";
 import { ProductVisual } from "../components/visuals/ProductVisual";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
@@ -251,6 +251,7 @@ export function Onboarding() {
                 <div className="hidden rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-5 xl:block">
                   <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Bạn sẽ nhận được gì</p>
                   <WelcomeIllustration className="mt-[var(--space-stack)] w-full text-violet-500" />
+                  <LifeBalanceWheelIllustration className="mx-auto mt-2 w-48 text-fuchsia-500 opacity-80" />
                   <ProductVisual variant="moodboard" className="mt-[var(--space-stack)] min-h-[210px]" />
                   <div className="mt-[var(--space-stack)] stack-tight">
                     {[
@@ -304,8 +305,9 @@ export function Onboarding() {
 
               <div
                 data-testid="onboarding-assessment-summary"
-                className="rounded-[var(--r-tile)] border border-slate-200 bg-slate-50/85 p-4"
+                className="relative overflow-hidden rounded-[var(--r-tile)] border border-slate-200 bg-slate-50/85 p-4"
               >
+                <LifeBalanceWheelIllustration className="pointer-events-none absolute -right-10 -top-10 hidden w-36 text-violet-500 opacity-20 lg:block" />
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Tín hiệu đang hiện ra</p>
                 <div className="mt-[var(--space-inline)] grid grid-cols-2 gap-2 text-sm">
                   <div className="rounded-[var(--r-control)] border border-slate-200 bg-white p-3">

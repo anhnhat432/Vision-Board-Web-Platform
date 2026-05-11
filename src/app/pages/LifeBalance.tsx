@@ -17,6 +17,7 @@ import { Button } from "../components/ui/button";
 import type { LifeBalanceHistoryChartPoint } from "../components/LifeBalanceHistoryChart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { CountUp } from "../components/ui/count-up";
+import { LifeBalanceWheelIllustration } from "../components/illustrations";
 import { ProductVisual } from "../components/visuals/ProductVisual";
 import { Reveal } from "../components/ui/reveal";
 import { SimpleRadarChart } from "../components/SimpleRadarChart";
@@ -308,7 +309,7 @@ export function LifeBalance() {
           className="border border-slate-200/80 bg-white/92 shadow-lg"
         >
           <CardContent className="p-5 sm:p-6">
-            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_180px_auto] lg:items-center">
               <div data-testid="life-balance-signal-summary" className="stack-stack">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
@@ -345,6 +346,10 @@ export function LifeBalance() {
                     <p className="mt-1 text-sm font-semibold text-emerald-800">{strongestArea.score}/10</p>
                   </div>
                 </div>
+              </div>
+
+              <div className="pointer-events-none hidden justify-center lg:flex" aria-hidden="true">
+                <LifeBalanceWheelIllustration className="w-44 text-violet-500 opacity-80 dark:opacity-60" />
               </div>
 
               <div className="flex w-full flex-col gap-3 sm:w-auto">

@@ -17,6 +17,7 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { CountUp } from "../components/ui/count-up";
+import { AchievementBadgeIllustration, ConstellationAccent } from "../components/illustrations";
 import { InteractiveSurface } from "../components/ui/interactive-surface";
 import { Reveal } from "../components/ui/reveal";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
@@ -102,6 +103,7 @@ export function Achievements() {
         <Card className="hero-surface overflow-hidden border-0 text-white">
           <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
+            <ConstellationAccent className="pointer-events-none absolute right-4 top-4 w-32 text-white opacity-35" />
 
             <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
               <div className="stack-section">
@@ -140,6 +142,7 @@ export function Achievements() {
               </div>
 
               <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-[var(--r-card)] border border-white/14 bg-white/12 p-6 shadow-sm">
+                <AchievementBadgeIllustration className="mx-auto mb-4 w-36 text-white opacity-75" />
                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Tình trạng hiện tại</p>
 
                 <div className="mt-6 stack-stack">
@@ -245,6 +248,7 @@ export function Achievements() {
         <Reveal delay={0.04}>
           <Card className="overflow-hidden">
             <CardContent className="p-10 text-center lg:p-14">
+              <AchievementBadgeIllustration className="mx-auto w-40 text-amber-500 opacity-90" />
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-amber-50 text-amber-700">
                 <Trophy className="h-10 w-10" />
               </div>

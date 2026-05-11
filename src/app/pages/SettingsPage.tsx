@@ -5,6 +5,7 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import { DataStorageInfo } from "../components/DataStorageInfo";
+import { CloudSyncIllustration } from "../components/illustrations";
 import { PageHeader } from "../components/layout/PageHeader";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -160,8 +161,13 @@ export function SettingsPage() {
             <CardDescription>Thông tin đăng nhập hiện tại của không gian làm việc này.</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="truncate text-sm font-semibold text-slate-900">{accountLabel}</p>
-            <p className="mt-1 truncate text-sm text-slate-500">{accountStatus}</p>
+            <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-slate-900">{accountLabel}</p>
+                <p className="mt-1 truncate text-sm text-slate-500">{accountStatus}</p>
+              </div>
+              <CloudSyncIllustration className="hidden w-24 text-violet-500 opacity-70 sm:block" />
+            </div>
             <Button
               type="button"
               variant="outline"

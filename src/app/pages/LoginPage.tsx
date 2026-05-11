@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { AlertCircle, Compass, Loader2, LogOut, RefreshCw, ShieldCheck, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
-import { HeroOrbitIllustration } from "../components/illustrations";
+import { ConstellationAccent, HeroOrbitIllustration } from "../components/illustrations";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
@@ -185,8 +185,9 @@ export function LoginPage() {
               transition: { duration: 0.36, ease: "easeOut", staggerChildren: 0.08 },
             },
           }}
-          className="glass-surface-gradient-border hidden p-8 shadow-2xl lg:block"
+          className="glass-surface-gradient-border relative hidden overflow-hidden p-8 shadow-2xl lg:block"
         >
+          <ConstellationAccent className="pointer-events-none absolute right-4 top-4 w-28 text-violet-500 opacity-35 dark:opacity-25" />
           <motion.div
             variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
             className="mb-5 flex items-start justify-between gap-4"
