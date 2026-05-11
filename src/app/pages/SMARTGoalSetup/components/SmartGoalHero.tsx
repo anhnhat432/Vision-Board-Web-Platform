@@ -1,6 +1,6 @@
 ﻿import { CheckCircle2, Compass, Sparkles, Target } from "lucide-react";
 
-import { ConstellationAccent, SmartGoalIllustration } from "../../../components/illustrations";
+import { ConstellationAccent, HeroSmartGoalScene, SmartGoalIllustration } from "../../../components/illustrations";
 import { Badge } from "../../../components/ui/badge";
 import { PrimaryActionCard } from "../../../components/layout/PrimaryActionCard";
 import { Progress } from "../../../components/ui/progress";
@@ -46,6 +46,7 @@ export function SmartGoalHero({
       descriptionClassName="max-w-2xl text-base leading-8 text-white/82 lg:text-lg"
       contentClassName="relative grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start"
     >
+          <HeroSmartGoalScene className="pointer-events-none absolute -right-16 top-0 hidden w-[520px] text-white opacity-18 lg:block" />
           <ConstellationAccent className="pointer-events-none absolute right-3 top-0 w-28 text-white opacity-35 sm:w-36" />
           <SmartGoalIllustration className="pointer-events-none absolute -right-8 bottom-2 hidden w-56 text-white opacity-25 lg:block" />
           <div className="stack-stack">

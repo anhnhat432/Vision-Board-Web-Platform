@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { AlertCircle, Compass, Loader2, LogOut, RefreshCw, ShieldCheck, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
-import { ConstellationAccent, HeroOrbitIllustration } from "../components/illustrations";
+import { ConstellationAccent, HeroLoginScene, HeroOrbitIllustration } from "../components/illustrations";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
@@ -187,6 +187,7 @@ export function LoginPage() {
           }}
           className="glass-surface-gradient-border surface-aurora ring-soft-glow page-enter relative hidden overflow-hidden p-8 shadow-2xl lg:block"
         >
+          <HeroLoginScene className="pointer-events-none absolute -right-20 top-6 hidden w-[420px] text-violet-500 opacity-18 xl:block dark:opacity-14" />
           <ConstellationAccent className="pointer-events-none absolute right-4 top-4 w-28 text-violet-500 opacity-35 dark:opacity-25" />
           <motion.div
             variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
@@ -251,6 +252,7 @@ export function LoginPage() {
 
         <div className="w-full max-w-sm justify-self-center lg:max-w-md">
         <div className="mb-8 text-center">
+          <HeroLoginScene className="mx-auto mb-1 w-40 text-violet-500 opacity-80 lg:hidden" />
           <HeroOrbitIllustration className="mx-auto mb-3 w-28 text-violet-500 lg:hidden" />
           <div className="gradient-brand mx-auto mb-3 flex size-12 items-center justify-center rounded-[var(--r-tile)] shadow-lg">
             <Sparkles className="h-5.5 w-5.5 text-white" />

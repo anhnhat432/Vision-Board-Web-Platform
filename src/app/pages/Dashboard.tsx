@@ -34,6 +34,7 @@ import { FeedbackDialog } from "../components/FeedbackDialog";
 import {
   EmptyGoalIllustration,
   EmptyHintArrow,
+  HeroDashboardScene,
   HeroOrbitIllustration,
   SoftDotsPattern,
   WavyDividerIllustration,
@@ -697,7 +698,7 @@ function DashboardContent({
               hero
               titleAs="h2"
               density="compact"
-              className={`${dashboardGreeting.surfaceClass} surface-aurora ring-soft-glow page-enter bg-white/80 shadow-xl shadow-slate-900/5 dark:bg-slate-900/70 dark:shadow-black/30`}
+              className={`${dashboardGreeting.surfaceClass} surface-aurora ring-soft-glow page-enter relative bg-white/80 shadow-xl shadow-slate-900/5 dark:bg-slate-900/70 dark:shadow-black/30`}
               eyebrow={dashboardNextAction.eyebrow}
               title={`${dashboardGreeting.label}, ${dashboardDisplayName}`}
               description={`Tuần ${dashboardKpiCurrentWeek ?? "--"}/${dashboardKpiTotalWeeks} — còn ${dashboardOpenTaskCount} việc hôm nay`}
@@ -718,6 +719,7 @@ function DashboardContent({
                 </Button>
               }
             >
+              <HeroDashboardScene className="pointer-events-none absolute -right-12 top-2 hidden w-[420px] text-violet-500 opacity-22 dark:opacity-16 xl:block" />
               <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 hidden w-56 text-violet-500 opacity-35 dark:opacity-20 sm:block" />
               <div className="stack-stack">
                 <div className="hidden justify-end xl:flex">

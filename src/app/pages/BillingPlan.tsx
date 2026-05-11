@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
-import { BillingPlusIllustration, SoftDotsPattern } from "../components/illustrations";
+import { BillingPlusIllustration, HeroBillingPlusScene, SoftDotsPattern } from "../components/illustrations";
 import { PrimaryActionCard } from "../components/layout/PrimaryActionCard";
 import { SectionBlock } from "../components/layout/SectionBlock";
 import {
@@ -431,11 +431,12 @@ export function BillingPlan() {
             ? "Bạn có thể xem trước quyền Plus mà không thanh toán. Khi mở thanh toán thật, giao dịch sẽ được xác nhận qua trang thanh toán."
             : "Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản của bạn."
         }
-        className="flow-surface surface-aurora ring-soft-glow page-enter overflow-hidden text-white"
+        className="flow-surface surface-aurora ring-soft-glow page-enter relative overflow-hidden text-white"
         titleClassName="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl"
         descriptionClassName="max-w-2xl text-base leading-8 text-white/82"
         contentClassName="pointer-events-none hidden justify-end lg:flex"
       >
+        <HeroBillingPlusScene className="pointer-events-none absolute -right-12 -top-14 hidden w-[360px] text-white opacity-18 lg:block" />
         <BillingPlusIllustration className="-my-8 w-56 text-white opacity-35" />
       </PrimaryActionCard>
 
@@ -1004,6 +1005,7 @@ export function BillingPlan() {
                 {plan.code !== "FREE" && (
                   <>
                     <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 w-40 text-violet-500 opacity-25" />
+                    <HeroBillingPlusScene className="pointer-events-none absolute -right-16 -top-14 w-40 text-violet-500 opacity-18" />
                     <BillingPlusIllustration className="pointer-events-none absolute -right-8 -top-8 w-28 text-violet-500 opacity-20" />
                   </>
                 )}

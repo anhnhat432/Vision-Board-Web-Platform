@@ -17,7 +17,7 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { CountUp } from "../components/ui/count-up";
-import { AchievementBadgeIllustration, BadgeRibbonAccent, ConstellationAccent } from "../components/illustrations";
+import { AchievementBadgeIllustration, BadgeRibbonAccent, ConstellationAccent, HeroAchievementsScene } from "../components/illustrations";
 import { InteractiveSurface } from "../components/ui/interactive-surface";
 import { Reveal } from "../components/ui/reveal";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
@@ -103,6 +103,7 @@ export function Achievements() {
         <Card className="hero-surface surface-aurora ring-soft-glow page-enter overflow-hidden border-0 text-white">
           <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
+            <HeroAchievementsScene className="pointer-events-none absolute -right-20 -top-4 hidden w-[560px] text-white opacity-20 xl:block" />
             <ConstellationAccent className="pointer-events-none absolute right-4 top-4 w-32 text-white opacity-35" />
 
             <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">

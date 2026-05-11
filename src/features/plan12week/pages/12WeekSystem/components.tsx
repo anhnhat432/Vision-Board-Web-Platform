@@ -4,7 +4,7 @@ import { AlertTriangle, CalendarDays, CheckCircle2, Flame, Loader2, Sparkles, Ta
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
-import { PhaseHarvestChipIcon, PhasePeakChipIcon, PhaseRampChipIcon, SoftDotsPattern } from "@/app/components/illustrations";
+import { Hero12WeekScene, PhaseHarvestChipIcon, PhasePeakChipIcon, PhaseRampChipIcon, SoftDotsPattern } from "@/app/components/illustrations";
 import { ProductVisual } from "@/app/components/visuals/ProductVisual";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import {
@@ -197,6 +197,7 @@ export function TwelveWeekDashboardHeader({
 
   return (
     <Card className="glass-surface-sm surface-aurora ring-soft-glow page-enter relative overflow-hidden rounded-[var(--r-tile)] border border-violet-100/80 bg-white/94 shadow-xl shadow-slate-900/5 ring-1 ring-white/70 sm:rounded-[var(--r-card)] dark:shadow-black/30">
+      <Hero12WeekScene className="pointer-events-none absolute -right-16 top-0 hidden w-[560px] text-violet-500 opacity-18 dark:opacity-14 xl:block" />
       <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 hidden w-44 text-violet-500 opacity-25 dark:opacity-15 sm:block" />
       <CardContent className="p-4 sm:p-6 lg:p-7">
         <div className="flex flex-col gap-3 sm:gap-5 xl:flex-row xl:items-start xl:justify-between">
