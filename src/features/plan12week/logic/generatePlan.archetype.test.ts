@@ -147,12 +147,12 @@ describe("generate12WeekPlan - low-feasibility week 1 sizing", () => {
 
   it("project archetype week 1 explicitly mentions clarify scope", () => {
     const plan = generate12WeekPlan(GOAL_INPUT, { goalArchetype: "project_completion" });
-    expect(plan.weeks[0].expectedOutput.toLowerCase()).toMatch(/scope/);
+    expect(plan.weeks[0].expectedOutput.toLowerCase()).toMatch(/phạm vi/);
   });
 
   it("habit archetype week 1 explicitly mentions environment / cue", () => {
     const plan = generate12WeekPlan(GOAL_INPUT, { goalArchetype: "habit_building" });
-    expect(plan.weeks[0].expectedOutput.toLowerCase()).toMatch(/cue|routine/);
+    expect(plan.weeks[0].expectedOutput.toLowerCase()).toMatch(/tín hiệu|nhịp quen thuộc/);
   });
 
   it("skill archetype week 1 explicitly mentions practice/luyện", () => {
