@@ -13,6 +13,7 @@ import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import type { PendingSMARTGoal } from "@/lib/smart-goal";
 import { CoreFlowProgress } from "../../../components/CoreFlowProgress";
+import { FeasibilityScaleIllustration } from "../../../components/illustrations";
 import { useBreakpoint } from "../../../hooks/useBreakpoint";
 import { useReducedMotion } from "../../../components/ui/use-reduced-motion";
 import { Badge } from "../../../components/ui/badge";
@@ -304,6 +305,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             </>
           }
         >
+          <FeasibilityScaleIllustration className="pointer-events-none absolute right-4 top-4 hidden w-28 text-white opacity-25 sm:block" />
           <div className="flex flex-wrap gap-3">
             <div className={`inline-flex rounded-[var(--r-pill)] border px-4 py-2 text-sm font-semibold ${styles.badge}`}>
               {copy.statusLabel}
