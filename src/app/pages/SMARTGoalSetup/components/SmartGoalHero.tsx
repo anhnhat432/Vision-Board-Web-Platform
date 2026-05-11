@@ -41,8 +41,8 @@ export function SmartGoalHero({
       title="Biến trọng tâm thành mục tiêu rõ, đo được, đủ thực tế."
       titleAs="h1"
       description="5 câu hỏi: kết quả, chỉ số, điều kiện, lý do và mốc thời gian. Sau đó sang kiểm tra tính thực tế."
-      className="overflow-hidden text-white glass-surface-gradient-border ambient-glow"
-      titleClassName="gradient-text max-w-3xl text-3xl font-bold tracking-normal lg:text-4xl"
+      className="surface-aurora ring-soft-glow overflow-hidden text-white glass-surface-gradient-border ambient-glow"
+      titleClassName="gradient-text max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl"
       descriptionClassName="max-w-2xl text-base leading-8 text-white/82 lg:text-lg"
       contentClassName="relative grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start"
     >

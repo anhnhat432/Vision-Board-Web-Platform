@@ -228,7 +228,7 @@ export function LifeBalance() {
         </div>
       )}
 
-      <Card className="ops-surface overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-sm">
+      <Card className="ops-surface surface-aurora ring-soft-glow overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-xl shadow-slate-900/5 dark:shadow-black/30">
         <CardContent className="relative p-5 sm:p-6">
           <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="stack-stack">
@@ -238,14 +238,14 @@ export function LifeBalance() {
               </div>
 
               <div className="stack-tight">
-                <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl">
+                <h1 className="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl">
                   Cập nhật{" "}
                   <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-transparent">
                     8 lĩnh vực sống
                   </span>{" "}
                   để chọn đúng trọng tâm tiếp theo.
                 </h1>
-                <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
+                <p className="max-w-2xl text-sm leading-relaxed text-slate-700 sm:text-base dark:text-slate-300">
                   Mỗi điểm bạn chỉnh sẽ cập nhật ngay phần tín hiệu bên dưới. Sau đó bạn có thể lưu riêng hoặc lưu rồi
                   mở Góc nhìn cuộc sống để chọn vấn đề đáng ưu tiên nhất.
                 </p>

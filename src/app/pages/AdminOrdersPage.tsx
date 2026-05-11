@@ -740,7 +740,7 @@ export function AdminOrdersPage() {
 
   return (
     <div className="stack-section pb-12">
-      <Card className="hero-surface overflow-hidden border-0 text-white">
+      <Card className="hero-surface surface-aurora ring-soft-glow overflow-hidden border-0 text-white">
         <CardContent className="p-5 sm:p-6 lg:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="stack-stack">
@@ -749,7 +749,7 @@ export function AdminOrdersPage() {
                 Quản trị vận hành
               </div>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Người dùng, thanh toán và đơn hàng</h1>
+                <h1 className="text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl">Người dùng, thanh toán và đơn hàng</h1>
                 <p className="mt-[var(--space-inline)] max-w-3xl text-base leading-8 text-white/82">
                   Theo dõi người dùng, doanh thu VietQR, trạng thái email và xử lý đơn in từ một màn hình.
                 </p>

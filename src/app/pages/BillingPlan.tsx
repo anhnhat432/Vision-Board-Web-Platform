@@ -431,8 +431,8 @@ export function BillingPlan() {
             ? "Bạn có thể xem trước quyền Plus mà không thanh toán. Khi mở thanh toán thật, giao dịch sẽ được xác nhận qua trang thanh toán."
             : "Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản của bạn."
         }
-        className="flow-surface overflow-hidden text-white"
-        titleClassName="max-w-3xl text-2xl font-bold tracking-normal text-white sm:text-3xl lg:text-4xl"
+        className="flow-surface surface-aurora ring-soft-glow overflow-hidden text-white"
+        titleClassName="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl"
         descriptionClassName="max-w-2xl text-base leading-8 text-white/82"
         contentClassName="pointer-events-none hidden justify-end lg:flex"
       >
@@ -520,7 +520,7 @@ export function BillingPlan() {
           tone={currentPlanCode === "FREE" ? "primary" : "violet"}
           title="Gói hiện tại"
           titleAs="h2"
-          titleClassName="text-2xl font-bold text-slate-950"
+          titleClassName="text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl"
           eyebrow="Tài khoản"
           icon={<Crown className="h-4 w-4" />}
           description={

@@ -32,17 +32,17 @@ export function PageHeader({
   const HeadingTag = level === 2 ? "h2" : "h3";
 
   return (
-    <div className={cn("max-w-3xl space-y-2.5", className)}>
+    <div className={cn("max-w-3xl space-y-3", className)}>
       {eyebrow && (
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           {eyebrow}
         </p>
       )}
-      <HeadingTag className="text-2xl font-bold leading-tight tracking-normal text-foreground sm:text-3xl">
+      <HeadingTag className="text-xl font-semibold leading-snug tracking-tight text-foreground sm:text-2xl">
         {title}
       </HeadingTag>
       {description && (
-        <p className="text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
+        <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
           {description}
         </p>
       )}

@@ -100,7 +100,7 @@ export function Achievements() {
   return (
     <div className="stack-section pb-12">
       <InteractiveSurface className="rounded-[var(--r-card)]" intensity={9} translate={22}>
-        <Card className="hero-surface overflow-hidden border-0 text-white">
+        <Card className="hero-surface surface-aurora ring-soft-glow overflow-hidden border-0 text-white">
           <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
             <ConstellationAccent className="pointer-events-none absolute right-4 top-4 w-32 text-white opacity-35" />
@@ -113,7 +113,7 @@ export function Achievements() {
                 </div>
 
                 <div className="stack-stack">
-                  <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+                  <h1 className="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl">
                     Mọi cột mốc nhỏ bạn mở khóa ở đây đều là bằng chứng rằng hành trình đang thật sự diễn ra.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">

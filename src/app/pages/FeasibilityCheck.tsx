@@ -292,7 +292,7 @@ export function FeasibilityCheck() {
       <div className={prefersReducedMotion ? "stack-section" : "animate-fade-in-up stack-section"}>
         <CoreFlowProgress currentStepId="feasibility" onExit={() => navigate("/")} />
 
-        <Card className="hero-surface overflow-hidden border-0 text-white">
+        <Card className="hero-surface surface-aurora ring-soft-glow overflow-hidden border-0 text-white">
           <CardContent className="relative p-5 sm:p-6 lg:p-10">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
             <FeasibilityScaleIllustration className="pointer-events-none absolute -right-4 bottom-4 hidden w-56 text-white opacity-30 lg:block" />
@@ -305,7 +305,7 @@ export function FeasibilityCheck() {
                 </div>
 
                 <div className="stack-tight sm:stack-stack">
-                  <h1 className="max-w-4xl text-2xl font-bold leading-tight tracking-normal sm:text-4xl lg:text-5xl">
+                  <h1 className="max-w-4xl text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl">
                     Mục tiêu này có{" "}
                     <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-transparent dark:from-violet-200 dark:via-fuchsia-200 dark:to-rose-200">
                       khả thi

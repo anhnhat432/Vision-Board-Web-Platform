@@ -208,6 +208,7 @@
   --color-input-background: var(--input-background);
   --color-switch-background: var(--switch-background);
   --color-ring: var(--ring);
+  --color-surface: var(--card);
   --color-surface-muted: var(--surface-muted);
   --color-border-muted: var(--border-muted);
   --color-chart-1: var(--chart-1);
@@ -818,6 +819,28 @@
     background-image:
       radial-gradient(circle 380px at 12% 28%, var(--tone-orb-a) 0%, transparent 65%),
       radial-gradient(circle 320px at 88% 72%, var(--tone-orb-b) 0%, transparent 65%);
+  }
+
+  .surface-aurora {
+    background:
+      radial-gradient(60% 80% at 20% 0%, color-mix(in oklab, var(--color-primary) 18%, transparent) 0%, transparent 60%),
+      radial-gradient(60% 80% at 100% 100%, color-mix(in oklab, var(--color-accent) 14%, transparent) 0%, transparent 60%);
+  }
+
+  .surface-glass {
+    background: color-mix(in oklab, var(--color-surface) 80%, transparent);
+    backdrop-filter: saturate(120%) blur(8px);
+    -webkit-backdrop-filter: saturate(120%) blur(8px);
+  }
+
+  .ring-soft-glow {
+    box-shadow:
+      0 1px 0 0 color-mix(in oklab, var(--color-border) 60%, transparent),
+      0 8px 24px -12px color-mix(in oklab, var(--color-primary) 35%, transparent);
+  }
+
+  .border-gradient-violet-rose {
+    border-image: linear-gradient(135deg, var(--color-primary), var(--color-accent)) 1;
   }
 
   .glass-surface {

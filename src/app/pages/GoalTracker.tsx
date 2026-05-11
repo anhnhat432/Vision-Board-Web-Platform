@@ -773,7 +773,7 @@ function GoalTrackerContent({
         </AlertDialogContent>
       </AlertDialog>
 
-      <Card data-tour-id="goaltracker-hero" className="flow-panel overflow-hidden">
+      <Card data-tour-id="goaltracker-hero" className="flow-panel surface-aurora ring-soft-glow overflow-hidden shadow-xl shadow-slate-900/5 dark:shadow-black/30">
         <CardContent className="p-5 sm:p-6">
           <div className="grid gap-[var(--space-stack)] xl:grid-cols-[minmax(0,1fr)_340px]">
             <div data-tour-id="goaltracker-start-card" className="stack-stack">
@@ -782,7 +782,7 @@ function GoalTrackerContent({
                 Mục tiêu
               </div>
               <div className="max-w-3xl">
-                <h1 className="break-words text-2xl font-bold tracking-normal text-foreground sm:text-3xl">
+                <h1 className="break-words text-3xl font-semibold leading-[1.15] tracking-tight text-foreground sm:text-4xl md:text-5xl">
                   Mục tiêu và bước tiếp theo.
                 </h1>
                 <p className="mt-[var(--space-inline)] max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">

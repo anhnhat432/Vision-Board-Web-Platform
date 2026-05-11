@@ -185,7 +185,7 @@ export function LoginPage() {
               transition: { duration: 0.36, ease: "easeOut", staggerChildren: 0.08 },
             },
           }}
-          className="glass-surface-gradient-border relative hidden overflow-hidden p-8 shadow-2xl lg:block"
+          className="glass-surface-gradient-border surface-aurora ring-soft-glow relative hidden overflow-hidden p-8 shadow-2xl lg:block"
         >
           <ConstellationAccent className="pointer-events-none absolute right-4 top-4 w-28 text-violet-500 opacity-35 dark:opacity-25" />
           <motion.div
@@ -205,7 +205,7 @@ export function LoginPage() {
           </motion.p>
           <motion.p
             variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
-            className="mt-[var(--space-inline)] text-4xl font-bold leading-[1.08] tracking-tight text-slate-950 xl:text-[2.75rem] dark:text-white"
+            className="mt-[var(--space-inline)] text-3xl font-semibold leading-[1.15] tracking-tight text-slate-950 sm:text-4xl md:text-5xl dark:text-white"
           >
             Biến mục tiêu thành{" "}
             <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-transparent">

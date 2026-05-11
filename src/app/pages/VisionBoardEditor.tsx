@@ -648,7 +648,7 @@ export function VisionBoardEditor() {
         </AlertDialog>
 
         <Dialog open={isAddingItem} onOpenChange={setIsAddingItem}>
-          <Card className="hero-surface overflow-hidden border-0 text-white">
+          <Card className="hero-surface surface-aurora ring-soft-glow overflow-hidden border-0 text-white">
             <CardContent className="relative p-5 sm:p-6 lg:p-8">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_22%)] opacity-90" />
 
@@ -660,7 +660,7 @@ export function VisionBoardEditor() {
                   </div>
 
                   <div className="stack-stack">
-                    <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+                    <h1 className="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl">
                       Dựng một không gian hình ảnh khiến mục tiêu của bạn trở nên chạm được mỗi ngày.
                     </h1>
                     <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">

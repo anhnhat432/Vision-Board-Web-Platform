@@ -136,8 +136,8 @@ export function AspirationalVision() {
           title="Tầm nhìn 3 năm"
           titleAs="h2"
           description="Viết phần aspirational vision riêng với mục tiêu 12 tuần. Phần này không bắt buộc, nhưng giúp mỗi cycle ngắn hạn bám vào một hướng dài hơn."
-          className="text-white"
-          titleClassName="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-2xl font-semibold text-transparent dark:from-violet-200 dark:via-fuchsia-200 dark:to-rose-200"
+          className="surface-aurora ring-soft-glow text-white"
+          titleClassName="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-3xl font-semibold leading-[1.15] tracking-tight text-transparent sm:text-4xl md:text-5xl dark:from-violet-200 dark:via-fuchsia-200 dark:to-rose-200"
           descriptionClassName="max-w-3xl leading-7 text-white/78"
           contentClassName="pointer-events-none hidden justify-end sm:flex"
         >

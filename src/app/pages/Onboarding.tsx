@@ -153,7 +153,7 @@ export function Onboarding() {
         <OnboardingPageMotion>
           <CoreFlowProgress currentStepId="life_balance" />
 
-          <Card className="flow-surface overflow-hidden border border-slate-200/80 bg-white/94 shadow-sm">
+          <Card className="flow-surface surface-aurora ring-soft-glow overflow-hidden border border-slate-200/80 bg-white/94 shadow-xl shadow-slate-900/5 dark:shadow-black/30">
             <CardContent className="relative p-4 sm:p-6 lg:p-7 xl:p-8">
               <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_360px]">
                 <div className="stack-stack">
@@ -170,7 +170,7 @@ export function Onboarding() {
                   </div>
 
                   <div className="stack-tight">
-                    <h1 className="max-w-3xl text-2xl font-bold tracking-normal text-slate-950 sm:text-3xl lg:text-4xl">
+                    <h1 className="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight text-slate-950 sm:text-4xl md:text-5xl">
                       {isReturning ? "Cập nhật lại " : "Bắt đầu bằng "}
                       <span className="bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
                         8 lĩnh vực
@@ -179,7 +179,7 @@ export function Onboarding() {
                         ? " để góc nhìn bám sát cuộc sống hiện tại hơn."
                         : " để biết nên ưu tiên điều gì trước."}
                     </h1>
-                    <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base lg:text-lg">
+                    <p className="max-w-2xl text-sm leading-relaxed text-slate-700 sm:text-base dark:text-slate-300">
                       Chỉ khoảng 3 phút để chấm điểm hiện tại. Kết quả sẽ nối thẳng sang Góc nhìn cuộc sống, mục tiêu SMART
                       và kế hoạch 12 tuần, nên bạn không phải đoán bước tiếp theo.
                     </p>
@@ -283,7 +283,7 @@ export function Onboarding() {
       <OnboardingPageMotion>
         <CoreFlowProgress currentStepId="life_balance" />
 
-        <Card className="flow-surface overflow-hidden border border-slate-200/80 bg-white/94 shadow-sm">
+        <Card className="flow-surface surface-aurora ring-soft-glow overflow-hidden border border-slate-200/80 bg-white/94 shadow-xl shadow-slate-900/5 dark:shadow-black/30">
           <CardContent className="p-4 sm:p-6 lg:p-7">
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
               <div className="stack-tight">
@@ -291,14 +291,14 @@ export function Onboarding() {
                   <Compass className="h-4 w-4" />
                   Chấm 8 lĩnh vực
                 </div>
-                <h1 className="max-w-3xl text-2xl font-bold tracking-normal text-slate-950 sm:text-3xl lg:text-4xl">
+                <h1 className="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight text-slate-950 sm:text-4xl md:text-5xl">
                   Chấm điểm hiện tại để biết chính xác{" "}
                   <span className="bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
                     nơi bạn nên bắt đầu
                   </span>
                   .
                 </h1>
-                <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
+                <p className="max-w-2xl text-sm leading-relaxed text-slate-700 sm:text-base dark:text-slate-300">
                   Kéo từng lĩnh vực từ 1 đến 10. Tóm tắt bên cạnh cập nhật ngay để bạn thấy tín hiệu trước khi lưu.
                 </p>
               </div>

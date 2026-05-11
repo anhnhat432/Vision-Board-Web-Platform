@@ -697,12 +697,12 @@ function DashboardContent({
               hero
               titleAs="h2"
               density="compact"
-              className={dashboardGreeting.surfaceClass}
+              className={`${dashboardGreeting.surfaceClass} surface-aurora ring-soft-glow bg-white/80 shadow-xl shadow-slate-900/5 dark:bg-slate-900/70 dark:shadow-black/30`}
               eyebrow={dashboardNextAction.eyebrow}
               title={`${dashboardGreeting.label}, ${dashboardDisplayName}`}
               description={`Tuần ${dashboardKpiCurrentWeek ?? "--"}/${dashboardKpiTotalWeeks} — còn ${dashboardOpenTaskCount} việc hôm nay`}
               icon={<CalendarDays className="h-4 w-4" />}
-              titleClassName={`text-3xl font-bold leading-[1.08] tracking-tight sm:text-4xl lg:text-5xl ${dashboardGreeting.textClass}`}
+              titleClassName={`text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl ${dashboardGreeting.textClass}`}
               descriptionClassName="count-up text-sm font-semibold tabular-nums text-slate-700 sm:text-base"
               headerClassName="relative z-10"
               actionClassName="relative z-10"

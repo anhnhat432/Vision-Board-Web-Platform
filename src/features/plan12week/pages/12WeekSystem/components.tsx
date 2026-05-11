@@ -100,13 +100,13 @@ export function TwelveWeekDashboardState({
   const Icon = kind === "loading" ? Loader2 : Sparkles;
 
   return (
-    <Card className="overflow-hidden border border-slate-200/80 bg-white/92 shadow-sm">
+    <Card className="surface-aurora ring-soft-glow overflow-hidden border border-slate-200/80 bg-white/92 shadow-sm">
       <CardContent className="p-8 text-center sm:p-10 lg:p-14">
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700">
           <Icon className={`h-10 w-10 ${kind === "loading" ? "animate-spin" : ""}`} />
         </div>
         <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{eyebrow}</p>
-        <h1 className="mt-[var(--space-inline)] text-2xl font-bold tracking-normal text-slate-900 sm:text-3xl">{title}</h1>
+        <h1 className="mt-[var(--space-inline)] text-3xl font-semibold leading-[1.15] tracking-tight text-slate-900 sm:text-4xl md:text-5xl">{title}</h1>
         <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-sm leading-7 text-slate-500 sm:text-base" role="status">
           {description}
         </p>
@@ -196,7 +196,7 @@ export function TwelveWeekDashboardHeader({
   const PhaseChipIcon = phaseInfo.chipIcon;
 
   return (
-    <Card className="glass-surface-sm relative overflow-hidden rounded-[var(--r-tile)] border border-violet-100/80 bg-white/94 shadow-sm ring-1 ring-white/70 sm:rounded-[var(--r-card)]">
+    <Card className="glass-surface-sm surface-aurora ring-soft-glow relative overflow-hidden rounded-[var(--r-tile)] border border-violet-100/80 bg-white/94 shadow-xl shadow-slate-900/5 ring-1 ring-white/70 sm:rounded-[var(--r-card)] dark:shadow-black/30">
       <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 hidden w-44 text-violet-500 opacity-25 dark:opacity-15 sm:block" />
       <CardContent className="p-4 sm:p-6 lg:p-7">
         <div className="flex flex-col gap-3 sm:gap-5 xl:flex-row xl:items-start xl:justify-between">
@@ -221,7 +221,7 @@ export function TwelveWeekDashboardHeader({
               )}
             </div>
             <div className="space-y-2">
-              <h1 className="line-clamp-2 max-w-4xl break-words text-lg font-bold tracking-normal text-slate-950 sm:text-2xl">
+              <h1 className="line-clamp-2 max-w-4xl break-words text-3xl font-semibold leading-[1.15] tracking-tight text-slate-950 sm:text-4xl md:text-5xl">
                 {activeGoal.title}
               </h1>
               <p data-testid="twelve-week-header-description" className="hidden max-w-3xl text-sm leading-7 text-slate-600 sm:block">

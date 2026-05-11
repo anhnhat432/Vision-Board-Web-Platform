@@ -222,7 +222,7 @@ export function LifeInsight() {
       <LifeInsightPageMotion>
         <CoreFlowProgress currentStepId="life_insight" />
 
-        <Card className="ops-surface overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-sm">
+        <Card className="ops-surface surface-aurora ring-soft-glow overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-xl shadow-slate-900/5 dark:shadow-black/30">
           <CardContent className="relative p-5 sm:p-6">
             <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
               <div className="stack-stack">
@@ -232,14 +232,14 @@ export function LifeInsight() {
                 </div>
 
                 <div className="stack-tight">
-                  <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl">
+                  <h1 className="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl">
                     Bạn đã có một tín hiệu rất rõ.{" "}
                     <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-transparent">
                       Đây là 3 trọng tâm hiện ra
                     </span>{" "}
                     để chọn bước tiếp theo.
                   </h1>
-                  <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
+                  <p className="max-w-2xl text-sm leading-relaxed text-slate-700 sm:text-base dark:text-slate-300">
                     Hệ thống gợi ý lĩnh vực có điểm thấp nhất. Bạn cũng có thể chọn lại bên dưới nếu muốn tập trung vào
                     một khu vực khác phù hợp hơn với lúc này.
                   </p>
@@ -278,7 +278,7 @@ export function LifeInsight() {
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
                       Quyết định tiếp theo
                     </p>
-                    <h2 className="mt-2 text-xl font-bold text-slate-950">
+                    <h2 className="mt-2 text-xl font-semibold leading-snug tracking-tight text-slate-950 sm:text-2xl">
                       Tạo mục tiêu SMART cho {focusAreaLabel} trong khung 12 tuần.
                     </h2>
                     <p className="mt-2 text-sm leading-7 text-slate-600">
