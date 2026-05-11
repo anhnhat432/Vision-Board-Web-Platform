@@ -185,7 +185,7 @@ export function LoginPage() {
               transition: { duration: 0.36, ease: "easeOut", staggerChildren: 0.08 },
             },
           }}
-          className="glass-surface-gradient-border surface-aurora ring-soft-glow relative hidden overflow-hidden p-8 shadow-2xl lg:block"
+          className="glass-surface-gradient-border surface-aurora ring-soft-glow page-enter relative hidden overflow-hidden p-8 shadow-2xl lg:block"
         >
           <ConstellationAccent className="pointer-events-none absolute right-4 top-4 w-28 text-violet-500 opacity-35 dark:opacity-25" />
           <motion.div

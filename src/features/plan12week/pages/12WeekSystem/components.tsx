@@ -196,7 +196,7 @@ export function TwelveWeekDashboardHeader({
   const PhaseChipIcon = phaseInfo.chipIcon;
 
   return (
-    <Card className="glass-surface-sm surface-aurora ring-soft-glow relative overflow-hidden rounded-[var(--r-tile)] border border-violet-100/80 bg-white/94 shadow-xl shadow-slate-900/5 ring-1 ring-white/70 sm:rounded-[var(--r-card)] dark:shadow-black/30">
+    <Card className="glass-surface-sm surface-aurora ring-soft-glow page-enter relative overflow-hidden rounded-[var(--r-tile)] border border-violet-100/80 bg-white/94 shadow-xl shadow-slate-900/5 ring-1 ring-white/70 sm:rounded-[var(--r-card)] dark:shadow-black/30">
       <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 hidden w-44 text-violet-500 opacity-25 dark:opacity-15 sm:block" />
       <CardContent className="p-4 sm:p-6 lg:p-7">
         <div className="flex flex-col gap-3 sm:gap-5 xl:flex-row xl:items-start xl:justify-between">

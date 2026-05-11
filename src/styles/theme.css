@@ -970,8 +970,8 @@
 
   .card-hover-lift {
     transition:
-      transform 150ms ease,
-      box-shadow 150ms ease;
+      transform 200ms ease,
+      box-shadow 200ms ease;
   }
 
   .focus-ring {
@@ -1050,7 +1050,8 @@
     transition:
       box-shadow 150ms ease,
       border-color 150ms ease,
-      background-color 150ms ease;
+      background-color 150ms ease,
+      transform 150ms ease;
   }
 
   @media (hover: hover) {
@@ -1908,7 +1909,7 @@
   .skeleton-shimmer {
     position: relative;
     overflow: hidden;
-    background-color: rgba(226, 232, 240, 0.68);
+    background: color-mix(in oklab, var(--color-surface) 70%, var(--color-muted) 30%);
     border-radius: inherit;
   }
   .skeleton-shimmer::after {
@@ -1916,14 +1917,29 @@
     position: absolute;
     inset: 0;
     background: linear-gradient(
-      105deg,
-      transparent 40%,
-      rgba(255, 255, 255, 0.65) 50%,
-      transparent 60%
+      90deg,
+      transparent 0%,
+      color-mix(in oklab, var(--color-primary) 12%, transparent) 50%,
+      transparent 100%
     );
-    background-size: 200% 100%;
-    animation: shimmer-move 1.8s ease-in-out infinite;
+    animation: skeleton-sweep 1.6s ease-in-out infinite;
     pointer-events: none;
+  }
+
+  @keyframes skeleton-sweep {
+    0% {
+      transform: translateX(-100%);
+    }
+
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton-shimmer::after {
+      animation: none;
+    }
   }
 
   .stat-value {

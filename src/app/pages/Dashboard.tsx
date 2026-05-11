@@ -697,7 +697,7 @@ function DashboardContent({
               hero
               titleAs="h2"
               density="compact"
-              className={`${dashboardGreeting.surfaceClass} surface-aurora ring-soft-glow bg-white/80 shadow-xl shadow-slate-900/5 dark:bg-slate-900/70 dark:shadow-black/30`}
+              className={`${dashboardGreeting.surfaceClass} surface-aurora ring-soft-glow page-enter bg-white/80 shadow-xl shadow-slate-900/5 dark:bg-slate-900/70 dark:shadow-black/30`}
               eyebrow={dashboardNextAction.eyebrow}
               title={`${dashboardGreeting.label}, ${dashboardDisplayName}`}
               description={`Tuần ${dashboardKpiCurrentWeek ?? "--"}/${dashboardKpiTotalWeeks} — còn ${dashboardOpenTaskCount} việc hôm nay`}

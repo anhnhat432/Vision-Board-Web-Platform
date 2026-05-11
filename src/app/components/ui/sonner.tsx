@@ -18,10 +18,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
       toastOptions={{
         classNames: {
           toast:
-            "group toast rounded-[var(--r-card)] border border-white/70 bg-white/90 backdrop-blur-xl shadow-2xl text-slate-900 text-sm font-medium",
+            "group toast rounded-[var(--r-card)] border border-white/70 bg-white/90 text-sm font-medium text-slate-900 shadow-2xl ring-1 ring-slate-900/5 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/88 dark:text-slate-50 dark:ring-white/10",
           description: "text-slate-500 text-[0.82rem]",
-          actionButton: "rounded-[var(--r-pill)] bg-primary text-primary-foreground text-xs font-semibold px-3",
-          cancelButton: "rounded-[var(--r-pill)] bg-white/60 text-slate-500 text-xs font-semibold px-3",
+          actionButton: "rounded-[var(--r-pill)] bg-primary px-3 text-xs font-semibold text-primary-foreground",
+          cancelButton: "rounded-[var(--r-pill)] bg-white/60 px-3 text-xs font-semibold text-slate-500 dark:bg-white/10 dark:text-slate-300",
           success:
             "border-emerald-200/60 bg-emerald-50/90 shadow-lg",
           error:
