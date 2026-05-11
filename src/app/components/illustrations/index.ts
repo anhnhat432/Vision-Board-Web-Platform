@@ -1,12 +1,26 @@
 export { CelebrationBurst } from "./CelebrationBurst";
+export { AchievementBadgeIllustration } from "./AchievementBadgeIllustration";
+export { AspirationalVisionIllustration } from "./AspirationalVisionIllustration";
+export { BillingPlusIllustration } from "./BillingPlusIllustration";
+export { CloudSyncIllustration } from "./CloudSyncIllustration";
+export { ConstellationAccent } from "./ConstellationAccent";
 export { EmptyGoalIllustration } from "./EmptyGoalIllustration";
 export { EmptyJournalIllustration } from "./EmptyJournalIllustration";
+export { EmptyOrdersIllustration } from "./EmptyOrdersIllustration";
 export { EmptyTaskIllustration } from "./EmptyTaskIllustration";
+export { FeasibilityScaleIllustration } from "./FeasibilityScaleIllustration";
+export { FooterAuroraIllustration } from "./FooterAuroraIllustration";
 export { HeroOrbitIllustration } from "./HeroOrbitIllustration";
+export { LifeBalanceWheelIllustration } from "./LifeBalanceWheelIllustration";
+export { LifeInsightIllustration } from "./LifeInsightIllustration";
 export { PhaseHarvestIllustration } from "./PhaseHarvestIllustration";
 export { PhasePeakIllustration } from "./PhasePeakIllustration";
 export { PhaseRampIllustration } from "./PhaseRampIllustration";
+export { SmartGoalIllustration } from "./SmartGoalIllustration";
+export { SoftDotsPattern } from "./SoftDotsPattern";
 export { VisionMapIllustration } from "./VisionMapIllustration";
+export { WavyDividerIllustration } from "./WavyDividerIllustration";
+export { WeeklyReviewIllustration } from "./WeeklyReviewIllustration";
 export { WelcomeIllustration } from "./WelcomeIllustration";
 export type { AmbientIllustrationProps } from "./utils";
 
