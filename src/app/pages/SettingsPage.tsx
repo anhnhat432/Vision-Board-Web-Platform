@@ -5,7 +5,7 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import { DataStorageInfo } from "../components/DataStorageInfo";
-import { CloudSyncIllustration } from "../components/illustrations";
+import { CloudSyncIllustration, SyncIdleDot, SyncOkDot } from "../components/illustrations";
 import { PageHeader } from "../components/layout/PageHeader";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -54,6 +54,7 @@ export function SettingsPage() {
     : user
       ? userProfile?.email || user.email || "Đã đăng nhập"
       : "Chưa đăng nhập";
+  const AccountStatusDot = isConfigured && user ? SyncOkDot : SyncIdleDot;
 
   const handleExport = () => {
     downloadLocalUserDataBackup({ data: userData, filenamePrefix: "dear-our-future-backup" });
@@ -164,7 +165,10 @@ export function SettingsPage() {
             <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-slate-900">{accountLabel}</p>
-                <p className="mt-1 truncate text-sm text-slate-500">{accountStatus}</p>
+                <p className="mt-1 flex min-w-0 items-center gap-1.5 truncate text-sm text-slate-500">
+                  <AccountStatusDot className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{accountStatus}</span>
+                </p>
               </div>
               <CloudSyncIllustration className="hidden w-24 text-violet-500 opacity-70 sm:block" />
             </div>

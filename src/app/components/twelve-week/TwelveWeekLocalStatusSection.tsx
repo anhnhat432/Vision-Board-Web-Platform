@@ -1,6 +1,6 @@
 ﻿import { type SyntheticEvent, useCallback, useState } from "react";
 import { AlertTriangle, CloudDownload, CloudUpload, FileDown, RefreshCw, Trash2, WifiOff } from "lucide-react";
-import { CloudSyncIllustration } from "../illustrations";
+import { CloudSyncIllustration, SyncErrorDot, SyncIdleDot, SyncOkDot, SyncSyncingDot } from "../illustrations";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
@@ -50,6 +50,14 @@ function getBackendBadgeClass(status: TwelveWeekSettingsTabProps["backendConnect
   if (status.syncStatus === "partial") return "border-amber-200 bg-amber-50 text-amber-800";
   if (status.syncStatus === "error") return "border-amber-200 bg-amber-50 text-amber-800";
   return "border-emerald-200 bg-emerald-50 text-emerald-800";
+}
+
+function getBackendStatusDot(status: TwelveWeekSettingsTabProps["backendConnectionStatus"]) {
+  if (!status.authConfigured || !status.signedIn) return SyncIdleDot;
+  if (status.authLoading || !status.profileReady || status.syncing) return SyncSyncingDot;
+  if (status.syncStatus === "partial" || status.syncStatus === "error") return SyncErrorDot;
+  if (status.authConfigured && status.signedIn) return SyncOkDot;
+  return SyncIdleDot;
 }
 
 function getMutationQueueSyncBlocker(input: {
@@ -592,6 +600,7 @@ export function TwelveWeekLocalStatusSection({
   const mutationQueueMergeReviewResult = isMutationQueueMergeReviewNeeded(mutationQueueSyncStatus.lastResult)
     ? mutationQueueSyncStatus.lastResult
     : null;
+  const BackendStatusDot = getBackendStatusDot(backendConnectionStatus);
 
   return (
     <div className="rounded-[var(--r-control)] border border-slate-200 bg-white p-5 shadow-lg">
@@ -618,6 +627,7 @@ export function TwelveWeekLocalStatusSection({
             </p>
           </div>
           <Badge variant="outline" className={getBackendBadgeClass(backendConnectionStatus)}>
+            <BackendStatusDot className="mr-1.5 h-4 w-4" />
             {getBackendStatusLabel(backendConnectionStatus)}
           </Badge>
         </div>

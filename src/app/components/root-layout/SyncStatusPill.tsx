@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { CheckCircle2, Clock3, Loader2, Upload, WifiOff } from "lucide-react";
 
+import { SyncIdleDot, SyncOkDot, SyncSyncingDot } from "@/app/components/illustrations";
 import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 
 export const AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME = "visionboard:auto-cloud-conflict-dialog-open";
@@ -68,31 +69,36 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
 
   const config = {
     syncing: {
+      dot: <SyncSyncingDot className="h-4 w-4" />,
       icon: <Loader2 className="h-3 w-3 animate-spin" />,
       label: "Đang đồng bộ",
       tone: "border-sky-200 bg-sky-50 text-sky-700",
     },
     offline: {
+      dot: <SyncIdleDot className="h-4 w-4" />,
       icon: <WifiOff className="h-3 w-3" />,
       label: "Đợi mạng",
       tone: "border-slate-200 bg-slate-100 text-slate-600",
     },
     pending: {
+      dot: <SyncSyncingDot className="h-4 w-4" />,
       icon: <Upload className="h-3 w-3" />,
       label: `${syncState.pendingCount} chờ gửi`,
       tone: "border-amber-200 bg-amber-50 text-amber-700",
     },
     ok: {
+      dot: <SyncOkDot className="h-4 w-4" />,
       icon: <CheckCircle2 className="h-3 w-3" />,
       label: `Đồng bộ ${relativeTime ?? "vừa xong"}`,
       tone: "border-emerald-200 bg-emerald-50 text-emerald-700",
     },
     idle: {
+      dot: <SyncIdleDot className="h-4 w-4" />,
       icon: <Clock3 className="h-3 w-3" />,
       label: "Chưa đồng bộ",
       tone: "border-slate-200 bg-slate-50 text-slate-600",
     },
-  } satisfies Record<SyncPillState, { icon: ReactNode; label: string; tone: string }>;
+  } satisfies Record<SyncPillState, { dot: ReactNode; icon: ReactNode; label: string; tone: string }>;
 
   return (
     <button
@@ -101,6 +107,7 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
       title={tooltip}
       aria-label={config[state].label}
     >
+      {config[state].dot}
       {config[state].icon}
       <span className="truncate">{config[state].label}</span>
     </button>
