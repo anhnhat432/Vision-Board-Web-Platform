@@ -96,7 +96,9 @@ export function AppErrorBoundary() {
                   </div>
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">Trạng thái</p>
-                    <p className="text-lg font-semibold text-white">{errorCode ? `Lỗi ${errorCode}` : "Lỗi runtime"}</p>
+                    <p className="text-lg font-semibold text-white">
+                      {errorCode ? `Lỗi ${errorCode}` : "Trang gặp lỗi ngoài dự kiến"}
+                    </p>
                   </div>
                 </div>
 

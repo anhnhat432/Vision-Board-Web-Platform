@@ -120,8 +120,8 @@ export function NewUserGuideBanner({ userData, variant = "full", onOpenGuide }: 
       ? "Đi tiếp theo đúng thứ tự này"
       : `Nếu mới vào web, cứ đi theo ${progress.totalSteps} bước này là đủ gọn.`;
   const description = userData.isHydratedFromDemo
-    ? "Bản hiện tại đã có dữ liệu mẫu sẵn. Hãy dùng checklist này như đường đi ngắn nhất để nhìn rõ flow thật của sản phẩm."
-    : "Website này dễ dùng hơn nhiều nếu bạn đi đúng flow: mục tiêu rõ, chu kỳ rõ, rồi mới nhìn hôm nay và review tuần.";
+    ? "Bản hiện tại đã có dữ liệu mẫu sẵn. Hãy dùng checklist này như đường đi ngắn nhất để nhìn rõ luồng thật của sản phẩm."
+    : "Website này dễ dùng hơn nhiều nếu bạn đi đúng luồng: mục tiêu rõ, chu kỳ rõ, rồi mới nhìn hôm nay và review tuần.";
   const surfaceClass = compact
     ? "max-w-full overflow-hidden border border-slate-200/80 bg-white/92 shadow-sm"
     : "max-w-full overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-sm";
@@ -239,8 +239,9 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
 
         {userData.isHydratedFromDemo && (
           <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50/90 p-4 text-sm leading-7 text-amber-900">
-            Dữ liệu hiện tại là dữ liệu mẫu để bạn xem nhanh sản phẩm. Khi chuyển sang bản thật, flow chuẩn vẫn là: đo
-            bánh xe cuộc đời, chốt insight, viết SMART goal, kiểm tra tính thực tế rồi mới vào chu kỳ 12 tuần.
+            Dữ liệu hiện tại là dữ liệu mẫu để bạn xem nhanh sản phẩm. Khi chuyển sang bản thật, luồng chuẩn vẫn là: đo
+            bánh xe cuộc đời, chốt góc nhìn cuộc sống, viết mục tiêu SMART, kiểm tra tính thực tế rồi mới vào chu kỳ 12
+            tuần.
           </div>
         )}
 
