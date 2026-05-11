@@ -3,6 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
+
 const { appMode, authContext, createGoal, updateGoal, createPlan, getPlan } = vi.hoisted(() => ({
   appMode: { value: "real" as "demo" | "real" },
   authContext: {

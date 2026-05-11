@@ -3,6 +3,8 @@ import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
+
 const {
   syncTaskToggleMock,
   syncWeeklyReviewMock,

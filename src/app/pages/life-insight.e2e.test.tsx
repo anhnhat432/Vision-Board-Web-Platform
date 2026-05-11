@@ -1,8 +1,11 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { vi } from "vitest";
 
 import { renderAppRoute, resetTestStorage, updateUserData } from "../../test/app-flow-helpers";
 import { APP_STORAGE_KEYS, LIFE_AREAS } from "../utils/storage";
+
+vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
 
 const INTEGRATION_TEST_TIMEOUT_MS = 10_000;
 

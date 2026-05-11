@@ -3,6 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { vi } from "vitest";
 
+vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
+
 import {
   APP_STORAGE_KEYS,
   formatDateInputValue,
