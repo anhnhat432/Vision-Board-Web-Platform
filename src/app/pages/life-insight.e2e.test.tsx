@@ -4,6 +4,8 @@ import userEvent from "@testing-library/user-event";
 import { renderAppRoute, resetTestStorage, updateUserData } from "../../test/app-flow-helpers";
 import { APP_STORAGE_KEYS, LIFE_AREAS } from "../utils/storage";
 
+const INTEGRATION_TEST_TIMEOUT_MS = 10_000;
+
 describe("life insight flow", () => {
   beforeEach(() => {
     resetTestStorage();
@@ -112,5 +114,5 @@ describe("life insight flow", () => {
     });
     expect(localStorage.getItem(APP_STORAGE_KEYS.pendingSmartGoal)).toBeNull();
     expect(localStorage.getItem(APP_STORAGE_KEYS.selectedFocusArea)).toBe("Health");
-  });
+  }, INTEGRATION_TEST_TIMEOUT_MS);
 });

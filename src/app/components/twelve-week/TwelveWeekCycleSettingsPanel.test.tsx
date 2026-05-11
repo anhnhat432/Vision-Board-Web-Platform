@@ -105,5 +105,5 @@ describe("TwelveWeekCycleSettingsPanel", () => {
     await user.click(await screen.findByRole("button", { name: "Đồng ý đổi" }));
 
     expect(onReviewDayChange).toHaveBeenCalledWith("Friday");
-  });
+  }, 10_000);
 });

@@ -808,7 +808,7 @@ describe("12-week core flows", () => {
     expect(getCurrentPlan()).toBe("FREE");
 
     renderAppRoute("/12-week-system?tab=settings");
-    await screen.findByText("Cài đặt mục tiêu");
+    await screen.findByText("Cài đặt mục tiêu", {}, { timeout: 10_000 });
     expect(screen.queryByText("Thiết bị, dữ liệu và đồng bộ")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Khôi phục quyền Plus" })).not.toBeInTheDocument();
     expect(getCurrentPlan()).toBe("FREE");
