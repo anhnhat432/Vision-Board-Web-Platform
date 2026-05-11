@@ -18,6 +18,7 @@ import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Progress } from "../ui/progress";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { WeeklyReviewIllustration } from "../illustrations";
 import { PrimaryActionCard } from "../layout/PrimaryActionCard";
 import { SectionBlock } from "../layout/SectionBlock";
 import { formatCalendarDate, getReviewDayLabel } from "../../utils/storage";
@@ -286,6 +287,9 @@ export function TwelveWeekProgressTab({
           ) : null
         }
       >
+        <div className="pointer-events-none hidden justify-end sm:flex">
+          <WeeklyReviewIllustration className="-my-6 w-36 text-white opacity-45" />
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           <span
             className={`shrink-0 rounded-[var(--r-pill)] border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${narrativeStyle.badge}`}
@@ -374,6 +378,9 @@ export function TwelveWeekProgressTab({
 
         <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
           <CardContent className="p-5">
+            {reviewDoneCount === 0 && (
+              <WeeklyReviewIllustration className="mb-3 w-24 text-emerald-600 opacity-65" />
+            )}
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
               <Flag className="h-3.5 w-3.5" />
               Tuần đã hoàn thành

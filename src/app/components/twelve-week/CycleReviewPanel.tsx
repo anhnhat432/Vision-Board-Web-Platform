@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { calculateCycleSummary } from "@/features/plan12week/logic/cycleReview";
 import type { CycleSummary } from "@/features/plan12week/logic/cycleReview";
 import type { Goal, TwelveWeekSystem } from "@/app/utils/storage-types";
+import { WeeklyReviewIllustration } from "../illustrations";
 import { Button } from "../ui/button";
 import { PrimaryActionCard } from "../layout/PrimaryActionCard";
 import { Card, CardContent } from "../ui/card";
@@ -88,6 +89,9 @@ export function CycleReviewPanel({
           </>
         }
       >
+        <div className="pointer-events-none hidden justify-end sm:flex">
+          <WeeklyReviewIllustration className="-my-6 w-40 text-white opacity-45" />
+        </div>
         {aspirationalVisionSummary ? (
           <div className="rounded-[var(--r-control)] border border-white/14 bg-white/10 px-4 py-3 text-sm text-white/82">
             <p className="font-semibold text-white">Chu kỳ này đã đưa bạn gần hơn với tầm nhìn 3 năm chưa?</p>
