@@ -1,5 +1,7 @@
 import { CalendarDays, Flame, TrendingUp, Zap } from "lucide-react";
 
+import { KpiBalanceSpark, KpiFocusSpark, KpiOutputSpark, KpiStreakSpark } from "@/app/components/illustrations";
+
 type DashboardKpiRowProps = {
   leadAverage: number;
   currentWeek: number | null;
@@ -21,6 +23,8 @@ export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, 
   const items = [
     {
       icon: CalendarDays,
+      spark: KpiFocusSpark,
+      sparkClass: "text-violet-500",
       label: "Tuần",
       value: currentWeek ? `${currentWeek}/${totalWeeks}` : "--",
       note: "trong chu kỳ",
@@ -29,6 +33,8 @@ export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, 
     },
     {
       icon: TrendingUp,
+      spark: KpiOutputSpark,
+      sparkClass: "text-emerald-500",
       label: "Tỷ lệ tạo kết quả",
       value: formatPercent(leadAverage),
       note: "hoàn thành việc lặp lại",
@@ -37,6 +43,8 @@ export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, 
     },
     {
       icon: Zap,
+      spark: KpiBalanceSpark,
+      sparkClass: "text-amber-500",
       label: "Nhịp việc lặp lại",
       value: formatWheelScore(wheelScore),
       note: "điểm cuộc sống",
@@ -45,6 +53,8 @@ export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, 
     },
     {
       icon: Flame,
+      spark: KpiStreakSpark,
+      sparkClass: "text-rose-500",
       label: "Chuỗi ngày",
       value: String(streak),
       note: "tuần giữ nhịp",
@@ -59,12 +69,14 @@ export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, 
     <div data-testid="dashboard-kpi-row" className="grid grid-cols-2 gap-2 sm:gap-[var(--space-stack)] lg:grid-cols-4">
       {items.map((item) => {
         const Icon = item.icon;
+        const Spark = item.spark;
 
         return (
           <div
             key={item.label}
-            className="glass-surface-sm min-h-[92px] rounded-[var(--r-tile)] p-3 ring-1 ring-slate-200/70 sm:min-h-24 sm:p-4"
+            className="glass-surface-sm relative min-h-[92px] overflow-hidden rounded-[var(--r-tile)] p-3 ring-1 ring-slate-200/70 sm:min-h-24 sm:p-4"
           >
+            <Spark className={`pointer-events-none absolute right-12 top-3 h-6 w-6 opacity-60 ${item.sparkClass}`} />
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:text-xs sm:tracking-[0.16em]">
