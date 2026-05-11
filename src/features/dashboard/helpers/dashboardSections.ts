@@ -21,7 +21,7 @@ export function getDashboardNextAction(state: DashboardNextActionInput): Dashboa
     return {
       eyebrow: "Việc tiếp theo nên làm",
       title: "Bắt đầu hành trình",
-      description: "Chấm Life Balance trước để dashboard có dữ liệu thật, rồi mới chọn insight và mục tiêu SMART.",
+      description: "Chấm Cân bằng cuộc sống trước để Trang chính có dữ liệu thật, rồi mới chọn góc nhìn và mục tiêu SMART.",
       ctaLabel: "Đánh giá cân bằng cuộc sống",
       ctaTarget: "/life-balance",
     };
@@ -31,7 +31,7 @@ export function getDashboardNextAction(state: DashboardNextActionInput): Dashboa
     return {
       eyebrow: "Việc tiếp theo nên làm",
       title: "Tạo kế hoạch 12 tuần",
-      description: "Mục tiêu đã có. Bước tiếp theo là biến nó thành cycle 12 tuần có lead indicators và lịch review.",
+      description: "Mục tiêu đã có. Bước tiếp theo là biến nó thành chu kỳ 12 tuần có việc lặp lại và lịch review.",
       ctaLabel: "Thiết lập 12 tuần",
       ctaTarget: "/12-week-setup",
     };
@@ -41,7 +41,7 @@ export function getDashboardNextAction(state: DashboardNextActionInput): Dashboa
     return {
       eyebrow: "Việc tiếp theo nên làm",
       title: "Cycle đã kết thúc, review tổng",
-      description: "12 tuần đã khép lại. Hãy chốt cycle review trước khi mở nhịp mới.",
+      description: "12 tuần đã khép lại. Hãy chốt review chu kỳ trước khi mở nhịp mới.",
       ctaLabel: "Mở Cycle Review",
       ctaTarget: "/12-week-system",
     };
@@ -51,7 +51,7 @@ export function getDashboardNextAction(state: DashboardNextActionInput): Dashboa
     return {
       eyebrow: "Việc tiếp theo nên làm",
       title: "Đến ngày review tuần",
-      description: "Chốt tuần hiện tại để biết nên giữ, giảm hay điều chỉnh lead indicators cho tuần tiếp theo.",
+      description: "Chốt tuần hiện tại để biết nên giữ, giảm hay điều chỉnh việc lặp lại cho tuần tiếp theo.",
       ctaLabel: "Mở review",
       ctaTarget: "/12-week-system?tab=week",
     };
@@ -69,7 +69,7 @@ export function getDashboardNextAction(state: DashboardNextActionInput): Dashboa
 
   return {
     eyebrow: "Việc tiếp theo nên làm",
-    title: state.hasReviewedCurrentWeek ? "Tiếp tục cycle" : "Mở nhịp 12 tuần",
+    title: state.hasReviewedCurrentWeek ? "Tiếp tục chu kỳ" : "Mở nhịp 12 tuần",
     description: "Cycle đang ổn. Vào trung tâm 12 tuần để xem Today, tuần hiện tại và tiến độ khi cần.",
     ctaLabel: "Mở 12 tuần",
     ctaTarget: "/12-week-system",
