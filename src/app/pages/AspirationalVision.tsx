@@ -5,6 +5,7 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import { PageShell } from "../components/PageShell";
+import { AspirationalVisionIllustration } from "../components/illustrations";
 import { PrimaryActionCard } from "../components/layout/PrimaryActionCard";
 import { SectionBlock } from "../components/layout/SectionBlock";
 import { Button } from "../components/ui/button";
@@ -138,7 +139,10 @@ export function AspirationalVision() {
           className="text-white"
           titleClassName="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-2xl font-semibold text-transparent dark:from-violet-200 dark:via-fuchsia-200 dark:to-rose-200"
           descriptionClassName="max-w-3xl leading-7 text-white/78"
-        />
+          contentClassName="pointer-events-none hidden justify-end sm:flex"
+        >
+          <AspirationalVisionIllustration className="-mt-4 w-56 text-white opacity-32 sm:w-72" />
+        </PrimaryActionCard>
         <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
         <CardContent className="stack-section">
           <div className="stack-tight">
