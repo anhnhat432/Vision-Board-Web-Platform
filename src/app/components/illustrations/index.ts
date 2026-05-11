@@ -22,5 +22,6 @@ export { VisionMapIllustration } from "./VisionMapIllustration";
 export { WavyDividerIllustration } from "./WavyDividerIllustration";
 export { WeeklyReviewIllustration } from "./WeeklyReviewIllustration";
 export { WelcomeIllustration } from "./WelcomeIllustration";
+export * from "./mini";
 export type { AmbientIllustrationProps } from "./utils";
 
