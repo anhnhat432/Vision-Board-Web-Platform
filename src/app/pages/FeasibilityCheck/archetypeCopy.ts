@@ -144,7 +144,7 @@ const ARCHETYPE_COPY: Record<GoalArchetype, ArchetypeFeasibilityCopy | null> = {
         "Dự án dễ phình phạm vi. Mốc tuần 4 và tuần 8 phải rõ trước khi bắt đầu, không phải để 'thấy sao'.",
       resources: "Liệt kê phần phụ thuộc (API, người, ngân sách) tuần 1 — bị chặn sớm là chết kế hoạch.",
       time: "Cắt phạm vi, không cắt kết quả chính. Một tính năng hoàn tất tốt hơn ba tính năng dở.",
-      obstacle: "Stakeholder feedback từ tuần 2-3, không phải tuần 12. Build trong vacuum là pattern thất bại.",
+      obstacle: "Góp ý từ người liên quan cần có từ tuần 2-3, không phải tuần 12. Làm trong khoảng trống là kiểu dễ thất bại.",
     },
     firstWeek: {
       realistic:

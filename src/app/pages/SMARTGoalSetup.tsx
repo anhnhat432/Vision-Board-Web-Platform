@@ -138,7 +138,7 @@ export function SMARTGoalSetup() {
 
   const firstStepData = SMART_STEPS[0];
   if (!firstStepData) {
-    throw new Error("SMART goal steps are not configured.");
+    throw new Error("Các bước mục tiêu SMART chưa được cấu hình.");
   }
 
   const currentStepData = SMART_STEPS[currentStep] ?? firstStepData;

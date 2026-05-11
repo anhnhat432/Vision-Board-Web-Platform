@@ -30,7 +30,7 @@ export const applyCapacityRule: GoalAdjustmentRule = ({
     type: "reduce_frequency",
     title: "Giảm tải tuần",
     description:
-      "Sức chứa hiện tại đang thấp. Giảm tải tuần và giữ nhịp thực hiện nhẹ hơn.",
+      "Quỹ thời gian đang hạn chế. Giảm tải tuần và giữ nhịp nhẹ hơn.",
     priority: getPriorityForDimension("capacity", weakestDimension),
   });
 };
@@ -45,7 +45,7 @@ export const applyReadinessRule: GoalAdjustmentRule = ({
     type: "split_into_phases",
     title: "Bắt đầu bằng thói quen nhỏ hơn",
     description:
-      "Mức sẵn sàng đang thấp. Bắt đầu bằng một thói quen nhỏ trước, rồi mở rộng dần tới mục tiêu đầy đủ.",
+      "Mức sẵn sàng còn thấp. Bắt đầu bằng thói quen nhỏ trước, rồi mở rộng dần thành mục tiêu đầy đủ.",
     priority: getPriorityForDimension("readiness", weakestDimension),
   });
 };
@@ -73,9 +73,9 @@ export const applyContextRule: GoalAdjustmentRule = ({
 
   return createSuggestion({
     type: "delay_start",
-    title: "Điều chỉnh thời điểm",
+    title: "Điều chỉnh thời điểm mục tiêu",
     description:
-      "Bối cảnh hiện tại chưa đủ thuận. Điều chỉnh thời điểm để giảm xung đột với các ưu tiên cuộc sống.",
+      "Bối cảnh hiện tại chưa thuận. Đổi thời điểm để tránh xung đột với ưu tiên khác trong cuộc sống.",
     priority: getPriorityForDimension("context", weakestDimension),
   });
 };
@@ -87,8 +87,8 @@ export const applyLowScoreRule: GoalAdjustmentRule = ({
 
   return createSuggestion({
     type: "reduce_scope",
-    title: "Chỉnh lại mục tiêu trước khi lập kế hoạch",
-    description: "Cân nhắc giảm phạm vi mục tiêu này hoặc lùi thời điểm bắt đầu.",
+    title: "Cân chỉnh lại mục tiêu trước khi lên kế hoạch",
+    description: "Cân nhắc thu hẹp phạm vi mục tiêu hoặc dời thời điểm bắt đầu.",
     priority: 3,
   });
 };

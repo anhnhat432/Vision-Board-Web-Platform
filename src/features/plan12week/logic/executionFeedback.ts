@@ -16,11 +16,11 @@ export function generateExecutionSuggestion(score: number): string {
 
   switch (status) {
     case "excellent_execution":
-      return "Nhịp thực thi đang rất tốt. Có thể tăng nhẹ độ khó trong tuần tới.";
+      return "Thực hiện rất tốt. Tăng nhẹ thử thách tuần sau.";
     case "on_track":
-      return "Nhịp thực thi đang ổn. Giữ nguyên kế hoạch tuần hiện tại.";
+      return "Thực hiện đúng nhịp. Giữ nguyên kế hoạch tuần.";
     case "at_risk":
-      return "Nhịp đang trượt nhẹ. Giảm bớt việc trong tuần để lấy lại sự đều đặn.";
+      return "Thực hiện đang chậm. Giảm số việc trong tuần để nhẹ hơn.";
     default:
       return "Nhịp đang ở mức cần cứu. Rút gọn kế hoạch và tập trung vào một việc quan trọng nhất.";
   }
