@@ -4,7 +4,7 @@ import { AlertTriangle, CalendarDays, CheckCircle2, Flame, Loader2, Sparkles, Ta
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
-import { SoftDotsPattern } from "@/app/components/illustrations";
+import { PhaseHarvestChipIcon, PhasePeakChipIcon, PhaseRampChipIcon, SoftDotsPattern } from "@/app/components/illustrations";
 import { ProductVisual } from "@/app/components/visuals/ProductVisual";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import {
@@ -37,6 +37,7 @@ function getHeaderPhaseInfo(currentWeek: number) {
   if (currentWeek <= 4) {
     return {
       label: "Khởi động",
+      chipIcon: PhaseRampChipIcon,
       badgeClassName:
         "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/30 dark:bg-violet-950/35 dark:text-violet-200",
       tileClassName:
@@ -49,6 +50,7 @@ function getHeaderPhaseInfo(currentWeek: number) {
   if (currentWeek <= 8) {
     return {
       label: "Bứt phá",
+      chipIcon: PhasePeakChipIcon,
       badgeClassName:
         "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700 dark:border-fuchsia-500/30 dark:bg-fuchsia-950/35 dark:text-fuchsia-200",
       tileClassName:
@@ -60,6 +62,7 @@ function getHeaderPhaseInfo(currentWeek: number) {
 
   return {
     label: "Thu hoạch",
+    chipIcon: PhaseHarvestChipIcon,
     badgeClassName:
       "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/35 dark:text-emerald-200",
     tileClassName:
@@ -190,6 +193,7 @@ export function TwelveWeekDashboardHeader({
   onOpenGoals,
 }: TwelveWeekDashboardHeaderProps) {
   const phaseInfo = getHeaderPhaseInfo(currentWeek);
+  const PhaseChipIcon = phaseInfo.chipIcon;
 
   return (
     <Card className="glass-surface-sm relative overflow-hidden rounded-[var(--r-tile)] border border-violet-100/80 bg-white/94 shadow-sm ring-1 ring-white/70 sm:rounded-[var(--r-card)]">
@@ -203,6 +207,7 @@ export function TwelveWeekDashboardHeader({
               </Badge>
               <Badge variant="outline" className={`rounded-[var(--r-pill)] px-3 py-1.5 ${phaseInfo.badgeClassName}`}>
                 <Target className="mr-1 h-3.5 w-3.5" />
+                <PhaseChipIcon className="mr-1 h-4 w-4" />
                 Tuần {currentWeek}/{system.totalWeeks} - {phaseInfo.label}
               </Badge>
               <Badge variant="outline" className={`rounded-[var(--r-pill)] px-3 py-1.5 ${syncBadgeClass}`}>

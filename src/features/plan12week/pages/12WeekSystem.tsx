@@ -11,8 +11,11 @@ import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/Delet
 import { CycleReviewPanel } from "@/app/components/twelve-week/CycleReviewPanel";
 import {
   PhaseHarvestIllustration,
+  PhaseHarvestChipIcon,
   PhasePeakIllustration,
+  PhasePeakChipIcon,
   PhaseRampIllustration,
+  PhaseRampChipIcon,
 } from "@/app/components/illustrations";
 import { UpgradePaywallDialog } from '@/app/components/UpgradePaywallDialog';
 import { trackAnalyticsEvent } from '@/app/utils/analytics';
@@ -122,6 +125,7 @@ function getExecutionPhaseInfo(currentWeek: number) {
   if (currentWeek <= 4) {
     return {
       label: "Khởi động",
+      chipIcon: PhaseRampChipIcon,
       badgeClassName:
         "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/30 dark:bg-violet-950/35 dark:text-violet-200",
       textClassName: "text-violet-700 dark:text-violet-200",
@@ -132,6 +136,7 @@ function getExecutionPhaseInfo(currentWeek: number) {
   if (currentWeek <= 8) {
     return {
       label: "Bứt phá",
+      chipIcon: PhasePeakChipIcon,
       badgeClassName:
         "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700 dark:border-fuchsia-500/30 dark:bg-fuchsia-950/35 dark:text-fuchsia-200",
       textClassName: "text-fuchsia-700 dark:text-fuchsia-200",
@@ -141,6 +146,7 @@ function getExecutionPhaseInfo(currentWeek: number) {
 
   return {
     label: "Thu hoạch",
+    chipIcon: PhaseHarvestChipIcon,
     badgeClassName:
       "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/35 dark:text-emerald-200",
     textClassName: "text-emerald-700 dark:text-emerald-200",
@@ -749,6 +755,7 @@ export function TwelveWeekSystem() {
   const syncBadgeClass = getSyncBadgeClass(backendConnectionStatus);
   const syncBadgeLabel = getSyncBadgeLabel(backendConnectionStatus);
   const phaseInfo = getExecutionPhaseInfo(currentWeek);
+  const PhaseChipIcon = phaseInfo.chipIcon;
   const phaseIllustration = getExecutionPhaseIllustration(currentWeek);
   const syncPillClass = getExecutionSyncPillClass(backendConnectionStatus.syncStatus);
 
@@ -1009,6 +1016,7 @@ export function TwelveWeekSystem() {
           <div className="flex min-w-0 items-center gap-2">
             <span className={`inline-flex shrink-0 items-center gap-2 rounded-[var(--r-pill)] border px-3 py-2 text-xs font-semibold ${phaseInfo.badgeClassName}`}>
               {phaseIllustration}
+              <PhaseChipIcon className="h-4 w-4" />
               Tuần {currentWeek}/{system.totalWeeks} - {phaseInfo.label}
             </span>
             <span className={`inline-flex shrink-0 items-center gap-2 rounded-[var(--r-pill)] border px-3 py-2 text-xs font-semibold ${syncPillClass.pill}`}>
