@@ -265,7 +265,7 @@ export function TwelveWeekWeekTab({
     },
     {
       key: "insights",
-      label: "Insight",
+      label: "Góc nhìn",
       done: weeklyForm.insights.trim().length > 0,
     },
     {
@@ -462,7 +462,7 @@ export function TwelveWeekWeekTab({
               Review tuần
             </CardTitle>
             <CardDescription className="text-slate-700">
-              WAM 4 câu: score, cam kết, insight và cam kết tuần tới.
+              WAM 4 câu: điểm, cam kết, góc nhìn và cam kết tuần tới.
             </CardDescription>
           </CardHeader>
           <CardContent className="stack-stack">
@@ -550,7 +550,7 @@ export function TwelveWeekWeekTab({
                   </div>
                   {summaryInsights && (
                     <div className="rounded-[var(--r-control)] border border-white/82 bg-white/82 px-3 py-2 md:col-span-2">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Insight tuần sau</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Góc nhìn tuần sau</p>
                       <p className="mt-1 text-sm leading-5 text-slate-700">{summaryInsights}</p>
                     </div>
                   )}
@@ -878,7 +878,7 @@ export function TwelveWeekWeekTab({
               data-testid="wam-section-insights"
               className="rounded-[var(--r-control)] border border-slate-200 bg-white px-4 py-4"
             >
-              <Label htmlFor="weekly-insights">3. Insight/learning gì cần áp dụng tuần sau?</Label>
+              <Label htmlFor="weekly-insights">3. Góc nhìn/điều học được nào cần áp dụng tuần sau?</Label>
               <Textarea
                 id="weekly-insights"
                 rows={3}

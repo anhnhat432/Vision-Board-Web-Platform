@@ -39,7 +39,7 @@ interface PlanPreviewProps {
 
 const TIMELINE_PHASES = [
   {
-    label: "Ramp",
+    label: "Khởi động",
     weekStart: 1,
     weekEnd: 4,
     tileClassName:
@@ -48,7 +48,7 @@ const TIMELINE_PHASES = [
       "border-violet-500 bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20 dark:from-violet-500 dark:to-fuchsia-500",
   },
   {
-    label: "Peak",
+    label: "Bứt phá",
     weekStart: 5,
     weekEnd: 8,
     tileClassName:
@@ -57,7 +57,7 @@ const TIMELINE_PHASES = [
       "border-fuchsia-500 bg-gradient-to-br from-fuchsia-600 to-rose-500 text-white shadow-lg shadow-fuchsia-500/20 dark:from-fuchsia-500 dark:to-rose-400",
   },
   {
-    label: "Harvest",
+    label: "Thu hoạch",
     weekStart: 9,
     weekEnd: 12,
     tileClassName:
@@ -110,9 +110,9 @@ export function PlanPreview({
     <div className="stack-section">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold">Xem trÆ°á»›c káº¿ hoáº¡ch 12 tuáº§n</h2>
+        <h2 className="text-2xl font-bold">Xem trước kế hoạch 12 tuần</h2>
         <p className="text-muted-foreground mt-1">
-          Kiá»ƒm tra láº¡i káº¿ hoáº¡ch trÆ°á»›c khi xÃ¡c nháº­n táº¡o. Báº¡n cÃ³ thá»ƒ chá»‰nh sá»­a cÃ¡c viá»‡c láº·p láº¡i.
+          Kiểm tra lại kế hoạch trước khi xác nhận tạo. Bạn có thể chỉnh sửa các việc lặp lại.
         </p>
       </div>
 
@@ -125,7 +125,7 @@ export function PlanPreview({
             <div>
               <h3 className="text-base font-semibold text-slate-950 dark:text-slate-50">Timeline 12 tuần</h3>
               <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                Ramp 4 tuần đầu, Peak 4 tuần giữa, Harvest 4 tuần cuối. Chọn từng tuần để xem nhịp dự kiến.
+                Khởi động 4 tuần đầu, Bứt phá 4 tuần giữa, Thu hoạch 4 tuần cuối. Chọn từng tuần để xem nhịp dự kiến.
               </p>
             </div>
           </div>
@@ -163,7 +163,7 @@ export function PlanPreview({
               <Badge variant={selectedTimelineWeekData.weekNumber <= 4 ? "brand" : "neutral"}>
                 {selectedTimelineWeekData.tasks.length > 0
                   ? `${selectedTimelineWeekData.tasks.length} việc tuần này`
-                  : `${selectedTimelineWeekData.leadMetrics.length} lead indicators`}
+                  : `${selectedTimelineWeekData.leadMetrics.length} việc lặp lại`}
               </Badge>
             </div>
             <div className="mt-3 stack-tight text-sm leading-6 text-slate-700 dark:text-slate-300">
@@ -175,7 +175,7 @@ export function PlanPreview({
                 ))
               ) : (
                 <p className="rounded-[var(--r-control)] bg-white/82 px-3 py-2 dark:bg-slate-950/70">
-                  Tuần này giữ cùng nhịp lead indicators và dùng review tuần để điều chỉnh tải.
+                  Tuần này giữ cùng nhịp việc lặp lại và dùng review tuần để điều chỉnh tải.
                 </p>
               )}
             </div>
@@ -184,7 +184,7 @@ export function PlanPreview({
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           <div className="rounded-[var(--r-tile)] border border-violet-200 bg-violet-50/70 p-3 dark:border-violet-500/30 dark:bg-violet-950/30">
             <Target className="h-4 w-4 text-violet-700 dark:text-violet-200" aria-hidden="true" />
-            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-violet-700 dark:text-violet-200">Output</p>
+            <p className="mt-2 text-xs uppercase tracking-[0.14em] text-violet-700 dark:text-violet-200">Kết quả</p>
             <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-slate-50">1 mục tiêu 12 tuần</p>
           </div>
           <div className="rounded-[var(--r-tile)] border border-emerald-200 bg-emerald-50/70 p-3 dark:border-emerald-500/30 dark:bg-emerald-950/30">
@@ -212,7 +212,7 @@ export function PlanPreview({
         className="grid gap-3"
       >
         <AccordionItem value="outcome-summary" className={accordionItemClass}>
-          <AccordionTrigger className={accordionTriggerClass}>Outcome summary</AccordionTrigger>
+          <AccordionTrigger className={accordionTriggerClass}>Tóm tắt kết quả</AccordionTrigger>
           <AccordionContent className="space-y-4 pb-5">
             <div className="rounded-[var(--r-control)] bg-muted p-3">
               <p className="text-sm font-medium">Tầm nhìn 12 tuần:</p>
@@ -235,7 +235,7 @@ export function PlanPreview({
         </AccordionItem>
 
         <AccordionItem value="lead-indicators-preview" className={accordionItemClass}>
-          <AccordionTrigger className={accordionTriggerClass}>Lead indicators preview</AccordionTrigger>
+          <AccordionTrigger className={accordionTriggerClass}>Xem trước việc lặp lại</AccordionTrigger>
           <AccordionContent className="space-y-3 pb-5">
             {weekOneLeadMetrics.length > 0 ? (
               weekOneLeadMetrics.map((leadMetric) => (
@@ -256,30 +256,30 @@ export function PlanPreview({
             {week1 && (
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">Tuáº§n 1 (Chi tiáº¿t)</CardTitle>
+                  <CardTitle className="text-lg">Tuần 1 (Chi tiết)</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div className="rounded-[var(--r-control)] bg-muted p-3">
-                      <p className="text-sm font-medium">Trá»ng tÃ¢m:</p>
+                      <p className="text-sm font-medium">Trọng tâm:</p>
                       <p className="text-sm text-muted-foreground">{week1.focus}</p>
                     </div>
 
                     {week1.expectedOutput && (
                       <div className="rounded-[var(--r-control)] bg-muted p-3">
-                        <p className="text-sm font-medium">Káº¿t quáº£ dá»± kiáº¿n:</p>
+                        <p className="text-sm font-medium">Kết quả dự kiến:</p>
                         <p className="text-sm text-muted-foreground whitespace-pre-line">{week1.expectedOutput}</p>
                       </div>
                     )}
 
                     <div>
-                      <p className="text-sm font-medium mb-2">CÃ¡c viá»‡c cáº§n lÃ m:</p>
+                      <p className="text-sm font-medium mb-2">Các việc cần làm:</p>
                       <div className="space-y-2">
                         {week1.tasks.map((task, idx) => (
                           <div
                             key={task.id}
                             className={`flex items-start gap-3 rounded-[var(--r-control)] border p-3 ${
-                              task.title.startsWith("[Cá»T Lá»–I]")
+                              task.title.startsWith("[CỐT LÕI]")
                                 ? "border-orange-200 bg-orange-50"
                                 : "border-gray-200"
                             }`}
@@ -297,7 +297,7 @@ export function PlanPreview({
                                 })}
                               </p>
                             </div>
-                            {task.title.startsWith("[Cá»T Lá»–I]") && <Badge variant="secondary">Cá»‘t lÃµi</Badge>}
+                            {task.title.startsWith("[CỐT LÕI]") && <Badge variant="secondary">Cốt lõi</Badge>}
                           </div>
                         ))}
                       </div>
@@ -309,14 +309,14 @@ export function PlanPreview({
 
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Tuáº§n 2-4 (TÃ³m táº¯t)</CardTitle>
+                <CardTitle className="text-lg">Tuần 2-4 (Tóm tắt)</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {weeks24.map((week) => (
                     <div key={week.weekNumber} className="rounded-[var(--r-control)] border p-3">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-medium">Tuáº§n {week.weekNumber}</h4>
+                        <h4 className="font-medium">Tuần {week.weekNumber}</h4>
                         <Button variant="ghost" size="sm" onClick={() => toggleWeekExpansion(week.weekNumber)}>
                           {expandedWeeks.has(week.weekNumber) ? (
                             <ChevronDown className="h-4 w-4" />
@@ -326,16 +326,16 @@ export function PlanPreview({
                         </Button>
                       </div>
 
-                      {week.focus && <p className="text-sm text-muted-foreground mt-1">Trá»ng tÃ¢m: {week.focus}</p>}
+                      {week.focus && <p className="text-sm text-muted-foreground mt-1">Trọng tâm: {week.focus}</p>}
 
                       {expandedWeeks.has(week.weekNumber) && (
                         <div className="mt-3 space-y-2 border-t pt-3">
                           <p className="text-sm">
-                            <span className="font-medium">Káº¿t quáº£:</span> {week.expectedOutput || "ChÆ°a cÃ³"}
+                            <span className="font-medium">Kết quả:</span> {week.expectedOutput || "Chưa có"}
                           </p>
                           <p className="text-sm">
-                            <span className="font-medium">Viá»‡c láº·p láº¡i:</span>{" "}
-                            {week.leadMetrics.map((lm) => lm.name).join(", ") || "ChÆ°a cÃ³"}
+                            <span className="font-medium">Việc lặp lại:</span>{" "}
+                            {week.leadMetrics.map((lm) => lm.name).join(", ") || "Chưa có"}
                           </p>
                         </div>
                       )}
@@ -363,14 +363,14 @@ export function PlanPreview({
                       <span className="font-medium">{indicator.name}</span>
                       {idx < 2 && (
                         <Badge variant="outline" className="bg-green-100 text-green-800 text-xs">
-                          Cá»‘t lÃµi
+                          Cốt lõi
                         </Badge>
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Má»¥c tiÃªu: {indicator.target} láº§n/tuáº§n
+                      Mục tiêu: {indicator.target} lần/tuần
                       {draft.preferredDays && draft.preferredDays.length > 0 && (
-                        <> â€¢ Trong cÃ¡c ngÃ y: {draft.preferredDays.map((d: number) => `T${d}`).join(", ")}</>
+                        <> • Trong các ngày: {draft.preferredDays.map((d: number) => `T${d}`).join(", ")}</>
                       )}
                     </p>
                   </div>
@@ -380,7 +380,7 @@ export function PlanPreview({
 
             <Button variant="outline" className="mt-3 w-full" onClick={onEditTactics}>
               <Edit2 className="mr-2 h-4 w-4" />
-              Chá»‰nh sá»­a viá»‡c láº·p láº¡i
+              Chỉnh sửa việc lặp lại
             </Button>
           </AccordionContent>
         </AccordionItem>
@@ -389,7 +389,7 @@ export function PlanPreview({
       {/* Actions */}
       <div className="flex justify-between gap-4">
         <Button variant="outline" onClick={onBack} disabled={loading}>
-          Quay láº¡i sá»­a
+          Quay lại sửa
         </Button>
         <div className="flex flex-col items-end gap-2">
           {validationMessage ? (
@@ -398,7 +398,7 @@ export function PlanPreview({
             </p>
           ) : null}
           <Button onClick={onConfirm} disabled={loading || !canConfirm}>
-            {loading ? "Äang táº¡o..." : "XÃ¡c nháº­n táº¡o káº¿ hoáº¡ch"}
+            {loading ? "Đang tạo..." : "Xác nhận tạo kế hoạch"}
           </Button>
         </div>
       </div>

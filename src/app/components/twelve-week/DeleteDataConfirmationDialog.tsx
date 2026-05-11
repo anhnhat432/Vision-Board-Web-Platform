@@ -48,7 +48,7 @@ export function DeleteDataConfirmationDialog({
               </>
             ) : isSignedIn ? (
               <>
-                Tất cả dữ liệu trên cloud và thiết bị sẽ bị xóa vĩnh viễn, bao gồm mục tiêu, kế hoạch 12 tuần,
+                Tất cả dữ liệu trên đám mây và thiết bị sẽ bị xóa vĩnh viễn, bao gồm mục tiêu, kế hoạch 12 tuần,
                 nhật ký, review và cài đặt. Tài khoản sẽ không còn có thể truy cập.
               </>
             ) : (

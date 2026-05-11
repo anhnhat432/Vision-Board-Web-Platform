@@ -370,7 +370,7 @@ export function buildWeeklyPlans(
 ) {
   return Array.from({ length: 12 }, (_, index) => {
     const weekNumber = index + 1;
-    const phaseName = weekNumber <= 4 ? "Foundation" : weekNumber <= 8 ? "Build / Acceleration" : "Finish / Execution";
+    const phaseName = weekNumber <= 4 ? "Khởi động" : weekNumber <= 8 ? "Bứt phá" : "Hoàn tất / Thực hiện";
 
     return {
       weekNumber,

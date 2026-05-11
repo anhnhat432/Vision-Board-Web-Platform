@@ -112,7 +112,7 @@ function getFailureInput(result: TwelveWeekMutationResult | null, fallbackMessag
   if (status === "conflict") {
     return {
       code: result?.reason ?? "sync_conflict",
-      message: result?.message ?? "Mutation sync reported a conflict.",
+      message: result?.message ?? "Đồng bộ thay đổi báo có xung đột.",
       httpStatus: 409,
       retryable: false,
     };
@@ -121,7 +121,7 @@ function getFailureInput(result: TwelveWeekMutationResult | null, fallbackMessag
   if (status === "failed_validation") {
     return {
       code: result?.reason ?? "sync_validation_failed",
-      message: result?.message ?? "Mutation payload failed backend validation.",
+      message: result?.message ?? "Thay đổi chưa vượt qua kiểm tra của máy chủ.",
       httpStatus: 400,
       retryable: false,
     };
@@ -146,7 +146,7 @@ function getRequestFailureInput(error: unknown): MutationFailureInput {
 
   return {
     code: retryable ? "sync_request_retryable" : "sync_request_failed",
-    message: appError.message || "Could not send queued mutations.",
+    message: appError.message || "Chưa gửi được các thay đổi đang chờ.",
     httpStatus: status,
     retryable,
   };
@@ -229,10 +229,10 @@ export async function sendPending12WeekMutations(
       }
 
       const failure = result
-        ? getFailureInput(result, "Mutation sync failed.")
+        ? getFailureInput(result, "Đồng bộ thay đổi chưa thành công.")
         : {
             code: "missing_sync_result",
-            message: "Backend response did not include this mutation result.",
+            message: "Phản hồi từ máy chủ chưa có kết quả cho thay đổi này.",
             retryable: true,
           };
       const inFlightItem = latestStore.items.find((candidate) => candidate.id === item.id);

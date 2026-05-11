@@ -58,7 +58,7 @@ export function getMaxTasksPerTactic(input: WeeklyTaskLoadInput = {}): number {
 
 export function getWeeklyTaskWarning(taskCount: number): string | null {
   if (taskCount > MAX_RECOMMENDED_TASKS) {
-    return "Khuyen nghi moi tuan chi nen co 3-5 task. Ban dang vuot qua 5 task.";
+    return "Khuyến nghị mỗi tuần chỉ nên có 3-5 việc. Bạn đang vượt quá 5 việc.";
   }
 
   return null;

@@ -29,9 +29,9 @@ function addCalendarDays(date: Date, days: number): Date {
 }
 
 function getLegacyPhaseName(weekNumber: number): string {
-  if (weekNumber <= 4) return "Foundation";
-  if (weekNumber <= 8) return "Build / Acceleration";
-  return "Finish / Execution";
+  if (weekNumber <= 4) return "Khởi động";
+  if (weekNumber <= 8) return "Bứt phá";
+  return "Hoàn tất / Thực hiện";
 }
 
 function getWeekStartOffset(weekStartsOn: TwelveWeekSystem["weekStartsOn"]): number {

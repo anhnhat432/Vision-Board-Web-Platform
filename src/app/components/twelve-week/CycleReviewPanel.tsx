@@ -90,7 +90,7 @@ export function CycleReviewPanel({
       >
         {aspirationalVisionSummary ? (
           <div className="rounded-[var(--r-control)] border border-white/14 bg-white/10 px-4 py-3 text-sm text-white/82">
-            <p className="font-semibold text-white">Cycle này đã đưa bạn gần hơn với vision 3 năm chưa?</p>
+            <p className="font-semibold text-white">Chu kỳ này đã đưa bạn gần hơn với tầm nhìn 3 năm chưa?</p>
             <p className="mt-1 text-white/72">{aspirationalVisionSummary}</p>
           </div>
         ) : null}
@@ -124,7 +124,7 @@ export function CycleReviewPanel({
                     </li>
                   ))
                 ) : (
-                  <EmptyListItem>Chưa có insight nào được ghi trong 12 review.</EmptyListItem>
+                  <EmptyListItem>Chưa có góc nhìn nào được ghi trong 12 review.</EmptyListItem>
                 )}
               </ul>
             </div>

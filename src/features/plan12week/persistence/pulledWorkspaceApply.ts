@@ -58,9 +58,9 @@ function clampWeekNumber(value: number | undefined, totalWeeks: number): number 
 }
 
 function getLegacyPhaseName(weekNumber: number): string {
-  if (weekNumber <= 4) return "Foundation";
-  if (weekNumber <= 8) return "Build / Acceleration";
-  return "Finish / Execution";
+  if (weekNumber <= 4) return "Khởi động";
+  if (weekNumber <= 8) return "Bứt phá";
+  return "Hoàn tất / Thực hiện";
 }
 
 function slugify(value: string, fallback: string): string {
@@ -113,7 +113,7 @@ function buildLeadIndicators(input: {
   const indicatorsById = new Map<string, LeadIndicator>();
 
   for (const metric of input.leadMetrics) {
-    const name = metric.name?.trim() || "Cloud tactic";
+    const name = metric.name?.trim() || "Việc lặp lại trên tài khoản";
     const id = metric.leadIndicatorId?.trim() || `tactic_cloud_${slugify(name, String(indicatorsById.size + 1))}`;
     if (indicatorsById.has(id)) continue;
 
@@ -132,7 +132,7 @@ function buildLeadIndicators(input: {
 
   const groupedTasks = new Map<string, { name: string; id: string; isCore: boolean; countByWeek: Map<number, number> }>();
   input.tasks.forEach((task, index) => {
-    const name = task.leadIndicatorName?.trim() || task.title?.trim() || "Cloud tactic";
+    const name = task.leadIndicatorName?.trim() || task.title?.trim() || "Việc lặp lại trên tài khoản";
     const id = getIndicatorIdFromTask(task, index);
     const existing = groupedTasks.get(id) ?? {
       id,
@@ -162,7 +162,7 @@ function buildTaskInstances(tasks: TwelveWeekPulledTask[], totalWeeks: number): 
       id: task.clientTaskId?.trim() || `cloud_task_${index + 1}`,
       weekNumber: clampWeekNumber(task.weekNumber, totalWeeks),
       scheduledDate: normalizeDateKey(task.scheduledDate),
-      title: task.title?.trim() || "Cloud task",
+      title: task.title?.trim() || "Việc trên tài khoản",
       leadIndicatorName: task.leadIndicatorName?.trim() || "",
       isCore: task.isCore !== false,
       completed: task.status === "done",
@@ -426,9 +426,9 @@ function buildPulledGoal(input: {
       input.pulledGoal?.description?.trim() ||
       input.pulledGoal?.title?.trim() ||
       input.existingGoal?.twelveWeekSystem?.vision12Week ||
-      "Cloud workspace",
+      "Không gian làm việc trên tài khoản",
     lagMetric: input.existingGoal?.twelveWeekSystem?.lagMetric ?? {
-      name: leadIndicators[0]?.name ?? "Main progress",
+      name: leadIndicators[0]?.name ?? "Tiến độ chính",
       unit: "",
       target: "",
       currentValue: "",
@@ -467,8 +467,8 @@ function buildPulledGoal(input: {
 
   const baseGoal: Goal = {
     id: clientGoalId,
-    category: input.pulledGoal?.category?.trim() || input.existingGoal?.category || "Cloud",
-    title: input.pulledGoal?.title?.trim() || input.existingGoal?.title || "Cloud 12-week goal",
+    category: input.pulledGoal?.category?.trim() || input.existingGoal?.category || "Tài khoản",
+    title: input.pulledGoal?.title?.trim() || input.existingGoal?.title || "Mục tiêu 12 tuần trên tài khoản",
     description: input.pulledGoal?.description?.trim() || input.existingGoal?.description || "",
     deadline: normalizeDateKey(input.pulledGoal?.deadline) || input.existingGoal?.deadline || "",
     tasks: buildGoalTaskSummary(input.pulledGoal?.tasks),

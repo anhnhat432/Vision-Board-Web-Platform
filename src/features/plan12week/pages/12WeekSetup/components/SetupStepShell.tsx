@@ -48,7 +48,7 @@ const STEP_VISUALS: Array<{
 }> = [
   {
     icon: Target,
-    eyebrow: "Output",
+    eyebrow: "Kết quả",
     caption: "Chốt kết quả đủ rõ để 12 tuần có điểm đến.",
     panelClassName:
       "border-violet-200/80 bg-gradient-to-br from-violet-50 to-fuchsia-50 text-violet-900 dark:border-violet-500/30 dark:from-violet-950/50 dark:to-fuchsia-950/30 dark:text-violet-100",

@@ -189,7 +189,7 @@ export function TwelveWeekPlanAccessSection({
               </div>
               <div className="mt-[var(--space-inline)] space-y-1 text-sm text-slate-700">
                 <p>Provider: {billingProviderStatus.providerLabel}</p>
-                <p>Checkout: {getBillingReadinessLabel(billingProviderStatus.checkoutReady, "Local fallback")}</p>
+                <p>Thanh toán: {getBillingReadinessLabel(billingProviderStatus.checkoutReady, "Dự phòng trên thiết bị")}</p>
                 <p>Restore: {getBillingReadinessLabel(billingProviderStatus.restoreReady, "Local fallback")}</p>
                 <p>
                   Kiểm tra quyền:{" "}

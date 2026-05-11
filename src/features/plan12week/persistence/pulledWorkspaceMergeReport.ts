@@ -489,7 +489,7 @@ function buildPendingMutationConflicts(
           clientId,
           cloudId: cloudEntity.cloudId,
           path: cloudEntity.path,
-          message: "Cloud record changed after an unresolved local mutation for the same entity.",
+          message: "Bản trên tài khoản đã đổi trong khi thiết bị vẫn còn thay đổi chưa gửi cho cùng mục này.",
           mutationId: item.id,
           reason: "pending_local_mutation_cloud_newer" as const,
           localUpdatedAt: item.updatedAt,
@@ -524,7 +524,7 @@ function buildMatchedCloudChanges(
       localId: localEntity.localId,
       cloudId: cloudEntity.cloudId,
       path: cloudEntity.path,
-      message: "Pulled cloud value differs from the current local value.",
+      message: "Bản trên tài khoản khác với bản hiện có trên thiết bị.",
       cloudSyncUpdatedAt: cloudEntity.syncUpdatedAt,
     });
   });
@@ -553,7 +553,7 @@ function buildValueDiffConflicts(
       localId: localEntity.localId,
       cloudId: cloudEntity.cloudId,
       path: cloudEntity.path,
-      message: "Local and cloud values differ for a field-complete sync entity.",
+      message: "Dữ liệu trên thiết bị và trên tài khoản đang khác nhau ở mục đã đủ thông tin đồng bộ.",
       reason,
       cloudSyncUpdatedAt: cloudEntity.syncUpdatedAt,
     });
@@ -574,7 +574,7 @@ function buildLocalOnlyChanges(
       clientId: entity.clientId,
       localId: entity.localId,
       path: entity.path,
-      message: "Local entity is not present in the pulled cloud workspace.",
+      message: "Mục trên thiết bị chưa có trong dữ liệu vừa lấy từ tài khoản.",
     }));
 }
 
@@ -590,7 +590,7 @@ function buildCloudOnlyChanges(
       clientId: entity.clientId,
       cloudId: entity.cloudId,
       path: entity.path,
-      message: "Cloud entity is not present in the current local workspace.",
+      message: "Mục trên tài khoản chưa có trong dữ liệu hiện tại trên thiết bị.",
       cloudSyncUpdatedAt: entity.syncUpdatedAt,
     }));
 }

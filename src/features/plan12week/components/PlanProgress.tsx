@@ -43,7 +43,7 @@ export function PlanProgress({ weeks, totalWeeks = 12 }: PlanProgressProps) {
   return (
     <Card className="border-0 bg-white/85 shadow-sm">
       <CardHeader className="space-y-2 pb-3">
-        <CardTitle className="text-lg text-slate-900">12 Week Progress</CardTitle>
+        <CardTitle className="text-lg text-slate-900">Tiến độ 12 tuần</CardTitle>
         <p className="text-sm text-slate-600">
           {completedWeeks}/{totalWeeks} weeks reviewed
         </p>

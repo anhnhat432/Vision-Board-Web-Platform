@@ -137,7 +137,7 @@ function getPullEntityKindLabel(kind: MutationQueueMergeReport["conflicts"][numb
     case "weeklyReview":
       return "Review tuần";
     default:
-      return "Mục trong workspace";
+      return "Mục trong không gian làm việc";
   }
 }
 
@@ -211,11 +211,11 @@ function getBackendStatusLabel(status: TwelveWeekSettingsTabProps["backendConnec
   if (!status.authConfigured) return "Chưa cấu hình";
   if (status.authLoading) return "Đang kiểm tra";
   if (!status.signedIn) return "Chưa đăng nhập";
-  if (!status.profileReady) return "Đang nối profile";
+  if (!status.profileReady) return "Đang nối hồ sơ";
   if (status.syncing) return "Đang đồng bộ";
   if (status.syncStatus === "success") return "Đã đồng bộ";
   if (status.syncStatus === "partial") return "Đồng bộ một phần";
-  if (status.syncStatus === "error") return "Có lỗi sync";
+  if (status.syncStatus === "error") return "Có lỗi đồng bộ";
   return "Đã sẵn sàng";
 }
 
@@ -423,7 +423,7 @@ function MutationQueueConflictResolutionPanel({
         <summary className="cursor-pointer text-sm font-semibold text-slate-900">Xem chi tiết</summary>
         <div className="mt-[var(--space-inline)] stack-tight text-xs leading-5 text-slate-600">
           <p>
-            Chi tiết bên dưới chỉ hiển thị loại dữ liệu và số lượng. Nội dung note, reflection, check-in hoặc review
+            Chi tiết bên dưới chỉ hiển thị loại dữ liệu và số lượng. Nội dung ghi chú, nhìn lại, check-in hoặc review
             không được mở ra ở đây.
           </p>
           {visibleConflicts.length > 0 ? (
@@ -760,7 +760,7 @@ export function TwelveWeekLocalStatusSection({
               </p>
               <div className="grid grid-cols-2 gap-2 pt-2 sm:grid-cols-4">
                 <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Chờ sync</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Chờ đồng bộ</p>
                   <p className="mt-1 text-lg font-semibold text-slate-950">{queueSummary.pendingCount}</p>
                 </div>
                 <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
@@ -778,11 +778,11 @@ export function TwelveWeekLocalStatusSection({
               </div>
               <div className="grid gap-2 pt-2 text-xs leading-5 text-slate-500 sm:grid-cols-2">
                 <p>
-                  <span className="font-semibold text-slate-700">Bắt đầu sync gần nhất:</span>{" "}
+                  <span className="font-semibold text-slate-700">Bắt đầu đồng bộ gần nhất:</span>{" "}
                   {formatMutationQueueTimestamp(queueSummary.lastDrainStartedAt)}
                 </p>
                 <p>
-                  <span className="font-semibold text-slate-700">Kết thúc sync gần nhất:</span>{" "}
+                  <span className="font-semibold text-slate-700">Kết thúc đồng bộ gần nhất:</span>{" "}
                   {formatMutationQueueTimestamp(queueSummary.lastDrainFinishedAt)}
                 </p>
               </div>

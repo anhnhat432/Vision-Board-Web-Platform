@@ -343,7 +343,7 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
         "task_completion_without_progress",
         "warning",
         "Đang làm đều nhưng kim mục tiêu chưa di chuyển",
-        "Bạn xong nhiều việc, nhưng chỉ số chính chưa được cập nhật. Tuần sau hãy gắn việc tuần với output thực sự đẩy chỉ số.",
+        "Bạn xong nhiều việc, nhưng chỉ số chính chưa được cập nhật. Tuần sau hãy gắn việc tuần với kết quả thực sự đẩy chỉ số.",
         "tighten_scope",
         {
           completionPercent: metrics.currentWeekCompletionPercent,
@@ -559,7 +559,7 @@ const NEXT_ACTION_LIBRARY: Record<ExecutionInsightNextActionId, Omit<ExecutionIn
     hint: "Việc đang giúp bạn tiến bộ — giữ y nguyên cho tuần sau.",
   },
   tighten_scope: {
-    label: "Thu hẹp scope",
+    label: "Thu hẹp phạm vi",
     hint: "Tuần sau chỉ giữ việc thực sự đẩy chỉ số chính.",
   },
   reset_focus: {

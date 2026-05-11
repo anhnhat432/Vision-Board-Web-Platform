@@ -74,21 +74,21 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
       "Pair review hoặc demo nhỏ",
     ],
     milestoneTemplates: {
-      week4: "Hoàn thành 1 dự án nhỏ làm output đầu tiên.",
+      week4: "Hoàn thành 1 dự án nhỏ làm kết quả đầu tiên.",
       week8: "Ship phiên bản thứ 2 sau khi nhận feedback.",
       week12: "Có portfolio hoặc 3-4 sản phẩm thực hành đo được.",
     },
-    weekOneFocus: "Chọn 1 dự án nhỏ làm output đầu tiên, bắt đầu feedback loop.",
+    weekOneFocus: "Chọn 1 dự án nhỏ làm kết quả đầu tiên, bắt đầu vòng góp ý.",
     weekOneExpectedOutput: "1 mini project chạy được + 1 buổi pair review/demo nhỏ.",
     firstAction: {
       standard: "Lên lịch 1 buổi luyện tập 30-60 phút trong 24h tới và viết tên buổi vào lịch.",
       lowFeasibility: "Đặt lịch 1 buổi luyện 15 phút ngay hôm nay hoặc ngày mai — chỉ cần bắt đầu, chưa cần dài.",
     },
     weekOneTacticLoadHint: "balanced",
-    reviewPrompt: "Tuần này học được kỹ năng nào mới? Có output nào để demo chưa?",
+    reviewPrompt: "Tuần này học được kỹ năng nào mới? Có kết quả nào để demo chưa?",
     antiPatterns: [
       "Học lý thuyết không có sản phẩm — dễ ảo tưởng tiến bộ.",
-      "Dùng số giờ học làm metric chính thay vì số sản phẩm.",
+      "Dùng số giờ học làm chỉ số chính thay vì số sản phẩm.",
       "Chọn quá nhiều khóa học song song, không hoàn thành khóa nào.",
     ],
     requiredSignals: {
@@ -132,9 +132,9 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
       "Demo prep / feedback session",
     ],
     milestoneTemplates: {
-      week4: "Hoàn thành 3-4 deliverable IDP và có 2 buổi 1:1.",
-      week8: "Ship deliverable lớn + feedback từ stakeholder.",
-      week12: "Có 12 deliverable cụ thể và 1 bản self-review.",
+      week4: "Hoàn thành 3-4 phần việc IDP và có 2 buổi 1:1.",
+      week8: "Hoàn tất phần việc lớn và lấy góp ý từ stakeholder.",
+      week12: "Có 12 phần việc cụ thể và 1 bản tự review.",
     },
     weekOneFocus: "Lock lịch deep work + book 1 buổi 1:1 với mentor/manager.",
     weekOneExpectedOutput: "2 deep work block đã chạy + 1 buổi 1:1 đã họp.",
@@ -143,7 +143,7 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
       lowFeasibility: "Hôm nay block 30 phút deep work trên lịch và soạn 1 tin nhắn xin 1:1 (chưa cần gửi cũng được).",
     },
     weekOneTacticLoadHint: "balanced",
-    reviewPrompt: "Có deliverable nào ship được tuần này? Có stakeholder nào cần update?",
+    reviewPrompt: "Có phần việc nào hoàn tất được tuần này? Có stakeholder nào cần cập nhật?",
     antiPatterns: [
       "Đặt mục tiêu kết quả ngoài tầm (promotion) thay vì input kiểm soát được.",
       "Chỉ làm việc lớn, không có việc nhỏ giữ nhịp hằng tuần.",
@@ -163,7 +163,7 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
     milestoneTemplates: {
       week4: "Tracking chi tiêu 4 tuần liên tiếp + chuyển khoản tự động đã set up.",
       week8: "Đạt saving rate mục tiêu 2 tuần liên tiếp + có runway 1 tháng.",
-      week12: "Đạt milestone tiết kiệm + có báo cáo hằng tuần ổn định.",
+      week12: "Đạt cột mốc tiết kiệm + có báo cáo hằng tuần ổn định.",
     },
     weekOneFocus: "Set up tracking + tự động hóa saving, giữ số tiết kiệm nhẹ tuần đầu.",
     weekOneExpectedOutput: "Hệ thống tracking đã chạy + 1 lần chuyển khoản tự động đã thành công.",
@@ -176,7 +176,7 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
     antiPatterns: [
       "Đặt số tiết kiệm tuyệt đối phụ thuộc thu nhập biến động — không có plan B.",
       "Không track chi tiêu hằng tuần, chỉ check cuối kỳ.",
-      "Chỉ có lag metric (số tiền) mà không có lead action (track/chuyển khoản/review).",
+      "Chỉ có kết quả cuối (số tiền) mà không có việc lặp lại (theo dõi/chuyển khoản/review).",
     ],
     requiredSignals: {
       leadIndicatorKeywords: ["track", "chi tiêu", "chi tieu", "tiết kiệm", "tiet kiem", "chuyển khoản", "chuyen khoan", "tự động", "tu dong", "review", "ngân sách", "ngan sach", "saving"],
@@ -216,25 +216,25 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
     leadIndicatorSuggestions: [
       "Build session",
       "User interview / feedback",
-      "Ship review hoặc demo nội bộ",
+      "Hoàn tất review hoặc bản thử nội bộ",
     ],
     milestoneTemplates: {
       week4: "Ship được 50% scope MVP và có phản hồi từ user đầu tiên.",
       week8: "Đạt 80% scope MVP, đã fix dependency blocker, có 2 feedback session.",
-      week12: "Ship MVP v1 công khai hoặc nội bộ với metric được đo rõ.",
+      week12: "Ra mắt MVP v1 công khai hoặc nội bộ với chỉ số được đo rõ.",
     },
     weekOneFocus: "Chốt MVP scope + danh sách dependencies + lịch user feedback.",
-    weekOneExpectedOutput: "Scope document + danh sách dependency + 1 build session khởi động.",
+    weekOneExpectedOutput: "Tài liệu phạm vi + danh sách phụ thuộc + 1 phiên xây dựng khởi động.",
     firstAction: {
       standard: "Viết scope document 5-10 dòng cho MVP trong 24h tới (mục tiêu, in-scope, out-of-scope).",
       lowFeasibility: "Hôm nay viết 3 dòng scope: MVP làm gì, không làm gì, ai dùng đầu tiên. 10 phút là đủ.",
     },
     weekOneTacticLoadHint: "balanced",
-    reviewPrompt: "Tuần này ship được gì? Có dependency nào đang block?",
+    reviewPrompt: "Tuần này hoàn tất được gì? Có phụ thuộc nào đang chặn?",
     antiPatterns: [
-      "Đặt launch MVP tuần 12 mà không có milestone rõ ở tuần 4 và 8.",
+      "Đặt ra mắt MVP tuần 12 mà không có cột mốc rõ ở tuần 4 và 8.",
       "Build trong vacuum không có session feedback người dùng.",
-      "Scope phình to giữa chu kỳ, mất focus.",
+      "Phạm vi phình to giữa chu kỳ, mất tập trung.",
     ],
     requiredSignals: {
       leadIndicatorKeywords: ["build", "ship", "deliver", "demo", "feature", "user interview", "feedback", "deploy", "release", "pr ", "review"],
@@ -243,13 +243,13 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
   },
   habit_building: {
     leadIndicatorSuggestions: [
-      "Habit chính phiên bản 2 phút",
+      "Thói quen chính phiên bản 2 phút",
       "Ghi chú ngắn cuối ngày",
     ],
     milestoneTemplates: {
-      week4: "Giữ streak habit chính ≥ 21 ngày phiên bản dễ.",
+      week4: "Giữ chuỗi ngày thói quen chính ≥ 21 ngày phiên bản dễ.",
       week8: "Tăng cường độ habit lên mức mục tiêu, môi trường đã ổn định.",
-      week12: "Habit tự chạy, không cần ý chí — môi trường + cue đã khóa.",
+      week12: "Thói quen tự chạy, không cần ý chí — môi trường + tín hiệu bắt đầu đã khóa.",
     },
     weekOneFocus: "Chọn habit phiên bản 2 phút, gắn cue cụ thể vào routine có sẵn.",
     weekOneExpectedOutput: "Streak 5-7 ngày phiên bản dễ + cue đã được test.",
@@ -260,7 +260,7 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
     weekOneTacticLoadHint: "lighter",
     reviewPrompt: "Streak còn giữ được không? Cue nào đang hoạt động tốt nhất?",
     antiPatterns: [
-      "Habit tuần 1 quá khó — không xây được streak ban đầu.",
+      "Thói quen tuần 1 quá khó — không xây được chuỗi ngày ban đầu.",
       "Nhiều habit cùng lúc — chọn 1 habit chính.",
       "Không có cue/trigger gắn với routine có sẵn.",
     ],
@@ -271,8 +271,8 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
   },
   creative_output: {
     leadIndicatorSuggestions: [
-      "Buổi sáng tác / draft",
-      "Buổi edit",
+      "Buổi sáng tác / bản nháp",
+      "Buổi sửa",
       "Lịch xuất bản (post / upload)",
     ],
     milestoneTemplates: {
@@ -283,15 +283,15 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
     weekOneFocus: "Ship 1 tác phẩm rough tuần đầu. Bỏ qua tham vọng perfect.",
     weekOneExpectedOutput: "1 bài/tác phẩm đã publish + lịch xuất bản tuần kế tiếp.",
     firstAction: {
-      standard: "Viết draft rough cho 1 tác phẩm trong 48h tới và đặt lịch publish cuối tuần.",
+      standard: "Viết bản nháp thô cho 1 tác phẩm trong 48h tới và đặt lịch xuất bản cuối tuần.",
       lowFeasibility: "Hôm nay viết 100-200 chữ rough hoặc làm 1 sketch nhỏ. Chưa cần publish.",
     },
     weekOneTacticLoadHint: "balanced",
     reviewPrompt: "Tuần này publish được gì? Có bị block bởi 'chưa đủ tốt' không?",
     antiPatterns: [
-      "Chỉ có metric 'viết tốt hơn' — không đếm được.",
+      "Chỉ có chỉ số 'viết tốt hơn' — không đếm được.",
       "Đăng dồn cuối kỳ, không có cadence xuất bản đều.",
-      "Edit vô hạn, không ship.",
+      "Sửa mãi, không đưa ra bản hoàn tất.",
     ],
     requiredSignals: {
       leadIndicatorKeywords: ["viết", "viet ", "draft", "edit", "publish", "post", "upload", "bài", "bai ", "tác phẩm", "tac pham", "xuất bản", "xuat ban"],
@@ -336,7 +336,7 @@ const DEFAULTS: Record<GoalArchetype, ArchetypePlanFullDefaults> = {
       week8: "Đạt nửa mục tiêu và có 2 bản review.",
       week12: "Đạt mục tiêu + tổng kết chu kỳ.",
     },
-    weekOneFocus: "Tuần 1 giữ nhẹ. Khi metric rõ hơn, tăng tải từ tuần 2-3.",
+    weekOneFocus: "Tuần 1 giữ nhẹ. Khi chỉ số rõ hơn, tăng tải từ tuần 2-3.",
     weekOneExpectedOutput: "Ít nhất 1 việc cốt lõi đã làm + 1 buổi nhìn lại ngắn.",
     firstAction: {
       standard: "Chọn 1 việc cốt lõi và đặt lịch làm trong 24-48h tới. Ghi rõ thời gian + địa điểm.",

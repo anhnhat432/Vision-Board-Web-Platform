@@ -157,7 +157,7 @@ export function LeadIndicatorsStep({
           <div className="rounded-[var(--r-card)] border border-emerald-200 bg-white/82 p-3">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Ví dụ tốt (kiểm soát được)</p>
             <ul className="mt-2 stack-tight text-sm leading-6 text-slate-700">
-              <li>• Viết draft 800 từ</li>
+              <li>• Viết bản nháp 800 từ</li>
               <li>• Tập gym 45 phút</li>
               <li>• Gửi 5 email outreach</li>
               <li>• Học flashcard tiếng Anh 30 phút</li>

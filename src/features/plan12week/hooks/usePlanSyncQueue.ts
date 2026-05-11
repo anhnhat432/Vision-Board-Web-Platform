@@ -211,7 +211,7 @@ export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
           // Show error toast on first failure in batch
           if (failedCount === 1) {
             setLastError({ code: failure.code, message: failure.message });
-            toast.error("Sync failed, sẽ thử lại sau", {
+            toast.error("Đồng bộ chưa thành công, sẽ thử lại sau", {
               description: failure.message,
               duration: 4500,
             });
