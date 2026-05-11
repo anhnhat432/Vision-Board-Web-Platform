@@ -168,10 +168,10 @@ describe("GoalTracker fresh workspace state", () => {
     renderGoalTracker();
 
     const emptyState = await screen.findByTestId("goaltracker-fresh-empty-state");
-    expect(emptyState).toHaveTextContent("Chưa có mục tiêu nào trong workspace của bạn");
-    expect(emptyState).toHaveTextContent("Bắt đầu bằng Life Balance để có dữ liệu thật");
+    expect(emptyState).toHaveTextContent("Chưa có mục tiêu nào trong không gian làm việc của bạn");
+    expect(emptyState).toHaveTextContent("Bắt đầu bằng Cân bằng cuộc sống để có dữ liệu thật");
     expect(emptyState).toHaveTextContent("SMART + 12 tuần");
-    expect(within(emptyState).getByRole("button", { name: "Bắt đầu Life Balance" })).toBeInTheDocument();
+    expect(within(emptyState).getByRole("button", { name: "Bắt đầu Cân bằng cuộc sống" })).toBeInTheDocument();
     expect(screen.queryByText("Anonymous stale goal must stay hidden")).not.toBeInTheDocument();
     expect(screen.queryByText("Mục tiêu đang theo")).not.toBeInTheDocument();
     expect(screen.queryByText(/Bạn đang ở gói/i)).not.toBeInTheDocument();
@@ -183,7 +183,7 @@ describe("GoalTracker fresh workspace state", () => {
     const { router } = renderGoalTracker();
 
     const emptyState = await screen.findByTestId("goaltracker-fresh-empty-state");
-    await user.click(within(emptyState).getByRole("button", { name: "Bắt đầu Life Balance" }));
+    await user.click(within(emptyState).getByRole("button", { name: "Bắt đầu Cân bằng cuộc sống" }));
 
     expect(router.state.location.pathname).toBe("/onboarding");
   });

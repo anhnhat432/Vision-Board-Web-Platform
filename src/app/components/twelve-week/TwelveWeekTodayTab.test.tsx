@@ -203,7 +203,7 @@ describe("TwelveWeekTodayTab — Performance Time Blocking", () => {
     );
 
     expect(
-      screen.getByText("Sắp tới giờ Strategic Block. Đóng tab phụ, chọn 1 việc cốt lõi."),
+      screen.getByText("Sắp tới giờ Khung chiến lược. Đóng tab phụ, chọn 1 việc cốt lõi."),
     ).toBeInTheDocument();
   });
 });

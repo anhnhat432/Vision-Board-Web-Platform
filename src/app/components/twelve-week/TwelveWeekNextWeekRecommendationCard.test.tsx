@@ -68,7 +68,7 @@ describe("TwelveWeekNextWeekRecommendationCard", () => {
     expect(screen.queryByRole("button", { name: /Áp dụng cho tuần sau/i })).toBeNull();
   });
 
-  it("invokes onOpenTodayTab when 'Mở Today' is clicked", async () => {
+  it("invokes onOpenTodayTab when 'Mở Hôm nay' is clicked", async () => {
     const onOpenTodayTab = vi.fn();
     render(
       <TwelveWeekNextWeekRecommendationCard
@@ -76,7 +76,7 @@ describe("TwelveWeekNextWeekRecommendationCard", () => {
         onOpenTodayTab={onOpenTodayTab}
       />,
     );
-    await userEvent.click(screen.getByRole("button", { name: /Mở Today/i }));
+    await userEvent.click(screen.getByRole("button", { name: /Mở Hôm nay/i }));
     expect(onOpenTodayTab).toHaveBeenCalledTimes(1);
   });
 

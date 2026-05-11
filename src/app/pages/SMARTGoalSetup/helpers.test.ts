@@ -99,7 +99,7 @@ describe("SMART measurable validation", () => {
       }),
     );
 
-    expect(error).toBe("Mục tiêu cần lớn hơn baseline");
+    expect(error).toBe("Mục tiêu cần lớn hơn mốc hiện tại");
   });
 });
 
@@ -265,7 +265,7 @@ describe("getStepQualityHint", () => {
     const goal = buildSmartGoalFromFormData(data, "learning");
     const result = evaluateSmartGoalQuality(goal);
     const hint = getStepQualityHint("measurable", result, true);
-    expect(hint).toContain("baseline");
+    expect(hint).toContain("mốc hiện tại");
   });
 
   it("returns hint for achievable step without resources", () => {

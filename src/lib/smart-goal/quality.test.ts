@@ -151,7 +151,7 @@ describe("metric có target nhưng không có baseline", () => {
     expect(btDim?.score).toBe(3);
     expect(result.suggestions).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("baseline"),
+        expect.stringContaining("mốc hiện tại"),
       ]),
     );
   });

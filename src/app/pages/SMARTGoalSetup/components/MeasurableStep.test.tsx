@@ -67,6 +67,6 @@ describe("MeasurableStep — intent metric hint", () => {
     );
 
     expect(screen.getByLabelText("Mốc mục tiêu")).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByText("Mục tiêu cần lớn hơn baseline")).toBeInTheDocument();
+    expect(screen.getByText("Mục tiêu cần lớn hơn mốc hiện tại")).toBeInTheDocument();
   });
 });

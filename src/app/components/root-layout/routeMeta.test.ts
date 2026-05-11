@@ -4,9 +4,9 @@ import { getRouteMeta } from "./routeMeta";
 
 describe("route metadata", () => {
   it.each([
-    ["/onboarding", "Onboarding"],
-    ["/life-insight", "Life Insight"],
-    ["/smart-goal-setup", "SMART Goal"],
+    ["/onboarding", "Bắt đầu"],
+    ["/life-insight", "Góc nhìn cuộc sống"],
+    ["/smart-goal-setup", "Mục tiêu SMART"],
     ["/feasibility", "Kiểm tra tính khả thi"],
     ["/12-week-setup", "Thiết lập 12 tuần"],
   ])("uses core-flow metadata for %s", (path, expectedTitle) => {

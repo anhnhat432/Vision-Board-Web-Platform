@@ -27,7 +27,7 @@ describe("PublicVisitorHero", () => {
 
     const scope = within(hero as HTMLElement);
     expect(scope.getByRole("button", { name: /Trải nghiệm demo miễn phí/i })).toBeInTheDocument();
-    expect(scope.getByRole("button", { name: /Lưu workspace bằng tài khoản/i })).toBeInTheDocument();
+    expect(scope.getByRole("button", { name: /Lưu không gian làm việc bằng tài khoản/i })).toBeInTheDocument();
     expect(scope.queryByRole("button", { name: /^Đăng nhập$/i })).not.toBeInTheDocument();
   });
 });

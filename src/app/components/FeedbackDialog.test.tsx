@@ -46,7 +46,7 @@ describe("FeedbackDialog", () => {
     expect(screen.getByRole("button", { name: "Gửi góp ý" })).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: "4 điểm" }));
-    fireEvent.click(screen.getByRole("button", { name: "Today tasks" }));
+    fireEvent.click(screen.getByRole("button", { name: "Việc hôm nay" }));
     fireEvent.change(screen.getByLabelText("Điều gì khó hiểu nhất?"), {
       target: { value: "Không rõ task quan trọng nhất." },
     });
