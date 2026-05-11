@@ -5,7 +5,7 @@ if (!window.matchMedia) {
     writable: true,
     configurable: true,
     value: (query: string): MediaQueryList => ({
-      matches: query.includes("prefers-reduced-motion") ? true : false,
+      matches: query.includes("prefers-reduced-motion"),
       media: query,
       onchange: null,
       addEventListener: () => {},
