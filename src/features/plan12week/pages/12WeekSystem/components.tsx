@@ -4,6 +4,7 @@ import { AlertTriangle, CalendarDays, CheckCircle2, Flame, Loader2, Sparkles, Ta
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
+import { SoftDotsPattern } from "@/app/components/illustrations";
 import { ProductVisual } from "@/app/components/visuals/ProductVisual";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import {
@@ -191,7 +192,8 @@ export function TwelveWeekDashboardHeader({
   const phaseInfo = getHeaderPhaseInfo(currentWeek);
 
   return (
-    <Card className="glass-surface-sm overflow-hidden rounded-[var(--r-tile)] border border-violet-100/80 bg-white/94 shadow-sm ring-1 ring-white/70 sm:rounded-[var(--r-card)]">
+    <Card className="glass-surface-sm relative overflow-hidden rounded-[var(--r-tile)] border border-violet-100/80 bg-white/94 shadow-sm ring-1 ring-white/70 sm:rounded-[var(--r-card)]">
+      <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 hidden w-44 text-violet-500 opacity-25 dark:opacity-15 sm:block" />
       <CardContent className="p-4 sm:p-6 lg:p-7">
         <div className="flex flex-col gap-3 sm:gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0 flex-1 stack-tight">

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
-import { BillingPlusIllustration } from "../components/illustrations";
+import { BillingPlusIllustration, SoftDotsPattern } from "../components/illustrations";
 import { PrimaryActionCard } from "../components/layout/PrimaryActionCard";
 import { SectionBlock } from "../components/layout/SectionBlock";
 import {
@@ -1002,7 +1002,10 @@ export function BillingPlan() {
                 }`}
               >
                 {plan.code !== "FREE" && (
-                  <BillingPlusIllustration className="pointer-events-none absolute -right-8 -top-8 w-28 text-violet-500 opacity-20" />
+                  <>
+                    <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 w-40 text-violet-500 opacity-25" />
+                    <BillingPlusIllustration className="pointer-events-none absolute -right-8 -top-8 w-28 text-violet-500 opacity-20" />
+                  </>
                 )}
                 <div className="flex items-center gap-2">
                   <h3 className="text-lg font-semibold text-slate-900">{plan.name}</h3>

@@ -31,7 +31,12 @@ import { useDashboardPlanLink } from "@/features/dashboard/hooks/useDashboardPla
 import { usePlan12Week } from "@/features/plan12week/hooks";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { FeedbackDialog } from "../components/FeedbackDialog";
-import { EmptyGoalIllustration, HeroOrbitIllustration } from "../components/illustrations";
+import {
+  EmptyGoalIllustration,
+  HeroOrbitIllustration,
+  SoftDotsPattern,
+  WavyDividerIllustration,
+} from "../components/illustrations";
 import { PageHeader } from "../components/layout/PageHeader";
 import { SectionBlock } from "../components/layout/SectionBlock";
 import { NewUserGuideBanner } from "../components/NewUserGuide";
@@ -712,6 +717,7 @@ function DashboardContent({
                 </Button>
               }
             >
+              <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 hidden w-56 text-violet-500 opacity-35 dark:opacity-20 sm:block" />
               <div className="stack-stack">
                 <div className="hidden justify-end xl:flex">
                   <HeroOrbitIllustration className="-mb-10 -mt-12 w-44 text-violet-500 opacity-80" />
@@ -800,6 +806,8 @@ function DashboardContent({
               wheelScore={averageLifeScore}
             />
           </SectionBlock>
+
+          <WavyDividerIllustration className="pointer-events-none -my-4 hidden w-full text-violet-500 opacity-35 dark:opacity-20 sm:block" />
 
           <SectionBlock
             title="Mục tiêu đang chạy"

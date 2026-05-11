@@ -62,6 +62,7 @@ import {
 } from "@/services/syncService";
 import { BACKEND_PLAN_HYDRATION_EVENT_NAME, useBackendPlanHydration } from "../hooks/useBackendPlanHydration";
 import { useTheme } from "../hooks/useTheme";
+import { FooterAuroraIllustration } from "./illustrations";
 import { MotivationalReminder } from "./MotivationalReminder";
 import { NewUserGuideDialog } from "./NewUserGuide";
 import {
@@ -1341,6 +1342,12 @@ export function RootLayout() {
           </div>
           {pageTransitionContent}
         </main>
+
+        {user ? (
+          <div className="pointer-events-none relative z-0 h-32 overflow-hidden text-violet-500" aria-hidden="true">
+            <FooterAuroraIllustration className="absolute inset-x-0 bottom-0 h-full w-full opacity-70 dark:opacity-40" />
+          </div>
+        ) : null}
 
         {user ? (
           <footer className="relative z-10 mx-auto max-w-6xl px-4 pb-24 text-xs text-slate-500 sm:px-6 md:pb-8 lg:px-8">
