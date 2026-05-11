@@ -251,7 +251,7 @@ export function PlanPreview({
         </AccordionItem>
 
         <AccordionItem value="schedule-preview" className={accordionItemClass}>
-          <AccordionTrigger className={accordionTriggerClass}>Schedule preview</AccordionTrigger>
+          <AccordionTrigger className={accordionTriggerClass}>Xem trước lịch</AccordionTrigger>
           <AccordionContent className="space-y-4 pb-5">
             {week1 && (
               <Card>
@@ -348,7 +348,7 @@ export function PlanPreview({
         </AccordionItem>
 
         <AccordionItem value="tactics-list" className={accordionItemClass}>
-          <AccordionTrigger className={accordionTriggerClass}>Tactics list</AccordionTrigger>
+          <AccordionTrigger className={accordionTriggerClass}>Danh sách việc</AccordionTrigger>
           <AccordionContent className="pb-5">
             <div className="space-y-3">
               {draft.leadIndicators.map((indicator: LeadIndicatorDraft, idx: number) => (
