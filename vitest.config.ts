@@ -16,6 +16,12 @@ export default defineConfig({
     css: true,
     testTimeout: 15_000,
     hookTimeout: 15_000,
+    poolOptions: {
+      threads: {
+        maxThreads: 4,
+        minThreads: 1,
+      },
+    },
     exclude: [
       "**/node_modules/**",
       "**/dist/**",
