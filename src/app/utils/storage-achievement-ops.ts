@@ -75,7 +75,7 @@ export function checkAchievementsInData(data: UserData, referenceDate = new Date
   if (data.visionBoards.length === 1) {
     addIfEligible({
       title: "Visionary",
-      description: "Tạo bảng tầm nhìn đầu tiên của bạn",
+      description: "Tạo vision board đầu tiên của bạn",
       icon: "Sparkles",
     });
   }
@@ -83,7 +83,7 @@ export function checkAchievementsInData(data: UserData, referenceDate = new Date
   if (data.reflections.length === 1) {
     addIfEligible({
       title: "Reflective Mind",
-      description: "Viết nhật ký phản tư đầu tiên của bạn",
+      description: "Viết nhật ký nhìn lại đầu tiên của bạn",
       icon: "BookOpen",
     });
   }
@@ -117,7 +117,7 @@ export function checkAchievementsInData(data: UserData, referenceDate = new Date
   if (longestStreak >= 30) {
     addIfEligible({
       title: "Dedicated",
-      description: "30 ngày duy trì viết nhật ký phản tư",
+      description: "30 ngày duy trì viết nhật ký nhìn lại",
       icon: "Flame",
     });
   }

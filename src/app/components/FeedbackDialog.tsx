@@ -25,10 +25,10 @@ const RATING_VALUES: DemoFeedbackRating[] = [1, 2, 3, 4, 5];
 
 const CATEGORY_OPTIONS: Array<{ value: DemoFeedbackCategory; label: string }> = [
   { value: "core_flow", label: "Luồng chính" },
-  { value: "life_balance", label: "Life Balance" },
-  { value: "smart_goal", label: "SMART Goal" },
+  { value: "life_balance", label: "Cân bằng cuộc sống" },
+  { value: "smart_goal", label: "Mục tiêu SMART" },
   { value: "twelve_week_setup", label: "Setup 12 tuần" },
-  { value: "today_tasks", label: "Today tasks" },
+  { value: "today_tasks", label: "Việc hôm nay" },
   { value: "weekly_review", label: "Review tuần" },
   { value: "mock_billing", label: "Nâng cấp Plus" },
   { value: "local_data", label: "Lưu dữ liệu" },
@@ -182,7 +182,7 @@ export function FeedbackDialog({
                 id="demo-feedback-confusing"
                 value={confusingText}
                 maxLength={500}
-                placeholder="Ví dụ: không rõ bước tiếp theo, setup 12 tuần dài, tab Today chưa dễ hiểu..."
+                placeholder="Ví dụ: không rõ bước tiếp theo, Setup 12 tuần dài, tab Hôm nay chưa dễ hiểu..."
                 onChange={(event) => setConfusingText(event.target.value)}
               />
               <p className="text-xs leading-5 text-slate-500">
@@ -198,7 +198,7 @@ export function FeedbackDialog({
                 id="demo-feedback-next-help"
                 value={nextHelpText}
                 maxLength={500}
-                placeholder="Ví dụ: nhắc review tuần, giải thích task ưu tiên, export dữ liệu rõ hơn..."
+                placeholder="Ví dụ: nhắc review tuần, giải thích việc ưu tiên, xuất dữ liệu rõ hơn..."
                 onChange={(event) => setNextHelpText(event.target.value)}
               />
             </div>

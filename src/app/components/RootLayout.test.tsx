@@ -520,11 +520,11 @@ describe("RootLayout onboarding redirect", () => {
     expect(await screen.findByRole("menu")).toBeInTheDocument();
     expect(screen.getByText("Plus")).toBeInTheDocument();
     expect(screen.getByText(/Đồng bộ/)).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: "Settings" })).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: "Quản lý subscription" })).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: "Logout" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Cài đặt" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Quản lý gói" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Đăng xuất" })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("menuitem", { name: "Quản lý subscription" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Quản lý gói" }));
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/billing/plan");
     });

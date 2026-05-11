@@ -137,11 +137,11 @@ const REASON_PRIORITY: PlanRationaleReasonId[] = [
 
 const ARCHETYPE_REASON_TEXT: Record<GoalArchetype, string | null> = {
   skill_learning:
-    "Có ít nhất một việc lặp lại tạo output để bạn đo tiến bộ thật, không chỉ đo giờ học.",
+    "Có ít nhất một việc lặp lại tạo kết quả để bạn đo tiến bộ thật, không chỉ đo giờ học.",
   health_fitness:
     "Nhịp tuần được giữ vừa sức để tránh kiệt sức hoặc chấn thương khi mới bắt đầu.",
   career_growth:
-    "Tập trung vào deliverable bạn kiểm soát được, không phụ thuộc người khác công nhận.",
+    "Tập trung vào kết quả công việc bạn kiểm soát được, không phụ thuộc người khác công nhận.",
   financial_goal:
     "Có hành động lặp lại bạn kiểm soát được, không phụ thuộc thu nhập bất thường.",
   exam_study:
@@ -149,9 +149,9 @@ const ARCHETYPE_REASON_TEXT: Record<GoalArchetype, string | null> = {
   project_completion:
     "Có cột mốc tuần 4 và tuần 8 để biết dự án đang đúng hướng giữa chu kỳ.",
   habit_building:
-    "Tuần 1 đủ nhỏ để xây streak, đặt nền cho thói quen lâu dài.",
+    "Tuần 1 đủ nhỏ để xây chuỗi ngày, đặt nền cho thói quen lâu dài.",
   creative_output:
-    "Ưu tiên cadence xuất bản đều đặn hơn là cố làm hoàn hảo từng tác phẩm.",
+    "Ưu tiên nhịp xuất bản đều đặn hơn là cố làm hoàn hảo từng tác phẩm.",
   relationship_life:
     "Có lịch cố định và việc bạn kiểm soát được, không phụ thuộc 'lúc rảnh thì gặp'.",
   other: null,
@@ -316,7 +316,7 @@ function buildWarnings(
   if (taskCount > ceiling) {
     warnings.push({
       id: "week_one_overloaded",
-      text: `Tuần 1 đang có ${taskCount} việc — nhiều hơn mức khuyên (≤ ${ceiling} với capacity hiện tại). Cân nhắc bỏ bớt 1-2 việc.`,
+      text: `Tuần 1 đang có ${taskCount} việc — nhiều hơn mức khuyên (≤ ${ceiling} với sức chứa hiện tại). Cân nhắc bỏ bớt 1-2 việc.`,
     });
   }
 
@@ -330,7 +330,7 @@ function buildWarnings(
   if (planLoad === "push" && weeklyCapacity === "low") {
     warnings.push({
       id: "load_mismatched_to_capacity",
-      text: "Nhịp 'đẩy nhanh' không khớp capacity tuần thấp — tuần đầu có thể bị quá tải.",
+      text: "Nhịp 'đẩy nhanh' không khớp sức chứa tuần thấp — tuần đầu có thể bị quá tải.",
     });
   }
 

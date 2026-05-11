@@ -290,7 +290,7 @@ export function TwelveWeekTodayTab({
                 Performance Time Blocking
               </p>
               <p className="mt-2 text-sm font-semibold leading-6 sm:text-base">
-                Sắp tới giờ Strategic Block. Đóng tab phụ, chọn 1 việc cốt lõi.
+                Sắp tới giờ Khung chiến lược. Đóng tab phụ, chọn 1 việc cốt lõi.
               </p>
             </div>
             <Badge variant="outline" className="w-fit border-[color:var(--color-success-border)] bg-white text-[color:var(--color-success-fg)]">

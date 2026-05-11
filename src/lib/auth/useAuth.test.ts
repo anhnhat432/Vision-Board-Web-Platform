@@ -5,19 +5,19 @@ import { resolveAuthErrorMessage } from "./useAuth";
 describe("resolveAuthErrorMessage", () => {
   it("explains missing Firebase Authentication setup", () => {
     expect(resolveAuthErrorMessage({ code: "auth/configuration-not-found" })).toContain(
-      "Firebase Authentication chưa được bật",
+      "Đăng nhập hiện chưa sẵn sàng",
     );
   });
 
   it("explains disabled sign-in providers", () => {
     expect(resolveAuthErrorMessage({ code: "auth/operation-not-allowed" })).toContain(
-      "Phương thức đăng nhập này chưa được bật",
+      "Phương thức đăng nhập này chưa sẵn sàng",
     );
   });
 
   it("explains unauthorized Firebase domains", () => {
     expect(resolveAuthErrorMessage({ code: "auth/unauthorized-domain" })).toContain(
-      "Domain hiện tại chưa nằm trong Authorized domains",
+      "Trang này chưa được phép đăng nhập trên tên miền hiện tại",
     );
   });
 

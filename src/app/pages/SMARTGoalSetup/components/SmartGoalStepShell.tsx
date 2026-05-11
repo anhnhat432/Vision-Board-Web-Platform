@@ -204,7 +204,7 @@ export function SmartGoalStepShell({
             </ol>
             <div
               role="progressbar"
-              aria-label="Tiến độ SMART Goal"
+              aria-label="Tiến độ mục tiêu SMART"
               aria-valuemin={1}
               aria-valuemax={totalSteps}
               aria-valuenow={stepIndex + 1}

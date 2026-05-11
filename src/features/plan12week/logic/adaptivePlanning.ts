@@ -7,18 +7,18 @@ export function generateAdaptiveSuggestion(score: number, taskCount: number): st
   const safeTaskCount = normalizeTaskCount(taskCount);
 
   if (score >= 85) {
-    return "Execution is excellent. Increase challenge slightly next week.";
+    return "Việc thực hiện đang rất tốt. Tăng thử thách nhẹ trong tuần tới.";
   }
 
   if (score >= 60) {
-    return "Execution is on track. Keep the current weekly plan.";
+    return "Việc thực hiện đang đúng nhịp. Giữ kế hoạch tuần hiện tại.";
   }
 
   if (score >= 40) {
     return safeTaskCount > 0
-      ? `Execution is at risk. Reduce weekly tasks from ${safeTaskCount} to a lighter load.`
-      : "Execution is at risk. Reduce weekly tasks to a lighter load.";
+      ? `Việc thực hiện đang có rủi ro. Giảm số việc trong tuần từ ${safeTaskCount} xuống mức nhẹ hơn.`
+      : "Việc thực hiện đang có rủi ro. Giảm số việc trong tuần xuống mức nhẹ hơn.";
   }
 
-  return "Execution is critical. Simplify the plan and focus on 1 key task.";
+  return "Việc thực hiện đang rất rủi ro. Rút gọn kế hoạch và tập trung vào 1 việc quan trọng.";
 }

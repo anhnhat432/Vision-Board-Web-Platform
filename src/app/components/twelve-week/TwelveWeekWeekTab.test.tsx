@@ -140,7 +140,7 @@ describe("TwelveWeekWeekTab review flow", () => {
   it("renders WAM answer fields directly", () => {
     render(<TwelveWeekWeekTab {...makeProps()} />);
 
-    expect(screen.getByLabelText(/insight\/learning/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/góc nhìn\/điều học được/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/cam kết của tuần tới/i)).toBeInTheDocument();
     expect(screen.queryByLabelText(/ưu tiên số 1/i)).toBeNull();
   });

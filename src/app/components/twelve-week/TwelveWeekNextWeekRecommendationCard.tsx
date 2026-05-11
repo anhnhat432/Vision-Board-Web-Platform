@@ -25,7 +25,7 @@ const ADJUSTMENT_BADGE_LABEL: Record<NextWeekAdjustment, string> = {
   same: "Giữ nguyên",
   push: "Đẩy thêm",
   reset: "Restart nhẹ",
-  reduce_scope: "Thu hẹp scope",
+  reduce_scope: "Thu hẹp phạm vi",
 };
 
 const ADJUSTMENT_ACCENT: Record<NextWeekAdjustment, string> = {
@@ -117,7 +117,7 @@ export function TwelveWeekNextWeekRecommendationCard({
             )}
             {onOpenTodayTab && (
               <Button size="sm" variant="ghost" onClick={onOpenTodayTab}>
-                Mở Today
+                Mở Hôm nay
               </Button>
             )}
           </div>

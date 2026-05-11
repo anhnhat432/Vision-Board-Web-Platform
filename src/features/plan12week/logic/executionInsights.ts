@@ -303,7 +303,7 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
         "review_missing",
         "warning",
         "Tuần trước chưa có review",
-        "3 phút phản tư cho tuần trước sẽ giúp bạn quyết định nhịp tuần này nhẹ hơn — không cần dài, chỉ cần chốt.",
+        "3 phút nhìn lại tuần trước sẽ giúp bạn quyết định nhịp tuần này nhẹ hơn — không cần dài, chỉ cần chốt.",
         "open_week_review",
         {
           weekNumber: metrics.weekNumber,
@@ -343,7 +343,7 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
         "task_completion_without_progress",
         "warning",
         "Đang làm đều nhưng kim mục tiêu chưa di chuyển",
-        "Bạn xong nhiều việc, nhưng chỉ số chính chưa được cập nhật. Tuần sau hãy gắn việc tuần với output thực sự đẩy chỉ số.",
+        "Bạn xong nhiều việc, nhưng chỉ số chính chưa được cập nhật. Tuần sau hãy gắn việc tuần với kết quả thực sự đẩy chỉ số.",
         "tighten_scope",
         {
           completionPercent: metrics.currentWeekCompletionPercent,
@@ -543,7 +543,7 @@ export function getWeeklyReflectionInsights(
 
 const NEXT_ACTION_LIBRARY: Record<ExecutionInsightNextActionId, Omit<ExecutionInsightNextAction, "id">> = {
   open_today: {
-    label: "Mở Today",
+    label: "Mở Hôm nay",
     hint: "Xem việc đầu tiên hôm nay và bắt đầu nhỏ.",
   },
   open_week_review: {
@@ -559,7 +559,7 @@ const NEXT_ACTION_LIBRARY: Record<ExecutionInsightNextActionId, Omit<ExecutionIn
     hint: "Việc đang giúp bạn tiến bộ — giữ y nguyên cho tuần sau.",
   },
   tighten_scope: {
-    label: "Thu hẹp scope",
+    label: "Thu hẹp phạm vi",
     hint: "Tuần sau chỉ giữ việc thực sự đẩy chỉ số chính.",
   },
   reset_focus: {

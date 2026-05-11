@@ -19,10 +19,10 @@ describe("life insight flow", () => {
     const user = userEvent.setup();
 
     await screen.findByRole("heading", { name: "Chưa có dữ liệu cân bằng cuộc sống" });
-    expect(screen.getByRole("button", { name: "Đi tới Onboarding" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Mở Life Balance" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Đi tới Bắt đầu" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Mở Cân bằng cuộc sống" })).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Đi tới Onboarding" }));
+    await user.click(screen.getByRole("button", { name: "Đi tới Bắt đầu" }));
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/onboarding");
     });
@@ -56,7 +56,7 @@ describe("life insight flow", () => {
     expect(decisionCard).toHaveTextContent("Duy trì 3 buổi vận động mỗi tuần");
     expect(decisionCard).toHaveTextContent("Số buổi vận động mỗi tuần");
 
-    expect(screen.getByTestId("life-insight-primary-cta")).toHaveTextContent("Tạo SMART Goal từ quyết định này");
+    expect(screen.getByTestId("life-insight-primary-cta")).toHaveTextContent("Tạo mục tiêu SMART từ quyết định này");
     await user.click(screen.getByTestId("life-insight-primary-cta"));
 
     await waitFor(() => {
@@ -94,18 +94,18 @@ describe("life insight flow", () => {
     const user = userEvent.setup();
 
     await user.click(await screen.findByTestId("life-insight-primary-cta"));
-    expect(await screen.findByText("Bạn có draft mục tiêu chưa lưu")).toBeInTheDocument();
+    expect(await screen.findByText("Bạn có bản nháp mục tiêu chưa lưu")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Giữ draft" }));
+    await user.click(screen.getByRole("button", { name: "Giữ bản nháp" }));
     await waitFor(() => {
-      expect(screen.queryByText("Bạn có draft mục tiêu chưa lưu")).not.toBeInTheDocument();
+      expect(screen.queryByText("Bạn có bản nháp mục tiêu chưa lưu")).not.toBeInTheDocument();
     });
     expect(router.state.location.pathname).toBe("/life-insight");
     expect(localStorage.getItem(APP_STORAGE_KEYS.pendingSmartGoal)).not.toBeNull();
     expect(localStorage.getItem(APP_STORAGE_KEYS.selectedFocusArea)).toBe("Career");
 
     await user.click(screen.getByTestId("life-insight-primary-cta"));
-    await user.click(await screen.findByRole("button", { name: "Xoá draft và đổi area" }));
+    await user.click(await screen.findByRole("button", { name: "Xoá bản nháp và đổi lĩnh vực" }));
 
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/smart-goal-setup");

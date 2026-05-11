@@ -212,7 +212,7 @@ export function TwelveWeekSetup() {
     } catch (error) {
       console.warn("Pending feasibility result could not be parsed.", error);
       localStorage.removeItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
-      toast.error("Kết quả feasibility cũ không đọc được, làm lại nhanh");
+      toast.error("Kết quả kiểm tra tính khả thi cũ không đọc được, làm lại nhanh");
       navigate("/feasibility");
       setSetupGate("needs_feasibility");
       setIsLoading(false);
@@ -226,7 +226,7 @@ export function TwelveWeekSetup() {
     }
 
     if (isFeasibilityResultStale(parsedFeasibility.savedAt)) {
-      toast.warning("Kết quả feasibility hơi cũ, làm lại để dữ liệu chính xác?", {
+      toast.warning("Kết quả kiểm tra tính khả thi hơi cũ, làm lại để dữ liệu chính xác?", {
         action: {
           label: "Làm lại",
           onClick: () => navigate("/feasibility"),
@@ -501,9 +501,9 @@ export function TwelveWeekSetup() {
       <CoreFlowGateState
         currentStepId="life_balance"
         eyebrow="Thiết lập 12 tuần"
-        title="Hoàn thành Life Balance trước khi tạo kế hoạch 12 tuần"
+        title="Hoàn thành Cân bằng cuộc sống trước khi tạo kế hoạch 12 tuần"
         description="Kế hoạch 12 tuần cần điểm cân bằng thật để biết mục tiêu đang gắn với lĩnh vực nào. Hãy bắt đầu từ đánh giá cân bằng rồi quay lại flow chính."
-        actionLabel="Bắt đầu Life Balance"
+        actionLabel="Bắt đầu Cân bằng cuộc sống"
         onAction={() => navigate("/onboarding")}
         secondaryActionLabel="Về bảng điều khiển"
         onSecondaryAction={() => navigate("/")}
@@ -517,10 +517,10 @@ export function TwelveWeekSetup() {
         currentStepId="life_insight"
         eyebrow="Thiết lập 12 tuần"
         title="Chọn trọng tâm trước khi tạo kế hoạch 12 tuần"
-        description="Bạn cần một trọng tâm hợp lệ từ Life Insight để kế hoạch 12 tuần không bị quá rộng hoặc lệch khỏi dữ liệu cân bằng."
-        actionLabel="Mở Life Insight"
+        description="Bạn cần một trọng tâm hợp lệ từ Góc nhìn cuộc sống để kế hoạch 12 tuần không bị quá rộng hoặc lệch khỏi dữ liệu cân bằng."
+        actionLabel="Mở Góc nhìn cuộc sống"
         onAction={() => navigate("/life-insight")}
-        secondaryActionLabel="Bắt đầu Life Balance"
+        secondaryActionLabel="Bắt đầu Cân bằng cuộc sống"
         onSecondaryAction={() => navigate("/onboarding")}
       />
     );
@@ -531,11 +531,11 @@ export function TwelveWeekSetup() {
       <CoreFlowGateState
         currentStepId="smart_goal"
         eyebrow="Thiết lập 12 tuần"
-        title="Viết SMART Goal trước khi tạo kế hoạch 12 tuần"
-        description="Kế hoạch cần mục tiêu đủ rõ về kết quả, chỉ số và thời hạn. Hoàn thiện SMART Goal trước, sau đó kiểm tra tính khả thi và quay lại thiết lập."
+        title="Viết mục tiêu SMART trước khi tạo kế hoạch 12 tuần"
+        description="Kế hoạch cần mục tiêu đủ rõ về kết quả, chỉ số và thời hạn. Hoàn thiện mục tiêu SMART trước, sau đó kiểm tra tính khả thi và quay lại thiết lập."
         actionLabel="Quay lại viết mục tiêu"
         onAction={() => navigate("/smart-goal-setup")}
-        secondaryActionLabel="Mở Life Insight"
+        secondaryActionLabel="Mở Góc nhìn cuộc sống"
         onSecondaryAction={() => navigate("/life-insight")}
       />
     );

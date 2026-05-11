@@ -44,7 +44,7 @@ describe("ReflectionJournal fresh state", () => {
     expect(screen.queryByText("Tổng số nhật ký")).not.toBeInTheDocument();
     expect(screen.queryByText("Review tuần")).not.toBeInTheDocument();
     expect(screen.queryByText("Tổng số bài")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Bắt đầu Life Balance/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Bắt đầu Cân bằng cuộc sống/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Viết nhật ký tự do/i })).toBeInTheDocument();
   });
 
@@ -52,7 +52,7 @@ describe("ReflectionJournal fresh state", () => {
     const user = userEvent.setup();
     const { router } = renderJournal();
 
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu Life Balance/i }));
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu Cân bằng cuộc sống/i }));
 
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/onboarding");

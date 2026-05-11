@@ -241,7 +241,7 @@ export function TwelveWeekSystemSettings() {
 
   // Cloud version handler (simplified - not functional in settings context)
   const handleUseCloudVersion = () => {
-    toast.info("Tính năng dùng bản cloud chưa được hỗ trợ trong trang cài đặt.");
+    toast.info("Tính năng dùng bản trên tài khoản chưa được hỗ trợ trong trang cài đặt.");
   };
 
   if (!isReady || !activeGoal || !system) {
@@ -313,7 +313,7 @@ export function TwelveWeekSystemSettings() {
       <DataStorageInfo showSyncHint className="mb-6" />
 
       <TabErrorBoundary fallbackTitle="Cài đặt gặp lỗi">
-        <Suspense fallback={<TwelveWeekTabFallback title="Đang mở tab Cài đặt" description="Phần chỉnh nhịp chu kỳ, dữ liệu local và quyền gói đang được tải." />}>
+        <Suspense fallback={<TwelveWeekTabFallback title="Đang mở tab Cài đặt" description="Phần chỉnh nhịp chu kỳ, dữ liệu trên thiết bị và quyền gói đang được tải." />}>
           <WeekEditor
             system={system}
             activeGoalId={activeGoal.id}

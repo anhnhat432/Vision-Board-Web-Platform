@@ -18,26 +18,26 @@ export const GUIDED_PATHS = new Set([
 export const ROUTE_META: RouteMeta[] = [
   {
     match: (pathname: string) => pathname === "/",
-    label: "Bảng điều khiển",
-    title: "Bảng điều khiển – Dear Our Future",
+    label: "Trang chính",
+    title: "Trang chính – Dear Our Future",
     tagline: "Thấy rõ quỹ đạo phát triển của mình, không chỉ những việc cần làm hôm nay.",
   },
   {
     match: (pathname: string) => pathname === "/onboarding",
-    label: "Onboarding",
-    title: "Onboarding – Dear Our Future",
+    label: "Bắt đầu",
+    title: "Bắt đầu – Dear Our Future",
     tagline: "Tạo điểm bắt đầu đủ rõ trước khi chọn trọng tâm và viết mục tiêu.",
   },
   {
     match: (pathname: string) => pathname === "/life-insight",
-    label: "Life Insight",
-    title: "Life Insight – Dear Our Future",
+    label: "Góc nhìn cuộc sống",
+    title: "Góc nhìn cuộc sống – Dear Our Future",
     tagline: "Chọn một trọng tâm từ dữ liệu cân bằng để không bắt đầu quá rộng.",
   },
   {
     match: (pathname: string) => pathname === "/smart-goal-setup",
-    label: "SMART Goal",
-    title: "SMART Goal – Dear Our Future",
+    label: "Mục tiêu SMART",
+    title: "Mục tiêu SMART – Dear Our Future",
     tagline: "Biến trọng tâm thành mục tiêu rõ kết quả, chỉ số, lý do và thời hạn.",
   },
   {
@@ -66,8 +66,8 @@ export const ROUTE_META: RouteMeta[] = [
   },
   {
     match: (pathname: string) => pathname.startsWith("/vision-board"),
-    label: "Bảng tầm nhìn",
-    title: "Bảng tầm nhìn – Dear Our Future",
+    label: "Vision board",
+    title: "Vision board – Dear Our Future",
     tagline: "Dựng tương lai theo cách đủ đẹp để bạn muốn quay lại mỗi ngày.",
   },
   {
@@ -123,7 +123,7 @@ export const ROUTE_META: RouteMeta[] = [
     match: (pathname: string) => pathname.startsWith("/order-status"),
     label: "Trạng thái đơn",
     title: "Trạng thái đơn – Dear Our Future",
-    tagline: "Theo dõi tiến trình đơn kit trong workspace hiện tại.",
+    tagline: "Theo dõi tiến trình đơn kit trong không gian làm việc hiện tại.",
   },
   {
     match: (pathname: string) => pathname.startsWith("/order"),

@@ -64,7 +64,7 @@ export function UpgradePaywallDialog({
   const billingProviderStatus = useMemo(() => getBillingProviderStatus(), []);
   const billingDebugUi = shouldShowBillingDebugUi();
   const demoMode = isDemoMode();
-  const providerLabel = billingProviderStatus.providerLabel || "provider";
+  const providerLabel = billingProviderStatus.providerLabel || "đơn vị thanh toán";
   const upgradeFeatureLabel = paywallCopy.bullets[0] ?? paywallCopy.title;
 
   useEffect(() => {
@@ -210,20 +210,20 @@ export function UpgradePaywallDialog({
                         {billingProviderStatus.mode === "api_contract"
                           ? "API contract"
                           : billingProviderStatus.mode === "mock_provider"
-                            ? "Provider nội bộ"
+                            ? "Đơn vị nội bộ"
                             : "Cục bộ"}
                       </p>
                     </div>
                     <div className="rounded-[var(--r-tile)] border border-white/80 bg-white px-4 py-3">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Thanh toán</p>
                       <p className="mt-2 text-sm font-semibold text-slate-900">
-                        {billingProviderStatus.checkoutReady ? "Sẵn sàng" : "Dự phòng cục bộ"}
+                        {billingProviderStatus.checkoutReady ? "Sẵn sàng" : "Dự phòng trên thiết bị"}
                       </p>
                     </div>
                     <div className="rounded-[var(--r-tile)] border border-white/80 bg-white px-4 py-3">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Khôi phục</p>
                       <p className="mt-2 text-sm font-semibold text-slate-900">
-                        {billingProviderStatus.restoreReady ? "Sẵn sàng" : "Dự phòng cục bộ"}
+                        {billingProviderStatus.restoreReady ? "Sẵn sàng" : "Dự phòng trên thiết bị"}
                       </p>
                     </div>
                   </div>
@@ -261,7 +261,7 @@ export function UpgradePaywallDialog({
                         {!demoMode && (
                           <p className="mt-2 text-sm leading-7 text-slate-600">
                             Nâng cấp {plan.name} để mở khoá {upgradeFeatureLabel.toLowerCase()} — gia hạn theo chu kỳ
-                            thanh toán hàng tháng/năm theo cấu hình provider.
+                            thanh toán hàng tháng/năm theo cấu hình nhà cung cấp.
                           </p>
                         )}
                       </div>

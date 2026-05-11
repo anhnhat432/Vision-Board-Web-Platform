@@ -138,7 +138,7 @@ export function MeasurableStep({
           />
           {targetNotAboveBaseline ? (
             <p id="smart-target-error" className="text-xs font-medium text-rose-700">
-              Mục tiêu cần lớn hơn baseline
+              Mục tiêu cần lớn hơn mốc hiện tại
             </p>
           ) : null}
         </div>

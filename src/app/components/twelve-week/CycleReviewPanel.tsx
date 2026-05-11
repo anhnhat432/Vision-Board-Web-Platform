@@ -45,7 +45,7 @@ export function CycleReviewPanel({
   const sanitizedLessons = sanitizeLessons(lessons);
   const kpis = [
     { label: "Lag cuối cycle", value: `${summary.finalLagPercent}%`, icon: Trophy },
-    { label: "Lead trung bình", value: `${summary.averageLeadScore}%`, icon: BarChart3 },
+    { label: "Việc lặp lại trung bình", value: `${summary.averageLeadScore}%`, icon: BarChart3 },
     { label: "Giữ cam kết", value: `${summary.commitmentsKeptRate}%`, icon: CheckCircle2 },
     { label: "Tuần đạt 85%+", value: `${summary.weeksWith85Plus}/12`, icon: Flag },
   ];
@@ -64,7 +64,7 @@ export function CycleReviewPanel({
         eyebrowClassName="text-white/72"
         title="Cycle 12 tuần đã kết thúc"
         titleAs="h2"
-        description={`Đây là tuần 13: nhìn lại cycle cũ, chốt bài học, rồi chuẩn bị cycle tiếp theo cho mục tiêu ${goal.title}.`}
+        description={`Đây là tuần 13: nhìn lại chu kỳ cũ, chốt bài học, rồi chuẩn bị chu kỳ tiếp theo cho mục tiêu ${goal.title}.`}
         titleClassName="text-2xl font-semibold text-white"
         descriptionClassName="max-w-3xl text-sm leading-7 text-white/78"
         contentClassName="stack-stack"
@@ -90,7 +90,7 @@ export function CycleReviewPanel({
       >
         {aspirationalVisionSummary ? (
           <div className="rounded-[var(--r-control)] border border-white/14 bg-white/10 px-4 py-3 text-sm text-white/82">
-            <p className="font-semibold text-white">Cycle này đã đưa bạn gần hơn với vision 3 năm chưa?</p>
+            <p className="font-semibold text-white">Chu kỳ này đã đưa bạn gần hơn với tầm nhìn 3 năm chưa?</p>
             <p className="mt-1 text-white/72">{aspirationalVisionSummary}</p>
           </div>
         ) : null}
@@ -124,7 +124,7 @@ export function CycleReviewPanel({
                     </li>
                   ))
                 ) : (
-                  <EmptyListItem>Chưa có insight nào được ghi trong 12 review.</EmptyListItem>
+                  <EmptyListItem>Chưa có góc nhìn nào được ghi trong 12 review.</EmptyListItem>
                 )}
               </ul>
             </div>

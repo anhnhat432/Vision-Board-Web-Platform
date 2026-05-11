@@ -60,7 +60,7 @@ describe("TwelveWeekProgressTab", () => {
   it("shows average lead score and completed week count separately", () => {
     render(<TwelveWeekProgressTab {...makeProps()} />);
 
-    expect(screen.getByText("Lead trung bình 80%")).toBeInTheDocument();
+    expect(screen.getByText("Việc lặp lại trung bình 80%")).toBeInTheDocument();
     expect(screen.getByText("Đã hoàn thành 2/12 tuần")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Tại sao 85%?" })).not.toHaveAttribute("title");
   });
@@ -99,7 +99,7 @@ describe("TwelveWeekProgressTab", () => {
         hasReviewedCurrentWeek: false,
         hasAnyTasks: true,
       },
-      "Mở Weekly Review",
+      "Mở review tuần",
     ],
     [
       "review completed",
@@ -135,7 +135,7 @@ describe("TwelveWeekProgressTab", () => {
         hasReviewedCurrentWeek: false,
         hasAnyTasks: false,
       },
-      "Hoàn tất setup ở Settings",
+      "Hoàn tất setup trong Cài đặt",
     ],
   ])("maps next action for %s", (_caseName, input, expectedLabel) => {
     expect(getProgressNextActionSuggestion(input).label).toBe(expectedLabel);

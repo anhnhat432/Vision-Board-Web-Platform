@@ -196,13 +196,13 @@ function createSnapshot(
   const message =
     status === "success"
       ? counter.syncedCount > 0
-        ? `Đã đồng bộ ${counter.syncedCount} mục 12-week lên backend.`
-        : "Backend đã sẵn sàng, chưa có mục 12-week mới cần đẩy lên."
+        ? `Đã đồng bộ ${counter.syncedCount} mục 12 tuần lên máy chủ.`
+        : "Máy chủ đã sẵn sàng, chưa có mục 12 tuần mới cần gửi lên."
       : status === "partial" && counter.conflictCount > 0
         ? `Đã đồng bộ ${counter.syncedCount} mục, ${counter.conflictCount} mục bị xung đột (đã được cập nhật từ thiết bị khác).`
         : counter.failedCount > 0
           ? `Đã đồng bộ ${counter.syncedCount} mục, còn ${counter.failedCount} mục cần thử lại.`
-          : "Chưa thể đồng bộ dữ liệu 12-week lên backend. Dữ liệu local vẫn được giữ nguyên.";
+          : "Chưa thể đồng bộ dữ liệu 12 tuần lên máy chủ. Dữ liệu trên thiết bị vẫn được giữ nguyên.";
 
   return {
     at: new Date().toISOString(),
@@ -663,21 +663,21 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
       case "task_completed": {
         const taskPayload = payload as { taskId: string; completed: boolean };
         const result = await syncTaskToggleNow(taskPayload.taskId, taskPayload.completed);
-        if (!result) throw new Error("Task sync failed");
+        if (!result) throw new Error("Không đồng bộ được việc");
         return true;
       }
 
       case "daily_checkin": {
         const checkinPayload = payload as { weekNumber: number; date: string; didWorkToday: boolean };
         const result = await syncDailyCheckInNow(checkinPayload);
-        if (!result) throw new Error("Daily check-in sync failed");
+        if (!result) throw new Error("Không đồng bộ được check-in hôm nay");
         return true;
       }
 
       case "weekly_review": {
         const reviewPayload = payload as { weekNumber: number; executionScore: number; reflection?: string; adjustments?: string };
         const result = await syncWeeklyReviewNow(reviewPayload);
-        if (!result) throw new Error("Weekly review sync failed");
+        if (!result) throw new Error("Không đồng bộ được review tuần");
         return true;
       }
 

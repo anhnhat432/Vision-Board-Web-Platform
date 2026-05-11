@@ -61,7 +61,7 @@ export function SettingsPage() {
 
   const handleAccountExport = async () => {
     if (!isConfigured || !user) {
-      toast.error("Bạn cần đăng nhập để xuất dữ liệu tài khoản trên cloud.");
+      toast.error("Bạn cần đăng nhập để xuất dữ liệu tài khoản trên đám mây.");
       return;
     }
 
@@ -99,7 +99,7 @@ export function SettingsPage() {
 
       saveUserData(parsed);
       reloadUserData();
-      toast.success("Đã nhập dữ liệu. Dashboard sẽ dùng dữ liệu mới.");
+      toast.success("Đã nhập dữ liệu. Trang chính sẽ dùng dữ liệu mới.");
     };
     reader.onerror = () => toast.error("Không đọc được file.");
     reader.readAsText(file);
@@ -157,7 +157,7 @@ export function SettingsPage() {
               <User2 className="h-4 w-4 text-slate-500" />
               Tài khoản
             </CardTitle>
-            <CardDescription>Thông tin đăng nhập hiện tại của workspace này.</CardDescription>
+            <CardDescription>Thông tin đăng nhập hiện tại của không gian làm việc này.</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="truncate text-sm font-semibold text-slate-900">{accountLabel}</p>

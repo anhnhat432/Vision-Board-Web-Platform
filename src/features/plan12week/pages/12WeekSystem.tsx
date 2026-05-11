@@ -121,7 +121,7 @@ const TWELVE_WEEK_SECTION_TABS = [
 function getExecutionPhaseInfo(currentWeek: number) {
   if (currentWeek <= 4) {
     return {
-      label: "Ramp",
+      label: "Khởi động",
       badgeClassName:
         "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/30 dark:bg-violet-950/35 dark:text-violet-200",
       textClassName: "text-violet-700 dark:text-violet-200",
@@ -131,7 +131,7 @@ function getExecutionPhaseInfo(currentWeek: number) {
 
   if (currentWeek <= 8) {
     return {
-      label: "Peak",
+      label: "Bứt phá",
       badgeClassName:
         "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700 dark:border-fuchsia-500/30 dark:bg-fuchsia-950/35 dark:text-fuchsia-200",
       textClassName: "text-fuchsia-700 dark:text-fuchsia-200",
@@ -140,7 +140,7 @@ function getExecutionPhaseInfo(currentWeek: number) {
   }
 
   return {
-    label: "Harvest",
+    label: "Thu hoạch",
     badgeClassName:
       "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/35 dark:text-emerald-200",
     textClassName: "text-emerald-700 dark:text-emerald-200",
@@ -790,9 +790,9 @@ export function TwelveWeekSystem() {
     return (
       <TwelveWeekDashboardState
         kind="loading"
-        eyebrow="Đang chuẩn bị dashboard"
+        eyebrow="Đang chuẩn bị Trang chính"
         title="Đang tải hệ thống 12 tuần"
-        description="Mình đang đọc dữ liệu local và kiểm tra trạng thái chu kỳ hiện tại trước khi mở hàng việc hôm nay."
+        description="Mình đang đọc dữ liệu trên thiết bị và kiểm tra trạng thái chu kỳ hiện tại trước khi mở hàng việc hôm nay."
       />
     );
   }
@@ -807,8 +807,8 @@ export function TwelveWeekSystem() {
       >
         <div className="mx-auto mt-8 grid max-w-3xl gap-3 text-left sm:grid-cols-3">
           {[
-            "Chọn lĩnh vực ưu tiên từ Life Insight.",
-            "Viết SMART goal và kiểm tra tính thực tế.",
+            "Chọn lĩnh vực ưu tiên từ Góc nhìn cuộc sống.",
+            "Viết mục tiêu SMART và kiểm tra tính thực tế.",
             "Chốt việc giữ nhịp, chỉ số và ngày review tuần.",
           ].map((item, index) => (
             <div key={item} className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
@@ -863,15 +863,15 @@ export function TwelveWeekSystem() {
       <AlertDialog open={isClearLocalDialogOpen} onOpenChange={setIsClearLocalDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xóa dấu vết local trên thiết bị này?</AlertDialogTitle>
+            <AlertDialogTitle>Xóa dấu vết trên thiết bị này?</AlertDialogTitle>
             <AlertDialogDescription>
-              Hành động này chỉ xóa nhật ký sự kiện, outbox và trạng thái nhắc việc local. Mục tiêu, review tuần, nhật
+              Hành động này chỉ xóa nhật ký sự kiện, hàng chờ gửi và trạng thái nhắc việc trên thiết bị. Mục tiêu, review tuần, nhật
               ký và vision board của bạn vẫn được giữ nguyên.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Giữ lại</AlertDialogCancel>
-            <AlertDialogAction onClick={handleClearLocalSignals}>Xóa dấu vết local</AlertDialogAction>
+            <AlertDialogAction onClick={handleClearLocalSignals}>Xóa dấu vết trên thiết bị</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -911,9 +911,9 @@ export function TwelveWeekSystem() {
           title="Chu kỳ này chưa có việc hoặc chỉ số đủ rõ"
           description={
             planHasNoLeadMetrics
-              ? "Dashboard đã thấy kế hoạch, nhưng chưa có việc giữ nhịp để tạo hàng việc mỗi tuần. Hãy tạo lại chu kỳ từ flow mục tiêu để có việc và review rõ ràng."
+              ? "Trang chính đã thấy kế hoạch, nhưng chưa có việc lặp lại trong tuần để tạo hàng việc mỗi tuần. Hãy tạo lại chu kỳ từ luồng mục tiêu để có việc và review rõ ràng."
               : planHasNoTasks
-                ? "Kế hoạch đã có việc giữ nhịp nhưng chưa có việc nào trong chu kỳ. Hãy kiểm tra lại setup hoặc tạo lại chu kỳ để dashboard có hàng việc hôm nay."
+                ? "Kế hoạch đã có việc lặp lại trong tuần nhưng chưa có việc nào trong chu kỳ. Hãy kiểm tra lại setup hoặc tạo lại chu kỳ để Trang chính có hàng việc hôm nay."
                 : "Chỉ số kết quả chính đang trống, nên phần tiến độ và review sẽ khó hiểu hơn. Hãy bổ sung chỉ số khi chỉnh lại chu kỳ."
           }
         >
@@ -933,7 +933,7 @@ export function TwelveWeekSystem() {
       {hasBackendSyncIssue && (
         <TwelveWeekDashboardNotice
           tone="error"
-          title="Chưa thể đồng bộ backend"
+          title="Chưa thể đồng bộ với máy chủ"
           description={`${backendSyncIssueMessage} Các thay đổi hiện tại vẫn được giữ trên thiết bị này.`}
         >
           <Button
@@ -1202,7 +1202,7 @@ export function TwelveWeekSystem() {
               fallback={
                 <TwelveWeekTabFallback
                   title="Đang mở cài đặt chu kỳ"
-                  description="Phần chỉnh nhịp chu kỳ, dữ liệu local và quyền gói đang được tải."
+                  description="Phần chỉnh nhịp chu kỳ, dữ liệu trên thiết bị và quyền gói đang được tải."
                 />
               }
             >

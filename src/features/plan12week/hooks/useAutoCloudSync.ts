@@ -329,7 +329,7 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
       const result: TwelveWeekManualCloudSyncResult = {
         status: "skipped",
         skipReason: "offline",
-        message: "Dang offline. Hang cho thay doi se duoc gui khi ket noi lai.",
+        message: "Đang mất mạng. Hàng chờ thay đổi sẽ được gửi khi kết nối lại.",
       };
       setLastResult(result);
       refreshPendingCount();

@@ -287,7 +287,7 @@ export const CORE_FUNNEL_SCENARIOS: CoreFunnelScenario[] = [
       maxTasksPerTactic: 2,
       week1TaskCount: 6,
       week1TaskCountInRecommendedRange: false,
-      weeklyTaskWarning: "Khuyen nghi moi tuan chi nen co 3-5 task. Ban dang vuot qua 5 task.",
+      weeklyTaskWarning: "Khuyến nghị mỗi tuần chỉ nên có 3-5 việc. Bạn đang vượt quá 5 việc.",
       expectedLeadIndicatorCount: 4,
     },
     knownLimitations: [

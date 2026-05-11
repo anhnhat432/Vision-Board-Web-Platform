@@ -4,11 +4,11 @@ import type { PricingPlanDefinition, TwelveWeekTemplateDefinition } from "./type
 export const PLAN_DEFINITIONS: PricingPlanDefinition[] = [
   {
     code: "FREE",
-    name: "Free",
-    shortLabel: "Free",
+    name: "Miễn phí",
+    shortLabel: "Miễn phí",
     priceLabel: "0đ",
     description: "Đủ để bạn chạy một chu kỳ 12 tuần hoàn chỉnh và biết hôm nay cần làm gì.",
-    highlights: ["1 chu kỳ 12 tuần", "Today queue + check-in", "Review tuần cơ bản"],
+    highlights: ["1 chu kỳ 12 tuần", "Danh sách Hôm nay + check-in", "Review tuần cơ bản"],
   },
   {
     code: "PLUS",
@@ -18,8 +18,8 @@ export const PLAN_DEFINITIONS: PricingPlanDefinition[] = [
     description: "Lớp Plus cho người muốn setup nhanh, giữ nhịp đều và có gợi ý review tuần sau.",
     highlights: [
       "Khung gợi ý thích nghi theo kiểu mục tiêu",
-      "Review premium với gợi ý tuần sau",
-      "Nhắc việc ưu tiên + analytics nâng cao",
+      "Review Plus với gợi ý tuần sau",
+      "Nhắc việc ưu tiên + phân tích nâng cao",
     ],
   },
 ];
@@ -34,7 +34,7 @@ export const TWELVE_WEEK_TEMPLATE_CATALOG: TwelveWeekTemplateDefinition[] = [
   {
     id: "steady-focus-reset",
     name: "Quay lại nhịp gọn",
-    subtitle: "Khung gợi ý Free",
+    subtitle: "Khung gợi ý miễn phí",
     description: "Dành cho lúc bạn cần cắt loãng, quay lại nhịp và làm ít nhưng chắc.",
     bestFor: "Lúc bạn vừa bị rơi nhịp, đang ôm quá tay, hoặc muốn một chu kỳ thật gọn để quay lại.",
     whyItWorks: "Khung này thắng bằng độ đều. Bạn chỉ giữ vài nhịp lặp đơn giản nên rất khó vỡ tuần đầu.",
@@ -60,13 +60,13 @@ export const TWELVE_WEEK_TEMPLATE_CATALOG: TwelveWeekTemplateDefinition[] = [
   {
     id: "study-sprint-basics",
     name: "Đều và bền",
-    subtitle: "Khung gợi ý Free",
+    subtitle: "Khung gợi ý miễn phí",
     description: "Khi mục tiêu cần tiến đều từng tuần, không cần nước rút mạnh nhưng phải tích lũy thật.",
     bestFor: "Khi bạn muốn giữ nhịp bền, không cần tăng tốc mạnh nhưng vẫn phải thấy tiến triển đều.",
     whyItWorks: "Khung này cân giữa tiến độ chính và một vòng rà lại nhẹ, nên tuần nào cũng có bước tiến thật.",
     firstWeekWin: "Tuần đầu đã có nhịp tiến độ chính, nhịp rà lại và một review tuần rất nhẹ để giữ đều.",
     idealFor: ["Xây thói quen", "Tích lũy từng tuần", "Muốn tiến đều"],
-    goalType: "Habit Building",
+    goalType: "Xây thói quen",
     reviewDay: "Sunday",
     requiredPlan: null,
     accent: "sky",
@@ -90,10 +90,10 @@ export const TWELVE_WEEK_TEMPLATE_CATALOG: TwelveWeekTemplateDefinition[] = [
     name: "Ít nhưng phải ra đầu ra",
     subtitle: "Khung gợi ý Plus",
     description: "Khung Plus cho mục tiêu cần tạo đầu ra rõ mỗi tuần, không chỉ bận mà không tiến.",
-    bestFor: "Khi bạn cần mỗi tuần phải có thứ gì đó được ship, nộp, đăng, gửi hoặc hoàn thành.",
+    bestFor: "Khi bạn cần mỗi tuần phải có thứ gì đó được hoàn tất, nộp, đăng, gửi hoặc hoàn thành.",
     whyItWorks: "Mọi tactic đều bị kéo về một đầu ra chính, nên tuần không bị nuốt bởi việc phụ.",
-    firstWeekWin: "Tuần đầu đã có slot tạo đầu ra, slot hoàn thiện và một nhịp follow-up nhẹ để đóng vòng.",
-    idealFor: ["Ra đầu ra", "Ship dự án", "Chốt deliverable"],
+    firstWeekWin: "Tuần đầu đã có slot tạo đầu ra, slot hoàn thiện và một nhịp theo dõi nhẹ để đóng vòng.",
+    idealFor: ["Ra đầu ra", "Hoàn tất dự án", "Chốt phần việc"],
     goalType: "Project Completion",
     reviewDay: "Friday",
     requiredPlan: "PLUS",
@@ -109,7 +109,7 @@ export const TWELVE_WEEK_TEMPLATE_CATALOG: TwelveWeekTemplateDefinition[] = [
     tactics: [
       { name: "Tạo bản nháp hoặc phiên bản đầu", target: "2", unit: "phiên/tuần", type: "core", cadence: "frontload" },
       { name: "Hoàn thiện để chốt đầu ra", target: "2", unit: "phiên/tuần", type: "core", cadence: "backload" },
-      { name: "Follow-up hoặc công bố", target: "1", unit: "lần/tuần", type: "optional", cadence: "spread" },
+      { name: "Theo dõi tiếp hoặc công bố", target: "1", unit: "lần/tuần", type: "optional", cadence: "spread" },
     ],
   },
   {
@@ -195,7 +195,7 @@ export const TWELVE_WEEK_TEMPLATE_CATALOG: TwelveWeekTemplateDefinition[] = [
     successEvidence: "Bạn ngồi vào buổi học là biết ngay hôm nay sẽ nắm thêm phần nào và kiểm tra bằng cách nào.",
     tactics: [
       { name: "Buổi học chủ động mới", target: "3", unit: "buổi/tuần", type: "core", cadence: "spread" },
-      { name: "Ôn và consolidate", target: "2", unit: "lần/tuần", type: "core", cadence: "backload" },
+      { name: "Ôn và củng cố", target: "2", unit: "lần/tuần", type: "core", cadence: "backload" },
       {
         name: "Kiểm tra mức hiểu (quiz/flashcard)",
         target: "1",

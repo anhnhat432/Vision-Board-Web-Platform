@@ -292,7 +292,7 @@ describe("hydrateTwelveWeekPlansFromBackend", () => {
         planId: "plan_1",
       }),
     );
-    expect(result.message).toBe("1 local/backend differences need review.");
+    expect(result.message).toBe("1 khác biệt giữa thiết bị và máy chủ cần xem lại.");
     expect(getUserData().goals).toHaveLength(1);
   });
 

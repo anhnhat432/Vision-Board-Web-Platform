@@ -298,10 +298,10 @@ describe("TwelveWeekSetup ReviewStep — accordion", () => {
       />,
     );
 
-    const outcome = screen.getByRole("button", { name: "Outcome summary" });
-    const indicators = screen.getByRole("button", { name: "Lead indicators preview" });
-    const schedule = screen.getByRole("button", { name: "Schedule preview" });
-    const tactics = screen.getByRole("button", { name: "Tactics list" });
+    const outcome = screen.getByRole("button", { name: "Tóm tắt kết quả" });
+    const indicators = screen.getByRole("button", { name: "Xem trước việc lặp lại" });
+    const schedule = screen.getByRole("button", { name: "Xem trước lịch" });
+    const tactics = screen.getByRole("button", { name: "Danh sách việc" });
 
     expect(outcome).toHaveAttribute("aria-expanded", "false");
     expect(indicators).toHaveAttribute("aria-expanded", "false");
@@ -338,7 +338,7 @@ describe("TwelveWeekSetup ReviewStep — accordion", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: "Outcome summary" })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("button", { name: "Tóm tắt kết quả" })).toHaveAttribute("aria-expanded", "true");
   });
 });
 
@@ -358,10 +358,10 @@ describe("TwelveWeekSetup PlanPreview — accordion", () => {
       />,
     );
 
-    const outcome = screen.getByRole("button", { name: "Outcome summary" });
-    const indicators = screen.getByRole("button", { name: "Lead indicators preview" });
-    const schedule = screen.getByRole("button", { name: "Schedule preview" });
-    const tactics = screen.getByRole("button", { name: "Tactics list" });
+    const outcome = screen.getByRole("button", { name: "Tóm tắt kết quả" });
+    const indicators = screen.getByRole("button", { name: "Xem trước việc lặp lại" });
+    const schedule = screen.getByRole("button", { name: "Xem trước lịch" });
+    const tactics = screen.getByRole("button", { name: "Danh sách việc" });
 
     expect(outcome).toHaveAttribute("aria-expanded", "false");
     expect(indicators).toHaveAttribute("aria-expanded", "false");
@@ -390,7 +390,7 @@ describe("TwelveWeekSetup PlanPreview — accordion", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: "Outcome summary" })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("button", { name: "Tóm tắt kết quả" })).toHaveAttribute("aria-expanded", "true");
   });
 });
 

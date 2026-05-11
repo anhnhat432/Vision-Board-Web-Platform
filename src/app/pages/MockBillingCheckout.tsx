@@ -96,7 +96,7 @@ export function MockBillingCheckout() {
                 className="border-white/18 bg-white/10 text-white hover:bg-white/18"
                 onClick={() => navigate("/")}
               >
-                Về bảng điều khiển
+                Về Trang chính
               </Button>
             </div>
           </CardContent>
@@ -130,7 +130,7 @@ export function MockBillingCheckout() {
           <div className="stack-stack">
             <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/78">
               <CreditCard className="h-3.5 w-3.5" />
-              Checkout dùng thử
+              Thanh toán dùng thử
             </div>
             <div>
               <h1 className="text-4xl font-bold tracking-normal">Xác nhận mở gói {plan.name}</h1>

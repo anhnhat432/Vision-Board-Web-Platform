@@ -574,7 +574,7 @@ export function RootLayout() {
   const accountEmail = user?.email || userProfile?.email || "";
   const currentAccountPlanCode = getCurrentPlan(guideUserData);
   const accountPlanLabel =
-    currentAccountPlanCode === "PRO" ? "Pro" : currentAccountPlanCode === "PLUS" ? "Plus" : "Free";
+    currentAccountPlanCode === "PRO" ? "Pro" : currentAccountPlanCode === "PLUS" ? "Plus" : "Miễn phí";
   const accountAvatarLabel = (accountLabel || accountEmail || "A").trim().slice(0, 1).toUpperCase();
   const accountStatus = userProfileError ? "Lỗi hồ sơ" : accountEmail || "Tài khoản đã đăng nhập";
   const canRetryUserProfile = Boolean(user) && !userProfileLoading && (!userProfile || Boolean(userProfileError));
@@ -628,7 +628,9 @@ export function RootLayout() {
                 {accountAvatarLabel}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Account info</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                  Thông tin tài khoản
+                </p>
                 <p className="mt-1 truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
                   {accountEmail || accountLabel}
                 </p>
@@ -650,14 +652,14 @@ export function RootLayout() {
             onSelect={() => navigateAppRoute("/settings")}
           >
             <Settings2 className="h-4 w-4" />
-            Settings
+            Cài đặt
           </DropdownMenuItem>
           <DropdownMenuItem
             className="rounded-[var(--r-control)] px-3 py-2"
             onSelect={() => navigateAppRoute("/billing/plan")}
           >
             <CreditCard className="h-4 w-4" />
-            Quản lý subscription
+            Quản lý gói
           </DropdownMenuItem>
           <DropdownMenuSeparator className="bg-slate-100" />
           <DropdownMenuItem
@@ -668,7 +670,7 @@ export function RootLayout() {
             }}
           >
             <LogOut className="h-4 w-4" />
-            Logout
+            Đăng xuất
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -705,7 +707,7 @@ export function RootLayout() {
     : !user
       ? "Bạn cần đăng nhập trước khi kiểm tra dữ liệu tài khoản."
       : !isApiBaseUrlConfigured()
-        ? "Kết nối tài khoản chưa được cấu hình cho workspace này."
+        ? "Kết nối tài khoản chưa được cấu hình cho không gian làm việc này."
         : !shouldEnable12WeekImportDryRun()
           ? "Kiểm tra dữ liệu trước khi đồng bộ chưa được bật."
           : undefined;
@@ -728,7 +730,7 @@ export function RootLayout() {
     if (!isApiBaseUrlConfigured()) {
       return {
         status: "skipped",
-        message: "Kết nối tài khoản chưa được cấu hình cho workspace này.",
+        message: "Kết nối tài khoản chưa được cấu hình cho không gian làm việc này.",
       };
     }
 
@@ -793,7 +795,7 @@ export function RootLayout() {
     : !user
       ? "Bạn cần đăng nhập trước khi nhập dữ liệu tài khoản."
       : !isApiBaseUrlConfigured()
-        ? "Kết nối tài khoản chưa được cấu hình cho workspace này."
+        ? "Kết nối tài khoản chưa được cấu hình cho không gian làm việc này."
         : !shouldEnable12WeekCloudImport()
           ? "Đồng bộ dữ liệu tài khoản chưa được bật."
           : undefined;
@@ -821,7 +823,7 @@ export function RootLayout() {
     if (!isApiBaseUrlConfigured()) {
       return {
         status: "skipped",
-        message: "Kết nối tài khoản chưa được cấu hình cho workspace này.",
+        message: "Kết nối tài khoản chưa được cấu hình cho không gian làm việc này.",
       };
     }
 
@@ -974,7 +976,7 @@ export function RootLayout() {
             >
               <HardDrive className="mr-1 inline h-3 w-3 align-text-bottom" />
               Bản dùng thử đang lưu dữ liệu trên trình duyệt này. Có thể bấm{" "}
-              <span className="font-semibold">Tạm thoát</span> bất kỳ lúc nào để quay lại bảng điều khiển.
+              <span className="font-semibold">Tạm thoát</span> bất kỳ lúc nào để quay lại Trang chính.
             </div>
           ) : null}
           <main id="main-content" className="relative z-10" aria-label="Nội dung trang">

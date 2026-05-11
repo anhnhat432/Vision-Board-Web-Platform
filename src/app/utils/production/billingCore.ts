@@ -60,9 +60,9 @@ export function getProviderLabel(mode: BillingProviderMode): string {
 
   switch (mode) {
     case "api_contract":
-      return "Billing provider";
+      return "Nhà cung cấp thanh toán";
     case "mock_provider":
-      return "Mock provider";
+      return "Nhà cung cấp giả lập";
     default:
       return "Local test";
   }

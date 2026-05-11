@@ -26,7 +26,7 @@ function getLeadScore(goal: Goal) {
 
 function getWeekLabel(goal: Goal) {
   const system = goal.twelveWeekSystem;
-  if (!system) return "Chưa vào cycle";
+  if (!system) return "Chưa vào chu kỳ";
 
   return `Tuần ${getTwelveWeekCurrentWeek(system)}/${system.totalWeeks}`;
 }
@@ -64,7 +64,7 @@ export function DashboardActiveGoalsList({
 
                 <div className="mt-[var(--space-stack)] stack-tight">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-muted-foreground">Lead score tuần này</span>
+                    <span className="font-medium text-muted-foreground">Điểm việc lặp lại tuần này</span>
                     <span className="font-semibold text-foreground">{leadScore}%</span>
                   </div>
                   <Progress value={leadScore} className="h-2 bg-slate-100" />
@@ -88,7 +88,7 @@ export function DashboardActiveGoalsList({
         <div className="rounded-[var(--r-card)] bg-white/92 p-5 ring-1 ring-slate-200/70 dark:bg-slate-900/70 dark:ring-slate-700">
           <p className="font-semibold text-foreground">Chưa có mục tiêu đang chạy.</p>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
-            Dashboard sẽ gọn hơn sau khi bạn chọn một mục tiêu và tạo cycle 12 tuần đầu tiên.
+            Trang chính sẽ gọn hơn sau khi bạn chọn một mục tiêu và tạo chu kỳ 12 tuần đầu tiên.
           </p>
         </div>
       )}
@@ -99,7 +99,7 @@ export function DashboardActiveGoalsList({
         className="w-full justify-center border-border bg-white text-foreground hover:bg-muted sm:w-auto dark:bg-slate-900"
         onClick={onAddGoal}
         disabled={isAtLimit}
-        title={isAtLimit ? "Đã đạt giới hạn 3 goals/cycle (theo 12 Week Year)" : "Thêm mục tiêu vào cycle"}
+        title={isAtLimit ? "Đã đạt giới hạn 3 mục tiêu/chu kỳ (theo 12 Week Year)" : "Thêm mục tiêu vào chu kỳ"}
       >
         <Plus className="h-4 w-4" />
         Thêm mục tiêu ({Math.min(goals.length, maxGoals)}/{maxGoals})

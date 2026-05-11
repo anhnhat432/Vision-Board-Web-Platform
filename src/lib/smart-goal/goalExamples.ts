@@ -70,12 +70,12 @@ const GOAL_EXAMPLES: Record<GoalArchetype, ArchetypeExample> = {
     archetype: "career_growth",
     weakGoal: "Thăng chức trong 3 tháng tới.",
     strongerGoal:
-      "Trong 12 tuần, hoàn thành 2 deliverable lớn của vai trò hiện tại và đặt 6 buổi 1:1 với mentor để xin feedback định kỳ.",
-    goodMetric: "Số deliverable hoàn thành (2 trong 12 tuần) và số buổi 1:1 đã xin feedback.",
+      "Trong 12 tuần, hoàn thành 2 kết quả công việc lớn của vai trò hiện tại và đặt 6 buổi 1:1 với mentor để xin góp ý định kỳ.",
+    goodMetric: "Số kết quả công việc đã hoàn thành (2 trong 12 tuần) và số buổi 1:1 đã xin góp ý.",
     badMetric: "Có được thăng chức (kết quả người khác quyết, không kiểm soát được).",
-    goodLeadIndicator: "Block 2 buổi 90 phút deep work mỗi tuần để đẩy deliverable.",
+    goodLeadIndicator: "Giữ 2 khung 90 phút làm sâu mỗi tuần để đẩy kết quả công việc.",
     badLeadIndicator: "Được sếp công nhận (kết quả phụ thuộc người khác).",
-    week1StarterTask: "Block 60 phút trên lịch thứ Tư và viết 5 dòng scope cho deliverable đầu tiên.",
+    week1StarterTask: "Giữ 60 phút trên lịch thứ Tư và viết 5 dòng phạm vi cho kết quả công việc đầu tiên.",
   },
 
   financial_goal: {
@@ -94,32 +94,32 @@ const GOAL_EXAMPLES: Record<GoalArchetype, ArchetypeExample> = {
     archetype: "exam_study",
     weakGoal: "Đạt IELTS 7.0 thật sớm.",
     strongerGoal:
-      "Trong 12 tuần, hoàn thành 8 đề thi thử IELTS đầy đủ, tăng điểm Reading + Listening lên ít nhất 0.5 band so với baseline tuần 1.",
+      "Trong 12 tuần, hoàn thành 8 đề thi thử IELTS đầy đủ, tăng điểm Reading + Listening lên ít nhất 0.5 band so với mốc hiện tại tuần 1.",
     goodMetric: "Số đề thi thử đã hoàn thành và điểm trung bình Reading + Listening qua từng tuần.",
-    badMetric: "Đạt band 7.0 (band score là metric phi tuyến — hãy đo qua đề thi thử thay).",
+    badMetric: "Đạt band 7.0 (mức điểm band là chỉ số phi tuyến — hãy đo qua đề thi thử thay).",
     goodLeadIndicator: "Làm 1 đề thi thử Reading hoặc Listening đầy đủ, 2 buổi mỗi tuần.",
     badLeadIndicator: "Học chăm hơn (mơ hồ, không đo được).",
-    week1StarterTask: "Làm 1 phần Reading 30 phút từ đề mẫu vào tối thứ Ba và ghi điểm baseline.",
+    week1StarterTask: "Làm 1 phần Reading 30 phút từ đề mẫu vào tối thứ Ba và ghi điểm mốc hiện tại.",
   },
 
   project_completion: {
     archetype: "project_completion",
     weakGoal: "Ra mắt MVP trong 3 tháng.",
     strongerGoal:
-      "Trong 12 tuần, ship 4 milestone của MVP (scope rõ ở tuần 1) và có ít nhất 5 buổi feedback với người dùng thật.",
-    goodMetric: "Số milestone đã ship và số buổi phỏng vấn người dùng đã hoàn thành.",
+      "Trong 12 tuần, hoàn tất 4 cột mốc của MVP (phạm vi rõ ở tuần 1) và có ít nhất 5 buổi góp ý với người dùng thật.",
+    goodMetric: "Số cột mốc đã hoàn tất và số buổi phỏng vấn người dùng đã hoàn thành.",
     badMetric: "Sản phẩm thành công (kết quả thị trường, không kiểm soát được trong 12 tuần).",
-    goodLeadIndicator: "Ship 1 deliverable nhỏ thuộc milestone hiện tại, 2 buổi mỗi tuần.",
+    goodLeadIndicator: "Hoàn tất 1 phần việc nhỏ thuộc cột mốc hiện tại, 2 buổi mỗi tuần.",
     badLeadIndicator: "Có nhiều người dùng (kết quả cuối, phụ thuộc thị trường).",
-    week1StarterTask: "Viết scope document 5-10 dòng cho milestone 1 và post lên Notion/doc nội bộ.",
+    week1StarterTask: "Viết tài liệu phạm vi 5-10 dòng cho cột mốc 1 và đăng lên Notion/tài liệu nội bộ.",
   },
 
   habit_building: {
     archetype: "habit_building",
     weakGoal: "Tập thiền đều đặn để bớt căng thẳng.",
     strongerGoal:
-      "Trong 12 tuần, thiền 5 phút mỗi sáng sau khi đánh răng, tối thiểu 5 ngày/tuần, ghi vào tracker đơn giản.",
-    goodMetric: "Số ngày trong tuần đã thiền (mục tiêu ≥ 5/7) và streak dài nhất trong chu kỳ.",
+      "Trong 12 tuần, thiền 5 phút mỗi sáng sau khi đánh răng, tối thiểu 5 ngày/tuần, ghi vào bảng theo dõi đơn giản.",
+    goodMetric: "Số ngày trong tuần đã thiền (mục tiêu ≥ 5/7) và chuỗi ngày dài nhất trong chu kỳ.",
     badMetric: "Cảm thấy bình tĩnh hơn (chủ quan, không so sánh được).",
     goodLeadIndicator: "Thiền 5 phút sau khi đánh răng buổi sáng, 5 ngày/tuần.",
     badLeadIndicator: "Có cuộc sống cân bằng hơn (kết quả cuối, không phải việc tuần).",
@@ -131,11 +131,11 @@ const GOAL_EXAMPLES: Record<GoalArchetype, ArchetypeExample> = {
     weakGoal: "Trở thành writer giỏi và có nhiều người đọc.",
     strongerGoal:
       "Trong 12 tuần, xuất bản 12 bài blog (1 bài/tuần) trên nền tảng cá nhân, mỗi bài 600-1200 từ.",
-    goodMetric: "Số bài đã publish mỗi tuần và tổng số bài cuối chu kỳ.",
+    goodMetric: "Số bài đã xuất bản mỗi tuần và tổng số bài cuối chu kỳ.",
     badMetric: "Số người đăng ký theo dõi (phụ thuộc thuật toán + thời gian, không kiểm soát hết).",
-    goodLeadIndicator: "Viết draft 600 từ vào tối thứ Tư và publish vào sáng thứ Bảy mỗi tuần.",
+    goodLeadIndicator: "Viết bản nháp 600 từ vào tối thứ Tư và xuất bản vào sáng thứ Bảy mỗi tuần.",
     badLeadIndicator: "Viết hay hơn (mơ hồ, không đo được).",
-    week1StarterTask: "Viết rough 200 từ về 1 chủ đề bạn quan tâm và lưu draft (chưa cần publish).",
+    week1StarterTask: "Viết bản thô 200 từ về 1 chủ đề bạn quan tâm và lưu nháp (chưa cần xuất bản).",
   },
 
   relationship_life: {

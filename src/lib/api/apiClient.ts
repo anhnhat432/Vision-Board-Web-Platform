@@ -135,7 +135,7 @@ async function request<TResponse, TBody = unknown>(
   options?: ApiRequestOptions,
 ): Promise<TResponse> {
   if (isDemoMode()) {
-    throw new Error("API calls are disabled in demo mode");
+    throw new Error("Các yêu cầu API bị tắt trong chế độ thử.");
   }
 
   const token = (await getFirebaseToken().catch(() => null)) ?? getStoredFirebaseToken();
@@ -159,7 +159,7 @@ async function request<TResponse, TBody = unknown>(
     });
   } catch (networkError) {
     const apiError = createApiClientError({
-      message: "Network error. Please check your connection and try again.",
+      message: "Lỗi kết nối mạng. Kiểm tra mạng rồi thử lại.",
       isNetworkError: true,
       details: networkError,
     });
@@ -172,7 +172,7 @@ async function request<TResponse, TBody = unknown>(
   if (!response.ok) {
     const isConflict = response.status === 409;
     const apiError = createApiClientError({
-      message: getErrorMessageFromPayload(payload) ?? `Request failed with status ${response.status}.`,
+      message: getErrorMessageFromPayload(payload) ?? `Yêu cầu không thành công (mã ${response.status}).`,
       status: response.status,
       details: payload,
       conflict: isConflict || undefined,
@@ -192,7 +192,7 @@ async function request<TResponse, TBody = unknown>(
     const apiPayload = payload as ApiSuccessEnvelope<TResponse> | ApiErrorEnvelope;
     if (apiPayload.success === false) {
       const apiError = createApiClientError({
-        message: apiPayload.message || "API request failed.",
+        message: apiPayload.message || "Không gửi được yêu cầu. Thử lại sau.",
         status: response.status,
         details: apiPayload.details,
       });

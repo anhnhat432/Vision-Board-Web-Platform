@@ -34,38 +34,38 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 const ACHIEVEMENT_COPY: Record<string, { title: string; description: string; icon: keyof typeof ICON_MAP }> = {
   "First Step": {
-    title: "Bước Đầu Tiên",
+    title: "Bước đầu tiên",
     description: "Tạo mục tiêu đầu tiên của bạn.",
     icon: "Target",
   },
   "Goal Setter": {
-    title: "Người Đặt Mục Tiêu",
+    title: "Người đặt mục tiêu",
     description: "Tạo 5 mục tiêu trong hành trình của bạn.",
     icon: "Trophy",
   },
   Achiever: {
-    title: "Người Hoàn Thành",
+    title: "Người hoàn thành",
     description: "Hoàn thành mục tiêu đầu tiên của bạn.",
     icon: "Award",
   },
   "Master Achiever": {
-    title: "Bậc Thầy Hoàn Thành",
+    title: "Bậc thầy hoàn thành",
     description: "Hoàn thành 5 mục tiêu và giữ vững đà phát triển.",
     icon: "Crown",
   },
   Visionary: {
-    title: "Người Tầm Nhìn",
-    description: "Tạo bảng tầm nhìn đầu tiên của bạn.",
+    title: "Người có tầm nhìn",
+    description: "Tạo vision board đầu tiên của bạn.",
     icon: "Sparkles",
   },
   "Reflective Mind": {
-    title: "Tâm Trí Suy Ngẫm",
-    description: "Viết bài nhật ký phản tư đầu tiên.",
+    title: "Người hay nhìn lại",
+    description: "Viết bài nhật ký nhìn lại đầu tiên.",
     icon: "BookOpen",
   },
   Dedicated: {
     title: "Bền Bỉ",
-    description: "Duy trì 30 ngày viết nhật ký phản tư.",
+    description: "Duy trì 30 ngày viết nhật ký nhìn lại.",
     icon: "Flame",
   },
 };
@@ -107,7 +107,7 @@ export function Achievements() {
               <div className="stack-section">
                 <div className="interactive-layer interactive-layer--soft inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Trophy className="h-4 w-4" />
-                  Trophy Room
+                  Phòng thành tựu
                 </div>
 
                 <div className="stack-stack">
@@ -134,7 +134,7 @@ export function Achievements() {
                     className="border-white/18 bg-white/12 text-white hover:bg-white/18 hover:text-white"
                     onClick={() => navigate("/gallery")}
                   >
-                    Mở thư viện tầm nhìn
+                    Mở thư viện vision board
                   </Button>
                 </div>
               </div>
@@ -191,19 +191,19 @@ export function Achievements() {
             {
               title: "Mục tiêu hoàn thành",
               value: completedGoals,
-              note: "goal đã đi trọn hành trình",
+              note: "mục tiêu đã đi trọn hành trình",
               icon: Target,
               color: "from-violet-500/18 to-fuchsia-500/10 text-violet-700",
             },
             {
-              title: "Board tầm nhìn",
+              title: "Vision board",
               value: userData.visionBoards.length,
               note: "bảng đã tạo",
               icon: Sparkles,
               color: "from-sky-500/18 to-cyan-500/10 text-sky-700",
             },
             {
-              title: "Nhật ký phản tư",
+              title: "Nhật ký nhìn lại",
               value: userData.reflections.length,
               note: "bài viết đã lưu",
               icon: BookOpen,
@@ -250,8 +250,8 @@ export function Achievements() {
               </div>
               <h2 className="mt-6 text-3xl font-bold text-slate-900">Chưa có huy hiệu nào được mở khóa</h2>
               <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-slate-500">
-                Cột mốc đầu tiên thường đến rất nhanh. Hãy bắt đầu bằng một mục tiêu, một board tầm nhìn hoặc một bài
-                viết phản tư.
+                Cột mốc đầu tiên thường đến rất nhanh. Hãy bắt đầu bằng một mục tiêu, một vision board hoặc một bài
+                viết nhìn lại.
               </p>
               <div className="mx-auto mt-6 flex flex-wrap justify-center gap-3">
                 <Button variant="outline" onClick={() => navigate("/goals")}>
@@ -347,7 +347,7 @@ export function Achievements() {
                             className="rounded-[var(--r-pill)] border-slate-200 bg-slate-50 px-3 py-1 text-slate-500"
                           >
                             <LockKeyhole className="mr-1 h-3.5 w-3.5" />
-                            Locked
+                            Đang khóa
                           </Badge>
                         </div>
                         <p className="mt-2 text-sm leading-7 text-slate-500">{achievement.description}</p>

@@ -88,7 +88,7 @@ describe("monetization flows", () => {
     const { ui } = renderAppRoute(`${checkoutUrl.pathname}${checkoutUrl.search}`);
     const user = userEvent.setup();
 
-    await screen.findByText("Checkout dùng thử");
+    await screen.findByText("Thanh toán dùng thử");
     await user.click(screen.getByRole("button", { name: /Xác nhận mở gói/i }));
 
     await waitFor(() => {
@@ -122,7 +122,7 @@ describe("monetization flows", () => {
     const { router, ui } = renderAppRoute(`${checkoutUrl.pathname}${checkoutUrl.search}`);
     const user = userEvent.setup();
 
-    await screen.findByText("Checkout dùng thử");
+    await screen.findByText("Thanh toán dùng thử");
     await user.click(screen.getByRole("button", { name: /Xác nhận mở gói/i }));
 
     await waitFor(() => {
@@ -217,7 +217,7 @@ describe("monetization flows", () => {
     const checkoutUrl = new URL(checkout.checkoutUrl ?? "", "http://localhost");
     const { ui } = renderAppRoute(`${checkoutUrl.pathname}${checkoutUrl.search}`);
     const user = userEvent.setup();
-    await screen.findByText("Checkout dùng thử");
+    await screen.findByText("Thanh toán dùng thử");
     await user.click(screen.getByRole("button", { name: /Xác nhận mở gói/i }));
     await waitFor(() => expect(getCurrentPlan()).toBe("PLUS"));
     ui.unmount();

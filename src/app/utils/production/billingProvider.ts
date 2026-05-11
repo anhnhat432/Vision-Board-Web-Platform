@@ -69,7 +69,7 @@ const localBillingProvider: BillingProvider = {
       message:
         planCode === "FREE"
           ? "Thiết bị này hiện vẫn đang ở gói Free, nên chưa có gì để đồng bộ."
-          : `Quyền ${planCode} hiện đang được giữ local trên thiết bị này.`,
+          : `Quyền ${planCode} hiện đang được giữ trên thiết bị này.`,
     };
   },
   restoreAccess: async (_goalId?: string) => {
@@ -85,7 +85,7 @@ const localBillingProvider: BillingProvider = {
       message:
         planCode === "FREE"
           ? "Thiết bị này hiện đang ở gói Free."
-          : `Đã khôi phục quyền ${planCode} từ dữ liệu local trên thiết bị này.`,
+          : `Đã khôi phục quyền ${planCode} từ dữ liệu trên thiết bị này.`,
     };
   },
   openCustomerPortal: async () => ({
@@ -93,7 +93,7 @@ const localBillingProvider: BillingProvider = {
     status: "local_only",
     providerMode: "local_test",
     providerLabel: getProviderLabel("local_test"),
-    message: "Bản local test chưa có cổng quản lý thanh toán riêng.",
+    message: "Bản dùng thử trên thiết bị chưa có cổng quản lý thanh toán riêng.",
   }),
 };
 
@@ -106,7 +106,7 @@ const apiContractBillingProvider: BillingProvider = {
         status: "offline",
         providerMode: "api_contract",
         planCode: getCurrentPlan(),
-        message: "Thiết bị đang offline nên chưa thể mở trang thanh toán.",
+        message: "Thiết bị đang mất mạng nên chưa thể mở trang thanh toán.",
       };
     }
 
@@ -150,13 +150,13 @@ const apiContractBillingProvider: BillingProvider = {
           providerMode: "api_contract",
           planCode: getCurrentPlan(),
           checkoutUrl,
-          message: `Checkout session tạo thành công (${result.provider}). Chuyển hướng đến trang thanh toán.`,
+          message: `Đã tạo phiên thanh toán từ nhà cung cấp (${result.provider}). Đang chuyển hướng đến trang thanh toán.`,
         };
       } catch (error: unknown) {
         const msg =
           error && typeof error === "object" && "message" in error
             ? (error as { message: string }).message
-            : "Unknown error";
+            : "Lỗi không xác định";
         console.warn("[billing] Backend checkout-session failed, trying legacy flow:", msg);
       }
     }
@@ -168,7 +168,7 @@ const apiContractBillingProvider: BillingProvider = {
         status: "not_configured",
         providerMode: "api_contract",
         planCode: getCurrentPlan(),
-        message: "Thanh toán thật chưa được cấu hình. Vui lòng cấu hình backend billing provider trước.",
+        message: "Thanh toán chưa sẵn sàng. Vui lòng thử lại sau.",
       };
     }
 
@@ -187,7 +187,7 @@ const apiContractBillingProvider: BillingProvider = {
         providerMode: "api_contract",
         planCode: getCurrentPlan(),
         checkoutUrl: response.checkoutUrl,
-        message: response.message ?? "Đã tạo checkout session từ provider.",
+        message: response.message ?? "Đã tạo phiên thanh toán.",
       };
     }
 
@@ -199,7 +199,7 @@ const apiContractBillingProvider: BillingProvider = {
       status: getPlanRank(planCode) > getPlanRank(currentPlan) ? "upgraded" : "already_active",
       providerMode: "api_contract",
       planCode,
-      message: response.message ?? `Đã đồng bộ gói ${planCode} từ provider.`,
+      message: response.message ?? `Đã đồng bộ gói ${planCode} từ đơn vị thanh toán.`,
     };
   },
   syncEntitlements: async (goalId) => {
@@ -215,7 +215,7 @@ const apiContractBillingProvider: BillingProvider = {
           providerMode: "api_contract",
           planCode: getCurrentPlan(),
           entitlementKeys: getCurrentEntitlementKeys(),
-          message: "Thiết bị đang offline nên chưa thể đồng bộ quyền từ server.",
+          message: "Thiết bị đang mất mạng nên chưa thể đồng bộ quyền từ tài khoản.",
         };
       }
 
@@ -264,14 +264,14 @@ const apiContractBillingProvider: BillingProvider = {
           entitlementKeys,
           message:
             isSamePlan && isSameEntitlements
-              ? "Quyền hiện tại đã khớp với server."
-              : `Đã đồng bộ gói ${planCode} và quyền premium từ server.`,
+              ? "Quyền hiện tại đã khớp với tài khoản."
+              : `Đã đồng bộ gói ${planCode} và quyền Plus từ tài khoản.`,
         };
       } catch (error: unknown) {
         const msg =
           error && typeof error === "object" && "message" in error
             ? (error as { message: string }).message
-            : "Không thể đồng bộ quyền từ server.";
+            : "Không thể đồng bộ quyền từ tài khoản.";
         if (!BILLING_ENTITLEMENT_SYNC_ENDPOINT) {
           return {
             ok: false,
@@ -292,7 +292,7 @@ const apiContractBillingProvider: BillingProvider = {
         providerMode: "api_contract",
         planCode: getCurrentPlan(),
         entitlementKeys: getCurrentEntitlementKeys(),
-        message: "Chưa cấu hình endpoint đồng bộ quyền premium.",
+        message: "Chưa cấu hình điểm kết nối đồng bộ quyền nâng cao.",
       };
     }
 
@@ -303,7 +303,7 @@ const apiContractBillingProvider: BillingProvider = {
         providerMode: "api_contract",
         planCode: getCurrentPlan(),
         entitlementKeys: getCurrentEntitlementKeys(),
-        message: "Thiết bị đang offline nên chưa thể đồng bộ quyền từ provider.",
+        message: "Thiết bị đang mất mạng nên chưa thể đồng bộ quyền từ đơn vị thanh toán.",
       };
     }
 
@@ -326,8 +326,8 @@ const apiContractBillingProvider: BillingProvider = {
       message:
         response.message ??
         (isSamePlan && isSameEntitlements
-          ? "Quyền hiện tại đã khớp với provider."
-          : `Đã đồng bộ gói ${planCode} và quyền premium từ provider.`),
+          ? "Quyền hiện tại đã khớp với đơn vị thanh toán."
+          : `Đã đồng bộ gói ${planCode} và quyền nâng cao từ đơn vị thanh toán.`),
     };
   },
   restoreAccess: async (goalId) => {
@@ -366,7 +366,7 @@ const apiContractBillingProvider: BillingProvider = {
         providerMode: "api_contract",
         planCode: getCurrentPlan(),
         entitlementKeys: getCurrentEntitlementKeys(),
-        message: "Chưa cấu hình endpoint khôi phục quyền premium.",
+        message: "Chưa cấu hình điểm kết nối khôi phục quyền nâng cao.",
       };
     }
 
@@ -377,7 +377,7 @@ const apiContractBillingProvider: BillingProvider = {
         providerMode: "api_contract",
         planCode: getCurrentPlan(),
         entitlementKeys: getCurrentEntitlementKeys(),
-        message: "Thiết bị đang offline nên chưa thể khôi phục giao dịch từ provider.",
+        message: "Thiết bị đang mất mạng nên chưa thể khôi phục giao dịch từ đơn vị thanh toán.",
       };
     }
 
@@ -394,8 +394,8 @@ const apiContractBillingProvider: BillingProvider = {
       message:
         response.message ??
         (planCode === currentPlan
-          ? `Provider xác nhận gói ${planCode} vẫn đang hoạt động.`
-          : `Đã khôi phục quyền ${planCode} từ provider.`),
+          ? `Đơn vị thanh toán xác nhận gói ${planCode} vẫn đang hoạt động.`
+          : `Đã khôi phục quyền ${planCode} từ đơn vị thanh toán.`),
     };
   },
 };
@@ -470,7 +470,7 @@ export async function openBillingCustomerPortal(goalId?: string): Promise<Custom
       status: "offline",
       providerMode: status.mode,
       providerLabel: status.providerLabel,
-      message: "Thiết bị đang offline nên chưa thể mở cổng quản lý thanh toán.",
+      message: "Thiết bị đang mất mạng nên chưa thể mở cổng quản lý thanh toán.",
     };
   }
 
@@ -513,7 +513,7 @@ export async function openBillingCustomerPortal(goalId?: string): Promise<Custom
       const msg =
         error && typeof error === "object" && "message" in error
           ? (error as { message: string }).message
-          : "Unknown error";
+          : "Lỗi không xác định";
       console.warn("[billing] Backend customer-portal failed:", msg);
       // Fall through to legacy/provider flow
     }
@@ -542,7 +542,7 @@ export async function openBillingCustomerPortal(goalId?: string): Promise<Custom
       message:
         status.mode === "api_contract"
           ? "Chưa cấu hình endpoint cho cổng quản lý thanh toán."
-          : "Provider hiện tại chưa có cổng quản lý thanh toán riêng.",
+          : "Đơn vị thanh toán hiện tại chưa có cổng quản lý riêng.",
     };
   }
 
@@ -565,7 +565,7 @@ export async function openBillingCustomerPortal(goalId?: string): Promise<Custom
       status: "error",
       providerMode: status.mode,
       providerLabel: response.providerLabel || status.providerLabel,
-      message: response.message ?? "Provider không trả về liên kết quản lý thanh toán.",
+      message: response.message ?? "Đơn vị thanh toán không trả về liên kết quản lý.",
     };
   } catch {
     return {
@@ -603,7 +603,7 @@ export async function cancelSubscriptionOnServer(): Promise<CancelSubscriptionRe
     return {
       ok: false,
       status: "offline",
-      message: "Thiết bị đang offline. Vui lòng thử lại khi có kết nối.",
+      message: "Thiết bị đang mất mạng. Vui lòng thử lại khi có kết nối.",
     };
   }
 
@@ -615,7 +615,7 @@ export async function cancelSubscriptionOnServer(): Promise<CancelSubscriptionRe
     return {
       ok: false,
       status: "local_only",
-      message: "Tính năng hủy gói chỉ khả dụng trong chế độ real mode với backend.",
+      message: "Chỉ có thể hủy gói khi hệ thống thanh toán thật đã sẵn sàng.",
     };
   }
 

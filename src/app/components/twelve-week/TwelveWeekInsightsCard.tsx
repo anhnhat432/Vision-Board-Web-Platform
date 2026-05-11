@@ -78,7 +78,7 @@ function getCallbackForActionId(
 }
 
 export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
-  const { insights, title = "Insight nhịp thực thi" } = props;
+  const { insights, title = "Góc nhìn nhịp thực thi" } = props;
   if (insights.length === 0) return null;
 
   const nextAction = getNextActionFromInsights(insights);
@@ -98,7 +98,7 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
           <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-700">{title}</p>
         </div>
         <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
-          {insights.length} insight{insights.length > 1 ? "s" : ""}
+          {insights.length} góc nhìn
         </Badge>
       </div>
 

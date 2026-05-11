@@ -36,7 +36,7 @@ describe("SMARTGoalSetup handoff", () => {
     );
 
     const handoffCard = await screen.findByTestId("smart-goal-handoff-card");
-    expect(handoffCard).toHaveTextContent("Life Insight đã chọn");
+    expect(handoffCard).toHaveTextContent("Góc nhìn cuộc sống đã chọn");
     expect(handoffCard).toHaveTextContent("Sức khỏe");
     expect(handoffCard).toHaveTextContent("Số buổi vận động mỗi tuần");
     expect(handoffCard).toHaveTextContent("12 tuần");

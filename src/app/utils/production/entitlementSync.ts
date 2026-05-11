@@ -98,7 +98,7 @@ export async function syncEntitlementsWithProvider(goalId?: string): Promise<Ent
   } catch {
     const planCode = getCurrentPlan();
     const entitlementKeys = getCurrentEntitlementKeys();
-    const message = "Không thể đồng bộ quyền với provider lúc này.";
+    const message = "Không thể đồng bộ quyền với nhà cung cấp lúc này.";
     persistBillingActionSnapshot(
       LAST_ENTITLEMENT_SYNC_KEY,
       buildBillingActionSnapshot(status.mode, "error", planCode, entitlementKeys, message),
@@ -148,7 +148,7 @@ export async function restorePlanAccess(goalId?: string): Promise<RestoreAccessR
   } catch {
     const planCode = getCurrentPlan();
     const entitlementKeys = getCurrentEntitlementKeys();
-    const message = "Không thể khôi phục quyền từ provider lúc này.";
+    const message = "Không thể khôi phục quyền từ nhà cung cấp lúc này.";
     persistBillingActionSnapshot(
       LAST_RESTORE_ACCESS_KEY,
       buildBillingActionSnapshot(status.mode, "error", planCode, entitlementKeys, message),

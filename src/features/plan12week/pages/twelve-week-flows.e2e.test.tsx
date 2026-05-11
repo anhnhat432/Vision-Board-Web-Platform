@@ -174,7 +174,7 @@ describe("12-week core flows", () => {
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/feasibility");
     });
-    expect(toastSpy).toHaveBeenCalledWith("Kết quả feasibility cũ không đọc được, làm lại nhanh");
+    expect(toastSpy).toHaveBeenCalledWith("Kết quả kiểm tra tính khả thi cũ không đọc được, làm lại nhanh");
     expect(localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult)).toBeNull();
   }, 10_000);
 
@@ -349,7 +349,7 @@ describe("12-week core flows", () => {
       const user = userEvent.setup();
 
       await screen.findByRole("heading", { name: "Cycle 12 tuần đã kết thúc" });
-      expect(screen.getByText("Cycle này đã đưa bạn gần hơn với vision 3 năm chưa?")).toBeInTheDocument();
+      expect(screen.getByText("Chu kỳ này đã đưa bạn gần hơn với tầm nhìn 3 năm chưa?")).toBeInTheDocument();
       await user.type(screen.getByLabelText("Bài học lớn nhất 1"), "Tiếp tục giữ review cuối tuần.");
       await user.click(screen.getByRole("button", { name: "Lưu báo cáo cycle" }));
 
@@ -790,7 +790,7 @@ describe("12-week core flows", () => {
     const checkoutRender = renderAppRoute(`${checkoutUrl.pathname}${checkoutUrl.search}`);
     const user = userEvent.setup();
 
-    await screen.findByText("Checkout dùng thử");
+    await screen.findByText("Thanh toán dùng thử");
     await user.click(screen.getByRole("button", { name: /Xác nhận mở gói/i }));
 
     await waitFor(() => {
@@ -828,7 +828,7 @@ describe("12-week core flows", () => {
         expect(readGoal(goalId).twelveWeekSystem?.weeklyTimeBlocks).toHaveLength(4);
       });
       expect(screen.getAllByTestId("weekly-time-block-chip")).toHaveLength(4);
-      expect(screen.getAllByText("Strategic Block").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("Khung chiến lược").length).toBeGreaterThan(0);
 
       firstRender.ui.unmount();
       renderAppRoute("/12-week-system?tab=settings");

@@ -23,29 +23,29 @@ export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, 
       icon: CalendarDays,
       label: "Tuần",
       value: currentWeek ? `${currentWeek}/${totalWeeks}` : "--",
-      note: "trong cycle",
+      note: "trong chu kỳ",
       iconClass:
         "bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 dark:from-violet-950/50 dark:to-fuchsia-950/40 dark:text-violet-200",
     },
     {
       icon: TrendingUp,
-      label: "Output rate",
+      label: "Tỷ lệ tạo kết quả",
       value: formatPercent(leadAverage),
-      note: "lead completion",
+      note: "hoàn thành việc lặp lại",
       iconClass:
         "bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-700 dark:from-emerald-950/50 dark:to-teal-950/40 dark:text-emerald-200",
     },
     {
       icon: Zap,
-      label: "Lead pace",
+      label: "Nhịp việc lặp lại",
       value: formatWheelScore(wheelScore),
-      note: "life score",
+      note: "điểm cuộc sống",
       iconClass:
         "bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 dark:from-amber-950/50 dark:to-orange-950/40 dark:text-amber-200",
     },
     {
       icon: Flame,
-      label: "Streak",
+      label: "Chuỗi ngày",
       value: String(streak),
       note: "tuần giữ nhịp",
       iconClass:

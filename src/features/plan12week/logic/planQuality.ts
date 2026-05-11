@@ -444,7 +444,7 @@ function evaluateWeekOneStartability(
     } else {
       if (analysis.isVague) {
         warnings.push(
-          "Việc đầu tiên còn mơ hồ — viết rõ hành động và đầu ra (ví dụ: 'viết draft 800 từ', 'đo baseline 1 set').",
+          "Việc đầu tiên còn mơ hồ — viết rõ hành động và đầu ra (ví dụ: 'viết bản nháp 800 từ', 'đo mốc hiện tại trong 1 set').",
         );
       }
       if (analysis.missingActionVerb) {
@@ -577,7 +577,7 @@ function evaluateArchetypeFit(
     !milestonesMatchArchetype(nonEmptyMilestones, archetype)
   ) {
     suggestions.push(
-      `Mốc tuần 4/8/12 chưa nói đến output đặc thù của loại mục tiêu này (ví dụ: ${defaults.milestoneTemplates.week4}).`,
+      `Mốc tuần 4/8/12 chưa nói đến kết quả đặc thù của loại mục tiêu này (ví dụ: ${defaults.milestoneTemplates.week4}).`,
     );
   }
 
@@ -593,7 +593,7 @@ function evaluateArchetypeFit(
         /nghỉ|recovery|mobility|ngủ|ngu /i.test(name.toLowerCase()),
       );
       if (validIndicators.length >= 2 && !hasRecoverySignal) {
-        suggestions.push("Cân nhắc thêm 1 việc recovery/nghỉ để tránh tăng tải liên tiếp.");
+        suggestions.push("Cân nhắc thêm 1 việc phục hồi/nghỉ để tránh tăng tải liên tiếp.");
       }
       break;
     }
@@ -612,7 +612,7 @@ function evaluateArchetypeFit(
       );
       if (validIndicators.length > 0 && !hasPracticeTest) {
         warnings.push(
-          "Plan thi cử cần ít nhất 1 việc 'đề thi thử / practice test' mỗi tuần để theo dõi baseline thật.",
+          "Kế hoạch thi cử cần ít nhất 1 việc 'đề thi thử' mỗi tuần để theo dõi mốc hiện tại thật.",
         );
       }
       break;
@@ -646,7 +646,7 @@ function evaluateArchetypeFit(
       );
       if (validIndicators.length > 0 && !hasFeedbackLoop) {
         suggestions.push(
-          "Skill learning cần feedback loop (demo, pair review, ship output). Học mà không có output dễ ảo tưởng tiến bộ.",
+          "Học kỹ năng cần vòng phản hồi (demo, review cùng người khác, đưa kết quả ra ngoài). Học mà không có kết quả dễ ảo tưởng tiến bộ.",
         );
       }
       break;
@@ -755,11 +755,23 @@ function getLoadBand(planLoad: PlanLoadPreference, weeklyCapacity: WeeklyCapacit
   return LOAD_BANDS[`${planLoad}-${weeklyCapacity}`] ?? LOAD_BANDS["balanced-medium"];
 }
 
+function formatPlanLoadPreference(planLoad: PlanLoadPreference): string {
+  if (planLoad === "lighter") return "nhẹ hơn";
+  if (planLoad === "push") return "đẩy nhanh";
+  return "giữ nguyên";
+}
+
+function formatWeeklyCapacityBand(weeklyCapacity: WeeklyCapacityBand): string {
+  if (weeklyCapacity === "low") return "ít thời gian";
+  if (weeklyCapacity === "high") return "nhiều thời gian";
+  return "vừa phải";
+}
+
 function buildOverloadedSuggestion(taskCount: number, planLoad: PlanLoadPreference, band: LoadBand): string {
   if (planLoad === "push") {
-    return `Tuần 1 đang có ${taskCount} task — vượt giới hạn ${band.hardCap} ngay cả ở nhịp push. Bỏ bớt 1-2 việc tùy chọn để tránh kiệt sức tuần đầu.`;
+    return `Tuần 1 đang có ${taskCount} việc — vượt giới hạn ${band.hardCap} ngay cả ở nhịp đẩy nhanh. Bỏ bớt 1-2 việc tùy chọn để tránh kiệt sức tuần đầu.`;
   }
-  return `Tuần 1 đang có ${taskCount} task. Giảm xuống ${band.max} hoặc ít hơn để giữ nhịp.`;
+  return `Tuần 1 đang có ${taskCount} việc. Giảm xuống ${band.max} hoặc ít hơn để giữ nhịp.`;
 }
 
 function buildUnderloadedSuggestion(
@@ -774,18 +786,19 @@ function buildUnderloadedSuggestion(
   if (taskCount === 0) {
     return "Tuần 1 chưa có việc nào. Thêm ít nhất một việc lặp lại trước khi bắt đầu chu kỳ.";
   }
-  return `Tuần 1 chỉ có ${taskCount} task — dưới mức gợi ý ${band.min}. Cân nhắc thêm 1 việc cốt lõi nếu lịch cho phép.`;
+  return `Tuần 1 chỉ có ${taskCount} việc — dưới mức gợi ý ${band.min}. Cân nhắc thêm 1 việc cốt lõi nếu lịch cho phép.`;
 }
 
 export function assessWeekOneLoad(input: AssessWeekOneLoadInput): WeekOneLoadAssessment {
   const { taskCount, planLoad, weeklyCapacity } = input;
   const band = getLoadBand(planLoad, weeklyCapacity);
+  const loadConfigLabel = `${formatPlanLoadPreference(planLoad)} / ${formatWeeklyCapacityBand(weeklyCapacity)}`;
   const appropriateRange = { min: band.min, max: band.max };
 
   if (!Number.isFinite(taskCount) || taskCount < 0) {
     return {
       level: "underloaded",
-      warning: "Số task tuần 1 không hợp lệ.",
+      warning: "Số việc tuần 1 không hợp lệ.",
       suggestion: "Tạo lại chu kỳ để dashboard nhận đúng số việc tuần 1.",
       appropriateRange,
     };
@@ -794,7 +807,7 @@ export function assessWeekOneLoad(input: AssessWeekOneLoadInput): WeekOneLoadAss
   if (taskCount > band.hardCap) {
     return {
       level: "overloaded",
-      warning: `Tuần 1 quá nặng cho cấu hình ${planLoad}/${weeklyCapacity}.`,
+      warning: `Tuần 1 quá nặng cho cấu hình ${loadConfigLabel}.`,
       suggestion: buildOverloadedSuggestion(taskCount, planLoad, band),
       appropriateRange,
     };
@@ -803,7 +816,7 @@ export function assessWeekOneLoad(input: AssessWeekOneLoadInput): WeekOneLoadAss
   if (taskCount > band.max) {
     return {
       level: "upper_limit",
-      warning: `Tuần 1 đang chạm trần ${band.hardCap} task của cấu hình ${planLoad}/${weeklyCapacity}.`,
+      warning: `Tuần 1 đang chạm trần ${band.hardCap} việc của cấu hình ${loadConfigLabel}.`,
       suggestion: "Giữ nguyên nếu lịch ổn, nhưng nên review sớm để cắt bớt nếu thấy đuối.",
       appropriateRange,
     };
@@ -872,7 +885,7 @@ export function assessPlanQuality(input: AssessPlanQualityInput): PlanQualityAss
 
   if (!input.hasLagMetric) {
     warnings.push("Chưa có chỉ số kết quả chính của chu kỳ.");
-    suggestions.push("Thêm 1 chỉ số kết quả chính (lag metric) để tuần 12 có đầu ra rõ.");
+    suggestions.push("Thêm 1 chỉ số kết quả chính (kết quả cuối) để tuần 12 có đầu ra rõ.");
   }
 
   if (!input.hasMidCycleMilestones) {

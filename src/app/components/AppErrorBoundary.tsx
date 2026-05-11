@@ -63,8 +63,8 @@ export function AppErrorBoundary() {
                     Trang này vừa gặp lỗi, nhưng mình vẫn có thể quay lại flow chính ngay.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
-                    Mình đã chặn màn lỗi mặc định để trải nghiệm đỡ gắt hơn. Bạn có thể tải lại trang hoặc quay về bảng
-                    điều khiển rồi tiếp tục từ đó.
+                    Mình đã chặn màn lỗi mặc định để trải nghiệm đỡ gắt hơn. Bạn có thể tải lại trang hoặc quay về Trang
+                    chính rồi tiếp tục từ đó.
                   </p>
                 </div>
 
@@ -75,7 +75,7 @@ export function AppErrorBoundary() {
                     onClick={() => navigate("/")}
                   >
                     <Home className="h-4 w-4" />
-                    Về bảng điều khiển
+                    Về Trang chính
                   </Button>
                   <Button
                     variant="secondary"
@@ -96,7 +96,9 @@ export function AppErrorBoundary() {
                   </div>
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">Trạng thái</p>
-                    <p className="text-lg font-semibold text-white">{errorCode ? `Lỗi ${errorCode}` : "Lỗi runtime"}</p>
+                    <p className="text-lg font-semibold text-white">
+                      {errorCode ? `Lỗi ${errorCode}` : "Trang gặp lỗi ngoài dự kiến"}
+                    </p>
                   </div>
                 </div>
 

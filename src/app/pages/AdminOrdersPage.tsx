@@ -311,7 +311,7 @@ function PaymentRecoveryPanel({
               className="pl-11"
               value={draftQuery}
               onChange={(event) => setDraftQuery(event.target.value)}
-              placeholder="Tìm order code, email, user id, mã giao dịch"
+              placeholder="Tìm mã đơn, email, mã người dùng, mã giao dịch"
             />
           </div>
           <Select
@@ -344,12 +344,12 @@ function PaymentRecoveryPanel({
         </div>
 
         {payments.length === 0 ? (
-          <p className="rounded-[var(--r-card)] bg-slate-50 p-4 text-sm text-slate-500">Không tìm thấy payment order phù hợp.</p>
+          <p className="rounded-[var(--r-card)] bg-slate-50 p-4 text-sm text-slate-500">Không tìm thấy đơn thanh toán phù hợp.</p>
         ) : (
           <div className="overflow-hidden rounded-[var(--r-card)] border border-slate-100">
             <div className="hidden grid-cols-[1.1fr_1.2fr_0.8fr_0.8fr_1fr] gap-4 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 lg:grid">
-              <span>Order</span>
-              <span>User</span>
+              <span>Đơn</span>
+              <span>Người dùng</span>
               <span>Số tiền</span>
               <span>Trạng thái</span>
               <span className="text-right">Hành động</span>
@@ -421,7 +421,7 @@ function PaymentRecoveryPanel({
 
 function RecentUserList({ users }: { users: AdminUserSummary[] }) {
   if (users.length === 0) {
-    return <p className="rounded-[var(--r-card)] bg-slate-50 p-4 text-sm text-slate-500">Chưa có user.</p>;
+    return <p className="rounded-[var(--r-card)] bg-slate-50 p-4 text-sm text-slate-500">Chưa có người dùng.</p>;
   }
 
   return (
@@ -471,7 +471,7 @@ function BillingReminderPanel({
               {expiringCount > 0
                 ? `${expiringCount.toLocaleString("vi-VN")} gói Plus sẽ hết hạn trong 7 ngày.`
                 : "Không có gói Plus nào sắp hết hạn trong 7 ngày."}{" "}
-              Email provider: {emailConfigured ? "đã cấu hình" : overview?.email.reason ?? "chưa cấu hình"}.
+              Nhà cung cấp email: {emailConfigured ? "đã cấu hình" : overview?.email.reason ?? "chưa cấu hình"}.
             </p>
             {result ? (
               <p className="mt-2 text-xs leading-5 text-slate-500">
@@ -529,7 +529,7 @@ export function AdminOrdersPage() {
       const [overviewData, orderData] = await withTimeout(
         Promise.all([adminGetOverview(), adminGetOrders()]),
         ADMIN_LOAD_TIMEOUT_MS,
-        "Backend admin phản hồi quá lâu. Render có thể đang cold start; hãy thử lại sau vài giây.",
+        "Máy chủ quản trị phản hồi quá lâu. Render có thể đang cold start; hãy thử lại sau vài giây.",
       );
       setOverview(overviewData);
       setOrders(orderData);
@@ -596,10 +596,10 @@ export function AdminOrdersPage() {
         return;
       }
 
-      toast.success(`Đã gửi ${result.sent} reminder, bỏ qua ${result.duplicate + result.skipped}.`);
+      toast.success(`Đã gửi ${result.sent} lời nhắc, bỏ qua ${result.duplicate + result.skipped}.`);
       void loadAdminData();
     } catch (err) {
-      toast.error(getErrorMessage(err, "Không thể gửi reminder lúc này."));
+      toast.error(getErrorMessage(err, "Không thể gửi lời nhắc lúc này."));
     } finally {
       setReminderLoading(false);
     }
@@ -681,10 +681,10 @@ export function AdminOrdersPage() {
         <Card className="border-0 bg-white shadow-2xl">
           <CardContent className="p-10 text-center lg:p-14">
             <ShieldAlert className="mx-auto h-12 w-12 text-amber-500" />
-            <h1 className="mt-6 text-2xl font-bold text-slate-900">Không tải được quyền admin</h1>
+            <h1 className="mt-6 text-2xl font-bold text-slate-900">Không tải được quyền quản trị</h1>
             <p className="mx-auto mt-[var(--space-inline)] max-w-xl text-base leading-7 text-slate-500">
               {userProfileError ||
-                "Backend chưa trả profile cho tài khoản này. Kiểm tra Render đã deploy, VITE_API_BASE_URL trỏ đúng backend và ADMIN_EMAILS có email admin."}
+                "Máy chủ chưa trả hồ sơ cho tài khoản này. Kiểm tra Render đã deploy, VITE_API_BASE_URL trỏ đúng backend và ADMIN_EMAILS có email quản trị."}
             </p>
             <Button className="mt-6" variant="outline" onClick={refreshUserProfile}>
               Thử lại
@@ -748,9 +748,9 @@ export function AdminOrdersPage() {
                 Quản trị vận hành
               </div>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Users, billing và đơn hàng</h1>
+                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Người dùng, thanh toán và đơn hàng</h1>
                 <p className="mt-[var(--space-inline)] max-w-3xl text-base leading-8 text-white/82">
-                  Theo dõi user, doanh thu VietQR, trạng thái email và xử lý đơn in từ một màn hình.
+                  Theo dõi người dùng, doanh thu VietQR, trạng thái email và xử lý đơn in từ một màn hình.
                 </p>
               </div>
             </div>
@@ -762,7 +762,7 @@ export function AdminOrdersPage() {
               onClick={handleReminderRun}
             >
               {reminderLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bell className="h-4 w-4" />}
-              Gửi reminder 7 ngày
+              Gửi lời nhắc 7 ngày
             </Button>
           </div>
         </CardContent>
@@ -772,13 +772,13 @@ export function AdminOrdersPage() {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <SummaryCard
             icon={Users}
-            label="Tổng user"
+            label="Tổng người dùng"
             value={summary.totalUsers.toLocaleString("vi-VN")}
             detail={`${summary.adminUsers} admin`}
           />
           <SummaryCard
             icon={CreditCard}
-            label="Plus active"
+            label="Plus đang dùng"
             value={summary.activePlusSubscriptions.toLocaleString("vi-VN")}
             detail={`${summary.expiringSoonSubscriptions} gói sắp hết hạn 7 ngày`}
           />
@@ -808,7 +808,7 @@ export function AdminOrdersPage() {
         <Card className="border-0 shadow-lg">
           <CardHeader>
             <CardTitle className="text-base">Thanh toán VietQR gần đây</CardTitle>
-            <CardDescription>Các order Casso/VietQR mới nhất.</CardDescription>
+            <CardDescription>Các đơn Casso/VietQR mới nhất.</CardDescription>
           </CardHeader>
           <CardContent>
             <RecentPaymentList
@@ -821,8 +821,8 @@ export function AdminOrdersPage() {
 
         <Card className="border-0 shadow-lg">
           <CardHeader>
-            <CardTitle className="text-base">User mới</CardTitle>
-            <CardDescription>Email provider: {overview?.email.configured ? "đã cấu hình" : "chưa cấu hình"}</CardDescription>
+            <CardTitle className="text-base">Người dùng mới</CardTitle>
+            <CardDescription>Nhà cung cấp email: {overview?.email.configured ? "đã cấu hình" : "chưa cấu hình"}</CardDescription>
           </CardHeader>
           <CardContent>
             <RecentUserList users={overview?.recentUsers ?? []} />

@@ -210,7 +210,7 @@ export function LoginPage() {
             <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-transparent">
               12 tuần hành động
             </span>{" "}
-            trong một workspace.
+            trong một không gian làm việc.
           </motion.p>
           <motion.div
             variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
@@ -244,7 +244,7 @@ export function LoginPage() {
             className="mt-5 flex items-start gap-3 rounded-[var(--r-control)] border border-emerald-200/70 bg-emerald-50/85 px-4 py-3 text-sm leading-6 text-emerald-800 dark:border-emerald-400/20 dark:bg-emerald-950/40 dark:text-emerald-100"
           >
             <ShieldCheck className="mt-0.5 h-4 w-4 flex-none" />
-            <p>Đăng nhập an toàn qua Firebase. Không lưu mật khẩu trên thiết bị.</p>
+            <p>Đăng nhập an toàn. Không lưu mật khẩu trên thiết bị.</p>
           </motion.div>
         </motion.section>
 
@@ -264,7 +264,7 @@ export function LoginPage() {
 
         <div className="mb-4 flex items-start gap-3 rounded-[var(--r-control)] border border-emerald-200/70 bg-emerald-50/90 px-4 py-3 text-sm leading-6 text-emerald-800 shadow-sm lg:hidden">
           <ShieldCheck className="mt-0.5 h-4 w-4 flex-none" />
-          <p>Đăng nhập an toàn qua Firebase. Không lưu mật khẩu trên thiết bị.</p>
+          <p>Đăng nhập an toàn. Không lưu mật khẩu trên thiết bị.</p>
         </div>
 
         <Card className="glass-surface-gradient-border">

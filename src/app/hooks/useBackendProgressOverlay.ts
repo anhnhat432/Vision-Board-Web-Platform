@@ -174,7 +174,7 @@ function buildSyntheticDailyCheckIns(
             date: dateKey,
             didWorkToday: Boolean(log.completed || log.value > 0),
             whichLeadIndicatorWorkedOn: "",
-            amountDone: "Check-in backend",
+            amountDone: "Check-in từ máy chủ",
             outputCreated: "",
             obstacleOrIssue: "",
             dailySelfRating: 3,

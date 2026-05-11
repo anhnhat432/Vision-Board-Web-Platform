@@ -60,8 +60,8 @@ function buildSummaryItems(summary: LocalDataMigrationSummary): string[] {
     formatCount(summary.dailyCheckInCount, "check-in ngày"),
     formatCount(summary.weeklyReviewCount, "review tuần"),
     formatCount(summary.wheelRecordCount, "bản cân bằng cuộc sống"),
-    formatCount(summary.reflectionCount, "ghi chú phản tư"),
-    formatCount(summary.visionBoardCount, "bảng tầm nhìn"),
+    formatCount(summary.reflectionCount, "ghi chú nhìn lại"),
+    formatCount(summary.visionBoardCount, "vision board"),
   ].filter((item) => !item.startsWith("0 "));
 }
 
@@ -281,7 +281,7 @@ export function LocalDataMigrationPrompt({
                   </p>
                 ) : !cloudImportEnabled ? (
                   <p className="rounded-[var(--r-tile)] bg-white/75 px-3 py-2 text-xs font-medium text-amber-700">
-                    {cloudImportUnavailableReason ?? "Đồng bộ dữ liệu tài khoản chưa được bật cho workspace này."}
+                    {cloudImportUnavailableReason ?? "Đồng bộ dữ liệu tài khoản chưa được bật cho không gian làm việc này."}
                   </p>
                 ) : cloudImportAlreadyCompleted && !cloudWriteSucceeded ? (
                   <p className="rounded-[var(--r-tile)] bg-white/75 px-3 py-2 text-xs font-medium text-emerald-700">

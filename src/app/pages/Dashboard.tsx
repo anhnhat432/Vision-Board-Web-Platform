@@ -143,7 +143,7 @@ function DeferredDashboardLifeAreaRadar({ data }: { data: DashboardRadarDatum[] 
           <TrendingUp className="h-10 w-10 text-muted-foreground/45" />
           <p className="mt-[var(--space-inline)] font-semibold text-foreground">Biểu đồ sẽ tải khi bạn kéo tới đây.</p>
           <p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">
-            Dashboard giữ phần đầu nhẹ hơn; dữ liệu cân bằng vẫn nằm ở đây khi cần xem.
+            Trang chính giữ phần đầu nhẹ hơn; dữ liệu cân bằng vẫn nằm ở đây khi cần xem.
           </p>
         </div>
       )}
@@ -157,7 +157,7 @@ const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
     targetId: "dashboard-start-card",
     title: "Bắt đầu từ khối này",
     description:
-      "Nếu chưa có chu kỳ, hãy nhìn khối này trước. Đây là nơi dẫn bạn qua đúng flow: insight, SMART, kiểm tra tính thực tế rồi mới vào 12 tuần.",
+      "Nếu chưa có chu kỳ, hãy nhìn khối này trước. Đây là nơi dẫn bạn qua đúng luồng: góc nhìn, mục tiêu SMART, kiểm tra tính thực tế rồi mới vào 12 tuần.",
   },
   {
     id: "attention",
@@ -233,7 +233,7 @@ function getTaskVisual(task: { title: string; leadIndicatorName?: string; isCore
 
   return {
     icon: Target,
-    label: "Output",
+    label: "Kết quả",
     iconClass:
       "bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 dark:from-violet-950/50 dark:to-fuchsia-950/40 dark:text-violet-200",
   };
@@ -544,7 +544,7 @@ function DashboardContent({
 
   return (
     <div className={`ops-shell ops-dashboard ${showMobileStickyCTA ? 'pb-24' : ''}`}>
-      {!isSignedOut ? <h1 className="sr-only">Bảng điều khiển</h1> : null}
+      {!isSignedOut ? <h1 className="sr-only">Trang chính</h1> : null}
       <UpgradePaywallDialog
         open={isUpgradeDialogOpen}
         onOpenChange={setIsUpgradeDialogOpen}
@@ -678,7 +678,7 @@ function DashboardContent({
       <SpotlightTour
         open={isTourOpen}
         onOpenChange={setIsTourOpen}
-        title="Tour bảng điều khiển"
+        title="Tour Trang chính"
         description="Ba điểm chính để người mới mở vào là biết nên bắt đầu từ đâu."
         steps={dashboardTourSteps}
       />
@@ -790,7 +790,7 @@ function DashboardContent({
 
           <SectionBlock
             title="Nhịp 12 tuần"
-            description={isDesktopViewport ? "Bốn tín hiệu đủ để biết cycle đang chạy gọn hay cần chỉnh." : undefined}
+            description={isDesktopViewport ? "Bốn tín hiệu đủ để biết chu kỳ đang chạy gọn hay cần chỉnh." : undefined}
           >
             <DashboardKpiRow
               leadAverage={dashboardKpiLeadAverage}
@@ -803,7 +803,7 @@ function DashboardContent({
 
           <SectionBlock
             title="Mục tiêu đang chạy"
-            description={isDesktopViewport ? "Chuẩn bị slot 1-3 mục tiêu cho cùng một cycle." : undefined}
+            description={isDesktopViewport ? "Chuẩn bị chỗ cho 1-3 mục tiêu trong cùng một chu kỳ." : undefined}
           >
             <DashboardActiveGoalsList
               goals={dashboardActiveGoals}
@@ -815,7 +815,7 @@ function DashboardContent({
           {activeSystem && (
             <SectionBlock
               title="Việc hôm nay"
-              description={isDesktopViewport ? "Nhìn nhanh những việc tạo lực đẩy tuần này. Mở Today để đánh dấu và check-in." : undefined}
+              description={isDesktopViewport ? "Nhìn nhanh những việc tạo lực đẩy tuần này. Mở Hôm nay để đánh dấu và check-in." : undefined}
             >
               <div className="grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1fr)_190px]">
                 {activeSystemTodayTasks.length > 0 ? (
@@ -831,7 +831,7 @@ function DashboardContent({
                           type="button"
                           className="card-hover-lift group rounded-[var(--r-tile)] border border-slate-200/70 bg-white/92 p-4 text-left shadow-sm transition-colors hover:border-violet-200 hover:bg-violet-50/45 dark:border-slate-700 dark:bg-slate-900/70"
                           onClick={() => navigate("/12-week-system?tab=today")}
-                          aria-label={`${task.completed ? "Đã hoàn thành" : "Mở Today để xử lý"}: ${task.title}`}
+                          aria-label={`${task.completed ? "Đã hoàn thành" : "Mở Hôm nay để xử lý"}: ${task.title}`}
                         >
                           <div className="flex items-start gap-3">
                             <div
@@ -882,13 +882,13 @@ function DashboardContent({
                     </div>
                     <h3 className="mt-4 text-base font-semibold text-slate-950">Hôm nay là ngày để bắt đầu nhỏ.</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-600">
-                      Click + để thêm task đầu tiên trong trung tâm 12 tuần.
+                      Bấm + để thêm việc đầu tiên trong trung tâm 12 tuần.
                     </p>
                     <Button
                       className="mt-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700"
                       onClick={() => navigate("/12-week-system?tab=today")}
                     >
-                      Mở Today
+                      Mở Hôm nay
                     </Button>
                   </div>
                 )}
@@ -955,9 +955,9 @@ function DashboardContent({
               align="left"
               headingLevel={2}
               testId="fresh-workspace-empty-state"
-              eyebrow="Workspace mới"
+              eyebrow="Không gian làm việc mới"
               title="Chưa có dữ liệu thực thi để hiển thị."
-              description="Dashboard sẽ chỉ hiện điểm, chuỗi ngày và chỉ số sau khi bạn tạo chu kỳ 12 tuần đầu tiên. Bây giờ nên đi từ Life Balance để có dữ liệu thật, rồi mới chốt mục tiêu SMART."
+              description="Trang chính sẽ chỉ hiện điểm, chuỗi ngày và chỉ số sau khi bạn tạo chu kỳ 12 tuần đầu tiên. Bây giờ nên đi từ Cân bằng cuộc sống để có dữ liệu thật, rồi mới chốt mục tiêu SMART."
               illustration={<EmptyGoalIllustration className="w-full text-violet-500" />}
               actions={
                 <Button
@@ -965,12 +965,12 @@ function DashboardContent({
                   className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
                   onClick={() => navigate("/onboarding")}
                 >
-                  Bắt đầu Life Balance
+                  Bắt đầu Cân bằng cuộc sống
                 </Button>
               }
             >
               <ol className="grid gap-3 md:grid-cols-3">
-                {["Chấm 8 lĩnh vực cuộc sống", "Chọn một insight ưu tiên", "Tạo SMART goal và chu kỳ 12 tuần"].map(
+                {["Chấm 8 lĩnh vực cuộc sống", "Chọn một góc nhìn ưu tiên", "Tạo mục tiêu SMART và chu kỳ 12 tuần"].map(
                   (item, index) => (
                     <li key={item} className="rounded-[var(--r-tile)] border border-border bg-muted p-4">
                       <div
@@ -1009,12 +1009,12 @@ function DashboardContent({
                         Tuần {activeSystemWeek ?? currentWeekExecutionSnapshot.weekNumber}:{" "}
                         {activeSystemWeekCompletion?.completed ?? currentWeekExecutionSnapshot.completedTasks}/
                         {activeSystemWeekCompletion?.total ?? currentWeekExecutionSnapshot.totalTasks} việc —{" "}
-                        {activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore}% lead completion
+                        {activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore}% việc lặp lại
                       </p>
                     </div>
                     <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
                       <div className="rounded-[var(--r-tile)] bg-muted px-4 py-3">
-                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tiến độ goal</p>
+                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tiến độ mục tiêu</p>
                         <p className="mt-1 text-xl font-bold text-foreground">{goalProgressSnapshot.percent}%</p>
                       </div>
                       <div className="rounded-[var(--r-tile)] bg-muted px-4 py-3">
@@ -1048,7 +1048,7 @@ function DashboardContent({
                       Tuần {activeSystemWeek ?? currentWeekExecutionSnapshot.weekNumber}:{" "}
                       {activeSystemWeekCompletion?.completed ?? currentWeekExecutionSnapshot.completedTasks}/
                       {activeSystemWeekCompletion?.total ?? currentWeekExecutionSnapshot.totalTasks} việc —{" "}
-                      {activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore}% lead completion
+                      {activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore}% việc lặp lại
                     </p>
                   </div>
                   <span className="rounded-[var(--r-pill)] border border-border bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
@@ -1084,7 +1084,7 @@ function DashboardContent({
                   {planLoading && !plan && (
                     <Card className="border border-border bg-white/80 shadow-sm">
                       <CardContent className="p-4 text-sm text-muted-foreground">
-                        Đang tải dữ liệu dashboard 12 tuần...
+                        Đang tải dữ liệu Trang chính 12 tuần...
                       </CardContent>
                     </Card>
                   )}
@@ -1123,7 +1123,7 @@ function DashboardContent({
           className="ops-section-secondary"
         >
           <PageHeader
-            eyebrow="Chi tiết workspace"
+            eyebrow="Chi tiết không gian làm việc"
             title="Dữ liệu gần đây"
             description="Xem nhanh mục tiêu, cân bằng cuộc sống và nhật ký của bạn."
           />
@@ -1160,7 +1160,7 @@ function DashboardContent({
                       <Target className="mx-auto mb-4 h-12 w-12 text-muted-foreground/45" />
                       <p>
                         {isSignedOut
-                          ? "Bạn có thể đi qua Life Insight, SMART Goal và kiểm tra tính thực tế mà không cần đăng nhập."
+                          ? "Bạn có thể đi qua Góc nhìn cuộc sống, mục tiêu SMART và kiểm tra tính thực tế mà không cần đăng nhập."
                           : "Chưa có mục tiêu nào. Hãy bắt đầu bằng mục tiêu đầu tiên của bạn."}
                       </p>
                       <Button
@@ -1311,8 +1311,8 @@ function DashboardContent({
                         <p className="mt-[var(--space-inline)] font-semibold text-foreground">Chưa có dữ liệu bánh xe cuộc sống</p>
                         <p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">
                           {isSignedOut
-                            ? "Bạn có thể bắt đầu Life Balance không cần đăng nhập. Tài khoản chỉ cần khi muốn đồng bộ sau."
-                            : "Bắt đầu bằng bài đánh giá Life Balance để dashboard có dữ liệu thật thay vì số mặc định."}
+                          ? "Bạn có thể bắt đầu Cân bằng cuộc sống không cần đăng nhập. Tài khoản chỉ cần khi muốn đồng bộ sau."
+                            : "Bắt đầu bằng bài đánh giá Cân bằng cuộc sống để Trang chính có dữ liệu thật thay vì số mặc định."}
                         </p>
                       </div>
                     )}
@@ -1322,7 +1322,7 @@ function DashboardContent({
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Cần ưu tiên tiếp</p>
                       <p className="mt-2 text-lg font-semibold text-foreground">
                         {isSignedOut
-                          ? "Chọn sau Life Balance"
+                          ? "Chọn sau Cân bằng cuộc sống"
                           : weakestArea
                             ? getLifeAreaLabel(weakestArea.name)
                             : "Chưa có dữ liệu"}

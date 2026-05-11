@@ -111,7 +111,7 @@ export function AspirationalVision() {
     };
     saveUserData(data);
     toast.success("Đã lưu tầm nhìn 3 năm", {
-      description: "Bạn có thể quay lại sửa bất cứ lúc nào từ Dashboard.",
+    description: "Bạn có thể quay lại sửa bất cứ lúc nào từ Trang chính.",
     });
     navigate("/");
   };

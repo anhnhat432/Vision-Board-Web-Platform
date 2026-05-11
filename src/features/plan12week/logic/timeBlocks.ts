@@ -33,7 +33,7 @@ export function getDefaultTimeBlocks(): TimeBlock[] {
       dayOfWeek: "Tuesday",
       startTime: "09:00",
       durationMinutes: 180,
-      note: "Deep work cho tactic quan trọng nhất",
+      note: "Làm sâu cho việc quan trọng nhất",
     },
     {
       id: "timeblock_buffer_wednesday_1400",
@@ -41,7 +41,7 @@ export function getDefaultTimeBlocks(): TimeBlock[] {
       dayOfWeek: "Wednesday",
       startTime: "14:00",
       durationMinutes: 45,
-      note: "Email, admin, việc rời rạc",
+      note: "Email, việc hành chính, việc rời rạc",
     },
     {
       id: "timeblock_buffer_friday_1400",
@@ -49,7 +49,7 @@ export function getDefaultTimeBlocks(): TimeBlock[] {
       dayOfWeek: "Friday",
       startTime: "14:00",
       durationMinutes: 45,
-      note: "Dọn inbox và follow-up cuối tuần",
+      note: "Dọn hộp thư và theo dõi tiếp cuối tuần",
     },
     {
       id: "timeblock_breakout_saturday_1500",
@@ -74,17 +74,17 @@ export function validateTimeBlocks(blocks: readonly TimeBlock[]): TimeBlockValid
 
   for (const block of blocks) {
     if (!TIME_BLOCK_DAYS.includes(block.dayOfWeek)) {
-      errors.push(`Ngày của block ${block.id || block.startTime} không hợp lệ.`);
+      errors.push(`Ngày của khung ${block.id || block.startTime} không hợp lệ.`);
     }
     if (parseTimeToMinutes(block.startTime) === null) {
-      errors.push(`Giờ bắt đầu của block ${block.id || block.dayOfWeek} không hợp lệ.`);
+      errors.push(`Giờ bắt đầu của khung ${block.id || block.dayOfWeek} không hợp lệ.`);
     }
     if (
       !Number.isFinite(block.durationMinutes) ||
       block.durationMinutes < 15 ||
       block.durationMinutes > 300
     ) {
-      errors.push("Thời lượng block cần nằm trong khoảng 15-300 phút.");
+      errors.push("Thời lượng khung cần nằm trong khoảng 15-300 phút.");
     }
   }
 
@@ -102,7 +102,7 @@ export function validateTimeBlocks(blocks: readonly TimeBlock[]): TimeBlockValid
       const previous = dayBlocks[index - 1];
       const current = dayBlocks[index];
       if (previous && current && current.start < previous.end) {
-        errors.push(`${day} có block bị trùng giờ.`);
+        errors.push(`${day} có khung bị trùng giờ.`);
         break;
       }
     }

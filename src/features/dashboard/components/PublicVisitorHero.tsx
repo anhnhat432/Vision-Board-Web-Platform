@@ -13,17 +13,17 @@ interface PublicVisitorHeroProps {
 
 const FLOW_STEPS = [
   "Đánh giá cân bằng cuộc sống",
-  "Chọn insight và mục tiêu SMART",
+  "Chọn góc nhìn và mục tiêu SMART",
   "Chạy kế hoạch 12 tuần rồi review",
 ];
 
 export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: PublicVisitorHeroProps) {
   const heroDescription = isDemo
     ? "Dùng thử ngay không cần đăng nhập. Chấm cân bằng cuộc sống, chốt mục tiêu SMART, kiểm tra khả thi rồi vào kế hoạch 12 tuần có việc cho từng ngày."
-    : "Đăng ký hoặc đăng nhập để lưu workspace, đồng bộ kế hoạch và tiếp tục flow 12 tuần trên thiết bị khác.";
+    : "Đăng ký hoặc đăng nhập để lưu không gian làm việc, đồng bộ kế hoạch và tiếp tục luồng 12 tuần trên thiết bị khác.";
   const heroStats = isDemo
     ? [
-        ["1 workspace", "lưu theo trình duyệt"],
+        ["1 không gian làm việc", "lưu theo trình duyệt"],
         ["12 tuần", "kế hoạch rõ từng ngày"],
         ["Review", "giữ nhịp mỗi tuần"],
       ]
@@ -57,7 +57,7 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
                   </Button>
                   <Button variant="outline" className="border-slate-200 bg-white text-slate-900" onClick={onSignUp}>
                     <UserPlus className="h-4 w-4" />
-                    Lưu workspace bằng tài khoản
+                    Lưu không gian làm việc bằng tài khoản
                   </Button>
                 </>
               ) : (
@@ -76,7 +76,7 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
             {isDemo ? (
               <p className="max-w-2xl text-xs leading-6 text-slate-500">
                 Bắt đầu demo ngay trên trình duyệt này. Đăng ký khi bạn muốn gắn tiến độ với tài khoản. Có thể xuất dữ
-                liệu trong Settings.
+                liệu trong Cài đặt.
               </p>
             ) : null}
             <div className="grid gap-2 pt-1 sm:grid-cols-3">

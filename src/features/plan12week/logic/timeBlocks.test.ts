@@ -58,7 +58,7 @@ describe("timeBlocks", () => {
     const result = validateTimeBlocks(blocks);
 
     expect(result.isValid).toBe(false);
-    expect(result.errors).toContain("Tuesday có block bị trùng giờ.");
+    expect(result.errors).toContain("Tuesday có khung bị trùng giờ.");
   });
 
   it("finds a Strategic Block that starts within the next two hours", () => {

@@ -370,7 +370,7 @@ export function buildWeeklyPlans(
 ) {
   return Array.from({ length: 12 }, (_, index) => {
     const weekNumber = index + 1;
-    const phaseName = weekNumber <= 4 ? "Foundation" : weekNumber <= 8 ? "Build / Acceleration" : "Finish / Execution";
+    const phaseName = weekNumber <= 4 ? "Khởi động" : weekNumber <= 8 ? "Bứt phá" : "Hoàn tất / Thực hiện";
 
     return {
       weekNumber,
@@ -524,7 +524,7 @@ export function validateLeadIndicatorDraft(
     warnings.push("Đặt tên cho việc lặp lại này.");
   } else {
     if (trimmedName.length < 6) {
-      warnings.push("Tên hơi ngắn — viết rõ hành động bạn sẽ làm (ví dụ: 'viết draft 800 từ').");
+      warnings.push("Tên hơi ngắn — viết rõ hành động bạn sẽ làm (ví dụ: 'viết bản nháp 800 từ').");
     }
     if (GENERIC_NAME_PATTERNS.some((pattern) => pattern.test(trimmedName))) {
       warnings.push("Tên còn quá chung chung — mô tả cụ thể hành động hằng tuần.");

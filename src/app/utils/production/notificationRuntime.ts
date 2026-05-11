@@ -57,7 +57,7 @@ export async function syncEmailReminderSchedule(): Promise<EmailSyncResult> {
       sentCount: 0,
       failedCount: dueItems.length,
       status: "offline",
-      message: "Đang offline — email sẽ được gửi khi có kết nối.",
+      message: "Đang mất mạng — email sẽ được gửi khi có kết nối.",
     };
   }
 
@@ -73,7 +73,7 @@ export async function syncEmailReminderSchedule(): Promise<EmailSyncResult> {
       sentCount: dueItems.length,
       failedCount: 0,
       status: "not_configured",
-      message: "Chưa cấu hình email endpoint — đã đánh dấu gửi locally.",
+      message: "Chưa cấu hình điểm nhận email — đã đánh dấu gửi trên thiết bị.",
     };
   }
 

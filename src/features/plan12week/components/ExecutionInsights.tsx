@@ -16,14 +16,14 @@ export function ExecutionInsights({
   return (
     <Card className="border-0 bg-white/85 shadow-sm">
       <CardHeader className="pb-2">
-        <CardTitle className="text-base text-slate-900">Execution Insights</CardTitle>
+        <CardTitle className="text-base text-slate-900">Góc nhìn thực hiện</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-2 text-sm text-slate-700 sm:grid-cols-2">
         <p>
-          <span className="font-semibold">Average execution score:</span> {averageExecutionScore}
+          <span className="font-semibold">Điểm thực hiện trung bình:</span> {averageExecutionScore}
         </p>
         <p>
-          <span className="font-semibold">Longest streak:</span> {longestStreak} days
+          <span className="font-semibold">Chuỗi ngày dài nhất:</span> {longestStreak} ngày
         </p>
         <p>
           <span className="font-semibold">Best performing week:</span>{" "}

@@ -113,7 +113,7 @@ function detectWeeklyPlanConflicts(
         backendId: backendWeek.id,
         localValue: localFocus,
         backendValue: backendFocus,
-        message: `Week ${weeklyPlan.weekNumber} focus differs between local and backend.`,
+        message: `Trọng tâm tuần ${weeklyPlan.weekNumber} khác nhau giữa thiết bị và máy chủ.`,
       });
     }
 
@@ -130,7 +130,7 @@ function detectWeeklyPlanConflicts(
         backendId: backendWeek.id,
         localValue: localMilestone,
         backendValue: backendMilestone,
-        message: `Week ${weeklyPlan.weekNumber} milestone differs between local and backend.`,
+        message: `Cột mốc tuần ${weeklyPlan.weekNumber} khác nhau giữa thiết bị và máy chủ.`,
       });
     }
   });
@@ -155,7 +155,7 @@ function detectTaskConflicts(
         backendId: linkedTaskId,
         localValue: localTask.title,
         backendValue: "",
-        message: `Local task ${localTask.id} is linked to a backend task that no longer exists.`,
+        message: `Việc trên thiết bị ${localTask.id} đang liên kết với một việc trên máy chủ không còn tồn tại.`,
       });
       return;
     }
@@ -172,7 +172,7 @@ function detectTaskConflicts(
         backendId: backendTask.id,
         localValue: formatCompletion(localCompleted),
         backendValue: formatCompletion(backendCompleted),
-        message: `Task "${localTask.title}" completion differs between local and backend.`,
+        message: `Trạng thái hoàn thành của việc "${localTask.title}" khác nhau giữa thiết bị và máy chủ.`,
       });
     }
 
@@ -186,7 +186,7 @@ function detectTaskConflicts(
         backendId: backendTask.id,
         localValue: localTitle,
         backendValue: backendTitle,
-        message: `Task title differs for local task ${localTask.id}.`,
+        message: `Tên việc khác nhau với việc trên thiết bị ${localTask.id}.`,
       });
     }
 
@@ -200,7 +200,7 @@ function detectTaskConflicts(
         backendId: backendTask.id,
         localValue: localDate,
         backendValue: backendDate,
-        message: `Task "${localTask.title}" scheduled date differs between local and backend.`,
+        message: `Ngày lên lịch của việc "${localTask.title}" khác nhau giữa thiết bị và máy chủ.`,
       });
     }
   });
@@ -236,7 +236,7 @@ function detectDailyCheckInConflicts(
             backendId: log.id,
             localValue: formatCompletion(localCheckIn.didWorkToday),
             backendValue: formatCompletion(backendDidWork),
-            message: `Daily check-in on ${dateKey} differs between local and backend.`,
+            message: `Check-in ngày ${dateKey} khác nhau giữa thiết bị và máy chủ.`,
           });
         });
       });
@@ -264,7 +264,7 @@ function detectWeeklyReviewConflicts(
         backendId: backendWeek.id,
         localValue: localOutput,
         backendValue: backendOutput,
-        message: `Week ${weekNumber} review output differs between local and backend.`,
+        message: `Kết quả review tuần ${weekNumber} khác nhau giữa thiết bị và máy chủ.`,
       });
     }
 
@@ -281,7 +281,7 @@ function detectWeeklyReviewConflicts(
         backendId: backendWeek.id,
         localValue: localPriority,
         backendValue: backendPriority,
-        message: `Week ${weekNumber} review next priority differs between local and backend.`,
+        message: `Ưu tiên tiếp theo trong review tuần ${weekNumber} khác nhau giữa thiết bị và máy chủ.`,
       });
     }
 
@@ -294,7 +294,7 @@ function detectWeeklyReviewConflicts(
         backendId: backendWeek.id,
         localValue: String(localScore),
         backendValue: String(backendScore),
-        message: `Week ${weekNumber} review score differs between local and backend.`,
+        message: `Điểm review tuần ${weekNumber} khác nhau giữa thiết bị và máy chủ.`,
       });
     }
   });

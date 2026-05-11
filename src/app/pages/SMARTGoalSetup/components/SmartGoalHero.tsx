@@ -62,10 +62,12 @@ export function SmartGoalHero({
             data-testid="smart-goal-handoff-card"
             className="rounded-[var(--r-control)] border border-white/18 bg-white/12 p-4 text-white shadow-sm"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/62">Life Insight đã chọn</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/62">
+              Góc nhìn cuộc sống đã chọn
+            </p>
             <p className="mt-2 text-2xl font-bold">{focusAreaLabel}</p>
             <p className="mt-2 text-sm leading-6 text-white/78">
-              Bắt đầu từ insight này, rồi biến nó thành một kết quả đo được trong {smartGoalStarter.targetWeeks} tuần.
+              Bắt đầu từ góc nhìn này, rồi biến nó thành một kết quả đo được trong {smartGoalStarter.targetWeeks} tuần.
             </p>
             <div className="mt-4 stack-tight">
               <div className="rounded-[var(--r-control)] border border-white/14 bg-black/10 px-3 py-2">

@@ -173,10 +173,10 @@ export function useTwelveWeekSettingsActions({
   const handleOutboxItemToggle = useCallback((item: SyncOutboxItem) => {
     if (item.status === "pending") {
       archiveOutboxItem(item.id);
-      toast.success("Mục outbox đã được lưu lại.");
+      toast.success("Mục trong hàng chờ gửi đã được lưu lại.");
     } else {
       restoreOutboxItem(item.id);
-      toast.success("Mục outbox đã được khôi phục về hàng chờ.");
+      toast.success("Mục trong hàng chờ gửi đã được khôi phục về hàng chờ.");
     }
     refreshSnapshotMeta();
   }, [refreshSnapshotMeta]);
@@ -254,7 +254,7 @@ export function useTwelveWeekSettingsActions({
   const handleClearLocalSignals = useCallback(() => {
     clearLocalDeviceSignals();
     setIsClearLocalDialogOpen(false);
-    toast.success("Đã xóa log, outbox và trạng thái nhắc việc trên thiết bị này.");
+    toast.success("Đã xóa nhật ký, hàng chờ gửi và trạng thái nhắc việc trên thiết bị này.");
     refreshSnapshotMeta();
   }, [setIsClearLocalDialogOpen, refreshSnapshotMeta]);
 

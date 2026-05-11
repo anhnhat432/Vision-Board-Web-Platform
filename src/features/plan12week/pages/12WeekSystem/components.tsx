@@ -35,7 +35,7 @@ interface WeekCompletionSummary {
 function getHeaderPhaseInfo(currentWeek: number) {
   if (currentWeek <= 4) {
     return {
-      label: "Ramp",
+      label: "Khởi động",
       badgeClassName:
         "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/30 dark:bg-violet-950/35 dark:text-violet-200",
       tileClassName:
@@ -47,7 +47,7 @@ function getHeaderPhaseInfo(currentWeek: number) {
 
   if (currentWeek <= 8) {
     return {
-      label: "Peak",
+      label: "Bứt phá",
       badgeClassName:
         "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700 dark:border-fuchsia-500/30 dark:bg-fuchsia-950/35 dark:text-fuchsia-200",
       tileClassName:
@@ -58,7 +58,7 @@ function getHeaderPhaseInfo(currentWeek: number) {
   }
 
   return {
-    label: "Harvest",
+    label: "Thu hoạch",
     badgeClassName:
       "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/35 dark:text-emerald-200",
     tileClassName:

@@ -232,7 +232,7 @@ export function ReviewStep({
           className="rounded-[var(--r-card)] border border-white/70 bg-white/72 px-5"
         >
           <AccordionTrigger className="text-base font-semibold text-slate-900 hover:no-underline">
-            Outcome summary
+            Tóm tắt kết quả
           </AccordionTrigger>
           <AccordionContent className="stack-stack pb-5">
             <div>
@@ -277,7 +277,7 @@ export function ReviewStep({
           className="rounded-[var(--r-card)] border border-white/70 bg-white/72 px-5"
         >
           <AccordionTrigger className="text-base font-semibold text-slate-900 hover:no-underline">
-            Lead indicators preview
+            Xem trước việc lặp lại
           </AccordionTrigger>
           <AccordionContent className="pb-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -319,7 +319,7 @@ export function ReviewStep({
           className="rounded-[var(--r-card)] border border-white/70 bg-white/72 px-5"
         >
           <AccordionTrigger className="text-base font-semibold text-slate-900 hover:no-underline">
-            Schedule preview
+            Xem trước lịch
           </AccordionTrigger>
           <AccordionContent className="pb-5">
             <div className="flex items-center gap-2">
@@ -352,7 +352,7 @@ export function ReviewStep({
           className="rounded-[var(--r-card)] border border-white/70 bg-white/72 px-5"
         >
           <AccordionTrigger className="text-base font-semibold text-slate-900 hover:no-underline">
-            Tactics list
+            Danh sách việc
           </AccordionTrigger>
           <AccordionContent className="pb-5">
             {weekOneTaskPreview.length > 0 ? (

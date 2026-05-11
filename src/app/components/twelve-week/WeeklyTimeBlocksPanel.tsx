@@ -31,14 +31,14 @@ interface TimeBlockDraft {
 }
 
 const TYPE_LABELS: Record<TimeBlockType, string> = {
-  strategic: "Strategic Block",
-  buffer: "Buffer Block",
-  breakout: "Breakout Block",
+  strategic: "Khung chiến lược",
+  buffer: "Khung dự phòng",
+  breakout: "Khung đột phá",
 };
 
 const TYPE_DESCRIPTIONS: Record<TimeBlockType, string> = {
-  strategic: "3 giờ deep work cho tactic quan trọng nhất.",
-  buffer: "30-60 phút xử lý email, admin, việc rời rạc.",
+  strategic: "3 giờ làm sâu cho việc lặp lại quan trọng nhất.",
+  buffer: "30-60 phút xử lý email, việc hành chính nhỏ, việc rời rạc.",
   breakout: "3 giờ nghỉ chủ động, tách khỏi công việc.",
 };
 
@@ -137,7 +137,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
               Performance Time Blocking
             </CardTitle>
             <CardDescription className="mt-2 text-slate-700">
-              Gợi ý nhịp tuần theo 12 Week Year: Strategic, Buffer và Breakout Block. Lịch này chỉ lưu local, không đồng bộ calendar.
+              Gợi ý nhịp tuần theo 12 Week Year: Khung chiến lược, Khung dự phòng và Khung đột phá. Lịch này chỉ lưu trên thiết bị, không đồng bộ lịch.
             </CardDescription>
           </div>
           {sortedBlocks.length === 0 && (
@@ -155,7 +155,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
               <p className="text-sm font-semibold text-slate-950">{DAY_LABELS[day]}</p>
               <div className="mt-[var(--space-inline)] space-y-2">
                 {blocks.length === 0 ? (
-                  <p className="text-xs leading-5 text-slate-500">Chưa có block.</p>
+                  <p className="text-xs leading-5 text-slate-500">Chưa có khung.</p>
                 ) : (
                   blocks.map((block) => (
                     <div
@@ -180,7 +180,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
                         }}
                       >
                         <Pencil className="h-3 w-3" />
-                        Sửa block
+                        Sửa khung
                       </Button>
                     </div>
                   ))
@@ -205,8 +205,8 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
       <Dialog open={Boolean(editingDraft)} onOpenChange={(open) => !open && setEditingDraft(null)}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Sửa block</DialogTitle>
-            <DialogDescription>Chỉnh ngày, giờ bắt đầu và thời lượng. App sẽ chặn block trùng giờ trong cùng ngày.</DialogDescription>
+            <DialogTitle>Sửa khung</DialogTitle>
+            <DialogDescription>Chỉnh ngày, giờ bắt đầu và thời lượng. App sẽ chặn khung trùng giờ trong cùng ngày.</DialogDescription>
           </DialogHeader>
           {editingDraft ? (
             <div className="stack-stack">
@@ -285,7 +285,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
                   Huỷ
                 </Button>
                 <Button type="button" onClick={handleSaveDraft}>
-                  Lưu block
+                  Lưu khung
                 </Button>
               </div>
             </div>

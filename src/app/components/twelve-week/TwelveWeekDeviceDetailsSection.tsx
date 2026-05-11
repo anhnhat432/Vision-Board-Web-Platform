@@ -425,7 +425,7 @@ export function TwelveWeekDeviceDetailsSection({
             </p>
             <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-700">
               <li>• Hàng chờ gửi (nếu bật giữ lại dữ liệu chờ)</li>
-              <li>• Push subscription endpoint (nếu bật push)</li>
+              <li>• Đường dẫn đăng ký thông báo đẩy (nếu bật push)</li>
               <li>• Sự kiện analytics (nếu bật cho phép)</li>
             </ul>
             <p className="mt-2 text-xs text-amber-600">

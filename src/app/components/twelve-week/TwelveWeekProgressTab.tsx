@@ -113,7 +113,7 @@ export function getProgressNextActionSuggestion(
   if (input.reviewDueToday && !input.hasReviewedCurrentWeek) {
     return {
       target: "week",
-      label: "Mở Weekly Review",
+      label: "Mở review tuần",
       buttonLabel: "Mở tab Tuần",
     };
   }
@@ -128,8 +128,8 @@ export function getProgressNextActionSuggestion(
 
   return {
     target: "settings",
-    label: input.hasAnyTasks ? "Hoàn thành việc cốt lõi hôm nay" : "Hoàn tất setup ở Settings",
-    buttonLabel: input.hasAnyTasks ? "Mở tab Hôm nay" : "Mở Settings",
+    label: input.hasAnyTasks ? "Hoàn thành việc cốt lõi hôm nay" : "Hoàn tất setup trong Cài đặt",
+    buttonLabel: input.hasAnyTasks ? "Mở tab Hôm nay" : "Mở Cài đặt",
   };
 }
 
@@ -349,10 +349,10 @@ export function TwelveWeekProgressTab({
           <CardContent className="p-5">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
               <BarChart3 className="h-3.5 w-3.5" />
-              Lead progress
+              Tiến độ việc lặp lại
             </p>
             <div className="mt-[var(--space-inline)] flex items-start justify-between gap-3">
-              <p className="text-3xl font-bold text-slate-950">Lead trung bình {averageLeadScore}%</p>
+              <p className="text-3xl font-bold text-slate-950">Việc lặp lại trung bình {averageLeadScore}%</p>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
@@ -367,7 +367,7 @@ export function TwelveWeekProgressTab({
               </Tooltip>
             </div>
             <p className="mt-1 text-sm text-slate-600">
-              Tuần hiện tại: {currentWeekScoreValue}% lead. Điểm hệ cũ: {averageScore}
+              Tuần hiện tại: {currentWeekScoreValue}% việc lặp lại. Điểm hệ cũ: {averageScore}
             </p>
           </CardContent>
         </Card>

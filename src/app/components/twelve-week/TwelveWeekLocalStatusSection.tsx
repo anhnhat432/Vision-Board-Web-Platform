@@ -60,8 +60,8 @@ function getMutationQueueSyncBlocker(input: {
   if (!mutationQueueSyncStatus.realMode) return "Bản dùng thử lưu trên trình duyệt này, không cần đồng bộ tài khoản.";
   if (!mutationQueueSyncStatus.featureEnabled) return "Đồng bộ thay đổi đang tắt.";
   if (!mutationQueueSyncStatus.pullFeatureEnabled) return "Khôi phục dữ liệu tài khoản đang tắt.";
-  if (!mutationQueueSyncStatus.apiConfigured) return "Chưa cấu hình API để gửi hàng chờ.";
-  if (!backendConnectionStatus.authConfigured) return "Chưa cấu hình đăng nhập Firebase.";
+  if (!mutationQueueSyncStatus.apiConfigured) return "Chưa cấu hình kết nối tài khoản để gửi hàng chờ.";
+  if (!backendConnectionStatus.authConfigured) return "Chưa cấu hình đăng nhập.";
   if (backendConnectionStatus.authLoading) return "Đang kiểm tra phiên đăng nhập.";
   if (!backendConnectionStatus.signedIn) return "Cần đăng nhập để gửi hàng chờ lên tài khoản.";
   if (!backendConnectionStatus.profileReady) return "Đang chờ hồ sơ tài khoản sẵn sàng.";
@@ -137,7 +137,7 @@ function getPullEntityKindLabel(kind: MutationQueueMergeReport["conflicts"][numb
     case "weeklyReview":
       return "Review tuần";
     default:
-      return "Mục trong workspace";
+      return "Mục trong không gian làm việc";
   }
 }
 
@@ -211,11 +211,11 @@ function getBackendStatusLabel(status: TwelveWeekSettingsTabProps["backendConnec
   if (!status.authConfigured) return "Chưa cấu hình";
   if (status.authLoading) return "Đang kiểm tra";
   if (!status.signedIn) return "Chưa đăng nhập";
-  if (!status.profileReady) return "Đang nối profile";
+  if (!status.profileReady) return "Đang kết nối hồ sơ";
   if (status.syncing) return "Đang đồng bộ";
   if (status.syncStatus === "success") return "Đã đồng bộ";
   if (status.syncStatus === "partial") return "Đồng bộ một phần";
-  if (status.syncStatus === "error") return "Có lỗi sync";
+  if (status.syncStatus === "error") return "Có lỗi đồng bộ";
   return "Đã sẵn sàng";
 }
 
@@ -261,7 +261,7 @@ function getConflictKindLabel(kind: BackendConflict["kind"]): string {
     case "task_schedule":
       return "Lịch việc";
     case "linked_task_missing_backend":
-      return "Việc đã link";
+      return "Việc đã liên kết";
     case "daily_checkin":
       return "Check-in ngày";
     case "weekly_review_output":
@@ -423,7 +423,7 @@ function MutationQueueConflictResolutionPanel({
         <summary className="cursor-pointer text-sm font-semibold text-slate-900">Xem chi tiết</summary>
         <div className="mt-[var(--space-inline)] stack-tight text-xs leading-5 text-slate-600">
           <p>
-            Chi tiết bên dưới chỉ hiển thị loại dữ liệu và số lượng. Nội dung note, reflection, check-in hoặc review
+            Chi tiết bên dưới chỉ hiển thị loại dữ liệu và số lượng. Nội dung ghi chú, nhìn lại, check-in hoặc review
             không được mở ra ở đây.
           </p>
           {visibleConflicts.length > 0 ? (
@@ -760,7 +760,7 @@ export function TwelveWeekLocalStatusSection({
               </p>
               <div className="grid grid-cols-2 gap-2 pt-2 sm:grid-cols-4">
                 <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Chờ sync</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Chờ đồng bộ</p>
                   <p className="mt-1 text-lg font-semibold text-slate-950">{queueSummary.pendingCount}</p>
                 </div>
                 <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
@@ -768,7 +768,7 @@ export function TwelveWeekLocalStatusSection({
                   <p className="mt-1 text-lg font-semibold text-slate-950">{queueSummary.inFlightCount}</p>
                 </div>
                 <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Lỗi/retry</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Lỗi/thử lại</p>
                   <p className="mt-1 text-lg font-semibold text-slate-950">{queueSummary.failedOrRetryableCount}</p>
                 </div>
                 <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
@@ -778,11 +778,11 @@ export function TwelveWeekLocalStatusSection({
               </div>
               <div className="grid gap-2 pt-2 text-xs leading-5 text-slate-500 sm:grid-cols-2">
                 <p>
-                  <span className="font-semibold text-slate-700">Bắt đầu sync gần nhất:</span>{" "}
+                  <span className="font-semibold text-slate-700">Bắt đầu đồng bộ gần nhất:</span>{" "}
                   {formatMutationQueueTimestamp(queueSummary.lastDrainStartedAt)}
                 </p>
                 <p>
-                  <span className="font-semibold text-slate-700">Kết thúc sync gần nhất:</span>{" "}
+                  <span className="font-semibold text-slate-700">Kết thúc đồng bộ gần nhất:</span>{" "}
                   {formatMutationQueueTimestamp(queueSummary.lastDrainFinishedAt)}
                 </p>
               </div>
@@ -796,11 +796,11 @@ export function TwelveWeekLocalStatusSection({
                         ? "text-emerald-700"
                         : "text-slate-500"
                   }`}>
-                    {mutationQueueSyncStatus.networkStatus === "offline" ? "Offline" : mutationQueueSyncStatus.networkStatus === "online" ? "Online" : "Không rõ"}
+                    {mutationQueueSyncStatus.networkStatus === "offline" ? "Mất mạng" : mutationQueueSyncStatus.networkStatus === "online" ? "Có mạng" : "Không rõ"}
                   </p>
                 </div>
                 <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Tự retry khi online</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Tự thử lại khi có mạng</p>
                   <p className="mt-1 text-sm font-semibold text-slate-950">
                     {mutationQueueSyncStatus.retryOnReconnectEnabled ? "Bật" : "Tắt"}
                   </p>
@@ -810,7 +810,7 @@ export function TwelveWeekLocalStatusSection({
                 <div className="flex items-start gap-2 rounded-[var(--r-control)] border border-amber-200 bg-amber-50 px-3 py-2">
                   <WifiOff className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
                   <p className="text-xs leading-5 text-amber-800">
-                    Trình duyệt đang offline. Thay đổi vẫn lưu trên thiết bị và sẽ đồng bộ khi có mạng.
+                    Trình duyệt đang mất mạng. Thay đổi vẫn lưu trên thiết bị và sẽ đồng bộ khi có mạng.
                   </p>
                 </div>
               ) : null}
@@ -862,7 +862,7 @@ export function TwelveWeekLocalStatusSection({
               </Button>
             </div>
             <p className="text-xs leading-5 text-slate-500">
-              Tải bản sao dữ liệu tài khoản dưới dạng JSON. Xóa dữ liệu tài khoản chỉ xóa dữ liệu 12 tuần trên server,
+              Tải bản sao dữ liệu tài khoản dưới dạng JSON. Xóa dữ liệu tài khoản chỉ xóa dữ liệu 12 tuần trên tài khoản,
               không xóa dữ liệu trên thiết bị, gói Plus hay tài khoản đăng nhập.
             </p>
           </div>

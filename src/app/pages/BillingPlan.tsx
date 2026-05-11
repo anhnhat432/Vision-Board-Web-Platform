@@ -392,7 +392,7 @@ export function BillingPlan() {
       "Tôi cần hỗ trợ thanh toán Dear Our Future.",
       `Mã đơn gần nhất: ${latestOrderId}`,
       `Gói hiện tại: ${currentPlanCode}`,
-      "Tôi sẽ gửi kèm mã giao dịch hoặc hóa đơn provider nếu có.",
+      "Tôi sẽ gửi kèm mã giao dịch hoặc hóa đơn từ đơn vị thanh toán nếu có.",
     ].join("\n");
 
     try {
@@ -427,8 +427,8 @@ export function BillingPlan() {
         titleAs="h1"
         description={
           demoMode
-            ? "Bạn có thể xem trước quyền Plus mà không thanh toán. Khi mở thanh toán thật, giao dịch sẽ được xác nhận qua trang checkout."
-            : "Nâng cấp, kiểm tra quyền premium và quản lý thanh toán cho tài khoản của bạn."
+            ? "Bạn có thể xem trước quyền Plus mà không thanh toán. Khi mở thanh toán thật, giao dịch sẽ được xác nhận qua trang thanh toán."
+            : "Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản của bạn."
         }
         className="flow-surface overflow-hidden text-white"
         titleClassName="max-w-3xl text-2xl font-bold tracking-normal text-white sm:text-3xl lg:text-4xl"
@@ -463,7 +463,7 @@ export function BillingPlan() {
               </div>
             </div>
             <Button asChild size="sm" className="w-full sm:w-auto">
-              <Link to="/12-week-system">Bắt đầu 12-week plan</Link>
+              <Link to="/12-week-system">Bắt đầu kế hoạch 12 tuần</Link>
             </Button>
           </CardContent>
         </Card>
@@ -496,7 +496,7 @@ export function BillingPlan() {
                 </p>
                 <p className={`mt-1 text-sm leading-6 ${isExpired ? "text-red-700" : "text-amber-700"}`}>
                   {isExpired
-                    ? "Quyền Plus đã được thu hồi. Gia hạn để mở lại mẫu nâng cao, review insight và thống kê."
+                    ? "Quyền Plus đã được thu hồi. Gia hạn để mở lại mẫu nâng cao, góc nhìn review và thống kê."
                     : `Chu kỳ hiện tại hết hạn ngày ${formatBillingExpiryDate(expiryInfo.expiresAt)}. Gia hạn sớm để không bị gián đoạn quyền Plus.`}
                 </p>
               </div>
@@ -544,7 +544,7 @@ export function BillingPlan() {
                 {billingStatus.manageBillingReady
                   ? isOpeningPortal
                     ? "Đang mở…"
-                    : "Quản lý subscription"
+                    : "Quản lý gói"
                   : "Đang chuẩn bị"}
               </Button>
             ) : null
@@ -580,7 +580,7 @@ export function BillingPlan() {
                 <p className="font-medium text-slate-900">{renewalLabel}</p>
               </div>
               <div className="flow-muted p-4">
-                <p className="text-slate-500">Provider</p>
+                <p className="text-slate-500">Đơn vị thanh toán</p>
                 <p className="flex items-center gap-2 font-medium text-slate-900">
                   <CreditCard className="h-4 w-4 text-slate-500" />
                   Thanh toán qua {providerLabel}
@@ -687,7 +687,7 @@ export function BillingPlan() {
         <AlertDialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Huỷ subscription?</AlertDialogTitle>
+              <AlertDialogTitle>Huỷ gói?</AlertDialogTitle>
               <AlertDialogDescription>
                 Plus sẽ hết hạn sau {cancelEffectiveDate}, dữ liệu giữ nguyên.
               </AlertDialogDescription>
@@ -719,7 +719,7 @@ export function BillingPlan() {
               Lịch sử thanh toán
             </CardTitle>
             <CardDescription>
-              Các giao dịch gần đây của tài khoản này qua provider đang cấu hình.
+              Các giao dịch gần đây của tài khoản này qua đơn vị thanh toán đang cấu hình.
             </CardDescription>
           </CardHeader>
           <CardContent className="stack-stack">
@@ -743,7 +743,7 @@ export function BillingPlan() {
               <div className="flow-muted p-4">
                 <p className="text-sm font-medium text-slate-900">Chưa có giao dịch nào.</p>
                 <p className="mt-1 text-sm text-slate-600">
-                  Khi provider gửi lịch sử thanh toán, giao dịch và hóa đơn sẽ xuất hiện tại đây.
+                  Khi đơn vị thanh toán gửi lịch sử thanh toán, giao dịch và hóa đơn sẽ xuất hiện tại đây.
                 </p>
               </div>
             )}
@@ -815,7 +815,7 @@ export function BillingPlan() {
               Hỗ trợ thanh toán
             </CardTitle>
             <CardDescription>
-              Nếu provider đã xác nhận thanh toán nhưng Plus chưa mở sau vài phút, gửi mã đơn để kiểm tra thủ công.
+              Nếu đơn vị thanh toán đã xác nhận nhưng Plus chưa mở sau vài phút, gửi mã đơn để kiểm tra thủ công.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
@@ -860,7 +860,7 @@ export function BillingPlan() {
           </CardTitle>
           <CardDescription>
             {realMode
-              ? "Quyền premium được quản lý qua tài khoản của bạn."
+              ? "Quyền nâng cao được quản lý qua tài khoản của bạn."
               : "Các quyền Plus đang mở trên trình duyệt này."}
           </CardDescription>
         </CardHeader>
@@ -912,20 +912,20 @@ export function BillingPlan() {
           <CardDescription>
             {demoMode
               ? "Kiểm tra quyền Plus, khôi phục quyền đã mở hoặc quay lại trang chính."
-              : "Kiểm tra quyền premium, khôi phục giao dịch đã mua hoặc quay lại trang chính."}
+              : "Kiểm tra quyền nâng cao, khôi phục giao dịch đã mua hoặc quay lại trang chính."}
           </CardDescription>
         </CardHeader>
         <CardContent className="stack-stack">
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" onClick={handleSyncEntitlements} disabled={isSyncing}>
               <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
-              {isSyncing ? "Đang kiểm tra…" : demoMode ? "Kiểm tra quyền Plus" : "Kiểm tra quyền premium"}
+              {isSyncing ? "Đang kiểm tra…" : demoMode ? "Kiểm tra quyền Plus" : "Kiểm tra quyền nâng cao"}
             </Button>
             <Button variant="outline" onClick={handleRestoreAccess} disabled={isRestoring}>
               {isRestoring ? "Đang khôi phục…" : demoMode ? "Khôi phục quyền Plus" : "Khôi phục quyền đã mua"}
             </Button>
             <Button variant="outline" onClick={() => navigate("/")}>
-              Quay lại bảng điều khiển
+              Quay lại Trang chính
             </Button>
           </div>
 
@@ -951,12 +951,12 @@ export function BillingPlan() {
       {demoMode && shouldShowBillingDebugUi() && (
         <Card className="flow-panel">
           <CardHeader>
-            <CardTitle className="text-sm">Thông tin billing provider</CardTitle>
+            <CardTitle className="text-sm">Thông tin nhà cung cấp thanh toán</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-2 text-xs text-slate-600 sm:grid-cols-2">
               <div>
-                <span className="text-slate-400">Provider: </span>
+                <span className="text-slate-400">Nhà cung cấp: </span>
                 {getBillingProviderModeLabel(billingStatus.mode)}
                 {billingStatus.providerLabel && ` (${billingStatus.providerLabel})`}
               </div>
@@ -983,7 +983,7 @@ export function BillingPlan() {
         <CardHeader>
           <CardTitle>So sánh các gói</CardTitle>
           <CardDescription>
-            {demoMode ? "So sánh Free với Plus." : "So sánh Free với Plus."}
+            {demoMode ? "So sánh Miễn phí với Plus." : "So sánh Miễn phí với Plus."}
           </CardDescription>
         </CardHeader>
         <CardContent>

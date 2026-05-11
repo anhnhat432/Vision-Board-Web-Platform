@@ -22,14 +22,14 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
 
       <SectionBlock
         title="Lịch tuần tham chiếu"
-        description="Performance Time Blocking gọn cho MVP: deep work, buffer và nghỉ chủ động trong tuần."
+        description="Khung làm việc tối ưu (bản gọn): chuyên sâu, dự phòng và nghỉ chủ động trong tuần."
       >
         <WeeklyTimeBlocksPanel value={props.system.weeklyTimeBlocks ?? []} onChange={props.onTimeBlocksChange} />
       </SectionBlock>
 
       <SectionBlock
         title="Sao lưu dữ liệu"
-        description="Xuất hoặc nhập bản sao local-first của cycle khi bạn cần đổi trình duyệt hoặc giữ bản dự phòng."
+        description="Xuất hoặc nhập bản sao trên thiết bị của chu kỳ khi bạn cần đổi trình duyệt hoặc giữ bản dự phòng."
       >
         <DataStorageInfo variant="inline" />
       </SectionBlock>

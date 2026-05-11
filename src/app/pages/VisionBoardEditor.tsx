@@ -92,7 +92,7 @@ const ICON_COMPONENTS = {
 type IconName = keyof typeof ICON_COMPONENTS;
 
 const ICON_OPTIONS = Object.keys(ICON_COMPONENTS) as IconName[];
-const IMAGE_SUGGESTIONS = ["luxury workspace", "healthy morning", "freedom travel", "dream home"];
+const IMAGE_SUGGESTIONS = ["không gian làm việc đẹp", "buổi sáng khỏe mạnh", "du lịch tự do", "ngôi nhà mơ ước"];
 const QUOTE_SUGGESTIONS = [
   "Mỗi ngày tiến một chút vẫn là tiến lên.",
   "Kỷ luật là cây cầu nối tầm nhìn với kết quả.",
@@ -100,18 +100,18 @@ const QUOTE_SUGGESTIONS = [
 ];
 
 const CURATED_IMAGES: Array<{ label: string; url: string }> = [
-  { label: "Workspace", url: "https://picsum.photos/seed/vision-workspace/480/360" },
-  { label: "Sunrise", url: "https://picsum.photos/seed/vision-sunrise/480/360" },
-  { label: "Travel", url: "https://picsum.photos/seed/vision-freedom-travel/480/360" },
-  { label: "Home", url: "https://picsum.photos/seed/vision-dream-home/480/360" },
-  { label: "Fitness", url: "https://picsum.photos/seed/vision-fitness-run/480/360" },
-  { label: "Nature", url: "https://picsum.photos/seed/vision-nature-forest/480/360" },
-  { label: "City", url: "https://picsum.photos/seed/vision-city-skyline/480/360" },
-  { label: "Beach", url: "https://picsum.photos/seed/vision-ocean-beach/480/360" },
-  { label: "Books", url: "https://picsum.photos/seed/vision-books-study/480/360" },
-  { label: "Food", url: "https://picsum.photos/seed/vision-healthy-food/480/360" },
-  { label: "Art", url: "https://picsum.photos/seed/vision-creative-art/480/360" },
-  { label: "Garden", url: "https://picsum.photos/seed/vision-garden-bloom/480/360" },
+  { label: "Không gian", url: "https://picsum.photos/seed/vision-workspace/480/360" },
+  { label: "Bình minh", url: "https://picsum.photos/seed/vision-sunrise/480/360" },
+  { label: "Du lịch", url: "https://picsum.photos/seed/vision-freedom-travel/480/360" },
+  { label: "Nhà", url: "https://picsum.photos/seed/vision-dream-home/480/360" },
+  { label: "Vận động", url: "https://picsum.photos/seed/vision-fitness-run/480/360" },
+  { label: "Thiên nhiên", url: "https://picsum.photos/seed/vision-nature-forest/480/360" },
+  { label: "Thành phố", url: "https://picsum.photos/seed/vision-city-skyline/480/360" },
+  { label: "Biển", url: "https://picsum.photos/seed/vision-ocean-beach/480/360" },
+  { label: "Sách", url: "https://picsum.photos/seed/vision-books-study/480/360" },
+  { label: "Ẩm thực", url: "https://picsum.photos/seed/vision-healthy-food/480/360" },
+  { label: "Nghệ thuật", url: "https://picsum.photos/seed/vision-creative-art/480/360" },
+  { label: "Vườn", url: "https://picsum.photos/seed/vision-garden-bloom/480/360" },
 ];
 
 // Upload hardening constants — module scope so they are not recreated on each render
@@ -242,7 +242,7 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
           <div className="overflow-hidden rounded-[var(--r-card)] border border-white/85 bg-white/90 p-2 shadow-2xl">
             <ImageWithFallback
               src={item.content}
-              alt="Phần tử bảng tầm nhìn"
+              alt="Phần tử vision board"
               className="rounded-[var(--r-tile)] shadow-sm"
               style={{ width: `${item.width - 16}px` }}
             />
@@ -257,7 +257,7 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
             <div className="flex items-center gap-2 text-violet-600">
               <MessageSquareQuote className="h-4 w-4" />
               <span className="text-xs font-semibold uppercase tracking-[0.18em]">
-                Quote
+                Câu nói
               </span>
             </div>
             <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-700">{item.content}</p>
@@ -325,7 +325,7 @@ export function VisionBoardEditor() {
         return;
       }
 
-      toast.info("Bảng tầm nhìn này không còn tồn tại. Đang đưa bạn về thư viện.");
+      toast.info("Vision board này không còn tồn tại. Đang đưa bạn về thư viện.");
       navigate("/gallery", { replace: true });
       return;
     }
@@ -427,13 +427,13 @@ export function VisionBoardEditor() {
       }, 140);
     }
 
-    toast.success(id ? "Canvas đã được làm mới." : "Board đã vào thư viện.", {
+    toast.success(id ? "Bảng đã được làm mới." : "Vision board đã vào thư viện.", {
       description:
         achievementCopy?.title
           ? `${achievementCopy.title}. ${achievementCopy.description}`
           : id
-            ? "Phiên bản mới nhất của board này đã sẵn sàng để bạn tiếp tục nuôi cảm hứng."
-            : "Board mới của bạn đã được lưu và sẽ được spotlight ngay trong thư viện.",
+            ? "Phiên bản mới nhất của bảng này đã sẵn sàng để bạn tiếp tục nuôi cảm hứng."
+            : "Vision board mới của bạn đã được lưu và sẽ được nổi bật ngay trong thư viện.",
     });
 
     setHasUnsavedChanges(false);
@@ -621,9 +621,9 @@ export function VisionBoardEditor() {
         >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Rời khỏi board khi chưa lưu?</AlertDialogTitle>
+              <AlertDialogTitle>Rời khỏi bảng khi chưa lưu?</AlertDialogTitle>
               <AlertDialogDescription>
-                Bạn đang có thay đổi chưa được lưu. Nếu rời trang bây giờ, các thay đổi trên canvas sẽ bị mất.
+                Bạn đang có thay đổi chưa được lưu. Nếu rời trang bây giờ, các thay đổi trên bảng sẽ bị mất.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -663,14 +663,14 @@ export function VisionBoardEditor() {
                       Dựng một không gian hình ảnh khiến mục tiêu của bạn trở nên chạm được mỗi ngày.
                     </h1>
                     <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
-                      Kéo thả hình ảnh, câu nói và biểu tượng để tạo một canvas giàu cảm xúc,
+                      Kéo thả hình ảnh, câu nói và biểu tượng để tạo một bảng giàu cảm xúc,
                       rõ định hướng và đủ đẹp để bạn muốn quay lại thường xuyên.
                     </p>
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_120px]">
                     <Input
-                      placeholder="Tên bảng tầm nhìn của bạn"
+                      placeholder="Tên vision board của bạn"
                       value={boardName}
                       onChange={(event) => { setBoardName(event.target.value); setHasUnsavedChanges(true); }}
                       className="border-white/20 bg-white/14 text-lg font-semibold text-white placeholder:text-white/52"
@@ -700,26 +700,26 @@ export function VisionBoardEditor() {
                       disabled={!boardName.trim()}
                     >
                       <Save className="h-4 w-4" />
-                      Lưu board
+                      Lưu bảng
                     </Button>
                   </div>
 
                   <p className="text-sm text-white/70">
-                    Trên điện thoại, bạn có thể chạm giữ rồi rê để di chuyển các phần tử trên canvas.
+                    Trên điện thoại, bạn có thể chạm giữ rồi rê để di chuyển các phần tử trên bảng.
                   </p>
                 </div>
 
                 <div className="hidden xl:block rounded-[var(--r-card)] border border-white/14 bg-white/12 p-6 shadow-sm">
                   <ProductVisual variant="vision" className="mb-5 min-h-[180px]" />
                   <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">
-                    Snapshot canvas
+                    Tóm tắt bảng
                   </p>
 
                   <div className="mt-6 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
                     {[
-                      { label: "Tổng phần tử", value: board.items.length, note: "đang có trên canvas" },
+                      { label: "Tổng phần tử", value: board.items.length, note: "đang có trên bảng" },
                       { label: "Hình ảnh", value: boardStats.images, note: "nguồn cảm hứng trực quan" },
-                      { label: "Quote + icon", value: boardStats.quotes + boardStats.icons, note: "điểm nhấn cảm xúc" },
+                      { label: "Trích dẫn + biểu tượng", value: boardStats.quotes + boardStats.icons, note: "điểm nhấn cảm xúc" },
                     ].map((item) => (
                       <div
                         key={item.label}
@@ -738,9 +738,9 @@ export function VisionBoardEditor() {
 
           <DialogContent className="max-w-3xl overflow-y-auto max-h-[85vh]">
             <DialogHeader>
-              <DialogTitle>Thêm vào bảng tầm nhìn</DialogTitle>
+              <DialogTitle>Thêm vào vision board</DialogTitle>
               <DialogDescription>
-                Chọn loại phần tử phù hợp để làm board của bạn sống động và giàu ý nghĩa hơn.
+                Chọn loại phần tử phù hợp để làm bảng của bạn sống động và giàu ý nghĩa hơn.
               </DialogDescription>
             </DialogHeader>
 
@@ -829,10 +829,10 @@ export function VisionBoardEditor() {
                 <div className="stack-tight">
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                     <Globe className="h-4 w-4" />
-                    Tìm theo vibe
+                    Tìm theo cảm giác
                   </div>
                   <Input
-                    placeholder="Tìm một vibe hình ảnh, ví dụ: dream office, healthy life..."
+                    placeholder="Tìm một cảm giác hình ảnh, ví dụ: văn phòng mơ ước, sống khỏe..."
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                     onKeyDown={(event) => event.key === "Enter" && handleAddImage()}
@@ -850,7 +850,7 @@ export function VisionBoardEditor() {
                     ))}
                   </div>
                   <Button variant="outline" className="w-full" onClick={handleAddImage} disabled={isSearching || !searchQuery.trim()}>
-                    {isSearching ? "Đang thêm hình..." : "Thêm hình theo vibe"}
+                    {isSearching ? "Đang thêm hình..." : "Thêm hình theo cảm giác"}
                   </Button>
                 </div>
               </TabsContent>
@@ -875,7 +875,7 @@ export function VisionBoardEditor() {
                   ))}
                 </div>
                 <Button className="w-full" onClick={handleAddQuote} disabled={!quoteText.trim()}>
-                  Thêm quote vào canvas
+                  Thêm câu nói vào bảng
                 </Button>
               </TabsContent>
 
@@ -905,7 +905,7 @@ export function VisionBoardEditor() {
                   })}
                 </div>
                 <Button className="w-full" onClick={handleAddIcon}>
-                  Thêm icon vào canvas
+                  Thêm biểu tượng vào bảng
                 </Button>
               </TabsContent>
             </Tabs>
@@ -929,7 +929,7 @@ export function VisionBoardEditor() {
                         <Sparkles className="h-8 w-8 sm:h-9 sm:w-9" />
                       </div>
                       <h2 className="mt-[var(--space-stack)] text-2xl font-bold text-slate-900 sm:mt-6 sm:text-3xl">
-                        Canvas của bạn đang chờ câu chuyện đầu tiên
+                        Bảng của bạn đang chờ câu chuyện đầu tiên
                       </h2>
                       <p className="mt-[var(--space-inline)] text-base text-slate-500">
                         Hãy bắt đầu bằng một hình ảnh đại diện, một câu nói khiến bạn rung động hoặc một biểu tượng để neo cảm xúc cho mục tiêu của mình.
@@ -954,7 +954,7 @@ export function VisionBoardEditor() {
             </CardContent>
           </Card>
 
-          <SectionBlock title="Công cụ board" headerVisuallyHidden className="xl:sticky xl:top-28">
+          <SectionBlock title="Công cụ bảng" headerVisuallyHidden className="xl:sticky xl:top-28">
             <div className="stack-stack">
             <Card>
               <CardContent className="p-6">
@@ -963,9 +963,9 @@ export function VisionBoardEditor() {
                     <LayoutGrid className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-900">Thành phần board</h3>
+                    <h3 className="text-lg font-semibold text-slate-900">Thành phần bảng</h3>
                     <p className="text-sm text-slate-500">
-                      Một board tốt có đủ hình ảnh, biểu tượng và câu chữ nhắc hướng đi.
+                      Một bảng tốt có đủ hình ảnh, biểu tượng và câu chữ nhắc hướng đi.
                     </p>
                   </div>
                 </div>
@@ -973,8 +973,8 @@ export function VisionBoardEditor() {
                 <div className="mt-[var(--space-stack)] stack-tight">
                   {[
                     { label: "Hình ảnh", value: boardStats.images, color: "bg-violet-50 text-violet-700" },
-                    { label: "Quote", value: boardStats.quotes, color: "bg-amber-50 text-amber-700" },
-                    { label: "Icon", value: boardStats.icons, color: "bg-sky-50 text-sky-700" },
+                    { label: "Trích dẫn", value: boardStats.quotes, color: "bg-amber-50 text-amber-700" },
+                    { label: "Biểu tượng", value: boardStats.icons, color: "bg-sky-50 text-sky-700" },
                   ].map((item) => (
                     <div
                       key={item.label}
@@ -999,7 +999,7 @@ export function VisionBoardEditor() {
                   <div>
                     <h3 className="text-lg font-semibold text-slate-900">Gợi ý bố cục</h3>
                     <p className="text-sm text-slate-500">
-                      Một vài nguyên tắc nhỏ để board nhìn sang hơn và dễ chạm cảm xúc hơn.
+                      Một vài nguyên tắc nhỏ để bảng nhìn sang hơn và dễ chạm cảm xúc hơn.
                     </p>
                   </div>
                 </div>
@@ -1007,8 +1007,8 @@ export function VisionBoardEditor() {
                 <div className="mt-[var(--space-stack)] stack-tight">
                   {[
                     "Đặt hình ảnh quan trọng nhất ở trung tâm hoặc góc trái trên.",
-                    "Dùng 1-2 quote đủ mạnh thay vì quá nhiều chữ trên canvas.",
-                    "Xen icon ở các khoảng trống để board có nhịp và điểm nhấn.",
+                    "Dùng 1-2 câu nói đủ mạnh thay vì quá nhiều chữ trên bảng.",
+                    "Xen biểu tượng ở các khoảng trống để bảng có nhịp và điểm nhấn.",
                     "Giữ khoảng thở giữa các phần tử để tổng thể trông cao cấp hơn.",
                   ].map((item) => (
                     <div
@@ -1031,7 +1031,7 @@ export function VisionBoardEditor() {
                   <div>
                     <h3 className="text-lg font-semibold text-slate-900">Hoàn tất</h3>
                     <p className="text-sm text-slate-500">
-                      Lưu board để xuất hiện trong thư viện và trở thành một phần của hành trình.
+                      Lưu bảng để xuất hiện trong thư viện và trở thành một phần của hành trình.
                     </p>
                   </div>
                 </div>
@@ -1039,7 +1039,7 @@ export function VisionBoardEditor() {
                 <div className="mt-[var(--space-stack)] flex flex-col gap-3">
                   <Button onClick={handleSave} disabled={!boardName.trim()}>
                     <Save className="h-4 w-4" />
-                    Lưu bảng tầm nhìn
+                    Lưu vision board
                   </Button>
                   <Button variant="outline" onClick={() => setIsAddingItem(true)}>
                     <Plus className="h-4 w-4" />

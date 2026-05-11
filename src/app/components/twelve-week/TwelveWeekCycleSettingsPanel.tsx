@@ -58,9 +58,9 @@ export function TwelveWeekCycleSettingsPanel({
       <AlertDialog open={pendingReviewDay !== null} onOpenChange={(open) => !open && setPendingReviewDay(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Đổi review day?</AlertDialogTitle>
+            <AlertDialogTitle>Đổi ngày review?</AlertDialogTitle>
             <AlertDialogDescription>
-              Đổi review day sẽ điều chỉnh lịch task các tuần còn lại (tuần đã review không đổi). Tiếp tục?
+              Đổi ngày review sẽ điều chỉnh lịch việc các tuần còn lại (tuần đã review không đổi). Tiếp tục?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -170,7 +170,7 @@ export function TwelveWeekCycleSettingsPanel({
                   Trạng thái
                 </p>
                 <p className="mt-1 text-sm text-slate-600">
-                  Giúp Dashboard và màn Hôm nay biết chu kỳ này đang chạy hay đã kết thúc.
+                  Giúp Trang chính và màn Hôm nay biết chu kỳ này đang chạy hay đã kết thúc.
                 </p>
               </div>
               <Select value={system.status} onValueChange={onStatusChange}>

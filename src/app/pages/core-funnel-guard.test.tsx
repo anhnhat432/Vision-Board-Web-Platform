@@ -126,7 +126,7 @@ describe("core funnel guards", () => {
     renderCoreFunnel("/life-insight");
 
     expect(await screen.findByRole("heading", { name: "Chưa có dữ liệu cân bằng cuộc sống" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Đi tới Onboarding" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Đi tới Bắt đầu" })).toBeInTheDocument();
   });
 
   it("blocks direct SMART Goal access when Life Balance has not been completed", async () => {
@@ -153,9 +153,9 @@ describe("core funnel guards", () => {
     renderCoreFunnel("/feasibility");
 
     expect(
-      await screen.findByRole("heading", { name: "Hoàn thành Life Balance trước khi kiểm tra tính khả thi" }),
+      await screen.findByRole("heading", { name: "Hoàn thành Cân bằng cuộc sống trước khi kiểm tra tính khả thi" }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Bắt đầu Life Balance" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Bắt đầu Cân bằng cuộc sống" })).toBeInTheDocument();
   });
 
   it("shows a recovery gate on 12-week setup when feasibility is missing", async () => {

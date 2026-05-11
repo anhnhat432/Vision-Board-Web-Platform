@@ -85,7 +85,7 @@ describe("TwelveWeekCycleSettingsPanel", () => {
 
     expect(
       await screen.findByText(
-        "Đổi review day sẽ điều chỉnh lịch task các tuần còn lại (tuần đã review không đổi). Tiếp tục?",
+        "Đổi ngày review sẽ điều chỉnh lịch việc các tuần còn lại (tuần đã review không đổi). Tiếp tục?",
       ),
     ).toBeInTheDocument();
     expect(onReviewDayChange).not.toHaveBeenCalled();
@@ -94,7 +94,7 @@ describe("TwelveWeekCycleSettingsPanel", () => {
     await waitFor(() => {
       expect(
         screen.queryByText(
-          "Đổi review day sẽ điều chỉnh lịch task các tuần còn lại (tuần đã review không đổi). Tiếp tục?",
+          "Đổi ngày review sẽ điều chỉnh lịch việc các tuần còn lại (tuần đã review không đổi). Tiếp tục?",
         ),
       ).not.toBeInTheDocument();
     });

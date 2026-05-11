@@ -320,7 +320,7 @@ export function getSyncStatusLabel(status: OutboxSyncSnapshot["status"] | null):
     case "partial":
       return "Đồng bộ một phần";
     case "offline":
-      return "Đang offline";
+      return "Đang mất mạng";
     case "not_configured":
       return "Chưa cấu hình endpoint";
     case "error":

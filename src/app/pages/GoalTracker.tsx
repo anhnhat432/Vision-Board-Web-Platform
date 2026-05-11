@@ -177,7 +177,7 @@ function GoalTrackerContent({
   const hasGoals = effectiveGoals.length > 0;
   const hasRealLifeBalance = userData.onboardingCompleted && userData.currentWheelOfLife.some((area) => area.score > 0);
   const goalFlowStartHref = hasRealLifeBalance ? "/life-insight" : "/onboarding";
-  const goalFlowStartLabel = hasRealLifeBalance ? "Tạo mục tiêu từ insight" : "Bắt đầu Life Balance";
+  const goalFlowStartLabel = hasRealLifeBalance ? "Tạo mục tiêu từ góc nhìn" : "Bắt đầu Cân bằng cuộc sống";
   const twelveWeekGoals = useMemo(
     () => effectiveGoals.filter((goal) => Boolean(goal.twelveWeekSystem)),
     [effectiveGoals],
@@ -360,7 +360,7 @@ function GoalTrackerContent({
               icon: Target,
               eyebrow: "Bắt đầu",
               title: "Tạo mục tiêu đầu tiên",
-              note: "Đi từ Life Balance để mục tiêu không bị viết vội hoặc quá rộng.",
+              note: "Đi từ Cân bằng cuộc sống để mục tiêu không bị viết vội hoặc quá rộng.",
               tone: "border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)]",
               cta: goalFlowStartLabel,
             };
@@ -604,7 +604,7 @@ function GoalTrackerContent({
                           : "border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)]"
                       }
                     >
-                      {hasPremiumReviewInsights ? "Insight review đã mở" : "Insight review đang khóa"}
+                      {hasPremiumReviewInsights ? "Góc nhìn review đã mở" : "Góc nhìn review đang khóa"}
                     </Badge>
                     {!hasPremiumReviewInsights && (
                       <Badge variant="outline" className="border-border bg-white text-muted-foreground">
@@ -885,10 +885,12 @@ function GoalTrackerContent({
                 <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-control)] bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)]">
                   <Target className="h-10 w-10" />
                 </div>
-                <h2 className="mt-6 text-3xl font-bold text-foreground">Chưa có mục tiêu nào trong workspace của bạn</h2>
+                <h2 className="mt-6 text-3xl font-bold text-foreground">
+                  Chưa có mục tiêu nào trong không gian làm việc của bạn
+                </h2>
                 <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-muted-foreground">
-                  Bắt đầu bằng Life Balance để có dữ liệu thật, sau đó chọn Life Insight, viết SMART goal, kiểm tra
-                  feasibility rồi mới tạo chu kỳ 12 tuần.
+                  Bắt đầu bằng Cân bằng cuộc sống để có dữ liệu thật, sau đó chọn Góc nhìn cuộc sống, viết mục tiêu
+                  SMART, kiểm tra tính khả thi rồi mới tạo chu kỳ 12 tuần.
                 </p>
                 <Button className="mt-8 w-full sm:w-auto" onClick={handleStartGuidedGoalFlow}>
                   <Target className="h-4 w-4" />
@@ -896,8 +898,8 @@ function GoalTrackerContent({
                 </Button>
                 <div className="mx-auto mt-8 grid max-w-lg gap-3 text-left sm:grid-cols-3">
                   {[
-                    { icon: Target, label: "Chấm Life Balance" },
-                    { icon: CheckCircle2, label: "Chọn Life Insight" },
+                    { icon: Target, label: "Chấm Cân bằng cuộc sống" },
+                    { icon: CheckCircle2, label: "Chọn Góc nhìn cuộc sống" },
                     { icon: Zap, label: "SMART + 12 tuần" },
                   ].map((item) => (
                     <div

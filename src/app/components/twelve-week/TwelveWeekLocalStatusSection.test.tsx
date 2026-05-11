@@ -438,7 +438,7 @@ describe("TwelveWeekLocalStatusSection", () => {
       />,
     );
 
-    expect(screen.getByText("Chưa cấu hình API để gửi hàng chờ.")).toBeInTheDocument();
+    expect(screen.getByText("Chưa cấu hình kết nối tài khoản để gửi hàng chờ.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Đồng bộ tài khoản/i })).toBeDisabled();
     expect(onRunMutationQueueSync).not.toHaveBeenCalled();
   });
@@ -531,17 +531,17 @@ describe("TwelveWeekLocalStatusSection", () => {
     );
 
     for (const [label, value] of [
-      ["Chờ sync", "3"],
+      ["Chờ đồng bộ", "3"],
       ["Đang gửi", "1"],
-      ["Lỗi/retry", "2"],
+      ["Lỗi/thử lại", "2"],
       ["Đã nhận", "4"],
     ] as const) {
       const card = screen.getByText(label).closest("div");
       expect(card).not.toBeNull();
       expect(within(card as HTMLElement).getByText(value)).toBeInTheDocument();
     }
-    expect(screen.getByText(/Bắt đầu sync gần nhất:/i)).toBeInTheDocument();
-    expect(screen.getByText(/Kết thúc sync gần nhất:/i)).toBeInTheDocument();
+    expect(screen.getByText(/Bắt đầu đồng bộ gần nhất:/i)).toBeInTheDocument();
+    expect(screen.getByText(/Kết thúc đồng bộ gần nhất:/i)).toBeInTheDocument();
     expect(screen.getByText(/Đã gửi hàng chờ, lấy 1 mục tiêu từ tài khoản/i)).toBeInTheDocument();
   });
 

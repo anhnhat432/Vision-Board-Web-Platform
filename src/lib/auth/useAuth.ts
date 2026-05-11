@@ -49,11 +49,11 @@ export function resolveAuthErrorMessage(error: unknown): string {
 
   switch (code) {
     case "auth/configuration-not-found":
-      return "Firebase Authentication chưa được bật cho project này. Vào Firebase Console > Authentication > Get started, rồi bật Google hoặc Email/Password.";
+      return "Đăng nhập hiện chưa sẵn sàng. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.";
     case "auth/operation-not-allowed":
-      return "Phương thức đăng nhập này chưa được bật trong Firebase Authentication. Hãy bật Google hoặc Email/Password trong tab Sign-in method.";
+      return "Phương thức đăng nhập này chưa sẵn sàng. Vui lòng thử cách khác hoặc liên hệ hỗ trợ.";
     case "auth/unauthorized-domain":
-      return "Domain hiện tại chưa nằm trong Authorized domains của Firebase Authentication. Hãy thêm domain production hoặc localhost trong Firebase Console > Authentication > Settings.";
+      return "Trang này chưa được phép đăng nhập trên tên miền hiện tại. Vui lòng liên hệ hỗ trợ.";
     case "auth/popup-blocked":
       return "Trình duyệt đã chặn popup đăng nhập. Hãy cho phép popup rồi thử lại.";
     case "auth/popup-closed-by-user":
@@ -122,7 +122,7 @@ export function useAuth(): UseAuthResult {
       const password = options?.password ?? "";
 
       if (!email || !password) {
-        throw new Error("Email and password are required.");
+        throw new Error("Vui lòng nhập email và mật khẩu.");
       }
 
       if (resolvedMode === "signup") {

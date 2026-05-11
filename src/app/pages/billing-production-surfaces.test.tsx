@@ -117,7 +117,7 @@ describe("production billing surfaces", () => {
     expect(screen.getAllByText("Plus").length).toBeGreaterThan(0);
     expect(screen.getByText(/Gia hạn ngày/i)).toHaveTextContent("01/06/2026");
     expect(screen.getByText("Thanh toán qua Stripe")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Quản lý subscription" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Quản lý gói" })).toBeInTheDocument();
     expect(screen.queryByText(/\(mock\)|mô phỏng/i)).not.toBeInTheDocument();
   }, UI_TEST_TIMEOUT_MS);
 
@@ -236,7 +236,7 @@ describe("production billing surfaces", () => {
     render(<RouterProvider router={router} />);
 
     expect(await screen.findByText("Thanh toán đã xác nhận")).toBeInTheDocument();
-    const startPlanLink = screen.getByRole("link", { name: "Bắt đầu 12-week plan" });
+    const startPlanLink = screen.getByRole("link", { name: "Bắt đầu kế hoạch 12 tuần" });
     expect(startPlanLink).toHaveAttribute("href", "/12-week-system");
   }, UI_TEST_TIMEOUT_MS);
 });

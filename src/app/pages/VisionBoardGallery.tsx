@@ -183,9 +183,9 @@ export function VisionBoardGallery() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xóa bảng tầm nhìn này?</AlertDialogTitle>
+            <AlertDialogTitle>Xóa vision board này?</AlertDialogTitle>
             <AlertDialogDescription>
-              Hành động này không thể hoàn tác. Toàn bộ hình ảnh, quote và biểu tượng trong board sẽ bị xóa vĩnh viễn.
+              Hành động này không thể hoàn tác. Toàn bộ hình ảnh, câu nói và biểu tượng trong bảng sẽ bị xóa vĩnh viễn.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -206,16 +206,16 @@ export function VisionBoardGallery() {
               <div className="stack-section">
                 <div className="interactive-layer interactive-layer--soft inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Images className="h-4 w-4" />
-                  Dear Our Future Library
+                  Thư viện Dear Our Future
                 </div>
 
                 <div className="stack-stack">
                   <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-                    Một thư viện nơi mọi bảng tầm nhìn của bạn được lưu lại như những phiên bản của tương lai.
+                    Một thư viện nơi mọi vision board của bạn được lưu lại như những phiên bản của tương lai.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
-                    Tại đây bạn có thể xem lại các board theo từng năm, tiếp tục chỉnh sửa, so sánh độ phong phú của
-                    từng canvas và giữ cảm hứng luôn ở gần mình.
+                    Tại đây bạn có thể xem lại các vision board theo từng năm, tiếp tục chỉnh sửa, so sánh độ phong phú của
+                    từng bảng và giữ cảm hứng luôn ở gần mình.
                   </p>
                 </div>
 
@@ -235,7 +235,7 @@ export function VisionBoardGallery() {
                       onClick={() => navigate("/order", { state: { visionBoardId: orderSourceBoard.id } })}
                     >
                       <Package className="h-4 w-4" />
-                      {spotlightBoardId ? "Tạo kit từ board vừa lưu" : "Tạo kit từ board gần nhất"}
+                      {spotlightBoardId ? "Tạo bộ in từ bảng vừa lưu" : "Tạo bộ in từ bảng gần nhất"}
                     </Button>
                   ) : null}
                   <Button
@@ -243,7 +243,7 @@ export function VisionBoardGallery() {
                     className="border-white/18 bg-white/10 text-white hover:bg-white/16 hover:text-white"
                     onClick={() => navigate("/")}
                   >
-                    Về bảng điều khiển
+                    Về Trang chính
                   </Button>
                 </div>
               </div>
@@ -254,7 +254,7 @@ export function VisionBoardGallery() {
 
                 <div className="mt-4 stack-tight">
                   <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Tổng số bảng</p>
+                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Tổng số vision board</p>
                     <p className="mt-2 text-3xl font-bold text-white">{userData.visionBoards.length}</p>
                   </div>
                   <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
@@ -262,12 +262,12 @@ export function VisionBoardGallery() {
                     <p className="mt-2 text-3xl font-bold text-white">{totalItems}</p>
                   </div>
                   <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Board gần nhất</p>
+                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Vision board gần nhất</p>
                     <p className="mt-2 text-lg font-semibold text-white">
-                      {latestBoard ? latestBoard.name : "Chưa có board nào"}
+                      {latestBoard ? latestBoard.name : "Chưa có bảng nào"}
                     </p>
                     <p className="mt-1 text-sm text-white/68">
-                      {latestBoard ? `Năm ${latestBoard.year}` : "Bắt đầu với board đầu tiên của bạn."}
+                      {latestBoard ? `Năm ${latestBoard.year}` : "Bắt đầu với bảng đầu tiên của bạn."}
                     </p>
                   </div>
                 </div>
@@ -281,30 +281,30 @@ export function VisionBoardGallery() {
       <div className="stagger-hover-grid grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
         {[
           {
-            title: "Tổng số bảng",
+            title: "Tổng số vision board",
             value: userData.visionBoards.length,
-            note: "canvas đang lưu",
+            note: "bảng đang lưu",
             icon: Images,
             color: "from-violet-500/18 to-fuchsia-500/10 text-violet-700",
           },
           {
             title: "Năm bao quát",
             value: years.length,
-            note: "mốc thời gian có board",
+            note: "mốc thời gian có bảng",
             icon: Calendar,
             color: "from-sky-500/18 to-cyan-500/10 text-sky-700",
           },
           {
             title: "Tổng phần tử",
             value: totalItems,
-            note: "ảnh, quote và icon",
+            note: "ảnh, câu nói và biểu tượng",
             icon: Sparkles,
             color: "from-amber-500/18 to-orange-500/10 text-amber-700",
           },
           {
-            title: "Trung bình mỗi board",
+            title: "Trung bình mỗi bảng",
             value: userData.visionBoards.length ? Math.round(totalItems / userData.visionBoards.length) : 0,
-            note: "mức độ phong phú của canvas",
+            note: "mức độ phong phú của bảng",
             icon: ImageIcon,
             color: "from-emerald-500/18 to-teal-500/10 text-emerald-700",
           },
@@ -347,11 +347,11 @@ export function VisionBoardGallery() {
             </div>
             <h2 className="mt-6 text-3xl font-bold text-slate-900">Thư viện của bạn vẫn còn trống</h2>
             <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-slate-500">
-              Hãy tạo bảng tầm nhìn đầu tiên để biến những hình dung trong đầu thành một không gian trực quan thật sự.
+              Hãy tạo vision board đầu tiên để biến những hình dung trong đầu thành một không gian trực quan thật sự.
             </p>
             <Button className="mt-8" onClick={() => navigate("/vision-board")}>
               <Plus className="h-4 w-4" />
-              Tạo bảng tầm nhìn đầu tiên
+              Tạo vision board đầu tiên
             </Button>
           </CardContent>
         </Card>
@@ -463,7 +463,7 @@ export function VisionBoardGallery() {
                                       Preview sống
                                     </p>
                                     <p className="mt-1 text-sm font-semibold">
-                                      {imageCount} ảnh • {quoteCount} quote • {iconCount} biểu tượng
+                                      {imageCount} ảnh • {quoteCount} câu nói • {iconCount} biểu tượng
                                     </p>
                                   </div>
                                   <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] border border-white/16 bg-white/10">
@@ -479,7 +479,7 @@ export function VisionBoardGallery() {
                                 <p className="mt-2 text-xl font-bold text-slate-900">{imageCount}</p>
                               </div>
                               <div className="rounded-[var(--r-tile)] border border-white/70 bg-white/72 p-3 text-center">
-                                <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Quote</p>
+                                <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Câu nói</p>
                                 <p className="mt-2 text-xl font-bold text-slate-900">{quoteCount}</p>
                               </div>
                               <div className="rounded-[var(--r-tile)] border border-white/70 bg-white/72 p-3 text-center">

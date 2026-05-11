@@ -28,20 +28,20 @@ const JOURNEY_STEPS = [
   {
     icon: Compass,
     title: "Chọn trọng tâm",
-    description: "Dữ liệu này mở Life Insight để chọn đúng nơi nên ưu tiên.",
+    description: "Dữ liệu này mở Góc nhìn cuộc sống để chọn đúng nơi nên ưu tiên.",
     iconClass:
       "bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 dark:from-violet-950/50 dark:to-fuchsia-950/40 dark:text-violet-200",
   },
   {
     icon: Target,
-    title: "Đi tiếp tới SMART Goal",
+    title: "Đi tiếp tới mục tiêu SMART",
     description: "Trọng tâm được chuyển thành mục tiêu rõ và kế hoạch 12 tuần.",
     iconClass:
       "bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-700 dark:from-emerald-950/50 dark:to-teal-950/40 dark:text-emerald-200",
   },
 ];
 
-const FEATURE_PILLS = ["8 lĩnh vực", "Khoảng 3 phút", "Life Insight", "SMART Goal", "12 tuần"];
+const FEATURE_PILLS = ["8 lĩnh vực", "Khoảng 3 phút", "Góc nhìn cuộc sống", "mục tiêu SMART", "12 tuần"];
 
 function OnboardingPageMotion({ children }: { children: ReactNode }) {
   const prefersReducedMotion = useReducedMotion();
@@ -166,7 +166,7 @@ export function Onboarding() {
 
                   <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-violet-200 bg-violet-50 px-4 py-1.5 text-sm font-semibold text-violet-700">
                     <Sparkles className="h-4 w-4" />
-                    Bước 1: Life Balance
+                    Bước 1: Cân bằng cuộc sống
                   </div>
 
                   <div className="stack-tight">
@@ -176,11 +176,11 @@ export function Onboarding() {
                         8 lĩnh vực
                       </span>
                       {isReturning
-                        ? " để insight bám sát cuộc sống hiện tại hơn."
+                        ? " để góc nhìn bám sát cuộc sống hiện tại hơn."
                         : " để biết nên ưu tiên điều gì trước."}
                     </h1>
                     <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base lg:text-lg">
-                      Chỉ khoảng 3 phút để chấm điểm hiện tại. Kết quả sẽ nối thẳng sang Life Insight, SMART Goal
+                      Chỉ khoảng 3 phút để chấm điểm hiện tại. Kết quả sẽ nối thẳng sang Góc nhìn cuộc sống, mục tiêu SMART
                       và kế hoạch 12 tuần, nên bạn không phải đoán bước tiếp theo.
                     </p>
                   </div>
@@ -255,7 +255,7 @@ export function Onboarding() {
                   <div className="mt-[var(--space-stack)] stack-tight">
                     {[
                       "Điểm trung bình để đọc mặt bằng hiện tại.",
-                      "Lĩnh vực thấp nhất để mở Life Insight.",
+                      "Lĩnh vực thấp nhất để mở Góc nhìn cuộc sống.",
                       "Lĩnh vực mạnh nhất để biết phần đang tạo lực đỡ.",
                     ].map((item) => (
                       <div key={item} className="flex items-start gap-3 rounded-[var(--r-control)] border border-slate-200 bg-white p-3">
@@ -298,7 +298,7 @@ export function Onboarding() {
                   .
                 </h1>
                 <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                  Kéo từng lĩnh vực từ 1 đến 10. Summary bên cạnh cập nhật ngay để bạn thấy tín hiệu trước khi lưu.
+                  Kéo từng lĩnh vực từ 1 đến 10. Tóm tắt bên cạnh cập nhật ngay để bạn thấy tín hiệu trước khi lưu.
                 </p>
               </div>
 
@@ -331,7 +331,7 @@ export function Onboarding() {
                 </div>
                 <p className="mt-[var(--space-inline)] text-sm leading-6 text-slate-600">
                   {remainingAreaCount === 0
-                    ? "Bánh xe đã sẵn sàng để lưu và mở Life Insight."
+                    ? "Bánh xe đã sẵn sàng để lưu và mở Góc nhìn cuộc sống."
                     : `Còn ${remainingAreaCount} lĩnh vực nên rà lại trước khi lưu.`}
                 </p>
               </div>
@@ -391,7 +391,7 @@ export function Onboarding() {
                     <BarChart3 className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-900">Sẵn sàng sang Life Insight</h3>
+                    <h3 className="text-lg font-semibold text-slate-900">Sẵn sàng sang Góc nhìn cuộc sống</h3>
                     <p className="text-sm leading-6 text-slate-500">
                       Điểm này sẽ được lưu trên trình duyệt và dùng để chọn trọng tâm tiếp theo.
                     </p>
