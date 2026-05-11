@@ -261,7 +261,7 @@ export function UpgradePaywallDialog({
                         {!demoMode && (
                           <p className="mt-2 text-sm leading-7 text-slate-600">
                             Nâng cấp {plan.name} để mở khoá {upgradeFeatureLabel.toLowerCase()} — gia hạn theo chu kỳ
-                            thanh toán hàng tháng/năm theo cấu hình provider.
+                            thanh toán hàng tháng/năm theo cấu hình nhà cung cấp.
                           </p>
                         )}
                       </div>

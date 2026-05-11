@@ -81,7 +81,7 @@ const ORDER_TIMELINE_STEPS: ReadonlyArray<{
 }> = [
   {
     status: "pending",
-    description: "Đơn đã được ghi nhận trong không gian làm việc trên thiết bị này và chờ xác nhận.",
+    description: "Đơn đã được ghi nhận trên không gian làm việc cục bộ và chờ xác nhận.",
     icon: ClipboardList,
   },
   {
@@ -330,7 +330,7 @@ export function OrderStatusPage() {
                   </div>
                   <p className="mt-[var(--space-inline)] text-base font-semibold text-slate-900">{getKitTypeLabel(order.kitType)}</p>
                   <p className="mt-1 text-sm leading-7 text-slate-600">
-                    {hasKeywords ? `${order.keywords.length} keyword đã được lưu cùng đơn này.` : "Chưa có keyword cụ thể cho kit."}
+                    {hasKeywords ? `${order.keywords.length} từ khóa đã được lưu cùng đơn này.` : "Chưa có từ khóa cụ thể cho kit."}
                   </p>
                 </div>
               </div>
@@ -366,7 +366,7 @@ export function OrderStatusPage() {
               {(hasKeywords || hasNote) && (
                 <div className="stack-stack border-t border-slate-100 pt-5">
                   <div className="space-y-1">
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Keyword & ghi chú</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Từ khóa & ghi chú</p>
                     <p className="text-sm text-slate-600">Những thông tin tinh chỉnh cho kit được gom riêng để đỡ lẫn với thông tin giao hàng.</p>
                   </div>
 
@@ -396,7 +396,7 @@ export function OrderStatusPage() {
           <Card className="border-0 shadow-lg">
             <CardHeader>
               <CardTitle>Tiến trình đơn</CardTitle>
-              <CardDescription>Timeline nhỏ cho local order flow hiện tại, bao gồm đầy đủ 4 bước từ chờ xác nhận đến đã giao.</CardDescription>
+              <CardDescription>Dòng thời gian nhỏ cho luồng đơn hiện tại, gồm đủ 4 bước từ chờ xác nhận đến đã giao.</CardDescription>
             </CardHeader>
 
             <CardContent className="stack-section">
@@ -458,7 +458,7 @@ export function OrderStatusPage() {
               <div className="stack-stack border-t border-slate-100 pt-5">
                 <div className="space-y-1">
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Điều khiển trạng thái</p>
-                  <p className="text-sm text-slate-600">Phần này chỉ xuất hiện khi đơn chưa gắn máy chủ.</p>
+                  <p className="text-sm text-slate-600">Phần này chỉ xuất hiện khi đơn chưa kết nối máy chủ.</p>
                 </div>
 
                 <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
@@ -504,7 +504,7 @@ export function OrderStatusPage() {
           <Card className="border-0 shadow-lg">
             <CardHeader>
               <CardTitle>Đơn gần đây</CardTitle>
-              <CardDescription>Giữ local order flow gọn và cho phép mở nhanh lại các đơn vừa tạo.</CardDescription>
+              <CardDescription>Giữ luồng đơn gọn và cho phép mở nhanh lại các đơn vừa tạo.</CardDescription>
             </CardHeader>
 
             <CardContent className="stack-tight">

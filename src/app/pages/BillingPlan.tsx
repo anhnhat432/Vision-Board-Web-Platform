@@ -951,12 +951,12 @@ export function BillingPlan() {
       {demoMode && shouldShowBillingDebugUi() && (
         <Card className="flow-panel">
           <CardHeader>
-            <CardTitle className="text-sm">Thông tin billing provider</CardTitle>
+            <CardTitle className="text-sm">Thông tin nhà cung cấp thanh toán</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-2 text-xs text-slate-600 sm:grid-cols-2">
               <div>
-                <span className="text-slate-400">Provider: </span>
+                <span className="text-slate-400">Nhà cung cấp: </span>
                 {getBillingProviderModeLabel(billingStatus.mode)}
                 {billingStatus.providerLabel && ` (${billingStatus.providerLabel})`}
               </div>

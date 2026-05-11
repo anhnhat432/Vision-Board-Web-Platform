@@ -69,7 +69,7 @@ const localBillingProvider: BillingProvider = {
       message:
         planCode === "FREE"
           ? "Thiết bị này hiện vẫn đang ở gói Free, nên chưa có gì để đồng bộ."
-          : `Quyền ${planCode} hiện đang được giữ local trên thiết bị này.`,
+          : `Quyền ${planCode} hiện đang được giữ trên thiết bị này.`,
     };
   },
   restoreAccess: async (_goalId?: string) => {
@@ -85,7 +85,7 @@ const localBillingProvider: BillingProvider = {
       message:
         planCode === "FREE"
           ? "Thiết bị này hiện đang ở gói Free."
-          : `Đã khôi phục quyền ${planCode} từ dữ liệu local trên thiết bị này.`,
+          : `Đã khôi phục quyền ${planCode} từ dữ liệu trên thiết bị này.`,
     };
   },
   openCustomerPortal: async () => ({
@@ -93,7 +93,7 @@ const localBillingProvider: BillingProvider = {
     status: "local_only",
     providerMode: "local_test",
     providerLabel: getProviderLabel("local_test"),
-    message: "Bản local test chưa có cổng quản lý thanh toán riêng.",
+    message: "Bản dùng thử trên thiết bị chưa có cổng quản lý thanh toán riêng.",
   }),
 };
 
@@ -150,13 +150,13 @@ const apiContractBillingProvider: BillingProvider = {
           providerMode: "api_contract",
           planCode: getCurrentPlan(),
           checkoutUrl,
-          message: `Đã tạo phiên thanh toán (${result.provider}). Đang chuyển hướng đến trang thanh toán.`,
+          message: `Đã tạo phiên thanh toán từ nhà cung cấp (${result.provider}). Đang chuyển hướng đến trang thanh toán.`,
         };
       } catch (error: unknown) {
         const msg =
           error && typeof error === "object" && "message" in error
             ? (error as { message: string }).message
-            : "Lỗi chưa rõ";
+            : "Lỗi không xác định";
         console.warn("[billing] Backend checkout-session failed, trying legacy flow:", msg);
       }
     }
@@ -513,7 +513,7 @@ export async function openBillingCustomerPortal(goalId?: string): Promise<Custom
       const msg =
         error && typeof error === "object" && "message" in error
           ? (error as { message: string }).message
-          : "Lỗi chưa rõ";
+          : "Lỗi không xác định";
       console.warn("[billing] Backend customer-portal failed:", msg);
       // Fall through to legacy/provider flow
     }

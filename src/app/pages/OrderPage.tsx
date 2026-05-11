@@ -120,7 +120,7 @@ function buildSuggestedNote(goal: Goal | null, board: VisionBoard | null, pendin
   }
 
   if (boardName) {
-    return `Ưu tiên kit tham chiếu vision board "${boardName}" để giữ cùng mood và keyword.`;
+    return `Ưu tiên kit tham chiếu vision board "${boardName}" để giữ cùng cảm giác và từ khóa.`;
   }
 
   if (draftGoal && draftFocusArea) {
@@ -513,7 +513,7 @@ export function OrderPage() {
               <div className="space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Người nhận</p>
                 <p className="text-sm text-slate-600">
-                  Thông tin tối thiểu để tạo đơn và theo dõi lại trong local order flow.
+                  Thông tin tối thiểu để tạo đơn và theo dõi lại trên thiết bị.
                 </p>
                 <p className="text-sm text-slate-500">Các trường có ghi “Bắt buộc” cần hoàn tất trước khi tạo đơn.</p>
               </div>
@@ -554,7 +554,7 @@ export function OrderPage() {
                   {showInlineErrors && fieldErrors.email ? (
                     <p className="text-sm text-rose-600">Vui lòng nhập email để lưu và nhận diện đơn.</p>
                   ) : (
-                    <p className="text-sm text-slate-500">Email hiện được dùng cho flow local, chưa có gửi thư thật.</p>
+                    <p className="text-sm text-slate-500">Email hiện dùng cho luồng trên thiết bị, chưa có gửi thư thật.</p>
                   )}
                 </div>
               </div>
@@ -580,7 +580,7 @@ export function OrderPage() {
               <div className="space-y-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Nội dung giao kit</p>
                 <p className="text-sm text-slate-600">
-                  Thêm địa chỉ, keyword và ghi chú để kit dễ bám đúng mục tiêu hoặc chủ đề bạn muốn.
+                  Thêm địa chỉ, từ khóa và ghi chú để kit dễ bám đúng mục tiêu hoặc chủ đề bạn muốn.
                 </p>
               </div>
 
@@ -605,17 +605,17 @@ export function OrderPage() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="order-keywords">Keyword cho kit</Label>
+                <Label htmlFor="order-keywords">Từ khóa cho kit</Label>
                 <Input
                   id="order-keywords"
                   value={form.keywords}
                   onChange={(event) => handleFieldChange("keywords", event.target.value)}
-                  placeholder="focus, confidence, study"
+                  placeholder="tập trung, tự tin, học tập"
                 />
                 <p className="text-sm text-slate-500">
                   {keywordList.length > 0
-                    ? `${keywordList.length} keyword sẽ được lưu cùng đơn này.`
-                    : "Bạn có thể nhập nhiều keyword, ngăn cách bằng dấu phẩy."}
+                    ? `${keywordList.length} từ khóa sẽ được lưu cùng đơn này.`
+                    : "Bạn có thể nhập nhiều từ khóa, ngăn cách bằng dấu phẩy."}
                 </p>
               </div>
 
@@ -651,7 +651,7 @@ export function OrderPage() {
                 <p className={`text-sm ${showInlineErrors ? "text-rose-600" : "text-slate-600"}`}>
                   {showInlineErrors
                     ? "Điền xong các trường bắt buộc để chuyển sang trang trạng thái đơn."
-                    : "Đơn sẽ được lưu local và chuyển ngay sang Order Status sau khi tạo."}
+                    : "Đơn sẽ được lưu trên thiết bị và chuyển ngay sang trang trạng thái sau khi tạo."}
                 </p>
               </div>
 
@@ -672,7 +672,7 @@ export function OrderPage() {
         <Card className="border-0 shadow-lg">
           <CardHeader>
             <CardTitle>Phạm vi của bước này</CardTitle>
-            <CardDescription>Giữ implementation an toàn và nhỏ, chỉ phục vụ local order flow hiện tại.</CardDescription>
+            <CardDescription>Giữ phần triển khai an toàn và nhỏ, chỉ phục vụ luồng đặt đơn hiện tại.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2.5">
             <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
@@ -683,9 +683,9 @@ export function OrderPage() {
             </div>
 
             <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Chưa xử lý trên máy chủ</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Chưa kết nối máy chủ</p>
               <p className="mt-2 text-sm leading-7 text-slate-600">
-                Chưa có thanh toán thật, chuẩn bị đơn thật, đồng bộ nhiều thiết bị hoặc xử lý đơn ở phía quản trị.
+                Chưa có thanh toán thật, giao hàng thật, đồng bộ nhiều thiết bị hoặc xử lý đơn ở phía quản trị.
               </p>
             </div>
 
