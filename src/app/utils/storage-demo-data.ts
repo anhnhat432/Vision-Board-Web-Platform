@@ -335,7 +335,7 @@ export function createDemoUserData({
       tasks: [
         { id: "task_demo_reading_1", title: "Chọn 2 cuốn sách ưu tiên trong tháng này", completed: true },
         { id: "task_demo_reading_2", title: "Tạo template ghi chú ngắn sau mỗi buổi đọc", completed: true },
-        { id: "task_demo_reading_3", title: "Giữ streak đọc ít nhất 10 ngày", completed: false },
+        { id: "task_demo_reading_3", title: "Giữ chuỗi ngày đọc ít nhất 10 ngày", completed: false },
       ],
     },
     {
@@ -430,14 +430,14 @@ export function createDemoUserData({
     {
       id: "achievement_demo_2",
       title: "Visionary",
-      description: "Tạo bảng tầm nhìn đầu tiên của bạn",
+      description: "Tạo vision board đầu tiên của bạn",
       icon: "Sparkles",
       earnedAt: getRelativeISOString(-10),
     },
     {
       id: "achievement_demo_3",
       title: "Reflective Mind",
-      description: "Viết nhật ký phản tư đầu tiên của bạn",
+      description: "Viết nhật ký nhìn lại đầu tiên của bạn",
       icon: "BookOpen",
       earnedAt: getRelativeISOString(-5),
     },

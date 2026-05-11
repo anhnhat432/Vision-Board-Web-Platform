@@ -3,13 +3,13 @@ import confetti from "canvas-confetti";
 import type { Achievement } from "./storage";
 
 const ACHIEVEMENT_LABELS: Record<string, string> = {
-  "First Step": "Bước Đầu Tiên",
-  "Goal Setter": "Người Đặt Mục Tiêu",
-  Achiever: "Người Hoàn Thành",
-  "Master Achiever": "Bậc Thầy Hoàn Thành",
-  Visionary: "Người Tầm Nhìn",
-  "Reflective Mind": "Tâm Trí Suy Ngẫm",
-  Dedicated: "Bền Bỉ",
+  "First Step": "Bước đầu tiên",
+  "Goal Setter": "Người đặt mục tiêu",
+  Achiever: "Người hoàn thành",
+  "Master Achiever": "Bậc thầy hoàn thành",
+  Visionary: "Người có tầm nhìn",
+  "Reflective Mind": "Người hay nhìn lại",
+  Dedicated: "Bền bỉ",
 };
 
 const CELEBRATION_COLORS = ["#6d28d9", "#c026d3", "#3b82f6", "#f59e0b", "#10b981"];

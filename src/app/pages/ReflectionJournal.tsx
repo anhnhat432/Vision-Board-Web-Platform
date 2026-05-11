@@ -316,7 +316,7 @@ export function ReflectionJournal() {
               <div className="stack-stack">
                 <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-slate-200 bg-slate-50/90 px-3 py-1.5 text-xs font-semibold text-slate-600">
                   <NotebookPen className="h-4 w-4" />
-                  Nhật ký phản tư
+                  Nhật ký nhìn lại
                 </div>
 
                 <div className="stack-tight">
@@ -613,7 +613,7 @@ export function ReflectionJournal() {
               </div>
               <h2 className="mt-6 text-3xl font-bold text-slate-900">Chưa có trang nhật ký nào được mở ra</h2>
               <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-slate-500">
-                Nhật ký phản tư là phần về sau của flow. Bạn có thể đi từ Life Balance trước, hoặc viết một trang tự do
+                Nhật ký nhìn lại là phần về sau của flow. Bạn có thể đi từ Cân bằng cuộc sống trước, hoặc viết một trang tự do
                 nếu hôm nay đã có điều cần ghi lại.
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
@@ -621,7 +621,7 @@ export function ReflectionJournal() {
                   className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700"
                   onClick={() => navigate("/onboarding")}
                 >
-                  Bắt đầu Life Balance
+                  Bắt đầu Cân bằng cuộc sống
                   <ArrowRight className="h-4 w-4" />
                 </Button>
                 <Button variant="outline" onClick={() => setIsAddingReflection(true)}>
@@ -685,7 +685,7 @@ export function ReflectionJournal() {
                 {(
                   [
                     { value: "all", label: "Tất cả" },
-                    { value: "weekly-review", label: "Review" },
+                    { value: "weekly-review", label: "Review tuần" },
                     { value: "freeform", label: "Tự do" },
                   ] as const
                 ).map((item) => (
@@ -820,7 +820,7 @@ export function ReflectionJournal() {
           <div className="stack-section xl:sticky xl:top-28">
             <Card>
               <CardContent className="p-6">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Streak hiện tại</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Chuỗi ngày hiện tại</p>
                 <div className="mt-4 flex items-center gap-3 rounded-[var(--r-tile)] border border-violet-200 bg-violet-50 px-4 py-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] bg-violet-100 text-violet-700">
                     <Sparkles className="h-5 w-5" />
@@ -834,7 +834,7 @@ export function ReflectionJournal() {
                         ? "Nhịp viết đang rất tốt!"
                         : currentStreak > 0
                           ? "Hãy duy trì đều hơn nhé."
-                          : "Bắt đầu streak hôm nay!"}
+                          : "Bắt đầu chuỗi ngày hôm nay!"}
                     </p>
                   </div>
                 </div>

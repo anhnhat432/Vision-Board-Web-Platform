@@ -49,24 +49,24 @@ function getDemoGuideSteps(): NewUserGuideStep[] {
   return [
     {
       id: "dashboard_preview",
-      title: "Xem bảng điều khiển trước",
-      description: "Mở bảng điều khiển để nhìn nhanh cấu trúc web và hiểu một chu kỳ 12 tuần trông như thế nào.",
+      title: "Xem Trang chính trước",
+      description: "Mở Trang chính để nhìn nhanh cấu trúc web và hiểu một chu kỳ 12 tuần trông như thế nào.",
       completed: false,
       href: "/",
-      ctaLabel: "Mở bảng điều khiển",
+      ctaLabel: "Mở Trang chính",
     },
     {
       id: "goal_preview",
       title: "Mở một mục tiêu mẫu",
       description:
-        "Vào màn Mục tiêu để xem cách một mục tiêu đã đi qua insight, SMART và 12 tuần được biểu diễn ra sao.",
+        "Vào màn Mục tiêu để xem cách một mục tiêu đã đi qua góc nhìn cuộc sống, mục tiêu SMART và 12 tuần được trình bày ra sao.",
       completed: false,
       href: "/goals",
       ctaLabel: "Mở mục tiêu mẫu",
     },
     {
       id: "complete_today",
-      title: "Thử hàng việc hôm nay",
+      title: "Thử việc hôm nay",
       description: "Mở trung tâm 12 tuần và xem cách web trả lời câu hỏi: hôm nay tôi nên làm gì trước.",
       completed: false,
       href: "/12-week-system",
@@ -75,7 +75,7 @@ function getDemoGuideSteps(): NewUserGuideStep[] {
     {
       id: "complete_review",
       title: "Mở thử review tuần",
-      description: "Chuyển sang tab Tuần để xem score, reflection và cách quyết định tải cho tuần sau.",
+      description: "Chuyển sang tab Tuần để xem điểm, phần nhìn lại và cách quyết định tải cho tuần sau.",
       completed: false,
       href: "/12-week-system?tab=week",
       ctaLabel: "Mở review tuần",
@@ -112,7 +112,7 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
   const steps: NewUserGuideStep[] = [
     {
       id: "life_balance",
-      title: "Đánh giá Life Balance",
+      title: "Đánh giá Cân bằng cuộc sống",
       description: "Chấm điểm 8 lĩnh vực để biết hiện tại mình đang lệch ở đâu và nên ưu tiên nơi nào.",
       completed: hasLifeBalance,
       href: "/onboarding",
@@ -120,19 +120,19 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
     },
     {
       id: "life_insight",
-      title: "Chọn Life Insight",
-      description: "Dùng dữ liệu Life Balance để chọn một lĩnh vực trọng tâm, thay vì bắt đầu từ cảm hứng mơ hồ.",
+      title: "Chọn góc nhìn cuộc sống",
+      description: "Dùng dữ liệu Cân bằng cuộc sống để chọn một lĩnh vực trọng tâm, thay vì bắt đầu từ cảm hứng mơ hồ.",
       completed: hasInsight,
       href: "/life-insight",
       ctaLabel: "Chọn trọng tâm",
     },
     {
       id: "smart_goal",
-      title: "Viết SMART Goal",
+      title: "Viết mục tiêu SMART",
       description: "Biến trọng tâm đó thành mục tiêu có kết quả, chỉ số đo, thời gian và lý do rõ ràng.",
       completed: hasSmartGoal,
       href: hasInsight ? "/smart-goal-setup" : "/life-insight",
-      ctaLabel: hasInsight ? "Viết SMART Goal" : "Chọn trọng tâm trước",
+      ctaLabel: hasInsight ? "Viết mục tiêu SMART" : "Chọn trọng tâm trước",
     },
     {
       id: "feasibility",
@@ -140,15 +140,15 @@ export function getNewUserGuideProgress(userData: UserData): NewUserGuideProgres
       description: "Đo mức sẵn sàng trước khi dựng kế hoạch, để mục tiêu không quá nặng so với lịch sống hiện tại.",
       completed: hasFeasibility,
       href: hasSmartGoal ? "/feasibility" : "/smart-goal-setup",
-      ctaLabel: hasSmartGoal ? "Kiểm tra khả thi" : "Viết SMART Goal trước",
+      ctaLabel: hasSmartGoal ? "Kiểm tra khả thi" : "Viết mục tiêu SMART trước",
     },
     {
       id: "setup_cycle",
       title: "Chốt chu kỳ 12 tuần",
-      description: "Biến mục tiêu đó thành một chu kỳ có outcome, tactic, metric, tuần đầu và ngày review rõ ràng.",
+      description: "Biến mục tiêu đó thành một chu kỳ có kết quả, việc lặp lại, chỉ số, tuần đầu và ngày review rõ ràng.",
       completed: hasCycle,
       href: hasFeasibility ? "/12-week-setup" : "/feasibility",
-      ctaLabel: hasFeasibility ? "Dựng hệ 12 tuần" : "Kiểm tra khả thi trước",
+      ctaLabel: hasFeasibility ? "Tạo kế hoạch 12 tuần" : "Kiểm tra khả thi trước",
     },
     {
       id: "complete_today",
