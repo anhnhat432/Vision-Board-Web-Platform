@@ -28,17 +28,41 @@ describe("UI primitive visual hierarchy", () => {
   });
 
   it("limits button magnetic motion to the primary hierarchy", () => {
-    render(
-      <>
-        <Button>Primary action</Button>
-        <Button variant="secondary">Secondary action</Button>
-        <Button variant="outline">Outline action</Button>
-      </>,
-    );
+    const originalMatchMedia = window.matchMedia;
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      configurable: true,
+      value: (query: string): MediaQueryList => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        addListener: () => {},
+        removeListener: () => {},
+        dispatchEvent: () => false,
+      }),
+    });
 
-    expect(document.querySelector("button:nth-of-type(1)")?.className).toContain("button-magnetic");
-    expect(document.querySelector("button:nth-of-type(2)")?.className).not.toContain("button-magnetic");
-    expect(document.querySelector("button:nth-of-type(3)")?.className).not.toContain("button-magnetic");
+    try {
+      render(
+        <>
+          <Button>Primary action</Button>
+          <Button variant="secondary">Secondary action</Button>
+          <Button variant="outline">Outline action</Button>
+        </>,
+      );
+
+      expect(document.querySelector("button:nth-of-type(1)")?.className).toContain("button-magnetic");
+      expect(document.querySelector("button:nth-of-type(2)")?.className).not.toContain("button-magnetic");
+      expect(document.querySelector("button:nth-of-type(3)")?.className).not.toContain("button-magnetic");
+    } finally {
+      Object.defineProperty(window, "matchMedia", {
+        writable: true,
+        configurable: true,
+        value: originalMatchMedia,
+      });
+    }
   });
 
   it("maps badge status variants to semantic color tokens", () => {
