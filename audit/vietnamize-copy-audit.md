@@ -391,3 +391,23 @@ No UI copy has been changed in this commit. This is an audit-only checkpoint for
 - Cần user duyệt các term lớn trước khi sửa: `workspace`, `dashboard`, `vision board`, `Life Insight`, `cloud/backend/API/Firebase`, `checkout`, `sync`.
 - Không đổi enum/storage values ở Bảng 3. Chỉ đổi label/message render ra UI.
 - Test updates nên gom ở commit cuối nếu exact text queries bị ảnh hưởng.
+
+## Round 2 update — 2026-05-11
+
+Đã fix ở round 2:
+
+- Backend/sync/network user-facing messages: đã Việt hóa thông báo đồng bộ, khôi phục từ máy chủ, lỗi hàng chờ, xung đột, API/network và trạng thái mất mạng.
+- Adjustment/planning messages: đã Việt hóa các gợi ý điều chỉnh tải, mức sẵn sàng, thời điểm mục tiêu và phản hồi thực hiện.
+- Admin console/auth copy: đã Việt hóa hồ sơ, vai trò, trạng thái kiểm tra quản trị và các câu hướng dẫn máy chủ; giữ tên kỹ thuật như Firebase Auth, Render, ADMIN_EMAILS, env.
+- Admin orders/billing copy: đã Việt hóa order/payment/provider copy user-facing; giữ VietQR, Casso, Stripe/localStorage/backend production khi là technical note.
+- Time blocking/scope/milestone/output copy: đã Việt hóa block -> khung, scope -> phạm vi, milestone -> cột mốc, ship/publish -> phát hành, feedback -> góp ý, habit/streak/cue -> thói quen/chuỗi ngày/tín hiệu khi là copy hiển thị.
+- Upgrade/paywall analytics labels: đã Việt hóa paywall/checkout/insight premium labels thành lời mời nâng cấp/thanh toán/góc nhìn cao cấp.
+- Machine-translated artifacts: đã sửa các câu còn lẫn `offline`, `endpoint`, `locally`, `review Plus`, `Follow-up`, `consolidate`, `Build trong vacuum`.
+
+Cần user duyệt thêm / cố ý giữ:
+
+- Keyword arrays và classifier aliases như `ship`, `publish`, `draft`, `habit`, `streak`, `milestone tiet kiem` trong logic phân loại SMART/12-week được giữ nguyên vì không phải copy UI; đổi các chuỗi này sẽ làm thay đổi hành vi nhận diện.
+- Route/query string `/12-week-system?tab=settings` giữ nguyên.
+- Dev-only error/log như `useAutoCloudSyncContext must be used inside AutoCloudSyncProvider`, console warning/error nội bộ, storage key và analytics event id giữ nguyên.
+- Branding/technical name `Dear Our Future`, `Vision Kit`, `Plus`, `SMART`, `Firebase Console > Authentication > Get started`, `Sign-in method`, `Authorized domains`, `Render`, `ADMIN_EMAILS`, `VITE_API_BASE_URL` giữ nguyên theo duyệt.
+- `Goal Setter` đang được giữ như tên thành tựu/badge; nếu muốn đổi thành `Người đặt mục tiêu` cần duyệt riêng để tránh đổi identity thành tựu.
