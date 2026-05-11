@@ -25,6 +25,7 @@ import {
 import { toast } from "sonner";
 
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { EmptyOrdersIllustration } from "../components/illustrations";
 import { SectionBlock } from "../components/layout/SectionBlock";
 import { ProductVisual } from "../components/visuals/ProductVisual";
 import {
@@ -924,6 +925,7 @@ export function VisionBoardEditor() {
                 {board.items.length === 0 ? (
                   <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
                     <div className="w-full max-w-md rounded-[var(--r-card)] border border-white/80 bg-white/86 p-5 text-center shadow-2xl sm:p-7">
+                      <EmptyOrdersIllustration className="mx-auto mb-4 w-32 text-violet-500 opacity-70 sm:w-40" />
                       <ProductVisual variant="vision" className="mx-auto mb-5 min-h-[150px] max-w-sm" />
                       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700 sm:h-20 sm:w-20 sm:rounded-[var(--r-tile)]">
                         <Sparkles className="h-8 w-8 sm:h-9 sm:w-9" />
