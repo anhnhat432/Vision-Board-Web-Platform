@@ -23,6 +23,22 @@ const GOAL_ARCHETYPE_ICON_MAP: Record<string, GoalArchetypeIconComponent> = {
   habit_building: GoalArchetypeHabitIcon,
   relationship_life: GoalArchetypeRelationshipIcon,
   other: GoalArchetypeHabitIcon,
+  "skill learning": GoalArchetypeLearningIcon,
+  "exam / study": GoalArchetypeLearningIcon,
+  education: GoalArchetypeLearningIcon,
+  "fitness / health": GoalArchetypeHealthIcon,
+  health: GoalArchetypeHealthIcon,
+  "career / job search": GoalArchetypeFinancialIcon,
+  career: GoalArchetypeFinancialIcon,
+  "finance / saving": GoalArchetypeFinancialIcon,
+  finance: GoalArchetypeFinancialIcon,
+  "project completion": GoalArchetypeCreativeIcon,
+  "habit building": GoalArchetypeHabitIcon,
+  "personal growth": GoalArchetypeHabitIcon,
+  relationships: GoalArchetypeRelationshipIcon,
+  relationship: GoalArchetypeRelationshipIcon,
+  family: GoalArchetypeRelationshipIcon,
+  leisure: GoalArchetypeCreativeIcon,
 };
 
 export function getGoalArchetypeIcon(archetype: string | null | undefined): GoalArchetypeIconComponent {

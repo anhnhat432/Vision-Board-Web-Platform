@@ -1,6 +1,7 @@
 import { ArrowRight, Plus, Target } from "lucide-react";
 
 import { Button } from "@/app/components/ui/button";
+import { getGoalArchetypeIcon } from "@/app/components/illustrations";
 import { Progress } from "@/app/components/ui/progress";
 import {
   calculateGoalProgress,
@@ -46,12 +47,14 @@ export function DashboardActiveGoalsList({
         <div className="grid gap-[var(--space-stack)] lg:grid-cols-3">
           {visibleGoals.map((goal) => {
             const leadScore = getLeadScore(goal);
+            const GoalArchetypeIcon = getGoalArchetypeIcon(goal.twelveWeekSystem?.goalType ?? goal.category);
 
             return (
               <article
                 key={goal.id}
-                className="card-hover-lift rounded-[var(--r-card)] bg-white/92 p-5 ring-1 ring-slate-200/70 dark:bg-slate-900/70 dark:ring-slate-700"
+                className="card-hover-lift relative overflow-hidden rounded-[var(--r-card)] bg-white/92 p-5 ring-1 ring-slate-200/70 dark:bg-slate-900/70 dark:ring-slate-700"
               >
+                <GoalArchetypeIcon className="pointer-events-none absolute right-4 top-4 h-6 w-6 text-fuchsia-500 opacity-70" />
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 shadow-sm dark:from-violet-950/50 dark:to-fuchsia-950/40 dark:text-violet-200">
                     <Target className="h-4 w-4" />

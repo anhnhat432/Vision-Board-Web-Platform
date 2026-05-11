@@ -30,7 +30,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Checkbox } from "../components/ui/checkbox";
 import { CountUp } from "../components/ui/count-up";
-import { EmptyGoalIllustration } from "../components/illustrations";
+import { EmptyGoalIllustration, getGoalArchetypeIcon } from "../components/illustrations";
 import { Input } from "../components/ui/input";
 import { LoadingSpinner } from "../components/ui/loading-spinner";
 import { SectionBlock } from "../components/layout/SectionBlock";
@@ -417,6 +417,7 @@ function GoalTrackerContent({
     const systemWeekRange = system && systemCurrentWeek ? getTwelveWeekWeekRange(system, systemCurrentWeek) : null;
     const systemReviewDueToday = Boolean(system && isTwelveWeekReviewDueToday(system));
     const systemTodayOpenTasks = system ? getTwelveWeekTodayTasks(system).filter((task) => !task.completed) : [];
+    const GoalArchetypeIcon = getGoalArchetypeIcon(system?.goalType ?? goal.category);
     const nextSystemTask =
       systemTodayOpenTasks[0] ??
       (system && systemCurrentWeek
@@ -428,9 +429,12 @@ function GoalTrackerContent({
         <CardContent className="grid gap-[var(--space-stack)] p-5 sm:p-6 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)]">
           <div className="rounded-[var(--r-card)] gradient-dark p-5 text-white">
             <div className="flex items-start justify-between gap-3">
-              <Badge className="text-white" style={{ backgroundColor: areaMeta?.color ?? "#7c3aed" }}>
-                {progress}%
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge className="text-white" style={{ backgroundColor: areaMeta?.color ?? "#7c3aed" }}>
+                  {progress}%
+                </Badge>
+                <GoalArchetypeIcon className="h-7 w-7 text-white/80" />
+              </div>
               <Button
                 variant="ghost"
                 size="icon"
