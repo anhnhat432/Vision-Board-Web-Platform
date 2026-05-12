@@ -4,3 +4,4 @@ export { MotionPageTransition } from "./MotionPageTransition";
 export { MotionParallaxLayer } from "./MotionParallaxLayer";
 export { MotionStaggerItem } from "./MotionStaggerItem";
 export { MotionStaggerList } from "./MotionStaggerList";
+export { MotionTilt } from "./MotionTilt";
