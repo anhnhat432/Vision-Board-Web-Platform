@@ -7,7 +7,7 @@ import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { BillingPlusIllustration, HeroBillingPlusScene, SoftDotsPattern } from "../components/illustrations";
 import { PrimaryActionCard } from "../components/layout/PrimaryActionCard";
 import { SectionBlock } from "../components/layout/SectionBlock";
-import { MotionStaggerItem, MotionStaggerList } from "../components/motion";
+import { MotionStaggerItem, MotionStaggerList, MotionTilt } from "../components/motion";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -995,14 +995,15 @@ export function BillingPlan() {
         <CardContent>
           <MotionStaggerList className="grid gap-4 sm:grid-cols-2">
             {PLAN_DEFINITIONS.map((plan) => (
-              <MotionStaggerItem
-                key={plan.code}
-                className={`relative overflow-hidden rounded-[var(--r-control)] border p-5 ${
-                  plan.code === currentPlanCode
-                    ? "featured-surface glow-vivid border-violet-300 bg-violet-50/50"
-                    : "border-slate-100 bg-slate-50/30"
-                }`}
-              >
+              <MotionStaggerItem key={plan.code}>
+                <MotionTilt
+                  intensity={plan.code === "PLUS" ? 6 : 3}
+                  className={`relative overflow-hidden rounded-[var(--r-control)] border p-5 ${
+                    plan.code === currentPlanCode
+                      ? "featured-surface glow-vivid border-violet-300 bg-violet-50/50"
+                      : "border-slate-100 bg-slate-50/30"
+                  }`}
+                >
                 {plan.code !== "FREE" && (
                   <>
                     <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 w-40 text-violet-500 opacity-25" />
@@ -1033,6 +1034,7 @@ export function BillingPlan() {
                     {demoMode ? "Mở Plus" : "Nâng cấp Plus"}
                   </Button>
                 )}
+                </MotionTilt>
               </MotionStaggerItem>
             ))}
           </MotionStaggerList>
