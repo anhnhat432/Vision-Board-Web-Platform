@@ -1,4 +1,5 @@
 ﻿import { useMemo } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import {
   Award,
@@ -25,6 +26,8 @@ import { InteractiveSurface } from "../components/ui/interactive-surface";
 import { Reveal } from "../components/ui/reveal";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { calculateGoalProgress } from "../utils/storage";
+import { celebrateLarge } from "@/lib/effects/celebrate";
+import { hasNewCelebrationIds } from "@/lib/effects/celebrationTriggers";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Target,
@@ -79,6 +82,7 @@ const ACHIEVEMENT_ORDER = Object.keys(ACHIEVEMENT_COPY);
 export function Achievements() {
   const navigate = useNavigate();
   const { userData } = useSyncedUserData();
+  const seenAchievementIdsRef = useRef<Set<string> | null>(null);
 
   const sortedAchievements = useMemo(() => {
     if (!userData) return [];
@@ -92,6 +96,16 @@ export function Achievements() {
       key,
       ...ACHIEVEMENT_COPY[key],
     }));
+  }, [userData]);
+
+  useEffect(() => {
+    if (!userData) return;
+
+    const currentIds = new Set(userData.achievements.map((achievement) => achievement.id));
+    if (hasNewCelebrationIds(seenAchievementIdsRef.current, currentIds)) {
+      celebrateLarge();
+    }
+    seenAchievementIdsRef.current = currentIds;
   }, [userData]);
 
   if (!userData) return null;
