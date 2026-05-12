@@ -191,7 +191,7 @@ export function LoginPage() {
           <ConstellationAccent className="pointer-events-none absolute right-4 top-4 w-28 text-violet-500 opacity-35 dark:opacity-25" />
           <motion.div
             variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
-            className="mb-5 flex items-start justify-between gap-4"
+            className="relative z-10 mb-5 flex items-start justify-between gap-4"
           >
             <div className="gradient-brand flex size-12 items-center justify-center rounded-[var(--r-tile)] shadow-lg">
               <Sparkles className="h-5.5 w-5.5 text-white" />
@@ -200,13 +200,13 @@ export function LoginPage() {
           </motion.div>
           <motion.p
             variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
-            className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300"
+            className="relative z-10 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300"
           >
             Dear Our Future
           </motion.p>
           <motion.p
             variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
-            className="mt-[var(--space-inline)] text-3xl font-semibold leading-[1.15] tracking-tight text-slate-950 sm:text-4xl md:text-5xl dark:text-white"
+            className="relative z-10 mt-[var(--space-inline)] text-3xl font-semibold leading-[1.15] tracking-tight text-slate-950 sm:text-4xl md:text-5xl dark:text-white"
           >
             Biến mục tiêu thành{" "}
             <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-transparent">
@@ -216,7 +216,7 @@ export function LoginPage() {
           </motion.p>
           <motion.div
             variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
-            className="mt-6 flex flex-wrap gap-2"
+            className="relative z-10 mt-6 flex flex-wrap gap-2"
           >
             {TRUST_FEATURES.map(({ icon: Icon, label }) => (
               <span
@@ -230,7 +230,7 @@ export function LoginPage() {
           </motion.div>
           <motion.div
             variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
-            className="mt-6 grid gap-3 text-sm leading-6 text-slate-600 dark:text-slate-200"
+            className="relative z-10 mt-6 grid gap-3 text-sm leading-6 text-slate-600 dark:text-slate-200"
           >
             {WORKSPACE_PROMISES.map((item) => (
               <div
@@ -243,7 +243,7 @@ export function LoginPage() {
           </motion.div>
           <motion.div
             variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
-            className="mt-5 flex items-start gap-3 rounded-[var(--r-control)] border border-emerald-200/70 bg-emerald-50/85 px-4 py-3 text-sm leading-6 text-emerald-800 dark:border-emerald-400/20 dark:bg-emerald-950/40 dark:text-emerald-100"
+            className="relative z-10 mt-5 flex items-start gap-3 rounded-[var(--r-control)] border border-emerald-200/70 bg-emerald-50/85 px-4 py-3 text-sm leading-6 text-emerald-800 dark:border-emerald-400/20 dark:bg-emerald-950/40 dark:text-emerald-100"
           >
             <ShieldCheck className="mt-0.5 h-4 w-4 flex-none" />
             <p>Đăng nhập an toàn. Không lưu mật khẩu trên thiết bị.</p>

@@ -721,7 +721,7 @@ function DashboardContent({
             >
               <HeroDashboardScene className="pointer-events-none absolute -right-12 top-2 hidden w-[420px] text-violet-500 opacity-22 dark:opacity-16 xl:block" />
               <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 hidden w-56 text-violet-500 opacity-35 dark:opacity-20 sm:block" />
-              <div className="stack-stack">
+              <div className="relative z-10 stack-stack">
                 <div className="hidden justify-end xl:flex">
                   <HeroOrbitIllustration className="-mb-10 -mt-12 w-44 text-violet-500 opacity-80" />
                 </div>

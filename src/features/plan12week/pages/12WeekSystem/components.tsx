@@ -199,7 +199,7 @@ export function TwelveWeekDashboardHeader({
     <Card className="glass-surface-sm surface-aurora ring-soft-glow page-enter relative overflow-hidden rounded-[var(--r-tile)] border border-violet-100/80 bg-white/94 shadow-xl shadow-slate-900/5 ring-1 ring-white/70 sm:rounded-[var(--r-card)] dark:shadow-black/30">
       <Hero12WeekScene className="pointer-events-none absolute -right-16 top-0 hidden w-[560px] text-violet-500 opacity-18 dark:opacity-14 xl:block" />
       <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 hidden w-44 text-violet-500 opacity-25 dark:opacity-15 sm:block" />
-      <CardContent className="p-4 sm:p-6 lg:p-7">
+      <CardContent className="relative z-10 p-4 sm:p-6 lg:p-7">
         <div className="flex flex-col gap-3 sm:gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0 flex-1 stack-tight">
             <div className="flex flex-wrap items-center gap-2">

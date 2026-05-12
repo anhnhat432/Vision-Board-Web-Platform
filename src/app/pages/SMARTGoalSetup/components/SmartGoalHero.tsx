@@ -49,7 +49,7 @@ export function SmartGoalHero({
           <HeroSmartGoalScene className="pointer-events-none absolute -right-16 top-0 hidden w-[520px] text-white opacity-18 lg:block" />
           <ConstellationAccent className="pointer-events-none absolute right-3 top-0 w-28 text-white opacity-35 sm:w-36" />
           <SmartGoalIllustration className="pointer-events-none absolute -right-8 bottom-2 hidden w-56 text-white opacity-25 lg:block" />
-          <div className="stack-stack">
+          <div className="relative z-10 stack-stack">
             <div className="flex flex-wrap gap-3">
               <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
                 <Target className="mr-1 h-3.5 w-3.5" />
@@ -64,7 +64,7 @@ export function SmartGoalHero({
 
           <div
             data-testid="smart-goal-handoff-card"
-            className="rounded-[var(--r-control)] border border-white/18 bg-white/12 p-4 text-white shadow-sm"
+            className="relative z-10 rounded-[var(--r-control)] border border-white/18 bg-white/12 p-4 text-white shadow-sm"
           >
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/62">
               Góc nhìn cuộc sống đã chọn
@@ -85,7 +85,7 @@ export function SmartGoalHero({
             </div>
           </div>
 
-          <div className="hidden flow-panel p-5 sm:p-6">
+          <div className="relative z-10 hidden flow-panel p-5 sm:p-6">
             <div className="flex items-center justify-between text-sm text-white/72">
               <span>
                 Bước {currentStep + 1} / {totalSteps}
