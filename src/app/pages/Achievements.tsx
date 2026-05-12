@@ -18,6 +18,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { CountUp } from "../components/ui/count-up";
 import { AchievementBadgeIllustration, BadgeRibbonAccent, ConstellationAccent, HeroAchievementsScene } from "../components/illustrations";
+import { MotionStaggerItem, MotionStaggerList } from "../components/motion";
 import { InteractiveSurface } from "../components/ui/interactive-surface";
 import { Reveal } from "../components/ui/reveal";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
@@ -183,7 +184,7 @@ export function Achievements() {
       </InteractiveSurface>
 
       <Reveal>
-        <div className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <MotionStaggerList className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           {[
             {
               title: "Tổng thành tựu",
@@ -217,7 +218,7 @@ export function Achievements() {
             const Icon = item.icon;
 
             return (
-              <div key={item.title}>
+              <MotionStaggerItem key={item.title}>
                 <Card className="relative overflow-hidden">
                   <div
                     className={`pointer-events-none absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
@@ -239,10 +240,10 @@ export function Achievements() {
                     <p className="text-sm text-slate-500">{item.note}</p>
                   </CardContent>
                 </Card>
-              </div>
+              </MotionStaggerItem>
             );
           })}
-        </div>
+        </MotionStaggerList>
       </Reveal>
 
       {sortedAchievements.length === 0 ? (
@@ -278,7 +279,7 @@ export function Achievements() {
             <p className="mt-1 text-sm text-slate-500">Những cột mốc bạn đã thực sự chạm tới trên hành trình này.</p>
           </div>
 
-          <div className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <MotionStaggerList className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             {sortedAchievements.map((achievement) => {
               const localized = ACHIEVEMENT_COPY[achievement.title] ?? {
                 title: achievement.title,
@@ -288,7 +289,7 @@ export function Achievements() {
               const Icon = ICON_MAP[localized.icon] ?? Trophy;
 
               return (
-                <div key={achievement.id}>
+                <MotionStaggerItem key={achievement.id}>
                   <Card className="relative overflow-hidden">
                     <BadgeRibbonAccent className="pointer-events-none absolute right-3 top-3 h-8 w-8 text-amber-500 opacity-75" />
                     <CardContent className="p-6">
@@ -314,10 +315,10 @@ export function Achievements() {
                       </div>
                     </CardContent>
                   </Card>
-                </div>
+                </MotionStaggerItem>
               );
             })}
-          </div>
+          </MotionStaggerList>
         </Reveal>
       )}
 
@@ -333,12 +334,12 @@ export function Achievements() {
                 Bạn đã mở khóa toàn bộ bộ thành tựu hiện có. Đây là một cột mốc rất đẹp.
               </div>
             ) : (
-              <div className="stagger-hover-grid grid grid-cols-1 gap-4 md:grid-cols-2">
+              <MotionStaggerList className="stagger-hover-grid grid grid-cols-1 gap-4 md:grid-cols-2">
                 {lockedAchievements.map((achievement) => {
                   const Icon = ICON_MAP[achievement.icon] ?? Trophy;
 
                   return (
-                    <div
+                    <MotionStaggerItem
                       key={achievement.key}
                       className="flex items-start gap-4 rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5"
                     >
@@ -358,10 +359,10 @@ export function Achievements() {
                         </div>
                         <p className="mt-2 text-sm leading-7 text-slate-500">{achievement.description}</p>
                       </div>
-                    </div>
+                    </MotionStaggerItem>
                   );
                 })}
-              </div>
+              </MotionStaggerList>
             )}
           </CardContent>
         </Card>

@@ -7,6 +7,7 @@ import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { BillingPlusIllustration, HeroBillingPlusScene, SoftDotsPattern } from "../components/illustrations";
 import { PrimaryActionCard } from "../components/layout/PrimaryActionCard";
 import { SectionBlock } from "../components/layout/SectionBlock";
+import { MotionStaggerItem, MotionStaggerList } from "../components/motion";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -992,9 +993,9 @@ export function BillingPlan() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <MotionStaggerList className="grid gap-4 sm:grid-cols-2">
             {PLAN_DEFINITIONS.map((plan) => (
-              <div
+              <MotionStaggerItem
                 key={plan.code}
                 className={`relative overflow-hidden rounded-[var(--r-control)] border p-5 ${
                   plan.code === currentPlanCode
@@ -1032,9 +1033,9 @@ export function BillingPlan() {
                     {demoMode ? "Mở Plus" : "Nâng cấp Plus"}
                   </Button>
                 )}
-              </div>
+              </MotionStaggerItem>
             ))}
-          </div>
+          </MotionStaggerList>
         </CardContent>
         </Card>
       </SectionBlock>
