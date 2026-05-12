@@ -841,6 +841,38 @@
     -webkit-backdrop-filter: saturate(120%) blur(8px);
   }
 
+  .surface-glass-deep {
+    position: relative;
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in oklab, var(--color-surface) 70%, transparent),
+        color-mix(in oklab, var(--color-surface) 90%, transparent)
+      );
+    backdrop-filter: saturate(150%) blur(20px);
+    -webkit-backdrop-filter: saturate(150%) blur(20px);
+    border: 1px solid color-mix(in oklab, white 8%, transparent);
+  }
+
+  .dark .surface-glass-deep {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in oklab, var(--color-surface) 60%, transparent),
+        color-mix(in oklab, var(--color-surface) 85%, transparent)
+      );
+    border: 1px solid color-mix(in oklab, white 6%, transparent);
+  }
+
+  .surface-glass-deep::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(135deg, color-mix(in oklab, var(--vivid-violet) 8%, transparent), transparent 60%);
+  }
+
   .ring-soft-glow {
     box-shadow:
       0 1px 0 0 color-mix(in oklab, var(--color-border) 60%, transparent),
@@ -2015,6 +2047,8 @@
     overflow: hidden;
     background: color-mix(in oklab, var(--color-surface) 70%, var(--color-muted) 30%);
     border-radius: inherit;
+    filter: blur(0);
+    animation: skeleton-progressive 2.4s ease-in-out infinite;
   }
   .skeleton-shimmer::after {
     content: "";
@@ -2040,10 +2074,37 @@
     }
   }
 
+  @keyframes skeleton-progressive {
+    0%,
+    100% {
+      filter: blur(0);
+      opacity: 0.6;
+    }
+
+    50% {
+      filter: blur(2px);
+      opacity: 0.8;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
+    .skeleton-shimmer {
+      animation: none;
+      filter: none;
+    }
+
     .skeleton-shimmer::after {
       animation: none;
     }
+  }
+
+  .scroll-snap-x {
+    scroll-snap-type: x mandatory;
+    overflow-x: auto;
+  }
+
+  .scroll-snap-x > * {
+    scroll-snap-align: start;
   }
 
   .stat-value {
