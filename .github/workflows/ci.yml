@@ -48,7 +48,7 @@ jobs:
             echo "MONGODB_URI=mongodb://127.0.0.1:27017/vision-board-ci"
             echo "FIREBASE_PROJECT_ID=vision-board-ci"
             echo "FIREBASE_CLIENT_EMAIL=firebase-adminsdk-ci@vision-board-ci.iam.gserviceaccount.com"
-            echo "FRONTEND_ORIGIN=http://localhost:5173"
+            echo "FRONTEND_ORIGIN=https://example.com"
             echo "FIREBASE_PRIVATE_KEY<<EOF"
             node -e "const { generateKeyPairSync } = require('crypto'); const { privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 }); process.stdout.write(privateKey.export({ type: 'pkcs8', format: 'pem' }));"
             echo "EOF"
