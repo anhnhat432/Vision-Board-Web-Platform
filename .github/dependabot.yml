@@ -1,0 +1,61 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Ho_Chi_Minh
+    open-pull-requests-limit: 5
+    groups:
+      radix-ui:
+        patterns:
+          - "@radix-ui/*"
+      testing:
+        patterns:
+          - "@testing-library/*"
+          - vitest
+          - "@vitejs/*"
+          - jsdom
+      lint:
+        patterns:
+          - "@biomejs/*"
+          - prettier
+      types:
+        patterns:
+          - "@types/*"
+    labels:
+      - dependencies
+      - frontend
+
+  - package-ecosystem: npm
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Ho_Chi_Minh
+    open-pull-requests-limit: 5
+    groups:
+      backend-types:
+        patterns:
+          - "@types/*"
+      sentry:
+        patterns:
+          - "@sentry/*"
+    labels:
+      - dependencies
+      - backend
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Ho_Chi_Minh
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - ci
