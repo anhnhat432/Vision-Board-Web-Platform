@@ -1,0 +1,22 @@
+title = "Vision Board Web Platform Gitleaks Config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Files and patterns explicitly safe to commit"
+paths = [
+  '''(.*?)\.env\.example''',
+  '''(.*?)\.env\.test''',
+  '''docs/.*''',
+  '''guidelines/.*''',
+  '''README.*\.md''',
+  '''AGENTS\.md''',
+  '''CLAUDE\.md''',
+  '''PROMPTS.*\.md''',
+]
+regexes = [
+  # Demo/mock placeholder keys used in docs
+  '''sk-(demo|mock|example|xxx)[-_a-zA-Z0-9]*''',
+  '''AIza(SyDemoKey|MockKey)[-_a-zA-Z0-9]*''',
+]
