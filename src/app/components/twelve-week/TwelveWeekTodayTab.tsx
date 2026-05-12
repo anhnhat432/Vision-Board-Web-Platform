@@ -3,6 +3,7 @@ import { AlertTriangle, ArrowRight, CalendarClock, CalendarPlus, Check, CheckCir
 
 import type { RescueModeStatus } from "@/features/plan12week/logic";
 import { getUpcomingStrategicBlock } from "@/features/plan12week/logic/timeBlocks";
+import { MotionStaggerItem, MotionStaggerList } from "@/app/components/motion";
 
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -600,7 +601,8 @@ export function TwelveWeekTodayTab({
                   />
                 )
               ) : (
-                todayQueue.map((task) => {
+                <MotionStaggerList className="contents">
+                  {todayQueue.map((task) => {
                   const taskCompleted = optimisticTaskCompletionById[task.id] ?? task.completed;
                   const isOverdue = !taskCompleted && task.scheduledDate < todayDateKey;
                   const isPrimaryTask = firstPriorityTask?.id === task.id && !taskCompleted;
@@ -618,7 +620,7 @@ export function TwelveWeekTodayTab({
                   );
 
                   return (
-                    <div
+                    <MotionStaggerItem
                       key={task.id}
                       className={`flex min-w-0 items-start gap-3 rounded-[var(--r-tile)] border p-4 shadow-sm ${
                         isPrimaryTask ? "border-foreground bg-foreground" : "border-border bg-white"
@@ -782,9 +784,10 @@ export function TwelveWeekTodayTab({
                             </div>
                           )}
                       </div>
-                    </div>
+                    </MotionStaggerItem>
                   );
-                })
+                })}
+                </MotionStaggerList>
               )}
               {secondaryTodayTasks.length > 0 && (
                 <details className="group min-w-0 rounded-[var(--r-control)] border border-border bg-muted px-4 py-3">

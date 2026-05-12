@@ -117,6 +117,10 @@
   --tone-orb-a: rgba(124, 58, 237, 0.12);
   --tone-orb-b: rgba(217, 70, 239, 0.1);
   --tone-orb-c: rgba(244, 114, 182, 0.08);
+  --vivid-violet: oklch(0.62 0.25 285);
+  --vivid-fuchsia: oklch(0.65 0.28 350);
+  --vivid-cyan: oklch(0.78 0.18 205);
+  --vivid-amber: oklch(0.82 0.18 75);
 }
 
 .dark {
@@ -183,6 +187,10 @@
   --tone-orb-a: rgba(124, 58, 237, 0.2);
   --tone-orb-b: rgba(217, 70, 239, 0.16);
   --tone-orb-c: rgba(244, 114, 182, 0.12);
+  --vivid-violet: oklch(0.7 0.22 285);
+  --vivid-fuchsia: oklch(0.72 0.24 350);
+  --vivid-cyan: oklch(0.82 0.16 205);
+  --vivid-amber: oklch(0.85 0.16 75);
 }
 
 @theme inline {
@@ -833,6 +841,38 @@
     -webkit-backdrop-filter: saturate(120%) blur(8px);
   }
 
+  .surface-glass-deep {
+    position: relative;
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in oklab, var(--color-surface) 70%, transparent),
+        color-mix(in oklab, var(--color-surface) 90%, transparent)
+      );
+    backdrop-filter: saturate(150%) blur(20px);
+    -webkit-backdrop-filter: saturate(150%) blur(20px);
+    border: 1px solid color-mix(in oklab, white 8%, transparent);
+  }
+
+  .dark .surface-glass-deep {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in oklab, var(--color-surface) 60%, transparent),
+        color-mix(in oklab, var(--color-surface) 85%, transparent)
+      );
+    border: 1px solid color-mix(in oklab, white 6%, transparent);
+  }
+
+  .surface-glass-deep::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(135deg, color-mix(in oklab, var(--vivid-violet) 8%, transparent), transparent 60%);
+  }
+
   .ring-soft-glow {
     box-shadow:
       0 1px 0 0 color-mix(in oklab, var(--color-border) 60%, transparent),
@@ -841,6 +881,39 @@
 
   .border-gradient-violet-rose {
     border-image: linear-gradient(135deg, var(--color-primary), var(--color-accent)) 1;
+  }
+
+  .text-gradient-vibrant {
+    background: linear-gradient(135deg, var(--vivid-violet), var(--vivid-fuchsia));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .text-gradient-aurora {
+    background: linear-gradient(135deg, var(--vivid-violet), var(--vivid-fuchsia), var(--vivid-cyan));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradient-flow 12s ease-in-out infinite;
+  }
+
+  .glow-vivid {
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--vivid-violet) 30%, transparent),
+      0 8px 32px -8px color-mix(in oklab, var(--vivid-violet) 40%, transparent),
+      0 16px 48px -16px color-mix(in oklab, var(--vivid-fuchsia) 30%, transparent);
+  }
+
+  .featured-surface {
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in oklab, var(--vivid-violet) 12%, transparent),
+        color-mix(in oklab, var(--vivid-fuchsia) 8%, transparent)
+      ),
+      var(--color-surface);
   }
 
   .glass-surface {
@@ -1027,6 +1100,69 @@
     100% {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  @keyframes twinkle {
+    0%,
+    100% {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+  }
+
+  .twinkle-slow {
+    animation: twinkle 4s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .twinkle-fast {
+    animation: twinkle 2.4s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  @keyframes gradient-flow {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .gradient-flow {
+    animation: gradient-flow 12s ease-in-out infinite;
+    background-size: 200% 200%;
+  }
+
+  @keyframes float-subtle {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  .float-subtle {
+    animation: float-subtle 6s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .twinkle-slow,
+    .twinkle-fast,
+    .gradient-flow,
+    .text-gradient-aurora,
+    .float-subtle {
+      animation: none;
     }
   }
 
@@ -1911,6 +2047,8 @@
     overflow: hidden;
     background: color-mix(in oklab, var(--color-surface) 70%, var(--color-muted) 30%);
     border-radius: inherit;
+    filter: blur(0);
+    animation: skeleton-progressive 2.4s ease-in-out infinite;
   }
   .skeleton-shimmer::after {
     content: "";
@@ -1936,10 +2074,37 @@
     }
   }
 
+  @keyframes skeleton-progressive {
+    0%,
+    100% {
+      filter: blur(0);
+      opacity: 0.6;
+    }
+
+    50% {
+      filter: blur(2px);
+      opacity: 0.8;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
+    .skeleton-shimmer {
+      animation: none;
+      filter: none;
+    }
+
     .skeleton-shimmer::after {
       animation: none;
     }
+  }
+
+  .scroll-snap-x {
+    scroll-snap-type: x mandatory;
+    overflow-x: auto;
+  }
+
+  .scroll-snap-x > * {
+    scroll-snap-align: start;
   }
 
   .stat-value {

@@ -1,5 +1,4 @@
 import { startTransition, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
 import {
   ChevronDown,
   Compass,
@@ -63,6 +62,7 @@ import {
 import { BACKEND_PLAN_HYDRATION_EVENT_NAME, useBackendPlanHydration } from "../hooks/useBackendPlanHydration";
 import { useTheme } from "../hooks/useTheme";
 import { FooterAuroraIllustration } from "./illustrations";
+import { MotionPageTransition } from "./motion";
 import { MotivationalReminder } from "./MotivationalReminder";
 import { NewUserGuideDialog } from "./NewUserGuide";
 import {
@@ -933,22 +933,7 @@ export function RootLayout() {
     />
   );
 
-  const pageTransitionContent = prefersReducedMotion ? (
-    outlet
-  ) : (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={location.pathname}
-        className="page-transition-shell"
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -4 }}
-        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {outlet}
-      </motion.div>
-    </AnimatePresence>
-  );
+  const pageTransitionContent = <MotionPageTransition pageKey={location.pathname}>{outlet}</MotionPageTransition>;
 
   if (GUIDED_PATHS.has(location.pathname)) {
     return (

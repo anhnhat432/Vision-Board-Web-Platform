@@ -5,6 +5,7 @@ import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
 import { Hero12WeekScene, PhaseHarvestChipIcon, PhasePeakChipIcon, PhaseRampChipIcon, SoftDotsPattern } from "@/app/components/illustrations";
+import { MotionCountUp, MotionParallaxLayer } from "@/app/components/motion";
 import { ProductVisual } from "@/app/components/visuals/ProductVisual";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import {
@@ -196,8 +197,14 @@ export function TwelveWeekDashboardHeader({
   const PhaseChipIcon = phaseInfo.chipIcon;
 
   return (
-    <Card className="glass-surface-sm surface-aurora ring-soft-glow page-enter relative overflow-hidden rounded-[var(--r-tile)] border border-violet-100/80 bg-white/94 shadow-xl shadow-slate-900/5 ring-1 ring-white/70 sm:rounded-[var(--r-card)] dark:shadow-black/30">
-      <Hero12WeekScene className="pointer-events-none absolute -right-16 top-0 hidden w-[560px] text-violet-500 opacity-18 dark:opacity-14 xl:block" />
+    <Card className="glass-surface-sm surface-aurora surface-glass-deep ring-soft-glow page-enter relative overflow-hidden rounded-[var(--r-tile)] border border-violet-100/80 bg-white/94 shadow-xl shadow-slate-900/5 ring-1 ring-white/70 sm:rounded-[var(--r-card)] dark:shadow-black/30">
+      <MotionParallaxLayer
+        depth={0.3}
+        className="pointer-events-none absolute -right-16 top-0 hidden w-[560px] text-violet-500 opacity-18 dark:opacity-14 xl:block"
+        aria-hidden="true"
+      >
+        <Hero12WeekScene className="w-full" />
+      </MotionParallaxLayer>
       <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 hidden w-44 text-violet-500 opacity-25 dark:opacity-15 sm:block" />
       <CardContent className="relative z-10 p-4 sm:p-6 lg:p-7">
         <div className="flex flex-col gap-3 sm:gap-5 xl:flex-row xl:items-start xl:justify-between">
@@ -261,7 +268,9 @@ export function TwelveWeekDashboardHeader({
                 <TrendingUp className="h-4 w-4" aria-hidden="true" />
               </span>
               <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 sm:text-xs sm:tracking-[0.14em]">Tuần</p>
-              <p className="count-up mt-1 text-xl font-bold tabular-nums text-slate-950 sm:text-2xl">{weekCompletion.percent}%</p>
+              <p className="count-up mt-1 text-xl font-bold tabular-nums text-slate-950 sm:text-2xl">
+                <MotionCountUp value={weekCompletion.percent} suffix="%" />
+              </p>
               <p className="hidden text-xs text-slate-500 sm:block">
                 {currentWeekRange
                   ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`

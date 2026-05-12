@@ -80,6 +80,8 @@ import {
 import { applyPulledWorkspaceToUserData } from "@/features/plan12week/persistence/pulledWorkspaceApply";
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
+import { celebrateLarge } from "@/lib/effects/celebrate";
+import { claimCelebrationOnce, getCycleCelebrationStorageKey } from "@/lib/effects/celebrationTriggers";
 import {
   TwelveWeekDashboardHeader,
   TwelveWeekDashboardNotice,
@@ -427,6 +429,7 @@ export function TwelveWeekSystem() {
 
   const handleSaveCycleReview = (input: { lessons: string[]; summary: CycleSummary }) => {
     if (!activeGoal || !system) return;
+    const cycleId = getCycleId(activeGoal.id, system);
     const continuingCommitments = getLatestContinuingCommitments(system);
     const content = buildCycleReviewContent({
       summary: input.summary,
@@ -441,10 +444,13 @@ export function TwelveWeekSystem() {
       mood: input.summary.averageLeadScore >= 85 ? "happy" : input.summary.averageLeadScore >= 65 ? "neutral" : "sad",
       entryType: "cycleReview",
       linkedGoalId: activeGoal.id,
-      cycleId: getCycleId(activeGoal.id, system),
+      cycleId,
       finalLagPercent: input.summary.finalLagPercent,
     });
     refreshSnapshotMeta();
+    if (claimCelebrationOnce(getCycleCelebrationStorageKey(cycleId))) {
+      celebrateLarge();
+    }
     toast.success("Báo cáo cycle đã được lưu.");
   };
 

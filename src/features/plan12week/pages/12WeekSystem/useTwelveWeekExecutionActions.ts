@@ -1,10 +1,10 @@
 import { useCallback, useMemo, type Dispatch, type RefObject, type SetStateAction } from "react";
-import confetti from "canvas-confetti";
 import { toast } from "sonner";
 
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
 import { hapticLight, hapticMedium, hapticSuccess } from "@/app/utils/haptics";
 import { playAllCompleteSound, playTaskCompleteSound } from "@/app/utils/sound";
+import { celebrateMedium, celebrateSmall } from "@/lib/effects/celebrate";
 import {
   type UniversalDailyCheckIn,
   type UniversalWeeklyReview,
@@ -180,55 +180,17 @@ function isCommitmentAnswered(status: WeeklyCommitmentStatus | undefined): boole
   return status === "kept" || status === "missed" || status === "not_set";
 }
 
-function canRunConfetti(): boolean {
-  if (typeof window === "undefined" || typeof document === "undefined") return false;
-  if (typeof navigator !== "undefined" && navigator.userAgent.toLowerCase().includes("jsdom")) return false;
-  return typeof window.HTMLCanvasElement !== "undefined" && "getContext" in window.HTMLCanvasElement.prototype;
-}
-
-function runConfetti(options: NonNullable<Parameters<typeof confetti>[0]>): void {
-  if (!canRunConfetti()) return;
-  confetti(options);
-}
-
 function triggerTaskCompletionConfetti(allTodayTasksCompleted: boolean): void {
   if (allTodayTasksCompleted) {
-    runConfetti({
-      particleCount: 60,
-      spread: 80,
-      origin: { y: 0.6 },
-      colors: ["#7c3aed", "#d946ef", "#f472b6", "#10b981", "#fbbf24"],
-      scalar: 0.9,
-      gravity: 0.9,
-      ticks: 150,
-      disableForReducedMotion: true,
-    });
+    celebrateMedium();
     return;
   }
 
-  runConfetti({
-    particleCount: 12,
-    spread: 40,
-    origin: { y: 0.7 },
-    colors: ["#7c3aed", "#d946ef", "#f472b6"],
-    scalar: 0.7,
-    gravity: 1.2,
-    ticks: 80,
-    disableForReducedMotion: true,
-  });
+  celebrateSmall();
 }
 
 function triggerWeeklyReviewConfetti(): void {
-  runConfetti({
-    particleCount: 60,
-    spread: 80,
-    origin: { y: 0.6 },
-    colors: ["#7c3aed", "#d946ef", "#f472b6", "#10b981", "#fbbf24"],
-    scalar: 0.9,
-    gravity: 0.9,
-    ticks: 150,
-    disableForReducedMotion: true,
-  });
+  celebrateMedium();
 }
 
 export function useTwelveWeekExecutionActions({

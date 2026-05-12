@@ -1,4 +1,5 @@
 ﻿import { useMemo } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import {
   Award,
@@ -17,11 +18,16 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { CountUp } from "../components/ui/count-up";
+import { FeaturedCard } from "../components/ui/featured-card";
 import { AchievementBadgeIllustration, BadgeRibbonAccent, ConstellationAccent, HeroAchievementsScene } from "../components/illustrations";
+import { emptyNarratives } from "../components/empty-states/narratives";
+import { MotionParallaxLayer, MotionStaggerItem, MotionStaggerList } from "../components/motion";
 import { InteractiveSurface } from "../components/ui/interactive-surface";
 import { Reveal } from "../components/ui/reveal";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { calculateGoalProgress } from "../utils/storage";
+import { celebrateLarge } from "@/lib/effects/celebrate";
+import { hasNewCelebrationIds } from "@/lib/effects/celebrationTriggers";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Target,
@@ -76,6 +82,7 @@ const ACHIEVEMENT_ORDER = Object.keys(ACHIEVEMENT_COPY);
 export function Achievements() {
   const navigate = useNavigate();
   const { userData } = useSyncedUserData();
+  const seenAchievementIdsRef = useRef<Set<string> | null>(null);
 
   const sortedAchievements = useMemo(() => {
     if (!userData) return [];
@@ -91,6 +98,16 @@ export function Achievements() {
     }));
   }, [userData]);
 
+  useEffect(() => {
+    if (!userData) return;
+
+    const currentIds = new Set(userData.achievements.map((achievement) => achievement.id));
+    if (hasNewCelebrationIds(seenAchievementIdsRef.current, currentIds)) {
+      celebrateLarge();
+    }
+    seenAchievementIdsRef.current = currentIds;
+  }, [userData]);
+
   if (!userData) return null;
 
   const completedGoals = userData.goals.filter((goal) => calculateGoalProgress(goal) === 100).length;
@@ -100,10 +117,16 @@ export function Achievements() {
   return (
     <div className="stack-section pb-12">
       <InteractiveSurface className="rounded-[var(--r-card)]" intensity={9} translate={22}>
-        <Card className="hero-surface surface-aurora ring-soft-glow page-enter overflow-hidden border-0 text-white">
+        <Card className="hero-surface surface-aurora surface-glass-deep ring-soft-glow featured-surface glow-vivid page-enter overflow-hidden border-0 text-white">
           <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
-            <HeroAchievementsScene className="pointer-events-none absolute -right-20 -top-4 hidden w-[560px] text-white opacity-20 xl:block" />
+            <MotionParallaxLayer
+              depth={0.24}
+              className="pointer-events-none absolute -right-20 -top-4 hidden w-[560px] text-white opacity-20 xl:block"
+              aria-hidden="true"
+            >
+              <HeroAchievementsScene className="w-full" />
+            </MotionParallaxLayer>
             <ConstellationAccent className="pointer-events-none absolute right-4 top-4 w-32 text-white opacity-35" />
 
             <div className="relative z-10 grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
@@ -114,8 +137,8 @@ export function Achievements() {
                 </div>
 
                 <div className="stack-stack">
-                  <h1 className="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl">
-                    Mọi cột mốc nhỏ bạn mở khóa ở đây đều là bằng chứng rằng hành trình đang thật sự diễn ra.
+                  <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+                    Mọi <span className="text-gradient-aurora">cột mốc nhỏ</span> bạn mở khóa ở đây đều là bằng chứng rằng hành trình đang thật sự diễn ra.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
                     Thành tựu không chỉ là huy hiệu. Chúng là những mốc xác nhận bạn đã bắt đầu, đã duy trì, đã hoàn
@@ -183,7 +206,7 @@ export function Achievements() {
       </InteractiveSurface>
 
       <Reveal>
-        <div className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <MotionStaggerList className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           {[
             {
               title: "Tổng thành tựu",
@@ -217,8 +240,8 @@ export function Achievements() {
             const Icon = item.icon;
 
             return (
-              <div key={item.title}>
-                <Card className="relative overflow-hidden">
+              <MotionStaggerItem key={item.title}>
+                <FeaturedCard className="relative overflow-hidden">
                   <div
                     className={`pointer-events-none absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
                   />
@@ -238,11 +261,11 @@ export function Achievements() {
                   <CardContent className="relative">
                     <p className="text-sm text-slate-500">{item.note}</p>
                   </CardContent>
-                </Card>
-              </div>
+                </FeaturedCard>
+              </MotionStaggerItem>
             );
           })}
-        </div>
+        </MotionStaggerList>
       </Reveal>
 
       {sortedAchievements.length === 0 ? (
@@ -253,10 +276,9 @@ export function Achievements() {
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-amber-50 text-amber-700">
                 <Trophy className="h-10 w-10" />
               </div>
-              <h2 className="mt-6 text-3xl font-bold text-slate-900">Chưa có huy hiệu nào được mở khóa</h2>
+              <h2 className="mt-6 text-3xl font-bold text-slate-900">{emptyNarratives.noAchievements.title}</h2>
               <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-slate-500">
-                Cột mốc đầu tiên thường đến rất nhanh. Hãy bắt đầu bằng một mục tiêu, một vision board hoặc một bài
-                viết nhìn lại.
+                {emptyNarratives.noAchievements.body}
               </p>
               <div className="mx-auto mt-6 flex flex-wrap justify-center gap-3">
                 <Button variant="outline" onClick={() => navigate("/goals")}>
@@ -278,7 +300,7 @@ export function Achievements() {
             <p className="mt-1 text-sm text-slate-500">Những cột mốc bạn đã thực sự chạm tới trên hành trình này.</p>
           </div>
 
-          <div className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <MotionStaggerList className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
             {sortedAchievements.map((achievement) => {
               const localized = ACHIEVEMENT_COPY[achievement.title] ?? {
                 title: achievement.title,
@@ -288,7 +310,7 @@ export function Achievements() {
               const Icon = ICON_MAP[localized.icon] ?? Trophy;
 
               return (
-                <div key={achievement.id}>
+                <MotionStaggerItem key={achievement.id}>
                   <Card className="relative overflow-hidden">
                     <BadgeRibbonAccent className="pointer-events-none absolute right-3 top-3 h-8 w-8 text-amber-500 opacity-75" />
                     <CardContent className="p-6">
@@ -314,10 +336,10 @@ export function Achievements() {
                       </div>
                     </CardContent>
                   </Card>
-                </div>
+                </MotionStaggerItem>
               );
             })}
-          </div>
+          </MotionStaggerList>
         </Reveal>
       )}
 
@@ -333,12 +355,12 @@ export function Achievements() {
                 Bạn đã mở khóa toàn bộ bộ thành tựu hiện có. Đây là một cột mốc rất đẹp.
               </div>
             ) : (
-              <div className="stagger-hover-grid grid grid-cols-1 gap-4 md:grid-cols-2">
+              <MotionStaggerList className="stagger-hover-grid grid grid-cols-1 gap-4 md:grid-cols-2">
                 {lockedAchievements.map((achievement) => {
                   const Icon = ICON_MAP[achievement.icon] ?? Trophy;
 
                   return (
-                    <div
+                    <MotionStaggerItem
                       key={achievement.key}
                       className="flex items-start gap-4 rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5"
                     >
@@ -358,10 +380,10 @@ export function Achievements() {
                         </div>
                         <p className="mt-2 text-sm leading-7 text-slate-500">{achievement.description}</p>
                       </div>
-                    </div>
+                    </MotionStaggerItem>
                   );
                 })}
-              </div>
+              </MotionStaggerList>
             )}
           </CardContent>
         </Card>

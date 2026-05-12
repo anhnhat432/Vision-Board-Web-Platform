@@ -26,8 +26,8 @@ export function HeroDashboardScene({ className, ...rest }: AmbientIllustrationPr
           <stop offset="1" stopColor="var(--tone-shell-tertiary, #22d3ee)" />
         </linearGradient>
       </defs>
-      <rect x="38" y="34" width="724" height="326" rx="72" fill={`url(#${glowId})`} />
-      <g opacity="0.62" transform="translate(70 72)">
+      <rect className="gradient-flow" x="38" y="34" width="724" height="326" rx="72" fill={`url(#${glowId})`} />
+      <g className="float-subtle" opacity="0.62" transform="translate(70 72)">
         <circle cx="106" cy="112" r="92" stroke="currentColor" strokeOpacity="0.22" strokeWidth="2" />
         {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
           <path
@@ -42,11 +42,11 @@ export function HeroDashboardScene({ className, ...rest }: AmbientIllustrationPr
         ))}
         <circle cx="106" cy="112" r="18" fill="currentColor" fillOpacity="0.28" />
       </g>
-      <path d="M176 286C268 226 334 244 418 190C493 142 560 136 666 96" stroke={`url(#${pathId})`} strokeWidth="8" strokeLinecap="round" opacity="0.72" />
+      <path className="float-subtle" d="M176 286C268 226 334 244 418 190C493 142 560 136 666 96" stroke={`url(#${pathId})`} strokeWidth="8" strokeLinecap="round" opacity="0.72" />
       {[176, 418, 666].map((cx, index) => (
         <circle key={cx} cx={cx} cy={[286, 190, 96][index]} r="14" fill="white" fillOpacity="0.72" stroke={`url(#${pathId})`} strokeWidth="4" />
       ))}
-      <g stroke="currentColor" strokeLinecap="round" strokeOpacity="0.42" strokeWidth="2">
+      <g className="twinkle-slow" stroke="currentColor" strokeLinecap="round" strokeOpacity="0.42" strokeWidth="2">
         <path d="M656 56L668 68M668 56L656 68" />
         <path d="M704 102L714 112M714 102L704 112" />
         <path d="M602 88L612 98M612 88L602 98" />

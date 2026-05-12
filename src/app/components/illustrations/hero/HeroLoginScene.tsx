@@ -28,9 +28,9 @@ export function HeroLoginScene({ className, ...rest }: AmbientIllustrationProps)
           <stop offset="1" stopColor="var(--tone-shell-tertiary, #fb7185)" stopOpacity="0.45" />
         </linearGradient>
       </defs>
-      <ellipse cx="300" cy="245" rx="245" ry="202" fill={`url(#${blobId})`} />
-      <HeroOrbitIllustration x="112" y="62" width="376" height="376" className="text-current" />
-      <g opacity="0.42">
+      <ellipse className="gradient-flow" cx="300" cy="245" rx="245" ry="202" fill={`url(#${blobId})`} />
+      <HeroOrbitIllustration x="112" y="62" width="376" height="376" className="float-subtle text-current" />
+      <g className="twinkle-slow" opacity="0.42">
         <circle cx="112" cy="118" r="4" fill="currentColor" />
         <circle cx="492" cy="132" r="3.5" fill="currentColor" />
         <circle cx="518" cy="318" r="5" fill="currentColor" />

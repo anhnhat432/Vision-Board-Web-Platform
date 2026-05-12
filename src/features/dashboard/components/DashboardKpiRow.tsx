@@ -1,6 +1,7 @@
 import { CalendarDays, Flame, TrendingUp, Zap } from "lucide-react";
 
 import { KpiBalanceSpark, KpiFocusSpark, KpiOutputSpark, KpiStreakSpark } from "@/app/components/illustrations";
+import { MotionCountUp, MotionStaggerItem, MotionStaggerList } from "@/app/components/motion";
 
 type DashboardKpiRowProps = {
   leadAverage: number;
@@ -10,15 +11,6 @@ type DashboardKpiRowProps = {
   wheelScore: number;
 };
 
-function formatPercent(value: number) {
-  return `${Math.max(0, Math.round(value))}%`;
-}
-
-function formatWheelScore(value: number) {
-  if (!Number.isFinite(value) || value <= 0) return "--";
-  return value.toFixed(1);
-}
-
 export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, wheelScore }: DashboardKpiRowProps) {
   const items = [
     {
@@ -26,7 +18,13 @@ export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, 
       spark: KpiFocusSpark,
       sparkClass: "text-violet-500",
       label: "Tuần",
-      value: currentWeek ? `${currentWeek}/${totalWeeks}` : "--",
+      value: currentWeek ? (
+        <>
+          <MotionCountUp value={currentWeek} />/<MotionCountUp value={totalWeeks} />
+        </>
+      ) : (
+        "--"
+      ),
       note: "trong chu kỳ",
       iconClass:
         "bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 dark:from-violet-950/50 dark:to-fuchsia-950/40 dark:text-violet-200",
@@ -36,7 +34,7 @@ export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, 
       spark: KpiOutputSpark,
       sparkClass: "text-emerald-500",
       label: "Tỷ lệ tạo kết quả",
-      value: formatPercent(leadAverage),
+      value: <MotionCountUp value={Math.max(0, Math.round(leadAverage))} suffix="%" />,
       note: "hoàn thành việc lặp lại",
       iconClass:
         "bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-700 dark:from-emerald-950/50 dark:to-teal-950/40 dark:text-emerald-200",
@@ -46,7 +44,12 @@ export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, 
       spark: KpiBalanceSpark,
       sparkClass: "text-amber-500",
       label: "Nhịp việc lặp lại",
-      value: formatWheelScore(wheelScore),
+      value:
+        Number.isFinite(wheelScore) && wheelScore > 0 ? (
+          <MotionCountUp value={Number(wheelScore.toFixed(1))} precision={1} />
+        ) : (
+          "--"
+        ),
       note: "điểm cuộc sống",
       iconClass:
         "bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 dark:from-amber-950/50 dark:to-orange-950/40 dark:text-amber-200",
@@ -56,7 +59,7 @@ export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, 
       spark: KpiStreakSpark,
       sparkClass: "text-rose-500",
       label: "Chuỗi ngày",
-      value: String(streak),
+      value: <MotionCountUp value={streak} />,
       note: "tuần giữ nhịp",
       iconClass:
         streak >= 7
@@ -66,13 +69,16 @@ export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, 
   ];
 
   return (
-    <div data-testid="dashboard-kpi-row" className="grid grid-cols-2 gap-2 sm:gap-[var(--space-stack)] lg:grid-cols-4">
+    <MotionStaggerList
+      data-testid="dashboard-kpi-row"
+      className="grid grid-cols-2 gap-2 sm:gap-[var(--space-stack)] lg:grid-cols-4"
+    >
       {items.map((item) => {
         const Icon = item.icon;
         const Spark = item.spark;
 
         return (
-          <div
+          <MotionStaggerItem
             key={item.label}
             className="glass-surface-sm relative min-h-[100px] overflow-hidden rounded-[var(--r-tile)] p-3 ring-1 ring-slate-200/70 sm:min-h-24 sm:p-4"
           >
@@ -93,9 +99,9 @@ export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, 
               </div>
             </div>
             <p className="mt-1.5 text-[10px] text-muted-foreground sm:mt-2 sm:text-xs">{item.note}</p>
-          </div>
+          </MotionStaggerItem>
         );
       })}
-    </div>
+    </MotionStaggerList>
   );
 }

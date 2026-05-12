@@ -5,6 +5,7 @@ import { AlertCircle, Compass, Loader2, LogOut, RefreshCw, ShieldCheck, Sparkles
 import { toast } from "sonner";
 
 import { ConstellationAccent, HeroLoginScene, HeroOrbitIllustration } from "../components/illustrations";
+import { MotionParallaxLayer } from "../components/motion";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
@@ -206,7 +207,13 @@ export function LoginPage() {
           {...heroPanelMotionProps}
           className="glass-surface-gradient-border surface-aurora ring-soft-glow page-enter relative hidden overflow-hidden p-8 shadow-2xl lg:block"
         >
-          <HeroLoginScene className="pointer-events-none absolute -right-20 top-6 hidden w-[420px] text-violet-500 opacity-18 xl:block dark:opacity-14" />
+          <MotionParallaxLayer
+            depth={0.22}
+            className="pointer-events-none absolute -right-20 top-6 hidden w-[420px] text-violet-500 opacity-18 xl:block dark:opacity-14"
+            aria-hidden="true"
+          >
+            <HeroLoginScene className="w-full" />
+          </MotionParallaxLayer>
           <ConstellationAccent className="pointer-events-none absolute right-4 top-4 w-28 text-violet-500 opacity-35 dark:opacity-25" />
           <RevealDiv {...revealMotionProps} className="relative z-10 mb-5 flex items-start justify-between gap-4">
             <div className="gradient-brand flex size-12 items-center justify-center rounded-[var(--r-tile)] shadow-lg">
@@ -222,10 +229,10 @@ export function LoginPage() {
           </RevealParagraph>
           <RevealParagraph
             {...revealMotionProps}
-            className="relative z-10 mt-[var(--space-inline)] text-3xl font-semibold leading-[1.15] tracking-tight text-slate-950 sm:text-4xl md:text-5xl dark:text-white"
+            className="relative z-10 mt-[var(--space-inline)] text-4xl font-extrabold leading-[1.05] tracking-tight text-slate-950 sm:text-5xl md:text-6xl lg:text-7xl dark:text-white"
           >
             Biến mục tiêu thành{" "}
-            <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-transparent">
+            <span className="text-gradient-aurora">
               12 tuần hành động
             </span>{" "}
             trong một không gian làm việc.

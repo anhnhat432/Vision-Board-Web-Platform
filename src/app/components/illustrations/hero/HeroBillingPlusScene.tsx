@@ -26,17 +26,19 @@ export function HeroBillingPlusScene({ className, ...rest }: AmbientIllustration
           <stop offset="1" stopColor="currentColor" stopOpacity="0" />
         </radialGradient>
       </defs>
-      <ellipse cx="300" cy="388" rx="184" ry="54" fill={`url(#${floorId})`} />
-      <path d="M300 58L396 114L432 238L374 362L300 414L226 362L168 238L204 114L300 58Z" fill={`url(#${crystalId})`} stroke="white" strokeOpacity="0.24" strokeWidth="3" />
-      <path d="M300 58V414M204 114L374 362M396 114L226 362M168 238H432" stroke="white" strokeOpacity="0.22" strokeWidth="3" />
-      <path d="M300 174V298M238 236H362" stroke="white" strokeOpacity="0.82" strokeWidth="16" strokeLinecap="round" />
-      <g stroke="currentColor" strokeLinecap="round" strokeOpacity="0.42" strokeWidth="6">
+      <ellipse className="gradient-flow" cx="300" cy="388" rx="184" ry="54" fill={`url(#${floorId})`} />
+      <g className="float-subtle">
+        <path d="M300 58L396 114L432 238L374 362L300 414L226 362L168 238L204 114L300 58Z" fill={`url(#${crystalId})`} stroke="white" strokeOpacity="0.24" strokeWidth="3" />
+        <path d="M300 58V414M204 114L374 362M396 114L226 362M168 238H432" stroke="white" strokeOpacity="0.22" strokeWidth="3" />
+        <path d="M300 174V298M238 236H362" stroke="white" strokeOpacity="0.82" strokeWidth="16" strokeLinecap="round" />
+      </g>
+      <g className="twinkle-slow" stroke="currentColor" strokeLinecap="round" strokeOpacity="0.42" strokeWidth="6">
         <path d="M300 20V48" />
         <path d="M300 424V462" />
         <path d="M104 238H148" />
         <path d="M452 238H496" />
       </g>
-      <g fill="white" opacity="0.62">
+      <g className="twinkle-fast" fill="white" opacity="0.62">
         <circle cx="420" cy="96" r="5" />
         <circle cx="172" cy="154" r="4" />
         <circle cx="464" cy="332" r="4" />

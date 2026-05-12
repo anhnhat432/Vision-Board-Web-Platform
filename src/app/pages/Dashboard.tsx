@@ -39,6 +39,7 @@ import {
   SoftDotsPattern,
   WavyDividerIllustration,
 } from "../components/illustrations";
+import { MotionParallaxLayer } from "../components/motion";
 import { PageHeader } from "../components/layout/PageHeader";
 import { SectionBlock } from "../components/layout/SectionBlock";
 import { NewUserGuideBanner } from "../components/NewUserGuide";
@@ -698,12 +699,12 @@ function DashboardContent({
               hero
               titleAs="h2"
               density="compact"
-              className={`${dashboardGreeting.surfaceClass} surface-aurora ring-soft-glow page-enter relative bg-gradient-to-br from-white/95 via-white/90 to-violet-50/80 shadow-xl shadow-violet-500/8 border-violet-200/50 dark:from-slate-900/80 dark:via-slate-900/70 dark:to-violet-950/50 dark:shadow-violet-500/10 dark:border-violet-400/15`}
+              className={`${dashboardGreeting.surfaceClass} surface-aurora surface-glass-deep ring-soft-glow featured-surface glow-vivid page-enter relative bg-gradient-to-br from-white/95 via-white/90 to-violet-50/80 shadow-xl shadow-violet-500/8 border-violet-200/50 dark:from-slate-900/80 dark:via-slate-900/70 dark:to-violet-950/50 dark:shadow-violet-500/10 dark:border-violet-400/15`}
               eyebrow={dashboardNextAction.eyebrow}
               title={`${dashboardGreeting.label}, ${dashboardDisplayName}`}
               description={`Tuần ${dashboardKpiCurrentWeek ?? "--"}/${dashboardKpiTotalWeeks} — còn ${dashboardOpenTaskCount} việc hôm nay`}
               icon={<CalendarDays className="h-4 w-4" />}
-              titleClassName={`text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl ${dashboardGreeting.textClass}`}
+              titleClassName={`text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl ${dashboardGreeting.textClass}`}
               descriptionClassName="count-up text-sm font-semibold tabular-nums text-slate-700 sm:text-base"
               headerClassName="relative z-10"
               actionClassName="relative z-10"
@@ -718,7 +719,13 @@ function DashboardContent({
                 </Button>
               }
             >
-              <HeroDashboardScene className="pointer-events-none absolute -right-12 top-2 hidden w-[420px] text-violet-500 opacity-22 dark:opacity-16 xl:block" />
+              <MotionParallaxLayer
+                depth={0.28}
+                className="pointer-events-none absolute -right-12 top-2 hidden w-[420px] text-violet-500 opacity-22 dark:opacity-16 xl:block"
+                aria-hidden="true"
+              >
+                <HeroDashboardScene className="w-full" />
+              </MotionParallaxLayer>
               <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 hidden w-56 text-violet-500 opacity-35 dark:opacity-20 sm:block" />
               <div className="relative z-10 stack-stack">
                 <div className="hidden justify-end xl:flex">
