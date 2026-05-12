@@ -763,10 +763,10 @@ export function TwelveWeekWeekTab({
         </Card>
         </div>
       </SectionBlock>
-      {/* Sticky review CTA for mobile */}
+      {/* Sticky review CTA is shared by mobile and desktop; keep the test id stable for existing coverage. */}
       <div
         data-testid="weekly-review-mobile-sticky-cta"
-        className="md:hidden sticky bottom-20 z-40 border-t bg-white/95 p-4 backdrop-blur-sm"
+        className="sticky bottom-20 z-40 border-t bg-white/95 p-4 backdrop-blur-sm md:bottom-4 md:mx-auto md:max-w-md md:rounded-[var(--r-control)] md:border md:shadow-lg"
       >
         <Button
           size="lg"
