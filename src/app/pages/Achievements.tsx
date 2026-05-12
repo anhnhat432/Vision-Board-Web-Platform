@@ -19,6 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { CountUp } from "../components/ui/count-up";
 import { FeaturedCard } from "../components/ui/featured-card";
 import { AchievementBadgeIllustration, BadgeRibbonAccent, ConstellationAccent, HeroAchievementsScene } from "../components/illustrations";
+import { emptyNarratives } from "../components/empty-states/narratives";
 import { MotionStaggerItem, MotionStaggerList } from "../components/motion";
 import { InteractiveSurface } from "../components/ui/interactive-surface";
 import { Reveal } from "../components/ui/reveal";
@@ -102,7 +103,7 @@ export function Achievements() {
   return (
     <div className="stack-section pb-12">
       <InteractiveSurface className="rounded-[var(--r-card)]" intensity={9} translate={22}>
-        <Card className="hero-surface surface-aurora ring-soft-glow featured-surface glow-vivid page-enter overflow-hidden border-0 text-white">
+        <Card className="hero-surface surface-aurora surface-glass-deep ring-soft-glow featured-surface glow-vivid page-enter overflow-hidden border-0 text-white">
           <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
             <HeroAchievementsScene className="pointer-events-none absolute -right-20 -top-4 hidden w-[560px] text-white opacity-20 xl:block" />
@@ -255,10 +256,9 @@ export function Achievements() {
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-amber-50 text-amber-700">
                 <Trophy className="h-10 w-10" />
               </div>
-              <h2 className="mt-6 text-3xl font-bold text-slate-900">Chưa có huy hiệu nào được mở khóa</h2>
+              <h2 className="mt-6 text-3xl font-bold text-slate-900">{emptyNarratives.noAchievements.title}</h2>
               <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-slate-500">
-                Cột mốc đầu tiên thường đến rất nhanh. Hãy bắt đầu bằng một mục tiêu, một vision board hoặc một bài
-                viết nhìn lại.
+                {emptyNarratives.noAchievements.body}
               </p>
               <div className="mx-auto mt-6 flex flex-wrap justify-center gap-3">
                 <Button variant="outline" onClick={() => navigate("/goals")}>
