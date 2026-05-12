@@ -698,7 +698,7 @@ function DashboardContent({
               hero
               titleAs="h2"
               density="compact"
-              className={`${dashboardGreeting.surfaceClass} surface-aurora ring-soft-glow page-enter relative bg-white/80 shadow-xl shadow-slate-900/5 dark:bg-slate-900/70 dark:shadow-black/30`}
+              className={`${dashboardGreeting.surfaceClass} surface-aurora ring-soft-glow page-enter relative bg-gradient-to-br from-white/95 via-white/90 to-violet-50/80 shadow-xl shadow-violet-500/8 border-violet-200/50 dark:from-slate-900/80 dark:via-slate-900/70 dark:to-violet-950/50 dark:shadow-violet-500/10 dark:border-violet-400/15`}
               eyebrow={dashboardNextAction.eyebrow}
               title={`${dashboardGreeting.label}, ${dashboardDisplayName}`}
               description={`Tuần ${dashboardKpiCurrentWeek ?? "--"}/${dashboardKpiTotalWeeks} — còn ${dashboardOpenTaskCount} việc hôm nay`}
@@ -710,8 +710,7 @@ function DashboardContent({
               action={
                 <Button
                   variant="outline"
-                  className="w-full border-slate-950 bg-slate-950 hover:bg-slate-800 sm:w-auto"
-                  style={{ color: "#fff" }}
+                  className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
                   onClick={() => navigate(dashboardNextAction.ctaTarget)}
                 >
                   {dashboardNextAction.ctaLabel}
@@ -736,7 +735,7 @@ function DashboardContent({
                     className={`inline-flex shrink-0 items-center gap-2 rounded-[var(--r-pill)] px-3 py-1.5 text-xs font-bold ${
                       dashboardKpiStreak >= 7
                         ? "bg-gradient-to-r from-orange-500 to-rose-500 text-white shadow-lg shadow-rose-500/25 ring-4 ring-rose-500/10 motion-safe:animate-pulse"
-                        : "bg-slate-100 text-slate-700 ring-1 ring-slate-200"
+                        : "bg-white text-slate-700 ring-1 ring-slate-200 shadow-sm"
                     }`}
                   >
                     <Flame className="h-3.5 w-3.5" />
@@ -745,7 +744,7 @@ function DashboardContent({
                 </div>
 
                 {activeSystem && activeSystemTodayOpenTasks.length > 0 && (
-                  <div data-tour-id="dashboard-start-card" className="rounded-[var(--r-tile)] bg-white/88 p-4 ring-1 ring-slate-200">
+                  <div data-tour-id="dashboard-start-card" className="rounded-[var(--r-tile)] bg-gradient-to-br from-white/92 to-violet-50/60 p-4 ring-1 ring-slate-200 dark:from-slate-900/70 dark:to-violet-950/40">
                     <div className="flex items-start gap-3">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-foreground text-white">
                         <CheckCircle2 className="h-5 w-5" />
@@ -765,31 +764,37 @@ function DashboardContent({
                   </div>
                 )}
 
-                <div className="hidden flex-col gap-3 border-t border-border pt-4 text-sm sm:flex sm:flex-row sm:flex-wrap sm:items-center">
-                  <span className="font-semibold text-foreground">Tầm nhìn 3 năm</span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full border-border bg-white text-foreground hover:bg-muted sm:w-auto"
-                    onClick={() => navigate("/vision")}
-                  >
-                    {aspirationalVision ? "Sửa tầm nhìn 3 năm" : "Hình dung tầm nhìn 3 năm"}
-                  </Button>
-                  <span
-                    data-tour-id="dashboard-plan-card"
-                    className="inline-flex items-center gap-1.5 rounded-[var(--r-pill)] border border-border bg-white px-3 py-1.5 text-xs font-medium text-muted-foreground"
-                  >
-                    <Crown className="h-3.5 w-3.5" />
-                    {getPlanLabel(currentPlanCode)}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full justify-start text-muted-foreground hover:bg-muted sm:w-auto"
-                    onClick={() => (currentPlanCode === "FREE" ? openUpgradeDialog("plan", "PLUS") : navigate(planTarget))}
-                  >
-                    {currentPlanCode === "FREE" ? "Khám phá Plus" : "Quản lý gói"}
-                  </Button>
+                <div className="hidden flex-col gap-3 border-t border-border pt-4 sm:flex">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold text-foreground">Tầm nhìn 3 năm</span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-border bg-white text-foreground hover:bg-muted"
+                        onClick={() => navigate("/vision")}
+                      >
+                        {aspirationalVision ? "Sửa tầm nhìn" : "Hình dung tầm nhìn"}
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        data-tour-id="dashboard-plan-card"
+                        className="inline-flex items-center gap-1.5 rounded-[var(--r-pill)] border border-border bg-white px-3 py-1.5 text-xs font-medium text-muted-foreground"
+                      >
+                        <Crown className="h-3.5 w-3.5" />
+                        {getPlanLabel(currentPlanCode)}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-muted-foreground hover:bg-muted"
+                        onClick={() => (currentPlanCode === "FREE" ? openUpgradeDialog("plan", "PLUS") : navigate(planTarget))}
+                      >
+                        {currentPlanCode === "FREE" ? "Khám phá Plus" : "Quản lý gói"}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </PrimaryActionCard>
@@ -1059,12 +1064,6 @@ function DashboardContent({
                       Bảng thực thi
                     </p>
                     <h2 className="mt-1 text-xl font-bold tracking-tight text-foreground">Chi tiết nhịp tuần</h2>
-                    <p className="mt-2 text-sm font-medium text-muted-foreground">
-                      Tuần {activeSystemWeek ?? currentWeekExecutionSnapshot.weekNumber}:{" "}
-                      {activeSystemWeekCompletion?.completed ?? currentWeekExecutionSnapshot.completedTasks}/
-                      {activeSystemWeekCompletion?.total ?? currentWeekExecutionSnapshot.totalTasks} việc —{" "}
-                      {activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore}% việc lặp lại
-                    </p>
                   </div>
                   <span className="rounded-[var(--r-pill)] border border-border bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
                     Dữ liệu chu kỳ hiện tại
@@ -1120,7 +1119,12 @@ function DashboardContent({
 
       {showMobileStickyCTA && (
         <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/95 p-4 backdrop-blur supports-backdrop-blur:bg-white/90 md:hidden">
-          <Button variant="secondary" className="w-full shadow-lg" size="lg" onClick={() => navigate("/12-week-system")}>
+          <Button
+            variant="outline"
+            className="w-full border-border bg-white text-foreground shadow-lg hover:bg-muted"
+            size="lg"
+            onClick={() => navigate("/12-week-system")}
+          >
             <CheckCircle2 className="mr-2 h-5 w-5" />
             Đánh dấu xong - {activeSystemTodayOpenTasks.length} việc
           </Button>

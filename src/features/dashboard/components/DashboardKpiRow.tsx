@@ -74,12 +74,12 @@ export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, 
         return (
           <div
             key={item.label}
-            className="glass-surface-sm relative min-h-[92px] overflow-hidden rounded-[var(--r-tile)] p-3 ring-1 ring-slate-200/70 sm:min-h-24 sm:p-4"
+            className="glass-surface-sm relative min-h-[100px] overflow-hidden rounded-[var(--r-tile)] p-3 ring-1 ring-slate-200/70 sm:min-h-24 sm:p-4"
           >
             <Spark className={`pointer-events-none absolute right-12 top-3 h-6 w-6 opacity-60 ${item.sparkClass}`} />
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:text-xs sm:tracking-[0.16em]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:text-xs sm:tracking-[0.16em]">
                   {item.label}
                 </p>
                 <p className="count-up mt-1 text-xl font-bold tabular-nums text-foreground sm:mt-2 sm:text-2xl">
@@ -92,7 +92,7 @@ export function DashboardKpiRow({ leadAverage, currentWeek, totalWeeks, streak, 
                 <Icon className="h-4 w-4" />
               </div>
             </div>
-            <p className="mt-2 hidden text-xs text-muted-foreground sm:block">{item.note}</p>
+            <p className="mt-1.5 text-[10px] text-muted-foreground sm:mt-2 sm:text-xs">{item.note}</p>
           </div>
         );
       })}

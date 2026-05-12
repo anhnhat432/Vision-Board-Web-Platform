@@ -1,6 +1,6 @@
 ﻿import type { ChangeEvent } from "react";
 import { useRef, useState } from "react";
-import { AlertTriangle, CalendarDays, CloudDownload, CreditCard, Loader2, RefreshCw, User2 } from "lucide-react";
+import { AlertTriangle, CalendarDays, CloudDownload, CreditCard, Loader2, RefreshCw, User2, Volume2 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -9,11 +9,13 @@ import { CloudSyncIllustration, SyncIdleDot, SyncOkDot } from "../components/ill
 import { PageHeader } from "../components/layout/PageHeader";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Switch } from "../components/ui/switch";
 import { DashboardDataBackupCard } from "@/features/dashboard/components/DashboardDataBackupCard";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { formatBillingExpiryDate, getBillingExpiryInfo } from "../utils/billing-expiry";
 import { downloadLocalUserDataBackup } from "../utils/local-data-backup";
+import { isSoundEnabled, setSoundEnabled } from "../utils/sound";
 import { getUserData, parseStoredUserData, saveUserData } from "../utils/storage";
 import { exportAccountData } from "@/services/syncService";
 
@@ -42,6 +44,7 @@ export function SettingsPage() {
   const navigate = useNavigate();
   const importFileRef = useRef<HTMLInputElement>(null);
   const [isExportingAccount, setIsExportingAccount] = useState(false);
+  const [taskSoundEnabled, setTaskSoundEnabled] = useState(() => isSoundEnabled());
   const { isConfigured, user, userProfile } = useAuthContext();
   const { userData: syncedUserData, reloadUserData } = useSyncedUserData();
   const userData = syncedUserData ?? getUserData();
@@ -105,6 +108,11 @@ export function SettingsPage() {
     };
     reader.onerror = () => toast.error("Không đọc được file.");
     reader.readAsText(file);
+  };
+
+  const handleTaskSoundEnabledChange = (enabled: boolean) => {
+    setTaskSoundEnabled(enabled);
+    setSoundEnabled(enabled);
   };
 
   return (
@@ -203,6 +211,34 @@ export function SettingsPage() {
               <CreditCard className="h-4 w-4" />
               Gói & thanh toán
             </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-surface-sm rounded-[var(--r-card)] border shadow-none lg:col-span-2">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Volume2 className="h-4 w-4 text-slate-500" />
+              Tuỳ chọn trải nghiệm
+            </CardTitle>
+            <CardDescription>Điều chỉnh phản hồi nhỏ khi bạn làm việc trong hệ 12 tuần.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between gap-4 rounded-[var(--r-control)] border border-slate-200 bg-white/70 px-4 py-3">
+              <div className="min-w-0">
+                <label htmlFor="task-complete-sound" className="text-sm font-semibold text-slate-900">
+                  Âm thanh khi xong việc
+                </label>
+                <p className="mt-1 text-sm leading-6 text-slate-500">
+                  Phát một tiếng rất nhẹ khi bạn chốt xong việc hôm nay.
+                </p>
+              </div>
+              <Switch
+                id="task-complete-sound"
+                checked={taskSoundEnabled}
+                onCheckedChange={handleTaskSoundEnabledChange}
+                aria-label="Âm thanh khi xong việc"
+              />
+            </div>
           </CardContent>
         </Card>
       </section>

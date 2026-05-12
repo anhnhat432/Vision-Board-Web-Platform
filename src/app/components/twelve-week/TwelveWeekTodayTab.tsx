@@ -11,10 +11,12 @@ import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
 import { Progress } from "../ui/progress";
 import { Textarea } from "../ui/textarea";
+import { useReducedMotion } from "../ui/use-reduced-motion";
 import { EmptyTaskIllustration, TaskDoneIcon, TaskInProgressIcon, TaskTodoIcon } from "../illustrations";
 import { EmptyState } from "../states";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 import { formatCalendarDate } from "../../utils/storage";
+import { hapticLight } from "../../utils/haptics";
 import type { TwelveWeekTaskInstance, TwelveWeekSystem, UniversalDailyCheckIn } from "../../utils/storage-types";
 import { PrimaryActionCard } from "@/app/components/layout/PrimaryActionCard";
 import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
@@ -177,6 +179,9 @@ export function TwelveWeekTodayTab({
   const [optimisticTaskCompletionById, setOptimisticTaskCompletionById] = useState<Record<string, boolean>>({});
   const deferredToggleTimersRef = useRef<number[]>([]);
   const upcomingStrategicBlock = getUpcomingStrategicBlock(system.weeklyTimeBlocks, new Date());
+  const prefersReducedMotion = useReducedMotion();
+  const fadeInClassName = prefersReducedMotion ? "min-w-0" : "animate-fade-in-up min-w-0";
+  const loadingIconClassName = prefersReducedMotion ? "h-4 w-4" : "h-4 w-4 animate-spin";
 
   useEffect(() => {
     setOptimisticTaskCompletionById((current) => {
@@ -215,6 +220,7 @@ export function TwelveWeekTodayTab({
   };
 
   const handleTaskCompletionChange = (taskId: string, completed: boolean) => {
+    hapticLight();
     setOptimisticTaskCompletionById((current) => ({ ...current, [taskId]: completed }));
 
     const timerId = window.setTimeout(() => {
@@ -530,7 +536,7 @@ export function TwelveWeekTodayTab({
 
       <SectionBlock title="Hàng việc và check-in hôm nay" headerVisuallyHidden className="order-3">
         <div data-testid="today-main-work-grid" className="grid min-w-0 gap-[var(--space-inline)] sm:gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1.12fr)_380px]">
-        <div className="animate-fade-in-up min-w-0">
+        <div className={fadeInClassName}>
           <Card
             data-tour-id="system-today-queue"
             className="h-full min-w-0 overflow-hidden rounded-[var(--r-tile)] border border-border bg-white/92 shadow-sm ring-1 ring-slate-200 sm:rounded-[var(--r-card)]"
@@ -831,7 +837,7 @@ export function TwelveWeekTodayTab({
           </Card>
         </div>
         <div
-          className="animate-fade-in-up min-w-0"
+          className={fadeInClassName}
           style={{ animationDelay: '0.06s' }}
         >
           <Card className="h-full min-w-0 overflow-hidden rounded-[var(--r-tile)] border border-border bg-white/92 shadow-sm ring-1 ring-slate-200 sm:rounded-[var(--r-card)]">
@@ -921,7 +927,7 @@ export function TwelveWeekTodayTab({
               >
                 {isSavingCheckIn ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    <Loader2 className={loadingIconClassName} aria-hidden="true" />
                     Đang lưu check-in...
                   </>
                 ) : (
@@ -983,7 +989,7 @@ export function TwelveWeekTodayTab({
           >
             {isSavingCheckIn ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                <Loader2 className={loadingIconClassName} aria-hidden="true" />
                 Đang lưu check-in...
               </>
             ) : (

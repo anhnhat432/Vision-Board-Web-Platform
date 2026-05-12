@@ -3,6 +3,13 @@
   import "./lib/monitoring/sentry";
   import App from "./app/App.tsx";
   import "./styles/index.css";
+  import "@fontsource/be-vietnam-pro/300.css";
+  import "@fontsource/be-vietnam-pro/400.css";
+  import "@fontsource/be-vietnam-pro/500.css";
+  import "@fontsource/be-vietnam-pro/600.css";
+  import "@fontsource/be-vietnam-pro/700.css";
+  import "@fontsource/be-vietnam-pro/400-italic.css";
+  import "@fontsource/be-vietnam-pro/500-italic.css";
 
   // Inject GA4 script only for explicitly configured real-mode analytics.
   const appMode = import.meta.env.VITE_APP_MODE?.trim().toLowerCase() ?? "demo";
