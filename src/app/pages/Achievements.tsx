@@ -20,7 +20,7 @@ import { CountUp } from "../components/ui/count-up";
 import { FeaturedCard } from "../components/ui/featured-card";
 import { AchievementBadgeIllustration, BadgeRibbonAccent, ConstellationAccent, HeroAchievementsScene } from "../components/illustrations";
 import { emptyNarratives } from "../components/empty-states/narratives";
-import { MotionStaggerItem, MotionStaggerList } from "../components/motion";
+import { MotionParallaxLayer, MotionStaggerItem, MotionStaggerList } from "../components/motion";
 import { InteractiveSurface } from "../components/ui/interactive-surface";
 import { Reveal } from "../components/ui/reveal";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
@@ -106,7 +106,13 @@ export function Achievements() {
         <Card className="hero-surface surface-aurora surface-glass-deep ring-soft-glow featured-surface glow-vivid page-enter overflow-hidden border-0 text-white">
           <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
-            <HeroAchievementsScene className="pointer-events-none absolute -right-20 -top-4 hidden w-[560px] text-white opacity-20 xl:block" />
+            <MotionParallaxLayer
+              depth={0.24}
+              className="pointer-events-none absolute -right-20 -top-4 hidden w-[560px] text-white opacity-20 xl:block"
+              aria-hidden="true"
+            >
+              <HeroAchievementsScene className="w-full" />
+            </MotionParallaxLayer>
             <ConstellationAccent className="pointer-events-none absolute right-4 top-4 w-32 text-white opacity-35" />
 
             <div className="relative z-10 grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">

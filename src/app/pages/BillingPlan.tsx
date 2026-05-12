@@ -7,7 +7,7 @@ import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { BillingPlusIllustration, HeroBillingPlusScene, SoftDotsPattern } from "../components/illustrations";
 import { PrimaryActionCard } from "../components/layout/PrimaryActionCard";
 import { SectionBlock } from "../components/layout/SectionBlock";
-import { MotionStaggerItem, MotionStaggerList, MotionTilt } from "../components/motion";
+import { MotionParallaxLayer, MotionStaggerItem, MotionStaggerList, MotionTilt } from "../components/motion";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -437,7 +437,13 @@ export function BillingPlan() {
         descriptionClassName="max-w-2xl text-base leading-8 text-white/82"
         contentClassName="pointer-events-none hidden justify-end lg:flex"
       >
-        <HeroBillingPlusScene className="pointer-events-none absolute -right-12 -top-14 hidden w-[360px] text-white opacity-18 lg:block" />
+        <MotionParallaxLayer
+          depth={0.26}
+          className="pointer-events-none absolute -right-12 -top-14 hidden w-[360px] text-white opacity-18 lg:block"
+          aria-hidden="true"
+        >
+          <HeroBillingPlusScene className="w-full" />
+        </MotionParallaxLayer>
         <BillingPlusIllustration className="-my-8 w-56 text-white opacity-35" />
       </PrimaryActionCard>
 

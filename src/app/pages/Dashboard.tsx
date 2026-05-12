@@ -39,6 +39,7 @@ import {
   SoftDotsPattern,
   WavyDividerIllustration,
 } from "../components/illustrations";
+import { MotionParallaxLayer } from "../components/motion";
 import { PageHeader } from "../components/layout/PageHeader";
 import { SectionBlock } from "../components/layout/SectionBlock";
 import { NewUserGuideBanner } from "../components/NewUserGuide";
@@ -718,7 +719,13 @@ function DashboardContent({
                 </Button>
               }
             >
-              <HeroDashboardScene className="pointer-events-none absolute -right-12 top-2 hidden w-[420px] text-violet-500 opacity-22 dark:opacity-16 xl:block" />
+              <MotionParallaxLayer
+                depth={0.28}
+                className="pointer-events-none absolute -right-12 top-2 hidden w-[420px] text-violet-500 opacity-22 dark:opacity-16 xl:block"
+                aria-hidden="true"
+              >
+                <HeroDashboardScene className="w-full" />
+              </MotionParallaxLayer>
               <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 hidden w-56 text-violet-500 opacity-35 dark:opacity-20 sm:block" />
               <div className="relative z-10 stack-stack">
                 <div className="hidden justify-end xl:flex">
