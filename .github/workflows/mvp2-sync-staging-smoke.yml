@@ -35,7 +35,7 @@ jobs:
       MVP2_SMOKE_TEST_PREFIX: ${{ github.event.inputs.test_prefix }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Set up Node
         uses: actions/setup-node@v6
