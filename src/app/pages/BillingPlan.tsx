@@ -432,8 +432,8 @@ export function BillingPlan() {
             ? "Bạn có thể xem trước quyền Plus mà không thanh toán. Khi mở thanh toán thật, giao dịch sẽ được xác nhận qua trang thanh toán."
             : "Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản của bạn."
         }
-        className="flow-surface surface-aurora ring-soft-glow page-enter relative overflow-hidden text-white"
-        titleClassName="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl"
+        className="flow-surface surface-aurora ring-soft-glow featured-surface glow-vivid page-enter relative overflow-hidden text-white"
+        titleClassName="max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
         descriptionClassName="max-w-2xl text-base leading-8 text-white/82"
         contentClassName="pointer-events-none hidden justify-end lg:flex"
       >
@@ -999,7 +999,7 @@ export function BillingPlan() {
                 key={plan.code}
                 className={`relative overflow-hidden rounded-[var(--r-control)] border p-5 ${
                   plan.code === currentPlanCode
-                    ? "border-violet-300 bg-violet-50/50"
+                    ? "featured-surface glow-vivid border-violet-300 bg-violet-50/50"
                     : "border-slate-100 bg-slate-50/30"
                 }`}
               >

@@ -1097,7 +1097,7 @@ export function TwelveWeekSetup() {
         </Card>
       )}
 
-      <Card className="hero-surface overflow-hidden border-0 text-white glass-surface-gradient-border ambient-glow">
+      <Card className="hero-surface featured-surface glow-vivid overflow-hidden border-0 text-white glass-surface-gradient-border ambient-glow">
         <CardContent className="relative p-5 sm:p-6 lg:p-10">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_22%)] opacity-90" />
           <div className="relative z-10 max-w-4xl">
@@ -1107,8 +1107,8 @@ export function TwelveWeekSetup() {
                 Thiết lập 12 tuần
               </div>
               <div className="stack-stack">
-                <h1 className="gradient-text max-w-4xl text-2xl font-bold tracking-normal sm:text-4xl lg:text-5xl">
-                  Chốt chu kỳ 12 tuần gọn, rõ và vào việc ngay.
+                <h1 className="max-w-4xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+                  Chốt chu kỳ <span className="text-gradient-aurora">12 tuần</span> gọn, rõ và vào việc ngay.
                 </h1>
                 <p className="max-w-2xl text-sm leading-7 text-white/82 sm:text-base lg:text-lg">
                   Sau bước này bạn có kết quả rõ, 2-4 việc lặp lại có lịch, và tuần 1 đủ nhẹ để bắt đầu.

@@ -222,10 +222,10 @@ export function LoginPage() {
           </RevealParagraph>
           <RevealParagraph
             {...revealMotionProps}
-            className="relative z-10 mt-[var(--space-inline)] text-3xl font-semibold leading-[1.15] tracking-tight text-slate-950 sm:text-4xl md:text-5xl dark:text-white"
+            className="relative z-10 mt-[var(--space-inline)] text-4xl font-extrabold leading-[1.05] tracking-tight text-slate-950 sm:text-5xl md:text-6xl lg:text-7xl dark:text-white"
           >
             Biến mục tiêu thành{" "}
-            <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-transparent">
+            <span className="text-gradient-aurora">
               12 tuần hành động
             </span>{" "}
             trong một không gian làm việc.

@@ -17,6 +17,7 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { CountUp } from "../components/ui/count-up";
+import { FeaturedCard } from "../components/ui/featured-card";
 import { AchievementBadgeIllustration, BadgeRibbonAccent, ConstellationAccent, HeroAchievementsScene } from "../components/illustrations";
 import { MotionStaggerItem, MotionStaggerList } from "../components/motion";
 import { InteractiveSurface } from "../components/ui/interactive-surface";
@@ -101,7 +102,7 @@ export function Achievements() {
   return (
     <div className="stack-section pb-12">
       <InteractiveSurface className="rounded-[var(--r-card)]" intensity={9} translate={22}>
-        <Card className="hero-surface surface-aurora ring-soft-glow page-enter overflow-hidden border-0 text-white">
+        <Card className="hero-surface surface-aurora ring-soft-glow featured-surface glow-vivid page-enter overflow-hidden border-0 text-white">
           <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
             <HeroAchievementsScene className="pointer-events-none absolute -right-20 -top-4 hidden w-[560px] text-white opacity-20 xl:block" />
@@ -115,8 +116,8 @@ export function Achievements() {
                 </div>
 
                 <div className="stack-stack">
-                  <h1 className="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl">
-                    Mọi cột mốc nhỏ bạn mở khóa ở đây đều là bằng chứng rằng hành trình đang thật sự diễn ra.
+                  <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+                    Mọi <span className="text-gradient-aurora">cột mốc nhỏ</span> bạn mở khóa ở đây đều là bằng chứng rằng hành trình đang thật sự diễn ra.
                   </h1>
                   <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
                     Thành tựu không chỉ là huy hiệu. Chúng là những mốc xác nhận bạn đã bắt đầu, đã duy trì, đã hoàn
@@ -219,7 +220,7 @@ export function Achievements() {
 
             return (
               <MotionStaggerItem key={item.title}>
-                <Card className="relative overflow-hidden">
+                <FeaturedCard className="relative overflow-hidden">
                   <div
                     className={`pointer-events-none absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
                   />
@@ -239,7 +240,7 @@ export function Achievements() {
                   <CardContent className="relative">
                     <p className="text-sm text-slate-500">{item.note}</p>
                   </CardContent>
-                </Card>
+                </FeaturedCard>
               </MotionStaggerItem>
             );
           })}
