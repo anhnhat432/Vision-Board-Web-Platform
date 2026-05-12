@@ -1345,7 +1345,7 @@ export function RootLayout() {
 
         {user ? (
           <div className="pointer-events-none relative z-0 h-32 overflow-hidden text-violet-500" aria-hidden="true">
-            <FooterAuroraIllustration className="absolute inset-x-0 bottom-0 h-full w-full opacity-70 dark:opacity-40" />
+            <FooterAuroraIllustration className="pointer-events-none absolute inset-x-0 bottom-0 h-full w-full opacity-70 dark:opacity-40" />
           </div>
         ) : null}
 
