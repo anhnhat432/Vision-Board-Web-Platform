@@ -3,6 +3,9 @@
   "description": "A full-stack web app for turning life vision into SMART goals and 12-week execution plans.",
   "private": true,
   "version": "0.0.1",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "type": "module",
   "scripts": {
     "build": "vite build",
