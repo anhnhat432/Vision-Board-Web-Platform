@@ -1,5 +1,5 @@
 ﻿import { useState } from "react";
-import { CalendarCheck, CheckCircle2, ClipboardCheck, Crown, Flag, Layers, Loader2, TrendingUp } from "lucide-react";
+import { CheckCircle2, ClipboardCheck, Layers, Loader2 } from "lucide-react";
 
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -14,11 +14,7 @@ import type {
   TwelveWeekSystem,
   UniversalWeeklyReview,
 } from "../../utils/storage-types";
-import {
-  getPlanLabel,
-  type SuggestedNextWeekPlan,
-  type WeeklyReviewPremiumInsight,
-} from "../../utils/twelve-week-premium";
+import type { SuggestedNextWeekPlan, WeeklyReviewPremiumInsight } from "../../utils/twelve-week-premium";
 import { getWorkloadDecisionLabel } from "../../utils/twelve-week-system-ui";
 import { calculateLagScore, interpretWeeklyExecutionScore } from "@/features/plan12week/logic";
 import type {
@@ -29,6 +25,7 @@ import type {
 
 import { TwelveWeekInsightsCard } from "./TwelveWeekInsightsCard";
 import { NextWeekCommitmentsEditor } from "./NextWeekCommitmentsEditor";
+import { TwelveWeekPremiumInsightSection } from "./TwelveWeekPremiumInsightSection";
 import { TwelveWeekNextWeekRecommendationCard } from "./TwelveWeekNextWeekRecommendationCard";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 import { SectionBlock } from "../layout/SectionBlock";
@@ -192,7 +189,6 @@ export function TwelveWeekWeekTab({
   currentPlanFocus,
   currentPlanMilestone,
   reviewDueToday,
-  reviewStatusLabel,
   weekCompletion,
   currentLagMetricValue,
   coreIndicators,
@@ -302,63 +298,6 @@ export function TwelveWeekWeekTab({
           onReviewPlan={onApplySuggestedPlan}
         />
       )}
-      <SectionBlock title="Tóm tắt tuần hiện tại" headerVisuallyHidden>
-        <div className="grid gap-[var(--space-stack)] md:grid-cols-3">
-        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
-          <CardContent className="p-5">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-              <Flag className="h-3.5 w-3.5" />
-              Một câu để nhớ
-            </p>
-            <p className="mt-[var(--space-inline)] text-lg font-semibold leading-8 text-slate-950">{currentPlanFocus}</p>
-          </CardContent>
-        </Card>
-        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
-          <CardContent className="p-5">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
-              <TrendingUp className="h-3.5 w-3.5" />
-              Lead tuần này
-            </p>
-            <p
-              data-testid="weekly-lead-score"
-              className={`mt-[var(--space-inline)] font-bold text-slate-950 ${
-                weekCompletion.isEmpty ? "text-lg leading-7" : "text-3xl"
-              }`}
-            >
-              {weekCompletion.isEmpty ? "Chưa có việc trong tuần này" : `${leadScoreValue}%`}
-            </p>
-            <p className="mt-1 text-sm text-slate-600">
-              {weekCompletion.isEmpty
-                ? "Khi có việc lặp lại, điểm việc lặp lại sẽ bắt đầu tính."
-                : `${weekCompletion.completed}/${weekCompletion.total} việc đã chốt`}
-            </p>
-            {!weekCompletion.isEmpty && (
-              <p className="mt-2 flex items-center gap-2 text-xs font-semibold text-slate-600">
-                <span className={`h-2.5 w-2.5 rounded-[var(--r-pill)] ${scoreTone.marker}`} />
-                Chuẩn tuần: 85%
-              </p>
-            )}
-          </CardContent>
-        </Card>
-        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
-          <CardContent className="p-5">
-            <p
-              className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] ${
-                reviewDueToday ? "text-amber-700" : "text-emerald-700"
-              }`}
-            >
-              <CalendarCheck className="h-3.5 w-3.5" />
-              Review tuần
-            </p>
-            <p className="mt-[var(--space-inline)] text-3xl font-bold text-slate-950">
-              {reviewDueToday ? "Hôm nay" : getReviewDayLabel(system.reviewDay)}
-            </p>
-            <p className="mt-1 text-sm text-slate-600">{reviewStatusLabel}</p>
-          </CardContent>
-        </Card>
-        </div>
-      </SectionBlock>
-
       <SectionBlock title="Review và cam kết tuần" headerVisuallyHidden>
         <div className="grid gap-[var(--space-section)] lg:grid-cols-[minmax(0,1fr)_420px]">
         <Card className="h-full border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
@@ -658,164 +597,20 @@ export function TwelveWeekWeekTab({
               </div>
               <p className="mt-[var(--space-inline)] text-sm text-slate-500">Chỉ số chính: {lagMetricValue || "Chưa cập nhật"}</p>
             </div>
-            <div
-              className={`rounded-[var(--r-control)] border p-4 shadow-sm ${
-                hasPremiumInsights ? "border-sky-200 bg-sky-50" : "border-violet-200 bg-violet-50"
-              }`}
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Phân tích ôn lại Plus
-                  </p>
-                  <p className="mt-2 text-lg font-semibold text-slate-950">{premiumInsight.headline}</p>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">{premiumInsight.summary}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className={
-                      hasPremiumInsights
-                        ? "border-sky-200 bg-white/90 text-sky-800"
-                        : "border-violet-200 bg-white/90 text-violet-800"
-                    }
-                  >
-                    {premiumInsight.badgeLabel}
-                  </Badge>
-                  <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
-                    {getPlanLabel(currentPlanCode)}
-                  </Badge>
-                </div>
-              </div>
-
-              {hasPremiumInsights ? (
-                <div className="mt-4 stack-tight">
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <div className="rounded-[var(--r-control)] border border-sky-100 bg-white p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                        Gợi ý chỉnh tải
-                      </p>
-                      <p className="mt-2 text-sm leading-7 text-slate-800">{premiumInsight.recommendedAdjustment}</p>
-                    </div>
-                    <div className="rounded-[var(--r-control)] border border-sky-100 bg-white p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Gợi ý ngắn</p>
-                      <p className="mt-2 text-sm leading-7 text-slate-800">{premiumInsight.coachNote}</p>
-                    </div>
-                  </div>
-                  <div className="rounded-[var(--r-control)] border border-sky-200 bg-white p-4 shadow-sm">
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                          Kế hoạch gợi ý cho tuần sau
-                        </p>
-                        <p className="mt-2 text-base font-semibold leading-7 text-slate-950">
-                          {suggestedNextWeekPlan.focus}
-                        </p>
-                        <p className="mt-2 text-sm leading-7 text-slate-600">{suggestedNextWeekPlan.rationale}</p>
-                      </div>
-                      <Badge className="bg-sky-700 text-white hover:bg-sky-700">
-                        {getWorkloadDecisionLabel(suggestedNextWeekPlan.workloadDecision)}
-                      </Badge>
-                    </div>
-                    <div className="mt-4 grid gap-3 md:grid-cols-2">
-                      <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Giữ chắc</p>
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {suggestedNextWeekPlan.protectTactics.map((item) => (
-                            <Badge key={item} variant="outline" className="border-slate-200 bg-white text-slate-700">
-                              {item}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                          {suggestedNextWeekPlan.secondaryTrackLabel}
-                        </p>
-                        <div className="mt-2 stack-tight">
-                          {suggestedNextWeekPlan.secondaryTrackItems.map((item) => (
-                            <p key={item} className="text-sm leading-6 text-slate-700">
-                              {item}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <p className="mt-4 text-sm leading-7 text-slate-600">
-                      Bước đầu tuần nên làm: {suggestedNextWeekPlan.firstMove}
-                    </p>
-                    <div className="mt-4 flex flex-wrap items-center gap-3">
-                      <Button className="w-full sm:w-auto" onClick={onApplySuggestedPlan}>
-                        Dùng gợi ý này cho tuần sau
-                      </Button>
-                      <p className="text-sm text-slate-500">Bạn vẫn có thể sửa lại trước khi chốt review.</p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-4 stack-tight">
-                  {/* Status indicator — always computed, shown as teaser */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--r-control)] border border-violet-100 bg-white px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`h-2 w-2 rounded-[var(--r-pill)] ${
-                          premiumInsight.status === "strong"
-                            ? "bg-emerald-500"
-                            : premiumInsight.status === "at_risk"
-                              ? "bg-amber-400"
-                              : "bg-amber-400"
-                        }`}
-                      />
-                      <span className="text-sm font-semibold text-slate-800">Đã đọc được nhịp tuần này</span>
-                    </div>
-                    <Badge
-                      variant="outline"
-                      className={
-                        premiumInsight.status === "strong"
-                          ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                          : premiumInsight.status === "at_risk"
-                            ? "border-amber-200 bg-amber-50 text-amber-800"
-                            : "border-amber-200 bg-amber-50 text-amber-800"
-                      }
-                    >
-                      {premiumInsight.badgeLabel}
-                    </Badge>
-                  </div>
-                  {/* Blurred content preview */}
-                  <div className="relative overflow-hidden rounded-[var(--r-control)] border border-violet-200 bg-white p-4">
-                    <div className="pointer-events-none select-none blur-[3px] opacity-60">
-                      <p className="text-sm font-semibold text-slate-900">{premiumInsight.headline}</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-600 line-clamp-2">{premiumInsight.summary}</p>
-                      <p className="mt-2 text-xs text-slate-500">
-                        Gợi ý chỉnh tải: {premiumInsight.recommendedAdjustment}
-                      </p>
-                    </div>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[var(--r-control)] bg-white/50">
-                      <Crown className="h-5 w-5 text-violet-500" />
-                      <p className="mt-1 text-xs font-semibold text-violet-700">Chỉ dành cho Plus</p>
-                    </div>
-                  </div>
-                  <div className="rounded-[var(--r-control)] border border-violet-200/70 bg-white p-4">
-                    <p className="text-sm font-semibold text-slate-950">
-                      Mở Plus để đọc phân tích đầy đủ và ra ngay kế hoạch tuần sau đủ gọn để làm.
-                    </p>
-                    <p className="mt-1 text-sm text-slate-600">
-                      Plus chốt luôn ưu tiên tuần sau, mức tải nên giữ và phần nào nên buông bớt — không chỉ là phân
-                      tích để đọc.
-                    </p>
-                    <Button className="mt-4 w-full sm:w-auto" onClick={onOpenPremiumInsights}>
-                      Mở ôn lại Plus ngay
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
+            <TwelveWeekPremiumInsightSection
+              currentPlanCode={currentPlanCode}
+              hasPremiumInsights={hasPremiumInsights}
+              premiumInsight={premiumInsight}
+              suggestedNextWeekPlan={suggestedNextWeekPlan}
+              onApplySuggestedPlan={onApplySuggestedPlan}
+              onOpenPremiumInsights={onOpenPremiumInsights}
+            />
             <div
               data-testid="wam-section-score"
               className="rounded-[var(--r-control)] border border-sky-200 bg-sky-50/70 px-4 py-4"
             >
               <Label className="text-sm font-semibold text-slate-950">1. Điểm tuần qua bao nhiêu %?</Label>
-              <p className="mt-2 text-3xl font-bold text-slate-950">
+              <p data-testid="weekly-lead-score" className="mt-2 text-3xl font-bold text-slate-950">
                 {weekCompletion.isEmpty ? "Chưa có việc trong tuần này" : `${leadScoreValue}%`}
               </p>
               <p className="mt-1 text-sm leading-6 text-slate-600">
@@ -968,10 +763,10 @@ export function TwelveWeekWeekTab({
         </Card>
         </div>
       </SectionBlock>
-      {/* Sticky review CTA for mobile */}
+      {/* Sticky review CTA is shared by mobile and desktop; keep the test id stable for existing coverage. */}
       <div
         data-testid="weekly-review-mobile-sticky-cta"
-        className="md:hidden sticky bottom-20 z-40 border-t bg-white/95 p-4 backdrop-blur-sm"
+        className="sticky bottom-20 z-40 border-t bg-white/95 p-4 backdrop-blur-sm md:bottom-4 md:mx-auto md:max-w-md md:rounded-[var(--r-control)] md:border md:shadow-lg"
       >
         <Button
           size="lg"
