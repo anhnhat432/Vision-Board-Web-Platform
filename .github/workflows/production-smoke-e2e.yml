@@ -101,5 +101,8 @@ jobs:
           echo "::error::Timed out waiting for Vercel production deployment for ${GITHUB_SHA}."
           exit 1
 
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
       - name: Run production smoke e2e
         run: npm run smoke:prod
