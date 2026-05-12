@@ -200,9 +200,9 @@ export function VisionBoardGallery() {
       <InteractiveSurface className="rounded-[var(--r-card)]" intensity={4} translate={10} shine={false}>
         <Card className="hero-surface overflow-hidden border-0 text-white">
           <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.12),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.08),_transparent_22%)] opacity-55" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.12),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.08),_transparent_22%)] opacity-55" />
 
-            <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
+            <div className="relative z-10 grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
               <div className="stack-section">
                 <div className="interactive-layer interactive-layer--soft inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Images className="h-4 w-4" />
@@ -315,7 +315,7 @@ export function VisionBoardGallery() {
             <div key={item.title}>
               <Card className="relative gap-4 overflow-hidden">
                 <div
-                  className={`absolute inset-x-6 top-0 h-14 rounded-b-[24px] bg-gradient-to-br ${item.color} opacity-65 blur-xl`}
+                  className={`pointer-events-none absolute inset-x-6 top-0 h-14 rounded-b-[24px] bg-gradient-to-br ${item.color} opacity-65 blur-xl`}
                 />
                 <CardHeader className="relative flex flex-row items-start justify-between pb-0">
                   <div>
@@ -417,11 +417,11 @@ export function VisionBoardGallery() {
                               className="relative overflow-hidden rounded-[var(--r-card)] border border-white/80 bg-[linear-gradient(180deg,_rgba(248,250,252,0.98)_0%,_rgba(241,245,249,0.96)_100%)]"
                               style={{ aspectRatio: "16/10" }}
                             >
-                              <div className="absolute inset-0 gradient-grid bg-[size:30px_30px] opacity-28" />
+                              <div className="pointer-events-none absolute inset-0 gradient-grid bg-[size:30px_30px] opacity-28" />
                               <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,_rgba(15,23,42,0)_24%,_rgba(15,23,42,0.05)_100%)]" />
 
                               {board.items.length === 0 ? (
-                                <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                                   <Sparkles className="h-12 w-12 text-slate-300" />
                                 </div>
                               ) : (

@@ -294,10 +294,10 @@ export function FeasibilityCheck() {
 
         <Card className="hero-surface surface-aurora ring-soft-glow overflow-hidden border-0 text-white">
           <CardContent className="relative p-5 sm:p-6 lg:p-10">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
             <FeasibilityScaleIllustration className="pointer-events-none absolute -right-4 bottom-4 hidden w-56 text-white opacity-30 lg:block" />
 
-            <div className="relative max-w-4xl">
+            <div className="relative z-10 max-w-4xl">
               <div className="stack-stack sm:stack-section">
                 <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Compass className="h-4 w-4" />

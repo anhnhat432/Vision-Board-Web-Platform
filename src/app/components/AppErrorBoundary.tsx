@@ -50,7 +50,7 @@ export function AppErrorBoundary() {
       <main className="relative z-10 mx-auto flex min-h-screen max-w-5xl items-center px-4 py-12 sm:px-6 lg:px-8">
         <Card className="hero-surface w-full overflow-hidden border-0 text-white">
           <CardContent className="relative p-8 lg:p-10">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
             <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_320px]">
               <div className="space-y-6">
                 <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">

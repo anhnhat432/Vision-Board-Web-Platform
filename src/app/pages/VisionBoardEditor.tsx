@@ -650,9 +650,9 @@ export function VisionBoardEditor() {
         <Dialog open={isAddingItem} onOpenChange={setIsAddingItem}>
           <Card className="hero-surface surface-aurora ring-soft-glow overflow-hidden border-0 text-white">
             <CardContent className="relative p-5 sm:p-6 lg:p-8">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_22%)] opacity-90" />
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_22%)] opacity-90" />
 
-              <div className="relative grid gap-[var(--space-section)] xl:grid-cols-[minmax(0,1.15fr)_360px]">
+              <div className="relative z-10 grid gap-[var(--space-section)] xl:grid-cols-[minmax(0,1.15fr)_360px]">
                 <div className="stack-section">
                   <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                     <Wand2 className="h-4 w-4" />
@@ -919,8 +919,8 @@ export function VisionBoardEditor() {
               <div
                 className="relative h-[520px] min-w-0 overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.82),_transparent_24%),linear-gradient(135deg,_rgba(244,244,255,0.96)_0%,_rgba(251,244,255,0.94)_48%,_rgba(239,246,255,0.96)_100%)] sm:h-[580px] lg:h-[620px] xl:h-[600px]"
               >
-                <div className="absolute inset-0 gradient-grid bg-[size:36px_36px] opacity-70" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(168,85,247,0.14),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(56,189,248,0.14),_transparent_22%)]" />
+                <div className="pointer-events-none absolute inset-0 gradient-grid bg-[size:36px_36px] opacity-70" />
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(168,85,247,0.14),_transparent_24%),radial-gradient(circle_at_bottom_left,_rgba(56,189,248,0.14),_transparent_22%)]" />
 
                 {board.items.length === 0 ? (
                   <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">

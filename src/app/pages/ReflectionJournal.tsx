@@ -566,7 +566,7 @@ export function ReflectionJournal() {
                 <div key={item.title}>
                   <Card className="glass-surface-sm card-hover-lift relative overflow-hidden border border-slate-200/70 bg-white/92 dark:border-slate-700/70 dark:bg-slate-950/70">
                     <div
-                      className={`absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
+                      className={`pointer-events-none absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
                     />
                     <CardHeader className="relative flex flex-row items-start justify-between pb-3">
                       <div>

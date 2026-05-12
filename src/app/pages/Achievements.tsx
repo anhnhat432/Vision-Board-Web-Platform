@@ -102,11 +102,11 @@ export function Achievements() {
       <InteractiveSurface className="rounded-[var(--r-card)]" intensity={9} translate={22}>
         <Card className="hero-surface surface-aurora ring-soft-glow page-enter overflow-hidden border-0 text-white">
           <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
             <HeroAchievementsScene className="pointer-events-none absolute -right-20 -top-4 hidden w-[560px] text-white opacity-20 xl:block" />
             <ConstellationAccent className="pointer-events-none absolute right-4 top-4 w-32 text-white opacity-35" />
 
-            <div className="relative grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
+            <div className="relative z-10 grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
               <div className="stack-section">
                 <div className="interactive-layer interactive-layer--soft inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
                   <Trophy className="h-4 w-4" />
@@ -220,7 +220,7 @@ export function Achievements() {
               <div key={item.title}>
                 <Card className="relative overflow-hidden">
                   <div
-                    className={`absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
+                    className={`pointer-events-none absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
                   />
                   <CardHeader className="relative flex flex-row items-start justify-between pb-3">
                     <div>
