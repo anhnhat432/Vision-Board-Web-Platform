@@ -1,5 +1,5 @@
 ﻿import { useState } from "react";
-import { CalendarCheck, CheckCircle2, ClipboardCheck, Crown, Flag, Layers, Loader2, TrendingUp } from "lucide-react";
+import { CheckCircle2, ClipboardCheck, Crown, Layers, Loader2 } from "lucide-react";
 
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -192,7 +192,6 @@ export function TwelveWeekWeekTab({
   currentPlanFocus,
   currentPlanMilestone,
   reviewDueToday,
-  reviewStatusLabel,
   weekCompletion,
   currentLagMetricValue,
   coreIndicators,
@@ -302,63 +301,6 @@ export function TwelveWeekWeekTab({
           onReviewPlan={onApplySuggestedPlan}
         />
       )}
-      <SectionBlock title="Tóm tắt tuần hiện tại" headerVisuallyHidden>
-        <div className="grid gap-[var(--space-stack)] md:grid-cols-3">
-        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
-          <CardContent className="p-5">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-              <Flag className="h-3.5 w-3.5" />
-              Một câu để nhớ
-            </p>
-            <p className="mt-[var(--space-inline)] text-lg font-semibold leading-8 text-slate-950">{currentPlanFocus}</p>
-          </CardContent>
-        </Card>
-        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
-          <CardContent className="p-5">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
-              <TrendingUp className="h-3.5 w-3.5" />
-              Lead tuần này
-            </p>
-            <p
-              data-testid="weekly-lead-score"
-              className={`mt-[var(--space-inline)] font-bold text-slate-950 ${
-                weekCompletion.isEmpty ? "text-lg leading-7" : "text-3xl"
-              }`}
-            >
-              {weekCompletion.isEmpty ? "Chưa có việc trong tuần này" : `${leadScoreValue}%`}
-            </p>
-            <p className="mt-1 text-sm text-slate-600">
-              {weekCompletion.isEmpty
-                ? "Khi có việc lặp lại, điểm việc lặp lại sẽ bắt đầu tính."
-                : `${weekCompletion.completed}/${weekCompletion.total} việc đã chốt`}
-            </p>
-            {!weekCompletion.isEmpty && (
-              <p className="mt-2 flex items-center gap-2 text-xs font-semibold text-slate-600">
-                <span className={`h-2.5 w-2.5 rounded-[var(--r-pill)] ${scoreTone.marker}`} />
-                Chuẩn tuần: 85%
-              </p>
-            )}
-          </CardContent>
-        </Card>
-        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
-          <CardContent className="p-5">
-            <p
-              className={`flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] ${
-                reviewDueToday ? "text-amber-700" : "text-emerald-700"
-              }`}
-            >
-              <CalendarCheck className="h-3.5 w-3.5" />
-              Review tuần
-            </p>
-            <p className="mt-[var(--space-inline)] text-3xl font-bold text-slate-950">
-              {reviewDueToday ? "Hôm nay" : getReviewDayLabel(system.reviewDay)}
-            </p>
-            <p className="mt-1 text-sm text-slate-600">{reviewStatusLabel}</p>
-          </CardContent>
-        </Card>
-        </div>
-      </SectionBlock>
-
       <SectionBlock title="Review và cam kết tuần" headerVisuallyHidden>
         <div className="grid gap-[var(--space-section)] lg:grid-cols-[minmax(0,1fr)_420px]">
         <Card className="h-full border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
@@ -815,7 +757,7 @@ export function TwelveWeekWeekTab({
               className="rounded-[var(--r-control)] border border-sky-200 bg-sky-50/70 px-4 py-4"
             >
               <Label className="text-sm font-semibold text-slate-950">1. Điểm tuần qua bao nhiêu %?</Label>
-              <p className="mt-2 text-3xl font-bold text-slate-950">
+              <p data-testid="weekly-lead-score" className="mt-2 text-3xl font-bold text-slate-950">
                 {weekCompletion.isEmpty ? "Chưa có việc trong tuần này" : `${leadScoreValue}%`}
               </p>
               <p className="mt-1 text-sm leading-6 text-slate-600">
