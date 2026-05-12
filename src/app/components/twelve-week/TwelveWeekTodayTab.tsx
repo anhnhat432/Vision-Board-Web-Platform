@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, ArrowRight, CalendarClock, CalendarPlus, Check, CheckCircle2, Crown, Gauge, Inbox, Loader2, Sparkles, X } from "lucide-react";
 
 import type { RescueModeStatus } from "@/features/plan12week/logic";
@@ -174,7 +174,35 @@ export function TwelveWeekTodayTab({
   );
   const isFirstWeek = currentWeek === 1;
   const [isSavingCheckIn, setIsSavingCheckIn] = useState(false);
+  const [optimisticTaskCompletionById, setOptimisticTaskCompletionById] = useState<Record<string, boolean>>({});
+  const deferredToggleTimersRef = useRef<number[]>([]);
   const upcomingStrategicBlock = getUpcomingStrategicBlock(system.weeklyTimeBlocks, new Date());
+
+  useEffect(() => {
+    setOptimisticTaskCompletionById((current) => {
+      let changed = false;
+      const next = { ...current };
+
+      Object.entries(current).forEach(([taskId, optimisticCompleted]) => {
+        const task = todayQueue.find((item) => item.id === taskId);
+        if (!task || task.completed === optimisticCompleted) {
+          delete next[taskId];
+          changed = true;
+        }
+      });
+
+      return changed ? next : current;
+    });
+  }, [todayQueue]);
+
+  useEffect(() => {
+    return () => {
+      deferredToggleTimersRef.current.forEach((timerId) => {
+        window.clearTimeout(timerId);
+      });
+      deferredToggleTimersRef.current = [];
+    };
+  }, []);
 
   const handleSaveCheckInClick = async () => {
     if (isSavingCheckIn) return;
@@ -184,6 +212,16 @@ export function TwelveWeekTodayTab({
     } finally {
       setIsSavingCheckIn(false);
     }
+  };
+
+  const handleTaskCompletionChange = (taskId: string, completed: boolean) => {
+    setOptimisticTaskCompletionById((current) => ({ ...current, [taskId]: completed }));
+
+    const timerId = window.setTimeout(() => {
+      deferredToggleTimersRef.current = deferredToggleTimersRef.current.filter((item) => item !== timerId);
+      onToggleTask(taskId, completed);
+    }, 0);
+    deferredToggleTimersRef.current.push(timerId);
   };
 
   const todayCheckIn = latestCheckIn?.date === todayDateKey ? latestCheckIn : null;
@@ -557,10 +595,11 @@ export function TwelveWeekTodayTab({
                 )
               ) : (
                 todayQueue.map((task) => {
-                  const isOverdue = !task.completed && task.scheduledDate < todayDateKey;
-                  const isPrimaryTask = firstPriorityTask?.id === task.id && !task.completed;
-                  const TaskStateIcon = task.completed ? TaskDoneIcon : isPrimaryTask ? TaskInProgressIcon : TaskTodoIcon;
-                  const statusLabel = task.completed
+                  const taskCompleted = optimisticTaskCompletionById[task.id] ?? task.completed;
+                  const isOverdue = !taskCompleted && task.scheduledDate < todayDateKey;
+                  const isPrimaryTask = firstPriorityTask?.id === task.id && !taskCompleted;
+                  const TaskStateIcon = taskCompleted ? TaskDoneIcon : isPrimaryTask ? TaskInProgressIcon : TaskTodoIcon;
+                  const statusLabel = taskCompleted
                     ? "Đã chốt"
                     : isOverdue
                       ? "Đang trễ"
@@ -581,13 +620,13 @@ export function TwelveWeekTodayTab({
                     >
                       <Checkbox
                         aria-label={`Hoàn thành việc: ${task.title}`}
-                        checked={task.completed}
+                        checked={taskCompleted}
                         className={`-m-2 mt-0 h-11 w-11 rounded-[var(--r-pill)] ${
                           isPrimaryTask
                             ? "border-white/30 bg-white/10 text-white data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-foreground"
                             : "border-border bg-white"
                         }`}
-                        onCheckedChange={(checked) => onToggleTask(task.id, checked === true)}
+                        onCheckedChange={(checked) => handleTaskCompletionChange(task.id, checked === true)}
                       />
                       <div className="min-w-0 flex-1">
                         {isPrimaryTask && (
@@ -597,23 +636,23 @@ export function TwelveWeekTodayTab({
                         )}
                         <div
                           className={`flex min-w-0 flex-wrap items-start justify-between gap-3 ${
-                            isPrimaryTask && !task.completed ? "text-white" : ""
+                            isPrimaryTask && !taskCompleted ? "text-white" : ""
                           }`}
                         >
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
                               <TaskStateIcon
                                 className={`h-4 w-4 shrink-0 ${
-                                  isPrimaryTask && !task.completed
+                                  isPrimaryTask && !taskCompleted
                                     ? "text-white"
-                                    : task.completed
+                                    : taskCompleted
                                       ? "text-[color:var(--color-success-fg)]"
                                       : "text-violet-500"
                                 }`}
                               />
                               <p
                                 className={`min-w-0 max-w-full break-words font-medium ${
-                                  task.completed
+                                  taskCompleted
                                     ? "text-[color:var(--color-success-bg)] line-through"
                                     : isPrimaryTask
                                       ? "text-white"
@@ -625,7 +664,7 @@ export function TwelveWeekTodayTab({
                               <Badge
                                 variant={task.isCore ? "success" : "warning"}
                                 className={
-                                  isPrimaryTask && !task.completed
+                                  isPrimaryTask && !taskCompleted
                                     ? "border-white/20 bg-white/10 text-white hover:bg-white/10"
                                     : ""
                                 }
@@ -635,9 +674,9 @@ export function TwelveWeekTodayTab({
                             </div>
                             <p
                               className={`mt-1 text-sm ${
-                                isPrimaryTask && !task.completed
+                                isPrimaryTask && !taskCompleted
                                   ? "text-white/80"
-                                  : task.completed
+                                  : taskCompleted
                                     ? "text-muted-foreground"
                                     : "text-muted-foreground"
                               }`}
@@ -647,7 +686,7 @@ export function TwelveWeekTodayTab({
                             {showTaskCommitmentQuote ? (
                               <p
                                 className={`mt-1 text-xs italic leading-5 ${
-                                  isPrimaryTask && !task.completed ? "text-white/60" : "text-muted-foreground"
+                                  isPrimaryTask && !taskCompleted ? "text-white/60" : "text-muted-foreground"
                                 }`}
                               >
                                 {taskCommitmentQuote}
@@ -659,7 +698,7 @@ export function TwelveWeekTodayTab({
                             className={
                               isOverdue
                                 ? "border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning-fg)]"
-                                : task.completed
+                                : taskCompleted
                                   ? "border-[color:var(--color-success-border)] bg-[color:var(--color-success-bg)] text-[color:var(--color-success-fg)]"
                                   : isPrimaryTask
                                     ? "border-white/30 bg-white/10 text-white/90"
