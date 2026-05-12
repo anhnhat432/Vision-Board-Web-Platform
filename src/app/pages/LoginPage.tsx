@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router";
-import { motion } from "motion/react";
+import { motion, type Variants } from "motion/react";
 import { AlertCircle, Compass, Loader2, LogOut, RefreshCw, ShieldCheck, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,6 +35,20 @@ const WORKSPACE_PROMISES = [
   "Đồng bộ kế hoạch 12 tuần khi tài khoản sẵn sàng.",
   "Quản lý quyền Plus và thanh toán trong cùng tài khoản.",
 ];
+
+const heroPanelVariants: Variants = {
+  hidden: { opacity: 0, y: 18 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.36, ease: "easeOut", staggerChildren: 0.08 },
+  },
+};
+
+const revealVariants: Variants = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0 },
+};
 
 function getInitialLoginMode(search: string): LoginMode {
   return new URLSearchParams(search).get("mode") === "signup" ? "signup" : "signin";
@@ -142,6 +156,20 @@ export function LoginPage() {
     }
   }
 
+  const HeroPanel = prefersReducedMotion ? "section" : motion.section;
+  const RevealDiv = prefersReducedMotion ? "div" : motion.div;
+  const RevealParagraph = prefersReducedMotion ? "p" : motion.p;
+  const heroPanelMotionProps = prefersReducedMotion
+    ? {}
+    : {
+        initial: "hidden",
+        animate: "show",
+        variants: heroPanelVariants,
+      };
+  const revealMotionProps = prefersReducedMotion
+    ? {}
+    : { variants: revealVariants };
+
   if (!isConfigured) {
     // Firebase not configured — show a notice instead of a broken form
     return (
@@ -174,38 +202,26 @@ export function LoginPage() {
       <div className="ambient-orb ambient-orb--rose" />
 
       <div className="relative z-10 grid w-full max-w-5xl gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.72fr)] lg:items-center">
-        <motion.section
-          initial={prefersReducedMotion ? false : "hidden"}
-          animate={prefersReducedMotion ? undefined : "show"}
-          variants={{
-            hidden: { opacity: 0, y: 18 },
-            show: {
-              opacity: 1,
-              y: 0,
-              transition: { duration: 0.36, ease: "easeOut", staggerChildren: 0.08 },
-            },
-          }}
+        <HeroPanel
+          {...heroPanelMotionProps}
           className="glass-surface-gradient-border surface-aurora ring-soft-glow page-enter relative hidden overflow-hidden p-8 shadow-2xl lg:block"
         >
           <HeroLoginScene className="pointer-events-none absolute -right-20 top-6 hidden w-[420px] text-violet-500 opacity-18 xl:block dark:opacity-14" />
           <ConstellationAccent className="pointer-events-none absolute right-4 top-4 w-28 text-violet-500 opacity-35 dark:opacity-25" />
-          <motion.div
-            variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
-            className="relative z-10 mb-5 flex items-start justify-between gap-4"
-          >
+          <RevealDiv {...revealMotionProps} className="relative z-10 mb-5 flex items-start justify-between gap-4">
             <div className="gradient-brand flex size-12 items-center justify-center rounded-[var(--r-tile)] shadow-lg">
               <Sparkles className="h-5.5 w-5.5 text-white" />
             </div>
             <HeroOrbitIllustration className="-mt-6 hidden w-32 shrink-0 text-violet-500 opacity-90 xl:block" />
-          </motion.div>
-          <motion.p
-            variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+          </RevealDiv>
+          <RevealParagraph
+            {...revealMotionProps}
             className="relative z-10 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300"
           >
             Dear Our Future
-          </motion.p>
-          <motion.p
-            variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+          </RevealParagraph>
+          <RevealParagraph
+            {...revealMotionProps}
             className="relative z-10 mt-[var(--space-inline)] text-3xl font-semibold leading-[1.15] tracking-tight text-slate-950 sm:text-4xl md:text-5xl dark:text-white"
           >
             Biến mục tiêu thành{" "}
@@ -213,11 +229,8 @@ export function LoginPage() {
               12 tuần hành động
             </span>{" "}
             trong một không gian làm việc.
-          </motion.p>
-          <motion.div
-            variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
-            className="relative z-10 mt-6 flex flex-wrap gap-2"
-          >
+          </RevealParagraph>
+          <RevealDiv {...revealMotionProps} className="relative z-10 mt-6 flex flex-wrap gap-2">
             {TRUST_FEATURES.map(({ icon: Icon, label }) => (
               <span
                 key={label}
@@ -227,9 +240,9 @@ export function LoginPage() {
                 {label}
               </span>
             ))}
-          </motion.div>
-          <motion.div
-            variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+          </RevealDiv>
+          <RevealDiv
+            {...revealMotionProps}
             className="relative z-10 mt-6 grid gap-3 text-sm leading-6 text-slate-600 dark:text-slate-200"
           >
             {WORKSPACE_PROMISES.map((item) => (
@@ -240,15 +253,15 @@ export function LoginPage() {
                 {item}
               </div>
             ))}
-          </motion.div>
-          <motion.div
-            variants={prefersReducedMotion ? undefined : { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}
+          </RevealDiv>
+          <RevealDiv
+            {...revealMotionProps}
             className="relative z-10 mt-5 flex items-start gap-3 rounded-[var(--r-control)] border border-emerald-200/70 bg-emerald-50/85 px-4 py-3 text-sm leading-6 text-emerald-800 dark:border-emerald-400/20 dark:bg-emerald-950/40 dark:text-emerald-100"
           >
             <ShieldCheck className="mt-0.5 h-4 w-4 flex-none" />
             <p>Đăng nhập an toàn. Không lưu mật khẩu trên thiết bị.</p>
-          </motion.div>
-        </motion.section>
+          </RevealDiv>
+        </HeroPanel>
 
         <div className="w-full max-w-sm justify-self-center lg:max-w-md">
         <div className="mb-8 text-center">
@@ -263,6 +276,17 @@ export function LoginPage() {
           <p className="mt-1 text-sm text-slate-500">
             {mode === "signin" ? "Đăng nhập để tiếp tục hành trình." : "Tạo tài khoản để bắt đầu."}
           </p>
+          <div className="mt-4 flex flex-wrap justify-center gap-2 lg:hidden">
+            {TRUST_FEATURES.map(({ icon: Icon, label }) => (
+              <span
+                key={label}
+                className="inline-flex items-center gap-1.5 rounded-[var(--r-pill)] border border-violet-200/60 bg-violet-50/80 px-2.5 py-1 text-[11px] font-semibold text-violet-700 dark:border-violet-400/20 dark:bg-violet-950/50 dark:text-violet-200"
+              >
+                <Icon className="h-3 w-3" />
+                {label}
+              </span>
+            ))}
+          </div>
         </div>
 
         <div className="mb-4 flex items-start gap-3 rounded-[var(--r-control)] border border-emerald-200/70 bg-emerald-50/90 px-4 py-3 text-sm leading-6 text-emerald-800 shadow-sm lg:hidden">

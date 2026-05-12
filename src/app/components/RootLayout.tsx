@@ -181,6 +181,7 @@ export function RootLayout() {
     scopeKey: userProfile?.id ?? null,
   });
   const { resolvedTheme, setTheme } = useTheme();
+  const prefersReducedMotion = useReducedMotion();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMoreOpen, setDesktopMoreOpen] = useState(false);
   const desktopMoreRef = useRef<HTMLDivElement | null>(null);
@@ -422,11 +423,7 @@ export function RootLayout() {
 
   useEffect(() => {
     const currentPath = location.pathname;
-    if (
-      !currentPath ||
-      typeof window === "undefined" ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
+    if (!currentPath || typeof window === "undefined" || prefersReducedMotion) {
       return;
     }
 
@@ -490,7 +487,7 @@ export function RootLayout() {
         cleanup();
       });
     };
-  }, [location.pathname]);
+  }, [location.pathname, prefersReducedMotion]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -936,28 +933,18 @@ export function RootLayout() {
     />
   );
 
-  const prefersReducedMotion = useReducedMotion();
-
-  const pageTransition = prefersReducedMotion
-    ? ({
-        initial: { opacity: 1 },
-        animate: { opacity: 1 },
-        exit: { opacity: 1 },
-        transition: { duration: 0 },
-      } as const)
-    : ({
-        initial: { opacity: 0, y: 8 },
-        animate: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: -4 },
-        transition: { duration: 0.24, ease: [0.22, 1, 0.36, 1] },
-      } as const);
   const pageTransitionContent = prefersReducedMotion ? (
-    <div key={location.pathname} className="page-transition-shell">
-      {outlet}
-    </div>
+    outlet
   ) : (
-    <AnimatePresence initial={false}>
-      <motion.div key={location.pathname} className="page-transition-shell" {...pageTransition}>
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={location.pathname}
+        className="page-transition-shell"
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -4 }}
+        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+      >
         {outlet}
       </motion.div>
     </AnimatePresence>

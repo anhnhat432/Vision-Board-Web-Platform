@@ -4,7 +4,6 @@ import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RootLayout } from "./components/RootLayout";
-import { Dashboard } from "./pages/Dashboard";
 import { loadWithChunkReload } from "./utils/chunkLoad";
 
 function lazyComponent<TModule extends Record<string, unknown>>(
@@ -80,7 +79,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        Component: Dashboard,
+        ...lazyRoute(() => import("./pages/Dashboard"), "Dashboard"),
       },
       {
         path: "onboarding",
