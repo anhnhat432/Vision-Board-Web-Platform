@@ -33,9 +33,9 @@ export function Hero12WeekScene({ className, ...rest }: AmbientIllustrationProps
           <stop offset="1" stopColor="white" stopOpacity="0.16" />
         </linearGradient>
       </defs>
-      <path d="M54 302C172 190 260 318 390 204C502 106 598 194 746 98" stroke={`url(#${waveId})`} strokeWidth="58" strokeLinecap="round" opacity="0.28" />
-      <path d="M70 244C186 156 282 254 408 162C526 76 610 150 730 94" stroke={`url(#${waveId})`} strokeWidth="22" strokeLinecap="round" opacity="0.36" />
-      <g transform="translate(300 108) rotate(-7 150 92)">
+      <path className="gradient-flow" d="M54 302C172 190 260 318 390 204C502 106 598 194 746 98" stroke={`url(#${waveId})`} strokeWidth="58" strokeLinecap="round" opacity="0.28" />
+      <path className="float-subtle" d="M70 244C186 156 282 254 408 162C526 76 610 150 730 94" stroke={`url(#${waveId})`} strokeWidth="22" strokeLinecap="round" opacity="0.36" />
+      <g className="float-subtle" transform="translate(300 108) rotate(-7 150 92)">
         <rect width="300" height="184" rx="28" fill={`url(#${cardId})`} stroke="currentColor" strokeOpacity="0.18" strokeWidth="2" />
         {WEEK_CELLS.map((cell) => (
           <rect
@@ -51,7 +51,7 @@ export function Hero12WeekScene({ className, ...rest }: AmbientIllustrationProps
         ))}
       </g>
       <path d="M154 316C250 252 344 278 438 210C500 165 548 116 606 84" stroke="white" strokeOpacity="0.64" strokeWidth="4" strokeLinecap="round" />
-      <path d="M606 66L614 82L632 84L618 96L622 114L606 104L590 114L594 96L580 84L598 82L606 66Z" fill="currentColor" fillOpacity="0.48" />
+      <path className="twinkle-fast" d="M606 66L614 82L632 84L618 96L622 114L606 104L590 114L594 96L580 84L598 82L606 66Z" fill="currentColor" fillOpacity="0.48" />
     </svg>
   );
 }

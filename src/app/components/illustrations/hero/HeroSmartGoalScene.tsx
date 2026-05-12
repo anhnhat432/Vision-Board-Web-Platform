@@ -32,13 +32,13 @@ export function HeroSmartGoalScene({ className, ...rest }: AmbientIllustrationPr
           <stop offset="1" stopColor="white" stopOpacity="0.18" />
         </linearGradient>
       </defs>
-      <g opacity="0.22">
+      <g className="twinkle-slow" opacity="0.22">
         {SMART_DOTS.map((dot) => (
           <circle key={dot.id} cx={dot.cx} cy={dot.cy} r="3" fill="currentColor" />
         ))}
       </g>
-      <ellipse cx="400" cy="202" rx="252" ry="86" stroke={`url(#${orbitId})`} strokeWidth="4" strokeDasharray="10 14" transform="rotate(-14 400 202)" />
-      <path d="M400 78L430 158L514 162L448 214L470 296L400 250L330 296L352 214L286 162L370 158L400 78Z" fill={`url(#${starId})`} />
+      <ellipse className="float-subtle" cx="400" cy="202" rx="252" ry="86" stroke={`url(#${orbitId})`} strokeWidth="4" strokeDasharray="10 14" transform="rotate(-14 400 202)" />
+      <path className="gradient-flow" d="M400 78L430 158L514 162L448 214L470 296L400 250L330 296L352 214L286 162L370 158L400 78Z" fill={`url(#${starId})`} />
       <g stroke="white" strokeLinecap="round" strokeOpacity="0.52" strokeWidth="3">
         <path d="M400 104V44" />
         <path d="M464 166L534 126" />
@@ -47,7 +47,7 @@ export function HeroSmartGoalScene({ className, ...rest }: AmbientIllustrationPr
         <path d="M336 166L266 126" />
       </g>
       <path d="M164 316C246 276 316 286 380 246C438 210 488 158 636 112" stroke="currentColor" strokeOpacity="0.28" strokeWidth="7" strokeLinecap="round" />
-      <circle cx="636" cy="112" r="10" fill="white" fillOpacity="0.7" />
+      <circle className="twinkle-fast" cx="636" cy="112" r="10" fill="white" fillOpacity="0.7" />
     </svg>
   );
 }
