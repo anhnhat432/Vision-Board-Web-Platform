@@ -1,0 +1,4 @@
+.gitattributes text eol=lf
+.github/workflows/*.yml text eol=lf
+.husky/* text eol=lf
+scripts/*.mjs text eol=lf

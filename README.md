@@ -332,6 +332,15 @@ npm run env:check:full
 
 `env:check` reports missing env values without failing the local demo path. `env:check:full` is stricter and should pass before testing authenticated backend sync.
 
+## Pre-commit Hooks
+
+Project dùng Husky + lint-staged. Sau `npm install` lần đầu, hooks sẽ tự setup qua script `prepare`.
+
+- **pre-commit**: chạy `biome check --write` trên file đã staged (~1-2s)
+- **commit-msg**: validate Conventional Commits format
+
+Bypass khẩn cấp (KHÔNG khuyến khích): `git commit --no-verify`.
+
 ## API Surface
 
 All backend routes except `GET /api/health` require:
@@ -388,6 +397,23 @@ Backend deployment is Render-ready:
 Detailed frontend deployment checklist:
 
 - `guidelines/VercelDeploymentChecklist.md`
+
+## Release Process
+
+1. Đảm bảo `main` xanh CI và đã merge các PR cần thiết.
+2. Bump version trong `package.json` nếu có, update `CHANGELOG.md` move `Unreleased` -> new version section.
+3. Tag và push:
+
+   ```bash
+   git tag v1.0-soft-launch-rc6
+   git push origin v1.0-soft-launch-rc6
+   ```
+
+4. GitHub Action `release.yml` sẽ tự chạy:
+   - Verify: typecheck, lint, test, build (frontend + backend)
+   - Generate release notes từ commits
+   - Tạo GitHub Release (auto-detect prerelease nếu tag chứa `rc`/`beta`/`alpha`)
+5. Check tab "Releases" trên GitHub.
 
 ## Portfolio Review Notes
 

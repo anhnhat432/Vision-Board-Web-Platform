@@ -31,7 +31,8 @@
     "smoke:prod:quick": "node scripts/smoke-production-quick.mjs",
     "smoke:prod": "node scripts/smoke-production-e2e.mjs",
     "smoke:mvp2-sync": "node scripts/smoke-mvp2-sync-staging.mjs",
-    "smoke:mvp2-sync:staging": "node scripts/smoke-mvp2-sync-staging.mjs"
+    "smoke:mvp2-sync:staging": "node scripts/smoke-mvp2-sync-staging.mjs",
+    "prepare": "node scripts/prepare-husky.mjs"
   },
   "dependencies": {
     "@fontsource/be-vietnam-pro": "^5.2.8",
@@ -95,13 +96,23 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "4.7.0",
+    "husky": "^9.1.7",
     "jsdom": "^28.1.0",
+    "lint-staged": "^16.4.0",
     "playwright": "^1.59.1",
     "prettier": "^3.8.3",
     "tailwindcss": "4.1.12",
     "typescript": "^6.0.2",
     "vite": "6.4.2",
     "vitest": "^4.1.1"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,css}": [
+      "biome check --write --no-errors-on-unmatched"
+    ],
+    "*.{ts,tsx}": [
+      "biome lint --no-errors-on-unmatched"
+    ]
   },
   "overrides": {
     "lodash": "4.18.1",

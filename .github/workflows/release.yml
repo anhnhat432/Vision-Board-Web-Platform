@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build, verify, publish release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout (full history for changelog)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install deps (frontend)
+        run: npm ci
+
+      - name: Install deps (backend)
+        run: npm --prefix backend ci
+
+      - name: Typecheck (frontend)
+        run: npm run typecheck
+
+      - name: Lint (frontend)
+        run: npm run lint
+
+      - name: Test (frontend)
+        run: npm run test:run
+
+      - name: Build (frontend)
+        run: npm run build
+
+      - name: Typecheck (backend)
+        run: npm --prefix backend run typecheck
+
+      - name: Build (backend)
+        run: npm --prefix backend run build
+
+      - name: Generate release notes
+        id: notes
+        run: node scripts/generate-release-notes.mjs > release-notes.md
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body_path: release-notes.md
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'rc') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
+          generate_release_notes: false
+          files: |
+            dist/**/*
