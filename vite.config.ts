@@ -46,7 +46,6 @@ export default defineConfig({
           if (id.includes("@radix-ui")) return "radix";
           if (id.includes("lucide-react")) return "icons";
           if (id.includes("firebase")) return "firebase";
-          if (id.includes("@sentry/")) return "monitoring";
 
           return "vendor";
         },

@@ -13,6 +13,16 @@ import {
 import { toast } from "sonner";
 
 import { Badge } from "../components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 import { Button } from "../components/ui/button";
 import type { LifeBalanceHistoryChartPoint } from "../components/LifeBalanceHistoryChart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -196,37 +206,38 @@ export function LifeBalance() {
 
   return (
     <div ref={pageTopRef} className="stack-section pb-12">
-      {blocker.state === "blocked" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="mx-4 w-full max-w-sm rounded-[var(--r-control)] border border-white/70 bg-white p-6 shadow-2xl">
+      <AlertDialog open={blocker.state === "blocked"}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
             <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-control)] bg-amber-50 text-amber-600">
               <AlertTriangle className="h-6 w-6" />
             </div>
-            <h3 className="mt-4 text-lg font-bold text-slate-900">Bạn có thay đổi chưa lưu</h3>
-            <p className="mt-2 text-sm leading-7 text-slate-500">
+            <AlertDialogTitle>Bạn có thay đổi chưa lưu</AlertDialogTitle>
+            <AlertDialogDescription>
               Nếu rời khỏi trang này ngay bây giờ, điểm số vừa điều chỉnh sẽ không được lưu lại.
-            </p>
-            <div className="mt-6 flex flex-col gap-3">
-              <Button
-                onClick={() => {
-                  saveLifeBalance();
-                  toast.success("Đã lưu trước khi rời trang.");
-                  blocker.proceed();
-                }}
-              >
-                <Save className="h-4 w-4" />
-                Lưu rồi rời trang
-              </Button>
-              <Button variant="outline" onClick={() => blocker.proceed()}>
-                Rời trang không lưu
-              </Button>
-              <Button variant="ghost" onClick={() => blocker.reset()}>
-                Ở lại trang này
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col gap-3 sm:flex-col sm:items-stretch sm:justify-start">
+            <AlertDialogAction
+              onClick={() => {
+                saveLifeBalance();
+                toast.success("Đã lưu trước khi rời trang.");
+                blocker.proceed?.();
+              }}
+              className="w-full"
+            >
+              <Save className="h-4 w-4" />
+              Lưu rồi rời trang
+            </AlertDialogAction>
+            <Button variant="outline" onClick={() => blocker.proceed?.()}>
+              Rời trang không lưu
+            </Button>
+            <AlertDialogCancel onClick={() => blocker.reset?.()}>
+              Ở lại trang này
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Card className="ops-surface surface-aurora ring-soft-glow overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-xl shadow-slate-900/5 dark:shadow-black/30">
         <CardContent className="relative p-5 sm:p-6">
