@@ -272,8 +272,8 @@ export function LoginPage() {
 
         <div className="w-full max-w-sm justify-self-center lg:max-w-md">
         <div className="mb-8 text-center">
-          <HeroLoginScene className="mx-auto mb-1 w-40 text-violet-500 opacity-80 lg:hidden" />
-          <HeroOrbitIllustration className="mx-auto mb-3 w-28 text-violet-500 lg:hidden" />
+          {/* Single hero illustration on mobile (was 2 stacked, took too much vertical space). */}
+          <HeroLoginScene className="mx-auto mb-3 w-40 text-violet-500 opacity-80 lg:hidden" />
           <div className="gradient-brand mx-auto mb-3 flex size-12 items-center justify-center rounded-[var(--r-tile)] shadow-lg">
             <Sparkles className="h-5.5 w-5.5 text-white" />
           </div>
