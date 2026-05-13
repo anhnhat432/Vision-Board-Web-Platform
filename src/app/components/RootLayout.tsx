@@ -1,4 +1,11 @@
-import { startTransition, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   ChevronDown,
   Compass,
@@ -35,7 +42,11 @@ import {
   isNewUserGuideDismissed,
   markNewUserGuideSeen,
 } from "../utils/new-user-guide";
-import { isDemoMode, shouldEnable12WeekImportDryRun, shouldEnable12WeekCloudImport } from "../utils/app-mode";
+import {
+  isDemoMode,
+  shouldEnable12WeekImportDryRun,
+  shouldEnable12WeekCloudImport,
+} from "../utils/app-mode";
 import {
   getAnonymousLocalDataMigrationCandidate,
   hasCompletedCloudImport,
@@ -59,7 +70,10 @@ import {
   type TwelveWeekImportValidationReport,
   type TwelveWeekImportValidationRequest,
 } from "@/services/syncService";
-import { BACKEND_PLAN_HYDRATION_EVENT_NAME, useBackendPlanHydration } from "../hooks/useBackendPlanHydration";
+import {
+  BACKEND_PLAN_HYDRATION_EVENT_NAME,
+  useBackendPlanHydration,
+} from "../hooks/useBackendPlanHydration";
 import { useTheme } from "../hooks/useTheme";
 import { FooterAuroraIllustration } from "./illustrations";
 import { MotionPageTransition } from "./motion";
@@ -80,8 +94,17 @@ import {
   prefetchRoute,
   WARM_PREFETCH_ROUTE_PATHS,
 } from "./root-layout/navConfig";
-import { GUIDED_PATHS, getRouteMeta, getRouteTone as getFallbackRouteTone } from "./root-layout/routeMeta";
-import { buildLoginRedirect, isAuthProtectedPath, isPublicCheckoutPath, useWorkspaceGate } from "./root-layout/useWorkspaceGate";
+import {
+  GUIDED_PATHS,
+  getRouteMeta,
+  getRouteTone as getFallbackRouteTone,
+} from "./root-layout/routeMeta";
+import {
+  buildLoginRedirect,
+  isAuthProtectedPath,
+  isPublicCheckoutPath,
+  useWorkspaceGate,
+} from "./root-layout/useWorkspaceGate";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import {
@@ -99,7 +122,9 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function isImportValidationReport(value: unknown): value is TwelveWeekImportValidationReport {
+function isImportValidationReport(
+  value: unknown,
+): value is TwelveWeekImportValidationReport {
   return (
     isRecord(value) &&
     (value.status === "valid" || value.status === "invalid") &&
@@ -111,11 +136,16 @@ function isImportValidationReport(value: unknown): value is TwelveWeekImportVali
   );
 }
 
-function getImportValidationReportFromError(error: unknown): TwelveWeekImportValidationReport | null {
+function getImportValidationReportFromError(
+  error: unknown,
+): TwelveWeekImportValidationReport | null {
   if (!isRecord(error)) return null;
 
   if (isImportValidationReport(error.details)) return error.details;
-  if (isRecord(error.details) && isImportValidationReport(error.details.details)) {
+  if (
+    isRecord(error.details) &&
+    isImportValidationReport(error.details.details)
+  ) {
     return error.details.details;
   }
 
@@ -123,7 +153,11 @@ function getImportValidationReportFromError(error: unknown): TwelveWeekImportVal
 }
 
 function getErrorMessage(error: unknown): string {
-  if (isRecord(error) && typeof error.message === "string" && error.message.trim()) {
+  if (
+    isRecord(error) &&
+    typeof error.message === "string" &&
+    error.message.trim()
+  ) {
     return error.message;
   }
 
@@ -188,15 +222,19 @@ export function RootLayout() {
   const [guideUserData, setGuideUserData] = useState(() => getUserData());
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const [localDataMigrationCandidate, setLocalDataMigrationCandidate] = useState<LocalDataMigrationCandidate | null>(
-    null,
-  );
-  const [isLocalDataMigrationPromptOpen, setIsLocalDataMigrationPromptOpen] = useState(false);
+  const [localDataMigrationCandidate, setLocalDataMigrationCandidate] =
+    useState<LocalDataMigrationCandidate | null>(null);
+  const [isLocalDataMigrationPromptOpen, setIsLocalDataMigrationPromptOpen] =
+    useState(false);
   const entitlementAutoSyncScopeRef = useRef<string | null>(null);
 
   const routeScrollKey = `${location.pathname}${location.search}`;
   const currentRouteKey = `${routeScrollKey}${location.hash}`;
-  const { shouldRedirectToLogin, shouldShowWorkspaceGate, shouldWaitForWorkspace } = useWorkspaceGate({
+  const {
+    shouldRedirectToLogin,
+    shouldShowWorkspaceGate,
+    shouldWaitForWorkspace,
+  } = useWorkspaceGate({
     authLoading,
     backendHydrationLoading: backendPlanHydration.loading,
     demoMode,
@@ -223,7 +261,8 @@ export function RootLayout() {
   );
 
   useLayoutEffect(() => {
-    if (!routeScrollKey || typeof window === "undefined" || location.hash) return;
+    if (!routeScrollKey || typeof window === "undefined" || location.hash)
+      return;
 
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, [location.hash, routeScrollKey]);
@@ -240,7 +279,11 @@ export function RootLayout() {
     }
 
     if (shouldRedirectToLogin) {
-      const { destination, loginPath } = buildLoginRedirect(location.pathname, location.search, location.hash);
+      const { destination, loginPath } = buildLoginRedirect(
+        location.pathname,
+        location.search,
+        location.hash,
+      );
       navigate(loginPath, { replace: true, state: { from: destination } });
       return;
     }
@@ -252,9 +295,19 @@ export function RootLayout() {
     const userData = getUserData();
     setGuideUserData(userData);
 
-    if (!demoMode && (isAuthProtectedPath(location.pathname) || isPublicCheckoutPath(location.pathname))) return;
+    if (
+      !demoMode &&
+      (isAuthProtectedPath(location.pathname) ||
+        isPublicCheckoutPath(location.pathname))
+    )
+      return;
 
-    if (!demoMode && user && !userData.onboardingCompleted && location.pathname !== "/onboarding") {
+    if (
+      !demoMode &&
+      user &&
+      !userData.onboardingCompleted &&
+      location.pathname !== "/onboarding"
+    ) {
       navigate("/onboarding");
     }
   }, [
@@ -274,12 +327,20 @@ export function RootLayout() {
       setMobileMenuOpen(false);
       setDesktopMoreOpen(false);
       setGuideUserData(getUserData());
-      document.title = getRouteMeta(location.pathname).title ?? "Dear Our Future";
+      document.title =
+        getRouteMeta(location.pathname).title ?? "Dear Our Future";
     }
   }, [location.pathname]);
 
   useEffect(() => {
-    if (demoMode || !isConfigured || !isApiBaseUrlConfigured() || !user || !userProfile) return;
+    if (
+      demoMode ||
+      !isConfigured ||
+      !isApiBaseUrlConfigured() ||
+      !user ||
+      !userProfile
+    )
+      return;
     if (userProfile.role === "admin") return;
 
     const scopeKey = userProfile.id || user.uid;
@@ -307,7 +368,11 @@ export function RootLayout() {
   }, [demoMode, isConfigured, user, userProfile]);
 
   useEffect(() => {
-    if (!canSendRemoteAnalytics() || typeof window === "undefined" || typeof window.gtag !== "function") {
+    if (
+      !canSendRemoteAnalytics() ||
+      typeof window === "undefined" ||
+      typeof window.gtag !== "function"
+    ) {
       return;
     }
 
@@ -369,13 +434,25 @@ export function RootLayout() {
       setGuideUserData(getUserData());
     };
     window.addEventListener("visionboard:open-guide", handleOpenGuide);
-    window.addEventListener(USER_DATA_UPDATED_EVENT_NAME, handleBackendHydrated);
-    window.addEventListener(BACKEND_PLAN_HYDRATION_EVENT_NAME, handleBackendHydrated);
+    window.addEventListener(
+      USER_DATA_UPDATED_EVENT_NAME,
+      handleBackendHydrated,
+    );
+    window.addEventListener(
+      BACKEND_PLAN_HYDRATION_EVENT_NAME,
+      handleBackendHydrated,
+    );
 
     return () => {
       window.removeEventListener("visionboard:open-guide", handleOpenGuide);
-      window.removeEventListener(USER_DATA_UPDATED_EVENT_NAME, handleBackendHydrated);
-      window.removeEventListener(BACKEND_PLAN_HYDRATION_EVENT_NAME, handleBackendHydrated);
+      window.removeEventListener(
+        USER_DATA_UPDATED_EVENT_NAME,
+        handleBackendHydrated,
+      );
+      window.removeEventListener(
+        BACKEND_PLAN_HYDRATION_EVENT_NAME,
+        handleBackendHydrated,
+      );
     };
   }, []);
 
@@ -387,7 +464,11 @@ export function RootLayout() {
     if (localDataMigrationCandidate && isLocalDataMigrationPromptOpen) return;
 
     const progress = getNewUserGuideProgress(guideUserData);
-    if (progress.isComplete || isNewUserGuideDismissed() || hasSeenNewUserGuide()) {
+    if (
+      progress.isComplete ||
+      isNewUserGuideDismissed() ||
+      hasSeenNewUserGuide()
+    ) {
       return;
     }
 
@@ -411,7 +492,10 @@ export function RootLayout() {
     }
 
     const candidate = getAnonymousLocalDataMigrationCandidate();
-    if (!candidate || hasSkippedLocalDataMigrationPrompt(user.uid, candidate.fingerprint)) {
+    if (
+      !candidate ||
+      hasSkippedLocalDataMigrationPrompt(user.uid, candidate.fingerprint)
+    ) {
       setLocalDataMigrationCandidate(null);
       setIsLocalDataMigrationPromptOpen(false);
       return;
@@ -427,9 +511,9 @@ export function RootLayout() {
       return;
     }
 
-    const heroCards = Array.from(document.querySelectorAll<HTMLElement>(".hero-surface")).filter(
-      (card) => !card.closest(".interactive-surface"),
-    );
+    const heroCards = Array.from(
+      document.querySelectorAll<HTMLElement>(".hero-surface"),
+    ).filter((card) => !card.closest(".interactive-surface"));
 
     const resetCard = (card: HTMLElement) => {
       card.style.setProperty("--hero-pointer-x", "0.5");
@@ -450,8 +534,14 @@ export function RootLayout() {
         const bounds = card.getBoundingClientRect();
         if (bounds.width === 0 || bounds.height === 0) return;
 
-        const pointerX = Math.min(Math.max((event.clientX - bounds.left) / bounds.width, 0), 1);
-        const pointerY = Math.min(Math.max((event.clientY - bounds.top) / bounds.height, 0), 1);
+        const pointerX = Math.min(
+          Math.max((event.clientX - bounds.left) / bounds.width, 0),
+          1,
+        );
+        const pointerY = Math.min(
+          Math.max((event.clientY - bounds.top) / bounds.height, 0),
+          1,
+        );
         const rotateX = ((0.5 - pointerY) * 3.5).toFixed(3);
         const rotateY = ((pointerX - 0.5) * 3.5).toFixed(3);
         const shiftX = ((pointerX - 0.5) * 6).toFixed(2);
@@ -544,17 +634,28 @@ export function RootLayout() {
   const handlePrefetch = useCallback((path: string) => prefetchRoute(path), []);
   const handleAuthNavigate = useCallback(
     (mode: "signin" | "signup") => {
-      navigate(buildAuthPath(mode, location.pathname, location.search, location.hash));
+      navigate(
+        buildAuthPath(mode, location.pathname, location.search, location.hash),
+      );
     },
     [location.hash, location.pathname, location.search, navigate],
   );
 
   const pageMeta = getRouteMeta(location.pathname);
   const isSignedOutVisitor = isConfigured && !user;
-  const { bottomNavItems, mobileMenuNavItems, primaryNavItems, secondaryNavItems } =
-    getNavItemsForState(isSignedOutVisitor);
-  const isDesktopMoreNavActive = desktopMoreOpen || secondaryNavItems.some((item) => isActive(item.path));
-  const isMoreNavActive = mobileMenuOpen || secondaryNavItems.some((item) => isActive(item.path));
+  // The /12-week-system route has its own internal bottom tab nav (Today/Week/Progress/Settings).
+  // Hide RootLayout's bottom nav there to avoid stacking two fixed bars on mobile.
+  const hasInternalBottomNav = location.pathname.startsWith("/12-week-system");
+  const {
+    bottomNavItems,
+    mobileMenuNavItems,
+    primaryNavItems,
+    secondaryNavItems,
+  } = getNavItemsForState(isSignedOutVisitor);
+  const isDesktopMoreNavActive =
+    desktopMoreOpen || secondaryNavItems.some((item) => isActive(item.path));
+  const isMoreNavActive =
+    mobileMenuOpen || secondaryNavItems.some((item) => isActive(item.path));
   const routeTone = getRouteTone(location.pathname);
   const shellGradientStyle = {
     backgroundImage:
@@ -568,14 +669,27 @@ export function RootLayout() {
     ...shellGradientStyle,
     boxShadow: "0 14px 30px -18px var(--tone-shell-shadow)",
   };
-  const accountLabel = userProfile?.displayName || user?.displayName || user?.email || "Khách";
+  const accountLabel =
+    userProfile?.displayName || user?.displayName || user?.email || "Khách";
   const accountEmail = user?.email || userProfile?.email || "";
   const currentAccountPlanCode = getCurrentPlan(guideUserData);
   const accountPlanLabel =
-    currentAccountPlanCode === "PRO" ? "Pro" : currentAccountPlanCode === "PLUS" ? "Plus" : "Miễn phí";
-  const accountAvatarLabel = (accountLabel || accountEmail || "A").trim().slice(0, 1).toUpperCase();
-  const accountStatus = userProfileError ? "Lỗi hồ sơ" : accountEmail || "Tài khoản đã đăng nhập";
-  const canRetryUserProfile = Boolean(user) && !userProfileLoading && (!userProfile || Boolean(userProfileError));
+    currentAccountPlanCode === "PRO"
+      ? "Pro"
+      : currentAccountPlanCode === "PLUS"
+        ? "Plus"
+        : "Miễn phí";
+  const accountAvatarLabel = (accountLabel || accountEmail || "A")
+    .trim()
+    .slice(0, 1)
+    .toUpperCase();
+  const accountStatus = userProfileError
+    ? "Lỗi hồ sơ"
+    : accountEmail || "Tài khoản đã đăng nhập";
+  const canRetryUserProfile =
+    Boolean(user) &&
+    !userProfileLoading &&
+    (!userProfile || Boolean(userProfileError));
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -589,7 +703,9 @@ export function RootLayout() {
 
   const renderAccountMenu = (variant: "desktop" | "mobile") => {
     const isMobile = variant === "mobile";
-    const triggerLabel = isMobile ? "Mở menu tài khoản di động" : "Mở menu tài khoản";
+    const triggerLabel = isMobile
+      ? "Mở menu tài khoản di động"
+      : "Mở menu tài khoản";
 
     return (
       <DropdownMenu>
@@ -677,7 +793,10 @@ export function RootLayout() {
 
   const handleSkipLocalDataMigration = useCallback(() => {
     if (user?.uid && localDataMigrationCandidate) {
-      markLocalDataMigrationPromptSkipped(user.uid, localDataMigrationCandidate.fingerprint);
+      markLocalDataMigrationPromptSkipped(
+        user.uid,
+        localDataMigrationCandidate.fingerprint,
+      );
     }
 
     setIsLocalDataMigrationPromptOpen(false);
@@ -689,9 +808,15 @@ export function RootLayout() {
       return { status: "inactive_auth_scope" as const };
     }
 
-    const result = importAnonymousLocalDataToAccountScope(user.uid, localDataMigrationCandidate.fingerprint);
+    const result = importAnonymousLocalDataToAccountScope(
+      user.uid,
+      localDataMigrationCandidate.fingerprint,
+    );
     if (result.status === "imported") {
-      markLocalDataMigrationPromptSkipped(user.uid, localDataMigrationCandidate.fingerprint);
+      markLocalDataMigrationPromptSkipped(
+        user.uid,
+        localDataMigrationCandidate.fingerprint,
+      );
       setGuideUserData(getUserData());
     }
 
@@ -699,7 +824,10 @@ export function RootLayout() {
   }, [localDataMigrationCandidate, user?.uid]);
 
   const cloudImportDryRunEnabled =
-    !demoMode && Boolean(user) && isApiBaseUrlConfigured() && shouldEnable12WeekImportDryRun();
+    !demoMode &&
+    Boolean(user) &&
+    isApiBaseUrlConfigured() &&
+    shouldEnable12WeekImportDryRun();
   const cloudImportDryRunUnavailableReason = demoMode
     ? "Bản dùng thử đang lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản."
     : !user
@@ -710,84 +838,94 @@ export function RootLayout() {
           ? "Kiểm tra dữ liệu trước khi đồng bộ chưa được bật."
           : undefined;
 
-  const handleValidateCloudImport = useCallback(async (): Promise<CloudImportDryRunResult> => {
-    if (demoMode) {
-      return {
-        status: "skipped",
-        message: "Bản dùng thử đang lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản.",
-      };
-    }
-
-    if (!user?.uid) {
-      return {
-        status: "skipped",
-        message: "Bạn cần đăng nhập trước khi kiểm tra dữ liệu tài khoản.",
-      };
-    }
-
-    if (!isApiBaseUrlConfigured()) {
-      return {
-        status: "skipped",
-        message: "Kết nối tài khoản chưa được cấu hình cho không gian làm việc này.",
-      };
-    }
-
-    if (!shouldEnable12WeekImportDryRun()) {
-      return {
-        status: "skipped",
-        message: "Kiểm tra dữ liệu trước khi đồng bộ chưa được bật.",
-      };
-    }
-
-    const importPayloads = getUserData()
-      .goals.map(createTwelveWeekImportPayload)
-      .filter((payload): payload is TwelveWeekImportPayload => Boolean(payload));
-    if (importPayloads.length === 0) {
-      return {
-        status: "skipped",
-        message: "Tài khoản trên trình duyệt này chưa có dữ liệu 12 tuần để kiểm tra.",
-      };
-    }
-
-    const requestId = createImportValidationRequestId();
-    const request: TwelveWeekImportValidationRequest = {
-      requestId,
-      idempotencyKey: `account_scope_import_dry_run:${requestId}`,
-      source: "account_scope_import_dry_run",
-      mode: "validate_only",
-      workspace: {
-        goals: importPayloads,
-      },
-    };
-
-    try {
-      const report = await post12WeekImportValidation(request);
-      return {
-        status: report.status === "valid" ? "valid" : "invalid",
-        message:
-          report.status === "valid"
-            ? "Dữ liệu hợp lệ để đồng bộ lên tài khoản. Chưa có dữ liệu nào bị thay đổi."
-            : "Dữ liệu chưa sẵn sàng để đồng bộ lên tài khoản.",
-        report,
-      };
-    } catch (error) {
-      const report = getImportValidationReportFromError(error);
-      if (report) {
+  const handleValidateCloudImport =
+    useCallback(async (): Promise<CloudImportDryRunResult> => {
+      if (demoMode) {
         return {
-          status: "invalid",
-          message: "Dữ liệu chưa sẵn sàng để đồng bộ lên tài khoản.",
-          report,
+          status: "skipped",
+          message:
+            "Bản dùng thử đang lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản.",
         };
       }
 
-      return {
-        status: "error",
-        message: getErrorMessage(error),
-      };
-    }
-  }, [demoMode, user?.uid]);
+      if (!user?.uid) {
+        return {
+          status: "skipped",
+          message: "Bạn cần đăng nhập trước khi kiểm tra dữ liệu tài khoản.",
+        };
+      }
 
-  const cloudImportEnabled = !demoMode && Boolean(user) && isApiBaseUrlConfigured() && shouldEnable12WeekCloudImport();
+      if (!isApiBaseUrlConfigured()) {
+        return {
+          status: "skipped",
+          message:
+            "Kết nối tài khoản chưa được cấu hình cho không gian làm việc này.",
+        };
+      }
+
+      if (!shouldEnable12WeekImportDryRun()) {
+        return {
+          status: "skipped",
+          message: "Kiểm tra dữ liệu trước khi đồng bộ chưa được bật.",
+        };
+      }
+
+      const importPayloads = getUserData()
+        .goals.map(createTwelveWeekImportPayload)
+        .filter((payload): payload is TwelveWeekImportPayload =>
+          Boolean(payload),
+        );
+      if (importPayloads.length === 0) {
+        return {
+          status: "skipped",
+          message:
+            "Tài khoản trên trình duyệt này chưa có dữ liệu 12 tuần để kiểm tra.",
+        };
+      }
+
+      const requestId = createImportValidationRequestId();
+      const request: TwelveWeekImportValidationRequest = {
+        requestId,
+        idempotencyKey: `account_scope_import_dry_run:${requestId}`,
+        source: "account_scope_import_dry_run",
+        mode: "validate_only",
+        workspace: {
+          goals: importPayloads,
+        },
+      };
+
+      try {
+        const report = await post12WeekImportValidation(request);
+        return {
+          status: report.status === "valid" ? "valid" : "invalid",
+          message:
+            report.status === "valid"
+              ? "Dữ liệu hợp lệ để đồng bộ lên tài khoản. Chưa có dữ liệu nào bị thay đổi."
+              : "Dữ liệu chưa sẵn sàng để đồng bộ lên tài khoản.",
+          report,
+        };
+      } catch (error) {
+        const report = getImportValidationReportFromError(error);
+        if (report) {
+          return {
+            status: "invalid",
+            message: "Dữ liệu chưa sẵn sàng để đồng bộ lên tài khoản.",
+            report,
+          };
+        }
+
+        return {
+          status: "error",
+          message: getErrorMessage(error),
+        };
+      }
+    }, [demoMode, user?.uid]);
+
+  const cloudImportEnabled =
+    !demoMode &&
+    Boolean(user) &&
+    isApiBaseUrlConfigured() &&
+    shouldEnable12WeekCloudImport();
   const cloudImportUnavailableReason = demoMode
     ? "Bản dùng thử đang lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản."
     : !user
@@ -799,107 +937,126 @@ export function RootLayout() {
           : undefined;
   const cloudImportAlreadyCompleted = Boolean(
     user?.uid &&
-      localDataMigrationCandidate &&
-      hasCompletedCloudImport(user.uid, localDataMigrationCandidate.fingerprint),
+    localDataMigrationCandidate &&
+    hasCompletedCloudImport(user.uid, localDataMigrationCandidate.fingerprint),
   );
 
-  const handleCloudImport = useCallback(async (): Promise<CloudImportResult> => {
-    if (demoMode) {
-      return {
-        status: "skipped",
-        message: "Bản dùng thử đang lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản.",
-      };
-    }
-
-    if (!user?.uid) {
-      return {
-        status: "skipped",
-        message: "Bạn cần đăng nhập trước khi nhập dữ liệu tài khoản.",
-      };
-    }
-
-    if (!isApiBaseUrlConfigured()) {
-      return {
-        status: "skipped",
-        message: "Kết nối tài khoản chưa được cấu hình cho không gian làm việc này.",
-      };
-    }
-
-    if (!shouldEnable12WeekCloudImport()) {
-      return {
-        status: "skipped",
-        message: "Đồng bộ dữ liệu tài khoản chưa được bật.",
-      };
-    }
-
-    const importPayloads = getUserData()
-      .goals.map(createTwelveWeekImportPayload)
-      .filter((payload): payload is TwelveWeekImportPayload => Boolean(payload));
-    if (importPayloads.length === 0) {
-      return {
-        status: "skipped",
-        message: "Tài khoản trên trình duyệt này chưa có dữ liệu 12 tuần để đồng bộ.",
-      };
-    }
-
-    // Safe analytics: only counts, no raw text
-    trackAppEvent("cloud_import_started", undefined, {
-      goalCount: String(importPayloads.length),
-      source: "local_data_migration_prompt",
-    });
-
-    const importId = createCloudImportId();
-    const request: TwelveWeekImportRequest = {
-      importId,
-      idempotencyKey: `account_scope_cloud_import:${importId}`,
-      source: "account_scope_cloud_import",
-      workspace: {
-        goals: importPayloads,
-      },
-    };
-
-    try {
-      const response = await post12WeekImport(request);
-      const succeeded = response.status === "applied" || response.status === "duplicate";
-
-      if (succeeded && localDataMigrationCandidate) {
-        markCloudImportCompleted(user.uid, localDataMigrationCandidate.fingerprint);
+  const handleCloudImport =
+    useCallback(async (): Promise<CloudImportResult> => {
+      if (demoMode) {
+        return {
+          status: "skipped",
+          message:
+            "Bản dùng thử đang lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản.",
+        };
       }
 
-      // Safe analytics: only status, no raw text
-      trackAppEvent(succeeded ? "cloud_import_succeeded" : "cloud_import_partial", undefined, {
-        status: response.status,
-        importId,
+      if (!user?.uid) {
+        return {
+          status: "skipped",
+          message: "Bạn cần đăng nhập trước khi nhập dữ liệu tài khoản.",
+        };
+      }
+
+      if (!isApiBaseUrlConfigured()) {
+        return {
+          status: "skipped",
+          message:
+            "Kết nối tài khoản chưa được cấu hình cho không gian làm việc này.",
+        };
+      }
+
+      if (!shouldEnable12WeekCloudImport()) {
+        return {
+          status: "skipped",
+          message: "Đồng bộ dữ liệu tài khoản chưa được bật.",
+        };
+      }
+
+      const importPayloads = getUserData()
+        .goals.map(createTwelveWeekImportPayload)
+        .filter((payload): payload is TwelveWeekImportPayload =>
+          Boolean(payload),
+        );
+      if (importPayloads.length === 0) {
+        return {
+          status: "skipped",
+          message:
+            "Tài khoản trên trình duyệt này chưa có dữ liệu 12 tuần để đồng bộ.",
+        };
+      }
+
+      // Safe analytics: only counts, no raw text
+      trackAppEvent("cloud_import_started", undefined, {
+        goalCount: String(importPayloads.length),
+        source: "local_data_migration_prompt",
       });
 
-      return {
-        status: response.status,
-        message:
-          response.status === "applied"
-            ? "Dữ liệu đã được đồng bộ lên tài khoản thành công."
-            : response.status === "duplicate"
-              ? "Dữ liệu này đã được đồng bộ lên tài khoản trước đó."
-              : response.status === "partial"
-                ? "Đồng bộ dữ liệu thành công một phần. Một số mục có thể chưa được lưu."
-                : response.message || "Đồng bộ dữ liệu thất bại.",
-        response,
-      };
-    } catch (error) {
-      // Safe analytics: only error code, no raw text
-      trackAppEvent("cloud_import_failed", undefined, {
-        errorCode: isRecord(error) && typeof error.errorCode === "string" ? error.errorCode : "unknown",
+      const importId = createCloudImportId();
+      const request: TwelveWeekImportRequest = {
         importId,
-      });
-
-      return {
-        status: "error",
-        message:
-          isRecord(error) && typeof error.message === "string" && error.message.trim()
-            ? error.message
-            : "Không thể đồng bộ dữ liệu tài khoản lúc này. Dữ liệu trên thiết bị vẫn an toàn.",
+        idempotencyKey: `account_scope_cloud_import:${importId}`,
+        source: "account_scope_cloud_import",
+        workspace: {
+          goals: importPayloads,
+        },
       };
-    }
-  }, [demoMode, localDataMigrationCandidate, user?.uid]);
+
+      try {
+        const response = await post12WeekImport(request);
+        const succeeded =
+          response.status === "applied" || response.status === "duplicate";
+
+        if (succeeded && localDataMigrationCandidate) {
+          markCloudImportCompleted(
+            user.uid,
+            localDataMigrationCandidate.fingerprint,
+          );
+        }
+
+        // Safe analytics: only status, no raw text
+        trackAppEvent(
+          succeeded ? "cloud_import_succeeded" : "cloud_import_partial",
+          undefined,
+          {
+            status: response.status,
+            importId,
+          },
+        );
+
+        return {
+          status: response.status,
+          message:
+            response.status === "applied"
+              ? "Dữ liệu đã được đồng bộ lên tài khoản thành công."
+              : response.status === "duplicate"
+                ? "Dữ liệu này đã được đồng bộ lên tài khoản trước đó."
+                : response.status === "partial"
+                  ? "Đồng bộ dữ liệu thành công một phần. Một số mục có thể chưa được lưu."
+                  : response.message || "Đồng bộ dữ liệu thất bại.",
+          response,
+        };
+      } catch (error) {
+        // Safe analytics: only error code, no raw text
+        trackAppEvent("cloud_import_failed", undefined, {
+          errorCode:
+            isRecord(error) && typeof error.errorCode === "string"
+              ? error.errorCode
+              : "unknown",
+          importId,
+        });
+
+        return {
+          status: "error",
+          message:
+            isRecord(error) &&
+            typeof error.message === "string" &&
+            error.message.trim()
+              ? error.message
+              : "Không thể đồng bộ dữ liệu tài khoản lúc này. Dữ liệu trên thiết bị vẫn an toàn.",
+        };
+      }
+    }, [demoMode, localDataMigrationCandidate, user?.uid]);
 
   const handleExportBackup = useCallback(() => {
     try {
@@ -919,7 +1076,9 @@ export function RootLayout() {
   const localDataMigrationPrompt = (
     <LocalDataMigrationPrompt
       candidate={localDataMigrationCandidate}
-      open={Boolean(localDataMigrationCandidate && isLocalDataMigrationPromptOpen)}
+      open={Boolean(
+        localDataMigrationCandidate && isLocalDataMigrationPromptOpen,
+      )}
       onImport={handleImportLocalDataMigration}
       onValidateCloudImport={handleValidateCloudImport}
       onCloudImport={handleCloudImport}
@@ -933,7 +1092,11 @@ export function RootLayout() {
     />
   );
 
-  const pageTransitionContent = <MotionPageTransition pageKey={location.pathname}>{outlet}</MotionPageTransition>;
+  const pageTransitionContent = (
+    <MotionPageTransition pageKey={location.pathname}>
+      {outlet}
+    </MotionPageTransition>
+  );
 
   if (GUIDED_PATHS.has(location.pathname)) {
     return (
@@ -949,10 +1112,15 @@ export function RootLayout() {
             >
               <HardDrive className="mr-1 inline h-3 w-3 align-text-bottom" />
               Bản dùng thử đang lưu dữ liệu trên trình duyệt này. Có thể bấm{" "}
-              <span className="font-semibold">Tạm thoát</span> bất kỳ lúc nào để quay lại Trang chính.
+              <span className="font-semibold">Tạm thoát</span> bất kỳ lúc nào để
+              quay lại Trang chính.
             </div>
           ) : null}
-          <main id="main-content" className="relative z-10" aria-label="Nội dung trang">
+          <main
+            id="main-content"
+            className="relative z-10"
+            aria-label="Nội dung trang"
+          >
             {pageTransitionContent}
             {localDataMigrationPrompt}
             <Toaster />
@@ -1030,7 +1198,13 @@ export function RootLayout() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          aria-current={secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined}
+                          aria-current={
+                            secondaryNavItems.some((item) =>
+                              isActive(item.path),
+                            )
+                              ? "page"
+                              : undefined
+                          }
                           aria-expanded={desktopMoreOpen}
                           aria-haspopup="menu"
                           className={`h-8 shrink-0 rounded-[var(--r-pill)] px-3 text-[0.82rem] transition-colors transition-transform duration-150 active:scale-95 ${
@@ -1038,7 +1212,9 @@ export function RootLayout() {
                               ? "text-white hover:text-white"
                               : "bg-transparent text-slate-500 shadow-none hover:bg-white/90 hover:text-slate-700"
                           }`}
-                          style={isDesktopMoreNavActive ? activeNavStyle : undefined}
+                          style={
+                            isDesktopMoreNavActive ? activeNavStyle : undefined
+                          }
                           onClick={() => setDesktopMoreOpen((open) => !open)}
                         >
                           <Menu className="h-3.5 w-3.5" />
@@ -1068,7 +1244,9 @@ export function RootLayout() {
                                   type="button"
                                   role="menuitem"
                                   aria-current={active ? "page" : undefined}
-                                  onPointerEnter={() => handlePrefetch(item.path)}
+                                  onPointerEnter={() =>
+                                    handlePrefetch(item.path)
+                                  }
                                   onClick={() => {
                                     setDesktopMoreOpen(false);
                                     navigateAppRoute(item.path);
@@ -1080,8 +1258,12 @@ export function RootLayout() {
                                   }`}
                                   style={active ? activeNavStyle : undefined}
                                 >
-                                  <Icon className={`h-4 w-4 shrink-0 ${active ? "text-white" : "text-slate-500"}`} />
-                                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                                  <Icon
+                                    className={`h-4 w-4 shrink-0 ${active ? "text-white" : "text-slate-500"}`}
+                                  />
+                                  <span className="min-w-0 flex-1 truncate">
+                                    {item.label}
+                                  </span>
                                 </button>
                               );
                             })}
@@ -1117,11 +1299,21 @@ export function RootLayout() {
                 ) : null}
                 <button
                   type="button"
-                  onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                  onClick={() =>
+                    setTheme(resolvedTheme === "dark" ? "light" : "dark")
+                  }
                   className="flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-300 dark:hover:bg-white/12"
-                  aria-label={resolvedTheme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
+                  aria-label={
+                    resolvedTheme === "dark"
+                      ? "Chuyển sang chế độ sáng"
+                      : "Chuyển sang chế độ tối"
+                  }
                 >
-                  {resolvedTheme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+                  {resolvedTheme === "dark" ? (
+                    <Sun className="h-3.5 w-3.5" />
+                  ) : (
+                    <Moon className="h-3.5 w-3.5" />
+                  )}
                 </button>
               </div>
 
@@ -1132,8 +1324,12 @@ export function RootLayout() {
                 <button
                   type="button"
                   className="hidden size-11 items-center justify-center rounded-[var(--r-tile)] border border-white/72 bg-white/76 text-slate-700 transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300 sm:flex"
-                  onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                  aria-label={resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
+                  onClick={() =>
+                    setTheme(resolvedTheme === "dark" ? "light" : "dark")
+                  }
+                  aria-label={
+                    resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"
+                  }
                 >
                   {resolvedTheme === "dark" ? (
                     <Sun className="h-[1.1rem] w-[1.1rem]" />
@@ -1184,7 +1380,10 @@ export function RootLayout() {
           </div>
 
           {mobileMenuOpen && (
-            <div id="mobile-nav-menu" className="mx-auto mt-2 max-w-6xl md:hidden">
+            <div
+              id="mobile-nav-menu"
+              className="mx-auto mt-2 max-w-6xl md:hidden"
+            >
               <div className="glass-surface rounded-[var(--r-card)] p-3">
                 <nav className="space-y-1" aria-label="Menu điều hướng">
                   {user ? (
@@ -1194,8 +1393,12 @@ export function RootLayout() {
                           <User2 className="h-5 w-5" />
                         </span>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-slate-800">{accountLabel}</p>
-                          <p className="mt-1 text-xs font-medium text-slate-500">{accountStatus}</p>
+                          <p className="truncate text-sm font-semibold text-slate-800">
+                            {accountLabel}
+                          </p>
+                          <p className="mt-1 text-xs font-medium text-slate-500">
+                            {accountStatus}
+                          </p>
                         </div>
                         <button
                           type="button"
@@ -1215,7 +1418,9 @@ export function RootLayout() {
                           className="flex size-9 items-center justify-center rounded-[var(--r-tile)] border border-slate-200 bg-white text-slate-600 disabled:opacity-50"
                           aria-label="Kiểm tra lại hồ sơ tài khoản"
                         >
-                          <RefreshCw className={`h-4 w-4 ${userProfileLoading ? "animate-spin" : ""}`} />
+                          <RefreshCw
+                            className={`h-4 w-4 ${userProfileLoading ? "animate-spin" : ""}`}
+                          />
                         </button>
                         <button
                           type="button"
@@ -1231,7 +1436,9 @@ export function RootLayout() {
                         </button>
                       </div>
                       {userProfileError ? (
-                        <p className="mt-2 text-xs leading-5 text-red-600">{userProfileError}</p>
+                        <p className="mt-2 text-xs leading-5 text-red-600">
+                          {userProfileError}
+                        </p>
                       ) : null}
                     </div>
                   ) : null}
@@ -1285,7 +1492,9 @@ export function RootLayout() {
                         }}
                         onFocus={() => handlePrefetch(item.path)}
                         className={`flex w-full items-center gap-3 rounded-[var(--r-control)] px-4 py-3.5 text-left text-sm font-medium tracking-normal transition-transform duration-150 active:scale-[0.98] ${
-                          active ? "text-white" : "text-slate-600 hover:bg-white/80 hover:text-slate-900"
+                          active
+                            ? "text-white"
+                            : "text-slate-600 hover:bg-white/80 hover:text-slate-900"
                         }`}
                         style={active ? activeNavStyle : undefined}
                         aria-current={active ? "page" : undefined}
@@ -1303,20 +1512,30 @@ export function RootLayout() {
 
         <main
           className={`relative z-10 mx-auto max-w-6xl px-4 pb-12 pt-5 sm:px-6 sm:pt-7 lg:px-8 ${
-            isSignedOutVisitor ? "" : "main-content-mobile-pad"
+            isSignedOutVisitor || hasInternalBottomNav
+              ? ""
+              : "main-content-mobile-pad"
           }`}
           id="main-content"
           aria-label="Nội dung trang"
         >
           {/* Screen-reader route announcer */}
-          <div className="sr-only" aria-live="polite" aria-atomic="true" role="status">
+          <div
+            className="sr-only"
+            aria-live="polite"
+            aria-atomic="true"
+            role="status"
+          >
             {pageMeta.label}
           </div>
           {pageTransitionContent}
         </main>
 
         {user ? (
-          <div className="pointer-events-none relative z-0 h-32 overflow-hidden text-violet-500" aria-hidden="true">
+          <div
+            className="pointer-events-none relative z-0 h-32 overflow-hidden text-violet-500"
+            aria-hidden="true"
+          >
             <FooterAuroraIllustration className="pointer-events-none absolute inset-x-0 bottom-0 h-full w-full opacity-70 dark:opacity-40" />
           </div>
         ) : null}
@@ -1326,7 +1545,9 @@ export function RootLayout() {
             <div className="flex items-center justify-center gap-2 border-t border-slate-200/70 pt-4 md:justify-end">
               <span className="font-medium text-slate-500">v1.0</span>
               <span aria-hidden="true">·</span>
-              <span className="hidden max-w-[260px] truncate md:inline">{accountEmail || accountLabel}</span>
+              <span className="hidden max-w-[260px] truncate md:inline">
+                {accountEmail || accountLabel}
+              </span>
               <span className="hidden md:inline" aria-hidden="true">
                 ·
               </span>
@@ -1344,11 +1565,14 @@ export function RootLayout() {
           </footer>
         ) : null}
 
-        {!isSignedOutVisitor ? (
+        {!isSignedOutVisitor && !hasInternalBottomNav ? (
           <nav
             className="bottom-nav md:hidden"
             aria-label="Điều hướng chính"
-            style={{ animation: "bottom-nav-rise 0.38s cubic-bezier(0.22,1,0.36,1) both" }}
+            style={{
+              animation:
+                "bottom-nav-rise 0.38s cubic-bezier(0.22,1,0.36,1) both",
+            }}
           >
             <div className="bottom-nav-inner">
               {bottomNavItems.map((item) => {
@@ -1373,8 +1597,12 @@ export function RootLayout() {
                         strokeWidth={active ? 2.25 : 1.8}
                       />
                     </div>
-                    <span className={`bottom-nav-label ${active ? "nav-label-active" : "text-slate-400"}`}>
-                      {MOBILE_NAV_LABELS[item.path] ?? item.compactLabel ?? item.label}
+                    <span
+                      className={`bottom-nav-label ${active ? "nav-label-active" : "text-slate-400"}`}
+                    >
+                      {MOBILE_NAV_LABELS[item.path] ??
+                        item.compactLabel ??
+                        item.label}
                     </span>
                   </button>
                 );
@@ -1394,7 +1622,9 @@ export function RootLayout() {
                     strokeWidth={isMoreNavActive ? 2.25 : 1.8}
                   />
                 </div>
-                <span className={`bottom-nav-label ${isMoreNavActive ? "nav-label-active" : "text-slate-400"}`}>
+                <span
+                  className={`bottom-nav-label ${isMoreNavActive ? "nav-label-active" : "text-slate-400"}`}
+                >
                   Khác
                 </span>
               </button>
@@ -1403,7 +1633,11 @@ export function RootLayout() {
         ) : null}
 
         {demoMode || user ? <MotivationalReminder /> : null}
-        <NewUserGuideDialog open={isGuideOpen} onOpenChange={setIsGuideOpen} userData={guideUserData} />
+        <NewUserGuideDialog
+          open={isGuideOpen}
+          onOpenChange={setIsGuideOpen}
+          userData={guideUserData}
+        />
         {localDataMigrationPrompt}
         <Toaster />
       </div>
