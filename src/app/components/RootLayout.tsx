@@ -1321,22 +1321,7 @@ export function RootLayout() {
                 <span className="hidden max-w-[120px] truncate text-sm font-medium tracking-normal text-slate-700 dark:text-slate-200 sm:inline">
                   {pageMeta.label}
                 </span>
-                <button
-                  type="button"
-                  className="hidden size-11 items-center justify-center rounded-[var(--r-tile)] border border-white/72 bg-white/76 text-slate-700 transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300 sm:flex"
-                  onClick={() =>
-                    setTheme(resolvedTheme === "dark" ? "light" : "dark")
-                  }
-                  aria-label={
-                    resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"
-                  }
-                >
-                  {resolvedTheme === "dark" ? (
-                    <Sun className="h-[1.1rem] w-[1.1rem]" />
-                  ) : (
-                    <Moon className="h-[1.1rem] w-[1.1rem]" />
-                  )}
-                </button>
+                {/* Theme toggle moved into the mobile menu (see below) to declutter the header on small screens. */}
                 {isSignedOutVisitor ? (
                   <Button
                     variant="secondary"
@@ -1477,6 +1462,24 @@ export function RootLayout() {
                   >
                     <Compass className="h-5 w-5" />
                     <span>Hướng dẫn sử dụng</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setTheme(resolvedTheme === "dark" ? "light" : "dark")
+                    }
+                    className="mb-2 flex w-full items-center gap-3 rounded-[var(--r-control)] border border-white/72 bg-white/82 px-4 py-3 text-left text-sm font-medium tracking-normal text-slate-700"
+                  >
+                    {resolvedTheme === "dark" ? (
+                      <Sun className="h-5 w-5" />
+                    ) : (
+                      <Moon className="h-5 w-5" />
+                    )}
+                    <span>
+                      {resolvedTheme === "dark"
+                        ? "Chuyển sang chế độ sáng"
+                        : "Chuyển sang chế độ tối"}
+                    </span>
                   </button>
                   {mobileMenuNavItems.map((item) => {
                     const Icon = item.icon;
