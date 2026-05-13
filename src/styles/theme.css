@@ -2321,10 +2321,11 @@
   }
 
   .bottom-nav-label {
-    font-size: 0.68rem;
+    /* Bumped from 0.68rem to 0.75rem (12px) to meet readability baseline. */
+    font-size: 0.75rem;
     font-weight: 500;
     letter-spacing: 0;
-    line-height: 1;
+    line-height: 1.05;
     max-width: 100%;
     min-width: 0;
     overflow: hidden;
