@@ -1,0 +1,17 @@
+commit_msg=$(cat "$1")
+pattern='^(feat|fix|chore|test|refactor|docs|ci|perf|style|build|revert)(\([a-z0-9-]+\))?!?: .{1,100}'
+
+if ! printf '%s' "$commit_msg" | grep -qE "$pattern"; then
+  if printf '%s' "$commit_msg" | grep -qE '^(Merge|Revert)'; then
+    exit 0
+  fi
+  echo ""
+  echo "✘ Commit message không đúng Conventional Commits format."
+  echo ""
+  echo "Format: <type>(<scope>): <description>"
+  echo "Type:   feat | fix | chore | test | refactor | docs | ci | perf | style | build | revert"
+  echo "Ví dụ:  feat(weekly-review): add summary card"
+  echo "        fix(mobile): hide nav on 12-week page"
+  echo ""
+  exit 1
+fi
