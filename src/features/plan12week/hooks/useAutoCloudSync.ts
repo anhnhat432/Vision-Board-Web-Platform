@@ -323,20 +323,6 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     refreshPendingCount,
   ]);
 
-  const autoResolveKeepLocalConflicts = useCallback(
-    async (result: TwelveWeekManualCloudSyncResult) => {
-      if (!isBlockingResult(result) || !ownerUid) return;
-
-      const changed = markConflictMutationsForLocalResolution(ownerUid, result);
-      refreshPendingCount();
-      if (!changed) return;
-
-      lastDrainStartedAtRef.current = null;
-      await drainPendingMutations({ allowDuringFullSync: true, bypassRateLimit: true });
-    },
-    [drainPendingMutations, ownerUid, refreshPendingCount],
-  );
-
   const triggerSyncNow = useCallback(async () => {
     if (fullSyncEnabled && ownerUid && userProfileReady && !networkStatusInfo.isOnline) {
       const result: TwelveWeekManualCloudSyncResult = {
@@ -384,8 +370,6 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
           });
         }
 
-        await autoResolveKeepLocalConflicts(result);
-
         return result;
       })
       .finally(() => {
@@ -398,7 +382,6 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
   }, [
     fullSyncBaseReady,
     fullSyncEnabled,
-    autoResolveKeepLocalConflicts,
     minSyncIntervalMs,
     networkStatusInfo.isOnline,
     ownerUid,
@@ -412,6 +395,7 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
   const triggerDrainOnly = useCallback(() => drainPendingMutations(), [drainPendingMutations]);
 
   const effectiveLastResult = manualSyncLastResult ?? lastResult;
+  const conflictPending = isBlockingResult(effectiveLastResult);
 
   const resolveConflictKeepLocal = useCallback(async () => {
     if (!ownerUid) return;
@@ -541,7 +525,7 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
       lastSyncedAt,
       pendingCount,
       online: networkStatusInfo.isOnline,
-      conflictPending: false,
+      conflictPending,
       firstLoginRestoreSummary,
       triggerSyncNow,
       triggerDrainOnly,
@@ -551,6 +535,7 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     }),
     [
       clearFirstLoginRestoreSummary,
+      conflictPending,
       effectiveLastResult,
       autoLoading,
       drainLoading,

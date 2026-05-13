@@ -230,7 +230,7 @@ describe("two-device 12-week auto-sync integration", () => {
     expect(mounted.getLatestState()?.firstLoginRestoreSummary).toBeNull();
   });
 
-  it("auto-resolves concurrent edits by keeping the current device usable", async () => {
+  it("surfaces concurrent edits instead of auto-overwriting either side", async () => {
     const backend = createMockBackend();
     configureBackend(backend);
 
@@ -261,13 +261,9 @@ describe("two-device 12-week auto-sync integration", () => {
     await waitFor(() => {
       expect(keepLocalMount.getLatestState()?.lastResult?.status).toBe("conflict");
     });
-    expect(keepLocalMount.getLatestState()?.conflictPending).toBe(false);
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(backend.getSnapshot().goals[0]?.title).toBe("B");
-    });
-    expect(getAppliedMutationKinds(device2)).toContain("plan_snapshot_updated");
+    expect(keepLocalMount.getLatestState()?.conflictPending).toBe(true);
+    expect(backend.getSnapshot().goals[0]?.title).toBe("C");
+    expect(getAppliedMutationKinds(device2)).not.toContain("plan_snapshot_updated");
     keepLocalMount.unmount();
   });
 

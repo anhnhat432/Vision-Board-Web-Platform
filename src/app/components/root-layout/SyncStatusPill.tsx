@@ -6,7 +6,7 @@ import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSy
 
 export const AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME = "visionboard:auto-cloud-conflict-dialog-open";
 
-type SyncPillState = "syncing" | "offline" | "pending" | "ok" | "idle";
+type SyncPillState = "conflict" | "syncing" | "offline" | "pending" | "ok" | "idle";
 
 interface SyncStatusPillProps {
   compact?: boolean;
@@ -32,7 +32,9 @@ function getSyncState(input: {
   online: boolean;
   pendingCount: number;
   lastSyncedAt: string | null;
+  conflictPending: boolean;
 }): SyncPillState {
+  if (input.conflictPending) return "conflict";
   if (input.syncing) return "syncing";
   if (!input.online) return "offline";
   if (input.pendingCount > 0) return "pending";
@@ -41,15 +43,17 @@ function getSyncState(input: {
 }
 
 function getPendingCopy(count: number): string {
-  return `${count} mutation chờ gửi`;
+  return count > 0 ? `${count} thay đổi đã lưu trên thiết bị, chờ gửi lên tài khoản` : "không có thay đổi chờ gửi";
 }
 
 function getTooltip(state: SyncPillState, relativeTime: string | null, pendingCount: number): string {
-  if (state === "syncing") return `Đang kiểm tra cập nhật, ${getPendingCopy(pendingCount)}.`;
-  if (state === "offline") return `Đang đợi mạng, ${getPendingCopy(pendingCount)}.`;
+  if (state === "conflict") return "Dữ liệu trên thiết bị và tài khoản đang khác nhau. Bấm để chọn phiên bản an toàn.";
+  if (state === "syncing") return `Đã lưu trên thiết bị. Đang đồng bộ lên tài khoản; ${getPendingCopy(pendingCount)}.`;
+  if (state === "offline") return `Đã lưu trên thiết bị. Sẽ đồng bộ tài khoản khi có mạng; ${getPendingCopy(pendingCount)}.`;
+  if (state === "pending") return `Đã lưu trên thiết bị. ${getPendingCopy(pendingCount)}.`;
 
-  const timeCopy = relativeTime ? `Cập nhật ${relativeTime}` : "Chưa có lần cập nhật";
-  return `${timeCopy}, ${getPendingCopy(pendingCount)}.`;
+  const timeCopy = relativeTime ? `Đã đồng bộ tài khoản ${relativeTime}` : "Chưa có lần đồng bộ tài khoản";
+  return `${timeCopy}; ${getPendingCopy(pendingCount)}.`;
 }
 
 export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
@@ -61,6 +65,7 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
     online: syncState.online,
     pendingCount: syncState.pendingCount,
     lastSyncedAt: syncState.lastSyncedAt,
+    conflictPending: syncState.conflictPending,
   });
   const tooltip = getTooltip(state, relativeTime, syncState.pendingCount);
   const baseClass =
@@ -68,28 +73,34 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
   const sizeClass = compact ? "mt-1" : "mt-2";
 
   const config = {
+    conflict: {
+      dot: <SyncIdleDot className="h-4 w-4" />,
+      icon: <Upload className="h-3 w-3" />,
+      label: "Cần xử lý đồng bộ",
+      tone: "border-amber-300 bg-amber-100 text-amber-800",
+    },
     syncing: {
       dot: <SyncSyncingDot className="h-4 w-4" />,
       icon: <Loader2 className="h-3 w-3 animate-spin" />,
-      label: "Đang đồng bộ",
+      label: "Đang đồng bộ tài khoản",
       tone: "border-sky-200 bg-sky-50 text-sky-700",
     },
     offline: {
       dot: <SyncIdleDot className="h-4 w-4" />,
       icon: <WifiOff className="h-3 w-3" />,
-      label: "Đợi mạng",
+      label: "Đã lưu trên thiết bị",
       tone: "border-slate-200 bg-slate-100 text-slate-600",
     },
     pending: {
       dot: <SyncSyncingDot className="h-4 w-4" />,
       icon: <Upload className="h-3 w-3" />,
-      label: `${syncState.pendingCount} chờ gửi`,
+      label: `${syncState.pendingCount} chờ đồng bộ`,
       tone: "border-amber-200 bg-amber-50 text-amber-700",
     },
     ok: {
       dot: <SyncOkDot className="h-4 w-4" />,
       icon: <CheckCircle2 className="h-3 w-3" />,
-      label: `Đồng bộ ${relativeTime ?? "vừa xong"}`,
+      label: `Đã đồng bộ tài khoản ${relativeTime ?? "vừa xong"}`,
       tone: "border-emerald-200 bg-emerald-50 text-emerald-700",
     },
     idle: {
@@ -100,12 +111,19 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
     },
   } satisfies Record<SyncPillState, { dot: ReactNode; icon: ReactNode; label: string; tone: string }>;
 
+  const interactive = state === "conflict";
+  const handleClick = () => {
+    if (!interactive) return;
+    window.dispatchEvent(new CustomEvent(AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME));
+  };
+
   return (
     <button
       type="button"
-      className={`${baseClass} ${sizeClass} ${config[state].tone} cursor-default`}
+      className={`${baseClass} ${sizeClass} ${config[state].tone} ${interactive ? "cursor-pointer" : "cursor-default"}`}
       title={tooltip}
       aria-label={config[state].label}
+      onClick={handleClick}
     >
       {config[state].dot}
       {config[state].icon}

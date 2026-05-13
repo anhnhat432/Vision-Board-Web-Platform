@@ -617,7 +617,7 @@ describe("useAutoCloudSync", () => {
     expect(result.current.firstLoginRestoreSummary).toBeNull();
   });
 
-  it("keeps cloud conflicts non-blocking for the app shell", async () => {
+  it("surfaces cloud conflicts for explicit user resolution", async () => {
     setSignedIn("firebase_uid_conflict");
     manualSyncMock.syncNow.mockResolvedValue(conflictResult);
 
@@ -626,10 +626,10 @@ describe("useAutoCloudSync", () => {
     await waitFor(() => {
       expect(result.current.lastResult?.status).toBe("conflict");
     });
-    expect(result.current.conflictPending).toBe(false);
+    expect(result.current.conflictPending).toBe(true);
   });
 
-  it("auto-keeps local changes by re-queueing conflict mutations and draining them", async () => {
+  it("keeps conflict mutations blocked until the user chooses keep local", async () => {
     queueMock.pendingCount = 1;
     queueMock.store = {
       version: 1,
@@ -670,23 +670,13 @@ describe("useAutoCloudSync", () => {
     const { result } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 30_000 }));
 
     await waitFor(() => {
-      expect(mutationSenderMock.sendPending12WeekMutations).toHaveBeenCalledTimes(1);
+      expect(result.current.lastResult?.status).toBe("conflict");
     });
 
-    expect(result.current.lastResult?.status).toBe("conflict");
-    expect(result.current.conflictPending).toBe(false);
-    expect(queueMock.writeMutationQueueStore).toHaveBeenCalled();
-    expect(queueMock.store.items[0]?.status).toBe("pending");
-    expect(queueMock.store.items[0]?.error).toBeUndefined();
-    expect(mutationSenderMock.sendPending12WeekMutations).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ownerUid: "firebase_uid_auto_keep",
-        authenticated: true,
-        realMode: true,
-        apiConfigured: true,
-        online: true,
-      }),
-    );
+    expect(result.current.conflictPending).toBe(true);
+    expect(queueMock.writeMutationQueueStore).not.toHaveBeenCalled();
+    expect(queueMock.store.items[0]?.status).toBe("blocked_conflict");
+    expect(mutationSenderMock.sendPending12WeekMutations).not.toHaveBeenCalled();
   });
 
   it("resolves keep-local conflicts by re-queueing conflict mutations and draining them", async () => {

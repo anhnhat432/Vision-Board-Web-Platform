@@ -6,6 +6,8 @@ import {
   Compass,
   Crown,
   Flame,
+  HardDrive,
+  LogIn,
   Plus,
   Sparkles,
   Target,
@@ -503,6 +505,12 @@ function DashboardContent({
   const demoMode = isDemoMode();
   const isSignedOut = !user;
   const shouldRequireAuthForSignedOut = isSignedOut && !demoMode;
+  const hasLocalWorkspaceData =
+    userData.goals.length > 0 ||
+    userData.currentWheelOfLife.some((area) => area.score > 0) ||
+    userData.reflections.length > 0 ||
+    userData.visionBoards.length > 0;
+  const hasSignedOutRealLocalData = !demoMode && isSignedOut && hasLocalWorkspaceData;
   const isFreshDemoVisitor = demoMode && isSignedOut && userData.goals.length === 0;
   const visibleGoals = isSignedOut ? [] : userData.goals;
   const visibleWheelOfLife = isSignedOut ? [] : userData.currentWheelOfLife;
@@ -661,6 +669,33 @@ function DashboardContent({
             onSignIn={() => handleAuthNavigate("signin")}
             onSignUp={() => handleAuthNavigate("signup")}
           />
+          {hasSignedOutRealLocalData ? (
+            <Card className="border-amber-200 bg-amber-50/90 shadow-sm">
+              <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 gap-3">
+                  <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-amber-100 text-amber-700">
+                    <HardDrive className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-amber-950">Có dữ liệu đã lưu trên thiết bị này</p>
+                    <p className="mt-1 text-sm leading-6 text-amber-800">
+                      Đăng nhập để kiểm tra, sao lưu và nhập dữ liệu này vào tài khoản. Chúng tôi không ghi đè dữ liệu
+                      tài khoản nếu chưa có xác nhận của bạn.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+                  <Button size="sm" onClick={() => handleAuthNavigate("signin")}>
+                    <LogIn className="h-4 w-4" />
+                    Đăng nhập để khôi phục
+                  </Button>
+                  <Button size="sm" variant="outline" className="border-amber-200 bg-white" onClick={() => handleAuthNavigate("signup")}>
+                    Tạo tài khoản mới
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
           <div className="flex justify-end">
             <FeedbackDialog
               source="dashboard"
