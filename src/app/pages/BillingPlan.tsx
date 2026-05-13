@@ -430,7 +430,7 @@ export function BillingPlan() {
         description={
           demoMode
             ? "Bạn có thể xem trước quyền Plus mà không thanh toán. Khi mở thanh toán thật, giao dịch sẽ được xác nhận qua trang thanh toán."
-            : "Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản của bạn."
+            : "Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản của bạn. Quyền Plus chỉ mở sau khi hệ thống xác nhận giao dịch."
         }
         className="flow-surface surface-aurora ring-soft-glow featured-surface glow-vivid page-enter relative overflow-hidden text-white"
         titleClassName="max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
@@ -521,6 +521,25 @@ export function BillingPlan() {
         </Card>
       )}
 
+      {!demoMode ? (
+        <Card className="border-slate-200 bg-slate-50/90">
+          <CardContent className="grid gap-3 p-4 sm:grid-cols-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Thanh toán thật</p>
+              <p className="mt-1 text-sm leading-6 text-slate-700">Quyền Plus chỉ mở khi giao dịch được xác nhận từ hệ thống thanh toán.</p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Dữ liệu tài khoản</p>
+              <p className="mt-1 text-sm leading-6 text-slate-700">Quyền gói, chu kỳ 12 tuần và lịch sử thanh toán gắn với tài khoản của bạn.</p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Hỗ trợ thủ công</p>
+              <p className="mt-1 text-sm leading-6 text-slate-700">Nếu đã trả tiền nhưng quyền chưa mở, dùng mã đơn ở dưới để yêu cầu kiểm tra nhanh.</p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
       {/* Current plan */}
       <SectionBlock title="Khu vực gói đang dùng" headerVisuallyHidden>
         <PrimaryActionCard
@@ -538,7 +557,7 @@ export function BillingPlan() {
                 : "Bạn đang dùng gói miễn phí."
               : demoMode
                 ? `Bạn đang dùng ${currentPlanName} trên trình duyệt này.`
-                : `Bạn đang dùng ${currentPlanName} trên tài khoản này.`
+                : `Bạn đang dùng ${currentPlanName} trên tài khoản này và có thể tiếp tục trên thiết bị khác sau khi đăng nhập.`
           }
           action={
             currentPlanCode === "FREE" ? (

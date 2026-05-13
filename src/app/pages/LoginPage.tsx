@@ -33,7 +33,7 @@ const TRUST_FEATURES = [
 
 const WORKSPACE_PROMISES = [
   "Lưu tiến độ và tiếp tục trên thiết bị khác.",
-  "Đồng bộ kế hoạch 12 tuần khi tài khoản sẵn sàng.",
+  "Đồng bộ kế hoạch 12 tuần vào cùng tài khoản.",
   "Quản lý quyền Plus và thanh toán trong cùng tài khoản.",
 ];
 
@@ -281,7 +281,7 @@ export function LoginPage() {
             {mode === "signin" ? "Chào mừng quay lại" : "Bắt đầu hành trình"}
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            {mode === "signin" ? "Đăng nhập để tiếp tục hành trình." : "Tạo tài khoản để bắt đầu."}
+            {mode === "signin" ? "Đăng nhập để mở lại không gian làm việc và quyền tài khoản." : "Tạo tài khoản để lưu, đồng bộ và bắt đầu an toàn."}
           </p>
           <div className="mt-4 flex flex-wrap justify-center gap-2 lg:hidden">
             {TRUST_FEATURES.map(({ icon: Icon, label }) => (

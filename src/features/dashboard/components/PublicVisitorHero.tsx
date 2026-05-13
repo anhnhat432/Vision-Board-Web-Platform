@@ -20,7 +20,7 @@ const FLOW_STEPS = [
 export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: PublicVisitorHeroProps) {
   const heroDescription = isDemo
     ? "Dùng thử ngay không cần đăng nhập. Chấm cân bằng cuộc sống, chốt mục tiêu SMART, kiểm tra khả thi rồi vào kế hoạch 12 tuần có việc cho từng ngày."
-    : "Đăng ký hoặc đăng nhập để lưu không gian làm việc, đồng bộ kế hoạch và tiếp tục luồng 12 tuần trên thiết bị khác.";
+    : "Tạo tài khoản hoặc đăng nhập để lưu không gian làm việc, đồng bộ kế hoạch 12 tuần và tiếp tục an toàn trên thiết bị khác.";
   const heroStats = isDemo
     ? [
         ["1 không gian làm việc", "lưu theo trình duyệt"],
@@ -64,11 +64,11 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
                 <>
                   <Button className="w-full sm:w-auto" onClick={onSignUp}>
                     <UserPlus className="h-4 w-4" />
-                    Đăng ký miễn phí để lưu
+                    Tạo tài khoản để lưu và đồng bộ
                   </Button>
                   <Button variant="outline" className="border-slate-200 bg-white text-slate-900" onClick={onSignIn}>
                     <LogIn className="h-4 w-4" />
-                    Tôi đã có tài khoản
+                    Đăng nhập vào tài khoản
                   </Button>
                 </>
               )}

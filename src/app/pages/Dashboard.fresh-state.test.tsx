@@ -144,7 +144,7 @@ describe("Dashboard fresh workspace states", () => {
     expect(screen.queryByText("Private stale goal must stay hidden")).not.toBeInTheDocument();
     expect(screen.getByText("Có dữ liệu đã lưu trên thiết bị này")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Đăng nhập để khôi phục/i })).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: /Đăng ký miễn phí để lưu/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: /Tạo tài khoản để lưu và đồng bộ/i }).length).toBeGreaterThan(0);
     expect(screen.queryByText("Một luồng chính, không phải ba lựa chọn ngang nhau.")).not.toBeInTheDocument();
     expect(container.querySelector('[data-tour-id="dashboard-plan-card"]')).not.toBeInTheDocument();
     expect(container.querySelector('[data-tour-id="dashboard-next-card"]')).not.toBeInTheDocument();

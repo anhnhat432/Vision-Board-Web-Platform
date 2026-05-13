@@ -403,7 +403,11 @@ export function LifeInsight() {
               Hệ thống gợi ý <strong>{getLifeAreaLabel(lowestArea.name)}</strong> vì đây là điểm thấp nhất. Nếu lúc này
               bạn muốn ưu tiên khu vực khác, chọn lại bên dưới.
             </p>
-            <div className="mt-[var(--space-stack)] grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            <div
+              className="mt-[var(--space-stack)] grid gap-2 sm:grid-cols-2 lg:grid-cols-4"
+              role="radiogroup"
+              aria-label="Chọn lĩnh vực trọng tâm"
+            >
               {lifeAreas.map((area) => {
                 const isSelected = focusArea.name === area.name;
                 const isRecommended = area.name === lowestArea.name;
@@ -412,6 +416,9 @@ export function LifeInsight() {
                   <button
                     key={area.name}
                     type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    aria-label={`${getLifeAreaLabel(area.name)} ${area.score}/10${isRecommended ? ", gợi ý" : ""}`}
                     onClick={() => setSelectedAreaName(area.name === lowestArea.name ? null : area.name)}
                     className={`card-hover-lift glass-surface-sm relative overflow-hidden rounded-[var(--r-tile)] border border-l-4 p-4 text-left transition-colors transition-transform duration-150 ${
                       isSelected

@@ -96,7 +96,7 @@ describe("LoginPage", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("Tạo tài khoản để bắt đầu.")).toBeInTheDocument();
+    expect(screen.getByText("Tạo tài khoản để lưu, đồng bộ và bắt đầu an toàn.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Tạo tài khoản" })).toBeInTheDocument();
   });
 
