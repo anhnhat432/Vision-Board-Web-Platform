@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { BarChart3, CalendarDays, ListTodo, Settings2, MoreHorizontal, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -235,6 +235,7 @@ function buildCycleReviewContent(input: {
 
 export function TwelveWeekSystem() {
   const navigate = useNavigate();
+  const tabPanelId = useId();
   const { authLoading, isConfigured: isAuthConfigured, user, userProfile } = useAuthContext();
   const {
     isReady,
@@ -577,6 +578,7 @@ export function TwelveWeekSystem() {
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
+    navigate(`/12-week-system?tab=${value}`, { replace: true });
 
     if (!activeGoal || !system) return;
 
@@ -992,30 +994,33 @@ export function TwelveWeekSystem() {
         <div className="flex max-w-full items-center justify-between gap-3 rounded-[var(--r-card)] border border-white/70 bg-white/88 p-2 shadow-lg shadow-slate-900/5 backdrop-blur dark:border-slate-700/70 dark:bg-slate-950/86">
           <div
             role="tablist"
-          aria-label="Điều hướng hệ 12 tuần"
+            aria-label="Điều hướng hệ 12 tuần"
             className="inline-flex max-w-full items-center gap-1 rounded-[var(--r-pill)] bg-slate-100/90 p-1 dark:bg-slate-900"
-        >
-          {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => {
-            const selected = activeTab === value;
+          >
+            {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => {
+              const selected = activeTab === value;
+              const tabId = `${tabPanelId}-${value}-tab`;
 
-            return (
-              <button
-                key={value}
-                type="button"
-                role="tab"
-                aria-selected={selected}
-                aria-label={`Mở tab ${label}`}
-                className={`inline-flex h-10 items-center justify-center gap-2 rounded-[var(--r-pill)] px-4 text-sm font-semibold transition-colors ${
-                  selected
-                    ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20"
-                    : "text-slate-600 hover:bg-white hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-                }`}
-                onClick={() => handleTabChange(value)}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{label}</span>
-              </button>
-            );
+              return (
+                <button
+                  key={value}
+                  id={tabId}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  aria-controls={tabPanelId}
+                  aria-label={`Mở tab ${label}`}
+                  className={`inline-flex h-10 items-center justify-center gap-2 rounded-[var(--r-pill)] px-4 text-sm font-semibold transition-colors ${
+                    selected
+                      ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20"
+                      : "text-slate-600 hover:bg-white hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+                  }`}
+                  onClick={() => handleTabChange(value)}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{label}</span>
+                </button>
+              );
             })}
           </div>
 
@@ -1034,7 +1039,7 @@ export function TwelveWeekSystem() {
       </nav>
 
       {/* Main content sections */}
-      <div ref={tabsTopRef} className="pt-4">
+      <div ref={tabsTopRef} className="pt-4" role="tabpanel" id={tabPanelId} aria-labelledby={`${tabPanelId}-${activeTab}-tab`}>
         {isCycleReviewMode && activeTab !== "settings" && (
           <CycleReviewPanel
             goal={activeGoal}
@@ -1346,7 +1351,7 @@ export function TwelveWeekSystem() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigate("/12-week-system/settings")}>
+              <DropdownMenuItem onClick={() => handleTabChange("settings")}>
                 <Settings2 className="mr-2 h-4 w-4" />
                 Cài đặt chu kỳ
               </DropdownMenuItem>

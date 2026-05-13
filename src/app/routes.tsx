@@ -44,6 +44,10 @@ function RedirectToTwelveWeekSystem() {
   return <Navigate to="/12-week-system" replace />;
 }
 
+function RedirectToTwelveWeekSystemSettings() {
+  return <Navigate to="/12-week-system?tab=settings" replace />;
+}
+
 function RedirectToBillingPlan() {
   return <Navigate to="/billing/plan" replace />;
 }
@@ -126,7 +130,7 @@ export const router = createBrowserRouter([
           },
           {
             path: "settings",
-            ...lazyRoute(() => import("../features/plan12week/pages/12WeekSystemSettings"), "TwelveWeekSystemSettings"),
+            Component: RedirectToTwelveWeekSystemSettings,
           },
         ],
       },
