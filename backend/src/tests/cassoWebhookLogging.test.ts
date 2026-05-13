@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { afterEach, describe, it, mock } from "node:test";
 import type { Request, Response } from "express";
 
-import { handleCassoWebhook } from "../controllers/cassoWebhookController";
+import { getCassoWebhookHealth, handleCassoWebhook } from "../controllers/cassoWebhookController";
 import * as backendMonitoring from "../monitoring/sentry";
 import { PaymentOrderModel, type PaymentOrderStatus } from "../models/PaymentOrderModel";
 import { UserModel } from "../models/UserModel";
@@ -10,6 +10,8 @@ import { UserModel } from "../models/UserModel";
 interface MockResponse {
   statusCode: number;
   body: unknown;
+  headers: Record<string, string>;
+  setHeader(name: string, value: string): MockResponse;
   status(code: number): MockResponse;
   json(body: unknown): MockResponse;
 }
@@ -38,6 +40,11 @@ function createResponse(): MockResponse {
   return {
     statusCode: 200,
     body: undefined,
+    headers: {},
+    setHeader(name: string, value: string) {
+      this.headers[name.toLowerCase()] = value;
+      return this;
+    },
     status(code: number) {
       this.statusCode = code;
       return this;
@@ -115,6 +122,23 @@ afterEach(() => {
 });
 
 describe("Casso webhook security logging", () => {
+  it("keeps webhook health responses generic and uncached", async () => {
+    process.env.CASSO_WEBHOOK_SECRET = "expected-secret";
+    const response = createResponse();
+
+    await getCassoWebhookHealth(createRequest({}), response as unknown as Response);
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.headers["cache-control"], "no-store, max-age=0");
+    assert.deepEqual(response.body, {
+      success: true,
+      data: {
+        provider: "casso",
+        status: "ok",
+      },
+    });
+  });
+
   it("captures signature mismatches with sanitized context", async () => {
     process.env.CASSO_WEBHOOK_SECRET = "expected-secret";
     const capture = mock.method(backendMonitoring, "captureBackendException", () => undefined);

@@ -51,6 +51,25 @@ function serializeOrder(order: {
   };
 }
 
+function serializePublicOrder(order: Parameters<typeof serializeOrder>[0]) {
+  return {
+    orderId: order.orderId,
+    status: order.status,
+    amount: order.amount,
+    currency: order.currency,
+    bankAccount: order.bankAccount,
+    bankName: order.bankName,
+    accountName: order.accountName,
+    qrDataUrl: order.qrDataUrl,
+    expiresAt: toIsoString(order.expiresAt),
+  };
+}
+
+function setNoStore(res: Response): void {
+  res.setHeader("Cache-Control", "no-store, max-age=0");
+  res.setHeader("Pragma", "no-cache");
+}
+
 async function expirePendingOrderIfNeeded(order: { status: string; expiresAt?: Date | null; save: () => Promise<unknown> }) {
   if (order.status === "pending" && order.expiresAt && new Date() > order.expiresAt) {
     order.status = "expired";
@@ -80,6 +99,7 @@ export async function getOrderStatus(req: Request, res: Response): Promise<void>
 
   await expirePendingOrderIfNeeded(order);
 
+  setNoStore(res);
   res.status(200).json(successResponse(serializeOrder(order)));
 }
 
@@ -103,14 +123,12 @@ export async function getPublicOrderStatus(req: Request, res: Response): Promise
 
   await expirePendingOrderIfNeeded(order);
 
-  res.status(200).json(successResponse(serializeOrder(order)));
+  setNoStore(res);
+  res.status(200).json(successResponse(serializePublicOrder(order)));
 }
 
 /**
  * GET /api/billing/payment-history
- *
- * Returns recent payment orders for the authenticated user.
- * Sensitive bank and provider transaction details are intentionally omitted.
  */
 export async function getPaymentHistory(req: Request, res: Response): Promise<void> {
   const user = requireAuthUser(req);

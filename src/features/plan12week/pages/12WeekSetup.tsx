@@ -118,6 +118,93 @@ function isFeasibilityResultStale(savedAt: string | undefined, now = new Date())
   return now.getTime() - savedAtDate.getTime() > FEASIBILITY_RESULT_MAX_AGE_MS;
 }
 
+type TwelveWeekSetupPrerequisites =
+  | {
+      status: "gate";
+      gate: TwelveWeekSetupGate;
+      aspirationalVision: AspirationalVisionModel | null;
+      clearPendingFeasibility?: boolean;
+    }
+  | {
+      status: "ready";
+      aspirationalVision: AspirationalVisionModel | null;
+      selectedFocusArea: string;
+      parsedSmartGoal: PendingSMARTGoal;
+      normalizedSmartGoal: ReturnType<typeof parseSmartGoal>;
+      parsedFeasibility: PendingFeasibilityResult;
+      savedDraft: string | null;
+      feasibilityDefaults: ReturnType<typeof getFeasibilityDraftDefaults>;
+      setupPlan: PricingPlanCode;
+      smartGoalMetricName: string;
+      smartGoalMetricUnit: string;
+      staleFeasibility: boolean;
+    };
+
+function readTwelveWeekSetupPrerequisites(): TwelveWeekSetupPrerequisites {
+  const data = getUserData();
+  const aspirationalVision = data.aspirationalVision ?? null;
+
+  if (!hasRealLifeBalance(data)) {
+    return { status: "gate", gate: "needs_life_balance", aspirationalVision };
+  }
+
+  const selectedFocusArea = localStorage.getItem(APP_STORAGE_KEYS.selectedFocusArea);
+  const pendingSmartGoal = localStorage.getItem(APP_STORAGE_KEYS.pendingSmartGoal);
+  const pendingFeasibilityResult = localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
+
+  if (!selectedFocusArea) return { status: "gate", gate: "needs_life_insight", aspirationalVision };
+  if (!pendingSmartGoal) return { status: "gate", gate: "needs_smart_goal", aspirationalVision };
+  if (!pendingFeasibilityResult) return { status: "gate", gate: "needs_feasibility", aspirationalVision };
+
+  let parsedSmartGoalValue: unknown;
+  try {
+    parsedSmartGoalValue = JSON.parse(pendingSmartGoal);
+  } catch {
+    return { status: "gate", gate: "needs_smart_goal", aspirationalVision };
+  }
+
+  const normalizedSmartGoal = parseSmartGoal(parsedSmartGoalValue, selectedFocusArea);
+  if (normalizedSmartGoal) {
+    localStorage.setItem(APP_STORAGE_KEYS.pendingSmartGoal, JSON.stringify(normalizedSmartGoal));
+  }
+
+  const parsedSmartGoal = parsePendingSMARTGoal(normalizedSmartGoal ?? parsedSmartGoalValue, selectedFocusArea);
+  if (!parsedSmartGoal) return { status: "gate", gate: "needs_smart_goal", aspirationalVision };
+
+  let parsedFeasibility: unknown;
+  try {
+    parsedFeasibility = JSON.parse(pendingFeasibilityResult);
+  } catch (error) {
+    console.warn("Pending feasibility result could not be parsed.", error);
+    return { status: "gate", gate: "needs_feasibility", aspirationalVision, clearPendingFeasibility: true };
+  }
+
+  if (!isPendingFeasibilityResult(parsedFeasibility)) {
+    return { status: "gate", gate: "needs_feasibility", aspirationalVision };
+  }
+
+  if (!getScoredLifeArea(data, selectedFocusArea)) {
+    return { status: "gate", gate: "needs_life_insight", aspirationalVision };
+  }
+
+  const feasibilityDefaults = getFeasibilityDraftDefaults(parsedFeasibility);
+  const setupPlan = getCurrentPlan();
+  return {
+    status: "ready",
+    aspirationalVision,
+    selectedFocusArea,
+    parsedSmartGoal,
+    normalizedSmartGoal,
+    parsedFeasibility,
+    savedDraft: localStorage.getItem(APP_STORAGE_KEYS.pending12WeekSetupDraft),
+    feasibilityDefaults,
+    setupPlan,
+    smartGoalMetricName: getSmartGoalMetricName(normalizedSmartGoal),
+    smartGoalMetricUnit: getSmartGoalMetricUnit(normalizedSmartGoal),
+    staleFeasibility: isFeasibilityResultStale(parsedFeasibility.savedAt),
+  };
+}
+
 export function TwelveWeekSetup() {
   const navigate = useNavigate();
   const { actions: planSetupActions } = usePlanSetupSync();
@@ -154,78 +241,21 @@ export function TwelveWeekSetup() {
   });
 
   useEffect(() => {
-    const data = getUserData();
-    setAspirationalVision(data.aspirationalVision ?? null);
+    const prerequisites = readTwelveWeekSetupPrerequisites();
+    setAspirationalVision(prerequisites.aspirationalVision);
 
-    if (!hasRealLifeBalance(data)) {
-      setSetupGate("needs_life_balance");
+    if (prerequisites.status === "gate") {
+      if (prerequisites.clearPendingFeasibility) {
+        localStorage.removeItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
+        toast.error("Kết quả kiểm tra tính khả thi cũ không đọc được, làm lại nhanh");
+        navigate("/feasibility");
+      }
+      setSetupGate(prerequisites.gate);
       setIsLoading(false);
       return;
     }
 
-    const selectedFocusArea = localStorage.getItem(APP_STORAGE_KEYS.selectedFocusArea);
-    const pendingSmartGoal = localStorage.getItem(APP_STORAGE_KEYS.pendingSmartGoal);
-    const pendingFeasibilityResult = localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
-
-    if (!selectedFocusArea) {
-      setSetupGate("needs_life_insight");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!pendingSmartGoal) {
-      setSetupGate("needs_smart_goal");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!pendingFeasibilityResult) {
-      setSetupGate("needs_feasibility");
-      setIsLoading(false);
-      return;
-    }
-
-    let parsedSmartGoalValue: unknown;
-    try {
-      parsedSmartGoalValue = JSON.parse(pendingSmartGoal);
-    } catch {
-      setSetupGate("needs_smart_goal");
-      setIsLoading(false);
-      return;
-    }
-
-    const normalizedSmartGoal = parseSmartGoal(parsedSmartGoalValue, selectedFocusArea);
-    if (normalizedSmartGoal) {
-      localStorage.setItem(APP_STORAGE_KEYS.pendingSmartGoal, JSON.stringify(normalizedSmartGoal));
-    }
-
-    const parsedSmartGoal = parsePendingSMARTGoal(normalizedSmartGoal ?? parsedSmartGoalValue, selectedFocusArea);
-    if (!parsedSmartGoal) {
-      setSetupGate("needs_smart_goal");
-      setIsLoading(false);
-      return;
-    }
-
-    let parsedFeasibility: unknown;
-    try {
-      parsedFeasibility = JSON.parse(pendingFeasibilityResult);
-    } catch (error) {
-      console.warn("Pending feasibility result could not be parsed.", error);
-      localStorage.removeItem(APP_STORAGE_KEYS.pendingFeasibilityResult);
-      toast.error("Kết quả kiểm tra tính khả thi cũ không đọc được, làm lại nhanh");
-      navigate("/feasibility");
-      setSetupGate("needs_feasibility");
-      setIsLoading(false);
-      return;
-    }
-
-    if (!isPendingFeasibilityResult(parsedFeasibility)) {
-      setSetupGate("needs_feasibility");
-      setIsLoading(false);
-      return;
-    }
-
-    if (isFeasibilityResultStale(parsedFeasibility.savedAt)) {
+    if (prerequisites.staleFeasibility) {
       toast.warning("Kết quả kiểm tra tính khả thi hơi cũ, làm lại để dữ liệu chính xác?", {
         action: {
           label: "Làm lại",
@@ -238,44 +268,37 @@ export function TwelveWeekSetup() {
       });
     }
 
-    if (!getScoredLifeArea(data, selectedFocusArea)) {
-      setSetupGate("needs_life_insight");
-      setIsLoading(false);
-      return;
-    }
-
-    const savedDraft = localStorage.getItem(APP_STORAGE_KEYS.pending12WeekSetupDraft);
-    const feasibilityDefaults = getFeasibilityDraftDefaults(parsedFeasibility);
-    const setupPlan = getCurrentPlan();
-    const smartGoalMetricName = getSmartGoalMetricName(normalizedSmartGoal);
-    const smartGoalMetricUnit = getSmartGoalMetricUnit(normalizedSmartGoal);
-    setFocusArea(selectedFocusArea);
-    setSmartGoal(parsedSmartGoal);
-    setFeasibility(parsedFeasibility);
-    setCurrentPlan(setupPlan);
+    setFocusArea(prerequisites.selectedFocusArea);
+    setSmartGoal(prerequisites.parsedSmartGoal);
+    setFeasibility(prerequisites.parsedFeasibility);
+    setCurrentPlan(prerequisites.setupPlan);
 
     setDraft((previousDraft) => {
       const baseDraft = {
         ...previousDraft,
         vision12Week:
           previousDraft.vision12Week ||
-          `Trong 12 tuần tới, tôi muốn biến mục tiêu "${parsedSmartGoal.specific}" thành một nhịp thực thi rõ ràng.`,
-        week12Outcome: previousDraft.week12Outcome || parsedSmartGoal.measurable || parsedSmartGoal.specific,
+          `Trong 12 tuần tới, tôi muốn biến mục tiêu "${prerequisites.parsedSmartGoal.specific}" thành một nhịp thực thi rõ ràng.`,
+        week12Outcome:
+          previousDraft.week12Outcome || prerequisites.parsedSmartGoal.measurable || prerequisites.parsedSmartGoal.specific,
         lagMetricName:
-          previousDraft.lagMetricName || smartGoalMetricName || parsedSmartGoal.measurable || "Chỉ số kết quả chính",
-        lagMetricUnit: previousDraft.lagMetricUnit || smartGoalMetricUnit,
+          previousDraft.lagMetricName ||
+          prerequisites.smartGoalMetricName ||
+          prerequisites.parsedSmartGoal.measurable ||
+          "Chỉ số kết quả chính",
+        lagMetricUnit: previousDraft.lagMetricUnit || prerequisites.smartGoalMetricUnit,
         tacticLoadPreference:
           previousDraft.tacticLoadPreference === "balanced"
-            ? feasibilityDefaults.tacticLoadPreference
+            ? prerequisites.feasibilityDefaults.tacticLoadPreference
             : previousDraft.tacticLoadPreference,
-        dailyTimeBudget: previousDraft.dailyTimeBudget || feasibilityDefaults.dailyTimeBudget,
-        personalConstraint: previousDraft.personalConstraint || feasibilityDefaults.personalConstraint,
+        dailyTimeBudget: previousDraft.dailyTimeBudget || prerequisites.feasibilityDefaults.dailyTimeBudget,
+        personalConstraint: previousDraft.personalConstraint || prerequisites.feasibilityDefaults.personalConstraint,
       };
 
-      if (!savedDraft) return baseDraft;
+      if (!prerequisites.savedDraft) return baseDraft;
 
       try {
-        const parsedDraft = JSON.parse(savedDraft) as Partial<TwelveWeekSetupDraft>;
+        const parsedDraft = JSON.parse(prerequisites.savedDraft) as Partial<TwelveWeekSetupDraft>;
         const normalizedReviewDay = normalizeReviewDay(parsedDraft.reviewDay);
         if (normalizedReviewDay.changed && parsedDraft.reviewDay !== undefined) {
           console.info("Invalid 12-week setup reviewDay draft reset to Sunday.", {
@@ -322,12 +345,12 @@ export function TwelveWeekSetup() {
       }
     });
 
-    if (!savedDraft) {
+    if (!prerequisites.savedDraft) {
       trackAnalyticsEvent(
         "twelve_week_setup_started",
         {
           source: "12_week_setup",
-          current_plan: setupPlan,
+          current_plan: prerequisites.setupPlan,
           entry_mode: "smart_goal_handoff",
           template_tier: "none",
           has_saved_draft: false,
@@ -335,8 +358,8 @@ export function TwelveWeekSetup() {
         {
           legacyEventName: "12_week_setup_started",
           legacyPayload: {
-            focusArea: selectedFocusArea,
-            readinessScore: String(parsedFeasibility.adjustedScore),
+            focusArea: prerequisites.selectedFocusArea,
+            readinessScore: String(prerequisites.parsedFeasibility.adjustedScore),
           },
         },
       );

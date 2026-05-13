@@ -144,22 +144,12 @@ function verifyCassoWebhookSignature(req: Request, expectedSecret: string): bool
 }
 
 export async function getCassoWebhookHealth(_req: Request, res: Response): Promise<void> {
-  const signatureSecrets = getCassoSignatureSecrets();
-  const secureTokens = getCassoSecureTokens();
-
+  res.setHeader("Cache-Control", "no-store, max-age=0");
   res.status(200).json({
     success: true,
     data: {
       provider: "casso",
-      configured: signatureSecrets.length > 0 || secureTokens.length > 0,
-      accepts: {
-        secureToken: secureTokens.length > 0,
-        xCassoSignature: signatureSecrets.length > 0,
-      },
-      routes: [
-        "/api/billing/webhook/casso",
-        "/api/webhook/casso",
-      ],
+      status: "ok",
     },
   });
 }

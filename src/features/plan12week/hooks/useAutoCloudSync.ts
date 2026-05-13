@@ -14,6 +14,7 @@ import {
   writeMutationQueueStore,
 } from "../persistence/mutationQueue";
 import { clearPullCursor } from "../persistence/pullCursorStore";
+import { getTwelveWeekSyncFeatureFlags, getTwelveWeekSyncReadiness } from "../persistence/syncContract";
 import { applyPulledWorkspaceToUserData } from "../persistence/pulledWorkspaceApply";
 import { sendPending12WeekMutations, type MutationQueueSyncResult } from "../persistence/mutationQueueSender";
 import { type TwelveWeekManualCloudSyncResult, useTwelveWeekManualCloudSync } from "./useTwelveWeekManualCloudSync";
@@ -191,8 +192,12 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
   const mutationSyncEnabled = shouldEnable12WeekMutationSync();
   const pullSyncEnabled = shouldEnable12WeekPullSync();
   const apiConfigured = isApiBaseUrlConfigured();
-  const fullSyncEnabled = realMode && mutationSyncEnabled && pullSyncEnabled && apiConfigured;
-  const drainSyncEnabled = realMode && mutationSyncEnabled && apiConfigured;
+  const { fullSyncEnabled, drainSyncEnabled } = getTwelveWeekSyncFeatureFlags({
+    realMode,
+    mutationSyncEnabled,
+    pullSyncEnabled,
+    apiConfigured,
+  });
   const { user, userProfile, userProfileLoading } = useAuthContext();
   const triggerSyncNowRef = useRef<(() => Promise<TwelveWeekManualCloudSyncResult | null>) | null>(null);
   const handleReconnect = useCallback(() => {
@@ -225,9 +230,17 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
   const mutationDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const visibilityDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fullSyncBaseReady = fullSyncEnabled && Boolean(ownerUid) && userProfileReady && networkStatusInfo.isOnline;
-  const drainSyncBaseReady = drainSyncEnabled && Boolean(ownerUid) && userProfileReady && networkStatusInfo.isOnline;
-  const drainSyncReady = drainSyncBaseReady && documentVisible;
+  const syncReadiness = getTwelveWeekSyncReadiness({
+    realMode,
+    mutationSyncEnabled,
+    pullSyncEnabled,
+    apiConfigured,
+    ownerUid,
+    userProfileReady,
+    online: networkStatusInfo.isOnline,
+    documentVisible,
+  });
+  const { fullSyncBaseReady, drainSyncBaseReady, drainSyncReady } = syncReadiness;
 
   const refreshPendingCount = useCallback(() => {
     setPendingCount(drainSyncEnabled ? getQueuePendingCount(ownerUid) : 0);

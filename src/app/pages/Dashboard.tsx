@@ -329,6 +329,155 @@ export function Dashboard() {
   );
 }
 
+function useDashboardDerivedData({
+  visibleGoals,
+  visibleWheelOfLife,
+  visibleReflections,
+  visibleVisionBoards,
+  visibleActiveTwelveWeekGoal,
+  plan,
+  hasRealLifeBalance,
+  isSignedOut,
+  isFreshDemoVisitor,
+}: {
+  visibleGoals: UserData["goals"];
+  visibleWheelOfLife: UserData["currentWheelOfLife"];
+  visibleReflections: UserData["reflections"];
+  visibleVisionBoards: UserData["visionBoards"];
+  visibleActiveTwelveWeekGoal: ReturnType<typeof getActiveTwelveWeekGoal>;
+  plan: ReturnType<typeof usePlan12Week>["plan"];
+  hasRealLifeBalance: boolean;
+  isSignedOut: boolean;
+  isFreshDemoVisitor: boolean;
+}) {
+  const recentGoals = visibleGoals.slice(0, 3);
+  const recentReflections = sortReflectionsByDateDesc(visibleReflections).slice(0, 2);
+  const dashboardGoalTitle = visibleActiveTwelveWeekGoal?.title ?? plan?.vision ?? "Mục tiêu hiện tại";
+  const goalProgressSnapshot = useMemo(() => buildGoalProgressSnapshot(plan), [plan]);
+  const currentWeekExecutionSnapshot = useMemo(() => buildCurrentWeekExecutionSnapshot(plan), [plan]);
+  const weeklyProgressPoints = useMemo(() => buildWeeklyProgressPoints(plan), [plan]);
+  const weeklyStreak = useMemo(() => calculateWeeklyStreak(weeklyProgressPoints), [weeklyProgressPoints]);
+  const averageLifeScore =
+    hasRealLifeBalance && visibleWheelOfLife.length > 0
+      ? visibleWheelOfLife.reduce((sum, area) => sum + area.score, 0) / visibleWheelOfLife.length
+      : 0;
+  const journalStreak = useMemo(() => {
+    const sorted = [...visibleReflections].sort((a, b) => b.date.localeCompare(a.date));
+    if (sorted.length === 0) return 0;
+
+    const dates = [...new Set(sorted.map((reflection) => reflection.date.slice(0, 10)))];
+    const today = new Date();
+    const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+    if (dates[0] !== todayKey && dates[0] !== yesterdayKey) return 0;
+
+    let streak = 0;
+    const check = new Date(dates[0]);
+    for (const date of dates) {
+      const expected = `${check.getFullYear()}-${String(check.getMonth() + 1).padStart(2, "0")}-${String(check.getDate()).padStart(2, "0")}`;
+      if (date !== expected) break;
+      streak++;
+      check.setDate(check.getDate() - 1);
+    }
+    return streak;
+  }, [visibleReflections]);
+  const weakestArea =
+    hasRealLifeBalance && visibleWheelOfLife.length > 0
+      ? [...visibleWheelOfLife].sort((a, b) => a.score - b.score)[0]
+      : null;
+  const localActiveSystem = visibleActiveTwelveWeekGoal?.twelveWeekSystem ?? null;
+  const { effectiveSystem: activeSystem } = useBackendProgressOverlay(
+    visibleActiveTwelveWeekGoal?.id ?? null,
+    localActiveSystem,
+  );
+  const effectiveSystem = activeSystem;
+  const activeSystemWeek = effectiveSystem ? getTwelveWeekCurrentWeek(effectiveSystem) : null;
+  const activeSystemTodayTasks = effectiveSystem ? getTwelveWeekTodayTasks(effectiveSystem) : [];
+  const activeSystemTodayOpenTasks = activeSystemTodayTasks.filter((task) => !task.completed);
+  const activeSystemTodayCompletedCount = activeSystemTodayTasks.length - activeSystemTodayOpenTasks.length;
+  const activeSystemWeekCompletion =
+    effectiveSystem && activeSystemWeek ? getTwelveWeekWeekCompletion(effectiveSystem, activeSystemWeek) : null;
+  const reviewDueToday = Boolean(effectiveSystem && isTwelveWeekReviewDueToday(effectiveSystem));
+  const activeSystemTaskPreview =
+    effectiveSystem && activeSystemWeek
+      ? (activeSystemTodayOpenTasks.length > 0
+          ? activeSystemTodayOpenTasks
+          : getTwelveWeekTasksForWeek(effectiveSystem, activeSystemWeek).filter((task) => !task.completed)
+        ).slice(0, 3)
+      : [];
+  const hasReviewedCurrentWeek = Boolean(
+    effectiveSystem &&
+      activeSystemWeek &&
+      (effectiveSystem.weeklyReviews.some((review) => review.weekNumber === activeSystemWeek && review.reviewCompleted) ||
+        effectiveSystem.scoreboard.some((week) => week.weekNumber === activeSystemWeek && week.reviewDone)),
+  );
+  const dashboardNextAction = getDashboardNextAction({
+    hasGoal: visibleGoals.length > 0,
+    hasTwelveWeekSystem: Boolean(effectiveSystem),
+    reviewDueToday,
+    hasOpenTodayTasks: activeSystemTodayOpenTasks.length > 0,
+    hasReviewedCurrentWeek,
+    currentWeek: activeSystemWeek,
+    totalWeeks: effectiveSystem?.totalWeeks ?? null,
+  });
+  const dashboardActiveGoals = visibleActiveTwelveWeekGoal ? [visibleActiveTwelveWeekGoal] : recentGoals;
+  const dashboardKpiLeadAverage = activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore;
+  const dashboardKpiCurrentWeek = activeSystemWeek ?? currentWeekExecutionSnapshot.weekNumber ?? null;
+  const dashboardKpiTotalWeeks = effectiveSystem?.totalWeeks ?? 12;
+  const dashboardKpiStreak = weeklyStreak > 0 ? weeklyStreak : journalStreak;
+  const dashboardOpenTaskCount = activeSystemTodayOpenTasks.length;
+  const hasLocalTwelveWeekSystem = Boolean(effectiveSystem);
+  const hasWorkspaceSignals =
+    hasRealLifeBalance || visibleGoals.length > 0 || visibleVisionBoards.length > 0 || visibleReflections.length > 0;
+  const shouldShowMainDashboardCard = !isSignedOut && !isFreshDemoVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
+  const showMobileStickyCTA = shouldShowMainDashboardCard && activeSystem && activeSystemTodayOpenTasks.length > 0;
+  const shouldShowSetupGuide = !isSignedOut && !isFreshDemoVisitor && !activeSystem;
+  const shouldShowWorkspaceDetailGrid = !isSignedOut && !isFreshDemoVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
+  const radarData = hasRealLifeBalance
+    ? visibleWheelOfLife.map((area) => ({
+        subject: getLifeAreaLabel(area.name),
+        value: area.score,
+        fullMark: 10,
+      }))
+    : [];
+
+  return {
+    recentGoals,
+    recentReflections,
+    dashboardGoalTitle,
+    goalProgressSnapshot,
+    currentWeekExecutionSnapshot,
+    averageLifeScore,
+    journalStreak,
+    weakestArea,
+    activeSystem,
+    effectiveSystem,
+    activeSystemWeek,
+    activeSystemTodayTasks,
+    activeSystemTodayOpenTasks,
+    activeSystemTodayCompletedCount,
+    activeSystemWeekCompletion,
+    reviewDueToday,
+    activeSystemTaskPreview,
+    hasReviewedCurrentWeek,
+    dashboardNextAction,
+    dashboardActiveGoals,
+    dashboardKpiLeadAverage,
+    dashboardKpiCurrentWeek,
+    dashboardKpiTotalWeeks,
+    dashboardKpiStreak,
+    dashboardOpenTaskCount,
+    hasLocalTwelveWeekSystem,
+    hasWorkspaceSignals,
+    showMobileStickyCTA,
+    shouldShowSetupGuide,
+    shouldShowWorkspaceDetailGrid,
+    radarData,
+  };
+}
+
 function DashboardContent({
   userData,
   activeTwelveWeekGoal,
@@ -399,100 +548,49 @@ function DashboardContent({
     void loadPlan(dashboardPlanId);
   }, [dashboardPlanId, loadPlan, plan?.id]);
 
-  const recentGoals = visibleGoals.slice(0, 3);
-  const recentReflections = sortReflectionsByDateDesc(visibleReflections).slice(0, 2);
-  const dashboardGoalTitle = visibleActiveTwelveWeekGoal?.title ?? plan?.vision ?? "Mục tiêu hiện tại";
-  const goalProgressSnapshot = useMemo(() => buildGoalProgressSnapshot(plan), [plan]);
-  const currentWeekExecutionSnapshot = useMemo(() => buildCurrentWeekExecutionSnapshot(plan), [plan]);
-  const weeklyProgressPoints = useMemo(() => buildWeeklyProgressPoints(plan), [plan]);
-  const weeklyStreak = useMemo(() => calculateWeeklyStreak(weeklyProgressPoints), [weeklyProgressPoints]);
-
-  const averageLifeScore =
-    hasRealLifeBalance && visibleWheelOfLife.length > 0
-      ? visibleWheelOfLife.reduce((sum, area) => sum + area.score, 0) / visibleWheelOfLife.length
-      : 0;
-
-  // Compute journal writing streak
-  const journalStreak = (() => {
-    const sorted = [...visibleReflections].sort((a, b) => b.date.localeCompare(a.date));
-    if (sorted.length === 0) return 0;
-    const dates = [...new Set(sorted.map((r) => r.date.slice(0, 10)))];
-    const today = new Date();
-    const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
-    if (dates[0] !== todayKey && dates[0] !== yesterdayKey) return 0;
-    let streak = 0;
-    const check = new Date(dates[0]);
-    for (const d of dates) {
-      const expected = `${check.getFullYear()}-${String(check.getMonth() + 1).padStart(2, "0")}-${String(check.getDate()).padStart(2, "0")}`;
-      if (d !== expected) break;
-      streak++;
-      check.setDate(check.getDate() - 1);
-    }
-    return streak;
-  })();
-
-  const weakestArea =
-    hasRealLifeBalance && visibleWheelOfLife.length > 0
-      ? [...visibleWheelOfLife].sort((a, b) => a.score - b.score)[0]
-      : null;
-  const localActiveSystem = visibleActiveTwelveWeekGoal?.twelveWeekSystem ?? null;
-  const { effectiveSystem: activeSystem } = useBackendProgressOverlay(
-    visibleActiveTwelveWeekGoal?.id ?? null,
-    localActiveSystem,
-  );
-  const effectiveSystem = activeSystem;
-
-  const activeSystemWeek = effectiveSystem ? getTwelveWeekCurrentWeek(effectiveSystem) : null;
-  const activeSystemTodayTasks = effectiveSystem ? getTwelveWeekTodayTasks(effectiveSystem) : [];
-  const activeSystemTodayOpenTasks = activeSystemTodayTasks.filter((task) => !task.completed);
-  const activeSystemTodayCompletedCount = activeSystemTodayTasks.length - activeSystemTodayOpenTasks.length;
-  const activeSystemWeekCompletion =
-    effectiveSystem && activeSystemWeek ? getTwelveWeekWeekCompletion(effectiveSystem, activeSystemWeek) : null;
-  const reviewDueToday = Boolean(effectiveSystem && isTwelveWeekReviewDueToday(effectiveSystem));
-  const activeSystemTaskPreview =
-    effectiveSystem && activeSystemWeek
-      ? (activeSystemTodayOpenTasks.length > 0
-          ? activeSystemTodayOpenTasks
-          : getTwelveWeekTasksForWeek(effectiveSystem, activeSystemWeek).filter((task) => !task.completed)
-        ).slice(0, 3)
-      : [];
-  const hasReviewedCurrentWeek = Boolean(
-    effectiveSystem &&
-      activeSystemWeek &&
-      (effectiveSystem.weeklyReviews.some(
-        (review) => review.weekNumber === activeSystemWeek && review.reviewCompleted,
-      ) ||
-        effectiveSystem.scoreboard.some((week) => week.weekNumber === activeSystemWeek && week.reviewDone)),
-  );
-  const dashboardNextAction = getDashboardNextAction({
-    hasGoal: visibleGoals.length > 0,
-    hasTwelveWeekSystem: Boolean(effectiveSystem),
+  const {
+    recentGoals,
+    recentReflections,
+    dashboardGoalTitle,
+    goalProgressSnapshot,
+    currentWeekExecutionSnapshot,
+    averageLifeScore,
+    weakestArea,
+    activeSystem,
+    effectiveSystem,
+    activeSystemWeek,
+    activeSystemTodayTasks,
+    activeSystemTodayOpenTasks,
+    activeSystemTodayCompletedCount,
+    activeSystemWeekCompletion,
     reviewDueToday,
-    hasOpenTodayTasks: activeSystemTodayOpenTasks.length > 0,
-    hasReviewedCurrentWeek,
-    currentWeek: activeSystemWeek,
-    totalWeeks: effectiveSystem?.totalWeeks ?? null,
+    activeSystemTaskPreview,
+    dashboardNextAction,
+    dashboardActiveGoals,
+    dashboardKpiLeadAverage,
+    dashboardKpiCurrentWeek,
+    dashboardKpiTotalWeeks,
+    dashboardKpiStreak,
+    dashboardOpenTaskCount,
+    hasLocalTwelveWeekSystem,
+    showMobileStickyCTA,
+    shouldShowSetupGuide,
+    shouldShowWorkspaceDetailGrid,
+    radarData,
+  } = useDashboardDerivedData({
+    visibleGoals,
+    visibleWheelOfLife,
+    visibleReflections,
+    visibleVisionBoards,
+    visibleActiveTwelveWeekGoal,
+    plan,
+    hasRealLifeBalance,
+    isSignedOut,
+    isFreshDemoVisitor,
   });
-  const dashboardActiveGoals = visibleActiveTwelveWeekGoal ? [visibleActiveTwelveWeekGoal] : recentGoals;
-  const dashboardKpiLeadAverage = activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore;
-  const dashboardKpiCurrentWeek = activeSystemWeek ?? currentWeekExecutionSnapshot.weekNumber ?? null;
-  const dashboardKpiTotalWeeks = effectiveSystem?.totalWeeks ?? 12;
-  const dashboardKpiStreak = weeklyStreak > 0 ? weeklyStreak : journalStreak;
   const dashboardGreeting = getDashboardGreeting();
   const dashboardDisplayName = getDashboardDisplayName(user);
-  const dashboardOpenTaskCount = activeSystemTodayOpenTasks.length;
   const signedIn = Boolean(user);
-  const hasLocalTwelveWeekSystem = Boolean(effectiveSystem);
-  const hasWorkspaceSignals =
-    hasRealLifeBalance || visibleGoals.length > 0 || visibleVisionBoards.length > 0 || visibleReflections.length > 0;
-
-  const shouldShowMainDashboardCard = !isSignedOut && !isFreshDemoVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
-  const showMobileStickyCTA = shouldShowMainDashboardCard && activeSystem && activeSystemTodayOpenTasks.length > 0;
-  const shouldShowSetupGuide = !isSignedOut && !isFreshDemoVisitor && !activeSystem;
-  const shouldShowWorkspaceDetailGrid = !isSignedOut && !isFreshDemoVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
 
   useEffect(() => {
     if (landingViewedRef.current) return;
@@ -523,14 +621,6 @@ function DashboardContent({
       { goalId: visibleActiveTwelveWeekGoal.id },
     );
   }, [activeSystemWeek, currentPlanCode, effectiveSystem, visibleActiveTwelveWeekGoal]);
-
-  const radarData = hasRealLifeBalance
-    ? visibleWheelOfLife.map((area) => ({
-        subject: getLifeAreaLabel(area.name),
-        value: area.score,
-        fullMark: 10,
-      }))
-    : [];
 
   const planTarget = activeSystem ? "/12-week-system?tab=settings" : "/billing/plan";
 
