@@ -266,6 +266,12 @@ export function SettingsPage() {
                     ? "Đang đồng bộ lên tài khoản. Bạn có thể tiếp tục dùng app."
                     : "Đồng bộ sẵn sàng. Nếu có lỗi, dữ liệu vẫn được giữ trên thiết bị này để thử lại."}
             </div>
+            {autoSyncState.lastResult?.message ? (
+              <div className="rounded-[var(--r-control)] border border-slate-200 bg-white/80 p-3 text-sm leading-6 text-slate-600">
+                <p className="font-semibold text-slate-900">Kết quả gần nhất</p>
+                <p className="mt-1">{autoSyncState.lastResult.message}</p>
+              </div>
+            ) : null}
             <div className="flex flex-wrap gap-3">
               <Button type="button" variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={handleRetrySync} disabled={autoSyncState.syncing || !user}>
                 {autoSyncState.syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
@@ -274,6 +280,10 @@ export function SettingsPage() {
               <Button type="button" variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={handleExport}>
                 <CloudDownload className="h-4 w-4" />
                 Tải backup thiết bị
+              </Button>
+              <Button type="button" variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={() => navigate("/12-week-system?tab=settings")}>
+                <CalendarDays className="h-4 w-4" />
+                Mở cài đặt chu kỳ
               </Button>
             </div>
           </CardContent>
