@@ -74,7 +74,16 @@ describe("Onboarding", () => {
     );
 
     await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm 8 lĩnh vực/i }));
-    await user.click(await screen.findByRole("button", { name: /Hoàn thành đánh giá/i }));
+    const completeButton = await screen.findByRole("button", { name: /Hoàn thành đánh giá/i });
+    expect(completeButton).toBeDisabled();
+
+    for (const slider of screen.getAllByRole("slider")) {
+      slider.focus();
+      await user.keyboard("{ArrowRight}");
+    }
+
+    expect(completeButton).toBeEnabled();
+    await user.click(completeButton);
 
     await waitFor(() => {
       expect(getUserData().currentWheelOfLife.some((area) => area.score > 0)).toBe(true);

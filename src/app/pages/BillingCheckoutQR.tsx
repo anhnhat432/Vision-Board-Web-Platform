@@ -20,8 +20,8 @@ interface OrderStatusResponse {
   accountName: string;
   qrDataUrl: string;
   expiresAt: string | null;
-  completedAt: string | null;
-  createdAt: string | null;
+  completedAt?: string | null;
+  createdAt?: string | null;
 }
 
 interface CheckoutSessionResponse {
@@ -59,6 +59,7 @@ export function BillingCheckoutQR() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [copyMessage, setCopyMessage] = useState("");
   const [entitlementSyncStatus, setEntitlementSyncStatus] = useState<EntitlementSyncStatus>("idle");
   const [entitlementSyncMessage, setEntitlementSyncMessage] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
@@ -151,11 +152,20 @@ export function BillingCheckoutQR() {
   }, [order, timeLeft]);
 
   // Copy to clipboard
-  const copyToClipboard = useCallback((text: string, label: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(label);
-      setTimeout(() => setCopied(null), 2000);
-    });
+  const copyToClipboard = useCallback((text: string, label: string, displayLabel: string) => {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopied(label);
+        setCopyMessage(`Đã sao chép ${displayLabel}.`);
+        setTimeout(() => {
+          setCopied(null);
+          setCopyMessage("");
+        }, 2000);
+      })
+      .catch(() => {
+        setCopyMessage(`Không thể tự sao chép ${displayLabel}. Bạn có thể chọn và sao chép thủ công.`);
+      });
   }, []);
 
   const syncCompletedOrderAccess = useCallback(async () => {
@@ -306,6 +316,9 @@ export function BillingCheckoutQR() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+      <div className="sr-only" aria-live="polite">
+        {copyMessage || `Trạng thái đơn hàng: ${order.status}. ${timeLeft > 0 ? `Còn ${formatCountdown(timeLeft)} để thanh toán.` : ""}`}
+      </div>
       <div className="overflow-hidden rounded-[var(--r-card)] border border-slate-200 bg-white shadow-2xl">
         <div className="grid gap-0 lg:grid-cols-[minmax(320px,0.86fr)_minmax(0,1fr)]">
           <section className="border-b border-slate-200 bg-slate-50/80 p-5 text-center sm:p-7 lg:border-b-0 lg:border-r">
@@ -331,7 +344,7 @@ export function BillingCheckoutQR() {
             </div>
 
             <div className="mt-[var(--space-stack)] text-center">
-              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] bg-indigo-50 px-4 py-2">
+              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] bg-indigo-50 px-4 py-2" role="status" aria-live="polite">
                 <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
                 <span className="text-sm font-medium text-indigo-700">Đang chờ xác nhận...</span>
               </div>
@@ -357,35 +370,36 @@ export function BillingCheckoutQR() {
                 <InfoRow
                   label="Ngân hàng"
                   value={order.bankName}
-                  onCopy={() => copyToClipboard(order.bankName, "bank")}
+                  onCopy={() => copyToClipboard(order.bankName, "bank", "ngân hàng")}
                   isCopied={copied === "bank"}
                 />
                 <InfoRow
                   label="Số tài khoản"
                   value={order.bankAccount}
-                  onCopy={() => copyToClipboard(order.bankAccount, "account")}
+                  onCopy={() => copyToClipboard(order.bankAccount, "account", "số tài khoản")}
                   isCopied={copied === "account"}
                 />
                 <InfoRow
                   label="Chủ tài khoản"
                   value={order.accountName}
-                  onCopy={() => copyToClipboard(order.accountName, "name")}
+                  onCopy={() => copyToClipboard(order.accountName, "name", "chủ tài khoản")}
                   isCopied={copied === "name"}
                 />
                 <InfoRow
                   label="Số tiền"
                   value={formatVND(order.amount)}
-                  onCopy={() => copyToClipboard(String(order.amount), "amount")}
+                  onCopy={() => copyToClipboard(String(order.amount), "amount", "số tiền")}
                   isCopied={copied === "amount"}
                 />
                 <InfoRow
                   label="Nội dung CK"
                   value={order.orderId}
-                  onCopy={() => copyToClipboard(order.orderId, "desc")}
+                  onCopy={() => copyToClipboard(order.orderId, "desc", "nội dung chuyển khoản")}
                   isCopied={copied === "desc"}
                   highlight
                 />
               </div>
+              {copyMessage ? <p className="text-xs font-medium text-emerald-700" aria-live="polite">{copyMessage}</p> : null}
 
               <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50 px-4 py-3">
                 <p className="text-xs font-medium leading-5 text-amber-800">
@@ -459,7 +473,8 @@ function InfoRow({
           type="button"
           onClick={onCopy}
           className="rounded-[var(--r-control)] p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-          title="Sao chép"
+          title={`Sao chép ${label}`}
+          aria-label={`Sao chép ${label}`}
         >
           {isCopied ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
         </button>

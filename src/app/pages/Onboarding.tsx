@@ -90,6 +90,7 @@ export function Onboarding() {
   const growthArea = [...lifeAreas].sort((a, b) => a.score - b.score)[0];
   const reviewedAreaCount = reviewedAreaIndices.size;
   const remainingAreaCount = Math.max(0, lifeAreas.length - reviewedAreaCount);
+  const canCompleteAssessment = remainingAreaCount === 0;
 
   useScrollToTopOnChange(step, {
     focusRef: flowTopRef,
@@ -118,6 +119,7 @@ export function Onboarding() {
   }, [isDirty]);
 
   const handleComplete = () => {
+    if (!canCompleteAssessment) return;
     updateWheelOfLife(lifeAreas);
     trackAnalyticsEvent("life_balance_completed", {
       source: "onboarding",
@@ -400,7 +402,7 @@ export function Onboarding() {
                   <div>
                     <h3 className="text-lg font-semibold text-slate-900">Sẵn sàng sang Góc nhìn cuộc sống</h3>
                     <p className="text-sm leading-6 text-slate-500">
-                      Điểm này sẽ được lưu trên trình duyệt và dùng để chọn trọng tâm tiếp theo.
+                      Rà đủ 8 lĩnh vực trước khi lưu để dữ liệu phản ánh đúng cuộc sống hiện tại.
                     </p>
                   </div>
                 </div>
@@ -410,9 +412,15 @@ export function Onboarding() {
                     <ArrowLeft className="h-4 w-4" />
                     Quay lại giới thiệu
                   </Button>
+                  {!canCompleteAssessment ? (
+                    <p className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50 px-3 py-2 text-sm leading-6 text-amber-800">
+                      Còn {remainingAreaCount} lĩnh vực cần rà trước khi lưu.
+                    </p>
+                  ) : null}
                   <Button
-                    className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30 hover:from-violet-700 hover:to-fuchsia-700"
+                    className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30 hover:from-violet-700 hover:to-fuchsia-700 disabled:cursor-not-allowed disabled:opacity-60"
                     onClick={handleComplete}
+                    disabled={!canCompleteAssessment}
                   >
                     Hoàn thành đánh giá
                     <ArrowRight className="h-4 w-4" />

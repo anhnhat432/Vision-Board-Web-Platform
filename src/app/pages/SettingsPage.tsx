@@ -1,6 +1,6 @@
 ﻿import type { ChangeEvent } from "react";
 import { useRef, useState } from "react";
-import { AlertTriangle, CalendarDays, CloudDownload, CreditCard, Loader2, RefreshCw, User2, Volume2 } from "lucide-react";
+import { AlertTriangle, CalendarDays, CheckCircle2, CloudDownload, CreditCard, Loader2, RefreshCw, Upload, User2, Volume2, WifiOff } from "lucide-react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { Switch } from "../components/ui/switch";
 import { DashboardDataBackupCard } from "@/features/dashboard/components/DashboardDataBackupCard";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
+import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { formatBillingExpiryDate, getBillingExpiryInfo } from "../utils/billing-expiry";
 import { downloadLocalUserDataBackup } from "../utils/local-data-backup";
@@ -40,12 +41,20 @@ function getErrorMessage(error: unknown, fallback: string): string {
   return fallback;
 }
 
+function formatSyncTime(value: string | null): string {
+  if (!value) return "Chưa có lần đồng bộ tài khoản";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Chưa có lần đồng bộ tài khoản";
+  return `Lần cuối: ${date.toLocaleString("vi-VN")}`;
+}
+
 export function SettingsPage() {
   const navigate = useNavigate();
   const importFileRef = useRef<HTMLInputElement>(null);
   const [isExportingAccount, setIsExportingAccount] = useState(false);
   const [taskSoundEnabled, setTaskSoundEnabled] = useState(() => isSoundEnabled());
   const { isConfigured, user, userProfile } = useAuthContext();
+  const autoSyncState = useAutoCloudSyncContext();
   const { userData: syncedUserData, reloadUserData } = useSyncedUserData();
   const userData = syncedUserData ?? getUserData();
   const expiryInfo = getBillingExpiryInfo(userData.subscription);
@@ -114,6 +123,30 @@ export function SettingsPage() {
     setTaskSoundEnabled(enabled);
     setSoundEnabled(enabled);
   };
+
+  const handleRetrySync = async () => {
+    const result = await autoSyncState.triggerSyncNow();
+    if (result?.status === "conflict" || result?.status === "unsafe") {
+      toast.warning("Có khác biệt giữa thiết bị và tài khoản. Mở thông báo đồng bộ để chọn phiên bản an toàn.");
+      return;
+    }
+    if (result?.status === "error" || result?.status === "drain_failed") {
+      toast.error(result.message || "Chưa đồng bộ được tài khoản. Dữ liệu vẫn được giữ trên thiết bị này.");
+      return;
+    }
+    toast.success("Đã kiểm tra đồng bộ tài khoản.");
+  };
+
+  const syncIcon = autoSyncState.conflictPending
+    ? AlertTriangle
+    : autoSyncState.syncing
+      ? Loader2
+      : !autoSyncState.online
+        ? WifiOff
+        : autoSyncState.pendingCount > 0
+          ? Upload
+          : CheckCircle2;
+  const SyncIcon = syncIcon;
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
@@ -194,6 +227,55 @@ export function SettingsPage() {
               )}
               Xuất dữ liệu tài khoản
             </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-surface-sm rounded-[var(--r-card)] border shadow-none">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <SyncIcon className={`h-4 w-4 ${autoSyncState.syncing ? "animate-spin text-sky-600" : "text-slate-500"}`} />
+              Đồng bộ tài khoản
+            </CardTitle>
+            <CardDescription>Phân biệt dữ liệu đã lưu trên thiết bị và dữ liệu đã lên tài khoản.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-2 text-sm sm:grid-cols-3">
+              <div className="rounded-[var(--r-control)] border border-slate-200 bg-white/75 p-3">
+                <p className="font-semibold text-slate-900">Thiết bị</p>
+                <p className="mt-1 leading-6 text-slate-500">Thay đổi được giữ ngay trên trình duyệt này.</p>
+              </div>
+              <div className="rounded-[var(--r-control)] border border-slate-200 bg-white/75 p-3">
+                <p className="font-semibold text-slate-900">Tài khoản</p>
+                <p className="mt-1 leading-6 text-slate-500">{formatSyncTime(autoSyncState.lastSyncedAt)}</p>
+              </div>
+              <div className="rounded-[var(--r-control)] border border-slate-200 bg-white/75 p-3">
+                <p className="font-semibold text-slate-900">Hàng chờ</p>
+                <p className="mt-1 leading-6 text-slate-500">
+                  {autoSyncState.pendingCount > 0
+                    ? `${autoSyncState.pendingCount} thay đổi chờ đồng bộ`
+                    : "Không có thay đổi chờ gửi"}
+                </p>
+              </div>
+            </div>
+            <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50/80 p-3 text-sm leading-6 text-slate-600">
+              {autoSyncState.conflictPending
+                ? "Dữ liệu trên thiết bị và tài khoản đang khác nhau. Ứng dụng sẽ hỏi bạn trước khi ghi đè."
+                : !autoSyncState.online
+                  ? "Bạn đang offline. Dữ liệu vẫn được lưu trên thiết bị và sẽ gửi lên tài khoản khi có mạng."
+                  : autoSyncState.syncing
+                    ? "Đang đồng bộ lên tài khoản. Bạn có thể tiếp tục dùng app."
+                    : "Đồng bộ sẵn sàng. Nếu có lỗi, dữ liệu vẫn được giữ trên thiết bị này để thử lại."}
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Button type="button" variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={handleRetrySync} disabled={autoSyncState.syncing || !user}>
+                {autoSyncState.syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                Kiểm tra đồng bộ
+              </Button>
+              <Button type="button" variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={handleExport}>
+                <CloudDownload className="h-4 w-4" />
+                Tải backup thiết bị
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
