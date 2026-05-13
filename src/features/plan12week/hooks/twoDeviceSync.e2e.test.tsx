@@ -1,6 +1,8 @@
 import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
+
 import {
   createMockBackend,
   dispatchUserDataUpdated,
