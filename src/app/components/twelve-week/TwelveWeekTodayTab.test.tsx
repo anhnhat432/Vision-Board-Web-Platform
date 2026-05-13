@@ -446,14 +446,14 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
 
     const stickyButton = screen
       .getAllByRole("button", { name: /^Lưu check-in hôm nay$/i })
-      .find((button) => button.closest(".fixed.inset-x-0.bottom-0"));
+      .find((button) => button.closest(".above-mobile-nav.fixed.inset-x-0"));
     expect(stickyButton).toBeInTheDocument();
     expect(stickyButton?.closest("div")).toHaveClass(
+      "above-mobile-nav",
       "sm:hidden",
       "fixed",
       "inset-x-0",
-      "bottom-0",
-      "z-30",
+      "z-40",
       "border-t",
       "border-slate-200",
       "bg-white/96",
@@ -473,7 +473,7 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
     expect(
       screen
         .queryAllByRole("button", { name: /^Lưu check-in hôm nay$/i })
-        .find((button) => button.closest(".fixed.inset-x-0.bottom-0")),
+        .find((button) => button.closest(".above-mobile-nav.fixed.inset-x-0")),
     ).toBeUndefined();
   });
 });

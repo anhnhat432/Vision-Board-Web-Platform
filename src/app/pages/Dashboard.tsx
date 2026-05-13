@@ -1125,17 +1125,21 @@ function DashboardContent({
       )}
 
       {showMobileStickyCTA && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/95 p-4 backdrop-blur supports-backdrop-blur:bg-white/90 md:hidden">
-          <Button
-            variant="outline"
-            className="w-full border-border bg-white text-foreground shadow-lg hover:bg-muted"
-            size="lg"
-            onClick={() => navigate("/12-week-system")}
-          >
-            <CheckCircle2 className="mr-2 h-5 w-5" />
-            Đánh dấu xong - {activeSystemTodayOpenTasks.length} việc
-          </Button>
-        </div>
+        <>
+          {/* Spacer reserves space below content so the sticky CTA + bottom-nav don't overlap the last card */}
+          <div aria-hidden="true" className="h-20 md:hidden" />
+          <div className="above-mobile-nav fixed left-0 right-0 z-40 border-t bg-white/95 p-4 backdrop-blur supports-backdrop-blur:bg-white/90 md:hidden">
+            <Button
+              variant="outline"
+              className="w-full border-border bg-white text-foreground shadow-lg hover:bg-muted"
+              size="lg"
+              onClick={() => navigate("/12-week-system")}
+            >
+              <CheckCircle2 className="mr-2 h-5 w-5" />
+              Đánh dấu xong - {activeSystemTodayOpenTasks.length} việc
+            </Button>
+          </div>
+        </>
       )}
 
       {/* SECONDARY SECTION: Workspace Details */}
