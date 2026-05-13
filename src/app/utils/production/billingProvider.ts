@@ -1,3 +1,4 @@
+import { apiClient } from "@/lib/api/apiClient";
 import { getCurrentEntitlementKeys, getCurrentPlan, restorePlanAccessLocally, upgradePlanLocally } from "../storage";
 import type {
   BillingProvider,
@@ -117,7 +118,6 @@ const apiContractBillingProvider: BillingProvider = {
 
     if (apiBaseConfigured) {
       try {
-        const { apiClient } = await import("@/lib/api/apiClient");
         const currentUrl = typeof window !== "undefined" ? window.location.origin : "";
         const result = await apiClient.post<{
           checkoutSessionId: string;
@@ -220,7 +220,6 @@ const apiContractBillingProvider: BillingProvider = {
       }
 
       try {
-        const { apiClient } = await import("@/lib/api/apiClient");
         const response = await apiClient.get<{
           planCode: string;
           status: string;
@@ -481,7 +480,6 @@ export async function openBillingCustomerPortal(goalId?: string): Promise<Custom
 
   if (apiBaseConfigured && status.mode === "api_contract") {
     try {
-      const { apiClient } = await import("@/lib/api/apiClient");
       const returnUrl = typeof window !== "undefined" ? `${window.location.origin}/billing/plan` : "";
       const result = await apiClient.post<{
         supported: boolean;
@@ -620,7 +618,6 @@ export async function cancelSubscriptionOnServer(): Promise<CancelSubscriptionRe
   }
 
   try {
-    const { apiClient } = await import("@/lib/api/apiClient");
     const result = await apiClient.post<{
       status: "pending_cancel" | "already_canceled" | "already_pending_cancel";
       message: string;
