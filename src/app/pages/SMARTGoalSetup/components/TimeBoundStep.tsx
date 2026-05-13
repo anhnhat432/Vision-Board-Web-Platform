@@ -27,9 +27,10 @@ export function TimeBoundStep({ smartData, setSmartData }: TimeBoundStepProps) {
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Chọn cách chốt thời hạn">
         <Button
           variant={smartData.timeBound.mode === "weeks" ? "default" : "outline"}
+          aria-pressed={smartData.timeBound.mode === "weeks"}
           onClick={() =>
             setSmartData((previous) => ({
               ...previous,
@@ -46,6 +47,7 @@ export function TimeBoundStep({ smartData, setSmartData }: TimeBoundStepProps) {
         </Button>
         <Button
           variant={smartData.timeBound.mode === "date" ? "default" : "outline"}
+          aria-pressed={smartData.timeBound.mode === "date"}
           onClick={() =>
             setSmartData((previous) => ({
               ...previous,

@@ -403,30 +403,29 @@ export function LifeInsight() {
               Hệ thống gợi ý <strong>{getLifeAreaLabel(lowestArea.name)}</strong> vì đây là điểm thấp nhất. Nếu lúc này
               bạn muốn ưu tiên khu vực khác, chọn lại bên dưới.
             </p>
-            <div
-              className="mt-[var(--space-stack)] grid gap-2 sm:grid-cols-2 lg:grid-cols-4"
-              role="radiogroup"
-              aria-label="Chọn lĩnh vực trọng tâm"
-            >
+            <div className="mt-[var(--space-stack)] grid gap-2 sm:grid-cols-2 lg:grid-cols-4" role="radiogroup" aria-label="Chọn lĩnh vực trọng tâm">
               {lifeAreas.map((area) => {
                 const isSelected = focusArea.name === area.name;
                 const isRecommended = area.name === lowestArea.name;
                 const AreaIcon = getLifeAreaIcon(area.name);
                 return (
-                  <button
+                  <label
                     key={area.name}
-                    type="button"
-                    role="radio"
-                    aria-checked={isSelected}
-                    aria-label={`${getLifeAreaLabel(area.name)} ${area.score}/10${isRecommended ? ", gợi ý" : ""}`}
-                    onClick={() => setSelectedAreaName(area.name === lowestArea.name ? null : area.name)}
-                    className={`card-hover-lift glass-surface-sm relative overflow-hidden rounded-[var(--r-tile)] border border-l-4 p-4 text-left transition-colors transition-transform duration-150 ${
+                    className={`card-hover-lift glass-surface-sm relative cursor-pointer overflow-hidden rounded-[var(--r-tile)] border border-l-4 p-4 text-left transition-colors transition-transform duration-150 ${
                       isSelected
                         ? "border-violet-300 bg-violet-50 shadow-md dark:bg-violet-950/30"
                         : "border-white/70 bg-white/72 hover:border-white hover:bg-white dark:bg-slate-950/50"
                     }`}
                     style={{ borderLeftColor: area.color }}
                   >
+                    <input
+                      type="radio"
+                      name="life-insight-focus-area"
+                      className="sr-only"
+                      checked={isSelected}
+                      onChange={() => setSelectedAreaName(area.name === lowestArea.name ? null : area.name)}
+                      aria-label={`${getLifeAreaLabel(area.name)} ${area.score}/10${isRecommended ? ", gợi ý" : ""}`}
+                    />
                     {isRecommended && (
                       <span className="absolute -top-2 left-3 rounded-[var(--r-pill)] bg-violet-600 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-white">
                         Gợi ý
@@ -451,7 +450,7 @@ export function LifeInsight() {
                     <p className="mt-1 text-xs font-medium" style={{ color: area.color }}>
                       {area.score}/10
                     </p>
-                  </button>
+                  </label>
                 );
               })}
             </div>
