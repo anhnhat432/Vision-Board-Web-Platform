@@ -40,6 +40,7 @@ function createUserDoc(overrides: Record<string, unknown> = {}) {
     displayName: "User",
     role: "user",
     onboardingCompletedAt: null,
+    termsAcceptedAt: null,
     avatarUrl: null,
     locale: "vi",
     createdAt: now,

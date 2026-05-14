@@ -61,7 +61,7 @@ function RedirectToTwelveWeekSystem() {
   return <Navigate to="/12-week-system" replace />;
 }
 
-export const router = createBrowserRouter([
+export const appRoutes = [
   {
     path: "/login",
     ...lazyRoute(() => import("./pages/LoginPage"), "LoginPage"),
@@ -74,6 +74,14 @@ export const router = createBrowserRouter([
       {
         index: true,
         Component: Dashboard,
+      },
+      {
+        path: "terms",
+        ...lazyRoute(() => import("./pages/TermsPage"), "TermsPage"),
+      },
+      {
+        path: "privacy",
+        ...lazyRoute(() => import("./pages/PrivacyPage"), "PrivacyPage"),
       },
       {
         path: "onboarding",
@@ -142,14 +150,6 @@ export const router = createBrowserRouter([
         ...lazyRoute(() => import("./pages/AdminOrdersPage"), "AdminOrdersPage"),
       },
       {
-        path: "terms",
-        ...lazyRoute(() => import("./pages/TermsPage"), "TermsPage"),
-      },
-      {
-        path: "privacy",
-        ...lazyRoute(() => import("./pages/PrivacyPage"), "PrivacyPage"),
-      },
-      {
         path: "goals",
         Component: GoalTracker,
       },
@@ -171,4 +171,6 @@ export const router = createBrowserRouter([
       },
     ],
   },
-]);
+];
+
+export const router = createBrowserRouter(appRoutes);

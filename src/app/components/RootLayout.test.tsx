@@ -520,7 +520,11 @@ describe("RootLayout onboarding redirect", () => {
     const demoMenu = await screen.findByRole("menu");
     expect(demoMenu).toBeInTheDocument();
     expect(within(demoMenu).getByText("Plus")).toBeInTheDocument();
-    expect(within(demoMenu).getByRole("button", { name: /đồng bộ/i })).toBeInTheDocument();
+    expect(
+      within(demoMenu).getByRole("button", {
+        name: /(đồng bộ|Đã sao lưu \d+ giờ trước)/i,
+      }),
+    ).toBeInTheDocument();
     expect(within(demoMenu).getByRole("menuitem", { name: "Cài đặt" })).toBeInTheDocument();
     expect(within(demoMenu).getByRole("menuitem", { name: "Quản lý gói" })).toBeInTheDocument();
     expect(within(demoMenu).getByRole("menuitem", { name: "Đăng xuất" })).toBeInTheDocument();

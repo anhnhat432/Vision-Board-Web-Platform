@@ -48,6 +48,7 @@ export async function updateProfile(req: Request, res: Response): Promise<void> 
     avatarUrl?: string | null;
     locale?: string;
     onboardingCompletedAt?: Date | null;
+    termsAcceptedAt?: Date | null;
   } = {};
 
   if ("displayName" in body) {
@@ -91,6 +92,27 @@ export async function updateProfile(req: Request, res: Response): Promise<void> 
       throw new ApiError(
         400,
         "onboardingCompletedAt must be a valid ISO 8601 date or null.",
+      );
+    }
+  }
+
+  if ("termsAcceptedAt" in body) {
+    const val = body.termsAcceptedAt;
+    if (val === null) {
+      allowed.termsAcceptedAt = null;
+    } else if (typeof val === "string") {
+      const parsed = new Date(val);
+      if (Number.isNaN(parsed.getTime())) {
+        throw new ApiError(
+          400,
+          "termsAcceptedAt must be a valid ISO 8601 date or null.",
+        );
+      }
+      allowed.termsAcceptedAt = parsed;
+    } else {
+      throw new ApiError(
+        400,
+        "termsAcceptedAt must be a valid ISO 8601 date or null.",
       );
     }
   }

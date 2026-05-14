@@ -329,6 +329,7 @@ export const validateProfilePatchInput: RequestHandler = (req, _res, next) => {
   normalizeStringField(body, "avatarUrl", 500);
   normalizeStringField(body, "locale", 10);
   normalizeStringField(body, "onboardingCompletedAt", 64);
+  normalizeStringField(body, "termsAcceptedAt", 64);
 
   next();
 };
