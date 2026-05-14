@@ -78,13 +78,64 @@ export function hasBackendSyncIssue(
   );
 }
 
+const BACKEND_ERROR_PATTERNS: Array<{ match: RegExp; vietnamese: string }> = [
+  {
+    match: /too many requests|rate limit/i,
+    vietnamese: "Bạn vừa đồng bộ liên tục. Hãy đợi một chút rồi thử lại.",
+  },
+  {
+    match: /timeout|timed out|deadline exceeded/i,
+    vietnamese: "Yêu cầu mất quá nhiều thời gian. Hãy thử lại khi mạng ổn hơn.",
+  },
+  {
+    match: /network|fetch failed|failed to fetch|offline/i,
+    vietnamese: "Mạng đang chập chờn. Hãy kiểm tra kết nối rồi thử lại.",
+  },
+  {
+    match: /unauthorized|unauthenticated|invalid token|expired token|401/i,
+    vietnamese: "Phiên đăng nhập đã hết hạn. Hãy đăng xuất rồi đăng nhập lại.",
+  },
+  {
+    match: /forbidden|permission denied|403/i,
+    vietnamese: "Tài khoản chưa đủ quyền cho thao tác này.",
+  },
+  {
+    match: /not found|404/i,
+    vietnamese: "Không tìm thấy dữ liệu trên máy chủ.",
+  },
+  {
+    match: /service unavailable|503|bad gateway|502|internal server error|500/i,
+    vietnamese: "Máy chủ đang bận. Hãy thử lại sau ít phút.",
+  },
+];
+
+const VIETNAMESE_DIACRITICS_REGEX =
+  /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ]/u;
+
+export function translateBackendErrorMessage(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  for (const pattern of BACKEND_ERROR_PATTERNS) {
+    if (pattern.match.test(trimmed)) return pattern.vietnamese;
+  }
+
+  // Plain English (no Vietnamese diacritics, ASCII only) → generic friendly fallback
+  if (!VIETNAMESE_DIACRITICS_REGEX.test(trimmed) && /^[\x20-\x7e]+$/.test(trimmed)) {
+    return "Máy chủ trả về lỗi. Hãy thử lại sau ít giây.";
+  }
+
+  return trimmed;
+}
+
 export function getBackendSyncIssueMessage(
   backendConnectionStatus: BackendConnectionStatus,
   lastBackendHydrationResult: BackendPlanHydrationResult | null,
 ): string {
   return (
-    backendConnectionStatus.syncMessage ||
-    lastBackendHydrationResult?.message ||
+    translateBackendErrorMessage(backendConnectionStatus.syncMessage) ||
+    translateBackendErrorMessage(lastBackendHydrationResult?.message) ||
     "Dữ liệu trên thiết bị vẫn được giữ lại. Bạn có thể thử đồng bộ lại khi tài khoản hoặc mạng ổn định hơn."
   );
 }
