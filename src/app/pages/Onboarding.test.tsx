@@ -121,7 +121,7 @@ describe("Onboarding", () => {
     expect(screen.getByText(/không tạo lại từ đầu/i)).toBeInTheDocument();
   });
 
-  it("saves life areas to storage when clicking 'Lưu và quay lại sau'", async () => {
+  it("does not save default scores when clicking 'Quay lại sau' without reviewing any area", async () => {
     const user = userEvent.setup();
 
     render(
@@ -130,17 +130,16 @@ describe("Onboarding", () => {
       </MemoryRouter>,
     );
 
-    // Click save-and-return button on the welcome step
-    const saveButton = await screen.findByRole("button", { name: /Lưu và quay lại sau/i });
+    // Click return button on the welcome step without reviewing any areas
+    const saveButton = await screen.findByRole("button", { name: /Quay lại sau/i });
     await user.click(saveButton);
 
-    // Verify the wheel of life data was persisted with default scores (5)
+    // Verify the wheel of life data was NOT persisted with default scores
     const data = getUserData();
-    expect(data.currentWheelOfLife.length).toBe(8);
-    expect(data.currentWheelOfLife.every((area) => area.score === 5)).toBe(true);
+    expect(data.currentWheelOfLife.every((area) => area.score === 0)).toBe(true);
   });
 
-  it("saves adjusted scores when clicking 'Lưu và quay lại sau' after modifying sliders", async () => {
+  it("saves adjusted scores when clicking 'Quay lại sau' after modifying sliders", async () => {
     const user = userEvent.setup();
 
     render(
@@ -159,7 +158,7 @@ describe("Onboarding", () => {
 
     // Go back to welcome step and save
     await user.click(await screen.findByRole("button", { name: /Quay lại giới thiệu/i }));
-    await user.click(await screen.findByRole("button", { name: /Lưu và quay lại sau/i }));
+    await user.click(await screen.findByRole("button", { name: /Quay lại sau/i }));
 
     // Verify the adjusted score was persisted
     const data = getUserData();

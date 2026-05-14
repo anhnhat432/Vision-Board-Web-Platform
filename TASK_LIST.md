@@ -191,13 +191,23 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 
 ## P1: Backend Sync Hardening
 
-### 11. ⬜ Retry Logic for Sync Failures
+### 11. ✅ Retry Logic for Sync Failures
 
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
+- **Status:** [x] Completed
 - **Prompt:** Prompt 11
 - **Files changed:**
-- **Notes:** Exponential backoff, persistent queue
-- **Verified:** [ ] Offline test: changes sync when back online
+  - `src/features/plan12week/hooks/useBackendSyncIssueState.ts` - new hook to delay visible sync warnings until retries/time threshold, while showing conflicts immediately
+  - `src/features/plan12week/hooks/useBackendSyncIssueState.test.tsx` - focused tests for transient errors, conflicts, retry count and recovery
+  - `src/features/plan12week/pages/12WeekSystem.tsx` - dashboard sync warning now uses the new issue-state hook and no longer flashes on first transient backend failure
+  - `src/lib/api/apiClient.ts` - added `RateLimitError`, `isRateLimitError()` and `Retry-After` parsing for HTTP 429 responses
+  - `src/features/plan12week/hooks/usePlanSyncQueue.ts` - queue retry now respects server `Retry-After`, applies exponential backoff fallback, and stops processing the current drain on rate limit
+  - `src/features/plan12week/hooks/usePlanExecutionSync.ts` - debounced `syncPlanSnapshotNow` with in-flight promise dedup to avoid duplicate backend snapshot writes
+- **Notes:**
+  - Transient backend sync errors are tracked without immediately alarming users.
+  - HTTP 429 is handled as retryable and schedules the next retry using the server-provided `Retry-After` when present.
+  - Queue processing breaks on rate-limit to avoid hammering the backend.
+  - Existing bulk mutation queue (`sendPending12WeekMutations`) already batches up to 25 pending mutations per request.
+- **Verified:** [x] `npm run typecheck` / [x] focused hook tests / [x] `npm run lint` / [x] `npm run build`
 
 ### 12. ✅ Conflict Resolution
 
@@ -293,12 +303,21 @@ Sử dụng file này để theo dõi tiến độ hoàn thiện dự án.
 - **Files changed:**
 - **Verified:** [ ] npm --prefix backend run test passes
 
-### 17. ⬜ Durable Retry Queue
+### 17. ✅ Durable Retry Queue
 
 - **Prompt:** Prompt 17
-- **Status:** [ ] Not started / [ ] In progress / [ ] Completed
+- **Status:** [x] Completed
 - **Files changed:**
-- **Verified:** [ ] Queue persists across reloads
+  - `src/features/plan12week/persistence/mutationQueue.ts` - existing persisted mutation queue store
+  - `src/features/plan12week/persistence/mutationQueueSender.ts` - existing batched sender for pending 12-week mutations with retry metadata
+  - `src/features/plan12week/hooks/usePlanSyncQueue.ts` - persistent queue retry/backoff improved for 429 and transient failures
+  - `src/lib/api/apiClient.ts` - 429 `Retry-After` support
+  - `src/features/plan12week/hooks/usePlanExecutionSync.ts` - snapshot sync dedup to reduce duplicate queue writes
+- **Notes:**
+  - Queue persists in localStorage and drains in real mode only when authenticated/API configured/online.
+  - Pending mutations are compacted, marked in-flight, then marked succeeded/failed per server result.
+  - Retryable request failures keep `nextRetryAt` for later drain attempts.
+- **Verified:** [x] Queue implementation reviewed / [x] `npm run typecheck` / [x] `npm run lint` / [x] `npm run build`
 
 ### 18. ⬜ Loading States
 

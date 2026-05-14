@@ -46,12 +46,12 @@ describe("SyncStatusPill", () => {
   });
 
   it.each([
-    ["conflict", createSyncState({ conflictPending: true }), "Cần xử lý đồng bộ"],
-    ["syncing", createSyncState({ syncing: true, loading: true }), "Đang đồng bộ tài khoản"],
+    ["conflict", createSyncState({ conflictPending: true }), "Cần chọn bản dữ liệu"],
+    ["syncing", createSyncState({ syncing: true, loading: true }), "Đang sao lưu"],
     ["offline", createSyncState({ online: false }), "Đã lưu trên thiết bị"],
-    ["pending", createSyncState({ pendingCount: 3 }), "3 chờ đồng bộ"],
-    ["ok", createSyncState({ lastSyncedAt: "2026-05-10T09:55:00.000Z" }), "Đã đồng bộ tài khoản 5 phút trước"],
-    ["idle", createSyncState(), "Chưa đồng bộ"],
+    ["pending", createSyncState({ pendingCount: 3 }), "3 chờ sao lưu"],
+    ["ok", createSyncState({ lastSyncedAt: "2026-05-10T09:55:00.000Z" }), "Đã sao lưu 5 phút trước"],
+    ["idle", createSyncState(), "Chưa sao lưu"],
   ])("renders the %s state", (_stateName, state, text) => {
     renderPill(state);
 
@@ -61,11 +61,11 @@ describe("SyncStatusPill", () => {
   it("uses a compact tooltip without promising multi-device sync", () => {
     renderPill(createSyncState({ lastSyncedAt: "2026-05-10T09:00:00.000Z", pendingCount: 2 }));
 
-    const pill = screen.getByText("2 chờ đồng bộ").closest("button");
+    const pill = screen.getByText("2 chờ sao lưu").closest("button");
 
     expect(pill).toHaveAttribute(
       "title",
-      "Đã lưu trên thiết bị. 2 thay đổi đã lưu trên thiết bị, chờ gửi lên tài khoản.",
+      "Đã lưu trên thiết bị. 2 thay đổi đã lưu, chờ sao lưu vào tài khoản.",
     );
     expect(pill?.getAttribute("title")).not.toMatch(/đa thiết bị|tự đồng bộ/i);
   });
@@ -81,9 +81,9 @@ describe("SyncStatusPill", () => {
       }),
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Cần xử lý đồng bộ" }));
+    fireEvent.click(screen.getByRole("button", { name: "Cần chọn bản dữ liệu" }));
 
-    expect(screen.getByText("Cần xử lý đồng bộ")).toBeInTheDocument();
+    expect(screen.getByText("Cần chọn bản dữ liệu")).toBeInTheDocument();
     expect(listener).toHaveBeenCalledTimes(1);
     window.removeEventListener(AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME, listener);
   });

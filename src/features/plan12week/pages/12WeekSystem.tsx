@@ -968,8 +968,8 @@ export function TwelveWeekSystem() {
       {hasBackendSyncIssue && (
         <TwelveWeekDashboardNotice
           tone="error"
-          title="Chưa thể đồng bộ với máy chủ"
-          description={`${backendSyncIssueMessage} Các thay đổi hiện tại vẫn được giữ trên thiết bị này.`}
+          title="Chưa sao lưu được vào tài khoản"
+          description={`${backendSyncIssueMessage} Tiến trình vẫn được lưu trên thiết bị này.`}
         >
           <Button
             variant="destructive"
@@ -977,7 +977,7 @@ export function TwelveWeekSystem() {
             disabled={isBackendSyncing}
             onClick={handleRunOutboxSync}
           >
-            {isBackendSyncing ? "Đang thử lại..." : "Thử đồng bộ lại"}
+            {isBackendSyncing ? "Đang thử lại..." : "Thử sao lưu lại"}
           </Button>
           <Button className="w-full bg-white sm:w-auto" variant="outline" onClick={() => handleTabChange("settings")}>
             Xem trạng thái

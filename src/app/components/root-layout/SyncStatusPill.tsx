@@ -44,16 +44,16 @@ function getSyncState(input: {
 }
 
 function getPendingCopy(count: number): string {
-  return count > 0 ? `${count} thay đổi đã lưu trên thiết bị, chờ gửi lên tài khoản` : "không có thay đổi chờ gửi";
+  return count > 0 ? `${count} thay đổi đã lưu, chờ sao lưu vào tài khoản` : "không có thay đổi chờ gửi";
 }
 
 function getTooltip(state: SyncPillState, relativeTime: string | null, pendingCount: number): string {
   if (state === "conflict") return "Dữ liệu trên thiết bị và tài khoản đang khác nhau. Bấm để chọn phiên bản an toàn.";
-  if (state === "syncing") return `Đã lưu trên thiết bị. Đang đồng bộ lên tài khoản; ${getPendingCopy(pendingCount)}.`;
-  if (state === "offline") return `Đã lưu trên thiết bị. Sẽ đồng bộ tài khoản khi có mạng; ${getPendingCopy(pendingCount)}.`;
+  if (state === "syncing") return `Đã lưu trên thiết bị. Đang sao lưu vào tài khoản; ${getPendingCopy(pendingCount)}.`;
+  if (state === "offline") return `Đã lưu trên thiết bị. Sẽ sao lưu vào tài khoản khi có mạng; ${getPendingCopy(pendingCount)}.`;
   if (state === "pending") return `Đã lưu trên thiết bị. ${getPendingCopy(pendingCount)}.`;
 
-  const timeCopy = relativeTime ? `Đã đồng bộ tài khoản ${relativeTime}` : "Chưa có lần đồng bộ tài khoản";
+  const timeCopy = relativeTime ? `Đã sao lưu ${relativeTime}` : "Chưa có lần sao lưu";
   return `${timeCopy}; ${getPendingCopy(pendingCount)}.`;
 }
 
@@ -78,13 +78,13 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
     conflict: {
       dot: <SyncIdleDot className="h-4 w-4" />,
       icon: <Upload className="h-3 w-3" />,
-      label: "Cần xử lý đồng bộ",
+      label: "Cần chọn bản dữ liệu",
       tone: "border-amber-300 bg-amber-100 text-amber-800",
     },
     syncing: {
       dot: <SyncSyncingDot className="h-4 w-4" />,
       icon: <Loader2 className="h-3 w-3 animate-spin" />,
-      label: "Đang đồng bộ tài khoản",
+      label: "Đang sao lưu",
       tone: "border-sky-200 bg-sky-50 text-sky-700",
     },
     offline: {
@@ -96,19 +96,19 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
     pending: {
       dot: <SyncSyncingDot className="h-4 w-4" />,
       icon: <Upload className="h-3 w-3" />,
-      label: `${syncState.pendingCount} chờ đồng bộ`,
+      label: `${syncState.pendingCount} chờ sao lưu`,
       tone: "border-amber-200 bg-amber-50 text-amber-700",
     },
     ok: {
       dot: <SyncOkDot className="h-4 w-4" />,
       icon: <CheckCircle2 className="h-3 w-3" />,
-      label: `Đã đồng bộ tài khoản ${relativeTime ?? "vừa xong"}`,
+      label: `Đã sao lưu ${relativeTime ?? "vừa xong"}`,
       tone: "border-emerald-200 bg-emerald-50 text-emerald-700",
     },
     idle: {
       dot: <SyncIdleDot className="h-4 w-4" />,
       icon: <Clock3 className="h-3 w-3" />,
-      label: "Chưa đồng bộ",
+      label: "Chưa sao lưu",
       tone: "border-slate-200 bg-slate-50 text-slate-600",
     },
   } satisfies Record<SyncPillState, { dot: ReactNode; icon: ReactNode; label: string; tone: string }>;

@@ -21,7 +21,7 @@ export function DataStorageInfo({
       <p className={`flex items-center gap-1.5 text-xs text-slate-500 ${className}`}>
         <Monitor className="h-3 w-3 shrink-0" />
         {demoMode
-          ? "Kế hoạch 12 tuần được lưu trên trình duyệt này."
+          ? "Kế hoạch 12 tuần được lưu trên thiết bị này."
           : "Kế hoạch 12 tuần đang gắn với tài khoản của bạn."}
       </p>
     );
@@ -35,12 +35,12 @@ export function DataStorageInfo({
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
         <div className="min-w-0">
           <p className="text-sm font-medium text-sky-900">
-            {demoMode ? "Dữ liệu được lưu trên trình duyệt này" : "Dữ liệu được gắn với tài khoản của bạn"}
+            {demoMode ? "Dữ liệu được lưu trên thiết bị này" : "Dữ liệu được gắn với tài khoản của bạn"}
           </p>
           <p className="mt-0.5 text-sm text-sky-700">
             {demoMode
-              ? "Nếu đổi thiết bị hoặc xóa dữ liệu trình duyệt, tiến độ sẽ bị mất. Hãy xuất bản sao lưu nếu muốn giữ lại."
-              : "Ứng dụng vẫn giữ một bản trên thiết bị để thao tác nhanh và đồng bộ lại khi tài khoản sẵn sàng."}
+              ? "Nếu đổi thiết bị hoặc xóa dữ liệu trình duyệt, tiến độ sẽ bị mất. Hãy tải bản dự phòng nếu muốn giữ lại."
+              : "Ứng dụng vẫn giữ một bản trên thiết bị để thao tác nhanh và sao lưu lại khi tài khoản sẵn sàng."}
           </p>
         </div>
       </div>
@@ -64,21 +64,21 @@ export function DataStorageInfo({
         <li className="flex items-start gap-2.5 text-sm leading-6 text-slate-700">
           <Monitor className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
           {demoMode
-            ? "Toàn bộ dữ liệu được lưu trên trình duyệt này. App chỉ đồng bộ lên tài khoản khi bạn đăng nhập."
+            ? "Tiến trình được lưu trên thiết bị này. Đăng nhập để sao lưu vào tài khoản và dùng tiếp trên thiết bị khác."
             : "Dữ liệu được gắn với tài khoản; thiết bị vẫn giữ bản tạm để bạn dùng mượt khi mạng chập chờn."}
         </li>
         <li className="flex items-start gap-2.5 text-sm leading-6 text-slate-700">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
           {demoMode
-            ? "Đổi thiết bị, dùng trình duyệt khác hoặc xóa dữ liệu trình duyệt sẽ mất tiến độ. Hãy xuất bản sao lưu thường xuyên."
-            : "Nếu đổi thiết bị, hãy đăng nhập cùng tài khoản để khôi phục dữ liệu. Bạn vẫn có thể xuất bản sao lưu khi cần."}
+            ? "Đổi thiết bị hoặc xóa dữ liệu trình duyệt sẽ mất tiến độ. Hãy đăng nhập hoặc tải bản dự phòng thường xuyên."
+            : "Nếu đổi thiết bị, hãy đăng nhập cùng tài khoản để khôi phục dữ liệu. Bạn vẫn có thể tải bản dự phòng khi cần."}
         </li>
         {showSyncHint && (
           <li className="flex items-start gap-2.5 text-sm leading-6 text-slate-500">
             <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-300" />
             {demoMode
-              ? "Đăng nhập để đồng bộ dữ liệu giữa các thiết bị khi dùng bản production."
-              : "Đồng bộ tài khoản chạy nền và không xóa dữ liệu trên thiết bị nếu gặp lỗi."}
+              ? "Đăng nhập để sao lưu dữ liệu giữa các thiết bị."
+              : "Sao lưu vào tài khoản chạy nền và không xóa dữ liệu trên thiết bị nếu gặp lỗi."}
           </li>
         )}
       </ul>

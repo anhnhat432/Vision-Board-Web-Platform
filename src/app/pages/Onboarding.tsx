@@ -213,13 +213,17 @@ export function Onboarding() {
                       variant="ghost"
                       className="w-full text-slate-500 hover:bg-slate-50 sm:w-auto"
                       onClick={() => {
-                        updateWheelOfLife(lifeAreas);
-                        setIsDirty(false);
-                        toast.success("Đã lưu 8 lĩnh vực, bạn có thể quay lại bất kỳ lúc nào.");
+                        if (reviewedAreaIndices.size > 0) {
+                          updateWheelOfLife(lifeAreas);
+                          setIsDirty(false);
+                          toast.success("Đã lưu phần bạn đã chỉnh. Bạn có thể quay lại rà đủ 8 lĩnh vực bất kỳ lúc nào.");
+                        } else {
+                          toast.info("Chưa có điểm nào được chỉnh. Dữ liệu chưa lưu.");
+                        }
                         navigate("/");
                       }}
                     >
-                      Lưu và quay lại sau
+                      Quay lại sau
                     </Button>
                   </div>
 
