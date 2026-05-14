@@ -99,3 +99,10 @@ export const billingStatusRateLimiter = createLimiter({
   limit: 40,
   keyGenerator: userOrIpKey,
 });
+
+export const planBulkSyncRateLimiter = createLimiter({
+  keyPrefix: "plan-bulk-sync",
+  windowMs: ONE_MINUTE_MS,
+  limit: 10,
+  keyGenerator: userOrIpKey,
+});

@@ -280,7 +280,7 @@ export async function sendPending12WeekMutations(
       attemptedCount: pendingMutations.length,
       succeededCount: 0,
       duplicateCount: 0,
-      failedCount: pendingMutations.length,
+      failedCount: failure.httpStatus === 429 ? 0 : pendingMutations.length,
       pendingCount: countRemainingPending(latestStore, ownerUid, now),
       error,
     };

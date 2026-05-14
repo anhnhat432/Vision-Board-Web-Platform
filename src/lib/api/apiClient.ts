@@ -16,6 +16,9 @@ export interface ApiClientError extends AppError {
   details?: unknown;
   isNetworkError?: boolean;
   conflict?: true;
+  rateLimited?: true;
+  /** Server-suggested retry delay in ms (from Retry-After header), or a default */
+  retryAfterMs?: number;
   currentRevision?: number;
   serverUpdatedAt?: string;
 }
@@ -28,7 +31,17 @@ const responseErrorInterceptors: ResponseErrorInterceptor[] = [];
 
 function toApiClientError(error: unknown): ApiClientError {
   if (error && typeof error === "object" && "message" in error) {
-    const withMessage = error as { message?: unknown; status?: unknown; details?: unknown; isNetworkError?: unknown; conflict?: unknown; currentRevision?: unknown; serverUpdatedAt?: unknown };
+    const withMessage = error as {
+      message?: unknown;
+      status?: unknown;
+      details?: unknown;
+      isNetworkError?: unknown;
+      conflict?: unknown;
+      rateLimited?: unknown;
+      retryAfterMs?: unknown;
+      currentRevision?: unknown;
+      serverUpdatedAt?: unknown;
+    };
     return {
       message:
         typeof withMessage.message === "string" && withMessage.message.trim().length > 0
@@ -39,6 +52,8 @@ function toApiClientError(error: unknown): ApiClientError {
       isNetworkError:
         typeof withMessage.isNetworkError === "boolean" ? withMessage.isNetworkError : undefined,
       conflict: withMessage.conflict === true ? true : undefined,
+      rateLimited: withMessage.rateLimited === true || withMessage.status === 429 ? true : undefined,
+      retryAfterMs: typeof withMessage.retryAfterMs === "number" ? withMessage.retryAfterMs : undefined,
       currentRevision: typeof withMessage.currentRevision === "number" ? withMessage.currentRevision : undefined,
       serverUpdatedAt: typeof withMessage.serverUpdatedAt === "string" ? withMessage.serverUpdatedAt : undefined,
     };
@@ -56,6 +71,8 @@ function createApiClientError(payload: ApiClientError): ApiClientError {
     details: payload.details,
     isNetworkError: payload.isNetworkError,
     conflict: payload.conflict,
+    rateLimited: payload.rateLimited,
+    retryAfterMs: payload.retryAfterMs,
     currentRevision: payload.currentRevision,
     serverUpdatedAt: payload.serverUpdatedAt,
   };
@@ -117,6 +134,45 @@ async function parseResponseBody(response: Response): Promise<unknown> {
   }
 }
 
+export class RateLimitError extends Error {
+  public readonly status = 429;
+  public readonly rateLimited = true;
+  public readonly retryAfterMs: number;
+
+  constructor(retryAfterMs: number, message = "Máy chủ đang giới hạn tốc độ đồng bộ. Hệ thống sẽ tự thử lại.") {
+    super(message);
+    this.name = "RateLimitError";
+    this.retryAfterMs = retryAfterMs;
+  }
+}
+
+const DEFAULT_RATE_LIMIT_RETRY_MS = 5_000;
+
+function parseRetryAfterMs(response: Response): number {
+  const header = response.headers.get("Retry-After");
+  if (!header) return DEFAULT_RATE_LIMIT_RETRY_MS;
+
+  const seconds = Number(header);
+  if (Number.isFinite(seconds) && seconds > 0) {
+    return Math.min(seconds * 1000, 120_000);
+  }
+
+  // Try HTTP-date format
+  const dateMs = Date.parse(header);
+  if (Number.isFinite(dateMs)) {
+    const delayMs = dateMs - Date.now();
+    return delayMs > 0 ? Math.min(delayMs, 120_000) : DEFAULT_RATE_LIMIT_RETRY_MS;
+  }
+
+  return DEFAULT_RATE_LIMIT_RETRY_MS;
+}
+
+export function isRateLimitError(error: unknown): error is (ApiClientError & { rateLimited: true }) | RateLimitError {
+  if (error instanceof RateLimitError) return true;
+  if (!error || typeof error !== "object") return false;
+  return (error as ApiClientError).rateLimited === true || (error as ApiClientError).status === 429;
+}
+
 function getErrorMessageFromPayload(payload: unknown): string | null {
   if (!payload || typeof payload !== "object") return null;
   if (!("message" in payload)) return null;
@@ -171,11 +227,15 @@ async function request<TResponse, TBody = unknown>(
 
   if (!response.ok) {
     const isConflict = response.status === 409;
+    const isRateLimit = response.status === 429;
+    const retryAfterMs = isRateLimit ? parseRetryAfterMs(response) : undefined;
     const apiError = createApiClientError({
       message: getErrorMessageFromPayload(payload) ?? `Yêu cầu không thành công (mã ${response.status}).`,
       status: response.status,
       details: payload,
       conflict: isConflict || undefined,
+      rateLimited: isRateLimit || undefined,
+      retryAfterMs,
       currentRevision: isConflict && payload && typeof payload === "object" && "currentRevision" in payload
         ? (payload as { currentRevision?: number }).currentRevision
         : undefined,

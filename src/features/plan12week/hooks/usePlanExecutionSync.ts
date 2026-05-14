@@ -1,11 +1,13 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
-import { toAppError } from "@/lib/api/apiClient";
+import { isRateLimitError, RateLimitError, toAppError } from "@/lib/api/apiClient";
 import type { ApiClientError } from "@/lib/api/apiClient";
 import { createMetric, getMetrics, logMetric, updateMetricLog } from "@/services/metricService";
-import { createPlan, getPlan, getPlans } from "@/services/planService";
+import { bulkSyncPlan, createPlan, getPlan, getPlans } from "@/services/planService";
 import { addTask, updateTask } from "@/services/taskService";
 import { updateWeek, updateWeekReview } from "@/services/weekService";
+import type { BulkSyncResponse } from "@/types/bulkSync";
+import { buildBulkSyncRequest, isBulkRequestEmpty } from "../persistence/bulkSyncBuilder";
 import type { AppError } from "@/types/api";
 import type { PlanDetails, Task, WeekDetails } from "@/types/plan";
 import type { TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
@@ -13,6 +15,7 @@ import { isDemoMode } from "@/app/utils/app-mode";
 import { getCalendarDateKey } from "@/app/utils/storage-date-utils";
 import { getTwelveWeekCurrentWeek } from "@/app/utils/storage-twelve-week";
 import { DAILY_CHECKIN_METRIC_NAME } from "../constants/progressMetrics";
+import { getCachedMetrics, invalidateMetricsCache, setCachedMetrics } from "../persistence/metricCache";
 import { getUniversalWeeklyReviewExecutionScore } from "../persistence/reviewExecutionScore";
 import {
   getMetricIdForGoal,
@@ -24,6 +27,7 @@ import {
   savePlanDetailsLink,
   setMetricIdForGoal,
   setRemoteTaskIdForGoal,
+  updateTaskRevisionInLink,
   updateWeekRevisionInLink,
 } from "../persistence/planLinkStore";
 import { usePlanSyncQueue } from "./usePlanSyncQueue";
@@ -77,6 +81,9 @@ interface SyncCounter {
   failedCount: number;
   conflictCount: number;
 }
+
+const PLAN_SNAPSHOT_SYNC_DEBOUNCE_MS = 5_000;
+const DEFAULT_RATE_LIMIT_RETRY_MS = 5_000;
 
 interface SyncTaskSnapshotOptions {
   allowStatusDowngrade?: boolean;
@@ -225,6 +232,45 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
   const [error, setError] = useState<AppError | null>(null);
   const [lastSnapshot, setLastSnapshot] = useState<PlanExecutionSyncSnapshot | null>(null);
   const [conflicts, setConflicts] = useState<ConflictInfo[]>([]);
+  const snapshotInFlightRef = useRef<Promise<PlanExecutionSyncSnapshot> | null>(null);
+  const lastSnapshotSyncStartedAtRef = useRef(0);
+  const snapshotDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingSnapshotResolversRef = useRef<
+    Array<{
+      resolve: (snapshot: PlanExecutionSyncSnapshot) => void;
+      reject: (error: unknown) => void;
+    }>
+  >([]);
+  const latestSnapshotSystemRef = useRef<TwelveWeekSystem | null | undefined>(null);
+  const readInFlightRef = useRef(new Map<string, Promise<unknown>>());
+
+  const dedupRead = useCallback(<T,>(key: string, action: () => Promise<T>): Promise<T> => {
+    const existing = readInFlightRef.current.get(key) as Promise<T> | undefined;
+    if (existing) return existing;
+
+    const promise = action().finally(() => {
+      readInFlightRef.current.delete(key);
+    });
+    readInFlightRef.current.set(key, promise);
+    return promise;
+  }, []);
+
+  const getPlanDeduped = useCallback((planId: string): Promise<PlanDetails> => {
+    return dedupRead(`plan:${planId}`, () => getPlan(planId));
+  }, [dedupRead]);
+
+  const getPlansDeduped = useCallback(() => {
+    return dedupRead("plans:list", () => getPlans());
+  }, [dedupRead]);
+
+  const getMetricsCached = useCallback(async (weekId: string) => {
+    const cachedMetrics = getCachedMetrics(weekId);
+    if (cachedMetrics) return cachedMetrics;
+
+    const metrics = await dedupRead(`metrics:${weekId}`, () => getMetrics(weekId));
+    setCachedMetrics(weekId, metrics);
+    return metrics;
+  }, [dedupRead]);
 
   // runAction wrapper for API calls with conflict detection
   const runAction = useCallback(async <T,>(action: () => Promise<T>, conflictMeta?: { entityType: ConflictInfo["entityType"]; entityId: string }): Promise<T | null> => {
@@ -240,6 +286,10 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
       return await action();
     } catch (nextError) {
       const parsedError = toAppError(nextError) as ApiClientError;
+      if (isRateLimitError(parsedError)) {
+        throw new RateLimitError(parsedError.retryAfterMs ?? DEFAULT_RATE_LIMIT_RETRY_MS, parsedError.message);
+      }
+
       if (parsedError.status === 409 && conflictMeta) {
         const conflict: ConflictInfo = {
           entityType: conflictMeta.entityType,
@@ -266,17 +316,17 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
   ): Promise<PlanDetails | null> => {
     const link = getPlanLink(goalId);
     if (link?.planId) {
-      const linkedDetails = await runAction(() => getPlan(link.planId));
+      const linkedDetails = await runAction(() => getPlanDeduped(link.planId));
       if (linkedDetails) {
         savePlanDetailsLink(goalId, linkedDetails);
         return linkedDetails;
       }
     }
 
-    const plans = await runAction(() => getPlans());
+    const plans = await runAction(() => getPlansDeduped());
     const existingPlan = plans?.find((plan) => plan.smartGoalId === goalId);
     if (existingPlan) {
-      const details = await runAction(() => getPlan(existingPlan.id));
+      const details = await runAction(() => getPlanDeduped(existingPlan.id));
       if (details) {
         savePlanDetailsLink(goalId, details);
         return details;
@@ -294,12 +344,12 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     );
     if (!createdPlan) return null;
 
-    const details = await runAction(() => getPlan(createdPlan.id));
+    const details = await runAction(() => getPlanDeduped(createdPlan.id));
     if (!details) return null;
 
     savePlanDetailsLink(goalId, details);
     return details;
-  }, [runAction]);
+  }, [runAction, getPlanDeduped, getPlansDeduped]);
 
   // Ensure remote metric exists
   const ensureRemoteMetricId = useCallback(async (
@@ -311,7 +361,7 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     const knownMetricId = getMetricIdForGoal(goalId, weekNumber, metricName);
     if (knownMetricId) return knownMetricId;
 
-    const metrics = await runAction(() => getMetrics(weekId));
+    const metrics = await runAction(() => getMetricsCached(weekId));
     const existingMetric = metrics?.find(
       (metric) => metric.name.trim().toLowerCase() === metricName.trim().toLowerCase(),
     );
@@ -329,9 +379,10 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     );
     if (!createdMetric) return null;
 
+    invalidateMetricsCache(weekId);
     setMetricIdForGoal(goalId, weekNumber, metricName, createdMetric.id);
     return createdMetric.id;
-  }, [runAction]);
+  }, [runAction, getMetricsCached]);
 
   // Sync task to remote
   const syncTaskSnapshot = useCallback(async (
@@ -393,7 +444,7 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     const metricId = await ensureRemoteMetricId(goalId, weekId, input.weekNumber, DAILY_CHECKIN_METRIC_NAME);
     if (!metricId) return false;
 
-    const metrics = await runAction(() => getMetrics(weekId));
+    const metrics = await runAction(() => getMetricsCached(weekId));
     if (metrics) {
       const metric =
         metrics.find((item) => item.id === metricId) ??
@@ -415,6 +466,7 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
               completed: input.didWorkToday,
             }),
           );
+          if (updatedMetric) invalidateMetricsCache(weekId);
           return Boolean(updatedMetric);
         }
       }
@@ -428,8 +480,9 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
       }),
     );
 
+    if (updatedMetric) invalidateMetricsCache(weekId);
     return Boolean(updatedMetric);
-  }, [ensureRemoteMetricId, runAction]);
+  }, [ensureRemoteMetricId, runAction, getMetricsCached]);
 
   // Sync completed task metric
   const syncCompletedTaskMetricForWeek = useCallback(async (
@@ -445,7 +498,7 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     const metricId = await ensureRemoteMetricId(goalId, weekId, task.weekNumber, metricName);
     if (!metricId) return false;
 
-    const metrics = await runAction(() => getMetrics(weekId));
+    const metrics = await runAction(() => getMetricsCached(weekId));
     const metric =
       metrics?.find((item) => item.id === metricId) ??
       metrics?.find((item) => item.name.trim().toLowerCase() === metricName.trim().toLowerCase());
@@ -462,8 +515,9 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
         completed: true,
       }),
     );
+    if (updatedMetric) invalidateMetricsCache(weekId);
     return Boolean(updatedMetric);
-  }, [ensureRemoteMetricId, runAction]);
+  }, [ensureRemoteMetricId, runAction, getMetricsCached]);
 
   // Sync weekly review
   const syncWeeklyReviewForWeek = useCallback(async (
@@ -530,25 +584,100 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     return syncWeeklyReviewForWeek(weekId, input);
   }, [goalId, system, ensurePlanDetails, syncWeeklyReviewForWeek]);
 
-  const syncPlanSnapshotNow = useCallback(async (
-    systemToSync: TwelveWeekSystem | null | undefined,
-  ): Promise<PlanExecutionSyncSnapshot> => {
-    const counter: SyncCounter = { syncedCount: 0, skippedCount: 0, failedCount: 0, conflictCount: 0 };
-
-    if (!goalId || !systemToSync || isDemoMode()) {
-      const snapshot = createSnapshot(counter, null, "idle");
-      setLastSnapshot(snapshot);
-      return snapshot;
+  // ── Apply bulk sync response to link store + counters ──────────────
+  const applyBulkSyncResponse = useCallback((
+    currentGoalId: string,
+    systemToSync: TwelveWeekSystem,
+    response: BulkSyncResponse,
+    counter: SyncCounter,
+  ): void => {
+    // Weeks
+    for (const weekResult of response.weeks) {
+      if (weekResult.ok && weekResult.revision != null) {
+        updateWeekRevisionInLink(currentGoalId, weekResult.weekId, weekResult.revision);
+        counter.syncedCount += 1;
+      } else if (weekResult.conflict) {
+        counter.conflictCount += 1;
+        setConflicts((prev) => [...prev, {
+          entityType: "week" as const,
+          entityId: weekResult.weekId,
+          message: weekResult.error || "Dữ liệu tuần đã được cập nhật từ thiết bị khác.",
+        }]);
+      } else {
+        counter.failedCount += 1;
+      }
     }
 
-    const details = await ensurePlanDetails(goalId, systemToSync);
-    if (!details) {
-      counter.failedCount += 1;
-      const snapshot = createSnapshot(counter, null, "error");
-      setLastSnapshot(snapshot);
-      return snapshot;
+    // Tasks
+    for (const taskResult of response.tasks) {
+      if (taskResult.ok) {
+        // Find local task that maps to this result to update the link
+        const localTask = systemToSync.taskInstances.find((t) => {
+          const linkedRemoteId = getRemoteTaskIdForGoal(currentGoalId, t.id);
+          return linkedRemoteId === taskResult.clientTaskId || linkedRemoteId === taskResult.taskId;
+        }) ?? systemToSync.taskInstances.find((t) => {
+          // For newly created tasks, clientTaskId is empty — match by title+weekId
+          if (taskResult.clientTaskId) return false;
+          const weekId = getWeekIdForGoal(currentGoalId, t.weekNumber);
+          return weekId === taskResult.weekId && !getRemoteTaskIdForGoal(currentGoalId, t.id);
+        });
+
+        if (localTask) {
+          setRemoteTaskIdForGoal(currentGoalId, localTask.id, taskResult.taskId, taskResult.revision);
+        } else if (taskResult.clientTaskId && taskResult.revision != null) {
+          updateTaskRevisionInLink(currentGoalId, taskResult.clientTaskId, taskResult.taskId, taskResult.revision);
+        }
+        counter.syncedCount += 1;
+      } else if (taskResult.conflict) {
+        counter.conflictCount += 1;
+        setConflicts((prev) => [...prev, {
+          entityType: "task" as const,
+          entityId: taskResult.taskId,
+          message: taskResult.error || "Dữ liệu việc đã được cập nhật từ thiết bị khác.",
+        }]);
+      } else {
+        counter.failedCount += 1;
+      }
     }
 
+    // Metric logs
+    for (const metricResult of response.metricLogs) {
+      if (metricResult.ok) {
+        if (metricResult.metricId) {
+          // Find weekNumber for this weekId
+          const weekNumber = systemToSync.weeklyPlans.findIndex((wp) => {
+            return getWeekIdForGoal(currentGoalId, wp.weekNumber) === metricResult.weekId;
+          });
+          if (weekNumber >= 0) {
+            setMetricIdForGoal(currentGoalId, systemToSync.weeklyPlans[weekNumber].weekNumber, metricResult.metricName, metricResult.metricId);
+          }
+        }
+        counter.syncedCount += 1;
+      } else {
+        counter.failedCount += 1;
+      }
+    }
+
+    // Reviews
+    for (const reviewResult of response.reviews) {
+      if (reviewResult.ok && reviewResult.revision != null) {
+        updateWeekRevisionInLink(currentGoalId, reviewResult.weekId, reviewResult.revision);
+        counter.syncedCount += 1;
+      } else if (reviewResult.conflict) {
+        counter.conflictCount += 1;
+      } else if (!reviewResult.ok) {
+        counter.failedCount += 1;
+      }
+    }
+  }, []);
+
+  // ── Legacy per-entity sync (fallback when bulk endpoint unavailable) ─
+  const syncPlanSnapshotLegacy = useCallback(async (
+    currentGoalId: string,
+    systemToSync: TwelveWeekSystem,
+    details: PlanDetails,
+    counter: SyncCounter,
+  ): Promise<void> => {
     for (const weekPlan of systemToSync.weeklyPlans) {
       const week = findWeekDetails(details, weekPlan.weekNumber);
       if (!week) {
@@ -564,11 +693,11 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
       }
 
       const updatedWeek = await runAction(
-        () => updateWeek(week.id, { focus, expectedOutput, baseRevision: getWeekRemoteRevision(goalId, week.id) }),
+        () => updateWeek(week.id, { focus, expectedOutput, baseRevision: getWeekRemoteRevision(currentGoalId, week.id) }),
         { entityType: "week", entityId: week.id },
       );
       if (updatedWeek) {
-        updateWeekRevisionInLink(goalId, updatedWeek.id, (updatedWeek as { revision?: number }).revision ?? 1);
+        updateWeekRevisionInLink(currentGoalId, updatedWeek.id, (updatedWeek as { revision?: number }).revision ?? 1);
         counter.syncedCount += 1;
       } else {
         counter.failedCount += 1;
@@ -576,7 +705,7 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     }
 
     for (const task of systemToSync.taskInstances) {
-      const result = await syncTaskSnapshot(goalId, details, task);
+      const result = await syncTaskSnapshot(currentGoalId, details, task);
       if (result === "synced") {
         counter.syncedCount += 1;
       } else if (result === "skipped") {
@@ -587,9 +716,9 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
         counter.failedCount += 1;
       }
 
-      const weekId = getWeekIdForGoal(goalId, task.weekNumber) ?? findWeekDetails(details, task.weekNumber)?.id;
+      const weekId = getWeekIdForGoal(currentGoalId, task.weekNumber) ?? findWeekDetails(details, task.weekNumber)?.id;
       if (weekId && task.completed) {
-        const metricResult = await syncCompletedTaskMetricForWeek(goalId, weekId, task);
+        const metricResult = await syncCompletedTaskMetricForWeek(currentGoalId, weekId, task);
         if (metricResult) {
           counter.syncedCount += 1;
         } else {
@@ -604,13 +733,13 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
         systemToSync,
         Number.isFinite(checkInDate.valueOf()) ? checkInDate : new Date(),
       );
-      const weekId = getWeekIdForGoal(goalId, weekNumber) ?? findWeekDetails(details, weekNumber)?.id;
+      const weekId = getWeekIdForGoal(currentGoalId, weekNumber) ?? findWeekDetails(details, weekNumber)?.id;
       if (!weekId) {
         counter.skippedCount += 1;
         continue;
       }
 
-      const synced = await syncDailyCheckInForWeek(goalId, weekId, {
+      const synced = await syncDailyCheckInForWeek(currentGoalId, weekId, {
         weekNumber,
         date: checkIn.date,
         didWorkToday: checkIn.didWorkToday,
@@ -623,7 +752,7 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
     }
 
     for (const review of systemToSync.weeklyReviews.filter(hasReviewContent)) {
-      const weekId = getWeekIdForGoal(goalId, review.weekNumber) ?? findWeekDetails(details, review.weekNumber)?.id;
+      const weekId = getWeekIdForGoal(currentGoalId, review.weekNumber) ?? findWeekDetails(details, review.weekNumber)?.id;
       if (!weekId) {
         counter.skippedCount += 1;
         continue;
@@ -641,18 +770,91 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
         counter.failedCount += 1;
       }
     }
+  }, [runAction, syncTaskSnapshot, syncCompletedTaskMetricForWeek, syncDailyCheckInForWeek, syncWeeklyReviewForWeek]);
 
-    const snapshot = createSnapshot(counter, details.plan.id);
-    setLastSnapshot(snapshot);
-    return snapshot;
+  const syncPlanSnapshotNow = useCallback(async (
+    systemToSync: TwelveWeekSystem | null | undefined,
+  ): Promise<PlanExecutionSyncSnapshot> => {
+    const nowMs = Date.now();
+    const existingSnapshotSync = snapshotInFlightRef.current;
+    if (existingSnapshotSync && nowMs - lastSnapshotSyncStartedAtRef.current < PLAN_SNAPSHOT_SYNC_DEBOUNCE_MS) {
+      return existingSnapshotSync;
+    }
+
+    const snapshotSync = (async (): Promise<PlanExecutionSyncSnapshot> => {
+      const counter: SyncCounter = { syncedCount: 0, skippedCount: 0, failedCount: 0, conflictCount: 0 };
+
+      if (!goalId || !systemToSync || isDemoMode()) {
+        const snapshot = createSnapshot(counter, null, "idle");
+        setLastSnapshot(snapshot);
+        return snapshot;
+      }
+
+      const details = await ensurePlanDetails(goalId, systemToSync);
+      if (!details) {
+        counter.failedCount += 1;
+        const snapshot = createSnapshot(counter, null, "error");
+        setLastSnapshot(snapshot);
+        return snapshot;
+      }
+
+      // ── Try bulk sync first ──────────────────────────────────
+      const bulkRequest = buildBulkSyncRequest(systemToSync, details, goalId);
+
+      if (isBulkRequestEmpty(bulkRequest)) {
+        const snapshot = createSnapshot(counter, details.plan.id, "success");
+        setLastSnapshot(snapshot);
+        return snapshot;
+      }
+
+      let usedBulk = false;
+
+      try {
+        const bulkResponse = await bulkSyncPlan(details.plan.id, bulkRequest);
+        usedBulk = true;
+        applyBulkSyncResponse(goalId, systemToSync, bulkResponse, counter);
+      } catch (bulkError) {
+        const parsed = toAppError(bulkError) as ApiClientError;
+
+        // Re-throw rate-limit errors so the queue can handle backoff
+        if (isRateLimitError(parsed)) {
+          throw new RateLimitError(parsed.retryAfterMs ?? DEFAULT_RATE_LIMIT_RETRY_MS, parsed.message);
+        }
+
+        // 404 means the bulk endpoint doesn't exist on this backend version — fall back to legacy
+        if (parsed.status === 404) {
+          console.warn("[bulk-sync] Endpoint not available, falling back to per-entity sync.");
+        } else {
+          // For other errors, also fall back but log
+          console.warn("[bulk-sync] Bulk sync failed, falling back to per-entity sync.", parsed.message);
+        }
+      }
+
+      // ── Legacy per-entity fallback ───────────────────────────
+      if (!usedBulk) {
+        await syncPlanSnapshotLegacy(goalId, systemToSync, details, counter);
+      }
+
+      const snapshot = createSnapshot(counter, details.plan.id);
+      setLastSnapshot(snapshot);
+      return snapshot;
+    })();
+
+    snapshotInFlightRef.current = snapshotSync;
+    lastSnapshotSyncStartedAtRef.current = nowMs;
+
+    try {
+      return await snapshotSync;
+    } finally {
+      if (snapshotInFlightRef.current === snapshotSync) {
+        snapshotInFlightRef.current = null;
+      }
+    }
   }, [
     goalId,
     ensurePlanDetails,
-    syncTaskSnapshot,
-    syncCompletedTaskMetricForWeek,
-    syncDailyCheckInForWeek,
-    syncWeeklyReviewForWeek,
-    runAction,
+    applyBulkSyncResponse,
+    syncPlanSnapshotLegacy,
   ]);
 
   // Internal executeSync function for queue processor
@@ -771,12 +973,39 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
       return snapshot;
     }
 
-    const systemToSync = input.system ?? system;
-    const snapshot = await syncPlanSnapshotNow(systemToSync);
-    if (snapshot.failedCount > 0 || snapshot.status === "error") {
-      enqueueRetry("plan_snapshot", { system: systemToSync }, undefined, "plan");
+    latestSnapshotSystemRef.current = input.system ?? system;
+
+    if (snapshotDebounceTimerRef.current) {
+      clearTimeout(snapshotDebounceTimerRef.current);
     }
-    return snapshot;
+
+    const snapshotPromise = new Promise<PlanExecutionSyncSnapshot>((resolve, reject) => {
+      pendingSnapshotResolversRef.current.push({ resolve, reject });
+    });
+
+    snapshotDebounceTimerRef.current = setTimeout(() => {
+      const systemToSync = latestSnapshotSystemRef.current ?? system;
+
+      void syncPlanSnapshotNow(systemToSync)
+        .then((snapshot) => {
+          if (snapshot.failedCount > 0 || snapshot.status === "error") {
+            enqueueRetry("plan_snapshot", { system: systemToSync }, undefined, "plan");
+          }
+
+          for (const pending of pendingSnapshotResolversRef.current) {
+            pending.resolve(snapshot);
+          }
+          pendingSnapshotResolversRef.current = [];
+        })
+        .catch((error) => {
+          for (const pending of pendingSnapshotResolversRef.current) {
+            pending.reject(error);
+          }
+          pendingSnapshotResolversRef.current = [];
+        });
+    }, PLAN_SNAPSHOT_SYNC_DEBOUNCE_MS);
+
+    return snapshotPromise;
   }, [goalId, system, enabled, syncPlanSnapshotNow, enqueueRetry]);
 
   const clearError = useCallback(() => {

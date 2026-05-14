@@ -585,6 +585,32 @@ describe("mutation queue sender", () => {
     expect(localStorage.getItem("visionboard_user_data")).toBe(userDataSnapshot);
   });
 
+  it("does not count rate-limited request retries as failed syncs", async () => {
+    seedTaskMutation({ mutationId: "mutation_rate_limit" });
+    const postMutations = vi.fn(async () => {
+      throw { message: "Too many requests", status: 429 };
+    });
+
+    const result = await sendPending12WeekMutations({
+      ownerUid: "user_1",
+      authenticated: true,
+      featureEnabled: true,
+      realMode: true,
+      apiConfigured: true,
+      storage: localStorage,
+      now: at(2),
+      postMutations,
+    });
+
+    const item = readItem("user_1", "mutation_rate_limit");
+    expect(result.status).toBe("error");
+    expect(result.failedCount).toBe(0);
+    expect(item.status).toBe("retry_scheduled");
+    expect(item.error?.httpStatus).toBe(429);
+    expect(item.error?.retryable).toBe(true);
+    expect(item.nextRetryAt).toBeTruthy();
+  });
+
   it("handles duplicate responses as safely succeeded", async () => {
     seedTaskMutation({ mutationId: "mutation_duplicate" });
     const postMutations = vi.fn(async (): Promise<TwelveWeekMutationBatchResponse> => ({

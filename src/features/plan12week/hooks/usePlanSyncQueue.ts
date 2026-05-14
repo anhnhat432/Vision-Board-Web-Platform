@@ -2,11 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
+import { isRateLimitError } from "@/lib/api/apiClient";
 import { isDemoMode } from "@/app/utils/app-mode";
 import {
   cleanupOldSyncs,
   enqueueSync,
-  getNextRetryAt,
   getSyncQueueSummary,
   listPendingSyncs,
   markSyncFailed,
@@ -51,6 +51,12 @@ interface ProcessQueueResult {
 
 const PROCESS_QUEUE_THROTTLE_MS = 1000;
 const AUTO_RETRY_DEBOUNCE_MS = 3000;
+const RETRY_BACKOFF_BASE_MS = 5_000;
+const RETRY_BACKOFF_MAX_MS = 60_000;
+
+function getBackoffDelayMs(attemptCount: number): number {
+  return Math.min(RETRY_BACKOFF_BASE_MS * 2 ** Math.max(0, attemptCount), RETRY_BACKOFF_MAX_MS);
+}
 
 export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
   const {
@@ -186,8 +192,9 @@ export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
             });
           }
         } catch (error: unknown) {
-          const err = error as { message?: string; status?: number };
-          const retryable = !err.status || err.status >= 500 || err.status === 408 || err.status === 429;
+          const err = error as { message?: string; status?: number; retryAfterMs?: number };
+          const rateLimited = isRateLimitError(error);
+          const retryable = !err.status || err.status >= 500 || err.status === 408 || rateLimited;
 
           const failure = {
             code: err.status?.toString() ?? "sync_error",
@@ -196,7 +203,11 @@ export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
             lastSeenAt: now.toISOString(),
           };
 
-          const nextRetryAt = retryable ? getNextRetryAt(now, item.attemptCount) : undefined;
+          const exponentialBackoffMs = getBackoffDelayMs(item.attemptCount);
+          const retryAfterMs = rateLimited && typeof err.retryAfterMs === "number" ? err.retryAfterMs : 0;
+          const nextRetryAt = retryable
+            ? new Date(now.getTime() + (rateLimited ? Math.max(retryAfterMs, exponentialBackoffMs) : exponentialBackoffMs))
+            : undefined;
           store = markSyncFailed(store, item.id, failure, {
             now: now.toISOString(),
             nextRetryAt: nextRetryAt?.toISOString(),
@@ -204,17 +215,24 @@ export function usePlanSyncQueue(options: UsePlanSyncQueueOptions = {}) {
           writeSyncQueueStore(store);
           setSyncQueueStore(store);
 
-          failedCount += 1;
           attemptedCount += 1;
-          batchHasFailuresRef.current = true;
 
-          // Show error toast on first failure in batch
-          if (failedCount === 1) {
-            setLastError({ code: failure.code, message: failure.message });
-            toast.error("Đồng bộ chưa thành công, sẽ thử lại sau", {
-              description: failure.message,
-              duration: 4500,
-            });
+          if (!rateLimited) {
+            failedCount += 1;
+            batchHasFailuresRef.current = true;
+
+            // Show error toast on first persistent failure in batch
+            if (failedCount === 1) {
+              setLastError({ code: failure.code, message: failure.message });
+              toast.error("Đồng bộ chưa thành công, sẽ thử lại sau", {
+                description: failure.message,
+                duration: 4500,
+              });
+            }
+          }
+
+          if (rateLimited) {
+            break;
           }
         }
       }

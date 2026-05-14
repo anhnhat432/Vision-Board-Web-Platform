@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { BarChart3, CalendarDays, ListTodo, Settings2, MoreHorizontal, type LucideIcon } from "lucide-react";
+import { BarChart3, CalendarDays, ListTodo, Loader2, Settings2, MoreHorizontal, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { useTwelveWeekSystemSnapshot } from "@/app/hooks/useTwelveWeekSystemSnapshot";
@@ -72,6 +72,7 @@ import {
 import type { CycleSummary } from "@/features/plan12week/logic/cycleReview";
 import { TaskBoard } from "@/features/plan12week/components/TaskBoard";
 import { usePlanExecutionSync } from "@/features/plan12week/hooks";
+import { useBackendSyncIssueState } from "@/features/plan12week/hooks/useBackendSyncIssueState";
 import { useTwelveWeekManualCloudSync } from "@/features/plan12week/hooks/useTwelveWeekManualCloudSync";
 import {
   readMutationQueueStore,
@@ -90,14 +91,7 @@ import {
   TwelveWeekRescueTriggerBanner,
   TwelveWeekTabFallback,
 } from "./12WeekSystem/components";
-import {
-  buildBackendSyncKey,
-  getBackendSyncIssueMessage,
-  getLatestCheckIn,
-  getSyncBadgeClass,
-  getSyncBadgeLabel,
-  hasBackendSyncIssue as getHasBackendSyncIssue,
-} from "./12WeekSystem/helpers";
+import { buildBackendSyncKey, getLatestCheckIn, getSyncBadgeClass, getSyncBadgeLabel } from "./12WeekSystem/helpers";
 import { PlanOverview, WeekEditor, WeeklyReview } from "./12WeekSystem/lazyTabs";
 import { ProgressSummaryCard } from "@/app/components/twelve-week/ProgressSummaryCard";
 import { useTwelveWeekBackendActions } from "./12WeekSystem/useTwelveWeekBackendActions";
@@ -761,10 +755,16 @@ export function TwelveWeekSystem() {
     system,
   ]);
 
-  const hasBackendSyncIssue = getHasBackendSyncIssue(backendConnectionStatus, lastBackendHydrationResult);
-  const backendSyncIssueMessage = getBackendSyncIssueMessage(backendConnectionStatus, lastBackendHydrationResult);
+  const syncIssueState = useBackendSyncIssueState({
+    backendConnectionStatus,
+    lastBackendHydrationResult,
+    failedOrRetryableCount: mutationQueueSummary.failedOrRetryableCount,
+    error: backendSyncError,
+  });
+  const hasBackendSyncIssue = syncIssueState.visible;
+  const backendSyncIssueMessage = syncIssueState.message;
   const syncBadgeClass = getSyncBadgeClass(backendConnectionStatus);
-  const syncBadgeLabel = getSyncBadgeLabel(backendConnectionStatus);
+  const syncBadgeLabel = syncIssueState.isTransient ? "Đang thử lại…" : getSyncBadgeLabel(backendConnectionStatus);
   const phaseInfo = getExecutionPhaseInfo(currentWeek);
   const PhaseChipIcon = phaseInfo.chipIcon;
   const phaseIllustration = getExecutionPhaseIllustration(currentWeek);
@@ -1051,7 +1051,11 @@ export function TwelveWeekSystem() {
               Tuần {currentWeek}/{system.totalWeeks} - {phaseInfo.label}
             </span>
             <span className={`inline-flex shrink-0 items-center gap-2 rounded-[var(--r-pill)] border px-3 py-2 text-xs font-semibold ${syncPillClass.pill}`}>
-              <span className={`h-2 w-2 rounded-[var(--r-pill)] ${syncPillClass.dot}`} aria-hidden="true" />
+              {syncIssueState.isTransient ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+              ) : (
+                <span className={`h-2 w-2 rounded-[var(--r-pill)] ${syncPillClass.dot}`} aria-hidden="true" />
+              )}
               {syncBadgeLabel}
             </span>
           </div>

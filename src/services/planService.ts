@@ -1,5 +1,6 @@
 import { get, patch, post } from "@/lib/api/apiClient";
 import type { Plan, PlanDetails } from "@/types/plan";
+import type { BulkSyncRequest, BulkSyncResponse } from "@/types/bulkSync";
 
 export interface CreatePlanPayload {
   vision?: string;
@@ -34,4 +35,8 @@ export function getPlanById(planId: string): Promise<PlanDetails> {
 
 export function updatePlan(planId: string, payload: UpdatePlanPayload): Promise<Plan> {
   return patch<Plan, UpdatePlanPayload>(`/plans/${planId}`, payload);
+}
+
+export function bulkSyncPlan(planId: string, request: BulkSyncRequest): Promise<BulkSyncResponse> {
+  return post<BulkSyncResponse, BulkSyncRequest>(`/plans/${planId}/bulk-sync`, request);
 }
