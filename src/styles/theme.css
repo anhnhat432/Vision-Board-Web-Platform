@@ -282,12 +282,7 @@
     letter-spacing: 0;
     background-color: #eef5f7;
     background-image:
-      linear-gradient(
-        135deg,
-        rgba(224, 242, 254, 0.62) 0%,
-        rgba(255, 247, 237, 0.36) 42%,
-        rgba(236, 253, 245, 0.52) 100%
-      ),
+      linear-gradient(135deg, rgba(224, 242, 254, 0.62) 0%, rgba(255, 247, 237, 0.36) 42%, rgba(236, 253, 245, 0.52) 100%),
       linear-gradient(180deg, #f4f9fb 0%, #eef5f7 46%, #f7f4fb 100%);
     background-attachment: fixed;
     text-rendering: optimizeLegibility;
@@ -822,55 +817,22 @@
 
   .dark .app-shell::before {
     background:
-      radial-gradient(
-        ellipse 70% 60% at 18% 22%,
-        var(--tone-bg-left) 0%,
-        rgba(15, 23, 42, 0) 55%
-      ),
-      radial-gradient(
-        ellipse 60% 50% at 82% 18%,
-        var(--tone-bg-right) 0%,
-        rgba(15, 23, 42, 0) 55%
-      ),
-      radial-gradient(
-        ellipse 90% 50% at 50% 95%,
-        var(--tone-bg-bottom) 0%,
-        rgba(15, 23, 42, 0) 60%
-      ),
-      linear-gradient(
-        180deg,
-        rgba(8, 17, 31, 0.98) 0%,
-        rgba(15, 26, 45, 0.94) 52%,
-        rgba(8, 17, 31, 0.98) 100%
-      );
+      radial-gradient(ellipse 70% 60% at 18% 22%, var(--tone-bg-left) 0%, rgba(15, 23, 42, 0) 55%),
+      radial-gradient(ellipse 60% 50% at 82% 18%, var(--tone-bg-right) 0%, rgba(15, 23, 42, 0) 55%),
+      radial-gradient(ellipse 90% 50% at 50% 95%, var(--tone-bg-bottom) 0%, rgba(15, 23, 42, 0) 60%),
+      linear-gradient(180deg, rgba(8, 17, 31, 0.98) 0%, rgba(15, 26, 45, 0.94) 52%, rgba(8, 17, 31, 0.98) 100%);
   }
 
   .dark .app-shell::after {
     background-image:
-      radial-gradient(
-        circle 380px at 12% 28%,
-        var(--tone-orb-a) 0%,
-        transparent 65%
-      ),
-      radial-gradient(
-        circle 320px at 88% 72%,
-        var(--tone-orb-b) 0%,
-        transparent 65%
-      );
+      radial-gradient(circle 380px at 12% 28%, var(--tone-orb-a) 0%, transparent 65%),
+      radial-gradient(circle 320px at 88% 72%, var(--tone-orb-b) 0%, transparent 65%);
   }
 
   .surface-aurora {
     background:
-      radial-gradient(
-        60% 80% at 20% 0%,
-        color-mix(in oklab, var(--color-primary) 18%, transparent) 0%,
-        transparent 60%
-      ),
-      radial-gradient(
-        60% 80% at 100% 100%,
-        color-mix(in oklab, var(--color-accent) 14%, transparent) 0%,
-        transparent 60%
-      );
+      radial-gradient(60% 80% at 20% 0%, color-mix(in oklab, var(--color-primary) 18%, transparent) 0%, transparent 60%),
+      radial-gradient(60% 80% at 100% 100%, color-mix(in oklab, var(--color-accent) 14%, transparent) 0%, transparent 60%);
   }
 
   .surface-glass {
@@ -881,22 +843,24 @@
 
   .surface-glass-deep {
     position: relative;
-    background: linear-gradient(
-      135deg,
-      color-mix(in oklab, var(--color-surface) 70%, transparent),
-      color-mix(in oklab, var(--color-surface) 90%, transparent)
-    );
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in oklab, var(--color-surface) 70%, transparent),
+        color-mix(in oklab, var(--color-surface) 90%, transparent)
+      );
     backdrop-filter: saturate(150%) blur(20px);
     -webkit-backdrop-filter: saturate(150%) blur(20px);
     border: 1px solid color-mix(in oklab, white 8%, transparent);
   }
 
   .dark .surface-glass-deep {
-    background: linear-gradient(
-      135deg,
-      color-mix(in oklab, var(--color-surface) 60%, transparent),
-      color-mix(in oklab, var(--color-surface) 85%, transparent)
-    );
+    background:
+      linear-gradient(
+        135deg,
+        color-mix(in oklab, var(--color-surface) 60%, transparent),
+        color-mix(in oklab, var(--color-surface) 85%, transparent)
+      );
     border: 1px solid color-mix(in oklab, white 6%, transparent);
   }
 
@@ -906,47 +870,28 @@
     inset: 0;
     pointer-events: none;
     border-radius: inherit;
-    background: linear-gradient(
-      135deg,
-      color-mix(in oklab, var(--vivid-violet) 8%, transparent),
-      transparent 60%
-    );
+    background: linear-gradient(135deg, color-mix(in oklab, var(--vivid-violet) 8%, transparent), transparent 60%);
   }
 
   .ring-soft-glow {
     box-shadow:
       0 1px 0 0 color-mix(in oklab, var(--color-border) 60%, transparent),
-      0 8px 24px -12px
-        color-mix(in oklab, var(--color-primary) 35%, transparent);
+      0 8px 24px -12px color-mix(in oklab, var(--color-primary) 35%, transparent);
   }
 
   .border-gradient-violet-rose {
-    border-image: linear-gradient(
-        135deg,
-        var(--color-primary),
-        var(--color-accent)
-      )
-      1;
+    border-image: linear-gradient(135deg, var(--color-primary), var(--color-accent)) 1;
   }
 
   .text-gradient-vibrant {
-    background: linear-gradient(
-      135deg,
-      var(--vivid-violet),
-      var(--vivid-fuchsia)
-    );
+    background: linear-gradient(135deg, var(--vivid-violet), var(--vivid-fuchsia));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
 
   .text-gradient-aurora {
-    background: linear-gradient(
-      135deg,
-      var(--vivid-violet),
-      var(--vivid-fuchsia),
-      var(--vivid-cyan)
-    );
+    background: linear-gradient(135deg, var(--vivid-violet), var(--vivid-fuchsia), var(--vivid-cyan));
     background-size: 200% 200%;
     -webkit-background-clip: text;
     background-clip: text;
@@ -958,8 +903,7 @@
     box-shadow:
       0 0 0 1px color-mix(in oklab, var(--vivid-violet) 30%, transparent),
       0 8px 32px -8px color-mix(in oklab, var(--vivid-violet) 40%, transparent),
-      0 16px 48px -16px
-        color-mix(in oklab, var(--vivid-fuchsia) 30%, transparent);
+      0 16px 48px -16px color-mix(in oklab, var(--vivid-fuchsia) 30%, transparent);
   }
 
   .featured-surface {
@@ -1749,11 +1693,7 @@
     border-radius: 1.25rem;
     border: 1px solid rgba(255, 255, 255, 0.38);
     background:
-      linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.18),
-        rgba(255, 255, 255, 0.04)
-      ),
+      linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04)),
       linear-gradient(145deg, rgba(15, 23, 42, 0.2), rgba(255, 255, 255, 0.08));
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.28),
@@ -1767,10 +1707,7 @@
       linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
       linear-gradient(135deg, rgba(255, 255, 255, 0.12), transparent 42%);
-    background-size:
-      30px 30px,
-      30px 30px,
-      100% 100%;
+    background-size: 30px 30px, 30px 30px, 100% 100%;
     opacity: 0.76;
   }
 
@@ -1822,11 +1759,7 @@
   .product-visual--moodboard {
     background:
       linear-gradient(135deg, rgba(37, 99, 235, 0.3), rgba(20, 184, 166, 0.18)),
-      linear-gradient(
-        155deg,
-        rgba(255, 255, 255, 0.2),
-        rgba(255, 255, 255, 0.06)
-      );
+      linear-gradient(155deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.06));
   }
 
   .product-visual__photo {
@@ -1841,11 +1774,7 @@
     width: 48%;
     height: 66%;
     background:
-      linear-gradient(
-        145deg,
-        rgba(37, 99, 235, 0.08),
-        rgba(255, 255, 255, 0.12)
-      ),
+      linear-gradient(145deg, rgba(37, 99, 235, 0.08), rgba(255, 255, 255, 0.12)),
       linear-gradient(135deg, #dbeafe 0%, #fbcfe8 48%, #ccfbf1 100%);
     transform: rotate(-3deg);
   }
@@ -1901,16 +1830,8 @@
 
   .product-visual--vision {
     background:
-      linear-gradient(
-        135deg,
-        rgba(124, 58, 237, 0.34),
-        rgba(236, 72, 153, 0.2)
-      ),
-      linear-gradient(
-        160deg,
-        rgba(255, 255, 255, 0.18),
-        rgba(59, 130, 246, 0.16)
-      );
+      linear-gradient(135deg, rgba(124, 58, 237, 0.34), rgba(236, 72, 153, 0.2)),
+      linear-gradient(160deg, rgba(255, 255, 255, 0.18), rgba(59, 130, 246, 0.16));
   }
 
   .product-visual__tile {
@@ -1926,11 +1847,7 @@
     width: 48%;
     height: 72%;
     background:
-      linear-gradient(
-        145deg,
-        rgba(255, 255, 255, 0.08),
-        rgba(15, 23, 42, 0.06)
-      ),
+      linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(15, 23, 42, 0.06)),
       linear-gradient(135deg, #c4b5fd 0%, #f9a8d4 52%, #bfdbfe 100%);
   }
 
@@ -1967,11 +1884,7 @@
   .product-visual--balance {
     background:
       linear-gradient(135deg, rgba(6, 95, 70, 0.32), rgba(14, 165, 233, 0.18)),
-      linear-gradient(
-        160deg,
-        rgba(255, 255, 255, 0.18),
-        rgba(255, 255, 255, 0.06)
-      );
+      linear-gradient(160deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06));
   }
 
   .product-visual__wheel {
@@ -2023,16 +1936,8 @@
 
   .product-visual--execution {
     background:
-      linear-gradient(
-        135deg,
-        rgba(30, 64, 175, 0.34),
-        rgba(13, 148, 136, 0.18)
-      ),
-      linear-gradient(
-        160deg,
-        rgba(255, 255, 255, 0.18),
-        rgba(255, 255, 255, 0.06)
-      );
+      linear-gradient(135deg, rgba(30, 64, 175, 0.34), rgba(13, 148, 136, 0.18)),
+      linear-gradient(160deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06));
   }
 
   .product-visual__calendar {
@@ -2140,11 +2045,7 @@
   .skeleton-shimmer {
     position: relative;
     overflow: hidden;
-    background: color-mix(
-      in oklab,
-      var(--color-surface) 70%,
-      var(--color-muted) 30%
-    );
+    background: color-mix(in oklab, var(--color-surface) 70%, var(--color-muted) 30%);
     border-radius: inherit;
     filter: blur(0);
     animation: skeleton-progressive 2.4s ease-in-out infinite;
@@ -2251,11 +2152,7 @@
     gap: 0.2rem;
     min-width: 0;
     width: 100%;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.98) 0%,
-      rgba(247, 250, 252, 0.94) 100%
-    );
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 250, 252, 0.94) 100%);
     border: 1px solid rgba(203, 213, 225, 0.74);
     border-bottom: none;
     box-shadow:
@@ -2321,11 +2218,10 @@
   }
 
   .bottom-nav-label {
-    /* Bumped from 0.68rem to 0.75rem (12px) to meet readability baseline. */
-    font-size: 0.75rem;
+    font-size: 0.68rem;
     font-weight: 500;
     letter-spacing: 0;
-    line-height: 1.05;
+    line-height: 1;
     max-width: 100%;
     min-width: 0;
     overflow: hidden;
@@ -2347,27 +2243,13 @@
   }
 
   /* ── Page main bottom safe area for mobile nav ──────── */
-  /*
-   * --mobile-nav-h represents the visible height of the mobile bottom nav
-   * (RootLayout .bottom-nav OR a route-level tab nav like /12-week-system).
-   * Use .above-mobile-nav on sticky CTAs to keep them clear of the nav.
-   */
   .main-content-mobile-pad {
-    padding-bottom: calc(
-      var(--mobile-nav-h, 5rem) + env(safe-area-inset-bottom, 0)
-    );
-  }
-
-  .above-mobile-nav {
-    bottom: calc(var(--mobile-nav-h, 5rem) + env(safe-area-inset-bottom, 0));
+    padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0));
   }
 
   @media (min-width: 768px) {
     .main-content-mobile-pad {
       padding-bottom: 0;
-    }
-    .above-mobile-nav {
-      bottom: 0;
     }
     .bottom-nav {
       display: none;
