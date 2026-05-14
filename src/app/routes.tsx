@@ -142,6 +142,14 @@ export const router = createBrowserRouter([
         ...lazyRoute(() => import("./pages/AdminOrdersPage"), "AdminOrdersPage"),
       },
       {
+        path: "terms",
+        ...lazyRoute(() => import("./pages/TermsPage"), "TermsPage"),
+      },
+      {
+        path: "privacy",
+        ...lazyRoute(() => import("./pages/PrivacyPage"), "PrivacyPage"),
+      },
+      {
         path: "goals",
         Component: GoalTracker,
       },
