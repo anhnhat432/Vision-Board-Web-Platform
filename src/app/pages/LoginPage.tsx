@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router";
+import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { motion, type Variants } from "motion/react";
 import { AlertCircle, Compass, Loader2, LogOut, RefreshCw, ShieldCheck, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
@@ -13,6 +13,8 @@ import { Label } from "../components/ui/label";
 import { Toaster } from "../components/ui/sonner";
 import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { useAuthContext } from "@/lib/auth/AuthContext";
+import { resetPassword } from "@/lib/auth/firebase";
+import { isDemoMode } from "@/app/utils/app-mode";
 
 type LoginMode = "signin" | "signup";
 
@@ -94,6 +96,11 @@ export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSubmitting, setResetSubmitting] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const [resetError, setResetError] = useState<string | null>(null);
 
   useEffect(() => {
     setMode(getInitialLoginMode(location.search));
@@ -133,6 +140,36 @@ export function LoginPage() {
         }
       />
     );
+  }
+
+  async function handleResetPassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (!resetEmail.trim()) return;
+    setResetSubmitting(true);
+    setResetError(null);
+    if (isDemoMode()) {
+      toast.info("Demo đang chạy trên thiết bị này, chưa cần đặt lại mật khẩu. Trên phiên bản đầy đủ bạn sẽ nhận email đặt lại.");
+      setResetSent(true);
+      setResetSubmitting(false);
+      return;
+    }
+    try {
+      await resetPassword(resetEmail.trim());
+      setResetSent(true);
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code ?? "";
+      if (code === "auth/user-not-found") {
+        setResetError("Không tìm thấy tài khoản với email này.");
+      } else if (code === "auth/invalid-email") {
+        setResetError("Email không hợp lệ.");
+      } else if (code === "auth/too-many-requests") {
+        setResetError("Quá nhiều yêu cầu. Vui lòng thử lại sau.");
+      } else {
+        setResetError("Không gửi được email đặt lại mật khẩu. Vui lòng thử lại.");
+      }
+    } finally {
+      setResetSubmitting(false);
+    }
   }
 
   async function handleEmailSubmit(e: React.FormEvent) {
@@ -359,7 +396,23 @@ export function LoginPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="login-password">Mật khẩu</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="login-password">Mật khẩu</Label>
+                    {mode === "signin" ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowResetPassword(true);
+                          setResetEmail(email);
+                          setResetSent(false);
+                          setResetError(null);
+                        }}
+                        className="text-xs font-medium text-violet-600 hover:text-violet-700 hover:underline dark:text-violet-300 dark:hover:text-violet-200"
+                      >
+                        Quên mật khẩu?
+                      </button>
+                    ) : null}
+                  </div>
                   <Input
                     id="login-password"
                     type="password"
@@ -381,6 +434,25 @@ export function LoginPage() {
                     "Tạo tài khoản"
                   )}
                 </Button>
+                {mode === "signup" ? (
+                  <p className="text-center text-xs leading-5 text-slate-500 dark:text-slate-300">
+                    Khi tạo tài khoản, bạn đồng ý với{" "}
+                    <Link
+                      to="/terms"
+                      className="font-medium text-violet-700 underline-offset-4 hover:text-violet-800 hover:underline dark:text-violet-200 dark:hover:text-violet-100"
+                    >
+                      Điều khoản
+                    </Link>{" "}
+                    và{" "}
+                    <Link
+                      to="/privacy"
+                      className="font-medium text-violet-700 underline-offset-4 hover:text-violet-800 hover:underline dark:text-violet-200 dark:hover:text-violet-100"
+                    >
+                      Chính sách bảo mật
+                    </Link>
+                    .
+                  </p>
+                ) : null}
               </form>
 
               {error ? (
@@ -395,6 +467,72 @@ export function LoginPage() {
             </div>
           </CardContent>
         </Card>
+
+        {showResetPassword ? (
+          <Card className="mt-4 border-violet-200/60 bg-violet-50/50 dark:border-violet-400/20 dark:bg-violet-950/30">
+            <CardContent className="pt-5 pb-4">
+              {resetSent ? (
+                <div className="text-center">
+                  <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-[var(--r-pill)] bg-emerald-100 dark:bg-emerald-900/50">
+                    <ShieldCheck className="h-5 w-5 text-emerald-600 dark:text-emerald-300" />
+                  </div>
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-100">Đã gửi email đặt lại mật khẩu</p>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-300">
+                    Kiểm tra hộp thư <strong>{resetEmail}</strong> và làm theo hướng dẫn. Nếu không thấy, hãy kiểm tra thư mục spam.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-3"
+                    onClick={() => {
+                      setShowResetPassword(false);
+                      setResetSent(false);
+                    }}
+                  >
+                    Quay lại đăng nhập
+                  </Button>
+                </div>
+              ) : (
+                <form onSubmit={handleResetPassword} className="stack-tight">
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Đặt lại mật khẩu</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-300">Nhập email đã đăng ký, chúng tôi sẽ gửi link đặt lại mật khẩu.</p>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="reset-email">Email</Label>
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      autoComplete="email"
+                      placeholder="you@example.com"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      disabled={resetSubmitting}
+                      required
+                    />
+                  </div>
+                  {resetError ? (
+                    <div role="alert" className="flex gap-2 rounded-[var(--r-control)] border border-rose-200/70 bg-rose-50 px-3 py-2 text-sm leading-5 text-rose-700 dark:border-rose-400/25 dark:bg-rose-950/40 dark:text-rose-100">
+                      <AlertCircle className="mt-0.5 h-4 w-4 flex-none" aria-hidden="true" />
+                      <p>{resetError}</p>
+                    </div>
+                  ) : null}
+                  <div className="flex gap-2">
+                    <Button type="submit" size="sm" disabled={resetSubmitting || !resetEmail.trim()}>
+                      {resetSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Gửi email đặt lại"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowResetPassword(false)}
+                    >
+                      Huỷ
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </CardContent>
+          </Card>
+        ) : null}
 
         <p className="mt-4 text-center text-sm text-slate-500">
           {mode === "signin" ? (

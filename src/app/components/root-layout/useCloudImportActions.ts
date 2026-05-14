@@ -91,7 +91,7 @@ function getCloudImportUnavailableReason({
   loginMessage: string;
   disabledMessage: string;
 }): string | undefined {
-  if (demoMode) return "Bản dùng thử đang lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản.";
+  if (demoMode) return "Bản demo đang lưu trên thiết bị này, chưa bật nhập dữ liệu tài khoản.";
   if (!userUid) return loginMessage;
   if (!apiConfigured) return "Kết nối tài khoản chưa được cấu hình cho không gian làm việc này.";
   if (!featureEnabled) return disabledMessage;
@@ -139,7 +139,7 @@ export function useCloudImportActions({
     if (importPayloads.length === 0) {
       return {
         status: "skipped",
-        message: "Tài khoản trên trình duyệt này chưa có dữ liệu 12 tuần để kiểm tra.",
+        message: "Tài khoản chưa có dữ liệu 12 tuần để kiểm tra.",
       };
     }
 
@@ -194,7 +194,7 @@ export function useCloudImportActions({
     if (importPayloads.length === 0) {
       return {
         status: "skipped",
-        message: "Tài khoản trên trình duyệt này chưa có dữ liệu 12 tuần để đồng bộ.",
+        message: "Tài khoản chưa có dữ liệu 12 tuần để đồng bộ.",
       };
     }
 

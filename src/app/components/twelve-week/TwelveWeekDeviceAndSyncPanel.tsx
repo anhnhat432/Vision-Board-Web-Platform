@@ -25,7 +25,7 @@ export function TwelveWeekDeviceAndSyncPanel(props: TwelveWeekDeviceAndSyncPanel
   const showAdvancedSync = shouldShowSyncDebugUi() || hasSyncAttention;
   const storageDescription = props.backendConnectionStatus.signedIn
     ? "Quản lý quyền Plus, nhắc việc và dữ liệu tài khoản. Bản trên thiết bị vẫn được giữ để dùng khi mất mạng và đồng bộ an toàn."
-    : "Quản lý quyền Plus, nhắc việc và dữ liệu đang lưu trên trình duyệt này. Các thao tác xóa đều cần xác nhận.";
+    : "Quản lý quyền Plus, nhắc việc và dữ liệu đang lưu trên thiết bị này. Các thao tác xóa đều cần xác nhận.";
 
   return (
     <Card className="border border-slate-200/80 bg-slate-50/80 shadow-sm lg:sticky lg:top-6">

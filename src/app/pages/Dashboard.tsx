@@ -1305,7 +1305,7 @@ function DashboardContent({
                       onClick={() => (isSignedOut ? handleAuthNavigate("signup") : navigate("/life-insight"))}
                     >
                       <Plus className="h-4 w-4" />
-                      {isSignedOut ? "Đăng ký để đồng bộ sau" : "Tạo mục tiêu"}
+                      {isSignedOut ? (demoMode ? "Đăng ký để đồng bộ sau" : "Đăng ký miễn phí") : "Tạo mục tiêu"}
                     </Button>
                   </div>
                 </CardHeader>
@@ -1315,7 +1315,7 @@ function DashboardContent({
                       <Target className="mx-auto mb-4 h-12 w-12 text-muted-foreground/45" />
                       <p>
                         {isSignedOut
-                          ? "Bạn có thể đi qua Góc nhìn cuộc sống, mục tiêu SMART và kiểm tra tính thực tế mà không cần đăng nhập."
+                          ? (demoMode ? "Bạn có thể đi qua Góc nhìn cuộc sống, mục tiêu SMART và kiểm tra tính thực tế trước khi tạo tài khoản." : "Đăng ký miễn phí để bắt đầu hành trình 12 tuần với mục tiêu của bạn.")
                           : "Chưa có mục tiêu nào. Hãy bắt đầu bằng mục tiêu đầu tiên của bạn."}
                       </p>
                       <Button
@@ -1323,7 +1323,7 @@ function DashboardContent({
                         className="mt-[var(--space-stack)] w-full sm:w-auto"
                         onClick={() => (isSignedOut ? handleAuthNavigate("signup") : navigate("/life-insight"))}
                       >
-                        {isSignedOut ? "Đăng ký để đồng bộ sau" : "Tạo mục tiêu"}
+                        {isSignedOut ? (demoMode ? "Đăng ký để đồng bộ sau" : "Đăng ký miễn phí") : "Tạo mục tiêu"}
                       </Button>
                     </div>
                   ) : (
@@ -1466,7 +1466,7 @@ function DashboardContent({
                         <p className="mt-[var(--space-inline)] font-semibold text-foreground">Chưa có dữ liệu bánh xe cuộc sống</p>
                         <p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">
                           {isSignedOut
-                          ? "Bạn có thể bắt đầu Cân bằng cuộc sống không cần đăng nhập. Tài khoản chỉ cần khi muốn đồng bộ sau."
+                          ? (demoMode ? "Bạn có thể chấm Cân bằng cuộc sống trước khi tạo tài khoản. Tài khoản cần khi muốn đồng bộ sang thiết bị khác." : "Đăng ký miễn phí và chấm Cân bằng cuộc sống để Trang chính có dữ liệu thật.")
                             : "Bắt đầu bằng bài đánh giá Cân bằng cuộc sống để Trang chính có dữ liệu thật thay vì số mặc định."}
                         </p>
                       </div>
@@ -1484,7 +1484,7 @@ function DashboardContent({
                       </p>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {isSignedOut
-                          ? "Dữ liệu lưu trên trình duyệt này"
+                          ? (demoMode ? "Dữ liệu lưu trên thiết bị này" : "Đăng ký để xem điểm")
                           : weakestArea
                             ? `${weakestArea.score}/10`
                             : "--"}
@@ -1508,7 +1508,7 @@ function DashboardContent({
                         </div>
                         <div className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                           {isSignedOut
-                            ? "Đăng ký chỉ khi muốn thử lớp đồng bộ sau."
+                            ? (demoMode ? "Đăng ký chỉ khi muốn thử lớp đồng bộ sau." : "Đăng ký miễn phí để bắt đầu chấm 8 lĩnh vực.")
                             : hasRealLifeBalance
                               ? "Xem chi tiết và cập nhật lại bánh xe cuộc đời."
                               : "Chấm điểm 8 lĩnh vực để mở đúng luồng mục tiêu."}

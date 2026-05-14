@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useNavigate } from "react-router";
 import { CheckCircle2, Clock3, Loader2, Upload, WifiOff } from "lucide-react";
 
 import { SyncIdleDot, SyncOkDot, SyncSyncingDot } from "@/app/components/illustrations";
@@ -58,6 +59,7 @@ function getTooltip(state: SyncPillState, relativeTime: string | null, pendingCo
 
 export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
   const syncState = useAutoCloudSyncContext();
+  const navigate = useNavigate();
 
   const relativeTime = formatRelativeSyncTime(syncState.lastSyncedAt);
   const state = getSyncState({
@@ -111,16 +113,18 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
     },
   } satisfies Record<SyncPillState, { dot: ReactNode; icon: ReactNode; label: string; tone: string }>;
 
-  const interactive = state === "conflict";
   const handleClick = () => {
-    if (!interactive) return;
-    window.dispatchEvent(new CustomEvent(AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME));
+    if (state === "conflict") {
+      window.dispatchEvent(new CustomEvent(AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME));
+      return;
+    }
+    navigate("/settings#account-sync");
   };
 
   return (
     <button
       type="button"
-      className={`${baseClass} ${sizeClass} ${config[state].tone} ${interactive ? "cursor-pointer" : "cursor-default"}`}
+      className={`${baseClass} ${sizeClass} ${config[state].tone} cursor-pointer`}
       title={tooltip}
       aria-label={config[state].label}
       onClick={handleClick}

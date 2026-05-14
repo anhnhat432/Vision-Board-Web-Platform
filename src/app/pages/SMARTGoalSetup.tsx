@@ -1,6 +1,7 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 
+import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { PageShell } from "../components/PageShell";
@@ -186,6 +187,28 @@ export function SMARTGoalSetup() {
           canProceedToFeasibility: qualityResult.canProceedToFeasibility,
         }
       : null;
+
+  // ── Autosave draft to localStorage (debounced) ──
+  const isInitialLoadRef = useRef(true);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const hasAnyDraftContent = useMemo(
+    () => SMART_STEPS.some((step) => hasStepDraftContent(step.key, smartData)),
+    [smartData],
+  );
+  useEffect(() => {
+    if (setupState !== "ready") return;
+    // Skip the first render after loading — avoids writing back what was just loaded
+    if (isInitialLoadRef.current) {
+      isInitialLoadRef.current = false;
+      return;
+    }
+    if (!hasAnyDraftContent) return;
+    const timer = setTimeout(() => {
+      localStorage.setItem(APP_STORAGE_KEYS.pendingSmartGoal, JSON.stringify(liveSmartGoal));
+      setLastSavedAt(new Date());
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [hasAnyDraftContent, liveSmartGoal, setupState]);
 
   useScrollToTopOnChange(currentStep, {
     targetRef: stepTopRef,
@@ -453,6 +476,9 @@ export function SMARTGoalSetup() {
         <div ref={stepTopRef} className="mx-auto max-w-4xl">
           <Card className="flow-panel overflow-hidden">
             <CardContent className="p-5 sm:p-6 lg:p-7">
+              <div className="mb-3 flex justify-end">
+                <AutoSaveIndicator lastSavedAt={lastSavedAt} />
+              </div>
               <SmartGoalStepShell
                 stepIndex={currentStep}
                 totalSteps={totalSteps}

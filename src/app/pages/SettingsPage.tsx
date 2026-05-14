@@ -230,7 +230,7 @@ export function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="glass-surface-sm rounded-[var(--r-card)] border shadow-none">
+        <Card id="account-sync" className="glass-surface-sm scroll-mt-24 rounded-[var(--r-card)] border shadow-none">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <SyncIcon className={`h-4 w-4 ${autoSyncState.syncing ? "animate-spin text-sky-600" : "text-slate-500"}`} />
@@ -242,7 +242,7 @@ export function SettingsPage() {
             <div className="grid gap-2 text-sm sm:grid-cols-3">
               <div className="rounded-[var(--r-control)] border border-slate-200 bg-white/75 p-3">
                 <p className="font-semibold text-slate-900">Thiết bị</p>
-                <p className="mt-1 leading-6 text-slate-500">Thay đổi được giữ ngay trên trình duyệt này.</p>
+                <p className="mt-1 leading-6 text-slate-500">Thay đổi được giữ ngay trên thiết bị này.</p>
               </div>
               <div className="rounded-[var(--r-control)] border border-slate-200 bg-white/75 p-3">
                 <p className="font-semibold text-slate-900">Tài khoản</p>

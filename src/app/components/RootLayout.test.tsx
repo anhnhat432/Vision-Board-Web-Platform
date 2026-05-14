@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -517,14 +517,15 @@ describe("RootLayout onboarding redirect", () => {
 
     fireEvent.pointerDown(screen.getByRole("button", { name: "Mở menu tài khoản" }), { button: 0 });
 
-    expect(await screen.findByRole("menu")).toBeInTheDocument();
-    expect(screen.getByText("Plus")).toBeInTheDocument();
-    expect(screen.getByText(/Đồng bộ/)).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: "Cài đặt" })).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: "Quản lý gói" })).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: "Đăng xuất" })).toBeInTheDocument();
+    const demoMenu = await screen.findByRole("menu");
+    expect(demoMenu).toBeInTheDocument();
+    expect(within(demoMenu).getByText("Plus")).toBeInTheDocument();
+    expect(within(demoMenu).getByRole("button", { name: /đồng bộ/i })).toBeInTheDocument();
+    expect(within(demoMenu).getByRole("menuitem", { name: "Cài đặt" })).toBeInTheDocument();
+    expect(within(demoMenu).getByRole("menuitem", { name: "Quản lý gói" })).toBeInTheDocument();
+    expect(within(demoMenu).getByRole("menuitem", { name: "Đăng xuất" })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("menuitem", { name: "Quản lý gói" }));
+    fireEvent.click(within(demoMenu).getByRole("menuitem", { name: "Quản lý gói" }));
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/billing/plan");
     });
@@ -608,8 +609,9 @@ describe("RootLayout onboarding redirect", () => {
     const accountMenuTriggers = screen.getAllByTitle("plus@example.com");
     fireEvent.pointerDown(accountMenuTriggers[1], { button: 0 });
 
-    expect(await screen.findByRole("menu")).toBeInTheDocument();
-    expect(screen.getByText(/^2 /)).toBeInTheDocument();
+    const menu = await screen.findByRole("menu");
+    expect(menu).toBeInTheDocument();
+    expect(within(menu).getByText(/^2 /)).toBeInTheDocument();
   });
 
   it("does not render the sync status pill in demo mode", async () => {
@@ -640,8 +642,9 @@ describe("RootLayout onboarding redirect", () => {
     expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
     fireEvent.pointerDown(screen.getAllByTitle("plus@example.com")[0], { button: 0 });
 
-    expect(await screen.findByRole("menu")).toBeInTheDocument();
-    expect(screen.queryByText(/^7 /)).not.toBeInTheDocument();
+    const menu = await screen.findByRole("menu");
+    expect(menu).toBeInTheDocument();
+    expect(within(menu).queryByText(/^7 /)).not.toBeInTheDocument();
   });
 
   it("sends public app routes to login before onboarding when signed out", async () => {

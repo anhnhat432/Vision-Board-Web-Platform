@@ -80,10 +80,10 @@ export function FeedbackDialog({
     setCopyText(formatDemoFeedbackForCopy(result.record));
     setSubmitted(true);
 
-    toast.success("Đã lưu góp ý trên trình duyệt này.", {
+    toast.success("Đã lưu góp ý trên thiết bị này.", {
       description: result.savedLocally
-        ? "Nội dung góp ý không cần đăng nhập và chỉ dùng để cải thiện trải nghiệm."
-        : "Không lưu được góp ý trên trình duyệt, nhưng app không gửi nội dung chi tiết ra công cụ phân tích ngoài.",
+        ? "Nội dung góp ý chỉ dùng để cải thiện trải nghiệm, không cần gắn với tài khoản."
+        : "Không lưu được góp ý cục bộ, nhưng app không gửi nội dung chi tiết ra công cụ phân tích ngoài.",
     });
   };
 
@@ -108,15 +108,14 @@ export function FeedbackDialog({
         <DialogHeader>
           <DialogTitle>Góp ý nhanh</DialogTitle>
           <DialogDescription>
-            Không cần đăng nhập. Nội dung bạn nhập chỉ được lưu trên trình duyệt này; công cụ phân tích ngoài chỉ nhận
-            điểm chấm và nhóm góp ý.
+            Nội dung bạn nhập chỉ được lưu trên thiết bị này; công cụ phân tích ngoài chỉ nhận điểm chấm và nhóm góp ý.
           </DialogDescription>
         </DialogHeader>
 
         {submitted ? (
           <div className="space-y-4">
             <div className="rounded-[var(--r-card)] border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm leading-6 text-emerald-900">
-              Cảm ơn bạn. Góp ý đã được ghi nhận trên trình duyệt này.
+              Cảm ơn bạn. Góp ý đã được ghi nhận trên thiết bị này.
             </div>
             <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-600">
               Nếu muốn gửi lại qua kênh riêng, bạn có thể sao chép nội dung vừa nhập. App không yêu cầu email và không

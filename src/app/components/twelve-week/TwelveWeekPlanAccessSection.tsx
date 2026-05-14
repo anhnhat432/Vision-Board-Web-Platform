@@ -1,4 +1,4 @@
-﻿import { Crown } from "lucide-react";
+import { Crown } from "lucide-react";
 import { shouldShowBillingDebugUi } from "../../utils/app-mode";
 import {
   getBillingActionStatusLabel,
@@ -246,7 +246,7 @@ export function TwelveWeekPlanAccessSection({
               </p>
               <p className="mt-1 text-sm opacity-80">
                 {lastRestoreAccessSnapshot?.message ??
-                  "Dùng khi bạn đã từng mở Plus và muốn lấy lại quyền trên trình duyệt này."}
+                  "Dùng khi bạn đã từng mở Plus và muốn lấy lại quyền trên thiết bị này."}
               </p>
               <p className="mt-[var(--space-inline)] text-xs uppercase tracking-[0.16em] opacity-60">
                 {lastRestoreAccessSnapshot ? formatDateTimeLabel(lastRestoreAccessSnapshot.at) : "Chưa chạy"}

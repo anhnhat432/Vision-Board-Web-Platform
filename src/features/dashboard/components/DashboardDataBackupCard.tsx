@@ -21,7 +21,7 @@ export function DashboardDataBackupCard({
     <Card className="glass-surface-sm rounded-[var(--r-card)] border shadow-none">
       <CardHeader className="pb-3">
         <CardTitle className="text-base">Sao lưu dữ liệu</CardTitle>
-        <CardDescription>Dữ liệu lưu trên trình duyệt này. Xuất bản sao lưu để không mất tiến độ khi đổi thiết bị hoặc xóa dữ liệu trình duyệt.</CardDescription>
+        <CardDescription>Dữ liệu lưu trên thiết bị này. Xuất bản sao lưu để không mất tiến độ khi đổi thiết bị hoặc xóa dữ liệu cục bộ.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-wrap gap-3">
         <Button variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={onExport}>

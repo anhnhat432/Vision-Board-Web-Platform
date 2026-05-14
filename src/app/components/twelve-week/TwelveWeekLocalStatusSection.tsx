@@ -1,4 +1,4 @@
-﻿import { type SyntheticEvent, useCallback, useState } from "react";
+import { type SyntheticEvent, useCallback, useState } from "react";
 import { AlertTriangle, CloudDownload, CloudUpload, FileDown, RefreshCw, Trash2, WifiOff } from "lucide-react";
 import { CloudSyncIllustration, SyncErrorDot, SyncIdleDot, SyncOkDot, SyncSyncingDot } from "../illustrations";
 import { Badge } from "../ui/badge";
@@ -66,7 +66,7 @@ function getMutationQueueSyncBlocker(input: {
 }): string | null {
   const { backendConnectionStatus, mutationQueueSyncStatus } = input;
 
-  if (!mutationQueueSyncStatus.realMode) return "Bản dùng thử lưu trên trình duyệt này, không cần đồng bộ tài khoản.";
+  if (!mutationQueueSyncStatus.realMode) return "Bản demo lưu trên thiết bị này, không cần đồng bộ tài khoản.";
   if (!mutationQueueSyncStatus.featureEnabled) return "Đồng bộ thay đổi đang tắt.";
   if (!mutationQueueSyncStatus.pullFeatureEnabled) return "Khôi phục dữ liệu tài khoản đang tắt.";
   if (!mutationQueueSyncStatus.apiConfigured) return "Chưa cấu hình kết nối tài khoản để gửi hàng chờ.";
@@ -397,7 +397,7 @@ function MutationQueueConflictResolutionPanel({
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
         <div className="min-w-0">
           <p className="text-sm font-semibold text-amber-950">
-            Có thay đổi trên trình duyệt này và trong tài khoản.
+            Có thay đổi trên thiết bị này và trong tài khoản.
           </p>
           <p className="mt-1 text-xs leading-5 text-amber-800">
             Ứng dụng chưa tự ghi đè để tránh mất dữ liệu. Nên tải bản sao trước khi xử lý khác biệt.
@@ -450,7 +450,7 @@ function MutationQueueConflictResolutionPanel({
             </div>
           ) : null}
           {report.localOnlyChanges.length > 0 ? (
-            <p>Có {report.localOnlyChanges.length} mục chỉ có trên trình duyệt này.</p>
+            <p>Có {report.localOnlyChanges.length} mục chỉ có trên thiết bị này.</p>
           ) : null}
           {report.cloudOnlyChanges.length > 0 ? (
             <p>Có {report.cloudOnlyChanges.length} mục chỉ có trong tài khoản.</p>

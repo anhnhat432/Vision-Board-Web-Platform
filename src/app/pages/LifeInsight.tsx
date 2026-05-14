@@ -1,4 +1,4 @@
-﻿import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { ArrowRight, Check, Compass, Sparkles, Target, TrendingDown, TrendingUp } from "lucide-react";
@@ -505,7 +505,7 @@ export function LifeInsight() {
             {selectedIntent !== null && (
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <p className="text-xs text-slate-500">
-                  Lựa chọn này được lưu trên trình duyệt này để gợi ý bước SMART và kế hoạch 12 tuần.
+                  Lựa chọn này được lưu trên thiết bị này để gợi ý bước SMART và kế hoạch 12 tuần.
                 </p>
                 <button
                   type="button"

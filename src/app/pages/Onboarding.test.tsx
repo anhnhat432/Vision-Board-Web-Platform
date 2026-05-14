@@ -121,6 +121,79 @@ describe("Onboarding", () => {
     expect(screen.getByText(/không tạo lại từ đầu/i)).toBeInTheDocument();
   });
 
+  it("saves life areas to storage when clicking 'Lưu và quay lại sau'", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter>
+        <Onboarding />
+      </MemoryRouter>,
+    );
+
+    // Click save-and-return button on the welcome step
+    const saveButton = await screen.findByRole("button", { name: /Lưu và quay lại sau/i });
+    await user.click(saveButton);
+
+    // Verify the wheel of life data was persisted with default scores (5)
+    const data = getUserData();
+    expect(data.currentWheelOfLife.length).toBe(8);
+    expect(data.currentWheelOfLife.every((area) => area.score === 5)).toBe(true);
+  });
+
+  it("saves adjusted scores when clicking 'Lưu và quay lại sau' after modifying sliders", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter>
+        <Onboarding />
+      </MemoryRouter>,
+    );
+
+    // Go to assessment step first
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm 8 lĩnh vực/i }));
+
+    // Modify first slider
+    const firstSlider = screen.getAllByRole("slider")[0];
+    firstSlider.focus();
+    await user.keyboard("{ArrowRight}{ArrowRight}{ArrowRight}"); // 5 → 8
+
+    // Go back to welcome step and save
+    await user.click(await screen.findByRole("button", { name: /Quay lại giới thiệu/i }));
+    await user.click(await screen.findByRole("button", { name: /Lưu và quay lại sau/i }));
+
+    // Verify the adjusted score was persisted
+    const data = getUserData();
+    expect(data.currentWheelOfLife[0].score).toBe(8);
+  });
+
+  it("returning user sees previously saved scores after save-and-return", async () => {
+    // Simulate a previous save: set real scores
+    const data = getUserData();
+    data.currentWheelOfLife = LIFE_AREAS.map((area, index) => ({
+      ...area,
+      score: index + 2, // scores 2-9
+    }));
+    data.onboardingCompleted = true;
+    saveUserData(data);
+
+    render(
+      <MemoryRouter>
+        <Onboarding />
+      </MemoryRouter>,
+    );
+
+    // Should show returning banner
+    expect(await screen.findByText(/Cập nhật điểm hiện tại/i)).toBeInTheDocument();
+
+    // Go to assessment and verify first slider value
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm 8 lĩnh vực/i }));
+
+    // Verify the scores from storage are loaded (first area should show score 2)
+    const sliders = screen.getAllByRole("slider");
+    expect(sliders[0]).toHaveAttribute("aria-valuenow", "2");
+  });
+
   it("shows live assessment summary and reviewed count", async () => {
     const user = userEvent.setup();
 

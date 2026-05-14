@@ -318,7 +318,7 @@ describe("TwelveWeekLocalStatusSection", () => {
       />,
     );
 
-    expect(screen.getByText("Bản dùng thử lưu trên trình duyệt này, không cần đồng bộ tài khoản.")).toBeInTheDocument();
+    expect(screen.getByText("Bản demo lưu trên thiết bị này, không cần đồng bộ tài khoản.")).toBeInTheDocument();
     const button = screen.getByRole("button", { name: /Đồng bộ tài khoản/i });
     expect(button).toBeDisabled();
 
@@ -632,7 +632,7 @@ describe("TwelveWeekLocalStatusSection", () => {
   it("renders manual cloud sync conflict state with safe v1 actions", () => {
     renderConflictSection();
 
-    expect(screen.getByText("Có thay đổi trên trình duyệt này và trong tài khoản.")).toBeInTheDocument();
+    expect(screen.getByText("Có thay đổi trên thiết bị này và trong tài khoản.")).toBeInTheDocument();
     expect(screen.getByText(/Ứng dụng chưa tự ghi đè để tránh mất dữ liệu/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Tải bản sao dữ liệu/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Giữ bản trên thiết bị/i })).toBeInTheDocument();

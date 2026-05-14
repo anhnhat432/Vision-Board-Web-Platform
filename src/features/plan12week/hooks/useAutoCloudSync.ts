@@ -227,8 +227,8 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
   const triggeredUserUidRef = useRef<string | null>(null);
   const lastSyncStartedAtRef = useRef<number | null>(null);
   const lastDrainStartedAtRef = useRef<number | null>(null);
-  const mutationDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const visibilityDebounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mutationDebounceTimerRef = useRef<number | null>(null);
+  const visibilityDebounceTimerRef = useRef<number | null>(null);
 
   const syncReadiness = getTwelveWeekSyncReadiness({
     realMode,

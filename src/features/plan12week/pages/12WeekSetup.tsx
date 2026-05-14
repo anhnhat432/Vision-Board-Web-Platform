@@ -503,10 +503,6 @@ export function TwelveWeekSetup() {
     );
   }
 
-  if (isRealMode() && !auth.user) {
-    return <RealModeLoginGate target="12WeekSetup" />;
-  }
-
   if (isLoading) {
     return (
       <CoreFlowGateState
@@ -901,6 +897,11 @@ export function TwelveWeekSetup() {
       return;
     }
 
+    if (isRealMode() && !auth.user) {
+      setCurrentStep(STEPS.length - 1);
+      return;
+    }
+
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Ho_Chi_Minh";
     const goalId = addGoal({
       category: focusArea,
@@ -1069,7 +1070,7 @@ export function TwelveWeekSetup() {
     }
 
     toast.success("Kế hoạch 12 tuần đã sẵn sàng.", {
-      description: "Kế hoạch được lưu trên trình duyệt này. Vào ngay màn Hôm nay để bắt đầu tuần đầu tiên.",
+      description: "Vào ngay màn Hôm nay để bắt đầu tuần đầu tiên.",
     });
 
     navigate("/12-week-system");
@@ -1221,6 +1222,8 @@ export function TwelveWeekSetup() {
             onChange={handleChange}
           />
         )}
+
+        {currentStep === 3 && isRealMode() && !auth.user && <RealModeLoginGate target="12WeekSetup" />}
 
         {currentStep === 3 && (
           <PlanPreviewStep

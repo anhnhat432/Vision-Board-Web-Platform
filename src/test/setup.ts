@@ -1,5 +1,13 @@
 import "@testing-library/jest-dom/vitest";
 
+// jsdom does not implement URL.createObjectURL / revokeObjectURL
+if (typeof URL.createObjectURL !== "function") {
+  URL.createObjectURL = () => "blob:mock";
+}
+if (typeof URL.revokeObjectURL !== "function") {
+  URL.revokeObjectURL = () => {};
+}
+
 if (!window.matchMedia) {
   Object.defineProperty(window, "matchMedia", {
     writable: true,

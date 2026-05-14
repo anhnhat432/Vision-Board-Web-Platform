@@ -4,6 +4,7 @@ import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RootLayout } from "./components/RootLayout";
+import { isDemoMode } from "./utils/app-mode";
 import { loadWithChunkReload } from "./utils/chunkLoad";
 
 function lazyComponent<TModule extends Record<string, unknown>>(
@@ -134,10 +135,20 @@ export const router = createBrowserRouter([
           },
         ],
       },
-      {
-        path: "billing/mock-checkout",
-        ...lazyRoute(() => import("./pages/MockBillingCheckout"), "MockBillingCheckout"),
-      },
+      // Mock checkout is demo-only; in real mode redirect to the real billing plan page.
+      ...(isDemoMode()
+        ? [
+            {
+              path: "billing/mock-checkout",
+              ...lazyRoute(() => import("./pages/MockBillingCheckout"), "MockBillingCheckout"),
+            },
+          ]
+        : [
+            {
+              path: "billing/mock-checkout",
+              Component: RedirectToBillingPlan,
+            },
+          ]),
       {
         path: "billing",
         Component: RedirectToBillingPlan,
@@ -195,6 +206,14 @@ export const router = createBrowserRouter([
       {
         path: "gallery",
         ...lazyRoute(() => import("./pages/VisionBoardGallery"), "VisionBoardGallery"),
+      },
+      {
+        path: "privacy",
+        ...lazyRoute(() => import("./pages/PrivacyPage"), "PrivacyPage"),
+      },
+      {
+        path: "terms",
+        ...lazyRoute(() => import("./pages/TermsPage"), "TermsPage"),
       },
     ],
   },

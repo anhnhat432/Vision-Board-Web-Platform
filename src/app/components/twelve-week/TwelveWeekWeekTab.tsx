@@ -1,6 +1,16 @@
 ﻿import { useState } from "react";
 import { CheckCircle2, ClipboardCheck, Layers, Loader2 } from "lucide-react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
@@ -249,6 +259,7 @@ export function TwelveWeekWeekTab({
     summaryReview?.insights?.trim() || summaryReview?.reflection?.trim() || summaryReview?.biggestOutputThisWeek?.trim();
   const summaryNextWeekCommitments = getReviewNextWeekCommitments(summaryReview);
   const [isSavingReview, setIsSavingReview] = useState(false);
+  const [showEarlyReviewConfirm, setShowEarlyReviewConfirm] = useState(false);
   const reviewReadinessItems = [
     {
       key: "score",
@@ -274,20 +285,51 @@ export function TwelveWeekWeekTab({
   const reviewReadyCount = reviewReadinessItems.filter((item) => item.done).length;
   const canSubmitWeeklyReview = allPreviousCommitmentsAnswered && hasNextWeekCommitment && !isFutureReviewWeek;
 
-  const handleSaveReviewClick = async () => {
-    if (isSavingReview || !canSubmitWeeklyReview) return;
-    if (isFutureReviewWeek) return;
-    if (shouldConfirmEarlyReview && !window.confirm("Tuần chưa hết, vẫn lưu sớm?")) return;
+  const saveWeeklyReview = async () => {
     setIsSavingReview(true);
     try {
       await Promise.resolve(onSaveWeeklyReview());
     } finally {
       setIsSavingReview(false);
+      setShowEarlyReviewConfirm(false);
     }
+  };
+
+  const handleSaveReviewClick = async () => {
+    if (isSavingReview || !canSubmitWeeklyReview) return;
+    if (isFutureReviewWeek) return;
+    if (shouldConfirmEarlyReview) {
+      setShowEarlyReviewConfirm(true);
+      return;
+    }
+    await saveWeeklyReview();
   };
 
   return (
     <div className="stack-section pt-4 pb-24 md:pb-0">
+      <AlertDialog open={showEarlyReviewConfirm} onOpenChange={setShowEarlyReviewConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Lưu review trước khi tuần kết thúc?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tuần hiện tại chưa tới ngày review. Nếu lưu sớm, hệ thống sẽ ghi nhận kết quả tuần này ngay bây giờ và dùng
+              dữ liệu đó để gợi ý bước tiếp theo.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSavingReview}>Quay lại chỉnh sửa</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isSavingReview}
+              onClick={(event) => {
+                event.preventDefault();
+                void saveWeeklyReview();
+              }}
+            >
+              {isSavingReview ? "Đang lưu…" : "Vẫn lưu sớm"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {rescueStatus && rescueStatus.severity !== "none" && (
         <TwelveWeekRescueNudge
           status={rescueStatus}

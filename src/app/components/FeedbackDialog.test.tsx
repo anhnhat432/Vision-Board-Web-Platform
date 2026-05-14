@@ -63,6 +63,6 @@ describe("FeedbackDialog", () => {
       confusingText: "Không rõ task quan trọng nhất.",
       nextHelpText: "Chỉ rõ bước tiếp theo.",
     });
-    expect(screen.getByText("Cảm ơn bạn. Góp ý đã được ghi nhận trên trình duyệt này.")).toBeInTheDocument();
+    expect(screen.getByText("Cảm ơn bạn. Góp ý đã được ghi nhận trên thiết bị này.")).toBeInTheDocument();
   });
 });

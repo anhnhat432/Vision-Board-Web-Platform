@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Vision Board Web Platform is a local-first web app with an optional full-stack backend. The product turns a life vision into SMART goals, feasibility checks, 12-week execution plans, weekly action, and reflection.
+Vision Board Web Platform is a local-first **production web app** with a full-stack backend. The product turns a life vision into SMART goals, feasibility checks, 12-week execution plans, weekly action, and reflection.
 
 Current product priority:
 
@@ -10,7 +10,15 @@ Current product priority:
 Onboarding -> Life Balance -> Life Insight -> SMART Goal -> Feasibility Check -> 12-Week Plan -> Weekly Execution -> Reflection/Review
 ```
 
-For MVP 1, treat the app as a local-first public demo for the 12-week execution system. Backend sync, Firebase login, and billing provider integrations are optional layers, not required for the demo path.
+**App is launching for real end users.** Backend sync, Firebase login, real billing, and provider integrations are **required production layers**, not optional demo flair.
+
+Demo mode (`VITE_APP_MODE=demo`) still exists for preview deployments and marketing pages, but must not leak demo-only copy, mock checkout routes, or "trial on this browser" wording into production builds.
+
+Production targets:
+
+- Vercel main domain runs `VITE_APP_MODE=real`.
+- Preview branches and marketing demos may run `VITE_APP_MODE=demo`.
+- All copy, route registration, and CTA behaviour must branch correctly on `isRealMode()` / `isDemoMode()`.
 
 ## Tech Stack
 
@@ -36,9 +44,10 @@ Backend:
 
 Deployment and runtime:
 
-- Frontend on Vercel as a SPA with `vercel.json` rewrites.
-- Backend is Render-ready through `render.yaml`.
-- `.env.production` is intentionally demo-safe unless host env overrides it.
+- Frontend on Vercel as a SPA with `vercel.json` rewrites. **Production Vercel env must set `VITE_APP_MODE=real`.**
+- Backend on Render through `render.yaml` with MongoDB + Firebase Admin configured.
+- `.env.production` provides a safe local-first fallback but **host env vars override it** and must be set explicitly in real-mode deployments.
+- Sentry, analytics, and billing provider env vars (`VITE_BILLING_SUPPORT_EMAIL`, payment endpoints) must be set in real-mode deployments.
 
 ## Repository Map
 
@@ -69,7 +78,8 @@ Docs:
 
 - `README.md`: setup, verification, deployment overview.
 - `guidelines/CURRENT_PROJECT_STATUS.md`: current code-backed project status.
-- `guidelines/MVP_1_SCOPE.md`: MVP 1 scope and release checklist.
+- `guidelines/MVP_1_SCOPE.md`: historical MVP 1 scope (kept for reference; **superseded** by the production launch — verify against current status doc before relying on it).
+- `guidelines/PRODUCTION_ROADMAP.md`: active production roadmap and release-readiness items.
 - `guidelines/VercelDeploymentChecklist.md`: deployment mode notes.
 
 ## Product Scope Rules
@@ -77,8 +87,9 @@ Docs:
 - Do not expand scope randomly.
 - Prefer the core flow over side features.
 - Do not turn the product into a generic planner, social app, AI coach, or payment platform unless the task explicitly asks for that.
-- For MVP 1 work, prioritize demo-mode stability, 12-week setup, Today tasks, weekly review, progress, and mock upgrade.
-- Keep vision board, achievements, admin orders, real billing, and perfect cloud sync secondary unless explicitly requested.
+- **Production priorities**: real-mode safety, real billing flow correctness, auth flows (signup / signin / password reset / email verification), data export and account deletion, sync reliability, accessibility, and the 12-week execution surface (setup, Today, weekly review, progress).
+- Demo-mode polish is now secondary unless the task explicitly targets preview/marketing deployments.
+- Vision board, achievements, and admin orders remain side surfaces — keep them out of the main flow unless the task explicitly asks.
 
 ## Engineering Rules
 
@@ -94,33 +105,36 @@ Docs:
 
 ## LocalStorage and Migration Rules
 
-LocalStorage is the primary UX source of truth for most frontend flows.
+LocalStorage is the primary UX source of truth for most frontend flows. Even in real mode, the app must remain usable while sync is in-flight or offline.
 
 - Treat `src/app/utils/storage.ts`, `storage-types.ts`, `storage-twelve-week.ts`, and related storage modules as compatibility-sensitive.
 - Do not rename storage keys, change stored shapes, or clear local data casually.
 - If changing `UserData`, `Goal`, `TwelveWeekSystem`, billing, entitlement, event log, or outbox shapes, add or update normalization/migration logic.
 - Preserve existing local-first behavior: local save should succeed even when backend/Firebase is unavailable.
 - Add focused tests for migrations or normalization when changing persisted shapes.
-- Never make backend sync a hard requirement for demo mode.
+- Never make backend sync a hard requirement for the basic 12-week execution loop. Sync is required for cross-device continuity but the in-session experience must not break when sync is unavailable.
 
 ## Backend Sync Rules
 
-- Backend sync is conditional and best-effort.
+- Backend sync is best-effort at the per-call level, but **production users expect cross-device continuity to work**. Track and surface sync failures rather than swallowing them.
 - Protected backend calls require Firebase auth readiness and a signed-in user.
 - Demo mode must not call protected backend sync paths.
 - Local data should be saved before remote sync.
-- Remote sync failures should not destroy local user progress.
+- Remote sync failures must not destroy local user progress.
 - Use existing API services and link stores rather than ad hoc fetch calls.
+- Surface a visible sync state (synced / syncing / offline / error) somewhere in the UI for signed-in real-mode users so they know their data is or is not safe on the server.
 
 ## Billing and Paywall Rules
 
-Billing is currently mock/provider-contract oriented.
+Billing has three modes (`local_test`, `mock_provider`, `api_contract`) selected via env. Real-mode production uses `api_contract` against the backend `/billing/*` endpoints.
 
-- Do not present mock billing as real production payment.
-- Do not convert mock checkout into production billing unless the task explicitly asks for real billing integration.
-- Keep paywall logic behind existing billing/entitlement helpers instead of scattering plan checks across pages.
-- Mock upgrade must remain safe for public demo: no real charge, clear copy, local entitlement unlock.
-- Do not hardcode provider-specific assumptions such as Stripe, VNPay, or MoMo unless the task requires that provider.
+- Do not present mock billing as real production payment. Mock copy ("không thu tiền thật", "bản dùng thử trên trình duyệt") must not appear in real mode.
+- Mock billing routes (`/billing/mock-checkout`) must be gated to demo mode only in production routing.
+- The real billing flow goes through `apiContractBillingProvider` in `src/app/utils/production/billingProvider.ts` and must respect the contract: do not unlock entitlements from the checkout-session response — wait for the entitlement sync or webhook confirmation.
+- Keep paywall logic behind existing billing/entitlement helpers (`usePlanEntitlements`, `UpgradePaywallDialog`) instead of scattering plan checks across pages.
+- Do not hardcode provider-specific assumptions such as Stripe, VNPay, or MoMo unless the task explicitly targets that provider.
+- Provide a customer portal (cancel / refund / manage) link for real-mode `PLUS` users.
+- Real-mode trial countdown copy must not mention "trên trình duyệt này"; use "trên tài khoản này" or similar account-bound language.
 
 ## Firebase, Env, and Secrets Rules
 
@@ -128,8 +142,21 @@ Billing is currently mock/provider-contract oriented.
 - Do not commit `.env`, `.env.local`, `backend/.env`, service account JSON files, or downloaded secret files.
 - Use `.env.example`, `backend/.env.example`, README, and deployment docs to document required env names.
 - Keep demo mode runnable without Firebase and without backend.
-- In real/full-stack mode, guard Firebase and backend-only behavior when env or auth is not ready.
+- In real/full-stack mode, guard Firebase and backend-only behavior when env or auth is not ready, but **fail loud** if a production deployment is missing required env (e.g. log an error to Sentry on boot).
 - Backend Firebase private keys should stay in env form with escaped `\n`, not source code.
+
+## Production Mode Safety Rules
+
+These rules apply specifically to real-mode (production-bound) work. They override demo-friendly shortcuts where they conflict.
+
+- `VITE_APP_MODE` default fallback should be `"real"`, not `"demo"`. A missing or malformed env value must never silently downgrade a production deployment to demo mode.
+- Routes that exist only for demo (`/billing/mock-checkout`, demo seeders, debug UIs gated by `VITE_SHOW_BILLING_DEBUG` or `VITE_SHOW_SYNC_DEBUG`) must not register or render in real mode.
+- Copy strings must be audited for demo-only phrasing: `"dùng thử"`, `"không cần đăng nhập"`, `"trên trình duyệt này"`, `"không thu tiền thật"`, `"mock"`, `"demo"`. In real mode these must either disappear or be replaced with account-bound, production-appropriate language.
+- Destructive actions (delete account, delete cloud workspace, wipe local data, cancel subscription) must use the in-app `AlertDialog` component, not `window.confirm`. Provide a clear two-step confirmation when the action is irreversible.
+- `beforeunload` listeners must set both `event.preventDefault()` and `event.returnValue = ""` to actually trigger modern Chromium / Firefox / Safari unload warnings.
+- Auth flows that real users expect must exist: signup, signin, sign-out, password reset, email verification banner, error messages that distinguish wrong-password from no-account.
+- Legal pages (`/privacy`, `/terms`, `/contact` or footer support email) must exist before any paid transaction is allowed.
+- Account export and account deletion must be reachable from Settings with clear copy and irreversible-action confirmations.
 
 ## Frontend Verification
 
@@ -180,8 +207,9 @@ If these fail due to missing env, MongoDB, Firebase, or backend health, report t
 
 - Keep docs aligned with code. If docs and code disagree, either fix the doc in scope or report the mismatch.
 - Do not delete backlog/guideline files unless explicitly asked.
-- For MVP scope, follow `guidelines/MVP_1_SCOPE.md`.
+- For active production roadmap, follow `guidelines/PRODUCTION_ROADMAP.md`.
 - For current capability claims, follow `guidelines/CURRENT_PROJECT_STATUS.md`.
+- `guidelines/MVP_1_SCOPE.md` is historical reference only and may not reflect current scope; verify with the production roadmap before citing it.
 
 ## Final Output Rules
 

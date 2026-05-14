@@ -44,7 +44,7 @@ export function DeleteDataConfirmationDialog({
                 <span className="rounded-[var(--r-control)] bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
                   Chỉ trên thiết bị này
                 </span>{" "}
-                trên trình duyệt này sẽ bị xóa vĩnh viễn.
+                sẽ bị xóa vĩnh viễn.
               </>
             ) : isSignedIn ? (
               <>

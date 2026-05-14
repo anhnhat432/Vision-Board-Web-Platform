@@ -1,7 +1,18 @@
 export type AppMode = "demo" | "real";
 
 function normalizeAppMode(value: string | undefined): AppMode {
-  return value?.trim().toLowerCase() === "real" ? "real" : "demo";
+  const trimmed = value?.trim().toLowerCase();
+  if (trimmed === "demo") return "demo";
+  if (trimmed === "real") return "real";
+
+  // Missing or malformed → default to "real" so production deployments
+  // never silently downgrade to demo mode.
+  if (trimmed !== undefined && trimmed !== "") {
+    console.error(
+      `[app-mode] Invalid VITE_APP_MODE="${value}". Expected "real" or "demo". Falling back to "real".`,
+    );
+  }
+  return "real";
 }
 
 const APP_MODE = normalizeAppMode(import.meta.env.VITE_APP_MODE);

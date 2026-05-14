@@ -696,6 +696,9 @@ export function TwelveWeekSystem() {
     handleExportLocalData,
     handleExportCloudWorkspace,
     handleDeleteCloudWorkspace,
+    handleConfirmDeleteCloudWorkspace,
+    isDeleteCloudDialogOpen,
+    setIsDeleteCloudDialogOpen,
     handleClearLocalSignals,
     handleDeleteAllData,
     handleBrowserNotificationToggle,
@@ -887,6 +890,23 @@ export function TwelveWeekSystem() {
           <AlertDialogFooter>
             <AlertDialogCancel>Giữ lại</AlertDialogCancel>
             <AlertDialogAction onClick={handleClearLocalSignals}>Xóa dấu vết trên thiết bị</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isDeleteCloudDialogOpen} onOpenChange={setIsDeleteCloudDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xóa dữ liệu 12 tuần đã đồng bộ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Chỉ xóa dữ liệu kế hoạch trong tài khoản (mục tiêu, kế hoạch, tuần, việc, chỉ số, check-in, review).
+              Không xóa dữ liệu trên thiết bị này. Không xóa gói Plus, đăng ký hay tài khoản.
+              Hành động này không thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Quay lại</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDeleteCloudWorkspace}>Xóa dữ liệu đã đồng bộ</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

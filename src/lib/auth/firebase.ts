@@ -4,6 +4,8 @@ import {
   createUserWithEmailAndPassword,
   getAuth,
   onAuthStateChanged,
+  sendEmailVerification as firebaseSendEmailVerification,
+  sendPasswordResetEmail as firebaseSendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -165,6 +167,19 @@ export async function logoutFirebase(): Promise<void> {
 
   await signOut(auth);
   clearStoredFirebaseToken();
+}
+
+export async function resetPassword(email: string): Promise<void> {
+  const auth = getFirebaseAuth();
+  if (!auth) throw new Error("Firebase chưa được cấu hình.");
+  await firebaseSendPasswordResetEmail(auth, email);
+}
+
+export async function sendVerificationEmail(): Promise<void> {
+  const auth = getFirebaseAuth();
+  if (!auth?.currentUser) throw new Error("Chưa đăng nhập.");
+  if (auth.currentUser.emailVerified) return;
+  await firebaseSendEmailVerification(auth.currentUser);
 }
 
 export function subscribeAuthState(

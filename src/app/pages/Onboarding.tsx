@@ -3,6 +3,8 @@ import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { ArrowLeft, ArrowRight, BarChart3, Check, Compass, Heart, Sparkles, Target } from "lucide-react";
 
+import { toast } from "sonner";
+
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { LifeBalanceWheelIllustration, WelcomeIllustration, getLifeAreaIcon } from "../components/illustrations";
 import { ProductVisual } from "../components/visuals/ProductVisual";
@@ -113,6 +115,7 @@ export function Onboarding() {
     if (!isDirty) return;
     const handler = (event: BeforeUnloadEvent) => {
       event.preventDefault();
+      event.returnValue = "";
     };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
@@ -210,11 +213,13 @@ export function Onboarding() {
                       variant="ghost"
                       className="w-full text-slate-500 hover:bg-slate-50 sm:w-auto"
                       onClick={() => {
-                        localStorage.setItem("onboarding_draft_saved", "true");
+                        updateWheelOfLife(lifeAreas);
+                        setIsDirty(false);
+                        toast.success("Đã lưu 8 lĩnh vực, bạn có thể quay lại bất kỳ lúc nào.");
                         navigate("/");
                       }}
                     >
-                      Lưu nháp và quay lại sau
+                      Lưu và quay lại sau
                     </Button>
                   </div>
 

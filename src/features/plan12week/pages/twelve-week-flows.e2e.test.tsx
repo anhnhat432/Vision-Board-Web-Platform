@@ -75,6 +75,11 @@ async function typeWamReview(
   await user.type(commitmentsInput as HTMLElement, `${input.nextWeekCommitments}{Enter}`);
 }
 
+async function confirmEarlyReviewIfPrompted(user: ReturnType<typeof userEvent.setup>) {
+  const action = screen.queryByRole("button", { name: /vẫn lưu sớm/i });
+  if (action) await user.click(action);
+}
+
 describe("12-week core flows", () => {
   beforeEach(() => {
     resetTestStorage();
@@ -603,6 +608,7 @@ describe("12-week core flows", () => {
         nextWeekCommitments: "Giữ nhịp execution.",
       });
       await user.click(getPrimaryButton("Chốt review tuần này"));
+      await confirmEarlyReviewIfPrompted(user);
 
       await waitFor(() => {
         const system = readGoal(goalId).twelveWeekSystem;
@@ -628,6 +634,7 @@ describe("12-week core flows", () => {
         nextWeekCommitments: "Chốt xong command center trước.",
       });
       await user.click(getPrimaryButton("Chốt review tuần này"));
+      await confirmEarlyReviewIfPrompted(user);
 
       await waitFor(() => {
         const system = readGoal(goalId).twelveWeekSystem;
@@ -671,6 +678,7 @@ describe("12-week core flows", () => {
         nextWeekCommitments: "Hoàn thành module sync trước thứ Tư.",
       });
       await user.click(getPrimaryButton("Chốt review tuần này"));
+      await confirmEarlyReviewIfPrompted(user);
 
       await waitFor(() => {
         const review = readGoal(goalId).twelveWeekSystem?.weeklyReviews[0];
@@ -744,6 +752,7 @@ describe("12-week core flows", () => {
         nextWeekCommitments: "First priority.",
       });
       await user.click(getPrimaryButton("Chốt review tuần này"));
+      await confirmEarlyReviewIfPrompted(user);
 
       await waitFor(() => {
         expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.insights).toBe("First weekly insight.");
@@ -758,6 +767,7 @@ describe("12-week core flows", () => {
       await user.click(screen.getByRole("button", { name: "Xóa cam kết: First priority." }));
       await user.type(commitmentsInput as HTMLElement, "Latest priority.{Enter}");
       await user.click(getPrimaryButton("Chốt review tuần này"));
+      await confirmEarlyReviewIfPrompted(user);
 
       await waitFor(() => {
         expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.insights).toBe("Latest weekly insight.");

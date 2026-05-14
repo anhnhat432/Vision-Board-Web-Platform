@@ -18,6 +18,16 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import { EmptyOrdersIllustration } from "../components/illustrations";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -517,6 +527,7 @@ export function AdminOrdersPage() {
   const [error, setError] = useState<string | null>(null);
   const [busyOrderId, setBusyOrderId] = useState<string | null>(null);
   const [busyPaymentOrderId, setBusyPaymentOrderId] = useState<string | null>(null);
+  const [pendingManualPayment, setPendingManualPayment] = useState<{ orderId: string; note: string } | null>(null);
   const [reminderLoading, setReminderLoading] = useState(false);
   const [reminderResult, setReminderResult] = useState<AdminReminderRunResult | null>(null);
 
@@ -606,18 +617,26 @@ export function AdminOrdersPage() {
     }
   };
 
-  const handleManualCompletePayment = async (orderId: string) => {
+  const handleManualCompletePayment = (orderId: string) => {
     const manualCompletionNote = window.prompt(
       `Ghi chú đối chiếu cho đơn ${orderId}`,
       "Đã đối chiếu giao dịch tiền vào trong Casso/app ngân hàng.",
     );
     if (manualCompletionNote === null) return;
-    if (!window.confirm(`Đánh dấu đơn ${orderId} là đã nhận tiền và mở Plus?`)) return;
 
-    setBusyPaymentOrderId(orderId);
+    setPendingManualPayment({ orderId, note: manualCompletionNote });
+  };
+
+  const confirmManualCompletePayment = async () => {
+    if (!pendingManualPayment) return;
+
+    setBusyPaymentOrderId(pendingManualPayment.orderId);
     try {
-      const result = await adminCompletePaymentOrderManually(orderId, { manualCompletionNote });
+      const result = await adminCompletePaymentOrderManually(pendingManualPayment.orderId, {
+        manualCompletionNote: pendingManualPayment.note,
+      });
       toast.success(`Đã mở Plus cho đơn ${result.orderId}.`);
+      setPendingManualPayment(null);
       void loadAdminData();
       void loadPaymentOrders(paymentOrdersQuery, paymentOrdersStatus);
     } catch (err) {
@@ -740,6 +759,33 @@ export function AdminOrdersPage() {
 
   return (
     <div className="stack-section pb-12">
+      <AlertDialog open={pendingManualPayment !== null} onOpenChange={(open) => !open && setPendingManualPayment(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Mở Plus thủ công?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Đánh dấu đơn {pendingManualPayment?.orderId} là đã nhận tiền và mở Plus cho tài khoản tương ứng. Chỉ xác nhận
+              sau khi đã đối chiếu số tiền trong Casso hoặc app ngân hàng.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="rounded-[var(--r-control)] bg-slate-50 p-3 text-sm leading-6 text-slate-600">
+            <span className="font-medium text-slate-800">Ghi chú:</span> {pendingManualPayment?.note}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busyPaymentOrderId !== null}>Huỷ</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={busyPaymentOrderId !== null}
+              onClick={(event) => {
+                event.preventDefault();
+                void confirmManualCompletePayment();
+              }}
+            >
+              {busyPaymentOrderId !== null ? "Đang mở Plus…" : "Xác nhận mở Plus"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <Card className="hero-surface surface-aurora ring-soft-glow overflow-hidden border-0 text-white">
         <CardContent className="p-5 sm:p-6 lg:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">

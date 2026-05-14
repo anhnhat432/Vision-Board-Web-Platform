@@ -876,6 +876,23 @@ export function BillingPlan() {
                 </Button>
               )}
             </div>
+            <p className="border-t border-slate-100 pt-3 text-xs leading-5 text-slate-500">
+              Khi tiếp tục thanh toán, bạn đồng ý với{" "}
+              <Link
+                to="/terms"
+                className="font-medium text-slate-700 underline-offset-4 hover:text-slate-900 hover:underline"
+              >
+                Điều khoản
+              </Link>{" "}
+              và{" "}
+              <Link
+                to="/privacy"
+                className="font-medium text-slate-700 underline-offset-4 hover:text-slate-900 hover:underline"
+              >
+                Chính sách bảo mật
+              </Link>
+              .
+            </p>
           </CardContent>
           </Card>
         </SectionBlock>

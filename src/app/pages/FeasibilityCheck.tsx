@@ -1,6 +1,8 @@
 ﻿import { Compass, Sparkles, Target } from "lucide-react";
 import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { useEffect, useRef, useState, type MutableRefObject } from "react";
+
+import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import {
@@ -106,11 +108,43 @@ export function FeasibilityCheck() {
       return;
     }
 
+    // Restore saved feasibility answers (draft)
+    const savedAnswers = localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers);
+    if (savedAnswers) {
+      try {
+        const parsed = JSON.parse(savedAnswers);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          setAnswers(parsed as Record<number, string>);
+        }
+      } catch {
+        // Ignore malformed draft
+      }
+    }
+
     setFocusArea(storedFocusArea);
     setWheelScore(areaData.score);
     setPendingGoal(normalizedPendingGoal);
     setSetupState("ready");
   }, []);
+
+  // ── Autosave feasibility answers to localStorage (debounced) ──
+  const isInitialAnswerLoadRef = useRef(true);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  useEffect(() => {
+    if (setupState !== "ready") return;
+    // Skip writing back what was just loaded
+    if (isInitialAnswerLoadRef.current) {
+      isInitialAnswerLoadRef.current = false;
+      return;
+    }
+    const answeredCount = Object.keys(answers).length;
+    if (answeredCount === 0) return;
+    const timer = setTimeout(() => {
+      localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers, JSON.stringify(answers));
+      setLastSavedAt(new Date());
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [answers, setupState]);
 
   useScrollToTopOnChange(currentStep, {
     targetRef: questionTopRef,
@@ -354,6 +388,10 @@ export function FeasibilityCheck() {
             </div>
           </CardContent>
         </Card>
+
+        <div className="flex justify-end">
+          <AutoSaveIndicator lastSavedAt={lastSavedAt} />
+        </div>
 
         <FeasibilityStepShell
           currentQuestion={currentQuestion}

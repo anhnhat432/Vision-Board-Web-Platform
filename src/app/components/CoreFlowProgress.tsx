@@ -77,7 +77,7 @@ export function CoreFlowProgress({
   className = "",
   onExit,
   exitLabel = "Tạm thoát",
-  exitTooltip = "Quay lại Trang chính — tiến độ đã nhập tự lưu trên trình duyệt này",
+  exitTooltip = "Quay lại Trang chính — tiến độ đã nhập tự lưu trên thiết bị này",
 }: CoreFlowProgressProps) {
   const currentIndex = Math.max(
     0,

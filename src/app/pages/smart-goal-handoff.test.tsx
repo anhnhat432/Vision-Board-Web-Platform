@@ -1,6 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SMARTGoalSetup } from "./SMARTGoalSetup";
 import { APP_STORAGE_KEYS, getUserData, LIFE_AREAS, saveUserData } from "../utils/storage";
@@ -26,6 +27,38 @@ describe("SMARTGoalSetup handoff", () => {
   beforeEach(() => {
     localStorage.clear();
     seedSmartGoalHandoff();
+  });
+
+  it("autosaves draft to localStorage when user types in goal statement", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+
+    render(
+      <MemoryRouter>
+        <SMARTGoalSetup />
+      </MemoryRouter>,
+    );
+
+    // Wait for the form to be ready
+    await screen.findByText("Bước 1/5");
+
+    // Type a goal statement into the Specific step textarea
+    const goalInput = await screen.findByRole("textbox");
+    await user.clear(goalInput);
+    await user.type(goalInput, "Chạy bộ 5km mỗi tuần trong 12 tuần tới");
+
+    // Advance past the 600ms debounce
+    vi.advanceTimersByTime(700);
+
+    // Verify the draft was autosaved
+    await waitFor(() => {
+      const saved = localStorage.getItem(APP_STORAGE_KEYS.pendingSmartGoal);
+      expect(saved).toBeTruthy();
+      const parsed = JSON.parse(saved!);
+      expect(parsed.specific.goal_statement).toBe("Chạy bộ 5km mỗi tuần trong 12 tuần tới");
+    });
+
+    vi.useRealTimers();
   });
 
   it("surfaces the Life Insight decision before the SMART form starts", async () => {

@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
@@ -26,9 +27,11 @@ function createSyncState(overrides: Partial<AutoCloudSyncState> = {}): AutoCloud
 
 function renderPill(state: AutoCloudSyncState | null, compact = false) {
   return render(
-    <AutoCloudSyncContext.Provider value={state}>
-      <SyncStatusPill compact={compact} />
-    </AutoCloudSyncContext.Provider>,
+    <MemoryRouter>
+      <AutoCloudSyncContext.Provider value={state}>
+        <SyncStatusPill compact={compact} />
+      </AutoCloudSyncContext.Provider>
+    </MemoryRouter>,
   );
 }
 

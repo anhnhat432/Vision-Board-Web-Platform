@@ -308,7 +308,7 @@ describe("12-week setup backend sync", () => {
     expect(updateGoal).not.toHaveBeenCalled();
   }, INTEGRATION_TEST_TIMEOUT_MS);
 
-  it("requires login before opening setup in real mode when signed out", async () => {
+  it("lets signed-out users preview setup steps but gates the final preview in real mode", async () => {
     appMode.value = "real";
     setAuthSignedOut();
     seedReadyTwelveWeekSetup();
@@ -323,7 +323,18 @@ describe("12-week setup backend sync", () => {
     );
 
     render(<RouterProvider router={router} />);
+    const user = userEvent.setup();
 
+    // Step 0 — preview-first: setup heading visible, login gate not yet shown
+    expect(await screen.findByRole("heading", { name: "Mục tiêu 12 tuần" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Đăng nhập để bắt đầu" })).not.toBeInTheDocument();
+
+    // Walk through steps 0 → 1 → 2 → 3
+    await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
+    await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
+    await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
+
+    // Step 3 — gate now appears alongside the preview
     expect(await screen.findByRole("heading", { name: "Đăng nhập để bắt đầu" })).toBeInTheDocument();
     expect(screen.getByText(/Phiên bản đầy đủ lưu kế hoạch 12 tuần lên tài khoản/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Đăng nhập với Google" })).toHaveAttribute(
@@ -331,7 +342,6 @@ describe("12-week setup backend sync", () => {
       "/login?next=%2F12-week-setup",
     );
     expect(screen.getByRole("link", { name: "Quay về trang chính" })).toHaveAttribute("href", "/");
-    expect(screen.queryByRole("heading", { name: "Mục tiêu 12 tuần" })).not.toBeInTheDocument();
   });
 
   it("creates backend goal, syncs plan with backend goal id, stores links, then updates goal with plan id", async () => {

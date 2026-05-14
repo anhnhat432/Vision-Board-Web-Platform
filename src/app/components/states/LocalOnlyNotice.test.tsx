@@ -8,7 +8,7 @@ describe("LocalOnlyNotice", () => {
     render(<LocalOnlyNotice testId="local" />);
     const node = screen.getByTestId("local");
     expect(node.getAttribute("role")).toBe("status");
-    expect(node.textContent).toMatch(/lưu trên trình duyệt này/i);
+    expect(node.textContent).toMatch(/lưu trên thiết bị này/i);
   });
 
   it("uses a custom message when provided", () => {

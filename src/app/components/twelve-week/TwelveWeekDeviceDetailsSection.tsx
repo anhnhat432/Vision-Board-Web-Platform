@@ -355,7 +355,7 @@ export function TwelveWeekDeviceDetailsSection({
 
       <ExpandableSection
         title="Dữ liệu trên thiết bị"
-        description="Dữ liệu đang được lưu trên trình duyệt này. Hãy xuất bản sao nếu muốn giữ lại."
+        description="Dữ liệu đang được lưu trên thiết bị này. Hãy xuất bản sao nếu muốn giữ lại."
         badge={
           <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
             Thiết bị này
@@ -372,7 +372,7 @@ export function TwelveWeekDeviceDetailsSection({
         </div>
         <p className="mt-[var(--space-inline)] text-sm text-slate-500">
           Sẽ xóa nhật ký sự kiện, hàng chờ gửi và trạng thái nhắc việc. Dữ liệu chu kỳ 12 tuần và nhật ký vẫn được giữ
-          nguyên trên trình duyệt này.
+          nguyên trên thiết bị này.
         </p>
       </ExpandableSection>
 
@@ -397,7 +397,7 @@ export function TwelveWeekDeviceDetailsSection({
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Quyền riêng tư</p>
             <p className="mt-2 text-sm leading-6 text-slate-700">
               Xuất bản JSON gồm mục tiêu hiện tại, hệ thống 12 tuần và cài đặt ứng dụng. Nếu xóa dữ liệu, chỉ dữ liệu
-              đang lưu trên trình duyệt này bị xóa.
+              đang lưu trên thiết bị này bị xóa.
             </p>
             <div className="mt-[var(--space-inline)] grid gap-2 sm:grid-cols-2">
               <Button variant="outline" className="bg-white/90" onClick={onExportLocalData}>
@@ -435,7 +435,7 @@ export function TwelveWeekDeviceDetailsSection({
           <div className="rounded-[var(--r-control)] border border-destructive/20 bg-destructive/5 p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-destructive">Xóa toàn bộ dữ liệu</p>
             <p className="mt-2 text-sm text-destructive/90">
-              Hành động này sẽ xóa vĩnh viễn tất cả dữ liệu đang lưu trên trình duyệt này: mục tiêu, nhật ký, check-in,
+              Hành động này sẽ xóa vĩnh viễn tất cả dữ liệu đang lưu trên thiết bị này: mục tiêu, nhật ký, check-in,
               cài đặt và trạng thái gói Plus. Không thể hoàn tác.
             </p>
             <Button variant="destructive" className="mt-[var(--space-inline)] w-full" onClick={onOpenDeleteDataDialog}>

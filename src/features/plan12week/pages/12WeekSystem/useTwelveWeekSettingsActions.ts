@@ -1,4 +1,4 @@
-import { useCallback, type RefObject } from "react";
+import { useCallback, useState, type RefObject } from "react";
 import type { NavigateFunction } from "react-router";
 import { toast } from "sonner";
 
@@ -224,19 +224,18 @@ export function useTwelveWeekSettingsActions({
     }
   };
 
-  const handleDeleteCloudWorkspace = useCallback(async () => {
+  const [isDeleteCloudDialogOpen, setIsDeleteCloudDialogOpen] = useState(false);
+
+  const handleDeleteCloudWorkspace = useCallback(() => {
     if (isDemoMode()) {
       toast.info("Bản dùng thử chưa bật xóa dữ liệu tài khoản.");
       return;
     }
-    const confirmed = window.confirm(
-      "Bạn có chắc muốn xóa toàn bộ dữ liệu 12-week đã đồng bộ?\n\n" +
-        "• Chỉ xóa dữ liệu kế hoạch trong tài khoản (mục tiêu, kế hoạch, tuần, việc, chỉ số, check-in, review).\n" +
-        "• KHÔNG xóa dữ liệu trên trình duyệt này.\n" +
-        "• KHÔNG xóa billing, subscription hay tài khoản.\n\n" +
-        "Hành động này không thể hoàn tác.",
-    );
-    if (!confirmed) return;
+    setIsDeleteCloudDialogOpen(true);
+  }, []);
+
+  const handleConfirmDeleteCloudWorkspace = useCallback(async () => {
+    setIsDeleteCloudDialogOpen(false);
     try {
       const result = await deleteCloudWorkspace();
       trackAppEvent("cloud_workspace_deleted", activeGoal?.id ?? "", {
@@ -352,6 +351,9 @@ export function useTwelveWeekSettingsActions({
     handleExportLocalData,
     handleExportCloudWorkspace,
     handleDeleteCloudWorkspace,
+    handleConfirmDeleteCloudWorkspace,
+    isDeleteCloudDialogOpen,
+    setIsDeleteCloudDialogOpen,
     handleClearLocalSignals,
     handleDeleteAllData,
     handleOpenDeleteDataDialog,

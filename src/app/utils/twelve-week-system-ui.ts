@@ -391,9 +391,9 @@ export function evaluateRescueTriggers(input: {
       triggers.push({
         kind: "trial_ending",
         severity: daysLeft <= 1 ? "urgent" : "caution",
-        headline: `Còn ${timeLabel} để giữ quyền Plus dùng thử.`,
+        headline: `Còn ${timeLabel} để giữ quyền Plus.`,
         detail:
-          "Sau khi hết thử, quyền Plus sẽ về mức Free trên trình duyệt này.",
+          "Sau khi hết hạn, quyền Plus sẽ về mức Free.",
         surfacedAt: now.toISOString(),
       });
     }

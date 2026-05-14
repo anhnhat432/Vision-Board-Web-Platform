@@ -82,6 +82,11 @@ async function typeWamReview(
   await user.type(commitmentsInput as HTMLElement, `${input.nextWeekCommitments}{Enter}`);
 }
 
+async function confirmEarlyReviewIfPrompted(user: ReturnType<typeof userEvent.setup>) {
+  const action = screen.queryByRole("button", { name: /vẫn lưu sớm/i });
+  if (action) await user.click(action);
+}
+
 describe("12-week write-path safety", () => {
   beforeEach(() => {
     resetTestStorage();
@@ -226,6 +231,7 @@ describe("12-week write-path safety", () => {
 
     try {
       await user.click(getPrimaryButton("Chốt review tuần này"));
+      await confirmEarlyReviewIfPrompted(user);
 
       await waitFor(() => {
         expect(syncWeeklyReviewMock).toHaveBeenCalledTimes(1);
@@ -263,6 +269,7 @@ describe("12-week write-path safety", () => {
       nextWeekCommitments: "Chốt xong command center trước.",
     });
     await user.click(getPrimaryButton("Chốt review tuần này"));
+    await confirmEarlyReviewIfPrompted(user);
 
     await waitFor(() => {
       expect(syncWeeklyReviewMock).toHaveBeenCalledTimes(1);
@@ -310,6 +317,7 @@ describe("12-week write-path safety", () => {
       nextWeekCommitments: "Giữ review hiển thị trong journal.",
     });
     await user.click(getPrimaryButton("Chốt review tuần này"));
+    await confirmEarlyReviewIfPrompted(user);
 
     await waitFor(() => {
       expect(syncWeeklyReviewMock).toHaveBeenCalledTimes(1);

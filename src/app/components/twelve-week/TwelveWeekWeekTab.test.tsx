@@ -255,7 +255,6 @@ describe("TwelveWeekWeekTab review flow", () => {
   it("asks for confirmation before saving the current week early", async () => {
     const user = userEvent.setup();
     const onSaveWeeklyReview = vi.fn();
-    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValueOnce(false).mockReturnValueOnce(true);
 
     render(
       <TwelveWeekWeekTab
@@ -282,11 +281,16 @@ describe("TwelveWeekWeekTab review flow", () => {
     await user.click(saveButton);
     expect(onSaveWeeklyReview).not.toHaveBeenCalled();
 
-    await user.click(saveButton);
-    expect(confirmSpy).toHaveBeenCalledWith("Tuần chưa hết, vẫn lưu sớm?");
-    expect(onSaveWeeklyReview).toHaveBeenCalledTimes(1);
+    // Dialog opens — cancel keeps the review unsaved
+    expect(await screen.findByRole("alertdialog")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /quay lại chỉnh sửa/i }));
+    expect(onSaveWeeklyReview).not.toHaveBeenCalled();
 
-    confirmSpy.mockRestore();
+    // Reopen and confirm — save fires
+    await user.click(saveButton);
+    expect(await screen.findByRole("alertdialog")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /vẫn lưu sớm/i }));
+    expect(onSaveWeeklyReview).toHaveBeenCalledTimes(1);
   });
 
   it("shows lead as the weekly hero score and lag progress beside it", () => {

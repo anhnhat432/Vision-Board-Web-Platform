@@ -96,6 +96,7 @@ import {
 } from "./ui/dropdown-menu";
 import { Toaster } from "./ui/sonner";
 import { useReducedMotion } from "./ui/use-reduced-motion";
+import { EmailVerificationBanner } from "./root-layout/EmailVerificationBanner";
 
 function getRouteTone(pathname: string): string | undefined {
   if (pathname.startsWith("/login")) return "onboarding";
@@ -820,6 +821,7 @@ export function RootLayout() {
               quay lại Trang chính.
             </div>
           ) : null}
+          <EmailVerificationBanner />
           <main
             id="main-content"
             className="relative z-10"
@@ -841,6 +843,7 @@ export function RootLayout() {
         <a href="#main-content" className="skip-to-content">
           Bỏ qua điều hướng
         </a>
+        <EmailVerificationBanner />
 
         <header className="sticky top-0 z-40 px-4 pt-2 sm:top-3 sm:px-6 sm:pt-0 lg:px-8">
           <div className="glass-surface mx-auto max-w-6xl rounded-[var(--r-tile)] px-3 py-2 sm:px-4 sm:py-2.5 shadow-sm">
@@ -980,6 +983,7 @@ export function RootLayout() {
               </nav>
 
               <div className="hidden shrink-0 items-center gap-1 md:flex">
+                {!demoMode && user ? <SyncStatusPill compact /> : null}
                 {user ? renderAccountMenu("desktop") : null}
                 {!user ? (
                   <>
@@ -1247,30 +1251,54 @@ export function RootLayout() {
           </div>
         ) : null}
 
-        {user ? (
-          <footer className="relative z-10 mx-auto max-w-6xl px-4 pb-24 text-xs text-slate-500 sm:px-6 md:pb-8 lg:px-8">
-            <div className="flex items-center justify-center gap-2 border-t border-slate-200/70 pt-4 md:justify-end">
-              <span className="font-medium text-slate-500">v1.0</span>
-              <span aria-hidden="true">·</span>
-              <span className="hidden max-w-[260px] truncate md:inline">
-                {accountEmail || accountLabel}
-              </span>
-              <span className="hidden md:inline" aria-hidden="true">
-                ·
-              </span>
-              <a
-                href="/settings"
-                className="font-semibold text-slate-600 underline-offset-4 transition-colors hover:text-slate-900 hover:underline"
-                onClick={(event) => {
-                  event.preventDefault();
-                  navigateAppRoute("/settings");
-                }}
-              >
-                Cài đặt
-              </a>
-            </div>
-          </footer>
-        ) : null}
+        <footer className="relative z-10 mx-auto max-w-6xl px-4 pb-24 text-xs text-slate-500 sm:px-6 md:pb-8 lg:px-8">
+          <div className="flex flex-wrap items-center justify-center gap-2 border-t border-slate-200/70 pt-4 md:justify-end">
+            {user ? (
+              <>
+                <span className="font-medium text-slate-500">v1.0</span>
+                <span aria-hidden="true">·</span>
+                <span className="hidden max-w-[260px] truncate md:inline">
+                  {accountEmail || accountLabel}
+                </span>
+                <span className="hidden md:inline" aria-hidden="true">
+                  ·
+                </span>
+                <a
+                  href="/settings"
+                  className="font-semibold text-slate-600 underline-offset-4 transition-colors hover:text-slate-900 hover:underline"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    navigateAppRoute("/settings");
+                  }}
+                >
+                  Cài đặt
+                </a>
+                <span aria-hidden="true">·</span>
+              </>
+            ) : null}
+            <a
+              href="/privacy"
+              className="text-slate-500 underline-offset-4 transition-colors hover:text-slate-700 hover:underline"
+              onClick={(event) => {
+                event.preventDefault();
+                navigateAppRoute("/privacy");
+              }}
+            >
+              Bảo mật
+            </a>
+            <span aria-hidden="true">·</span>
+            <a
+              href="/terms"
+              className="text-slate-500 underline-offset-4 transition-colors hover:text-slate-700 hover:underline"
+              onClick={(event) => {
+                event.preventDefault();
+                navigateAppRoute("/terms");
+              }}
+            >
+              Điều khoản
+            </a>
+          </div>
+        </footer>
 
         {!isSignedOutVisitor && !hasInternalBottomNav ? (
           <nav
