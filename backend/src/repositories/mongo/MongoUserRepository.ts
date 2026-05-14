@@ -10,6 +10,7 @@ export interface UserEntity {
   displayName: string;
   role: "user" | "admin";
   onboardingCompletedAt: Date | null;
+  termsAcceptedAt: Date | null;
   avatarUrl: string | null;
   locale: string;
   createdAt: Date;
@@ -21,6 +22,7 @@ export interface UpdateUserData {
   avatarUrl?: string | null;
   locale?: string;
   onboardingCompletedAt?: Date | null;
+  termsAcceptedAt?: Date | null;
 }
 
 function getDisplayName(displayName: string, email: string): string {
@@ -52,6 +54,7 @@ function mapUser(doc: {
   displayName: string;
   role: string;
   onboardingCompletedAt?: Date | null;
+  termsAcceptedAt?: Date | null;
   avatarUrl?: string | null;
   locale: string;
   createdAt: Date;
@@ -64,6 +67,7 @@ function mapUser(doc: {
     displayName: doc.displayName,
     role: doc.role as "user" | "admin",
     onboardingCompletedAt: doc.onboardingCompletedAt ?? null,
+    termsAcceptedAt: doc.termsAcceptedAt ?? null,
     avatarUrl: doc.avatarUrl ?? null,
     locale: doc.locale,
     createdAt: doc.createdAt,
@@ -90,6 +94,7 @@ export class MongoUserRepository {
     };
     const setOnInsertFields: Record<string, unknown> = {
       onboardingCompletedAt: null,
+      termsAcceptedAt: null,
       avatarUrl: null,
       locale: "vi",
     };

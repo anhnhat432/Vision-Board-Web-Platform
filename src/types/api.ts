@@ -18,6 +18,7 @@ export interface UserProfile {
   displayName: string;
   role: "user" | "admin";
   onboardingCompletedAt: string | null;
+  termsAcceptedAt: string | null;
   avatarUrl: string | null;
   locale: string;
   createdAt: string;

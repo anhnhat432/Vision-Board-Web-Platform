@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import type { User, UserCredential } from "firebase/auth";
 
 import { activateAuthenticatedUserData, persistActiveAuthenticatedUserData } from "@/app/utils/storage";
+import { patch, post } from "@/lib/api/apiClient";
+import type { UserProfile } from "@/types/api";
 import {
   getFirebaseToken,
   isFirebaseAuthEnabled,
@@ -36,6 +38,13 @@ const DEFAULT_LOGIN_OPTIONS: Required<Pick<LoginOptions, "provider" | "mode">> =
   provider: "google",
   mode: "signin",
 };
+
+export async function recordSignupTermsAcceptance(now: Date = new Date()): Promise<UserProfile> {
+  await post<UserProfile>("/auth/profile");
+  return patch<UserProfile, { termsAcceptedAt: string }>("/auth/profile", {
+    termsAcceptedAt: now.toISOString(),
+  });
+}
 
 function getFirebaseErrorCode(error: unknown): string | null {
   if (!error || typeof error !== "object" || !("code" in error)) return null;
@@ -127,7 +136,10 @@ export function useAuth(): UseAuthResult {
 
       if (resolvedMode === "signup") {
         const credential = await registerWithEmail(email, password);
-        if (credential) activateAuthenticatedUserData(credential.user.uid);
+        if (credential) {
+          activateAuthenticatedUserData(credential.user.uid);
+          await recordSignupTermsAcceptance();
+        }
         return credential;
       }
 

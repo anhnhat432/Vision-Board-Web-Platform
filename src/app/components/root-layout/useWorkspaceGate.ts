@@ -31,6 +31,10 @@ export function isPublicHomePath(pathname: string): boolean {
   return pathname === "/";
 }
 
+export function isPublicLegalPath(pathname: string): boolean {
+  return pathname === "/terms" || pathname === "/privacy";
+}
+
 export function buildLoginRedirect(pathname: string, search: string, hash: string) {
   const destination = `${pathname}${search}${hash}`;
   return {
@@ -49,7 +53,8 @@ export function resolveWorkspaceGateState({
   userProfileLoading,
 }: UseWorkspaceGateOptions): WorkspaceGateState {
   const isPublicHome = isPublicHomePath(pathname);
-  const canRenderWhileSignedOut = isPublicHome || isAuthProtectedPath(pathname) || isPublicCheckoutPath(pathname);
+  const canRenderWhileSignedOut =
+    isPublicHome || isPublicLegalPath(pathname) || isAuthProtectedPath(pathname) || isPublicCheckoutPath(pathname);
   const hasUser = Boolean(user);
   const shouldRedirectToLogin =
     !demoMode && !authLoading && !hasUser && !canRenderWhileSignedOut;

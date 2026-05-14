@@ -32,6 +32,11 @@ const userSchema = new Schema(
       required: false,
       default: null,
     },
+    termsAcceptedAt: {
+      type: Date,
+      required: false,
+      default: null,
+    },
     avatarUrl: {
       type: String,
       required: false,
@@ -57,6 +62,7 @@ export type UserDocument = {
   displayName: string;
   role: "user" | "admin";
   onboardingCompletedAt: Date | null;
+  termsAcceptedAt: Date | null;
   avatarUrl: string | null;
   locale: string;
   createdAt: Date;
