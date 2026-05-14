@@ -1,18 +1,22 @@
-import type { ComponentType } from "react";
+import { Suspense, lazy, type ComponentType } from "react";
 import { Navigate, createBrowserRouter } from "react-router";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
-import { AdminLayout } from "./components/admin/AdminLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RootLayout } from "./components/RootLayout";
-import { isDemoMode } from "./utils/app-mode";
-import { loadWithChunkReload } from "./utils/chunkLoad";
+import { Achievements } from "./pages/Achievements";
+import { BillingPlan } from "./pages/BillingPlan";
+import { Dashboard } from "./pages/Dashboard";
+import { GoalTracker } from "./pages/GoalTracker";
+import { ReflectionJournal } from "./pages/ReflectionJournal";
+import { VisionBoardEditor } from "./pages/VisionBoardEditor";
+import { VisionBoardGallery } from "./pages/VisionBoardGallery";
 
 function lazyComponent<TModule extends Record<string, unknown>>(
   loader: () => Promise<TModule>,
   exportName: keyof TModule,
 ) {
   return async () => {
-    const module = await loadWithChunkReload(loader);
+    const module = await loader();
     return {
       Component: module[exportName] as ComponentType,
     };
@@ -22,11 +26,23 @@ function lazyComponent<TModule extends Record<string, unknown>>(
 function RouteHydrateFallback() {
   return (
     <div className="flex min-h-[360px] items-center justify-center px-6 py-12" role="status" aria-live="polite">
-      <div className="w-full max-w-md rounded-[var(--r-control)] border border-slate-200 bg-white/90 p-6 text-center shadow-sm">
+      <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white/90 p-6 text-center shadow-[0_18px_44px_-34px_rgba(15,23,42,0.35)]">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Dear Our Future</p>
         <p className="mt-3 text-base font-semibold text-slate-900">Đang mở trang...</p>
       </div>
     </div>
+  );
+}
+
+const TwelveWeekSystemPage = lazy(async () => ({
+  default: (await import("./pages/12WeekSystem")).TwelveWeekSystem,
+}));
+
+function TwelveWeekSystemRoute() {
+  return (
+    <Suspense fallback={<RouteHydrateFallback />}>
+      <TwelveWeekSystemPage />
+    </Suspense>
   );
 }
 
@@ -45,37 +61,10 @@ function RedirectToTwelveWeekSystem() {
   return <Navigate to="/12-week-system" replace />;
 }
 
-function RedirectToTwelveWeekSystemSettings() {
-  return <Navigate to="/12-week-system?tab=settings" replace />;
-}
-
-function RedirectToBillingPlan() {
-  return <Navigate to="/billing/plan" replace />;
-}
-
-function RedirectToAdminOrders() {
-  return <Navigate to="/admin/orders" replace />;
-}
-
 export const router = createBrowserRouter([
   {
     path: "/login",
     ...lazyRoute(() => import("./pages/LoginPage"), "LoginPage"),
-  },
-  {
-    path: "/admin",
-    Component: AdminLayout,
-    errorElement: <AppErrorBoundary />,
-    children: [
-      {
-        index: true,
-        Component: RedirectToAdminOrders,
-      },
-      {
-        path: "orders",
-        ...lazyRoute(() => import("./pages/AdminOrdersPage"), "AdminOrdersPage"),
-      },
-    ],
   },
   {
     path: "/",
@@ -84,7 +73,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        ...lazyRoute(() => import("./pages/Dashboard"), "Dashboard"),
+        Component: Dashboard,
       },
       {
         path: "onboarding",
@@ -103,12 +92,8 @@ export const router = createBrowserRouter([
         ...lazyRoute(() => import("./pages/SMARTGoalSetup"), "SMARTGoalSetup"),
       },
       {
-        path: "vision",
-        ...lazyRoute(() => import("./pages/AspirationalVision"), "AspirationalVision"),
-      },
-      {
         path: "12-week-setup",
-        ...lazyRoute(() => import("../features/plan12week/pages/12WeekSetup.tsx"), "TwelveWeekSetup"),
+        ...lazyRoute(() => import("./pages/12WeekSetup"), "TwelveWeekSetup"),
       },
       {
         path: "12-week-dashboard",
@@ -124,50 +109,15 @@ export const router = createBrowserRouter([
       },
       {
         path: "12-week-system",
-        children: [
-          {
-            index: true,
-            ...lazyRoute(() => import("../features/plan12week/pages/12WeekSystem.tsx"), "TwelveWeekSystem"),
-          },
-          {
-            path: "settings",
-            Component: RedirectToTwelveWeekSystemSettings,
-          },
-        ],
-      },
-      // Mock checkout is demo-only; in real mode redirect to the real billing plan page.
-      ...(isDemoMode()
-        ? [
-            {
-              path: "billing/mock-checkout",
-              ...lazyRoute(() => import("./pages/MockBillingCheckout"), "MockBillingCheckout"),
-            },
-          ]
-        : [
-            {
-              path: "billing/mock-checkout",
-              Component: RedirectToBillingPlan,
-            },
-          ]),
-      {
-        path: "billing",
-        Component: RedirectToBillingPlan,
+        Component: TwelveWeekSystemRoute,
       },
       {
-        path: "account/billing",
-        Component: RedirectToBillingPlan,
+        path: "billing/mock-checkout",
+        ...lazyRoute(() => import("./pages/MockBillingCheckout"), "MockBillingCheckout"),
       },
       {
         path: "billing/plan",
-        ...lazyRoute(() => import("./pages/BillingPlan"), "BillingPlan"),
-      },
-      {
-        path: "billing/checkout/:orderId?",
-        ...lazyRoute(() => import("./pages/BillingCheckoutQR"), "BillingCheckoutQR"),
-      },
-      {
-        path: "settings",
-        ...lazyRoute(() => import("./pages/SettingsPage"), "SettingsPage"),
+        Component: BillingPlan,
       },
       {
         // Protected routes — require authentication
@@ -185,11 +135,15 @@ export const router = createBrowserRouter([
       },
       {
         path: "vision-board/:id?",
-        ...lazyRoute(() => import("./pages/VisionBoardEditor"), "VisionBoardEditor"),
+        Component: VisionBoardEditor,
+      },
+      {
+        path: "admin/orders",
+        ...lazyRoute(() => import("./pages/AdminOrdersPage"), "AdminOrdersPage"),
       },
       {
         path: "goals",
-        ...lazyRoute(() => import("./pages/GoalTracker"), "GoalTracker"),
+        Component: GoalTracker,
       },
       {
         path: "life-balance",
@@ -197,23 +151,15 @@ export const router = createBrowserRouter([
       },
       {
         path: "achievements",
-        ...lazyRoute(() => import("./pages/Achievements"), "Achievements"),
+        Component: Achievements,
       },
       {
         path: "journal",
-        ...lazyRoute(() => import("./pages/ReflectionJournal"), "ReflectionJournal"),
+        Component: ReflectionJournal,
       },
       {
         path: "gallery",
-        ...lazyRoute(() => import("./pages/VisionBoardGallery"), "VisionBoardGallery"),
-      },
-      {
-        path: "privacy",
-        ...lazyRoute(() => import("./pages/PrivacyPage"), "PrivacyPage"),
-      },
-      {
-        path: "terms",
-        ...lazyRoute(() => import("./pages/TermsPage"), "TermsPage"),
+        Component: VisionBoardGallery,
       },
     ],
   },
