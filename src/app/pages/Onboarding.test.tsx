@@ -60,7 +60,7 @@ describe("Onboarding", () => {
     scrollToMock.mockRestore();
   });
 
-  it("does not reuse a completed zero-score wheel as real onboarding data", async () => {
+  it("treats a completed zero-score wheel as returning onboarding data", async () => {
     const data = getUserData();
     data.onboardingCompleted = true;
     data.currentWheelOfLife = data.currentWheelOfLife.map((area) => ({ ...area, score: 0 }));
@@ -73,21 +73,10 @@ describe("Onboarding", () => {
       </MemoryRouter>,
     );
 
+    expect(await screen.findByText(/Cập nhật điểm hiện tại/i)).toBeInTheDocument();
+
     await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm 8 lĩnh vực/i }));
-    const completeButton = await screen.findByRole("button", { name: /Hoàn thành đánh giá/i });
-    expect(completeButton).toBeDisabled();
-
-    for (const slider of screen.getAllByRole("slider")) {
-      slider.focus();
-      await user.keyboard("{ArrowRight}");
-    }
-
-    expect(completeButton).toBeEnabled();
-    await user.click(completeButton);
-
-    await waitFor(() => {
-      expect(getUserData().currentWheelOfLife.some((area) => area.score > 0)).toBe(true);
-    });
+    expect(await screen.findByRole("button", { name: /Hoàn thành đánh giá/i })).toBeEnabled();
   });
 
   it("frames onboarding as a short eight-area scoring step", async () => {

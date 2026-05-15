@@ -101,7 +101,16 @@ describe("life insight flow", () => {
     await user.click(await screen.findByTestId("life-insight-primary-cta"));
     expect(await screen.findByText("Bạn có bản nháp mục tiêu chưa lưu")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Giữ bản nháp" }));
+    await user.click(screen.getByRole("button", { name: "Huỷ" }));
+    await waitFor(() => {
+      expect(screen.queryByText("Bạn có bản nháp mục tiêu chưa lưu")).not.toBeInTheDocument();
+    });
+    expect(router.state.location.pathname).toBe("/life-insight");
+    expect(localStorage.getItem(APP_STORAGE_KEYS.pendingSmartGoal)).not.toBeNull();
+    expect(localStorage.getItem(APP_STORAGE_KEYS.selectedFocusArea)).toBe("Career");
+
+    await user.click(screen.getByTestId("life-insight-primary-cta"));
+    await user.click(await screen.findByRole("button", { name: "Giữ bản nháp" }));
     await waitFor(() => {
       expect(screen.queryByText("Bạn có bản nháp mục tiêu chưa lưu")).not.toBeInTheDocument();
     });

@@ -119,6 +119,7 @@ export interface UniversalWeeklyReview {
   insights?: string;
   nextWeekCommitments?: string[];
   executionScore?: number;
+  lastReviewAt?: string;
   reflection?: string;
   adjustments?: string;
   /** Việc nào tuần sau nên giữ — added in Weekly Review v2 (optional, backwards-compat). */

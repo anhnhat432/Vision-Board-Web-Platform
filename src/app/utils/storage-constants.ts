@@ -123,6 +123,7 @@ export const TWELVE_WEEK_MONETIZATION_STEPS = [
 
 export const APP_STORAGE_KEYS = {
   selectedFocusArea: "selected_focus_area",
+  onboardingDraft: "onboarding_draft",
   pendingSmartGoal: "pending_smart_goal",
   pendingFeasibilityResult: "pending_feasibility_result",
   pendingFeasibilityAnswers: "pending_feasibility_answers",

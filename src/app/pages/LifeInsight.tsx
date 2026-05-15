@@ -214,6 +214,9 @@ export function LifeInsight() {
             <AlertDialogDescription>Đổi lĩnh vực sẽ xoá bản nháp hiện tại. Tiếp tục?</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
+            <Button type="button" variant="ghost" className="sm:mr-auto" onClick={() => setPendingFocusAreaName(null)}>
+              Huỷ
+            </Button>
             <AlertDialogCancel>Giữ bản nháp</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmDraftClear}>Xoá bản nháp và đổi lĩnh vực</AlertDialogAction>
           </AlertDialogFooter>

@@ -61,7 +61,7 @@ import {
   upsertReflection,
 } from '@/app/utils/storage';
 import { dismissRescueTrigger } from "@/app/utils/twelve-week-system-ui";
-import type { TwelveWeekSystem as TwelveWeekSystemModel } from '@/app/utils/storage-types';
+import type { TwelveWeekSystem as TwelveWeekSystemModel, UniversalWeeklyReview } from '@/app/utils/storage-types';
 import {
   buildDerivedScoreboard,
   getCycleEndDate,
@@ -112,12 +112,31 @@ const emptyMutationQueueSummary = {
   lastDrainFinishedAt: null,
 };
 
+export const WEEKLY_REVIEW_SNOOZE_STORAGE_KEY = "weekly_review_snooze";
+const WEEKLY_REVIEW_SNOOZE_MS = 24 * 60 * 60 * 1000;
+
 const TWELVE_WEEK_SECTION_TABS = [
   { value: "today", label: "Hôm nay", icon: ListTodo },
   { value: "week", label: "Tuần", icon: CalendarDays },
   { value: "progress", label: "Tiến độ", icon: BarChart3 },
   { value: "settings", label: "Cài đặt", icon: Settings2 },
 ] satisfies Array<{ value: string; label: string; icon: LucideIcon }>;
+
+function readWeeklyReviewSnoozeUntil(): number {
+  if (typeof window === "undefined") return 0;
+
+  const rawValue = window.localStorage.getItem(WEEKLY_REVIEW_SNOOZE_STORAGE_KEY);
+  if (!rawValue) return 0;
+
+  const numericValue = Number(rawValue);
+  if (Number.isFinite(numericValue)) return numericValue;
+
+  const parsedDateValue = Date.parse(rawValue);
+  if (Number.isFinite(parsedDateValue)) return parsedDateValue;
+
+  window.localStorage.removeItem(WEEKLY_REVIEW_SNOOZE_STORAGE_KEY);
+  return 0;
+}
 
 function getExecutionPhaseInfo(currentWeek: number) {
   if (currentWeek <= 4) {
@@ -308,6 +327,7 @@ export function TwelveWeekSystem() {
   const [isDeleteDataDialogOpen, setIsDeleteDataDialogOpen] = useState(false);
   const [isDeletingData, setIsDeletingData] = useState(false);
   const [dismissedTriggerKind, setDismissedTriggerKind] = useState<string | null>(null);
+  const [weeklyReviewSnoozeUntil, setWeeklyReviewSnoozeUntil] = useState(readWeeklyReviewSnoozeUntil);
   const demoMode = isDemoMode();
   const [showFullProgress, setShowFullProgress] = useState(false);
   const {
@@ -358,6 +378,18 @@ export function TwelveWeekSystem() {
   useEffect(() => {
     activeGoalIdRef.current = activeGoal?.id ?? null;
   }, [activeGoal?.id]);
+
+  useEffect(() => {
+    if (!reviewDueToday) return;
+    const delayMs = weeklyReviewSnoozeUntil - Date.now() + 1;
+    if (delayMs <= 0) return;
+
+    const timer = window.setTimeout(() => {
+      setWeeklyReviewSnoozeUntil(readWeeklyReviewSnoozeUntil());
+    }, Math.min(delayMs, 2_147_483_647));
+
+    return () => window.clearTimeout(timer);
+  }, [reviewDueToday, weeklyReviewSnoozeUntil]);
 
   useEffect(() => {
     const handleRefresh = () => loadGoalData(activeGoalIdRef.current ?? undefined);
@@ -449,6 +481,66 @@ export function TwelveWeekSystem() {
 
     return normalizedNextSystem;
   };
+
+  const markWeeklyReviewCompleted = () => {
+    if (!system) return;
+
+    const nowIso = new Date().toISOString();
+    const scoreFromCompletion = Math.max(5, Math.round(weekCompletion.percent / 20));
+    const fallbackReview: UniversalWeeklyReview = {
+      weekNumber: currentWeek,
+      leadCompletionPercent: weekCompletion.percent,
+      lagProgressValue: currentLagMetricValue,
+      biggestOutputThisWeek: "",
+      mainObstacle: "",
+      nextWeekPriority: "",
+      workloadDecision: "keep same",
+      reviewCompleted: true,
+      progressScore: scoreFromCompletion,
+      disciplineScore: scoreFromCompletion,
+      focusScore: weekCompletion.percent >= 70 ? 8 : 6,
+      improvementScore: 6,
+      outputQualityScore: 6,
+      completedLeadIndicators: weekCompletion.completed,
+      commitmentsKept: [],
+      commitmentsMissed: [],
+      insights: "",
+      nextWeekCommitments: [],
+      executionScore: weekCompletion.percent,
+      lastReviewAt: nowIso,
+      reflection: "",
+      adjustments: "",
+    };
+    const nextReview: UniversalWeeklyReview = {
+      ...fallbackReview,
+      ...(currentReview ?? {}),
+      weekNumber: currentWeek,
+      leadCompletionPercent: currentReview?.leadCompletionPercent ?? weekCompletion.percent,
+      lagProgressValue: currentReview?.lagProgressValue ?? currentLagMetricValue,
+      workloadDecision: currentReview?.workloadDecision || "keep same",
+      reviewCompleted: true,
+      completedLeadIndicators: currentReview?.completedLeadIndicators ?? weekCompletion.completed,
+      executionScore: currentReview?.executionScore ?? weekCompletion.percent,
+      lastReviewAt: nowIso,
+    };
+    const updatedReviews = [
+      ...system.weeklyReviews.filter((review) => review.weekNumber !== currentWeek),
+      nextReview,
+    ].sort((left, right) => left.weekNumber - right.weekNumber);
+
+    commitSystemUpdate({
+      ...system,
+      weeklyReviews: updatedReviews,
+    });
+  };
+
+  const handleSnoozeWeeklyReview = () => {
+    const snoozeUntil = Date.now() + WEEKLY_REVIEW_SNOOZE_MS;
+    localStorage.setItem(WEEKLY_REVIEW_SNOOZE_STORAGE_KEY, String(snoozeUntil));
+    setWeeklyReviewSnoozeUntil(snoozeUntil);
+  };
+
+  const shouldShowWeeklyReviewBanner = reviewDueToday && Date.now() > weeklyReviewSnoozeUntil;
 
   const isCycleReviewMode = Boolean(system && isTwelveWeekCycleReviewPhase(system));
 
@@ -969,6 +1061,28 @@ export function TwelveWeekSystem() {
       />
 
       <TwelveWeekGoalSwitcher allGoals={allGoals} activeGoalId={activeGoal.id} onLoadGoal={loadGoalData} />
+
+      {shouldShowWeeklyReviewBanner && (
+        <TwelveWeekDashboardNotice
+          tone="warning"
+          title="Đến lúc chốt review tuần"
+          description="Review tuần đang đến hạn. Bạn có thể mở tab Tuần, đánh dấu đã xong, hoặc nhắc lại sau."
+        >
+          <Button
+            variant="secondary"
+            className="w-full border-slate-950 bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
+            onClick={markWeeklyReviewCompleted}
+          >
+            Đã đánh giá xong tuần này
+          </Button>
+          <Button className="w-full bg-white sm:w-auto" variant="outline" onClick={handleSnoozeWeeklyReview}>
+            Nhắc lại sau 24h
+          </Button>
+          <Button className="w-full bg-white sm:w-auto" variant="outline" onClick={() => handleTabChange("week")}>
+            Mở review tuần
+          </Button>
+        </TwelveWeekDashboardNotice>
+      )}
 
       {hasIncompletePlanStructure && (
         <TwelveWeekDashboardNotice

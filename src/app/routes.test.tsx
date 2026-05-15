@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -38,6 +39,20 @@ vi.mock("@/features/plan12week/hooks/useAutoCloudSync", () => ({
   }),
 }));
 
+vi.mock("@/features/plan12week/hooks/AutoCloudSyncProvider", () => ({
+  AutoCloudSyncProvider: ({ children }: { children: ReactNode }) => children,
+  useAutoCloudSyncContext: () => ({
+    loading: false,
+    lastResult: null,
+    lastSyncedAt: null,
+    pendingCount: 0,
+    online: true,
+    conflictPending: false,
+    syncing: false,
+    triggerSyncNow: autoCloudSyncMock.triggerSyncNow,
+  }),
+}));
+
 vi.mock("./hooks/useBackendPlanHydration", () => ({
   BACKEND_PLAN_HYDRATION_EVENT_NAME: "visionboard:backend-hydrated",
   useBackendPlanHydration: () => ({ loading: false, result: null, error: null }),
@@ -68,6 +83,7 @@ vi.mock("./utils/production", () => ({
   syncPendingOutbox: vi.fn(),
 }));
 
+import { initializeUserData, saveUserData } from "./utils/storage";
 import { appRoutes } from "./routes";
 
 function renderRoute(pathname: string) {
@@ -75,8 +91,9 @@ function renderRoute(pathname: string) {
   return render(<RouterProvider router={router} />);
 }
 
-describe("public legal routes", () => {
+describe("app routes", () => {
   beforeEach(() => {
+    localStorage.clear();
     authContextMock.useAuthContext.mockReturnValue({
       user: null,
       userProfile: null,
@@ -108,5 +125,24 @@ describe("public legal routes", () => {
     expect(await screen.findByRole("heading", { name: /Câu hỏi thường gặp/i })).toBeInTheDocument();
     expect(screen.getByText("Làm sao tôi biết đã thanh toán thành công?")).toBeInTheDocument();
     expect(screen.getByText(/Bạn nhận biên nhận qua email/)).toBeInTheDocument();
+  });
+  it("resolves /settings through the app route table", async () => {
+    authContextMock.useAuthContext.mockReturnValue({
+      user: { displayName: "Test User", email: "test@example.com" },
+      userProfile: { email: "test@example.com", id: "test-user", role: "user" },
+      userProfileLoading: false,
+      userProfileError: null,
+      authLoading: false,
+      error: null,
+      login: vi.fn(),
+      logout: vi.fn(),
+      refreshUserProfile: vi.fn(),
+      isConfigured: true,
+    });
+    const userData = initializeUserData();
+    saveUserData({ ...userData, onboardingCompleted: true });
+    renderRoute("/settings");
+
+    expect(await screen.findByRole("heading", { level: 1, name: /T.i kho.n v. d. li.u/i })).toBeInTheDocument();
   });
 });

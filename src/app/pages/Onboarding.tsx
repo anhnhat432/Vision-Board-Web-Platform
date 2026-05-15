@@ -44,6 +44,85 @@ const JOURNEY_STEPS = [
 ];
 
 const FEATURE_PILLS = ["8 lĩnh vực", "Khoảng 3 phút", "Góc nhìn cuộc sống", "mục tiêu SMART", "12 tuần"];
+export const ONBOARDING_DRAFT_STORAGE_KEY = "onboarding_draft";
+const ONBOARDING_DRAFT_VERSION = 1;
+
+const createDefaultOnboardingLifeAreas = () => LIFE_AREAS.map((area) => ({ ...area, score: 5 }));
+
+type OnboardingDraft = {
+  version: number;
+  completed: boolean;
+  step: OnboardingStep;
+  lifeAreas: LifeArea[];
+  reviewedAreaIndices: number[];
+  updatedAt: string;
+};
+
+function normalizeDraftScore(value: unknown) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return 5;
+  return Math.min(10, Math.max(1, Math.round(value)));
+}
+
+function parseOnboardingDraft(raw: string | null): OnboardingDraft | null {
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<OnboardingDraft> | null;
+    if (!parsed || typeof parsed !== "object" || parsed.completed) return null;
+
+    const draftLifeAreas = Array.isArray(parsed.lifeAreas) ? parsed.lifeAreas : [];
+    const lifeAreas = LIFE_AREAS.map((baseArea, index) => {
+      const draftArea = draftLifeAreas.find((area) => area?.name === baseArea.name) ?? draftLifeAreas[index];
+      return { ...baseArea, score: normalizeDraftScore(draftArea?.score) };
+    });
+    const reviewedAreaIndices = Array.isArray(parsed.reviewedAreaIndices)
+      ? parsed.reviewedAreaIndices.filter(
+          (index): index is number => Number.isInteger(index) && index >= 0 && index < LIFE_AREAS.length,
+        )
+      : [];
+
+    return {
+      version: ONBOARDING_DRAFT_VERSION,
+      completed: false,
+      step: parsed.step === "assessment" ? "assessment" : "welcome",
+      lifeAreas,
+      reviewedAreaIndices: [...new Set(reviewedAreaIndices)],
+      updatedAt: typeof parsed.updatedAt === "string" ? parsed.updatedAt : new Date().toISOString(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function readOnboardingDraft(): OnboardingDraft | null {
+  if (typeof window === "undefined") return null;
+
+  const raw = window.localStorage.getItem(ONBOARDING_DRAFT_STORAGE_KEY);
+  const draft = parseOnboardingDraft(raw);
+  if (raw && !draft) window.localStorage.removeItem(ONBOARDING_DRAFT_STORAGE_KEY);
+  return draft;
+}
+
+function writeOnboardingDraft(draft: OnboardingDraft) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(ONBOARDING_DRAFT_STORAGE_KEY, JSON.stringify(draft));
+}
+
+function clearOnboardingDraft() {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(ONBOARDING_DRAFT_STORAGE_KEY);
+}
+
+function createOnboardingDraft(step: OnboardingStep, lifeAreas: LifeArea[], reviewedAreaIndices: Set<number>): OnboardingDraft {
+  return {
+    version: ONBOARDING_DRAFT_VERSION,
+    completed: false,
+    step,
+    lifeAreas: lifeAreas.map((area) => ({ ...area })),
+    reviewedAreaIndices: [...reviewedAreaIndices],
+    updatedAt: new Date().toISOString(),
+  };
+}
 
 function OnboardingPageMotion({ children }: { children: ReactNode }) {
   const prefersReducedMotion = useReducedMotion();
@@ -70,10 +149,12 @@ export function Onboarding() {
   const prefersReducedMotion = useReducedMotion();
   const [step, setStep] = useState<OnboardingStep>("welcome");
   const [isReturning, setIsReturning] = useState(false);
-  const [lifeAreas, setLifeAreas] = useState<LifeArea[]>(LIFE_AREAS.map((area) => ({ ...area, score: 5 })));
+  const [lifeAreas, setLifeAreas] = useState<LifeArea[]>(createDefaultOnboardingLifeAreas);
   const [reviewedAreaIndices, setReviewedAreaIndices] = useState<Set<number>>(new Set());
   const [isDirty, setIsDirty] = useState(false);
+  const [availableDraft, setAvailableDraft] = useState<OnboardingDraft | null>(null);
   const flowTopRef = useRef<HTMLDivElement | null>(null);
+  const autosaveTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
 
   const guardedRef = useRef(false);
   useEffect(() => {
@@ -84,7 +165,11 @@ export function Onboarding() {
       setIsReturning(true);
       setLifeAreas(data.currentWheelOfLife);
       setReviewedAreaIndices(new Set(data.currentWheelOfLife.map((_, index) => index)));
+      clearOnboardingDraft();
+      return;
     }
+
+    setAvailableDraft(readOnboardingDraft());
   }, []);
 
   const averageScore = lifeAreas.reduce((sum, area) => sum + area.score, 0) / lifeAreas.length;
@@ -98,6 +183,12 @@ export function Onboarding() {
     focusRef: flowTopRef,
     topOffset: 0,
   });
+
+  const cancelPendingDraftSave = useCallback(() => {
+    if (!autosaveTimerRef.current) return;
+    window.clearTimeout(autosaveTimerRef.current);
+    autosaveTimerRef.current = null;
+  }, []);
 
   const handleScoreChangeWrapped = useCallback((index: number, value: number[]) => {
     setLifeAreas((currentAreas) =>
@@ -113,6 +204,21 @@ export function Onboarding() {
 
   useEffect(() => {
     if (!isDirty) return;
+
+    const draft = createOnboardingDraft(step, lifeAreas, reviewedAreaIndices);
+    cancelPendingDraftSave();
+    autosaveTimerRef.current = window.setTimeout(() => {
+      writeOnboardingDraft(draft);
+      autosaveTimerRef.current = null;
+    }, 500);
+
+    return cancelPendingDraftSave;
+  }, [cancelPendingDraftSave, isDirty, lifeAreas, reviewedAreaIndices, step]);
+
+  useEffect(() => cancelPendingDraftSave, [cancelPendingDraftSave]);
+
+  useEffect(() => {
+    if (!isDirty) return;
     const handler = (event: BeforeUnloadEvent) => {
       event.preventDefault();
       event.returnValue = "";
@@ -124,6 +230,9 @@ export function Onboarding() {
   const handleComplete = () => {
     if (!canCompleteAssessment) return;
     updateWheelOfLife(lifeAreas);
+    clearOnboardingDraft();
+    cancelPendingDraftSave();
+    setAvailableDraft(null);
     trackAnalyticsEvent("life_balance_completed", {
       source: "onboarding",
       area_count: lifeAreas.length,
@@ -148,6 +257,44 @@ export function Onboarding() {
     setStep("assessment");
   };
 
+  const handleResumeDraft = () => {
+    if (!availableDraft) return;
+    setLifeAreas(availableDraft.lifeAreas.map((area) => ({ ...area })));
+    setReviewedAreaIndices(new Set(availableDraft.reviewedAreaIndices));
+    setStep(availableDraft.step);
+    setIsDirty(true);
+    setAvailableDraft(null);
+  };
+
+  const handleRestartDraft = () => {
+    clearOnboardingDraft();
+    cancelPendingDraftSave();
+    setAvailableDraft(null);
+    setStep("welcome");
+    setLifeAreas(createDefaultOnboardingLifeAreas());
+    setReviewedAreaIndices(new Set());
+    setIsDirty(false);
+  };
+
+  const draftBanner = availableDraft ? (
+    <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="font-semibold">Tiếp tục từ chỗ bạn dừng?</p>
+          <p>Bạn có bản nháp Cân bằng cuộc sống chưa hoàn thành.</p>
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button size="sm" onClick={handleResumeDraft}>
+            Tiếp tục
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleRestartDraft}>
+            Bắt đầu lại
+          </Button>
+        </div>
+      </div>
+    </div>
+  ) : null;
+
   if (step === "welcome") {
     return (
       <div
@@ -168,6 +315,8 @@ export function Onboarding() {
                       bạn chỉ điều chỉnh phần thay đổi, không tạo lại từ đầu.
                     </div>
                   )}
+
+                  {draftBanner}
 
                   <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-violet-200 bg-violet-50 px-4 py-1.5 text-sm font-semibold text-violet-700">
                     <Sparkles className="h-4 w-4" />
@@ -215,6 +364,9 @@ export function Onboarding() {
                       onClick={() => {
                         if (reviewedAreaIndices.size > 0) {
                           updateWheelOfLife(lifeAreas);
+                          clearOnboardingDraft();
+                          cancelPendingDraftSave();
+                          setAvailableDraft(null);
                           setIsDirty(false);
                           toast.success("Đã lưu phần bạn đã chỉnh. Bạn có thể quay lại rà đủ 8 lĩnh vực bất kỳ lúc nào.");
                         } else {
@@ -293,6 +445,7 @@ export function Onboarding() {
     >
       <OnboardingPageMotion>
         <CoreFlowProgress currentStepId="life_balance" />
+        {draftBanner}
 
         <Card className="flow-surface surface-aurora ring-soft-glow overflow-hidden border border-slate-200/80 bg-white/94 shadow-xl shadow-slate-900/5 dark:shadow-black/30">
           <CardContent className="p-4 sm:p-6 lg:p-7">

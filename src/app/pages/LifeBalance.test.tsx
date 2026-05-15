@@ -39,6 +39,19 @@ function seedZeroScoreWheel() {
   saveUserData(data);
 }
 
+function seedCompletedZeroScoreWheel() {
+  const data = getUserData();
+  data.onboardingCompleted = true;
+  data.currentWheelOfLife = LIFE_AREAS.map((area) => ({ ...area, score: 0 }));
+  data.wheelOfLifeHistory = [
+    {
+      date: "2026-04-27T00:00:00.000Z",
+      areas: data.currentWheelOfLife,
+    },
+  ];
+  saveUserData(data);
+}
+
 function seedRealLifeBalance() {
   const scores = [7, 5, 6, 8, 4, 7, 6, 5];
   const data = getUserData();
@@ -68,6 +81,16 @@ describe("LifeBalance", () => {
     await user.click(screen.getByRole("button", { name: /Bắt đầu đánh giá/i }));
 
     expect(router.state.location.pathname).toBe("/onboarding");
+  });
+
+  it("renders completed zero-score Life Balance data without redirecting", async () => {
+    seedCompletedZeroScoreWheel();
+    const { router } = renderLifeBalance();
+
+    expect(await screen.findByText("Bạn chưa chấm điểm — hãy chỉnh các thanh để bắt đầu")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /Cập nhật/i })).toBeInTheDocument();
+    expect(screen.queryByTestId("onboarding-page")).not.toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/life-balance");
   });
 
   it("shows the next Life Insight step after real Life Balance data exists", async () => {

@@ -40,7 +40,6 @@ import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { loadWithChunkReload } from "../utils/chunkLoad";
-import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { type LifeArea, getLifeAreaLabel, updateWheelOfLife } from "../utils/storage";
 
 const LifeBalanceHistoryChart = lazy(() =>
@@ -124,11 +123,9 @@ export function LifeBalance() {
   }, [hasChanges, userData]);
 
   useEffect(() => {
-    if (!userData || lifeBalanceStartedRef.current) return;
+    if (!userData?.onboardingCompleted || lifeBalanceStartedRef.current) return;
 
-    const hasExistingScores = hasRealLifeBalance(userData);
-    if (!hasExistingScores) return;
-
+    const hasExistingScores = userData.currentWheelOfLife.some((area) => area.score > 0);
     lifeBalanceStartedRef.current = true;
     trackAnalyticsEvent("life_balance_started", {
       source: "life_balance",
@@ -180,7 +177,8 @@ export function LifeBalance() {
     });
   }, [userData]);
 
-  const hasLifeBalanceData = hasRealLifeBalance(userData);
+  const hasLifeBalanceData = Boolean(userData?.onboardingCompleted);
+  const hasAnyScore = lifeAreas.some((area) => area.score > 0);
   const balanceTone =
     averageScore < 5
       ? "Mặt bằng hiện tại còn thấp. Hãy chọn một lĩnh vực nhỏ để tạo lực kéo trước."
@@ -393,6 +391,14 @@ export function LifeBalance() {
           </div>
         </CardContent>
       </Card>
+
+      {!hasAnyScore ? (
+        <Card className="border border-amber-200/80 bg-amber-50/90 shadow-sm">
+          <CardContent className="p-4 text-sm font-medium leading-6 text-amber-900 sm:p-5">
+            Bạn chưa chấm điểm — hãy chỉnh các thanh để bắt đầu
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Reveal delay={0.02}>
         <Card

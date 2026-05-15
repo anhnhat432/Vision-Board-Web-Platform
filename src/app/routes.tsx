@@ -89,6 +89,10 @@ export const appRoutes = [
         ...lazyRoute(() => import("./pages/RefundPolicyPage"), "RefundPolicyPage"),
       },
       {
+        path: "settings",
+        ...lazyRoute(() => import("./pages/SettingsPage"), "SettingsPage"),
+      },
+      {
         path: "onboarding",
         ...lazyRoute(() => import("./pages/Onboarding"), "Onboarding"),
       },
