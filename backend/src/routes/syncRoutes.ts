@@ -8,6 +8,7 @@ import {
   submitTwelveWeekMutations,
   validateTwelveWeekImport,
 } from "../controllers/syncController";
+import { requireEmailVerified } from "../middleware/authMiddlewareCore";
 import { validateJsonObjectBody } from "../middleware/requestValidation";
 import { asyncHandler } from "../utils/asyncHandler";
 
@@ -19,6 +20,7 @@ const syncRoutes = Router();
  * allowing other CRUD routes to accept larger bodies if needed.
  */
 syncRoutes.use(express.json({ limit: "1mb" }));
+syncRoutes.use(requireEmailVerified);
 
 syncRoutes.post(
   "/sync/12-week/import",

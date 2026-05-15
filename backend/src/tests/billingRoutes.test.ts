@@ -28,9 +28,9 @@ function createBillingTestApp(): Express {
     "/api",
     createAuthMiddleware({
       async verifyIdToken(token: string) {
-        if (token === "owner-token") return { uid: ownerUserId, email: "owner@test.com" };
-        if (token === "other-token") return { uid: otherUserId, email: "other@test.com" };
-        if (token === "checkout-token") return { uid: checkoutUserId, email: "checkout@test.com" };
+        if (token === "owner-token") return { uid: ownerUserId, email: "owner@test.com", emailVerified: true };
+        if (token === "other-token") return { uid: otherUserId, email: "other@test.com", emailVerified: true };
+        if (token === "checkout-token") return { uid: checkoutUserId, email: "checkout@test.com", emailVerified: true };
         throw new Error("Invalid test token");
       },
     }),
@@ -117,7 +117,7 @@ describe("GET /api/billing/entitlement", () => {
       "/api",
       createAuthMiddleware({
         async verifyIdToken(token: string) {
-          if (token === "plus-token") return { uid: testUserId, email: "plus@test.com" };
+          if (token === "plus-token") return { uid: testUserId, email: "plus@test.com", emailVerified: true };
           throw new Error("Invalid test token");
         },
       }),
@@ -175,7 +175,7 @@ describe("GET /api/billing/entitlement", () => {
       "/api",
       createAuthMiddleware({
         async verifyIdToken(token: string) {
-          if (token === "canceled-token") return { uid: testUserId, email: "canceled@test.com" };
+          if (token === "canceled-token") return { uid: testUserId, email: "canceled@test.com", emailVerified: true };
           throw new Error("Invalid test token");
         },
       }),
@@ -463,7 +463,7 @@ describe("POST /api/billing/customer-portal", () => {
       "/api",
       createAuthMiddleware({
         async verifyIdToken(token: string) {
-          if (token === "portal-token") return { uid: portalUserId, email: "portal@test.com" };
+          if (token === "portal-token") return { uid: portalUserId, email: "portal@test.com", emailVerified: true };
           throw new Error("Invalid test token");
         },
       }),
@@ -518,8 +518,8 @@ describe("POST /api/billing/subscription/cancel", () => {
       "/api",
       createAuthMiddleware({
         async verifyIdToken(token: string) {
-          if (token === "cancel-token") return { uid: cancelUserId, email: "cancel@test.com" };
-          if (token === "free-token") return { uid: "user_cancel_free", email: "free@test.com" };
+          if (token === "cancel-token") return { uid: cancelUserId, email: "cancel@test.com", emailVerified: true };
+          if (token === "free-token") return { uid: "user_cancel_free", email: "free@test.com", emailVerified: true };
           throw new Error("Invalid test token");
         },
       }),

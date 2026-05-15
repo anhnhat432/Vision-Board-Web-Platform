@@ -1,5 +1,6 @@
 
 import { apiClient } from "@/lib/api/apiClient";
+import { canSyncToCloud, getEmailVerificationRequiredMessage } from "../email-verification-guard";
 import { isDemoMode } from "../app-mode";
 import { getUserData, saveUserData } from "../storage";
 import { LAST_OUTBOX_SYNC_KEY, OUTBOX_SYNC_ENDPOINT } from "./env";
@@ -7,7 +8,7 @@ import { isOffline } from "./billingCore";
 
 export interface OutboxSyncSnapshot {
   at: string;
-  status: "idle" | "success" | "partial" | "offline" | "not_configured" | "error";
+  status: "idle" | "success" | "partial" | "offline" | "not_configured" | "email_unverified" | "error";
   syncedCount: number;
   pendingCount: number;
   message: string;
@@ -66,6 +67,19 @@ export async function syncPendingOutbox(): Promise<OutboxSyncSnapshot> {
       message: "Không có mục nào cần đồng bộ.",
     };
     persistSyncSnapshot(snapshot);
+    return snapshot;
+  }
+
+  if (!canSyncToCloud()) {
+    const snapshot: OutboxSyncSnapshot = {
+      ...baseSnapshot,
+      status: "email_unverified",
+      message: getEmailVerificationRequiredMessage("sync"),
+    };
+    persistSyncSnapshot(snapshot);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("email-verification:required", { detail: { action: "sync" } }));
+    }
     return snapshot;
   }
 

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
+import { canRequestRefund, getEmailVerificationRequiredMessage, rememberEmailVerificationReturnPath } from "../utils/email-verification-guard";
 import { BillingPlusIllustration, HeroBillingPlusScene, SoftDotsPattern } from "../components/illustrations";
 import { PrimaryActionCard } from "../components/layout/PrimaryActionCard";
 import { SectionBlock } from "../components/layout/SectionBlock";
@@ -279,7 +280,7 @@ export function BillingPlan() {
 
   const billingStatus = useMemo(() => getBillingProviderStatus(), []);
   const profileEmail = authContext?.user?.email?.trim() ?? "";
-  const emailNeedsVerification = authContext?.user ? authContext.user.emailVerified !== true : false;
+  const emailNeedsVerification = authContext?.user ? !canRequestRefund(authContext.user) : false;
   const subscription = userData.subscription;
   const expiryInfo = useMemo(() => getBillingExpiryInfo(subscription), [subscription]);
 
@@ -399,7 +400,8 @@ export function BillingPlan() {
 
   const openRefundDialog = (order: PaymentHistoryOrder, reason = "") => {
     if (emailNeedsVerification) {
-      toast.error("Bạn cần xác minh email trước khi yêu cầu hoàn tiền.");
+      rememberEmailVerificationReturnPath("/billing/plan");
+      toast.error(getEmailVerificationRequiredMessage("refund"));
       return;
     }
 
@@ -434,6 +436,12 @@ export function BillingPlan() {
 
   const handleSubmitRefundRequest = async () => {
     if (!refundDialogOrder || !canSubmitRefundRequest) return;
+    if (emailNeedsVerification) {
+      const message = getEmailVerificationRequiredMessage("refund");
+      setRefundFormError(message);
+      toast.error(message);
+      return;
+    }
 
     setIsSubmittingRefund(true);
     setRefundFormError(null);

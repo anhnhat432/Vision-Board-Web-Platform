@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { User, UserCredential } from "firebase/auth";
+import { toast } from "sonner";
 
 import { post } from "@/lib/api/apiClient";
 import type { UserProfile } from "@/types/api";
@@ -23,6 +24,8 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 const PROFILE_BOOTSTRAP_TIMEOUT_MS = 60_000;
 const PROFILE_BOOTSTRAP_MAX_ATTEMPTS = 3;
 const PROFILE_BOOTSTRAP_RETRY_DELAYS_MS = [1_200, 2_500] as const;
+const EMAIL_VERIFICATION_RECHECK_INTERVAL_MS = 30_000;
+const EMAIL_VERIFICATION_RECHECK_MAX_MS = 10 * 60_000;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -94,12 +97,13 @@ async function requestUserProfileWithTimeout(): Promise<{ profile: UserProfile; 
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { user, loading, error, login, logout, isConfigured } = useAuth();
+  const { user, loading, error, login, logout, isConfigured, refreshUser } = useAuth();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userProfileLoading, setUserProfileLoading] = useState(false);
   const [userProfileError, setUserProfileError] = useState<string | null>(null);
   const [profileRefreshIndex, setProfileRefreshIndex] = useState(0);
   const bootstrappedUid = useRef<string | null>(null);
+  const previousEmailVerified = useRef<boolean | null>(null);
 
   const refreshUserProfile = useCallback(() => {
     bootstrappedUid.current = null;
@@ -171,6 +175,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       cancelled = true;
     };
   }, [user, profileRefreshIndex]);
+
+  useEffect(() => {
+    if (!user || user.emailVerified) return;
+
+    const startedAt = Date.now();
+    const interval = globalThis.setInterval(() => {
+      if (Date.now() - startedAt > EMAIL_VERIFICATION_RECHECK_MAX_MS) {
+        globalThis.clearInterval(interval);
+        return;
+      }
+      void refreshUser();
+    }, EMAIL_VERIFICATION_RECHECK_INTERVAL_MS);
+
+    return () => globalThis.clearInterval(interval);
+  }, [refreshUser, user]);
+
+  useEffect(() => {
+    if (!user) {
+      previousEmailVerified.current = null;
+      return;
+    }
+
+    const wasVerified = previousEmailVerified.current;
+    previousEmailVerified.current = user.emailVerified === true;
+    if (wasVerified === false && user.emailVerified === true) {
+      toast.success("Email đã xác thực, bạn có thể tiếp tục");
+      const redirectPath = typeof window !== "undefined" ? window.sessionStorage.getItem("emailVerification:returnTo") : null;
+      if (redirectPath && typeof window !== "undefined") {
+        window.sessionStorage.removeItem("emailVerification:returnTo");
+        window.location.assign(redirectPath);
+      }
+    }
+  }, [user]);
 
   const value: AuthContextValue = {
     user,

@@ -15,6 +15,7 @@ import {
   resendPaymentReceipt,
 } from "../controllers/orderStatusController";
 import { createBillingRefundRequest } from "../controllers/refundController";
+import { requireEmailVerified } from "../middleware/authMiddlewareCore";
 import { billingCheckoutRateLimiter, billingStatusRateLimiter } from "../middleware/rateLimiters";
 import {
   validateCheckoutSessionInput,
@@ -46,6 +47,14 @@ billingRoutes.get("/billing/entitlement", billingStatusRateLimiter, asyncHandler
 billingRoutes.post(
   "/billing/checkout-session",
   billingCheckoutRateLimiter,
+  requireEmailVerified,
+  validateCheckoutSessionInput,
+  asyncHandler(createCheckoutSession),
+);
+billingRoutes.post(
+  "/billing/orders",
+  billingCheckoutRateLimiter,
+  requireEmailVerified,
   validateCheckoutSessionInput,
   asyncHandler(createCheckoutSession),
 );
@@ -77,6 +86,7 @@ billingRoutes.post(
 billingRoutes.post(
   "/billing/orders/:orderId/refund-request",
   billingCheckoutRateLimiter,
+  requireEmailVerified,
   validateOrderIdParam,
   validateOptionalJsonObjectBody,
   asyncHandler(createBillingRefundRequest),

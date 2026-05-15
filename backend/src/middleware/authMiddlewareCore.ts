@@ -13,6 +13,10 @@ export interface TokenVerifier {
   }>;
 }
 
+export interface AuthMiddlewareOptions {
+  requireEmailVerified?: boolean;
+}
+
 function extractBearerToken(authorizationHeader?: string): string | null {
   if (!authorizationHeader) return null;
 
@@ -22,13 +26,41 @@ function extractBearerToken(authorizationHeader?: string): string | null {
   return token;
 }
 
-export function createAuthMiddleware(tokenVerifier: TokenVerifier) {
+function assertEmailVerified(emailVerified: boolean | undefined): void {
+  if (emailVerified === true) return;
+  throw new ApiError(
+    403,
+    "Email chưa được xác thực. Vui lòng xác thực email trước khi tiếp tục.",
+    undefined,
+    "EMAIL_NOT_VERIFIED",
+  );
+}
+
+export function requireEmailVerified(req: Request, _res: Response, next: NextFunction): void {
+  try {
+    if (!req.user) {
+      throw new ApiError(401, "Unauthorized: Missing authenticated user.");
+    }
+    assertEmailVerified(req.user.emailVerified);
+    next();
+  } catch (error) {
+    next(error);
+  }
+}
+
+export function createAuthMiddleware(tokenVerifier: TokenVerifier, options: AuthMiddlewareOptions = {}) {
   return async function authMiddleware(
     req: Request,
     _res: Response,
     next: NextFunction,
   ): Promise<void> {
     try {
+      if (req.user) {
+        if (options.requireEmailVerified) assertEmailVerified(req.user.emailVerified);
+        next();
+        return;
+      }
+
       const token = extractBearerToken(req.headers.authorization);
       if (!token) {
         throw new ApiError(401, "Unauthorized: Missing or invalid bearer token.");
@@ -41,6 +73,7 @@ export function createAuthMiddleware(tokenVerifier: TokenVerifier) {
         name: decodedToken.name,
         emailVerified: decodedToken.email_verified === true || decodedToken.emailVerified === true,
       };
+      if (options.requireEmailVerified) assertEmailVerified(req.user.emailVerified);
 
       next();
     } catch (error) {

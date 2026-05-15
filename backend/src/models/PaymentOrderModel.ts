@@ -125,6 +125,8 @@ const paymentOrderSchema = new Schema(
       type: String,
       required: false,
       trim: true,
+      unique: true,
+      sparse: true,
     },
     receiptEmail: {
       type: String,
@@ -179,9 +181,6 @@ const paymentOrderSchema = new Schema(
 paymentOrderSchema.index({ orderId: 1, status: 1 });
 // User's order history
 paymentOrderSchema.index({ userId: 1, createdAt: -1 });
-// Idempotency: one Casso transaction only completes one order
-paymentOrderSchema.index({ cassoTransactionId: 1 }, { sparse: true });
-
 export const PaymentOrderModel = model("PaymentOrder", paymentOrderSchema);
 
 export type PaymentOrderDocument = Document & {

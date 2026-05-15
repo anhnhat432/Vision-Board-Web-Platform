@@ -1,3 +1,4 @@
+import { canUpgradeToPlus, getEmailVerificationRequiredMessage, rememberEmailVerificationReturnPath } from "../email-verification-guard";
 import { getCurrentEntitlementKeys, getCurrentPlan, restorePlanAccessLocally, upgradePlanLocally } from "../storage";
 import type {
   BillingProvider,
@@ -100,6 +101,17 @@ const localBillingProvider: BillingProvider = {
 const apiContractBillingProvider: BillingProvider = {
   getStatus: getBillingProviderStatus,
   startCheckout: async (input) => {
+    if (!canUpgradeToPlus()) {
+      rememberEmailVerificationReturnPath("/billing/plan");
+      return {
+        ok: false,
+        status: "not_configured",
+        providerMode: "api_contract",
+        planCode: getCurrentPlan(),
+        message: getEmailVerificationRequiredMessage("upgrade"),
+      };
+    }
+
     if (isOffline()) {
       return {
         ok: false,

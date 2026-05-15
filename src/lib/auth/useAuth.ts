@@ -13,7 +13,8 @@ import {
   loginWithGoogle,
   logoutFirebase,
   registerWithEmail,
-  subscribeAuthState,
+  reloadCurrentUser,
+  subscribeIdToken,
 } from "./firebase";
 
 type LoginProvider = "google" | "email";
@@ -34,6 +35,7 @@ export interface UseAuthResult {
   login: (options?: LoginOptions) => Promise<UserCredential | null>;
   logout: () => Promise<void>;
   getToken: (forceRefresh?: boolean) => Promise<string | null>;
+  refreshUser: () => Promise<User | null>;
 }
 
 const DEFAULT_LOGIN_OPTIONS: Required<Pick<LoginOptions, "provider" | "mode">> = {
@@ -98,7 +100,7 @@ export function useAuth(): UseAuthResult {
   const isConfigured = isFirebaseAuthEnabled();
 
   useEffect(() => {
-    const unsubscribe = subscribeAuthState((nextUser) => {
+    const unsubscribe = subscribeIdToken((nextUser) => {
       if (nextUser) {
         activateAuthenticatedUserData(nextUser.uid);
       } else {
@@ -193,6 +195,21 @@ export function useAuth(): UseAuthResult {
     }
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    setError(null);
+
+    try {
+      const refreshedUser = await reloadCurrentUser();
+      if (refreshedUser) setUser(refreshedUser);
+      return refreshedUser;
+    } catch (nextError) {
+      const message = resolveAuthErrorMessage(nextError);
+      setError(message);
+      console.error("Refresh user failed.", nextError);
+      return null;
+    }
+  }, []);
+
   return {
     user,
     loading,
@@ -201,5 +218,6 @@ export function useAuth(): UseAuthResult {
     login,
     logout,
     getToken,
+    refreshUser,
   };
 }

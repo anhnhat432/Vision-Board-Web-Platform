@@ -1,10 +1,12 @@
-import { apiClient } from "@/lib/api/apiClient";
+import { apiClient, toAppError } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
+import { sendVerificationEmail } from "@/lib/auth/firebase";
 import { CheckCircle2, Loader2, Mail, ReceiptText, ShieldCheck } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { BillingPlusIllustration } from "../components/illustrations";
 import { formatVndAmount, PLUS_MONTHLY_PRICE_VND, PLUS_PRICE_CYCLE_LABEL } from "../utils/billing-pricing";
+import { canUpgradeToPlus, getEmailVerificationRequiredMessage, rememberEmailVerificationReturnPath } from "../utils/email-verification-guard";
 import { getUserData } from "../utils/storage";
 
 interface CheckoutInfoResponse {
@@ -43,15 +45,17 @@ export function BillingConfirm() {
   const [agreed, setAgreed] = useState(false);
   const [loadingInfo, setLoadingInfo] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [sendingVerification, setSendingVerification] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const userEmail = user?.email?.trim() ?? "";
   const emailVerified = user?.emailVerified === true;
+  const emailVerificationRequired = Boolean(user) && !canUpgradeToPlus(user);
   const canEditEmail = !user || !emailVerified;
   const amount = getAmount(checkoutInfo);
   const planName = getPlanName(checkoutInfo?.billingCycle ?? "monthly");
   const emailInvalid = receiptEmail.trim().length > 0 && !isValidEmail(receiptEmail);
-  const canSubmit = agreed && isValidEmail(receiptEmail) && !submitting && !authLoading;
+  const canSubmit = agreed && isValidEmail(receiptEmail) && !submitting && !authLoading && !emailVerificationRequired;
 
   useEffect(() => {
     if (authLoading) return;
@@ -82,12 +86,31 @@ export function BillingConfirm() {
 
   const submitLabel = useMemo(() => {
     if (submitting) return "Đang tạo mã QR...";
+    if (emailVerificationRequired) return "Cần xác thực email trước";
     if (!agreed) return "Cần đồng ý điều khoản trước";
     if (!isValidEmail(receiptEmail)) return "Nhập email nhận biên nhận";
     return "Xác nhận và tạo mã QR";
-  }, [agreed, receiptEmail, submitting]);
+  }, [agreed, emailVerificationRequired, receiptEmail, submitting]);
+
+  const handleSendVerification = useCallback(async () => {
+    setSendingVerification(true);
+    setError(null);
+    try {
+      rememberEmailVerificationReturnPath("/billing/confirm");
+      await sendVerificationEmail();
+    } catch (err: unknown) {
+      setError(toAppError(err).message || "Không gửi được email xác thực.");
+    } finally {
+      setSendingVerification(false);
+    }
+  }, []);
 
   const handleConfirm = useCallback(async () => {
+    if (emailVerificationRequired) {
+      rememberEmailVerificationReturnPath("/billing/confirm");
+      setError(getEmailVerificationRequiredMessage("upgrade"));
+      return;
+    }
     if (!canSubmit) return;
 
     setSubmitting(true);
@@ -118,7 +141,7 @@ export function BillingConfirm() {
     } finally {
       setSubmitting(false);
     }
-  }, [canSubmit, checkoutInfo?.billingCycle, navigate, receiptEmail, user]);
+  }, [canSubmit, checkoutInfo?.billingCycle, emailVerificationRequired, navigate, receiptEmail, user]);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
@@ -188,6 +211,23 @@ export function BillingConfirm() {
               .
             </span>
           </label>
+
+          {emailVerificationRequired ? (
+            <div className="mt-4 rounded-[var(--r-card)] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              <p className="font-semibold">Vui lòng xác thực email trước khi thanh toán.</p>
+              <p className="mt-1 leading-6">
+                Email là cách chúng tôi gửi biên nhận và liên hệ khi cần hỗ trợ hoàn tiền. Địa chỉ đang chờ xác thực: {userEmail || "chưa có email"}.
+              </p>
+              <button
+                type="button"
+                onClick={handleSendVerification}
+                disabled={sendingVerification}
+                className="mt-3 rounded-[var(--r-control)] border border-amber-300 bg-white px-3 py-2 text-xs font-semibold text-amber-900 disabled:opacity-60"
+              >
+                {sendingVerification ? "Đang gửi..." : "Gửi email xác thực"}
+              </button>
+            </div>
+          ) : null}
 
           {error && (
             <div className="mt-4 rounded-[var(--r-card)] border border-red-200 bg-red-50 p-3 text-sm text-red-700">

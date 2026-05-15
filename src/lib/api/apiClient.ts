@@ -19,6 +19,7 @@ export interface ApiClientError extends AppError {
   rateLimited?: true;
   /** Server-suggested retry delay in ms (from Retry-After header), or a default */
   retryAfterMs?: number;
+  errorCode?: string;
   currentRevision?: number;
   serverUpdatedAt?: string;
 }
@@ -39,6 +40,7 @@ function toApiClientError(error: unknown): ApiClientError {
       conflict?: unknown;
       rateLimited?: unknown;
       retryAfterMs?: unknown;
+      errorCode?: unknown;
       currentRevision?: unknown;
       serverUpdatedAt?: unknown;
     };
@@ -54,6 +56,7 @@ function toApiClientError(error: unknown): ApiClientError {
       conflict: withMessage.conflict === true ? true : undefined,
       rateLimited: withMessage.rateLimited === true || withMessage.status === 429 ? true : undefined,
       retryAfterMs: typeof withMessage.retryAfterMs === "number" ? withMessage.retryAfterMs : undefined,
+      errorCode: typeof withMessage.errorCode === "string" ? withMessage.errorCode : undefined,
       currentRevision: typeof withMessage.currentRevision === "number" ? withMessage.currentRevision : undefined,
       serverUpdatedAt: typeof withMessage.serverUpdatedAt === "string" ? withMessage.serverUpdatedAt : undefined,
     };
@@ -73,6 +76,7 @@ function createApiClientError(payload: ApiClientError): ApiClientError {
     conflict: payload.conflict,
     rateLimited: payload.rateLimited,
     retryAfterMs: payload.retryAfterMs,
+    errorCode: payload.errorCode,
     currentRevision: payload.currentRevision,
     serverUpdatedAt: payload.serverUpdatedAt,
   };
@@ -108,6 +112,13 @@ async function handleUnauthorizedResponse(error: ApiClientError): Promise<void> 
 }
 
 addResponseErrorInterceptor(handleUnauthorizedResponse);
+
+addResponseErrorInterceptor((error) => {
+  if (error.status !== 403 || error.errorCode !== "EMAIL_NOT_VERIFIED") return;
+  if (typeof window === "undefined") return;
+  window.sessionStorage.setItem("emailVerification:returnTo", `${window.location.pathname || "/"}${window.location.search || ""}`);
+  window.dispatchEvent(new CustomEvent("email-verification:required"));
+});
 
 function buildApiUrl(path: string): string {
   if (/^https?:\/\//i.test(path)) return path;
@@ -184,6 +195,12 @@ function getErrorMessageFromPayload(payload: unknown): string | null {
   return message;
 }
 
+function getErrorCodeFromPayload(payload: unknown): string | undefined {
+  if (!payload || typeof payload !== "object") return undefined;
+  const errorCode = (payload as { errorCode?: unknown }).errorCode;
+  return typeof errorCode === "string" ? errorCode : undefined;
+}
+
 async function request<TResponse, TBody = unknown>(
   method: HttpMethod,
   path: string,
@@ -236,6 +253,7 @@ async function request<TResponse, TBody = unknown>(
       conflict: isConflict || undefined,
       rateLimited: isRateLimit || undefined,
       retryAfterMs,
+      errorCode: getErrorCodeFromPayload(payload),
       currentRevision: isConflict && payload && typeof payload === "object" && "currentRevision" in payload
         ? (payload as { currentRevision?: number }).currentRevision
         : undefined,

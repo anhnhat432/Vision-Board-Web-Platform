@@ -147,8 +147,8 @@ function createRouteTestApp(): Express {
     "/api",
     createAuthMiddleware({
       async verifyIdToken(token: string) {
-        if (token === "owner-token") return { uid: ownerUserId, email: "owner@example.com" };
-        if (token === "other-token") return { uid: otherUserId, email: "other@example.com" };
+        if (token === "owner-token") return { uid: ownerUserId, email: "owner@example.com", emailVerified: true };
+        if (token === "other-token") return { uid: otherUserId, email: "other@example.com", emailVerified: true };
         throw new Error("Invalid test token");
       },
     }),

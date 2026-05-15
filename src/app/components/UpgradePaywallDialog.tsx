@@ -1,8 +1,11 @@
 import { CreditCard, Crown, LockKeyhole, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
+import { sendVerificationEmail } from "@/lib/auth/firebase";
 import { shouldShowBillingDebugUi } from "../utils/app-mode";
 import { formatVndAmount, getPlusPriceLabel, PLUS_MONTHLY_PRICE_VND } from "../utils/billing-pricing";
+import { canUpgradeToPlus, rememberEmailVerificationReturnPath } from "../utils/email-verification-guard";
 import { type MonetizationSource, trackPaywallCtaClicked, trackPaywallViewed } from "../utils/monetization-analytics";
 import { getBillingProviderStatus } from "../utils/production";
 import { BILLING_SUPPORT_EMAIL } from "../utils/production/env";
@@ -57,7 +60,10 @@ export function UpgradePaywallDialog({
   source = "paywall_dialog",
 }: UpgradePaywallDialogProps) {
   const navigate = useNavigate();
+  const authContext = useOptionalAuthContext();
+  const user = authContext?.user ?? null;
   const [isUpgrading, setIsUpgrading] = useState(false);
+  const [sendingVerification, setSendingVerification] = useState(false);
   const paywallCopy = useMemo(() => getPaywallCopy(context), [context]);
   const billingProviderStatus = useMemo(() => getBillingProviderStatus(), []);
   const billingDebugUi = shouldShowBillingDebugUi();
@@ -67,6 +73,7 @@ export function UpgradePaywallDialog({
   const plusPriceAmountLabel = formatVndAmount(PLUS_MONTHLY_PRICE_VND);
   const plusPriceLabel = getPlusPriceLabel();
   const receiptEmailLabel = BILLING_SUPPORT_EMAIL ? `email ${BILLING_SUPPORT_EMAIL}` : "email tài khoản của bạn";
+  const emailVerificationRequired = Boolean(user) && !canUpgradeToPlus(user);
 
   useEffect(() => {
     if (!open) return;
@@ -80,7 +87,20 @@ export function UpgradePaywallDialog({
     });
   }, [context, currentPlan, goalId, open, paywallCopy.recommendedPlan, recommendedPlan, source]);
 
+  const handleSendVerification = async () => {
+    setSendingVerification(true);
+    try {
+      await sendVerificationEmail();
+    } finally {
+      setSendingVerification(false);
+    }
+  };
+
   const handleUpgrade = async (planCode: Exclude<PricingPlanCode, "FREE">) => {
+    if (emailVerificationRequired) {
+      rememberEmailVerificationReturnPath(buildBillingPlanUpgradePath(getCurrentUpgradeOriginPath()));
+      return;
+    }
     setIsUpgrading(true);
 
     try {
@@ -188,6 +208,21 @@ export function UpgradePaywallDialog({
 
             <fieldset className="min-w-0 space-y-4">
               <legend className="sr-only">Chọn gói nâng cấp</legend>
+              {emailVerificationRequired ? (
+                <div className="rounded-[var(--r-card)] border border-amber-200 bg-amber-50 px-4 py-4 text-amber-950">
+                  <p className="flex items-center gap-2 text-sm font-semibold">
+                    <LockKeyhole className="h-4 w-4" />
+                    Vui lòng xác thực email trước khi thanh toán.
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-amber-800">
+                    Email là cách chúng tôi gửi biên nhận và liên hệ khi cần hỗ trợ hoàn tiền.
+                    {user?.email ? ` Địa chỉ đang chờ xác thực: ${user.email}.` : ""}
+                  </p>
+                  <Button className="mt-3" variant="outline" size="sm" onClick={handleSendVerification} disabled={sendingVerification}>
+                    {sendingVerification ? "Đang gửi..." : "Gửi email xác thực"}
+                  </Button>
+                </div>
+              ) : null}
               {PLAN_DEFINITIONS.filter((plan) => plan.code !== "FREE").map((plan) => {
                 const isRecommended = plan.code === (recommendedPlan ?? paywallCopy.recommendedPlan);
                 const isCurrent = plan.code === currentPlan;
@@ -248,7 +283,7 @@ export function UpgradePaywallDialog({
 
                     <Button
                       className={`mt-5 w-full ${!isCurrent ? "gradient-brand text-white" : ""}`}
-                      disabled={isUpgrading}
+                      disabled={isUpgrading || emailVerificationRequired}
                       variant={isCurrent ? "outline" : "default"}
                       onClick={() => handleUpgrade(plan.code as Exclude<PricingPlanCode, "FREE">)}
                     >

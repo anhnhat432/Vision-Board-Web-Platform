@@ -1,14 +1,18 @@
 import { getApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
 import {
+  EmailAuthProvider,
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   getAuth,
   onAuthStateChanged,
+  onIdTokenChanged,
+  reauthenticateWithCredential,
   sendEmailVerification as firebaseSendEmailVerification,
   sendPasswordResetEmail as firebaseSendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
+  verifyBeforeUpdateEmail,
   type Auth,
   type User,
   type UserCredential,
@@ -182,6 +186,27 @@ export async function sendVerificationEmail(): Promise<void> {
   await firebaseSendEmailVerification(auth.currentUser);
 }
 
+export async function changeEmailWithPassword(newEmail: string, currentPassword: string): Promise<void> {
+  const auth = getFirebaseAuth();
+  const user = auth?.currentUser;
+  const currentEmail = user?.email?.trim();
+  if (!user || !currentEmail) throw new Error("Chưa đăng nhập bằng email.");
+
+  const credential = EmailAuthProvider.credential(currentEmail, currentPassword);
+  await reauthenticateWithCredential(user, credential);
+  await verifyBeforeUpdateEmail(user, newEmail.trim());
+}
+
+export async function reloadCurrentUser(): Promise<User | null> {
+  const auth = getFirebaseAuth();
+  const user = auth?.currentUser ?? null;
+  if (!user) return null;
+  await user.reload();
+  const token = await user.getIdToken(true);
+  setStoredFirebaseToken(token);
+  return user;
+}
+
 export function subscribeAuthState(
   callback: (user: User | null) => void,
 ): () => void {
@@ -192,6 +217,28 @@ export function subscribeAuthState(
   }
 
   return onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      clearStoredFirebaseToken();
+      callback(null);
+      return;
+    }
+
+    void persistCurrentUserToken(user).finally(() => {
+      callback(user);
+    });
+  });
+}
+
+export function subscribeIdToken(
+  callback: (user: User | null) => void,
+): () => void {
+  const auth = getFirebaseAuth();
+  if (!auth) {
+    callback(null);
+    return () => undefined;
+  }
+
+  return onIdTokenChanged(auth, (user) => {
     if (!user) {
       clearStoredFirebaseToken();
       callback(null);

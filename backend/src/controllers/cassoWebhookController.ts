@@ -105,6 +105,25 @@ function getRawWebhookPayload(req: Request): unknown {
   }
 }
 
+function isMongoDuplicateKeyError(error: unknown): boolean {
+  return Boolean(
+    error &&
+      typeof error === "object" &&
+      "code" in error &&
+      (error as { code?: unknown }).code === 11000,
+  );
+}
+
+function logCassoWebhookReplayIgnored(transactionId: string, accountId: string, reason: string): void {
+  console.info({
+    event: "casso_webhook_replay_ignored",
+    message: "webhook replay ignored",
+    transactionId,
+    accountId,
+    reason,
+  });
+}
+
 function getCassoSignatureSecrets(): string[] {
   return [
     process.env.CASSO_WEBHOOK_CHECKSUM_KEY,
@@ -223,8 +242,12 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
     // Step 4: Check idempotency (same Casso transaction already processed)
     if (cassoTxId) {
       const duplicate = await PaymentOrderModel.findOne({ cassoTransactionId: cassoTxId });
+      if (duplicate?.status === "completed") {
+        logCassoWebhookReplayIgnored(cassoTxId, orderId, "completed_order_exists");
+        continue;
+      }
       if (duplicate) {
-        console.info(`[casso-webhook] Transaction ${cassoTxId}: already processed. Skipping.`);
+        console.info(`[casso-webhook] Transaction ${cassoTxId}: already linked to non-completed order. Skipping.`);
         continue;
       }
     }
@@ -322,6 +345,11 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
       });
       processedCount++;
     } catch (error: unknown) {
+      if (isMongoDuplicateKeyError(error) && cassoTxId) {
+        logCassoWebhookReplayIgnored(cassoTxId, orderId, "duplicate_key");
+        continue;
+      }
+
       failedCount++;
       const msg = error instanceof Error ? error.message : "Unknown error";
       const context = {

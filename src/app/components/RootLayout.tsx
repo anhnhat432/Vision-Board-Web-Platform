@@ -70,6 +70,7 @@ import {
   type CloudImportDryRunResult,
   type CloudImportResult,
 } from "./root-layout/LocalDataMigrationPrompt";
+import { EmailVerificationBanner } from "./root-layout/EmailVerificationBanner";
 import { FirstLoginRestoreToast } from "./root-layout/FirstLoginRestoreToast";
 import { SyncStatusPill } from "./root-layout/SyncStatusPill";
 import {
@@ -942,6 +943,7 @@ export function RootLayout() {
           <a href="#main-content" className="skip-to-content">
             Bỏ qua điều hướng
           </a>
+          <EmailVerificationBanner />
           {demoMode ? (
             <div
               role="note"
@@ -969,6 +971,7 @@ export function RootLayout() {
         <a href="#main-content" className="skip-to-content">
           Bỏ qua điều hướng
         </a>
+        <EmailVerificationBanner />
 
         <header className="sticky top-0 z-40 px-4 pt-2 sm:top-3 sm:px-6 sm:pt-0 lg:px-8">
           <div className="glass-surface mx-auto max-w-6xl rounded-[var(--r-tile)] px-3 py-2 sm:px-4 sm:py-2.5 shadow-sm">
