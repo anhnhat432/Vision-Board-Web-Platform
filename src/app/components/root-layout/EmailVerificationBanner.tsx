@@ -10,6 +10,23 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "../ui/input";
 
 const RESEND_COOLDOWN_MS = 60_000;
+const LAST_SENT_STORAGE_PREFIX = "emailVerificationLastSentAt:";
+
+function getLastSentStorageKey(user: { uid?: string | null; email?: string | null } | null | undefined): string | null {
+  const scope = user?.uid || user?.email?.trim();
+  return scope ? `${LAST_SENT_STORAGE_PREFIX}${scope}` : null;
+}
+
+function readStoredLastSentAt(storageKey: string | null): number | null {
+  if (!storageKey || typeof window === "undefined") return null;
+  const parsed = Number(window.localStorage.getItem(storageKey));
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function storeLastSentAt(storageKey: string | null, timestamp: number): void {
+  if (!storageKey || typeof window === "undefined") return;
+  window.localStorage.setItem(storageKey, String(timestamp));
+}
 
 function formatSentAt(timestamp: number | null): string | null {
   if (!timestamp) return null;
@@ -37,7 +54,12 @@ export function EmailVerificationBanner() {
   const [changeEmailError, setChangeEmailError] = useState<string | null>(null);
 
   const pendingEmail = user?.email?.trim() ?? "";
+  const lastSentStorageKey = useMemo(() => getLastSentStorageKey(user), [user]);
   const lastSentLabel = useMemo(() => formatSentAt(lastSentAt), [lastSentAt]);
+
+  useEffect(() => {
+    setLastSentAt(readStoredLastSentAt(lastSentStorageKey));
+  }, [lastSentStorageKey]);
 
   useEffect(() => {
     if (lastSentAt === null) {
@@ -69,7 +91,9 @@ export function EmailVerificationBanner() {
     setSending(true);
     try {
       await sendVerificationEmail();
-      setLastSentAt(Date.now());
+      const sentAt = Date.now();
+      setLastSentAt(sentAt);
+      storeLastSentAt(lastSentStorageKey, sentAt);
       toast.success("Đã gửi lại email xác thực", {
         description: "Kiểm tra hộp thư và thư mục spam.",
       });
@@ -91,7 +115,9 @@ export function EmailVerificationBanner() {
     setChangeEmailError(null);
     try {
       await changeEmailWithPassword(trimmedEmail, password);
-      setLastSentAt(Date.now());
+      const sentAt = Date.now();
+      setLastSentAt(sentAt);
+      storeLastSentAt(lastSentStorageKey, sentAt);
       toast.success("Đã gửi email xác thực tới địa chỉ mới", {
         description: "Email tài khoản sẽ đổi sau khi bạn bấm link xác thực.",
       });

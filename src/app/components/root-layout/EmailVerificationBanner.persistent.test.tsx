@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { EmailVerificationBanner } from "./EmailVerificationBanner";
@@ -26,6 +27,9 @@ vi.mock("@/app/utils/app-mode", () => ({
 
 describe("EmailVerificationBanner persistent behavior", () => {
   beforeEach(() => {
+    window.localStorage.clear();
+    firebaseMock.sendVerificationEmail.mockReset();
+    firebaseMock.changeEmailWithPassword.mockReset();
     authContextMock.useAuthContext.mockReturnValue({
       user: {
         uid: "user_unverified",
@@ -34,6 +38,25 @@ describe("EmailVerificationBanner persistent behavior", () => {
         providerData: [{ providerId: "password" }],
       },
     });
+  });
+
+  it("restores resend cooldown after refresh", async () => {
+    firebaseMock.sendVerificationEmail.mockResolvedValue(undefined);
+    const user = userEvent.setup();
+
+    const { unmount } = render(<EmailVerificationBanner />);
+    await user.click(screen.getByRole("button", { name: "Gửi lại email xác thực" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /Gửi lại sau/ })).toBeDisabled();
+    });
+    expect(window.localStorage.getItem("emailVerificationLastSentAt:user_unverified")).toBeTruthy();
+
+    unmount();
+    render(<EmailVerificationBanner />);
+
+    expect(screen.getByRole("button", { name: /Gửi lại sau/ })).toBeDisabled();
+    expect(screen.getByText(/Gần nhất đã gửi:/)).toBeInTheDocument();
   });
 
   it("stays visible for an unverified email and has no dismiss button", () => {

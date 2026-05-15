@@ -6,6 +6,8 @@ import express, { type Express } from "express";
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
 import { billingRoutes } from "../routes/billingRoutes";
+import { orderRoutes } from "../routes/orderRoutes";
+import { planBulkSyncRoutes } from "../routes/planBulkSyncRoutes";
 
 interface JsonResponse {
   status: number;
@@ -30,11 +32,18 @@ function createTestApp(): Express {
     }),
   );
   app.use("/api", billingRoutes);
+  app.use("/api", orderRoutes);
+  app.use("/api", planBulkSyncRoutes);
   app.use(errorMiddleware);
   return app;
 }
 
-async function requestJson(app: Express, token: string): Promise<JsonResponse> {
+async function requestJson(app: Express, token: string, path = "/api/billing/orders", body: unknown = {
+  planCode: "PLUS",
+  billingCycle: "twelve_week",
+  returnUrl: "https://app.example.test/billing/checkout",
+  cancelUrl: "https://app.example.test/billing/plan",
+}): Promise<JsonResponse> {
   const server = app.listen(0);
   await new Promise<void>((resolve) => {
     server.once("listening", resolve);
@@ -42,20 +51,16 @@ async function requestJson(app: Express, token: string): Promise<JsonResponse> {
 
   const address = server.address() as AddressInfo;
   try {
-    const response = await fetch(`http://127.0.0.1:${address.port}/api/billing/orders`, {
+    const response = await fetch(`http://127.0.0.1:${address.port}${path}`, {
       method: "POST",
       headers: {
         accept: "application/json",
         authorization: `Bearer ${token}`,
         "content-type": "application/json",
       },
-      body: JSON.stringify({
-        planCode: "PLUS",
-        billingCycle: "twelve_week",
-        returnUrl: "https://app.example.test/billing/checkout",
-        cancelUrl: "https://app.example.test/billing/plan",
-      }),
+      body: JSON.stringify(body),
     });
+
     const text = await response.text();
     return {
       status: response.status,
@@ -74,6 +79,35 @@ async function requestJson(app: Express, token: string): Promise<JsonResponse> {
 describe("auth requireEmailVerified", () => {
   it("returns 403 for unverified email on billing order creation", async () => {
     const response = await requestJson(createTestApp(), "unverified-token");
+
+    assert.equal(response.status, 403);
+    assert.equal(response.body.success, false);
+    assert.equal(response.body.errorCode, "EMAIL_NOT_VERIFIED");
+  });
+
+  it("returns 403 for unverified email on physical order creation", async () => {
+    const response = await requestJson(createTestApp(), "unverified-token", "/api/orders", {
+      kitType: "starter",
+      fullName: "Buyer",
+      email: "buyer@example.test",
+      phone: "0900000000",
+      shippingAddress: {
+        line1: "1 Nguyen Trai",
+        city: "Ho Chi Minh",
+        country: "VN",
+      },
+    });
+
+    assert.equal(response.status, 403);
+    assert.equal(response.body.success, false);
+    assert.equal(response.body.errorCode, "EMAIL_NOT_VERIFIED");
+  });
+
+  it("returns 403 for unverified email on plan bulk sync", async () => {
+    const response = await requestJson(createTestApp(), "unverified-token", "/api/plans/507f1f77bcf86cd799439011/bulk-sync", {
+      weeks: [],
+      tasks: [],
+    });
 
     assert.equal(response.status, 403);
     assert.equal(response.body.success, false);

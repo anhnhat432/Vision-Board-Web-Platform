@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import type { AddressInfo } from "node:net";
-import { afterEach, describe, it } from "node:test";
+import { afterEach, describe, it, mock } from "node:test";
 import express, { type Express } from "express";
 
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
@@ -10,7 +10,9 @@ import { AuditLogModel, type AuditLogEntity } from "../models/auditLogModel";
 import { PaymentOrderModel, type PaymentOrderStatus } from "../models/PaymentOrderModel";
 import { UserModel } from "../models/UserModel";
 import { adminRoutes } from "../routes/adminRoutes";
+import { orderRoutes } from "../routes/orderRoutes";
 import { billingService } from "../services/billingServiceInstance";
+import { orderService } from "../services/orderService";
 
 type MockableModel = {
   create: unknown;
@@ -75,6 +77,7 @@ function createAdminTestApp(): Express {
     }),
   );
   app.use("/api", adminRoutes);
+  app.use("/api", orderRoutes);
   app.use(errorMiddleware);
   return app;
 }
@@ -137,6 +140,7 @@ function mockUserRole(role: "user" | "admin"): void {
 }
 
 afterEach(() => {
+  mock.restoreAll();
   (AuditLogModel as unknown as MockableModel).create = originalAuditCreate;
   (PaymentOrderModel as unknown as MockableModel).findOne = originalPaymentOrderFindOne;
   (UserModel as unknown as MockableModel).findOne = originalUserFindOne;
@@ -183,6 +187,50 @@ describe("admin audit logging", () => {
     assert.equal("userId" in (createdLogs[0]?.payload ?? {}), false);
     assert.equal(JSON.stringify(createdLogs[0]).includes("customer@example.com"), false);
     assert.equal(JSON.stringify(createdLogs[0]).includes("customer_uid_should_not_log"), false);
+  });
+
+  it("creates an audit log entry when admin updates physical order status", async () => {
+    const createdLogs: AuditLogEntity[] = [];
+
+    (AuditLogModel as unknown as MockableModel).create = async (entry: AuditLogEntity) => {
+      createdLogs.push(entry);
+      return entry;
+    };
+    mock.method(orderService, "adminUpdateStatus", async () => ({
+      id: "507f1f77bcf86cd799439011",
+      status: "confirmed",
+    }));
+
+    const response = await requestJson(createAdminTestApp(), "PATCH", "/api/admin/orders/507f1f77bcf86cd799439011/status", {
+      body: {
+        status: "confirmed",
+        adminNote: "Customer paid.",
+        customerEmail: "customer@example.com",
+      },
+    });
+
+    assert.equal(response.status, 200);
+    assert.equal(createdLogs.length, 1);
+    assert.equal(createdLogs[0]?.actorUid, "admin_uid");
+    assert.equal(createdLogs[0]?.action, "adminUpdateOrderStatus");
+    assert.equal(createdLogs[0]?.target, "physical_order");
+    assert.equal(createdLogs[0]?.targetId, "507f1f77bcf86cd799439011");
+    assert.equal(createdLogs[0]?.success, true);
+    assert.equal(createdLogs[0]?.payload?.status, "confirmed");
+    assert.equal(createdLogs[0]?.payload?.adminNote, "Customer paid.");
+    assert.equal("customerEmail" in (createdLogs[0]?.payload ?? {}), false);
+  });
+
+  it("returns reconciliation last-run status for admins", async () => {
+    const response = await requestJson(createAdminTestApp(), "GET", "/api/admin/reconciliation/last-run");
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.success, true);
+    assert.ok("data" in response.body);
+    assert.ok(
+      (response.body.data as Record<string, unknown>).lastRun === null ||
+        typeof (response.body.data as Record<string, unknown>).lastRun === "object",
+    );
   });
 
   it("creates a failed audit log entry when non-admin calls completePaymentOrderManually", async () => {

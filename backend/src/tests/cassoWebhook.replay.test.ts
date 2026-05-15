@@ -123,6 +123,96 @@ afterEach(() => {
 });
 
 describe("Casso webhook replay protection", () => {
+  it("skips a duplicate transaction linked to a non-completed order", async () => {
+    process.env.CASSO_WEBHOOK_SECRET = "expected-secret";
+    const duplicateOrder = createOrder({ status: "pending", cassoTransactionId: "tx_replay_pending" });
+    const payload = createPayload(duplicateOrder.orderId, "tx_replay_pending");
+    mockPaymentOrderPersistence(duplicateOrder);
+
+    let grantCalls = 0;
+    mock.method(billingService, "upsertSubscriptionFromProviderEvent", async () => {
+      grantCalls++;
+      throw new Error("should_not_grant_duplicate_pending_transaction");
+    });
+
+    const response = createResponse();
+    await handleCassoWebhook(
+      createRequest(payload, { "secure-token": "expected-secret" }),
+      response as unknown as Response,
+    );
+
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(response.body, {
+      success: true,
+      processedCount: 0,
+      message: "Không có giao dịch nào khớp với đơn hàng đang chờ.",
+    });
+    assert.equal(grantCalls, 0);
+    assert.equal(duplicateOrder.status, "pending");
+  });
+
+  it("treats Mongo duplicate key during save as an idempotent replay", async () => {
+    process.env.CASSO_WEBHOOK_SECRET = "expected-secret";
+    const order = createOrder({
+      async save(this: MockCassoPaymentOrder) {
+        this.saveCalls++;
+        const duplicateKeyError = new Error("E11000 duplicate key error");
+        (duplicateKeyError as Error & { code?: number }).code = 11000;
+        throw duplicateKeyError;
+      },
+    });
+    const payload = createPayload(order.orderId, "tx_race_11000");
+    mockPaymentOrderPersistence(order);
+
+    let grantCalls = 0;
+    mock.method(billingService, "upsertSubscriptionFromProviderEvent", async (event: ProviderSubscriptionEvent) => {
+      grantCalls++;
+      return {
+        subscription: {
+          id: "sub_race_11000",
+          userId: event.userId,
+          planCode: event.planCode,
+          status: event.status,
+          provider: event.provider,
+          source: "provider" as const,
+          providerSubscriptionId: event.providerSubscriptionId,
+          billingCycle: event.billingCycle,
+          currentPeriodStart: event.currentPeriodStart,
+          currentPeriodEnd: event.currentPeriodEnd,
+          entitlements: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        eventStatus: "processed" as const,
+        eventId: "evt_race_11000",
+      };
+    });
+    const info = mock.method(console, "info", () => undefined);
+
+    const response = createResponse();
+    await handleCassoWebhook(
+      createRequest(payload, { "secure-token": "expected-secret" }),
+      response as unknown as Response,
+    );
+
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(response.body, {
+      success: true,
+      processedCount: 0,
+      message: "Không có giao dịch nào khớp với đơn hàng đang chờ.",
+    });
+    assert.equal(grantCalls, 1);
+    assert.equal(order.saveCalls, 1);
+    const replayLog = info.mock.calls
+      .map((call) => call.arguments[0])
+      .find((arg): arg is Record<string, unknown> => {
+        return Boolean(arg) && typeof arg === "object" && (arg as Record<string, unknown>).event === "casso_webhook_replay_ignored";
+      });
+    assert.ok(replayLog);
+    assert.equal(replayLog.reason, "duplicate_key");
+    assert.equal(replayLog.transactionId, "tx_race_11000");
+  });
+
   it("returns 200 for replayed webhook without granting entitlement again", async () => {
     process.env.CASSO_WEBHOOK_SECRET = "expected-secret";
     const order = createOrder();

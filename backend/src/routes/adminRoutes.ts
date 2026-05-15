@@ -59,7 +59,7 @@ function runAdminHandler(handler: AdminHandler, req: Request, res: Response): Pr
   });
 }
 
-function auditedAdminAction(options: AuditedAdminActionOptions): RequestHandler {
+export function auditedAdminAction(options: AuditedAdminActionOptions): RequestHandler {
   return async (req, res, next) => {
     const targetId = options.getTargetId?.(req) ?? null;
 

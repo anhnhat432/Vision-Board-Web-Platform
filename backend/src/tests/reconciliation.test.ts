@@ -161,6 +161,77 @@ describe("Casso payment reconciliation", () => {
     assert.equal(order.saveCalls, 0);
   });
 
+  it("marks amount mismatch without granting entitlement", async () => {
+    const order = createOrder();
+    let grantCalls = 0;
+    let captureCalls = 0;
+
+    const summary = await reconcilePendingCassoPaymentOrders({
+      paymentOrderModel: createPaymentOrderModel([order]),
+      transactionClient: {
+        async listTransactions() {
+          return [createTransaction("tx_recon_short", order.orderId, order.amount - 1000)];
+        },
+      },
+      billing: {
+        async upsertSubscriptionFromProviderEvent() {
+          grantCalls++;
+          throw new Error("should_not_grant_amount_mismatch");
+        },
+      },
+      receiptDelivery: async () => ({ sent: true }),
+      captureException: (_error, context) => {
+        captureCalls++;
+        const tags = (context as { tags?: Record<string, unknown> } | undefined)?.tags;
+        assert.equal(tags?.event, "casso_reconciliation_amount_mismatch");
+      },
+      sleepMs: 0,
+    });
+
+    assert.equal(summary.ordersChecked, 1);
+    assert.equal(summary.ordersMatched, 0);
+    assert.equal(summary.errors, 0);
+    assert.equal(order.status, "pending");
+    assert.equal(order.reconciliationStatus, "amount_mismatch");
+    assert.equal(order.reconciliationLastError, "amount_mismatch");
+    assert.equal(order.saveCalls, 1);
+    assert.equal(grantCalls, 0);
+    assert.equal(captureCalls, 1);
+  });
+
+  it("captures Casso API errors without crashing the run", async () => {
+    const order = createOrder();
+    let captureCalls = 0;
+
+    const summary = await reconcilePendingCassoPaymentOrders({
+      paymentOrderModel: createPaymentOrderModel([order]),
+      transactionClient: {
+        async listTransactions() {
+          throw new Error("Casso transactions API failed with HTTP 503");
+        },
+      },
+      billing: {
+        async upsertSubscriptionFromProviderEvent() {
+          throw new Error("should_not_grant_when_api_fails");
+        },
+      },
+      receiptDelivery: async () => ({ sent: true }),
+      captureException: (_error, context) => {
+        captureCalls++;
+        const tags = (context as { tags?: Record<string, unknown> } | undefined)?.tags;
+        assert.equal(tags?.event, "casso_reconciliation_order_failed");
+      },
+      sleepMs: 0,
+    });
+
+    assert.equal(summary.ordersChecked, 1);
+    assert.equal(summary.ordersMatched, 0);
+    assert.equal(summary.errors, 1);
+    assert.equal(order.status, "pending");
+    assert.equal(order.saveCalls, 0);
+    assert.equal(captureCalls, 1);
+  });
+
   it("does not double-grant when webhook already completed the same Casso transaction", async () => {
     const order = createOrder();
     const completedDuplicate = createOrder({
