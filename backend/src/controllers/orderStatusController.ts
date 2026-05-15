@@ -33,6 +33,7 @@ function serializeOrder(order: {
   bankAccount: string;
   bankName: string;
   accountName: string;
+  description?: string | null;
   qrDataUrl: string;
   expiresAt?: Date | string | null;
   completedAt?: Date | string | null;
@@ -47,6 +48,7 @@ function serializeOrder(order: {
     bankAccount: order.bankAccount,
     bankName: order.bankName,
     accountName: order.accountName,
+    description: order.description ?? order.orderId,
     qrDataUrl: order.qrDataUrl,
     expiresAt: toIsoString(order.expiresAt),
     completedAt: toIsoString(order.completedAt),
@@ -64,6 +66,7 @@ function serializePublicOrder(order: Parameters<typeof serializeOrder>[0]) {
     bankAccount: order.bankAccount,
     bankName: order.bankName,
     accountName: order.accountName,
+    description: order.description ?? order.orderId,
     qrDataUrl: order.qrDataUrl,
     expiresAt: toIsoString(order.expiresAt),
   };
@@ -191,6 +194,41 @@ export async function getPaymentHistory(req: Request, res: Response): Promise<vo
       }),
     }),
   );
+}
+
+/**
+ * POST /api/billing/orders/:orderId/userConfirmedTransfer
+ */
+export async function markUserConfirmedTransfer(req: Request, res: Response): Promise<void> {
+  const user = requireAuthUser(req);
+  const { orderId } = req.params;
+
+  if (!orderId || typeof orderId !== "string" || orderId.length < 4) {
+    throw new ApiError(400, "orderId không hợp lệ.", undefined, "invalid_order_id");
+  }
+
+  const order = await PaymentOrderModel.findOne({
+    orderId: orderId.trim().toUpperCase(),
+    userId: user.uid,
+  });
+
+  if (!order) {
+    throw new ApiError(404, "Không tìm thấy đơn hàng.", undefined, "order_not_found");
+  }
+
+  const requestedAt = req.body && typeof req.body === "object" && "userConfirmedTransferAt" in req.body
+    ? new Date(String((req.body as { userConfirmedTransferAt?: unknown }).userConfirmedTransferAt ?? ""))
+    : new Date();
+  const userConfirmedTransferAt = Number.isNaN(requestedAt.getTime()) ? new Date() : requestedAt;
+
+  order.metadata = {
+    ...(order.metadata ?? {}),
+    userConfirmedTransferAt,
+  };
+  await order.save();
+
+  setNoStore(res);
+  res.status(200).json(successResponse({ orderId: order.orderId, userConfirmedTransferAt: toIsoString(userConfirmedTransferAt) }));
 }
 
 /**

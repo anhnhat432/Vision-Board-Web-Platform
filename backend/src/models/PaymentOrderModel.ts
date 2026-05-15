@@ -40,6 +40,9 @@ export interface PaymentOrderEntity {
   reconciliationStatus?: "matched" | "amount_mismatch" | null;
   reconciliationLastCheckedAt?: Date | null;
   reconciliationLastError?: string | null;
+  metadata?: {
+    userConfirmedTransferAt?: Date | null;
+  } | null;
   manualCompletedBy?: string | null;
   manualCompletedAt?: Date | null;
   manualCompletionNote?: string | null;
@@ -169,6 +172,12 @@ const paymentOrderSchema = new Schema(
       trim: true,
       maxlength: 500,
     },
+    metadata: {
+      userConfirmedTransferAt: {
+        type: Date,
+        required: false,
+      },
+    },
     manualCompletedBy: {
       type: String,
       required: false,
@@ -224,6 +233,9 @@ export type PaymentOrderDocument = Document & {
   reconciliationStatus?: "matched" | "amount_mismatch" | null;
   reconciliationLastCheckedAt?: Date | null;
   reconciliationLastError?: string | null;
+  metadata?: {
+    userConfirmedTransferAt?: Date | null;
+  } | null;
   manualCompletedBy?: string | null;
   manualCompletedAt?: Date | null;
   manualCompletionNote?: string | null;

@@ -12,6 +12,7 @@ import {
   getOrderStatus,
   getPaymentHistory,
   getPublicOrderStatus,
+  markUserConfirmedTransfer,
   resendPaymentReceipt,
 } from "../controllers/orderStatusController";
 import { createBillingRefundRequest } from "../controllers/refundController";
@@ -75,6 +76,19 @@ billingRoutes.get(
   billingStatusRateLimiter,
   validateOrderIdParam,
   asyncHandler(getOrderStatus),
+);
+billingRoutes.get(
+  "/billing/orders/:orderId",
+  billingStatusRateLimiter,
+  validateOrderIdParam,
+  asyncHandler(getOrderStatus),
+);
+billingRoutes.post(
+  "/billing/orders/:orderId/userConfirmedTransfer",
+  billingCheckoutRateLimiter,
+  validateOrderIdParam,
+  validateOptionalJsonObjectBody,
+  asyncHandler(markUserConfirmedTransfer),
 );
 billingRoutes.get("/billing/payment-history", billingStatusRateLimiter, asyncHandler(getPaymentHistory));
 billingRoutes.post(

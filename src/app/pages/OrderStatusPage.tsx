@@ -1,15 +1,21 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CalendarDays,
   CheckCircle2,
   ClipboardList,
+  Clock,
+  Copy,
+  Loader2,
   Mail,
   MapPin,
   Package,
   Phone,
+  QrCode,
+  RefreshCw,
   Target,
   Truck,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useNavigate, useParams } from "react-router";
 
 import { EmptyOrdersIllustration } from "../components/illustrations";
@@ -30,12 +36,72 @@ import {
 } from "../utils/order-storage";
 import { formatCalendarDate } from "../utils/storage";
 import { isDemoMode } from "../utils/app-mode";
+import { formatVndAmount } from "../utils/billing-pricing";
 import { useAuthContext } from "@/lib/auth/AuthContext";
+import { apiClient } from "@/lib/api/apiClient";
 import { getOrder as getBackendOrder, type ApiOrder } from "@/services/orderService";
 import { getBackendOrderId } from "@/lib/api/orderLinkStore";
 
 const UNLINKED_GOAL_TITLE = "Chưa gắn mục tiêu cụ thể";
 const DEFAULT_FOCUS_AREA = "Chưa chọn trọng tâm";
+const PAYMENT_ORDER_ID_PREFIX = "VB";
+const PAYMENT_POLL_INTERVAL_MS = 5_000;
+const PAYMENT_TIMEOUT_MS = 15 * 60 * 1000;
+const TRANSFER_CONFIRM_DELAY_MS = 30 * 1000;
+const PAYMENT_HELP_DELAY_MS = 5 * 60 * 1000;
+const REDIRECT_AFTER_SUCCESS_MS = 1_200;
+
+function getSupportEmail(): string {
+  return import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
+}
+
+type PaymentOrderStatus = "pending" | "completed" | "expired" | "failed";
+
+interface PaymentOrderStatusResponse {
+  orderId: string;
+  status: PaymentOrderStatus;
+  amount: number;
+  currency: string;
+  bankAccount: string;
+  bankName: string;
+  accountName: string;
+  qrDataUrl: string;
+  expiresAt: string | null;
+  completedAt?: string | null;
+  createdAt?: string | null;
+  description?: string | null;
+}
+
+function isPaymentOrderId(value: string | undefined): value is string {
+  return Boolean(value?.toUpperCase().startsWith(PAYMENT_ORDER_ID_PREFIX));
+}
+
+function formatCountdown(ms: number): string {
+  if (ms <= 0) return "00:00";
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+function getPaymentExpiresAt(order: PaymentOrderStatusResponse | null): number | null {
+  if (!order) return null;
+  if (order.expiresAt) {
+    const expiresAtMs = new Date(order.expiresAt).getTime();
+    if (Number.isFinite(expiresAtMs)) return expiresAtMs;
+  }
+  if (order.createdAt) {
+    const createdAtMs = new Date(order.createdAt).getTime();
+    if (Number.isFinite(createdAtMs)) return createdAtMs + PAYMENT_TIMEOUT_MS;
+  }
+  return null;
+}
+
+function createSupportMailto(orderId: string): string {
+  const subject = encodeURIComponent(`Hỗ trợ thanh toán đơn ${orderId}`);
+  const body = encodeURIComponent(`Chào đội hỗ trợ,\n\nTôi đã chuyển khoản cho đơn ${orderId} nhưng chưa nhận quyền Plus. Nhờ đội kiểm tra giúp.\n`);
+  return `mailto:${getSupportEmail()}?subject=${subject}&body=${body}`;
+}
 
 /** Map backend status → local display status. Backend has "confirmed"/"cancelled" which local doesn't. */
 function normalizeBackendStatus(status: string): OrderStatus {
@@ -111,8 +177,107 @@ export function OrderStatusPage() {
   const [recentOrders, setRecentOrders] = useState<LocalOrder[]>([]);
   const [isBackendBacked, setIsBackendBacked] = useState(false);
   const [backendRawStatus, setBackendRawStatus] = useState<string | null>(null);
+  const [paymentOrder, setPaymentOrder] = useState<PaymentOrderStatusResponse | null>(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [paymentNow, setPaymentNow] = useState(() => Date.now());
+  const [copiedPaymentField, setCopiedPaymentField] = useState<string | null>(null);
+  const [transferConfirmedByUser, setTransferConfirmedByUser] = useState(false);
+  const [confirmingTransfer, setConfirmingTransfer] = useState(false);
+  const [successRedirecting, setSuccessRedirecting] = useState(false);
+  const paymentPageOpenedAtRef = useRef(Date.now());
+  const paymentRedirectedRef = useRef(false);
+  const paymentMode = isPaymentOrderId(params.orderId);
+
+  const fetchPaymentOrder = useCallback(async (orderId: string) => {
+    setPaymentError(null);
+    try {
+      const data = await apiClient.get<PaymentOrderStatusResponse>(`/billing/orders/${encodeURIComponent(orderId)}`);
+      setPaymentOrder(data);
+      if (data.status === "completed" && !paymentRedirectedRef.current) {
+        paymentRedirectedRef.current = true;
+        setSuccessRedirecting(true);
+        toast.success("Plus đã kích hoạt!");
+        window.setTimeout(() => navigate("/billing/plan", { replace: true }), REDIRECT_AFTER_SUCCESS_MS);
+      }
+    } catch (error: unknown) {
+      setPaymentError(error instanceof Error ? error.message : "Không tải được trạng thái thanh toán.");
+    } finally {
+      setPaymentLoading(false);
+    }
+  }, [navigate]);
 
   useEffect(() => {
+    if (!paymentMode || !params.orderId) return;
+
+    setOrder(null);
+    setRecentOrders([]);
+    setPaymentLoading(true);
+    paymentPageOpenedAtRef.current = Date.now();
+    paymentRedirectedRef.current = false;
+    void fetchPaymentOrder(params.orderId);
+
+    const poll = window.setInterval(() => {
+      setPaymentOrder((currentOrder) => {
+        const expiresAt = getPaymentExpiresAt(currentOrder);
+        if (currentOrder?.status === "completed" || currentOrder?.status === "expired" || currentOrder?.status === "failed") {
+          window.clearInterval(poll);
+          return currentOrder;
+        }
+        if (expiresAt && Date.now() >= expiresAt) {
+          window.clearInterval(poll);
+          return currentOrder;
+        }
+        void fetchPaymentOrder(params.orderId as string);
+        return currentOrder;
+      });
+    }, PAYMENT_POLL_INTERVAL_MS);
+
+    return () => window.clearInterval(poll);
+  }, [fetchPaymentOrder, params.orderId, paymentMode]);
+
+  useEffect(() => {
+    if (!paymentMode) return;
+    const timer = window.setInterval(() => setPaymentNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [paymentMode]);
+
+  const copyPaymentValue = useCallback((value: string, key: string) => {
+    navigator.clipboard
+      ?.writeText(value)
+      .then(() => {
+        setCopiedPaymentField(key);
+        window.setTimeout(() => setCopiedPaymentField((current) => (current === key ? null : current)), 1600);
+      })
+      .catch(() => setPaymentError("Không sao chép được. Bạn có thể chọn và sao chép thủ công."));
+  }, []);
+
+  const handleUserConfirmedTransfer = useCallback(async () => {
+    if (!paymentOrder || confirmingTransfer) return;
+    setConfirmingTransfer(true);
+    setPaymentError(null);
+    try {
+      await apiClient.post(`/billing/orders/${encodeURIComponent(paymentOrder.orderId)}/userConfirmedTransfer`, {
+        userConfirmedTransferAt: new Date().toISOString(),
+      });
+      setTransferConfirmedByUser(true);
+    } catch (error: unknown) {
+      setPaymentError(error instanceof Error ? error.message : "Không ghi nhận được xác nhận chuyển khoản.");
+    } finally {
+      setConfirmingTransfer(false);
+    }
+  }, [confirmingTransfer, paymentOrder]);
+
+  const paymentExpiresAtMs = getPaymentExpiresAt(paymentOrder);
+  const paymentTimeLeftMs = paymentExpiresAtMs ? Math.max(0, paymentExpiresAtMs - paymentNow) : PAYMENT_TIMEOUT_MS;
+  const paymentElapsedOnPageMs = paymentNow - paymentPageOpenedAtRef.current;
+  const paymentTimedOut = Boolean(paymentOrder?.status === "expired" || (paymentOrder?.status === "pending" && paymentExpiresAtMs && paymentNow >= paymentExpiresAtMs));
+  const showTransferConfirmButton = Boolean(paymentOrder?.status === "pending" && paymentElapsedOnPageMs >= TRANSFER_CONFIRM_DELAY_MS && !transferConfirmedByUser && !paymentTimedOut);
+  const showSlowPaymentHelp = Boolean(paymentOrder?.status === "pending" && paymentElapsedOnPageMs >= PAYMENT_HELP_DELAY_MS && !paymentTimedOut);
+  const transferDescription = paymentOrder?.description?.trim() || paymentOrder?.orderId || "";
+
+  useEffect(() => {
+    if (paymentMode) return;
     const nextRecentOrders = getOrders();
     const matchedOrder = params.orderId ? getOrderById(params.orderId) : getLatestOrder();
 
@@ -137,7 +302,186 @@ export function OrderStatusPage() {
           });
       }
     }
-  }, [params.orderId, user]);
+  }, [params.orderId, paymentMode, user]);
+
+  if (paymentMode) {
+    if (paymentLoading && !paymentOrder) {
+      return (
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+            <p className="text-sm text-slate-500">Đang tải trạng thái thanh toán...</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (paymentError && !paymentOrder) {
+      return (
+        <div className="mx-auto max-w-md px-4 py-12">
+          <Card className="border-red-200 bg-red-50/80 text-center shadow-lg">
+            <CardContent className="p-8">
+              <h1 className="text-xl font-bold text-red-800">Không tải được đơn thanh toán</h1>
+              <p className="mt-2 text-sm leading-6 text-red-700">{paymentError}</p>
+              <Button type="button" className="mt-6" onClick={() => params.orderId && void fetchPaymentOrder(params.orderId)}>
+                <RefreshCw className="h-4 w-4" />
+                Tải lại trang
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    if (!paymentOrder) return null;
+
+    if (successRedirecting || paymentOrder.status === "completed") {
+      return (
+        <div className="mx-auto max-w-md px-4 py-12">
+          <Card className="overflow-hidden border-emerald-200 bg-emerald-50/90 text-center shadow-xl">
+            <CardContent className="p-8">
+              <div className="mx-auto flex h-20 w-20 animate-bounce items-center justify-center rounded-[var(--r-pill)] bg-emerald-100 text-emerald-700">
+                <CheckCircle2 className="h-10 w-10" />
+              </div>
+              <h1 className="mt-5 text-2xl font-bold text-emerald-900">Plus đã kích hoạt!</h1>
+              <p className="mt-2 text-sm leading-6 text-emerald-800">Đang chuyển bạn về trang gói để tiếp tục sử dụng Plus.</p>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    if (paymentTimedOut || paymentOrder.status === "failed") {
+      return (
+        <div className="mx-auto max-w-2xl px-4 py-12">
+          <Card className="border-amber-200 bg-amber-50/90 shadow-lg">
+            <CardContent className="p-8 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[var(--r-pill)] bg-amber-100 text-amber-700">
+                <Clock className="h-8 w-8" />
+              </div>
+              <h1 className="mt-5 text-2xl font-bold text-amber-900">Đơn hàng đã huỷ</h1>
+              <p className="mx-auto mt-2 max-w-xl text-sm leading-7 text-amber-800">
+                Đơn hàng đã huỷ, không nhận được chuyển khoản. Nếu bạn đã chuyển khoản, liên hệ {getSupportEmail()} để đội hỗ trợ kiểm tra.
+              </p>
+              <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+                <Button type="button" asChild>
+                  <a href={createSupportMailto(paymentOrder.orderId)}>
+                    <Mail className="h-4 w-4" />
+                    Liên hệ hỗ trợ
+                  </a>
+                </Button>
+                <Button type="button" variant="outline" onClick={() => window.location.reload()}>
+                  <RefreshCw className="h-4 w-4" />
+                  Tải lại trang
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    return (
+      <div className="mx-auto max-w-5xl px-4 py-8 lg:py-12">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(320px,1.05fr)]">
+          <Card className="overflow-hidden border-indigo-100 bg-white shadow-xl shadow-indigo-100/60">
+            <CardHeader className="text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[var(--r-pill)] bg-indigo-100 text-indigo-700">
+                <QrCode className="h-6 w-6" />
+              </div>
+              <CardTitle className="text-2xl text-slate-950">Quét QR để chuyển khoản</CardTitle>
+              <CardDescription>Giữ nguyên số tiền và nội dung. Hệ thống thường xác nhận trong 1-2 phút.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-5 p-5 sm:p-7">
+              <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50 p-4 text-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Mã đơn hàng</p>
+                <p className="mt-2 select-all break-all text-3xl font-black tracking-wide text-slate-950 sm:text-4xl">{paymentOrder.orderId}</p>
+              </div>
+
+              <div className="rounded-[var(--r-card)] border border-indigo-100 bg-indigo-50/60 p-4">
+                {paymentOrder.qrDataUrl ? (
+                  <img src={paymentOrder.qrDataUrl} alt={`QR chuyển khoản đơn ${paymentOrder.orderId}`} className="mx-auto aspect-square w-full max-w-[360px] rounded-[var(--r-card)] bg-white p-3 shadow-sm" />
+                ) : (
+                  <div className="mx-auto flex aspect-square w-full max-w-[360px] items-center justify-center rounded-[var(--r-card)] bg-white text-slate-400">
+                    <QrCode className="h-16 w-16" />
+                  </div>
+                )}
+              </div>
+
+              <div className="text-center" role="status" aria-live="polite">
+                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] bg-indigo-50 px-4 py-2 text-indigo-700">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="text-sm font-semibold">Đang chờ xác nhận chuyển khoản</span>
+                </div>
+                <p className="mt-2 text-sm font-medium text-slate-600">Đơn hàng sẽ huỷ trong {formatCountdown(paymentTimeLeftMs)}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="space-y-5">
+            <Card className="border-slate-200 bg-white shadow-lg">
+              <CardHeader>
+                <CardTitle>Thông tin chuyển khoản</CardTitle>
+                <CardDescription>Nhấn nút sao chép từng dòng để tránh nhập sai. Nội dung chuyển khoản là phần quan trọng nhất.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <PaymentInfoRow label="Số tiền" value={`${formatVndAmount(paymentOrder.amount)} ${paymentOrder.currency}`} copyValue={String(paymentOrder.amount)} copyKey="amount" copiedKey={copiedPaymentField} onCopy={copyPaymentValue} highlight />
+                <PaymentInfoRow label="Ngân hàng nhận" value={paymentOrder.bankName} copyValue={paymentOrder.bankName} copyKey="bank" copiedKey={copiedPaymentField} onCopy={copyPaymentValue} />
+                <PaymentInfoRow label="STK ngân hàng nhận" value={paymentOrder.bankAccount} copyValue={paymentOrder.bankAccount} copyKey="account" copiedKey={copiedPaymentField} onCopy={copyPaymentValue} highlight />
+                <PaymentInfoRow label="Chủ tài khoản" value={paymentOrder.accountName} copyValue={paymentOrder.accountName} copyKey="name" copiedKey={copiedPaymentField} onCopy={copyPaymentValue} />
+                <PaymentInfoRow label="Nội dung chuyển khoản" value={transferDescription} copyValue={transferDescription} copyKey="description" copiedKey={copiedPaymentField} onCopy={copyPaymentValue} highlight />
+              </CardContent>
+            </Card>
+
+            {paymentError && (
+              <div className="rounded-[var(--r-card)] border border-red-200 bg-red-50 p-3 text-sm text-red-700">{paymentError}</div>
+            )}
+
+            {showTransferConfirmButton && (
+              <Card className="border-emerald-100 bg-emerald-50/80 shadow-sm">
+                <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm leading-6 text-emerald-900">Đã chuyển khoản? Bấm để đội hỗ trợ thấy bạn đã xác nhận khi cần kiểm tra.</p>
+                  <Button type="button" onClick={handleUserConfirmedTransfer} disabled={confirmingTransfer} className="bg-emerald-600 hover:bg-emerald-700">
+                    {confirmingTransfer ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                    Tôi đã chuyển khoản xong
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {transferConfirmedByUser && (
+              <div className="rounded-[var(--r-card)] border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium leading-6 text-emerald-800">
+                Cảm ơn bạn! Chúng tôi đang xác nhận giao dịch (thường 1-2 phút).
+              </div>
+            )}
+
+            {showSlowPaymentHelp && (
+              <Card className="border-amber-200 bg-amber-50/90 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="text-base text-amber-950">Quá lâu chưa thấy phản hồi?</CardTitle>
+                  <CardDescription className="text-amber-800">
+                    Ngân hàng đôi khi chậm 3-5 phút. Nếu bạn đã chuyển và quá 10 phút chưa nhận quyền:
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col gap-3 sm:flex-row">
+                  <Button type="button" asChild variant="outline" className="border-amber-300 bg-white text-amber-900 hover:bg-amber-100">
+                    <a href={createSupportMailto(paymentOrder.orderId)}>
+                      <Mail className="h-4 w-4" />
+                      Liên hệ hỗ trợ
+                    </a>
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => window.location.reload()} className="border-amber-300 bg-white text-amber-900 hover:bg-amber-100">
+                    <RefreshCw className="h-4 w-4" />
+                    Tải lại trang
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!order) {
     return (
@@ -556,6 +900,41 @@ export function OrderStatusPage() {
             </Button>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function PaymentInfoRow({
+  label,
+  value,
+  copyValue,
+  copyKey,
+  copiedKey,
+  onCopy,
+  highlight,
+}: {
+  label: string;
+  value: string;
+  copyValue: string;
+  copyKey: string;
+  copiedKey: string | null;
+  onCopy: (value: string, key: string) => void;
+  highlight?: boolean;
+}) {
+  const copied = copiedKey === copyKey;
+
+  return (
+    <div className={`rounded-[var(--r-card)] border p-4 ${highlight ? "border-indigo-200 bg-indigo-50" : "border-slate-200 bg-slate-50/70"}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
+          <p className={`mt-2 select-all break-all font-bold ${highlight ? "text-lg text-indigo-900" : "text-base text-slate-900"}`}>{value}</p>
+        </div>
+        <Button type="button" size="sm" variant="outline" onClick={() => onCopy(copyValue, copyKey)} aria-label={`Sao chép ${label}`}>
+          {copied ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+          {copied ? "Đã copy" : "Copy"}
+        </Button>
       </div>
     </div>
   );
