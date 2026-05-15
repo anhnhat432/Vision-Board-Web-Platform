@@ -53,7 +53,9 @@ import {
 import {
   addGoalToData,
   deleteGoalFromData,
+  recomputeGoalProgressFromWeeksInData,
   resetTwelveWeekGoalCycleInData,
+  toggleTwelveWeekTaskInData,
   updateGoalInData,
   updateWheelOfLifeInData,
   upgradeLegacyGoalToSystemInData,
@@ -192,8 +194,13 @@ if (typeof window !== "undefined") {
 
   subscribeUserDataMutation((payload) => {
     if (payload.source === userDataMutationSource) return;
-    hydrateUserDataCacheFromStorage();
-    notifyUserDataUpdated();
+
+    try {
+      hydrateUserDataCacheFromStorage();
+      notifyUserDataUpdated();
+    } catch {
+      // Ignore late BroadcastChannel messages after the test/browser context is gone.
+    }
   });
 }
 
@@ -716,6 +723,17 @@ export function updateGoal(goalId: string, updates: Partial<Goal>): void {
   if (!updateGoalInData(data, goalId, updates)) return;
   checkAchievementsInData(data);
   saveUserData(data);
+}
+
+export function toggleTwelveWeekTask(goalId: string, taskId: string, completed: boolean, now = Date.now()): boolean {
+  const data = getUserData();
+  if (!toggleTwelveWeekTaskInData(data, goalId, taskId, completed, now)) return false;
+  checkAchievementsInData(data);
+  return saveUserData(data);
+}
+
+export function recomputeGoalProgressFromWeeks(goalId: string): number | null {
+  return recomputeGoalProgressFromWeeksInData(getUserData(), goalId);
 }
 
 export function resetTwelveWeekGoalCycle(goalId: string, referenceDate = new Date()): boolean {

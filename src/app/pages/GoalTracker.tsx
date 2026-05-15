@@ -60,7 +60,9 @@ import {
   getTwelveWeekWeekRange,
   getUserData,
   isTwelveWeekReviewDueToday,
+  recomputeGoalProgressFromWeeks,
   saveUserData,
+  toggleTwelveWeekTask,
   updateGoal,
 } from "../utils/storage";
 import { generateId } from "../utils/storage-types";
@@ -132,6 +134,7 @@ function GoalTrackerContent({
   const [expandedGoals, setExpandedGoals] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [viewUserData, setViewUserData] = useState(userData);
+  const [locallyUpdatedSystemGoalIds, setLocallyUpdatedSystemGoalIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     setViewUserData(userData);
@@ -176,6 +179,8 @@ function GoalTrackerContent({
       goals.map((goal) => {
         if (!goal.twelveWeekSystem) return goal;
 
+        if (locallyUpdatedSystemGoalIds.has(goal.id)) return goal;
+
         const effectiveSystem = backendSystemsByGoalId.get(goal.id);
         if (!effectiveSystem) return goal;
 
@@ -184,7 +189,7 @@ function GoalTrackerContent({
           twelveWeekSystem: effectiveSystem,
         };
       }),
-    [backendSystemsByGoalId, goals],
+    [backendSystemsByGoalId, goals, locallyUpdatedSystemGoalIds],
   );
   const hasGoals = effectiveGoals.length > 0;
   const hasRealLifeBalance = viewUserData.onboardingCompleted && viewUserData.currentWheelOfLife.some((area) => area.score > 0);
@@ -248,10 +253,64 @@ function GoalTrackerContent({
     if (!goal) return;
 
     if (goal.twelveWeekSystem) {
-      toast.info("Hãy tick việc này trong trung tâm 12 tuần.", {
-        description: "Màn Mục tiêu giờ chỉ giữ vai trò tổng quan cho các chu kỳ 12 tuần.",
-      });
-      openTwelveWeekCenter(goalId);
+      const task = goal.twelveWeekSystem.taskInstances.find((item) => item.id === taskId);
+      if (!task) return;
+
+      const previousProgress = calculateGoalProgress(goal);
+      const nextCompleted = !task.completed;
+      const now = Date.now();
+      const previousViewUserData = viewUserData;
+      const nextSystem = {
+        ...goal.twelveWeekSystem,
+        taskInstances: goal.twelveWeekSystem.taskInstances.map((item) =>
+          item.id === taskId
+            ? {
+                ...item,
+                completed: nextCompleted,
+                completedAt: nextCompleted ? new Date(now).toISOString() : undefined,
+                lastModifiedAt: now,
+              }
+            : item,
+        ),
+      };
+
+      setLocallyUpdatedSystemGoalIds((current) => new Set(current).add(goalId));
+      setViewUserData((current) => ({
+        ...current,
+        goals: current.goals.map((item) =>
+          item.id === goalId
+            ? {
+                ...item,
+                twelveWeekSystem: nextSystem,
+              }
+            : item,
+        ),
+      }));
+
+      try {
+        if (!toggleTwelveWeekTask(goalId, taskId, nextCompleted, now)) {
+          throw new Error("Unable to toggle 12-week task");
+        }
+      } catch {
+        setViewUserData(previousViewUserData);
+        toast.error("Không thể cập nhật, vui lòng thử lại");
+        return;
+      }
+
+      const afterData = getUserData();
+      setViewUserData(afterData);
+      const refreshedProgress = recomputeGoalProgressFromWeeks(goalId) ?? previousProgress;
+      const justCompletedGoal = previousProgress < 100 && refreshedProgress === 100;
+
+      if (nextCompleted) {
+        if (justCompletedGoal) {
+          celebrateSpotlight({ x: 0.82, y: 0.14 });
+        } else {
+          celebrateSpark({ x: 0.82, y: 0.14 });
+        }
+        toast.success(justCompletedGoal ? "Mục tiêu vừa chạm mốc 100%." : "Đã chốt thêm một bước nhỏ.");
+      }
+
       return;
     }
 
@@ -594,6 +653,17 @@ function GoalTrackerContent({
                           ? `Tuần ${systemCurrentWeek}/${system.totalWeeks} đang khá gọn (${formatCalendarDate(systemWeekRange.start)} - ${formatCalendarDate(systemWeekRange.end)}).`
                           : "Mở trung tâm 12 tuần để xem lại hàng việc và nhịp tuần hiện tại."}
                   </p>
+                  {nextSystemTask && !systemReviewDueToday && (
+                    <div className="mt-4 flex items-center gap-3 rounded-[var(--r-tile)] border border-white/12 bg-white/10 px-4 py-3">
+                      <Checkbox
+                        checked={nextSystemTask.completed}
+                        onCheckedChange={() => handleToggleTask(goal.id, nextSystemTask.id)}
+                        aria-label={`Đánh dấu việc ${nextSystemTask.title}`}
+                        className="border-white/50 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-foreground"
+                      />
+                      <span className="flex-1 text-sm font-semibold text-white">{nextSystemTask.title}</span>
+                    </div>
+                  )}
                   <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                     <Button className="w-full sm:w-auto" onClick={() => openTwelveWeekCenter(goal.id)}>
                       <Zap className="h-4 w-4" />

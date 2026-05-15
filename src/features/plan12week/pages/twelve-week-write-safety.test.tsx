@@ -20,6 +20,9 @@ vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: () => ({
     user: null,
   }),
+  useOptionalAuthContext: () => ({
+    user: null,
+  }),
 }));
 
 vi.mock("@/features/plan12week/hooks", async () => {

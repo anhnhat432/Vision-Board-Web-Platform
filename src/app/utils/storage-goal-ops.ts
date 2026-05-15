@@ -1,5 +1,6 @@
 import { formatDateInputValue } from "./storage-date-utils";
 import {
+  buildDerivedScoreboard,
   getCycleEndDate,
   getDefaultScoreboard,
   getStartOfWeek,
@@ -55,6 +56,55 @@ export function updateGoalInData(data: UserData, goalId: string, updates: Partia
 
   data.goals[goalIndex] = { ...data.goals[goalIndex], ...updates };
   return true;
+}
+
+export function toggleTwelveWeekTaskInData(
+  data: UserData,
+  goalId: string,
+  taskId: string,
+  completed: boolean,
+  now = Date.now(),
+): boolean {
+  const goalIndex = data.goals.findIndex((goal) => goal.id === goalId);
+  if (goalIndex === -1) return false;
+
+  const goal = data.goals[goalIndex];
+  const system = goal.twelveWeekSystem;
+  if (!system?.taskInstances.some((task) => task.id === taskId)) return false;
+
+  const nextSystem = {
+    ...system,
+    taskInstances: system.taskInstances.map((task) =>
+      task.id === taskId
+        ? {
+            ...task,
+            completed,
+            completedAt: completed ? new Date(now).toISOString() : undefined,
+            lastModifiedAt: now,
+          }
+        : task,
+    ),
+  };
+
+  data.goals[goalIndex] = {
+    ...goal,
+    twelveWeekSystem: {
+      ...nextSystem,
+      scoreboard: buildDerivedScoreboard(nextSystem, getDefaultScoreboard(nextSystem.totalWeeks)),
+    },
+  };
+
+  return true;
+}
+
+export function recomputeGoalProgressFromWeeksInData(data: UserData, goalId: string): number | null {
+  const goal = data.goals.find((item) => item.id === goalId);
+  const taskInstances = goal?.twelveWeekSystem?.taskInstances;
+  if (!taskInstances) return null;
+  if (taskInstances.length === 0) return 0;
+
+  const completed = taskInstances.filter((task) => task.completed).length;
+  return Math.round((completed / taskInstances.length) * 100);
 }
 
 export function resetTwelveWeekGoalCycleInData(

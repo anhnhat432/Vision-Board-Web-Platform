@@ -5,10 +5,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
+  useOptionalAuthContext: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
+  useOptionalAuthContext: authContextMock.useOptionalAuthContext,
 }));
 
 vi.mock("../hooks/useBackendProgressOverlay", () => ({
@@ -60,7 +62,7 @@ class MockBroadcastChannel {
 }
 
 function setSignedInAuthContext() {
-  authContextMock.useAuthContext.mockReturnValue({
+  const value = {
     user: {
       uid: "firebase_uid_multi_tab_goals",
       email: "multi-tab-goals@example.com",
@@ -78,7 +80,10 @@ function setSignedInAuthContext() {
     logout: vi.fn().mockResolvedValue(undefined),
     refreshUserProfile: vi.fn(),
     isConfigured: true,
-  });
+  };
+
+  authContextMock.useAuthContext.mockReturnValue(value);
+  authContextMock.useOptionalAuthContext.mockReturnValue(value);
 }
 
 async function renderGoalTracker() {
@@ -103,6 +108,115 @@ describe("GoalTracker multi-tab task updates", () => {
     MockBroadcastChannel.channels = [];
     vi.stubGlobal("BroadcastChannel", MockBroadcastChannel);
     setSignedInAuthContext();
+  });
+
+  it("updates 12-week goal progress immediately after ticking the next task", async () => {
+    const storage = await import("../utils/storage");
+    const data = storage.getUserData();
+    const todayKey = storage.formatDateInputValue(new Date());
+    data.onboardingCompleted = true;
+    data.currentWheelOfLife = data.currentWheelOfLife.map((area) => ({ ...area, score: 6 }));
+    data.goals = [
+      {
+        id: "goal_12_week_progress",
+        category: "Career",
+        title: "12-week progress goal",
+        description: "Progress should update without reload.",
+        deadline: "2026-08-03",
+        tasks: [],
+        createdAt: "2026-05-01T00:00:00.000Z",
+        twelveWeekSystem: {
+          goalType: "Career",
+          vision12Week: "Ship the operating cadence",
+          lagMetric: {
+            name: "Progress",
+            unit: "%",
+            target: "100",
+            currentValue: "0",
+          },
+          leadIndicators: [
+            {
+              id: "tactic_12_week_a",
+              name: "Deep work A",
+              target: "5",
+              unit: "tasks",
+              type: "core",
+              priority: 1,
+              schedule: [0, 1, 2, 3, 4],
+            },
+            {
+              id: "tactic_12_week_b",
+              name: "Deep work B",
+              target: "5",
+              unit: "tasks",
+              type: "core",
+              priority: 2,
+              schedule: [0, 1, 2, 3, 4],
+            },
+          ],
+          milestones: { week4: "", week8: "", week12: "" },
+          successEvidence: "",
+          reviewDay: "Sunday",
+          week12Outcome: "",
+          startDate: todayKey,
+          endDate: todayKey,
+          timezone: "Asia/Ho_Chi_Minh",
+          weekStartsOn: "Monday",
+          status: "active",
+          currentWeek: 1,
+          totalWeeks: 1,
+          weeklyPlans: [],
+          taskInstances: [
+            ...Array.from({ length: 5 }, (_, index) => ({
+              id: `tw_task_1_tactic_12_week_a_${index}`,
+              weekNumber: 1,
+              scheduledDate: todayKey,
+              title: `Deep work A ${index + 1}`,
+              leadIndicatorName: "Deep work A",
+              isCore: true,
+              completed: index < 4,
+              completedAt: index < 4 ? "2026-05-15T00:00:00.000Z" : undefined,
+              lastModifiedAt: index + 1,
+              tacticId: "tactic_12_week_a",
+            })),
+            ...Array.from({ length: 5 }, (_, index) => ({
+              id: `tw_task_1_tactic_12_week_b_${index}`,
+              weekNumber: 1,
+              scheduledDate: todayKey,
+              title: `Deep work B ${index + 1}`,
+              leadIndicatorName: "Deep work B",
+              isCore: true,
+              completed: false,
+              lastModifiedAt: index + 6,
+              tacticId: "tactic_12_week_b",
+            })),
+          ],
+          dailyCheckIns: [],
+          weeklyReviews: [],
+          scoreboard: Array.from({ length: 12 }, (_, index) => ({
+            weekNumber: index + 1,
+            leadCompletionPercent: 0,
+            mainMetricProgress: "0%",
+            outputDone: "0/0 việc",
+            reviewDone: false,
+            weeklyScore: 0,
+          })),
+        },
+      },
+    ];
+    storage.saveUserData(data);
+
+    await renderGoalTracker();
+
+    expect(await screen.findAllByText("40%")).not.toHaveLength(0);
+
+    const channel = MockBroadcastChannel.channels[0];
+    const checkbox = await screen.findByRole("checkbox", { name: "Đánh dấu việc Deep work A 5" });
+    await userEvent.click(checkbox);
+
+    expect(channel.postMessage).toHaveBeenCalledWith(expect.objectContaining({ source: expect.any(String) }));
+    await waitFor(() => expect(screen.getAllByText("50%")).not.toHaveLength(0));
+    expect(storage.calculateGoalProgress(storage.getUserData().goals[0])).toBe(50);
   });
 
   it("posts local task mutations and applies newer task state from another tab", async () => {
