@@ -378,6 +378,7 @@ export function SmartGoalStepShell({
             Quay lại
           </Button>
           <Button
+            glow={isCurrentStepValid}
             className={`flex-1 overflow-hidden gradient-brand text-white shadow-lg motion-safe:hover:scale-[1.01] hover:shadow-xl ${
               stepIndex < totalSteps - 1 ? "" : "shimmer"
             }`}

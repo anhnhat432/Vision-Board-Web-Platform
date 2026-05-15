@@ -46,16 +46,23 @@ const buttonVariants = cva(
 type ButtonProps = ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
+    /**
+     * Add an ambient brand glow pulse. Reserve for the single most
+     * important primary CTA on the page (e.g. dashboard hero).
+     * Respects reduced-motion automatically.
+     */
+    glow?: boolean;
   };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { className, variant, size, asChild = false, style, onPointerMove, onPointerLeave, ...props },
+  { className, variant, size, asChild = false, glow = false, style, onPointerMove, onPointerLeave, ...props },
   ref,
 ) {
   const prefersReducedMotion = useReducedMotion();
   const Comp = asChild ? Slot : "button";
   const isPrimaryVariant = variant === undefined || variant === "default";
   const magnetic = !prefersReducedMotion && isPrimaryVariant;
+  const showGlow = glow && !prefersReducedMotion;
 
   const setPointer = (element: HTMLElement, x: number, y: number, hovering: boolean) => {
     const shiftX = ((x - 0.5) * 5).toFixed(2);
@@ -96,7 +103,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
       ref={ref}
       data-slot="button"
       data-button-hovering="false"
-      className={cn(buttonVariants({ variant, size, className }), magnetic && "button-magnetic")}
+      className={cn(
+        buttonVariants({ variant, size, className }),
+        magnetic && "button-magnetic",
+        showGlow && "brand-glow-pulse",
+      )}
       style={{ ...DEFAULT_BUTTON_STYLE, ...style }}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}

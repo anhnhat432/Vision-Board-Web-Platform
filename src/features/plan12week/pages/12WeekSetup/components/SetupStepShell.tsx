@@ -249,6 +249,7 @@ export function SetupStepShell({
             </Button>
             {isLastStep ? (
               <Button
+                glow={!isSubmitting && !isSubmitDisabled}
                 className="w-full gradient-brand text-white shadow-lg motion-safe:hover:scale-[1.01] hover:shadow-xl sm:w-auto"
                 onClick={handleSubmitClick}
                 size="lg"
@@ -264,6 +265,7 @@ export function SetupStepShell({
               </Button>
             ) : (
               <Button
+                glow={!isNextDisabled}
                 className="w-full gradient-brand text-white shadow-lg motion-safe:hover:scale-[1.02] hover:shadow-xl sm:w-auto"
                 onClick={onNext}
                 disabled={isNextDisabled}

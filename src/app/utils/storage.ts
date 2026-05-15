@@ -925,7 +925,9 @@ export function getCurrentPlan(userData?: UserData): PricingPlanCode {
 
 export function hasEntitlement(key: EntitlementKey, userData?: UserData): boolean {
   const data = userData ?? getUserData();
-  return hasEntitlementInData(key, data);
+  return hasEntitlementInData(key, data, () => {
+    saveUserData(data);
+  });
 }
 
 export function getCurrentEntitlementKeys(userData?: UserData): EntitlementKey[] {

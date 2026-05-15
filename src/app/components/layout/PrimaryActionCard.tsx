@@ -25,6 +25,17 @@ interface PrimaryActionCardProps extends Omit<React.ComponentPropsWithoutRef<"di
   headerClassName?: string;
   contentClassName?: string;
   actionClassName?: string;
+  /**
+   * Add a soft, breathing brand glow around the card to emphasise it
+   * as the most important action on the page. Uses the route tone
+   * tokens so it matches whichever page it sits on.
+   */
+  glow?: boolean;
+  /**
+   * Animate the card on first mount. Useful for hero cards that should
+   * draw attention without being jarring. Respects reduced-motion.
+   */
+  appear?: boolean;
 }
 
 const toneClass: Record<PrimaryActionCardTone, string> = {
@@ -74,6 +85,8 @@ export function PrimaryActionCard({
   headerClassName,
   contentClassName,
   actionClassName,
+  glow = false,
+  appear = false,
   className,
   ...cardProps
 }: PrimaryActionCardProps) {
@@ -86,6 +99,8 @@ export function PrimaryActionCard({
         toneClass[tone],
         densityClass[density],
         hero && "hero-surface",
+        glow && "brand-glow-pulse",
+        appear && "appear-fade-up",
         className,
       )}
       {...cardProps}

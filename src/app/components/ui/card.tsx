@@ -97,7 +97,7 @@ function Card({
       data-card-hovering="false"
       className={cn(
         "glass-surface text-card-foreground flex flex-col gap-6 rounded-[var(--r-card)]",
-        isInteractive && "card-interactive-base",
+        isInteractive && "card-interactive-base tap-scale",
         className,
       )}
       style={{ ...DEFAULT_CARD_STYLE, ...style }}

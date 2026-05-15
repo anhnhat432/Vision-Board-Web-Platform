@@ -6,6 +6,7 @@ import { Badge } from "@/app/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/app/components/ui/accordion";
 import { PhaseHarvestChipIcon, PhasePeakChipIcon, PhaseRampChipIcon } from "@/app/components/illustrations";
 import { useBreakpoint } from "@/app/hooks/useBreakpoint";
+import { FEATURE_TERMS } from "@/app/utils/user-facing-copy";
 import { PlanQualityPanel } from "./PlanQualityPanel";
 import type { LeadIndicatorDraft } from "@/app/pages/12WeekSetup/types";
 import type { TwelveWeekSetupDraft } from "@/app/pages/12WeekSetup/types";
@@ -40,7 +41,7 @@ interface PlanPreviewProps {
 
 const TIMELINE_PHASES = [
   {
-    label: "Khởi động",
+    label: FEATURE_TERMS.ramp,
     weekStart: 1,
     weekEnd: 4,
     icon: PhaseRampChipIcon,
@@ -50,7 +51,7 @@ const TIMELINE_PHASES = [
       "border-violet-500 bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20 dark:from-violet-500 dark:to-fuchsia-500",
   },
   {
-    label: "Bứt phá",
+    label: FEATURE_TERMS.peak,
     weekStart: 5,
     weekEnd: 8,
     icon: PhasePeakChipIcon,
@@ -60,7 +61,7 @@ const TIMELINE_PHASES = [
       "border-fuchsia-500 bg-gradient-to-br from-fuchsia-600 to-rose-500 text-white shadow-lg shadow-fuchsia-500/20 dark:from-fuchsia-500 dark:to-rose-400",
   },
   {
-    label: "Thu hoạch",
+    label: FEATURE_TERMS.harvest,
     weekStart: 9,
     weekEnd: 12,
     icon: PhaseHarvestChipIcon,
@@ -130,7 +131,7 @@ export function PlanPreview({
             <div>
               <h3 className="text-base font-semibold text-slate-950 dark:text-slate-50">Timeline 12 tuần</h3>
               <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                Khởi động 4 tuần đầu, Bứt phá 4 tuần giữa, Thu hoạch 4 tuần cuối. Chọn từng tuần để xem nhịp dự kiến.
+                {FEATURE_TERMS.ramp} 4 tuần đầu, {FEATURE_TERMS.peak} 4 tuần giữa, {FEATURE_TERMS.harvest} 4 tuần cuối. Chọn từng tuần để xem nhịp dự kiến.
               </p>
             </div>
           </div>

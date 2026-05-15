@@ -153,8 +153,9 @@ describe("monetization flows", () => {
   });
 
   it("entitlement gating: expired Plus subscription revokes local access", () => {
-    const grantedAt = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString();
-    const renewsAt = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const grantedAt = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    // 5 days past renewsAt is well past the 3-day grace period, so access is revoked.
+    const renewsAt = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
 
     updateUserData((data) => {
       data.subscription = {

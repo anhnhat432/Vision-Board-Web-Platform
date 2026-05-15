@@ -1,4 +1,4 @@
-import {
+﻿import {
   AlertTriangle,
   ArrowRight,
   CalendarDays,
@@ -850,6 +850,7 @@ function DashboardContent({
               action={
                 <Button
                   variant="outline"
+                  glow
                   className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
                   onClick={() => navigate(dashboardNextAction.ctaTarget)}
                 >

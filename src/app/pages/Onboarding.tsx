@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, BarChart3, Check, Compass, Heart, Sparkles, Targ
 
 import { toast } from "sonner";
 
+import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { LifeBalanceWheelIllustration, WelcomeIllustration, getLifeAreaIcon } from "../components/illustrations";
 import { ProductVisual } from "../components/visuals/ProductVisual";
@@ -153,6 +154,7 @@ export function Onboarding() {
   const [reviewedAreaIndices, setReviewedAreaIndices] = useState<Set<number>>(new Set());
   const [isDirty, setIsDirty] = useState(false);
   const [availableDraft, setAvailableDraft] = useState<OnboardingDraft | null>(null);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const flowTopRef = useRef<HTMLDivElement | null>(null);
   const autosaveTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
 
@@ -209,6 +211,7 @@ export function Onboarding() {
     cancelPendingDraftSave();
     autosaveTimerRef.current = window.setTimeout(() => {
       writeOnboardingDraft(draft);
+      setLastSavedAt(new Date());
       autosaveTimerRef.current = null;
     }, 500);
 
@@ -233,6 +236,7 @@ export function Onboarding() {
     clearOnboardingDraft();
     cancelPendingDraftSave();
     setAvailableDraft(null);
+    setLastSavedAt(null);
     trackAnalyticsEvent("life_balance_completed", {
       source: "onboarding",
       area_count: lifeAreas.length,
@@ -264,6 +268,8 @@ export function Onboarding() {
     setStep(availableDraft.step);
     setIsDirty(true);
     setAvailableDraft(null);
+    const resumedAt = new Date(availableDraft.updatedAt);
+    setLastSavedAt(Number.isNaN(resumedAt.getTime()) ? null : resumedAt);
   };
 
   const handleRestartDraft = () => {
@@ -274,6 +280,7 @@ export function Onboarding() {
     setLifeAreas(createDefaultOnboardingLifeAreas());
     setReviewedAreaIndices(new Set());
     setIsDirty(false);
+    setLastSavedAt(null);
   };
 
   const draftBanner = availableDraft ? (
@@ -352,6 +359,7 @@ export function Onboarding() {
 
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <Button
+                      glow
                       className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
                       onClick={handleStartAssessment}
                     >
@@ -472,7 +480,10 @@ export function Onboarding() {
                 className="relative overflow-hidden rounded-[var(--r-tile)] border border-slate-200 bg-slate-50/85 p-4"
               >
                 <LifeBalanceWheelIllustration className="pointer-events-none absolute -right-10 -top-10 hidden w-36 text-violet-500 opacity-20 lg:block" />
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Tín hiệu đang hiện ra</p>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Tín hiệu đang hiện ra</p>
+                  <AutoSaveIndicator lastSavedAt={lastSavedAt} />
+                </div>
                 <div className="mt-[var(--space-inline)] grid grid-cols-2 gap-2 text-sm">
                   <div className="rounded-[var(--r-control)] border border-slate-200 bg-white p-3">
                     <p className="text-slate-500">Điểm trung bình</p>
@@ -514,7 +525,7 @@ export function Onboarding() {
                 return (
                   <div
                     key={area.name}
-                    className="card-hover-lift rounded-[var(--r-tile)] border border-slate-200 bg-white p-3 shadow-sm sm:p-4 dark:border-slate-700 dark:bg-slate-900/70"
+                    className="card-hover-lift tap-scale rounded-[var(--r-tile)] border border-slate-200 bg-white p-3 shadow-sm sm:p-4 dark:border-slate-700 dark:bg-slate-900/70"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
@@ -580,6 +591,7 @@ export function Onboarding() {
                     </p>
                   ) : null}
                   <Button
+                    glow={canCompleteAssessment}
                     className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30 hover:from-violet-700 hover:to-fuchsia-700 disabled:cursor-not-allowed disabled:opacity-60"
                     onClick={handleComplete}
                     disabled={!canCompleteAssessment}

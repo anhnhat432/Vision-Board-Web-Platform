@@ -39,6 +39,7 @@ import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { isRealMode, shouldShowBillingDebugUi } from "../utils/app-mode";
 import { formatBillingExpiryDate, getBillingExpiryInfo } from "../utils/billing-expiry";
+import { getSubscriptionGraceState } from "../utils/billing-grace-period";
 import { getBillingProviderModeLabel, getBillingReadinessLabel } from "../utils/billing-contract";
 import { trackPaywallCtaClicked } from "../utils/monetization-analytics";
 import {
@@ -293,6 +294,7 @@ export function BillingPlan() {
   const emailNeedsVerification = authContext?.user ? !canRequestRefund(authContext.user) : false;
   const subscription = userData.subscription;
   const expiryInfo = useMemo(() => getBillingExpiryInfo(subscription), [subscription]);
+  const graceState = useMemo(() => getSubscriptionGraceState(userData), [userData]);
 
   const lastEntitlementSync = useMemo(() => getLastEntitlementSyncSnapshot(), []);
   const lastRestoreAccess = useMemo(() => getLastRestoreAccessSnapshot(), []);
@@ -412,11 +414,12 @@ export function BillingPlan() {
       ? formatDate(subscription.renewsAt)
       : "ngày kết thúc chu kỳ hiện tại";
 
-  const isExpired = expiryInfo.isExpired;
+  const isInRenewalPriority = graceState.inGracePeriod;
+  const isExpired = expiryInfo.isExpired && !graceState.active;
   const shouldShowExpiryNotice =
     realMode &&
     subscription?.planCode === "PLUS" &&
-    (expiryInfo.isExpiringSoon || expiryInfo.isExpired);
+    (isInRenewalPriority || expiryInfo.isExpiringSoon || isExpired);
 
   const handleConfirmStopUsing = () => {
     setShowStopUsingConfirm(false);
@@ -754,20 +757,24 @@ export function BillingPlan() {
               <AlertTriangle className={`mt-0.5 h-5 w-5 ${isExpired ? "text-red-600" : "text-amber-600"}`} />
               <div>
                 <p className={`font-medium ${isExpired ? "text-red-900" : "text-amber-900"}`}>
-                  {isExpired
-                    ? "Gói Plus đã hết hạn"
-                    : `Gói Plus còn ${expiryInfo.daysLeft ?? 0} ngày`}
+                  {isInRenewalPriority
+                    ? `Đang trong giai đoạn ưu tiên gia hạn — còn ${graceState.daysRemaining} ngày`
+                    : isExpired
+                      ? "Gói Plus đã hết hạn"
+                      : `Gói Plus còn ${expiryInfo.daysLeft ?? 0} ngày`}
                 </p>
                 <p className={`mt-1 text-sm leading-6 ${isExpired ? "text-red-700" : "text-amber-700"}`}>
-                  {isExpired
-                    ? "Quyền Plus đã được thu hồi. Gia hạn để mở lại mẫu nâng cao, góc nhìn review và thống kê."
-                    : `Chu kỳ hiện tại hết hạn ngày ${formatBillingExpiryDate(expiryInfo.expiresAt)}. Gia hạn sớm để không bị gián đoạn quyền Plus.`}
+                  {isInRenewalPriority
+                    ? "Quyền Plus vẫn được giữ trong thời gian này. Gia hạn ngay để không bị tạm dừng."
+                    : isExpired
+                      ? "Quyền Plus đã được thu hồi. Gia hạn để mở lại mẫu nâng cao, góc nhìn review và thống kê."
+                      : `Chu kỳ hiện tại hết hạn ngày ${formatBillingExpiryDate(expiryInfo.expiresAt)}. Gia hạn sớm để không bị gián đoạn quyền Plus.`}
                 </p>
               </div>
             </div>
             <Button onClick={handleRenewPlan}>
               <RefreshCw className="mr-2 h-4 w-4" />
-              Gia hạn Plus
+              {isInRenewalPriority ? "Gia hạn ngay" : "Gia hạn Plus"}
             </Button>
           </CardContent>
         </Card>
@@ -791,7 +798,12 @@ export function BillingPlan() {
               : `Bạn đang dùng ${currentPlanName} trên tài khoản này và có thể tiếp tục trên thiết bị khác sau khi đăng nhập.`
           }
           action={
-            currentPlanCode === "FREE" ? (
+            isInRenewalPriority && realMode ? (
+              <Button className="w-full sm:w-auto" onClick={handleRenewPlan}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Gia hạn ngay
+              </Button>
+            ) : currentPlanCode === "FREE" ? (
               <Button className="w-full gradient-brand text-white sm:w-auto" onClick={() => handleOpenUpgrade("plan")}>
                 <Sparkles className="mr-2 h-4 w-4" />
                 Nâng cấp Plus
@@ -828,11 +840,15 @@ export function BillingPlan() {
             {currentPlanDefinition && (
               <span className="text-sm text-slate-500">{currentPlanDefinition.priceLabel}</span>
             )}
-            {isExpired && (
+            {isInRenewalPriority ? (
+              <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                Còn {graceState.daysRemaining} ngày để gia hạn ưu tiên
+              </Badge>
+            ) : isExpired ? (
               <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700">
                 Đã hết hạn
               </Badge>
-            )}
+            ) : null}
           </div>
 
           {isPaidPlan && (
@@ -851,15 +867,17 @@ export function BillingPlan() {
               <div className="flow-muted p-4">
                 <p className="text-slate-500">Trạng thái</p>
                 <p className="font-medium text-slate-900">
-                  {subscription?.status === "active"
-                    ? "Đang hoạt động"
-                    : subscription?.status === "trialing"
-                      ? "Đang trong thời gian ưu đãi"
-                      : subscription?.status === "canceled"
-                        ? "Đã hủy"
-                        : subscription
-                          ? "Không hoạt động"
-                          : "Đang chuẩn bị"}
+                  {isInRenewalPriority
+                    ? "Đang chờ gia hạn ưu tiên"
+                    : subscription?.status === "active"
+                      ? "Đang hoạt động"
+                      : subscription?.status === "trialing"
+                        ? "Đang trong thời gian ưu đãi"
+                        : subscription?.status === "canceled"
+                          ? "Đã hủy"
+                          : subscription
+                            ? "Không hoạt động"
+                            : "Đang chuẩn bị"}
                 </p>
               </div>
               <div className="flow-muted p-4">
@@ -882,7 +900,7 @@ export function BillingPlan() {
               {realMode && (
                 <Button onClick={handleRenewPlan}>
                   <RefreshCw className="mr-2 h-4 w-4" />
-                  Gia hạn Plus
+                  {isInRenewalPriority ? "Gia hạn ngay" : "Gia hạn Plus"}
                 </Button>
               )}
               {realMode && (

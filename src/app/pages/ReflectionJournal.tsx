@@ -38,6 +38,7 @@ import { Reveal } from "../components/ui/reveal";
 import { Textarea } from "../components/ui/textarea";
 import { useReflectionDraft, type ReflectionDraft } from "../hooks/useReflectionDraft";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
+import { getDayKey, getPreviousDayKey, getTodayDayKey } from "../utils/day-key";
 import {
   celebrateAchievementUnlock,
   celebrateSpotlight,
@@ -308,28 +309,20 @@ export function ReflectionJournal() {
 
   const currentStreak = useMemo(() => {
     if (sortedReflections.length === 0) return 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const writtenDays = new Set(
-      sortedReflections
-        .map((r) => {
-          const d = parseCalendarDate(r.date);
-          if (!d) return "";
-          d.setHours(0, 0, 0, 0);
-          return d.getTime().toString();
-        })
-        .filter(Boolean),
-    );
+    const todayKey = getTodayDayKey();
+
+    const writtenDays = new Set(sortedReflections.map((r) => getDayKey(r.date)));
+
+    let cursorKey = todayKey;
+    // allow today or yesterday as streak start
+    if (!writtenDays.has(cursorKey)) {
+      cursorKey = getPreviousDayKey(cursorKey);
+    }
 
     let streak = 0;
-    const cursor = new Date(today);
-    // allow today or yesterday as streak start
-    if (!writtenDays.has(cursor.getTime().toString())) {
-      cursor.setDate(cursor.getDate() - 1);
-    }
-    while (writtenDays.has(cursor.getTime().toString())) {
+    while (writtenDays.has(cursorKey)) {
       streak += 1;
-      cursor.setDate(cursor.getDate() - 1);
+      cursorKey = getPreviousDayKey(cursorKey);
     }
     return streak;
   }, [sortedReflections]);
@@ -704,6 +697,13 @@ export function ReflectionJournal() {
                 Nhật ký nhìn lại là phần về sau của flow. Bạn có thể đi từ Cân bằng cuộc sống trước, hoặc viết một trang tự do
                 nếu hôm nay đã có điều cần ghi lại.
               </p>
+              <div className="mx-auto mt-5 inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-violet-100 bg-white/80 px-4 py-2 text-sm text-violet-700 shadow-sm">
+                <Sparkles className="h-4 w-4" />
+                <span>Chuỗi ngày hiện tại</span>
+                <strong className="font-semibold">
+                  <CountUp value={currentStreak} /> ngày
+                </strong>
+              </div>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <EmptyHintArrow className="pointer-events-none absolute bottom-24 right-[18%] hidden h-10 w-10 text-fuchsia-500 opacity-65 sm:block" />
                 <Button

@@ -1,5 +1,8 @@
+import { getSubscriptionGraceState } from "./billing-grace-period";
 import { getEntitlementsForPlan, normalizePlanCode } from "./twelve-week-premium";
 import type { BillingCycle, EntitlementKey, PricingPlanCode, UserData } from "./storage-types";
+
+export const SUBSCRIPTION_GRACE_PERIOD_MS = 3 * 24 * 60 * 60 * 1000;
 
 interface LocalPlanOptions {
   startedAt?: string;
@@ -20,7 +23,8 @@ export function getPlanRank(planCode: PricingPlanCode): number {
 export function getCurrentPlanFromData(userData: UserData, persistOnExpiry?: PersistCallback): PricingPlanCode {
   const sub = userData.subscription;
   if (sub?.status === "active" || sub?.status === "trialing") {
-    if (sub.renewsAt && new Date(sub.renewsAt) < new Date()) {
+    const graceState = getSubscriptionGraceState(userData);
+    if (!graceState.active) {
       sub.status = "canceled";
       userData.entitlements = [];
       persistOnExpiry?.();
@@ -46,7 +50,12 @@ export function getCurrentPlanFromData(userData: UserData, persistOnExpiry?: Per
   return normalizePlanCode(highestEntitledPlan);
 }
 
-export function hasEntitlementInData(key: EntitlementKey, userData: UserData): boolean {
+export function hasEntitlementInData(
+  key: EntitlementKey,
+  userData: UserData,
+  persistOnExpiry?: PersistCallback,
+): boolean {
+  if (getCurrentPlanFromData(userData, persistOnExpiry) === "FREE") return false;
   return (userData.entitlements ?? []).some((entitlement) => entitlement.key === key);
 }
 

@@ -290,7 +290,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           actionClassName="relative z-10 flex flex-col gap-3 sm:max-w-xl sm:flex-row"
           action={
             <>
-              <Button className="bg-white text-slate-950 hover:bg-white/90" onClick={onContinue}>
+              <Button glow className="bg-white text-slate-950 hover:bg-white/90" onClick={onContinue}>
                 {result.type === "too_ambitious" ? "Tạo kế hoạch 12 tuần nhỏ hơn" : "Tạo kế hoạch 12 tuần"}
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -614,7 +614,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             <ArrowLeft className="h-4 w-4" />
             Sửa
           </Button>
-          <Button tabIndex={-1} className="flex-[2]" size="lg" onClick={onContinue}>
+          <Button glow tabIndex={-1} className="flex-[2]" size="lg" onClick={onContinue}>
             {result.type === "too_ambitious" ? "Tạo kế hoạch nhỏ hơn" : "Tạo kế hoạch 12 tuần"}
             <ArrowRight className="h-4 w-4" />
           </Button>
