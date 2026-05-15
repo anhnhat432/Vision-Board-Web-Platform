@@ -134,7 +134,7 @@ export const appRoutes = [
       },
       {
         path: "billing/mock-checkout",
-        Component: () => <Navigate to="/billing/confirm" replace />,
+        ...lazyRoute(() => import("./pages/MockBillingCheckout"), "MockBillingCheckout"),
       },
       {
         path: "billing/plan",

@@ -19,13 +19,13 @@ describe("monetization flows", () => {
     });
     render(<RouterProvider router={router} />);
 
-    await screen.findByRole("heading", { name: "Quản lý quyền Plus" });
+    await screen.findByRole("heading", { name: "Quản lý gói của bạn" });
     expect(screen.getByText("Gói hiện tại")).toBeInTheDocument();
-    expect(screen.getByText("Bạn đang dùng gói miễn phí trên trình duyệt này.")).toBeInTheDocument();
+    expect(screen.getByText("Bạn đang dùng gói miễn phí.")).toBeInTheDocument();
 
     // Should show all 4 entitlement slots, all locked
     expect(screen.getByText("Mẫu nâng cao")).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "Mở Plus" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: "Nâng cấp Plus" }).length).toBeGreaterThan(0);
   });
 
   it("BillingPlan page shows active plan for Plus user", async () => {
@@ -36,8 +36,8 @@ describe("monetization flows", () => {
     });
     render(<RouterProvider router={router} />);
 
-    await screen.findByRole("heading", { name: "Quản lý quyền Plus" });
-    expect(screen.getByText("Bạn đang dùng Plus trên trình duyệt này.")).toBeInTheDocument();
+    await screen.findByRole("heading", { name: "Quản lý gói của bạn" });
+    expect(screen.getByText(/Bạn đang dùng Plus trên tài khoản này/i)).toBeInTheDocument();
     // Entitlements should show as active
     const activeItems = screen.getAllByText("Đang mở");
     expect(activeItems.length).toBeGreaterThan(0);
@@ -50,12 +50,12 @@ describe("monetization flows", () => {
     render(<RouterProvider router={router} />);
     const user = userEvent.setup();
 
-    const upgradeButtons = await screen.findAllByRole("button", { name: "Mở Plus" });
+    const upgradeButtons = await screen.findAllByRole("button", { name: "Nâng cấp Plus" });
     await user.click(upgradeButtons[0]);
 
     // Paywall dialog should open
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByText(/Dùng thử Plus/i)).toBeInTheDocument();
+    expect(within(dialog).getByText(/Thanh toán qua/i)).toBeInTheDocument();
   });
 
   it("captures the paywall opening path as the BillingPlan returnTo", () => {
@@ -198,7 +198,7 @@ describe("monetization flows", () => {
 
     await screen.findByText("So sánh các gói");
     // Upgrade button in the plan comparison section
-    const upgradeButtons = screen.getAllByRole("button", { name: "Mở Plus" });
+    const upgradeButtons = screen.getAllByRole("button", { name: "Nâng cấp Plus" });
     expect(upgradeButtons.length).toBeGreaterThan(0);
   });
 
@@ -234,8 +234,8 @@ describe("monetization flows", () => {
       initialEntries: ["/billing/plan"],
     });
     render(<RouterProvider router={router} />);
-    await screen.findByRole("heading", { name: "Quản lý quyền Plus" });
-    await user.click(screen.getByRole("button", { name: "Khôi phục quyền Plus" }));
+    await screen.findByRole("heading", { name: "Quản lý gói của bạn" });
+    await user.click(screen.getByRole("button", { name: "Khôi phục quyền đã mua" }));
 
     await waitFor(() => {
       expect(getCurrentPlan()).toBe("PLUS");

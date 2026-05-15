@@ -336,7 +336,7 @@ describe("12-week setup backend sync", () => {
 
     // Step 3 — gate now appears alongside the preview
     expect(await screen.findByRole("heading", { name: "Đăng nhập để bắt đầu" })).toBeInTheDocument();
-    expect(screen.getByText(/Phiên bản đầy đủ lưu kế hoạch 12 tuần lên tài khoản/i)).toBeInTheDocument();
+    expect(screen.getByText(/Tài khoản giúp lưu kế hoạch 12 tuần và đồng bộ giữa các thiết bị/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Đăng nhập với Google" })).toHaveAttribute(
       "href",
       "/login?next=%2F12-week-setup",
