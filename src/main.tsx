@@ -1,5 +1,6 @@
 
   import { createRoot } from "react-dom/client";
+  import { getAppMode } from "./app/utils/app-mode";
   import "./lib/monitoring/sentry";
   import App from "./app/App.tsx";
   import "./styles/index.css";
@@ -12,7 +13,7 @@
   import "@fontsource/be-vietnam-pro/500-italic.css";
 
   // Inject GA4 script only for explicitly configured real-mode analytics.
-  const appMode = import.meta.env.VITE_APP_MODE?.trim().toLowerCase() ?? "demo";
+  const appMode = getAppMode();
   const analyticsMode = import.meta.env.VITE_ANALYTICS_MODE?.trim().toLowerCase();
   const gaMeasurementId = import.meta.env.VITE_GA_MEASUREMENT_ID?.trim();
   if (appMode === "real" && analyticsMode === "ga4" && gaMeasurementId && /^G-[A-Z0-9]+$/.test(gaMeasurementId)) {

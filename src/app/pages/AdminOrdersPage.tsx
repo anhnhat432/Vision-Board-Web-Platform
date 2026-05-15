@@ -33,14 +33,19 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { Textarea } from "../components/ui/textarea";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
   adminCompletePaymentOrderManually,
+  adminCompleteRefundRequest,
   adminGetOverview,
   adminListPaymentOrders,
+  adminListRefundRequests,
+  adminRejectRefundRequest,
   adminSendExpiringBillingReminders,
   type AdminOverview,
   type AdminPaymentOrderSummary,
+  type AdminRefundRequestSummary,
   type AdminReminderRunResult,
   type AdminUserSummary,
 } from "@/services/adminService";
@@ -97,6 +102,17 @@ const PAYMENT_STATUS_FILTERS: Array<AdminPaymentOrderSummary["status"] | "all"> 
   "expired",
   "failed",
 ];
+const REFUND_STATUS_LABELS: Record<AdminRefundRequestSummary["status"], string> = {
+  pending: "Đang chờ",
+  completed: "Đã hoàn tiền",
+  rejected: "Đã từ chối",
+};
+const REFUND_STATUS_COLORS: Record<AdminRefundRequestSummary["status"], string> = {
+  pending: "border-amber-200 bg-amber-50 text-amber-800",
+  completed: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  rejected: "border-rose-200 bg-rose-50 text-rose-800",
+};
+type AdminOperationalTab = "payments" | "refunds";
 const ADMIN_LOAD_TIMEOUT_MS = 18_000;
 
 function getErrorMessage(error: unknown, fallback: string): string {
@@ -430,6 +446,99 @@ function PaymentRecoveryPanel({
   );
 }
 
+function RefundRequestsPanel({
+  busyRequestId,
+  loading,
+  onComplete,
+  onRefresh,
+  onReject,
+  requests,
+}: {
+  busyRequestId: string | null;
+  loading: boolean;
+  onComplete: (request: AdminRefundRequestSummary) => void;
+  onRefresh: () => void;
+  onReject: (request: AdminRefundRequestSummary) => void;
+  requests: AdminRefundRequestSummary[];
+}) {
+  return (
+    <Card className="border-0 shadow-lg">
+      <CardHeader className="gap-4">
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <WalletCards className="h-5 w-5 text-amber-600" />
+              Hoàn tiền
+            </CardTitle>
+            <CardDescription>
+              Danh sách yêu cầu hoàn tiền thủ công đang chờ admin duyệt và chuyển khoản.
+            </CardDescription>
+          </div>
+          <Button type="button" variant="outline" className="rounded-[var(--r-control)]" disabled={loading} onClick={onRefresh}>
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+            Tải lại
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {requests.length === 0 ? (
+          <p className="rounded-[var(--r-card)] bg-slate-50 p-4 text-sm text-slate-500">
+            Không có yêu cầu hoàn tiền đang chờ xử lý.
+          </p>
+        ) : (
+          <div className="divide-y divide-slate-100 overflow-hidden rounded-[var(--r-card)] border border-slate-100 bg-white">
+            {requests.map((request) => (
+              <div key={request.id} className="grid gap-4 p-4 text-sm lg:grid-cols-[1fr_auto]">
+                <div className="min-w-0 space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-mono text-xs font-semibold text-slate-950">{request.orderId}</p>
+                    <Badge variant="outline" className={REFUND_STATUS_COLORS[request.status]}>
+                      {REFUND_STATUS_LABELS[request.status]}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-slate-500">
+                    {request.contactEmail} · tạo {formatDate(request.createdAt)}
+                  </p>
+                  <div className="rounded-[var(--r-control)] bg-slate-50 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Lý do</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-700">{request.reason}</p>
+                  </div>
+                  <div className="rounded-[var(--r-control)] bg-amber-50 p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">Tài khoản nhận hoàn tiền</p>
+                    <p className="mt-1 text-sm leading-6 text-amber-900">{request.refundAccount}</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-start gap-2 lg:justify-end">
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="rounded-[var(--r-control)]"
+                    disabled={busyRequestId === request.id}
+                    onClick={() => onComplete(request)}
+                  >
+                    {busyRequestId === request.id ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
+                    Đã hoàn tiền
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="rounded-[var(--r-control)] text-rose-700 hover:bg-rose-50"
+                    disabled={busyRequestId === request.id}
+                    onClick={() => onReject(request)}
+                  >
+                    Từ chối
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function RecentUserList({ users }: { users: AdminUserSummary[] }) {
   if (users.length === 0) {
     return <p className="rounded-[var(--r-card)] bg-slate-50 p-4 text-sm text-slate-500">Chưa có người dùng.</p>;
@@ -523,11 +632,21 @@ export function AdminOrdersPage() {
   const [paymentOrdersQuery, setPaymentOrdersQuery] = useState("");
   const [paymentOrdersStatus, setPaymentOrdersStatus] = useState<AdminPaymentOrderSummary["status"] | "all">("all");
   const [paymentOrdersLoading, setPaymentOrdersLoading] = useState(false);
+  const [activeOperationalTab, setActiveOperationalTab] = useState<AdminOperationalTab>("payments");
+  const [refundRequests, setRefundRequests] = useState<AdminRefundRequestSummary[]>([]);
+  const [refundRequestsLoading, setRefundRequestsLoading] = useState(false);
+  const [busyRefundRequestId, setBusyRefundRequestId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyOrderId, setBusyOrderId] = useState<string | null>(null);
   const [busyPaymentOrderId, setBusyPaymentOrderId] = useState<string | null>(null);
-  const [pendingManualPayment, setPendingManualPayment] = useState<{ orderId: string; note: string } | null>(null);
+  const [pendingManualPaymentOrderId, setPendingManualPaymentOrderId] = useState<string | null>(null);
+  const [manualPaymentNote, setManualPaymentNote] = useState("Đã đối chiếu giao dịch tiền vào trong Casso/app ngân hàng.");
+  const [pendingRefundAction, setPendingRefundAction] = useState<{
+    request: AdminRefundRequestSummary;
+    status: Extract<AdminRefundRequestSummary["status"], "completed" | "rejected">;
+  } | null>(null);
+  const [refundAdminNote, setRefundAdminNote] = useState("");
   const [reminderLoading, setReminderLoading] = useState(false);
   const [reminderResult, setReminderResult] = useState<AdminReminderRunResult | null>(null);
 
@@ -572,6 +691,18 @@ export function AdminOrdersPage() {
     [],
   );
 
+  const loadRefundRequests = useCallback(async () => {
+    setRefundRequestsLoading(true);
+    try {
+      const result = await adminListRefundRequests("pending");
+      setRefundRequests(result.items);
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Không thể tải danh sách yêu cầu hoàn tiền."));
+    } finally {
+      setRefundRequestsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (authLoading) return;
     if (userProfileLoading) return;
@@ -583,7 +714,8 @@ export function AdminOrdersPage() {
 
     void loadAdminData();
     void loadPaymentOrders("", "all");
-  }, [authLoading, isAdmin, loadAdminData, loadPaymentOrders, user, userProfileLoading]);
+    void loadRefundRequests();
+  }, [authLoading, isAdmin, loadAdminData, loadPaymentOrders, loadRefundRequests, user, userProfileLoading]);
 
   const handlePaymentOrderSearch = (
     nextQuery: string,
@@ -596,6 +728,10 @@ export function AdminOrdersPage() {
 
   const handlePaymentOrderRefresh = () => {
     void loadPaymentOrders(paymentOrdersQuery, paymentOrdersStatus);
+  };
+
+  const handleRefundRequestsRefresh = () => {
+    void loadRefundRequests();
   };
 
   const handleReminderRun = async () => {
@@ -618,31 +754,57 @@ export function AdminOrdersPage() {
   };
 
   const handleManualCompletePayment = (orderId: string) => {
-    const manualCompletionNote = window.prompt(
-      `Ghi chú đối chiếu cho đơn ${orderId}`,
-      "Đã đối chiếu giao dịch tiền vào trong Casso/app ngân hàng.",
-    );
-    if (manualCompletionNote === null) return;
-
-    setPendingManualPayment({ orderId, note: manualCompletionNote });
+    setPendingManualPaymentOrderId(orderId);
+    setManualPaymentNote("Đã đối chiếu giao dịch tiền vào trong Casso/app ngân hàng.");
   };
 
   const confirmManualCompletePayment = async () => {
-    if (!pendingManualPayment) return;
+    if (!pendingManualPaymentOrderId) return;
 
-    setBusyPaymentOrderId(pendingManualPayment.orderId);
+    setBusyPaymentOrderId(pendingManualPaymentOrderId);
     try {
-      const result = await adminCompletePaymentOrderManually(pendingManualPayment.orderId, {
-        manualCompletionNote: pendingManualPayment.note,
+      const result = await adminCompletePaymentOrderManually(pendingManualPaymentOrderId, {
+        manualCompletionNote: manualPaymentNote.trim() || undefined,
       });
       toast.success(`Đã mở Plus cho đơn ${result.orderId}.`);
-      setPendingManualPayment(null);
+      setPendingManualPaymentOrderId(null);
+      setManualPaymentNote("Đã đối chiếu giao dịch tiền vào trong Casso/app ngân hàng.");
       void loadAdminData();
       void loadPaymentOrders(paymentOrdersQuery, paymentOrdersStatus);
     } catch (err) {
       toast.error(getErrorMessage(err, "Không thể hoàn tất đơn thanh toán."));
     } finally {
       setBusyPaymentOrderId(null);
+    }
+  };
+
+  const handleResolveRefundRequest = (
+    request: AdminRefundRequestSummary,
+    status: Extract<AdminRefundRequestSummary["status"], "completed" | "rejected">,
+  ) => {
+    setPendingRefundAction({ request, status });
+    setRefundAdminNote(status === "completed" ? "Đã chuyển khoản hoàn tiền thủ công." : "Không đủ điều kiện hoàn tiền.");
+  };
+
+  const confirmResolveRefundRequest = async () => {
+    if (!pendingRefundAction) return;
+    const { request, status } = pendingRefundAction;
+
+    setBusyRefundRequestId(request.id);
+    try {
+      const result =
+        status === "completed"
+          ? await adminCompleteRefundRequest(request.id, { adminNote: refundAdminNote.trim() || undefined })
+          : await adminRejectRefundRequest(request.id, { adminNote: refundAdminNote.trim() || undefined });
+      setRefundRequests((items) => items.filter((item) => item.id !== result.request.id));
+      setPendingRefundAction(null);
+      setRefundAdminNote("");
+      toast.success(status === "completed" ? `Đã đánh dấu hoàn tiền cho ${request.orderId}.` : `Đã từ chối hoàn tiền cho ${request.orderId}.`);
+      void loadRefundRequests();
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Không thể xử lý yêu cầu hoàn tiền."));
+    } finally {
+      setBusyRefundRequestId(null);
     }
   };
 
@@ -759,17 +921,32 @@ export function AdminOrdersPage() {
 
   return (
     <div className="stack-section pb-12">
-      <AlertDialog open={pendingManualPayment !== null} onOpenChange={(open) => !open && setPendingManualPayment(null)}>
+      <AlertDialog
+        open={pendingManualPaymentOrderId !== null}
+        onOpenChange={(open) => {
+          if (open) return;
+          setPendingManualPaymentOrderId(null);
+          setManualPaymentNote("Đã đối chiếu giao dịch tiền vào trong Casso/app ngân hàng.");
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Mở Plus thủ công?</AlertDialogTitle>
             <AlertDialogDescription>
-              Đánh dấu đơn {pendingManualPayment?.orderId} là đã nhận tiền và mở Plus cho tài khoản tương ứng. Chỉ xác nhận
-              sau khi đã đối chiếu số tiền trong Casso hoặc app ngân hàng.
+              Đơn <span className="font-mono">{pendingManualPaymentOrderId ?? "—"}</span> sẽ được đánh dấu đã nhận tiền.
+              Chỉ xác nhận sau khi đã đối chiếu số tiền trong Casso/app ngân hàng.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="rounded-[var(--r-control)] bg-slate-50 p-3 text-sm leading-6 text-slate-600">
-            <span className="font-medium text-slate-800">Ghi chú:</span> {pendingManualPayment?.note}
+          <div className="grid gap-2">
+            <label htmlFor="manual-payment-note" className="text-sm font-medium text-slate-700">
+              Ghi chú đối chiếu
+            </label>
+            <Textarea
+              id="manual-payment-note"
+              value={manualPaymentNote}
+              onChange={(event) => setManualPaymentNote(event.target.value)}
+              placeholder="Nhập ghi chú đối chiếu giao dịch"
+            />
           </div>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={busyPaymentOrderId !== null}>Huỷ</AlertDialogCancel>
@@ -781,6 +958,63 @@ export function AdminOrdersPage() {
               }}
             >
               {busyPaymentOrderId !== null ? "Đang mở Plus…" : "Xác nhận mở Plus"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={pendingRefundAction !== null}
+        onOpenChange={(open) => {
+          if (open) return;
+          setPendingRefundAction(null);
+          setRefundAdminNote("");
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingRefundAction?.status === "completed" ? "Xác nhận đã hoàn tiền?" : "Xác nhận từ chối hoàn tiền?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Đơn <span className="font-mono">{pendingRefundAction?.request.orderId ?? "—"}</span> · {pendingRefundAction?.request.contactEmail ?? "—"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="grid gap-3">
+            <div className="rounded-[var(--r-control)] bg-slate-50 p-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">Lý do user</p>
+              <p className="mt-1 text-sm leading-6 text-slate-700">{pendingRefundAction?.request.reason ?? "—"}</p>
+            </div>
+            <div className="rounded-[var(--r-control)] bg-amber-50 p-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-amber-700">Tài khoản nhận hoàn tiền</p>
+              <p className="mt-1 text-sm leading-6 text-amber-900">{pendingRefundAction?.request.refundAccount ?? "—"}</p>
+            </div>
+            <div className="grid gap-2">
+              <label htmlFor="refund-admin-note" className="text-sm font-medium text-slate-700">
+                Ghi chú admin
+              </label>
+              <Textarea
+                id="refund-admin-note"
+                value={refundAdminNote}
+                onChange={(event) => setRefundAdminNote(event.target.value)}
+                placeholder="Nhập ghi chú xử lý hoàn tiền"
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busyRefundRequestId !== null}>Huỷ</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={busyRefundRequestId !== null}
+              onClick={(event) => {
+                event.preventDefault();
+                void confirmResolveRefundRequest();
+              }}
+            >
+              {busyRefundRequestId !== null
+                ? "Đang xử lý…"
+                : pendingRefundAction?.status === "completed"
+                  ? "Xác nhận đã hoàn tiền"
+                  : "Xác nhận từ chối"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -877,17 +1111,47 @@ export function AdminOrdersPage() {
         </Card>
       </section>
 
-      <PaymentRecoveryPanel
-        busyOrderId={busyPaymentOrderId}
-        loading={paymentOrdersLoading}
-        onManualComplete={handleManualCompletePayment}
-        onRefresh={handlePaymentOrderRefresh}
-        onSearch={handlePaymentOrderSearch}
-        payments={paymentOrders}
-        query={paymentOrdersQuery}
-        status={paymentOrdersStatus}
-        total={paymentOrdersTotal}
-      />
+      <section className="stack-stack">
+        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Quản trị thanh toán">
+          <Button
+            type="button"
+            variant={activeOperationalTab === "payments" ? "default" : "outline"}
+            onClick={() => setActiveOperationalTab("payments")}
+          >
+            Thanh toán VietQR
+          </Button>
+          <Button
+            type="button"
+            variant={activeOperationalTab === "refunds" ? "default" : "outline"}
+            onClick={() => setActiveOperationalTab("refunds")}
+          >
+            Hoàn tiền ({refundRequests.length})
+          </Button>
+        </div>
+
+        {activeOperationalTab === "payments" ? (
+          <PaymentRecoveryPanel
+            busyOrderId={busyPaymentOrderId}
+            loading={paymentOrdersLoading}
+            onManualComplete={handleManualCompletePayment}
+            onRefresh={handlePaymentOrderRefresh}
+            onSearch={handlePaymentOrderSearch}
+            payments={paymentOrders}
+            query={paymentOrdersQuery}
+            status={paymentOrdersStatus}
+            total={paymentOrdersTotal}
+          />
+        ) : (
+          <RefundRequestsPanel
+            busyRequestId={busyRefundRequestId}
+            loading={refundRequestsLoading}
+            onComplete={(request) => void handleResolveRefundRequest(request, "completed")}
+            onRefresh={handleRefundRequestsRefresh}
+            onReject={(request) => void handleResolveRefundRequest(request, "rejected")}
+            requests={refundRequests}
+          />
+        )}
+      </section>
 
       <section className="stack-stack">
         <div>
