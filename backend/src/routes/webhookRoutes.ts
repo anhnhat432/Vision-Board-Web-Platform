@@ -6,31 +6,68 @@
  * Signature verification is the security gate.
  */
 
-import { Router } from "express";
+import { Router, type RequestHandler } from "express";
 
 import { getCassoWebhookHealth, handleCassoWebhook } from "../controllers/cassoWebhookController";
 import { handleWebhook } from "../controllers/webhookController";
+import { cassoWebhookLimiter, payosWebhookLimiter, webhookRateLimiter } from "../middleware/rateLimiters";
 import { validateCassoWebhookPayload, validateWebhookProviderParam } from "../middleware/requestValidation";
 import { asyncHandler } from "../utils/asyncHandler";
 
 const webhookRoutes = Router();
+
+function setWebhookProvider(provider: string): RequestHandler {
+  return (req, _res, next) => {
+    req.params.provider = provider;
+    next();
+  };
+}
 
 // Casso-specific webhook (matches PaymentOrders by bank transfer description)
 webhookRoutes.get("/billing/webhook/casso/health", asyncHandler(getCassoWebhookHealth));
 webhookRoutes.get("/webhook/casso/health", asyncHandler(getCassoWebhookHealth));
 webhookRoutes.post(
   "/billing/webhook/casso",
+  cassoWebhookLimiter,
   validateCassoWebhookPayload,
   asyncHandler(handleCassoWebhook),
 );
 webhookRoutes.post(
   "/webhook/casso",
+  cassoWebhookLimiter,
   validateCassoWebhookPayload,
   asyncHandler(handleCassoWebhook),
 );
+webhookRoutes.post(
+  "/webhooks/casso",
+  cassoWebhookLimiter,
+  validateCassoWebhookPayload,
+  asyncHandler(handleCassoWebhook),
+);
+webhookRoutes.post(
+  "/webhooks/payos",
+  payosWebhookLimiter,
+  setWebhookProvider("payos"),
+  validateWebhookProviderParam,
+  asyncHandler(handleWebhook),
+);
 // Generic provider webhook (PayOS, VNPay, mock, etc.)
 webhookRoutes.post(
+  "/billing/webhook/payos",
+  payosWebhookLimiter,
+  setWebhookProvider("payos"),
+  validateWebhookProviderParam,
+  asyncHandler(handleWebhook),
+);
+webhookRoutes.post(
   "/billing/webhook/:provider",
+  webhookRateLimiter,
+  validateWebhookProviderParam,
+  asyncHandler(handleWebhook),
+);
+webhookRoutes.post(
+  "/webhooks/:provider",
+  webhookRateLimiter,
   validateWebhookProviderParam,
   asyncHandler(handleWebhook),
 );

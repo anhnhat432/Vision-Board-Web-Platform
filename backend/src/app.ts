@@ -27,7 +27,7 @@ app.use(
   express.json({
     limit: "2mb",
     verify: (req: Request, _res, buffer) => {
-      if (req.originalUrl.includes("/api/billing/webhook/")) {
+      if (req.originalUrl.includes("/api/billing/webhook/") || req.originalUrl.includes("/api/webhooks/")) {
         (req as Request & { rawBody?: Buffer }).rawBody = Buffer.from(buffer);
       }
     },

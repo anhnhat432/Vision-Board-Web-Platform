@@ -5,7 +5,6 @@ import {
   authProfileRateLimiter,
   generalApiRateLimiter,
   healthRateLimiter,
-  webhookRateLimiter,
 } from "../middleware/rateLimiters";
 import { accountRoutes } from "./accountRoutes";
 import { adminRoutes } from "./adminRoutes";
@@ -27,7 +26,7 @@ const apiRoutes = Router();
 
 // Webhook routes BEFORE auth — providers use signature verification, not Firebase auth.
 apiRoutes.use(healthRateLimiter, healthRoutes);
-apiRoutes.use(webhookRateLimiter, webhookRoutes);
+apiRoutes.use(webhookRoutes);
 apiRoutes.use(publicBillingRoutes);
 apiRoutes.use(authMiddleware);
 apiRoutes.use(generalApiRateLimiter);
