@@ -54,7 +54,18 @@ export interface LocalDataAccountImportResult {
   summary?: LocalDataMigrationSummary;
   accountSummary?: LocalDataMigrationSummary;
   backupKey?: string;
+  snapshotKey?: string;
 }
+
+export interface MigrationBackupSnapshot {
+  key: string;
+  createdAt: string;
+  data: UserData;
+  summary: LocalDataMigrationSummary;
+}
+
+const MIGRATION_BACKUP_STORAGE_PREFIX = "migration_backup_";
+const MIGRATION_BACKUP_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 let seededDemoComparableSnapshot: string | null = null;
 
@@ -305,6 +316,34 @@ function createSnapshotFingerprint(rawData: string): string {
   return `${rawData.length.toString(36)}-${(hash >>> 0).toString(36)}`;
 }
 
+function createMigrationBackupTimestamp(date = new Date()): string {
+  return date.toISOString().slice(0, 19).replace(/:/g, "-");
+}
+
+function parseMigrationBackupTimestamp(key: string): number | null {
+  if (!key.startsWith(MIGRATION_BACKUP_STORAGE_PREFIX)) return null;
+
+  const timestamp = key.slice(MIGRATION_BACKUP_STORAGE_PREFIX.length, MIGRATION_BACKUP_STORAGE_PREFIX.length + 19);
+  const match = /^(\d{4}-\d{2}-\d{2}T\d{2})-(\d{2})-(\d{2})$/.exec(timestamp);
+  if (!match) return null;
+
+  const [, dateHour, minute, second] = match;
+  const time = new Date(`${dateHour}:${minute}:${second}.000Z`).getTime();
+  return Number.isNaN(time) ? null : time;
+}
+
+function createMigrationBackupKey(): string {
+  const baseKey = `${MIGRATION_BACKUP_STORAGE_PREFIX}${createMigrationBackupTimestamp()}`;
+  if (typeof window === "undefined" || !window.localStorage.getItem(baseKey)) return baseKey;
+
+  for (let index = 1; index < 100; index += 1) {
+    const candidate = `${baseKey}_${index}`;
+    if (!window.localStorage.getItem(candidate)) return candidate;
+  }
+
+  return `${baseKey}_${Date.now().toString(36)}`;
+}
+
 function createLocalDataMigrationSummary(data: UserData): LocalDataMigrationSummary {
   const twelveWeekSystems = data.goals
     .map((goal) => goal.twelveWeekSystem)
@@ -370,6 +409,74 @@ function createImportBackupKey(authUid: string, fingerprint: string): string {
   return `${LOCAL_DATA_IMPORT_BACKUP_STORAGE_PREFIX}auth:${encodeURIComponent(authUid)}:${Date.now().toString(36)}:${fingerprint}`;
 }
 
+export function cleanupExpiredMigrationBackups(now = Date.now()): void {
+  if (typeof window === "undefined") return;
+
+  for (let index = window.localStorage.length - 1; index >= 0; index -= 1) {
+    const key = window.localStorage.key(index);
+    if (!key?.startsWith(MIGRATION_BACKUP_STORAGE_PREFIX)) continue;
+
+    const createdAt = parseMigrationBackupTimestamp(key);
+    if (createdAt !== null && now - createdAt > MIGRATION_BACKUP_MAX_AGE_MS) {
+      window.localStorage.removeItem(key);
+    }
+  }
+}
+
+export function getMigrationBackupSnapshots(): MigrationBackupSnapshot[] {
+  if (typeof window === "undefined") return [];
+
+  cleanupExpiredMigrationBackups();
+
+  const snapshots: MigrationBackupSnapshot[] = [];
+  for (let index = 0; index < window.localStorage.length; index += 1) {
+    const key = window.localStorage.key(index);
+    if (!key?.startsWith(MIGRATION_BACKUP_STORAGE_PREFIX)) continue;
+
+    const data = parseUserDataForMigration(window.localStorage.getItem(key));
+    const createdAtMs = parseMigrationBackupTimestamp(key);
+    if (!data || createdAtMs === null) continue;
+
+    snapshots.push({
+      key,
+      createdAt: new Date(createdAtMs).toISOString(),
+      data,
+      summary: createLocalDataMigrationSummary(data),
+    });
+  }
+
+  return snapshots.sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+}
+
+export function hasMigrationBackupSnapshots(): boolean {
+  return getMigrationBackupSnapshots().length > 0;
+}
+
+export function restoreMigrationBackupSnapshot(snapshotKey: string): boolean {
+  if (typeof window === "undefined") return false;
+
+  const data = parseUserDataForMigration(window.localStorage.getItem(snapshotKey));
+  if (!data) return false;
+
+  const serialized = JSON.stringify(data);
+  window.localStorage.setItem(STORAGE_KEY, serialized);
+
+  const activeAuthUid = readActiveAuthOwnerUid();
+  if (activeAuthUid) {
+    window.localStorage.setItem(getScopedUserDataStorageKey(activeAuthUid), serialized);
+  }
+
+  window.localStorage.removeItem(snapshotKey);
+  notifyUserDataUpdated();
+  return true;
+}
+
+function writeMigrationBackupSnapshot(data: UserData): string {
+  const snapshotKey = createMigrationBackupKey();
+  window.localStorage.setItem(snapshotKey, JSON.stringify(data));
+  return snapshotKey;
+}
+
 function findMeaningfulAccountData(rawSnapshots: Array<string | null>): UserData | null {
   for (const rawSnapshot of rawSnapshots) {
     const data = parseUserDataForMigration(rawSnapshot);
@@ -428,6 +535,7 @@ export function importAnonymousLocalDataToAccountScope(
   }
 
   const backupKey = createImportBackupKey(normalizedAuthUid, actualFingerprint);
+  let snapshotKey: string | undefined;
   const backupPayload = {
     authUid: normalizedAuthUid,
     createdAt: new Date().toISOString(),
@@ -439,15 +547,18 @@ export function importAnonymousLocalDataToAccountScope(
   };
 
   try {
+    snapshotKey = writeMigrationBackupSnapshot(anonymousData);
     window.localStorage.setItem(backupKey, JSON.stringify(backupPayload));
     window.localStorage.setItem(scopedKey, anonymousRaw);
     window.localStorage.setItem(STORAGE_KEY, anonymousRaw);
+    window.localStorage.removeItem(snapshotKey);
     notifyUserDataUpdated();
 
     return {
       status: "imported",
       summary: createLocalDataMigrationSummary(anonymousData),
       backupKey,
+      snapshotKey,
     };
   } catch {
     try {
@@ -461,6 +572,7 @@ export function importAnonymousLocalDataToAccountScope(
       status: "write_failed",
       summary: createLocalDataMigrationSummary(anonymousData),
       backupKey,
+      snapshotKey,
     };
   }
 }

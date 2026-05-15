@@ -1,3 +1,4 @@
+import { formatDateInputValue } from "@/app/utils/storage-date-utils";
 import type {
   Goal,
   LeadIndicator,
@@ -173,7 +174,7 @@ function normalizeDateKey(value: string): string {
 
   const parsed = new Date(trimmed);
   if (!Number.isFinite(parsed.valueOf())) return trimmed;
-  return parsed.toISOString().slice(0, 10);
+  return formatDateInputValue(parsed);
 }
 
 function getCalendarDayIndex(dateKey: string): number | null {

@@ -211,7 +211,7 @@ export function useTwelveWeekSettingsActions({
       const url = window.URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `vision-board-account-${new Date().toISOString().slice(0, 10)}.json`;
+      anchor.download = `vision-board-account-${formatDateInputValue(new Date())}.json`;
       anchor.style.display = "none";
       document.body.appendChild(anchor);
       anchor.click();

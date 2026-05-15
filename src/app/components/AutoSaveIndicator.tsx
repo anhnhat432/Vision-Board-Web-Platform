@@ -1,37 +1,41 @@
-import { useEffect, useState } from "react";
-import { Check, Cloud } from "lucide-react";
+import { AlertCircle, Check, Cloud } from "lucide-react";
+
+export type AutoSaveStatus = "idle" | "saving" | "saved";
 
 interface AutoSaveIndicatorProps {
+  status?: AutoSaveStatus;
   lastSavedAt: Date | null;
   className?: string;
 }
-
-const RECENT_SAVE_WINDOW_MS = 5_000;
-const TICK_INTERVAL_MS = 1_000;
 
 function formatTimeLabel(date: Date): string {
   return date.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
 }
 
-export function AutoSaveIndicator({ lastSavedAt, className = "" }: AutoSaveIndicatorProps) {
-  const [now, setNow] = useState<number>(() => Date.now());
+export function AutoSaveIndicator({ status, lastSavedAt, className = "" }: AutoSaveIndicatorProps) {
+  const effectiveStatus = status ?? (lastSavedAt ? "saved" : null);
 
-  useEffect(() => {
-    if (!lastSavedAt) return;
-    const elapsed = Date.now() - lastSavedAt.getTime();
-    if (elapsed >= RECENT_SAVE_WINDOW_MS) return;
-    const interval = window.setInterval(() => {
-      setNow(Date.now());
-    }, TICK_INTERVAL_MS);
-    return () => window.clearInterval(interval);
-  }, [lastSavedAt]);
+  if (!effectiveStatus) return null;
 
-  if (!lastSavedAt) return null;
+  const stateConfig = {
+    idle: {
+      icon: AlertCircle,
+      label: "Có thay đổi chưa lưu",
+      tone: "text-amber-700",
+    },
+    saving: {
+      icon: Cloud,
+      label: "Đang lưu",
+      tone: "text-sky-700",
+    },
+    saved: {
+      icon: Check,
+      label: lastSavedAt ? `Đã lưu lúc ${formatTimeLabel(lastSavedAt)}` : "Đã lưu",
+      tone: "text-emerald-700",
+    },
+  } satisfies Record<AutoSaveStatus, { icon: typeof Check; label: string; tone: string }>;
 
-  const isRecent = now - lastSavedAt.getTime() < RECENT_SAVE_WINDOW_MS;
-  const label = isRecent ? "Đã tự lưu" : `Đã lưu lúc ${formatTimeLabel(lastSavedAt)}`;
-  const tone = isRecent ? "text-emerald-700" : "text-slate-500";
-  const Icon = isRecent ? Check : Cloud;
+  const { icon: Icon, label, tone } = stateConfig[effectiveStatus];
 
   return (
     <span

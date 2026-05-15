@@ -1,3 +1,5 @@
+import { formatDateInputValue } from "@/app/utils/storage-date-utils";
+
 import type { GeneratedTactic, WeekOneTask } from "./tacticGeneration";
 
 /**
@@ -31,7 +33,7 @@ export function generateWeekOneTasks(
       tasks.push({
         id: generateTaskId(tacticIndex, slotIndex),
         title,
-        scheduledDate: taskDate.toISOString().split("T")[0],
+        scheduledDate: formatDateInputValue(taskDate),
         tacticId: tactic.id,
         isCore: tactic.type === "core",
       });
@@ -81,9 +83,7 @@ function createPlaceholderTasks(count: number): WeekOneTask[] {
     placeholders.push({
       id: `placeholder_${i}_${Date.now()}`,
       title: `[CẦN THÊM] Hành động cụ thể cho mục tiêu`,
-      scheduledDate: new Date(baseDate.getTime() + i * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split("T")[0],
+      scheduledDate: formatDateInputValue(new Date(baseDate.getTime() + i * 24 * 60 * 60 * 1000)),
       tacticId: "placeholder",
       isCore: true,
     });

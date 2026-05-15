@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   AlertTriangle,
@@ -128,13 +128,25 @@ function GoalTrackerContent({
   onReload: () => void;
 }) {
   const navigate = useNavigate();
+  const reload = onReload;
   const [expandedGoals, setExpandedGoals] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
-  const { currentPlanCode, hasPremiumReviewInsights } = usePlanEntitlements(userData);
+  const [viewUserData, setViewUserData] = useState(userData);
+
+  useEffect(() => {
+    setViewUserData(userData);
+  }, [userData]);
+
+  useEffect(() => {
+    window.addEventListener("focus", reload);
+    return () => window.removeEventListener("focus", reload);
+  }, [reload]);
+
+  const { currentPlanCode, hasPremiumReviewInsights } = usePlanEntitlements(viewUserData);
 
   const goals = useMemo(
     () =>
-      [...userData.goals].sort((left, right) => {
+      [...viewUserData.goals].sort((left, right) => {
         const leftProgress = calculateGoalProgress(left);
         const rightProgress = calculateGoalProgress(right);
         if ((leftProgress === 100) !== (rightProgress === 100)) {
@@ -145,7 +157,7 @@ function GoalTrackerContent({
         if (leftDays !== rightDays) return leftDays - rightDays;
         return left.title.localeCompare(right.title, "vi");
       }),
-    [userData.goals],
+    [viewUserData.goals],
   );
   const backendSystemsByGoalId = useBackendProgressOverlayMap(
     useMemo(
@@ -175,7 +187,7 @@ function GoalTrackerContent({
     [backendSystemsByGoalId, goals],
   );
   const hasGoals = effectiveGoals.length > 0;
-  const hasRealLifeBalance = userData.onboardingCompleted && userData.currentWheelOfLife.some((area) => area.score > 0);
+  const hasRealLifeBalance = viewUserData.onboardingCompleted && viewUserData.currentWheelOfLife.some((area) => area.score > 0);
   const goalFlowStartHref = hasRealLifeBalance ? "/life-insight" : "/onboarding";
   const goalFlowStartLabel = hasRealLifeBalance ? "Tạo mục tiêu từ góc nhìn" : "Bắt đầu Cân bằng cuộc sống";
   const twelveWeekGoals = useMemo(
@@ -196,8 +208,6 @@ function GoalTrackerContent({
     return standardGoals.filter((g) => g.title.toLowerCase().includes(q) || g.description?.toLowerCase().includes(q));
   }, [standardGoals, searchQuery]);
 
-  const reload = onReload;
-
   const openTwelveWeekCenter = (goalId: string) => {
     localStorage.setItem(APP_STORAGE_KEYS.latest12WeekGoalId, goalId);
     localStorage.setItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId, goalId);
@@ -212,7 +222,7 @@ function GoalTrackerContent({
   const handleAddTask = (goalId: string) => {
     if (!newTask.trim()) return;
 
-    const goal = userData.goals.find((item) => item.id === goalId);
+    const goal = viewUserData.goals.find((item) => item.id === goalId);
     if (!goal) return;
 
     if (goal.twelveWeekSystem) {
@@ -223,8 +233,9 @@ function GoalTrackerContent({
       return;
     }
 
+    const now = Date.now();
     updateGoal(goalId, {
-      tasks: [...goal.tasks, { id: generateId("task"), title: newTask.trim(), completed: false }],
+      tasks: [...goal.tasks, { id: generateId("task"), title: newTask.trim(), completed: false, lastModifiedAt: now }],
     });
 
     setNewTask("");
@@ -233,7 +244,7 @@ function GoalTrackerContent({
   };
 
   const handleToggleTask = (goalId: string, taskId: string) => {
-    const goal = userData.goals.find((item) => item.id === goalId);
+    const goal = viewUserData.goals.find((item) => item.id === goalId);
     if (!goal) return;
 
     if (goal.twelveWeekSystem) {
@@ -246,10 +257,30 @@ function GoalTrackerContent({
 
     const previousProgress = calculateGoalProgress(goal);
     const taskWasCompleted = Boolean(goal.tasks.find((task) => task.id === taskId)?.completed);
+    const nextCompleted = !taskWasCompleted;
+    const now = Date.now();
+    const previousViewUserData = viewUserData;
+    const nextTasks = goal.tasks.map((task) =>
+      task.id === taskId ? { ...task, completed: nextCompleted, lastModifiedAt: now } : task,
+    );
 
-    updateGoal(goalId, {
-      tasks: goal.tasks.map((task) => (task.id === taskId ? { ...task, completed: !task.completed } : task)),
-    });
+    setViewUserData((current) => ({
+      ...current,
+      goals: current.goals.map((item) => (item.id === goalId ? { ...item, tasks: nextTasks } : item)),
+    }));
+
+    try {
+      const latestGoal = getUserData().goals.find((item) => item.id === goalId) ?? goal;
+      updateGoal(goalId, {
+        tasks: latestGoal.tasks.map((task) =>
+          task.id === taskId ? { ...task, completed: nextCompleted, lastModifiedAt: now } : task,
+        ),
+      });
+    } catch {
+      setViewUserData(previousViewUserData);
+      toast.error("Không thể cập nhật, vui lòng thử lại");
+      return;
+    }
 
     const afterData = getUserData();
     const refreshedGoal = afterData.goals.find((item) => item.id === goalId);
@@ -269,7 +300,7 @@ function GoalTrackerContent({
   };
 
   const handleDeleteTask = (goalId: string, taskId: string) => {
-    const goal = userData.goals.find((item) => item.id === goalId);
+    const goal = viewUserData.goals.find((item) => item.id === goalId);
     if (!goal) return;
 
     if (goal.twelveWeekSystem) {

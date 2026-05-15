@@ -52,6 +52,8 @@ import {
   clearArchivedOutbox,
   clearEventLog,
   APP_STORAGE_KEYS,
+  USER_DATA_STORAGE_KEY,
+  USER_DATA_UPDATED_EVENT_NAME,
   formatDateInputValue,
   getUserData,
   saveUserData,
@@ -357,6 +359,24 @@ export function TwelveWeekSystem() {
     activeGoalIdRef.current = activeGoal?.id ?? null;
   }, [activeGoal?.id]);
 
+  useEffect(() => {
+    const handleRefresh = () => loadGoalData(activeGoalIdRef.current ?? undefined);
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === null || event.key === USER_DATA_STORAGE_KEY || event.key.startsWith(`${USER_DATA_STORAGE_KEY}:auth:`)) {
+        handleRefresh();
+      }
+    };
+
+    window.addEventListener("focus", handleRefresh);
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener(USER_DATA_UPDATED_EVENT_NAME, handleRefresh);
+    return () => {
+      window.removeEventListener("focus", handleRefresh);
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener(USER_DATA_UPDATED_EVENT_NAME, handleRefresh);
+    };
+  }, [loadGoalData]);
+
   const {
     loading: isBackendSyncing,
     error: backendSyncError,
@@ -413,10 +433,20 @@ export function TwelveWeekSystem() {
 
     if (!activeGoal) return normalizedNextSystem;
 
-    updateGoal(activeGoal.id, {
-      twelveWeekSystem: normalizedNextSystem,
-    });
+    const previousSystem = activeGoal.twelveWeekSystem;
     updateActiveSystemState(() => normalizedNextSystem);
+
+    try {
+      updateGoal(activeGoal.id, {
+        twelveWeekSystem: normalizedNextSystem,
+      });
+    } catch (error) {
+      if (previousSystem) {
+        updateActiveSystemState(() => previousSystem);
+      }
+      throw error;
+    }
+
     return normalizedNextSystem;
   };
 

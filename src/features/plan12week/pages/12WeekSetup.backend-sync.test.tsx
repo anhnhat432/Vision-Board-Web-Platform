@@ -9,6 +9,7 @@ const { appMode, authContext, createGoal, updateGoal, createPlan, getPlan } = vi
   appMode: { value: "real" as "demo" | "real" },
   authContext: {
     useAuthContext: vi.fn(),
+    useOptionalAuthContext: vi.fn(),
   },
   createGoal: vi.fn(),
   updateGoal: vi.fn(),
@@ -34,6 +35,7 @@ vi.mock("@/app/utils/app-mode", () => ({
 
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContext.useAuthContext,
+  useOptionalAuthContext: authContext.useOptionalAuthContext,
 }));
 
 vi.mock("@/services/goalService", () => ({
@@ -54,7 +56,7 @@ import { TwelveWeekSetup } from "./12WeekSetup";
 const INTEGRATION_TEST_TIMEOUT_MS = 20_000;
 
 function setAuthReady() {
-  authContext.useAuthContext.mockReturnValue({
+  const value = {
     user: { uid: "firebase_uid_1", email: "user@example.com" },
     userProfile: {
       id: "profile_1",
@@ -76,11 +78,13 @@ function setAuthReady() {
     logout: vi.fn(),
     refreshUserProfile: vi.fn(),
     isConfigured: true,
-  });
+  };
+  authContext.useAuthContext.mockReturnValue(value);
+  authContext.useOptionalAuthContext.mockReturnValue(value);
 }
 
 function setAuthNotConfigured() {
-  authContext.useAuthContext.mockReturnValue({
+  const value = {
     user: null,
     userProfile: null,
     userProfileLoading: false,
@@ -91,11 +95,13 @@ function setAuthNotConfigured() {
     logout: vi.fn(),
     refreshUserProfile: vi.fn(),
     isConfigured: false,
-  });
+  };
+  authContext.useAuthContext.mockReturnValue(value);
+  authContext.useOptionalAuthContext.mockReturnValue(value);
 }
 
 function setAuthSignedOut() {
-  authContext.useAuthContext.mockReturnValue({
+  const value = {
     user: null,
     userProfile: null,
     userProfileLoading: false,
@@ -106,7 +112,9 @@ function setAuthSignedOut() {
     logout: vi.fn(),
     refreshUserProfile: vi.fn(),
     isConfigured: true,
-  });
+  };
+  authContext.useAuthContext.mockReturnValue(value);
+  authContext.useOptionalAuthContext.mockReturnValue(value);
 }
 
 function buildPlanDetails(planId = "backend_plan_1", smartGoalId = "backend_goal_1") {

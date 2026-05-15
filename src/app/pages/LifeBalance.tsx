@@ -1,4 +1,4 @@
-﻿import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
+﻿import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBlocker, useNavigate } from "react-router";
 import {
   AlertTriangle,
@@ -12,7 +12,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { Badge } from "../components/ui/badge";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +35,7 @@ import { Reveal } from "../components/ui/reveal";
 import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { Slider } from "../components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
@@ -46,13 +49,60 @@ const LifeBalanceHistoryChart = lazy(() =>
   })),
 );
 
+type FlushableDebouncedSave<T> = {
+  schedule: (value: T) => void;
+  flush: () => void;
+  cancel: () => void;
+};
+
+function createFlushableDebouncedSave<T>(callback: (value: T) => void, delayMs: number): FlushableDebouncedSave<T> {
+  let timer: ReturnType<typeof window.setTimeout> | null = null;
+  let pendingValue: T | null = null;
+
+  const flush = () => {
+    if (pendingValue === null) return;
+
+    if (timer) {
+      window.clearTimeout(timer);
+      timer = null;
+    }
+
+    const value = pendingValue;
+    pendingValue = null;
+    callback(value);
+  };
+
+  return {
+    schedule: (value) => {
+      pendingValue = value;
+      if (timer) window.clearTimeout(timer);
+      timer = window.setTimeout(flush, delayMs);
+    },
+    flush,
+    cancel: () => {
+      if (timer) window.clearTimeout(timer);
+      timer = null;
+      pendingValue = null;
+    },
+  };
+}
+
+function createLifeBalanceSnapshot(lifeAreas: LifeArea[]) {
+  return JSON.stringify(lifeAreas.map(({ name, score }) => ({ name, score })));
+}
+
 export function LifeBalance() {
   const navigate = useNavigate();
   const { userData, reloadUserData } = useSyncedUserData();
   const [lifeAreas, setLifeAreas] = useState<LifeArea[]>([]);
-  const [hasChanges, setHasChanges] = useState(false);
+  const [lastSavedSnapshot, setLastSavedSnapshot] = useState<string | null>(null);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("saved");
   const lifeBalanceStartedRef = useRef(false);
   const pageTopRef = useRef<HTMLDivElement | null>(null);
+  const currentSnapshot = useMemo(() => createLifeBalanceSnapshot(lifeAreas), [lifeAreas]);
+  const hasChanges = lifeAreas.length > 0 && lastSavedSnapshot !== null && currentSnapshot !== lastSavedSnapshot;
+  const debouncedSaveRef = useRef<FlushableDebouncedSave<LifeArea[]> | null>(null);
 
   useScrollToTopOnChange(0, {
     targetRef: pageTopRef,
@@ -66,7 +116,11 @@ export function LifeBalance() {
 
   useEffect(() => {
     if (!userData || hasChanges) return;
-    setLifeAreas(userData.currentWheelOfLife.map((area) => ({ ...area })));
+
+    const nextLifeAreas = userData.currentWheelOfLife.map((area) => ({ ...area }));
+    setLifeAreas(nextLifeAreas);
+    setLastSavedSnapshot(createLifeBalanceSnapshot(nextLifeAreas));
+    setAutoSaveStatus("saved");
   }, [hasChanges, userData]);
 
   useEffect(() => {
@@ -146,18 +200,43 @@ export function LifeBalance() {
     });
   };
 
+  const saveLifeBalanceAreas = useCallback(
+    (areasToSave: LifeArea[]) => {
+      if (areasToSave.length === 0) return;
+
+      setAutoSaveStatus("saving");
+      updateWheelOfLife(areasToSave);
+      setLastSavedSnapshot(createLifeBalanceSnapshot(areasToSave));
+      setLastSavedAt(new Date());
+      setAutoSaveStatus("saved");
+      reloadUserData();
+    },
+    [reloadUserData],
+  );
+
+  if (!debouncedSaveRef.current) {
+    debouncedSaveRef.current = createFlushableDebouncedSave(saveLifeBalanceAreas, 600);
+  }
+
+  useEffect(() => {
+    if (!hasChanges) return;
+
+    setAutoSaveStatus("idle");
+    debouncedSaveRef.current?.schedule(lifeAreas.map((area) => ({ ...area })));
+  }, [hasChanges, lifeAreas]);
+
+  useDirtyFormGuard(hasChanges, () => debouncedSaveRef.current?.flush());
+
   const saveLifeBalance = () => {
-    updateWheelOfLife(lifeAreas);
+    debouncedSaveRef.current?.cancel();
+    saveLifeBalanceAreas(lifeAreas);
     trackCompletion();
-    setHasChanges(false);
-    reloadUserData();
   };
 
   const handleScoreChange = (index: number, value: number[]) => {
     const updated = [...lifeAreas];
     updated[index] = { ...updated[index], score: value[0] };
     setLifeAreas(updated);
-    setHasChanges(true);
   };
 
   const handleSave = () => {
@@ -214,7 +293,8 @@ export function LifeBalance() {
             </div>
             <AlertDialogTitle>Bạn có thay đổi chưa lưu</AlertDialogTitle>
             <AlertDialogDescription>
-              Nếu rời khỏi trang này ngay bây giờ, điểm số vừa điều chỉnh sẽ không được lưu lại.
+              Nếu rời khỏi trang này ngay bây giờ, hệ thống sẽ cố lưu điểm số vừa điều chỉnh trước khi đóng trang.
+
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-col gap-3 sm:flex-col sm:items-stretch sm:justify-start">
@@ -230,8 +310,9 @@ export function LifeBalance() {
               Lưu rồi rời trang
             </AlertDialogAction>
             <Button variant="outline" onClick={() => blocker.proceed?.()}>
-              Rời trang không lưu
+              Rời trang
             </Button>
+
             <AlertDialogCancel onClick={() => blocker.reset?.()}>
               Ở lại trang này
             </AlertDialogCancel>
@@ -262,7 +343,10 @@ export function LifeBalance() {
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge variant="outline" className="rounded-[var(--r-pill)] border-slate-200 bg-slate-50 px-4 py-2 text-slate-600">
+                  <AutoSaveIndicator status={hasChanges ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} />
+                </Badge>
                 {hasChanges ? (
                   <Button
                     variant="outline"
@@ -270,13 +354,9 @@ export function LifeBalance() {
                     onClick={handleSave}
                   >
                     <Save className="h-4 w-4" />
-                    Lưu thay đổi
+                    Lưu ngay
                   </Button>
-                ) : (
-                  <Badge variant="outline" className="rounded-[var(--r-pill)] border-slate-200 bg-slate-50 px-4 py-2 text-slate-600">
-                    Không có thay đổi chưa lưu
-                  </Badge>
-                )}
+                ) : null}
               </div>
             </div>
 

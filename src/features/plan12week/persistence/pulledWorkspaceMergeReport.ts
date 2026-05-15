@@ -1,3 +1,4 @@
+import { formatDateInputValue } from "@/app/utils/storage-date-utils";
 import type { Goal, TwelveWeekSystem, UserData } from "@/app/utils/storage-types";
 import type { DataMutationItem, DataMutationStatus } from "./mutationQueue";
 import {
@@ -122,7 +123,7 @@ function normalizeDateKey(value: string | undefined): string {
   const match = trimmed.match(/^(\d{4}-\d{2}-\d{2})(?:$|T)/);
   if (match?.[1]) return match[1];
   const parsed = new Date(trimmed);
-  return Number.isFinite(parsed.valueOf()) ? parsed.toISOString().slice(0, 10) : trimmed;
+  return Number.isFinite(parsed.valueOf()) ? formatDateInputValue(parsed) : trimmed;
 }
 
 function isMeaningful(value: unknown): boolean {

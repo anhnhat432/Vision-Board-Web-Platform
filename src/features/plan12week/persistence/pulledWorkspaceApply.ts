@@ -1,3 +1,4 @@
+import { formatDateInputValue } from "@/app/utils/storage-date-utils";
 import {
   buildDerivedScoreboard,
   getDefaultScoreboard,
@@ -49,7 +50,7 @@ function normalizeDateKey(value: string | undefined): string {
   if (match?.[1]) return match[1];
 
   const parsed = new Date(trimmed);
-  return Number.isFinite(parsed.valueOf()) ? parsed.toISOString().slice(0, 10) : trimmed;
+  return Number.isFinite(parsed.valueOf()) ? formatDateInputValue(parsed) : trimmed;
 }
 
 function clampWeekNumber(value: number | undefined, totalWeeks: number): number {

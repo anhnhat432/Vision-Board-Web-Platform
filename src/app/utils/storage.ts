@@ -14,16 +14,22 @@ import type {
   PricingPlanCode,
   PrivacyConsentCategory,
   Reflection,
+  Task,
   TwelveWeekSystem,
   TwelveWeekTaskInstance,
   UserData,
   VisionBoard,
 } from "./storage-types";
 import {
+  compareCalendarDateKeys as compareCalendarDateKeysFromModule,
   formatCalendarDate as formatCalendarDateFromModule,
   formatDateInputValue as formatDateInputValueFromModule,
   getCalendarDateKey as getCalendarDateKeyFromModule,
   getCalendarDayDifference as getCalendarDayDifferenceFromModule,
+  isCalendarDateKeyAfter as isCalendarDateKeyAfterFromModule,
+  isCalendarDateKeyBefore as isCalendarDateKeyBeforeFromModule,
+  isCalendarDateKeyOnOrAfter as isCalendarDateKeyOnOrAfterFromModule,
+  isCalendarDateKeyOnOrBefore as isCalendarDateKeyOnOrBeforeFromModule,
   parseCalendarDate as parseCalendarDateFromModule,
   sortReflectionsByDateDesc as sortReflectionsByDateDescFromModule,
 } from "./storage-date-utils";
@@ -83,8 +89,10 @@ import {
   shouldHydrateDemoData as shouldHydrateDemoDataFromModule,
 } from "./storage-demo-data";
 import { createLocalUserDataBackupJson } from "./local-data-backup";
+import { cleanupExpiredMigrationBackups } from "./local-data-migration";
 import { getEntitlementsForPlan } from "./twelve-week-premium";
 import { shouldSeedDemoData } from "./app-mode";
+import { postUserDataMutation, subscribeUserDataMutation, userDataMutationSource } from "./cross-tab-sync";
 import {
   APP_STORAGE_KEYS,
   AUTH_OWNER_STORAGE_KEY,
@@ -174,13 +182,18 @@ const LEGACY_TRUST_BADGE_DISMISSED_KEY = "trust_badge_dismissed_v1";
 let _cachedUserData: UserData | null = null;
 let _cachedRawHash: string | null = null;
 
-// Invalidate in-memory cache when another browser tab saves user data
+// Invalidate in-memory cache when another browser context saves user data.
 if (typeof window !== "undefined") {
   window.addEventListener("storage", (e) => {
     if (e.key === STORAGE_KEY) {
-      _cachedUserData = null;
-      _cachedRawHash = null;
+      hydrateUserDataCacheFromStorage();
     }
+  });
+
+  subscribeUserDataMutation((payload) => {
+    if (payload.source === userDataMutationSource) return;
+    hydrateUserDataCacheFromStorage();
+    notifyUserDataUpdated();
   });
 }
 
@@ -211,6 +224,22 @@ function removeLegacyTrustBadgeDismissal(): void {
 function setUserDataCache(data: UserData, rawHash: string): void {
   _cachedUserData = data;
   _cachedRawHash = rawHash;
+}
+
+function hydrateUserDataCacheFromStorage(): void {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) {
+    resetUserDataCache();
+    return;
+  }
+
+  const parsed = parseStoredUserData(raw);
+  if (!parsed) {
+    resetUserDataCache();
+    return;
+  }
+
+  setUserDataCache(parsed, raw);
 }
 
 function createFreshUserData(): UserData {
@@ -292,6 +321,20 @@ function normalizeAspirationalVision(value: unknown): AspirationalVision | undef
   };
 }
 
+function normalizeTask(task: Task): Task {
+  return {
+    ...task,
+    lastModifiedAt: Number.isFinite(task.lastModifiedAt) ? task.lastModifiedAt : 0,
+  };
+}
+
+function normalizeGoalTasks(goal: Goal): Goal {
+  return {
+    ...goal,
+    tasks: Array.isArray(goal.tasks) ? goal.tasks.map(normalizeTask) : [],
+  };
+}
+
 function normalizeUserData(data: UserData): UserData {
   const subscription = data.subscription ?? null;
   const entitlements = Array.isArray(data.entitlements) ? data.entitlements : [];
@@ -309,7 +352,7 @@ function normalizeUserData(data: UserData): UserData {
   return {
     ...data,
     storageVersion: data.storageVersion || CURRENT_STORAGE_VERSION,
-    goals: Array.isArray(data.goals) ? data.goals.map((goal) => normalizeGoalFromModule(goal)) : [],
+    goals: Array.isArray(data.goals) ? data.goals.map((goal) => normalizeGoalFromModule(normalizeGoalTasks(goal))) : [],
     reflections: sortReflectionsByDateDesc(
       Array.isArray(data.reflections) ? data.reflections.map((reflection) => normalizeReflection(reflection)) : [],
     ),
@@ -323,6 +366,60 @@ function normalizeUserData(data: UserData): UserData {
     subscription,
     entitlements: normalizedEntitlements,
   };
+}
+
+function getComparableLastModifiedAt(value: { lastModifiedAt?: number }): number {
+  return Number.isFinite(value.lastModifiedAt) ? (value.lastModifiedAt ?? 0) : 0;
+}
+
+function mergeGoalTaskMutations(localGoal: Goal, incomingGoal: Goal): Goal {
+  const localTasksById = new Map(localGoal.tasks.map((task) => [task.id, task]));
+  const mergedTasks = incomingGoal.tasks.map((incomingTask) => {
+    const localTask = localTasksById.get(incomingTask.id);
+    if (!localTask) return incomingTask;
+    return getComparableLastModifiedAt(incomingTask) >= getComparableLastModifiedAt(localTask) ? incomingTask : localTask;
+  });
+
+  const localTaskInstancesById = new Map(
+    (localGoal.twelveWeekSystem?.taskInstances ?? []).map((task) => [task.id, task]),
+  );
+  const incomingSystem = incomingGoal.twelveWeekSystem;
+  const mergedTaskInstances = incomingSystem?.taskInstances.map((incomingTask) => {
+    const localTask = localTaskInstancesById.get(incomingTask.id);
+    if (!localTask) return incomingTask;
+    return getComparableLastModifiedAt(incomingTask) >= getComparableLastModifiedAt(localTask) ? incomingTask : localTask;
+  });
+
+  return {
+    ...incomingGoal,
+    tasks: mergedTasks,
+    twelveWeekSystem:
+      incomingSystem && mergedTaskInstances
+        ? {
+            ...incomingSystem,
+            taskInstances: mergedTaskInstances,
+          }
+        : incomingSystem,
+  };
+}
+
+function mergeUserDataTaskMutations(localData: UserData | null, incomingData: UserData): UserData {
+  if (!localData) return incomingData;
+
+  const localGoalsById = new Map(localData.goals.map((goal) => [goal.id, goal]));
+  return {
+    ...incomingData,
+    goals: incomingData.goals.map((incomingGoal) => {
+      const localGoal = localGoalsById.get(incomingGoal.id);
+      return localGoal ? mergeGoalTaskMutations(localGoal, incomingGoal) : incomingGoal;
+    }),
+  };
+}
+
+function getLatestStoredUserDataForMerge(): UserData | null {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return null;
+  return parseStoredUserData(raw);
 }
 
 function isValidUserDataShape(data: unknown): data is UserData {
@@ -361,6 +458,26 @@ export function parseCalendarDate(value: string): Date | null {
 
 export function getCalendarDateKey(value: string): string | null {
   return getCalendarDateKeyFromModule(value);
+}
+
+export function compareCalendarDateKeys(left: string, right: string): number | null {
+  return compareCalendarDateKeysFromModule(left, right);
+}
+
+export function isCalendarDateKeyBefore(left: string, right: string): boolean {
+  return isCalendarDateKeyBeforeFromModule(left, right);
+}
+
+export function isCalendarDateKeyAfter(left: string, right: string): boolean {
+  return isCalendarDateKeyAfterFromModule(left, right);
+}
+
+export function isCalendarDateKeyOnOrBefore(left: string, right: string): boolean {
+  return isCalendarDateKeyOnOrBeforeFromModule(left, right);
+}
+
+export function isCalendarDateKeyOnOrAfter(left: string, right: string): boolean {
+  return isCalendarDateKeyOnOrAfterFromModule(left, right);
 }
 
 export function formatCalendarDate(value: string, locale = "vi-VN", options?: Intl.DateTimeFormatOptions): string {
@@ -516,6 +633,7 @@ export function persistActiveAuthenticatedUserData(): void {
 }
 
 export function getUserData(): UserData {
+  cleanupExpiredMigrationBackups();
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return initializeUserData();
 
@@ -538,7 +656,8 @@ export function getUserData(): UserData {
 
 export function saveUserData(data: UserData): boolean {
   const normalized = normalizeUserData(data);
-  const serialized = JSON.stringify(normalized);
+  const normalizedLatest = normalizeUserData(mergeUserDataTaskMutations(getLatestStoredUserDataForMerge(), normalized));
+  const serialized = JSON.stringify(normalizedLatest);
 
   // Keep previous cache for rollback in case of quota failure
   const prevCachedData = _cachedUserData;
@@ -547,8 +666,9 @@ export function saveUserData(data: UserData): boolean {
   try {
     localStorage.setItem(STORAGE_KEY, serialized);
     mirrorUserDataToActiveAuthScope(serialized);
-    _cachedUserData = normalized;
+    _cachedUserData = normalizedLatest;
     _cachedRawHash = serialized;
+    postUserDataMutation({ at: Date.now(), source: userDataMutationSource });
     notifyUserDataUpdated();
     return true;
   } catch (err: unknown) {

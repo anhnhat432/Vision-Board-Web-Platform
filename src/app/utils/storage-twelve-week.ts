@@ -607,6 +607,7 @@ function buildTaskInstances(
           isCore: indicator.type !== "optional",
           completed: existing?.completed ?? false,
           completedAt: existing?.completedAt,
+          lastModifiedAt: Number.isFinite(existing?.lastModifiedAt) ? (existing?.lastModifiedAt ?? 0) : 0,
           tacticId,
           rescheduledFrom: existing?.rescheduledFrom,
           skipped: existing?.skipped,

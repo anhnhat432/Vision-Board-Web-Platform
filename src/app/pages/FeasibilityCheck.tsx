@@ -1,6 +1,6 @@
 ﻿import { Compass, Sparkles, Target } from "lucide-react";
 import { useReducedMotion } from "../components/ui/use-reduced-motion";
-import { useEffect, useRef, useState, type MutableRefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { useNavigate } from "react-router";
@@ -21,6 +21,7 @@ import { PageShell } from "../components/PageShell";
 import { Badge } from "../components/ui/badge";
 import { Card, CardContent } from "../components/ui/card";
 import { Progress } from "../components/ui/progress";
+import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
@@ -33,6 +34,44 @@ import type { PendingFeasibilityResult, ResultData } from "./FeasibilityCheck/ty
 
 type FeasibilitySetupState = "checking" | "needs_life_balance" | "needs_life_insight" | "needs_smart_goal" | "ready";
 
+type FlushableDebouncedSave<T> = {
+  schedule: (value: T) => void;
+  flush: () => void;
+  cancel: () => void;
+};
+
+function createFlushableDebouncedSave<T>(callback: (value: T) => void, delayMs: number): FlushableDebouncedSave<T> {
+  let timer: ReturnType<typeof window.setTimeout> | null = null;
+  let pendingValue: T | null = null;
+
+  const flush = () => {
+    if (pendingValue === null) return;
+
+    if (timer) {
+      window.clearTimeout(timer);
+      timer = null;
+    }
+
+    const value = pendingValue;
+    pendingValue = null;
+    callback(value);
+  };
+
+  return {
+    schedule: (value) => {
+      pendingValue = value;
+      if (timer) window.clearTimeout(timer);
+      timer = window.setTimeout(flush, delayMs);
+    },
+    flush,
+    cancel: () => {
+      if (timer) window.clearTimeout(timer);
+      timer = null;
+      pendingValue = null;
+    },
+  };
+}
+
 export function FeasibilityCheck() {
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
@@ -40,6 +79,9 @@ export function FeasibilityCheck() {
   const [setupState, setSetupState] = useState<FeasibilitySetupState>("checking");
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [lastSavedSnapshot, setLastSavedSnapshot] = useState<string | null>(null);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("saved");
   const [focusArea, setFocusArea] = useState<string>("");
   const [wheelScore, setWheelScore] = useState<number | null>(null);
   const [pendingGoal, setPendingGoal] = useState<PendingSMARTGoal | null>(null);
@@ -114,7 +156,10 @@ export function FeasibilityCheck() {
       try {
         const parsed = JSON.parse(savedAnswers);
         if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-          setAnswers(parsed as Record<number, string>);
+          const restoredAnswers = parsed as Record<number, string>;
+          setAnswers(restoredAnswers);
+          setLastSavedSnapshot(JSON.stringify(restoredAnswers));
+          setLastSavedAt(new Date());
         }
       } catch {
         // Ignore malformed draft
@@ -127,24 +172,36 @@ export function FeasibilityCheck() {
     setSetupState("ready");
   }, []);
 
-  // ── Autosave feasibility answers to localStorage (debounced) ──
-  const isInitialAnswerLoadRef = useRef(true);
-  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const answeredCount = Object.keys(answers).length;
+  const currentAnswersSnapshot = useMemo(() => JSON.stringify(answers), [answers]);
+  const isDirty = setupState === "ready" && answeredCount > 0 && currentAnswersSnapshot !== lastSavedSnapshot;
+  const debouncedSaveRef = useRef<FlushableDebouncedSave<string> | null>(null);
+
+  const saveAnswersSnapshot = useCallback((snapshot: string) => {
+    setAutoSaveStatus("saving");
+    localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers, snapshot);
+    setLastSavedSnapshot(snapshot);
+    setLastSavedAt(new Date());
+    setAutoSaveStatus("saved");
+  }, []);
+
+  if (!debouncedSaveRef.current) {
+    debouncedSaveRef.current = createFlushableDebouncedSave(saveAnswersSnapshot, 400);
+  }
+
   useEffect(() => {
     if (setupState !== "ready") return;
-    // Skip writing back what was just loaded
-    if (isInitialAnswerLoadRef.current) {
-      isInitialAnswerLoadRef.current = false;
+    if (answeredCount === 0) return;
+    if (!isDirty) {
+      setAutoSaveStatus("saved");
       return;
     }
-    const answeredCount = Object.keys(answers).length;
-    if (answeredCount === 0) return;
-    const timer = setTimeout(() => {
-      localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers, JSON.stringify(answers));
-      setLastSavedAt(new Date());
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [answers, setupState]);
+
+    setAutoSaveStatus("idle");
+    debouncedSaveRef.current?.schedule(currentAnswersSnapshot);
+  }, [answeredCount, currentAnswersSnapshot, isDirty, setupState]);
+
+  useDirtyFormGuard(isDirty, () => debouncedSaveRef.current?.flush());
 
   useScrollToTopOnChange(currentStep, {
     targetRef: questionTopRef,
@@ -285,8 +342,13 @@ export function FeasibilityCheck() {
       savedAt: new Date().toISOString(),
     };
 
+    const finalAnswersSnapshot = JSON.stringify(answers);
+    debouncedSaveRef.current?.cancel();
     localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityResult, JSON.stringify(pendingFeasibilityResult));
-    localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers, JSON.stringify(answers));
+    localStorage.setItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers, finalAnswersSnapshot);
+    setLastSavedSnapshot(finalAnswersSnapshot);
+    setLastSavedAt(new Date());
+    setAutoSaveStatus("saved");
     trackAnalyticsEvent("feasibility_completed", {
       focus_area: focusArea,
       result_type: result.type,
@@ -390,7 +452,7 @@ export function FeasibilityCheck() {
         </Card>
 
         <div className="flex justify-end">
-          <AutoSaveIndicator lastSavedAt={lastSavedAt} />
+          <AutoSaveIndicator status={isDirty ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} />
         </div>
 
         <FeasibilityStepShell

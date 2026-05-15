@@ -1048,7 +1048,7 @@ export function TwelveWeekSetup() {
           localGoalId: goalId,
           backendGoalId: backendGoalId ?? undefined,
           vision: draft.vision12Week.trim(),
-          startDate: new Date(cycleStartDate).toISOString(),
+          startDate: parseCalendarDate(cycleStartDate)?.toISOString() ?? new Date().toISOString(),
           totalWeeks: 12,
         });
 

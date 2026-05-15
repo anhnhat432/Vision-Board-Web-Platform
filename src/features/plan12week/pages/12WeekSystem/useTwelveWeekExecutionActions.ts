@@ -11,6 +11,8 @@ import {
   formatDateInputValue,
   getCalendarDateKey,
   getUserData,
+  isCalendarDateKeyOnOrAfter,
+  isCalendarDateKeyOnOrBefore,
   trackAppEvent,
   updateGoal,
   upsertReflection,
@@ -222,18 +224,26 @@ export function useTwelveWeekExecutionActions({
       const actionGoalId = activeGoal.id;
       const toggledTask = system.taskInstances.find((task) => task.id === taskId);
       const taskCompletedFromIncomplete = Boolean(completed && toggledTask && !toggledTask.completed);
+      const now = Date.now();
+      const completedAt = completed ? new Date(now).toISOString() : undefined;
       const nextTaskInstances = system.taskInstances.map((task) =>
         task.id === taskId
-          ? { ...task, completed, completedAt: completed ? new Date().toISOString() : undefined }
+          ? { ...task, completed, completedAt, lastModifiedAt: now }
           : task,
       );
       const nextToggledTask = nextTaskInstances.find((task) => task.id === taskId);
 
       invalidateOverlay();
-      const savedSystem = commitSystemUpdate({
-        ...system,
-        taskInstances: nextTaskInstances,
-      });
+      let savedSystem: TwelveWeekSystem;
+      try {
+        savedSystem = commitSystemUpdate({
+          ...system,
+          taskInstances: nextTaskInstances,
+        });
+      } catch {
+        toast.error("Không thể cập nhật, vui lòng thử lại");
+        return;
+      }
 
       if (nextToggledTask) {
         enqueueTaskCompletionChangedMutation(actionGoalId, nextToggledTask);
@@ -278,6 +288,7 @@ export function useTwelveWeekExecutionActions({
                     ...task,
                     completed: toggledTask?.completed ?? false,
                     completedAt: toggledTask?.completedAt,
+                    lastModifiedAt: toggledTask?.lastModifiedAt ?? 0,
                   }
                 : task,
             ),
@@ -304,11 +315,7 @@ export function useTwelveWeekExecutionActions({
           }
         }
 
-        toast.error(
-          shouldRollbackTask
-            ? "Không thể đồng bộ trạng thái việc. Mình đã hoàn tác thay đổi."
-            : "Chưa đồng bộ được trạng thái việc. Trạng thái trên thiết bị này vẫn được giữ lại.",
-        );
+        toast.error("Không thể cập nhật, vui lòng thử lại");
         return;
       }
 
@@ -621,8 +628,8 @@ export function useTwelveWeekExecutionActions({
         mode === "restart"
           ? Array.from({ length: 4 }, (_, index) => addDaysToDateKey(todayKey, index))
           : mode === "lighten"
-            ? [weekEnd, addDaysToDateKey(weekEnd, -1), addDaysToDateKey(weekEnd, -2)].filter(
-                (value) => value >= todayKey,
+            ? [weekEnd, addDaysToDateKey(weekEnd, -1), addDaysToDateKey(weekEnd, -2)].filter((value) =>
+                isCalendarDateKeyOnOrAfter(value, todayKey),
               )
             : Array.from({ length: 4 }, (_, index) => addDaysToDateKey(nextWeekStart, index));
 
@@ -634,7 +641,7 @@ export function useTwelveWeekExecutionActions({
           task.weekNumber === reentryWeekNumber &&
           !task.isCore &&
           !task.completed &&
-          task.scheduledDate <= weekEnd;
+          isCalendarDateKeyOnOrBefore(task.scheduledDate, weekEnd);
         if (!isMissed && !isOptionalThisWeek) return task;
 
         const date = targets[Math.min(moved, Math.max(targets.length - 1, 0))] ?? todayKey;

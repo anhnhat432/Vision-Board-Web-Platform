@@ -10,6 +10,7 @@ import {
   formatDateInputValue,
   getCurrentEntitlementKeys,
   getCurrentPlan,
+  isCalendarDateKeyOnOrAfter,
   getUserData,
 } from "@/app/utils/storage";
 import { startCheckoutFlow } from "@/app/utils/production";
@@ -130,7 +131,7 @@ describe("12-week core flows", () => {
     expect(createdSystem).toBeDefined();
     expect(data.goals[0]?.aspirationalVisionId).toBe("vision_3y_1");
     expect(weekOneTasks.length).toBeGreaterThan(0);
-    expect(weekOneTasks.every((task) => task.scheduledDate >= todayKey)).toBe(true);
+    expect(weekOneTasks.every((task) => isCalendarDateKeyOnOrAfter(task.scheduledDate, todayKey))).toBe(true);
     expect(localStorage.getItem(APP_STORAGE_KEYS.latest12WeekSystemGoalId)).toBe(data.goals[0]?.id);
 
     const snapshotMutation = listStoredPendingMutations(null).find((item) => item.kind === "plan_snapshot_updated");

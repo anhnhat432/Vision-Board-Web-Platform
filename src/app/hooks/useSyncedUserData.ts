@@ -34,11 +34,13 @@ export function useSyncedUserData(): {
     };
 
     window.addEventListener("storage", handleStorage);
+    window.addEventListener("focus", reloadUserData);
     window.addEventListener(USER_DATA_UPDATED_EVENT_NAME, reloadUserData);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("focus", reloadUserData);
       window.removeEventListener(USER_DATA_UPDATED_EVENT_NAME, reloadUserData);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };

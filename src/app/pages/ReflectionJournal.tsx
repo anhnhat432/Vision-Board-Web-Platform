@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import {
   ArrowRight,
@@ -36,6 +36,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Reveal } from "../components/ui/reveal";
 import { Textarea } from "../components/ui/textarea";
+import { useReflectionDraft, type ReflectionDraft } from "../hooks/useReflectionDraft";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import {
   celebrateAchievementUnlock,
@@ -64,6 +65,54 @@ const JOURNAL_PROMPTS = [
   "Bạn đang học được điều gì từ chặng đường hiện tại?",
   "Tuần sau bạn muốn giữ lại một nhịp nhỏ nào?",
 ];
+
+function createEmptyReflectionInput() {
+  return {
+    title: "",
+    content: "",
+    mood: "" as MoodValue,
+    date: formatDateInputValue(new Date()),
+  };
+}
+
+function formatDraftSavedTime(savedAt: string) {
+  const date = new Date(savedAt);
+  if (Number.isNaN(date.getTime())) return "không rõ giờ";
+
+  return date.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+}
+
+function getReflectionTitleFromContent(content: string) {
+  const firstLine = content.trim().split(/\r?\n/)[0]?.trim() ?? "";
+  if (!firstLine) return "Nhật ký chưa đặt tên";
+
+  return firstLine.length > 64 ? `${firstLine.slice(0, 61)}...` : firstLine;
+}
+
+function getReflectionInputFromDraft(draft: ReflectionDraft) {
+  return {
+    title: getReflectionTitleFromContent(draft.content),
+    content: draft.content,
+    mood: "" as MoodValue,
+    date: formatDateInputValue(new Date()),
+  };
+}
+
+function getEmptyReflectionInputWithDraftDate(draft: ReflectionDraft) {
+  const savedDate = new Date(draft.savedAt);
+  return {
+    ...createEmptyReflectionInput(),
+    date: Number.isNaN(savedDate.getTime()) ? formatDateInputValue(new Date()) : formatDateInputValue(savedDate),
+  };
+}
+
+function getReflectionInputForContent(content: string, previous: ReturnType<typeof createEmptyReflectionInput>) {
+  return {
+    ...previous,
+    title: previous.title || getReflectionTitleFromContent(content),
+    content,
+  };
+}
 
 function getMoodConfig(mood?: string) {
   switch (mood) {
@@ -121,17 +170,40 @@ function getJournalPhaseTone(weekNumber?: number) {
 export function ReflectionJournal() {
   const navigate = useNavigate();
   const { userData, reloadUserData } = useSyncedUserData();
+  const { clearDraft, loadDraft, saveDraft } = useReflectionDraft();
   const [isAddingReflection, setIsAddingReflection] = useState(false);
-  const [newReflection, setNewReflection] = useState({
-    title: "",
-    content: "",
-    mood: "" as MoodValue,
-    date: formatDateInputValue(new Date()),
-  });
+  const [newReflection, setNewReflection] = useState(() => createEmptyReflectionInput());
+  const [pendingReflectionDraft, setPendingReflectionDraft] = useState<ReflectionDraft | null>(null);
   const [reflectionToDelete, setReflectionToDelete] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterMood, setFilterMood] = useState<MoodValue | "">("");
   const [filterType, setFilterType] = useState<"all" | "weekly-review" | "freeform">("all");
+
+  useEffect(() => {
+    if (!isAddingReflection) return;
+
+    const draft = loadDraft();
+    setPendingReflectionDraft(draft);
+    setNewReflection(draft ? getEmptyReflectionInputWithDraftDate(draft) : createEmptyReflectionInput());
+  }, [isAddingReflection, loadDraft]);
+
+  const handleRestoreReflectionDraft = () => {
+    if (!pendingReflectionDraft) return;
+
+    setNewReflection(getReflectionInputFromDraft(pendingReflectionDraft));
+    setPendingReflectionDraft(null);
+  };
+
+  const handleIgnoreReflectionDraft = () => {
+    clearDraft();
+    setPendingReflectionDraft(null);
+    setNewReflection(createEmptyReflectionInput());
+  };
+
+  const handleReflectionContentChange = (content: string) => {
+    setNewReflection((previous) => getReflectionInputForContent(content, previous));
+    saveDraft(content);
+  };
 
   const handleAddReflection = () => {
     if (!newReflection.title || !newReflection.content) return;
@@ -162,12 +234,9 @@ export function ReflectionJournal() {
         : "Suy nghĩ, cảm xúc và bài học hôm nay đã có chỗ đứng trong hành trình của bạn.",
     });
 
-    setNewReflection({
-      title: "",
-      content: "",
-      mood: "",
-      date: formatDateInputValue(new Date()),
-    });
+    clearDraft();
+    setPendingReflectionDraft(null);
+    setNewReflection(createEmptyReflectionInput());
     setIsAddingReflection(false);
     reloadUserData();
   };
@@ -388,6 +457,24 @@ export function ReflectionJournal() {
           </DialogHeader>
 
           <div className="mt-4 grid gap-5">
+            {pendingReflectionDraft ? (
+              <div className="rounded-[var(--r-card)] border border-amber-200 bg-amber-50/90 p-4 text-sm text-amber-950">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p>
+                    Có bản nháp. Tìm thấy bản nháp chưa lưu lúc {formatDraftSavedTime(pendingReflectionDraft.savedAt)}.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" type="button" onClick={handleRestoreReflectionDraft}>
+                      Khôi phục
+                    </Button>
+                    <Button size="sm" type="button" variant="outline" onClick={handleIgnoreReflectionDraft}>
+                      Bỏ qua
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
             <div className="grid gap-5 md:grid-cols-2">
               <div className="stack-tight">
                 <Label>Ngày</Label>
@@ -465,7 +552,7 @@ export function ReflectionJournal() {
               <Textarea
                 placeholder="Viết về trải nghiệm, điều bạn học được, khoảnh khắc đáng nhớ hoặc điều bạn muốn nhắc mình sau này..."
                 value={newReflection.content}
-                onChange={(event) => setNewReflection({ ...newReflection, content: event.target.value })}
+                onChange={(event) => handleReflectionContentChange(event.target.value)}
                 onKeyDown={(event) => {
                   if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
                     event.preventDefault();
@@ -500,12 +587,13 @@ export function ReflectionJournal() {
                         "border-rose-200 bg-gradient-to-br from-rose-50 to-pink-50 text-rose-700 hover:bg-rose-50 dark:border-rose-500/30 dark:from-rose-950/40 dark:to-pink-950/25 dark:text-rose-200",
                       ][index]
                     }
-                    onClick={() =>
-                      setNewReflection((prev) => ({
-                        ...prev,
-                        content: prev.content ? `${prev.content}\n\n${prompt}` : prompt,
-                      }))
-                    }
+                    onClick={() => {
+                      setNewReflection((prev) => {
+                        const content = prev.content ? `${prev.content}\n\n${prompt}` : prompt;
+                        saveDraft(content);
+                        return getReflectionInputForContent(content, prev);
+                      });
+                    }}
                   >
                     {prompt}
                   </Button>

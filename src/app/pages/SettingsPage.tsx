@@ -1,12 +1,22 @@
 ﻿import type { ChangeEvent } from "react";
-import { useRef, useState } from "react";
-import { AlertTriangle, CalendarDays, CheckCircle2, CloudDownload, CreditCard, Loader2, RefreshCw, Upload, User2, Volume2, WifiOff } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { AlertTriangle, CalendarDays, CheckCircle2, CloudDownload, CreditCard, Loader2, RefreshCw, RotateCcw, Upload, User2, Volume2, WifiOff } from "lucide-react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 import { DataStorageInfo } from "../components/DataStorageInfo";
 import { CloudSyncIllustration, SyncIdleDot, SyncOkDot } from "../components/illustrations";
 import { PageHeader } from "../components/layout/PageHeader";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Switch } from "../components/ui/switch";
@@ -16,6 +26,7 @@ import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSy
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { formatBillingExpiryDate, getBillingExpiryInfo } from "../utils/billing-expiry";
 import { downloadLocalUserDataBackup } from "../utils/local-data-backup";
+import { getMigrationBackupSnapshots, restoreMigrationBackupSnapshot, type MigrationBackupSnapshot } from "../utils/local-data-migration";
 import { isSoundEnabled, setSoundEnabled } from "../utils/sound";
 import { getUserData, parseStoredUserData, saveUserData } from "../utils/storage";
 import { exportAccountData } from "@/services/syncService";
@@ -53,6 +64,8 @@ export function SettingsPage() {
   const importFileRef = useRef<HTMLInputElement>(null);
   const [isExportingAccount, setIsExportingAccount] = useState(false);
   const [taskSoundEnabled, setTaskSoundEnabled] = useState(() => isSoundEnabled());
+  const [migrationBackups, setMigrationBackups] = useState<MigrationBackupSnapshot[]>(() => getMigrationBackupSnapshots());
+  const [recoverySnapshotKey, setRecoverySnapshotKey] = useState<string | null>(null);
   const { isConfigured, user, userProfile } = useAuthContext();
   const autoSyncState = useAutoCloudSyncContext();
   const { userData: syncedUserData, reloadUserData } = useSyncedUserData();
@@ -67,6 +80,11 @@ export function SettingsPage() {
       ? userProfile?.email || user.email || "Đã đăng nhập"
       : "Chưa đăng nhập";
   const AccountStatusDot = isConfigured && user ? SyncOkDot : SyncIdleDot;
+  const firstRecoverySnapshot = migrationBackups[0];
+
+  useEffect(() => {
+    setMigrationBackups(getMigrationBackupSnapshots());
+  }, []);
 
   const handleExport = () => {
     downloadLocalUserDataBackup({ data: userData, filenamePrefix: "dear-our-future-backup" });
@@ -124,6 +142,25 @@ export function SettingsPage() {
     setSoundEnabled(enabled);
   };
 
+  const handleRestoreMigrationBackup = () => {
+    if (!recoverySnapshotKey) return;
+
+    try {
+      const restored = restoreMigrationBackupSnapshot(recoverySnapshotKey);
+      if (!restored) {
+        toast.error("Không tìm thấy bản sao dữ liệu cũ hoặc bản sao đã hỏng.");
+        return;
+      }
+
+      reloadUserData();
+      setMigrationBackups(getMigrationBackupSnapshots());
+      setRecoverySnapshotKey(null);
+      toast.success("Đã khôi phục dữ liệu cũ.");
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Không thể khôi phục dữ liệu cũ lúc này."));
+    }
+  };
+
   const handleRetrySync = async () => {
     const result = await autoSyncState.triggerSyncNow();
     if (result?.status === "conflict" || result?.status === "unsafe") {
@@ -168,6 +205,26 @@ export function SettingsPage() {
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]" aria-label="Cài đặt nhanh">
+        {firstRecoverySnapshot ? (
+          <Card className="glass-surface-sm rounded-[var(--r-card)] border-amber-200 bg-amber-50/80 shadow-none lg:col-span-2">
+            <CardContent className="grid gap-4 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
+              <div className="flex gap-3">
+                <RotateCcw className="mt-0.5 h-5 w-5 text-amber-600" />
+                <div>
+                  <p className="text-sm font-semibold text-amber-950">Có 1 bản sao dữ liệu cũ chưa được phục hồi</p>
+                  <p className="mt-1 text-sm leading-6 text-amber-800">
+                    Bấm để khôi phục dữ liệu cũ. Thao tác này sẽ ghi đè dữ liệu hiện tại trên thiết bị này.
+                  </p>
+                </div>
+              </div>
+              <Button className="gap-2 rounded-[var(--r-control)]" onClick={() => setRecoverySnapshotKey(firstRecoverySnapshot.key)}>
+                <RotateCcw className="h-4 w-4" />
+                Khôi phục dữ liệu cũ
+              </Button>
+            </CardContent>
+          </Card>
+        ) : null}
+
         {shouldShowExpiryNotice && (
           <Card className="glass-surface-sm rounded-[var(--r-card)] border-amber-200 bg-amber-50/80 shadow-none lg:col-span-2">
             <CardContent className="grid gap-4 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
@@ -334,6 +391,21 @@ export function SettingsPage() {
           </CardContent>
         </Card>
       </section>
+
+      <AlertDialog open={Boolean(recoverySnapshotKey)} onOpenChange={(open) => !open && setRecoverySnapshotKey(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Khôi phục dữ liệu cũ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Dữ liệu hiện tại trên thiết bị này sẽ được thay bằng bản sao dữ liệu cũ. Hãy tải backup thiết bị trước nếu bạn muốn giữ cả hai phiên bản.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Quay lại</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRestoreMigrationBackup}>Khôi phục dữ liệu cũ</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

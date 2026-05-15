@@ -209,11 +209,8 @@ export function getLeadIndicatorUnitValidationError(
   return `Đơn vị của việc lặp lại ${index + 1} (${label}) không được trống. Gợi ý: lần, phút, trang, buổi.`;
 }
 
-function toLocalDateKey(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+function getLocalDayStart(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
 function parseDateKey(value: string): Date | null {
@@ -235,17 +232,16 @@ export function getStartDateValidation(
   startDate: string,
   referenceDate = new Date(),
 ): { error: string | null; warning: string | null } {
-  const todayKey = toLocalDateKey(referenceDate);
   const parsedStartDate = parseDateKey(startDate);
   if (!parsedStartDate) {
     return { error: "Chọn ngày bắt đầu hợp lệ", warning: null };
   }
-  if (startDate < todayKey) {
+
+  const today = getLocalDayStart(referenceDate);
+  if (parsedStartDate.getTime() < today.getTime()) {
     return { error: "Ngày bắt đầu không được ở quá khứ", warning: null };
   }
 
-  const today = parseDateKey(todayKey);
-  if (!today) return { error: null, warning: null };
   const daysFromToday = Math.round((parsedStartDate.getTime() - today.getTime()) / 86_400_000);
   if (daysFromToday > 30) {
     return {

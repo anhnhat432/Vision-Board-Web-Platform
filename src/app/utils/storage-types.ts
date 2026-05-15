@@ -17,6 +17,7 @@ export interface Task {
   id: string;
   title: string;
   completed: boolean;
+  lastModifiedAt?: number;
 }
 
 export interface DailyUpdate {
@@ -144,6 +145,7 @@ export interface TwelveWeekTaskInstance {
   isCore: boolean;
   completed: boolean;
   completedAt?: string;
+  lastModifiedAt?: number;
   tacticId?: string;
   rescheduledFrom?: string;
   /**

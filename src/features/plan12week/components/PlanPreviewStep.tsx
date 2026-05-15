@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback } from "react";
+import { formatDateInputValue } from "@/app/utils/storage-date-utils";
 import { getUserIntentId, getArchetypeForIntent, hasActionableArchetypeHint } from "@/app/utils/user-intent";
 import { isLowFeasibility } from "../logic/generatePlan";
 import { getArchetypePlanFullDefaults, getArchetypeFirstAction } from "../logic/planArchetypeDefaults";
@@ -88,7 +89,7 @@ export function PlanPreviewStep({
         weekOneTasks.push({
           id: `task_${indicator.id}_${Date.now()}_${dayOffset}`,
           title,
-          scheduledDate: taskDate.toISOString().split("T")[0],
+          scheduledDate: formatDateInputValue(taskDate),
         });
       });
     });

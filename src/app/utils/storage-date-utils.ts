@@ -45,6 +45,33 @@ export function getCalendarDateKey(value: string): string | null {
   return date ? formatDateInputValue(date) : null;
 }
 
+export function compareCalendarDateKeys(left: string, right: string): number | null {
+  const leftDate = parseCalendarDate(left);
+  const rightDate = parseCalendarDate(right);
+  if (!leftDate || !rightDate) return null;
+  return getCalendarDayIndex(leftDate) - getCalendarDayIndex(rightDate);
+}
+
+export function isCalendarDateKeyBefore(left: string, right: string): boolean {
+  const comparison = compareCalendarDateKeys(left, right);
+  return comparison !== null && comparison < 0;
+}
+
+export function isCalendarDateKeyAfter(left: string, right: string): boolean {
+  const comparison = compareCalendarDateKeys(left, right);
+  return comparison !== null && comparison > 0;
+}
+
+export function isCalendarDateKeyOnOrBefore(left: string, right: string): boolean {
+  const comparison = compareCalendarDateKeys(left, right);
+  return comparison !== null && comparison <= 0;
+}
+
+export function isCalendarDateKeyOnOrAfter(left: string, right: string): boolean {
+  const comparison = compareCalendarDateKeys(left, right);
+  return comparison !== null && comparison >= 0;
+}
+
 export function formatCalendarDate(
   value: string,
   locale = "vi-VN",

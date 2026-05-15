@@ -1,10 +1,11 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { PageShell } from "../components/PageShell";
+import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -55,6 +56,44 @@ import { SpecificStep } from "./SMARTGoalSetup/components/SpecificStep";
 import { TimeBoundStep } from "./SMARTGoalSetup/components/TimeBoundStep";
 import type { SMARTData, SmartStepKey } from "./SMARTGoalSetup/types";
 
+type FlushableDebouncedSave<T> = {
+  schedule: (value: T) => void;
+  flush: () => void;
+  cancel: () => void;
+};
+
+function createFlushableDebouncedSave<T>(callback: (value: T) => void, delayMs: number): FlushableDebouncedSave<T> {
+  let timer: ReturnType<typeof window.setTimeout> | null = null;
+  let pendingValue: T | null = null;
+
+  const flush = () => {
+    if (pendingValue === null) return;
+
+    if (timer) {
+      window.clearTimeout(timer);
+      timer = null;
+    }
+
+    const value = pendingValue;
+    pendingValue = null;
+    callback(value);
+  };
+
+  return {
+    schedule: (value) => {
+      pendingValue = value;
+      if (timer) window.clearTimeout(timer);
+      timer = window.setTimeout(flush, delayMs);
+    },
+    flush,
+    cancel: () => {
+      if (timer) window.clearTimeout(timer);
+      timer = null;
+      pendingValue = null;
+    },
+  };
+}
+
 export function SMARTGoalSetup() {
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
@@ -68,6 +107,9 @@ export function SMARTGoalSetup() {
   const [archetypeOverride, setArchetypeOverride] = useState<GoalArchetype | null>(null);
   const [aspirationalVision, setAspirationalVision] = useState<AspirationalVisionModel | null>(null);
   const [isVisionPromptDismissed, setIsVisionPromptDismissed] = useState(false);
+  const [lastSavedSnapshot, setLastSavedSnapshot] = useState<string | null>(null);
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("saved");
   const stepTopRef = useRef<HTMLDivElement | null>(null);
   const stepHeadingRef = useRef<HTMLHeadingElement | null>(null);
 
@@ -106,7 +148,10 @@ export function SMARTGoalSetup() {
         setFocusArea(parsedFocusArea);
       }
 
-      setSmartData(buildSMARTDataFromDraft(parsed));
+      const initialSmartData = buildSMARTDataFromDraft(parsed);
+      setSmartData(initialSmartData);
+      setLastSavedSnapshot(JSON.stringify(buildSmartGoalFromFormData(initialSmartData, parsedFocusArea || area)));
+      setLastSavedAt(new Date());
     } catch {
       // Ignore malformed drafts.
     }
@@ -188,27 +233,39 @@ export function SMARTGoalSetup() {
         }
       : null;
 
-  // ── Autosave draft to localStorage (debounced) ──
-  const isInitialLoadRef = useRef(true);
-  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const hasAnyDraftContent = useMemo(
     () => SMART_STEPS.some((step) => hasStepDraftContent(step.key, smartData)),
     [smartData],
   );
+  const currentSnapshot = useMemo(() => JSON.stringify(liveSmartGoal), [liveSmartGoal]);
+  const isDirty = setupState === "ready" && hasAnyDraftContent && currentSnapshot !== lastSavedSnapshot;
+  const debouncedSaveRef = useRef<FlushableDebouncedSave<string> | null>(null);
+
+  const saveSmartGoalSnapshot = useCallback((snapshot: string) => {
+    setAutoSaveStatus("saving");
+    localStorage.setItem(APP_STORAGE_KEYS.pendingSmartGoal, snapshot);
+    setLastSavedSnapshot(snapshot);
+    setLastSavedAt(new Date());
+    setAutoSaveStatus("saved");
+  }, []);
+
+  if (!debouncedSaveRef.current) {
+    debouncedSaveRef.current = createFlushableDebouncedSave(saveSmartGoalSnapshot, 600);
+  }
+
   useEffect(() => {
     if (setupState !== "ready") return;
-    // Skip the first render after loading — avoids writing back what was just loaded
-    if (isInitialLoadRef.current) {
-      isInitialLoadRef.current = false;
+    if (!hasAnyDraftContent) return;
+    if (!isDirty) {
+      setAutoSaveStatus("saved");
       return;
     }
-    if (!hasAnyDraftContent) return;
-    const timer = setTimeout(() => {
-      localStorage.setItem(APP_STORAGE_KEYS.pendingSmartGoal, JSON.stringify(liveSmartGoal));
-      setLastSavedAt(new Date());
-    }, 600);
-    return () => clearTimeout(timer);
-  }, [hasAnyDraftContent, liveSmartGoal, setupState]);
+
+    setAutoSaveStatus("idle");
+    debouncedSaveRef.current?.schedule(currentSnapshot);
+  }, [currentSnapshot, hasAnyDraftContent, isDirty, setupState]);
+
+  useDirtyFormGuard(isDirty, () => debouncedSaveRef.current?.flush());
 
   useScrollToTopOnChange(currentStep, {
     targetRef: stepTopRef,
@@ -248,7 +305,12 @@ export function SMARTGoalSetup() {
       timeBoundTargetWeeks: smartData.timeBound.mode === "weeks" ? targetWeeks : undefined,
     });
 
-    localStorage.setItem(APP_STORAGE_KEYS.pendingSmartGoal, JSON.stringify(smartGoal));
+    const finalSnapshot = JSON.stringify(smartGoal);
+    debouncedSaveRef.current?.cancel();
+    localStorage.setItem(APP_STORAGE_KEYS.pendingSmartGoal, finalSnapshot);
+    setLastSavedSnapshot(finalSnapshot);
+    setLastSavedAt(new Date());
+    setAutoSaveStatus("saved");
     const finalQuality = evaluateSmartGoalQuality(smartGoal);
     trackAnalyticsEvent("smart_goal_created", {
       focus_area: focusArea,
@@ -477,7 +539,7 @@ export function SMARTGoalSetup() {
           <Card className="flow-panel overflow-hidden">
             <CardContent className="p-5 sm:p-6 lg:p-7">
               <div className="mb-3 flex justify-end">
-                <AutoSaveIndicator lastSavedAt={lastSavedAt} />
+                <AutoSaveIndicator status={isDirty ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} />
               </div>
               <SmartGoalStepShell
                 stepIndex={currentStep}
