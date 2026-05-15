@@ -1,5 +1,7 @@
 import * as Sentry from "@sentry/react";
 
+import { getAppMode } from "@/app/utils/app-mode";
+
 const DEFAULT_TRACES_SAMPLE_RATE = 0.02;
 
 function parseSampleRate(rawValue: string | undefined, fallback: number): number {
@@ -17,7 +19,7 @@ function optionalEnv(value: string | undefined): string | undefined {
 }
 
 const sentryDsn = optionalEnv(import.meta.env.VITE_SENTRY_DSN);
-const appMode = optionalEnv(import.meta.env.VITE_APP_MODE) ?? "demo";
+const appMode = getAppMode();
 
 export const sentryEnabled = Boolean(sentryDsn);
 

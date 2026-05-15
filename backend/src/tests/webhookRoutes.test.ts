@@ -32,6 +32,10 @@ interface MockCassoPaymentOrder {
   expiresAt: Date;
   completedAt?: Date;
   cassoTransactionId?: string;
+  receiptEmail?: string;
+  receiptName?: string;
+  receiptSentAt?: Date;
+  receiptLastError?: string;
   saveCalls: number;
   save(): Promise<MockCassoPaymentOrder>;
 }
@@ -113,6 +117,8 @@ function createMockCassoPaymentOrder(overrides: Partial<MockCassoPaymentOrder> =
     amount: 2000,
     currency: "VND",
     status: "pending",
+    receiptEmail: "paid@example.test",
+    receiptName: "Paid User",
     expiresAt: new Date(Date.now() + 30 * 60 * 1000),
     saveCalls: 0,
     async save() {

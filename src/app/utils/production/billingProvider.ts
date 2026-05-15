@@ -93,7 +93,7 @@ const localBillingProvider: BillingProvider = {
     status: "local_only",
     providerMode: "local_test",
     providerLabel: getProviderLabel("local_test"),
-    message: "Bản dùng thử trên thiết bị chưa có cổng quản lý thanh toán riêng.",
+    message: "Chế độ chỉ lưu trên thiết bị chưa có cổng quản lý thanh toán riêng.",
   }),
 };
 

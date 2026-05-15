@@ -53,6 +53,38 @@ export interface AdminPaymentOrderSummary {
   } | null;
 }
 
+export type AdminRefundRequestStatus = "pending" | "completed" | "rejected";
+
+export interface AdminRefundRequestSummary {
+  id: string;
+  orderId: string;
+  userId: string;
+  userEmail: string;
+  contactEmail: string;
+  reason: string;
+  refundAccount: string;
+  status: AdminRefundRequestStatus;
+  adminNote?: string | null;
+  resolvedBy?: string | null;
+  resolvedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminRefundRequestListResponse {
+  status: AdminRefundRequestStatus | "all";
+  total: number;
+  items: AdminRefundRequestSummary[];
+}
+
+export interface AdminResolveRefundPayload {
+  adminNote?: string;
+}
+
+export interface AdminResolveRefundResult {
+  request: AdminRefundRequestSummary;
+}
+
 export interface AdminOverview {
   generatedAt: string;
   email: AdminEmailStatus;
@@ -131,6 +163,35 @@ export function adminListPaymentOrders(
 
   const query = searchParams.toString();
   return get<AdminPaymentOrderListResponse>(`/admin/billing/payment-orders${query ? `?${query}` : ""}`);
+}
+
+export function adminListRefundRequests(
+  status: AdminRefundRequestStatus | "all" = "pending",
+): Promise<AdminRefundRequestListResponse> {
+  const searchParams = new URLSearchParams();
+  if (status !== "pending") searchParams.set("status", status);
+  const query = searchParams.toString();
+  return get<AdminRefundRequestListResponse>(`/admin/billing/refund-requests${query ? `?${query}` : ""}`);
+}
+
+export function adminCompleteRefundRequest(
+  requestId: string,
+  payload: AdminResolveRefundPayload = {},
+): Promise<AdminResolveRefundResult> {
+  return post<AdminResolveRefundResult, AdminResolveRefundPayload>(
+    `/admin/billing/refund-requests/${requestId}/complete`,
+    payload,
+  );
+}
+
+export function adminRejectRefundRequest(
+  requestId: string,
+  payload: AdminResolveRefundPayload = {},
+): Promise<AdminResolveRefundResult> {
+  return post<AdminResolveRefundResult, AdminResolveRefundPayload>(
+    `/admin/billing/refund-requests/${requestId}/reject`,
+    payload,
+  );
 }
 
 export function adminSendExpiringBillingReminders(

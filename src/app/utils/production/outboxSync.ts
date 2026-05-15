@@ -38,7 +38,7 @@ export async function syncPendingOutbox(): Promise<OutboxSyncSnapshot> {
       status: "idle",
       syncedCount: 0,
       pendingCount: 0,
-      message: "Bản dùng thử đang giữ hàng chờ trên thiết bị này.",
+      message: "Dữ liệu đang giữ hàng chờ trên thiết bị này.",
     };
   }
 

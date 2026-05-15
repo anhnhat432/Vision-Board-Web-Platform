@@ -1,3 +1,4 @@
+import { getPlusPriceLabel } from "../billing-pricing";
 import type { EntitlementKey, PricingPlanCode } from "../storage-types";
 import type { PricingPlanDefinition, TwelveWeekTemplateDefinition } from "./types";
 
@@ -14,7 +15,7 @@ export const PLAN_DEFINITIONS: PricingPlanDefinition[] = [
     code: "PLUS",
     name: "Plus",
     shortLabel: "Plus",
-    priceLabel: "149.000đ / chu kỳ",
+    priceLabel: getPlusPriceLabel(),
     description: "Lớp Plus cho người muốn setup nhanh, giữ nhịp đều và có gợi ý review tuần sau.",
     highlights: [
       "Khung gợi ý thích nghi theo kiểu mục tiêu",

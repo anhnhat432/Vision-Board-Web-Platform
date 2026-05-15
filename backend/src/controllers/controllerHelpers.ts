@@ -2,7 +2,7 @@ import type { Request } from "express";
 
 import { ApiError } from "../utils/apiError";
 
-export function requireAuthUser(req: Request): { uid: string; email?: string; name?: string } {
+export function requireAuthUser(req: Request): { uid: string; email?: string; name?: string; emailVerified?: boolean } {
   if (!req.user?.uid) {
     throw new ApiError(401, "Unauthorized");
   }

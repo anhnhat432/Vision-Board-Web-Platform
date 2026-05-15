@@ -361,7 +361,8 @@ function getAnalyticsMode(): string {
 }
 
 function getAppMode(): string {
-  return import.meta.env.VITE_APP_MODE?.trim().toLowerCase() ?? "demo";
+  const appMode = import.meta.env.VITE_APP_MODE?.trim().toLowerCase();
+  return appMode === "demo" ? "demo" : "real";
 }
 
 function getGaMeasurementId(): string {

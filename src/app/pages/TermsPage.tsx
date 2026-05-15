@@ -77,17 +77,22 @@ export function TermsPage() {
             Thanh toán qua chuyển khoản ngân hàng (VietQR). Gói được kích hoạt
             sau khi hệ thống xác nhận giao dịch thành công.
           </li>
-          <li>
-            <strong>Hoàn tiền:</strong> bạn có thể yêu cầu hoàn tiền trong vòng
-            7 ngày kể từ ngày kích hoạt nếu chưa sử dụng đáng kể các tính năng
-            Plus. Liên hệ{" "}
+          <li id="refund" className="scroll-mt-24">
+            <strong>Hoàn tiền:</strong> yêu cầu hoàn tiền được xử lý thủ công qua support/admin, không tự động qua cổng thanh toán. Xem{" "}
+            <Link
+              to="/refund-policy"
+              className="font-medium text-violet-600 underline underline-offset-2 hover:text-violet-800"
+            >
+              Chính sách hoàn tiền
+            </Link>{" "}
+            hoặc liên hệ{" "}
             <a
               href={`mailto:${SUPPORT_EMAIL}`}
               className="font-medium text-violet-600 underline underline-offset-2 hover:text-violet-800"
             >
               {SUPPORT_EMAIL}
             </a>{" "}
-            để yêu cầu hoàn tiền.
+            kèm mã đơn hàng.
           </li>
           <li>
             <strong>Hủy gói:</strong> bạn có thể hủy gói Plus bất kỳ lúc nào.
@@ -153,6 +158,12 @@ export function TermsPage() {
             className="font-medium text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline dark:text-slate-400 dark:hover:text-slate-200"
           >
             Chính sách bảo mật
+          </Link>
+          <Link
+            to="/refund-policy"
+            className="font-medium text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline dark:text-slate-400 dark:hover:text-slate-200"
+          >
+            Chính sách hoàn tiền
           </Link>
           <Link
             to="/"

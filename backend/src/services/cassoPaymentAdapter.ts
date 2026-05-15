@@ -15,7 +15,7 @@
  *   CASSO_BANK_ACCOUNT   — receiving bank account number
  *   CASSO_BANK_NAME      — bank short name (e.g. "MB", "VCB", "TCB")
  *   CASSO_ACCOUNT_NAME   — account holder name
- *   PLUS_PRICE_VND       — price in VND (e.g. "79000")
+ *   PLUS_PRICE_VND       — price in VND (e.g. "99000")
  */
 
 import { createHash, randomBytes } from "node:crypto";
@@ -70,7 +70,7 @@ function getCassoConfig() {
     bankAccount: process.env.CASSO_BANK_ACCOUNT?.trim() ?? "",
     bankName: process.env.CASSO_BANK_NAME?.trim().toUpperCase() ?? "",
     accountName: process.env.CASSO_ACCOUNT_NAME?.trim() ?? "",
-    plusPriceVnd: Number.parseInt(process.env.PLUS_PRICE_VND?.trim() ?? "79000", 10),
+    plusPriceVnd: Number.parseInt(process.env.PLUS_PRICE_VND?.trim() ?? "99000", 10),
   };
 }
 
@@ -188,6 +188,8 @@ export function createCassoPaymentAdapter(): PaymentProviderAdapter {
         accountName: config.accountName,
         description: orderId,
         qrDataUrl,
+        receiptEmail: input.receiptEmail || input.customerEmail,
+        receiptName: input.receiptName,
         expiresAt,
       });
 

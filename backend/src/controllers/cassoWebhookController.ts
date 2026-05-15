@@ -18,9 +18,8 @@ import type { Request, Response } from "express";
 import { billingService } from "../services/billingServiceInstance";
 import * as backendMonitoring from "../monitoring/sentry";
 import { PaymentOrderModel } from "../models/PaymentOrderModel";
-import { UserModel } from "../models/UserModel";
 import type { CassoWebhookPayload, CassoTransaction } from "../services/cassoPaymentAdapter";
-import { sendBillingPaymentConfirmedEmail } from "../services/emailNotificationService";
+import { deliverReceiptForOrder } from "../services/paymentReceiptDeliveryService";
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 
 const TWELVE_WEEKS_MS = 12 * 7 * 24 * 60 * 60 * 1000;
@@ -304,23 +303,11 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
       order.cassoTransactionId = cassoTxId || undefined;
       await order.save();
 
-      try {
-        const account = await UserModel.findOne({ firebaseUid: order.userId })
-          .select("email displayName")
-          .lean();
-        const emailResult = await sendBillingPaymentConfirmedEmail({
-          to: account?.email,
-          displayName: account?.displayName,
-          orderId,
-          amount: order.amount,
-          currency: order.currency,
-          currentPeriodEnd: new Date(now.getTime() + TWELVE_WEEKS_MS),
-        });
-        if (emailResult.status === "failed") {
-          console.warn(`[casso-webhook] Payment email failed for order "${orderId}": ${emailResult.reason ?? "unknown"}`);
-        }
-      } catch (emailError) {
-        console.warn(`[casso-webhook] Payment email skipped for order "${orderId}":`, emailError);
+      const receiptResult = await deliverReceiptForOrder(orderId);
+      if (!receiptResult.sent) {
+        console.warn(
+          `[casso-webhook] Payment receipt email queued for retry for order "${orderId}": ${receiptResult.reason ?? "unknown"}`,
+        );
       }
 
       console.info({

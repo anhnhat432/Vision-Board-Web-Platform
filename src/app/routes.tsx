@@ -4,6 +4,7 @@ import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RootLayout } from "./components/RootLayout";
 import { Achievements } from "./pages/Achievements";
+import { BillingCheckoutQR } from "./pages/BillingCheckoutQR";
 import { BillingPlan } from "./pages/BillingPlan";
 import { Dashboard } from "./pages/Dashboard";
 import { GoalTracker } from "./pages/GoalTracker";
@@ -84,6 +85,10 @@ export const appRoutes = [
         ...lazyRoute(() => import("./pages/PrivacyPage"), "PrivacyPage"),
       },
       {
+        path: "refund-policy",
+        ...lazyRoute(() => import("./pages/RefundPolicyPage"), "RefundPolicyPage"),
+      },
+      {
         path: "onboarding",
         ...lazyRoute(() => import("./pages/Onboarding"), "Onboarding"),
       },
@@ -120,8 +125,16 @@ export const appRoutes = [
         Component: TwelveWeekSystemRoute,
       },
       {
+        path: "billing/confirm",
+        ...lazyRoute(() => import("./pages/BillingConfirm"), "BillingConfirm"),
+      },
+      {
+        path: "billing/checkout/:orderId?",
+        Component: BillingCheckoutQR,
+      },
+      {
         path: "billing/mock-checkout",
-        ...lazyRoute(() => import("./pages/MockBillingCheckout"), "MockBillingCheckout"),
+        Component: () => <Navigate to="/billing/confirm" replace />,
       },
       {
         path: "billing/plan",

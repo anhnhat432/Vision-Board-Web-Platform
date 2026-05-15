@@ -37,6 +37,10 @@ export interface CreateCheckoutSessionInput {
   locale?: string;
   /** Optional customer email hint (pre-fill). */
   customerEmail?: string;
+  /** Email address where the post-payment receipt should be sent. */
+  receiptEmail?: string;
+  /** Optional recipient name for the post-payment receipt. */
+  receiptName?: string;
 }
 
 export interface CheckoutSessionResult {

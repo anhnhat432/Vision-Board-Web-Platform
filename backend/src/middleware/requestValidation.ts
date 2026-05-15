@@ -19,6 +19,9 @@ const MAX_LOCALE_LENGTH = 20;
 const MAX_CLIENT_USER_ID_LENGTH = 128;
 const CLIENT_USER_ID_REGEX = /^[A-Za-z0-9._:-]{4,128}$/;
 const MAX_PROFILE_PATCH_FIELDS = 12;
+const MAX_RECEIPT_EMAIL_LENGTH = 254;
+const MAX_RECEIPT_NAME_LENGTH = 120;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_CASSO_TRANSACTIONS = 100;
 const MAX_CASSO_DESCRIPTION_LENGTH = 512;
 const MAX_CASSO_ID_LENGTH = 128;
@@ -127,6 +130,32 @@ function normalizeClientUserId(value: unknown): string {
   }
 
   return trimmed;
+}
+
+function normalizeOptionalReceiptEmail(value: unknown): string | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (typeof value !== "string") {
+    throw new ApiError(400, "receiptEmail must be a valid email address.", undefined, "invalid_receipt_email");
+  }
+
+  const trimmed = value.trim().toLowerCase();
+  if (trimmed.length === 0) return undefined;
+  if (trimmed.length > MAX_RECEIPT_EMAIL_LENGTH || !EMAIL_REGEX.test(trimmed)) {
+    throw new ApiError(400, "receiptEmail must be a valid email address.", undefined, "invalid_receipt_email");
+  }
+
+  return trimmed;
+}
+
+function normalizeOptionalReceiptName(value: unknown): string | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (typeof value !== "string") {
+    throw new ApiError(400, "receiptName must be a string.", undefined, "invalid_receipt_name");
+  }
+
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return undefined;
+  return trimmed.slice(0, MAX_RECEIPT_NAME_LENGTH);
 }
 
 function normalizeStringField(
@@ -283,6 +312,8 @@ export const validateCheckoutSessionInput: RequestHandler = (req, _res, next) =>
     cancelUrl: normalizeHttpUrl(body.cancelUrl, "cancelUrl"),
     billingCycle: normalizeBillingCycle(body.billingCycle),
     locale: normalizeOptionalLocale(body.locale),
+    receiptEmail: normalizeOptionalReceiptEmail(body.receiptEmail),
+    receiptName: normalizeOptionalReceiptName(body.receiptName),
   };
 
   next();
@@ -304,6 +335,8 @@ export const validatePublicCheckoutSessionInput: RequestHandler = (req, _res, ne
     billingCycle: normalizeBillingCycle(body.billingCycle),
     locale: normalizeOptionalLocale(body.locale),
     clientUserId: normalizeClientUserId(body.clientUserId),
+    receiptEmail: normalizeOptionalReceiptEmail(body.receiptEmail),
+    receiptName: normalizeOptionalReceiptName(body.receiptName),
   };
 
   next();

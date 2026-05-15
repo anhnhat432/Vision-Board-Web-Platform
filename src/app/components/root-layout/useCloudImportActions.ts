@@ -91,7 +91,7 @@ function getCloudImportUnavailableReason({
   loginMessage: string;
   disabledMessage: string;
 }): string | undefined {
-  if (demoMode) return "Bản demo đang lưu trên thiết bị này, chưa bật nhập dữ liệu tài khoản.";
+  if (demoMode) return "Dữ liệu hiện chỉ lưu trên thiết bị này, chưa bật nhập dữ liệu tài khoản.";
   if (!userUid) return loginMessage;
   if (!apiConfigured) return "Kết nối tài khoản chưa được cấu hình cho không gian làm việc này.";
   if (!featureEnabled) return disabledMessage;

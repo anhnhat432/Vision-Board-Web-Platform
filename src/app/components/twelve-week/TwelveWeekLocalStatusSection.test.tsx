@@ -318,7 +318,7 @@ describe("TwelveWeekLocalStatusSection", () => {
       />,
     );
 
-    expect(screen.getByText("Bản demo lưu trên thiết bị này, không cần đồng bộ tài khoản.")).toBeInTheDocument();
+    expect(screen.getByText("Dữ liệu đang lưu trên thiết bị này, chưa bật đồng bộ tài khoản.")).toBeInTheDocument();
     const button = screen.getByRole("button", { name: /Đồng bộ tài khoản/i });
     expect(button).toBeDisabled();
 

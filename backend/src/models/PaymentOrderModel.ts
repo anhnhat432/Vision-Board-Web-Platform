@@ -31,11 +31,15 @@ export interface PaymentOrderEntity {
   accountName: string;
   description: string;
   qrDataUrl: string;
-  completedAt?: Date;
-  cassoTransactionId?: string;
-  manualCompletedBy?: string;
-  manualCompletedAt?: Date;
-  manualCompletionNote?: string;
+  completedAt?: Date | null;
+  cassoTransactionId?: string | null;
+  receiptEmail?: string | null;
+  receiptName?: string | null;
+  receiptSentAt?: Date | null;
+  receiptLastError?: string | null;
+  manualCompletedBy?: string | null;
+  manualCompletedAt?: Date | null;
+  manualCompletionNote?: string | null;
   expiresAt: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -122,6 +126,29 @@ const paymentOrderSchema = new Schema(
       required: false,
       trim: true,
     },
+    receiptEmail: {
+      type: String,
+      required: false,
+      trim: true,
+      lowercase: true,
+      maxlength: 254,
+    },
+    receiptName: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 120,
+    },
+    receiptSentAt: {
+      type: Date,
+      required: false,
+    },
+    receiptLastError: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 500,
+    },
     manualCompletedBy: {
       type: String,
       required: false,
@@ -171,11 +198,15 @@ export type PaymentOrderDocument = Document & {
   accountName: string;
   description: string;
   qrDataUrl: string;
-  completedAt?: Date;
-  cassoTransactionId?: string;
-  manualCompletedBy?: string;
-  manualCompletedAt?: Date;
-  manualCompletionNote?: string;
+  completedAt?: Date | null;
+  cassoTransactionId?: string | null;
+  receiptEmail?: string | null;
+  receiptName?: string | null;
+  receiptSentAt?: Date | null;
+  receiptLastError?: string | null;
+  manualCompletedBy?: string | null;
+  manualCompletedAt?: Date | null;
+  manualCompletionNote?: string | null;
   expiresAt: Date;
   createdAt: Date;
   updatedAt: Date;

@@ -43,9 +43,10 @@ export function PrivacyPage() {
             trong ứng dụng.
           </li>
           <li>
-            <strong>Dữ liệu thanh toán:</strong> thông tin đơn hàng và trạng
-            thái giao dịch (chúng tôi không lưu trực tiếp số tài khoản ngân
-            hàng).
+            <strong>Dữ liệu thanh toán:</strong> thông tin đơn hàng, trạng thái
+            giao dịch và trạng thái yêu cầu hoàn tiền. Khi bạn chủ động gửi yêu
+            cầu hoàn tiền, chúng tôi lưu tài khoản ngân hàng nhận hoàn tiền để
+            support xử lý chuyển khoản thủ công.
           </li>
           <li>
             <strong>Dữ liệu kỹ thuật:</strong> thông tin trình duyệt, thiết bị
@@ -61,7 +62,7 @@ export function PrivacyPage() {
         <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
           <li>Cung cấp và duy trì dịch vụ lập kế hoạch 12 tuần.</li>
           <li>Đồng bộ dữ liệu giữa các thiết bị khi bạn đăng nhập.</li>
-          <li>Xử lý thanh toán và kích hoạt gói Plus.</li>
+          <li>Xử lý thanh toán, kích hoạt gói Plus và yêu cầu hoàn tiền thủ công theo chính sách.</li>
           <li>Cải thiện trải nghiệm người dùng và sửa lỗi kỹ thuật.</li>
         </ul>
       </section>
@@ -162,6 +163,12 @@ export function PrivacyPage() {
             className="font-medium text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline dark:text-slate-400 dark:hover:text-slate-200"
           >
             Điều khoản dịch vụ
+          </Link>
+          <Link
+            to="/refund-policy"
+            className="font-medium text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline dark:text-slate-400 dark:hover:text-slate-200"
+          >
+            Chính sách hoàn tiền
           </Link>
           <Link
             to="/"

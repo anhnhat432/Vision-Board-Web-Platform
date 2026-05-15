@@ -1,6 +1,6 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { createMemoryRouter, RouterProvider } from "react-router";
+import { MemoryRouter, createMemoryRouter, RouterProvider } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 function stubRealBillingEnv(
@@ -24,6 +24,8 @@ function stubRealBillingEnv(
   vi.stubEnv("VITE_BILLING_PROVIDER_MODE", "api_contract");
   vi.stubEnv("VITE_BILLING_PROVIDER_LABEL", providerLabel);
   vi.stubEnv("VITE_API_BASE_URL", "https://api.example.test");
+  vi.stubEnv("VITE_BILLING_PLUS_MONTHLY_PRICE_VND", "99000");
+  vi.stubEnv("VITE_BILLING_PLUS_PRICE_CYCLE_LABEL", "tháng");
   const apiClient = {
     get: vi.fn((path: string) => {
       if (path === "/billing/entitlement") {
@@ -40,7 +42,7 @@ function stubRealBillingEnv(
         return Promise.resolve({
           orderId: "checkout_test",
           status: "pending",
-          amount: 79000,
+          amount: 99000,
           currency: "VND",
           bankAccount: "123456789",
           bankName: "MB",
@@ -49,6 +51,15 @@ function stubRealBillingEnv(
           expiresAt: "2099-05-10T10:30:00.000Z",
           completedAt: null,
           createdAt: "2026-05-10T10:00:00.000Z",
+        });
+      }
+
+      if (path === "/billing/checkout-info") {
+        return Promise.resolve({
+          amount: 99000,
+          currency: "VND",
+          billingCycle: "twelve_week",
+          provider: providerLabel,
         });
       }
 
@@ -126,42 +137,45 @@ describe("production billing surfaces", () => {
     const { UpgradePaywallDialog } = await import("../components/UpgradePaywallDialog");
 
     render(
-      <UpgradePaywallDialog
-        open
-        onOpenChange={() => undefined}
-        context="plan"
-        currentPlan="FREE"
-        checkoutMode="checkout"
-      />,
+      <MemoryRouter>
+        <UpgradePaywallDialog
+          open
+          onOpenChange={() => undefined}
+          context="plan"
+          currentPlan="FREE"
+          checkoutMode="checkout"
+        />
+      </MemoryRouter>,
     );
 
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByText("Thanh toán qua VNPay")).toBeInTheDocument();
-    expect(within(dialog).getByText(/149\.000/i)).toBeInTheDocument();
-    expect(within(dialog).getByRole("button", { name: "Nâng cấp Plus" })).toBeInTheDocument();
-    expect(within(dialog).queryByText(/mô phỏng|Bản dùng thử/i)).not.toBeInTheDocument();
+    expect(within(dialog).getByText(/99\.000\s*₫\s*\/\s*tháng/i)).toBeInTheDocument();
+    expect(within(dialog).getByText(/Bạn sẽ chuyển khoản 99\.000 ₫ đến tài khoản ngân hàng/i)).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: "Tiếp tục thanh toán" })).toBeInTheDocument();
+    expect(within(dialog).queryByText(/demo|dùng thử miễn phí|thử miễn phí|mô phỏng|Bản dùng thử/i)).not.toBeInTheDocument();
   }, UI_TEST_TIMEOUT_MS);
 
-  it("redirects mock checkout away from real provider mode", async () => {
-    stubRealBillingEnv("Momo");
+  it("redirects the legacy checkout route to the payment confirmation page", async () => {
+    stubRealBillingEnv("Casso + VietQR");
     const { MockBillingCheckout } = await import("./MockBillingCheckout");
 
     const router = createMemoryRouter(
       [
         { path: "/billing/mock-checkout", element: <MockBillingCheckout /> },
-        { path: "/billing/plan", element: <div data-testid="billing-plan-page">Billing plan</div> },
+        { path: "/billing/confirm", element: <div data-testid="billing-confirm-page">Confirm checkout</div> },
       ],
-      { initialEntries: ["/billing/mock-checkout?session=mock_checkout_test"] },
+      { initialEntries: ["/billing/mock-checkout?session=legacy_checkout_test"] },
     );
     render(<RouterProvider router={router} />);
 
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe("/billing/plan");
+      expect(router.state.location.pathname).toBe("/billing/confirm");
     });
-    expect(await screen.findByTestId("billing-plan-page")).toBeInTheDocument();
+    expect(await screen.findByTestId("billing-confirm-page")).toBeInTheDocument();
   }, UI_TEST_TIMEOUT_MS);
 
-  it("routes the real Plus upgrade CTA to the VietQR checkout page", async () => {
+  it("routes the real Plus upgrade CTA to the confirmation page", async () => {
     stubRealBillingEnv("Casso + VietQR");
     const { BillingPlan } = await import("./BillingPlan");
     const user = userEvent.setup();
@@ -169,7 +183,7 @@ describe("production billing surfaces", () => {
     const router = createMemoryRouter(
       [
         { path: "/billing/plan", element: <BillingPlan /> },
-        { path: "/billing/checkout", element: <div data-testid="vietqr-checkout-page">VietQR checkout</div> },
+        { path: "/billing/confirm", element: <div data-testid="billing-confirm-page">Confirm checkout</div> },
       ],
       {
         initialEntries: ["/billing/plan"],
@@ -179,14 +193,18 @@ describe("production billing surfaces", () => {
 
     await screen.findByRole("heading", { name: "Gói hiện tại" });
     await user.click(screen.getAllByRole("button", { name: "Nâng cấp Plus" })[0]);
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText(/99\.000\s*₫\s*\/\s*tháng/i)).toBeInTheDocument();
+    expect(within(dialog).queryByText(/demo|dùng thử miễn phí|thử miễn phí/i)).not.toBeInTheDocument();
+    await user.click(within(dialog).getByRole("button", { name: "Tiếp tục thanh toán" }));
 
     await waitFor(() => {
-      expect(router.state.location.pathname).toBe("/billing/checkout");
+      expect(router.state.location.pathname).toBe("/billing/confirm");
     });
-    expect(await screen.findByTestId("vietqr-checkout-page")).toBeInTheDocument();
+    expect(await screen.findByTestId("billing-confirm-page")).toBeInTheDocument();
   }, UI_TEST_TIMEOUT_MS);
 
-  it("creates a public VietQR checkout session when the visitor is signed out", async () => {
+  it("creates a public VietQR checkout session only after confirmation", async () => {
     const apiClient = stubRealBillingEnv("Casso + VietQR");
     vi.doMock("@/lib/auth/AuthContext", () => ({
       useAuthContext: () => ({
@@ -194,12 +212,23 @@ describe("production billing surfaces", () => {
         authLoading: false,
       }),
     }));
-    const { BillingCheckoutQR } = await import("./BillingCheckoutQR");
+    const { BillingConfirm } = await import("./BillingConfirm");
 
-    const router = createMemoryRouter([{ path: "/billing/checkout/:orderId?", element: <BillingCheckoutQR /> }], {
-      initialEntries: ["/billing/checkout"],
-    });
+    const router = createMemoryRouter(
+      [
+        { path: "/billing/confirm", element: <BillingConfirm /> },
+        { path: "/billing/checkout/:orderId", element: <div data-testid="vietqr-checkout-page">VietQR checkout</div> },
+      ],
+      {
+        initialEntries: ["/billing/confirm"],
+      },
+    );
     render(<RouterProvider router={router} />);
+
+    expect(await screen.findByRole("heading", { name: "Bạn đang mua gì?" })).toBeInTheDocument();
+    await userEvent.type(screen.getByLabelText(/Email sẽ nhận biên nhận/i), "buyer@example.test");
+    await userEvent.click(screen.getByRole("checkbox"));
+    await userEvent.click(screen.getByRole("button", { name: /Xác nhận và tạo mã QR/i }));
 
     await waitFor(() => {
       expect(apiClient.post).toHaveBeenCalledWith(
@@ -207,11 +236,14 @@ describe("production billing surfaces", () => {
         expect.objectContaining({
           planCode: "PLUS",
           clientUserId: expect.any(String),
+          receiptEmail: "buyer@example.test",
         }),
       );
     });
-    expect(await screen.findByText("Thanh toán VietQR")).toBeInTheDocument();
-    expect(screen.getByText("MB")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/billing/checkout/checkout_test");
+    });
+    expect(await screen.findByTestId("vietqr-checkout-page")).toBeInTheDocument();
   }, UI_TEST_TIMEOUT_MS);
 
   it("shows a 12-week plan CTA after a confirmed real checkout return", async () => {

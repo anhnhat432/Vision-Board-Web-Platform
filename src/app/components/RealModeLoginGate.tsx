@@ -16,7 +16,7 @@ const TARGET_LOGIN_PATH: Record<RealModeLoginGateProps["target"], string> = {
 
 export function RealModeLoginGate({ target }: RealModeLoginGateProps) {
   useEffect(() => {
-    toast.info("Bạn cần đăng nhập để bắt đầu kế hoạch 12 tuần trên phiên bản đầy đủ.");
+    toast.info("Bạn cần đăng nhập để bắt đầu kế hoạch 12 tuần và đồng bộ dữ liệu tài khoản.");
   }, []);
 
   return (
@@ -33,8 +33,7 @@ export function RealModeLoginGate({ target }: RealModeLoginGateProps) {
                 Đăng nhập để bắt đầu
               </h1>
               <p className="mx-auto max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                Phiên bản đầy đủ lưu kế hoạch 12 tuần lên tài khoản để đồng bộ giữa các thiết bị. Bạn cần đăng nhập
-                trước khi bắt đầu.
+                Tài khoản giúp lưu kế hoạch 12 tuần và đồng bộ giữa các thiết bị. Bạn cần đăng nhập trước khi bắt đầu.
               </p>
             </div>
             <div className="flex flex-col justify-center gap-3 sm:flex-row">

@@ -192,7 +192,7 @@ export async function runTwelveWeekManualCloudSync(
   const apiConfigured = options.apiConfigured ?? isApiBaseUrlConfigured();
 
   if (!realMode) {
-    return createSkippedResult("demo_mode", "Bản dùng thử đang lưu trên trình duyệt này, chưa cần đồng bộ tài khoản.");
+    return createSkippedResult("demo_mode", "Dữ liệu đang lưu trên trình duyệt này, chưa cần đồng bộ tài khoản.");
   }
   if (!mutationFeatureEnabled) {
     return createSkippedResult("mutation_feature_disabled", "Mutation sync đang tắt bằng feature flag.");

@@ -74,7 +74,7 @@ export async function getEntitlement(req: Request, res: Response): Promise<void>
  */
 export async function createCheckoutSession(req: Request, res: Response): Promise<void> {
   const user = requireAuthUser(req);
-  const { planCode, returnUrl, cancelUrl, billingCycle, locale } = req.body ?? {};
+  const { planCode, returnUrl, cancelUrl, billingCycle, locale, receiptEmail, receiptName } = req.body ?? {};
 
   // Validate planCode
   if (!planCode || typeof planCode !== "string" || !ALLOWED_PLAN_CODES.has(planCode)) {
@@ -111,6 +111,8 @@ export async function createCheckoutSession(req: Request, res: Response): Promis
       cancelUrl,
       locale,
       customerEmail: user.email,
+      receiptEmail: typeof receiptEmail === "string" ? receiptEmail : user.email,
+      receiptName: typeof receiptName === "string" ? receiptName : user.name,
     });
 
     // Verify entitlement is NOT granted at this point
@@ -147,7 +149,7 @@ export async function createCheckoutSession(req: Request, res: Response): Promis
  * frontend unlocks the local device after polling a completed order.
  */
 export async function createPublicCheckoutSession(req: Request, res: Response): Promise<void> {
-  const { planCode, returnUrl, cancelUrl, billingCycle, locale, clientUserId } = req.body ?? {};
+  const { planCode, returnUrl, cancelUrl, billingCycle, locale, clientUserId, receiptEmail, receiptName } = req.body ?? {};
 
   if (!planCode || typeof planCode !== "string" || !ALLOWED_PLAN_CODES.has(planCode)) {
     throw new ApiError(
@@ -188,6 +190,8 @@ export async function createPublicCheckoutSession(req: Request, res: Response): 
       successUrl: returnUrl,
       cancelUrl,
       locale,
+      receiptEmail: typeof receiptEmail === "string" ? receiptEmail : undefined,
+      receiptName: typeof receiptName === "string" ? receiptName : undefined,
     });
 
     res.status(200).json(

@@ -7,6 +7,7 @@ declare global {
         uid: string;
         email?: string;
         name?: string;
+        emailVerified?: boolean;
       };
     }
   }

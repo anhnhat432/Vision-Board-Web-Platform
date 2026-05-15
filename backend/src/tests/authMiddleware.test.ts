@@ -40,6 +40,7 @@ describe("auth middleware", () => {
           uid: "firebase_uid",
           email: "user@example.com",
           name: "Test User",
+          email_verified: true,
         };
       },
     };
@@ -55,6 +56,7 @@ describe("auth middleware", () => {
       uid: "firebase_uid",
       email: "user@example.com",
       name: "Test User",
+      emailVerified: true,
     });
     assert.deepEqual(nextArgs, [undefined]);
   });

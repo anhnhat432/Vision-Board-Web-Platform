@@ -282,6 +282,7 @@ function renderAppShell(initialEntry: string) {
           { path: "goals", element: <div data-testid="goals-page">Goals page</div> },
           { path: "settings", element: <div data-testid="settings-page">Settings page</div> },
           { path: "billing/plan", element: <div data-testid="billing-plan-page">Billing plan page</div> },
+          { path: "billing/confirm", element: <div data-testid="billing-confirm-page">Confirm checkout</div> },
           { path: "billing/checkout/:orderId?", element: <div data-testid="billing-checkout-page">Checkout page</div> },
           {
             element: <ProtectedRoute />,
@@ -660,11 +661,11 @@ describe("RootLayout onboarding redirect", () => {
     expect(router.state.location.state).toMatchObject({ from: "/goals" });
   });
 
-  it("keeps signed-out visitors on the Plus checkout page", async () => {
-    const { router } = renderAppShell("/billing/checkout");
+  it("keeps signed-out visitors on the Plus confirmation page", async () => {
+    const { router } = renderAppShell("/billing/confirm");
 
-    expect(await screen.findByTestId("billing-checkout-page")).toBeInTheDocument();
-    expect(router.state.location.pathname).toBe("/billing/checkout");
+    expect(await screen.findByTestId("billing-confirm-page")).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/billing/confirm");
     expect(screen.queryByTestId("login-page")).not.toBeInTheDocument();
   });
 

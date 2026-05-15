@@ -1,0 +1,247 @@
+import { apiClient } from "@/lib/api/apiClient";
+import { useAuthContext } from "@/lib/auth/AuthContext";
+import { CheckCircle2, Loader2, Mail, ReceiptText, ShieldCheck } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router";
+import { BillingPlusIllustration } from "../components/illustrations";
+import { formatVndAmount, PLUS_MONTHLY_PRICE_VND, PLUS_PRICE_CYCLE_LABEL } from "../utils/billing-pricing";
+import { getUserData } from "../utils/storage";
+
+interface CheckoutInfoResponse {
+  amount: number;
+  currency: string;
+  billingCycle: string;
+  provider: string;
+}
+
+interface CheckoutSessionResponse {
+  checkoutSessionId: string;
+  checkoutUrl: string;
+  expiresAt?: string;
+  provider: string;
+}
+
+function isValidEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function getPlanName(billingCycle: string): string {
+  if (billingCycle === "yearly") return "Plus yearly";
+  if (billingCycle === "monthly") return "Plus monthly";
+  return `Plus ${PLUS_PRICE_CYCLE_LABEL}`;
+}
+
+function getAmount(info: CheckoutInfoResponse | null): number {
+  return info?.amount && Number.isFinite(info.amount) ? info.amount : PLUS_MONTHLY_PRICE_VND;
+}
+
+export function BillingConfirm() {
+  const navigate = useNavigate();
+  const { authLoading, user } = useAuthContext();
+  const [checkoutInfo, setCheckoutInfo] = useState<CheckoutInfoResponse | null>(null);
+  const [receiptEmail, setReceiptEmail] = useState("");
+  const [agreed, setAgreed] = useState(false);
+  const [loadingInfo, setLoadingInfo] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const userEmail = user?.email?.trim() ?? "";
+  const emailVerified = user?.emailVerified === true;
+  const canEditEmail = !user || !emailVerified;
+  const amount = getAmount(checkoutInfo);
+  const planName = getPlanName(checkoutInfo?.billingCycle ?? "monthly");
+  const emailInvalid = receiptEmail.trim().length > 0 && !isValidEmail(receiptEmail);
+  const canSubmit = agreed && isValidEmail(receiptEmail) && !submitting && !authLoading;
+
+  useEffect(() => {
+    if (authLoading) return;
+    const fallbackEmail = userEmail || "";
+    setReceiptEmail((current) => current || fallbackEmail);
+  }, [authLoading, userEmail]);
+
+  useEffect(() => {
+    let cancelled = false;
+    apiClient
+      .get<CheckoutInfoResponse>("/billing/checkout-info")
+      .then((data) => {
+        if (cancelled) return;
+        setCheckoutInfo(data);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : "Không lấy được thông tin thanh toán.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingInfo(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const submitLabel = useMemo(() => {
+    if (submitting) return "Đang tạo mã QR...";
+    if (!agreed) return "Cần đồng ý điều khoản trước";
+    if (!isValidEmail(receiptEmail)) return "Nhập email nhận biên nhận";
+    return "Xác nhận và tạo mã QR";
+  }, [agreed, receiptEmail, submitting]);
+
+  const handleConfirm = useCallback(async () => {
+    if (!canSubmit) return;
+
+    setSubmitting(true);
+    setError(null);
+    try {
+      const isPublicCheckout = !user;
+      const result = await apiClient.post<CheckoutSessionResponse>(
+        isPublicCheckout ? "/billing/public-checkout-session" : "/billing/checkout-session",
+        {
+          planCode: "PLUS",
+          billingCycle: checkoutInfo?.billingCycle ?? "twelve_week",
+          returnUrl: `${window.location.origin}/billing/checkout`,
+          cancelUrl: `${window.location.origin}/billing/plan`,
+          receiptEmail: receiptEmail.trim(),
+          receiptName: user?.displayName ?? undefined,
+          ...(isPublicCheckout ? { clientUserId: getUserData().userId } : {}),
+        },
+      );
+
+      if (result?.checkoutSessionId) {
+        navigate(`/billing/checkout/${result.checkoutSessionId}`, { replace: true });
+        return;
+      }
+
+      throw new Error("Không nhận được mã đơn hàng.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Không thể tạo mã QR thanh toán.");
+    } finally {
+      setSubmitting(false);
+    }
+  }, [canSubmit, checkoutInfo?.billingCycle, navigate, receiptEmail, user]);
+
+  return (
+    <div className="mx-auto max-w-4xl px-4 py-10">
+      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <section className="rounded-[var(--r-card)] border border-slate-200 bg-white/95 p-6 shadow-xl shadow-slate-200/60">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-violet-100 text-violet-700">
+              <ReceiptText className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-600">Xác nhận trước khi thanh toán</p>
+              <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">Bạn đang mua gì?</h1>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Vui lòng kiểm tra gói, số tiền và email nhận biên nhận trước khi tạo mã QR chuyển khoản.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-4 rounded-[var(--r-card)] border border-slate-100 bg-slate-50/80 p-4">
+            <ConfirmRow label="Tên gói" value={planName} />
+            <ConfirmRow
+              label="Số tiền"
+              value={loadingInfo ? "Đang tải..." : `${formatVndAmount(amount)} ${checkoutInfo?.currency ?? "VND"}`}
+              highlight
+            />
+            <ConfirmRow label="Phương thức" value="Chuyển khoản VietQR qua Casso" />
+          </div>
+
+          <div className="mt-6 rounded-[var(--r-card)] border border-indigo-100 bg-indigo-50/60 p-4">
+            <label htmlFor="receipt-email" className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+              <Mail className="h-4 w-4 text-indigo-600" />
+              Email sẽ nhận biên nhận
+            </label>
+            <input
+              id="receipt-email"
+              type="email"
+              value={receiptEmail}
+              onChange={(event) => setReceiptEmail(event.target.value)}
+              disabled={!canEditEmail}
+              className="mt-3 w-full rounded-[var(--r-control)] border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-100 disabled:text-slate-500"
+              placeholder="you@example.com"
+            />
+            <p className="mt-2 text-xs leading-5 text-slate-600">
+              {emailVerified
+                ? "Email tài khoản đã xác minh nên biên nhận sẽ gửi về địa chỉ này."
+                : "Nếu email tài khoản chưa xác minh hoặc bạn chưa đăng nhập, bạn có thể sửa email nhận biên nhận."}
+            </p>
+            {emailInvalid && <p className="mt-2 text-xs font-medium text-red-600">Email nhận biên nhận chưa đúng định dạng.</p>}
+          </div>
+
+          <label className="mt-6 flex items-start gap-3 rounded-[var(--r-card)] border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-700">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={(event) => setAgreed(event.target.checked)}
+              className="mt-1 h-4 w-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+            />
+            <span>
+              Tôi đồng ý với{" "}
+              <Link to="/terms" className="font-semibold text-violet-700 underline-offset-4 hover:underline">
+                Điều khoản
+              </Link>{" "}
+              và{" "}
+              <Link to="/refund-policy" className="font-semibold text-violet-700 underline-offset-4 hover:underline">
+                Chính sách hoàn tiền
+              </Link>
+              .
+            </span>
+          </label>
+
+          {error && (
+            <div className="mt-4 rounded-[var(--r-card)] border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              onClick={handleConfirm}
+              disabled={!canSubmit}
+              className="inline-flex items-center justify-center gap-2 rounded-[var(--r-tile)] bg-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-200 transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+            >
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              {submitLabel}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/billing/plan")}
+              className="text-sm font-medium text-slate-500 underline decoration-slate-300 transition hover:text-slate-700"
+            >
+              Quay lại trang gói
+            </button>
+          </div>
+        </section>
+
+        <aside className="rounded-[var(--r-card)] border border-violet-100 bg-violet-50/70 p-6">
+          <BillingPlusIllustration className="mx-auto w-44 text-violet-500 opacity-80" />
+          <div className="mt-6 space-y-4">
+            <div className="flex gap-3">
+              <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+              <p className="text-sm leading-6 text-slate-700">
+                Mã QR chỉ được tạo sau khi bạn xác nhận rõ số tiền và email nhận biên nhận.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <ReceiptText className="mt-0.5 h-5 w-5 shrink-0 text-violet-600" />
+              <p className="text-sm leading-6 text-slate-700">
+                Sau khi Casso xác nhận giao dịch, Dear Our Future gửi biên nhận thanh toán đơn giản qua email.
+              </p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function ConfirmRow({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-4 text-sm">
+      <span className="text-slate-500">{label}</span>
+      <span className={highlight ? "text-lg font-bold text-violet-700" : "font-semibold text-slate-900"}>{value}</span>
+    </div>
+  );
+}

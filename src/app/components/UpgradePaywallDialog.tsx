@@ -1,9 +1,11 @@
 import { CreditCard, Crown, LockKeyhole, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
-import { isDemoMode, shouldShowBillingDebugUi } from "../utils/app-mode";
+import { useNavigate } from "react-router";
+import { shouldShowBillingDebugUi } from "../utils/app-mode";
+import { formatVndAmount, getPlusPriceLabel, PLUS_MONTHLY_PRICE_VND } from "../utils/billing-pricing";
 import { type MonetizationSource, trackPaywallCtaClicked, trackPaywallViewed } from "../utils/monetization-analytics";
-import { getBillingProviderStatus, startCheckoutFlow } from "../utils/production";
+import { getBillingProviderStatus } from "../utils/production";
+import { BILLING_SUPPORT_EMAIL } from "../utils/production/env";
 import type { PricingPlanCode } from "../utils/storage-types";
 import {
   getPaywallCopy,
@@ -28,8 +30,6 @@ export function buildBillingPlanUpgradePath(originPath: string): string {
   return `/billing/plan?returnTo=${encodeURIComponent(safeOriginPath)}`;
 }
 
-type UpgradeCheckoutMode = "billing_plan" | "checkout";
-
 interface UpgradePaywallDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -41,7 +41,7 @@ interface UpgradePaywallDialogProps {
   recommendedPlan?: PricingPlanCode;
   source?: MonetizationSource;
   onCheckoutComplete?: (planCode: PricingPlanCode) => void;
-  checkoutMode?: UpgradeCheckoutMode;
+  checkoutMode?: "billing_plan" | "checkout";
   returnUrl?: string;
 }
 
@@ -55,23 +55,22 @@ export function UpgradePaywallDialog({
   description,
   recommendedPlan,
   source = "paywall_dialog",
-  onCheckoutComplete,
-  checkoutMode = "billing_plan",
-  returnUrl,
 }: UpgradePaywallDialogProps) {
+  const navigate = useNavigate();
   const [isUpgrading, setIsUpgrading] = useState(false);
-  const [originPath, setOriginPath] = useState(() => getCurrentUpgradeOriginPath());
   const paywallCopy = useMemo(() => getPaywallCopy(context), [context]);
   const billingProviderStatus = useMemo(() => getBillingProviderStatus(), []);
   const billingDebugUi = shouldShowBillingDebugUi();
-  const demoMode = isDemoMode();
-  const providerLabel = billingProviderStatus.providerLabel || "đơn vị thanh toán";
+  const providerLabel = billingProviderStatus.providerLabel || "Casso + VietQR";
   const upgradeFeatureLabel = paywallCopy.bullets[0] ?? paywallCopy.title;
+  const blockedFeatureLabel = title ?? upgradeFeatureLabel;
+  const plusPriceAmountLabel = formatVndAmount(PLUS_MONTHLY_PRICE_VND);
+  const plusPriceLabel = getPlusPriceLabel();
+  const receiptEmailLabel = BILLING_SUPPORT_EMAIL ? `email ${BILLING_SUPPORT_EMAIL}` : "email tài khoản của bạn";
 
   useEffect(() => {
     if (!open) return;
 
-    setOriginPath(getCurrentUpgradeOriginPath());
     trackPaywallViewed({
       goalId,
       context,
@@ -95,52 +94,7 @@ export function UpgradePaywallDialog({
         placement: "paywall_dialog_plan_card",
       });
 
-      if (checkoutMode === "billing_plan") {
-        if (typeof window !== "undefined") {
-          window.location.assign(buildBillingPlanUpgradePath(originPath));
-        }
-        onOpenChange(false);
-        return;
-      }
-
-      const result = await startCheckoutFlow({
-        planCode,
-        context,
-        goalId,
-        source,
-        recommendedPlan: recommendedPlan ?? paywallCopy.recommendedPlan,
-        returnUrl: returnUrl ?? DEFAULT_BILLING_RETURN_PATH,
-      });
-
-      if (!result.ok) {
-        toast.error(result.message);
-      } else if (result.status === "redirect_required") {
-        if (result.checkoutUrl && typeof window !== "undefined") {
-          const isSameOriginCheckout =
-            result.checkoutUrl.startsWith("/") || result.checkoutUrl.startsWith(window.location.origin);
-
-          if (isSameOriginCheckout) {
-            window.location.assign(result.checkoutUrl);
-          } else {
-            window.open(result.checkoutUrl, "_blank", "noopener,noreferrer");
-          }
-        }
-
-        toast.success(result.message, {
-          description: "Tiếp tục thanh toán để hoàn tất nâng cấp.",
-        });
-      } else if (result.status === "already_active") {
-        toast.info(result.message);
-      } else {
-        toast.success(result.message, {
-          description: "Quyền đã được cập nhật trên tài khoản của bạn.",
-        });
-      }
-
-      if (result.ok && result.status !== "redirect_required") {
-        onCheckoutComplete?.(result.planCode);
-      }
-
+      navigate("/billing/confirm");
       onOpenChange(false);
     } finally {
       setIsUpgrading(false);
@@ -151,21 +105,12 @@ export function UpgradePaywallDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[calc(100vh-1rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] overflow-hidden border-0 gradient-shell p-0 shadow-2xl sm:!max-w-4xl">
         <div className="max-h-[calc(100vh-1rem)] overflow-hidden rounded-[var(--r-card)] sm:rounded-[var(--r-card)]">
-          {/* Demo banner - only show in demo mode */}
-          {demoMode && (
-            <div className="border-b border-amber-400 bg-amber-50 px-5 py-3 sm:px-7">
-              <div className="flex items-center justify-center gap-2 text-amber-900">
-                <span className="font-semibold">Bản dùng thử</span>
-                <span className="text-amber-700">Không cần thanh toán thật. Quyền chỉ mở trên trình duyệt này.</span>
-              </div>
-            </div>
-          )}
           <div className="border-b border-white/70 gradient-dark-indigo px-5 py-6 text-white sm:px-7 sm:py-7">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="max-w-2xl">
                 <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/78">
                   <LockKeyhole className="h-3.5 w-3.5" />
-                  {demoMode ? "Dùng thử Plus" : "Plus cho hệ 12 tuần"}
+                  Plus cho hệ 12 tuần
                 </div>
                 <DialogHeader className="mt-4 text-left">
                   <DialogTitle className="text-3xl font-bold leading-tight text-white">
@@ -188,7 +133,15 @@ export function UpgradePaywallDialog({
             <div className="min-w-0 space-y-4">
               <div className="rounded-[var(--r-card)] border border-white/70 bg-white/82 p-5 shadow-sm">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Điều Plus giúp bạn ngay lúc này
+                  Tính năng đang bị giới hạn
+                </p>
+                <h3 className="mt-2 text-lg font-semibold text-slate-950">{blockedFeatureLabel}</h3>
+                <p className="mt-2 text-sm leading-7 text-slate-600">
+                  Gói Miễn phí vẫn giúp bạn chạy một chu kỳ 12 tuần cơ bản. Plus mở thêm lớp nâng cao để setup nhanh hơn,
+                  giữ nhịp tốt hơn và review rõ hơn.
+                </p>
+                <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  Plus mở khóa
                 </p>
                 <div className="mt-4 space-y-3">
                   {paywallCopy.bullets.map((bullet) => (
@@ -212,7 +165,7 @@ export function UpgradePaywallDialog({
                         {billingProviderStatus.mode === "api_contract"
                           ? "API contract"
                           : billingProviderStatus.mode === "mock_provider"
-                            ? "Đơn vị nội bộ"
+                            ? "Nhà cung cấp nội bộ"
                             : "Cục bộ"}
                       </p>
                     </div>
@@ -260,12 +213,10 @@ export function UpgradePaywallDialog({
                           )}
                         </div>
                         <p className="mt-2 text-sm leading-7 text-slate-600">{plan.description}</p>
-                        {!demoMode && (
-                          <p className="mt-2 text-sm leading-7 text-slate-600">
-                            Nâng cấp {plan.name} để mở khoá {upgradeFeatureLabel.toLowerCase()} — gia hạn theo chu kỳ
-                            thanh toán hàng tháng/năm theo cấu hình nhà cung cấp.
-                          </p>
-                        )}
+                        <p className="mt-2 text-sm leading-7 text-slate-600">
+                          Nâng cấp {plan.name} để mở khoá {upgradeFeatureLabel.toLowerCase()}. Quyền Plus được kích hoạt
+                          sau khi Casso xác nhận chuyển khoản ngân hàng.
+                        </p>
                       </div>
                       <div className="rounded-[var(--r-card)] border border-slate-200 bg-white/90 p-3 text-slate-900">
                         <Crown className="h-5 w-5 text-violet-600" />
@@ -276,13 +227,11 @@ export function UpgradePaywallDialog({
                       <p className="text-xs uppercase tracking-[0.16em] text-slate-400">
                         Giá gói
                       </p>
-                      <p className="mt-2 text-3xl font-bold text-slate-950">{plan.priceLabel}</p>
-                      {!demoMode && (
-                        <p className="mt-2 flex items-center gap-2 text-sm font-medium text-slate-700">
-                          <CreditCard className="h-4 w-4 text-slate-500" />
-                          Thanh toán qua {providerLabel}
-                        </p>
-                      )}
+                      <p className="mt-2 text-3xl font-bold text-slate-950">{plusPriceLabel}</p>
+                      <p className="mt-2 flex items-center gap-2 text-sm font-medium text-slate-700">
+                        <CreditCard className="h-4 w-4 text-slate-500" />
+                        Thanh toán qua {providerLabel}
+                      </p>
                     </div>
 
                     <div className="mt-4 space-y-2">
@@ -303,13 +252,7 @@ export function UpgradePaywallDialog({
                       variant={isCurrent ? "outline" : "default"}
                       onClick={() => handleUpgrade(plan.code as Exclude<PricingPlanCode, "FREE">)}
                     >
-                      {isCurrent
-                        ? demoMode
-                          ? "Đang dùng trên thiết bị này"
-                          : "Đang dùng"
-                        : demoMode
-                          ? `Mở ${plan.name}`
-                          : `Nâng cấp ${plan.name}`}
+                      {isCurrent ? "Đang dùng" : "Tiếp tục thanh toán"}
                     </Button>
                   </div>
                 );
@@ -319,11 +262,8 @@ export function UpgradePaywallDialog({
 
           <DialogFooter className="flex flex-col gap-3 border-t border-white/70 bg-white/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5">
             <p className="text-sm leading-7 text-slate-500">
-              {demoMode
-                ? "Bản dùng thử không thu tiền thật. Gói chỉ được mở trên trình duyệt này."
-                : billingProviderStatus.mode === "api_contract"
-                  ? `Bạn sẽ được chuyển đến trang thanh toán ${billingProviderStatus.providerLabel || "an toàn"} khi xác nhận.`
-                  : "Bạn có thể dùng gói miễn phí nếu chưa cần tính năng nâng cao lúc này."}
+              Bạn sẽ chuyển khoản {plusPriceAmountLabel} đến tài khoản ngân hàng. Sau khi chúng tôi nhận được tiền
+              (thường trong 1-2 phút), quyền Plus sẽ kích hoạt và biên nhận gửi về {receiptEmailLabel}.
             </p>
             <Button className="w-full sm:w-auto" variant="outline" onClick={() => onOpenChange(false)}>
               Để sau

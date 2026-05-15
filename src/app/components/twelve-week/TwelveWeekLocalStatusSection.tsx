@@ -66,7 +66,7 @@ function getMutationQueueSyncBlocker(input: {
 }): string | null {
   const { backendConnectionStatus, mutationQueueSyncStatus } = input;
 
-  if (!mutationQueueSyncStatus.realMode) return "Bản demo lưu trên thiết bị này, không cần đồng bộ tài khoản.";
+  if (!mutationQueueSyncStatus.realMode) return "Dữ liệu đang lưu trên thiết bị này, chưa bật đồng bộ tài khoản.";
   if (!mutationQueueSyncStatus.featureEnabled) return "Đồng bộ thay đổi đang tắt.";
   if (!mutationQueueSyncStatus.pullFeatureEnabled) return "Khôi phục dữ liệu tài khoản đang tắt.";
   if (!mutationQueueSyncStatus.apiConfigured) return "Chưa cấu hình kết nối tài khoản để gửi hàng chờ.";
@@ -115,7 +115,7 @@ function getMutationQueueResultDescription(result: MutationQueueSyncResult | nul
     case "pull_feature_disabled":
       return "Khôi phục dữ liệu tài khoản đang tắt.";
     case "demo_mode":
-      return "Bản dùng thử không gọi API tài khoản.";
+      return "Chế độ chỉ lưu cục bộ không gọi API tài khoản.";
     case "unauthenticated":
       return "Cần đăng nhập để đồng bộ tài khoản.";
     case "api_not_configured":

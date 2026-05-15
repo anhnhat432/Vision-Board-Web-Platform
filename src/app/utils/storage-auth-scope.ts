@@ -182,6 +182,14 @@ function removeAuthScopedAuxiliaryData(authUid: string): void {
   }
 }
 
+/**
+ * Clears sensitive browser data that is scoped to a signed-in Firebase UID.
+ *
+ * Call this on every logout before Firebase sign-out and before persisting the
+ * active authenticated snapshot so billing, entitlement sync markers, restore
+ * snapshots, backend link stores, import backups, and UID-scoped mutation queue
+ * entries cannot leak to the next account using the same device.
+ */
 export function clearAuthScopedSensitiveData(authUid: string): void {
   if (typeof window === "undefined") return;
 

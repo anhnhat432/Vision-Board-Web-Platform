@@ -6,6 +6,11 @@ import {
   getAdminOverview,
   sendExpiringBillingReminders,
 } from "../controllers/adminController";
+import {
+  completeAdminRefundRequest,
+  getAdminRefundRequests,
+  rejectAdminRefundRequest,
+} from "../controllers/refundController";
 import { requireAdmin } from "../middleware/requireAdmin";
 import { validateOptionalJsonObjectBody, validateOrderIdParam } from "../middleware/requestValidation";
 import { asyncHandler } from "../utils/asyncHandler";
@@ -26,6 +31,19 @@ adminRoutes.post(
   validateOrderIdParam,
   validateOptionalJsonObjectBody,
   asyncHandler(completePaymentOrderManually),
+);
+adminRoutes.get("/admin/billing/refund-requests", asyncHandler(requireAdmin), asyncHandler(getAdminRefundRequests));
+adminRoutes.post(
+  "/admin/billing/refund-requests/:requestId/complete",
+  asyncHandler(requireAdmin),
+  validateOptionalJsonObjectBody,
+  asyncHandler(completeAdminRefundRequest),
+);
+adminRoutes.post(
+  "/admin/billing/refund-requests/:requestId/reject",
+  asyncHandler(requireAdmin),
+  validateOptionalJsonObjectBody,
+  asyncHandler(rejectAdminRefundRequest),
 );
 
 export { adminRoutes };

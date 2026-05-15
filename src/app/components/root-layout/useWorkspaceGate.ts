@@ -24,7 +24,7 @@ export function isAuthProtectedPath(pathname: string): boolean {
 }
 
 export function isPublicCheckoutPath(pathname: string): boolean {
-  return pathname === "/billing/checkout" || pathname.startsWith("/billing/checkout/");
+  return pathname === "/billing/confirm" || pathname === "/billing/checkout" || pathname.startsWith("/billing/checkout/");
 }
 
 export function isPublicHomePath(pathname: string): boolean {

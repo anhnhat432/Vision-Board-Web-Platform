@@ -1,4 +1,5 @@
 ﻿import { apiClient, toAppError } from "@/lib/api/apiClient";
+import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
 import { AlertTriangle, CreditCard, Crown, LifeBuoy, Loader2, ReceiptText, RefreshCw, Shield, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
@@ -21,14 +22,23 @@ import {
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
+import { Input } from "../components/ui/input";
+import { Textarea } from "../components/ui/textarea";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
-import { isDemoMode, isRealMode, shouldShowBillingDebugUi } from "../utils/app-mode";
+import { isRealMode, shouldShowBillingDebugUi } from "../utils/app-mode";
 import { formatBillingExpiryDate, getBillingExpiryInfo } from "../utils/billing-expiry";
 import { getBillingProviderModeLabel, getBillingReadinessLabel } from "../utils/billing-contract";
-import { trackExperimentExposure, trackPaywallCtaClicked } from "../utils/monetization-analytics";
+import { trackPaywallCtaClicked } from "../utils/monetization-analytics";
 import {
-  cancelSubscriptionOnServer,
   getBillingProviderStatus,
   getLastEntitlementSyncSnapshot,
   getLastRestoreAccessSnapshot,
@@ -37,7 +47,7 @@ import {
   resolveAppReturnPath,
   syncEntitlementsWithProvider,
 } from "../utils/production";
-import { getOrAssignExperimentVariant, getUserData, markExperimentExposed, startTrialLocally } from "../utils/storage";
+import { getUserData } from "../utils/storage";
 import type { PricingPlanCode } from "../utils/storage-types";
 import {
   getEntitlementLabel,
@@ -48,6 +58,13 @@ import {
 
 type CheckoutReturnStatus = "idle" | "pending" | "confirmed" | "failed";
 type PaymentOrderStatus = "pending" | "completed" | "expired" | "failed";
+type RefundRequestStatus = "pending" | "completed" | "rejected";
+
+interface PaymentHistoryRefundRequest {
+  status: RefundRequestStatus;
+  createdAt: string | null;
+  resolvedAt: string | null;
+}
 
 interface PaymentHistoryOrder {
   orderId: string;
@@ -61,6 +78,28 @@ interface PaymentHistoryOrder {
   completedAt: string | null;
   expiresAt: string | null;
   invoiceUrl?: string | null;
+  receiptSentAt?: string | null;
+  refundRequest?: PaymentHistoryRefundRequest | null;
+}
+
+interface RefundRequestResponse {
+  request: PaymentHistoryRefundRequest & {
+    id: string;
+    orderId: string;
+    contactEmail: string;
+  };
+}
+
+interface RefundFormState {
+  orderId: string;
+  contactEmail: string;
+  reason: string;
+  refundAccount: string;
+}
+
+interface ResendReceiptResponse {
+  orderId: string;
+  receiptSentAt: string | null;
 }
 
 interface PaymentHistoryResponse {
@@ -68,6 +107,11 @@ interface PaymentHistoryResponse {
 }
 
 const BILLING_SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() ?? "";
+const DEFAULT_REFUND_WINDOW_DAYS = 7;
+const REFUND_WINDOW_DAYS = Number.parseInt(
+  import.meta.env.VITE_REFUND_WINDOW_DAYS?.trim() || String(DEFAULT_REFUND_WINDOW_DAYS),
+  10,
+);
 
 const PAYMENT_STATUS_LABELS: Record<PaymentOrderStatus, string> = {
   pending: "Đang chờ",
@@ -122,13 +166,34 @@ function formatPaymentDate(iso: string | null): string {
   }
 }
 
+function getRefundWindowDays(): number {
+  return Number.isFinite(REFUND_WINDOW_DAYS) && REFUND_WINDOW_DAYS > 0
+    ? REFUND_WINDOW_DAYS
+    : DEFAULT_REFUND_WINDOW_DAYS;
+}
+
+function isOrderRefundEligible(order: PaymentHistoryOrder): boolean {
+  if (order.status !== "completed" || !order.completedAt) return false;
+  const paidAt = new Date(order.completedAt);
+  if (!Number.isFinite(paidAt.valueOf())) return false;
+  const elapsedMs = Date.now() - paidAt.getTime();
+  if (elapsedMs < 0) return true;
+  return elapsedMs <= getRefundWindowDays() * 24 * 60 * 60 * 1000;
+}
+
+function getRefundStatusLabel(status: RefundRequestStatus): string {
+  if (status === "completed") return "Đã hoàn tiền";
+  if (status === "rejected") return "Đã từ chối";
+  return "Đang chờ xử lý";
+}
+
 export function BillingPlan() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const authContext = useOptionalAuthContext();
   const { userData: syncedUserData, reloadUserData } = useSyncedUserData();
   const userData = syncedUserData ?? getUserData();
   const { currentPlanCode, currentPlanDefinition, entitlementKeys, premiumStatusItems } = usePlanEntitlements(userData);
-  const demoMode = isDemoMode();
   const realMode = isRealMode();
   const billingReturnUrl = useMemo(
     () => resolveAppReturnPath(searchParams.get("returnTo") ?? "/12-week-system?tab=settings"),
@@ -140,13 +205,21 @@ export function BillingPlan() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   const [isOpeningPortal, setIsOpeningPortal] = useState(false);
-  const [isStartingTrial, setIsStartingTrial] = useState(false);
-  const [isCanceling, setIsCanceling] = useState(false);
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showStopUsingConfirm, setShowStopUsingConfirm] = useState(false);
   const [checkoutReturnStatus, setCheckoutReturnStatus] = useState<CheckoutReturnStatus>("idle");
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistoryOrder[]>([]);
   const [isLoadingPaymentHistory, setIsLoadingPaymentHistory] = useState(false);
   const [paymentHistoryError, setPaymentHistoryError] = useState<string | null>(null);
+  const [resendingReceiptOrderId, setResendingReceiptOrderId] = useState<string | null>(null);
+  const [refundDialogOrder, setRefundDialogOrder] = useState<PaymentHistoryOrder | null>(null);
+  const [refundForm, setRefundForm] = useState<RefundFormState>({
+    orderId: "",
+    contactEmail: "",
+    reason: "",
+    refundAccount: "",
+  });
+  const [refundFormError, setRefundFormError] = useState<string | null>(null);
+  const [isSubmittingRefund, setIsSubmittingRefund] = useState(false);
 
   // Handle checkout return URL
   const returnStatus = searchParams.get("status");
@@ -204,26 +277,18 @@ export function BillingPlan() {
     }
   }, [isCheckoutReturn, checkoutReturnStatus, pollServerEntitlement]);
 
-  const trialCtaExperiment = useMemo(
-    () => getOrAssignExperimentVariant("paywall_trial_cta", ["control", "variant_a"]),
-    [],
-  );
-
-  useEffect(() => {
-    markExperimentExposed("paywall_trial_cta");
-    trackExperimentExposure({
-      experimentId: "paywall_trial_cta",
-      variantId: trialCtaExperiment,
-      context: "billing_plan",
-    });
-  }, [trialCtaExperiment]);
-
   const billingStatus = useMemo(() => getBillingProviderStatus(), []);
+  const profileEmail = authContext?.user?.email?.trim() ?? "";
+  const emailNeedsVerification = authContext?.user ? authContext.user.emailVerified !== true : false;
   const subscription = userData.subscription;
   const expiryInfo = useMemo(() => getBillingExpiryInfo(subscription), [subscription]);
 
   const lastEntitlementSync = useMemo(() => getLastEntitlementSyncSnapshot(), []);
   const lastRestoreAccess = useMemo(() => getLastRestoreAccessSnapshot(), []);
+  const latestRefundEligibleOrder = useMemo(
+    () => paymentHistory.find((order) => isOrderRefundEligible(order) && !order.refundRequest) ?? null,
+    [paymentHistory],
+  );
 
   const handleOpenUpgrade = (context: PremiumFeatureContext = "plan") => {
     trackPaywallCtaClicked({
@@ -235,11 +300,6 @@ export function BillingPlan() {
       targetPlan: "PLUS",
       placement: "billing_plan_page",
     });
-
-    if (realMode) {
-      navigate("/billing/checkout");
-      return;
-    }
 
     setUpgradeContext(context);
     setIsUpgradeDialogOpen(true);
@@ -294,11 +354,7 @@ export function BillingPlan() {
   const handleCheckoutComplete = (planCode: PricingPlanCode) => {
     reloadUserData();
     if (planCode !== "FREE") {
-      toast.success(
-        demoMode
-          ? `Đã mở ${getPlanLabel(planCode)} trên trình duyệt này.`
-          : `Đã cập nhật ${getPlanLabel(planCode)} trên tài khoản của bạn.`,
-      );
+      toast.success(`Đã cập nhật ${getPlanLabel(planCode)} trên tài khoản của bạn.`);
       navigate(billingReturnUrl);
     }
   };
@@ -336,42 +392,83 @@ export function BillingPlan() {
     subscription?.planCode === "PLUS" &&
     (expiryInfo.isExpiringSoon || expiryInfo.isExpired);
 
-  const isTrialing = subscription?.status === "trialing" && !isExpired;
-
-  const trialDaysLeft = useMemo(() => {
-    if (!isTrialing || !subscription?.renewsAt) return null;
-    const ms = new Date(subscription.renewsAt).getTime() - Date.now();
-    return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
-  }, [isTrialing, subscription?.renewsAt]);
-
-  const handleStartTrial = () => {
-    setIsStartingTrial(true);
-    try {
-      const granted = startTrialLocally("PLUS", 7);
-      if (granted !== "FREE") {
-        toast.success("Đã kích hoạt Plus dùng thử 7 ngày.");
-        reloadUserData();
-      } else {
-        toast.info("Bạn đã có gói này rồi.");
-      }
-    } finally {
-      setIsStartingTrial(false);
-    }
+  const handleConfirmStopUsing = () => {
+    setShowStopUsingConfirm(false);
+    toast.info("Plus hiện không tự động gia hạn. Bạn có thể tiếp tục dùng đến hết chu kỳ hoặc gửi yêu cầu hoàn tiền nếu còn đủ điều kiện.");
   };
 
-  const handleCancelSubscription = async () => {
-    setIsCanceling(true);
+  const openRefundDialog = (order: PaymentHistoryOrder, reason = "") => {
+    if (emailNeedsVerification) {
+      toast.error("Bạn cần xác minh email trước khi yêu cầu hoàn tiền.");
+      return;
+    }
+
+    setRefundDialogOrder(order);
+    setRefundForm({
+      orderId: order.orderId,
+      contactEmail: profileEmail,
+      reason,
+      refundAccount: "",
+    });
+    setRefundFormError(null);
+  };
+
+  const handleRequestUnusedCycleRefund = () => {
+    if (!latestRefundEligibleOrder) {
+      toast.info(`Không có đơn đã thanh toán còn trong thời hạn hoàn tiền ${getRefundWindowDays()} ngày.`);
+      return;
+    }
+
+    openRefundDialog(
+      latestRefundEligibleOrder,
+      "Tôi không muốn tiếp tục sử dụng Plus và muốn yêu cầu hoàn tiền cho phần chu kỳ chưa dùng.",
+    );
+  };
+
+  const canSubmitRefundRequest =
+    refundForm.orderId.trim().length > 0 &&
+    refundForm.contactEmail.trim().length > 0 &&
+    refundForm.reason.trim().length > 0 &&
+    refundForm.refundAccount.trim().length > 0 &&
+    !isSubmittingRefund;
+
+  const handleSubmitRefundRequest = async () => {
+    if (!refundDialogOrder || !canSubmitRefundRequest) return;
+
+    setIsSubmittingRefund(true);
+    setRefundFormError(null);
     try {
-      const result = await cancelSubscriptionOnServer();
-      if (result.ok) {
-        toast.success(result.message);
-        reloadUserData();
-      } else {
-        toast.error(result.message);
-      }
+      const response = await apiClient.post<RefundRequestResponse>(
+        `/billing/orders/${encodeURIComponent(refundDialogOrder.orderId)}/refund-request`,
+        {
+          contactEmail: refundForm.contactEmail.trim(),
+          reason: refundForm.reason.trim(),
+          refundAccount: refundForm.refundAccount.trim(),
+        },
+      );
+      const refundRequest: PaymentHistoryRefundRequest = {
+        status: response.request.status,
+        createdAt: response.request.createdAt,
+        resolvedAt: response.request.resolvedAt,
+      };
+      setPaymentHistory((orders) =>
+        orders.map((order) =>
+          order.orderId === refundDialogOrder.orderId
+            ? {
+                ...order,
+                refundRequest,
+              }
+            : order,
+        ),
+      );
+      toast.success("Đã gửi yêu cầu hoàn tiền — sẽ xử lý trong 3-7 ngày làm việc.");
+      setRefundDialogOrder(null);
+    } catch (error) {
+      const message = toAppError(error).message || "Không thể gửi yêu cầu hoàn tiền. Vui lòng thử lại sau.";
+      setRefundFormError(message);
+      toast.error(message);
     } finally {
-      setIsCanceling(false);
-      setShowCancelConfirm(false);
+      setIsSubmittingRefund(false);
     }
   };
 
@@ -385,7 +482,7 @@ export function BillingPlan() {
       targetPlan: "PLUS",
       placement: "billing_plan_renew",
     });
-    navigate("/billing/checkout");
+    navigate("/billing/confirm");
   };
 
   const handleCopySupportMessage = async () => {
@@ -405,8 +502,101 @@ export function BillingPlan() {
     }
   };
 
+  const handleResendReceipt = async (orderId: string) => {
+    setResendingReceiptOrderId(orderId);
+    try {
+      const response = await apiClient.post<ResendReceiptResponse>(
+        `/billing/orders/${encodeURIComponent(orderId)}/resend-receipt`,
+      );
+      setPaymentHistory((orders) =>
+        orders.map((order) =>
+          order.orderId === orderId ? { ...order, receiptSentAt: response.receiptSentAt ?? new Date().toISOString() } : order,
+        ),
+      );
+      toast.success("Đã gửi lại biên nhận thanh toán.");
+    } catch (error) {
+      toast.error(toAppError(error).message || "Chưa gửi lại được biên nhận. Vui lòng thử lại sau.");
+    } finally {
+      setResendingReceiptOrderId(null);
+    }
+  };
+
   return (
     <div className="flow-shell stack-section pb-12">
+      <Dialog open={refundDialogOrder !== null} onOpenChange={(open) => !open && setRefundDialogOrder(null)}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Yêu cầu hoàn tiền</DialogTitle>
+            <DialogDescription>
+              Yêu cầu sẽ được gửi tới support để admin duyệt thủ công và chuyển khoản hoàn lại trong 3-7 ngày làm việc.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <label htmlFor="refund-order-id" className="text-sm font-medium text-slate-700">
+                Mã đơn hàng
+              </label>
+              <Input id="refund-order-id" value={refundForm.orderId} readOnly />
+            </div>
+            <div className="grid gap-2">
+              <label htmlFor="refund-contact-email" className="text-sm font-medium text-slate-700">
+                Email liên hệ
+              </label>
+              <Input
+                id="refund-contact-email"
+                type="email"
+                value={refundForm.contactEmail}
+                onChange={(event) => setRefundForm((current) => ({ ...current, contactEmail: event.target.value }))}
+                placeholder="you@example.com"
+              />
+            </div>
+            <div className="grid gap-2">
+              <label htmlFor="refund-reason" className="text-sm font-medium text-slate-700">
+                Lý do hoàn tiền
+              </label>
+              <Textarea
+                id="refund-reason"
+                value={refundForm.reason}
+                onChange={(event) => setRefundForm((current) => ({ ...current, reason: event.target.value }))}
+                placeholder="Cho chúng tôi biết lý do bạn muốn hoàn tiền."
+              />
+            </div>
+            <div className="grid gap-2">
+              <label htmlFor="refund-account" className="text-sm font-medium text-slate-700">
+                Số tài khoản ngân hàng nhận tiền hoàn
+              </label>
+              <Input
+                id="refund-account"
+                value={refundForm.refundAccount}
+                onChange={(event) => setRefundForm((current) => ({ ...current, refundAccount: event.target.value }))}
+                placeholder="Ngân hàng - Số TK - Chủ TK"
+              />
+              <p className="text-xs leading-5 text-slate-500">
+                Đây là thông tin PII, chỉ dùng để support chuyển khoản hoàn tiền thủ công.
+              </p>
+            </div>
+            {refundFormError ? (
+              <div className="rounded-[var(--r-control)] border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {refundFormError}
+              </div>
+            ) : null}
+            {emailNeedsVerification ? (
+              <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                Bạn cần xác minh email tài khoản trước khi yêu cầu hoàn tiền.
+              </div>
+            ) : null}
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setRefundDialogOrder(null)} disabled={isSubmittingRefund}>
+              Huỷ
+            </Button>
+            <Button type="button" onClick={handleSubmitRefundRequest} disabled={!canSubmitRefundRequest || emailNeedsVerification}>
+              {isSubmittingRefund ? "Đang gửi…" : "Gửi yêu cầu hoàn tiền"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <UpgradePaywallDialog
         open={isUpgradeDialogOpen}
         onOpenChange={setIsUpgradeDialogOpen}
@@ -422,16 +612,12 @@ export function BillingPlan() {
       <PrimaryActionCard
         hero
         tone="violet"
-        eyebrow={demoMode ? "Plus dùng thử" : "Premium"}
+        eyebrow="Premium"
         icon={<CreditCard className="h-4 w-4" />}
         eyebrowClassName="text-white/72"
-        title={demoMode ? "Quản lý quyền Plus" : "Quản lý gói của bạn"}
+        title="Quản lý gói của bạn"
         titleAs="h1"
-        description={
-          demoMode
-            ? "Bạn có thể xem trước quyền Plus mà không thanh toán. Khi mở thanh toán thật, giao dịch sẽ được xác nhận qua trang thanh toán."
-            : "Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản của bạn. Quyền Plus chỉ mở sau khi hệ thống xác nhận giao dịch."
-        }
+        description="Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản của bạn. Quyền Plus chỉ mở sau khi hệ thống xác nhận giao dịch."
         className="flow-surface surface-aurora ring-soft-glow featured-surface glow-vivid page-enter relative overflow-hidden text-white"
         titleClassName="max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
         descriptionClassName="max-w-2xl text-base leading-8 text-white/82"
@@ -521,8 +707,7 @@ export function BillingPlan() {
         </Card>
       )}
 
-      {!demoMode ? (
-        <Card className="border-slate-200 bg-slate-50/90">
+      <Card className="border-slate-200 bg-slate-50/90">
           <CardContent className="grid gap-3 p-4 sm:grid-cols-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Thanh toán thật</p>
@@ -538,7 +723,6 @@ export function BillingPlan() {
             </div>
           </CardContent>
         </Card>
-      ) : null}
 
       {/* Current plan */}
       <SectionBlock title="Khu vực gói đang dùng" headerVisuallyHidden>
@@ -552,12 +736,8 @@ export function BillingPlan() {
           icon={<Crown className="h-4 w-4" />}
           description={
             currentPlanCode === "FREE"
-              ? demoMode
-                ? "Bạn đang dùng gói miễn phí trên trình duyệt này."
-                : "Bạn đang dùng gói miễn phí."
-              : demoMode
-                ? `Bạn đang dùng ${currentPlanName} trên trình duyệt này.`
-                : `Bạn đang dùng ${currentPlanName} trên tài khoản này và có thể tiếp tục trên thiết bị khác sau khi đăng nhập.`
+              ? "Bạn đang dùng gói miễn phí."
+              : `Bạn đang dùng ${currentPlanName} trên tài khoản này và có thể tiếp tục trên thiết bị khác sau khi đăng nhập.`
           }
           action={
             currentPlanCode === "FREE" ? (
@@ -621,13 +801,9 @@ export function BillingPlan() {
                 <p className="text-slate-500">Trạng thái</p>
                 <p className="font-medium text-slate-900">
                   {subscription?.status === "active"
-                    ? demoMode
-                      ? "Đang mở"
-                      : "Đang hoạt động"
+                    ? "Đang hoạt động"
                     : subscription?.status === "trialing"
-                      ? demoMode
-                        ? "Dùng thử"
-                        : "Đang trong thời gian ưu đãi"
+                      ? "Đang trong thời gian ưu đãi"
                       : subscription?.status === "canceled"
                         ? "Đã hủy"
                         : subscription
@@ -639,102 +815,54 @@ export function BillingPlan() {
                 <p className="text-slate-500">Chu kỳ</p>
                 <p className="font-medium text-slate-900">
                   {subscription?.billingCycle === "monthly"
-                    ? demoMode
-                      ? "Tháng"
-                      : "Tháng"
+                    ? "Tháng"
                     : subscription?.billingCycle === "quarterly"
-                      ? demoMode
-                        ? "Quý"
-                        : "Quý"
+                      ? "Quý"
                       : subscription
-                        ? demoMode
                         ? "Trọn chu kỳ"
-                          : "Trọn chu kỳ"
                         : "Đang chuẩn bị"}
                 </p>
               </div>
             </div>
           )}
 
-          <div className="grid gap-3 pt-2 sm:flex sm:flex-wrap">
-            {currentPlanCode === "FREE" ? (
-              demoMode && !isTrialing && (
-                <div className="flex w-full flex-col items-start gap-1 sm:w-auto">
-                  <Button
-                    variant="outline"
-                    className="w-full sm:w-auto"
-                    onClick={handleStartTrial}
-                    disabled={isStartingTrial}
-                  >
-                    {isStartingTrial
-                      ? "Đang kích hoạt…"
-                      : trialCtaExperiment === "variant_a"
-                        ? "Bắt đầu Plus dùng thử 7 ngày"
-                        : "Dùng thử Plus 7 ngày"}
-                  </Button>
-                  <p className="text-xs text-slate-500">
-                    Không cần thẻ trong bản dùng thử. Quyền Plus sẽ mở trên trình duyệt này.
-                  </p>
-                </div>
-              )
-            ) : (
-              <>
-                {isTrialing && trialDaysLeft !== null && (
-                  <div className="w-full rounded-[var(--r-control)] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                    <span className="font-semibold">
-                      {demoMode ? "Plus dùng thử:" : "Plus đang trong thời gian ưu đãi:"}
-                    </span>{" "}
-                    còn{" "}
-                    {trialDaysLeft} ngày
-                    {demoMode ? " dùng thử." : " ưu đãi."}
-                    <Button
-                      size="sm"
-                      className="mt-[var(--space-inline)] w-full sm:ml-3 sm:mt-0 sm:w-auto"
-                      onClick={() => handleOpenUpgrade("plan")}
-                    >
-                      {demoMode ? "Mở Plus" : "Nâng cấp Plus"}
-                    </Button>
-                  </div>
-                )}
-                {realMode && (
-                  <Button onClick={handleRenewPlan}>
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Gia hạn Plus
-                  </Button>
-                )}
-                {realMode && !showCancelConfirm && (
-                  <Button
-                    variant="outline"
-                    className="text-red-600 hover:bg-red-50 hover:text-red-700"
-                    onClick={() => setShowCancelConfirm(true)}
-                  >
-                    Hủy gói
-                  </Button>
-                )}
-              </>
-            )}
-          </div>
+          {currentPlanCode !== "FREE" && (
+            <div className="grid gap-3 pt-2 sm:flex sm:flex-wrap">
+              {realMode && (
+                <Button onClick={handleRenewPlan}>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Gia hạn Plus
+                </Button>
+              )}
+              {realMode && (
+                <Button
+                  variant="outline"
+                  className="text-slate-700 hover:bg-slate-50"
+                  onClick={() => setShowStopUsingConfirm(true)}
+                >
+                  Tôi không muốn dùng nữa
+                </Button>
+              )}
+              {realMode && (
+                <Button variant="outline" className="text-amber-700 hover:bg-amber-50" onClick={handleRequestUnusedCycleRefund}>
+                  Yêu cầu hoàn tiền cho chu kỳ chưa dùng
+                </Button>
+              )}
+            </div>
+          )}
         </PrimaryActionCard>
-        <AlertDialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
+        <AlertDialog open={showStopUsingConfirm} onOpenChange={setShowStopUsingConfirm}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Huỷ gói?</AlertDialogTitle>
+              <AlertDialogTitle>Ghi nhận bạn không muốn dùng nữa?</AlertDialogTitle>
               <AlertDialogDescription>
-                Plus sẽ hết hạn sau {cancelEffectiveDate}, dữ liệu giữ nguyên.
+                Plus hiện không tự động gia hạn, nên không có auto-renewal cần hủy. Quyền Plus vẫn hoạt động đến {cancelEffectiveDate}.
+                Nếu muốn hoàn tiền cho phần chu kỳ chưa dùng và đơn còn đủ điều kiện, hãy gửi yêu cầu hoàn tiền riêng.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={isCanceling}>Giữ Plus</AlertDialogCancel>
-              <AlertDialogAction
-                className="bg-red-600 text-white hover:bg-red-700"
-                disabled={isCanceling}
-                onClick={(event) => {
-                  event.preventDefault();
-                  void handleCancelSubscription();
-                }}
-              >
-                {isCanceling ? "Đang huỷ…" : "Xác nhận huỷ"}
-              </AlertDialogAction>
+              <AlertDialogCancel>Tiếp tục dùng Plus</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmStopUsing}>Tôi đã hiểu</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -797,9 +925,24 @@ export function BillingPlan() {
                         {getBillingCycleLabel(order.billingCycle)} · {formatPaymentDate(order.createdAt)}
                       </p>
                       {order.status === "completed" && (
-                        <p className="mt-1 text-xs text-emerald-700">
-                          Xác nhận lúc {formatPaymentDate(order.completedAt)}
-                        </p>
+                        <div className="mt-1 space-y-1 text-xs">
+                          <p className="text-emerald-700">Xác nhận lúc {formatPaymentDate(order.completedAt)}</p>
+                          {order.receiptSentAt ? (
+                            <p className="text-emerald-700">
+                              ✓ Biên nhận đã gửi ngày {formatPaymentDate(order.receiptSentAt)}
+                            </p>
+                          ) : (
+                            <p className="text-amber-700">Biên nhận chưa ghi nhận đã gửi.</p>
+                          )}
+                          {order.refundRequest ? (
+                            <p className="text-amber-700">
+                              Hoàn tiền: {getRefundStatusLabel(order.refundRequest.status)}
+                              {order.refundRequest.createdAt
+                                ? ` — gửi lúc ${formatPaymentDate(order.refundRequest.createdAt)}`
+                                : ""}
+                            </p>
+                          ) : null}
+                        </div>
                       )}
                     </div>
                     <div className="flex flex-wrap items-center gap-3 sm:justify-end">
@@ -815,15 +958,33 @@ export function BillingPlan() {
                           Tiếp tục thanh toán
                         </Button>
                       )}
+                      {order.status === "completed" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleResendReceipt(order.orderId)}
+                          disabled={resendingReceiptOrderId === order.orderId}
+                        >
+                          {resendingReceiptOrderId === order.orderId ? "Đang gửi..." : "Gửi lại biên nhận"}
+                        </Button>
+                      )}
+                      {order.status === "completed" && !order.refundRequest && isOrderRefundEligible(order) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-amber-700 hover:bg-amber-50"
+                          onClick={() => openRefundDialog(order)}
+                          disabled={emailNeedsVerification}
+                          title={emailNeedsVerification ? "Bạn cần xác minh email trước khi yêu cầu hoàn tiền." : undefined}
+                        >
+                          Yêu cầu hoàn tiền
+                        </Button>
+                      )}
                       {order.invoiceUrl ? (
                         <Button variant="outline" size="sm" asChild>
                           <a href={order.invoiceUrl} target="_blank" rel="noreferrer">
                             Xem hóa đơn
                           </a>
-                        </Button>
-                      ) : order.status === "completed" ? (
-                        <Button variant="outline" size="sm" disabled>
-                          Hóa đơn đang chuẩn bị
                         </Button>
                       ) : null}
                     </div>
@@ -883,13 +1044,20 @@ export function BillingPlan() {
                 className="font-medium text-slate-700 underline-offset-4 hover:text-slate-900 hover:underline"
               >
                 Điều khoản
-              </Link>{" "}
-              và{" "}
+              </Link>
+              ,{" "}
               <Link
                 to="/privacy"
                 className="font-medium text-slate-700 underline-offset-4 hover:text-slate-900 hover:underline"
               >
                 Chính sách bảo mật
+              </Link>{" "}
+              và{" "}
+              <Link
+                to="/refund-policy"
+                className="font-medium text-slate-700 underline-offset-4 hover:text-slate-900 hover:underline"
+              >
+                Chính sách hoàn tiền
               </Link>
               .
             </p>
@@ -958,19 +1126,17 @@ export function BillingPlan() {
         <CardHeader>
           <CardTitle>Thao tác</CardTitle>
           <CardDescription>
-            {demoMode
-              ? "Kiểm tra quyền Plus, khôi phục quyền đã mở hoặc quay lại trang chính."
-              : "Kiểm tra quyền nâng cao, khôi phục giao dịch đã mua hoặc quay lại trang chính."}
+            Kiểm tra quyền nâng cao, khôi phục giao dịch đã mua hoặc quay lại trang chính.
           </CardDescription>
         </CardHeader>
         <CardContent className="stack-stack">
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" onClick={handleSyncEntitlements} disabled={isSyncing}>
               <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
-              {isSyncing ? "Đang kiểm tra…" : demoMode ? "Kiểm tra quyền Plus" : "Kiểm tra quyền nâng cao"}
+              {isSyncing ? "Đang kiểm tra…" : "Kiểm tra quyền nâng cao"}
             </Button>
             <Button variant="outline" onClick={handleRestoreAccess} disabled={isRestoring}>
-              {isRestoring ? "Đang khôi phục…" : demoMode ? "Khôi phục quyền Plus" : "Khôi phục quyền đã mua"}
+              {isRestoring ? "Đang khôi phục…" : "Khôi phục quyền đã mua"}
             </Button>
             <Button variant="outline" onClick={() => navigate("/")}>
               Quay lại Trang chính
@@ -995,8 +1161,8 @@ export function BillingPlan() {
         </Card>
       </SectionBlock>
 
-      {/* Billing provider info (debug/demo) */}
-      {demoMode && shouldShowBillingDebugUi() && (
+      {/* Billing provider info (debug only) */}
+      {shouldShowBillingDebugUi() && (
         <Card className="flow-panel">
           <CardHeader>
             <CardTitle className="text-sm">Thông tin nhà cung cấp thanh toán</CardTitle>
@@ -1030,9 +1196,7 @@ export function BillingPlan() {
         <Card className="flow-panel">
         <CardHeader>
           <CardTitle>So sánh các gói</CardTitle>
-          <CardDescription>
-            {demoMode ? "So sánh Miễn phí với Plus." : "So sánh Miễn phí với Plus."}
-          </CardDescription>
+          <CardDescription>So sánh Miễn phí với Plus.</CardDescription>
         </CardHeader>
         <CardContent>
           <MotionStaggerList className="grid gap-4 sm:grid-cols-2">
@@ -1073,7 +1237,7 @@ export function BillingPlan() {
                 </ul>
                 {plan.code !== "FREE" && currentPlanCode === "FREE" && (
                   <Button className="mt-4 w-full" onClick={() => handleOpenUpgrade("plan")}>
-                    {demoMode ? "Mở Plus" : "Nâng cấp Plus"}
+                    Nâng cấp Plus
                   </Button>
                 )}
                 </MotionTilt>

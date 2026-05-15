@@ -2,9 +2,11 @@ import { useCallback, useEffect, useState } from "react";
 import type { User, UserCredential } from "firebase/auth";
 
 import { activateAuthenticatedUserData, persistActiveAuthenticatedUserData } from "@/app/utils/storage";
+import { clearAuthScopedSensitiveData } from "@/app/utils/storage-auth-scope";
 import { patch, post } from "@/lib/api/apiClient";
 import type { UserProfile } from "@/types/api";
 import {
+  getFirebaseAuth,
   getFirebaseToken,
   isFirebaseAuthEnabled,
   loginWithEmail,
@@ -161,6 +163,12 @@ export function useAuth(): UseAuthResult {
     setLoading(true);
 
     try {
+      const currentAuthUid = getFirebaseAuth()?.currentUser?.uid ?? null;
+
+      if (currentAuthUid) {
+        clearAuthScopedSensitiveData(currentAuthUid);
+      }
+
       persistActiveAuthenticatedUserData();
       await logoutFirebase();
     } catch (nextError) {

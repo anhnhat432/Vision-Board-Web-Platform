@@ -5,8 +5,9 @@ import { CheckCircle2, Clock, Copy, Loader2, QrCode, RefreshCw, XCircle } from "
 import { apiClient } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { BillingPlusIllustration } from "../components/illustrations";
+import { formatVndAmount } from "../utils/billing-pricing";
 import { syncEntitlementsWithProvider } from "../utils/production";
-import { getUserData, upgradePlanLocally } from "../utils/storage";
+import { upgradePlanLocally } from "../utils/storage";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -24,20 +25,9 @@ interface OrderStatusResponse {
   createdAt?: string | null;
 }
 
-interface CheckoutSessionResponse {
-  checkoutSessionId: string;
-  checkoutUrl: string;
-  expiresAt?: string;
-  provider: string;
-}
-
 type EntitlementSyncStatus = "idle" | "syncing" | "synced" | "failed";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
-
-function formatVND(amount: number): string {
-  return `${new Intl.NumberFormat("vi-VN").format(amount)}đ`;
-}
 
 function formatCountdown(ms: number): string {
   if (ms <= 0) return "00:00";
@@ -56,7 +46,6 @@ export function BillingCheckoutQR() {
 
   const [order, setOrder] = useState<OrderStatusResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [copyMessage, setCopyMessage] = useState("");
@@ -66,35 +55,6 @@ export function BillingCheckoutQR() {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const autoSyncedOrderRef = useRef<string | null>(null);
-
-  // Create a new order if no orderId in URL
-  const createOrder = useCallback(async () => {
-    if (authLoading) return;
-
-    setCreating(true);
-    setError(null);
-    try {
-      const isPublicCheckout = !user;
-      const result = await apiClient.post<CheckoutSessionResponse>(
-        isPublicCheckout ? "/billing/public-checkout-session" : "/billing/checkout-session",
-        {
-          planCode: "PLUS",
-          billingCycle: "twelve_week",
-          returnUrl: `${window.location.origin}/billing/checkout`,
-          cancelUrl: `${window.location.origin}/billing/plan`,
-          ...(isPublicCheckout ? { clientUserId: getUserData().userId } : {}),
-        },
-      );
-      if (result?.checkoutSessionId) {
-        navigate(`/billing/checkout/${result.checkoutSessionId}`, { replace: true });
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Không thể tạo đơn hàng";
-      setError(msg);
-    } finally {
-      setCreating(false);
-    }
-  }, [authLoading, navigate, user]);
 
   // Fetch order status
   const fetchStatus = useCallback(async (oid: string) => {
@@ -125,7 +85,7 @@ export function BillingCheckoutQR() {
     if (authLoading) return;
 
     if (!paramOrderId) {
-      createOrder();
+      navigate("/billing/confirm", { replace: true });
       return;
     }
     fetchStatus(paramOrderId);
@@ -134,7 +94,7 @@ export function BillingCheckoutQR() {
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [authLoading, paramOrderId, createOrder, fetchStatus]);
+  }, [authLoading, paramOrderId, fetchStatus, navigate]);
 
   // Countdown timer
   useEffect(() => {
@@ -265,7 +225,7 @@ export function BillingCheckoutQR() {
           <p className="mt-2 text-sm text-amber-700">Đơn hàng đã hết hạn. Bạn có thể tạo đơn mới để tiếp tục.</p>
           <button
             type="button"
-            onClick={() => navigate("/billing/checkout")}
+            onClick={() => navigate("/billing/confirm")}
             className="mt-6 inline-flex items-center gap-2 rounded-[var(--r-tile)] bg-amber-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-amber-700"
           >
             <RefreshCw className="h-4 w-4" />
@@ -301,12 +261,12 @@ export function BillingCheckoutQR() {
 
   // ─── Loading state ──────────────────────────────────────────────────────
 
-  if (loading || creating || !order) {
+  if (loading || !order) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-          <p className="text-sm text-slate-500">{creating ? "Đang tạo đơn hàng..." : "Đang tải..."}</p>
+          <p className="text-sm text-slate-500">Đang tải...</p>
         </div>
       </div>
     );
@@ -328,7 +288,7 @@ export function BillingCheckoutQR() {
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Thanh toán VietQR</p>
             <h1 className="mt-2 text-xl font-bold text-slate-900">Nâng cấp gói Plus</h1>
             <p className="mt-2 text-3xl font-bold text-indigo-600">
-              {formatVND(order.amount)}
+              {formatVndAmount(order.amount)}
               <span className="ml-1 text-sm font-normal text-slate-500">/ chu kỳ 12 tuần</span>
             </p>
 
@@ -387,7 +347,7 @@ export function BillingCheckoutQR() {
                 />
                 <InfoRow
                   label="Số tiền"
-                  value={formatVND(order.amount)}
+                  value={formatVndAmount(order.amount)}
                   onCopy={() => copyToClipboard(String(order.amount), "amount", "số tiền")}
                   isCopied={copied === "amount"}
                 />

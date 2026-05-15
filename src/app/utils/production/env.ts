@@ -10,6 +10,7 @@ export const MOCK_BILLING_SESSION_PREFIX = "visionboard_mock_billing_session_";
 export const OUTBOX_SYNC_ENDPOINT = import.meta.env.VITE_OUTBOX_SYNC_ENDPOINT?.trim() || "";
 export const BILLING_PROVIDER_MODE = import.meta.env.VITE_BILLING_PROVIDER_MODE?.trim() || "";
 export const BILLING_PROVIDER_LABEL = import.meta.env.VITE_BILLING_PROVIDER_LABEL?.trim() || "";
+export const BILLING_SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "";
 export const BILLING_API_BASE = (import.meta.env.VITE_BILLING_API_BASE?.trim() || "").replace(/\/$/, "");
 export const BILLING_CHECKOUT_ENDPOINT =
   import.meta.env.VITE_BILLING_CHECKOUT_ENDPOINT?.trim() || (BILLING_API_BASE ? `${BILLING_API_BASE}/checkout` : "");

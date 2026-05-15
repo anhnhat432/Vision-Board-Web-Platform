@@ -202,7 +202,7 @@ export function useTwelveWeekSettingsActions({
 
   const handleExportCloudWorkspace = async () => {
     if (isDemoMode()) {
-      toast.info("Bản dùng thử chưa bật xuất dữ liệu tài khoản. Hãy dùng bản xuất dữ liệu trên thiết bị.");
+      toast.info("Chế độ chỉ lưu trên thiết bị chưa bật xuất dữ liệu tài khoản. Hãy dùng bản xuất dữ liệu trên thiết bị.");
       return;
     }
     try {
@@ -228,7 +228,7 @@ export function useTwelveWeekSettingsActions({
 
   const handleDeleteCloudWorkspace = useCallback(() => {
     if (isDemoMode()) {
-      toast.info("Bản dùng thử chưa bật xóa dữ liệu tài khoản.");
+      toast.info("Chế độ chỉ lưu trên thiết bị chưa bật xóa dữ liệu tài khoản.");
       return;
     }
     setIsDeleteCloudDialogOpen(true);

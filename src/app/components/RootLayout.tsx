@@ -701,7 +701,7 @@ export function RootLayout() {
   const cloudImportDryRunEnabled =
     !demoMode && Boolean(user) && isApiBaseUrlConfigured() && shouldEnable12WeekImportDryRun();
   const cloudImportDryRunUnavailableReason = demoMode
-    ? "Bản dùng thử đang lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản."
+    ? "Dữ liệu hiện chỉ lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản."
     : !user
       ? "Bạn cần đăng nhập trước khi kiểm tra dữ liệu tài khoản."
       : !isApiBaseUrlConfigured()
@@ -714,7 +714,7 @@ export function RootLayout() {
     if (demoMode) {
       return {
         status: "skipped",
-        message: "Bản dùng thử đang lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản.",
+        message: "Dữ liệu hiện chỉ lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản.",
       };
     }
 
@@ -789,7 +789,7 @@ export function RootLayout() {
 
   const cloudImportEnabled = !demoMode && Boolean(user) && isApiBaseUrlConfigured() && shouldEnable12WeekCloudImport();
   const cloudImportUnavailableReason = demoMode
-    ? "Bản dùng thử đang lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản."
+    ? "Dữ liệu hiện chỉ lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản."
     : !user
       ? "Bạn cần đăng nhập trước khi nhập dữ liệu tài khoản."
       : !isApiBaseUrlConfigured()
@@ -807,7 +807,7 @@ export function RootLayout() {
     if (demoMode) {
       return {
         status: "skipped",
-        message: "Bản dùng thử đang lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản.",
+        message: "Dữ liệu hiện chỉ lưu trên trình duyệt này, chưa bật nhập dữ liệu tài khoản.",
       };
     }
 
@@ -948,7 +948,7 @@ export function RootLayout() {
               className="border-b border-amber-200 bg-amber-50/85 px-4 py-1.5 text-center text-[11px] font-medium text-amber-800 sm:px-6"
             >
               <HardDrive className="mr-1 inline h-3 w-3 align-text-bottom" />
-              Bản dùng thử đang lưu dữ liệu trên trình duyệt này. Có thể bấm{" "}
+              Dữ liệu hiện đang lưu trên trình duyệt này. Có thể bấm{" "}
               <span className="font-semibold">Tạm thoát</span> bất kỳ lúc nào để quay lại Trang chính.
             </div>
           ) : null}

@@ -8,6 +8,8 @@ export interface TokenVerifier {
     uid: string;
     email?: string;
     name?: string;
+    email_verified?: boolean;
+    emailVerified?: boolean;
   }>;
 }
 
@@ -37,6 +39,7 @@ export function createAuthMiddleware(tokenVerifier: TokenVerifier) {
         uid: decodedToken.uid,
         email: decodedToken.email,
         name: decodedToken.name,
+        emailVerified: decodedToken.email_verified === true || decodedToken.emailVerified === true,
       };
 
       next();

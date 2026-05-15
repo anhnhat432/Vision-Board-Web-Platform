@@ -173,7 +173,7 @@ export const mockBillingProvider: BillingProvider = {
       providerMode: "mock_provider",
       planCode: currentPlan,
       checkoutUrl: createMockCheckoutUrl(sessionId),
-      message: "Đã mở trang thanh toán dùng thử. Màn này không thu tiền thật và hoàn tất ngay trên web.",
+      message: "Đã mở trang xác nhận quyền Plus nội bộ.",
     };
   },
   syncEntitlements: async (_goalId?: string) => {
@@ -247,7 +247,7 @@ export const mockBillingProvider: BillingProvider = {
     status: "local_only",
     providerMode: "mock_provider",
     providerLabel: getProviderLabel("mock_provider"),
-    message: "Bản dùng thử chưa có cổng quản lý thanh toán.",
+    message: "Chế độ xác nhận nội bộ chưa có cổng quản lý thanh toán.",
   }),
 };
 
@@ -274,7 +274,7 @@ export function completeMockCheckoutSession(sessionId: string): MockCheckoutComp
       ok: false,
       planCode: getCurrentPlan(),
       returnUrl: "/12-week-system?tab=settings",
-      message: "Phiên thanh toán dùng thử không còn hợp lệ.",
+      message: "Phiên xác nhận quyền Plus không còn hợp lệ.",
     };
   }
 

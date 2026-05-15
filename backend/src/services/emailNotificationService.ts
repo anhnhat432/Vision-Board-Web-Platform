@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import nodemailer from "nodemailer";
 
 export type EmailSendStatus = "sent" | "skipped" | "failed";
 
@@ -42,12 +43,57 @@ function getEmailProvider(): string {
   return process.env.EMAIL_PROVIDER?.trim().toLowerCase() || "disabled";
 }
 
+function parseBooleanEnv(value: string | undefined, fallback: boolean): boolean {
+  if (value === undefined) return fallback;
+  const normalized = value.trim().toLowerCase();
+  if (["1", "true", "yes", "on"].includes(normalized)) return true;
+  if (["0", "false", "no", "off"].includes(normalized)) return false;
+  return fallback;
+}
+
+function getSmtpPort(): number {
+  const parsed = Number.parseInt(process.env.SMTP_PORT?.trim() ?? "", 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 587;
+}
+
+function getSmtpHost(): string {
+  return process.env.SMTP_HOST?.trim() ?? "";
+}
+
+function getSmtpUser(): string {
+  return process.env.SMTP_USER?.trim() ?? "";
+}
+
+function getSmtpPassword(): string {
+  return process.env.SMTP_PASS?.trim() ?? "";
+}
+
+function isSmtpSecure(): boolean {
+  return parseBooleanEnv(process.env.SMTP_SECURE, getSmtpPort() === 465);
+}
+
+function shouldRequireSmtpTls(): boolean {
+  return parseBooleanEnv(process.env.SMTP_REQUIRE_TLS, true);
+}
+
 function getEmailFrom(): string {
-  return process.env.EMAIL_FROM?.trim() || "";
+  return (
+    process.env.EMAIL_FROM?.trim() ||
+    process.env.SUPPORT_EMAIL?.trim() ||
+    process.env.VITE_BILLING_SUPPORT_EMAIL?.trim() ||
+    process.env.BILLING_SUPPORT_EMAIL?.trim() ||
+    ""
+  );
 }
 
 function getEmailReplyTo(): string {
-  return process.env.EMAIL_REPLY_TO?.trim() || process.env.BILLING_SUPPORT_EMAIL?.trim() || "";
+  return (
+    process.env.EMAIL_REPLY_TO?.trim() ||
+    process.env.SUPPORT_EMAIL?.trim() ||
+    process.env.VITE_BILLING_SUPPORT_EMAIL?.trim() ||
+    process.env.BILLING_SUPPORT_EMAIL?.trim() ||
+    ""
+  );
 }
 
 function getFrontendOrigin(): string {
@@ -113,7 +159,7 @@ export function getEmailRuntimeStatus(): EmailRuntimeStatus {
     return { provider, configured: false, reason: "email_provider_disabled" };
   }
 
-  if (provider !== "resend") {
+  if (provider !== "resend" && provider !== "smtp") {
     return { provider, configured: false, reason: "unsupported_email_provider" };
   }
 
@@ -121,8 +167,17 @@ export function getEmailRuntimeStatus(): EmailRuntimeStatus {
     return { provider, configured: false, reason: "missing_email_from" };
   }
 
-  if (!process.env.RESEND_API_KEY?.trim()) {
+  if (provider === "resend" && !process.env.RESEND_API_KEY?.trim()) {
     return { provider, configured: false, reason: "missing_resend_api_key" };
+  }
+
+  if (provider === "smtp") {
+    if (!getSmtpHost()) return { provider, configured: false, reason: "missing_smtp_host" };
+    if (!getSmtpUser()) return { provider, configured: false, reason: "missing_smtp_user" };
+    if (!getSmtpPassword()) return { provider, configured: false, reason: "missing_smtp_pass" };
+    if (!isSmtpSecure() && !shouldRequireSmtpTls()) {
+      return { provider, configured: false, reason: "smtp_tls_required" };
+    }
   }
 
   return { provider, configured: true };
@@ -141,6 +196,45 @@ export async function sendEmail(input: SendEmailInput): Promise<EmailSendResult>
   const from = getEmailFrom();
   if (!isConfiguredEmailAddress(from)) {
     return { status: "skipped", reason: "missing_email_from", provider };
+  }
+
+  if (provider === "smtp") {
+    if (!getSmtpHost()) return { status: "skipped", reason: "missing_smtp_host", provider };
+    if (!getSmtpUser()) return { status: "skipped", reason: "missing_smtp_user", provider };
+    if (!getSmtpPassword()) return { status: "skipped", reason: "missing_smtp_pass", provider };
+    if (!isSmtpSecure() && !shouldRequireSmtpTls()) {
+      return { status: "skipped", reason: "smtp_tls_required", provider };
+    }
+
+    try {
+      const transporter = nodemailer.createTransport({
+        host: getSmtpHost(),
+        port: getSmtpPort(),
+        secure: isSmtpSecure(),
+        requireTLS: shouldRequireSmtpTls(),
+        auth: {
+          user: getSmtpUser(),
+          pass: getSmtpPassword(),
+        },
+      });
+
+      await transporter.sendMail({
+        from,
+        to: input.to,
+        subject: input.subject,
+        text: input.text,
+        html: input.html,
+        replyTo: input.replyTo || getEmailReplyTo() || undefined,
+      });
+
+      return { status: "sent", provider };
+    } catch (error) {
+      return {
+        status: "failed",
+        reason: error instanceof Error ? error.message : "email_send_failed",
+        provider,
+      };
+    }
   }
 
   if (provider !== "resend") {
