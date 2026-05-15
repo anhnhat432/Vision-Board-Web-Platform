@@ -879,7 +879,7 @@ export function RootLayout() {
           response.status === "applied"
             ? "Dữ liệu đã được đồng bộ lên tài khoản thành công."
             : response.status === "duplicate"
-              ? "Dữ liệu này đã được đồng bộ lên tài khoản trước đó."
+              ? "Dữ li���u này đã được đồng bộ lên tài khoản trước đó."
               : response.status === "partial"
                 ? "Đồng bộ dữ liệu thành công một phần. Một số mục có thể chưa được lưu."
                 : response.message || "Đồng bộ dữ liệu thất bại.",
@@ -998,7 +998,7 @@ export function RootLayout() {
               </div>
 
               <nav className="hidden flex-1 items-center justify-center md:flex">
-                <div className="flex flex-wrap items-center gap-0.5 rounded-[var(--r-pill)] border border-slate-200/60 bg-slate-50/80 px-1.5 py-1">
+                <div className="flex flex-wrap items-center gap-1 rounded-[var(--r-pill)] border border-slate-200/60 bg-slate-50/80 px-2 py-1.5">
                   {primaryNavItems.map((item) => {
                     const Icon = item.icon;
                     const active = isActive(item.path);
@@ -1012,14 +1012,14 @@ export function RootLayout() {
                         onPointerEnter={() => handlePrefetch(item.path)}
                         aria-current={active ? "page" : undefined}
                         title={item.label}
-                        className={`h-8 shrink-0 rounded-[var(--r-pill)] px-3 text-[0.82rem] transition-colors transition-transform duration-150 active:scale-95 ${
+                        className={`h-9 shrink-0 rounded-[var(--r-pill)] px-3.5 text-[0.82rem] transition-all duration-150 active:scale-95 ${
                           active
-                            ? "text-white hover:text-white"
-                            : "bg-transparent text-slate-600 shadow-none hover:bg-white/90 hover:text-slate-900"
+                            ? "text-white hover:text-white shadow-md"
+                            : "bg-transparent text-slate-600 shadow-none hover:bg-white/90 hover:text-slate-900 hover:shadow-sm"
                         }`}
                         style={active ? activeNavStyle : undefined}
                       >
-                        <Icon className="h-3.5 w-3.5" />
+                        <Icon className="h-4 w-4" />
                         <span>{item.compactLabel ?? item.label}</span>
                       </Button>
                     );
@@ -1027,7 +1027,7 @@ export function RootLayout() {
 
                   {secondaryNavItems.length > 0 ? (
                     <>
-                      <div className="mx-0.5 h-5 w-px shrink-0 bg-slate-200/60" />
+                      <div className="mx-1 h-5 w-px shrink-0 bg-slate-200/60" />
 
                       <div ref={desktopMoreRef} className="relative">
                         <Button
@@ -1036,31 +1036,31 @@ export function RootLayout() {
                           aria-current={secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined}
                           aria-expanded={desktopMoreOpen}
                           aria-haspopup="menu"
-                          className={`h-8 shrink-0 rounded-[var(--r-pill)] px-3 text-[0.82rem] transition-colors transition-transform duration-150 active:scale-95 ${
+                          className={`h-9 shrink-0 rounded-[var(--r-pill)] px-3.5 text-[0.82rem] transition-all duration-150 active:scale-95 ${
                             isDesktopMoreNavActive
-                              ? "text-white hover:text-white"
-                              : "bg-transparent text-slate-500 shadow-none hover:bg-white/90 hover:text-slate-700"
+                              ? "text-white hover:text-white shadow-md"
+                              : "bg-transparent text-slate-500 shadow-none hover:bg-white/90 hover:text-slate-700 hover:shadow-sm"
                           }`}
                           style={isDesktopMoreNavActive ? activeNavStyle : undefined}
                           onClick={() => setDesktopMoreOpen((open) => !open)}
                         >
-                          <Menu className="h-3.5 w-3.5" />
-                          <span>Khác</span>
+                          <Menu className="h-4 w-4" />
+                          <span>Khac</span>
                           <ChevronDown
-                            className={`h-3.5 w-3.5 transition-transform ${desktopMoreOpen ? "rotate-180" : ""}`}
+                            className={`h-4 w-4 transition-transform duration-200 ${desktopMoreOpen ? "rotate-180" : ""}`}
                           />
                         </Button>
 
                         {desktopMoreOpen ? (
                           <div
                             role="menu"
-                            aria-label="Mục khác"
-                            className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-[var(--r-control)] border border-slate-200 bg-white/96 p-2 shadow-lg backdrop-blur-xl"
+                            aria-label="Muc khac"
+                            className="absolute left-1/2 top-full z-50 mt-2.5 w-72 -translate-x-1/2 rounded-[var(--r-card)] border border-slate-200/80 bg-white/98 p-2.5 shadow-xl backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-200"
                           >
-                            <div className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                              Mục khác
+                            <div className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                              Tinh nang khac
                             </div>
-                            <div className="mx-1 mb-1 h-px bg-slate-200/80" />
+                            <div className="mx-1 mb-2 h-px bg-slate-100" />
                             {secondaryNavItems.map((item) => {
                               const Icon = item.icon;
                               const active = isActive(item.path);
@@ -1076,14 +1076,14 @@ export function RootLayout() {
                                     setDesktopMoreOpen(false);
                                     navigateAppRoute(item.path);
                                   }}
-                                  className={`my-1 flex w-full cursor-pointer items-center gap-2 rounded-[var(--r-control)] px-3 py-2.5 text-left text-sm font-medium tracking-normal outline-none transition-colors ${
+                                  className={`my-0.5 flex w-full cursor-pointer items-center gap-3 rounded-[var(--r-control)] px-3 py-3 text-left text-sm font-medium tracking-normal outline-none transition-all duration-150 ${
                                     active
-                                      ? "text-white focus:text-white"
-                                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-950 focus:bg-slate-50 focus:text-slate-950"
+                                      ? "text-white shadow-md focus:text-white"
+                                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-950 hover:shadow-sm focus:bg-slate-50 focus:text-slate-950"
                                   }`}
                                   style={active ? activeNavStyle : undefined}
                                 >
-                                  <Icon className={`h-4 w-4 shrink-0 ${active ? "text-white" : "text-slate-500"}`} />
+                                  <Icon className={`h-4 w-4 shrink-0 ${active ? "text-white" : "text-slate-400"}`} />
                                   <span className="min-w-0 flex-1 truncate">{item.label}</span>
                                 </button>
                               );
@@ -1187,9 +1187,9 @@ export function RootLayout() {
           </div>
 
           {mobileMenuOpen && (
-            <div id="mobile-nav-menu" className="mx-auto mt-2 max-w-6xl md:hidden">
-              <div className="glass-surface rounded-[var(--r-card)] p-3">
-                <nav className="space-y-1" aria-label="Menu điều hướng">
+            <div id="mobile-nav-menu" className="mx-auto mt-2 max-w-6xl md:hidden animate-in slide-in-from-top-2 fade-in duration-200">
+              <div className="glass-surface rounded-[var(--r-card)] p-4 shadow-lg">
+                <nav className="space-y-1.5" aria-label="Menu điều hướng">
                   {user ? (
                     <div className="mb-2 rounded-[var(--r-card)] border border-white/72 bg-white/82 px-4 py-3 text-left">
                       <div className="flex items-center gap-3">
@@ -1287,14 +1287,17 @@ export function RootLayout() {
                           setMobileMenuOpen(false);
                         }}
                         onFocus={() => handlePrefetch(item.path)}
-                        className={`flex w-full items-center gap-3 rounded-[var(--r-control)] px-4 py-3.5 text-left text-sm font-medium tracking-normal transition-transform duration-150 active:scale-[0.98] ${
-                          active ? "text-white" : "text-slate-600 hover:bg-white/80 hover:text-slate-900"
+                        className={`flex w-full items-center gap-3 rounded-[var(--r-control)] px-4 py-4 text-left text-sm font-medium tracking-normal transition-all duration-150 active:scale-[0.98] ${
+                          active ? "text-white shadow-md" : "text-slate-600 hover:bg-white/80 hover:text-slate-900"
                         }`}
                         style={active ? activeNavStyle : undefined}
                         aria-current={active ? "page" : undefined}
                       >
                         <Icon className="h-5 w-5 shrink-0" />
-                        <span>{item.label}</span>
+                        <span className="flex-1">{item.label}</span>
+                        {active && (
+                          <span className="text-xs opacity-80">Trang hiện tại</span>
+                        )}
                       </button>
                     );
                   })}

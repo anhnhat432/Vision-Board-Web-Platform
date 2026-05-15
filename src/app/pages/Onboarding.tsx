@@ -1,4 +1,4 @@
-﻿import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { ArrowLeft, ArrowRight, BarChart3, Check, Compass, Heart, Sparkles, Target } from "lucide-react";
@@ -324,35 +324,42 @@ export function Onboarding() {
                   </div>
 
                   <div className="stack-tight">
-                    <h1 className="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight text-slate-950 sm:text-4xl md:text-5xl">
-                      {isReturning ? "Cập nhật lại " : "Bắt đầu bằng "}
+                    <h1 className="max-w-2xl text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl md:text-4xl">
+                      {isReturning ? "Cap nhat lai " : "Bat dau bang "}
                       <span className="bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
-                        8 lĩnh vực
+                        8 linh vuc
                       </span>
                       {isReturning
-                        ? " để góc nhìn bám sát cuộc sống hiện tại hơn."
-                        : " để biết nên ưu tiên điều gì trước."}
+                        ? " de goc nhin bam sat cuoc song hien tai hon."
+                        : " de biet nen uu tien dieu gi truoc."}
                     </h1>
-                    <p className="max-w-2xl text-sm leading-relaxed text-slate-700 sm:text-base dark:text-slate-300">
-                      Chỉ khoảng 3 phút để chấm điểm hiện tại. Kết quả sẽ nối thẳng sang Góc nhìn cuộc sống, mục tiêu SMART
-                      và kế hoạch 12 tuần, nên bạn không phải đoán bước tiếp theo.
+                    <p className="max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
+                      Chi khoang 3 phut de cham diem hien tai. Ket qua se noi thang sang Goc nhin cuoc song va ke hoach 12 tuan.
                     </p>
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    {FEATURE_PILLS.map((item) => (
-                      <span
-                        key={item}
-                        className="rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600"
-                      >
-                        {item}
-                      </span>
-                    ))}
+                  <div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-violet-500"></span>
+                      8 linh vuc
+                    </span>
+                    <span className="text-slate-300">|</span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                      Khoang 3 phut
+                    </span>
+                    <span className="text-slate-300">|</span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                      Tu dong luu
+                    </span>
                   </div>
 
-                  <div className="flex flex-col gap-2 sm:flex-row">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                     <Button
-                      className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
+                      variant="gradient"
+                      size="lg"
+                      className="w-full sm:w-auto"
                       onClick={handleStartAssessment}
                     >
                       Bắt đầu chấm 8 lĩnh vực
@@ -360,7 +367,7 @@ export function Onboarding() {
                     </Button>
                     <Button
                       variant="ghost"
-                      className="w-full text-slate-500 hover:bg-slate-50 sm:w-auto"
+                      className="w-full sm:w-auto"
                       onClick={() => {
                         if (reviewedAreaIndices.size > 0) {
                           updateWheelOfLife(lifeAreas);
@@ -451,19 +458,19 @@ export function Onboarding() {
           <CardContent className="p-4 sm:p-6 lg:p-7">
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
               <div className="stack-tight">
-                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-4 py-1.5 text-sm text-slate-600">
+                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-sm text-slate-600">
                   <Compass className="h-4 w-4" />
-                  Chấm 8 lĩnh vực
+                  Cham 8 linh vuc
                 </div>
-                <h1 className="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight text-slate-950 sm:text-4xl md:text-5xl">
-                  Chấm điểm hiện tại để biết chính xác{" "}
+                <h1 className="max-w-2xl text-2xl font-bold leading-tight tracking-tight text-slate-950 sm:text-3xl md:text-4xl">
+                  Cham diem hien tai de biet chinh xac{" "}
                   <span className="bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent">
-                    nơi bạn nên bắt đầu
+                    noi ban nen bat dau
                   </span>
                   .
                 </h1>
-                <p className="max-w-2xl text-sm leading-relaxed text-slate-700 sm:text-base dark:text-slate-300">
-                  Kéo từng lĩnh vực từ 1 đến 10. Tóm tắt bên cạnh cập nhật ngay để bạn thấy tín hiệu trước khi lưu.
+                <p className="max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-300">
+                  Keo tung linh vuc tu 1 den 10. Tom tat ben canh cap nhat ngay de ban thay tin hieu truoc khi luu.
                 </p>
               </div>
 
@@ -580,7 +587,8 @@ export function Onboarding() {
                     </p>
                   ) : null}
                   <Button
-                    className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30 hover:from-violet-700 hover:to-fuchsia-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    variant="gradient"
+                    className="disabled:cursor-not-allowed disabled:opacity-60"
                     onClick={handleComplete}
                     disabled={!canCompleteAssessment}
                   >
