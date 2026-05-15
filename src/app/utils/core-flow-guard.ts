@@ -6,6 +6,11 @@ export function hasRealLifeBalance(userData: LifeBalanceUserData | null | undefi
   return Boolean(userData?.onboardingCompleted);
 }
 
+export function hasScoredLifeBalance(userData: LifeBalanceUserData | null | undefined): boolean {
+  if (!userData?.onboardingCompleted) return false;
+  return userData.currentWheelOfLife.some((area) => area.score > 0);
+}
+
 export function getScoredLifeArea(userData: LifeBalanceUserData, areaName: string): LifeArea | null {
   const area = userData.currentWheelOfLife.find((item) => item.name === areaName);
   return area && area.score > 0 ? area : null;
