@@ -694,7 +694,7 @@ export function OrderPage() {
             <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Đi tiếp sau khi tạo</p>
               <p className="mt-2 text-sm leading-7 text-slate-600">
-                Bạn có thể mở trang trạng thái đơn để xem timeline, chi tiết kit và chuyển trạng thái cục bộ.
+                Bạn có thể mở trang trạng thái đơn để xem timeline, chi tiết kit và chuyển trạng thái trên thiết bị này.
               </p>
             </div>
           </CardContent>

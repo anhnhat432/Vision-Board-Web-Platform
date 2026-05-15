@@ -5,6 +5,21 @@ const DEFAULT_TRACES_SAMPLE_RATE = 0.05;
 const DEFAULT_FLUSH_TIMEOUT_MS = 2000;
 type BackendCaptureContext = Parameters<typeof Sentry.captureException>[1];
 
+interface BillingCriticalContext {
+  event: string;
+  orderId?: string | null;
+  amount?: number | null;
+  status?: string | null;
+}
+
+function buildBillingCriticalExtra(context: BillingCriticalContext): Record<string, string | number> {
+  const extra: Record<string, string | number> = {};
+  if (context.orderId) extra.orderId = context.orderId;
+  if (typeof context.amount === "number" && Number.isFinite(context.amount)) extra.amount = context.amount;
+  if (context.status) extra.status = context.status;
+  return extra;
+}
+
 function parseSampleRate(rawValue: string | undefined, fallback: number): number {
   if (!rawValue) return fallback;
 
@@ -57,6 +72,23 @@ export function setupSentryErrorHandler(app: Express): void {
 export function captureBackendException(error: unknown, context?: BackendCaptureContext): void {
   if (!sentryEnabled || !Sentry.isEnabled()) return;
   Sentry.captureException(error, context);
+}
+
+export function captureBillingCriticalException(
+  error: unknown,
+  context: BillingCriticalContext,
+): void {
+  captureBackendException(error, {
+    tags: {
+      feature: "billing",
+      severity: "critical",
+      event: context.event,
+    },
+    extra: {
+      event: context.event,
+      ...buildBillingCriticalExtra(context),
+    },
+  });
 }
 
 export async function flushSentry(timeoutMs = DEFAULT_FLUSH_TIMEOUT_MS): Promise<void> {

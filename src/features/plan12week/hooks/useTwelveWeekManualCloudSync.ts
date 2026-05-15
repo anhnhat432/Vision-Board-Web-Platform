@@ -147,14 +147,14 @@ function getDrainFailureMessage(result: MutationQueueSyncResult): string {
   }
 
   if (result.status === "skipped") {
-    return "Hàng chờ thay đổi chưa đủ điều kiện gửi. Đã dừng nhận dữ liệu để giữ bản trên thiết bị an toàn.";
+    return "Việc đang chờ đồng bộ chưa đủ điều kiện gửi. Đã dừng nhận dữ liệu để giữ bản trên thiết bị an toàn.";
   }
 
   if (result.status === "partial") {
-    return `Queue chỉ sync được ${result.succeededCount}/${result.attemptedCount} thay đổi. Đã dừng pull để tránh ghi đè dữ liệu local.`;
+    return `Chỉ gửi được ${result.succeededCount}/${result.attemptedCount} thay đổi. Đã dừng nhận dữ liệu để tránh ghi đè dữ liệu trên thiết bị.`;
   }
 
-  return "Chưa gửi được hàng chờ thay đổi. Đã dừng nhận dữ liệu để giữ bản trên thiết bị an toàn.";
+  return "Chưa gửi được việc đang chờ đồng bộ. Đã dừng nhận dữ liệu để giữ bản trên thiết bị an toàn.";
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -192,13 +192,13 @@ export async function runTwelveWeekManualCloudSync(
   const apiConfigured = options.apiConfigured ?? isApiBaseUrlConfigured();
 
   if (!realMode) {
-    return createSkippedResult("demo_mode", "Dữ liệu đang lưu trên trình duyệt này, chưa cần đồng bộ tài khoản.");
+    return createSkippedResult("demo_mode", "Dữ liệu đang lưu trên thiết bị này, chưa cần đồng bộ tài khoản.");
   }
   if (!mutationFeatureEnabled) {
-    return createSkippedResult("mutation_feature_disabled", "Mutation sync đang tắt bằng feature flag.");
+    return createSkippedResult("mutation_feature_disabled", "Đồng bộ thay đổi đang tắt.");
   }
   if (!pullFeatureEnabled) {
-    return createSkippedResult("pull_feature_disabled", "Pull sync đang tắt bằng feature flag.");
+    return createSkippedResult("pull_feature_disabled", "Khôi phục dữ liệu tài khoản đang tắt.");
   }
   if (!authenticated || !ownerUid) {
     return createSkippedResult("unauthenticated", "Cần đăng nhập để đồng bộ dữ liệu tài khoản.");
@@ -208,7 +208,7 @@ export async function runTwelveWeekManualCloudSync(
   }
 
   if (options.online === false) {
-    return createSkippedResult("offline", "Đang mất mạng. Hàng chờ thay đổi sẽ được gửi khi kết nối lại.");
+    return createSkippedResult("offline", "Đang mất mạng. Việc đang chờ đồng bộ sẽ được gửi khi kết nối lại.");
   }
 
   try {
@@ -309,7 +309,7 @@ export async function runTwelveWeekManualCloudSync(
       recordErrorFn(ownerUid);
       return {
         status: "error",
-        message: "Không thể lưu bản gộp vào trình duyệt. Dữ liệu cũ trên thiết bị vẫn được giữ.",
+        message: "Không thể lưu bản gộp vào thiết bị này. Dữ liệu cũ trên thiết bị vẫn được giữ.",
         drainResult,
         pullResponse,
         mergeReport,
@@ -322,7 +322,7 @@ export async function runTwelveWeekManualCloudSync(
 
     return {
       status: "applied",
-      message: "Đã gửi hàng chờ, nhận dữ liệu tài khoản và gộp an toàn vào thiết bị.",
+        message: "Đã gửi việc đang chờ đồng bộ, nhận dữ liệu tài khoản và gộp an toàn vào thiết bị.",
       drainResult,
       pullResponse,
       mergeReport,

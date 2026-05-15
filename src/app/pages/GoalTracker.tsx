@@ -31,6 +31,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { Checkbox } from "../components/ui/checkbox";
 import { CountUp } from "../components/ui/count-up";
 import { EmptyGoalIllustration, EmptyHintArrow, getGoalArchetypeIcon } from "../components/illustrations";
+import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { Input } from "../components/ui/input";
 import { LoadingSpinner } from "../components/ui/loading-spinner";
 import { SectionBlock } from "../components/layout/SectionBlock";
@@ -41,6 +42,7 @@ import { useBackendProgressOverlayMap } from "../hooks/useBackendProgressOverlay
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { celebrateSpark, celebrateSpotlight } from "../utils/experience";
+import { FREE_TIER_LIMITS, getFreeTierUsage, hasReachedLimit } from "../utils/feature-entitlements";
 import {
   APP_STORAGE_KEYS,
   LIFE_AREAS,
@@ -134,6 +136,7 @@ function GoalTrackerContent({
   const [expandedGoals, setExpandedGoals] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [viewUserData, setViewUserData] = useState(userData);
+  const [isGoalLimitPaywallOpen, setIsGoalLimitPaywallOpen] = useState(false);
   const [locallyUpdatedSystemGoalIds, setLocallyUpdatedSystemGoalIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -192,6 +195,8 @@ function GoalTrackerContent({
     [backendSystemsByGoalId, goals, locallyUpdatedSystemGoalIds],
   );
   const hasGoals = effectiveGoals.length > 0;
+  const goalLimitUsage = getFreeTierUsage(viewUserData, "maxActiveGoals");
+  const shouldShowFreeGoalLimit = currentPlanCode === "FREE" && Number.isFinite(FREE_TIER_LIMITS.maxActiveGoals);
   const hasRealLifeBalance = viewUserData.onboardingCompleted && viewUserData.currentWheelOfLife.some((area) => area.score > 0);
   const goalFlowStartHref = hasRealLifeBalance ? "/life-insight" : "/onboarding";
   const goalFlowStartLabel = hasRealLifeBalance ? "Tạo mục tiêu từ góc nhìn" : "Bắt đầu Cân bằng cuộc sống";
@@ -220,6 +225,11 @@ function GoalTrackerContent({
   };
 
   const handleStartGuidedGoalFlow = () => {
+    if (hasReachedLimit(viewUserData, "maxActiveGoals")) {
+      setIsGoalLimitPaywallOpen(true);
+      return;
+    }
+
     clearGoalPlanningDrafts();
     navigate(goalFlowStartHref);
   };
@@ -852,6 +862,15 @@ function GoalTrackerContent({
 
   return (
     <div className="flow-shell stack-section pb-12">
+      <UpgradePaywallDialog
+        open={isGoalLimitPaywallOpen}
+        onOpenChange={setIsGoalLimitPaywallOpen}
+        context="plan"
+        currentPlan={currentPlanCode}
+        title="Bạn đã có 3 mục tiêu"
+        description="Nâng cấp Plus để tạo thêm mục tiêu. Dữ liệu hiện có vẫn được giữ nguyên."
+        source="goal_tracker"
+      />
       <AlertDialog
         open={Boolean(goalToDelete)}
         onOpenChange={(open) => {
@@ -890,6 +909,11 @@ function GoalTrackerContent({
                   Xem nhanh mục tiêu, hạn chót và nơi cần mở tiếp. Việc hằng ngày của chu kỳ 12 tuần vẫn nằm trong
                   trung tâm 12 tuần.
                 </p>
+                {shouldShowFreeGoalLimit ? (
+                  <p className="mt-3 inline-flex rounded-[var(--r-pill)] border border-slate-200 bg-white/80 px-3 py-1 text-xs font-semibold text-slate-600">
+                    {goalLimitUsage.current}/{goalLimitUsage.limit} mục tiêu Free
+                  </p>
+                ) : null}
               </div>
               <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
                 <Button

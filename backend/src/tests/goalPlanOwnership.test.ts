@@ -312,6 +312,7 @@ describe("plan ownership", () => {
       fixture.weekRepository as never,
       fixture.taskRepository as never,
       fixture.metricRepository as never,
+      async () => true,
     );
 
     const plan = await service.createPlanForUser(ownerUserId, {
@@ -333,6 +334,7 @@ describe("plan ownership", () => {
       fixture.weekRepository as never,
       fixture.taskRepository as never,
       fixture.metricRepository as never,
+      async () => true,
     );
 
     await assert.rejects(

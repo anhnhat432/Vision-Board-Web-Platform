@@ -60,7 +60,7 @@ export function AdminLayout() {
       <AdminStatusCard
         icon={<AlertTriangle className="h-7 w-7 text-amber-300" />}
         title="Chưa cấu hình đăng nhập"
-        description="Trang quản trị cần Firebase Auth và backend production để kiểm soát hệ thống."
+        description="Trang quản trị cần đăng nhập và máy chủ sản xuất để kiểm soát hệ thống."
       />
     );
   }
@@ -96,7 +96,7 @@ export function AdminLayout() {
         title="Không tải được hồ sơ"
         description={
           userProfileError ||
-          "Không thể tải hồ sơ quản trị. Kiểm tra Render backend đã deploy và Firebase Admin env đang đúng."
+          "Không thể tải hồ sơ quản trị. Kiểm tra máy chủ đã sẵn sàng và quyền quản trị đã được cấu hình."
         }
         action={
           <Button type="button" variant="secondary" className="gap-2" onClick={refreshUserProfile}>
@@ -124,7 +124,7 @@ export function AdminLayout() {
       <AdminStatusCard
         icon={<AlertTriangle className="h-7 w-7 text-rose-300" />}
         title="Không có quyền quản trị"
-        description="Tài khoản này không nằm trong ADMIN_EMAILS trên Render, hoặc hồ sơ chưa được làm mới sau khi bạn cập nhật env."
+        description="Tài khoản này chưa có quyền quản trị, hoặc hồ sơ chưa được làm mới sau khi bạn cập nhật quyền."
         action={
           <>
             <Button type="button" variant="secondary" className="gap-2" onClick={refreshUserProfile}>

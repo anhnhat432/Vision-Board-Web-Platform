@@ -15,6 +15,7 @@ import { APP_STORAGE_KEYS, activateAuthenticatedUserData, getUserData, saveUserD
 
 const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
+  useOptionalAuthContext: vi.fn(),
 }));
 
 const backendHydrationMock = vi.hoisted(() => ({
@@ -58,6 +59,7 @@ const planHookMock = vi.hoisted(() => ({
 
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
+  useOptionalAuthContext: authContextMock.useOptionalAuthContext,
 }));
 
 vi.mock("../hooks/useBackendPlanHydration", () => ({
@@ -125,7 +127,7 @@ vi.mock("@/features/plan12week/hooks", () => ({
 }));
 
 function setSignedInAuthContext() {
-  authContextMock.useAuthContext.mockReturnValue({
+  const context = {
     user: {
       uid: "firebase_uid_new_user",
       email: "new-user@example.com",
@@ -143,7 +145,9 @@ function setSignedInAuthContext() {
     logout: vi.fn().mockResolvedValue(undefined),
     refreshUserProfile: vi.fn(),
     isConfigured: true,
-  });
+  };
+  authContextMock.useAuthContext.mockReturnValue(context);
+  authContextMock.useOptionalAuthContext.mockReturnValue(context);
 }
 
 function renderAuthenticatedCoreFlow(initialEntry = "/") {

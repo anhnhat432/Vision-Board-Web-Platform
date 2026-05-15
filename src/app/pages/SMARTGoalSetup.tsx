@@ -2,6 +2,7 @@
 import { Link, useNavigate } from "react-router";
 
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
+import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { PageShell } from "../components/PageShell";
@@ -13,7 +14,8 @@ import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
 import { getSmartGoalStarter, getSmartGoalStarterPreview } from "../utils/smart-goal-starters";
-import { APP_STORAGE_KEYS, getUserData } from "../utils/storage";
+import { APP_STORAGE_KEYS, getCurrentPlan, getUserData } from "../utils/storage";
+import { hasReachedLimit } from "../utils/feature-entitlements";
 import type { AspirationalVision as AspirationalVisionModel } from "../utils/storage-types";
 import {
   buildSmartGoal,
@@ -107,6 +109,7 @@ export function SMARTGoalSetup() {
   const [archetypeOverride, setArchetypeOverride] = useState<GoalArchetype | null>(null);
   const [aspirationalVision, setAspirationalVision] = useState<AspirationalVisionModel | null>(null);
   const [isVisionPromptDismissed, setIsVisionPromptDismissed] = useState(false);
+  const [isGoalLimitPaywallOpen, setIsGoalLimitPaywallOpen] = useState(false);
   const [lastSavedSnapshot, setLastSavedSnapshot] = useState<string | null>(null);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("saved");
@@ -287,6 +290,12 @@ export function SMARTGoalSetup() {
       return;
     }
     if (measurableBaseline !== undefined && measurableTarget <= measurableBaseline) {
+      return;
+    }
+
+    const currentUserData = getUserData();
+    if (hasReachedLimit(currentUserData, "maxActiveGoals")) {
+      setIsGoalLimitPaywallOpen(true);
       return;
     }
 
@@ -494,6 +503,15 @@ export function SMARTGoalSetup() {
 
   return (
     <PageShell maxWidth="hero">
+      <UpgradePaywallDialog
+        open={isGoalLimitPaywallOpen}
+        onOpenChange={setIsGoalLimitPaywallOpen}
+        context="plan"
+        currentPlan={getCurrentPlan(getUserData())}
+        title="Bạn đã có 3 mục tiêu"
+        description="Nâng cấp Plus để tạo thêm mục tiêu. Dữ liệu hiện có vẫn được giữ nguyên."
+        source="paywall_dialog"
+      />
       <div className={prefersReducedMotion ? "stack-stack" : "animate-fade-in-up stack-stack"}>
         <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} />
         {!isVisionPromptDismissed && (

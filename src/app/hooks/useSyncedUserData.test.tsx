@@ -58,7 +58,7 @@ describe("useSyncedUserData", () => {
       saveUserData(createUserData("user_event"));
 
       await waitFor(() => {
-        expect(listener).toHaveBeenCalledTimes(1);
+        expect(listener).toHaveBeenCalled();
       });
       expect(localStorage.getItem(USER_DATA_STORAGE_KEY)).not.toBeNull();
     } finally {

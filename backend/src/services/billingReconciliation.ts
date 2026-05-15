@@ -450,11 +450,15 @@ export async function reconcilePendingCassoPaymentOrders(
         errors++;
         captureException(error, {
           tags: {
+            feature: "billing",
+            severity: "critical",
             event: "casso_reconciliation_order_failed",
             provider: "casso",
           },
           extra: {
-            orderIdHash: hashForLog(order.orderId),
+            orderId: order.orderId,
+            amount: order.amount,
+            status: order.status,
           },
         });
       }
@@ -464,8 +468,13 @@ export async function reconcilePendingCassoPaymentOrders(
     errors++;
     captureException(error, {
       tags: {
+        feature: "billing",
+        severity: "critical",
         event: "casso_reconciliation_run_failed",
         provider: "casso",
+      },
+      extra: {
+        status: "failed",
       },
     });
   }

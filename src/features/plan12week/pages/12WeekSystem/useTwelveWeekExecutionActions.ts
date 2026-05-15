@@ -278,9 +278,7 @@ export function useTwelveWeekExecutionActions({
         const latestGoal = getUserData().goals.find((goal) => goal.id === actionGoalId);
         const latestSystem = latestGoal?.twelveWeekSystem;
         const latestTask = latestSystem?.taskInstances.find((task) => task.id === taskId);
-        const shouldRollbackTask = Boolean(
-          latestSystem && latestTask && latestTask.completed === completed && latestTask.lastModifiedAt === now,
-        );
+        const shouldRollbackTask = Boolean(latestSystem && latestTask && latestTask.completed === completed);
         if (latestSystem && shouldRollbackTask) {
           const rollbackSystem = {
             ...latestSystem,
@@ -288,8 +286,8 @@ export function useTwelveWeekExecutionActions({
               task.id === taskId
                 ? {
                     ...task,
-                    completed: toggledTask?.completed ?? false,
-                    completedAt: toggledTask?.completedAt,
+                    completed: !completed,
+                    completedAt: !completed ? undefined : toggledTask?.completedAt,
                     lastModifiedAt: toggledTask?.lastModifiedAt ?? 0,
                   }
                 : task,

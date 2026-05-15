@@ -74,7 +74,7 @@ interface TwelveWeekTodayTabProps {
   onReentry: (mode: ReentryMode) => void;
   onApplyRecommendedReentry: () => void;
   onOpenSmartRescue: () => void;
-  onToggleTask: (taskId: string, completed: boolean) => void;
+  onToggleTask: (taskId: string, completed: boolean) => void | Promise<void>;
   onDailyMoodChange: (value: DailyMood) => void;
   onDailyNoteChange: (value: string) => void;
   onSaveCheckIn: () => void;
@@ -226,7 +226,14 @@ export function TwelveWeekTodayTab({
 
     const timerId = window.setTimeout(() => {
       deferredToggleTimersRef.current = deferredToggleTimersRef.current.filter((item) => item !== timerId);
-      onToggleTask(taskId, completed);
+      Promise.resolve(onToggleTask(taskId, completed)).finally(() => {
+        setOptimisticTaskCompletionById((current) => {
+          if (!(taskId in current)) return current;
+          const next = { ...current };
+          delete next[taskId];
+          return next;
+        });
+      });
     }, 0);
     deferredToggleTimersRef.current.push(timerId);
   };

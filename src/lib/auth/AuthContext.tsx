@@ -111,6 +111,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    const handleForceLogout = () => {
+      void logout();
+    };
+
+    window.addEventListener("auth:force-logout", handleForceLogout);
+    return () => window.removeEventListener("auth:force-logout", handleForceLogout);
+  }, [logout]);
+
+  useEffect(() => {
     if (!user) {
       setUserProfile(null);
       setUserProfileLoading(false);

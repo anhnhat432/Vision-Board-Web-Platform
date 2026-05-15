@@ -77,8 +77,7 @@ export function PrivacyPage() {
         </p>
         <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
           <li>
-            <strong>Firebase Authentication (Google):</strong> xác thực đăng
-            nhập.
+            <strong>Đăng nhập Google:</strong> xác thực đăng nhập.
           </li>
           <li>
             <strong>Nhà cung cấp thanh toán:</strong> chỉ khi bạn thực hiện

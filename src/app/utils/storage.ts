@@ -684,7 +684,7 @@ export function saveUserData(data: UserData): boolean {
     _cachedRawHash = prevCachedHash;
 
     if (err instanceof DOMException && err.name === "QuotaExceededError") {
-      toast.error("Bộ nhớ trình duyệt đã đầy. Dữ liệu chưa được lưu.", {
+      toast.error("Bộ nhớ trên thiết bị này đã đầy. Dữ liệu chưa được lưu.", {
         description: "Hãy xóa bớt board hoặc ảnh đã tải lên để giải phóng dung lượng, sau đó thử lại.",
         duration: 8000,
       });

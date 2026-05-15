@@ -26,6 +26,7 @@ import { toast } from "sonner";
 
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { EmptyOrdersIllustration } from "../components/illustrations";
+import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { SectionBlock } from "../components/layout/SectionBlock";
 import { ProductVisual } from "../components/visuals/ProductVisual";
 import {
@@ -54,9 +55,11 @@ import {
   type VisionBoard,
   type VisionBoardItem,
   addVisionBoard,
+  getCurrentPlan,
   getUserData,
   updateVisionBoard,
 } from "../utils/storage";
+import { hasReachedLimit } from "../utils/feature-entitlements";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
   createVisionBoard as backendCreateVisionBoard,
@@ -298,6 +301,7 @@ export function VisionBoardEditor() {
   const [iconName, setIconName] = useState<IconName>("Sparkles");
   const [isSearching, setIsSearching] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isVisionBoardLimitPaywallOpen, setIsVisionBoardLimitPaywallOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const blocker = useBlocker(hasUnsavedChanges);
@@ -359,6 +363,11 @@ export function VisionBoardEditor() {
     if (!board || !boardName.trim()) return;
 
     const beforeData = getUserData();
+    if (!id && hasReachedLimit(beforeData, "maxVisionBoards")) {
+      setIsVisionBoardLimitPaywallOpen(true);
+      return;
+    }
+
     let savedBoardId = id ?? "";
 
     if (id) {
@@ -612,6 +621,15 @@ export function VisionBoardEditor() {
 
   return (
       <div className="stack-section pb-12">
+        <UpgradePaywallDialog
+          open={isVisionBoardLimitPaywallOpen}
+          onOpenChange={setIsVisionBoardLimitPaywallOpen}
+          context="plan"
+          currentPlan={getCurrentPlan(getUserData())}
+          title="Bạn đã có 1 bảng tầm nhìn"
+          description="Nâng cấp Plus để tạo thêm bảng tầm nhìn. Dữ liệu hiện có vẫn được giữ nguyên."
+          source="paywall_dialog"
+        />
         <AlertDialog
           open={blocker.state === "blocked"}
           onOpenChange={(open) => {

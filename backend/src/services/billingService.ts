@@ -12,6 +12,8 @@
  * - No sensitive data (card numbers, bank info) ever flows through here.
  */
 
+import * as backendMonitoring from "../monitoring/sentry";
+
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export type BillingPlanCode = "FREE" | "PLUS";
@@ -47,6 +49,18 @@ const ACTIVE_STATUSES = new Set<BillingSubscriptionStatus>([
   "trialing",
   "active",
 ]);
+
+function captureBillingServiceCriticalFailure(
+  error: unknown,
+  event: ProviderSubscriptionEvent,
+  status: string,
+): void {
+  backendMonitoring.captureBillingCriticalException(error, {
+    event: "billing_entitlement_grant_failed",
+    orderId: event.providerSubscriptionId ?? event.providerEventId,
+    status,
+  });
+}
 
 export interface EntitlementGrant {
   key: BillingEntitlementKey;
@@ -285,9 +299,11 @@ export class BillingService {
       const subscription =
         await this.subscriptionRepo.findLatestByUserId(event.userId);
       if (!subscription) {
-        throw new Error(
+        const error = new Error(
           `Duplicate billing event "${event.providerEventId}" has no matching subscription.`,
         );
+        captureBillingServiceCriticalFailure(error, event, existingEvent.status);
+        throw error;
       }
       return {
         subscription,
@@ -325,7 +341,12 @@ export class BillingService {
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Unknown error";
-      await this.eventRepo.markFailed(billingEvent.id, message);
+      try {
+        await this.eventRepo.markFailed(billingEvent.id, message);
+      } catch (markFailedError: unknown) {
+        captureBillingServiceCriticalFailure(markFailedError, event, "mark_failed_error");
+      }
+      captureBillingServiceCriticalFailure(error, event, "failed");
       throw error;
     }
   }

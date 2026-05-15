@@ -25,6 +25,10 @@ const firebaseMock = vi.hoisted(() => {
       callback(currentUser as User | null);
       return () => undefined;
     }),
+    subscribeIdToken: vi.fn((callback: (user: User | null) => void) => {
+      callback(currentUser as User | null);
+      return () => undefined;
+    }),
   };
 });
 
@@ -37,6 +41,7 @@ vi.mock("./firebase", () => ({
   logoutFirebase: firebaseMock.logoutFirebase,
   registerWithEmail: firebaseMock.registerWithEmail,
   subscribeAuthState: firebaseMock.subscribeAuthState,
+  subscribeIdToken: firebaseMock.subscribeIdToken,
 }));
 
 import { LAST_ENTITLEMENT_SYNC_KEY, MOCK_BILLING_ACCOUNT_KEY } from "@/app/utils/production/env";
@@ -108,6 +113,7 @@ describe("useAuth logout", () => {
     firebaseMock.logoutFirebase.mockClear();
     firebaseMock.registerWithEmail.mockReset();
     firebaseMock.subscribeAuthState.mockClear();
+    firebaseMock.subscribeIdToken.mockClear();
   });
 
   it("clears billing, entitlement sync, and UID-scoped mutation queue before signing out", async () => {

@@ -69,10 +69,10 @@ function getMutationQueueSyncBlocker(input: {
   if (!mutationQueueSyncStatus.realMode) return "Dữ liệu đang lưu trên thiết bị này, chưa bật đồng bộ tài khoản.";
   if (!mutationQueueSyncStatus.featureEnabled) return "Đồng bộ thay đổi đang tắt.";
   if (!mutationQueueSyncStatus.pullFeatureEnabled) return "Khôi phục dữ liệu tài khoản đang tắt.";
-  if (!mutationQueueSyncStatus.apiConfigured) return "Chưa cấu hình kết nối tài khoản để gửi hàng chờ.";
+  if (!mutationQueueSyncStatus.apiConfigured) return "Chưa cấu hình kết nối tài khoản để gửi việc đang chờ đồng bộ.";
   if (!backendConnectionStatus.authConfigured) return "Chưa cấu hình đăng nhập.";
   if (backendConnectionStatus.authLoading) return "Đang kiểm tra phiên đăng nhập.";
-  if (!backendConnectionStatus.signedIn) return "Cần đăng nhập để gửi hàng chờ lên tài khoản.";
+  if (!backendConnectionStatus.signedIn) return "Cần đăng nhập để gửi việc đang chờ đồng bộ lên tài khoản.";
   if (!backendConnectionStatus.profileReady) return "Đang chờ hồ sơ tài khoản sẵn sàng.";
 
   return null;
@@ -80,12 +80,12 @@ function getMutationQueueSyncBlocker(input: {
 
 function getMutationQueueResultDescription(result: MutationQueueSyncResult | null): string {
   if (!result) {
-    return "Chưa chạy lần nào trong phiên này. Hành động này gửi các mục đang chờ, lấy dữ liệu tài khoản, rồi chỉ áp dụng khi an toàn.";
+    return "Chưa chạy lần nào trong phiên này. Hành động này gửi các việc đang chờ đồng bộ, lấy dữ liệu tài khoản, rồi chỉ áp dụng khi an toàn.";
   }
 
   if (result.status === "applied") {
     const pulledGoalCount = result.pullResponse?.workspace.goals.length ?? 0;
-    return `Đã gửi hàng chờ, lấy ${pulledGoalCount} mục tiêu từ tài khoản và áp dụng dữ liệu an toàn vào thiết bị.`;
+    return `Đã gửi việc đang chờ đồng bộ, lấy ${pulledGoalCount} mục tiêu từ tài khoản và áp dụng dữ liệu an toàn vào thiết bị.`;
   }
 
   if (result.status === "drain_failed") {
@@ -115,11 +115,11 @@ function getMutationQueueResultDescription(result: MutationQueueSyncResult | nul
     case "pull_feature_disabled":
       return "Khôi phục dữ liệu tài khoản đang tắt.";
     case "demo_mode":
-      return "Chế độ chỉ lưu cục bộ không gọi API tài khoản.";
+      return "Chế độ chỉ lưu trên thiết bị này không gọi máy chủ tài khoản.";
     case "unauthenticated":
       return "Cần đăng nhập để đồng bộ tài khoản.";
     case "api_not_configured":
-      return "Chưa cấu hình API.";
+      return "Chưa cấu hình kết nối tài khoản.";
     default:
       return result.message || "Điều kiện đồng bộ chưa sẵn sàng.";
   }
@@ -755,7 +755,7 @@ export function TwelveWeekLocalStatusSection({
             <div className="min-w-0 space-y-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                  Hàng chờ đồng bộ
+                  Việc đang chờ đồng bộ
                 </p>
                 <Badge
                   variant="outline"
@@ -770,7 +770,7 @@ export function TwelveWeekLocalStatusSection({
               </div>
               <p className="text-sm leading-6 text-slate-700">
                 {mutationQueueBlocker ??
-                  "Gửi các mục đang chờ, lấy dữ liệu tài khoản, rồi chỉ cập nhật thiết bị nếu an toàn. Dữ liệu trên thiết bị vẫn được ưu tiên."}
+                  "Gửi các việc đang chờ đồng bộ, lấy dữ liệu tài khoản, rồi chỉ cập nhật thiết bị nếu an toàn. Dữ liệu trên thiết bị vẫn được ưu tiên."}
               </p>
               <div className="grid grid-cols-2 gap-2 pt-2 sm:grid-cols-4">
                 <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
@@ -876,7 +876,7 @@ export function TwelveWeekLocalStatusSection({
               </Button>
             </div>
             <p className="text-xs leading-5 text-slate-500">
-              Tải bản sao dữ liệu tài khoản dưới dạng JSON. Xóa dữ liệu tài khoản chỉ xóa dữ liệu 12 tuần trên tài khoản,
+              Tải bản sao dữ liệu tài khoản về thiết bị. Xóa dữ liệu tài khoản chỉ xóa dữ liệu 12 tuần trên tài khoản,
               không xóa dữ liệu trên thiết bị, gói Plus hay tài khoản đăng nhập.
             </p>
           </div>
@@ -890,7 +890,7 @@ export function TwelveWeekLocalStatusSection({
           </p>
         </div>
         <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Trình duyệt</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Thiết bị</p>
           <p className="mt-2 text-sm font-semibold text-slate-950">
             {appPreferences.enableBrowserNotifications ? "Bật" : "Tắt"}
           </p>
@@ -902,7 +902,7 @@ export function TwelveWeekLocalStatusSection({
           </p>
         </div>
         <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Hàng chờ gửi</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Việc đang chờ đồng bộ</p>
           <p className="mt-2 text-sm font-semibold text-slate-950">{pendingOutboxCount} chờ</p>
         </div>
       </div>

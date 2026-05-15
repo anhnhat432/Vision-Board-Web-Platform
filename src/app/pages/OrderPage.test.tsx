@@ -1,5 +1,4 @@
-import { render, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, render, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -79,11 +78,8 @@ describe("OrderPage synced user data", () => {
       expect(noteInput.value).toContain("Synced order goal");
     });
 
-    const user = userEvent.setup();
-    await user.clear(keywordsInput);
-    await user.type(keywordsInput, "manual keyword");
-    await user.clear(noteInput);
-    await user.type(noteInput, "manual note");
+    fireEvent.change(keywordsInput, { target: { value: "manual keyword" } });
+    fireEvent.change(noteInput, { target: { value: "manual note" } });
 
     seedGoals([createGoal("goal_primary", "Second synced order goal")]);
 

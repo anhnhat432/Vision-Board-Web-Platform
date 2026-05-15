@@ -16,7 +16,7 @@ import {
   Truck,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 
 import { EmptyOrdersIllustration } from "../components/illustrations";
 import { Badge } from "../components/ui/badge";
@@ -36,6 +36,7 @@ import {
 } from "../utils/order-storage";
 import { formatCalendarDate } from "../utils/storage";
 import { isDemoMode } from "../utils/app-mode";
+import { logBillingUiError, toastBillingNetworkError } from "../utils/billing-ui-monitoring";
 import { formatVndAmount } from "../utils/billing-pricing";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { apiClient } from "@/lib/api/apiClient";
@@ -148,7 +149,7 @@ const ORDER_TIMELINE_STEPS: ReadonlyArray<{
 }> = [
   {
     status: "pending",
-    description: "Đơn đã được ghi nhận trên không gian làm việc cục bộ và chờ xác nhận.",
+    description: "Đơn đã được ghi nhận trên thiết bị này và chờ xác nhận.",
     icon: ClipboardList,
   },
   {
@@ -201,7 +202,12 @@ export function OrderStatusPage() {
         window.setTimeout(() => navigate("/billing/plan", { replace: true }), REDIRECT_AFTER_SUCCESS_MS);
       }
     } catch (error: unknown) {
-      setPaymentError(error instanceof Error ? error.message : "Không tải được trạng thái thanh toán.");
+      if (toastBillingNetworkError(error, { surface: "OrderStatusPage", action: "fetch_payment_order", orderId })) {
+        setPaymentError("Mạng có vấn đề, vui lòng thử lại");
+      } else {
+        logBillingUiError(error, { surface: "OrderStatusPage", action: "fetch_payment_order", orderId });
+        setPaymentError(error instanceof Error ? error.message : "Không tải được trạng thái thanh toán.");
+      }
     } finally {
       setPaymentLoading(false);
     }
@@ -262,7 +268,24 @@ export function OrderStatusPage() {
       });
       setTransferConfirmedByUser(true);
     } catch (error: unknown) {
-      setPaymentError(error instanceof Error ? error.message : "Không ghi nhận được xác nhận chuyển khoản.");
+      if (toastBillingNetworkError(error, {
+        surface: "OrderStatusPage",
+        action: "confirm_transfer",
+        orderId: paymentOrder.orderId,
+        amount: paymentOrder.amount,
+        status: paymentOrder.status,
+      })) {
+        setPaymentError("Mạng có vấn đề, vui lòng thử lại");
+      } else {
+        logBillingUiError(error, {
+          surface: "OrderStatusPage",
+          action: "confirm_transfer",
+          orderId: paymentOrder.orderId,
+          amount: paymentOrder.amount,
+          status: paymentOrder.status,
+        });
+        setPaymentError(error instanceof Error ? error.message : "Không ghi nhận được xác nhận chuyển khoản.");
+      }
     } finally {
       setConfirmingTransfer(false);
     }
@@ -370,6 +393,9 @@ export function OrderStatusPage() {
                     Liên hệ hỗ trợ
                   </a>
                 </Button>
+                <Button type="button" variant="outline" asChild>
+                  <Link to="/billing/faq">Xem FAQ thanh toán</Link>
+                </Button>
                 <Button type="button" variant="outline" onClick={() => window.location.reload()}>
                   <RefreshCw className="h-4 w-4" />
                   Tải lại trang
@@ -437,6 +463,17 @@ export function OrderStatusPage() {
               <div className="rounded-[var(--r-card)] border border-red-200 bg-red-50 p-3 text-sm text-red-700">{paymentError}</div>
             )}
 
+            <Card className="border-slate-200 bg-slate-50/90 shadow-sm">
+              <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm leading-6 text-slate-700">
+                  Cần biết cách xác nhận thanh toán, nhận Plus hoặc xử lý chuyển khoản sai?
+                </p>
+                <Button type="button" variant="outline" asChild>
+                  <Link to="/billing/faq">Xem FAQ thanh toán</Link>
+                </Button>
+              </CardContent>
+            </Card>
+
             {showTransferConfirmButton && (
               <Card className="border-emerald-100 bg-emerald-50/80 shadow-sm">
                 <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -469,6 +506,9 @@ export function OrderStatusPage() {
                       <Mail className="h-4 w-4" />
                       Liên hệ hỗ trợ
                     </a>
+                  </Button>
+                  <Button type="button" variant="outline" asChild className="border-amber-300 bg-white text-amber-900 hover:bg-amber-100">
+                    <Link to="/billing/faq">Xem FAQ thanh toán</Link>
                   </Button>
                   <Button type="button" variant="outline" onClick={() => window.location.reload()} className="border-amber-300 bg-white text-amber-900 hover:bg-amber-100">
                     <RefreshCw className="h-4 w-4" />
@@ -833,7 +873,7 @@ export function OrderStatusPage() {
                       </>
                     ) : (
                       <>
-                        <p className="text-sm text-slate-600">Đơn đã ở bước cuối cùng của flow cục bộ.</p>
+                        <p className="text-sm text-slate-600">Đơn đã ở bước cuối cùng trên thiết bị này.</p>
                         <Button type="button" size="sm" variant="outline" disabled>
                           Đã hoàn tất
                         </Button>

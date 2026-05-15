@@ -198,6 +198,7 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
     return;
   }
 
+  try {
   // Step 2: Parse payload
   const payload: CassoWebhookPayload = req.body;
   if (payload.error !== 0 || !Array.isArray(payload.data)) {
@@ -260,9 +261,9 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
 
     if (!order) {
       const context = {
-        transactionId: cassoTxId,
-        accountId: orderId,
+        orderId,
         amount,
+        status: "not_found",
       };
       console.warn("[casso-webhook] No pending order matched Casso transaction.", context);
       captureCassoWebhookFailure(
@@ -276,11 +277,9 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
     // Step 6: Verify amount
     if (amount < order.amount) {
       const context = {
-        transactionId: cassoTxId,
-        accountId: orderId,
+        orderId,
         amount,
-        expectedAmount: order.amount,
-        userId: order.userId,
+        status: "amount_mismatch",
       };
       console.warn("[casso-webhook] Casso transaction amount is below expected order amount.", context);
       captureCassoWebhookFailure(
@@ -353,19 +352,14 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
       failedCount++;
       const msg = error instanceof Error ? error.message : "Unknown error";
       const context = {
-        transactionId: cassoTxId,
-        accountId: orderId,
+        orderId,
         amount,
-        planCode: "PLUS",
-        userId: order.userId,
+        status: order.status,
       };
       console.error("[casso-webhook] Failed to upsert subscription for order.", { ...context, error: msg });
-      backendMonitoring.captureBackendException(error, {
-        tags: {
-          event: "casso_webhook_subscription_upsert_failed",
-          provider: "casso",
-        },
-        extra: context,
+      backendMonitoring.captureBillingCriticalException(error, {
+        event: "casso_webhook_subscription_upsert_failed",
+        ...context,
       });
     }
   }
@@ -387,4 +381,11 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
       ? `Đã xử lý ${processedCount} giao dịch.`
       : "Không có giao dịch nào khớp với đơn hàng đang chờ.",
   });
+  } catch (error: unknown) {
+    backendMonitoring.captureBillingCriticalException(error, {
+      event: "casso_webhook_unhandled_failed",
+      status: "failed",
+    });
+    throw error;
+  }
 }

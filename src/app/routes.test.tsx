@@ -101,4 +101,12 @@ describe("public legal routes", () => {
     renderRoute("/privacy");
     expect(await screen.findByRole("heading", { name: /Chính sách bảo mật/i })).toBeInTheDocument();
   });
+
+  it("resolves /billing/faq through the app route table", async () => {
+    renderRoute("/billing/faq");
+
+    expect(await screen.findByRole("heading", { name: /Câu hỏi thường gặp/i })).toBeInTheDocument();
+    expect(screen.getByText("Làm sao tôi biết đã thanh toán thành công?")).toBeInTheDocument();
+    expect(screen.getByText(/Bạn nhận biên nhận qua email/)).toBeInTheDocument();
+  });
 });

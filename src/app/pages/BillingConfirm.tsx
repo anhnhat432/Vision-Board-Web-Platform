@@ -4,6 +4,7 @@ import { sendVerificationEmail } from "@/lib/auth/firebase";
 import { CheckCircle2, Loader2, Mail, ReceiptText, ShieldCheck } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { BillingTrustSignals } from "../components/BillingTrustSignals";
 import { BillingPlusIllustration } from "../components/illustrations";
 import { formatVndAmount, PLUS_MONTHLY_PRICE_VND, PLUS_PRICE_CYCLE_LABEL } from "../utils/billing-pricing";
 import { canUpgradeToPlus, getEmailVerificationRequiredMessage, rememberEmailVerificationReturnPath } from "../utils/email-verification-guard";
@@ -22,6 +23,8 @@ interface CheckoutSessionResponse {
   expiresAt?: string;
   provider: string;
 }
+
+const BILLING_SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
@@ -169,6 +172,8 @@ export function BillingConfirm() {
             />
             <ConfirmRow label="Phương thức" value="Chuyển khoản VietQR qua Casso" />
           </div>
+
+          <BillingTrustSignals className="mt-6" supportEmail={BILLING_SUPPORT_EMAIL} />
 
           <div className="mt-6 rounded-[var(--r-card)] border border-indigo-100 bg-indigo-50/60 p-4">
             <label htmlFor="receipt-email" className="flex items-center gap-2 text-sm font-semibold text-slate-900">

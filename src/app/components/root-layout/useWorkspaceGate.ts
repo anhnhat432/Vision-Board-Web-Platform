@@ -32,7 +32,7 @@ export function isPublicHomePath(pathname: string): boolean {
 }
 
 export function isPublicLegalPath(pathname: string): boolean {
-  return pathname === "/terms" || pathname === "/privacy";
+  return pathname === "/terms" || pathname === "/privacy" || pathname === "/refund-policy" || pathname === "/billing/faq";
 }
 
 export function buildLoginRedirect(pathname: string, search: string, hash: string) {

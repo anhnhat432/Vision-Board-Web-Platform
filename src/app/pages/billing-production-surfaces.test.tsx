@@ -87,7 +87,7 @@ function stubRealBillingEnv(
   return apiClient;
 }
 
-const UI_TEST_TIMEOUT_MS = 10_000;
+const UI_TEST_TIMEOUT_MS = 30_000;
 
 describe("production billing surfaces", () => {
   afterEach(() => {

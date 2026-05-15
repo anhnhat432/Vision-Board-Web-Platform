@@ -44,7 +44,7 @@ function getSyncState(input: {
 }
 
 function getPendingCopy(count: number): string {
-  return count > 0 ? `${count} thay đổi đã lưu, chờ sao lưu vào tài khoản` : "không có thay đổi chờ gửi";
+  return count > 0 ? `${count} thay đổi đã lưu, chờ sao lưu vào tài khoản` : "không có thay đổi chờ đồng bộ";
 }
 
 function getTooltip(state: SyncPillState, relativeTime: string | null, pendingCount: number): string {

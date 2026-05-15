@@ -149,7 +149,7 @@ export function AutoCloudConflictDialog() {
           <div className="rounded-[var(--r-card)] border border-red-200 bg-red-50 p-4 text-sm text-red-800">
             <p className="font-semibold">Bản trên thiết bị sẽ bị thay thế. Tải xuống bản backup trước?</p>
             <p className="mt-2 leading-6">
-              Ứng dụng sẽ tự tải một file JSON backup của dữ liệu hiện tại rồi mới áp dụng bản trong tài khoản.
+              Ứng dụng sẽ tự tải một bản sao dữ liệu hiện tại rồi mới áp dụng bản trong tài khoản.
             </p>
           </div>
         ) : null}

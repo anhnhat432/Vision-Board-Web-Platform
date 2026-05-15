@@ -411,3 +411,18 @@ Cần user duyệt thêm / cố ý giữ:
 - Dev-only error/log như `useAutoCloudSyncContext must be used inside AutoCloudSyncProvider`, console warning/error nội bộ, storage key và analytics event id giữ nguyên.
 - Branding/technical name `Dear Our Future`, `Vision Kit`, `Plus`, `SMART`, `Firebase Console > Authentication > Get started`, `Sign-in method`, `Authorized domains`, `Render`, `ADMIN_EMAILS`, `VITE_API_BASE_URL` giữ nguyên theo duyệt.
 - `Goal Setter` đang được giữ như tên thành tựu/badge; nếu muốn đổi thành `Người đặt mục tiêu` cần duyệt riêng để tránh đổi identity thành tựu.
+
+## Round 3 update — 2026-05-15
+
+Đã fix trong round thuật ngữ kỹ thuật:
+
+- Thêm `src/app/utils/user-facing-copy.ts` để gom copy trạng thái lưu: đã lưu trên thiết bị này, đang lưu, đang sao lưu lên đám mây, lỗi lưu.
+- Auto-save, Settings, SyncStatusPill và 12-week sync panels: đổi copy hướng người dùng từ hàng chờ/queue/API/JSON/local/trình duyệt sang thiết bị, tài khoản, máy chủ hoặc việc đang chờ đồng bộ.
+- Admin/auth/billing copy: bỏ `Firebase`, `backend`, `API contract`, `Local test`, `endpoint` khỏi thông báo hiển thị; thay bằng đăng nhập, máy chủ, máy chủ thanh toán hoặc trên thiết bị này.
+- Toast/banner có thuật ngữ kỹ thuật: đổi các thông báo `Firebase account`, hàng chờ gửi, outbox, trình duyệt, đồng bộ thủ công và lỗi sao lưu sang copy thân thiện hơn.
+- Legal/UI copy có tên `Firebase Authentication` đổi thành `Đăng nhập Google`; các chuỗi kỹ thuật còn lại trong code identifier, storage key, test name, console log hoặc route/query được giữ nguyên vì không phải copy UI.
+
+Kiểm tra sau sửa:
+
+- Grep `src/` theo nhóm `Firebase`, `localStorage`, `outbox`, `mutation`, `queue`, `backend`, `API`, `JSON`, `schema` vẫn còn match ở code identifier, storage key, test name, console log và MIME/serialization code.
+- Không còn copy UI mới phát hiện ở các file bắt buộc chứa trực tiếp `localStorage`, `Firebase`, `API contract`, `Local test`, `JSON`, `outbox`, `mutation queue`, hoặc `sync queue`.

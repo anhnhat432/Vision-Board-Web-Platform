@@ -21,6 +21,11 @@ vi.mock("@/lib/auth/AuthContext", () => ({
     isConfigured: true,
     user: null,
   }),
+  useOptionalAuthContext: () => ({
+    authLoading: false,
+    isConfigured: true,
+    user: null,
+  }),
 }));
 
 describe("Dashboard public visitor state", () => {

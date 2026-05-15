@@ -5,6 +5,7 @@ import { CheckCircle2, Clock, Copy, Loader2, QrCode, RefreshCw, XCircle } from "
 import { apiClient } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { BillingPlusIllustration } from "../components/illustrations";
+import { logBillingUiError, toastBillingNetworkError } from "../utils/billing-ui-monitoring";
 import { formatVndAmount } from "../utils/billing-pricing";
 import { syncEntitlementsWithProvider } from "../utils/production";
 import { upgradePlanLocally } from "../utils/storage";
@@ -73,8 +74,13 @@ export function BillingCheckoutQR() {
         }
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Lỗi khi kiểm tra đơn hàng";
-      setError(msg);
+      if (toastBillingNetworkError(err, { surface: "BillingCheckoutQR", action: "fetch_order_status", orderId: oid })) {
+        setError("Mạng có vấn đề, vui lòng thử lại");
+      } else {
+        logBillingUiError(err, { surface: "BillingCheckoutQR", action: "fetch_order_status", orderId: oid });
+        const msg = err instanceof Error ? err.message : "Lỗi khi kiểm tra đơn hàng";
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -141,19 +147,42 @@ export function BillingCheckoutQR() {
       return true;
     }
 
-    const result = await syncEntitlementsWithProvider();
-    if (result.ok && result.planCode !== "FREE") {
-      setEntitlementSyncStatus("synced");
-      setEntitlementSyncMessage(result.message);
-      return true;
-    }
+    try {
+      const result = await syncEntitlementsWithProvider();
+      if (result.ok && result.planCode !== "FREE") {
+        setEntitlementSyncStatus("synced");
+        setEntitlementSyncMessage(result.message);
+        return true;
+      }
 
-    setEntitlementSyncStatus("failed");
-    setEntitlementSyncMessage(
-      result.message ||
-        "Đã nhận thanh toán nhưng chưa cập nhật được quyền Plus trên thiết bị này. Vui lòng thử lại.",
-    );
-    return false;
+      setEntitlementSyncStatus("failed");
+      setEntitlementSyncMessage(
+        result.message ||
+          "Đã nhận thanh toán nhưng chưa cập nhật được quyền Plus trên thiết bị này. Vui lòng thử lại.",
+      );
+      return false;
+    } catch (error: unknown) {
+      if (toastBillingNetworkError(error, {
+        surface: "BillingCheckoutQR",
+        action: "sync_completed_order_access",
+        orderId: order.orderId,
+        amount: order.amount,
+        status: order.status,
+      })) {
+        setEntitlementSyncMessage("Mạng có vấn đề, vui lòng thử lại");
+      } else {
+        logBillingUiError(error, {
+          surface: "BillingCheckoutQR",
+          action: "sync_completed_order_access",
+          orderId: order.orderId,
+          amount: order.amount,
+          status: order.status,
+        });
+        setEntitlementSyncMessage("Đã nhận thanh toán nhưng chưa cập nhật được quyền Plus trên thiết bị này. Vui lòng thử lại.");
+      }
+      setEntitlementSyncStatus("failed");
+      return false;
+    }
   }, [order, user]);
 
   useEffect(() => {

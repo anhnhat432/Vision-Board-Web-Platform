@@ -553,7 +553,7 @@ export async function openBillingCustomerPortal(goalId?: string): Promise<Custom
       providerLabel: status.providerLabel,
       message:
         status.mode === "api_contract"
-          ? "Chưa cấu hình endpoint cho cổng quản lý thanh toán."
+          ? "Chưa cấu hình cổng quản lý thanh toán."
           : "Đơn vị thanh toán hiện tại chưa có cổng quản lý riêng.",
     };
   }

@@ -4,6 +4,7 @@ import {
   type UpdateVisionBoardData,
 } from "../repositories/mongo/MongoVisionBoardRepository";
 import { ApiError } from "../utils/apiError";
+import { assertFreeTierLimit, hasPlusAccess } from "./freeTierLimits";
 
 export interface CreateVisionBoardPayload {
   name: string;
@@ -69,12 +70,23 @@ function validateItems(
   });
 }
 
-class VisionBoardService {
-  constructor(private readonly repository: MongoVisionBoardRepository) {}
+export class VisionBoardService {
+  constructor(
+    private readonly repository: MongoVisionBoardRepository,
+    private readonly hasPlusAccessForUser: (userId: string) => Promise<boolean> = hasPlusAccess,
+  ) {}
 
   async createVisionBoard(userId: string, payload: CreateVisionBoardPayload) {
     if (!payload.name?.trim()) throw new ApiError(400, "name is required.");
     if (!payload.year?.trim()) throw new ApiError(400, "year is required.");
+
+    const existingBoards = await this.repository.getVisionBoardsByUserId(userId);
+    await assertFreeTierLimit({
+      userId,
+      limitName: "maxVisionBoards",
+      currentCount: existingBoards.length,
+      hasPlusAccess: this.hasPlusAccessForUser,
+    });
 
     const validatedItems = validateItems(payload.items);
 

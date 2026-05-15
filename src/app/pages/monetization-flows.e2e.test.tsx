@@ -55,7 +55,7 @@ describe("monetization flows", () => {
 
     // Paywall dialog should open
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByText(/Thanh toán qua/i)).toBeInTheDocument();
+    expect(within(dialog).getAllByText(/Thanh toán qua/i).length).toBeGreaterThan(0);
   });
 
   it("captures the paywall opening path as the BillingPlan returnTo", () => {

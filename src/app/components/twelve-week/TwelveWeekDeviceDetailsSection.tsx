@@ -396,7 +396,7 @@ export function TwelveWeekDeviceDetailsSection({
           <div className="rounded-[var(--r-control)] border border-slate-200 bg-white p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Quyền riêng tư</p>
             <p className="mt-2 text-sm leading-6 text-slate-700">
-              Xuất bản JSON gồm mục tiêu hiện tại, hệ thống 12 tuần và cài đặt ứng dụng. Nếu xóa dữ liệu, chỉ dữ liệu
+              Tải bản sao gồm mục tiêu hiện tại, hệ thống 12 tuần và cài đặt ứng dụng. Nếu xóa dữ liệu, chỉ dữ liệu
               đang lưu trên thiết bị này bị xóa.
             </p>
             <div className="mt-[var(--space-inline)] grid gap-2 sm:grid-cols-2">

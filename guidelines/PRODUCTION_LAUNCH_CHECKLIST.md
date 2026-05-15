@@ -82,6 +82,15 @@ Live Casso payment cannot be fully smoke-tested without an actual bank transfer 
 - Reminder email sending is idempotent per subscription/date through `BillingEvent`, so rerunning the admin action does not spam the same user on the same expiry date.
 - Email sending requires `EMAIL_PROVIDER=resend`, `EMAIL_FROM`, and `RESEND_API_KEY` on Render.
 
+## Sentry billing alerts
+
+Manual Sentry setup before launch:
+
+- Create an issue alert for any event where `feature=billing` and `severity=critical`; notify Slack and email immediately.
+- Create a metric alert for a spike in 4xx/5xx responses on `POST /api/webhooks/casso`, `POST /api/webhook/casso`, and `POST /api/billing/webhook/casso`; notify Slack and email immediately.
+- Create a metric or issue alert when Casso reconciliation fails more than 2 consecutive runs; use events tagged `event=casso_reconciliation_job_failed` or `/api/health/billing` returning `reconciliation=stale`.
+- Keep Sentry `sendDefaultPii=false`; billing alert context must only include `orderId`, `amount`, and `status`.
+
 ## Operational risks
 
 Render free cold start:

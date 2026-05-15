@@ -1,5 +1,7 @@
 import { AlertCircle, Check, Cloud } from "lucide-react";
 
+import { SAVE_STATUS } from "../utils/user-facing-copy";
+
 export type AutoSaveStatus = "idle" | "saving" | "saved";
 
 interface AutoSaveIndicatorProps {
@@ -25,12 +27,12 @@ export function AutoSaveIndicator({ status, lastSavedAt, className = "" }: AutoS
     },
     saving: {
       icon: Cloud,
-      label: "Đang lưu",
+      label: SAVE_STATUS.saving,
       tone: "text-sky-700",
     },
     saved: {
       icon: Check,
-      label: lastSavedAt ? `Đã lưu lúc ${formatTimeLabel(lastSavedAt)}` : "Đã lưu",
+      label: lastSavedAt ? `${SAVE_STATUS.saved} lúc ${formatTimeLabel(lastSavedAt)}` : SAVE_STATUS.saved,
       tone: "text-emerald-700",
     },
   } satisfies Record<AutoSaveStatus, { icon: typeof Check; label: string; tone: string }>;

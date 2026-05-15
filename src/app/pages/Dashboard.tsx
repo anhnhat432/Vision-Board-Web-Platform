@@ -58,6 +58,7 @@ import { useBreakpoint } from "../hooks/useBreakpoint";
 import { useBackendProgressOverlay } from "../hooks/useBackendProgressOverlay";
 import { usePageTour } from "../hooks/usePageTour";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
+import { FREE_TIER_LIMITS, getFreeTierUsage } from "../utils/feature-entitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useUpgradeDialog } from "../hooks/useUpgradeDialog";
 import { trackAnalyticsEvent } from "../utils/analytics";
@@ -599,6 +600,8 @@ function DashboardContent({
   const dashboardGreeting = getDashboardGreeting();
   const dashboardDisplayName = getDashboardDisplayName(user);
   const signedIn = Boolean(user);
+  const goalLimitUsage = getFreeTierUsage(userData, "maxActiveGoals");
+  const shouldShowFreeGoalLimit = !isSignedOut && currentPlanCode === "FREE" && Number.isFinite(FREE_TIER_LIMITS.maxActiveGoals);
 
   useEffect(() => {
     if (landingViewedRef.current) return;
@@ -661,6 +664,17 @@ function DashboardContent({
         source="dashboard"
         onCheckoutComplete={onReload}
       />
+      {shouldShowFreeGoalLimit ? (
+        <Card className="border-slate-200 bg-white/88 shadow-sm">
+          <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-slate-900">Gói Free: {goalLimitUsage.current}/{goalLimitUsage.limit} mục tiêu</p>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Nâng cấp Plus khi bạn cần tạo thêm mục tiêu mới. Dữ liệu cũ vẫn được giữ nguyên.</p>
+            </div>
+            <Button type="button" variant="outline" onClick={() => openUpgradeDialog("plan")}>Mở Plus</Button>
+          </CardContent>
+        </Card>
+      ) : null}
       {isSignedOut ? (
         <>
           <PublicVisitorHero

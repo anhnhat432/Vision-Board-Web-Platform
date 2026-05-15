@@ -8,10 +8,12 @@ import { GoalTracker } from "./GoalTracker";
 
 const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
+  useOptionalAuthContext: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
+  useOptionalAuthContext: authContextMock.useOptionalAuthContext,
 }));
 
 vi.mock("../hooks/useBackendProgressOverlay", () => ({
@@ -27,7 +29,7 @@ vi.mock("../utils/app-mode", () => ({
 }));
 
 function setSignedInAuthContext() {
-  authContextMock.useAuthContext.mockReturnValue({
+  const context = {
     user: {
       uid: "firebase_uid_fresh_goals",
       email: "fresh-goals@example.com",
@@ -45,7 +47,9 @@ function setSignedInAuthContext() {
     logout: vi.fn().mockResolvedValue(undefined),
     refreshUserProfile: vi.fn(),
     isConfigured: true,
-  });
+  };
+  authContextMock.useAuthContext.mockReturnValue(context);
+  authContextMock.useOptionalAuthContext.mockReturnValue(context);
 }
 
 function seedAnonymousStaleGoal() {

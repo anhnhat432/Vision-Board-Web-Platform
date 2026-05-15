@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -40,8 +41,7 @@ describe("LoginPage", () => {
   });
 
   it("keeps authentication setup errors visible in the form", () => {
-    const message =
-      "Firebase Authentication chưa được bật cho project này. Vào Firebase Console > Authentication > Get started.";
+    const message = "Đăng nhập hiện chưa sẵn sàng. Vui lòng thử lại sau hoặc liên hệ hỗ trợ.";
     setAuthContext({ error: message });
 
     render(
@@ -98,6 +98,85 @@ describe("LoginPage", () => {
 
     expect(screen.getByText("Tạo tài khoản để lưu, đồng bộ và bắt đầu an toàn.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Tạo tài khoản" })).toBeInTheDocument();
+  });
+
+  it("shows two password fields in sign-up mode", () => {
+    render(
+      <MemoryRouter initialEntries={["/login?mode=signup"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    const passwordFields = screen.getAllByPlaceholderText("••••••••");
+    expect(passwordFields).toHaveLength(2);
+    expect(passwordFields.every((field) => field instanceof HTMLInputElement && field.type === "password")).toBe(true);
+    expect(screen.getByLabelText("Xác nhận mật khẩu")).toBeInTheDocument();
+    expect(screen.getByText("Ít nhất 8 ký tự")).toBeInTheDocument();
+    expect(screen.getByText("Có ít nhất 1 chữ số")).toBeInTheDocument();
+    expect(screen.getByText("Khớp với mật khẩu xác nhận")).toBeInTheDocument();
+  });
+
+  it("keeps sign-up disabled until password confirmation matches", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/login?mode=signup"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    const submitButton = screen.getByRole("button", { name: "Tạo tài khoản" });
+    await user.type(screen.getByLabelText("Email"), "test@example.com");
+    await user.type(screen.getByLabelText("Mật khẩu"), "matkhau1");
+    await user.type(screen.getByLabelText("Xác nhận mật khẩu"), "matkhau2");
+
+    expect(submitButton).toBeDisabled();
+
+    await user.clear(screen.getByLabelText("Xác nhận mật khẩu"));
+    await user.type(screen.getByLabelText("Xác nhận mật khẩu"), "matkhau1");
+
+    expect(submitButton).toBeEnabled();
+  });
+
+  it("toggles sign-up password field visibility", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/login?mode=signup"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    const passwordInput = screen.getByLabelText("Mật khẩu") as HTMLInputElement;
+    const confirmPasswordInput = screen.getByLabelText("Xác nhận mật khẩu") as HTMLInputElement;
+
+    expect(passwordInput.type).toBe("password");
+    expect(confirmPasswordInput.type).toBe("password");
+
+    await user.click(screen.getByRole("button", { name: "Hiện mật khẩu" }));
+    expect(passwordInput.type).toBe("text");
+    expect(confirmPasswordInput.type).toBe("password");
+
+    await user.click(screen.getByRole("button", { name: "Hiện mật khẩu xác nhận" }));
+    expect(confirmPasswordInput.type).toBe("text");
+
+    await user.click(screen.getByRole("button", { name: "Ẩn mật khẩu" }));
+    expect(passwordInput.type).toBe("password");
+
+    await user.click(screen.getByRole("button", { name: "Ẩn mật khẩu xác nhận" }));
+    expect(confirmPasswordInput.type).toBe("password");
+  });
+
+  it("does not show confirmation requirements in sign-in mode", () => {
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getAllByPlaceholderText("••••••••")).toHaveLength(1);
+    expect(screen.queryByLabelText("Xác nhận mật khẩu")).not.toBeInTheDocument();
+    expect(screen.queryByText("Ít nhất 8 ký tự")).not.toBeInTheDocument();
   });
 
   it("ignores unsafe login next redirects", async () => {

@@ -913,8 +913,8 @@ export function TwelveWeekSystem() {
           <AlertDialogHeader>
             <AlertDialogTitle>Xóa dấu vết trên thiết bị này?</AlertDialogTitle>
             <AlertDialogDescription>
-              Hành động này chỉ xóa nhật ký sự kiện, hàng chờ gửi và trạng thái nhắc việc trên thiết bị. Mục tiêu, review tuần, nhật
-              ký và vision board của bạn vẫn được giữ nguyên.
+              Hành động này chỉ xóa nhật ký sự kiện, việc đang chờ đồng bộ và trạng thái nhắc việc trên thiết bị. Mục tiêu, review tuần, nhật
+              ký và bảng tầm nhìn của bạn vẫn được giữ nguyên.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

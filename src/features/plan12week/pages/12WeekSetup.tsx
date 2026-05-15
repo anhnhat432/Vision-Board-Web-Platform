@@ -26,6 +26,7 @@ import {
   trackAppEvent,
 } from "@/app/utils/storage";
 import { getScoredLifeArea, hasRealLifeBalance } from "@/app/utils/core-flow-guard";
+import { hasReachedLimit } from "@/app/utils/feature-entitlements";
 import {
   trackPaywallCtaClicked,
   trackPremiumTemplateUnlockPrompted,
@@ -214,6 +215,7 @@ export function TwelveWeekSetup() {
   const [setupGate, setSetupGate] = useState<TwelveWeekSetupGate>("none");
   const [currentPlan, setCurrentPlan] = useState<PricingPlanCode>(getCurrentPlan());
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
+  const [paywallReason, setPaywallReason] = useState<"template" | "cycle_limit">("template");
   const [pendingTemplateId, setPendingTemplateId] = useState<string | null>(null);
   const [focusArea, setFocusArea] = useState("");
   const [smartGoal, setSmartGoal] = useState<PendingSMARTGoal | null>(null);
@@ -744,6 +746,7 @@ export function TwelveWeekSetup() {
         });
       }
       setPendingTemplateId(template.id);
+      setPaywallReason("template");
       setIsPaywallOpen(true);
       return;
     }
@@ -899,6 +902,13 @@ export function TwelveWeekSetup() {
 
     if (isRealMode() && !auth.user) {
       setCurrentStep(STEPS.length - 1);
+      return;
+    }
+
+    const currentUserData = getUserData();
+    if (hasReachedLimit(currentUserData, "maxActiveGoals") || hasReachedLimit(currentUserData, "max12WeekCycles")) {
+      setPaywallReason("cycle_limit");
+      setIsPaywallOpen(true);
       return;
     }
 
@@ -1085,8 +1095,12 @@ export function TwelveWeekSetup() {
         currentPlan={currentPlan}
         recommendedPlan={pendingTemplate?.requiredPlan ?? "PLUS"}
         source="12_week_setup"
-        title="Mở Plus để thiết lập nhanh hơn"
-        description="Khung này phù hợp với kiểu mục tiêu và mức sẵn sàng của bạn. Mở Plus để dùng ngay."
+        title={paywallReason === "cycle_limit" ? "Bạn đã có 1 chu kỳ đang chạy" : "Mở Plus để thiết lập nhanh hơn"}
+        description={
+          paywallReason === "cycle_limit"
+            ? "Nâng cấp Plus để tạo thêm chu kỳ 12 tuần. Dữ liệu hiện có vẫn được giữ nguyên."
+            : "Khung này phù hợp với kiểu mục tiêu và mức sẵn sàng của bạn. Mở Plus để dùng ngay."
+        }
         onCheckoutComplete={handleCheckoutComplete}
       />
 

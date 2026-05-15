@@ -175,7 +175,7 @@ export async function logoutFirebase(): Promise<void> {
 
 export async function resetPassword(email: string): Promise<void> {
   const auth = getFirebaseAuth();
-  if (!auth) throw new Error("Firebase chưa được cấu hình.");
+  if (!auth) throw new Error("Đăng nhập chưa được cấu hình.");
   await firebaseSendPasswordResetEmail(auth, email);
 }
 

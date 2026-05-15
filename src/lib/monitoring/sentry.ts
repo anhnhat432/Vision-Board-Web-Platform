@@ -37,15 +37,29 @@ if (sentryDsn) {
   });
 }
 
+interface FrontendCaptureContext extends Record<string, unknown> {
+  tags?: Record<string, string>;
+  extra?: Record<string, unknown>;
+}
+
 export function captureFrontendException(
   error: unknown,
-  context?: Record<string, unknown>,
+  context?: FrontendCaptureContext,
 ): void {
   if (!sentryEnabled) return;
 
   Sentry.withScope((scope) => {
+    if (context?.tags) {
+      scope.setTags(context.tags);
+    }
+    if (context?.extra) {
+      scope.setContext("extra", context.extra);
+    }
     if (context) {
-      scope.setContext("app", context);
+      const appContext = { ...context };
+      delete appContext.tags;
+      delete appContext.extra;
+      scope.setContext("app", appContext);
     }
     Sentry.captureException(error);
   });

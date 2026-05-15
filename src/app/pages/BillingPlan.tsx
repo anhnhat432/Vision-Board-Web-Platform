@@ -4,9 +4,11 @@ import { AlertTriangle, CreditCard, Crown, LifeBuoy, Loader2, ReceiptText, Refre
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
+import { BillingTrustSignals } from "../components/BillingTrustSignals";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { canRequestRefund, getEmailVerificationRequiredMessage, rememberEmailVerificationReturnPath } from "../utils/email-verification-guard";
 import { BillingPlusIllustration, HeroBillingPlusScene, SoftDotsPattern } from "../components/illustrations";
+import { logBillingUiError, toastBillingNetworkError } from "../utils/billing-ui-monitoring";
 import { PrimaryActionCard } from "../components/layout/PrimaryActionCard";
 import { SectionBlock } from "../components/layout/SectionBlock";
 import { MotionParallaxLayer, MotionStaggerItem, MotionStaggerList, MotionTilt } from "../components/motion";
@@ -234,8 +236,13 @@ export function BillingPlan() {
     try {
       const response = await apiClient.get<PaymentHistoryResponse>("/billing/payment-history");
       setPaymentHistory(response.orders);
-    } catch (error) {
-      setPaymentHistoryError(toAppError(error).message || "Không thể tải lịch sử thanh toán.");
+    } catch (error: unknown) {
+      if (toastBillingNetworkError(error, { surface: "BillingPlan", action: "load_payment_history" })) {
+        setPaymentHistoryError("Mạng có vấn đề, vui lòng thử lại");
+      } else {
+        logBillingUiError(error, { surface: "BillingPlan", action: "load_payment_history" });
+        setPaymentHistoryError(toAppError(error).message || "Không thể tải lịch sử thanh toán.");
+      }
     } finally {
       setIsLoadingPaymentHistory(false);
     }
@@ -266,9 +273,12 @@ export function BillingPlan() {
         setCheckoutReturnStatus("pending");
         toast.info("Thanh toán đang được xử lý. Quyền sẽ được cập nhật khi hệ thống xác nhận.");
       }
-    } catch {
+    } catch (error: unknown) {
       setCheckoutReturnStatus("failed");
-      toast.error("Không thể kiểm tra quyền trên tài khoản. Vui lòng thử lại.");
+      if (!toastBillingNetworkError(error, { surface: "BillingPlan", action: "poll_server_entitlement" })) {
+        logBillingUiError(error, { surface: "BillingPlan", action: "poll_server_entitlement" });
+        toast.error("Không thể kiểm tra quyền trên tài khoản. Vui lòng thử lại.");
+      }
     }
   }, [isCheckoutReturn, searchParams, setSearchParams, reloadUserData]);
 
@@ -316,6 +326,11 @@ export function BillingPlan() {
         toast.error(result.message);
       }
       reloadUserData();
+    } catch (error: unknown) {
+      if (!toastBillingNetworkError(error, { surface: "BillingPlan", action: "sync_entitlements" })) {
+        logBillingUiError(error, { surface: "BillingPlan", action: "sync_entitlements" });
+        toast.error("Không thể kiểm tra quyền trên tài khoản. Vui lòng thử lại.");
+      }
     } finally {
       setIsSyncing(false);
     }
@@ -331,6 +346,11 @@ export function BillingPlan() {
         toast.error(result.message);
       }
       reloadUserData();
+    } catch (error: unknown) {
+      if (!toastBillingNetworkError(error, { surface: "BillingPlan", action: "restore_access" })) {
+        logBillingUiError(error, { surface: "BillingPlan", action: "restore_access" });
+        toast.error("Không thể khôi phục quyền lúc này. Vui lòng thử lại.");
+      }
     } finally {
       setIsRestoring(false);
     }
@@ -346,6 +366,11 @@ export function BillingPlan() {
         toast.success(result.message);
       } else {
         toast.info(result.message);
+      }
+    } catch (error: unknown) {
+      if (!toastBillingNetworkError(error, { surface: "BillingPlan", action: "open_customer_portal" })) {
+        logBillingUiError(error, { surface: "BillingPlan", action: "open_customer_portal" });
+        toast.error("Không thể mở trang quản lý thanh toán. Vui lòng thử lại.");
       }
     } finally {
       setIsOpeningPortal(false);
@@ -471,10 +496,27 @@ export function BillingPlan() {
       );
       toast.success("Đã gửi yêu cầu hoàn tiền — sẽ xử lý trong 3-7 ngày làm việc.");
       setRefundDialogOrder(null);
-    } catch (error) {
-      const message = toAppError(error).message || "Không thể gửi yêu cầu hoàn tiền. Vui lòng thử lại sau.";
-      setRefundFormError(message);
-      toast.error(message);
+    } catch (error: unknown) {
+      if (toastBillingNetworkError(error, {
+        surface: "BillingPlan",
+        action: "submit_refund_request",
+        orderId: refundDialogOrder.orderId,
+        amount: refundDialogOrder.amount,
+        status: refundDialogOrder.status,
+      })) {
+        setRefundFormError("Mạng có vấn đề, vui lòng thử lại");
+      } else {
+        logBillingUiError(error, {
+          surface: "BillingPlan",
+          action: "submit_refund_request",
+          orderId: refundDialogOrder.orderId,
+          amount: refundDialogOrder.amount,
+          status: refundDialogOrder.status,
+        });
+        const message = toAppError(error).message || "Không thể gửi yêu cầu hoàn tiền. Vui lòng thử lại sau.";
+        setRefundFormError(message);
+        toast.error(message);
+      }
     } finally {
       setIsSubmittingRefund(false);
     }
@@ -522,8 +564,24 @@ export function BillingPlan() {
         ),
       );
       toast.success("Đã gửi lại biên nhận thanh toán.");
-    } catch (error) {
-      toast.error(toAppError(error).message || "Chưa gửi lại được biên nhận. Vui lòng thử lại sau.");
+    } catch (error: unknown) {
+      const order = paymentHistory.find((item) => item.orderId === orderId);
+      if (!toastBillingNetworkError(error, {
+        surface: "BillingPlan",
+        action: "resend_receipt",
+        orderId,
+        amount: order?.amount,
+        status: order?.status,
+      })) {
+        logBillingUiError(error, {
+          surface: "BillingPlan",
+          action: "resend_receipt",
+          orderId,
+          amount: order?.amount,
+          status: order?.status,
+        });
+        toast.error(toAppError(error).message || "Chưa gửi lại được biên nhận. Vui lòng thử lại sau.");
+      }
     } finally {
       setResendingReceiptOrderId(null);
     }
@@ -715,22 +773,7 @@ export function BillingPlan() {
         </Card>
       )}
 
-      <Card className="border-slate-200 bg-slate-50/90">
-          <CardContent className="grid gap-3 p-4 sm:grid-cols-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Thanh toán thật</p>
-              <p className="mt-1 text-sm leading-6 text-slate-700">Quyền Plus chỉ mở khi giao dịch được xác nhận từ hệ thống thanh toán.</p>
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Dữ liệu tài khoản</p>
-              <p className="mt-1 text-sm leading-6 text-slate-700">Quyền gói, chu kỳ 12 tuần và lịch sử thanh toán gắn với tài khoản của bạn.</p>
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Hỗ trợ thủ công</p>
-              <p className="mt-1 text-sm leading-6 text-slate-700">Nếu đã trả tiền nhưng quyền chưa mở, dùng mã đơn ở dưới để yêu cầu kiểm tra nhanh.</p>
-            </div>
-          </CardContent>
-        </Card>
+        <BillingTrustSignals supportEmail={BILLING_SUPPORT_EMAIL} />
 
       {/* Current plan */}
       <SectionBlock title="Khu vực gói đang dùng" headerVisuallyHidden>
@@ -1066,6 +1109,13 @@ export function BillingPlan() {
                 className="font-medium text-slate-700 underline-offset-4 hover:text-slate-900 hover:underline"
               >
                 Chính sách hoàn tiền
+              </Link>
+              . Xem thêm{" "}
+              <Link
+                to="/billing/faq"
+                className="font-medium text-slate-700 underline-offset-4 hover:text-slate-900 hover:underline"
+              >
+                câu hỏi thanh toán
               </Link>
               .
             </p>

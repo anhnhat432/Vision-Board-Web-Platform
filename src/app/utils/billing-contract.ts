@@ -86,11 +86,11 @@ export interface BillingProvider {
 export function getBillingProviderModeLabel(mode: BillingProviderMode): string {
   switch (mode) {
     case "api_contract":
-      return "API contract";
+      return "Máy chủ thanh toán";
     case "mock_provider":
       return "Đơn vị demo";
     default:
-      return "Local test";
+      return "Trên thiết bị này";
   }
 }
 

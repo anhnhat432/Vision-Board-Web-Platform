@@ -438,7 +438,7 @@ describe("TwelveWeekLocalStatusSection", () => {
       />,
     );
 
-    expect(screen.getByText("Chưa cấu hình kết nối tài khoản để gửi hàng chờ.")).toBeInTheDocument();
+    expect(screen.getByText("Chưa cấu hình kết nối tài khoản để gửi việc đang chờ đồng bộ.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Đồng bộ tài khoản/i })).toBeDisabled();
     expect(onRunMutationQueueSync).not.toHaveBeenCalled();
   });
@@ -542,7 +542,7 @@ describe("TwelveWeekLocalStatusSection", () => {
     }
     expect(screen.getByText(/Bắt đầu đồng bộ gần nhất:/i)).toBeInTheDocument();
     expect(screen.getByText(/Kết thúc đồng bộ gần nhất:/i)).toBeInTheDocument();
-    expect(screen.getByText(/Đã gửi hàng chờ, lấy 1 mục tiêu từ tài khoản/i)).toBeInTheDocument();
+    expect(screen.getByText(/Đã gửi việc đang chờ đồng bộ, lấy 1 mục tiêu từ tài khoản/i)).toBeInTheDocument();
   });
 
   it("keeps manual queue sync disabled when signed out", () => {
@@ -585,7 +585,7 @@ describe("TwelveWeekLocalStatusSection", () => {
       />,
     );
 
-    expect(screen.getByText("Cần đăng nhập để gửi hàng chờ lên tài khoản.")).toBeInTheDocument();
+    expect(screen.getByText("Cần đăng nhập để gửi việc đang chờ đồng bộ lên tài khoản.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Đồng bộ tài khoản/i })).toBeDisabled();
     expect(onRunMutationQueueSync).not.toHaveBeenCalled();
   });

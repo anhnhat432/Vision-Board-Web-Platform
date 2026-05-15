@@ -141,6 +141,10 @@ export const appRoutes = [
         Component: BillingPlan,
       },
       {
+        path: "billing/faq",
+        ...lazyRoute(() => import("./pages/BillingFAQPage"), "BillingFAQPage"),
+      },
+      {
         // Protected routes — require authentication
         Component: ProtectedRoute,
         children: [

@@ -1,0 +1,88 @@
+import { HelpCircle, LifeBuoy } from "lucide-react";
+import { Link } from "react-router";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+
+const SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
+
+const FAQ_ITEMS = [
+  {
+    question: "Làm sao tôi biết đã thanh toán thành công?",
+    answer: "Bạn nhận biên nhận qua email + thấy gói Plus trong tài khoản.",
+  },
+  {
+    question: "Tôi chuyển khoản rồi mà chưa nhận Plus?",
+    answer: `Thường 1-2 phút. Nếu > 10 phút, liên hệ ${SUPPORT_EMAIL} kèm mã đơn hàng.`,
+  },
+  {
+    question: "Tôi chuyển sai số tiền/sai nội dung thì sao?",
+    answer: `Liên hệ ${SUPPORT_EMAIL}, admin sẽ xử lý thủ công.`,
+  },
+  {
+    question: "Hoàn tiền như nào?",
+    answer: "Xem chính sách hoàn tiền để biết điều kiện và cách gửi yêu cầu.",
+    link: "/refund-policy",
+    linkLabel: "Chính sách hoàn tiền",
+  },
+  {
+    question: "Có thuế/VAT không?",
+    answer: `Chúng tôi gửi biên nhận điện tử đơn giản. Nếu cần hoá đơn VAT, liên hệ ${SUPPORT_EMAIL}.`,
+  },
+];
+
+export function BillingFAQPage() {
+  return (
+    <div className="mx-auto max-w-4xl px-4 py-10">
+      <Card className="overflow-hidden border-slate-200 bg-white/95 shadow-xl shadow-slate-200/70">
+        <CardHeader className="border-b border-slate-100 bg-slate-50/80">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-emerald-100 text-emerald-700">
+              <HelpCircle className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Thanh toán Plus</p>
+              <CardTitle className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Câu hỏi thường gặp</CardTitle>
+              <CardDescription className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
+                Các câu hỏi hay gặp khi chuyển khoản ngân hàng để nâng cấp Plus.
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4 p-5 sm:p-7">
+          {FAQ_ITEMS.map((item) => (
+            <article key={item.question} className="rounded-[var(--r-card)] border border-slate-200 bg-white p-5">
+              <h2 className="text-lg font-semibold text-slate-950">{item.question}</h2>
+              <p className="mt-2 text-sm leading-7 text-slate-700">
+                {item.answer}
+                {item.link ? (
+                  <>
+                    {" "}
+                    <Link to={item.link} className="font-semibold text-violet-700 underline-offset-4 hover:underline">
+                      {item.linkLabel}
+                    </Link>
+                    .
+                  </>
+                ) : null}
+              </p>
+            </article>
+          ))}
+
+          <div className="rounded-[var(--r-card)] border border-emerald-100 bg-emerald-50/80 p-5">
+            <div className="flex gap-3">
+              <LifeBuoy className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+              <div>
+                <p className="text-sm font-semibold text-emerald-950">Cần kiểm tra đơn cụ thể?</p>
+                <p className="mt-1 text-sm leading-7 text-emerald-900">
+                  Gửi mã đơn hàng tới{" "}
+                  <a href={`mailto:${SUPPORT_EMAIL}`} className="font-semibold underline-offset-4 hover:underline">
+                    {SUPPORT_EMAIL}
+                  </a>{" "}
+                  để đội hỗ trợ kiểm tra thủ công.
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

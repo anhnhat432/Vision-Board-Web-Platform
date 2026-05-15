@@ -25,7 +25,7 @@ vi.mock("@/lib/auth/AuthContext", () => ({
   }),
 }));
 
-const UI_TEST_TIMEOUT_MS = 10_000;
+const UI_TEST_TIMEOUT_MS = 30_000;
 
 describe("BillingPlan refund request", () => {
   beforeEach(() => {

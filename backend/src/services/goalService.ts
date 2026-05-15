@@ -4,6 +4,7 @@ import {
 } from "../repositories/mongo/MongoGoalRepository";
 import { ApiError } from "../utils/apiError";
 import type { GoalStatus } from "../models/GoalModel";
+import { assertFreeTierLimit, hasPlusAccess } from "./freeTierLimits";
 import { assertValidObjectId } from "./serviceGuards";
 
 export interface CreateGoalPayload {
@@ -187,10 +188,21 @@ function validateUpdateGoalPayload(payload: unknown): Parameters<MongoGoalReposi
 }
 
 export class GoalService {
-  constructor(private readonly goalRepository: MongoGoalRepository) {}
+  constructor(
+    private readonly goalRepository: MongoGoalRepository,
+    private readonly hasPlusAccessForUser: (userId: string) => Promise<boolean> = hasPlusAccess,
+  ) {}
 
   async createGoal(userId: string, payload: unknown) {
     const validated = validateCreateGoalPayload(payload);
+    const existingGoals = await this.goalRepository.getGoalsByUserId(userId);
+    const activeGoalCount = existingGoals.filter((goal) => goal.status === "active").length;
+    await assertFreeTierLimit({
+      userId,
+      limitName: "maxActiveGoals",
+      currentCount: activeGoalCount,
+      hasPlusAccess: this.hasPlusAccessForUser,
+    });
 
     return this.goalRepository.createGoal({
       userId,

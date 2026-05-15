@@ -866,7 +866,7 @@ export function AdminOrdersPage() {
             <h1 className="mt-6 text-2xl font-bold text-slate-900">Không tải được quyền quản trị</h1>
             <p className="mx-auto mt-[var(--space-inline)] max-w-xl text-base leading-7 text-slate-500">
               {userProfileError ||
-                "Máy chủ chưa trả hồ sơ cho tài khoản này. Kiểm tra Render đã deploy, VITE_API_BASE_URL trỏ đúng backend và ADMIN_EMAILS có email quản trị."}
+                "Máy chủ chưa trả hồ sơ cho tài khoản này. Kiểm tra máy chủ đã sẵn sàng và quyền quản trị đã được cấu hình."}
             </p>
             <Button className="mt-6" variant="outline" onClick={refreshUserProfile}>
               Thử lại

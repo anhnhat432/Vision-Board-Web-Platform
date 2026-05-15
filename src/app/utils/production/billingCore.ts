@@ -64,7 +64,7 @@ export function getProviderLabel(mode: BillingProviderMode): string {
     case "mock_provider":
       return "Nhà cung cấp giả lập";
     default:
-      return "Local test";
+      return "Trên thiết bị này";
   }
 }
 

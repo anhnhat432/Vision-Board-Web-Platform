@@ -1,4 +1,4 @@
-import { getFirebaseToken, getStoredFirebaseToken, logoutFirebase } from "@/lib/auth/firebase";
+import { AuthError, authedFetch } from "@/lib/auth/authedFetch";
 import type { ApiErrorEnvelope, ApiSuccessEnvelope, AppError } from "@/types/api";
 import { isDemoMode } from "@/app/utils/app-mode";
 
@@ -97,14 +97,8 @@ export function addResponseErrorInterceptor(interceptor: ResponseErrorIntercepto
   };
 }
 
-async function handleUnauthorizedResponse(error: ApiClientError): Promise<void> {
+function handleUnauthorizedResponse(error: ApiClientError): void {
   if (error.status !== 401) return;
-
-  try {
-    await logoutFirebase();
-  } catch (logoutError) {
-    console.error("Failed to logout after 401 response.", logoutError);
-  }
 
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent("api:unauthorized"));
@@ -208,34 +202,36 @@ async function request<TResponse, TBody = unknown>(
   options?: ApiRequestOptions,
 ): Promise<TResponse> {
   if (isDemoMode()) {
-    throw new Error("Các yêu cầu API bị tắt trong chế độ thử.");
+    throw new Error("Các yêu cầu máy chủ bị tắt trong chế độ thử.");
   }
 
-  const token = (await getFirebaseToken().catch(() => null)) ?? getStoredFirebaseToken();
   const headers = new Headers(options?.headers ?? {});
 
   if (body !== undefined && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
-  if (token && token.trim().length > 0) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-
   let response: Response;
   try {
-    response = await fetch(buildApiUrl(path), {
+    response = await authedFetch(buildApiUrl(path), {
       ...options,
       method,
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),
     });
   } catch (networkError) {
-    const apiError = createApiClientError({
-      message: "Lỗi kết nối mạng. Kiểm tra mạng rồi thử lại.",
-      isNetworkError: true,
-      details: networkError,
-    });
+    const apiError = networkError instanceof AuthError
+      ? createApiClientError({
+          message: networkError.message,
+          status: networkError.status,
+          errorCode: networkError.code,
+          details: networkError,
+        })
+      : createApiClientError({
+          message: "Lỗi kết nối mạng. Kiểm tra mạng rồi thử lại.",
+          isNetworkError: true,
+          details: networkError,
+        });
     await runResponseErrorInterceptors(apiError);
     throw apiError;
   }

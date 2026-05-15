@@ -1,7 +1,18 @@
 ﻿import { useEffect, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { motion, type Variants } from "motion/react";
-import { AlertCircle, Compass, Loader2, LogOut, RefreshCw, ShieldCheck, Sparkles, Target } from "lucide-react";
+import {
+  AlertCircle,
+  Compass,
+  Eye,
+  EyeOff,
+  Loader2,
+  LogOut,
+  RefreshCw,
+  ShieldCheck,
+  Sparkles,
+  Target,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { ConstellationAccent, HeroLoginScene, HeroOrbitIllustration } from "../components/illustrations";
@@ -35,7 +46,7 @@ const TRUST_FEATURES = [
 
 const WORKSPACE_PROMISES = [
   "Lưu tiến độ và tiếp tục trên thiết bị khác.",
-  "Đồng bộ kế hoạch 12 tuần vào cùng tài khoản.",
+  "Giữ kế hoạch 12 tuần trong cùng tài khoản.",
   "Quản lý quyền Plus và thanh toán trong cùng tài khoản.",
 ];
 
@@ -95,6 +106,9 @@ export function LoginPage() {
   const [mode, setMode] = useState<LoginMode>(() => getInitialLoginMode(location.search));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
@@ -106,7 +120,29 @@ export function LoginPage() {
     setMode(getInitialLoginMode(location.search));
   }, [location.search]);
 
-  // If already authenticated, wait for backend profile so admin accounts can
+  useEffect(() => {
+    setShowPassword(false);
+    if (mode !== "signup") {
+      setConfirmPassword("");
+      setShowConfirmPassword(false);
+    }
+  }, [mode]);
+
+  const passwordChecks = {
+    hasMinimumLength: password.length >= 8,
+    hasNumber: /\d/.test(password),
+    matchesConfirmation: confirmPassword.length > 0 && confirmPassword === password,
+  };
+  const canSubmitSignup =
+    mode !== "signup" ||
+    (passwordChecks.hasMinimumLength && passwordChecks.hasNumber && passwordChecks.matchesConfirmation);
+  const passwordRequirementItems = [
+    { label: "Ít nhất 8 ký tự", passed: passwordChecks.hasMinimumLength },
+    { label: "Có ít nhất 1 chữ số", passed: passwordChecks.hasNumber },
+    { label: "Khớp với mật khẩu xác nhận", passed: passwordChecks.matchesConfirmation },
+  ];
+
+  // If already signed in, wait for profile so admin accounts can
   // land directly in the admin console instead of the normal user workspace.
   if (!authLoading && user) {
     if (userProfile?.role === "admin") {
@@ -174,6 +210,8 @@ export function LoginPage() {
 
   async function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!canSubmitSignup) return;
+
     setSubmitting(true);
 
     const result = await login({ provider: "email", email, password, mode });
@@ -209,7 +247,7 @@ export function LoginPage() {
     : { variants: revealVariants };
 
   if (!isConfigured) {
-    // Firebase not configured — show a notice instead of a broken form
+    // Sign-in not configured — show a notice instead of a broken form
     return (
       <div className="app-shell flex min-h-screen items-center justify-center px-4" data-route-tone="vision">
         <div className="ambient-orb ambient-orb--violet" />
@@ -413,19 +451,75 @@ export function LoginPage() {
                       </button>
                     ) : null}
                   </div>
-                  <Input
-                    id="login-password"
-                    type="password"
-                    autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={submitting || authLoading}
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="login-password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      disabled={submitting || authLoading}
+                      className="pr-11"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((current) => !current)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-[var(--r-control)] p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300 disabled:pointer-events-none disabled:opacity-50 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+                      disabled={submitting || authLoading}
+                      aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  {mode === "signup" ? (
+                    <div className="space-y-1 pt-1" aria-live="polite">
+                      {passwordRequirementItems.map((item) => (
+                        <div
+                          key={item.label}
+                          className={item.passed ? "flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300" : "flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"}
+                        >
+                          <span
+                            className={item.passed ? "h-2 w-2 rounded-full bg-emerald-500" : "h-2 w-2 rounded-full border border-slate-300 bg-transparent dark:border-slate-600"}
+                            aria-hidden="true"
+                          />
+                          <span>{item.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
 
-                <Button type="submit" className="w-full" disabled={submitting || authLoading || !email || !password}>
+                {mode === "signup" ? (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="login-confirm-password">Xác nhận mật khẩu</Label>
+                    <div className="relative">
+                      <Input
+                        id="login-confirm-password"
+                        type={showConfirmPassword ? "text" : "password"}
+                        autoComplete="new-password"
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        disabled={submitting || authLoading}
+                        className="pr-11"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword((current) => !current)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-[var(--r-control)] p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-300 disabled:pointer-events-none disabled:opacity-50 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+                        disabled={submitting || authLoading}
+                        aria-label={showConfirmPassword ? "Ẩn mật khẩu xác nhận" : "Hiện mật khẩu xác nhận"}
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+
+                <Button type="submit" className="w-full" disabled={submitting || authLoading || !email || !password || !canSubmitSignup}>
                   {submitting ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : mode === "signin" ? (

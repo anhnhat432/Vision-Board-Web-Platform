@@ -173,17 +173,17 @@ export function useTwelveWeekSettingsActions({
   const handleOutboxItemToggle = useCallback((item: SyncOutboxItem) => {
     if (item.status === "pending") {
       archiveOutboxItem(item.id);
-      toast.success("Mục trong hàng chờ gửi đã được lưu lại.");
+      toast.success("Mục đang chờ đồng bộ đã được lưu lại.");
     } else {
       restoreOutboxItem(item.id);
-      toast.success("Mục trong hàng chờ gửi đã được khôi phục về hàng chờ.");
+      toast.success("Mục đã được đưa lại vào việc đang chờ đồng bộ.");
     }
     refreshSnapshotMeta();
   }, [refreshSnapshotMeta]);
 
   const handleRestoreArchivedOutbox = useCallback(() => {
     restoreArchivedOutbox();
-      toast.success("Các thay đổi chưa gửi đã được đưa lại vào hàng chờ đồng bộ.");
+      toast.success("Các thay đổi chưa gửi đã được đưa lại vào việc đang chờ đồng bộ.");
     refreshSnapshotMeta();
   }, [refreshSnapshotMeta]);
 
@@ -242,7 +242,7 @@ export function useTwelveWeekSettingsActions({
         policy: result.policy,
         counts: JSON.stringify(result.counts),
       });
-      toast.success("Đã xóa dữ liệu 12-week đã đồng bộ.", {
+      toast.success("Đã xóa dữ liệu 12 tuần đã sao lưu.", {
         description: "Dữ liệu trên thiết bị, quyền Plus và tài khoản không bị ảnh hưởng.",
       });
     } catch (_error) {
@@ -253,7 +253,7 @@ export function useTwelveWeekSettingsActions({
   const handleClearLocalSignals = useCallback(() => {
     clearLocalDeviceSignals();
     setIsClearLocalDialogOpen(false);
-    toast.success("Đã xóa nhật ký, hàng chờ gửi và trạng thái nhắc việc trên thiết bị này.");
+    toast.success("Đã xóa nhật ký, việc đang chờ đồng bộ và trạng thái nhắc việc trên thiết bị này.");
     refreshSnapshotMeta();
   }, [setIsClearLocalDialogOpen, refreshSnapshotMeta]);
 
@@ -267,7 +267,7 @@ export function useTwelveWeekSettingsActions({
       setIsDeleteDataDialogOpen(false);
 
       if (accountDeleteResult && !accountDeleteResult.firebaseAccountDeleted) {
-        toast.warning("Dữ liệu đã được xóa, nhưng Firebase account cần được kiểm tra lại.");
+        toast.warning("Dữ liệu đã được xóa, nhưng tài khoản cần được kiểm tra lại.");
       } else {
         toast.success(shouldDeleteRemoteAccount ? "Đã xóa tài khoản và dữ liệu." : "Đã xóa toàn bộ dữ liệu trên thiết bị.");
       }
@@ -295,14 +295,14 @@ export function useTwelveWeekSettingsActions({
 
       if (permission === "granted") {
         sendTestBrowserNotification();
-        toast.success("Thông báo ngoài trình duyệt đã được bật.");
+        toast.success("Thông báo trên thiết bị đã được bật.");
       } else if (permission === "denied") {
-        toast.error("Trình duyệt đang chặn thông báo ngoài trình duyệt.");
+        toast.error("Thiết bị đang chặn thông báo.");
       } else if (permission === "unsupported") {
-        toast.info("Trình duyệt hiện tại không hỗ trợ thông báo ngoài trình duyệt.");
+        toast.info("Thiết bị hiện tại không hỗ trợ thông báo.");
       }
     } else {
-      toast.success("Đã tắt thông báo ngoài trình duyệt.");
+      toast.success("Đã tắt thông báo trên thiết bị.");
       setBrowserNotificationStatus(getBrowserNotificationStatus());
     }
 

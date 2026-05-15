@@ -4,6 +4,7 @@ import { MongoTaskRepository } from "../repositories/mongo/MongoTaskRepository";
 import { MongoWeekRepository } from "../repositories/mongo/MongoWeekRepository";
 import { ApiError } from "../utils/apiError";
 import { requirePlanOwnership } from "./serviceGuards";
+import { assertFreeTierLimit, hasPlusAccess } from "./freeTierLimits";
 
 export interface CreatePlanPayload {
   vision?: string;
@@ -160,10 +161,18 @@ export class PlanService {
     private readonly weekRepository: MongoWeekRepository,
     private readonly taskRepository: MongoTaskRepository,
     private readonly metricRepository: MongoMetricRepository,
+    private readonly hasPlusAccessForUser: (userId: string) => Promise<boolean> = hasPlusAccess,
   ) {}
 
   async createPlanForUser(userId: string, payload: CreatePlanPayload) {
     const validatedPayload = validateCreatePlanPayload(payload);
+    const existingPlans = await this.planRepository.getPlansByUserId(userId);
+    await assertFreeTierLimit({
+      userId,
+      limitName: "max12WeekCycles",
+      currentCount: existingPlans.length,
+      hasPlusAccess: this.hasPlusAccessForUser,
+    });
     const plan = await this.planRepository.createPlan({
       userId,
       vision: validatedPayload.vision,

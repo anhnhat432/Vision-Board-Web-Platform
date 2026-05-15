@@ -75,7 +75,7 @@ export function SettingsPage() {
     userData.subscription?.planCode === "PLUS" && (expiryInfo.isExpiringSoon || expiryInfo.isExpired);
   const accountLabel = userProfile?.displayName || user?.displayName || user?.email || "Khách";
   const accountStatus = !isConfigured
-    ? "Đang dùng dữ liệu cục bộ"
+    ? "Đang dùng dữ liệu trên thiết bị"
     : user
       ? userProfile?.email || user.email || "Đã đăng nhập"
       : "Chưa đăng nhập";
@@ -168,10 +168,10 @@ export function SettingsPage() {
       return;
     }
     if (result?.status === "error" || result?.status === "drain_failed") {
-      toast.error(result.message || "Chưa đồng bộ được tài khoản. Dữ liệu vẫn được giữ trên thiết bị này.");
+      toast.error(result.message || "Chưa sao lưu được vào tài khoản. Dữ liệu vẫn được giữ trên thiết bị này.");
       return;
     }
-    toast.success("Đã kiểm tra đồng bộ tài khoản.");
+    toast.success("Đã kiểm tra sao lưu tài khoản.");
   };
 
   const syncIcon = autoSyncState.conflictPending
@@ -191,7 +191,7 @@ export function SettingsPage() {
       <PageHeader
         eyebrow="Cài đặt"
         title="Tài khoản và dữ liệu"
-        description="Quản lý dữ liệu lưu trên trình duyệt, bản sao lưu và các lối tắt cài đặt quan trọng."
+        description="Quản lý dữ liệu lưu trên thiết bị này, bản sao lưu và các lối tắt cài đặt quan trọng."
       />
 
       <section className="stack-tight" aria-label="Dữ liệu và sao lưu">
@@ -291,9 +291,9 @@ export function SettingsPage() {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <SyncIcon className={`h-4 w-4 ${autoSyncState.syncing ? "animate-spin text-sky-600" : "text-slate-500"}`} />
-              Đồng bộ tài khoản
+              Sao lưu tài khoản
             </CardTitle>
-            <CardDescription>Phân biệt dữ liệu đã lưu trên thiết bị và dữ liệu đã lên tài khoản.</CardDescription>
+            <CardDescription>Phân biệt dữ liệu đã lưu trên thiết bị và dữ liệu đã sao lưu vào tài khoản.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-2 text-sm sm:grid-cols-3">
@@ -306,22 +306,22 @@ export function SettingsPage() {
                 <p className="mt-1 leading-6 text-slate-500">{formatSyncTime(autoSyncState.lastSyncedAt)}</p>
               </div>
               <div className="rounded-[var(--r-control)] border border-slate-200 bg-white/75 p-3">
-                <p className="font-semibold text-slate-900">Hàng chờ</p>
+                <p className="font-semibold text-slate-900">Việc đang chờ đồng bộ</p>
                 <p className="mt-1 leading-6 text-slate-500">
                   {autoSyncState.pendingCount > 0
                     ? `${autoSyncState.pendingCount} thay đổi chờ đồng bộ`
-                    : "Không có thay đổi chờ gửi"}
+                    : "Không có thay đổi chờ đồng bộ"}
                 </p>
               </div>
             </div>
             <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50/80 p-3 text-sm leading-6 text-slate-600">
               {autoSyncState.conflictPending
                 ? "Dữ liệu trên thiết bị và tài khoản đang khác nhau. Ứng dụng sẽ hỏi bạn trước khi ghi đè."
-                : !autoSyncState.online
-                  ? "Bạn đang offline. Dữ liệu vẫn được lưu trên thiết bị và sẽ gửi lên tài khoản khi có mạng."
-                  : autoSyncState.syncing
-                    ? "Đang đồng bộ lên tài khoản. Bạn có thể tiếp tục dùng app."
-                    : "Đồng bộ sẵn sàng. Nếu có lỗi, dữ liệu vẫn được giữ trên thiết bị này để thử lại."}
+                  : !autoSyncState.online
+                    ? "Bạn đang mất kết nối. Dữ liệu vẫn được lưu trên thiết bị và sẽ gửi lên tài khoản khi có mạng."
+                    : autoSyncState.syncing
+                      ? "Đang sao lưu lên tài khoản. Bạn có thể tiếp tục dùng app."
+                      : "Sao lưu sẵn sàng. Nếu có lỗi, dữ liệu vẫn được giữ trên thiết bị này để thử lại."}
             </div>
             {autoSyncState.lastResult?.message ? (
               <div className="rounded-[var(--r-control)] border border-slate-200 bg-white/80 p-3 text-sm leading-6 text-slate-600">
@@ -332,7 +332,7 @@ export function SettingsPage() {
             <div className="flex flex-wrap gap-3">
               <Button type="button" variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={handleRetrySync} disabled={autoSyncState.syncing || !user}>
                 {autoSyncState.syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                Kiểm tra đồng bộ
+                Kiểm tra sao lưu
               </Button>
               <Button type="button" variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={handleExport}>
                 <CloudDownload className="h-4 w-4" />

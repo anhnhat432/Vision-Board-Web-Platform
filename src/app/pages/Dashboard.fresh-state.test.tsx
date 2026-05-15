@@ -8,6 +8,7 @@ import { Dashboard } from "./Dashboard";
 
 const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
+  useOptionalAuthContext: vi.fn(),
 }));
 
 const planHookMock = vi.hoisted(() => ({
@@ -20,6 +21,7 @@ const appModeMock = vi.hoisted(() => ({
 
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
+  useOptionalAuthContext: authContextMock.useOptionalAuthContext,
 }));
 
 vi.mock("../utils/app-mode", () => ({
@@ -61,7 +63,7 @@ vi.mock("../utils/production", async (importOriginal) => {
 });
 
 function setAuthContext(overrides: Record<string, unknown> = {}) {
-  authContextMock.useAuthContext.mockReturnValue({
+  const context = {
     user: null,
     userProfile: null,
     userProfileLoading: false,
@@ -73,7 +75,9 @@ function setAuthContext(overrides: Record<string, unknown> = {}) {
     refreshUserProfile: vi.fn(),
     isConfigured: true,
     ...overrides,
-  });
+  };
+  authContextMock.useAuthContext.mockReturnValue(context);
+  authContextMock.useOptionalAuthContext.mockReturnValue(context);
 }
 
 function renderDashboard() {

@@ -513,7 +513,7 @@ describe("RootLayout onboarding redirect", () => {
 
     expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
     expect(screen.getByText("v1.0")).toBeInTheDocument();
-    expect(screen.getByText("plus@example.com")).toBeInTheDocument();
+    expect(screen.getAllByText("plus@example.com").length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: "Cài đặt" })).toHaveAttribute("href", "/settings");
 
     fireEvent.pointerDown(screen.getByRole("button", { name: "Mở menu tài khoản" }), { button: 0 });

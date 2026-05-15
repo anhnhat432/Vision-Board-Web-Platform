@@ -8,6 +8,7 @@ import { Dashboard } from "./Dashboard";
 
 const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
+  useOptionalAuthContext: vi.fn(),
 }));
 
 const planHookMock = vi.hoisted(() => ({
@@ -16,6 +17,7 @@ const planHookMock = vi.hoisted(() => ({
 
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
+  useOptionalAuthContext: authContextMock.useOptionalAuthContext,
 }));
 
 vi.mock("../utils/app-mode", () => ({
@@ -46,7 +48,7 @@ vi.mock("../components/DashboardLifeAreaRadar", () => ({
 }));
 
 function setAuthContext() {
-  authContextMock.useAuthContext.mockReturnValue({
+  const context = {
     user: { uid: "active_user", email: "active@example.com" },
     userProfile: { id: "profile_active", email: "active@example.com" },
     userProfileLoading: false,
@@ -57,7 +59,9 @@ function setAuthContext() {
     logout: vi.fn().mockResolvedValue(undefined),
     refreshUserProfile: vi.fn(),
     isConfigured: true,
-  });
+  };
+  authContextMock.useAuthContext.mockReturnValue(context);
+  authContextMock.useOptionalAuthContext.mockReturnValue(context);
 }
 
 function makeTask(id: string, title: string, completed = false): TwelveWeekTaskInstance {

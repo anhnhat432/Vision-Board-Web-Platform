@@ -1,9 +1,10 @@
 import { CreditCard, Crown, LockKeyhole, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
 import { sendVerificationEmail } from "@/lib/auth/firebase";
 import { shouldShowBillingDebugUi } from "../utils/app-mode";
+import { logBillingUiError, toastBillingNetworkError } from "../utils/billing-ui-monitoring";
 import { formatVndAmount, getPlusPriceLabel, PLUS_MONTHLY_PRICE_VND } from "../utils/billing-pricing";
 import { canUpgradeToPlus, rememberEmailVerificationReturnPath } from "../utils/email-verification-guard";
 import { type MonetizationSource, trackPaywallCtaClicked, trackPaywallViewed } from "../utils/monetization-analytics";
@@ -16,6 +17,7 @@ import {
   PLAN_DEFINITIONS,
   type PremiumFeatureContext,
 } from "../utils/twelve-week-premium";
+import { BillingTrustSignals } from "./BillingTrustSignals";
 import { BillingPlusIllustration } from "./illustrations";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -91,6 +93,10 @@ export function UpgradePaywallDialog({
     setSendingVerification(true);
     try {
       await sendVerificationEmail();
+    } catch (error: unknown) {
+      if (!toastBillingNetworkError(error, { surface: "UpgradePaywallDialog", action: "send_verification_email" })) {
+        logBillingUiError(error, { surface: "UpgradePaywallDialog", action: "send_verification_email" });
+      }
     } finally {
       setSendingVerification(false);
     }
@@ -116,6 +122,10 @@ export function UpgradePaywallDialog({
 
       navigate("/billing/confirm");
       onOpenChange(false);
+    } catch (error: unknown) {
+      if (!toastBillingNetworkError(error, { surface: "UpgradePaywallDialog", action: "start_checkout" })) {
+        logBillingUiError(error, { surface: "UpgradePaywallDialog", action: "start_checkout" });
+      }
     } finally {
       setIsUpgrading(false);
     }
@@ -183,10 +193,10 @@ export function UpgradePaywallDialog({
                       <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Chế độ</p>
                       <p className="mt-2 text-sm font-semibold text-slate-900">
                         {billingProviderStatus.mode === "api_contract"
-                          ? "API contract"
+                          ? "Máy chủ thanh toán"
                           : billingProviderStatus.mode === "mock_provider"
                             ? "Nhà cung cấp nội bộ"
-                            : "Cục bộ"}
+                            : "Trên thiết bị này"}
                       </p>
                     </div>
                     <div className="rounded-[var(--r-tile)] border border-white/80 bg-white px-4 py-3">
@@ -269,6 +279,8 @@ export function UpgradePaywallDialog({
                       </p>
                     </div>
 
+                    <BillingTrustSignals compact className="mt-4" supportEmail={BILLING_SUPPORT_EMAIL} />
+
                     <div className="mt-4 space-y-2">
                       {plan.highlights.map((feature) => (
                         <div
@@ -298,7 +310,11 @@ export function UpgradePaywallDialog({
           <DialogFooter className="flex flex-col gap-3 border-t border-white/70 bg-white/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5">
             <p className="text-sm leading-7 text-slate-500">
               Bạn sẽ chuyển khoản {plusPriceAmountLabel} đến tài khoản ngân hàng. Sau khi chúng tôi nhận được tiền
-              (thường trong 1-2 phút), quyền Plus sẽ kích hoạt và biên nhận gửi về {receiptEmailLabel}.
+              (thường trong 1-2 phút), quyền Plus sẽ kích hoạt và biên nhận gửi về {receiptEmailLabel}. Xem thêm{" "}
+              <Link to="/billing/faq" className="font-semibold text-slate-700 underline-offset-4 hover:underline">
+                câu hỏi thanh toán
+              </Link>
+              .
             </p>
             <Button className="w-full sm:w-auto" variant="outline" onClick={() => onOpenChange(false)}>
               Để sau
