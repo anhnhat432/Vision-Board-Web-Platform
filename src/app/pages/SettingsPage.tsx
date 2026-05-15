@@ -352,7 +352,7 @@ export function SettingsPage() {
             <CardDescription>Mở đúng khu vực khi cần chỉnh chu kỳ hoặc gói truy cập.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">
-            <Button variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={() => navigate("/12-week-system/settings")}>
+            <Button variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={() => navigate("/12-week-system?tab=settings")}>
               <CalendarDays className="h-4 w-4" />
               Cài đặt chu kỳ
             </Button>
