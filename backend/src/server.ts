@@ -4,11 +4,13 @@ import { captureBackendException, flushSentry } from "./monitoring/sentry";
 import { app } from "./app";
 import { startFailedReceiptRetryJob } from "./jobs/failedReceiptRetryJob";
 import { startPaymentOrderExpiryJob } from "./jobs/paymentOrderExpiryJob";
+import { startPaymentReconciliationJob } from "./jobs/reconciliationJob";
 
 async function bootstrap(): Promise<void> {
   await connectMongo();
   startFailedReceiptRetryJob();
   startPaymentOrderExpiryJob();
+  startPaymentReconciliationJob();
 
   app.listen(env.PORT, () => {
     // eslint-disable-next-line no-console

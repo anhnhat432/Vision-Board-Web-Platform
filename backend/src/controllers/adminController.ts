@@ -18,6 +18,7 @@ import {
   sendBillingExpirationReminderEmail,
 } from "../services/emailNotificationService";
 import { ApiError } from "../utils/apiError";
+import { getLastPaymentReconciliationRun } from "../jobs/reconciliationJob";
 import { successResponse } from "../utils/apiResponse";
 
 const DEFAULT_EXPIRING_REMINDER_DAYS = 7;
@@ -228,6 +229,10 @@ async function buildPaymentOrderFilter(
   }
 
   return filter;
+}
+
+export async function getReconciliationLastRun(_req: Request, res: Response): Promise<void> {
+  res.status(200).json(successResponse({ lastRun: getLastPaymentReconciliationRun() }));
 }
 
 export async function getAdminOverview(_req: Request, res: Response, next: NextFunction): Promise<void> {

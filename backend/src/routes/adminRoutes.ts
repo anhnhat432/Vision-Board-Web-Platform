@@ -4,6 +4,7 @@ import {
   completePaymentOrderManually,
   getAdminPaymentOrders,
   getAdminOverview,
+  getReconciliationLastRun,
   sendExpiringBillingReminders,
 } from "../controllers/adminController";
 import {
@@ -18,6 +19,7 @@ import { asyncHandler } from "../utils/asyncHandler";
 const adminRoutes = Router();
 
 adminRoutes.get("/admin/overview", asyncHandler(requireAdmin), asyncHandler(getAdminOverview));
+adminRoutes.get("/admin/reconciliation/last-run", asyncHandler(requireAdmin), asyncHandler(getReconciliationLastRun));
 adminRoutes.get("/admin/billing/payment-orders", asyncHandler(requireAdmin), asyncHandler(getAdminPaymentOrders));
 adminRoutes.post(
   "/admin/billing/reminders/expiring",

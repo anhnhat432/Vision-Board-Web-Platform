@@ -37,6 +37,9 @@ export interface PaymentOrderEntity {
   receiptName?: string | null;
   receiptSentAt?: Date | null;
   receiptLastError?: string | null;
+  reconciliationStatus?: "matched" | "amount_mismatch" | null;
+  reconciliationLastCheckedAt?: Date | null;
+  reconciliationLastError?: string | null;
   manualCompletedBy?: string | null;
   manualCompletedAt?: Date | null;
   manualCompletionNote?: string | null;
@@ -151,6 +154,21 @@ const paymentOrderSchema = new Schema(
       trim: true,
       maxlength: 500,
     },
+    reconciliationStatus: {
+      type: String,
+      required: false,
+      enum: ["matched", "amount_mismatch"],
+    },
+    reconciliationLastCheckedAt: {
+      type: Date,
+      required: false,
+    },
+    reconciliationLastError: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 500,
+    },
     manualCompletedBy: {
       type: String,
       required: false,
@@ -203,6 +221,9 @@ export type PaymentOrderDocument = Document & {
   receiptName?: string | null;
   receiptSentAt?: Date | null;
   receiptLastError?: string | null;
+  reconciliationStatus?: "matched" | "amount_mismatch" | null;
+  reconciliationLastCheckedAt?: Date | null;
+  reconciliationLastError?: string | null;
   manualCompletedBy?: string | null;
   manualCompletedAt?: Date | null;
   manualCompletionNote?: string | null;
