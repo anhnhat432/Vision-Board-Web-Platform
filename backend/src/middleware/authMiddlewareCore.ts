@@ -10,6 +10,7 @@ export interface TokenVerifier {
     name?: string;
     email_verified?: boolean;
     emailVerified?: boolean;
+    role?: string;
   }>;
 }
 
@@ -73,6 +74,8 @@ export function createAuthMiddleware(tokenVerifier: TokenVerifier, options: Auth
         name: decodedToken.name,
         emailVerified: decodedToken.email_verified === true || decodedToken.emailVerified === true,
       };
+      if (decodedToken.role !== undefined) req.user.role = decodedToken.role;
+      req.firebaseToken = req.user;
       if (options.requireEmailVerified) assertEmailVerified(req.user.emailVerified);
 
       next();

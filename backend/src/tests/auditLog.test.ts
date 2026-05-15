@@ -1,0 +1,223 @@
+import assert from "node:assert/strict";
+import type { AddressInfo } from "node:net";
+import { afterEach, describe, it } from "node:test";
+import express, { type Express } from "express";
+
+import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
+import { errorMiddleware } from "../middleware/errorMiddleware";
+import { clearAdminRoleCache } from "../middleware/requireAdmin";
+import { AuditLogModel, type AuditLogEntity } from "../models/auditLogModel";
+import { PaymentOrderModel, type PaymentOrderStatus } from "../models/PaymentOrderModel";
+import { UserModel } from "../models/UserModel";
+import { adminRoutes } from "../routes/adminRoutes";
+import { billingService } from "../services/billingServiceInstance";
+
+type MockableModel = {
+  create: unknown;
+  findOne: unknown;
+};
+
+type MockableBillingService = {
+  upsertSubscriptionFromProviderEvent: unknown;
+};
+
+interface JsonResponse {
+  status: number;
+  body: Record<string, unknown>;
+}
+
+interface MockPaymentOrder {
+  orderId: string;
+  userId: string;
+  amount: number;
+  status: PaymentOrderStatus;
+  completedAt?: Date;
+  cassoTransactionId?: string;
+  manualCompletedBy?: string;
+  manualCompletedAt?: Date;
+  manualCompletionNote?: string;
+  save(): Promise<MockPaymentOrder>;
+}
+
+const originalAuditCreate = AuditLogModel.create;
+const originalPaymentOrderFindOne = PaymentOrderModel.findOne;
+const originalUserFindOne = UserModel.findOne;
+const originalBillingUpsert = billingService.upsertSubscriptionFromProviderEvent;
+
+function createMockPaymentOrder(overrides: Partial<MockPaymentOrder> = {}): MockPaymentOrder {
+  return {
+    orderId: "VBQA000001",
+    userId: "customer_uid_should_not_log",
+    amount: 2000,
+    status: "pending",
+    async save() {
+      return this;
+    },
+    ...overrides,
+  };
+}
+
+function createAdminTestApp(): Express {
+  const app = express();
+  app.use(express.json());
+  app.use(
+    "/api",
+    createAuthMiddleware({
+      async verifyIdToken(token: string) {
+        if (token === "admin-token") {
+          return { uid: "admin_uid", email: "admin@example.com", emailVerified: true, role: "admin" };
+        }
+        if (token === "non-admin-token") {
+          return { uid: "non_admin_uid", email: "viewer@example.com", emailVerified: true, role: "user" };
+        }
+        throw new Error("Invalid test token");
+      },
+    }),
+  );
+  app.use("/api", adminRoutes);
+  app.use(errorMiddleware);
+  return app;
+}
+
+async function requestJson(
+  app: Express,
+  method: string,
+  path: string,
+  options: { token?: string; body?: unknown } = {},
+): Promise<JsonResponse> {
+  const server = app.listen(0);
+  await new Promise<void>((resolve) => {
+    server.once("listening", resolve);
+  });
+
+  const address = server.address() as AddressInfo;
+  const headers: Record<string, string> = {
+    accept: "application/json",
+    authorization: `Bearer ${options.token ?? "admin-token"}`,
+  };
+  if (options.body !== undefined) headers["content-type"] = "application/json";
+
+  try {
+    const response = await fetch(`http://127.0.0.1:${address.port}${path}`, {
+      method,
+      headers,
+      body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+    });
+    const text = await response.text();
+    return {
+      status: response.status,
+      body: text ? JSON.parse(text) : {},
+    };
+  } finally {
+    await new Promise<void>((resolve, reject) => {
+      server.close((error) => {
+        if (error) reject(error);
+        else resolve();
+      });
+    });
+  }
+}
+
+function mockUserRole(role: "user" | "admin"): void {
+  (UserModel as unknown as MockableModel).findOne = () => {
+    const chain = {
+      select() {
+        return chain;
+      },
+      maxTimeMS(ms: number) {
+        assert.equal(ms, 5000);
+        return chain;
+      },
+      async lean() {
+        return { role };
+      },
+    };
+    return chain;
+  };
+}
+
+afterEach(() => {
+  (AuditLogModel as unknown as MockableModel).create = originalAuditCreate;
+  (PaymentOrderModel as unknown as MockableModel).findOne = originalPaymentOrderFindOne;
+  (UserModel as unknown as MockableModel).findOne = originalUserFindOne;
+  (billingService as unknown as MockableBillingService).upsertSubscriptionFromProviderEvent = originalBillingUpsert;
+  clearAdminRoleCache();
+});
+
+describe("admin audit logging", () => {
+  it("creates an audit log entry when completePaymentOrderManually succeeds", async () => {
+    const createdLogs: AuditLogEntity[] = [];
+    const order = createMockPaymentOrder();
+
+    (AuditLogModel as unknown as MockableModel).create = async (entry: AuditLogEntity) => {
+      createdLogs.push(entry);
+      return entry;
+    };
+    (PaymentOrderModel as unknown as MockableModel).findOne = async () => order;
+    (billingService as unknown as MockableBillingService).upsertSubscriptionFromProviderEvent = async () => ({
+      subscription: { id: "sub_manual_1" },
+      eventStatus: "processed",
+      eventId: "evt_manual_1",
+    });
+
+    const response = await requestJson(createAdminTestApp(), "POST", "/api/admin/billing/payment-orders/VBQA000001/complete", {
+      body: {
+        manualCompletionNote: "Matched transfer manually.",
+        customerEmail: "customer@example.com",
+        userId: "customer_uid_should_not_log",
+      },
+    });
+
+    assert.equal(response.status, 200);
+    assert.equal(createdLogs.length, 1);
+    assert.equal(createdLogs[0]?.actorUid, "admin_uid");
+    assert.equal(createdLogs[0]?.actorEmail, "admin@example.com");
+    assert.equal(createdLogs[0]?.action, "completePaymentOrderManually");
+    assert.equal(createdLogs[0]?.target, "payment_order");
+    assert.equal(createdLogs[0]?.targetId, "VBQA000001");
+    assert.equal(createdLogs[0]?.success, true);
+    assert.ok(createdLogs[0]?.timestamp instanceof Date);
+    assert.equal(typeof createdLogs[0]?.ip, "string");
+    assert.equal(createdLogs[0]?.payload?.manualCompletionNote, "Matched transfer manually.");
+    assert.equal("customerEmail" in (createdLogs[0]?.payload ?? {}), false);
+    assert.equal("userId" in (createdLogs[0]?.payload ?? {}), false);
+    assert.equal(JSON.stringify(createdLogs[0]).includes("customer@example.com"), false);
+    assert.equal(JSON.stringify(createdLogs[0]).includes("customer_uid_should_not_log"), false);
+  });
+
+  it("creates a failed audit log entry when non-admin calls completePaymentOrderManually", async () => {
+    const createdLogs: AuditLogEntity[] = [];
+    mockUserRole("user");
+
+    (AuditLogModel as unknown as MockableModel).create = async (entry: AuditLogEntity) => {
+      createdLogs.push(entry);
+      return entry;
+    };
+    (PaymentOrderModel as unknown as MockableModel).findOne = async () => {
+      throw new Error("payment lookup should not run");
+    };
+
+    const response = await requestJson(createAdminTestApp(), "POST", "/api/admin/billing/payment-orders/VBQA000001/complete", {
+      token: "non-admin-token",
+      body: {
+        manualCompletionNote: "Should not pass.",
+        customerEmail: "customer@example.com",
+        userId: "customer_uid_should_not_log",
+      },
+    });
+
+    assert.equal(response.status, 403);
+    assert.equal(createdLogs.length, 1);
+    assert.equal(createdLogs[0]?.actorUid, "non_admin_uid");
+    assert.equal(createdLogs[0]?.actorEmail, "viewer@example.com");
+    assert.equal(createdLogs[0]?.action, "completePaymentOrderManually");
+    assert.equal(createdLogs[0]?.target, "payment_order");
+    assert.equal(createdLogs[0]?.targetId, "VBQA000001");
+    assert.equal(createdLogs[0]?.success, false);
+    assert.equal(createdLogs[0]?.payload?.manualCompletionNote, "Should not pass.");
+    assert.equal("customerEmail" in (createdLogs[0]?.payload ?? {}), false);
+    assert.equal("userId" in (createdLogs[0]?.payload ?? {}), false);
+    assert.equal(JSON.stringify(createdLogs[0]).includes("customer@example.com"), false);
+    assert.equal(JSON.stringify(createdLogs[0]).includes("customer_uid_should_not_log"), false);
+  });
+});

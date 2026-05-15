@@ -8,6 +8,14 @@ declare global {
         email?: string;
         name?: string;
         emailVerified?: boolean;
+        role?: string;
+      };
+      firebaseToken?: {
+        uid: string;
+        email?: string;
+        name?: string;
+        emailVerified?: boolean;
+        role?: string;
       };
     }
   }
