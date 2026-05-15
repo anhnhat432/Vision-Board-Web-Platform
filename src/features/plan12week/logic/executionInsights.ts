@@ -22,6 +22,7 @@ import type {
   UniversalScoreboardWeek,
   UniversalWeeklyReview,
 } from "@/app/utils/storage-types";
+import { getCalendarDayDifference, parseCalendarDate } from "@/app/utils/storage-date-utils";
 
 // ---- Public types -----------------------------------------------------------
 
@@ -113,7 +114,10 @@ const OVERLOADED_TASK_COUNT = 11;
 // ---- Internal helpers -------------------------------------------------------
 
 function todayKeyDefault(input?: string): string {
-  if (input && /^\d{4}-\d{2}-\d{2}/.test(input)) return input.slice(0, 10);
+  if (input && /^\d{4}-\d{2}-\d{2}/.test(input)) {
+    const parsed = parseCalendarDate(input.slice(0, 10));
+    if (parsed) return input.slice(0, 10);
+  }
   const now = new Date();
   const y = now.getFullYear();
   const m = `${now.getMonth() + 1}`.padStart(2, "0");
@@ -122,10 +126,7 @@ function todayKeyDefault(input?: string): string {
 }
 
 function differenceInDays(later: string, earlier: string): number {
-  const a = Date.parse(`${later.slice(0, 10)}T00:00:00Z`);
-  const b = Date.parse(`${earlier.slice(0, 10)}T00:00:00Z`);
-  if (!Number.isFinite(a) || !Number.isFinite(b)) return 0;
-  return Math.round((a - b) / 86_400_000);
+  return getCalendarDayDifference(later.slice(0, 10), parseCalendarDate(earlier.slice(0, 10)) ?? new Date()) ?? 0;
 }
 
 function clampPercent(value: number | null | undefined): number | null {

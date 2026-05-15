@@ -219,6 +219,17 @@ describe("GoalTracker multi-tab task updates", () => {
     expect(storage.calculateGoalProgress(storage.getUserData().goals[0])).toBe(50);
   });
 
+  it("broadcasts when all user data is deleted", async () => {
+    const storage = await import("../utils/storage");
+    storage.saveUserData(storage.getUserData());
+    const channel = MockBroadcastChannel.channels[0];
+    channel.postMessage.mockClear();
+
+    storage.deleteAllUserData();
+
+    expect(channel.postMessage).toHaveBeenCalledWith(expect.objectContaining({ source: expect.any(String) }));
+  });
+
   it("posts local task mutations and applies newer task state from another tab", async () => {
     const storage = await import("../utils/storage");
     const data = storage.getUserData();

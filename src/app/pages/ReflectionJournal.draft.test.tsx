@@ -7,6 +7,7 @@ import { getUserData, saveUserData } from "../utils/storage";
 import { ReflectionJournal } from "./ReflectionJournal";
 
 const REFLECTION_DRAFT_KEY = "pendingReflectionDraft_freeform";
+const DRAFT_CONTENT = "Hôm nay tôi viết một đoạn nhìn lại dài để kiểm tra bản nháp được giữ lại.";
 
 function seedFreshJournal() {
   const data = getUserData();
@@ -34,41 +35,72 @@ async function openFreeformJournal(user: ReturnType<typeof userEvent.setup>) {
   return screen.findByPlaceholderText(/Viết về trải nghiệm/i);
 }
 
+function seedDraft(content = DRAFT_CONTENT) {
+  localStorage.setItem(
+    REFLECTION_DRAFT_KEY,
+    JSON.stringify({
+      content,
+      savedAt: new Date().toISOString(),
+    }),
+  );
+}
+
 describe("ReflectionJournal bản nháp", () => {
   beforeEach(() => {
     localStorage.clear();
     seedFreshJournal();
   });
 
-  it("lưu, hiển thị, khôi phục và xoá bản nháp sau khi submit thành công", async () => {
+  it("lưu nội dung vào bản nháp sau 500ms", async () => {
     const user = userEvent.setup();
-    const content = "Hôm nay tôi viết một đoạn nhìn lại dài để kiểm tra bản nháp được giữ lại.";
-    const view = renderJournal();
+    renderJournal();
 
     const textarea = await openFreeformJournal(user);
-    await user.type(textarea, content);
+    await user.type(textarea, DRAFT_CONTENT);
 
     await waitFor(
       () => {
-        expect(localStorage.getItem(REFLECTION_DRAFT_KEY)).toContain(content);
+        expect(localStorage.getItem(REFLECTION_DRAFT_KEY)).toContain(DRAFT_CONTENT);
       },
       { timeout: 1000 },
     );
+  });
 
-    view.unmount();
+  it("hiển thị banner khi mở lại và có bản nháp", async () => {
+    const user = userEvent.setup();
+    seedDraft();
     renderJournal();
 
     await openFreeformJournal(user);
-    expect(await screen.findByText(/Có bản nháp/i)).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Khôi phục" }));
-    expect(screen.getByPlaceholderText(/Viết về trải nghiệm/i)).toHaveValue(content);
+    expect(await screen.findByText(/Tìm thấy bản nháp chưa lưu lúc/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Khôi phục" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Bỏ qua" })).toBeInTheDocument();
+  });
 
+  it("khôi phục bản nháp vào form", async () => {
+    const user = userEvent.setup();
+    seedDraft();
+    renderJournal();
+
+    await openFreeformJournal(user);
+    await user.click(await screen.findByRole("button", { name: "Khôi phục" }));
+
+    expect(screen.getByPlaceholderText(/Viết về trải nghiệm/i)).toHaveValue(DRAFT_CONTENT);
+  });
+
+  it("xoá bản nháp sau khi submit thành công", async () => {
+    const user = userEvent.setup();
+    seedDraft();
+    renderJournal();
+
+    await openFreeformJournal(user);
+    await user.click(await screen.findByRole("button", { name: "Khôi phục" }));
     await user.click(screen.getByRole("button", { name: /Lưu nhật ký/i }));
 
     await waitFor(() => {
       expect(localStorage.getItem(REFLECTION_DRAFT_KEY)).toBeNull();
     });
-    expect(getUserData().reflections.some((reflection) => reflection.content === content)).toBe(true);
+    expect(getUserData().reflections.some((reflection) => reflection.content === DRAFT_CONTENT)).toBe(true);
   });
 });

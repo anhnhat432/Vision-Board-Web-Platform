@@ -6,8 +6,12 @@ function padDatePart(value: number): string {
   return String(value).padStart(2, "0");
 }
 
+export function getLocalDayStart(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
 export function getCalendarDayIndex(date: Date): number {
-  return Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / MILLISECONDS_PER_DAY);
+  return Math.round(getLocalDayStart(date).getTime() / MILLISECONDS_PER_DAY);
 }
 
 export function formatDateInputValue(date: Date): string {

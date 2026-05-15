@@ -461,7 +461,7 @@ export function ReflectionJournal() {
               <div className="rounded-[var(--r-card)] border border-amber-200 bg-amber-50/90 p-4 text-sm text-amber-950">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <p>
-                    Có bản nháp. Tìm thấy bản nháp chưa lưu lúc {formatDraftSavedTime(pendingReflectionDraft.savedAt)}.
+                    Tìm thấy bản nháp chưa lưu lúc {formatDraftSavedTime(pendingReflectionDraft.savedAt)}.
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <Button size="sm" type="button" onClick={handleRestoreReflectionDraft}>

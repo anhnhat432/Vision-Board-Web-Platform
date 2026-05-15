@@ -887,6 +887,7 @@ export function deleteAllUserData(): void {
     localStorage.removeItem(key);
   }
   removeKnownAuxiliaryUserData();
+  postUserDataMutation({ at: Date.now(), source: userDataMutationSource });
   notifyUserDataUpdated();
 }
 

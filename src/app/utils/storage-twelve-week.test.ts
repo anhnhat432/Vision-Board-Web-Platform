@@ -19,6 +19,7 @@ import {
   skipTwelveWeekNonCoreTask,
   sortTwelveWeekGoalsForSelection,
 } from "./storage-twelve-week";
+import { recomputeGoalProgressFromWeeksInData } from "./storage-goal-ops";
 import { CURRENT_STORAGE_VERSION, DEFAULT_APP_PREFERENCES, MOTIVATIONAL_QUOTES } from "./storage-constants";
 import { createEmptyUserData } from "./storage-demo-data";
 import type { Goal, TwelveWeekSystem, TwelveWeekTaskInstance } from "./storage-types";
@@ -150,6 +151,25 @@ function makeTask(overrides: Partial<TwelveWeekTaskInstance> = {}): TwelveWeekTa
 function createSystemWithTasks(tasks: TwelveWeekTaskInstance[]): TwelveWeekSystem {
   return createSystem({ taskInstances: tasks });
 }
+
+describe("recomputeGoalProgressFromWeeksInData", () => {
+  it("returns 50 when five of ten 12-week tasks are completed", () => {
+    const taskInstances = Array.from({ length: 10 }, (_, index) =>
+      makeTask({
+        id: `task_${index + 1}`,
+        completed: index < 5,
+      }),
+    );
+    const data = createEmptyUserData({
+      currentStorageVersion: CURRENT_STORAGE_VERSION,
+      defaultAppPreferences: DEFAULT_APP_PREFERENCES,
+      motivationalQuotes: MOTIVATIONAL_QUOTES,
+    });
+    data.goals = [createGoal("goal_12_week", "2026-03-01T00:00:00.000Z", { taskInstances })];
+
+    expect(recomputeGoalProgressFromWeeksInData(data, "goal_12_week")).toBe(50);
+  });
+});
 
 describe("rescheduleTwelveWeekTaskWithinWeek", () => {
   it("moves an overdue task to today (within current week range)", () => {

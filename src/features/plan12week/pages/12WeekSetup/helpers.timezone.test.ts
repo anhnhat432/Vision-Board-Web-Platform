@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { getStartDateValidation } from "./helpers";
 
@@ -12,17 +12,17 @@ function makeLocalReferenceDate(year: number, monthIndex: number, day: number): 
   } as Date;
 }
 
+function makeReferenceDateInOffset(utcIso: string, offsetMinutes: number): Date {
+  const shifted = new Date(new Date(utcIso).getTime() + offsetMinutes * 60_000);
+  return makeLocalReferenceDate(shifted.getUTCFullYear(), shifted.getUTCMonth(), shifted.getUTCDate());
+}
+
 describe("getStartDateValidation timezone handling", () => {
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   it("accepts local today at 23:00 in UTC+7", () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date(2026, 4, 15, 23, 0, 0));
+    const vietnamReference = makeReferenceDateInOffset("2026-05-15T16:00:00.000Z", 7 * 60);
 
-    expect(getStartDateValidation("2026-05-15")).toEqual({ error: null, warning: null });
-    expect(getStartDateValidation("2026-05-14")).toEqual({ error: PAST_DATE_ERROR, warning: null });
+    expect(getStartDateValidation("2026-05-15", vietnamReference)).toEqual({ error: null, warning: null });
+    expect(getStartDateValidation("2026-05-14", vietnamReference)).toEqual({ error: PAST_DATE_ERROR, warning: null });
   });
 
   it("validates against local calendar fields for UTC+0 users", () => {
