@@ -287,7 +287,8 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-family-sans);
+  --font-sans: var(--app-font-sans);
+  --font-serif: var(--app-font-serif);
 
   --font-size-xs: var(--text-xs);
   --font-size-xs--line-height: var(--text-xs--line-height);

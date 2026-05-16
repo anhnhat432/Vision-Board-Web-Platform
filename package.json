@@ -34,7 +34,9 @@
     "smoke:mvp2-sync:staging": "node scripts/smoke-mvp2-sync-staging.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/source-serif-4": "^5.2.9",
     "@fontsource/be-vietnam-pro": "^5.2.8",
+    "@fontsource/inter": "^5.2.8",
     "@radix-ui/react-accordion": "1.2.3",
     "@radix-ui/react-alert-dialog": "1.1.6",
     "@radix-ui/react-aspect-ratio": "1.1.2",
