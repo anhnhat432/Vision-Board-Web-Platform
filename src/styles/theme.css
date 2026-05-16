@@ -288,6 +288,26 @@
 
 @theme inline {
   --font-sans: var(--font-family-sans);
+
+  --font-size-xs: var(--text-xs);
+  --font-size-xs--line-height: var(--text-xs--line-height);
+  --font-size-sm: var(--text-sm);
+  --font-size-sm--line-height: var(--text-sm--line-height);
+  --font-size-base: var(--text-base);
+  --font-size-base--line-height: var(--text-base--line-height);
+  --font-size-lg: var(--text-lg);
+  --font-size-lg--line-height: var(--text-lg--line-height);
+  --font-size-xl: var(--text-xl);
+  --font-size-xl--line-height: var(--text-xl--line-height);
+  --font-size-2xl: var(--text-2xl);
+  --font-size-2xl--line-height: var(--text-2xl--line-height);
+  --font-size-3xl: var(--text-3xl);
+  --font-size-3xl--line-height: var(--text-3xl--line-height);
+  --font-size-4xl: var(--text-4xl);
+  --font-size-4xl--line-height: var(--text-4xl--line-height);
+  --font-size-5xl: var(--text-5xl);
+  --font-size-5xl--line-height: var(--text-5xl--line-height);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
