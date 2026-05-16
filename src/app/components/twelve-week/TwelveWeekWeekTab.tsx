@@ -341,8 +341,8 @@ export function TwelveWeekWeekTab({
         />
       )}
       <SectionBlock title="Review và cam kết tuần" headerVisuallyHidden>
-        <div className="grid gap-[var(--space-section)] lg:grid-cols-[minmax(0,1fr)_420px]">
-        <Card className="h-full border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
+        <div className="grid gap-[var(--space-section)]">
+        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-slate-950">
               <Layers className="h-5 w-5 text-indigo-600" />
@@ -442,7 +442,7 @@ export function TwelveWeekWeekTab({
 
         <Card
           data-tour-id="system-week-review"
-          className="h-full border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
+          className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200"
         >
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-slate-950">
@@ -454,7 +454,6 @@ export function TwelveWeekWeekTab({
             </CardDescription>
           </CardHeader>
           <CardContent className="stack-stack">
-            <WeeklyReviewIllustration className="mx-auto w-32 text-violet-500 opacity-75 sm:w-36" />
             <div
               className={`rounded-[var(--r-control)] border p-4 ${reviewDueToday ? "border-amber-200 bg-amber-50/80" : "border-slate-200 bg-slate-50"}`}
             >
@@ -647,6 +646,7 @@ export function TwelveWeekWeekTab({
               onApplySuggestedPlan={onApplySuggestedPlan}
               onOpenPremiumInsights={onOpenPremiumInsights}
             />
+            <div className="grid gap-[var(--space-stack)] lg:grid-cols-2">
             <div
               data-testid="wam-section-score"
               className="rounded-[var(--r-control)] border border-sky-200 bg-sky-50/70 px-4 py-4"
@@ -725,7 +725,9 @@ export function TwelveWeekWeekTab({
                 </div>
               )}
             </div>
+            </div>
 
+            <div className="grid gap-[var(--space-stack)] lg:grid-cols-2">
             <div
               data-testid="wam-section-insights"
               className="rounded-[var(--r-control)] border border-slate-200 bg-white px-4 py-4"
@@ -753,6 +755,7 @@ export function TwelveWeekWeekTab({
               {hasPremiumInsights && nextWeekCommitments.length === 0 && (
                 <p className="mt-2 text-xs leading-5 text-slate-600">Gợi ý Plus: {suggestedNextWeekPlan.focus}</p>
               )}
+            </div>
             </div>
 
             {/* Review CTA */}
