@@ -41,19 +41,12 @@ const Slider = React.forwardRef<
     >
       <SliderPrimitive.Track
         data-slot="slider-track"
-        className="relative grow overflow-hidden rounded-[var(--r-pill)] bg-slate-100 border border-white/70 shadow-inner data-[orientation=horizontal]:h-2 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-2"
+        className="relative grow overflow-hidden rounded-full bg-app-line data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5"
       >
         <SliderPrimitive.Range
           data-slot="slider-range"
-          className="absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full rounded-[var(--r-pill)] shadow-sm"
-          style={
-            trackColor
-              ? { background: trackColor }
-              : {
-                  background:
-                    "linear-gradient(90deg, rgba(37,99,235,0.92) 0%, rgba(8,145,178,0.9) 52%, rgba(16,185,129,0.88) 100%)",
-                }
-          }
+          className="absolute rounded-full bg-app-accent data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full"
+          style={trackColor ? { backgroundColor: trackColor } : undefined}
         />
       </SliderPrimitive.Track>
       {Array.from({ length: _values.length }, (_, index) => (
@@ -61,8 +54,8 @@ const Slider = React.forwardRef<
           data-slot="slider-thumb"
           // biome-ignore lint/suspicious/noArrayIndexKey: thumb position is stable and index-based in Radix slider.
           key={index}
-          className="block size-5 shrink-0 rounded-[var(--r-pill)] bg-white border-2 shadow-sm transition-transform transition-shadow duration-150 hover:scale-110 hover:shadow-md focus-visible:scale-110 focus-visible:ring-4 focus-visible:ring-primary/30 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
-          style={trackColor ? { borderColor: trackColor } : { borderColor: "rgba(8,145,178,0.72)" }}
+          className="block h-4 w-4 shrink-0 rounded-full border-2 border-white bg-app-accent shadow-sm transition-[box-shadow,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 disabled:pointer-events-none disabled:opacity-50"
+          style={trackColor ? { backgroundColor: trackColor } : undefined}
         />
       ))}
     </SliderPrimitive.Root>

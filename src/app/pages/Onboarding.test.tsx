@@ -44,14 +44,14 @@ describe("Onboarding", () => {
       </MemoryRouter>,
     );
 
-    const startButton = await screen.findByRole("button", { name: /Bắt đầu chấm 8 lĩnh vực/i });
-    expect(startButton).toHaveClass("gradient-brand");
-    expect(startButton).not.toHaveClass("bg-slate-950");
+    const startButton = await screen.findByRole("button", { name: /Bắt đầu chấm điểm/i });
+    expect(startButton).toHaveClass("bg-app-accent");
+    expect(startButton).not.toHaveClass("gradient-brand");
 
     scrollToMock.mockClear();
     await user.click(startButton);
 
-    expect(await screen.findByRole("heading", { name: /Chấm điểm hiện tại/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /Chấm 8 lĩnh vực của bạn/i })).toBeInTheDocument();
     await waitFor(() => {
       expect(scrollToMock).toHaveBeenCalledWith({ top: 0, left: 0, behavior: "smooth" });
     });
@@ -74,8 +74,8 @@ describe("Onboarding", () => {
 
     expect(await screen.findByText(/Cập nhật điểm hiện tại/i)).toBeInTheDocument();
 
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm 8 lĩnh vực/i }));
-    expect(await screen.findByRole("button", { name: /Hoàn thành đánh giá/i })).toBeEnabled();
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm điểm/i }));
+    expect(await screen.findByRole("button", { name: /Tiếp → Chọn trọng tâm/i })).toBeEnabled();
   });
 
   it("frames onboarding as a short eight-area scoring step", async () => {
@@ -87,7 +87,7 @@ describe("Onboarding", () => {
 
     expect((await screen.findAllByText(/8 lĩnh vực/i)).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/khoảng 3 phút/i).length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: /Bắt đầu chấm 8 lĩnh vực/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Bắt đầu chấm điểm/i })).toBeInTheDocument();
   });
 
   it("shows returning users that existing scores will be updated", async () => {
@@ -109,7 +109,7 @@ describe("Onboarding", () => {
     expect(screen.getByText(/không tạo lại từ đầu/i)).toBeInTheDocument();
   });
 
-  it("does not save default scores when clicking 'Quay lại sau' without reviewing any area", async () => {
+  it("does not save default scores when clicking 'Để sau' without reviewing any area", async () => {
     const user = userEvent.setup();
 
     render(
@@ -119,7 +119,7 @@ describe("Onboarding", () => {
     );
 
     // Click return button on the welcome step without reviewing any areas
-    const saveButton = await screen.findByRole("button", { name: /Quay lại sau/i });
+    const saveButton = await screen.findByRole("button", { name: /Để sau/i });
     await user.click(saveButton);
 
     // Verify the wheel of life data was NOT persisted with default scores
@@ -127,7 +127,7 @@ describe("Onboarding", () => {
     expect(data.currentWheelOfLife.every((area) => area.score === 0)).toBe(true);
   });
 
-  it("saves adjusted scores when clicking 'Quay lại sau' after modifying sliders", async () => {
+  it("saves adjusted scores when clicking 'Để sau' after modifying sliders", async () => {
     const user = userEvent.setup();
 
     render(
@@ -137,7 +137,7 @@ describe("Onboarding", () => {
     );
 
     // Go to assessment step first
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm 8 lĩnh vực/i }));
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm điểm/i }));
 
     // Modify first slider
     const firstSlider = screen.getAllByRole("slider")[0];
@@ -145,8 +145,8 @@ describe("Onboarding", () => {
     await user.keyboard("{ArrowRight}{ArrowRight}{ArrowRight}"); // 5 → 8
 
     // Go back to welcome step and save
-    await user.click(await screen.findByRole("button", { name: /Quay lại giới thiệu/i }));
-    await user.click(await screen.findByRole("button", { name: /Quay lại sau/i }));
+    await user.click(await screen.findByRole("button", { name: /Quay lại welcome/i }));
+    await user.click(await screen.findByRole("button", { name: /Để sau/i }));
 
     // Verify the adjusted score was persisted
     const data = getUserData();
@@ -174,7 +174,7 @@ describe("Onboarding", () => {
 
     // Go to assessment and verify first slider value
     const user = userEvent.setup();
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm 8 lĩnh vực/i }));
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm điểm/i }));
 
     // Verify the scores from storage are loaded (first area should show score 2)
     const sliders = screen.getAllByRole("slider");
@@ -190,7 +190,7 @@ describe("Onboarding", () => {
       </MemoryRouter>,
     );
 
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm 8 lĩnh vực/i }));
+    await user.click(await screen.findByRole("button", { name: /Bắt đầu chấm điểm/i }));
     const summary = await screen.findByTestId("onboarding-assessment-summary");
     expect(summary).toHaveTextContent("0/8");
 

@@ -346,7 +346,7 @@ describe("authenticated new user core flow", () => {
 
     expect(
       await screen.findByText(
-        (_content, element) => element?.tagName === "H1" && /Bắt đầu bằng\s*8 lĩnh vực/i.test(element.textContent ?? ""),
+        (_content, element) => element?.tagName === "H1" && /Cùng xem bức tranh hiện tại của bạn/i.test(element.textContent ?? ""),
       ),
     ).toBeInTheDocument();
     await waitFor(() => {
@@ -355,12 +355,12 @@ describe("authenticated new user core flow", () => {
     expect(screen.queryByText("Anonymous stale goal must stay hidden")).not.toBeInTheDocument();
     await user.click(await screen.findByRole("button", { name: "Để sau" }));
 
-    await user.click(screen.getByRole("button", { name: /Bắt đầu chấm 8 lĩnh vực/i }));
+    await user.click(screen.getByRole("button", { name: /Bắt đầu chấm điểm/i }));
     for (const slider of await screen.findAllByRole("slider")) {
       slider.focus();
       await user.keyboard("{ArrowRight}");
     }
-    await user.click(await screen.findByRole("button", { name: "Hoàn thành đánh giá" }));
+    await user.click(await screen.findByRole("button", { name: /Tiếp → Chọn trọng tâm/i }));
 
     expect(
       await screen.findByText(

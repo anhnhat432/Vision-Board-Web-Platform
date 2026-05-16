@@ -1,20 +1,29 @@
-﻿import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { motion } from "motion/react";
-import { ArrowLeft, ArrowRight, BarChart3, Check, Compass, Heart, Sparkles, Target } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  BriefcaseBusiness,
+  Compass,
+  Heart,
+  HeartPulse,
+  Home,
+  Smile,
+  Sprout,
+  Target,
+  Users,
+  WalletCards,
+  type LucideIcon,
+} from "lucide-react";
 
 import { toast } from "sonner";
 
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
-import { LifeBalanceWheelIllustration, WelcomeIllustration, getLifeAreaIcon } from "../components/illustrations";
 import { PageShell } from "../components/PageShell";
-import { ProductVisual } from "../components/visuals/ProductVisual";
-import { Button } from "../components/ui/button";
-import { Card, CardContent } from "../components/ui/card";
-import { Slider } from "../components/ui/slider";
-import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { InlineStatusMessage } from "../components/states/InlineStatusMessage";
+import { Slider } from "../components/ui/slider";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
 import { LIFE_AREAS, type LifeArea, getLifeAreaLabel, getUserData, updateWheelOfLife } from "../utils/storage";
@@ -22,35 +31,58 @@ import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 
 type OnboardingStep = "welcome" | "assessment";
 
+type AutoSaveDraftStatus = "idle" | "saving" | "saved";
+
 const JOURNEY_STEPS = [
   {
     icon: Heart,
     title: "Chấm 8 lĩnh vực",
     description: "Nhìn nhanh sức khỏe hiện tại của từng phần trong cuộc sống.",
-    iconClass:
-      "bg-gradient-to-br from-rose-100 to-pink-100 text-rose-600 dark:from-rose-950/50 dark:to-pink-950/40 dark:text-rose-200",
   },
   {
     icon: Compass,
     title: "Chọn trọng tâm",
     description: "Dữ liệu này mở Góc nhìn cuộc sống để chọn đúng nơi nên ưu tiên.",
-    iconClass:
-      "bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 dark:from-violet-950/50 dark:to-fuchsia-950/40 dark:text-violet-200",
   },
   {
     icon: Target,
     title: "Đi tiếp tới mục tiêu SMART",
     description: "Trọng tâm được chuyển thành mục tiêu rõ và kế hoạch 12 tuần.",
-    iconClass:
-      "bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-700 dark:from-emerald-950/50 dark:to-teal-950/40 dark:text-emerald-200",
   },
-];
+] satisfies Array<{ icon: LucideIcon; title: string; description: string }>;
 
-const FEATURE_PILLS = ["8 lĩnh vực", "Khoảng 3 phút", "Góc nhìn cuộc sống", "mục tiêu SMART", "12 tuần"];
+const FEATURE_PILLS = ["8 lĩnh vực", "3 phút", "Góc nhìn cuộc sống", "mục tiêu SMART", "12 tuần"];
+
+const LIFE_AREA_DETAILS: Record<string, string> = {
+  Career: "Việc học, công việc, hướng đi nghề nghiệp và cảm giác tiến triển.",
+  Finance: "Thu nhập, chi tiêu, tiết kiệm và mức an tâm với tiền bạc.",
+  Health: "Năng lượng, giấc ngủ, vận động và cách bạn chăm cơ thể.",
+  Education: "Việc học thêm, kỹ năng mới và khả năng duy trì nhịp phát triển.",
+  Relationships: "Bạn bè, người yêu, cộng đồng và chất lượng kết nối gần đây.",
+  Family: "Sự hiện diện, hỗ trợ và cảm giác bình yên trong gia đình.",
+  "Personal Growth": "Tự hiểu mình, thói quen cá nhân và khả năng giữ lời với bản thân.",
+  Leisure: "Nghỉ ngơi, vui chơi, sở thích và khoảng trống để hồi phục.",
+};
+
+const LIFE_AREA_ICON_MAP: Record<string, LucideIcon> = {
+  Career: BriefcaseBusiness,
+  Finance: WalletCards,
+  Health: HeartPulse,
+  Education: BookOpen,
+  Relationships: Users,
+  Family: Home,
+  "Personal Growth": Sprout,
+  Leisure: Smile,
+};
+
 export const ONBOARDING_DRAFT_STORAGE_KEY = "onboarding_draft";
 const ONBOARDING_DRAFT_VERSION = 1;
 
 const createDefaultOnboardingLifeAreas = () => LIFE_AREAS.map((area) => ({ ...area, score: 5 }));
+
+function getCalmLifeAreaIcon(areaName: string): LucideIcon {
+  return LIFE_AREA_ICON_MAP[areaName] ?? Compass;
+}
 
 type OnboardingDraft = {
   version: number;
@@ -63,7 +95,7 @@ type OnboardingDraft = {
 
 function normalizeDraftScore(value: unknown) {
   if (typeof value !== "number" || !Number.isFinite(value)) return 5;
-  return Math.min(10, Math.max(1, Math.round(value)));
+  return Math.min(10, Math.max(0, Math.round(value)));
 }
 
 function parseOnboardingDraft(raw: string | null): OnboardingDraft | null {
@@ -127,29 +159,8 @@ function createOnboardingDraft(step: OnboardingStep, lifeAreas: LifeArea[], revi
   };
 }
 
-function OnboardingPageMotion({ children }: { children: ReactNode }) {
-  const prefersReducedMotion = useReducedMotion();
-  const className = "stack-stack";
-
-  if (prefersReducedMotion) {
-    return <div className={className}>{children}</div>;
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.55 }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
 export function Onboarding() {
   const navigate = useNavigate();
-  const prefersReducedMotion = useReducedMotion();
   const [step, setStep] = useState<OnboardingStep>("welcome");
   const [isReturning, setIsReturning] = useState(false);
   const [lifeAreas, setLifeAreas] = useState<LifeArea[]>(createDefaultOnboardingLifeAreas);
@@ -157,6 +168,7 @@ export function Onboarding() {
   const [isDirty, setIsDirty] = useState(false);
   const [availableDraft, setAvailableDraft] = useState<OnboardingDraft | null>(null);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveDraftStatus>("saved");
   const flowTopRef = useRef<HTMLDivElement | null>(null);
   const autosaveTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
 
@@ -196,7 +208,7 @@ export function Onboarding() {
 
   const handleScoreChangeWrapped = useCallback((index: number, value: number[]) => {
     setLifeAreas((currentAreas) =>
-      currentAreas.map((area, areaIndex) => (areaIndex === index ? { ...area, score: value[0] ?? 1 } : area)),
+      currentAreas.map((area, areaIndex) => (areaIndex === index ? { ...area, score: value[0] ?? 0 } : area)),
     );
     setReviewedAreaIndices((current) => {
       const next = new Set(current);
@@ -210,10 +222,12 @@ export function Onboarding() {
     if (!isDirty) return;
 
     const draft = createOnboardingDraft(step, lifeAreas, reviewedAreaIndices);
+    setAutoSaveStatus("saving");
     cancelPendingDraftSave();
     autosaveTimerRef.current = window.setTimeout(() => {
       writeOnboardingDraft(draft);
       setLastSavedAt(new Date());
+      setAutoSaveStatus("saved");
       autosaveTimerRef.current = null;
     }, 500);
 
@@ -239,6 +253,7 @@ export function Onboarding() {
     cancelPendingDraftSave();
     setAvailableDraft(null);
     setLastSavedAt(null);
+    setAutoSaveStatus("saved");
     trackAnalyticsEvent("life_balance_completed", {
       source: "onboarding",
       area_count: lifeAreas.length,
@@ -283,19 +298,53 @@ export function Onboarding() {
     setReviewedAreaIndices(new Set());
     setIsDirty(false);
     setLastSavedAt(null);
+    setAutoSaveStatus("saved");
   };
+
+  const handleDefer = () => {
+    if (reviewedAreaIndices.size > 0) {
+      updateWheelOfLife(lifeAreas);
+      clearOnboardingDraft();
+      cancelPendingDraftSave();
+      setAvailableDraft(null);
+      setLastSavedAt(null);
+      setAutoSaveStatus("saved");
+      setIsDirty(false);
+      toast.success("Đã lưu phần bạn đã chỉnh. Bạn có thể quay lại rà đủ 8 lĩnh vực bất kỳ lúc nào.");
+    } else {
+      toast.info("Chưa có điểm nào được chỉnh. Dữ liệu chưa lưu.");
+    }
+    navigate("/");
+  };
+
+  const progressHeader = (
+    <div>
+      <CoreFlowProgress currentStepId="life_balance" onExit={() => navigate("/")} className="mb-2" />
+      <div className="flex justify-end">
+        <AutoSaveIndicator status={isDirty ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} />
+      </div>
+    </div>
+  );
 
   const draftBanner = availableDraft ? (
     <InlineStatusMessage tone="warning" prefix="Tiếp tục từ chỗ bạn dừng?">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="leading-6">Bạn có bản nháp Cân bằng cuộc sống chưa hoàn thành.</p>
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button size="sm" onClick={handleResumeDraft}>
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-lg bg-app-accent px-3.5 py-2 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            onClick={handleResumeDraft}
+          >
             Tiếp tục
-          </Button>
-          <Button size="sm" variant="outline" onClick={handleRestartDraft}>
+          </button>
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-3.5 py-2 text-[13px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            onClick={handleRestartDraft}
+          >
             Bắt đầu lại
-          </Button>
+          </button>
         </div>
       </div>
     </InlineStatusMessage>
@@ -303,138 +352,84 @@ export function Onboarding() {
 
   if (step === "welcome") {
     return (
-      <PageShell maxWidth="xl" outerClassName="page-enter" className="focus:outline-none">
-        <div ref={flowTopRef} tabIndex={-1} className="focus:outline-none">
-          <OnboardingPageMotion>
-            <CoreFlowProgress currentStepId="life_balance" />
+      <PageShell maxWidth="xl" className="focus:outline-none">
+        <div ref={flowTopRef} tabIndex={-1} className="space-y-6 focus:outline-none">
+          {progressHeader}
 
-            <Card>
-              <CardContent className="relative p-5 sm:p-7 lg:p-8">
-                <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_320px]">
-                  <div className="stack-stack">
-                    {isReturning && (
-                      <InlineStatusMessage tone="success" prefix="Cập nhật điểm hiện tại.">
-                        Điểm cũ đã được tải sẵn, bạn chỉ điều chỉnh phần thay đổi, không tạo lại từ đầu.
-                      </InlineStatusMessage>
-                    )}
+          {isReturning ? (
+            <InlineStatusMessage tone="success" prefix="Cập nhật điểm hiện tại.">
+              Điểm cũ đã được tải sẵn, bạn chỉ điều chỉnh phần thay đổi, không tạo lại từ đầu.
+            </InlineStatusMessage>
+          ) : null}
 
-                    {draftBanner}
+          {draftBanner}
 
-                    <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                      <Sparkles className="h-3.5 w-3.5 text-[color:var(--tone-shell-secondary)]" aria-hidden="true" />
-                      Bước 1 · Cân bằng cuộc sống
-                    </p>
+          <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-8" aria-labelledby="onboarding-welcome-title">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+                  BẮT ĐẦU · CÂN BẰNG CUỘC SỐNG
+                </p>
+                <h1
+                  id="onboarding-welcome-title"
+                  className="mt-3 max-w-3xl font-serif text-[30px] font-medium leading-tight tracking-tight text-app-ink"
+                >
+                  Cùng xem bức tranh hiện tại của bạn.
+                </h1>
+                <p className="mt-2 max-w-2xl text-[14px] leading-6 text-app-ink-soft">
+                  Chấm 8 lĩnh vực để chọn đúng nơi cần ưu tiên. Mất khoảng 3 phút.
+                </p>
+              </div>
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+                <Compass className="h-6 w-6" aria-hidden="true" />
+              </div>
+            </div>
 
-                    <div className="stack-tight">
-                      <h1 className="max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl">
-                        {isReturning ? "Cập nhật lại " : "Bắt đầu bằng "}
-                        <span className="text-gradient-vibrant">8 lĩnh vực</span>
-                        {isReturning
-                          ? " để góc nhìn bám sát cuộc sống hiện tại hơn."
-                          : " để biết nên ưu tiên điều gì trước."}
-                      </h1>
-                      <p className="max-w-2xl text-[15px] leading-relaxed text-muted-foreground sm:text-base">
-                        Chỉ khoảng 3 phút để chấm điểm hiện tại. Kết quả sẽ nối thẳng sang Góc nhìn cuộc sống, mục tiêu SMART
-                        và kế hoạch 12 tuần, nên bạn không phải đoán bước tiếp theo.
-                      </p>
+            <div className="mt-8 grid gap-3 md:grid-cols-3">
+              {JOURNEY_STEPS.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <article key={item.title} className="rounded-card border border-app-line bg-app-surface p-5">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+                      <Icon className="h-4 w-4" aria-hidden="true" />
                     </div>
+                    <h2 className="mt-3 text-[14px] font-medium text-app-ink">{item.title}</h2>
+                    <p className="mt-1 text-[13px] leading-relaxed text-app-ink-soft">{item.description}</p>
+                  </article>
+                );
+              })}
+            </div>
 
-                    <div className="flex flex-wrap gap-2">
-                      {FEATURE_PILLS.map((item) => (
-                        <span
-                          key={item}
-                          className="rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-1.5 text-xs font-semibold text-muted-foreground"
-                        >
-                          {item}
-                        </span>
-                      ))}
-                    </div>
+            <div className="mt-6 flex flex-wrap gap-2">
+              {FEATURE_PILLS.map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full border border-app-line bg-app-bg px-3 py-1 text-[12px] font-medium text-app-ink-soft"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
 
-                    <div className="flex flex-col gap-2 sm:flex-row">
-                      <Button glow className="w-full sm:w-auto" onClick={handleStartAssessment}>
-                        Bắt đầu chấm 8 lĩnh vực
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        className="w-full sm:w-auto"
-                        onClick={() => {
-                          if (reviewedAreaIndices.size > 0) {
-                            updateWheelOfLife(lifeAreas);
-                            clearOnboardingDraft();
-                            cancelPendingDraftSave();
-                            setAvailableDraft(null);
-                            setIsDirty(false);
-                            toast.success("Đã lưu phần bạn đã chỉnh. Bạn có thể quay lại rà đủ 8 lĩnh vực bất kỳ lúc nào.");
-                          } else {
-                            toast.info("Chưa có điểm nào được chỉnh. Dữ liệu chưa lưu.");
-                          }
-                          navigate("/");
-                        }}
-                      >
-                        Quay lại sau
-                      </Button>
-                    </div>
-
-                    <div className="grid gap-3 md:grid-cols-3">
-                      {JOURNEY_STEPS.map((item, index) => {
-                        const Icon = item.icon;
-
-                        return (
-                          <motion.div
-                            key={item.title}
-                            initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
-                            animate={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
-                            transition={{ duration: 0.32, delay: index * 0.06, ease: "easeOut" }}
-                            className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-card p-4 shadow-[var(--shadow-1)]"
-                          >
-                            <div className="flex items-center justify-between gap-3">
-                              <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                                Bước 0{index + 1}
-                              </span>
-                              <div
-                                className={`flex h-10 w-10 items-center justify-center rounded-[var(--r-control)] shadow-sm ${item.iconClass}`}
-                              >
-                                <Icon className="h-5 w-5" />
-                              </div>
-                            </div>
-                            <h3 className="mt-[var(--space-inline)] text-base font-semibold text-foreground">
-                              {item.title}
-                            </h3>
-                            <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.description}</p>
-                          </motion.div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="hidden rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-5 xl:block">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                      Bạn sẽ nhận được gì
-                    </p>
-                    <WelcomeIllustration className="mt-[var(--space-stack)] w-full text-[color:var(--tone-shell-primary)]" />
-                    <LifeBalanceWheelIllustration className="mx-auto mt-2 w-48 text-[color:var(--tone-shell-secondary)] opacity-80" />
-                    <ProductVisual variant="moodboard" className="mt-[var(--space-stack)] min-h-[210px]" />
-                    <div className="mt-[var(--space-stack)] stack-tight">
-                      {[
-                        "Điểm trung bình để đọc mặt bằng hiện tại.",
-                        "Lĩnh vực thấp nhất để mở Góc nhìn cuộc sống.",
-                        "Lĩnh vực mạnh nhất để biết phần đang tạo lực đỡ.",
-                      ].map((item) => (
-                        <div
-                          key={item}
-                          className="flex items-start gap-3 rounded-[var(--r-control)] border border-[color:var(--border)] bg-card p-3"
-                        >
-                          <Check className="mt-0.5 h-4 w-4 text-[color:var(--color-success-fg)]" />
-                          <p className="text-sm leading-6 text-muted-foreground">{item}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </OnboardingPageMotion>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <button
+                type="button"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                onClick={handleStartAssessment}
+              >
+                Bắt đầu chấm điểm
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center justify-center rounded-lg px-5 py-3 text-[14px] font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                onClick={handleDefer}
+              >
+                Để sau
+              </button>
+            </div>
+          </section>
         </div>
       </PageShell>
     );
@@ -442,159 +437,121 @@ export function Onboarding() {
 
   return (
     <PageShell maxWidth="xl" className="focus:outline-none">
-      <div ref={flowTopRef} tabIndex={-1} className="focus:outline-none">
-        <OnboardingPageMotion>
-          <CoreFlowProgress currentStepId="life_balance" />
-          {draftBanner}
+      <div ref={flowTopRef} tabIndex={-1} className="space-y-6 focus:outline-none">
+        {progressHeader}
+        {draftBanner}
 
-          <Card>
-            <CardContent className="p-5 sm:p-7">
-              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-                <div className="stack-tight">
-                  <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                    <Compass className="h-3.5 w-3.5 text-[color:var(--tone-shell-secondary)]" aria-hidden="true" />
-                    Chấm 8 lĩnh vực
-                  </p>
-                  <h1 className="max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl">
-                    Chấm điểm hiện tại để biết chính xác{" "}
-                    <span className="text-gradient-vibrant">nơi bạn nên bắt đầu</span>.
-                  </h1>
-                  <p className="max-w-2xl text-[15px] leading-relaxed text-muted-foreground sm:text-base">
-                    Kéo từng lĩnh vực từ 1 đến 10. Tóm tắt bên cạnh cập nhật ngay để bạn thấy tín hiệu trước khi lưu.
-                  </p>
-                </div>
+        <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-8" aria-labelledby="onboarding-assessment-title">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+            BƯỚC 1 / 6 · CÂN BẰNG CUỘC SỐNG
+          </p>
+          <h1
+            id="onboarding-assessment-title"
+            className="mt-3 max-w-3xl font-serif text-[28px] font-medium leading-tight tracking-tight text-app-ink"
+          >
+            Chấm 8 lĩnh vực của bạn
+          </h1>
+          <p className="mt-2 max-w-2xl text-[14px] leading-6 text-app-ink-soft">
+            Mỗi lĩnh vực 0 đến 10. 0 = rất kém, 10 = rất tốt. Không cần đúng tuyệt đối — đây là cảm nhận hiện tại.
+          </p>
 
-                <div
-                  data-testid="onboarding-assessment-summary"
-                  className="relative overflow-hidden rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4"
-                >
-                  <LifeBalanceWheelIllustration className="pointer-events-none absolute -right-10 -top-10 hidden w-36 text-[color:var(--tone-shell-primary)] opacity-15 lg:block" />
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                      Tín hiệu đang hiện ra
-                    </p>
-                    <AutoSaveIndicator lastSavedAt={lastSavedAt} />
-                  </div>
-                  <div className="mt-[var(--space-inline)] grid grid-cols-2 gap-2 text-sm">
-                    <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card p-3">
-                      <p className="text-muted-foreground">Điểm trung bình</p>
-                      <p className="mt-1 text-xl font-bold text-foreground">{averageScore.toFixed(1)}/10</p>
-                    </div>
-                    <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card p-3">
-                      <p className="text-muted-foreground">Đã rà soát</p>
-                      <p className="mt-1 text-xl font-bold text-foreground">
-                        {reviewedAreaCount}/{lifeAreas.length}
-                      </p>
-                    </div>
-                    <div className="rounded-[var(--r-control)] border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] p-3">
-                      <p className="text-[color:var(--color-warning-fg)]">Ưu tiên</p>
-                      <p className="mt-1 font-semibold text-[color:var(--color-warning-fg)]">
-                        {getLifeAreaLabel(growthArea.name)}
-                      </p>
-                      <p className="text-sm text-[color:var(--color-warning-fg)] opacity-90">{growthArea.score}/10</p>
-                    </div>
-                    <div className="rounded-[var(--r-control)] border border-[color:var(--color-success-border)] bg-[color:var(--color-success-bg)] p-3">
-                      <p className="text-[color:var(--color-success-fg)]">Mạnh nhất</p>
-                      <p className="mt-1 font-semibold text-[color:var(--color-success-fg)]">
-                        {getLifeAreaLabel(strongestArea.name)}
-                      </p>
-                      <p className="text-sm text-[color:var(--color-success-fg)] opacity-90">{strongestArea.score}/10</p>
-                    </div>
-                  </div>
-                  <p className="mt-[var(--space-inline)] text-sm leading-6 text-muted-foreground">
-                    {remainingAreaCount === 0
-                      ? "Bánh xe đã sẵn sàng để lưu và mở Góc nhìn cuộc sống."
-                      : `Còn ${remainingAreaCount} lĩnh vực nên rà lại trước khi lưu.`}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-            <Card>
-              <CardContent className="stack-tight p-5 sm:p-7">
-                {lifeAreas.map((area, index) => {
-                  const AreaIcon = getLifeAreaIcon(area.name);
-
-                  return (
-                    <div
-                      key={area.name}
-                      className="card-hover-lift tap-scale rounded-[var(--r-tile)] border border-[color:var(--border)] bg-card p-3 shadow-[var(--shadow-1)] sm:p-4"
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <AreaIcon className="h-6 w-6 shrink-0" style={{ color: area.color }} />
-                          <div
-                            className="h-3.5 w-3.5 shrink-0 rounded-[var(--r-pill)] ring-4 ring-[color:var(--muted)]"
-                            style={{ backgroundColor: area.color }}
-                          />
-                          <h3 className="text-base font-semibold text-foreground sm:text-lg">
-                            {getLifeAreaLabel(area.name)}
-                          </h3>
-                        </div>
-
-                        <div
-                          className="min-w-14 rounded-[var(--r-pill)] px-3 py-1.5 text-center text-sm font-semibold text-white shadow-sm"
-                          style={{ backgroundColor: area.color }}
-                        >
-                          {area.score}/10
-                        </div>
-                      </div>
-
-                      <div className="mt-[var(--space-inline)]">
-                        <Slider
-                          value={[area.score]}
-                          onValueChange={(value) => handleScoreChangeWrapped(index, value)}
-                          min={1}
-                          max={10}
-                          step={1}
-                          className="w-full"
-                          trackColor={area.color}
-                          aria-label={`Điểm ${getLifeAreaLabel(area.name)}`}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
-
-            <div className="stack-stack xl:sticky xl:top-28">
-              <Card>
-                <CardContent className="p-5 sm:p-7">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-[var(--r-control)] bg-[color:var(--muted)] text-[color:var(--tone-shell-primary)]">
-                      <BarChart3 className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-foreground">Sẵn sàng sang Góc nhìn cuộc sống</h3>
-                      <p className="text-sm leading-6 text-muted-foreground">
-                        Rà đủ 8 lĩnh vực trước khi lưu để dữ liệu phản ánh đúng cuộc sống hiện tại.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-[var(--space-stack)] flex flex-col gap-3">
-                    <Button variant="outline" onClick={() => setStep("welcome")}>
-                      <ArrowLeft className="h-4 w-4" />
-                      Quay lại giới thiệu
-                    </Button>
-                    {!canCompleteAssessment ? (
-                      <InlineStatusMessage tone="warning">
-                        Còn {remainingAreaCount} lĩnh vực cần rà trước khi lưu.
-                      </InlineStatusMessage>
-                    ) : null}
-                    <Button glow={canCompleteAssessment} onClick={handleComplete} disabled={!canCompleteAssessment}>
-                      Hoàn thành đánh giá
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+          <div
+            data-testid="onboarding-assessment-summary"
+            className="mt-6 grid gap-3 rounded-card border border-app-line bg-app-bg p-4 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            <div className="rounded-lg border border-app-line bg-app-surface p-3">
+              <p className="text-[12px] text-app-ink-muted">Điểm trung bình</p>
+              <p className="mt-1 font-serif text-[24px] font-medium text-app-ink tabular-nums">{averageScore.toFixed(1)}/10</p>
+            </div>
+            <div className="rounded-lg border border-app-line bg-app-surface p-3">
+              <p className="text-[12px] text-app-ink-muted">Đã rà soát</p>
+              <p className="mt-1 font-serif text-[24px] font-medium text-app-ink tabular-nums">
+                {reviewedAreaCount}/{lifeAreas.length}
+              </p>
+            </div>
+            <div className="rounded-lg border border-app-line bg-app-surface p-3">
+              <p className="text-[12px] text-app-ink-muted">Ưu tiên</p>
+              <p className="mt-1 text-[14px] font-medium text-app-ink">{getLifeAreaLabel(growthArea.name)}</p>
+              <p className="mt-1 text-[12px] text-app-ink-muted">{growthArea.score}/10</p>
+            </div>
+            <div className="rounded-lg border border-app-line bg-app-surface p-3">
+              <p className="text-[12px] text-app-ink-muted">Mạnh nhất</p>
+              <p className="mt-1 text-[14px] font-medium text-app-ink">{getLifeAreaLabel(strongestArea.name)}</p>
+              <p className="mt-1 text-[12px] text-app-ink-muted">{strongestArea.score}/10</p>
             </div>
           </div>
-        </OnboardingPageMotion>
+        </section>
+
+        <section className="space-y-3" aria-label="8 lĩnh vực cuộc sống">
+          {lifeAreas.map((area, index) => {
+            const AreaIcon = getCalmLifeAreaIcon(area.name);
+            const areaLabel = getLifeAreaLabel(area.name);
+
+            return (
+              <article key={area.name} className="rounded-card border border-app-line bg-app-surface p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+                      <AreaIcon className="h-4 w-4" aria-hidden="true" />
+                    </div>
+                    <div>
+                      <h2 className="text-[14px] font-medium text-app-ink">{areaLabel}</h2>
+                      <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">
+                        {LIFE_AREA_DETAILS[area.name] ?? "Một phần quan trọng trong bức tranh hiện tại của bạn."}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="shrink-0 font-serif text-[28px] font-medium leading-none text-app-ink tabular-nums">
+                    {area.score}
+                  </p>
+                </div>
+
+                <div className="mt-4">
+                  <Slider
+                    value={[area.score]}
+                    onValueChange={(value) => handleScoreChangeWrapped(index, value)}
+                    min={0}
+                    max={10}
+                    step={1}
+                    className="w-full"
+                    aria-label={`Điểm ${areaLabel}`}
+                  />
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-app-ink-muted">
+                    <span>0</span>
+                    <span>10</span>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </section>
+
+        {!canCompleteAssessment ? (
+          <InlineStatusMessage tone="warning">Còn {remainingAreaCount} lĩnh vực cần rà trước khi đi tiếp.</InlineStatusMessage>
+        ) : null}
+
+        <footer className="mt-8 flex flex-col-reverse gap-3 border-t border-app-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[12px] text-app-ink-muted">Bước 1 / 6 · Cân bằng</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              onClick={() => setStep("welcome")}
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              Quay lại welcome
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              onClick={handleComplete}
+              disabled={!canCompleteAssessment}
+            >
+              Tiếp → Chọn trọng tâm
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
+        </footer>
       </div>
     </PageShell>
   );
