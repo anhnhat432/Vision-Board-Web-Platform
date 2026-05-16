@@ -952,7 +952,7 @@ export function RootLayout() {
           />
         ) : null}
 
-        <div className={showSidebar ? "lg:pl-[260px]" : undefined}>
+        <div className={showSidebar ? "lg:pl-[272px]" : undefined}>
         <header
           className={`sticky top-0 z-40 px-4 pt-2 sm:top-3 sm:px-6 sm:pt-0 lg:px-8 ${
             showSidebar ? "lg:hidden" : ""
