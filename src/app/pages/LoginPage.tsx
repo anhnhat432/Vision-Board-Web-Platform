@@ -280,57 +280,55 @@ export function LoginPage() {
       <div className="relative z-10 grid w-full max-w-5xl gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.72fr)] lg:items-center">
         <HeroPanel
           {...heroPanelMotionProps}
-          className="glass-surface-gradient-border surface-aurora ring-soft-glow page-enter relative hidden overflow-hidden p-8 shadow-2xl lg:block"
+          className="page-enter relative hidden overflow-hidden rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-8 shadow-[var(--shadow-3)] lg:block"
         >
           <MotionParallaxLayer
             depth={0.22}
-            className="pointer-events-none absolute -right-20 top-6 hidden w-[420px] text-violet-500 opacity-18 xl:block dark:opacity-14"
+            className="pointer-events-none absolute -right-20 top-6 hidden w-[420px] text-[color:var(--tone-shell-primary)] opacity-12 xl:block"
             aria-hidden="true"
           >
             <HeroLoginScene className="w-full" />
           </MotionParallaxLayer>
-          <ConstellationAccent className="pointer-events-none absolute right-4 top-4 w-28 text-violet-500 opacity-35 dark:opacity-25" />
+          <ConstellationAccent className="pointer-events-none absolute right-4 top-4 w-28 text-[color:var(--tone-shell-primary)] opacity-25" />
           <RevealDiv {...revealMotionProps} className="relative z-10 mb-5 flex items-start justify-between gap-4">
             <div className="gradient-brand flex size-12 items-center justify-center rounded-[var(--r-tile)] shadow-lg">
               <Sparkles className="h-5.5 w-5.5 text-white" />
             </div>
-            <HeroOrbitIllustration className="-mt-6 hidden w-32 shrink-0 text-violet-500 opacity-90 xl:block" />
+            <HeroOrbitIllustration className="-mt-6 hidden w-32 shrink-0 text-[color:var(--tone-shell-primary)] opacity-60 xl:block" />
           </RevealDiv>
           <RevealParagraph
             {...revealMotionProps}
-            className="relative z-10 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300"
+            className="relative z-10 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground"
           >
             Dear Our Future
           </RevealParagraph>
           <RevealParagraph
             {...revealMotionProps}
-            className="relative z-10 mt-[var(--space-inline)] text-4xl font-extrabold leading-[1.05] tracking-tight text-slate-950 sm:text-5xl md:text-6xl lg:text-7xl dark:text-white"
+            className="relative z-10 mt-[var(--space-inline)] text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl lg:text-5xl"
           >
             Biến mục tiêu thành{" "}
-            <span className="text-gradient-aurora">
-              12 tuần hành động
-            </span>{" "}
+            <span className="text-gradient-vibrant">12 tuần hành động</span>{" "}
             trong một không gian làm việc.
           </RevealParagraph>
           <RevealDiv {...revealMotionProps} className="relative z-10 mt-6 flex flex-wrap gap-2">
             {TRUST_FEATURES.map(({ icon: Icon, label }) => (
               <span
                 key={label}
-                className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-violet-200/70 bg-gradient-to-r from-violet-100 to-fuchsia-100 px-3 py-1.5 text-xs font-semibold text-violet-800 shadow-sm dark:border-violet-400/20 dark:from-violet-950/70 dark:to-fuchsia-950/60 dark:text-violet-100"
+                className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm"
               >
-                <Icon className="h-3.5 w-3.5" />
+                <Icon className="h-3.5 w-3.5 text-[color:var(--tone-shell-primary)]" />
                 {label}
               </span>
             ))}
           </RevealDiv>
           <RevealDiv
             {...revealMotionProps}
-            className="relative z-10 mt-6 grid gap-3 text-sm leading-6 text-slate-600 dark:text-slate-200"
+            className="relative z-10 mt-6 grid gap-3 text-sm leading-6 text-muted-foreground"
           >
             {WORKSPACE_PROMISES.map((item) => (
               <div
                 key={item}
-                className="rounded-[var(--r-control)] border border-slate-200/70 bg-white/70 px-4 py-3 shadow-sm dark:border-slate-700/70 dark:bg-slate-900/60"
+                className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-4 py-3 shadow-sm"
               >
                 {item}
               </div>
@@ -338,7 +336,7 @@ export function LoginPage() {
           </RevealDiv>
           <RevealDiv
             {...revealMotionProps}
-            className="relative z-10 mt-5 flex items-start gap-3 rounded-[var(--r-control)] border border-emerald-200/70 bg-emerald-50/85 px-4 py-3 text-sm leading-6 text-emerald-800 dark:border-emerald-400/20 dark:bg-emerald-950/40 dark:text-emerald-100"
+            className="relative z-10 mt-5 flex items-start gap-3 rounded-[var(--r-control)] border border-[color:var(--color-success-border)] bg-[color:var(--color-success-bg)] px-4 py-3 text-sm leading-6 text-[color:var(--color-success-fg)]"
           >
             <ShieldCheck className="mt-0.5 h-4 w-4 flex-none" />
             <p>Đăng nhập an toàn. Không lưu mật khẩu trên thiết bị.</p>
@@ -348,35 +346,35 @@ export function LoginPage() {
         <div className="w-full max-w-sm justify-self-center lg:max-w-md">
         <div className="mb-8 text-center">
           {/* Single hero illustration on mobile (was 2 stacked, took too much vertical space). */}
-          <HeroLoginScene className="mx-auto mb-3 w-40 text-violet-500 opacity-80 lg:hidden" />
+          <HeroLoginScene className="mx-auto mb-3 w-40 text-[color:var(--tone-shell-primary)] opacity-50 lg:hidden" />
           <div className="gradient-brand mx-auto mb-3 flex size-12 items-center justify-center rounded-[var(--r-tile)] shadow-lg">
             <Sparkles className="h-5.5 w-5.5 text-white" />
           </div>
-          <h1 className="text-xl font-semibold tracking-tight text-slate-900">
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
             {mode === "signin" ? "Chào mừng quay lại" : "Bắt đầu hành trình"}
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             {mode === "signin" ? "Đăng nhập để mở lại không gian làm việc và quyền tài khoản." : "Tạo tài khoản để lưu, đồng bộ và bắt đầu an toàn."}
           </p>
           <div className="mt-4 flex flex-wrap justify-center gap-2 lg:hidden">
             {TRUST_FEATURES.map(({ icon: Icon, label }) => (
               <span
                 key={label}
-                className="inline-flex items-center gap-1.5 rounded-[var(--r-pill)] border border-violet-200/60 bg-violet-50/80 px-2.5 py-1 text-[11px] font-semibold text-violet-700 dark:border-violet-400/20 dark:bg-violet-950/50 dark:text-violet-200"
+                className="inline-flex items-center gap-1.5 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-2.5 py-1 text-[11px] font-semibold text-foreground"
               >
-                <Icon className="h-3 w-3" />
+                <Icon className="h-3 w-3 text-[color:var(--tone-shell-primary)]" />
                 {label}
               </span>
             ))}
           </div>
         </div>
 
-        <div className="mb-4 flex items-start gap-3 rounded-[var(--r-control)] border border-emerald-200/70 bg-emerald-50/90 px-4 py-3 text-sm leading-6 text-emerald-800 shadow-sm lg:hidden">
+        <div className="mb-4 flex items-start gap-3 rounded-[var(--r-control)] border border-[color:var(--color-success-border)] bg-[color:var(--color-success-bg)] px-4 py-3 text-sm leading-6 text-[color:var(--color-success-fg)] shadow-sm lg:hidden">
           <ShieldCheck className="mt-0.5 h-4 w-4 flex-none" />
           <p>Đăng nhập an toàn. Không lưu mật khẩu trên thiết bị.</p>
         </div>
 
-        <Card className="glass-surface-gradient-border">
+        <Card>
           <CardContent className="pt-6 pb-5">
             <div className="stack-stack">
               {/* Google */}
@@ -412,9 +410,9 @@ export function LoginPage() {
               </Button>
 
               <div className="relative flex items-center gap-3">
-                <div className="h-px flex-1 bg-slate-200" />
-                <span className="text-xs text-slate-400">hoặc</span>
-                <div className="h-px flex-1 bg-slate-200" />
+                <div className="h-px flex-1 bg-[color:var(--border)]" />
+                <span className="text-xs text-muted-foreground">hoặc</span>
+                <div className="h-px flex-1 bg-[color:var(--border)]" />
               </div>
 
               {/* Email form */}

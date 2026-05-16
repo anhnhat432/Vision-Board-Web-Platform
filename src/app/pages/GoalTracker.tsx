@@ -525,7 +525,7 @@ function GoalTrackerContent({
         : null);
 
     return (
-      <Card key={goal.id} className="flow-panel overflow-hidden">
+      <Card key={goal.id} className="overflow-hidden">
         <CardContent className="grid gap-[var(--space-stack)] p-5 sm:p-6 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)]">
           <div className="rounded-[var(--r-card)] gradient-dark p-5 text-white">
             <div className="flex items-start justify-between gap-3">
@@ -861,7 +861,7 @@ function GoalTrackerContent({
   };
 
   return (
-    <div className="flow-shell stack-section pb-12">
+    <div className="stack-section pb-12">
       <UpgradePaywallDialog
         open={isGoalLimitPaywallOpen}
         onOpenChange={setIsGoalLimitPaywallOpen}
@@ -893,7 +893,7 @@ function GoalTrackerContent({
         </AlertDialogContent>
       </AlertDialog>
 
-      <Card data-tour-id="goaltracker-hero" className="flow-panel surface-aurora ring-soft-glow overflow-hidden shadow-xl shadow-slate-900/5 dark:shadow-black/30">
+      <Card data-tour-id="goaltracker-hero" className="overflow-hidden">
         <CardContent className="p-5 sm:p-6">
           <div className="grid gap-[var(--space-stack)] xl:grid-cols-[minmax(0,1fr)_340px]">
             <div data-tour-id="goaltracker-start-card" className="stack-stack">
@@ -910,7 +910,7 @@ function GoalTrackerContent({
                   trung tâm 12 tuần.
                 </p>
                 {shouldShowFreeGoalLimit ? (
-                  <p className="mt-3 inline-flex rounded-[var(--r-pill)] border border-slate-200 bg-white/80 px-3 py-1 text-xs font-semibold text-slate-600">
+                  <p className="mt-3 inline-flex rounded-[var(--r-pill)] border border-[color:var(--border)] bg-card px-3 py-1 text-xs font-semibold text-muted-foreground">
                     {goalLimitUsage.current}/{goalLimitUsage.limit} mục tiêu Free
                   </p>
                 ) : null}
@@ -1007,7 +1007,7 @@ function GoalTrackerContent({
             <Card
               data-testid="goaltracker-fresh-empty-state"
               data-tour-id="goaltracker-empty-state"
-              className="flow-panel relative overflow-hidden"
+              className="relative overflow-hidden"
             >
               <CardContent className="p-10 text-center lg:p-14">
                 <EmptyGoalIllustration className="mx-auto mb-4 w-44 text-violet-500 sm:w-56" />

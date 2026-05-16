@@ -214,7 +214,7 @@ describe("12-week write-path safety", () => {
 
     renderAppRoute("/12-week-system");
     const user = userEvent.setup();
-    await user.click(screen.getByRole("button", { name: "Tuần" }));
+    await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
     await typeWamReview(user, {
       insights: "Weekly review still saves locally.",
       nextWeekCommitments: "Keep the local review.",
@@ -266,7 +266,7 @@ describe("12-week write-path safety", () => {
     renderAppRoute("/12-week-system");
     const user = userEvent.setup();
 
-    await user.click(screen.getByRole("button", { name: "Tuần" }));
+    await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
     await typeWamReview(user, {
       insights: "Bị phân tán vì đổi context.",
       nextWeekCommitments: "Chốt xong command center trước.",
@@ -311,7 +311,7 @@ describe("12-week write-path safety", () => {
     renderAppRoute("/12-week-system");
     const user = userEvent.setup();
 
-    await user.click(screen.getByRole("button", { name: "Tuần" }));
+    await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
     await openWeeklyReviewDetails(user);
     expect(screen.queryByLabelText("Reflection")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Adjustments")).not.toBeInTheDocument();

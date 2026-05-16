@@ -118,7 +118,7 @@ export function AspirationalVision() {
   };
 
   return (
-    <PageShell maxWidth="hero" className="stack-section page-enter">
+    <PageShell maxWidth="xl" className="stack-section page-enter">
       <motion.div
         initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
@@ -129,21 +129,18 @@ export function AspirationalVision() {
         <SectionBlock title="Biểu mẫu tầm nhìn 3 năm" headerVisuallyHidden>
         <PrimaryActionCard
           hero
-          tone="violet"
           eyebrow="Tầm nhìn 3 năm"
           icon={<Sparkles className="h-3.5 w-3.5" />}
-          eyebrowClassName="text-white/72"
           title="Tầm nhìn 3 năm"
           titleAs="h2"
           description="Viết phần aspirational vision riêng với mục tiêu 12 tuần. Phần này không bắt buộc, nhưng giúp mỗi cycle ngắn hạn bám vào một hướng dài hơn."
-          className="surface-aurora ring-soft-glow text-white"
-          titleClassName="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-3xl font-semibold leading-[1.15] tracking-tight text-transparent sm:text-4xl md:text-5xl dark:from-violet-200 dark:via-fuchsia-200 dark:to-rose-200"
-          descriptionClassName="max-w-3xl leading-7 text-white/78"
+          titleClassName="text-gradient-vibrant text-3xl font-semibold leading-[1.1] tracking-[-0.018em] sm:text-4xl"
+          descriptionClassName="max-w-3xl leading-7 text-muted-foreground"
           contentClassName="pointer-events-none hidden justify-end sm:flex"
         >
-          <AspirationalVisionIllustration className="-mt-4 w-56 text-white opacity-32 sm:w-72" />
+          <AspirationalVisionIllustration className="-mt-4 w-56 text-[color:var(--tone-shell-primary)] opacity-30 sm:w-72" />
         </PrimaryActionCard>
-        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
+        <Card>
         <CardContent className="stack-section">
           <div className="stack-tight">
             <Label htmlFor="aspirational-summary">Tóm tắt tầm nhìn 3 năm</Label>
@@ -164,7 +161,7 @@ export function AspirationalVision() {
           </div>
 
           <div className="stack-tight">
-            <p className="text-sm font-medium text-slate-900">Khoảng thời gian</p>
+            <p className="text-sm font-medium text-foreground">Khoảng thời gian</p>
             <div className="flex flex-wrap gap-2">
               {[3, 5].map((year) => (
                 <button
@@ -172,10 +169,10 @@ export function AspirationalVision() {
                   type="button"
                   aria-pressed={horizonYears === year}
                   onClick={() => setHorizonYears(year as 3 | 5)}
-                  className={`rounded-[var(--r-pill)] border px-4 py-2 text-sm font-medium ${
+                  className={`rounded-[var(--r-pill)] border px-4 py-2 text-sm font-medium transition-colors ${
                     horizonYears === year
-                      ? "border-slate-950 bg-slate-950 text-white"
-                      : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+                      ? "border-foreground bg-foreground text-[color:var(--background)]"
+                      : "border-[color:var(--border)] bg-card text-foreground hover:border-[color:var(--tone-shell-primary)]"
                   }`}
                 >
                   {year} năm
@@ -186,8 +183,8 @@ export function AspirationalVision() {
 
           <div className="stack-tight">
             <div>
-              <h2 className="text-base font-semibold text-slate-950">Các mảng đời sống</h2>
-              <p className="mt-1 text-sm text-slate-600">Điền ít nhất một mảng. Các mảng còn lại có thể để trống.</p>
+              <h2 className="text-base font-semibold text-foreground">Các mảng đời sống</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Điền ít nhất một mảng. Các mảng còn lại có thể để trống.</p>
             </div>
             <div className="grid gap-3 md:grid-cols-2">
               {LIFE_AREA_FIELDS.map(({ area, label, placeholder }) => (
@@ -210,12 +207,8 @@ export function AspirationalVision() {
             ) : null}
           </div>
 
-          <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row">
-            <Button
-              type="button"
-              className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
-              onClick={handleSubmit}
-            >
+          <div className="flex flex-col gap-3 border-t border-[color:var(--border)] pt-4 sm:flex-row">
+            <Button type="button" glow className="w-full sm:w-auto" onClick={handleSubmit}>
               <Save className="h-4 w-4" />
               Lưu tầm nhìn 3 năm
             </Button>

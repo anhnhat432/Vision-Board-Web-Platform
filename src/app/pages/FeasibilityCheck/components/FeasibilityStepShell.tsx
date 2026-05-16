@@ -45,9 +45,9 @@ export function FeasibilityStepShell({
   );
 
   return (
-    <div ref={targetRef} className="mx-auto max-w-4xl">
-      <Card className="overflow-hidden">
-        <CardContent className="p-5 sm:p-6 lg:p-7">
+    <div ref={targetRef}>
+      <Card>
+        <CardContent className="p-5 sm:p-7">
           <motion.div
             key={currentQuestion.id}
             initial={prefersReducedMotion ? false : { opacity: 0, x: 18 }}
@@ -56,7 +56,7 @@ export function FeasibilityStepShell({
             className="stack-section"
           >
             <SectionBlock title={`Nội dung câu hỏi ${currentStep + 1}`} headerVisuallyHidden density="default">
-              <div className="rounded-[var(--r-card)] gradient-violet-pink p-4 sm:p-6">
+              <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4 sm:p-6">
                 <WizardStepPip
                   steps={feasibilityStepPips}
                   currentStep={currentStep}
@@ -64,23 +64,23 @@ export function FeasibilityStepShell({
                   mobileMode="compact"
                   className="mb-[var(--space-stack)]"
                 />
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
                   {currentQuestion.axisLabel}
                 </p>
-                <p className="mt-2 text-xs font-medium text-violet-700">
+                <p className="mt-2 text-xs font-medium text-muted-foreground">
                   {answeredQuestionCount}/{totalSteps} câu đã trả lời
                 </p>
                 <h2
                   ref={headingRef}
                   id={`feasibility-question-${currentQuestion.id}`}
                   tabIndex={-1}
-                  className="mt-2 text-xl font-bold leading-tight text-slate-900 focus:outline-none sm:mt-[var(--space-inline)] sm:text-3xl"
+                  className="mt-2 text-xl font-bold leading-[1.1] tracking-[-0.014em] text-foreground focus:outline-none sm:mt-[var(--space-inline)] sm:text-3xl"
                 >
                   {currentQuestion.question}
                 </h2>
                 <p
                   id={`feasibility-question-${currentQuestion.id}-helper`}
-                  className="mt-2 text-sm leading-6 text-slate-600 sm:mt-[var(--space-inline)] sm:leading-7"
+                  className="mt-2 text-sm leading-6 text-muted-foreground sm:mt-[var(--space-inline)] sm:leading-7"
                 >
                   {currentQuestion.helper}
                 </p>
@@ -99,15 +99,15 @@ export function FeasibilityStepShell({
                       htmlFor={option.value}
                       className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-[var(--r-card)] border px-4 py-3 transition-colors transition-shadow duration-150 sm:gap-4 sm:px-5 sm:py-4 ${
                         selectedAnswer === option.value
-                          ? "border-violet-300 bg-violet-50/90 shadow-lg"
-                          : "border-white/70 bg-white/72 hover:border-violet-200"
+                          ? "border-[color:var(--ring)] bg-[color:var(--muted)] shadow-[var(--shadow-2)]"
+                          : "border-[color:var(--border)] bg-card hover:bg-[color:var(--muted)]"
                       }`}
                     >
                       <RadioGroupItem value={option.value} id={option.value} />
                       <div className="flex-1">
-                        <p className="text-sm font-medium leading-6 text-slate-800 sm:text-base">{option.label}</p>
+                        <p className="text-sm font-medium leading-6 text-foreground sm:text-base">{option.label}</p>
                       </div>
-                      {selectedAnswer === option.value && <CheckCircle2 className="h-5 w-5 shrink-0 text-violet-600" />}
+                      {selectedAnswer === option.value && <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />}
                     </Label>
                   </div>
                 ))}
@@ -122,7 +122,7 @@ export function FeasibilityStepShell({
                 </Button>
                 <Button
                   glow={Boolean(selectedAnswer)}
-                  className="flex-1 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700"
+                  className="flex-1"
                   onClick={onNext}
                   disabled={!selectedAnswer}
                   aria-describedby={!selectedAnswer ? `feasibility-question-${currentQuestion.id}-next-hint` : undefined}
@@ -135,7 +135,7 @@ export function FeasibilityStepShell({
                 <p
                   id={`feasibility-question-${currentQuestion.id}-next-hint`}
                   role="status"
-                  className="text-center text-xs text-slate-500 sm:text-right"
+                  className="text-center text-xs text-muted-foreground sm:text-right"
                 >
                   Chọn một lựa chọn phù hợp để tiếp tục.
                 </p>

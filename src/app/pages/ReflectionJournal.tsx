@@ -372,43 +372,37 @@ export function ReflectionJournal() {
       </AlertDialog>
 
       <Dialog open={isAddingReflection} onOpenChange={setIsAddingReflection}>
-        <Card className="ops-surface surface-aurora ring-soft-glow overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-xl shadow-slate-900/5 dark:shadow-black/30">
+        <Card className="overflow-hidden">
           <CardContent className="relative p-5 sm:p-6">
             <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
               <div className="stack-stack">
-                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-slate-200 bg-slate-50/90 px-3 py-1.5 text-xs font-semibold text-slate-600">
+                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-1.5 text-xs font-semibold text-muted-foreground">
                   <NotebookPen className="h-4 w-4" />
                   Nhật ký nhìn lại
                 </div>
 
                 <div className="stack-tight">
-                  <h1 className="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl">
-                    <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-transparent">
-                      Tuần này bạn nhìn lại
-                    </span>{" "}
+                  <h1 className="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-[-0.018em] text-foreground sm:text-4xl md:text-5xl">
+                    <span className="text-gradient-vibrant">Tuần này bạn nhìn lại</span>{" "}
                     đủ sâu để giữ bài học, cảm xúc và những điều đáng nhớ.
                   </h1>
-                  <p className="max-w-2xl text-sm leading-relaxed text-slate-700 sm:text-base dark:text-slate-300">
+                  <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
                     Nhật ký ở đây không chỉ để lưu chữ. Nó là nơi gom lại bài học, cảm xúc, những chuyển động nhỏ và cả
                     cách bạn đang lớn lên qua từng ngày.
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  <Button
-                    variant="outline"
-                    className="border-transparent bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 hover:text-white"
-                    onClick={() => setIsAddingReflection(true)}
-                  >
+                  <Button glow onClick={() => setIsAddingReflection(true)}>
                     <Plus className="h-4 w-4" />
                     Viết nhật ký mới
                   </Button>
                 </div>
               </div>
 
-              <div className="hidden rounded-[var(--r-tile)] border border-slate-200 bg-slate-50/80 p-4 shadow-sm lg:block">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Nhịp viết hiện tại</p>
-                <CelebrationBurst className="mx-auto mt-3 w-32 text-violet-500" />
+              <div className="hidden rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4 shadow-sm lg:block">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Nhịp viết hiện tại</p>
+                <CelebrationBurst className="mx-auto mt-3 w-32 text-[color:var(--tone-shell-primary)]" />
                 {hasReflections ? (
                   <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                     {[
@@ -416,7 +410,7 @@ export function ReflectionJournal() {
                       { label: "Tháng này", value: monthlyCount, note: "bài viết trong tháng hiện tại" },
                       { label: "Tâm trạng gần nhất", value: recentMood.label, note: "tín hiệu cảm xúc mới nhất" },
                     ].map((item) => (
-                      <div key={item.label} className="rounded-[var(--r-tile)] border border-slate-200 bg-white px-4 py-4">
+                      <div key={item.label} className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-card px-4 py-4">
                         <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
                         <p className="mt-2 text-2xl font-bold text-slate-950">
                           {typeof item.value === "number" ? <CountUp value={item.value} /> : item.value}
@@ -595,7 +589,8 @@ export function ReflectionJournal() {
             </div>
 
             <Button
-              className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 motion-safe:hover:scale-[1.01] hover:from-violet-700 hover:to-fuchsia-700"
+              glow
+              className="w-full motion-safe:hover:scale-[1.01]"
               onClick={handleAddReflection}
               disabled={!newReflection.title || !newReflection.content}
             >
@@ -706,10 +701,7 @@ export function ReflectionJournal() {
               </div>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <EmptyHintArrow className="pointer-events-none absolute bottom-24 right-[18%] hidden h-10 w-10 text-fuchsia-500 opacity-65 sm:block" />
-                <Button
-                  className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700"
-                  onClick={() => navigate("/onboarding")}
-                >
+                <Button glow onClick={() => navigate("/onboarding")}>
                   Bắt đầu Cân bằng cuộc sống
                   <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -726,16 +718,16 @@ export function ReflectionJournal() {
           <div className="stack-stack">
             <h2 className="sr-only">Nhật ký đã lưu</h2>
             {latestWeeklyReview && (
-              <Card className="overflow-hidden border-violet-200 bg-gradient-to-br from-violet-50 to-fuchsia-50 shadow-sm dark:border-violet-500/30 dark:from-violet-950/35 dark:to-fuchsia-950/20">
+              <Card className="overflow-hidden">
                 <CardContent className="p-6">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
-                      <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-sky-200 bg-white/90 px-3 py-1.5 text-sm font-medium text-sky-700">
+                      <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] px-3 py-1.5 text-sm font-medium text-[color:var(--color-info-fg)]">
                         <Flag className="h-4 w-4" />
                         Review tuần mới nhất
                       </div>
-                      <h3 className="mt-4 text-2xl font-bold text-slate-950">{latestWeeklyReview.title}</h3>
-                      <p className="mt-2 text-sm leading-7 text-slate-600">
+                      <h3 className="mt-4 text-2xl font-bold text-foreground">{latestWeeklyReview.title}</h3>
+                      <p className="mt-2 text-sm leading-7 text-muted-foreground">
                         {latestWeeklyReview.linkedGoalId
                           ? goalsById.get(latestWeeklyReview.linkedGoalId)?.title
                           : "Chu kỳ 12 tuần"}
@@ -747,10 +739,7 @@ export function ReflectionJournal() {
                       </p>
                     </div>
                     {latestWeeklyReview.linkedGoalId && (
-                      <Button
-                        className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700"
-                        onClick={() => openLinkedCycle(latestWeeklyReview.linkedGoalId)}
-                      >
+                      <Button glow onClick={() => openLinkedCycle(latestWeeklyReview.linkedGoalId)}>
                         Mở chu kỳ 12 tuần
                         <ArrowRight className="h-4 w-4" />
                       </Button>
@@ -990,10 +979,7 @@ export function ReflectionJournal() {
                   ))}
                 </div>
 
-                <Button
-                  className="mt-6 w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700"
-                  onClick={() => setIsAddingReflection(true)}
-                >
+                <Button glow className="mt-6 w-full" onClick={() => setIsAddingReflection(true)}>
                   <Plus className="h-4 w-4" />
                   Viết thêm một trang mới
                 </Button>

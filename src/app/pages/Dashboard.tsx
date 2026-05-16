@@ -838,20 +838,19 @@ function DashboardContent({
               hero
               titleAs="h2"
               density="compact"
-              className={`${dashboardGreeting.surfaceClass} surface-aurora surface-glass-deep ring-soft-glow featured-surface glow-vivid page-enter relative bg-gradient-to-br from-white/95 via-white/90 to-violet-50/80 shadow-xl shadow-violet-500/8 border-violet-200/50 dark:from-slate-900/80 dark:via-slate-900/70 dark:to-violet-950/50 dark:shadow-violet-500/10 dark:border-violet-400/15`}
+              className="page-enter relative"
               eyebrow={dashboardNextAction.eyebrow}
               title={`${dashboardGreeting.label}, ${dashboardDisplayName}`}
               description={`Tuần ${dashboardKpiCurrentWeek ?? "--"}/${dashboardKpiTotalWeeks} — còn ${dashboardOpenTaskCount} việc hôm nay`}
               icon={<CalendarDays className="h-4 w-4" />}
-              titleClassName={`text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl ${dashboardGreeting.textClass}`}
-              descriptionClassName="count-up text-sm font-semibold tabular-nums text-slate-700 sm:text-base"
+              titleClassName="text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl lg:text-5xl"
+              descriptionClassName="count-up text-sm font-semibold tabular-nums text-muted-foreground sm:text-base"
               headerClassName="relative z-10"
               actionClassName="relative z-10"
               action={
                 <Button
-                  variant="outline"
                   glow
-                  className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
+                  className="w-full sm:w-auto"
                   onClick={() => navigate(dashboardNextAction.ctaTarget)}
                 >
                   {dashboardNextAction.ctaLabel}
@@ -866,23 +865,23 @@ function DashboardContent({
               >
                 <HeroDashboardScene className="w-full" />
               </MotionParallaxLayer>
-              <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 hidden w-56 text-violet-500 opacity-35 dark:opacity-20 sm:block" />
+              <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 hidden w-56 text-[color:var(--tone-shell-primary)] opacity-15 sm:block" />
               <div className="relative z-10 stack-stack">
                 <div className="hidden justify-end xl:flex">
-                  <HeroOrbitIllustration className="-mb-10 -mt-12 w-44 text-violet-500 opacity-80" />
+                  <HeroOrbitIllustration className="-mb-10 -mt-12 w-44 text-[color:var(--tone-shell-primary)] opacity-60" />
                 </div>
-                <div className="flex flex-wrap items-start justify-between gap-3 rounded-[var(--r-tile)] bg-white/82 p-4 ring-1 ring-slate-200/70 dark:bg-slate-900/60 dark:ring-slate-700">
+                <div className="flex flex-wrap items-start justify-between gap-3 rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
                       {dashboardNextAction.title}
                     </p>
-                    <p className="mt-1 text-sm leading-6 text-slate-700">{dashboardNextAction.description}</p>
+                    <p className="mt-1 text-sm leading-6 text-foreground">{dashboardNextAction.description}</p>
                   </div>
                   <span
                     className={`inline-flex shrink-0 items-center gap-2 rounded-[var(--r-pill)] px-3 py-1.5 text-xs font-bold ${
                       dashboardKpiStreak >= 7
-                        ? "bg-gradient-to-r from-orange-500 to-rose-500 text-white shadow-lg shadow-rose-500/25 ring-4 ring-rose-500/10 motion-safe:animate-pulse"
-                        : "bg-white text-slate-700 ring-1 ring-slate-200 shadow-sm"
+                        ? "bg-[color:var(--color-warning-fg)] text-white shadow-[var(--shadow-2)] motion-safe:animate-pulse"
+                        : "bg-card text-foreground ring-1 ring-[color:var(--border)] shadow-sm"
                     }`}
                   >
                     <Flame className="h-3.5 w-3.5" />
@@ -1026,9 +1025,9 @@ function DashboardContent({
                                 Tuần {task.weekNumber}
                                 {task.scheduledDate ? ` · ${formatCalendarDate(task.scheduledDate)}` : ""}
                               </p>
-                              <div className="mt-3 h-1.5 overflow-hidden rounded-[var(--r-pill)] bg-slate-100">
+                              <div className="mt-3 h-1.5 overflow-hidden rounded-[var(--r-pill)] bg-[color:var(--muted)]">
                                 <div
-                                  className="h-full rounded-[var(--r-pill)] bg-gradient-to-r from-violet-600 to-fuchsia-600"
+                                  className="h-full rounded-[var(--r-pill)] gradient-brand"
                                   style={{ width: `${Math.max(0, Math.min(100, weekPercent))}%` }}
                                 />
                               </div>
@@ -1039,18 +1038,15 @@ function DashboardContent({
                     })}
                   </div>
                 ) : (
-                  <div className="rounded-[var(--r-card)] border border-dashed border-violet-200/80 bg-gradient-to-br from-violet-50 to-fuchsia-50 p-6 text-center dark:border-violet-400/20 dark:from-violet-950/35 dark:to-fuchsia-950/25">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[var(--r-tile)] bg-white text-violet-700 shadow-sm">
+                  <div className="rounded-[var(--r-card)] border border-dashed border-[color:var(--border)] bg-[color:var(--muted)] p-6 text-center">
+                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[var(--r-tile)] bg-card text-[color:var(--tone-shell-primary)] shadow-sm">
                       <Plus className="h-6 w-6" />
                     </div>
-                    <h3 className="mt-4 text-base font-semibold text-slate-950">Hôm nay là ngày để bắt đầu nhỏ.</h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                    <h3 className="mt-4 text-base font-semibold text-foreground">Hôm nay là ngày để bắt đầu nhỏ.</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
                       Bấm + để thêm việc đầu tiên trong trung tâm 12 tuần.
                     </p>
-                    <Button
-                      className="mt-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700"
-                      onClick={() => navigate("/12-week-system?tab=today")}
-                    >
+                    <Button glow className="mt-4" onClick={() => navigate("/12-week-system?tab=today")}>
                       Mở Hôm nay
                     </Button>
                   </div>
@@ -1126,12 +1122,8 @@ function DashboardContent({
               actions={
                 <>
                   <EmptyHintArrow className="pointer-events-none absolute bottom-24 right-[18%] hidden h-10 w-10 text-fuchsia-500 opacity-65 sm:block" />
-                  <Button
-                  variant="secondary"
-                  className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
-                  onClick={() => navigate("/onboarding")}
-                >
-                  Bắt đầu Cân bằng cuộc sống
+                  <Button glow className="w-full sm:w-auto" onClick={() => navigate("/onboarding")}>
+                    Bắt đầu Cân bằng cuộc sống
                   </Button>
                 </>
               }

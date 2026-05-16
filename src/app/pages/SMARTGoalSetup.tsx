@@ -502,7 +502,7 @@ export function SMARTGoalSetup() {
   }
 
   return (
-    <PageShell maxWidth="hero">
+    <PageShell maxWidth="xl">
       <UpgradePaywallDialog
         open={isGoalLimitPaywallOpen}
         onOpenChange={setIsGoalLimitPaywallOpen}
@@ -515,23 +515,25 @@ export function SMARTGoalSetup() {
       <div className={prefersReducedMotion ? "stack-stack" : "animate-fade-in-up stack-stack"}>
         <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} />
         {!isVisionPromptDismissed && (
-          <Card className="border border-violet-200 bg-violet-50/80 shadow-sm">
+          <Card>
             <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
                 {aspirationalVision ? (
-                  <p className="text-sm leading-6 text-violet-950">
-                    <span className="font-semibold">Mục tiêu này phục vụ tầm nhìn 3 năm:</span>{" "}
+                  <p className="text-sm leading-6 text-foreground">
+                    <span className="font-semibold text-[color:var(--tone-shell-primary)]">
+                      Mục tiêu này phục vụ tầm nhìn 3 năm:
+                    </span>{" "}
                     {aspirationalVision.summary}
                   </p>
                 ) : (
-                  <p className="text-sm leading-6 text-violet-950">
+                  <p className="text-sm leading-6 text-foreground">
                     Bạn đang đặt mục tiêu 12 tuần. Phương pháp gốc khuyên gắn với tầm nhìn 3 năm.
                   </p>
                 )}
               </div>
               {!aspirationalVision && (
                 <div className="flex shrink-0 flex-wrap gap-2">
-                  <Button asChild size="sm" variant="outline" className="bg-white">
+                  <Button asChild size="sm" variant="outline">
                     <Link to="/vision">Điền 2 phút →</Link>
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => setIsVisionPromptDismissed(true)}>
@@ -553,9 +555,9 @@ export function SMARTGoalSetup() {
           smartGoalStarter={smartGoalStarter}
         />
 
-        <div ref={stepTopRef} className="mx-auto max-w-4xl">
-          <Card className="flow-panel overflow-hidden">
-            <CardContent className="p-5 sm:p-6 lg:p-7">
+        <div ref={stepTopRef}>
+          <Card>
+            <CardContent className="p-5 sm:p-7">
               <div className="mb-3 flex justify-end">
                 <AutoSaveIndicator status={isDirty ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} />
               </div>
@@ -584,16 +586,21 @@ export function SMARTGoalSetup() {
             </CardContent>
           </Card>
 
-          <details className="mt-[var(--space-stack)] rounded-[var(--r-card)] border border-dashed border-slate-200 bg-white/78 p-4 shadow-lg">
-            <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
+          <details className="mt-[var(--space-stack)] rounded-[var(--r-card)] border border-dashed border-[color:var(--border)] bg-[color:var(--muted)] p-5 shadow-[var(--shadow-1)]">
+            <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">
               Xem lại mục tiêu đang viết
             </summary>
 
             <div className="mt-4 stack-tight">
               {SMART_STEPS.map((step) => (
-                <div key={step.key} className="flow-muted p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{step.label}</p>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">
+                <div
+                  key={step.key}
+                  className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card p-4"
+                >
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    {step.label}
+                  </p>
+                  <p className="mt-2 text-sm leading-7 text-foreground">
                     {formatStepDraft(step.key, smartData) || "Chưa có nội dung cho phần này."}
                   </p>
                 </div>

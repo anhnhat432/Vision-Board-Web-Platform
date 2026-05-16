@@ -62,7 +62,7 @@ function BoardPreviewIcon({ content }: { content: string }) {
   const Icon = ICON_COMPONENTS[content as IconName] ?? Sparkles;
 
   return (
-    <div className="flex h-9 w-9 items-center justify-center rounded-[var(--r-pill)] gradient-violet-pink text-white shadow-lg">
+    <div className="flex h-9 w-9 items-center justify-center rounded-[var(--r-pill)] gradient-brand text-primary-foreground shadow-[var(--shadow-2)]">
       <Icon className="h-4 w-4" />
     </div>
   );
@@ -197,85 +197,72 @@ export function VisionBoardGallery() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <InteractiveSurface className="rounded-[var(--r-card)]" intensity={4} translate={10} shine={false}>
-        <Card className="hero-surface overflow-hidden border-0 text-white">
-          <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.12),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.08),_transparent_22%)] opacity-55" />
-
-            <div className="relative z-10 grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
-              <div className="stack-section">
-                <div className="interactive-layer interactive-layer--soft inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
-                  <Images className="h-4 w-4" />
-                  Thư viện Dear Our Future
-                </div>
-
-                <div className="stack-stack">
-                  <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-                    Một thư viện nơi mọi vision board của bạn được lưu lại như những phiên bản của tương lai.
-                  </h1>
-                  <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
-                    Tại đây bạn có thể xem lại các vision board theo từng năm, tiếp tục chỉnh sửa, so sánh độ phong phú của
-                    từng bảng và giữ cảm hứng luôn ở gần mình.
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    variant="outline"
-                    className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92"
-                    onClick={() => navigate("/vision-board")}
-                  >
-                    <Plus className="h-4 w-4" />
-                    Tạo bảng mới
-                  </Button>
-                  {orderSourceBoard ? (
-                    <Button
-                      variant="outline"
-                      className="border-white/18 bg-white/10 text-white hover:bg-white/16 hover:text-white"
-                      onClick={() => navigate("/order", { state: { visionBoardId: orderSourceBoard.id } })}
-                    >
-                      <Package className="h-4 w-4" />
-                      {spotlightBoardId ? "Tạo bộ in từ bảng vừa lưu" : "Tạo bộ in từ bảng gần nhất"}
-                    </Button>
-                  ) : null}
-                  <Button
-                    variant="outline"
-                    className="border-white/18 bg-white/10 text-white hover:bg-white/16 hover:text-white"
-                    onClick={() => navigate("/")}
-                  >
-                    Về Trang chính
-                  </Button>
-                </div>
+      <Card className="overflow-hidden">
+        <CardContent className="relative p-5 sm:p-6 lg:p-8">
+          <div className="relative z-10 grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
+            <div className="stack-section">
+              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-4 py-1.5 text-sm text-muted-foreground">
+                <Images className="h-4 w-4" />
+                Thư viện Dear Our Future
               </div>
 
-              <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-[var(--r-card)] border border-white/14 bg-white/10 p-5 shadow-sm">
-                <VisionMapIllustration className="mb-5 w-full text-white/85" />
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Snapshot thư viện</p>
+              <div className="stack-stack">
+                <h1 className="max-w-3xl text-2xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-3xl lg:text-4xl">
+                  Một thư viện nơi mọi <span className="text-gradient-vibrant">vision board</span> của bạn được lưu lại như những phiên bản của tương lai.
+                </h1>
+                <p className="max-w-2xl text-base leading-7 text-muted-foreground">
+                  Tại đây bạn có thể xem lại các vision board theo từng năm, tiếp tục chỉnh sửa, so sánh độ phong phú của
+                  từng bảng và giữ cảm hứng luôn ở gần mình.
+                </p>
+              </div>
 
-                <div className="mt-4 stack-tight">
-                  <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Tổng số vision board</p>
-                    <p className="mt-2 text-3xl font-bold text-white">{userData.visionBoards.length}</p>
-                  </div>
-                  <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Tổng số phần tử</p>
-                    <p className="mt-2 text-3xl font-bold text-white">{totalItems}</p>
-                  </div>
-                  <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Vision board gần nhất</p>
-                    <p className="mt-2 text-lg font-semibold text-white">
-                      {latestBoard ? latestBoard.name : "Chưa có bảng nào"}
-                    </p>
-                    <p className="mt-1 text-sm text-white/68">
-                      {latestBoard ? `Năm ${latestBoard.year}` : "Bắt đầu với bảng đầu tiên của bạn."}
-                    </p>
-                  </div>
+              <div className="flex flex-wrap gap-3">
+                <Button glow onClick={() => navigate("/vision-board")}>
+                  <Plus className="h-4 w-4" />
+                  Tạo bảng mới
+                </Button>
+                {orderSourceBoard ? (
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate("/order", { state: { visionBoardId: orderSourceBoard.id } })}
+                  >
+                    <Package className="h-4 w-4" />
+                    {spotlightBoardId ? "Tạo bộ in từ bảng vừa lưu" : "Tạo bộ in từ bảng gần nhất"}
+                  </Button>
+                ) : null}
+                <Button variant="outline" onClick={() => navigate("/")}>
+                  Về Trang chính
+                </Button>
+              </div>
+            </div>
+
+            <div className="hidden xl:block rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-5 shadow-sm">
+              <VisionMapIllustration className="mb-5 w-full text-[color:var(--tone-shell-primary)] opacity-70" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Snapshot thư viện</p>
+
+              <div className="mt-4 stack-tight">
+                <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Tổng số vision board</p>
+                  <p className="mt-2 text-3xl font-bold text-foreground">{userData.visionBoards.length}</p>
+                </div>
+                <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Tổng số phần tử</p>
+                  <p className="mt-2 text-3xl font-bold text-foreground">{totalItems}</p>
+                </div>
+                <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Vision board gần nhất</p>
+                  <p className="mt-2 text-lg font-semibold text-foreground">
+                    {latestBoard ? latestBoard.name : "Chưa có bảng nào"}
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {latestBoard ? `Năm ${latestBoard.year}` : "Bắt đầu với bảng đầu tiên của bạn."}
+                  </p>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </InteractiveSurface>
+          </div>
+        </CardContent>
+      </Card>
 
       {userData.visionBoards.length > 0 && (
       <div className="stagger-hover-grid grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">

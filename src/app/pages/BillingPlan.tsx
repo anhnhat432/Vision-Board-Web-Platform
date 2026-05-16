@@ -591,7 +591,7 @@ export function BillingPlan() {
   };
 
   return (
-    <div className="flow-shell stack-section pb-12">
+    <div className="stack-section pb-12">
       <Dialog open={refundDialogOrder !== null} onOpenChange={(open) => !open && setRefundDialogOrder(null)}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
@@ -680,26 +680,24 @@ export function BillingPlan() {
       {/* Hero */}
       <PrimaryActionCard
         hero
-        tone="violet"
         eyebrow="Premium"
         icon={<CreditCard className="h-4 w-4" />}
-        eyebrowClassName="text-white/72"
         title="Quản lý gói của bạn"
         titleAs="h1"
         description="Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản của bạn. Quyền Plus chỉ mở sau khi hệ thống xác nhận giao dịch."
-        className="flow-surface surface-aurora ring-soft-glow featured-surface glow-vivid page-enter relative overflow-hidden text-white"
-        titleClassName="max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl"
-        descriptionClassName="max-w-2xl text-base leading-8 text-white/82"
+        className="page-enter relative overflow-hidden"
+        titleClassName="max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl lg:text-5xl"
+        descriptionClassName="max-w-2xl text-base leading-7 text-muted-foreground"
         contentClassName="pointer-events-none hidden justify-end lg:flex"
       >
         <MotionParallaxLayer
           depth={0.26}
-          className="pointer-events-none absolute -right-12 -top-14 hidden w-[360px] text-white opacity-18 lg:block"
+          className="pointer-events-none absolute -right-12 -top-14 hidden w-[360px] text-[color:var(--tone-shell-primary)] opacity-12 lg:block"
           aria-hidden="true"
         >
           <HeroBillingPlusScene className="w-full" />
         </MotionParallaxLayer>
-        <BillingPlusIllustration className="-my-8 w-56 text-white opacity-35" />
+        <BillingPlusIllustration className="-my-8 w-56 text-[color:var(--tone-shell-primary)] opacity-30" />
       </PrimaryActionCard>
 
       {/* Checkout return status */}
@@ -1282,8 +1280,8 @@ export function BillingPlan() {
                   intensity={plan.code === "PLUS" ? 6 : 3}
                   className={`relative overflow-hidden rounded-[var(--r-control)] border p-5 ${
                     plan.code === currentPlanCode
-                      ? "featured-surface glow-vivid border-violet-300 bg-violet-50/50"
-                      : "border-slate-100 bg-slate-50/30"
+                      ? "border-[color:var(--tone-shell-primary)] bg-[color:var(--muted)] shadow-[var(--shadow-glow)]"
+                      : "border-[color:var(--border)] bg-[color:var(--muted)]"
                   }`}
                 >
                 {plan.code !== "FREE" && (

@@ -86,39 +86,41 @@ export function MockBillingCheckout() {
         </p>
       </div>
 
-      <Card className="overflow-hidden border-0 gradient-dark-indigo text-white shadow-2xl">
+      <Card className="overflow-hidden">
         <CardContent className="grid gap-6 p-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-10">
           <div className="stack-stack">
-            <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/78">
-              <Crown className="h-3.5 w-3.5" />
+            <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              <Crown className="h-3.5 w-3.5 text-[color:var(--tone-shell-primary)]" />
               Mở Plus demo
             </div>
             <div>
-              <h1 className="text-4xl font-bold tracking-normal">Xác nhận mở gói {plan.name}</h1>
-              <p className="mt-[var(--space-inline)] max-w-2xl text-base leading-8 text-white/74">
+              <h1 className="text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl">
+                Xác nhận mở gói <span className="text-gradient-vibrant">{plan.name}</span>
+              </h1>
+              <p className="mt-[var(--space-inline)] max-w-2xl text-base leading-7 text-muted-foreground">
                 Xác nhận để mở quyền Plus cho bản demo. Production sẽ dùng trang xác nhận thanh toán thật.
               </p>
             </div>
           </div>
 
-          <div className="rounded-[var(--r-card)] border border-white/14 bg-white/10 p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/56">Tóm tắt nâng cấp</p>
-            <p className="mt-2 text-3xl font-bold text-white">{getPlanLabel(session.planCode)}</p>
-            <p className="mt-1 text-sm text-white/72">{plan.priceLabel}</p>
+          <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-5 shadow-sm">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Tóm tắt nâng cấp</p>
+            <p className="mt-2 text-3xl font-bold text-foreground">{getPlanLabel(session.planCode)}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{plan.priceLabel}</p>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="border-0 gradient-white-panel shadow-xl">
+      <Card>
         <CardHeader>
           <CardTitle>Bạn sẽ mở được gì sau khi xác nhận</CardTitle>
           <CardDescription>Quyền Plus chỉ được mô phỏng trong môi trường demo/preview.</CardDescription>
         </CardHeader>
         <CardContent className="stack-stack">
           {plan.highlights.map((feature) => (
-            <div key={feature} className="flex gap-3 rounded-[var(--r-tile)] border border-slate-200 bg-white px-4 py-3">
-              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />
-              <p className="text-sm leading-7 text-slate-700">{feature}</p>
+            <div key={feature} className="flex gap-3 rounded-[var(--r-tile)] border border-[color:var(--border)] bg-card px-4 py-3">
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--tone-shell-primary)]" />
+              <p className="text-sm leading-7 text-foreground">{feature}</p>
             </div>
           ))}
           <div className="grid gap-2 sm:grid-cols-2">

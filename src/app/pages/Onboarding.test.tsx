@@ -45,8 +45,7 @@ describe("Onboarding", () => {
     );
 
     const startButton = await screen.findByRole("button", { name: /Bắt đầu chấm 8 lĩnh vực/i });
-    expect(startButton).toHaveClass("from-violet-600");
-    expect(startButton).toHaveClass("to-fuchsia-600");
+    expect(startButton).toHaveClass("gradient-brand");
     expect(startButton).not.toHaveClass("bg-slate-950");
 
     scrollToMock.mockClear();

@@ -96,7 +96,7 @@
   --card-foreground: #0a0a0a;
   --popover: #ffffff;
   --popover-foreground: #0a0a0a;
-  --primary: #2563eb;
+  --primary: #7c3aed;
   --primary-foreground: #ffffff;
   --secondary: rgba(241, 245, 249, 0.96);
   --secondary-foreground: #0f172a;
@@ -135,7 +135,7 @@
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
-  --ring: rgba(37, 99, 235, 0.32);
+  --ring: rgba(124, 58, 237, 0.32);
   --surface-muted: #f4f5f7;
   --border-muted: rgba(15, 23, 42, 0.06);
   --surface-panel: #ffffff;
@@ -2458,16 +2458,16 @@
   .gradient-brand {
     background: linear-gradient(
       135deg,
-      rgba(37, 99, 235, 0.98) 0%,
-      rgba(8, 145, 178, 0.94) 54%,
-      rgba(16, 185, 129, 0.92) 100%
+      var(--tone-shell-primary) 0%,
+      var(--tone-shell-secondary) 58%,
+      var(--tone-shell-tertiary) 100%
     );
   }
   .gradient-brand-icon {
     background: linear-gradient(
       135deg,
-      rgba(37, 99, 235, 0.96) 0%,
-      rgba(20, 184, 166, 0.88) 100%
+      var(--tone-shell-primary) 0%,
+      var(--tone-shell-secondary) 100%
     );
   }
 

@@ -384,67 +384,68 @@ export function FeasibilityCheck() {
   }
 
   return (
-    <PageShell maxWidth="hero">
+    <PageShell maxWidth="xl">
       <div className={prefersReducedMotion ? "stack-section" : "animate-fade-in-up stack-section"}>
         <CoreFlowProgress currentStepId="feasibility" onExit={() => navigate("/")} />
 
-        <Card className="hero-surface surface-aurora ring-soft-glow overflow-hidden border-0 text-white">
-          <CardContent className="relative p-5 sm:p-6 lg:p-10">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
-            <FeasibilityScaleIllustration className="pointer-events-none absolute -right-4 bottom-4 hidden w-56 text-white opacity-30 lg:block" />
+        <Card>
+          <CardContent className="relative p-5 sm:p-7 lg:p-8">
+            <FeasibilityScaleIllustration className="pointer-events-none absolute -right-4 bottom-4 hidden w-56 text-[color:var(--tone-shell-primary)] opacity-15 lg:block" />
 
-            <div className="relative z-10 max-w-4xl">
-              <div className="stack-stack sm:stack-section">
-                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
-                  <Compass className="h-4 w-4" />
+            <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
+              <div className="stack-stack min-w-0">
+                <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  <Compass className="h-3.5 w-3.5 text-[color:var(--tone-shell-secondary)]" aria-hidden="true" />
                   Kiểm tra tính thực tế
-                </div>
+                </p>
 
-                <div className="stack-tight sm:stack-stack">
-                  <h1 className="max-w-4xl text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl">
-                    Mục tiêu này có{" "}
-                    <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-transparent dark:from-violet-200 dark:via-fuchsia-200 dark:to-rose-200">
-                      khả thi
-                    </span>{" "}
-                    với bạn lúc này không?
+                <div className="stack-tight">
+                  <h1 className="max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl">
+                    Mục tiêu này có <span className="text-gradient-vibrant">khả thi</span> với bạn lúc này không?
                   </h1>
-                  <p className="hidden max-w-2xl text-base leading-8 text-white/82 sm:block lg:text-lg">
+                  <p className="hidden max-w-2xl text-base leading-relaxed text-muted-foreground sm:block">
                     Không phải bài kiểm tra chặn lại — giúp bạn biết nên giữ nguyên, chia nhỏ hay điều chỉnh mục tiêu
                     trước khi vào kế hoạch 12 tuần.
                   </p>
-                  <p className="max-w-2xl text-sm leading-6 text-white/82 sm:hidden">
+                  <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:hidden">
                     Giúp biết nên giữ nguyên, chia nhỏ hay điều chỉnh mục tiêu trước khi vào kế hoạch 12 tuần.
                   </p>
                 </div>
 
-                <div className="flex flex-wrap gap-3">
-                  <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="brand">
                     <Target className="mr-1 h-3.5 w-3.5" />
                     {getLifeAreaLabel(focusArea)}
                   </Badge>
-                  <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
+                  <Badge variant="neutral">
                     <Sparkles className="mr-1 h-3.5 w-3.5" />
                     Điểm hiện tại: {wheelScore}/10
                   </Badge>
                 </div>
+
+                <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
+                  <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
+                    <span>
+                      Câu hỏi {currentStep + 1} / {totalSteps}
+                    </span>
+                    <span className="font-semibold text-foreground">{Math.round(progressPercentage)}%</span>
+                  </div>
+                  <Progress value={progressPercentage} className="mt-2 h-2" />
+                </div>
               </div>
 
-              <div className="hidden rounded-[var(--r-card)] border border-white/14 bg-white/12 p-6 shadow-sm">
-                <div className="flex items-center justify-between text-sm text-white/72">
-                  <span>
-                    Câu hỏi {currentStep + 1} / {totalSteps}
-                  </span>
-                  <span>{Math.round(progressPercentage)}%</span>
+              <div className="space-y-3">
+                <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    Mục tiêu đã viết
+                  </p>
+                  <p className="mt-2 text-base font-semibold leading-6 text-foreground">{pendingGoal.specific}</p>
                 </div>
-                <Progress value={progressPercentage} className="mt-[var(--space-inline)] h-2.5 bg-white/20" />
-
-                <div className="mt-6 rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-white/55">Mục tiêu đã viết</p>
-                  <p className="mt-2 text-lg font-semibold text-white">{pendingGoal.specific}</p>
-                </div>
-                <div className="mt-4 rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-white/55">Khung thời gian</p>
-                  <p className="mt-2 text-sm font-semibold text-white">{pendingGoal.timeBound}</p>
+                <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    Khung thời gian
+                  </p>
+                  <p className="mt-2 text-sm font-semibold text-foreground">{pendingGoal.timeBound}</p>
                 </div>
               </div>
             </div>

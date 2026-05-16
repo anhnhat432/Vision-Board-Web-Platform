@@ -22,7 +22,6 @@ import { FeaturedCard } from "../components/ui/featured-card";
 import { AchievementBadgeIllustration, BadgeRibbonAccent, ConstellationAccent, HeroAchievementsScene } from "../components/illustrations";
 import { emptyNarratives } from "../components/empty-states/narratives";
 import { MotionParallaxLayer, MotionStaggerItem, MotionStaggerList } from "../components/motion";
-import { InteractiveSurface } from "../components/ui/interactive-surface";
 import { Reveal } from "../components/ui/reveal";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { calculateGoalProgress } from "../utils/storage";
@@ -116,94 +115,83 @@ export function Achievements() {
 
   return (
     <div className="stack-section pb-12">
-      <InteractiveSurface className="rounded-[var(--r-card)]" intensity={9} translate={22}>
-        <Card className="hero-surface surface-aurora surface-glass-deep ring-soft-glow featured-surface glow-vivid page-enter overflow-hidden border-0 text-white">
-          <CardContent className="interactive-layer interactive-layer--medium relative p-5 sm:p-6 lg:p-8">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
-            <MotionParallaxLayer
-              depth={0.24}
-              className="pointer-events-none absolute -right-20 -top-4 hidden w-[560px] text-white opacity-20 xl:block"
-              aria-hidden="true"
-            >
-              <HeroAchievementsScene className="w-full" />
-            </MotionParallaxLayer>
-            <ConstellationAccent className="pointer-events-none absolute right-4 top-4 w-32 text-white opacity-35" />
+      <Card className="page-enter overflow-hidden">
+        <CardContent className="relative p-5 sm:p-6 lg:p-8">
+          <ConstellationAccent className="pointer-events-none absolute right-4 top-4 hidden w-32 text-[color:var(--tone-shell-primary)] opacity-15 sm:block" />
+          <MotionParallaxLayer
+            depth={0.24}
+            className="pointer-events-none absolute -right-20 -top-4 hidden w-[560px] text-[color:var(--tone-shell-primary)] opacity-10 xl:block"
+            aria-hidden="true"
+          >
+            <HeroAchievementsScene className="w-full" />
+          </MotionParallaxLayer>
 
-            <div className="relative z-10 grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
-              <div className="stack-section">
-                <div className="interactive-layer interactive-layer--soft inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
-                  <Trophy className="h-4 w-4" />
-                  Phòng thành tựu
-                </div>
+          <div className="relative z-10 grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
+            <div className="stack-section">
+              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-4 py-1.5 text-sm text-muted-foreground">
+                <Trophy className="h-4 w-4" />
+                Phòng thành tựu
+              </div>
 
-                <div className="stack-stack">
-                  <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-                    Mọi <span className="text-gradient-aurora">cột mốc nhỏ</span> bạn mở khóa ở đây đều là bằng chứng rằng hành trình đang thật sự diễn ra.
-                  </h1>
-                  <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
-                    Thành tựu không chỉ là huy hiệu. Chúng là những mốc xác nhận bạn đã bắt đầu, đã duy trì, đã hoàn
-                    thành và đang trưởng thành theo cách có thể nhìn thấy được.
+              <div className="stack-stack">
+                <h1 className="max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl lg:text-5xl">
+                  Mọi <span className="text-gradient-vibrant">cột mốc nhỏ</span> bạn mở khóa ở đây đều là bằng chứng rằng hành trình đang thật sự diễn ra.
+                </h1>
+                <p className="max-w-2xl text-base leading-7 text-muted-foreground">
+                  Thành tựu không chỉ là huy hiệu. Chúng là những mốc xác nhận bạn đã bắt đầu, đã duy trì, đã hoàn
+                  thành và đang trưởng thành theo cách có thể nhìn thấy được.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <Button glow onClick={() => navigate("/goals")}>
+                  Tiếp tục mục tiêu
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" onClick={() => navigate("/gallery")}>
+                  Mở thư viện vision board
+                </Button>
+              </div>
+            </div>
+
+            <div className="hidden xl:block rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-6 shadow-sm">
+              <AchievementBadgeIllustration className="mx-auto mb-4 w-36 text-[color:var(--tone-shell-primary)] opacity-70" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Tình trạng hiện tại</p>
+
+              <div className="mt-6 stack-stack">
+                <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Đã mở khóa</p>
+                  <p className="mt-2 text-3xl font-bold text-foreground">
+                    <CountUp value={userData.achievements.length} />
+                    <span className="text-muted-foreground">/{ACHIEVEMENT_ORDER.length}</span>
                   </p>
                 </div>
 
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    variant="outline"
-                    className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92"
-                    onClick={() => navigate("/goals")}
-                  >
-                    Tiếp tục mục tiêu
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="border-white/18 bg-white/12 text-white hover:bg-white/18 hover:text-white"
-                    onClick={() => navigate("/gallery")}
-                  >
-                    Mở thư viện vision board
-                  </Button>
+                <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Tiến độ bộ sưu tập</p>
+                  <p className="mt-2 text-3xl font-bold text-foreground">
+                    <CountUp value={completionRate} suffix="%" />
+                  </p>
                 </div>
-              </div>
 
-              <div className="hidden xl:block interactive-layer interactive-layer--strong rounded-[var(--r-card)] border border-white/14 bg-white/12 p-6 shadow-sm">
-                <AchievementBadgeIllustration className="mx-auto mb-4 w-36 text-white opacity-75" />
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Tình trạng hiện tại</p>
-
-                <div className="mt-6 stack-stack">
-                  <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Đã mở khóa</p>
-                    <p className="mt-2 text-3xl font-bold text-white">
-                      <CountUp value={userData.achievements.length} />
-                      <span className="text-white/68">/{ACHIEVEMENT_ORDER.length}</span>
-                    </p>
-                  </div>
-
-                  <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Tiến độ bộ sưu tập</p>
-                    <p className="mt-2 text-3xl font-bold text-white">
-                      <CountUp value={completionRate} suffix="%" />
-                    </p>
-                  </div>
-
-                  <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Mới nhất</p>
-                    <p className="mt-2 text-lg font-semibold text-white">
-                      {latestAchievement
-                        ? (ACHIEVEMENT_COPY[latestAchievement.title]?.title ?? latestAchievement.title)
-                        : "Chưa có thành tựu nào"}
-                    </p>
-                    <p className="mt-1 text-sm text-white/68">
-                      {latestAchievement
-                        ? `Đạt được ${new Date(latestAchievement.earnedAt).toLocaleDateString("vi-VN")}`
-                        : "Hãy hành động để mở huy hiệu đầu tiên."}
-                    </p>
-                  </div>
+                <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4">
+                  <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Mới nhất</p>
+                  <p className="mt-2 text-lg font-semibold text-foreground">
+                    {latestAchievement
+                      ? (ACHIEVEMENT_COPY[latestAchievement.title]?.title ?? latestAchievement.title)
+                      : "Chưa có thành tựu nào"}
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {latestAchievement
+                      ? `Đạt được ${new Date(latestAchievement.earnedAt).toLocaleDateString("vi-VN")}`
+                      : "Hãy hành động để mở huy hiệu đầu tiên."}
+                  </p>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </InteractiveSurface>
+          </div>
+        </CardContent>
+      </Card>
 
       <Reveal>
         <MotionStaggerList className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">

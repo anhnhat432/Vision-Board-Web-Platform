@@ -14,6 +14,8 @@ import { toast } from "sonner";
 
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { Badge } from "../components/ui/badge";
+import { EmptyState } from "../components/states/EmptyState";
+import { InlineStatusMessage } from "../components/states/InlineStatusMessage";
 
 import {
   AlertDialog,
@@ -257,24 +259,19 @@ export function LifeBalance() {
 
   if (!userData || !hasLifeBalanceData) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
-        <div className="relative">
-          <div className="absolute -inset-4 animate-pulse rounded-[var(--r-pill)] border-2 border-dashed border-violet-200" />
-          <div className="flex h-20 w-20 items-center justify-center rounded-[var(--r-control)] bg-violet-50 text-violet-600">
-            <CompassIcon className="h-9 w-9" />
-          </div>
-        </div>
-        <div className="stack-tight">
-          <h1 className="text-2xl font-bold text-slate-900">Chưa có dữ liệu bánh xe cuộc sống</h1>
-          <p className="max-w-sm text-sm leading-7 text-slate-500">
-            Bạn cần hoàn thành đánh giá ban đầu trước. Chỉ mất khoảng 3 phút để tạo bức tranh nền cho hành trình phát
-            triển.
-          </p>
-        </div>
-        <Button onClick={() => navigate("/onboarding")}>
-          Bắt đầu đánh giá
-          <TrendingUp className="h-4 w-4" />
-        </Button>
+      <div className="flex min-h-[60vh] items-center justify-center px-4">
+        <EmptyState
+          icon={<CompassIcon className="h-7 w-7" />}
+          headingLevel={2}
+          title="Chưa có dữ liệu bánh xe cuộc sống"
+          description="Bạn cần hoàn thành đánh giá ban đầu trước. Chỉ mất khoảng 3 phút để tạo bức tranh nền cho hành trình phát triển."
+          actions={
+            <Button onClick={() => navigate("/onboarding")}>
+              Bắt đầu đánh giá
+              <TrendingUp className="h-4 w-4" />
+            </Button>
+          }
+        />
       </div>
     );
   }
@@ -318,39 +315,34 @@ export function LifeBalance() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Card className="ops-surface surface-aurora ring-soft-glow overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-xl shadow-slate-900/5 dark:shadow-black/30">
-        <CardContent className="relative p-5 sm:p-6">
+      <Card>
+        <CardContent className="relative p-5 sm:p-7 lg:p-8">
           <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="stack-stack">
-              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-slate-200 bg-slate-50/90 px-3 py-1.5 text-xs font-semibold text-slate-600">
-                <Compass className="h-4 w-4" />
+              <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                <Compass className="h-3.5 w-3.5 text-[color:var(--tone-shell-secondary)]" aria-hidden="true" />
                 Trung tâm Cân bằng cuộc sống
-              </div>
+              </p>
 
               <div className="stack-tight">
-                <h1 className="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl">
-                  Cập nhật{" "}
-                  <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-transparent">
-                    8 lĩnh vực sống
-                  </span>{" "}
-                  để chọn đúng trọng tâm tiếp theo.
+                <h1 className="max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl">
+                  Cập nhật <span className="text-gradient-vibrant">8 lĩnh vực sống</span> để chọn đúng trọng tâm tiếp theo.
                 </h1>
-                <p className="max-w-2xl text-sm leading-relaxed text-slate-700 sm:text-base dark:text-slate-300">
+                <p className="max-w-2xl text-[15px] leading-relaxed text-muted-foreground sm:text-base">
                   Mỗi điểm bạn chỉnh sẽ cập nhật ngay phần tín hiệu bên dưới. Sau đó bạn có thể lưu riêng hoặc lưu rồi
                   mở Góc nhìn cuộc sống để chọn vấn đề đáng ưu tiên nhất.
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <Badge variant="outline" className="rounded-[var(--r-pill)] border-slate-200 bg-slate-50 px-4 py-2 text-slate-600">
+                <Badge
+                  variant="outline"
+                  className="rounded-[var(--r-pill)] border-[color:var(--border)] bg-[color:var(--muted)] px-4 py-2 text-muted-foreground"
+                >
                   <AutoSaveIndicator status={hasChanges ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} />
                 </Badge>
                 {hasChanges ? (
-                  <Button
-                    variant="outline"
-                    className="border-violet-600 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 hover:text-white"
-                    onClick={handleSave}
-                  >
+                  <Button glow onClick={handleSave}>
                     <Save className="h-4 w-4" />
                     Lưu ngay
                   </Button>
@@ -358,30 +350,30 @@ export function LifeBalance() {
               </div>
             </div>
 
-            <div className="hidden rounded-[var(--r-control)] border border-slate-200 bg-slate-50/80 p-4 shadow-sm lg:block">
+            <div className="hidden rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4 lg:block">
               <ProductVisual variant="balance" className="mb-4 min-h-[160px]" />
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Snapshot hiện tại</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Snapshot hiện tại</p>
 
               <div className="mt-4 stack-tight">
-                <div className="rounded-[var(--r-control)] border border-slate-200 bg-white p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Điểm cân bằng chung</p>
-                  <p className="mt-2 text-3xl font-bold text-slate-950">
+                <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card p-4">
+                  <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Điểm cân bằng chung</p>
+                  <p className="mt-2 text-3xl font-bold text-foreground">
                     <CountUp value={averageScore} precision={1} />
-                    <span className="text-slate-400">/10</span>
+                    <span className="text-muted-foreground">/10</span>
                   </p>
                 </div>
-                <div className="rounded-[var(--r-control)] border border-slate-200 bg-white p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Mạnh nhất</p>
-                  <p className="mt-2 text-xl font-bold text-slate-950">{getLifeAreaLabel(strongestArea.name)}</p>
-                  <p className="mt-1 text-sm text-slate-500">
+                <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card p-4">
+                  <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Mạnh nhất</p>
+                  <p className="mt-2 text-xl font-bold text-foreground">{getLifeAreaLabel(strongestArea.name)}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
                     <CountUp value={strongestArea.score} />
                     <span>/10</span>
                   </p>
                 </div>
-                <div className="rounded-[var(--r-control)] border border-slate-200 bg-white p-4">
-                  <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Nên ưu tiên</p>
-                  <p className="mt-2 text-xl font-bold text-slate-950">{getLifeAreaLabel(weakestArea.name)}</p>
-                  <p className="mt-1 text-sm text-slate-500">
+                <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card p-4">
+                  <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Nên ưu tiên</p>
+                  <p className="mt-2 text-xl font-bold text-foreground">{getLifeAreaLabel(weakestArea.name)}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
                     <CountUp value={weakestArea.score} />
                     <span>/10</span>
                   </p>
@@ -393,31 +385,28 @@ export function LifeBalance() {
       </Card>
 
       {!hasAnyScore ? (
-        <Card className="border border-amber-200/80 bg-amber-50/90 shadow-sm">
-          <CardContent className="p-4 text-sm font-medium leading-6 text-amber-900 sm:p-5">
-            Bạn chưa chấm điểm — hãy chỉnh các thanh để bắt đầu
-          </CardContent>
-        </Card>
+        <InlineStatusMessage tone="warning">
+          Bạn chưa chấm điểm — hãy chỉnh các thanh để bắt đầu
+        </InlineStatusMessage>
       ) : null}
 
       <Reveal delay={0.02}>
-        <Card
-          data-testid="life-balance-next-step-card"
-          className="border border-slate-200/80 bg-white/92 shadow-lg"
-        >
-          <CardContent className="p-5 sm:p-6">
+        <Card data-testid="life-balance-next-step-card">
+          <CardContent className="p-5 sm:p-7">
             <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_180px_auto] lg:items-center">
               <div data-testid="life-balance-signal-summary" className="stack-stack">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                     Tiếp theo trong luồng chính
                   </p>
-                  <h2 className="mt-1 text-xl font-bold text-slate-950">Tín hiệu từ Cân bằng cuộc sống</h2>
-                  <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
+                  <h2 className="mt-1 text-xl font-bold tracking-[-0.014em] text-foreground sm:text-2xl">
+                    Tín hiệu từ Cân bằng cuộc sống
+                  </h2>
+                  <p className="mt-2 max-w-2xl text-sm leading-7 text-muted-foreground">
                     {balanceTone} Góc nhìn cuộc sống sẽ dùng tín hiệu này để nối sang mục tiêu SMART và kế hoạch 12 tuần.
                   </p>
                   {hasChanges && (
-                    <p className="mt-2 text-sm font-medium text-amber-700">
+                    <p className="mt-2 text-sm font-medium text-[color:var(--color-warning-fg)]">
                       Bạn đang xem tín hiệu từ điểm mới chưa lưu. Khi đi tiếp, hệ thống sẽ lưu điểm này trước.
                     </p>
                   )}
@@ -426,31 +415,37 @@ export function LifeBalance() {
                 <div className="grid gap-3 sm:grid-cols-3">
                   <div
                     data-testid="life-balance-signal-weakest"
-                    className="rounded-[var(--r-control)] border border-amber-200/70 bg-gradient-to-br from-amber-50 to-orange-50 p-4 dark:border-amber-400/20 dark:from-amber-950/40 dark:to-orange-950/35"
+                    className="rounded-[var(--r-control)] border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] p-4"
                   >
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Ưu tiên</p>
-                    <p className="mt-2 text-lg font-bold text-slate-950">{getLifeAreaLabel(weakestArea.name)}</p>
-                    <p className="mt-1 text-sm font-semibold text-amber-800">{weakestArea.score}/10</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-warning-fg)]">
+                      Ưu tiên
+                    </p>
+                    <p className="mt-2 text-lg font-bold text-foreground">{getLifeAreaLabel(weakestArea.name)}</p>
+                    <p className="mt-1 text-sm font-semibold text-[color:var(--color-warning-fg)]">{weakestArea.score}/10</p>
                   </div>
-                  <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Trung bình</p>
-                    <p className="mt-2 text-lg font-bold text-slate-950">{averageScore.toFixed(1)}/10</p>
-                    <p className="mt-1 text-sm text-slate-500">mặt bằng hiện tại</p>
+                  <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                      Trung bình
+                    </p>
+                    <p className="mt-2 text-lg font-bold text-foreground">{averageScore.toFixed(1)}/10</p>
+                    <p className="mt-1 text-sm text-muted-foreground">mặt bằng hiện tại</p>
                   </div>
-                  <div className="rounded-[var(--r-control)] border border-emerald-200/70 bg-gradient-to-br from-emerald-50 to-teal-50 p-4 dark:border-emerald-400/20 dark:from-emerald-950/40 dark:to-teal-950/35">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Điểm tựa</p>
-                    <p className="mt-2 text-lg font-bold text-slate-950">{getLifeAreaLabel(strongestArea.name)}</p>
-                    <p className="mt-1 text-sm font-semibold text-emerald-800">{strongestArea.score}/10</p>
+                  <div className="rounded-[var(--r-control)] border border-[color:var(--color-success-border)] bg-[color:var(--color-success-bg)] p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-success-fg)]">
+                      Điểm tựa
+                    </p>
+                    <p className="mt-2 text-lg font-bold text-foreground">{getLifeAreaLabel(strongestArea.name)}</p>
+                    <p className="mt-1 text-sm font-semibold text-[color:var(--color-success-fg)]">{strongestArea.score}/10</p>
                   </div>
                 </div>
               </div>
 
               <div className="pointer-events-none hidden justify-center lg:flex" aria-hidden="true">
-                <LifeBalanceWheelIllustration className="w-44 text-violet-500 opacity-80 dark:opacity-60" />
+                <LifeBalanceWheelIllustration className="w-44 text-[color:var(--tone-shell-primary)] opacity-70" />
               </div>
 
               <div className="flex w-full flex-col gap-3 sm:w-auto">
-                <Button className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto" onClick={handleContinueToInsight}>
+                <Button glow className="w-full sm:w-auto" onClick={handleContinueToInsight}>
                   {hasChanges ? "Lưu và xem Góc nhìn cuộc sống" : "Mở Góc nhìn cuộc sống"}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -467,67 +462,66 @@ export function LifeBalance() {
       </Reveal>
 
       <Reveal>
-        <div className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
           {[
             {
               title: "Điểm trung bình",
               value: averageScore.toFixed(1),
               note: "mặt bằng hiện tại",
               icon: TrendingUp,
-              color: "from-violet-500/18 to-fuchsia-500/10 text-violet-700 dark:text-violet-400",
+              tone: "primary" as const,
             },
             {
               title: "Điểm cao nhất",
               value: strongestArea.score,
               note: getLifeAreaLabel(strongestArea.name),
               icon: Sparkles,
-              color: "from-emerald-500/18 to-teal-500/10 text-emerald-700 dark:text-emerald-400",
+              tone: "success" as const,
             },
             {
               title: "Điểm thấp nhất",
               value: weakestArea.score,
               note: getLifeAreaLabel(weakestArea.name),
               icon: Compass,
-              color: "from-amber-500/18 to-orange-500/10 text-amber-700 dark:text-amber-400",
+              tone: "warning" as const,
             },
             {
               title: "Lần đo đã lưu",
               value: userData.wheelOfLifeHistory.length,
               note: "mốc lịch sử hiện có",
               icon: Calendar,
-              color: "from-sky-500/18 to-cyan-500/10 text-sky-700 dark:text-sky-400",
+              tone: "info" as const,
             },
           ].map((item) => {
             const Icon = item.icon;
+            const iconBg = {
+              primary: "bg-[color:var(--muted)] text-[color:var(--tone-shell-primary)]",
+              success: "bg-[color:var(--color-success-bg)] text-[color:var(--color-success-fg)]",
+              warning: "bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning-fg)]",
+              info: "bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)]",
+            }[item.tone];
 
             return (
-              <div key={item.title}>
-                <Card className="relative overflow-hidden">
-                  <div
-                    className={`pointer-events-none absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
-                  />
-                  <CardHeader className="relative flex flex-row items-start justify-between pb-3">
-                    <div>
-                      <CardDescription>{item.title}</CardDescription>
-                      <CardTitle className="mt-2 text-4xl">
-                        {typeof item.value === "number" ? (
-                          <CountUp value={item.value} />
-                        ) : (
-                          <CountUp value={Number(item.value)} precision={1} />
-                        )}
-                      </CardTitle>
-                    </div>
-                    <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-[var(--r-control)] bg-gradient-to-br ${item.color}`}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </div>
-                  </CardHeader>
-                  <CardContent className="relative">
-                    <p className="text-sm text-slate-500">{item.note}</p>
-                  </CardContent>
-                </Card>
-              </div>
+              <Card key={item.title}>
+                <CardHeader className="flex flex-row items-start justify-between pb-3">
+                  <div>
+                    <CardDescription>{item.title}</CardDescription>
+                    <CardTitle className="mt-2 text-3xl tracking-[-0.014em]">
+                      {typeof item.value === "number" ? (
+                        <CountUp value={item.value} />
+                      ) : (
+                        <CountUp value={Number(item.value)} precision={1} />
+                      )}
+                    </CardTitle>
+                  </div>
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-[var(--r-control)] ${iconBg}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">{item.note}</p>
+                </CardContent>
+              </Card>
             );
           })}
         </div>
@@ -617,18 +611,18 @@ export function LifeBalance() {
                       return (
                         <div
                           key={area.name}
-                          className="card-hover-lift rounded-[var(--r-control)] border border-white/70 bg-white/72 p-4"
+                          className="card-hover-lift rounded-[var(--r-control)] border border-[color:var(--border)] bg-card p-4"
                         >
                           <div className="flex items-center justify-between gap-4">
                             <div className="flex items-center gap-3">
                               <AreaIcon className="h-7 w-7 shrink-0" style={{ color: area.color }} />
                               <div
-                                className="h-4 w-4 rounded-[var(--r-pill)] ring-4 ring-white/85 dark:ring-black/35"
+                                className="h-4 w-4 rounded-[var(--r-pill)] ring-4 ring-[color:var(--muted)]"
                                 style={{ backgroundColor: area.color }}
                               />
                               <div>
-                                <p className="font-semibold text-slate-900">{getLifeAreaLabel(area.name)}</p>
-                                <p className="text-sm text-slate-500">
+                                <p className="font-semibold text-foreground">{getLifeAreaLabel(area.name)}</p>
+                                <p className="text-sm text-muted-foreground">
                                   {area.score <= 4
                                     ? "Đang cần thêm sự chăm sóc."
                                     : area.score <= 7
@@ -653,7 +647,7 @@ export function LifeBalance() {
                               trackColor={area.color}
                               aria-label={`Điểm ${getLifeAreaLabel(area.name)}`}
                             />
-                            <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.14em] text-slate-400">
+                            <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
                               <span>Cần chú ý</span>
                               <span>Xuất sắc</span>
                             </div>
@@ -669,12 +663,12 @@ export function LifeBalance() {
                     <CardContent className="p-6">
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                          <h3 className="text-lg font-semibold text-slate-900">Bạn có thay đổi chưa lưu</h3>
-                          <p className="text-sm text-slate-500">
+                          <h3 className="text-lg font-semibold text-foreground">Bạn có thay đổi chưa lưu</h3>
+                          <p className="text-sm text-muted-foreground">
                             Lưu lại để cập nhật bánh xe hiện tại và thêm một mốc vào lịch sử theo dõi.
                           </p>
                         </div>
-                        <Button className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700" onClick={handleSave}>
+                        <Button glow onClick={handleSave}>
                           <Save className="h-4 w-4" />
                           Lưu thay đổi
                         </Button>
@@ -698,21 +692,23 @@ export function LifeBalance() {
                 {historicalData.length > 0 ? (
                   <Suspense
                     fallback={
-                      <div className="rounded-[var(--r-control)] border border-white/70 bg-white/72 py-12 text-center text-slate-500">
-                        <Calendar className="mx-auto mb-3 h-12 w-12 opacity-50" />
-                        <p>Đang mở biểu đồ lịch sử...</p>
-                        <p className="mt-1 text-sm">Dữ liệu xu hướng sẽ hiện ra ngay sau khi tải xong.</p>
-                      </div>
+                      <EmptyState
+                        variant="dashed"
+                        icon={<Calendar className="h-6 w-6" />}
+                        title="Đang mở biểu đồ lịch sử..."
+                        description="Dữ liệu xu hướng sẽ hiện ra ngay sau khi tải xong."
+                      />
                     }
                   >
                     <LifeBalanceHistoryChart data={historicalData} />
                   </Suspense>
                 ) : (
-                  <div className="rounded-[var(--r-control)] border border-white/70 bg-white/72 py-12 text-center text-slate-500">
-                    <Calendar className="mx-auto mb-3 h-12 w-12 opacity-50" />
-                    <p>Chưa có dữ liệu lịch sử.</p>
-                    <p className="mt-1 text-sm">Hãy lưu một vài lần cập nhật để bắt đầu thấy xu hướng.</p>
-                  </div>
+                  <EmptyState
+                    variant="dashed"
+                    icon={<Calendar className="h-6 w-6" />}
+                    title="Chưa có dữ liệu lịch sử."
+                    description="Hãy lưu một vài lần cập nhật để bắt đầu thấy xu hướng."
+                  />
                 )}
               </CardContent>
             </Card>

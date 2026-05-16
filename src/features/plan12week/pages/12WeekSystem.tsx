@@ -1,36 +1,20 @@
+import { BarChart3, CalendarDays, ListTodo, Loader2, type LucideIcon, Settings2 } from "lucide-react";
 import { Suspense, useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { BarChart3, CalendarDays, ListTodo, Loader2, Settings2, MoreHorizontal, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
-
-import { useTwelveWeekSystemSnapshot } from "@/app/hooks/useTwelveWeekSystemSnapshot";
-import { useScrollToTopOnChange } from "@/app/hooks/useScrollToTopOnChange";
-import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
-import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
-import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/DeleteDataConfirmationDialog";
-import { CycleReviewPanel } from "@/app/components/twelve-week/CycleReviewPanel";
 import {
-  PhaseHarvestIllustration,
   PhaseHarvestChipIcon,
-  PhasePeakIllustration,
+  PhaseHarvestIllustration,
   PhasePeakChipIcon,
-  PhaseRampIllustration,
+  PhasePeakIllustration,
   PhaseRampChipIcon,
+  PhaseRampIllustration,
 } from "@/app/components/illustrations";
-import { UpgradePaywallDialog } from '@/app/components/UpgradePaywallDialog';
-import { trackAnalyticsEvent } from '@/app/utils/analytics';
-import {
-  isDemoMode,
-  isRealMode,
-  shouldEnable12WeekMutationSync,
-  shouldEnable12WeekPullSync,
-} from '@/app/utils/app-mode';
-import {
-  trackPremiumInsightOpened,
-  trackRescueActionTaken,
-  trackRescueTriggerDismissed,
-  trackRescueTriggerFired,
-} from '@/app/utils/monetization-analytics';
+import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
+import { CycleReviewPanel } from "@/app/components/twelve-week/CycleReviewPanel";
+import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/DeleteDataConfirmationDialog";
+import { ProgressSummaryCard } from "@/app/components/twelve-week/ProgressSummaryCard";
+import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,26 +26,34 @@ import {
   AlertDialogTitle,
 } from "@/app/components/ui/alert-dialog";
 import { Button } from "@/app/components/ui/button";
+import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
+import { useScrollToTopOnChange } from "@/app/hooks/useScrollToTopOnChange";
+import { useTwelveWeekSystemSnapshot } from "@/app/hooks/useTwelveWeekSystemSnapshot";
+import { trackAnalyticsEvent } from "@/app/utils/analytics";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/app/components/ui/dropdown-menu";
+  isDemoMode,
+  isRealMode,
+  shouldEnable12WeekMutationSync,
+  shouldEnable12WeekPullSync,
+} from "@/app/utils/app-mode";
 import {
+  trackPremiumInsightOpened,
+  trackRescueActionTaken,
+  trackRescueTriggerDismissed,
+  trackRescueTriggerFired,
+} from "@/app/utils/monetization-analytics";
+import {
+  APP_STORAGE_KEYS,
   clearArchivedOutbox,
   clearEventLog,
-  APP_STORAGE_KEYS,
-  USER_DATA_STORAGE_KEY,
-  USER_DATA_UPDATED_EVENT_NAME,
   formatDateInputValue,
   getUserData,
   saveUserData,
+  USER_DATA_STORAGE_KEY,
+  USER_DATA_UPDATED_EVENT_NAME,
   updateGoal,
   upsertReflection,
-} from '@/app/utils/storage';
-import { dismissRescueTrigger } from "@/app/utils/twelve-week-system-ui";
-import type { TwelveWeekSystem as TwelveWeekSystemModel, UniversalWeeklyReview } from '@/app/utils/storage-types';
+} from "@/app/utils/storage";
 import {
   buildDerivedScoreboard,
   getCycleEndDate,
@@ -70,16 +62,15 @@ import {
   getTwelveWeekCurrentWeek,
   isTwelveWeekCycleReviewPhase,
   syncWeeklyPlans,
-} from '@/app/utils/storage-twelve-week';
-import type { CycleSummary } from "@/features/plan12week/logic/cycleReview";
+} from "@/app/utils/storage-twelve-week";
+import type { TwelveWeekSystem as TwelveWeekSystemModel, UniversalWeeklyReview } from "@/app/utils/storage-types";
+import { dismissRescueTrigger } from "@/app/utils/twelve-week-system-ui";
 import { TaskBoard } from "@/features/plan12week/components/TaskBoard";
 import { usePlanExecutionSync } from "@/features/plan12week/hooks";
 import { useBackendSyncIssueState } from "@/features/plan12week/hooks/useBackendSyncIssueState";
 import { useTwelveWeekManualCloudSync } from "@/features/plan12week/hooks/useTwelveWeekManualCloudSync";
-import {
-  readMutationQueueStore,
-  summarizeMutationQueueStore,
-} from "@/features/plan12week/persistence/mutationQueue";
+import type { CycleSummary } from "@/features/plan12week/logic/cycleReview";
+import { readMutationQueueStore, summarizeMutationQueueStore } from "@/features/plan12week/persistence/mutationQueue";
 import { applyPulledWorkspaceToUserData } from "@/features/plan12week/persistence/pulledWorkspaceApply";
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
@@ -95,7 +86,6 @@ import {
 } from "./12WeekSystem/components";
 import { buildBackendSyncKey, getLatestCheckIn, getSyncBadgeClass, getSyncBadgeLabel } from "./12WeekSystem/helpers";
 import { PlanOverview, WeekEditor, WeeklyReview } from "./12WeekSystem/lazyTabs";
-import { ProgressSummaryCard } from "@/app/components/twelve-week/ProgressSummaryCard";
 import { useTwelveWeekBackendActions } from "./12WeekSystem/useTwelveWeekBackendActions";
 import { useTwelveWeekBillingActions } from "./12WeekSystem/useTwelveWeekBillingActions";
 import { useTwelveWeekExecutionActions } from "./12WeekSystem/useTwelveWeekExecutionActions";
@@ -218,7 +208,13 @@ function getCycleId(goalId: string, system: TwelveWeekSystemModel): string {
 function getLatestContinuingCommitments(system: TwelveWeekSystemModel): string[] {
   return [...system.weeklyReviews]
     .sort((left, right) => right.weekNumber - left.weekNumber)
-    .flatMap((review) => review.nextWeekCommitments?.length ? review.nextWeekCommitments : review.nextWeekPriority ? [review.nextWeekPriority] : [])
+    .flatMap((review) =>
+      review.nextWeekCommitments?.length
+        ? review.nextWeekCommitments
+        : review.nextWeekPriority
+          ? [review.nextWeekPriority]
+          : [],
+    )
     .map((commitment) => commitment.trim())
     .filter(Boolean)
     .slice(0, 5);
@@ -384,9 +380,12 @@ export function TwelveWeekSystem() {
     const delayMs = weeklyReviewSnoozeUntil - Date.now() + 1;
     if (delayMs <= 0) return;
 
-    const timer = window.setTimeout(() => {
-      setWeeklyReviewSnoozeUntil(readWeeklyReviewSnoozeUntil());
-    }, Math.min(delayMs, 2_147_483_647));
+    const timer = window.setTimeout(
+      () => {
+        setWeeklyReviewSnoozeUntil(readWeeklyReviewSnoozeUntil());
+      },
+      Math.min(delayMs, 2_147_483_647),
+    );
 
     return () => window.clearTimeout(timer);
   }, [reviewDueToday, weeklyReviewSnoozeUntil]);
@@ -394,7 +393,11 @@ export function TwelveWeekSystem() {
   useEffect(() => {
     const handleRefresh = () => loadGoalData(activeGoalIdRef.current ?? undefined);
     const handleStorage = (event: StorageEvent) => {
-      if (event.key === null || event.key === USER_DATA_STORAGE_KEY || event.key.startsWith(`${USER_DATA_STORAGE_KEY}:auth:`)) {
+      if (
+        event.key === null ||
+        event.key === USER_DATA_STORAGE_KEY ||
+        event.key.startsWith(`${USER_DATA_STORAGE_KEY}:auth:`)
+      ) {
         handleRefresh();
       }
     };
@@ -602,9 +605,10 @@ export function TwelveWeekSystem() {
       weeklyPlans: syncWeeklyPlans(system.weeklyPlans, totalWeeks, system.week12Outcome).map((plan, index) => ({
         ...plan,
         completed: false,
-        focus: index === 0 && continuingCommitments.length > 0
-          ? `Tiếp tục: ${continuingCommitments.slice(0, 3).join("; ")}`
-          : plan.focus,
+        focus:
+          index === 0 && continuingCommitments.length > 0
+            ? `Tiếp tục: ${continuingCommitments.slice(0, 3).join("; ")}`
+            : plan.focus,
       })),
       taskInstances: [],
       dailyCheckIns: [],
@@ -619,7 +623,8 @@ export function TwelveWeekSystem() {
       JSON.stringify({
         focusArea,
         specific: activeGoal.title,
-        measurable: `${system.lagMetric.name || "Chỉ số kết quả chính"} đạt ${system.lagMetric.target || "mục tiêu"} ${system.lagMetric.unit || ""}`.trim(),
+        measurable:
+          `${system.lagMetric.name || "Chỉ số kết quả chính"} đạt ${system.lagMetric.target || "mục tiêu"} ${system.lagMetric.unit || ""}`.trim(),
         achievable: "Dùng lại nhịp đã học từ cycle trước và chỉnh tải theo bài học mới.",
         relevant: activeGoal.description || system.vision12Week,
         timeBound: "Trong 12 tuần tới",
@@ -841,11 +846,7 @@ export function TwelveWeekSystem() {
     targetRef: tabsTopRef,
     focus: false,
     enabled:
-      isReady &&
-      Boolean(activeGoal && system) &&
-      !isUpgradeDialogOpen &&
-      !isResetDialogOpen &&
-      !isClearLocalDialogOpen,
+      isReady && Boolean(activeGoal && system) && !isUpgradeDialogOpen && !isResetDialogOpen && !isClearLocalDialogOpen,
   });
 
   useEffect(() => {
@@ -866,16 +867,7 @@ export function TwelveWeekSystem() {
       },
       { goalId: activeGoal.id },
     );
-  }, [
-    activeGoal,
-    activePlanCode,
-    activeTab,
-    currentWeek,
-    hasCurrentReview,
-    hasTodayTasks,
-    isReady,
-    system,
-  ]);
+  }, [activeGoal, activePlanCode, activeTab, currentWeek, hasCurrentReview, hasTodayTasks, isReady, system]);
 
   const syncIssueState = useBackendSyncIssueState({
     backendConnectionStatus,
@@ -951,7 +943,10 @@ export function TwelveWeekSystem() {
             "Viết mục tiêu SMART và kiểm tra tính thực tế.",
             "Chốt việc giữ nhịp, chỉ số và ngày review tuần.",
           ].map((item, index) => (
-            <div key={item} className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            <div
+              key={item}
+              className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600"
+            >
               <span className="mr-2 font-semibold text-slate-950">0{index + 1}</span>
               {item}
             </div>
@@ -970,7 +965,7 @@ export function TwelveWeekSystem() {
   }
 
   return (
-    <div className="ops-shell ops-system pb-28 md:pb-4">
+    <div className="ops-shell ops-system">
       <UpgradePaywallDialog
         open={isUpgradeDialogOpen}
         onOpenChange={setIsUpgradeDialogOpen}
@@ -1005,8 +1000,8 @@ export function TwelveWeekSystem() {
           <AlertDialogHeader>
             <AlertDialogTitle>Xóa dấu vết trên thiết bị này?</AlertDialogTitle>
             <AlertDialogDescription>
-              Hành động này chỉ xóa nhật ký sự kiện, việc đang chờ đồng bộ và trạng thái nhắc việc trên thiết bị. Mục tiêu, review tuần, nhật
-              ký và bảng tầm nhìn của bạn vẫn được giữ nguyên.
+              Hành động này chỉ xóa nhật ký sự kiện, việc đang chờ đồng bộ và trạng thái nhắc việc trên thiết bị. Mục
+              tiêu, review tuần, nhật ký và bảng tầm nhìn của bạn vẫn được giữ nguyên.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1021,9 +1016,9 @@ export function TwelveWeekSystem() {
           <AlertDialogHeader>
             <AlertDialogTitle>Xóa dữ liệu 12 tuần đã đồng bộ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Chỉ xóa dữ liệu kế hoạch trong tài khoản (mục tiêu, kế hoạch, tuần, việc, chỉ số, check-in, review).
-              Không xóa dữ liệu trên thiết bị này. Không xóa gói Plus, đăng ký hay tài khoản.
-              Hành động này không thể hoàn tác.
+              Chỉ xóa dữ liệu kế hoạch trong tài khoản (mục tiêu, kế hoạch, tuần, việc, chỉ số, check-in, review). Không
+              xóa dữ liệu trên thiết bị này. Không xóa gói Plus, đăng ký hay tài khoản. Hành động này không thể hoàn
+              tác.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1176,8 +1171,8 @@ export function TwelveWeekSystem() {
                   aria-label={`Mở tab ${label}`}
                   className={`inline-flex h-10 items-center justify-center gap-2 rounded-[var(--r-pill)] px-4 text-sm font-semibold transition-colors ${
                     selected
-                      ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20"
-                      : "text-slate-600 hover:bg-white hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+                      ? "gradient-brand text-primary-foreground shadow-[var(--shadow-2)]"
+                      : "text-muted-foreground hover:bg-card hover:text-foreground"
                   }`}
                   onClick={() => handleTabChange(value)}
                 >
@@ -1189,12 +1184,16 @@ export function TwelveWeekSystem() {
           </div>
 
           <div className="flex min-w-0 items-center gap-2">
-            <span className={`inline-flex shrink-0 items-center gap-2 rounded-[var(--r-pill)] border px-3 py-2 text-xs font-semibold ${phaseInfo.badgeClassName}`}>
+            <span
+              className={`inline-flex shrink-0 items-center gap-2 rounded-[var(--r-pill)] border px-3 py-2 text-xs font-semibold ${phaseInfo.badgeClassName}`}
+            >
               {phaseIllustration}
               <PhaseChipIcon className="h-4 w-4" />
               Tuần {currentWeek}/{system.totalWeeks} - {phaseInfo.label}
             </span>
-            <span className={`inline-flex shrink-0 items-center gap-2 rounded-[var(--r-pill)] border px-3 py-2 text-xs font-semibold ${syncPillClass.pill}`}>
+            <span
+              className={`inline-flex shrink-0 items-center gap-2 rounded-[var(--r-pill)] border px-3 py-2 text-xs font-semibold ${syncPillClass.pill}`}
+            >
               {syncIssueState.isTransient ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
               ) : (
@@ -1207,7 +1206,13 @@ export function TwelveWeekSystem() {
       </nav>
 
       {/* Main content sections */}
-      <div ref={tabsTopRef} className="pt-4" role="tabpanel" id={tabPanelId} aria-labelledby={`${tabPanelId}-${activeTab}-tab`}>
+      <div
+        ref={tabsTopRef}
+        className="pt-4"
+        role="tabpanel"
+        id={tabPanelId}
+        aria-labelledby={`${tabPanelId}-${activeTab}-tab`}
+      >
         {isCycleReviewMode && activeTab !== "settings" && (
           <CycleReviewPanel
             goal={activeGoal}
@@ -1464,73 +1469,8 @@ export function TwelveWeekSystem() {
           </TabErrorBoundary>
         )}
       </div>
-
-      {/* Mobile bottom navigation */}
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200/80 bg-white/94 px-2 pb-[max(env(safe-area-inset-bottom),0.25rem)] pt-2 shadow-2xl backdrop-blur md:hidden">
-        <div className="flex h-14 items-center justify-around gap-1">
-          <Button
-            variant={activeTab === "today" ? "default" : "ghost"}
-            size="sm"
-            className={`flex h-full flex-1 flex-col items-center justify-center gap-1 px-3 py-2 shadow-none ${
-              activeTab === "today" ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20" : ""
-            }`}
-            onClick={() => handleTabChange("today")}
-          >
-            <ListTodo className={`h-5 w-5 ${activeTab === "today" ? "text-primary-foreground" : "text-slate-500"}`} />
-            <span className="text-xs font-medium">Hôm nay</span>
-          </Button>
-
-          <Button
-            variant={activeTab === "week" ? "default" : "ghost"}
-            size="sm"
-            className={`flex h-full flex-1 flex-col items-center justify-center gap-1 px-3 py-2 shadow-none ${
-              activeTab === "week" ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20" : ""
-            }`}
-            onClick={() => handleTabChange("week")}
-          >
-            <CalendarDays className={`h-5 w-5 ${activeTab === "week" ? "text-primary-foreground" : "text-slate-500"}`} />
-            <span className="text-xs font-medium">Tuần</span>
-          </Button>
-
-          <Button
-            variant={activeTab === "progress" ? "default" : "ghost"}
-            size="sm"
-            className={`flex h-full flex-1 flex-col items-center justify-center gap-1 px-3 py-2 shadow-none ${
-              activeTab === "progress" ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20" : ""
-            }`}
-            onClick={() => handleTabChange("progress")}
-          >
-            <BarChart3 className={`h-5 w-5 ${activeTab === "progress" ? "text-primary-foreground" : "text-slate-500"}`} />
-            <span className="text-xs font-medium">Tiến độ</span>
-          </Button>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                variant={activeTab === "settings" ? "default" : "ghost"}
-                size="sm"
-                className={`flex h-full flex-1 flex-col items-center justify-center gap-1 px-3 py-2 shadow-none ${
-                  activeTab === "settings" ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20" : ""
-                }`}
-              >
-                <MoreHorizontal className={`h-5 w-5 ${activeTab === "settings" ? "text-primary-foreground" : "text-slate-500"}`} />
-                <span className="text-xs font-medium">Khác</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleTabChange("settings")}>
-                <Settings2 className="mr-2 h-4 w-4" />
-                Cài đặt chu kỳ
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </nav>
-
     </div>
   );
 }
 
-export function TwelveWeekSystemSettings() {
-}
+export function TwelveWeekSystemSettings() {}

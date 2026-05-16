@@ -788,7 +788,8 @@ export function TwelveWeekWeekTab({
               </p>
               <Button
                 size="lg"
-                className="w-full shrink-0 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-blue-600 text-white hover:opacity-90 sm:w-auto"
+                glow
+                className="w-full shrink-0 sm:w-auto"
                 onClick={handleSaveReviewClick}
                 disabled={isSavingReview || !canSubmitWeeklyReview}
                 aria-busy={isSavingReview}

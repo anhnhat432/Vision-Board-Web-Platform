@@ -128,9 +128,9 @@ export function SetupStepShell({
       ref={stepShellRef}
       className={prefersReducedMotion ? "" : "animate-fade-in-up"}
     >
-      <Card className="ops-surface relative overflow-hidden border border-slate-200/80 bg-white/94 shadow-sm ring-1 ring-white/70">
+      <Card className="relative overflow-hidden">
         <CardHeader className="stack-stack pb-3">
-          <div className="sticky top-3 z-20 rounded-[var(--r-card)] border border-slate-200/80 bg-white/90 p-2 shadow-sm backdrop-blur dark:border-slate-700/80 dark:bg-slate-950/88">
+          <div className="sticky top-3 z-20 rounded-[var(--r-card)] border border-[color:var(--border)] bg-card/95 p-2 shadow-[var(--shadow-1)] backdrop-blur">
             <div className="sm:hidden">
               <Select
                 value={String(currentStep)}
@@ -171,17 +171,17 @@ export function SetupStepShell({
               aria-valuemin={1}
               aria-valuemax={stepCount}
               aria-valuenow={currentStep + 1}
-              className="mt-2 h-1.5 overflow-hidden rounded-[var(--r-pill)] bg-slate-200/80 dark:bg-slate-800"
+              className="mt-2 h-1.5 overflow-hidden rounded-[var(--r-pill)] bg-[color:var(--muted)]"
             >
               <div
-                className="h-full rounded-[var(--r-pill)] bg-gradient-to-r from-violet-600 to-fuchsia-600 transition-[width] duration-300 ease-out dark:from-violet-400 dark:to-fuchsia-400"
+                className="h-full rounded-[var(--r-pill)] gradient-brand transition-[width] duration-300 ease-out"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
           </div>
           <div className="grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1fr)_220px] lg:items-stretch">
             <div className="stack-tight">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
                 {STEPS[currentStep]?.label}
               </p>
               <CardTitle>
@@ -197,22 +197,25 @@ export function SetupStepShell({
               >
                 <StepIcon className="h-6 w-6" aria-hidden="true" />
               </div>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] opacity-70">{visual.eyebrow}</p>
+              <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.12em] opacity-70">{visual.eyebrow}</p>
               <p className="mt-1 text-sm font-semibold leading-6">{visual.caption}</p>
             </div>
           </div>
           {whyThisMatters && (
-            <div className="flex items-center justify-between gap-3 rounded-[var(--r-tile)] border border-sky-200 bg-sky-50/72 px-3 py-2.5 text-sm leading-6 text-sky-900 dark:border-sky-500/30 dark:bg-sky-950/30 dark:text-sky-100">
-              <Lightbulb className="mt-0.5 h-4 w-4 flex-shrink-0 text-sky-700" aria-hidden="true" />
+            <div className="flex items-center justify-between gap-3 rounded-[var(--r-tile)] border border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] px-3 py-2.5 text-sm leading-6 text-[color:var(--color-info-fg)]">
+              <Lightbulb
+                className="mt-0.5 h-4 w-4 flex-shrink-0 text-[color:var(--color-info-fg)]"
+                aria-hidden="true"
+              />
               <div className="min-w-0 flex-1">
                 <span className="font-semibold">Gợi ý nhanh: </span>
-                <span className="text-sky-900/86 dark:text-sky-100/86">giữ câu trả lời cụ thể, đo được và vừa sức.</span>
+                <span className="opacity-90">giữ câu trả lời cụ thể, đo được và vừa sức.</span>
               </div>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] border border-sky-200 bg-white/82 text-sky-700 hover:bg-sky-100 dark:border-sky-500/30 dark:bg-sky-950/50 dark:text-sky-100"
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] border border-[color:var(--color-info-border)] bg-card text-[color:var(--color-info-fg)] hover:bg-[color:var(--color-info-bg)]"
                     aria-label="Xem vì sao bước này quan trọng"
                   >
                     <HelpCircle className="h-4 w-4" aria-hidden="true" />
@@ -230,16 +233,19 @@ export function SetupStepShell({
           <SectionBlock title={`Nội dung bước ${currentStep + 1}`} headerVisuallyHidden density="default">
             {children}
             {stepError ? (
-              <p role="alert" className="rounded-[var(--r-tile)] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
+              <p
+                role="alert"
+                className="rounded-[var(--r-tile)] border border-[color:var(--color-error-border)] bg-[color:var(--color-error-bg)] px-4 py-3 text-sm font-medium text-[color:var(--color-error-fg)]"
+              >
                 {stepError}
               </p>
             ) : null}
           </SectionBlock>
 
           <div
-            className={`flex flex-col justify-between gap-[var(--space-inline)] border-t border-white/70 pt-[var(--space-section)] sm:flex-row sm:static ${
+            className={`flex flex-col justify-between gap-[var(--space-inline)] border-t border-[color:var(--border)] pt-[var(--space-section)] sm:flex-row sm:static ${
               isLastStep
-                ? "sticky bottom-0 -mx-4 -mb-6 bg-white/95 px-4 pb-[max(env(safe-area-inset-bottom),1rem)] pt-[var(--space-section)] sm:mx-0 sm:mb-0 sm:bg-transparent sm:px-0 sm:pb-0"
+                ? "sticky bottom-0 -mx-4 -mb-6 bg-card/95 px-4 pb-[max(env(safe-area-inset-bottom),1rem)] pt-[var(--space-section)] backdrop-blur sm:mx-0 sm:mb-0 sm:bg-transparent sm:px-0 sm:pb-0 sm:backdrop-blur-none"
                 : ""
             }`}
           >
@@ -250,7 +256,7 @@ export function SetupStepShell({
             {isLastStep ? (
               <Button
                 glow={!isSubmitting && !isSubmitDisabled}
-                className="w-full gradient-brand text-white shadow-lg motion-safe:hover:scale-[1.01] hover:shadow-xl sm:w-auto"
+                className="w-full sm:w-auto"
                 onClick={handleSubmitClick}
                 size="lg"
                 disabled={isSubmitting || isSubmitDisabled}
@@ -264,12 +270,7 @@ export function SetupStepShell({
                 {isSubmitting ? "Đang tạo kế hoạch..." : "Tạo kế hoạch 12 tuần"}
               </Button>
             ) : (
-              <Button
-                glow={!isNextDisabled}
-                className="w-full gradient-brand text-white shadow-lg motion-safe:hover:scale-[1.02] hover:shadow-xl sm:w-auto"
-                onClick={onNext}
-                disabled={isNextDisabled}
-              >
+              <Button glow={!isNextDisabled} className="w-full sm:w-auto" onClick={onNext} disabled={isNextDisabled}>
                 Tiếp tục
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -277,19 +278,17 @@ export function SetupStepShell({
           </div>
         </CardContent>
         {isSubmitting ? (
-          <div className="absolute inset-0 z-30 flex items-center justify-center bg-white/88 px-4 backdrop-blur-sm dark:bg-slate-950/82">
-            <div className="w-full max-w-md rounded-[var(--r-card)] border border-emerald-200/80 bg-white p-5 text-center shadow-2xl dark:border-emerald-500/30 dark:bg-slate-950">
-              <div className="shimmer mb-4 h-2 rounded-[var(--r-pill)] bg-emerald-100 dark:bg-emerald-950/50" />
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-card/90 px-4 backdrop-blur-sm">
+            <div className="w-full max-w-md rounded-[var(--r-card)] border border-[color:var(--color-success-border)] bg-card p-5 text-center shadow-[var(--shadow-3)]">
+              <div className="shimmer mb-4 h-2 rounded-[var(--r-pill)] bg-[color:var(--color-success-bg)]" />
               <Loader2
-                className={`mx-auto h-8 w-8 text-emerald-600 dark:text-emerald-300 ${
+                className={`mx-auto h-8 w-8 text-[color:var(--color-success-fg)] ${
                   prefersReducedMotion ? "" : "animate-spin"
                 }`}
                 aria-hidden="true"
               />
-              <p className="mt-3 text-base font-semibold text-slate-950 dark:text-slate-50">
-                Đang chuẩn bị 12 tuần của bạn...
-              </p>
-              <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              <p className="mt-3 text-base font-semibold text-foreground">Đang chuẩn bị 12 tuần của bạn...</p>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">
                 Hệ thống đang chốt tuần đầu, việc lặp lại và nhịp review.
               </p>
             </div>

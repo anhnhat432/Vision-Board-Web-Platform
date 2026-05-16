@@ -269,7 +269,7 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
         )}
 
         {item.type === "icon" && (
-          <div className="flex h-24 w-24 items-center justify-center rounded-[var(--r-tile)] gradient-violet-pink text-white shadow-2xl">
+          <div className="flex h-24 w-24 items-center justify-center rounded-[var(--r-tile)] gradient-brand text-primary-foreground shadow-[var(--shadow-2)]">
             <Icon className="h-10 w-10" />
           </div>
         )}
@@ -666,22 +666,20 @@ export function VisionBoardEditor() {
         </AlertDialog>
 
         <Dialog open={isAddingItem} onOpenChange={setIsAddingItem}>
-          <Card className="hero-surface surface-aurora ring-soft-glow overflow-hidden border-0 text-white">
+          <Card className="overflow-hidden">
             <CardContent className="relative p-5 sm:p-6 lg:p-8">
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_22%)] opacity-90" />
-
               <div className="relative z-10 grid gap-[var(--space-section)] xl:grid-cols-[minmax(0,1.15fr)_360px]">
                 <div className="stack-section">
-                  <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+                  <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-4 py-1.5 text-sm text-muted-foreground">
                     <Wand2 className="h-4 w-4" />
                     Dear Our Future Studio
                   </div>
 
                   <div className="stack-stack">
-                    <h1 className="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl">
-                      Dựng một không gian hình ảnh khiến mục tiêu của bạn trở nên chạm được mỗi ngày.
+                    <h1 className="max-w-3xl text-3xl font-semibold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl md:text-5xl">
+                      Dựng một <span className="text-gradient-vibrant">không gian hình ảnh</span> khiến mục tiêu của bạn trở nên chạm được mỗi ngày.
                     </h1>
-                    <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
+                    <p className="max-w-2xl text-base leading-7 text-muted-foreground">
                       Kéo thả hình ảnh, câu nói và biểu tượng để tạo một bảng giàu cảm xúc,
                       rõ định hướng và đủ đẹp để bạn muốn quay lại thường xuyên.
                     </p>
@@ -692,45 +690,35 @@ export function VisionBoardEditor() {
                       placeholder="Tên vision board của bạn"
                       value={boardName}
                       onChange={(event) => { setBoardName(event.target.value); setHasUnsavedChanges(true); }}
-                      className="border-white/20 bg-white/14 text-lg font-semibold text-white placeholder:text-white/52"
+                      className="text-lg font-semibold"
                     />
                     <Input
                       type="number"
                       placeholder="Năm"
                       value={boardYear}
                       onChange={(event) => { setBoardYear(event.target.value); setHasUnsavedChanges(true); }}
-                      className="border-white/20 bg-white/14 text-white placeholder:text-white/52"
                     />
                   </div>
 
                   <div className="flex flex-wrap gap-3">
-                    <Button
-                      variant="outline"
-                      className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92"
-                      onClick={() => setIsAddingItem(true)}
-                    >
+                    <Button glow onClick={() => setIsAddingItem(true)}>
                       <Plus className="h-4 w-4" />
                       Thêm phần tử
                     </Button>
-                    <Button
-                      variant="outline"
-                      className="border-white/18 bg-white/12 text-white hover:bg-white/18 hover:text-white"
-                      onClick={handleSave}
-                      disabled={!boardName.trim()}
-                    >
+                    <Button variant="outline" onClick={handleSave} disabled={!boardName.trim()}>
                       <Save className="h-4 w-4" />
                       Lưu bảng
                     </Button>
                   </div>
 
-                  <p className="text-sm text-white/70">
+                  <p className="text-sm text-muted-foreground">
                     Trên điện thoại, bạn có thể chạm giữ rồi rê để di chuyển các phần tử trên bảng.
                   </p>
                 </div>
 
-                <div className="hidden xl:block rounded-[var(--r-card)] border border-white/14 bg-white/12 p-6 shadow-sm">
+                <div className="hidden xl:block rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-6 shadow-sm">
                   <ProductVisual variant="vision" className="mb-5 min-h-[180px]" />
-                  <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     Tóm tắt bảng
                   </p>
 
@@ -742,11 +730,11 @@ export function VisionBoardEditor() {
                     ].map((item) => (
                       <div
                         key={item.label}
-                        className="rounded-[var(--r-card)] border border-white/10 bg-black/12 px-4 py-4"
+                        className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card px-4 py-4"
                       >
-                        <p className="text-xs uppercase tracking-[0.18em] text-white/55">{item.label}</p>
-                        <p className="mt-2 text-3xl font-bold text-white">{item.value}</p>
-                        <p className="mt-1 text-sm text-white/68">{item.note}</p>
+                        <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{item.label}</p>
+                        <p className="mt-2 text-3xl font-bold text-foreground">{item.value}</p>
+                        <p className="mt-1 text-sm text-muted-foreground">{item.note}</p>
                       </div>
                     ))}
                   </div>

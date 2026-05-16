@@ -6,6 +6,7 @@ import { ArrowRight, Check, Compass, Sparkles, Target, TrendingDown, TrendingUp 
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { LifeInsightIllustration, getLifeAreaIcon } from "../components/illustrations";
+import { PageShell } from "../components/PageShell";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,7 +57,7 @@ function getPendingSmartGoalStatement(): string {
 
 function LifeInsightPageMotion({ children }: { children: ReactNode }) {
   const prefersReducedMotion = useReducedMotion();
-  const className = "mx-auto w-full max-w-6xl stack-section";
+  const className = "stack-section";
 
   if (prefersReducedMotion) {
     return <div className={className}>{children}</div>;
@@ -206,7 +207,8 @@ export function LifeInsight() {
   const scoreGapFromAverage = Math.max(0, averageScore - focusArea.score);
 
   return (
-    <div ref={pageTopRef} className="app-shell min-h-screen px-4 py-8 sm:px-6 lg:px-8">
+    <PageShell maxWidth="xl">
+      <div ref={pageTopRef}>
       <AlertDialog open={pendingFocusAreaName !== null} onOpenChange={(open) => !open && setPendingFocusAreaName(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -225,66 +227,50 @@ export function LifeInsight() {
       <LifeInsightPageMotion>
         <CoreFlowProgress currentStepId="life_insight" />
 
-        <Card className="ops-surface surface-aurora ring-soft-glow overflow-hidden border border-slate-200/80 bg-white/94 text-slate-950 shadow-xl shadow-slate-900/5 dark:shadow-black/30">
-          <CardContent className="relative p-5 sm:p-6">
-            <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <Card>
+          <CardContent className="relative p-5 sm:p-7 lg:p-8">
+            <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_240px]">
               <div className="stack-stack">
-                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-slate-200 bg-slate-50/90 px-3 py-1.5 text-xs font-semibold text-slate-600">
-                  <Compass className="h-4 w-4" />
+                <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  <Compass className="h-3.5 w-3.5 text-[color:var(--tone-shell-secondary)]" aria-hidden="true" />
                   Góc nhìn cuộc sống
-                </div>
+                </p>
 
                 <div className="stack-tight">
-                  <h1 className="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl">
+                  <h1 className="max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl">
                     Bạn đã có một tín hiệu rất rõ.{" "}
-                    <span className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text text-transparent">
-                      Đây là 3 trọng tâm hiện ra
-                    </span>{" "}
-                    để chọn bước tiếp theo.
+                    <span className="text-gradient-vibrant">Đây là 3 trọng tâm hiện ra</span> để chọn bước tiếp theo.
                   </h1>
-                  <p className="max-w-2xl text-sm leading-relaxed text-slate-700 sm:text-base dark:text-slate-300">
+                  <p className="max-w-2xl text-[15px] leading-relaxed text-muted-foreground sm:text-base">
                     Hệ thống gợi ý lĩnh vực có điểm thấp nhất. Bạn cũng có thể chọn lại bên dưới nếu muốn tập trung vào
                     một khu vực khác phù hợp hơn với lúc này.
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  <Badge
-                    variant="outline"
-                    className="rounded-[var(--r-pill)] border-violet-200 bg-violet-50 px-4 py-2 text-violet-700"
-                  >
+                  <Badge variant="brand">
                     <Target className="mr-1 h-3.5 w-3.5" />
                     Ưu tiên: {getLifeAreaLabel(focusArea.name)}
                   </Badge>
-                  <Badge
-                    variant="outline"
-                    className="rounded-[var(--r-pill)] border-slate-200 bg-slate-50 px-4 py-2 text-slate-600"
-                  >
+                  <Badge variant="neutral">
                     <TrendingUp className="mr-1 h-3.5 w-3.5" />
                     Điểm trung bình: {averageScore.toFixed(1)}/10
                   </Badge>
-                  {isCustomSelection && (
-                    <Badge
-                      variant="outline"
-                      className="rounded-[var(--r-pill)] border-amber-200 bg-amber-50 px-4 py-2 text-amber-700"
-                    >
-                      Bạn đã chọn thủ công
-                    </Badge>
-                  )}
+                  {isCustomSelection && <Badge variant="warning">Bạn đã chọn thủ công</Badge>}
                 </div>
 
                 <div
                   data-testid="life-insight-decision-card"
-                  className="grid gap-3 rounded-[var(--r-tile)] border border-violet-200 bg-violet-50/85 p-4 shadow-sm lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)]"
+                  className="grid gap-3 rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)]"
                 >
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-700">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
                       Quyết định tiếp theo
                     </p>
-                    <h2 className="mt-2 text-xl font-semibold leading-snug tracking-tight text-slate-950 sm:text-2xl">
+                    <h2 className="mt-2 text-xl font-semibold leading-snug tracking-[-0.014em] text-foreground sm:text-2xl">
                       Tạo mục tiêu SMART cho {focusAreaLabel} trong khung 12 tuần.
                     </h2>
-                    <p className="mt-2 text-sm leading-7 text-slate-600">
+                    <p className="mt-2 text-sm leading-7 text-muted-foreground">
                       {isCustomSelection
                         ? `Bạn đang ưu tiên thủ công ${focusAreaLabel}; gợi ý hệ thống vẫn là ${lowestAreaLabel}.`
                         : `${focusAreaLabel} đang là điểm thấp nhất, nên đây là nơi đáng biến thành mục tiêu rõ trước.`}
@@ -292,121 +278,101 @@ export function LifeInsight() {
                   </div>
 
                   <div className="grid gap-2 text-sm">
-                    <div className="rounded-[var(--r-control)] border border-white bg-white/85 px-4 py-3">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Trọng tâm</p>
-                      <p className="mt-1 font-bold text-slate-950">
+                    <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-4 py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Trọng tâm</p>
+                      <p className="mt-1 font-bold text-foreground">
                         {focusAreaLabel} · {focusArea.score}/10
                       </p>
                     </div>
-                    <div className="rounded-[var(--r-control)] border border-white bg-white/85 px-4 py-3">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Gợi ý SMART</p>
-                      <p className="mt-1 font-semibold text-slate-950">{smartGoalStarter.metricName}</p>
-                      <p className="mt-1 text-xs leading-5 text-slate-500">{smartGoalStarter.specificGoalStatement}</p>
+                    <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-4 py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Gợi ý SMART</p>
+                      <p className="mt-1 font-semibold text-foreground">{smartGoalStarter.metricName}</p>
+                      <p className="mt-1 text-xs leading-5 text-muted-foreground">{smartGoalStarter.specificGoalStatement}</p>
                     </div>
-                    <div className="rounded-[var(--r-control)] border border-white bg-white/85 px-4 py-3">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Điểm tựa</p>
-                      <p className="mt-1 font-semibold text-slate-950">{strongestAreaLabel}</p>
+                    <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-4 py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Điểm tựa</p>
+                      <p className="mt-1 font-semibold text-foreground">{strongestAreaLabel}</p>
                     </div>
                   </div>
                 </div>
 
                 <div
                   data-testid="life-insight-recommendation-card"
-                  className="grid gap-3 rounded-[var(--r-tile)] border border-slate-200 bg-slate-50/80 p-4 shadow-sm sm:grid-cols-[minmax(0,1.35fr)_minmax(220px,0.65fr)]"
+                  className="grid gap-3 rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-5 sm:grid-cols-[minmax(0,1.35fr)_minmax(220px,0.65fr)]"
                 >
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                       Vì sao chọn trọng tâm này?
                     </p>
-                    <h2 className="mt-2 text-xl font-bold text-slate-950">
+                    <h2 className="mt-2 text-xl font-bold tracking-[-0.014em] text-foreground">
                       {isCustomSelection
                         ? `Bạn đang chọn ${focusAreaLabel} thay cho gợi ý ${lowestAreaLabel}.`
                         : `${focusAreaLabel} là điểm thấp nhất trong bánh xe hiện tại.`}
                     </h2>
-                    <p className="mt-2 text-sm leading-7 text-slate-600">
+                    <p className="mt-2 text-sm leading-7 text-muted-foreground">
                       Dùng một lĩnh vực đủ cụ thể giúp bước mục tiêu SMART không bị rộng. Sau khi chọn xong, phần tiếp theo
                       sẽ ép trọng tâm này thành mục tiêu đo được và có thời hạn.
                     </p>
                   </div>
 
                   <div className="grid gap-2 text-sm">
-                    <div className="rounded-[var(--r-tile)] border border-slate-200 bg-white px-4 py-3">
-                      <p className="text-slate-500">Điểm hiện tại</p>
-                      <p className="mt-1 text-lg font-bold text-slate-950">{focusArea.score}/10</p>
+                    <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-4 py-3">
+                      <p className="text-muted-foreground">Điểm hiện tại</p>
+                      <p className="mt-1 text-lg font-bold text-foreground">{focusArea.score}/10</p>
                     </div>
-                    <div className="rounded-[var(--r-tile)] border border-slate-200 bg-white px-4 py-3">
-                      <p className="text-slate-500">Lệch so với trung bình</p>
-                      <p className="mt-1 text-lg font-bold text-slate-950">
+                    <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-4 py-3">
+                      <p className="text-muted-foreground">Lệch so với trung bình</p>
+                      <p className="mt-1 text-lg font-bold text-foreground">
                         {scoreGapFromAverage > 0 ? `-${scoreGapFromAverage.toFixed(1)}` : "0.0"}
                       </p>
                     </div>
-                    <div className="rounded-[var(--r-tile)] border border-slate-200 bg-white px-4 py-3">
-                      <p className="text-slate-500">Lực đỡ hiện có</p>
-                      <p className="mt-1 font-semibold text-slate-950">{strongestAreaLabel}</p>
+                    <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-4 py-3">
+                      <p className="text-muted-foreground">Lực đỡ hiện có</p>
+                      <p className="mt-1 font-semibold text-foreground">{strongestAreaLabel}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-3">
                   <Button
+                    glow
                     data-testid="life-insight-primary-cta"
-                    className="w-full justify-center bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
+                    className="w-full justify-center sm:w-auto"
                     onClick={handleStartGoalSetup}
                   >
                     Tạo mục tiêu SMART từ quyết định này
                     <ArrowRight className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full text-violet-700 hover:bg-violet-50 hover:text-violet-800 dark:text-violet-200 dark:hover:bg-violet-950/40 sm:w-auto"
-                    onClick={() => navigate("/")}
-                  >
+                  <Button variant="ghost" className="w-full sm:w-auto" onClick={() => navigate("/")}>
                     Về Trang chính
                   </Button>
                 </div>
               </div>
 
-              <div className="pointer-events-none hidden min-h-[220px] items-center justify-center lg:flex" aria-hidden="true">
-                <LifeInsightIllustration className="w-56 text-violet-500 opacity-85 dark:opacity-65" />
-              </div>
-
-              <div className="hidden rounded-[var(--r-card)] border border-white/14 bg-white/12 p-6 shadow-sm">
-                <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/60">Snapshot hiện tại</p>
-
-                <div className="mt-6 stack-stack">
-                  <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Đang tập trung vào</p>
-                    <p className="mt-2 text-2xl font-bold text-white">{getLifeAreaLabel(focusArea.name)}</p>
-                    <p className="mt-1 text-sm text-white/68">{focusArea.score}/10</p>
-                  </div>
-                  <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Điểm mạnh hiện tại</p>
-                    <p className="mt-2 text-2xl font-bold text-white">{getLifeAreaLabel(strongestArea.name)}</p>
-                    <p className="mt-1 text-sm text-white/68">{strongestArea.score}/10</p>
-                  </div>
-                  <div className="rounded-[var(--r-card)] border border-white/10 bg-black/12 p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-white/55">Thông điệp</p>
-                    <p className="mt-2 text-sm leading-7 text-white/74">
-                      Đừng cố sửa mọi thứ cùng lúc. Chỉ cần chọn một điểm yếu nhất, rồi biến nó thành một hướng đi đủ rõ
-                      để hành động.
-                    </p>
-                  </div>
-                </div>
+              <div
+                className="pointer-events-none hidden min-h-[220px] items-center justify-center lg:flex"
+                aria-hidden="true"
+              >
+                <LifeInsightIllustration className="w-56 text-[color:var(--tone-shell-primary)] opacity-80" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="mx-auto max-w-5xl stack-stack">
-          <details className="rounded-[var(--r-card)] border border-white/70 bg-white/82 p-5 shadow-lg lg:p-6">
-            <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
+        <div className="stack-stack">
+          <details className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-5 shadow-[var(--shadow-1)] lg:p-6">
+            <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">
               Đổi lĩnh vực trọng tâm
             </summary>
-            <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">
+            <p className="mt-[var(--space-inline)] text-sm leading-7 text-muted-foreground">
               Hệ thống gợi ý <strong>{getLifeAreaLabel(lowestArea.name)}</strong> vì đây là điểm thấp nhất. Nếu lúc này
               bạn muốn ưu tiên khu vực khác, chọn lại bên dưới.
             </p>
-            <div className="mt-[var(--space-stack)] grid gap-2 sm:grid-cols-2 lg:grid-cols-4" role="radiogroup" aria-label="Chọn lĩnh vực trọng tâm">
+            <div
+              className="mt-[var(--space-stack)] grid gap-2 sm:grid-cols-2 lg:grid-cols-4"
+              role="radiogroup"
+              aria-label="Chọn lĩnh vực trọng tâm"
+            >
               {lifeAreas.map((area) => {
                 const isSelected = focusArea.name === area.name;
                 const isRecommended = area.name === lowestArea.name;
@@ -414,10 +380,10 @@ export function LifeInsight() {
                 return (
                   <label
                     key={area.name}
-                    className={`card-hover-lift glass-surface-sm relative cursor-pointer overflow-hidden rounded-[var(--r-tile)] border border-l-4 p-4 text-left transition-colors transition-transform duration-150 ${
+                    className={`card-hover-lift relative cursor-pointer overflow-hidden rounded-[var(--r-tile)] border border-l-4 p-4 text-left transition-colors transition-transform duration-150 ${
                       isSelected
-                        ? "border-violet-300 bg-violet-50 shadow-md dark:bg-violet-950/30"
-                        : "border-white/70 bg-white/72 hover:border-white hover:bg-white dark:bg-slate-950/50"
+                        ? "border-[color:var(--ring)] bg-[color:var(--muted)] shadow-[var(--shadow-2)]"
+                        : "border-[color:var(--border)] bg-card hover:bg-[color:var(--muted)]"
                     }`}
                     style={{ borderLeftColor: area.color }}
                   >
@@ -430,7 +396,7 @@ export function LifeInsight() {
                       aria-label={`${getLifeAreaLabel(area.name)} ${area.score}/10${isRecommended ? ", gợi ý" : ""}`}
                     />
                     {isRecommended && (
-                      <span className="absolute -top-2 left-3 rounded-[var(--r-pill)] bg-violet-600 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-white">
+                      <span className="absolute -top-2 left-3 rounded-[var(--r-pill)] bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">
                         Gợi ý
                       </span>
                     )}
@@ -447,9 +413,11 @@ export function LifeInsight() {
                           <Target className="h-4 w-4" aria-hidden="true" />
                         </div>
                       </div>
-                      {isSelected && <Check className="h-4 w-4 text-violet-600" />}
+                      {isSelected && <Check className="h-4 w-4 text-primary" />}
                     </div>
-                    <p className="mt-[var(--space-inline)] text-sm font-semibold text-slate-900">{getLifeAreaLabel(area.name)}</p>
+                    <p className="mt-[var(--space-inline)] text-sm font-semibold text-foreground">
+                      {getLifeAreaLabel(area.name)}
+                    </p>
                     <p className="mt-1 text-xs font-medium" style={{ color: area.color }}>
                       {area.score}/10
                     </p>
@@ -461,13 +429,13 @@ export function LifeInsight() {
 
           <details
             data-testid="life-insight-intent-picker"
-            className="rounded-[var(--r-card)] border border-white/70 bg-white/82 p-5 shadow-lg lg:p-6"
+            className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-5 shadow-[var(--shadow-1)] lg:p-6"
             open={selectedIntent !== null}
           >
-            <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
+            <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">
               Bạn đang muốn làm điều gì trong 12 tuần tới?
             </summary>
-            <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">
+            <p className="mt-[var(--space-inline)] text-sm leading-7 text-muted-foreground">
               Chọn một mô tả gần nhất để app gợi ý cho sát hơn. Không bắt buộc — bạn có thể bỏ qua, thay đổi hoặc xoá
               bất cứ lúc nào.
             </p>
@@ -482,10 +450,10 @@ export function LifeInsight() {
                   <label
                     key={option.id}
                     data-intent-id={option.id}
-                    className={`cursor-pointer rounded-[var(--r-tile)] border p-4 text-left transition-colors transition-transform duration-150 hover:-translate-y-0.5 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-violet-300 ${
+                    className={`cursor-pointer rounded-[var(--r-tile)] border p-4 text-left transition-colors transition-transform duration-150 hover:-translate-y-0.5 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[color:var(--ring)] ${
                       isSelected
-                        ? "border-violet-300 bg-violet-50 shadow-md"
-                        : "border-white/70 bg-white/72 hover:border-white hover:bg-white"
+                        ? "border-[color:var(--ring)] bg-[color:var(--muted)] shadow-[var(--shadow-2)]"
+                        : "border-[color:var(--border)] bg-card hover:bg-[color:var(--muted)]"
                     }`}
                   >
                     <input
@@ -497,23 +465,23 @@ export function LifeInsight() {
                       className="sr-only"
                     />
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm font-semibold text-slate-900">{option.label}</p>
-                      {isSelected && <Check className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" aria-hidden="true" />}
+                      <p className="text-sm font-semibold text-foreground">{option.label}</p>
+                      {isSelected && <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />}
                     </div>
-                    <p className="mt-1 text-xs leading-5 text-slate-500">{option.description}</p>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">{option.description}</p>
                   </label>
                 );
               })}
             </div>
             {selectedIntent !== null && (
               <div className="mt-4 flex flex-wrap items-center gap-3">
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Lựa chọn này được lưu trên thiết bị này để gợi ý bước SMART và kế hoạch 12 tuần.
                 </p>
                 <button
                   type="button"
                   onClick={handleIntentClear}
-                  className="text-xs font-semibold text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline"
+                  className="text-xs font-semibold text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
                 >
                   Bỏ chọn
                 </button>
@@ -521,14 +489,19 @@ export function LifeInsight() {
             )}
           </details>
 
-          <details className="rounded-[var(--r-card)] border border-white/70 bg-white/82 p-5 shadow-lg lg:p-6">
-            <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
+          <details className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-5 shadow-[var(--shadow-1)] lg:p-6">
+            <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">
               Xem bức tranh tổng thể
             </summary>
-            <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">
+            <p className="mt-[var(--space-inline)] text-sm leading-7 text-muted-foreground">
               Biểu đồ này cho thấy toàn bộ bánh xe cuộc sống hiện tại để bạn không nhìn một chiều.
             </p>
-            <SimpleRadarChart className="mx-auto mt-[var(--space-stack)] max-w-[460px]" data={radarData} height={320} fillOpacity={0.2} />
+            <SimpleRadarChart
+              className="mx-auto mt-[var(--space-stack)] max-w-[460px]"
+              data={radarData}
+              height={320}
+              fillOpacity={0.2}
+            />
 
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               <div
@@ -540,10 +513,12 @@ export function LifeInsight() {
               >
                 <div className="flex items-center gap-2" style={{ color: lowestArea.color }}>
                   <TrendingDown className="h-4 w-4" />
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em]">Nút thắt hiện tại</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em]">Nút thắt hiện tại</p>
                 </div>
-                <p className="mt-[var(--space-inline)] text-lg font-semibold text-slate-900">{getLifeAreaLabel(lowestArea.name)}</p>
-                <p className="mt-1 text-sm text-slate-600">Đây là khu vực nên trở thành trọng tâm tiếp theo.</p>
+                <p className="mt-[var(--space-inline)] text-lg font-semibold text-foreground">
+                  {getLifeAreaLabel(lowestArea.name)}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">Đây là khu vực nên trở thành trọng tâm tiếp theo.</p>
               </div>
 
               <div
@@ -555,10 +530,14 @@ export function LifeInsight() {
               >
                 <div className="flex items-center gap-2" style={{ color: strongestArea.color }}>
                   <Sparkles className="h-4 w-4" />
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em]">Lực đỡ hiện có</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em]">Lực đỡ hiện có</p>
                 </div>
-                <p className="mt-[var(--space-inline)] text-lg font-semibold text-slate-900">{getLifeAreaLabel(strongestArea.name)}</p>
-                <p className="mt-1 text-sm text-slate-600">Tận dụng điểm mạnh này để kéo khu vực đang yếu lên cùng.</p>
+                <p className="mt-[var(--space-inline)] text-lg font-semibold text-foreground">
+                  {getLifeAreaLabel(strongestArea.name)}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Tận dụng điểm mạnh này để kéo khu vực đang yếu lên cùng.
+                </p>
               </div>
             </div>
           </details>
@@ -566,18 +545,17 @@ export function LifeInsight() {
           <Card>
             <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between lg:p-6">
               <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Trọng tâm hiện tại</p>
-                <p className="mt-2 text-lg font-semibold text-slate-900">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  Trọng tâm hiện tại
+                </p>
+                <p className="mt-2 text-lg font-semibold text-foreground">
                   {getLifeAreaLabel(focusArea.name)} ({focusArea.score}/10)
                 </p>
-                <p className="mt-1 text-sm leading-6 text-slate-600">
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">
                   Tiếp theo là biến trọng tâm này thành một mục tiêu SMART đủ rõ để hành động.
                 </p>
               </div>
-              <Button
-                className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25 hover:from-violet-700 hover:to-fuchsia-700 sm:w-auto"
-                onClick={handleStartGoalSetup}
-              >
+              <Button glow className="w-full sm:w-auto" onClick={handleStartGoalSetup}>
                 Tạo mục tiêu SMART từ quyết định này
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -585,6 +563,7 @@ export function LifeInsight() {
           </Card>
         </div>
       </LifeInsightPageMotion>
-    </div>
+      </div>
+    </PageShell>
   );
 }

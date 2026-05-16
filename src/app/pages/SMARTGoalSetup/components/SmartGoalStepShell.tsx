@@ -160,13 +160,13 @@ export function SmartGoalStepShell({
       className="stack-section"
     >
       <SectionBlock title={`Nội dung bước ${stepIndex + 1}`} headerVisuallyHidden density="default">
-        <div className="flow-muted p-4 sm:p-6">
-          <div className="sticky top-3 z-20 rounded-[var(--r-card)] border border-slate-200/80 bg-white/90 p-2 shadow-sm backdrop-blur dark:border-slate-700/70 dark:bg-slate-950/88">
+        <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4 sm:p-6">
+          <div className="sticky top-3 z-20 rounded-[var(--r-card)] border border-[color:var(--border)] bg-card/95 p-2 shadow-[var(--shadow-1)] backdrop-blur">
             <div className="mb-2 flex items-center justify-between gap-3 px-1">
-              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 Bước {stepIndex + 1}/{totalSteps}
               </span>
-              <span className="truncate text-xs font-semibold text-slate-900">{step.label}</span>
+              <span className="truncate text-xs font-semibold text-foreground">{step.label}</span>
             </div>
             <ol aria-label={`Bước ${stepIndex + 1} trên ${totalSteps}`} className="grid grid-cols-5 gap-2">
               {SMART_STEPS.map((smartStep, index) => {
@@ -208,45 +208,49 @@ export function SmartGoalStepShell({
               aria-valuemin={1}
               aria-valuemax={totalSteps}
               aria-valuenow={stepIndex + 1}
-              className="mt-2 h-1.5 overflow-hidden rounded-[var(--r-pill)] bg-slate-200/80 dark:bg-slate-800"
+              className="mt-2 h-1.5 overflow-hidden rounded-[var(--r-pill)] bg-[color:var(--muted)]"
             >
               <div
-                className="h-full rounded-[var(--r-pill)] bg-gradient-to-r from-violet-600 to-fuchsia-600 transition-[width] duration-300 ease-out dark:from-violet-400 dark:to-fuchsia-400"
+                className="h-full rounded-[var(--r-pill)] gradient-brand transition-[width] duration-300 ease-out"
                 style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}
               />
             </div>
           </div>
           <div className="mt-[var(--space-stack)] grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1fr)_200px]">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-500">{step.label}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
+                {step.label}
+              </p>
               <h2
                 ref={headingRef}
                 tabIndex={-1}
-                className="mt-2 text-2xl font-bold leading-tight text-slate-900 focus:outline-none sm:mt-[var(--space-inline)] sm:text-3xl"
+                className="mt-2 text-2xl font-bold leading-[1.1] tracking-[-0.014em] text-foreground focus:outline-none sm:mt-[var(--space-inline)] sm:text-3xl"
               >
                 {step.title}
               </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600 sm:mt-[var(--space-inline)] sm:text-base sm:leading-7">
+              <p className="mt-2 text-sm leading-6 text-muted-foreground sm:mt-[var(--space-inline)] sm:text-base sm:leading-7">
                 {step.description}
               </p>
             </div>
             <div className={`rounded-[var(--r-card)] border p-4 ${currentStepVisual.tone}`}>
-              <div className={`flex h-11 w-11 items-center justify-center rounded-[var(--r-tile)] ${currentStepVisual.iconTone}`}>
+              <div
+                className={`flex h-11 w-11 items-center justify-center rounded-[var(--r-tile)] ${currentStepVisual.iconTone}`}
+              >
                 <CurrentStepIcon className="h-5 w-5" aria-hidden="true" />
               </div>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] opacity-70">
+              <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.12em] opacity-70">
                 SMART · {currentStepVisual.letter}
               </p>
               <p className="mt-1 text-sm font-semibold leading-6">{step.completionHint}</p>
             </div>
           </div>
-          <div className="mt-[var(--space-inline)] flex items-center justify-between gap-3 rounded-[var(--r-tile)] border border-sky-200 bg-sky-50/72 px-3 py-2.5 text-sm leading-6 text-sky-900 dark:border-sky-500/30 dark:bg-sky-950/30 dark:text-sky-100 sm:mt-4">
+          <div className="mt-[var(--space-inline)] flex items-center justify-between gap-3 rounded-[var(--r-tile)] border border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] px-3 py-2.5 text-sm leading-6 text-[color:var(--color-info-fg)] sm:mt-4">
             <span className="font-semibold">Gợi ý nhanh</span>
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
                   type="button"
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] border border-sky-200 bg-white/82 text-sky-700 hover:bg-sky-100 dark:border-sky-500/30 dark:bg-sky-950/50 dark:text-sky-100"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] border border-[color:var(--color-info-border)] bg-card text-[color:var(--color-info-fg)] hover:bg-[color:var(--color-info-bg)]"
                   aria-label={`Xem gợi ý cho bước ${step.label}`}
                 >
                   <HelpCircle className="h-4 w-4" aria-hidden="true" />
@@ -259,22 +263,22 @@ export function SmartGoalStepShell({
 
         {children}
 
-        <div className="rounded-[var(--r-card)] border border-violet-100 bg-violet-50/80 p-4 shadow-sm">
+        <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
-              <div className="flex items-center gap-2 text-sm font-semibold text-violet-700">
+              <div className="flex items-center gap-2 text-sm font-semibold text-[color:var(--tone-shell-primary)]">
                 <Sparkles className="h-4 w-4" />
                 Gợi ý điền nhanh
               </div>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{starterPreview}</p>
-              <p className="mt-1 text-xs leading-5 text-slate-500">
+              <p className="mt-2 text-sm leading-6 text-foreground">{starterPreview}</p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
                 Dùng làm bản nháp rồi sửa cho đúng đời sống bạn.
               </p>
             </div>
             <Button
               type="button"
               variant="outline"
-              className="w-full shrink-0 border-violet-200 bg-white text-violet-700 hover:bg-violet-50 sm:w-auto"
+              className="w-full shrink-0 sm:w-auto"
               onClick={onApplyStarter}
               aria-label={`Dùng gợi ý cho bước ${step.label}`}
             >
@@ -283,19 +287,22 @@ export function SmartGoalStepShell({
           </div>
         </div>
 
-        <details className="rounded-[var(--r-card)] border border-slate-200 bg-white/82 p-4 shadow-sm">
-          <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 text-sm font-semibold text-slate-950">
+        <details className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4 shadow-[var(--shadow-1)]">
+          <summary className="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 text-sm font-semibold text-foreground">
             <div>
-              <p className="font-semibold text-slate-950">Độ rõ của mục tiêu</p>
-              <p className="mt-1 font-normal text-slate-500">
+              <p className="font-semibold text-foreground">Độ rõ của mục tiêu</p>
+              <p className="mt-1 font-normal text-muted-foreground">
                 {clarityDoneCount}/{clarityItems.length} bước đã hoàn thành
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="h-2 w-32 overflow-hidden rounded-[var(--r-pill)] bg-slate-100">
-                <div className="h-full rounded-[var(--r-pill)] bg-emerald-500 transition-all" style={{ width: `${clarityProgress}%` }} />
+              <div className="h-2 w-32 overflow-hidden rounded-[var(--r-pill)] bg-[color:var(--muted)]">
+                <div
+                  className="h-full rounded-[var(--r-pill)] bg-[color:var(--color-success-fg)] transition-all"
+                  style={{ width: `${clarityProgress}%` }}
+                />
               </div>
-              <ChevronDown className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180" />
+              <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
             </div>
           </summary>
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -306,21 +313,23 @@ export function SmartGoalStepShell({
                 onClick={() => onJumpToStep(item.stepKey)}
                 className={`rounded-[var(--r-card)] border px-3 py-3 text-left transition-colors ${
                   item.done
-                    ? "border-emerald-200 bg-emerald-50/80 hover:border-emerald-300"
-                    : "border-amber-200 bg-amber-50/80 hover:border-amber-300"
+                    ? "border-[color:var(--color-success-border)] bg-[color:var(--color-success-bg)] hover:border-[color:var(--color-success-fg)]"
+                    : "border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] hover:border-[color:var(--color-warning-fg)]"
                 }`}
               >
                 <div className="flex items-start gap-2">
                   <span
                     className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-[var(--r-pill)] text-xs font-bold ${
-                      item.done ? "bg-emerald-600 text-white" : "bg-amber-200 text-amber-700"
+                      item.done
+                        ? "bg-[color:var(--color-success-fg)] text-[color:var(--color-success-bg)]"
+                        : "bg-[color:var(--color-warning-fg)] text-[color:var(--color-warning-bg)]"
                     }`}
                   >
                     {item.done ? "✓" : "!"}
                   </span>
                   <span>
-                    <span className="block text-sm font-semibold text-slate-900">{item.label}</span>
-                    <span className="mt-1 block text-xs leading-5 text-slate-500">{item.detail}</span>
+                    <span className="block text-sm font-semibold text-foreground">{item.label}</span>
+                    <span className="mt-1 block text-xs leading-5 text-muted-foreground">{item.detail}</span>
                   </span>
                 </div>
               </button>
@@ -349,27 +358,31 @@ export function SmartGoalStepShell({
         ) : null}
 
         {currentStepError ? (
-          <Alert className="border-amber-200 bg-amber-50/85 text-rose-700">
+          <Alert
+            className="border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning-fg)]"
+          >
             <CircleAlert className="h-4 w-4" />
             <AlertTitle>Cần hoàn tất bước này</AlertTitle>
-            <AlertDescription className="text-amber-700/90">{currentStepError}</AlertDescription>
+            <AlertDescription className="opacity-90">{currentStepError}</AlertDescription>
           </Alert>
         ) : null}
         {currentStepSoftWarning ? (
-          <Alert className="border-amber-200 bg-amber-50/85 text-amber-700">
+          <Alert
+            className="border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)]"
+          >
             <Lightbulb className="h-4 w-4" />
             <AlertTitle>Gợi ý để mục tiêu rõ hơn</AlertTitle>
-            <AlertDescription className="text-amber-700/90">{currentStepSoftWarning}</AlertDescription>
+            <AlertDescription className="opacity-90">{currentStepSoftWarning}</AlertDescription>
           </Alert>
         ) : null}
       </SectionBlock>
 
-      <div className="flow-muted p-4">
+      <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
         <div className="stack-tight">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
             Tiếp tục viết mục tiêu
           </p>
-          <p className="text-sm text-slate-600">{step.completionHint}</p>
+          <p className="text-sm text-muted-foreground">{step.completionHint}</p>
         </div>
 
         <div className="mt-[var(--space-section)] flex flex-col gap-[var(--space-inline)] sm:flex-row">
@@ -379,9 +392,7 @@ export function SmartGoalStepShell({
           </Button>
           <Button
             glow={isCurrentStepValid}
-            className={`flex-1 overflow-hidden gradient-brand text-white shadow-lg motion-safe:hover:scale-[1.01] hover:shadow-xl ${
-              stepIndex < totalSteps - 1 ? "" : "shimmer"
-            }`}
+            className="flex-1"
             onClick={onNext}
             disabled={!isCurrentStepValid}
           >

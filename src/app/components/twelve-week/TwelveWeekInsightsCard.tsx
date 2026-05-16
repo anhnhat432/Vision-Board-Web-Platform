@@ -30,21 +30,23 @@ interface TwelveWeekInsightsCardProps {
 }
 
 const SEVERITY_ACCENT: Record<ExecutionInsightSeverity, string> = {
-  positive: "border-emerald-200 bg-emerald-50/85",
-  neutral: "border-slate-200 bg-slate-50",
-  warning: "border-amber-200 bg-amber-50/85",
+  positive: "border-[color:var(--color-success-border)] bg-[color:var(--color-success-bg)]",
+  neutral: "border-[color:var(--border)] bg-[color:var(--muted)]",
+  warning: "border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)]",
 };
 
 const SEVERITY_BADGE: Record<ExecutionInsightSeverity, string> = {
-  positive: "border-emerald-300 bg-white text-emerald-800",
-  neutral: "border-slate-300 bg-white text-slate-700",
-  warning: "border-amber-300 bg-white text-amber-800",
+  positive:
+    "border-[color:var(--color-success-border)] bg-card text-[color:var(--color-success-fg)]",
+  neutral: "border-[color:var(--border)] bg-card text-foreground",
+  warning:
+    "border-[color:var(--color-warning-border)] bg-card text-[color:var(--color-warning-fg)]",
 };
 
 const SEVERITY_ICON: Record<ExecutionInsightSeverity, ReactElement> = {
-  positive: <Sparkles className="h-4 w-4 text-emerald-700" />,
-  neutral: <Lightbulb className="h-4 w-4 text-slate-600" />,
-  warning: <ShieldAlert className="h-4 w-4 text-amber-700" />,
+  positive: <Sparkles className="h-4 w-4 text-[color:var(--color-success-fg)]" />,
+  neutral: <Lightbulb className="h-4 w-4 text-muted-foreground" />,
+  warning: <ShieldAlert className="h-4 w-4 text-[color:var(--color-warning-fg)]" />,
 };
 
 const SEVERITY_LABEL: Record<ExecutionInsightSeverity, string> = {
@@ -88,18 +90,16 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
     <section
       data-testid="execution-insights-card"
       data-insight-count={insights.length}
-      className="rounded-[var(--r-control)] border border-slate-200/82 bg-white/92 p-4 shadow-sm sm:p-5"
+      className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card p-4 shadow-sm sm:p-5"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-[var(--r-pill)] bg-indigo-100 text-indigo-700">
+          <span className="flex h-7 w-7 items-center justify-center rounded-[var(--r-pill)] bg-[color:var(--muted)] text-[color:var(--tone-shell-primary)]">
             <ChevronUp className="h-4 w-4" />
           </span>
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-700">{title}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{title}</p>
         </div>
-        <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
-          {insights.length} góc nhìn
-        </Badge>
+        <Badge variant="neutral">{insights.length} góc nhìn</Badge>
       </div>
 
       <ul data-testid="execution-insights-list" className="mt-[var(--space-inline)] grid gap-3">
@@ -114,12 +114,12 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
               <span className="mt-0.5 shrink-0">{SEVERITY_ICON[insight.severity]}</span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-semibold leading-6 text-slate-950">{insight.headline}</p>
+                  <p className="text-sm font-semibold leading-6 text-foreground">{insight.headline}</p>
                   <Badge variant="outline" className={SEVERITY_BADGE[insight.severity]}>
                     {SEVERITY_LABEL[insight.severity]}
                   </Badge>
                 </div>
-                <p className="mt-1 text-sm leading-6 text-slate-700">{insight.body}</p>
+                <p className="mt-1 text-sm leading-6 text-muted-foreground">{insight.body}</p>
               </div>
             </div>
           </li>
@@ -127,14 +127,14 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
       </ul>
 
       {nextActionCallback && nextAction.id !== "no_action" && (
-        <div className="mt-4 flex flex-wrap items-start justify-between gap-3 rounded-[var(--r-control)] border border-indigo-200 bg-indigo-50/72 p-3">
+        <div className="mt-4 flex flex-wrap items-start justify-between gap-3 rounded-[var(--r-control)] border border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] p-3">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-indigo-700">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-info-fg)]">
               Gợi ý hành động tiếp theo
             </p>
             <p
               data-testid="execution-insights-next-action-hint"
-              className="mt-1 text-sm leading-6 text-slate-700"
+              className="mt-1 text-sm leading-6 text-foreground"
             >
               {nextAction.hint}
             </p>
@@ -142,7 +142,7 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
           <Button
             size="sm"
             variant="outline"
-            className="bg-white"
+            className="bg-card"
             data-testid="execution-insights-next-action-button"
             onClick={nextActionCallback}
           >

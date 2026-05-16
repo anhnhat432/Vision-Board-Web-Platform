@@ -498,7 +498,7 @@ describe("12-week core flows", () => {
 
     expect(await screen.findAllByText("« Tôi muốn ship đều vì đây là lời hứa với chính mình. »")).not.toHaveLength(0);
 
-    await user.click(screen.getByRole("button", { name: "Tuần" }));
+    await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
 
     const commitmentsSection = await screen.findByTestId("wam-section-commitments");
     expect(commitmentsSection).toHaveTextContent("Tôi muốn ship đều vì đây là lời hứa với chính mình.");
@@ -603,7 +603,7 @@ describe("12-week core flows", () => {
       await user.click(within(taskListCard as HTMLElement).getAllByRole("checkbox")[0]);
       await user.type(screen.getByLabelText("Note tùy chọn"), "Giữ task đã tick khi review tuần.");
       await user.click(getPrimaryButton("Lưu check-in hôm nay"));
-      await user.click(screen.getByRole("button", { name: "Tuần" }));
+      await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
       await typeWamReview(user, {
         insights: "Chốt được một việc thật.",
         nextWeekCommitments: "Giữ nhịp execution.",
@@ -629,7 +629,7 @@ describe("12-week core flows", () => {
       renderAppRoute("/12-week-system");
       const user = userEvent.setup();
 
-      await user.click(screen.getByRole("button", { name: "Tuần" }));
+      await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
       await typeWamReview(user, {
         insights: "Bị phân tán vì đổi context.",
         nextWeekCommitments: "Chốt xong command center trước.",
@@ -673,7 +673,7 @@ describe("12-week core flows", () => {
       renderAppRoute("/12-week-system");
       const user = userEvent.setup();
 
-      await user.click(screen.getByRole("button", { name: "Tuần" }));
+      await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
       await typeWamReview(user, {
         insights: "Giữ buổi review thứ Năm.",
         nextWeekCommitments: "Hoàn thành module sync trước thứ Tư.",
@@ -724,7 +724,7 @@ describe("12-week core flows", () => {
       renderAppRoute("/12-week-system");
       const user = userEvent.setup();
 
-      await user.click(screen.getByRole("button", { name: "Tuần" }));
+      await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
       await openWeeklyReviewDetails(user);
 
       // Existing legacy fields should hydrate the WAM form
@@ -747,7 +747,7 @@ describe("12-week core flows", () => {
       renderAppRoute("/12-week-system");
       const user = userEvent.setup();
 
-      await user.click(screen.getByRole("button", { name: "Tuần" }));
+      await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
       await typeWamReview(user, {
         insights: "First weekly insight.",
         nextWeekCommitments: "First priority.",

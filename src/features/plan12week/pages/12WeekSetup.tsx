@@ -1087,7 +1087,7 @@ export function TwelveWeekSetup() {
   };
 
   return (
-    <PageShell maxWidth="hero" className="stack-section sm:stack-section page-enter">
+    <PageShell maxWidth="xl" className="stack-section sm:stack-section page-enter">
       <UpgradePaywallDialog
         open={isPaywallOpen}
         onOpenChange={setIsPaywallOpen}
@@ -1107,23 +1107,25 @@ export function TwelveWeekSetup() {
       <CoreFlowProgress currentStepId="twelve_week_setup" onExit={() => navigate("/")} />
 
       {!isVisionPromptDismissed && (
-        <Card className="border border-violet-200 bg-violet-50/80 shadow-sm">
+        <Card>
           <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               {aspirationalVision ? (
-                <p className="text-sm leading-6 text-violet-950">
-                  <span className="font-semibold">Mục tiêu này phục vụ tầm nhìn 3 năm:</span>{" "}
+                <p className="text-sm leading-6 text-foreground">
+                  <span className="font-semibold text-[color:var(--tone-shell-primary)]">
+                    Mục tiêu này phục vụ tầm nhìn 3 năm:
+                  </span>{" "}
                   {aspirationalVision.summary}
                 </p>
               ) : (
-                <p className="text-sm leading-6 text-violet-950">
+                <p className="text-sm leading-6 text-foreground">
                   Bạn đang đặt mục tiêu 12 tuần. Phương pháp gốc khuyên gắn với tầm nhìn 3 năm.
                 </p>
               )}
             </div>
             {!aspirationalVision && (
               <div className="flex shrink-0 flex-wrap gap-2">
-                <Button asChild size="sm" variant="outline" className="bg-white">
+                <Button asChild size="sm" variant="outline">
                   <Link to="/vision">Điền 2 phút →</Link>
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => setIsVisionPromptDismissed(true)}>
@@ -1135,41 +1137,35 @@ export function TwelveWeekSetup() {
         </Card>
       )}
 
-      <Card className="hero-surface featured-surface glow-vivid overflow-hidden border-0 text-white glass-surface-gradient-border ambient-glow">
-        <CardContent className="relative p-5 sm:p-6 lg:p-10">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_22%)] opacity-90" />
-          <div className="relative z-10 max-w-4xl">
-            <div className="stack-stack sm:stack-section">
-              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
-                <Compass className="h-4 w-4" />
-                Thiết lập 12 tuần
-              </div>
-              <div className="stack-stack">
-                <h1 className="max-w-4xl text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-                  Chốt chu kỳ <span className="text-gradient-aurora">12 tuần</span> gọn, rõ và vào việc ngay.
-                </h1>
-                <p className="max-w-2xl text-sm leading-7 text-white/82 sm:text-base lg:text-lg">
-                  Sau bước này bạn có kết quả rõ, 2-4 việc lặp lại có lịch, và tuần 1 đủ nhẹ để bắt đầu.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2 sm:gap-3">
-                <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
-                  <Target className="mr-1 h-3.5 w-3.5" />
-                  Ưu tiên: {getLifeAreaLabel(focusArea)}
+      <Card>
+        <CardContent className="relative p-5 sm:p-7 lg:p-8">
+          <div className="stack-stack">
+            <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              <Compass className="h-3.5 w-3.5 text-[color:var(--tone-shell-secondary)]" aria-hidden="true" />
+              Thiết lập 12 tuần
+            </p>
+            <div className="stack-tight">
+              <h1 className="max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl">
+                Chốt chu kỳ <span className="text-gradient-vibrant">12 tuần</span> gọn, rõ và vào việc ngay.
+              </h1>
+              <p className="max-w-2xl text-[15px] leading-relaxed text-muted-foreground sm:text-base">
+                Sau bước này bạn có kết quả rõ, 2-4 việc lặp lại có lịch, và tuần 1 đủ nhẹ để bắt đầu.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="brand">
+                <Target className="mr-1 h-3.5 w-3.5" />
+                Ưu tiên: {getLifeAreaLabel(focusArea)}
+              </Badge>
+              <Badge variant="neutral">
+                <Sparkles className="mr-1 h-3.5 w-3.5" />
+                Sẵn sàng: {feasibility.adjustedScore}/20
+              </Badge>
+              {feasibility.bottleneck && (
+                <Badge variant="warning" className="hidden sm:inline-flex">
+                  Cần chú ý: {feasibility.bottleneck.label}
                 </Badge>
-                <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
-                  <Sparkles className="mr-1 h-3.5 w-3.5" />
-                  Sẵn sàng: {feasibility.adjustedScore}/20
-                </Badge>
-                {feasibility.bottleneck && (
-                  <Badge
-                    variant="outline"
-                    className="hidden rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white sm:inline-flex"
-                  >
-                    Cần chú ý: {feasibility.bottleneck.label}
-                  </Badge>
-                )}
-              </div>
+              )}
             </div>
           </div>
         </CardContent>

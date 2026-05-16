@@ -6,3 +6,8 @@ export { ReviewSummaryGrid } from "./ReviewSummaryGrid";
 export { EmptyStateLayout } from "./EmptyStateLayout";
 export { StatusRow } from "./StatusRow";
 export { WizardStepPip } from "./WizardStepPip";
+export { PageHero } from "./PageHero";
+export type { PageHeroAlign, PageHeroTitleLevel, PageHeroDensity } from "./PageHero";
+export { WizardHero } from "./WizardHero";
+export { WizardActionBar } from "./WizardActionBar";
+export type { WizardActionBarMode } from "./WizardActionBar";

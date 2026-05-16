@@ -938,11 +938,10 @@ export function RootLayout() {
           {demoMode ? (
             <div
               role="note"
-              className="border-b border-amber-200 bg-amber-50/85 px-4 py-1.5 text-center text-[11px] font-medium text-amber-800 sm:px-6"
+              className="border-b border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] px-4 py-1.5 text-center text-[11px] font-medium text-[color:var(--color-info-fg)] sm:px-6"
             >
               <HardDrive className="mr-1 inline h-3 w-3 align-text-bottom" />
-              Dữ liệu hiện đang lưu trên trình duyệt này. Có thể bấm{" "}
-              <span className="font-semibold">Tạm thoát</span> bất kỳ lúc nào để quay lại Trang chính.
+              Bản demo · Dữ liệu lưu trên trình duyệt này.
             </div>
           ) : null}
           <main id="main-content" className="relative z-10" aria-label="Nội dung trang">
