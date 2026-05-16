@@ -62,18 +62,17 @@ export function CycleReviewPanel({
         tone="emerald"
         eyebrow={`Cycle ${system.cycleNumber ?? 1} đã kết thúc`}
         icon={<Trophy className="h-4 w-4" />}
-        eyebrowClassName="text-white/72"
         title="Cycle 12 tuần đã kết thúc"
         titleAs="h2"
         description={`Đây là tuần 13: nhìn lại chu kỳ cũ, chốt bài học, rồi chuẩn bị chu kỳ tiếp theo cho mục tiêu ${goal.title}.`}
-        titleClassName="text-2xl font-semibold text-white"
-        descriptionClassName="max-w-3xl text-sm leading-7 text-white/78"
+        titleClassName="text-2xl font-semibold text-foreground"
+        descriptionClassName="max-w-3xl text-sm leading-7 text-muted-foreground"
         contentClassName="stack-stack"
         actionClassName="flex flex-col gap-3 sm:flex-row"
         action={
           <>
             <Button
-              className="w-full bg-white text-slate-950 hover:bg-white/90 sm:w-auto"
+              className="w-full sm:w-auto"
               onClick={() => onStartNewCycle({ lessons: sanitizedLessons, summary })}
             >
               <RefreshCw className="mr-2 h-4 w-4" />
@@ -81,7 +80,7 @@ export function CycleReviewPanel({
             </Button>
             <Button
               variant="outline"
-              className="w-full border-white/24 bg-white/10 text-white hover:bg-white/16 hover:text-white sm:w-auto"
+              className="w-full sm:w-auto"
               onClick={onOpenSettings}
             >
               Mở cài đặt
@@ -90,12 +89,12 @@ export function CycleReviewPanel({
         }
       >
         <div className="pointer-events-none hidden justify-end sm:flex">
-          <WeeklyReviewIllustration className="-my-6 w-40 text-white opacity-45" />
+          <WeeklyReviewIllustration className="-my-6 w-40 text-emerald-400 opacity-60" />
         </div>
         {aspirationalVisionSummary ? (
-          <div className="rounded-[var(--r-control)] border border-white/14 bg-white/10 px-4 py-3 text-sm text-white/82">
-            <p className="font-semibold text-white">Chu kỳ này đã đưa bạn gần hơn với tầm nhìn 3 năm chưa?</p>
-            <p className="mt-1 text-white/72">{aspirationalVisionSummary}</p>
+          <div className="rounded-[var(--r-control)] border border-border bg-muted px-4 py-3 text-sm text-muted-foreground">
+            <p className="font-semibold text-foreground">Chu kỳ này đã đưa bạn gần hơn với tầm nhìn 3 năm chưa?</p>
+            <p className="mt-1 text-muted-foreground">{aspirationalVisionSummary}</p>
           </div>
         ) : null}
       </PrimaryActionCard>

@@ -266,19 +266,18 @@ export function TwelveWeekProgressTab({
         tone="primary"
         eyebrow="Trạng thái nhịp tuần này"
         icon={<Sparkles className="h-3.5 w-3.5" />}
-        eyebrowClassName="text-white/72"
         title={trend.headline}
         description={trend.advice}
-        titleClassName="text-base font-semibold text-white sm:text-lg"
-        descriptionClassName="text-sm leading-6 text-white/78"
+        titleClassName="text-base font-semibold text-foreground sm:text-lg"
+        descriptionClassName="text-sm leading-6 text-muted-foreground"
         contentClassName="stack-stack"
         action={
           nextActionHandler ? (
-            <div className="rounded-[var(--r-control)] border border-slate-900/10 bg-white/86 p-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+            <div className="rounded-[var(--r-control)] border border-border bg-muted p-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 Tiếp theo nên làm
               </p>
-              <p className="mt-1 text-sm leading-6 text-slate-800">{nextActionSuggestion.label}</p>
+              <p className="mt-1 text-sm leading-6 text-foreground">{nextActionSuggestion.label}</p>
               <Button size="lg" className="mt-[var(--space-inline)] w-full sm:w-auto" onClick={nextActionHandler}>
                 {nextActionSuggestion.buttonLabel}
                 <ArrowRight className="ml-1 h-4 w-4" />
@@ -288,7 +287,7 @@ export function TwelveWeekProgressTab({
         }
       >
         <div className="pointer-events-none hidden justify-end sm:flex">
-          <WeeklyReviewIllustration className="-my-6 w-36 text-white opacity-45" />
+          <WeeklyReviewIllustration className="-my-6 w-36 text-violet-400 opacity-60" />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span

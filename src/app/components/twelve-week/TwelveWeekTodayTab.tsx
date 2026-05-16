@@ -481,7 +481,6 @@ export function TwelveWeekTodayTab({
           tone={primaryTaskOverdue ? "amber" : "emerald"}
           eyebrow={isFirstWeek ? "Việc đầu tiên của tuần 1" : "Việc quan trọng nhất hôm nay"}
           icon={<Sparkles className="h-3.5 w-3.5" />}
-          eyebrowClassName="text-white/72"
           title={primaryTask.title}
           description={
             primaryTaskOverdue
@@ -490,11 +489,11 @@ export function TwelveWeekTodayTab({
                 ? `Thuộc nhóm việc lặp lại '${primaryTask.leadIndicatorName}'. Bắt đầu nhỏ — xong việc này là tuần 1 đã khởi động đúng hướng.`
                 : `Thuộc nhóm việc lặp lại '${primaryTask.leadIndicatorName}'. Xong việc này là tuần đã đi đúng hướng.`
           }
-          titleClassName="break-words text-lg font-semibold text-white sm:text-xl"
-          descriptionClassName="text-sm leading-6 text-white/78"
+          titleClassName="break-words text-lg font-semibold text-foreground sm:text-xl"
+          descriptionClassName="text-sm leading-6 text-muted-foreground"
           contentClassName="stack-tight"
           actionClassName="flex flex-wrap gap-2"
-          className={`order-2 ${primaryTaskOverdue ? "bg-[color:var(--color-warning-bg)]" : "bg-white"}`}
+          className={`order-2 ${primaryTaskOverdue ? "bg-[color:var(--color-warning-bg)]" : ""}`}
           action={
             <>
               <Button
@@ -526,15 +525,15 @@ export function TwelveWeekTodayTab({
             </Badge>
           )}
           {primaryTaskCommitmentQuote ? (
-            <p className="text-sm italic leading-6 text-white/74">{primaryTaskCommitmentQuote}</p>
+            <p className="text-sm italic leading-6 text-muted-foreground">{primaryTaskCommitmentQuote}</p>
           ) : null}
-          <p className="text-sm font-medium text-white">
+          <p className="text-sm font-medium text-foreground">
             Chỉ cần xong việc này là hôm nay đã đủ. Phần còn lại để sau.
           </p>
           {isFirstWeek && (
             <p
               data-testid="today-first-week-encouragement"
-              className="text-sm leading-6 text-white/74"
+              className="text-sm leading-6 text-muted-foreground"
             >
               Tuần đầu — bắt đầu nhỏ là quan trọng nhất. Không cần làm hết hôm nay, duy trì đến hết tuần.
             </p>
@@ -608,7 +607,7 @@ export function TwelveWeekTodayTab({
                   />
                 )
               ) : (
-                <MotionStaggerList className="contents">
+                <MotionStaggerList className="stack-tight">
                   {todayQueue.map((task) => {
                   const taskCompleted = optimisticTaskCompletionById[task.id] ?? task.completed;
                   const isOverdue = !taskCompleted && task.scheduledDate < todayDateKey;

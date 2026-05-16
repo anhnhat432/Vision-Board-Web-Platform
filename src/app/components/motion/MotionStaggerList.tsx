@@ -15,8 +15,7 @@ export function MotionStaggerList({ children, ...props }: MotionStaggerListProps
   return (
     <motion.div
       initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, amount: 0.2 }}
+      animate="show"
       variants={{
         hidden: {},
         show: {
