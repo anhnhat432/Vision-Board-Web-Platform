@@ -16,7 +16,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { CelebrationBurst, EmptyHintArrow, EmptyJournalIllustration } from "../components/illustrations";
+import { EmptyHintArrow, EmptyJournalIllustration } from "../components/illustrations";
+import { PageHero } from "../components/layout/PageHero";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -372,68 +373,58 @@ export function ReflectionJournal() {
       </AlertDialog>
 
       <Dialog open={isAddingReflection} onOpenChange={setIsAddingReflection}>
-        <Card className="overflow-hidden">
-          <CardContent className="relative p-5 sm:p-6">
-            <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-              <div className="stack-stack">
-                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-1.5 text-xs font-semibold text-muted-foreground">
-                  <NotebookPen className="h-4 w-4" />
-                  Nhật ký nhìn lại
-                </div>
-
-                <div className="stack-tight">
-                  <h1 className="max-w-3xl text-3xl font-semibold leading-[1.15] tracking-[-0.018em] text-foreground sm:text-4xl md:text-5xl">
-                    <span className="text-gradient-vibrant">Tuần này bạn nhìn lại</span>{" "}
-                    đủ sâu để giữ bài học, cảm xúc và những điều đáng nhớ.
-                  </h1>
-                  <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-                    Nhật ký ở đây không chỉ để lưu chữ. Nó là nơi gom lại bài học, cảm xúc, những chuyển động nhỏ và cả
-                    cách bạn đang lớn lên qua từng ngày.
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                  <Button glow onClick={() => setIsAddingReflection(true)}>
-                    <Plus className="h-4 w-4" />
-                    Viết nhật ký mới
-                  </Button>
-                </div>
-              </div>
-
-              <div className="hidden rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4 shadow-sm lg:block">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Nhịp viết hiện tại</p>
-                <CelebrationBurst className="mx-auto mt-3 w-32 text-[color:var(--tone-shell-primary)]" />
-                {hasReflections ? (
-                  <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                    {[
-                      { label: "Tổng số bài", value: userData.reflections.length, note: "đã lưu trong hành trình" },
-                      { label: "Tháng này", value: monthlyCount, note: "bài viết trong tháng hiện tại" },
-                      { label: "Tâm trạng gần nhất", value: recentMood.label, note: "tín hiệu cảm xúc mới nhất" },
-                    ].map((item) => (
-                      <div key={item.label} className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-card px-4 py-4">
-                        <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
-                        <p className="mt-2 text-2xl font-bold text-slate-950">
-                          {typeof item.value === "number" ? <CountUp value={item.value} /> : item.value}
-                        </p>
-                        <p className="mt-1 text-sm text-slate-500">{item.note}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="mt-4 rounded-[var(--r-tile)] border border-slate-200 bg-white px-5 py-6">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-slate-100 text-slate-700">
-                      <BookOpen className="h-6 w-6" />
-                    </div>
-                    <p className="mt-4 text-xl font-bold text-slate-950">Chưa có nhật ký nào</p>
-                    <p className="mt-2 text-sm leading-7 text-slate-600">
-                      Dữ liệu thật sẽ xuất hiện sau bài viết đầu tiên hoặc sau review tuần trong chu kỳ 12 tuần.
+        <PageHero
+          className="page-enter"
+          eyebrow="Nhật ký nhìn lại"
+          eyebrowIcon={<NotebookPen className="h-3.5 w-3.5" />}
+          title={
+            <>
+              <span className="text-gradient-vibrant">Tuần này bạn nhìn lại</span> đủ sâu để giữ bài học và cảm xúc.
+            </>
+          }
+          description="Nhật ký ở đây không chỉ để lưu chữ. Nó là nơi gom lại bài học, cảm xúc và những chuyển động nhỏ qua từng ngày."
+          primaryCta={
+            <Button glow onClick={() => setIsAddingReflection(true)}>
+              <Plus className="h-4 w-4" />
+              Viết nhật ký mới
+            </Button>
+          }
+          aside={
+            <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Nhịp viết hiện tại</p>
+              {hasReflections ? (
+                <div className="mt-3 grid gap-2">
+                  <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
+                    <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Tổng số bài</p>
+                    <p className="mt-1 text-2xl font-bold text-foreground">
+                      <CountUp value={userData.reflections.length} />
                     </p>
                   </div>
-                )}
-              </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
+                      <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Tháng này</p>
+                      <p className="mt-1 text-lg font-bold text-foreground">
+                        <CountUp value={monthlyCount} />
+                      </p>
+                    </div>
+                    <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
+                      <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Cảm xúc</p>
+                      <p className="mt-1 truncate text-[13px] font-bold text-foreground">{recentMood.label}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-3 rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-4 text-center">
+                  <BookOpen className="mx-auto h-7 w-7 text-[color:var(--tone-shell-primary)]" />
+                  <p className="mt-2 text-[13px] font-bold text-foreground">Chưa có nhật ký nào</p>
+                  <p className="mt-1 text-[11px] leading-5 text-muted-foreground">
+                    Dữ liệu sẽ xuất hiện sau bài viết đầu tiên.
+                  </p>
+                </div>
+              )}
             </div>
-          </CardContent>
-        </Card>
+          }
+        />
 
         <DialogContent className="max-w-3xl">
           <DialogHeader>

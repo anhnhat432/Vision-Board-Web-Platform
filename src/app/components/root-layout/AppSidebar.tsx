@@ -47,7 +47,6 @@ export interface AppSidebarProps {
   onSignOut: () => void;
   isSigningOut: boolean;
   shellBadgeStyle: CSSProperties;
-  activeNavStyle: CSSProperties;
 }
 
 export function AppSidebar({
@@ -66,7 +65,6 @@ export function AppSidebar({
   onSignOut,
   isSigningOut,
   shellBadgeStyle,
-  activeNavStyle,
 }: AppSidebarProps) {
   return (
     <aside
@@ -104,7 +102,14 @@ export function AppSidebar({
             const Icon = item.icon;
             const active = isActive(item.path);
             return (
-              <li key={item.path}>
+              <li key={item.path} className="relative">
+                <span
+                  aria-hidden="true"
+                  className={`absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full transition-opacity ${
+                    active ? "opacity-100" : "opacity-0"
+                  }`}
+                  style={active ? { background: "linear-gradient(180deg, var(--tone-shell-primary), var(--tone-shell-secondary))" } : undefined}
+                />
                 <button
                   type="button"
                   aria-current={active ? "page" : undefined}
@@ -112,13 +117,12 @@ export function AppSidebar({
                   onPointerEnter={() => onPrefetch(item.path)}
                   className={`group flex w-full items-center gap-2.5 rounded-[var(--r-control)] px-2.5 py-2 text-[13px] font-semibold tracking-tight transition-colors ${
                     active
-                      ? "text-white"
+                      ? "bg-[color-mix(in_srgb,var(--tone-shell-primary)_10%,transparent)] text-[color:var(--tone-shell-primary)]"
                       : "text-foreground hover:bg-[color:var(--muted)]"
                   }`}
-                  style={active ? activeNavStyle : undefined}
                 >
                   <Icon
-                    className={`h-4 w-4 shrink-0 ${active ? "text-white" : "text-muted-foreground group-hover:text-foreground"}`}
+                    className={`h-4 w-4 shrink-0 ${active ? "text-[color:var(--tone-shell-primary)]" : "text-muted-foreground group-hover:text-foreground"}`}
                     strokeWidth={active ? 2.2 : 1.8}
                   />
                   <span className="min-w-0 flex-1 truncate text-left">{item.label}</span>
@@ -138,7 +142,14 @@ export function AppSidebar({
                 const Icon = item.icon;
                 const active = isActive(item.path);
                 return (
-                  <li key={item.path}>
+                  <li key={item.path} className="relative">
+                    <span
+                      aria-hidden="true"
+                      className={`absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full transition-opacity ${
+                        active ? "opacity-100" : "opacity-0"
+                      }`}
+                      style={active ? { background: "linear-gradient(180deg, var(--tone-shell-primary), var(--tone-shell-secondary))" } : undefined}
+                    />
                     <button
                       type="button"
                       aria-current={active ? "page" : undefined}
@@ -146,13 +157,12 @@ export function AppSidebar({
                       onPointerEnter={() => onPrefetch(item.path)}
                       className={`group flex w-full items-center gap-2.5 rounded-[var(--r-control)] px-2.5 py-2 text-[13px] font-medium tracking-tight transition-colors ${
                         active
-                          ? "text-white"
+                          ? "bg-[color-mix(in_srgb,var(--tone-shell-primary)_10%,transparent)] text-[color:var(--tone-shell-primary)]"
                           : "text-muted-foreground hover:bg-[color:var(--muted)] hover:text-foreground"
                       }`}
-                      style={active ? activeNavStyle : undefined}
                     >
                       <Icon
-                        className={`h-4 w-4 shrink-0 ${active ? "text-white" : "text-muted-foreground group-hover:text-foreground"}`}
+                        className={`h-4 w-4 shrink-0 ${active ? "text-[color:var(--tone-shell-primary)]" : "text-muted-foreground group-hover:text-foreground"}`}
                         strokeWidth={active ? 2.2 : 1.7}
                       />
                       <span className="min-w-0 flex-1 truncate text-left">{item.label}</span>

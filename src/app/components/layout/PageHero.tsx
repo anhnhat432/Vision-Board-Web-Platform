@@ -138,7 +138,7 @@ export function PageHero({
             ) : null}
             <Heading
               data-slot="page-hero-title"
-              className="text-2xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-3xl lg:text-4xl"
+              className="text-[28px] font-bold leading-[1.05] tracking-[-0.022em] text-foreground sm:text-[34px] lg:text-[44px]"
             >
               {title}
             </Heading>

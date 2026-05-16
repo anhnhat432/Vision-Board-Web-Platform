@@ -32,7 +32,7 @@ import type { LifeBalanceHistoryChartPoint } from "../components/LifeBalanceHist
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { CountUp } from "../components/ui/count-up";
 import { LifeBalanceWheelIllustration, getLifeAreaIcon } from "../components/illustrations";
-import { ProductVisual } from "../components/visuals/ProductVisual";
+import { PageHero } from "../components/layout/PageHero";
 import { Reveal } from "../components/ui/reveal";
 import { SimpleRadarChart } from "../components/SimpleRadarChart";
 import { Slider } from "../components/ui/slider";
@@ -315,74 +315,72 @@ export function LifeBalance() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Card>
-        <CardContent className="relative p-5 sm:p-7 lg:p-8">
-          <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-            <div className="stack-stack">
-              <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                <Compass className="h-3.5 w-3.5 text-[color:var(--tone-shell-secondary)]" aria-hidden="true" />
-                Trung tâm Cân bằng cuộc sống
-              </p>
-
-              <div className="stack-tight">
-                <h1 className="max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl">
-                  Cập nhật <span className="text-gradient-vibrant">8 lĩnh vực sống</span> để chọn đúng trọng tâm tiếp theo.
-                </h1>
-                <p className="max-w-2xl text-[15px] leading-relaxed text-muted-foreground sm:text-base">
-                  Mỗi điểm bạn chỉnh sẽ cập nhật ngay phần tín hiệu bên dưới. Sau đó bạn có thể lưu riêng hoặc lưu rồi
-                  mở Góc nhìn cuộc sống để chọn vấn đề đáng ưu tiên nhất.
+      <PageHero
+        className="page-enter"
+        eyebrow="Trung tâm Cân bằng cuộc sống"
+        eyebrowIcon={<Compass className="h-3.5 w-3.5" />}
+        title={
+          <>
+            Cập nhật <span className="text-gradient-vibrant">8 lĩnh vực sống</span> để chọn đúng trọng tâm tiếp theo.
+          </>
+        }
+        description="Mỗi điểm bạn chỉnh sẽ cập nhật ngay phần tín hiệu bên dưới. Sau đó bạn có thể lưu riêng hoặc mở Góc nhìn cuộc sống để chọn vấn đề đáng ưu tiên nhất."
+        primaryCta={
+          hasChanges ? (
+            <Button glow onClick={handleSave}>
+              <Save className="h-4 w-4" />
+              Lưu ngay
+            </Button>
+          ) : (
+            <Badge
+              variant="outline"
+              className="rounded-[var(--r-pill)] border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-1.5 text-muted-foreground"
+            >
+              <AutoSaveIndicator status="saved" lastSavedAt={lastSavedAt} />
+            </Badge>
+          )
+        }
+        secondaryCta={
+          hasChanges ? (
+            <Badge
+              variant="outline"
+              className="rounded-[var(--r-pill)] border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-1.5 text-muted-foreground"
+            >
+              <AutoSaveIndicator status={autoSaveStatus} lastSavedAt={lastSavedAt} />
+            </Badge>
+          ) : undefined
+        }
+        aside={
+          <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Snapshot hiện tại</p>
+            <div className="mt-3 grid gap-2">
+              <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
+                <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Điểm chung</p>
+                <p className="mt-1 text-2xl font-bold text-foreground">
+                  <CountUp value={averageScore} precision={1} />
+                  <span className="text-muted-foreground">/10</span>
                 </p>
               </div>
-
-              <div className="flex flex-wrap items-center gap-3">
-                <Badge
-                  variant="outline"
-                  className="rounded-[var(--r-pill)] border-[color:var(--border)] bg-[color:var(--muted)] px-4 py-2 text-muted-foreground"
-                >
-                  <AutoSaveIndicator status={hasChanges ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} />
-                </Badge>
-                {hasChanges ? (
-                  <Button glow onClick={handleSave}>
-                    <Save className="h-4 w-4" />
-                    Lưu ngay
-                  </Button>
-                ) : null}
-              </div>
-            </div>
-
-            <div className="hidden rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4 lg:block">
-              <ProductVisual variant="balance" className="mb-4 min-h-[160px]" />
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Snapshot hiện tại</p>
-
-              <div className="mt-4 stack-tight">
-                <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card p-4">
-                  <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Điểm cân bằng chung</p>
-                  <p className="mt-2 text-3xl font-bold text-foreground">
-                    <CountUp value={averageScore} precision={1} />
-                    <span className="text-muted-foreground">/10</span>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
+                  <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Mạnh nhất</p>
+                  <p className="mt-1 truncate text-[13px] font-bold text-foreground">{getLifeAreaLabel(strongestArea.name)}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    <CountUp value={strongestArea.score} />/10
                   </p>
                 </div>
-                <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card p-4">
-                  <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Mạnh nhất</p>
-                  <p className="mt-2 text-xl font-bold text-foreground">{getLifeAreaLabel(strongestArea.name)}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    <CountUp value={strongestArea.score} />
-                    <span>/10</span>
-                  </p>
-                </div>
-                <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card p-4">
-                  <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Nên ưu tiên</p>
-                  <p className="mt-2 text-xl font-bold text-foreground">{getLifeAreaLabel(weakestArea.name)}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    <CountUp value={weakestArea.score} />
-                    <span>/10</span>
+                <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
+                  <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Ưu tiên</p>
+                  <p className="mt-1 truncate text-[13px] font-bold text-foreground">{getLifeAreaLabel(weakestArea.name)}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    <CountUp value={weakestArea.score} />/10
                   </p>
                 </div>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        }
+      />
 
       {!hasAnyScore ? (
         <InlineStatusMessage tone="warning">

@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { Link, useNavigate, useParams } from "react-router";
 
 import { EmptyOrdersIllustration } from "../components/illustrations";
+import { PageHero } from "../components/layout/PageHero";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -622,59 +623,55 @@ export function OrderStatusPage() {
 
   return (
     <div className="stack-section pb-12">
-      <Card className="overflow-hidden">
-        <CardContent className="relative p-5 sm:p-6 lg:p-8">
-          <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_320px]">
-            <div className="stack-section">
-              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-4 py-1.5 text-sm text-muted-foreground">
-                <Truck className="h-4 w-4" />
-                Theo dõi đơn hàng
-              </div>
-
-              <div className="stack-stack">
-                <h1 className="max-w-3xl text-2xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-3xl lg:text-4xl">
-                  Theo dõi <span className="text-gradient-vibrant">trạng thái đơn kit</span> hiện tại.
-                </h1>
-                <p className="max-w-3xl text-base leading-7 text-muted-foreground">
-                  Trang này gom lại thông tin chính của đơn, kit và tiến trình giao hiện tại. Flow vẫn là local-only, nhưng đã đủ rõ để review trải nghiệm đặt đơn.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <Badge variant="neutral">{getOrderStatusLabel(order.status)}</Badge>
-                <Badge variant="neutral">{getKitTypeLabel(order.kitType)}</Badge>
-              </div>
-
-              <p className="max-w-2xl text-sm leading-7 text-muted-foreground">
-                {hasGoalLink
-                  ? `Đơn này đang bám theo mục tiêu "${order.goalTitle}" trong nhóm ${order.focusArea}.`
-                  : "Đơn này chưa gắn với mục tiêu cụ thể, nhưng vẫn có thể theo dõi đầy đủ như một kit độc lập."}
-              </p>
-            </div>
-
-            <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-5 shadow-sm">
-              <EmptyOrdersIllustration className="mb-3 hidden w-24 text-[color:var(--tone-shell-primary)] opacity-50 sm:block" />
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Tóm tắt đơn</p>
-              <div className="mt-4 grid gap-2.5">
-                {summaryItems.map((item) => {
-                  const Icon = item.icon;
-
-                  return (
-                    <div key={item.label} className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card px-4 py-3.5">
-                      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                        <Icon className="h-3.5 w-3.5 text-[color:var(--tone-shell-primary)]" />
-                        {item.label}
-                      </div>
-                      <p className="mt-2 text-base font-semibold text-foreground">{item.value}</p>
-                      <p className="mt-1 text-xs leading-6 text-muted-foreground">{item.note}</p>
+      <PageHero
+        className="page-enter"
+        eyebrow="Theo dõi đơn hàng"
+        eyebrowIcon={<Truck className="h-3.5 w-3.5" />}
+        title={
+          <>
+            Theo dõi <span className="text-gradient-vibrant">trạng thái đơn kit</span> hiện tại.
+          </>
+        }
+        description={
+          hasGoalLink
+            ? `Đơn này đang bám theo mục tiêu "${order.goalTitle}" trong nhóm ${order.focusArea}.`
+            : "Đơn này chưa gắn với mục tiêu cụ thể, nhưng vẫn có thể theo dõi đầy đủ như một kit độc lập."
+        }
+        primaryCta={
+          <Badge variant="neutral" className="px-3 py-1.5 text-[12px]">
+            {getOrderStatusLabel(order.status)}
+          </Badge>
+        }
+        secondaryCta={
+          <Badge variant="neutral" className="px-3 py-1.5 text-[12px]">
+            {getKitTypeLabel(order.kitType)}
+          </Badge>
+        }
+        aside={
+          <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4 shadow-sm">
+            <EmptyOrdersIllustration className="mb-2 hidden w-20 text-[color:var(--tone-shell-primary)] opacity-50 sm:block" />
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tóm tắt đơn</p>
+            <div className="mt-3 grid gap-2">
+              {summaryItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={item.label}
+                    className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5"
+                  >
+                    <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                      <Icon className="h-3 w-3 text-[color:var(--tone-shell-primary)]" />
+                      {item.label}
                     </div>
-                  );
-                })}
-              </div>
+                    <p className="mt-1 text-[13px] font-semibold text-foreground">{item.value}</p>
+                    <p className="mt-0.5 text-[11px] leading-5 text-muted-foreground">{item.note}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        </CardContent>
-      </Card>
+        }
+      />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="stack-section">

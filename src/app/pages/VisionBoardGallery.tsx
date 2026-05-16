@@ -21,6 +21,7 @@ import {
 
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { VisionMapIllustration } from "../components/illustrations";
+import { PageHero } from "../components/layout/PageHero";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -197,72 +198,64 @@ export function VisionBoardGallery() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Card className="overflow-hidden">
-        <CardContent className="relative p-5 sm:p-6 lg:p-8">
-          <div className="relative z-10 grid gap-8 xl:grid-cols-[minmax(0,1.15fr)_360px]">
-            <div className="stack-section">
-              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-4 py-1.5 text-sm text-muted-foreground">
-                <Images className="h-4 w-4" />
-                Thư viện Dear Our Future
+      <PageHero
+        className="page-enter"
+        eyebrow="Thư viện Dear Our Future"
+        eyebrowIcon={<Images className="h-3.5 w-3.5" />}
+        title={
+          <>
+            Mọi <span className="text-gradient-vibrant">vision board</span> được lưu lại như những phiên bản tương lai.
+          </>
+        }
+        description="Xem lại các vision board theo từng năm, tiếp tục chỉnh sửa và giữ cảm hứng luôn ở gần mình."
+        primaryCta={
+          <Button glow onClick={() => navigate("/vision-board")}>
+            <Plus className="h-4 w-4" />
+            Tạo bảng mới
+          </Button>
+        }
+        secondaryCta={
+          orderSourceBoard ? (
+            <Button
+              variant="outline"
+              onClick={() => navigate("/order", { state: { visionBoardId: orderSourceBoard.id } })}
+            >
+              <Package className="h-4 w-4" />
+              {spotlightBoardId ? "Tạo bộ in từ bảng vừa lưu" : "Tạo bộ in từ bảng gần nhất"}
+            </Button>
+          ) : (
+            <Button variant="outline" onClick={() => navigate("/")}>
+              Về Trang chính
+            </Button>
+          )
+        }
+        aside={
+          <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Snapshot thư viện</p>
+            <div className="mt-3 grid gap-2">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
+                  <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Tổng bảng</p>
+                  <p className="mt-1 text-2xl font-bold text-foreground">{userData.visionBoards.length}</p>
+                </div>
+                <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
+                  <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Phần tử</p>
+                  <p className="mt-1 text-2xl font-bold text-foreground">{totalItems}</p>
+                </div>
               </div>
-
-              <div className="stack-stack">
-                <h1 className="max-w-3xl text-2xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-3xl lg:text-4xl">
-                  Một thư viện nơi mọi <span className="text-gradient-vibrant">vision board</span> của bạn được lưu lại như những phiên bản của tương lai.
-                </h1>
-                <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-                  Tại đây bạn có thể xem lại các vision board theo từng năm, tiếp tục chỉnh sửa, so sánh độ phong phú của
-                  từng bảng và giữ cảm hứng luôn ở gần mình.
+              <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
+                <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Bảng gần nhất</p>
+                <p className="mt-1 truncate text-[13px] font-semibold text-foreground">
+                  {latestBoard ? latestBoard.name : "Chưa có bảng nào"}
                 </p>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <Button glow onClick={() => navigate("/vision-board")}>
-                  <Plus className="h-4 w-4" />
-                  Tạo bảng mới
-                </Button>
-                {orderSourceBoard ? (
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate("/order", { state: { visionBoardId: orderSourceBoard.id } })}
-                  >
-                    <Package className="h-4 w-4" />
-                    {spotlightBoardId ? "Tạo bộ in từ bảng vừa lưu" : "Tạo bộ in từ bảng gần nhất"}
-                  </Button>
-                ) : null}
-                <Button variant="outline" onClick={() => navigate("/")}>
-                  Về Trang chính
-                </Button>
-              </div>
-            </div>
-
-            <div className="hidden xl:block rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-5 shadow-sm">
-              <VisionMapIllustration className="mb-5 w-full text-[color:var(--tone-shell-primary)] opacity-70" />
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Snapshot thư viện</p>
-
-              <div className="mt-4 stack-tight">
-                <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Tổng số vision board</p>
-                  <p className="mt-2 text-3xl font-bold text-foreground">{userData.visionBoards.length}</p>
-                </div>
-                <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Tổng số phần tử</p>
-                  <p className="mt-2 text-3xl font-bold text-foreground">{totalItems}</p>
-                </div>
-                <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4">
-                  <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Vision board gần nhất</p>
-                  <p className="mt-2 text-lg font-semibold text-foreground">
-                    {latestBoard ? latestBoard.name : "Chưa có bảng nào"}
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {latestBoard ? `Năm ${latestBoard.year}` : "Bắt đầu với bảng đầu tiên của bạn."}
-                  </p>
-                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  {latestBoard ? `Năm ${latestBoard.year}` : "Bắt đầu với bảng đầu tiên."}
+                </p>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        }
+      />
 
       {userData.visionBoards.length > 0 && (
       <div className="stagger-hover-grid grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">

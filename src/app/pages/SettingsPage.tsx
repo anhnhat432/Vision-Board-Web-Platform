@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { DataStorageInfo } from "../components/DataStorageInfo";
 import { CloudSyncIllustration, SyncIdleDot, SyncOkDot } from "../components/illustrations";
-import { PageHeader } from "../components/layout/PageHeader";
+import { PageHero } from "../components/layout/PageHero";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -187,10 +187,15 @@ export function SettingsPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-      <h1 className="sr-only">Tài khoản và dữ liệu</h1>
-      <PageHeader
+      <PageHero
+        className="page-enter"
         eyebrow="Cài đặt"
-        title="Tài khoản và dữ liệu"
+        eyebrowIcon={<SyncIcon className="h-3.5 w-3.5" />}
+        title={
+          <>
+            Tài khoản và <span className="text-gradient-vibrant">dữ liệu</span>
+          </>
+        }
         description="Quản lý dữ liệu lưu trên thiết bị này, bản sao lưu và các lối tắt cài đặt quan trọng."
       />
 

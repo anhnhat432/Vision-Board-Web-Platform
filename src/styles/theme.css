@@ -854,14 +854,19 @@
     pointer-events: none;
     background-image:
       radial-gradient(
-        circle 380px at 12% 28%,
-        var(--tone-orb-a) 0%,
-        transparent 65%
+        circle 620px at 10% 18%,
+        var(--tone-orb-a, var(--tone-bg-left, transparent)) 0%,
+        transparent 70%
       ),
       radial-gradient(
-        circle 320px at 88% 72%,
-        var(--tone-orb-b) 0%,
-        transparent 65%
+        circle 540px at 92% 8%,
+        var(--tone-orb-b, var(--tone-bg-right, transparent)) 0%,
+        transparent 70%
+      ),
+      radial-gradient(
+        circle 480px at 92% 78%,
+        var(--tone-orb-c, var(--tone-bg-bottom, transparent)) 0%,
+        transparent 70%
       );
     animation: ambient-drift 32s ease-in-out infinite alternate;
   }
@@ -906,14 +911,19 @@
   .dark .app-shell::after {
     background-image:
       radial-gradient(
-        circle 380px at 12% 28%,
-        var(--tone-orb-a) 0%,
-        transparent 65%
+        circle 620px at 10% 18%,
+        var(--tone-orb-a, var(--tone-bg-left, transparent)) 0%,
+        transparent 70%
       ),
       radial-gradient(
-        circle 320px at 88% 72%,
-        var(--tone-orb-b) 0%,
-        transparent 65%
+        circle 540px at 92% 8%,
+        var(--tone-orb-b, var(--tone-bg-right, transparent)) 0%,
+        transparent 70%
+      ),
+      radial-gradient(
+        circle 480px at 92% 78%,
+        var(--tone-orb-c, var(--tone-bg-bottom, transparent)) 0%,
+        transparent 70%
       );
   }
 

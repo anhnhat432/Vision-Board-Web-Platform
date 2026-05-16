@@ -8,6 +8,7 @@ import {
   Menu,
   Moon,
   RefreshCw,
+  Search,
   Settings2,
   Sparkles,
   Sun,
@@ -72,6 +73,7 @@ import {
 } from "./root-layout/LocalDataMigrationPrompt";
 import { GracePeriodBanner } from "./billing/GracePeriodBanner";
 import { AppSidebar } from "./root-layout/AppSidebar";
+import { CommandPalette, type CommandPaletteGoal } from "./root-layout/CommandPalette";
 import { EmailVerificationBanner } from "./root-layout/EmailVerificationBanner";
 import { FirstLoginRestoreToast } from "./root-layout/FirstLoginRestoreToast";
 import { SyncStatusPill } from "./root-layout/SyncStatusPill";
@@ -80,6 +82,7 @@ import {
   getNavItemsForState,
   isActiveRoute,
   MOBILE_NAV_LABELS,
+  NAV_ITEMS,
   prefetchRoute,
   WARM_PREFETCH_ROUTE_PATHS,
 } from "./root-layout/navConfig";
@@ -184,6 +187,18 @@ export function RootLayout() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMoreOpen, setDesktopMoreOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = (event: KeyboardEvent) => {
+      const isHotkey = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k";
+      if (!isHotkey) return;
+      event.preventDefault();
+      setCommandPaletteOpen((open) => !open);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
   const desktopMoreRef = useRef<HTMLDivElement | null>(null);
   const [guideUserData, setGuideUserData] = useState(() => getUserData());
   const [isGuideOpen, setIsGuideOpen] = useState(false);
@@ -507,6 +522,13 @@ export function RootLayout() {
     currentAccountPlanCode === "PRO" ? "Pro" : currentAccountPlanCode === "PLUS" ? "Plus" : "Miễn phí";
   const accountAvatarLabel = (accountLabel || accountEmail || "A").trim().slice(0, 1).toUpperCase();
   const accountStatus = userProfileError ? "Lỗi hồ sơ" : accountEmail || "Tài khoản đã đăng nhập";
+  const commandPaletteGoals: CommandPaletteGoal[] = (guideUserData.goals ?? [])
+    .slice(0, 12)
+    .map((goal) => ({
+      id: goal.id,
+      title: goal.title || "Mục tiêu chưa đặt tên",
+      hasTwelveWeek: Boolean(goal.twelveWeekSystem),
+    }));
   const canRetryUserProfile = Boolean(user) && !userProfileLoading && (!userProfile || Boolean(userProfileError));
 
   const handleSignOut = async () => {
@@ -927,7 +949,6 @@ export function RootLayout() {
             }}
             isSigningOut={isSigningOut}
             shellBadgeStyle={shellBadgeStyle}
-            activeNavStyle={activeNavStyle}
           />
         ) : null}
 
@@ -1266,6 +1287,37 @@ export function RootLayout() {
           )}
         </header>
 
+        {showSidebar ? (
+          <div className="sticky top-0 z-30 hidden lg:block">
+            <div className="border-b border-[color:var(--border)] bg-[color-mix(in_srgb,var(--background)_72%,transparent)] backdrop-blur-xl supports-[backdrop-filter]:bg-[color-mix(in_srgb,var(--background)_60%,transparent)]">
+              <div className="mx-auto flex h-12 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+                <nav aria-label="Vị trí trang" className="flex min-w-0 items-center gap-2 text-[12.5px]">
+                  <span className="text-muted-foreground">Workspace</span>
+                  <span aria-hidden="true" className="text-muted-foreground/60">
+                    /
+                  </span>
+                  <span className="truncate font-semibold text-foreground">{pageMeta.label}</span>
+                </nav>
+                <div className="flex items-center gap-2">
+                  {!demoMode && user ? <SyncStatusPill compact /> : null}
+                  <button
+                    type="button"
+                    onClick={() => setCommandPaletteOpen(true)}
+                    className="flex items-center gap-2 rounded-[var(--r-control)] border border-[color:var(--border)] bg-[color:var(--muted)] px-2.5 py-1 text-[12px] font-medium text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
+                    aria-label="Mở command palette"
+                  >
+                    <Search className="h-3 w-3" />
+                    <span>Tìm nhanh</span>
+                    <kbd className="ml-1 hidden rounded border border-[color:var(--border)] bg-card px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground xl:inline-block">
+                      ⌘K
+                    </kbd>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         <main
           className={`relative z-10 mx-auto max-w-6xl px-4 pb-12 pt-5 sm:px-6 sm:pt-7 lg:px-8 ${
             isSignedOutVisitor ? "" : "main-content-mobile-pad"
@@ -1369,6 +1421,25 @@ export function RootLayout() {
         ) : null}
 
         {demoMode || user ? <MotivationalReminder /> : null}
+        {showSidebar ? (
+          <CommandPalette
+            open={commandPaletteOpen}
+            onOpenChange={setCommandPaletteOpen}
+            navItems={NAV_ITEMS}
+            goals={commandPaletteGoals}
+            onNavigate={navigateAppRoute}
+            onOpenGoal={(goalId) => navigateAppRoute(`/goals?goal=${goalId}`)}
+            onOpenTwelveWeek={(goalId) => {
+              try {
+                localStorage.setItem("latest_12_week_goal_id", goalId);
+                localStorage.setItem("latest_12_week_system_goal_id", goalId);
+              } catch {
+                /* ignore storage errors */
+              }
+              navigateAppRoute("/12-week-system");
+            }}
+          />
+        ) : null}
         <NewUserGuideDialog open={isGuideOpen} onOpenChange={setIsGuideOpen} userData={guideUserData} />
         {localDataMigrationPrompt}
         <Toaster />

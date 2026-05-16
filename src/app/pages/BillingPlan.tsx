@@ -9,9 +9,10 @@ import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { canRequestRefund, getEmailVerificationRequiredMessage, rememberEmailVerificationReturnPath } from "../utils/email-verification-guard";
 import { BillingPlusIllustration, HeroBillingPlusScene, SoftDotsPattern } from "../components/illustrations";
 import { logBillingUiError, toastBillingNetworkError } from "../utils/billing-ui-monitoring";
+import { PageHero } from "../components/layout/PageHero";
 import { PrimaryActionCard } from "../components/layout/PrimaryActionCard";
 import { SectionBlock } from "../components/layout/SectionBlock";
-import { MotionParallaxLayer, MotionStaggerItem, MotionStaggerList, MotionTilt } from "../components/motion";
+import { MotionStaggerItem, MotionStaggerList, MotionTilt } from "../components/motion";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -677,28 +678,22 @@ export function BillingPlan() {
         onCheckoutComplete={handleCheckoutComplete}
       />
 
-      {/* Hero */}
-      <PrimaryActionCard
-        hero
+      <PageHero
+        className="page-enter"
         eyebrow="Premium"
-        icon={<CreditCard className="h-4 w-4" />}
-        title="Quản lý gói của bạn"
-        titleAs="h1"
-        description="Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản của bạn. Quyền Plus chỉ mở sau khi hệ thống xác nhận giao dịch."
-        className="page-enter relative overflow-hidden"
-        titleClassName="max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl lg:text-5xl"
-        descriptionClassName="max-w-2xl text-base leading-7 text-muted-foreground"
-        contentClassName="pointer-events-none hidden justify-end lg:flex"
-      >
-        <MotionParallaxLayer
-          depth={0.26}
-          className="pointer-events-none absolute -right-12 -top-14 hidden w-[360px] text-[color:var(--tone-shell-primary)] opacity-12 lg:block"
-          aria-hidden="true"
-        >
-          <HeroBillingPlusScene className="w-full" />
-        </MotionParallaxLayer>
-        <BillingPlusIllustration className="-my-8 w-56 text-[color:var(--tone-shell-primary)] opacity-30" />
-      </PrimaryActionCard>
+        eyebrowIcon={<CreditCard className="h-3.5 w-3.5" />}
+        title={
+          <>
+            Quản lý <span className="text-gradient-vibrant">gói của bạn</span>
+          </>
+        }
+        description="Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản. Quyền Plus chỉ mở sau khi hệ thống xác nhận giao dịch."
+        aside={
+          <div className="flex h-full items-center justify-center rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-3">
+            <BillingPlusIllustration className="w-40 text-[color:var(--tone-shell-primary)] opacity-50" />
+          </div>
+        }
+      />
 
       {/* Checkout return status */}
       {checkoutReturnStatus === "pending" && (
