@@ -136,12 +136,12 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
 
             <h1
               id="public-landing-title"
-              className="mt-6 max-w-4xl text-4xl font-black tracking-[-0.05em] text-white sm:text-5xl lg:text-7xl"
+              className="mt-6 max-w-4xl text-3xl font-extrabold tracking-[-0.04em] text-white sm:text-4xl lg:text-6xl"
             >
               Biến tầm nhìn thành mục tiêu rõ ràng và kế hoạch 12 tuần có nhịp làm mỗi ngày.
             </h1>
 
-            <p className="mt-6 max-w-2xl text-base leading-8 text-cyan-50/82 sm:text-lg">{heroDescription}</p>
+            <p className="mt-6 max-w-2xl text-sm leading-7 text-cyan-50/82 sm:text-base">{heroDescription}</p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               {isDemo ? (
@@ -184,8 +184,8 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
             <div className="mt-8 grid max-w-3xl gap-3 sm:grid-cols-3">
               {heroStats.map(([value, label]) => (
                 <div key={value} className="rounded-[1.35rem] border border-white/15 bg-white/10 px-4 py-3 backdrop-blur">
-                  <p className="text-xl font-black tracking-tight text-white">{value}</p>
-                  <p className="mt-1 text-sm leading-5 text-cyan-50/62">{label}</p>
+                  <p className="text-lg font-extrabold tracking-tight text-white">{value}</p>
+                  <p className="mt-1 text-xs leading-5 text-cyan-50/62">{label}</p>
                 </div>
               ))}
             </div>
@@ -228,7 +228,7 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">Luồng nên đi</p>
-              <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">Một đường chính, không phải nhiều lối rẽ.</h2>
+              <h2 className="mt-2 text-xl font-extrabold tracking-[-0.03em] text-slate-950 sm:text-2xl">Một đường chính, không phải nhiều lối rẽ.</h2>
             </div>
             <p className="max-w-xl text-sm leading-6 text-slate-500">
               Trang mới dẫn người dùng theo đúng thứ tự: hiểu hiện trạng, chốt mục tiêu, kiểm tra khả thi, rồi mới thực thi.
@@ -273,7 +273,7 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
                 >
                   {card.metric}
                 </span>
-                <h3 className="text-xl font-black tracking-[-0.025em]">{card.title}</h3>
+                <h3 className="text-lg font-extrabold tracking-[-0.025em]">{card.title}</h3>
                 <p className={`text-sm leading-7 ${index === 1 ? "text-slate-300" : "text-slate-500"}`}>{card.description}</p>
               </div>
             </article>
@@ -284,7 +284,7 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-200/75">Bắt đầu đúng thứ tự</p>
-              <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] sm:text-3xl">Đừng mở planner trống. Đi qua flow 12 tuần trước.</h2>
+              <h2 className="mt-2 text-xl font-extrabold tracking-[-0.03em] sm:text-2xl">Đừng mở planner trống. Đi qua flow 12 tuần trước.</h2>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-300">
                 Sau vài phút, người dùng biết điểm yếu hiện tại, mục tiêu nên chọn, và việc đầu tiên cần làm trong tuần này.
               </p>
