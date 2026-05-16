@@ -143,14 +143,14 @@ export function CommandPalette({
             className="flex-1 bg-transparent text-[14px] tracking-tight text-foreground placeholder:text-muted-foreground focus:outline-none"
             aria-label="Tìm kiếm command palette"
           />
-          <kbd className="hidden rounded border border-[color:var(--border)] bg-[color:var(--muted)] px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground sm:inline-block">
+          <kbd className="hidden rounded border border-[color:var(--border)] bg-[color:var(--muted)] px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground sm:inline-block">
             ESC
           </kbd>
         </div>
 
         <div ref={listRef} className="max-h-[60vh] overflow-y-auto p-1.5">
           {filtered.length === 0 ? (
-            <div className="px-3 py-8 text-center text-[13px] text-muted-foreground">
+            <div className="px-3 py-8 text-center text-sm text-muted-foreground">
               Không có kết quả phù hợp.
             </div>
           ) : (
@@ -169,7 +169,7 @@ export function CommandPalette({
                   data-cmd-index={index}
                   onMouseEnter={() => setHighlight(index)}
                   onClick={() => runAction(action)}
-                  className={`flex w-full items-center gap-3 rounded-[calc(var(--r-control)-2px)] px-2.5 py-2 text-left text-[13px] transition-colors ${
+                  className={`flex w-full items-center gap-3 rounded-[calc(var(--r-control)-2px)] px-2.5 py-2 text-left text-sm transition-colors ${
                     isActive
                       ? "bg-[color:var(--muted)] text-foreground"
                       : "text-foreground/85 hover:bg-[color:var(--muted)]"
@@ -188,13 +188,13 @@ export function CommandPalette({
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-semibold">{action.label}</span>
                     {action.description ? (
-                      <span className="block truncate text-[11.5px] text-muted-foreground">
+                      <span className="block truncate text-xs text-muted-foreground">
                         {action.description}
                       </span>
                     ) : null}
                   </span>
                   {isActive ? (
-                    <span className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground">
+                    <span className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground">
                       Enter
                       <CornerDownLeft className="h-3 w-3" />
                     </span>
@@ -207,7 +207,7 @@ export function CommandPalette({
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-2 border-t border-[color:var(--border)] bg-[color:var(--muted)] px-3.5 py-2 text-[11px] text-muted-foreground">
+        <div className="flex items-center justify-between gap-2 border-t border-[color:var(--border)] bg-[color:var(--muted)] px-3.5 py-2 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-2">
             <kbd className="rounded border border-[color:var(--border)] bg-card px-1.5 py-0.5 font-semibold">↑</kbd>
             <kbd className="rounded border border-[color:var(--border)] bg-card px-1.5 py-0.5 font-semibold">↓</kbd>

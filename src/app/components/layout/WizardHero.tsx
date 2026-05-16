@@ -80,7 +80,7 @@ export function WizardHero({
         >
           <div className="min-w-0 space-y-3">
             {eyebrow ? (
-              <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 {eyebrowIcon ? (
                   <span aria-hidden="true" className="text-[color:var(--tone-shell-secondary)]">
                     {eyebrowIcon}

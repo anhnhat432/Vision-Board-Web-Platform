@@ -231,7 +231,7 @@ export function LifeInsight() {
           <CardContent className="relative p-5 sm:p-7 lg:p-8">
             <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_240px]">
               <div className="stack-stack">
-                <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   <Compass className="h-3.5 w-3.5 text-[color:var(--tone-shell-secondary)]" aria-hidden="true" />
                   Góc nhìn cuộc sống
                 </p>
@@ -264,7 +264,7 @@ export function LifeInsight() {
                   className="grid gap-3 rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)]"
                 >
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
                       Quyết định tiếp theo
                     </p>
                     <h2 className="mt-2 text-xl font-semibold leading-snug tracking-[-0.014em] text-foreground sm:text-2xl">
@@ -279,18 +279,18 @@ export function LifeInsight() {
 
                   <div className="grid gap-2 text-sm">
                     <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-4 py-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Trọng tâm</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Trọng tâm</p>
                       <p className="mt-1 font-bold text-foreground">
                         {focusAreaLabel} · {focusArea.score}/10
                       </p>
                     </div>
                     <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-4 py-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Gợi ý SMART</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Gợi ý SMART</p>
                       <p className="mt-1 font-semibold text-foreground">{smartGoalStarter.metricName}</p>
                       <p className="mt-1 text-xs leading-5 text-muted-foreground">{smartGoalStarter.specificGoalStatement}</p>
                     </div>
                     <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-4 py-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Điểm tựa</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Điểm tựa</p>
                       <p className="mt-1 font-semibold text-foreground">{strongestAreaLabel}</p>
                     </div>
                   </div>
@@ -301,7 +301,7 @@ export function LifeInsight() {
                   className="grid gap-3 rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-5 sm:grid-cols-[minmax(0,1.35fr)_minmax(220px,0.65fr)]"
                 >
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                       Vì sao chọn trọng tâm này?
                     </p>
                     <h2 className="mt-2 text-xl font-bold tracking-[-0.014em] text-foreground">
@@ -396,7 +396,7 @@ export function LifeInsight() {
                       aria-label={`${getLifeAreaLabel(area.name)} ${area.score}/10${isRecommended ? ", gợi ý" : ""}`}
                     />
                     {isRecommended && (
-                      <span className="absolute -top-2 left-3 rounded-[var(--r-pill)] bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground">
+                      <span className="absolute -top-2 left-3 rounded-[var(--r-pill)] bg-primary px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-primary-foreground">
                         Gợi ý
                       </span>
                     )}
@@ -513,7 +513,7 @@ export function LifeInsight() {
               >
                 <div className="flex items-center gap-2" style={{ color: lowestArea.color }}>
                   <TrendingDown className="h-4 w-4" />
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em]">Nút thắt hiện tại</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em]">Nút thắt hiện tại</p>
                 </div>
                 <p className="mt-[var(--space-inline)] text-lg font-semibold text-foreground">
                   {getLifeAreaLabel(lowestArea.name)}
@@ -530,7 +530,7 @@ export function LifeInsight() {
               >
                 <div className="flex items-center gap-2" style={{ color: strongestArea.color }}>
                   <Sparkles className="h-4 w-4" />
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em]">Lực đỡ hiện có</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em]">Lực đỡ hiện có</p>
                 </div>
                 <p className="mt-[var(--space-inline)] text-lg font-semibold text-foreground">
                   {getLifeAreaLabel(strongestArea.name)}
@@ -545,7 +545,7 @@ export function LifeInsight() {
           <Card>
             <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between lg:p-6">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   Trọng tâm hiện tại
                 </p>
                 <p className="mt-2 text-lg font-semibold text-foreground">

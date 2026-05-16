@@ -138,7 +138,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <p
       data-slot="card-description"
-      className={cn("text-[13px] leading-6 text-muted-foreground tracking-tight", className)}
+      className={cn("text-sm leading-6 text-muted-foreground tracking-tight", className)}
       {...props}
     />
   );

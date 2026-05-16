@@ -104,7 +104,7 @@ export function TwelveWeekDashboardState({
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-[color:var(--muted)] text-[color:var(--tone-shell-primary)]">
           <Icon className={`h-10 w-10 ${kind === "loading" ? "animate-spin" : ""}`} />
         </div>
-        <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{eyebrow}</p>
+        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{eyebrow}</p>
         <h1 className="mt-[var(--space-inline)] text-3xl font-semibold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl">{title}</h1>
         <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base" role="status">
           {description}
@@ -228,21 +228,21 @@ export function TwelveWeekDashboardHeader({
       aside={
         <div data-testid="twelve-week-header-metrics" className="grid h-full gap-2.5">
           <div className="flex flex-wrap items-center gap-1.5">
-            <Badge variant="outline" className={`rounded-[var(--r-pill)] px-2.5 py-1 text-[11px] ${phaseInfo.badgeClassName}`}>
+            <Badge variant="outline" className={`rounded-[var(--r-pill)] px-2.5 py-1 text-xs ${phaseInfo.badgeClassName}`}>
               <Target className="mr-1 h-3 w-3" />
               Tuần {currentWeek}/{system.totalWeeks}
             </Badge>
-            <Badge variant="outline" className={`rounded-[var(--r-pill)] px-2.5 py-1 text-[11px] ${syncBadgeClass}`}>
+            <Badge variant="outline" className={`rounded-[var(--r-pill)] px-2.5 py-1 text-xs ${syncBadgeClass}`}>
               <span className="mr-1 inline-block h-1.5 w-1.5 rounded-[var(--r-pill)] bg-current opacity-70" aria-hidden="true" />
               {syncBadgeLabel}
             </Badge>
-            <Badge variant="neutral" className="text-[11px]">
+            <Badge variant="neutral" className="text-xs">
               Gói {getPlanLabel(activePlanCode)}
             </Badge>
             {reviewDueToday && (
               <Badge
                 variant="outline"
-                className="rounded-[var(--r-pill)] border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] px-2.5 py-1 text-[11px] text-[color:var(--color-warning-fg)]"
+                className="rounded-[var(--r-pill)] border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] px-2.5 py-1 text-xs text-[color:var(--color-warning-fg)]"
               >
                 Review hôm nay
               </Badge>
@@ -253,19 +253,19 @@ export function TwelveWeekDashboardHeader({
               <span className="mb-1 flex h-7 w-7 items-center justify-center rounded-[var(--r-control)] bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning-fg)]">
                 <Zap className="h-3.5 w-3.5" aria-hidden="true" />
               </span>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Còn làm</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Còn làm</p>
               <p className="count-up mt-0.5 text-xl font-bold tabular-nums text-foreground">{todayRemainingCount}</p>
-              <p className="mt-0.5 text-[10.5px] text-muted-foreground">{todayCompletedCount} đã chốt</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{todayCompletedCount} đã chốt</p>
             </div>
             <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-2.5">
               <span className="mb-1 flex h-7 w-7 items-center justify-center rounded-[var(--r-control)] bg-[color:var(--color-success-bg)] text-[color:var(--color-success-fg)]">
                 <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
               </span>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Tuần</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Tuần</p>
               <p className="count-up mt-0.5 text-xl font-bold tabular-nums text-foreground">
                 <MotionCountUp value={weekCompletion.percent} suffix="%" />
               </p>
-              <p className="mt-0.5 line-clamp-1 text-[10.5px] text-muted-foreground">
+              <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
                 {currentWeekRange
                   ? `${formatCalendarDate(currentWeekRange.start)}–${formatCalendarDate(currentWeekRange.end)}`
                   : "Đang chạy"}
@@ -285,16 +285,16 @@ export function TwelveWeekDashboardHeader({
                   <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
                 )}
               </span>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Review</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Review</p>
               <p className="mt-0.5 truncate text-sm font-bold text-foreground">
                 {reviewDueToday ? "Hôm nay" : getReviewDayLabel(system.reviewDay)}
               </p>
-              <p className="mt-0.5 line-clamp-1 text-[10.5px] text-muted-foreground">{reviewStatusLabel}</p>
+              <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{reviewStatusLabel}</p>
             </div>
           </div>
           <p
             data-testid="twelve-week-header-actions"
-            className="hidden text-[12px] leading-5 text-muted-foreground sm:block"
+            className="hidden text-xs leading-5 text-muted-foreground sm:block"
           >
             {reviewDueToday
               ? "Việc tiếp theo: chốt review tuần trước khi mở việc mới."

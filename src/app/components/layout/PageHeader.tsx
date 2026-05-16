@@ -34,7 +34,7 @@ export function PageHeader({
   return (
     <div className={cn("max-w-3xl space-y-3", className)}>
       {eyebrow && (
-        <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+        <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
           <span
             aria-hidden="true"
             className="inline-block h-1.5 w-1.5 rounded-full"

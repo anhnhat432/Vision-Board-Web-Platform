@@ -46,7 +46,7 @@ function ExecutionScoreCardComponent({
           <p className="text-sm font-semibold text-slate-900">
             {completedTasks}/{totalTasks || 0}
           </p>
-          <p className="text-[11px] text-slate-500">việc đã lên kế hoạch</p>
+          <p className="text-xs text-slate-500">việc đã lên kế hoạch</p>
         </div>
       </div>
       <div className="space-y-1.5">

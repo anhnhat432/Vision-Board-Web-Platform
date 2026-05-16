@@ -391,33 +391,33 @@ export function ReflectionJournal() {
           }
           aside={
             <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Nhịp viết hiện tại</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Nhịp viết hiện tại</p>
               {hasReflections ? (
                 <div className="mt-3 grid gap-2">
                   <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                    <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Tổng số bài</p>
+                    <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Tổng số bài</p>
                     <p className="mt-1 text-2xl font-bold text-foreground">
                       <CountUp value={userData.reflections.length} />
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                      <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Tháng này</p>
+                      <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Tháng này</p>
                       <p className="mt-1 text-lg font-bold text-foreground">
                         <CountUp value={monthlyCount} />
                       </p>
                     </div>
                     <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                      <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Cảm xúc</p>
-                      <p className="mt-1 truncate text-[13px] font-bold text-foreground">{recentMood.label}</p>
+                      <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Cảm xúc</p>
+                      <p className="mt-1 truncate text-sm font-bold text-foreground">{recentMood.label}</p>
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="mt-3 rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-4 text-center">
                   <BookOpen className="mx-auto h-7 w-7 text-[color:var(--tone-shell-primary)]" />
-                  <p className="mt-2 text-[13px] font-bold text-foreground">Chưa có nhật ký nào</p>
-                  <p className="mt-1 text-[11px] leading-5 text-muted-foreground">
+                  <p className="mt-2 text-sm font-bold text-foreground">Chưa có nhật ký nào</p>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
                     Dữ liệu sẽ xuất hiện sau bài viết đầu tiên.
                   </p>
                 </div>

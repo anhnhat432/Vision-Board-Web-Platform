@@ -65,7 +65,7 @@ export function WizardStepPip({
             >
               <span
                 className={cn(
-                  "flex size-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] border text-[11px] font-bold",
+                  "flex size-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] border text-xs font-bold",
                   isActive && "border-primary bg-primary text-white",
                   isDone && !isActive && "border-primary/30 bg-primary/10 text-primary",
                   !isDone && !isActive && "border-slate-300 bg-white text-slate-400",

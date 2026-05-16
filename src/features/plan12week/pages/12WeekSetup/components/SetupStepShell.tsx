@@ -181,7 +181,7 @@ export function SetupStepShell({
           </div>
           <div className="grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1fr)_220px] lg:items-stretch">
             <div className="stack-tight">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
                 {STEPS[currentStep]?.label}
               </p>
               <CardTitle>
@@ -197,7 +197,7 @@ export function SetupStepShell({
               >
                 <StepIcon className="h-6 w-6" aria-hidden="true" />
               </div>
-              <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.12em] opacity-70">{visual.eyebrow}</p>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.12em] opacity-70">{visual.eyebrow}</p>
               <p className="mt-1 text-sm font-semibold leading-6">{visual.caption}</p>
             </div>
           </div>

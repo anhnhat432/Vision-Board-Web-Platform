@@ -352,10 +352,10 @@ export function LifeBalance() {
         }
         aside={
           <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Snapshot hiện tại</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Snapshot hiện tại</p>
             <div className="mt-3 grid gap-2">
               <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Điểm chung</p>
+                <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Điểm chung</p>
                 <p className="mt-1 text-2xl font-bold text-foreground">
                   <CountUp value={averageScore} precision={1} />
                   <span className="text-muted-foreground">/10</span>
@@ -363,16 +363,16 @@ export function LifeBalance() {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                  <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Mạnh nhất</p>
-                  <p className="mt-1 truncate text-[13px] font-bold text-foreground">{getLifeAreaLabel(strongestArea.name)}</p>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Mạnh nhất</p>
+                  <p className="mt-1 truncate text-sm font-bold text-foreground">{getLifeAreaLabel(strongestArea.name)}</p>
+                  <p className="text-xs text-muted-foreground">
                     <CountUp value={strongestArea.score} />/10
                   </p>
                 </div>
                 <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                  <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Ưu tiên</p>
-                  <p className="mt-1 truncate text-[13px] font-bold text-foreground">{getLifeAreaLabel(weakestArea.name)}</p>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Ưu tiên</p>
+                  <p className="mt-1 truncate text-sm font-bold text-foreground">{getLifeAreaLabel(weakestArea.name)}</p>
+                  <p className="text-xs text-muted-foreground">
                     <CountUp value={weakestArea.score} />/10
                   </p>
                 </div>
@@ -394,7 +394,7 @@ export function LifeBalance() {
             <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_180px_auto] lg:items-center">
               <div data-testid="life-balance-signal-summary" className="stack-stack">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                     Tiếp theo trong luồng chính
                   </p>
                   <h2 className="mt-1 text-xl font-bold tracking-[-0.014em] text-foreground sm:text-2xl">
@@ -415,21 +415,21 @@ export function LifeBalance() {
                     data-testid="life-balance-signal-weakest"
                     className="rounded-[var(--r-control)] border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] p-4"
                   >
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-warning-fg)]">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--color-warning-fg)]">
                       Ưu tiên
                     </p>
                     <p className="mt-2 text-lg font-bold text-foreground">{getLifeAreaLabel(weakestArea.name)}</p>
                     <p className="mt-1 text-sm font-semibold text-[color:var(--color-warning-fg)]">{weakestArea.score}/10</p>
                   </div>
                   <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                       Trung bình
                     </p>
                     <p className="mt-2 text-lg font-bold text-foreground">{averageScore.toFixed(1)}/10</p>
                     <p className="mt-1 text-sm text-muted-foreground">mặt bằng hiện tại</p>
                   </div>
                   <div className="rounded-[var(--r-control)] border border-[color:var(--color-success-border)] bg-[color:var(--color-success-bg)] p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--color-success-fg)]">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--color-success-fg)]">
                       Điểm tựa
                     </p>
                     <p className="mt-2 text-lg font-bold text-foreground">{getLifeAreaLabel(strongestArea.name)}</p>
@@ -645,7 +645,7 @@ export function LifeBalance() {
                               trackColor={area.color}
                               aria-label={`Điểm ${getLifeAreaLabel(area.name)}`}
                             />
-                            <div className="flex items-center justify-between text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+                            <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
                               <span>Cần chú ý</span>
                               <span>Xuất sắc</span>
                             </div>

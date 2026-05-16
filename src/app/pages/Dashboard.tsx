@@ -870,11 +870,11 @@ function DashboardContent({
               aside={
                 <div className="flex h-full flex-col gap-3 rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                       Nhịp hôm nay
                     </p>
                     <span
-                      className={`inline-flex items-center gap-1 rounded-[var(--r-pill)] px-2.5 py-1 text-[11px] font-bold ${
+                      className={`inline-flex items-center gap-1 rounded-[var(--r-pill)] px-2.5 py-1 text-xs font-bold ${
                         dashboardKpiStreak >= 7
                           ? "bg-[color:var(--color-warning-fg)] text-white shadow-[var(--shadow-2)] motion-safe:animate-pulse"
                           : "bg-card text-foreground ring-1 ring-[color:var(--border)]"
@@ -885,7 +885,7 @@ function DashboardContent({
                     </span>
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[12.5px] font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
                       {dashboardNextAction.title}
                     </p>
                     <p className="mt-1 text-sm leading-6 text-foreground">{dashboardNextAction.description}</p>
@@ -893,14 +893,14 @@ function DashboardContent({
                   <div className="mt-auto flex items-center justify-between gap-2 border-t border-[color:var(--border)] pt-3">
                     <span
                       data-tour-id="dashboard-plan-card"
-                      className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground"
+                      className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground"
                     >
                       <Crown className="h-3 w-3 text-[color:var(--tone-shell-primary)]" />
                       Gói {getPlanLabel(currentPlanCode)}
                     </span>
                     <button
                       type="button"
-                      className="text-[11px] font-semibold text-[color:var(--tone-shell-primary)] underline-offset-4 hover:underline"
+                      className="text-xs font-semibold text-[color:var(--tone-shell-primary)] underline-offset-4 hover:underline"
                       onClick={() =>
                         currentPlanCode === "FREE" ? openUpgradeDialog("plan", "PLUS") : navigate(planTarget)
                       }
@@ -923,7 +923,7 @@ function DashboardContent({
                       <CheckCircle2 className="h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--tone-shell-primary)]">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--tone-shell-primary)]">
                         Việc quan trọng nhất hôm nay
                       </p>
                       <h3 className="mt-1 line-clamp-2 text-lg font-bold tracking-tight text-foreground sm:text-xl">
@@ -1355,12 +1355,12 @@ function DashboardContent({
                                       <div className="flex flex-wrap items-center gap-2">
                                         <p className="truncate font-semibold text-foreground">{goal.title}</p>
                                         {goal.twelveWeekSystem && (
-                                          <span className="rounded-[var(--r-pill)] bg-[color:var(--color-info-bg)] px-3 py-1 text-[11px] font-semibold text-[color:var(--color-info-fg)]">
+                                          <span className="rounded-[var(--r-pill)] bg-[color:var(--color-info-bg)] px-3 py-1 text-xs font-semibold text-[color:var(--color-info-fg)]">
                                             12 tuần
                                           </span>
                                         )}
                                         {progress === 100 && (
-                                          <span className="rounded-[var(--r-pill)] bg-[color:var(--color-success-bg)] px-3 py-1 text-[11px] font-semibold text-[color:var(--color-success-fg)]">
+                                          <span className="rounded-[var(--r-pill)] bg-[color:var(--color-success-bg)] px-3 py-1 text-xs font-semibold text-[color:var(--color-success-fg)]">
                                             Hoàn thành
                                           </span>
                                         )}

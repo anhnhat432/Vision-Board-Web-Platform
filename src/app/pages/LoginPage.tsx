@@ -298,7 +298,7 @@ export function LoginPage() {
           </RevealDiv>
           <RevealParagraph
             {...revealMotionProps}
-            className="relative z-10 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground"
+            className="relative z-10 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground"
           >
             Dear Our Future
           </RevealParagraph>
@@ -360,7 +360,7 @@ export function LoginPage() {
             {TRUST_FEATURES.map(({ icon: Icon, label }) => (
               <span
                 key={label}
-                className="inline-flex items-center gap-1.5 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-2.5 py-1 text-[11px] font-semibold text-foreground"
+                className="inline-flex items-center gap-1.5 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-2.5 py-1 text-xs font-semibold text-foreground"
               >
                 <Icon className="h-3 w-3 text-[color:var(--tone-shell-primary)]" />
                 {label}

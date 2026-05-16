@@ -101,7 +101,7 @@ export function PlanQualityPanel({ plan, context, className = "" }: PlanQualityP
                     style={{ width: `${(dim.score / dim.maxScore) * 100}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-muted-foreground">
+                <span className="text-[11px] text-muted-foreground">
                   {dim.score}/{dim.maxScore}
                 </span>
               </div>

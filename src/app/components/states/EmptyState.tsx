@@ -130,7 +130,7 @@ export function EmptyState({
       ) : null}
       <div className={cn("space-y-2", blockAlignClass, variant === "card" ? "max-w-2xl" : "max-w-lg")}>
         {eyebrow ? (
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{eyebrow}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{eyebrow}</p>
         ) : null}
         <HeadingTag className={titleSizeClass}>{title}</HeadingTag>
         {description ? (

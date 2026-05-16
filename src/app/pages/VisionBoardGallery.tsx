@@ -231,24 +231,24 @@ export function VisionBoardGallery() {
         }
         aside={
           <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Snapshot thư viện</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Snapshot thư viện</p>
             <div className="mt-3 grid gap-2">
               <div className="grid grid-cols-2 gap-2">
                 <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                  <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Tổng bảng</p>
+                  <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Tổng bảng</p>
                   <p className="mt-1 text-2xl font-bold text-foreground">{userData.visionBoards.length}</p>
                 </div>
                 <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                  <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Phần tử</p>
+                  <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Phần tử</p>
                   <p className="mt-1 text-2xl font-bold text-foreground">{totalItems}</p>
                 </div>
               </div>
               <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Bảng gần nhất</p>
-                <p className="mt-1 truncate text-[13px] font-semibold text-foreground">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Bảng gần nhất</p>
+                <p className="mt-1 truncate text-sm font-semibold text-foreground">
                   {latestBoard ? latestBoard.name : "Chưa có bảng nào"}
                 </p>
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {latestBoard ? `Năm ${latestBoard.year}` : "Bắt đầu với bảng đầu tiên."}
                 </p>
               </div>
@@ -426,7 +426,7 @@ export function VisionBoardGallery() {
                                         </div>
                                       )}
                                       {item.type === "quote" && (
-                                        <div className="rounded-[var(--r-tile)] border border-white/80 bg-white/90 px-3 py-2 text-[10px] italic leading-4 text-slate-700 shadow-sm">
+                                        <div className="rounded-[var(--r-tile)] border border-white/80 bg-white/90 px-3 py-2 text-[11px] italic leading-4 text-slate-700 shadow-sm">
                                           {item.content}
                                         </div>
                                       )}

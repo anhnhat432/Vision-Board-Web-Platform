@@ -139,24 +139,24 @@ export function Achievements() {
         }
         aside={
           <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tình trạng hiện tại</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tình trạng hiện tại</p>
             <div className="mt-3 grid gap-2">
               <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Đã mở khóa</p>
+                <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Đã mở khóa</p>
                 <p className="mt-1 text-2xl font-bold text-foreground">
                   <CountUp value={userData.achievements.length} />
                   <span className="text-muted-foreground">/{ACHIEVEMENT_ORDER.length}</span>
                 </p>
               </div>
               <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Tiến độ bộ sưu tập</p>
+                <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Tiến độ bộ sưu tập</p>
                 <p className="mt-1 text-2xl font-bold text-foreground">
                   <CountUp value={completionRate} suffix="%" />
                 </p>
               </div>
               <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Mới nhất</p>
-                <p className="mt-1 truncate text-[13px] font-semibold text-foreground">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Mới nhất</p>
+                <p className="mt-1 truncate text-sm font-semibold text-foreground">
                   {latestAchievement
                     ? (ACHIEVEMENT_COPY[latestAchievement.title]?.title ?? latestAchievement.title)
                     : "Chưa có thành tựu nào"}

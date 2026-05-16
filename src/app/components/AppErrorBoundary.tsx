@@ -87,7 +87,7 @@ export function AppErrorBoundary() {
                     <AlertTriangle className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Trạng thái</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Trạng thái</p>
                     <p className="text-lg font-semibold text-foreground">
                       {errorCode ? `Lỗi ${errorCode}` : "Trang gặp lỗi ngoài dự kiến"}
                     </p>
@@ -95,13 +95,13 @@ export function AppErrorBoundary() {
                 </div>
 
                 <div className="mt-6 rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Mô tả</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Mô tả</p>
                   <p className="mt-2 text-sm leading-7 text-foreground">{errorMessage}</p>
                 </div>
 
                 {import.meta.env.DEV && error instanceof Error ? (
                   <div className="mt-4 rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Chi tiết dev</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Chi tiết dev</p>
                     <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs leading-6 text-muted-foreground">
                       {error.stack || error.message}
                     </pre>

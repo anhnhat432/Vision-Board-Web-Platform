@@ -34,7 +34,7 @@ function GoalProgressCardComponent({
           <p className="text-sm font-semibold text-slate-900">
             {completedTasks}/{totalTasks || 0}
           </p>
-          <p className="text-[11px] text-slate-500">việc</p>
+          <p className="text-xs text-slate-500">việc</p>
         </div>
       </div>
       <div className="space-y-1.5">

@@ -552,7 +552,7 @@ export function TwelveWeekProgressTab({
                   <div className="min-w-[320px] stack-tight">
                     <div className="flex gap-1 pl-10">
                       {["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map((day) => (
-                        <div key={day} className="w-9 text-center text-[10px] font-medium text-slate-500">
+                        <div key={day} className="w-9 text-center text-[11px] font-medium text-slate-500">
                           {day}
                         </div>
                       ))}
@@ -563,7 +563,7 @@ export function TwelveWeekProgressTab({
 
                       return (
                         <div key={weekNumber} className="flex items-center gap-1">
-                          <span className="w-8 text-right text-[10px] font-medium text-slate-500">T{weekNumber}</span>
+                          <span className="w-8 text-right text-[11px] font-medium text-slate-500">T{weekNumber}</span>
                           {cells.map((cell) => {
                             const cellClass =
                               cell.total === 0
@@ -589,7 +589,7 @@ export function TwelveWeekProgressTab({
                         </div>
                       );
                     })}
-                    <div className="mt-[var(--space-inline)] flex flex-wrap items-center gap-3 text-[10px] text-slate-500">
+                    <div className="mt-[var(--space-inline)] flex flex-wrap items-center gap-3 text-[11px] text-slate-500">
                       <span className="flex items-center gap-1">
                         <span className="inline-block h-3 w-3 rounded-[var(--r-control)] bg-emerald-500" /> &gt;=80%
                       </span>

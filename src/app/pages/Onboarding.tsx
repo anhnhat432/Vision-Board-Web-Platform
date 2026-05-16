@@ -320,7 +320,7 @@ export function Onboarding() {
 
                     {draftBanner}
 
-                    <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                       <Sparkles className="h-3.5 w-3.5 text-[color:var(--tone-shell-secondary)]" aria-hidden="true" />
                       Bước 1 · Cân bằng cuộc sống
                     </p>
@@ -389,7 +389,7 @@ export function Onboarding() {
                             className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-card p-4 shadow-[var(--shadow-1)]"
                           >
                             <div className="flex items-center justify-between gap-3">
-                              <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                              <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                                 Bước 0{index + 1}
                               </span>
                               <div
@@ -409,7 +409,7 @@ export function Onboarding() {
                   </div>
 
                   <div className="hidden rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-5 xl:block">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                       Bạn sẽ nhận được gì
                     </p>
                     <WelcomeIllustration className="mt-[var(--space-stack)] w-full text-[color:var(--tone-shell-primary)]" />
@@ -451,7 +451,7 @@ export function Onboarding() {
             <CardContent className="p-5 sm:p-7">
               <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
                 <div className="stack-tight">
-                  <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                     <Compass className="h-3.5 w-3.5 text-[color:var(--tone-shell-secondary)]" aria-hidden="true" />
                     Chấm 8 lĩnh vực
                   </p>
@@ -470,7 +470,7 @@ export function Onboarding() {
                 >
                   <LifeBalanceWheelIllustration className="pointer-events-none absolute -right-10 -top-10 hidden w-36 text-[color:var(--tone-shell-primary)] opacity-15 lg:block" />
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                       Tín hiệu đang hiện ra
                     </p>
                     <AutoSaveIndicator lastSavedAt={lastSavedAt} />

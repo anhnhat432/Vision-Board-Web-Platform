@@ -163,7 +163,7 @@ export function SmartGoalStepShell({
         <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4 sm:p-6">
           <div className="sticky top-3 z-20 rounded-[var(--r-card)] border border-[color:var(--border)] bg-card/95 p-2 shadow-[var(--shadow-1)] backdrop-blur">
             <div className="mb-2 flex items-center justify-between gap-3 px-1">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 Bước {stepIndex + 1}/{totalSteps}
               </span>
               <span className="truncate text-xs font-semibold text-foreground">{step.label}</span>
@@ -195,7 +195,7 @@ export function SmartGoalStepShell({
                         <Icon className="h-4 w-4" />
                       </span>
                       <span className="text-sm font-bold">{visual.letter}</span>
-                      <span className="hidden truncate text-[11px] sm:block">{smartStep.label}</span>
+                      <span className="hidden truncate text-xs sm:block">{smartStep.label}</span>
                       {isDone ? <span className="sr-only">đã hoàn thành</span> : null}
                     </button>
                   </li>
@@ -218,7 +218,7 @@ export function SmartGoalStepShell({
           </div>
           <div className="mt-[var(--space-stack)] grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1fr)_200px]">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
                 {step.label}
               </p>
               <h2
@@ -238,7 +238,7 @@ export function SmartGoalStepShell({
               >
                 <CurrentStepIcon className="h-5 w-5" aria-hidden="true" />
               </div>
-              <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.12em] opacity-70">
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.12em] opacity-70">
                 SMART · {currentStepVisual.letter}
               </p>
               <p className="mt-1 text-sm font-semibold leading-6">{step.completionHint}</p>
@@ -379,7 +379,7 @@ export function SmartGoalStepShell({
 
       <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
         <div className="stack-tight">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
             Tiếp tục viết mục tiêu
           </p>
           <p className="text-sm text-muted-foreground">{step.completionHint}</p>

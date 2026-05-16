@@ -97,7 +97,7 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
           <span className="flex h-7 w-7 items-center justify-center rounded-[var(--r-pill)] bg-[color:var(--muted)] text-[color:var(--tone-shell-primary)]">
             <ChevronUp className="h-4 w-4" />
           </span>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{title}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{title}</p>
         </div>
         <Badge variant="neutral">{insights.length} góc nhìn</Badge>
       </div>
@@ -129,7 +129,7 @@ export function TwelveWeekInsightsCard(props: TwelveWeekInsightsCardProps) {
       {nextActionCallback && nextAction.id !== "no_action" && (
         <div className="mt-4 flex flex-wrap items-start justify-between gap-3 rounded-[var(--r-control)] border border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] p-3">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-info-fg)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--color-info-fg)]">
               Gợi ý hành động tiếp theo
             </p>
             <p

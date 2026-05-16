@@ -34,7 +34,7 @@ export function SmartGoalHero({
     <Card className="page-enter">
       <CardContent className="relative grid gap-6 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:p-8">
         <div className="stack-stack min-w-0">
-          <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+          <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
             <Compass className="h-3.5 w-3.5 text-[color:var(--tone-shell-secondary)]" aria-hidden="true" />
             Viết mục tiêu rõ
           </p>
@@ -85,7 +85,7 @@ export function SmartGoalHero({
                     }`}
                   >
                     <span
-                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-[var(--r-pill)] text-[10px] font-bold ${
+                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-[var(--r-pill)] text-[11px] font-bold ${
                         active
                           ? "bg-primary text-primary-foreground"
                           : done
@@ -108,7 +108,7 @@ export function SmartGoalHero({
           data-testid="smart-goal-handoff-card"
           className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-5"
         >
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
             Góc nhìn cuộc sống đã chọn
           </p>
           <p className="mt-2 text-2xl font-bold tracking-[-0.014em] text-foreground">{focusAreaLabel}</p>
@@ -117,13 +117,13 @@ export function SmartGoalHero({
           </p>
           <div className="mt-4 space-y-2">
             <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 Chỉ số gợi ý
               </p>
               <p className="mt-1 text-sm font-semibold text-foreground">{smartGoalStarter.metricName}</p>
             </div>
             <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 Khung thực thi
               </p>
               <p className="mt-1 text-sm font-semibold text-foreground">{smartGoalStarter.targetWeeks} tuần</p>

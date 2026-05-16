@@ -20,7 +20,7 @@ function LoadingSpinner({ className, label = "Đang tải..." }: { className?: s
         />
       </div>
       {label ? (
-        <p className="text-[13px] font-medium tracking-tight text-muted-foreground">{label}</p>
+        <p className="text-sm font-medium tracking-tight text-muted-foreground">{label}</p>
       ) : null}
     </div>
   );

@@ -1140,7 +1140,7 @@ export function TwelveWeekSetup() {
       <Card>
         <CardContent className="relative p-5 sm:p-7 lg:p-8">
           <div className="stack-stack">
-            <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+            <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               <Compass className="h-3.5 w-3.5 text-[color:var(--tone-shell-secondary)]" aria-hidden="true" />
               Thiết lập 12 tuần
             </p>

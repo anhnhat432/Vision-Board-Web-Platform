@@ -73,7 +73,7 @@ export function SectionBlock({
       <div className={cn("flex items-start justify-between gap-2", headerVisuallyHidden && "sr-only")}>
         <div className={cn("flex-1", headerDensityClass)}>
           {eyebrow && (
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               {eyebrow}
             </p>
           )}

@@ -58,7 +58,7 @@ export function PlanProgress({ weeks, totalWeeks = 12 }: PlanProgressProps) {
                 week.completed ? "opacity-100" : "opacity-45"
               }`}
             >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em]">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em]">
                 Week {week.weekNumber}
               </p>
               <p className="mt-1 text-sm font-semibold">{week.executionScore}%</p>

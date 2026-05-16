@@ -46,7 +46,7 @@ export function LocalOnlyNotice({
         role="status"
         data-testid={testId}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-2.5 py-1 text-[11px] font-semibold tracking-tight text-muted-foreground",
+          "inline-flex items-center gap-1.5 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-2.5 py-1 text-xs font-semibold tracking-tight text-muted-foreground",
           className,
         )}
       >
@@ -61,7 +61,7 @@ export function LocalOnlyNotice({
       role="status"
       data-testid={testId}
       className={cn(
-        "flex flex-col gap-3 rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] px-4 py-3 text-[13px] leading-6 text-muted-foreground sm:flex-row sm:items-center",
+        "flex flex-col gap-3 rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] px-4 py-3 text-sm leading-6 text-muted-foreground sm:flex-row sm:items-center",
         className,
       )}
     >

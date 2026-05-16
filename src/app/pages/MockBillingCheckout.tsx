@@ -89,7 +89,7 @@ export function MockBillingCheckout() {
       <Card className="overflow-hidden">
         <CardContent className="grid gap-6 p-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-10">
           <div className="stack-stack">
-            <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               <Crown className="h-3.5 w-3.5 text-[color:var(--tone-shell-primary)]" />
               Mở Plus demo
             </div>
@@ -104,7 +104,7 @@ export function MockBillingCheckout() {
           </div>
 
           <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-5 shadow-sm">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Tóm tắt nâng cấp</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Tóm tắt nâng cấp</p>
             <p className="mt-2 text-3xl font-bold text-foreground">{getPlanLabel(session.planCode)}</p>
             <p className="mt-1 text-sm text-muted-foreground">{plan.priceLabel}</p>
           </div>

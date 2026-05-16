@@ -638,19 +638,19 @@ export function OrderStatusPage() {
             : "Đơn này chưa gắn với mục tiêu cụ thể, nhưng vẫn có thể theo dõi đầy đủ như một kit độc lập."
         }
         primaryCta={
-          <Badge variant="neutral" className="px-3 py-1.5 text-[12px]">
+          <Badge variant="neutral" className="px-3 py-1.5 text-xs">
             {getOrderStatusLabel(order.status)}
           </Badge>
         }
         secondaryCta={
-          <Badge variant="neutral" className="px-3 py-1.5 text-[12px]">
+          <Badge variant="neutral" className="px-3 py-1.5 text-xs">
             {getKitTypeLabel(order.kitType)}
           </Badge>
         }
         aside={
           <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4 shadow-sm">
             <EmptyOrdersIllustration className="mb-2 hidden w-20 text-[color:var(--tone-shell-primary)] opacity-50 sm:block" />
-            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tóm tắt đơn</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tóm tắt đơn</p>
             <div className="mt-3 grid gap-2">
               {summaryItems.map((item) => {
                 const Icon = item.icon;
@@ -659,12 +659,12 @@ export function OrderStatusPage() {
                     key={item.label}
                     className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5"
                   >
-                    <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                       <Icon className="h-3 w-3 text-[color:var(--tone-shell-primary)]" />
                       {item.label}
                     </div>
-                    <p className="mt-1 text-[13px] font-semibold text-foreground">{item.value}</p>
-                    <p className="mt-0.5 text-[11px] leading-5 text-muted-foreground">{item.note}</p>
+                    <p className="mt-1 text-sm font-semibold text-foreground">{item.value}</p>
+                    <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{item.note}</p>
                   </div>
                 );
               })}
@@ -683,13 +683,13 @@ export function OrderStatusPage() {
 
             <CardContent className="stack-section">
               <div className="space-y-1">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Mục tiêu & kit</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Mục tiêu & kit</p>
                 <p className="text-sm text-muted-foreground">Giữ phần định hướng và cấu hình kit ở cùng một cụm để quét nhanh hơn.</p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     <Target className="h-3.5 w-3.5 text-[color:var(--tone-shell-primary)]" />
                     Mục tiêu đang gắn
                   </div>
@@ -704,7 +704,7 @@ export function OrderStatusPage() {
                 </div>
 
                 <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     <Package className="h-3.5 w-3.5" />
                     Cấu hình kit
                   </div>

@@ -910,7 +910,7 @@ function GoalTrackerContent({
               Xem nhanh mục tiêu, hạn chót và nơi cần mở tiếp. Việc hằng ngày của chu kỳ 12 tuần vẫn nằm trong
               trung tâm 12 tuần.
               {shouldShowFreeGoalLimit ? (
-                <span className="mt-2 inline-flex rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                <span className="mt-2 inline-flex rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">
                   {goalLimitUsage.current}/{goalLimitUsage.limit} mục tiêu Free
                 </span>
               ) : null}
@@ -949,11 +949,11 @@ function GoalTrackerContent({
                   <PriorityIcon className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] opacity-75">{priority.eyebrow}</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] opacity-75">{priority.eyebrow}</p>
                   <p className="mt-1 text-base font-semibold leading-6">{priority.title}</p>
                 </div>
               </div>
-              <p className="text-[13px] leading-6 opacity-80">{priority.note}</p>
+              <p className="text-sm leading-6 opacity-80">{priority.note}</p>
               <Button className="mt-auto w-full" variant="outline" onClick={handlePriorityAction}>
                 {priority.cta}
               </Button>

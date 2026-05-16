@@ -597,7 +597,7 @@ export function SMARTGoalSetup() {
                   key={step.key}
                   className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card p-4"
                 >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                     {step.label}
                   </p>
                   <p className="mt-2 text-sm leading-7 text-foreground">

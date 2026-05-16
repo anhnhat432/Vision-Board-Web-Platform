@@ -621,7 +621,7 @@ export function TwelveWeekLocalStatusSection({
       <div className="mt-4 rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-4 py-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Đồng bộ tài khoản</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Đồng bộ tài khoản</p>
             <p className="mt-2 text-sm leading-6 text-slate-700">
               {getBackendStatusDescription(backendConnectionStatus)}
             </p>
@@ -754,7 +754,7 @@ export function TwelveWeekLocalStatusSection({
           <div className="flex flex-col gap-3">
             <div className="min-w-0 space-y-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   Việc đang chờ đồng bộ
                 </p>
                 <Badge
@@ -774,19 +774,19 @@ export function TwelveWeekLocalStatusSection({
               </p>
               <div className="grid grid-cols-2 gap-2 pt-2 sm:grid-cols-4">
                 <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Chờ đồng bộ</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Chờ đồng bộ</p>
                   <p className="mt-1 text-lg font-semibold text-slate-950">{queueSummary.pendingCount}</p>
                 </div>
                 <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Đang gửi</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Đang gửi</p>
                   <p className="mt-1 text-lg font-semibold text-slate-950">{queueSummary.inFlightCount}</p>
                 </div>
                 <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Lỗi/thử lại</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Lỗi/thử lại</p>
                   <p className="mt-1 text-lg font-semibold text-slate-950">{queueSummary.failedOrRetryableCount}</p>
                 </div>
                 <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Đã nhận</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Đã nhận</p>
                   <p className="mt-1 text-lg font-semibold text-slate-950">{queueSummary.succeededCount}</p>
                 </div>
               </div>
@@ -802,7 +802,7 @@ export function TwelveWeekLocalStatusSection({
               </div>
               <div className="grid grid-cols-2 gap-2 pt-2 sm:grid-cols-3">
                 <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Mạng</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Mạng</p>
                   <p className={`mt-1 text-sm font-semibold ${
                     mutationQueueSyncStatus.networkStatus === "offline"
                       ? "text-amber-700"
@@ -814,7 +814,7 @@ export function TwelveWeekLocalStatusSection({
                   </p>
                 </div>
                 <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Tự thử lại khi có mạng</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tự thử lại khi có mạng</p>
                   <p className="mt-1 text-sm font-semibold text-slate-950">
                     {mutationQueueSyncStatus.retryOnReconnectEnabled ? "Bật" : "Tắt"}
                   </p>
@@ -884,25 +884,25 @@ export function TwelveWeekLocalStatusSection({
       </div>
       <div className="mt-4 grid grid-cols-2 gap-2">
         <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Nhắc việc</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Nhắc việc</p>
           <p className="mt-2 text-sm font-semibold text-slate-950">
             {appPreferences.enableInAppReminders ? "Bật" : "Tắt"}
           </p>
         </div>
         <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Thiết bị</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Thiết bị</p>
           <p className="mt-2 text-sm font-semibold text-slate-950">
             {appPreferences.enableBrowserNotifications ? "Bật" : "Tắt"}
           </p>
         </div>
         <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Phân tích</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Phân tích</p>
           <p className="mt-2 text-sm font-semibold text-slate-950">
             {appPreferences.allowLocalAnalytics ? "Bật" : "Tắt"}
           </p>
         </div>
         <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">Việc đang chờ đồng bộ</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Việc đang chờ đồng bộ</p>
           <p className="mt-2 text-sm font-semibold text-slate-950">{pendingOutboxCount} chờ</p>
         </div>
       </div>

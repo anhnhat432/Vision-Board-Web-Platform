@@ -335,11 +335,11 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                 <p className="count-up text-4xl font-bold tabular-nums text-foreground">{fitScore}</p>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">/100</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">/100</p>
               </div>
             </div>
             <div className="min-w-0 text-center sm:text-left">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Điểm khả thi</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Điểm khả thi</p>
               <p className="mt-2 text-lg font-semibold leading-7 text-foreground">{copy.statusHint}</p>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 Điểm này kết hợp câu trả lời kiểm tra, điểm Cân bằng cuộc sống và độ rõ của mục tiêu SMART.
@@ -350,7 +350,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4 shadow-sm sm:hidden">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                   Mức phù hợp hiện tại
                 </p>
                 <p className="mt-2 text-3xl font-bold text-foreground">{fitScore}%</p>
@@ -381,7 +381,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                 key={card.label}
                 className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-5 shadow-sm"
               >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{card.label}</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{card.label}</p>
                 <p
                   className={`mt-[var(--space-inline)] font-bold text-foreground ${
                     card.label === "Phần cần chú ý nhất" ? "text-xl leading-7" : "text-3xl"
@@ -447,10 +447,10 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                           Tuần 1 nên thế nào
                         </p>
-                        <span className="rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
+                        <span className="rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
                           Mức tải: {planLoadLabel[result.planLoad]}
                         </span>
-                        <span className="rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
+                        <span className="rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
                           Quỹ thời gian: {capacityLabel[result.weeklyCapacity]}
                         </span>
                       </div>

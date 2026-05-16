@@ -64,7 +64,7 @@ export function FeasibilityStepShell({
                   mobileMode="compact"
                   className="mb-[var(--space-stack)]"
                 />
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
                   {currentQuestion.axisLabel}
                 </p>
                 <p className="mt-2 text-xs font-medium text-muted-foreground">

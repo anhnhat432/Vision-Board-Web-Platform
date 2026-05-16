@@ -559,7 +559,7 @@ export function RootLayout() {
             title={accountEmail || accountLabel}
           >
             <span
-              className={`flex shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-foreground text-[11px] font-bold uppercase text-background ${
+              className={`flex shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-foreground text-xs font-bold uppercase text-background ${
                 isMobile ? "h-7 w-7" : "h-8 w-8"
               }`}
               aria-hidden="true"
@@ -576,11 +576,11 @@ export function RootLayout() {
         >
           <DropdownMenuLabel className="px-2.5 py-3 normal-case tracking-normal">
             <div className="flex items-start gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-foreground text-[12px] font-bold uppercase text-background">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-foreground text-xs font-bold uppercase text-background">
                 {accountAvatarLabel}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                   Tài khoản
                 </p>
                 <p className="mt-1 truncate text-[14px] font-semibold tracking-tight text-foreground">
@@ -890,7 +890,7 @@ export function RootLayout() {
           {demoMode ? (
             <div
               role="note"
-              className="border-b border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] px-4 py-1.5 text-center text-[11px] font-medium text-[color:var(--color-info-fg)] sm:px-6"
+              className="border-b border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] px-4 py-1.5 text-center text-xs font-medium text-[color:var(--color-info-fg)] sm:px-6"
             >
               <HardDrive className="mr-1 inline h-3 w-3 align-text-bottom" />
               Bản demo · Dữ liệu lưu trên trình duyệt này.
@@ -996,7 +996,7 @@ export function RootLayout() {
                         onPointerEnter={() => handlePrefetch(item.path)}
                         aria-current={active ? "page" : undefined}
                         title={item.label}
-                        className={`h-8 shrink-0 rounded-[var(--r-pill)] px-3 text-[13px] font-semibold tracking-tight transition-colors duration-150 ${
+                        className={`h-8 shrink-0 rounded-[var(--r-pill)] px-3 text-sm font-semibold tracking-tight transition-colors duration-150 ${
                           active
                             ? "text-white hover:text-white"
                             : "bg-transparent text-muted-foreground shadow-none hover:bg-card hover:text-foreground"
@@ -1020,7 +1020,7 @@ export function RootLayout() {
                           aria-current={secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined}
                           aria-expanded={desktopMoreOpen}
                           aria-haspopup="menu"
-                          className={`h-8 shrink-0 rounded-[var(--r-pill)] px-3 text-[13px] font-semibold tracking-tight transition-colors duration-150 ${
+                          className={`h-8 shrink-0 rounded-[var(--r-pill)] px-3 text-sm font-semibold tracking-tight transition-colors duration-150 ${
                             isDesktopMoreNavActive
                               ? "text-white hover:text-white"
                               : "bg-transparent text-muted-foreground shadow-none hover:bg-card hover:text-foreground"
@@ -1041,7 +1041,7 @@ export function RootLayout() {
                             aria-label="Mục khác"
                             className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-[var(--r-soft)] border border-[color:var(--border)] bg-popover p-1.5 shadow-[0_4px_8px_-2px_rgba(15,23,42,0.06),0_16px_32px_-12px_rgba(15,23,42,0.16)]"
                           >
-                            <div className="px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                            <div className="px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                               Mục khác
                             </div>
                             {secondaryNavItems.map((item) => {
@@ -1059,7 +1059,7 @@ export function RootLayout() {
                                     setDesktopMoreOpen(false);
                                     navigateAppRoute(item.path);
                                   }}
-                                  className={`my-0.5 flex w-full cursor-pointer items-center gap-2.5 rounded-[calc(var(--r-control)-3px)] px-2.5 py-2 text-left text-[13px] font-medium tracking-tight outline-none transition-colors ${
+                                  className={`my-0.5 flex w-full cursor-pointer items-center gap-2.5 rounded-[calc(var(--r-control)-3px)] px-2.5 py-2 text-left text-sm font-medium tracking-tight outline-none transition-colors ${
                                     active
                                       ? "text-white focus:text-white"
                                       : "text-foreground hover:bg-[color:var(--muted)] focus:bg-[color:var(--muted)]"
@@ -1087,7 +1087,7 @@ export function RootLayout() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleAuthNavigate("signin")}
-                      className="h-8 rounded-[var(--r-pill)] px-3 text-[13px]"
+                      className="h-8 rounded-[var(--r-pill)] px-3 text-sm"
                     >
                       Đăng nhập
                     </Button>
@@ -1095,7 +1095,7 @@ export function RootLayout() {
                       variant="secondary"
                       size="sm"
                       onClick={() => handleAuthNavigate("signup")}
-                      className="h-8 rounded-[var(--r-pill)] px-3.5 text-[13px]"
+                      className="h-8 rounded-[var(--r-pill)] px-3.5 text-sm"
                     >
                       Đăng ký
                     </Button>
@@ -1112,7 +1112,7 @@ export function RootLayout() {
               </div>
 
               <div className="md:hidden flex min-w-0 items-center gap-1.5">
-                <span className="hidden max-w-[120px] truncate text-[13px] font-semibold tracking-tight text-foreground sm:inline">
+                <span className="hidden max-w-[120px] truncate text-sm font-semibold tracking-tight text-foreground sm:inline">
                   {pageMeta.label}
                 </span>
                 <button
@@ -1131,7 +1131,7 @@ export function RootLayout() {
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="h-10 rounded-[var(--r-control)] px-3 text-[13px]"
+                    className="h-10 rounded-[var(--r-control)] px-3 text-sm"
                     onClick={() => handleAuthNavigate("signup")}
                   >
                     Đăng ký
@@ -1291,7 +1291,7 @@ export function RootLayout() {
           <div className="sticky top-0 z-30 hidden lg:block">
             <div className="border-b border-[color:var(--border)] bg-[color-mix(in_srgb,var(--background)_72%,transparent)] backdrop-blur-xl supports-[backdrop-filter]:bg-[color-mix(in_srgb,var(--background)_60%,transparent)]">
               <div className="mx-auto flex h-12 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-                <nav aria-label="Vị trí trang" className="flex min-w-0 items-center gap-2 text-[12.5px]">
+                <nav aria-label="Vị trí trang" className="flex min-w-0 items-center gap-2 text-xs">
                   <span className="text-muted-foreground">Workspace</span>
                   <span aria-hidden="true" className="text-muted-foreground/60">
                     /
@@ -1303,12 +1303,12 @@ export function RootLayout() {
                   <button
                     type="button"
                     onClick={() => setCommandPaletteOpen(true)}
-                    className="flex items-center gap-2 rounded-[var(--r-control)] border border-[color:var(--border)] bg-[color:var(--muted)] px-2.5 py-1 text-[12px] font-medium text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
+                    className="flex items-center gap-2 rounded-[var(--r-control)] border border-[color:var(--border)] bg-[color:var(--muted)] px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
                     aria-label="Mở command palette"
                   >
                     <Search className="h-3 w-3" />
                     <span>Tìm nhanh</span>
-                    <kbd className="ml-1 hidden rounded border border-[color:var(--border)] bg-card px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground xl:inline-block">
+                    <kbd className="ml-1 hidden rounded border border-[color:var(--border)] bg-card px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground xl:inline-block">
                       ⌘K
                     </kbd>
                   </button>
@@ -1339,7 +1339,7 @@ export function RootLayout() {
         ) : null}
 
         {user ? (
-          <footer className="relative z-10 mx-auto max-w-6xl px-4 pb-24 text-[12px] tracking-tight text-muted-foreground sm:px-6 md:pb-8 lg:px-8">
+          <footer className="relative z-10 mx-auto max-w-6xl px-4 pb-24 text-xs tracking-tight text-muted-foreground sm:px-6 md:pb-8 lg:px-8">
             <div className="flex items-center justify-center gap-2 border-t border-[color:var(--border)] pt-4 md:justify-end">
               <span className="font-semibold">v1.0</span>
               <span aria-hidden="true">·</span>

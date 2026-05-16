@@ -313,15 +313,15 @@ export function TwelveWeekTodayTab({
         className="order-0 grid grid-cols-3 gap-2 rounded-[var(--r-tile)] border border-border bg-white/92 p-2.5 shadow-sm ring-1 ring-slate-200 sm:hidden"
       >
         <div className="min-w-0 rounded-[var(--r-control)] bg-muted px-2 py-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Còn</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Còn</p>
           <p className="mt-0.5 text-lg font-bold text-foreground">{todayRemainingCount}</p>
         </div>
         <div className="min-w-0 rounded-[var(--r-control)] bg-muted px-2 py-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Tuần</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Tuần</p>
           <p className="mt-0.5 text-lg font-bold text-foreground">{weekCompletion.percent}%</p>
         </div>
         <div className={`min-w-0 rounded-[var(--r-control)] px-2 py-2 ${reviewDueToday ? "bg-[color:var(--color-warning-bg)]" : "bg-[color:var(--color-info-bg)]"}`}>
-          <p className={`text-[10px] font-semibold uppercase tracking-[0.12em] ${reviewDueToday ? "text-[color:var(--color-warning-fg)]" : "text-[color:var(--color-info-fg)]"}`}>
+          <p className={`text-[11px] font-semibold uppercase tracking-[0.12em] ${reviewDueToday ? "text-[color:var(--color-warning-fg)]" : "text-[color:var(--color-info-fg)]"}`}>
             {reviewDueToday ? "Review" : "Xong"}
           </p>
           <p className="mt-0.5 truncate text-lg font-bold text-foreground">

@@ -190,7 +190,7 @@ export function UpgradePaywallDialog({
                   </p>
                   <div className="mt-4 grid gap-2 sm:grid-cols-3">
                     <div className="rounded-[var(--r-tile)] border border-white/80 bg-white px-4 py-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Chế độ</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Chế độ</p>
                       <p className="mt-2 text-sm font-semibold text-slate-900">
                         {billingProviderStatus.mode === "api_contract"
                           ? "Máy chủ thanh toán"
@@ -200,13 +200,13 @@ export function UpgradePaywallDialog({
                       </p>
                     </div>
                     <div className="rounded-[var(--r-tile)] border border-white/80 bg-white px-4 py-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Thanh toán</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Thanh toán</p>
                       <p className="mt-2 text-sm font-semibold text-slate-900">
                         {billingProviderStatus.checkoutReady ? "Sẵn sàng" : "Dự phòng trên thiết bị"}
                       </p>
                     </div>
                     <div className="rounded-[var(--r-tile)] border border-white/80 bg-white px-4 py-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Khôi phục</p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Khôi phục</p>
                       <p className="mt-2 text-sm font-semibold text-slate-900">
                         {billingProviderStatus.restoreReady ? "Sẵn sàng" : "Dự phòng trên thiết bị"}
                       </p>

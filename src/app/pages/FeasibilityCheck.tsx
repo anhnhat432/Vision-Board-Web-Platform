@@ -394,7 +394,7 @@ export function FeasibilityCheck() {
 
             <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
               <div className="stack-stack min-w-0">
-                <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                   <Compass className="h-3.5 w-3.5 text-[color:var(--tone-shell-secondary)]" aria-hidden="true" />
                   Kiểm tra tính thực tế
                 </p>
@@ -436,13 +436,13 @@ export function FeasibilityCheck() {
 
               <div className="space-y-3">
                 <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                     Mục tiêu đã viết
                   </p>
                   <p className="mt-2 text-base font-semibold leading-6 text-foreground">{pendingGoal.specific}</p>
                 </div>
                 <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                     Khung thời gian
                   </p>
                   <p className="mt-2 text-sm font-semibold text-foreground">{pendingGoal.timeBound}</p>

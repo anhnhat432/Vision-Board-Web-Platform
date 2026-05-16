@@ -157,7 +157,7 @@ export function PlanPreview({
               >
                 <PhaseIcon className="mx-auto mb-1 h-4 w-4" />
                 <span className="block text-sm">W{week.weekNumber}</span>
-                <span className="mt-1 block text-[11px] opacity-80">{phase.label}</span>
+                <span className="mt-1 block text-xs opacity-80">{phase.label}</span>
               </button>
             );
           })}

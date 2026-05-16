@@ -718,7 +718,7 @@ export function VisionBoardEditor() {
 
                 <div className="hidden xl:block rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-6 shadow-sm">
                   <ProductVisual variant="vision" className="mb-5 min-h-[180px]" />
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     Tóm tắt bảng
                   </p>
 
@@ -732,7 +732,7 @@ export function VisionBoardEditor() {
                         key={item.label}
                         className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card px-4 py-4"
                       >
-                        <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{item.label}</p>
+                        <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{item.label}</p>
                         <p className="mt-2 text-3xl font-bold text-foreground">{item.value}</p>
                         <p className="mt-1 text-sm text-muted-foreground">{item.note}</p>
                       </div>
@@ -825,7 +825,7 @@ export function VisionBoardEditor() {
                           alt={img.label}
                           className="aspect-[4/3] w-full object-cover"
                         />
-                        <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2 py-1.5 text-[11px] font-medium text-white">
+                        <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2 py-1.5 text-xs font-medium text-white">
                           {img.label}
                         </span>
                       </button>

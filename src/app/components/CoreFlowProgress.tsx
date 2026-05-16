@@ -111,7 +111,7 @@ export function CoreFlowProgress({
               onClick={onExit}
               title={exitTooltip}
               aria-label={exitTooltip}
-              className="h-7 rounded-[var(--r-pill)] border border-slate-200 bg-white px-2.5 text-[11px] font-medium text-slate-600 shadow-sm hover:bg-slate-50 hover:text-slate-900"
+              className="h-7 rounded-[var(--r-pill)] border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50 hover:text-slate-900"
             >
               <LogOut className="mr-1 h-3 w-3" />
               {exitLabel}
@@ -122,7 +122,7 @@ export function CoreFlowProgress({
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
                 {currentStep.label}
               </p>
               <h2 className="truncate text-sm font-bold tracking-normal text-slate-950 sm:text-base">
@@ -140,7 +140,7 @@ export function CoreFlowProgress({
               <ArrowRight className="h-4 w-4" />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Tiếp theo</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tiếp theo</p>
               <p className="truncate text-sm font-semibold text-slate-950">{nextActionLabel}</p>
             </div>
           </div>
