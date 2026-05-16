@@ -183,7 +183,6 @@ describe("Dashboard fresh workspace states", () => {
     expect(screen.queryByText("Chưa có dữ liệu bánh xe cuộc sống")).not.toBeInTheDocument();
     expect(screen.queryByText("Tổng quan hiệu suất 12 tuần")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Bắt đầu Cân bằng cuộc sống" })).toBeInTheDocument();
-    expect(screen.getByText("Tầm nhìn 3 năm")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Hình dung tầm nhìn" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Tôi đã có insight" })).not.toBeInTheDocument();
     expect(screen.queryByText("Mục tiêu gần đây")).not.toBeInTheDocument();

@@ -4,14 +4,12 @@ import { AlertTriangle, CalendarDays, CheckCircle2, Flame, Loader2, Sparkles, Ta
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
-import { Hero12WeekScene, PhaseHarvestChipIcon, PhasePeakChipIcon, PhaseRampChipIcon, SoftDotsPattern } from "@/app/components/illustrations";
-import { MotionCountUp, MotionParallaxLayer } from "@/app/components/motion";
-import { ProductVisual } from "@/app/components/visuals/ProductVisual";
+import { PageHero } from "@/app/components/layout/PageHero";
+import { PhaseHarvestChipIcon, PhasePeakChipIcon, PhaseRampChipIcon } from "@/app/components/illustrations";
+import { MotionCountUp } from "@/app/components/motion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import {
   formatCalendarDate,
-  getFeasibilityResultLabel,
-  getLifeAreaLabel,
   getReviewDayLabel,
 } from "@/app/utils/storage";
 import type {
@@ -197,139 +195,120 @@ export function TwelveWeekDashboardHeader({
   const PhaseChipIcon = phaseInfo.chipIcon;
 
   return (
-    <Card className="page-enter relative overflow-hidden">
-      <MotionParallaxLayer
-        depth={0.3}
-        className="pointer-events-none absolute -right-16 top-0 hidden w-[560px] text-[color:var(--tone-shell-primary)] opacity-12 xl:block"
-        aria-hidden="true"
-      >
-        <Hero12WeekScene className="w-full" />
-      </MotionParallaxLayer>
-      <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 hidden w-44 text-[color:var(--tone-shell-primary)] opacity-15 sm:block" />
-      <CardContent className="relative z-10 p-4 sm:p-6 lg:p-7">
-        <div className="flex flex-col gap-3 sm:gap-5 xl:flex-row xl:items-start xl:justify-between">
-          <div className="min-w-0 flex-1 stack-tight">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="brand" className="rounded-[var(--r-pill)] px-3 py-1.5">
-                Nhịp 12 tuần
+    <PageHero
+      titleAs={1}
+      density="compact"
+      className="page-enter"
+      eyebrow={
+        <>
+          <span>Nhịp 12 tuần</span>
+          <span aria-hidden="true">·</span>
+          <span>{phaseInfo.label}</span>
+        </>
+      }
+      eyebrowIcon={<PhaseChipIcon className="h-3.5 w-3.5" />}
+      title={
+        <span className="line-clamp-2 break-words">
+          <span className="text-gradient-vibrant">{activeGoal.title}</span>
+        </span>
+      }
+      description={
+        <span data-testid="twelve-week-header-description" className="hidden sm:block">
+          Bắt đầu từ tab Hôm nay: tick việc quan trọng nhất, lưu check-in, rồi mở Tuần để review.
+        </span>
+      }
+      primaryCta={
+        <Button glow className="w-full sm:w-auto" onClick={onOpenFocusTab}>
+          {reviewDueToday ? "Mở review tuần" : "Xem việc hôm nay"}
+          <Target className="h-4 w-4" />
+        </Button>
+      }
+      secondaryCta={
+        <Button variant="outline" className="w-full sm:w-auto" onClick={onOpenGoals}>
+          Mở mục tiêu
+        </Button>
+      }
+      contentClassName="overflow-hidden"
+      aside={
+        <div data-testid="twelve-week-header-metrics" className="grid h-full gap-2.5">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Badge variant="outline" className={`rounded-[var(--r-pill)] px-2.5 py-1 text-[11px] ${phaseInfo.badgeClassName}`}>
+              <Target className="mr-1 h-3 w-3" />
+              Tuần {currentWeek}/{system.totalWeeks}
+            </Badge>
+            <Badge variant="outline" className={`rounded-[var(--r-pill)] px-2.5 py-1 text-[11px] ${syncBadgeClass}`}>
+              <span className="mr-1 inline-block h-1.5 w-1.5 rounded-[var(--r-pill)] bg-current opacity-70" aria-hidden="true" />
+              {syncBadgeLabel}
+            </Badge>
+            <Badge variant="neutral" className="text-[11px]">
+              Gói {getPlanLabel(activePlanCode)}
+            </Badge>
+            {reviewDueToday && (
+              <Badge
+                variant="outline"
+                className="rounded-[var(--r-pill)] border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] px-2.5 py-1 text-[11px] text-[color:var(--color-warning-fg)]"
+              >
+                Review hôm nay
               </Badge>
-              <Badge variant="outline" className={`rounded-[var(--r-pill)] px-3 py-1.5 ${phaseInfo.badgeClassName}`}>
-                <Target className="mr-1 h-3.5 w-3.5" />
-                <PhaseChipIcon className="mr-1 h-4 w-4" />
-                Tuần {currentWeek}/{system.totalWeeks} - {phaseInfo.label}
-              </Badge>
-              <Badge variant="outline" className={`rounded-[var(--r-pill)] px-3 py-1.5 ${syncBadgeClass}`}>
-                <span className="mr-1.5 inline-block h-2 w-2 rounded-[var(--r-pill)] bg-current opacity-70" aria-hidden="true" />
-                {syncBadgeLabel}
-              </Badge>
-              {reviewDueToday && (
-                <Badge variant="outline" className="rounded-[var(--r-pill)] border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] px-3 py-1.5 text-[color:var(--color-warning-fg)]">
-                  Review hôm nay
-                </Badge>
-              )}
-            </div>
-            <div className="space-y-2">
-              <h1 className="line-clamp-2 max-w-4xl break-words text-3xl font-semibold leading-[1.15] tracking-tight text-slate-950 sm:text-4xl md:text-5xl">
-                {activeGoal.title}
-              </h1>
-              <p data-testid="twelve-week-header-description" className="hidden max-w-3xl text-sm leading-7 text-slate-600 sm:block">
-                Bắt đầu từ tab Hôm nay: tick việc quan trọng nhất, lưu check-in, rồi mở Tuần để review.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2 text-xs text-slate-700">
-              <span className="rounded-[var(--r-pill)] bg-slate-100 px-3 py-1">
-                {getLifeAreaLabel(activeGoal.focusArea || activeGoal.category)}
-              </span>
-              <span className="rounded-[var(--r-pill)] bg-slate-100 px-3 py-1">Gói {getPlanLabel(activePlanCode)}</span>
-              {activeGoal.feasibilityResult && (
-                <span className="rounded-[var(--r-pill)] bg-slate-100 px-3 py-1">
-                  {getFeasibilityResultLabel(activeGoal.feasibilityResult)}
-                </span>
-              )}
-            </div>
+            )}
           </div>
-
-          <div
-            data-testid="twelve-week-header-metrics"
-            className="hidden min-w-0 grid-cols-3 gap-2 sm:grid sm:gap-3 xl:w-[540px]"
-          >
-            <ProductVisual variant="execution" className="hidden min-h-[136px] rounded-[var(--r-tile)] border border-slate-200/70 bg-slate-50/72 sm:col-span-3 sm:block" />
-            <div className="glass-surface-sm rounded-[var(--r-control)] border border-amber-200/70 bg-gradient-to-br from-amber-50 to-orange-50 px-2 py-2 shadow-sm sm:rounded-[var(--r-tile)] sm:px-4 sm:py-3 dark:border-amber-500/30 dark:from-amber-950/35 dark:to-orange-950/25">
-              <span className="mb-2 flex h-8 w-8 items-center justify-center rounded-[var(--r-control)] bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 dark:from-amber-950/70 dark:to-orange-950/50 dark:text-amber-200">
-                <Zap className="h-4 w-4" aria-hidden="true" />
+          <div className="grid grid-cols-3 gap-2">
+            <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-2.5">
+              <span className="mb-1 flex h-7 w-7 items-center justify-center rounded-[var(--r-control)] bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning-fg)]">
+                <Zap className="h-3.5 w-3.5" aria-hidden="true" />
               </span>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 sm:text-xs sm:tracking-[0.14em]">Còn làm</p>
-              <p className="count-up mt-1 text-xl font-bold tabular-nums text-slate-950 sm:text-2xl">{todayRemainingCount}</p>
-              <p className="hidden text-xs text-slate-500 sm:block">{todayCompletedCount} việc đã chốt hôm nay</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Còn làm</p>
+              <p className="count-up mt-0.5 text-xl font-bold tabular-nums text-foreground">{todayRemainingCount}</p>
+              <p className="mt-0.5 text-[10.5px] text-muted-foreground">{todayCompletedCount} đã chốt</p>
             </div>
-            <div className="glass-surface-sm rounded-[var(--r-control)] border border-emerald-200/70 bg-gradient-to-br from-emerald-50 to-teal-50 px-2 py-2 shadow-sm sm:rounded-[var(--r-tile)] sm:px-4 sm:py-3 dark:border-emerald-500/30 dark:from-emerald-950/35 dark:to-teal-950/25">
-              <span className="mb-2 flex h-8 w-8 items-center justify-center rounded-[var(--r-control)] bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-700 dark:from-emerald-950/70 dark:to-teal-950/50 dark:text-emerald-200">
-                <TrendingUp className="h-4 w-4" aria-hidden="true" />
+            <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-2.5">
+              <span className="mb-1 flex h-7 w-7 items-center justify-center rounded-[var(--r-control)] bg-[color:var(--color-success-bg)] text-[color:var(--color-success-fg)]">
+                <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
               </span>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500 sm:text-xs sm:tracking-[0.14em]">Tuần</p>
-              <p className="count-up mt-1 text-xl font-bold tabular-nums text-slate-950 sm:text-2xl">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Tuần</p>
+              <p className="count-up mt-0.5 text-xl font-bold tabular-nums text-foreground">
                 <MotionCountUp value={weekCompletion.percent} suffix="%" />
               </p>
-              <p className="hidden text-xs text-slate-500 sm:block">
+              <p className="mt-0.5 line-clamp-1 text-[10.5px] text-muted-foreground">
                 {currentWeekRange
-                  ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
+                  ? `${formatCalendarDate(currentWeekRange.start)}–${formatCalendarDate(currentWeekRange.end)}`
                   : "Đang chạy"}
               </p>
             </div>
-            <div
-              className={`rounded-[var(--r-control)] border px-2 py-2 shadow-sm sm:rounded-[var(--r-tile)] sm:px-4 sm:py-3 ${
-                reviewDueToday
-                  ? "border-rose-200 bg-gradient-to-br from-rose-50 to-pink-50 dark:border-rose-500/30 dark:from-rose-950/35 dark:to-pink-950/25"
-                  : phaseInfo.tileClassName
-              }`}
-            >
+            <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-2.5">
               <span
-                className={`mb-2 flex h-8 w-8 items-center justify-center rounded-[var(--r-control)] ${
+                className={`mb-1 flex h-7 w-7 items-center justify-center rounded-[var(--r-control)] ${
                   reviewDueToday
-                    ? "bg-gradient-to-br from-rose-100 to-pink-100 text-rose-700 dark:from-rose-950/70 dark:to-pink-950/50 dark:text-rose-200"
-                    : phaseInfo.iconClassName
+                    ? "bg-[color:var(--color-warning-fg)] text-white"
+                    : "bg-card text-[color:var(--tone-shell-primary)] ring-1 ring-[color:var(--border)]"
                 }`}
               >
-                {reviewDueToday ? <Flame className="h-4 w-4" aria-hidden="true" /> : <CalendarDays className="h-4 w-4" aria-hidden="true" />}
+                {reviewDueToday ? (
+                  <Flame className="h-3.5 w-3.5" aria-hidden="true" />
+                ) : (
+                  <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
+                )}
               </span>
-              <p
-                className={`text-[10px] font-semibold uppercase tracking-[0.12em] sm:text-xs sm:tracking-[0.14em] ${
-                  reviewDueToday ? "text-rose-700 dark:text-rose-200" : "text-slate-500"
-                }`}
-              >
-                Review
-              </p>
-              <p className="mt-1 truncate text-sm font-bold text-slate-950 sm:text-base">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Review</p>
+              <p className="mt-0.5 truncate text-sm font-bold text-foreground">
                 {reviewDueToday ? "Hôm nay" : getReviewDayLabel(system.reviewDay)}
               </p>
-              <p className="hidden text-xs text-slate-500 sm:block">{reviewStatusLabel}</p>
+              <p className="mt-0.5 line-clamp-1 text-[10.5px] text-muted-foreground">{reviewStatusLabel}</p>
             </div>
           </div>
-        </div>
-
-        <div data-testid="twelve-week-header-actions" className="mt-4 hidden flex-col gap-3 border-t border-slate-200 pt-4 sm:flex lg:flex-row lg:items-center lg:justify-between">
-          <p className="min-w-0 text-sm leading-6 text-slate-600">
+          <p
+            data-testid="twelve-week-header-actions"
+            className="hidden text-[12px] leading-5 text-muted-foreground sm:block"
+          >
             {reviewDueToday
               ? "Việc tiếp theo: chốt review tuần trước khi mở việc mới."
               : firstPriorityTask
                 ? `Việc quan trọng nhất: ${firstPriorityTask.title}`
                 : "Hôm nay đang gọn. Bạn có thể lưu check-in hoặc xem lại tab Tuần."}
           </p>
-          <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-            <Button variant="secondary" className="w-full bg-slate-950 text-white hover:bg-slate-800 sm:w-auto" onClick={onOpenFocusTab}>
-              {reviewDueToday ? "Mở review tuần" : "Xem việc hôm nay"}
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full border-slate-200 bg-white text-slate-900 hover:bg-slate-50 sm:w-auto"
-              onClick={onOpenGoals}
-            >
-              Mở mục tiêu
-            </Button>
-          </div>
         </div>
-      </CardContent>
-    </Card>
+      }
+    />
   );
 }
 

@@ -34,8 +34,8 @@ import { EmptyGoalIllustration, EmptyHintArrow, getGoalArchetypeIcon } from "../
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { Input } from "../components/ui/input";
 import { LoadingSpinner } from "../components/ui/loading-spinner";
+import { PageHero } from "../components/layout/PageHero";
 import { SectionBlock } from "../components/layout/SectionBlock";
-import { ProductVisual } from "../components/visuals/ProductVisual";
 import { Progress } from "../components/ui/progress";
 import { Reveal } from "../components/ui/reveal";
 import { useBackendProgressOverlayMap } from "../hooks/useBackendProgressOverlay";
@@ -893,72 +893,85 @@ function GoalTrackerContent({
         </AlertDialogContent>
       </AlertDialog>
 
-      <Card data-tour-id="goaltracker-hero" className="overflow-hidden">
-        <CardContent className="p-5 sm:p-6">
-          <div className="grid gap-[var(--space-stack)] xl:grid-cols-[minmax(0,1fr)_340px]">
-            <div data-tour-id="goaltracker-start-card" className="stack-stack">
-              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-border bg-muted px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                <Target className="h-3.5 w-3.5" />
-                Mục tiêu
-              </div>
-              <div className="max-w-3xl">
-                <h1 className="break-words text-3xl font-semibold leading-[1.15] tracking-tight text-foreground sm:text-4xl md:text-5xl">
-                  Mục tiêu và bước tiếp theo.
-                </h1>
-                <p className="mt-[var(--space-inline)] max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-                  Xem nhanh mục tiêu, hạn chót và nơi cần mở tiếp. Việc hằng ngày của chu kỳ 12 tuần vẫn nằm trong
-                  trung tâm 12 tuần.
-                </p>
-                {shouldShowFreeGoalLimit ? (
-                  <p className="mt-3 inline-flex rounded-[var(--r-pill)] border border-[color:var(--border)] bg-card px-3 py-1 text-xs font-semibold text-muted-foreground">
-                    {goalLimitUsage.current}/{goalLimitUsage.limit} mục tiêu Free
-                  </p>
-                ) : null}
-              </div>
-              <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
-                <Button
-                  data-tour-id="goaltracker-create-goal"
-                  variant="secondary"
-                  className="col-span-2 w-full sm:w-auto"
-                  onClick={handleStartGuidedGoalFlow}
-                >
-                  <Target className="h-4 w-4" />
-                  {hasGoals ? "Tạo mục tiêu mới" : goalFlowStartLabel}
-                </Button>
-                {twelveWeekGoals[0] && (
-                  <Button variant="outline" className="w-full sm:w-auto" onClick={() => openTwelveWeekCenter(twelveWeekGoals[0].id)}>
-                    <Zap className="h-4 w-4" />
-                    Mở 12 tuần
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            <div className="stack-tight">
-              <ProductVisual variant="execution" className="min-h-[170px]" />
-              <div className={`rounded-[var(--r-control)] border p-4 shadow-sm ${priority.tone}`}>
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-control)] bg-white/75">
-                    <PriorityIcon className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] opacity-70">{priority.eyebrow}</p>
-                    <p className="mt-2 text-lg font-semibold leading-6">{priority.title}</p>
-                    <p className="mt-2 text-sm leading-6 opacity-75">{priority.note}</p>
-                  </div>
+      <div data-tour-id="goaltracker-hero">
+        <PageHero
+          titleAs={1}
+          density="compact"
+          className="page-enter"
+          eyebrow="Mục tiêu"
+          eyebrowIcon={<Target className="h-3.5 w-3.5" />}
+          title={
+            <>
+              Mục tiêu và <span className="text-gradient-vibrant">bước tiếp theo</span>.
+            </>
+          }
+          description={
+            <>
+              Xem nhanh mục tiêu, hạn chót và nơi cần mở tiếp. Việc hằng ngày của chu kỳ 12 tuần vẫn nằm trong
+              trung tâm 12 tuần.
+              {shouldShowFreeGoalLimit ? (
+                <span className="mt-2 inline-flex rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                  {goalLimitUsage.current}/{goalLimitUsage.limit} mục tiêu Free
+                </span>
+              ) : null}
+            </>
+          }
+          primaryCta={
+            <Button
+              data-tour-id="goaltracker-create-goal"
+              glow
+              className="w-full sm:w-auto"
+              onClick={handleStartGuidedGoalFlow}
+            >
+              <Target className="h-4 w-4" />
+              {hasGoals ? "Tạo mục tiêu mới" : goalFlowStartLabel}
+            </Button>
+          }
+          secondaryCta={
+            twelveWeekGoals[0] ? (
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={() => openTwelveWeekCenter(twelveWeekGoals[0].id)}
+              >
+                <Zap className="h-4 w-4" />
+                Mở 12 tuần
+              </Button>
+            ) : undefined
+          }
+          aside={
+            <div
+              data-tour-id="goaltracker-start-card"
+              className={`flex h-full flex-col gap-3 rounded-[var(--r-tile)] border p-4 shadow-[var(--shadow-1)] ${priority.tone}`}
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-control)] bg-card/80">
+                  <PriorityIcon className="h-5 w-5" />
                 </div>
-                <Button className="mt-4 w-full" variant="outline" onClick={handlePriorityAction}>
-                  {priority.cta}
-                </Button>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] opacity-75">{priority.eyebrow}</p>
+                  <p className="mt-1 text-base font-semibold leading-6">{priority.title}</p>
+                </div>
               </div>
+              <p className="text-[13px] leading-6 opacity-80">{priority.note}</p>
+              <Button className="mt-auto w-full" variant="outline" onClick={handlePriorityAction}>
+                {priority.cta}
+              </Button>
             </div>
-          </div>
+          }
+        />
+      </div>
 
-          <div data-tour-id="goaltracker-summary" className="mt-[var(--space-stack)] grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <Card data-tour-id="goaltracker-summary" className="overflow-hidden">
+        <CardContent className="p-4 sm:p-5">
+          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
             {overviewItems.map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.title} className="rounded-[var(--r-control)] border border-border bg-muted px-3 py-3 sm:px-4">
+                <div
+                  key={item.title}
+                  className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-3 sm:px-4"
+                >
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{item.title}</p>
@@ -966,7 +979,7 @@ function GoalTrackerContent({
                         {typeof item.value === "number" ? <CountUp value={item.value} /> : item.value}
                       </p>
                     </div>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-[var(--r-control)] bg-white text-muted-foreground">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-[var(--r-control)] bg-card text-[color:var(--tone-shell-primary)]">
                       <Icon className="h-4 w-4" />
                     </div>
                   </div>

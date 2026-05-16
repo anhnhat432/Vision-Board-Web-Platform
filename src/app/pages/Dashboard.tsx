@@ -17,7 +17,7 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 
-import { PrimaryActionCard } from "../components/layout/PrimaryActionCard";
+import { PageHero } from "../components/layout/PageHero";
 import { DashboardActiveGoalsList } from "@/features/dashboard/components/DashboardActiveGoalsList";
 import { DashboardKpiRow } from "@/features/dashboard/components/DashboardKpiRow";
 import { PublicVisitorHero } from "@/features/dashboard/components/PublicVisitorHero";
@@ -36,12 +36,8 @@ import { FeedbackDialog } from "../components/FeedbackDialog";
 import {
   EmptyGoalIllustration,
   EmptyHintArrow,
-  HeroDashboardScene,
-  HeroOrbitIllustration,
-  SoftDotsPattern,
   WavyDividerIllustration,
 } from "../components/illustrations";
-import { MotionParallaxLayer } from "../components/motion";
 import { PageHeader } from "../components/layout/PageHeader";
 import { SectionBlock } from "../components/layout/SectionBlock";
 import { NewUserGuideBanner } from "../components/NewUserGuide";
@@ -832,118 +828,115 @@ function DashboardContent({
 
       {!isSignedOut && (
         <div className="stack-section">
-          <div data-testid="dashboard-primary-action-card" data-tour-id="dashboard-next-card">
-            <PrimaryActionCard
-              data-testid="dashboard-next-action-hero"
-              hero
-              titleAs="h2"
+          <div
+            data-testid="dashboard-primary-action-card"
+            data-tour-id="dashboard-next-card"
+            className="stack-tight"
+          >
+            <PageHero
+              testId="dashboard-next-action-hero"
+              titleAs={2}
               density="compact"
-              className="page-enter relative"
+              className="page-enter"
               eyebrow={dashboardNextAction.eyebrow}
-              title={`${dashboardGreeting.label}, ${dashboardDisplayName}`}
-              description={`Tuần ${dashboardKpiCurrentWeek ?? "--"}/${dashboardKpiTotalWeeks} — còn ${dashboardOpenTaskCount} việc hôm nay`}
-              icon={<CalendarDays className="h-4 w-4" />}
-              titleClassName="text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl lg:text-5xl"
-              descriptionClassName="count-up text-sm font-semibold tabular-nums text-muted-foreground sm:text-base"
-              headerClassName="relative z-10"
-              actionClassName="relative z-10"
-              action={
-                <Button
-                  glow
-                  className="w-full sm:w-auto"
-                  onClick={() => navigate(dashboardNextAction.ctaTarget)}
-                >
+              eyebrowIcon={<CalendarDays className="h-3.5 w-3.5" />}
+              title={
+                <>
+                  {dashboardGreeting.label},{" "}
+                  <span className="text-gradient-vibrant">{dashboardDisplayName}</span>
+                </>
+              }
+              description={
+                <span className="count-up font-semibold tabular-nums">
+                  Tuần {dashboardKpiCurrentWeek ?? "--"}/{dashboardKpiTotalWeeks} — còn {dashboardOpenTaskCount} việc hôm nay
+                </span>
+              }
+              primaryCta={
+                <Button glow className="w-full sm:w-auto" onClick={() => navigate(dashboardNextAction.ctaTarget)}>
                   {dashboardNextAction.ctaLabel}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               }
-            >
-              <MotionParallaxLayer
-                depth={0.28}
-                className="pointer-events-none absolute -right-12 top-2 hidden w-[420px] text-violet-500 opacity-22 dark:opacity-16 xl:block"
-                aria-hidden="true"
-              >
-                <HeroDashboardScene className="w-full" />
-              </MotionParallaxLayer>
-              <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 hidden w-56 text-[color:var(--tone-shell-primary)] opacity-15 sm:block" />
-              <div className="relative z-10 stack-stack">
-                <div className="hidden justify-end xl:flex">
-                  <HeroOrbitIllustration className="-mb-10 -mt-12 w-44 text-[color:var(--tone-shell-primary)] opacity-60" />
-                </div>
-                <div className="flex flex-wrap items-start justify-between gap-3 rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
+              secondaryCta={
+                <Button
+                  variant="outline"
+                  size="default"
+                  className="w-full sm:w-auto"
+                  onClick={() => navigate("/vision")}
+                >
+                  {aspirationalVision ? "Sửa tầm nhìn" : "Hình dung tầm nhìn"}
+                </Button>
+              }
+              aside={
+                <div className="flex h-full flex-col gap-3 rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                      Nhịp hôm nay
+                    </p>
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-[var(--r-pill)] px-2.5 py-1 text-[11px] font-bold ${
+                        dashboardKpiStreak >= 7
+                          ? "bg-[color:var(--color-warning-fg)] text-white shadow-[var(--shadow-2)] motion-safe:animate-pulse"
+                          : "bg-card text-foreground ring-1 ring-[color:var(--border)]"
+                      }`}
+                    >
+                      <Flame className="h-3 w-3" />
+                      {dashboardKpiStreak} ngày
+                    </span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[12.5px] font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
                       {dashboardNextAction.title}
                     </p>
                     <p className="mt-1 text-sm leading-6 text-foreground">{dashboardNextAction.description}</p>
                   </div>
-                  <span
-                    className={`inline-flex shrink-0 items-center gap-2 rounded-[var(--r-pill)] px-3 py-1.5 text-xs font-bold ${
-                      dashboardKpiStreak >= 7
-                        ? "bg-[color:var(--color-warning-fg)] text-white shadow-[var(--shadow-2)] motion-safe:animate-pulse"
-                        : "bg-card text-foreground ring-1 ring-[color:var(--border)] shadow-sm"
-                    }`}
-                  >
-                    <Flame className="h-3.5 w-3.5" />
-                    {dashboardKpiStreak} ngày
-                  </span>
-                </div>
-
-                {activeSystem && activeSystemTodayOpenTasks.length > 0 && (
-                  <div data-tour-id="dashboard-start-card" className="rounded-[var(--r-tile)] bg-gradient-to-br from-white/92 to-violet-50/60 p-4 ring-1 ring-slate-200 dark:from-slate-900/70 dark:to-violet-950/40">
-                    <div className="flex items-start gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-foreground text-white">
-                        <CheckCircle2 className="h-5 w-5" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-                          Việc quan trọng nhất hôm nay
-                        </p>
-                        <h3 className="mt-1 line-clamp-2 text-base font-bold text-foreground">
-                          {activeSystemTodayOpenTasks[0].title}
-                        </h3>
-                        <p className="mt-2 text-sm font-medium leading-6 text-[color:var(--color-success-fg)]">
-                          Chỉ cần xong việc này là hôm nay đã đủ. Phần còn lại mở sau.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="hidden flex-col gap-3 border-t border-border pt-4 sm:flex">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <span className="font-semibold text-foreground">Tầm nhìn 3 năm</span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-border bg-white text-foreground hover:bg-muted"
-                        onClick={() => navigate("/vision")}
-                      >
-                        {aspirationalVision ? "Sửa tầm nhìn" : "Hình dung tầm nhìn"}
-                      </Button>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span
-                        data-tour-id="dashboard-plan-card"
-                        className="inline-flex items-center gap-1.5 rounded-[var(--r-pill)] border border-border bg-white px-3 py-1.5 text-xs font-medium text-muted-foreground"
-                      >
-                        <Crown className="h-3.5 w-3.5" />
-                        {getPlanLabel(currentPlanCode)}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-muted-foreground hover:bg-muted"
-                        onClick={() => (currentPlanCode === "FREE" ? openUpgradeDialog("plan", "PLUS") : navigate(planTarget))}
-                      >
-                        {currentPlanCode === "FREE" ? "Khám phá Plus" : "Quản lý gói"}
-                      </Button>
-                    </div>
+                  <div className="mt-auto flex items-center justify-between gap-2 border-t border-[color:var(--border)] pt-3">
+                    <span
+                      data-tour-id="dashboard-plan-card"
+                      className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground"
+                    >
+                      <Crown className="h-3 w-3 text-[color:var(--tone-shell-primary)]" />
+                      Gói {getPlanLabel(currentPlanCode)}
+                    </span>
+                    <button
+                      type="button"
+                      className="text-[11px] font-semibold text-[color:var(--tone-shell-primary)] underline-offset-4 hover:underline"
+                      onClick={() =>
+                        currentPlanCode === "FREE" ? openUpgradeDialog("plan", "PLUS") : navigate(planTarget)
+                      }
+                    >
+                      {currentPlanCode === "FREE" ? "Khám phá Plus" : "Quản lý"}
+                    </button>
                   </div>
                 </div>
-              </div>
-            </PrimaryActionCard>
+              }
+            />
+
+            {activeSystem && activeSystemTodayOpenTasks.length > 0 && (
+              <Card
+                data-tour-id="dashboard-start-card"
+                className="overflow-hidden border-[color:var(--tone-shell-primary)]/30 shadow-[var(--shadow-glow)]"
+              >
+                <CardContent className="p-5 sm:p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="flex size-11 shrink-0 items-center justify-center rounded-[var(--r-tile)] gradient-brand text-primary-foreground">
+                      <CheckCircle2 className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--tone-shell-primary)]">
+                        Việc quan trọng nhất hôm nay
+                      </p>
+                      <h3 className="mt-1 line-clamp-2 text-lg font-bold tracking-tight text-foreground sm:text-xl">
+                        {activeSystemTodayOpenTasks[0].title}
+                      </h3>
+                      <p className="mt-2 text-sm font-medium leading-6 text-[color:var(--color-success-fg)]">
+                        Chỉ cần xong việc này là hôm nay đã đủ. Phần còn lại mở sau.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {shouldShowSetupGuide && <NewUserGuideBanner userData={userData} variant="compact" />}

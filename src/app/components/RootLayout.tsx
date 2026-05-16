@@ -71,6 +71,7 @@ import {
   type CloudImportResult,
 } from "./root-layout/LocalDataMigrationPrompt";
 import { GracePeriodBanner } from "./billing/GracePeriodBanner";
+import { AppSidebar } from "./root-layout/AppSidebar";
 import { EmailVerificationBanner } from "./root-layout/EmailVerificationBanner";
 import { FirstLoginRestoreToast } from "./root-layout/FirstLoginRestoreToast";
 import { SyncStatusPill } from "./root-layout/SyncStatusPill";
@@ -884,6 +885,8 @@ export function RootLayout() {
     );
   }
 
+  const showSidebar = !isSignedOutVisitor;
+
   return (
     <AutoCloudSyncProvider>
       <div className="app-shell min-h-screen" data-route-tone={routeTone}>
@@ -893,7 +896,47 @@ export function RootLayout() {
         <EmailVerificationBanner />
         <GracePeriodBanner />
 
-        <header className="sticky top-0 z-40 px-4 pt-2 sm:top-3 sm:px-6 sm:pt-0 lg:px-8">
+        {showSidebar ? (
+          <AppSidebar
+            primaryNavItems={primaryNavItems}
+            secondaryNavItems={secondaryNavItems}
+            isActive={isActive}
+            onNavigate={navigateAppRoute}
+            onPrefetch={handlePrefetch}
+            onOpenGuide={() => {
+              setGuideUserData(getUserData());
+              setIsGuideOpen(true);
+            }}
+            resolvedTheme={resolvedTheme === "dark" ? "dark" : "light"}
+            onToggleTheme={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+            user={
+              user
+                ? {
+                    email: accountEmail || null,
+                    displayName: accountLabel || null,
+                    avatarLetter: accountAvatarLabel,
+                    planLabel: accountPlanLabel,
+                  }
+                : null
+            }
+            onAuthNavigate={handleAuthNavigate}
+            onOpenSettings={() => navigateAppRoute("/settings")}
+            onOpenAccountInfo={() => navigateAppRoute("/settings")}
+            onSignOut={() => {
+              void handleSignOut();
+            }}
+            isSigningOut={isSigningOut}
+            shellBadgeStyle={shellBadgeStyle}
+            activeNavStyle={activeNavStyle}
+          />
+        ) : null}
+
+        <div className={showSidebar ? "lg:pl-[260px]" : undefined}>
+        <header
+          className={`sticky top-0 z-40 px-4 pt-2 sm:top-3 sm:px-6 sm:pt-0 lg:px-8 ${
+            showSidebar ? "lg:hidden" : ""
+          }`}
+        >
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-[var(--r-soft)] border border-[color:var(--border)] bg-[color-mix(in_srgb,var(--card)_94%,transparent)] px-3 py-2 shadow-[0_1px_2px_rgba(15,23,42,0.04)] backdrop-blur-xl supports-[backdrop-filter]:bg-[color-mix(in_srgb,var(--card)_82%,transparent)] sm:px-4 sm:py-2.5">
             <div className="flex w-full items-center justify-between gap-3">
               <div className="flex min-w-0 shrink-0 items-center gap-2.5">
@@ -1265,6 +1308,7 @@ export function RootLayout() {
             </div>
           </footer>
         ) : null}
+        </div>
 
         {!isSignedOutVisitor ? (
           <nav
