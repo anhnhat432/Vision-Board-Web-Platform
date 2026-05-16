@@ -76,14 +76,12 @@ export function AppSidebar({
           className="flex items-center gap-2.5 rounded-lg text-left transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
           aria-label="Về trang chủ Dear Our Future"
         >
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-app-accent p-0.5 shadow-md">
-            <img
-              src="/favicon-192.png"
-              alt=""
-              aria-hidden="true"
-              className="size-full rounded-md object-cover"
-            />
-          </span>
+          <img
+            src="/favicon-192.png"
+            alt=""
+            aria-hidden="true"
+            className="size-9 rounded-lg object-cover shadow-md ring-1 ring-app-accent/20"
+          />
           <div className="min-w-0">
             <span className="block truncate text-[15px] font-semibold tracking-tight text-app-ink">
               Dear Our Future
