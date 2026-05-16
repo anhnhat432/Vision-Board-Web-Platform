@@ -254,7 +254,7 @@ async function completeFeasibility(user: ReturnType<typeof userEvent.setup>) {
 
 async function completeTwelveWeekSetup(user: ReturnType<typeof userEvent.setup>) {
   await screen.findByRole("heading", { name: "Mục tiêu 12 tuần" });
-  await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
+  await user.click(screen.getByRole("button", { name: "Tiếp →" }));
 
   const tacticInputs = await screen.findAllByLabelText("Tên việc");
   await user.clear(tacticInputs[0]);
@@ -262,9 +262,9 @@ async function completeTwelveWeekSetup(user: ReturnType<typeof userEvent.setup>)
   await user.clear(tacticInputs[1]);
   await user.type(tacticInputs[1], "Hoàn thành việc trọng tâm");
 
-  await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
-  await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
-  await user.click(screen.getByRole("button", { name: "Tạo kế hoạch 12 tuần" }));
+  await user.click(screen.getByRole("button", { name: "Tiếp →" }));
+  await user.click(screen.getByRole("button", { name: "Tiếp →" }));
+  await user.click(screen.getByRole("button", { name: "Lưu kế hoạch" }));
 }
 
 describe("authenticated new user core flow", () => {

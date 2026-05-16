@@ -1,25 +1,20 @@
 ﻿import { useRef, useState, type ReactNode } from "react";
 import {
+  AlertCircle,
   ArrowLeft,
   ArrowRight,
   CalendarDays,
   CheckCircle2,
+  ChevronDown,
   Flag,
-  HelpCircle,
-  Lightbulb,
   ListChecks,
   Loader2,
   Target,
   type LucideIcon,
 } from "lucide-react";
 
-import { Button } from "@/app/components/ui/button";
-import { SectionBlock } from "@/app/components/layout/SectionBlock";
-import { WizardStepPip } from "@/app/components/layout/WizardStepPip";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/app/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/app/components/ui/tooltip";
 import { useReducedMotion } from "@/app/components/ui/use-reduced-motion";
+import { cn } from "@/app/components/ui/utils";
 import { useScrollToTopOnChange } from "@/app/hooks/useScrollToTopOnChange";
 import { STEPS } from "../constants";
 
@@ -32,56 +27,22 @@ interface SetupStepShellProps {
   children: ReactNode;
   onBack: () => void;
   onNext: () => void;
-  onSubmit: () => void;
+  onSubmit: () => void | Promise<void>;
   onJumpToStep?: (stepIndex: number) => void;
   stepError?: string | null;
   isNextDisabled?: boolean;
   isSubmitDisabled?: boolean;
 }
 
-const STEP_VISUALS: Array<{
+const STEP_META: Array<{
   icon: LucideIcon;
   eyebrow: string;
   caption: string;
-  panelClassName: string;
-  iconClassName: string;
 }> = [
-  {
-    icon: Target,
-    eyebrow: "Kết quả",
-    caption: "Chốt kết quả đủ rõ để 12 tuần có điểm đến.",
-    panelClassName:
-      "border-violet-200/80 bg-gradient-to-br from-violet-50 to-fuchsia-50 text-violet-900 dark:border-violet-500/30 dark:from-violet-950/50 dark:to-fuchsia-950/30 dark:text-violet-100",
-    iconClassName:
-      "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/20 dark:shadow-violet-950/30",
-  },
-  {
-    icon: ListChecks,
-    eyebrow: "Lead",
-    caption: "Giữ vài việc lặp lại mà bạn thật sự kiểm soát được.",
-    panelClassName:
-      "border-amber-200/80 bg-gradient-to-br from-amber-50 to-orange-50 text-amber-900 dark:border-amber-500/30 dark:from-amber-950/45 dark:to-orange-950/30 dark:text-amber-100",
-    iconClassName:
-      "bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20 dark:shadow-amber-950/30",
-  },
-  {
-    icon: CalendarDays,
-    eyebrow: "Rhythm",
-    caption: "Đặt ngày bắt đầu, nhịp tuần và lịch nhìn lại cố định.",
-    panelClassName:
-      "border-teal-200/80 bg-gradient-to-br from-teal-50 to-cyan-50 text-teal-900 dark:border-teal-500/30 dark:from-teal-950/45 dark:to-cyan-950/30 dark:text-teal-100",
-    iconClassName:
-      "bg-gradient-to-br from-teal-600 to-cyan-600 text-white shadow-lg shadow-teal-500/20 dark:shadow-teal-950/30",
-  },
-  {
-    icon: CheckCircle2,
-    eyebrow: "Confirm",
-    caption: "Soát lần cuối để bước vào tuần đầu không bị mơ hồ.",
-    panelClassName:
-      "border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-900 dark:border-emerald-500/30 dark:from-emerald-950/45 dark:to-teal-950/30 dark:text-emerald-100",
-    iconClassName:
-      "bg-gradient-to-br from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/20 dark:shadow-emerald-950/30",
-  },
+  { icon: Target, eyebrow: "Kết quả", caption: "Chốt kết quả đủ rõ để 12 tuần có điểm đến." },
+  { icon: ListChecks, eyebrow: "Lead", caption: "Chọn 1-3 việc lặp lại tạo ra kết quả." },
+  { icon: CalendarDays, eyebrow: "Lịch", caption: "Đặt ngày bắt đầu và nhịp nhìn lại tuần." },
+  { icon: Flag, eyebrow: "Hoàn tất", caption: "Rà soát toàn bộ trước khi kích hoạt chu kỳ." },
 ];
 
 export function SetupStepShell({
@@ -100,13 +61,14 @@ export function SetupStepShell({
   isSubmitDisabled = false,
 }: SetupStepShellProps) {
   const isLastStep = currentStep >= stepCount - 1;
-  const stepShellRef = useRef<HTMLDivElement | null>(null);
-  const titleFocusRef = useRef<HTMLSpanElement | null>(null);
+  const stepShellRef = useRef<HTMLElement | null>(null);
+  const titleFocusRef = useRef<HTMLHeadingElement | null>(null);
   const prefersReducedMotion = useReducedMotion();
+  const [isWhyOpen, setIsWhyOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const progressPercent = ((currentStep + 1) / stepCount) * 100;
-  const visual = STEP_VISUALS[currentStep] ?? STEP_VISUALS[0];
-  const StepIcon = visual.icon;
+  const stepMeta = STEP_META[currentStep] ?? STEP_META[0];
+  const StepIcon = stepMeta.icon;
+  const stepDefinitions = STEPS.slice(0, stepCount);
 
   const handleSubmitClick = async () => {
     if (isSubmitting) return;
@@ -124,177 +86,142 @@ export function SetupStepShell({
   });
 
   return (
-    <div
+    <section
       ref={stepShellRef}
-      className={prefersReducedMotion ? "" : "animate-fade-in-up"}
+      className="rounded-card border border-app-line bg-app-surface p-6 md:p-8"
+      aria-labelledby="twelve-week-step-title"
     >
-      <Card className="relative overflow-hidden">
-        <CardHeader className="stack-stack pb-3">
-          <div className="sticky top-3 z-20 rounded-[var(--r-card)] border border-[color:var(--border)] bg-card/95 p-2 shadow-[var(--shadow-1)] backdrop-blur">
-            <div className="sm:hidden">
-              <Select
-                value={String(currentStep)}
-                onValueChange={(value) => {
-                  const nextStep = Number(value);
-                  if (Number.isInteger(nextStep) && nextStep < currentStep) {
-                    onJumpToStep?.(nextStep);
-                  }
-                }}
-              >
-                <SelectTrigger aria-label="Chọn bước đã hoàn thành">
-                  <SelectValue placeholder="Chọn bước" />
-                </SelectTrigger>
-                <SelectContent>
-                  {STEPS.map((step, index) => (
-                    <SelectItem
-                      key={step.id}
-                      value={String(index)}
-                      disabled={index > currentStep || (!onJumpToStep && index !== currentStep)}
-                    >
-                      Bước {index + 1}: {step.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <WizardStepPip
-              steps={STEPS}
-              currentStep={currentStep}
-              onJumpToStep={onJumpToStep}
-              ariaLabel={`Bước ${currentStep + 1} trên ${stepCount}`}
-              mobileMode="full"
-              className="hidden sm:block"
-            />
-            <div
-              role="progressbar"
-              aria-label="Tiến độ thiết lập 12 tuần"
-              aria-valuemin={1}
-              aria-valuemax={stepCount}
-              aria-valuenow={currentStep + 1}
-              className="mt-2 h-1.5 overflow-hidden rounded-[var(--r-pill)] bg-[color:var(--muted)]"
-            >
-              <div
-                className="h-full rounded-[var(--r-pill)] gradient-brand transition-[width] duration-300 ease-out"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-          </div>
-          <div className="grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1fr)_220px] lg:items-stretch">
-            <div className="stack-tight">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
-                {STEPS[currentStep]?.label}
-              </p>
-              <CardTitle>
-                <span ref={titleFocusRef} tabIndex={-1} className="block focus:outline-none">
-                  {title}
-                </span>
-              </CardTitle>
-              <CardDescription>{description}</CardDescription>
-            </div>
-            <div className={`rounded-[var(--r-card)] border p-4 ${visual.panelClassName}`}>
-              <div
-                className={`flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] ${visual.iconClassName}`}
-              >
-                <StepIcon className="h-6 w-6" aria-hidden="true" />
-              </div>
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.12em] opacity-70">{visual.eyebrow}</p>
-              <p className="mt-1 text-sm font-semibold leading-6">{visual.caption}</p>
-            </div>
-          </div>
-          {whyThisMatters && (
-            <div className="flex items-center justify-between gap-3 rounded-[var(--r-tile)] border border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] px-3 py-2.5 text-sm leading-6 text-[color:var(--color-info-fg)]">
-              <Lightbulb
-                className="mt-0.5 h-4 w-4 flex-shrink-0 text-[color:var(--color-info-fg)]"
-                aria-hidden="true"
-              />
-              <div className="min-w-0 flex-1">
-                <span className="font-semibold">Gợi ý nhanh: </span>
-                <span className="opacity-90">giữ câu trả lời cụ thể, đo được và vừa sức.</span>
-              </div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] border border-[color:var(--color-info-border)] bg-card text-[color:var(--color-info-fg)] hover:bg-[color:var(--color-info-bg)]"
-                    aria-label="Xem vì sao bước này quan trọng"
-                  >
-                    <HelpCircle className="h-4 w-4" aria-hidden="true" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs text-sm leading-6">
-                  <span className="font-semibold">Vì sao bước này quan trọng: </span>
-                  {whyThisMatters}
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          )}
-        </CardHeader>
-        <CardContent className="stack-section">
-          <SectionBlock title={`Nội dung bước ${currentStep + 1}`} headerVisuallyHidden density="default">
-            {children}
-            {stepError ? (
-              <p
-                role="alert"
-                className="rounded-[var(--r-tile)] border border-[color:var(--color-error-border)] bg-[color:var(--color-error-bg)] px-4 py-3 text-sm font-medium text-[color:var(--color-error-fg)]"
-              >
-                {stepError}
-              </p>
-            ) : null}
-          </SectionBlock>
+      <div>
+        <div className="mb-2 flex items-center gap-2">
+          <StepIcon className="h-4 w-4 text-app-accent" aria-hidden="true" />
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-accent">
+            Bước {currentStep + 1} / {stepCount} · {stepMeta.eyebrow.toUpperCase()}
+          </p>
+        </div>
+        <h2
+          id="twelve-week-step-title"
+          ref={titleFocusRef}
+          tabIndex={-1}
+          className="mt-2 font-serif text-[22px] font-medium leading-7 text-app-ink focus:outline-none"
+        >
+          {title}
+        </h2>
+        <div className="mt-2 text-[14px] leading-6 text-app-ink-soft">{description}</div>
 
-          <div
-            className={`flex flex-col justify-between gap-[var(--space-inline)] border-t border-[color:var(--border)] pt-[var(--space-section)] sm:flex-row sm:static ${
-              isLastStep
-                ? "sticky bottom-0 -mx-4 -mb-6 bg-card/95 px-4 pb-[max(env(safe-area-inset-bottom),1rem)] pt-[var(--space-section)] backdrop-blur sm:mx-0 sm:mb-0 sm:bg-transparent sm:px-0 sm:pb-0 sm:backdrop-blur-none"
-                : ""
-            }`}
-          >
-            <Button className="w-full sm:w-auto" variant="outline" onClick={onBack} disabled={isSubmitting}>
-              <ArrowLeft className="h-4 w-4" />
-              Quay lại
-            </Button>
-            {isLastStep ? (
-              <Button
-                glow={!isSubmitting && !isSubmitDisabled}
-                className="w-full sm:w-auto"
-                onClick={handleSubmitClick}
-                size="lg"
-                disabled={isSubmitting || isSubmitDisabled}
-                aria-busy={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <Loader2 className={prefersReducedMotion ? "h-4 w-4" : "h-4 w-4 animate-spin"} aria-hidden="true" />
-                ) : (
-                  <Flag className="h-4 w-4" />
-                )}
-                {isSubmitting ? "Đang tạo kế hoạch..." : "Tạo kế hoạch 12 tuần"}
-              </Button>
-            ) : (
-              <Button glow={!isNextDisabled} className="w-full sm:w-auto" onClick={onNext} disabled={isNextDisabled}>
-                Tiếp tục
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        </CardContent>
-        {isSubmitting ? (
-          <div className="absolute inset-0 z-30 flex items-center justify-center bg-card/90 px-4 backdrop-blur-sm">
-            <div className="w-full max-w-md rounded-[var(--r-card)] border border-[color:var(--color-success-border)] bg-card p-5 text-center shadow-[var(--shadow-3)]">
-              <div className="shimmer mb-4 h-2 rounded-[var(--r-pill)] bg-[color:var(--color-success-bg)]" />
-              <Loader2
-                className={`mx-auto h-8 w-8 text-[color:var(--color-success-fg)] ${
-                  prefersReducedMotion ? "" : "animate-spin"
-                }`}
+        <ol aria-label={`Bước ${currentStep + 1} trên ${stepCount}`} className="mt-6 flex gap-1.5">
+          {stepDefinitions.map((step, index) => {
+            const isActive = index === currentStep;
+            const isCompleted = index < currentStep;
+            const canJump = Boolean(onJumpToStep && isCompleted);
+
+            return (
+              <li key={step.id} aria-current={isActive ? "step" : undefined}>
+                <button
+                  type="button"
+                  className={cn(
+                    "h-1.5 w-6 rounded-full transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                    isActive && "bg-app-accent",
+                    isCompleted && !isActive && "bg-app-accent/40",
+                    !isActive && !isCompleted && "bg-app-line",
+                    canJump ? "cursor-pointer hover:bg-app-accent/60" : "cursor-default",
+                  )}
+                  disabled={!canJump}
+                  onClick={() => {
+                    if (canJump) onJumpToStep?.(index);
+                  }}
+                  aria-label={`Đi tới bước ${index + 1}: ${step.label}`}
+                >
+                  <span className="sr-only">
+                    Bước {index + 1}: {step.label}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+        <p className="mt-2 text-[13px] leading-5 text-app-ink-muted">{stepMeta.caption}</p>
+
+        {whyThisMatters ? (
+          <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-3">
+            <button
+              type="button"
+              className="flex items-center gap-2 text-left text-[12px] font-medium text-app-accent transition-colors duration-150 hover:text-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              onClick={() => setIsWhyOpen((isOpen) => !isOpen)}
+              aria-expanded={isWhyOpen}
+              aria-controls="twelve-week-step-why"
+            >
+              <span>Tại sao bước này quan trọng?</span>
+              <ChevronDown
+                className={cn("h-4 w-4 transition-transform duration-150", isWhyOpen && "rotate-180")}
                 aria-hidden="true"
               />
-              <p className="mt-3 text-base font-semibold text-foreground">Đang chuẩn bị 12 tuần của bạn...</p>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                Hệ thống đang chốt tuần đầu, việc lặp lại và nhịp review.
-              </p>
+            </button>
+            {isWhyOpen ? (
+              <div id="twelve-week-step-why" className="mt-2 text-[13px] leading-6 text-app-ink-soft">
+                {whyThisMatters}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="mt-6">
+        {children}
+        {stepError ? (
+          <div
+            role="alert"
+            className="mt-4 rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-3 text-[color:var(--color-danger-fg)]"
+          >
+            <div className="flex items-start gap-2">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <p className="text-[13px] font-medium leading-5">{stepError}</p>
             </div>
           </div>
         ) : null}
-      </Card>
-    </div>
+      </div>
+
+      <div className="mt-8 flex flex-col-reverse gap-3 border-t border-app-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-[12px] text-app-ink-muted">
+          Bước {currentStep + 1} / {stepCount}
+        </p>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+            onClick={onBack}
+            disabled={isSubmitting}
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Quay lại
+          </button>
+          {isLastStep ? (
+            <button
+              type="button"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-2 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+              onClick={handleSubmitClick}
+              disabled={isSubmitting || isSubmitDisabled}
+              aria-busy={isSubmitting}
+            >
+              {isSubmitting ? (
+                <Loader2 className={prefersReducedMotion ? "h-4 w-4" : "h-4 w-4 animate-spin"} aria-hidden="true" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+              )}
+              {isSubmitting ? "Đang lưu..." : "Lưu kế hoạch"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-2 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+              onClick={onNext}
+              disabled={isNextDisabled}
+            >
+              Tiếp →
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }

@@ -263,10 +263,10 @@ async function submitSetupFlow() {
   const user = userEvent.setup();
 
   expect(await screen.findByRole("heading", { name: "Mục tiêu 12 tuần" })).toBeInTheDocument();
-  await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
-  await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
-  await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
-  await user.click(screen.getByRole("button", { name: "Tạo kế hoạch 12 tuần" }));
+  await user.click(screen.getByRole("button", { name: "Tiếp →" }));
+  await user.click(screen.getByRole("button", { name: "Tiếp →" }));
+  await user.click(screen.getByRole("button", { name: "Tiếp →" }));
+  await user.click(screen.getByRole("button", { name: "Lưu kế hoạch" }));
 
   await waitFor(() => {
     expect(router.state.location.pathname).toBe("/12-week-system");
@@ -338,9 +338,9 @@ describe("12-week setup backend sync", () => {
     expect(screen.queryByRole("heading", { name: "Đăng nhập để bắt đầu" })).not.toBeInTheDocument();
 
     // Walk through steps 0 → 1 → 2 → 3
-    await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
-    await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
-    await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
+    await user.click(screen.getByRole("button", { name: "Tiếp →" }));
+    await user.click(screen.getByRole("button", { name: "Tiếp →" }));
+    await user.click(screen.getByRole("button", { name: "Tiếp →" }));
 
     // Step 3 — gate now appears alongside the preview
     expect(await screen.findByRole("heading", { name: "Đăng nhập để bắt đầu" })).toBeInTheDocument();

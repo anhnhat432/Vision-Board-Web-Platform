@@ -1,6 +1,5 @@
 ﻿import { useEffect, useMemo, useCallback, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { Compass, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 
 import { CoreFlowGateState } from "@/app/components/CoreFlowGateState";
@@ -8,9 +7,6 @@ import { CoreFlowProgress } from "@/app/components/CoreFlowProgress";
 import { PageShell } from "@/app/components/PageShell";
 import { RealModeLoginGate } from "@/app/components/RealModeLoginGate";
 import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
-import { Badge } from "@/app/components/ui/badge";
-import { Button } from "@/app/components/ui/button";
-import { Card, CardContent } from "@/app/components/ui/card";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
 import {
   APP_STORAGE_KEYS,
@@ -1087,104 +1083,111 @@ export function TwelveWeekSetup() {
   };
 
   return (
-    <PageShell maxWidth="xl" className="stack-section sm:stack-section page-enter">
-      <UpgradePaywallDialog
-        open={isPaywallOpen}
-        onOpenChange={setIsPaywallOpen}
-        context="template"
-        currentPlan={currentPlan}
-        recommendedPlan={pendingTemplate?.requiredPlan ?? "PLUS"}
-        source="12_week_setup"
-        title={paywallReason === "cycle_limit" ? "Bạn đã có 1 chu kỳ đang chạy" : "Mở Plus để thiết lập nhanh hơn"}
-        description={
-          paywallReason === "cycle_limit"
-            ? "Nâng cấp Plus để tạo thêm chu kỳ 12 tuần. Dữ liệu hiện có vẫn được giữ nguyên."
-            : "Khung này phù hợp với kiểu mục tiêu và mức sẵn sàng của bạn. Mở Plus để dùng ngay."
-        }
-        onCheckoutComplete={handleCheckoutComplete}
-      />
+    <PageShell maxWidth="xl">
+      <div className="space-y-6">
+        <UpgradePaywallDialog
+          open={isPaywallOpen}
+          onOpenChange={setIsPaywallOpen}
+          context="template"
+          currentPlan={currentPlan}
+          recommendedPlan={pendingTemplate?.requiredPlan ?? "PLUS"}
+          source="12_week_setup"
+          title={paywallReason === "cycle_limit" ? "Bạn đã có 1 chu kỳ đang chạy" : "Mở Plus để thiết lập nhanh hơn"}
+          description={
+            paywallReason === "cycle_limit"
+              ? "Nâng cấp Plus để tạo thêm chu kỳ 12 tuần. Dữ liệu hiện có vẫn được giữ nguyên."
+              : "Khung này phù hợp với kiểu mục tiêu và mức sẵn sàng của bạn. Mở Plus để dùng ngay."
+          }
+          onCheckoutComplete={handleCheckoutComplete}
+        />
 
-      <CoreFlowProgress currentStepId="twelve_week_setup" onExit={() => navigate("/")} />
+        <CoreFlowProgress currentStepId="twelve_week_setup" onExit={() => navigate("/")} />
 
-      {!isVisionPromptDismissed && (
-        <Card>
-          <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              {aspirationalVision ? (
-                <p className="text-sm leading-6 text-foreground">
-                  <span className="font-semibold text-[color:var(--tone-shell-primary)]">
-                    Mục tiêu này phục vụ tầm nhìn 3 năm:
-                  </span>{" "}
-                  {aspirationalVision.summary}
+        {!isVisionPromptDismissed ? (
+          <section className="rounded-card border border-[#F3D9CC] bg-app-warm-soft p-5 md:p-6" aria-label="Tầm nhìn dài hạn">
+            <span className="inline-flex rounded-full bg-app-surface px-3 py-1 text-[12px] font-medium text-app-warm">
+              Tầm nhìn dài hạn
+            </span>
+            {aspirationalVision ? (
+              <p className="mt-3 font-serif text-[16px] font-medium leading-7 text-[#5C3A2E]">
+                Kế hoạch 12 tuần này phục vụ tầm nhìn 3 năm: {aspirationalVision.summary}
+              </p>
+            ) : (
+              <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-[14px] leading-6 text-app-ink-soft">
+                  Đặt mục tiêu 12 tuần. Phương pháp gốc khuyên gắn với tầm nhìn 3 năm.
                 </p>
-              ) : (
-                <p className="text-sm leading-6 text-foreground">
-                  Bạn đang đặt mục tiêu 12 tuần. Phương pháp gốc khuyên gắn với tầm nhìn 3 năm.
-                </p>
-              )}
-            </div>
-            {!aspirationalVision && (
-              <div className="flex shrink-0 flex-wrap gap-2">
-                <Button asChild size="sm" variant="outline">
-                  <Link to="/vision">Điền 2 phút →</Link>
-                </Button>
-                <Button size="sm" variant="ghost" onClick={() => setIsVisionPromptDismissed(true)}>
-                  Bỏ qua
-                </Button>
+                <div className="flex shrink-0 flex-wrap gap-2">
+                  <Link
+                    to="/vision"
+                    className="inline-flex items-center justify-center rounded-lg bg-app-warm px-3.5 py-2 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-[#c86547] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                  >
+                    Điền 2 phút →
+                  </Link>
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center rounded-lg px-3.5 py-2 text-[13px] font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                    onClick={() => setIsVisionPromptDismissed(true)}
+                  >
+                    Bỏ qua
+                  </button>
+                </div>
               </div>
             )}
-          </CardContent>
-        </Card>
-      )}
+          </section>
+        ) : null}
 
-      <Card>
-        <CardContent className="relative p-5 sm:p-7 lg:p-8">
-          <div className="stack-stack">
-            <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              <Compass className="h-3.5 w-3.5 text-[color:var(--tone-shell-secondary)]" aria-hidden="true" />
-              Thiết lập 12 tuần
+        <section aria-labelledby="twelve-week-setup-title">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+            {getLifeAreaLabel(focusArea)} · Kế hoạch 12 tuần
+          </p>
+          <h1
+            id="twelve-week-setup-title"
+            className="mt-3 max-w-3xl font-serif text-[30px] font-medium leading-tight tracking-tight text-app-ink"
+          >
+            Tạo kế hoạch 12 tuần cho {smartGoal.specific.trim() || "mục tiêu của bạn"}.
+          </h1>
+          <p className="mt-2 max-w-2xl text-[14px] leading-6 text-app-ink-soft">
+            Chốt kết quả, việc lặp lại, lịch nhìn lại — tất cả trong 4 bước.
+          </p>
+          <div className="mt-4 rounded-card border border-app-line bg-app-surface p-4">
+            <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-app-ink-muted">Mục tiêu hiện tại</p>
+            <p className="mt-1 line-clamp-2 text-[14px] font-medium leading-6 text-app-ink">
+              {smartGoal.specific.trim()}
             </p>
-            <div className="stack-tight">
-              <h1 className="max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl">
-                Chốt chu kỳ <span className="text-gradient-vibrant">12 tuần</span> gọn, rõ và vào việc ngay.
-              </h1>
-              <p className="max-w-2xl text-[15px] leading-relaxed text-muted-foreground sm:text-base">
-                Sau bước này bạn có kết quả rõ, 2-4 việc lặp lại có lịch, và tuần 1 đủ nhẹ để bắt đầu.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="brand">
-                <Target className="mr-1 h-3.5 w-3.5" />
-                Ưu tiên: {getLifeAreaLabel(focusArea)}
-              </Badge>
-              <Badge variant="neutral">
-                <Sparkles className="mr-1 h-3.5 w-3.5" />
-                Sẵn sàng: {feasibility.adjustedScore}/20
-              </Badge>
-              {feasibility.bottleneck && (
-                <Badge variant="warning" className="hidden sm:inline-flex">
+            <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-app-ink-muted">
+              <span className="rounded-full bg-app-accent-soft px-2.5 py-1 font-medium text-app-accent">
+                Sẵn sàng {feasibility.adjustedScore}/20
+              </span>
+              {feasibility.bottleneck ? (
+                <span className="rounded-full border border-app-line bg-app-bg px-2.5 py-1">
                   Cần chú ý: {feasibility.bottleneck.label}
-                </Badge>
-              )}
+                </span>
+              ) : null}
+              <Link
+                to="/smart-goal-setup"
+                className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              >
+                Sửa mục tiêu
+              </Link>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </section>
 
-      <SetupStepShell
-        title={STEPS[currentStep].title}
-        description={currentStepDescription}
-        whyThisMatters={currentStepWhy}
-        currentStep={currentStep}
-        stepCount={STEPS.length}
-        onBack={handleBack}
-        onNext={handleNext}
-        onSubmit={handleSubmit}
-        onJumpToStep={handleJumpToStep}
-        stepError={currentStepValidationError}
-        isNextDisabled={Boolean(currentStepValidationError)}
-        isSubmitDisabled={Boolean(currentStepValidationError)}
-      >
+        <SetupStepShell
+          title={STEPS[currentStep].title}
+          description={currentStepDescription}
+          whyThisMatters={currentStepWhy}
+          currentStep={currentStep}
+          stepCount={STEPS.length}
+          onBack={handleBack}
+          onNext={handleNext}
+          onSubmit={handleSubmit}
+          onJumpToStep={handleJumpToStep}
+          stepError={currentStepValidationError}
+          isNextDisabled={Boolean(currentStepValidationError)}
+          isSubmitDisabled={Boolean(currentStepValidationError)}
+        >
         {currentStep === 0 && (
           <OutcomeStep
             feasibility={feasibility}
@@ -1249,7 +1252,8 @@ export function TwelveWeekSetup() {
             canConfirm={!currentStepValidationError}
           />
         )}
-      </SetupStepShell>
+        </SetupStepShell>
+      </div>
     </PageShell>
   );
 }

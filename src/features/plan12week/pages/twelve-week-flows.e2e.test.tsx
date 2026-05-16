@@ -103,8 +103,8 @@ describe("12-week core flows", () => {
     const user = userEvent.setup();
 
     await screen.findByRole("heading", { name: "Mục tiêu 12 tuần" });
-    expect(screen.getByText(/Mục tiêu này phục vụ tầm nhìn 3 năm:/)).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
+    expect(screen.getByText(/Kế hoạch 12 tuần này phục vụ tầm nhìn 3 năm:/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Tiếp →" }));
 
     const tacticInputs = await screen.findAllByLabelText("Tên việc");
     await user.clear(tacticInputs[0]);
@@ -112,9 +112,9 @@ describe("12-week core flows", () => {
     await user.clear(tacticInputs[1]);
     await user.type(tacticInputs[1], "Review cuối ngày");
 
-    await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
-    await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
-    await user.click(screen.getByRole("button", { name: "Tạo kế hoạch 12 tuần" }));
+    await user.click(screen.getByRole("button", { name: "Tiếp →" }));
+    await user.click(screen.getByRole("button", { name: "Tiếp →" }));
+    await user.click(screen.getByRole("button", { name: "Lưu kế hoạch" }));
 
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/12-week-system");
@@ -166,11 +166,11 @@ describe("12-week core flows", () => {
 
     await screen.findByRole("heading", { name: "Mục tiêu 12 tuần" });
     expect(
-      screen.getByText("Bạn đang đặt mục tiêu 12 tuần. Phương pháp gốc khuyên gắn với tầm nhìn 3 năm."),
+      screen.getByText("Đặt mục tiêu 12 tuần. Phương pháp gốc khuyên gắn với tầm nhìn 3 năm."),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Điền 2 phút →" })).toHaveAttribute("href", "/vision");
     expect(screen.getByRole("button", { name: "Bỏ qua" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Tiếp tục" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Tiếp →" })).toBeEnabled();
   }, 10_000);
 
   it("sends corrupt saved feasibility results back to feasibility with a clear toast", async () => {
