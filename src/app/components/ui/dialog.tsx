@@ -42,7 +42,7 @@ const DialogOverlay = React.forwardRef<
     ref={ref}
     data-slot="dialog-overlay"
     className={cn(
-      "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm",
+      "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/55 backdrop-blur-md",
       className,
     )}
     {...props}
@@ -65,13 +65,13 @@ const DialogContent = React.forwardRef<
         ref={ref}
         data-slot="dialog-content"
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid max-h-[calc(100dvh-2rem)] w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-5 overflow-y-auto rounded-[var(--r-card)] border border-white/72 p-5 shadow-2xl backdrop-blur-2xl duration-200 sm:max-w-lg sm:p-7",
+          "bg-card text-card-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid max-h-[calc(100dvh-2rem)] w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-5 overflow-y-auto rounded-[var(--r-card)] border border-[color:var(--border)] p-6 shadow-[0_8px_16px_-4px_rgba(0,0,0,0.08),0_24px_48px_-16px_rgba(0,0,0,0.18)] duration-200 sm:max-w-lg sm:p-7",
           className,
         )}
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-[var(--r-control)] p-1.5 opacity-70 transition-colors transition-opacity hover:bg-slate-100 hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
+        <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-[color:var(--muted)] data-[state=open]:text-foreground absolute top-4 right-4 inline-flex h-8 w-8 items-center justify-center rounded-[var(--r-control)] text-muted-foreground transition-colors transition-opacity hover:bg-[color:var(--muted)] hover:text-foreground focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
           <XIcon />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
@@ -85,7 +85,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      className={cn("flex flex-col gap-2.5 text-center sm:text-left", className)}
       {...props}
     />
   );
@@ -115,7 +115,7 @@ const DialogTitle = React.forwardRef<
     <DialogPrimitive.Title
       ref={ref}
       data-slot="dialog-title"
-      className={cn("text-lg font-semibold leading-tight tracking-normal text-slate-950", className)}
+      className={cn("text-xl font-bold leading-tight tracking-tight text-foreground", className)}
       {...props}
     />
   );
@@ -133,7 +133,7 @@ const DialogDescription = React.forwardRef<
     <DialogPrimitive.Description
       ref={ref}
       data-slot="dialog-description"
-      className={cn("text-muted-foreground text-sm leading-6", className)}
+      className={cn("text-[14px] leading-6 text-muted-foreground tracking-tight", className)}
       {...props}
     />
   );

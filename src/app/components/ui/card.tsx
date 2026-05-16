@@ -129,7 +129,7 @@ function CardTitle({ className, as: Heading = "h3", ...props }: CardTitleProps) 
   return (
     <Heading
       data-slot="card-title"
-      className={cn("leading-tight tracking-normal", className)}
+      className={cn("text-lg font-semibold leading-tight tracking-tight text-foreground", className)}
       {...props}
     />
   );
@@ -139,7 +139,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <p
       data-slot="card-description"
-      className={cn("text-muted-foreground text-sm leading-6 tracking-normal", className)}
+      className={cn("text-[13px] leading-6 text-muted-foreground tracking-tight", className)}
       {...props}
     />
   );

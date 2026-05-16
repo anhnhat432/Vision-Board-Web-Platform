@@ -600,14 +600,14 @@ export function RootLayout() {
             type="button"
             className={
               isMobile
-                ? "flex size-11 items-center justify-center rounded-[var(--r-tile)] border border-white/72 bg-white/76 text-slate-700 transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300"
-                : "flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] bg-slate-900 text-white shadow-sm ring-1 ring-slate-200 transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 dark:bg-white dark:text-slate-950 dark:ring-white/12"
+                ? "flex size-10 items-center justify-center rounded-[var(--r-control)] border border-[color:var(--border)] bg-card text-foreground transition-colors hover:bg-[color:var(--muted)]"
+                : "flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] bg-foreground text-background transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             }
             aria-label={triggerLabel}
             title={accountEmail || accountLabel}
           >
             <span
-              className={`flex shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-slate-900 text-xs font-semibold uppercase text-white ${
+              className={`flex shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-foreground text-[11px] font-bold uppercase text-background ${
                 isMobile ? "h-7 w-7" : "h-8 w-8"
               }`}
               aria-hidden="true"
@@ -620,50 +620,39 @@ export function RootLayout() {
           align="end"
           sideOffset={10}
           aria-label="Tài khoản"
-          className="w-72 rounded-[var(--r-card)] border-0 bg-white/96 p-2 text-slate-700 shadow-xl ring-1 ring-slate-200 dark:bg-slate-950/96 dark:text-slate-100 dark:ring-white/12"
+          className="w-72 p-1.5"
         >
-          <DropdownMenuLabel className="px-3 py-3">
+          <DropdownMenuLabel className="px-2.5 py-3 normal-case tracking-normal">
             <div className="flex items-start gap-3">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-slate-900 text-xs font-semibold uppercase text-white">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-foreground text-[12px] font-bold uppercase text-background">
                 {accountAvatarLabel}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Thông tin tài khoản
+                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                  Tài khoản
                 </p>
-                <p className="mt-1 truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                <p className="mt-1 truncate text-[14px] font-semibold tracking-tight text-foreground">
                   {accountEmail || accountLabel}
                 </p>
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className="rounded-[var(--r-pill)] border-violet-200 bg-violet-50 px-2 py-0.5 text-[11px] text-violet-700"
-                  >
-                    {accountPlanLabel}
-                  </Badge>
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                  <Badge variant="outline">{accountPlanLabel}</Badge>
                   {!demoMode ? <SyncStatusPill compact={isMobile} /> : null}
                 </div>
               </div>
             </div>
           </DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-slate-100" />
-          <DropdownMenuItem
-            className="rounded-[var(--r-control)] px-3 py-2"
-            onSelect={() => navigateAppRoute("/settings")}
-          >
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => navigateAppRoute("/settings")}>
             <Settings2 className="h-4 w-4" />
             Cài đặt
           </DropdownMenuItem>
-          <DropdownMenuItem
-            className="rounded-[var(--r-control)] px-3 py-2"
-            onSelect={() => navigateAppRoute("/billing/plan")}
-          >
+          <DropdownMenuItem onSelect={() => navigateAppRoute("/billing/plan")}>
             <CreditCard className="h-4 w-4" />
             Quản lý gói
           </DropdownMenuItem>
-          <DropdownMenuSeparator className="bg-slate-100" />
+          <DropdownMenuSeparator />
           <DropdownMenuItem
-            className="rounded-[var(--r-control)] px-3 py-2 text-red-600 focus:text-red-700"
+            variant="destructive"
             disabled={isSigningOut}
             onSelect={() => {
               void handleSignOut();
@@ -977,9 +966,9 @@ export function RootLayout() {
         <GracePeriodBanner />
 
         <header className="sticky top-0 z-40 px-4 pt-2 sm:top-3 sm:px-6 sm:pt-0 lg:px-8">
-          <div className="glass-surface mx-auto max-w-6xl rounded-[var(--r-tile)] px-3 py-2 sm:px-4 sm:py-2.5 shadow-sm">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex min-w-0 shrink-0 items-center gap-2">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-[var(--r-soft)] border border-[color:var(--border)] bg-[color-mix(in_srgb,var(--card)_94%,transparent)] px-3 py-2 shadow-[0_1px_2px_rgba(15,23,42,0.04)] backdrop-blur-xl supports-[backdrop-filter]:bg-[color-mix(in_srgb,var(--card)_82%,transparent)] sm:px-4 sm:py-2.5">
+            <div className="flex w-full items-center justify-between gap-3">
+              <div className="flex min-w-0 shrink-0 items-center gap-2.5">
                 <button
                   type="button"
                   onClick={() => navigateAppRoute("/")}
@@ -987,13 +976,13 @@ export function RootLayout() {
                   aria-label="Về trang chủ Dear Our Future"
                 >
                   <div
-                    className="flex size-9 items-center justify-center rounded-[var(--r-tile)]"
+                    className="flex size-9 items-center justify-center rounded-[var(--r-control)] shadow-[0_2px_8px_-4px_var(--tone-shell-shadow)]"
                     style={shellBadgeStyle}
                   >
-                    <Sparkles className="h-4.5 w-4.5 text-white" />
+                    <Sparkles className="h-4 w-4 text-white" strokeWidth={2.4} />
                   </div>
                   <div className="min-w-0">
-                    <span className="block truncate text-sm font-semibold tracking-normal text-slate-900">
+                    <span className="block truncate text-[14px] font-bold tracking-[-0.012em] text-foreground">
                       Dear Our Future
                     </span>
                   </div>
@@ -1001,7 +990,7 @@ export function RootLayout() {
               </div>
 
               <nav className="hidden flex-1 items-center justify-center md:flex">
-                <div className="flex flex-wrap items-center gap-0.5 rounded-[var(--r-pill)] border border-slate-200/60 bg-slate-50/80 px-1.5 py-1">
+                <div className="flex flex-wrap items-center gap-0.5 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-1 py-1">
                   {primaryNavItems.map((item) => {
                     const Icon = item.icon;
                     const active = isActive(item.path);
@@ -1015,14 +1004,14 @@ export function RootLayout() {
                         onPointerEnter={() => handlePrefetch(item.path)}
                         aria-current={active ? "page" : undefined}
                         title={item.label}
-                        className={`h-8 shrink-0 rounded-[var(--r-pill)] px-3 text-[0.82rem] transition-colors transition-transform duration-150 active:scale-95 ${
+                        className={`h-8 shrink-0 rounded-[var(--r-pill)] px-3 text-[13px] font-semibold tracking-tight transition-colors duration-150 ${
                           active
                             ? "text-white hover:text-white"
-                            : "bg-transparent text-slate-600 shadow-none hover:bg-white/90 hover:text-slate-900"
+                            : "bg-transparent text-muted-foreground shadow-none hover:bg-card hover:text-foreground"
                         }`}
                         style={active ? activeNavStyle : undefined}
                       >
-                        <Icon className="h-3.5 w-3.5" />
+                        <Icon className="h-3.5 w-3.5" strokeWidth={active ? 2.2 : 1.8} />
                         <span>{item.compactLabel ?? item.label}</span>
                       </Button>
                     );
@@ -1030,7 +1019,7 @@ export function RootLayout() {
 
                   {secondaryNavItems.length > 0 ? (
                     <>
-                      <div className="mx-0.5 h-5 w-px shrink-0 bg-slate-200/60" />
+                      <div className="mx-1 h-4 w-px shrink-0 bg-[color:var(--border)]" />
 
                       <div ref={desktopMoreRef} className="relative">
                         <Button
@@ -1039,10 +1028,10 @@ export function RootLayout() {
                           aria-current={secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined}
                           aria-expanded={desktopMoreOpen}
                           aria-haspopup="menu"
-                          className={`h-8 shrink-0 rounded-[var(--r-pill)] px-3 text-[0.82rem] transition-colors transition-transform duration-150 active:scale-95 ${
+                          className={`h-8 shrink-0 rounded-[var(--r-pill)] px-3 text-[13px] font-semibold tracking-tight transition-colors duration-150 ${
                             isDesktopMoreNavActive
                               ? "text-white hover:text-white"
-                              : "bg-transparent text-slate-500 shadow-none hover:bg-white/90 hover:text-slate-700"
+                              : "bg-transparent text-muted-foreground shadow-none hover:bg-card hover:text-foreground"
                           }`}
                           style={isDesktopMoreNavActive ? activeNavStyle : undefined}
                           onClick={() => setDesktopMoreOpen((open) => !open)}
@@ -1058,12 +1047,11 @@ export function RootLayout() {
                           <div
                             role="menu"
                             aria-label="Mục khác"
-                            className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-[var(--r-control)] border border-slate-200 bg-white/96 p-2 shadow-lg backdrop-blur-xl"
+                            className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-[var(--r-soft)] border border-[color:var(--border)] bg-popover p-1.5 shadow-[0_4px_8px_-2px_rgba(15,23,42,0.06),0_16px_32px_-12px_rgba(15,23,42,0.16)]"
                           >
-                            <div className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                            <div className="px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                               Mục khác
                             </div>
-                            <div className="mx-1 mb-1 h-px bg-slate-200/80" />
                             {secondaryNavItems.map((item) => {
                               const Icon = item.icon;
                               const active = isActive(item.path);
@@ -1079,14 +1067,14 @@ export function RootLayout() {
                                     setDesktopMoreOpen(false);
                                     navigateAppRoute(item.path);
                                   }}
-                                  className={`my-1 flex w-full cursor-pointer items-center gap-2 rounded-[var(--r-control)] px-3 py-2.5 text-left text-sm font-medium tracking-normal outline-none transition-colors ${
+                                  className={`my-0.5 flex w-full cursor-pointer items-center gap-2.5 rounded-[calc(var(--r-control)-3px)] px-2.5 py-2 text-left text-[13px] font-medium tracking-tight outline-none transition-colors ${
                                     active
                                       ? "text-white focus:text-white"
-                                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-950 focus:bg-slate-50 focus:text-slate-950"
+                                      : "text-foreground hover:bg-[color:var(--muted)] focus:bg-[color:var(--muted)]"
                                   }`}
                                   style={active ? activeNavStyle : undefined}
                                 >
-                                  <Icon className={`h-4 w-4 shrink-0 ${active ? "text-white" : "text-slate-500"}`} />
+                                  <Icon className={`h-4 w-4 shrink-0 ${active ? "text-white" : "text-muted-foreground"}`} />
                                   <span className="min-w-0 flex-1 truncate">{item.label}</span>
                                 </button>
                               );
@@ -1099,15 +1087,15 @@ export function RootLayout() {
                 </div>
               </nav>
 
-              <div className="hidden shrink-0 items-center gap-1 md:flex">
+              <div className="hidden shrink-0 items-center gap-1.5 md:flex">
                 {user ? renderAccountMenu("desktop") : null}
                 {!user ? (
                   <>
                     <Button
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
                       onClick={() => handleAuthNavigate("signin")}
-                      className="h-8 rounded-[var(--r-pill)] border-slate-200/60 bg-white/90 px-3 text-xs text-slate-700 hover:bg-white"
+                      className="h-8 rounded-[var(--r-pill)] px-3 text-[13px]"
                     >
                       Đăng nhập
                     </Button>
@@ -1115,7 +1103,7 @@ export function RootLayout() {
                       variant="secondary"
                       size="sm"
                       onClick={() => handleAuthNavigate("signup")}
-                      className="h-8 rounded-[var(--r-pill)] px-3 text-xs"
+                      className="h-8 rounded-[var(--r-pill)] px-3.5 text-[13px]"
                     >
                       Đăng ký
                     </Button>
@@ -1124,34 +1112,34 @@ export function RootLayout() {
                 <button
                   type="button"
                   onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                  className="flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:text-slate-300 dark:hover:bg-white/12"
+                  className="flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] text-muted-foreground transition-colors hover:bg-[color:var(--muted)] hover:text-foreground"
                   aria-label={resolvedTheme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
                 >
                   {resolvedTheme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
                 </button>
               </div>
 
-              <div className="md:hidden flex min-w-0 items-center gap-2">
-                <span className="hidden max-w-[120px] truncate text-sm font-medium tracking-normal text-slate-700 dark:text-slate-200 sm:inline">
+              <div className="md:hidden flex min-w-0 items-center gap-1.5">
+                <span className="hidden max-w-[120px] truncate text-[13px] font-semibold tracking-tight text-foreground sm:inline">
                   {pageMeta.label}
                 </span>
                 <button
                   type="button"
-                  className="hidden size-11 items-center justify-center rounded-[var(--r-tile)] border border-white/72 bg-white/76 text-slate-700 transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300 sm:flex"
+                  className="hidden size-10 items-center justify-center rounded-[var(--r-control)] border border-[color:var(--border)] bg-card text-foreground transition-colors hover:bg-[color:var(--muted)] sm:flex"
                   onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
                   aria-label={resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
                 >
                   {resolvedTheme === "dark" ? (
-                    <Sun className="h-[1.1rem] w-[1.1rem]" />
+                    <Sun className="h-[1.05rem] w-[1.05rem]" />
                   ) : (
-                    <Moon className="h-[1.1rem] w-[1.1rem]" />
+                    <Moon className="h-[1.05rem] w-[1.05rem]" />
                   )}
                 </button>
                 {isSignedOutVisitor ? (
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="h-10 rounded-[var(--r-tile)] px-3 text-xs shadow-sm sm:h-11"
+                    className="h-10 rounded-[var(--r-control)] px-3 text-[13px]"
                     onClick={() => handleAuthNavigate("signup")}
                   >
                     Đăng ký
@@ -1161,28 +1149,28 @@ export function RootLayout() {
                 ) : (
                   <button
                     type="button"
-                    className="flex size-11 items-center justify-center rounded-[var(--r-tile)] border border-white/72 bg-white/76 text-slate-700 transition-colors active:scale-95 hover:bg-white dark:border-white/10 dark:bg-white/6 dark:text-slate-300"
+                    className="flex size-10 items-center justify-center rounded-[var(--r-control)] border border-[color:var(--border)] bg-card text-foreground transition-colors hover:bg-[color:var(--muted)]"
                     onClick={() => {
                       setGuideUserData(getUserData());
                       setIsGuideOpen(true);
                     }}
                     aria-label="Mở hướng dẫn sử dụng"
                   >
-                    <Compass className="h-[1.1rem] w-[1.1rem]" />
+                    <Compass className="h-[1.05rem] w-[1.05rem]" />
                   </button>
                 )}
                 <button
                   type="button"
-                  className="flex size-11 items-center justify-center rounded-[var(--r-tile)] border border-white/72 bg-white/76 text-slate-700 transition-colors active:scale-95 hover:bg-white"
+                  className="flex size-10 items-center justify-center rounded-[var(--r-control)] border border-[color:var(--border)] bg-card text-foreground transition-colors hover:bg-[color:var(--muted)]"
                   onClick={() => setMobileMenuOpen((open) => !open)}
                   aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
                   aria-expanded={mobileMenuOpen}
                   aria-controls="mobile-nav-menu"
                 >
                   {mobileMenuOpen ? (
-                    <X className="h-[1.1rem] w-[1.1rem]" />
+                    <X className="h-[1.05rem] w-[1.05rem]" />
                   ) : (
-                    <Menu className="h-[1.1rem] w-[1.1rem]" />
+                    <Menu className="h-[1.05rem] w-[1.05rem]" />
                   )}
                 </button>
               </div>
@@ -1328,9 +1316,9 @@ export function RootLayout() {
         ) : null}
 
         {user ? (
-          <footer className="relative z-10 mx-auto max-w-6xl px-4 pb-24 text-xs text-slate-500 sm:px-6 md:pb-8 lg:px-8">
-            <div className="flex items-center justify-center gap-2 border-t border-slate-200/70 pt-4 md:justify-end">
-              <span className="font-medium text-slate-500">v1.0</span>
+          <footer className="relative z-10 mx-auto max-w-6xl px-4 pb-24 text-[12px] tracking-tight text-muted-foreground sm:px-6 md:pb-8 lg:px-8">
+            <div className="flex items-center justify-center gap-2 border-t border-[color:var(--border)] pt-4 md:justify-end">
+              <span className="font-semibold">v1.0</span>
               <span aria-hidden="true">·</span>
               <span className="hidden max-w-[260px] truncate md:inline">{accountEmail || accountLabel}</span>
               <span className="hidden md:inline" aria-hidden="true">
@@ -1338,7 +1326,7 @@ export function RootLayout() {
               </span>
               <a
                 href="/settings"
-                className="font-semibold text-slate-600 underline-offset-4 transition-colors hover:text-slate-900 hover:underline"
+                className="font-semibold text-foreground underline-offset-4 transition-colors hover:underline"
                 onClick={(event) => {
                   event.preventDefault();
                   navigateAppRoute("/settings");

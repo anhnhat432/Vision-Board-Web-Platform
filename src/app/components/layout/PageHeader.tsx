@@ -34,15 +34,23 @@ export function PageHeader({
   return (
     <div className={cn("max-w-3xl space-y-3", className)}>
       {eyebrow && (
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+          <span
+            aria-hidden="true"
+            className="inline-block h-1.5 w-1.5 rounded-full"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--tone-shell-primary), var(--tone-shell-secondary))",
+            }}
+          />
           {eyebrow}
         </p>
       )}
-      <HeadingTag className="text-xl font-semibold leading-snug tracking-tight text-foreground sm:text-2xl">
+      <HeadingTag className="text-2xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-3xl">
         {title}
       </HeadingTag>
       {description && (
-        <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+        <p className="text-[15px] leading-relaxed tracking-tight text-muted-foreground sm:text-base">
           {description}
         </p>
       )}

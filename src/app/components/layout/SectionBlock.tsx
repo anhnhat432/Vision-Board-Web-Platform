@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useId, useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "../ui/utils";
 
@@ -73,15 +73,15 @@ export function SectionBlock({
       <div className={cn("flex items-start justify-between gap-2", headerVisuallyHidden && "sr-only")}>
         <div className={cn("flex-1", headerDensityClass)}>
           {eyebrow && (
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               {eyebrow}
             </p>
           )}
-          <h2 id={headingId} className="text-lg font-semibold leading-tight tracking-tight text-foreground">
+          <h2 id={headingId} className="text-xl font-bold leading-tight tracking-[-0.014em] text-foreground">
             {title}
           </h2>
           {description && (
-            <p className="text-sm text-muted-foreground">{description}</p>
+            <p className="text-[14px] leading-6 tracking-tight text-muted-foreground">{description}</p>
           )}
         </div>
         {collapsible && (
@@ -89,16 +89,17 @@ export function SectionBlock({
             type="button"
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0"
+            className="h-9 w-9 p-0 transition-transform duration-200"
             onClick={toggle}
             aria-expanded={isOpen}
             aria-controls={contentId}
           >
-            {isOpen ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
+            <ChevronDown
+              className={cn(
+                "h-4 w-4 transition-transform duration-300 ease-out",
+                isOpen ? "rotate-0" : "-rotate-90",
+              )}
+            />
           </Button>
         )}
       </div>

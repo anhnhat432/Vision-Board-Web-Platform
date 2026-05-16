@@ -9,22 +9,21 @@ import { Input } from "./input";
 import { Sheet, SheetContent, SheetTitle } from "./sheet";
 
 describe("UI primitive visual hierarchy", () => {
-  it("keeps the primary button as the only gradient hierarchy without a base shadow", () => {
+  it("keeps the primary button as the only gradient hierarchy with a tonal shadow", () => {
     const primary = buttonVariants({ variant: "default" });
 
     expect(primary).toContain("gradient-brand");
-    expect(primary).toContain("shadow-none");
-    expect(primary).toContain("hover:shadow-[0_18px_38px_-24px_var(--tone-shell-shadow-strong)]");
+    expect(primary).toContain("var(--tone-shell-shadow-strong)");
     expect(primary).not.toContain("shadow-lg");
   });
 
-  it("uses a dark secondary button and white outline tertiary button", () => {
-    expect(buttonVariants({ variant: "secondary" })).toContain("bg-slate-950");
+  it("uses a dark secondary button and tokenized outline tertiary button", () => {
+    expect(buttonVariants({ variant: "secondary" })).toContain("bg-foreground");
 
     const outline = buttonVariants({ variant: "outline" });
-    expect(outline).toContain("border-slate-300");
-    expect(outline).toContain("bg-white");
-    expect(outline).toContain("text-slate-900");
+    expect(outline).toContain("border-[color:var(--border)]");
+    expect(outline).toContain("bg-card");
+    expect(outline).toContain("text-foreground");
   });
 
   it("limits button magnetic motion to the primary hierarchy", () => {
@@ -86,7 +85,7 @@ describe("UI primitive visual hierarchy", () => {
 
     render(<Input aria-label="Name" />);
     expect(document.querySelector('[data-slot="input"]')?.className).toContain(
-      "rounded-[var(--r-control)]",
+      "rounded-[var(--r-input)]",
     );
 
     render(

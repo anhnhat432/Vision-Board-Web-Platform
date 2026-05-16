@@ -30,7 +30,7 @@ const TabsList = React.forwardRef<
       ref={ref}
       data-slot="tabs-list"
       className={cn(
-        "text-muted-foreground inline-flex min-h-[3.25rem] max-w-full items-center justify-start gap-1 overflow-x-auto rounded-[var(--r-control)] border border-white/70 bg-white/82 p-1 shadow-sm",
+        "text-muted-foreground inline-flex min-h-11 max-w-full items-center justify-start gap-1 overflow-x-auto rounded-[var(--r-control)] border border-[color:var(--border)] bg-[color:var(--muted)] p-1",
         className,
       )}
       {...props}
@@ -51,11 +51,9 @@ const TabsTrigger = React.forwardRef<
       ref={ref}
       data-slot="tabs-trigger"
       className={cn(
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-[var(--r-control)] border border-transparent px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-colors transition-shadow transition-transform duration-150 focus-visible:ring-[3px] focus-visible:outline-1 hover:bg-white/72 hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        "text-slate-600 dark:text-muted-foreground",
-        "data-[state=active]:text-white data-[state=active]:font-semibold data-[state=active]:border-transparent data-[state=active]:scale-[1.02]",
-        "data-[state=active]:bg-[linear-gradient(135deg,var(--tone-shell-primary)_0%,var(--tone-shell-secondary)_55%,var(--tone-shell-tertiary)_100%)]",
-        "data-[state=active]:shadow-md",
+        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-[calc(var(--r-control)-2px)] border border-transparent px-3.5 py-1.5 text-[13px] font-semibold tracking-tight whitespace-nowrap transition-colors transition-shadow duration-150 focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "text-muted-foreground hover:text-foreground",
+        "data-[state=active]:text-foreground data-[state=active]:bg-card data-[state=active]:shadow-[0_1px_2px_rgba(15,23,42,0.06),0_2px_6px_-2px_rgba(15,23,42,0.08)]",
         className,
       )}
       {...props}

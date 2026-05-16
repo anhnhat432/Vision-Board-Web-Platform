@@ -34,17 +34,20 @@ interface InlineStatusMessageProps {
 }
 
 const TONE_CLASS: Record<InlineStatusTone, string> = {
-  info: "border-sky-200 bg-sky-50 text-sky-900",
-  warning: "border-amber-200 bg-amber-50 text-amber-900",
-  error: "border-rose-200 bg-rose-50 text-rose-900",
-  success: "border-emerald-200 bg-emerald-50 text-emerald-900",
+  info: "border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)]",
+  warning:
+    "border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning-fg)]",
+  error:
+    "border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] text-[color:var(--color-danger-fg)]",
+  success:
+    "border-[color:var(--color-success-border)] bg-[color:var(--color-success-bg)] text-[color:var(--color-success-fg)]",
 };
 
 const TONE_ICON_CLASS: Record<InlineStatusTone, string> = {
-  info: "text-sky-700",
-  warning: "text-amber-700",
-  error: "text-rose-700",
-  success: "text-emerald-700",
+  info: "text-[color:var(--color-info-fg)]",
+  warning: "text-[color:var(--color-warning-fg)]",
+  error: "text-[color:var(--color-danger-fg)]",
+  success: "text-[color:var(--color-success-fg)]",
 };
 
 const DEFAULT_ICONS: Record<InlineStatusTone, ReactNode> = {
@@ -70,7 +73,7 @@ export function InlineStatusMessage({
       role={role}
       data-testid={testId}
       className={cn(
-        "flex items-start gap-2 rounded-[var(--r-control)] border px-3 py-2 text-sm leading-6",
+        "flex items-start gap-2.5 rounded-[var(--r-control)] border px-3.5 py-2.5 text-[13px] leading-5 font-medium tracking-tight shadow-[0_1px_2px_rgba(15,23,42,0.04)]",
         TONE_CLASS[tone],
         className,
       )}
