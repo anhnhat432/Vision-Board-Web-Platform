@@ -275,10 +275,9 @@ describe("Feasibility ResultStep — mobile detail disclosure", () => {
   });
 });
 
-describe("TwelveWeekSetup ReviewStep — accordion", () => {
-  it("renders the four review panels as one-at-a-time mobile accordion panels", async () => {
+describe("TwelveWeekSetup ReviewStep — summary stack", () => {
+  it("renders the four review sections and edit controls", () => {
     setViewportWidth(375);
-    const user = userEvent.setup();
     const draft = makeFeatureSetupDraft();
     const leadIndicator = makeFeatureIndicator();
 
@@ -298,26 +297,14 @@ describe("TwelveWeekSetup ReviewStep — accordion", () => {
       />,
     );
 
-    const outcome = screen.getByRole("button", { name: "Tóm tắt kết quả" });
-    const indicators = screen.getByRole("button", { name: "Xem trước việc lặp lại" });
-    const schedule = screen.getByRole("button", { name: "Xem trước lịch" });
-    const tactics = screen.getByRole("button", { name: "Danh sách việc" });
-
-    expect(outcome).toHaveAttribute("aria-expanded", "false");
-    expect(indicators).toHaveAttribute("aria-expanded", "false");
-    expect(schedule).toHaveAttribute("aria-expanded", "false");
-    expect(tactics).toHaveAttribute("aria-expanded", "false");
-
-    await user.click(indicators);
-    expect(indicators).toHaveAttribute("aria-expanded", "true");
-    expect(outcome).toHaveAttribute("aria-expanded", "false");
-
-    await user.click(schedule);
-    expect(schedule).toHaveAttribute("aria-expanded", "true");
-    expect(indicators).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("heading", { name: "Kết quả 12 tuần" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Việc lặp lại mỗi tuần" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Chu kỳ và tuần đầu" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Chất lượng và gợi ý" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Sửa" })).toHaveLength(4);
   });
 
-  it("opens the outcome summary panel by default on desktop", () => {
+  it("shows the outcome summary content without requiring accordion expansion", () => {
     setViewportWidth(1024);
     const draft = makeFeatureSetupDraft();
     const leadIndicator = makeFeatureIndicator();
@@ -338,7 +325,9 @@ describe("TwelveWeekSetup ReviewStep — accordion", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: "Tóm tắt kết quả" })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByText("Mục tiêu SMART")).toBeInTheDocument();
+    expect(screen.getAllByText("Portfolio có 6 bài chất lượng.").length).toBeGreaterThan(0);
+    expect(screen.getByText("Viết outline bài đầu tiên")).toBeInTheDocument();
   });
 });
 

@@ -1,20 +1,18 @@
-﻿import { useMemo, useState, useEffect } from "react";
-import { useBreakpoint } from "@/app/hooks/useBreakpoint";
-import { SecondaryPanel } from "@/app/components/layout";
-import { CheckCircle2, CircleAlert, CircleDot, Flag, Target, TriangleAlert, Wrench } from "lucide-react";
-
-import { Badge } from "@/app/components/ui/badge";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/app/components/ui/accordion";
-import { Input } from "@/app/components/ui/input";
-import { Label } from "@/app/components/ui/label";
-import { Textarea } from "@/app/components/ui/textarea";
-import { getLifeAreaLabel } from "@/app/utils/storage";
-import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
+﻿import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
-  getArchetypeForIntent,
-  getUserIntentId,
-  hasActionableArchetypeHint,
-} from "@/app/utils/user-intent";
+  CheckCircle2,
+  CircleAlert,
+  CircleDot,
+  TriangleAlert,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
+
+import { Input } from "@/app/components/ui/input";
+import { Textarea } from "@/app/components/ui/textarea";
+import { cn } from "@/app/components/ui/utils";
+import { formatDateInputValue, getLifeAreaLabel } from "@/app/utils/storage";
+import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
 import {
   evaluateTwelveWeekPlanQuality,
   getPlanRationale,
@@ -22,13 +20,26 @@ import {
 } from "@/features/plan12week/logic";
 import type { PendingSMARTGoal } from "@/lib/smart-goal";
 import {
+  errorTextClass,
+  inputClass,
+  labelClass,
+  textareaClass,
+} from "../../../../../app/pages/SMARTGoalSetup/components/formStyles";
+import {
+  addDays,
   formatScheduleDayLabels,
+  getCycleWeekStart,
   getGoalTypeLabel,
   getLoadPreferenceLabel,
   getMilestoneValidationError,
   getReviewDayLabel,
 } from "../helpers";
 import type { LeadIndicatorDraft, PendingFeasibilityResult, TwelveWeekSetupDraft } from "../types";
+import {
+  getArchetypeForIntent,
+  getUserIntentId,
+  hasActionableArchetypeHint,
+} from "@/app/utils/user-intent";
 
 interface ReviewStepProps {
   smartGoal: PendingSMARTGoal;
@@ -45,9 +56,9 @@ interface ReviewStepProps {
 }
 
 function getQualityBadgeStyle(level: PlanQualityLevel): string {
-  if (level === "strong") return "border-emerald-300 bg-emerald-50 text-emerald-800";
-  if (level === "okay") return "border-amber-300 bg-amber-50 text-amber-800";
-  return "border-amber-300 bg-amber-50 text-amber-800";
+  if (level === "strong") return "border-app-accent bg-app-accent-soft text-app-accent";
+  if (level === "okay") return "border-app-line bg-app-bg text-app-ink-soft";
+  return "border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] text-[color:var(--color-danger-fg)]";
 }
 
 function getQualityLevelLabel(level: PlanQualityLevel): string {
@@ -58,16 +69,81 @@ function getQualityLevelLabel(level: PlanQualityLevel): string {
 
 function getDimensionStatusMeta(status: PlanQualityLevel): {
   label: string;
-  icon: typeof CheckCircle2;
+  icon: LucideIcon;
   textClass: string;
 } {
   if (status === "strong") {
-    return { label: "Tốt", icon: CheckCircle2, textClass: "text-emerald-700" };
+    return { label: "Tốt", icon: CheckCircle2, textClass: "text-app-accent" };
   }
   if (status === "okay") {
-    return { label: "Ổn", icon: CircleDot, textClass: "text-amber-700" };
+    return { label: "Ổn", icon: CircleDot, textClass: "text-app-ink-soft" };
   }
-  return { label: "Cần xem lại", icon: TriangleAlert, textClass: "text-amber-700" };
+  return { label: "Cần xem lại", icon: TriangleAlert, textClass: "text-[color:var(--color-danger-fg)]" };
+}
+
+function jumpToSetupStep(stepIndex: number) {
+  if (typeof document === "undefined") return;
+  const stepButton = document.querySelector<HTMLButtonElement>(`button[aria-label^="Đi tới bước ${stepIndex + 1}:"]`);
+  stepButton?.click();
+}
+
+function getCycleDates(startDate: string): { start: string; end: string } {
+  const parsedStart = startDate ? new Date(`${startDate}T00:00:00`) : null;
+  if (!parsedStart || Number.isNaN(parsedStart.getTime())) {
+    return { start: "Chưa chọn", end: "Chưa chọn" };
+  }
+
+  const cycleStart = getCycleWeekStart(parsedStart);
+  return {
+    start: formatDateInputValue(cycleStart),
+    end: formatDateInputValue(addDays(cycleStart, 83)),
+  };
+}
+
+function ReviewSection({
+  caption,
+  title,
+  stepIndex,
+  children,
+}: {
+  caption: string;
+  title: string;
+  stepIndex: number;
+  children: ReactNode;
+}) {
+  return (
+    <section className="border-b border-app-line pb-5 last:border-0" aria-labelledby={`review-section-${stepIndex}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{caption}</p>
+          <h3 id={`review-section-${stepIndex}`} className="mt-1 font-serif text-[18px] font-medium text-app-ink">
+            {title}
+          </h3>
+        </div>
+        <button
+          type="button"
+          onClick={() => jumpToSetupStep(stepIndex)}
+          className="rounded-full px-2 py-1 text-[12px] font-medium text-app-accent transition-colors duration-150 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+        >
+          Sửa
+        </button>
+      </div>
+      <div className="mt-4">{children}</div>
+    </section>
+  );
+}
+
+function SummaryItem({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{label}</p>
+      <div className="mt-1 text-[14px] leading-6 text-app-ink">{children}</div>
+    </div>
+  );
+}
+
+function EmptyValue({ children }: { children: ReactNode }) {
+  return <span className="text-app-ink-muted">{children}</span>;
 }
 
 export function ReviewStep({
@@ -85,7 +161,7 @@ export function ReviewStep({
 }: ReviewStepProps) {
   const [suggestionsOpen, setSuggestionsOpen] = useState(() => {
     try {
-      return localStorage.getItem("review-step-suggestions-open") === "true";
+      return typeof localStorage !== "undefined" && localStorage.getItem("review-step-suggestions-open") === "true";
     } catch {
       return false;
     }
@@ -94,10 +170,9 @@ export function ReviewStep({
   useEffect(() => {
     try {
       localStorage.setItem("review-step-suggestions-open", String(suggestionsOpen));
-    } catch { /* ignore */ }
+    } catch {}
   }, [suggestionsOpen]);
 
-  const isDesktop = useBreakpoint();
   const milestoneError = getMilestoneValidationError({
     week4: draft.week4Milestone,
     week8: draft.week8Milestone,
@@ -109,6 +184,10 @@ export function ReviewStep({
     if (!intent || !hasActionableArchetypeHint(intent)) return null;
     return getArchetypeForIntent(intent);
   }, []);
+
+  const cycleDates = useMemo(() => getCycleDates(draft.startDate), [draft.startDate]);
+  const coreIndicators = scheduledLeadIndicators.filter((indicator) => indicator.type !== "optional");
+  const optionalIndicators = scheduledLeadIndicators.filter((indicator) => indicator.type === "optional");
 
   const feasibilityContext = feasibility
     ? {
@@ -214,117 +293,99 @@ export function ReviewStep({
     ],
   );
 
-    const _firstAction = weekOneTaskPreview[0] ?? null;
-  const coreIndicators = scheduledLeadIndicators.filter((indicator) => indicator.type !== "optional");
-  const optionalIndicators = scheduledLeadIndicators.filter((indicator) => indicator.type === "optional");
-
   return (
-    <div className="mx-auto max-w-4xl stack-section">
-      <Accordion
-        key={isDesktop ? "review-desktop" : "review-mobile"}
-        type="single"
-        collapsible
-        defaultValue={isDesktop ? "outcome-summary" : undefined}
-        className="grid gap-3"
-      >
-        <AccordionItem
-          value="outcome-summary"
-          className="rounded-[var(--r-card)] border border-white/70 bg-white/72 px-5"
-        >
-          <AccordionTrigger className="text-base font-semibold text-slate-900 hover:no-underline">
-            Tóm tắt kết quả
-          </AccordionTrigger>
-          <AccordionContent className="stack-stack pb-5">
-            <div>
-              <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Tóm tắt kế hoạch</p>
-              <h3 className="mt-[var(--space-inline)] text-xl font-semibold text-slate-900">{smartGoal.specific}</h3>
-              <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">{draft.vision12Week}</p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Badge variant="outline">{getGoalTypeLabel(draft.goalType)}</Badge>
-                <Badge variant="outline">{getLifeAreaLabel(focusArea)}</Badge>
-                <Badge variant="outline">Nhìn lại {getReviewDayLabel(draft.reviewDay)}</Badge>
-                <Badge variant="outline">Nhịp {getLoadPreferenceLabel(draft.tacticLoadPreference)}</Badge>
-                {selectedTemplate && <Badge variant="outline">Khung {selectedTemplate.name}</Badge>}
-              </div>
-            </div>
+    <div className="mx-auto max-w-4xl space-y-6">
+      <div className="rounded-card border border-app-line bg-app-surface p-5 sm:p-6">
+        <div className="flex items-start gap-3">
+          <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-app-accent" aria-hidden="true" />
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-accent">Rà soát cuối</p>
+            <h3 className="mt-2 font-serif text-[22px] font-medium leading-7 text-app-ink">
+              Kiểm tra lần cuối trước khi kích hoạt chu kỳ.
+            </h3>
+            <p className="mt-2 text-[13px] leading-6 text-app-ink-soft">
+              Sau khi lưu, bạn vào trung tâm 12 tuần với Hôm nay, Tuần, Tiến độ và Cài đặt.
+            </p>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+            {getGoalTypeLabel(draft.goalType)}
+          </span>
+          <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+            {getLifeAreaLabel(focusArea)}
+          </span>
+          <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+            Nhìn lại {getReviewDayLabel(draft.reviewDay)}
+          </span>
+          <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+            Nhịp {getLoadPreferenceLabel(draft.tacticLoadPreference)}
+          </span>
+        </div>
+      </div>
 
-            <div className="rounded-[var(--r-card)] border-2 border-emerald-200 bg-emerald-50/60 p-5">
-              <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-emerald-700" aria-hidden="true" />
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">Kết quả 12 tuần</p>
-              </div>
-              <p className="mt-[var(--space-inline)] text-base leading-7 text-slate-900">
-                {draft.week12Outcome.trim() || (
-                  <span className="italic text-slate-400">Chưa điền - quay lại bước 1 để bổ sung.</span>
-                )}
-              </p>
-              {(draft.lagMetricName.trim() || draft.lagMetricTarget.trim()) && (
-                <div className="mt-[var(--space-inline)] inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-emerald-200 bg-white/86 px-3 py-1 text-sm text-slate-700">
-                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Đo bằng</span>
+      <div className="rounded-card border border-app-line bg-app-surface p-5 sm:p-6">
+        <div className="space-y-5">
+          <ReviewSection caption="KẾT QUẢ" title="Kết quả 12 tuần" stepIndex={0}>
+            <div className="grid gap-4 md:grid-cols-2">
+              <SummaryItem label="Mục tiêu SMART">
+                {smartGoal.specific || <EmptyValue>Chưa có mục tiêu SMART.</EmptyValue>}
+              </SummaryItem>
+              <SummaryItem label="Tầm nhìn 12 tuần">
+                {draft.vision12Week.trim() || <EmptyValue>Chưa điền tầm nhìn 12 tuần.</EmptyValue>}
+              </SummaryItem>
+              <SummaryItem label="Outcome statement">
+                {draft.week12Outcome.trim() || <EmptyValue>Chưa điền kết quả tuần 12.</EmptyValue>}
+              </SummaryItem>
+              <SummaryItem label="Chỉ số">
+                {draft.lagMetricName.trim() || draft.lagMetricTarget.trim() ? (
                   <span>
                     {draft.lagMetricName || "-"}
                     {draft.lagMetricTarget ? ` · ${draft.lagMetricTarget}` : ""}
                     {draft.lagMetricUnit ? ` ${draft.lagMetricUnit}` : ""}
                   </span>
-                </div>
-              )}
+                ) : (
+                  <EmptyValue>Chưa có chỉ số kết quả.</EmptyValue>
+                )}
+              </SummaryItem>
             </div>
-          </AccordionContent>
-        </AccordionItem>
+          </ReviewSection>
 
-        <AccordionItem
-          value="lead-indicators-preview"
-          className="rounded-[var(--r-card)] border border-white/70 bg-white/72 px-5"
-        >
-          <AccordionTrigger className="text-base font-semibold text-slate-900 hover:no-underline">
-            Xem trước việc lặp lại
-          </AccordionTrigger>
-          <AccordionContent className="pb-5">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Việc lặp lại mỗi tuần</p>
-              <span className="text-xs text-slate-500">
-                {coreIndicators.length} cốt lõi · {optionalIndicators.length} tùy chọn
+          <ReviewSection caption="LEAD" title="Việc lặp lại mỗi tuần" stepIndex={1}>
+            <div className="flex flex-wrap gap-2">
+              <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+                {coreIndicators.length} cốt lõi
+              </span>
+              <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-[12px] text-app-ink-muted">
+                {optionalIndicators.length} tùy chọn
               </span>
             </div>
             {scheduledLeadIndicators.length === 0 ? (
-              <p className="mt-[var(--space-inline)] text-sm text-slate-500">Chưa có việc nào được chốt.</p>
+              <p className="mt-3 text-[13px] text-app-ink-soft">Chưa có việc nào được chốt.</p>
             ) : (
-              <ul className="mt-[var(--space-inline)] stack-tight">
+              <ul className="mt-3 space-y-2">
                 {scheduledLeadIndicators.map((indicator) => (
-                  <li
-                    key={indicator.id}
-                    className={`flex flex-wrap items-center justify-between gap-2 rounded-[var(--r-card)] border px-3 py-2 ${
-                      indicator.type === "optional" ? "border-amber-200 bg-amber-50/80" : "border-emerald-200 bg-emerald-50/80"
-                    }`}
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-900">{indicator.name || "-"}</p>
-                      <p className="text-xs text-slate-500">
-                        {indicator.target || "1"} {indicator.unit || "lần/tuần"} ·{" "}
-                        {formatScheduleDayLabels(indicator.schedule)}
-                      </p>
+                  <li key={indicator.id} className="rounded-lg border border-app-line bg-app-bg px-3 py-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-[14px] font-medium text-app-ink">{indicator.name || "-"}</p>
+                      <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+                        {indicator.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
+                      </span>
                     </div>
-                    <Badge variant={indicator.type === "optional" ? "warning" : "success"} className="text-xs">
-                      {indicator.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
-                    </Badge>
+                    <p className="mt-1 text-[12px] text-app-ink-muted">
+                      {indicator.target || "1"} {indicator.unit || "lần/tuần"} · {formatScheduleDayLabels(indicator.schedule)}
+                    </p>
                   </li>
                 ))}
               </ul>
             )}
-          </AccordionContent>
-        </AccordionItem>
+          </ReviewSection>
 
-        <AccordionItem
-          value="schedule-preview"
-          className="rounded-[var(--r-card)] border border-white/70 bg-white/72 px-5"
-        >
-          <AccordionTrigger className="text-base font-semibold text-slate-900 hover:no-underline">
-            Xem trước lịch
-          </AccordionTrigger>
-          <AccordionContent className="pb-5">
-            <div className="flex items-center gap-2">
-              <Flag className="h-4 w-4 text-slate-600" aria-hidden="true" />
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Cột mốc giữa chu kỳ</p>
+          <ReviewSection caption="LỊCH" title="Chu kỳ và tuần đầu" stepIndex={2}>
+            <div className="grid gap-4 md:grid-cols-3">
+              <SummaryItem label="Bắt đầu">{cycleDates.start}</SummaryItem>
+              <SummaryItem label="Kết thúc">{cycleDates.end}</SummaryItem>
+              <SummaryItem label="Ngày nhìn lại">{getReviewDayLabel(draft.reviewDay)}</SummaryItem>
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               {[
@@ -332,261 +393,246 @@ export function ReviewStep({
                 { label: "Tuần 8", value: draft.week8Milestone },
                 { label: "Tuần 12", value: draft.week12Outcome },
               ].map((milestone) => (
-                <div key={milestone.label} className="rounded-[var(--r-tile)] border border-white/70 bg-slate-50/80 p-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{milestone.label}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-700">
-                    {milestone.value.trim() || (
-                      <span className="italic text-slate-400">
-                        Chưa có - bạn có thể thêm trong phần nâng cao bên dưới.
-                      </span>
-                    )}
+                <div key={milestone.label} className="rounded-lg border border-app-line bg-app-bg p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{milestone.label}</p>
+                  <p className="mt-2 text-[13px] leading-6 text-app-ink-soft">
+                    {milestone.value.trim() || <EmptyValue>Chưa có.</EmptyValue>}
                   </p>
                 </div>
               ))}
             </div>
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem
-          value="tactics-list"
-          className="rounded-[var(--r-card)] border border-white/70 bg-white/72 px-5"
-        >
-          <AccordionTrigger className="text-base font-semibold text-slate-900 hover:no-underline">
-            Danh sách việc
-          </AccordionTrigger>
-          <AccordionContent className="pb-5">
-            {weekOneTaskPreview.length > 0 ? (
-              <>
-                <div className="grid gap-2 md:grid-cols-2">
+            <div className="mt-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                {weekOneTaskPreview.length > 0 ? "Việc tuần 1" : "Tuần đầu"}
+              </p>
+              {weekOneTaskPreview.length > 0 ? (
+                <div className="mt-2 grid gap-2 md:grid-cols-2">
                   {weekOneTaskPreview.map((task) => (
-                    <div
-                      key={task}
-                      className="rounded-[var(--r-card)] border border-white/70 bg-slate-50/80 px-3 py-2 text-sm text-slate-700"
-                    >
+                    <div key={task} className="rounded-lg border border-app-line bg-app-bg px-3 py-2 text-[13px] text-app-ink-soft">
                       {task}
                     </div>
                   ))}
                 </div>
-                {weekOneTaskWarning ? <p className="mt-[var(--space-inline)] text-xs text-amber-600">{weekOneTaskWarning}</p> : null}
-              </>
-            ) : (
-              <p className="text-sm text-slate-500">Chưa có việc tuần 1 để xem trước.</p>
-            )}
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-
-      {/* 5. Quality panel - secondary (collapsible) */}
-      <SecondaryPanel title="Chất lượng kế hoạch" collapsible defaultOpen={isDesktop}>
-        <div className="rounded-[var(--r-card)] border p-5">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                Đánh giá nhanh kế hoạch
-              </p>
-              <p className="mt-2 text-base font-semibold text-slate-950">
-                Chất lượng: {getQualityLevelLabel(planQuality.level)} · {planQuality.overallScore}/100
-              </p>
-              <p className="mt-1 text-sm text-slate-600">Đây là gợi ý - bạn vẫn có thể tạo kế hoạch.</p>
+              ) : (
+                <p className="mt-2 text-[13px] text-app-ink-soft">Chưa có việc tuần 1 để xem trước.</p>
+              )}
+              {weekOneTaskWarning ? (
+                <p className="mt-3 text-[12px] leading-5 text-[color:var(--color-danger-fg)]">{weekOneTaskWarning}</p>
+              ) : null}
             </div>
-            <span
-              className={`rounded-[var(--r-pill)] border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${getQualityBadgeStyle(
-                planQuality.level,
-              )}`}
-            >
-              {getQualityLevelLabel(planQuality.level)}
-            </span>
-          </div>
+          </ReviewSection>
 
-          {/* Dimensions grid - hide on mobile, show on md+ */}
-          <ul className="mt-4 hidden md:grid gap-2 md:grid-cols-2">
-            {planQuality.dimensions.map((dimension) => {
-              const statusMeta = getDimensionStatusMeta(dimension.status);
-              const StatusIcon = statusMeta.icon;
-              return (
-                <li
-                  key={dimension.id}
-                  className="flex items-center justify-between rounded-[var(--r-card)] border border-white/70 bg-white/82 px-3 py-2"
+          <ReviewSection caption="TỔNG QUAN" title="Chất lượng và gợi ý" stepIndex={3}>
+            <div className="rounded-lg border border-app-line bg-app-bg p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                    Đánh giá nhanh kế hoạch
+                  </p>
+                  <p className="mt-2 text-[14px] font-medium text-app-ink">
+                    Chất lượng: {getQualityLevelLabel(planQuality.level)} · {planQuality.overallScore}/100
+                  </p>
+                  <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">Đây là gợi ý — bạn vẫn có thể tạo kế hoạch.</p>
+                </div>
+                <span
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-[12px] font-semibold uppercase tracking-[0.14em]",
+                    getQualityBadgeStyle(planQuality.level),
+                  )}
                 >
-                  <span className="text-sm text-slate-700">{dimension.label}</span>
-                  <span
-                    className={`flex items-center gap-1.5 text-xs font-semibold ${statusMeta.textClass}`}
-                  >
-                    <StatusIcon className={`h-3.5 w-3.5 ${dimension.status === "strong" ? "check-bounce" : ""}`} aria-hidden="true" />
-                    <span className="sr-only">{statusMeta.label}: </span>
-                    <span>
-                      {dimension.score}/{dimension.maxScore}
-                    </span>
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
+                  {getQualityLevelLabel(planQuality.level)}
+                </span>
+              </div>
 
-          {planQuality.warnings.length > 0 && (
-            <div className="mt-4 rounded-[var(--r-card)] border border-amber-300 bg-amber-50/82 p-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">
-                Cảnh báo ({planQuality.warnings.length})
-              </p>
-              <ul className="mt-2 stack-tight text-sm leading-6 text-amber-900">
-                {planQuality.warnings.map((warning) => (
-                  <li key={warning}>• {warning}</li>
-                ))}
+              <ul className="mt-4 grid gap-2 md:grid-cols-2">
+                {planQuality.dimensions.map((dimension) => {
+                  const statusMeta = getDimensionStatusMeta(dimension.status);
+                  const StatusIcon = statusMeta.icon;
+                  return (
+                    <li key={dimension.id} className="flex items-center justify-between rounded-lg border border-app-line bg-app-surface px-3 py-2">
+                      <span className="text-[13px] text-app-ink-soft">{dimension.label}</span>
+                      <span className={cn("flex items-center gap-1.5 text-[12px] font-medium", statusMeta.textClass)}>
+                        <StatusIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                        <span className="sr-only">{statusMeta.label}: </span>
+                        <span>
+                          {dimension.score}/{dimension.maxScore}
+                        </span>
+                      </span>
+                    </li>
+                  );
+                })}
               </ul>
+
+              {planQuality.warnings.length > 0 ? (
+                <div className="mt-4 rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-danger-fg)]">
+                    Cảnh báo ({planQuality.warnings.length})
+                  </p>
+                  <ul className="mt-2 space-y-1 text-[13px] leading-6 text-[color:var(--color-danger-fg)]">
+                    {planQuality.warnings.map((warning) => (
+                      <li key={warning}>• {warning}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {planQuality.suggestions.length > 0 ? (
+                <details
+                  className="mt-4 rounded-lg border border-app-line bg-app-surface px-3 py-2"
+                  open={suggestionsOpen}
+                  onToggle={(event) => setSuggestionsOpen(event.currentTarget.open)}
+                >
+                  <summary className="cursor-pointer list-none text-[12px] font-medium text-app-accent">
+                    Gợi ý cải thiện ({planQuality.suggestions.length})
+                  </summary>
+                  <ul className="mt-2 space-y-1 text-[13px] leading-6 text-app-ink-soft">
+                    {planQuality.suggestions.map((suggestion) => (
+                      <li key={suggestion}>• {suggestion}</li>
+                    ))}
+                  </ul>
+                </details>
+              ) : null}
             </div>
-          )}
 
-          {planQuality.suggestions.length > 0 && (
-            <details
-              className="mt-[var(--space-inline)] rounded-[var(--r-card)] border border-violet-200 bg-violet-50/72 px-3 py-2"
-              open={suggestionsOpen}
-              onToggle={() => setSuggestionsOpen(!suggestionsOpen)}
-            >
-              <summary className="cursor-pointer list-none text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                Gợi ý cải thiện ({planQuality.suggestions.length})
-              </summary>
-              <ul className="mt-2 stack-tight text-sm leading-6 text-slate-700">
-                {planQuality.suggestions.map((suggestion) => (
-                  <li key={suggestion}>• {suggestion}</li>
-                ))}
-              </ul>
-            </details>
-          )}
-        </div>
-      </SecondaryPanel>
-
-      {/* 6. Rationale - secondary (collapsible) */}
-      <SecondaryPanel
-        title="Vì sao kế hoạch này phù hợp với bạn?"
-        collapsible
-        defaultOpen={isDesktop}
-      >
-        <div className="rounded-[var(--r-card)] border border-violet-200 bg-violet-50/76 p-5">
-          <p className="mt-2 text-xs leading-6 text-violet-900/72">
-            Tổng hợp từ kết quả kiểm tra, nhịp tuần, việc lặp lại và cột mốc. Đây là gợi ý — kế hoạch không bảo
-            đảm thành công, nhưng giúp bạn biết vì sao nên thử cách này trước.
-          </p>
-
-          <ul data-testid="plan-rationale-reasons" className="mt-4 stack-tight text-sm leading-6 text-slate-800">
-            {planRationale.reasons.map((reason) => (
-              <li
-                key={reason.id}
-                data-reason-id={reason.id}
-                className="rounded-[var(--r-card)] border border-white/70 bg-white/82 px-3 py-2"
-              >
-                <span aria-hidden="true">• </span>
-                {reason.text}
-              </li>
-            ))}
-          </ul>
-
-          {planRationale.warnings.length > 0 && (
-            <div
-              data-testid="plan-rationale-warnings"
-              className="mt-[var(--space-inline)] rounded-[var(--r-card)] border border-amber-200 bg-amber-50/82 p-3"
-            >
-              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-amber-800">
-                <CircleAlert className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Lưu ý cần biết</span>
+            <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                Vì sao kế hoạch này phù hợp
               </p>
-              <ul className="mt-2 stack-tight text-sm leading-6 text-amber-900">
-                {planRationale.warnings.map((warning) => (
-                  <li key={warning.id} data-warning-id={warning.id}>
-                    • {warning.text}
+              <p className="mt-2 text-[12px] leading-6 text-app-ink-soft">
+                Tổng hợp từ kết quả kiểm tra, nhịp tuần, việc lặp lại và cột mốc.
+              </p>
+              <ul data-testid="plan-rationale-reasons" className="mt-3 space-y-2 text-[13px] leading-6 text-app-ink-soft">
+                {planRationale.reasons.map((reason) => (
+                  <li key={reason.id} data-reason-id={reason.id} className="rounded-lg border border-app-line bg-app-surface px-3 py-2">
+                    • {reason.text}
                   </li>
                 ))}
               </ul>
+
+              {planRationale.warnings.length > 0 ? (
+                <div
+                  data-testid="plan-rationale-warnings"
+                  className="mt-3 rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-3"
+                >
+                  <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-danger-fg)]">
+                    <CircleAlert className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>Lưu ý cần biết</span>
+                  </p>
+                  <ul className="mt-2 space-y-1 text-[13px] leading-6 text-[color:var(--color-danger-fg)]">
+                    {planRationale.warnings.map((warning) => (
+                      <li key={warning.id} data-warning-id={warning.id}>
+                        • {warning.text}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {planRationale.adjustments.length > 0 ? (
+                <div data-testid="plan-rationale-adjustments" className="mt-3 rounded-lg border border-app-line bg-app-surface p-3">
+                  <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-app-accent">
+                    <Wrench className="h-3.5 w-3.5" aria-hidden="true" />
+                    <span>Nếu bạn thấy chưa khớp, có thể đổi</span>
+                  </p>
+                  <ul className="mt-2 space-y-1 text-[13px] leading-6 text-app-ink-soft">
+                    {planRationale.adjustments.map((adjustment) => (
+                      <li key={adjustment.id} data-adjustment-id={adjustment.id}>
+                        • {adjustment.text}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
             </div>
-          )}
 
-          {planRationale.adjustments.length > 0 && (
-            <div
-              data-testid="plan-rationale-adjustments"
-              className="mt-[var(--space-inline)] rounded-[var(--r-card)] border border-sky-200 bg-sky-50/82 p-3"
-            >
-              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-sky-800">
-                <Wrench className="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Nếu bạn thấy chưa khớp, có thể đổi</span>
-              </p>
-              <ul className="mt-2 stack-tight text-sm leading-6 text-sky-900">
-                {planRationale.adjustments.map((adjustment) => (
-                  <li key={adjustment.id} data-adjustment-id={adjustment.id}>
-                    • {adjustment.text}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      </SecondaryPanel>
-
-      {/* 8. Template support - secondary (collapsible) */}
-      {setupGuideSupport && setupGuideTemplate && (
-        <SecondaryPanel
-          title="Tuần đầu sẽ khởi động như thế nào"
-          collapsible
-          defaultOpen={isDesktop}
-        >
-          <div className="rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5">
-            <p className="mt-2 text-base font-semibold text-slate-900">{setupGuideSupport.week1Headline}</p>
-            <p className="mt-2 text-sm leading-7 text-slate-600">{setupGuideSupport.week1Support}</p>
-          </div>
-        </SecondaryPanel>
-      )}
-
-      {/* 9. Advanced section - secondary (collapsible) */}
-      <SecondaryPanel
-        title="Mở phần nâng cao (tùy chọn)"
-        collapsible
-        defaultOpen={isDesktop}
-      >
-        <div className="rounded-[var(--r-card)] border border-dashed border-slate-200 bg-slate-50/80 p-5">
-          <div className="stack-stack">
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="stack-tight">
-                <Label htmlFor="milestone-week-4">Mốc tuần 4</Label>
-                <Input
-                  id="milestone-week-4"
-                  value={draft.week4Milestone}
-                  aria-invalid={Boolean(milestoneError)}
-                  aria-describedby={milestoneError ? "milestone-validation-error" : undefined}
-                  className={milestoneError ? "border-rose-300 focus-visible:ring-rose-200" : undefined}
-                  onChange={(event) => onChange("week4Milestone", event.target.value)}
-                />
+            {setupGuideSupport && setupGuideTemplate ? (
+              <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                  Tuần đầu theo khung {setupGuideTemplate.name}
+                </p>
+                <p className="mt-2 text-[14px] font-medium text-app-ink">{setupGuideSupport.week1Headline}</p>
+                <p className="mt-2 text-[13px] leading-6 text-app-ink-soft">{setupGuideSupport.week1Support}</p>
               </div>
-              <div className="stack-tight">
-                <Label htmlFor="milestone-week-8">Mốc tuần 8</Label>
-                <Input
-                  id="milestone-week-8"
-                  value={draft.week8Milestone}
-                  aria-invalid={Boolean(milestoneError)}
-                  aria-describedby={milestoneError ? "milestone-validation-error" : undefined}
-                  className={milestoneError ? "border-rose-300 focus-visible:ring-rose-200" : undefined}
-                  onChange={(event) => onChange("week8Milestone", event.target.value)}
-                />
-              </div>
-            </div>
-            {milestoneError ? (
-              <p id="milestone-validation-error" role="alert" className="text-xs font-medium text-rose-700">
-                {milestoneError}
+            ) : null}
+
+            {selectedTemplate ? (
+              <p className="mt-4 rounded-lg border border-app-line bg-app-bg px-3 py-2 text-[13px] leading-6 text-app-ink-soft">
+                Khung đang dùng: <span className="font-medium text-app-ink">{selectedTemplate.name}</span>
               </p>
             ) : null}
-            <div className="stack-tight">
-              <Label htmlFor="success-evidence">Bằng chứng thành công muốn thấy</Label>
-              <Textarea
-                id="success-evidence"
-                rows={3}
-                value={draft.successEvidence}
-                onChange={(event) => onChange("successEvidence", event.target.value)}
+          </ReviewSection>
+        </div>
+
+        <div className="mt-6 rounded-card border border-app-line bg-app-bg p-4">
+          <div className="flex items-start gap-2">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
+            <p className="text-[13px] leading-6 text-app-ink-soft">
+              Tôi đã rà soát toàn bộ trước khi lưu. Nếu có điểm chưa khớp, dùng nút Sửa hoặc thanh bước phía trên để quay lại.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <details className="rounded-card border border-app-line bg-app-surface p-4">
+        <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">
+          Mở phần nâng cao (tùy chọn)
+        </summary>
+        <div className="mt-4 space-y-4">
+          <div className="grid gap-3 md:grid-cols-2">
+            <div>
+              <label htmlFor="milestone-week-4" className={labelClass}>
+                Mốc tuần 4
+              </label>
+              <Input
+                id="milestone-week-4"
+                value={draft.week4Milestone}
+                aria-invalid={Boolean(milestoneError)}
+                aria-describedby={milestoneError ? "milestone-validation-error" : undefined}
+                className={cn(
+                  inputClass,
+                  milestoneError &&
+                    "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
+                )}
+                onChange={(event) => onChange("week4Milestone", event.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="milestone-week-8" className={labelClass}>
+                Mốc tuần 8
+              </label>
+              <Input
+                id="milestone-week-8"
+                value={draft.week8Milestone}
+                aria-invalid={Boolean(milestoneError)}
+                aria-describedby={milestoneError ? "milestone-validation-error" : undefined}
+                className={cn(
+                  inputClass,
+                  milestoneError &&
+                    "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
+                )}
+                onChange={(event) => onChange("week8Milestone", event.target.value)}
               />
             </div>
           </div>
+          {milestoneError ? (
+            <p id="milestone-validation-error" role="alert" className={errorTextClass}>
+              {milestoneError}
+            </p>
+          ) : null}
+          <div>
+            <label htmlFor="success-evidence" className={labelClass}>
+              Bằng chứng thành công muốn thấy
+            </label>
+            <Textarea
+              id="success-evidence"
+              rows={3}
+              value={draft.successEvidence}
+              onChange={(event) => onChange("successEvidence", event.target.value)}
+              className={textareaClass}
+            />
+          </div>
         </div>
-      </SecondaryPanel>
-
-      <p className="text-center text-xs text-slate-500">
-        Sau khi tạo, bạn vào ngay trung tâm 12 tuần với màn Hôm nay, Tuần, Tiến độ và Cài đặt.
-      </p>
+      </details>
     </div>
   );
 }

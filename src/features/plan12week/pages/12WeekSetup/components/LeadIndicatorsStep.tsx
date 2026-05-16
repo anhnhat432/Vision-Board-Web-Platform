@@ -1,22 +1,26 @@
 ﻿import { useMemo, useState } from "react";
-import { AlertTriangle } from "lucide-react";
-
-import type { GoalArchetype } from "@/lib/smart-goal";
+import { AlertTriangle, GripVertical, Plus, Trash2 } from "lucide-react";
 
 import { GoalArchetypeExamples } from "@/app/components/GoalArchetypeExamples";
+import { Input } from "@/app/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
+import { Textarea } from "@/app/components/ui/textarea";
+import { cn } from "@/app/components/ui/utils";
+import type { TacticType } from "@/app/utils/storage";
+import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
 import {
   getArchetypeForIntent,
   getUserIntentId,
   hasActionableArchetypeHint,
 } from "@/app/utils/user-intent";
-import type { TacticType } from "@/app/utils/storage";
-import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
-import { Badge } from "@/app/components/ui/badge";
-import { Button } from "@/app/components/ui/button";
-import { Input } from "@/app/components/ui/input";
-import { Label } from "@/app/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
-import { Textarea } from "@/app/components/ui/textarea";
+import type { GoalArchetype } from "@/lib/smart-goal";
+import {
+  errorTextClass,
+  helperTextClass,
+  inputClass,
+  labelClass,
+  textareaClass,
+} from "../../../../../app/pages/SMARTGoalSetup/components/formStyles";
 import {
   formatScheduleDayLabels,
   getLeadIndicatorTargetValidationError,
@@ -25,8 +29,6 @@ import {
 } from "../helpers";
 import type { IndicatorPreviewGroup } from "../helpers";
 import type { LeadIndicatorDraft, TwelveWeekSetupDraft } from "../types";
-import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
-import { useBreakpoint } from "@/app/hooks/useBreakpoint";
 
 interface LeadIndicatorsStepProps {
   draft: TwelveWeekSetupDraft;
@@ -69,6 +71,21 @@ const COMMITMENT_FIELDS = [
     label: "Tôi sẽ tự thưởng gì khi giữ được...",
   },
 ] as const;
+
+const LEAD_EXAMPLES = [
+  { name: "Viết bản nháp 800 từ", target: "2", unit: "lần/tuần" },
+  { name: "Tập gym 45 phút", target: "3", unit: "buổi/tuần" },
+  { name: "Gửi 5 email chủ động", target: "2", unit: "lần/tuần" },
+  { name: "Học flashcard tiếng Anh", target: "4", unit: "buổi/tuần" },
+] as const;
+
+const selectTriggerClass =
+  "h-auto rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-[14px] font-normal text-app-ink shadow-none focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30";
+const selectContentClass = "rounded-card border border-app-line bg-app-surface shadow-md";
+const selectItemClass = "cursor-pointer text-[14px] text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink";
+const optionButtonClass =
+  "flex flex-col items-start gap-1 rounded-lg border border-app-line bg-app-surface p-3 text-left text-[13px] font-medium text-app-ink-soft transition-colors duration-150 hover:border-app-ink-muted hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30";
+const optionButtonActiveClass = "border-app-accent bg-app-accent-soft text-app-accent";
 
 function normalizeCommitmentChange(
   current: LeadIndicatorDraft["commitment"],
@@ -122,8 +139,8 @@ export function LeadIndicatorsStep({
     return getArchetypeForIntent(intent);
   }, []);
 
-  const isDesktop = useBreakpoint();
   const [expandedCommitments, setExpandedCommitments] = useState<Record<string, boolean>>({});
+  const canAddIndicator = draft.leadIndicators.length < 4;
 
   const toggleCommitmentEditor = (indicatorId: string) => {
     setExpandedCommitments((previous) => ({
@@ -132,289 +149,360 @@ export function LeadIndicatorsStep({
     }));
   };
 
-  return (
-    <div className="mx-auto max-w-4xl stack-section">
-      {/* Explanation card - primary action */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--r-card)] border border-dashed border-slate-200 bg-slate-50/80 p-4">
-        <div>
-          <p className="text-sm font-semibold text-slate-900">Giữ 2-4 việc lặp lại cho cả chu kỳ</p>
-          <p className="mt-1 text-sm text-slate-500">
-            Việc chính được ưu tiên trong điểm tuần. Việc tùy chọn là phần thêm khi bạn còn sức.
-          </p>
-          <p className="mt-2 text-xs leading-6 text-slate-500">
-            Việc lặp lại là <strong>hành động bạn kiểm soát được</strong> — không phải kết quả cuối. Mỗi tuần, việc
-            hôm nay sẽ được tạo từ các việc này.
-          </p>
-        </div>
-        <Button type="button" variant="outline" onClick={onAddIndicator} disabled={draft.leadIndicators.length >= 4}>
-          Thêm việc
-        </Button>
-      </div>
+  const addExampleIndicator = (example: (typeof LEAD_EXAMPLES)[number]) => {
+    if (!canAddIndicator) return;
 
-      {/* What are lead indicators? */}
-      <SecondaryPanel title="Việc lặp lại là gì? Khác kết quả cuối thế nào?" collapsible defaultOpen={isDesktop}>
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="rounded-[var(--r-card)] border border-emerald-200 bg-white/82 p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Ví dụ tốt (kiểm soát được)</p>
-            <ul className="mt-2 stack-tight text-sm leading-6 text-slate-700">
+    const nextIndex = draft.leadIndicators.length;
+    onAddIndicator();
+
+    if (typeof window !== "undefined") {
+      window.setTimeout(() => {
+        onIndicatorChange(nextIndex, "name", example.name);
+        onIndicatorChange(nextIndex, "target", example.target);
+        onIndicatorChange(nextIndex, "unit", example.unit);
+      }, 0);
+    }
+  };
+
+  return (
+    <div className="mx-auto max-w-4xl space-y-5">
+      <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="lead-step-hero">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p id="lead-step-hero" className="text-[13px] leading-6 text-app-ink-soft">
+              Chọn 1-3 việc lặp lại tạo ra kết quả. Nếu cần, thêm việc thứ 4 như phần tùy chọn.
+            </p>
+            <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">
+              Việc lặp lại là hành động bạn kiểm soát được, không phải kết quả cuối.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onAddIndicator}
+            disabled={!canAddIndicator}
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-dashed border-app-line bg-app-bg p-3 text-[14px] font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft disabled:cursor-not-allowed disabled:text-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          >
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            Thêm việc lặp lại
+          </button>
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="lead-examples-title">
+        <p id="lead-examples-title" className="text-[13px] font-medium text-app-ink">
+          Ví dụ nhanh
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {LEAD_EXAMPLES.map((example) => (
+            <button
+              key={example.name}
+              type="button"
+              onClick={() => addExampleIndicator(example)}
+              disabled={!canAddIndicator}
+              className="rounded-full border border-app-line px-3 py-1 text-[12px] text-app-ink-soft transition-colors duration-150 hover:border-app-accent hover:bg-app-accent-soft hover:text-app-accent disabled:cursor-not-allowed disabled:text-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            >
+              {example.name}
+            </button>
+          ))}
+        </div>
+        {!canAddIndicator ? <p className={helperTextClass}>Bạn đã có tối đa 4 việc lặp lại.</p> : null}
+      </section>
+
+      <details className="rounded-lg border border-app-line bg-app-surface p-4">
+        <summary className="cursor-pointer list-none text-[13px] font-medium text-app-ink">
+          Việc lặp lại là gì? Khác kết quả cuối thế nào?
+        </summary>
+        <div className="mt-3 grid gap-3 md:grid-cols-2">
+          <div className="rounded-lg border border-app-line bg-app-bg p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-accent">Ví dụ tốt</p>
+            <ul className="mt-2 space-y-1 text-[13px] leading-6 text-app-ink-soft">
               <li>• Viết bản nháp 800 từ</li>
               <li>• Tập gym 45 phút</li>
               <li>• Gửi 5 email chủ động liên hệ</li>
               <li>• Học flashcard tiếng Anh 30 phút</li>
             </ul>
           </div>
-          <div className="rounded-[var(--r-card)] border border-amber-200 bg-white/82 p-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">Ví dụ chưa hợp (kết quả cuối)</p>
-            <ul className="mt-2 stack-tight text-sm leading-6 text-slate-700">
+          <div className="rounded-lg border border-app-line bg-app-bg p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Chưa hợp</p>
+            <ul className="mt-2 space-y-1 text-[13px] leading-6 text-app-ink-soft">
               <li>• Tăng 100 followers</li>
               <li>• Giảm 5kg</li>
               <li>• Có job mới</li>
               <li>• Đạt IELTS 7.0</li>
             </ul>
-            <p className="mt-2 text-xs leading-5 text-slate-500">
+            <p className="mt-2 text-[12px] leading-5 text-app-ink-muted">
               Đây là kết quả cuối — đo ở chỉ số chính, không phải việc tuần.
             </p>
           </div>
         </div>
-      </SecondaryPanel>
+      </details>
 
-      {/* Goal archetype examples */}
-      {intentArchetype && (
-        <SecondaryPanel title="Ví dụ theo loại mục tiêu" collapsible={false}>
-          <GoalArchetypeExamples archetype={intentArchetype} variant="lead_indicator" />
-        </SecondaryPanel>
-      )}
+      <GoalArchetypeExamples archetype={intentArchetype} variant="lead_indicator" />
 
-      {/* Indicator cards */}
-      <div className="stack-stack">
+      <div className="space-y-3">
         {draft.leadIndicators.map((indicator, index) => (
-          <div
+          <article
             key={indicator.id}
-            className={`relative overflow-hidden rounded-[var(--r-card)] border p-5 before:absolute before:left-0 before:top-0 before:h-full before:w-1 ${
-              indicator.type === "optional"
-                ? "border-amber-200 bg-amber-50/72 before:bg-gradient-to-b before:from-amber-500 before:to-orange-500 dark:border-amber-500/30 dark:bg-amber-950/25"
-                : "border-emerald-200 bg-emerald-50/72 shadow-sm before:bg-gradient-to-b before:from-emerald-600 before:to-teal-600 dark:border-emerald-500/30 dark:bg-emerald-950/25"
-            }`}
+            className="rounded-lg border border-app-line bg-app-surface p-3"
+            aria-labelledby={`tactic-card-title-${index}`}
           >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-sm font-semibold text-slate-900">Việc {index + 1}</p>
-              <div className="flex items-center gap-2">
-                <Badge variant={indicator.type === "optional" ? "warning" : "success"}>
-                  {indicator.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
-                </Badge>
-                {draft.leadIndicators.length > 2 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onRemoveIndicator(index)}
-                    aria-label={`Xóa việc ${index + 1}${indicator.name ? `: ${indicator.name}` : ""}`}
-                  >
-                    Xóa
-                  </Button>
-                )}
-              </div>
-            </div>
-            <div className="mt-4 grid gap-3">
-              <div className="stack-tight">
-                <Label htmlFor={`tactic-name-${index}`}>Tên việc</Label>
-                <Input
-                  id={`tactic-name-${index}`}
-                  value={indicator.name}
-                  onChange={(event) => onIndicatorChange(index, "name", event.target.value)}
-                  placeholder="Ví dụ: viết 3 bài, tập 2 buổi, gửi 5 lời nhắn chủ động..."
-                />
-              </div>
-              <div className="grid gap-3 md:grid-cols-2">
-                <div className="stack-tight">
-                  <Label htmlFor={`tactic-type-${index}`}>Loại</Label>
-                  <Select
-                    value={indicator.type}
-                    onValueChange={(value) => onIndicatorChange(index, "type", value as TacticType)}
-                  >
-                    <SelectTrigger id={`tactic-type-${index}`} aria-label={`Chọn loại cho việc ${index + 1}`}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="core">Cốt lõi</SelectItem>
-                      <SelectItem value="optional">Tùy chọn</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="stack-tight">
-                  <Label htmlFor={`tactic-target-${index}`}>Tần suất / tuần</Label>
-                  <Input
-                    id={`tactic-target-${index}`}
-                    value={indicator.target}
-                    aria-invalid={Boolean(indicatorTargetErrors[index])}
-                    aria-describedby={indicatorTargetErrors[index] ? `tactic-target-${index}-error` : undefined}
-                    className={indicatorTargetErrors[index] ? "border-rose-300 focus-visible:ring-rose-200" : undefined}
-                    onChange={(event) => onIndicatorChange(index, "target", event.target.value)}
-                    placeholder="Ví dụ: 2"
-                  />
-                  {indicatorTargetErrors[index] ? (
-                    <p id={`tactic-target-${index}-error`} role="alert" className="text-xs font-medium text-rose-700">
-                      {indicatorTargetErrors[index]}
+            <div className="flex items-start gap-3">
+              <GripVertical className="mt-1 h-4 w-4 shrink-0 text-app-ink-muted" aria-hidden="true" />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p id={`tactic-card-title-${index}`} className="text-[14px] font-medium text-app-ink">
+                      Việc {index + 1}
                     </p>
+                    <p className="mt-0.5 text-[12px] text-app-ink-muted">
+                      {indicator.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
+                    </p>
+                  </div>
+                  {draft.leadIndicators.length > 2 ? (
+                    <button
+                      type="button"
+                      onClick={() => onRemoveIndicator(index)}
+                      aria-label={`Xóa việc ${index + 1}${indicator.name ? `: ${indicator.name}` : ""}`}
+                      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-medium text-app-ink-muted transition-colors duration-150 hover:text-[color:var(--color-danger-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    >
+                      <Trash2 className="h-4 w-4" aria-hidden="true" />
+                      Xoá
+                    </button>
                   ) : null}
                 </div>
-                <div className="stack-tight">
-                  <Label htmlFor={`tactic-unit-${index}`}>Đơn vị</Label>
-                  <Input
-                    id={`tactic-unit-${index}`}
-                    value={indicator.unit}
-                    aria-invalid={Boolean(indicatorUnitErrors[index])}
-                    aria-describedby={indicatorUnitErrors[index] ? `tactic-unit-${index}-error` : undefined}
-                    className={indicatorUnitErrors[index] ? "border-rose-300 focus-visible:ring-rose-200" : undefined}
-                    onChange={(event) => onIndicatorChange(index, "unit", event.target.value)}
-                    placeholder="buổi, bài, lần..."
-                  />
-                  {indicatorUnitErrors[index] ? (
-                    <p id={`tactic-unit-${index}-error`} role="alert" className="text-xs font-medium text-rose-700">
-                      {indicatorUnitErrors[index]}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="stack-tight">
-                  <Label htmlFor={`tactic-cadence-${index}`}>Nhịp</Label>
-                  <Select
-                    value={indicator.cadence}
-                    onValueChange={(value) =>
-                      onIndicatorChange(index, "cadence", value as LeadIndicatorDraft["cadence"])
-                    }
-                  >
-                    <SelectTrigger id={`tactic-cadence-${index}`} aria-label={`Chọn nhịp cho việc ${index + 1}`}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="spread">Trải đều</SelectItem>
-                      <SelectItem value="frontload">Đầu tuần</SelectItem>
-                      <SelectItem value="backload">Cuối tuần</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 rounded-[var(--r-card)] border border-white/70 bg-white/72 p-4">
-              <Button
-                type="button"
-                variant="ghost"
-                className="h-auto w-full justify-between px-0 py-0 text-left text-sm font-semibold text-slate-900 hover:bg-transparent"
-                aria-expanded={Boolean(expandedCommitments[indicator.id])}
-                aria-controls={`tactic-commitment-${index}`}
-                onClick={() => toggleCommitmentEditor(indicator.id)}
-              >
-                <span>Cam kết với chính mình (tuỳ chọn)</span>
-                <span className="text-xs font-medium text-slate-500">
-                  {expandedCommitments[indicator.id] ? "Thu gọn" : "Mở"}
-                </span>
-              </Button>
-              <p className="mt-2 text-xs leading-5 text-slate-500">
-                Điền 5 câu này giúp bạn rõ tại sao mình cam kết. Sách 12 Week Year cho thấy người trả lời được 5 câu ít bỏ cuộc giữa cycle hơn 60%.
-              </p>
-              {expandedCommitments[indicator.id] ? (
-                <div id={`tactic-commitment-${index}`} className="mt-4 grid gap-3">
-                  {COMMITMENT_FIELDS.map((field) => (
-                    <div key={field.key} className="stack-tight">
-                      <Label htmlFor={`tactic-commitment-${field.key}-${index}`}>{field.label}</Label>
-                      <Textarea
-                        id={`tactic-commitment-${field.key}-${index}`}
-                        rows={3}
-                        value={indicator.commitment?.[field.key] ?? ""}
-                        onChange={(event) =>
-                          onIndicatorChange(
-                            index,
-                            "commitment",
-                            normalizeCommitmentChange(indicator.commitment, field.key, event.target.value),
-                          )
-                        }
-                      />
+
+                <div className="mt-4 grid gap-3">
+                  <div>
+                    <label htmlFor={`tactic-name-${index}`} className={labelClass}>
+                      Tên việc
+                    </label>
+                    <Input
+                      id={`tactic-name-${index}`}
+                      value={indicator.name}
+                      onChange={(event) => onIndicatorChange(index, "name", event.target.value)}
+                      placeholder="Ví dụ: viết 3 bài, tập 2 buổi, gửi 5 lời nhắn chủ động..."
+                      className={inputClass}
+                    />
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div>
+                      <p className={labelClass}>Loại</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {([
+                          { value: "core", label: "Cốt lõi", hint: "Tính vào điểm tuần" },
+                          { value: "optional", label: "Tùy chọn", hint: "Làm thêm khi còn sức" },
+                        ] as const).map((option) => {
+                          const active = indicator.type === option.value;
+                          return (
+                            <button
+                              key={option.value}
+                              type="button"
+                              aria-pressed={active}
+                              onClick={() => onIndicatorChange(index, "type", option.value as TacticType)}
+                              className={cn(optionButtonClass, active && optionButtonActiveClass)}
+                            >
+                              <span>{option.label}</span>
+                              <span className="text-[11px] font-normal opacity-80">{option.hint}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                  ))}
+
+                    <div>
+                      <label htmlFor={`tactic-cadence-${index}`} className={labelClass}>
+                        Nhịp
+                      </label>
+                      <Select
+                        value={indicator.cadence}
+                        onValueChange={(value) =>
+                          onIndicatorChange(index, "cadence", value as LeadIndicatorDraft["cadence"])
+                        }
+                      >
+                        <SelectTrigger id={`tactic-cadence-${index}`} aria-label={`Chọn nhịp cho việc ${index + 1}`} className={selectTriggerClass}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className={selectContentClass}>
+                          <SelectItem value="spread" className={selectItemClass}>Trải đều</SelectItem>
+                          <SelectItem value="frontload" className={selectItemClass}>Đầu tuần</SelectItem>
+                          <SelectItem value="backload" className={selectItemClass}>Cuối tuần</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div>
+                      <label htmlFor={`tactic-target-${index}`} className={labelClass}>
+                        Tần suất / tuần
+                      </label>
+                      <Input
+                        id={`tactic-target-${index}`}
+                        value={indicator.target}
+                        aria-invalid={Boolean(indicatorTargetErrors[index])}
+                        aria-describedby={indicatorTargetErrors[index] ? `tactic-target-${index}-error` : undefined}
+                        className={cn(
+                          inputClass,
+                          indicatorTargetErrors[index] &&
+                            "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
+                        )}
+                        onChange={(event) => onIndicatorChange(index, "target", event.target.value)}
+                        placeholder="Ví dụ: 2"
+                      />
+                      {indicatorTargetErrors[index] ? (
+                        <p id={`tactic-target-${index}-error`} role="alert" className={errorTextClass}>
+                          {indicatorTargetErrors[index]}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    <div>
+                      <label htmlFor={`tactic-unit-${index}`} className={labelClass}>
+                        Đơn vị
+                      </label>
+                      <Input
+                        id={`tactic-unit-${index}`}
+                        value={indicator.unit}
+                        aria-invalid={Boolean(indicatorUnitErrors[index])}
+                        aria-describedby={indicatorUnitErrors[index] ? `tactic-unit-${index}-error` : undefined}
+                        className={cn(
+                          inputClass,
+                          indicatorUnitErrors[index] &&
+                            "border-[color:var(--color-danger-border)] focus-visible:border-[color:var(--color-danger-fg)] focus-visible:ring-[color:var(--color-danger-border)]",
+                        )}
+                        onChange={(event) => onIndicatorChange(index, "unit", event.target.value)}
+                        placeholder="buổi, bài, lần..."
+                      />
+                      {indicatorUnitErrors[index] ? (
+                        <p id={`tactic-unit-${index}-error`} role="alert" className={errorTextClass}>
+                          {indicatorUnitErrors[index]}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
                 </div>
-              ) : null}
+
+                <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-3">
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-between gap-3 text-left text-[13px] font-medium text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    aria-expanded={Boolean(expandedCommitments[indicator.id])}
+                    aria-controls={`tactic-commitment-${index}`}
+                    onClick={() => toggleCommitmentEditor(indicator.id)}
+                  >
+                    <span>Cam kết với chính mình (tuỳ chọn)</span>
+                    <span className="text-[12px] font-medium text-app-ink-muted">
+                      {expandedCommitments[indicator.id] ? "Thu gọn" : "Mở"}
+                    </span>
+                  </button>
+                  <p className={helperTextClass}>
+                    Điền 5 câu này giúp bạn rõ tại sao mình cam kết và bớt bỏ cuộc giữa chu kỳ.
+                  </p>
+                  {expandedCommitments[indicator.id] ? (
+                    <div id={`tactic-commitment-${index}`} className="mt-4 grid gap-3">
+                      {COMMITMENT_FIELDS.map((field) => (
+                        <div key={field.key}>
+                          <label htmlFor={`tactic-commitment-${field.key}-${index}`} className={labelClass}>
+                            {field.label}
+                          </label>
+                          <Textarea
+                            id={`tactic-commitment-${field.key}-${index}`}
+                            rows={3}
+                            value={indicator.commitment?.[field.key] ?? ""}
+                            onChange={(event) =>
+                              onIndicatorChange(
+                                index,
+                                "commitment",
+                                normalizeCommitmentChange(indicator.commitment, field.key, event.target.value),
+                              )
+                            }
+                            className={textareaClass}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+
+                {indicatorWarnings[index]?.length > 0 ? (
+                  <ul
+                    className="mt-3 space-y-1 rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] px-3 py-2 text-[12px] leading-5 text-[color:var(--color-danger-fg)]"
+                    aria-label={`Cảnh báo cho việc ${index + 1}`}
+                  >
+                    {indicatorWarnings[index].map((warning) => (
+                      <li key={warning}>• {warning}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
             </div>
-            {indicatorWarnings[index]?.length > 0 && (
-              <ul
-                className="mt-[var(--space-inline)] stack-tight rounded-[var(--r-card)] border border-amber-200 bg-amber-50/82 px-3 py-2 text-xs leading-5 text-amber-800"
-                aria-label={`Cảnh báo cho việc ${index + 1}`}
-              >
-                {indicatorWarnings[index].map((warning) => (
-                  <li key={warning}>• {warning}</li>
-                ))}
-              </ul>
-            )}
-          </div>
+          </article>
         ))}
       </div>
 
-      {/* Week 1 preview */}
-      <SecondaryPanel title="Xem trước tuần 1" collapsible defaultOpen={isDesktop || Boolean(weekOneTaskWarning)}>
-        <div className="rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Xem trước tuần 1</p>
-          <div className="rounded-[var(--r-card)] border border-white/70 bg-white/78 p-4">
-            <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Cốt lõi / Tùy chọn</p>
-            <p className="mt-2 text-sm text-slate-600">
-              {coreCount} cốt lõi • {optionalCount} tùy chọn
-            </p>
-          </div>
-          {setupGuideSupport && setupGuideTemplate && (
-            <div className="rounded-[var(--r-card)] border border-slate-900 bg-slate-950 p-4 text-white">
-              <p className="text-xs uppercase tracking-[0.16em] text-white/54">
-                {selectedTemplate ? "Tuần 1 theo khung đang dùng" : "Nếu đi theo khung gợi ý này"}
-              </p>
-              <p className="mt-2 text-base font-semibold">{setupGuideSupport.week1Headline}</p>
-              <p className="mt-2 text-sm leading-7 text-white/78">{setupGuideSupport.week1Support}</p>
-              <p className="mt-[var(--space-inline)] rounded-[var(--r-card)] border border-white/12 bg-white/8 px-3 py-3 text-sm text-white/74">
-                {setupGuideSupport.week1CadenceHint}
-              </p>
-            </div>
-          )}
-          <p className="mt-[var(--space-inline)] text-xs leading-5 text-slate-500">
-            Từ mỗi việc lặp lại bên trên, việc hôm nay sẽ được tạo vào các ngày sau:
+      <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="week-one-preview-title">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p id="week-one-preview-title" className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+            Xem trước tuần 1
           </p>
-          <div className="mt-[var(--space-inline)] stack-tight">
-            {weekOneTaskGroups.length === 0 ? (
-              <p className="text-sm text-slate-500">Thêm việc để thấy tuần đầu tiên sẽ trông như thế nào.</p>
-            ) : (
-              weekOneTaskGroups.map((group) => (
-                <div
-                  key={group.id}
-                  className="rounded-[var(--r-card)] border border-white/70 bg-slate-50/80 px-4 py-3"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <p className="text-sm font-semibold text-slate-900">{group.name}</p>
-                    <Badge variant={group.type === "optional" ? "warning" : "success"} className="text-xs">
-                      {group.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
-                    </Badge>
-                  </div>
-                  <p className="mt-1 text-xs text-slate-500">
-                    {group.taskTitles.length} việc / tuần • Lịch: {formatScheduleDayLabels(group.scheduleDays)}
-                  </p>
-                  {group.taskTitles.length > 0 && (
-                    <ul className="mt-2 stack-tight text-xs leading-5 text-slate-600">
-                      {group.taskTitles.map((title) => (
-                        <li key={title}>→ {title}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-          {weekOneTaskWarning ? (
-            <p
-              role="status"
-              className="mt-[var(--space-inline)] flex items-start gap-1.5 text-xs leading-5 text-amber-700"
-            >
-              <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-              <span>
-                <span className="font-semibold">Cảnh báo:</span> {weekOneTaskWarning}
-              </span>
-            </p>
-          ) : null}
+          <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+            {coreCount} cốt lõi · {optionalCount} tùy chọn
+          </span>
         </div>
-      </SecondaryPanel>
+
+        {setupGuideSupport && setupGuideTemplate ? (
+          <div className="mt-3 rounded-lg border border-app-line bg-app-surface p-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+              {selectedTemplate ? "Tuần 1 theo khung đang dùng" : "Nếu đi theo khung gợi ý này"}
+            </p>
+            <p className="mt-2 text-[14px] font-medium text-app-ink">{setupGuideSupport.week1Headline}</p>
+            <p className="mt-2 text-[13px] leading-6 text-app-ink-soft">{setupGuideSupport.week1Support}</p>
+            <p className="mt-3 rounded-lg border border-app-line bg-app-bg px-3 py-2 text-[13px] leading-6 text-app-ink-soft">
+              {setupGuideSupport.week1CadenceHint}
+            </p>
+          </div>
+        ) : null}
+
+        <p className="mt-3 text-[12px] leading-5 text-app-ink-muted">
+          Từ mỗi việc lặp lại bên trên, việc hôm nay sẽ được tạo vào các ngày sau:
+        </p>
+        <div className="mt-3 space-y-2">
+          {weekOneTaskGroups.length === 0 ? (
+            <p className="text-[13px] text-app-ink-soft">Thêm việc để thấy tuần đầu tiên sẽ trông như thế nào.</p>
+          ) : (
+            weekOneTaskGroups.map((group) => (
+              <div key={group.id} className="rounded-lg border border-app-line bg-app-surface px-4 py-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-[13px] font-medium text-app-ink">{group.name}</p>
+                  <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+                    {group.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
+                  </span>
+                </div>
+                <p className="mt-1 text-[12px] text-app-ink-muted">
+                  {group.taskTitles.length} việc / tuần · Lịch: {formatScheduleDayLabels(group.scheduleDays)}
+                </p>
+                {group.taskTitles.length > 0 ? (
+                  <ul className="mt-2 space-y-1 text-[12px] leading-5 text-app-ink-soft">
+                    {group.taskTitles.map((title) => (
+                      <li key={title}>→ {title}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            ))
+          )}
+        </div>
+
+        {weekOneTaskWarning ? (
+          <p role="status" className="mt-3 flex items-start gap-1.5 text-[12px] leading-5 text-[color:var(--color-danger-fg)]">
+            <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <span>
+              <span className="font-medium">Cảnh báo:</span> {weekOneTaskWarning}
+            </span>
+          </p>
+        ) : null}
+      </section>
     </div>
   );
 }
