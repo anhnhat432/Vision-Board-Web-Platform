@@ -1,12 +1,7 @@
 ﻿import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
-import { motion } from "motion/react";
 import type { Ref } from "react";
 
-import { Button } from "../../../components/ui/button";
-import { useReducedMotion } from "../../../components/ui/use-reduced-motion";
-import { Card, CardContent } from "../../../components/ui/card";
-import { SectionBlock } from "../../../components/layout/SectionBlock";
-import { WizardStepPip } from "../../../components/layout/WizardStepPip";
+import { helperTextClass } from "../../SMARTGoalSetup/components/formStyles";
 import { Label } from "../../../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
 import type { Question } from "../types";
@@ -36,114 +31,106 @@ export function FeasibilityStepShell({
   targetRef,
   headingRef,
 }: FeasibilityStepShellProps) {
-  const prefersReducedMotion = useReducedMotion();
-  const wizardStepCount = totalSteps + 1;
-  const feasibilityStepPips = Array.from({ length: wizardStepCount }, (_, index) =>
-    index < totalSteps
-      ? { id: `question-${index + 1}`, label: `Câu ${index + 1}`, shortLabel: `Q${index + 1}` }
-      : { id: "result", label: "Kết quả", shortLabel: "KQ" },
-  );
+  const isFirstStep = currentStep === 0;
+  const isLastStep = currentStep === totalSteps - 1;
 
   return (
-    <div ref={targetRef}>
-      <Card>
-        <CardContent className="p-5 sm:p-7">
-          <motion.div
-            key={currentQuestion.id}
-            initial={prefersReducedMotion ? false : { opacity: 0, x: 18 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3 }}
-            className="stack-section"
+    <section
+      ref={targetRef}
+      className="mt-6 rounded-card border border-app-line bg-app-surface p-6 md:p-8"
+      aria-labelledby={`feasibility-question-${currentQuestion.id}`}
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-accent">
+            Câu {currentStep + 1} / {totalSteps}
+          </p>
+          <h2
+            ref={headingRef}
+            id={`feasibility-question-${currentQuestion.id}`}
+            tabIndex={-1}
+            className="mt-2 font-serif text-[22px] font-medium leading-7 text-app-ink focus:outline-none"
           >
-            <SectionBlock title={`Nội dung câu hỏi ${currentStep + 1}`} headerVisuallyHidden density="default">
-              <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4 sm:p-6">
-                <WizardStepPip
-                  steps={feasibilityStepPips}
-                  currentStep={currentStep}
-                  ariaLabel={`Bước ${currentStep + 1} trên ${wizardStepCount}`}
-                  mobileMode="compact"
-                  className="mb-[var(--space-stack)]"
+            {currentQuestion.question}
+          </h2>
+          <p id={`feasibility-question-${currentQuestion.id}-helper`} className="mt-2 text-[14px] leading-6 text-app-ink-soft">
+            {currentQuestion.helper}
+          </p>
+        </div>
+        <span className="inline-flex w-fit rounded-full bg-app-accent-soft px-3 py-1 text-[12px] font-medium text-app-accent">
+          {answeredQuestionCount}/{totalSteps}
+        </span>
+      </div>
+
+      <RadioGroup
+        value={selectedAnswer}
+        onValueChange={onAnswerChange}
+        aria-labelledby={`feasibility-question-${currentQuestion.id}`}
+        aria-describedby={`feasibility-question-${currentQuestion.id}-helper`}
+        className="mt-6 grid gap-2 sm:grid-cols-2"
+      >
+        {currentQuestion.options.map((option, index) => {
+          const isSelected = selectedAnswer === option.value;
+
+          return (
+            <Label
+              key={option.value}
+              htmlFor={`feasibility-${currentQuestion.id}-${option.value}`}
+              className={
+                isSelected
+                  ? "flex min-h-20 cursor-pointer flex-col gap-2 rounded-lg border border-app-accent bg-app-accent-soft px-3 py-3 text-[13px] font-medium text-app-accent transition-colors duration-150 focus-within:ring-2 focus-within:ring-app-accent/30"
+                  : "flex min-h-20 cursor-pointer flex-col gap-2 rounded-lg border border-app-line bg-app-surface px-3 py-3 text-[13px] font-medium text-app-ink-soft transition-colors duration-150 hover:border-app-ink-muted hover:bg-app-bg hover:text-app-ink focus-within:ring-2 focus-within:ring-app-accent/30"
+              }
+            >
+              <span className="flex items-center justify-between gap-3">
+                <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full border border-current text-[12px]">
+                  {index + 1}
+                </span>
+                <RadioGroupItem
+                  value={option.value}
+                  id={`feasibility-${currentQuestion.id}-${option.value}`}
+                  className="sr-only"
                 />
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
-                  {currentQuestion.axisLabel}
-                </p>
-                <p className="mt-2 text-xs font-medium text-muted-foreground">
-                  {answeredQuestionCount}/{totalSteps} câu đã trả lời
-                </p>
-                <h2
-                  ref={headingRef}
-                  id={`feasibility-question-${currentQuestion.id}`}
-                  tabIndex={-1}
-                  className="mt-2 text-xl font-bold leading-[1.1] tracking-[-0.014em] text-foreground focus:outline-none sm:mt-[var(--space-inline)] sm:text-3xl"
-                >
-                  {currentQuestion.question}
-                </h2>
-                <p
-                  id={`feasibility-question-${currentQuestion.id}-helper`}
-                  className="mt-2 text-sm leading-6 text-muted-foreground sm:mt-[var(--space-inline)] sm:leading-7"
-                >
-                  {currentQuestion.helper}
-                </p>
-              </div>
+                {isSelected ? <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" /> : null}
+              </span>
+              <span className="leading-5">{option.label}</span>
+            </Label>
+          );
+        })}
+      </RadioGroup>
 
-              <RadioGroup
-                value={selectedAnswer}
-                onValueChange={onAnswerChange}
-                aria-labelledby={`feasibility-question-${currentQuestion.id}`}
-                aria-describedby={`feasibility-question-${currentQuestion.id}-helper`}
-                className="stack-tight"
-              >
-                {currentQuestion.options.map((option) => (
-                  <div key={option.value}>
-                    <Label
-                      htmlFor={option.value}
-                      className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-[var(--r-card)] border px-4 py-3 transition-colors transition-shadow duration-150 sm:gap-4 sm:px-5 sm:py-4 ${
-                        selectedAnswer === option.value
-                          ? "border-[color:var(--ring)] bg-[color:var(--muted)] shadow-[var(--shadow-2)]"
-                          : "border-[color:var(--border)] bg-card hover:bg-[color:var(--muted)]"
-                      }`}
-                    >
-                      <RadioGroupItem value={option.value} id={option.value} />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium leading-6 text-foreground sm:text-base">{option.label}</p>
-                      </div>
-                      {selectedAnswer === option.value && <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />}
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
-            </SectionBlock>
+      {!selectedAnswer ? (
+        <p id={`feasibility-question-${currentQuestion.id}-next-hint`} role="status" className={helperTextClass}>
+          Chọn một lựa chọn phù hợp để tiếp tục.
+        </p>
+      ) : null}
 
-            <div className="stack-tight">
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Button variant="outline" className="flex-1" onClick={onBack}>
-                  <ArrowLeft className="h-4 w-4" />
-                  Quay lại
-                </Button>
-                <Button
-                  glow={Boolean(selectedAnswer)}
-                  className="flex-1"
-                  onClick={onNext}
-                  disabled={!selectedAnswer}
-                  aria-describedby={!selectedAnswer ? `feasibility-question-${currentQuestion.id}-next-hint` : undefined}
-                >
-                  {currentStep < totalSteps - 1 ? "Tiếp theo" : "Hoàn thành đánh giá"}
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </div>
-              {!selectedAnswer && (
-                <p
-                  id={`feasibility-question-${currentQuestion.id}-next-hint`}
-                  role="status"
-                  className="text-center text-xs text-muted-foreground sm:text-right"
-                >
-                  Chọn một lựa chọn phù hợp để tiếp tục.
-                </p>
-              )}
-            </div>
-          </motion.div>
-        </CardContent>
-      </Card>
-    </div>
+      <div className="mt-6 flex flex-col-reverse gap-3 border-t border-app-line pt-5 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-[12px] text-app-ink-muted">
+          Câu {currentStep + 1} / {totalSteps}
+        </p>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+            onClick={onBack}
+            disabled={isFirstStep}
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Quay lại
+          </button>
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+            onClick={onNext}
+            disabled={!selectedAnswer}
+            aria-describedby={!selectedAnswer ? `feasibility-question-${currentQuestion.id}-next-hint` : undefined}
+          >
+            {isLastStep ? "Xem kết quả →" : "Tiếp →"}
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    </section>
   );
 }

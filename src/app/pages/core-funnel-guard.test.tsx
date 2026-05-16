@@ -152,10 +152,8 @@ describe("core funnel guards", () => {
 
     renderCoreFunnel("/feasibility");
 
-    expect(
-      await screen.findByRole("heading", { name: "Hoàn thành Cân bằng cuộc sống trước khi kiểm tra tính khả thi" }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Bắt đầu Cân bằng cuộc sống" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Hoàn thành bước cân bằng trước" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Bắt đầu cân bằng" })).toBeInTheDocument();
   });
 
   it("shows a recovery gate on 12-week setup when feasibility is missing", async () => {

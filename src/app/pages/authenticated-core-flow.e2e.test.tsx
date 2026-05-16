@@ -244,12 +244,12 @@ async function completeFeasibility(user: ReturnType<typeof userEvent.setup>) {
     await user.click(await screen.findByLabelText(answer));
     await user.click(
       screen.getByRole("button", {
-        name: index === answers.length - 1 ? "Hoàn thành đánh giá" : "Tiếp theo",
+        name: index === answers.length - 1 ? "Xem kết quả →" : "Tiếp →",
       }),
     );
   }
 
-  await user.click(await screen.findByRole("button", { name: "Tạo kế hoạch 12 tuần" }));
+  await user.click(await screen.findByRole("button", { name: "Tiếp tục → Kế hoạch 12 tuần" }));
 }
 
 async function completeTwelveWeekSetup(user: ReturnType<typeof userEvent.setup>) {

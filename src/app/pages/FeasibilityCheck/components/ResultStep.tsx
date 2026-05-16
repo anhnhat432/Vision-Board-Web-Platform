@@ -1,5 +1,5 @@
 ﻿import {
-  AlertTriangle,
+  AlertCircle,
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
@@ -8,19 +8,12 @@
   ShieldCheck,
   Sparkles,
   Target,
+  type LucideIcon,
 } from "lucide-react";
-import { motion } from "motion/react";
-import type { ReactNode } from "react";
 import type { PendingSMARTGoal } from "@/lib/smart-goal";
-import { CoreFlowProgress } from "../../../components/CoreFlowProgress";
-import { FeasibilityScaleIllustration } from "../../../components/illustrations";
-import { useBreakpoint } from "../../../hooks/useBreakpoint";
-import { useReducedMotion } from "../../../components/ui/use-reduced-motion";
-import { Badge } from "../../../components/ui/badge";
-import { Button } from "../../../components/ui/button";
+
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../../../components/ui/collapsible";
-import { PrimaryActionCard } from "../../../components/layout/PrimaryActionCard";
-import { Card, CardContent } from "../../../components/ui/card";
+import { useBreakpoint } from "../../../hooks/useBreakpoint";
 import { getLifeAreaLabel } from "../../../utils/storage";
 import type { PlanLoadRecommendation, ResultData, ResultType, WeeklyCapacity } from "../types";
 
@@ -32,586 +25,405 @@ interface ResultStepProps {
   onAdjustGoal: () => void;
 }
 
-function getAxisTone(percent: number): { bar: string; border: string } {
-  if (percent >= 80) {
-    return { bar: "from-emerald-600 to-teal-600", border: "#059669" };
-  }
-  if (percent >= 60) {
-    return { bar: "from-amber-500 to-orange-500", border: "#f59e0b" };
-  }
-  return { bar: "from-rose-500 to-pink-500", border: "#f43f5e" };
+interface ResultCopy {
+  statusLabel: string;
+  statusHint: string;
+  guideTitle: string;
+  guideBody: string;
+  highlights: Array<{ title: string; description: string; icon: LucideIcon }>;
+  nextMoves: string[];
+  weeklyRhythm: Array<{ label: string; detail: string }>;
 }
 
+const RESULT_COPY: Record<ResultType, ResultCopy> = {
+  realistic: {
+    statusLabel: "Đủ thực tế để bắt đầu",
+    statusHint: "Nền tảng hiện tại đủ để bước vào chu kỳ 12 tuần gọn và rõ.",
+    guideTitle: "Đi tiếp, nhưng giữ cho tuần đầu thật vừa tay.",
+    guideBody: "Không cần kế hoạch lớn. Chỉ cần vài việc nhỏ, rõ, đo được và đủ nhẹ để duy trì đều mỗi tuần.",
+    highlights: [
+      {
+        title: "Nhịp nhỏ nhưng đều",
+        description: "Chọn 2-4 việc lặp lại mỗi tuần thay vì nhồi quá nhiều ngay đầu.",
+        icon: Sparkles,
+      },
+      {
+        title: "Khóa lịch nhìn lại ngay",
+        description: "Lịch nhìn lại cố định giúp không lệch khi tuần bận hơn.",
+        icon: ShieldCheck,
+      },
+      {
+        title: "Ưu tiên cảm giác thắng sớm",
+        description: "Tuần đầu đủ nhẹ để hoàn thành tốt và tạo đà cho cả chu kỳ.",
+        icon: Target,
+      },
+    ],
+    nextMoves: [
+      "Chuyển mục tiêu thành kế hoạch 12 tuần với 2-4 việc chính thật rõ.",
+      "Thiết kế tuần đầu thiên về duy trì đều, không phải khối lượng lớn.",
+      "Giữ một buổi nhìn lại hằng tuần để điều chỉnh trước khi bị trễ.",
+    ],
+    weeklyRhythm: [
+      { label: "Ngay sau kết quả", detail: "Chốt kết quả 12 tuần và việc bạn sẽ lặp lại hằng tuần." },
+      { label: "Tuần 1", detail: "Giữ kế hoạch gọn để thắng sớm và tạo đà." },
+      { label: "Từ tuần 2 trở đi", detail: "Duy trì buổi nhìn lại, chỉ tăng độ khó khi đang duy trì ổn thật sự." },
+    ],
+  },
+  challenging: {
+    statusLabel: "Khó nhưng vẫn làm được",
+    statusHint: "Có thể đạt nếu thu gọn mục tiêu, làm rõ việc cần làm và nhìn lại mỗi tuần nghiêm túc.",
+    guideTitle: "Tập trung hơn một chút, bạn sẽ đi được xa hơn.",
+    guideBody: "Mục tiêu có sức bật nhưng không phù hợp nếu triển khai quá rộng. Giữ một hướng chính rõ và bỏ bớt phần gây nhiễu.",
+    highlights: [
+      {
+        title: "Thu hẹp mục tiêu 12 tuần đầu",
+        description: "Chỉ giữ kết quả quan trọng nhất, bỏ phần còn lại cho chu kỳ sau.",
+        icon: Target,
+      },
+      {
+        title: "Ưu tiên việc đo được",
+        description: "Tập trung vài việc đo được, thay vì danh sách dài nhưng mờ hiệu quả.",
+        icon: Gauge,
+      },
+      {
+        title: "Dùng buổi nhìn lại để cắt nhiễu",
+        description: "Mỗi tuần bỏ bớt việc không phục vụ kết quả chính.",
+        icon: Compass,
+      },
+    ],
+    nextMoves: [
+      "Thu gọn về một kết quả duy nhất cho 12 tuần đầu.",
+      "Chỉ chọn việc thật sự đo được và lặp lại được mỗi tuần.",
+      "Đặt buổi nhìn lại hằng tuần để kiểm soát mức tải, không để kế hoạch phình dần.",
+    ],
+    weeklyRhythm: [
+      { label: "Ngay sau kết quả", detail: "Chốt một kết quả đủ rõ, bỏ bớt mục tiêu phụ không cần cho chu kỳ này." },
+      { label: "Tuần 1-2", detail: "Kiểm tra xem lịch hành động có thực sự vừa với cuộc sống hằng ngày không." },
+      { label: "Sau mỗi lần nhìn lại", detail: "Đang đuối thì giảm tải trước khi tăng tốc. Bền quan trọng hơn hưng phấn đầu kỳ." },
+    ],
+  },
+  too_ambitious: {
+    statusLabel: "Cần thu nhỏ trước khi tăng tốc",
+    statusHint: "Mục tiêu đang hơi nặng so với nền hiện tại. Thu nhỏ đúng cách giúp giữ động lực và xác suất hoàn thành cao hơn.",
+    guideTitle: "Không cần hạ tham vọng — chỉ cần hạ mức tải bước đầu.",
+    guideBody: "Chưa cần từ bỏ mục tiêu lớn. Biến nó thành bước đệm vừa tầm để 12 tuần tới là chu kỳ thắng được, không phải lời hứa áp lực.",
+    highlights: [
+      {
+        title: "Thu nhỏ kết quả đầu tiên",
+        description: "Chọn phiên bản gần hơn, dễ thắng hơn làm cột mốc khởi động.",
+        icon: AlertCircle,
+      },
+      {
+        title: "Kéo giãn thời hạn nếu cần",
+        description: "Không phải mục tiêu sai — chỉ là tốc độ hoặc thời điểm chưa phù hợp.",
+        icon: Gauge,
+      },
+      {
+        title: "Dựng mục tiêu bước đệm",
+        description: "Chu kỳ 12 tuần nhỏ mà hoàn thành được tốt hơn kế hoạch quá tải rồi bỏ dở.",
+        icon: ShieldCheck,
+      },
+    ],
+    nextMoves: [
+      "Quay lại sửa mục tiêu nếu cần — giảm quy mô hoặc kéo dài thời hạn.",
+      "Chọn bước đệm gần hơn để chu kỳ 12 tuần đầu có khả năng thắng.",
+      "Khi đã duy trì ổn, có thể tăng độ khó ở chu kỳ sau.",
+    ],
+    weeklyRhythm: [
+      { label: "Ngay sau kết quả", detail: "Xác định phiên bản nhỏ hơn nhưng vẫn đủ ý nghĩa để muốn theo đuổi." },
+      { label: "Tuần 1", detail: "Thiết kế kế hoạch cực gọn để tạo ổn định, không tạo áp lực chứng minh." },
+      { label: "Sau chu kỳ đầu", detail: "Khi đã duy trì tốt, dùng dữ liệu thực để quyết định tăng tốc ở vòng sau." },
+    ],
+  },
+};
+
+function clampPercent(value: number): number {
+  return Math.max(0, Math.min(100, value));
+}
+
+function getScoreLabel(percent: number): string {
+  if (percent >= 75) return "Cao";
+  if (percent >= 50) return "Trung bình";
+  return "Thấp";
+}
+
+function getAxisBarClass(percent: number): string {
+  if (percent >= 75) return "bg-app-accent";
+  if (percent >= 50) return "bg-app-ink-soft";
+  return "bg-app-warm";
+}
+
+const PLAN_LOAD_LABEL: Record<PlanLoadRecommendation, string> = {
+  lighter: "Nhẹ hơn",
+  balanced: "Cân bằng",
+  push: "Đẩy nhẹ",
+};
+
+const CAPACITY_LABEL: Record<WeeklyCapacity, string> = {
+  low: "Ít thời gian",
+  medium: "Vừa đủ",
+  high: "Khá rộng",
+};
+
 export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjustGoal }: ResultStepProps) {
-  const prefersReducedMotion = useReducedMotion();
   const isDesktop = useBreakpoint();
-
-  const styleMap: Record<ResultType, { glow: string; badge: string; title: string; panel: string; meter: string }> = {
-    realistic: {
-      glow: "bg-gradient-to-br from-emerald-400/24 via-cyan-300/14 to-transparent",
-      badge: "border-emerald-200 bg-emerald-50 text-emerald-800",
-      title: "border-emerald-200/70 gradient-emerald-title",
-      panel: "border-emerald-100/80 gradient-white-emerald",
-      meter: "from-emerald-400 via-teal-400 to-cyan-400",
-    },
-    challenging: {
-      glow: "bg-gradient-to-br from-amber-400/24 via-orange-300/14 to-transparent",
-      badge: "border-amber-200 bg-amber-50 text-amber-800",
-      title: "border-amber-200/70 gradient-amber-title",
-      panel: "border-amber-100/80 gradient-white-amber",
-      meter: "from-amber-400 via-orange-400 to-pink-400",
-    },
-    too_ambitious: {
-      glow: "bg-gradient-to-br from-amber-400/24 via-orange-300/14 to-transparent",
-      badge: "border-amber-200 bg-amber-50 text-amber-800",
-      title: "border-amber-200/70 gradient-amber-title",
-      panel: "border-amber-100/80 gradient-white-amber",
-      meter: "from-amber-400 via-orange-400 to-pink-400",
-    },
-  };
-
-  const resultCopy: Record<
-    ResultType,
-    {
-      statusLabel: string;
-      statusHint: string;
-      guideTitle: string;
-      guideBody: string;
-      highlights: { title: string; description: string; icon: ReactNode }[];
-      nextMoves: string[];
-      weeklyRhythm: { label: string; detail: string }[];
-    }
-  > = {
-    realistic: {
-      statusLabel: "Đủ thực tế để bắt đầu",
-      statusHint: "Nền tảng hiện tại đủ để bước vào chu kỳ 12 tuần gọn và rõ.",
-      guideTitle: "Đi tiếp, nhưng giữ cho tuần đầu thật vừa tay.",
-      guideBody:
-        "Không cần kế hoạch lớn. Chỉ cần vài việc nhỏ, rõ, đo được và đủ nhẹ để duy trì đều mỗi tuần.",
-      highlights: [
-        {
-          title: "Nhịp nhỏ nhưng đều",
-          description: "Chọn 2-4 việc lặp lại mỗi tuần thay vì nhồi quá nhiều ngay đầu.",
-          icon: <Sparkles className="h-4 w-4" />,
-        },
-        {
-          title: "Khóa lịch nhìn lại ngay",
-          description: "Lịch nhìn lại cố định giúp không lệch khi tuần bận hơn.",
-          icon: <ShieldCheck className="h-4 w-4" />,
-        },
-        {
-          title: "Ưu tiên cảm giác thắng sớm",
-          description: "Tuần đầu đủ nhẹ để hoàn thành tốt và tạo đà cho cả chu kỳ.",
-          icon: <Target className="h-4 w-4" />,
-        },
-      ],
-      nextMoves: [
-        "Chuyển mục tiêu thành kế hoạch 12 tuần với 2-4 việc chính thật rõ.",
-        "Thiết kế tuần đầu thiên về duy trì đều, không phải khối lượng lớn.",
-        "Giữ một buổi nhìn lại hằng tuần để điều chỉnh trước khi bị trễ.",
-      ],
-      weeklyRhythm: [
-        {
-          label: "Ngay sau kết quả",
-          detail: "Chốt kết quả 12 tuần và việc bạn sẽ lặp lại hằng tuần.",
-        },
-        {
-          label: "Tuần 1",
-          detail: "Giữ kế hoạch gọn để thắng sớm và tạo đà.",
-        },
-        {
-          label: "Từ tuần 2 trở đi",
-          detail: "Duy trì buổi nhìn lại, chỉ tăng độ khó khi đang duy trì ổn thật sự.",
-        },
-      ],
-    },
-    challenging: {
-      statusLabel: "Khó nhưng vẫn làm được",
-      statusHint:
-        "Có thể đạt nếu thu gọn mục tiêu, làm rõ việc cần làm và nhìn lại mỗi tuần nghiêm túc.",
-      guideTitle: "Tập trung hơn một chút, bạn sẽ đi được xa hơn.",
-      guideBody:
-        "Mục tiêu có sức bật nhưng không phù hợp nếu triển khai quá rộng. Giữ một hướng chính rõ và bỏ bớt phần gây nhiễu.",
-      highlights: [
-        {
-          title: "Thu hẹp mục tiêu 12 tuần đầu",
-          description: "Chỉ giữ kết quả quan trọng nhất, bỏ phần còn lại cho chu kỳ sau.",
-          icon: <Target className="h-4 w-4" />,
-        },
-        {
-          title: "Ưu tiên việc đo được",
-          description: "Tập trung vài việc đo được, thay vì danh sách dài nhưng mờ hiệu quả.",
-          icon: <Gauge className="h-4 w-4" />,
-        },
-        {
-          title: "Dùng buổi nhìn lại để cắt nhiễu",
-          description: "Mỗi tuần bỏ bớt việc không phục vụ kết quả chính.",
-          icon: <Compass className="h-4 w-4" />,
-        },
-      ],
-      nextMoves: [
-        "Thu gọn về một kết quả duy nhất cho 12 tuần đầu.",
-        "Chỉ chọn việc thật sự đo được và lặp lại được mỗi tuần.",
-        "Đặt buổi nhìn lại hằng tuần để kiểm soát mức tải, không để kế hoạch phình dần.",
-      ],
-      weeklyRhythm: [
-        {
-          label: "Ngay sau kết quả",
-          detail: "Chốt một kết quả đủ rõ, bỏ bớt mục tiêu phụ không cần cho chu kỳ này.",
-        },
-        {
-          label: "Tuần 1-2",
-          detail: "Kiểm tra xem lịch hành động có thực sự vừa với cuộc sống hằng ngày không.",
-        },
-        {
-          label: "Sau mỗi lần nhìn lại",
-          detail: "Đang đuối thì giảm tải trước khi tăng tốc. Bền quan trọng hơn hưng phấn đầu kỳ.",
-        },
-      ],
-    },
-    too_ambitious: {
-      statusLabel: "Cần thu nhỏ trước khi tăng tốc",
-      statusHint:
-        "Mục tiêu đang hơi nặng so với nền hiện tại. Thu nhỏ đúng cách giúp giữ động lực và xác suất hoàn thành cao hơn.",
-      guideTitle: "Không cần hạ tham vọng — chỉ cần hạ mức tải bước đầu.",
-      guideBody:
-        "Chưa cần từ bỏ mục tiêu lớn. Biến nó thành bước đệm vừa tầm để 12 tuần tới là chu kỳ thắng được, không phải lời hứa áp lực.",
-      highlights: [
-        {
-          title: "Thu nhỏ kết quả đầu tiên",
-          description: "Chọn phiên bản gần hơn, dễ thắng hơn làm cột mốc khởi động.",
-          icon: <AlertTriangle className="h-4 w-4" />,
-        },
-        {
-          title: "Kéo giãn thời hạn nếu cần",
-          description: "Không phải mục tiêu sai — chỉ là tốc độ hoặc thời điểm chưa phù hợp.",
-          icon: <Gauge className="h-4 w-4" />,
-        },
-        {
-          title: "Dựng mục tiêu bước đệm",
-          description: "Chu kỳ 12 tuần nhỏ mà hoàn thành được tốt hơn kế hoạch quá tải rồi bỏ dở.",
-          icon: <ShieldCheck className="h-4 w-4" />,
-        },
-      ],
-      nextMoves: [
-        "Quay lại sửa mục tiêu nếu cần — giảm quy mô hoặc kéo dài thời hạn.",
-        "Chọn bước đệm gần hơn để chu kỳ 12 tuần đầu có khả năng thắng.",
-        "Khi đã duy trì ổn, có thể tăng độ khó ở chu kỳ sau.",
-      ],
-      weeklyRhythm: [
-        {
-          label: "Ngay sau kết quả",
-          detail: "Xác định phiên bản nhỏ hơn nhưng vẫn đủ ý nghĩa để muốn theo đuổi.",
-        },
-        {
-          label: "Tuần 1",
-          detail: "Thiết kế kế hoạch cực gọn để tạo ổn định, không tạo áp lực chứng minh.",
-        },
-        {
-          label: "Sau chu kỳ đầu",
-          detail: "Khi đã duy trì tốt, dùng dữ liệu thực để quyết định tăng tốc ở vòng sau.",
-        },
-      ],
-    },
-  };
-
-  const styles = styleMap[result.type];
-  const copy = resultCopy[result.type];
-  const fitScore = Math.max(0, Math.min(100, Math.round((result.adjustedScore / 20) * 100)));
-  const readinessPercent = Math.max(0, Math.min(100, Math.round((result.readinessScore / 20) * 100)));
-  const scoreCircleRadius = 70;
-  const scoreCircleCircumference = 2 * Math.PI * scoreCircleRadius;
-  const scoreCircleOffset = scoreCircleCircumference * (1 - fitScore / 100);
-  const recommendationToneClass =
-    fitScore >= 80
-      ? "border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-teal-50 dark:border-emerald-500/30 dark:from-emerald-950/35 dark:to-teal-950/25"
-      : fitScore >= 60
-        ? "border-amber-200/80 bg-gradient-to-br from-amber-50 to-orange-50 dark:border-amber-500/30 dark:from-amber-950/35 dark:to-orange-950/25"
-        : "border-rose-200/80 bg-gradient-to-br from-rose-50 to-pink-50 dark:border-rose-500/30 dark:from-rose-950/35 dark:to-pink-950/25";
-  const planLoadLabel: Record<PlanLoadRecommendation, string> = {
-    lighter: "Nhẹ hơn",
-    balanced: "Cân bằng",
-    push: "Đẩy nhẹ",
-  };
-  const capacityLabel: Record<WeeklyCapacity, string> = {
-    low: "Ít thời gian",
-    medium: "Vừa đủ",
-    high: "Khá rộng",
-  };
+  const copy = RESULT_COPY[result.type];
+  const scorePercent = clampPercent(Math.round((result.adjustedScore / 20) * 100));
+  const scoreOutOfTen = Math.max(0, Math.min(10, Math.round(scorePercent / 10)));
+  const readinessPercent = clampPercent(Math.round((result.readinessScore / 20) * 100));
+  const bottleneckPercent =
+    result.bottleneck.axis === "wheel"
+      ? clampPercent(result.wheelScore * 10)
+      : clampPercent(Math.round((result.bottleneck.score / 4) * 100));
+  const statusLabel = getScoreLabel(scorePercent);
+  const showRiskWarning = result.type !== "realistic" || Boolean(result.smartGoalQualityNote);
 
   const scoreCards = [
     {
-      label: "Mức phù hợp hiện tại",
-      value: `${fitScore}%`,
-      note: "Điểm đã tính cả 7 góc nhìn và nền hiện tại của lĩnh vực này.",
-      progress: fitScore,
+      label: "Mức sẵn sàng tổng",
+      value: `${result.readinessScore}/20`,
+      note: `${result.diagnosticScore}/${result.maxDiagnosticScore} điểm trước khi tính nền lĩnh vực.`,
+      progress: readinessPercent,
     },
     {
       label: "Phần cần chú ý nhất",
       value: result.bottleneck.label,
       note: result.bottleneck.action,
-      progress:
-        result.bottleneck.axis === "wheel"
-          ? Math.max(0, Math.min(100, result.wheelScore * 10))
-          : Math.max(0, Math.min(100, Math.round((result.bottleneck.score / 4) * 100))),
+      progress: bottleneckPercent,
     },
     {
-      label: "Mức sẵn sàng tổng",
-      value: `${result.readinessScore}/20`,
-      note: `${result.diagnosticScore}/${result.maxDiagnosticScore} điểm đánh giá trước khi tính nền lĩnh vực.`,
-      progress: readinessPercent,
+      label: "Mức tải gợi ý",
+      value: PLAN_LOAD_LABEL[result.planLoad],
+      note: `Quỹ thời gian: ${CAPACITY_LABEL[result.weeklyCapacity]}.`,
+      progress: scorePercent,
     },
   ];
 
   return (
-    <div className="app-shell min-h-screen px-4 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pb-6 sm:pt-6 lg:px-8">
-      <motion.div
-        initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.5 }}
-        className="mx-auto w-full max-w-6xl stack-stack sm:stack-section"
-      >
-        <CoreFlowProgress currentStepId="feasibility" />
-
-        <PrimaryActionCard
-          hero
-          eyebrow="Kết quả kiểm tra"
-          icon={<ShieldCheck className="h-4 w-4" />}
-          title={result.title}
-          titleAs="h1"
-          description={result.summary}
-          className="overflow-hidden"
-          headerClassName="relative z-10 max-w-4xl"
-          titleClassName="max-w-3xl text-gradient-vibrant text-2xl font-bold leading-[1.1] tracking-[-0.018em] sm:text-3xl lg:text-4xl"
-          descriptionClassName="max-w-3xl text-sm leading-7 text-muted-foreground sm:text-base"
-          contentClassName="relative z-10 max-w-4xl stack-stack sm:stack-section"
-          actionClassName="relative z-10 flex flex-col gap-3 sm:max-w-xl sm:flex-row"
-          action={
-            <>
-              <Button glow onClick={onContinue}>
-                {result.type === "too_ambitious" ? "Tạo kế hoạch 12 tuần nhỏ hơn" : "Tạo kế hoạch 12 tuần"}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" className="hidden sm:inline-flex" onClick={onAdjustGoal}>
-                <ArrowLeft className="h-4 w-4" />
-                Sửa mục tiêu
-              </Button>
-            </>
-          }
+    <section className="mt-6 rounded-card border border-app-line bg-app-surface p-6 md:p-8" aria-labelledby="feasibility-result-title">
+      <div>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-accent">Kết quả kiểm tra</p>
+          <span className="w-fit rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+            {getLifeAreaLabel(focusArea)}
+          </span>
+        </div>
+        <h2
+          id="feasibility-result-title"
+          className="mt-2 font-serif text-[24px] font-medium leading-8 tracking-[-0.01em] text-app-ink"
         >
-          <FeasibilityScaleIllustration className="pointer-events-none absolute right-4 top-4 hidden w-28 text-[color:var(--tone-shell-primary)] opacity-25 sm:block" />
-          <div className="flex flex-wrap gap-3">
-            <div className={`inline-flex rounded-[var(--r-pill)] border px-4 py-2 text-sm font-semibold ${styles.badge}`}>
-              {copy.statusLabel}
-            </div>
-            <Badge variant="neutral">
-              <Target className="mr-1 h-3.5 w-3.5" />
-              {getLifeAreaLabel(focusArea)}
-            </Badge>
-          </div>
+          {copy.statusLabel}
+        </h2>
+        <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{result.summary}</p>
+      </div>
 
-          <div className="flex flex-col gap-4 rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4 shadow-sm sm:flex-row sm:items-center">
-            <div className="relative mx-auto size-40 shrink-0 sm:mx-0">
-              <svg className="-rotate-90" width="160" height="160" viewBox="0 0 160 160" aria-hidden="true">
-                <defs>
-                  <linearGradient id="feasibility-score-gradient" x1="0" x2="1" y1="0" y2="1">
-                    <stop offset="0%" stopColor="#7c3aed" />
-                    <stop offset="55%" stopColor="#c026d3" />
-                    <stop offset="100%" stopColor="#ec4899" />
-                  </linearGradient>
-                </defs>
-                <circle cx="80" cy="80" r={scoreCircleRadius} fill="none" stroke="rgba(148,163,184,0.32)" strokeWidth="12" />
-                <circle
-                  cx="80"
-                  cy="80"
-                  r={scoreCircleRadius}
-                  fill="none"
-                  stroke="url(#feasibility-score-gradient)"
-                  strokeDasharray={scoreCircleCircumference}
-                  strokeDashoffset={scoreCircleOffset}
-                  strokeLinecap="round"
-                  strokeWidth="12"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <p className="count-up text-4xl font-bold tabular-nums text-foreground">{fitScore}</p>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">/100</p>
-              </div>
-            </div>
-            <div className="min-w-0 text-center sm:text-left">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Điểm khả thi</p>
-              <p className="mt-2 text-lg font-semibold leading-7 text-foreground">{copy.statusHint}</p>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Điểm này kết hợp câu trả lời kiểm tra, điểm Cân bằng cuộc sống và độ rõ của mục tiêu SMART.
-              </p>
-            </div>
+      <div className="mt-6 rounded-card border border-app-line bg-app-bg p-5">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+          <div className="flex shrink-0 flex-col items-center text-center sm:w-44">
+            <Compass className="h-12 w-12 text-app-accent" aria-hidden="true" />
+            <p className="mt-3 font-serif text-[56px] font-medium leading-none text-app-ink">{scoreOutOfTen}</p>
+            <p className="mt-1 text-[13px] font-medium text-app-ink-muted">/10 · {statusLabel}</p>
           </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] font-medium text-app-ink">{copy.statusHint}</p>
+            <div className="relative mt-4 h-2 w-full overflow-hidden rounded-full bg-app-line" aria-hidden="true">
+              <div className="h-full rounded-full bg-app-accent" style={{ width: `${scoreOutOfTen * 10}%` }} />
+              <span className="absolute left-[10%] top-0 h-full w-px bg-app-ink-muted/40" />
+              <span className="absolute left-1/2 top-0 h-full w-px bg-app-ink-muted/40" />
+              <span className="absolute left-[90%] top-0 h-full w-px bg-app-ink-muted/40" />
+            </div>
+            <div className="mt-2 flex justify-between text-[11px] text-app-ink-muted">
+              <span>Cần nhẹ</span>
+              <span>Vừa sức</span>
+              <span>Sẵn sàng</span>
+            </div>
+            <p className="mt-4 text-[13px] leading-6 text-app-ink-soft">{result.recommendation}</p>
+          </div>
+        </div>
+      </div>
 
-          <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4 shadow-sm sm:hidden">
-            <div className="flex items-start justify-between gap-4">
+      <div className="mt-6 grid gap-3">
+        {copy.highlights.map((item) => {
+          const Icon = item.icon;
+
+          return (
+            <div key={item.title} className="flex gap-3 rounded-lg border border-app-line bg-app-bg p-3">
+              <Icon className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  Mức phù hợp hiện tại
-                </p>
-                <p className="mt-2 text-3xl font-bold text-foreground">{fitScore}%</p>
+                <p className="text-[13px] font-medium text-app-ink">{item.title}</p>
+                <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">{item.description}</p>
               </div>
-              <Badge variant="neutral">{result.wheelScore}/10</Badge>
             </div>
-            <div className="mt-4 h-2 overflow-hidden rounded-[var(--r-pill)] bg-[color:var(--muted)]">
-              <div
-                className={`h-full rounded-[var(--r-pill)] bg-gradient-to-r ${styles.meter}`}
-                style={{ width: `${fitScore}%` }}
-              />
+          );
+        })}
+      </div>
+
+      {showRiskWarning ? (
+        <div className="mt-6 rounded-card border border-[#F3D9CC] bg-app-warm-soft p-4">
+          <div className="flex gap-3">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-app-warm" aria-hidden="true" />
+            <div>
+              <p className="font-serif text-[16px] font-medium text-[#5C3A2E]">Có vài rủi ro cần xử lý trước</p>
+              <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">
+                {result.smartGoalQualityNote ?? result.bottleneck.action}
+              </p>
             </div>
-            <div className="mt-[var(--space-inline)] grid gap-2 text-sm leading-6 text-muted-foreground">
-              <p>
-                <span className="font-semibold text-foreground">Cần chú ý:</span> {result.bottleneck.label}
-              </p>
-              <p>
-                <span className="font-semibold text-foreground">Mức tải gợi ý:</span> {planLoadLabel[result.planLoad]}{" "}
-                · {capacityLabel[result.weeklyCapacity]}
-              </p>
-              <p>{result.firstWeekGuidance}</p>
+          </div>
+        </div>
+      ) : null}
+
+      <Collapsible
+        key={isDesktop ? "feasibility-details-desktop" : "feasibility-details-mobile"}
+        defaultOpen={isDesktop}
+        className="mt-6"
+      >
+        <CollapsibleTrigger asChild>
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-between gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+          >
+            {isDesktop ? "Phân tích chi tiết" : "Mở chi tiết"}
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-4 space-y-4 data-[state=closed]:hidden">
+          <div className="rounded-card border border-app-line bg-app-bg p-4 md:p-5">
+            <div className="flex items-center gap-2">
+              <Compass className="h-4 w-4 text-app-accent" aria-hidden="true" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Hướng đi tiếp theo</p>
+            </div>
+            <h3 className="mt-3 font-serif text-[18px] font-medium text-app-ink">{copy.guideTitle}</h3>
+            <p className="mt-2 text-[13px] leading-6 text-app-ink-soft">{copy.guideBody}</p>
+            <div className="mt-4 rounded-lg border border-app-line bg-app-surface p-3">
+              <p className="text-[13px] font-medium text-app-ink">Tuần 1 nên thế nào</p>
+              <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">{result.firstWeekGuidance}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+                  Mức tải: {PLAN_LOAD_LABEL[result.planLoad]}
+                </span>
+                <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-[12px] text-app-ink-muted">
+                  Quỹ thời gian: {CAPACITY_LABEL[result.weeklyCapacity]}
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="hidden gap-4 sm:grid md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-3">
             {scoreCards.map((card) => (
-              <div
-                key={card.label}
-                className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-5 shadow-sm"
-              >
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{card.label}</p>
-                <p
-                  className={`mt-[var(--space-inline)] font-bold text-foreground ${
-                    card.label === "Phần cần chú ý nhất" ? "text-xl leading-7" : "text-3xl"
-                  }`}
-                >
-                  {card.value}
-                </p>
-                <div className="mt-4 h-2 overflow-hidden rounded-[var(--r-pill)] bg-[color:var(--muted)]">
-                  <div
-                    className={`h-full rounded-[var(--r-pill)] bg-gradient-to-r ${styles.meter}`}
-                    style={{ width: `${card.progress}%` }}
-                  />
+              <div key={card.label} className="rounded-lg border border-app-line bg-app-surface p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{card.label}</p>
+                <p className="mt-2 text-[20px] font-semibold leading-6 text-app-ink">{card.value}</p>
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-app-line" aria-hidden="true">
+                  <div className="h-full rounded-full bg-app-accent" style={{ width: `${card.progress}%` }} />
                 </div>
-                <p className="mt-[var(--space-inline)] text-sm leading-6 text-muted-foreground">{card.note}</p>
+                <p className="mt-2 text-[12px] leading-5 text-app-ink-muted">{card.note}</p>
               </div>
             ))}
           </div>
-        </PrimaryActionCard>
 
-        <Collapsible
-          key={isDesktop ? "feasibility-details-desktop" : "feasibility-details-mobile"}
-          defaultOpen={isDesktop}
-          className="stack-stack"
-        >
-          <CollapsibleTrigger asChild>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full justify-between border-slate-200 bg-white/92 text-slate-900 shadow-sm sm:w-auto"
-            >
-              {isDesktop ? "Phân tích chi tiết" : "Mở chi tiết"}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </CollapsibleTrigger>
-          <CollapsibleContent className="stack-stack data-[state=closed]:hidden">
-            <Card className={`overflow-hidden ${styles.panel} ${recommendationToneClass} shadow-sm ring-1 ring-slate-200`}>
-              <CardContent className="stack-stack p-5 lg:p-6">
+          <details className="rounded-lg border border-app-line bg-app-surface p-4">
+            <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">Xem 7 góc nhìn</summary>
+            <div className="mt-4 grid gap-3">
+              {result.axisScores.map((axis) => (
+                <div key={axis.axis} className="rounded-lg border border-app-line bg-app-bg p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[13px] font-medium text-app-ink">{axis.label}</p>
+                    <span className="text-[12px] font-medium text-app-ink-muted">
+                      {axis.score}/{axis.maxScore}
+                    </span>
+                  </div>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-app-line" aria-hidden="true">
+                    <div className={`h-full rounded-full ${getAxisBarClass(axis.percent)}`} style={{ width: `${axis.percent}%` }} />
+                  </div>
+                  <p className="mt-2 text-[12px] leading-5 text-app-ink-muted">{axis.diagnostic}</p>
+                </div>
+              ))}
+            </div>
+          </details>
+
+          <details className="rounded-lg border border-app-line bg-app-surface p-4">
+            <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">Xem mục tiêu đã viết</summary>
+            <div className="mt-4 space-y-3">
+              <p className="text-[14px] font-medium leading-6 text-app-ink">{pendingGoal.specific}</p>
+              <div className="grid gap-3 text-[13px] leading-6 text-app-ink-soft">
                 <div>
-                  <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-slate-200/80 bg-white/82 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-600">
-                    <Compass className="h-3.5 w-3.5" />
-                    Hướng đi tiếp theo
-                  </div>
-                  <h2 className="mt-4 text-xl font-bold tracking-normal text-slate-900 sm:text-2xl">
-                    {result.type === "too_ambitious" ? "Thu nhỏ rồi đi tiếp." : "Đây là hướng nên đi tiếp."}
-                  </h2>
-                  <p className="mt-[var(--space-inline)] text-sm leading-7 text-slate-600">{copy.statusHint}</p>
-                  <p className="mt-[var(--space-inline)] text-base font-semibold leading-7 text-slate-900">{result.recommendation}</p>
-
-                  {result.smartGoalQualityNote ? (
-                    <div className="mt-[var(--space-inline)] rounded-[var(--r-card)] border border-amber-200 bg-amber-50/80 px-4 py-3">
-                      <p className="text-sm leading-6 text-amber-800">{result.smartGoalQualityNote}</p>
-                    </div>
-                  ) : null}
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Thời hạn</p>
+                  <p className="mt-1">{pendingGoal.timeBound}</p>
                 </div>
-
-                <div className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/82 p-4 shadow-sm">
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-slate-900 text-white">
-                      <Sparkles className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                          Tuần 1 nên thế nào
-                        </p>
-                        <span className="rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
-                          Mức tải: {planLoadLabel[result.planLoad]}
-                        </span>
-                        <span className="rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
-                          Quỹ thời gian: {capacityLabel[result.weeklyCapacity]}
-                        </span>
-                      </div>
-                      <p className="mt-2 text-sm font-semibold leading-6 text-slate-900">{result.firstWeekGuidance}</p>
-                    </div>
-                  </div>
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Dấu hiệu hoàn thành</p>
+                  <p className="mt-1">{pendingGoal.measurable}</p>
                 </div>
-
-                <div className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/82 p-4">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-slate-700" />
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                      Nên làm trước khi tạo kế hoạch
-                    </p>
-                  </div>
-                  <ol className="mt-[var(--space-inline)] stack-tight">
-                    {copy.nextMoves.map((item, index) => (
-                      <li key={item} className="flex items-start gap-3">
-                        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-slate-900 text-xs font-semibold text-white">
-                          {index + 1}
-                        </span>
-                        <p className="text-sm leading-6 text-slate-700">{item}</p>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="grid gap-[var(--space-stack)] lg:grid-cols-3">
-              <Card className={`hidden overflow-hidden lg:block ${styles.title} border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200`}>
-                <CardContent className="p-5 lg:p-6">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Lĩnh vực trọng tâm</p>
-                  <p className="mt-[var(--space-inline)] text-2xl font-bold text-slate-900">{getLifeAreaLabel(focusArea)}</p>
-                  <p className="mt-[var(--space-inline)] text-sm leading-6 text-slate-600">
-                    Đây là phần đời sống đang tác động trực tiếp tới độ khả thi của mục tiêu này.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <details className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 lg:rounded-[var(--r-card)] lg:p-6">
-              <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
-                Xem 7 góc nhìn
-              </summary>
-              <div className="mt-4 stack-tight">
-                {result.axisScores.map((axis) => {
-                  const axisTone = getAxisTone(axis.percent);
-
-                  return (
-                    <div
-                      key={axis.axis}
-                      className="card-hover-lift rounded-[var(--r-tile)] border border-l-4 border-slate-200 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-950/55"
-                      style={{ borderLeftColor: axisTone.border }}
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-semibold text-slate-900">{axis.label}</p>
-                        <span className="text-sm font-semibold text-slate-600">
-                          {axis.score}/{axis.maxScore}
-                        </span>
-                      </div>
-                      <div className="mt-2 h-2 overflow-hidden rounded-[var(--r-pill)] bg-slate-200 dark:bg-slate-800">
-                        <div
-                          className={`h-full rounded-[var(--r-pill)] bg-gradient-to-r ${axisTone.bar}`}
-                          style={{ width: `${axis.percent}%` }}
-                        />
-                      </div>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">{axis.diagnostic}</p>
-                    </div>
-                  );
-                })}
-              </div>
-              </details>
-
-              <details className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 lg:rounded-[var(--r-card)] lg:p-6">
-              <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
-                Xem mục tiêu đã viết
-              </summary>
-              <div className="mt-4 stack-stack">
-                <p className="text-base font-semibold leading-7 text-slate-900">{pendingGoal.specific}</p>
-                <div className="stack-tight text-sm leading-6 text-slate-600">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Thời hạn</p>
-                    <p className="mt-1">{pendingGoal.timeBound}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                      Dấu hiệu hoàn thành
-                    </p>
-                    <p className="mt-1">{pendingGoal.measurable}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Lý do theo đuổi</p>
-                    <p className="mt-1">{pendingGoal.relevant}</p>
-                  </div>
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Lý do theo đuổi</p>
+                  <p className="mt-1">{pendingGoal.relevant}</p>
                 </div>
               </div>
-              </details>
+            </div>
+          </details>
 
-              <details className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 lg:rounded-[var(--r-card)] lg:p-6">
-              <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
-                Xem nhịp triển khai gợi ý
-              </summary>
-              <div className="mt-4 stack-stack">
-                {copy.weeklyRhythm.map((item, index) => (
-                  <div key={item.label} className="flex gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--r-tile)] border border-violet-200 bg-violet-50 text-xs font-semibold text-violet-700">
+          <details className="rounded-lg border border-app-line bg-app-surface p-4">
+            <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">Xem nhịp triển khai gợi ý</summary>
+            <div className="mt-4 grid gap-3">
+              {copy.weeklyRhythm.map((item, index) => (
+                <div key={item.label} className="flex gap-3">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-[12px] font-medium text-app-accent">
+                    {index + 1}
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-medium text-app-ink">{item.label}</p>
+                    <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">{item.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </details>
+
+          <details className="rounded-lg border border-app-line bg-app-surface p-4">
+            <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">Xem lý do đằng sau kết quả</summary>
+            <div className="mt-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-app-accent" aria-hidden="true" />
+                <p className="text-[13px] font-medium text-app-ink">Nên làm trước khi tạo kế hoạch</p>
+              </div>
+              <ol className="grid gap-2">
+                {copy.nextMoves.map((item, index) => (
+                  <li key={item} className="flex gap-3 text-[13px] leading-6 text-app-ink-soft">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-[11px] font-medium text-app-accent">
                       {index + 1}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">{item.label}</p>
-                      <p className="mt-1 text-sm leading-6 text-slate-600">{item.detail}</p>
-                    </div>
-                  </div>
+                    </span>
+                    <span>{item}</span>
+                  </li>
                 ))}
-              </div>
-              </details>
-            </div>
-
-            <details className="rounded-[var(--r-card)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 lg:rounded-[var(--r-card)] lg:p-6">
-            <summary className="cursor-pointer list-none text-sm font-semibold text-slate-900">
-              Xem lý do đằng sau kết quả
-            </summary>
-            <div className="mt-4 stack-stack">
-              <h2 className="text-xl font-bold tracking-normal text-slate-900">{copy.guideTitle}</h2>
-              <p className="text-sm leading-7 text-slate-600">{copy.guideBody}</p>
-              <div className="rounded-[var(--r-tile)] border border-slate-200 bg-slate-50/80 p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-                  Nguyên tắc lập kế hoạch
-                </p>
-                <p className="mt-2 text-sm font-semibold leading-6 text-slate-900">{result.scopeRecommendation}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{result.bottleneck.action}</p>
+              </ol>
+              <div className="rounded-lg border border-app-line bg-app-bg p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nguyên tắc lập kế hoạch</p>
+                <p className="mt-2 text-[13px] font-medium leading-6 text-app-ink">{result.scopeRecommendation}</p>
+                <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">{result.bottleneck.action}</p>
               </div>
             </div>
-            </details>
-          </CollapsibleContent>
-        </Collapsible>
-      </motion.div>
+          </details>
+        </CollapsibleContent>
+      </Collapsible>
 
-      {/* Mobile-only sticky bottom CTA bar — guided path, no bottom-nav conflict.
-          Buttons use aria-hidden so screen readers + RTL queries reach the canonical
-          in-hero buttons; visual users still see this sticky bar on small viewports. */}
-      <div
-        aria-hidden="true"
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-3 shadow-2xl sm:hidden"
-      >
-        <div className="flex gap-2">
-          <Button
-            tabIndex={-1}
-            variant="outline"
-            className="flex-1 bg-white"
-            onClick={onAdjustGoal}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Sửa
-          </Button>
-          <Button glow tabIndex={-1} className="flex-[2]" size="lg" onClick={onContinue}>
-            {result.type === "too_ambitious" ? "Tạo kế hoạch nhỏ hơn" : "Tạo kế hoạch 12 tuần"}
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
+      <div className="mt-8 flex flex-col-reverse gap-3 border-t border-app-line pt-5 sm:flex-row sm:justify-between">
+        <button
+          type="button"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+          onClick={onAdjustGoal}
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Sửa mục tiêu
+        </button>
+        <button
+          type="button"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+          onClick={onContinue}
+        >
+          Tiếp tục → Kế hoạch 12 tuần
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        </button>
       </div>
-    </div>
+    </section>
   );
 }

@@ -1,10 +1,7 @@
-﻿import { Compass, Sparkles, Target } from "lucide-react";
-import { useReducedMotion } from "../components/ui/use-reduced-motion";
-import { useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
-
-import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
-import { useNavigate } from "react-router";
+﻿import { useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
+import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
+
 import {
   type GoalArchetype,
   type PendingSMARTGoal,
@@ -13,14 +10,10 @@ import {
   parsePendingSMARTGoal,
   parseSmartGoal,
 } from "@/lib/smart-goal";
-import type { SmartGoalQualityBridge } from "./FeasibilityCheck/types";
+import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { CoreFlowGateState } from "../components/CoreFlowGateState";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
-import { FeasibilityScaleIllustration } from "../components/illustrations";
 import { PageShell } from "../components/PageShell";
-import { Badge } from "../components/ui/badge";
-import { Card, CardContent } from "../components/ui/card";
-import { Progress } from "../components/ui/progress";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
@@ -30,7 +23,7 @@ import { FeasibilityStepShell } from "./FeasibilityCheck/components/FeasibilityS
 import { ResultStep } from "./FeasibilityCheck/components/ResultStep";
 import { QUESTIONS } from "./FeasibilityCheck/constants";
 import { buildResult, getAnsweredQuestionCount, hasCompleteFeasibilityAnswers } from "./FeasibilityCheck/helpers";
-import type { PendingFeasibilityResult, ResultData } from "./FeasibilityCheck/types";
+import type { PendingFeasibilityResult, ResultData, SmartGoalQualityBridge } from "./FeasibilityCheck/types";
 
 type FeasibilitySetupState = "checking" | "needs_life_balance" | "needs_life_insight" | "needs_smart_goal" | "ready";
 
@@ -74,7 +67,6 @@ function createFlushableDebouncedSave<T>(callback: (value: T) => void, delayMs: 
 
 export function FeasibilityCheck() {
   const navigate = useNavigate();
-  const prefersReducedMotion = useReducedMotion();
   const hasGuardedRef = useRef(false);
   const [setupState, setSetupState] = useState<FeasibilitySetupState>("checking");
   const [currentStep, setCurrentStep] = useState(0);
@@ -150,7 +142,6 @@ export function FeasibilityCheck() {
       return;
     }
 
-    // Restore saved feasibility answers (draft)
     const savedAnswers = localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityAnswers);
     if (savedAnswers) {
       try {
@@ -162,7 +153,7 @@ export function FeasibilityCheck() {
           setLastSavedAt(new Date());
         }
       } catch {
-        // Ignore malformed draft
+        // Ignore malformed draft.
       }
     }
 
@@ -214,7 +205,7 @@ export function FeasibilityCheck() {
       <CoreFlowGateState
         currentStepId="feasibility"
         eyebrow="Kiểm tra"
-        title="Đang chuẩn bị phần kiểm tra tính khả thi"
+        title="Đang chuẩn bị phần kiểm tra tính thực tế"
         description="Đang đọc lại mục tiêu và dữ liệu trọng tâm trước khi bắt đầu."
         loading
       />
@@ -226,12 +217,10 @@ export function FeasibilityCheck() {
       <CoreFlowGateState
         currentStepId="life_balance"
         eyebrow="Kiểm tra"
-        title="Hoàn thành Cân bằng cuộc sống trước khi kiểm tra tính khả thi"
-        description="Phần kiểm tra cần điểm cân bằng thật để biết mục tiêu đang dựa trên khu vực nào. Hãy hoàn thành bước đánh giá trước, rồi quay lại kiểm tra."
-        actionLabel="Bắt đầu Cân bằng cuộc sống"
+        title="Hoàn thành bước cân bằng trước"
+        description="Phần kiểm tra cần điểm cân bằng thật để biết mục tiêu đang dựa trên khu vực nào."
+        actionLabel="Bắt đầu cân bằng"
         onAction={() => navigate("/onboarding")}
-        secondaryActionLabel="Về Trang chính"
-        onSecondaryAction={() => navigate("/")}
       />
     );
   }
@@ -241,12 +230,10 @@ export function FeasibilityCheck() {
       <CoreFlowGateState
         currentStepId="life_insight"
         eyebrow="Kiểm tra"
-        title="Chọn trọng tâm trước khi kiểm tra tính khả thi"
-        description="Bạn đã có dữ liệu cân bằng nhưng chưa có trọng tâm hợp lệ. Chọn một lĩnh vực ưu tiên để phần kiểm tra hiểu đúng bối cảnh mục tiêu."
-        actionLabel="Mở góc nhìn cuộc sống"
+        title="Chọn trọng tâm trước"
+        description="Bạn đã có dữ liệu cân bằng nhưng chưa chọn lĩnh vực ưu tiên cho mục tiêu này."
+        actionLabel="Mở bước chọn trọng tâm"
         onAction={() => navigate("/life-insight")}
-        secondaryActionLabel="Bắt đầu Cân bằng cuộc sống"
-        onSecondaryAction={() => navigate("/onboarding")}
       />
     );
   }
@@ -256,12 +243,10 @@ export function FeasibilityCheck() {
       <CoreFlowGateState
         currentStepId="smart_goal"
         eyebrow="Kiểm tra"
-        title="Viết mục tiêu SMART trước khi kiểm tra tính khả thi"
-        description="Phần kiểm tra cần một mục tiêu đủ rõ về kết quả, chỉ số, mức cam kết và thời hạn. Quay lại bước viết mục tiêu để hoàn thiện bản nháp."
-        actionLabel="Quay lại viết mục tiêu"
+        title="Viết mục tiêu trước"
+        description="Phần kiểm tra cần một mục tiêu đủ rõ về kết quả, chỉ số, mức cam kết và thời hạn."
+        actionLabel="Viết mục tiêu"
         onAction={() => navigate("/smart-goal-setup")}
-        secondaryActionLabel="Mở góc nhìn cuộc sống"
-        onSecondaryAction={() => navigate("/life-insight")}
       />
     );
   }
@@ -273,7 +258,7 @@ export function FeasibilityCheck() {
         eyebrow="Kiểm tra"
         title="Thiếu dữ liệu để kiểm tra"
         description="Chưa đủ thông tin mục tiêu hoặc điểm trọng tâm. Quay lại bước viết mục tiêu để tiếp tục."
-        actionLabel="Quay lại viết mục tiêu"
+        actionLabel="Viết mục tiêu"
         onAction={() => navigate("/smart-goal-setup")}
       />
     );
@@ -281,21 +266,17 @@ export function FeasibilityCheck() {
 
   const currentQuestion = QUESTIONS[currentStep];
   const totalSteps = QUESTIONS.length;
-  const progressPercentage = ((currentStep + 1) / totalSteps) * 100;
   const selectedAnswer = answers[currentQuestion.id];
   const answeredQuestionCount = getAnsweredQuestionCount(answers);
 
   const handleAnswerChange = (value: string) => {
-    setAnswers({ ...answers, [currentQuestion.id]: value });
+    setAnswers((currentAnswers) => ({ ...currentAnswers, [currentQuestion.id]: value }));
   };
 
   const handleBack = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
-      return;
     }
-
-    navigate("/smart-goal-setup");
   };
 
   const handleNext = () => {
@@ -371,90 +352,76 @@ export function FeasibilityCheck() {
     navigate("/smart-goal-setup");
   };
 
+  const autoSave = <AutoSaveIndicator status={isDirty ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} />;
+
   if (result) {
     return (
-      <ResultStep
-        result={result}
-        focusArea={focusArea}
-        pendingGoal={pendingGoal}
-        onContinue={handleContinueToPlan}
-        onAdjustGoal={handleAdjustGoal}
-      />
+      <PageShell maxWidth="md">
+        <div className="space-y-6">
+          <div>
+            <CoreFlowProgress currentStepId="feasibility" onExit={() => navigate("/")} className="mb-2" />
+            <div className="flex justify-end">{autoSave}</div>
+          </div>
+
+          <ResultStep
+            result={result}
+            focusArea={focusArea}
+            pendingGoal={pendingGoal}
+            onContinue={handleContinueToPlan}
+            onAdjustGoal={handleAdjustGoal}
+          />
+        </div>
+      </PageShell>
     );
   }
 
   return (
-    <PageShell maxWidth="xl">
-      <div className={prefersReducedMotion ? "stack-section" : "animate-fade-in-up stack-section"}>
-        <CoreFlowProgress currentStepId="feasibility" onExit={() => navigate("/")} />
-
-        <Card>
-          <CardContent className="relative p-5 sm:p-7 lg:p-8">
-            <FeasibilityScaleIllustration className="pointer-events-none absolute -right-4 bottom-4 hidden w-56 text-[color:var(--tone-shell-primary)] opacity-15 lg:block" />
-
-            <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
-              <div className="stack-stack min-w-0">
-                <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                  <Compass className="h-3.5 w-3.5 text-[color:var(--tone-shell-secondary)]" aria-hidden="true" />
-                  Kiểm tra tính thực tế
-                </p>
-
-                <div className="stack-tight">
-                  <h1 className="max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl">
-                    Mục tiêu này có <span className="text-gradient-vibrant">khả thi</span> với bạn lúc này không?
-                  </h1>
-                  <p className="hidden max-w-2xl text-base leading-relaxed text-muted-foreground sm:block">
-                    Không phải bài kiểm tra chặn lại — giúp bạn biết nên giữ nguyên, chia nhỏ hay điều chỉnh mục tiêu
-                    trước khi vào kế hoạch 12 tuần.
-                  </p>
-                  <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:hidden">
-                    Giúp biết nên giữ nguyên, chia nhỏ hay điều chỉnh mục tiêu trước khi vào kế hoạch 12 tuần.
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="brand">
-                    <Target className="mr-1 h-3.5 w-3.5" />
-                    {getLifeAreaLabel(focusArea)}
-                  </Badge>
-                  <Badge variant="neutral">
-                    <Sparkles className="mr-1 h-3.5 w-3.5" />
-                    Điểm hiện tại: {wheelScore}/10
-                  </Badge>
-                </div>
-
-                <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-                  <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
-                    <span>
-                      Câu hỏi {currentStep + 1} / {totalSteps}
-                    </span>
-                    <span className="font-semibold text-foreground">{Math.round(progressPercentage)}%</span>
-                  </div>
-                  <Progress value={progressPercentage} className="mt-2 h-2" />
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                    Mục tiêu đã viết
-                  </p>
-                  <p className="mt-2 text-base font-semibold leading-6 text-foreground">{pendingGoal.specific}</p>
-                </div>
-                <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                    Khung thời gian
-                  </p>
-                  <p className="mt-2 text-sm font-semibold text-foreground">{pendingGoal.timeBound}</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="flex justify-end">
-          <AutoSaveIndicator status={isDirty ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} />
+    <PageShell maxWidth="md">
+      <div className="space-y-6">
+        <div>
+          <CoreFlowProgress currentStepId="feasibility" onExit={() => navigate("/")} className="mb-2" />
+          <div className="flex justify-end">{autoSave}</div>
         </div>
+
+        <section aria-labelledby="feasibility-title">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+            {getLifeAreaLabel(focusArea)} · Kiểm tra tính thực tế
+          </p>
+          <h1
+            id="feasibility-title"
+            className="mt-3 font-serif text-[30px] font-medium leading-tight tracking-[-0.02em] text-app-ink sm:text-[34px]"
+          >
+            Mục tiêu của bạn đã đủ thực tế chưa?
+          </h1>
+          <p className="mt-2 max-w-2xl text-[14px] leading-6 text-app-ink-soft">
+            Đo mức sẵn sàng trước khi biến mục tiêu thành kế hoạch 12 tuần.
+          </p>
+
+          <div className="mt-5 rounded-card border border-app-line bg-app-surface p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                  Mục tiêu đang kiểm tra
+                </p>
+                <p className="mt-1 line-clamp-2 text-[14px] font-medium leading-6 text-app-ink">
+                  {pendingGoal.specific}
+                </p>
+              </div>
+              <Link
+                to="/smart-goal-setup"
+                className="shrink-0 text-[12px] font-medium text-app-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              >
+                Sửa mục tiêu
+              </Link>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-app-ink-muted">
+              <span className="rounded-full bg-app-accent-soft px-2.5 py-1 font-medium text-app-accent">
+                {getLifeAreaLabel(focusArea)}
+              </span>
+              <span className="rounded-full border border-app-line px-2.5 py-1">Điểm hiện tại: {wheelScore}/10</span>
+            </div>
+          </div>
+        </section>
 
         <FeasibilityStepShell
           currentQuestion={currentQuestion}

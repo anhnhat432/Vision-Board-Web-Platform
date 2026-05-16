@@ -247,8 +247,8 @@ describe("Feasibility ResultStep — mobile detail disclosure", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { level: 1, name: "Đủ thực tế để bắt đầu" })).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: /Tạo kế hoạch 12 tuần/i }).length).toBeGreaterThan(0);
+    expect(screen.getByRole("heading", { level: 2, name: "Đủ thực tế để bắt đầu" })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Tiếp tục → Kế hoạch 12 tuần" }).length).toBeGreaterThan(0);
     const detailsTrigger = screen.getByRole("button", { name: "Mở chi tiết" });
     expect(detailsTrigger).toHaveAttribute("aria-expanded", "false");
     expect(screen.getAllByRole("button", { name: "Mở chi tiết" })).toHaveLength(1);
