@@ -849,104 +849,9 @@
     --tone-orb-c: rgba(20, 184, 166, 0.06);
   }
 
-  .app-shell::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -2;
-    pointer-events: none;
-    background:
-      radial-gradient(
-        ellipse 60% 40% at 18% 12%,
-        var(--tone-bg-left) 0%,
-        transparent 60%
-      ),
-      radial-gradient(
-        ellipse 50% 40% at 82% 12%,
-        var(--tone-bg-right) 0%,
-        transparent 60%
-      );
-  }
-
+  .app-shell::before,
   .app-shell::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background-image:
-      radial-gradient(
-        circle 620px at 10% 18%,
-        var(--tone-orb-a, var(--tone-bg-left, transparent)) 0%,
-        transparent 70%
-      ),
-      radial-gradient(
-        circle 540px at 92% 8%,
-        var(--tone-orb-b, var(--tone-bg-right, transparent)) 0%,
-        transparent 70%
-      ),
-      radial-gradient(
-        circle 480px at 92% 78%,
-        var(--tone-orb-c, var(--tone-bg-bottom, transparent)) 0%,
-        transparent 70%
-      );
-    animation: ambient-drift 32s ease-in-out infinite alternate;
-  }
-
-  @keyframes ambient-drift {
-    0% {
-      transform: translate3d(0, 0, 0) scale(1);
-      opacity: 0.85;
-    }
-
-    50% {
-      transform: translate3d(2.5%, -1.5%, 0) scale(1.05);
-      opacity: 1;
-    }
-
-    100% {
-      transform: translate3d(-1.5%, 2%, 0) scale(0.98);
-      opacity: 0.92;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .app-shell::after {
-      animation: none;
-    }
-  }
-
-  .dark .app-shell::before {
-    background:
-      radial-gradient(
-        ellipse 60% 40% at 18% 12%,
-        var(--tone-bg-left) 0%,
-        transparent 60%
-      ),
-      radial-gradient(
-        ellipse 50% 40% at 82% 12%,
-        var(--tone-bg-right) 0%,
-        transparent 60%
-      );
-  }
-
-  .dark .app-shell::after {
-    background-image:
-      radial-gradient(
-        circle 620px at 10% 18%,
-        var(--tone-orb-a, var(--tone-bg-left, transparent)) 0%,
-        transparent 70%
-      ),
-      radial-gradient(
-        circle 540px at 92% 8%,
-        var(--tone-orb-b, var(--tone-bg-right, transparent)) 0%,
-        transparent 70%
-      ),
-      radial-gradient(
-        circle 480px at 92% 78%,
-        var(--tone-orb-c, var(--tone-bg-bottom, transparent)) 0%,
-        transparent 70%
-      );
+    content: none;
   }
 
   /* .surface-aurora removed — superseded by simple Card + token shadows. */
@@ -2197,15 +2102,11 @@
     gap: 0.2rem;
     min-width: 0;
     width: 100%;
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(15, 23, 42, 0.06);
+    background: var(--app-surface);
+    border: 1px solid var(--app-line);
     border-bottom: none;
-    box-shadow:
-      0 -1px 0 rgba(15, 23, 42, 0.04),
-      0 -10px 30px -12px rgba(15, 23, 42, 0.12);
-    backdrop-filter: blur(20px) saturate(1.4);
-    -webkit-backdrop-filter: blur(20px) saturate(1.4);
-    border-radius: 1.25rem 1.25rem 0 0;
+    box-shadow: 0 -1px 0 rgba(26, 26, 26, 0.04);
+    border-radius: 1rem 1rem 0 0;
     padding: 0.55rem 0.5rem calc(0.45rem + env(safe-area-inset-bottom, 0));
   }
 
@@ -2235,7 +2136,7 @@
   }
 
   .bottom-nav-item[aria-current="page"] {
-    background: rgba(15, 23, 42, 0.04);
+    background: var(--app-accent-soft);
   }
 
   .bottom-nav-icon {
@@ -2249,13 +2150,7 @@
   }
 
   .bottom-nav-item[aria-current="page"] .bottom-nav-icon {
-    background: linear-gradient(
-      135deg,
-      var(--tone-shell-primary) 0%,
-      var(--tone-shell-secondary) 58%,
-      var(--tone-shell-tertiary) 100%
-    );
-    box-shadow: 0 6px 16px -4px var(--tone-shell-shadow);
+    background: var(--app-accent);
   }
 
   .bottom-nav-label {
@@ -2273,14 +2168,7 @@
   }
 
   .nav-label-active {
-    background: linear-gradient(
-      135deg,
-      var(--tone-shell-primary),
-      var(--tone-shell-secondary)
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--app-accent);
   }
 
   /* ── Page main bottom safe area for mobile nav ──────── */
@@ -2723,15 +2611,13 @@
   }
 
   .dark .bottom-nav-inner {
-    background: rgba(10, 10, 10, 0.92);
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow:
-      0 -1px 0 rgba(255, 255, 255, 0.04),
-      0 -10px 30px -12px rgba(0, 0, 0, 0.6);
+    background: var(--app-surface);
+    border-color: var(--app-line);
+    box-shadow: 0 -1px 0 rgba(26, 26, 26, 0.04);
   }
 
   .dark .bottom-nav-item[aria-current="page"] {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--app-accent-soft);
   }
 
   /* ── Dark mode global utility overrides ─────────────── */

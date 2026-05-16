@@ -18,7 +18,7 @@ exports[`PrimaryActionCard > renders the default hero shell with tokenized card 
       Việc quan trọng nhất
     </h3>
     <p
-      class="text-[13px] leading-6 text-muted-foreground tracking-tight"
+      class="text-sm leading-6 text-muted-foreground tracking-tight"
       data-slot="card-description"
     >
       Chỉ cần xong việc này là hôm nay đã đủ.

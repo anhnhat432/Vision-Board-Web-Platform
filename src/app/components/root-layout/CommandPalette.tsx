@@ -91,7 +91,9 @@ export function CommandPalette({
   const filtered = useMemo(() => {
     const q = normalize(query.trim());
     if (!q) return actions;
-    return actions.filter((action) => normalize(action.label).includes(q) || normalize(action.description ?? "").includes(q));
+    return actions.filter(
+      (action) => normalize(action.label).includes(q) || normalize(action.description ?? "").includes(q),
+    );
   }, [actions, query]);
 
   useEffect(() => {
@@ -127,10 +129,10 @@ export function CommandPalette({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-[560px]">
+      <DialogContent className="gap-0 overflow-hidden border-app-line bg-app-surface p-0 sm:max-w-[560px]">
         <DialogTitle className="sr-only">Command Palette</DialogTitle>
-        <div className="flex items-center gap-2 border-b border-[color:var(--border)] px-3.5 py-2.5">
-          <Search className="h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center gap-2 border-b border-app-line px-3.5 py-2.5">
+          <Search className="h-4 w-4 text-app-ink-muted" />
           <input
             ref={inputRef}
             value={query}
@@ -140,28 +142,21 @@ export function CommandPalette({
             }}
             onKeyDown={onKeyDown}
             placeholder="Tìm trang hoặc mục tiêu…"
-            className="flex-1 bg-transparent text-[14px] tracking-tight text-foreground placeholder:text-muted-foreground focus:outline-none"
+            className="flex-1 bg-transparent text-[14px] tracking-tight text-app-ink placeholder:text-app-ink-muted focus:outline-none"
             aria-label="Tìm kiếm command palette"
           />
-          <kbd className="hidden rounded border border-[color:var(--border)] bg-[color:var(--muted)] px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground sm:inline-block">
+          <kbd className="hidden rounded border border-app-line bg-app-bg px-1.5 py-0.5 text-[11px] font-medium text-app-ink-muted sm:inline-block">
             ESC
           </kbd>
         </div>
 
         <div ref={listRef} className="max-h-[60vh] overflow-y-auto p-1.5">
           {filtered.length === 0 ? (
-            <div className="px-3 py-8 text-center text-sm text-muted-foreground">
-              Không có kết quả phù hợp.
-            </div>
+            <div className="px-3 py-8 text-center text-sm text-app-ink-muted">Không có kết quả phù hợp.</div>
           ) : (
             filtered.map((action, index) => {
               const isActive = index === highlight;
-              const Icon =
-                action.kind === "nav"
-                  ? action.icon
-                  : action.kind === "twelve"
-                    ? Sparkles
-                    : Target;
+              const Icon = action.kind === "nav" ? action.icon : action.kind === "twelve" ? Sparkles : Target;
               return (
                 <button
                   key={action.key}
@@ -169,37 +164,31 @@ export function CommandPalette({
                   data-cmd-index={index}
                   onMouseEnter={() => setHighlight(index)}
                   onClick={() => runAction(action)}
-                  className={`flex w-full items-center gap-3 rounded-[calc(var(--r-control)-2px)] px-2.5 py-2 text-left text-sm transition-colors ${
-                    isActive
-                      ? "bg-[color:var(--muted)] text-foreground"
-                      : "text-foreground/85 hover:bg-[color:var(--muted)]"
+                  className={`group flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-left text-sm transition-colors duration-150 ${
+                    isActive ? "bg-app-accent-soft text-app-accent" : "text-app-ink hover:bg-app-bg"
                   }`}
                 >
                   <span
-                    className={`flex size-7 shrink-0 items-center justify-center rounded-[var(--r-control)] ${
-                      isActive
-                        ? "bg-card text-[color:var(--tone-shell-primary)] shadow-[var(--shadow-1)]"
-                        : "bg-[color:var(--muted)] text-muted-foreground"
+                    className={`flex size-7 shrink-0 items-center justify-center rounded-lg ${
+                      isActive ? "bg-app-surface text-app-accent" : "bg-app-bg text-app-ink-muted"
                     }`}
                     aria-hidden="true"
                   >
                     <Icon className="h-3.5 w-3.5" />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate font-semibold">{action.label}</span>
+                    <span className="block truncate font-medium">{action.label}</span>
                     {action.description ? (
-                      <span className="block truncate text-xs text-muted-foreground">
-                        {action.description}
-                      </span>
+                      <span className="block truncate text-xs text-app-ink-muted">{action.description}</span>
                     ) : null}
                   </span>
                   {isActive ? (
-                    <span className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground">
+                    <span className="flex items-center gap-1 text-[11px] font-medium text-app-ink-muted">
                       Enter
                       <CornerDownLeft className="h-3 w-3" />
                     </span>
                   ) : (
-                    <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/0 group-hover:text-muted-foreground" />
+                    <ArrowRight className="h-3.5 w-3.5 text-transparent group-hover:text-app-ink-muted" />
                   )}
                 </button>
               );
@@ -207,15 +196,13 @@ export function CommandPalette({
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-2 border-t border-[color:var(--border)] bg-[color:var(--muted)] px-3.5 py-2 text-xs text-muted-foreground">
+        <div className="flex items-center justify-between gap-2 border-t border-app-line bg-app-bg px-3.5 py-2 text-xs text-app-ink-muted">
           <span className="inline-flex items-center gap-2">
-            <kbd className="rounded border border-[color:var(--border)] bg-card px-1.5 py-0.5 font-semibold">↑</kbd>
-            <kbd className="rounded border border-[color:var(--border)] bg-card px-1.5 py-0.5 font-semibold">↓</kbd>
+            <kbd className="rounded border border-app-line bg-app-surface px-1.5 py-0.5 font-medium">↑</kbd>
+            <kbd className="rounded border border-app-line bg-app-surface px-1.5 py-0.5 font-medium">↓</kbd>
             điều hướng
           </span>
-          <span className="inline-flex items-center gap-2">
-            {filtered.length} kết quả
-          </span>
+          <span className="inline-flex items-center gap-2">{filtered.length} kết quả</span>
         </div>
       </DialogContent>
     </Dialog>

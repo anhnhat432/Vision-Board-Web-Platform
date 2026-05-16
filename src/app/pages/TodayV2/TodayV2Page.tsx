@@ -270,59 +270,14 @@ function buildTodayV2ViewModel(userData: UserData | null, today: Date): TodayV2V
   };
 }
 
-function TodayV2TopBar({ currentWeek }: { currentWeek: number }) {
-  const navItems = [
-    { label: "Today", href: "/today-v2", active: true },
-    { label: `Week ${currentWeek}`, href: "/12-week-system?tab=week", active: false },
-    { label: "12-Week Plan", href: "/12-week-system", active: false },
-    { label: "Reflect", href: "/journal", active: false },
-  ];
-
-  return (
-    <header className="sticky top-3 z-30 mx-auto max-w-6xl px-6">
-      <div className="flex h-14 items-center justify-between gap-4 rounded-card border border-app-line bg-app-surface/95 px-3 shadow-[0_1px_2px_rgba(26,26,26,0.04)] backdrop-blur sm:px-4">
-        <Link to="/" className="flex min-w-0 items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-app-accent text-[13px] font-semibold text-white">
-            V
-          </span>
-          <span className="truncate text-[15px] font-semibold text-app-ink">Vision Board</span>
-        </Link>
-
-        <nav className="hidden items-center gap-6 md:flex" aria-label="Today preview">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              aria-current={item.active ? "page" : undefined}
-              className={`relative py-2 text-[14px] font-medium transition-colors duration-150 ${
-                item.active ? "text-app-ink" : "text-app-ink-muted hover:text-app-ink"
-              }`}
-            >
-              {item.label}
-              {item.active ? <span className="absolute inset-x-0 -bottom-0.5 h-0.5 rounded-full bg-app-accent" /> : null}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-2">
-          <span className="rounded-full bg-app-accent-soft px-3 py-1 text-[12px] font-medium text-app-accent md:hidden">
-            Today · Tuần {currentWeek}
-          </span>
-          <div className="flex size-8 items-center justify-center rounded-full bg-app-accent-soft text-[12px] font-semibold text-app-accent">
-            VB
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-}
-
 function TodayV2Hero({ viewModel }: { viewModel: TodayV2ViewModel }) {
   return (
     <section className="grid gap-6 md:grid-cols-[minmax(0,1fr)_260px] md:items-end">
       <div>
         <div className="flex flex-wrap items-center gap-2">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">{viewModel.dateCaption}</p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+            {viewModel.dateCaption}
+          </p>
           <span className="rounded-full bg-app-accent-soft px-3 py-1 text-[12px] font-medium text-app-accent">
             Tuần {viewModel.currentWeek} / {viewModel.totalWeeks}
           </span>
@@ -376,7 +331,10 @@ function TodayTasksCard({
   onTaskToggle: (taskId: string, completed: boolean) => void;
 }) {
   return (
-    <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-6" aria-labelledby="today-v2-tasks-title">
+    <section
+      className="rounded-card border border-app-line bg-app-surface p-5 md:p-6"
+      aria-labelledby="today-v2-tasks-title"
+    >
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 id="today-v2-tasks-title" className="text-[15px] font-semibold text-app-ink">
@@ -411,7 +369,9 @@ function TodayTasksCard({
               }}
             />
             <div className="min-w-0 flex-1">
-              <p className={`text-[14px] font-medium leading-5 ${task.completed ? "text-app-ink-muted line-through" : "text-app-ink"}`}>
+              <p
+                className={`text-[14px] font-medium leading-5 ${task.completed ? "text-app-ink-muted line-through" : "text-app-ink"}`}
+              >
                 {task.title}
               </p>
               <p className="mt-0.5 text-[12px] text-app-ink-muted">
@@ -439,13 +399,18 @@ function getBarOpacity(percent: number): number {
 function WeekProgressDay({ day }: { day: WeekDayProgress }) {
   const barContent = (() => {
     if (day.isFuture) {
-      return <div className="h-12 w-5 rounded-md border border-dashed border-app-line bg-transparent" aria-hidden="true" />;
+      return (
+        <div className="h-12 w-5 rounded-md border border-dashed border-app-line bg-transparent" aria-hidden="true" />
+      );
     }
 
     if (day.isToday) {
       const fillHeight = day.total === 0 ? 18 : clamp(day.percent, 18, 100);
       return (
-        <div className="flex h-12 w-5 items-end rounded-md bg-app-accent-soft ring-2 ring-app-accent" aria-hidden="true">
+        <div
+          className="flex h-12 w-5 items-end rounded-md bg-app-accent-soft ring-2 ring-app-accent"
+          aria-hidden="true"
+        >
           <div className="w-full rounded-md bg-app-accent" style={{ height: `${fillHeight}%` }} />
         </div>
       );
@@ -483,7 +448,10 @@ function WeekProgressCard({
   days: WeekDayProgress[];
 }) {
   return (
-    <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-6" aria-labelledby="today-v2-week-title">
+    <section
+      className="rounded-card border border-app-line bg-app-surface p-5 md:p-6"
+      aria-labelledby="today-v2-week-title"
+    >
       <div>
         <h2 id="today-v2-week-title" className="text-[15px] font-semibold text-app-ink">
           Tuần {currentWeek} · Tiến độ
@@ -504,7 +472,10 @@ function WeekProgressCard({
 
 function ReflectionPrompt() {
   return (
-    <section className="rounded-card border border-[#F3D9CC] bg-app-warm-soft p-5 md:p-6" aria-labelledby="today-v2-reflection-title">
+    <section
+      className="rounded-card border border-[#F3D9CC] bg-app-warm-soft p-5 md:p-6"
+      aria-labelledby="today-v2-reflection-title"
+    >
       <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-[12px] font-medium text-app-warm ring-1 ring-[#F3D9CC]">
         Phản tư cuối ngày
       </span>
@@ -523,7 +494,10 @@ function ReflectionPrompt() {
 
 function LifeBalanceCard({ rows }: { rows: LifeBalanceRow[] }) {
   return (
-    <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-6" aria-labelledby="today-v2-balance-title">
+    <section
+      className="rounded-card border border-app-line bg-app-surface p-5 md:p-6"
+      aria-labelledby="today-v2-balance-title"
+    >
       <div>
         <h2 id="today-v2-balance-title" className="text-[15px] font-semibold text-app-ink">
           Cân bằng cuộc sống
@@ -583,8 +557,6 @@ export function TodayV2Page() {
 
   return (
     <div className="min-h-screen bg-app-bg text-app-ink">
-      <TodayV2TopBar currentWeek={viewModel.currentWeek} />
-
       <div className="mx-auto max-w-6xl px-4 pb-8 pt-8 sm:px-6 lg:px-0">
         <TodayV2Hero viewModel={viewModel} />
 

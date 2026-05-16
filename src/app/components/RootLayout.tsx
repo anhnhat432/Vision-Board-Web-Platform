@@ -62,7 +62,6 @@ import {
 } from "@/services/syncService";
 import { BACKEND_PLAN_HYDRATION_EVENT_NAME, useBackendPlanHydration } from "../hooks/useBackendPlanHydration";
 import { useTheme } from "../hooks/useTheme";
-import { FooterAuroraIllustration } from "./illustrations";
 import { MotionPageTransition } from "./motion";
 import { MotivationalReminder } from "./MotivationalReminder";
 import { NewUserGuideDialog } from "./NewUserGuide";
@@ -87,7 +86,12 @@ import {
   WARM_PREFETCH_ROUTE_PATHS,
 } from "./root-layout/navConfig";
 import { GUIDED_PATHS, getRouteMeta, getRouteTone as getFallbackRouteTone } from "./root-layout/routeMeta";
-import { buildLoginRedirect, isAuthProtectedPath, isPublicCheckoutPath, useWorkspaceGate } from "./root-layout/useWorkspaceGate";
+import {
+  buildLoginRedirect,
+  isAuthProtectedPath,
+  isPublicCheckoutPath,
+  useWorkspaceGate,
+} from "./root-layout/useWorkspaceGate";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import {
@@ -503,18 +507,6 @@ export function RootLayout() {
   const isDesktopMoreNavActive = desktopMoreOpen || secondaryNavItems.some((item) => isActive(item.path));
   const isMoreNavActive = mobileMenuOpen || secondaryNavItems.some((item) => isActive(item.path));
   const routeTone = getRouteTone(location.pathname);
-  const shellGradientStyle = {
-    backgroundImage:
-      "linear-gradient(135deg, var(--tone-shell-primary) 0%, var(--tone-shell-secondary) 58%, var(--tone-shell-tertiary) 100%)",
-  };
-  const shellBadgeStyle = {
-    ...shellGradientStyle,
-    boxShadow: "0 14px 28px -20px var(--tone-shell-shadow-strong)",
-  };
-  const activeNavStyle = {
-    ...shellGradientStyle,
-    boxShadow: "0 14px 30px -18px var(--tone-shell-shadow)",
-  };
   const accountLabel = userProfile?.displayName || user?.displayName || user?.email || "Khách";
   const accountEmail = user?.email || userProfile?.email || "";
   const currentAccountPlanCode = getCurrentPlan(guideUserData);
@@ -522,13 +514,11 @@ export function RootLayout() {
     currentAccountPlanCode === "PRO" ? "Pro" : currentAccountPlanCode === "PLUS" ? "Plus" : "Miễn phí";
   const accountAvatarLabel = (accountLabel || accountEmail || "A").trim().slice(0, 1).toUpperCase();
   const accountStatus = userProfileError ? "Lỗi hồ sơ" : accountEmail || "Tài khoản đã đăng nhập";
-  const commandPaletteGoals: CommandPaletteGoal[] = (guideUserData.goals ?? [])
-    .slice(0, 12)
-    .map((goal) => ({
-      id: goal.id,
-      title: goal.title || "Mục tiêu chưa đặt tên",
-      hasTwelveWeek: Boolean(goal.twelveWeekSystem),
-    }));
+  const commandPaletteGoals: CommandPaletteGoal[] = (guideUserData.goals ?? []).slice(0, 12).map((goal) => ({
+    id: goal.id,
+    title: goal.title || "Mục tiêu chưa đặt tên",
+    hasTwelveWeek: Boolean(goal.twelveWeekSystem),
+  }));
   const canRetryUserProfile = Boolean(user) && !userProfileLoading && (!userProfile || Boolean(userProfileError));
 
   const handleSignOut = async () => {
@@ -552,15 +542,15 @@ export function RootLayout() {
             type="button"
             className={
               isMobile
-                ? "flex size-10 items-center justify-center rounded-[var(--r-control)] border border-[color:var(--border)] bg-card text-foreground transition-colors hover:bg-[color:var(--muted)]"
-                : "flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] bg-foreground text-background transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                ? "flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                : "flex h-8 w-8 items-center justify-center rounded-full bg-app-accent text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             }
             aria-label={triggerLabel}
             title={accountEmail || accountLabel}
           >
             <span
-              className={`flex shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-foreground text-xs font-bold uppercase text-background ${
-                isMobile ? "h-7 w-7" : "h-8 w-8"
+              className={`flex shrink-0 items-center justify-center rounded-full text-xs font-semibold uppercase ${
+                isMobile ? "h-7 w-7 bg-app-accent-soft text-app-accent" : "h-8 w-8 bg-app-accent text-white"
               }`}
               aria-hidden="true"
             >
@@ -572,18 +562,16 @@ export function RootLayout() {
           align="end"
           sideOffset={10}
           aria-label="Tài khoản"
-          className="w-72 p-1.5"
+          className="w-72 rounded-card border border-app-line bg-app-surface p-1.5 shadow-[0_4px_12px_rgba(15,23,42,0.06)]"
         >
           <DropdownMenuLabel className="px-2.5 py-3 normal-case tracking-normal">
             <div className="flex items-start gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-foreground text-xs font-bold uppercase text-background">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-app-accent text-xs font-semibold uppercase text-white">
                 {accountAvatarLabel}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                  Tài khoản
-                </p>
-                <p className="mt-1 truncate text-[14px] font-semibold tracking-tight text-foreground">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-app-ink-muted">Tài khoản</p>
+                <p className="mt-1 truncate text-[14px] font-medium tracking-tight text-app-ink">
                   {accountEmail || accountLabel}
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -593,19 +581,26 @@ export function RootLayout() {
               </div>
             </div>
           </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => navigateAppRoute("/settings")}>
-            <Settings2 className="h-4 w-4" />
+          <DropdownMenuSeparator className="bg-app-line" />
+          <DropdownMenuItem
+            onSelect={() => navigateAppRoute("/settings")}
+            className="text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink"
+          >
+            <Settings2 className="h-4 w-4 text-app-ink-muted" />
             Cài đặt
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => navigateAppRoute("/billing/plan")}>
-            <CreditCard className="h-4 w-4" />
+          <DropdownMenuItem
+            onSelect={() => navigateAppRoute("/billing/plan")}
+            className="text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink"
+          >
+            <CreditCard className="h-4 w-4 text-app-ink-muted" />
             Quản lý gói
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="bg-app-line" />
           <DropdownMenuItem
             variant="destructive"
             disabled={isSigningOut}
+            className="text-[color:var(--color-danger-fg)] focus:bg-[color:var(--color-danger-bg)]"
             onSelect={() => {
               void handleSignOut();
             }}
@@ -881,7 +876,7 @@ export function RootLayout() {
   if (GUIDED_PATHS.has(location.pathname)) {
     return (
       <AutoCloudSyncProvider>
-        <div className="app-shell min-h-screen" data-route-tone={routeTone}>
+        <div className="app-shell min-h-screen bg-app-bg" data-route-tone={routeTone}>
           <a href="#main-content" className="skip-to-content">
             Bỏ qua điều hướng
           </a>
@@ -896,7 +891,7 @@ export function RootLayout() {
               Bản demo · Dữ liệu lưu trên trình duyệt này.
             </div>
           ) : null}
-          <main id="main-content" className="relative z-10" aria-label="Nội dung trang">
+          <main id="main-content" className="relative" aria-label="Nội dung trang">
             {pageTransitionContent}
             {localDataMigrationPrompt}
             <Toaster />
@@ -948,418 +943,405 @@ export function RootLayout() {
               void handleSignOut();
             }}
             isSigningOut={isSigningOut}
-            shellBadgeStyle={shellBadgeStyle}
+            shellBadgeStyle={{}}
           />
         ) : null}
 
-        <div className={showSidebar ? "lg:pl-[272px]" : undefined}>
-        <header
-          className={`sticky top-0 z-40 px-4 pt-2 sm:top-3 sm:px-6 sm:pt-0 lg:px-8 ${
-            showSidebar ? "lg:hidden" : ""
-          }`}
-        >
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-[var(--r-soft)] border border-[color:var(--border)] bg-[color-mix(in_srgb,var(--card)_94%,transparent)] px-3 py-2 shadow-[0_1px_2px_rgba(15,23,42,0.04)] backdrop-blur-xl supports-[backdrop-filter]:bg-[color-mix(in_srgb,var(--card)_82%,transparent)] sm:px-4 sm:py-2.5">
-            <div className="flex w-full items-center justify-between gap-3">
-              <div className="flex min-w-0 shrink-0 items-center gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => navigateAppRoute("/")}
-                  className="flex shrink-0 items-center gap-2.5 rounded-[var(--r-control)] text-left transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
-                  aria-label="Về trang chủ Dear Our Future"
-                >
-                  <div
-                    className="flex size-9 items-center justify-center rounded-[var(--r-control)] shadow-[0_2px_8px_-4px_var(--tone-shell-shadow)]"
-                    style={shellBadgeStyle}
-                  >
-                    <Sparkles className="h-4 w-4 text-white" strokeWidth={2.4} />
-                  </div>
-                  <div className="min-w-0">
-                    <span className="block truncate text-[14px] font-bold tracking-[-0.012em] text-foreground">
-                      Dear Our Future
-                    </span>
-                  </div>
-                </button>
-              </div>
-
-              <nav className="hidden flex-1 items-center justify-center md:flex">
-                <div className="flex flex-wrap items-center gap-0.5 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-1 py-1">
-                  {primaryNavItems.map((item) => {
-                    const Icon = item.icon;
-                    const active = isActive(item.path);
-
-                    return (
-                      <Button
-                        key={item.path}
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigateAppRoute(item.path)}
-                        onPointerEnter={() => handlePrefetch(item.path)}
-                        aria-current={active ? "page" : undefined}
-                        title={item.label}
-                        className={`h-8 shrink-0 rounded-[var(--r-pill)] px-3 text-sm font-semibold tracking-tight transition-colors duration-150 ${
-                          active
-                            ? "text-white hover:text-white"
-                            : "bg-transparent text-muted-foreground shadow-none hover:bg-card hover:text-foreground"
-                        }`}
-                        style={active ? activeNavStyle : undefined}
-                      >
-                        <Icon className="h-3.5 w-3.5" strokeWidth={active ? 2.2 : 1.8} />
-                        <span>{item.compactLabel ?? item.label}</span>
-                      </Button>
-                    );
-                  })}
-
-                  {secondaryNavItems.length > 0 ? (
-                    <>
-                      <div className="mx-1 h-4 w-px shrink-0 bg-[color:var(--border)]" />
-
-                      <div ref={desktopMoreRef} className="relative">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          aria-current={secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined}
-                          aria-expanded={desktopMoreOpen}
-                          aria-haspopup="menu"
-                          className={`h-8 shrink-0 rounded-[var(--r-pill)] px-3 text-sm font-semibold tracking-tight transition-colors duration-150 ${
-                            isDesktopMoreNavActive
-                              ? "text-white hover:text-white"
-                              : "bg-transparent text-muted-foreground shadow-none hover:bg-card hover:text-foreground"
-                          }`}
-                          style={isDesktopMoreNavActive ? activeNavStyle : undefined}
-                          onClick={() => setDesktopMoreOpen((open) => !open)}
-                        >
-                          <Menu className="h-3.5 w-3.5" />
-                          <span>Khác</span>
-                          <ChevronDown
-                            className={`h-3.5 w-3.5 transition-transform ${desktopMoreOpen ? "rotate-180" : ""}`}
-                          />
-                        </Button>
-
-                        {desktopMoreOpen ? (
-                          <div
-                            role="menu"
-                            aria-label="Mục khác"
-                            className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-[var(--r-soft)] border border-[color:var(--border)] bg-popover p-1.5 shadow-[0_4px_8px_-2px_rgba(15,23,42,0.06),0_16px_32px_-12px_rgba(15,23,42,0.16)]"
-                          >
-                            <div className="px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-                              Mục khác
-                            </div>
-                            {secondaryNavItems.map((item) => {
-                              const Icon = item.icon;
-                              const active = isActive(item.path);
-
-                              return (
-                                <button
-                                  key={item.path}
-                                  type="button"
-                                  role="menuitem"
-                                  aria-current={active ? "page" : undefined}
-                                  onPointerEnter={() => handlePrefetch(item.path)}
-                                  onClick={() => {
-                                    setDesktopMoreOpen(false);
-                                    navigateAppRoute(item.path);
-                                  }}
-                                  className={`my-0.5 flex w-full cursor-pointer items-center gap-2.5 rounded-[calc(var(--r-control)-3px)] px-2.5 py-2 text-left text-sm font-medium tracking-tight outline-none transition-colors ${
-                                    active
-                                      ? "text-white focus:text-white"
-                                      : "text-foreground hover:bg-[color:var(--muted)] focus:bg-[color:var(--muted)]"
-                                  }`}
-                                  style={active ? activeNavStyle : undefined}
-                                >
-                                  <Icon className={`h-4 w-4 shrink-0 ${active ? "text-white" : "text-muted-foreground"}`} />
-                                  <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        ) : null}
-                      </div>
-                    </>
-                  ) : null}
-                </div>
-              </nav>
-
-              <div className="hidden shrink-0 items-center gap-1.5 md:flex">
-                {user ? renderAccountMenu("desktop") : null}
-                {!user ? (
-                  <>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleAuthNavigate("signin")}
-                      className="h-8 rounded-[var(--r-pill)] px-3 text-sm"
-                    >
-                      Đăng nhập
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleAuthNavigate("signup")}
-                      className="h-8 rounded-[var(--r-pill)] px-3.5 text-sm"
-                    >
-                      Đăng ký
-                    </Button>
-                  </>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                  className="flex h-8 w-8 items-center justify-center rounded-[var(--r-pill)] text-muted-foreground transition-colors hover:bg-[color:var(--muted)] hover:text-foreground"
-                  aria-label={resolvedTheme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
-                >
-                  {resolvedTheme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
-                </button>
-              </div>
-
-              <div className="md:hidden flex min-w-0 items-center gap-1.5">
-                <span className="hidden max-w-[120px] truncate text-sm font-semibold tracking-tight text-foreground sm:inline">
-                  {pageMeta.label}
-                </span>
-                <button
-                  type="button"
-                  className="hidden size-10 items-center justify-center rounded-[var(--r-control)] border border-[color:var(--border)] bg-card text-foreground transition-colors hover:bg-[color:var(--muted)] sm:flex"
-                  onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                  aria-label={resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
-                >
-                  {resolvedTheme === "dark" ? (
-                    <Sun className="h-[1.05rem] w-[1.05rem]" />
-                  ) : (
-                    <Moon className="h-[1.05rem] w-[1.05rem]" />
-                  )}
-                </button>
-                {isSignedOutVisitor ? (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="h-10 rounded-[var(--r-control)] px-3 text-sm"
-                    onClick={() => handleAuthNavigate("signup")}
-                  >
-                    Đăng ký
-                  </Button>
-                ) : user ? (
-                  renderAccountMenu("mobile")
-                ) : (
+        <div className={showSidebar ? "flex-1 lg:pl-[272px]" : "flex-1"}>
+          <header
+            className={`sticky top-0 z-40 border-b border-app-line bg-app-bg/95 backdrop-blur-sm ${
+              showSidebar ? "lg:hidden" : ""
+            }`}
+          >
+            <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+              <div className="flex w-full items-center justify-between gap-3">
+                <div className="flex min-w-0 shrink-0 items-center gap-2.5">
                   <button
                     type="button"
-                    className="flex size-10 items-center justify-center rounded-[var(--r-control)] border border-[color:var(--border)] bg-card text-foreground transition-colors hover:bg-[color:var(--muted)]"
-                    onClick={() => {
-                      setGuideUserData(getUserData());
-                      setIsGuideOpen(true);
-                    }}
-                    aria-label="Mở hướng dẫn sử dụng"
+                    onClick={() => navigateAppRoute("/")}
+                    className="flex shrink-0 items-center gap-2.5 rounded-md text-left transition-opacity duration-150 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    aria-label="Về trang chủ Dear Our Future"
                   >
-                    <Compass className="h-[1.05rem] w-[1.05rem]" />
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className="flex size-10 items-center justify-center rounded-[var(--r-control)] border border-[color:var(--border)] bg-card text-foreground transition-colors hover:bg-[color:var(--muted)]"
-                  onClick={() => setMobileMenuOpen((open) => !open)}
-                  aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
-                  aria-expanded={mobileMenuOpen}
-                  aria-controls="mobile-nav-menu"
-                >
-                  {mobileMenuOpen ? (
-                    <X className="h-[1.05rem] w-[1.05rem]" />
-                  ) : (
-                    <Menu className="h-[1.05rem] w-[1.05rem]" />
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {mobileMenuOpen && (
-            <div id="mobile-nav-menu" className="mx-auto mt-2 max-w-7xl md:hidden">
-              <div className="glass-surface rounded-[var(--r-card)] p-3">
-                <nav className="space-y-1" aria-label="Menu điều hướng">
-                  {user ? (
-                    <div className="mb-2 rounded-[var(--r-card)] border border-white/72 bg-white/82 px-4 py-3 text-left">
-                      <div className="flex items-center gap-3">
-                        <span className="flex size-10 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-slate-100 text-slate-600">
-                          <User2 className="h-5 w-5" />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-slate-800">{accountLabel}</p>
-                          <p className="mt-1 text-xs font-medium text-slate-500">{accountStatus}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setMobileMenuOpen(false);
-                            navigateAppRoute("/settings");
-                          }}
-                          className="flex size-9 items-center justify-center rounded-[var(--r-tile)] border border-slate-200 bg-white text-slate-600"
-                          aria-label="Mở cài đặt tài khoản"
-                        >
-                          <Settings2 className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={refreshUserProfile}
-                          disabled={!canRetryUserProfile}
-                          className="flex size-9 items-center justify-center rounded-[var(--r-tile)] border border-slate-200 bg-white text-slate-600 disabled:opacity-50"
-                          aria-label="Kiểm tra lại hồ sơ tài khoản"
-                        >
-                          <RefreshCw className={`h-4 w-4 ${userProfileLoading ? "animate-spin" : ""}`} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setMobileMenuOpen(false);
-                            void handleSignOut();
-                          }}
-                          disabled={isSigningOut}
-                          className="flex size-9 items-center justify-center rounded-[var(--r-tile)] border border-slate-200 bg-white text-slate-600 disabled:opacity-50"
-                          aria-label="Đăng xuất"
-                        >
-                          <LogOut className="h-4 w-4" />
-                        </button>
-                      </div>
-                      {userProfileError ? (
-                        <p className="mt-2 text-xs leading-5 text-red-600">{userProfileError}</p>
-                      ) : null}
+                    <div className="flex size-9 items-center justify-center rounded-md bg-app-accent">
+                      <Sparkles className="h-4 w-4 text-white" strokeWidth={2.4} />
                     </div>
-                  ) : null}
+                    <div className="min-w-0">
+                      <span className="block truncate text-[14px] font-medium tracking-tight text-app-ink">
+                        Dear Our Future
+                      </span>
+                    </div>
+                  </button>
+                </div>
+
+                <nav className="hidden flex-1 items-center justify-center md:flex">
+                  <div className="flex flex-wrap items-center gap-1 rounded-full border border-app-line bg-app-surface px-1 py-1">
+                    {primaryNavItems.map((item) => {
+                      const Icon = item.icon;
+                      const active = isActive(item.path);
+
+                      return (
+                        <Button
+                          key={item.path}
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => navigateAppRoute(item.path)}
+                          onPointerEnter={() => handlePrefetch(item.path)}
+                          aria-current={active ? "page" : undefined}
+                          title={item.label}
+                          className={`h-8 shrink-0 rounded-full px-3 text-[13px] font-medium tracking-tight transition-colors duration-150 ${
+                            active
+                              ? "bg-app-accent text-white hover:bg-app-accent hover:text-white"
+                              : "bg-transparent text-app-ink-soft shadow-none hover:bg-app-bg hover:text-app-ink"
+                          }`}
+                        >
+                          <Icon className="h-3.5 w-3.5" strokeWidth={active ? 2.2 : 1.8} />
+                          <span>{item.compactLabel ?? item.label}</span>
+                        </Button>
+                      );
+                    })}
+
+                    {secondaryNavItems.length > 0 ? (
+                      <>
+                        <div className="mx-1 h-4 w-px shrink-0 bg-app-line" />
+
+                        <div ref={desktopMoreRef} className="relative">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            aria-current={secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined}
+                            aria-expanded={desktopMoreOpen}
+                            aria-haspopup="menu"
+                            className={`h-8 shrink-0 rounded-full px-3 text-[13px] font-medium tracking-tight transition-colors duration-150 ${
+                              isDesktopMoreNavActive
+                                ? "bg-app-accent text-white hover:bg-app-accent hover:text-white"
+                                : "bg-transparent text-app-ink-soft shadow-none hover:bg-app-bg hover:text-app-ink"
+                            }`}
+                            onClick={() => setDesktopMoreOpen((open) => !open)}
+                          >
+                            <Menu className="h-3.5 w-3.5" />
+                            <span>Khác</span>
+                            <ChevronDown
+                              className={`h-3.5 w-3.5 transition-transform ${desktopMoreOpen ? "rotate-180" : ""}`}
+                            />
+                          </Button>
+
+                          {desktopMoreOpen ? (
+                            <div
+                              role="menu"
+                              aria-label="Mục khác"
+                              className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-card border border-app-line bg-app-surface p-1.5 shadow-[0_4px_12px_rgba(15,23,42,0.06)]"
+                            >
+                              <div className="px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-app-ink-muted">
+                                Mục khác
+                              </div>
+                              {secondaryNavItems.map((item) => {
+                                const Icon = item.icon;
+                                const active = isActive(item.path);
+
+                                return (
+                                  <button
+                                    key={item.path}
+                                    type="button"
+                                    role="menuitem"
+                                    aria-current={active ? "page" : undefined}
+                                    onPointerEnter={() => handlePrefetch(item.path)}
+                                    onClick={() => {
+                                      setDesktopMoreOpen(false);
+                                      navigateAppRoute(item.path);
+                                    }}
+                                    className={`my-0.5 flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[13px] font-medium tracking-tight outline-none transition-colors ${
+                                      active
+                                        ? "bg-app-accent-soft text-app-accent focus:bg-app-accent-soft"
+                                        : "text-app-ink hover:bg-app-bg focus:bg-app-bg"
+                                    }`}
+                                  >
+                                    <Icon
+                                      className={`h-4 w-4 shrink-0 ${active ? "text-app-accent" : "text-app-ink-muted"}`}
+                                    />
+                                    <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          ) : null}
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
+                </nav>
+
+                <div className="hidden shrink-0 items-center gap-1.5 md:flex">
+                  {user ? renderAccountMenu("desktop") : null}
                   {!user ? (
-                    <div className="mb-2 grid grid-cols-2 gap-2 rounded-[var(--r-card)] border border-white/72 bg-white/82 p-2">
+                    <>
                       <Button
-                        variant="outline"
-                        className="w-full border-slate-200 bg-white text-slate-900"
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          handleAuthNavigate("signin");
-                        }}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleAuthNavigate("signin")}
+                        className="h-8 rounded-full px-3 text-[13px] text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
                       >
                         Đăng nhập
                       </Button>
                       <Button
-                        variant="secondary"
-                        className="w-full"
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          handleAuthNavigate("signup");
-                        }}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleAuthNavigate("signup")}
+                        className="h-8 rounded-full bg-app-accent px-3.5 text-[13px] text-white hover:bg-[#284f45] hover:text-white"
                       >
                         Đăng ký
                       </Button>
-                    </div>
+                    </>
                   ) : null}
                   <button
                     type="button"
-                    onClick={() => {
-                      setGuideUserData(getUserData());
-                      setIsGuideOpen(true);
-                      setMobileMenuOpen(false);
-                    }}
-                    className="mb-2 flex w-full items-center gap-3 rounded-[var(--r-control)] border border-white/72 bg-white/82 px-4 py-3 text-left text-sm font-medium tracking-normal text-slate-700"
+                    onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    aria-label={resolvedTheme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
                   >
-                    <Compass className="h-5 w-5" />
-                    <span>Hướng dẫn sử dụng</span>
+                    {resolvedTheme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
                   </button>
-                  {mobileMenuNavItems.map((item) => {
-                    const Icon = item.icon;
-                    const active = isActive(item.path);
+                </div>
 
-                    return (
-                      <button
-                        key={item.path}
-                        type="button"
-                        onClick={() => {
-                          navigateAppRoute(item.path);
-                          setMobileMenuOpen(false);
-                        }}
-                        onFocus={() => handlePrefetch(item.path)}
-                        className={`flex w-full items-center gap-3 rounded-[var(--r-control)] px-4 py-3.5 text-left text-sm font-medium tracking-normal transition-transform duration-150 active:scale-[0.98] ${
-                          active ? "text-white" : "text-slate-600 hover:bg-white/80 hover:text-slate-900"
-                        }`}
-                        style={active ? activeNavStyle : undefined}
-                        aria-current={active ? "page" : undefined}
-                      >
-                        <Icon className="h-5 w-5 shrink-0" />
-                        <span>{item.label}</span>
-                      </button>
-                    );
-                  })}
-                </nav>
+                <div className="md:hidden flex min-w-0 items-center gap-1.5">
+                  <span className="hidden max-w-[120px] truncate text-[14px] font-medium tracking-tight text-app-ink sm:inline">
+                    {pageMeta.label}
+                  </span>
+                  <button
+                    type="button"
+                    className="hidden size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:flex"
+                    onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                    aria-label={resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
+                  >
+                    {resolvedTheme === "dark" ? (
+                      <Sun className="h-[1.05rem] w-[1.05rem]" />
+                    ) : (
+                      <Moon className="h-[1.05rem] w-[1.05rem]" />
+                    )}
+                  </button>
+                  {isSignedOutVisitor ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-10 rounded-lg bg-app-accent px-3 text-[13px] text-white hover:bg-[#284f45] hover:text-white"
+                      onClick={() => handleAuthNavigate("signup")}
+                    >
+                      Đăng ký
+                    </Button>
+                  ) : user ? (
+                    renderAccountMenu("mobile")
+                  ) : (
+                    <button
+                      type="button"
+                      className="flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                      onClick={() => {
+                        setGuideUserData(getUserData());
+                        setIsGuideOpen(true);
+                      }}
+                      aria-label="Mở hướng dẫn sử dụng"
+                    >
+                      <Compass className="h-[1.05rem] w-[1.05rem]" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    onClick={() => setMobileMenuOpen((open) => !open)}
+                    aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
+                    aria-expanded={mobileMenuOpen}
+                    aria-controls="mobile-nav-menu"
+                  >
+                    {mobileMenuOpen ? (
+                      <X className="h-[1.05rem] w-[1.05rem]" />
+                    ) : (
+                      <Menu className="h-[1.05rem] w-[1.05rem]" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
-          )}
-        </header>
 
-        {showSidebar ? (
-          <div className="sticky top-0 z-30 hidden lg:block">
-            <div className="border-b border-[color:var(--border)] bg-[color-mix(in_srgb,var(--background)_72%,transparent)] backdrop-blur-xl supports-[backdrop-filter]:bg-[color-mix(in_srgb,var(--background)_60%,transparent)]">
-              <div className="mx-auto flex h-12 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-                <nav aria-label="Vị trí trang" className="flex min-w-0 items-center gap-2 text-xs">
-                  <span className="text-muted-foreground">Workspace</span>
-                  <span aria-hidden="true" className="text-muted-foreground/60">
+            {mobileMenuOpen && (
+              <div id="mobile-nav-menu" className="mx-auto mt-2 max-w-7xl px-4 md:hidden">
+                <div className="rounded-card border border-app-line bg-app-surface p-3 shadow-[0_4px_12px_rgba(15,23,42,0.06)]">
+                  <nav className="space-y-1" aria-label="Menu điều hướng">
+                    {user ? (
+                      <div className="mb-2 rounded-card border border-app-line bg-app-bg px-4 py-3 text-left">
+                        <div className="flex items-center gap-3">
+                          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
+                            <User2 className="h-5 w-5" />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-medium text-app-ink">{accountLabel}</p>
+                            <p className="mt-1 text-xs font-medium text-app-ink-muted">{accountStatus}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setMobileMenuOpen(false);
+                              navigateAppRoute("/settings");
+                            }}
+                            className="flex size-9 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink disabled:opacity-50"
+                            aria-label="Mở cài đặt tài khoản"
+                          >
+                            <Settings2 className="h-4 w-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={refreshUserProfile}
+                            disabled={!canRetryUserProfile}
+                            className="flex size-9 items-center justify-center rounded-[var(--r-tile)] border border-slate-200 bg-white text-slate-600 disabled:opacity-50"
+                            aria-label="Kiểm tra lại hồ sơ tài khoản"
+                          >
+                            <RefreshCw className={`h-4 w-4 ${userProfileLoading ? "animate-spin" : ""}`} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setMobileMenuOpen(false);
+                              void handleSignOut();
+                            }}
+                            disabled={isSigningOut}
+                            className="flex size-9 items-center justify-center rounded-[var(--r-tile)] border border-slate-200 bg-white text-slate-600 disabled:opacity-50"
+                            aria-label="Đăng xuất"
+                          >
+                            <LogOut className="h-4 w-4" />
+                          </button>
+                        </div>
+                        {userProfileError ? (
+                          <p className="mt-2 text-xs leading-5 text-red-600">{userProfileError}</p>
+                        ) : null}
+                      </div>
+                    ) : null}
+                    {!user ? (
+                      <div className="mb-2 grid grid-cols-2 gap-2 rounded-card border border-app-line bg-app-bg p-2">
+                        <Button
+                          variant="outline"
+                          className="w-full border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            handleAuthNavigate("signin");
+                          }}
+                        >
+                          Đăng nhập
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="w-full bg-app-accent text-white hover:bg-[#284f45] hover:text-white"
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            handleAuthNavigate("signup");
+                          }}
+                        >
+                          Đăng ký
+                        </Button>
+                      </div>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setGuideUserData(getUserData());
+                        setIsGuideOpen(true);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="mb-2 flex w-full items-center gap-3 rounded-lg border border-app-line bg-app-surface px-4 py-3 text-left text-sm font-medium tracking-normal text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink"
+                    >
+                      <Compass className="h-5 w-5" />
+                      <span>Hướng dẫn sử dụng</span>
+                    </button>
+                    {mobileMenuNavItems.map((item) => {
+                      const Icon = item.icon;
+                      const active = isActive(item.path);
+
+                      return (
+                        <button
+                          key={item.path}
+                          type="button"
+                          onClick={() => {
+                            navigateAppRoute(item.path);
+                            setMobileMenuOpen(false);
+                          }}
+                          onFocus={() => handlePrefetch(item.path)}
+                          className={`flex w-full items-center gap-3 rounded-lg px-4 py-3.5 text-left text-sm font-medium tracking-normal transition-colors duration-150 ${
+                            active
+                              ? "bg-app-accent-soft text-app-accent"
+                              : "text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
+                          }`}
+                          aria-current={active ? "page" : undefined}
+                        >
+                          <Icon className="h-5 w-5 shrink-0" />
+                          <span>{item.label}</span>
+                        </button>
+                      );
+                    })}
+                  </nav>
+                </div>
+              </div>
+            )}
+          </header>
+
+          {showSidebar ? (
+            <div className="sticky top-0 z-40 hidden border-b border-app-line bg-app-bg/95 backdrop-blur-sm lg:block">
+              <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+                <nav aria-label="Vị trí trang" className="flex min-w-0 items-center gap-2">
+                  <span className="text-[12px] text-app-ink-muted">Workspace</span>
+                  <span aria-hidden="true" className="text-app-ink-muted">
                     /
                   </span>
-                  <span className="truncate font-semibold text-foreground">{pageMeta.label}</span>
+                  <span className="truncate text-[14px] font-medium text-app-ink">{pageMeta.label}</span>
                 </nav>
                 <div className="flex items-center gap-2">
                   {!demoMode && user ? <SyncStatusPill compact /> : null}
                   <button
                     type="button"
                     onClick={() => setCommandPaletteOpen(true)}
-                    className="flex items-center gap-2 rounded-[var(--r-control)] border border-[color:var(--border)] bg-[color:var(--muted)] px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-card hover:text-foreground"
+                    className="flex items-center gap-2 rounded-md border border-app-line bg-app-surface px-3 py-1.5 text-[13px] text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     aria-label="Mở command palette"
                   >
-                    <Search className="h-3 w-3" />
+                    <Search className="h-3.5 w-3.5" />
                     <span>Tìm nhanh</span>
-                    <kbd className="ml-1 hidden rounded border border-[color:var(--border)] bg-card px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground xl:inline-block">
+                    <kbd className="ml-1 hidden rounded border border-app-line bg-app-bg px-1.5 py-0.5 text-[11px] font-medium text-app-ink-muted xl:inline-block">
                       ⌘K
                     </kbd>
                   </button>
                 </div>
               </div>
             </div>
-          </div>
-        ) : null}
+          ) : null}
 
-        <main
-          className={`relative z-10 mx-auto max-w-7xl px-4 pb-12 pt-5 sm:px-6 sm:pt-7 lg:px-8 ${
-            isSignedOutVisitor ? "" : "main-content-mobile-pad"
-          }`}
-          id="main-content"
-          aria-label="Nội dung trang"
-        >
-          {/* Screen-reader route announcer */}
-          <div className="sr-only" aria-live="polite" aria-atomic="true" role="status">
-            {pageMeta.label}
-          </div>
-          {pageTransitionContent}
-        </main>
-
-        {user ? (
-          <div className="pointer-events-none relative z-0 h-32 overflow-hidden text-violet-500" aria-hidden="true">
-            <FooterAuroraIllustration className="pointer-events-none absolute inset-x-0 bottom-0 h-full w-full opacity-70 dark:opacity-40" />
-          </div>
-        ) : null}
-
-        {user ? (
-          <footer className="relative z-10 mx-auto max-w-7xl px-4 pb-24 text-xs tracking-tight text-muted-foreground sm:px-6 md:pb-8 lg:px-8">
-            <div className="flex items-center justify-center gap-2 border-t border-[color:var(--border)] pt-4 md:justify-end">
-              <span className="font-semibold">v1.0</span>
-              <span aria-hidden="true">·</span>
-              <span className="hidden max-w-[260px] truncate md:inline">{accountEmail || accountLabel}</span>
-              <span className="hidden md:inline" aria-hidden="true">
-                ·
-              </span>
-              <a
-                href="/settings"
-                className="font-semibold text-foreground underline-offset-4 transition-colors hover:underline"
-                onClick={(event) => {
-                  event.preventDefault();
-                  navigateAppRoute("/settings");
-                }}
-              >
-                Cài đặt
-              </a>
+          <main
+            className={`relative ${isSignedOutVisitor ? "" : "main-content-mobile-pad"}`}
+            id="main-content"
+            aria-label="Nội dung trang"
+          >
+            {/* Screen-reader route announcer */}
+            <div className="sr-only" aria-live="polite" aria-atomic="true" role="status">
+              {pageMeta.label}
             </div>
-          </footer>
-        ) : null}
+            {pageTransitionContent}
+          </main>
+
+          {user ? (
+            <footer className="mx-auto max-w-7xl px-4 pb-24 text-xs tracking-tight text-app-ink-muted sm:px-6 md:pb-8 lg:px-8">
+              <div className="flex items-center justify-center gap-2 border-t border-app-line pt-4 md:justify-end">
+                <span className="font-semibold">v1.0</span>
+                <span aria-hidden="true">·</span>
+                <span className="hidden max-w-[260px] truncate md:inline">{accountEmail || accountLabel}</span>
+                <span className="hidden md:inline" aria-hidden="true">
+                  ·
+                </span>
+                <a
+                  href="/settings"
+                  className="font-semibold text-app-ink underline-offset-4 transition-colors hover:underline"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    navigateAppRoute("/settings");
+                  }}
+                >
+                  Cài đặt
+                </a>
+              </div>
+            </footer>
+          ) : null}
         </div>
 
         {!isSignedOutVisitor ? (
@@ -1387,11 +1369,11 @@ export function RootLayout() {
                   >
                     <div className="bottom-nav-icon">
                       <Icon
-                        className={`h-4 w-4 ${active ? "text-white" : "text-slate-500"}`}
+                        className={`h-4 w-4 ${active ? "text-white" : "text-app-ink-muted"}`}
                         strokeWidth={active ? 2.25 : 1.8}
                       />
                     </div>
-                    <span className={`bottom-nav-label ${active ? "nav-label-active" : "text-slate-400"}`}>
+                    <span className={`bottom-nav-label ${active ? "nav-label-active" : "text-app-ink-muted"}`}>
                       {MOBILE_NAV_LABELS[item.path] ?? item.compactLabel ?? item.label}
                     </span>
                   </button>
@@ -1408,11 +1390,11 @@ export function RootLayout() {
               >
                 <div className="bottom-nav-icon">
                   <Menu
-                    className={`h-4 w-4 ${isMoreNavActive ? "text-white" : "text-slate-500"}`}
+                    className={`h-4 w-4 ${isMoreNavActive ? "text-white" : "text-app-ink-muted"}`}
                     strokeWidth={isMoreNavActive ? 2.25 : 1.8}
                   />
                 </div>
-                <span className={`bottom-nav-label ${isMoreNavActive ? "nav-label-active" : "text-slate-400"}`}>
+                <span className={`bottom-nav-label ${isMoreNavActive ? "nav-label-active" : "text-app-ink-muted"}`}>
                   Khác
                 </span>
               </button>

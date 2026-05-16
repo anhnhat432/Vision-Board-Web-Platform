@@ -5,7 +5,6 @@ import { ActiveGoalsCard } from "@/features/dashboard/v2/ActiveGoalsCard";
 import { BalanceCard } from "@/features/dashboard/v2/BalanceCard";
 import { DashboardFooter } from "@/features/dashboard/v2/DashboardFooter";
 import { DashboardHero } from "@/features/dashboard/v2/DashboardHero";
-import { DashboardTopBar } from "@/features/dashboard/v2/DashboardTopBar";
 import { NewUserSetupView } from "@/features/dashboard/v2/NewUserSetupView";
 import { PublicVisitorView } from "@/features/dashboard/v2/PublicVisitorView";
 import { QuoteBlock } from "@/features/dashboard/v2/QuoteBlock";
@@ -287,7 +286,9 @@ function useDashboardDerivedData({
   const hasReviewedCurrentWeek = Boolean(
     effectiveSystem &&
       activeSystemWeek &&
-      (effectiveSystem.weeklyReviews.some((review) => review.weekNumber === activeSystemWeek && review.reviewCompleted) ||
+      (effectiveSystem.weeklyReviews.some(
+        (review) => review.weekNumber === activeSystemWeek && review.reviewCompleted,
+      ) ||
         effectiveSystem.scoreboard.some((week) => week.weekNumber === activeSystemWeek && week.reviewDone)),
   );
   const dashboardNextAction = getDashboardNextAction({
@@ -308,10 +309,12 @@ function useDashboardDerivedData({
   const hasLocalTwelveWeekSystem = Boolean(effectiveSystem);
   const hasWorkspaceSignals =
     hasRealLifeBalance || visibleGoals.length > 0 || visibleVisionBoards.length > 0 || visibleReflections.length > 0;
-  const shouldShowMainDashboardCard = !isSignedOut && !isFreshDemoVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
+  const shouldShowMainDashboardCard =
+    !isSignedOut && !isFreshDemoVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
   const showMobileStickyCTA = shouldShowMainDashboardCard && activeSystem && activeSystemTodayOpenTasks.length > 0;
   const shouldShowSetupGuide = !isSignedOut && !isFreshDemoVisitor && !activeSystem;
-  const shouldShowWorkspaceDetailGrid = !isSignedOut && !isFreshDemoVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
+  const shouldShowWorkspaceDetailGrid =
+    !isSignedOut && !isFreshDemoVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
   const radarData = hasRealLifeBalance
     ? visibleWheelOfLife.map((area) => ({
         subject: getLifeAreaLabel(area.name),
@@ -447,7 +450,8 @@ function DashboardContent({
   const caption = formatDashboardDateCaption(new Date(), dashboardGreeting);
   const signedIn = Boolean(user);
   const goalLimitUsage = getFreeTierUsage(userData, "maxActiveGoals");
-  const shouldShowFreeGoalLimit = !isSignedOut && currentPlanCode === "FREE" && Number.isFinite(FREE_TIER_LIMITS.maxActiveGoals);
+  const shouldShowFreeGoalLimit =
+    !isSignedOut && currentPlanCode === "FREE" && Number.isFinite(FREE_TIER_LIMITS.maxActiveGoals);
   const lastSavedLabel = getLastSavedLabel(userData, dashboardData.activeSystemTodayTasks);
   const balanceRows = getLifeBalanceRows(visibleWheelOfLife);
 
@@ -481,7 +485,9 @@ function DashboardContent({
     );
   }, [currentPlanCode, dashboardData.activeSystemWeek, dashboardData.effectiveSystem, visibleActiveTwelveWeekGoal]);
 
-  const overdueCount = dashboardData.activeSystem ? dashboardData.activeSystemTodayTasks.filter((task) => !task.completed).length : 0;
+  const overdueCount = dashboardData.activeSystem
+    ? dashboardData.activeSystemTodayTasks.filter((task) => !task.completed).length
+    : 0;
   const activeTriggers = evaluateRescueTriggers({
     system: dashboardData.activeSystem,
     subscription: isSignedOut ? null : (userData.subscription ?? null),
@@ -506,9 +512,11 @@ function DashboardContent({
   const showMobileStickyCTA = !isDesktopViewport && dashboardData.showMobileStickyCTA;
 
   return (
-    <div className={showMobileStickyCTA ? "min-h-screen bg-app-bg pb-24 text-app-ink" : "min-h-screen bg-app-bg text-app-ink"}>
-      <DashboardTopBar currentWeek={dashboardData.dashboardKpiCurrentWeek} displayName={dashboardDisplayName} />
-
+    <div
+      className={
+        showMobileStickyCTA ? "min-h-screen bg-app-bg pb-24 text-app-ink" : "min-h-screen bg-app-bg text-app-ink"
+      }
+    >
       <div className="mx-auto max-w-6xl px-4 pb-8 pt-8 sm:px-6 lg:px-0">
         {shouldShowFreeGoalLimit ? (
           <FreeGoalLimitCard
@@ -520,7 +528,9 @@ function DashboardContent({
 
         <TrialCountdownBanner
           demoMode={demoMode}
-          renewsAt={userData.subscription?.status === "trialing" ? (userData.subscription.renewsAt ?? undefined) : undefined}
+          renewsAt={
+            userData.subscription?.status === "trialing" ? (userData.subscription.renewsAt ?? undefined) : undefined
+          }
           onOpenPlan={() => navigate("/billing/plan")}
         />
 
@@ -533,7 +543,11 @@ function DashboardContent({
             onSignUp={() => handleAuthNavigate("signup")}
           />
         ) : !dashboardData.activeSystem ? (
-          <NewUserSetupView userData={userData} displayName={dashboardDisplayName} onContinue={(href) => navigate(href)} />
+          <NewUserSetupView
+            userData={userData}
+            displayName={dashboardDisplayName}
+            onContinue={(href) => navigate(href)}
+          />
         ) : (
           <DashboardActiveLayout
             data={dashboardData}
@@ -642,7 +656,10 @@ function DashboardActiveLayout({
   onTriggerAction: () => void;
   onTriggerDismiss: () => void;
 }) {
-  const trendPoints = data.weeklyProgressPoints.length > 0 ? data.weeklyProgressPoints : buildSystemWeeklyProgressPoints(data.activeSystem);
+  const trendPoints =
+    data.weeklyProgressPoints.length > 0
+      ? data.weeklyProgressPoints
+      : buildSystemWeeklyProgressPoints(data.activeSystem);
   const planHref = "/12-week-system?tab=week";
 
   return (
@@ -676,7 +693,9 @@ function DashboardActiveLayout({
             system={data.activeSystem}
             currentWeek={data.dashboardKpiCurrentWeek}
             totalWeeks={data.dashboardKpiTotalWeeks}
-            completedCount={data.activeSystemWeekCompletion?.completed ?? data.currentWeekExecutionSnapshot.completedTasks}
+            completedCount={
+              data.activeSystemWeekCompletion?.completed ?? data.currentWeekExecutionSnapshot.completedTasks
+            }
             totalCount={data.activeSystemWeekCompletion?.total ?? data.currentWeekExecutionSnapshot.totalTasks}
             leadAverage={data.dashboardKpiLeadAverage}
             wheelScore={data.averageLifeScore}
@@ -687,7 +706,10 @@ function DashboardActiveLayout({
 
         <aside className="space-y-5">
           {data.reviewDueToday ? (
-            <ReflectionPrompt currentWeek={data.dashboardKpiCurrentWeek} reviewHref={data.dashboardNextAction.ctaTarget} />
+            <ReflectionPrompt
+              currentWeek={data.dashboardKpiCurrentWeek}
+              reviewHref={data.dashboardNextAction.ctaTarget}
+            />
           ) : null}
           <TodayMiniCard
             tasks={data.activeSystemTaskPreview.length > 0 ? data.activeSystemTaskPreview : data.activeSystemTodayTasks}
@@ -707,7 +729,9 @@ function FreeGoalLimitCard({ current, limit, onUpgrade }: { current: number; lim
     <section className="mb-5 rounded-card border border-app-line bg-app-surface p-4" aria-label="Giới hạn gói Free">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-[14px] font-semibold text-app-ink">Gói Free: {current}/{limit} mục tiêu</p>
+          <p className="text-[14px] font-semibold text-app-ink">
+            Gói Free: {current}/{limit} mục tiêu
+          </p>
           <p className="mt-1 text-[13px] leading-6 text-app-ink-muted">
             Nâng cấp Plus khi bạn cần tạo thêm mục tiêu mới. Dữ liệu cũ vẫn được giữ nguyên.
           </p>
@@ -738,10 +762,16 @@ function TrialCountdownBanner({
   const daysLeft = Math.max(0, Math.ceil((new Date(renewsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
 
   return (
-    <section className="mb-5 rounded-card border border-app-line bg-app-surface p-4 text-[13px] text-app-ink-soft" aria-label="Thời hạn Plus">
+    <section
+      className="mb-5 rounded-card border border-app-line bg-app-surface p-4 text-[13px] text-app-ink-soft"
+      aria-label="Thời hạn Plus"
+    >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <span>
-          <span className="font-semibold text-app-ink">{demoMode ? "Plus dùng thử:" : "Plus đang trong thời gian ưu đãi:"}</span> còn {daysLeft} ngày {demoMode ? "trên trình duyệt này" : "trên tài khoản này"}.
+          <span className="font-semibold text-app-ink">
+            {demoMode ? "Plus dùng thử:" : "Plus đang trong thời gian ưu đãi:"}
+          </span>{" "}
+          còn {daysLeft} ngày {demoMode ? "trên trình duyệt này" : "trên tài khoản này"}.
         </span>
         <button
           type="button"

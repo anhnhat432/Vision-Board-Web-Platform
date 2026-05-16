@@ -50,7 +50,8 @@ function getPendingCopy(count: number): string {
 function getTooltip(state: SyncPillState, relativeTime: string | null, pendingCount: number): string {
   if (state === "conflict") return "Dữ liệu trên thiết bị và tài khoản đang khác nhau. Bấm để chọn phiên bản an toàn.";
   if (state === "syncing") return `Đã lưu trên thiết bị. Đang sao lưu vào tài khoản; ${getPendingCopy(pendingCount)}.`;
-  if (state === "offline") return `Đã lưu trên thiết bị. Sẽ sao lưu vào tài khoản khi có mạng; ${getPendingCopy(pendingCount)}.`;
+  if (state === "offline")
+    return `Đã lưu trên thiết bị. Sẽ sao lưu vào tài khoản khi có mạng; ${getPendingCopy(pendingCount)}.`;
   if (state === "pending") return `Đã lưu trên thiết bị. ${getPendingCopy(pendingCount)}.`;
 
   const timeCopy = relativeTime ? `Đã sao lưu ${relativeTime}` : "Chưa có lần sao lưu";
@@ -71,45 +72,45 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
   });
   const tooltip = getTooltip(state, relativeTime, syncState.pendingCount);
   const baseClass =
-    "inline-flex max-w-full items-center gap-1.5 rounded-[var(--r-pill)] border px-2 py-0.5 text-xs font-medium leading-none transition-colors";
-  const sizeClass = compact ? "mt-1" : "mt-2";
+    "inline-flex max-w-full items-center gap-1.5 rounded-full border px-2 py-1 text-[12px] font-medium leading-none transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30";
+  const sizeClass = compact ? "" : "mt-2";
 
   const config = {
     conflict: {
       dot: <SyncIdleDot className="h-4 w-4" />,
       icon: <Upload className="h-3 w-3" />,
       label: "Cần chọn bản dữ liệu",
-      tone: "border-amber-300 bg-amber-100 text-amber-800",
+      tone: "border-[#F3D9CC] bg-app-warm-soft text-app-warm",
     },
     syncing: {
       dot: <SyncSyncingDot className="h-4 w-4" />,
       icon: <Loader2 className="h-3 w-3 animate-spin" />,
       label: "Đang sao lưu",
-      tone: "border-sky-200 bg-sky-50 text-sky-700",
+      tone: "border-app-line bg-app-accent-soft text-app-accent",
     },
     offline: {
       dot: <SyncIdleDot className="h-4 w-4" />,
       icon: <WifiOff className="h-3 w-3" />,
       label: "Đã lưu trên thiết bị",
-      tone: "border-slate-200 bg-slate-100 text-slate-600",
+      tone: "border-app-line bg-app-surface text-app-ink-soft",
     },
     pending: {
       dot: <SyncSyncingDot className="h-4 w-4" />,
       icon: <Upload className="h-3 w-3" />,
       label: `${syncState.pendingCount} chờ sao lưu`,
-      tone: "border-amber-200 bg-amber-50 text-amber-700",
+      tone: "border-[#F3D9CC] bg-app-warm-soft text-app-warm",
     },
     ok: {
       dot: <SyncOkDot className="h-4 w-4" />,
       icon: <CheckCircle2 className="h-3 w-3" />,
       label: `Đã sao lưu ${relativeTime ?? "vừa xong"}`,
-      tone: "border-emerald-200 bg-emerald-50 text-emerald-700",
+      tone: "border-app-line bg-app-accent-soft text-app-accent",
     },
     idle: {
       dot: <SyncIdleDot className="h-4 w-4" />,
       icon: <Clock3 className="h-3 w-3" />,
       label: "Chưa sao lưu",
-      tone: "border-slate-200 bg-slate-50 text-slate-600",
+      tone: "border-app-line bg-app-surface text-app-ink-soft",
     },
   } satisfies Record<SyncPillState, { dot: ReactNode; icon: ReactNode; label: string; tone: string }>;
 

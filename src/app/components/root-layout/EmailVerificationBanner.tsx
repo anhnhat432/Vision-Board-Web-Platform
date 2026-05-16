@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Loader2, Mail, Pencil } from "lucide-react";
+import { HardDrive, Loader2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 import { useAuthContext } from "@/lib/auth/AuthContext";
@@ -135,16 +135,17 @@ export function EmailVerificationBanner() {
     <>
       <div
         role="alert"
-        className="relative z-50 border-b border-amber-200 bg-amber-50/95 px-4 py-3 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-950/75 dark:text-amber-100 sm:px-6"
+        className="relative z-50 border-b border-[#F3D9CC] bg-app-warm-soft px-4 py-3 text-sm text-[#5C3A2E] sm:px-6"
       >
         <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <p className="inline-flex items-center gap-2 font-semibold">
-              <Mail className="h-4 w-4 flex-none" />
+              <HardDrive className="h-4 w-4 flex-none" />
               Email chưa xác thực: <span className="break-all">{pendingEmail || "chưa có email"}</span>
             </p>
-            <p className="mt-1 text-xs leading-5 text-amber-800 dark:text-amber-200">
-              Xác thực giúp chúng tôi gửi biên nhận, hỗ trợ hoàn tiền và bảo vệ tài khoản khi dùng tính năng trả phí hoặc đồng bộ cloud.
+            <p className="mt-1 text-xs leading-5 text-[#6F493A]">
+              Xác thực giúp chúng tôi gửi biên nhận, hỗ trợ hoàn tiền và bảo vệ tài khoản khi dùng tính năng trả phí
+              hoặc đồng bộ cloud.
               {lastSentLabel ? ` Gần nhất đã gửi: ${lastSentLabel}.` : ""}
             </p>
           </div>
@@ -152,7 +153,7 @@ export function EmailVerificationBanner() {
             <Button
               variant="outline"
               size="sm"
-              className="border-amber-300 bg-white/85 text-amber-900 hover:bg-white dark:border-amber-500/40 dark:bg-amber-900/40 dark:text-amber-100"
+              className="border-[#F3D9CC] bg-app-surface text-[#5C3A2E] hover:bg-app-warm-soft"
               onClick={handleResend}
               disabled={sending || cooldownSeconds > 0}
             >
@@ -169,7 +170,7 @@ export function EmailVerificationBanner() {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="text-amber-900 hover:bg-amber-100 dark:text-amber-100 dark:hover:bg-amber-900/50"
+                className="text-[#5C3A2E] hover:bg-app-surface"
                 onClick={() => setEmailDialogOpen(true)}
               >
                 <Pencil className="mr-1 h-3.5 w-3.5" />
@@ -185,12 +186,13 @@ export function EmailVerificationBanner() {
           <DialogHeader>
             <DialogTitle>Đổi email tài khoản</DialogTitle>
             <DialogDescription>
-              Nhập email đúng và mật khẩu hiện tại. Chúng tôi sẽ gửi link xác thực tới email mới trước khi cập nhật tài khoản.
+              Nhập email đúng và mật khẩu hiện tại. Chúng tôi sẽ gửi link xác thực tới email mới trước khi cập nhật tài
+              khoản.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label htmlFor="verification-new-email" className="text-sm font-medium text-slate-700">
+              <label htmlFor="verification-new-email" className="text-sm font-medium text-app-ink-soft">
                 Email mới
               </label>
               <Input
@@ -202,7 +204,7 @@ export function EmailVerificationBanner() {
               />
             </div>
             <div>
-              <label htmlFor="verification-current-password" className="text-sm font-medium text-slate-700">
+              <label htmlFor="verification-current-password" className="text-sm font-medium text-app-ink-soft">
                 Mật khẩu hiện tại
               </label>
               <Input

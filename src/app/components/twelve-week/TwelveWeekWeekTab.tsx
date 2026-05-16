@@ -39,7 +39,7 @@ import { TwelveWeekPremiumInsightSection } from "./TwelveWeekPremiumInsightSecti
 import { TwelveWeekNextWeekRecommendationCard } from "./TwelveWeekNextWeekRecommendationCard";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 import { SectionBlock } from "../layout/SectionBlock";
-import { TaskDoneIcon, TaskInProgressIcon, TaskTodoIcon, WeeklyReviewIllustration } from "../illustrations";
+import { TaskDoneIcon, TaskInProgressIcon, TaskTodoIcon } from "../illustrations";
 
 interface WeekRange {
   start: string;

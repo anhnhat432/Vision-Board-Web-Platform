@@ -67,7 +67,7 @@ describe("WizardStepPip", () => {
             >
               <span
                 aria-hidden="true"
-                class="flex size-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] border text-[11px] font-bold border-primary/30 bg-primary/10 text-primary"
+                class="flex size-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] border text-xs font-bold border-primary/30 bg-primary/10 text-primary"
               >
                 <svg
                   class="lucide lucide-check size-3.5"
@@ -109,7 +109,7 @@ describe("WizardStepPip", () => {
             >
               <span
                 aria-hidden="true"
-                class="flex size-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] border text-[11px] font-bold border-primary bg-primary text-white"
+                class="flex size-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] border text-xs font-bold border-primary bg-primary text-white"
               >
                 2
               </span>
@@ -135,7 +135,7 @@ describe("WizardStepPip", () => {
             >
               <span
                 aria-hidden="true"
-                class="flex size-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] border text-[11px] font-bold border-slate-300 bg-white text-slate-400"
+                class="flex size-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] border text-xs font-bold border-slate-300 bg-white text-slate-400"
               >
                 3
               </span>
