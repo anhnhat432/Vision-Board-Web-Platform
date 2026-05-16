@@ -17,9 +17,9 @@ interface SimpleRadarChartProps {
 
 const VIEWBOX_SIZE = 560;
 const CENTER = VIEWBOX_SIZE / 2;
-const OUTER_RADIUS = 150;
+const OUTER_RADIUS = 155;
 const GRID_LEVELS = 5;
-const LABEL_RADIUS = OUTER_RADIUS + 28;
+const LABEL_RADIUS = OUTER_RADIUS + 38;
 
 function toRadians(index: number, total: number) {
   return -Math.PI / 2 + (index / total) * Math.PI * 2;
@@ -160,14 +160,14 @@ export function SimpleRadarChart({
           const anchor = getTextAnchor(label.x);
           const scorePoint = {
             x: label.x,
-            y: label.y + (lines.length > 1 ? 18 : 14),
+            y: label.y + (lines.length > 1 ? 22 : 18),
           };
 
           return (
             <g key={`label-${item.subject}`}>
               <text
                 fill="var(--color-foreground, #475569)"
-                fontSize="12"
+                fontSize="15"
                 fontWeight="600"
                 textAnchor={anchor}
                 x={label.x}
@@ -175,7 +175,7 @@ export function SimpleRadarChart({
               >
                 {lines.map((line, lineIndex) => (
                   <tspan
-                    dy={lineIndex === 0 ? 0 : 16}
+                    dy={lineIndex === 0 ? 0 : 19}
                     key={`${item.subject}-${line}`}
                     x={label.x}
                   >
@@ -185,11 +185,11 @@ export function SimpleRadarChart({
               </text>
               <text
                 fill="var(--color-muted-foreground, #94a3b8)"
-                fontSize="11"
+                fontSize="13"
                 fontWeight="500"
                 textAnchor={anchor}
                 x={scorePoint.x}
-                y={scorePoint.y + (lines.length - 1) * 16}
+                y={scorePoint.y + (lines.length - 1) * 19}
               >
                 {item.value}/{item.fullMark ?? fullMark}
               </text>

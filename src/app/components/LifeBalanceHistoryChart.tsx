@@ -35,8 +35,8 @@ export function LifeBalanceHistoryChart({ data }: LifeBalanceHistoryChartProps) 
     <ResponsiveContainer height={420} width="100%">
       <LineChart data={data}>
         <CartesianGrid stroke={gridStroke} strokeDasharray="3 3" />
-        <XAxis dataKey="date" tick={{ fontSize: 12, fill: tickFill }} />
-        <YAxis domain={[0, 10]} tick={{ fontSize: 12, fill: tickFill }} />
+        <XAxis dataKey="date" tick={{ fontSize: 14, fill: tickFill }} />
+        <YAxis domain={[0, 10]} tick={{ fontSize: 14, fill: tickFill }} />
         <Tooltip
           contentStyle={{
             backgroundColor: tooltipBg,
