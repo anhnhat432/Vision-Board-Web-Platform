@@ -135,7 +135,7 @@ function DeferredDashboardLifeAreaRadar({ data }: { data: DashboardRadarDatum[] 
       {isVisible ? (
         <Suspense
           fallback={
-            <div className="flex h-[300px] items-center justify-center rounded-[var(--r-tile)] bg-muted text-sm text-muted-foreground">
+            <div className="flex h-[360px] items-center justify-center rounded-[var(--r-tile)] bg-muted text-sm text-muted-foreground">
               Đang tải biểu đồ cân bằng cuộc sống...
             </div>
           }
@@ -145,7 +145,7 @@ function DeferredDashboardLifeAreaRadar({ data }: { data: DashboardRadarDatum[] 
       ) : (
         <div
           data-testid="dashboard-radar-deferred"
-          className="flex h-[300px] flex-col items-center justify-center rounded-[var(--r-tile)] bg-muted px-5 text-center"
+          className="flex h-[360px] flex-col items-center justify-center rounded-[var(--r-tile)] bg-muted px-5 text-center"
         >
           <TrendingUp className="h-10 w-10 text-muted-foreground/45" />
           <p className="mt-[var(--space-inline)] font-semibold text-foreground">Biểu đồ sẽ tải khi bạn kéo tới đây.</p>
@@ -870,7 +870,7 @@ function DashboardContent({
               aside={
                 <div className="flex h-full flex-col gap-3 rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                       Nhịp hôm nay
                     </p>
                     <span
@@ -923,7 +923,7 @@ function DashboardContent({
                       <CheckCircle2 className="h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--tone-shell-primary)]">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--tone-shell-primary)]">
                         Việc quan trọng nhất hôm nay
                       </p>
                       <h3 className="mt-1 line-clamp-2 text-lg font-bold tracking-tight text-foreground sm:text-xl">
@@ -972,7 +972,7 @@ function DashboardContent({
               title="Việc hôm nay"
               description={isDesktopViewport ? "Nhìn nhanh những việc tạo lực đẩy tuần này. Mở Hôm nay để đánh dấu và check-in." : undefined}
             >
-              <div className="grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1fr)_190px]">
+              <div className="grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1fr)_minmax(228px,280px)]">
                 {activeSystemTodayTasks.length > 0 ? (
                   <div className="grid gap-3 md:grid-cols-2">
                     {activeSystemTodayTasks.slice(0, 4).map((task) => {
@@ -1147,7 +1147,7 @@ function DashboardContent({
             >
               <Card data-testid="dashboard-main-card" className="border border-border bg-white/92 shadow-sm">
                 <CardContent className="p-5 sm:p-6">
-                  <div className="grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+                  <div className="grid gap-[var(--space-stack)] grid-cols-1 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
                     <div className="stack-tight">
                       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                         {dashboardGoalTitle}
@@ -1164,7 +1164,7 @@ function DashboardContent({
                         {activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore}% việc lặp lại
                       </p>
                     </div>
-                    <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
+                    <div className="grid gap-2 sm:grid-cols-3">
                       <div className="rounded-[var(--r-tile)] bg-muted px-4 py-3">
                         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tiến độ mục tiêu</p>
                         <p className="mt-1 text-xl font-bold text-foreground">{goalProgressSnapshot.percent}%</p>
@@ -1283,7 +1283,7 @@ function DashboardContent({
             description="Xem nhanh mục tiêu, cân bằng cuộc sống và nhật ký của bạn."
           />
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             <Reveal>
               <Card className="h-full border border-border bg-white/92 shadow-sm">
                 <CardHeader>
@@ -1461,7 +1461,7 @@ function DashboardContent({
                     {radarData.length > 0 ? (
                       <DeferredDashboardLifeAreaRadar data={radarData} />
                     ) : (
-                      <div className="flex h-[300px] flex-col items-center justify-center rounded-[var(--r-tile)] bg-muted px-5 text-center">
+                      <div className="flex h-[360px] flex-col items-center justify-center rounded-[var(--r-tile)] bg-muted px-5 text-center">
                         <TrendingUp className="h-10 w-10 text-muted-foreground/45" />
                         <p className="mt-[var(--space-inline)] font-semibold text-foreground">Chưa có dữ liệu bánh xe cuộc sống</p>
                         <p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">

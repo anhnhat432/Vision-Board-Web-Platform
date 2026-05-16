@@ -958,7 +958,7 @@ export function RootLayout() {
             showSidebar ? "lg:hidden" : ""
           }`}
         >
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-[var(--r-soft)] border border-[color:var(--border)] bg-[color-mix(in_srgb,var(--card)_94%,transparent)] px-3 py-2 shadow-[0_1px_2px_rgba(15,23,42,0.04)] backdrop-blur-xl supports-[backdrop-filter]:bg-[color-mix(in_srgb,var(--card)_82%,transparent)] sm:px-4 sm:py-2.5">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-[var(--r-soft)] border border-[color:var(--border)] bg-[color-mix(in_srgb,var(--card)_94%,transparent)] px-3 py-2 shadow-[0_1px_2px_rgba(15,23,42,0.04)] backdrop-blur-xl supports-[backdrop-filter]:bg-[color-mix(in_srgb,var(--card)_82%,transparent)] sm:px-4 sm:py-2.5">
             <div className="flex w-full items-center justify-between gap-3">
               <div className="flex min-w-0 shrink-0 items-center gap-2.5">
                 <button
@@ -1170,7 +1170,7 @@ export function RootLayout() {
           </div>
 
           {mobileMenuOpen && (
-            <div id="mobile-nav-menu" className="mx-auto mt-2 max-w-6xl md:hidden">
+            <div id="mobile-nav-menu" className="mx-auto mt-2 max-w-7xl md:hidden">
               <div className="glass-surface rounded-[var(--r-card)] p-3">
                 <nav className="space-y-1" aria-label="Menu điều hướng">
                   {user ? (
@@ -1290,7 +1290,7 @@ export function RootLayout() {
         {showSidebar ? (
           <div className="sticky top-0 z-30 hidden lg:block">
             <div className="border-b border-[color:var(--border)] bg-[color-mix(in_srgb,var(--background)_72%,transparent)] backdrop-blur-xl supports-[backdrop-filter]:bg-[color-mix(in_srgb,var(--background)_60%,transparent)]">
-              <div className="mx-auto flex h-12 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+              <div className="mx-auto flex h-12 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
                 <nav aria-label="Vị trí trang" className="flex min-w-0 items-center gap-2 text-xs">
                   <span className="text-muted-foreground">Workspace</span>
                   <span aria-hidden="true" className="text-muted-foreground/60">
@@ -1319,7 +1319,7 @@ export function RootLayout() {
         ) : null}
 
         <main
-          className={`relative z-10 mx-auto max-w-6xl px-4 pb-12 pt-5 sm:px-6 sm:pt-7 lg:px-8 ${
+          className={`relative z-10 mx-auto max-w-7xl px-4 pb-12 pt-5 sm:px-6 sm:pt-7 lg:px-8 ${
             isSignedOutVisitor ? "" : "main-content-mobile-pad"
           }`}
           id="main-content"
@@ -1339,7 +1339,7 @@ export function RootLayout() {
         ) : null}
 
         {user ? (
-          <footer className="relative z-10 mx-auto max-w-6xl px-4 pb-24 text-xs tracking-tight text-muted-foreground sm:px-6 md:pb-8 lg:px-8">
+          <footer className="relative z-10 mx-auto max-w-7xl px-4 pb-24 text-xs tracking-tight text-muted-foreground sm:px-6 md:pb-8 lg:px-8">
             <div className="flex items-center justify-center gap-2 border-t border-[color:var(--border)] pt-4 md:justify-end">
               <span className="font-semibold">v1.0</span>
               <span aria-hidden="true">·</span>

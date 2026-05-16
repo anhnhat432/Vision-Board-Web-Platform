@@ -36,7 +36,7 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-5 sm:p-6 lg:p-7">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(320px,0.72fr)] lg:items-stretch">
+        <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.88fr)] xl:items-stretch">
           <div className="flex min-w-0 flex-col justify-center space-y-5">
             <span className="inline-flex w-fit items-center gap-2 rounded-[var(--r-pill)] border border-slate-200 bg-slate-50/90 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
               <Sparkles className="h-3.5 w-3.5" />
