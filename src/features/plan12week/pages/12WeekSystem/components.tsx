@@ -207,11 +207,7 @@ export function TwelveWeekDashboardHeader({
         </>
       }
       eyebrowIcon={<PhaseChipIcon className="h-3.5 w-3.5" />}
-      title={
-        <span className="line-clamp-2 break-words">
-          <span className="text-gradient-vibrant">{activeGoal.title}</span>
-        </span>
-      }
+      title={<span className="text-gradient-vibrant break-words">{activeGoal.title}</span>}
       description={
         <span data-testid="twelve-week-header-description" className="hidden sm:block">
           Bắt đầu từ tab Hôm nay: tick việc quan trọng nhất, lưu check-in, rồi mở Tuần để review.
