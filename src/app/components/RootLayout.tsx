@@ -961,12 +961,14 @@ export function RootLayout() {
                     className="flex shrink-0 items-center gap-2.5 rounded-md text-left transition-opacity duration-150 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     aria-label="Về trang chủ Dear Our Future"
                   >
-                    <img
-                      src="/favicon-192.png"
-                      alt=""
-                      aria-hidden="true"
-                      className="size-9 rounded-md object-cover shadow-md ring-1 ring-app-accent/20"
-                    />
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-app-accent p-0.5 shadow-md">
+                      <img
+                        src="/favicon-192.png"
+                        alt=""
+                        aria-hidden="true"
+                        className="size-full rounded-sm object-cover"
+                      />
+                    </span>
                     <div className="min-w-0">
                       <span className="block truncate text-[14px] font-medium tracking-tight text-app-ink">
                         Dear Our Future
