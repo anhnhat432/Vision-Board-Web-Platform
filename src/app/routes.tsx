@@ -166,6 +166,10 @@ export const appRoutes = [
         Component: TwelveWeekSystemRoute,
       },
       {
+        path: "today-v2",
+        ...lazyRoute(() => import("./pages/TodayV2/TodayV2Page"), "TodayV2Page"),
+      },
+      {
         path: "billing/confirm",
         ...lazyRoute(() => import("./pages/BillingConfirm"), "BillingConfirm"),
       },

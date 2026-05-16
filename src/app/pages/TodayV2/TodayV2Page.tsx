@@ -1,0 +1,619 @@
+import { Check, Plus } from "lucide-react";
+import { useMemo } from "react";
+import { Link } from "react-router";
+
+import { useSyncedUserData } from "../../hooks/useSyncedUserData";
+import {
+  formatDateInputValue,
+  getActiveTwelveWeekGoal,
+  getTwelveWeekCurrentWeek,
+  getTwelveWeekTasksForWeek,
+  getTwelveWeekTodayTasks,
+  getTwelveWeekWeekCompletion,
+  getTwelveWeekWeekRange,
+  parseCalendarDate,
+  toggleTwelveWeekTask,
+  type TwelveWeekSystem,
+  type TwelveWeekTaskInstance,
+  type UserData,
+} from "../../utils/storage";
+
+const WEEKDAY_LABELS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"] as const;
+
+const MOCK_GOAL_TITLE = "Hoàn thành một chu kỳ phát triển bản thân rõ ràng";
+const MOCK_CURRENT_WEEK = 4;
+const MOCK_TOTAL_WEEKS = 12;
+const MOCK_PROGRESS_PERCENT = 42;
+
+const QUOTE = {
+  text: "Điều nhỏ được làm đều đặn sẽ đổi hướng cả một mùa sống.",
+  author: "Vision Board",
+};
+
+const LIFE_BALANCE_ROWS = [
+  { label: "Sức khoẻ", aliases: ["Health"], fallbackScore: 7 },
+  { label: "Sự nghiệp", aliases: ["Career", "Education"], fallbackScore: 6 },
+  { label: "Mối quan hệ", aliases: ["Relationships", "Family"], fallbackScore: 8 },
+  { label: "Tinh thần", aliases: ["Personal Growth", "Leisure"], fallbackScore: 5 },
+] as const;
+
+interface TodayTaskViewModel {
+  id: string;
+  title: string;
+  domain: string;
+  meta: string;
+  completed: boolean;
+  isCurrent: boolean;
+  canToggle: boolean;
+}
+
+interface WeekDayProgress {
+  key: string;
+  label: string;
+  completed: number;
+  total: number;
+  percent: number;
+  isToday: boolean;
+  isFuture: boolean;
+}
+
+interface LifeBalanceRow {
+  label: string;
+  score: number;
+}
+
+interface TodayV2ViewModel {
+  dateCaption: string;
+  currentWeek: number;
+  totalWeeks: number;
+  goalTitle: string;
+  goalProgressPercent: number;
+  tasks: TodayTaskViewModel[];
+  todayCompletedCount: number;
+  todayTotalCount: number;
+  weekCompletedCount: number;
+  weekTotalCount: number;
+  weekDays: WeekDayProgress[];
+  lifeBalanceRows: LifeBalanceRow[];
+  lastSavedLabel: string;
+  activeGoalId: string | null;
+}
+
+function addDays(date: Date, days: number): Date {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+function formatTodayCaption(date: Date): string {
+  const weekday = new Intl.DateTimeFormat("vi-VN", { weekday: "long" }).format(date);
+  return `${weekday} · Ngày ${date.getDate()} tháng ${date.getMonth() + 1}`.toLocaleUpperCase("vi-VN");
+}
+
+function formatTaskMeta(task: TwelveWeekTaskInstance): string {
+  const coreLabel = task.isCore ? "Cốt lõi" : "Bổ trợ";
+  return `${coreLabel} · Hôm nay`;
+}
+
+function getOverallGoalProgress(system: TwelveWeekSystem | null): number {
+  if (!system) return MOCK_PROGRESS_PERCENT;
+
+  const tasks = system.taskInstances.filter((task) => !task.skipped);
+  if (tasks.length === 0) return 0;
+
+  const completed = tasks.filter((task) => task.completed).length;
+  return Math.round((completed / tasks.length) * 100);
+}
+
+function buildTaskViewModels(tasks: TwelveWeekTaskInstance[], hasRealData: boolean): TodayTaskViewModel[] {
+  if (!hasRealData) {
+    return [
+      {
+        id: "mock-task-1",
+        title: "Viết 25 phút cho mục tiêu chính",
+        domain: "Tập trung sâu",
+        meta: "25 phút · ưu tiên sáng",
+        completed: false,
+        isCurrent: true,
+        canToggle: false,
+      },
+      {
+        id: "mock-task-2",
+        title: "Đi bộ hoặc vận động nhẹ",
+        domain: "Sức khoẻ",
+        meta: "20 phút · giữ năng lượng",
+        completed: true,
+        isCurrent: false,
+        canToggle: false,
+      },
+      {
+        id: "mock-task-3",
+        title: "Ghi lại một điều học được",
+        domain: "Tinh thần",
+        meta: "5 phút · cuối ngày",
+        completed: false,
+        isCurrent: false,
+        canToggle: false,
+      },
+    ];
+  }
+
+  const currentTaskId = tasks.find((task) => !task.completed)?.id ?? null;
+
+  return tasks.map((task) => ({
+    id: task.id,
+    title: task.title,
+    domain: task.leadIndicatorName,
+    meta: formatTaskMeta(task),
+    completed: task.completed,
+    isCurrent: task.id === currentTaskId,
+    canToggle: true,
+  }));
+}
+
+function buildMockWeekDays(today: Date): WeekDayProgress[] {
+  const mondayBasedIndex = (today.getDay() + 6) % 7;
+  const samples = [
+    { completed: 2, total: 3 },
+    { completed: 1, total: 2 },
+    { completed: 3, total: 3 },
+    { completed: 1, total: 3 },
+    { completed: 0, total: 2 },
+    { completed: 0, total: 1 },
+    { completed: 0, total: 1 },
+  ];
+
+  return samples.map((sample, index) => ({
+    key: `mock-day-${index}`,
+    label: WEEKDAY_LABELS[index],
+    completed: sample.completed,
+    total: sample.total,
+    percent: sample.total === 0 ? 0 : Math.round((sample.completed / sample.total) * 100),
+    isToday: index === mondayBasedIndex,
+    isFuture: index > mondayBasedIndex,
+  }));
+}
+
+function buildWeekDays(system: TwelveWeekSystem | null, currentWeek: number, today: Date): WeekDayProgress[] {
+  if (!system) return buildMockWeekDays(today);
+
+  const weekRange = getTwelveWeekWeekRange(system, currentWeek);
+  const startDate = parseCalendarDate(weekRange.start);
+  if (!startDate) return buildMockWeekDays(today);
+
+  const todayKey = formatDateInputValue(today);
+  const weekTasks = getTwelveWeekTasksForWeek(system, currentWeek).filter((task) => !task.skipped);
+
+  return WEEKDAY_LABELS.map((label, index) => {
+    const date = addDays(startDate, index);
+    const dateKey = formatDateInputValue(date);
+    const dayTasks = weekTasks.filter((task) => task.scheduledDate === dateKey);
+    const completed = dayTasks.filter((task) => task.completed).length;
+    const total = dayTasks.length;
+
+    return {
+      key: dateKey,
+      label,
+      completed,
+      total,
+      percent: total === 0 ? 0 : Math.round((completed / total) * 100),
+      isToday: dateKey === todayKey,
+      isFuture: dateKey > todayKey,
+    };
+  });
+}
+
+function getLifeBalanceRows(userData: UserData | null): LifeBalanceRow[] {
+  return LIFE_BALANCE_ROWS.map((row) => {
+    const matchedArea = userData?.currentWheelOfLife.find((area) => row.aliases.some((alias) => alias === area.name));
+    const score = Math.round(clamp(matchedArea?.score ?? row.fallbackScore, 0, 10));
+
+    return {
+      label: row.label,
+      score,
+    };
+  });
+}
+
+function getLastSavedLabel(userData: UserData | null, tasks: TwelveWeekTaskInstance[]): string {
+  const timestamps = [
+    ...tasks.map((task) => task.lastModifiedAt ?? 0),
+    ...tasks.map((task) => (task.completedAt ? Date.parse(task.completedAt) : 0)),
+    ...(userData?.goals.map((goal) => Date.parse(goal.createdAt)) ?? []),
+    ...(userData?.reflections.map((reflection) => Date.parse(reflection.date)) ?? []),
+  ].filter((value) => Number.isFinite(value) && value > 0);
+
+  if (timestamps.length === 0) return "vừa xong";
+
+  const minutes = Math.max(0, Math.round((Date.now() - Math.max(...timestamps)) / 60000));
+  if (minutes < 1) return "vừa xong";
+  if (minutes < 60) return `${minutes} phút trước`;
+
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours} giờ trước`;
+
+  return `${Math.round(hours / 24)} ngày trước`;
+}
+
+function buildTodayV2ViewModel(userData: UserData | null, today: Date): TodayV2ViewModel {
+  const activeGoal = userData ? getActiveTwelveWeekGoal(userData.goals) : null;
+  const system = activeGoal?.twelveWeekSystem ?? null;
+  const hasRealSystem = Boolean(system);
+  const currentWeek = system ? getTwelveWeekCurrentWeek(system, today) : MOCK_CURRENT_WEEK;
+  const totalWeeks = system?.totalWeeks ?? MOCK_TOTAL_WEEKS;
+  const todayTasks = system ? getTwelveWeekTodayTasks(system, today) : [];
+  const weekCompletion = system
+    ? getTwelveWeekWeekCompletion(system, currentWeek)
+    : { completed: 7, total: 14, percent: MOCK_PROGRESS_PERCENT };
+  const tasks = buildTaskViewModels(todayTasks, hasRealSystem);
+  const todayCompletedCount = tasks.filter((task) => task.completed).length;
+
+  return {
+    dateCaption: formatTodayCaption(today),
+    currentWeek,
+    totalWeeks,
+    goalTitle: activeGoal?.title ?? MOCK_GOAL_TITLE,
+    goalProgressPercent: getOverallGoalProgress(system),
+    tasks,
+    todayCompletedCount,
+    todayTotalCount: tasks.length,
+    weekCompletedCount: weekCompletion.completed,
+    weekTotalCount: weekCompletion.total,
+    weekDays: buildWeekDays(system, currentWeek, today),
+    lifeBalanceRows: getLifeBalanceRows(userData),
+    lastSavedLabel: getLastSavedLabel(userData, todayTasks),
+    activeGoalId: activeGoal?.id ?? null,
+  };
+}
+
+function TodayV2TopBar({ currentWeek }: { currentWeek: number }) {
+  const navItems = [
+    { label: "Today", href: "/today-v2", active: true },
+    { label: `Week ${currentWeek}`, href: "/12-week-system?tab=week", active: false },
+    { label: "12-Week Plan", href: "/12-week-system", active: false },
+    { label: "Reflect", href: "/journal", active: false },
+  ];
+
+  return (
+    <header className="sticky top-3 z-30 mx-auto max-w-6xl px-6">
+      <div className="flex h-14 items-center justify-between gap-4 rounded-card border border-app-line bg-app-surface/95 px-3 shadow-[0_1px_2px_rgba(26,26,26,0.04)] backdrop-blur sm:px-4">
+        <Link to="/" className="flex min-w-0 items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-app-accent text-[13px] font-semibold text-white">
+            V
+          </span>
+          <span className="truncate text-[15px] font-semibold text-app-ink">Vision Board</span>
+        </Link>
+
+        <nav className="hidden items-center gap-6 md:flex" aria-label="Today preview">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              to={item.href}
+              aria-current={item.active ? "page" : undefined}
+              className={`relative py-2 text-[14px] font-medium transition-colors duration-150 ${
+                item.active ? "text-app-ink" : "text-app-ink-muted hover:text-app-ink"
+              }`}
+            >
+              {item.label}
+              {item.active ? <span className="absolute inset-x-0 -bottom-0.5 h-0.5 rounded-full bg-app-accent" /> : null}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-app-accent-soft px-3 py-1 text-[12px] font-medium text-app-accent md:hidden">
+            Today · Tuần {currentWeek}
+          </span>
+          <div className="flex size-8 items-center justify-center rounded-full bg-app-accent-soft text-[12px] font-semibold text-app-accent">
+            VB
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function TodayV2Hero({ viewModel }: { viewModel: TodayV2ViewModel }) {
+  return (
+    <section className="grid gap-6 md:grid-cols-[minmax(0,1fr)_260px] md:items-end">
+      <div>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">{viewModel.dateCaption}</p>
+          <span className="rounded-full bg-app-accent-soft px-3 py-1 text-[12px] font-medium text-app-accent">
+            Tuần {viewModel.currentWeek} / {viewModel.totalWeeks}
+          </span>
+        </div>
+        <h1 className="mt-4 max-w-3xl font-serif text-[34px] font-medium leading-[1.12] tracking-[-0.02em] text-app-ink sm:text-[40px]">
+          Hôm nay là một ngày bình tĩnh để tiến từng bước.
+        </h1>
+      </div>
+
+      <div className="hidden rounded-card border border-app-line bg-app-surface p-5 md:block">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">12-Week Goal</p>
+        <p className="mt-2 line-clamp-2 text-[14px] font-medium leading-5 text-app-ink">{viewModel.goalTitle}</p>
+        <div className="mt-4 flex items-center gap-3">
+          <div className="h-1.5 w-[160px] overflow-hidden rounded-full bg-app-accent-soft" aria-hidden="true">
+            <div className="h-full rounded-full bg-app-accent" style={{ width: `${viewModel.goalProgressPercent}%` }} />
+          </div>
+          <span className="text-[12px] font-semibold text-app-accent">{viewModel.goalProgressPercent}%</span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TaskCheckbox({ checked, onToggle }: { checked: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-label={checked ? "Đánh dấu chưa xong" : "Đánh dấu xong"}
+      aria-pressed={checked}
+      onClick={onToggle}
+      className={`mt-0.5 flex size-[18px] shrink-0 items-center justify-center rounded-[6px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 ${
+        checked ? "border border-app-accent bg-app-accent text-white" : "border-[1.5px] border-[#C8C2B6] bg-app-surface"
+      }`}
+    >
+      {checked ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : null}
+    </button>
+  );
+}
+
+function TodayTasksCard({
+  tasks,
+  completedCount,
+  totalCount,
+  activeGoalId,
+  onTaskToggle,
+}: {
+  tasks: TodayTaskViewModel[];
+  completedCount: number;
+  totalCount: number;
+  activeGoalId: string | null;
+  onTaskToggle: (taskId: string, completed: boolean) => void;
+}) {
+  return (
+    <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-6" aria-labelledby="today-v2-tasks-title">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 id="today-v2-tasks-title" className="text-[15px] font-semibold text-app-ink">
+            Việc hôm nay
+          </h2>
+          <p className="mt-1 text-[13px] text-app-ink-muted">
+            {completedCount} trong {totalCount} việc đã xong
+          </p>
+        </div>
+        <Link
+          to="/12-week-system?tab=week"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-app-accent px-3 py-2 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Thêm việc
+        </Link>
+      </div>
+
+      <div className="mt-5 space-y-1">
+        {tasks.map((task) => (
+          <div
+            key={task.id}
+            className={`flex items-start gap-3 rounded-xl px-2 py-2.5 transition-colors duration-150 hover:bg-app-bg ${
+              task.isCurrent ? "bg-app-bg ring-1 ring-app-accent/15" : ""
+            }`}
+          >
+            <TaskCheckbox
+              checked={task.completed}
+              onToggle={() => {
+                if (!task.canToggle || !activeGoalId) return;
+                onTaskToggle(task.id, !task.completed);
+              }}
+            />
+            <div className="min-w-0 flex-1">
+              <p className={`text-[14px] font-medium leading-5 ${task.completed ? "text-app-ink-muted line-through" : "text-app-ink"}`}>
+                {task.title}
+              </p>
+              <p className="mt-0.5 text-[12px] text-app-ink-muted">
+                {task.domain} · {task.meta}
+              </p>
+            </div>
+            {task.isCurrent ? (
+              <span className="mt-0.5 shrink-0 rounded-full bg-app-accent-soft px-2.5 py-1 text-[11px] font-medium text-app-accent">
+                Đang làm
+              </span>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function getBarOpacity(percent: number): number {
+  if (percent >= 80) return 0.85;
+  if (percent >= 40) return 0.6;
+  return 0.4;
+}
+
+function WeekProgressDay({ day }: { day: WeekDayProgress }) {
+  const barContent = (() => {
+    if (day.isFuture) {
+      return <div className="h-12 w-5 rounded-md border border-dashed border-app-line bg-transparent" aria-hidden="true" />;
+    }
+
+    if (day.isToday) {
+      const fillHeight = day.total === 0 ? 18 : clamp(day.percent, 18, 100);
+      return (
+        <div className="flex h-12 w-5 items-end rounded-md bg-app-accent-soft ring-2 ring-app-accent" aria-hidden="true">
+          <div className="w-full rounded-md bg-app-accent" style={{ height: `${fillHeight}%` }} />
+        </div>
+      );
+    }
+
+    return (
+      <div
+        className="h-12 w-5 rounded-md bg-app-accent"
+        style={{ opacity: getBarOpacity(day.percent) }}
+        aria-hidden="true"
+      />
+    );
+  })();
+
+  return (
+    <div className="flex flex-col items-center gap-2 text-center">
+      <span className="text-[11px] font-medium text-app-ink-muted">{day.label}</span>
+      {barContent}
+      <span className="text-[11px] tabular-nums text-app-ink-muted">
+        {day.completed}/{day.total}
+      </span>
+    </div>
+  );
+}
+
+function WeekProgressCard({
+  currentWeek,
+  completedCount,
+  totalCount,
+  days,
+}: {
+  currentWeek: number;
+  completedCount: number;
+  totalCount: number;
+  days: WeekDayProgress[];
+}) {
+  return (
+    <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-6" aria-labelledby="today-v2-week-title">
+      <div>
+        <h2 id="today-v2-week-title" className="text-[15px] font-semibold text-app-ink">
+          Tuần {currentWeek} · Tiến độ
+        </h2>
+        <p className="mt-1 text-[13px] text-app-ink-muted">
+          {completedCount}/{totalCount} việc
+        </p>
+      </div>
+
+      <div className="mt-5 grid grid-cols-7 gap-2">
+        {days.map((day) => (
+          <WeekProgressDay key={day.key} day={day} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ReflectionPrompt() {
+  return (
+    <section className="rounded-card border border-[#F3D9CC] bg-app-warm-soft p-5 md:p-6" aria-labelledby="today-v2-reflection-title">
+      <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-[12px] font-medium text-app-warm ring-1 ring-[#F3D9CC]">
+        Phản tư cuối ngày
+      </span>
+      <h2 id="today-v2-reflection-title" className="mt-4 font-serif text-[18px] font-medium leading-7 text-[#5C3A2E]">
+        Hôm nay điều gì khiến bạn cảm thấy gần với phiên bản tốt hơn của chính mình?
+      </h2>
+      <Link
+        to="/journal"
+        className="mt-5 inline-flex rounded-lg bg-app-warm px-3.5 py-2 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-[#c56b4e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+      >
+        Viết phản tư →
+      </Link>
+    </section>
+  );
+}
+
+function LifeBalanceCard({ rows }: { rows: LifeBalanceRow[] }) {
+  return (
+    <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-6" aria-labelledby="today-v2-balance-title">
+      <div>
+        <h2 id="today-v2-balance-title" className="text-[15px] font-semibold text-app-ink">
+          Cân bằng cuộc sống
+        </h2>
+        <p className="mt-1 text-[13px] text-app-ink-muted">Tuần này so với mục tiêu</p>
+      </div>
+
+      <div className="mt-5 space-y-4">
+        {rows.map((row) => (
+          <div key={row.label}>
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <span className="text-[13px] font-medium text-app-ink-soft">{row.label}</span>
+              <span className="text-[12px] tabular-nums text-app-ink-muted">{row.score}/10</span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-[#EFEAE2]" aria-hidden="true">
+              <div className="h-full rounded-full bg-app-accent" style={{ width: `${row.score * 10}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function QuoteBlock() {
+  return (
+    <figure className="px-4 text-center">
+      <blockquote className="font-serif text-[14px] italic leading-6 text-app-ink-soft">“{QUOTE.text}”</blockquote>
+      <figcaption className="mt-2 text-[11px] font-medium uppercase tracking-[0.14em] text-app-ink-muted">
+        {QUOTE.author}
+      </figcaption>
+    </figure>
+  );
+}
+
+function TodayV2Footer({ lastSavedLabel }: { lastSavedLabel: string }) {
+  return (
+    <footer className="border-t border-app-line py-5 text-[12px] text-app-ink-muted">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <span>Đã lưu cục bộ · {lastSavedLabel}</span>
+        <span>v0.4 · Design preview</span>
+      </div>
+    </footer>
+  );
+}
+
+export function TodayV2Page() {
+  const { userData, reloadUserData } = useSyncedUserData();
+  const today = useMemo(() => new Date(), []);
+  const viewModel = useMemo(() => buildTodayV2ViewModel(userData, today), [userData, today]);
+
+  const handleTaskToggle = (taskId: string, completed: boolean) => {
+    if (!viewModel.activeGoalId) return;
+    toggleTwelveWeekTask(viewModel.activeGoalId, taskId, completed);
+    reloadUserData();
+  };
+
+  return (
+    <div className="min-h-screen bg-app-bg text-app-ink">
+      <TodayV2TopBar currentWeek={viewModel.currentWeek} />
+
+      <div className="mx-auto max-w-6xl px-4 pb-8 pt-8 sm:px-6 lg:px-0">
+        <TodayV2Hero viewModel={viewModel} />
+
+        <div className="mt-8 grid gap-5 lg:grid-cols-3">
+          <div className="space-y-5 lg:col-span-2">
+            <TodayTasksCard
+              tasks={viewModel.tasks}
+              completedCount={viewModel.todayCompletedCount}
+              totalCount={viewModel.todayTotalCount}
+              activeGoalId={viewModel.activeGoalId}
+              onTaskToggle={handleTaskToggle}
+            />
+            <WeekProgressCard
+              currentWeek={viewModel.currentWeek}
+              completedCount={viewModel.weekCompletedCount}
+              totalCount={viewModel.weekTotalCount}
+              days={viewModel.weekDays}
+            />
+          </div>
+
+          <aside className="space-y-5">
+            <ReflectionPrompt />
+            <LifeBalanceCard rows={viewModel.lifeBalanceRows} />
+            <QuoteBlock />
+          </aside>
+        </div>
+
+        <TodayV2Footer lastSavedLabel={viewModel.lastSavedLabel} />
+      </div>
+    </div>
+  );
+}

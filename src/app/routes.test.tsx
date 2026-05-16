@@ -126,6 +126,29 @@ describe("app routes", () => {
     expect(screen.getByText("Làm sao tôi biết đã thanh toán thành công?")).toBeInTheDocument();
     expect(screen.getByText(/Bạn nhận biên nhận qua email/)).toBeInTheDocument();
   });
+
+  it("resolves /today-v2 through the app route table", async () => {
+    authContextMock.useAuthContext.mockReturnValue({
+      user: { displayName: "Test User", email: "test@example.com" },
+      userProfile: { email: "test@example.com", id: "test-user", role: "user" },
+      userProfileLoading: false,
+      userProfileError: null,
+      authLoading: false,
+      error: null,
+      login: vi.fn(),
+      logout: vi.fn(),
+      refreshUserProfile: vi.fn(),
+      isConfigured: true,
+    });
+    const userData = initializeUserData();
+    saveUserData({ ...userData, onboardingCompleted: true });
+
+    renderRoute("/today-v2");
+
+    expect(await screen.findByRole("heading", { name: /Hôm nay là một ngày bình tĩnh/i })).toBeInTheDocument();
+    expect(screen.getByText("v0.4 · Design preview")).toBeInTheDocument();
+  });
+
   it("resolves /settings through the app route table", async () => {
     authContextMock.useAuthContext.mockReturnValue({
       user: { displayName: "Test User", email: "test@example.com" },
