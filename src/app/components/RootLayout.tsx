@@ -10,7 +10,6 @@ import {
   RefreshCw,
   Search,
   Settings2,
-  Sparkles,
   Sun,
   User2,
   X,
@@ -962,9 +961,12 @@ export function RootLayout() {
                     className="flex shrink-0 items-center gap-2.5 rounded-md text-left transition-opacity duration-150 hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     aria-label="Về trang chủ Dear Our Future"
                   >
-                    <div className="flex size-9 items-center justify-center rounded-md bg-app-accent">
-                      <Sparkles className="h-4 w-4 text-white" strokeWidth={2.4} />
-                    </div>
+                    <img
+                      src="/favicon-192.png"
+                      alt=""
+                      aria-hidden="true"
+                      className="size-9 rounded-md object-cover"
+                    />
                     <div className="min-w-0">
                       <span className="block truncate text-[14px] font-medium tracking-tight text-app-ink">
                         Dear Our Future

@@ -8,7 +8,6 @@ import {
   LogOut,
   Moon,
   Settings as SettingsIcon,
-  Sparkles,
   Sun,
   User as UserIcon,
 } from "lucide-react";
@@ -77,9 +76,12 @@ export function AppSidebar({
           className="flex items-center gap-2.5 rounded-lg text-left transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
           aria-label="Về trang chủ Dear Our Future"
         >
-          <div className="flex size-9 items-center justify-center rounded-lg bg-app-accent shadow-sm">
-            <Sparkles className="h-4 w-4 text-white" strokeWidth={2.4} />
-          </div>
+          <img
+            src="/favicon-192.png"
+            alt=""
+            aria-hidden="true"
+            className="size-9 rounded-lg object-cover shadow-sm"
+          />
           <div className="min-w-0">
             <span className="block truncate text-[15px] font-semibold tracking-tight text-app-ink">
               Dear Our Future
