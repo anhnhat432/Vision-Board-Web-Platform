@@ -2,7 +2,7 @@
 
 exports[`PrimaryActionCard > renders the default hero shell with tokenized card spacing 1`] = `
 <div
-  class="glass-surface text-card-foreground flex flex-col rounded-[var(--r-card)] border-2 bg-white/94 shadow-sm border-primary gap-[var(--space-stack)] p-[var(--space-loose)] hero-surface"
+  class="glass-surface text-card-foreground flex flex-col rounded-[var(--r-card)] border bg-card shadow-sm border-primary gap-[var(--space-stack)] p-[var(--space-loose)] shadow-[var(--shadow-3)]"
   data-card-hovering="false"
   data-slot="card"
   style="--card-pointer-x: 0.5; --card-pointer-y: 0.5; --card-rotate-x: 0deg; --card-rotate-y: 0deg; --card-shift-x: 0px; --card-shift-y: 0px;"

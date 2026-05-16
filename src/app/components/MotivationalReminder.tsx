@@ -88,18 +88,18 @@ export function MotivationalReminder() {
   if (!showReminder) return null;
 
   const content = (
-      <Card className="max-w-full overflow-hidden rounded-[var(--r-tile)] border border-white/10 gradient-dark-teal text-white shadow-lg">
+      <Card className="max-w-full overflow-hidden rounded-[var(--r-tile)] border border-[color:var(--border)] bg-card shadow-[var(--shadow-2)]">
         <CardContent className="space-y-2.5 p-3 sm:space-y-3 sm:p-4">
           {reminder ? (
             <div className="flex items-start gap-2.5">
-              <BellRing className="mt-1 h-5 w-5 flex-shrink-0" />
+              <BellRing className="mt-1 h-5 w-5 flex-shrink-0 text-[color:var(--tone-shell-primary)]" />
               <div className="min-w-0 flex-1">
-                <p className="break-words font-semibold">{reminder.title}</p>
-                <p className="mt-1 hidden line-clamp-2 break-words text-sm text-white/82 sm:block">{reminder.description}</p>
+                <p className="break-words font-semibold text-foreground">{reminder.title}</p>
+                <p className="mt-1 hidden line-clamp-2 break-words text-sm text-muted-foreground sm:block">{reminder.description}</p>
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="hero-cta mt-2 h-10 border-white/18 bg-white px-3 text-xs text-slate-900 hover:bg-white/92"
+                  glow
+                  className="mt-2 h-10 px-3 text-xs"
                   onClick={() => {
                     setShowReminder(false);
                     if (reminder.goalId) {
@@ -114,7 +114,7 @@ export function MotivationalReminder() {
               </div>
               <button
                 onClick={() => setShowReminder(false)}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-pill)] text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-pill)] text-muted-foreground transition hover:bg-[color:var(--muted)] hover:text-foreground"
                 aria-label="Đóng nhắc việc"
                 type="button"
               >
@@ -123,14 +123,14 @@ export function MotivationalReminder() {
             </div>
           ) : (
             <div className="flex items-start gap-2.5">
-              <Sparkles className="mt-1 h-5 w-5 flex-shrink-0" />
+              <Sparkles className="mt-1 h-5 w-5 flex-shrink-0 text-[color:var(--tone-shell-primary)]" />
               <div className="min-w-0 flex-1">
-                <p className="font-semibold">Cảm hứng hôm nay</p>
-                <p className="line-clamp-2 text-sm italic text-white/90">"{quote}"</p>
+                <p className="font-semibold text-foreground">Cảm hứng hôm nay</p>
+                <p className="line-clamp-2 text-sm italic text-muted-foreground">"{quote}"</p>
               </div>
               <button
                 onClick={() => setShowReminder(false)}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-pill)] text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-pill)] text-muted-foreground transition hover:bg-[color:var(--muted)] hover:text-foreground"
                 aria-label="Đóng thông điệp"
                 type="button"
               >

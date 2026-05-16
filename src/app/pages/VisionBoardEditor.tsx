@@ -255,7 +255,7 @@ function DraggableItem({ item, onUpdate, onDelete }: DraggableItemProps) {
 
         {item.type === "quote" && (
           <div
-            className="rounded-[var(--r-card)] border border-white/80 gradient-white-panel p-5 shadow-2xl"
+            className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-5 shadow-[var(--shadow-3)]"
             style={{ width: `${item.width}px` }}
           >
             <div className="flex items-center gap-2 text-violet-600">

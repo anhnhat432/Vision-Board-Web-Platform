@@ -133,12 +133,12 @@ export function UpgradePaywallDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[calc(100vh-1rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] overflow-hidden border-0 gradient-shell p-0 shadow-2xl sm:!max-w-4xl">
+      <DialogContent className="max-h-[calc(100vh-1rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] overflow-hidden border-0 bg-card p-0 shadow-[var(--shadow-4)] sm:!max-w-4xl">
         <div className="max-h-[calc(100vh-1rem)] overflow-hidden rounded-[var(--r-card)] sm:rounded-[var(--r-card)]">
-          <div className="border-b border-white/70 gradient-dark-indigo px-5 py-6 text-white sm:px-7 sm:py-7">
+          <div className="border-b border-white/15 gradient-brand px-5 py-6 text-primary-foreground sm:px-7 sm:py-7">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="max-w-2xl">
-                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/78">
+                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/12 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/82">
                   <LockKeyhole className="h-3.5 w-3.5" />
                   Plus cho hệ 12 tuần
                 </div>
@@ -146,14 +146,14 @@ export function UpgradePaywallDialog({
                   <DialogTitle className="text-3xl font-bold leading-tight text-white">
                     {title ?? paywallCopy.title}
                   </DialogTitle>
-                  <DialogDescription className="mt-2 max-w-xl text-sm leading-7 text-white/74">
+                  <DialogDescription className="mt-2 max-w-xl text-sm leading-7 text-white/82">
                     {description ?? paywallCopy.description}
                   </DialogDescription>
                 </DialogHeader>
               </div>
-              <div className="rounded-[var(--r-card)] border border-white/12 bg-white/10 px-4 py-4 text-left sm:text-right">
-                <BillingPlusIllustration className="mb-2 ml-auto hidden w-20 text-white opacity-70 sm:block" />
-                <p className="text-xs uppercase tracking-[0.16em] text-white/56">Gói hiện tại</p>
+              <div className="rounded-[var(--r-card)] border border-white/18 bg-white/12 px-4 py-4 text-left sm:text-right">
+                <BillingPlusIllustration className="mb-2 ml-auto hidden w-20 text-white opacity-80 sm:block" />
+                <p className="text-xs uppercase tracking-[0.16em] text-white/64">Gói hiện tại</p>
                 <p className="mt-2 text-2xl font-bold text-white">{getPlanLabel(currentPlan)}</p>
               </div>
             </div>

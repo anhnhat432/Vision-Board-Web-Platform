@@ -295,7 +295,7 @@ export function Dashboard() {
 
   if (!userData) {
     return (
-      <div className="ops-shell ops-dashboard">
+      <div className="stack-section pb-12">
         {/* Hero card skeleton */}
         <Skeleton className="h-56 rounded-[var(--r-card)]" />
         {/* Quick action tiles skeleton */}
@@ -652,7 +652,7 @@ function DashboardContent({
     : DASHBOARD_TOUR_STEPS;
 
   return (
-    <div className={`ops-shell ops-dashboard ${showMobileStickyCTA ? 'pb-24' : ''}`}>
+    <div className={`stack-section ${showMobileStickyCTA ? 'pb-24' : 'pb-12'}`}>
       {!isSignedOut ? <h1 className="sr-only">Trang chính</h1> : null}
       <UpgradePaywallDialog
         open={isUpgradeDialogOpen}

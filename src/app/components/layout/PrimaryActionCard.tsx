@@ -95,10 +95,10 @@ export function PrimaryActionCard({
   return (
     <Card
       className={cn(
-        "rounded-[var(--r-card)] border-2 bg-white/94 shadow-sm",
+        "rounded-[var(--r-card)] border bg-card shadow-sm",
         toneClass[tone],
         densityClass[density],
-        hero && "hero-surface",
+        hero && "shadow-[var(--shadow-3)]",
         glow && "brand-glow-pulse",
         appear && "appear-fade-up",
         className,

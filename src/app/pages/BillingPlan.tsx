@@ -783,11 +783,9 @@ export function BillingPlan() {
       {/* Current plan */}
       <SectionBlock title="Khu vực gói đang dùng" headerVisuallyHidden>
         <PrimaryActionCard
-          className="flow-panel"
-          tone={currentPlanCode === "FREE" ? "primary" : "violet"}
           title="Gói hiện tại"
           titleAs="h2"
-          titleClassName="text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl"
+          titleClassName="text-xl font-semibold tracking-tight text-foreground sm:text-2xl"
           eyebrow="Tài khoản"
           icon={<Crown className="h-4 w-4" />}
           description={
@@ -851,18 +849,18 @@ export function BillingPlan() {
 
           {isPaidPlan && (
             <div className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
-              <div className="flow-muted p-4">
+              <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
                 <p className="text-slate-500">Gia hạn</p>
                 <p className="font-medium text-slate-900">{renewalLabel}</p>
               </div>
-              <div className="flow-muted p-4">
+              <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
                 <p className="text-slate-500">Đơn vị thanh toán</p>
                 <p className="flex items-center gap-2 font-medium text-slate-900">
                   <CreditCard className="h-4 w-4 text-slate-500" />
                   Thanh toán qua {providerLabel}
                 </p>
               </div>
-              <div className="flow-muted p-4">
+              <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
                 <p className="text-slate-500">Trạng thái</p>
                 <p className="font-medium text-slate-900">
                   {isInRenewalPriority
@@ -878,7 +876,7 @@ export function BillingPlan() {
                             : "Đang chuẩn bị"}
                 </p>
               </div>
-              <div className="flow-muted p-4">
+              <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
                 <p className="text-slate-500">Chu kỳ</p>
                 <p className="font-medium text-slate-900">
                   {subscription?.billingCycle === "monthly"
@@ -938,7 +936,7 @@ export function BillingPlan() {
       {/* Payment history */}
       {realMode && (
         <SectionBlock title="Khu vực lịch sử thanh toán" headerVisuallyHidden>
-          <Card className="flow-panel">
+          <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ReceiptText className="h-5 w-5 text-sky-600" />
@@ -950,14 +948,14 @@ export function BillingPlan() {
           </CardHeader>
           <CardContent className="stack-stack">
             {isLoadingPaymentHistory && (
-              <div className="flow-muted flex items-center gap-3 p-4 text-sm text-slate-600">
+              <div className="flex items-center gap-3 rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Đang tải lịch sử thanh toán...
               </div>
             )}
 
             {!isLoadingPaymentHistory && paymentHistoryError && (
-              <div className="flow-muted flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-red-700">{paymentHistoryError}</p>
                 <Button variant="outline" size="sm" onClick={loadPaymentHistory}>
                   Thử lại
@@ -966,7 +964,7 @@ export function BillingPlan() {
             )}
 
             {!isLoadingPaymentHistory && !paymentHistoryError && paymentHistory.length === 0 && (
-              <div className="flow-muted p-4">
+              <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
                 <p className="text-sm font-medium text-slate-900">Chưa có giao dịch nào.</p>
                 <p className="mt-1 text-sm text-slate-600">
                   Khi đơn vị thanh toán gửi lịch sử thanh toán, giao dịch và hóa đơn sẽ xuất hiện tại đây.
@@ -1067,7 +1065,7 @@ export function BillingPlan() {
       {/* Billing support */}
       {realMode && (
         <SectionBlock title="Khu vực hỗ trợ thanh toán" headerVisuallyHidden>
-          <Card className="flow-panel">
+          <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <LifeBuoy className="h-5 w-5 text-teal-600" />
@@ -1078,7 +1076,7 @@ export function BillingPlan() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
-            <div className="flow-muted p-4">
+            <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
               <p className="text-sm text-slate-500">Email hỗ trợ</p>
               <p className="mt-1 font-medium text-slate-900">
                 {BILLING_SUPPORT_EMAIL || "Chưa cấu hình email hỗ trợ"}
@@ -1142,7 +1140,7 @@ export function BillingPlan() {
 
       {/* Entitlements */}
       <SectionBlock title="Khu vực quyền truy cập" headerVisuallyHidden>
-        <Card className="flow-panel">
+        <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-emerald-600" />
@@ -1196,7 +1194,7 @@ export function BillingPlan() {
 
       {/* Actions */}
       <SectionBlock title="Khu vực thao tác gói" headerVisuallyHidden>
-        <Card className="flow-panel">
+        <Card>
         <CardHeader>
           <CardTitle>Thao tác</CardTitle>
           <CardDescription>
@@ -1237,7 +1235,7 @@ export function BillingPlan() {
 
       {/* Billing provider info (debug only) */}
       {shouldShowBillingDebugUi() && (
-        <Card className="flow-panel">
+        <Card>
           <CardHeader>
             <CardTitle className="text-sm">Thông tin nhà cung cấp thanh toán</CardTitle>
           </CardHeader>
@@ -1267,7 +1265,7 @@ export function BillingPlan() {
 
       {/* Compare plans */}
       <SectionBlock title="Khu vực so sánh gói" headerVisuallyHidden>
-        <Card className="flow-panel">
+        <Card>
         <CardHeader>
           <CardTitle>So sánh các gói</CardTitle>
           <CardDescription>So sánh Miễn phí với Plus.</CardDescription>

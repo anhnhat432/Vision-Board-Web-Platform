@@ -917,19 +917,7 @@
       );
   }
 
-  .surface-aurora {
-    background:
-      radial-gradient(
-        60% 80% at 20% 0%,
-        color-mix(in oklab, var(--color-primary) 18%, transparent) 0%,
-        transparent 60%
-      ),
-      radial-gradient(
-        60% 80% at 100% 100%,
-        color-mix(in oklab, var(--color-accent) 14%, transparent) 0%,
-        transparent 60%
-      );
-  }
+  /* .surface-aurora removed — superseded by simple Card + token shadows. */
 
   .surface-glass {
     background: color-mix(in oklab, var(--color-surface) 80%, transparent);
@@ -971,12 +959,7 @@
     );
   }
 
-  .ring-soft-glow {
-    box-shadow:
-      0 1px 0 0 color-mix(in oklab, var(--color-border) 60%, transparent),
-      0 8px 24px -12px
-        color-mix(in oklab, var(--color-primary) 35%, transparent);
-  }
+  /* .ring-soft-glow removed — use Tailwind ring + shadow utilities instead. */
 
   .border-gradient-violet-rose {
     border-image: linear-gradient(
@@ -998,37 +981,9 @@
     color: transparent;
   }
 
-  .text-gradient-aurora {
-    background: linear-gradient(
-      135deg,
-      var(--vivid-violet),
-      var(--vivid-fuchsia),
-      var(--vivid-cyan)
-    );
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    animation: gradient-flow 12s ease-in-out infinite;
-  }
+  /* .text-gradient-aurora removed — use .text-gradient-vibrant instead. */
 
-  .glow-vivid {
-    box-shadow:
-      0 0 0 1px color-mix(in oklab, var(--vivid-violet) 30%, transparent),
-      0 8px 32px -8px color-mix(in oklab, var(--vivid-violet) 40%, transparent),
-      0 16px 48px -16px
-        color-mix(in oklab, var(--vivid-fuchsia) 30%, transparent);
-  }
-
-  .featured-surface {
-    background:
-      linear-gradient(
-        135deg,
-        color-mix(in oklab, var(--vivid-violet) 12%, transparent),
-        color-mix(in oklab, var(--vivid-fuchsia) 8%, transparent)
-      ),
-      var(--color-surface);
-  }
+  /* .glow-vivid, .featured-surface removed — use shadow-[var(--shadow-glow)] or FeaturedCard ring helpers. */
 
   .glass-surface {
     background: #ffffff;
@@ -1042,7 +997,7 @@
   }
 
   @media (hover: hover) {
-    .glass-surface:not(.hero-surface):hover {
+    .glass-surface:hover {
       box-shadow: var(--shadow-3);
       border-color: rgba(15, 23, 42, 0.1);
       transform: translateY(-1px);
@@ -1076,7 +1031,7 @@
   }
 
   @media (hover: hover) {
-    .glass-surface-gradient-border:not(.hero-surface):hover {
+    .glass-surface-gradient-border:hover {
       background:
         linear-gradient(rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.88))
           padding-box,
@@ -1259,7 +1214,6 @@
     .twinkle-slow,
     .twinkle-fast,
     .gradient-flow,
-    .text-gradient-aurora,
     .float-subtle {
       animation: none;
     }
@@ -1377,79 +1331,7 @@
     opacity: 1;
   }
 
-  .hero-surface {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-    transform-style: preserve-3d;
-    background:
-      radial-gradient(
-        circle at top right,
-        rgba(255, 255, 255, 0.12),
-        transparent 24%
-      ),
-      linear-gradient(
-        135deg,
-        var(--tone-hero-start) 0%,
-        var(--tone-hero-mid) 38%,
-        var(--tone-hero-accent) 72%,
-        var(--tone-hero-end) 100%
-      );
-    box-shadow: 0 20px 48px -28px var(--tone-hero-shadow);
-    transition:
-      box-shadow 150ms ease,
-      filter 150ms ease;
-  }
-
-  .hero-surface:hover {
-    box-shadow: 0 24px 56px -32px
-      color-mix(in srgb, var(--tone-hero-shadow) 96%, transparent);
-  }
-
-  .hero-surface > [data-slot="card-content"] {
-    position: relative;
-    z-index: 1;
-  }
-
-  .hero-surface::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: linear-gradient(
-      115deg,
-      rgba(255, 255, 255, 0) 10%,
-      rgba(255, 255, 255, 0.08) 40%,
-      rgba(255, 255, 255, 0.02) 56%,
-      rgba(255, 255, 255, 0) 78%
-    );
-    mix-blend-mode: screen;
-    opacity: 0.16;
-    transform: none;
-    animation: none;
-  }
-
-  .hero-surface::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    border-radius: inherit;
-    background: radial-gradient(
-      circle at calc(var(--hero-pointer-x, 0.5) * 100%)
-        calc(var(--hero-pointer-y, 0.5) * 100%),
-      rgba(255, 255, 255, 0.18) 0%,
-      rgba(255, 255, 255, 0.05) 18%,
-      rgba(255, 255, 255, 0) 48%
-    );
-    opacity: 0;
-    transition: opacity 220ms ease;
-    mix-blend-mode: screen;
-  }
-
-  .hero-surface[data-hero-hovering="true"]::after {
-    opacity: 1;
-  }
+  /* .hero-surface removed — Login + MockBillingCheckout now use Card + token shadows directly. */
 
   .page-transition-shell {
     position: relative;
@@ -2419,42 +2301,11 @@
 
   /* ── Gradient card utility classes (light + dark) ──── */
 
-  /* Dark-base gradients (look fine in both modes) */
-  .gradient-dark {
-    background: linear-gradient(
-      135deg,
-      rgba(15, 23, 42, 0.98) 0%,
-      rgba(30, 41, 59, 0.94) 100%
-    );
-  }
-  .gradient-dark-indigo {
-    background: linear-gradient(
-      135deg,
-      rgba(15, 23, 42, 0.98) 0%,
-      rgba(14, 116, 144, 0.9) 100%
-    );
-  }
-  .gradient-dark-sky {
-    background: linear-gradient(
-      135deg,
-      rgba(8, 47, 73, 0.95) 0%,
-      rgba(3, 105, 161, 0.88) 100%
-    );
-  }
-  .gradient-dark-teal {
-    background: linear-gradient(
-      135deg,
-      rgba(15, 23, 42, 0.98) 0%,
-      rgba(14, 116, 144, 0.92) 100%
-    );
-  }
-  .gradient-indigo-purple {
-    background: linear-gradient(
-      135deg,
-      rgba(30, 64, 175, 0.96) 0%,
-      rgba(8, 145, 178, 0.9) 100%
-    );
-  }
+  /*
+   * Legacy dark gradient utilities (.gradient-dark*, .gradient-indigo-purple)
+   * removed. Use .gradient-brand for accent surfaces or token bg-card for
+   * neutral surfaces.
+   */
   .gradient-brand {
     background: linear-gradient(
       135deg,
@@ -2607,34 +2458,10 @@
     );
   }
 
-  .gradient-shell {
-    background: #ffffff;
-  }
-  .dark .gradient-shell {
-    background: #111114;
-  }
-
-  .gradient-white-panel {
-    background: #ffffff;
-  }
-  .dark .gradient-white-panel {
-    background: #111114;
-  }
-
-  .gradient-violet-pink {
-    background: linear-gradient(
-      135deg,
-      rgba(239, 246, 255, 0.95) 0%,
-      rgba(204, 251, 241, 0.72) 100%
-    );
-  }
-  .dark .gradient-violet-pink {
-    background: linear-gradient(
-      135deg,
-      rgba(139, 92, 246, 0.15) 0%,
-      rgba(236, 72, 153, 0.1) 100%
-    );
-  }
+  /*
+   * .gradient-shell, .gradient-white-panel, .gradient-violet-pink removed
+   * — use `bg-card` and `gradient-brand` tokens instead.
+   */
 
   /* FeasibilityCheck section title/panel pairs */
   .gradient-emerald-title {
@@ -2738,15 +2565,7 @@
       linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
   }
 
-  /* Dark-accent special combinations */
-  .gradient-dark-blue-accent {
-    background: linear-gradient(
-      135deg,
-      rgba(15, 23, 42, 0.98) 0%,
-      rgba(14, 116, 144, 0.92) 54%,
-      rgba(13, 148, 136, 0.84) 100%
-    );
-  }
+  /* .gradient-dark-blue-accent removed — use gradient-brand. */
 
   .gradient-teal-dark-subtle {
     background: linear-gradient(
@@ -2863,7 +2682,7 @@
   }
 
   @media (hover: hover) {
-    .dark .glass-surface:not(.hero-surface):hover {
+    .dark .glass-surface:hover {
       border-color: rgba(255, 255, 255, 0.14);
       box-shadow:
         0 0 0 1px rgba(255, 255, 255, 0.06),
@@ -3132,276 +2951,11 @@
 }
 
 @layer components {
-  .ops-shell {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    padding-bottom: 3rem;
-  }
-
-  .ops-shell > * {
-    min-width: 0;
-  }
-
-  .ops-surface {
-    border: 1px solid var(--surface-stroke);
-    background: var(--surface-panel);
-    box-shadow: var(--shadow-panel);
-  }
-
-  .ops-surface-muted {
-    border: 1px solid var(--surface-stroke);
-    background: var(--surface-panel-muted);
-  }
-
-  .ops-metric-tile {
-    border: 1px solid var(--surface-stroke);
-    background: rgba(248, 250, 252, 0.78);
-    box-shadow: 0 10px 28px -24px rgba(15, 23, 42, 0.28);
-  }
-
-  .ops-shell [data-slot="card"],
-  .ops-shell .rounded-\[32px\],
-  .ops-shell .rounded-\[28px\],
-  .ops-shell .rounded-\[26px\],
-  .ops-shell .rounded-\[24px\],
-  .ops-shell .rounded-\[22px\],
-  .ops-shell .rounded-\[20px\],
-  .ops-shell .rounded-3xl,
-  .ops-shell .rounded-2xl {
-    border-radius: 0.5rem !important;
-  }
-
-  .ops-shell .glass-surface {
-    box-shadow: 0 16px 42px -34px rgba(15, 23, 42, 0.34);
-  }
-
-  @media (min-width: 768px) {
-    .ops-shell {
-      gap: 1.5rem;
-    }
-  }
-
-  .ops-shell .hero-surface {
-    color: #0f172a !important;
-    border: 1px solid rgba(148, 163, 184, 0.28) !important;
-    background:
-      linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.96),
-        rgba(248, 250, 252, 0.9)
-      ),
-      linear-gradient(90deg, rgba(15, 23, 42, 0.06), rgba(14, 165, 233, 0.05)) !important;
-    box-shadow: 0 18px 44px -36px rgba(15, 23, 42, 0.38) !important;
-  }
-
-  .ops-shell .hero-surface > [data-slot="card-content"] > .absolute {
-    display: none;
-  }
-
-  .ops-shell .hero-surface .text-white {
-    color: #0f172a !important;
-  }
-
-  .ops-shell .hero-surface [class*="text-white/"] {
-    color: rgba(51, 65, 85, 0.78) !important;
-  }
-
-  .ops-shell .hero-surface [class*="border-white/"] {
-    border-color: rgba(203, 213, 225, 0.8) !important;
-  }
-
-  .ops-shell .hero-surface [class*="bg-white/"],
-  .ops-shell .hero-surface [class*="bg-black/"] {
-    background-color: rgba(248, 250, 252, 0.86) !important;
-  }
-
-  .ops-shell .hero-surface .shadow-\[0_26px_70px_-34px_rgba\(0\,0\,0\,0\.38\)\],
-  .ops-shell
-    .hero-surface
-    .shadow-\[0_20px_48px_-30px_rgba\(0\,0\,0\,0\.32\)\] {
-    box-shadow: 0 12px 30px -28px rgba(15, 23, 42, 0.3) !important;
-  }
-
-  .ops-dashboard .gradient-dark,
-  .ops-system .gradient-dark,
-  .ops-system .gradient-dark-blue-accent,
-  .ops-system .gradient-dark-sky {
-    background: #123047 !important;
-  }
-
-  .ops-shell .gradient-slate,
-  .ops-shell .gradient-sky,
-  .ops-shell .gradient-violet,
-  .ops-shell .gradient-violet-warm {
-    border: 1px solid rgba(203, 213, 225, 0.78) !important;
-    background: rgba(255, 255, 255, 0.9) !important;
-    box-shadow: 0 14px 34px -30px rgba(15, 23, 42, 0.28) !important;
-  }
-
-  .ops-system .gradient-purple-vivid {
-    background: #0f766e !important;
-  }
-
-  .ops-system-panel [data-slot="card"] {
-    border-color: rgba(203, 213, 225, 0.78);
-  }
-
-  .ops-system .bg-violet-50,
-  .ops-system .bg-violet-50\/70,
-  .ops-system .bg-violet-50\/75,
-  .ops-system .bg-violet-50\/85 {
-    background-color: rgba(239, 246, 255, 0.82) !important;
-  }
-
-  .ops-system .bg-violet-100 {
-    background-color: rgba(207, 250, 254, 0.82) !important;
-  }
-
-  .ops-system .bg-violet-600,
-  .ops-system .hover\:bg-violet-600:hover {
-    background-color: #2563eb !important;
-  }
-
-  .ops-system .border-violet-100,
-  .ops-system .border-violet-200,
-  .ops-system .border-violet-200\/70,
-  .ops-system .border-violet-300 {
-    border-color: rgba(14, 165, 233, 0.24) !important;
-  }
-
-  .ops-system .text-violet-500,
-  .ops-system .text-violet-600,
-  .ops-system .text-violet-700,
-  .ops-system .text-violet-800,
-  .ops-system .text-violet-900 {
-    color: #0369a1 !important;
-  }
-
-  .flow-shell {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    max-width: 100vw;
-    overflow-x: hidden;
-    padding-bottom: 3rem;
-    width: 100%;
-  }
-
-  .flow-shell *,
-  .flow-shell *::before,
-  .flow-shell *::after {
-    box-sizing: border-box;
-  }
-
-  .flow-shell > *,
-  .flow-shell [data-slot="card-content"],
-  .flow-shell [data-slot="card"],
-  .flow-shell .flow-panel,
-  .flow-shell .flow-muted,
-  .flow-shell .grid,
-  .flow-shell .flex {
-    max-width: 100%;
-    min-width: 0;
-  }
-
-  .flow-shell [data-slot="card"],
-  .flow-shell .flow-panel,
-  .flow-shell .flow-muted {
-    width: 100%;
-  }
-
-  .flow-shell h1,
-  .flow-shell h2,
-  .flow-shell h3,
-  .flow-shell p,
-  .flow-shell span {
-    overflow-wrap: break-word;
-  }
-
-  .flow-shell [data-slot="card"],
-  .flow-shell .rounded-\[32px\],
-  .flow-shell .rounded-\[28px\],
-  .flow-shell .rounded-\[26px\],
-  .flow-shell .rounded-\[24px\],
-  .flow-shell .rounded-\[22px\],
-  .flow-shell .rounded-\[20px\],
-  .flow-shell .rounded-3xl,
-  .flow-shell .rounded-2xl {
-    border-radius: 0.5rem !important;
-  }
-
-  .flow-surface {
-    border: 1px solid rgba(148, 163, 184, 0.28) !important;
-    border-radius: 0.5rem !important;
-    background: rgba(255, 255, 255, 0.96) !important;
-    box-shadow: 0 18px 44px -36px rgba(15, 23, 42, 0.38) !important;
-  }
-
-  .flow-panel {
-    border: 1px solid rgba(203, 213, 225, 0.78) !important;
-    border-radius: 0.5rem !important;
-    background: rgba(255, 255, 255, 0.9) !important;
-    box-shadow: 0 14px 34px -30px rgba(15, 23, 42, 0.28) !important;
-  }
-
-  .flow-muted {
-    border: 1px solid rgba(203, 213, 225, 0.78) !important;
-    border-radius: 0.5rem !important;
-    background: rgba(248, 250, 252, 0.86) !important;
-  }
-
-  .flow-shell .hero-surface {
-    color: #0f172a !important;
-    border: 1px solid rgba(148, 163, 184, 0.28) !important;
-    background: rgba(255, 255, 255, 0.96) !important;
-    box-shadow: 0 18px 44px -36px rgba(15, 23, 42, 0.38) !important;
-    transform: none !important;
-  }
-
-  .flow-shell .hero-surface:hover {
-    box-shadow: 0 18px 44px -36px rgba(15, 23, 42, 0.38) !important;
-  }
-
-  .flow-shell .hero-surface::before,
-  .flow-shell .hero-surface::after,
-  .flow-shell .hero-surface > [data-slot="card-content"] > .absolute {
-    display: none;
-  }
-
-  .flow-shell .hero-surface > [data-slot="card-content"] {
-    transform: none !important;
-  }
-
-  .flow-shell .hero-surface .text-white {
-    color: #0f172a !important;
-  }
-
-  .flow-shell .hero-surface [class*="text-white/"] {
-    color: rgba(51, 65, 85, 0.78) !important;
-  }
-
-  .flow-shell .hero-surface [class*="border-white/"] {
-    border-color: rgba(203, 213, 225, 0.8) !important;
-  }
-
-  .flow-shell .hero-surface [class*="bg-white/"],
-  .flow-shell .hero-surface [class*="bg-black/"] {
-    background-color: rgba(248, 250, 252, 0.86) !important;
-  }
-
-  .flow-shell .hero-cta,
-  .flow-shell .hero-surface .hero-cta {
-    border-color: #0f172a !important;
-    background: #0f172a !important;
-    color: #ffffff !important;
-  }
-
-  .flow-shell .gradient-violet-pink {
-    border: 1px solid rgba(203, 213, 225, 0.78) !important;
-    background: rgba(248, 250, 252, 0.86) !important;
-  }
+  /*
+   * .ops-* and .flow-* legacy shells removed.
+   * Pages now use RootLayout <main> wrapper + <PageShell> + <stack-section>.
+   * If you need a wrapper, use `stack-section pb-12` directly.
+   */
 
   /* ── Elevation utilities ───────────────────────────────────
    * Drop-in shadow scale that pairs with --shadow-1..5 tokens.
@@ -3683,7 +3237,6 @@
 
   .button-magnetic,
   .card-interactive-base,
-  .hero-surface,
   .page-enter,
   .page-transition-shell,
   .reveal-block,

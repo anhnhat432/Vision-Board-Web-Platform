@@ -95,8 +95,6 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Toaster } from "./ui/sonner";
-import { useReducedMotion } from "./ui/use-reduced-motion";
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -183,7 +181,6 @@ export function RootLayout() {
     scopeKey: userProfile?.id ?? null,
   });
   const { resolvedTheme, setTheme } = useTheme();
-  const prefersReducedMotion = useReducedMotion();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [desktopMoreOpen, setDesktopMoreOpen] = useState(false);
   const desktopMoreRef = useRef<HTMLDivElement | null>(null);
@@ -422,74 +419,6 @@ export function RootLayout() {
     setLocalDataMigrationCandidate(candidate);
     setIsLocalDataMigrationPromptOpen(true);
   }, [demoMode, shouldShowWorkspaceGate, user]);
-
-  useEffect(() => {
-    const currentPath = location.pathname;
-    if (!currentPath || typeof window === "undefined" || prefersReducedMotion) {
-      return;
-    }
-
-    const heroCards = Array.from(document.querySelectorAll<HTMLElement>(".hero-surface")).filter(
-      (card) => !card.closest(".interactive-surface"),
-    );
-
-    const resetCard = (card: HTMLElement) => {
-      card.style.setProperty("--hero-pointer-x", "0.5");
-      card.style.setProperty("--hero-pointer-y", "0.5");
-      card.style.setProperty("--hero-rotate-x", "0deg");
-      card.style.setProperty("--hero-rotate-y", "0deg");
-      card.style.setProperty("--hero-shift-x", "0px");
-      card.style.setProperty("--hero-shift-y", "0px");
-      card.dataset.heroHovering = "false";
-    };
-
-    const cleanups = heroCards.map((card) => {
-      resetCard(card);
-
-      const handleMove = (event: PointerEvent) => {
-        if (event.pointerType === "touch") return;
-
-        const bounds = card.getBoundingClientRect();
-        if (bounds.width === 0 || bounds.height === 0) return;
-
-        const pointerX = Math.min(Math.max((event.clientX - bounds.left) / bounds.width, 0), 1);
-        const pointerY = Math.min(Math.max((event.clientY - bounds.top) / bounds.height, 0), 1);
-        const rotateX = ((0.5 - pointerY) * 3.5).toFixed(3);
-        const rotateY = ((pointerX - 0.5) * 3.5).toFixed(3);
-        const shiftX = ((pointerX - 0.5) * 6).toFixed(2);
-        const shiftY = ((pointerY - 0.5) * 6).toFixed(2);
-
-        card.style.setProperty("--hero-pointer-x", pointerX.toFixed(4));
-        card.style.setProperty("--hero-pointer-y", pointerY.toFixed(4));
-        card.style.setProperty("--hero-rotate-x", `${rotateX}deg`);
-        card.style.setProperty("--hero-rotate-y", `${rotateY}deg`);
-        card.style.setProperty("--hero-shift-x", `${shiftX}px`);
-        card.style.setProperty("--hero-shift-y", `${shiftY}px`);
-        card.dataset.heroHovering = "true";
-      };
-
-      const handleLeave = () => {
-        resetCard(card);
-      };
-
-      card.addEventListener("pointermove", handleMove);
-      card.addEventListener("pointerenter", handleMove);
-      card.addEventListener("pointerleave", handleLeave);
-
-      return () => {
-        card.removeEventListener("pointermove", handleMove);
-        card.removeEventListener("pointerenter", handleMove);
-        card.removeEventListener("pointerleave", handleLeave);
-        resetCard(card);
-      };
-    });
-
-    return () => {
-      cleanups.forEach((cleanup) => {
-        cleanup();
-      });
-    };
-  }, [location.pathname, prefersReducedMotion]);
 
   useEffect(() => {
     if (typeof window === "undefined") {

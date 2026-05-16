@@ -101,14 +101,14 @@ export function TwelveWeekDashboardState({
   const Icon = kind === "loading" ? Loader2 : Sparkles;
 
   return (
-    <Card className="surface-aurora ring-soft-glow overflow-hidden border border-slate-200/80 bg-white/92 shadow-sm">
+    <Card className="overflow-hidden">
       <CardContent className="p-8 text-center sm:p-10 lg:p-14">
-        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700">
+        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-[color:var(--muted)] text-[color:var(--tone-shell-primary)]">
           <Icon className={`h-10 w-10 ${kind === "loading" ? "animate-spin" : ""}`} />
         </div>
-        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{eyebrow}</p>
-        <h1 className="mt-[var(--space-inline)] text-3xl font-semibold leading-[1.15] tracking-tight text-slate-900 sm:text-4xl md:text-5xl">{title}</h1>
-        <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-sm leading-7 text-slate-500 sm:text-base" role="status">
+        <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{eyebrow}</p>
+        <h1 className="mt-[var(--space-inline)] text-3xl font-semibold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl">{title}</h1>
+        <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base" role="status">
           {description}
         </p>
         {children}
@@ -197,20 +197,20 @@ export function TwelveWeekDashboardHeader({
   const PhaseChipIcon = phaseInfo.chipIcon;
 
   return (
-    <Card className="glass-surface-sm surface-aurora surface-glass-deep ring-soft-glow page-enter relative overflow-hidden rounded-[var(--r-tile)] border border-violet-100/80 bg-white/94 shadow-xl shadow-slate-900/5 ring-1 ring-white/70 sm:rounded-[var(--r-card)] dark:shadow-black/30">
+    <Card className="page-enter relative overflow-hidden">
       <MotionParallaxLayer
         depth={0.3}
-        className="pointer-events-none absolute -right-16 top-0 hidden w-[560px] text-violet-500 opacity-18 dark:opacity-14 xl:block"
+        className="pointer-events-none absolute -right-16 top-0 hidden w-[560px] text-[color:var(--tone-shell-primary)] opacity-12 xl:block"
         aria-hidden="true"
       >
         <Hero12WeekScene className="w-full" />
       </MotionParallaxLayer>
-      <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 hidden w-44 text-violet-500 opacity-25 dark:opacity-15 sm:block" />
+      <SoftDotsPattern className="pointer-events-none absolute right-0 top-0 hidden w-44 text-[color:var(--tone-shell-primary)] opacity-15 sm:block" />
       <CardContent className="relative z-10 p-4 sm:p-6 lg:p-7">
         <div className="flex flex-col gap-3 sm:gap-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0 flex-1 stack-tight">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="rounded-[var(--r-pill)] border-violet-200 bg-violet-50 px-3 py-1.5 text-violet-700">
+              <Badge variant="brand" className="rounded-[var(--r-pill)] px-3 py-1.5">
                 Nhịp 12 tuần
               </Badge>
               <Badge variant="outline" className={`rounded-[var(--r-pill)] px-3 py-1.5 ${phaseInfo.badgeClassName}`}>
@@ -223,7 +223,7 @@ export function TwelveWeekDashboardHeader({
                 {syncBadgeLabel}
               </Badge>
               {reviewDueToday && (
-                <Badge variant="outline" className="rounded-[var(--r-pill)] border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-800">
+                <Badge variant="outline" className="rounded-[var(--r-pill)] border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] px-3 py-1.5 text-[color:var(--color-warning-fg)]">
                   Review hôm nay
                 </Badge>
               )}

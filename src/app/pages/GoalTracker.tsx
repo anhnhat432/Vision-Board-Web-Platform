@@ -527,7 +527,7 @@ function GoalTrackerContent({
     return (
       <Card key={goal.id} className="overflow-hidden">
         <CardContent className="grid gap-[var(--space-stack)] p-5 sm:p-6 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)]">
-          <div className="rounded-[var(--r-card)] gradient-dark p-5 text-white">
+          <div className="rounded-[var(--r-card)] gradient-brand p-5 text-primary-foreground">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Badge className="text-white" style={{ backgroundColor: areaMeta?.color ?? "#7c3aed" }}>
@@ -619,7 +619,7 @@ function GoalTrackerContent({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="hero-cta w-full bg-white text-foreground hover:bg-white/92"
+                  className="w-full bg-card text-foreground hover:bg-[color:var(--muted)]"
                   onClick={() => openTwelveWeekCenter(goal.id)}
                 >
                   <Zap className="h-4 w-4" />
@@ -635,7 +635,7 @@ function GoalTrackerContent({
                   className={`rounded-[var(--r-card)] border p-5 ${
                     systemReviewDueToday
                       ? "border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)]"
-                      : "border-white/10 gradient-dark-indigo text-white"
+                      : "border-white/10 gradient-brand text-primary-foreground"
                   }`}
                 >
                   <p

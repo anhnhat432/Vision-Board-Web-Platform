@@ -48,69 +48,61 @@ export function AppErrorBoundary() {
       <div className="ambient-orb ambient-orb--rose" />
 
       <main className="relative z-10 mx-auto flex min-h-screen max-w-5xl items-center px-4 py-12 sm:px-6 lg:px-8">
-        <Card className="hero-surface w-full overflow-hidden border-0 text-white">
+        <Card className="w-full overflow-hidden">
           <CardContent className="relative p-8 lg:p-10">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.12),_transparent_24%)] opacity-90" />
             <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_320px]">
               <div className="space-y-6">
-                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
-                  <Sparkles className="h-4 w-4" />
+                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-4 py-1.5 text-sm text-muted-foreground">
+                  <Sparkles className="h-4 w-4 text-[color:var(--tone-shell-primary)]" />
                   Dear Our Future
                 </div>
 
                 <div className="space-y-4">
-                  <h1 className="max-w-3xl text-4xl font-bold tracking-normal lg:text-5xl">
-                    Trang này vừa gặp lỗi, nhưng mình vẫn có thể quay lại flow chính ngay.
+                  <h1 className="max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl lg:text-5xl">
+                    Trang này vừa gặp lỗi, nhưng mình vẫn có thể{" "}
+                    <span className="text-gradient-vibrant">quay lại flow chính</span> ngay.
                   </h1>
-                  <p className="max-w-2xl text-base leading-8 text-white/82 lg:text-lg">
+                  <p className="max-w-2xl text-base leading-7 text-muted-foreground">
                     Mình đã chặn màn lỗi mặc định để trải nghiệm đỡ gắt hơn. Bạn có thể tải lại trang hoặc quay về Trang
                     chính rồi tiếp tục từ đó.
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  <Button
-                    variant="outline"
-                    className="hero-cta border-white/18 bg-white text-slate-900 hover:bg-white/92"
-                    onClick={() => navigate("/")}
-                  >
+                  <Button glow onClick={() => navigate("/")}>
                     <Home className="h-4 w-4" />
                     Về Trang chính
                   </Button>
-                  <Button
-                    variant="secondary"
-                    className="border-white/18 bg-white/12 text-white hover:bg-white/18"
-                    onClick={() => window.location.reload()}
-                  >
+                  <Button variant="outline" onClick={() => window.location.reload()}>
                     <RefreshCw className="h-4 w-4" />
                     Tải lại trang
                   </Button>
                 </div>
               </div>
 
-              <div className="rounded-[var(--r-card)] border border-white/14 bg-white/12 p-6 shadow-sm">
-                <CelebrationBurst className="mx-auto mb-4 w-32 text-white/85" />
+              <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-6 shadow-sm">
+                <CelebrationBurst className="mx-auto mb-4 w-32 text-[color:var(--tone-shell-primary)] opacity-60" />
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-[var(--r-tile)] bg-white/14 text-white">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-[var(--r-tile)] bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning-fg)]">
                     <AlertTriangle className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">Trạng thái</p>
-                    <p className="text-lg font-semibold text-white">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Trạng thái</p>
+                    <p className="text-lg font-semibold text-foreground">
                       {errorCode ? `Lỗi ${errorCode}` : "Trang gặp lỗi ngoài dự kiến"}
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-6 rounded-[var(--r-card)] border border-white/12 bg-black/12 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/55">Mô tả</p>
-                  <p className="mt-2 text-sm leading-7 text-white/82">{errorMessage}</p>
+                <div className="mt-6 rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Mô tả</p>
+                  <p className="mt-2 text-sm leading-7 text-foreground">{errorMessage}</p>
                 </div>
 
                 {import.meta.env.DEV && error instanceof Error ? (
-                  <div className="mt-4 rounded-[var(--r-card)] border border-white/12 bg-black/18 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/55">Chi tiết dev</p>
-                    <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs leading-6 text-white/72">
+                  <div className="mt-4 rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Chi tiết dev</p>
+                    <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs leading-6 text-muted-foreground">
                       {error.stack || error.message}
                     </pre>
                   </div>

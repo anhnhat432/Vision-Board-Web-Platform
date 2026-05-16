@@ -383,54 +383,50 @@ export function OrderPage() {
 
   return (
     <div className="stack-section pb-12">
-      <Card className="hero-surface overflow-hidden border-0 text-white">
+      <Card className="overflow-hidden">
         <CardContent className="relative p-5 sm:p-6 lg:p-8">
           <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_320px]">
             <div className="stack-section">
-              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-4 py-1.5 text-sm text-muted-foreground">
                 <Package className="h-4 w-4" />
                 Tạo đơn kit
               </div>
 
               <div className="stack-stack">
-                <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-                  Tạo đơn kit cá nhân hóa từ mục tiêu hiện tại.
+                <h1 className="max-w-3xl text-2xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-3xl lg:text-4xl">
+                  Tạo <span className="text-gradient-vibrant">đơn kit cá nhân hóa</span> từ mục tiêu hiện tại.
                 </h1>
-                <p className="max-w-3xl text-base leading-8 text-white/82 lg:text-lg">
+                <p className="max-w-3xl text-base leading-7 text-muted-foreground">
                   Đây là bước tối thiểu để chốt nhu cầu, người nhận và định hướng kit. Chưa kết nối xử lý đơn thật,
                   nhưng đủ để nhóm kiểm tra luồng đặt đơn sớm.
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
-                  {getKitTypeLabel(form.kitType)}
-                </Badge>
-                <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
-                  {selectedGoal ? "Đã gắn mục tiêu" : "Đơn độc lập"}
-                </Badge>
+                <Badge variant="neutral">{getKitTypeLabel(form.kitType)}</Badge>
+                <Badge variant="neutral">{selectedGoal ? "Đã gắn mục tiêu" : "Đơn độc lập"}</Badge>
               </div>
 
-              <p className="max-w-2xl text-sm leading-7 text-white/70">
+              <p className="max-w-2xl text-sm leading-7 text-muted-foreground">
                 Sau khi tạo, bạn có thể xem lại đơn gần nhất hoặc theo dõi trạng thái ngay trong luồng đơn hiện tại.
               </p>
             </div>
 
-            <div className="rounded-[var(--r-card)] border border-white/14 bg-white/12 p-5 shadow-sm">
-              <EmptyOrdersIllustration className="mb-3 hidden w-24 text-white opacity-50 sm:block" />
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Tóm tắt nhanh</p>
+            <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-5 shadow-sm">
+              <EmptyOrdersIllustration className="mb-3 hidden w-24 text-[color:var(--tone-shell-primary)] opacity-50 sm:block" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Tóm tắt nhanh</p>
               <div className="mt-4 space-y-2.5">
                 {summaryItems.map((item) => {
                   const Icon = item.icon;
 
                   return (
-                    <div key={item.label} className="rounded-[var(--r-card)] border border-white/10 bg-black/12 px-4 py-3.5">
-                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
-                        <Icon className="h-3.5 w-3.5" />
+                    <div key={item.label} className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card px-4 py-3.5">
+                      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                        <Icon className="h-3.5 w-3.5 text-[color:var(--tone-shell-primary)]" />
                         {item.label}
                       </div>
-                      <p className="mt-2 text-base font-semibold text-white">{item.value}</p>
-                      <p className="mt-1 text-xs leading-6 text-white/64">{item.note}</p>
+                      <p className="mt-2 text-base font-semibold text-foreground">{item.value}</p>
+                      <p className="mt-1 text-xs leading-6 text-muted-foreground">{item.note}</p>
                     </div>
                   );
                 })}

@@ -307,7 +307,7 @@ export function TwelveWeekTodayTab({
   })();
 
   return (
-    <div className="ops-system-panel flex min-w-0 flex-col gap-[var(--space-inline)] sm:gap-[var(--space-stack)]">
+    <div className="flex min-w-0 flex-col gap-[var(--space-inline)] sm:gap-[var(--space-stack)]">
       <div
         data-testid="today-mobile-compact-strip"
         className="order-0 grid grid-cols-3 gap-2 rounded-[var(--r-tile)] border border-border bg-white/92 p-2.5 shadow-sm ring-1 ring-slate-200 sm:hidden"

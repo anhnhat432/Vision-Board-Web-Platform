@@ -27,8 +27,7 @@ function Card({
   const prefersReducedMotion = useReducedMotion();
   const cardRef = React.useRef<HTMLDivElement | null>(null);
   const frameRef = React.useRef<number | null>(null);
-  const isHeroCard = className?.includes("hero-surface");
-  const isInteractive = interactive && !prefersReducedMotion && !isHeroCard;
+  const isInteractive = interactive && !prefersReducedMotion;
 
   React.useEffect(() => {
     return () => {

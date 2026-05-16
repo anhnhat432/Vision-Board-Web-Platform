@@ -18,7 +18,7 @@ describe("PrimaryActionCard", () => {
     );
 
     const card = screen.getByRole("heading", { name: "Việc quan trọng nhất" }).closest("[data-slot='card']");
-    expect(card).toHaveClass("border-2", "border-primary", "hero-surface", "rounded-[var(--r-card)]");
+    expect(card).toHaveClass("border", "border-primary", "rounded-[var(--r-card)]");
     expect(screen.getByText("Chi tiết hành động chính.")).toBeInTheDocument();
 
     // visual change PR-UX-5 hero card pattern
@@ -49,7 +49,6 @@ describe("PrimaryActionCard", () => {
     const card = screen.getByRole("heading", { level: 2, name: "Nhịp tuần này" }).closest("[data-slot='card']");
     expect(screen.getByText("Trạng thái nhịp")).toBeInTheDocument();
     expect(card).toHaveClass("border-emerald-300", "p-[var(--space-stack)]");
-    expect(card).not.toHaveClass("hero-surface");
 
     await user.click(screen.getByRole("button", { name: "Mở tab Hôm nay" }));
 

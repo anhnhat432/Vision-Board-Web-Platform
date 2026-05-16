@@ -622,55 +622,51 @@ export function OrderStatusPage() {
 
   return (
     <div className="stack-section pb-12">
-      <Card className="hero-surface overflow-hidden border-0 text-white">
+      <Card className="overflow-hidden">
         <CardContent className="relative p-5 sm:p-6 lg:p-8">
           <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_320px]">
             <div className="stack-section">
-              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-4 py-1.5 text-sm text-muted-foreground">
                 <Truck className="h-4 w-4" />
                 Theo dõi đơn hàng
               </div>
 
               <div className="stack-stack">
-                <h1 className="max-w-3xl text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
-                  Theo dõi trạng thái đơn kit hiện tại.
+                <h1 className="max-w-3xl text-2xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-3xl lg:text-4xl">
+                  Theo dõi <span className="text-gradient-vibrant">trạng thái đơn kit</span> hiện tại.
                 </h1>
-                <p className="max-w-3xl text-base leading-8 text-white/82 lg:text-lg">
+                <p className="max-w-3xl text-base leading-7 text-muted-foreground">
                   Trang này gom lại thông tin chính của đơn, kit và tiến trình giao hiện tại. Flow vẫn là local-only, nhưng đã đủ rõ để review trải nghiệm đặt đơn.
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
-                  {getOrderStatusLabel(order.status)}
-                </Badge>
-                <Badge variant="outline" className="rounded-[var(--r-pill)] border-white/18 bg-white/12 px-4 py-2 text-white">
-                  {getKitTypeLabel(order.kitType)}
-                </Badge>
+                <Badge variant="neutral">{getOrderStatusLabel(order.status)}</Badge>
+                <Badge variant="neutral">{getKitTypeLabel(order.kitType)}</Badge>
               </div>
 
-              <p className="max-w-2xl text-sm leading-7 text-white/70">
+              <p className="max-w-2xl text-sm leading-7 text-muted-foreground">
                 {hasGoalLink
                   ? `Đơn này đang bám theo mục tiêu "${order.goalTitle}" trong nhóm ${order.focusArea}.`
                   : "Đơn này chưa gắn với mục tiêu cụ thể, nhưng vẫn có thể theo dõi đầy đủ như một kit độc lập."}
               </p>
             </div>
 
-            <div className="rounded-[var(--r-card)] border border-white/14 bg-white/12 p-5 shadow-sm">
-              <EmptyOrdersIllustration className="mb-3 hidden w-24 text-white opacity-50 sm:block" />
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60">Tóm tắt đơn</p>
+            <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-5 shadow-sm">
+              <EmptyOrdersIllustration className="mb-3 hidden w-24 text-[color:var(--tone-shell-primary)] opacity-50 sm:block" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Tóm tắt đơn</p>
               <div className="mt-4 grid gap-2.5">
                 {summaryItems.map((item) => {
                   const Icon = item.icon;
 
                   return (
-                    <div key={item.label} className="rounded-[var(--r-card)] border border-white/10 bg-black/12 px-4 py-3.5">
-                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/55">
-                        <Icon className="h-3.5 w-3.5" />
+                    <div key={item.label} className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card px-4 py-3.5">
+                      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                        <Icon className="h-3.5 w-3.5 text-[color:var(--tone-shell-primary)]" />
                         {item.label}
                       </div>
-                      <p className="mt-2 text-base font-semibold text-white">{item.value}</p>
-                      <p className="mt-1 text-xs leading-6 text-white/64">{item.note}</p>
+                      <p className="mt-2 text-base font-semibold text-foreground">{item.value}</p>
+                      <p className="mt-1 text-xs leading-6 text-muted-foreground">{item.note}</p>
                     </div>
                   );
                 })}
@@ -690,28 +686,28 @@ export function OrderStatusPage() {
 
             <CardContent className="stack-section">
               <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Mục tiêu & kit</p>
-                <p className="text-sm text-slate-600">Giữ phần định hướng và cấu hình kit ở cùng một cụm để quét nhanh hơn.</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Mục tiêu & kit</p>
+                <p className="text-sm text-muted-foreground">Giữ phần định hướng và cấu hình kit ở cùng một cụm để quét nhanh hơn.</p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                    <Target className="h-3.5 w-3.5" />
+                <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                    <Target className="h-3.5 w-3.5 text-[color:var(--tone-shell-primary)]" />
                     Mục tiêu đang gắn
                   </div>
-                  <p className="mt-[var(--space-inline)] text-base font-semibold text-slate-900">
+                  <p className="mt-[var(--space-inline)] text-base font-semibold text-foreground">
                     {hasGoalLink ? order.goalTitle : "Đơn này chưa gắn mục tiêu"}
                   </p>
-                  <p className="mt-1 text-sm leading-7 text-slate-600">
+                  <p className="mt-1 text-sm leading-7 text-muted-foreground">
                     {hasGoalLink
                       ? `Kit đang bám theo nhóm ${order.focusArea}.`
                       : "Bạn vẫn có thể theo dõi đơn như một kit độc lập trong flow hiện tại."}
                   </p>
                 </div>
 
-                <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50/80 p-4">
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     <Package className="h-3.5 w-3.5" />
                     Cấu hình kit
                   </div>

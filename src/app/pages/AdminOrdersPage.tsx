@@ -1020,25 +1020,27 @@ export function AdminOrdersPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Card className="hero-surface surface-aurora ring-soft-glow overflow-hidden border-0 text-white">
+      <Card className="overflow-hidden">
         <CardContent className="p-5 sm:p-6 lg:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="stack-stack">
-              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/18 bg-white/10 px-4 py-1.5 text-sm text-white/82">
+              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-4 py-1.5 text-sm text-muted-foreground">
                 <BarChart3 className="h-4 w-4" />
                 Quản trị vận hành
               </div>
               <div>
-                <h1 className="text-3xl font-semibold leading-[1.15] tracking-tight sm:text-4xl md:text-5xl">Người dùng, thanh toán và đơn hàng</h1>
-                <p className="mt-[var(--space-inline)] max-w-3xl text-base leading-8 text-white/82">
+                <h1 className="text-3xl font-semibold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl">
+                  Người dùng, <span className="text-gradient-vibrant">thanh toán</span> và đơn hàng
+                </h1>
+                <p className="mt-[var(--space-inline)] max-w-3xl text-base leading-7 text-muted-foreground">
                   Theo dõi người dùng, doanh thu VietQR, trạng thái email và xử lý đơn in từ một màn hình.
                 </p>
               </div>
             </div>
             <Button
               type="button"
-              variant="secondary"
-              className="gap-2 rounded-[var(--r-pill)] bg-white text-slate-900 hover:bg-white/92"
+              variant="outline"
+              className="gap-2 rounded-[var(--r-pill)]"
               disabled={reminderLoading}
               onClick={handleReminderRun}
             >
