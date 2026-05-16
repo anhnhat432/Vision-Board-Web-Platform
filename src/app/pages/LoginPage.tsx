@@ -10,7 +10,6 @@ import {
   LogOut,
   RefreshCw,
   ShieldCheck,
-  Sparkles,
   Target,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -254,9 +253,12 @@ export function LoginPage() {
         <div className="ambient-orb ambient-orb--cyan" />
         <Card className="w-full max-w-sm">
           <CardHeader className="text-center">
-            <div className="gradient-brand mx-auto mb-3 flex size-11 items-center justify-center rounded-[var(--r-tile)] shadow-lg">
-              <Sparkles className="h-5 w-5 text-white" />
-            </div>
+            <img
+              src="/favicon-192.png"
+              alt=""
+              aria-hidden="true"
+              className="mx-auto mb-3 size-11 rounded-[var(--r-tile)] object-cover shadow-lg"
+            />
             <CardTitle>Bắt đầu hành trình</CardTitle>
             <CardDescription>Xác thực chưa được cấu hình trong môi trường này.</CardDescription>
           </CardHeader>
@@ -291,9 +293,12 @@ export function LoginPage() {
           </MotionParallaxLayer>
           <ConstellationAccent className="pointer-events-none absolute right-4 top-4 w-28 text-[color:var(--tone-shell-primary)] opacity-25" />
           <RevealDiv {...revealMotionProps} className="relative z-10 mb-5 flex items-start justify-between gap-4">
-            <div className="gradient-brand flex size-12 items-center justify-center rounded-[var(--r-tile)] shadow-lg">
-              <Sparkles className="h-5.5 w-5.5 text-white" />
-            </div>
+            <img
+              src="/favicon-192.png"
+              alt=""
+              aria-hidden="true"
+              className="size-12 rounded-[var(--r-tile)] object-cover shadow-lg"
+            />
             <HeroOrbitIllustration className="-mt-6 hidden w-32 shrink-0 text-[color:var(--tone-shell-primary)] opacity-60 xl:block" />
           </RevealDiv>
           <RevealParagraph
@@ -347,9 +352,12 @@ export function LoginPage() {
         <div className="mb-8 text-center">
           {/* Single hero illustration on mobile (was 2 stacked, took too much vertical space). */}
           <HeroLoginScene className="mx-auto mb-3 w-40 text-[color:var(--tone-shell-primary)] opacity-50 lg:hidden" />
-          <div className="gradient-brand mx-auto mb-3 flex size-12 items-center justify-center rounded-[var(--r-tile)] shadow-lg">
-            <Sparkles className="h-5.5 w-5.5 text-white" />
-          </div>
+          <img
+            src="/favicon-192.png"
+            alt=""
+            aria-hidden="true"
+            className="mx-auto mb-3 size-12 rounded-[var(--r-tile)] object-cover shadow-lg"
+          />
           <h1 className="text-xl font-semibold tracking-tight text-foreground">
             {mode === "signin" ? "Chào mừng quay lại" : "Bắt đầu hành trình"}
           </h1>
