@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/app/components/ui/button";
-import { Card, CardContent } from "@/app/components/ui/card";
 import { ProductVisual, type ProductVisualVariant } from "@/app/components/visuals/ProductVisual";
 
 interface PublicVisitorHeroProps {
@@ -70,20 +69,20 @@ const OUTCOME_CARDS: Array<{
   visual: ProductVisualVariant;
 }> = [
   {
-    title: "Không bắt đầu bằng màn hình trống",
-    description: "Bánh xe cuộc sống tạo dữ liệu nền trước khi chọn mục tiêu.",
+    title: "Hiện trạng trước",
+    description: "Không hỏi mục tiêu ngay. Bắt đầu bằng bánh xe cuộc sống để biết vùng nào đang kéo toàn bộ hệ thống xuống.",
     metric: "8 lĩnh vực",
     visual: "balance",
   },
   {
-    title: "Mục tiêu được kiểm tra trước khi chạy",
-    description: "SMART và feasibility giúp tránh mục tiêu hay nhưng thiếu nguồn lực.",
+    title: "Mục tiêu sau",
+    description: "SMART Goal và feasibility check ép ý tưởng thành mục tiêu có chỉ số, deadline, nguồn lực và rủi ro rõ.",
     metric: "SMART + khả thi",
     visual: "vision",
   },
   {
-    title: "Hôm nay biết làm gì",
-    description: "Kế hoạch 12 tuần chuyển mục tiêu thành tuần, task và review.",
+    title: "Hành động mỗi ngày",
+    description: "Kế hoạch 12 tuần biến mục tiêu thành tuần, chỉ số dẫn, việc hôm nay và review để không bỏ cuộc âm thầm.",
     metric: "12 tuần",
     visual: "execution",
   },
@@ -114,136 +113,196 @@ export function PublicVisitorHero({ isDemo, onStartDemo, onSignIn, onSignUp }: P
   ];
 
   return (
-    <section className="space-y-5" aria-labelledby="public-landing-title">
-      <Card className="relative overflow-hidden border-slate-200 bg-white shadow-[var(--shadow-4)]">
+    <section
+      className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden bg-[#eefaf7] text-slate-950"
+      aria-labelledby="public-landing-title"
+    >
+      <div className="relative overflow-hidden bg-slate-950 text-white">
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(14,165,233,0.18),transparent_34%),radial-gradient(circle_at_86%_86%,rgba(16,185,129,0.18),transparent_34%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,rgba(34,211,238,0.28),transparent_32%),radial-gradient(circle_at_82%_14%,rgba(16,185,129,0.2),transparent_30%),linear-gradient(135deg,rgba(15,23,42,0.98),rgba(12,74,110,0.92)_48%,rgba(6,78,59,0.9))]"
         />
-        <CardContent className="relative p-5 sm:p-6 lg:p-8">
-          <div className="grid gap-8 xl:grid-cols-[minmax(0,0.98fr)_minmax(320px,0.78fr)] xl:items-stretch">
-            <div className="flex min-w-0 flex-col justify-center space-y-6">
-              <span className="inline-flex w-fit items-center gap-2 rounded-[var(--r-pill)] border border-cyan-100 bg-cyan-50/90 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-800">
-                <Sparkles className="h-3.5 w-3.5" />
-                Flow mục tiêu 12 tuần
-              </span>
-              <div className="space-y-4">
-                <h1
-                  id="public-landing-title"
-                  className="max-w-3xl text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl lg:text-5xl"
-                >
-                  Biến tầm nhìn thành mục tiêu rõ ràng và kế hoạch 12 tuần có nhịp làm mỗi ngày.
-                </h1>
-                <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">{heroDescription}</p>
-              </div>
-              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                {isDemo ? (
-                  <>
-                    <Button glow className="w-full sm:w-auto" onClick={onStartDemo}>
-                      <Sparkles className="h-4 w-4" />
-                      Trải nghiệm demo miễn phí
-                    </Button>
-                    <Button variant="outline" className="border-slate-200 bg-white text-slate-900" onClick={onSignUp}>
-                      <UserPlus className="h-4 w-4" />
-                      Lưu không gian làm việc bằng tài khoản
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button glow className="w-full sm:w-auto" onClick={onSignUp}>
-                      <UserPlus className="h-4 w-4" />
-                      Tạo tài khoản để lưu và đồng bộ
-                    </Button>
-                    <Button variant="outline" className="border-slate-200 bg-white text-slate-900" onClick={onSignIn}>
-                      <LogIn className="h-4 w-4" />
-                      Đăng nhập vào tài khoản
-                    </Button>
-                  </>
-                )}
-              </div>
-              <p className="max-w-2xl text-xs leading-6 text-slate-500">{supportCopy}</p>
-              <div className="grid gap-2 pt-1 sm:grid-cols-3">
-                {heroStats.map(([value, label]) => (
-                  <div
-                    key={value}
-                    className="rounded-[var(--r-tile)] border border-slate-200/80 bg-white/80 px-3 py-2.5 shadow-sm backdrop-blur"
-                  >
-                    <p className="text-sm font-bold text-slate-950">{value}</p>
-                    <p className="mt-0.5 text-xs leading-5 text-slate-500">{label}</p>
-                  </div>
-                ))}
-              </div>
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:44px_44px]"
+        />
+
+        <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 sm:py-14 lg:grid-cols-[minmax(0,1.08fr)_minmax(360px,0.78fr)] lg:items-center lg:px-8 lg:py-16">
+          <div className="max-w-4xl">
+            <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-cyan-100 backdrop-blur">
+              <Sparkles className="h-3.5 w-3.5" />
+              Dear Our Future - Flow mục tiêu 12 tuần
             </div>
 
-            <div className="flex min-w-0 flex-col rounded-[var(--r-card)] border border-slate-200/80 bg-slate-950 p-3 text-white shadow-[0_24px_60px_-34px_rgba(15,23,42,0.72)]">
-              <div className="rounded-[calc(var(--r-card)-0.4rem)] border border-white/10 bg-white/8 p-3">
-                <ProductVisual variant="execution" className="min-h-[230px]" />
+            <h1
+              id="public-landing-title"
+              className="mt-6 max-w-4xl text-4xl font-black tracking-[-0.05em] text-white sm:text-5xl lg:text-7xl"
+            >
+              Biến tầm nhìn thành mục tiêu rõ ràng và kế hoạch 12 tuần có nhịp làm mỗi ngày.
+            </h1>
+
+            <p className="mt-6 max-w-2xl text-base leading-8 text-cyan-50/82 sm:text-lg">{heroDescription}</p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              {isDemo ? (
+                <>
+                  <Button glow size="lg" className="w-full bg-white text-slate-950 hover:bg-cyan-50 sm:w-auto" onClick={onStartDemo}>
+                    <Sparkles className="h-4 w-4" />
+                    Trải nghiệm demo miễn phí
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full border-white/20 bg-white/10 text-white hover:bg-white/15 sm:w-auto"
+                    onClick={onSignUp}
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    Lưu không gian làm việc bằng tài khoản
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button glow size="lg" className="w-full bg-white text-slate-950 hover:bg-cyan-50 sm:w-auto" onClick={onSignUp}>
+                    <UserPlus className="h-4 w-4" />
+                    Tạo tài khoản để lưu và đồng bộ
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full border-white/20 bg-white/10 text-white hover:bg-white/15 sm:w-auto"
+                    onClick={onSignIn}
+                  >
+                    <LogIn className="h-4 w-4" />
+                    Đăng nhập vào tài khoản
+                  </Button>
+                </>
+              )}
+            </div>
+
+            <p className="mt-4 max-w-2xl text-sm leading-6 text-cyan-50/65">{supportCopy}</p>
+
+            <div className="mt-8 grid max-w-3xl gap-3 sm:grid-cols-3">
+              {heroStats.map(([value, label]) => (
+                <div key={value} className="rounded-[1.35rem] border border-white/15 bg-white/10 px-4 py-3 backdrop-blur">
+                  <p className="text-xl font-black tracking-tight text-white">{value}</p>
+                  <p className="mt-1 text-sm leading-5 text-cyan-50/62">{label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="absolute -inset-8 rounded-full bg-cyan-300/20 blur-3xl" aria-hidden="true" />
+            <div className="relative rounded-[2rem] border border-white/14 bg-white/12 p-3 shadow-[0_36px_90px_-44px_rgba(34,211,238,0.8)] backdrop-blur-xl">
+              <div className="rounded-[1.55rem] border border-white/10 bg-slate-950/88 p-3">
+                <div className="mb-3 flex items-center justify-between gap-3 px-1">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-200/70">Execution cockpit</p>
+                    <p className="mt-1 text-sm font-semibold text-white">Tuần 04 / 12</p>
+                  </div>
+                  <span className="rounded-[var(--r-pill)] bg-emerald-300 px-3 py-1 text-xs font-black text-emerald-950">72%</span>
+                </div>
+                <ProductVisual variant="execution" className="min-h-[260px]" />
               </div>
-              <div className="mt-3 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+
+              <div className="mt-3 grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
                 {statusItems.map(({ label, value, icon: Icon }) => (
-                  <div key={label} className="flex items-center gap-3 rounded-[var(--r-tile)] bg-white/10 px-3 py-3 ring-1 ring-white/10">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-white text-slate-950">
+                  <div key={label} className="flex items-center gap-3 rounded-[1.25rem] border border-white/10 bg-white/10 px-3 py-3">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-white text-slate-950">
                       <Icon className="h-4 w-4" />
                     </span>
                     <span className="min-w-0">
-                      <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-white/55">{label}</span>
-                      <span className="block text-sm font-semibold text-white">{value}</span>
+                      <span className="block text-xs font-bold uppercase tracking-[0.14em] text-cyan-50/50">{label}</span>
+                      <span className="block text-sm font-bold text-white">{value}</span>
                     </span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card id="public-flow" className="overflow-hidden border-slate-200 bg-white/92 shadow-sm">
-        <CardContent className="p-5 sm:p-6 lg:p-7">
+      <div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+        <div id="public-flow" className="rounded-[2rem] border border-cyan-100 bg-white p-4 shadow-[0_24px_80px_-54px_rgba(15,23,42,0.35)] sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-700">Luồng nên đi</p>
-              <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">Một đường chính, không phải nhiều lối rẽ.</h2>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">Luồng nên đi</p>
+              <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-slate-950 sm:text-3xl">Một đường chính, không phải nhiều lối rẽ.</h2>
             </div>
             <p className="max-w-xl text-sm leading-6 text-slate-500">
-              Layout đưa người mới theo đúng thứ tự: hiểu hiện trạng, chốt mục tiêu, kiểm tra khả thi, rồi mới thực thi.
+              Trang mới dẫn người dùng theo đúng thứ tự: hiểu hiện trạng, chốt mục tiêu, kiểm tra khả thi, rồi mới thực thi.
             </p>
           </div>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
+
+          <div className="mt-7 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
             {FLOW_STEPS.map((step, index) => {
               const Icon = step.icon;
               return (
-                <div key={step.title} className="rounded-[var(--r-tile)] border border-slate-200 bg-slate-50/80 p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-[var(--r-pill)] bg-slate-950 text-white">
+                <div key={step.title} className="group relative overflow-hidden rounded-[1.45rem] border border-slate-200 bg-slate-50 p-4 transition-transform duration-200 hover:-translate-y-1 hover:bg-white hover:shadow-[0_20px_50px_-35px_rgba(8,145,178,0.55)]">
+                  <div className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-cyan-100 opacity-0 transition-opacity duration-200 group-hover:opacity-100" aria-hidden="true" />
+                  <div className="relative flex items-center justify-between gap-3">
+                    <span className="flex h-11 w-11 items-center justify-center rounded-[var(--r-pill)] bg-slate-950 text-white">
                       <Icon className="h-4 w-4" />
                     </span>
-                    <span className="text-xs font-bold text-slate-400">0{index + 1}</span>
+                    <span className="text-xs font-black text-slate-400">0{index + 1}</span>
                   </div>
-                  <h3 className="mt-4 text-sm font-bold text-slate-950">{step.title}</h3>
-                  <p className="mt-2 text-xs leading-5 text-slate-500">{step.description}</p>
-                  {index < FLOW_STEPS.length - 1 ? <ArrowRight className="mt-4 hidden h-4 w-4 text-cyan-700 xl:block" /> : null}
+                  <h3 className="relative mt-5 text-base font-black text-slate-950">{step.title}</h3>
+                  <p className="relative mt-2 text-sm leading-6 text-slate-500">{step.description}</p>
+                  {index < FLOW_STEPS.length - 1 ? <ArrowRight className="relative mt-5 hidden h-4 w-4 text-cyan-700 xl:block" /> : null}
                 </div>
               );
             })}
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      <div className="grid gap-5 lg:grid-cols-3">
-        {OUTCOME_CARDS.map((card) => (
-          <Card key={card.title} className="overflow-hidden border-slate-200 bg-white/92 shadow-sm">
-            <CardContent className="p-4">
-              <ProductVisual variant={card.visual} className="min-h-[150px]" />
-              <div className="mt-4 space-y-2">
-                <span className="inline-flex rounded-[var(--r-pill)] bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-800">
+        <div className="mt-6 grid gap-5 lg:grid-cols-3">
+          {OUTCOME_CARDS.map((card, index) => (
+            <article
+              key={card.title}
+              className={`overflow-hidden rounded-[2rem] border p-4 shadow-[0_20px_70px_-50px_rgba(15,23,42,0.45)] ${
+                index === 1 ? "border-slate-800 bg-slate-950 text-white" : "border-cyan-100 bg-white text-slate-950"
+              }`}
+            >
+              <ProductVisual variant={card.visual} className="min-h-[170px]" />
+              <div className="mt-5 space-y-3 px-1 pb-1">
+                <span
+                  className={`inline-flex rounded-[var(--r-pill)] px-3 py-1 text-xs font-black ${
+                    index === 1 ? "bg-cyan-300 text-slate-950" : "bg-cyan-50 text-cyan-800"
+                  }`}
+                >
                   {card.metric}
                 </span>
-                <h3 className="text-base font-bold text-slate-950">{card.title}</h3>
-                <p className="text-sm leading-6 text-slate-500">{card.description}</p>
+                <h3 className="text-xl font-black tracking-[-0.025em]">{card.title}</h3>
+                <p className={`text-sm leading-7 ${index === 1 ? "text-slate-300" : "text-slate-500"}`}>{card.description}</p>
               </div>
-            </CardContent>
-          </Card>
-        ))}
+            </article>
+          ))}
+        </div>
+
+        <div className="mt-6 overflow-hidden rounded-[2rem] bg-slate-950 p-5 text-white shadow-[0_28px_90px_-56px_rgba(15,23,42,0.7)] sm:p-7">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-200/75">Bắt đầu đúng thứ tự</p>
+              <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] sm:text-3xl">Đừng mở planner trống. Đi qua flow 12 tuần trước.</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-300">
+                Sau vài phút, người dùng biết điểm yếu hiện tại, mục tiêu nên chọn, và việc đầu tiên cần làm trong tuần này.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row lg:shrink-0">
+              <Button glow size="lg" className="w-full bg-white text-slate-950 hover:bg-cyan-50 sm:w-auto" onClick={isDemo ? onStartDemo : onSignUp}>
+                {isDemo ? <Sparkles className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
+                {isDemo ? "Vào demo ngay" : "Tạo tài khoản miễn phí"}
+              </Button>
+              {!isDemo ? (
+                <Button variant="outline" size="lg" className="w-full border-white/20 bg-white/10 text-white hover:bg-white/15 sm:w-auto" onClick={onSignIn}>
+                  <LogIn className="h-4 w-4" />
+                  Đăng nhập
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

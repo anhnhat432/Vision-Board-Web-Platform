@@ -22,7 +22,7 @@ describe("PublicVisitorHero", () => {
       .getByRole("heading", {
         name: /Biến tầm nhìn thành mục tiêu rõ ràng/i,
       })
-      .closest("[data-slot='card']");
+      .closest("section");
     expect(hero).not.toBeNull();
 
     const scope = within(hero as HTMLElement);
