@@ -8,9 +8,6 @@ import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { PageShell } from "../components/PageShell";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
-import { Card, CardContent } from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
 import { getSmartGoalStarter, getSmartGoalStarterPreview } from "../utils/smart-goal-starters";
@@ -98,7 +95,6 @@ function createFlushableDebouncedSave<T>(callback: (value: T) => void, delayMs: 
 
 export function SMARTGoalSetup() {
   const navigate = useNavigate();
-  const prefersReducedMotion = useReducedMotion();
   const [setupState, setSetupState] = useState<"checking" | "needs_life_balance" | "needs_life_insight" | "ready">(
     "checking",
   );
@@ -502,7 +498,7 @@ export function SMARTGoalSetup() {
   }
 
   return (
-    <PageShell maxWidth="xl">
+    <PageShell maxWidth="md">
       <UpgradePaywallDialog
         open={isGoalLimitPaywallOpen}
         onOpenChange={setIsGoalLimitPaywallOpen}
@@ -512,38 +508,47 @@ export function SMARTGoalSetup() {
         description="Nâng cấp Plus để tạo thêm mục tiêu. Dữ liệu hiện có vẫn được giữ nguyên."
         source="paywall_dialog"
       />
-      <div className={prefersReducedMotion ? "stack-stack" : "animate-fade-in-up stack-stack"}>
-        <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} />
-        {!isVisionPromptDismissed && (
-          <Card>
-            <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                {aspirationalVision ? (
-                  <p className="text-sm leading-6 text-foreground">
-                    <span className="font-semibold text-[color:var(--tone-shell-primary)]">
-                      Mục tiêu này phục vụ tầm nhìn 3 năm:
-                    </span>{" "}
-                    {aspirationalVision.summary}
-                  </p>
-                ) : (
-                  <p className="text-sm leading-6 text-foreground">
-                    Bạn đang đặt mục tiêu 12 tuần. Phương pháp gốc khuyên gắn với tầm nhìn 3 năm.
-                  </p>
-                )}
-              </div>
-              {!aspirationalVision && (
+      <div className="space-y-6">
+        <div>
+          <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} className="mb-2" />
+          <div className="flex justify-end">
+            <AutoSaveIndicator status={isDirty ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} />
+          </div>
+        </div>
+
+        {!isVisionPromptDismissed ? (
+          <section className="rounded-card border border-[#F3D9CC] bg-app-warm-soft p-5 md:p-6" aria-label="Tầm nhìn dài hạn">
+            <span className="inline-flex rounded-full bg-app-surface px-3 py-1 text-[12px] font-medium text-app-warm">
+              Tầm nhìn dài hạn
+            </span>
+            {aspirationalVision ? (
+              <p className="mt-3 font-serif text-[16px] font-medium leading-7 text-[#5C3A2E]">
+                Mục tiêu này phục vụ tầm nhìn 3 năm: {aspirationalVision.summary}
+              </p>
+            ) : (
+              <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-[14px] leading-6 text-app-ink-soft">
+                  Bạn đang đặt mục tiêu 12 tuần. Hãy nghĩ thêm về tầm nhìn 3 năm trước.
+                </p>
                 <div className="flex shrink-0 flex-wrap gap-2">
-                  <Button asChild size="sm" variant="outline">
-                    <Link to="/vision">Điền 2 phút →</Link>
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setIsVisionPromptDismissed(true)}>
+                  <Link
+                    to="/vision"
+                    className="inline-flex items-center justify-center rounded-lg bg-app-warm px-3.5 py-2 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-[#c86547] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                  >
+                    Điền 2 phút →
+                  </Link>
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center rounded-lg px-3.5 py-2 text-[13px] font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                    onClick={() => setIsVisionPromptDismissed(true)}
+                  >
                     Bỏ qua
-                  </Button>
+                  </button>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+              </div>
+            )}
+          </section>
+        ) : null}
 
         <SmartGoalHero
           focusArea={focusArea}
@@ -556,51 +561,41 @@ export function SMARTGoalSetup() {
         />
 
         <div ref={stepTopRef}>
-          <Card>
-            <CardContent className="p-5 sm:p-7">
-              <div className="mb-3 flex justify-end">
-                <AutoSaveIndicator status={isDirty ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} />
-              </div>
-              <SmartGoalStepShell
-                stepIndex={currentStep}
-                totalSteps={totalSteps}
-                step={currentStepData}
-                headingRef={stepHeadingRef}
-                starterPreview={currentStarterPreview}
-                clarityItems={clarityItems}
-                clarityDoneCount={clarityDoneCount}
-                clarityProgress={clarityProgress}
-                summaryRows={summaryRows}
-                showReview={currentStepKey === "timeBound"}
-                currentStepError={shouldShowCurrentStepError ? currentStepError : null}
-                currentStepSoftWarning={currentStepSoftWarning}
-                isCurrentStepValid={isCurrentStepValid}
-                qualityFeedback={qualityFeedback}
-                onApplyStarter={() => handleApplyStarterForStep(currentStepKey)}
-                onJumpToStep={handleJumpToStep}
-                onBack={handleBack}
-                onNext={handleNext}
-              >
-                {renderCurrentStepFields()}
-              </SmartGoalStepShell>
-            </CardContent>
-          </Card>
+          <SmartGoalStepShell
+            stepIndex={currentStep}
+            totalSteps={totalSteps}
+            step={currentStepData}
+            headingRef={stepHeadingRef}
+            starterPreview={currentStarterPreview}
+            clarityItems={clarityItems}
+            clarityDoneCount={clarityDoneCount}
+            clarityProgress={clarityProgress}
+            summaryRows={summaryRows}
+            showReview={currentStepKey === "timeBound"}
+            currentStepError={shouldShowCurrentStepError ? currentStepError : null}
+            currentStepSoftWarning={currentStepSoftWarning}
+            isCurrentStepValid={isCurrentStepValid}
+            qualityFeedback={qualityFeedback}
+            onApplyStarter={() => handleApplyStarterForStep(currentStepKey)}
+            onJumpToStep={handleJumpToStep}
+            onBack={handleBack}
+            onNext={handleNext}
+          >
+            {renderCurrentStepFields()}
+          </SmartGoalStepShell>
 
-          <details className="mt-[var(--space-stack)] rounded-[var(--r-card)] border border-dashed border-[color:var(--border)] bg-[color:var(--muted)] p-5 shadow-[var(--shadow-1)]">
-            <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">
+          <details className="mt-5 rounded-card border border-dashed border-app-line bg-app-bg p-5">
+            <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">
               Xem lại mục tiêu đang viết
             </summary>
 
-            <div className="mt-4 stack-tight">
+            <div className="mt-4 space-y-3">
               {SMART_STEPS.map((step) => (
-                <div
-                  key={step.key}
-                  className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card p-4"
-                >
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                <div key={step.key} className="rounded-lg border border-app-line bg-app-surface p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">
                     {step.label}
                   </p>
-                  <p className="mt-2 text-sm leading-7 text-foreground">
+                  <p className="mt-2 text-[14px] leading-6 text-app-ink">
                     {formatStepDraft(step.key, smartData) || "Chưa có nội dung cho phần này."}
                   </p>
                 </div>

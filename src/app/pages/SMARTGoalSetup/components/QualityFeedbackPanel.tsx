@@ -1,7 +1,5 @@
-﻿import { AlertTriangle, CheckCircle2, CircleAlert, Lightbulb } from "lucide-react";
+﻿import { Check, Circle } from "lucide-react";
 
-import { Badge } from "../../../components/ui/badge";
-import { Progress } from "../../../components/ui/progress";
 import type { QualityLevel } from "@/lib/smart-goal/quality";
 
 interface QualityFeedbackPanelProps {
@@ -12,44 +10,28 @@ interface QualityFeedbackPanelProps {
   canProceedToFeasibility: boolean;
 }
 
-const LEVEL_CONFIG: Record<
-  QualityLevel,
-  {
-    label: string;
-    border: string;
-    bg: string;
-    badgeClass: string;
-    icon: typeof CheckCircle2;
-    iconColor: string;
-  }
-> = {
-  strong: {
-    label: "Mạnh",
-    border: "border-emerald-200",
-    bg: "bg-emerald-50/80",
-    badgeClass: "border-emerald-200 bg-emerald-50 text-emerald-800",
-    icon: CheckCircle2,
-    iconColor: "text-emerald-600",
-  },
-  okay: {
-    label: "Khá ổn",
-    border: "border-amber-200",
-    bg: "bg-amber-50/80",
-    badgeClass: "border-amber-200 bg-amber-50 text-amber-800",
-    icon: CircleAlert,
-    iconColor: "text-amber-600",
-  },
-  weak: {
-    label: "Cần làm rõ",
-    border: "border-amber-200",
-    bg: "bg-amber-50/80",
-    badgeClass: "border-rose-200 bg-rose-50 text-amber-800",
-    icon: AlertTriangle,
-    iconColor: "text-amber-600",
-  },
-};
+const MAX_DISPLAY_ITEMS = 6;
 
-const MAX_DISPLAY_ITEMS = 3;
+function getScoreBucket(overallScore: number) {
+  if (overallScore >= 80) {
+    return {
+      label: "Tốt",
+      className: "bg-app-accent-soft text-app-accent",
+    };
+  }
+
+  if (overallScore >= 50) {
+    return {
+      label: "Khá",
+      className: "border border-app-line bg-app-bg text-app-ink-soft",
+    };
+  }
+
+  return {
+    label: "Cần cải thiện",
+    className: "bg-app-warm-soft text-app-warm",
+  };
+}
 
 export function QualityFeedbackPanel({
   level,
@@ -58,64 +40,41 @@ export function QualityFeedbackPanel({
   suggestions,
   canProceedToFeasibility,
 }: QualityFeedbackPanelProps) {
-  const config = LEVEL_CONFIG[level];
-  const Icon = config.icon;
-  const topWarnings = warnings.slice(0, MAX_DISPLAY_ITEMS);
-  const topSuggestions = suggestions.slice(0, MAX_DISPLAY_ITEMS);
-
-  const headerDescription =
+  const bucket = getScoreBucket(overallScore);
+  const completedMessage =
     level === "strong"
-      ? "Mục tiêu đã đủ rõ ràng để chuyển sang kiểm tra tính thực tế."
+      ? "Mục tiêu đã đủ rõ để chuyển sang kiểm tra tính thực tế."
       : level === "okay"
-        ? "Mục tiêu khá ổn — xem gợi ý bên dưới nếu muốn chỉnh thêm."
+        ? "Mục tiêu khá ổn. Bạn có thể chỉnh thêm nếu muốn kế hoạch chắc hơn."
         : canProceedToFeasibility
-          ? "Vẫn tiếp tục được. Bổ sung theo gợi ý dưới sẽ giúp kế hoạch 12 tuần chắc hơn."
+          ? "Vẫn tiếp tục được. Thêm vài chi tiết sẽ giúp kế hoạch 12 tuần dễ giữ hơn."
           : "Cần bổ sung câu mục tiêu và mốc đích để tiếp tục.";
+  const hintItems = [completedMessage, ...warnings, ...suggestions].slice(0, MAX_DISPLAY_ITEMS);
 
   return (
-    <div className={`rounded-[var(--r-card)] border ${config.border} ${config.bg} p-4`}>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex items-start gap-2">
-          <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${config.iconColor} ${level === "strong" ? "check-bounce" : ""}`} />
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-slate-950">Chất lượng mục tiêu</p>
-            <p className="mt-0.5 text-sm leading-6 text-slate-600">{headerDescription}</p>
-          </div>
-        </div>
-        <Badge variant="outline" className={config.badgeClass}>
-          {config.label} · {overallScore}/100
-        </Badge>
+    <section className="mt-4 rounded-card border border-app-line bg-app-surface p-5" aria-label="Chất lượng mục tiêu">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h3 className="text-[14px] font-semibold text-app-ink">Chất lượng mục tiêu</h3>
+        <span className={`rounded-full px-3 py-1 text-[12px] font-medium ${bucket.className}`}>
+          {bucket.label} · {overallScore}/100
+        </span>
       </div>
 
-      <Progress value={overallScore} className="mt-4 h-2" aria-label={`Chất lượng mục tiêu: ${overallScore}/100`} />
-
-      {topWarnings.length > 0 && (
-        <div className="mt-4 stack-tight">
-          {topWarnings.map((warning) => (
-            <div
-              key={warning}
-              className="flex items-start gap-2 rounded-[var(--r-card)] border border-amber-100 bg-white/82 px-3 py-2.5"
-            >
-              <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-500" />
-              <p className="text-sm leading-6 text-slate-700">{warning}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {topSuggestions.length > 0 && (
-        <div className="mt-[var(--space-inline)] stack-tight">
-          {topSuggestions.map((suggestion) => (
-            <div
-              key={suggestion}
-              className="flex items-start gap-2 rounded-[var(--r-card)] border border-violet-100 bg-white/82 px-3 py-2.5"
-            >
-              <Lightbulb className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-500" />
-              <p className="text-sm leading-6 text-slate-600">{suggestion}</p>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+      <ul className="mt-4">
+        {hintItems.map((item, index) => {
+          const done = index === 0 || (level === "strong" && warnings.length === 0);
+          return (
+            <li key={item} className="flex gap-2 py-1.5">
+              {done ? (
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
+              ) : (
+                <Circle className="mt-0.5 h-4 w-4 shrink-0 text-app-ink-muted" aria-hidden="true" />
+              )}
+              <p className="text-[13px] leading-5 text-app-ink-soft">{item}</p>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }

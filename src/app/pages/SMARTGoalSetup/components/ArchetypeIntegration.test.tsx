@@ -48,7 +48,7 @@ describe("ArchetypeHint", () => {
 });
 
 describe("ArchetypePicker", () => {
-  it("renders the current archetype label inside the trigger", () => {
+  it("renders the current archetype label inside the option grid", () => {
     render(
       <ArchetypePicker
         archetype="exam_study"
@@ -59,8 +59,10 @@ describe("ArchetypePicker", () => {
       />,
     );
 
-    const trigger = screen.getByRole("combobox", { name: /loại mục tiêu/i });
-    expect(trigger.textContent).toContain(getGoalArchetypeLabel("exam_study"));
+    const label = screen.getByText(getGoalArchetypeLabel("exam_study"));
+    const option = label.closest("button");
+    if (!option) throw new Error("Expected archetype option button");
+    expect(option).toHaveAttribute("aria-pressed", "true");
   });
 
   it("shows the reset button only when overridden", () => {

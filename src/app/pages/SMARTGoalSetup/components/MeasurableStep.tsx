@@ -6,9 +6,9 @@ import { parseNumberInput } from "@/lib/smart-goal";
 
 import { GoalArchetypeExamples } from "../../../components/GoalArchetypeExamples";
 import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
 import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
+import { errorTextClass, helperTextClass, inputClass, labelClass } from "./formStyles";
 
 interface MeasurableStepProps {
   smartData: SMARTData;
@@ -45,16 +45,14 @@ export function MeasurableStep({
   const baselineInvalid = smartData.measurable.baseline_value.trim().length > 0 && parsedBaselineValue === undefined;
   const targetNotAboveBaseline =
     parsedBaselineValue !== undefined && parsedTargetValue !== undefined && parsedTargetValue <= parsedBaselineValue;
-  const targetInvalid =
-    parsedTargetValue === undefined ||
-    targetNotAboveBaseline;
+  const targetInvalid = parsedTargetValue === undefined || targetNotAboveBaseline;
 
   return (
-    <div className="stack-stack">
-      <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-cyan-200 bg-white/86 p-4 shadow-sm before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-cyan-600 before:to-sky-600 dark:border-cyan-500/30 dark:bg-slate-950/55">
-        <Label htmlFor="smart-metric-name" className="text-base">
+    <div className="space-y-5">
+      <div>
+        <label htmlFor="smart-metric-name" className={labelClass}>
           Con số hoặc dấu hiệu theo dõi
-        </Label>
+        </label>
         <Input
           id="smart-metric-name"
           placeholder="Ví dụ: điểm IELTS, số dự án hoàn thành, doanh thu..."
@@ -68,14 +66,11 @@ export function MeasurableStep({
               },
             }))
           }
+          className={inputClass}
           aria-invalid={metricNameMissing && currentStepHasDraftContent}
-          aria-describedby={
-            intentMetricHint
-              ? "smart-metric-name-hint smart-metric-intent-hint"
-              : "smart-metric-name-hint"
-          }
+          aria-describedby={intentMetricHint ? "smart-metric-name-hint smart-metric-intent-hint" : "smart-metric-name-hint"}
         />
-        <p id="smart-metric-name-hint" className="text-sm text-slate-500">
+        <p id="smart-metric-name-hint" className={helperTextClass}>
           Chọn chỉ số đo được — tăng hay đứng yên phải nhìn ra ngay.
         </p>
         {intentMetricHint && (
@@ -83,19 +78,21 @@ export function MeasurableStep({
             data-testid="smart-intent-metric-hint"
             id="smart-metric-intent-hint"
             role="note"
-            className="flex items-start gap-2 rounded-[var(--r-card)] border border-sky-200 bg-sky-50/82 px-3 py-2.5 text-sm leading-6 text-sky-900"
+            className="mt-3 flex items-start gap-2 rounded-lg border border-app-line bg-app-bg p-3 text-[12px] leading-relaxed text-app-ink-soft"
           >
-            <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" aria-hidden="true" />
+            <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
             <span>
-              <span className="font-semibold">Gợi ý theo hướng bạn chọn:</span> {intentMetricHint}
+              <span className="font-medium text-app-ink">Gợi ý theo hướng bạn chọn:</span> {intentMetricHint}
             </span>
           </div>
         )}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-cyan-100 bg-white/82 p-4 before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-cyan-300 dark:border-cyan-500/20 dark:bg-slate-950/45">
-          <Label htmlFor="smart-baseline">Mốc hiện tại (tuỳ chọn)</Label>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_140px]">
+        <div>
+          <label htmlFor="smart-baseline" className={labelClass}>
+            Mốc hiện tại (tuỳ chọn)
+          </label>
           <Input
             id="smart-baseline"
             type="number"
@@ -112,11 +109,20 @@ export function MeasurableStep({
                 },
               }))
             }
+            className={inputClass}
             aria-invalid={baselineInvalid}
+            aria-describedby={baselineInvalid ? "smart-baseline-error" : undefined}
           />
+          {baselineInvalid ? (
+            <p id="smart-baseline-error" className={errorTextClass}>
+              Nhập một con số hợp lệ.
+            </p>
+          ) : null}
         </div>
-        <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-cyan-100 bg-white/82 p-4 before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-sky-400 dark:border-cyan-500/20 dark:bg-slate-950/45">
-          <Label htmlFor="smart-target">Mốc mục tiêu</Label>
+        <div>
+          <label htmlFor="smart-target" className={labelClass}>
+            Mốc mục tiêu
+          </label>
           <Input
             id="smart-target"
             type="number"
@@ -133,19 +139,18 @@ export function MeasurableStep({
                 },
               }))
             }
+            className={inputClass}
             aria-invalid={targetInvalid && currentStepHasDraftContent}
             aria-describedby={targetNotAboveBaseline ? "smart-target-error" : undefined}
           />
           {targetNotAboveBaseline ? (
-            <p id="smart-target-error" className="text-xs font-medium text-rose-700">
+            <p id="smart-target-error" className={errorTextClass}>
               Mục tiêu cần lớn hơn mốc hiện tại
             </p>
           ) : null}
         </div>
       </div>
-      <p className="text-sm text-slate-500">
-        Nhập cả hai mốc thì mốc mục tiêu phải lớn hơn mốc hiện tại.
-      </p>
+      <p className={helperTextClass}>Nhập cả hai mốc thì mốc mục tiêu phải lớn hơn mốc hiện tại.</p>
       <ArchetypeHint archetype={activeArchetype} variant="metric" />
       <GoalArchetypeExamples archetype={intentArchetype} variant="metric" />
     </div>

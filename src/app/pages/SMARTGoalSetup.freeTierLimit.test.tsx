@@ -73,10 +73,11 @@ describe("SMARTGoalSetup free tier limit", () => {
 
     renderSmartSetup();
 
-    await screen.findByRole("button", { name: /Tiếp theo/i });
-    for (let index = 0; index < 5; index += 1) {
-      await user.click(screen.getByRole("button", { name: /Tiếp theo/i }));
+    await screen.findByRole("button", { name: "Tiếp" });
+    for (let index = 0; index < 4; index += 1) {
+      await user.click(screen.getByRole("button", { name: "Tiếp" }));
     }
+    await user.click(screen.getByRole("button", { name: "Hoàn thành" }));
 
     expect((await screen.findAllByText("Bạn đã có 3 mục tiêu")).length).toBeGreaterThan(0);
     expect(screen.getByText(/Nâng cấp Plus để tạo thêm mục tiêu/)).toBeInTheDocument();

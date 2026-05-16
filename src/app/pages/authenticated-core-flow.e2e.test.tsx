@@ -206,27 +206,27 @@ async function fillSmartGoal(user: ReturnType<typeof userEvent.setup>) {
     await screen.findByLabelText("Câu trả lời của bạn"),
     "Ra mắt hệ thống review cá nhân giúp tôi giữ nhịp thực thi mỗi tuần.",
   );
-  await user.click(screen.getByRole("button", { name: "Tiếp theo" }));
+  await user.click(screen.getByRole("button", { name: "Tiếp" }));
 
   await user.type(await screen.findByLabelText("Con số hoặc dấu hiệu theo dõi"), "Số tuần review hoàn chỉnh");
   await user.type(screen.getByLabelText(/Mốc hiện tại/i), "0");
   await user.type(screen.getByLabelText(/Mốc mục tiêu/i), "12");
-  await user.click(screen.getByRole("button", { name: "Tiếp theo" }));
+  await user.click(screen.getByRole("button", { name: "Tiếp" }));
 
   await user.type(await screen.findByLabelText("Thời gian mỗi tuần"), "6");
   await user.type(screen.getByLabelText("Kỹ năng cần có"), "Lập kế hoạch\nReview tuần");
   await user.type(screen.getByLabelText("Nguồn lực hỗ trợ"), "Lịch cá nhân và dashboard 12 tuần");
-  await user.click(screen.getByRole("button", { name: "Tiếp theo" }));
+  await user.click(screen.getByRole("button", { name: "Tiếp" }));
 
   await user.type(
     await screen.findByLabelText("Lý do bạn thật sự muốn theo đuổi"),
     "Tôi cần một nhịp review đủ rõ để không bỏ dở mục tiêu dài hạn.",
   );
   await user.type(screen.getByLabelText(/Lĩnh vực cuộc sống liên quan/i), "Sự nghiệp");
-  await user.click(screen.getByRole("button", { name: "Tiếp theo" }));
+  await user.click(screen.getByRole("button", { name: "Tiếp" }));
 
   await screen.findByLabelText("Số tuần mục tiêu");
-  await user.click(screen.getByRole("button", { name: "Tiếp theo: kiểm tra tính thực tế" }));
+  await user.click(screen.getByRole("button", { name: "Hoàn thành" }));
 }
 
 async function completeFeasibility(user: ReturnType<typeof userEvent.setup>) {

@@ -1,4 +1,4 @@
-import { Lightbulb, Sparkles, Target, TriangleAlert } from "lucide-react";
+import { Lightbulb, Target, TriangleAlert } from "lucide-react";
 
 import {
   type GoalArchetype,
@@ -22,12 +22,6 @@ const VARIANT_TITLE: Record<ArchetypeHintVariant, string> = {
   antiPattern: "Rủi ro hay gặp với loại mục tiêu này",
 };
 
-const VARIANT_BG: Record<ArchetypeHintVariant, string> = {
-  metric: "border-emerald-200 bg-emerald-50/70",
-  leadAction: "border-violet-200 bg-violet-50/70",
-  antiPattern: "border-amber-200 bg-amber-50/70",
-};
-
 export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: ArchetypeHintProps) {
   const archetypeLabel = getGoalArchetypeLabel(archetype);
   const hints = getArchetypeQualityHints(archetype);
@@ -38,11 +32,10 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
 
   if (variant === "metric") {
     Icon = Target;
-    body = <p className="text-sm leading-6 text-slate-700">{hints.recommendedMetric}</p>;
+    body = <p>{hints.recommendedMetric}</p>;
   } else if (variant === "leadAction") {
-    Icon = Sparkles;
     body = (
-      <ul className="list-disc stack-tight pl-5 text-sm leading-6 text-slate-700">
+      <ul className="list-disc space-y-1 pl-4">
         {planDefaults.recommendedLeadIndicators.map((indicator) => (
           <li key={indicator}>{indicator}</li>
         ))}
@@ -51,7 +44,7 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
   } else {
     Icon = TriangleAlert;
     body = (
-      <ul className="list-disc stack-tight pl-5 text-sm leading-6 text-slate-700">
+      <ul className="list-disc space-y-1 pl-4">
         {hints.antiPatterns.slice(0, 3).map((pattern) => (
           <li key={pattern}>{pattern}</li>
         ))}
@@ -63,20 +56,20 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
     <div
       role="note"
       aria-label={`${VARIANT_TITLE[variant]} (${archetypeLabel})`}
-      className={`rounded-[var(--r-card)] border p-4 ${VARIANT_BG[variant]}`}
+      className="rounded-lg border border-app-line bg-app-bg p-3"
       data-archetype={archetype}
       data-archetype-hint-variant={variant}
     >
-      {showArchetypeTag && (
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+      {showArchetypeTag ? (
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">
           Loại mục tiêu: {archetypeLabel}
         </p>
-      )}
-      <div className="mt-2 flex items-start gap-2">
-        <Icon className="mt-0.5 h-4 w-4 shrink-0 text-slate-700" aria-hidden="true" />
-        <div className="min-w-0">
-          <p className="text-sm font-semibold text-slate-900">{VARIANT_TITLE[variant]}</p>
-          <div className="mt-2">{body}</div>
+      ) : null}
+      <div className="flex items-start gap-2">
+        <Icon className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
+        <div className="min-w-0 text-[12px] leading-relaxed text-app-ink-soft">
+          <p className="font-medium text-app-ink">{VARIANT_TITLE[variant]}</p>
+          <div className="mt-1.5">{body}</div>
         </div>
       </div>
     </div>

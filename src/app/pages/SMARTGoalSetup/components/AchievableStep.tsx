@@ -4,10 +4,10 @@ import { parseNumberInput } from "@/lib/smart-goal";
 import type { GoalArchetype } from "@/lib/smart-goal/goalArchetypes";
 
 import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
 import { Textarea } from "../../../components/ui/textarea";
 import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
+import { helperTextClass, inputClass, labelClass, textareaClass } from "./formStyles";
 
 interface AchievableStepProps {
   smartData: SMARTData;
@@ -26,11 +26,11 @@ export function AchievableStep({
   const weeklyHoursInvalid = parsedWeeklyHours === undefined || parsedWeeklyHours <= 0;
 
   return (
-    <div className="stack-stack">
-      <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-emerald-200 bg-white/86 p-4 shadow-sm before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-emerald-600 before:to-teal-600 dark:border-emerald-500/30 dark:bg-slate-950/55">
-        <Label htmlFor="smart-weekly-hours" className="text-base">
+    <div className="space-y-5">
+      <div>
+        <label htmlFor="smart-weekly-hours" className={labelClass}>
           Thời gian mỗi tuần
-        </Label>
+        </label>
         <Input
           id="smart-weekly-hours"
           type="number"
@@ -47,13 +47,16 @@ export function AchievableStep({
               },
             }))
           }
+          className={inputClass}
           aria-invalid={weeklyHoursInvalid && currentStepHasDraftContent}
         />
-        <p className="text-sm text-slate-500">Chỉ đếm thời gian bạn giữ được đều — không phải lúc lý tưởng.</p>
+        <p className={helperTextClass}>Chỉ đếm thời gian bạn giữ được đều — không phải lúc lý tưởng.</p>
       </div>
 
-      <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-emerald-100 bg-white/82 p-4 before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-emerald-300 dark:border-emerald-500/20 dark:bg-slate-950/45">
-        <Label htmlFor="smart-required-skills">Kỹ năng cần có</Label>
+      <div>
+        <label htmlFor="smart-required-skills" className={labelClass}>
+          Kỹ năng cần có
+        </label>
         <Textarea
           id="smart-required-skills"
           placeholder="Mỗi dòng một kỹ năng, hoặc ngăn cách bằng dấu phẩy."
@@ -67,15 +70,15 @@ export function AchievableStep({
               },
             }))
           }
-          className="min-h-[120px] resize-none text-base leading-7"
+          className={textareaClass}
         />
-        <p className="text-sm text-slate-500">
-          Liệt kê kỹ năng thật sự ảnh hưởng tới kết quả giai đoạn này.
-        </p>
+        <p className={helperTextClass}>Liệt kê kỹ năng thật sự ảnh hưởng tới kết quả giai đoạn này.</p>
       </div>
 
-      <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-emerald-100 bg-white/82 p-4 before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-teal-300 dark:border-emerald-500/20 dark:bg-slate-950/45">
-        <Label htmlFor="smart-support-resources">Nguồn lực hỗ trợ</Label>
+      <div>
+        <label htmlFor="smart-support-resources" className={labelClass}>
+          Nguồn lực hỗ trợ
+        </label>
         <Textarea
           id="smart-support-resources"
           placeholder="Ví dụ: mentor, khóa học, tài liệu, người đồng hành..."
@@ -89,9 +92,9 @@ export function AchievableStep({
               },
             }))
           }
-          className="min-h-[120px] resize-none text-base leading-7"
+          className={textareaClass}
         />
-        <p className="text-sm text-slate-500">Ghi cả người hỗ trợ lẫn tài liệu, công cụ bạn dùng được ngay.</p>
+        <p className={helperTextClass}>Ghi cả người hỗ trợ lẫn tài liệu, công cụ bạn dùng được ngay.</p>
       </div>
 
       <ArchetypeHint archetype={archetype} variant="leadAction" />

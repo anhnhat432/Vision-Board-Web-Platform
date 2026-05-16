@@ -1,8 +1,6 @@
 import { Compass, Loader2 } from "lucide-react";
 
 import { CoreFlowProgress, type CoreFlowStepId } from "./CoreFlowProgress";
-import { Button } from "./ui/button";
-import { Card, CardContent } from "./ui/card";
 
 interface CoreFlowGateStateProps {
   currentStepId: CoreFlowStepId;
@@ -28,39 +26,52 @@ export function CoreFlowGateState({
   loading = false,
 }: CoreFlowGateStateProps) {
   return (
-    <div className="app-shell min-h-screen px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-4xl space-y-4">
+    <div className="min-h-screen px-4 pb-8 pt-12 text-app-ink sm:px-6">
+      <div className="mx-auto w-full max-w-2xl">
         <CoreFlowProgress currentStepId={currentStepId} />
 
-        <Card className="overflow-hidden border border-slate-200/80 bg-white/92 shadow-sm">
-          <CardContent className="p-7 text-center sm:p-9">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700">
-              {loading ? <Loader2 className="h-7 w-7 animate-spin" /> : <Compass className="h-7 w-7" />}
+        <section className="rounded-card border border-app-line bg-app-surface p-8 text-center">
+          {loading ? (
+            <Loader2 className="mx-auto h-6 w-6 animate-spin text-app-accent" aria-hidden="true" />
+          ) : (
+            <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+              <Compass className="h-5 w-5" aria-hidden="true" />
             </div>
-            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{eyebrow}</p>
-            <h1 className="mx-auto mt-2 max-w-2xl text-2xl font-bold tracking-normal text-slate-950 sm:text-3xl">
-              {title}
-            </h1>
-            <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-600" role="status">
-              {description}
-            </p>
+          )}
 
-            {(actionLabel && onAction) || (secondaryActionLabel && onSecondaryAction) ? (
-              <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-                {actionLabel && onAction ? (
-                  <Button type="button" className="w-full sm:w-auto" onClick={onAction}>
-                    {actionLabel}
-                  </Button>
-                ) : null}
-                {secondaryActionLabel && onSecondaryAction ? (
-                  <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={onSecondaryAction}>
-                    {secondaryActionLabel}
-                  </Button>
-                ) : null}
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
+          <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+            {eyebrow}
+          </p>
+          <h1 className="mx-auto mt-2 max-w-xl font-serif text-[24px] font-medium leading-tight tracking-[-0.01em] text-app-ink">
+            {title}
+          </h1>
+          <p className="mx-auto mt-3 max-w-xl text-[14px] leading-6 text-app-ink-soft" role="status">
+            {description}
+          </p>
+
+          {(actionLabel && onAction) || (secondaryActionLabel && onSecondaryAction) ? (
+            <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+              {actionLabel && onAction ? (
+                <button
+                  type="button"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-2.5 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+                  onClick={onAction}
+                >
+                  {actionLabel}
+                </button>
+              ) : null}
+              {secondaryActionLabel && onSecondaryAction ? (
+                <button
+                  type="button"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-5 py-2.5 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+                  onClick={onSecondaryAction}
+                >
+                  {secondaryActionLabel}
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+        </section>
       </div>
     </div>
   );

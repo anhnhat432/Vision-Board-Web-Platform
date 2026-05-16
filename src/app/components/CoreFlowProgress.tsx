@@ -1,8 +1,4 @@
-import { ArrowRight, Compass, LogOut } from "lucide-react";
-
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
-import { Progress } from "./ui/progress";
+import { cn } from "./ui/utils";
 
 export type CoreFlowStepId =
   | "life_balance"
@@ -59,14 +55,9 @@ const CORE_FLOW_STEPS: Array<{
 interface CoreFlowProgressProps {
   currentStepId: CoreFlowStepId;
   className?: string;
-  /**
-   * Optional escape hatch shown next to the step badges. Renders a small
-   * "Tạm thoát" button that calls `onExit` so the user can leave the wizard
-   * mid-flow (their draft auto-saves locally and they can resume by re-opening
-   * the same step from the dashboard). Default `undefined` — no button rendered.
-   */
+  /** Optional escape hatch shown next to the progress caption. */
   onExit?: () => void;
-  /** Override the exit button label. Default `"Tạm thoát"`. */
+  /** Override the exit button label. Default `"Thoát →"`. */
   exitLabel?: string;
   /** Override the accessible label / tooltip for the exit button. */
   exitTooltip?: string;
@@ -76,7 +67,7 @@ export function CoreFlowProgress({
   currentStepId,
   className = "",
   onExit,
-  exitLabel = "Tạm thoát",
+  exitLabel = "Thoát →",
   exitTooltip = "Quay lại Trang chính — tiến độ đã nhập tự lưu trên thiết bị này",
 }: CoreFlowProgressProps) {
   const currentIndex = Math.max(
@@ -84,68 +75,44 @@ export function CoreFlowProgress({
     CORE_FLOW_STEPS.findIndex((step) => step.id === currentStepId),
   );
   const currentStep = CORE_FLOW_STEPS[currentIndex];
-  const nextStep = CORE_FLOW_STEPS[currentIndex + 1] ?? null;
   const progressValue = ((currentIndex + 1) / CORE_FLOW_STEPS.length) * 100;
-  const progressLabel = Math.round(progressValue);
-  const nextActionLabel = nextStep ? `Tiếp: ${nextStep.title}` : "Tiếp tục giữ nhịp";
 
   return (
-    <section
-      aria-label="Tiến độ đường chính"
-      className={`rounded-[var(--r-control)] border border-slate-200/80 bg-white/92 px-3.5 py-3 shadow-sm sm:px-4 ${className}`}
-    >
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-        <div className="flex shrink-0 flex-wrap items-center gap-2">
-          <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-600">
-            <Compass className="mr-2 h-3.5 w-3.5" />
-            Đường chính
-          </Badge>
-          <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
-            Bước {currentIndex + 1}/{CORE_FLOW_STEPS.length}
-          </Badge>
-          {onExit ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onExit}
-              title={exitTooltip}
-              aria-label={exitTooltip}
-              className="h-7 rounded-[var(--r-pill)] border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50 hover:text-slate-900"
-            >
-              <LogOut className="mr-1 h-3 w-3" />
-              {exitLabel}
-            </Button>
-          ) : null}
-        </div>
-
-        <div className="min-w-0 flex-1 space-y-2">
-          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-            <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
-                {currentStep.label}
-              </p>
-              <h2 className="truncate text-sm font-bold tracking-normal text-slate-950 sm:text-base">
-                {currentStep.title}
-              </h2>
-            </div>
-            <span className="text-sm font-semibold text-slate-500">{progressLabel}%</span>
-          </div>
-          <Progress value={progressValue} aria-label={`Tiến độ đường chính: ${progressLabel}%`} />
-        </div>
-
-        <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50/85 px-3 py-2 lg:w-[280px]">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-white text-slate-700 shadow-sm">
-              <ArrowRight className="h-4 w-4" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tiếp theo</p>
-              <p className="truncate text-sm font-semibold text-slate-950">{nextActionLabel}</p>
-            </div>
-          </div>
-        </div>
+    <section aria-label="Tiến độ đường chính" className={cn("mb-6 flex flex-col gap-2", className)}>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+          Bước {currentIndex + 1} / {CORE_FLOW_STEPS.length} · {currentStep.label.toLocaleUpperCase("vi-VN")}
+        </p>
+        {onExit ? (
+          <button
+            type="button"
+            onClick={onExit}
+            title={exitTooltip}
+            aria-label={exitTooltip}
+            className="shrink-0 rounded-full px-2 py-1 text-[13px] font-medium text-app-ink-muted transition-colors duration-150 hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          >
+            {exitLabel}
+          </button>
+        ) : null}
       </div>
+
+      <div
+        role="progressbar"
+        aria-label={`Tiến độ đường chính: bước ${currentIndex + 1} trên ${CORE_FLOW_STEPS.length}`}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(progressValue)}
+        className="flex gap-1"
+      >
+        {CORE_FLOW_STEPS.map((step, index) => (
+          <span
+            key={step.id}
+            className={cn("h-1 flex-1 rounded-full", index <= currentIndex ? "bg-app-accent" : "bg-app-line")}
+            aria-hidden="true"
+          />
+        ))}
+      </div>
+
       <p className="sr-only">{currentStep.description}</p>
     </section>
   );

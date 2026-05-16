@@ -40,7 +40,7 @@ describe("SMARTGoalSetup handoff", () => {
     );
 
     // Wait for the form to be ready
-    await screen.findByText("Bước 1/5");
+    await screen.findByText(/Bước 1: Specific/i);
 
     // Type a goal statement into the Specific step textarea
     const goalInput = await screen.findByRole("textbox");
@@ -69,11 +69,10 @@ describe("SMARTGoalSetup handoff", () => {
     );
 
     const handoffCard = await screen.findByTestId("smart-goal-handoff-card");
-    expect(handoffCard).toHaveTextContent("Góc nhìn cuộc sống đã chọn");
-    expect(handoffCard).toHaveTextContent("Sức khỏe");
+    expect(handoffCard).toHaveTextContent("Liên kết với: Sức khỏe");
     expect(handoffCard).toHaveTextContent("Số buổi vận động mỗi tuần");
     expect(handoffCard).toHaveTextContent("12 tuần");
-    expect(await screen.findByText("Bước 1/5")).toBeInTheDocument();
+    expect(await screen.findByText(/Bước 1: Specific/i)).toBeInTheDocument();
     expect(screen.queryByText(/Bu\?c/)).not.toBeInTheDocument();
   });
 });

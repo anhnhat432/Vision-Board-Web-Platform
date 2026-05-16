@@ -1,7 +1,5 @@
 ﻿import { Pencil } from "lucide-react";
 
-import { Badge } from "../../../components/ui/badge";
-import { Button } from "../../../components/ui/button";
 import type { SmartGoalSummaryRow, SmartStepKey } from "../types";
 
 interface ReviewStepProps {
@@ -13,49 +11,42 @@ interface ReviewStepProps {
 
 export function ReviewStep({ clarityDoneCount, clarityItemCount, summaryRows, onJumpToStep }: ReviewStepProps) {
   return (
-    <div className="rounded-[var(--r-card)] border border-emerald-200 bg-emerald-50/80 p-4">
+    <section className="rounded-card border border-app-line bg-app-surface p-6 md:p-8" aria-labelledby="smart-review-title">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-slate-950">Tóm tắt trước khi kiểm tra</p>
-          <p className="mt-1 text-sm leading-6 text-slate-600">
+          <h3 id="smart-review-title" className="font-serif text-[22px] font-medium leading-7 text-app-ink">
+            Xác nhận mục tiêu của bạn
+          </h3>
+          <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">
             Xem lại nhanh các phần chính trước khi sang bước kiểm tra tính thực tế.
           </p>
         </div>
-        <Badge variant="outline" className="border-emerald-200 bg-white text-emerald-700">
+        <span className="rounded-full bg-app-accent-soft px-3 py-1 text-[12px] font-medium text-app-accent">
           Sẵn sàng: {clarityDoneCount}/{clarityItemCount}
-        </Badge>
+        </span>
       </div>
-      <div className="mt-4 stack-tight">
+
+      <div className="mt-2">
         {summaryRows.map((row) => (
-          <div key={row.key} className="rounded-[var(--r-card)] border border-white/80 bg-white/82 p-3">
+          <div key={row.key} className="border-b border-app-line py-4 last:border-b-0">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{row.label}</p>
-                <p
-                  className={`mt-2 text-sm leading-6 ${
-                    row.key === "specific"
-                      ? "bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 bg-clip-text font-semibold text-transparent"
-                      : "text-slate-700"
-                  }`}
-                >
-                  {row.value}
-                </p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">{row.label}</p>
+                <p className="mt-2 text-[14px] leading-6 text-app-ink">{row.value}</p>
               </div>
-              <Button
+              <button
                 type="button"
-                variant="outline"
-                size="sm"
-                className="shrink-0 border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-[12px] font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                 onClick={() => onJumpToStep(row.key)}
                 aria-label={`Sửa phần ${row.label}`}
               >
-                <Pencil className="h-3.5 w-3.5" />
+                <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                 Sửa
-              </Button>
+              </button>
             </div>
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

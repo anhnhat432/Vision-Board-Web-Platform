@@ -2,11 +2,10 @@
 
 import { parseNumberInput } from "@/lib/smart-goal";
 
-import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
 import { DEFAULT_TARGET_WEEKS } from "../constants";
 import type { SMARTData } from "../types";
+import { helperTextClass, inputClass, labelClass } from "./formStyles";
 
 interface TimeBoundStepProps {
   smartData: SMARTData;
@@ -20,17 +19,18 @@ export function TimeBoundStep({ smartData, setSmartData }: TimeBoundStepProps) {
   const targetDateInvalid = smartData.timeBound.mode === "date" && smartData.timeBound.target_date.trim().length === 0;
 
   return (
-    <div className="stack-stack">
-      <div className="stack-tight">
-        <p className="text-sm text-slate-600">
-          Chọn cách chốt thời hạn phù hợp với bạn.
-        </p>
-      </div>
+    <div className="space-y-5">
+      <p className="text-[14px] leading-6 text-app-ink-soft">Chọn cách chốt thời hạn phù hợp với bạn.</p>
 
       <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Chọn cách chốt thời hạn">
-        <Button
-          variant={smartData.timeBound.mode === "weeks" ? "default" : "outline"}
+        <button
+          type="button"
           aria-pressed={smartData.timeBound.mode === "weeks"}
+          className={
+            smartData.timeBound.mode === "weeks"
+              ? "rounded-lg border border-app-accent bg-app-accent-soft px-4 py-2.5 text-[14px] font-medium text-app-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              : "rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[14px] font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          }
           onClick={() =>
             setSmartData((previous) => ({
               ...previous,
@@ -44,10 +44,15 @@ export function TimeBoundStep({ smartData, setSmartData }: TimeBoundStepProps) {
           }
         >
           Theo số tuần
-        </Button>
-        <Button
-          variant={smartData.timeBound.mode === "date" ? "default" : "outline"}
+        </button>
+        <button
+          type="button"
           aria-pressed={smartData.timeBound.mode === "date"}
+          className={
+            smartData.timeBound.mode === "date"
+              ? "rounded-lg border border-app-accent bg-app-accent-soft px-4 py-2.5 text-[14px] font-medium text-app-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              : "rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[14px] font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          }
           onClick={() =>
             setSmartData((previous) => ({
               ...previous,
@@ -59,14 +64,14 @@ export function TimeBoundStep({ smartData, setSmartData }: TimeBoundStepProps) {
           }
         >
           Theo ngày cụ thể
-        </Button>
+        </button>
       </div>
 
       {smartData.timeBound.mode === "weeks" ? (
-        <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-amber-200 bg-white/86 p-4 shadow-sm before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-amber-500 before:to-orange-500 dark:border-amber-500/30 dark:bg-slate-950/55">
-          <Label htmlFor="smart-target-weeks" className="text-base">
+        <div>
+          <label htmlFor="smart-target-weeks" className={labelClass}>
             Số tuần mục tiêu
-          </Label>
+          </label>
           <Input
             id="smart-target-weeks"
             type="number"
@@ -82,17 +87,16 @@ export function TimeBoundStep({ smartData, setSmartData }: TimeBoundStepProps) {
                 },
               }))
             }
+            className={inputClass}
             aria-invalid={targetWeeksInvalid}
           />
-          <p className="text-sm text-slate-500">
-            12 tuần phù hợp nhất với bước lập kế hoạch tiếp theo.
-          </p>
+          <p className={helperTextClass}>12 tuần phù hợp nhất với bước lập kế hoạch tiếp theo.</p>
         </div>
       ) : (
-        <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-amber-200 bg-white/86 p-4 shadow-sm before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-amber-500 before:to-orange-500 dark:border-amber-500/30 dark:bg-slate-950/55">
-          <Label htmlFor="smart-target-date" className="text-base">
+        <div>
+          <label htmlFor="smart-target-date" className={labelClass}>
             Ngày mục tiêu
-          </Label>
+          </label>
           <Input
             id="smart-target-date"
             type="date"
@@ -106,9 +110,10 @@ export function TimeBoundStep({ smartData, setSmartData }: TimeBoundStepProps) {
                 },
               }))
             }
+            className={inputClass}
             aria-invalid={targetDateInvalid}
           />
-          <p className="text-sm text-slate-500">Chọn ngày đủ rõ để nhìn lại tiến độ.</p>
+          <p className={helperTextClass}>Chọn ngày đủ rõ để nhìn lại tiến độ.</p>
         </div>
       )}
     </div>

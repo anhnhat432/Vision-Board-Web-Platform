@@ -3,11 +3,11 @@
 import type { GoalArchetype } from "@/lib/smart-goal";
 
 import { GoalArchetypeExamples } from "../../../components/GoalArchetypeExamples";
-import { Label } from "../../../components/ui/label";
 import { Textarea } from "../../../components/ui/textarea";
 import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
 import { ArchetypePicker } from "./ArchetypePicker";
+import { helperTextClass, labelClass, textareaClass } from "./formStyles";
 
 interface SpecificStepProps {
   smartData: SMARTData;
@@ -45,11 +45,11 @@ export function SpecificStep({
   const activeInferredArchetype = inferredArchetype ?? activeArchetype;
 
   return (
-    <div className="stack-stack">
-      <div className="stack-tight relative overflow-hidden rounded-[var(--r-card)] border border-violet-200 bg-white/86 p-4 shadow-sm before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-gradient-to-b before:from-violet-600 before:to-fuchsia-600 dark:border-violet-500/30 dark:bg-slate-950/55">
-        <Label htmlFor="smart-specific" className="text-base">
+    <div className="space-y-5">
+      <div>
+        <label htmlFor="smart-specific" className={labelClass}>
           Câu trả lời của bạn
-        </Label>
+        </label>
         <Textarea
           id="smart-specific"
           placeholder={placeholder}
@@ -62,13 +62,17 @@ export function SpecificStep({
               },
             }))
           }
-          className="min-h-[180px] resize-none text-base leading-7"
+          className={`${textareaClass} min-h-[180px]`}
           aria-invalid={showError}
           aria-describedby="smart-specific-hint smart-specific-counter"
         />
-        <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500">
-          <p id="smart-specific-hint">Viết kết quả cụ thể mà bạn có thể nhìn thấy hoặc kiểm chứng.</p>
-          <p id="smart-specific-counter">{specificLength}/10 ký tự tối thiểu</p>
+        <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
+          <p id="smart-specific-hint" className={helperTextClass}>
+            Viết kết quả cụ thể mà bạn có thể nhìn thấy hoặc kiểm chứng.
+          </p>
+          <p id="smart-specific-counter" className={helperTextClass}>
+            {specificLength}/10 ký tự tối thiểu
+          </p>
         </div>
       </div>
 

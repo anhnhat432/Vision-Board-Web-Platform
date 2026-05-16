@@ -1,30 +1,21 @@
-﻿import { Wand2 } from "lucide-react";
+﻿import { Lightbulb, RotateCcw, type LucideIcon } from "lucide-react";
 
 import {
   type GoalArchetype,
   getGoalArchetypeLabel,
 } from "@/lib/smart-goal/goalArchetypes";
-import { Button } from "../../../components/ui/button";
-import { Label } from "../../../components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../components/ui/select";
 
-const ARCHETYPE_ORDER: GoalArchetype[] = [
-  "skill_learning",
-  "health_fitness",
-  "career_growth",
-  "financial_goal",
-  "exam_study",
-  "project_completion",
-  "habit_building",
-  "creative_output",
-  "relationship_life",
-  "other",
+const ARCHETYPE_ORDER: Array<{ value: GoalArchetype; icon: LucideIcon; sub: string }> = [
+  { value: "skill_learning", icon: Lightbulb, sub: "Học kỹ năng" },
+  { value: "health_fitness", icon: Lightbulb, sub: "Sức khỏe" },
+  { value: "career_growth", icon: Lightbulb, sub: "Sự nghiệp" },
+  { value: "financial_goal", icon: Lightbulb, sub: "Tài chính" },
+  { value: "exam_study", icon: Lightbulb, sub: "Thi cử" },
+  { value: "project_completion", icon: Lightbulb, sub: "Dự án" },
+  { value: "habit_building", icon: Lightbulb, sub: "Thói quen" },
+  { value: "creative_output", icon: Lightbulb, sub: "Sáng tạo" },
+  { value: "relationship_life", icon: Lightbulb, sub: "Kết nối" },
+  { value: "other", icon: Lightbulb, sub: "Khác" },
 ];
 
 interface ArchetypePickerProps {
@@ -43,47 +34,52 @@ export function ArchetypePicker({
   onResetToInferred,
 }: ArchetypePickerProps) {
   return (
-    <div className="rounded-[var(--r-card)] border border-slate-200 bg-white/85 p-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <Label htmlFor="smart-archetype-select" className="text-sm font-semibold text-slate-900">
-            Loại mục tiêu
-          </Label>
-          <p className="mt-1 text-xs leading-5 text-slate-500">
-            Mình đoán loại để gợi ý đúng hơn. Nếu sai, đổi tay — gợi ý sẽ cập nhật theo.
+    <div className="rounded-card border border-app-line bg-app-surface p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="mb-1 text-[12px] font-medium text-app-ink-muted">Chọn loại mục tiêu</p>
+          <p className="text-[12px] leading-5 text-app-ink-muted">
+            Mình đoán loại để gợi ý đúng hơn. Nếu sai, đổi tay.
           </p>
         </div>
-        {isUserOverridden && (
-          <Button
+        {isUserOverridden ? (
+          <button
             type="button"
-            variant="ghost"
-            size="sm"
-            className="h-8 shrink-0 text-xs text-slate-500 hover:text-slate-900"
+            className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-[12px] font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             onClick={onResetToInferred}
             aria-label={`Quay lại đoán tự động (${getGoalArchetypeLabel(inferredArchetype)})`}
           >
-            <Wand2 className="h-3.5 w-3.5" />
+            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
             Dùng đoán tự động
-          </Button>
-        )}
+          </button>
+        ) : null}
       </div>
-      <div className="mt-[var(--space-inline)]">
-        <Select value={archetype} onValueChange={(value) => onChange(value as GoalArchetype)}>
-          <SelectTrigger
-            id="smart-archetype-select"
-            aria-label="Chọn loại mục tiêu"
-            className="w-full"
-          >
-            <SelectValue placeholder="Chọn loại mục tiêu" />
-          </SelectTrigger>
-          <SelectContent>
-            {ARCHETYPE_ORDER.map((option) => (
-              <SelectItem key={option} value={option}>
-                {getGoalArchetypeLabel(option)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+        {ARCHETYPE_ORDER.map((option) => {
+          const Icon = option.icon;
+          const active = archetype === option.value;
+
+          return (
+            <button
+              key={option.value}
+              type="button"
+              className={
+                active
+                  ? "flex flex-col items-start gap-1 rounded-lg border border-app-accent bg-app-accent-soft p-3 text-left text-app-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                  : "flex flex-col items-start gap-1 rounded-lg border border-app-line bg-app-surface p-3 text-left text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              }
+              onClick={() => onChange(option.value)}
+              aria-pressed={active}
+            >
+              <Icon className="h-4 w-4" aria-hidden="true" />
+              <span className="text-[13px] font-medium leading-5">{getGoalArchetypeLabel(option.value)}</span>
+              <span className={active ? "text-[11px] text-app-accent/80" : "text-[11px] text-app-ink-muted"}>
+                {option.sub}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

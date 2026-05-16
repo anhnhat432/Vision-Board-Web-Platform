@@ -1,8 +1,8 @@
-import { AlertCircle, Check, Cloud } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, type LucideIcon } from "lucide-react";
 
 import { SAVE_STATUS } from "../utils/user-facing-copy";
 
-export type AutoSaveStatus = "idle" | "saving" | "saved";
+export type AutoSaveStatus = "idle" | "saving" | "saved" | "error";
 
 interface AutoSaveIndicatorProps {
   status?: AutoSaveStatus;
@@ -22,20 +22,25 @@ export function AutoSaveIndicator({ status, lastSavedAt, className = "" }: AutoS
   const stateConfig = {
     idle: {
       icon: AlertCircle,
-      label: "Có thay đổi chưa lưu",
-      tone: "text-amber-700",
+      label: "Chưa lưu",
+      tone: "text-app-ink-muted",
     },
     saving: {
-      icon: Cloud,
+      icon: Loader2,
       label: SAVE_STATUS.saving,
-      tone: "text-sky-700",
+      tone: "text-app-ink-muted",
     },
     saved: {
-      icon: Check,
+      icon: CheckCircle2,
       label: lastSavedAt ? `${SAVE_STATUS.saved} lúc ${formatTimeLabel(lastSavedAt)}` : SAVE_STATUS.saved,
-      tone: "text-emerald-700",
+      tone: "text-app-ink-muted",
     },
-  } satisfies Record<AutoSaveStatus, { icon: typeof Check; label: string; tone: string }>;
+    error: {
+      icon: AlertCircle,
+      label: SAVE_STATUS.error,
+      tone: "text-[color:var(--color-danger-fg)]",
+    },
+  } satisfies Record<AutoSaveStatus, { icon: LucideIcon; label: string; tone: string }>;
 
   const { icon: Icon, label, tone } = stateConfig[effectiveStatus];
 
@@ -44,9 +49,9 @@ export function AutoSaveIndicator({ status, lastSavedAt, className = "" }: AutoS
       role="status"
       aria-live="polite"
       data-testid="auto-save-indicator"
-      className={`inline-flex items-center gap-1.5 text-xs font-medium ${tone} ${className}`}
+      className={`inline-flex items-center gap-1.5 text-[12px] font-medium ${tone} ${className}`}
     >
-      <Icon className="h-3 w-3" aria-hidden="true" />
+      <Icon className={`h-3.5 w-3.5 ${effectiveStatus === "saving" ? "animate-spin" : ""}`} aria-hidden="true" />
       {label}
     </span>
   );

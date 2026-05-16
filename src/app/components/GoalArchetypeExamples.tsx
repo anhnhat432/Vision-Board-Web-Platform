@@ -63,18 +63,14 @@ export function GoalArchetypeExamples({
       data-testid="goal-archetype-examples"
       data-variant={variant}
       data-archetype={archetype}
-      className={[
-        "rounded-[var(--r-card)] border border-violet-200 bg-violet-50/72 p-3 text-left",
-        className ?? "",
-      ]
+      className={["rounded-lg border border-app-line bg-app-bg p-3 text-left", className ?? ""]
         .filter(Boolean)
         .join(" ")}
     >
-      <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-violet-900">
-        <Lightbulb className="h-4 w-4 shrink-0 text-violet-700" aria-hidden="true" />
+      <summary className="flex cursor-pointer list-none items-center gap-2 text-[13px] font-medium text-app-ink">
+        <Lightbulb className="h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
         <span>
-          {headline}{" "}
-          <span className="font-normal text-violet-700/82">— {archetypeLabel}</span>
+          {headline} <span className="font-normal text-app-ink-muted">— {archetypeLabel}</span>
         </span>
       </summary>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -84,11 +80,11 @@ export function GoalArchetypeExamples({
             data-tone={entry.tone}
             className={
               entry.tone === "weak"
-                ? "rounded-[var(--r-tile)] border border-rose-200 bg-rose-50/70 px-3 py-2.5 text-sm leading-6 text-rose-950"
-                : "rounded-[var(--r-tile)] border border-emerald-200 bg-emerald-50/70 px-3 py-2.5 text-sm leading-6 text-emerald-950"
+                ? "rounded-lg border border-app-line bg-app-surface px-3 py-2.5 text-[13px] leading-6 text-app-ink-soft"
+                : "rounded-lg border border-app-accent bg-app-accent-soft px-3 py-2.5 text-[13px] leading-6 text-app-accent"
             }
           >
-            <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.14em]">
+            <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em]">
               {entry.tone === "weak" ? (
                 <CircleAlert className="h-3.5 w-3.5" aria-hidden="true" />
               ) : (
@@ -100,14 +96,14 @@ export function GoalArchetypeExamples({
           </div>
         ))}
       </div>
-      {variant === "lead_indicator" && (
+      {variant === "lead_indicator" ? (
         <p
           data-testid="goal-archetype-week1-starter"
-          className="mt-3 rounded-[var(--r-tile)] border border-sky-200 bg-sky-50/70 px-3 py-2.5 text-sm leading-6 text-sky-900"
+          className="mt-3 rounded-lg border border-app-line bg-app-surface px-3 py-2.5 text-[13px] leading-6 text-app-ink-soft"
         >
-          <span className="font-semibold">Việc bắt đầu cho tuần 1:</span> {example.week1StarterTask}
+          <span className="font-medium text-app-ink">Việc bắt đầu cho tuần 1:</span> {example.week1StarterTask}
         </p>
-      )}
+      ) : null}
     </details>
   );
 }

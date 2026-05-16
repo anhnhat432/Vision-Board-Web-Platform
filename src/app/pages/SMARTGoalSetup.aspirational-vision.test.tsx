@@ -60,7 +60,7 @@ describe("SMARTGoalSetup aspirational vision banner", () => {
     renderSmartSetup();
 
     expect(
-      await screen.findByText("Bạn đang đặt mục tiêu 12 tuần. Phương pháp gốc khuyên gắn với tầm nhìn 3 năm."),
+      await screen.findByText("Bạn đang đặt mục tiêu 12 tuần. Hãy nghĩ thêm về tầm nhìn 3 năm trước."),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Bỏ qua" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Điền 2 phút →" })).toHaveAttribute("href", "/vision");
