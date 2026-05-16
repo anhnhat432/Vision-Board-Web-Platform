@@ -254,6 +254,40 @@ For production, run this from a trusted operator machine or a secure scheduled j
 mongorestore --uri "$env:MONGODB_URI" --archive="backups/mongodb/<backup>.archive.gz" --gzip
 ```
 
+#### Scheduled GitHub Actions backup to Cloudflare R2
+
+The workflow `.github/workflows/mongodb-backup-r2.yml` runs daily at 03:00 Asia/Saigon, creates a `mongodump` archive, encrypts it with GPG, uploads only the encrypted `.archive.gz.gpg` file to Cloudflare R2, and prunes encrypted R2 backups older than the retention window.
+
+Create a private R2 bucket, then add these GitHub repository secrets:
+
+```text
+MONGODB_URI
+R2_ACCOUNT_ID
+R2_ACCESS_KEY_ID
+R2_SECRET_ACCESS_KEY
+R2_BUCKET
+MONGODB_BACKUP_GPG_PASSPHRASE
+```
+
+Optional GitHub repository variables:
+
+```text
+MONGODB_BACKUP_R2_PREFIX=mongodb/vision-board
+MONGODB_BACKUP_RETENTION_DAYS=30
+```
+
+Use a database user with the minimum read permissions required for backup. Keep the R2 bucket private and keep `MONGODB_BACKUP_GPG_PASSPHRASE` outside the repository.
+
+Restore flow:
+
+```bash
+aws --endpoint-url "https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com" \
+  s3 cp "s3://$R2_BUCKET/mongodb/vision-board/<backup>.archive.gz.gpg" ./backup.archive.gz.gpg
+
+gpg --batch --decrypt --output ./backup.archive.gz ./backup.archive.gz.gpg
+mongorestore --uri "$MONGODB_URI" --archive="./backup.archive.gz" --gzip
+```
+
 ### 5. Run the frontend
 
 ```powershell

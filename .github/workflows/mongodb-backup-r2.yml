@@ -1,0 +1,201 @@
+name: MongoDB backup to R2
+
+on:
+  schedule:
+    # 03:00 Asia/Saigon. GitHub cron uses UTC.
+    - cron: "0 20 * * *"
+  workflow_dispatch:
+    inputs:
+      retention_days:
+        description: Days to keep encrypted R2 backups
+        required: false
+        default: "30"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mongodb-backup-r2
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: Create encrypted MongoDB backup
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MONGODB_TOOLS_VERSION: "100.14.1"
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      R2_PREFIX: ${{ vars.MONGODB_BACKUP_R2_PREFIX || 'mongodb/vision-board' }}
+      BACKUP_RETENTION_DAYS: ${{ github.event.inputs.retention_days || vars.MONGODB_BACKUP_RETENTION_DAYS || '30' }}
+      BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.MONGODB_BACKUP_GPG_PASSPHRASE }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: auto
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Validate backup configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          missing=0
+          for name in MONGODB_URI R2_ACCOUNT_ID R2_BUCKET AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY BACKUP_ENCRYPTION_PASSPHRASE; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::Missing required secret or env: ${name}"
+              missing=1
+            fi
+          done
+
+          if ! [[ "${BACKUP_RETENTION_DAYS}" =~ ^[0-9]+$ ]] || [ "${BACKUP_RETENTION_DAYS}" -lt 1 ]; then
+            echo "::error::BACKUP_RETENTION_DAYS must be a positive integer."
+            missing=1
+          fi
+
+          if [ "${missing}" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Install MongoDB Database Tools
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tools_dir="${RUNNER_TEMP}/mongodb-database-tools"
+          mkdir -p "${tools_dir}"
+
+          curl -fsSL --retry 3 \
+            "https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2204-x86_64-${MONGODB_TOOLS_VERSION}.tgz" \
+            -o "${RUNNER_TEMP}/mongodb-tools.tgz"
+
+          tar -xzf "${RUNNER_TEMP}/mongodb-tools.tgz" --strip-components=1 -C "${tools_dir}"
+          echo "${tools_dir}/bin" >> "${GITHUB_PATH}"
+
+      - name: Verify MongoDB backup tool
+        run: mongodump --version
+
+      - name: Create compressed MongoDB archive
+        id: backup
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          backup_dir="${RUNNER_TEMP}/mongodb-backups"
+          mkdir -p "${backup_dir}"
+
+          npm run backup:mongo -- --out-dir "${backup_dir}" --retention-days "${BACKUP_RETENTION_DAYS}"
+
+          archive_path="$(find "${backup_dir}" -maxdepth 1 -type f -name 'vision-board-mongodb-*.archive.gz' -printf '%T@ %p\n' | sort -nr | head -n 1 | cut -d' ' -f2-)"
+          if [ -z "${archive_path}" ]; then
+            echo "::error::No MongoDB backup archive was created."
+            exit 1
+          fi
+
+          archive_name="$(basename "${archive_path}")"
+          echo "archive_path=${archive_path}" >> "${GITHUB_OUTPUT}"
+          echo "archive_name=${archive_name}" >> "${GITHUB_OUTPUT}"
+
+      - name: Encrypt archive
+        id: encrypt
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          encrypted_path="${{ steps.backup.outputs.archive_path }}.gpg"
+          gpg --batch --yes --symmetric --cipher-algo AES256 \
+            --pinentry-mode loopback \
+            --passphrase "${BACKUP_ENCRYPTION_PASSPHRASE}" \
+            --output "${encrypted_path}" \
+            "${{ steps.backup.outputs.archive_path }}"
+
+          encrypted_name="$(basename "${encrypted_path}")"
+          echo "encrypted_path=${encrypted_path}" >> "${GITHUB_OUTPUT}"
+          echo "encrypted_name=${encrypted_name}" >> "${GITHUB_OUTPUT}"
+
+      - name: Install AWS CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --user --upgrade awscli
+          echo "${HOME}/.local/bin" >> "${GITHUB_PATH}"
+
+      - name: Upload encrypted backup to R2
+        id: upload
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          export PATH="${HOME}/.local/bin:${PATH}"
+
+          r2_endpoint="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          clean_prefix="${R2_PREFIX%/}"
+          object_key="${clean_prefix}/${{ steps.encrypt.outputs.encrypted_name }}"
+
+          aws --endpoint-url "${r2_endpoint}" s3 cp \
+            "${{ steps.encrypt.outputs.encrypted_path }}" \
+            "s3://${R2_BUCKET}/${object_key}" \
+            --only-show-errors
+
+          aws --endpoint-url "${r2_endpoint}" s3api head-object \
+            --bucket "${R2_BUCKET}" \
+            --key "${object_key}" \
+            >/dev/null
+
+          echo "object_key=${object_key}" >> "${GITHUB_OUTPUT}"
+          echo "Uploaded encrypted backup to r2://${R2_BUCKET}/${object_key}"
+
+      - name: Prune old encrypted R2 backups
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          export PATH="${HOME}/.local/bin:${PATH}"
+
+          r2_endpoint="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          clean_prefix="${R2_PREFIX%/}"
+          objects_json="${RUNNER_TEMP}/r2-objects.json"
+          delete_keys="${RUNNER_TEMP}/r2-delete-keys.txt"
+
+          aws --endpoint-url "${r2_endpoint}" s3api list-objects-v2 \
+            --bucket "${R2_BUCKET}" \
+            --prefix "${clean_prefix}/" \
+            --output json > "${objects_json}"
+
+          node <<'NODE'
+          import { readFileSync, writeFileSync } from "node:fs";
+          import { join } from "node:path";
+
+          const objectsPath = join(process.env.RUNNER_TEMP, "r2-objects.json");
+          const deletePath = join(process.env.RUNNER_TEMP, "r2-delete-keys.txt");
+          const retentionDays = Number.parseInt(process.env.BACKUP_RETENTION_DAYS ?? "30", 10);
+          const cutoff = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
+          const payload = JSON.parse(readFileSync(objectsPath, "utf8"));
+
+          const keys = (payload.Contents ?? [])
+            .filter((item) => typeof item.Key === "string" && item.Key.endsWith(".archive.gz.gpg"))
+            .filter((item) => Number.isFinite(Date.parse(item.LastModified)) && Date.parse(item.LastModified) < cutoff)
+            .map((item) => item.Key);
+
+          writeFileSync(deletePath, keys.join("\n"));
+          console.log(`Found ${keys.length} encrypted backup(s) older than ${retentionDays} day(s).`);
+          NODE
+
+          while IFS= read -r object_key; do
+            if [ -z "${object_key}" ]; then
+              continue
+            fi
+
+            aws --endpoint-url "${r2_endpoint}" s3api delete-object \
+              --bucket "${R2_BUCKET}" \
+              --key "${object_key}" \
+              >/dev/null
+          done < "${delete_keys}"
