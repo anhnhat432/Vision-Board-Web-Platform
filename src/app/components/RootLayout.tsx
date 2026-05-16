@@ -965,7 +965,7 @@ export function RootLayout() {
                       src="/favicon-192.png"
                       alt=""
                       aria-hidden="true"
-                      className="size-9 rounded-md object-cover"
+                      className="size-9 rounded-md object-cover shadow-md ring-1 ring-app-accent/20"
                     />
                     <div className="min-w-0">
                       <span className="block truncate text-[14px] font-medium tracking-tight text-app-ink">

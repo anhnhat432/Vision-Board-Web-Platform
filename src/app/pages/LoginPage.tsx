@@ -257,7 +257,7 @@ export function LoginPage() {
               src="/favicon-192.png"
               alt=""
               aria-hidden="true"
-              className="mx-auto mb-3 size-11 rounded-[var(--r-tile)] object-cover shadow-lg"
+              className="mx-auto mb-3 size-11 rounded-[var(--r-tile)] object-cover shadow-lg ring-1 ring-app-accent/20"
             />
             <CardTitle>Bắt đầu hành trình</CardTitle>
             <CardDescription>Xác thực chưa được cấu hình trong môi trường này.</CardDescription>
@@ -297,7 +297,7 @@ export function LoginPage() {
               src="/favicon-192.png"
               alt=""
               aria-hidden="true"
-              className="size-12 rounded-[var(--r-tile)] object-cover shadow-lg"
+              className="size-12 rounded-[var(--r-tile)] object-cover shadow-lg ring-1 ring-app-accent/20"
             />
             <HeroOrbitIllustration className="-mt-6 hidden w-32 shrink-0 text-[color:var(--tone-shell-primary)] opacity-60 xl:block" />
           </RevealDiv>
@@ -356,7 +356,7 @@ export function LoginPage() {
             src="/favicon-192.png"
             alt=""
             aria-hidden="true"
-            className="mx-auto mb-3 size-12 rounded-[var(--r-tile)] object-cover shadow-lg"
+            className="mx-auto mb-3 size-12 rounded-[var(--r-tile)] object-cover shadow-lg ring-1 ring-app-accent/20"
           />
           <h1 className="text-xl font-semibold tracking-tight text-foreground">
             {mode === "signin" ? "Chào mừng quay lại" : "Bắt đầu hành trình"}
