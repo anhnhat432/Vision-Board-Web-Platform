@@ -80,7 +80,7 @@ export function AppSidebar({
             src="/favicon-192.png"
             alt=""
             aria-hidden="true"
-            className="size-9 rounded-lg object-cover shadow-sm"
+            className="size-9 rounded-lg object-cover shadow-md ring-1 ring-app-accent/20"
           />
           <div className="min-w-0">
             <span className="block truncate text-[15px] font-semibold tracking-tight text-app-ink">
