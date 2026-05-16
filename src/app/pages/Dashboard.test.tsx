@@ -69,7 +69,9 @@ describe("Dashboard public visitor state", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText(/Biến tầm nhìn thành mục tiêu/i)).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: /Một chỗ tĩnh để bạn nhìn lại tuần sống của mình/i }),
+    ).toBeInTheDocument();
 
     expect(screen.queryByText(/Luồng mục tiêu sau khi đăng ký/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Bánh xe cuộc sống là bước mở đầu/i)).not.toBeInTheDocument();

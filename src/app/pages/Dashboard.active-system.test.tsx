@@ -155,39 +155,44 @@ describe("Dashboard active 12-week system UX", () => {
     Object.defineProperty(window, "innerWidth", { configurable: true, value: 1024 });
   });
 
-  it("puts the primary task card before the main dashboard card", async () => {
+  it("orders the active dashboard as hero, goals, rhythm, then trend", async () => {
     seedActiveDashboard();
     renderDashboard();
 
-    const primaryCard = await screen.findByTestId("dashboard-primary-action-card");
-    const mainCard = screen.getByTestId("dashboard-main-card");
+    const hero = await screen.findByTestId("dashboard-primary-action-card");
+    const goalsHeading = screen.getByRole("heading", { name: "Mục tiêu đang chạy" });
+    const rhythmHeading = screen.getByRole("heading", { name: "Nhịp tuần 1" });
+    const trendHeading = screen.getByRole("heading", { name: "Đường 12 tuần" });
 
-    expect(primaryCard).toHaveTextContent("Việc quan trọng nhất hôm nay");
-    expect(primaryCard).toHaveTextContent("Chỉ cần xong việc này là hôm nay đã đủ");
-    expect(primaryCard.compareDocumentPosition(mainCard)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(hero).toHaveTextContent("Đây là bức tranh tuần 1");
+    expect(hero.compareDocumentPosition(goalsHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(goalsHeading.compareDocumentPosition(rhythmHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(rhythmHeading.compareDocumentPosition(trendHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  it("orders mobile signed-in dashboard as hero, KPI, goals, then collapsed remaining sections", async () => {
+  it("keeps mobile signed-in dashboard scannable in one column", async () => {
     Object.defineProperty(window, "innerWidth", { configurable: true, value: 390 });
     seedActiveDashboard();
     renderDashboard();
 
     const hero = await screen.findByTestId("dashboard-primary-action-card");
-    const kpiRow = await screen.findByTestId("dashboard-kpi-row");
     const goalsHeading = screen.getByRole("heading", { name: "Mục tiêu đang chạy" });
+    const kpiRow = await screen.findByTestId("dashboard-kpi-row");
 
-    expect(hero.compareDocumentPosition(kpiRow)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(kpiRow.compareDocumentPosition(goalsHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(screen.getByText("Launch a focused dashboard")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Tóm tắt tuần này" })).toBeInTheDocument();
+    expect(hero.compareDocumentPosition(goalsHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(goalsHeading.compareDocumentPosition(kpiRow)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(screen.getAllByText("Launch a focused dashboard").length).toBeGreaterThan(0);
+    expect(screen.getByRole("heading", { name: "Việc hôm nay" })).toBeInTheDocument();
     expect(screen.queryByTestId("dashboard-main-card")).toBeNull();
   });
 
-  it("defers the life balance radar until its section is visible", async () => {
+  it("renders balance rows without the old deferred radar", async () => {
     seedActiveDashboard();
     renderDashboard();
 
-    expect(await screen.findByTestId("dashboard-radar-deferred")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Cân bằng cuộc sống" })).toBeInTheDocument();
+    expect(screen.getByText("Sức khoẻ")).toBeInTheDocument();
+    expect(screen.queryByTestId("dashboard-radar-deferred")).not.toBeInTheDocument();
     expect(screen.queryByTestId("dashboard-radar-chart")).not.toBeInTheDocument();
   });
 });

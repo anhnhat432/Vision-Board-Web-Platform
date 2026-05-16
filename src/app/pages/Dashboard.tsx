@@ -1,162 +1,65 @@
-﻿import {
-  AlertTriangle,
-  ArrowRight,
-  CalendarDays,
-  CheckCircle2,
-  Compass,
-  Crown,
-  Flame,
-  HardDrive,
-  LogIn,
-  Plus,
-  Sparkles,
-  Target,
-  TrendingUp,
-  Zap,
-} from "lucide-react";
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 
-import { PageHero } from "../components/layout/PageHero";
-import { DashboardActiveGoalsList } from "@/features/dashboard/components/DashboardActiveGoalsList";
-import { DashboardKpiRow } from "@/features/dashboard/components/DashboardKpiRow";
-import { PublicVisitorHero } from "@/features/dashboard/components/PublicVisitorHero";
+import { ActiveGoalsCard } from "@/features/dashboard/v2/ActiveGoalsCard";
+import { BalanceCard } from "@/features/dashboard/v2/BalanceCard";
+import { DashboardFooter } from "@/features/dashboard/v2/DashboardFooter";
+import { DashboardHero } from "@/features/dashboard/v2/DashboardHero";
+import { DashboardTopBar } from "@/features/dashboard/v2/DashboardTopBar";
+import { NewUserSetupView } from "@/features/dashboard/v2/NewUserSetupView";
+import { PublicVisitorView } from "@/features/dashboard/v2/PublicVisitorView";
+import { QuoteBlock } from "@/features/dashboard/v2/QuoteBlock";
+import { ReflectionPrompt } from "@/features/dashboard/v2/ReflectionPrompt";
+import { RescueAlert } from "@/features/dashboard/v2/RescueAlert";
+import { TodayMiniCard } from "@/features/dashboard/v2/TodayMiniCard";
+import { TwelveWeekTrendCard } from "@/features/dashboard/v2/TwelveWeekTrendCard";
+import { WeekRhythmCard } from "@/features/dashboard/v2/WeekRhythmCard";
 import {
   buildCurrentWeekExecutionSnapshot,
   buildGoalProgressSnapshot,
   buildWeeklyProgressPoints,
   calculateWeeklyStreak,
+  type WeeklyProgressPoint,
 } from "@/features/dashboard/helpers/dashboardInsights";
-import { getDashboardNextAction } from "@/features/dashboard/helpers/dashboardSections";
 import { buildLoginPath } from "@/features/dashboard/helpers/dashboardNavigation";
+import { getDashboardNextAction } from "@/features/dashboard/helpers/dashboardSections";
 import { useDashboardPlanLink } from "@/features/dashboard/hooks/useDashboardPlanLink";
 import { usePlan12Week } from "@/features/plan12week/hooks";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { FeedbackDialog } from "../components/FeedbackDialog";
-import {
-  EmptyGoalIllustration,
-  EmptyHintArrow,
-  WavyDividerIllustration,
-} from "../components/illustrations";
-import { PageHeader } from "../components/layout/PageHeader";
-import { SectionBlock } from "../components/layout/SectionBlock";
-import { NewUserGuideBanner } from "../components/NewUserGuide";
 import { SpotlightTour, type SpotlightTourStep } from "../components/SpotlightTour";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
-import { EmptyState } from "../components/states";
-import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { CountUp } from "../components/ui/count-up";
-import { Progress } from "../components/ui/progress";
-import { Reveal } from "../components/ui/reveal";
 import { Skeleton } from "../components/ui/skeleton";
-import { useBreakpoint } from "../hooks/useBreakpoint";
 import { useBackendProgressOverlay } from "../hooks/useBackendProgressOverlay";
+import { useBreakpoint } from "../hooks/useBreakpoint";
 import { usePageTour } from "../hooks/usePageTour";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
-import { FREE_TIER_LIMITS, getFreeTierUsage } from "../utils/feature-entitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useUpgradeDialog } from "../hooks/useUpgradeDialog";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { isDemoMode } from "../utils/app-mode";
-import { loadWithChunkReload } from "../utils/chunkLoad";
+import { FREE_TIER_LIMITS, getFreeTierUsage } from "../utils/feature-entitlements";
 import {
   trackRescueActionTaken,
   trackRescueTriggerDismissed,
   trackRescueTriggerFired,
 } from "../utils/monetization-analytics";
 import {
-  calculateGoalProgress,
-  formatCalendarDate,
   getActiveTwelveWeekGoal,
-  getGoalExecutionStats,
   getLifeAreaLabel,
-  getReviewDayLabel,
   getTwelveWeekCurrentWeek,
   getTwelveWeekTasksForWeek,
   getTwelveWeekTodayTasks,
   getTwelveWeekWeekCompletion,
   isTwelveWeekReviewDueToday,
   sortReflectionsByDateDesc,
+  type Goal,
+  type LifeArea,
+  type TwelveWeekSystem,
+  type TwelveWeekTaskInstance,
   type UserData,
 } from "../utils/storage";
-import { getPlanLabel } from "../utils/twelve-week-premium";
 import { dismissRescueTrigger, evaluateRescueTriggers } from "../utils/twelve-week-system-ui";
-
-const DashboardLifeAreaRadar = lazy(() =>
-  loadWithChunkReload(async () => {
-    const module = await import("../components/DashboardLifeAreaRadar");
-    return { default: module.DashboardLifeAreaRadar };
-  }),
-);
-
-type DashboardRadarDatum = {
-  subject: string;
-  value: number;
-  fullMark: number;
-};
-
-function useDeferredVisibility<TElement extends HTMLElement>(rootMargin = "240px") {
-  const ref = useRef<TElement | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    if (isVisible) return;
-
-    const element = ref.current;
-    if (!element) return;
-
-    if (typeof IntersectionObserver === "undefined") {
-      setIsVisible(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return;
-        setIsVisible(true);
-        observer.disconnect();
-      },
-      { rootMargin },
-    );
-
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [isVisible, rootMargin]);
-
-  return { ref, isVisible };
-}
-
-function DeferredDashboardLifeAreaRadar({ data }: { data: DashboardRadarDatum[] }) {
-  const { ref, isVisible } = useDeferredVisibility<HTMLDivElement>();
-
-  return (
-    <div ref={ref}>
-      {isVisible ? (
-        <Suspense
-          fallback={
-            <div className="flex h-[360px] items-center justify-center rounded-[var(--r-tile)] bg-muted text-sm text-muted-foreground">
-              Đang tải biểu đồ cân bằng cuộc sống...
-            </div>
-          }
-        >
-          <DashboardLifeAreaRadar data={data} />
-        </Suspense>
-      ) : (
-        <div
-          data-testid="dashboard-radar-deferred"
-          className="flex h-[360px] flex-col items-center justify-center rounded-[var(--r-tile)] bg-muted px-5 text-center"
-        >
-          <TrendingUp className="h-10 w-10 text-muted-foreground/45" />
-          <p className="mt-[var(--space-inline)] font-semibold text-foreground">Biểu đồ sẽ tải khi bạn kéo tới đây.</p>
-          <p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">
-            Trang chính giữ phần đầu nhẹ hơn; dữ liệu cân bằng vẫn nằm ở đây khi cần xem.
-          </p>
-        </div>
-      )}
-    </div>
-  );
-}
 
 const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
   {
@@ -170,7 +73,7 @@ const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
     id: "attention",
     targetId: "dashboard-next-card",
     title: "Nhìn khối này trước khi quét cả màn",
-    description: "Phần 'Đi tiếp ngay' gom ba tín hiệu quan trọng nhất để bạn biết nên mở vào đâu tiếp theo.",
+    description: "Phần đầu Trang chính gom ba tín hiệu quan trọng nhất để bạn biết nên mở vào đâu tiếp theo.",
   },
   {
     id: "plan",
@@ -180,36 +83,31 @@ const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
   },
 ];
 
-function getDashboardGreeting(now = new Date()) {
-  const hour = now.getHours();
+const LIFE_BALANCE_ROWS = [
+  { label: "Sức khoẻ", aliases: ["Health"], fallbackScore: 7 },
+  { label: "Sự nghiệp", aliases: ["Career", "Education"], fallbackScore: 6 },
+  { label: "Mối quan hệ", aliases: ["Relationships", "Family"], fallbackScore: 8 },
+  { label: "Tinh thần", aliases: ["Personal Growth", "Leisure"], fallbackScore: 5 },
+] as const;
 
-  if (hour >= 5 && hour <= 11) {
-    return {
-      label: "Chào buổi sáng",
-      surfaceClass:
-        "bg-gradient-to-br from-amber-50 to-orange-100 border-amber-200/70 dark:from-amber-950/35 dark:to-orange-950/30 dark:border-amber-400/20",
-      textClass: "text-amber-700 dark:text-amber-200",
-    };
-  }
-
-  if (hour >= 12 && hour <= 17) {
-    return {
-      label: "Chào buổi chiều",
-      surfaceClass:
-        "bg-gradient-to-br from-sky-50 to-blue-100 border-sky-200/70 dark:from-sky-950/35 dark:to-blue-950/30 dark:border-sky-400/20",
-      textClass: "text-sky-700 dark:text-sky-200",
-    };
-  }
-
-  return {
-    label: "Chào buổi tối",
-    surfaceClass:
-      "bg-gradient-to-br from-violet-50 to-indigo-100 border-violet-200/70 dark:from-violet-950/35 dark:to-indigo-950/30 dark:border-violet-400/20",
-    textClass: "text-indigo-700 dark:text-indigo-200",
-  };
+interface LifeBalanceRow {
+  label: string;
+  score: number;
 }
 
-function getDashboardDisplayName(user: ReturnType<typeof useAuthContext>["user"]) {
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+function getDashboardGreeting(now = new Date()): string {
+  const hour = now.getHours();
+
+  if (hour >= 5 && hour <= 11) return "Chào buổi sáng";
+  if (hour >= 12 && hour <= 17) return "Chào buổi chiều";
+  return "Chào buổi tối";
+}
+
+function getDashboardDisplayName(user: ReturnType<typeof useAuthContext>["user"]): string {
   const displayName = user?.displayName?.trim();
   if (displayName) return displayName.split(/\s+/)[0];
 
@@ -217,72 +115,61 @@ function getDashboardDisplayName(user: ReturnType<typeof useAuthContext>["user"]
   return emailName || "bạn";
 }
 
-function getTaskVisual(task: { title: string; leadIndicatorName?: string; isCore?: boolean }) {
-  const lowerTitle = task.title.toLowerCase();
-
-  if (lowerTitle.includes("check")) {
-    return {
-      icon: Compass,
-      label: "Check-in",
-      iconClass:
-        "bg-gradient-to-br from-teal-100 to-cyan-100 text-teal-700 dark:from-teal-950/50 dark:to-cyan-950/40 dark:text-teal-200",
-    };
-  }
-
-  if (task.leadIndicatorName || task.isCore) {
-    return {
-      icon: Zap,
-      label: "Lead",
-      iconClass:
-        "bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 dark:from-amber-950/50 dark:to-orange-950/40 dark:text-amber-200",
-    };
-  }
-
-  return {
-    icon: Target,
-    label: "Kết quả",
-    iconClass:
-      "bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 dark:from-violet-950/50 dark:to-fuchsia-950/40 dark:text-violet-200",
-  };
+function formatDashboardDateCaption(date: Date, greeting: string): string {
+  const weekday = new Intl.DateTimeFormat("vi-VN", { weekday: "long" }).format(date);
+  return `${greeting} · ${weekday}, ngày ${date.getDate()} tháng ${date.getMonth() + 1}`.toLocaleUpperCase("vi-VN");
 }
 
-function DashboardWeekProgressRing({ value }: { value: number }) {
-  const safeValue = Math.max(0, Math.min(100, Math.round(value)));
-  const radius = 54;
-  const circumference = 2 * Math.PI * radius;
-  const dashOffset = circumference - (safeValue / 100) * circumference;
+function getLifeBalanceRows(areas: LifeArea[]): LifeBalanceRow[] {
+  return LIFE_BALANCE_ROWS.map((row) => {
+    const matchedArea = areas.find((area) => row.aliases.some((alias) => alias === area.name));
+    const score = Math.round(clamp(matchedArea?.score ?? row.fallbackScore, 0, 10));
 
-  return (
-    <div className="glass-surface-sm flex min-h-[180px] flex-col items-center justify-center rounded-[var(--r-card)] p-5 ring-1 ring-slate-200/70">
-      <div className="relative h-36 w-36">
-        <svg className="h-full w-full -rotate-90" viewBox="0 0 140 140" aria-hidden="true">
-          <defs>
-            <linearGradient id="dashboard-week-ring" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0%" stopColor="#7c3aed" />
-              <stop offset="55%" stopColor="#c026d3" />
-              <stop offset="100%" stopColor="#f43f5e" />
-            </linearGradient>
-          </defs>
-          <circle cx="70" cy="70" r={radius} fill="none" stroke="rgb(226 232 240)" strokeWidth="12" />
-          <circle
-            cx="70"
-            cy="70"
-            r={radius}
-            fill="none"
-            stroke="url(#dashboard-week-ring)"
-            strokeDasharray={circumference}
-            strokeDashoffset={dashOffset}
-            strokeLinecap="round"
-            strokeWidth="12"
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-          <p className="count-up text-3xl font-bold tabular-nums text-slate-950">{safeValue}%</p>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tuần này</p>
-        </div>
-      </div>
-    </div>
-  );
+    return {
+      label: row.label,
+      score,
+    };
+  });
+}
+
+function getLastSavedLabel(userData: UserData, tasks: TwelveWeekTaskInstance[]): string {
+  const timestamps = [
+    ...tasks.map((task) => task.lastModifiedAt ?? 0),
+    ...tasks.map((task) => (task.completedAt ? Date.parse(task.completedAt) : 0)),
+    ...userData.goals.map((goal) => Date.parse(goal.createdAt)),
+    ...userData.reflections.map((reflection) => Date.parse(reflection.date)),
+  ].filter((value) => Number.isFinite(value) && value > 0);
+
+  if (timestamps.length === 0) return "vừa xong";
+
+  const minutes = Math.max(0, Math.round((Date.now() - Math.max(...timestamps)) / 60000));
+  if (minutes < 1) return "vừa xong";
+  if (minutes < 60) return `${minutes} phút trước`;
+
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours} giờ trước`;
+
+  return `${Math.round(hours / 24)} ngày trước`;
+}
+
+function buildSystemWeeklyProgressPoints(system: TwelveWeekSystem | null): WeeklyProgressPoint[] {
+  if (!system) return [];
+
+  return Array.from({ length: system.totalWeeks }, (_, index) => {
+    const weekNumber = index + 1;
+    const completion = getTwelveWeekWeekCompletion(system, weekNumber);
+
+    return {
+      weekNumber,
+      completedTasks: completion.completed,
+      totalTasks: completion.total,
+      executionScore: completion.percent,
+    };
+  });
+}
+
+function getGoalTarget(goal: Goal): string {
+  return goal.twelveWeekSystem ? "/12-week-system" : "/goals";
 }
 
 export function Dashboard() {
@@ -291,25 +178,16 @@ export function Dashboard() {
 
   if (!userData) {
     return (
-      <div className="stack-section pb-12">
-        {/* Hero card skeleton */}
-        <Skeleton className="h-56 rounded-[var(--r-card)]" />
-        {/* Quick action tiles skeleton */}
-        <div className="grid gap-[var(--space-stack)] md:grid-cols-3">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-20 rounded-[var(--r-card)]" />
-          ))}
-        </div>
-        {/* Stat cards skeleton */}
-        <div className="grid gap-[var(--space-stack)] grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-28 rounded-[var(--r-card)]" />
-          ))}
-        </div>
-        {/* Content cards skeleton */}
-        <div className="grid gap-[var(--space-stack)] lg:grid-cols-2">
-          <Skeleton className="h-48 rounded-[var(--r-card)]" />
-          <Skeleton className="h-48 rounded-[var(--r-card)]" />
+      <div className="min-h-screen bg-app-bg text-app-ink">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-0">
+          <div className="space-y-5">
+            <Skeleton className="h-14 rounded-card bg-app-surface" />
+            <Skeleton className="h-56 rounded-card bg-app-surface" />
+            <div className="grid gap-5 lg:grid-cols-3">
+              <Skeleton className="h-48 rounded-card bg-app-surface lg:col-span-2" />
+              <Skeleton className="h-48 rounded-card bg-app-surface" />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -448,6 +326,7 @@ function useDashboardDerivedData({
     dashboardGoalTitle,
     goalProgressSnapshot,
     currentWeekExecutionSnapshot,
+    weeklyProgressPoints,
     averageLifeScore,
     journalStreak,
     weakestArea,
@@ -491,14 +370,14 @@ function DashboardContent({
   onReload: () => void;
 }) {
   const isDesktopViewport = useBreakpoint();
-  const isMobileViewport = !isDesktopViewport;
   const navigate = useNavigate();
   const location = useLocation();
   const { isConfigured, user } = useAuthContext();
   const [dismissedTrigger, setDismissedTrigger] = useState<string | null>(null);
   const landingViewedRef = useRef(false);
   const progressViewedGoalIdRef = useRef<string | null>(null);
-  const { currentPlanCode, entitlementKeys } = usePlanEntitlements(userData);
+  const firedTriggerKindRef = useRef<string | null>(null);
+  const { currentPlanCode } = usePlanEntitlements(userData);
   const demoMode = isDemoMode();
   const isSignedOut = !user;
   const shouldRequireAuthForSignedOut = isSignedOut && !demoMode;
@@ -513,7 +392,6 @@ function DashboardContent({
   const visibleWheelOfLife = isSignedOut ? [] : userData.currentWheelOfLife;
   const visibleReflections = isSignedOut ? [] : userData.reflections;
   const visibleVisionBoards = isSignedOut ? [] : userData.visionBoards;
-  const aspirationalVision = isSignedOut ? null : (userData.aspirationalVision ?? null);
   const visibleActiveTwelveWeekGoal = isSignedOut ? null : activeTwelveWeekGoal;
   const hasRealLifeBalance =
     !isSignedOut && userData.onboardingCompleted && visibleWheelOfLife.some((area) => area.score > 0);
@@ -553,36 +431,7 @@ function DashboardContent({
     void loadPlan(dashboardPlanId);
   }, [dashboardPlanId, loadPlan, plan?.id]);
 
-  const {
-    recentGoals,
-    recentReflections,
-    dashboardGoalTitle,
-    goalProgressSnapshot,
-    currentWeekExecutionSnapshot,
-    averageLifeScore,
-    weakestArea,
-    activeSystem,
-    effectiveSystem,
-    activeSystemWeek,
-    activeSystemTodayTasks,
-    activeSystemTodayOpenTasks,
-    activeSystemTodayCompletedCount,
-    activeSystemWeekCompletion,
-    reviewDueToday,
-    activeSystemTaskPreview,
-    dashboardNextAction,
-    dashboardActiveGoals,
-    dashboardKpiLeadAverage,
-    dashboardKpiCurrentWeek,
-    dashboardKpiTotalWeeks,
-    dashboardKpiStreak,
-    dashboardOpenTaskCount,
-    hasLocalTwelveWeekSystem,
-    showMobileStickyCTA,
-    shouldShowSetupGuide,
-    shouldShowWorkspaceDetailGrid,
-    radarData,
-  } = useDashboardDerivedData({
+  const dashboardData = useDashboardDerivedData({
     visibleGoals,
     visibleWheelOfLife,
     visibleReflections,
@@ -595,9 +444,12 @@ function DashboardContent({
   });
   const dashboardGreeting = getDashboardGreeting();
   const dashboardDisplayName = getDashboardDisplayName(user);
+  const caption = formatDashboardDateCaption(new Date(), dashboardGreeting);
   const signedIn = Boolean(user);
   const goalLimitUsage = getFreeTierUsage(userData, "maxActiveGoals");
   const shouldShowFreeGoalLimit = !isSignedOut && currentPlanCode === "FREE" && Number.isFinite(FREE_TIER_LIMITS.maxActiveGoals);
+  const lastSavedLabel = getLastSavedLabel(userData, dashboardData.activeSystemTodayTasks);
+  const balanceRows = getLifeBalanceRows(visibleWheelOfLife);
 
   useEffect(() => {
     if (landingViewedRef.current) return;
@@ -608,12 +460,12 @@ function DashboardContent({
       app_mode: demoMode ? "demo" : "real",
       signed_in: signedIn,
       auth_configured: isConfigured,
-      has_local_12_week_system: hasLocalTwelveWeekSystem,
+      has_local_12_week_system: dashboardData.hasLocalTwelveWeekSystem,
     });
-  }, [demoMode, hasLocalTwelveWeekSystem, isConfigured, signedIn]);
+  }, [dashboardData.hasLocalTwelveWeekSystem, demoMode, isConfigured, signedIn]);
 
   useEffect(() => {
-    if (!visibleActiveTwelveWeekGoal || !effectiveSystem || !activeSystemWeek) return;
+    if (!visibleActiveTwelveWeekGoal || !dashboardData.effectiveSystem || !dashboardData.activeSystemWeek) return;
     if (progressViewedGoalIdRef.current === visibleActiveTwelveWeekGoal.id) return;
 
     progressViewedGoalIdRef.current = visibleActiveTwelveWeekGoal.id;
@@ -621,35 +473,125 @@ function DashboardContent({
       "progress_viewed",
       {
         source: "dashboard",
-        week_number: activeSystemWeek,
-        total_weeks: effectiveSystem.totalWeeks,
+        week_number: dashboardData.activeSystemWeek,
+        total_weeks: dashboardData.effectiveSystem.totalWeeks,
         current_plan: currentPlanCode,
       },
       { goalId: visibleActiveTwelveWeekGoal.id },
     );
-  }, [activeSystemWeek, currentPlanCode, effectiveSystem, visibleActiveTwelveWeekGoal]);
+  }, [currentPlanCode, dashboardData.activeSystemWeek, dashboardData.effectiveSystem, visibleActiveTwelveWeekGoal]);
 
-  const planTarget = activeSystem ? "/12-week-system?tab=settings" : "/billing/plan";
-
-  const overdueCount = activeSystem ? activeSystemTodayTasks.filter((t) => !t.completed).length : 0;
+  const overdueCount = dashboardData.activeSystem ? dashboardData.activeSystemTodayTasks.filter((task) => !task.completed).length : 0;
   const activeTriggers = evaluateRescueTriggers({
-    system: activeSystem,
+    system: dashboardData.activeSystem,
     subscription: isSignedOut ? null : (userData.subscription ?? null),
     missedTasksCount: overdueCount,
-    weekCompletionPercent: activeSystemWeekCompletion?.percent ?? 0,
-  }).filter((t) => t.kind !== dismissedTrigger);
+    weekCompletionPercent: dashboardData.activeSystemWeekCompletion?.percent ?? 0,
+  }).filter((trigger) => trigger.kind !== dismissedTrigger);
   const topTrigger = activeTriggers[0] ?? null;
-  // Signed-out visitors get their hero from `PublicVisitorHero` (rendered above);
-  // skip the secondary dashboard card for them to avoid a double-hero.
-  const dashboardTourSteps = isSignedOut
-    ? DASHBOARD_TOUR_STEPS.filter(
-        (step) => step.targetId !== "dashboard-next-card" && step.targetId !== "dashboard-plan-card",
-      )
-    : DASHBOARD_TOUR_STEPS;
+
+  useEffect(() => {
+    if (!topTrigger) return;
+    if (firedTriggerKindRef.current === topTrigger.kind) return;
+
+    firedTriggerKindRef.current = topTrigger.kind;
+    trackRescueTriggerFired({
+      kind: topTrigger.kind,
+      severity: topTrigger.severity,
+      currentPlan: currentPlanCode,
+    });
+  }, [currentPlanCode, topTrigger]);
+
+  const dashboardTourSteps = isSignedOut ? [] : DASHBOARD_TOUR_STEPS;
+  const showMobileStickyCTA = !isDesktopViewport && dashboardData.showMobileStickyCTA;
 
   return (
-    <div className={`stack-section ${showMobileStickyCTA ? 'pb-24' : 'pb-12'}`}>
-      {!isSignedOut ? <h1 className="sr-only">Trang chính</h1> : null}
+    <div className={showMobileStickyCTA ? "min-h-screen bg-app-bg pb-24 text-app-ink" : "min-h-screen bg-app-bg text-app-ink"}>
+      <DashboardTopBar currentWeek={dashboardData.dashboardKpiCurrentWeek} displayName={dashboardDisplayName} />
+
+      <div className="mx-auto max-w-6xl px-4 pb-8 pt-8 sm:px-6 lg:px-0">
+        {shouldShowFreeGoalLimit ? (
+          <FreeGoalLimitCard
+            current={goalLimitUsage.current}
+            limit={goalLimitUsage.limit}
+            onUpgrade={() => openUpgradeDialog("plan")}
+          />
+        ) : null}
+
+        <TrialCountdownBanner
+          demoMode={demoMode}
+          renewsAt={userData.subscription?.status === "trialing" ? (userData.subscription.renewsAt ?? undefined) : undefined}
+          onOpenPlan={() => navigate("/billing/plan")}
+        />
+
+        {isSignedOut ? (
+          <PublicVisitorView
+            isDemo={demoMode}
+            hasLocalData={hasSignedOutRealLocalData}
+            onStart={handlePublicVisitorStart}
+            onSignIn={() => handleAuthNavigate("signin")}
+            onSignUp={() => handleAuthNavigate("signup")}
+          />
+        ) : !dashboardData.activeSystem ? (
+          <NewUserSetupView userData={userData} displayName={dashboardDisplayName} onContinue={(href) => navigate(href)} />
+        ) : (
+          <DashboardActiveLayout
+            data={dashboardData}
+            displayName={dashboardDisplayName}
+            caption={caption}
+            balanceRows={balanceRows}
+            topTrigger={topTrigger}
+            planLoading={planLoading}
+            hasPlan={Boolean(plan)}
+            planError={planError}
+            onSelectGoal={(goal) => navigate(getGoalTarget(goal))}
+            onAddGoal={() => navigate("/life-insight")}
+            onTriggerAction={() => {
+              if (!topTrigger) return;
+              const ctaHref = topTrigger.kind === "trial_ending" ? "/billing/plan" : "/12-week-system";
+              trackRescueActionTaken({
+                kind: topTrigger.kind,
+                action: topTrigger.kind === "trial_ending" ? "upgrade" : "navigate_system",
+                currentPlan: currentPlanCode,
+              });
+              navigate(ctaHref);
+            }}
+            onTriggerDismiss={() => {
+              if (!topTrigger) return;
+              dismissRescueTrigger(topTrigger.kind);
+              trackRescueTriggerDismissed({ kind: topTrigger.kind, currentPlan: currentPlanCode });
+              setDismissedTrigger(topTrigger.kind);
+            }}
+          />
+        )}
+
+        {!isSignedOut && userData.isHydratedFromDemo ? (
+          <DemoDataNotice onOpenLifeBalance={() => navigate("/life-balance")} />
+        ) : null}
+
+        <DashboardFooter lastSavedLabel={lastSavedLabel} />
+
+        <div className="mt-5 flex justify-end">
+          <FeedbackDialog
+            source="dashboard"
+            context="dashboard"
+            triggerClassName="border-app-line bg-app-surface text-app-ink-muted hover:bg-app-bg"
+          />
+        </div>
+      </div>
+
+      {showMobileStickyCTA ? (
+        <div className="above-mobile-nav fixed bottom-0 left-0 right-0 z-40 border-t border-app-line bg-app-surface/95 p-4 shadow-[0_-1px_2px_rgba(26,26,26,0.04)] backdrop-blur md:hidden">
+          <button
+            type="button"
+            className="w-full rounded-lg border border-app-line bg-app-surface px-4 py-3 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-accent-soft hover:text-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            onClick={() => navigate("/today-v2")}
+          >
+            Mở Today - {dashboardData.dashboardOpenTaskCount} việc
+          </button>
+        </div>
+      ) : null}
+
       <UpgradePaywallDialog
         open={isUpgradeDialogOpen}
         onOpenChange={setIsUpgradeDialogOpen}
@@ -660,164 +602,6 @@ function DashboardContent({
         source="dashboard"
         onCheckoutComplete={onReload}
       />
-      {shouldShowFreeGoalLimit ? (
-        <Card className="border-slate-200 bg-white/88 shadow-sm">
-          <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-slate-900">Gói Free: {goalLimitUsage.current}/{goalLimitUsage.limit} mục tiêu</p>
-              <p className="mt-1 text-sm leading-6 text-slate-500">Nâng cấp Plus khi bạn cần tạo thêm mục tiêu mới. Dữ liệu cũ vẫn được giữ nguyên.</p>
-            </div>
-            <Button type="button" variant="outline" onClick={() => openUpgradeDialog("plan")}>Mở Plus</Button>
-          </CardContent>
-        </Card>
-      ) : null}
-      {isSignedOut ? (
-        <>
-          <PublicVisitorHero
-            isDemo={demoMode}
-            onStartDemo={handlePublicVisitorStart}
-            onSignIn={() => handleAuthNavigate("signin")}
-            onSignUp={() => handleAuthNavigate("signup")}
-          />
-          {hasSignedOutRealLocalData ? (
-            <Card className="border-amber-200 bg-amber-50/90 shadow-sm">
-              <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex min-w-0 gap-3">
-                  <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-amber-100 text-amber-700">
-                    <HardDrive className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-amber-950">Có dữ liệu đã lưu trên thiết bị này</p>
-                    <p className="mt-1 text-sm leading-6 text-amber-800">
-                      Đăng nhập để kiểm tra, sao lưu và nhập dữ liệu này vào tài khoản. Chúng tôi không ghi đè dữ liệu
-                      tài khoản nếu chưa có xác nhận của bạn.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-                  <Button size="sm" onClick={() => handleAuthNavigate("signin")}>
-                    <LogIn className="h-4 w-4" />
-                    Đăng nhập để khôi phục
-                  </Button>
-                  <Button size="sm" variant="outline" className="border-amber-200 bg-white" onClick={() => handleAuthNavigate("signup")}>
-                    Tạo tài khoản mới
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ) : null}
-          <div className="flex justify-end">
-            <FeedbackDialog
-              source="dashboard"
-              context="dashboard"
-              triggerClassName="border-border bg-white/80 text-muted-foreground hover:bg-white"
-            />
-          </div>
-        </>
-      ) : null}
-
-      {/* Rescue trigger nudge banner */}
-      {isDesktopViewport && topTrigger &&
-        (() => {
-          const severityStyles = {
-            urgent: {
-              wrapper: "border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)]",
-              icon: "bg-[color:var(--color-danger-bg)] text-[color:var(--color-danger-fg)]",
-              headline: "text-[color:var(--color-danger-fg)]",
-              detail: "text-[color:var(--color-danger-fg)]",
-            },
-            caution: {
-              wrapper: "border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)]",
-              icon: "bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning-fg)]",
-              headline: "text-[color:var(--color-warning-fg)]",
-              detail: "text-[color:var(--color-warning-fg)]",
-            },
-            watch: {
-              wrapper: "border-border bg-muted",
-              icon: "bg-muted text-muted-foreground",
-              headline: "text-muted-foreground",
-              detail: "text-muted-foreground",
-            },
-          } as const;
-          const s = severityStyles[topTrigger.severity];
-          const ctaHref = topTrigger.kind === "trial_ending" ? "/billing/plan" : "/12-week-system";
-          const ctaLabel = topTrigger.kind === "trial_ending" ? "Mở Plus" : "Xem ngay";
-          return (
-            <Reveal key={topTrigger.kind}>
-              <div
-                className={`rounded-[var(--r-tile)] border px-4 py-3 text-sm flex flex-wrap items-start gap-3 ${s.wrapper}`}
-                onAnimationStart={() => {
-                  trackRescueTriggerFired({
-                    kind: topTrigger.kind,
-                    severity: topTrigger.severity,
-                    currentPlan: currentPlanCode,
-                  });
-                }}
-              >
-                <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--r-pill)] ${s.icon}`}>
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className={`font-semibold ${s.headline}`}>{topTrigger.headline}</p>
-                  <p className={`mt-0.5 text-xs ${s.detail}`}>{topTrigger.detail}</p>
-                </div>
-                <div className="flex shrink-0 items-center gap-2 ml-auto">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => {
-                      trackRescueActionTaken({
-                        kind: topTrigger.kind,
-                        action: topTrigger.kind === "trial_ending" ? "upgrade" : "navigate_system",
-                        currentPlan: currentPlanCode,
-                      });
-                      navigate(ctaHref);
-                    }}
-                  >
-                    {ctaLabel}
-                  </Button>
-                  <button
-                    type="button"
-                    className="text-xs opacity-60 hover:opacity-100 transition-opacity px-1"
-                    aria-label="Đóng thông báo"
-                    onClick={() => {
-                      dismissRescueTrigger(topTrigger.kind);
-                      trackRescueTriggerDismissed({ kind: topTrigger.kind, currentPlan: currentPlanCode });
-                      setDismissedTrigger(topTrigger.kind);
-                    }}
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-            </Reveal>
-          );
-        })()}
-
-      {/* Trial countdown banner */}
-      {!isSignedOut &&
-        userData.subscription?.status === "trialing" &&
-        userData.subscription.renewsAt &&
-        new Date(userData.subscription.renewsAt) >= new Date() &&
-        (() => {
-          const daysLeft = Math.max(
-            0,
-            Math.ceil((new Date(userData.subscription.renewsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
-          );
-          return (
-            <div className="rounded-[var(--r-tile)] border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] px-4 py-3 text-sm flex flex-wrap items-center gap-3">
-              <span>
-                <span className="font-semibold">
-                  {demoMode ? "Plus dùng thử:" : "Plus đang trong thời gian ưu đãi:"}
-                </span>{" "}
-                còn {daysLeft} ngày {demoMode ? "trên trình duyệt này" : "trên tài khoản này"}.
-              </span>
-              <Button size="sm" variant="ghost" className="ml-auto shrink-0 text-[color:var(--color-warning-fg)] hover:bg-[color:var(--color-warning-bg)]" onClick={() => navigate("/billing/plan")}>
-                Chi tiết
-              </Button>
-            </div>
-          );
-        })()}
       <SpotlightTour
         open={isTourOpen}
         onOpenChange={setIsTourOpen}
@@ -825,776 +609,198 @@ function DashboardContent({
         description="Ba điểm chính để người mới mở vào là biết nên bắt đầu từ đâu."
         steps={dashboardTourSteps}
       />
-
-      {!isSignedOut && (
-        <div className="stack-section">
-          <div
-            data-testid="dashboard-primary-action-card"
-            data-tour-id="dashboard-next-card"
-            className="stack-tight"
-          >
-            <PageHero
-              testId="dashboard-next-action-hero"
-              titleAs={2}
-              density="compact"
-              className="page-enter"
-              eyebrow={dashboardNextAction.eyebrow}
-              eyebrowIcon={<CalendarDays className="h-3.5 w-3.5" />}
-              title={
-                <>
-                  {dashboardGreeting.label},{" "}
-                  <span className="text-gradient-vibrant">{dashboardDisplayName}</span>
-                </>
-              }
-              description={
-                <span className="count-up font-semibold tabular-nums">
-                  Tuần {dashboardKpiCurrentWeek ?? "--"}/{dashboardKpiTotalWeeks} — còn {dashboardOpenTaskCount} việc hôm nay
-                </span>
-              }
-              primaryCta={
-                <Button glow className="w-full sm:w-auto" onClick={() => navigate(dashboardNextAction.ctaTarget)}>
-                  {dashboardNextAction.ctaLabel}
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              }
-              secondaryCta={
-                <Button
-                  variant="outline"
-                  size="default"
-                  className="w-full sm:w-auto"
-                  onClick={() => navigate("/vision")}
-                >
-                  {aspirationalVision ? "Sửa tầm nhìn" : "Hình dung tầm nhìn"}
-                </Button>
-              }
-              aside={
-                <div className="flex h-full flex-col gap-3 rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                      Nhịp hôm nay
-                    </p>
-                    <span
-                      className={`inline-flex items-center gap-1 rounded-[var(--r-pill)] px-2.5 py-1 text-xs font-bold ${
-                        dashboardKpiStreak >= 7
-                          ? "bg-[color:var(--color-warning-fg)] text-white shadow-[var(--shadow-2)] motion-safe:animate-pulse"
-                          : "bg-card text-foreground ring-1 ring-[color:var(--border)]"
-                      }`}
-                    >
-                      <Flame className="h-3 w-3" />
-                      {dashboardKpiStreak} ngày
-                    </span>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[color:var(--tone-shell-primary)]">
-                      {dashboardNextAction.title}
-                    </p>
-                    <p className="mt-1 text-sm leading-6 text-foreground">{dashboardNextAction.description}</p>
-                  </div>
-                  <div className="mt-auto flex items-center justify-between gap-2 border-t border-[color:var(--border)] pt-3">
-                    <span
-                      data-tour-id="dashboard-plan-card"
-                      className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground"
-                    >
-                      <Crown className="h-3 w-3 text-[color:var(--tone-shell-primary)]" />
-                      Gói {getPlanLabel(currentPlanCode)}
-                    </span>
-                    <button
-                      type="button"
-                      className="text-xs font-semibold text-[color:var(--tone-shell-primary)] underline-offset-4 hover:underline"
-                      onClick={() =>
-                        currentPlanCode === "FREE" ? openUpgradeDialog("plan", "PLUS") : navigate(planTarget)
-                      }
-                    >
-                      {currentPlanCode === "FREE" ? "Khám phá Plus" : "Quản lý"}
-                    </button>
-                  </div>
-                </div>
-              }
-            />
-
-            {activeSystem && activeSystemTodayOpenTasks.length > 0 && (
-              <Card
-                data-tour-id="dashboard-start-card"
-                className="overflow-hidden border-[color:var(--tone-shell-primary)]/30 shadow-[var(--shadow-glow)]"
-              >
-                <CardContent className="p-5 sm:p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="flex size-11 shrink-0 items-center justify-center rounded-[var(--r-tile)] gradient-brand text-primary-foreground">
-                      <CheckCircle2 className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--tone-shell-primary)]">
-                        Việc quan trọng nhất hôm nay
-                      </p>
-                      <h3 className="mt-1 line-clamp-2 text-lg font-bold tracking-tight text-foreground sm:text-xl">
-                        {activeSystemTodayOpenTasks[0].title}
-                      </h3>
-                      <p className="mt-2 text-sm font-medium leading-6 text-[color:var(--color-success-fg)]">
-                        Chỉ cần xong việc này là hôm nay đã đủ. Phần còn lại mở sau.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {shouldShowSetupGuide && <NewUserGuideBanner userData={userData} variant="compact" />}
-
-          <SectionBlock
-            title="Nhịp 12 tuần"
-            description={isDesktopViewport ? "Bốn tín hiệu đủ để biết chu kỳ đang chạy gọn hay cần chỉnh." : undefined}
-          >
-            <DashboardKpiRow
-              leadAverage={dashboardKpiLeadAverage}
-              currentWeek={dashboardKpiCurrentWeek}
-              totalWeeks={dashboardKpiTotalWeeks}
-              streak={dashboardKpiStreak}
-              wheelScore={averageLifeScore}
-            />
-          </SectionBlock>
-
-          <WavyDividerIllustration className="pointer-events-none -my-4 hidden w-full text-violet-500 opacity-35 dark:opacity-20 sm:block" />
-
-          <SectionBlock
-            title="Mục tiêu đang chạy"
-            description={isDesktopViewport ? "Chuẩn bị chỗ cho 1-3 mục tiêu trong cùng một chu kỳ." : undefined}
-          >
-            <DashboardActiveGoalsList
-              goals={dashboardActiveGoals}
-              onSelectGoal={(goal) => navigate(goal.twelveWeekSystem ? "/12-week-system" : "/goals")}
-              onAddGoal={() => navigate("/life-insight")}
-            />
-          </SectionBlock>
-
-          {activeSystem && (
-            <SectionBlock
-              title="Việc hôm nay"
-              description={isDesktopViewport ? "Nhìn nhanh những việc tạo lực đẩy tuần này. Mở Hôm nay để đánh dấu và check-in." : undefined}
-            >
-              <div className="grid gap-[var(--space-stack)] lg:grid-cols-[minmax(0,1fr)_minmax(228px,280px)]">
-                {activeSystemTodayTasks.length > 0 ? (
-                  <div className="grid gap-3 md:grid-cols-2">
-                    {activeSystemTodayTasks.slice(0, 4).map((task) => {
-                      const visual = getTaskVisual(task);
-                      const Icon = visual.icon;
-                      const weekPercent = activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore;
-
-                      return (
-                        <button
-                          key={task.id}
-                          type="button"
-                          className="card-hover-lift group rounded-[var(--r-tile)] border border-slate-200/70 bg-white/92 p-4 text-left shadow-sm transition-colors hover:border-violet-200 hover:bg-violet-50/45 dark:border-slate-700 dark:bg-slate-900/70"
-                          onClick={() => navigate("/12-week-system?tab=today")}
-                          aria-label={`${task.completed ? "Đã hoàn thành" : "Mở Hôm nay để xử lý"}: ${task.title}`}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div
-                              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-control)] shadow-sm ${visual.iconClass}`}
-                            >
-                              <Icon className="h-4 w-4" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0">
-                                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                    {visual.label}
-                                  </p>
-                                  <h3 className="mt-1 line-clamp-2 text-sm font-semibold leading-6 text-slate-950">
-                                    {task.title}
-                                  </h3>
-                                </div>
-                                <span
-                                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--r-pill)] transition-transform group-hover:scale-105 ${
-                                    task.completed
-                                      ? "bg-gradient-to-br from-violet-600 to-emerald-600 text-white shadow-sm"
-                                      : "border border-slate-300 bg-white text-slate-400"
-                                  }`}
-                                >
-                                  {task.completed ? <CheckCircle2 className="h-4 w-4" /> : null}
-                                </span>
-                              </div>
-                              <p className="mt-1 text-xs text-slate-500">
-                                Tuần {task.weekNumber}
-                                {task.scheduledDate ? ` · ${formatCalendarDate(task.scheduledDate)}` : ""}
-                              </p>
-                              <div className="mt-3 h-1.5 overflow-hidden rounded-[var(--r-pill)] bg-[color:var(--muted)]">
-                                <div
-                                  className="h-full rounded-[var(--r-pill)] gradient-brand"
-                                  style={{ width: `${Math.max(0, Math.min(100, weekPercent))}%` }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="rounded-[var(--r-card)] border border-dashed border-[color:var(--border)] bg-[color:var(--muted)] p-6 text-center">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[var(--r-tile)] bg-card text-[color:var(--tone-shell-primary)] shadow-sm">
-                      <Plus className="h-6 w-6" />
-                    </div>
-                    <h3 className="mt-4 text-base font-semibold text-foreground">Hôm nay là ngày để bắt đầu nhỏ.</h3>
-                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                      Bấm + để thêm việc đầu tiên trong trung tâm 12 tuần.
-                    </p>
-                    <Button glow className="mt-4" onClick={() => navigate("/12-week-system?tab=today")}>
-                      Mở Hôm nay
-                    </Button>
-                  </div>
-                )}
-
-                <DashboardWeekProgressRing
-                  value={activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore}
-                />
-              </div>
-            </SectionBlock>
-          )}
-
-          {isMobileViewport && topTrigger ? (
-            <SectionBlock
-              title="Cảnh báo tuần này"
-              density="compact"
-              collapsible
-              defaultOpen={false}
-            >
-              <div className="rounded-[var(--r-tile)] border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] px-4 py-3 text-sm">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--color-warning-fg)]" />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-[color:var(--color-warning-fg)]">{topTrigger.headline}</p>
-                    <p className="mt-1 text-xs leading-5 text-[color:var(--color-warning-fg)]">{topTrigger.detail}</p>
-                  </div>
-                </div>
-                <div className="mt-3 flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="bg-slate-950 text-white hover:bg-slate-800"
-                    onClick={() => {
-                      trackRescueActionTaken({
-                        kind: topTrigger.kind,
-                        action: topTrigger.kind === "trial_ending" ? "upgrade" : "navigate_system",
-                        currentPlan: currentPlanCode,
-                      });
-                      navigate(topTrigger.kind === "trial_ending" ? "/billing/plan" : "/12-week-system");
-                    }}
-                  >
-                    {topTrigger.kind === "trial_ending" ? "Mở Plus" : "Xem ngay"}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="text-[color:var(--color-warning-fg)] hover:bg-[color:var(--color-warning-bg)]"
-                    onClick={() => {
-                      dismissRescueTrigger(topTrigger.kind);
-                      trackRescueTriggerDismissed({ kind: topTrigger.kind, currentPlan: currentPlanCode });
-                      setDismissedTrigger(topTrigger.kind);
-                    }}
-                  >
-                    Đóng
-                  </Button>
-                </div>
-              </div>
-            </SectionBlock>
-          ) : null}
-
-          {!activeSystem ? (
-            <EmptyState
-              as="section"
-              align="left"
-              headingLevel={2}
-              testId="fresh-workspace-empty-state"
-              eyebrow="Không gian làm việc mới"
-              title="Chưa có dữ liệu thực thi để hiển thị."
-              description="Trang chính sẽ chỉ hiện điểm, chuỗi ngày và chỉ số sau khi bạn tạo chu kỳ 12 tuần đầu tiên. Bây giờ nên đi từ Cân bằng cuộc sống để có dữ liệu thật, rồi mới chốt mục tiêu SMART."
-              illustration={<EmptyGoalIllustration className="w-full text-violet-500" />}
-              className="relative overflow-hidden"
-              actions={
-                <>
-                  <EmptyHintArrow className="pointer-events-none absolute bottom-24 right-[18%] hidden h-10 w-10 text-fuchsia-500 opacity-65 sm:block" />
-                  <Button glow className="w-full sm:w-auto" onClick={() => navigate("/onboarding")}>
-                    Bắt đầu Cân bằng cuộc sống
-                  </Button>
-                </>
-              }
-            >
-              <ol className="grid gap-3 md:grid-cols-3">
-                {["Chấm 8 lĩnh vực cuộc sống", "Chọn một góc nhìn ưu tiên", "Tạo mục tiêu SMART và chu kỳ 12 tuần"].map(
-                  (item, index) => (
-                    <li key={item} className="rounded-[var(--r-tile)] border border-border bg-muted p-4">
-                      <div
-                        aria-hidden="true"
-                        className="flex h-9 w-9 items-center justify-center rounded-[var(--r-pill)] bg-foreground text-sm font-semibold text-white"
-                      >
-                        {index + 1}
-                      </div>
-                      <p className="mt-[var(--space-inline)] text-sm font-semibold leading-6 text-foreground">{item}</p>
-                    </li>
-                  ),
-                )}
-              </ol>
-            </EmptyState>
-          ) : (
-            <SectionBlock
-              key={isDesktopViewport ? "dashboard-week-summary-desktop" : "dashboard-week-summary-mobile"}
-              title="Tóm tắt tuần này"
-              density="compact"
-              collapsible={isMobileViewport}
-              defaultOpen={isDesktopViewport}
-            >
-              <Card data-testid="dashboard-main-card" className="border border-border bg-white/92 shadow-sm">
-                <CardContent className="p-5 sm:p-6">
-                  <div className="grid gap-[var(--space-stack)] grid-cols-1 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-                    <div className="stack-tight">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                        {dashboardGoalTitle}
-                      </p>
-                      <h3 className="text-xl font-bold text-foreground">
-                        {activeSystemTodayOpenTasks.length > 0
-                          ? `${activeSystemTodayOpenTasks.length} việc đang mở hôm nay`
-                          : "Hôm nay đang khá gọn"}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Tuần {activeSystemWeek ?? currentWeekExecutionSnapshot.weekNumber}:{" "}
-                        {activeSystemWeekCompletion?.completed ?? currentWeekExecutionSnapshot.completedTasks}/
-                        {activeSystemWeekCompletion?.total ?? currentWeekExecutionSnapshot.totalTasks} việc —{" "}
-                        {activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore}% việc lặp lại
-                      </p>
-                    </div>
-                    <div className="grid gap-2 sm:grid-cols-3">
-                      <div className="rounded-[var(--r-tile)] bg-muted px-4 py-3">
-                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tiến độ mục tiêu</p>
-                        <p className="mt-1 text-xl font-bold text-foreground">{goalProgressSnapshot.percent}%</p>
-                      </div>
-                      <div className="rounded-[var(--r-tile)] bg-muted px-4 py-3">
-                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Review</p>
-                        <p className="mt-1 text-base font-bold text-foreground">
-                          {reviewDueToday ? "Đến hạn hôm nay" : getReviewDayLabel(activeSystem.reviewDay)}
-                        </p>
-                      </div>
-                      <div className="rounded-[var(--r-tile)] bg-muted px-4 py-3">
-                        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Hôm nay</p>
-                        <p className="mt-1 text-xl font-bold text-foreground">{activeSystemTodayCompletedCount}</p>
-                        <p className="text-xs text-muted-foreground">việc đã chốt</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <details
-                data-testid="dashboard-execution-board"
-                className="group rounded-[var(--r-card)] border border-border bg-white/92 p-5 shadow-sm sm:p-6"
-                open={!isMobileViewport}
-              >
-                <summary className="flex cursor-pointer list-none flex-wrap items-end justify-between gap-3 sm:cursor-default">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                      Bảng thực thi
-                    </p>
-                    <h2 className="mt-1 text-xl font-bold tracking-tight text-foreground">Chi tiết nhịp tuần</h2>
-                  </div>
-                  <span className="rounded-[var(--r-pill)] border border-border bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-                    Dữ liệu chu kỳ hiện tại
-                  </span>
-                </summary>
-                <div className="mt-[var(--space-stack)] stack-stack">
-                  {activeSystemTaskPreview.length > 0 ? (
-                    <div className="stack-tight">
-                      {activeSystemTaskPreview.map((task, index) => (
-                        <div
-                          key={task.id}
-                          className="flex items-center gap-3 rounded-[var(--r-tile)] bg-white px-4 py-3 ring-1 ring-slate-200"
-                        >
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-foreground text-sm font-semibold text-white">
-                            {index + 1}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-semibold text-foreground">{task.title}</p>
-                            <p className="mt-1 text-xs text-muted-foreground">
-                              {index === 0 ? "Việc nên chạm vào đầu tiên" : "Việc đang chờ phía sau"}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="rounded-[var(--r-tile)] bg-muted p-4 text-sm text-muted-foreground">
-                      Hôm nay không còn việc mở. Nếu còn thời gian, hãy xem lại tuần hoặc chuẩn bị review khi đến hạn.
-                    </p>
-                  )}
-
-                  {planLoading && !plan && (
-                    <Card className="border border-border bg-white/80 shadow-sm">
-                      <CardContent className="p-4 text-sm text-muted-foreground">
-                        Đang tải dữ liệu Trang chính 12 tuần...
-                      </CardContent>
-                    </Card>
-                  )}
-
-                  {planError && (
-                    <Card className="border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] shadow-sm">
-                      <CardContent className="p-4 text-sm text-[color:var(--color-danger-fg)]">
-                        {planError.message}
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              </details>
-            </SectionBlock>
-          )}
-        </div>
-      )}
-
-      {showMobileStickyCTA && (
-        <>
-          {/* Spacer reserves space below content so the sticky CTA + bottom-nav don't overlap the last card */}
-          <div aria-hidden="true" className="h-20 md:hidden" />
-          <div className="above-mobile-nav fixed left-0 right-0 z-40 border-t bg-white/95 p-4 backdrop-blur supports-backdrop-blur:bg-white/90 md:hidden">
-            <Button
-              variant="outline"
-              className="w-full border-border bg-white text-foreground shadow-lg hover:bg-muted"
-              size="lg"
-              onClick={() => navigate("/12-week-system")}
-            >
-              <CheckCircle2 className="mr-2 h-5 w-5" />
-              Đánh dấu xong - {activeSystemTodayOpenTasks.length} việc
-            </Button>
-          </div>
-        </>
-      )}
-
-      {/* SECONDARY SECTION: Workspace Details */}
-      {shouldShowWorkspaceDetailGrid && (
-        <SectionBlock
-          key={isDesktopViewport ? "dashboard-workspace-details-desktop" : "dashboard-workspace-details-mobile"}
-          title="Dữ liệu gần đây"
-          headerVisuallyHidden={isDesktopViewport}
-          collapsible={isMobileViewport}
-          defaultOpen={isDesktopViewport}
-          className="ops-section-secondary"
-        >
-          <PageHeader
-            eyebrow="Chi tiết không gian làm việc"
-            title="Dữ liệu gần đây"
-            description="Xem nhanh mục tiêu, cân bằng cuộc sống và nhật ký của bạn."
-          />
-
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-            <Reveal>
-              <Card className="h-full border border-border bg-white/92 shadow-sm">
-                <CardHeader>
-                  <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                    <div className="min-w-0">
-                      <CardTitle className="text-foreground">
-                        {isSignedOut ? "Luồng mục tiêu mẫu" : "Mục tiêu gần đây"}
-                      </CardTitle>
-                      <CardDescription className="text-muted-foreground">
-                        {isSignedOut
-                          ? "Từ một mong muốn rộng, web sẽ ép lại thành mục tiêu rõ và kế hoạch có lịch."
-                          : "Đủ ít để bạn nhìn một lượt là hiểu."}
-                      </CardDescription>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full sm:w-auto"
-                      onClick={() => (isSignedOut ? handleAuthNavigate("signup") : navigate("/life-insight"))}
-                    >
-                      <Plus className="h-4 w-4" />
-                      {isSignedOut ? (demoMode ? "Đăng ký để đồng bộ sau" : "Đăng ký miễn phí") : "Tạo mục tiêu"}
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="stack-stack">
-                  {recentGoals.length === 0 ? (
-                    <div className="rounded-[var(--r-card)] border border-dashed border-border bg-muted px-6 py-10 text-center text-muted-foreground">
-                      <Target className="mx-auto mb-4 h-12 w-12 text-muted-foreground/45" />
-                      <p>
-                        {isSignedOut
-                          ? (demoMode ? "Bạn có thể đi qua Góc nhìn cuộc sống, mục tiêu SMART và kiểm tra tính thực tế trước khi tạo tài khoản." : "Đăng ký miễn phí để bắt đầu hành trình 12 tuần với mục tiêu của bạn.")
-                          : "Chưa có mục tiêu nào. Hãy bắt đầu bằng mục tiêu đầu tiên của bạn."}
-                      </p>
-                      <Button
-                        variant="secondary"
-                        className="mt-[var(--space-stack)] w-full sm:w-auto"
-                        onClick={() => (isSignedOut ? handleAuthNavigate("signup") : navigate("/life-insight"))}
-                      >
-                        {isSignedOut ? (demoMode ? "Đăng ký để đồng bộ sau" : "Đăng ký miễn phí") : "Tạo mục tiêu"}
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="overflow-hidden rounded-[var(--r-card)] border border-border bg-white shadow-sm">
-                      <div className="hidden grid-cols-[minmax(0,1.4fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)_minmax(100px,0.5fr)] gap-4 border-b border-border bg-muted px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground lg:grid">
-                        <span>Mục tiêu</span>
-                        <span>Loại</span>
-                        <span>Tiến độ</span>
-                        <span className="text-right">Hành động</span>
-                      </div>
-
-                      <div className="divide-y divide-border">
-                        {recentGoals.map((goal) => {
-                          const progress = calculateGoalProgress(goal);
-                          const execution = getGoalExecutionStats(goal);
-
-                          return (
-                            <div
-                              key={goal.id}
-                              className={`px-4 py-4 lg:px-5 ${goal.twelveWeekSystem ? "bg-[color:var(--color-info-bg)]" : "bg-white/40"}`}
-                            >
-                              <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(120px,0.6fr)_minmax(120px,0.6fr)_minmax(100px,0.5fr)] lg:items-center">
-                                <div className="min-w-0">
-                                  <div className="flex items-start gap-3">
-                                    <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-foreground text-white">
-                                      <Target className="h-4 w-4" />
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                      <div className="flex flex-wrap items-center gap-2">
-                                        <p className="truncate font-semibold text-foreground">{goal.title}</p>
-                                        {goal.twelveWeekSystem && (
-                                          <span className="rounded-[var(--r-pill)] bg-[color:var(--color-info-bg)] px-3 py-1 text-xs font-semibold text-[color:var(--color-info-fg)]">
-                                            12 tuần
-                                          </span>
-                                        )}
-                                        {progress === 100 && (
-                                          <span className="rounded-[var(--r-pill)] bg-[color:var(--color-success-bg)] px-3 py-1 text-xs font-semibold text-[color:var(--color-success-fg)]">
-                                            Hoàn thành
-                                          </span>
-                                        )}
-                                      </div>
-                                      <div className="mt-1 flex flex-wrap gap-2 text-sm text-muted-foreground">
-                                        <span>{getLifeAreaLabel(goal.category)}</span>
-                                        {goal.deadline && <span>• Đích {formatCalendarDate(goal.deadline)}</span>}
-                                      </div>
-                                      <div className="mt-[var(--space-inline)] flex flex-wrap gap-2 text-xs text-muted-foreground lg:hidden">
-                                        <span className="rounded-[var(--r-pill)] bg-muted px-3 py-1">
-                                          {goal.twelveWeekSystem ? "Chu kỳ 12 tuần" : "Mục tiêu thường"}
-                                        </span>
-                                        <span className="rounded-[var(--r-pill)] bg-muted px-3 py-1">
-                                          {execution.completed}/{execution.total} việc đã chốt
-                                        </span>
-                                        <span className="rounded-[var(--r-pill)] bg-muted px-3 py-1">{progress}% tiến độ</span>
-                                      </div>
-                                    </div>
-                                    <CheckCircle2
-                                      aria-hidden="true"
-                                      className={`h-5 w-5 shrink-0 ${progress === 100 ? "text-[color:var(--color-success-fg)]" : "text-muted-foreground/45"}`}
-                                    />
-                                  </div>
-                                </div>
-
-                                <div className="hidden min-w-0 lg:block">
-                                  <p className="truncate text-sm font-semibold text-foreground">
-                                    {goal.twelveWeekSystem ? "Chu kỳ 12 tuần" : "Mục tiêu thường"}
-                                  </p>
-                                  <p className="mt-1 truncate text-sm text-muted-foreground">
-                                    {goal.twelveWeekSystem
-                                      ? `Gói ${getPlanLabel(currentPlanCode)}`
-                                      : "Theo dõi tổng quan"}
-                                  </p>
-                                </div>
-
-                                <div className="stack-tight">
-                                  <div                               className="flex items-center justify-between text-sm">
-                                    <span className="font-semibold text-foreground">{progress}%</span>
-                                    <span className="text-muted-foreground">
-                                      {execution.completed}/{execution.total} việc
-                                    </span>
-                                  </div>
-                                  <Progress value={progress} className="h-2" />
-                                  {goal.twelveWeekSystem && !entitlementKeys.includes("premium_review_insights") && (
-                                    <p className="text-xs font-medium text-[color:var(--color-info-fg)]">Phân tích review đang khóa</p>
-                                  )}
-                                </div>
-
-                                <div className="flex flex-wrap gap-2 lg:justify-end">
-                                  <Button
-                                    size="sm"
-                                    variant={goal.twelveWeekSystem ? "secondary" : "outline"}
-                                    className={goal.twelveWeekSystem ? "" : "border-white/70 bg-white hover:bg-muted"}
-                                    onClick={() => navigate(goal.twelveWeekSystem ? "/12-week-system" : "/goals")}
-                                    aria-label={
-                                      goal.twelveWeekSystem ? `Mở 12 tuần: ${goal.title}` : `Mở mục tiêu: ${goal.title}`
-                                    }
-                                  >
-                                    {goal.twelveWeekSystem ? "Mở 12 tuần" : "Mở mục tiêu"}
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </Reveal>
-
-            <Reveal>
-              <Card className="h-full border border-border bg-white/92 shadow-sm">
-                <CardHeader>
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <CardTitle className="text-foreground">
-                        {isSignedOut ? "Bánh xe cuộc sống là bước mở đầu" : "Bánh xe cuộc sống"}
-                      </CardTitle>
-                      <CardDescription className="text-muted-foreground">
-                        {isSignedOut
-                          ? "Người mới nên chấm 8 lĩnh vực trước khi chọn mục tiêu ưu tiên."
-                          : "Nhìn nhanh bức tranh tổng quan hiện tại."}
-                      </CardDescription>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Điểm trung bình</p>
-                      <p className="mt-1 text-3xl font-bold text-foreground">
-                        <CountUp value={averageLifeScore} precision={1} />
-                      </p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="stack-stack">
-                  <div className="rounded-[var(--r-card)] border border-border bg-white p-4 shadow-sm">
-                    {radarData.length > 0 ? (
-                      <DeferredDashboardLifeAreaRadar data={radarData} />
-                    ) : (
-                      <div className="flex h-[360px] flex-col items-center justify-center rounded-[var(--r-tile)] bg-muted px-5 text-center">
-                        <TrendingUp className="h-10 w-10 text-muted-foreground/45" />
-                        <p className="mt-[var(--space-inline)] font-semibold text-foreground">Chưa có dữ liệu bánh xe cuộc sống</p>
-                        <p className="mt-1 max-w-sm text-sm leading-6 text-muted-foreground">
-                          {isSignedOut
-                          ? (demoMode ? "Bạn có thể chấm Cân bằng cuộc sống trước khi tạo tài khoản. Tài khoản cần khi muốn đồng bộ sang thiết bị khác." : "Đăng ký miễn phí và chấm Cân bằng cuộc sống để Trang chính có dữ liệu thật.")
-                            : "Bắt đầu bằng bài đánh giá Cân bằng cuộc sống để Trang chính có dữ liệu thật thay vì số mặc định."}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-[var(--r-tile)] border border-border bg-white p-4 shadow-sm">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Cần ưu tiên tiếp</p>
-                      <p className="mt-2 text-lg font-semibold text-foreground">
-                        {isSignedOut
-                          ? "Chọn sau Cân bằng cuộc sống"
-                          : weakestArea
-                            ? getLifeAreaLabel(weakestArea.name)
-                            : "Chưa có dữ liệu"}
-                      </p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {isSignedOut
-                          ? (demoMode ? "Dữ liệu lưu trên thiết bị này" : "Đăng ký để xem điểm")
-                          : weakestArea
-                            ? `${weakestArea.score}/10`
-                            : "--"}
-                      </p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      className="h-auto w-full min-w-0 justify-start whitespace-normal rounded-[var(--r-tile)] border-border bg-white px-4 py-4 text-left shadow-sm hover:bg-muted"
-                      onClick={() => (isSignedOut ? handleAuthNavigate("signup") : navigate("/life-balance"))}
-                    >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-foreground text-white">
-                        <TrendingUp className="h-4 w-4" />
-                      </div>
-                      <div className="ml-3 min-w-0 flex-1">
-                        <div className="line-clamp-2 break-words font-semibold text-foreground">
-                          {isSignedOut
-                            ? "Bắt đầu bằng cân bằng cuộc sống"
-                            : hasRealLifeBalance
-                              ? "Mở cân bằng cuộc sống"
-                              : "Bắt đầu đánh giá cuộc sống"}
-                        </div>
-                        <div className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                          {isSignedOut
-                            ? (demoMode ? "Đăng ký chỉ khi muốn thử lớp đồng bộ sau." : "Đăng ký miễn phí để bắt đầu chấm 8 lĩnh vực.")
-                            : hasRealLifeBalance
-                              ? "Xem chi tiết và cập nhật lại bánh xe cuộc đời."
-                              : "Chấm điểm 8 lĩnh vực để mở đúng luồng mục tiêu."}
-                        </div>
-                      </div>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </Reveal>
-          </div>
-        </SectionBlock>
-      )}
-
-      {/* Recent Reflections - Part of secondary content */}
-      {!isFreshDemoVisitor && recentReflections.length > 0 && (
-        <SectionBlock
-          key={isDesktopViewport ? "dashboard-reflections-desktop" : "dashboard-reflections-mobile"}
-          title="Nhật ký gần đây"
-          headerVisuallyHidden={isDesktopViewport}
-          collapsible={isMobileViewport}
-          defaultOpen={isDesktopViewport}
-          className="ops-section-secondary"
-        >
-          <Reveal>
-            <Card className="border border-border bg-white/92 shadow-sm">
-              <CardHeader>
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <CardTitle className="text-foreground">Nhật ký gần đây</CardTitle>
-                    <CardDescription className="text-muted-foreground">
-                      Những suy ngẫm mới nhất trên hành trình của bạn.
-                    </CardDescription>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={() => navigate("/journal")}>
-                    Xem tất cả
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="grid gap-4 lg:grid-cols-2">
-                {recentReflections.map((reflection, index) => (
-                  <div
-                    key={reflection.id}
-                    className={`rounded-[var(--r-card)] border p-5 shadow-sm ${
-                      index === 0 ? "border-border bg-muted" : "border-border bg-white"
-                    }`}
-                  >
-                    <div className="mb-3 flex items-start justify-between gap-4">
-                      <p className="min-w-0 truncate font-semibold text-foreground">{reflection.title}</p>
-                      <span className="text-xs font-medium text-muted-foreground">{formatCalendarDate(reflection.date)}</span>
-                    </div>
-                    <p className="line-clamp-3 text-sm text-muted-foreground">{reflection.content}</p>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </Reveal>
-        </SectionBlock>
-      )}
-
-      {/* Demo Notice - Non-intrusive, at bottom */}
-      {!isSignedOut && !isFreshDemoVisitor && userData.isHydratedFromDemo && (
-        <div className="ops-section-notice">
-          <Reveal>
-            <div className="flex flex-wrap items-center gap-4 rounded-[var(--r-card)] border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] px-5 py-4 shadow-lg">
-              <Sparkles className="h-5 w-5 shrink-0 text-[color:var(--color-warning-fg)]" />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-[color:var(--color-warning-fg)]">Dữ liệu đang hiển thị là ví dụ mẫu</p>
-                <p className="mt-0.5 text-sm text-[color:var(--color-warning-fg)]">
-                  Cập nhật bánh xe cuộc sống của bạn để thay dữ liệu mẫu bằng thông tin thật.
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-[color:var(--color-warning-border)] bg-white text-[color:var(--color-warning-fg)] hover:bg-[color:var(--color-warning-bg)]"
-                onClick={() => navigate("/life-balance")}
-              >
-                Cập nhật ngay
-              </Button>
-            </div>
-          </Reveal>
-        </div>
-      )}
-
     </div>
+  );
+}
+
+type DashboardData = ReturnType<typeof useDashboardDerivedData>;
+
+function DashboardActiveLayout({
+  data,
+  displayName,
+  caption,
+  balanceRows,
+  topTrigger,
+  planLoading,
+  hasPlan,
+  planError,
+  onSelectGoal,
+  onAddGoal,
+  onTriggerAction,
+  onTriggerDismiss,
+}: {
+  data: DashboardData;
+  displayName: string;
+  caption: string;
+  balanceRows: LifeBalanceRow[];
+  topTrigger: ReturnType<typeof evaluateRescueTriggers>[number] | null;
+  planLoading: boolean;
+  hasPlan: boolean;
+  planError: ReturnType<typeof usePlan12Week>["error"];
+  onSelectGoal: (goal: Goal) => void;
+  onAddGoal: () => void;
+  onTriggerAction: () => void;
+  onTriggerDismiss: () => void;
+}) {
+  const trendPoints = data.weeklyProgressPoints.length > 0 ? data.weeklyProgressPoints : buildSystemWeeklyProgressPoints(data.activeSystem);
+  const planHref = "/12-week-system?tab=week";
+
+  return (
+    <div className="space-y-6">
+      <div data-tour-id="dashboard-start-card">
+        <DashboardHero
+          caption={caption}
+          currentWeek={data.dashboardKpiCurrentWeek}
+          totalWeeks={data.dashboardKpiTotalWeeks}
+          displayName={displayName}
+          featuredGoalTitle={data.dashboardGoalTitle}
+          progressPercent={data.goalProgressSnapshot.percent || data.dashboardKpiLeadAverage}
+          planHref={planHref}
+        />
+      </div>
+
+      {topTrigger ? (
+        <RescueAlert
+          trigger={topTrigger}
+          ctaLabel={topTrigger.kind === "trial_ending" ? "Mở Plus" : "Xem ngay"}
+          onAction={onTriggerAction}
+          onDismiss={onTriggerDismiss}
+        />
+      ) : null}
+
+      <div className="grid gap-5 lg:grid-cols-3">
+        <div className="space-y-5 lg:col-span-2">
+          <DashboardPlanStateNotice planLoading={planLoading} hasPlan={hasPlan} planError={planError} />
+          <ActiveGoalsCard goals={data.dashboardActiveGoals} onSelectGoal={onSelectGoal} onAddGoal={onAddGoal} />
+          <WeekRhythmCard
+            system={data.activeSystem}
+            currentWeek={data.dashboardKpiCurrentWeek}
+            totalWeeks={data.dashboardKpiTotalWeeks}
+            completedCount={data.activeSystemWeekCompletion?.completed ?? data.currentWeekExecutionSnapshot.completedTasks}
+            totalCount={data.activeSystemWeekCompletion?.total ?? data.currentWeekExecutionSnapshot.totalTasks}
+            leadAverage={data.dashboardKpiLeadAverage}
+            wheelScore={data.averageLifeScore}
+            streak={data.dashboardKpiStreak}
+          />
+          <TwelveWeekTrendCard points={trendPoints} currentWeek={data.dashboardKpiCurrentWeek} />
+        </div>
+
+        <aside className="space-y-5">
+          {data.reviewDueToday ? (
+            <ReflectionPrompt currentWeek={data.dashboardKpiCurrentWeek} reviewHref={data.dashboardNextAction.ctaTarget} />
+          ) : null}
+          <TodayMiniCard
+            tasks={data.activeSystemTaskPreview.length > 0 ? data.activeSystemTaskPreview : data.activeSystemTodayTasks}
+            completedCount={data.activeSystemTodayCompletedCount}
+            totalCount={data.activeSystemTodayTasks.length}
+          />
+          <BalanceCard rows={balanceRows} />
+          <QuoteBlock />
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function FreeGoalLimitCard({ current, limit, onUpgrade }: { current: number; limit: number; onUpgrade: () => void }) {
+  return (
+    <section className="mb-5 rounded-card border border-app-line bg-app-surface p-4" aria-label="Giới hạn gói Free">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-[14px] font-semibold text-app-ink">Gói Free: {current}/{limit} mục tiêu</p>
+          <p className="mt-1 text-[13px] leading-6 text-app-ink-muted">
+            Nâng cấp Plus khi bạn cần tạo thêm mục tiêu mới. Dữ liệu cũ vẫn được giữ nguyên.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onUpgrade}
+          className="inline-flex shrink-0 rounded-lg border border-app-line bg-app-surface px-3.5 py-2 text-[13px] font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+        >
+          Mở Plus
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function TrialCountdownBanner({
+  demoMode,
+  renewsAt,
+  onOpenPlan,
+}: {
+  demoMode: boolean;
+  renewsAt?: string;
+  onOpenPlan: () => void;
+}) {
+  if (!renewsAt || new Date(renewsAt) < new Date()) return null;
+
+  const daysLeft = Math.max(0, Math.ceil((new Date(renewsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+
+  return (
+    <section className="mb-5 rounded-card border border-app-line bg-app-surface p-4 text-[13px] text-app-ink-soft" aria-label="Thời hạn Plus">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <span>
+          <span className="font-semibold text-app-ink">{demoMode ? "Plus dùng thử:" : "Plus đang trong thời gian ưu đãi:"}</span> còn {daysLeft} ngày {demoMode ? "trên trình duyệt này" : "trên tài khoản này"}.
+        </span>
+        <button
+          type="button"
+          onClick={onOpenPlan}
+          className="inline-flex shrink-0 rounded-lg border border-app-line bg-app-surface px-3 py-1.5 text-[13px] font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:ml-auto"
+        >
+          Chi tiết
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function DashboardPlanStateNotice({
+  planLoading,
+  hasPlan,
+  planError,
+}: {
+  planLoading: boolean;
+  hasPlan: boolean;
+  planError: ReturnType<typeof usePlan12Week>["error"];
+}) {
+  if (planLoading && !hasPlan) {
+    return (
+      <div className="rounded-card border border-app-line bg-app-surface p-4 text-[13px] text-app-ink-muted">
+        Đang tải dữ liệu Trang chính 12 tuần...
+      </div>
+    );
+  }
+
+  if (planError) {
+    return (
+      <div className="rounded-card border border-app-line bg-app-surface p-4 text-[13px] text-app-ink-soft">
+        {planError.message}
+      </div>
+    );
+  }
+
+  return null;
+}
+
+function DemoDataNotice({ onOpenLifeBalance }: { onOpenLifeBalance: () => void }) {
+  return (
+    <section className="mt-6 rounded-card border border-app-line bg-app-accent-soft p-5" aria-label="Dữ liệu mẫu">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-[14px] font-semibold text-app-accent">Dữ liệu đang hiển thị là ví dụ mẫu</p>
+          <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">
+            Cập nhật bánh xe cuộc sống của bạn để thay dữ liệu mẫu bằng thông tin thật.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onOpenLifeBalance}
+          className="inline-flex shrink-0 rounded-lg bg-app-accent px-3.5 py-2 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-[#264d43] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+        >
+          Cập nhật ngay
+        </button>
+      </div>
+    </section>
   );
 }

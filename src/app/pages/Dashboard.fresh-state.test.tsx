@@ -142,13 +142,13 @@ describe("Dashboard fresh workspace states", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: /Biến tầm nhìn thành mục tiêu rõ ràng và kế hoạch 12 tuần/i,
+        name: /Một chỗ tĩnh để bạn nhìn lại tuần sống của mình/i,
       }),
     ).toBeInTheDocument();
     expect(screen.queryByText("Private stale goal must stay hidden")).not.toBeInTheDocument();
     expect(screen.getByText("Có dữ liệu đã lưu trên thiết bị này")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Đăng nhập để khôi phục/i })).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: /Tạo tài khoản để lưu và đồng bộ/i }).length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: /Tạo tài khoản mới/i })).toBeInTheDocument();
     expect(screen.queryByText("Một luồng chính, không phải ba lựa chọn ngang nhau.")).not.toBeInTheDocument();
     expect(container.querySelector('[data-tour-id="dashboard-plan-card"]')).not.toBeInTheDocument();
     expect(container.querySelector('[data-tour-id="dashboard-next-card"]')).not.toBeInTheDocument();
@@ -160,8 +160,8 @@ describe("Dashboard fresh workspace states", () => {
 
     renderDashboard();
 
-    const startButton = await screen.findByRole("button", { name: /Trải nghiệm demo miễn phí/i });
-    expect(screen.getByText(/Bắt đầu demo ngay trên trình duyệt này/i)).toBeInTheDocument();
+    const startButton = await screen.findByRole("button", { name: /Bắt đầu demo/i });
+    expect(screen.getByRole("heading", { name: /Một chỗ tĩnh để bạn nhìn lại tuần sống của mình/i })).toBeInTheDocument();
 
     await user.click(startButton);
 
@@ -179,11 +179,11 @@ describe("Dashboard fresh workspace states", () => {
     renderDashboard();
 
     expect(await screen.findByTestId("fresh-workspace-empty-state")).toBeInTheDocument();
-    expect(screen.getByText("Chưa có dữ liệu thực thi để hiển thị.")).toBeInTheDocument();
+    expect(screen.getByText(/Chưa có dữ liệu thực thi để hiển thị/i)).toBeInTheDocument();
     expect(screen.queryByText("Chưa có dữ liệu bánh xe cuộc sống")).not.toBeInTheDocument();
     expect(screen.queryByText("Tổng quan hiệu suất 12 tuần")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Bắt đầu Cân bằng cuộc sống" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Hình dung tầm nhìn" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Tiếp tục thiết lập →" })).toBeInTheDocument();
+    expect(screen.getByText("Cân bằng")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Tôi đã có insight" })).not.toBeInTheDocument();
     expect(screen.queryByText("Mục tiêu gần đây")).not.toBeInTheDocument();
   });
