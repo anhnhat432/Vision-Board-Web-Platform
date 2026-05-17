@@ -36,7 +36,7 @@ describe("LifeInsight draft switch dialog", () => {
     const { router } = renderAppRoute("/life-insight");
     const user = userEvent.setup();
 
-    await user.click(await screen.findByTestId("life-insight-primary-cta"));
+    await user.click(await screen.findByRole("button", { name: /Tiếp → Viết mục tiêu/i }));
     expect(await screen.findByText("Bạn có bản nháp mục tiêu chưa lưu")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Huỷ" }));

@@ -113,7 +113,9 @@ describe("GoalTracker multi-tab task updates", () => {
   it("updates 12-week goal progress immediately after ticking the next task", async () => {
     const storage = await import("../utils/storage");
     const data = storage.getUserData();
-    const todayKey = storage.formatDateInputValue(new Date());
+    const today = new Date();
+    const todayKey = storage.formatDateInputValue(today);
+    const nonTodayReviewDay = today.getDay() === 0 ? "Monday" : "Sunday";
     data.onboardingCompleted = true;
     data.currentWheelOfLife = data.currentWheelOfLife.map((area) => ({ ...area, score: 6 }));
     data.goals = [
@@ -156,7 +158,7 @@ describe("GoalTracker multi-tab task updates", () => {
           ],
           milestones: { week4: "", week8: "", week12: "" },
           successEvidence: "",
-          reviewDay: "Sunday",
+          reviewDay: nonTodayReviewDay,
           week12Outcome: "",
           startDate: todayKey,
           endDate: todayKey,
