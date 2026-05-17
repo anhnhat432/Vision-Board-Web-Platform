@@ -365,13 +365,13 @@ describe("authenticated new user core flow", () => {
     expect(
       await screen.findByText(
         (_content, element) =>
-          element?.tagName === "H1" && /Bạn đã có một tín hiệu rất rõ/i.test(element.textContent ?? ""),
+          element?.tagName === "H1" && /Chọn nơi đáng ưu tiên trong 12 tuần tới/i.test(element.textContent ?? ""),
       ),
     ).toBeInTheDocument();
     expect(getUserData().onboardingCompleted).toBe(true);
     expect(getUserData().goals).toEqual([]);
 
-    await user.click(screen.getByTestId("life-insight-primary-cta"));
+    await user.click(screen.getByRole("button", { name: /Tiếp → Viết mục tiêu/i }));
     await fillSmartGoal(user);
     await completeFeasibility(user);
     await completeTwelveWeekSetup(user);

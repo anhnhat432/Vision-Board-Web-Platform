@@ -125,8 +125,8 @@ describe("core funnel guards", () => {
   it("treats the default zero-score wheel as missing Life Balance data", async () => {
     renderCoreFunnel("/life-insight");
 
-    expect(await screen.findByRole("heading", { name: "Chưa có dữ liệu cân bằng cuộc sống" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Đi tới Bắt đầu" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Hoàn thành bước cân bằng trước" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Bắt đầu cân bằng" })).toBeInTheDocument();
   });
 
   it("blocks direct SMART Goal access when Life Balance has not been completed", async () => {

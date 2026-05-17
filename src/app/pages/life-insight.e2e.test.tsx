@@ -23,11 +23,10 @@ describe("life insight flow", () => {
     const { router } = renderAppRoute("/life-insight");
     const user = userEvent.setup();
 
-    await screen.findByRole("heading", { name: "Chưa có dữ liệu cân bằng cuộc sống" });
-    expect(screen.getByRole("button", { name: "Đi tới Bắt đầu" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Mở Cân bằng cuộc sống" })).toBeInTheDocument();
+    await screen.findByRole("heading", { name: "Hoàn thành bước cân bằng trước" });
+    expect(screen.getByRole("button", { name: "Bắt đầu cân bằng" })).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Đi tới Bắt đầu" }));
+    await user.click(screen.getByRole("button", { name: "Bắt đầu cân bằng" }));
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/onboarding");
     });
@@ -51,18 +50,17 @@ describe("life insight flow", () => {
     const { router } = renderAppRoute("/life-insight");
     const user = userEvent.setup();
 
-    const recommendationCard = await screen.findByTestId("life-insight-recommendation-card");
-    expect(recommendationCard).toHaveTextContent("Vì sao chọn trọng tâm này?");
-    expect(recommendationCard).toHaveTextContent("4/10");
+    expect(
+      await screen.findByRole("heading", { name: "Chọn nơi đáng ưu tiên trong 12 tuần tới." }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Đề xuất ưu tiên: Sức khỏe")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Sức khỏe" })).toBeInTheDocument();
+    expect(screen.getByText("Điểm hiện tại: 4/10")).toBeInTheDocument();
+    expect(screen.getByText(/sức khỏe tốt hơn sẽ giúp tôi có năng lượng ổn định hơn/i)).toBeInTheDocument();
 
-    const decisionCard = await screen.findByTestId("life-insight-decision-card");
-    expect(decisionCard).toHaveTextContent("Quyết định tiếp theo");
-    expect(decisionCard).toHaveTextContent("Sức khỏe");
-    expect(decisionCard).toHaveTextContent("Duy trì 3 buổi vận động mỗi tuần");
-    expect(decisionCard).toHaveTextContent("Số buổi vận động mỗi tuần");
-
-    expect(screen.getByTestId("life-insight-primary-cta")).toHaveTextContent("Tạo mục tiêu SMART từ quyết định này");
-    await user.click(screen.getByTestId("life-insight-primary-cta"));
+    const primaryCta = screen.getByRole("button", { name: /Tiếp → Viết mục tiêu/i });
+    expect(primaryCta).toHaveTextContent("Tiếp → Viết mục tiêu");
+    await user.click(primaryCta);
 
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/smart-goal-setup");
@@ -98,7 +96,9 @@ describe("life insight flow", () => {
     const { router } = renderAppRoute("/life-insight");
     const user = userEvent.setup();
 
-    await user.click(await screen.findByTestId("life-insight-primary-cta"));
+    const primaryCta = await screen.findByRole("button", { name: /Tiếp → Viết mục tiêu/i });
+
+    await user.click(primaryCta);
     expect(await screen.findByText("Bạn có bản nháp mục tiêu chưa lưu")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Huỷ" }));
@@ -109,7 +109,7 @@ describe("life insight flow", () => {
     expect(localStorage.getItem(APP_STORAGE_KEYS.pendingSmartGoal)).not.toBeNull();
     expect(localStorage.getItem(APP_STORAGE_KEYS.selectedFocusArea)).toBe("Career");
 
-    await user.click(screen.getByTestId("life-insight-primary-cta"));
+    await user.click(primaryCta);
     await user.click(await screen.findByRole("button", { name: "Giữ bản nháp" }));
     await waitFor(() => {
       expect(screen.queryByText("Bạn có bản nháp mục tiêu chưa lưu")).not.toBeInTheDocument();
@@ -118,7 +118,7 @@ describe("life insight flow", () => {
     expect(localStorage.getItem(APP_STORAGE_KEYS.pendingSmartGoal)).not.toBeNull();
     expect(localStorage.getItem(APP_STORAGE_KEYS.selectedFocusArea)).toBe("Career");
 
-    await user.click(screen.getByTestId("life-insight-primary-cta"));
+    await user.click(primaryCta);
     await user.click(await screen.findByRole("button", { name: "Xoá bản nháp và đổi lĩnh vực" }));
 
     await waitFor(() => {

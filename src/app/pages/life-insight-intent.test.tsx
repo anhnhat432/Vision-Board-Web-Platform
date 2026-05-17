@@ -54,19 +54,20 @@ describe("LifeInsight — intent picker", () => {
       </MemoryRouter>,
     );
 
-    const picker = await screen.findByTestId("life-insight-intent-picker");
-    expect(picker).toBeInTheDocument();
-    expect(picker.querySelector('[data-intent-id="complete_project"]')).not.toBeNull();
-    expect(picker.querySelector('[data-intent-id="build_habit"]')).not.toBeNull();
-    expect(picker.querySelector('[data-intent-id="learn_skill"]')).not.toBeNull();
-    expect(picker.querySelector('[data-intent-id="improve_health"]')).not.toBeNull();
-    expect(picker.querySelector('[data-intent-id="prepare_exam"]')).not.toBeNull();
-    expect(picker.querySelector('[data-intent-id="grow_finance"]')).not.toBeNull();
-    expect(picker.querySelector('[data-intent-id="find_direction"]')).not.toBeNull();
-    expect(picker.querySelector('[data-intent-id="unsure"]')).not.toBeNull();
+    expect(
+      await screen.findByRole("heading", { name: "Mục đích chính của bạn với lĩnh vực này" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Hoàn thành một dự án/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Xây một thói quen/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Học một kỹ năng/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Cải thiện sức khỏe/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Chuẩn bị thi hoặc chứng chỉ/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Tăng thu nhập hoặc tiết kiệm/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Tìm lại định hướng/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Chưa chắc, cứ đi tiếp/i })).toBeInTheDocument();
   });
 
-  it("lets the user choose an intent and persists it with native radio state", async () => {
+  it("lets the user choose an intent, marks it selected, and persists it", async () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter>
@@ -74,18 +75,16 @@ describe("LifeInsight — intent picker", () => {
       </MemoryRouter>,
     );
 
-    const target = (await screen.findByTestId("life-insight-intent-picker")).querySelector(
-      '[data-intent-id="learn_skill"]',
-    ) as HTMLLabelElement;
-    const radio = target.querySelector('input[type="radio"]') as HTMLInputElement;
-    expect(radio.checked).toBe(false);
+    const target = await screen.findByRole("button", { name: /Học một kỹ năng/i });
+    expect(target).not.toHaveClass("bg-app-accent-soft");
 
     await user.click(target);
 
-    expect(radio.checked).toBe(true);
+    expect(target).toHaveClass("bg-app-accent-soft");
     const raw = localStorage.getItem("user_intent");
     expect(raw).toBeTruthy();
-    expect(JSON.parse(raw ?? "{}")).toMatchObject({ intent: "learn_skill" });
+    expect(JSON.parse(raw ?? "{}"))
+      .toMatchObject({ intent: "learn_skill" });
   });
 
   it("lets the user skip by not choosing (default state is nothing stored)", async () => {
@@ -96,7 +95,7 @@ describe("LifeInsight — intent picker", () => {
     );
 
     // Picker renders but nothing is selected, nothing stored.
-    await screen.findByTestId("life-insight-intent-picker");
+    await screen.findByRole("heading", { name: "Mục đích chính của bạn với lĩnh vực này" });
     expect(localStorage.getItem("user_intent")).toBeNull();
   });
 
@@ -108,14 +107,13 @@ describe("LifeInsight — intent picker", () => {
       </MemoryRouter>,
     );
 
-    const unsure = (await screen.findByTestId("life-insight-intent-picker")).querySelector(
-      '[data-intent-id="unsure"]',
-    ) as HTMLLabelElement;
+    const unsure = await screen.findByRole("button", { name: /Chưa chắc, cứ đi tiếp/i });
     await user.click(unsure);
 
     const raw = localStorage.getItem("user_intent");
     expect(raw).toBeTruthy();
-    expect(JSON.parse(raw ?? "{}")).toMatchObject({ intent: "unsure" });
+    expect(JSON.parse(raw ?? "{}"))
+      .toMatchObject({ intent: "unsure" });
   });
 
   it("clears the stored intent when 'Bỏ chọn' is clicked", async () => {
@@ -126,9 +124,7 @@ describe("LifeInsight — intent picker", () => {
       </MemoryRouter>,
     );
 
-    const target = (await screen.findByTestId("life-insight-intent-picker")).querySelector(
-      '[data-intent-id="improve_health"]',
-    ) as HTMLLabelElement;
+    const target = await screen.findByRole("button", { name: /Cải thiện sức khỏe/i });
     await user.click(target);
     expect(localStorage.getItem("user_intent")).toBeTruthy();
 
