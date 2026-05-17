@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import {
   AlertCircle,
@@ -18,10 +18,10 @@ import { Input } from "../components/ui/input";
 import { Toaster } from "../components/ui/sonner";
 import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { resetPassword } from "@/lib/auth/firebase";
+import { loginWithGoogle, resetPassword } from "@/lib/auth/firebase";
 import { isDemoMode } from "@/app/utils/app-mode";
 import { Label } from "../components/ui/label";
-import { inputClass, labelClass, errorTextClass } from "../features/auth/shared/formStyles";
+import { inputClass, labelClass } from "../features/auth/shared/formStyles";
 
 type LoginMode = "signin" | "signup";
 
@@ -66,7 +66,7 @@ export function LoginPage() {
     userProfileError,
     userProfileLoading,
     authLoading,
-    error,
+    error: authError,
     login,
     logout,
     refreshUserProfile,
@@ -79,8 +79,8 @@ export function LoginPage() {
   const redirectTo = stateRedirect ?? queryRedirect ?? "/";
 
   useEffect(() => {
-    if (error) toast.error(error);
-  }, [error]);
+    if (authError) toast.error(authError);
+  }, [authError]);
 
   const [mode, setMode] = useState<LoginMode>(() => getInitialLoginMode(location.search));
   const [email, setEmail] = useState("");
@@ -89,6 +89,8 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [googleSubmitting, setGoogleSubmitting] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetSubmitting, setResetSubmitting] = useState(false);
@@ -120,6 +122,33 @@ export function LoginPage() {
     { label: "Có ít nhất 1 chữ số", passed: passwordChecks.hasNumber },
     { label: "Khớp với mật khẩu xác nhận", passed: passwordChecks.matchesConfirmation },
   ];
+
+  const handleGoogleLogin = useCallback(async () => {
+    if (googleSubmitting || authLoading) return;
+
+    setGoogleSubmitting(true);
+    setLocalError(null);
+
+    try {
+      const credential = await loginWithGoogle();
+      if (!credential) {
+        setLocalError("Đăng nhập Google chưa sẵn sàng. Kiểm tra lại cấu hình.");
+        return;
+      }
+
+      toast.success("Đăng nhập Google thành công!");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Đăng nhập Google thất bại";
+      const normalizedMessage = message.toLowerCase();
+      if (normalizedMessage.includes("popup-closed") || normalizedMessage.includes("cancelled")) {
+        return;
+      }
+
+      setLocalError(message);
+    } finally {
+      setGoogleSubmitting(false);
+    }
+  }, [authLoading, googleSubmitting]);
 
   // If already signed in, wait for profile so admin accounts can
   // land directly in the admin console instead of the normal user workspace.
@@ -191,6 +220,7 @@ export function LoginPage() {
     e.preventDefault();
     if (!canSubmitSignup) return;
 
+    setLocalError(null);
     setSubmitting(true);
 
     const result = await login({ provider: "email", email, password, mode });
@@ -200,8 +230,6 @@ export function LoginPage() {
       refreshUserProfile();
     }
   }
-
-  const isDesktop = !prefersReducedMotion;
 
   if (!isConfigured) {
     // Sign-in not configured — show a notice instead of a broken form
@@ -238,6 +266,7 @@ export function LoginPage() {
     : "Khoảng 30 giây để bắt đầu.";
   const formTitle = isSignIn ? "Đăng nhập" : "Tạo tài khoản";
   const formDescription = isSignIn ? "Tiếp tục hành trình bạn đã bắt đầu." : "Khoảng 30 giây.";
+  const displayError = localError ?? authError;
 
   return (
     <div className="flex min-h-screen flex-col bg-app-bg">
@@ -333,7 +362,45 @@ export function LoginPage() {
                     </Link>
                   </div>
 
-                  <form onSubmit={handleEmailSubmit} className="mt-5 space-y-4">
+                  <button
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    disabled={googleSubmitting || authLoading}
+                    className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    aria-label="Đăng nhập với Google"
+                  >
+                    {googleSubmitting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          fill="#4285F4"
+                          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        />
+                        <path
+                          fill="#34A853"
+                          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                        />
+                        <path
+                          fill="#FBBC05"
+                          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                        />
+                        <path
+                          fill="#EA4335"
+                          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        />
+                      </svg>
+                    )}
+                    {googleSubmitting ? "Đang mở Google..." : "Tiếp tục với Google"}
+                  </button>
+
+                  <div className="my-5 flex items-center gap-3">
+                    <div className="h-px flex-1 bg-app-line" />
+                    <span className="text-[12px] text-app-ink-muted">hoặc dùng email</span>
+                    <div className="h-px flex-1 bg-app-line" />
+                  </div>
+
+                  <form onSubmit={handleEmailSubmit} className="space-y-4">
                     {/* Email field */}
                     <div>
                       <Label htmlFor="login-email" className={labelClass}>
@@ -447,7 +514,7 @@ export function LoginPage() {
                     ) : null}
 
                     {/* Error message */}
-                    {error ? (
+                    {displayError ? (
                       <div
                         role="alert"
                         className={`flex gap-2 rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-3 ${
@@ -455,7 +522,7 @@ export function LoginPage() {
                         }`}
                       >
                         <AlertCircle className="h-4 w-4 text-[color:var(--color-danger-fg)] shrink-0 mt-0.5" />
-                        <p className="text-[13px] text-[color:var(--color-danger-fg)] leading-relaxed">{error}</p>
+                        <p className="text-[13px] text-[color:var(--color-danger-fg)] leading-relaxed">{displayError}</p>
                       </div>
                     ) : null}
 
@@ -498,6 +565,10 @@ export function LoginPage() {
                       </p>
                     ) : null}
                   </form>
+
+                  <p className="mt-4 text-[12px] leading-5 text-app-ink-muted">
+                    Nếu trước đây bạn đăng nhập bằng Google, hãy dùng button trên thay vì email/mật khẩu.
+                  </p>
                 </div>
 
                 {/* Reset password card */}
