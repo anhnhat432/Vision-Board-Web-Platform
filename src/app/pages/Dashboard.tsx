@@ -276,13 +276,28 @@ function useDashboardDerivedData({
   const activeSystemWeekCompletion =
     effectiveSystem && activeSystemWeek ? getTwelveWeekWeekCompletion(effectiveSystem, activeSystemWeek) : null;
   const reviewDueToday = Boolean(effectiveSystem && isTwelveWeekReviewDueToday(effectiveSystem));
+
+  const activeSystemWeekTasks =
+    effectiveSystem && activeSystemWeek
+      ? getTwelveWeekTasksForWeek(effectiveSystem, activeSystemWeek).filter((task) => !task.skipped)
+      : [];
+  const activeSystemWeekOpenTasks = activeSystemWeekTasks.filter((task) => !task.completed);
+
+  // Preview ưu tiên task hôm nay; nếu trống thì fallback sang task tuần này
+  // chưa hoàn thành. Khi fallback, counter cũng đổi sang nguồn tuần để
+  // "0/0 việc" không hiện sai cùng 3 task render từ tuần.
+  const todayPreviewUsesToday = activeSystemTodayOpenTasks.length > 0;
   const activeSystemTaskPreview =
     effectiveSystem && activeSystemWeek
-      ? (activeSystemTodayOpenTasks.length > 0
-          ? activeSystemTodayOpenTasks
-          : getTwelveWeekTasksForWeek(effectiveSystem, activeSystemWeek).filter((task) => !task.completed)
-        ).slice(0, 3)
+      ? (todayPreviewUsesToday ? activeSystemTodayOpenTasks : activeSystemWeekOpenTasks).slice(0, 3)
       : [];
+  const todayPreviewTotal = todayPreviewUsesToday
+    ? activeSystemTodayTasks.length
+    : activeSystemWeekTasks.length;
+  const todayPreviewCompleted = todayPreviewUsesToday
+    ? activeSystemTodayCompletedCount
+    : activeSystemWeekTasks.length - activeSystemWeekOpenTasks.length;
+  const todayPreviewTitle = todayPreviewUsesToday ? "Việc hôm nay" : "Việc tuần này";
   const hasReviewedCurrentWeek = Boolean(
     effectiveSystem &&
       activeSystemWeek &&
@@ -342,6 +357,9 @@ function useDashboardDerivedData({
     activeSystemWeekCompletion,
     reviewDueToday,
     activeSystemTaskPreview,
+    todayPreviewTotal,
+    todayPreviewCompleted,
+    todayPreviewTitle,
     hasReviewedCurrentWeek,
     dashboardNextAction,
     dashboardActiveGoals,
@@ -712,9 +730,10 @@ function DashboardActiveLayout({
             />
           ) : null}
           <TodayMiniCard
-            tasks={data.activeSystemTaskPreview.length > 0 ? data.activeSystemTaskPreview : data.activeSystemTodayTasks}
-            completedCount={data.activeSystemTodayCompletedCount}
-            totalCount={data.activeSystemTodayTasks.length}
+            title={data.todayPreviewTitle}
+            tasks={data.activeSystemTaskPreview}
+            completedCount={data.todayPreviewCompleted}
+            totalCount={data.todayPreviewTotal}
           />
           <BalanceCard rows={balanceRows} />
           <QuoteBlock />

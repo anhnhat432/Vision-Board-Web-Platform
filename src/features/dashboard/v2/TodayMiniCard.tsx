@@ -3,19 +3,20 @@ import { Link } from "react-router";
 import type { TwelveWeekTaskInstance } from "@/app/utils/storage";
 
 interface TodayMiniCardProps {
+  title?: string;
   tasks: TwelveWeekTaskInstance[];
   completedCount: number;
   totalCount: number;
 }
 
-export function TodayMiniCard({ tasks, completedCount, totalCount }: TodayMiniCardProps) {
+export function TodayMiniCard({ title = "Việc hôm nay", tasks, completedCount, totalCount }: TodayMiniCardProps) {
   const visibleTasks = tasks.slice(0, 3);
 
   return (
     <section className="rounded-card border border-app-line bg-app-surface p-5" aria-labelledby="dashboard-today-mini-title">
       <div>
         <h2 id="dashboard-today-mini-title" className="text-[16px] font-semibold text-app-ink">
-          Việc hôm nay
+          {title}
         </h2>
         <p className="mt-1 text-[14px] text-app-ink-muted">
           {completedCount}/{totalCount} việc
