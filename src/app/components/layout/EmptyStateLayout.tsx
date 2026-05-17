@@ -23,7 +23,7 @@ interface EmptyStateLayoutProps {
  *   icon={<ClipboardX className="text-slate-400" />}
  *   title="Chưa có việc nào trong chu kỳ này"
  *   description="Chu kỳ chưa có việc lặp lại. Tạo việc để bắt đầu thực hiện."
- *   primaryAction={<Button className="gradient-brand">Vào Setup để thêm việc</Button>}
+ *   primaryAction={<Button>Vào Setup để thêm việc</Button>}
  * />
  */
 export function EmptyStateLayout({

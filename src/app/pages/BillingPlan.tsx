@@ -795,7 +795,7 @@ export function BillingPlan() {
                 Gia hạn ngay
               </Button>
             ) : currentPlanCode === "FREE" ? (
-              <Button className="w-full gradient-brand text-white sm:w-auto" onClick={() => handleOpenUpgrade("plan")}>
+              <Button className="w-full bg-app-accent text-white hover:bg-[#284f45] sm:w-auto" onClick={() => handleOpenUpgrade("plan")}>
                 <Sparkles className="mr-2 h-4 w-4" />
                 Nâng cấp Plus
               </Button>

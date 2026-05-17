@@ -9,21 +9,21 @@ import { Input } from "./input";
 import { Sheet, SheetContent, SheetTitle } from "./sheet";
 
 describe("UI primitive visual hierarchy", () => {
-  it("keeps the primary button as the only gradient hierarchy with a tonal shadow", () => {
+  it("keeps the primary button as a solid app accent action", () => {
     const primary = buttonVariants({ variant: "default" });
 
-    expect(primary).toContain("gradient-brand");
-    expect(primary).toContain("var(--tone-shell-shadow-strong)");
-    expect(primary).not.toContain("shadow-lg");
+    expect(primary).toContain("bg-app-accent");
+    expect(primary).toContain("text-white");
+    expect(primary).not.toContain("gradient-brand");
   });
 
-  it("uses a dark secondary button and tokenized outline tertiary button", () => {
-    expect(buttonVariants({ variant: "secondary" })).toContain("bg-foreground");
+  it("uses app tokens for secondary and outline button hierarchy", () => {
+    expect(buttonVariants({ variant: "secondary" })).toContain("bg-app-accent-soft");
 
     const outline = buttonVariants({ variant: "outline" });
-    expect(outline).toContain("border-[color:var(--border)]");
-    expect(outline).toContain("bg-card");
-    expect(outline).toContain("text-foreground");
+    expect(outline).toContain("border-app-line");
+    expect(outline).toContain("bg-app-surface");
+    expect(outline).toContain("text-app-ink");
   });
 
   it("limits button magnetic motion to the primary hierarchy", () => {

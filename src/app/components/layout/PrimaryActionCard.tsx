@@ -64,7 +64,7 @@ const densityClass: Record<PrimaryActionCardDensity, string> = {
  * <PrimaryActionCard
  *   title="Việc quan trọng nhất hôm nay"
  *   description="Chỉ cần xong việc này là hôm nay đã đủ."
- *   action={<Button className="gradient-brand">Lưu check-in</Button>}
+ *   action={<Button>Lưu check-in</Button>}
  *   hero
  * />
  */

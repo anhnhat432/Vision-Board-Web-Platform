@@ -737,21 +737,9 @@ function GoalTrackerContent({
 
       <div data-tour-id="goaltracker-goals">
         {hasGoals && (
-          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
-              <input
-                type="search"
-                placeholder="Tìm theo tên hoặc mô tả..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-[14px] text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/30 focus:border-app-accent"
-              />
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Danh sách</p>
-              <h2 className="mt-1 text-xl font-bold text-app-ink">Mục tiêu của bạn</h2>
-            </div>
+          <div className="mb-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Danh sách</p>
+            <h2 className="mt-1 text-xl font-bold text-app-ink">Mục tiêu của bạn</h2>
           </div>
         )}
         {!hasGoals ? (

@@ -13,20 +13,20 @@ const DEFAULT_BUTTON_STYLE = {
 } as CSSProperties;
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--r-control)] text-sm font-semibold tracking-tight transition-[transform,box-shadow,background-color,color,border-color] duration-200 ease-out disabled:pointer-events-none disabled:opacity-50 motion-reduce:transform-none motion-reduce:transition-none [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-ring active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--r-control)] text-sm font-semibold tracking-tight transition-[transform,box-shadow,background-color,color,border-color] duration-200 ease-out disabled:pointer-events-none disabled:opacity-50 motion-reduce:transform-none motion-reduce:transition-none [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 active:scale-[0.98]",
   {
     variants: {
       variant: {
         default:
-          "border border-transparent gradient-brand text-primary-foreground shadow-[0_1px_2px_rgba(15,23,42,0.06),0_4px_12px_-4px_var(--tone-shell-shadow)] hover:shadow-[0_2px_4px_rgba(15,23,42,0.08),0_10px_24px_-8px_var(--tone-shell-shadow-strong)] hover:-translate-y-px",
+          "border border-transparent bg-app-accent text-white hover:bg-[#284f45]",
         destructive:
           "border border-transparent bg-destructive text-white shadow-[0_1px_2px_rgba(15,23,42,0.06),0_4px_12px_-4px_rgba(220,38,38,0.32)] hover:bg-destructive/92 hover:-translate-y-px focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive",
         outline:
-          "border border-[color:var(--border)] bg-card text-foreground shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:bg-[color:var(--muted)] hover:border-[color:color-mix(in_srgb,var(--foreground)_18%,transparent)] hover:-translate-y-px dark:hover:bg-[color:var(--muted)]",
+          "border border-app-line bg-app-surface text-app-ink hover:bg-app-bg",
         secondary:
-          "border border-foreground bg-foreground text-background shadow-[0_1px_2px_rgba(15,23,42,0.06),0_4px_12px_-4px_rgba(15,23,42,0.18)] hover:bg-foreground/90 hover:-translate-y-px",
+          "border border-transparent bg-app-accent-soft text-app-accent hover:bg-app-accent hover:text-white",
         ghost:
-          "text-muted-foreground hover:bg-[color:var(--muted)] hover:text-foreground dark:hover:bg-[color:var(--muted)]",
+          "text-app-ink hover:bg-app-bg",
         link: "text-primary underline-offset-4 hover:underline px-0",
       },
       size: {

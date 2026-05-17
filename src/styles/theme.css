@@ -170,9 +170,6 @@
   --tone-shell-primary: rgba(124, 58, 237, 0.96);
   --tone-shell-secondary: rgba(217, 70, 239, 0.92);
   --tone-shell-tertiary: rgba(244, 114, 182, 0.86);
-  --tone-shell-shadow: rgba(124, 58, 237, 0.42);
-  --tone-shell-shadow-strong: rgba(124, 58, 237, 0.56);
-  --tone-shell-ring: rgba(217, 70, 239, 0.1);
   --tone-bg-left: rgba(167, 139, 250, 0.1);
   --tone-bg-right: rgba(232, 121, 249, 0.08);
   --tone-bg-bottom: rgba(244, 114, 182, 0.06);
@@ -262,9 +259,6 @@
   --tone-shell-primary: rgba(124, 58, 237, 0.96);
   --tone-shell-secondary: rgba(217, 70, 239, 0.9);
   --tone-shell-tertiary: rgba(244, 114, 182, 0.82);
-  --tone-shell-shadow: rgba(124, 58, 237, 0.46);
-  --tone-shell-shadow-strong: rgba(124, 58, 237, 0.6);
-  --tone-shell-ring: rgba(217, 70, 239, 0.12);
   --tone-bg-left: rgba(124, 58, 237, 0.16);
   --tone-bg-right: rgba(217, 70, 239, 0.12);
   --tone-bg-bottom: rgba(244, 114, 182, 0.1);
@@ -395,14 +389,8 @@
     line-height: var(--text-base--line-height);
     letter-spacing: -0.005em;
     font-feature-settings: "cv11", "ss03", "ss04";
-    background-color: #fafafa;
-    background-image:
-      radial-gradient(
-        ellipse 80% 60% at 50% 0%,
-        rgba(124, 58, 237, 0.05) 0%,
-        transparent 60%
-      ),
-      linear-gradient(180deg, #fafafa 0%, #f5f6f8 100%);
+    background-color: var(--app-bg);
+    background-image: none;
     background-attachment: fixed;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -415,14 +403,8 @@
   }
 
   .dark body {
-    background-color: #0a0a0a;
-    background-image:
-      radial-gradient(
-        ellipse 80% 60% at 50% 0%,
-        rgba(167, 139, 250, 0.08) 0%,
-        transparent 60%
-      ),
-      linear-gradient(180deg, #0a0a0a 0%, #0a0a0a 100%);
+    background-color: var(--background);
+    background-image: none;
   }
 
   h1 {
@@ -658,9 +640,6 @@
     --tone-shell-primary: rgba(159, 18, 57, 0.98);
     --tone-shell-secondary: rgba(225, 29, 72, 0.92);
     --tone-shell-tertiary: rgba(245, 158, 11, 0.86);
-    --tone-shell-shadow: rgba(225, 29, 72, 0.42);
-    --tone-shell-shadow-strong: rgba(159, 18, 57, 0.56);
-    --tone-shell-ring: rgba(225, 29, 72, 0.1);
     --tone-bg-left: rgba(244, 63, 94, 0.1);
     --tone-bg-right: rgba(245, 158, 11, 0.08);
     --tone-bg-bottom: rgba(20, 184, 166, 0.06);
@@ -682,9 +661,6 @@
     --tone-shell-primary: rgba(124, 58, 237, 0.96);
     --tone-shell-secondary: rgba(217, 70, 239, 0.92);
     --tone-shell-tertiary: rgba(20, 184, 166, 0.88);
-    --tone-shell-shadow: rgba(124, 58, 237, 0.42);
-    --tone-shell-shadow-strong: rgba(124, 58, 237, 0.56);
-    --tone-shell-ring: rgba(217, 70, 239, 0.1);
     --tone-bg-left: rgba(167, 139, 250, 0.1);
     --tone-bg-right: rgba(232, 121, 249, 0.08);
     --tone-bg-bottom: rgba(20, 184, 166, 0.06);
@@ -706,9 +682,6 @@
     --tone-shell-primary: rgba(13, 148, 136, 0.98);
     --tone-shell-secondary: rgba(245, 158, 11, 0.94);
     --tone-shell-tertiary: rgba(37, 99, 235, 0.86);
-    --tone-shell-shadow: rgba(13, 148, 136, 0.42);
-    --tone-shell-shadow-strong: rgba(13, 148, 136, 0.56);
-    --tone-shell-ring: rgba(245, 158, 11, 0.1);
     --tone-bg-left: rgba(13, 148, 136, 0.1);
     --tone-bg-right: rgba(245, 158, 11, 0.08);
     --tone-bg-bottom: rgba(37, 99, 235, 0.06);
@@ -730,9 +703,6 @@
     --tone-shell-primary: rgba(6, 95, 70, 0.98);
     --tone-shell-secondary: rgba(13, 148, 136, 0.94);
     --tone-shell-tertiary: rgba(14, 165, 233, 0.88);
-    --tone-shell-shadow: rgba(6, 95, 70, 0.4);
-    --tone-shell-shadow-strong: rgba(6, 95, 70, 0.54);
-    --tone-shell-ring: rgba(13, 148, 136, 0.12);
     --tone-bg-left: rgba(16, 185, 129, 0.1);
     --tone-bg-right: rgba(34, 211, 238, 0.08);
     --tone-bg-bottom: rgba(14, 165, 233, 0.06);
@@ -754,9 +724,6 @@
     --tone-shell-primary: rgba(91, 33, 182, 0.98);
     --tone-shell-secondary: rgba(236, 72, 153, 0.88);
     --tone-shell-tertiary: rgba(59, 130, 246, 0.92);
-    --tone-shell-shadow: rgba(109, 40, 217, 0.42);
-    --tone-shell-shadow-strong: rgba(91, 33, 182, 0.56);
-    --tone-shell-ring: rgba(236, 72, 153, 0.1);
     --tone-bg-left: rgba(168, 85, 247, 0.1);
     --tone-bg-right: rgba(244, 114, 182, 0.08);
     --tone-bg-bottom: rgba(59, 130, 246, 0.06);
@@ -778,9 +745,6 @@
     --tone-shell-primary: rgba(124, 58, 237, 0.96);
     --tone-shell-secondary: rgba(217, 70, 239, 0.92);
     --tone-shell-tertiary: rgba(244, 114, 182, 0.86);
-    --tone-shell-shadow: rgba(124, 58, 237, 0.42);
-    --tone-shell-shadow-strong: rgba(124, 58, 237, 0.56);
-    --tone-shell-ring: rgba(217, 70, 239, 0.1);
     --tone-bg-left: rgba(167, 139, 250, 0.12);
     --tone-bg-right: rgba(232, 121, 249, 0.1);
     --tone-bg-bottom: rgba(244, 114, 182, 0.08);
@@ -793,9 +757,6 @@
     --tone-shell-primary: rgba(124, 58, 237, 0.96);
     --tone-shell-secondary: rgba(217, 70, 239, 0.9);
     --tone-shell-tertiary: rgba(34, 211, 238, 0.86);
-    --tone-shell-shadow: rgba(124, 58, 237, 0.4);
-    --tone-shell-shadow-strong: rgba(124, 58, 237, 0.54);
-    --tone-shell-ring: rgba(34, 211, 238, 0.1);
     --tone-bg-left: rgba(167, 139, 250, 0.1);
     --tone-bg-right: rgba(232, 121, 249, 0.08);
     --tone-bg-bottom: rgba(34, 211, 238, 0.06);
@@ -808,9 +769,6 @@
     --tone-shell-primary: rgba(99, 102, 241, 0.96);
     --tone-shell-secondary: rgba(124, 58, 237, 0.92);
     --tone-shell-tertiary: rgba(217, 70, 239, 0.86);
-    --tone-shell-shadow: rgba(99, 102, 241, 0.42);
-    --tone-shell-shadow-strong: rgba(99, 102, 241, 0.56);
-    --tone-shell-ring: rgba(124, 58, 237, 0.1);
     --tone-bg-left: rgba(129, 140, 248, 0.1);
     --tone-bg-right: rgba(167, 139, 250, 0.08);
     --tone-bg-bottom: rgba(232, 121, 249, 0.06);
@@ -823,9 +781,6 @@
     --tone-shell-primary: rgba(245, 158, 11, 0.96);
     --tone-shell-secondary: rgba(251, 113, 133, 0.92);
     --tone-shell-tertiary: rgba(244, 63, 94, 0.86);
-    --tone-shell-shadow: rgba(245, 158, 11, 0.42);
-    --tone-shell-shadow-strong: rgba(245, 158, 11, 0.56);
-    --tone-shell-ring: rgba(251, 113, 133, 0.1);
     --tone-bg-left: rgba(252, 211, 77, 0.1);
     --tone-bg-right: rgba(251, 113, 133, 0.08);
     --tone-bg-bottom: rgba(244, 63, 94, 0.06);
@@ -838,9 +793,6 @@
     --tone-shell-primary: rgba(100, 116, 139, 0.96);
     --tone-shell-secondary: rgba(124, 58, 237, 0.84);
     --tone-shell-tertiary: rgba(20, 184, 166, 0.82);
-    --tone-shell-shadow: rgba(100, 116, 139, 0.36);
-    --tone-shell-shadow-strong: rgba(100, 116, 139, 0.5);
-    --tone-shell-ring: rgba(124, 58, 237, 0.1);
     --tone-bg-left: rgba(148, 163, 184, 0.08);
     --tone-bg-right: rgba(167, 139, 250, 0.06);
     --tone-bg-bottom: rgba(94, 234, 212, 0.05);
@@ -2221,27 +2173,6 @@
 
   /* ── Gradient card utility classes (light + dark) ──── */
 
-  /*
-   * Legacy dark gradient utilities (.gradient-dark*, .gradient-indigo-purple)
-   * removed. Use .gradient-brand for accent surfaces or token bg-card for
-   * neutral surfaces.
-   */
-  .gradient-brand {
-    background: linear-gradient(
-      135deg,
-      var(--tone-shell-primary) 0%,
-      var(--tone-shell-secondary) 58%,
-      var(--tone-shell-tertiary) 100%
-    );
-  }
-  .gradient-brand-icon {
-    background: linear-gradient(
-      135deg,
-      var(--tone-shell-primary) 0%,
-      var(--tone-shell-secondary) 100%
-    );
-  }
-
   /* Light pastel gradients with dark mode overrides */
   .gradient-blue {
     background: linear-gradient(
@@ -2380,7 +2311,7 @@
 
   /*
    * .gradient-shell, .gradient-white-panel, .gradient-violet-pink removed
-   * — use `bg-card` and `gradient-brand` tokens instead.
+   * — use `bg-card` for neutral surfaces or `bg-app-accent` for actions.
    */
 
   /* FeasibilityCheck section title/panel pairs */
@@ -2485,7 +2416,7 @@
       linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
   }
 
-  /* .gradient-dark-blue-accent removed — use gradient-brand. */
+  /* .gradient-dark-blue-accent removed — use app accent tokens. */
 
   .gradient-teal-dark-subtle {
     background: linear-gradient(
@@ -2538,21 +2469,6 @@
       135deg,
       rgba(14, 165, 233, 0.12) 0%,
       rgba(30, 41, 59, 0.2) 100%
-    );
-  }
-
-  .gradient-brand-subtle {
-    background: linear-gradient(
-      135deg,
-      rgba(37, 99, 235, 0.14) 0%,
-      rgba(20, 184, 166, 0.12) 100%
-    );
-  }
-  .dark .gradient-brand-subtle {
-    background: linear-gradient(
-      135deg,
-      rgba(37, 99, 235, 0.2) 0%,
-      rgba(20, 184, 166, 0.16) 100%
     );
   }
 
@@ -2990,8 +2906,7 @@
   }
 
   /* ── Brand glow pulse ──────────────────────────────────────
-   * Ambient breathing glow for hero CTAs. Quiet but alive.
-   * Pairs with .gradient-brand for the primary action button.
+   * Quiet accent pulse for the primary action button.
    * ───────────────────────────────────────────────────────── */
   .brand-glow-pulse {
     animation: brand-glow-pulse 4.4s var(--ease-standard) infinite;
@@ -3000,14 +2915,13 @@
     0%,
     100% {
       box-shadow:
-        0 0 0 0 color-mix(in oklab, var(--tone-shell-primary) 0%, transparent),
-        0 18px 38px -24px var(--tone-shell-shadow);
+        0 0 0 0 color-mix(in oklab, var(--app-accent) 0%, transparent),
+        0 10px 24px -18px color-mix(in oklab, var(--app-accent) 26%, transparent);
     }
     50% {
       box-shadow:
-        0 0 0 10px
-          color-mix(in oklab, var(--tone-shell-secondary) 0%, transparent),
-        0 22px 46px -22px var(--tone-shell-shadow-strong);
+        0 0 0 8px color-mix(in oklab, var(--app-accent) 0%, transparent),
+        0 14px 30px -20px color-mix(in oklab, var(--app-accent) 32%, transparent);
     }
   }
 
