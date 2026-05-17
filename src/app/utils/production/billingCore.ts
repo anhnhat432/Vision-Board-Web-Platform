@@ -1,5 +1,6 @@
 
 import { apiClient } from "@/lib/api/apiClient";
+import { isRealMode } from "../app-mode";
 import { getCurrentEntitlementKeys, getCurrentPlan, getUserData, saveUserData } from "../storage";
 import type { BillingActionSnapshot, BillingAccessContractPayload } from "../billing-contract";
 import type {
@@ -193,9 +194,10 @@ export function buildBillingActionSnapshot(
 }
 
 export function getBillingProviderMode(): BillingProviderMode {
+  if (BILLING_PROVIDER_MODE === "api_contract") return "api_contract";
+  if (isRealMode()) return "api_contract";
   if (BILLING_PROVIDER_MODE === "local_test") return "local_test";
   if (BILLING_PROVIDER_MODE === "mock_provider") return "mock_provider";
-  if (BILLING_PROVIDER_MODE === "api_contract") return "api_contract";
 
   const hasApiContract =
     Boolean(BILLING_API_BASE) ||
