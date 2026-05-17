@@ -10,29 +10,29 @@ export function PrivacyPage() {
   return (
     <article className="mx-auto max-w-2xl space-y-8 py-4">
       <header className="space-y-3">
-        <div className="flex items-center gap-2 text-violet-600">
+        <div className="flex items-center gap-2 text-app-accent">
           <Shield className="h-5 w-5" />
           <span className="text-xs font-semibold uppercase tracking-[0.14em]">
             Dear Our Future
           </span>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+        <h1 className="text-2xl font-semibold tracking-tight text-app-ink">
           Chính sách bảo mật
         </h1>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-app-ink-muted">
           Cập nhật lần cuối: {LAST_UPDATED}
         </p>
       </header>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
+        <h2 className="text-lg font-semibold text-app-ink">
           1. Dữ liệu chúng tôi thu thập
         </h2>
-        <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+        <p className="text-sm leading-relaxed text-app-ink-soft">
           Khi bạn sử dụng Dear Our Future, chúng tôi có thể thu thập các loại
           dữ liệu sau:
         </p>
-        <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+        <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-app-ink-soft">
           <li>
             <strong>Thông tin tài khoản:</strong> email, tên hiển thị mà bạn
             cung cấp khi đăng ký.
@@ -56,10 +56,10 @@ export function PrivacyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
+        <h2 className="text-lg font-semibold text-app-ink">
           2. Mục đích sử dụng
         </h2>
-        <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+        <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-app-ink-soft">
           <li>Cung cấp và duy trì dịch vụ lập kế hoạch 12 tuần.</li>
           <li>Đồng bộ dữ liệu giữa các thiết bị khi bạn đăng nhập.</li>
           <li>Xử lý thanh toán, kích hoạt gói Plus và yêu cầu hoàn tiền thủ công theo chính sách.</li>
@@ -68,14 +68,14 @@ export function PrivacyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
+        <h2 className="text-lg font-semibold text-app-ink">
           3. Chia sẻ với bên thứ ba
         </h2>
-        <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+        <p className="text-sm leading-relaxed text-app-ink-soft">
           Chúng tôi <strong>không bán</strong> dữ liệu cá nhân của bạn. Dữ liệu
           chỉ được chia sẻ với:
         </p>
-        <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+        <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-app-ink-soft">
           <li>
             <strong>Đăng nhập Google:</strong> xác thực đăng nhập.
           </li>
@@ -91,19 +91,19 @@ export function PrivacyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
+        <h2 className="text-lg font-semibold text-app-ink">
           4. Quyền của bạn
         </h2>
-        <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+        <p className="text-sm leading-relaxed text-app-ink-soft">
           Bạn có quyền:
         </p>
-        <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+        <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-app-ink-soft">
           <li>
             <strong>Xuất dữ liệu:</strong> tải toàn bộ dữ liệu của bạn từ
             trang{" "}
             <Link
               to="/settings"
-              className="font-medium text-violet-600 underline underline-offset-2 hover:text-violet-800"
+              className="font-medium text-app-accent underline underline-offset-2 hover:text-app-ink"
             >
               Cài đặt
             </Link>
@@ -114,7 +114,7 @@ export function PrivacyPage() {
             trang{" "}
             <Link
               to="/settings"
-              className="font-medium text-violet-600 underline underline-offset-2 hover:text-violet-800"
+              className="font-medium text-app-accent underline underline-offset-2 hover:text-app-ink"
             >
               Cài đặt
             </Link>
@@ -128,10 +128,10 @@ export function PrivacyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
+        <h2 className="text-lg font-semibold text-app-ink">
           5. Bảo mật dữ liệu
         </h2>
-        <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+        <p className="text-sm leading-relaxed text-app-ink-soft">
           Chúng tôi sử dụng mã hóa SSL/TLS cho mọi kết nối, và dữ liệu được
           lưu trữ trên hạ tầng đám mây có tiêu chuẩn bảo mật cao. Tuy nhiên,
           không hệ thống nào đảm bảo an toàn tuyệt đối — vui lòng bảo vệ mật
@@ -140,38 +140,38 @@ export function PrivacyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">
+        <h2 className="text-lg font-semibold text-app-ink">
           6. Liên hệ
         </h2>
-        <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+        <p className="text-sm leading-relaxed text-app-ink-soft">
           Nếu bạn có câu hỏi về chính sách bảo mật, vui lòng liên hệ qua
           email:{" "}
           <a
             href={`mailto:${SUPPORT_EMAIL}`}
-            className="font-medium text-violet-600 underline underline-offset-2 hover:text-violet-800"
+            className="font-medium text-app-accent underline underline-offset-2 hover:text-app-ink"
           >
             {SUPPORT_EMAIL}
           </a>
         </p>
       </section>
 
-      <footer className="border-t border-slate-200 pt-6 dark:border-slate-700">
+      <footer className="border-t border-app-line pt-6">
         <div className="flex flex-wrap gap-4 text-sm">
           <Link
             to="/terms"
-            className="font-medium text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline dark:text-slate-400 dark:hover:text-slate-200"
+            className="font-medium text-app-ink-soft underline-offset-2 hover:text-app-ink hover:underline"
           >
             Điều khoản dịch vụ
           </Link>
           <Link
             to="/refund-policy"
-            className="font-medium text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline dark:text-slate-400 dark:hover:text-slate-200"
+            className="font-medium text-app-ink-soft underline-offset-2 hover:text-app-ink hover:underline"
           >
             Chính sách hoàn tiền
           </Link>
           <Link
             to="/"
-            className="font-medium text-slate-600 underline-offset-2 hover:text-slate-900 hover:underline dark:text-slate-400 dark:hover:text-slate-200"
+            className="font-medium text-app-ink-soft underline-offset-2 hover:text-app-ink hover:underline"
           >
             Về trang chủ
           </Link>

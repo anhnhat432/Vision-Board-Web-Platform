@@ -32,16 +32,16 @@ const FAQ_ITEMS = [
 export function BillingFAQPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
-      <Card className="overflow-hidden border-slate-200 bg-white/95 shadow-xl shadow-slate-200/70">
-        <CardHeader className="border-b border-slate-100 bg-slate-50/80">
+      <Card className="overflow-hidden border-app-line bg-app-surface shadow-sm">
+        <CardHeader className="border-b border-app-line bg-app-bg">
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-emerald-100 text-emerald-700">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-app-accent-soft text-app-accent">
               <HelpCircle className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Thanh toán Plus</p>
-              <CardTitle className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Câu hỏi thường gặp</CardTitle>
-              <CardDescription className="mt-2 max-w-2xl text-sm leading-7 text-slate-600">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-accent">Thanh toán Plus</p>
+              <CardTitle className="mt-2 text-3xl font-semibold tracking-tight text-app-ink">Câu hỏi thường gặp</CardTitle>
+              <CardDescription className="mt-2 max-w-2xl text-sm leading-7 text-app-ink-soft">
                 Các câu hỏi hay gặp khi chuyển khoản ngân hàng để nâng cấp Plus.
               </CardDescription>
             </div>
@@ -49,14 +49,14 @@ export function BillingFAQPage() {
         </CardHeader>
         <CardContent className="space-y-4 p-5 sm:p-7">
           {FAQ_ITEMS.map((item) => (
-            <article key={item.question} className="rounded-[var(--r-card)] border border-slate-200 bg-white p-5">
-              <h2 className="text-lg font-semibold text-slate-950">{item.question}</h2>
-              <p className="mt-2 text-sm leading-7 text-slate-700">
+            <article key={item.question} className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-5">
+              <h2 className="text-lg font-semibold text-app-ink">{item.question}</h2>
+              <p className="mt-2 text-sm leading-7 text-app-ink-soft">
                 {item.answer}
                 {item.link ? (
                   <>
                     {" "}
-                    <Link to={item.link} className="font-semibold text-violet-700 underline-offset-4 hover:underline">
+                    <Link to={item.link} className="font-semibold text-app-accent underline-offset-4 hover:text-app-ink hover:underline">
                       {item.linkLabel}
                     </Link>
                     .
@@ -66,12 +66,12 @@ export function BillingFAQPage() {
             </article>
           ))}
 
-          <div className="rounded-[var(--r-card)] border border-emerald-100 bg-emerald-50/80 p-5">
+          <div className="rounded-[var(--r-card)] border border-app-warm-border bg-app-warm/30 p-5">
             <div className="flex gap-3">
-              <LifeBuoy className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+              <LifeBuoy className="mt-0.5 h-5 w-5 shrink-0 text-app-warm-strong" />
               <div>
-                <p className="text-sm font-semibold text-emerald-950">Cần kiểm tra đơn cụ thể?</p>
-                <p className="mt-1 text-sm leading-7 text-emerald-900">
+                <p className="text-sm font-semibold text-app-warm-strong">Cần kiểm tra đơn cụ thể?</p>
+                <p className="mt-1 text-sm leading-7 text-app-warm-strong/85">
                   Gửi mã đơn hàng tới{" "}
                   <a href={`mailto:${SUPPORT_EMAIL}`} className="font-semibold underline-offset-4 hover:underline">
                     {SUPPORT_EMAIL}
