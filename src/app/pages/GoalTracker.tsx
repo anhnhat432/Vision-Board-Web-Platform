@@ -23,15 +23,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
-import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import { Card, CardContent } from "../components/ui/card";
-import { Checkbox } from "../components/ui/checkbox";
 import { CountUp } from "../components/ui/count-up";
 import { getGoalArchetypeIcon } from "../components/illustrations";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { LoadingSpinner } from "../components/ui/loading-spinner";
-import { Progress } from "../components/ui/progress";
 import { useBackendProgressOverlayMap } from "../hooks/useBackendProgressOverlay";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
@@ -642,7 +638,7 @@ function GoalTrackerContent({
   };
 
   return (
-    <div className="stack-section pb-12">
+    <div className="stack-section mx-auto max-w-5xl px-4 pt-8 pb-12 sm:px-6 lg:px-8">
       <UpgradePaywallDialog
         open={isGoalLimitPaywallOpen}
         onOpenChange={setIsGoalLimitPaywallOpen}
@@ -675,7 +671,7 @@ function GoalTrackerContent({
       </AlertDialog>
 
       <div data-tour-id="goaltracker-hero">
-        <div className="mt-8">
+        <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">MỤC TIÊU</p>
           <h1 className="mt-3 font-serif text-[30px] font-medium leading-tight tracking-tight text-app-ink">
             Mục tiêu của bạn
@@ -706,34 +702,30 @@ function GoalTrackerContent({
         </div>
       </div>
 
-      <Card data-tour-id="goaltracker-summary" className="overflow-hidden rounded-card border border-app-line bg-app-surface">
-        <CardContent className="p-4 sm:p-5">
-          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-            {overviewItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={item.title}
-                  className="rounded-card border border-app-line bg-app-surface p-4"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{item.title}</p>
-                      <p className="mt-2 text-[26px] font-medium text-app-ink sm:text-2xl tabular-nums">
-                        {typeof item.value === "number" ? <CountUp value={item.value} /> : item.value}
-                      </p>
-                      <p className="mt-1 text-[12px] text-app-ink-muted">{item.note}</p>
-                    </div>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-app-bg text-app-accent">
-                      <Icon className="h-4 w-4" />
-                    </div>
-                  </div>
+      <div data-tour-id="goaltracker-summary" className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {overviewItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div
+              key={item.title}
+              className="rounded-card border border-app-line bg-app-surface p-4"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{item.title}</p>
+                  <p className="mt-2 text-[26px] font-medium text-app-ink sm:text-2xl tabular-nums">
+                    {typeof item.value === "number" ? <CountUp value={item.value} /> : item.value}
+                  </p>
+                  <p className="mt-1 text-[12px] text-app-ink-muted">{item.note}</p>
                 </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-app-bg text-app-accent">
+                  <Icon className="h-4 w-4" />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
       <div data-tour-id="goaltracker-goals">
         {hasGoals && (
