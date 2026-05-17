@@ -90,7 +90,7 @@ export function MockBillingCheckout() {
         <CardContent className="grid gap-6 p-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:p-10">
           <div className="stack-stack">
             <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              <Crown className="h-3.5 w-3.5 text-[color:var(--tone-shell-primary)]" />
+              <Crown className="h-3.5 w-3.5 text-app-accent" />
               Mở Plus demo
             </div>
             <div>
@@ -119,7 +119,7 @@ export function MockBillingCheckout() {
         <CardContent className="stack-stack">
           {plan.highlights.map((feature) => (
             <div key={feature} className="flex gap-3 rounded-[var(--r-tile)] border border-[color:var(--border)] bg-card px-4 py-3">
-              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--tone-shell-primary)]" />
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" />
               <p className="text-sm leading-7 text-foreground">{feature}</p>
             </div>
           ))}

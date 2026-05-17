@@ -42,46 +42,42 @@ export function AppErrorBoundary() {
   }, [error, errorCode]);
 
   return (
-    <div className="app-shell min-h-screen" data-route-tone="system">
-      <div className="ambient-orb ambient-orb--violet" />
-      <div className="ambient-orb ambient-orb--cyan" />
-      <div className="ambient-orb ambient-orb--rose" />
-
-      <main className="relative z-10 mx-auto flex min-h-screen max-w-5xl items-center px-4 py-12 sm:px-6 lg:px-8">
-        <Card className="w-full overflow-hidden">
+    <div className="min-h-screen bg-app-bg">
+      <main className="relative mx-auto flex min-h-screen max-w-5xl items-center px-4 py-12 sm:px-6 lg:px-8">
+        <Card className="w-full overflow-hidden rounded-card border border-app-line bg-app-surface shadow-sm">
           <CardContent className="relative p-8 lg:p-10">
             <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_320px]">
               <div className="space-y-6">
-                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-4 py-1.5 text-sm text-muted-foreground">
-                  <Sparkles className="h-4 w-4 text-[color:var(--tone-shell-primary)]" />
+                <div className="inline-flex items-center gap-2 rounded-full border border-app-line bg-app-accent-soft px-4 py-1.5 text-sm text-app-accent">
+                  <Sparkles className="h-4 w-4 text-app-accent" />
                   Dear Our Future
                 </div>
 
                 <div className="space-y-4">
-                  <h1 className="max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl lg:text-5xl">
+                  <h1 className="max-w-3xl text-3xl font-bold leading-[1.1] tracking-[-0.018em] text-app-ink sm:text-4xl lg:text-5xl">
                     Trang này vừa gặp lỗi, nhưng mình vẫn có thể{" "}
-                    <span className="text-gradient-vibrant">quay lại flow chính</span> ngay.
+                    <span className="text-app-accent">quay lại flow chính</span> ngay.
                   </h1>
-                  <p className="max-w-2xl text-base leading-7 text-muted-foreground">
+                  <p className="max-w-2xl text-base leading-7 text-app-ink-soft">
                     Mình đã chặn màn lỗi mặc định để trải nghiệm đỡ gắt hơn. Bạn có thể tải lại trang hoặc quay về Trang
                     chính rồi tiếp tục từ đó.
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  <Button glow onClick={() => navigate("/")}>
+                  <Button className="bg-app-accent text-white hover:bg-[#284f45]" onClick={() => navigate("/")}>
                     <Home className="h-4 w-4" />
                     Về Trang chính
                   </Button>
-                  <Button variant="outline" onClick={() => window.location.reload()}>
+                  <Button variant="outline" className="border-app-line text-app-ink hover:bg-app-bg" onClick={() => window.location.reload()}>
                     <RefreshCw className="h-4 w-4" />
                     Tải lại trang
                   </Button>
                 </div>
               </div>
 
-              <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-6 shadow-sm">
-                <CelebrationBurst className="mx-auto mb-4 w-32 text-[color:var(--tone-shell-primary)] opacity-60" />
+              <div className="rounded-card border border-app-line bg-app-surface p-6 shadow-sm">
+                <CelebrationBurst className="mx-auto mb-4 w-32 text-app-accent opacity-60" />
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-[var(--r-tile)] bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning-fg)]">
                     <AlertTriangle className="h-5 w-5" />
@@ -94,15 +90,15 @@ export function AppErrorBoundary() {
                   </div>
                 </div>
 
-                <div className="mt-6 rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Mô tả</p>
-                  <p className="mt-2 text-sm leading-7 text-foreground">{errorMessage}</p>
+                <div className="mt-6 rounded-card border border-app-line bg-app-bg p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Mô tả</p>
+                  <p className="mt-2 text-sm leading-7 text-app-ink">{errorMessage}</p>
                 </div>
 
                 {import.meta.env.DEV && error instanceof Error ? (
-                  <div className="mt-4 rounded-[var(--r-card)] border border-[color:var(--border)] bg-card p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Chi tiết dev</p>
-                    <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs leading-6 text-muted-foreground">
+                  <div className="mt-4 rounded-card border border-app-line bg-app-bg p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Chi tiết dev</p>
+                    <pre className="mt-2 overflow-x-auto whitespace-pre-wrap text-xs leading-6 text-app-ink-soft">
                       {error.stack || error.message}
                     </pre>
                   </div>

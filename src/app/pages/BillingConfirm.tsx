@@ -261,7 +261,7 @@ export function BillingConfirm() {
         </section>
 
         <aside className="rounded-[var(--r-card)] border border-violet-100 bg-violet-50/70 p-6">
-          <BillingPlusIllustration className="mx-auto w-44 text-violet-500 opacity-80" />
+          <BillingPlusIllustration className="mx-auto w-44 text-app-accent opacity-80" />
           <div className="mt-6 space-y-4">
             <div className="flex gap-3">
               <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />

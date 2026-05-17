@@ -1,7 +1,7 @@
 import { useIllustrationId, type AmbientIllustrationProps } from "./utils";
 
 export function EmptyOrdersIllustration({ className, ...rest }: AmbientIllustrationProps) {
-  const gradientId = useIllustrationId("empty-orders-violet-fuchsia");
+  const gradientId = useIllustrationId("empty-orders-app-accent");
   const glowId = useIllustrationId("empty-orders-glow");
 
   return (

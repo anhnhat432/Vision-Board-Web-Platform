@@ -54,11 +54,8 @@
     0 0 0 1px color-mix(in oklab, var(--destructive) 30%, transparent),
     0 14px 38px -10px color-mix(in oklab, var(--destructive) 36%, transparent);
   --shadow-glow-brand:
-    0 0 0 1px color-mix(in oklab, var(--tone-shell-primary) 30%, transparent),
-    0 14px 38px -10px
-      color-mix(in oklab, var(--tone-shell-primary) 38%, transparent),
-    0 22px 56px -22px
-      color-mix(in oklab, var(--tone-shell-secondary) 32%, transparent);
+    0 0 0 1px color-mix(in oklab, var(--app-accent) 24%, transparent),
+    0 14px 38px -18px color-mix(in oklab, var(--app-accent) 24%, transparent);
   /* ── Z-index tokens ────────────────────────────────────────
    * Single source of truth so layering decisions stay consistent.
    * ───────────────────────────────────────────────────────── */
@@ -167,9 +164,6 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --tone-shell-primary: rgba(124, 58, 237, 0.96);
-  --tone-shell-secondary: rgba(217, 70, 239, 0.92);
-  --tone-shell-tertiary: rgba(244, 114, 182, 0.86);
   --tone-bg-left: rgba(167, 139, 250, 0.1);
   --tone-bg-right: rgba(232, 121, 249, 0.08);
   --tone-bg-bottom: rgba(244, 114, 182, 0.06);
@@ -185,8 +179,6 @@
   --tone-orb-a: rgba(124, 58, 237, 0.12);
   --tone-orb-b: rgba(217, 70, 239, 0.1);
   --tone-orb-c: rgba(244, 114, 182, 0.08);
-  --vivid-violet: oklch(0.62 0.25 285);
-  --vivid-fuchsia: oklch(0.65 0.28 350);
   --vivid-cyan: oklch(0.78 0.18 205);
   --vivid-amber: oklch(0.82 0.18 75);
 }
@@ -256,9 +248,6 @@
   --sidebar-ring: oklch(0.439 0 0);
   --input-background: rgba(15, 23, 42, 0.82);
   --switch-background: rgba(51, 65, 85, 0.95);
-  --tone-shell-primary: rgba(124, 58, 237, 0.96);
-  --tone-shell-secondary: rgba(217, 70, 239, 0.9);
-  --tone-shell-tertiary: rgba(244, 114, 182, 0.82);
   --tone-bg-left: rgba(124, 58, 237, 0.16);
   --tone-bg-right: rgba(217, 70, 239, 0.12);
   --tone-bg-bottom: rgba(244, 114, 182, 0.1);
@@ -274,8 +263,6 @@
   --tone-orb-a: rgba(124, 58, 237, 0.2);
   --tone-orb-b: rgba(217, 70, 239, 0.16);
   --tone-orb-c: rgba(244, 114, 182, 0.12);
-  --vivid-violet: oklch(0.7 0.22 285);
-  --vivid-fuchsia: oklch(0.72 0.24 350);
   --vivid-cyan: oklch(0.82 0.16 205);
   --vivid-amber: oklch(0.85 0.16 75);
 }
@@ -494,7 +481,7 @@
   input,
   textarea,
   select {
-    caret-color: color-mix(in srgb, var(--tone-shell-secondary) 86%, black);
+    caret-color: color-mix(in srgb, var(--app-accent) 86%, black);
     transition:
       border-color 100ms ease,
       box-shadow 100ms ease,
@@ -508,11 +495,11 @@
     outline: none;
     border-color: color-mix(
       in srgb,
-      var(--tone-shell-secondary) 48%,
+      var(--app-accent) 48%,
       transparent
     );
     box-shadow:
-      0 0 0 3px color-mix(in srgb, var(--tone-shell-secondary) 14%, transparent),
+      0 0 0 3px color-mix(in srgb, var(--app-accent) 14%, transparent),
       0 1px 2px rgba(0, 0, 0, 0.04);
   }
 
@@ -565,7 +552,7 @@
   ::selection {
     background: color-mix(
       in srgb,
-      var(--tone-shell-secondary) 22%,
+      var(--app-accent) 18%,
       transparent
     );
     color: #0f172a;
@@ -637,9 +624,6 @@
   }
 
   .app-shell[data-route-tone="journal"] {
-    --tone-shell-primary: rgba(159, 18, 57, 0.98);
-    --tone-shell-secondary: rgba(225, 29, 72, 0.92);
-    --tone-shell-tertiary: rgba(245, 158, 11, 0.86);
     --tone-bg-left: rgba(244, 63, 94, 0.1);
     --tone-bg-right: rgba(245, 158, 11, 0.08);
     --tone-bg-bottom: rgba(20, 184, 166, 0.06);
@@ -658,9 +642,6 @@
   }
 
   .app-shell[data-route-tone="system"] {
-    --tone-shell-primary: rgba(124, 58, 237, 0.96);
-    --tone-shell-secondary: rgba(217, 70, 239, 0.92);
-    --tone-shell-tertiary: rgba(20, 184, 166, 0.88);
     --tone-bg-left: rgba(167, 139, 250, 0.1);
     --tone-bg-right: rgba(232, 121, 249, 0.08);
     --tone-bg-bottom: rgba(20, 184, 166, 0.06);
@@ -679,9 +660,6 @@
   }
 
   .app-shell[data-route-tone="achievements"] {
-    --tone-shell-primary: rgba(13, 148, 136, 0.98);
-    --tone-shell-secondary: rgba(245, 158, 11, 0.94);
-    --tone-shell-tertiary: rgba(37, 99, 235, 0.86);
     --tone-bg-left: rgba(13, 148, 136, 0.1);
     --tone-bg-right: rgba(245, 158, 11, 0.08);
     --tone-bg-bottom: rgba(37, 99, 235, 0.06);
@@ -700,9 +678,6 @@
   }
 
   .app-shell[data-route-tone="balance"] {
-    --tone-shell-primary: rgba(6, 95, 70, 0.98);
-    --tone-shell-secondary: rgba(13, 148, 136, 0.94);
-    --tone-shell-tertiary: rgba(14, 165, 233, 0.88);
     --tone-bg-left: rgba(16, 185, 129, 0.1);
     --tone-bg-right: rgba(34, 211, 238, 0.08);
     --tone-bg-bottom: rgba(14, 165, 233, 0.06);
@@ -721,9 +696,6 @@
   }
 
   .app-shell[data-route-tone="vision"] {
-    --tone-shell-primary: rgba(91, 33, 182, 0.98);
-    --tone-shell-secondary: rgba(236, 72, 153, 0.88);
-    --tone-shell-tertiary: rgba(59, 130, 246, 0.92);
     --tone-bg-left: rgba(168, 85, 247, 0.1);
     --tone-bg-right: rgba(244, 114, 182, 0.08);
     --tone-bg-bottom: rgba(59, 130, 246, 0.06);
@@ -742,9 +714,6 @@
   }
 
   .app-shell[data-route-tone="onboarding"] {
-    --tone-shell-primary: rgba(124, 58, 237, 0.96);
-    --tone-shell-secondary: rgba(217, 70, 239, 0.92);
-    --tone-shell-tertiary: rgba(244, 114, 182, 0.86);
     --tone-bg-left: rgba(167, 139, 250, 0.12);
     --tone-bg-right: rgba(232, 121, 249, 0.1);
     --tone-bg-bottom: rgba(244, 114, 182, 0.08);
@@ -754,9 +723,6 @@
   }
 
   .app-shell[data-route-tone="dashboard"] {
-    --tone-shell-primary: rgba(124, 58, 237, 0.96);
-    --tone-shell-secondary: rgba(217, 70, 239, 0.9);
-    --tone-shell-tertiary: rgba(34, 211, 238, 0.86);
     --tone-bg-left: rgba(167, 139, 250, 0.1);
     --tone-bg-right: rgba(232, 121, 249, 0.08);
     --tone-bg-bottom: rgba(34, 211, 238, 0.06);
@@ -766,9 +732,6 @@
   }
 
   .app-shell[data-route-tone="setup"] {
-    --tone-shell-primary: rgba(99, 102, 241, 0.96);
-    --tone-shell-secondary: rgba(124, 58, 237, 0.92);
-    --tone-shell-tertiary: rgba(217, 70, 239, 0.86);
     --tone-bg-left: rgba(129, 140, 248, 0.1);
     --tone-bg-right: rgba(167, 139, 250, 0.08);
     --tone-bg-bottom: rgba(232, 121, 249, 0.06);
@@ -778,9 +741,6 @@
   }
 
   .app-shell[data-route-tone="billing"] {
-    --tone-shell-primary: rgba(245, 158, 11, 0.96);
-    --tone-shell-secondary: rgba(251, 113, 133, 0.92);
-    --tone-shell-tertiary: rgba(244, 63, 94, 0.86);
     --tone-bg-left: rgba(252, 211, 77, 0.1);
     --tone-bg-right: rgba(251, 113, 133, 0.08);
     --tone-bg-bottom: rgba(244, 63, 94, 0.06);
@@ -790,9 +750,6 @@
   }
 
   .app-shell[data-route-tone="settings"] {
-    --tone-shell-primary: rgba(100, 116, 139, 0.96);
-    --tone-shell-secondary: rgba(124, 58, 237, 0.84);
-    --tone-shell-tertiary: rgba(20, 184, 166, 0.82);
     --tone-bg-left: rgba(148, 163, 184, 0.08);
     --tone-bg-right: rgba(167, 139, 250, 0.06);
     --tone-bg-bottom: rgba(94, 234, 212, 0.05);
@@ -843,36 +800,20 @@
     border-radius: inherit;
     background: linear-gradient(
       135deg,
-      color-mix(in oklab, var(--vivid-violet) 8%, transparent),
+      color-mix(in oklab, var(--app-accent) 8%, transparent),
       transparent 60%
     );
   }
 
   /* .ring-soft-glow removed — use Tailwind ring + shadow utilities instead. */
 
-  .border-gradient-violet-rose {
-    border-image: linear-gradient(
-        135deg,
-        var(--color-primary),
-        var(--color-accent)
-      )
-      1;
-  }
-
   .text-gradient-vibrant {
-    background: linear-gradient(
-      135deg,
-      var(--vivid-violet),
-      var(--vivid-fuchsia)
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: var(--app-accent);
   }
 
   /* .text-gradient-aurora removed — use .text-gradient-vibrant instead. */
 
-  /* .glow-vivid, .featured-surface removed — use shadow-[var(--shadow-glow)] or FeaturedCard ring helpers. */
+  /* .glow-vivid, .featured-surface removed — use shadow-sm or FeaturedCard ring helpers. */
 
   .glass-surface {
     background: #ffffff;
@@ -992,10 +933,10 @@
   }
   .focus-ring:focus-visible {
     outline: 2px solid
-      color-mix(in srgb, var(--tone-shell-primary) 70%, transparent);
+      color-mix(in srgb, var(--app-accent) 70%, transparent);
     outline-offset: 2px;
     box-shadow:
-      0 0 0 4px color-mix(in srgb, var(--tone-shell-secondary) 18%, transparent),
+      0 0 0 4px color-mix(in srgb, var(--app-accent) 18%, transparent),
       var(--shadow-glow-brand);
   }
 
@@ -1539,7 +1480,7 @@
     text-transform: uppercase;
     color: color-mix(
       in srgb,
-      var(--tone-shell-secondary) 72%,
+      var(--app-accent) 72%,
       rgba(71, 85, 105, 0.9)
     );
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
@@ -1596,7 +1537,7 @@
     place-items: center;
     border-radius: 0.8rem;
     background: rgba(255, 255, 255, 0.82);
-    color: color-mix(in srgb, var(--tone-shell-primary) 78%, #0f172a);
+    color: color-mix(in srgb, var(--app-accent) 78%, #0f172a);
     box-shadow: 0 14px 28px -22px rgba(15, 23, 42, 0.4);
   }
 
@@ -1932,9 +1873,9 @@
   .gradient-text {
     background: linear-gradient(
       135deg,
-      var(--tone-shell-primary) 0%,
-      var(--tone-shell-secondary) 52%,
-      var(--tone-shell-tertiary) 100%
+      var(--app-accent) 0%,
+      #3B7565 52%,
+      #4E8C7A 100%
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -2147,7 +2088,7 @@
     border-radius: 0.875rem;
     background: rgba(15, 23, 42, 0.04);
     border: 1px solid rgba(15, 23, 42, 0.06);
-    color: color-mix(in srgb, var(--tone-shell-primary) 72%, var(--foreground));
+    color: color-mix(in srgb, var(--app-accent) 72%, var(--foreground));
   }
 
   /* ── Premium badge ──────────────────────────────────── */
@@ -2864,7 +2805,7 @@
     pointer-events: none;
     background: radial-gradient(
       circle at center,
-      color-mix(in srgb, var(--tone-shell-secondary) 18%, transparent) 0%,
+      color-mix(in srgb, var(--app-accent) 18%, transparent) 0%,
       transparent 60%
     );
     opacity: 0;

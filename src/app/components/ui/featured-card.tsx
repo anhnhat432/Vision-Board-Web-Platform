@@ -7,7 +7,7 @@ function FeaturedCard({ className, ...props }: React.ComponentProps<typeof Card>
   return (
     <Card
       className={cn(
-        "relative overflow-hidden ring-1 ring-[color:var(--tone-shell-primary)]/30 shadow-[var(--shadow-glow)]",
+        "relative overflow-hidden ring-1 ring-app-accent/20 shadow-sm",
         className,
       )}
       {...props}

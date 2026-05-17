@@ -12,8 +12,8 @@ function LoadingSpinner({ className, label = "Đang tải..." }: { className?: s
         <span
           className="absolute inset-0 block h-9 w-9 animate-spin rounded-[var(--r-pill)] border-[2.5px] border-transparent"
           style={{
-            borderTopColor: "var(--tone-shell-primary)",
-            borderRightColor: "color-mix(in srgb, var(--tone-shell-secondary) 40%, transparent)",
+            borderTopColor: "var(--app-accent)",
+            borderRightColor: "color-mix(in srgb, var(--app-accent) 40%, transparent)",
             animationDuration: "640ms",
           }}
           aria-hidden="true"

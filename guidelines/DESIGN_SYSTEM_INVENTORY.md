@@ -46,7 +46,7 @@ Tokens defined in `@C:\Users\admin\Downloads\Vision Board Web Platform\src\style
 | `--border-muted` | `#dbe3f1` | Even quieter border |
 | `--radius` | `0.875rem` (14px) | Base radius |
 
-**Per-route tone palettes** (applied via `app-shell[data-route-tone="..."]` selectors at `theme.css:443-560`): `system` (blue), `balance` (green), `journal` (warm orange), `achievements` (amber), `vision` (violet). Each palette overrides 11 tokens (`--tone-shell-primary/secondary/tertiary`, `--tone-bg-*`, `--tone-overlay-*`, `--tone-cursor-*`, `--tone-hero-*`, `--tone-orb-*`).
+**App accent palette**: `--app-accent` and `--app-accent-soft` drive primary actions, focus states, progress, and active UI. Reflection-only surfaces use `--app-warm` and `--app-warm-soft`. Legacy route palettes should not define shell color tokens.
 
 **Brand gradient**: defined as `.gradient-brand` (`theme.css:1394-1396`) — `linear-gradient(135deg, rgba(109,40,217,.98), rgba(192,38,211,.94) 48%, rgba(59,130,246,.96) 100%)`. Used by primary `Button`, `Badge default`, `Progress` indicator, and active `TabsTrigger`.
 
@@ -160,7 +160,7 @@ Defined globally at `theme.css:367-371`:
 Plus per-component:
 
 - `Button`: `focus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[4px]` (button.tsx:16).
-- `Input` / `Textarea`: 4px ring sized off `--tone-shell-secondary` mixed with transparent (input.tsx:12, textarea.tsx:12).
+- `Input` / `Textarea`: focus ring sized off `--app-accent` mixed with transparent.
 - `Select trigger`: `focus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[4px]` (select.tsx:44).
 - `Tabs trigger`: 3px ring (tabs.tsx:45).
 - `Badge`: 3px ring when interactive.
@@ -212,7 +212,7 @@ Sizes: `default` (h-11 / 44px), `sm` (h-9), `lg` (h-12), `icon` (size-10, `round
 | Variant | Visual | Use |
 |---|---|---|
 | `default` | gradient-brand + white text + brand shadow | "premium" / hero badges |
-| `secondary` | tint of `--tone-shell-secondary` mixed with white + dark text | category, count |
+| `secondary` | app-accent-soft tint + app-accent text | category, count |
 | `destructive` | `bg-destructive` + white | error count |
 | `outline` | white/70 border on white/72 + dark text | quiet meta |
 
@@ -229,7 +229,7 @@ Plus utility classes in `theme.css`:
 
 | Primitive | Defaults |
 |---|---|
-| `<Input>` | h-11, `rounded-2xl`, inner highlight + soft shadow, focus-visible 4px ring tinted off `--tone-shell-secondary`. |
+| `<Input>` | h-11, `rounded-2xl`, inner highlight + soft shadow, focus-visible ring tinted off `--app-accent`. |
 | `<Textarea>` | min-h-20, `rounded-[24px]`, same shadow + focus pattern, `field-sizing-content` for auto-grow. |
 | `<Select trigger>` | h-11 default / h-9 sm via `data-size`, same shadow + focus pattern. |
 | `<Label>` | 0.875rem / 500 / 1.45 line-height; uses native `<label>` from Radix `@radix-ui/react-label` (`label.tsx`). |

@@ -1,7 +1,7 @@
 import { useIllustrationId, type AmbientIllustrationProps } from "./utils";
 
 export function EmptyTaskIllustration({ className, ...rest }: AmbientIllustrationProps) {
-  const gradientId = useIllustrationId("empty-task-violet-fuchsia");
+  const gradientId = useIllustrationId("empty-task-app-accent");
   const glowId = useIllustrationId("empty-task-glow");
 
   return (
@@ -16,13 +16,13 @@ export function EmptyTaskIllustration({ className, ...rest }: AmbientIllustratio
     >
       <defs>
         <linearGradient id={gradientId} x1="78" y1="58" x2="248" y2="194" gradientUnits="userSpaceOnUse">
-          <stop stopColor="var(--tone-shell-primary, #7c3aed)" stopOpacity="0.86" />
-          <stop offset="0.55" stopColor="var(--tone-shell-secondary, #d946ef)" stopOpacity="0.64" />
-          <stop offset="1" stopColor="var(--tone-shell-tertiary, #fb7185)" stopOpacity="0.56" />
+          <stop stopColor="#2F5D50" stopOpacity="0.86" />
+          <stop offset="0.5" stopColor="#3B7565" stopOpacity="0.64" />
+          <stop offset="1" stopColor="#4E8C7A" stopOpacity="0.56" />
         </linearGradient>
         <radialGradient id={glowId} cx="50%" cy="50%" r="55%">
-          <stop stopColor="#ddd6fe" stopOpacity="0.6" />
-          <stop offset="1" stopColor="#ddd6fe" stopOpacity="0" />
+          <stop stopColor="#E8F0EC" stopOpacity="0.8" />
+          <stop offset="1" stopColor="#E8F0EC" stopOpacity="0" />
         </radialGradient>
       </defs>
 
@@ -46,9 +46,9 @@ export function EmptyTaskIllustration({ className, ...rest }: AmbientIllustratio
       )}
       <path d="M192 83L202 93L222 70" stroke={`url(#${gradientId})`} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M72 188C110 202 176 207 248 182" stroke={`url(#${gradientId})`} strokeWidth="2" strokeLinecap="round" strokeDasharray="4 8" opacity="0.5" />
-      <path d="M68 70L76 84L92 87L81 99L83 115L68 108L53 115L56 99L44 87L60 84L68 70Z" fill="#fb7185" opacity="0.54" />
-      <circle cx="262" cy="80" r="6" fill="#7c3aed" opacity="0.45" />
-      <circle cx="246" cy="166" r="5" fill="#d946ef" opacity="0.52" />
+      <path d="M68 70L76 84L92 87L81 99L83 115L68 108L53 115L56 99L44 87L60 84L68 70Z" fill="#4E8C7A" opacity="0.54" />
+      <circle cx="262" cy="80" r="6" fill="#2F5D50" opacity="0.45" />
+      <circle cx="246" cy="166" r="5" fill="#3B7565" opacity="0.52" />
     </svg>
   );
 }

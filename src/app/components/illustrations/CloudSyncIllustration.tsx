@@ -1,7 +1,7 @@
 import { useIllustrationId, type AmbientIllustrationProps } from "./utils";
 
 export function CloudSyncIllustration({ className, ...rest }: AmbientIllustrationProps) {
-  const gradientId = useIllustrationId("cloud-sync-violet-fuchsia");
+  const gradientId = useIllustrationId("cloud-sync-app-accent");
   const glowId = useIllustrationId("cloud-sync-glow");
 
   return (

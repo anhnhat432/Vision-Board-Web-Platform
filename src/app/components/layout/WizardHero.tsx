@@ -82,18 +82,11 @@ export function WizardHero({
             {eyebrow ? (
               <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                 {eyebrowIcon ? (
-                  <span aria-hidden="true" className="text-[color:var(--tone-shell-secondary)]">
+                  <span aria-hidden="true" className="text-app-accent">
                     {eyebrowIcon}
                   </span>
                 ) : (
-                  <span
-                    aria-hidden="true"
-                    className="inline-block h-1.5 w-1.5 rounded-full"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, var(--tone-shell-primary), var(--tone-shell-secondary))",
-                    }}
-                  />
+                  <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rounded-full bg-app-accent" />
                 )}
                 {eyebrow}
               </p>

@@ -1,7 +1,7 @@
 import { useIllustrationId, type AmbientIllustrationProps } from "./utils";
 
 export function BillingPlusIllustration({ className, ...rest }: AmbientIllustrationProps) {
-  const gradientId = useIllustrationId("billing-plus-violet-fuchsia");
+  const gradientId = useIllustrationId("billing-plus-app-accent");
   const glowId = useIllustrationId("billing-plus-glow");
 
   return (

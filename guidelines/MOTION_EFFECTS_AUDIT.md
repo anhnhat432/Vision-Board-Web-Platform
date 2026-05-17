@@ -148,7 +148,7 @@ The app currently has **too many decorative motion effects** that make it feel l
 | `input:focus` border-color + box-shadow | Form usability: clear focus state |
 | `loading-*` animations (bounce, shimmer) | Loading state: users need feedback |
 | `bottom-nav-item[aria-current="page"]` background | Navigation: clear current page indicator |
-| `--tone-shell-*` (route-specific shells) | Branding: subtle per-route color theming |
+| `app-*` accent tokens | Branding: calm shared accent color system |
 | `.reveal-block` (scroll-triggered reveal) | UX: progressive disclosure for long content |
 | `disabled:opacity-50` | Standard: disabled state clarity |
 

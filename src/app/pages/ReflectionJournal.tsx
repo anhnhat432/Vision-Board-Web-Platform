@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { EmptyHintArrow, EmptyJournalIllustration } from "../components/illustrations";
+import { EmptyHintArrow } from "../components/illustrations";
 import {
   AlertDialog,
   AlertDialogAction,

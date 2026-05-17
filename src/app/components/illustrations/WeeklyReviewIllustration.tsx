@@ -18,7 +18,7 @@ const CHECKMARKS = [
 ] as const;
 
 export function WeeklyReviewIllustration({ className, ...rest }: AmbientIllustrationProps) {
-  const gradientId = useIllustrationId("weekly-review-violet-fuchsia");
+  const gradientId = useIllustrationId("weekly-review-app-accent");
   const glowId = useIllustrationId("weekly-review-glow");
 
   return (

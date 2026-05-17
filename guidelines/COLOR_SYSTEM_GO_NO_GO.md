@@ -107,14 +107,14 @@ Source files:
 | `--info` | #5b21d0 | ✅ Changed from #7c3aed | Coaching insight, supportive |
 | `--muted-foreground` | #475569 | ✅ Changed from #61738a | Metadata, increased contrast |
 
-### 3.2 Per-Route Tone Palettes (✅ GO — Not Changed)
+### 3.2 App Accent Palette (✅ GO)
 **Source**: `COLOR_SYSTEM_AUDIT.md` §1.3
-- Dashboard/System: Indigo (`--tone-shell-primary`)
-- Life Balance: Green (`--tone-orb-a`)
-- Journal: Warm orange
-- Vision Board: Violet
+- Primary action: forest green (`--app-accent`)
+- Soft primary surface: calm green (`--app-accent-soft`)
+- Reflection-only warmth: terracotta (`--app-warm`)
+- Route backgrounds: legacy route-only ambient variables remain non-interactive
 
-**Decision**: ⚠️ **Keep as-is** — documented in `COLOR_SYSTEM_DIRECTION.md` §10: "Don't change `--tone-*` (per-route palettes)"
+**Decision**: ✅ **Use app tokens** — page accents, focus states, and illustrations should prefer the shared `app-*` palette.
 
 ---
 

@@ -92,7 +92,7 @@ export function MotivationalReminder() {
         <CardContent className="space-y-2.5 p-3 sm:space-y-3 sm:p-4">
           {reminder ? (
             <div className="flex items-start gap-2.5">
-              <BellRing className="mt-1 h-5 w-5 flex-shrink-0 text-[color:var(--tone-shell-primary)]" />
+              <BellRing className="mt-1 h-5 w-5 flex-shrink-0 text-app-accent" />
               <div className="min-w-0 flex-1">
                 <p className="break-words font-semibold text-foreground">{reminder.title}</p>
                 <p className="mt-1 hidden line-clamp-2 break-words text-sm text-muted-foreground sm:block">{reminder.description}</p>
@@ -123,7 +123,7 @@ export function MotivationalReminder() {
             </div>
           ) : (
             <div className="flex items-start gap-2.5">
-              <Sparkles className="mt-1 h-5 w-5 flex-shrink-0 text-[color:var(--tone-shell-primary)]" />
+              <Sparkles className="mt-1 h-5 w-5 flex-shrink-0 text-app-accent" />
               <div className="min-w-0 flex-1">
                 <p className="font-semibold text-foreground">Cảm hứng hôm nay</p>
                 <p className="line-clamp-2 text-sm italic text-muted-foreground">"{quote}"</p>

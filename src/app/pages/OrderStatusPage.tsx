@@ -641,7 +641,7 @@ if (paymentLoading && !paymentOrder) {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                    <Target className="h-3.5 w-3.5 text-[color:var(--tone-shell-primary)]" />
+                    <Target className="h-3.5 w-3.5 text-app-accent" />
                     Mục tiêu đang gắn
                   </div>
                   <p className="mt-[var(--space-inline)] text-base font-semibold text-foreground">

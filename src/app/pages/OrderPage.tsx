@@ -413,7 +413,7 @@ export function OrderPage() {
             </div>
 
             <div className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-5 shadow-sm">
-              <EmptyOrdersIllustration className="mb-3 hidden w-24 text-[color:var(--tone-shell-primary)] opacity-50 sm:block" />
+              <EmptyOrdersIllustration className="mb-3 hidden w-24 text-app-accent opacity-50 sm:block" />
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Tóm tắt nhanh</p>
               <div className="mt-4 space-y-2.5">
                 {summaryItems.map((item) => {
@@ -422,7 +422,7 @@ export function OrderPage() {
                   return (
                     <div key={item.label} className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card px-4 py-3.5">
                       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                        <Icon className="h-3.5 w-3.5 text-[color:var(--tone-shell-primary)]" />
+                        <Icon className="h-3.5 w-3.5 text-app-accent" />
                         {item.label}
                       </div>
                       <p className="mt-2 text-base font-semibold text-foreground">{item.value}</p>

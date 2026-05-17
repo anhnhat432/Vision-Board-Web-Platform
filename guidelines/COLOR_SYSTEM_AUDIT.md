@@ -51,7 +51,7 @@ Defined via `--tone-*` variables, applied per route:
 
 | Route | Primary tone | Secondary tone | Effect |
 |---|---|---|---|
-| Dashboard/System | Indigo (`--tone-shell-primary: rgba(55,48,163,0.98)`) | Blue (`--tone-shell-secondary: rgba(79,70,229,0.94)`) | Gradient hero, focus rings |
+| Dashboard/System | Forest green (`--app-accent: #2F5D50`) | Soft green (`--app-accent-soft: #E8F0EC`) | Primary accents, focus rings |
 | Life Balance | Green (`--tone-orb-a: rgba(99,102,241,0.18)`) | Teal (`--tone-orb-b: rgba(56,189,248,0.14)`) | Green orb glow |
 | Journal | Warm orange | Orange tint | Warm surface |
 | Achievements | Amber | Amber tint | Gold accent |
@@ -96,7 +96,7 @@ Used by: Button default, Badge default, Progress indicator, active TabsTrigger.
 
 2. **`rgba(148,163,184,0.18)` border on white**: Border is very subtle (18% opacity slate-300). May be invisible on high-brightness screens.
 
-3. **Gradient text (`.gradient-text`)**: Uses `--tone-shell-primary` to `--tone-shell-tertiary`. On dark hero backgrounds it's white, but on white surfaces the indigo→blue gradient may have insufficient contrast with white background (WCAG requires 4.5:1 against background, not against adjacent colors).
+3. **Gradient text (`.gradient-text`)**: Uses the app accent ramp. On white surfaces it should keep enough contrast with `--app-bg` and `--app-surface` (WCAG requires 4.5:1 against background, not against adjacent colors).
 
 4. **Badge text `text-slate-600` on `bg-white`**: Ratio ~5.7:1 (passes) but `text-slate-500` drops to ~4.1:1 which fails for 12px text.
 
