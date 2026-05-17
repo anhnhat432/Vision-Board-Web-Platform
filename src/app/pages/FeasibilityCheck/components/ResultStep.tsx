@@ -203,18 +203,18 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
     <section className="mt-6 rounded-card border border-app-line bg-app-surface p-6 md:p-8" aria-labelledby="feasibility-result-title">
       <div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-accent">Kết quả kiểm tra</p>
-          <span className="w-fit rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">Kết quả kiểm tra</p>
+          <span className="w-fit rounded-full bg-app-accent-soft px-2.5 py-1 text-[13px] font-medium text-app-accent">
             {getLifeAreaLabel(focusArea)}
           </span>
         </div>
         <h2
           id="feasibility-result-title"
-          className="mt-2 font-serif text-[24px] font-medium leading-8 tracking-[-0.01em] text-app-ink"
+          className="mt-2 font-serif text-[26px] font-medium leading-8 tracking-[-0.01em] text-app-ink"
         >
           {copy.statusLabel}
         </h2>
-        <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{result.summary}</p>
+        <p className="mt-2 text-[15px] leading-6 text-app-ink-soft">{result.summary}</p>
       </div>
 
       <div className="mt-6 rounded-card border border-app-line bg-app-bg p-5">
@@ -222,22 +222,22 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           <div className="flex shrink-0 flex-col items-center text-center sm:w-44">
             <Compass className="h-12 w-12 text-app-accent" aria-hidden="true" />
             <p className="mt-3 font-serif text-[56px] font-medium leading-none text-app-ink">{scoreOutOfTen}</p>
-            <p className="mt-1 text-[13px] font-medium text-app-ink-muted">/10 · {statusLabel}</p>
+            <p className="mt-1 text-[14px] font-medium text-app-ink-muted">/10 · {statusLabel}</p>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-medium text-app-ink">{copy.statusHint}</p>
+            <p className="text-[14px] font-medium text-app-ink">{copy.statusHint}</p>
             <div className="relative mt-4 h-2 w-full overflow-hidden rounded-full bg-app-line" aria-hidden="true">
               <div className="h-full rounded-full bg-app-accent" style={{ width: `${scoreOutOfTen * 10}%` }} />
               <span className="absolute left-[10%] top-0 h-full w-px bg-app-ink-muted/40" />
               <span className="absolute left-1/2 top-0 h-full w-px bg-app-ink-muted/40" />
               <span className="absolute left-[90%] top-0 h-full w-px bg-app-ink-muted/40" />
             </div>
-            <div className="mt-2 flex justify-between text-[11px] text-app-ink-muted">
+            <div className="mt-2 flex justify-between text-[12px] text-app-ink-muted">
               <span>Cần nhẹ</span>
               <span>Vừa sức</span>
               <span>Sẵn sàng</span>
             </div>
-            <p className="mt-4 text-[13px] leading-6 text-app-ink-soft">{result.recommendation}</p>
+            <p className="mt-4 text-[14px] leading-6 text-app-ink-soft">{result.recommendation}</p>
           </div>
         </div>
       </div>
@@ -250,8 +250,8 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
             <div key={item.title} className="flex gap-3 rounded-lg border border-app-line bg-app-bg p-3">
               <Icon className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
               <div>
-                <p className="text-[13px] font-medium text-app-ink">{item.title}</p>
-                <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">{item.description}</p>
+                <p className="text-[14px] font-medium text-app-ink">{item.title}</p>
+                <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">{item.description}</p>
               </div>
             </div>
           );
@@ -263,8 +263,8 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           <div className="flex gap-3">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-app-warm" aria-hidden="true" />
             <div>
-              <p className="font-serif text-[16px] font-medium text-[#5C3A2E]">Có vài rủi ro cần xử lý trước</p>
-              <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">
+              <p className="font-serif text-[17px] font-medium text-[#5C3A2E]">Có vài rủi ro cần xử lý trước</p>
+              <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
                 {result.smartGoalQualityNote ?? result.bottleneck.action}
               </p>
             </div>
@@ -280,7 +280,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
         <CollapsibleTrigger asChild>
           <button
             type="button"
-            className="inline-flex w-full items-center justify-between gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-between gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[15px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
           >
             {isDesktop ? "Phân tích chi tiết" : "Mở chi tiết"}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -290,18 +290,18 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           <div className="rounded-card border border-app-line bg-app-bg p-4 md:p-5">
             <div className="flex items-center gap-2">
               <Compass className="h-4 w-4 text-app-accent" aria-hidden="true" />
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Hướng đi tiếp theo</p>
+              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Hướng đi tiếp theo</p>
             </div>
-            <h3 className="mt-3 font-serif text-[18px] font-medium text-app-ink">{copy.guideTitle}</h3>
-            <p className="mt-2 text-[13px] leading-6 text-app-ink-soft">{copy.guideBody}</p>
+            <h3 className="mt-3 font-serif text-[20px] font-medium text-app-ink">{copy.guideTitle}</h3>
+            <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{copy.guideBody}</p>
             <div className="mt-4 rounded-lg border border-app-line bg-app-surface p-3">
-              <p className="text-[13px] font-medium text-app-ink">Tuần 1 nên thế nào</p>
-              <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">{result.firstWeekGuidance}</p>
+              <p className="text-[14px] font-medium text-app-ink">Tuần 1 nên thế nào</p>
+              <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">{result.firstWeekGuidance}</p>
               <div className="mt-3 flex flex-wrap gap-2">
-                <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+                <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[13px] font-medium text-app-accent">
                   Mức tải: {PLAN_LOAD_LABEL[result.planLoad]}
                 </span>
-                <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-[12px] text-app-ink-muted">
+                <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-[13px] text-app-ink-muted">
                   Quỹ thời gian: {CAPACITY_LABEL[result.weeklyCapacity]}
                 </span>
               </div>
@@ -311,51 +311,51 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           <div className="grid gap-4 md:grid-cols-3">
             {scoreCards.map((card) => (
               <div key={card.label} className="rounded-lg border border-app-line bg-app-surface p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{card.label}</p>
-                <p className="mt-2 text-[20px] font-semibold leading-6 text-app-ink">{card.value}</p>
+                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{card.label}</p>
+                <p className="mt-2 text-[22px] font-semibold leading-6 text-app-ink">{card.value}</p>
                 <div className="mt-3 h-2 overflow-hidden rounded-full bg-app-line" aria-hidden="true">
                   <div className="h-full rounded-full bg-app-accent" style={{ width: `${card.progress}%` }} />
                 </div>
-                <p className="mt-2 text-[12px] leading-5 text-app-ink-muted">{card.note}</p>
+                <p className="mt-2 text-[13px] leading-5 text-app-ink-muted">{card.note}</p>
               </div>
             ))}
           </div>
 
           <details className="rounded-lg border border-app-line bg-app-surface p-4">
-            <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">Xem 7 góc nhìn</summary>
+            <summary className="cursor-pointer list-none text-[15px] font-medium text-app-ink">Xem 7 góc nhìn</summary>
             <div className="mt-4 grid gap-3">
               {result.axisScores.map((axis) => (
                 <div key={axis.axis} className="rounded-lg border border-app-line bg-app-bg p-3">
                   <div className="flex items-center justify-between gap-3">
-                    <p className="text-[13px] font-medium text-app-ink">{axis.label}</p>
-                    <span className="text-[12px] font-medium text-app-ink-muted">
+                    <p className="text-[14px] font-medium text-app-ink">{axis.label}</p>
+                    <span className="text-[13px] font-medium text-app-ink-muted">
                       {axis.score}/{axis.maxScore}
                     </span>
                   </div>
                   <div className="mt-2 h-2 overflow-hidden rounded-full bg-app-line" aria-hidden="true">
                     <div className={`h-full rounded-full ${getAxisBarClass(axis.percent)}`} style={{ width: `${axis.percent}%` }} />
                   </div>
-                  <p className="mt-2 text-[12px] leading-5 text-app-ink-muted">{axis.diagnostic}</p>
+                  <p className="mt-2 text-[13px] leading-5 text-app-ink-muted">{axis.diagnostic}</p>
                 </div>
               ))}
             </div>
           </details>
 
           <details className="rounded-lg border border-app-line bg-app-surface p-4">
-            <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">Xem mục tiêu đã viết</summary>
+            <summary className="cursor-pointer list-none text-[15px] font-medium text-app-ink">Xem mục tiêu đã viết</summary>
             <div className="mt-4 space-y-3">
-              <p className="text-[14px] font-medium leading-6 text-app-ink">{pendingGoal.specific}</p>
-              <div className="grid gap-3 text-[13px] leading-6 text-app-ink-soft">
+              <p className="text-[15px] font-medium leading-6 text-app-ink">{pendingGoal.specific}</p>
+              <div className="grid gap-3 text-[14px] leading-6 text-app-ink-soft">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Thời hạn</p>
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Thời hạn</p>
                   <p className="mt-1">{pendingGoal.timeBound}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Dấu hiệu hoàn thành</p>
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Dấu hiệu hoàn thành</p>
                   <p className="mt-1">{pendingGoal.measurable}</p>
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Lý do theo đuổi</p>
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Lý do theo đuổi</p>
                   <p className="mt-1">{pendingGoal.relevant}</p>
                 </div>
               </div>
@@ -363,16 +363,16 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           </details>
 
           <details className="rounded-lg border border-app-line bg-app-surface p-4">
-            <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">Xem nhịp triển khai gợi ý</summary>
+            <summary className="cursor-pointer list-none text-[15px] font-medium text-app-ink">Xem nhịp triển khai gợi ý</summary>
             <div className="mt-4 grid gap-3">
               {copy.weeklyRhythm.map((item, index) => (
                 <div key={item.label} className="flex gap-3">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-[12px] font-medium text-app-accent">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-[13px] font-medium text-app-accent">
                     {index + 1}
                   </div>
                   <div>
-                    <p className="text-[13px] font-medium text-app-ink">{item.label}</p>
-                    <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">{item.detail}</p>
+                    <p className="text-[14px] font-medium text-app-ink">{item.label}</p>
+                    <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">{item.detail}</p>
                   </div>
                 </div>
               ))}
@@ -380,16 +380,16 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
           </details>
 
           <details className="rounded-lg border border-app-line bg-app-surface p-4">
-            <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">Xem lý do đằng sau kết quả</summary>
+            <summary className="cursor-pointer list-none text-[15px] font-medium text-app-ink">Xem lý do đằng sau kết quả</summary>
             <div className="mt-4 space-y-3">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-app-accent" aria-hidden="true" />
-                <p className="text-[13px] font-medium text-app-ink">Nên làm trước khi tạo kế hoạch</p>
+                <p className="text-[14px] font-medium text-app-ink">Nên làm trước khi tạo kế hoạch</p>
               </div>
               <ol className="grid gap-2">
                 {copy.nextMoves.map((item, index) => (
-                  <li key={item} className="flex gap-3 text-[13px] leading-6 text-app-ink-soft">
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-[11px] font-medium text-app-accent">
+                  <li key={item} className="flex gap-3 text-[14px] leading-6 text-app-ink-soft">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-[12px] font-medium text-app-accent">
                       {index + 1}
                     </span>
                     <span>{item}</span>
@@ -397,9 +397,9 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
                 ))}
               </ol>
               <div className="rounded-lg border border-app-line bg-app-bg p-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nguyên tắc lập kế hoạch</p>
-                <p className="mt-2 text-[13px] font-medium leading-6 text-app-ink">{result.scopeRecommendation}</p>
-                <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">{result.bottleneck.action}</p>
+                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Nguyên tắc lập kế hoạch</p>
+                <p className="mt-2 text-[14px] font-medium leading-6 text-app-ink">{result.scopeRecommendation}</p>
+                <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">{result.bottleneck.action}</p>
               </div>
             </div>
           </details>
@@ -409,7 +409,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
       <div className="mt-8 flex flex-col-reverse gap-3 border-t border-app-line pt-5 sm:flex-row sm:justify-between">
         <button
           type="button"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[15px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
           onClick={onAdjustGoal}
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -417,7 +417,7 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
         </button>
         <button
           type="button"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-[15px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
           onClick={onContinue}
         >
           Tiếp tục → Kế hoạch 12 tuần

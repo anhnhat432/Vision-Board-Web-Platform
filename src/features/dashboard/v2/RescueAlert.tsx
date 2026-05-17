@@ -13,7 +13,7 @@ interface RescueAlertProps {
 export function RescueAlert({ trigger, ctaLabel, onAction, onDismiss, onVisible }: RescueAlertProps) {
   return (
     <section
-      className="rounded-card border border-[#F3D9CC] bg-app-warm-soft p-4 text-[13px] text-[#5C3A2E] md:p-5"
+      className="rounded-card border border-[#F3D9CC] bg-app-warm-soft p-4 text-[14px] text-[#5C3A2E] md:p-5"
       aria-label="Cảnh báo tuần này"
       onAnimationStart={onVisible}
     >
@@ -29,7 +29,7 @@ export function RescueAlert({ trigger, ctaLabel, onAction, onDismiss, onVisible 
           <button
             type="button"
             onClick={onAction}
-            className="inline-flex rounded-lg bg-app-warm px-3.5 py-2 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-[#c56b4e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+            className="inline-flex rounded-lg bg-app-warm px-3.5 py-2 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#c56b4e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
           >
             {ctaLabel}
           </button>

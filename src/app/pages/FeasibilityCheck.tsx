@@ -384,37 +384,37 @@ export function FeasibilityCheck() {
         </div>
 
         <section aria-labelledby="feasibility-title">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
             {getLifeAreaLabel(focusArea)} · Kiểm tra tính thực tế
           </p>
           <h1
             id="feasibility-title"
-            className="mt-3 font-serif text-[30px] font-medium leading-tight tracking-[-0.02em] text-app-ink sm:text-[34px]"
+            className="mt-3 font-serif text-[32px] font-medium leading-tight tracking-[-0.02em] text-app-ink sm:text-[38px]"
           >
             Mục tiêu của bạn đã đủ thực tế chưa?
           </h1>
-          <p className="mt-2 max-w-2xl text-[14px] leading-6 text-app-ink-soft">
+          <p className="mt-2 max-w-2xl text-[15px] leading-6 text-app-ink-soft">
             Đo mức sẵn sàng trước khi biến mục tiêu thành kế hoạch 12 tuần.
           </p>
 
           <div className="mt-5 rounded-card border border-app-line bg-app-surface p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                   Mục tiêu đang kiểm tra
                 </p>
-                <p className="mt-1 line-clamp-2 text-[14px] font-medium leading-6 text-app-ink">
+                <p className="mt-1 line-clamp-2 text-[15px] font-medium leading-6 text-app-ink">
                   {pendingGoal.specific}
                 </p>
               </div>
               <Link
                 to="/smart-goal-setup"
-                className="shrink-0 text-[12px] font-medium text-app-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                className="shrink-0 text-[13px] font-medium text-app-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
               >
                 Sửa mục tiêu
               </Link>
             </div>
-            <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-app-ink-muted">
+            <div className="mt-3 flex flex-wrap gap-2 text-[13px] text-app-ink-muted">
               <span className="rounded-full bg-app-accent-soft px-2.5 py-1 font-medium text-app-accent">
                 {getLifeAreaLabel(focusArea)}
               </span>

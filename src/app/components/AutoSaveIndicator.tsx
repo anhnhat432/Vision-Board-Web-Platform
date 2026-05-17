@@ -49,7 +49,7 @@ export function AutoSaveIndicator({ status, lastSavedAt, className = "" }: AutoS
       role="status"
       aria-live="polite"
       data-testid="auto-save-indicator"
-      className={`inline-flex items-center gap-1.5 text-[12px] font-medium ${tone} ${className}`}
+      className={`inline-flex items-center gap-1.5 text-[13px] font-medium ${tone} ${className}`}
     >
       <Icon className={`h-3.5 w-3.5 ${effectiveStatus === "saving" ? "animate-spin" : ""}`} aria-hidden="true" />
       {label}

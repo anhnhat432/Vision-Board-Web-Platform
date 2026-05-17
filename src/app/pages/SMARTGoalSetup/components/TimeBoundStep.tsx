@@ -20,7 +20,7 @@ export function TimeBoundStep({ smartData, setSmartData }: TimeBoundStepProps) {
 
   return (
     <div className="space-y-5">
-      <p className="text-[14px] leading-6 text-app-ink-soft">Chọn cách chốt thời hạn phù hợp với bạn.</p>
+      <p className="text-[15px] leading-6 text-app-ink-soft">Chọn cách chốt thời hạn phù hợp với bạn.</p>
 
       <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Chọn cách chốt thời hạn">
         <button
@@ -28,8 +28,8 @@ export function TimeBoundStep({ smartData, setSmartData }: TimeBoundStepProps) {
           aria-pressed={smartData.timeBound.mode === "weeks"}
           className={
             smartData.timeBound.mode === "weeks"
-              ? "rounded-lg border border-app-accent bg-app-accent-soft px-4 py-2.5 text-[14px] font-medium text-app-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-              : "rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[14px] font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              ? "rounded-lg border border-app-accent bg-app-accent-soft px-4 py-2.5 text-[15px] font-medium text-app-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              : "rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[15px] font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
           }
           onClick={() =>
             setSmartData((previous) => ({
@@ -50,8 +50,8 @@ export function TimeBoundStep({ smartData, setSmartData }: TimeBoundStepProps) {
           aria-pressed={smartData.timeBound.mode === "date"}
           className={
             smartData.timeBound.mode === "date"
-              ? "rounded-lg border border-app-accent bg-app-accent-soft px-4 py-2.5 text-[14px] font-medium text-app-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-              : "rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[14px] font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              ? "rounded-lg border border-app-accent bg-app-accent-soft px-4 py-2.5 text-[15px] font-medium text-app-accent transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              : "rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[15px] font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
           }
           onClick={() =>
             setSmartData((previous) => ({

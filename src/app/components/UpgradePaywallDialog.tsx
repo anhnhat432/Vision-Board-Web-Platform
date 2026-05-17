@@ -137,22 +137,22 @@ export function UpgradePaywallDialog({
           <div className="border-b border-app-line bg-app-surface px-5 py-6 sm:px-7 sm:py-7">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="max-w-2xl">
-                <div className="inline-flex items-center gap-2 rounded-full border border-app-line bg-app-bg px-3 py-1 text-[12px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">
+                <div className="inline-flex items-center gap-2 rounded-full border border-app-line bg-app-bg px-3 py-1 text-[13px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">
                   <LockKeyhole className="h-3.5 w-3.5 text-app-accent" />
                   Plus cho hệ 12 tuần
                 </div>
                 <DialogHeader className="mt-4 text-left">
-                  <DialogTitle className="font-serif text-[28px] font-medium leading-tight tracking-tight text-app-ink">
+                  <DialogTitle className="font-serif text-[30px] font-medium leading-tight tracking-tight text-app-ink">
                     {title ?? paywallCopy.title}
                   </DialogTitle>
-                  <DialogDescription className="mt-2 max-w-xl text-[14px] leading-7 text-app-ink-soft">
+                  <DialogDescription className="mt-2 max-w-xl text-[15px] leading-7 text-app-ink-soft">
                     {description ?? paywallCopy.description}
                   </DialogDescription>
                 </DialogHeader>
               </div>
               <div className="rounded-card border border-app-line bg-app-bg px-4 py-4 text-left sm:text-right">
-                <p className="text-[12px] uppercase tracking-[0.16em] text-app-ink-muted">Gói hiện tại</p>
-                <p className="mt-2 font-serif text-[24px] font-medium text-app-ink">{getPlanLabel(currentPlan)}</p>
+                <p className="text-[13px] uppercase tracking-[0.16em] text-app-ink-muted">Gói hiện tại</p>
+                <p className="mt-2 font-serif text-[26px] font-medium text-app-ink">{getPlanLabel(currentPlan)}</p>
               </div>
             </div>
           </div>
@@ -160,22 +160,22 @@ export function UpgradePaywallDialog({
           <div className="grid max-h-[calc(100vh-14rem)] gap-6 overflow-y-auto bg-app-bg px-5 py-5 sm:px-7 sm:py-7 xl:grid-cols-[minmax(0,1fr)_360px]">
             <div className="min-w-0 space-y-4">
               <div className="rounded-card border border-app-line bg-app-surface p-5">
-                <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">
+                <p className="text-[13px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">
                   Tính năng đang bị giới hạn
                 </p>
-                <h3 className="mt-2 text-[18px] font-medium text-app-ink">{blockedFeatureLabel}</h3>
-                <p className="mt-2 text-[14px] leading-7 text-app-ink-soft">
+                <h3 className="mt-2 text-[20px] font-medium text-app-ink">{blockedFeatureLabel}</h3>
+                <p className="mt-2 text-[15px] leading-7 text-app-ink-soft">
                   Gói Miễn phí vẫn giúp bạn chạy một chu kỳ 12 tuần cơ bản. Plus mở thêm lớp nâng cao để setup nhanh hơn,
                   giữ nhịp tốt hơn và review rõ hơn.
                 </p>
-                <p className="mt-4 text-[12px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">
+                <p className="mt-4 text-[13px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">
                   Plus mở khóa
                 </p>
                 <div className="mt-4 space-y-3">
                   {paywallCopy.bullets.map((bullet) => (
                     <div key={bullet} className="flex gap-3 rounded-lg border border-app-line bg-app-bg px-4 py-3">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" />
-                      <p className="text-[14px] leading-7 text-app-ink-soft">{bullet}</p>
+                      <p className="text-[15px] leading-7 text-app-ink-soft">{bullet}</p>
                     </div>
                   ))}
                 </div>
@@ -183,13 +183,13 @@ export function UpgradePaywallDialog({
 
               {billingDebugUi && (
                 <div className="rounded-card border border-app-line bg-app-surface p-5">
-                  <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">
+                  <p className="text-[13px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">
                     Trạng thái thanh toán
                   </p>
                   <div className="mt-4 grid gap-2 sm:grid-cols-3">
                     <div className="rounded-lg border border-app-line bg-app-bg px-4 py-3">
-                      <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">Chế độ</p>
-                      <p className="mt-2 text-[14px] font-medium text-app-ink">
+                      <p className="text-[13px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">Chế độ</p>
+                      <p className="mt-2 text-[15px] font-medium text-app-ink">
                         {billingProviderStatus.mode === "api_contract"
                           ? "Máy chủ thanh toán"
                           : billingProviderStatus.mode === "mock_provider"
@@ -198,14 +198,14 @@ export function UpgradePaywallDialog({
                       </p>
                     </div>
                     <div className="rounded-lg border border-app-line bg-app-bg px-4 py-3">
-                      <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">Thanh toán</p>
-                      <p className="mt-2 text-[14px] font-medium text-app-ink">
+                      <p className="text-[13px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">Thanh toán</p>
+                      <p className="mt-2 text-[15px] font-medium text-app-ink">
                         {billingProviderStatus.checkoutReady ? "Sẵn sàng" : "Dự phòng trên thiết bị"}
                       </p>
                     </div>
                     <div className="rounded-lg border border-app-line bg-app-bg px-4 py-3">
-                      <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">Khôi phục</p>
-                      <p className="mt-2 text-[14px] font-medium text-app-ink">
+                      <p className="text-[13px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">Khôi phục</p>
+                      <p className="mt-2 text-[15px] font-medium text-app-ink">
                         {billingProviderStatus.restoreReady ? "Sẵn sàng" : "Dự phòng trên thiết bị"}
                       </p>
                     </div>
@@ -218,11 +218,11 @@ export function UpgradePaywallDialog({
               <legend className="sr-only">Chọn gói nâng cấp</legend>
               {emailVerificationRequired ? (
                 <div className="rounded-card border border-[#F3D9CC] bg-app-warm-soft px-4 py-4 text-[#5C3A2E]">
-                  <p className="flex items-center gap-2 text-[14px] font-medium">
+                  <p className="flex items-center gap-2 text-[15px] font-medium">
                     <LockKeyhole className="h-4 w-4 text-app-warm" />
                     Vui lòng xác thực email trước khi thanh toán.
                   </p>
-                  <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">
+                  <p className="mt-2 text-[15px] leading-6 text-app-ink-soft">
                     Email là cách chúng tôi gửi biên nhận và liên hệ khi cần hỗ trợ hoàn tiền.
                     {user?.email ? ` Địa chỉ đang chờ xác thực: ${user.email}.` : ""}
                   </p>
@@ -251,7 +251,7 @@ export function UpgradePaywallDialog({
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-[20px] font-medium text-app-ink">{plan.name}</p>
+                          <p className="text-[22px] font-medium text-app-ink">{plan.name}</p>
                           {isRecommended && (
                             <Badge className="bg-app-accent text-white hover:bg-app-accent">Khuyên dùng</Badge>
                           )}
@@ -261,8 +261,8 @@ export function UpgradePaywallDialog({
                             </Badge>
                           )}
                         </div>
-                        <p className="mt-2 text-[14px] leading-7 text-app-ink-soft">{plan.description}</p>
-                        <p className="mt-2 text-[14px] leading-7 text-app-ink-soft">
+                        <p className="mt-2 text-[15px] leading-7 text-app-ink-soft">{plan.description}</p>
+                        <p className="mt-2 text-[15px] leading-7 text-app-ink-soft">
                           Nâng cấp {plan.name} để mở khoá {upgradeFeatureLabel.toLowerCase()}. Quyền Plus được kích hoạt
                           sau khi Casso xác nhận chuyển khoản ngân hàng.
                         </p>
@@ -273,11 +273,11 @@ export function UpgradePaywallDialog({
                     </div>
 
                     <div className="mt-5 rounded-card border border-app-line bg-app-surface px-4 py-4">
-                      <p className="text-[12px] uppercase tracking-[0.16em] text-app-ink-muted">
+                      <p className="text-[13px] uppercase tracking-[0.16em] text-app-ink-muted">
                         Giá gói
                       </p>
-                      <p className="mt-2 font-serif text-[30px] font-medium text-app-ink">{plusPriceLabel}</p>
-                      <p className="mt-2 flex items-center gap-2 text-[14px] font-medium text-app-ink-soft">
+                      <p className="mt-2 font-serif text-[32px] font-medium text-app-ink">{plusPriceLabel}</p>
+                      <p className="mt-2 flex items-center gap-2 text-[15px] font-medium text-app-ink-soft">
                         <CreditCard className="h-4 w-4 text-app-accent" />
                         Thanh toán qua {providerLabel}
                       </p>
@@ -292,7 +292,7 @@ export function UpgradePaywallDialog({
                           className="flex gap-3 rounded-lg border border-app-line bg-app-surface px-4 py-3"
                         >
                           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" />
-                          <p className="text-[14px] leading-7 text-app-ink-soft">{feature}</p>
+                          <p className="text-[15px] leading-7 text-app-ink-soft">{feature}</p>
                         </div>
                       ))}
                     </div>
@@ -316,7 +316,7 @@ export function UpgradePaywallDialog({
           </div>
 
           <DialogFooter className="flex flex-col gap-3 border-t border-app-line bg-app-surface px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5">
-            <p className="text-[14px] leading-7 text-app-ink-soft">
+            <p className="text-[15px] leading-7 text-app-ink-soft">
               Bạn sẽ chuyển khoản {plusPriceAmountLabel} đến tài khoản ngân hàng. Sau khi chúng tôi nhận được tiền
               (thường trong 1-2 phút), quyền Plus sẽ kích hoạt và biên nhận gửi về {receiptEmailLabel}. Xem thêm{" "}
               <Link to="/billing/faq" className="font-medium text-app-accent underline-offset-4 hover:underline">

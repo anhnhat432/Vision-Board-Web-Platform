@@ -333,14 +333,14 @@ export function Onboarding() {
         <div className="flex flex-col gap-2 sm:flex-row">
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-lg bg-app-accent px-3.5 py-2 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="inline-flex items-center justify-center rounded-lg bg-app-accent px-3.5 py-2 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             onClick={handleResumeDraft}
           >
             Tiếp tục
           </button>
           <button
             type="button"
-            className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-3.5 py-2 text-[13px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-3.5 py-2 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             onClick={handleRestartDraft}
           >
             Bắt đầu lại
@@ -367,16 +367,16 @@ export function Onboarding() {
           <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-8" aria-labelledby="onboarding-welcome-title">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+                <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
                   BẮT ĐẦU · CÂN BẰNG CUỘC SỐNG
                 </p>
                 <h1
                   id="onboarding-welcome-title"
-                  className="mt-3 max-w-3xl font-serif text-[30px] font-medium leading-tight tracking-tight text-app-ink"
+                  className="mt-3 max-w-3xl font-serif text-[32px] font-medium leading-tight tracking-tight text-app-ink"
                 >
                   Cùng xem bức tranh hiện tại của bạn.
                 </h1>
-                <p className="mt-2 max-w-2xl text-[14px] leading-6 text-app-ink-soft">
+                <p className="mt-2 max-w-2xl text-[15px] leading-6 text-app-ink-soft">
                   Chấm 8 lĩnh vực để chọn đúng nơi cần ưu tiên. Mất khoảng 3 phút.
                 </p>
               </div>
@@ -394,8 +394,8 @@ export function Onboarding() {
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
                       <Icon className="h-4 w-4" aria-hidden="true" />
                     </div>
-                    <h2 className="mt-3 text-[14px] font-medium text-app-ink">{item.title}</h2>
-                    <p className="mt-1 text-[13px] leading-relaxed text-app-ink-soft">{item.description}</p>
+                    <h2 className="mt-3 text-[15px] font-medium text-app-ink">{item.title}</h2>
+                    <p className="mt-1 text-[14px] leading-relaxed text-app-ink-soft">{item.description}</p>
                   </article>
                 );
               })}
@@ -405,7 +405,7 @@ export function Onboarding() {
               {FEATURE_PILLS.map((item) => (
                 <span
                   key={item}
-                  className="rounded-full border border-app-line bg-app-bg px-3 py-1 text-[12px] font-medium text-app-ink-soft"
+                  className="rounded-full border border-app-line bg-app-bg px-3 py-1 text-[13px] font-medium text-app-ink-soft"
                 >
                   {item}
                 </span>
@@ -415,7 +415,7 @@ export function Onboarding() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <button
                 type="button"
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-3 text-[15px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                 onClick={handleStartAssessment}
               >
                 Bắt đầu chấm điểm
@@ -423,7 +423,7 @@ export function Onboarding() {
               </button>
               <button
                 type="button"
-                className="inline-flex items-center justify-center rounded-lg px-5 py-3 text-[14px] font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                className="inline-flex items-center justify-center rounded-lg px-5 py-3 text-[15px] font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                 onClick={handleDefer}
               >
                 Để sau
@@ -442,16 +442,16 @@ export function Onboarding() {
         {draftBanner}
 
         <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-8" aria-labelledby="onboarding-assessment-title">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
             BƯỚC 1 / 6 · CÂN BẰNG CUỘC SỐNG
           </p>
           <h1
             id="onboarding-assessment-title"
-            className="mt-3 max-w-3xl font-serif text-[28px] font-medium leading-tight tracking-tight text-app-ink"
+            className="mt-3 max-w-3xl font-serif text-[30px] font-medium leading-tight tracking-tight text-app-ink"
           >
             Chấm 8 lĩnh vực của bạn
           </h1>
-          <p className="mt-2 max-w-2xl text-[14px] leading-6 text-app-ink-soft">
+          <p className="mt-2 max-w-2xl text-[15px] leading-6 text-app-ink-soft">
             Mỗi lĩnh vực 0 đến 10. 0 = rất kém, 10 = rất tốt. Không cần đúng tuyệt đối — đây là cảm nhận hiện tại.
           </p>
 
@@ -460,24 +460,24 @@ export function Onboarding() {
             className="mt-6 grid gap-3 rounded-card border border-app-line bg-app-bg p-4 sm:grid-cols-2 lg:grid-cols-4"
           >
             <div className="rounded-lg border border-app-line bg-app-surface p-3">
-              <p className="text-[12px] text-app-ink-muted">Điểm trung bình</p>
-              <p className="mt-1 font-serif text-[24px] font-medium text-app-ink tabular-nums">{averageScore.toFixed(1)}/10</p>
+              <p className="text-[13px] text-app-ink-muted">Điểm trung bình</p>
+              <p className="mt-1 font-serif text-[26px] font-medium text-app-ink tabular-nums">{averageScore.toFixed(1)}/10</p>
             </div>
             <div className="rounded-lg border border-app-line bg-app-surface p-3">
-              <p className="text-[12px] text-app-ink-muted">Đã rà soát</p>
-              <p className="mt-1 font-serif text-[24px] font-medium text-app-ink tabular-nums">
+              <p className="text-[13px] text-app-ink-muted">Đã rà soát</p>
+              <p className="mt-1 font-serif text-[26px] font-medium text-app-ink tabular-nums">
                 {reviewedAreaCount}/{lifeAreas.length}
               </p>
             </div>
             <div className="rounded-lg border border-app-line bg-app-surface p-3">
-              <p className="text-[12px] text-app-ink-muted">Ưu tiên</p>
-              <p className="mt-1 text-[14px] font-medium text-app-ink">{getLifeAreaLabel(growthArea.name)}</p>
-              <p className="mt-1 text-[12px] text-app-ink-muted">{growthArea.score}/10</p>
+              <p className="text-[13px] text-app-ink-muted">Ưu tiên</p>
+              <p className="mt-1 text-[15px] font-medium text-app-ink">{getLifeAreaLabel(growthArea.name)}</p>
+              <p className="mt-1 text-[13px] text-app-ink-muted">{growthArea.score}/10</p>
             </div>
             <div className="rounded-lg border border-app-line bg-app-surface p-3">
-              <p className="text-[12px] text-app-ink-muted">Mạnh nhất</p>
-              <p className="mt-1 text-[14px] font-medium text-app-ink">{getLifeAreaLabel(strongestArea.name)}</p>
-              <p className="mt-1 text-[12px] text-app-ink-muted">{strongestArea.score}/10</p>
+              <p className="text-[13px] text-app-ink-muted">Mạnh nhất</p>
+              <p className="mt-1 text-[15px] font-medium text-app-ink">{getLifeAreaLabel(strongestArea.name)}</p>
+              <p className="mt-1 text-[13px] text-app-ink-muted">{strongestArea.score}/10</p>
             </div>
           </div>
         </section>
@@ -495,13 +495,13 @@ export function Onboarding() {
                       <AreaIcon className="h-4 w-4" aria-hidden="true" />
                     </div>
                     <div>
-                      <h2 className="text-[14px] font-medium text-app-ink">{areaLabel}</h2>
-                      <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">
+                      <h2 className="text-[15px] font-medium text-app-ink">{areaLabel}</h2>
+                      <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">
                         {LIFE_AREA_DETAILS[area.name] ?? "Một phần quan trọng trong bức tranh hiện tại của bạn."}
                       </p>
                     </div>
                   </div>
-                  <p className="shrink-0 font-serif text-[28px] font-medium leading-none text-app-ink tabular-nums">
+                  <p className="shrink-0 font-serif text-[30px] font-medium leading-none text-app-ink tabular-nums">
                     {area.score}
                   </p>
                 </div>
@@ -516,7 +516,7 @@ export function Onboarding() {
                     className="w-full"
                     aria-label={`Điểm ${areaLabel}`}
                   />
-                  <div className="mt-2 flex items-center justify-between text-[11px] text-app-ink-muted">
+                  <div className="mt-2 flex items-center justify-between text-[12px] text-app-ink-muted">
                     <span>0</span>
                     <span>10</span>
                   </div>
@@ -531,11 +531,11 @@ export function Onboarding() {
         ) : null}
 
         <footer className="mt-8 flex flex-col-reverse gap-3 border-t border-app-line pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[12px] text-app-ink-muted">Bước 1 / 6 · Cân bằng</p>
+          <p className="text-[13px] text-app-ink-muted">Bước 1 / 6 · Cân bằng</p>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <button
               type="button"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[15px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
               onClick={() => setStep("welcome")}
             >
               <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -543,7 +543,7 @@ export function Onboarding() {
             </button>
             <button
               type="button"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-[15px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
               onClick={handleComplete}
               disabled={!canCompleteAssessment}
             >

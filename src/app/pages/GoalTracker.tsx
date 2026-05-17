@@ -532,8 +532,8 @@ function GoalTrackerContent({
                   <GoalArchetypeIcon className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-[15px] font-semibold text-app-ink line-clamp-2">{goal.title}</h3>
-                  <p className="text-[12px] text-app-ink-muted mt-1">
+                  <h3 className="text-[16px] font-semibold text-app-ink line-clamp-2">{goal.title}</h3>
+                  <p className="text-[13px] text-app-ink-muted mt-1">
                     Tu {systemCurrentWeek ?? "-"}/12 · {getLifeAreaLabel(goal.category)}
                   </p>
                 </div>
@@ -551,21 +551,21 @@ function GoalTrackerContent({
 
             {/* Metadata pills */}
             <div className="mt-3 flex flex-wrap gap-2">
-              <span className="bg-app-bg border border-app-line text-app-ink-soft text-[11px] rounded-full px-2.5 py-0.5">
+              <span className="bg-app-bg border border-app-line text-app-ink-soft text-[12px] rounded-full px-2.5 py-0.5">
                 {getLifeAreaLabel(goal.category)}
               </span>
               {isNearDeadline && (
-                <span className="bg-app-warm-soft text-app-warm text-[11px] rounded-full px-2.5 py-0.5">
+                <span className="bg-app-warm-soft text-app-warm text-[12px] rounded-full px-2.5 py-0.5">
                   Sắp đến hạn
                 </span>
               )}
               {isOverdue && (
-                <span className="bg-[color:var(--color-danger-bg)] text-[color:var(--color-danger-fg)] border border-[color:var(--color-danger-border)] text-[11px] rounded-full px-2.5 py-0.5">
+                <span className="bg-[color:var(--color-danger-bg)] text-[color:var(--color-danger-fg)] border border-[color:var(--color-danger-border)] text-[12px] rounded-full px-2.5 py-0.5">
                   Quá hạn
                 </span>
               )}
               {system && (
-                <span className="bg-app-bg border border-app-line text-app-ink-soft text-[11px] rounded-full px-2.5 py-0.5">
+                <span className="bg-app-bg border border-app-line text-app-ink-soft text-[12px] rounded-full px-2.5 py-0.5">
                   {getPlanLabel(currentPlanCode)}
                 </span>
               )}
@@ -573,7 +573,7 @@ function GoalTrackerContent({
 
             {/* Progress block */}
             <div className="mt-4">
-              <div className="flex items-center justify-between text-[12px]">
+              <div className="flex items-center justify-between text-[13px]">
                 <span className="text-app-ink-soft">Tiến độ</span>
                 <span className="font-medium text-app-ink">
                   <CountUp value={progress} suffix="%" />
@@ -589,7 +589,7 @@ function GoalTrackerContent({
               {system && (
                 <Button
                   variant="outline"
-                  className="rounded-lg border border-app-line bg-app-surface text-app-accent hover:bg-app-accent-soft px-3 py-1.5 text-[13px] font-medium"
+                  className="rounded-lg border border-app-line bg-app-surface text-app-accent hover:bg-app-accent-soft px-3 py-1.5 text-[14px] font-medium"
                   onClick={() => openTwelveWeekCenter(goal.id)}
                 >
                   Mở kế hoạch
@@ -597,7 +597,7 @@ function GoalTrackerContent({
               )}
               <Button
                 variant="ghost"
-                className="text-app-ink-muted hover:text-[color:var(--color-danger-fg)] text-[13px] px-3"
+                className="text-app-ink-muted hover:text-[color:var(--color-danger-fg)] text-[14px] px-3"
                 onClick={() => setGoalToDelete(goal.id)}
               >
                 Xóa
@@ -608,8 +608,8 @@ function GoalTrackerContent({
           {/* Cột phải — Today tasks preview */}
           <div>
             <div className="flex items-baseline justify-between">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">VIỆC HÔM NAY</p>
-              <span className="text-[12px] text-app-ink-muted">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">VIỆC HÔM NAY</p>
+              <span className="text-[13px] text-app-ink-muted">
                 {systemTodayOpenTasks.filter(t => !t.completed).length}/{systemTodayOpenTasks.length}
               </span>
             </div>
@@ -622,19 +622,19 @@ function GoalTrackerContent({
                     onChange={() => handleToggleTask(goal.id, task.id)}
                     className="size-4 rounded border-[1.5px] border-[#C8C2B6] bg-app-surface data-[state=checked]:bg-app-accent data-[state=checked]:border-app-accent"
                   />
-                  <span className={`text-[13px] line-clamp-1 ${task.completed ? "line-through text-app-ink-muted" : "text-app-ink"}`}>
+                  <span className={`text-[14px] line-clamp-1 ${task.completed ? "line-through text-app-ink-muted" : "text-app-ink"}`}>
                     {task.title}
                   </span>
                 </div>
               ))}
               {systemTodayOpenTasks.length === 0 && (
-                <p className="text-[12px] text-app-ink-muted">Không có việc nào hôm nay</p>
+                <p className="text-[13px] text-app-ink-muted">Không có việc nào hôm nay</p>
               )}
             </div>
             {system && (
               <button
                 type="button"
-                className="mt-2 text-app-accent text-[12px] hover:underline"
+                className="mt-2 text-app-accent text-[13px] hover:underline"
                 onClick={() => openTwelveWeekCenter(goal.id)}
               >
                 Xem tất cả →
@@ -682,10 +682,10 @@ function GoalTrackerContent({
       <div data-tour-id="goaltracker-hero">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">MỤC TIÊU</p>
-          <h1 className="mt-3 font-serif text-[30px] font-medium leading-tight tracking-tight text-app-ink">
+          <h1 className="mt-3 font-serif text-[32px] font-medium leading-tight tracking-tight text-app-ink">
             Mục tiêu của bạn
           </h1>
-          <p className="mt-2 text-[14px] text-app-ink-soft max-w-2xl">
+          <p className="mt-2 text-[15px] text-app-ink-soft max-w-2xl">
             Theo dõi tiến độ tất cả mục tiêu hiện tại và cũ.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -696,11 +696,11 @@ function GoalTrackerContent({
                 placeholder="Tìm theo tên hoặc mô tả..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full sm:w-80 rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-[14px] text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/30 focus:border-app-accent"
+                className="w-full sm:w-80 rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-[15px] text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/30 focus:border-app-accent"
               />
             </div>
             <Button
-              className="bg-app-accent text-white rounded-lg px-4 py-2 text-[14px] font-medium hover:bg-[#284f45] inline-flex items-center gap-2"
+              className="bg-app-accent text-white rounded-lg px-4 py-2 text-[15px] font-medium hover:bg-[#284f45] inline-flex items-center gap-2"
               onClick={handleStartGuidedGoalFlow}
               disabled={hasReachedLimit(viewUserData, "maxActiveGoals")}
             >
@@ -722,10 +722,10 @@ function GoalTrackerContent({
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{item.title}</p>
-                  <p className="mt-2 text-[26px] font-medium text-app-ink sm:text-2xl tabular-nums">
+                  <p className="mt-2 text-[28px] font-medium text-app-ink sm:text-2xl tabular-nums">
                     {typeof item.value === "number" ? <CountUp value={item.value} /> : item.value}
                   </p>
-                  <p className="mt-1 text-[12px] text-app-ink-muted">{item.note}</p>
+                  <p className="mt-1 text-[13px] text-app-ink-muted">{item.note}</p>
                 </div>
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-app-bg text-app-accent">
                   <Icon className="h-4 w-4" />
@@ -749,7 +749,7 @@ function GoalTrackerContent({
               <Target className="h-10 w-10" />
             </div>
             <h2 className="mt-4 font-serif text-2xl font-medium text-app-ink">Chưa có mục tiêu</h2>
-            <p className="mx-auto mt-2 max-w-md text-[14px] text-app-ink-soft">
+            <p className="mx-auto mt-2 max-w-md text-[15px] text-app-ink-soft">
               Bắt đầu bằng chu kỳ 12 tuần đầu tiên — hoặc tạo mục tiêu thường nếu bạn chưa sẵn sàng.
             </p>
             <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
@@ -775,8 +775,8 @@ function GoalTrackerContent({
                 <div className="flex items-baseline justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">CHU KỲ 12 TUẦN</p>
-                    <h2 className="mt-1 text-[15px] font-semibold text-app-ink">Mục tiêu đang chạy</h2>
-                    <p className="mt-1 text-[12px] text-app-ink-muted">
+                    <h2 className="mt-1 text-[16px] font-semibold text-app-ink">Mục tiêu đang chạy</h2>
+                    <p className="mt-1 text-[13px] text-app-ink-muted">
                       {filteredTwelveWeekGoals.length} mục tiêu
                     </p>
                   </div>
@@ -794,7 +794,7 @@ function GoalTrackerContent({
                 <div className="flex items-baseline justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">MỤC TIÊU THƯỜNG</p>
-                    <h2 className="mt-1 text-[15px] font-semibold text-app-ink">
+                    <h2 className="mt-1 text-[16px] font-semibold text-app-ink">
                       {filteredStandardGoals.length} mục tiêu
                     </h2>
                   </div>

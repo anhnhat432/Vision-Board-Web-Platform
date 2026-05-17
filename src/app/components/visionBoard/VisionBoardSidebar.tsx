@@ -76,7 +76,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
     <div className={`stack-stack ${className ?? ""}`}>
       <Card className="rounded-[var(--r-card)] border border-app-line bg-app-surface">
         <CardContent className="p-5">
-          <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Câu chuyện theo life area</h3>
+          <h3 className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Câu chuyện theo life area</h3>
           <p className="mt-1 text-xs text-app-ink-soft">
             Mỗi vùng đại diện một mảng cuộc sống. Vùng trống = cảm hứng đang thiếu.
           </p>
@@ -103,7 +103,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
                       </span>
                       <span className="text-sm font-semibold text-app-ink">{LIFE_AREA_LABELS[area.name]}</span>
                       {isFocus && (
-                        <span className="rounded-full bg-app-accent-soft px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-app-accent">
+                        <span className="rounded-full bg-app-accent-soft px-1.5 py-0.5 text-[12px] font-semibold uppercase tracking-wider text-app-accent">
                           Trọng tâm
                         </span>
                       )}
@@ -118,7 +118,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
                     />
                   </div>
                   {count === 0 && (
-                    <p className="mt-2 text-[11px] italic text-app-ink-muted">Thêm 1 ảnh hoặc câu nói cho vùng này.</p>
+                    <p className="mt-2 text-[12px] italic text-app-ink-muted">Thêm 1 ảnh hoặc câu nói cho vùng này.</p>
                   )}
                 </div>
               );
@@ -129,7 +129,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
 
       <Card className="rounded-[var(--r-card)] border border-app-line bg-app-surface">
         <CardContent className="p-5">
-          <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Tóm tắt nhanh</h3>
+          <h3 className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Tóm tắt nhanh</h3>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <SummaryStat label="Hình ảnh" value={stats.counters.image} />
             <SummaryStat label="Câu nói" value={stats.counters.quote} />
@@ -144,7 +144,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
 
       <Card className="rounded-[var(--r-card)] border border-app-line bg-app-surface">
         <CardContent className="p-5">
-          <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Gợi ý bố cục</h3>
+          <h3 className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Gợi ý bố cục</h3>
           <ul className="mt-3 space-y-2 text-sm leading-relaxed text-app-ink-soft">
             <li>Đặt hình ảnh quan trọng nhất ở trung tâm hoặc góc trái trên.</li>
             <li>Dùng 1-2 câu nói đủ mạnh thay vì rải quá nhiều câu chữ.</li>
@@ -160,7 +160,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
 function SummaryStat({ label, value }: { label: string; value: number }): JSX.Element {
   return (
     <div className="rounded-[var(--r-tile)] border border-app-line bg-app-surface px-3 py-2">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-app-ink-muted">{label}</p>
+      <p className="text-[12px] font-semibold uppercase tracking-wider text-app-ink-muted">{label}</p>
       <p className="mt-0.5 text-2xl font-bold text-app-ink">{value}</p>
     </div>
   );

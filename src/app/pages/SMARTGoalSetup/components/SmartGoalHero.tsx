@@ -45,16 +45,16 @@ export function SmartGoalHero({
 
   return (
     <section aria-labelledby="smart-goal-setup-title">
-      <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+      <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
         {focusAreaLabel} · Mục tiêu mới
       </p>
       <h1
         id="smart-goal-setup-title"
-        className="mt-3 font-serif text-[30px] font-medium leading-tight tracking-[-0.02em] text-app-ink sm:text-[34px]"
+        className="mt-3 font-serif text-[32px] font-medium leading-tight tracking-[-0.02em] text-app-ink sm:text-[38px]"
       >
         Viết mục tiêu SMART đầu tiên cho {focusAreaLabel}.
       </h1>
-      <p className="mt-2 max-w-2xl text-[14px] leading-6 text-app-ink-soft">
+      <p className="mt-2 max-w-2xl text-[15px] leading-6 text-app-ink-soft">
         {smartGoalStarter.specificGoalStatement}
       </p>
 
@@ -69,10 +69,10 @@ export function SmartGoalHero({
               key={step.key}
               className={
                 active
-                  ? "inline-flex items-center gap-2 rounded-full bg-app-accent-soft px-2.5 py-1 text-[11px] font-medium text-app-accent ring-2 ring-app-accent"
+                  ? "inline-flex items-center gap-2 rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent ring-2 ring-app-accent"
                   : done
-                    ? "inline-flex items-center gap-2 rounded-full bg-app-accent px-2.5 py-1 text-[11px] font-medium text-white"
-                    : "inline-flex items-center gap-2 rounded-full border border-app-line bg-app-bg px-2.5 py-1 text-[11px] font-medium text-app-ink-muted"
+                    ? "inline-flex items-center gap-2 rounded-full bg-app-accent px-2.5 py-1 text-[12px] font-medium text-white"
+                    : "inline-flex items-center gap-2 rounded-full border border-app-line bg-app-bg px-2.5 py-1 text-[12px] font-medium text-app-ink-muted"
               }
               aria-current={active ? "step" : undefined}
             >

@@ -243,11 +243,11 @@ export function SettingsPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 pb-12 pt-8 sm:px-6">
       <header>
-        <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">CÀI ĐẶT</p>
-        <h1 className="mt-3 font-serif text-[30px] font-medium leading-tight tracking-tight text-app-ink">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">CÀI ĐẶT</p>
+        <h1 className="mt-3 font-serif text-[32px] font-medium leading-tight tracking-tight text-app-ink">
           Tuỳ chỉnh tài khoản
         </h1>
-        <p className="mt-2 max-w-2xl text-[14px] leading-6 text-app-ink-soft">
+        <p className="mt-2 max-w-2xl text-[15px] leading-6 text-app-ink-soft">
           Quản lý tài khoản, dữ liệu lưu trên thiết bị và những tuỳ chọn nhỏ để app chạy đúng nhịp của bạn.
         </p>
       </header>
@@ -261,8 +261,8 @@ export function SettingsPage() {
                   <RotateCcw className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[15px] font-semibold text-app-ink">Có 1 bản sao dữ liệu cũ chưa được phục hồi</p>
-                  <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">
+                  <p className="text-[16px] font-semibold text-app-ink">Có 1 bản sao dữ liệu cũ chưa được phục hồi</p>
+                  <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
                     Bấm để khôi phục dữ liệu cũ. Thao tác này sẽ ghi đè dữ liệu hiện tại trên thiết bị này.
                   </p>
                 </div>
@@ -283,10 +283,10 @@ export function SettingsPage() {
                   <AlertTriangle className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[15px] font-semibold text-app-ink">
+                  <p className="text-[16px] font-semibold text-app-ink">
                     {expiryInfo.isExpired ? "Gói Plus đã hết hạn" : `Gói Plus còn ${expiryInfo.daysLeft ?? 0} ngày`}
                   </p>
-                  <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">
+                  <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
                     {expiryInfo.isExpired
                       ? "Gia hạn để mở lại quyền Plus trên tài khoản này."
                       : `Chu kỳ hiện tại hết hạn ngày ${formatBillingExpiryDate(expiryInfo.expiresAt)}.`}
@@ -307,31 +307,31 @@ export function SettingsPage() {
               <User2 className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-[15px] font-semibold text-app-ink">Tài khoản</h2>
-              <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">Thông tin đăng nhập hiện tại của không gian làm việc này.</p>
+              <h2 className="text-[16px] font-semibold text-app-ink">Tài khoản</h2>
+              <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">Thông tin đăng nhập hiện tại của không gian làm việc này.</p>
             </div>
           </div>
 
           <div className="mt-5 grid gap-5 md:grid-cols-[auto_1fr] md:items-start">
             <div className="flex items-center gap-3 md:block">
-              <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-app-line bg-app-bg text-[22px] font-semibold text-app-accent">
+              <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-app-line bg-app-bg text-[24px] font-semibold text-app-accent">
                 {avatarUrl ? <img src={avatarUrl} alt="Ảnh đại diện" className="h-full w-full object-cover" /> : accountInitial}
               </div>
               <div className="md:mt-3">
-                <p className="text-[12px] font-medium text-app-ink-muted">Ảnh đại diện</p>
-                <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">Đồng bộ từ tài khoản đăng nhập nếu có.</p>
+                <p className="text-[13px] font-medium text-app-ink-muted">Ảnh đại diện</p>
+                <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">Đồng bộ từ tài khoản đăng nhập nếu có.</p>
               </div>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="settings-display-name" className="mb-2 block text-[13px] font-medium text-app-ink">
+                <label htmlFor="settings-display-name" className="mb-2 block text-[14px] font-medium text-app-ink">
                   Tên hiển thị
                 </label>
                 <input id="settings-display-name" readOnly value={accountLabel} className={`${inputClass} bg-app-bg`} />
               </div>
               <div>
-                <label htmlFor="settings-email" className="mb-2 block text-[13px] font-medium text-app-ink">
+                <label htmlFor="settings-email" className="mb-2 block text-[14px] font-medium text-app-ink">
                   Email
                 </label>
                 <input id="settings-email" readOnly value={accountEmail} className={`${inputClass} bg-app-bg`} />
@@ -342,11 +342,11 @@ export function SettingsPage() {
           <div className="mt-5 rounded-lg border border-app-line bg-app-bg p-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="flex items-center gap-2 text-[13px] font-medium text-app-ink">
+                <p className="flex items-center gap-2 text-[14px] font-medium text-app-ink">
                   <span className={`h-2.5 w-2.5 rounded-full ${isConfigured && user ? "bg-app-accent" : "bg-app-ink-muted"}`} />
                   {accountStatus}
                 </p>
-                <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">Gói hiện tại: {userData.subscription?.planCode ?? "FREE"}</p>
+                <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">Gói hiện tại: {userData.subscription?.planCode ?? "FREE"}</p>
               </div>
               <Button type="button" variant="outline" onClick={handleAccountExport} disabled={!isConfigured || !user || isExportingAccount}>
                 {isExportingAccount ? <Loader2 className="h-4 w-4 animate-spin" /> : <CloudDownload className="h-4 w-4" />}
@@ -362,8 +362,8 @@ export function SettingsPage() {
               <Palette className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-[15px] font-semibold text-app-ink">Tuỳ chọn trải nghiệm</h2>
-              <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">Giao diện, ngôn ngữ và nhắc việc nhẹ trong hệ 12 tuần.</p>
+              <h2 className="text-[16px] font-semibold text-app-ink">Tuỳ chọn trải nghiệm</h2>
+              <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">Giao diện, ngôn ngữ và nhắc việc nhẹ trong hệ 12 tuần.</p>
             </div>
           </div>
 
@@ -372,8 +372,8 @@ export function SettingsPage() {
               <div className="flex items-start gap-3">
                 <Palette className="mt-0.5 h-4 w-4 text-app-ink-muted" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-semibold text-app-ink">Giao diện</p>
-                  <p className="mt-1 text-[12px] text-app-ink-muted">Đang dùng: {resolvedTheme === "dark" ? "Tối" : "Sáng"}</p>
+                  <p className="text-[14px] font-semibold text-app-ink">Giao diện</p>
+                  <p className="mt-1 text-[13px] text-app-ink-muted">Đang dùng: {resolvedTheme === "dark" ? "Tối" : "Sáng"}</p>
                   <fieldset className="mt-3 grid gap-2 sm:grid-cols-3">
                     <legend className="sr-only">Chọn giao diện</legend>
                     {themeOptions.map((option) => {
@@ -393,8 +393,8 @@ export function SettingsPage() {
                             onChange={() => setTheme(option.value)}
                             className="sr-only"
                           />
-                          <span className="block text-[13px] font-medium">{option.label}</span>
-                          <span className="mt-1 block text-[12px] leading-5 text-app-ink-muted">{option.description}</span>
+                          <span className="block text-[14px] font-medium">{option.label}</span>
+                          <span className="mt-1 block text-[13px] leading-5 text-app-ink-muted">{option.description}</span>
                         </label>
                       );
                     })}
@@ -407,13 +407,13 @@ export function SettingsPage() {
               <div className="flex items-start gap-3">
                 <Languages className="mt-0.5 h-4 w-4 text-app-ink-muted" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-semibold text-app-ink">Ngôn ngữ</p>
+                  <p className="text-[14px] font-semibold text-app-ink">Ngôn ngữ</p>
                   <fieldset className="mt-3">
                     <legend className="sr-only">Ngôn ngữ</legend>
                     <label className="block rounded-lg border border-app-accent bg-app-accent-soft p-3 text-app-accent">
                       <input type="radio" name="settings-language" checked readOnly className="sr-only" />
-                      <span className="block text-[13px] font-medium">{localeLabel}</span>
-                      <span className="mt-1 block text-[12px] leading-5 text-app-ink-muted">Tiếng Việt tự nhiên cho toàn bộ flow hiện tại.</span>
+                      <span className="block text-[14px] font-medium">{localeLabel}</span>
+                      <span className="mt-1 block text-[13px] leading-5 text-app-ink-muted">Tiếng Việt tự nhiên cho toàn bộ flow hiện tại.</span>
                     </label>
                   </fieldset>
                 </div>
@@ -426,8 +426,8 @@ export function SettingsPage() {
                 <div className="min-w-0 flex-1 space-y-3">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-[13px] font-semibold text-app-ink">Nhắc việc trong app</p>
-                      <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">Hiện gợi ý nhẹ khi có việc hoặc review cần quay lại.</p>
+                      <p className="text-[14px] font-semibold text-app-ink">Nhắc việc trong app</p>
+                      <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">Hiện gợi ý nhẹ khi có việc hoặc review cần quay lại.</p>
                     </div>
                     <Switch
                       checked={appPreferences.enableInAppReminders}
@@ -438,11 +438,11 @@ export function SettingsPage() {
                   </div>
                   <div className="flex items-center justify-between gap-4 border-t border-app-line pt-3">
                     <div>
-                      <p className="flex items-center gap-2 text-[13px] font-semibold text-app-ink">
+                      <p className="flex items-center gap-2 text-[14px] font-semibold text-app-ink">
                         <Volume2 className="h-4 w-4 text-app-ink-muted" />
                         Âm thanh khi xong việc
                       </p>
-                      <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">Phát một tiếng rất nhẹ khi bạn chốt xong việc hôm nay.</p>
+                      <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">Phát một tiếng rất nhẹ khi bạn chốt xong việc hôm nay.</p>
                     </div>
                     <Switch
                       id="task-complete-sound"
@@ -464,30 +464,30 @@ export function SettingsPage() {
               <CloudDownload className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-[15px] font-semibold text-app-ink">Dữ liệu</h2>
-              <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">Local-first: dữ liệu lưu trên thiết bị trước, rồi sao lưu vào tài khoản khi đủ điều kiện.</p>
+              <h2 className="text-[16px] font-semibold text-app-ink">Dữ liệu</h2>
+              <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">Local-first: dữ liệu lưu trên thiết bị trước, rồi sao lưu vào tài khoản khi đủ điều kiện.</p>
             </div>
           </div>
 
           <div id="account-sync" className="mt-5 scroll-mt-24 space-y-4">
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-lg border border-app-line bg-app-bg p-3">
-                <p className="text-[13px] font-semibold text-app-ink">Thiết bị</p>
-                <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">Thay đổi được giữ ngay trên thiết bị này.</p>
+                <p className="text-[14px] font-semibold text-app-ink">Thiết bị</p>
+                <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">Thay đổi được giữ ngay trên thiết bị này.</p>
               </div>
               <div className="rounded-lg border border-app-line bg-app-bg p-3">
-                <p className="text-[13px] font-semibold text-app-ink">Tài khoản</p>
-                <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">{formatSyncTime(autoSyncState.lastSyncedAt)}</p>
+                <p className="text-[14px] font-semibold text-app-ink">Tài khoản</p>
+                <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">{formatSyncTime(autoSyncState.lastSyncedAt)}</p>
               </div>
               <div className="rounded-lg border border-app-line bg-app-bg p-3">
-                <p className="text-[13px] font-semibold text-app-ink">Đang chờ đồng bộ</p>
-                <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">
+                <p className="text-[14px] font-semibold text-app-ink">Đang chờ đồng bộ</p>
+                <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">
                   {autoSyncState.pendingCount > 0 ? `${autoSyncState.pendingCount} thay đổi chờ đồng bộ` : "Không có thay đổi chờ đồng bộ"}
                 </p>
               </div>
             </div>
 
-            <div className="rounded-lg border border-app-line bg-app-bg p-3 text-[13px] leading-6 text-app-ink-soft">
+            <div className="rounded-lg border border-app-line bg-app-bg p-3 text-[14px] leading-6 text-app-ink-soft">
               <div className="flex gap-2">
                 <SyncIcon className={`mt-0.5 h-4 w-4 shrink-0 ${autoSyncState.syncing ? "animate-spin text-app-accent" : "text-app-ink-muted"}`} />
                 <p>
@@ -503,7 +503,7 @@ export function SettingsPage() {
             </div>
 
             {autoSyncState.lastResult?.message ? (
-              <div className="rounded-lg border border-app-line bg-app-surface p-3 text-[13px] leading-6 text-app-ink-soft">
+              <div className="rounded-lg border border-app-line bg-app-surface p-3 text-[14px] leading-6 text-app-ink-soft">
                 <p className="font-semibold text-app-ink">Kết quả gần nhất</p>
                 <p className="mt-1">{autoSyncState.lastResult.message}</p>
               </div>
@@ -538,8 +538,8 @@ export function SettingsPage() {
                 <div className="flex gap-3">
                   <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-[color:var(--color-danger-fg)]" />
                   <div>
-                    <p className="text-[15px] font-semibold text-[color:var(--color-danger-fg)]">Vùng nguy hiểm</p>
-                    <p className="mt-1 text-[13px] leading-6 text-[color:var(--color-danger-fg)]">
+                    <p className="text-[16px] font-semibold text-[color:var(--color-danger-fg)]">Vùng nguy hiểm</p>
+                    <p className="mt-1 text-[14px] leading-6 text-[color:var(--color-danger-fg)]">
                       Xóa dữ liệu trên thiết bị này chỉ nên làm sau khi bạn đã tải bản dự phòng.
                     </p>
                   </div>
@@ -558,9 +558,9 @@ export function SettingsPage() {
         </section>
 
         <section className="rounded-card border border-app-line bg-app-surface p-6 md:p-8" aria-label="Thông tin ứng dụng">
-          <h2 className="text-[15px] font-semibold text-app-ink">Thông tin</h2>
-          <p className="mt-2 text-[12px] leading-5 text-app-ink-muted">Phiên bản v0.4 · Vision Board Web Platform · local-first 12-Week Year.</p>
-          <div className="mt-4 flex flex-wrap gap-3 text-[12px] font-medium text-app-ink-soft">
+          <h2 className="text-[16px] font-semibold text-app-ink">Thông tin</h2>
+          <p className="mt-2 text-[13px] leading-5 text-app-ink-muted">Phiên bản v0.4 · Vision Board Web Platform · local-first 12-Week Year.</p>
+          <div className="mt-4 flex flex-wrap gap-3 text-[13px] font-medium text-app-ink-soft">
             <Link to="/privacy" className="rounded-full border border-app-line bg-app-bg px-3 py-1.5 hover:text-app-accent">
               Bảo mật
             </Link>

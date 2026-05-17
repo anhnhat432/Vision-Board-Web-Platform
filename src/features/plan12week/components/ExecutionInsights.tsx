@@ -39,7 +39,7 @@ export function ExecutionInsights({
 
   return (
     <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
-      <h3 className="text-[15px] font-semibold text-app-ink">Góc nhìn thực hiện</h3>
+      <h3 className="text-[16px] font-semibold text-app-ink">Góc nhìn thực hiện</h3>
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         {insights.map((insight) => (
           <div
@@ -48,7 +48,7 @@ export function ExecutionInsights({
           >
             <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" />
             <div className="min-w-0">
-              <p className="text-[13px] font-medium text-app-ink">{insight.title}</p>
+              <p className="text-[14px] font-medium text-app-ink">{insight.title}</p>
               <p className="mt-1 text-xs leading-relaxed text-app-ink-muted">{insight.description}</p>
             </div>
           </div>

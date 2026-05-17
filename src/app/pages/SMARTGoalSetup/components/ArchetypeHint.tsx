@@ -61,13 +61,13 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
       data-archetype-hint-variant={variant}
     >
       {showArchetypeTag ? (
-        <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">
+        <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">
           Loại mục tiêu: {archetypeLabel}
         </p>
       ) : null}
       <div className="flex items-start gap-2">
         <Icon className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
-        <div className="min-w-0 text-[12px] leading-relaxed text-app-ink-soft">
+        <div className="min-w-0 text-[13px] leading-relaxed text-app-ink-soft">
           <p className="font-medium text-app-ink">{VARIANT_TITLE[variant]}</p>
           <div className="mt-1.5">{body}</div>
         </div>

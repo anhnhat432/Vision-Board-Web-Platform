@@ -36,20 +36,20 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
     <div className="space-y-6">
       <section className="grid gap-6 md:grid-cols-[minmax(0,1fr)_280px] md:items-end">
         <div>
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
             Xin chào, đây là Vision Board
           </p>
-          <h1 className="mt-4 max-w-3xl font-serif text-[34px] font-medium leading-[1.12] tracking-[-0.02em] text-app-ink sm:text-[40px]">
+          <h1 className="mt-4 max-w-3xl font-serif text-[38px] font-medium leading-[1.12] tracking-[-0.02em] text-app-ink sm:text-[44px]">
             Một chỗ tĩnh để bạn nhìn lại tuần sống của mình.
           </h1>
-          <p className="mt-4 max-w-2xl text-[15px] leading-7 text-app-ink-soft">
+          <p className="mt-4 max-w-2xl text-[16px] leading-7 text-app-ink-soft">
             Đi từ cân bằng cuộc sống, mục tiêu SMART, kế hoạch 12 tuần đến việc hôm nay. Ít màn hình hơn, rõ việc tiếp theo hơn.
           </p>
         </div>
 
         <div className="hidden rounded-card border border-app-line bg-app-surface p-5 md:block">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Nhịp sản phẩm</p>
-          <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Nhịp sản phẩm</p>
+          <p className="mt-2 text-[15px] leading-6 text-app-ink-soft">
             Local-first. Lưu trước trên thiết bị, đồng bộ khi bạn đăng nhập và kết nối sẵn sàng.
           </p>
         </div>
@@ -63,10 +63,10 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
                 <HardDrive className="h-4 w-4" />
               </div>
               <div>
-                <h2 id="dashboard-local-data-title" className="text-[15px] font-semibold text-[#5C3A2E]">
+                <h2 id="dashboard-local-data-title" className="text-[16px] font-semibold text-[#5C3A2E]">
                   Có dữ liệu đã lưu trên thiết bị này
                 </h2>
-                <p className="mt-1 text-[13px] leading-6 text-[#5C3A2E]">
+                <p className="mt-1 text-[14px] leading-6 text-[#5C3A2E]">
                   Đăng nhập để kiểm tra, sao lưu và nhập dữ liệu này vào tài khoản. Chúng tôi không ghi đè dữ liệu tài khoản nếu chưa có xác nhận của bạn.
                 </p>
               </div>
@@ -75,7 +75,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
               <button
                 type="button"
                 onClick={onSignIn}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-warm px-3.5 py-2 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-[#c56b4e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-warm px-3.5 py-2 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#c56b4e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
               >
                 <LogIn className="h-4 w-4" />
                 Đăng nhập để khôi phục
@@ -83,7 +83,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
               <button
                 type="button"
                 onClick={onSignUp}
-                className="inline-flex items-center justify-center rounded-lg border border-[#F3D9CC] bg-app-surface px-3.5 py-2 text-[13px] font-medium text-[#5C3A2E] transition-colors duration-150 hover:bg-app-warm-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                className="inline-flex items-center justify-center rounded-lg border border-[#F3D9CC] bg-app-surface px-3.5 py-2 text-[14px] font-medium text-[#5C3A2E] transition-colors duration-150 hover:bg-app-warm-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
               >
                 Tạo tài khoản mới
               </button>
@@ -103,9 +103,9 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-[15px] font-semibold text-app-ink">{feature.title}</h2>
-                  <p className="mt-1 text-[13px] leading-6 text-app-ink-muted">{feature.description}</p>
-                  <a className="mt-3 inline-flex text-[13px] font-medium text-app-accent" href={feature.href}>
+                  <h2 className="text-[16px] font-semibold text-app-ink">{feature.title}</h2>
+                  <p className="mt-1 text-[14px] leading-6 text-app-ink-muted">{feature.description}</p>
+                  <a className="mt-3 inline-flex text-[14px] font-medium text-app-accent" href={feature.href}>
                     Khám phá →
                   </a>
                 </div>
@@ -118,11 +118,11 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
       <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-6" aria-labelledby="dashboard-public-cta-title">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Bắt đầu đúng thứ tự</p>
-            <h2 id="dashboard-public-cta-title" className="mt-2 font-serif text-[24px] font-medium leading-8 text-app-ink">
+            <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Bắt đầu đúng thứ tự</p>
+            <h2 id="dashboard-public-cta-title" className="mt-2 font-serif text-[26px] font-medium leading-8 text-app-ink">
               Đăng nhập để bắt đầu
             </h2>
-            <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">
+            <p className="mt-2 text-[15px] leading-6 text-app-ink-soft">
               Tạo không gian 12 tuần đầu tiên, rồi quay lại Trang chính để theo dõi nhịp tuần.
             </p>
           </div>
@@ -130,7 +130,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
             <button
               type="button"
               onClick={onStart}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#264d43] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-app-accent px-4 py-2.5 text-[15px] font-medium text-white transition-colors duration-150 hover:bg-[#264d43] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             >
               <UserPlus className="h-4 w-4" />
               {primaryLabel}
@@ -138,7 +138,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
             <button
               type="button"
               onClick={onSignIn}
-              className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[14px] font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[15px] font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             >
               Đăng nhập
             </button>

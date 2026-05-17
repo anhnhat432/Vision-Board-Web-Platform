@@ -86,7 +86,7 @@ export function VisionBoardCanvas({
               }}
             >
               <span
-                className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+                className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[12px] font-semibold uppercase tracking-wider"
                 style={{ backgroundColor: `${area.color}26`, color: area.color }}
               >
                 {LIFE_AREA_LABELS[area.name] ?? area.name}

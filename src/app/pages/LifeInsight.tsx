@@ -199,29 +199,29 @@ export function LifeInsight() {
           <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
             {/* Header section */}
             <div className="max-w-2xl">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+              <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
                 BƯỚC 2 / 6 · GÓC NHÌN CUỘC SỐNG
               </p>
-              <h1 className="mt-3 text-[30px] font-medium leading-tight tracking-tight text-app-ink" style={{ fontFamily: "var(--font-serif)" }}>
+              <h1 className="mt-3 text-[32px] font-medium leading-tight tracking-tight text-app-ink" style={{ fontFamily: "var(--font-serif)" }}>
                 Chọn nơi đáng ưu tiên trong 12 tuần tới.
               </h1>
-              <p className="mt-2 text-[14px] text-app-ink-soft">
+              <p className="mt-2 text-[15px] text-app-ink-soft">
                 Dữ liệu cân bằng cho thấy đâu là điểm mỏng và mạnh nhất. Chọn 1 lĩnh vực để biến thành mục tiêu SMART.
               </p>
             </div>
 
             {/* Status pills row */}
             <div className="mt-4 flex flex-wrap gap-2">
-              <span className="inline-flex items-center rounded-full bg-app-accent-soft px-3 py-1 text-[12px] font-medium text-app-accent">
+              <span className="inline-flex items-center rounded-full bg-app-accent-soft px-3 py-1 text-[13px] font-medium text-app-accent">
                 <Target className="mr-1 h-3.5 w-3.5" />
                 Đề xuất ưu tiên: {focusAreaLabel}
               </span>
-              <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3 py-1 text-[12px] text-app-ink-soft">
+              <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3 py-1 text-[13px] text-app-ink-soft">
                 <Compass className="mr-1 h-3.5 w-3.5" />
                 Đang chọn tự động
               </span>
               {isCustomSelection && (
-                <span className="inline-flex items-center rounded-full bg-app-warm-soft px-3 py-1 text-[12px] font-medium text-app-warm">
+                <span className="inline-flex items-center rounded-full bg-app-warm-soft px-3 py-1 text-[13px] font-medium text-app-warm">
                   <Sparkles className="mr-1 h-3.5 w-3.5" />
                   Bạn đã chọn thủ công
                 </span>
@@ -233,13 +233,13 @@ export function LifeInsight() {
               {/* Radar chart */}
               <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-[15px] font-semibold text-app-ink">Bánh xe của bạn</h3>
-                  <p className="text-[12px] text-app-ink-muted">8 lĩnh vực hiện tại</p>
+                  <h3 className="text-[16px] font-semibold text-app-ink">Bánh xe của bạn</h3>
+                  <p className="text-[13px] text-app-ink-muted">8 lĩnh vực hiện tại</p>
                 </div>
                 <div className="mt-4">
                   <SimpleRadarChart
                     data={radarData}
-                    height={280}
+                    height={360}
                     stroke="var(--app-accent)"
                     fill="var(--app-accent)"
                     fillOpacity={0.24}
@@ -249,7 +249,7 @@ export function LifeInsight() {
                   <button
                     type="button"
                     onClick={() => navigate("/life-balance")}
-                    className="text-[13px] text-app-accent hover:underline"
+                    className="text-[14px] text-app-accent hover:underline"
                   >
                     Chấm lại điểm →
                   </button>
@@ -258,15 +258,15 @@ export function LifeInsight() {
 
               {/* Selection summary */}
               <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
-                <p className="text-[12px] text-app-ink-muted">Đang chọn</p>
+                <p className="text-[13px] text-app-ink-muted">Đang chọn</p>
                 <div className="mt-3">
                   <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
                     <FocusAreaIcon className="h-6 w-6" />
                   </div>
-                  <h2 className="mt-3 text-[22px] font-medium text-app-ink" style={{ fontFamily: "var(--font-serif)" }}>
+                  <h2 className="mt-3 text-[24px] font-medium text-app-ink" style={{ fontFamily: "var(--font-serif)" }}>
                     {focusAreaLabel}
                   </h2>
-                  <p className="mt-2 text-[13px] text-app-ink-soft">
+                  <p className="mt-2 text-[14px] text-app-ink-soft">
                     <span className="inline-flex items-center gap-1">
                       {focusArea.score === lowestArea.score ? (
                         <TrendingDown className="h-3.5 w-3.5 text-app-warm" />
@@ -276,12 +276,12 @@ export function LifeInsight() {
                       Điểm hiện tại: {focusArea.score}/10
                     </span>
                   </p>
-                  <p className="mt-3 text-[14px] leading-relaxed text-app-ink">
+                  <p className="mt-3 text-[15px] leading-relaxed text-app-ink">
                     {smartGoalStarter.motivationReason}
                   </p>
                   {selectedIntent && (
                     <div className="mt-3">
-                      <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-2.5 py-1 text-[11px] text-app-ink-soft">
+                      <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-2.5 py-1 text-[12px] text-app-ink-soft">
                         {intentOptions.find((o) => o.id === selectedIntent)?.label}
                       </span>
                     </div>
@@ -294,8 +294,8 @@ export function LifeInsight() {
           {/* Life areas grid */}
           <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
             <div>
-              <h3 className="text-[15px] font-semibold text-app-ink">Hoặc chọn lĩnh vực khác</h3>
-              <p className="mt-1 text-[12px] text-app-ink-muted">Click để đặt làm trọng tâm</p>
+              <h3 className="text-[16px] font-semibold text-app-ink">Hoặc chọn lĩnh vực khác</h3>
+              <p className="mt-1 text-[13px] text-app-ink-muted">Click để đặt làm trọng tâm</p>
             </div>
             <div className="mt-5 grid grid-cols-2 gap-2 md:grid-cols-4">
               {lifeAreas.map((area) => {
@@ -321,10 +321,10 @@ export function LifeInsight() {
                         <AreaIcon className="h-3.5 w-3.5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className={`truncate text-[13px] font-medium ${isSelected ? "text-app-accent" : "text-app-ink"}`}>
+                        <p className={`truncate text-[14px] font-medium ${isSelected ? "text-app-accent" : "text-app-ink"}`}>
                           {getLifeAreaLabel(area.name)}
                         </p>
-                        <p className={`mt-0.5 text-[11px] ${isSelected ? "text-app-accent" : "text-app-ink-muted"}`}>
+                        <p className={`mt-0.5 text-[12px] ${isSelected ? "text-app-accent" : "text-app-ink-muted"}`}>
                           {area.score}/10
                         </p>
                       </div>
@@ -339,10 +339,10 @@ export function LifeInsight() {
           {/* Intent options */}
           <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
             <div>
-              <h3 className="text-[15px] font-semibold text-app-ink">
+              <h3 className="text-[16px] font-semibold text-app-ink">
                 Mục đích chính của bạn với lĩnh vực này
               </h3>
-              <p className="mt-1 text-[12px] text-app-ink-muted">Chọn 1 — sẽ định hình kiểu mục tiêu SMART</p>
+              <p className="mt-1 text-[13px] text-app-ink-muted">Chọn 1 — sẽ định hình kiểu mục tiêu SMART</p>
             </div>
             <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {intentOptions.map((option) => {
@@ -359,10 +359,10 @@ export function LifeInsight() {
                     }`}
                   >
                     <div className="flex w-full items-start justify-between gap-2">
-                      <span className="text-[14px] font-medium">{option.label}</span>
+                      <span className="text-[15px] font-medium">{option.label}</span>
                       {isSelected && <Check className="h-4 w-4 shrink-0" />}
                     </div>
-                    <p className={`text-[12px] leading-relaxed ${isSelected ? "text-app-accent" : "text-app-ink-soft"}`}>
+                    <p className={`text-[13px] leading-relaxed ${isSelected ? "text-app-accent" : "text-app-ink-soft"}`}>
                       {option.description}
                     </p>
                   </button>
@@ -371,13 +371,13 @@ export function LifeInsight() {
             </div>
             {selectedIntent !== null && (
               <div className="mt-4 flex flex-wrap items-center gap-3">
-                <p className="text-[12px] text-app-ink-soft">
+                <p className="text-[13px] text-app-ink-soft">
                   Lựa chọn này được lưu trên thiết bị này để gợi ý bước SMART và kế hoạch 12 tuần.
                 </p>
                 <button
                   type="button"
                   onClick={handleIntentClear}
-                  className="text-[12px] font-semibold text-app-ink-soft underline-offset-2 hover:text-app-ink hover:underline"
+                  className="text-[13px] font-semibold text-app-ink-soft underline-offset-2 hover:text-app-ink hover:underline"
                 >
                   Bỏ chọn
                 </button>
@@ -389,15 +389,15 @@ export function LifeInsight() {
           <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-[11px] uppercase tracking text-app-ink-muted">TIẾP THEO</p>
-                <h3 className="mt-1 text-[15px] font-medium text-app-ink">
+                <p className="text-[12px] uppercase tracking text-app-ink-muted">TIẾP THEO</p>
+                <h3 className="mt-1 text-[16px] font-medium text-app-ink">
                   Biến trọng tâm này thành mục tiêu SMART
                 </h3>
-                <p className="mt-1 text-[12px] text-app-ink-muted">Khoảng 4 phút</p>
+                <p className="mt-1 text-[13px] text-app-ink-muted">Khoảng 4 phút</p>
               </div>
               <Button
                 onClick={handleStartGoalSetup}
-                className="inline-flex items-center gap-2 bg-app-accent px-5 py-2.5 text-[14px] font-medium text-white hover:bg-[#284f45]"
+                className="inline-flex items-center gap-2 bg-app-accent px-5 py-2.5 text-[15px] font-medium text-white hover:bg-[#284f45]"
               >
                 Tiếp → Viết mục tiêu
                 <ArrowRight className="h-4 w-4" />

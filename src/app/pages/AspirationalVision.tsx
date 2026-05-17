@@ -124,21 +124,21 @@ export function AspirationalVision() {
   return (
     <div className="mx-auto max-w-4xl px-4 pb-12 pt-8 sm:px-6">
       <header>
-        <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">TẦM NHÌN</p>
-        <h1 className="mt-3 font-serif text-[30px] font-medium leading-tight tracking-tight text-app-ink">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">TẦM NHÌN</p>
+        <h1 className="mt-3 font-serif text-[32px] font-medium leading-tight tracking-tight text-app-ink">
           Tầm nhìn 3 năm của bạn
         </h1>
-        <p className="mt-2 max-w-2xl text-[14px] leading-6 text-app-ink-soft">
+        <p className="mt-2 max-w-2xl text-[15px] leading-6 text-app-ink-soft">
           Định hình bức tranh dài hạn để mỗi chu kỳ 12 tuần đều phục vụ điều này.
         </p>
       </header>
 
       <section className="mt-6 rounded-card border border-[#F3D9CC] bg-app-warm-soft p-6 md:p-8" aria-label="Biểu mẫu tầm nhìn">
         <div className="max-w-3xl">
-          <p className="font-serif text-[18px] font-medium leading-7 text-[#5C3A2E]">
+          <p className="font-serif text-[20px] font-medium leading-7 text-[#5C3A2E]">
             Trong 3 năm tới, bạn muốn cuộc sống mình trông như thế nào?
           </p>
-          <p className="mt-2 text-[13px] leading-6 text-[#6F4A3C]">
+          <p className="mt-2 text-[14px] leading-6 text-[#6F4A3C]">
             Viết chậm, cụ thể vừa đủ. Tầm nhìn này là điểm neo, không phải cam kết phải hoàn hảo.
           </p>
         </div>
@@ -168,7 +168,7 @@ export function AspirationalVision() {
           </div>
 
           <div>
-            <p className="mb-2 text-[13px] font-medium text-app-ink">Khoảng thời gian</p>
+            <p className="mb-2 text-[14px] font-medium text-app-ink">Khoảng thời gian</p>
             <div className="flex flex-wrap gap-2">
               {[3, 5].map((year) => {
                 const selected = horizonYears === year;
@@ -178,7 +178,7 @@ export function AspirationalVision() {
                     type="button"
                     aria-pressed={selected}
                     onClick={() => setHorizonYears(year as 3 | 5)}
-                    className={`rounded-full border px-4 py-2 text-[13px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 ${
+                    className={`rounded-full border px-4 py-2 text-[14px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 ${
                       selected
                         ? "border-app-warm bg-app-warm text-white"
                         : "border-[#F3D9CC] bg-app-surface text-[#5C3A2E] hover:border-app-warm"
@@ -193,8 +193,8 @@ export function AspirationalVision() {
 
           <div>
             <div>
-              <h2 className="text-[15px] font-semibold text-app-ink">Các mảng đời sống</h2>
-              <p className="mt-1 text-[13px] leading-6 text-[#6F4A3C]">Điền ít nhất một mảng. Các mảng còn lại có thể để trống.</p>
+              <h2 className="text-[16px] font-semibold text-app-ink">Các mảng đời sống</h2>
+              <p className="mt-1 text-[14px] leading-6 text-[#6F4A3C]">Điền ít nhất một mảng. Các mảng còn lại có thể để trống.</p>
             </div>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               {LIFE_AREA_FIELDS.map(({ area, label, placeholder }) => (
@@ -245,20 +245,20 @@ export function AspirationalVision() {
       {storedVision ? (
         <section className="mt-8" aria-label="Tầm nhìn đã lưu trước đó">
           <div className="mb-4">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">ĐÃ LƯU TRƯỚC</p>
-            <h2 className="mt-1 text-[15px] font-semibold text-app-ink">Bản tóm tắt gần nhất</h2>
+            <p className="text-[13px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">ĐÃ LƯU TRƯỚC</p>
+            <h2 className="mt-1 text-[16px] font-semibold text-app-ink">Bản tóm tắt gần nhất</h2>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
             <article className="rounded-card border border-app-line bg-app-surface p-5 md:col-span-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                 CẬP NHẬT {formatVisionDate(storedVision.updatedAt)}
               </p>
-              <p className="mt-3 font-serif text-[14px] italic leading-7 text-app-ink">"{storedVision.summary}"</p>
+              <p className="mt-3 font-serif text-[15px] italic leading-7 text-app-ink">"{storedVision.summary}"</p>
             </article>
             {storedVision.lifeAreas.map((item) => (
               <article key={item.area} className="rounded-card border border-app-line bg-app-surface p-5">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{getAreaLabel(item.area)}</p>
-                <p className="mt-3 font-serif text-[14px] italic leading-7 text-app-ink">"{item.statement}"</p>
+                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{getAreaLabel(item.area)}</p>
+                <p className="mt-3 font-serif text-[15px] italic leading-7 text-app-ink">"{item.statement}"</p>
               </article>
             ))}
           </div>

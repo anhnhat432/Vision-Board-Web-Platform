@@ -14,10 +14,10 @@ export function TodayMiniCard({ tasks, completedCount, totalCount }: TodayMiniCa
   return (
     <section className="rounded-card border border-app-line bg-app-surface p-5" aria-labelledby="dashboard-today-mini-title">
       <div>
-        <h2 id="dashboard-today-mini-title" className="text-[15px] font-semibold text-app-ink">
+        <h2 id="dashboard-today-mini-title" className="text-[16px] font-semibold text-app-ink">
           Việc hôm nay
         </h2>
-        <p className="mt-1 text-[13px] text-app-ink-muted">
+        <p className="mt-1 text-[14px] text-app-ink-muted">
           {completedCount}/{totalCount} việc
         </p>
       </div>
@@ -32,13 +32,13 @@ export function TodayMiniCard({ tasks, completedCount, totalCount }: TodayMiniCa
                   task.completed ? "border-app-accent bg-app-accent" : "border-[#C8C2B6] bg-app-surface"
                 }`}
               />
-              <p className={`min-w-0 flex-1 line-clamp-1 text-[13px] leading-5 ${task.completed ? "text-app-ink-muted line-through" : "text-app-ink"}`}>
+              <p className={`min-w-0 flex-1 line-clamp-1 text-[14px] leading-5 ${task.completed ? "text-app-ink-muted line-through" : "text-app-ink"}`}>
                 {task.title}
               </p>
             </div>
           ))
         ) : (
-          <p className="rounded-xl bg-app-bg px-3 py-3 text-[13px] leading-5 text-app-ink-muted">
+          <p className="rounded-xl bg-app-bg px-3 py-3 text-[14px] leading-5 text-app-ink-muted">
             Hôm nay chưa có việc mở. Mở Today để thêm hoặc xem lại tuần.
           </p>
         )}
@@ -46,7 +46,7 @@ export function TodayMiniCard({ tasks, completedCount, totalCount }: TodayMiniCa
 
       <Link
         to="/today-v2"
-        className="mt-5 inline-flex text-[13px] font-medium text-app-accent transition-colors duration-150 hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+        className="mt-5 inline-flex text-[14px] font-medium text-app-accent transition-colors duration-150 hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
       >
         Mở Today →
       </Link>

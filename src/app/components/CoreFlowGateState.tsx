@@ -39,13 +39,13 @@ export function CoreFlowGateState({
             </div>
           )}
 
-          <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+          <p className="mt-4 text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
             {eyebrow}
           </p>
-          <h1 className="mx-auto mt-2 max-w-xl font-serif text-[24px] font-medium leading-tight tracking-[-0.01em] text-app-ink">
+          <h1 className="mx-auto mt-2 max-w-xl font-serif text-[26px] font-medium leading-tight tracking-[-0.01em] text-app-ink">
             {title}
           </h1>
-          <p className="mx-auto mt-3 max-w-xl text-[14px] leading-6 text-app-ink-soft" role="status">
+          <p className="mx-auto mt-3 max-w-xl text-[15px] leading-6 text-app-ink-soft" role="status">
             {description}
           </p>
 
@@ -54,7 +54,7 @@ export function CoreFlowGateState({
               {actionLabel && onAction ? (
                 <button
                   type="button"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-2.5 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-2.5 text-[15px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
                   onClick={onAction}
                 >
                   {actionLabel}
@@ -63,7 +63,7 @@ export function CoreFlowGateState({
               {secondaryActionLabel && onSecondaryAction ? (
                 <button
                   type="button"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-5 py-2.5 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-5 py-2.5 text-[15px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
                   onClick={onSecondaryAction}
                 >
                   {secondaryActionLabel}

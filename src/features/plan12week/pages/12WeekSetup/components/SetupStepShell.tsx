@@ -94,7 +94,7 @@ export function SetupStepShell({
       <div>
         <div className="mb-2 flex items-center gap-2">
           <StepIcon className="h-4 w-4 text-app-accent" aria-hidden="true" />
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-accent">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">
             Bước {currentStep + 1} / {stepCount} · {stepMeta.eyebrow.toUpperCase()}
           </p>
         </div>
@@ -102,11 +102,11 @@ export function SetupStepShell({
           id="twelve-week-step-title"
           ref={titleFocusRef}
           tabIndex={-1}
-          className="mt-2 font-serif text-[22px] font-medium leading-7 text-app-ink focus:outline-none"
+          className="mt-2 font-serif text-[24px] font-medium leading-7 text-app-ink focus:outline-none"
         >
           {title}
         </h2>
-        <div className="mt-2 text-[14px] leading-6 text-app-ink-soft">{description}</div>
+        <div className="mt-2 text-[15px] leading-6 text-app-ink-soft">{description}</div>
 
         <ol aria-label={`Bước ${currentStep + 1} trên ${stepCount}`} className="mt-6 flex gap-1.5">
           {stepDefinitions.map((step, index) => {
@@ -139,13 +139,13 @@ export function SetupStepShell({
             );
           })}
         </ol>
-        <p className="mt-2 text-[13px] leading-5 text-app-ink-muted">{stepMeta.caption}</p>
+        <p className="mt-2 text-[14px] leading-5 text-app-ink-muted">{stepMeta.caption}</p>
 
         {whyThisMatters ? (
           <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-3">
             <button
               type="button"
-              className="flex items-center gap-2 text-left text-[12px] font-medium text-app-accent transition-colors duration-150 hover:text-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="flex items-center gap-2 text-left text-[13px] font-medium text-app-accent transition-colors duration-150 hover:text-[#284f45] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
               onClick={() => setIsWhyOpen((isOpen) => !isOpen)}
               aria-expanded={isWhyOpen}
               aria-controls="twelve-week-step-why"
@@ -157,7 +157,7 @@ export function SetupStepShell({
               />
             </button>
             {isWhyOpen ? (
-              <div id="twelve-week-step-why" className="mt-2 text-[13px] leading-6 text-app-ink-soft">
+              <div id="twelve-week-step-why" className="mt-2 text-[14px] leading-6 text-app-ink-soft">
                 {whyThisMatters}
               </div>
             ) : null}
@@ -174,20 +174,20 @@ export function SetupStepShell({
           >
             <div className="flex items-start gap-2">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              <p className="text-[13px] font-medium leading-5">{stepError}</p>
+              <p className="text-[14px] font-medium leading-5">{stepError}</p>
             </div>
           </div>
         ) : null}
       </div>
 
       <div className="mt-8 flex flex-col-reverse gap-3 border-t border-app-line pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-[12px] text-app-ink-muted">
+        <p className="text-[13px] text-app-ink-muted">
           Bước {currentStep + 1} / {stepCount}
         </p>
         <div className="flex flex-col gap-3 sm:flex-row">
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-4 py-2 text-[15px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
             onClick={onBack}
             disabled={isSubmitting}
           >
@@ -197,7 +197,7 @@ export function SetupStepShell({
           {isLastStep ? (
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-2 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-2 text-[15px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
               onClick={handleSubmitClick}
               disabled={isSubmitting || isSubmitDisabled}
               aria-busy={isSubmitting}
@@ -212,7 +212,7 @@ export function SetupStepShell({
           ) : (
             <button
               type="button"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-2 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-2 text-[15px] font-medium text-white transition-colors duration-150 hover:bg-[#284f45] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
               onClick={onNext}
               disabled={isNextDisabled}
             >

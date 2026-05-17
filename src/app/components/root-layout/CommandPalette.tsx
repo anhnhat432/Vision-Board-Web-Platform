@@ -142,10 +142,10 @@ export function CommandPalette({
             }}
             onKeyDown={onKeyDown}
             placeholder="Tìm trang hoặc mục tiêu…"
-            className="flex-1 bg-transparent text-[14px] tracking-tight text-app-ink placeholder:text-app-ink-muted focus:outline-none"
+            className="flex-1 bg-transparent text-[15px] tracking-tight text-app-ink placeholder:text-app-ink-muted focus:outline-none"
             aria-label="Tìm kiếm command palette"
           />
-          <kbd className="hidden rounded border border-app-line bg-app-bg px-1.5 py-0.5 text-[11px] font-medium text-app-ink-muted sm:inline-block">
+          <kbd className="hidden rounded border border-app-line bg-app-bg px-1.5 py-0.5 text-[12px] font-medium text-app-ink-muted sm:inline-block">
             ESC
           </kbd>
         </div>
@@ -183,7 +183,7 @@ export function CommandPalette({
                     ) : null}
                   </span>
                   {isActive ? (
-                    <span className="flex items-center gap-1 text-[11px] font-medium text-app-ink-muted">
+                    <span className="flex items-center gap-1 text-[12px] font-medium text-app-ink-muted">
                       Enter
                       <CornerDownLeft className="h-3 w-3" />
                     </span>

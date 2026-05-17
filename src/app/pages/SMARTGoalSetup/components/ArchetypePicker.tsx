@@ -37,15 +37,15 @@ export function ArchetypePicker({
     <div className="rounded-card border border-app-line bg-app-surface p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="mb-1 text-[12px] font-medium text-app-ink-muted">Chọn loại mục tiêu</p>
-          <p className="text-[12px] leading-5 text-app-ink-muted">
+          <p className="mb-1 text-[13px] font-medium text-app-ink-muted">Chọn loại mục tiêu</p>
+          <p className="text-[13px] leading-5 text-app-ink-muted">
             Mình đoán loại để gợi ý đúng hơn. Nếu sai, đổi tay.
           </p>
         </div>
         {isUserOverridden ? (
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-[12px] font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1 text-[13px] font-medium text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             onClick={onResetToInferred}
             aria-label={`Quay lại đoán tự động (${getGoalArchetypeLabel(inferredArchetype)})`}
           >
@@ -73,8 +73,8 @@ export function ArchetypePicker({
               aria-pressed={active}
             >
               <Icon className="h-4 w-4" aria-hidden="true" />
-              <span className="text-[13px] font-medium leading-5">{getGoalArchetypeLabel(option.value)}</span>
-              <span className={active ? "text-[11px] text-app-accent/80" : "text-[11px] text-app-ink-muted"}>
+              <span className="text-[14px] font-medium leading-5">{getGoalArchetypeLabel(option.value)}</span>
+              <span className={active ? "text-[12px] text-app-accent/80" : "text-[12px] text-app-ink-muted"}>
                 {option.sub}
               </span>
             </button>

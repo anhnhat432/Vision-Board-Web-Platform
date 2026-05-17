@@ -134,7 +134,7 @@ export function EmptyState({
         ) : null}
         <HeadingTag className={titleSizeClass}>{title}</HeadingTag>
         {description ? (
-          <p className="text-[14px] leading-relaxed text-muted-foreground">{description}</p>
+          <p className="text-[15px] leading-relaxed text-muted-foreground">{description}</p>
         ) : null}
       </div>
       {children ? <div className={blockAlignClass}>{children}</div> : null}

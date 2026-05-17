@@ -43,7 +43,7 @@ export function PageHeader({
         {title}
       </HeadingTag>
       {description && (
-        <p className="text-[15px] leading-relaxed tracking-tight text-muted-foreground sm:text-base">
+        <p className="text-[16px] leading-relaxed tracking-tight text-muted-foreground sm:text-base">
           {description}
         </p>
       )}

@@ -569,8 +569,8 @@ export function RootLayout() {
                 {accountAvatarLabel}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-app-ink-muted">Tài khoản</p>
-                <p className="mt-1 truncate text-[14px] font-medium tracking-tight text-app-ink">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.08em] text-app-ink-muted">Tài khoản</p>
+                <p className="mt-1 truncate text-[15px] font-medium tracking-tight text-app-ink">
                   {accountEmail || accountLabel}
                 </p>
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -968,7 +968,7 @@ export function RootLayout() {
                       className="size-9 rounded-md object-cover shadow-md ring-1 ring-app-accent/20"
                     />
                     <div className="min-w-0">
-                      <span className="block truncate text-[14px] font-medium tracking-tight text-app-ink">
+                      <span className="block truncate text-[15px] font-medium tracking-tight text-app-ink">
                         Dear Our Future
                       </span>
                     </div>
@@ -990,7 +990,7 @@ export function RootLayout() {
                           onPointerEnter={() => handlePrefetch(item.path)}
                           aria-current={active ? "page" : undefined}
                           title={item.label}
-                          className={`h-8 shrink-0 rounded-full px-3 text-[13px] font-medium tracking-tight transition-colors duration-150 ${
+                          className={`h-8 shrink-0 rounded-full px-3 text-[14px] font-medium tracking-tight transition-colors duration-150 ${
                             active
                               ? "bg-app-accent text-white hover:bg-app-accent hover:text-white"
                               : "bg-transparent text-app-ink-soft shadow-none hover:bg-app-bg hover:text-app-ink"
@@ -1013,7 +1013,7 @@ export function RootLayout() {
                             aria-current={secondaryNavItems.some((item) => isActive(item.path)) ? "page" : undefined}
                             aria-expanded={desktopMoreOpen}
                             aria-haspopup="menu"
-                            className={`h-8 shrink-0 rounded-full px-3 text-[13px] font-medium tracking-tight transition-colors duration-150 ${
+                            className={`h-8 shrink-0 rounded-full px-3 text-[14px] font-medium tracking-tight transition-colors duration-150 ${
                               isDesktopMoreNavActive
                                 ? "bg-app-accent text-white hover:bg-app-accent hover:text-white"
                                 : "bg-transparent text-app-ink-soft shadow-none hover:bg-app-bg hover:text-app-ink"
@@ -1033,7 +1033,7 @@ export function RootLayout() {
                               aria-label="Mục khác"
                               className="absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-card border border-app-line bg-app-surface p-1.5 shadow-[0_4px_12px_rgba(15,23,42,0.06)]"
                             >
-                              <div className="px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-app-ink-muted">
+                              <div className="px-2.5 py-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] text-app-ink-muted">
                                 Mục khác
                               </div>
                               {secondaryNavItems.map((item) => {
@@ -1051,7 +1051,7 @@ export function RootLayout() {
                                       setDesktopMoreOpen(false);
                                       navigateAppRoute(item.path);
                                     }}
-                                    className={`my-0.5 flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[13px] font-medium tracking-tight outline-none transition-colors ${
+                                    className={`my-0.5 flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[14px] font-medium tracking-tight outline-none transition-colors ${
                                       active
                                         ? "bg-app-accent-soft text-app-accent focus:bg-app-accent-soft"
                                         : "text-app-ink hover:bg-app-bg focus:bg-app-bg"
@@ -1080,7 +1080,7 @@ export function RootLayout() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleAuthNavigate("signin")}
-                        className="h-8 rounded-full px-3 text-[13px] text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
+                        className="h-8 rounded-full px-3 text-[14px] text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
                       >
                         Đăng nhập
                       </Button>
@@ -1088,7 +1088,7 @@ export function RootLayout() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleAuthNavigate("signup")}
-                        className="h-8 rounded-full bg-app-accent px-3.5 text-[13px] text-white hover:bg-[#284f45] hover:text-white"
+                        className="h-8 rounded-full bg-app-accent px-3.5 text-[14px] text-white hover:bg-[#284f45] hover:text-white"
                       >
                         Đăng ký
                       </Button>
@@ -1105,7 +1105,7 @@ export function RootLayout() {
                 </div>
 
                 <div className="md:hidden flex min-w-0 items-center gap-1.5">
-                  <span className="hidden max-w-[120px] truncate text-[14px] font-medium tracking-tight text-app-ink sm:inline">
+                  <span className="hidden max-w-[120px] truncate text-[15px] font-medium tracking-tight text-app-ink sm:inline">
                     {pageMeta.label}
                   </span>
                   <button
@@ -1124,7 +1124,7 @@ export function RootLayout() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-10 rounded-lg bg-app-accent px-3 text-[13px] text-white hover:bg-[#284f45] hover:text-white"
+                      className="h-10 rounded-lg bg-app-accent px-3 text-[14px] text-white hover:bg-[#284f45] hover:text-white"
                       onClick={() => handleAuthNavigate("signup")}
                     >
                       Đăng ký
@@ -1285,23 +1285,23 @@ export function RootLayout() {
             <div className="sticky top-0 z-40 hidden border-b border-app-line bg-app-bg/95 backdrop-blur-sm lg:block">
               <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
                 <nav aria-label="Vị trí trang" className="flex min-w-0 items-center gap-2">
-                  <span className="text-[12px] text-app-ink-muted">Workspace</span>
+                  <span className="text-[13px] text-app-ink-muted">Workspace</span>
                   <span aria-hidden="true" className="text-app-ink-muted">
                     /
                   </span>
-                  <span className="truncate text-[14px] font-medium text-app-ink">{pageMeta.label}</span>
+                  <span className="truncate text-[15px] font-medium text-app-ink">{pageMeta.label}</span>
                 </nav>
                 <div className="flex items-center gap-2">
                   {!demoMode && user ? <SyncStatusPill compact /> : null}
                   <button
                     type="button"
                     onClick={() => setCommandPaletteOpen(true)}
-                    className="flex items-center gap-2 rounded-md border border-app-line bg-app-surface px-3 py-1.5 text-[13px] text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    className="flex items-center gap-2 rounded-md border border-app-line bg-app-surface px-3 py-1.5 text-[14px] text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     aria-label="Mở command palette"
                   >
                     <Search className="h-3.5 w-3.5" />
                     <span>Tìm nhanh</span>
-                    <kbd className="ml-1 hidden rounded border border-app-line bg-app-bg px-1.5 py-0.5 text-[11px] font-medium text-app-ink-muted xl:inline-block">
+                    <kbd className="ml-1 hidden rounded border border-app-line bg-app-bg px-1.5 py-0.5 text-[12px] font-medium text-app-ink-muted xl:inline-block">
                       ⌘K
                     </kbd>
                   </button>

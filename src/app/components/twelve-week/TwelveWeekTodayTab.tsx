@@ -313,15 +313,15 @@ export function TwelveWeekTodayTab({
         className="order-0 grid grid-cols-3 gap-2 rounded-card border border-app-line bg-app-surface p-2.5 sm:hidden"
       >
         <div className="min-w-0 rounded-lg bg-app-bg px-2 py-2">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Còn</p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Còn</p>
           <p className="mt-0.5 text-lg font-bold text-app-ink">{todayRemainingCount}</p>
         </div>
         <div className="min-w-0 rounded-lg bg-app-bg px-2 py-2">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Tuần</p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Tuần</p>
           <p className="mt-0.5 text-lg font-bold text-app-ink">{weekCompletion.percent}%</p>
         </div>
         <div className={`min-w-0 rounded-lg px-2 py-2 ${reviewDueToday ? "bg-app-warm-soft" : "bg-app-accent-soft"}`}>
-          <p className={`text-[11px] font-semibold uppercase tracking-[0.12em] ${reviewDueToday ? "text-app-warm" : "text-app-accent"}`}>
+          <p className={`text-[12px] font-semibold uppercase tracking-[0.12em] ${reviewDueToday ? "text-app-warm" : "text-app-accent"}`}>
             {reviewDueToday ? "Review" : "Xong"}
           </p>
           <p className="mt-0.5 truncate text-lg font-bold text-app-ink">

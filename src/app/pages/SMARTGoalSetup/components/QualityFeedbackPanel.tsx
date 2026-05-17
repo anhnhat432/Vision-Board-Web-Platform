@@ -54,8 +54,8 @@ export function QualityFeedbackPanel({
   return (
     <section className="mt-4 rounded-card border border-app-line bg-app-surface p-5" aria-label="Chất lượng mục tiêu">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-[14px] font-semibold text-app-ink">Chất lượng mục tiêu</h3>
-        <span className={`rounded-full px-3 py-1 text-[12px] font-medium ${bucket.className}`}>
+        <h3 className="text-[15px] font-semibold text-app-ink">Chất lượng mục tiêu</h3>
+        <span className={`rounded-full px-3 py-1 text-[13px] font-medium ${bucket.className}`}>
           {bucket.label} · {overallScore}/100
         </span>
       </div>
@@ -70,7 +70,7 @@ export function QualityFeedbackPanel({
               ) : (
                 <Circle className="mt-0.5 h-4 w-4 shrink-0 text-app-ink-muted" aria-hidden="true" />
               )}
-              <p className="text-[13px] leading-5 text-app-ink-soft">{item}</p>
+              <p className="text-[14px] leading-5 text-app-ink-soft">{item}</p>
             </li>
           );
         })}

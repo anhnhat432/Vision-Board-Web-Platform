@@ -98,7 +98,7 @@ export function WizardHero({
               {title}
             </h1>
             {description ? (
-              <p className="max-w-prose text-[15px] leading-relaxed tracking-tight text-muted-foreground sm:text-base">
+              <p className="max-w-prose text-[16px] leading-relaxed tracking-tight text-muted-foreground sm:text-base">
                 {description}
               </p>
             ) : null}

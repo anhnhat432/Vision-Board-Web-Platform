@@ -115,15 +115,15 @@ function ReviewSection({
     <section className="border-b border-app-line pb-5 last:border-0" aria-labelledby={`review-section-${stepIndex}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{caption}</p>
-          <h3 id={`review-section-${stepIndex}`} className="mt-1 font-serif text-[18px] font-medium text-app-ink">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{caption}</p>
+          <h3 id={`review-section-${stepIndex}`} className="mt-1 font-serif text-[20px] font-medium text-app-ink">
             {title}
           </h3>
         </div>
         <button
           type="button"
           onClick={() => jumpToSetupStep(stepIndex)}
-          className="rounded-full px-2 py-1 text-[12px] font-medium text-app-accent transition-colors duration-150 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          className="rounded-full px-2 py-1 text-[13px] font-medium text-app-accent transition-colors duration-150 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
         >
           Sửa
         </button>
@@ -136,8 +136,8 @@ function ReviewSection({
 function SummaryItem({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{label}</p>
-      <div className="mt-1 text-[14px] leading-6 text-app-ink">{children}</div>
+      <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{label}</p>
+      <div className="mt-1 text-[15px] leading-6 text-app-ink">{children}</div>
     </div>
   );
 }
@@ -299,26 +299,26 @@ export function ReviewStep({
         <div className="flex items-start gap-3">
           <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-app-accent" aria-hidden="true" />
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-accent">Rà soát cuối</p>
-            <h3 className="mt-2 font-serif text-[22px] font-medium leading-7 text-app-ink">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">Rà soát cuối</p>
+            <h3 className="mt-2 font-serif text-[24px] font-medium leading-7 text-app-ink">
               Kiểm tra lần cuối trước khi kích hoạt chu kỳ.
             </h3>
-            <p className="mt-2 text-[13px] leading-6 text-app-ink-soft">
+            <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">
               Sau khi lưu, bạn vào trung tâm 12 tuần với Hôm nay, Tuần, Tiến độ và Cài đặt.
             </p>
           </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+          <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[13px] font-medium text-app-accent">
             {getGoalTypeLabel(draft.goalType)}
           </span>
-          <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+          <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[13px] font-medium text-app-accent">
             {getLifeAreaLabel(focusArea)}
           </span>
-          <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+          <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[13px] font-medium text-app-accent">
             Nhìn lại {getReviewDayLabel(draft.reviewDay)}
           </span>
-          <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+          <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[13px] font-medium text-app-accent">
             Nhịp {getLoadPreferenceLabel(draft.tacticLoadPreference)}
           </span>
         </div>
@@ -353,26 +353,26 @@ export function ReviewStep({
 
           <ReviewSection caption="LEAD" title="Việc lặp lại mỗi tuần" stepIndex={1}>
             <div className="flex flex-wrap gap-2">
-              <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+              <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[13px] font-medium text-app-accent">
                 {coreIndicators.length} cốt lõi
               </span>
-              <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-[12px] text-app-ink-muted">
+              <span className="rounded-full border border-app-line bg-app-surface px-2.5 py-1 text-[13px] text-app-ink-muted">
                 {optionalIndicators.length} tùy chọn
               </span>
             </div>
             {scheduledLeadIndicators.length === 0 ? (
-              <p className="mt-3 text-[13px] text-app-ink-soft">Chưa có việc nào được chốt.</p>
+              <p className="mt-3 text-[14px] text-app-ink-soft">Chưa có việc nào được chốt.</p>
             ) : (
               <ul className="mt-3 space-y-2">
                 {scheduledLeadIndicators.map((indicator) => (
                   <li key={indicator.id} className="rounded-lg border border-app-line bg-app-bg px-3 py-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="text-[14px] font-medium text-app-ink">{indicator.name || "-"}</p>
-                      <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+                      <p className="text-[15px] font-medium text-app-ink">{indicator.name || "-"}</p>
+                      <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[13px] font-medium text-app-accent">
                         {indicator.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
                       </span>
                     </div>
-                    <p className="mt-1 text-[12px] text-app-ink-muted">
+                    <p className="mt-1 text-[13px] text-app-ink-muted">
                       {indicator.target || "1"} {indicator.unit || "lần/tuần"} · {formatScheduleDayLabels(indicator.schedule)}
                     </p>
                   </li>
@@ -394,30 +394,30 @@ export function ReviewStep({
                 { label: "Tuần 12", value: draft.week12Outcome },
               ].map((milestone) => (
                 <div key={milestone.label} className="rounded-lg border border-app-line bg-app-bg p-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{milestone.label}</p>
-                  <p className="mt-2 text-[13px] leading-6 text-app-ink-soft">
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{milestone.label}</p>
+                  <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">
                     {milestone.value.trim() || <EmptyValue>Chưa có.</EmptyValue>}
                   </p>
                 </div>
               ))}
             </div>
             <div className="mt-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                 {weekOneTaskPreview.length > 0 ? "Việc tuần 1" : "Tuần đầu"}
               </p>
               {weekOneTaskPreview.length > 0 ? (
                 <div className="mt-2 grid gap-2 md:grid-cols-2">
                   {weekOneTaskPreview.map((task) => (
-                    <div key={task} className="rounded-lg border border-app-line bg-app-bg px-3 py-2 text-[13px] text-app-ink-soft">
+                    <div key={task} className="rounded-lg border border-app-line bg-app-bg px-3 py-2 text-[14px] text-app-ink-soft">
                       {task}
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="mt-2 text-[13px] text-app-ink-soft">Chưa có việc tuần 1 để xem trước.</p>
+                <p className="mt-2 text-[14px] text-app-ink-soft">Chưa có việc tuần 1 để xem trước.</p>
               )}
               {weekOneTaskWarning ? (
-                <p className="mt-3 text-[12px] leading-5 text-[color:var(--color-danger-fg)]">{weekOneTaskWarning}</p>
+                <p className="mt-3 text-[13px] leading-5 text-[color:var(--color-danger-fg)]">{weekOneTaskWarning}</p>
               ) : null}
             </div>
           </ReviewSection>
@@ -426,17 +426,17 @@ export function ReviewStep({
             <div className="rounded-lg border border-app-line bg-app-bg p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                     Đánh giá nhanh kế hoạch
                   </p>
-                  <p className="mt-2 text-[14px] font-medium text-app-ink">
+                  <p className="mt-2 text-[15px] font-medium text-app-ink">
                     Chất lượng: {getQualityLevelLabel(planQuality.level)} · {planQuality.overallScore}/100
                   </p>
-                  <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">Đây là gợi ý — bạn vẫn có thể tạo kế hoạch.</p>
+                  <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">Đây là gợi ý — bạn vẫn có thể tạo kế hoạch.</p>
                 </div>
                 <span
                   className={cn(
-                    "rounded-full border px-3 py-1 text-[12px] font-semibold uppercase tracking-[0.14em]",
+                    "rounded-full border px-3 py-1 text-[13px] font-semibold uppercase tracking-[0.14em]",
                     getQualityBadgeStyle(planQuality.level),
                   )}
                 >
@@ -450,8 +450,8 @@ export function ReviewStep({
                   const StatusIcon = statusMeta.icon;
                   return (
                     <li key={dimension.id} className="flex items-center justify-between rounded-lg border border-app-line bg-app-surface px-3 py-2">
-                      <span className="text-[13px] text-app-ink-soft">{dimension.label}</span>
-                      <span className={cn("flex items-center gap-1.5 text-[12px] font-medium", statusMeta.textClass)}>
+                      <span className="text-[14px] text-app-ink-soft">{dimension.label}</span>
+                      <span className={cn("flex items-center gap-1.5 text-[13px] font-medium", statusMeta.textClass)}>
                         <StatusIcon className="h-3.5 w-3.5" aria-hidden="true" />
                         <span className="sr-only">{statusMeta.label}: </span>
                         <span>
@@ -465,10 +465,10 @@ export function ReviewStep({
 
               {planQuality.warnings.length > 0 ? (
                 <div className="mt-4 rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-danger-fg)]">
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-danger-fg)]">
                     Cảnh báo ({planQuality.warnings.length})
                   </p>
-                  <ul className="mt-2 space-y-1 text-[13px] leading-6 text-[color:var(--color-danger-fg)]">
+                  <ul className="mt-2 space-y-1 text-[14px] leading-6 text-[color:var(--color-danger-fg)]">
                     {planQuality.warnings.map((warning) => (
                       <li key={warning}>• {warning}</li>
                     ))}
@@ -482,10 +482,10 @@ export function ReviewStep({
                   open={suggestionsOpen}
                   onToggle={(event) => setSuggestionsOpen(event.currentTarget.open)}
                 >
-                  <summary className="cursor-pointer list-none text-[12px] font-medium text-app-accent">
+                  <summary className="cursor-pointer list-none text-[13px] font-medium text-app-accent">
                     Gợi ý cải thiện ({planQuality.suggestions.length})
                   </summary>
-                  <ul className="mt-2 space-y-1 text-[13px] leading-6 text-app-ink-soft">
+                  <ul className="mt-2 space-y-1 text-[14px] leading-6 text-app-ink-soft">
                     {planQuality.suggestions.map((suggestion) => (
                       <li key={suggestion}>• {suggestion}</li>
                     ))}
@@ -495,13 +495,13 @@ export function ReviewStep({
             </div>
 
             <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                 Vì sao kế hoạch này phù hợp
               </p>
-              <p className="mt-2 text-[12px] leading-6 text-app-ink-soft">
+              <p className="mt-2 text-[13px] leading-6 text-app-ink-soft">
                 Tổng hợp từ kết quả kiểm tra, nhịp tuần, việc lặp lại và cột mốc.
               </p>
-              <ul data-testid="plan-rationale-reasons" className="mt-3 space-y-2 text-[13px] leading-6 text-app-ink-soft">
+              <ul data-testid="plan-rationale-reasons" className="mt-3 space-y-2 text-[14px] leading-6 text-app-ink-soft">
                 {planRationale.reasons.map((reason) => (
                   <li key={reason.id} data-reason-id={reason.id} className="rounded-lg border border-app-line bg-app-surface px-3 py-2">
                     • {reason.text}
@@ -514,11 +514,11 @@ export function ReviewStep({
                   data-testid="plan-rationale-warnings"
                   className="mt-3 rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-3"
                 >
-                  <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-danger-fg)]">
+                  <p className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-[color:var(--color-danger-fg)]">
                     <CircleAlert className="h-3.5 w-3.5" aria-hidden="true" />
                     <span>Lưu ý cần biết</span>
                   </p>
-                  <ul className="mt-2 space-y-1 text-[13px] leading-6 text-[color:var(--color-danger-fg)]">
+                  <ul className="mt-2 space-y-1 text-[14px] leading-6 text-[color:var(--color-danger-fg)]">
                     {planRationale.warnings.map((warning) => (
                       <li key={warning.id} data-warning-id={warning.id}>
                         • {warning.text}
@@ -530,11 +530,11 @@ export function ReviewStep({
 
               {planRationale.adjustments.length > 0 ? (
                 <div data-testid="plan-rationale-adjustments" className="mt-3 rounded-lg border border-app-line bg-app-surface p-3">
-                  <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-app-accent">
+                  <p className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">
                     <Wrench className="h-3.5 w-3.5" aria-hidden="true" />
                     <span>Nếu bạn thấy chưa khớp, có thể đổi</span>
                   </p>
-                  <ul className="mt-2 space-y-1 text-[13px] leading-6 text-app-ink-soft">
+                  <ul className="mt-2 space-y-1 text-[14px] leading-6 text-app-ink-soft">
                     {planRationale.adjustments.map((adjustment) => (
                       <li key={adjustment.id} data-adjustment-id={adjustment.id}>
                         • {adjustment.text}
@@ -547,16 +547,16 @@ export function ReviewStep({
 
             {setupGuideSupport && setupGuideTemplate ? (
               <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                   Tuần đầu theo khung {setupGuideTemplate.name}
                 </p>
-                <p className="mt-2 text-[14px] font-medium text-app-ink">{setupGuideSupport.week1Headline}</p>
-                <p className="mt-2 text-[13px] leading-6 text-app-ink-soft">{setupGuideSupport.week1Support}</p>
+                <p className="mt-2 text-[15px] font-medium text-app-ink">{setupGuideSupport.week1Headline}</p>
+                <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{setupGuideSupport.week1Support}</p>
               </div>
             ) : null}
 
             {selectedTemplate ? (
-              <p className="mt-4 rounded-lg border border-app-line bg-app-bg px-3 py-2 text-[13px] leading-6 text-app-ink-soft">
+              <p className="mt-4 rounded-lg border border-app-line bg-app-bg px-3 py-2 text-[14px] leading-6 text-app-ink-soft">
                 Khung đang dùng: <span className="font-medium text-app-ink">{selectedTemplate.name}</span>
               </p>
             ) : null}
@@ -566,7 +566,7 @@ export function ReviewStep({
         <div className="mt-6 rounded-card border border-app-line bg-app-bg p-4">
           <div className="flex items-start gap-2">
             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
-            <p className="text-[13px] leading-6 text-app-ink-soft">
+            <p className="text-[14px] leading-6 text-app-ink-soft">
               Tôi đã rà soát toàn bộ trước khi lưu. Nếu có điểm chưa khớp, dùng nút Sửa hoặc thanh bước phía trên để quay lại.
             </p>
           </div>
@@ -574,7 +574,7 @@ export function ReviewStep({
       </div>
 
       <details className="rounded-card border border-app-line bg-app-surface p-4">
-        <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">
+        <summary className="cursor-pointer list-none text-[15px] font-medium text-app-ink">
           Mở phần nâng cao (tùy chọn)
         </summary>
         <div className="mt-4 space-y-4">

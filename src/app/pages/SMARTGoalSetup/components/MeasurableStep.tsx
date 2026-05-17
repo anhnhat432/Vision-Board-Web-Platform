@@ -78,7 +78,7 @@ export function MeasurableStep({
             data-testid="smart-intent-metric-hint"
             id="smart-metric-intent-hint"
             role="note"
-            className="mt-3 flex items-start gap-2 rounded-lg border border-app-line bg-app-bg p-3 text-[12px] leading-relaxed text-app-ink-soft"
+            className="mt-3 flex items-start gap-2 rounded-lg border border-app-line bg-app-bg p-3 text-[13px] leading-relaxed text-app-ink-soft"
           >
             <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
             <span>

@@ -81,7 +81,7 @@ export function SectionBlock({
             {title}
           </h2>
           {description && (
-            <p className="text-[14px] leading-6 tracking-tight text-app-ink-muted">{description}</p>
+            <p className="text-[15px] leading-6 tracking-tight text-app-ink-muted">{description}</p>
           )}
         </div>
         {collapsible && (

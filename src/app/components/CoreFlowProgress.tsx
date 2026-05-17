@@ -80,7 +80,7 @@ export function CoreFlowProgress({
   return (
     <section aria-label="Tiến độ đường chính" className={cn("mb-6 flex flex-col gap-2", className)}>
       <div className="flex items-center justify-between gap-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
           Bước {currentIndex + 1} / {CORE_FLOW_STEPS.length} · {currentStep.label.toLocaleUpperCase("vi-VN")}
         </p>
         {onExit ? (
@@ -89,7 +89,7 @@ export function CoreFlowProgress({
             onClick={onExit}
             title={exitTooltip}
             aria-label={exitTooltip}
-            className="shrink-0 rounded-full px-2 py-1 text-[13px] font-medium text-app-ink-muted transition-colors duration-150 hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="shrink-0 rounded-full px-2 py-1 text-[14px] font-medium text-app-ink-muted transition-colors duration-150 hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
           >
             {exitLabel}
           </button>

@@ -80,11 +80,11 @@ const LEAD_EXAMPLES = [
 ] as const;
 
 const selectTriggerClass =
-  "h-auto rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-[14px] font-normal text-app-ink shadow-none focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30";
+  "h-auto rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-[15px] font-normal text-app-ink shadow-none focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30";
 const selectContentClass = "rounded-card border border-app-line bg-app-surface shadow-md";
-const selectItemClass = "cursor-pointer text-[14px] text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink";
+const selectItemClass = "cursor-pointer text-[15px] text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink";
 const optionButtonClass =
-  "flex flex-col items-start gap-1 rounded-lg border border-app-line bg-app-surface p-3 text-left text-[13px] font-medium text-app-ink-soft transition-colors duration-150 hover:border-app-ink-muted hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30";
+  "flex flex-col items-start gap-1 rounded-lg border border-app-line bg-app-surface p-3 text-left text-[14px] font-medium text-app-ink-soft transition-colors duration-150 hover:border-app-ink-muted hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30";
 const optionButtonActiveClass = "border-app-accent bg-app-accent-soft text-app-accent";
 
 function normalizeCommitmentChange(
@@ -169,10 +169,10 @@ export function LeadIndicatorsStep({
       <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="lead-step-hero">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p id="lead-step-hero" className="text-[13px] leading-6 text-app-ink-soft">
+            <p id="lead-step-hero" className="text-[14px] leading-6 text-app-ink-soft">
               Chọn 1-3 việc lặp lại tạo ra kết quả. Nếu cần, thêm việc thứ 4 như phần tùy chọn.
             </p>
-            <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">
+            <p className="mt-1 text-[13px] leading-5 text-app-ink-muted">
               Việc lặp lại là hành động bạn kiểm soát được, không phải kết quả cuối.
             </p>
           </div>
@@ -180,7 +180,7 @@ export function LeadIndicatorsStep({
             type="button"
             onClick={onAddIndicator}
             disabled={!canAddIndicator}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-dashed border-app-line bg-app-bg p-3 text-[14px] font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft disabled:cursor-not-allowed disabled:text-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-dashed border-app-line bg-app-bg p-3 text-[15px] font-medium text-app-accent transition-colors duration-150 hover:bg-app-accent-soft disabled:cursor-not-allowed disabled:text-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
             Thêm việc lặp lại
@@ -189,7 +189,7 @@ export function LeadIndicatorsStep({
       </section>
 
       <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="lead-examples-title">
-        <p id="lead-examples-title" className="text-[13px] font-medium text-app-ink">
+        <p id="lead-examples-title" className="text-[14px] font-medium text-app-ink">
           Ví dụ nhanh
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
@@ -199,7 +199,7 @@ export function LeadIndicatorsStep({
               type="button"
               onClick={() => addExampleIndicator(example)}
               disabled={!canAddIndicator}
-              className="rounded-full border border-app-line px-3 py-1 text-[12px] text-app-ink-soft transition-colors duration-150 hover:border-app-accent hover:bg-app-accent-soft hover:text-app-accent disabled:cursor-not-allowed disabled:text-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="rounded-full border border-app-line px-3 py-1 text-[13px] text-app-ink-soft transition-colors duration-150 hover:border-app-accent hover:bg-app-accent-soft hover:text-app-accent disabled:cursor-not-allowed disabled:text-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             >
               {example.name}
             </button>
@@ -209,13 +209,13 @@ export function LeadIndicatorsStep({
       </section>
 
       <details className="rounded-lg border border-app-line bg-app-surface p-4">
-        <summary className="cursor-pointer list-none text-[13px] font-medium text-app-ink">
+        <summary className="cursor-pointer list-none text-[14px] font-medium text-app-ink">
           Việc lặp lại là gì? Khác kết quả cuối thế nào?
         </summary>
         <div className="mt-3 grid gap-3 md:grid-cols-2">
           <div className="rounded-lg border border-app-line bg-app-bg p-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-accent">Ví dụ tốt</p>
-            <ul className="mt-2 space-y-1 text-[13px] leading-6 text-app-ink-soft">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-accent">Ví dụ tốt</p>
+            <ul className="mt-2 space-y-1 text-[14px] leading-6 text-app-ink-soft">
               <li>• Viết bản nháp 800 từ</li>
               <li>• Tập gym 45 phút</li>
               <li>• Gửi 5 email chủ động liên hệ</li>
@@ -223,14 +223,14 @@ export function LeadIndicatorsStep({
             </ul>
           </div>
           <div className="rounded-lg border border-app-line bg-app-bg p-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Chưa hợp</p>
-            <ul className="mt-2 space-y-1 text-[13px] leading-6 text-app-ink-soft">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Chưa hợp</p>
+            <ul className="mt-2 space-y-1 text-[14px] leading-6 text-app-ink-soft">
               <li>• Tăng 100 followers</li>
               <li>• Giảm 5kg</li>
               <li>• Có job mới</li>
               <li>• Đạt IELTS 7.0</li>
             </ul>
-            <p className="mt-2 text-[12px] leading-5 text-app-ink-muted">
+            <p className="mt-2 text-[13px] leading-5 text-app-ink-muted">
               Đây là kết quả cuối — đo ở chỉ số chính, không phải việc tuần.
             </p>
           </div>
@@ -251,10 +251,10 @@ export function LeadIndicatorsStep({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p id={`tactic-card-title-${index}`} className="text-[14px] font-medium text-app-ink">
+                    <p id={`tactic-card-title-${index}`} className="text-[15px] font-medium text-app-ink">
                       Việc {index + 1}
                     </p>
-                    <p className="mt-0.5 text-[12px] text-app-ink-muted">
+                    <p className="mt-0.5 text-[13px] text-app-ink-muted">
                       {indicator.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
                     </p>
                   </div>
@@ -263,7 +263,7 @@ export function LeadIndicatorsStep({
                       type="button"
                       onClick={() => onRemoveIndicator(index)}
                       aria-label={`Xóa việc ${index + 1}${indicator.name ? `: ${indicator.name}` : ""}`}
-                      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-medium text-app-ink-muted transition-colors duration-150 hover:text-[color:var(--color-danger-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[13px] font-medium text-app-ink-muted transition-colors duration-150 hover:text-[color:var(--color-danger-fg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     >
                       <Trash2 className="h-4 w-4" aria-hidden="true" />
                       Xoá
@@ -303,7 +303,7 @@ export function LeadIndicatorsStep({
                               className={cn(optionButtonClass, active && optionButtonActiveClass)}
                             >
                               <span>{option.label}</span>
-                              <span className="text-[11px] font-normal opacity-80">{option.hint}</span>
+                              <span className="text-[12px] font-normal opacity-80">{option.hint}</span>
                             </button>
                           );
                         })}
@@ -386,13 +386,13 @@ export function LeadIndicatorsStep({
                 <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-3">
                   <button
                     type="button"
-                    className="flex w-full items-center justify-between gap-3 text-left text-[13px] font-medium text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    className="flex w-full items-center justify-between gap-3 text-left text-[14px] font-medium text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     aria-expanded={Boolean(expandedCommitments[indicator.id])}
                     aria-controls={`tactic-commitment-${index}`}
                     onClick={() => toggleCommitmentEditor(indicator.id)}
                   >
                     <span>Cam kết với chính mình (tuỳ chọn)</span>
-                    <span className="text-[12px] font-medium text-app-ink-muted">
+                    <span className="text-[13px] font-medium text-app-ink-muted">
                       {expandedCommitments[indicator.id] ? "Thu gọn" : "Mở"}
                     </span>
                   </button>
@@ -427,7 +427,7 @@ export function LeadIndicatorsStep({
 
                 {indicatorWarnings[index]?.length > 0 ? (
                   <ul
-                    className="mt-3 space-y-1 rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] px-3 py-2 text-[12px] leading-5 text-[color:var(--color-danger-fg)]"
+                    className="mt-3 space-y-1 rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] px-3 py-2 text-[13px] leading-5 text-[color:var(--color-danger-fg)]"
                     aria-label={`Cảnh báo cho việc ${index + 1}`}
                   >
                     {indicatorWarnings[index].map((warning) => (
@@ -443,47 +443,47 @@ export function LeadIndicatorsStep({
 
       <section className="rounded-lg border border-app-line bg-app-bg p-3" aria-labelledby="week-one-preview-title">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p id="week-one-preview-title" className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+          <p id="week-one-preview-title" className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
             Xem trước tuần 1
           </p>
-          <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+          <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[13px] font-medium text-app-accent">
             {coreCount} cốt lõi · {optionalCount} tùy chọn
           </span>
         </div>
 
         {setupGuideSupport && setupGuideTemplate ? (
           <div className="mt-3 rounded-lg border border-app-line bg-app-surface p-3">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
               {selectedTemplate ? "Tuần 1 theo khung đang dùng" : "Nếu đi theo khung gợi ý này"}
             </p>
-            <p className="mt-2 text-[14px] font-medium text-app-ink">{setupGuideSupport.week1Headline}</p>
-            <p className="mt-2 text-[13px] leading-6 text-app-ink-soft">{setupGuideSupport.week1Support}</p>
-            <p className="mt-3 rounded-lg border border-app-line bg-app-bg px-3 py-2 text-[13px] leading-6 text-app-ink-soft">
+            <p className="mt-2 text-[15px] font-medium text-app-ink">{setupGuideSupport.week1Headline}</p>
+            <p className="mt-2 text-[14px] leading-6 text-app-ink-soft">{setupGuideSupport.week1Support}</p>
+            <p className="mt-3 rounded-lg border border-app-line bg-app-bg px-3 py-2 text-[14px] leading-6 text-app-ink-soft">
               {setupGuideSupport.week1CadenceHint}
             </p>
           </div>
         ) : null}
 
-        <p className="mt-3 text-[12px] leading-5 text-app-ink-muted">
+        <p className="mt-3 text-[13px] leading-5 text-app-ink-muted">
           Từ mỗi việc lặp lại bên trên, việc hôm nay sẽ được tạo vào các ngày sau:
         </p>
         <div className="mt-3 space-y-2">
           {weekOneTaskGroups.length === 0 ? (
-            <p className="text-[13px] text-app-ink-soft">Thêm việc để thấy tuần đầu tiên sẽ trông như thế nào.</p>
+            <p className="text-[14px] text-app-ink-soft">Thêm việc để thấy tuần đầu tiên sẽ trông như thế nào.</p>
           ) : (
             weekOneTaskGroups.map((group) => (
               <div key={group.id} className="rounded-lg border border-app-line bg-app-surface px-4 py-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-[13px] font-medium text-app-ink">{group.name}</p>
-                  <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[12px] font-medium text-app-accent">
+                  <p className="text-[14px] font-medium text-app-ink">{group.name}</p>
+                  <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-[13px] font-medium text-app-accent">
                     {group.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
                   </span>
                 </div>
-                <p className="mt-1 text-[12px] text-app-ink-muted">
+                <p className="mt-1 text-[13px] text-app-ink-muted">
                   {group.taskTitles.length} việc / tuần · Lịch: {formatScheduleDayLabels(group.scheduleDays)}
                 </p>
                 {group.taskTitles.length > 0 ? (
-                  <ul className="mt-2 space-y-1 text-[12px] leading-5 text-app-ink-soft">
+                  <ul className="mt-2 space-y-1 text-[13px] leading-5 text-app-ink-soft">
                     {group.taskTitles.map((title) => (
                       <li key={title}>→ {title}</li>
                     ))}
@@ -495,7 +495,7 @@ export function LeadIndicatorsStep({
         </div>
 
         {weekOneTaskWarning ? (
-          <p role="status" className="mt-3 flex items-start gap-1.5 text-[12px] leading-5 text-[color:var(--color-danger-fg)]">
+          <p role="status" className="mt-3 flex items-start gap-1.5 text-[13px] leading-5 text-[color:var(--color-danger-fg)]">
             <AlertTriangle className="mt-[1px] h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             <span>
               <span className="font-medium">Cảnh báo:</span> {weekOneTaskWarning}

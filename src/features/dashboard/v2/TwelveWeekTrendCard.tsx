@@ -53,10 +53,10 @@ export function TwelveWeekTrendCard({ points, currentWeek }: TwelveWeekTrendCard
   return (
     <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-6" aria-labelledby="dashboard-trend-title">
       <div>
-        <h2 id="dashboard-trend-title" className="text-[15px] font-semibold text-app-ink">
+        <h2 id="dashboard-trend-title" className="text-[16px] font-semibold text-app-ink">
           Đường 12 tuần
         </h2>
-        <p className="mt-1 text-[13px] text-app-ink-muted">Tiến độ % theo tuần</p>
+        <p className="mt-1 text-[14px] text-app-ink-muted">Tiến độ % theo tuần</p>
       </div>
 
       <div className="mt-5 h-[180px] overflow-hidden">

@@ -65,7 +65,7 @@ function splitLabel(label: string) {
 
 export function SimpleRadarChart({
   data,
-  height = 320,
+  height = 380,
   stroke = "var(--app-accent)",
   fill = "var(--app-accent)",
   fillOpacity = 0.15,
@@ -163,7 +163,7 @@ export function SimpleRadarChart({
             <g key={`label-${item.subject}`}>
               <text
                 fill="var(--app-ink-soft)"
-                fontSize="14"
+                fontSize="16"
                 fontWeight="500"
                 textAnchor={anchor}
                 x={label.x}
@@ -181,7 +181,7 @@ export function SimpleRadarChart({
               </text>
               <text
                 fill="var(--app-ink-muted)"
-                fontSize="12"
+                fontSize="14"
                 fontWeight="500"
                 textAnchor={anchor}
                 x={scorePoint.x}

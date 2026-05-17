@@ -1105,28 +1105,28 @@ export function TwelveWeekSetup() {
 
         {!isVisionPromptDismissed ? (
           <section className="rounded-card border border-[#F3D9CC] bg-app-warm-soft p-5 md:p-6" aria-label="Tầm nhìn dài hạn">
-            <span className="inline-flex rounded-full bg-app-surface px-3 py-1 text-[12px] font-medium text-app-warm">
+            <span className="inline-flex rounded-full bg-app-surface px-3 py-1 text-[13px] font-medium text-app-warm">
               Tầm nhìn dài hạn
             </span>
             {aspirationalVision ? (
-              <p className="mt-3 font-serif text-[16px] font-medium leading-7 text-[#5C3A2E]">
+              <p className="mt-3 font-serif text-[17px] font-medium leading-7 text-[#5C3A2E]">
                 Kế hoạch 12 tuần này phục vụ tầm nhìn 3 năm: {aspirationalVision.summary}
               </p>
             ) : (
               <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-[14px] leading-6 text-app-ink-soft">
+                <p className="text-[15px] leading-6 text-app-ink-soft">
                   Đặt mục tiêu 12 tuần. Phương pháp gốc khuyên gắn với tầm nhìn 3 năm.
                 </p>
                 <div className="flex shrink-0 flex-wrap gap-2">
                   <Link
                     to="/vision"
-                    className="inline-flex items-center justify-center rounded-lg bg-app-warm px-3.5 py-2 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-[#c86547] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                    className="inline-flex items-center justify-center rounded-lg bg-app-warm px-3.5 py-2 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-[#c86547] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
                   >
                     Điền 2 phút →
                   </Link>
                   <button
                     type="button"
-                    className="inline-flex items-center justify-center rounded-lg px-3.5 py-2 text-[13px] font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                    className="inline-flex items-center justify-center rounded-lg px-3.5 py-2 text-[14px] font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
                     onClick={() => setIsVisionPromptDismissed(true)}
                   >
                     Bỏ qua
@@ -1138,24 +1138,24 @@ export function TwelveWeekSetup() {
         ) : null}
 
         <section aria-labelledby="twelve-week-setup-title">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
+          <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
             {getLifeAreaLabel(focusArea)} · Kế hoạch 12 tuần
           </p>
           <h1
             id="twelve-week-setup-title"
-            className="mt-3 max-w-3xl font-serif text-[30px] font-medium leading-tight tracking-tight text-app-ink"
+            className="mt-3 max-w-3xl font-serif text-[32px] font-medium leading-tight tracking-tight text-app-ink"
           >
             Tạo kế hoạch 12 tuần cho {smartGoal.specific.trim() || "mục tiêu của bạn"}.
           </h1>
-          <p className="mt-2 max-w-2xl text-[14px] leading-6 text-app-ink-soft">
+          <p className="mt-2 max-w-2xl text-[15px] leading-6 text-app-ink-soft">
             Chốt kết quả, việc lặp lại, lịch nhìn lại — tất cả trong 4 bước.
           </p>
           <div className="mt-4 rounded-card border border-app-line bg-app-surface p-4">
-            <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-app-ink-muted">Mục tiêu hiện tại</p>
-            <p className="mt-1 line-clamp-2 text-[14px] font-medium leading-6 text-app-ink">
+            <p className="text-[13px] font-medium uppercase tracking-[0.14em] text-app-ink-muted">Mục tiêu hiện tại</p>
+            <p className="mt-1 line-clamp-2 text-[15px] font-medium leading-6 text-app-ink">
               {smartGoal.specific.trim()}
             </p>
-            <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-app-ink-muted">
+            <div className="mt-3 flex flex-wrap gap-2 text-[13px] text-app-ink-muted">
               <span className="rounded-full bg-app-accent-soft px-2.5 py-1 font-medium text-app-accent">
                 Sẵn sàng {feasibility.adjustedScore}/20
               </span>

@@ -27,7 +27,7 @@ function sanitizeLessons(lessons: readonly string[]): string[] {
 }
 
 function EmptyListItem({ children }: { children: string }) {
-  return <li className="rounded-lg border border-dashed border-app-line bg-app-bg px-4 py-3 text-[13px] text-app-ink-muted">{children}</li>;
+  return <li className="rounded-lg border border-dashed border-app-line bg-app-bg px-4 py-3 text-[14px] text-app-ink-muted">{children}</li>;
 }
 
 export function CycleReviewPanel({
@@ -66,7 +66,7 @@ export function CycleReviewPanel({
         titleAs="h2"
         description={`Đây là tuần 13: nhìn lại chu kỳ cũ, chốt bài học, rồi chuẩn bị chu kỳ tiếp theo cho mục tiêu ${goal.title}.`}
         titleClassName="font-serif text-2xl font-medium text-app-ink"
-        descriptionClassName="max-w-3xl text-[13px] leading-7 text-app-ink-soft"
+        descriptionClassName="max-w-3xl text-[14px] leading-7 text-app-ink-soft"
         contentClassName="stack-stack"
         actionClassName="flex flex-col gap-3 sm:flex-row"
         action={
@@ -92,7 +92,7 @@ export function CycleReviewPanel({
           <WeeklyReviewIllustration className="-my-6 w-40 text-app-accent opacity-60" />
         </div>
         {aspirationalVisionSummary ? (
-          <div className="rounded-lg border border-app-warm/30 bg-app-warm-soft px-4 py-3 text-[13px] text-app-ink-soft">
+          <div className="rounded-lg border border-app-warm/30 bg-app-warm-soft px-4 py-3 text-[14px] text-app-ink-soft">
             <p className="font-serif text-base font-medium text-app-ink">Chu kỳ này đã đưa bạn gần hơn với tầm nhìn 3 năm chưa?</p>
             <p className="mt-1 text-app-ink-soft">{aspirationalVisionSummary}</p>
           </div>
@@ -105,7 +105,7 @@ export function CycleReviewPanel({
             key={label}
             className="rounded-card border border-app-line bg-app-surface p-4"
           >
-            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+            <p className="flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
               <Icon className="h-3.5 w-3.5 text-app-accent" />
               {label}
             </p>
@@ -122,7 +122,7 @@ export function CycleReviewPanel({
               <ul className="stack-tight">
                 {summary.biggestWins.length > 0 ? (
                   summary.biggestWins.map((win) => (
-                    <li key={win} className="rounded-lg border border-app-accent/20 bg-app-accent-soft px-4 py-3 text-[13px] text-app-accent">
+                    <li key={win} className="rounded-lg border border-app-accent/20 bg-app-accent-soft px-4 py-3 text-[14px] text-app-accent">
                       {win}
                     </li>
                   ))
@@ -136,7 +136,7 @@ export function CycleReviewPanel({
               <ul className="stack-tight">
                 {summary.topAdjustments.length > 0 ? (
                   summary.topAdjustments.map((adjustment) => (
-                    <li key={adjustment} className="rounded-lg border border-app-warm/30 bg-app-warm-soft px-4 py-3 text-[13px] text-app-warm">
+                    <li key={adjustment} className="rounded-lg border border-app-warm/30 bg-app-warm-soft px-4 py-3 text-[14px] text-app-warm">
                       {adjustment}
                     </li>
                   ))
@@ -149,7 +149,7 @@ export function CycleReviewPanel({
 
           <div className="stack-tight rounded-lg border border-app-warm/30 bg-app-warm-soft p-5">
             <h2 className="font-serif text-lg font-medium text-app-ink">3 bài học lớn nhất</h2>
-            <p className="text-[13px] text-app-ink-soft">Viết ngắn gọn những gì bạn muốn mang sang chu kỳ sau.</p>
+            <p className="text-[14px] text-app-ink-soft">Viết ngắn gọn những gì bạn muốn mang sang chu kỳ sau.</p>
             <div className="grid gap-3 md:grid-cols-3">
               {LESSON_FIELD_IDS.map((lessonId, index) => {
                 const lesson = lessons[index] ?? "";
