@@ -629,7 +629,7 @@ export function TwelveWeekTodayTab({
                     <MotionStaggerItem
                       key={task.id}
                       className={`flex min-w-0 items-start gap-3 rounded-card border p-4 ${
-                        isPrimaryTask ? "border-app-ink bg-app-ink" : "border-app-line bg-app-surface"
+                        isPrimaryTask ? "border-app-accent bg-app-accent" : "border-app-line bg-app-surface"
                       }`}
                     >
                       <Checkbox
@@ -810,7 +810,7 @@ export function TwelveWeekTodayTab({
                         key={task.id}
                         className="flex min-w-0 items-center gap-3 rounded-lg border border-app-line bg-app-surface px-3 py-3"
                       >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-ink text-xs font-semibold text-white">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent text-xs font-semibold text-white">
                           {index + 2}
                         </div>
                         <div className="min-w-0 flex-1">
