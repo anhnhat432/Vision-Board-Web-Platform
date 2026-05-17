@@ -4,8 +4,6 @@ import {
   AlertTriangle,
   CalendarDays,
   CheckCircle2,
-  ChevronDown,
-  ChevronUp,
   Clock3,
   Plus,
   Search,
@@ -30,14 +28,10 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Checkbox } from "../components/ui/checkbox";
 import { CountUp } from "../components/ui/count-up";
-import { EmptyGoalIllustration, EmptyHintArrow, getGoalArchetypeIcon } from "../components/illustrations";
+import { getGoalArchetypeIcon } from "../components/illustrations";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
-import { Input } from "../components/ui/input";
 import { LoadingSpinner } from "../components/ui/loading-spinner";
-import { PageHero } from "../components/layout/PageHero";
-import { SectionBlock } from "../components/layout/SectionBlock";
 import { Progress } from "../components/ui/progress";
-import { Reveal } from "../components/ui/reveal";
 import { useBackendProgressOverlayMap } from "../hooks/useBackendProgressOverlay";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
@@ -54,9 +48,7 @@ import {
   getCalendarDayDifference,
   getGoalExecutionStats,
   getLifeAreaLabel,
-  getReviewDayLabel,
   getTwelveWeekCurrentWeek,
-  getTwelveWeekTacticCount,
   getTwelveWeekTasksForWeek,
   getTwelveWeekTodayTasks,
   getTwelveWeekWeekRange,
@@ -512,6 +504,7 @@ function GoalTrackerContent({
     const areaMeta = LIFE_AREAS.find((area) => area.name === goal.category);
     const daysLeft = getCalendarDayDifference(goal.deadline);
     const isOverdue = daysLeft !== null && daysLeft < 0 && progress < 100;
+    const isNearDeadline = daysLeft !== null && daysLeft >= 0 && daysLeft <= 7;
     const standardNextTask = !system ? (goal.tasks.find((task) => !task.completed) ?? null) : null;
     const systemCurrentWeek = system ? getTwelveWeekCurrentWeek(system) : null;
     const systemWeekRange = system && systemCurrentWeek ? getTwelveWeekWeekRange(system, systemCurrentWeek) : null;
@@ -525,338 +518,126 @@ function GoalTrackerContent({
         : null);
 
     return (
-      <Card key={goal.id} className="overflow-hidden">
-        <CardContent className="grid gap-[var(--space-stack)] p-5 sm:p-6 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)]">
-          <div className="rounded-[var(--r-card)] gradient-brand p-5 text-primary-foreground">
+      <div key={goal.id} className="rounded-card border border-app-line bg-app-surface p-5 md:p-6 overflow-hidden">
+        <div className="grid gap-5 lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)]">
+          {/* Cột trái — Goal summary */}
+          <div>
             <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <Badge className="text-white" style={{ backgroundColor: areaMeta?.color ?? "#7c3aed" }}>
-                  {progress}%
-                </Badge>
-                <GoalArchetypeIcon className="h-7 w-7 text-white/80" />
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 rounded-lg bg-app-accent-soft text-app-accent items-center justify-center">
+                  <GoalArchetypeIcon className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-semibold text-app-ink line-clamp-2">{goal.title}</h3>
+                  <p className="text-[12px] text-app-ink-muted mt-1">
+                    Tu {systemCurrentWeek ?? "-"}/12 · {getLifeAreaLabel(goal.category)}
+                  </p>
+                </div>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-11 w-11 rounded-[var(--r-tile)] text-white/60 hover:bg-white/10 hover:text-[color:var(--color-danger-bg)]"
+                className="h-8 w-8 rounded-lg text-app-ink-muted hover:text-[color:var(--color-danger-fg)]"
                 onClick={() => setGoalToDelete(goal.id)}
                 aria-label={`Xóa mục tiêu ${goal.title}`}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
-            <h3 className="mt-4 line-clamp-2 break-words text-2xl font-bold">{goal.title}</h3>
-            <p className="mt-2 line-clamp-3 text-sm leading-7 text-white/68">
-              {goal.description || "Chưa có mô tả ngắn cho mục tiêu này."}
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Badge variant="outline" className="border-white/12 bg-white/10 text-white">
+
+            {/* Metadata pills */}
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="bg-app-bg border border-app-line text-app-ink-soft text-[11px] rounded-full px-2.5 py-0.5">
                 {getLifeAreaLabel(goal.category)}
-              </Badge>
-              {system && (
-                <Badge variant="outline" className="border-white/12 bg-white/10 text-white">
-                  12 tuần
-                </Badge>
+              </span>
+              {isNearDeadline && (
+                <span className="bg-app-warm-soft text-app-warm text-[11px] rounded-full px-2.5 py-0.5">
+                  Sắp đến hạn
+                </span>
+              )}
+              {isOverdue && (
+                <span className="bg-[color:var(--color-danger-bg)] text-[color:var(--color-danger-fg)] border border-[color:var(--color-danger-border)] text-[11px] rounded-full px-2.5 py-0.5">
+                  Quá hạn
+                </span>
               )}
               {system && (
-                <Badge variant="outline" className="border-white/12 bg-white/10 text-white">
-                  Gói {getPlanLabel(currentPlanCode)}
-                </Badge>
+                <span className="bg-app-bg border border-app-line text-app-ink-soft text-[11px] rounded-full px-2.5 py-0.5">
+                  {getPlanLabel(currentPlanCode)}
+                </span>
               )}
             </div>
-            <div className="mt-[var(--space-stack)]">
-              <div className="mb-2 flex items-center justify-between text-sm">
-                <span className="text-white/60">Tiến độ</span>
-                <span className="font-semibold text-white">
+
+            {/* Progress block */}
+            <div className="mt-4">
+              <div className="flex items-center justify-between text-[12px]">
+                <span className="text-app-ink-soft">Tiến độ</span>
+                <span className="font-medium text-app-ink">
                   <CountUp value={progress} suffix="%" />
                 </span>
               </div>
-              <Progress value={progress} className="h-2.5 bg-white/16" />
-            </div>
-            <div className="mt-[var(--space-stack)] stack-tight text-sm text-white/72">
-              <div className={`flex items-center gap-2 ${isOverdue ? "text-[color:var(--color-warning-bg)]" : ""}`}>
-                {isOverdue ? <AlertTriangle className="h-4 w-4" /> : <CalendarDays className="h-4 w-4 text-white/45" />}
-                <span>
-                  {daysLeft === null
-                    ? "Chưa có ngày đích"
-                    : isOverdue
-                      ? `Quá hạn ${Math.abs(daysLeft)} ngày`
-                      : progress === 100
-                        ? "Đã hoàn thành"
-                        : `${daysLeft} ngày còn lại`}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock3 className="h-4 w-4 text-white/45" />
-                <span>Ngày đích: {formatDeadline(goal.deadline)}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-white/45" />
-                <span>
-                  {execution.completed}/{execution.total} việc đã chốt
-                </span>
+              <div className="h-2 rounded-full bg-app-accent-soft overflow-hidden mt-1">
+                <div className="h-full bg-app-accent" style={{ width: `${progress}%` }} />
               </div>
             </div>
-            <div className="mt-2 grid gap-2 lg:hidden">
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full border-white/12 bg-white/10 text-white hover:bg-white/18"
-                aria-expanded={expandedGoals.has(goal.id)}
-                onClick={() =>
-                  setExpandedGoals((prev) => {
-                    const next = new Set(prev);
-                    if (next.has(goal.id)) next.delete(goal.id);
-                    else next.add(goal.id);
-                    return next;
-                  })
-                }
-              >
-                {expandedGoals.has(goal.id) ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                {expandedGoals.has(goal.id) ? "Ẩn chi tiết" : "Xem chi tiết"}
-              </Button>
+
+            {/* Action row */}
+            <div className="mt-4 flex gap-2">
               {system && (
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="w-full bg-card text-foreground hover:bg-[color:var(--muted)]"
+                  className="rounded-lg border border-app-line bg-app-surface text-app-accent hover:bg-app-accent-soft px-3 py-1.5 text-[13px] font-medium"
                   onClick={() => openTwelveWeekCenter(goal.id)}
                 >
-                  <Zap className="h-4 w-4" />
-                  Mở 12 tuần
+                  Mở kế hoạch
                 </Button>
               )}
+              <Button
+                variant="ghost"
+                className="text-app-ink-muted hover:text-[color:var(--color-danger-fg)] text-[13px] px-3"
+                onClick={() => setGoalToDelete(goal.id)}
+              >
+                Xóa
+              </Button>
             </div>
           </div>
-          <div className={`${expandedGoals.has(goal.id) ? "block" : "hidden"} lg:block`}>
-            {system ? (
-              <div className="stack-stack">
-                <div
-                  className={`rounded-[var(--r-card)] border p-5 ${
-                    systemReviewDueToday
-                      ? "border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)]"
-                      : "border-white/10 gradient-brand text-primary-foreground"
-                  }`}
-                >
-                  <p
-                    className={`text-xs font-semibold uppercase tracking-[0.18em] ${systemReviewDueToday ? "text-[color:var(--color-warning-fg)]" : "text-white/60"}`}
-                  >
-                    Đi tiếp từ đây
-                  </p>
-                  <p className={`mt-[var(--space-inline)] text-xl font-semibold ${systemReviewDueToday ? "text-foreground" : "text-white"}`}>
-                    {systemReviewDueToday
-                      ? "Chốt review tuần"
-                      : nextSystemTask
-                        ? nextSystemTask.title
-                        : "Hôm nay không còn việc mở"}
-                  </p>
-                  <p className={`mt-2 text-sm leading-7 ${systemReviewDueToday ? "text-muted-foreground" : "text-white/72"}`}>
-                    {systemReviewDueToday
-                      ? `Tuần ${systemCurrentWeek ?? system.currentWeek} đã đến lúc khóa lại. Chốt review trước để tuần sau vào nhịp gọn hơn.`
-                      : nextSystemTask
-                        ? `${systemTodayOpenTasks.length} việc đang mở hôm nay. ${
-                            nextSystemTask.isCore
-                              ? "Hãy bắt đầu từ việc cốt lõi này trước."
-                              : "Đây là việc tùy chọn nếu bạn còn sức."
-                          }`
-                        : systemWeekRange
-                          ? `Tuần ${systemCurrentWeek}/${system.totalWeeks} đang khá gọn (${formatCalendarDate(systemWeekRange.start)} - ${formatCalendarDate(systemWeekRange.end)}).`
-                          : "Mở trung tâm 12 tuần để xem lại hàng việc và nhịp tuần hiện tại."}
-                  </p>
-                  {nextSystemTask && !systemReviewDueToday && (
-                    <div className="mt-4 flex items-center gap-3 rounded-[var(--r-tile)] border border-white/12 bg-white/10 px-4 py-3">
-                      <Checkbox
-                        checked={nextSystemTask.completed}
-                        onCheckedChange={() => handleToggleTask(goal.id, nextSystemTask.id)}
-                        aria-label={`Đánh dấu việc ${nextSystemTask.title}`}
-                        className="border-white/50 data-[state=checked]:border-white data-[state=checked]:bg-white data-[state=checked]:text-foreground"
-                      />
-                      <span className="flex-1 text-sm font-semibold text-white">{nextSystemTask.title}</span>
-                    </div>
-                  )}
-                  <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                    <Button className="w-full sm:w-auto" onClick={() => openTwelveWeekCenter(goal.id)}>
-                      <Zap className="h-4 w-4" />
-                      Mở trung tâm 12 tuần
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className={`w-full sm:w-auto ${
-                        systemReviewDueToday
-                          ? "border-[color:var(--color-warning-border)] bg-white text-[color:var(--color-warning-fg)] hover:bg-[color:var(--color-warning-bg)]"
-                          : "border-white/12 bg-white/10 text-white hover:bg-white/16"
-                      }`}
-                      onClick={() => navigate("/journal")}
-                    >
-                      Mở nhật ký tuần
-                    </Button>
-                  </div>
-                </div>
 
-                <div className="rounded-[var(--r-card)] border border-[color:var(--color-info-border)] bg-white/78 p-5">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--color-info-fg)]">
-                        Chu kỳ 12 tuần
-                      </p>
-                      <p className="mt-2 text-lg font-semibold text-foreground">Bức tranh nhanh của chu kỳ đang chạy</p>
-                      {systemWeekRange && (
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {formatCalendarDate(systemWeekRange.start)} - {formatCalendarDate(systemWeekRange.end)}
-                        </p>
-                      )}
-                    </div>
-                    <Badge variant="outline" className="border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)]">
-                      {getSystemStatusLabel(system.status)}
-                    </Badge>
-                  </div>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <Badge
-                      variant="outline"
-                      className={
-                        hasPremiumReviewInsights
-                          ? "border-[color:var(--color-success-border)] bg-[color:var(--color-success-bg)] text-[color:var(--color-success-fg)]"
-                          : "border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)]"
-                      }
-                    >
-                      {hasPremiumReviewInsights ? "Góc nhìn review đã mở" : "Góc nhìn review đang khóa"}
-                    </Badge>
-                    {!hasPremiumReviewInsights && (
-                      <Badge variant="outline" className="border-border bg-white text-muted-foreground">
-                        Mở Plus để review rõ hơn
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="mt-4 grid gap-3 md:grid-cols-4">
-                    <div className="rounded-[var(--r-tile)] border border-white/80 bg-muted p-4">
-                      <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Tuần</p>
-                      <p className="mt-2 text-2xl font-bold text-foreground">
-                        {execution.currentWeek ?? system.currentWeek}
-                        <span className="text-muted-foreground">/{system.totalWeeks}</span>
-                      </p>
-                    </div>
-                    <div className="rounded-[var(--r-tile)] border border-white/80 bg-muted p-4">
-                      <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Tiến độ tuần</p>
-                      <p className="mt-2 text-2xl font-bold text-foreground">
-                        {execution.weekCompletion?.percent ?? 0}%
-                      </p>
-                    </div>
-                    <div className="rounded-[var(--r-tile)] border border-white/80 bg-muted p-4">
-                      <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Tactic</p>
-                      <p className="mt-2 text-2xl font-bold text-foreground">{getTwelveWeekTacticCount(system)}</p>
-                    </div>
-                    <div className="rounded-[var(--r-tile)] border border-white/80 bg-muted p-4">
-                      <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Review</p>
-                      <p className="mt-2 text-sm font-semibold text-foreground">
-                        {execution.reviewDueToday
-                          ? "Đến hạn hôm nay"
-                          : system.reviewDay
-                            ? getReviewDayLabel(system.reviewDay)
-                            : "Chưa chọn"}
-                      </p>
-                    </div>
-                  </div>
+          {/* Cột phải — Today tasks preview */}
+          <div>
+            <div className="flex items-baseline justify-between">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">VIỆC HÔM NAY</p>
+              <span className="text-[12px] text-app-ink-muted">
+                {systemTodayOpenTasks.filter(t => !t.completed).length}/{systemTodayOpenTasks.length}
+              </span>
+            </div>
+            <div className="mt-2 space-y-1 max-h-[100px] overflow-y-auto">
+              {systemTodayOpenTasks.slice(0, 3).map((task) => (
+                <div key={task.id} className="flex items-center gap-2.5 py-1.5">
+                  <input
+                    type="checkbox"
+                    checked={task.completed || false}
+                    onChange={() => handleToggleTask(goal.id, task.id)}
+                    className="size-4 rounded border-[1.5px] border-[#C8C2B6] bg-app-surface data-[state=checked]:bg-app-accent data-[state=checked]:border-app-accent"
+                  />
+                  <span className={`text-[13px] line-clamp-1 ${task.completed ? "line-through text-app-ink-muted" : "text-app-ink"}`}>
+                    {task.title}
+                  </span>
                 </div>
-              </div>
-            ) : (
-              <div className="rounded-[var(--r-card)] border border-white/60 bg-white/80 p-5">
-                <div className="flex justify-end">
-                  <div className="sr-only" aria-hidden="true">
-                    <p className="text-lg font-semibold text-foreground">Danh sách việc</p>
-                    <p className="text-sm text-muted-foreground">Bẻ nhỏ mục tiêu thành những bước đủ rõ để làm tiếp.</p>
-                  </div>
-                  <Badge variant="outline" className="border-border bg-muted text-muted-foreground">
-                    {goal.tasks.length} việc
-                  </Badge>
-                </div>
-                <div className="mt-4 stack-tight">
-                  {goal.tasks.length === 0 ? (
-                    <div className="rounded-[var(--r-card)] border border-dashed border-border bg-muted px-5 py-7 text-center text-sm text-muted-foreground">
-                      Chưa có việc nào. Hãy thêm bước đầu tiên để biến mục tiêu này thành hành động cụ thể.
-                    </div>
-                  ) : (
-                    goal.tasks.map((task) => (
-                      <div
-                        key={task.id}
-                        className="group flex items-center gap-3 rounded-[var(--r-tile)] border border-white/70 bg-muted px-4 py-3"
-                      >
-                        <Checkbox
-                          checked={task.completed}
-                          onCheckedChange={() => handleToggleTask(goal.id, task.id)}
-                          aria-label={`Đánh dấu việc ${task.title}`}
-                        />
-                        <span
-                          className={`flex-1 text-sm ${task.completed ? "text-muted-foreground line-through" : "text-muted-foreground"}`}
-                        >
-                          {task.title}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-11 w-11 rounded-[var(--r-tile)] opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
-                          onClick={() => handleDeleteTask(goal.id, task.id)}
-                          aria-label={`Xóa việc ${task.title}`}
-                        >
-                          <Trash2 className="h-4 w-4 text-[color:var(--color-danger-fg)]" />
-                        </Button>
-                      </div>
-                    ))
-                  )}
-                </div>
-                <div className="mt-4 rounded-[var(--r-card)] border border-border bg-muted p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Việc kế tiếp</p>
-                  <p className="mt-2 text-base font-semibold text-foreground">
-                    {standardNextTask
-                      ? standardNextTask.title
-                      : goal.tasks.length === 0
-                        ? "Thêm bước đầu tiên"
-                        : "Mọi việc hiện tại đã xong"}
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {standardNextTask
-                      ? "Bắt đầu từ đúng việc này trước rồi mới mở thêm phần khác."
-                      : goal.tasks.length === 0
-                        ? "Chỉ cần một việc đầu tiên là mục tiêu sẽ bớt mơ hồ hơn nhiều."
-                        : "Nếu muốn đi tiếp, hãy thêm việc mới cho chặng kế tiếp."}
-                  </p>
-                </div>
-                <div className="mt-4 stack-tight border-t border-border pt-4">
-                  {addingTaskToGoalId === goal.id ? (
-                    <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
-                      <Input
-                        id={`new-task-${goal.id}`}
-                        placeholder="Nhập việc tiếp theo..."
-                        aria-label={`Việc mới cho mục tiêu ${goal.title}`}
-                        value={newTask}
-                        onChange={(event) => setNewTask(event.target.value)}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter") handleAddTask(goal.id);
-                        }}
-                        autoFocus
-                      />
-                      <Button variant="secondary" onClick={() => handleAddTask(goal.id)}>Thêm</Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => {
-                          setAddingTaskToGoalId(null);
-                          setNewTask("");
-                        }}
-                      >
-                        Hủy
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button variant="outline" className="w-full" onClick={() => setAddingTaskToGoalId(goal.id)}>
-                      <Plus className="h-4 w-4" />
-                      Thêm việc
-                    </Button>
-                  )}
-                </div>
-              </div>
+              ))}
+              {systemTodayOpenTasks.length === 0 && (
+                <p className="text-[12px] text-app-ink-muted">Không có việc nào hôm nay</p>
+              )}
+            </div>
+            {system && (
+              <button
+                className="mt-2 text-app-accent text-[12px] hover:underline"
+                onClick={() => openTwelveWeekCenter(goal.id)}
+              >
+                Xem tất cả →
+              </button>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   };
 
@@ -894,75 +675,38 @@ function GoalTrackerContent({
       </AlertDialog>
 
       <div data-tour-id="goaltracker-hero">
-        <PageHero
-          titleAs={1}
-          density="compact"
-          className="page-enter"
-          eyebrow="Mục tiêu"
-          eyebrowIcon={<Target className="h-3.5 w-3.5" />}
-          title={
-            <>
-              Mục tiêu và <span className="text-gradient-vibrant">bước tiếp theo</span>.
-            </>
-          }
-          description={
-            <>
-              Xem nhanh mục tiêu, hạn chót và nơi cần mở tiếp. Việc hằng ngày của chu kỳ 12 tuần vẫn nằm trong
-              trung tâm 12 tuần.
-              {shouldShowFreeGoalLimit ? (
-                <span className="mt-2 inline-flex rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">
-                  {goalLimitUsage.current}/{goalLimitUsage.limit} mục tiêu Free
-                </span>
-              ) : null}
-            </>
-          }
-          primaryCta={
-            <Button
-              data-tour-id="goaltracker-create-goal"
-              glow
-              className="w-full sm:w-auto"
-              onClick={handleStartGuidedGoalFlow}
-            >
-              <Target className="h-4 w-4" />
-              {hasGoals ? "Tạo mục tiêu mới" : goalFlowStartLabel}
-            </Button>
-          }
-          secondaryCta={
-            twelveWeekGoals[0] ? (
-              <Button
-                variant="outline"
-                className="w-full sm:w-auto"
-                onClick={() => openTwelveWeekCenter(twelveWeekGoals[0].id)}
-              >
-                <Zap className="h-4 w-4" />
-                Mở 12 tuần
-              </Button>
-            ) : undefined
-          }
-          aside={
-            <div
-              data-tour-id="goaltracker-start-card"
-              className={`flex h-full flex-col gap-3 rounded-[var(--r-tile)] border p-4 shadow-[var(--shadow-1)] ${priority.tone}`}
-            >
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-control)] bg-card/80">
-                  <PriorityIcon className="h-5 w-5" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] opacity-75">{priority.eyebrow}</p>
-                  <p className="mt-1 text-base font-semibold leading-6">{priority.title}</p>
-                </div>
-              </div>
-              <p className="text-sm leading-6 opacity-80">{priority.note}</p>
-              <Button className="mt-auto w-full" variant="outline" onClick={handlePriorityAction}>
-                {priority.cta}
-              </Button>
+        <div className="mt-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">MỤC TIÊU</p>
+          <h1 className="mt-3 font-serif text-[30px] font-medium leading-tight tracking-tight text-app-ink">
+            Mục tiêu của bạn
+          </h1>
+          <p className="mt-2 text-[14px] text-app-ink-soft max-w-2xl">
+            Theo dõi tiến độ tất cả mục tiêu hiện tại và cũ.
+          </p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
+              <input
+                type="search"
+                placeholder="Tìm theo tên hoặc mô tả..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full sm:w-80 rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-[14px] text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/30 focus:border-app-accent"
+              />
             </div>
-          }
-        />
+            <Button
+              className="bg-app-accent text-white rounded-lg px-4 py-2 text-[14px] font-medium hover:bg-[#284f45] inline-flex items-center gap-2"
+              onClick={handleStartGuidedGoalFlow}
+              disabled={hasReachedLimit(viewUserData, "maxActiveGoals")}
+            >
+              <Plus className="h-4 w-4" />
+              Mục tiêu mới
+            </Button>
+          </div>
+        </div>
       </div>
 
-      <Card data-tour-id="goaltracker-summary" className="overflow-hidden">
+      <Card data-tour-id="goaltracker-summary" className="overflow-hidden rounded-card border border-app-line bg-app-surface">
         <CardContent className="p-4 sm:p-5">
           <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
             {overviewItems.map((item) => {
@@ -970,20 +714,20 @@ function GoalTrackerContent({
               return (
                 <div
                   key={item.title}
-                  className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-3 sm:px-4"
+                  className="rounded-card border border-app-line bg-app-surface p-4"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{item.title}</p>
-                      <p className="mt-1 text-xl font-bold text-foreground sm:text-2xl">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{item.title}</p>
+                      <p className="mt-2 text-[26px] font-medium text-app-ink sm:text-2xl tabular-nums">
                         {typeof item.value === "number" ? <CountUp value={item.value} /> : item.value}
                       </p>
+                      <p className="mt-1 text-[12px] text-app-ink-muted">{item.note}</p>
                     </div>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-[var(--r-control)] bg-card text-[color:var(--tone-shell-primary)]">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-app-bg text-app-accent">
                       <Icon className="h-4 w-4" />
                     </div>
                   </div>
-                  <p className="mt-2 text-sm text-muted-foreground">{item.note}</p>
                 </div>
               );
             })}
@@ -993,136 +737,93 @@ function GoalTrackerContent({
 
       <div data-tour-id="goaltracker-goals">
         {hasGoals && (
-          <div className="mb-5 rounded-[var(--r-control)] border border-border bg-white/92 p-4 shadow-lg sm:p-5">
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-center">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Danh sách</p>
-                <h2 className="mt-1 text-xl font-bold tracking-normal text-foreground">Mục tiêu của bạn</h2>
-                <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                  Chu kỳ 12 tuần nằm trước, mục tiêu thường nằm sau để bạn biết việc nào cần mở đúng trung tâm.
-                </p>
-              </div>
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="search"
-                  placeholder="Tìm mục tiêu..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-[var(--r-control)] border border-border bg-white py-3 pl-11 pr-4 text-sm font-medium text-foreground placeholder:text-muted-foreground outline-none transition-colors transition-shadow duration-150 focus:border-[color:var(--color-info-border)] focus:ring-2 focus:ring-ring/40"
-                />
-              </div>
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
+              <input
+                type="search"
+                placeholder="Tìm theo tên hoặc mô tả..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-[14px] text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/30 focus:border-app-accent"
+              />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Danh sách</p>
+              <h2 className="mt-1 text-xl font-bold text-app-ink">Mục tiêu của bạn</h2>
             </div>
           </div>
         )}
         {!hasGoals ? (
-          <Reveal delay={0.04}>
-            <Card
-              data-testid="goaltracker-fresh-empty-state"
-              data-tour-id="goaltracker-empty-state"
-              className="relative overflow-hidden"
-            >
-              <CardContent className="p-10 text-center lg:p-14">
-                <EmptyGoalIllustration className="mx-auto mb-4 w-44 text-violet-500 sm:w-56" />
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-control)] bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)]">
-                  <Target className="h-10 w-10" />
-                </div>
-                <h2 className="mt-6 text-3xl font-bold text-foreground">
-                  Chưa có mục tiêu nào trong không gian làm việc của bạn
-                </h2>
-                <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-muted-foreground">
-                  Bắt đầu bằng Cân bằng cuộc sống để có dữ liệu thật, sau đó chọn Góc nhìn cuộc sống, viết mục tiêu
-                  SMART, kiểm tra tính khả thi rồi mới tạo chu kỳ 12 tuần.
-                </p>
-                <EmptyHintArrow className="pointer-events-none absolute bottom-28 right-[18%] hidden h-10 w-10 text-fuchsia-500 opacity-65 sm:block" />
-                <Button className="mt-8 w-full sm:w-auto" onClick={handleStartGuidedGoalFlow}>
-                  <Target className="h-4 w-4" />
-                  {goalFlowStartLabel}
-                </Button>
-                <div className="mx-auto mt-8 grid max-w-lg gap-3 text-left sm:grid-cols-3">
-                  {[
-                    { icon: Target, label: "Chấm Cân bằng cuộc sống" },
-                    { icon: CheckCircle2, label: "Chọn Góc nhìn cuộc sống" },
-                    { icon: Zap, label: "SMART + 12 tuần" },
-                  ].map((item) => (
-                    <div
-                      key={item.label}
-                      className="flex items-center gap-2 rounded-[var(--r-control)] border border-[color:var(--color-info-border)] bg-white/80 px-4 py-3 text-sm text-muted-foreground"
-                    >
-                      <item.icon className="h-4 w-4 text-[color:var(--color-info-fg)]" />
-                      {item.label}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </Reveal>
-        ) : (
-          <Reveal delay={0.04} className="stack-section">
-            {filteredTwelveWeekGoals.length > 0 && (
-              <SectionBlock
-                title="Chu kỳ 12 tuần đang chạy"
-                description="Nhóm này nên được nhìn trước vì việc hằng ngày và review đều nằm ở đây."
-                className="[&>div:first-child]:flex [&>div:first-child]:flex-wrap [&>div:first-child]:items-center [&>div:first-child]:justify-between [&>div:first-child]:gap-[var(--space-inline)] [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-foreground"
-                data-tour-id="goaltracker-priority-section"
+          <div className="rounded-card border border-app-line bg-app-surface p-10 text-center mt-8">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
+              <Target className="h-10 w-10" />
+            </div>
+            <h2 className="mt-4 font-serif text-2xl font-medium text-app-ink">Chưa có mục tiêu</h2>
+            <p className="mx-auto mt-2 max-w-md text-[14px] text-app-ink-soft">
+              Bắt đầu bằng chu kỳ 12 tuần đầu tiên — hoặc tạo mục tiêu thường nếu bạn chưa sẵn sàng.
+            </p>
+            <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+              <Button
+                className="bg-app-accent text-white hover:bg-[#284f45]"
+                onClick={handleStartGuidedGoalFlow}
               >
-                <div className="flex justify-end">
-                  <div className="sr-only" aria-hidden="true">
-                    <h2 className="text-2xl font-bold text-foreground">Chu kỳ 12 tuần đang chạy</h2>
-                    <p className="text-sm text-muted-foreground">
-                      Nhóm này nên được nhìn trước vì việc hằng ngày và review đều nằm ở đây.
+                Bắt đầu chu kỳ 12 tuần →
+              </Button>
+              <Button
+                variant="outline"
+                className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
+                onClick={handleStartGuidedGoalFlow}
+              >
+                Tạo mục tiêu thường
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="stack-section mt-8">
+            {filteredTwelveWeekGoals.length > 0 && (
+              <div className="mb-4">
+                <div className="flex items-baseline justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">CHU KỲ 12 TUẦN</p>
+                    <h2 className="mt-1 text-[15px] font-semibold text-app-ink">Mục tiêu đang chạy</h2>
+                    <p className="mt-1 text-[12px] text-app-ink-muted">
+                      {filteredTwelveWeekGoals.length} mục tiêu
                     </p>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className="rounded-[var(--r-pill)] border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] px-4 py-2 text-[color:var(--color-info-fg)]"
-                  >
-                    {filteredTwelveWeekGoals.length} chu kỳ
-                  </Badge>
                 </div>
-                <div className="stack-stack">
+                <div className="stack-stack mt-4 space-y-3">
                   {filteredTwelveWeekGoals.map((goal) => (
                     <div key={goal.id}>{renderGoalCard(goal)}</div>
                   ))}
                 </div>
-              </SectionBlock>
+              </div>
             )}
 
             {filteredStandardGoals.length > 0 && (
-              <SectionBlock
-                title="Mục tiêu thường"
-                description="Những mục tiêu chưa vào chu kỳ 12 tuần, phù hợp để theo dõi theo dạng danh sách việc."
-                className="[&>div:first-child]:flex [&>div:first-child]:flex-wrap [&>div:first-child]:items-center [&>div:first-child]:justify-between [&>div:first-child]:gap-[var(--space-inline)] [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-foreground"
-                data-tour-id="goaltracker-standard-section"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="mt-8">
+                <div className="flex items-baseline justify-between">
                   <div>
-                    <h2 className="text-2xl font-bold text-foreground">Mục tiêu thường</h2>
-                    <p className="text-sm text-muted-foreground">
-                      Những mục tiêu chưa vào chu kỳ 12 tuần, phù hợp để theo dõi theo dạng danh sách việc.
-                    </p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">MỤC TIÊU THƯỜNG</p>
+                    <h2 className="mt-1 text-[15px] font-semibold text-app-ink">
+                      {filteredStandardGoals.length} mục tiêu
+                    </h2>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className="rounded-[var(--r-pill)] border-white/70 bg-white/72 px-4 py-2 text-muted-foreground"
-                  >
-                    {filteredStandardGoals.length} mục tiêu
-                  </Badge>
                 </div>
-                <div className="stack-stack">
+                <div className="stack-stack mt-4 space-y-3">
                   {filteredStandardGoals.map((goal) => (
                     <div key={goal.id}>{renderGoalCard(goal)}</div>
                   ))}
                 </div>
-              </SectionBlock>
+              </div>
             )}
 
             {searchQuery.trim() && filteredTwelveWeekGoals.length === 0 && filteredStandardGoals.length === 0 && (
-              <p className="py-12 text-center text-sm text-muted-foreground">
+              <p className="py-12 text-center text-sm text-app-ink-muted">
                 Không tìm thấy mục tiêu nào khớp với "{searchQuery}"
               </p>
             )}
-          </Reveal>
+          </div>
         )}
       </div>
     </div>

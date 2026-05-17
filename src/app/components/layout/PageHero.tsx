@@ -104,7 +104,7 @@ export function PageHero({
   return (
     <Card
       className={cn(
-        "relative overflow-hidden border border-[color:var(--border)] bg-card",
+        "relative overflow-hidden border border-app-line bg-app-surface",
         className,
       )}
       {...heroExtraProps}
@@ -118,19 +118,15 @@ export function PageHero({
         >
           <div className={cn("min-w-0 space-y-3", alignClass)}>
             {eyebrow ? (
-              <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-app-ink-muted">
                 {eyebrowIcon ? (
-                  <span aria-hidden="true" className="text-[color:var(--tone-shell-secondary)]">
+                  <span aria-hidden="true" className="text-app-accent">
                     {eyebrowIcon}
                   </span>
                 ) : (
                   <span
                     aria-hidden="true"
-                    className="inline-block h-1.5 w-1.5 rounded-full"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, var(--tone-shell-primary), var(--tone-shell-secondary))",
-                    }}
+                    className="inline-block h-1.5 w-1.5 rounded-full bg-app-accent"
                   />
                 )}
                 {eyebrow}
@@ -138,12 +134,12 @@ export function PageHero({
             ) : null}
             <Heading
               data-slot="page-hero-title"
-              className="text-[28px] font-bold leading-[1.05] tracking-[-0.022em] text-foreground sm:text-[34px] lg:text-[44px]"
+              className="text-[28px] font-bold leading-[1.05] tracking-[-0.022em] text-app-ink sm:text-[34px] lg:text-[44px]"
             >
               {title}
             </Heading>
             {description ? (
-              <p className="max-w-prose text-[15px] leading-relaxed tracking-tight text-muted-foreground sm:text-base">
+              <p className="max-w-prose text-[15px] leading-relaxed tracking-tight text-app-ink-muted sm:text-base">
                 {description}
               </p>
             ) : null}

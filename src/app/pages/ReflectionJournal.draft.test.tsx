@@ -30,8 +30,8 @@ function renderJournal() {
   return render(<RouterProvider router={router} />);
 }
 
-async function openFreeformJournal(user: ReturnType<typeof userEvent.setup>) {
-  await user.click(await screen.findByRole("button", { name: /Viết nhật ký tự do/i }));
+async function openJournal(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(await screen.findByRole("button", { name: /Viết entry đầu tiên/i }));
   return screen.findByPlaceholderText(/Viết về trải nghiệm/i);
 }
 
@@ -45,6 +45,8 @@ function seedDraft(content = DRAFT_CONTENT) {
   );
 }
 
+// Note: Tests updated after UI refactoring with app tokens
+// The draft functionality logic remains unchanged, selectors adapted to new markup
 describe("ReflectionJournal bản nháp", () => {
   beforeEach(() => {
     localStorage.clear();
@@ -55,7 +57,7 @@ describe("ReflectionJournal bản nháp", () => {
     const user = userEvent.setup();
     renderJournal();
 
-    const textarea = await openFreeformJournal(user);
+    const textarea = await openJournal(user);
     await user.type(textarea, DRAFT_CONTENT);
 
     await waitFor(
@@ -71,7 +73,7 @@ describe("ReflectionJournal bản nháp", () => {
     seedDraft();
     renderJournal();
 
-    await openFreeformJournal(user);
+    await openJournal(user);
 
     expect(await screen.findByText(/Tìm thấy bản nháp chưa lưu lúc/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Khôi phục" })).toBeInTheDocument();
@@ -83,7 +85,7 @@ describe("ReflectionJournal bản nháp", () => {
     seedDraft();
     renderJournal();
 
-    await openFreeformJournal(user);
+    await openJournal(user);
     await user.click(await screen.findByRole("button", { name: "Khôi phục" }));
 
     expect(screen.getByPlaceholderText(/Viết về trải nghiệm/i)).toHaveValue(DRAFT_CONTENT);
@@ -94,7 +96,7 @@ describe("ReflectionJournal bản nháp", () => {
     seedDraft();
     renderJournal();
 
-    await openFreeformJournal(user);
+    await openJournal(user);
     await user.click(await screen.findByRole("button", { name: "Khôi phục" }));
     await user.click(screen.getByRole("button", { name: /Lưu nhật ký/i }));
 

@@ -1,5 +1,6 @@
-﻿import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, Link } from "react-router";
+import { cn } from "../components/ui/utils";
 import {
   ArrowRight,
   BookOpen,
@@ -13,11 +14,11 @@ import {
   Smile,
   Sparkles,
   Trash2,
+  MoreVertical,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { EmptyHintArrow, EmptyJournalIllustration } from "../components/illustrations";
-import { PageHero } from "../components/layout/PageHero";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,12 +31,24 @@ import {
 } from "../components/ui/alert-dialog";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader } from "../components/ui/card";
+import { Card, CardContent } from "../components/ui/card";
 import { CountUp } from "../components/ui/count-up";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../components/ui/dropdown-menu";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Reveal } from "../components/ui/reveal";
 import { Textarea } from "../components/ui/textarea";
 import { useReflectionDraft, type ReflectionDraft } from "../hooks/useReflectionDraft";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
@@ -80,14 +93,12 @@ function createEmptyReflectionInput() {
 function formatDraftSavedTime(savedAt: string) {
   const date = new Date(savedAt);
   if (Number.isNaN(date.getTime())) return "không rõ giờ";
-
   return date.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
 }
 
 function getReflectionTitleFromContent(content: string) {
   const firstLine = content.trim().split(/\r?\n/)[0]?.trim() ?? "";
   if (!firstLine) return "Nhật ký chưa đặt tên";
-
   return firstLine.length > 64 ? `${firstLine.slice(0, 61)}...` : firstLine;
 }
 
@@ -120,52 +131,36 @@ function getMoodConfig(mood?: string) {
   switch (mood) {
     case "happy":
       return {
-        icon: <Smile className="h-5 w-5 text-emerald-600" />,
+        icon: <Smile className="h-5 w-5 text-app-accent" />,
         label: "Vui vẻ",
-        badge: "border-emerald-200 bg-emerald-50 text-emerald-700",
+        badge: "border-app-accent bg-app-accent-soft text-app-accent",
       };
     case "neutral":
       return {
-        icon: <Meh className="h-5 w-5 text-amber-600" />,
+        icon: <Meh className="h-5 w-5 text-app-ink-soft" />,
         label: "Bình thường",
-        badge: "border-amber-200 bg-amber-50 text-amber-700",
+        badge: "border-app-line bg-app-bg text-app-ink-soft",
       };
     case "sad":
       return {
-        icon: <Frown className="h-5 w-5 text-sky-600" />,
+        icon: <Frown className="h-5 w-5 text-app-warm" />,
         label: "Suy tư",
-        badge: "border-sky-200 bg-sky-50 text-sky-700",
+        badge: "border-app-warm bg-app-warm-soft text-app-warm",
       };
     default:
       return {
         icon: null,
         label: "Chưa chọn",
-        badge: "border-slate-200 bg-slate-50 text-slate-600",
+        badge: "border-app-line bg-app-bg text-app-ink-muted",
       };
   }
 }
 
 function getJournalPhaseTone(weekNumber?: number) {
-  if (!weekNumber || weekNumber <= 4) {
-    return {
-      stripe: "bg-gradient-to-b from-violet-500 to-fuchsia-500",
-      soft: "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/30 dark:bg-violet-950/35 dark:text-violet-200",
-      bar: "from-violet-500 to-fuchsia-500",
-    };
-  }
-
-  if (weekNumber <= 8) {
-    return {
-      stripe: "bg-gradient-to-b from-fuchsia-500 to-rose-500",
-      soft: "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700 dark:border-fuchsia-500/30 dark:bg-fuchsia-950/35 dark:text-fuchsia-200",
-      bar: "from-fuchsia-500 to-rose-500",
-    };
-  }
-
   return {
-    stripe: "bg-gradient-to-b from-emerald-500 to-teal-500",
-    soft: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/35 dark:text-emerald-200",
-    bar: "from-emerald-500 to-teal-500",
+    stripe: "bg-app-warm",
+    soft: "border-app-line bg-app-warm-soft text-app-warm",
+    bar: "bg-app-warm",
   };
 }
 
@@ -183,7 +178,6 @@ export function ReflectionJournal() {
 
   useEffect(() => {
     if (!isAddingReflection) return;
-
     const draft = loadDraft();
     setPendingReflectionDraft(draft);
     setNewReflection(draft ? getEmptyReflectionInputWithDraftDate(draft) : createEmptyReflectionInput());
@@ -191,7 +185,6 @@ export function ReflectionJournal() {
 
   const handleRestoreReflectionDraft = () => {
     if (!pendingReflectionDraft) return;
-
     setNewReflection(getReflectionInputFromDraft(pendingReflectionDraft));
     setPendingReflectionDraft(null);
   };
@@ -282,7 +275,6 @@ export function ReflectionJournal() {
 
   const moodCounts = useMemo(() => {
     if (!userData) return { happy: 0, neutral: 0, sad: 0 };
-
     return sortedReflections.reduce(
       (acc, reflection) => {
         if (reflection.mood === "happy") acc.happy += 1;
@@ -311,15 +303,11 @@ export function ReflectionJournal() {
   const currentStreak = useMemo(() => {
     if (sortedReflections.length === 0) return 0;
     const todayKey = getTodayDayKey();
-
     const writtenDays = new Set(sortedReflections.map((r) => getDayKey(r.date)));
-
     let cursorKey = todayKey;
-    // allow today or yesterday as streak start
     if (!writtenDays.has(cursorKey)) {
       cursorKey = getPreviousDayKey(cursorKey);
     }
-
     let streak = 0;
     while (writtenDays.has(cursorKey)) {
       streak += 1;
@@ -349,7 +337,7 @@ export function ReflectionJournal() {
   if (!userData) return null;
 
   return (
-    <div className="stack-section pb-12">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 space-y-6">
       <AlertDialog
         open={Boolean(reflectionToDelete)}
         onOpenChange={(open) => {
@@ -365,67 +353,73 @@ export function ReflectionJournal() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Hủy</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDeleteReflection} className="bg-red-600 hover:bg-red-700">
+            <AlertDialogAction
+              onClick={confirmDeleteReflection}
+              className="bg-[color:var(--color-danger-fg)] hover:bg-[color:var(--color-danger-fg)]/90"
+            >
               Xóa
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <Dialog open={isAddingReflection} onOpenChange={setIsAddingReflection}>
-        <PageHero
-          className="page-enter"
-          eyebrow="Nhật ký nhìn lại"
-          eyebrowIcon={<NotebookPen className="h-3.5 w-3.5" />}
-          title={
-            <>
-              <span className="text-gradient-vibrant">Tuần này bạn nhìn lại</span> đủ sâu để giữ bài học và cảm xúc.
-            </>
-          }
-          description="Nhật ký ở đây không chỉ để lưu chữ. Nó là nơi gom lại bài học, cảm xúc và những chuyển động nhỏ qua từng ngày."
-          primaryCta={
-            <Button glow onClick={() => setIsAddingReflection(true)}>
-              <Plus className="h-4 w-4" />
-              Viết nhật ký mới
-            </Button>
-          }
-          aside={
-            <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Nhịp viết hiện tại</p>
-              {hasReflections ? (
-                <div className="mt-3 grid gap-2">
-                  <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                    <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Tổng số bài</p>
-                    <p className="mt-1 text-2xl font-bold text-foreground">
-                      <CountUp value={userData.reflections.length} />
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                      <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Tháng này</p>
-                      <p className="mt-1 text-lg font-bold text-foreground">
-                        <CountUp value={monthlyCount} />
-                      </p>
-                    </div>
-                    <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                      <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Cảm xúc</p>
-                      <p className="mt-1 truncate text-sm font-bold text-foreground">{recentMood.label}</p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-3 rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-4 text-center">
-                  <BookOpen className="mx-auto h-7 w-7 text-[color:var(--tone-shell-primary)]" />
-                  <p className="mt-2 text-sm font-bold text-foreground">Chưa có nhật ký nào</p>
-                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                    Dữ liệu sẽ xuất hiện sau bài viết đầu tiên.
-                  </p>
-                </div>
-              )}
-            </div>
-          }
-        />
+      {/* Hero Section */}
+      <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-8">
+        <div className="flex flex-col gap-3">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">PHẢN TƯ</p>
+          <h1 className="font-serif text-[30px] font-medium leading-tight text-app-ink">Nhật ký phản tư</h1>
+          <p className="max-w-2xl text-[14px] leading-6 text-app-ink-soft">
+            Ghi lại điều bạn học được, biết ơn, và muốn cải thiện.
+          </p>
+        </div>
 
+        {/* Toolbar */}
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative min-w-[200px] flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
+            <Input
+              placeholder="Tìm kiếm nhật ký..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {(["all", "weekly-review", "freeform"] as const).map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setFilterType(type)}
+                className={cn(
+                  "rounded-full border border-app-line bg-app-surface px-3 py-1 text-[12px] transition-colors",
+                  filterType === type ? "bg-app-accent-soft text-app-accent" : "text-app-ink-soft hover:bg-app-bg",
+                )}
+              >
+                {type === "all" ? "Tất cả" : type === "weekly-review" ? "Review tuần" : "Tự do"}
+              </button>
+            ))}
+            <span className="hidden sm:inline w-px h-5 bg-app-line" />
+            {(["", "happy", "neutral", "sad"] as const).map((mood) => {
+              const labels: Record<string, string> = { "": "Tất cả", happy: "Vui vẻ", neutral: "Bình thường", sad: "Suy tư" };
+              return (
+                <button
+                  key={mood}
+                  type="button"
+                  onClick={() => setFilterMood(mood)}
+                  className={cn(
+                    "rounded-full border border-app-line bg-app-surface px-3 py-1 text-[12px] transition-colors",
+                    filterMood === mood ? "bg-app-accent-soft text-app-accent" : "text-app-ink-soft hover:bg-app-bg",
+                  )}
+                >
+                  {labels[mood]}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <Dialog open={isAddingReflection} onOpenChange={setIsAddingReflection}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Viết nhật ký mới</DialogTitle>
@@ -436,11 +430,9 @@ export function ReflectionJournal() {
 
           <div className="mt-4 grid gap-5">
             {pendingReflectionDraft ? (
-              <div className="rounded-[var(--r-card)] border border-amber-200 bg-amber-50/90 p-4 text-sm text-amber-950">
+              <div className="rounded-card border border-amber-200 bg-amber-50/90 p-4 text-sm text-amber-950">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p>
-                    Tìm thấy bản nháp chưa lưu lúc {formatDraftSavedTime(pendingReflectionDraft.savedAt)}.
-                  </p>
+                  <p>Tìm thấy bản nháp chưa lưu lúc {formatDraftSavedTime(pendingReflectionDraft.savedAt)}.</p>
                   <div className="flex flex-wrap gap-2">
                     <Button size="sm" type="button" onClick={handleRestoreReflectionDraft}>
                       Khôi phục
@@ -462,7 +454,6 @@ export function ReflectionJournal() {
                   onChange={(event) => setNewReflection({ ...newReflection, date: event.target.value })}
                 />
               </div>
-
               <div className="stack-tight">
                 <Label>Tiêu đề</Label>
                 <Input
@@ -473,60 +464,18 @@ export function ReflectionJournal() {
               </div>
             </div>
 
-            <div className="stack-tight">
-              <Label>Hôm nay bạn đang cảm thấy thế nào?</Label>
-              <div className="grid gap-3 sm:grid-cols-3">
-                {[
-                  {
-                    value: "happy" as MoodValue,
-                    label: "Vui vẻ",
-                    icon: Smile,
-                    activeClass: "border-emerald-200 bg-emerald-50 text-emerald-700",
-                  },
-                  {
-                    value: "neutral" as MoodValue,
-                    label: "Bình thường",
-                    icon: Meh,
-                    activeClass: "border-amber-200 bg-amber-50 text-amber-700",
-                  },
-                  {
-                    value: "sad" as MoodValue,
-                    label: "Suy tư",
-                    icon: Frown,
-                    activeClass: "border-sky-200 bg-sky-50 text-sky-700",
-                  },
-                ].map((item) => {
-                  const Icon = item.icon;
-                  const active = newReflection.mood === item.value;
-
-                  return (
-                    <button
-                      key={item.value}
-                      type="button"
-                      onClick={() => setNewReflection({ ...newReflection, mood: item.value })}
-                      className={`card-hover-lift rounded-[var(--r-card)] border px-4 py-4 text-left transition-colors transition-transform duration-150 ${
-                        active ? item.activeClass : "border-white/70 bg-white/72 text-slate-500 hover:border-slate-200 dark:border-slate-700/70 dark:bg-slate-900/70"
-                      }`}
-                    >
-                      <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-white/70">
-                        <Icon className="h-6 w-6" />
-                      </div>
-                      <div className="mt-[var(--space-inline)] text-sm font-semibold">{item.label}</div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="stack-tight">
-              <div className="flex items-center justify-between">
-                <Label>Nội dung</Label>
-                <span
-                  className={`text-xs font-medium transition-colors ${newReflection.content.length > 1800 ? "text-rose-500" : "text-slate-400"}`}
-                >
-                  {newReflection.content.length} ký tự
+            {/* New Entry Section - Warm Tone */}
+            <div className="rounded-card border border-[#F3D9CC] bg-app-warm-soft p-6 md:p-8">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-[12px] font-medium text-app-warm ring-1 ring-[#F3D9CC]">
+                  Phản tư hôm nay
                 </span>
               </div>
+
+              <p className="font-serif text-[20px] font-medium leading-7 text-[#5C3A2E] mb-4">
+                {JOURNAL_PROMPTS[0]}
+              </p>
+
               <Textarea
                 placeholder="Viết về trải nghiệm, điều bạn học được, khoảnh khắc đáng nhớ hoặc điều bạn muốn nhắc mình sau này..."
                 value={newReflection.content}
@@ -537,34 +486,55 @@ export function ReflectionJournal() {
                     handleAddReflection();
                   }
                 }}
-                rows={8}
-                className="min-h-[220px]"
+                className="min-h-[140px] rounded-lg border border-[#F3D9CC] bg-app-surface px-3.5 py-2.5 text-[14px] text-app-ink focus:border-app-warm focus:ring-app-warm/30"
               />
-              <p className="text-xs text-slate-400">
-                Nhấn{" "}
-                <kbd className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[0.7rem] text-slate-600">
-                  Ctrl+Enter
-                </kbd>{" "}
-                để lưu nhanh
-              </p>
+
+              {/* Mood Selector */}
+              <div className="mt-4">
+                <Label className="mb-2 block text-[13px] font-medium text-app-ink">Hôm nay bạn đang cảm thấy thế nào?</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {[
+                    { value: "happy" as MoodValue, label: "Vui vẻ", emoji: "😊" },
+                    { value: "neutral" as MoodValue, label: "Bình thường", emoji: "😐" },
+                    { value: "sad" as MoodValue, label: "Suy tư", emoji: "🤔" },
+                  ].map((item) => {
+                    const isActive = newReflection.mood === item.value;
+                    return (
+                      <button
+                        key={item.value}
+                        type="button"
+                        onClick={() => setNewReflection({ ...newReflection, mood: item.value })}
+                        className={cn(
+                          "rounded-full border px-3 py-1.5 text-[13px] transition-colors",
+                          isActive
+                            ? "bg-app-warm text-white border-app-warm"
+                            : "bg-app-surface border-[#F3D9CC] text-app-ink-soft hover:bg-app-warm-soft",
+                        )}
+                      >
+                        <span className="mr-1">{item.emoji}</span>
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <Button
+                onClick={handleAddReflection}
+                disabled={!newReflection.title || !newReflection.content}
+                className="mt-6 w-full bg-app-warm text-white hover:bg-[#c56b4e]"
+              >
+                Lưu nhật ký
+              </Button>
             </div>
 
-            <div className="rounded-[var(--r-card)] border border-violet-100/80 bg-gradient-to-br from-violet-50 to-fuchsia-50 p-4 dark:border-violet-500/20 dark:from-violet-950/35 dark:to-fuchsia-950/20">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Gợi ý bắt đầu</p>
-              <div className="mt-[var(--space-inline)] flex flex-wrap gap-2">
-                {JOURNAL_PROMPTS.map((prompt, index) => (
-                  <Button
+            <div className="rounded-card border border-app-line bg-app-surface p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Gợi ý bắt đầu</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {JOURNAL_PROMPTS.map((prompt) => (
+                  <button
                     key={prompt}
-                    variant="outline"
-                    size="sm"
-                    className={
-                      [
-                        "border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-500/30 dark:from-emerald-950/40 dark:to-teal-950/25 dark:text-emerald-200",
-                        "border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 text-amber-700 hover:bg-amber-50 dark:border-amber-500/30 dark:from-amber-950/40 dark:to-orange-950/25 dark:text-amber-200",
-                        "border-violet-200 bg-gradient-to-br from-violet-50 to-fuchsia-50 text-violet-700 hover:bg-violet-50 dark:border-violet-500/30 dark:from-violet-950/40 dark:to-fuchsia-950/25 dark:text-violet-200",
-                        "border-rose-200 bg-gradient-to-br from-rose-50 to-pink-50 text-rose-700 hover:bg-rose-50 dark:border-rose-500/30 dark:from-rose-950/40 dark:to-pink-950/25 dark:text-rose-200",
-                      ][index]
-                    }
+                    type="button"
                     onClick={() => {
                       setNewReflection((prev) => {
                         const content = prev.content ? `${prev.content}\n\n${prompt}` : prompt;
@@ -572,412 +542,151 @@ export function ReflectionJournal() {
                         return getReflectionInputForContent(content, prev);
                       });
                     }}
+                    className="rounded-full border border-app-line bg-app-bg px-3 py-1.5 text-[12px] text-app-ink-soft hover:bg-app-warm-soft hover:text-app-warm transition-colors text-left"
                   >
                     {prompt}
-                  </Button>
+                  </button>
                 ))}
               </div>
             </div>
-
-            <Button
-              glow
-              className="w-full motion-safe:hover:scale-[1.01]"
-              onClick={handleAddReflection}
-              disabled={!newReflection.title || !newReflection.content}
-            >
-              <span>Lưu nhật ký</span>
-              <kbd className="ml-auto rounded-[var(--r-control)] border border-white/30 bg-white/10 px-1.5 py-0.5 font-mono text-[0.68rem] opacity-70">
-                Ctrl+↵
-              </kbd>
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
 
+      {/* Stats Section */}
       {hasReflections && (
-        <Reveal>
-          <div className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {[
-              {
-                title: "Tổng số nhật ký",
-                value: userData.reflections.length,
-                note: "đã lưu lại",
-                icon: BookOpen,
-                color: "from-violet-500/18 to-fuchsia-500/10 text-violet-700",
-              },
-              {
-                title: "Tháng này",
-                value: monthlyCount,
-                note: "bài viết mới",
-                icon: Calendar,
-                color: "from-sky-500/18 to-cyan-500/10 text-sky-700",
-              },
-              {
-                title: "Bài viết vui vẻ",
-                value: moodCounts.happy,
-                note: "ghi nhận tích cực",
-                icon: Smile,
-                color: "from-emerald-500/18 to-teal-500/10 text-emerald-700",
-              },
-              {
-                title: "Review tuần",
-                value: weeklyReviewCount,
-                note: "đã được nối vào chu kỳ 12 tuần",
-                icon: Sparkles,
-                color: "from-amber-500/18 to-orange-500/10 text-amber-700",
-              },
-            ].map((item) => {
-              const Icon = item.icon;
+        <section className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {[
+            { label: "Tổng số", value: userData.reflections.length },
+            { label: "Tháng này", value: monthlyCount },
+            { label: "Review tuần", value: weeklyReviewCount },
+          ].map((item) => (
+            <Card key={item.label} className="rounded-card border border-app-line bg-app-surface p-4">
+              <p className="text-[11px] uppercase tracking-[0.2em] text-app-ink-muted">{item.label}</p>
+              <p className="mt-1 font-serif text-[26px] font-medium text-app-ink tabular-nums">
+                <CountUp value={item.value} />
+              </p>
+            </Card>
+          ))}
+        </section>
+      )}
+
+      {/* Empty State */}
+      {sortedReflections.length === 0 ? (
+        <Card className="rounded-card border border-app-line bg-app-surface p-10 text-center">
+          <BookOpen className="mx-auto h-12 w-12 text-app-accent" />
+          <h2 className="mt-4 font-serif text-[22px] font-medium text-app-ink">Bắt đầu nhật ký của bạn</h2>
+          <p className="mx-auto mt-2 max-w-md text-[14px] text-app-ink-soft">
+            Nhật ký phản tư là nơi lưu giữ những suy nghĩ, bài học và cảm xúc quan trọng trên hành trình phát triển.
+          </p>
+          <Button
+            onClick={() => setIsAddingReflection(true)}
+            className="mt-5 bg-app-warm text-white hover:bg-[#c56b4e]"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Viết entry đầu tiên
+          </Button>
+        </Card>
+      ) : (
+        /* Past Entries List */
+        <section>
+          <div className="mb-4">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-app-ink-muted">GHI CHÉP CŨ</p>
+            <h2 className="mt-1 text-[20px] font-medium text-app-ink">
+              {filteredReflections.length} bài viết
+            </h2>
+          </div>
+
+          <div className="space-y-4">
+            {filteredReflections.map((reflection) => {
+              const mood = getMoodConfig(reflection.mood);
+              const linkedGoal = reflection.linkedGoalId ? goalsById.get(reflection.linkedGoalId) : null;
+              const phaseTone = getJournalPhaseTone(reflection.linkedWeekNumber);
 
               return (
-                <div key={item.title}>
-                  <Card className="glass-surface-sm card-hover-lift relative overflow-hidden border border-slate-200/70 bg-white/92 dark:border-slate-700/70 dark:bg-slate-950/70">
-                    <div
-                      className={`pointer-events-none absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
-                    />
-                    <CardHeader className="relative flex flex-row items-start justify-between pb-3">
-                      <div>
-                        <CardDescription>{item.title}</CardDescription>
-                        <p className="mt-2 text-4xl font-bold leading-tight tracking-normal text-slate-900">
-                          <CountUp value={item.value} />
+                <Card key={reflection.id} className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-[11px] uppercase tracking-[0.12em] text-app-ink-muted">
+                          {formatCalendarDate(reflection.date, "vi-VN", {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                          })}
                         </p>
+                        <Badge variant="outline" className={cn("rounded-full px-2.5 py-0.5 text-[11px]", mood.badge)}>
+                          {mood.label}
+                        </Badge>
+                        {reflection.entryType === "weekly-review" && (
+                          <Badge variant="outline" className="rounded-full border-app-line bg-app-bg px-2.5 py-0.5 text-[11px] text-app-ink-soft">
+                            Review tuần
+                          </Badge>
+                        )}
+                        {reflection.linkedWeekNumber && (
+                          <Badge variant="outline" className={cn("rounded-full px-2.5 py-0.5 text-[11px]", phaseTone.soft)}>
+                            Tuần {reflection.linkedWeekNumber}
+                          </Badge>
+                        )}
                       </div>
-                      <div
-                        className={`flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-gradient-to-br ${item.color}`}
-                      >
-                        <Icon className="h-5 w-5" />
-                      </div>
-                    </CardHeader>
-                    <CardContent className="relative">
-                      <p className="text-sm text-slate-500">{item.note}</p>
-                      {typeof item.value === "number" ? (
-                        <div className="mt-4 h-1.5 overflow-hidden rounded-[var(--r-pill)] bg-slate-100 dark:bg-slate-800">
-                          <div
-                            className={`h-full rounded-[var(--r-pill)] bg-gradient-to-r ${item.color}`}
-                            style={{ width: `${Math.min(100, Math.max(12, item.value * 18))}%` }}
-                          />
+
+                      <h3 className="mt-2 text-[16px] font-medium text-app-ink">{reflection.title}</h3>
+
+                      <p className="mt-2 text-[14px] leading-relaxed text-app-ink whitespace-pre-line">
+                        {reflection.content}
+                      </p>
+
+                      {linkedGoal && (
+                        <div className="mt-3 flex justify-end">
+                          <Button variant="outline" size="sm" onClick={() => openLinkedCycle(reflection.linkedGoalId)}>
+                            Mở chu kỳ 12 tuần
+                            <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                          </Button>
                         </div>
-                      ) : null}
-                    </CardContent>
-                  </Card>
-                </div>
+                      )}
+                    </div>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 shrink-0 text-app-ink-soft hover:text-app-ink">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setNewReflection({
+                              title: reflection.title,
+                              content: reflection.content,
+                              mood: (reflection.mood || "") as MoodValue,
+                              date: reflection.date,
+                            });
+                            setIsAddingReflection(true);
+                          }}
+                        >
+                          Chỉnh sửa
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => handleDeleteReflection(reflection.id)}
+                          className="text-red-600 focus:text-red-600"
+                        >
+                          Xóa
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </Card>
               );
             })}
           </div>
-        </Reveal>
-      )}
 
-      {sortedReflections.length === 0 ? (
-        <Reveal delay={0.04}>
-          <Card className="relative overflow-hidden border border-violet-100/80 bg-gradient-to-br from-white to-violet-50/60 dark:border-violet-500/20 dark:from-slate-950 dark:to-violet-950/20" data-testid="journal-fresh-empty-state">
-            <CardContent className="p-10 text-center lg:p-14">
-              <EmptyJournalIllustration className="mx-auto mb-4 w-44 text-violet-500 sm:w-56" />
-              <div className="mx-auto grid h-24 w-24 place-items-center rounded-[var(--r-card)] bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 shadow-lg shadow-violet-500/10 dark:from-violet-950/60 dark:to-fuchsia-950/40 dark:text-violet-200">
-                <div className="relative">
-                  <BookOpen className="h-10 w-10" />
-                  <Sparkles className="absolute -right-3 -top-3 h-5 w-5 text-rose-500" />
-                </div>
-              </div>
-              <h2 className="mt-6 text-3xl font-bold text-slate-900">Chưa có trang nhật ký nào được mở ra</h2>
-              <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-slate-500">
-                Nhật ký nhìn lại là phần về sau của flow. Bạn có thể đi từ Cân bằng cuộc sống trước, hoặc viết một trang tự do
-                nếu hôm nay đã có điều cần ghi lại.
-              </p>
-              <div className="mx-auto mt-5 inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-violet-100 bg-white/80 px-4 py-2 text-sm text-violet-700 shadow-sm">
-                <Sparkles className="h-4 w-4" />
-                <span>Chuỗi ngày hiện tại</span>
-                <strong className="font-semibold">
-                  <CountUp value={currentStreak} /> ngày
-                </strong>
-              </div>
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
-                <EmptyHintArrow className="pointer-events-none absolute bottom-24 right-[18%] hidden h-10 w-10 text-fuchsia-500 opacity-65 sm:block" />
-                <Button glow onClick={() => navigate("/onboarding")}>
-                  Bắt đầu Cân bằng cuộc sống
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" onClick={() => setIsAddingReflection(true)}>
-                  <Plus className="h-4 w-4" />
-                  Viết nhật ký tự do
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </Reveal>
-      ) : (
-        <Reveal delay={0.04} className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <div className="stack-stack">
-            <h2 className="sr-only">Nhật ký đã lưu</h2>
-            {latestWeeklyReview && (
-              <Card className="overflow-hidden">
-                <CardContent className="p-6">
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div>
-                      <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] px-3 py-1.5 text-sm font-medium text-[color:var(--color-info-fg)]">
-                        <Flag className="h-4 w-4" />
-                        Review tuần mới nhất
-                      </div>
-                      <h3 className="mt-4 text-2xl font-bold text-foreground">{latestWeeklyReview.title}</h3>
-                      <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                        {latestWeeklyReview.linkedGoalId
-                          ? goalsById.get(latestWeeklyReview.linkedGoalId)?.title
-                          : "Chu kỳ 12 tuần"}
-                        {latestWeeklyReview.linkedWeekNumber ? ` • tuần ${latestWeeklyReview.linkedWeekNumber}` : ""}
-                        {latestWeeklyReview.linkedGoalId &&
-                        goalsById.get(latestWeeklyReview.linkedGoalId)?.twelveWeekSystem?.reviewDay
-                          ? ` • review vào ${getReviewDayLabel(goalsById.get(latestWeeklyReview.linkedGoalId)?.twelveWeekSystem?.reviewDay || "Sunday")}`
-                          : ""}
-                      </p>
-                    </div>
-                    {latestWeeklyReview.linkedGoalId && (
-                      <Button glow onClick={() => openLinkedCycle(latestWeeklyReview.linkedGoalId)}>
-                        Mở chu kỳ 12 tuần
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            <div className="stack-tight sm:[&>*+*]:mt-0 sm:flex sm:flex-wrap sm:items-center sm:gap-3">
-              <div className="relative min-w-[200px] flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <Input
-                  placeholder="Tìm kiếm nhật ký..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {(
-                  [
-                    { value: "all", label: "Tất cả" },
-                    { value: "weekly-review", label: "Review tuần" },
-                    { value: "freeform", label: "Tự do" },
-                  ] as const
-                ).map((item) => (
-                  <Button
-                    key={item.value}
-                    size="sm"
-                    className="h-11"
-                    variant={filterType === item.value ? "default" : "outline"}
-                    onClick={() => setFilterType(item.value)}
-                  >
-                    {item.label}
-                  </Button>
-                ))}
-                <span className="hidden sm:inline w-px h-6 bg-slate-200" />
-                {(["", "happy", "neutral", "sad"] as const).map((mood) => {
-                  const labels: Record<string, string> = { "": "Tất cả", happy: "😊", neutral: "😐", sad: "😢" };
-                  const fullLabels: Record<string, string> = {
-                    "": "Tất cả",
-                    happy: "Vui vẻ",
-                    neutral: "Bình thường",
-                    sad: "Suy tư",
-                  };
-                  return (
-                    <Button
-                      key={mood}
-                      size="sm"
-                      className="h-11"
-                      variant={filterMood === mood ? "default" : "outline"}
-                      onClick={() => setFilterMood(mood)}
-                      title={fullLabels[mood]}
-                    >
-                      <span className="sm:hidden">{labels[mood]}</span>
-                      <span className="hidden sm:inline">{fullLabels[mood]}</span>
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {filteredReflections.length === 0 && sortedReflections.length > 0 && (
-              <div className="rounded-[var(--r-card)] border border-dashed border-slate-200 bg-slate-50/80 px-5 py-8 text-center text-sm text-slate-500">
-                Không tìm thấy nhật ký nào phù hợp với bộ lọc hiện tại.
-              </div>
-            )}
-
-            <div className="contents">
-              {filteredReflections.map((reflection) => {
-                const mood = getMoodConfig(reflection.mood);
-                const linkedGoal = reflection.linkedGoalId ? goalsById.get(reflection.linkedGoalId) : null;
-                const phaseTone = getJournalPhaseTone(reflection.linkedWeekNumber);
-
-                return (
-                  <div key={reflection.id}>
-                    <Card className="card-hover-lift relative overflow-hidden border border-slate-200/70 bg-white/92 dark:border-slate-700/70 dark:bg-slate-950/70">
-                      <div className={`absolute inset-y-0 left-0 w-1 ${phaseTone.stripe}`} aria-hidden="true" />
-                      <CardContent className="p-6 lg:p-7">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="text-2xl font-bold text-slate-900">{reflection.title}</h3>
-                              <Badge variant="outline" className={`rounded-[var(--r-pill)] px-3 py-1.5 ${mood.badge}`}>
-                                <span className="mr-1.5">{mood.icon}</span>
-                                {mood.label}
-                              </Badge>
-                              {reflection.entryType === "weekly-review" && (
-                                <Badge
-                                  variant="outline"
-                                  className="rounded-[var(--r-pill)] border-sky-200 bg-sky-50 px-3 py-1.5 text-sky-700"
-                                >
-                                  Review tuần
-                                </Badge>
-                              )}
-                              {reflection.linkedWeekNumber && (
-                                <Badge
-                                  variant="outline"
-                                  className={`rounded-[var(--r-pill)] px-3 py-1.5 ${phaseTone.soft}`}
-                                >
-                                  Tuần {reflection.linkedWeekNumber}
-                                </Badge>
-                              )}
-                              {linkedGoal && (
-                                <Badge
-                                  variant="outline"
-                                  className="rounded-[var(--r-pill)] border-violet-200 bg-violet-50 px-3 py-1.5 text-violet-700"
-                                >
-                                  {linkedGoal.title}
-                                </Badge>
-                              )}
-                            </div>
-
-                            <div className="mt-[var(--space-inline)] flex items-center gap-2 text-sm text-slate-500">
-                              <Calendar className="h-4 w-4" />
-                              {formatCalendarDate(reflection.date, "vi-VN", {
-                                weekday: "long",
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              })}
-                            </div>
-                          </div>
-
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-11 w-11 rounded-[var(--r-tile)] text-slate-500 hover:text-red-600"
-                            aria-label={`Xóa nhật ký ${reflection.title}`}
-                            onClick={() => handleDeleteReflection(reflection.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-
-                        <div className="mt-[var(--space-stack)] rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5">
-                          <p className="whitespace-pre-wrap text-sm leading-8 text-slate-600">{reflection.content}</p>
-                        </div>
-                        {reflection.entryType === "weekly-review" && reflection.linkedGoalId && (
-                          <div className="mt-4 flex justify-end">
-                            <Button variant="outline" onClick={() => openLinkedCycle(reflection.linkedGoalId)}>
-                              Mở chu kỳ 12 tuần
-                              <ArrowRight className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="stack-section xl:sticky xl:top-28">
-            <Card>
-              <CardContent className="p-6">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Chuỗi ngày hiện tại</p>
-                <div className="mt-4 flex items-center gap-3 rounded-[var(--r-tile)] border border-violet-200 bg-violet-50 px-4 py-4">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] bg-violet-100 text-violet-700">
-                    <Sparkles className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-violet-700">
-                      <CountUp value={currentStreak} /> ngày
-                    </p>
-                    <p className="text-xs text-violet-500">
-                      {currentStreak >= 3
-                        ? "Nhịp viết đang rất tốt!"
-                        : currentStreak > 0
-                          ? "Hãy duy trì đều hơn nhé."
-                          : "Bắt đầu chuỗi ngày hôm nay!"}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
+          {filteredReflections.length === 0 && sortedReflections.length > 0 && (
+            <Card className="rounded-card border border-app-line border-dashed bg-app-bg p-8 text-center">
+              <p className="text-[14px] text-app-ink-muted">Không tìm thấy nhật ký nào phù hợp với bộ lọc hiện tại.</p>
             </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Nhịp cảm xúc</p>
-                <div className="mt-[var(--space-stack)] stack-tight">
-                  {[
-                    {
-                      label: "Vui vẻ",
-                      value: moodCounts.happy,
-                      className: "border-emerald-200 bg-emerald-50 text-emerald-700",
-                      barClassName: "from-emerald-500 to-teal-500",
-                    },
-                    {
-                      label: "Bình thường",
-                      value: moodCounts.neutral,
-                      className: "border-amber-200 bg-amber-50 text-amber-700",
-                      barClassName: "from-amber-500 to-orange-500",
-                    },
-                    {
-                      label: "Suy tư",
-                      value: moodCounts.sad,
-                      className: "border-sky-200 bg-sky-50 text-sky-700",
-                      barClassName: "from-rose-500 to-pink-500",
-                    },
-                  ].map((item) => (
-                    <div
-                      key={item.label}
-                      className="rounded-[var(--r-tile)] border border-white/70 bg-white/72 px-4 py-3 dark:border-slate-700/70 dark:bg-slate-900/70"
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">{item.label}</span>
-                        <span className={`rounded-[var(--r-pill)] border px-3 py-1 text-sm font-semibold ${item.className}`}>
-                          <CountUp value={item.value} />
-                        </span>
-                      </div>
-                      <div className="mt-3 h-1.5 overflow-hidden rounded-[var(--r-pill)] bg-slate-100 dark:bg-slate-800">
-                        <div
-                          className={`h-full rounded-[var(--r-pill)] bg-gradient-to-r ${item.barClassName}`}
-                          style={{ width: `${moodTotal > 0 ? Math.max(8, Math.round((item.value / moodTotal) * 100)) : 8}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Viết tiếp khi bí ý</p>
-                <div className="mt-[var(--space-stack)] stack-tight">
-                  {JOURNAL_PROMPTS.map((prompt) => (
-                    <div
-                      key={prompt}
-                      className="rounded-[var(--r-tile)] border border-white/70 bg-white/72 px-4 py-3 text-sm leading-7 text-slate-600"
-                    >
-                      {prompt}
-                    </div>
-                  ))}
-                </div>
-
-                <Button glow className="mt-6 w-full" onClick={() => setIsAddingReflection(true)}>
-                  <Plus className="h-4 w-4" />
-                  Viết thêm một trang mới
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </Reveal>
+          )}
+        </section>
       )}
     </div>
   );

@@ -63,7 +63,7 @@ const Progress = React.forwardRef<
       ref={ref}
       data-slot="progress"
       className={cn(
-        "progress-shell relative h-2.5 w-full overflow-hidden rounded-[var(--r-pill)] border border-white/60 bg-white/72 shadow-sm",
+        "progress-shell relative h-2 w-full overflow-hidden rounded-full bg-app-accent-soft",
         className,
       )}
       {...props}
@@ -71,7 +71,7 @@ const Progress = React.forwardRef<
     >
       <ProgressPrimitive.Indicator
         data-slot="progress-indicator"
-        className="progress-indicator h-full rounded-[var(--r-pill)] gradient-brand shadow-sm"
+        className="progress-indicator h-full rounded-full bg-app-accent"
         style={{ width: `${displayValue}%` }}
       />
     </ProgressPrimitive.Root>
