@@ -96,8 +96,9 @@ describe("LoginPage", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText("Tạo tài khoản để lưu, đồng bộ và bắt đầu an toàn.")).toBeInTheDocument();
+    expect(screen.getByText("Bắt đầu hành trình")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Tạo tài khoản" })).toBeInTheDocument();
+    expect(screen.getByText("Khoảng 30 giây để bắt đầu.")).toBeInTheDocument();
   });
 
   it("shows two password fields in sign-up mode", () => {
