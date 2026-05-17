@@ -62,7 +62,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   const Comp = asChild ? Slot : "button";
   const isPrimaryVariant = variant === undefined || variant === "default";
   const magnetic = !prefersReducedMotion && isPrimaryVariant;
-  const showGlow = glow && !prefersReducedMotion;
+  // Glow is a quiet box-shadow pulse (no movement) so we keep it on even when
+  // the OS asks for reduced motion — it's a low-vestibular visual cue.
+  const showGlow = glow;
 
   const setPointer = (element: HTMLElement, x: number, y: number, hovering: boolean) => {
     const shiftX = ((x - 0.5) * 5).toFixed(2);
