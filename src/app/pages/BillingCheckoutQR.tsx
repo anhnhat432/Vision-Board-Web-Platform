@@ -4,7 +4,6 @@ import { CheckCircle2, Clock, Copy, Loader2, QrCode, RefreshCw, XCircle } from "
 
 import { apiClient } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { BillingPlusIllustration } from "../components/illustrations";
 import { logBillingUiError, toastBillingNetworkError } from "../utils/billing-ui-monitoring";
 import { formatVndAmount } from "../utils/billing-pricing";
 import { syncEntitlementsWithProvider } from "../utils/production";
@@ -210,12 +209,12 @@ export function BillingCheckoutQR() {
 
     return (
       <div className="mx-auto max-w-md px-4 py-12">
-        <div className="rounded-[var(--r-card)] border border-emerald-200 bg-emerald-50/80 p-8 text-center shadow-lg">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[var(--r-pill)] bg-emerald-100">
-            <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+        <div className="rounded-card border border-app-accent-soft bg-app-accent-soft p-8 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-app-accent">
+            <CheckCircle2 className="h-8 w-8 text-white" />
           </div>
-          <h2 className="text-xl font-bold text-emerald-800">Thanh toán thành công!</h2>
-          <p className="mt-2 text-sm text-emerald-700">
+          <h2 className="font-serif text-xl font-medium text-app-ink">Thanh toán thành công!</h2>
+          <p className="mt-2 text-sm text-app-ink-soft">
             {isSyncingEntitlement
               ? "Đã nhận thanh toán. Đang cập nhật quyền Plus trên tài khoản của bạn..."
               : syncFailed
@@ -223,7 +222,7 @@ export function BillingCheckoutQR() {
                 : "Gói Plus đã được kích hoạt. Chúc bạn có 12 tuần hiệu quả!"}
           </p>
           {entitlementSyncMessage && (
-            <p className={`mt-[var(--space-inline)] text-xs leading-5 ${syncFailed ? "text-amber-700" : "text-emerald-700"}`}>
+            <p className={`mt-2 text-xs leading-5 ${syncFailed ? "text-app-warm" : "text-app-accent"}`}>
               {entitlementSyncMessage}
             </p>
           )}
@@ -231,7 +230,7 @@ export function BillingCheckoutQR() {
             type="button"
             onClick={handleCompletedOrderContinue}
             disabled={isSyncingEntitlement}
-            className="mt-6 inline-flex items-center justify-center gap-2 rounded-[var(--r-tile)] bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-70"
+            className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-app-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#284f45] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isSyncingEntitlement && <Loader2 className="h-4 w-4 animate-spin" />}
             {isSyncingEntitlement ? "Đang cập nhật..." : syncFailed ? "Đồng bộ lại quyền Plus" : "Bắt đầu ngay"}
@@ -246,16 +245,16 @@ export function BillingCheckoutQR() {
   if (order?.status === "expired" || (order?.status === "pending" && timeLeft <= 0 && order?.expiresAt)) {
     return (
       <div className="mx-auto max-w-md px-4 py-12">
-        <div className="rounded-[var(--r-card)] border border-amber-200 bg-amber-50/80 p-8 text-center shadow-lg">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[var(--r-pill)] bg-amber-100">
-            <Clock className="h-8 w-8 text-amber-600" />
+        <div className="rounded-card border border-app-line bg-app-warm-soft p-8 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-app-warm">
+            <Clock className="h-8 w-8 text-white" />
           </div>
-          <h2 className="text-xl font-bold text-amber-800">Hết thời gian thanh toán</h2>
-          <p className="mt-2 text-sm text-amber-700">Đơn hàng đã hết hạn. Bạn có thể tạo đơn mới để tiếp tục.</p>
+          <h2 className="font-serif text-xl font-medium text-app-ink">Hết thời gian thanh toán</h2>
+          <p className="mt-2 text-sm text-app-ink-soft">Đơn hàng đã hết hạn. Bạn có thể tạo đơn mới để tiếp tục.</p>
           <button
             type="button"
             onClick={() => navigate("/billing/confirm")}
-            className="mt-6 inline-flex items-center gap-2 rounded-[var(--r-tile)] bg-amber-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-amber-700"
+            className="mt-6 inline-flex items-center gap-2 rounded-full bg-app-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#284f45]"
           >
             <RefreshCw className="h-4 w-4" />
             Tạo đơn mới
@@ -270,16 +269,16 @@ export function BillingCheckoutQR() {
   if (error && !order) {
     return (
       <div className="mx-auto max-w-md px-4 py-12">
-        <div className="rounded-[var(--r-card)] border border-red-200 bg-red-50/80 p-8 text-center shadow-lg">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[var(--r-pill)] bg-red-100">
-            <XCircle className="h-8 w-8 text-red-500" />
+        <div className="rounded-card border border-app-line bg-[color:var(--color-danger-bg)] p-8 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+            <XCircle className="h-8 w-8 text-[color:var(--color-danger-fg)]" />
           </div>
-          <h2 className="text-lg font-bold text-red-800">Có lỗi xảy ra</h2>
-          <p className="mt-2 text-sm text-red-700">{error}</p>
+          <h2 className="font-serif text-lg font-medium text-app-ink">Có lỗi xảy ra</h2>
+          <p className="mt-2 text-sm text-app-ink-soft">{error}</p>
           <button
             type="button"
             onClick={() => navigate("/billing/plan")}
-            className="mt-6 rounded-[var(--r-tile)] bg-slate-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-slate-700"
+            className="mt-6 rounded-full bg-app-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#284f45]"
           >
             Quay lại
           </button>
@@ -294,8 +293,8 @@ export function BillingCheckoutQR() {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-          <p className="text-sm text-slate-500">Đang tải...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-app-accent" />
+          <p className="text-sm text-app-ink-muted">Đang tải...</p>
         </div>
       </div>
     );
@@ -308,21 +307,21 @@ export function BillingCheckoutQR() {
       <div className="sr-only" aria-live="polite">
         {copyMessage || `Trạng thái đơn hàng: ${order.status}. ${timeLeft > 0 ? `Còn ${formatCountdown(timeLeft)} để thanh toán.` : ""}`}
       </div>
-      <div className="overflow-hidden rounded-[var(--r-card)] border border-slate-200 bg-white shadow-2xl">
+      <div className="overflow-hidden rounded-card border border-app-line bg-app-surface">
         <div className="grid gap-0 lg:grid-cols-[minmax(320px,0.86fr)_minmax(0,1fr)]">
-          <section className="border-b border-slate-200 bg-slate-50/80 p-5 text-center sm:p-7 lg:border-b-0 lg:border-r">
-            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-indigo-100">
-              <QrCode className="h-6 w-6 text-indigo-600" />
+          <section className="border-b border-app-line bg-app-bg p-5 text-center sm:p-7 lg:border-b-0 lg:border-r">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-app-accent-soft">
+              <QrCode className="h-6 w-6 text-app-accent" />
             </div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Thanh toán VietQR</p>
-            <h1 className="mt-2 text-xl font-bold text-slate-900">Nâng cấp gói Plus</h1>
-            <p className="mt-2 text-3xl font-bold text-indigo-600">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Thanh toán VietQR</p>
+            <h1 className="font-serif text-2xl font-medium text-app-ink mt-2">Nâng cấp gói Plus</h1>
+            <p className="mt-2 text-3xl font-medium text-app-accent">
               {formatVndAmount(order.amount)}
-              <span className="ml-1 text-sm font-normal text-slate-500">/ chu kỳ 12 tuần</span>
+              <span className="ml-1 text-sm font-normal text-app-ink-muted">/ chu kỳ 12 tuần</span>
             </p>
 
             <div className="mt-6 flex justify-center">
-              <div className="overflow-hidden rounded-[var(--r-tile)] border border-indigo-100 bg-white p-3 shadow-sm">
+              <div className="overflow-hidden rounded-lg border border-app-line bg-app-surface p-3">
                 <img
                   src={order.qrDataUrl}
                   alt="Mã QR chuyển khoản"
@@ -332,13 +331,13 @@ export function BillingCheckoutQR() {
               </div>
             </div>
 
-            <div className="mt-[var(--space-stack)] text-center">
-              <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] bg-indigo-50 px-4 py-2" role="status" aria-live="polite">
-                <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
-                <span className="text-sm font-medium text-indigo-700">Đang chờ xác nhận...</span>
+            <div className="mt-6 text-center">
+              <div className="inline-flex items-center gap-2 rounded-full bg-app-warm-soft px-4 py-2" role="status" aria-live="polite">
+                <Loader2 className="h-4 w-4 animate-spin text-app-warm" />
+                <span className="text-sm font-medium text-app-ink">Đang chờ xác nhận...</span>
               </div>
               {timeLeft > 0 && (
-                <p className="mt-2 text-xs text-slate-500">Còn {formatCountdown(timeLeft)} để thanh toán</p>
+                <p className="mt-2 text-xs text-app-ink-muted">Còn {formatCountdown(timeLeft)} để thanh toán</p>
               )}
             </div>
           </section>
@@ -347,15 +346,14 @@ export function BillingCheckoutQR() {
             <div className="stack-stack">
               <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
                 <div>
-                  <h2 className="text-base font-bold text-slate-900">Thông tin chuyển khoản</h2>
-                  <p className="mt-1 text-sm leading-6 text-slate-500">
+                  <h2 className="text-base font-semibold text-app-ink">Thông tin chuyển khoản</h2>
+                  <p className="mt-1 text-sm leading-6 text-app-ink-muted">
                     Chuyển đúng số tiền và giữ nguyên nội dung để hệ thống tự kích hoạt Plus sau khi nhận giao dịch.
                   </p>
                 </div>
-                <BillingPlusIllustration className="hidden w-24 text-indigo-500 opacity-70 sm:block" />
               </div>
 
-              <div className="stack-tight rounded-[var(--r-tile)] border border-slate-200 bg-slate-50 p-4">
+              <div className="stack-tight rounded-lg border border-app-line bg-app-bg p-4">
                 <InfoRow
                   label="Ngân hàng"
                   value={order.bankName}
@@ -388,18 +386,18 @@ export function BillingCheckoutQR() {
                   highlight
                 />
               </div>
-              {copyMessage ? <p className="text-xs font-medium text-emerald-700" aria-live="polite">{copyMessage}</p> : null}
+              {copyMessage ? <p className="text-xs font-medium text-app-accent" aria-live="polite">{copyMessage}</p> : null}
 
-              <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50 px-4 py-3">
-                <p className="text-xs font-medium leading-5 text-amber-800">
+              <div className="rounded-lg border border-app-line bg-app-warm-soft px-4 py-3">
+                <p className="text-xs font-medium leading-5 text-app-ink">
                   Quan trọng: Vui lòng <strong>không sửa nội dung chuyển khoản</strong>. Nếu nội dung khác mã đơn, giao
                   dịch có thể cần kiểm tra thủ công.
                 </p>
               </div>
 
               <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-slate-700">Cách thanh toán</h3>
-                <ol className="grid gap-2 text-sm text-slate-600">
+                <h3 className="text-sm font-semibold text-app-ink">Cách thanh toán</h3>
+                <ol className="grid gap-2 text-sm text-app-ink-soft">
                   {[
                     "Mở app ngân hàng trên điện thoại.",
                     "Chọn quét mã QR hoặc chuyển khoản.",
@@ -407,8 +405,8 @@ export function BillingCheckoutQR() {
                     "Xác nhận giao dịch và giữ trang này mở.",
                     "Plus sẽ được kích hoạt sau khi hệ thống nhận thanh toán.",
                   ].map((step, index) => (
-                    <li key={step} className="flex gap-3 rounded-[var(--r-control)] border border-slate-200 bg-white px-3 py-2">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-slate-950 text-xs font-semibold text-white">
+                    <li key={step} className="flex gap-3 rounded-lg border border-app-line bg-app-surface px-3 py-2">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-app-accent text-xs font-semibold text-white">
                         {index + 1}
                       </span>
                       <span className="leading-6">{step}</span>
@@ -420,7 +418,7 @@ export function BillingCheckoutQR() {
               <button
                 type="button"
                 onClick={() => navigate("/billing/plan")}
-                className="text-sm font-medium text-slate-500 underline decoration-slate-300 transition hover:text-slate-700"
+                className="text-sm font-medium text-app-ink-muted underline decoration-app-line transition hover:text-app-ink"
               >
                 Hủy thanh toán
               </button>
@@ -449,11 +447,11 @@ function InfoRow({
 }) {
   return (
     <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-      <span className="text-xs text-slate-500">{label}</span>
+      <span className="text-xs text-app-ink-muted">{label}</span>
       <div className="flex min-w-0 items-center gap-1.5">
         <span
           className={`min-w-0 break-all text-sm font-semibold ${
-            highlight ? "rounded-[var(--r-control)] bg-indigo-100 px-2 py-0.5 text-indigo-700" : "text-slate-800"
+            highlight ? "rounded-full bg-app-warm-soft px-2 py-0.5 text-app-warm" : "text-app-ink"
           }`}
         >
           {value}
@@ -461,11 +459,11 @@ function InfoRow({
         <button
           type="button"
           onClick={onCopy}
-          className="rounded-[var(--r-control)] p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+          className="rounded-full p-1 text-app-ink-muted transition hover:bg-app-bg hover:text-app-ink"
           title={`Sao chép ${label}`}
           aria-label={`Sao chép ${label}`}
         >
-          {isCopied ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+          {isCopied ? <CheckCircle2 className="h-3.5 w-3.5 text-app-accent" /> : <Copy className="h-3.5 w-3.5" />}
         </button>
       </div>
     </div>

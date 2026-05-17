@@ -19,9 +19,9 @@ describe("monetization flows", () => {
     });
     render(<RouterProvider router={router} />);
 
-    await screen.findByRole("heading", { name: "Quản lý gói của bạn" });
-    expect(screen.getByText("Gói hiện tại")).toBeInTheDocument();
-    expect(screen.getByText("Bạn đang dùng gói miễn phí.")).toBeInTheDocument();
+    await screen.findByRole("heading", { name: "Chọn gói phù hợp với bạn" });
+    // Current plan card should have the plan status
+    expect(screen.getByText(/Bạn đang dùng gói miễn phí/i)).toBeInTheDocument();
 
     // Should show all 4 entitlement slots, all locked
     expect(screen.getByText("Mẫu nâng cao")).toBeInTheDocument();
@@ -36,7 +36,7 @@ describe("monetization flows", () => {
     });
     render(<RouterProvider router={router} />);
 
-    await screen.findByRole("heading", { name: "Quản lý gói của bạn" });
+    await screen.findByRole("heading", { name: "Chọn gói phù hợp với bạn" });
     expect(screen.getByText(/Bạn đang dùng Plus trên tài khoản này/i)).toBeInTheDocument();
     // Entitlements should show as active
     const activeItems = screen.getAllByText("Đang mở");
@@ -235,7 +235,7 @@ describe("monetization flows", () => {
       initialEntries: ["/billing/plan"],
     });
     render(<RouterProvider router={router} />);
-    await screen.findByRole("heading", { name: "Quản lý gói của bạn" });
+    await screen.findByRole("heading", { name: "Chọn gói phù hợp với bạn" });
     await user.click(screen.getByRole("button", { name: "Khôi phục quyền đã mua" }));
 
     await waitFor(() => {

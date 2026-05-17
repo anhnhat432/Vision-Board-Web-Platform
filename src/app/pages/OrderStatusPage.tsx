@@ -18,7 +18,6 @@ import {
 import { toast } from "sonner";
 import { Link, useNavigate, useParams } from "react-router";
 
-import { EmptyOrdersIllustration } from "../components/illustrations";
 import { PageHero } from "../components/layout/PageHero";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -329,194 +328,188 @@ export function OrderStatusPage() {
   }, [params.orderId, paymentMode, user]);
 
   if (paymentMode) {
-    if (paymentLoading && !paymentOrder) {
-      return (
-        <div className="flex min-h-[50vh] items-center justify-center">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-            <p className="text-sm text-slate-500">Đang tải trạng thái thanh toán...</p>
+if (paymentLoading && !paymentOrder) {
+        return (
+          <div className="flex min-h-[50vh] items-center justify-center">
+            <div className="flex flex-col items-center gap-3">
+              <Loader2 className="h-8 w-8 animate-spin text-app-accent" />
+              <p className="text-sm text-app-ink-muted">Đang tải trạng thái thanh toán...</p>
+            </div>
           </div>
-        </div>
-      );
-    }
+        );
+      }
 
-    if (paymentError && !paymentOrder) {
-      return (
-        <div className="mx-auto max-w-md px-4 py-12">
-          <Card className="border-red-200 bg-red-50/80 text-center shadow-lg">
-            <CardContent className="p-8">
-              <h1 className="text-xl font-bold text-red-800">Không tải được đơn thanh toán</h1>
-              <p className="mt-2 text-sm leading-6 text-red-700">{paymentError}</p>
-              <Button type="button" className="mt-6" onClick={() => params.orderId && void fetchPaymentOrder(params.orderId)}>
+      if (paymentError && !paymentOrder) {
+        return (
+          <div className="mx-auto max-w-md px-4 py-12">
+            <div className="rounded-card border border-app-line bg-[color:var(--color-danger-bg)] p-8 text-center">
+              <h1 className="font-serif text-xl font-medium text-app-ink">Không tải được đơn thanh toán</h1>
+              <p className="mt-2 text-sm leading-6 text-app-ink-soft">{paymentError}</p>
+              <Button
+                type="button"
+                className="mt-6 bg-app-accent text-white hover:bg-[#284f45]"
+                onClick={() => params.orderId && void fetchPaymentOrder(params.orderId)}
+              >
                 <RefreshCw className="h-4 w-4" />
                 Tải lại trang
               </Button>
-            </CardContent>
-          </Card>
-        </div>
-      );
-    }
+            </div>
+          </div>
+        );
+      }
 
-    if (!paymentOrder) return null;
+      if (!paymentOrder) return null;
 
-    if (successRedirecting || paymentOrder.status === "completed") {
-      return (
-        <div className="mx-auto max-w-md px-4 py-12">
-          <Card className="overflow-hidden border-emerald-200 bg-emerald-50/90 text-center shadow-xl">
-            <CardContent className="p-8">
-              <div className="mx-auto flex h-20 w-20 animate-bounce items-center justify-center rounded-[var(--r-pill)] bg-emerald-100 text-emerald-700">
+      if (successRedirecting || paymentOrder.status === "completed") {
+        return (
+          <div className="mx-auto max-w-md px-4 py-12">
+            <div className="rounded-card border border-app-accent-soft bg-app-accent-soft p-8 text-center">
+              <div className="mx-auto flex h-20 w-20 animate-bounce items-center justify-center rounded-full bg-app-accent text-white">
                 <CheckCircle2 className="h-10 w-10" />
               </div>
-              <h1 className="mt-5 text-2xl font-bold text-emerald-900">Plus đã kích hoạt!</h1>
-              <p className="mt-2 text-sm leading-6 text-emerald-800">Đang chuyển bạn về trang gói để tiếp tục sử dụng Plus.</p>
-            </CardContent>
-          </Card>
-        </div>
-      );
-    }
+              <h1 className="font-serif text-2xl font-medium text-app-ink mt-5">Plus đã kích hoạt!</h1>
+              <p className="mt-2 text-sm leading-6 text-app-ink-soft">Đang chuyển bạn về trang gói để tiếp tục sử dụng Plus.</p>
+            </div>
+          </div>
+        );
+      }
 
-    if (paymentTimedOut || paymentOrder.status === "failed") {
-      return (
-        <div className="mx-auto max-w-2xl px-4 py-12">
-          <Card className="border-amber-200 bg-amber-50/90 shadow-lg">
-            <CardContent className="p-8 text-center">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[var(--r-pill)] bg-amber-100 text-amber-700">
+      if (paymentTimedOut || paymentOrder.status === "failed") {
+        return (
+          <div className="mx-auto max-w-2xl px-4 py-12">
+            <div className="rounded-card border border-app-line bg-app-warm-soft p-8 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-app-warm text-white">
                 <Clock className="h-8 w-8" />
               </div>
-              <h1 className="mt-5 text-2xl font-bold text-amber-900">Đơn hàng đã huỷ</h1>
-              <p className="mx-auto mt-2 max-w-xl text-sm leading-7 text-amber-800">
+              <h1 className="font-serif text-2xl font-medium text-app-ink mt-5">Đơn hàng đã huỷ</h1>
+              <p className="mx-auto mt-2 max-w-xl text-sm leading-7 text-app-ink-soft">
                 Đơn hàng đã huỷ, không nhận được chuyển khoản. Nếu bạn đã chuyển khoản, liên hệ {getSupportEmail()} để đội hỗ trợ kiểm tra.
               </p>
               <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-                <Button type="button" asChild>
+                <Button type="button" asChild className="bg-app-accent text-white hover:bg-[#284f45]">
                   <a href={createSupportMailto(paymentOrder.orderId)}>
                     <Mail className="h-4 w-4" />
                     Liên hệ hỗ trợ
                   </a>
                 </Button>
-                <Button type="button" variant="outline" asChild>
+                <Button type="button" variant="outline" asChild className="border-app-line text-app-ink hover:bg-app-bg">
                   <Link to="/billing/faq">Xem FAQ thanh toán</Link>
                 </Button>
-                <Button type="button" variant="outline" onClick={() => window.location.reload()}>
+                <Button type="button" variant="outline" onClick={() => window.location.reload()} className="border-app-line text-app-ink hover:bg-app-bg">
                   <RefreshCw className="h-4 w-4" />
                   Tải lại trang
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      );
-    }
+            </div>
+          </div>
+        );
+      }
 
     return (
       <div className="mx-auto max-w-5xl px-4 py-8 lg:py-12">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(320px,1.05fr)]">
-          <Card className="overflow-hidden border-indigo-100 bg-white shadow-xl shadow-indigo-100/60">
-            <CardHeader className="text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[var(--r-pill)] bg-indigo-100 text-indigo-700">
+          <div className="overflow-hidden rounded-card border border-app-line bg-app-surface">
+            <div className="border-b border-app-line p-5 text-center sm:p-7">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
                 <QrCode className="h-6 w-6" />
               </div>
-              <CardTitle className="text-2xl text-slate-950">Quét QR để chuyển khoản</CardTitle>
-              <CardDescription>Giữ nguyên số tiền và nội dung. Hệ thống thường xác nhận trong 1-2 phút.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-5 p-5 sm:p-7">
-              <div className="rounded-[var(--r-card)] border border-slate-200 bg-slate-50 p-4 text-center">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Mã đơn hàng</p>
-                <p className="mt-2 select-all break-all text-3xl font-black tracking-wide text-slate-950 sm:text-4xl">{paymentOrder.orderId}</p>
+              <h2 className="font-serif text-2xl font-medium text-app-ink">Quét QR để chuyển khoản</h2>
+              <p className="mt-1 text-sm text-app-ink-muted">Giữ nguyên số tiền và nội dung. Hệ thống thường xác nhận trong 1-2 phút.</p>
+            </div>
+            <div className="space-y-5 p-5 sm:p-7">
+              <div className="rounded-lg border border-app-line bg-app-bg p-4 text-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Mã đơn hàng</p>
+                <p className="mt-2 select-all break-all font-serif text-3xl font-medium text-app-ink">{paymentOrder.orderId}</p>
               </div>
 
-              <div className="rounded-[var(--r-card)] border border-indigo-100 bg-indigo-50/60 p-4">
+              <div className="rounded-lg border border-app-line bg-app-bg p-4">
                 {paymentOrder.qrDataUrl ? (
-                  <img src={paymentOrder.qrDataUrl} alt={`QR chuyển khoản đơn ${paymentOrder.orderId}`} className="mx-auto aspect-square w-full max-w-[360px] rounded-[var(--r-card)] bg-white p-3 shadow-sm" />
+                  <img src={paymentOrder.qrDataUrl} alt={`QR chuyển khoản đơn ${paymentOrder.orderId}`} className="mx-auto aspect-square w-full max-w-[360px] rounded-lg bg-app-surface p-3" />
                 ) : (
-                  <div className="mx-auto flex aspect-square w-full max-w-[360px] items-center justify-center rounded-[var(--r-card)] bg-white text-slate-400">
+                  <div className="mx-auto flex aspect-square w-full max-w-[360px] items-center justify-center rounded-lg bg-app-surface text-app-ink-muted">
                     <QrCode className="h-16 w-16" />
                   </div>
                 )}
               </div>
 
               <div className="text-center" role="status" aria-live="polite">
-                <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] bg-indigo-50 px-4 py-2 text-indigo-700">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="text-sm font-semibold">Đang chờ xác nhận chuyển khoản</span>
+                <div className="inline-flex items-center gap-2 rounded-full bg-app-warm-soft px-4 py-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-app-warm" />
+                  <span className="text-sm font-semibold text-app-ink">Đang chờ xác nhận chuyển khoản</span>
                 </div>
-                <p className="mt-2 text-sm font-medium text-slate-600">Đơn hàng sẽ huỷ trong {formatCountdown(paymentTimeLeftMs)}</p>
+                <p className="mt-2 text-sm font-medium text-app-ink-muted">Đơn hàng sẽ huỷ trong {formatCountdown(paymentTimeLeftMs)}</p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           <div className="space-y-5">
-            <Card className="border-slate-200 bg-white shadow-lg">
-              <CardHeader>
-                <CardTitle>Thông tin chuyển khoản</CardTitle>
-                <CardDescription>Nhấn nút sao chép từng dòng để tránh nhập sai. Nội dung chuyển khoản là phần quan trọng nhất.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
+            <div className="rounded-card border border-app-line bg-app-surface p-6">
+              <h3 className="mb-1 text-lg font-semibold text-app-ink">Thông tin chuyển khoản</h3>
+              <p className="text-sm text-app-ink-muted">Nhấn nút sao chép từng dòng để tránh nhập sai. Nội dung chuyển khoản là phần quan trọng nhất.</p>
+              <div className="mt-4 space-y-3">
                 <PaymentInfoRow label="Số tiền" value={`${formatVndAmount(paymentOrder.amount)} ${paymentOrder.currency}`} copyValue={String(paymentOrder.amount)} copyKey="amount" copiedKey={copiedPaymentField} onCopy={copyPaymentValue} highlight />
                 <PaymentInfoRow label="Ngân hàng nhận" value={paymentOrder.bankName} copyValue={paymentOrder.bankName} copyKey="bank" copiedKey={copiedPaymentField} onCopy={copyPaymentValue} />
                 <PaymentInfoRow label="STK ngân hàng nhận" value={paymentOrder.bankAccount} copyValue={paymentOrder.bankAccount} copyKey="account" copiedKey={copiedPaymentField} onCopy={copyPaymentValue} highlight />
                 <PaymentInfoRow label="Chủ tài khoản" value={paymentOrder.accountName} copyValue={paymentOrder.accountName} copyKey="name" copiedKey={copiedPaymentField} onCopy={copyPaymentValue} />
                 <PaymentInfoRow label="Nội dung chuyển khoản" value={transferDescription} copyValue={transferDescription} copyKey="description" copiedKey={copiedPaymentField} onCopy={copyPaymentValue} highlight />
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {paymentError && (
-              <div className="rounded-[var(--r-card)] border border-red-200 bg-red-50 p-3 text-sm text-red-700">{paymentError}</div>
+              <div className="rounded-lg border border-app-line bg-[color:var(--color-danger-bg)] p-3 text-sm text-[color:var(--color-danger-fg)]">{paymentError}</div>
             )}
 
-            <Card className="border-slate-200 bg-slate-50/90 shadow-sm">
-              <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm leading-6 text-slate-700">
+            <div className="rounded-card border border-app-line bg-app-bg p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm leading-6 text-app-ink">
                   Cần biết cách xác nhận thanh toán, nhận Plus hoặc xử lý chuyển khoản sai?
                 </p>
-                <Button type="button" variant="outline" asChild>
+                <Button type="button" variant="outline" asChild className="border-app-line text-app-ink hover:bg-app-bg">
                   <Link to="/billing/faq">Xem FAQ thanh toán</Link>
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {showTransferConfirmButton && (
-              <Card className="border-emerald-100 bg-emerald-50/80 shadow-sm">
-                <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm leading-6 text-emerald-900">Đã chuyển khoản? Bấm để đội hỗ trợ thấy bạn đã xác nhận khi cần kiểm tra.</p>
-                  <Button type="button" onClick={handleUserConfirmedTransfer} disabled={confirmingTransfer} className="bg-emerald-600 hover:bg-emerald-700">
+              <div className="rounded-card border border-app-line bg-app-accent-soft p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm leading-6 text-app-ink">Đã chuyển khoản? Bấm để đội hỗ trợ thấy bạn đã xác nhận khi cần kiểm tra.</p>
+                  <Button type="button" onClick={handleUserConfirmedTransfer} disabled={confirmingTransfer} className="bg-app-accent text-white hover:bg-[#284f45]">
                     {confirmingTransfer ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                     Tôi đã chuyển khoản xong
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
 
             {transferConfirmedByUser && (
-              <div className="rounded-[var(--r-card)] border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium leading-6 text-emerald-800">
+              <div className="rounded-lg border border-app-line bg-app-accent-soft p-4 text-sm font-medium leading-6 text-app-accent">
                 Cảm ơn bạn! Chúng tôi đang xác nhận giao dịch (thường 1-2 phút).
               </div>
             )}
 
             {showSlowPaymentHelp && (
-              <Card className="border-amber-200 bg-amber-50/90 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="text-base text-amber-950">Quá lâu chưa thấy phản hồi?</CardTitle>
-                  <CardDescription className="text-amber-800">
-                    Ngân hàng đôi khi chậm 3-5 phút. Nếu bạn đã chuyển và quá 10 phút chưa nhận quyền:
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-3 sm:flex-row">
-                  <Button type="button" asChild variant="outline" className="border-amber-300 bg-white text-amber-900 hover:bg-amber-100">
+              <div className="rounded-card border border-app-line bg-app-warm-soft p-6">
+                <h3 className="font-serif text-base font-medium text-app-ink">Quá lâu chưa thấy phản hồi?</h3>
+                <p className="mt-1 text-sm text-app-ink-muted">
+                  Ngân hàng đôi khi chậm 3-5 phút. Nếu bạn đã chuyển và quá 10 phút chưa nhận quyền:
+                </p>
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <Button type="button" asChild variant="outline" className="border-app-line text-app-ink hover:bg-app-bg">
                     <a href={createSupportMailto(paymentOrder.orderId)}>
                       <Mail className="h-4 w-4" />
                       Liên hệ hỗ trợ
                     </a>
                   </Button>
-                  <Button type="button" variant="outline" asChild className="border-amber-300 bg-white text-amber-900 hover:bg-amber-100">
+                  <Button type="button" variant="outline" asChild className="border-app-line text-app-ink hover:bg-app-bg">
                     <Link to="/billing/faq">Xem FAQ thanh toán</Link>
                   </Button>
-                  <Button type="button" variant="outline" onClick={() => window.location.reload()} className="border-amber-300 bg-white text-amber-900 hover:bg-amber-100">
+                  <Button type="button" variant="outline" onClick={() => window.location.reload()} className="border-app-line text-app-ink hover:bg-app-bg">
                     <RefreshCw className="h-4 w-4" />
                     Tải lại trang
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -527,27 +520,24 @@ export function OrderStatusPage() {
   if (!order) {
     return (
       <div className="stack-section pb-12">
-        <Card className="overflow-hidden border-0 gradient-slate shadow-2xl">
-          <CardContent className="p-10 text-center lg:p-14">
-            <EmptyOrdersIllustration className="mx-auto mb-4 w-40 text-violet-500 opacity-80" />
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-slate-900 text-white">
-              <ClipboardList className="h-10 w-10" />
-            </div>
-            <h1 className="mt-6 text-3xl font-bold text-slate-900">Chưa có đơn nào trong không gian làm việc của bạn</h1>
-            <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-slate-500">
-              Hiện chưa tìm thấy đơn theo mã đang mở. Bạn có thể tạo đơn mới hoặc quay lại luồng mục tiêu để chọn hướng đi tiếp theo.
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Button onClick={() => navigate("/order")}>
-                <Package className="h-4 w-4" />
-                Tạo đơn kit
-              </Button>
-              <Button variant="outline" onClick={() => navigate("/goals")}>
-                Quay lại luồng mục tiêu
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="rounded-card border border-app-line bg-app-surface p-10 text-center lg:p-14">
+          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-app-bg text-app-ink">
+            <ClipboardList className="h-10 w-10 text-app-accent" />
+          </div>
+          <h1 className="font-serif text-3xl font-medium text-app-ink mt-6">Chưa có đơn nào trong không gian làm việc của bạn</h1>
+          <p className="mx-auto mt-2 max-w-2xl text-base text-app-ink-muted">
+            Hiện chưa tìm thấy đơn theo mã đang mở. Bạn có thể tạo đơn mới hoặc quay lại luồng mục tiêu để chọn hướng đi tiếp theo.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Button onClick={() => navigate("/order")} className="bg-app-accent text-white hover:bg-[#284f45]">
+              <Package className="h-4 w-4" />
+              Tạo đơn kit
+            </Button>
+            <Button variant="outline" onClick={() => navigate("/goals")} className="border-app-line text-app-ink hover:bg-app-bg">
+              Quay lại luồng mục tiêu
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -625,51 +615,12 @@ export function OrderStatusPage() {
     <div className="stack-section pb-12">
       <PageHero
         className="page-enter"
-        eyebrow="Theo dõi đơn hàng"
-        eyebrowIcon={<Truck className="h-3.5 w-3.5" />}
-        title={
-          <>
-            Theo dõi <span className="text-gradient-vibrant">trạng thái đơn kit</span> hiện tại.
-          </>
-        }
+        eyebrow="THEO DÕI ĐƠN HÀNG"
+        title="Theo dõi trạng thái đơn kit hiện tại"
         description={
           hasGoalLink
             ? `Đơn này đang bám theo mục tiêu "${order.goalTitle}" trong nhóm ${order.focusArea}.`
             : "Đơn này chưa gắn với mục tiêu cụ thể, nhưng vẫn có thể theo dõi đầy đủ như một kit độc lập."
-        }
-        primaryCta={
-          <Badge variant="neutral" className="px-3 py-1.5 text-xs">
-            {getOrderStatusLabel(order.status)}
-          </Badge>
-        }
-        secondaryCta={
-          <Badge variant="neutral" className="px-3 py-1.5 text-xs">
-            {getKitTypeLabel(order.kitType)}
-          </Badge>
-        }
-        aside={
-          <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4 shadow-sm">
-            <EmptyOrdersIllustration className="mb-2 hidden w-20 text-[color:var(--tone-shell-primary)] opacity-50 sm:block" />
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tóm tắt đơn</p>
-            <div className="mt-3 grid gap-2">
-              {summaryItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div
-                    key={item.label}
-                    className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5"
-                  >
-                    <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-                      <Icon className="h-3 w-3 text-[color:var(--tone-shell-primary)]" />
-                      {item.label}
-                    </div>
-                    <p className="mt-1 text-sm font-semibold text-foreground">{item.value}</p>
-                    <p className="mt-0.5 text-xs leading-5 text-muted-foreground">{item.note}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
         }
       />
 
@@ -958,14 +909,14 @@ function PaymentInfoRow({
   const copied = copiedKey === copyKey;
 
   return (
-    <div className={`rounded-[var(--r-card)] border p-4 ${highlight ? "border-indigo-200 bg-indigo-50" : "border-slate-200 bg-slate-50/70"}`}>
+    <div className={`rounded-lg border p-4 ${highlight ? "border-app-line bg-app-warm-soft" : "border-app-line bg-app-bg"}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
-          <p className={`mt-2 select-all break-all font-bold ${highlight ? "text-lg text-indigo-900" : "text-base text-slate-900"}`}>{value}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">{label}</p>
+          <p className={`mt-2 select-all break-all font-semibold ${highlight ? "text-lg text-app-warm" : "text-base text-app-ink"}`}>{value}</p>
         </div>
-        <Button type="button" size="sm" variant="outline" onClick={() => onCopy(copyValue, copyKey)} aria-label={`Sao chép ${label}`}>
-          {copied ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <Copy className="h-4 w-4" />}
+        <Button type="button" size="sm" variant="outline" onClick={() => onCopy(copyValue, copyKey)} aria-label={`Sao chép ${label}`} className="border-app-line text-app-ink-muted hover:bg-app-bg">
+          {copied ? <CheckCircle2 className="h-4 w-4 text-app-accent" /> : <Copy className="h-4 w-4" />}
           {copied ? "Đã copy" : "Copy"}
         </Button>
       </div>
