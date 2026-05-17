@@ -2848,19 +2848,35 @@
    * Quiet accent pulse for the primary action button.
    * ───────────────────────────────────────────────────────── */
   .brand-glow-pulse {
-    animation: brand-glow-pulse 2.6s var(--ease-standard) infinite;
+    animation: brand-glow-pulse 2.4s ease-in-out infinite;
   }
   @keyframes brand-glow-pulse {
     0%,
     100% {
       box-shadow:
-        0 0 0 0 color-mix(in oklab, var(--app-accent) 55%, transparent),
-        0 10px 24px -18px color-mix(in oklab, var(--app-accent) 50%, transparent);
+        0 0 0 0 rgba(47, 93, 80, 0.7),
+        0 10px 24px -10px rgba(47, 93, 80, 0.45);
     }
     50% {
       box-shadow:
-        0 0 0 10px color-mix(in oklab, var(--app-accent) 0%, transparent),
-        0 14px 30px -20px color-mix(in oklab, var(--app-accent) 60%, transparent);
+        0 0 0 10px rgba(47, 93, 80, 0),
+        0 14px 28px -12px rgba(47, 93, 80, 0.55);
+    }
+  }
+  html.dark .brand-glow-pulse {
+    animation-name: brand-glow-pulse-dark;
+  }
+  @keyframes brand-glow-pulse-dark {
+    0%,
+    100% {
+      box-shadow:
+        0 0 0 0 rgba(91, 165, 144, 0.75),
+        0 10px 24px -10px rgba(91, 165, 144, 0.5);
+    }
+    50% {
+      box-shadow:
+        0 0 0 10px rgba(91, 165, 144, 0),
+        0 14px 28px -12px rgba(91, 165, 144, 0.6);
     }
   }
 
