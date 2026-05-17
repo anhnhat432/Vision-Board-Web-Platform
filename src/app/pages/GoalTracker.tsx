@@ -523,7 +523,7 @@ function GoalTrackerContent({
 
     return (
       <div key={goal.id} className="rounded-card border border-app-line bg-app-surface p-5 md:p-6 overflow-hidden">
-        <div className="grid gap-5 lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)]">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(220px,1fr)]">
           {/* Cột trái — Goal summary */}
           <div>
             <div className="flex items-start justify-between gap-3">
@@ -689,14 +689,14 @@ function GoalTrackerContent({
             Theo dõi tiến độ tất cả mục tiêu hiện tại và cũ.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative">
+            <div className="relative w-full sm:w-96">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
               <input
                 type="search"
                 placeholder="Tìm theo tên hoặc mô tả..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full sm:w-80 rounded-lg border border-app-line bg-app-surface px-3.5 py-2.5 text-[15px] text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/30 focus:border-app-accent"
+                className="w-full rounded-lg border border-app-line bg-app-surface pl-10 pr-3.5 py-2.5 text-[15px] text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/30 focus:border-app-accent"
               />
             </div>
             <Button

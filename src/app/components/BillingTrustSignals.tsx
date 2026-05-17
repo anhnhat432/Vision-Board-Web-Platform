@@ -64,11 +64,11 @@ export function BillingTrustSignals({ className = "", compact = false, supportEm
         </div>
         <div className={itemClassName}>
           <LifeBuoy className="mt-0.5 h-5 w-5 shrink-0 text-app-accent" />
-          <p className="text-[15px] leading-6 text-app-ink-soft">
-            Liên hệ hỗ trợ: {" "}
+          <p className="min-w-0 break-words text-[15px] leading-6 text-app-ink-soft">
+            Liên hệ hỗ trợ:{" "}
             <a
               href={`mailto:${resolvedSupportEmail}`}
-              className="font-medium text-app-ink underline-offset-4 hover:underline"
+              className="font-medium text-app-ink underline-offset-4 break-all hover:underline"
             >
               {resolvedSupportEmail}
             </a>{" "}
