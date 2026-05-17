@@ -114,18 +114,18 @@ function getExportRatioDescription(ratio: ExportOptions["ratio"]): string {
 }
 
 const CURATED_IMAGES: Array<{ label: string; url: string }> = [
-  { label: "Không gian", url: "https://picsum.photos/seed/vision-workspace/480/360" },
-  { label: "Bình minh", url: "https://picsum.photos/seed/vision-sunrise/480/360" },
-  { label: "Du lịch", url: "https://picsum.photos/seed/vision-freedom-travel/480/360" },
-  { label: "Nhà", url: "https://picsum.photos/seed/vision-dream-home/480/360" },
-  { label: "Vận động", url: "https://picsum.photos/seed/vision-fitness-run/480/360" },
-  { label: "Thiên nhiên", url: "https://picsum.photos/seed/vision-nature-forest/480/360" },
-  { label: "Thành phố", url: "https://picsum.photos/seed/vision-city-skyline/480/360" },
-  { label: "Biển", url: "https://picsum.photos/seed/vision-ocean-beach/480/360" },
-  { label: "Sách", url: "https://picsum.photos/seed/vision-books-study/480/360" },
-  { label: "Ẩm thực", url: "https://picsum.photos/seed/vision-healthy-food/480/360" },
-  { label: "Nghệ thuật", url: "https://picsum.photos/seed/vision-creative-art/480/360" },
-  { label: "Vườn", url: "https://picsum.photos/seed/vision-garden-bloom/480/360" },
+  { label: "Không gian", url: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=480&h=360&fit=crop&q=80" },
+  { label: "Bình minh", url: "https://images.unsplash.com/photo-1500672100127-fc5ed5f63ed3?w=480&h=360&fit=crop&q=80" },
+  { label: "Du lịch", url: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=480&h=360&fit=crop&q=80" },
+  { label: "Nhà", url: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=480&h=360&fit=crop&q=80" },
+  { label: "Vận động", url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=480&h=360&fit=crop&q=80" },
+  { label: "Thiên nhiên", url: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=480&h=360&fit=crop&q=80" },
+  { label: "Thành phố", url: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=480&h=360&fit=crop&q=80" },
+  { label: "Biển", url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=480&h=360&fit=crop&q=80" },
+  { label: "Sách", url: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=480&h=360&fit=crop&q=80" },
+  { label: "Ẩm thực", url: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=480&h=360&fit=crop&q=80" },
+  { label: "Nghệ thuật", url: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=480&h=360&fit=crop&q=80" },
+  { label: "Vườn", url: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=480&h=360&fit=crop&q=80" },
 ];
 
 function createImageItem(
@@ -238,6 +238,7 @@ export function VisionBoardEditor() {
   const [imageUrl, setImageUrl] = useState("");
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const canvasExportRef = useRef<HTMLDivElement>(null);
+  const boardNameInputRef = useRef<HTMLInputElement>(null);
   const blocker = useBlocker(hasUnsavedChanges);
 
   const handleBeforeUnload = useCallback(
@@ -318,7 +319,16 @@ export function VisionBoardEditor() {
   );
 
   const handleSave = () => {
-    if (!board || !boardName.trim()) return;
+    if (!board) return;
+
+    if (!boardName.trim()) {
+      toast.error("Hãy đặt tên cho vision board trước khi lưu.", {
+        description: "Tên bảng giúp bạn nhận ra bảng này trong thư viện.",
+      });
+      boardNameInputRef.current?.focus();
+      boardNameInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
 
     const beforeData = getUserData();
     if (!id && hasReachedLimit(beforeData, "maxVisionBoards")) {
@@ -748,6 +758,7 @@ export function VisionBoardEditor() {
 
                   <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_120px]">
                     <Input
+                      ref={boardNameInputRef}
                       placeholder="Tên vision board của bạn"
                       value={boardName}
                       onChange={(event) => { setBoardName(event.target.value); setHasUnsavedChanges(true); }}
@@ -774,11 +785,16 @@ export function VisionBoardEditor() {
                       <Download className="h-4 w-4" />
                       Tải về wallpaper
                     </Button>
-                    <Button variant="outline" onClick={handleSave} disabled={!boardName.trim()}>
+                    <Button variant="outline" onClick={handleSave}>
                       <Save className="h-4 w-4" />
                       Lưu bảng
                     </Button>
                   </div>
+                  {!boardName.trim() ? (
+                    <p className="text-xs text-app-ink-soft">
+                      Đặt tên bảng (ví dụ "Vision 2026") rồi bấm <span className="font-medium text-app-ink">Lưu bảng</span>.
+                    </p>
+                  ) : null}
 
 
                   <div className="flex flex-wrap items-center gap-2">
