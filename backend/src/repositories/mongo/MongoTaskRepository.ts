@@ -102,4 +102,10 @@ export class MongoTaskRepository {
     const deleted = await TaskModel.findByIdAndDelete(id).lean();
     return Boolean(deleted);
   }
+
+  async deleteTasksByWeekIds(weekIds: string[]): Promise<number> {
+    if (weekIds.length === 0) return 0;
+    const result = await TaskModel.deleteMany({ weekId: { $in: weekIds } });
+    return result.deletedCount ?? 0;
+  }
 }

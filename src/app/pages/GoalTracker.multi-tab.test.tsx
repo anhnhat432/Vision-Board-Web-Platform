@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -8,9 +8,22 @@ const authContextMock = vi.hoisted(() => ({
   useOptionalAuthContext: vi.fn(),
 }));
 
+const remoteDeleteMocks = vi.hoisted(() => ({
+  deleteGoal: vi.fn(),
+  deletePlan: vi.fn(),
+}));
+
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
   useOptionalAuthContext: authContextMock.useOptionalAuthContext,
+}));
+
+vi.mock("@/services/goalService", () => ({
+  deleteGoal: remoteDeleteMocks.deleteGoal,
+}));
+
+vi.mock("@/services/planService", () => ({
+  deletePlan: remoteDeleteMocks.deletePlan,
 }));
 
 vi.mock("../hooks/useBackendProgressOverlay", () => ({
@@ -117,6 +130,11 @@ describe("GoalTracker multi-tab task updates", () => {
     localStorage.clear();
     MockBroadcastChannel.channels = [];
     vi.stubGlobal("BroadcastChannel", MockBroadcastChannel);
+    vi.stubEnv("VITE_API_BASE_URL", "https://api.example.test");
+    remoteDeleteMocks.deleteGoal.mockReset();
+    remoteDeleteMocks.deletePlan.mockReset();
+    remoteDeleteMocks.deleteGoal.mockResolvedValue({ deleted: true });
+    remoteDeleteMocks.deletePlan.mockResolvedValue({ deleted: true });
     setSignedInAuthContext();
   });
 
@@ -241,6 +259,72 @@ describe("GoalTracker multi-tab task updates", () => {
     storage.deleteAllUserData();
 
     expect(channel.postMessage).toHaveBeenCalledWith(expect.objectContaining({ source: expect.any(String) }));
+  });
+
+  it("deletes synced goal and plan records so backend hydration cannot restore the card", async () => {
+    const storage = await import("../utils/storage");
+    const data = storage.getUserData();
+    const todayKey = storage.formatDateInputValue(new Date());
+    data.onboardingCompleted = true;
+    data.goals = [
+      {
+        id: "goal_synced_delete",
+        category: "Career",
+        title: "Delete synced goal",
+        description: "This goal should disappear and stay deleted.",
+        deadline: "2026-08-03",
+        tasks: [],
+        createdAt: "2026-05-01T00:00:00.000Z",
+        twelveWeekSystem: {
+          goalType: "Career",
+          vision12Week: "Delete this synced cycle",
+          lagMetric: { name: "Progress", unit: "%", target: "100", currentValue: "0" },
+          leadIndicators: [],
+          milestones: { week4: "", week8: "", week12: "" },
+          successEvidence: "",
+          reviewDay: "Friday",
+          week12Outcome: "",
+          startDate: todayKey,
+          endDate: todayKey,
+          timezone: "Asia/Ho_Chi_Minh",
+          weekStartsOn: "Monday",
+          status: "active",
+          currentWeek: 1,
+          totalWeeks: 1,
+          weeklyPlans: [],
+          taskInstances: [],
+          dailyCheckIns: [],
+          weeklyReviews: [],
+          scoreboard: [],
+        },
+      },
+    ];
+    storage.saveUserData(data);
+    localStorage.setItem("backend_goal_links", JSON.stringify({ goal_synced_delete: "507f1f77bcf86cd799439011" }));
+    localStorage.setItem(
+      "backend_plan_links",
+      JSON.stringify({
+        goal_synced_delete: {
+          planId: "507f1f77bcf86cd799439021",
+          weekIdByNumber: {},
+          weekRevisionById: {},
+          metricIdByKey: {},
+          taskIdByLocalTaskId: {},
+          taskRevisionByRemoteId: {},
+        },
+      }),
+    );
+
+    await renderGoalTracker();
+
+    expect(await screen.findByText("Delete synced goal")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Xóa mục tiêu Delete synced goal" }));
+    const dialog = await screen.findByRole("alertdialog");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Xóa" }));
+
+    await waitFor(() => expect(screen.queryByText("Delete synced goal")).not.toBeInTheDocument());
+    await waitFor(() => expect(remoteDeleteMocks.deletePlan).toHaveBeenCalledWith("507f1f77bcf86cd799439021"));
+    expect(remoteDeleteMocks.deleteGoal).toHaveBeenCalledWith("507f1f77bcf86cd799439011");
   });
 
   it("posts local task mutations and applies newer task state from another tab", async () => {

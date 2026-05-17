@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { createPlan, getPlanById, getPlans, updatePlan } from "../controllers/planController";
+import { createPlan, deletePlan, getPlanById, getPlans, updatePlan } from "../controllers/planController";
 import { validateJsonObjectBody, validateObjectIdParam } from "../middleware/requestValidation";
 import { asyncHandler } from "../utils/asyncHandler";
 
@@ -15,5 +15,6 @@ planRoutes.patch(
   asyncHandler(updatePlan),
 );
 planRoutes.get("/plans/:id", validateObjectIdParam("id", "planId"), asyncHandler(getPlanById));
+planRoutes.delete("/plans/:id", validateObjectIdParam("id", "planId"), asyncHandler(deletePlan));
 
 export { planRoutes };

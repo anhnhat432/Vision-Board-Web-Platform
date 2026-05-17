@@ -1,5 +1,11 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
+import { isApiBaseUrlConfigured, toAppError } from "@/lib/api/apiClient";
+import { getBackendGoalId } from "@/lib/api/goalLinkStore";
+import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
+import { deleteGoal as deleteBackendGoal } from "@/services/goalService";
+import { deletePlan as deleteBackendPlan } from "@/services/planService";
 import {
   AlertTriangle,
   CalendarDays,
@@ -39,7 +45,7 @@ import {
   type UserData,
   calculateGoalProgress,
   clearGoalPlanningDrafts,
-  deleteGoal,
+  deleteGoal as deleteLocalGoal,
   formatCalendarDate,
   getCalendarDayDifference,
   getGoalExecutionStats,
@@ -55,6 +61,7 @@ import {
   toggleTwelveWeekTask,
   updateGoal,
 } from "../utils/storage";
+import { isRealMode } from "../utils/app-mode";
 import { generateId } from "../utils/storage-types";
 import { getPlanLabel } from "../utils/twelve-week-premium";
 
@@ -72,8 +79,35 @@ const getSystemStatusLabel = (status?: string) => {
   return "Đang chạy";
 };
 
+async function deleteRemoteGoalRecords({
+  backendGoalId,
+  backendPlanId,
+}: {
+  backendGoalId: string | null;
+  backendPlanId: string | null;
+}): Promise<void> {
+  const operations: Promise<unknown>[] = [];
+  if (backendPlanId) operations.push(deleteBackendPlan(backendPlanId));
+  if (backendGoalId) operations.push(deleteBackendGoal(backendGoalId));
+  if (operations.length === 0) return;
+
+  const results = await Promise.allSettled(operations);
+  const hasFailure = results.some((result) => result.status === "rejected");
+  if (!hasFailure) return;
+
+  const firstFailure = results.find((result): result is PromiseRejectedResult => result.status === "rejected");
+  const message = firstFailure
+    ? toAppError(firstFailure.reason).message
+    : "Chưa xóa được dữ liệu trên tài khoản.";
+
+  toast.warning("Mục tiêu đã xóa trên thiết bị này, nhưng chưa xóa xong trên tài khoản.", {
+    description: message,
+  });
+}
+
 export function GoalTracker() {
   const { userData, reloadUserData } = useSyncedUserData();
+  const authContext = useOptionalAuthContext();
   const [newTask, setNewTask] = useState("");
   const [addingTaskToGoalId, setAddingTaskToGoalId] = useState<string | null>(null);
   const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
@@ -96,6 +130,7 @@ export function GoalTracker() {
       goalToDelete={goalToDelete}
       setGoalToDelete={setGoalToDelete}
       onReload={reloadUserData}
+      canSyncRemoteDelete={isRealMode() && isApiBaseUrlConfigured() && Boolean(authContext?.user)}
     />
   );
 }
@@ -109,6 +144,7 @@ function GoalTrackerContent({
   goalToDelete,
   setGoalToDelete,
   onReload,
+  canSyncRemoteDelete,
 }: {
   userData: UserData;
   newTask: string;
@@ -118,6 +154,7 @@ function GoalTrackerContent({
   goalToDelete: string | null;
   setGoalToDelete: (value: string | null) => void;
   onReload: () => void;
+  canSyncRemoteDelete: boolean;
 }) {
   const navigate = useNavigate();
   const reload = onReload;
@@ -376,7 +413,11 @@ function GoalTrackerContent({
     if (!goalToDelete) return;
     const deletedGoalId = goalToDelete;
     const snapshot = getUserData();
-    deleteGoal(deletedGoalId);
+    const backendGoalId = getBackendGoalId(deletedGoalId);
+    const backendPlanId = getPlanLink(deletedGoalId)?.planId ?? null;
+    const shouldDeleteRemote = canSyncRemoteDelete && Boolean(backendPlanId || backendGoalId);
+
+    deleteLocalGoal(deletedGoalId);
     // Optimistic local update so the card disappears immediately without
     // waiting for the next render cycle (useEffect[userData] lag).
     setViewUserData((current) => ({
@@ -385,6 +426,15 @@ function GoalTrackerContent({
     }));
     setGoalToDelete(null);
     reload();
+    if (shouldDeleteRemote) {
+      void deleteRemoteGoalRecords({
+        backendGoalId,
+        backendPlanId,
+      });
+      toast.success("Mục tiêu đã được xóa.");
+      return;
+    }
+
     toast.success("Mục tiêu đã được xóa.", {
       action: {
         label: "Hoàn tác",

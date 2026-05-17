@@ -23,6 +23,12 @@ export async function getPlanById(req: Request, res: Response): Promise<void> {
   res.status(200).json(successResponse(details));
 }
 
+export async function deletePlan(req: Request, res: Response): Promise<void> {
+  const user = requireAuthUser(req);
+  await planService.deletePlanForUser(user.uid, req.params.id);
+  res.status(200).json(successResponse({ deleted: true }));
+}
+
 export async function updatePlan(req: Request, res: Response): Promise<void> {
   const user = requireAuthUser(req);
 

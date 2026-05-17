@@ -221,6 +221,21 @@ export class PlanService {
     return updated;
   }
 
+  async deletePlanForUser(userId: string, planId: string) {
+    const plan = await requirePlanOwnership(this.planRepository, userId, planId);
+    const weeks = await this.weekRepository.getWeeksByPlanId(plan.id);
+    const weekIds = weeks.map((week) => week.id);
+
+    await this.taskRepository.deleteTasksByWeekIds(weekIds);
+    await this.metricRepository.deleteMetricsByWeekIds(weekIds);
+    await this.weekRepository.deleteWeeksByPlanId(plan.id);
+
+    const deleted = await this.planRepository.deletePlan(plan.id);
+    if (!deleted) {
+      throw new ApiError(404, "Plan not found.");
+    }
+  }
+
   async getPlanDetails(userId: string, planId: string) {
     const plan = await requirePlanOwnership(this.planRepository, userId, planId);
     const weeks = await this.weekRepository.getWeeksByPlanId(plan.id);

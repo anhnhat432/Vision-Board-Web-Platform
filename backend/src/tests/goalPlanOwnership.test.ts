@@ -121,6 +121,20 @@ function createPlanFixture(options: { failWeekNumber?: number } = {}) {
       },
     ],
   ]);
+  const metrics = new Map([
+    [
+      ids.metric,
+      {
+        id: ids.metric,
+        weekId: ids.week,
+        name: "Lead metric",
+        weeklyTarget: 1,
+        logs: [],
+        createdAt: now,
+        updatedAt: now,
+      },
+    ],
+  ]);
 
   return {
     planRepository: {
@@ -189,10 +203,34 @@ function createPlanFixture(options: { failWeekNumber?: number } = {}) {
       async getTasksByWeekId(weekId: string) {
         return [...tasks.values()].filter((task) => task.weekId === weekId);
       },
+      async deleteTasksByWeekIds(weekIds: string[]) {
+        const weekIdSet = new Set(weekIds);
+        const matchingTaskIds = [...tasks.entries()]
+          .filter(([, task]) => weekIdSet.has(task.weekId))
+          .map(([taskId]) => taskId);
+
+        for (const taskId of matchingTaskIds) {
+          tasks.delete(taskId);
+        }
+
+        return matchingTaskIds.length;
+      },
     },
     metricRepository: {
-      async getMetricsByWeekId() {
-        return [];
+      async getMetricsByWeekId(weekId: string) {
+        return [...metrics.values()].filter((metric) => metric.weekId === weekId);
+      },
+      async deleteMetricsByWeekIds(weekIds: string[]) {
+        const weekIdSet = new Set(weekIds);
+        const matchingMetricIds = [...metrics.entries()]
+          .filter(([, metric]) => weekIdSet.has(metric.weekId))
+          .map(([metricId]) => metricId);
+
+        for (const metricId of matchingMetricIds) {
+          metrics.delete(metricId);
+        }
+
+        return matchingMetricIds.length;
       },
     },
   };
@@ -289,7 +327,8 @@ describe("plan ownership", () => {
     assert.equal(details.plan.id, ids.plan);
     assert.equal(details.weeks.length, 1);
     assert.equal(details.weeks[0].tasks.length, 1);
-    assert.deepEqual(details.weeks[0].metrics, []);
+    assert.equal(details.weeks[0].metrics.length, 1);
+    assert.equal(details.weeks[0].metrics[0].id, ids.metric);
   });
 
   it("rejects cross-user and invalid plan access", async () => {
@@ -352,5 +391,25 @@ describe("plan ownership", () => {
 
     assert.equal(rolledBackPlan, undefined);
     assert.equal((await fixture.weekRepository.getWeeksByPlanId("507f1f77bcf86cd799439098")).length, 0);
+  });
+
+  it("deletes an owned plan with child weeks, tasks, and metrics", async () => {
+    const fixture = createPlanFixture();
+    const service = new PlanService(
+      fixture.planRepository as never,
+      fixture.weekRepository as never,
+      fixture.taskRepository as never,
+      fixture.metricRepository as never,
+      async () => true,
+    );
+
+    await service.deletePlanForUser(ownerUserId, ids.plan);
+
+    assert.equal(await fixture.planRepository.getPlanById(ids.plan), null);
+    assert.deepEqual(await fixture.weekRepository.getWeeksByPlanId(ids.plan), []);
+    assert.deepEqual(await fixture.taskRepository.getTasksByWeekId(ids.week), []);
+    assert.deepEqual(await fixture.metricRepository.getMetricsByWeekId(ids.week), []);
+    await assertApiError(service.deletePlanForUser(ownerUserId, ids.otherPlan), 403, "access");
+    await assertApiError(service.deletePlanForUser(ownerUserId, "not-an-object-id"), 400, "ObjectId");
   });
 });

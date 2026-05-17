@@ -1,4 +1,4 @@
-import { get, patch, post } from "@/lib/api/apiClient";
+import { delete as deleteRequest, get, patch, post } from "@/lib/api/apiClient";
 import type { Plan, PlanDetails } from "@/types/plan";
 import type { BulkSyncRequest, BulkSyncResponse } from "@/types/bulkSync";
 
@@ -35,6 +35,10 @@ export function getPlanById(planId: string): Promise<PlanDetails> {
 
 export function updatePlan(planId: string, payload: UpdatePlanPayload): Promise<Plan> {
   return patch<Plan, UpdatePlanPayload>(`/plans/${planId}`, payload);
+}
+
+export function deletePlan(planId: string): Promise<{ deleted: boolean }> {
+  return deleteRequest<{ deleted: boolean }>(`/plans/${planId}`);
 }
 
 export function bulkSyncPlan(planId: string, request: BulkSyncRequest): Promise<BulkSyncResponse> {

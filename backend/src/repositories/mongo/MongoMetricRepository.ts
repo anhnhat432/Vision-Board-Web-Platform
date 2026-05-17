@@ -146,4 +146,10 @@ export class MongoMetricRepository {
 
     return doc ? mapMetric(doc) : null;
   }
+
+  async deleteMetricsByWeekIds(weekIds: string[]): Promise<number> {
+    if (weekIds.length === 0) return 0;
+    const result = await LeadMetricModel.deleteMany({ weekId: { $in: weekIds } });
+    return result.deletedCount ?? 0;
+  }
 }
