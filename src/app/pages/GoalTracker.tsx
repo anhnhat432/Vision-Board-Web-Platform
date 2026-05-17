@@ -625,6 +625,7 @@ function GoalTrackerContent({
             </div>
             {system && (
               <button
+                type="button"
                 className="mt-2 text-app-accent text-[12px] hover:underline"
                 onClick={() => openTwelveWeekCenter(goal.id)}
               >
