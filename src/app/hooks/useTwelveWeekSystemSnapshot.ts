@@ -219,7 +219,6 @@ export function useTwelveWeekSystemSnapshot() {
   const completedTodayTasks = useMemo(() =>
     currentWeekTasks
       .filter((task) => task.completed && !task.skipped && getCalendarDateKey(task.completedAt || "") === snapshotTodayDateKey)
-      .slice(0, 3)
   , [currentWeekTasks, snapshotTodayDateKey]);
 
   const fallbackTasks = useMemo(() =>
