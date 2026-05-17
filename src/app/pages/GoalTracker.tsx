@@ -374,8 +374,15 @@ function GoalTrackerContent({
 
   const handleConfirmDeleteGoal = () => {
     if (!goalToDelete) return;
+    const deletedGoalId = goalToDelete;
     const snapshot = getUserData();
-    deleteGoal(goalToDelete);
+    deleteGoal(deletedGoalId);
+    // Optimistic local update so the card disappears immediately without
+    // waiting for the next render cycle (useEffect[userData] lag).
+    setViewUserData((current) => ({
+      ...current,
+      goals: current.goals.filter((goal) => goal.id !== deletedGoalId),
+    }));
     setGoalToDelete(null);
     reload();
     toast.success("Mục tiêu đã được xóa.", {
@@ -383,6 +390,7 @@ function GoalTrackerContent({
         label: "Hoàn tác",
         onClick: () => {
           saveUserData(snapshot);
+          setViewUserData(snapshot);
           reload();
           toast.info("Đã khôi phục mục tiêu.");
         },
