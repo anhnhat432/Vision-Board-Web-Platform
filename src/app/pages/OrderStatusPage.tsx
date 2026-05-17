@@ -612,7 +612,7 @@ if (paymentLoading && !paymentOrder) {
   ];
 
   return (
-    <div className="stack-section pb-12">
+    <div className="stack-section mx-auto max-w-5xl px-4 pb-12 sm:px-6 lg:px-8">
       <PageHero
         className="page-enter"
         eyebrow="THEO DÕI ĐƠN HÀNG"

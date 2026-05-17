@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import {
   Calendar,
@@ -63,7 +63,7 @@ function BoardPreviewIcon({ content }: { content: string }) {
   const Icon = ICON_COMPONENTS[content as IconName] ?? Sparkles;
 
   return (
-    <div className="flex h-9 w-9 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent shadow-sm">
+    <div className="flex h-9 w-9 items-center justify-center rounded-[var(--r-pill)] gradient-brand text-primary-foreground shadow-[var(--shadow-2)]">
       <Icon className="h-4 w-4" />
     </div>
   );
@@ -90,7 +90,7 @@ export function VisionBoardGallery() {
 
         for (const backendBoard of backendBoards) {
           // If a link already exists, this board was previously known locally.
-          // Skip it � even if the local copy was deleted (intentional deletion).
+          // Skip it — even if the local copy was deleted (intentional deletion).
           const existingLocalId = getLocalVisionBoardId(backendBoard.id);
           if (existingLocalId) continue;
 
@@ -184,15 +184,15 @@ export function VisionBoardGallery() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>X�a vision board n�y?</AlertDialogTitle>
+            <AlertDialogTitle>Xóa vision board này?</AlertDialogTitle>
             <AlertDialogDescription>
-              H�nh d?ng n�y kh�ng th? ho�n t�c. To�n b? h�nh ?nh, c�u n�i v� bi?u tu?ng trong b?ng s? b? x�a vinh vi?n.
+              Hành động này không thể hoàn tác. Toàn bộ hình ảnh, câu nói và biểu tượng trong bảng sẽ bị xóa vĩnh viễn.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>H?y</AlertDialogCancel>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDeleteBoard} className="bg-red-600 hover:bg-red-700">
-              X�a
+              Xóa
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -200,18 +200,18 @@ export function VisionBoardGallery() {
 
       <PageHero
         className="page-enter"
-        eyebrow="Thu vi?n Dear Our Future"
+        eyebrow="Thư viện Dear Our Future"
         eyebrowIcon={<Images className="h-3.5 w-3.5" />}
         title={
           <>
-            M?i <span className="text-gradient-vibrant">vision board</span> du?c luu l?i nhu nh?ng phi�n b?n tuong lai.
+            Mọi <span className="text-gradient-vibrant">vision board</span> được lưu lại như những phiên bản tương lai.
           </>
         }
-        description="Xem l?i c�c vision board theo t?ng nam, ti?p t?c ch?nh s?a v� gi? c?m h?ng lu�n ? g?n m�nh."
+        description="Xem lại các vision board theo từng năm, tiếp tục chỉnh sửa và giữ cảm hứng luôn ở gần mình."
         primaryCta={
           <Button glow onClick={() => navigate("/vision-board")}>
             <Plus className="h-4 w-4" />
-            T?o b?ng m?i
+            Tạo bảng mới
           </Button>
         }
         secondaryCta={
@@ -221,35 +221,35 @@ export function VisionBoardGallery() {
               onClick={() => navigate("/order", { state: { visionBoardId: orderSourceBoard.id } })}
             >
               <Package className="h-4 w-4" />
-              {spotlightBoardId ? "T?o b? in t? b?ng v?a luu" : "T?o b? in t? b?ng g?n nh?t"}
+              {spotlightBoardId ? "Tạo bộ in từ bảng vừa lưu" : "Tạo bộ in từ bảng gần nhất"}
             </Button>
           ) : (
             <Button variant="outline" onClick={() => navigate("/")}>
-              V? Trang ch�nh
+              Về Trang chính
             </Button>
           )
         }
         aside={
-          <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Snapshot thu vi?n</p>
+          <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Snapshot thư viện</p>
             <div className="mt-3 grid gap-2">
               <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-[var(--r-control)] border border-app-line bg-app-surface px-3 py-2.5">
-                  <p className="text-[11px] uppercase tracking-[0.12em] text-app-ink-muted">T?ng b?ng</p>
-                  <p className="mt-1 text-2xl font-bold text-app-ink">{userData.visionBoards.length}</p>
+                <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
+                  <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Tổng bảng</p>
+                  <p className="mt-1 text-2xl font-bold text-foreground">{userData.visionBoards.length}</p>
                 </div>
-                <div className="rounded-[var(--r-control)] border border-app-line bg-app-surface px-3 py-2.5">
-                  <p className="text-[11px] uppercase tracking-[0.12em] text-app-ink-muted">Ph?n t?</p>
-                  <p className="mt-1 text-2xl font-bold text-app-ink">{totalItems}</p>
+                <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
+                  <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Phần tử</p>
+                  <p className="mt-1 text-2xl font-bold text-foreground">{totalItems}</p>
                 </div>
               </div>
-              <div className="rounded-[var(--r-control)] border border-app-line bg-app-surface px-3 py-2.5">
-                <p className="text-[11px] uppercase tracking-[0.12em] text-app-ink-muted">B?ng g?n nh?t</p>
-                <p className="mt-1 truncate text-sm font-semibold text-app-ink">
-                  {latestBoard ? latestBoard.name : "Chua c� b?ng n�o"}
+              <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Bảng gần nhất</p>
+                <p className="mt-1 truncate text-sm font-semibold text-foreground">
+                  {latestBoard ? latestBoard.name : "Chưa có bảng nào"}
                 </p>
-                <p className="text-xs text-app-ink-soft">
-                  {latestBoard ? `Nam ${latestBoard.year}` : "B?t d?u v?i b?ng d?u ti�n."}
+                <p className="text-xs text-muted-foreground">
+                  {latestBoard ? `Năm ${latestBoard.year}` : "Bắt đầu với bảng đầu tiên."}
                 </p>
               </div>
             </div>
@@ -261,28 +261,32 @@ export function VisionBoardGallery() {
       <div className="stagger-hover-grid grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
         {[
           {
-            title: "T?ng s? vision board",
+            title: "Tổng số vision board",
             value: userData.visionBoards.length,
-            note: "b?ng dang luu",
+            note: "bảng đang lưu",
             icon: Images,
+            color: "from-violet-500/18 to-fuchsia-500/10 text-violet-700",
           },
           {
-            title: "Nam bao qu�t",
+            title: "Năm bao quát",
             value: years.length,
-            note: "m?c th?i gian c� b?ng",
+            note: "mốc thời gian có bảng",
             icon: Calendar,
+            color: "from-sky-500/18 to-cyan-500/10 text-sky-700",
           },
           {
-            title: "T?ng ph?n t?",
+            title: "Tổng phần tử",
             value: totalItems,
-            note: "?nh, c�u n�i v� bi?u tu?ng",
+            note: "ảnh, câu nói và biểu tượng",
             icon: Sparkles,
+            color: "from-amber-500/18 to-orange-500/10 text-amber-700",
           },
           {
-            title: "Trung b�nh m?i b?ng",
+            title: "Trung bình mỗi bảng",
             value: userData.visionBoards.length ? Math.round(totalItems / userData.visionBoards.length) : 0,
-            note: "m?c d? phong ph� c?a b?ng",
+            note: "mức độ phong phú của bảng",
             icon: ImageIcon,
+            color: "from-emerald-500/18 to-teal-500/10 text-emerald-700",
           },
         ].map((item) => {
           const Icon = item.icon;
@@ -290,19 +294,22 @@ export function VisionBoardGallery() {
           return (
             <div key={item.title}>
               <Card className="relative gap-4 overflow-hidden">
+                <div
+                  className={`pointer-events-none absolute inset-x-6 top-0 h-14 rounded-b-[24px] bg-gradient-to-br ${item.color} opacity-65 blur-xl`}
+                />
                 <CardHeader className="relative flex flex-row items-start justify-between pb-0">
                   <div>
                     <CardDescription>{item.title}</CardDescription>
-                    <CardTitle className="mt-2 text-4xl text-app-ink">{item.value}</CardTitle>
+                    <CardTitle className="mt-2 text-4xl">{item.value}</CardTitle>
                   </div>
                   <div
-                    className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent"
+                    className={`flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-gradient-to-br ${item.color} opacity-90`}
                   >
                     <Icon className="h-5 w-5" />
                   </div>
                 </CardHeader>
                 <CardContent className="relative pt-0">
-                  <p className="text-sm text-app-ink-soft">{item.note}</p>
+                  <p className="text-sm text-slate-500">{item.note}</p>
                 </CardContent>
               </Card>
             </div>
@@ -314,17 +321,17 @@ export function VisionBoardGallery() {
       {userData.visionBoards.length === 0 ? (
         <Card className="overflow-hidden">
           <CardContent className="p-10 text-center lg:p-14">
-            <VisionMapIllustration className="mx-auto mb-4 w-56 text-app-ink-muted sm:w-64" />
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent">
+            <VisionMapIllustration className="mx-auto mb-4 w-56 text-violet-500 sm:w-64" />
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700">
               <Images className="h-10 w-10" />
             </div>
-            <h2 className="mt-6 text-3xl font-medium text-app-ink">Thu vi?n c?a b?n v?n c�n tr?ng</h2>
-            <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-app-ink-soft">
-              H�y t?o vision board d?u ti�n d? bi?n nh?ng h�nh dung trong d?u th�nh m?t kh�ng gian tr?c quan th?t s?.
+            <h2 className="mt-6 text-3xl font-bold text-slate-900">Thư viện của bạn vẫn còn trống</h2>
+            <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-slate-500">
+              Hãy tạo vision board đầu tiên để biến những hình dung trong đầu thành một không gian trực quan thật sự.
             </p>
             <Button className="mt-8" onClick={() => navigate("/vision-board")}>
               <Plus className="h-4 w-4" />
-              T?o vision board d?u ti�n
+              Tạo vision board đầu tiên
             </Button>
           </CardContent>
         </Card>
@@ -333,12 +340,12 @@ export function VisionBoardGallery() {
           {years.map((year) => (
             <section key={year} className="stack-stack">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent">
+                <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700">
                   <Calendar className="h-6 w-6" />
                 </div>
                 <div className="stack-tight">
-                  <h2 className="text-2xl font-bold text-app-ink">{year}</h2>
-                  <p className="text-sm text-app-ink-soft">{boardsByYear[year].length} b?ng du?c luu trong nam n�y.</p>
+                  <h2 className="text-2xl font-bold text-slate-900">{year}</h2>
+                  <p className="text-sm text-slate-500">{boardsByYear[year].length} bảng được lưu trong năm này.</p>
                 </div>
               </div>
 
@@ -368,17 +375,17 @@ export function VisionBoardGallery() {
                                       variant="outline"
                                       className="spotlight-badge rounded-[var(--r-pill)] border-0 px-3 py-1.5"
                                     >
-                                      V?a luu
+                                      Vừa lưu
                                     </Badge>
                                   )}
                                 </div>
                                 <CardDescription>
-                                  {new Date(board.createdAt).toLocaleDateString("vi-VN")} � {board.items.length} ph?n t?
+                                  {new Date(board.createdAt).toLocaleDateString("vi-VN")} • {board.items.length} phần tử
                                 </CardDescription>
                               </div>
                               <Badge
                                 variant="outline"
-                                className="rounded-[var(--r-pill)] border-app-line bg-app-surface px-3 py-1.5 text-app-ink-soft"
+                                className="rounded-[var(--r-pill)] border-white/70 bg-white/72 px-3 py-1.5 text-slate-600"
                               >
                                 {board.year}
                               </Badge>
@@ -387,7 +394,7 @@ export function VisionBoardGallery() {
 
                           <CardContent className="stack-stack pt-0">
                             <div
-                              className="relative overflow-hidden rounded-[var(--r-card)] border border-app-line bg-[linear-gradient(180deg,_rgba(248,250,252,0.98)_0%,_rgba(241,245,249,0.96)_100%)]"
+                              className="relative overflow-hidden rounded-[var(--r-card)] border border-white/80 bg-[linear-gradient(180deg,_rgba(248,250,252,0.98)_0%,_rgba(241,245,249,0.96)_100%)]"
                               style={{ aspectRatio: "16/10" }}
                             >
                               <div className="pointer-events-none absolute inset-0 gradient-grid bg-[size:30px_30px] opacity-28" />
@@ -395,7 +402,7 @@ export function VisionBoardGallery() {
 
                               {board.items.length === 0 ? (
                                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                                  <Sparkles className="h-12 w-12 text-app-ink-muted" />
+                                  <Sparkles className="h-12 w-12 text-slate-300" />
                                 </div>
                               ) : (
                                 <div className="preview-hover-media relative h-full w-full interactive-layer interactive-layer--strong">
@@ -410,16 +417,16 @@ export function VisionBoardGallery() {
                                       }}
                                     >
                                       {item.type === "image" && (
-                                        <div className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-1.5 shadow-sm">
+                                        <div className="rounded-[var(--r-card)] border border-white/80 bg-white/88 p-1.5 shadow-sm">
                                           <ImageWithFallback
                                             src={item.content}
-                                            alt="Ph?n t? b?ng"
+                                            alt="Phần tử bảng"
                                             className="rounded-[var(--r-tile)] shadow-sm w-full h-auto"
                                           />
                                         </div>
                                       )}
                                       {item.type === "quote" && (
-                                        <div className="rounded-[var(--r-tile)] border border-app-line bg-app-surface px-3 py-2 text-[11px] italic leading-4 text-slate-700 shadow-sm">
+                                        <div className="rounded-[var(--r-tile)] border border-white/80 bg-white/90 px-3 py-2 text-[11px] italic leading-4 text-slate-700 shadow-sm">
                                           {item.content}
                                         </div>
                                       )}
@@ -429,17 +436,17 @@ export function VisionBoardGallery() {
                                 </div>
                               )}
 
-                              <div className="preview-hover-overlay absolute inset-x-4 bottom-4 rounded-[var(--r-tile)] border border-app-line bg-slate-900/38 px-4 py-3 text-white shadow-lg">
+                              <div className="preview-hover-overlay absolute inset-x-4 bottom-4 rounded-[var(--r-tile)] border border-white/18 bg-slate-900/38 px-4 py-3 text-white shadow-lg">
                                 <div className="flex items-center justify-between gap-4">
                                   <div>
                                     <p className="text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-white/58">
-                                      Preview s?ng
+                                      Preview sống
                                     </p>
                                     <p className="mt-1 text-sm font-semibold">
-                                      {imageCount} ?nh � {quoteCount} c�u n�i � {iconCount} bi?u tu?ng
+                                      {imageCount} ảnh • {quoteCount} câu nói • {iconCount} biểu tượng
                                     </p>
                                   </div>
-                                  <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] border border-app-line bg-app-surface">
+                                  <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] border border-white/16 bg-white/10">
                                     <Eye className="h-4 w-4" />
                                   </div>
                                 </div>
@@ -447,28 +454,28 @@ export function VisionBoardGallery() {
                             </div>
 
                             <div className="grid grid-cols-3 gap-3">
-                              <div className="rounded-[var(--r-tile)] border border-app-line bg-app-surface p-3 text-center">
-                                <p className="text-xs uppercase tracking-[0.12em] text-app-ink-muted">?nh</p>
-                                <p className="mt-2 text-xl font-bold text-app-ink">{imageCount}</p>
+                              <div className="rounded-[var(--r-tile)] border border-white/70 bg-white/72 p-3 text-center">
+                                <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Ảnh</p>
+                                <p className="mt-2 text-xl font-bold text-slate-900">{imageCount}</p>
                               </div>
-                              <div className="rounded-[var(--r-tile)] border border-app-line bg-app-surface p-3 text-center">
-                                <p className="text-xs uppercase tracking-[0.12em] text-app-ink-muted">C�u n�i</p>
-                                <p className="mt-2 text-xl font-bold text-app-ink">{quoteCount}</p>
+                              <div className="rounded-[var(--r-tile)] border border-white/70 bg-white/72 p-3 text-center">
+                                <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Câu nói</p>
+                                <p className="mt-2 text-xl font-bold text-slate-900">{quoteCount}</p>
                               </div>
-                              <div className="rounded-[var(--r-tile)] border border-app-line bg-app-surface p-3 text-center">
-                                <p className="text-xs uppercase tracking-[0.12em] text-app-ink-muted">Icon</p>
-                                <p className="mt-2 text-xl font-bold text-app-ink">{iconCount}</p>
+                              <div className="rounded-[var(--r-tile)] border border-white/70 bg-white/72 p-3 text-center">
+                                <p className="text-xs uppercase tracking-[0.12em] text-slate-400">Icon</p>
+                                <p className="mt-2 text-xl font-bold text-slate-900">{iconCount}</p>
                               </div>
                             </div>
 
-                            <div className="flex gap-2 border-t border-app-line pt-4">
+                            <div className="flex gap-2 border-t border-slate-100 pt-4">
                               <Button
                                 variant="outline"
                                 className="flex-1"
                                 onClick={() => navigate(`/vision-board/${board.id}`)}
                               >
                                 <Edit className="h-4 w-4" />
-                                Ch?nh s?a
+                                Chỉnh sửa
                               </Button>
                               <Button
                                 variant="outline"
@@ -476,11 +483,11 @@ export function VisionBoardGallery() {
                                 onClick={() => navigate(`/vision-board/${board.id}`)}
                               >
                                 <Eye className="h-4 w-4" />
-                                M?
+                                Mở
                               </Button>
                               <Button
                                 variant="outline"
-                                className="border-app-line text-app-ink-soft hover:bg-app-bg"
+                                className="border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100"
                                 onClick={() => handleDeleteBoard(board.id)}
                               >
                                 <Trash2 className="h-4 w-4" />
