@@ -1,8 +1,8 @@
 ﻿import { useEffect, useRef, type ReactNode } from "react";
-import { AlertTriangle, Award, CalendarDays, CheckCircle2, Compass, Loader2, Sparkles, Target, TrendingUp, Zap } from "lucide-react";
+import { AlertTriangle, Award, CheckCircle2, Compass, Loader2, Sparkles, Target, TrendingUp } from "lucide-react";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
-import { formatCalendarDate, getReviewDayLabel } from "@/app/utils/storage";
+import { getReviewDayLabel } from "@/app/utils/storage";
 import type {
   Goal,
   PricingPlanCode,
@@ -11,11 +11,6 @@ import type {
   TwelveWeekTaskInstance,
 } from "@/app/utils/storage-types";
 import { getPlanLabel } from "@/app/utils/twelve-week-premium";
-
-interface WeekRange {
-  start: string;
-  end: string;
-}
 
 interface WeekCompletionSummary {
   completed: number;
@@ -47,14 +42,12 @@ function getHeaderPhaseInfo(currentWeek: number) {
 function getTokenSyncBadgeClass(syncBadgeClass: string, syncBadgeLabel: string): string {
   if (syncBadgeClass.includes("app-") || syncBadgeClass.includes("color:")) return syncBadgeClass;
 
-  if (syncBadgeClass.includes("emerald")) return "border-transparent bg-app-accent-soft text-app-accent";
-
-  if (syncBadgeClass.includes("amber") || syncBadgeClass.includes("rose")) {
-    return "border-[#F3D9CC] bg-app-warm-soft text-app-warm";
+  if (syncBadgeLabel === "Đã lưu & đồng bộ") {
+    return "border-transparent bg-app-accent-soft text-app-accent";
   }
 
-  if (syncBadgeLabel.startsWith("Đang") || syncBadgeClass.includes("sky")) {
-    return "border-app-line bg-app-bg text-app-ink-soft";
+  if (syncBadgeLabel === "Đã lưu trên thiết bị") {
+    return "border-[#F3D9CC] bg-app-warm-soft text-app-warm";
   }
 
   return "border-app-line bg-app-bg text-app-ink-soft";
@@ -131,9 +124,10 @@ export function TwelveWeekDashboardNotice({
       : tone === "error"
         ? "text-[color:var(--color-danger-fg)]"
         : "text-app-ink";
+  const role = tone === "success" ? "status" : "alert";
 
   return (
-    <div role={tone === "success" ? "status" : "alert"} className={`rounded-card border p-4 ${toneClass}`}>
+    <div role={role} className={`rounded-card border p-4 ${toneClass}`}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
         <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${iconClass}`} aria-hidden="true" />
         <div className="min-w-0 flex-1">
@@ -157,7 +151,6 @@ interface TwelveWeekDashboardHeaderProps {
   todayRemainingCount: number;
   todayCompletedCount: number;
   weekCompletion: WeekCompletionSummary;
-  currentWeekRange: WeekRange | null;
   reviewStatusLabel: string;
   firstPriorityTask: TwelveWeekTaskInstance | null;
   onOpenFocusTab: () => void;
@@ -175,7 +168,6 @@ export function TwelveWeekDashboardHeader({
   todayRemainingCount,
   todayCompletedCount,
   weekCompletion,
-  currentWeekRange,
   reviewStatusLabel,
   firstPriorityTask,
   onOpenFocusTab,
@@ -185,13 +177,15 @@ export function TwelveWeekDashboardHeader({
   const PhaseIcon = phaseInfo.icon;
   const tokenSyncBadgeClass = getTokenSyncBadgeClass(syncBadgeClass, syncBadgeLabel);
   const domainLabel = activeGoal.focusArea || activeGoal.category;
-  const weekRangeLabel = currentWeekRange
-    ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
-    : "Đang chạy";
+  const nextActionLabel = reviewDueToday
+    ? "Việc tiếp theo: chốt review tuần trước khi mở việc mới."
+    : firstPriorityTask
+      ? `Việc quan trọng nhất: ${firstPriorityTask.title}`
+      : "Hôm nay đang gọn. Bạn có thể lưu check-in hoặc xem lại tab Tuần.";
 
   return (
     <header>
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
           <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">HỆ THỐNG 12 TUẦN</p>
           <span className="sr-only">Nhịp 12 tuần</span>
@@ -201,12 +195,13 @@ export function TwelveWeekDashboardHeader({
           <p data-testid="twelve-week-header-description" className="mt-1 text-[13px] leading-6 text-app-ink-soft">
             Tuần {currentWeek} / {system.totalWeeks}{domainLabel ? ` · ${domainLabel}` : ""}
           </p>
+          <p className="mt-3 max-w-2xl text-[13px] leading-6 text-app-ink-soft">{nextActionLabel}</p>
         </div>
 
         <div data-testid="twelve-week-header-actions" className="flex flex-col gap-2 sm:flex-row md:shrink-0">
           <button
             type="button"
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-app-accent px-4 py-2.5 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-app-accent hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-app-accent px-4 py-2.5 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-app-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             onClick={onOpenFocusTab}
           >
             {reviewDueToday ? "Mở review tuần" : "Xem việc hôm nay"}
@@ -239,47 +234,15 @@ export function TwelveWeekDashboardHeader({
         </span>
         {reviewDueToday && (
           <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3 py-1 text-[12px] text-app-ink-soft">
-            Review hôm nay
+            {getReviewDayLabel(system.reviewDay)} · {reviewStatusLabel}
+          </span>
+        )}
+        {!reviewDueToday && (
+          <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3 py-1 text-[12px] text-app-ink-soft">
+            Còn {todayRemainingCount} hôm nay · {todayCompletedCount}/{weekCompletion.total} việc tuần
           </span>
         )}
       </div>
-
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-card border border-app-line bg-app-surface p-4">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
-            <Zap className="h-4 w-4" aria-hidden="true" />
-          </span>
-          <p className="mt-3 text-[11px] font-medium uppercase tracking-[0.14em] text-app-ink-muted">Còn làm</p>
-          <p className="mt-1 font-serif text-[24px] font-medium leading-none text-app-ink tabular-nums">{todayRemainingCount}</p>
-          <p className="mt-1 text-[12px] text-app-ink-soft">{todayCompletedCount} đã chốt</p>
-        </div>
-        <div className="rounded-card border border-app-line bg-app-surface p-4">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
-            <TrendingUp className="h-4 w-4" aria-hidden="true" />
-          </span>
-          <p className="mt-3 text-[11px] font-medium uppercase tracking-[0.14em] text-app-ink-muted">Tuần</p>
-          <p className="mt-1 font-serif text-[24px] font-medium leading-none text-app-ink tabular-nums">{weekCompletion.percent}%</p>
-          <p className="mt-1 truncate text-[12px] text-app-ink-soft">{weekRangeLabel}</p>
-        </div>
-        <div className="rounded-card border border-app-line bg-app-surface p-4">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-bg text-app-ink-soft">
-            <CalendarDays className="h-4 w-4" aria-hidden="true" />
-          </span>
-          <p className="mt-3 text-[11px] font-medium uppercase tracking-[0.14em] text-app-ink-muted">Review</p>
-          <p className="mt-1 truncate text-[14px] font-medium text-app-ink">
-            {reviewDueToday ? "Hôm nay" : getReviewDayLabel(system.reviewDay)}
-          </p>
-          <p className="mt-1 truncate text-[12px] text-app-ink-soft">{reviewStatusLabel}</p>
-        </div>
-      </div>
-
-      <p className="mt-3 text-[12px] leading-5 text-app-ink-muted">
-        {reviewDueToday
-          ? "Việc tiếp theo: chốt review tuần trước khi mở việc mới."
-          : firstPriorityTask
-            ? `Việc quan trọng nhất: ${firstPriorityTask.title}`
-            : "Hôm nay đang gọn. Bạn có thể lưu check-in hoặc xem lại tab Tuần."}
-      </p>
     </header>
   );
 }
