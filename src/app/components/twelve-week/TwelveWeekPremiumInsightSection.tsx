@@ -35,8 +35,8 @@ export function TwelveWeekPremiumInsightSection({
     <Collapsible
       open={isOpen}
       onOpenChange={setIsOpen}
-      className={`rounded-[var(--r-control)] border shadow-sm ${
-        hasPremiumInsights ? "border-sky-200 bg-sky-50" : "border-violet-200 bg-violet-50"
+      className={`rounded-card border ${
+        hasPremiumInsights ? "border-app-accent/20 bg-app-accent-soft" : "border-app-line bg-app-bg"
       }`}
     >
       <CollapsibleTrigger asChild>
@@ -45,24 +45,24 @@ export function TwelveWeekPremiumInsightSection({
           className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left motion-safe:transition-colors hover:bg-white/50"
         >
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
               Phân tích ôn lại Plus
             </p>
-            <p className="mt-1 truncate text-sm font-semibold text-slate-950">{premiumInsight.headline}</p>
+            <p className="mt-1 truncate text-sm font-semibold text-app-ink">{premiumInsight.headline}</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <Badge
               variant="outline"
               className={
                 hasPremiumInsights
-                  ? "border-sky-200 bg-white/90 text-sky-800"
-                  : "border-violet-200 bg-white/90 text-violet-800"
+                  ? "border-app-accent/20 bg-app-surface/90 text-app-accent"
+                  : "border-app-line bg-app-surface/90 text-app-ink-soft"
               }
             >
               {premiumInsight.badgeLabel}
             </Badge>
             <ChevronDown
-              className={`h-4 w-4 text-slate-500 motion-safe:transition-transform ${isOpen ? "rotate-180" : ""}`}
+              className={`h-4 w-4 text-app-ink-muted motion-safe:transition-transform ${isOpen ? "rotate-180" : ""}`}
               aria-hidden="true"
             />
           </div>
@@ -71,9 +71,9 @@ export function TwelveWeekPremiumInsightSection({
       <CollapsibleContent className="px-4 pb-4">
         <div className="flex flex-wrap items-start justify-between gap-3 border-t border-white/70 pt-4">
           <div>
-            <p className="text-sm leading-7 text-slate-600">{premiumInsight.summary}</p>
+            <p className="text-sm leading-7 text-app-ink-soft">{premiumInsight.summary}</p>
           </div>
-          <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+          <Badge variant="outline" className="border-app-line bg-app-surface text-app-ink-soft">
             {getPlanLabel(currentPlanCode)}
           </Badge>
         </div>
@@ -81,109 +81,105 @@ export function TwelveWeekPremiumInsightSection({
         {hasPremiumInsights ? (
           <div className="mt-4 stack-tight">
             <div className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-[var(--r-control)] border border-sky-100 bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Gợi ý chỉnh tải</p>
-                <p className="mt-2 text-sm leading-7 text-slate-800">{premiumInsight.recommendedAdjustment}</p>
+              <div className="rounded-lg border border-app-line bg-app-surface p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Gợi ý chỉnh tải</p>
+                <p className="mt-2 text-sm leading-7 text-app-ink">{premiumInsight.recommendedAdjustment}</p>
               </div>
-              <div className="rounded-[var(--r-control)] border border-sky-100 bg-white p-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Gợi ý ngắn</p>
-                <p className="mt-2 text-sm leading-7 text-slate-800">{premiumInsight.coachNote}</p>
+              <div className="rounded-lg border border-app-line bg-app-surface p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Gợi ý ngắn</p>
+                <p className="mt-2 text-sm leading-7 text-app-ink">{premiumInsight.coachNote}</p>
               </div>
             </div>
-            <div className="rounded-[var(--r-control)] border border-sky-200 bg-white p-4 shadow-sm">
+            <div className="rounded-lg border border-app-accent/20 bg-app-surface p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                     Kế hoạch gợi ý cho tuần sau
                   </p>
-                  <p className="mt-2 text-base font-semibold leading-7 text-slate-950">{suggestedNextWeekPlan.focus}</p>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">{suggestedNextWeekPlan.rationale}</p>
+                  <p className="mt-2 text-base font-semibold leading-7 text-app-ink">{suggestedNextWeekPlan.focus}</p>
+                  <p className="mt-2 text-sm leading-7 text-app-ink-soft">{suggestedNextWeekPlan.rationale}</p>
                 </div>
-                <Badge className="bg-sky-700 text-white hover:bg-sky-700">
+                <Badge className="bg-app-accent text-white hover:bg-app-accent">
                   {getWorkloadDecisionLabel(suggestedNextWeekPlan.workloadDecision)}
                 </Badge>
               </div>
               <div className="mt-4 grid gap-3 md:grid-cols-2">
-                <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Giữ chắc</p>
+                <div className="rounded-lg border border-app-line bg-app-bg p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Giữ chắc</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {suggestedNextWeekPlan.protectTactics.map((item) => (
-                      <Badge key={item} variant="outline" className="border-slate-200 bg-white text-slate-700">
+                      <Badge key={item} variant="outline" className="border-app-line bg-app-surface text-app-ink-soft">
                         {item}
                       </Badge>
                     ))}
                   </div>
                 </div>
-                <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <div className="rounded-lg border border-app-line bg-app-bg p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                     {suggestedNextWeekPlan.secondaryTrackLabel}
                   </p>
                   <div className="mt-2 stack-tight">
                     {suggestedNextWeekPlan.secondaryTrackItems.map((item) => (
-                      <p key={item} className="text-sm leading-6 text-slate-700">
+                      <p key={item} className="text-sm leading-6 text-app-ink-soft">
                         {item}
                       </p>
                     ))}
                   </div>
                 </div>
               </div>
-              <p className="mt-4 text-sm leading-7 text-slate-600">
+              <p className="mt-4 text-sm leading-7 text-app-ink-soft">
                 Bước đầu tuần nên làm: {suggestedNextWeekPlan.firstMove}
               </p>
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <Button className="w-full sm:w-auto" onClick={onApplySuggestedPlan}>
                   Dùng gợi ý này cho tuần sau
                 </Button>
-                <p className="text-sm text-slate-500">Bạn vẫn có thể sửa lại trước khi chốt review.</p>
+                <p className="text-sm text-app-ink-muted">Bạn vẫn có thể sửa lại trước khi chốt review.</p>
               </div>
             </div>
           </div>
         ) : (
           <div className="mt-4 stack-tight">
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--r-control)] border border-violet-100 bg-white px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-app-line bg-app-surface px-4 py-3">
               <div className="flex items-center gap-2">
                 <div
-                  className={`h-2 w-2 rounded-[var(--r-pill)] ${
+                  className={`h-2 w-2 rounded-full ${
                     premiumInsight.status === "strong"
-                      ? "bg-emerald-500"
-                      : premiumInsight.status === "at_risk"
-                        ? "bg-amber-400"
-                        : "bg-amber-400"
+                      ? "bg-app-accent"
+                      : "bg-app-warm"
                   }`}
                 />
-                <span className="text-sm font-semibold text-slate-800">Đã đọc được nhịp tuần này</span>
+                <span className="text-sm font-semibold text-app-ink">Đã đọc được nhịp tuần này</span>
               </div>
               <Badge
                 variant="outline"
                 className={
                   premiumInsight.status === "strong"
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                    : premiumInsight.status === "at_risk"
-                      ? "border-amber-200 bg-amber-50 text-amber-800"
-                      : "border-amber-200 bg-amber-50 text-amber-800"
+                    ? "border-app-accent/20 bg-app-accent-soft text-app-accent"
+                    : "border-[#F3D9CC] bg-app-warm-soft text-app-warm"
                 }
               >
                 {premiumInsight.badgeLabel}
               </Badge>
             </div>
-            <div className="relative overflow-hidden rounded-[var(--r-control)] border border-violet-200 bg-white p-4">
+            <div className="relative overflow-hidden rounded-lg border border-app-line bg-app-surface p-4">
               <div className="pointer-events-none select-none blur-[3px] opacity-60">
-                <p className="text-sm font-semibold text-slate-900">{premiumInsight.headline}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600 line-clamp-2">{premiumInsight.summary}</p>
-                <p className="mt-2 text-xs text-slate-500">
+                <p className="text-sm font-semibold text-app-ink">{premiumInsight.headline}</p>
+                <p className="mt-2 text-sm leading-6 text-app-ink-soft line-clamp-2">{premiumInsight.summary}</p>
+                <p className="mt-2 text-xs text-app-ink-muted">
                   Gợi ý chỉnh tải: {premiumInsight.recommendedAdjustment}
                 </p>
               </div>
-              <div className="absolute inset-0 flex flex-col items-center justify-center rounded-[var(--r-control)] bg-white/50">
-                <Crown className="h-5 w-5 text-violet-500" />
-                <p className="mt-1 text-xs font-semibold text-violet-700">Chỉ dành cho Plus</p>
+              <div className="absolute inset-0 flex flex-col items-center justify-center rounded-lg bg-app-surface/50">
+                <Crown className="h-5 w-5 text-app-accent" />
+                <p className="mt-1 text-xs font-semibold text-app-accent">Chỉ dành cho Plus</p>
               </div>
             </div>
-            <div className="rounded-[var(--r-control)] border border-violet-200/70 bg-white p-4">
-              <p className="text-sm font-semibold text-slate-950">
+            <div className="rounded-lg border border-app-line bg-app-surface p-4">
+              <p className="text-sm font-semibold text-app-ink">
                 Mở Plus để đọc phân tích đầy đủ và ra ngay kế hoạch tuần sau đủ gọn để làm.
               </p>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="mt-1 text-sm text-app-ink-soft">
                 Plus chốt luôn ưu tiên tuần sau, mức tải nên giữ và phần nào nên buông bớt - không chỉ là phân tích để
                 đọc.
               </p>

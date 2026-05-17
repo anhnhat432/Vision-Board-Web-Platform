@@ -23,14 +23,14 @@ interface TwelveWeekRescueNudgeProps {
 
 const SEVERITY_BORDER = {
   today: {
-    gentle: "border-violet-200/80 bg-violet-50/70",
-    active: "border-violet-300 bg-violet-50",
-    urgent: "border-amber-300 bg-amber-50/82",
+    gentle: "border-app-line bg-app-accent-soft/70",
+    active: "border-app-accent/20 bg-app-accent-soft",
+    urgent: "border-[#F3D9CC] bg-app-warm-soft",
   },
   week: {
-    gentle: "border-amber-200/80 bg-amber-50/70",
-    active: "border-amber-300 bg-amber-50",
-    urgent: "border-amber-400 bg-amber-100/80",
+    gentle: "border-[#F3D9CC]/60 bg-app-warm-soft/70",
+    active: "border-[#F3D9CC] bg-app-warm-soft",
+    urgent: "border-app-warm/30 bg-app-warm-soft",
   },
 } as const;
 
@@ -72,12 +72,12 @@ export function TwelveWeekRescueNudge(props: TwelveWeekRescueNudgeProps) {
     <div
       data-testid={variant === "today" ? "today-rescue-nudge" : "week-rescue-nudge"}
       data-rescue-severity={status.severity}
-      className={`order-1 rounded-[var(--r-tile)] border p-5 sm:p-6 ${accent}`}
+      className={`order-1 rounded-card border p-5 sm:p-6 ${accent}`}
     >
       <div className="flex items-start gap-3">
         <span
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--r-pill)] ${
-            variant === "today" ? "bg-violet-100 text-violet-700" : "bg-amber-100 text-amber-800"
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+            variant === "today" ? "bg-app-accent-soft text-app-accent" : "bg-app-warm-soft text-app-warm"
           }`}
         >
           <Heart className="h-4 w-4" />
@@ -85,16 +85,16 @@ export function TwelveWeekRescueNudge(props: TwelveWeekRescueNudgeProps) {
         <div className="min-w-0 flex-1">
           <p
             className={`text-xs font-semibold uppercase tracking-[0.16em] ${
-              variant === "today" ? "text-violet-700" : "text-amber-800"
+              variant === "today" ? "text-app-accent" : "text-app-warm"
             }`}
           >
             Cứu nhịp nhẹ
           </p>
-          <p className="mt-1 text-base font-semibold leading-7 text-slate-950">
+          <p className="mt-1 text-base font-semibold leading-7 text-app-ink">
             {message.headline}
           </p>
           {message.subtext && (
-            <p className="mt-1 text-sm leading-6 text-slate-700">{message.subtext}</p>
+            <p className="mt-1 text-sm leading-6 text-app-ink-soft">{message.subtext}</p>
           )}
 
           {suggestions.length > 0 && (
@@ -102,7 +102,7 @@ export function TwelveWeekRescueNudge(props: TwelveWeekRescueNudgeProps) {
               data-testid={
                 variant === "today" ? "today-rescue-suggestions" : "week-rescue-suggestions"
               }
-              className="mt-[var(--space-inline)] grid gap-2"
+              className="mt-3 grid gap-2"
             >
               {suggestions.map((suggestion: RescueSuggestion) => {
                 const callback = getCallbackForSuggestion(suggestion.id, props);
@@ -110,12 +110,12 @@ export function TwelveWeekRescueNudge(props: TwelveWeekRescueNudgeProps) {
                   <li
                     key={suggestion.id}
                     data-suggestion-id={suggestion.id}
-                    className="rounded-[var(--r-control)] border border-white/82 bg-white/82 px-3 py-2"
+                    className="rounded-lg border border-app-line bg-app-surface px-3 py-2"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-slate-950">{suggestion.title}</p>
-                        <p className="mt-0.5 text-xs leading-5 text-slate-600">{suggestion.hint}</p>
+                        <p className="text-sm font-semibold text-app-ink">{suggestion.title}</p>
+                        <p className="mt-0.5 text-xs leading-5 text-app-ink-soft">{suggestion.hint}</p>
                       </div>
                       {callback && (
                         <Button

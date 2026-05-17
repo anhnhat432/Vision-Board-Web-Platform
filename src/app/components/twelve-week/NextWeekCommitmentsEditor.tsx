@@ -129,10 +129,10 @@ export function NextWeekCommitmentsEditor({
                 aria-label={`Cam kết: ${commitment}`}
                 data-state={duplicateKey === key ? "duplicate" : "idle"}
                 className={cn(
-                  "inline-flex max-w-full min-w-0 items-center gap-1 rounded-[var(--r-pill)] border bg-white px-3 py-1 text-xs font-semibold text-violet-800 transition-colors",
+                  "inline-flex max-w-full min-w-0 items-center gap-1 rounded-full border bg-app-surface px-3 py-1 text-xs font-semibold text-app-accent transition-colors",
                   duplicateKey === key
-                    ? "border-amber-300 bg-amber-50 text-amber-900"
-                    : "border-violet-200",
+                    ? "border-[#F3D9CC] bg-app-warm-soft text-app-warm"
+                    : "border-app-line",
                 )}
               >
                 <span className="min-w-0 truncate">{commitment}</span>
@@ -140,7 +140,7 @@ export function NextWeekCommitmentsEditor({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-5 w-5 shrink-0 rounded-[var(--r-pill)] p-0 text-violet-700 hover:bg-violet-100"
+                  className="h-5 w-5 shrink-0 rounded-full p-0 text-app-accent hover:bg-app-accent-soft"
                   onClick={() => removeCommitment(commitment)}
                   disabled={disabled}
                   aria-label={`Xóa cam kết: ${commitment}`}
@@ -162,11 +162,11 @@ export function NextWeekCommitmentsEditor({
         onKeyDown={handleKeyDown}
       />
       {isAtMax ? (
-        <p className="text-xs leading-5 text-slate-600">
+        <p className="text-xs leading-5 text-app-ink-muted">
           Đã đạt tối đa {maxItems} cam kết. Xoá bớt chip để thêm mới.
         </p>
       ) : (
-        <p className="text-xs leading-5 text-slate-600">Đây sẽ là tactic chính tuần sau. Tối đa {maxItems} cam kết.</p>
+        <p className="text-xs leading-5 text-app-ink-muted">Đây sẽ là tactic chính tuần sau. Tối đa {maxItems} cam kết.</p>
       )}
     </div>
   );

@@ -29,11 +29,11 @@ const ADJUSTMENT_BADGE_LABEL: Record<NextWeekAdjustment, string> = {
 };
 
 const ADJUSTMENT_ACCENT: Record<NextWeekAdjustment, string> = {
-  lighter: "border-amber-200 bg-amber-50/85 text-amber-900",
-  same: "border-sky-200 bg-sky-50/85 text-sky-900",
-  push: "border-emerald-200 bg-emerald-50/85 text-emerald-900",
-  reset: "border-violet-200 bg-violet-50/85 text-violet-900",
-  reduce_scope: "border-orange-200 bg-orange-50/85 text-orange-900",
+  lighter: "border-[#F3D9CC] bg-app-warm-soft text-app-ink",
+  same: "border-app-accent/20 bg-app-accent-soft text-app-ink",
+  push: "border-app-accent/20 bg-app-accent-soft text-app-ink",
+  reset: "border-app-line bg-app-bg text-app-ink",
+  reduce_scope: "border-[#F3D9CC] bg-app-warm-soft text-app-ink",
 };
 
 const CONFIDENCE_LABEL: Record<NextWeekConfidence, string> = {
@@ -54,10 +54,10 @@ export function TwelveWeekNextWeekRecommendationCard({
       data-testid="next-week-recommendation"
       data-recommendation={recommendation.recommendation}
       data-confidence={recommendation.confidence}
-      className={`rounded-[var(--r-tile)] border p-5 sm:p-6 ${accent}`}
+      className={`rounded-card border p-5 sm:p-6 ${accent}`}
     >
       <div className="flex items-start gap-3">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-white/82 text-slate-700">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-app-surface text-app-ink-soft">
           <Compass className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1">
@@ -74,19 +74,19 @@ export function TwelveWeekNextWeekRecommendationCard({
           </div>
           <p
             data-testid="next-week-recommendation-headline"
-            className="mt-2 text-base font-semibold leading-7 text-slate-950"
+            className="mt-2 text-base font-semibold leading-7 text-app-ink"
           >
             {recommendation.headline}
           </p>
-          <p className="mt-1 text-sm leading-6 text-slate-700">{recommendation.body}</p>
+          <p className="mt-1 text-sm leading-6 text-app-ink-soft">{recommendation.body}</p>
 
-          <div className="mt-[var(--space-inline)] rounded-[var(--r-control)] border border-white/82 bg-white/82 px-3 py-2">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+          <div className="mt-3 rounded-lg border border-app-line bg-app-surface px-3 py-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
               Khung ưu tiên tuần sau
             </p>
             <p
               data-testid="next-week-recommendation-priority"
-              className="mt-1 text-sm leading-6 text-slate-700"
+              className="mt-1 text-sm leading-6 text-app-ink-soft"
             >
               {recommendation.suggestedNextWeekPriority}
             </p>
@@ -94,16 +94,16 @@ export function TwelveWeekNextWeekRecommendationCard({
 
           <div
             data-testid="next-week-recommendation-control-note"
-            className="mt-[var(--space-inline)] flex items-start gap-2 rounded-[var(--r-control)] border border-white/60 bg-white/72 px-3 py-2 text-xs leading-5 text-slate-600"
+            className="mt-3 flex items-start gap-2 rounded-lg border border-app-line bg-app-surface px-3 py-2 text-xs leading-5 text-app-ink-soft"
           >
-            <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500" />
+            <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-app-ink-muted" />
             <span>
               Bạn vẫn kiểm soát kế hoạch — đây chỉ là gợi ý dựa trên tuần này, không tự đổi
               plan cho bạn.
             </span>
           </div>
 
-          <div className="mt-[var(--space-inline)] flex flex-wrap items-center gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             {onAcceptRecommendation && (
               <Button
                 size="sm"

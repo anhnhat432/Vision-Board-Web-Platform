@@ -455,8 +455,8 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
       "inset-x-0",
       "z-40",
       "border-t",
-      "border-slate-200",
-      "bg-white/96",
+      "border-app-line",
+      "bg-app-surface/96",
       "backdrop-blur",
       "p-3",
     );
