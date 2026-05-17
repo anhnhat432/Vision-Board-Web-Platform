@@ -9,7 +9,6 @@ import {
   YAxis,
 } from "recharts";
 
-import { useTheme } from "../hooks/useTheme";
 import { LIFE_AREAS, getLifeAreaLabel } from "../utils/storage";
 
 export interface LifeBalanceHistoryChartPoint {
@@ -22,38 +21,40 @@ interface LifeBalanceHistoryChartProps {
 }
 
 export function LifeBalanceHistoryChart({ data }: LifeBalanceHistoryChartProps) {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
-
-  const gridStroke = isDark ? "rgba(255,255,255,0.08)" : "#e5e7eb";
-  const tickFill = isDark ? "rgba(255,255,255,0.5)" : "#64748b";
-  const tooltipBg = isDark ? "rgba(22,22,34,0.95)" : "#fff";
-  const tooltipBorder = isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0";
-  const tooltipText = isDark ? "#e2e8f0" : "#1e293b";
-
   return (
-    <ResponsiveContainer height={420} width="100%">
-      <LineChart data={data}>
-        <CartesianGrid stroke={gridStroke} strokeDasharray="3 3" />
-        <XAxis dataKey="date" tick={{ fontSize: 14, fill: tickFill }} />
-        <YAxis domain={[0, 10]} tick={{ fontSize: 14, fill: tickFill }} />
+    <ResponsiveContainer height={380} width="100%">
+      <LineChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
+        <CartesianGrid stroke="var(--app-line)" strokeDasharray="3 3" />
+        <XAxis
+          dataKey="date"
+          tick={{ fontSize: 12, fill: "var(--app-ink-muted)" }}
+          tickLine={{ stroke: "var(--app-line)" }}
+          axisLine={{ stroke: "var(--app-line)" }}
+        />
+        <YAxis
+          domain={[0, 10]}
+          tick={{ fontSize: 12, fill: "var(--app-ink-muted)" }}
+          tickLine={{ stroke: "var(--app-line)" }}
+          axisLine={{ stroke: "var(--app-line)" }}
+        />
         <Tooltip
           contentStyle={{
-            backgroundColor: tooltipBg,
-            borderColor: tooltipBorder,
+            backgroundColor: "var(--app-surface)",
+            border: "1px solid var(--app-line)",
             borderRadius: "12px",
-            color: tooltipText,
+            color: "var(--app-ink)",
+            fontSize: "13px",
           }}
-          labelStyle={{ color: tooltipText }}
+          labelStyle={{ color: "var(--app-ink)", fontWeight: 500 }}
         />
-        <Legend />
+        <Legend wrapperStyle={{ fontSize: "12px", color: "var(--app-ink-soft)" }} />
         {LIFE_AREAS.map((area) => (
           <Line
             dataKey={getLifeAreaLabel(area.name)}
-            dot={{ r: 4 }}
+            dot={{ r: 3 }}
             key={area.name}
             stroke={area.color}
-            strokeWidth={2.5}
+            strokeWidth={2}
             type="monotone"
           />
         ))}

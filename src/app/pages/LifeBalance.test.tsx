@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -16,10 +16,6 @@ function renderLifeBalance() {
       {
         path: "/onboarding",
         element: <div data-testid="onboarding-page">Onboarding page</div>,
-      },
-      {
-        path: "/life-insight",
-        element: <div data-testid="life-insight-page">Life Insight page</div>,
       },
     ],
     { initialEntries: ["/life-balance"] },
@@ -76,9 +72,9 @@ describe("LifeBalance", () => {
     seedZeroScoreWheel();
     const { router } = renderLifeBalance();
 
-    expect(await screen.findByRole("heading", { name: "Chưa có dữ liệu bánh xe cuộc sống" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Chưa có dữ liệu bánh xe" })).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /Bắt đầu đánh giá/i }));
+    await user.click(screen.getByRole("link", { name: /Bắt đầu chấm điểm/i }));
 
     expect(router.state.location.pathname).toBe("/onboarding");
   });
@@ -87,59 +83,52 @@ describe("LifeBalance", () => {
     seedCompletedZeroScoreWheel();
     const { router } = renderLifeBalance();
 
-    expect(await screen.findByText("Bạn chưa chấm điểm — hãy chỉnh các thanh để bắt đầu")).toBeInTheDocument();
-    expect(await screen.findByRole("heading", { name: /Cập nhật/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Bức tranh hiện tại của bạn" }),
+    ).toBeInTheDocument();
     expect(screen.queryByTestId("onboarding-page")).not.toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/life-balance");
   });
 
-  it("shows the next Life Insight step after real Life Balance data exists", async () => {
-    const user = userEvent.setup();
+  it("renders 3-stat row with strongest and weakest area labels", async () => {
     seedRealLifeBalance();
-    const { router } = renderLifeBalance();
+    renderLifeBalance();
 
-    const nextStepCard = await screen.findByTestId("life-balance-next-step-card");
-    expect(nextStepCard).toHaveTextContent("Tiếp theo trong luồng chính");
-    expect(nextStepCard).toHaveTextContent("Góc nhìn cuộc sống");
-    expect(within(nextStepCard).getByRole("button", { name: /Mở Góc nhìn cuộc sống/i })).toBeInTheDocument();
+    const avgCaption = await screen.findByText("Trung bình");
+    expect(avgCaption).toBeInTheDocument();
 
-    await user.click(within(nextStepCard).getByRole("button", { name: /Mở Góc nhìn cuộc sống/i }));
+    // Strongest = Education (score 8) → "Học tập"; weakest = Relationships (score 4) → "Mối quan hệ"
+    const strongestCard = screen.getByText("Lĩnh vực mạnh nhất").closest("article");
+    expect(strongestCard).not.toBeNull();
+    expect(strongestCard).toHaveTextContent("Học tập");
+    expect(strongestCard).toHaveTextContent("8");
 
-    expect(router.state.location.pathname).toBe("/life-insight");
+    const weakestCard = screen.getByText("Lĩnh vực cần ưu tiên").closest("article");
+    expect(weakestCard).not.toBeNull();
+    expect(weakestCard).toHaveTextContent("Mối quan hệ");
+    expect(weakestCard).toHaveTextContent("4");
   });
 
-  it("updates the signal summary from unsaved in-memory score edits", async () => {
+  it("enables save button after editing a score and persists on save", async () => {
     const user = userEvent.setup();
     seedRealLifeBalance();
     renderLifeBalance();
 
-    const summary = await screen.findByTestId("life-balance-signal-summary");
-    expect(summary).toHaveTextContent("Tín hiệu từ Cân bằng cuộc sống");
-    expect(screen.getByTestId("life-balance-signal-weakest")).toHaveTextContent("Mối quan hệ");
-    expect(screen.getByTestId("life-balance-signal-weakest")).toHaveTextContent("4/10");
-
-    const firstSlider = screen.getAllByRole("slider")[0];
-    firstSlider.focus();
-    await user.keyboard("{Home}");
-
-    expect(screen.getByTestId("life-balance-signal-weakest")).toHaveTextContent("Sự nghiệp");
-    expect(screen.getByTestId("life-balance-signal-weakest")).toHaveTextContent("1/10");
-    expect(screen.getByRole("button", { name: /Lưu và xem Góc nhìn cuộc sống/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Chỉ lưu điểm/i })).toBeInTheDocument();
-  });
-
-  it("saves edited scores before opening Life Insight from the primary CTA", async () => {
-    const user = userEvent.setup();
-    seedRealLifeBalance();
-    const { router } = renderLifeBalance();
+    const saveButton = await screen.findByRole("button", { name: /Lưu thay đổi/i });
+    expect(saveButton).toBeDisabled();
 
     const firstSlider = (await screen.findAllByRole("slider"))[0];
     firstSlider.focus();
     await user.keyboard("{Home}");
 
-    await user.click(screen.getByRole("button", { name: /Lưu và xem Góc nhìn cuộc sống/i }));
+    await waitFor(() => {
+      expect(saveButton).not.toBeDisabled();
+    });
 
-    expect(router.state.location.pathname).toBe("/life-insight");
-    expect(getUserData().currentWheelOfLife[0]?.score).toBe(1);
+    await user.click(saveButton);
+
+    await waitFor(() => {
+      expect(getUserData().currentWheelOfLife[0]?.score).toBe(1);
+    });
   });
 });

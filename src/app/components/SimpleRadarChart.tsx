@@ -1,5 +1,3 @@
-import { useId } from "react";
-
 interface SimpleRadarChartPoint {
   subject: string;
   value: number;
@@ -68,12 +66,11 @@ function splitLabel(label: string) {
 export function SimpleRadarChart({
   data,
   height = 320,
-  stroke = "#7c3aed",
-  fill = "#7c3aed",
-  fillOpacity = 0.24,
+  stroke = "var(--app-accent)",
+  fill = "var(--app-accent)",
+  fillOpacity = 0.15,
   className,
 }: SimpleRadarChartProps) {
-  const gradientId = useId();
   if (data.length === 0) return null;
 
   const levels = Array.from({ length: GRID_LEVELS }, (_, index) => index + 1);
@@ -105,13 +102,6 @@ export function SimpleRadarChart({
         role="img"
         viewBox={`0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`}
       >
-        <defs>
-          <linearGradient id={gradientId} x1="0%" x2="100%" y1="0%" y2="100%">
-            <stop offset="0%" stopColor={fill} stopOpacity={fillOpacity + 0.18} />
-            <stop offset="100%" stopColor={fill} stopOpacity={fillOpacity} />
-          </linearGradient>
-        </defs>
-
         {levels.map((level) => {
           const radius = (OUTER_RADIUS / GRID_LEVELS) * level;
           const points = axisPoints.map(({ angle }) => toPoint(radius, angle));
@@ -119,8 +109,8 @@ export function SimpleRadarChart({
             <path
               key={`grid-${level}`}
               d={buildPolygonPath(points)}
-              fill={level === GRID_LEVELS ? "var(--color-surface-muted, #f8fafc)" : "none"}
-              stroke="var(--color-border-muted, #dbe3f1)"
+              fill={level === GRID_LEVELS ? "var(--app-bg)" : "none"}
+              stroke="var(--app-line)"
               strokeWidth={1}
             />
           );
@@ -129,7 +119,7 @@ export function SimpleRadarChart({
         {axisPoints.map(({ inner, outer }, index) => (
           <line
             key={`axis-${data[index]?.subject ?? index}`}
-            stroke="var(--color-border-muted, #e2e8f0)"
+            stroke="var(--app-line)"
             strokeWidth={1}
             x1={inner.x}
             x2={outer.x}
@@ -138,17 +128,23 @@ export function SimpleRadarChart({
           />
         ))}
 
-        <path d={buildPolygonPath(valuePoints)} fill={`url(#${gradientId})`} stroke={stroke} strokeWidth={3} />
+        <path
+          d={buildPolygonPath(valuePoints)}
+          fill={fill}
+          fillOpacity={fillOpacity}
+          stroke={stroke}
+          strokeWidth={2.5}
+        />
 
         {valuePoints.map((point, index) => (
           <circle
             key={`point-${data[index]?.subject ?? index}`}
             cx={point.x}
             cy={point.y}
-            fill="var(--color-background, #ffffff)"
+            fill="var(--app-surface)"
             r={5}
             stroke={stroke}
-            strokeWidth={3}
+            strokeWidth={2.5}
           />
         ))}
 
@@ -166,9 +162,9 @@ export function SimpleRadarChart({
           return (
             <g key={`label-${item.subject}`}>
               <text
-                fill="var(--color-foreground, #475569)"
-                fontSize="15"
-                fontWeight="600"
+                fill="var(--app-ink-soft)"
+                fontSize="14"
+                fontWeight="500"
                 textAnchor={anchor}
                 x={label.x}
                 y={label.y}
@@ -184,8 +180,8 @@ export function SimpleRadarChart({
                 ))}
               </text>
               <text
-                fill="var(--color-muted-foreground, #94a3b8)"
-                fontSize="13"
+                fill="var(--app-ink-muted)"
+                fontSize="12"
                 fontWeight="500"
                 textAnchor={anchor}
                 x={scorePoint.x}

@@ -30,7 +30,7 @@ const TabsList = React.forwardRef<
       ref={ref}
       data-slot="tabs-list"
       className={cn(
-        "text-muted-foreground inline-flex min-h-11 max-w-full items-center justify-start gap-1 overflow-x-auto rounded-[var(--r-control)] border border-[color:var(--border)] bg-[color:var(--muted)] p-1",
+        "inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-app-line bg-app-bg p-1",
         className,
       )}
       {...props}
@@ -51,9 +51,8 @@ const TabsTrigger = React.forwardRef<
       ref={ref}
       data-slot="tabs-trigger"
       className={cn(
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-[calc(var(--r-control)-2px)] border border-transparent px-3.5 py-1.5 text-sm font-semibold tracking-tight whitespace-nowrap transition-colors transition-shadow duration-150 focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        "text-muted-foreground hover:text-foreground",
-        "data-[state=active]:text-foreground data-[state=active]:bg-card data-[state=active]:shadow-[0_1px_2px_rgba(15,23,42,0.06),0_2px_6px_-2px_rgba(15,23,42,0.08)]",
+        "inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-medium whitespace-nowrap transition-colors duration-150 text-app-ink-soft hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "data-[state=active]:bg-app-surface data-[state=active]:text-app-ink data-[state=active]:shadow-sm",
         className,
       )}
       {...props}

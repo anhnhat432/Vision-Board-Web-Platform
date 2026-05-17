@@ -64,19 +64,19 @@ describe("UI primitive visual hierarchy", () => {
     }
   });
 
-  it("maps badge status variants to semantic color tokens", () => {
-    expect(badgeVariants({ variant: "success" })).toContain("var(--color-success-bg)");
-    expect(badgeVariants({ variant: "warning" })).toContain("var(--color-warning-bg)");
-    expect(badgeVariants({ variant: "info" })).toContain("var(--color-info-bg)");
-    expect(badgeVariants({ variant: "danger" })).toContain("var(--color-danger-bg)");
-    expect(badgeVariants({ variant: "neutral" })).toContain("var(--muted)");
-    expect(badgeVariants({ variant: "brand" })).toContain("var(--tone-shell-primary)");
+  it("maps badge status variants to app tokens", () => {
+    expect(badgeVariants({ variant: "success" })).toContain("bg-app-accent-soft");
+    expect(badgeVariants({ variant: "warning" })).toContain("bg-app-warm-soft");
+    expect(badgeVariants({ variant: "info" })).toContain("bg-app-bg");
+    expect(badgeVariants({ variant: "danger" })).toContain("var(--color-danger-bg");
+    expect(badgeVariants({ variant: "neutral" })).toContain("bg-app-bg");
+    expect(badgeVariants({ variant: "brand" })).toContain("bg-app-accent");
   });
 
   it("uses semantic radius tokens for primitive defaults", () => {
     expect(buttonVariants()).toContain("rounded-[var(--r-control)]");
     expect(buttonVariants({ size: "icon" })).not.toContain("rounded-[var(--r-card)]");
-    expect(badgeVariants()).toContain("rounded-[var(--r-pill)]");
+    expect(badgeVariants()).toContain("rounded-full");
 
     render(<Card data-testid="card" />);
     expect(document.querySelector('[data-testid="card"]')?.className).toContain(

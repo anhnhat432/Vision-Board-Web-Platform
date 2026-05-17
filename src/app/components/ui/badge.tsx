@@ -5,30 +5,30 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "./utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center justify-center rounded-[var(--r-pill)] border px-2.5 py-0.5 text-xs font-semibold w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1.5 tracking-tight leading-5 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-colors duration-150 overflow-hidden",
+  "inline-flex items-center justify-center rounded-full border px-2.5 py-0.5 text-xs font-semibold w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1.5 tracking-tight leading-5 [&>svg]:pointer-events-none focus-visible:ring-2 focus-visible:ring-app-accent/30 focus-visible:outline-none transition-colors duration-150 overflow-hidden",
   {
     variants: {
       variant: {
         default:
-          "border-[color-mix(in_srgb,var(--tone-shell-primary)_22%,transparent)] bg-[color-mix(in_srgb,var(--tone-shell-primary)_8%,transparent)] text-[color:var(--tone-shell-primary)] [a&]:hover:bg-[color-mix(in_srgb,var(--tone-shell-primary)_14%,transparent)]",
+          "border-transparent bg-app-accent text-white [a&]:hover:bg-[#284f45]",
         brand:
-          "border-[color-mix(in_srgb,var(--tone-shell-primary)_22%,transparent)] bg-[color-mix(in_srgb,var(--tone-shell-primary)_8%,transparent)] text-[color:var(--tone-shell-primary)] [a&]:hover:bg-[color-mix(in_srgb,var(--tone-shell-primary)_14%,transparent)]",
+          "border-transparent bg-app-accent text-white [a&]:hover:bg-[#284f45]",
         secondary:
-          "border-[color:var(--border)] bg-[color:var(--muted)] text-[color:var(--muted-foreground)] [a&]:hover:bg-[color:var(--muted)]",
+          "border-transparent bg-app-accent-soft text-app-accent [a&]:hover:bg-app-accent-soft",
         neutral:
-          "border-[color:var(--border)] bg-[color:var(--muted)] text-[color:var(--muted-foreground)] [a&]:hover:bg-[color:var(--muted)]",
+          "border-app-line bg-app-bg text-app-ink-soft [a&]:hover:bg-app-bg",
         destructive:
-          "border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] text-[color:var(--color-danger-fg)] [a&]:hover:bg-[color:var(--color-danger-bg)] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
+          "border-[color:var(--color-danger-border,var(--app-line))] bg-[color:var(--color-danger-bg,var(--app-warm-soft))] text-[color:var(--color-danger-fg,var(--app-warm))] [a&]:hover:bg-[color:var(--color-danger-bg,var(--app-warm-soft))]",
         danger:
-          "border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] text-[color:var(--color-danger-fg)] [a&]:hover:bg-[color:var(--color-danger-bg)] focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40",
+          "border-[color:var(--color-danger-border,var(--app-line))] bg-[color:var(--color-danger-bg,var(--app-warm-soft))] text-[color:var(--color-danger-fg,var(--app-warm))] [a&]:hover:bg-[color:var(--color-danger-bg,var(--app-warm-soft))]",
         success:
-          "border-[color:var(--color-success-border)] bg-[color:var(--color-success-bg)] text-[color:var(--color-success-fg)] [a&]:hover:bg-[color:var(--color-success-bg)]",
+          "border-transparent bg-app-accent-soft text-app-accent [a&]:hover:bg-app-accent-soft",
         warning:
-          "border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning-fg)] [a&]:hover:bg-[color:var(--color-warning-bg)]",
+          "border-transparent bg-app-warm-soft text-app-warm [a&]:hover:bg-app-warm-soft",
         info:
-          "border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)] [a&]:hover:bg-[color:var(--color-info-bg)]",
+          "border-app-line bg-app-bg text-app-ink-soft [a&]:hover:bg-app-bg",
         outline:
-          "border-[color:var(--border)] bg-card text-foreground [a&]:hover:bg-[color:var(--muted)]",
+          "border-app-line bg-app-surface text-app-ink-soft [a&]:hover:bg-app-bg",
       },
     },
     defaultVariants: {
