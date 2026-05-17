@@ -16,7 +16,7 @@ export default {
       },
       fontFamily: {
         sans: [
-          "Inter",
+          "Be Vietnam Pro",
           "ui-sans-serif",
           "system-ui",
           "-apple-system",
