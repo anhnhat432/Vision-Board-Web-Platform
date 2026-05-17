@@ -209,7 +209,7 @@ export function VisionBoardStoryWizard({
               <DialogTitle>Tạo bảng theo câu chuyện của bạn</DialogTitle>
               <DialogDescription>Trả lời nhanh vài câu để có một bản nháp vision board có chủ đích.</DialogDescription>
             </div>
-            <span className="rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-sm font-semibold text-violet-700">
+            <span className="rounded-full border border-app-line bg-app-bg px-3 py-1 text-sm font-semibold text-app-accent">
               {step}/4
             </span>
           </div>
@@ -222,7 +222,7 @@ export function VisionBoardStoryWizard({
                 <h2 id="vision-story-step-1" className="text-2xl font-bold tracking-tight text-slate-950">
                   Năm {year} bạn muốn cảm thấy như thế nào?
                 </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+                <p className="mt-2 text-sm leading-6 text-app-ink-soft">
                   Chọn đúng 3 từ phản ánh năng lượng bạn muốn nuôi dưỡng.
                 </p>
               </div>
@@ -240,8 +240,8 @@ export function VisionBoardStoryWizard({
                       className={cn(
                         "rounded-full border px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-45",
                         active
-                          ? "border-violet-300 bg-violet-100 text-violet-700"
-                          : "border-slate-200 bg-white text-slate-700 hover:border-violet-200 hover:bg-violet-50",
+                          ? "border-violet-300 bg-violet-100 text-app-accent"
+                          : "border-app-line bg-app-surface text-slate-700 hover:border-app-accent/50 hover:bg-app-bg",
                       )}
                     >
                       {feeling.label}
@@ -249,7 +249,7 @@ export function VisionBoardStoryWizard({
                   );
                 })}
               </div>
-              <p className="text-sm font-semibold text-slate-600">Đã chọn {feelings.length}/3</p>
+              <p className="text-sm font-semibold text-app-ink-soft">Đã chọn {feelings.length}/3</p>
             </section>
           )}
 
@@ -259,7 +259,7 @@ export function VisionBoardStoryWizard({
                 <h2 id="vision-story-step-2" className="text-2xl font-bold tracking-tight text-slate-950">
                   Vùng nào bạn muốn nâng cấp mạnh nhất?
                 </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+                <p className="mt-2 text-sm leading-6 text-app-ink-soft">
                   Chọn 1 đến 3 vùng. Bảng sẽ tập trung vào chúng.
                 </p>
               </div>
@@ -279,20 +279,20 @@ export function VisionBoardStoryWizard({
                       className={cn(
                         "min-h-32 rounded-[var(--r-card)] border bg-white p-4 text-left shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-45",
                         active
-                          ? "border-violet-300 bg-violet-50 ring-2 ring-violet-200"
-                          : "border-slate-200 hover:border-violet-200 hover:bg-violet-50/60",
+                          ? "border-app-accent bg-app-accent-soft ring-2 ring-app-accent/50"
+                          : "border-slate-200 hover:border-app-accent/50 hover:bg-app-bg/60",
                       )}
                     >
                       <Icon className="h-5 w-5" style={{ color: area.color }} aria-hidden="true" />
-                      <span className="mt-3 block font-semibold text-slate-900">{getLifeAreaLabel(area.name)}</span>
+                      <span className="mt-3 block font-semibold text-app-ink">{getLifeAreaLabel(area.name)}</span>
                       {goalCount > 0 && (
-                        <span className="mt-2 block text-xs text-violet-600">🎯 {goalCount} mục tiêu sẽ được ghim</span>
+                        <span className="mt-2 block text-xs text-app-accent">🎯 {goalCount} mục tiêu sẽ được ghim</span>
                       )}
                     </button>
                   );
                 })}
               </div>
-              <p className="text-sm font-semibold text-slate-600">Đã chọn {focusAreas.length}/3 vùng</p>
+              <p className="text-sm font-semibold text-app-ink-soft">Đã chọn {focusAreas.length}/3 vùng</p>
             </section>
           )}
 
@@ -302,7 +302,7 @@ export function VisionBoardStoryWizard({
                 <h2 id="vision-story-step-3" className="text-2xl font-bold tracking-tight text-slate-950">
                   Một câu nói nào đang trong đầu bạn?
                 </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+                <p className="mt-2 text-sm leading-6 text-app-ink-soft">
                   Bỏ qua nếu bạn muốn dùng gợi ý của chúng tôi.
                 </p>
               </div>
@@ -320,7 +320,7 @@ export function VisionBoardStoryWizard({
                       key={suggestion}
                       type="button"
                       onClick={() => setCoreQuote(suggestion)}
-                      className="rounded-[var(--r-card)] border border-slate-200 bg-white p-4 text-left text-sm leading-6 text-slate-700 shadow-sm transition-colors hover:border-violet-200 hover:bg-violet-50"
+                      className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-4 text-left text-sm leading-6 text-slate-700 shadow-sm transition-colors hover:border-app-accent/50 hover:bg-app-bg"
                     >
                       {suggestion}
                     </button>
@@ -336,7 +336,7 @@ export function VisionBoardStoryWizard({
                 <h2 id="vision-story-step-4" className="text-2xl font-bold tracking-tight text-slate-950">
                   Chọn không gian cho bảng
                 </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+                <p className="mt-2 text-sm leading-6 text-app-ink-soft">
                   Bạn có thể đổi theme bất cứ lúc nào sau khi tạo bảng.
                 </p>
               </div>
@@ -350,8 +350,8 @@ export function VisionBoardStoryWizard({
                       aria-pressed={active}
                       onClick={() => setSelectedThemeId(theme.id)}
                       className={cn(
-                        "rounded-[var(--r-card)] border border-slate-200 bg-white p-3 text-left shadow-sm transition-all hover:border-violet-200",
-                        active && "ring-2 ring-violet-500 ring-offset-2",
+                        "rounded-[var(--r-card)] border border-app-line bg-app-surface p-3 text-left shadow-sm transition-all hover:border-violet-200",
+                        active && "ring-2 ring-app-accent ring-offset-2",
                       )}
                     >
                       <span
@@ -359,8 +359,8 @@ export function VisionBoardStoryWizard({
                         style={{ background: theme.preview.gradient }}
                         aria-hidden="true"
                       />
-                      <span className="mt-3 block font-semibold text-slate-900">{theme.label}</span>
-                      <span className="mt-1 block text-sm leading-5 text-slate-500">{theme.description}</span>
+                      <span className="mt-3 block font-semibold text-app-ink">{theme.label}</span>
+                      <span className="mt-1 block text-sm leading-5 text-app-ink-muted">{theme.description}</span>
                     </button>
                   );
                 })}

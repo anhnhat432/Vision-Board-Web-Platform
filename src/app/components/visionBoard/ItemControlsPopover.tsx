@@ -29,17 +29,17 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
   };
 
   return (
-    <Card className={`shadow-2xl ${className ?? ""}`}>
+    <Card className={`shadow-md ${className ?? ""}`}>
       <CardContent className="p-4 stack-tight">
         <div className="flex items-center justify-between">
-          <h4 className="text-sm font-bold text-slate-900">Chỉnh phần tử</h4>
+          <h4 className="text-sm font-bold text-app-ink">Chỉnh phần tử</h4>
           <Button size="icon" variant="ghost" className="h-6 w-6" onClick={onClose} aria-label="Đóng">
             <X className="h-3.5 w-3.5" />
           </Button>
         </div>
 
         <div>
-          <p className="text-xs font-semibold text-slate-500">Kích thước</p>
+          <p className="text-xs font-semibold text-app-ink-muted">Kích thước</p>
           <div className="mt-1.5 grid grid-cols-4 gap-1">
             {(["S", "M", "L", "XL"] as const).map((size) => (
               <button
@@ -48,8 +48,8 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
                 onClick={() => updateStyle({ sizePreset: size })}
                 className={`rounded-md border px-2 py-1.5 text-xs font-medium transition ${
                   currentSize === size
-                    ? "border-violet-400 bg-violet-50 text-violet-700"
-                    : "border-slate-200 bg-white text-slate-600 hover:border-violet-300"
+                    ? "border-app-accent bg-app-accent-soft text-app-accent"
+                    : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50"
                 }`}
               >
                 {SIZE_PRESETS[size].label}
@@ -59,15 +59,15 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
         </div>
 
         <div>
-          <p className="text-xs font-semibold text-slate-500">Life area</p>
+          <p className="text-xs font-semibold text-app-ink-muted">Life area</p>
           <div className="mt-1.5 flex flex-wrap gap-1">
             <button
               type="button"
               onClick={() => onUpdate(item.id, { lifeAreaId: undefined })}
               className={`rounded-full border px-2.5 py-0.5 text-[11px] transition ${
                 !item.lifeAreaId
-                  ? "border-slate-400 bg-slate-100 text-slate-700"
-                  : "border-slate-200 bg-white text-slate-500"
+                  ? "border-slate-400 bg-app-bg text-app-ink"
+                  : "border-app-line bg-app-surface text-app-ink-muted"
               }`}
             >
               Không
@@ -79,8 +79,8 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
                 onClick={() => onUpdate(item.id, { lifeAreaId: area.name })}
                 className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium transition ${
                   item.lifeAreaId === area.name
-                    ? "border-violet-400 bg-violet-50 text-violet-700"
-                    : "border-slate-200 bg-white text-slate-600 hover:border-violet-300"
+                    ? "border-app-accent bg-app-accent-soft text-app-accent"
+                    : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50"
                 }`}
               >
                 {LIFE_AREA_LABELS[area.name]}
@@ -91,7 +91,7 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
 
         {item.type === "image" && (
           <div>
-            <p className="text-xs font-semibold text-slate-500">Khung ảnh</p>
+            <p className="text-xs font-semibold text-app-ink-muted">Khung ảnh</p>
             <div className="mt-1.5 grid grid-cols-4 gap-1">
               {IMAGE_FRAME_STYLES.map((frame) => (
                 <button
@@ -100,8 +100,8 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
                   onClick={() => updateStyle({ imageFrame: frame.id })}
                   className={`rounded-md border px-2 py-1.5 text-[11px] font-medium transition ${
                     currentFrame === frame.id
-                      ? "border-violet-400 bg-violet-50 text-violet-700"
-                      : "border-slate-200 bg-white text-slate-600"
+                      ? "border-app-accent bg-app-accent-soft text-app-accent"
+                      : "border-app-line bg-app-surface text-app-ink-soft"
                   }`}
                 >
                   {frame.label}
@@ -113,7 +113,7 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
 
         {item.type === "quote" && (
           <div>
-            <p className="text-xs font-semibold text-slate-500">Kiểu chữ</p>
+            <p className="text-xs font-semibold text-app-ink-muted">Kiểu chữ</p>
             <div className="mt-1.5 grid grid-cols-2 gap-1">
               {QUOTE_FONT_STYLES.map((font) => (
                 <button
@@ -121,7 +121,7 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
                   type="button"
                   onClick={() => updateStyle({ quoteFont: font.id })}
                   className={`rounded-md border px-2 py-2 text-left transition ${
-                    currentFont === font.id ? "border-violet-400 bg-violet-50" : "border-slate-200 bg-white"
+                    currentFont === font.id ? "border-app-accent bg-violet-50" : "border-app-line bg-app-surface"
                   }`}
                 >
                   <p
@@ -130,7 +130,7 @@ export function ItemControlsPopover(props: ItemControlsPopoverProps): JSX.Elemen
                   >
                     Aa
                   </p>
-                  <p className="mt-0.5 text-[10px] text-slate-500">{font.label}</p>
+                  <p className="mt-0.5 text-[10px] text-app-ink-muted">{font.label}</p>
                 </button>
               ))}
             </div>

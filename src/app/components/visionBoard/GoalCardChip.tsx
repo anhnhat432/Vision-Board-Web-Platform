@@ -22,11 +22,11 @@ export function GoalCardChip({ goal, lifeAreaId, width }: GoalCardChipProps): JS
   if (!goal) {
     return (
       <div
-        className="rounded-[var(--r-card)] border border-amber-200 bg-amber-50/90 p-4 text-center shadow-2xl"
+        className="rounded-[var(--r-card)] border border-[#F3D9CC] bg-app-warm-soft p-4 text-center"
         style={{ width: `${width}px` }}
       >
-        <p className="text-sm font-semibold text-amber-700">Mục tiêu không còn tồn tại</p>
-        <p className="mt-1 text-xs text-amber-600">Phần tử này sẽ tự gỡ khi bạn xóa.</p>
+        <p className="text-sm font-semibold text-app-warm">Mục tiêu không còn tồn tại</p>
+        <p className="mt-1 text-xs text-app-warm">Phần tử này sẽ tự gỡ khi bạn xóa.</p>
       </div>
     );
   }
@@ -36,7 +36,7 @@ export function GoalCardChip({ goal, lifeAreaId, width }: GoalCardChipProps): JS
 
   return (
     <div
-      className="rounded-[var(--r-card)] border border-white/85 bg-white/95 p-4 shadow-2xl backdrop-blur"
+      className="rounded-[var(--r-card)] border border-app-accent/30 bg-app-accent-soft text-app-accent p-3 text-left"
       style={{ width: `${width}px` }}
     >
       {areaLabel && area && (
@@ -47,21 +47,21 @@ export function GoalCardChip({ goal, lifeAreaId, width }: GoalCardChipProps): JS
           {areaLabel}
         </span>
       )}
-      <h4 className="mt-2 line-clamp-2 text-sm font-bold leading-snug text-slate-900">{goal.title}</h4>
+      <h4 className="mt-2 line-clamp-2 text-sm font-semibold leading-snug text-app-ink">{goal.title}</h4>
       {deadlineDisplay && (
-        <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
+        <div className="mt-2 flex items-center gap-1.5 text-xs text-app-ink-soft">
           <Calendar className="h-3 w-3" />
           <span>{deadlineDisplay}</span>
         </div>
       )}
       <div className="mt-3">
-        <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+        <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-app-ink-soft">
           <span>Tiến độ</span>
           <span>{progress}%</span>
         </div>
-        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-slate-100">
+        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-app-bg">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-violet-500 to-pink-500 transition-all"
+            className="h-full rounded-full bg-app-accent transition-all"
             style={{ width: `${progress}%` }}
           />
         </div>

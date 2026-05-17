@@ -50,7 +50,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
             }}
           />
         )}
-        {!item.content && <ImageIcon className="mx-auto h-10 w-10 text-slate-300" aria-hidden="true" />}
+        {!item.content && <ImageIcon className="mx-auto h-10 w-10 text-app-ink-muted" aria-hidden="true" />}
         <ImageWithFallback
           src={item.content}
           alt="Phần tử vision board"
@@ -58,7 +58,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
           style={{ width: "100%" }}
         />
         {frame.decorationsLayout === "polaroid" && (
-          <div className="mt-2 px-1 pb-1 text-center text-[10px] uppercase tracking-widest text-slate-500">
+          <div className="mt-2 px-1 pb-1 text-center text-[10px] uppercase tracking-widest text-app-ink-soft">
             {areaLabel ?? "Tầm nhìn"}
           </div>
         )}
@@ -72,10 +72,10 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
 
     return (
       <div
-        className="rounded-[var(--r-card)] border border-white/80 bg-white/92 p-5 shadow-2xl backdrop-blur"
+        className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-5 shadow-2xl backdrop-blur"
         style={{ width: `${width}px` }}
       >
-        <div className="flex items-center gap-2 text-violet-600">
+        <div className="flex items-center gap-2 text-app-accent">
           <MessageSquareQuote className="h-4 w-4" />
           <span className="text-xs font-semibold uppercase tracking-[0.18em]">Câu nói</span>
         </div>
@@ -95,7 +95,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
 
     return (
       <div
-        className="flex items-center justify-center rounded-[var(--r-tile)] gradient-brand text-primary-foreground shadow-2xl"
+        className="flex items-center justify-center rounded-[var(--r-tile)] bg-app-accent text-white shadow-2xl"
         style={{ width: `${size}px`, height: `${size}px` }}
       >
         <Icon className="h-10 w-10" style={{ width: size * 0.4, height: size * 0.4 }} />

@@ -635,7 +635,7 @@ export function VisionBoardEditor() {
   const selectedItem = selectedItemId ? board.items.find((item) => item.id === selectedItemId) : undefined;
 
   return (
-      <div className="stack-section pb-12">
+    <div className="stack-section pb-12">
         <UpgradePaywallDialog
           open={isVisionBoardLimitPaywallOpen}
           onOpenChange={setIsVisionBoardLimitPaywallOpen}
@@ -706,14 +706,14 @@ export function VisionBoardEditor() {
                   key={ratio}
                   type="button"
                   onClick={() => setSelectedRatio(ratio)}
-                  className={`w-full rounded-lg border p-3 text-left transition ${
+                  className={`w-full rounded-[var(--r-tile)] border p-3 text-left transition ${
                     selectedRatio === ratio
-                      ? "border-violet-400 bg-violet-50"
-                      : "border-slate-200 bg-white hover:border-violet-200"
+                      ? "border-app-accent bg-app-accent-soft"
+                      : "border-app-line bg-app-surface hover:border-app-accent/50"
                   }`}
                 >
-                  <p className="text-sm font-semibold text-slate-900">{getRatioLabel(ratio)}</p>
-                  <p className="text-xs text-slate-500">{getExportRatioDescription(ratio)}</p>
+                  <p className="text-sm font-semibold text-app-ink">{getRatioLabel(ratio)}</p>
+                  <p className="text-xs text-app-ink-soft">{getExportRatioDescription(ratio)}</p>
                 </button>
               ))}
             </div>
@@ -733,16 +733,16 @@ export function VisionBoardEditor() {
             <CardContent className="relative p-5 sm:p-6 lg:p-8">
               <div className="relative z-10 grid gap-[var(--space-section)] xl:grid-cols-[minmax(0,1.15fr)_360px]">
                 <div className="stack-section">
-                  <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-[color:var(--border)] bg-[color:var(--muted)] px-4 py-1.5 text-sm text-muted-foreground">
+                  <div className="inline-flex items-center gap-2 rounded-[var(--r-pill)] border border-app-line bg-app-bg px-4 py-1.5 text-sm text-app-ink-muted uppercase tracking-wide">
                     <Wand2 className="h-4 w-4" />
                     Dear Our Future Studio
                   </div>
 
                   <div className="stack-stack">
-                    <h1 className="max-w-3xl text-3xl font-semibold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl md:text-5xl">
-                      Dựng một <span className="text-gradient-vibrant">không gian hình ảnh</span> khiến mục tiêu của bạn trở nên chạm được mỗi ngày.
+                    <h1 className="max-w-3xl text-2xl font-medium leading-[1.1] tracking-[-0.018em] text-app-ink mt-2 sm:text-3xl md:text-4xl">
+                      {boardName || "Bức tranh tương lai"}
                     </h1>
-                    <p className="max-w-2xl text-base leading-7 text-muted-foreground">
+                    <p className="max-w-2xl text-base leading-7 text-app-ink-soft">
                       Kéo thả hình ảnh, câu nói và biểu tượng để tạo một bảng giàu cảm xúc,
                       rõ định hướng và đủ đẹp để bạn muốn quay lại thường xuyên.
                     </p>
@@ -782,8 +782,9 @@ export function VisionBoardEditor() {
                     </Button>
                   </div>
 
+
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Không gian</span>
+                    <span className="text-xs uppercase tracking-[0.18em] text-app-ink-muted">Không gian</span>
                     {VISION_BOARD_THEMES.map((theme) => (
                       <button
                         key={theme.id}
@@ -793,7 +794,7 @@ export function VisionBoardEditor() {
                           setHasUnsavedChanges(true);
                         }}
                         className={`h-7 w-7 rounded-full border-2 transition-all ${
-                          themeId === theme.id ? "scale-110 border-foreground" : "border-slate-300 hover:border-slate-500"
+                          themeId === theme.id ? "scale-110 ring-2 ring-app-accent ring-offset-2" : "border-app-line hover:border-app-accent"
                         }`}
                         style={{ background: theme.preview.gradient }}
                         aria-label={theme.label}
@@ -805,22 +806,23 @@ export function VisionBoardEditor() {
                       onClick={() => setShowZones((prev) => !prev)}
                       className={`ml-2 rounded-full border px-3 py-1 text-xs font-medium ${
                         showZones
-                          ? "border-slate-900 bg-slate-900 text-white"
-                          : "border-slate-300 bg-white/70 text-slate-600 hover:bg-white"
+                          ? "border-app-accent bg-app-accent text-white"
+                          : "border-app-line bg-app-bg text-app-ink-soft hover:bg-app-surface"
                       }`}
                     >
                       {showZones ? "Ẩn vùng life area" : "Hiện vùng life area"}
                     </button>
                   </div>
 
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-app-ink-soft">
                     Trên điện thoại, bạn có thể chạm giữ rồi rê để di chuyển các phần tử trên bảng.
                   </p>
                 </div>
 
-                <div className="hidden xl:block rounded-[var(--r-card)] border border-[color:var(--border)] bg-[color:var(--muted)] p-6 shadow-sm">
+
+                <div className="hidden xl:block rounded-[var(--r-card)] border border-app-line bg-app-surface p-5 shadow-sm sticky top-6">
                   <ProductVisual variant="vision" className="mb-5 min-h-[180px]" />
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
                     Tóm tắt bảng
                   </p>
 
@@ -832,11 +834,11 @@ export function VisionBoardEditor() {
                     ].map((item) => (
                       <div
                         key={item.label}
-                        className="rounded-[var(--r-card)] border border-[color:var(--border)] bg-card px-4 py-4"
+                        className="rounded-[var(--r-card)] border border-app-line bg-app-surface px-4 py-4"
                       >
-                        <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">{item.label}</p>
-                        <p className="mt-2 text-3xl font-bold text-foreground">{item.value}</p>
-                        <p className="mt-1 text-sm text-muted-foreground">{item.note}</p>
+                        <p className="text-[11px] uppercase tracking-[0.16em] text-app-ink-muted">{item.label}</p>
+                        <p className="mt-2 text-3xl font-bold text-app-ink">{item.value}</p>
+                        <p className="mt-1 text-sm text-app-ink-soft">{item.note}</p>
                       </div>
                     ))}
                   </div>
@@ -854,7 +856,7 @@ export function VisionBoardEditor() {
             </DialogHeader>
 
             <Tabs defaultValue="image" className="mt-4">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="mb-3 inline-flex rounded-full border border-app-line bg-app-bg p-1">
                 <TabsTrigger value="image">
                   <Image className="h-4 w-4" />
                   Hình ảnh
@@ -923,7 +925,7 @@ export function VisionBoardEditor() {
                       <button
                         key={img.label}
                         type="button"
-                        className="group relative overflow-hidden rounded-[var(--r-tile)] border border-white/70 transition-colors transition-shadow duration-150 hover:border-violet-300 hover:shadow-md"
+                        className="group relative overflow-hidden rounded-[var(--r-tile)] border border-app-line transition-colors transition-shadow duration-150 hover:border-app-accent hover:shadow-sm"
                         onClick={() => handleAddCuratedImage(img.url)}
                       >
                         <ImageWithFallback
@@ -931,7 +933,7 @@ export function VisionBoardEditor() {
                           alt={img.label}
                           className="aspect-[4/3] w-full object-cover"
                         />
-                        <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2 py-1.5 text-xs font-medium text-white">
+                        <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 to-transparent px-2 py-1.5 text-xs font-medium text-white">
                           {img.label}
                         </span>
                       </button>
@@ -940,7 +942,7 @@ export function VisionBoardEditor() {
                 </div>
 
                 <div className="stack-tight">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-app-ink">
                     <Globe className="h-4 w-4" />
                     Tìm theo cảm giác
                   </div>
@@ -962,10 +964,10 @@ export function VisionBoardEditor() {
                       </Button>
                     ))}
                   </div>
-                  <div className="stack-tight border-t border-slate-100 pt-4">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  <div className="stack-tight border-t border-app-line pt-4">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-app-ink">
                       <LayoutGrid className="h-4 w-4" />
-                      Gắn ảnh vào vùng nào? <span className="text-xs font-normal text-slate-400">(tùy chọn)</span>
+                      Gắn ảnh vào vùng nào? <span className="text-xs font-normal text-app-ink-soft">(tùy chọn)</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       {LIFE_AREAS.map((area) => (
@@ -975,8 +977,8 @@ export function VisionBoardEditor() {
                           onClick={() => setSelectedLifeArea((prev) => (prev === area.name ? null : area.name))}
                           className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                             selectedLifeArea === area.name
-                              ? "border-violet-400 bg-violet-50 text-violet-700"
-                              : "border-slate-200 bg-white text-slate-600 hover:border-violet-200"
+                              ? "border-app-accent bg-app-accent-soft text-app-accent"
+                              : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50"
                           }`}
                         >
                           {LIFE_AREA_LABELS[area.name]}
@@ -985,7 +987,7 @@ export function VisionBoardEditor() {
                     </div>
                   </div>
                   <div className="stack-tight">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-app-ink">
                       <Palette className="h-4 w-4" />
                       Khung ảnh
                     </div>
@@ -997,8 +999,8 @@ export function VisionBoardEditor() {
                           onClick={() => setSelectedImageFrame(frame.id)}
                           className={`rounded-md border px-3 py-1.5 text-xs font-medium ${
                             selectedImageFrame === frame.id
-                              ? "border-violet-400 bg-violet-50 text-violet-700"
-                              : "border-slate-200 bg-white text-slate-600 hover:border-violet-200"
+                              ? "border-app-accent bg-app-accent-soft text-app-accent"
+                              : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50"
                           }`}
                         >
                           {frame.label}
@@ -1032,7 +1034,7 @@ export function VisionBoardEditor() {
                   ))}
                 </div>
                 <div className="stack-tight">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-app-ink">
                     <Type className="h-4 w-4" />
                     Kiểu chữ
                   </div>
@@ -1042,10 +1044,10 @@ export function VisionBoardEditor() {
                         key={font.id}
                         type="button"
                         onClick={() => setSelectedQuoteFont(font.id)}
-                        className={`rounded-lg border p-3 text-left transition ${
+                        className={`rounded-[var(--r-card)] border p-3 text-left transition ${
                           selectedQuoteFont === font.id
-                            ? "border-violet-400 bg-violet-50"
-                            : "border-slate-200 bg-white hover:border-violet-200"
+                            ? "border-app-accent bg-app-accent-soft"
+                            : "border-app-line bg-app-surface hover:border-app-accent/50"
                         }`}
                       >
                         <p
@@ -1054,7 +1056,7 @@ export function VisionBoardEditor() {
                         >
                           Aa
                         </p>
-                        <p className="mt-1 text-xs text-slate-500">{font.label}</p>
+                        <p className="mt-1 text-xs text-app-ink-soft">{font.label}</p>
                       </button>
                     ))}
                   </div>
@@ -1065,141 +1067,141 @@ export function VisionBoardEditor() {
               </TabsContent>
 
               <TabsContent value="goal_card" className="stack-stack pt-4">
-                {(() => {
-                  const userData = getUserData();
-                  const goals = userData.goals;
+                    {(() => {
+                      const userData = getUserData();
+                      const goals = userData.goals;
 
-                  if (goals.length === 0) {
-                    return (
-                      <div className="rounded-[var(--r-card)] border border-violet-100 bg-violet-50/40 p-6 text-center">
-                        <Target className="mx-auto h-10 w-10 text-violet-400" />
-                        <p className="mt-3 text-base font-semibold text-slate-900">
-                          Bạn chưa có mục tiêu nào để ghim lên bảng
-                        </p>
-                        <p className="mt-1 text-sm text-slate-500">
-                          Hãy tạo một SMART goal trước, rồi quay lại để ghim mục tiêu thành phần tử trên Vision Board.
-                        </p>
-                        <Button
-                          className="mt-4"
-                          onClick={() => {
-                            setIsAddingItem(false);
-                            navigate("/goals");
-                          }}
-                        >
-                          Đi tới Mục tiêu
-                        </Button>
-                      </div>
-                    );
-                  }
+                      if (goals.length === 0) {
+                        return (
+                          <div className="rounded-[var(--r-card)] border border-app-line bg-app-bg p-6 text-center">
+                            <Target className="mx-auto h-10 w-10 text-app-ink-muted" />
+                            <p className="mt-3 text-base font-semibold text-app-ink">
+                              Bạn chưa có mục tiêu nào để ghim lên bảng
+                            </p>
+                            <p className="mt-1 text-sm text-app-ink-soft">
+                              Hãy tạo một SMART goal trước, rồi quay lại để ghim mục tiêu thành phần tử trên Vision Board.
+                            </p>
+                            <Button
+                              className="mt-4"
+                              onClick={() => {
+                                setIsAddingItem(false);
+                                navigate("/goals");
+                              }}
+                            >
+                              Đi tới Mục tiêu
+                            </Button>
+                          </div>
+                        );
+                      }
 
                   const pinnedGoalIds = new Set(
                     board?.items.filter((item) => item.type === "goal_card").map((item) => item.content) ?? [],
                   );
                   const availableGoals = goals.filter((goal) => !pinnedGoalIds.has(goal.id));
 
-                  return (
-                    <>
-                      <p className="text-sm text-slate-500">
-                        Chọn một mục tiêu để ghim lên bảng. Card sẽ tự cập nhật khi tiến độ thay đổi.
-                      </p>
-                      <div className="grid max-h-72 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
-                        {availableGoals.map((goal) => {
-                          const area = LIFE_AREAS.find((item) => item.name === goal.category);
-                          const areaLabel = LIFE_AREA_LABELS[goal.category] ?? goal.category;
-                          const progress = calculateGoalProgress(goal);
-                          const isActive = selectedGoalId === goal.id;
+return (
+                      <>
+                        <p className="text-sm text-app-ink-soft">
+                          Chọn một mục tiêu để ghim lên bảng. Card sẽ tự cập nhật khi tiến độ thay đổi.
+                        </p>
+                        <div className="grid max-h-72 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+                          {availableGoals.map((goal) => {
+                            const area = LIFE_AREAS.find((item) => item.name === goal.category);
+                            const areaLabel = LIFE_AREA_LABELS[goal.category] ?? goal.category;
+                            const progress = calculateGoalProgress(goal);
+                            const isActive = selectedGoalId === goal.id;
 
-                          return (
-                            <button
-                              key={goal.id}
-                              type="button"
-                              onClick={() => setSelectedGoalId(goal.id)}
-                              className={`rounded-[var(--r-card)] border p-3 text-left transition ${
-                                isActive
-                                  ? "border-violet-400 bg-violet-50 ring-1 ring-violet-300"
-                                  : "border-slate-200 bg-white hover:border-violet-200"
-                              }`}
-                            >
-                              {area && (
-                                <span
-                                  className="inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
-                                  style={{ backgroundColor: `${area.color}22`, color: area.color }}
-                                >
-                                  {areaLabel}
-                                </span>
-                              )}
-                              <p className="mt-2 line-clamp-2 text-sm font-semibold text-slate-900">{goal.title}</p>
-                              <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500">
-                                <span>HSD: {formatShortDate(goal.deadline)}</span>
-                                <span className="font-semibold">{progress}%</span>
-                              </div>
-                              <div className="mt-1 h-1 overflow-hidden rounded-full bg-slate-100">
-                                <div
-                                  className="h-full bg-gradient-to-r from-violet-500 to-pink-500"
-                                  style={{ width: `${progress}%` }}
-                                />
-                              </div>
-                            </button>
-                          );
-                        })}
-                        {availableGoals.length === 0 && (
-                          <p className="col-span-full rounded-[var(--r-card)] border border-amber-200 bg-amber-50/50 p-4 text-center text-sm text-amber-700">
-                            Tất cả mục tiêu đã được ghim trên bảng này.
-                          </p>
-                        )}
-                      </div>
-                      <Button className="w-full" onClick={handleAddGoalCard} disabled={!selectedGoalId}>
-                        Ghim mục tiêu vào bảng
-                      </Button>
-                    </>
-                  );
+                            return (
+                              <button
+                                key={goal.id}
+                                type="button"
+                                onClick={() => setSelectedGoalId(goal.id)}
+                                className={`rounded-[var(--r-card)] border p-3 text-left transition ${
+                                  isActive
+                                    ? "border-app-accent bg-app-accent-soft ring-1 ring-app-accent/30"
+                                    : "border-app-line bg-app-surface hover:bg-app-bg"
+                                }`}
+                              >
+                                {area && (
+                                  <span
+                                    className="inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+                                    style={{ backgroundColor: `${area.color}22`, color: area.color }}
+                                  >
+                                    {areaLabel}
+                                  </span>
+                                )}
+                                <p className="mt-2 line-clamp-2 text-sm font-semibold text-app-ink">{goal.title}</p>
+                                <div className="mt-2 flex items-center justify-between text-[11px] text-app-ink-soft">
+                                  <span>HSD: {formatShortDate(goal.deadline)}</span>
+                                  <span className="font-semibold">{progress}%</span>
+                                </div>
+                                <div className="mt-1 h-1 overflow-hidden rounded-full bg-app-bg">
+                                  <div
+                                    className="h-full bg-app-accent"
+                                    style={{ width: `${progress}%` }}
+                                  />
+                                </div>
+                              </button>
+                            );
+                          })}
+                          {availableGoals.length === 0 && (
+                            <p className="col-span-full rounded-[var(--r-card)] border border-[#F3D9CC] bg-app-warm-soft p-4 text-center text-sm text-app-warm">
+                              Tất cả mục tiêu đã được ghim trên bảng này.
+                            </p>
+                          )}
+                        </div>
+                        <Button className="w-full" onClick={handleAddGoalCard} disabled={!selectedGoalId}>
+                          Ghim mục tiêu vào bảng
+                        </Button>
+                      </>
+                    );
                 })()}
               </TabsContent>
 
               <TabsContent value="icon" className="stack-stack pt-4">
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {ICON_OPTIONS.map((item) => {
-                    const Icon = ICON_COMPONENTS[item];
-                    const isActive = iconName === item;
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                      {ICON_OPTIONS.map((item) => {
+                        const Icon = ICON_COMPONENTS[item];
+                        const isActive = iconName === item;
 
-                    return (
-                      <button
-                        key={item}
-                        type="button"
-                        onClick={() => setIconName(item)}
-                        className={`rounded-[var(--r-card)] border p-4 transition-colors transition-shadow duration-150 ${
-                          isActive
-                            ? "border-violet-300 bg-violet-50 text-violet-700 shadow-lg"
-                            : "border-white/80 bg-white/72 text-slate-500 hover:border-violet-200 hover:text-violet-700"
-                        }`}
-                      >
-                        <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] gradient-brand-subtle">
-                          <Icon className="h-6 w-6" />
-                        </div>
-                        <div className="mt-[var(--space-inline)] text-sm font-semibold">{item}</div>
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="stack-tight">
-                  <span className="text-sm font-semibold text-slate-700">Kích thước</span>
-                  <div className="flex gap-2">
-                    {(["S", "M", "L", "XL"] as const).map((size) => (
-                      <button
-                        key={size}
-                        type="button"
-                        onClick={() => setSelectedIconSize(size)}
-                        className={`flex-1 rounded-md border px-3 py-2 text-sm ${
-                          selectedIconSize === size
-                            ? "border-violet-400 bg-violet-50 text-violet-700"
-                            : "border-slate-200 bg-white text-slate-600"
-                        }`}
-                      >
-                        {SIZE_PRESETS[size].label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                        return (
+                          <button
+                            key={item}
+                            type="button"
+                            onClick={() => setIconName(item)}
+                            className={`rounded-[var(--r-card)] border p-4 transition-colors transition-shadow duration-150 ${
+                              isActive
+                                ? "border-app-accent bg-app-accent-soft text-app-accent shadow-sm"
+                                : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50 hover:text-app-accent"
+                            }`}
+                          >
+                            <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft">
+                              <Icon className="h-6 w-6" />
+                            </div>
+                            <div className="mt-[var(--space-inline)] text-sm font-semibold text-app-ink">{item}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="stack-tight">
+                      <span className="text-sm font-semibold text-app-ink">Kích thước</span>
+                      <div className="flex gap-2">
+                        {(["S", "M", "L", "XL"] as const).map((size) => (
+                          <button
+                            key={size}
+                            type="button"
+                            onClick={() => setSelectedIconSize(size)}
+                            className={`flex-1 rounded-md border px-3 py-2 text-sm ${
+                              selectedIconSize === size
+                                ? "border-app-accent bg-app-accent-soft text-app-accent"
+                                : "border-app-line bg-app-surface text-app-ink-soft"
+                            }`}
+                          >
+                            {SIZE_PRESETS[size].label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                 <Button className="w-full" onClick={handleAddIcon}>
                   Thêm biểu tượng vào bảng
                 </Button>
@@ -1225,16 +1227,16 @@ export function VisionBoardEditor() {
                 emptyStateSlot={
                   board.items.length === 0 ? (
                     <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
-                      <div className="w-full max-w-md rounded-[var(--r-card)] border border-white/80 bg-white/86 p-5 text-center shadow-2xl sm:p-7">
-                        <EmptyOrdersIllustration className="mx-auto mb-4 w-32 text-violet-500 opacity-70 sm:w-40" />
+                      <div className="w-full max-w-md rounded-[var(--r-card)] border border-app-line bg-app-surface p-5 text-center shadow-md sm:p-7">
+                        <EmptyOrdersIllustration className="mx-auto mb-4 w-32 text-app-ink-muted opacity-70 sm:w-40" />
                         <ProductVisual variant="vision" className="mx-auto mb-5 min-h-[150px] max-w-sm" />
-                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700 sm:h-20 sm:w-20 sm:rounded-[var(--r-tile)]">
+                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent sm:h-20 sm:w-20 sm:rounded-[var(--r-tile)]">
                           <Sparkles className="h-8 w-8 sm:h-9 sm:w-9" />
                         </div>
-                        <h2 className="mt-[var(--space-stack)] text-2xl font-bold text-slate-900 sm:mt-6 sm:text-3xl">
+                        <h2 className="mt-[var(--space-stack)] text-2xl font-medium text-app-ink sm:mt-6 sm:text-3xl">
                           Bảng của bạn đang chờ câu chuyện đầu tiên
                         </h2>
-                        <p className="mt-[var(--space-inline)] text-base text-slate-500">
+                        <p className="mt-[var(--space-inline)] text-base text-app-ink-soft">
                           Hãy bắt đầu bằng một hình ảnh đại diện, một câu nói khiến bạn rung động hoặc một biểu tượng để neo cảm xúc cho mục tiêu của mình.
                         </p>
                         <Button className="mt-6 w-full sm:mt-8 sm:w-auto" onClick={() => setIsWizardOpen(true)}>
@@ -1243,7 +1245,7 @@ export function VisionBoardEditor() {
                         </Button>
                         <button
                           type="button"
-                          className="mt-2 text-sm text-slate-500 underline-offset-2 hover:underline"
+                          className="mt-2 text-sm text-app-ink-soft underline-offset-2 hover:underline"
                           onClick={() => setIsAddingItem(true)}
                         >
                           Hoặc tự thêm phần tử

@@ -193,7 +193,7 @@ function DraggableItem({ item, goalsById, isSelected, onUpdate, onDelete, onSele
       onPointerUp={handlePointerEnd}
       onPointerCancel={handlePointerEnd}
       className={`absolute cursor-move touch-none select-none transition-transform duration-300 hover:scale-[1.015] ${
-        isSelected ? "rounded-[var(--r-card)] ring-2 ring-violet-400 ring-offset-2" : ""
+        isSelected ? "rounded-[var(--r-card)] ring-2 ring-app-accent ring-offset-2" : ""
       }`}
       style={{
         left: `${item.x}%`,

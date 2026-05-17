@@ -74,10 +74,10 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
 
   return (
     <div className={`stack-stack ${className ?? ""}`}>
-      <Card>
+      <Card className="rounded-[var(--r-card)] border border-app-line bg-app-surface">
         <CardContent className="p-5">
-          <h3 className="text-base font-bold text-slate-900">Câu chuyện theo life area</h3>
-          <p className="mt-1 text-xs text-slate-500">
+          <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Câu chuyện theo life area</h3>
+          <p className="mt-1 text-xs text-app-ink-soft">
             Mỗi vùng đại diện một mảng cuộc sống. Vùng trống = cảm hứng đang thiếu.
           </p>
           <div className="mt-4 space-y-3">
@@ -90,7 +90,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
               return (
                 <div
                   key={area.name}
-                  className="rounded-lg border border-slate-100 bg-slate-50/50 p-3"
+                  className="rounded-[var(--r-tile)] border border-slate-100 bg-app-bg p-3"
                   data-testid={`life-area-row-${area.name}`}
                 >
                   <div className="flex items-center justify-between gap-2">
@@ -101,16 +101,16 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
                       >
                         <Icon className="h-3.5 w-3.5" />
                       </span>
-                      <span className="text-sm font-semibold text-slate-700">{LIFE_AREA_LABELS[area.name]}</span>
+                      <span className="text-sm font-semibold text-app-ink">{LIFE_AREA_LABELS[area.name]}</span>
                       {isFocus && (
-                        <span className="rounded-full bg-violet-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-violet-700">
+                        <span className="rounded-full bg-app-accent-soft px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-app-accent">
                           Trọng tâm
                         </span>
                       )}
                     </div>
-                    <span className="text-xs font-semibold text-slate-500">{count}</span>
+                    <span className="text-xs font-semibold text-app-ink-soft">{count}</span>
                   </div>
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white" aria-hidden="true">
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-app-bg" aria-hidden="true">
                     <div
                       className="h-full rounded-full transition-all"
                       data-testid={`life-area-fill-${area.name}`}
@@ -118,7 +118,7 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
                     />
                   </div>
                   {count === 0 && (
-                    <p className="mt-2 text-[11px] italic text-slate-400">Thêm 1 ảnh hoặc câu nói cho vùng này.</p>
+                    <p className="mt-2 text-[11px] italic text-app-ink-muted">Thêm 1 ảnh hoặc câu nói cho vùng này.</p>
                   )}
                 </div>
               );
@@ -127,25 +127,25 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="rounded-[var(--r-card)] border border-app-line bg-app-surface">
         <CardContent className="p-5">
-          <h3 className="text-base font-bold text-slate-900">Tóm tắt nhanh</h3>
+          <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Tóm tắt nhanh</h3>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <SummaryStat label="Hình ảnh" value={stats.counters.image} />
             <SummaryStat label="Câu nói" value={stats.counters.quote} />
             <SummaryStat label="Mục tiêu ghim" value={stats.counters.goal_card} />
             <SummaryStat label="Biểu tượng" value={stats.counters.icon} />
           </div>
-          <div className="mt-3 rounded-lg bg-gradient-to-r from-violet-50 to-pink-50 p-3 text-xs text-slate-700">
+          <div className="mt-3 rounded-[var(--r-tile)] bg-app-accent-soft p-3 text-xs text-app-ink">
             <span className="font-semibold">{stats.total}</span> phần tử đang có trên bảng
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="rounded-[var(--r-card)] border border-app-line bg-app-surface">
         <CardContent className="p-5">
-          <h3 className="text-base font-bold text-slate-900">Gợi ý bố cục</h3>
-          <ul className="mt-3 space-y-2 text-sm leading-relaxed text-slate-600">
+          <h3 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">Gợi ý bố cục</h3>
+          <ul className="mt-3 space-y-2 text-sm leading-relaxed text-app-ink-soft">
             <li>Đặt hình ảnh quan trọng nhất ở trung tâm hoặc góc trái trên.</li>
             <li>Dùng 1-2 câu nói đủ mạnh thay vì rải quá nhiều câu chữ.</li>
             <li>Để mỗi life area trọng tâm có ít nhất 1 hình ảnh hoặc 1 goal card.</li>
@@ -159,9 +159,9 @@ export function VisionBoardSidebar({ items, focusAreaIds, className }: VisionBoa
 
 function SummaryStat({ label, value }: { label: string; value: number }): JSX.Element {
   return (
-    <div className="rounded-lg border border-slate-100 bg-white px-3 py-2">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{label}</p>
-      <p className="mt-0.5 text-2xl font-bold text-slate-900">{value}</p>
+    <div className="rounded-[var(--r-tile)] border border-app-line bg-app-surface px-3 py-2">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-app-ink-muted">{label}</p>
+      <p className="mt-0.5 text-2xl font-bold text-app-ink">{value}</p>
     </div>
   );
 }
