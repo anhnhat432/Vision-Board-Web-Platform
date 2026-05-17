@@ -32,16 +32,16 @@ export function DeleteDataConfirmationDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md">
+      <AlertDialogContent className="max-w-md rounded-card border border-app-line bg-app-surface">
         <AlertDialogHeader className="items-center text-center">
-          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-[var(--r-pill)] bg-rose-100">
-            <Trash2 className="h-7 w-7 text-rose-600" />
+          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-[color:var(--color-danger-bg)]">
+            <Trash2 className="h-7 w-7 text-[color:var(--color-danger-fg)]" />
           </div>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>
+          <AlertDialogTitle className="font-serif text-xl font-medium text-app-ink">{title}</AlertDialogTitle>
+          <AlertDialogDescription className="text-[13px] leading-6 text-app-ink-soft">
             {isDemoMode ? (
               <>
-                <span className="rounded-[var(--r-control)] bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                <span className="rounded-full bg-app-warm-soft px-2 py-0.5 text-xs font-medium text-app-warm">
                   Chỉ trên thiết bị này
                 </span>{" "}
                 sẽ bị xóa vĩnh viễn.
@@ -60,12 +60,12 @@ export function DeleteDataConfirmationDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="rounded-[var(--r-control)] border border-rose-200 bg-rose-50 px-4 py-3">
-          <p className="text-sm font-semibold text-rose-800">Hành động này không thể hoàn tác.</p>
-          <p className="mt-1 text-sm font-semibold text-rose-800">
+        <div className="rounded-lg border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] px-4 py-3">
+          <p className="text-[13px] font-semibold text-[color:var(--color-danger-fg)]">Hành động này không thể hoàn tác.</p>
+          <p className="mt-1 text-[13px] font-semibold text-[color:var(--color-danger-fg)]">
             Tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn.
           </p>
-          <ul className="mt-2 space-y-1 text-sm text-rose-700">
+          <ul className="mt-2 space-y-1 text-[13px] text-[color:var(--color-danger-fg)]">
             <li>• Mục tiêu và kế hoạch 12 tuần sẽ bị xóa</li>
             <li>• Nhật ký, review và check-in sẽ bị xóa</li>
             {isSignedIn && !isDemoMode && <li>• Dữ liệu tài khoản sẽ bị xóa khỏi hệ thống</li>}
@@ -75,9 +75,14 @@ export function DeleteDataConfirmationDialog({
         </div>
 
         <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
-          <AlertDialogCancel disabled={isLoading}>Hủy</AlertDialogCancel>
+          <AlertDialogCancel
+            disabled={isLoading}
+            className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
+          >
+            Hủy
+          </AlertDialogCancel>
           <AlertDialogAction
-            className="w-full bg-rose-600 text-white hover:bg-rose-700 focus:bg-rose-700 disabled:opacity-50"
+            className="w-full bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)]/90 focus:bg-[color:var(--color-danger-fg)]/90 disabled:opacity-50"
             disabled={isLoading}
             onClick={(event) => {
               event.preventDefault();

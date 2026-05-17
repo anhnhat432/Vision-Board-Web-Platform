@@ -315,7 +315,7 @@ describe("12-week core flows", () => {
 
       renderAppRoute("/12-week-system");
 
-      expect(await screen.findByRole("heading", { name: "Cycle 12 tuần đã kết thúc" })).toBeInTheDocument();
+      expect(await screen.findByRole("heading", { name: "Nhìn lại chu kỳ 12 tuần" })).toBeInTheDocument();
       expect(screen.getByTestId("cycle-review-panel")).toBeInTheDocument();
       expect(screen.queryByText("Hàng việc hôm nay")).not.toBeInTheDocument();
 
@@ -356,10 +356,10 @@ describe("12-week core flows", () => {
       const { router } = renderAppRoute("/12-week-system");
       const user = userEvent.setup();
 
-      await screen.findByRole("heading", { name: "Cycle 12 tuần đã kết thúc" });
+      await screen.findByRole("heading", { name: "Nhìn lại chu kỳ 12 tuần" });
       expect(screen.getByText("Chu kỳ này đã đưa bạn gần hơn với tầm nhìn 3 năm chưa?")).toBeInTheDocument();
-      await user.type(screen.getByLabelText("Bài học lớn nhất 1"), "Tiếp tục giữ review cuối tuần.");
-      await user.click(screen.getByRole("button", { name: "Lưu báo cáo cycle" }));
+      await user.type(screen.getByLabelText("Bài học 1"), "Tiếp tục giữ review cuối tuần.");
+      await user.click(screen.getByRole("button", { name: "Lưu báo cáo chu kỳ" }));
 
       await waitFor(() => {
         const reflection = getUserData().reflections.find(

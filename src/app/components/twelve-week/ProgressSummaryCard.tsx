@@ -49,15 +49,35 @@ interface ProgressSummaryCardProps {
 function getNarrativeStyle(level: ProgressTrendInterpretation["level"]) {
   switch (level) {
     case "on_track":
-      return { container: "border-emerald-200 bg-emerald-50/82", badge: "border-emerald-300 bg-white text-emerald-800", badgeLabel: "Đang đúng nhịp" };
+      return {
+        container: "border-app-line bg-app-surface",
+        badge: "border-app-accent/20 bg-app-accent-soft text-app-accent",
+        badgeLabel: "Đang đúng nhịp",
+      };
     case "early":
-      return { container: "border-sky-200 bg-sky-50/82", badge: "border-sky-300 bg-white text-sky-800", badgeLabel: "Mới bắt đầu" };
+      return {
+        container: "border-app-line bg-app-surface",
+        badge: "border-app-accent/20 bg-app-accent-soft text-app-accent",
+        badgeLabel: "Mới bắt đầu",
+      };
     case "slowing":
-      return { container: "border-amber-200 bg-amber-50/82", badge: "border-amber-300 bg-white text-amber-800", badgeLabel: "Cần chú ý" };
+      return {
+        container: "border-app-line bg-app-surface",
+        badge: "border-app-warm/30 bg-app-warm-soft text-app-warm",
+        badgeLabel: "Cần chú ý",
+      };
     case "at_risk":
-      return { container: "border-amber-200 bg-amber-50/82", badge: "border-amber-300 bg-white text-amber-800", badgeLabel: "Cần quay lại nhịp" };
+      return {
+        container: "border-app-line bg-app-surface",
+        badge: "border-app-warm/30 bg-app-warm-soft text-app-warm",
+        badgeLabel: "Cần quay lại nhịp",
+      };
     default:
-      return { container: "border-slate-200 bg-slate-50", badge: "border-slate-300 bg-white text-slate-700", badgeLabel: "Chưa có dữ liệu" };
+      return {
+        container: "border-app-line bg-app-surface",
+        badge: "border-app-line bg-app-bg text-app-ink-soft",
+        badgeLabel: "Chưa có dữ liệu",
+      };
   }
 }
 
@@ -153,24 +173,24 @@ export function ProgressSummaryCard({
   return (
     <div className="stack-section pt-4">
       <Card data-testid="progress-trend-hero" className={`border ${narrativeStyle.container}`}>
-        <CardContent className="p-5">
+        <CardContent className="p-5 md:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                <Sparkles className="h-3.5 w-3.5" />
+              <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+                <Sparkles className="h-3.5 w-3.5 text-app-accent" />
                 Trạng thái nhịp tuần này
               </p>
-              <p className="mt-2 text-base font-semibold text-slate-950 sm:text-lg">{trend.headline}</p>
-              <p className="mt-1 text-sm leading-6 text-slate-700">{trend.advice}</p>
-              <div className="mt-[var(--space-inline)] flex flex-wrap items-center gap-2">
+              <p className="mt-2 font-serif text-xl font-medium text-app-ink sm:text-2xl">{trend.headline}</p>
+              <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">{trend.advice}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
                 {trend.weekOverWeekDelta !== null && (
-                  <span className="inline-flex items-center rounded-[var(--r-pill)] border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700">
+                  <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-2.5 py-1 text-xs font-medium text-app-ink-soft">
                     {trend.trendDirection === "up" ? (
-                      <ArrowUp className="mr-1 h-3 w-3 text-emerald-600" />
+                      <ArrowUp className="mr-1 h-3 w-3 text-app-accent" />
                     ) : trend.trendDirection === "down" ? (
-                      <ArrowDown className="mr-1 h-3 w-3 text-amber-600" />
+                      <ArrowDown className="mr-1 h-3 w-3 text-app-warm" />
                     ) : (
-                      <Minus className="mr-1 h-3 w-3 text-slate-500" />
+                      <Minus className="mr-1 h-3 w-3 text-app-ink-muted" />
                     )}
                     {trend.weekOverWeekDelta > 0 ? "+" : ""}
                     {trend.weekOverWeekDelta} so với tuần trước
@@ -178,17 +198,17 @@ export function ProgressSummaryCard({
                 )}
               </div>
               {nextActionHandler && (
-                <div className="mt-4 rounded-[var(--r-control)] border border-slate-900/10 bg-white/86 p-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tiếp theo nên làm</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-800">{nextActionSuggestion.label}</p>
-                  <Button size="lg" className="mt-[var(--space-inline)] w-full sm:w-auto" onClick={nextActionHandler}>
+                <div className="mt-4 rounded-lg border border-app-line bg-app-bg p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Tiếp theo nên làm</p>
+                  <p className="mt-1 text-[13px] leading-6 text-app-ink">{nextActionSuggestion.label}</p>
+                  <Button size="lg" className="mt-3 w-full bg-app-accent text-white hover:bg-app-accent/90 sm:w-auto" onClick={nextActionHandler}>
                     {nextActionSuggestion.buttonLabel}
                     <ArrowRight className="ml-1 h-4 w-4" />
                   </Button>
                 </div>
               )}
             </div>
-            <span className={`shrink-0 rounded-[var(--r-pill)] border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${narrativeStyle.badge}`}>
+            <span className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${narrativeStyle.badge}`}>
               {narrativeStyle.badgeLabel}
             </span>
           </div>
@@ -196,15 +216,15 @@ export function ProgressSummaryCard({
       </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border border-slate-200/80 bg-white/92 shadow-sm">
+        <Card className="border border-app-line bg-app-surface">
           <CardContent className="p-5">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
               <CalendarDays className="h-3.5 w-3.5" />
               Tuần đang chạy
             </p>
-            <div className="mt-[var(--space-inline)]">
-              <p className="text-3xl font-bold text-slate-950">Tuần {boundedCurrentWeek}</p>
-              <p className="mt-1 text-sm text-slate-600">
+            <div className="mt-3">
+              <p className="font-serif text-2xl font-medium text-app-ink">Tuần {boundedCurrentWeek}</p>
+              <p className="mt-1 text-[13px] text-app-ink-muted">
                 {currentWeekRange
                   ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
                   : "Đang cập nhật phạm vi tuần"}
@@ -213,29 +233,29 @@ export function ProgressSummaryCard({
           </CardContent>
         </Card>
 
-        <Card className="border border-sky-200/80 bg-sky-50/70 shadow-lg">
+        <Card className="border border-app-line bg-app-surface">
           <CardContent className="p-5">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
-              <BarChart3 className="h-3.5 w-3.5" />
+            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+              <BarChart3 className="h-3.5 w-3.5 text-app-accent" />
               Điểm hiện tại
             </p>
-            <p className="mt-[var(--space-inline)] text-3xl font-bold text-slate-950">{currentWeekScoreValue}</p>
-            <p className="mt-1 text-sm text-slate-600">Trung bình toàn chu kỳ: {averageScore}</p>
+            <p className="mt-3 font-serif text-2xl font-medium text-app-ink">{currentWeekScoreValue}</p>
+            <p className="mt-1 text-[13px] text-app-ink-muted">Trung bình toàn chu kỳ: {averageScore}</p>
           </CardContent>
         </Card>
 
-        <Card className="border border-emerald-200/80 bg-emerald-50/70 shadow-lg">
+        <Card className="border border-app-line bg-app-surface">
           <CardContent className="p-5">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
-              <Flag className="h-3.5 w-3.5" />
+            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+              <Flag className="h-3.5 w-3.5 text-app-accent" />
               Review đã khóa
             </p>
-            <p className="mt-[var(--space-inline)] text-3xl font-bold text-slate-950">
+            <p className="mt-3 font-serif text-2xl font-medium text-app-ink">
               {isEarlyState
                 ? `Tuần ${boundedCurrentWeek}/${boundedTotalWeeks}`
                 : `${reviewDoneCount}/${boundedTotalWeeks}`}
             </p>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-[13px] text-app-ink-muted">
               {isEarlyState
                 ? "Hết tuần này thì có review đầu tiên — chưa cần gấp."
                 : `${weekCompletion.completed}/${weekCompletion.total} việc tuần này đã xong`}
@@ -244,33 +264,33 @@ export function ProgressSummaryCard({
         </Card>
       </div>
 
-      <Card className="border border-slate-200/80 bg-white/92 shadow-sm">
-        <CardContent className="stack-stack p-5">
+      <Card className="border border-app-line bg-app-surface">
+        <CardContent className="stack-stack p-5 md:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                <Target className="h-3.5 w-3.5" />
+              <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+                <Target className="h-3.5 w-3.5 text-app-accent" />
                 Bản đồ chu kỳ
               </p>
-              <p className="mt-2 text-base font-semibold text-slate-950">
+              <p className="mt-2 font-serif text-lg font-medium text-app-ink">
                 Đường chạy {boundedTotalWeeks} tuần
               </p>
-              <p className="mt-1 text-sm leading-6 text-slate-600">
+              <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">
                 Tuần hiện tại, review đã chốt và các mốc checkpoint được gom lại trong một hàng.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <div
                 data-testid="progress-current-milestone"
-                className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
+                className="rounded-lg border border-app-line bg-app-bg px-3 py-2 text-[13px] text-app-ink-soft"
               >
-                Hiện tại: <span className="font-semibold text-slate-950">{currentPhaseLabel}</span>
+                Hiện tại: <span className="font-semibold text-app-ink">{currentPhaseLabel}</span>
               </div>
               <div
                 data-testid="progress-next-milestone"
-                className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
+                className="rounded-lg border border-app-line bg-app-bg px-3 py-2 text-[13px] text-app-ink-soft"
               >
-                Mốc tiếp theo: <span className="font-semibold text-slate-950">{nextMilestoneLabel}</span>
+                Mốc tiếp theo: <span className="font-semibold text-app-ink">{nextMilestoneLabel}</span>
               </div>
             </div>
           </div>
@@ -296,14 +316,14 @@ export function ProgressSummaryCard({
                   data-milestone={isMilestone ? "true" : "false"}
                   aria-current={isCurrent ? "step" : undefined}
                   aria-label={weekLabel}
-                  className={`min-h-14 rounded-[var(--r-control)] border px-2 py-2 text-center text-xs ${
+                  className={`min-h-14 rounded-lg border px-2 py-2 text-center text-xs ${
                     isCurrent
-                      ? "border-slate-950 bg-slate-950 text-white"
+                      ? "border-app-ink bg-app-ink text-white"
                       : isReviewed
-                        ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                        ? "border-app-accent/20 bg-app-accent-soft text-app-accent"
                         : isMilestone
-                          ? "border-violet-200 bg-violet-50 text-violet-800"
-                          : "border-slate-200 bg-slate-50 text-slate-600"
+                          ? "border-app-warm/30 bg-app-warm-soft text-app-warm"
+                          : "border-app-line bg-app-bg text-app-ink-soft"
                   }`}
                 >
                   <p className="font-semibold">W{weekNumber}</p>
@@ -316,7 +336,7 @@ export function ProgressSummaryCard({
             })}
           </ol>
 
-          <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700">
+          <div className="rounded-lg border border-app-line bg-app-bg px-4 py-3 text-[13px] leading-6 text-app-ink-soft">
             {reviewDueToday
               ? "Bước tiếp theo: mở tab Tuần và chốt review trước khi thêm việc mới."
               : "Bước tiếp theo: quay lại Hôm nay và giữ một việc cụ thể trước mắt."}

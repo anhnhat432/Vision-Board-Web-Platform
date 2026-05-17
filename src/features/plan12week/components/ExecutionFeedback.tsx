@@ -1,5 +1,3 @@
-import { Card, CardContent } from "@/app/components/ui/card";
-
 import {
   generateExecutionSuggestion,
   interpretExecutionScore,
@@ -22,19 +20,41 @@ function getStatusLabel(status: ReturnType<typeof interpretExecutionScore>): str
   }
 }
 
+function getBucketBadgeClass(score: number): string {
+  if (score >= 80) return "bg-app-accent-soft text-app-accent";
+  if (score >= 50) return "bg-app-bg text-app-ink-soft border border-app-line";
+  return "bg-app-warm-soft text-app-warm";
+}
+
+function getBucketLabel(score: number): string {
+  if (score >= 80) return "Tốt";
+  if (score >= 50) return "Khá";
+  return "Cần cải thiện";
+}
+
 export function ExecutionFeedback({ score }: ExecutionFeedbackProps) {
   const status = interpretExecutionScore(score);
   const suggestion = generateExecutionSuggestion(score);
 
   return (
-    <Card className="border border-slate-200 bg-white/88 shadow-sm">
-      <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Phản hồi thực hiện</p>
-          <p className="mt-1 text-lg font-semibold text-slate-950">{getStatusLabel(status)}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+            Phản hồi thực hiện
+          </p>
+          <p className="mt-1 text-[15px] font-semibold text-app-ink">{getStatusLabel(status)}</p>
         </div>
-        <p className="max-w-3xl text-sm leading-6 text-slate-600">{suggestion}</p>
-      </CardContent>
-    </Card>
+        <div className="flex items-center gap-3">
+          <span className="font-serif text-3xl font-medium text-app-ink">{score}</span>
+          <span
+            className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${getBucketBadgeClass(score)}`}
+          >
+            {getBucketLabel(score)}
+          </span>
+        </div>
+      </div>
+      <p className="mt-3 text-[13px] leading-6 text-app-ink-soft">{suggestion}</p>
+    </div>
   );
 }

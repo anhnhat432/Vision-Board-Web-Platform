@@ -1,5 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
-import { Progress } from "@/app/components/ui/progress";
+import { CartesianGrid, Line, LineChart, ReferenceDot, Tooltip, XAxis, YAxis } from "recharts";
 
 export interface PlanProgressWeek {
   weekNumber: number;
@@ -10,62 +9,93 @@ export interface PlanProgressWeek {
 interface PlanProgressProps {
   weeks: PlanProgressWeek[];
   totalWeeks?: number;
+  currentWeek?: number;
 }
 
-function getWeekToneClass(score: number): string {
-  if (score >= 80) return "bg-emerald-500 text-emerald-950";
-  if (score >= 50) return "bg-amber-400 text-amber-950";
-  return "bg-rose-500 text-rose-950";
+interface TrendPoint {
+  week: number;
+  percent: number;
+  completed: boolean;
 }
 
-function buildWeekSlots(weeks: PlanProgressWeek[], totalWeeks: number): PlanProgressWeek[] {
+const TREND_TICKS = [1, 4, 8, 12];
+
+function buildWeekSlots(weeks: PlanProgressWeek[], totalWeeks: number): TrendPoint[] {
   return Array.from({ length: totalWeeks }, (_, index) => {
     const weekNumber = index + 1;
     const week = weeks.find((item) => item.weekNumber === weekNumber);
-
-    if (week) {
-      return week;
-    }
-
     return {
-      weekNumber,
-      executionScore: 0,
-      completed: false,
+      week: weekNumber,
+      percent: week?.executionScore ?? 0,
+      completed: week?.completed ?? false,
     };
   });
 }
 
-export function PlanProgress({ weeks, totalWeeks = 12 }: PlanProgressProps) {
-  const weekSlots = buildWeekSlots(weeks, totalWeeks);
-  const completedWeeks = weekSlots.filter((week) => week.completed).length;
-  const progress = Math.round((completedWeeks / totalWeeks) * 100);
+function getChartWidth(): number {
+  if (typeof window === "undefined") return 560;
+  return Math.max(320, Math.min(720, window.innerWidth - 64));
+}
+
+export function PlanProgress({ weeks, totalWeeks = 12, currentWeek }: PlanProgressProps) {
+  const data = buildWeekSlots(weeks, totalWeeks);
+  const completedWeeks = data.filter((week) => week.completed).length;
+  const activePoint = currentWeek ? data.find((point) => point.week === currentWeek) : null;
+  const chartWidth = getChartWidth();
 
   return (
-    <Card className="border-0 bg-white/85 shadow-sm">
-      <CardHeader className="space-y-2 pb-3">
-        <CardTitle className="text-lg text-slate-900">Tiến độ 12 tuần</CardTitle>
-        <p className="text-sm text-slate-600">
-          {completedWeeks}/{totalWeeks} weeks reviewed
+    <section className="rounded-card border border-app-line bg-app-surface p-5 md:p-6">
+      <div>
+        <h3 className="text-[15px] font-semibold text-app-ink">Đường 12 tuần</h3>
+        <p className="mt-1 text-[13px] text-app-ink-muted">
+          Tiến độ % theo tuần · {completedWeeks}/{totalWeeks} tuần đã review
         </p>
-        <Progress value={progress} className="h-2.5" />
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-12">
-          {weekSlots.map((week) => (
-            <div
-              key={week.weekNumber}
-              className={`rounded-[var(--r-tile)] px-2 py-2 text-center ${getWeekToneClass(week.executionScore)} ${
-                week.completed ? "opacity-100" : "opacity-45"
-              }`}
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.12em]">
-                Week {week.weekNumber}
-              </p>
-              <p className="mt-1 text-sm font-semibold">{week.executionScore}%</p>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      <div className="mt-5 h-[200px] overflow-hidden">
+        <LineChart data={data} width={chartWidth} height={200} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+          <CartesianGrid stroke="var(--app-line)" strokeDasharray="3 3" vertical={false} />
+          <XAxis
+            dataKey="week"
+            axisLine={false}
+            tickLine={false}
+            tick={{ fontSize: 11, fill: "var(--app-ink-muted)" }}
+            ticks={TREND_TICKS}
+          />
+          <YAxis hide domain={[0, 100]} />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "var(--app-surface)",
+              borderColor: "var(--app-line)",
+              borderRadius: "14px",
+              color: "var(--app-ink)",
+              fontSize: "12px",
+            }}
+            labelFormatter={(label) => `Tuần ${label}`}
+            formatter={(value, name) => {
+              const progress = typeof value === "number" ? `${value}%` : value;
+              return [progress, name === "percent" ? "Tiến độ" : name];
+            }}
+          />
+          <Line
+            type="monotone"
+            dataKey="percent"
+            stroke="var(--app-accent)"
+            strokeWidth={2}
+            dot={false}
+            activeDot={{ r: 5, fill: "var(--app-accent)" }}
+          />
+          {activePoint ? (
+            <ReferenceDot
+              x={activePoint.week}
+              y={activePoint.percent}
+              r={5}
+              stroke="var(--app-accent)"
+              fill="var(--app-accent)"
+            />
+          ) : null}
+        </LineChart>
+      </div>
+    </section>
   );
 }

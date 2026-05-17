@@ -40,7 +40,7 @@ export function TwelveWeekSettingsTab(props: TwelveWeekSettingsTabProps) {
             source="settings"
             context="12_week_settings"
             triggerLabel="Góp ý"
-            triggerClassName="border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+            triggerClassName="border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg"
           />
         </div>
       </SectionBlock>

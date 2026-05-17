@@ -1,9 +1,7 @@
+import { AlertCircle, Info, TrendingUp } from "lucide-react";
+
 import { evaluateTwelveWeekPlanQuality } from "../logic/planQuality";
 import type { PlanQualityInput, PlanQualityContext } from "../logic/planQuality";
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/components/ui/card";
-import { Badge } from "@/app/components/ui/badge";
-import { Alert, AlertDescription } from "@/app/components/ui/alert";
-import { AlertCircle, Info, TrendingUp } from "lucide-react";
 
 interface PlanQualityPanelProps {
   plan: {
@@ -19,6 +17,30 @@ interface PlanQualityPanelProps {
   className?: string;
 }
 
+function getBucketBadgeClass(level: string): string {
+  if (level === "strong") return "bg-app-accent-soft text-app-accent";
+  if (level === "okay") return "bg-app-bg text-app-ink-soft border border-app-line";
+  return "bg-app-warm-soft text-app-warm";
+}
+
+function getLevelLabel(level: string): string {
+  if (level === "strong") return "Tốt";
+  if (level === "okay") return "Khá";
+  return "Cần cải thiện";
+}
+
+function getDimensionFillClass(status: string): string {
+  if (status === "strong") return "bg-app-accent";
+  if (status === "okay") return "bg-app-ink-soft";
+  return "bg-app-warm";
+}
+
+function getDimensionRowClass(status: string): string {
+  if (status === "strong") return "bg-app-accent-soft";
+  if (status === "okay") return "bg-app-bg";
+  return "bg-app-warm-soft";
+}
+
 export function PlanQualityPanel({ plan, context, className = "" }: PlanQualityPanelProps) {
   const week12 = plan.weeks.find((w) => w.weekNumber === 12);
   const week4 = plan.weeks.find((w) => w.weekNumber === 4);
@@ -31,7 +53,7 @@ export function PlanQualityPanel({ plan, context, className = "" }: PlanQualityP
     leadIndicators: plan.weeks[0]?.leadMetrics.map((lm) => ({
       name: lm.name,
       target: lm.weeklyTarget.toString(),
-      schedule: [], // Not available in preview
+      schedule: [],
       type: "core" as const,
     })) ?? [],
     milestones: {
@@ -43,124 +65,81 @@ export function PlanQualityPanel({ plan, context, className = "" }: PlanQualityP
 
   const quality = evaluateTwelveWeekPlanQuality(input, context);
 
-  const getLevelColor = (level: string) => {
-    switch (level) {
-      case "strong":
-        return "bg-green-100 text-green-800 border-green-300";
-      case "okay":
-        return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      default:
-        return "bg-red-100 text-red-800 border-red-300";
-    }
-  };
-
-  const getLevelLabel = (level: string) => {
-    switch (level) {
-      case "strong":
-        return "Tốt";
-      case "okay":
-        return "Khá";
-      default:
-        return "Cần cải thiện";
-    }
-  };
-
   return (
-    <Card className={className}>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
-          <TrendingUp className="h-5 w-5" />
-          Đánh giá chất lượng kế hoạch
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Overall Score */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">Chất lượng tổng thể:</span>
-            <Badge className={`${getLevelColor(quality.level)} border`}>
-              {getLevelLabel(quality.level)} ({quality.overallScore}/100)
-            </Badge>
-          </div>
-          <div className="flex items-center gap-1">
-            {quality.dimensions.map((dim) => (
-              <div
-                key={dim.id}
-                className="flex flex-col items-center gap-0.5"
-                title={dim.label}
-              >
-                <div className="h-2 w-6 rounded-[var(--r-pill)] bg-gray-200 overflow-hidden">
-                  <div
-                    className={`h-full ${
-                      dim.status === "strong"
-                        ? "bg-green-500"
-                        : dim.status === "okay"
-                        ? "bg-yellow-500"
-                        : "bg-red-500"
-                    }`}
-                    style={{ width: `${(dim.score / dim.maxScore) * 100}%` }}
-                  />
-                </div>
-                <span className="text-[11px] text-muted-foreground">
-                  {dim.score}/{dim.maxScore}
-                </span>
+    <div className={`rounded-card border border-app-line bg-app-surface p-5 md:p-6 ${className}`}>
+      <div className="flex items-center gap-2">
+        <TrendingUp className="h-4 w-4 text-app-accent" />
+        <h3 className="text-[15px] font-semibold text-app-ink">Đánh giá nhanh kế hoạch</h3>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="font-serif text-3xl font-medium text-app-ink">{quality.overallScore}</span>
+          <span
+            className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${getBucketBadgeClass(quality.level)}`}
+          >
+            {getLevelLabel(quality.level)}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          {quality.dimensions.map((dim) => (
+            <div key={dim.id} className="flex flex-col items-center gap-0.5" title={dim.label}>
+              <div className="h-2 w-6 overflow-hidden rounded-full bg-app-line">
+                <div
+                  className={`h-full ${getDimensionFillClass(dim.status)}`}
+                  style={{ width: `${(dim.score / dim.maxScore) * 100}%` }}
+                />
               </div>
-            ))}
+              <span className="text-[11px] text-app-ink-muted">
+                {dim.score}/{dim.maxScore}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {quality.warnings.length > 0 && (
+        <div className="mt-4 rounded-lg border border-app-warm/30 bg-app-warm-soft p-3">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-app-warm" />
+            <ul className="space-y-1 text-[13px] leading-6 text-app-warm">
+              {quality.warnings.map((warning) => (
+                <li key={warning}>{warning}</li>
+              ))}
+            </ul>
           </div>
         </div>
+      )}
 
-        {/* Warnings */}
-        {quality.warnings.length > 0 && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              <ul className="ml-4 list-disc space-y-1 text-sm">
-                {quality.warnings.map((warning) => (
-                  <li key={warning}>{warning}</li>
-                ))}
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Suggestions */}
-        {quality.suggestions.length > 0 && (
-          <Alert className="bg-blue-50 border-blue-200">
-            <Info className="h-4 w-4 text-blue-600" />
-            <AlertDescription>
-              <ul className="ml-4 list-disc space-y-1 text-sm text-blue-900">
-                {quality.suggestions.map((suggestion) => (
-                  <li key={suggestion}>{suggestion}</li>
-                ))}
-              </ul>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Dimension details (optional) */}
-        <div className="rounded-[var(--r-control)] border p-3">
-          <h4 className="mb-2 text-sm font-medium">Chi tiết điểm từng tiêu chí:</h4>
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            {quality.dimensions.map((dim) => (
-              <div
-                key={dim.id}
-                className={`flex items-center justify-between rounded-[var(--r-control)] px-2 py-1 ${
-                  dim.status === "strong"
-                    ? "bg-green-50"
-                    : dim.status === "okay"
-                    ? "bg-yellow-50"
-                    : "bg-red-50"
-                }`}
-              >
-                <span>{dim.label}</span>
-                <span className="font-medium">
-                  {dim.score}/{dim.maxScore}
-                </span>
-              </div>
-            ))}
+      {quality.suggestions.length > 0 && (
+        <div className="mt-3 rounded-lg border border-app-line bg-app-bg p-3">
+          <div className="flex items-start gap-2">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" />
+            <ul className="space-y-1 text-[13px] leading-6 text-app-ink-soft">
+              {quality.suggestions.map((suggestion) => (
+                <li key={suggestion}>{suggestion}</li>
+              ))}
+            </ul>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      )}
+
+      <div className="mt-4 rounded-lg border border-app-line p-3">
+        <h4 className="mb-2 text-[13px] font-medium text-app-ink">Chi tiết từng tiêu chí</h4>
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          {quality.dimensions.map((dim) => (
+            <div
+              key={dim.id}
+              className={`flex items-center justify-between rounded-lg px-2.5 py-1.5 text-app-ink-soft ${getDimensionRowClass(dim.status)}`}
+            >
+              <span>{dim.label}</span>
+              <span className="font-medium">
+                {dim.score}/{dim.maxScore}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

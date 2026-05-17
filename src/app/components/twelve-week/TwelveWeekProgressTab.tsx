@@ -142,32 +142,32 @@ function getNarrativeStyle(level: ProgressTrendInterpretation["level"]): {
   switch (level) {
     case "on_track":
       return {
-        container: "border-emerald-200 bg-emerald-50/82",
-        badge: "border-emerald-300 bg-white text-emerald-800",
+        container: "border-app-line bg-app-surface",
+        badge: "border-app-accent/20 bg-app-accent-soft text-app-accent",
         badgeLabel: "Đang đúng nhịp",
       };
     case "early":
       return {
-        container: "border-sky-200 bg-sky-50/82",
-        badge: "border-sky-300 bg-white text-sky-800",
+        container: "border-app-line bg-app-surface",
+        badge: "border-app-accent/20 bg-app-accent-soft text-app-accent",
         badgeLabel: "Mới bắt đầu",
       };
     case "slowing":
       return {
-        container: "border-amber-200 bg-amber-50/82",
-        badge: "border-amber-300 bg-white text-amber-800",
+        container: "border-app-line bg-app-surface",
+        badge: "border-app-warm/30 bg-app-warm-soft text-app-warm",
         badgeLabel: "Cần chú ý",
       };
     case "at_risk":
       return {
-        container: "border-amber-200 bg-amber-50/82",
-        badge: "border-amber-300 bg-white text-amber-800",
+        container: "border-app-line bg-app-surface",
+        badge: "border-app-warm/30 bg-app-warm-soft text-app-warm",
         badgeLabel: "Cần quay lại nhịp",
       };
     default:
       return {
-        container: "border-slate-200 bg-slate-50",
-        badge: "border-slate-300 bg-white text-slate-700",
+        container: "border-app-line bg-app-surface",
+        badge: "border-app-line bg-app-bg text-app-ink-soft",
         badgeLabel: "Chưa có dữ liệu",
       };
   }
@@ -268,17 +268,17 @@ export function TwelveWeekProgressTab({
         icon={<Sparkles className="h-3.5 w-3.5" />}
         title={trend.headline}
         description={trend.advice}
-        titleClassName="text-base font-semibold text-foreground sm:text-lg"
-        descriptionClassName="text-sm leading-6 text-muted-foreground"
+        titleClassName="font-serif text-xl font-medium text-app-ink sm:text-2xl"
+        descriptionClassName="text-[13px] leading-6 text-app-ink-soft"
         contentClassName="stack-stack"
         action={
           nextActionHandler ? (
-            <div className="rounded-[var(--r-control)] border border-border bg-muted p-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            <div className="rounded-lg border border-app-line bg-app-bg p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
                 Tiếp theo nên làm
               </p>
-              <p className="mt-1 text-sm leading-6 text-foreground">{nextActionSuggestion.label}</p>
-              <Button size="lg" className="mt-[var(--space-inline)] w-full sm:w-auto" onClick={nextActionHandler}>
+              <p className="mt-1 text-[13px] leading-6 text-app-ink">{nextActionSuggestion.label}</p>
+              <Button size="lg" className="mt-3 w-full bg-app-accent text-white hover:bg-app-accent/90 sm:w-auto" onClick={nextActionHandler}>
                 {nextActionSuggestion.buttonLabel}
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
@@ -287,22 +287,22 @@ export function TwelveWeekProgressTab({
         }
       >
         <div className="pointer-events-none hidden justify-end sm:flex">
-          <WeeklyReviewIllustration className="-my-6 w-36 text-violet-400 opacity-60" />
+          <WeeklyReviewIllustration className="-my-6 w-36 text-app-accent opacity-60" />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span
-            className={`shrink-0 rounded-[var(--r-pill)] border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${narrativeStyle.badge}`}
+            className={`shrink-0 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${narrativeStyle.badge}`}
           >
             {narrativeStyle.badgeLabel}
           </span>
           {trend.weekOverWeekDelta !== null && (
-            <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+            <Badge variant="outline" className="border-app-line bg-app-bg text-app-ink-soft">
               {trend.trendDirection === "up" ? (
-                <ArrowUp className="mr-1 h-3 w-3 text-emerald-600" />
+                <ArrowUp className="mr-1 h-3 w-3 text-app-accent" />
               ) : trend.trendDirection === "down" ? (
-                <ArrowDown className="mr-1 h-3 w-3 text-amber-600" />
+                <ArrowDown className="mr-1 h-3 w-3 text-app-warm" />
               ) : (
-                <Minus className="mr-1 h-3 w-3 text-slate-500" />
+                <Minus className="mr-1 h-3 w-3 text-app-ink-muted" />
               )}
               {trend.weekOverWeekDelta > 0 ? "+" : ""}
               {trend.weekOverWeekDelta} so với tuần trước
@@ -330,16 +330,16 @@ export function TwelveWeekProgressTab({
         collapsible
         defaultOpen={true}
       >
-        <div className="grid gap-[var(--space-stack)] md:grid-cols-3">
-        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
+        <div className="grid gap-5 md:grid-cols-3">
+        <Card className="border border-app-line bg-app-surface">
           <CardContent className="p-5">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
               <CalendarDays className="h-3.5 w-3.5" />
               Tuần đang chạy
             </p>
-            <div className="mt-[var(--space-inline)]">
-              <p className="text-3xl font-bold text-slate-950">Tuần {currentWeek}</p>
-              <p className="mt-1 text-sm text-slate-600">
+            <div className="mt-3">
+              <p className="font-serif text-2xl font-medium text-app-ink">Tuần {currentWeek}</p>
+              <p className="mt-1 text-[13px] text-app-ink-muted">
                 {currentWeekRange
                   ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
                   : "Đang cập nhật phạm vi tuần"}
@@ -348,19 +348,19 @@ export function TwelveWeekProgressTab({
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
+        <Card className="border border-app-line bg-app-surface">
           <CardContent className="p-5">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
-              <BarChart3 className="h-3.5 w-3.5" />
+            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+              <BarChart3 className="h-3.5 w-3.5 text-app-accent" />
               Tiến độ việc lặp lại
             </p>
-            <div className="mt-[var(--space-inline)] flex items-start justify-between gap-3">
-              <p className="text-3xl font-bold text-slate-950">Việc lặp lại trung bình {averageLeadScore}%</p>
+            <div className="mt-3 flex items-start justify-between gap-3">
+              <p className="font-serif text-2xl font-medium text-app-ink">Việc lặp lại trung bình {averageLeadScore}%</p>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--r-pill)] border border-sky-200 bg-white text-sky-700 shadow-sm"
+                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-app-accent"
                     aria-label="Tại sao 85%?"
                   >
                     <CircleHelp className="h-4 w-4" />
@@ -369,25 +369,25 @@ export function TwelveWeekProgressTab({
                 <TooltipContent sideOffset={8}>{WEEKLY_EXECUTION_TARGET_TOOLTIP}</TooltipContent>
               </Tooltip>
             </div>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-[13px] text-app-ink-muted">
               Tuần hiện tại: {currentWeekScoreValue}% việc lặp lại. Điểm hệ cũ: {averageScore}
             </p>
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
+        <Card className="border border-app-line bg-app-surface">
           <CardContent className="p-5">
             {reviewDoneCount === 0 && (
-              <WeeklyReviewIllustration className="mb-3 w-24 text-emerald-600 opacity-65" />
+              <WeeklyReviewIllustration className="mb-3 w-24 text-app-accent opacity-65" />
             )}
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
-              <Flag className="h-3.5 w-3.5" />
+            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
+              <Flag className="h-3.5 w-3.5 text-app-accent" />
               Tuần đã hoàn thành
             </p>
-            <p className="mt-[var(--space-inline)] text-3xl font-bold text-slate-950">
+            <p className="mt-3 font-serif text-2xl font-medium text-app-ink">
               Đã hoàn thành {reviewDoneCount}/{system.totalWeeks} tuần
             </p>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-[13px] text-app-ink-muted">
               {isEarlyState
                 ? "Hết tuần này thì có review đầu tiên — chưa cần gấp."
                 : `${weekCompletion.completed}/${weekCompletion.total} việc tuần này đã xong`}
@@ -397,31 +397,31 @@ export function TwelveWeekProgressTab({
       </div>
       </SectionBlock>
 
-      <div className="grid gap-[var(--space-section)] lg:grid-cols-[minmax(0,1fr)_360px]">
-        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <Card className="border border-app-line bg-app-surface">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-slate-950">
-              <BarChart3 className="h-5 w-5 text-sky-700" />
+            <CardTitle className="flex items-center gap-2 text-app-ink">
+              <BarChart3 className="h-5 w-5 text-app-accent" />
               Bảng điểm 12 tuần
             </CardTitle>
-            <CardDescription className="text-slate-700">
+            <CardDescription className="text-app-ink-soft">
               Mỗi tuần được chấm từ hành vi thật: mức hoàn thành việc cốt lõi, check-in, đúng lịch và review.
             </CardDescription>
           </CardHeader>
           <CardContent className="stack-stack">
-            <div className="rounded-[var(--r-control)] border border-sky-200 bg-sky-50 p-5">
+            <div className="rounded-lg border border-app-accent/20 bg-app-accent-soft p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-slate-950">Tuần {currentWeek} đang là trọng tâm</p>
-                  <p className="mt-1 text-sm text-slate-600">
+                  <p className="text-[13px] font-semibold text-app-ink">Tuần {currentWeek} đang là trọng tâm</p>
+                  <p className="mt-1 text-[13px] text-app-ink-soft">
                     Ưu tiên duy trì việc cốt lõi và chốt review vào {getReviewDayLabel(system.reviewDay)}.
                   </p>
                 </div>
-                <Badge className="bg-sky-700 text-white hover:bg-sky-700">{currentWeekScoreValue} điểm</Badge>
+                <Badge className="bg-app-accent text-white hover:bg-app-accent">{currentWeekScoreValue} điểm</Badge>
               </div>
             </div>
 
-            <div className="grid gap-[var(--space-stack)] md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {system.scoreboard.map((week) => {
                 const isCurrentWeek = week.weekNumber === currentWeek;
                 const isReviewed = week.reviewDone;
@@ -429,24 +429,24 @@ export function TwelveWeekProgressTab({
                 return (
                   <div
                     key={week.weekNumber}
-                    className={`rounded-[var(--r-tile)] border bg-white/92 p-4 shadow-sm ring-1 ring-slate-200 ${
+                    className={`rounded-card border bg-app-surface p-4 ${
                       isCurrentWeek
-                        ? "border-slate-300"
+                        ? "border-app-ink"
                         : isReviewed
-                          ? "border-emerald-200"
-                          : "border-slate-200"
+                          ? "border-app-accent/30"
+                          : "border-app-line"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p
-                          className={`text-xs font-semibold uppercase tracking-[0.16em] ${
-                            isCurrentWeek ? "text-slate-700" : "text-slate-500"
+                          className={`text-[11px] font-semibold uppercase tracking-[0.16em] ${
+                            isCurrentWeek ? "text-app-ink" : "text-app-ink-muted"
                           }`}
                         >
                           Tuần {week.weekNumber}
                         </p>
-                        <p className="mt-2 text-3xl font-bold text-slate-950">
+                        <p className="mt-2 font-serif text-2xl font-medium text-app-ink">
                           {week.weeklyScore}
                         </p>
                       </div>
@@ -454,10 +454,10 @@ export function TwelveWeekProgressTab({
                         variant={isReviewed ? "default" : "outline"}
                         className={
                           isCurrentWeek
-                            ? "border-slate-300 bg-slate-100 text-slate-700 hover:bg-slate-100"
+                            ? "border-app-ink bg-app-ink text-white hover:bg-app-ink"
                             : isReviewed
-                              ? "bg-emerald-600 text-white hover:bg-emerald-600"
-                              : "border-slate-200 bg-white text-slate-600"
+                              ? "bg-app-accent text-white hover:bg-app-accent"
+                              : "border-app-line bg-app-bg text-app-ink-muted"
                         }
                       >
                         {isCurrentWeek ? "Đang chạy" : isReviewed ? "Đã review" : "Chưa review"}
@@ -466,31 +466,23 @@ export function TwelveWeekProgressTab({
 
                     <div className="mt-4 stack-tight">
                       <div>
-                        <div className="flex items-center justify-between text-sm text-slate-600">
+                        <div className="flex items-center justify-between text-[13px] text-app-ink-soft">
                           <span>Hoàn thành cốt lõi</span>
-                          <span className="font-semibold text-slate-900">
+                          <span className="font-semibold text-app-ink">
                             {week.leadCompletionPercent}%
                           </span>
                         </div>
                         <Progress
                           value={week.leadCompletionPercent}
-                          className={`mt-2 h-2.5 ${isCurrentWeek ? "bg-slate-100" : ""}`}
+                          className="mt-2 h-2.5"
                         />
                       </div>
 
-                      <div
-                        className={`rounded-[var(--r-control)] border px-4 py-3 ${
-                          isCurrentWeek ? "border-slate-200 bg-slate-50" : "border-slate-200 bg-white"
-                        }`}
-                      >
-                        <p
-                          className={`text-xs font-semibold uppercase tracking-[0.16em] ${
-                            isCurrentWeek ? "text-slate-600" : "text-slate-500"
-                          }`}
-                        >
+                      <div className="rounded-lg border border-app-line bg-app-bg px-4 py-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                           Chỉ số chính
                         </p>
-                        <p className="mt-1 text-sm font-medium text-slate-900">
+                        <p className="mt-1 text-[13px] font-medium text-app-ink">
                           {week.mainMetricProgress || "Chưa cập nhật"}
                         </p>
                       </div>
@@ -502,32 +494,32 @@ export function TwelveWeekProgressTab({
           </CardContent>
         </Card>
 
-        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
+        <Card className="border border-app-line bg-app-surface">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-slate-950">
-              <Target className="h-5 w-5 text-indigo-600" />
+            <CardTitle className="flex items-center gap-2 text-app-ink">
+              <Target className="h-5 w-5 text-app-accent" />
               Cột mốc và đích đến
             </CardTitle>
-            <CardDescription className="text-slate-700">
+            <CardDescription className="text-app-ink-soft">
               Nhìn lại các mốc quan trọng của chu kỳ thay vì chỉ nhìn điểm số.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="rounded-[var(--r-control)] border border-slate-200 bg-white p-5">
+            <div className="rounded-lg border border-app-line bg-app-bg p-5">
               <div className="stack-stack">
                 {milestoneItems.map((item, index) => {
                   const isLastItem = index === milestoneItems.length - 1;
 
                   return (
                     <div key={item.label} className={`relative pl-12 ${isLastItem ? "" : "pb-5"}`}>
-                      {!isLastItem && <div className="absolute left-[17px] top-9 h-full w-px bg-slate-300/70" />}
-                      <div className="absolute left-0 top-0 flex h-9 w-9 items-center justify-center rounded-[var(--r-control)] bg-slate-900 text-sm font-semibold text-white">
+                      {!isLastItem && <div className="absolute left-[17px] top-9 h-full w-px bg-app-line" />}
+                      <div className="absolute left-0 top-0 flex h-9 w-9 items-center justify-center rounded-lg bg-app-ink text-sm font-semibold text-white">
                         {index + 1}
                       </div>
-                      <p className="pt-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                      <p className="pt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                         {item.label}
                       </p>
-                      <p className="mt-2 text-sm leading-7 text-slate-800">{item.value}</p>
+                      <p className="mt-2 text-[13px] leading-7 text-app-ink-soft">{item.value}</p>
                     </div>
                   );
                 })}
@@ -540,10 +532,10 @@ export function TwelveWeekProgressTab({
       {hasAdvancedAnalytics ? (
         <div className="stack-section">
           {executionHeatmap.length > 0 && (
-            <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
+            <Card className="border border-app-line bg-app-surface">
               <CardHeader>
-                <CardTitle className="text-slate-950">Bản đồ thực thi</CardTitle>
-                <CardDescription className="text-slate-700">
+                <CardTitle className="text-app-ink">Bản đồ thực thi</CardTitle>
+                <CardDescription className="text-app-ink-soft">
                   Mỗi ô là một ngày. Màu càng đậm nghĩa là mức hoàn thành càng chắc.
                 </CardDescription>
               </CardHeader>
@@ -552,7 +544,7 @@ export function TwelveWeekProgressTab({
                   <div className="min-w-[320px] stack-tight">
                     <div className="flex gap-1 pl-10">
                       {["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map((day) => (
-                        <div key={day} className="w-9 text-center text-[11px] font-medium text-slate-500">
+                        <div key={day} className="w-9 text-center text-[11px] font-medium text-app-ink-muted">
                           {day}
                         </div>
                       ))}
@@ -563,24 +555,24 @@ export function TwelveWeekProgressTab({
 
                       return (
                         <div key={weekNumber} className="flex items-center gap-1">
-                          <span className="w-8 text-right text-[11px] font-medium text-slate-500">T{weekNumber}</span>
+                          <span className="w-8 text-right text-[11px] font-medium text-app-ink-muted">T{weekNumber}</span>
                           {cells.map((cell) => {
                             const cellClass =
                               cell.total === 0
-                                ? "bg-slate-100"
+                                ? "bg-app-bg"
                                 : cell.percent >= 80
-                                  ? "bg-emerald-500"
+                                  ? "bg-app-accent"
                                   : cell.percent >= 50
-                                    ? "bg-emerald-300"
+                                    ? "bg-app-accent/60"
                                     : cell.percent > 0
-                                      ? "bg-amber-300"
-                                      : "bg-amber-300";
+                                      ? "bg-app-warm/70"
+                                      : "bg-app-warm";
 
                             return (
                               <div
                                 key={cell.dateKey}
-                                className={`h-9 w-9 rounded-[var(--r-control)] ${cellClass} ${
-                                  weekNumber === currentWeek ? "ring-2 ring-sky-300" : ""
+                                className={`h-9 w-9 rounded-lg ${cellClass} ${
+                                  weekNumber === currentWeek ? "ring-2 ring-app-ink" : ""
                                 }`}
                                 title={`${cell.dateKey}: ${cell.completed}/${cell.total} xong`}
                               />
@@ -589,21 +581,21 @@ export function TwelveWeekProgressTab({
                         </div>
                       );
                     })}
-                    <div className="mt-[var(--space-inline)] flex flex-wrap items-center gap-3 text-[11px] text-slate-500">
+                    <div className="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-app-ink-muted">
                       <span className="flex items-center gap-1">
-                        <span className="inline-block h-3 w-3 rounded-[var(--r-control)] bg-emerald-500" /> &gt;=80%
+                        <span className="inline-block h-3 w-3 rounded bg-app-accent" /> &gt;=80%
                       </span>
                       <span className="flex items-center gap-1">
-                        <span className="inline-block h-3 w-3 rounded-[var(--r-control)] bg-emerald-300" /> 50-79%
+                        <span className="inline-block h-3 w-3 rounded bg-app-accent/60" /> 50-79%
                       </span>
                       <span className="flex items-center gap-1">
-                        <span className="inline-block h-3 w-3 rounded-[var(--r-control)] bg-amber-300" /> 1-49%
+                        <span className="inline-block h-3 w-3 rounded bg-app-warm/70" /> 1-49%
                       </span>
                       <span className="flex items-center gap-1">
-                        <span className="inline-block h-3 w-3 rounded-[var(--r-control)] bg-rose-300" /> 0%
+                        <span className="inline-block h-3 w-3 rounded bg-app-warm" /> 0%
                       </span>
                       <span className="flex items-center gap-1">
-                        <span className="inline-block h-3 w-3 rounded-[var(--r-control)] bg-slate-100 ring-1 ring-slate-200" /> Trống
+                        <span className="inline-block h-3 w-3 rounded border border-app-line bg-app-bg" /> Trống
                       </span>
                     </div>
                   </div>
@@ -613,10 +605,10 @@ export function TwelveWeekProgressTab({
           )}
 
           {weeklyTrend.length > 0 && (
-            <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
+            <Card className="border border-app-line bg-app-surface">
               <CardHeader>
-                <CardTitle className="text-slate-950">Xu hướng thực thi theo tuần</CardTitle>
-                <CardDescription className="text-slate-600">
+                <CardTitle className="text-app-ink">Xu hướng thực thi theo tuần</CardTitle>
+                <CardDescription className="text-app-ink-soft">
                   So sánh mức hoàn thành việc cốt lõi, việc tùy chọn và điểm qua các tuần.
                 </CardDescription>
               </CardHeader>
@@ -628,35 +620,35 @@ export function TwelveWeekProgressTab({
                     return (
                       <div
                         key={point.weekNumber}
-                        className={`rounded-[var(--r-control)] border p-4 ${
+                        className={`rounded-lg border p-4 ${
                           isCurrent
-                            ? "border-sky-300 bg-white shadow-md"
-                            : "border-slate-200 bg-white/80"
+                            ? "border-app-ink bg-app-surface"
+                            : "border-app-line bg-app-bg"
                         }`}
                       >
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
-                            <span className={`text-sm font-semibold ${isCurrent ? "text-sky-700" : "text-slate-700"}`}>
+                            <span className={`text-[13px] font-semibold ${isCurrent ? "text-app-ink" : "text-app-ink-soft"}`}>
                               Tuần {point.weekNumber}
                             </span>
                             {isCurrent && (
-                              <Badge className="border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-50">Đang chạy</Badge>
+                              <Badge className="border-app-accent/20 bg-app-accent-soft text-app-accent hover:bg-app-accent-soft">Đang chạy</Badge>
                             )}
                           </div>
-                          <span className="text-sm font-semibold text-slate-900">{point.score} điểm</span>
+                          <span className="text-[13px] font-semibold text-app-ink">{point.score} điểm</span>
                         </div>
-                        <div className="mt-[var(--space-inline)] grid gap-2 sm:grid-cols-2">
+                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
                           <div>
-                            <div className="flex items-center justify-between text-xs text-slate-600">
+                            <div className="flex items-center justify-between text-xs text-app-ink-soft">
                               <span>Cốt lõi</span>
-                              <span className="font-semibold text-slate-900">{point.corePercent}%</span>
+                              <span className="font-semibold text-app-ink">{point.corePercent}%</span>
                             </div>
                             <Progress value={point.corePercent} className="mt-1 h-2" />
                           </div>
                           <div>
-                            <div className="flex items-center justify-between text-xs text-slate-600">
+                            <div className="flex items-center justify-between text-xs text-app-ink-soft">
                               <span>Tùy chọn</span>
-                              <span className="font-semibold text-slate-900">{point.optionalPercent}%</span>
+                              <span className="font-semibold text-app-ink">{point.optionalPercent}%</span>
                             </div>
                             <Progress value={point.optionalPercent} className="mt-1 h-2" />
                           </div>
@@ -670,10 +662,10 @@ export function TwelveWeekProgressTab({
           )}
 
           {tacticBreakdown.length > 0 && (
-            <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
+            <Card className="border border-app-line bg-app-surface">
               <CardHeader>
-                <CardTitle className="text-slate-950">Phân tích theo việc lặp lại</CardTitle>
-                <CardDescription className="text-slate-600">
+                <CardTitle className="text-app-ink">Phân tích theo việc lặp lại</CardTitle>
+                <CardDescription className="text-app-ink-soft">
                   Chi tiết hoàn thành và xu hướng từng việc lặp lại đến tuần {currentWeek}.
                 </CardDescription>
               </CardHeader>
@@ -681,17 +673,17 @@ export function TwelveWeekProgressTab({
                 {tacticBreakdown.map((item) => (
                   <div
                     key={item.tacticId}
-                    className="flex items-center gap-4 rounded-[var(--r-control)] border border-emerald-100 bg-white px-4 py-4"
+                    className="flex items-center gap-4 rounded-lg border border-app-line bg-app-bg px-4 py-4"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="min-w-0 break-words text-sm font-semibold text-slate-950">{item.tacticName}</p>
+                        <p className="min-w-0 break-words text-[13px] font-semibold text-app-ink">{item.tacticName}</p>
                         <Badge
                           variant="outline"
                           className={
                             item.type === "core"
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                              : "border-slate-200 bg-slate-50 text-slate-600"
+                              ? "border-app-accent/20 bg-app-accent-soft text-app-accent"
+                              : "border-app-line bg-app-surface text-app-ink-muted"
                           }
                         >
                           {item.type === "core" ? "Cốt lõi" : "Tùy chọn"}
@@ -699,19 +691,19 @@ export function TwelveWeekProgressTab({
                       </div>
                       <div className="mt-2 flex items-center gap-3">
                         <Progress value={item.percent} className="h-2 flex-1" />
-                        <span className="text-sm font-semibold text-slate-800">{item.percent}%</span>
+                        <span className="text-[13px] font-semibold text-app-ink">{item.percent}%</span>
                       </div>
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-app-ink-muted">
                         {item.completedTasks}/{item.totalTasks} lần hoàn thành
                       </p>
                     </div>
                     <div
-                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-control)] ${
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                         item.trend === "up"
-                          ? "bg-emerald-100 text-emerald-700"
+                          ? "bg-app-accent-soft text-app-accent"
                           : item.trend === "down"
-                            ? "bg-amber-100 text-amber-700"
-                            : "bg-slate-100 text-slate-500"
+                            ? "bg-app-warm-soft text-app-warm"
+                            : "bg-app-bg text-app-ink-muted"
                       }`}
                     >
                       {item.trend === "up" ? (
@@ -729,19 +721,19 @@ export function TwelveWeekProgressTab({
           )}
         </div>
       ) : (
-        <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
+        <Card className="border border-app-line bg-app-surface">
           <CardContent className="flex flex-col items-center gap-4 p-8 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-[var(--r-control)] bg-violet-100 text-violet-600">
+            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
               <Lock className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-lg font-bold text-slate-950">Phân tích thực thi nâng cao</p>
-              <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-slate-600">
+              <p className="font-serif text-lg font-medium text-app-ink">Phân tích thực thi nâng cao</p>
+              <p className="mx-auto mt-2 max-w-md text-[13px] leading-7 text-app-ink-soft">
                 Bản đồ nhiệt hoàn thành, xu hướng theo tuần và phân tích từng việc lặp lại giúp bạn biết chỗ nào đang
                 mạnh, chỗ nào cần chú ý trước.
               </p>
             </div>
-            <Badge className="border-violet-200 bg-white text-violet-700 hover:bg-white">
+            <Badge className="border-app-accent/20 bg-app-accent-soft text-app-accent hover:bg-app-accent-soft">
               <TrendingUp className="mr-1.5 h-3.5 w-3.5" />
               Tính năng Plus
             </Badge>

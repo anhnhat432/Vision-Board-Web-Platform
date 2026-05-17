@@ -1,4 +1,4 @@
-import { type SyntheticEvent, useCallback, useState } from "react";
+﻿import { type SyntheticEvent, useCallback, useState } from "react";
 import { AlertTriangle, CloudDownload, CloudUpload, FileDown, RefreshCw, Trash2, WifiOff } from "lucide-react";
 import { CloudSyncIllustration, SyncErrorDot, SyncIdleDot, SyncOkDot, SyncSyncingDot } from "../illustrations";
 import { Badge } from "../ui/badge";
@@ -42,14 +42,14 @@ type MutationQueueConflictAction = "review_details" | "export_local_backup" | "k
 const MAX_VISIBLE_PULL_ISSUES = 4;
 
 function getBackendBadgeClass(status: TwelveWeekSettingsTabProps["backendConnectionStatus"]): string {
-  if (!status.authConfigured) return "border-amber-200 bg-amber-50 text-amber-800";
-  if (status.authLoading) return "border-sky-200 bg-sky-50 text-sky-800";
-  if (!status.signedIn) return "border-slate-300 bg-white text-slate-700";
-  if (!status.profileReady) return "border-violet-200 bg-violet-50 text-violet-800";
-  if (status.syncing) return "border-sky-200 bg-sky-50 text-sky-800";
-  if (status.syncStatus === "partial") return "border-amber-200 bg-amber-50 text-amber-800";
-  if (status.syncStatus === "error") return "border-amber-200 bg-amber-50 text-amber-800";
-  return "border-emerald-200 bg-emerald-50 text-emerald-800";
+  if (!status.authConfigured) return "border-app-warm/30 bg-app-warm-soft text-app-warm";
+  if (status.authLoading) return "border-app-accent/20 bg-app-accent-soft text-app-accent";
+  if (!status.signedIn) return "border-app-line bg-app-surface text-app-ink-soft";
+  if (!status.profileReady) return "border-app-accent/20 bg-app-accent-soft text-app-accent";
+  if (status.syncing) return "border-app-accent/20 bg-app-accent-soft text-app-accent";
+  if (status.syncStatus === "partial") return "border-app-warm/30 bg-app-warm-soft text-app-warm";
+  if (status.syncStatus === "error") return "border-app-warm/30 bg-app-warm-soft text-app-warm";
+  return "border-app-accent/20 bg-app-accent-soft text-app-accent";
 }
 
 function getBackendStatusDot(status: TwelveWeekSettingsTabProps["backendConnectionStatus"]) {
@@ -392,45 +392,45 @@ function MutationQueueConflictResolutionPanel({
   };
 
   return (
-    <div className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50 p-3">
+    <div className="rounded-lg border border-app-warm/30 bg-app-warm-soft p-3">
       <div className="flex items-start gap-2">
-        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-app-warm" />
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-amber-950">
+          <p className="text-sm font-semibold text-app-warm">
             Có thay đổi trên thiết bị này và trong tài khoản.
           </p>
-          <p className="mt-1 text-xs leading-5 text-amber-800">
+          <p className="mt-1 text-xs leading-5 text-app-warm">
             Ứng dụng chưa tự ghi đè để tránh mất dữ liệu. Nên tải bản sao trước khi xử lý khác biệt.
           </p>
         </div>
       </div>
 
-      <div className="mt-[var(--space-inline)] grid grid-cols-2 gap-2 text-xs sm:grid-cols-5">
-        <div className="rounded-[var(--r-control)] border border-amber-200 bg-white px-3 py-2">
-          <p className="font-semibold uppercase tracking-[0.12em] text-amber-700">Khác biệt</p>
-          <p className="mt-1 text-lg font-semibold text-slate-950">{report.summary.conflictCount}</p>
+      <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-5">
+        <div className="rounded-lg border border-app-warm/30 bg-white px-3 py-2">
+          <p className="font-semibold uppercase tracking-[0.12em] text-app-warm">Khác biệt</p>
+          <p className="mt-1 text-lg font-semibold text-app-ink">{report.summary.conflictCount}</p>
         </div>
-        <div className="rounded-[var(--r-control)] border border-amber-200 bg-white px-3 py-2">
-          <p className="font-semibold uppercase tracking-[0.12em] text-amber-700">Chỉ trên máy</p>
-          <p className="mt-1 text-lg font-semibold text-slate-950">{report.summary.localOnlyCount}</p>
+        <div className="rounded-lg border border-app-warm/30 bg-white px-3 py-2">
+          <p className="font-semibold uppercase tracking-[0.12em] text-app-warm">Chỉ trên máy</p>
+          <p className="mt-1 text-lg font-semibold text-app-ink">{report.summary.localOnlyCount}</p>
         </div>
-        <div className="rounded-[var(--r-control)] border border-amber-200 bg-white px-3 py-2">
-          <p className="font-semibold uppercase tracking-[0.12em] text-amber-700">Chỉ tài khoản</p>
-          <p className="mt-1 text-lg font-semibold text-slate-950">{report.summary.cloudOnlyCount}</p>
+        <div className="rounded-lg border border-app-warm/30 bg-white px-3 py-2">
+          <p className="font-semibold uppercase tracking-[0.12em] text-app-warm">Chỉ tài khoản</p>
+          <p className="mt-1 text-lg font-semibold text-app-ink">{report.summary.cloudOnlyCount}</p>
         </div>
-        <div className="rounded-[var(--r-control)] border border-amber-200 bg-white px-3 py-2">
-          <p className="font-semibold uppercase tracking-[0.12em] text-amber-700">Thiếu liên kết</p>
-          <p className="mt-1 text-lg font-semibold text-slate-950">{report.summary.missingClientIdCount}</p>
+        <div className="rounded-lg border border-app-warm/30 bg-white px-3 py-2">
+          <p className="font-semibold uppercase tracking-[0.12em] text-app-warm">Thiếu liên kết</p>
+          <p className="mt-1 text-lg font-semibold text-app-ink">{report.summary.missingClientIdCount}</p>
         </div>
-        <div className="rounded-[var(--r-control)] border border-amber-200 bg-white px-3 py-2">
-          <p className="font-semibold uppercase tracking-[0.12em] text-amber-700">Cần kiểm tra</p>
-          <p className="mt-1 text-lg font-semibold text-slate-950">{report.summary.unsupportedFieldCount}</p>
+        <div className="rounded-lg border border-app-warm/30 bg-white px-3 py-2">
+          <p className="font-semibold uppercase tracking-[0.12em] text-app-warm">Cần kiểm tra</p>
+          <p className="mt-1 text-lg font-semibold text-app-ink">{report.summary.unsupportedFieldCount}</p>
         </div>
       </div>
 
-      <details className="mt-[var(--space-inline)] rounded-[var(--r-control)] border border-amber-200 bg-white p-3" onToggle={handleDetailsToggle}>
-        <summary className="cursor-pointer text-sm font-semibold text-slate-900">Xem chi tiết</summary>
-        <div className="mt-[var(--space-inline)] stack-tight text-xs leading-5 text-slate-600">
+      <details className="mt-3 rounded-lg border border-app-warm/30 bg-white p-3" onToggle={handleDetailsToggle}>
+        <summary className="cursor-pointer text-sm font-semibold text-app-ink">Xem chi tiết</summary>
+        <div className="mt-3 stack-tight text-xs leading-5 text-app-ink-soft">
           <p>
             Chi tiết bên dưới chỉ hiển thị loại dữ liệu và số lượng. Nội dung ghi chú, nhìn lại, check-in hoặc review
             không được mở ra ở đây.
@@ -440,9 +440,9 @@ function MutationQueueConflictResolutionPanel({
               {visibleConflicts.map((conflict) => (
                 <div
                   key={`${conflict.kind}-${conflict.reason}`}
-                  className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-2"
+                  className="rounded-lg border border-app-line bg-app-bg p-2"
                 >
-                  <p className="font-semibold text-slate-900">{getPullEntityKindLabel(conflict.kind)}</p>
+                  <p className="font-semibold text-app-ink">{getPullEntityKindLabel(conflict.kind)}</p>
                   <p className="mt-1">{getPullConflictReasonLabel(conflict.reason)}</p>
                 </div>
               ))}
@@ -457,7 +457,7 @@ function MutationQueueConflictResolutionPanel({
           ) : null}
           {visibleUnsupportedFields.length > 0 ? (
             <div>
-              <p className="font-semibold text-slate-900">Mục chưa tự xử lý:</p>
+              <p className="font-semibold text-app-ink">Mục chưa tự xử lý:</p>
               <ul className="mt-1 list-disc space-y-1 pl-4">
                 {visibleUnsupportedFields.map((field) => (
                   <li key={field.field}>{field.field}</li>
@@ -469,11 +469,11 @@ function MutationQueueConflictResolutionPanel({
         </div>
       </details>
 
-      <div className="mt-[var(--space-inline)] grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <Button
           type="button"
           variant="outline"
-          className="whitespace-normal border-amber-200 bg-white text-center text-slate-800 hover:bg-amber-50"
+          className="whitespace-normal border-app-warm/30 bg-white text-center text-app-ink hover:bg-app-warm-soft"
           onClick={handleExport}
         >
           <FileDown className="mr-2 h-4 w-4" />
@@ -482,7 +482,7 @@ function MutationQueueConflictResolutionPanel({
         <Button
           type="button"
           variant="outline"
-          className="whitespace-normal border-amber-200 bg-white text-center text-slate-800 hover:bg-amber-50"
+          className="whitespace-normal border-app-warm/30 bg-white text-center text-app-ink hover:bg-app-warm-soft"
           onClick={handleKeepLocal}
         >
           Giữ bản trên thiết bị
@@ -490,7 +490,7 @@ function MutationQueueConflictResolutionPanel({
         <Button
           type="button"
           variant="outline"
-          className="whitespace-normal border-amber-200 bg-white text-center text-slate-800 hover:bg-amber-50"
+          className="whitespace-normal border-app-warm/30 bg-white text-center text-app-ink hover:bg-app-warm-soft"
           disabled={syncLoading}
           onClick={handleRetry}
         >
@@ -500,7 +500,7 @@ function MutationQueueConflictResolutionPanel({
         <Button
           type="button"
           variant="outline"
-          className="whitespace-normal border-amber-200 bg-white text-center text-slate-800 hover:bg-amber-50"
+          className="whitespace-normal border-app-warm/30 bg-white text-center text-app-ink hover:bg-app-warm-soft"
           disabled={!canUseCloudVersion}
           onClick={handleShowCloudConfirm}
         >
@@ -510,13 +510,13 @@ function MutationQueueConflictResolutionPanel({
       </div>
 
       {!canUseCloudVersion && hasPendingLocalMutations ? (
-        <p className="mt-2 text-xs leading-5 text-amber-800">
+        <p className="mt-2 text-xs leading-5 text-app-warm">
           Không thể dùng bản tài khoản khi vẫn còn thay đổi trên thiết bị chưa gửi. Thử đồng bộ lại trước.
         </p>
       ) : null}
 
       {showCloudConfirm ? (
-        <div className="mt-[var(--space-inline)] rounded-[var(--r-control)] border border-red-200 bg-red-50 p-3">
+        <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3">
           <p className="text-sm font-semibold text-red-900">
             Xác nhận dùng dữ liệu từ tài khoản
           </p>
@@ -524,7 +524,7 @@ function MutationQueueConflictResolutionPanel({
             Hành động này sẽ thay thế toàn bộ dữ liệu 12 tuần trên thiết bị này bằng bản từ tài khoản.
             Khuyên bạn tải bản sao trước khi tiếp tục.
           </p>
-          <label className="mt-[var(--space-inline)] flex cursor-pointer items-start gap-2 text-xs text-red-800">
+          <label className="mt-3 flex cursor-pointer items-start gap-2 text-xs text-red-800">
             <input
               type="checkbox"
               className="mt-0.5"
@@ -533,7 +533,7 @@ function MutationQueueConflictResolutionPanel({
             />
             <span>Tôi đã tải bản sao hoặc chấp nhận thay dữ liệu hiện tại trên thiết bị.</span>
           </label>
-          <div className="mt-[var(--space-inline)] flex gap-2">
+          <div className="mt-3 flex gap-2">
             <Button
               type="button"
               variant="outline"
@@ -547,7 +547,7 @@ function MutationQueueConflictResolutionPanel({
             <Button
               type="button"
               variant="outline"
-              className="border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
+              className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
               onClick={() => { setShowCloudConfirm(false); setConfirmExported(false); }}
             >
               Hủy
@@ -557,7 +557,7 @@ function MutationQueueConflictResolutionPanel({
       ) : null}
 
       {keptLocal ? (
-        <p className="mt-[var(--space-inline)] rounded-[var(--r-control)] border border-amber-200 bg-white px-3 py-2 text-xs leading-5 text-amber-800">
+        <p className="mt-3 rounded-lg border border-app-warm/30 bg-white px-3 py-2 text-xs leading-5 text-app-warm">
           Đã giữ bản trên thiết bị cho hiện tại. Không có dữ liệu nào bị xóa hoặc ghi đè.
         </p>
       ) : null}
@@ -603,26 +603,26 @@ export function TwelveWeekLocalStatusSection({
   const BackendStatusDot = getBackendStatusDot(backendConnectionStatus);
 
   return (
-    <div className="rounded-[var(--r-control)] border border-slate-200 bg-white p-5 shadow-lg">
+    <div className="rounded-lg border border-app-line bg-app-surface p-5 shadow-lg">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Đồng bộ tài khoản</p>
-          <p className="mt-2 text-lg font-semibold text-slate-950">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Đồng bộ tài khoản</p>
+          <p className="mt-2 text-lg font-semibold text-app-ink">
             Các tiện ích dưới đây giúp kiểm tra và bảo vệ dữ liệu trước khi đồng bộ.
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-3">
-          <CloudSyncIllustration className="hidden w-28 text-violet-500 opacity-70 sm:block" />
-          <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">
+          <CloudSyncIllustration className="hidden w-28 text-app-accent opacity-70 sm:block" />
+          <Badge variant="outline" className="border-app-line bg-app-bg text-app-ink-soft">
             Thiết bị này
           </Badge>
         </div>
       </div>
-      <div className="mt-4 rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-4 py-4">
+      <div className="mt-4 rounded-lg border border-app-line bg-app-bg px-4 py-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Đồng bộ tài khoản</p>
-            <p className="mt-2 text-sm leading-6 text-slate-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Đồng bộ tài khoản</p>
+            <p className="mt-2 text-sm leading-6 text-app-ink-soft">
               {getBackendStatusDescription(backendConnectionStatus)}
             </p>
           </div>
@@ -631,22 +631,22 @@ export function TwelveWeekLocalStatusSection({
             {getBackendStatusLabel(backendConnectionStatus)}
           </Badge>
         </div>
-        <div className="mt-4 rounded-[var(--r-control)] border border-slate-200 bg-white p-3">
+        <div className="mt-4 rounded-lg border border-app-line bg-app-surface p-3">
           <div className="flex flex-col gap-3">
             <div className="min-w-0 space-y-1">
-              <p className="text-sm leading-6 text-slate-700">
+              <p className="text-sm leading-6 text-app-ink-soft">
                 {isHydratingBackendPlans
                   ? "Đang kiểm tra tài khoản và khôi phục các chu kỳ còn thiếu."
                   : getBackendHydrationDescription(lastBackendHydrationResult)}
               </p>
-              <p className="text-xs leading-5 text-slate-500">
+              <p className="text-xs leading-5 text-app-ink-muted">
                 Hành động này không tự xóa dữ liệu trên thiết bị khi phát hiện khác biệt.
               </p>
             </div>
             <Button
               type="button"
               variant="outline"
-              className="w-full whitespace-normal border-slate-200 bg-white text-center text-slate-800 hover:bg-slate-50"
+              className="w-full whitespace-normal border-app-line bg-app-surface text-center text-app-ink hover:bg-app-bg"
               disabled={!canHydrateBackendPlans}
               onClick={onHydrateBackendPlans}
             >
@@ -656,12 +656,12 @@ export function TwelveWeekLocalStatusSection({
           </div>
         </div>
         {conflictGroups.length > 0 ? (
-          <div className="mt-4 stack-tight rounded-[var(--r-control)] border border-amber-200 bg-amber-50 p-3">
+          <div className="mt-4 stack-tight rounded-lg border border-app-warm/30 bg-app-warm-soft p-3">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-app-warm" />
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-amber-950">Cần chọn nguồn dữ liệu</p>
-                <p className="mt-1 text-xs leading-5 text-amber-800">
+                <p className="text-sm font-semibold text-app-warm">Cần chọn nguồn dữ liệu</p>
+                <p className="mt-1 text-xs leading-5 text-app-warm">
                   Dữ liệu trên thiết bị và tài khoản đang khác nhau. Chưa có dữ liệu nào bị ghi đè; chọn bản muốn giữ cho từng chu kỳ
                   trước khi web tự đồng bộ tiếp.
                 </p>
@@ -673,61 +673,61 @@ export function TwelveWeekLocalStatusSection({
               const hiddenCount = group.conflicts.length - visibleConflicts.length;
 
               return (
-                <div key={group.goalId} className="rounded-[var(--r-control)] border border-amber-200 bg-white p-3">
+                <div key={group.goalId} className="rounded-lg border border-app-warm/30 bg-white p-3">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
-                      <p className="break-words text-sm font-semibold text-slate-950">{group.goalTitle}</p>
+                      <p className="break-words text-sm font-semibold text-app-ink">{group.goalTitle}</p>
                       {group.planVision ? (
-                        <p className="mt-1 break-words text-xs leading-5 text-slate-600">{group.planVision}</p>
+                        <p className="mt-1 break-words text-xs leading-5 text-app-ink-soft">{group.planVision}</p>
                       ) : null}
                     </div>
-                    <Badge variant="outline" className="w-fit border-amber-200 bg-amber-50 text-amber-800">
+                    <Badge variant="outline" className="w-fit border-app-warm/30 bg-app-warm-soft text-app-warm">
                       {group.conflicts.length} khác biệt
                     </Badge>
                   </div>
-                  <div className="mt-[var(--space-inline)] space-y-2">
+                  <div className="mt-3 space-y-2">
                     {visibleConflicts.map((conflict, index) => (
                       <div
                         key={`${conflict.kind}-${conflict.localId ?? conflict.backendId ?? index}`}
-                        className="grid gap-2 rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-2 text-xs sm:grid-cols-[150px_minmax(0,1fr)_minmax(0,1fr)]"
+                        className="grid gap-2 rounded-lg border border-app-line bg-app-bg p-2 text-xs sm:grid-cols-[150px_minmax(0,1fr)_minmax(0,1fr)]"
                       >
                         <div className="min-w-0">
-                          <p className="font-semibold text-slate-800">{getConflictKindLabel(conflict.kind)}</p>
-                          <p className="mt-1 text-slate-500">{getConflictScopeLabel(conflict)}</p>
+                          <p className="font-semibold text-app-ink">{getConflictKindLabel(conflict.kind)}</p>
+                          <p className="mt-1 text-app-ink-muted">{getConflictScopeLabel(conflict)}</p>
                         </div>
-                        <div className="min-w-0 rounded-[var(--r-control)] bg-white p-2">
-                          <p className="font-semibold uppercase tracking-[0.12em] text-slate-400">Thiết bị</p>
-                          <p className="mt-1 break-words text-slate-800">
+                        <div className="min-w-0 rounded-lg bg-white p-2">
+                          <p className="font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Thiết bị</p>
+                          <p className="mt-1 break-words text-app-ink">
                             {getConflictValueLabel(conflict.localValue)}
                           </p>
                         </div>
-                        <div className="min-w-0 rounded-[var(--r-control)] bg-white p-2">
-                          <p className="font-semibold uppercase tracking-[0.12em] text-slate-400">Tài khoản</p>
-                          <p className="mt-1 break-words text-slate-800">
+                        <div className="min-w-0 rounded-lg bg-white p-2">
+                          <p className="font-semibold uppercase tracking-[0.12em] text-app-ink-muted">Tài khoản</p>
+                          <p className="mt-1 break-words text-app-ink">
                             {getConflictValueLabel(conflict.backendValue)}
                           </p>
                         </div>
                       </div>
                     ))}
                     {hiddenCount > 0 ? (
-                      <p className="text-xs text-slate-600">Còn {hiddenCount} khác biệt khác trong chu kỳ này.</p>
+                      <p className="text-xs text-app-ink-soft">Còn {hiddenCount} khác biệt khác trong chu kỳ này.</p>
                     ) : null}
                   </div>
-                  <div className="mt-[var(--space-inline)] grid gap-2 text-xs sm:grid-cols-2">
-                    <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-2 leading-5 text-slate-600">
-                      <span className="font-semibold text-slate-900">Dùng bản tài khoản:</span> thay dữ liệu trên thiết bị của chu
+                  <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
+                    <div className="rounded-lg border border-app-line bg-app-bg p-2 leading-5 text-app-ink-soft">
+                      <span className="font-semibold text-app-ink">Dùng bản tài khoản:</span> thay dữ liệu trên thiết bị của chu
                       kỳ này bằng bản đang lưu trong tài khoản.
                     </div>
-                    <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 p-2 leading-5 text-slate-600">
-                      <span className="font-semibold text-slate-900">Giữ bản thiết bị:</span> dùng dữ liệu trên thiết bị này
+                    <div className="rounded-lg border border-app-line bg-app-bg p-2 leading-5 text-app-ink-soft">
+                      <span className="font-semibold text-app-ink">Giữ bản thiết bị:</span> dùng dữ liệu trên thiết bị này
                       làm bản chính.
                     </div>
                   </div>
-                  <div className="mt-[var(--space-inline)] flex flex-col gap-2 sm:flex-row sm:justify-end">
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end">
                     <Button
                       type="button"
                       variant="outline"
-                      className="whitespace-normal border-slate-200 bg-white text-center text-slate-800 hover:bg-slate-50 sm:whitespace-nowrap"
+                      className="whitespace-normal border-app-line bg-app-surface text-center text-app-ink hover:bg-app-bg sm:whitespace-nowrap"
                       disabled={isResolvingBackendPlanConflicts}
                       onClick={() => onUseBackendPlanForConflicts(group.goalId)}
                     >
@@ -737,7 +737,7 @@ export function TwelveWeekLocalStatusSection({
                     <Button
                       type="button"
                       variant="outline"
-                      className="whitespace-normal border-slate-200 bg-white text-center text-slate-800 hover:bg-slate-50 sm:whitespace-nowrap"
+                      className="whitespace-normal border-app-line bg-app-surface text-center text-app-ink hover:bg-app-bg sm:whitespace-nowrap"
                       disabled={isResolvingBackendPlanConflicts}
                       onClick={() => onKeepLocalPlanForConflicts(group.goalId)}
                     >
@@ -750,88 +750,88 @@ export function TwelveWeekLocalStatusSection({
             })}
           </div>
         ) : null}
-        <div className="mt-4 rounded-[var(--r-control)] border border-slate-200 bg-white p-3">
+        <div className="mt-4 rounded-lg border border-app-line bg-app-surface p-3">
           <div className="flex flex-col gap-3">
             <div className="min-w-0 space-y-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">
                   Việc đang chờ đồng bộ
                 </p>
                 <Badge
                   variant="outline"
                   className={
                     mutationQueueBlocker
-                      ? "border-slate-200 bg-slate-50 text-slate-700"
-                      : "border-emerald-200 bg-emerald-50 text-emerald-800"
+                      ? "border-app-line bg-app-bg text-app-ink-soft"
+                      : "border-app-accent/20 bg-app-accent-soft text-app-accent"
                   }
                 >
                   {mutationQueueBlocker ? "Chưa bật" : "Sẵn sàng"}
                 </Badge>
               </div>
-              <p className="text-sm leading-6 text-slate-700">
+              <p className="text-sm leading-6 text-app-ink-soft">
                 {mutationQueueBlocker ??
                   "Gửi các việc đang chờ đồng bộ, lấy dữ liệu tài khoản, rồi chỉ cập nhật thiết bị nếu an toàn. Dữ liệu trên thiết bị vẫn được ưu tiên."}
               </p>
               <div className="grid grid-cols-2 gap-2 pt-2 sm:grid-cols-4">
-                <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Chờ đồng bộ</p>
-                  <p className="mt-1 text-lg font-semibold text-slate-950">{queueSummary.pendingCount}</p>
+                <div className="rounded-lg border border-app-line bg-app-bg px-3 py-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Chờ đồng bộ</p>
+                  <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.pendingCount}</p>
                 </div>
-                <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Đang gửi</p>
-                  <p className="mt-1 text-lg font-semibold text-slate-950">{queueSummary.inFlightCount}</p>
+                <div className="rounded-lg border border-app-line bg-app-bg px-3 py-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Đang gửi</p>
+                  <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.inFlightCount}</p>
                 </div>
-                <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Lỗi/thử lại</p>
-                  <p className="mt-1 text-lg font-semibold text-slate-950">{queueSummary.failedOrRetryableCount}</p>
+                <div className="rounded-lg border border-app-line bg-app-bg px-3 py-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Lỗi/thử lại</p>
+                  <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.failedOrRetryableCount}</p>
                 </div>
-                <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Đã nhận</p>
-                  <p className="mt-1 text-lg font-semibold text-slate-950">{queueSummary.succeededCount}</p>
+                <div className="rounded-lg border border-app-line bg-app-bg px-3 py-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Đã nhận</p>
+                  <p className="mt-1 text-lg font-semibold text-app-ink">{queueSummary.succeededCount}</p>
                 </div>
               </div>
-              <div className="grid gap-2 pt-2 text-xs leading-5 text-slate-500 sm:grid-cols-2">
+              <div className="grid gap-2 pt-2 text-xs leading-5 text-app-ink-muted sm:grid-cols-2">
                 <p>
-                  <span className="font-semibold text-slate-700">Bắt đầu đồng bộ gần nhất:</span>{" "}
+                  <span className="font-semibold text-app-ink-soft">Bắt đầu đồng bộ gần nhất:</span>{" "}
                   {formatMutationQueueTimestamp(queueSummary.lastDrainStartedAt)}
                 </p>
                 <p>
-                  <span className="font-semibold text-slate-700">Kết thúc đồng bộ gần nhất:</span>{" "}
+                  <span className="font-semibold text-app-ink-soft">Kết thúc đồng bộ gần nhất:</span>{" "}
                   {formatMutationQueueTimestamp(queueSummary.lastDrainFinishedAt)}
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-2 pt-2 sm:grid-cols-3">
-                <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Mạng</p>
+                <div className="rounded-lg border border-app-line bg-app-bg px-3 py-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Mạng</p>
                   <p className={`mt-1 text-sm font-semibold ${
                     mutationQueueSyncStatus.networkStatus === "offline"
-                      ? "text-amber-700"
+                      ? "text-app-warm"
                       : mutationQueueSyncStatus.networkStatus === "online"
-                        ? "text-emerald-700"
-                        : "text-slate-500"
+                        ? "text-app-accent"
+                        : "text-app-ink-muted"
                   }`}>
                     {mutationQueueSyncStatus.networkStatus === "offline" ? "Mất mạng" : mutationQueueSyncStatus.networkStatus === "online" ? "Có mạng" : "Không rõ"}
                   </p>
                 </div>
-                <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-2">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Tự thử lại khi có mạng</p>
-                  <p className="mt-1 text-sm font-semibold text-slate-950">
+                <div className="rounded-lg border border-app-line bg-app-bg px-3 py-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">Tự thử lại khi có mạng</p>
+                  <p className="mt-1 text-sm font-semibold text-app-ink">
                     {mutationQueueSyncStatus.retryOnReconnectEnabled ? "Bật" : "Tắt"}
                   </p>
                 </div>
               </div>
               {mutationQueueSyncStatus.networkStatus === "offline" ? (
-                <div className="flex items-start gap-2 rounded-[var(--r-control)] border border-amber-200 bg-amber-50 px-3 py-2">
-                  <WifiOff className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-                  <p className="text-xs leading-5 text-amber-800">
+                <div className="flex items-start gap-2 rounded-lg border border-app-warm/30 bg-app-warm-soft px-3 py-2">
+                  <WifiOff className="mt-0.5 h-4 w-4 shrink-0 text-app-warm" />
+                  <p className="text-xs leading-5 text-app-warm">
                     Trình duyệt đang mất mạng. Thay đổi vẫn lưu trên thiết bị và sẽ đồng bộ khi có mạng.
                   </p>
                 </div>
               ) : null}
-              <p className="text-xs leading-5 text-slate-500">
+              <p className="text-xs leading-5 text-app-ink-muted">
                 Dữ liệu trên thiết bị vẫn an toàn nếu đồng bộ lỗi; phần này chỉ dành cho kiểm thử nội bộ.
               </p>
-              <p className="text-xs leading-5 text-slate-500">
+              <p className="text-xs leading-5 text-app-ink-muted">
                 {getMutationQueueResultDescription(mutationQueueSyncStatus.lastResult)}
               </p>
             </div>
@@ -846,7 +846,7 @@ export function TwelveWeekLocalStatusSection({
             <Button
               type="button"
               variant="outline"
-              className="w-full whitespace-normal border-slate-200 bg-white text-center text-slate-800 hover:bg-slate-50"
+              className="w-full whitespace-normal border-app-line bg-app-surface text-center text-app-ink hover:bg-app-bg"
               disabled={!canRunMutationQueueSync}
               onClick={onRunMutationQueueSync}
             >
@@ -857,7 +857,7 @@ export function TwelveWeekLocalStatusSection({
               <Button
                 type="button"
                 variant="outline"
-                className="w-full whitespace-normal border-slate-200 bg-white text-center text-slate-800 hover:bg-slate-50"
+                className="w-full whitespace-normal border-app-line bg-app-surface text-center text-app-ink hover:bg-app-bg"
                 disabled={!canRunMutationQueueSync}
                 onClick={onExportCloudWorkspace}
               >
@@ -875,7 +875,7 @@ export function TwelveWeekLocalStatusSection({
                 Xóa dữ liệu tài khoản
               </Button>
             </div>
-            <p className="text-xs leading-5 text-slate-500">
+            <p className="text-xs leading-5 text-app-ink-muted">
               Tải bản sao dữ liệu tài khoản về thiết bị. Xóa dữ liệu tài khoản chỉ xóa dữ liệu 12 tuần trên tài khoản,
               không xóa dữ liệu trên thiết bị, gói Plus hay tài khoản đăng nhập.
             </p>
@@ -883,27 +883,27 @@ export function TwelveWeekLocalStatusSection({
         </div>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-2">
-        <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Nhắc việc</p>
-          <p className="mt-2 text-sm font-semibold text-slate-950">
+        <div className="rounded-lg border border-app-line bg-app-bg px-3 py-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Nhắc việc</p>
+          <p className="mt-2 text-sm font-semibold text-app-ink">
             {appPreferences.enableInAppReminders ? "Bật" : "Tắt"}
           </p>
         </div>
-        <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Thiết bị</p>
-          <p className="mt-2 text-sm font-semibold text-slate-950">
+        <div className="rounded-lg border border-app-line bg-app-bg px-3 py-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Thiết bị</p>
+          <p className="mt-2 text-sm font-semibold text-app-ink">
             {appPreferences.enableBrowserNotifications ? "Bật" : "Tắt"}
           </p>
         </div>
-        <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Phân tích</p>
-          <p className="mt-2 text-sm font-semibold text-slate-950">
+        <div className="rounded-lg border border-app-line bg-app-bg px-3 py-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Phân tích</p>
+          <p className="mt-2 text-sm font-semibold text-app-ink">
             {appPreferences.allowLocalAnalytics ? "Bật" : "Tắt"}
           </p>
         </div>
-        <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-3 py-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Việc đang chờ đồng bộ</p>
-          <p className="mt-2 text-sm font-semibold text-slate-950">{pendingOutboxCount} chờ</p>
+        <div className="rounded-lg border border-app-line bg-app-bg px-3 py-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Việc đang chờ đồng bộ</p>
+          <p className="mt-2 text-sm font-semibold text-app-ink">{pendingOutboxCount} chờ</p>
         </div>
       </div>
     </div>

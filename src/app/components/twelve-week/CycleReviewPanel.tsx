@@ -27,7 +27,7 @@ function sanitizeLessons(lessons: readonly string[]): string[] {
 }
 
 function EmptyListItem({ children }: { children: string }) {
-  return <li className="rounded-[var(--r-control)] border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">{children}</li>;
+  return <li className="rounded-lg border border-dashed border-app-line bg-app-bg px-4 py-3 text-[13px] text-app-ink-muted">{children}</li>;
 }
 
 export function CycleReviewPanel({
@@ -59,14 +59,14 @@ export function CycleReviewPanel({
     <section data-testid="cycle-review-panel" className="stack-section">
       <PrimaryActionCard
         hero
-        tone="emerald"
-        eyebrow={`Cycle ${system.cycleNumber ?? 1} đã kết thúc`}
+        tone="primary"
+        eyebrow={`Chu kỳ ${system.cycleNumber ?? 1} đã kết thúc`}
         icon={<Trophy className="h-4 w-4" />}
-        title="Cycle 12 tuần đã kết thúc"
+        title="Nhìn lại chu kỳ 12 tuần"
         titleAs="h2"
         description={`Đây là tuần 13: nhìn lại chu kỳ cũ, chốt bài học, rồi chuẩn bị chu kỳ tiếp theo cho mục tiêu ${goal.title}.`}
-        titleClassName="text-2xl font-semibold text-foreground"
-        descriptionClassName="max-w-3xl text-sm leading-7 text-muted-foreground"
+        titleClassName="font-serif text-2xl font-medium text-app-ink"
+        descriptionClassName="max-w-3xl text-[13px] leading-7 text-app-ink-soft"
         contentClassName="stack-stack"
         actionClassName="flex flex-col gap-3 sm:flex-row"
         action={
@@ -89,12 +89,12 @@ export function CycleReviewPanel({
         }
       >
         <div className="pointer-events-none hidden justify-end sm:flex">
-          <WeeklyReviewIllustration className="-my-6 w-40 text-emerald-400 opacity-60" />
+          <WeeklyReviewIllustration className="-my-6 w-40 text-app-accent opacity-60" />
         </div>
         {aspirationalVisionSummary ? (
-          <div className="rounded-[var(--r-control)] border border-border bg-muted px-4 py-3 text-sm text-muted-foreground">
-            <p className="font-semibold text-foreground">Chu kỳ này đã đưa bạn gần hơn với tầm nhìn 3 năm chưa?</p>
-            <p className="mt-1 text-muted-foreground">{aspirationalVisionSummary}</p>
+          <div className="rounded-lg border border-app-warm/30 bg-app-warm-soft px-4 py-3 text-[13px] text-app-ink-soft">
+            <p className="font-serif text-base font-medium text-app-ink">Chu kỳ này đã đưa bạn gần hơn với tầm nhìn 3 năm chưa?</p>
+            <p className="mt-1 text-app-ink-soft">{aspirationalVisionSummary}</p>
           </div>
         ) : null}
       </PrimaryActionCard>
@@ -103,26 +103,26 @@ export function CycleReviewPanel({
         {kpis.map(({ label, value, icon: Icon }) => (
           <div
             key={label}
-            className="rounded-[var(--r-control)] border border-slate-200/80 bg-white/92 p-4 shadow-sm ring-1 ring-slate-200"
+            className="rounded-card border border-app-line bg-app-surface p-4"
           >
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-              <Icon className="h-3.5 w-3.5 text-emerald-700" />
+            <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+              <Icon className="h-3.5 w-3.5 text-app-accent" />
               {label}
             </p>
-            <p className="mt-[var(--space-inline)] text-3xl font-bold text-slate-950">{value}</p>
+            <p className="mt-3 font-serif text-2xl font-medium text-app-ink">{value}</p>
           </div>
         ))}
       </div>
 
-      <Card className="border border-slate-200/80 bg-white/92 shadow-sm ring-1 ring-slate-200">
-        <CardContent className="stack-section p-5">
+      <Card className="border border-app-line bg-app-surface">
+        <CardContent className="stack-section p-6 md:p-8">
           <div className="grid gap-4 lg:grid-cols-2">
             <div className="stack-tight">
-              <h2 className="text-base font-semibold text-slate-950">Biggest wins</h2>
+              <h2 className="font-serif text-lg font-medium text-app-ink">Thắng lớn nhất</h2>
               <ul className="stack-tight">
                 {summary.biggestWins.length > 0 ? (
                   summary.biggestWins.map((win) => (
-                    <li key={win} className="rounded-[var(--r-control)] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                    <li key={win} className="rounded-lg border border-app-accent/20 bg-app-accent-soft px-4 py-3 text-[13px] text-app-accent">
                       {win}
                     </li>
                   ))
@@ -132,11 +132,11 @@ export function CycleReviewPanel({
               </ul>
             </div>
             <div className="stack-tight">
-              <h2 className="text-base font-semibold text-slate-950">Top adjustments</h2>
+              <h2 className="font-serif text-lg font-medium text-app-ink">Điều cần điều chỉnh</h2>
               <ul className="stack-tight">
                 {summary.topAdjustments.length > 0 ? (
                   summary.topAdjustments.map((adjustment) => (
-                    <li key={adjustment} className="rounded-[var(--r-control)] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    <li key={adjustment} className="rounded-lg border border-app-warm/30 bg-app-warm-soft px-4 py-3 text-[13px] text-app-warm">
                       {adjustment}
                     </li>
                   ))
@@ -147,20 +147,21 @@ export function CycleReviewPanel({
             </div>
           </div>
 
-          <div className="stack-tight rounded-[var(--r-control)] border border-slate-200 bg-white p-4">
-            <h2 className="text-base font-semibold text-slate-950">3 bài học lớn nhất</h2>
+          <div className="stack-tight rounded-lg border border-app-warm/30 bg-app-warm-soft p-5">
+            <h2 className="font-serif text-lg font-medium text-app-ink">3 bài học lớn nhất</h2>
+            <p className="text-[13px] text-app-ink-soft">Viết ngắn gọn những gì bạn muốn mang sang chu kỳ sau.</p>
             <div className="grid gap-3 md:grid-cols-3">
               {LESSON_FIELD_IDS.map((lessonId, index) => {
                 const lesson = lessons[index] ?? "";
                 return (
                   <div key={lessonId} className="stack-tight">
-                    <Label htmlFor={`cycle-lesson-${index + 1}`}>Bài học lớn nhất {index + 1}</Label>
+                    <Label htmlFor={`cycle-lesson-${index + 1}`}>Bài học {index + 1}</Label>
                     <Textarea
                       id={`cycle-lesson-${index + 1}`}
                       value={lesson}
                       onChange={(event) => updateLesson(index, event.target.value)}
                       rows={3}
-                      placeholder="Một bài học ngắn để áp dụng vào cycle sau"
+                      placeholder="Một bài học ngắn để áp dụng vào chu kỳ sau"
                     />
                   </div>
                 );
@@ -170,12 +171,11 @@ export function CycleReviewPanel({
 
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button
-              variant="secondary"
-              className="w-full sm:w-auto"
+              className="w-full bg-app-accent text-white hover:bg-app-accent/90 sm:w-auto"
               onClick={() => onSaveCycleReview({ lessons: sanitizedLessons, summary })}
             >
               <Save className="mr-2 h-4 w-4" />
-              Lưu báo cáo cycle
+              Lưu báo cáo chu kỳ
             </Button>
           </div>
         </CardContent>
