@@ -12,8 +12,6 @@ export function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElemen
   };
 
   const { src, alt, style, className, crossOrigin, ...rest } = props;
-  const resolvedCrossOrigin =
-    crossOrigin ?? (typeof src === "string" && /^https?:\/\//i.test(src) ? "anonymous" : undefined);
 
   return didError ? (
     <div
@@ -24,7 +22,6 @@ export function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElemen
         <img
           src={ERROR_IMG_SRC}
           alt="Fallback graphic"
-          crossOrigin={resolvedCrossOrigin}
           {...rest}
           data-original-url={src}
         />
@@ -36,8 +33,9 @@ export function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElemen
       alt={alt}
       className={className}
       style={style}
-      crossOrigin={resolvedCrossOrigin}
+      {...(crossOrigin ? { crossOrigin } : {})}
       {...rest}
+      referrerPolicy="no-referrer"
       onError={handleError}
     />
   );
