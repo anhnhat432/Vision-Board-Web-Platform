@@ -259,11 +259,11 @@ export function ResultStep({ result, focusArea, pendingGoal, onContinue, onAdjus
       </div>
 
       {showRiskWarning ? (
-        <div className="mt-6 rounded-card border border-[#F3D9CC] bg-app-warm-soft p-4">
+        <div className="mt-6 rounded-card border border-app-warm-border bg-app-warm-soft p-4">
           <div className="flex gap-3">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-app-warm" aria-hidden="true" />
             <div>
-              <p className="font-serif text-[17px] font-medium text-[#5C3A2E]">Có vài rủi ro cần xử lý trước</p>
+              <p className="font-serif text-[17px] font-medium text-app-warm-strong">Có vài rủi ro cần xử lý trước</p>
               <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">
                 {result.smartGoalQualityNote ?? result.bottleneck.action}
               </p>

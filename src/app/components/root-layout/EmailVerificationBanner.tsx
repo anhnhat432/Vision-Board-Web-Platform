@@ -135,7 +135,7 @@ export function EmailVerificationBanner() {
     <>
       <div
         role="alert"
-        className="relative z-50 border-b border-[#F3D9CC] bg-app-warm-soft px-4 py-3 text-sm text-[#5C3A2E] sm:px-6"
+        className="relative z-50 border-b border-app-warm-border bg-app-warm-soft px-4 py-3 text-sm text-app-warm-strong sm:px-6"
       >
         <div className="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
@@ -153,7 +153,7 @@ export function EmailVerificationBanner() {
             <Button
               variant="outline"
               size="sm"
-              className="border-[#F3D9CC] bg-app-surface text-[#5C3A2E] hover:bg-app-warm-soft"
+              className="border-app-warm-border bg-app-surface text-app-warm-strong hover:bg-app-warm-soft"
               onClick={handleResend}
               disabled={sending || cooldownSeconds > 0}
             >
@@ -170,7 +170,7 @@ export function EmailVerificationBanner() {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="text-[#5C3A2E] hover:bg-app-surface"
+                className="text-app-warm-strong hover:bg-app-surface"
                 onClick={() => setEmailDialogOpen(true)}
               >
                 <Pencil className="mr-1 h-3.5 w-3.5" />

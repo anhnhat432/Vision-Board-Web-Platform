@@ -134,13 +134,13 @@ function getLeadScoreTone(level: ReturnType<typeof interpretWeeklyExecutionScore
     case "okay":
       return {
         marker: "bg-app-warm",
-        panel: "border-[#F3D9CC] bg-app-warm-soft",
+        panel: "border-app-warm-border bg-app-warm-soft",
         text: "text-app-warm",
       };
     default:
       return {
         marker: "bg-app-warm",
-        panel: "border-[#F3D9CC] bg-app-warm-soft",
+        panel: "border-app-warm-border bg-app-warm-soft",
         text: "text-app-warm",
       };
   }
@@ -397,7 +397,7 @@ export function TwelveWeekWeekTab({
                 </div>
               </div>
 
-              <div className="rounded-lg border border-[#F3D9CC]/60 bg-app-warm-soft/70 p-5">
+              <div className="rounded-lg border border-app-warm-border/60 bg-app-warm-soft/70 p-5">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-warm">
@@ -409,7 +409,7 @@ export function TwelveWeekWeekTab({
                         : "Không có việc tùy chọn"}
                     </p>
                   </div>
-                  <Badge variant="outline" className="border-[#F3D9CC] bg-app-surface text-app-warm">
+                  <Badge variant="outline" className="border-app-warm-border bg-app-surface text-app-warm">
                     {optionalIndicators.length}
                   </Badge>
                 </div>
@@ -455,7 +455,7 @@ export function TwelveWeekWeekTab({
           </CardHeader>
           <CardContent className="stack-stack">
             <div
-              className={`rounded-lg border p-4 ${reviewDueToday ? "border-[#F3D9CC] bg-app-warm-soft" : "border-app-line bg-app-bg"}`}
+              className={`rounded-lg border p-4 ${reviewDueToday ? "border-app-warm-border bg-app-warm-soft" : "border-app-line bg-app-bg"}`}
             >
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -474,7 +474,7 @@ export function TwelveWeekWeekTab({
                   variant="outline"
                   className={
                     reviewDueToday
-                      ? "border-[#F3D9CC] bg-app-surface text-app-warm"
+                      ? "border-app-warm-border bg-app-surface text-app-warm"
                       : "border-app-line bg-app-surface text-app-ink-soft"
                   }
                 >
@@ -514,7 +514,7 @@ export function TwelveWeekWeekTab({
                     ? "border-app-accent/20 bg-app-accent-soft"
                     : scoreInterpretation.level === "okay"
                       ? "border-app-accent/20 bg-app-accent-soft"
-                      : "border-[#F3D9CC] bg-app-warm-soft"
+                      : "border-app-warm-border bg-app-warm-soft"
                 }`}
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -780,7 +780,7 @@ export function TwelveWeekWeekTab({
             <div
               className={`flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between ${
                 reviewDueToday
-                  ? "border-[#F3D9CC] bg-app-warm-soft"
+                  ? "border-app-warm-border bg-app-warm-soft"
                   : "border-app-line bg-app-bg"
               }`}
             >

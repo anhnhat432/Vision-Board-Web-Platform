@@ -22,7 +22,7 @@ export function GoalCardChip({ goal, lifeAreaId, width }: GoalCardChipProps): JS
   if (!goal) {
     return (
       <div
-        className="rounded-[var(--r-card)] border border-[#F3D9CC] bg-app-warm-soft p-4 text-center"
+        className="rounded-[var(--r-card)] border border-app-warm-border bg-app-warm-soft p-4 text-center"
         style={{ width: `${width}px` }}
       >
         <p className="text-sm font-semibold text-app-warm">Mục tiêu không còn tồn tại</p>

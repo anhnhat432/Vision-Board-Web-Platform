@@ -29,11 +29,11 @@ const ADJUSTMENT_BADGE_LABEL: Record<NextWeekAdjustment, string> = {
 };
 
 const ADJUSTMENT_ACCENT: Record<NextWeekAdjustment, string> = {
-  lighter: "border-[#F3D9CC] bg-app-warm-soft text-app-ink",
+  lighter: "border-app-warm-border bg-app-warm-soft text-app-ink",
   same: "border-app-accent/20 bg-app-accent-soft text-app-ink",
   push: "border-app-accent/20 bg-app-accent-soft text-app-ink",
   reset: "border-app-line bg-app-bg text-app-ink",
-  reduce_scope: "border-[#F3D9CC] bg-app-warm-soft text-app-ink",
+  reduce_scope: "border-app-warm-border bg-app-warm-soft text-app-ink",
 };
 
 const CONFIDENCE_LABEL: Record<NextWeekConfidence, string> = {

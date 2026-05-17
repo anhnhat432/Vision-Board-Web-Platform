@@ -13,6 +13,8 @@ export default {
         "app-accent-soft": "var(--app-accent-soft)",
         "app-warm": "var(--app-warm)",
         "app-warm-soft": "var(--app-warm-soft)",
+        "app-warm-strong": "var(--app-warm-strong)",
+        "app-warm-border": "var(--app-warm-border)",
       },
       fontFamily: {
         sans: [

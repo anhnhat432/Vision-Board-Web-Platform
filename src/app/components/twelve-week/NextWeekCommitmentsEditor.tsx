@@ -131,7 +131,7 @@ export function NextWeekCommitmentsEditor({
                 className={cn(
                   "inline-flex max-w-full min-w-0 items-center gap-1 rounded-full border bg-app-surface px-3 py-1 text-xs font-semibold text-app-accent transition-colors",
                   duplicateKey === key
-                    ? "border-[#F3D9CC] bg-app-warm-soft text-app-warm"
+                    ? "border-app-warm-border bg-app-warm-soft text-app-warm"
                     : "border-app-line",
                 )}
               >

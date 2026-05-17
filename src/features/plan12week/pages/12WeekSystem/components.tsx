@@ -47,7 +47,7 @@ function getTokenSyncBadgeClass(syncBadgeClass: string, syncBadgeLabel: string):
   }
 
   if (syncBadgeLabel === "Đã lưu trên thiết bị") {
-    return "border-[#F3D9CC] bg-app-warm-soft text-app-warm";
+    return "border-app-warm-border bg-app-warm-soft text-app-warm";
   }
 
   return "border-app-line bg-app-bg text-app-ink-soft";
@@ -111,7 +111,7 @@ export function TwelveWeekDashboardNotice({
       ? "border-app-line bg-app-surface"
       : tone === "error"
         ? "border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)]"
-        : "border-[#F3D9CC] bg-app-warm-soft";
+        : "border-app-warm-border bg-app-warm-soft";
   const iconClass =
     tone === "success"
       ? "text-app-accent"
@@ -120,7 +120,7 @@ export function TwelveWeekDashboardNotice({
         : "text-app-warm";
   const titleClass =
     tone === "warning"
-      ? "font-serif text-[#5C3A2E]"
+      ? "font-serif text-app-warm-strong"
       : tone === "error"
         ? "text-[color:var(--color-danger-fg)]"
         : "text-app-ink";
@@ -322,12 +322,12 @@ export function TwelveWeekRescueTriggerBanner({
   const ctaLabel = isUpgradeTrigger ? "Nâng cấp ngay" : "Xem ngay";
 
   return (
-    <div role="alert" className="rounded-card border border-[#F3D9CC] bg-app-warm-soft p-4 md:p-5">
+    <div role="alert" className="rounded-card border border-app-warm-border bg-app-warm-soft p-4 md:p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
         <div className="flex min-w-0 flex-1 items-start gap-3">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-app-warm" aria-hidden="true" />
           <div className="min-w-0 flex-1">
-            <p className="font-serif text-[17px] font-medium text-[#5C3A2E]">{trigger.headline}</p>
+            <p className="font-serif text-[17px] font-medium text-app-warm-strong">{trigger.headline}</p>
             <p className="mt-1 text-[14px] leading-6 text-app-ink-soft">{trigger.detail}</p>
           </div>
         </div>

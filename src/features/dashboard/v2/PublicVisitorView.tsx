@@ -56,17 +56,17 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
       </section>
 
       {hasLocalData ? (
-        <section className="rounded-card border border-[#F3D9CC] bg-app-warm-soft p-5 md:p-6" aria-labelledby="dashboard-local-data-title">
+        <section className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6" aria-labelledby="dashboard-local-data-title">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex min-w-0 gap-3">
               <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-app-surface text-app-warm">
                 <HardDrive className="h-4 w-4" />
               </div>
               <div>
-                <h2 id="dashboard-local-data-title" className="text-[16px] font-semibold text-[#5C3A2E]">
+                <h2 id="dashboard-local-data-title" className="text-[16px] font-semibold text-app-warm-strong">
                   Có dữ liệu đã lưu trên thiết bị này
                 </h2>
-                <p className="mt-1 text-[14px] leading-6 text-[#5C3A2E]">
+                <p className="mt-1 text-[14px] leading-6 text-app-warm-strong">
                   Đăng nhập để kiểm tra, sao lưu và nhập dữ liệu này vào tài khoản. Chúng tôi không ghi đè dữ liệu tài khoản nếu chưa có xác nhận của bạn.
                 </p>
               </div>
@@ -83,7 +83,7 @@ export function PublicVisitorView({ isDemo, hasLocalData, onStart, onSignIn, onS
               <button
                 type="button"
                 onClick={onSignUp}
-                className="inline-flex items-center justify-center rounded-lg border border-[#F3D9CC] bg-app-surface px-3.5 py-2 text-[14px] font-medium text-[#5C3A2E] transition-colors duration-150 hover:bg-app-warm-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
+                className="inline-flex items-center justify-center rounded-lg border border-app-warm-border bg-app-surface px-3.5 py-2 text-[14px] font-medium text-app-warm-strong transition-colors duration-150 hover:bg-app-warm-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30"
               >
                 Tạo tài khoản mới
               </button>

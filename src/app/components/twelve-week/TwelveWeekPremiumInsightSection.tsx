@@ -156,7 +156,7 @@ export function TwelveWeekPremiumInsightSection({
                 className={
                   premiumInsight.status === "strong"
                     ? "border-app-accent/20 bg-app-accent-soft text-app-accent"
-                    : "border-[#F3D9CC] bg-app-warm-soft text-app-warm"
+                    : "border-app-warm-border bg-app-warm-soft text-app-warm"
                 }
               >
                 {premiumInsight.badgeLabel}

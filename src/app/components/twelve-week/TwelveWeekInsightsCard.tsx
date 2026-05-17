@@ -32,13 +32,13 @@ interface TwelveWeekInsightsCardProps {
 const SEVERITY_ACCENT: Record<ExecutionInsightSeverity, string> = {
   positive: "border-app-accent/20 bg-app-accent-soft",
   neutral: "border-app-line bg-app-bg",
-  warning: "border-[#F3D9CC] bg-app-warm-soft",
+  warning: "border-app-warm-border bg-app-warm-soft",
 };
 
 const SEVERITY_BADGE: Record<ExecutionInsightSeverity, string> = {
   positive: "border-app-accent/20 bg-app-surface text-app-accent",
   neutral: "border-app-line bg-app-surface text-app-ink",
-  warning: "border-[#F3D9CC] bg-app-surface text-app-warm",
+  warning: "border-app-warm-border bg-app-surface text-app-warm",
 };
 
 const SEVERITY_ICON: Record<ExecutionInsightSeverity, ReactElement> = {

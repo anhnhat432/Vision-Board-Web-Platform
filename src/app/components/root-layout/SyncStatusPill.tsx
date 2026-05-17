@@ -80,7 +80,7 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
       dot: <SyncIdleDot className="h-4 w-4" />,
       icon: <Upload className="h-3 w-3" />,
       label: "Cần chọn bản dữ liệu",
-      tone: "border-[#F3D9CC] bg-app-warm-soft text-app-warm",
+      tone: "border-app-warm-border bg-app-warm-soft text-app-warm",
     },
     syncing: {
       dot: <SyncSyncingDot className="h-4 w-4" />,
@@ -98,7 +98,7 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
       dot: <SyncSyncingDot className="h-4 w-4" />,
       icon: <Upload className="h-3 w-3" />,
       label: `${syncState.pendingCount} chờ sao lưu`,
-      tone: "border-[#F3D9CC] bg-app-warm-soft text-app-warm",
+      tone: "border-app-warm-border bg-app-warm-soft text-app-warm",
     },
     ok: {
       dot: <SyncOkDot className="h-4 w-4" />,

@@ -47,7 +47,7 @@ const LIFE_AREA_FIELDS: Array<{ area: AspirationalVisionArea; label: string; pla
   },
 ];
 
-const warmTextareaClass = `${textareaClass} border-[#F3D9CC] focus-visible:border-app-warm focus-visible:ring-app-warm/30`;
+const warmTextareaClass = `${textareaClass} border-app-warm-border focus-visible:border-app-warm focus-visible:ring-app-warm/30`;
 
 function createVisionId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -133,9 +133,9 @@ export function AspirationalVision() {
         </p>
       </header>
 
-      <section className="mt-6 rounded-card border border-[#F3D9CC] bg-app-warm-soft p-6 md:p-8" aria-label="Biểu mẫu tầm nhìn">
+      <section className="mt-6 rounded-card border border-app-warm-border bg-app-warm-soft p-6 md:p-8" aria-label="Biểu mẫu tầm nhìn">
         <div className="max-w-3xl">
-          <p className="font-serif text-[20px] font-medium leading-7 text-[#5C3A2E]">
+          <p className="font-serif text-[20px] font-medium leading-7 text-app-warm-strong">
             Trong 3 năm tới, bạn muốn cuộc sống mình trông như thế nào?
           </p>
           <p className="mt-2 text-[14px] leading-6 text-[#6F4A3C]">
@@ -181,7 +181,7 @@ export function AspirationalVision() {
                     className={`rounded-full border px-4 py-2 text-[14px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 ${
                       selected
                         ? "border-app-warm bg-app-warm text-white"
-                        : "border-[#F3D9CC] bg-app-surface text-[#5C3A2E] hover:border-app-warm"
+                        : "border-app-warm-border bg-app-surface text-app-warm-strong hover:border-app-warm"
                     }`}
                   >
                     {year} năm
@@ -220,7 +220,7 @@ export function AspirationalVision() {
             ) : null}
           </div>
 
-          <div className="flex flex-col gap-3 border-t border-[#F3D9CC] pt-5 sm:flex-row">
+          <div className="flex flex-col gap-3 border-t border-app-warm-border pt-5 sm:flex-row">
             <Button
               type="button"
               className="w-full bg-app-warm text-white hover:bg-[#C76548] focus-visible:ring-app-warm/30 sm:w-auto"
@@ -232,7 +232,7 @@ export function AspirationalVision() {
             <Button
               type="button"
               variant="outline"
-              className="w-full border-[#F3D9CC] bg-app-surface text-[#5C3A2E] hover:bg-white focus-visible:ring-app-warm/30 sm:w-auto"
+              className="w-full border-app-warm-border bg-app-surface text-app-warm-strong hover:bg-white focus-visible:ring-app-warm/30 sm:w-auto"
               onClick={() => navigate("/")}
             >
               <ArrowLeft className="h-4 w-4" />

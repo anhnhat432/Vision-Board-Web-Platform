@@ -1142,7 +1142,7 @@ return (
                             );
                           })}
                           {availableGoals.length === 0 && (
-                            <p className="col-span-full rounded-[var(--r-card)] border border-[#F3D9CC] bg-app-warm-soft p-4 text-center text-sm text-app-warm">
+                            <p className="col-span-full rounded-[var(--r-card)] border border-app-warm-border bg-app-warm-soft p-4 text-center text-sm text-app-warm">
                               Tất cả mục tiêu đã được ghim trên bảng này.
                             </p>
                           )}

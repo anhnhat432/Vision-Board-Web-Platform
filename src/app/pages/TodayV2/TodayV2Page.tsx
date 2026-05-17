@@ -473,13 +473,13 @@ function WeekProgressCard({
 function ReflectionPrompt() {
   return (
     <section
-      className="rounded-card border border-[#F3D9CC] bg-app-warm-soft p-5 md:p-6"
+      className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6"
       aria-labelledby="today-v2-reflection-title"
     >
-      <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-[13px] font-medium text-app-warm ring-1 ring-[#F3D9CC]">
+      <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-[13px] font-medium text-app-warm ring-1 ring-app-warm-border">
         Phản tư cuối ngày
       </span>
-      <h2 id="today-v2-reflection-title" className="mt-4 font-serif text-[20px] font-medium leading-7 text-[#5C3A2E]">
+      <h2 id="today-v2-reflection-title" className="mt-4 font-serif text-[20px] font-medium leading-7 text-app-warm-strong">
         Hôm nay điều gì khiến bạn cảm thấy gần với phiên bản tốt hơn của chính mình?
       </h2>
       <Link

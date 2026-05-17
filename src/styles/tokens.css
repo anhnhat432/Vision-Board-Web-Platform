@@ -9,6 +9,8 @@
   --app-accent-soft: #E8F0EC;
   --app-warm: #D97757;
   --app-warm-soft: #FCEDE5;
+  --app-warm-strong: #5C3A2E;
+  --app-warm-border: #F3D9CC;
   --app-font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, -apple-system,
     BlinkMacSystemFont, "Segoe UI", sans-serif;
   --app-font-serif: "Source Serif 4 Variable", "Source Serif 4", Georgia,
@@ -18,6 +20,27 @@
   --app-section-gap-compact: 20px;
   --app-card-padding: 24px;
   --app-card-padding-mobile: 20px;
+}
+
+html.dark {
+  /* Dark mode overrides — keep the calm forest tone but invert levels.
+   * Warm near-black background instead of pure #000 so the eye stays
+   * relaxed, with ink/surface/line lifted just enough for cards to
+   * read clearly. Accent stays forest green (slightly lightened for
+   * contrast against the dark surface). Warm stays terracotta.
+   */
+  --app-bg: #1C1A15;
+  --app-surface: #26231D;
+  --app-ink: #F2EDE5;
+  --app-ink-soft: #C8C2B5;
+  --app-ink-muted: #8A8273;
+  --app-line: #3A342B;
+  --app-accent: #5BA590;
+  --app-accent-soft: #1F3A33;
+  --app-warm: #E89878;
+  --app-warm-soft: #3A2820;
+  --app-warm-strong: #F8D5C2;
+  --app-warm-border: #5C3A2E;
 }
 
 @theme inline {
@@ -31,6 +54,8 @@
   --color-app-accent-soft: var(--app-accent-soft);
   --color-app-warm: var(--app-warm);
   --color-app-warm-soft: var(--app-warm-soft);
+  --color-app-warm-strong: var(--app-warm-strong);
+  --color-app-warm-border: var(--app-warm-border);
   --font-sans: var(--app-font-sans);
   --font-serif: var(--app-font-serif);
   --radius-card: var(--app-radius-card);

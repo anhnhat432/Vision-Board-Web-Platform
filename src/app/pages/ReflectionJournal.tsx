@@ -465,14 +465,14 @@ export function ReflectionJournal() {
             </div>
 
             {/* New Entry Section - Warm Tone */}
-            <div className="rounded-card border border-[#F3D9CC] bg-app-warm-soft p-6 md:p-8">
+            <div className="rounded-card border border-app-warm-border bg-app-warm-soft p-6 md:p-8">
               <div className="flex items-center gap-2 mb-4">
-                <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-[13px] font-medium text-app-warm ring-1 ring-[#F3D9CC]">
+                <span className="inline-flex rounded-full bg-app-warm-soft px-3 py-1 text-[13px] font-medium text-app-warm ring-1 ring-app-warm-border">
                   Phản tư hôm nay
                 </span>
               </div>
 
-              <p className="font-serif text-[22px] font-medium leading-7 text-[#5C3A2E] mb-4">
+              <p className="font-serif text-[22px] font-medium leading-7 text-app-warm-strong mb-4">
                 {JOURNAL_PROMPTS[0]}
               </p>
 
@@ -486,7 +486,7 @@ export function ReflectionJournal() {
                     handleAddReflection();
                   }
                 }}
-                className="min-h-[140px] rounded-lg border border-[#F3D9CC] bg-app-surface px-3.5 py-2.5 text-[15px] text-app-ink focus:border-app-warm focus:ring-app-warm/30"
+                className="min-h-[140px] rounded-lg border border-app-warm-border bg-app-surface px-3.5 py-2.5 text-[15px] text-app-ink focus:border-app-warm focus:ring-app-warm/30"
               />
 
               {/* Mood Selector */}
@@ -508,7 +508,7 @@ export function ReflectionJournal() {
                           "rounded-full border px-3 py-1.5 text-[14px] transition-colors",
                           isActive
                             ? "bg-app-warm text-white border-app-warm"
-                            : "bg-app-surface border-[#F3D9CC] text-app-ink-soft hover:bg-app-warm-soft",
+                            : "bg-app-surface border-app-warm-border text-app-ink-soft hover:bg-app-warm-soft",
                         )}
                       >
                         <span className="mr-1">{item.emoji}</span>

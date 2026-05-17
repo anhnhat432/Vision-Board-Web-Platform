@@ -217,7 +217,7 @@ export function UpgradePaywallDialog({
             <fieldset className="min-w-0 space-y-4">
               <legend className="sr-only">Chọn gói nâng cấp</legend>
               {emailVerificationRequired ? (
-                <div className="rounded-card border border-[#F3D9CC] bg-app-warm-soft px-4 py-4 text-[#5C3A2E]">
+                <div className="rounded-card border border-app-warm-border bg-app-warm-soft px-4 py-4 text-app-warm-strong">
                   <p className="flex items-center gap-2 text-[15px] font-medium">
                     <LockKeyhole className="h-4 w-4 text-app-warm" />
                     Vui lòng xác thực email trước khi thanh toán.

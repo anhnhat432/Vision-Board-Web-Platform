@@ -25,11 +25,11 @@ const SEVERITY_BORDER = {
   today: {
     gentle: "border-app-line bg-app-accent-soft/70",
     active: "border-app-accent/20 bg-app-accent-soft",
-    urgent: "border-[#F3D9CC] bg-app-warm-soft",
+    urgent: "border-app-warm-border bg-app-warm-soft",
   },
   week: {
-    gentle: "border-[#F3D9CC]/60 bg-app-warm-soft/70",
-    active: "border-[#F3D9CC] bg-app-warm-soft",
+    gentle: "border-app-warm-border/60 bg-app-warm-soft/70",
+    active: "border-app-warm-border bg-app-warm-soft",
     urgent: "border-app-warm/30 bg-app-warm-soft",
   },
 } as const;

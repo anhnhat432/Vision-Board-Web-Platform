@@ -517,12 +517,12 @@ export function SMARTGoalSetup() {
         </div>
 
         {!isVisionPromptDismissed ? (
-          <section className="rounded-card border border-[#F3D9CC] bg-app-warm-soft p-5 md:p-6" aria-label="Tầm nhìn dài hạn">
+          <section className="rounded-card border border-app-warm-border bg-app-warm-soft p-5 md:p-6" aria-label="Tầm nhìn dài hạn">
             <span className="inline-flex rounded-full bg-app-surface px-3 py-1 text-[13px] font-medium text-app-warm">
               Tầm nhìn dài hạn
             </span>
             {aspirationalVision ? (
-              <p className="mt-3 font-serif text-[17px] font-medium leading-7 text-[#5C3A2E]">
+              <p className="mt-3 font-serif text-[17px] font-medium leading-7 text-app-warm-strong">
                 Mục tiêu này phục vụ tầm nhìn 3 năm: {aspirationalVision.summary}
               </p>
             ) : (

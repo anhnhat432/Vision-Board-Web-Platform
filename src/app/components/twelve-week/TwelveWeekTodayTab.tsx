@@ -388,7 +388,7 @@ export function TwelveWeekTodayTab({
                   Có {missedTasks.length} việc bị trễ. Không cần làm hết — chọn cách quay lại nhịp gọn nhất.
                 </CardDescription>
               </div>
-              <Badge variant="outline" className="border-[#F3D9CC] bg-app-warm-soft text-app-warm">
+              <Badge variant="outline" className="border-app-warm-border bg-app-warm-soft text-app-warm">
                 {overdueOpenCount} việc trễ
               </Badge>
             </div>
@@ -520,7 +520,7 @@ export function TwelveWeekTodayTab({
           }
         >
           {primaryTaskOverdue && (
-            <Badge variant="outline" className="border-[#F3D9CC] bg-app-surface text-app-warm">
+            <Badge variant="outline" className="border-app-warm-border bg-app-surface text-app-warm">
               Đang trễ
             </Badge>
           )}
@@ -711,7 +711,7 @@ export function TwelveWeekTodayTab({
                             variant="outline"
                             className={
                               isOverdue
-                                ? "border-[#F3D9CC] bg-app-warm-soft text-app-warm"
+                                ? "border-app-warm-border bg-app-warm-soft text-app-warm"
                                 : taskCompleted
                                   ? "border-app-accent/20 bg-app-accent-soft text-app-accent"
                                   : isPrimaryTask
