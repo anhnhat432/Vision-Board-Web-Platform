@@ -193,7 +193,7 @@ function DraggableItem({ item, goalsById, isSelected, onUpdate, onDelete, onSele
       onPointerUp={handlePointerEnd}
       onPointerCancel={handlePointerEnd}
       className={`absolute cursor-move touch-none select-none transition-transform duration-300 hover:scale-[1.015] ${
-        isSelected ? "rounded-[var(--r-card)] ring-2 ring-app-accent ring-offset-2" : ""
+        isSelected ? "rounded-xl ring-2 ring-app-accent ring-offset-2" : ""
       }`}
       style={{
         left: `${item.x}%`,
@@ -207,7 +207,7 @@ function DraggableItem({ item, goalsById, isSelected, onUpdate, onDelete, onSele
         <Button
           size="icon"
           variant="destructive"
-          className="absolute -right-2 -top-2 h-8 w-8 rounded-[var(--r-pill)] opacity-0 transition-opacity group-hover:opacity-100"
+          className="absolute -right-2 -top-2 h-8 w-8 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
           onClick={() => onDelete(item.id)}
           aria-label="Xóa phần tử"
           data-export-skip="true"

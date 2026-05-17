@@ -25,13 +25,11 @@ import {
 import { toast } from "sonner";
 
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { EmptyOrdersIllustration } from "../components/illustrations";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { ItemControlsPopover } from "../components/visionBoard/ItemControlsPopover";
 import { VisionBoardCanvas } from "../components/visionBoard/VisionBoardCanvas";
 import { VisionBoardSidebar } from "../components/visionBoard/VisionBoardSidebar";
 import { VisionBoardStoryWizard, type VisionBoardStorySeed } from "../components/visionBoard/VisionBoardStoryWizard";
-import { ProductVisual } from "../components/visuals/ProductVisual";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -820,8 +818,7 @@ export function VisionBoardEditor() {
                 </div>
 
 
-                <div className="hidden xl:block rounded-[var(--r-card)] border border-app-line bg-app-surface p-5 shadow-sm sticky top-6">
-                  <ProductVisual variant="vision" className="mb-5 min-h-[180px]" />
+                <div className="hidden xl:block rounded-xl border border-app-line bg-app-surface p-5 shadow-sm sticky top-6">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
                     Tóm tắt bảng
                   </p>
@@ -834,7 +831,7 @@ export function VisionBoardEditor() {
                     ].map((item) => (
                       <div
                         key={item.label}
-                        className="rounded-[var(--r-card)] border border-app-line bg-app-surface px-4 py-4"
+                        className="rounded-xl border border-app-line bg-app-surface px-4 py-4"
                       >
                         <p className="text-[11px] uppercase tracking-[0.16em] text-app-ink-muted">{item.label}</p>
                         <p className="mt-2 text-3xl font-bold text-app-ink">{item.value}</p>
@@ -1227,25 +1224,23 @@ return (
                 emptyStateSlot={
                   board.items.length === 0 ? (
                     <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
-                      <div className="w-full max-w-md rounded-[var(--r-card)] border border-app-line bg-app-surface p-5 text-center shadow-md sm:p-7">
-                        <EmptyOrdersIllustration className="mx-auto mb-4 w-32 text-app-ink-muted opacity-70 sm:w-40" />
-                        <ProductVisual variant="vision" className="mx-auto mb-5 min-h-[150px] max-w-sm" />
-                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent sm:h-20 sm:w-20 sm:rounded-[var(--r-tile)]">
-                          <Sparkles className="h-8 w-8 sm:h-9 sm:w-9" />
+                      <div className="w-full max-w-md rounded-xl border border-app-line bg-app-surface p-6 text-center shadow-sm sm:p-8">
+                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+                          <Sparkles className="h-7 w-7" />
                         </div>
-                        <h2 className="mt-[var(--space-stack)] text-2xl font-medium text-app-ink sm:mt-6 sm:text-3xl">
+                        <h2 className="mt-5 font-serif text-[22px] font-medium text-app-ink sm:mt-6 sm:text-3xl">
                           Bảng của bạn đang chờ câu chuyện đầu tiên
                         </h2>
-                        <p className="mt-[var(--space-inline)] text-base text-app-ink-soft">
+                        <p className="mt-2 text-sm leading-relaxed text-app-ink-soft">
                           Hãy bắt đầu bằng một hình ảnh đại diện, một câu nói khiến bạn rung động hoặc một biểu tượng để neo cảm xúc cho mục tiêu của mình.
                         </p>
-                        <Button className="mt-6 w-full sm:mt-8 sm:w-auto" onClick={() => setIsWizardOpen(true)}>
+                        <Button className="mt-6 w-full sm:w-auto" onClick={() => setIsWizardOpen(true)}>
                           <Wand2 className="h-4 w-4" />
                           Bắt đầu Story Mode
                         </Button>
                         <button
                           type="button"
-                          className="mt-2 text-sm text-app-ink-soft underline-offset-2 hover:underline"
+                          className="mt-3 block w-full text-sm text-app-ink-soft underline-offset-2 hover:underline hover:text-app-ink"
                           onClick={() => setIsAddingItem(true)}
                         >
                           Hoặc tự thêm phần tử

@@ -43,11 +43,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
         {frame.decorationsLayout === "washi" && (
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute -top-2 left-4 h-5 w-16 -rotate-6 rounded-sm opacity-80"
-            style={{
-              background: "linear-gradient(135deg, #fbbf24 0%, #f472b6 100%)",
-              boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
-            }}
+            className="pointer-events-none absolute -top-2 left-4 h-5 w-16 -rotate-6 rounded-sm bg-app-warm opacity-80"
           />
         )}
         {!item.content && <ImageIcon className="mx-auto h-10 w-10 text-app-ink-muted" aria-hidden="true" />}
@@ -72,7 +68,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
 
     return (
       <div
-        className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-5 shadow-2xl backdrop-blur"
+        className="rounded-xl border border-app-line bg-app-surface p-5 shadow-2xl backdrop-blur"
         style={{ width: `${width}px` }}
       >
         <div className="flex items-center gap-2 text-app-accent">
@@ -80,7 +76,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
           <span className="text-xs font-semibold uppercase tracking-[0.18em]">Câu nói</span>
         </div>
         <p
-          className={`mt-[var(--space-inline)] leading-relaxed ${font.className}`}
+          className={`mt-3 leading-relaxed ${font.className}`}
           style={font.fontFamily ? { fontFamily: font.fontFamily } : undefined}
         >
           {item.content}
@@ -95,7 +91,7 @@ export function VisionBoardItemRenderer({ item, goalsById }: VisionBoardItemRend
 
     return (
       <div
-        className="flex items-center justify-center rounded-[var(--r-tile)] bg-app-accent text-white shadow-2xl"
+        className="flex items-center justify-center rounded-lg bg-app-accent text-white shadow-2xl"
         style={{ width: `${size}px`, height: `${size}px` }}
       >
         <Icon className="h-10 w-10" style={{ width: size * 0.4, height: size * 0.4 }} />

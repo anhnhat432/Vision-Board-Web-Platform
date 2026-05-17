@@ -22,13 +22,13 @@ export const VISION_BOARD_THEMES: VisionBoardTheme[] = [
     label: "Cực quang",
     description: "Năng lượng buổi sáng dịu nhẹ.",
     canvasBackground:
-      "linear-gradient(135deg, rgba(139, 92, 246, 0.18), rgba(236, 72, 153, 0.16), rgba(56, 189, 248, 0.18))",
-    gridColor: "rgba(255, 255, 255, 0.36)",
-    accentZone: "rgba(255, 255, 255, 0.28)",
-    textColor: "#334155",
-    defaultQuoteFont: "default",
+      "linear-gradient(135deg, rgba(245, 242, 236, 0.95), rgba(232, 240, 236, 0.92), rgba(250, 248, 245, 0.98))",
+    gridColor: "rgba(74, 74, 74, 0.08)",
+    accentZone: "rgba(47, 93, 80, 0.08)",
+    textColor: "#1A1A1A",
+    defaultQuoteFont: "serif",
     preview: {
-      gradient: "linear-gradient(135deg, #8b5cf6 0%, #ec4899 52%, #38bdf8 100%)",
+      gradient: "linear-gradient(135deg, #F5F2EC 0%, #E8F0EC 52%, #FAF8F5 100%)",
     },
   },
   {
