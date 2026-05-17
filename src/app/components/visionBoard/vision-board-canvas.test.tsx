@@ -83,6 +83,15 @@ describe("VisionBoardCanvas", () => {
     expect(onItemSelect).toHaveBeenCalledWith("item_1");
   });
 
+  it("clears selection when clicking canvas background", () => {
+    const onItemSelect = vi.fn();
+    renderCanvas({ onItemSelect, selectedItemId: "item_1" });
+
+    fireEvent.click(screen.getByRole("button", { name: "Bỏ chọn phần tử" }));
+
+    expect(onItemSelect).toHaveBeenCalledWith(null);
+  });
+
   it("renders empty state slot when there are no items", () => {
     renderCanvas({ items: [], emptyStateSlot: <div>Chưa có phần tử nào</div> });
 

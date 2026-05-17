@@ -16,7 +16,7 @@ export interface VisionBoardCanvasProps {
   goalsById: Record<string, { title: string; category: string; deadline: string; progress: number }>;
   onItemPositionChange: (id: string, x: number, y: number) => void;
   onItemDelete: (id: string) => void;
-  onItemSelect?: (id: string) => void;
+  onItemSelect?: (id: string | null) => void;
   selectedItemId?: string | null;
   exportRef?: React.Ref<HTMLDivElement>;
   className?: string;
@@ -95,6 +95,15 @@ export function VisionBoardCanvas({
           );
         })}
 
+      <button
+        type="button"
+        className="absolute inset-0 h-full w-full cursor-default border-0 bg-transparent p-0"
+        onClick={() => onItemSelect?.(null)}
+        aria-label="Bỏ chọn phần tử"
+        tabIndex={selectedItemId ? 0 : -1}
+        data-export-skip="true"
+      />
+
       {items.length === 0 && emptyStateSlot}
       {items.map((item) => (
         <DraggableItem
@@ -117,7 +126,7 @@ interface DraggableItemProps {
   isSelected: boolean;
   onUpdate: (id: string, x: number, y: number) => void;
   onDelete: (id: string) => void;
-  onSelect?: (id: string) => void;
+  onSelect?: (id: string | null) => void;
 }
 
 function DraggableItem({ item, goalsById, isSelected, onUpdate, onDelete, onSelect }: DraggableItemProps): JSX.Element {
@@ -201,6 +210,7 @@ function DraggableItem({ item, goalsById, isSelected, onUpdate, onDelete, onSele
           className="absolute -right-2 -top-2 h-8 w-8 rounded-[var(--r-pill)] opacity-0 transition-opacity group-hover:opacity-100"
           onClick={() => onDelete(item.id)}
           aria-label="Xóa phần tử"
+          data-export-skip="true"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </Button>

@@ -76,9 +76,10 @@ describe("TwelveWeekDashboardHeader", () => {
       />,
     );
 
-    expect(screen.getByTestId("twelve-week-header-description")).toHaveClass("hidden", "sm:block");
-    expect(screen.getByTestId("twelve-week-header-actions")).toHaveClass("hidden", "sm:block");
-    expect(screen.getByText("Nhịp 12 tuần")).toBeInTheDocument();
+    expect(screen.getByTestId("twelve-week-header-description")).toHaveTextContent("Tuần 1 / 12");
+    expect(screen.getByTestId("twelve-week-header-actions")).toHaveClass("flex", "flex-col");
+    expect(screen.getByText("HỆ THỐNG 12 TUẦN")).toBeInTheDocument();
+    expect(screen.getByText("Khởi động")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Xem việc hôm nay/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Mở mục tiêu/ })).toBeInTheDocument();
   });

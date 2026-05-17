@@ -1,17 +1,8 @@
-﻿import type { ReactNode } from "react";
-import { AlertTriangle, CalendarDays, CheckCircle2, Flame, Loader2, Sparkles, Target, TrendingUp, Zap } from "lucide-react";
+﻿import { useEffect, useRef, type ReactNode } from "react";
+import { AlertTriangle, Award, CalendarDays, CheckCircle2, Compass, Loader2, Sparkles, Target, TrendingUp, Zap } from "lucide-react";
 
-import { Badge } from "@/app/components/ui/badge";
-import { Button } from "@/app/components/ui/button";
-import { Card, CardContent } from "@/app/components/ui/card";
-import { PageHero } from "@/app/components/layout/PageHero";
-import { PhaseHarvestChipIcon, PhasePeakChipIcon, PhaseRampChipIcon } from "@/app/components/illustrations";
-import { MotionCountUp } from "@/app/components/motion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
-import {
-  formatCalendarDate,
-  getReviewDayLabel,
-} from "@/app/utils/storage";
+import { formatCalendarDate, getReviewDayLabel } from "@/app/utils/storage";
 import type {
   Goal,
   PricingPlanCode,
@@ -36,50 +27,47 @@ function getHeaderPhaseInfo(currentWeek: number) {
   if (currentWeek <= 4) {
     return {
       label: "Khởi động",
-      chipIcon: PhaseRampChipIcon,
-      badgeClassName:
-        "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/30 dark:bg-violet-950/35 dark:text-violet-200",
-      tileClassName:
-        "border-violet-200 bg-gradient-to-br from-violet-50 to-fuchsia-50 dark:border-violet-500/30 dark:from-violet-950/40 dark:to-fuchsia-950/25",
-      iconClassName:
-        "bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700 dark:from-violet-950/70 dark:to-fuchsia-950/50 dark:text-violet-200",
+      icon: Compass,
     };
   }
 
   if (currentWeek <= 8) {
     return {
       label: "Bứt phá",
-      chipIcon: PhasePeakChipIcon,
-      badgeClassName:
-        "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700 dark:border-fuchsia-500/30 dark:bg-fuchsia-950/35 dark:text-fuchsia-200",
-      tileClassName:
-        "border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 to-rose-50 dark:border-fuchsia-500/30 dark:from-fuchsia-950/40 dark:to-rose-950/25",
-      iconClassName:
-        "bg-gradient-to-br from-fuchsia-100 to-rose-100 text-fuchsia-700 dark:from-fuchsia-950/70 dark:to-rose-950/50 dark:text-fuchsia-200",
+      icon: TrendingUp,
     };
   }
 
   return {
     label: "Thu hoạch",
-    chipIcon: PhaseHarvestChipIcon,
-    badgeClassName:
-      "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/35 dark:text-emerald-200",
-    tileClassName:
-      "border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 dark:border-emerald-500/30 dark:from-emerald-950/40 dark:to-teal-950/25",
-    iconClassName:
-      "bg-gradient-to-br from-emerald-100 to-teal-100 text-emerald-700 dark:from-emerald-950/70 dark:to-teal-950/50 dark:text-emerald-200",
+    icon: Award,
   };
+}
+
+function getTokenSyncBadgeClass(syncBadgeClass: string, syncBadgeLabel: string): string {
+  if (syncBadgeClass.includes("app-") || syncBadgeClass.includes("color:")) return syncBadgeClass;
+
+  if (syncBadgeClass.includes("emerald")) return "border-transparent bg-app-accent-soft text-app-accent";
+
+  if (syncBadgeClass.includes("amber") || syncBadgeClass.includes("rose")) {
+    return "border-[#F3D9CC] bg-app-warm-soft text-app-warm";
+  }
+
+  if (syncBadgeLabel.startsWith("Đang") || syncBadgeClass.includes("sky")) {
+    return "border-app-line bg-app-bg text-app-ink-soft";
+  }
+
+  return "border-app-line bg-app-bg text-app-ink-soft";
 }
 
 export function TwelveWeekTabFallback({ title, description }: { title: string; description: string }) {
   return (
-    <Card className="border border-white/70 bg-white/80 shadow-sm">
-      <CardContent className="flex min-h-[220px] flex-col justify-center gap-3 p-6 text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{title}</p>
-        <p className="text-base font-semibold text-slate-900">Đang mở phần này...</p>
-        <p className="mx-auto max-w-xl text-sm leading-7 text-slate-500">{description}</p>
-      </CardContent>
-    </Card>
+    <div className="rounded-card border border-app-line bg-app-surface p-8 text-center">
+      <Loader2 className="mx-auto h-5 w-5 animate-spin text-app-accent" aria-hidden="true" />
+      <p className="sr-only">{title}</p>
+      <p className="mt-3 text-[13px] text-app-ink-soft">Đang mở tab...</p>
+      <p className="mx-auto mt-2 max-w-xl text-[13px] leading-6 text-app-ink-muted">{description}</p>
+    </div>
   );
 }
 
@@ -99,19 +87,17 @@ export function TwelveWeekDashboardState({
   const Icon = kind === "loading" ? Loader2 : Sparkles;
 
   return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-8 text-center sm:p-10 lg:p-14">
-        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-[color:var(--muted)] text-[color:var(--tone-shell-primary)]">
-          <Icon className={`h-10 w-10 ${kind === "loading" ? "animate-spin" : ""}`} />
-        </div>
-        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{eyebrow}</p>
-        <h1 className="mt-[var(--space-inline)] text-3xl font-semibold leading-[1.1] tracking-[-0.018em] text-foreground sm:text-4xl">{title}</h1>
-        <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base" role="status">
-          {description}
-        </p>
-        {children}
-      </CardContent>
-    </Card>
+    <div className="mx-auto mt-12 max-w-2xl rounded-card border border-app-line bg-app-surface p-8 text-center">
+      <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+        <Icon className={`h-5 w-5 ${kind === "loading" ? "animate-spin" : ""}`} aria-hidden="true" />
+      </div>
+      <p className="mt-4 text-[12px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">{eyebrow}</p>
+      <h1 className="mt-2 font-serif text-[22px] font-medium leading-tight text-app-ink">{title}</h1>
+      <p className="mx-auto mt-2 max-w-xl text-[14px] leading-6 text-app-ink-soft" role="status">
+        {description}
+      </p>
+      {children}
+    </div>
   );
 }
 
@@ -129,26 +115,30 @@ export function TwelveWeekDashboardNotice({
   const Icon = tone === "success" ? CheckCircle2 : AlertTriangle;
   const toneClass =
     tone === "success"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+      ? "border-app-line bg-app-surface"
       : tone === "error"
-        ? "border-rose-200 bg-rose-50 text-rose-900"
-        : "border-amber-200 bg-amber-50 text-amber-900";
+        ? "border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)]"
+        : "border-[#F3D9CC] bg-app-warm-soft";
   const iconClass =
     tone === "success"
-      ? "bg-emerald-100 text-emerald-700"
+      ? "text-app-accent"
       : tone === "error"
-        ? "bg-rose-100 text-rose-700"
-        : "bg-amber-100 text-amber-700";
+        ? "text-[color:var(--color-danger-fg)]"
+        : "text-app-warm";
+  const titleClass =
+    tone === "warning"
+      ? "font-serif text-[#5C3A2E]"
+      : tone === "error"
+        ? "text-[color:var(--color-danger-fg)]"
+        : "text-app-ink";
 
   return (
-    <div role={tone === "success" ? "status" : "alert"} className={`rounded-[var(--r-tile)] border px-4 py-4 ${toneClass}`}>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--r-control)] ${iconClass}`}>
-          <Icon className="h-4 w-4" />
-        </div>
+    <div role={tone === "success" ? "status" : "alert"} className={`rounded-card border p-4 ${toneClass}`}>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+        <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${iconClass}`} aria-hidden="true" />
         <div className="min-w-0 flex-1">
-          <p className="font-semibold">{title}</p>
-          <p className="mt-1 text-sm leading-6 opacity-80">{description}</p>
+          <p className={`text-[14px] font-medium ${titleClass}`}>{title}</p>
+          <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">{description}</p>
         </div>
         {children ? <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">{children}</div> : null}
       </div>
@@ -192,119 +182,105 @@ export function TwelveWeekDashboardHeader({
   onOpenGoals,
 }: TwelveWeekDashboardHeaderProps) {
   const phaseInfo = getHeaderPhaseInfo(currentWeek);
-  const PhaseChipIcon = phaseInfo.chipIcon;
+  const PhaseIcon = phaseInfo.icon;
+  const tokenSyncBadgeClass = getTokenSyncBadgeClass(syncBadgeClass, syncBadgeLabel);
+  const domainLabel = activeGoal.focusArea || activeGoal.category;
+  const weekRangeLabel = currentWeekRange
+    ? `${formatCalendarDate(currentWeekRange.start)} - ${formatCalendarDate(currentWeekRange.end)}`
+    : "Đang chạy";
 
   return (
-    <PageHero
-      titleAs={1}
-      density="compact"
-      className="page-enter"
-      eyebrow={
-        <>
-          <span>Nhịp 12 tuần</span>
-          <span aria-hidden="true">·</span>
-          <span>{phaseInfo.label}</span>
-        </>
-      }
-      eyebrowIcon={<PhaseChipIcon className="h-3.5 w-3.5" />}
-      title={<span className="text-gradient-vibrant break-words">{activeGoal.title}</span>}
-      description={
-        <span data-testid="twelve-week-header-description" className="hidden sm:block">
-          Bắt đầu từ tab Hôm nay: tick việc quan trọng nhất, lưu check-in, rồi mở Tuần để review.
-        </span>
-      }
-      primaryCta={
-        <Button glow className="w-full sm:w-auto" onClick={onOpenFocusTab}>
-          {reviewDueToday ? "Mở review tuần" : "Xem việc hôm nay"}
-          <Target className="h-4 w-4" />
-        </Button>
-      }
-      secondaryCta={
-        <Button variant="outline" className="w-full sm:w-auto" onClick={onOpenGoals}>
-          Mở mục tiêu
-        </Button>
-      }
-      contentClassName="overflow-hidden"
-      aside={
-        <div data-testid="twelve-week-header-metrics" className="grid h-full gap-2.5">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <Badge variant="outline" className={`rounded-[var(--r-pill)] px-2.5 py-1 text-xs ${phaseInfo.badgeClassName}`}>
-              <Target className="mr-1 h-3 w-3" />
-              Tuần {currentWeek}/{system.totalWeeks}
-            </Badge>
-            <Badge variant="outline" className={`rounded-[var(--r-pill)] px-2.5 py-1 text-xs ${syncBadgeClass}`}>
-              <span className="mr-1 inline-block h-1.5 w-1.5 rounded-[var(--r-pill)] bg-current opacity-70" aria-hidden="true" />
-              {syncBadgeLabel}
-            </Badge>
-            <Badge variant="neutral" className="text-xs">
-              Gói {getPlanLabel(activePlanCode)}
-            </Badge>
-            {reviewDueToday && (
-              <Badge
-                variant="outline"
-                className="rounded-[var(--r-pill)] border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] px-2.5 py-1 text-xs text-[color:var(--color-warning-fg)]"
-              >
-                Review hôm nay
-              </Badge>
-            )}
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-2.5">
-              <span className="mb-1 flex h-7 w-7 items-center justify-center rounded-[var(--r-control)] bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning-fg)]">
-                <Zap className="h-3.5 w-3.5" aria-hidden="true" />
-              </span>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Còn làm</p>
-              <p className="count-up mt-0.5 text-xl font-bold tabular-nums text-foreground">{todayRemainingCount}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">{todayCompletedCount} đã chốt</p>
-            </div>
-            <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-2.5">
-              <span className="mb-1 flex h-7 w-7 items-center justify-center rounded-[var(--r-control)] bg-[color:var(--color-success-bg)] text-[color:var(--color-success-fg)]">
-                <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
-              </span>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Tuần</p>
-              <p className="count-up mt-0.5 text-xl font-bold tabular-nums text-foreground">
-                <MotionCountUp value={weekCompletion.percent} suffix="%" />
-              </p>
-              <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
-                {currentWeekRange
-                  ? `${formatCalendarDate(currentWeekRange.start)}–${formatCalendarDate(currentWeekRange.end)}`
-                  : "Đang chạy"}
-              </p>
-            </div>
-            <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] px-3 py-2.5">
-              <span
-                className={`mb-1 flex h-7 w-7 items-center justify-center rounded-[var(--r-control)] ${
-                  reviewDueToday
-                    ? "bg-[color:var(--color-warning-fg)] text-white"
-                    : "bg-card text-[color:var(--tone-shell-primary)] ring-1 ring-[color:var(--border)]"
-                }`}
-              >
-                {reviewDueToday ? (
-                  <Flame className="h-3.5 w-3.5" aria-hidden="true" />
-                ) : (
-                  <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
-                )}
-              </span>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Review</p>
-              <p className="mt-0.5 truncate text-sm font-bold text-foreground">
-                {reviewDueToday ? "Hôm nay" : getReviewDayLabel(system.reviewDay)}
-              </p>
-              <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{reviewStatusLabel}</p>
-            </div>
-          </div>
-          <p
-            data-testid="twelve-week-header-actions"
-            className="hidden text-xs leading-5 text-muted-foreground sm:block"
-          >
-            {reviewDueToday
-              ? "Việc tiếp theo: chốt review tuần trước khi mở việc mới."
-              : firstPriorityTask
-                ? `Việc quan trọng nhất: ${firstPriorityTask.title}`
-                : "Hôm nay đang gọn. Bạn có thể lưu check-in hoặc xem lại tab Tuần."}
+    <header>
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="min-w-0">
+          <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-app-ink-muted">HỆ THỐNG 12 TUẦN</p>
+          <span className="sr-only">Nhịp 12 tuần</span>
+          <h1 className="mt-2 break-words font-serif text-[28px] font-medium leading-tight tracking-tight text-app-ink">
+            {activeGoal.title || "Kế hoạch hiện tại"}
+          </h1>
+          <p data-testid="twelve-week-header-description" className="mt-1 text-[13px] leading-6 text-app-ink-soft">
+            Tuần {currentWeek} / {system.totalWeeks}{domainLabel ? ` · ${domainLabel}` : ""}
           </p>
         </div>
-      }
-    />
+
+        <div data-testid="twelve-week-header-actions" className="flex flex-col gap-2 sm:flex-row md:shrink-0">
+          <button
+            type="button"
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-app-accent px-4 py-2.5 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-app-accent hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            onClick={onOpenFocusTab}
+          >
+            {reviewDueToday ? "Mở review tuần" : "Xem việc hôm nay"}
+            <Target className="h-4 w-4" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-[13px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            onClick={onOpenGoals}
+          >
+            Mở mục tiêu
+          </button>
+        </div>
+      </div>
+
+      <div data-testid="twelve-week-header-metrics" className="mt-4 flex flex-wrap gap-2">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-app-accent-soft px-3 py-1 text-[12px] font-medium text-app-accent">
+          Tuần {currentWeek} / {system.totalWeeks}
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-bg px-3 py-1 text-[12px] text-app-ink-soft">
+          <PhaseIcon className="h-3.5 w-3.5" aria-hidden="true" />
+          {phaseInfo.label}
+        </span>
+        <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[12px] font-medium ${tokenSyncBadgeClass}`}>
+          <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" aria-hidden="true" />
+          {syncBadgeLabel}
+        </span>
+        <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3 py-1 text-[12px] text-app-ink-soft">
+          Gói {getPlanLabel(activePlanCode)}
+        </span>
+        {reviewDueToday && (
+          <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg px-3 py-1 text-[12px] text-app-ink-soft">
+            Review hôm nay
+          </span>
+        )}
+      </div>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        <div className="rounded-card border border-app-line bg-app-surface p-4">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+            <Zap className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <p className="mt-3 text-[11px] font-medium uppercase tracking-[0.14em] text-app-ink-muted">Còn làm</p>
+          <p className="mt-1 font-serif text-[24px] font-medium leading-none text-app-ink tabular-nums">{todayRemainingCount}</p>
+          <p className="mt-1 text-[12px] text-app-ink-soft">{todayCompletedCount} đã chốt</p>
+        </div>
+        <div className="rounded-card border border-app-line bg-app-surface p-4">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+            <TrendingUp className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <p className="mt-3 text-[11px] font-medium uppercase tracking-[0.14em] text-app-ink-muted">Tuần</p>
+          <p className="mt-1 font-serif text-[24px] font-medium leading-none text-app-ink tabular-nums">{weekCompletion.percent}%</p>
+          <p className="mt-1 truncate text-[12px] text-app-ink-soft">{weekRangeLabel}</p>
+        </div>
+        <div className="rounded-card border border-app-line bg-app-surface p-4">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-app-bg text-app-ink-soft">
+            <CalendarDays className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <p className="mt-3 text-[11px] font-medium uppercase tracking-[0.14em] text-app-ink-muted">Review</p>
+          <p className="mt-1 truncate text-[14px] font-medium text-app-ink">
+            {reviewDueToday ? "Hôm nay" : getReviewDayLabel(system.reviewDay)}
+          </p>
+          <p className="mt-1 truncate text-[12px] text-app-ink-soft">{reviewStatusLabel}</p>
+        </div>
+      </div>
+
+      <p className="mt-3 text-[12px] leading-5 text-app-ink-muted">
+        {reviewDueToday
+          ? "Việc tiếp theo: chốt review tuần trước khi mở việc mới."
+          : firstPriorityTask
+            ? `Việc quan trọng nhất: ${firstPriorityTask.title}`
+            : "Hôm nay đang gọn. Bạn có thể lưu check-in hoặc xem lại tab Tuần."}
+      </p>
+    </header>
   );
 }
 
@@ -320,31 +296,31 @@ export function TwelveWeekGoalSwitcher({
   if (allGoals.length <= 1) return null;
 
   return (
-    <details className="group rounded-[var(--r-tile)] border border-slate-200 bg-white/88 px-4 py-3 shadow-sm">
-      <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-3 text-sm font-semibold text-slate-900">
-        <span>Đổi chu kỳ 12 tuần khác</span>
-        <span className="rounded-[var(--r-pill)] border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
-          {allGoals.length} chu kỳ
-        </span>
-      </summary>
-      <div className="mt-[var(--space-inline)] stack-tight border-t border-slate-200 pt-3">
-        <p className="text-sm leading-6 text-slate-600">
-          App đang ưu tiên chu kỳ active mới nhất; chỉ mở lại chu kỳ cũ khi cần đối chiếu.
-        </p>
-        <Select value={activeGoalId} onValueChange={onLoadGoal}>
-          <SelectTrigger className="max-w-xl" aria-label="Chọn mục tiêu 12 tuần">
-            <SelectValue placeholder="Chọn mục tiêu" />
-          </SelectTrigger>
-          <SelectContent>
-            {allGoals.map((goal) => (
-              <SelectItem key={goal.id} value={goal.id}>
-                {goal.title}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </details>
+    <div className="flex">
+      <Select value={activeGoalId} onValueChange={onLoadGoal}>
+        <SelectTrigger
+          className="h-auto w-full max-w-full rounded-lg border-app-line bg-app-surface px-3.5 py-2 text-[13px] font-medium text-app-ink shadow-none hover:bg-app-bg focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:max-w-md"
+          aria-label="Chọn mục tiêu 12 tuần"
+        >
+          <SelectValue placeholder="Chọn mục tiêu" />
+        </SelectTrigger>
+        <SelectContent className="rounded-card border border-app-line bg-app-surface p-1.5 shadow-md backdrop-blur-none">
+          {allGoals.map((goal) => (
+            <SelectItem
+              key={goal.id}
+              value={goal.id}
+              className={`cursor-pointer rounded-md px-2.5 py-2 text-[13px] ${
+                goal.id === activeGoalId
+                  ? "bg-app-accent-soft text-app-accent focus:bg-app-accent-soft focus:text-app-accent"
+                  : "text-app-ink hover:bg-app-bg focus:bg-app-bg focus:text-app-ink"
+              }`}
+            >
+              {goal.title}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }
 
@@ -365,53 +341,37 @@ export function TwelveWeekRescueTriggerBanner({
   onOpenToday,
   onDismiss,
 }: TwelveWeekRescueTriggerBannerProps) {
+  const firedTriggerKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!trigger) return;
+
+    const triggerKey = `${trigger.kind}:${trigger.headline}`;
+    if (firedTriggerKeyRef.current === triggerKey) return;
+
+    firedTriggerKeyRef.current = triggerKey;
+    onTriggerFired(trigger);
+  }, [onTriggerFired, trigger]);
+
   if (!trigger) return null;
 
-  const severityStyles = {
-    urgent: {
-      wrapper: "border-rose-200 bg-rose-50",
-      icon: "bg-rose-100 text-rose-600",
-      headline: "text-rose-800",
-      detail: "text-rose-700",
-    },
-    caution: {
-      wrapper: "border-amber-200 bg-amber-50",
-      icon: "bg-amber-100 text-amber-600",
-      headline: "text-amber-800",
-      detail: "text-amber-700",
-    },
-    watch: {
-      wrapper: "border-slate-200 bg-slate-50",
-      icon: "bg-slate-100 text-slate-500",
-      headline: "text-slate-800",
-      detail: "text-slate-600",
-    },
-  } as const;
-  const style = severityStyles[trigger.severity];
   const isUpgradeTrigger = trigger.kind === "trial_ending";
-  const ctaLabel = isUpgradeTrigger ? "Nâng cấp ngay" : "Xem lại hàng việc";
+  const ctaLabel = isUpgradeTrigger ? "Nâng cấp ngay" : "Xem ngay";
 
   return (
-    <div
-      role="alert"
-      className={`rounded-[var(--r-tile)] border px-4 py-3 text-sm ${style.wrapper}`}
-      onAnimationStart={() => onTriggerFired(trigger)}
-    >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+    <div role="alert" className="rounded-card border border-[#F3D9CC] bg-app-warm-soft p-4 md:p-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
         <div className="flex min-w-0 flex-1 items-start gap-3">
-          <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--r-pill)] ${style.icon}`}>
-            <AlertTriangle className="h-3.5 w-3.5" />
-          </div>
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-app-warm" aria-hidden="true" />
           <div className="min-w-0 flex-1">
-            <p className={`font-semibold ${style.headline}`}>{trigger.headline}</p>
-            <p className={`mt-0.5 text-xs leading-5 ${style.detail}`}>{trigger.detail}</p>
+            <p className="font-serif text-[16px] font-medium text-[#5C3A2E]">{trigger.headline}</p>
+            <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">{trigger.detail}</p>
           </div>
         </div>
-        <div className="flex w-full shrink-0 items-center gap-2 sm:ml-auto sm:w-auto">
-          <Button
-            variant="secondary"
-            size="sm"
-            className="flex-1 sm:flex-none"
+        <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
+          <button
+            type="button"
+            className="inline-flex flex-1 items-center justify-center rounded-lg border border-transparent bg-app-warm px-4 py-2 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-app-warm hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:flex-none"
             onClick={() => {
               const action = isUpgradeTrigger ? "upgrade" : "navigate_system";
               onActionTaken(trigger, action);
@@ -420,14 +380,13 @@ export function TwelveWeekRescueTriggerBanner({
             }}
           >
             {ctaLabel}
-          </Button>
+          </button>
           <button
             type="button"
-            className="px-1 text-xs opacity-60 transition-opacity hover:opacity-100"
-            aria-label="Đóng thông báo"
+            className="inline-flex flex-1 items-center justify-center rounded-lg px-4 py-2 text-[13px] font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:flex-none"
             onClick={() => onDismiss(trigger.kind)}
           >
-            ✕
+            Bỏ qua
           </button>
         </div>
       </div>

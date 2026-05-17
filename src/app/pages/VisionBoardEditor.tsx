@@ -1,6 +1,7 @@
 ﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useBeforeUnload, useBlocker, useNavigate, useParams } from "react-router";
 import {
+  Download,
   Heart,
   Image,
   Globe,
@@ -26,8 +27,10 @@ import { toast } from "sonner";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { EmptyOrdersIllustration } from "../components/illustrations";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
+import { ItemControlsPopover } from "../components/visionBoard/ItemControlsPopover";
 import { VisionBoardCanvas } from "../components/visionBoard/VisionBoardCanvas";
-import { SectionBlock } from "../components/layout/SectionBlock";
+import { VisionBoardSidebar } from "../components/visionBoard/VisionBoardSidebar";
+import { VisionBoardStoryWizard, type VisionBoardStorySeed } from "../components/visionBoard/VisionBoardStoryWizard";
 import { ProductVisual } from "../components/visuals/ProductVisual";
 import {
   AlertDialog,
@@ -63,6 +66,13 @@ import {
 } from "../utils/storage";
 import { hasReachedLimit } from "../utils/feature-entitlements";
 import { LIFE_AREAS, LIFE_AREA_LABELS } from "../utils/storage-constants";
+import {
+  downloadDataUrl,
+  EXPORT_RATIOS,
+  type ExportOptions,
+  exportVisionBoardToPng,
+  getRatioLabel,
+} from "../utils/vision-board-export";
 import { IMAGE_FRAME_STYLES, QUOTE_FONT_STYLES, SIZE_PRESETS, VISION_BOARD_THEMES } from "../utils/vision-board-config";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
@@ -98,6 +108,12 @@ const QUOTE_SUGGESTIONS = [
   "Kỷ luật là cây cầu nối tầm nhìn với kết quả.",
   "Tôi đang xây một cuộc sống mình thật sự muốn thức dậy mỗi sáng.",
 ];
+
+function getExportRatioDescription(ratio: ExportOptions["ratio"]): string {
+  if (ratio === "wallpaper") return "Để làm hình nền điện thoại - gợi nhắc mỗi lần mở máy.";
+  if (ratio === "desktop") return "Để làm hình nền máy tính.";
+  return "Để chia sẻ lên Instagram, Facebook.";
+}
 
 const CURATED_IMAGES: Array<{ label: string; url: string }> = [
   { label: "Không gian", url: "https://picsum.photos/seed/vision-workspace/480/360" },
@@ -206,6 +222,10 @@ export function VisionBoardEditor() {
   const [showZones, setShowZones] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [isAddingItem, setIsAddingItem] = useState(false);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [selectedRatio, setSelectedRatio] = useState<ExportOptions["ratio"]>("wallpaper");
   const [searchQuery, setSearchQuery] = useState("");
   const [quoteText, setQuoteText] = useState("");
   const [iconName, setIconName] = useState<IconName>("Sparkles");
@@ -219,6 +239,7 @@ export function VisionBoardEditor() {
   const [isVisionBoardLimitPaywallOpen, setIsVisionBoardLimitPaywallOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const uploadInputRef = useRef<HTMLInputElement>(null);
+  const canvasExportRef = useRef<HTMLDivElement>(null);
   const blocker = useBlocker(hasUnsavedChanges);
 
   const handleBeforeUnload = useCallback(
@@ -313,6 +334,7 @@ export function VisionBoardEditor() {
       year: boardYear.trim(),
       items: board.items,
       theme: themeId,
+      storyAnswers: board.storyAnswers,
     };
 
     if (id) {
@@ -540,12 +562,61 @@ export function VisionBoardEditor() {
     setHasUnsavedChanges(true);
   };
 
+  const handleWizardComplete = (seed: VisionBoardStorySeed) => {
+    if (!board) return;
+
+    setThemeId(seed.themeId);
+    setBoard({
+      ...board,
+      items: [...board.items, ...seed.items],
+      theme: seed.themeId,
+      storyAnswers: seed.storyAnswers,
+    });
+    setHasUnsavedChanges(true);
+    setIsWizardOpen(false);
+    toast.success("Đã tạo bảng theo câu chuyện của bạn. Kéo thả để chỉnh nếu muốn.");
+  };
+
+  const handleExport = async () => {
+    if (!canvasExportRef.current || !board) return;
+
+    setIsExporting(true);
+    try {
+      setSelectedItemId(null);
+      await new Promise((resolve) => window.setTimeout(resolve, 50));
+
+      const dataUrl = await exportVisionBoardToPng(canvasExportRef.current, {
+        ratio: selectedRatio,
+        pixelRatio: 2,
+      });
+      const filename = `${boardName.trim() || board.name || "vision-board"}-${boardYear.trim() || board.year || "2026"}-${selectedRatio}.png`;
+      downloadDataUrl(dataUrl, filename);
+      toast.success("Đã tải bảng về máy. Đặt làm hình nền điện thoại nhé!");
+      setIsExportDialogOpen(false);
+    } catch (error) {
+      console.error("Export failed", error);
+      toast.error("Không thể xuất ảnh. Vui lòng thử lại hoặc thử trình duyệt khác.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const handleUpdateItemPosition = (itemId: string, x: number, y: number) => {
     if (!board) return;
 
     setBoard({
       ...board,
       items: board.items.map((item) => (item.id === itemId ? { ...item, x, y } : item)),
+    });
+    setHasUnsavedChanges(true);
+  };
+
+  const handleUpdateItem = (itemId: string, updates: Partial<VisionBoardItem>) => {
+    if (!board) return;
+
+    setBoard({
+      ...board,
+      items: board.items.map((item) => (item.id === itemId ? { ...item, ...updates } : item)),
     });
     setHasUnsavedChanges(true);
   };
@@ -560,6 +631,8 @@ export function VisionBoardEditor() {
   if (isResolvingBoard) return null;
 
   if (!board) return null;
+
+  const selectedItem = selectedItemId ? board.items.find((item) => item.id === selectedItemId) : undefined;
 
   return (
       <div className="stack-section pb-12">
@@ -607,6 +680,54 @@ export function VisionBoardEditor() {
           </AlertDialogContent>
         </AlertDialog>
 
+        <VisionBoardStoryWizard
+          open={isWizardOpen}
+          onOpenChange={setIsWizardOpen}
+          onComplete={handleWizardComplete}
+          availableGoals={getUserData().goals.map((goal) => ({
+            id: goal.id,
+            title: goal.title,
+            category: goal.category,
+          }))}
+          year={boardYear}
+        />
+
+        <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Tải bảng về máy</DialogTitle>
+              <DialogDescription>
+                Chọn tỉ lệ phù hợp với mục đích sử dụng. Bảng sẽ được render thành ảnh PNG chất lượng cao.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 py-2">
+              {EXPORT_RATIOS.map((ratio) => (
+                <button
+                  key={ratio}
+                  type="button"
+                  onClick={() => setSelectedRatio(ratio)}
+                  className={`w-full rounded-lg border p-3 text-left transition ${
+                    selectedRatio === ratio
+                      ? "border-violet-400 bg-violet-50"
+                      : "border-slate-200 bg-white hover:border-violet-200"
+                  }`}
+                >
+                  <p className="text-sm font-semibold text-slate-900">{getRatioLabel(ratio)}</p>
+                  <p className="text-xs text-slate-500">{getExportRatioDescription(ratio)}</p>
+                </button>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsExportDialogOpen(false)} disabled={isExporting}>
+                Hủy
+              </Button>
+              <Button onClick={handleExport} disabled={isExporting}>
+                {isExporting ? "Đang xuất..." : "Tải về"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <Dialog open={isAddingItem} onOpenChange={setIsAddingItem}>
           <Card className="overflow-hidden">
             <CardContent className="relative p-5 sm:p-6 lg:p-8">
@@ -646,6 +767,14 @@ export function VisionBoardEditor() {
                     <Button glow onClick={() => setIsAddingItem(true)}>
                       <Plus className="h-4 w-4" />
                       Thêm phần tử
+                    </Button>
+                    <Button variant="outline" onClick={() => setIsWizardOpen(true)}>
+                      <Wand2 className="h-4 w-4" />
+                      Story Mode
+                    </Button>
+                    <Button variant="outline" onClick={() => setIsExportDialogOpen(true)} disabled={board.items.length === 0}>
+                      <Download className="h-4 w-4" />
+                      Tải về wallpaper
                     </Button>
                     <Button variant="outline" onClick={handleSave} disabled={!boardName.trim()}>
                       <Save className="h-4 w-4" />
@@ -1089,6 +1218,7 @@ export function VisionBoardEditor() {
                 focusAreaIds={board.storyAnswers?.focusAreas}
                 goalsById={goalsById}
                 selectedItemId={selectedItemId}
+                exportRef={canvasExportRef}
                 onItemPositionChange={handleUpdateItemPosition}
                 onItemDelete={handleDeleteItem}
                 onItemSelect={setSelectedItemId}
@@ -1107,8 +1237,8 @@ export function VisionBoardEditor() {
                         <p className="mt-[var(--space-inline)] text-base text-slate-500">
                           Hãy bắt đầu bằng một hình ảnh đại diện, một câu nói khiến bạn rung động hoặc một biểu tượng để neo cảm xúc cho mục tiêu của mình.
                         </p>
-                        <Button className="mt-6 w-full sm:mt-8 sm:w-auto" onClick={() => setIsAddingItem(true)}>
-                          <Plus className="h-4 w-4" />
+                        <Button className="mt-6 w-full sm:mt-8 sm:w-auto" onClick={() => setIsWizardOpen(true)}>
+                          <Wand2 className="h-4 w-4" />
                           Bắt đầu Story Mode
                         </Button>
                         <button
@@ -1126,102 +1256,17 @@ export function VisionBoardEditor() {
             </CardContent>
           </Card>
 
-          <SectionBlock title="Công cụ bảng" headerVisuallyHidden className="xl:sticky xl:top-28">
-            <div className="stack-stack">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-violet-50 text-violet-700">
-                    <LayoutGrid className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900">Thành phần bảng</h3>
-                    <p className="text-sm text-slate-500">
-                      Một bảng tốt có đủ hình ảnh, biểu tượng và câu chữ nhắc hướng đi.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-[var(--space-stack)] stack-tight">
-                  {[
-                    { label: "Hình ảnh", value: boardStats.images, color: "bg-violet-50 text-violet-700" },
-                    { label: "Trích dẫn", value: boardStats.quotes, color: "bg-amber-50 text-amber-700" },
-                    { label: "Biểu tượng", value: boardStats.icons, color: "bg-sky-50 text-sky-700" },
-                  ].map((item) => (
-                    <div
-                      key={item.label}
-                      className="flex items-center justify-between rounded-[var(--r-card)] border border-white/70 bg-white/72 px-4 py-3"
-                    >
-                      <span className="text-sm font-medium text-slate-600">{item.label}</span>
-                      <span className={`rounded-[var(--r-pill)] px-3 py-1 text-sm font-semibold ${item.color}`}>
-                        {item.value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-sky-50 text-sky-700">
-                    <Palette className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900">Gợi ý bố cục</h3>
-                    <p className="text-sm text-slate-500">
-                      Một vài nguyên tắc nhỏ để bảng nhìn sang hơn và dễ chạm cảm xúc hơn.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-[var(--space-stack)] stack-tight">
-                  {[
-                    "Đặt hình ảnh quan trọng nhất ở trung tâm hoặc góc trái trên.",
-                    "Dùng 1-2 câu nói đủ mạnh thay vì quá nhiều chữ trên bảng.",
-                    "Xen biểu tượng ở các khoảng trống để bảng có nhịp và điểm nhấn.",
-                    "Giữ khoảng thở giữa các phần tử để tổng thể trông cao cấp hơn.",
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      className="rounded-[var(--r-tile)] border border-white/70 bg-white/72 px-4 py-3 text-sm leading-7 text-slate-600"
-                    >
-                      {item}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-emerald-50 text-emerald-700">
-                    <Save className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900">Hoàn tất</h3>
-                    <p className="text-sm text-slate-500">
-                      Lưu bảng để xuất hiện trong thư viện và trở thành một phần của hành trình.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-[var(--space-stack)] flex flex-col gap-3">
-                  <Button onClick={handleSave} disabled={!boardName.trim()}>
-                    <Save className="h-4 w-4" />
-                    Lưu vision board
-                  </Button>
-                  <Button variant="outline" onClick={() => setIsAddingItem(true)}>
-                    <Plus className="h-4 w-4" />
-                    Thêm phần tử mới
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            </div>
-          </SectionBlock>
+          <aside className="space-y-4 xl:sticky xl:top-28">
+            {selectedItem && (
+              <ItemControlsPopover
+                item={selectedItem}
+                onUpdate={handleUpdateItem}
+                onDelete={handleDeleteItem}
+                onClose={() => setSelectedItemId(null)}
+              />
+            )}
+            <VisionBoardSidebar items={board.items} focusAreaIds={board.storyAnswers?.focusAreas} />
+          </aside>
         </div>
       </div>
   );

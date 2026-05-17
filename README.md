@@ -21,6 +21,15 @@ Onboarding
 
 The frontend is local-first so the main product flow can be tested quickly without a backend. The backend adds authenticated sync for the 12-week planning domain.
 
+## Vision Board
+
+- Story Mode wizard with 4 steps: feelings, life areas, core quote, and theme.
+- 5 themes: Aurora / Sunset / Forest / Night Sky / Minimal.
+- 4 item types: images, quotes, icons, and goal cards linked to existing SMART goals.
+- Toggleable life area zones on the canvas.
+- Item controls popover for size preset, life area, image frame, and quote font.
+- PNG export for phone wallpaper (9:16), desktop wallpaper (16:9), and square social sharing (1:1).
+
 ## Tech Stack
 
 - Frontend: React, Vite, TypeScript

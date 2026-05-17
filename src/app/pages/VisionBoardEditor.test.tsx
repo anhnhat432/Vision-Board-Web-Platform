@@ -1,5 +1,5 @@
 import type React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -11,9 +11,44 @@ const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
 }));
 
+const toPngMock = vi.hoisted(() => vi.fn());
+
+const storySeedMock = vi.hoisted(() => ({
+  themeId: "sunset" as const,
+  items: [
+    {
+      id: "seed_quote",
+      type: "quote" as const,
+      content: "Tôi đang xây cuộc đời mình muốn thức dậy mỗi sáng",
+      x: 18,
+      y: 38,
+      width: 320,
+      height: 140,
+      style: { sizePreset: "L" as const, quoteFont: "handwriting" as const },
+    },
+    {
+      id: "seed_image",
+      type: "image" as const,
+      content: "https://example.com/health.jpg",
+      x: 50,
+      y: 45,
+      width: 220,
+      height: 165,
+      lifeAreaId: "Health",
+      style: { sizePreset: "M" as const, imageFrame: "polaroid" as const },
+    },
+  ],
+  storyAnswers: {
+    feelings: ["tu-do", "sang-tao", "binh-an"],
+    focusAreas: ["Health"],
+    coreQuote: "Tôi đang xây cuộc đời mình muốn thức dậy mỗi sáng",
+  },
+}));
+
 const storageMock = vi.hoisted(() => ({
   addVisionBoard: vi.fn(),
   calculateGoalProgress: vi.fn((goal: { progress?: number }) => goal.progress ?? 0),
+  getCurrentEntitlementKeys: vi.fn(() => []),
   getCurrentPlan: vi.fn(() => "FREE"),
   getUserData: vi.fn(),
   updateVisionBoard: vi.fn(),
@@ -21,6 +56,10 @@ const storageMock = vi.hoisted(() => ({
 
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
+}));
+
+vi.mock("html-to-image", () => ({
+  toPng: toPngMock,
 }));
 
 vi.mock("../utils/storage", () => storageMock);
@@ -37,9 +76,30 @@ vi.mock("../components/visuals/ProductVisual", () => ({
   ProductVisual: () => <div data-testid="product-visual" />,
 }));
 
+vi.mock("../components/visionBoard/VisionBoardStoryWizard", () => ({
+  VisionBoardStoryWizard: ({ open, onComplete }: { open: boolean; onComplete: (seed: typeof storySeedMock) => void }) =>
+    open ? (
+      <div role="dialog" aria-label="Story Mode Wizard">
+        <button type="button" onClick={() => onComplete(storySeedMock)}>
+          Mock tạo bảng
+        </button>
+      </div>
+    ) : null,
+}));
+
 vi.mock("../components/visionBoard/VisionBoardCanvas", () => ({
-  VisionBoardCanvas: ({ items, emptyStateSlot }: { items: VisionBoardItem[]; emptyStateSlot?: React.ReactNode }) => (
-    <div data-testid="vision-board-canvas">
+  VisionBoardCanvas: ({
+    items,
+    emptyStateSlot,
+    exportRef,
+    themeId,
+  }: {
+    items: VisionBoardItem[];
+    emptyStateSlot?: React.ReactNode;
+    exportRef?: React.Ref<HTMLDivElement>;
+    themeId?: string;
+  }) => (
+    <div data-testid="vision-board-canvas" data-theme-id={themeId ?? "aurora"} ref={exportRef}>
       <pre data-testid="canvas-items">{JSON.stringify(items)}</pre>
       {items.length === 0 ? emptyStateSlot : null}
     </div>
@@ -102,7 +162,7 @@ function renderEditor(initialEntry = "/vision-board") {
 }
 
 async function openAddDialog(user: ReturnType<typeof userEvent.setup>) {
-  await user.click(await screen.findByRole("button", { name: "Bắt đầu Story Mode" }));
+  await user.click(await screen.findByRole("button", { name: "Hoặc tự thêm phần tử" }));
 }
 
 function getCanvasItems(): VisionBoardItem[] {
@@ -113,7 +173,10 @@ describe("VisionBoardEditor add dialog", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     authContextMock.useAuthContext.mockReturnValue({ user: null });
+    storageMock.addVisionBoard.mockReturnValue("board_saved");
     storageMock.calculateGoalProgress.mockImplementation((goal: { progress?: number }) => goal.progress ?? 0);
+    toPngMock.mockResolvedValue("data:image/png;base64,exported");
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
     setUserData({ goals: [createGoal({ id: "goal_1" }), createGoal({ id: "goal_2", title: "Ngủ sâu hơn" })] });
   });
 
@@ -223,5 +286,67 @@ describe("VisionBoardEditor add dialog", () => {
         style: { sizePreset: "L", quoteFont: "handwriting" },
       }),
     );
+  });
+
+  it("completes story mode, saves seed data, reopens board, and exports wallpaper", async () => {
+    const user = userEvent.setup();
+    const { unmount } = renderEditor();
+
+    await user.click(await screen.findByRole("button", { name: "Bắt đầu Story Mode" }));
+    expect(screen.getByRole("dialog", { name: "Story Mode Wizard" })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Mock tạo bảng" }));
+
+    expect(getCanvasItems()).toHaveLength(2);
+    expect(screen.getByTestId("vision-board-canvas")).toHaveAttribute("data-theme-id", "sunset");
+    expect(screen.getByRole("button", { name: "Tải về wallpaper" })).toBeEnabled();
+
+    await user.type(screen.getByPlaceholderText("Tên vision board của bạn"), "Bảng 2026");
+    await user.click(screen.getByRole("button", { name: "Lưu bảng" }));
+
+    expect(storageMock.addVisionBoard).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "Bảng 2026",
+        theme: "sunset",
+        items: storySeedMock.items,
+        storyAnswers: storySeedMock.storyAnswers,
+      }),
+    );
+
+    setUserData({
+      goals: [createGoal({ id: "goal_1" })],
+      visionBoards: [
+        {
+          id: "board_saved",
+          name: "Bảng 2026",
+          year: "2026",
+          createdAt: "2026-05-17T00:00:00.000Z",
+          items: storySeedMock.items,
+          theme: storySeedMock.themeId,
+          storyAnswers: storySeedMock.storyAnswers,
+        },
+      ],
+    });
+    unmount();
+    renderEditor("/vision-board/board_saved");
+
+    expect(screen.getByTestId("vision-board-canvas")).toHaveAttribute("data-theme-id", "sunset");
+    expect(getCanvasItems()).toHaveLength(2);
+
+    await user.click(screen.getByRole("button", { name: "Tải về wallpaper" }));
+    expect(screen.getByText("Wallpaper điện thoại (9:16)")).toBeInTheDocument();
+    expect(screen.getByText("Wallpaper máy tính (16:9)")).toBeInTheDocument();
+    expect(screen.getByText(/Vuông \(1:1\)/)).toBeInTheDocument();
+    const wallpaperOption = screen.getByText("Wallpaper điện thoại (9:16)").closest("button");
+    if (!wallpaperOption) throw new Error("Expected wallpaper ratio option");
+    await user.click(wallpaperOption);
+    await user.click(screen.getByRole("button", { name: "Tải về" }));
+
+    await waitFor(() => {
+      expect(toPngMock).toHaveBeenCalledWith(
+        screen.getByTestId("vision-board-canvas"),
+        expect.objectContaining({ canvasWidth: 1080, canvasHeight: 1920 }),
+      );
+    });
   });
 });

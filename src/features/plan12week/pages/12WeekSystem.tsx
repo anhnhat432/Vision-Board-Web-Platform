@@ -1,15 +1,7 @@
-import { BarChart3, CalendarDays, ListTodo, Loader2, type LucideIcon, Settings2 } from "lucide-react";
+import { BarChart3, CalendarDays, ListTodo, type LucideIcon, Settings2 } from "lucide-react";
 import { Suspense, useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import {
-  PhaseHarvestChipIcon,
-  PhaseHarvestIllustration,
-  PhasePeakChipIcon,
-  PhasePeakIllustration,
-  PhaseRampChipIcon,
-  PhaseRampIllustration,
-} from "@/app/components/illustrations";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
 import { CycleReviewPanel } from "@/app/components/twelve-week/CycleReviewPanel";
 import { DeleteDataConfirmationDialog } from "@/app/components/twelve-week/DeleteDataConfirmationDialog";
@@ -25,7 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/app/components/ui/alert-dialog";
-import { Button } from "@/app/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
 import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
 import { useScrollToTopOnChange } from "@/app/hooks/useScrollToTopOnChange";
 import { useTwelveWeekSystemSnapshot } from "@/app/hooks/useTwelveWeekSystemSnapshot";
@@ -126,79 +118,6 @@ function readWeeklyReviewSnoozeUntil(): number {
 
   window.localStorage.removeItem(WEEKLY_REVIEW_SNOOZE_STORAGE_KEY);
   return 0;
-}
-
-function getExecutionPhaseInfo(currentWeek: number) {
-  if (currentWeek <= 4) {
-    return {
-      label: "Khởi động",
-      chipIcon: PhaseRampChipIcon,
-      badgeClassName:
-        "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/30 dark:bg-violet-950/35 dark:text-violet-200",
-      textClassName: "text-violet-700 dark:text-violet-200",
-      barClassName: "from-violet-600 to-fuchsia-600 dark:from-violet-400 dark:to-fuchsia-400",
-    };
-  }
-
-  if (currentWeek <= 8) {
-    return {
-      label: "Bứt phá",
-      chipIcon: PhasePeakChipIcon,
-      badgeClassName:
-        "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-700 dark:border-fuchsia-500/30 dark:bg-fuchsia-950/35 dark:text-fuchsia-200",
-      textClassName: "text-fuchsia-700 dark:text-fuchsia-200",
-      barClassName: "from-fuchsia-600 to-rose-500 dark:from-fuchsia-400 dark:to-rose-400",
-    };
-  }
-
-  return {
-    label: "Thu hoạch",
-    chipIcon: PhaseHarvestChipIcon,
-    badgeClassName:
-      "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-950/35 dark:text-emerald-200",
-    textClassName: "text-emerald-700 dark:text-emerald-200",
-    barClassName: "from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-400",
-  };
-}
-
-function getExecutionPhaseIllustration(currentWeek: number) {
-  if (currentWeek <= 4) {
-    return <PhaseRampIllustration className="h-7 w-7 text-violet-500" />;
-  }
-
-  if (currentWeek <= 8) {
-    return <PhasePeakIllustration className="h-7 w-7 text-fuchsia-500" />;
-  }
-
-  return <PhaseHarvestIllustration className="h-7 w-7 text-emerald-500" />;
-}
-
-function getExecutionSyncPillClass(syncStatus: string) {
-  if (syncStatus === "success") {
-    return {
-      pill: "border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-800 dark:border-emerald-500/30 dark:from-emerald-950/45 dark:to-teal-950/30 dark:text-emerald-100",
-      dot: "bg-emerald-500",
-    };
-  }
-
-  if (syncStatus === "error" || syncStatus === "partial") {
-    return {
-      pill: "border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 text-amber-800 dark:border-amber-500/30 dark:from-amber-950/45 dark:to-orange-950/30 dark:text-amber-100",
-      dot: "bg-amber-500",
-    };
-  }
-
-  if (syncStatus === "syncing") {
-    return {
-      pill: "border-sky-200 bg-gradient-to-r from-sky-50 to-cyan-50 text-sky-800 dark:border-sky-500/30 dark:from-sky-950/45 dark:to-cyan-950/30 dark:text-sky-100",
-      dot: "bg-sky-500",
-    };
-  }
-
-  return {
-    pill: "border-slate-200 bg-gradient-to-r from-slate-50 to-white text-slate-600 dark:border-slate-700 dark:from-slate-900 dark:to-slate-950 dark:text-slate-300",
-    dot: "bg-slate-400",
-  };
 }
 
 function getCycleId(goalId: string, system: TwelveWeekSystemModel): string {
@@ -879,10 +798,6 @@ export function TwelveWeekSystem() {
   const backendSyncIssueMessage = syncIssueState.message;
   const syncBadgeClass = getSyncBadgeClass(backendConnectionStatus);
   const syncBadgeLabel = syncIssueState.isTransient ? "Đang thử lại…" : getSyncBadgeLabel(backendConnectionStatus);
-  const phaseInfo = getExecutionPhaseInfo(currentWeek);
-  const PhaseChipIcon = phaseInfo.chipIcon;
-  const phaseIllustration = getExecutionPhaseIllustration(currentWeek);
-  const syncPillClass = getExecutionSyncPillClass(backendConnectionStatus.syncStatus);
 
   useEffect(() => {
     const localSystem = activeGoal?.twelveWeekSystem ?? null;
@@ -945,27 +860,35 @@ export function TwelveWeekSystem() {
           ].map((item, index) => (
             <div
               key={item}
-              className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600"
+              className="rounded-lg border border-app-line bg-app-bg px-4 py-3 text-[13px] leading-5 text-app-ink-soft"
             >
-              <span className="mr-2 font-semibold text-slate-950">0{index + 1}</span>
+              <span className="mr-2 font-medium text-app-ink">0{index + 1}</span>
               {item}
             </div>
           ))}
         </div>
-        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <Button className="w-full sm:w-auto" onClick={() => navigate("/life-insight")}>
+        <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-center rounded-lg bg-app-accent px-5 py-2.5 text-[14px] font-medium text-white transition-colors duration-150 hover:bg-app-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+            onClick={() => navigate("/life-insight")}
+          >
             Tạo mục tiêu 12 tuần
-          </Button>
-          <Button className="w-full sm:w-auto" variant="outline" onClick={() => navigate("/goals")}>
+          </button>
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-5 py-2.5 text-[14px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+            onClick={() => navigate("/goals")}
+          >
             Mở mục tiêu đã có
-          </Button>
+          </button>
         </div>
       </TwelveWeekDashboardState>
     );
   }
 
   return (
-    <div className="stack-section pb-12">
+    <div className="mx-auto max-w-6xl px-4 pt-6 pb-8 sm:px-6 lg:px-8">
       <UpgradePaywallDialog
         open={isUpgradeDialogOpen}
         onOpenChange={setIsUpgradeDialogOpen}
@@ -980,50 +903,50 @@ export function TwelveWeekSystem() {
       />
 
       <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-card border border-app-line bg-app-surface shadow-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Làm mới chu kỳ 12 tuần?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="font-serif text-app-ink">Làm mới chu kỳ 12 tuần?</AlertDialogTitle>
+            <AlertDialogDescription className="text-app-ink-soft">
               Hành động này sẽ bắt đầu lại tuần 1 từ tuần hiện tại, xóa việc đã hoàn thành, check-in hằng ngày, review
               tuần và nhật ký review tuần đã liên kết của chu kỳ đang chạy.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Quay lại</AlertDialogCancel>
-            <AlertDialogAction onClick={handleResetCycle}>Làm mới từ tuần này</AlertDialogAction>
+            <AlertDialogCancel className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg">Quay lại</AlertDialogCancel>
+            <AlertDialogAction className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)] hover:opacity-90" onClick={handleResetCycle}>Làm mới từ tuần này</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       <AlertDialog open={isClearLocalDialogOpen} onOpenChange={setIsClearLocalDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-card border border-app-line bg-app-surface shadow-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Xóa dấu vết trên thiết bị này?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="font-serif text-app-ink">Xóa dấu vết trên thiết bị này?</AlertDialogTitle>
+            <AlertDialogDescription className="text-app-ink-soft">
               Hành động này chỉ xóa nhật ký sự kiện, việc đang chờ đồng bộ và trạng thái nhắc việc trên thiết bị. Mục
               tiêu, review tuần, nhật ký và bảng tầm nhìn của bạn vẫn được giữ nguyên.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Giữ lại</AlertDialogCancel>
-            <AlertDialogAction onClick={handleClearLocalSignals}>Xóa dấu vết trên thiết bị</AlertDialogAction>
+            <AlertDialogCancel className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg">Giữ lại</AlertDialogCancel>
+            <AlertDialogAction className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)] hover:opacity-90" onClick={handleClearLocalSignals}>Xóa dấu vết trên thiết bị</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       <AlertDialog open={isDeleteCloudDialogOpen} onOpenChange={setIsDeleteCloudDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-card border border-app-line bg-app-surface shadow-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Xóa dữ liệu 12 tuần đã đồng bộ?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="font-serif text-app-ink">Xóa dữ liệu 12 tuần đã đồng bộ?</AlertDialogTitle>
+            <AlertDialogDescription className="text-app-ink-soft">
               Chỉ xóa dữ liệu kế hoạch trong tài khoản (mục tiêu, kế hoạch, tuần, việc, chỉ số, check-in, review). Không
               xóa dữ liệu trên thiết bị này. Không xóa gói Plus, đăng ký hay tài khoản. Hành động này không thể hoàn
               tác.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Quay lại</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDeleteCloudWorkspace}>Xóa dữ liệu đã đồng bộ</AlertDialogAction>
+            <AlertDialogCancel className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg">Quay lại</AlertDialogCancel>
+            <AlertDialogAction className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)] hover:opacity-90" onClick={handleConfirmDeleteCloudWorkspace}>Xóa dữ liệu đã đồng bộ</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -1063,19 +986,27 @@ export function TwelveWeekSystem() {
           title="Đến lúc chốt review tuần"
           description="Review tuần đang đến hạn. Bạn có thể mở tab Tuần, đánh dấu đã xong, hoặc nhắc lại sau."
         >
-          <Button
-            variant="secondary"
-            className="w-full border-slate-950 bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-center rounded-lg bg-app-warm px-4 py-2 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-app-warm/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
             onClick={markWeeklyReviewCompleted}
           >
             Đã đánh giá xong tuần này
-          </Button>
-          <Button className="w-full bg-white sm:w-auto" variant="outline" onClick={handleSnoozeWeeklyReview}>
+          </button>
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-[13px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+            onClick={handleSnoozeWeeklyReview}
+          >
             Nhắc lại sau 24h
-          </Button>
-          <Button className="w-full bg-white sm:w-auto" variant="outline" onClick={() => handleTabChange("week")}>
+          </button>
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-[13px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+            onClick={() => handleTabChange("week")}
+          >
             Mở review tuần
-          </Button>
+          </button>
         </TwelveWeekDashboardNotice>
       )}
 
@@ -1091,16 +1022,20 @@ export function TwelveWeekSystem() {
                 : "Chỉ số kết quả chính đang trống, nên phần tiến độ và review sẽ khó hiểu hơn. Hãy bổ sung chỉ số khi chỉnh lại chu kỳ."
           }
         >
-          <Button
-            variant="secondary"
-            className="w-full border-slate-950 bg-slate-950 text-white hover:bg-slate-800 sm:w-auto"
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-center rounded-lg bg-app-warm px-4 py-2 text-[13px] font-medium text-white transition-colors duration-150 hover:bg-app-warm/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
             onClick={() => navigate("/life-insight")}
           >
             Tạo lại chu kỳ
-          </Button>
-          <Button className="w-full bg-white sm:w-auto" variant="outline" onClick={() => handleTabChange("settings")}>
+          </button>
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-[13px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 sm:w-auto"
+            onClick={() => handleTabChange("settings")}
+          >
             Mở cài đặt chu kỳ
-          </Button>
+          </button>
         </TwelveWeekDashboardNotice>
       )}
 
@@ -1110,17 +1045,21 @@ export function TwelveWeekSystem() {
           title="Chưa sao lưu được vào tài khoản"
           description={`${backendSyncIssueMessage} Tiến trình vẫn được lưu trên thiết bị này.`}
         >
-          <Button
-            variant="destructive"
-            className="w-full border-rose-900 bg-rose-900 text-white hover:bg-rose-800 sm:w-auto"
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-center rounded-lg bg-[color:var(--color-danger-fg)] px-4 py-2 text-[13px] font-medium text-white transition-colors duration-150 hover:opacity-90 disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-danger-border)] sm:w-auto"
             disabled={isBackendSyncing}
             onClick={handleRunOutboxSync}
           >
             {isBackendSyncing ? "Đang thử lại..." : "Thử sao lưu lại"}
-          </Button>
-          <Button className="w-full bg-white sm:w-auto" variant="outline" onClick={() => handleTabChange("settings")}>
+          </button>
+          <button
+            type="button"
+            className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-[13px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-danger-border)] sm:w-auto"
+            onClick={() => handleTabChange("settings")}
+          >
             Xem trạng thái
-          </Button>
+          </button>
         </TwelveWeekDashboardNotice>
       )}
 
@@ -1149,66 +1088,30 @@ export function TwelveWeekSystem() {
         }}
       />
 
-      <nav className="sticky top-3 z-30 hidden md:block" aria-label="Điều hướng hệ 12 tuần">
-        <div className="flex max-w-full items-center justify-between gap-3 rounded-[var(--r-card)] border border-white/70 bg-white/88 p-2 shadow-lg shadow-slate-900/5 backdrop-blur dark:border-slate-700/70 dark:bg-slate-950/86">
-          <div
-            role="tablist"
-            aria-label="Điều hướng hệ 12 tuần"
-            className="inline-flex max-w-full items-center gap-1 rounded-[var(--r-pill)] bg-slate-100/90 p-1 dark:bg-slate-900"
-          >
-            {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => {
-              const selected = activeTab === value;
-              const tabId = `${tabPanelId}-${value}-tab`;
-
-              return (
-                <button
-                  key={value}
-                  id={tabId}
-                  type="button"
-                  role="tab"
-                  aria-selected={selected}
-                  aria-controls={tabPanelId}
-                  aria-label={`Mở tab ${label}`}
-                  className={`inline-flex h-10 items-center justify-center gap-2 rounded-[var(--r-pill)] px-4 text-sm font-semibold transition-colors ${
-                    selected
-                      ? "gradient-brand text-primary-foreground shadow-[var(--shadow-2)]"
-                      : "text-muted-foreground hover:bg-card hover:text-foreground"
-                  }`}
-                  onClick={() => handleTabChange(value)}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span>{label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          <div className="flex min-w-0 items-center gap-2">
-            <span
-              className={`inline-flex shrink-0 items-center gap-2 rounded-[var(--r-pill)] border px-3 py-2 text-xs font-semibold ${phaseInfo.badgeClassName}`}
-            >
-              {phaseIllustration}
-              <PhaseChipIcon className="h-4 w-4" />
-              Tuần {currentWeek}/{system.totalWeeks} - {phaseInfo.label}
-            </span>
-            <span
-              className={`inline-flex shrink-0 items-center gap-2 rounded-[var(--r-pill)] border px-3 py-2 text-xs font-semibold ${syncPillClass.pill}`}
-            >
-              {syncIssueState.isTransient ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-              ) : (
-                <span className={`h-2 w-2 rounded-[var(--r-pill)] ${syncPillClass.dot}`} aria-hidden="true" />
-              )}
-              {syncBadgeLabel}
-            </span>
-          </div>
-        </div>
+      <nav className="mt-5" aria-label="Điều hướng hệ 12 tuần">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto">
+          <TabsList aria-label="Điều hướng hệ 12 tuần" className="inline-flex min-h-0 rounded-full border border-app-line bg-app-bg p-1">
+            {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => (
+              <TabsTrigger
+                key={value}
+                id={`${tabPanelId}-${value}-tab`}
+                value={value}
+                aria-controls={tabPanelId}
+                aria-label={`Mở tab ${label}`}
+                className="flex-none rounded-full px-3.5 py-1.5 text-[13px] sm:px-4"
+              >
+                <Icon className="h-4 w-4" aria-hidden="true" />
+                <span>{label}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
       </nav>
 
       {/* Main content sections */}
       <div
         ref={tabsTopRef}
-        className="pt-4"
+        className="mt-5"
         role="tabpanel"
         id={tabPanelId}
         aria-labelledby={`${tabPanelId}-${activeTab}-tab`}
@@ -1355,10 +1258,14 @@ export function TwelveWeekSystem() {
                 />
               ) : (
                 <>
-                  <div className="flex justify-end mb-4">
-                    <Button variant="outline" onClick={() => setShowFullProgress(false)}>
-                      ← Quay lại tóm tắt
-                    </Button>
+                  <div className="mb-4 flex justify-end">
+                    <button
+                      type="button"
+                      className="inline-flex items-center justify-center rounded-lg border border-app-line bg-app-surface px-4 py-2 text-[13px] font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                      onClick={() => setShowFullProgress(false)}
+                    >
+                      Quay lại tóm tắt
+                    </button>
                   </div>
                   <PlanOverview
                     system={system}
