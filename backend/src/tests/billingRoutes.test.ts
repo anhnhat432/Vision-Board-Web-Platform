@@ -5,6 +5,7 @@ import express, { type Express } from "express";
 
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
+import { PaymentOrderModel } from "../models/PaymentOrderModel";
 import { billingRoutes, publicBillingRoutes } from "../routes/billingRoutes";
 import { billingService } from "../services/billingServiceInstance";
 import { _resetAdapterCacheForTesting } from "../services/paymentProviderRegistry";
@@ -450,6 +451,69 @@ describe("GET /api/billing/payment-history", () => {
 
     assert.equal(response.status, 401);
     assert.equal(response.body.success, false);
+  });
+
+  it("does not share rate-limit quota with entitlement polling", async () => {
+    const historyUserId = "user_payment_history_rate_limit";
+    const paymentOrderModel = PaymentOrderModel as unknown as {
+      updateMany: (...args: unknown[]) => Promise<unknown>;
+      find: (...args: unknown[]) => {
+        select: (...selectArgs: unknown[]) => {
+          sort: (...sortArgs: unknown[]) => {
+            limit: (...limitArgs: unknown[]) => {
+              lean: () => Promise<unknown[]>;
+            };
+          };
+        };
+      };
+    };
+    const originalUpdateMany = paymentOrderModel.updateMany;
+    const originalFind = paymentOrderModel.find;
+
+    paymentOrderModel.updateMany = async () => ({ modifiedCount: 0 });
+    paymentOrderModel.find = () => ({
+      select: () => ({
+        sort: () => ({
+          limit: () => ({
+            lean: async () => [],
+          }),
+        }),
+      }),
+    });
+
+    const app = express();
+    app.use(express.json());
+    app.use(
+      "/api",
+      createAuthMiddleware({
+        async verifyIdToken(token: string) {
+          if (token === "history-token") return { uid: historyUserId, email: "history@test.com", emailVerified: true };
+          throw new Error("Invalid test token");
+        },
+      }),
+    );
+    app.use("/api", billingRoutes);
+    app.use(errorMiddleware);
+
+    try {
+      for (let index = 0; index < 40; index += 1) {
+        const entitlementResponse = await requestJson(app, "GET", "/api/billing/entitlement", {
+          token: "history-token",
+        });
+        assert.equal(entitlementResponse.status, 200);
+      }
+
+      const response = await requestJson(app, "GET", "/api/billing/payment-history", {
+        token: "history-token",
+      });
+
+      assert.equal(response.status, 200);
+      assert.equal(response.body.success, true);
+      assert.deepEqual((response.body.data as { orders: unknown[] }).orders, []);
+    } finally {
+      paymentOrderModel.updateMany = originalUpdateMany;
+      paymentOrderModel.find = originalFind;
+    }
   });
 });
 

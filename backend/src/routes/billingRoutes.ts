@@ -17,7 +17,11 @@ import {
 } from "../controllers/orderStatusController";
 import { createBillingRefundRequest } from "../controllers/refundController";
 import { requireEmailVerified } from "../middleware/authMiddlewareCore";
-import { billingCheckoutRateLimiter, billingStatusRateLimiter } from "../middleware/rateLimiters";
+import {
+  billingCheckoutRateLimiter,
+  billingHistoryRateLimiter,
+  billingStatusRateLimiter,
+} from "../middleware/rateLimiters";
 import {
   validateCheckoutSessionInput,
   validateCustomerPortalInput,
@@ -90,7 +94,7 @@ billingRoutes.post(
   validateOptionalJsonObjectBody,
   asyncHandler(markUserConfirmedTransfer),
 );
-billingRoutes.get("/billing/payment-history", billingStatusRateLimiter, asyncHandler(getPaymentHistory));
+billingRoutes.get("/billing/payment-history", billingHistoryRateLimiter, asyncHandler(getPaymentHistory));
 billingRoutes.post(
   "/billing/orders/:orderId/resend-receipt",
   billingCheckoutRateLimiter,

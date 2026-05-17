@@ -147,6 +147,13 @@ export const billingStatusRateLimiter = createLimiter({
   keyGenerator: userOrIpKey,
 });
 
+export const billingHistoryRateLimiter = createLimiter({
+  keyPrefix: "billing-history",
+  windowMs: ONE_MINUTE_MS,
+  limit: 120,
+  keyGenerator: userOrIpKey,
+});
+
 export const planBulkSyncRateLimiter = createLimiter({
   keyPrefix: "plan-bulk-sync",
   windowMs: ONE_MINUTE_MS,

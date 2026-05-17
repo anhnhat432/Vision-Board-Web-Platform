@@ -190,6 +190,32 @@ function getRefundStatusLabel(status: RefundRequestStatus): string {
   return "Đang chờ xử lý";
 }
 
+function getPaymentHistoryErrorMessage(error: unknown): string {
+  const appError = toAppError(error) as ReturnType<typeof toAppError> & {
+    rateLimited?: boolean;
+    retryAfterMs?: number;
+    errorCode?: string;
+  };
+  const isRateLimited =
+    appError.status === 429 ||
+    appError.rateLimited === true ||
+    appError.errorCode === "rate_limited" ||
+    /too many requests|rate limit/i.test(appError.message);
+
+  if (isRateLimited) {
+    const retryAfterSeconds =
+      typeof appError.retryAfterMs === "number" && Number.isFinite(appError.retryAfterMs)
+        ? Math.max(1, Math.ceil(appError.retryAfterMs / 1000))
+        : null;
+    if (retryAfterSeconds) {
+      return `Bạn vừa kiểm tra lịch sử thanh toán quá nhanh. Hãy đợi khoảng ${retryAfterSeconds} giây rồi thử lại.`;
+    }
+    return "Bạn vừa kiểm tra lịch sử thanh toán quá nhanh. Hãy đợi một chút rồi thử lại.";
+  }
+
+  return appError.message || "Không thể tải lịch sử thanh toán.";
+}
+
 export function BillingPlan() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -241,7 +267,7 @@ export function BillingPlan() {
         setPaymentHistoryError("Mạng có vấn đề, vui lòng thử lại");
       } else {
         logBillingUiError(error, { surface: "BillingPlan", action: "load_payment_history" });
-        setPaymentHistoryError(toAppError(error).message || "Không thể tải lịch sử thanh toán.");
+        setPaymentHistoryError(getPaymentHistoryErrorMessage(error));
       }
     } finally {
       setIsLoadingPaymentHistory(false);

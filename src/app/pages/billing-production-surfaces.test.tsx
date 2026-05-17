@@ -18,6 +18,10 @@ function stubRealBillingEnv(
     currentPeriodEnd: null,
     cancelAtPeriodEnd: false,
   },
+  paymentHistory: {
+    error?: unknown;
+    orders?: unknown[];
+  } = {},
 ) {
   vi.resetModules();
   vi.stubEnv("VITE_APP_MODE", "real");
@@ -63,6 +67,11 @@ function stubRealBillingEnv(
         });
       }
 
+      if (path === "/billing/payment-history") {
+        if (paymentHistory.error) return Promise.reject(paymentHistory.error);
+        return Promise.resolve({ orders: paymentHistory.orders ?? [] });
+      }
+
       return Promise.resolve({ orders: [] });
     }),
     post: vi.fn().mockResolvedValue({
@@ -79,9 +88,24 @@ function stubRealBillingEnv(
   vi.doMock("@/lib/api/apiClient", () => ({
     apiClient,
     isApiBaseUrlConfigured: () => true,
-    toAppError: (error: unknown) => ({
-      message: error instanceof Error ? error.message : "Không thể tải dữ liệu.",
-    }),
+    toAppError: (error: unknown) => {
+      if (error instanceof Error) return { message: error.message };
+      if (error && typeof error === "object") {
+        const value = error as {
+          message?: string;
+          status?: number;
+          rateLimited?: boolean;
+          retryAfterMs?: number;
+        };
+        return {
+          message: value.message ?? "Không thể tải dữ liệu.",
+          status: value.status,
+          rateLimited: value.rateLimited,
+          retryAfterMs: value.retryAfterMs,
+        };
+      }
+      return { message: "Không thể tải dữ liệu." };
+    },
   }));
 
   return apiClient;
@@ -130,6 +154,36 @@ describe("production billing surfaces", () => {
     expect(screen.getByText("Thanh toán qua Stripe")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Quản lý gói" })).toBeInTheDocument();
     expect(screen.queryByText(/\(mock\)|mô phỏng/i)).not.toBeInTheDocument();
+  }, UI_TEST_TIMEOUT_MS);
+
+  it("localizes payment history rate-limit errors", async () => {
+    stubRealBillingEnv(
+      "Casso + VietQR",
+      {
+        planCode: "FREE",
+        status: "none",
+        entitlements: [],
+        currentPeriodEnd: null,
+        cancelAtPeriodEnd: false,
+      },
+      {
+        error: {
+          message: "Too many requests. Please wait a moment and try again.",
+          status: 429,
+          rateLimited: true,
+          retryAfterMs: 60_000,
+        },
+      },
+    );
+    const { BillingPlan } = await import("./BillingPlan");
+
+    const router = createMemoryRouter([{ path: "/billing/plan", element: <BillingPlan /> }], {
+      initialEntries: ["/billing/plan"],
+    });
+    render(<RouterProvider router={router} />);
+
+    expect(await screen.findByText(/Bạn vừa kiểm tra lịch sử thanh toán quá nhanh/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Too many requests/i)).not.toBeInTheDocument();
   }, UI_TEST_TIMEOUT_MS);
 
   it("shows real provider checkout copy in the upgrade dialog", async () => {
