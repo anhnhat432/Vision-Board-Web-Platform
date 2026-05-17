@@ -40,7 +40,7 @@ describe("AspirationalVision page", () => {
       screen.getByLabelText("Sức khoẻ"),
       "Tôi duy trì tập luyện đều và ngủ đủ.",
     );
-    await user.click(screen.getByRole("button", { name: "Lưu tầm nhìn 3 năm" }));
+    await user.click(screen.getByRole("button", { name: "Lưu tầm nhìn" }));
 
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/");

@@ -166,6 +166,6 @@ describe("app routes", () => {
     saveUserData({ ...userData, onboardingCompleted: true });
     renderRoute("/settings");
 
-    expect(await screen.findByRole("heading", { level: 1, name: /T.i kho.n v. d. li.u/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: /Tu. ch.nh t.i kho.n/i })).toBeInTheDocument();
   });
 });

@@ -1,18 +1,11 @@
-﻿import { ArrowLeft, Save, Sparkles } from "lucide-react";
-import { motion } from "motion/react";
+﻿import { ArrowLeft, Save } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
-import { PageShell } from "../components/PageShell";
-import { AspirationalVisionIllustration } from "../components/illustrations";
-import { PrimaryActionCard } from "../components/layout/PrimaryActionCard";
-import { SectionBlock } from "../components/layout/SectionBlock";
 import { Button } from "../components/ui/button";
-import { Card, CardContent } from "../components/ui/card";
-import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
-import { useReducedMotion } from "../components/ui/use-reduced-motion";
+import { errorTextClass, helperTextClass, labelClass, textareaClass } from "./SMARTGoalSetup/components/formStyles";
 import { getUserData, saveUserData } from "../utils/storage";
 import type { AspirationalVisionArea } from "../utils/storage-types";
 
@@ -54,6 +47,8 @@ const LIFE_AREA_FIELDS: Array<{ area: AspirationalVisionArea; label: string; pla
   },
 ];
 
+const warmTextareaClass = `${textareaClass} border-[#F3D9CC] focus-visible:border-app-warm focus-visible:ring-app-warm/30`;
+
 function createVisionId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return `vision_${crypto.randomUUID()}`;
@@ -61,9 +56,18 @@ function createVisionId(): string {
   return `vision_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function formatVisionDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "CHƯA RÕ NGÀY";
+  return date.toLocaleDateString("vi-VN").toLocaleUpperCase("vi-VN");
+}
+
+function getAreaLabel(area: AspirationalVisionArea): string {
+  return LIFE_AREA_FIELDS.find((field) => field.area === area)?.label ?? "Khác";
+}
+
 export function AspirationalVision() {
   const navigate = useNavigate();
-  const prefersReducedMotion = useReducedMotion();
   const storedVision = useMemo(() => getUserData().aspirationalVision, []);
   const [summary, setSummary] = useState(storedVision?.summary ?? "");
   const [horizonYears, setHorizonYears] = useState<3 | 5>(storedVision?.horizonYears ?? 3);
@@ -111,39 +115,39 @@ export function AspirationalVision() {
       updatedAt: now,
     };
     saveUserData(data);
-    toast.success("Đã lưu tầm nhìn 3 năm", {
-    description: "Bạn có thể quay lại sửa bất cứ lúc nào từ Trang chính.",
+    toast.success(`Đã lưu tầm nhìn ${horizonYears} năm`, {
+      description: "Bạn có thể quay lại sửa bất cứ lúc nào từ Trang chính.",
     });
     navigate("/");
   };
 
   return (
-    <PageShell maxWidth="xl" className="stack-section page-enter">
-      <motion.div
-        initial={prefersReducedMotion ? false : { opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.36, ease: "easeOut" }}
-        className="stack-section"
-      >
-        <h1 className="sr-only">Tầm nhìn 3 năm</h1>
-        <SectionBlock title="Biểu mẫu tầm nhìn 3 năm" headerVisuallyHidden>
-        <PrimaryActionCard
-          hero
-          eyebrow="Tầm nhìn 3 năm"
-          icon={<Sparkles className="h-3.5 w-3.5" />}
-          title="Tầm nhìn 3 năm"
-          titleAs="h2"
-          description="Viết phần aspirational vision riêng với mục tiêu 12 tuần. Phần này không bắt buộc, nhưng giúp mỗi cycle ngắn hạn bám vào một hướng dài hơn."
-          titleClassName="text-gradient-vibrant text-3xl font-semibold leading-[1.1] tracking-[-0.018em] sm:text-4xl"
-          descriptionClassName="max-w-3xl leading-7 text-muted-foreground"
-          contentClassName="pointer-events-none hidden justify-end sm:flex"
-        >
-          <AspirationalVisionIllustration className="-mt-4 w-56 text-[color:var(--tone-shell-primary)] opacity-30 sm:w-72" />
-        </PrimaryActionCard>
-        <Card>
-        <CardContent className="stack-section">
-          <div className="stack-tight">
-            <Label htmlFor="aspirational-summary">Tóm tắt tầm nhìn 3 năm</Label>
+    <div className="mx-auto max-w-4xl px-4 pb-12 pt-8 sm:px-6">
+      <header>
+        <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">TẦM NHÌN</p>
+        <h1 className="mt-3 font-serif text-[30px] font-medium leading-tight tracking-tight text-app-ink">
+          Tầm nhìn 3 năm của bạn
+        </h1>
+        <p className="mt-2 max-w-2xl text-[14px] leading-6 text-app-ink-soft">
+          Định hình bức tranh dài hạn để mỗi chu kỳ 12 tuần đều phục vụ điều này.
+        </p>
+      </header>
+
+      <section className="mt-6 rounded-card border border-[#F3D9CC] bg-app-warm-soft p-6 md:p-8" aria-label="Biểu mẫu tầm nhìn">
+        <div className="max-w-3xl">
+          <p className="font-serif text-[18px] font-medium leading-7 text-[#5C3A2E]">
+            Trong 3 năm tới, bạn muốn cuộc sống mình trông như thế nào?
+          </p>
+          <p className="mt-2 text-[13px] leading-6 text-[#6F4A3C]">
+            Viết chậm, cụ thể vừa đủ. Tầm nhìn này là điểm neo, không phải cam kết phải hoàn hảo.
+          </p>
+        </div>
+
+        <div className="mt-6 space-y-5">
+          <div>
+            <label htmlFor="aspirational-summary" className={labelClass}>
+              Tóm tắt tầm nhìn {horizonYears} năm
+            </label>
             <Textarea
               id="aspirational-summary"
               rows={4}
@@ -152,75 +156,114 @@ export function AspirationalVision() {
               placeholder="Viết 2-4 câu về con người, công việc và nhịp sống bạn muốn có trong 3 năm tới."
               aria-invalid={showError && trimmedSummary.length < 20}
               aria-describedby={showError && trimmedSummary.length < 20 ? "aspirational-summary-error" : undefined}
+              className={warmTextareaClass}
             />
             {showError && trimmedSummary.length < 20 ? (
-              <p id="aspirational-summary-error" role="alert" className="text-xs font-medium text-rose-700">
+              <p id="aspirational-summary-error" role="alert" className={errorTextClass}>
                 Viết tóm tắt tầm nhìn rõ hơn trước khi lưu.
               </p>
-            ) : null}
+            ) : (
+              <p className={helperTextClass}>Tối thiểu 20 ký tự để phần này đủ rõ khi quay lại lập kế hoạch.</p>
+            )}
           </div>
 
-          <div className="stack-tight">
-            <p className="text-sm font-medium text-foreground">Khoảng thời gian</p>
+          <div>
+            <p className="mb-2 text-[13px] font-medium text-app-ink">Khoảng thời gian</p>
             <div className="flex flex-wrap gap-2">
-              {[3, 5].map((year) => (
-                <button
-                  key={year}
-                  type="button"
-                  aria-pressed={horizonYears === year}
-                  onClick={() => setHorizonYears(year as 3 | 5)}
-                  className={`rounded-[var(--r-pill)] border px-4 py-2 text-sm font-medium transition-colors ${
-                    horizonYears === year
-                      ? "border-foreground bg-foreground text-[color:var(--background)]"
-                      : "border-[color:var(--border)] bg-card text-foreground hover:border-[color:var(--tone-shell-primary)]"
-                  }`}
-                >
-                  {year} năm
-                </button>
-              ))}
+              {[3, 5].map((year) => {
+                const selected = horizonYears === year;
+                return (
+                  <button
+                    key={year}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => setHorizonYears(year as 3 | 5)}
+                    className={`rounded-full border px-4 py-2 text-[13px] font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm/30 ${
+                      selected
+                        ? "border-app-warm bg-app-warm text-white"
+                        : "border-[#F3D9CC] bg-app-surface text-[#5C3A2E] hover:border-app-warm"
+                    }`}
+                  >
+                    {year} năm
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          <div className="stack-tight">
+          <div>
             <div>
-              <h2 className="text-base font-semibold text-foreground">Các mảng đời sống</h2>
-              <p className="mt-1 text-sm text-muted-foreground">Điền ít nhất một mảng. Các mảng còn lại có thể để trống.</p>
+              <h2 className="text-[15px] font-semibold text-app-ink">Các mảng đời sống</h2>
+              <p className="mt-1 text-[13px] leading-6 text-[#6F4A3C]">Điền ít nhất một mảng. Các mảng còn lại có thể để trống.</p>
             </div>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
               {LIFE_AREA_FIELDS.map(({ area, label, placeholder }) => (
-                <div key={area} className="stack-tight">
-                  <Label htmlFor={`aspirational-${area}`}>{label}</Label>
+                <div key={area}>
+                  <label htmlFor={`aspirational-${area}`} className={labelClass}>
+                    {label}
+                  </label>
                   <Textarea
                     id={`aspirational-${area}`}
                     rows={3}
                     value={statements[area]}
                     onChange={(event) => updateStatement(area, event.target.value)}
                     placeholder={placeholder}
+                    className={warmTextareaClass}
                   />
                 </div>
               ))}
             </div>
             {showError && lifeAreas.length === 0 ? (
-              <p role="alert" className="text-xs font-medium text-rose-700">
+              <p role="alert" className={errorTextClass}>
                 Điền ít nhất một mảng đời sống để tầm nhìn có điểm neo.
               </p>
             ) : null}
           </div>
 
-          <div className="flex flex-col gap-3 border-t border-[color:var(--border)] pt-4 sm:flex-row">
-            <Button type="button" glow className="w-full sm:w-auto" onClick={handleSubmit}>
+          <div className="flex flex-col gap-3 border-t border-[#F3D9CC] pt-5 sm:flex-row">
+            <Button
+              type="button"
+              className="w-full bg-app-warm text-white hover:bg-[#C76548] focus-visible:ring-app-warm/30 sm:w-auto"
+              onClick={handleSubmit}
+            >
               <Save className="h-4 w-4" />
-              Lưu tầm nhìn 3 năm
+              Lưu tầm nhìn
             </Button>
-            <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => navigate("/")}>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full border-[#F3D9CC] bg-app-surface text-[#5C3A2E] hover:bg-white focus-visible:ring-app-warm/30 sm:w-auto"
+              onClick={() => navigate("/")}
+            >
               <ArrowLeft className="h-4 w-4" />
               Bỏ qua
             </Button>
           </div>
-        </CardContent>
-        </Card>
-        </SectionBlock>
-      </motion.div>
-    </PageShell>
+        </div>
+      </section>
+
+      {storedVision ? (
+        <section className="mt-8" aria-label="Tầm nhìn đã lưu trước đó">
+          <div className="mb-4">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">ĐÃ LƯU TRƯỚC</p>
+            <h2 className="mt-1 text-[15px] font-semibold text-app-ink">Bản tóm tắt gần nhất</h2>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">
+            <article className="rounded-card border border-app-line bg-app-surface p-5 md:col-span-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">
+                CẬP NHẬT {formatVisionDate(storedVision.updatedAt)}
+              </p>
+              <p className="mt-3 font-serif text-[14px] italic leading-7 text-app-ink">"{storedVision.summary}"</p>
+            </article>
+            {storedVision.lifeAreas.map((item) => (
+              <article key={item.area} className="rounded-card border border-app-line bg-app-surface p-5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{getAreaLabel(item.area)}</p>
+                <p className="mt-3 font-serif text-[14px] italic leading-7 text-app-ink">"{item.statement}"</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+    </div>
   );
 }

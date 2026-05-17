@@ -1,31 +1,21 @@
-﻿import { useMemo } from "react";
-import { useEffect, useRef } from "react";
+﻿import { useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router";
 import {
+  ArrowRight,
   Award,
   BookOpen,
   Crown,
   Flame,
+  LockKeyhole,
   Sparkles,
   Target,
   Trophy,
   type LucideIcon,
-  LockKeyhole,
-  ArrowRight,
 } from "lucide-react";
 
-import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { CountUp } from "../components/ui/count-up";
-import { FeaturedCard } from "../components/ui/featured-card";
-import { AchievementBadgeIllustration, BadgeRibbonAccent } from "../components/illustrations";
 import { emptyNarratives } from "../components/empty-states/narratives";
-import { PageHero } from "../components/layout/PageHero";
-import { MotionStaggerItem, MotionStaggerList } from "../components/motion";
-import { Reveal } from "../components/ui/reveal";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
-import { calculateGoalProgress } from "../utils/storage";
 import { celebrateLarge } from "@/lib/effects/celebrate";
 import { hasNewCelebrationIds } from "@/lib/effects/celebrationTriggers";
 
@@ -79,6 +69,26 @@ const ACHIEVEMENT_COPY: Record<string, { title: string; description: string; ico
 
 const ACHIEVEMENT_ORDER = Object.keys(ACHIEVEMENT_COPY);
 
+type AchievementCard = {
+  id: string;
+  key: string;
+  title: string;
+  description: string;
+  icon: keyof typeof ICON_MAP;
+  unlocked: boolean;
+  earnedAt?: string;
+};
+
+function getIconKey(icon: string): keyof typeof ICON_MAP {
+  return icon in ICON_MAP ? (icon as keyof typeof ICON_MAP) : "Trophy";
+}
+
+function formatAchievementDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Không rõ ngày";
+  return date.toLocaleDateString("vi-VN");
+}
+
 export function Achievements() {
   const navigate = useNavigate();
   const { userData } = useSyncedUserData();
@@ -89,14 +99,38 @@ export function Achievements() {
     return [...userData.achievements].sort((a, b) => new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime());
   }, [userData]);
 
-  const lockedAchievements = useMemo(() => {
-    if (!userData) return [];
-    const unlockedSet = new Set(userData.achievements.map((achievement) => achievement.title));
-    return ACHIEVEMENT_ORDER.filter((key) => !unlockedSet.has(key)).map((key) => ({
-      key,
-      ...ACHIEVEMENT_COPY[key],
-    }));
-  }, [userData]);
+  const achievementCards = useMemo<AchievementCard[]>(() => {
+    const unlockedByTitle = new Map(sortedAchievements.map((achievement) => [achievement.title, achievement]));
+
+    const knownCards = ACHIEVEMENT_ORDER.map((key) => {
+      const copy = ACHIEVEMENT_COPY[key];
+      const unlocked = unlockedByTitle.get(key);
+
+      return {
+        id: unlocked?.id ?? key,
+        key,
+        title: copy.title,
+        description: copy.description,
+        icon: copy.icon,
+        unlocked: Boolean(unlocked),
+        earnedAt: unlocked?.earnedAt,
+      };
+    });
+
+    const customUnlockedCards = sortedAchievements
+      .filter((achievement) => !ACHIEVEMENT_COPY[achievement.title])
+      .map((achievement) => ({
+        id: achievement.id,
+        key: achievement.id,
+        title: achievement.title,
+        description: achievement.description,
+        icon: getIconKey(achievement.icon),
+        unlocked: true,
+        earnedAt: achievement.earnedAt,
+      }));
+
+    return [...knownCards, ...customUnlockedCards];
+  }, [sortedAchievements]);
 
   useEffect(() => {
     if (!userData) return;
@@ -110,246 +144,105 @@ export function Achievements() {
 
   if (!userData) return null;
 
-  const completedGoals = userData.goals.filter((goal) => calculateGoalProgress(goal) === 100).length;
-  const completionRate = Math.round((userData.achievements.length / ACHIEVEMENT_ORDER.length) * 100);
-  const latestAchievement = sortedAchievements[0];
+  const totalAchievementCount = achievementCards.length;
+  const unlockedCount = achievementCards.filter((achievement) => achievement.unlocked).length;
+  const completionRate = totalAchievementCount > 0 ? Math.round((unlockedCount / totalAchievementCount) * 100) : 0;
 
   return (
-    <div className="stack-section pb-12">
-      <PageHero
-        className="page-enter"
-        eyebrow="Phòng thành tựu"
-        eyebrowIcon={<Trophy className="h-3.5 w-3.5" />}
-        title={
-          <>
-            Mọi <span className="text-gradient-vibrant">cột mốc nhỏ</span> là bằng chứng hành trình đang diễn ra.
-          </>
-        }
-        description="Thành tựu không chỉ là huy hiệu. Chúng là những mốc xác nhận bạn đã bắt đầu, duy trì, hoàn thành và đang trưởng thành theo cách có thể nhìn thấy được."
-        primaryCta={
-          <Button glow onClick={() => navigate("/goals")}>
-            Tiếp tục mục tiêu
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        }
-        secondaryCta={
-          <Button variant="outline" onClick={() => navigate("/gallery")}>
-            Mở thư viện vision board
-          </Button>
-        }
-        aside={
-          <div className="rounded-[var(--r-tile)] border border-[color:var(--border)] bg-[color:var(--muted)] p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Tình trạng hiện tại</p>
-            <div className="mt-3 grid gap-2">
-              <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Đã mở khóa</p>
-                <p className="mt-1 text-2xl font-bold text-foreground">
-                  <CountUp value={userData.achievements.length} />
-                  <span className="text-muted-foreground">/{ACHIEVEMENT_ORDER.length}</span>
-                </p>
-              </div>
-              <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Tiến độ bộ sưu tập</p>
-                <p className="mt-1 text-2xl font-bold text-foreground">
-                  <CountUp value={completionRate} suffix="%" />
-                </p>
-              </div>
-              <div className="rounded-[var(--r-control)] border border-[color:var(--border)] bg-card px-3 py-2.5">
-                <p className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Mới nhất</p>
-                <p className="mt-1 truncate text-sm font-semibold text-foreground">
-                  {latestAchievement
-                    ? (ACHIEVEMENT_COPY[latestAchievement.title]?.title ?? latestAchievement.title)
-                    : "Chưa có thành tựu nào"}
-                </p>
-              </div>
-            </div>
-          </div>
-        }
-      />
+    <div className="mx-auto max-w-4xl px-4 pb-12 pt-8 sm:px-6">
+      <header>
+        <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">THÀNH TỰU</p>
+        <h1 className="mt-3 font-serif text-[30px] font-medium leading-tight tracking-tight text-app-ink">
+          Cột mốc của bạn
+        </h1>
+        <p className="mt-2 max-w-2xl text-[14px] leading-6 text-app-ink-soft">
+          Nơi ghi lại những dấu hiệu nhỏ cho thấy bạn đã bắt đầu, duy trì và đi xa hơn hôm qua.
+        </p>
+      </header>
 
-      <Reveal>
-        <MotionStaggerList className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-          {[
-            {
-              title: "Tổng thành tựu",
-              value: userData.achievements.length,
-              note: "huy hiệu đã mở khóa",
-              icon: Trophy,
-              color: "from-amber-500/18 to-orange-500/10 text-amber-700",
-            },
-            {
-              title: "Mục tiêu hoàn thành",
-              value: completedGoals,
-              note: "mục tiêu đã đi trọn hành trình",
-              icon: Target,
-              color: "from-violet-500/18 to-fuchsia-500/10 text-violet-700",
-            },
-            {
-              title: "Vision board",
-              value: userData.visionBoards.length,
-              note: "bảng đã tạo",
-              icon: Sparkles,
-              color: "from-sky-500/18 to-cyan-500/10 text-sky-700",
-            },
-            {
-              title: "Nhật ký nhìn lại",
-              value: userData.reflections.length,
-              note: "bài viết đã lưu",
-              icon: BookOpen,
-              color: "from-emerald-500/18 to-teal-500/10 text-emerald-700",
-            },
-          ].map((item) => {
-            const Icon = item.icon;
+      <section className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3" aria-label="Tổng quan thành tựu">
+        {[
+          { label: "Tổng thành tựu", value: totalAchievementCount, suffix: "huy hiệu" },
+          { label: "Đã mở khóa", value: unlockedCount, suffix: "cột mốc" },
+          { label: "Hoàn thành", value: `${completionRate}%`, suffix: "bộ sưu tập" },
+        ].map((stat) => (
+          <div key={stat.label} className="rounded-card border border-app-line bg-app-surface p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{stat.label}</p>
+            <p className="mt-2 text-[26px] font-medium leading-none text-app-ink tabular-nums">{stat.value}</p>
+            <p className="mt-2 text-[12px] text-app-ink-muted">{stat.suffix}</p>
+          </div>
+        ))}
+      </section>
+
+      {unlockedCount === 0 ? (
+        <section className="mt-6 rounded-card border border-app-line bg-app-surface p-6 text-center md:p-8" aria-label="Chưa có thành tựu">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+            <Award className="h-7 w-7" />
+          </div>
+          <h2 className="mt-4 font-serif text-2xl font-medium text-app-ink">{emptyNarratives.noAchievements.title}</h2>
+          <p className="mx-auto mt-2 max-w-md text-[14px] leading-6 text-app-ink-soft">{emptyNarratives.noAchievements.body}</p>
+          <div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
+            <Button type="button" onClick={() => navigate("/goals")}>
+              <Target className="h-4 w-4" />
+              Tạo mục tiêu
+            </Button>
+            <Button type="button" variant="outline" onClick={() => navigate("/journal")}>
+              <BookOpen className="h-4 w-4" />
+              Viết nhật ký
+            </Button>
+          </div>
+        </section>
+      ) : null}
+
+      <section className="mt-8" aria-label="Danh sách thành tựu">
+        <div className="mb-4">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-app-ink-muted">BỘ HUY HIỆU</p>
+          <h2 className="mt-1 text-[15px] font-semibold text-app-ink">Những cột mốc đang mở dần</h2>
+        </div>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+          {achievementCards.map((achievement) => {
+            const Icon = ICON_MAP[achievement.icon] ?? Trophy;
+            const isUnlocked = achievement.unlocked;
 
             return (
-              <MotionStaggerItem key={item.title}>
-                <FeaturedCard className="relative overflow-hidden">
-                  <div
-                    className={`pointer-events-none absolute inset-x-5 top-0 h-20 rounded-b-[28px] bg-gradient-to-br ${item.color} blur-2xl`}
-                  />
-                  <CardHeader className="relative flex flex-row items-start justify-between pb-3">
-                    <div>
-                      <CardDescription>{item.title}</CardDescription>
-                      <p className="mt-2 text-4xl font-bold leading-tight tracking-normal text-slate-900">
-                        <CountUp value={item.value} />
-                      </p>
-                    </div>
-                    <div
-                      className={`flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-gradient-to-br ${item.color}`}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </div>
-                  </CardHeader>
-                  <CardContent className="relative">
-                    <p className="text-sm text-slate-500">{item.note}</p>
-                  </CardContent>
-                </FeaturedCard>
-              </MotionStaggerItem>
+              <article
+                key={achievement.key}
+                className={`rounded-card border border-app-line bg-app-surface p-5 ${isUnlocked ? "" : "opacity-60"}`}
+              >
+                <div
+                  className={`flex h-12 w-12 items-center justify-center rounded-lg ${
+                    isUnlocked ? "bg-app-accent-soft text-app-accent" : "bg-app-bg text-app-ink-muted"
+                  }`}
+                >
+                  <Icon className="h-6 w-6" />
+                </div>
+                <h3 className="mt-4 text-[14px] font-medium leading-5 text-app-ink">{achievement.title}</h3>
+                <p className="mt-1 text-[12px] leading-5 text-app-ink-soft">{achievement.description}</p>
+                {isUnlocked && achievement.earnedAt ? (
+                  <p className="mt-4 text-[11px] uppercase tracking-[0.14em] text-app-ink-muted">
+                    {formatAchievementDate(achievement.earnedAt)}
+                  </p>
+                ) : (
+                  <p className="mt-4 flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] text-app-ink-muted">
+                    <LockKeyhole className="h-3 w-3" />
+                    Đang khóa
+                  </p>
+                )}
+              </article>
             );
           })}
-        </MotionStaggerList>
-      </Reveal>
+        </div>
+      </section>
 
-      {sortedAchievements.length === 0 ? (
-        <Reveal delay={0.04}>
-          <Card className="overflow-hidden">
-            <CardContent className="p-10 text-center lg:p-14">
-              <AchievementBadgeIllustration className="mx-auto w-40 text-amber-500 opacity-90" />
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[var(--r-tile)] bg-amber-50 text-amber-700">
-                <Trophy className="h-10 w-10" />
-              </div>
-              <h2 className="mt-6 text-3xl font-bold text-slate-900">{emptyNarratives.noAchievements.title}</h2>
-              <p className="mx-auto mt-[var(--space-inline)] max-w-2xl text-base text-slate-500">
-                {emptyNarratives.noAchievements.body}
-              </p>
-              <div className="mx-auto mt-6 flex flex-wrap justify-center gap-3">
-                <Button variant="outline" onClick={() => navigate("/goals")}>
-                  <Target className="h-4 w-4" />
-                  Tạo mục tiêu
-                </Button>
-                <Button variant="outline" onClick={() => navigate("/journal")}>
-                  <BookOpen className="h-4 w-4" />
-                  Viết nhật ký
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </Reveal>
-      ) : (
-        <Reveal delay={0.04} className="stack-stack">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900">Đã mở khóa</h2>
-            <p className="mt-1 text-sm text-slate-500">Những cột mốc bạn đã thực sự chạm tới trên hành trình này.</p>
-          </div>
-
-          <MotionStaggerList className="stagger-hover-grid grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {sortedAchievements.map((achievement) => {
-              const localized = ACHIEVEMENT_COPY[achievement.title] ?? {
-                title: achievement.title,
-                description: achievement.description,
-                icon: achievement.icon as keyof typeof ICON_MAP,
-              };
-              const Icon = ICON_MAP[localized.icon] ?? Trophy;
-
-              return (
-                <MotionStaggerItem key={achievement.id}>
-                  <Card className="relative overflow-hidden">
-                    <BadgeRibbonAccent className="pointer-events-none absolute right-3 top-3 h-8 w-8 text-amber-500 opacity-75" />
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-[var(--r-tile)] gradient-amber-icon text-amber-700 shadow-lg">
-                          <Icon className="h-8 w-8" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-xl font-bold text-slate-900">{localized.title}</h3>
-                            <Badge
-                              variant="outline"
-                              className="rounded-[var(--r-pill)] border-amber-200 bg-amber-50 px-3 py-1 text-amber-700"
-                            >
-                              Đã mở khóa
-                            </Badge>
-                          </div>
-                          <p className="mt-2 text-sm leading-7 text-slate-600">{localized.description}</p>
-                          <p className="mt-4 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-                            {new Date(achievement.earnedAt).toLocaleDateString("vi-VN")}
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </MotionStaggerItem>
-              );
-            })}
-          </MotionStaggerList>
-        </Reveal>
-      )}
-
-      <Reveal delay={0.08}>
-        <Card>
-          <CardHeader>
-            <CardTitle as="h2">Còn đang chờ mở khóa</CardTitle>
-            <CardDescription>Những cột mốc tiếp theo để bạn có thêm động lực và hướng tiến rõ ràng.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {lockedAchievements.length === 0 ? (
-              <div className="rounded-[var(--r-card)] border border-emerald-200 bg-emerald-50/80 p-5 text-sm text-emerald-900">
-                Bạn đã mở khóa toàn bộ bộ thành tựu hiện có. Đây là một cột mốc rất đẹp.
-              </div>
-            ) : (
-              <MotionStaggerList className="stagger-hover-grid grid grid-cols-1 gap-4 md:grid-cols-2">
-                {lockedAchievements.map((achievement) => {
-                  const Icon = ICON_MAP[achievement.icon] ?? Trophy;
-
-                  return (
-                    <MotionStaggerItem
-                      key={achievement.key}
-                      className="flex items-start gap-4 rounded-[var(--r-card)] border border-white/70 bg-white/72 p-5"
-                    >
-                      <div className="flex h-14 w-14 items-center justify-center rounded-[var(--r-tile)] bg-slate-100 text-slate-400">
-                        <Icon className="h-7 w-7" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="font-semibold text-slate-700">{achievement.title}</h3>
-                          <Badge
-                            variant="outline"
-                            className="rounded-[var(--r-pill)] border-slate-200 bg-slate-50 px-3 py-1 text-slate-500"
-                          >
-                            <LockKeyhole className="mr-1 h-3.5 w-3.5" />
-                            Đang khóa
-                          </Badge>
-                        </div>
-                        <p className="mt-2 text-sm leading-7 text-slate-500">{achievement.description}</p>
-                      </div>
-                    </MotionStaggerItem>
-                  );
-                })}
-              </MotionStaggerList>
-            )}
-          </CardContent>
-        </Card>
-      </Reveal>
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+        <Button type="button" variant="outline" onClick={() => navigate("/goals")}>
+          Tiếp tục mục tiêu
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+        <Button type="button" variant="outline" onClick={() => navigate("/gallery")}>
+          Mở thư viện vision board
+        </Button>
+      </div>
     </div>
   );
 }

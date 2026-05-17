@@ -1,12 +1,28 @@
 ﻿import type { ChangeEvent } from "react";
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, CalendarDays, CheckCircle2, CloudDownload, CreditCard, Loader2, RefreshCw, RotateCcw, Upload, User2, Volume2, WifiOff } from "lucide-react";
-import { useNavigate } from "react-router";
+import {
+  AlertTriangle,
+  Bell,
+  CalendarDays,
+  CheckCircle2,
+  CloudDownload,
+  CreditCard,
+  Download,
+  Languages,
+  Loader2,
+  Palette,
+  RefreshCw,
+  RotateCcw,
+  ShieldAlert,
+  Trash2,
+  Upload,
+  User2,
+  Volume2,
+  WifiOff,
+} from "lucide-react";
+import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 
-import { DataStorageInfo } from "../components/DataStorageInfo";
-import { CloudSyncIllustration, SyncIdleDot, SyncOkDot } from "../components/illustrations";
-import { PageHero } from "../components/layout/PageHero";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,18 +34,26 @@ import {
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Switch } from "../components/ui/switch";
-import { DashboardDataBackupCard } from "@/features/dashboard/components/DashboardDataBackupCard";
+import { useTheme } from "../hooks/useTheme";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import { useAuthContext } from "@/lib/auth/AuthContext";
+import { inputClass } from "./SMARTGoalSetup/components/formStyles";
 import { formatBillingExpiryDate, getBillingExpiryInfo } from "../utils/billing-expiry";
 import { downloadLocalUserDataBackup } from "../utils/local-data-backup";
 import { getMigrationBackupSnapshots, restoreMigrationBackupSnapshot, type MigrationBackupSnapshot } from "../utils/local-data-migration";
 import { isSoundEnabled, setSoundEnabled } from "../utils/sound";
-import { getUserData, parseStoredUserData, saveUserData } from "../utils/storage";
+import { deleteAllUserData, getUserData, parseStoredUserData, saveUserData, updateAppPreferences } from "../utils/storage";
 import { exportAccountData } from "@/services/syncService";
+
+const themeOptions = [
+  { value: "system", label: "Theo thiết bị", description: "Dùng cài đặt hệ thống." },
+  { value: "light", label: "Sáng", description: "Nền sáng, dễ đọc ban ngày." },
+  { value: "dark", label: "Tối", description: "Giảm sáng khi dùng buổi tối." },
+] as const;
+
+type ClearDataConfirmStep = "review" | "final";
 
 function downloadJsonFile(payload: unknown, filename: string): void {
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -59,6 +83,10 @@ function formatSyncTime(value: string | null): string {
   return `Lần cuối: ${date.toLocaleString("vi-VN")}`;
 }
 
+function getAccountInitial(label: string): string {
+  return label.trim().charAt(0).toUpperCase() || "K";
+}
+
 export function SettingsPage() {
   const navigate = useNavigate();
   const importFileRef = useRef<HTMLInputElement>(null);
@@ -66,20 +94,27 @@ export function SettingsPage() {
   const [taskSoundEnabled, setTaskSoundEnabled] = useState(() => isSoundEnabled());
   const [migrationBackups, setMigrationBackups] = useState<MigrationBackupSnapshot[]>(() => getMigrationBackupSnapshots());
   const [recoverySnapshotKey, setRecoverySnapshotKey] = useState<string | null>(null);
+  const [isClearDataDialogOpen, setIsClearDataDialogOpen] = useState(false);
+  const [clearDataConfirmStep, setClearDataConfirmStep] = useState<ClearDataConfirmStep>("review");
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const { isConfigured, user, userProfile } = useAuthContext();
   const autoSyncState = useAutoCloudSyncContext();
   const { userData: syncedUserData, reloadUserData } = useSyncedUserData();
   const userData = syncedUserData ?? getUserData();
+  const appPreferences = userData.appPreferences;
   const expiryInfo = getBillingExpiryInfo(userData.subscription);
   const shouldShowExpiryNotice =
     userData.subscription?.planCode === "PLUS" && (expiryInfo.isExpiringSoon || expiryInfo.isExpired);
   const accountLabel = userProfile?.displayName || user?.displayName || user?.email || "Khách";
+  const accountEmail = userProfile?.email || user?.email || "Chưa đăng nhập";
   const accountStatus = !isConfigured
     ? "Đang dùng dữ liệu trên thiết bị"
     : user
       ? userProfile?.email || user.email || "Đã đăng nhập"
       : "Chưa đăng nhập";
-  const AccountStatusDot = isConfigured && user ? SyncOkDot : SyncIdleDot;
+  const avatarUrl = userProfile?.avatarUrl ?? user?.photoURL ?? null;
+  const accountInitial = getAccountInitial(accountLabel);
+  const localeLabel = (userProfile?.locale ?? "vi").startsWith("vi") ? "Tiếng Việt" : (userProfile?.locale ?? "Tiếng Việt");
   const firstRecoverySnapshot = migrationBackups[0];
 
   useEffect(() => {
@@ -142,6 +177,12 @@ export function SettingsPage() {
     setSoundEnabled(enabled);
   };
 
+  const handleInAppRemindersChange = (enabled: boolean) => {
+    updateAppPreferences({ enableInAppReminders: enabled });
+    reloadUserData();
+    toast.success(enabled ? "Đã bật nhắc việc trong app." : "Đã tắt nhắc việc trong app.");
+  };
+
   const handleRestoreMigrationBackup = () => {
     if (!recoverySnapshotKey) return;
 
@@ -174,6 +215,20 @@ export function SettingsPage() {
     toast.success("Đã kiểm tra sao lưu tài khoản.");
   };
 
+  const handleClearDataDialogChange = (open: boolean) => {
+    setIsClearDataDialogOpen(open);
+    if (!open) setClearDataConfirmStep("review");
+  };
+
+  const handleClearAllData = () => {
+    deleteAllUserData();
+    reloadUserData();
+    setIsClearDataDialogOpen(false);
+    setClearDataConfirmStep("review");
+    toast.success("Đã xóa dữ liệu trên thiết bị này.");
+    navigate("/");
+  };
+
   const syncIcon = autoSyncState.conflictPending
     ? AlertTriangle
     : autoSyncState.syncing
@@ -186,216 +241,338 @@ export function SettingsPage() {
   const SyncIcon = syncIcon;
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-      <PageHero
-        className="page-enter"
-        eyebrow="Cài đặt"
-        eyebrowIcon={<SyncIcon className="h-3.5 w-3.5" />}
-        title={
-          <>
-            Tài khoản và <span className="text-gradient-vibrant">dữ liệu</span>
-          </>
-        }
-        description="Quản lý dữ liệu lưu trên thiết bị này, bản sao lưu và các lối tắt cài đặt quan trọng."
-      />
+    <div className="mx-auto max-w-4xl px-4 pb-12 pt-8 sm:px-6">
+      <header>
+        <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-app-ink-muted">CÀI ĐẶT</p>
+        <h1 className="mt-3 font-serif text-[30px] font-medium leading-tight tracking-tight text-app-ink">
+          Tuỳ chỉnh tài khoản
+        </h1>
+        <p className="mt-2 max-w-2xl text-[14px] leading-6 text-app-ink-soft">
+          Quản lý tài khoản, dữ liệu lưu trên thiết bị và những tuỳ chọn nhỏ để app chạy đúng nhịp của bạn.
+        </p>
+      </header>
 
-      <section className="stack-tight" aria-label="Dữ liệu và sao lưu">
-        <DataStorageInfo variant="banner" />
-        <DashboardDataBackupCard
-          importInputRef={importFileRef}
-          onExport={handleExport}
-          onImport={handleImport}
-          onOpenImportPicker={() => importFileRef.current?.click()}
-        />
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]" aria-label="Cài đặt nhanh">
+      <div className="mt-6 space-y-5">
         {firstRecoverySnapshot ? (
-          <Card className="glass-surface-sm rounded-[var(--r-card)] border-amber-200 bg-amber-50/80 shadow-none lg:col-span-2">
-            <CardContent className="grid gap-4 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
+          <section className="rounded-card border border-app-line bg-app-surface p-5" aria-label="Khôi phục dữ liệu cũ">
+            <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
               <div className="flex gap-3">
-                <RotateCcw className="mt-0.5 h-5 w-5 text-amber-600" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+                  <RotateCcw className="h-5 w-5" />
+                </div>
                 <div>
-                  <p className="text-sm font-semibold text-amber-950">Có 1 bản sao dữ liệu cũ chưa được phục hồi</p>
-                  <p className="mt-1 text-sm leading-6 text-amber-800">
+                  <p className="text-[15px] font-semibold text-app-ink">Có 1 bản sao dữ liệu cũ chưa được phục hồi</p>
+                  <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">
                     Bấm để khôi phục dữ liệu cũ. Thao tác này sẽ ghi đè dữ liệu hiện tại trên thiết bị này.
                   </p>
                 </div>
               </div>
-              <Button className="gap-2 rounded-[var(--r-control)]" onClick={() => setRecoverySnapshotKey(firstRecoverySnapshot.key)}>
+              <Button type="button" onClick={() => setRecoverySnapshotKey(firstRecoverySnapshot.key)}>
                 <RotateCcw className="h-4 w-4" />
                 Khôi phục dữ liệu cũ
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </section>
         ) : null}
 
-        {shouldShowExpiryNotice && (
-          <Card className="glass-surface-sm rounded-[var(--r-card)] border-amber-200 bg-amber-50/80 shadow-none lg:col-span-2">
-            <CardContent className="grid gap-4 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
+        {shouldShowExpiryNotice ? (
+          <section className="rounded-card border border-app-line bg-app-surface p-5" aria-label="Trạng thái gói Plus">
+            <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
               <div className="flex gap-3">
-                <AlertTriangle className="mt-0.5 h-5 w-5 text-amber-600" />
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+                  <AlertTriangle className="h-5 w-5" />
+                </div>
                 <div>
-                  <p className="text-sm font-semibold text-amber-950">
-                    {expiryInfo.isExpired
-                      ? "Gói Plus đã hết hạn"
-                      : `Gói Plus còn ${expiryInfo.daysLeft ?? 0} ngày`}
+                  <p className="text-[15px] font-semibold text-app-ink">
+                    {expiryInfo.isExpired ? "Gói Plus đã hết hạn" : `Gói Plus còn ${expiryInfo.daysLeft ?? 0} ngày`}
                   </p>
-                  <p className="mt-1 text-sm leading-6 text-amber-800">
+                  <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">
                     {expiryInfo.isExpired
                       ? "Gia hạn để mở lại quyền Plus trên tài khoản này."
                       : `Chu kỳ hiện tại hết hạn ngày ${formatBillingExpiryDate(expiryInfo.expiresAt)}.`}
                   </p>
                 </div>
               </div>
-              <Button className="gap-2 rounded-[var(--r-control)]" onClick={() => navigate("/billing/plan")}>
+              <Button type="button" onClick={() => navigate("/billing/plan")}>
                 <RefreshCw className="h-4 w-4" />
                 Mở trang gia hạn
               </Button>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          </section>
+        ) : null}
 
-        <Card className="glass-surface-sm rounded-[var(--r-card)] border shadow-none">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <User2 className="h-4 w-4 text-slate-500" />
-              Tài khoản
-            </CardTitle>
-            <CardDescription>Thông tin đăng nhập hiện tại của không gian làm việc này.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-slate-900">{accountLabel}</p>
-                <p className="mt-1 flex min-w-0 items-center gap-1.5 truncate text-sm text-slate-500">
-                  <AccountStatusDot className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{accountStatus}</span>
+        <section className="rounded-card border border-app-line bg-app-surface p-6 md:p-8" aria-label="Tài khoản">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+              <User2 className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-[15px] font-semibold text-app-ink">Tài khoản</h2>
+              <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">Thông tin đăng nhập hiện tại của không gian làm việc này.</p>
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-5 md:grid-cols-[auto_1fr] md:items-start">
+            <div className="flex items-center gap-3 md:block">
+              <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-app-line bg-app-bg text-[22px] font-semibold text-app-accent">
+                {avatarUrl ? <img src={avatarUrl} alt="Ảnh đại diện" className="h-full w-full object-cover" /> : accountInitial}
+              </div>
+              <div className="md:mt-3">
+                <p className="text-[12px] font-medium text-app-ink-muted">Ảnh đại diện</p>
+                <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">Đồng bộ từ tài khoản đăng nhập nếu có.</p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="settings-display-name" className="mb-2 block text-[13px] font-medium text-app-ink">
+                  Tên hiển thị
+                </label>
+                <input id="settings-display-name" readOnly value={accountLabel} className={`${inputClass} bg-app-bg`} />
+              </div>
+              <div>
+                <label htmlFor="settings-email" className="mb-2 block text-[13px] font-medium text-app-ink">
+                  Email
+                </label>
+                <input id="settings-email" readOnly value={accountEmail} className={`${inputClass} bg-app-bg`} />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 rounded-lg border border-app-line bg-app-bg p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="flex items-center gap-2 text-[13px] font-medium text-app-ink">
+                  <span className={`h-2.5 w-2.5 rounded-full ${isConfigured && user ? "bg-app-accent" : "bg-app-ink-muted"}`} />
+                  {accountStatus}
+                </p>
+                <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">Gói hiện tại: {userData.subscription?.planCode ?? "FREE"}</p>
+              </div>
+              <Button type="button" variant="outline" onClick={handleAccountExport} disabled={!isConfigured || !user || isExportingAccount}>
+                {isExportingAccount ? <Loader2 className="h-4 w-4 animate-spin" /> : <CloudDownload className="h-4 w-4" />}
+                Xuất dữ liệu tài khoản
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-card border border-app-line bg-app-surface p-6 md:p-8" aria-label="Tuỳ chọn trải nghiệm">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+              <Palette className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-[15px] font-semibold text-app-ink">Tuỳ chọn trải nghiệm</h2>
+              <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">Giao diện, ngôn ngữ và nhắc việc nhẹ trong hệ 12 tuần.</p>
+            </div>
+          </div>
+
+          <div className="mt-5 space-y-4">
+            <div className="rounded-lg border border-app-line bg-app-surface p-3">
+              <div className="flex items-start gap-3">
+                <Palette className="mt-0.5 h-4 w-4 text-app-ink-muted" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] font-semibold text-app-ink">Giao diện</p>
+                  <p className="mt-1 text-[12px] text-app-ink-muted">Đang dùng: {resolvedTheme === "dark" ? "Tối" : "Sáng"}</p>
+                  <fieldset className="mt-3 grid gap-2 sm:grid-cols-3">
+                    <legend className="sr-only">Chọn giao diện</legend>
+                    {themeOptions.map((option) => {
+                      const selected = theme === option.value;
+                      return (
+                        <label
+                          key={option.value}
+                          className={`cursor-pointer rounded-lg border p-3 text-left transition-colors duration-150 focus-within:ring-2 focus-within:ring-app-accent/30 ${
+                            selected ? "border-app-accent bg-app-accent-soft text-app-accent" : "border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="settings-theme"
+                            value={option.value}
+                            checked={selected}
+                            onChange={() => setTheme(option.value)}
+                            className="sr-only"
+                          />
+                          <span className="block text-[13px] font-medium">{option.label}</span>
+                          <span className="mt-1 block text-[12px] leading-5 text-app-ink-muted">{option.description}</span>
+                        </label>
+                      );
+                    })}
+                  </fieldset>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-app-line bg-app-surface p-3">
+              <div className="flex items-start gap-3">
+                <Languages className="mt-0.5 h-4 w-4 text-app-ink-muted" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] font-semibold text-app-ink">Ngôn ngữ</p>
+                  <fieldset className="mt-3">
+                    <legend className="sr-only">Ngôn ngữ</legend>
+                    <label className="block rounded-lg border border-app-accent bg-app-accent-soft p-3 text-app-accent">
+                      <input type="radio" name="settings-language" checked readOnly className="sr-only" />
+                      <span className="block text-[13px] font-medium">{localeLabel}</span>
+                      <span className="mt-1 block text-[12px] leading-5 text-app-ink-muted">Tiếng Việt tự nhiên cho toàn bộ flow hiện tại.</span>
+                    </label>
+                  </fieldset>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-app-line bg-app-surface p-3">
+              <div className="flex items-start gap-3">
+                <Bell className="mt-0.5 h-4 w-4 text-app-ink-muted" />
+                <div className="min-w-0 flex-1 space-y-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-[13px] font-semibold text-app-ink">Nhắc việc trong app</p>
+                      <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">Hiện gợi ý nhẹ khi có việc hoặc review cần quay lại.</p>
+                    </div>
+                    <Switch
+                      checked={appPreferences.enableInAppReminders}
+                      onCheckedChange={handleInAppRemindersChange}
+                      aria-label="Nhắc việc trong app"
+                      className="border border-app-line data-[state=checked]:bg-app-accent data-[state=unchecked]:bg-app-bg"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between gap-4 border-t border-app-line pt-3">
+                    <div>
+                      <p className="flex items-center gap-2 text-[13px] font-semibold text-app-ink">
+                        <Volume2 className="h-4 w-4 text-app-ink-muted" />
+                        Âm thanh khi xong việc
+                      </p>
+                      <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">Phát một tiếng rất nhẹ khi bạn chốt xong việc hôm nay.</p>
+                    </div>
+                    <Switch
+                      id="task-complete-sound"
+                      checked={taskSoundEnabled}
+                      onCheckedChange={handleTaskSoundEnabledChange}
+                      aria-label="Âm thanh khi xong việc"
+                      className="border border-app-line data-[state=checked]:bg-app-accent data-[state=unchecked]:bg-app-bg"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-card border border-app-line bg-app-surface p-6 md:p-8" aria-label="Dữ liệu">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
+              <CloudDownload className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-[15px] font-semibold text-app-ink">Dữ liệu</h2>
+              <p className="mt-1 text-[13px] leading-6 text-app-ink-soft">Local-first: dữ liệu lưu trên thiết bị trước, rồi sao lưu vào tài khoản khi đủ điều kiện.</p>
+            </div>
+          </div>
+
+          <div id="account-sync" className="mt-5 scroll-mt-24 space-y-4">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-lg border border-app-line bg-app-bg p-3">
+                <p className="text-[13px] font-semibold text-app-ink">Thiết bị</p>
+                <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">Thay đổi được giữ ngay trên thiết bị này.</p>
+              </div>
+              <div className="rounded-lg border border-app-line bg-app-bg p-3">
+                <p className="text-[13px] font-semibold text-app-ink">Tài khoản</p>
+                <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">{formatSyncTime(autoSyncState.lastSyncedAt)}</p>
+              </div>
+              <div className="rounded-lg border border-app-line bg-app-bg p-3">
+                <p className="text-[13px] font-semibold text-app-ink">Đang chờ đồng bộ</p>
+                <p className="mt-1 text-[12px] leading-5 text-app-ink-muted">
+                  {autoSyncState.pendingCount > 0 ? `${autoSyncState.pendingCount} thay đổi chờ đồng bộ` : "Không có thay đổi chờ đồng bộ"}
                 </p>
               </div>
-              <CloudSyncIllustration className="hidden w-24 text-violet-500 opacity-70 sm:block" />
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              className="mt-[var(--space-stack)] w-full gap-2 rounded-[var(--r-control)]"
-              disabled={!isConfigured || !user || isExportingAccount}
-              onClick={handleAccountExport}
-            >
-              {isExportingAccount ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <CloudDownload className="h-4 w-4" />
-              )}
-              Xuất dữ liệu tài khoản
-            </Button>
-          </CardContent>
-        </Card>
 
-        <Card id="account-sync" className="glass-surface-sm scroll-mt-24 rounded-[var(--r-card)] border shadow-none">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <SyncIcon className={`h-4 w-4 ${autoSyncState.syncing ? "animate-spin text-sky-600" : "text-slate-500"}`} />
-              Sao lưu tài khoản
-            </CardTitle>
-            <CardDescription>Phân biệt dữ liệu đã lưu trên thiết bị và dữ liệu đã sao lưu vào tài khoản.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-2 text-sm sm:grid-cols-3">
-              <div className="rounded-[var(--r-control)] border border-slate-200 bg-white/75 p-3">
-                <p className="font-semibold text-slate-900">Thiết bị</p>
-                <p className="mt-1 leading-6 text-slate-500">Thay đổi được giữ ngay trên thiết bị này.</p>
-              </div>
-              <div className="rounded-[var(--r-control)] border border-slate-200 bg-white/75 p-3">
-                <p className="font-semibold text-slate-900">Tài khoản</p>
-                <p className="mt-1 leading-6 text-slate-500">{formatSyncTime(autoSyncState.lastSyncedAt)}</p>
-              </div>
-              <div className="rounded-[var(--r-control)] border border-slate-200 bg-white/75 p-3">
-                <p className="font-semibold text-slate-900">Việc đang chờ đồng bộ</p>
-                <p className="mt-1 leading-6 text-slate-500">
-                  {autoSyncState.pendingCount > 0
-                    ? `${autoSyncState.pendingCount} thay đổi chờ đồng bộ`
-                    : "Không có thay đổi chờ đồng bộ"}
+            <div className="rounded-lg border border-app-line bg-app-bg p-3 text-[13px] leading-6 text-app-ink-soft">
+              <div className="flex gap-2">
+                <SyncIcon className={`mt-0.5 h-4 w-4 shrink-0 ${autoSyncState.syncing ? "animate-spin text-app-accent" : "text-app-ink-muted"}`} />
+                <p>
+                  {autoSyncState.conflictPending
+                    ? "Dữ liệu trên thiết bị và tài khoản đang khác nhau. Ứng dụng sẽ hỏi bạn trước khi ghi đè."
+                    : !autoSyncState.online
+                      ? "Bạn đang mất kết nối. Dữ liệu vẫn được lưu trên thiết bị và sẽ gửi lên tài khoản khi có mạng."
+                      : autoSyncState.syncing
+                        ? "Đang sao lưu lên tài khoản. Bạn có thể tiếp tục dùng app."
+                        : "Sao lưu sẵn sàng. Nếu có lỗi, dữ liệu vẫn được giữ trên thiết bị này để thử lại."}
                 </p>
               </div>
             </div>
-            <div className="rounded-[var(--r-control)] border border-slate-200 bg-slate-50/80 p-3 text-sm leading-6 text-slate-600">
-              {autoSyncState.conflictPending
-                ? "Dữ liệu trên thiết bị và tài khoản đang khác nhau. Ứng dụng sẽ hỏi bạn trước khi ghi đè."
-                  : !autoSyncState.online
-                    ? "Bạn đang mất kết nối. Dữ liệu vẫn được lưu trên thiết bị và sẽ gửi lên tài khoản khi có mạng."
-                    : autoSyncState.syncing
-                      ? "Đang sao lưu lên tài khoản. Bạn có thể tiếp tục dùng app."
-                      : "Sao lưu sẵn sàng. Nếu có lỗi, dữ liệu vẫn được giữ trên thiết bị này để thử lại."}
-            </div>
+
             {autoSyncState.lastResult?.message ? (
-              <div className="rounded-[var(--r-control)] border border-slate-200 bg-white/80 p-3 text-sm leading-6 text-slate-600">
-                <p className="font-semibold text-slate-900">Kết quả gần nhất</p>
+              <div className="rounded-lg border border-app-line bg-app-surface p-3 text-[13px] leading-6 text-app-ink-soft">
+                <p className="font-semibold text-app-ink">Kết quả gần nhất</p>
                 <p className="mt-1">{autoSyncState.lastResult.message}</p>
               </div>
             ) : null}
+
             <div className="flex flex-wrap gap-3">
-              <Button type="button" variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={handleRetrySync} disabled={autoSyncState.syncing || !user}>
+              <Button type="button" variant="outline" onClick={handleExport}>
+                <Download className="h-4 w-4" />
+                Xuất dữ liệu thiết bị
+              </Button>
+              <Button type="button" variant="outline" onClick={() => importFileRef.current?.click()}>
+                <Upload className="h-4 w-4" />
+                Nhập dữ liệu
+              </Button>
+              <Button type="button" variant="outline" onClick={handleRetrySync} disabled={autoSyncState.syncing || !user}>
                 {autoSyncState.syncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
                 Kiểm tra sao lưu
               </Button>
-              <Button type="button" variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={handleExport}>
-                <CloudDownload className="h-4 w-4" />
-                Tải backup thiết bị
-              </Button>
-              <Button type="button" variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={() => navigate("/12-week-system?tab=settings")}>
+              <Button type="button" variant="outline" onClick={() => navigate("/12-week-system?tab=settings")}>
                 <CalendarDays className="h-4 w-4" />
-                Mở cài đặt chu kỳ
+                Cài đặt chu kỳ
               </Button>
+              <Button type="button" variant="outline" onClick={() => navigate("/billing/plan")}>
+                <CreditCard className="h-4 w-4" />
+                Gói & thanh toán
+              </Button>
+              <input ref={importFileRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
             </div>
-          </CardContent>
-        </Card>
 
-        <Card className="glass-surface-sm rounded-[var(--r-card)] border shadow-none">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Lối tắt cài đặt</CardTitle>
-            <CardDescription>Mở đúng khu vực khi cần chỉnh chu kỳ hoặc gói truy cập.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-3">
-            <Button variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={() => navigate("/12-week-system?tab=settings")}>
-              <CalendarDays className="h-4 w-4" />
-              Cài đặt chu kỳ
-            </Button>
-            <Button variant="outline" className="gap-2 rounded-[var(--r-control)]" onClick={() => navigate("/billing/plan")}>
-              <CreditCard className="h-4 w-4" />
-              Gói & thanh toán
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-surface-sm rounded-[var(--r-card)] border shadow-none lg:col-span-2">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Volume2 className="h-4 w-4 text-slate-500" />
-              Tuỳ chọn trải nghiệm
-            </CardTitle>
-            <CardDescription>Điều chỉnh phản hồi nhỏ khi bạn làm việc trong hệ 12 tuần.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between gap-4 rounded-[var(--r-control)] border border-slate-200 bg-white/70 px-4 py-3">
-              <div className="min-w-0">
-                <label htmlFor="task-complete-sound" className="text-sm font-semibold text-slate-900">
-                  Âm thanh khi xong việc
-                </label>
-                <p className="mt-1 text-sm leading-6 text-slate-500">
-                  Phát một tiếng rất nhẹ khi bạn chốt xong việc hôm nay.
-                </p>
+            <div className="rounded-card border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-5">
+              <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
+                <div className="flex gap-3">
+                  <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-[color:var(--color-danger-fg)]" />
+                  <div>
+                    <p className="text-[15px] font-semibold text-[color:var(--color-danger-fg)]">Vùng nguy hiểm</p>
+                    <p className="mt-1 text-[13px] leading-6 text-[color:var(--color-danger-fg)]">
+                      Xóa dữ liệu trên thiết bị này chỉ nên làm sau khi bạn đã tải bản dự phòng.
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)]/90 focus-visible:ring-[color:var(--color-danger-border)]"
+                  onClick={() => setIsClearDataDialogOpen(true)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Xóa tất cả dữ liệu
+                </Button>
               </div>
-              <Switch
-                id="task-complete-sound"
-                checked={taskSoundEnabled}
-                onCheckedChange={handleTaskSoundEnabledChange}
-                aria-label="Âm thanh khi xong việc"
-              />
             </div>
-          </CardContent>
-        </Card>
-      </section>
+          </div>
+        </section>
+
+        <section className="rounded-card border border-app-line bg-app-surface p-6 md:p-8" aria-label="Thông tin ứng dụng">
+          <h2 className="text-[15px] font-semibold text-app-ink">Thông tin</h2>
+          <p className="mt-2 text-[12px] leading-5 text-app-ink-muted">Phiên bản v0.4 · Vision Board Web Platform · local-first 12-Week Year.</p>
+          <div className="mt-4 flex flex-wrap gap-3 text-[12px] font-medium text-app-ink-soft">
+            <Link to="/privacy" className="rounded-full border border-app-line bg-app-bg px-3 py-1.5 hover:text-app-accent">
+              Bảo mật
+            </Link>
+            <Link to="/terms" className="rounded-full border border-app-line bg-app-bg px-3 py-1.5 hover:text-app-accent">
+              Điều khoản
+            </Link>
+            <Link to="/billing/faq" className="rounded-full border border-app-line bg-app-bg px-3 py-1.5 hover:text-app-accent">
+              Hỏi đáp thanh toán
+            </Link>
+          </div>
+        </section>
+      </div>
 
       <AlertDialog open={Boolean(recoverySnapshotKey)} onOpenChange={(open) => !open && setRecoverySnapshotKey(null)}>
         <AlertDialogContent>
@@ -408,6 +585,41 @@ export function SettingsPage() {
           <AlertDialogFooter>
             <AlertDialogCancel>Quay lại</AlertDialogCancel>
             <AlertDialogAction onClick={handleRestoreMigrationBackup}>Khôi phục dữ liệu cũ</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isClearDataDialogOpen} onOpenChange={handleClearDataDialogChange}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {clearDataConfirmStep === "review" ? "Xóa tất cả dữ liệu trên thiết bị?" : "Xác nhận lần cuối"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {clearDataConfirmStep === "review"
+                ? "Hành động này xóa dữ liệu local: mục tiêu, kế hoạch, nhật ký, vision board và các bản nháp trên thiết bị này. Hãy tải bản dự phòng trước nếu cần."
+                : "Sau bước này, dữ liệu local trên thiết bị sẽ bị xóa và app quay về trạng thái mới. Hành động này không thể hoàn tác từ trong app."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Quay lại</AlertDialogCancel>
+            {clearDataConfirmStep === "review" ? (
+              <AlertDialogAction
+                onClick={(event) => {
+                  event.preventDefault();
+                  setClearDataConfirmStep("final");
+                }}
+              >
+                Tôi hiểu, tiếp tục
+              </AlertDialogAction>
+            ) : (
+              <AlertDialogAction
+                onClick={handleClearAllData}
+                className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)] hover:opacity-90"
+              >
+                Xóa tất cả dữ liệu
+              </AlertDialogAction>
+            )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
